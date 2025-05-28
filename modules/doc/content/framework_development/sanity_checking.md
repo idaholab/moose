@@ -110,5 +110,9 @@ Example Usage for  `block`:
 []
 ```
 
-Note: If the user sets either `kernel_coverage_check` or `material_coverage_check` to `ONLY_LIST` or `SKIP_LIST`, and simultaneously provides a `kernel_coverage_block_list` or `material_coverage_block_list`, the presence of a `block` can introduce ambiguity in determining which blocks are subject to coverage checks. To avoid confusion, the system will throw an error in this case.
+**Note 1:** If the user sets either `kernel_coverage_check` or `material_coverage_check` to `ONLY_LIST` or `SKIP_LIST`, and simultaneously provides a `kernel_coverage_block_list` or `material_coverage_block_list`, the presence of a `block` can introduce ambiguity in determining which blocks are subject to coverage checks. To avoid confusion, the system will throw an error in this case.
 This restriction is necessary to prevent unintended behavior. However, there are situations where the user may want to completely disable `kernel_coverage_check` while still using `block`. In such cases, the system will not throw any error.
+
+**Note 2:** Setting the `block` parameter only within the `[Problem]` block does **not** actually apply block restrictions to the `block` specified. We recommend users to set the `block` parameter inside the `[GlobalParams]` block instead. Doing so ensures that the `block` setting is automatically propagated to the `[Problem]` block and all other block-restrictable objects.
+
+In particular, specifying `block` in `[GlobalParams]` restricts all block-restrictable objects (e.g., Kernels, BCs) to the designated block, unless explicitly overridden in individual objects. Conversely, if the `block` parameter is set only in `[Problem]` and not in `[GlobalParams]`, block restrictions will **not** be applied to Kernels, BCs, or other block-restrictable objects. In such cases, the system will issue a warning to inform the user.
