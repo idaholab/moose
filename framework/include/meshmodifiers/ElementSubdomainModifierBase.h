@@ -13,12 +13,7 @@
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 #include "NodalPatchRecoveryBase.h"
-
-struct NeighborInfo
-{
-  std::vector<std::vector<Real>> solution_values;
-  std::vector<Real> distances;
-};
+#include "KDTree.h"
 
 namespace ICStrategyForNewlyActivated
 {
@@ -26,9 +21,17 @@ enum Type
 {
   IC_DEFAULT,
   IC_EXTRAPOLATE_FIRST_LAYER,
-  IC_POLYNOMIAL
+  IC_POLYNOMIAL,
+  IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN,
+  IC_POLYNOMIAL_THRESHOLD,
 };
 }
+
+struct NeighborInfo
+{
+  std::vector<std::vector<Real>> solution_values;
+  std::vector<Real> distances;
+};
 
 /**
  * Base class for mesh modifiers modifying element subdomains
@@ -75,34 +78,6 @@ protected:
 
   /// Boundary names associated with each moving boundary ID
   std::unordered_map<BoundaryID, BoundaryName> _moving_boundary_names;
-
-  inline void MPIAllgatherVectorAll_Int(const std::vector<int> & local_vec,
-                                        std::vector<int> & global_vec,
-                                        MPI_Comm comm = MPI_COMM_WORLD) const
-  {
-    int nProc, myRank;
-    MPI_Comm_size(comm, &nProc);
-    MPI_Comm_rank(comm, &myRank);
-
-    int local_size = static_cast<int>(local_vec.size());
-    std::vector<int> recv_counts(nProc);
-    MPI_Allgather(&local_size, 1, MPI_INT, recv_counts.data(), 1, MPI_INT, comm);
-
-    std::vector<int> displs(nProc, 0);
-    std::partial_sum(recv_counts.begin(), recv_counts.end() - 1, displs.begin() + 1);
-
-    int total_size = std::accumulate(recv_counts.begin(), recv_counts.end(), 0);
-    global_vec.resize(total_size);
-
-    MPI_Allgatherv(local_vec.data(),
-                   local_size,
-                   MPI_INT,
-                   global_vec.data(),
-                   recv_counts.data(),
-                   displs.data(),
-                   MPI_INT,
-                   comm);
-  }
 
 private:
   /// Create moving boundaries
@@ -191,23 +166,24 @@ private:
   /// Range of reinitialized boundary nodes on the displaced mesh
   std::unique_ptr<ConstBndNodeRange> _reinitialized_displaced_bnd_node_range;
 
-  std::map<dof_id_type, NeighborInfo> _newlyactivated_node_to_first_neighbors;
+  /// @brief Map from newly-activated node ID to a NeighborInfo structure (distances and solutions)
+  std::map<dof_id_type, NeighborInfo> _newlyactivated_node_to_first_layer_neighbors_info;
 
-  ///
+  /// @brief Set of newly activated nodes
   std::unordered_set<dof_id_type> _newactivated_nodes;
   std::unordered_set<dof_id_type> _first_pass_local_activated_nodes;
 
   std::string _ic_strategy_string;
   ICStrategyForNewlyActivated::Type _ic_strategy;
 
-  /// Inactive subdomain ID
-  int _inactive_subdomain_ID;
+  /// Unsolved block names
+  std::vector<SubdomainName> _unsolved_blocks;
+  /// Unsolved block IDs
+  std::set<SubdomainID> _unsolved_block_ids;
 
   /// @brief find the first layer of neighbors for each element
   /// @param sys
-  /// @param displaced
-  void computeFirstLayerNeighborInfo(SystemBase & sys, bool displaced);
-  void verifySecondNeighborInfo();
+  void computeFirstLayerNeighborInfo(SystemBase & sys);
 
   /**
    * * Check if the node is newly activated.
@@ -216,12 +192,12 @@ private:
    */
   bool nodeIsNewlyActivated(dof_id_type node_id) const;
 
-  /// @brief Collect all newly activated nodes globally across processors
+  /// @brief Collect the complete set of newly activated nodes globally across processors
   /// @param moved_elems Map from element ID to a pair of (old subdomain ID, new subdomain ID)
   /// @details This function gathers all nodes associated with moved elements that are newly
-  /// activated, regardless of processor ownership. This is typically the first pass in
-  /// a parallel algorithm and is followed by synchronization to build a global view.
-  void identifyFirstPassActivatedNodes(
+  /// activated, regardless of processor ownership. This is the authoritative global pass
+  /// in a parallel algorithm and is used to build the correct global view.
+  void identifyGloballyActivatedNodes(
       const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
 
   /// @brief Identify newly activated nodes that are locally owned by the current processor
@@ -232,21 +208,6 @@ private:
   /// operations such as mesh updates or DoF assignments.
   void identifyLocallyOwnedActivatedNodes(
       const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
-
-  inline ICStrategyForNewlyActivated::Type parseString2ICStrategy(const std::string & input)
-  {
-    if (input == "IC_EXTRAPOLATE_FIRST_LAYER")
-      return ICStrategyForNewlyActivated::IC_EXTRAPOLATE_FIRST_LAYER;
-    else if (input == "default_value")
-      return ICStrategyForNewlyActivated::IC_DEFAULT;
-    else if (input == "IC_POLYNOMIAL")
-      return ICStrategyForNewlyActivated::IC_POLYNOMIAL;
-    else
-      throw std::invalid_argument("Invalid string for ICStrategyForNewlyActivated: " + input);
-  }
-
-  /// Using weighted averaging to obtain the solution on the newly-activated nodes
-  void setCurrentSolutionsOnNewlyActivatedNodes(SystemBase & sys);
 
   /// Elements that have been reinitialized due to subdomain changes,
   /// gathered across all processors using MPI
@@ -273,6 +234,46 @@ private:
   /// true = IC already set; false = IC not yet set.
   std::unordered_map<dof_id_type, bool> _node2IC_set;
 
+  /// @brief Names of the NodalPatchRecoveryBase user objects
+  const std::vector<UserObjectName> _npr_names;
+
+  /// @brief Apply initial conditions using polynomial extrapolation
+  std::vector<const NodalPatchRecoveryBase *> _npr_vec;
+
+  /// @brief List of variable index number to be initialized (used to find corresponding DOFs) from Nodal Patch Recovery UserObjects
+  std::vector<unsigned int> _init_vars_number;
+
+  /// @brief List of variable names to be initialized (for debugging purposes) from Nodal Patch Recovery UserObjects
+  std::vector<VariableName> _init_vars_names;
+
+  /// @brief List of neighbor elements that share nodes with reinitialized elements
+  std::vector<dof_id_type> _solved_elem_ids_for_npr;
+
+  /// IC_POLYNOMIAL_THRESHOLD related parameters
+  /// @brief Threshold for checking the closeness of element numbers in polynomial extrapolation
+  int _nearby_element_threshold = 1;
+
+  /// @brief centroids of the element
+  std::vector<Point> _centroids_of_elements;
+
+  /// @brief Maximum number of elements in a leaf node of the k-d tree
+  int _leaf_max_size = 10;
+
+  /// @brief k-d tree for neighbor element search in polynomial extrapolation
+  KDTree * _kd_tree = nullptr;
+
+  /// @brief  Map from k-d tree sequence index to element ID
+  std::vector<dof_id_type> _kd_tree_sequence_elem_id_map;
+
+  /// @brief Minimum diagonal length (criteria) for the k-d tree search
+  double _min_diag_length = std::numeric_limits<double>::max();
+
+  /// @brief Radius search threshold for k-d tree search
+  double _radius_search_threshold = -1;
+
+  /// Using weighted averaging to obtain the solution on the newly-activated nodes
+  void setCurrentSolutionsOnNewlyActivatedNodes(SystemBase & sys);
+
   /// Perform a global MPI gather of reinitialized element IDs across all processors.
   /// Results are stored in `_global_reinitialized_elems`.
   void synchronizeReinitializedElems();
@@ -296,24 +297,29 @@ private:
   /// @brief Identify the processor that is missing the newly activated nodes
   void findMissingNewlyActivatedNodes();
 
-  /// @brief Find the first layer of neighbors for a given node (need to safisfy
-  /// (a) the neighbor node should belong to the active subdomain
-  /// (b) the neighbor node be solved previously if it is in inactive subdomain)
-  /// @param nid The ID of the node
-  /// @return A vector of pointers to the neighboring nodes
-  std::vector<const Node *> firstLayerNeighbours(dof_id_type nid) const;
-
   /// @brief Apply initial conditions for a list of nodes
   void applyICForNodeList(SystemBase & sys, const std::vector<dof_id_type> & nodes);
 
-  /// @brief Names of the NodalPatchRecoveryBase user objects
-  const std::vector<UserObjectName> _npr_names;
-
-  /// @brief Apply initial conditions using polynomial extrapolation
-  std::vector<const NodalPatchRecoveryBase *> _npr_vec;
-
-  std::vector<dof_id_type> _neighbor_solved_elem_ids;
-
+  /// @brief Apply initial conditions using polynomial nodal patch recovery
+  /// @param sys
   void applyIC_Polynomial(SystemBase & sys);
+
+  /// @brief Gather neighbor elements for newly activated nodes
   void gatherNeighborElementsForActivatedNodes();
+
+  inline ICStrategyForNewlyActivated::Type parseString2ICStrategy(const std::string & input)
+  {
+    if (input == "IC_EXTRAPOLATE_FIRST_LAYER")
+      return ICStrategyForNewlyActivated::IC_EXTRAPOLATE_FIRST_LAYER;
+    else if (input == "IC_DEFAULT")
+      return ICStrategyForNewlyActivated::IC_DEFAULT;
+    else if (input == "IC_POLYNOMIAL")
+      return ICStrategyForNewlyActivated::IC_POLYNOMIAL;
+    else if (input == "IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN")
+      return ICStrategyForNewlyActivated::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN;
+    else if (input == "IC_POLYNOMIAL_THRESHOLD")
+      return ICStrategyForNewlyActivated::IC_POLYNOMIAL_THRESHOLD;
+    else
+      throw std::invalid_argument("Invalid string for ICStrategyForNewlyActivated: " + input);
+  }
 };

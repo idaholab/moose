@@ -12,6 +12,32 @@
 // MOOSE includes
 #include "ElementUserObject.h"
 
+// Hash and equality function for using std::vector<dof_id_type> as unordered_map key
+inline void
+hash_combine(std::size_t & seed, std::size_t value)
+{
+  seed ^= value + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
+struct DofIDVectorHash
+{
+  std::size_t operator()(const std::vector<dof_id_type> & vec) const
+  {
+    std::size_t seed = vec.size(); // Include size to differentiate [1,2] and [1,2,0]
+    for (const auto & id : vec)
+      hash_combine(seed, std::hash<dof_id_type>()(id));
+    return seed;
+  }
+};
+
+struct DofIDVectorEqual
+{
+  bool operator()(const std::vector<dof_id_type> & a, const std::vector<dof_id_type> & b) const
+  {
+    return a == b;
+  }
+};
+
 class NodalPatchRecoveryBase : public ElementUserObject
 {
 public:
@@ -52,9 +78,13 @@ public:
   /// in a parallel computing environment.
   void synchronizeAebe() const;
 
+  /// Returns the variable name
+  virtual const VariableName & variableName() const { return _var_name; }
+
 protected:
   /// Compute the quantity to recover using nodal patch recovery
   virtual Real computeValue() = 0;
+  void setVariableName(const VariableName & var_name) { _var_name = var_name; }
 
   unsigned int _qp;
 
@@ -100,4 +130,14 @@ private:
 
   /// @brief Whether we want to specify the elements for the patch recovery
   bool _use_specific_elements;
+
+  /// @brief Cache for least-squares coefficients used in nodal patch recovery.
+  mutable std::
+      unordered_map<std::vector<dof_id_type>, RealEigenVector, DofIDVectorHash, DofIDVectorEqual>
+          _cached_coef;
+
+  /// Print coefficients of the polynomial to console
+  const bool _verbose;
+
+  VariableName _var_name; ///< Variable name
 };

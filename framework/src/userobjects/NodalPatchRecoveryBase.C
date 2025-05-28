@@ -39,6 +39,8 @@ NodalPatchRecoveryBase::validParams()
   params.addParam<bool>(
       "use_specific_elements", false, "Whether to use specific elements for patch recovery");
 
+  params.addParam<bool>("verbose", false, "Set to true to print coefficients of the polynomial.");
+
   return params;
 }
 
@@ -49,7 +51,8 @@ NodalPatchRecoveryBase::NodalPatchRecoveryBase(const InputParameters & parameter
         static_cast<unsigned int>(getParam<MooseEnum>("patch_polynomial_order"))),
     _multi_index(MathUtils::multiIndex(_mesh.dimension(), _patch_polynomial_order)),
     _q(_multi_index.size()),
-    _use_specific_elements(getParam<bool>("use_specific_elements"))
+    _use_specific_elements(getParam<bool>("use_specific_elements")),
+    _verbose(getParam<bool>("verbose"))
 {
 }
 
@@ -57,23 +60,45 @@ Real
 NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
                                            const std::vector<dof_id_type> & elem_ids) const
 {
-  // Before we go, check if we have enough sample points for solving the least square fitting
-  if (_q_point.size() * elem_ids.size() < _q)
-    mooseError("There are not enough sample points to recover the nodal value, try reducing the "
-               "polynomial order or using a higher-order quadrature scheme.");
 
-  _console << "nodalPatchRecovery." << std::endl;
-  // Assemble the least squares problem over the patch
-  RealEigenMatrix A = RealEigenMatrix::Zero(_q, _q);
-  RealEigenVector b = RealEigenVector::Zero(_q);
-  for (auto elem_id : elem_ids)
+  // Developer should sort vector of elem_ids outside of this function to prevent
+  // sorting the key vector on every call (expensive).
+  std::vector<dof_id_type> key = elem_ids;
+
+  // Check cache
+  auto it = _cached_coef.find(key);
+  RealEigenVector coef;
+
+  if (it != _cached_coef.end())
+    coef = it->second;
+  else
   {
-    A += libmesh_map_find(_Ae, elem_id);
-    b += libmesh_map_find(_be, elem_id);
-  }
+    // Before we go, check if we have enough sample points for solving the least square fitting
+    if (_q_point.size() * elem_ids.size() < _q)
+      mooseError("There are not enough sample points to recover the nodal value, try reducing the "
+                 "polynomial order or using a higher-order quadrature scheme.");
 
-  // Solve the least squares fitting
-  RealEigenVector coef = A.completeOrthogonalDecomposition().solve(b);
+    // Assemble the least squares problem over the patch
+    RealEigenMatrix A = RealEigenMatrix::Zero(_q, _q);
+    RealEigenVector b = RealEigenVector::Zero(_q);
+    for (auto elem_id : elem_ids)
+    {
+      A += libmesh_map_find(_Ae, elem_id);
+      b += libmesh_map_find(_be, elem_id);
+    }
+
+    // Solve the least squares fitting
+    coef = A.completeOrthogonalDecomposition().solve(b);
+
+    _cached_coef[key] = coef; // Save to cache
+
+    if (_verbose)
+    {
+      for (const auto & coef_i : coef)
+        _console << coef_i << " ";
+      _console << std::endl;
+    }
+  }
 
   // Compute the fitted nodal value
   RealEigenVector p = evaluateBasisFunctions(x);
@@ -118,28 +143,8 @@ NodalPatchRecoveryBase::execute()
 
   dof_id_type elem_id = _current_elem->id();
 
-  for (unsigned i = 0; i < _current_elem->n_nodes(); ++i)
-  {
-    const Node * node_ptr = _current_elem->node_ptr(i);
-
-    // print node position
-    Point node_pos = *node_ptr;
-
-    std::ofstream fout1("assembly_nodes.txt", std::ios::app);
-    if (fout1.is_open())
-    {
-      fout1 << node_pos(0) << ", " << node_pos(1) << "\n";
-      fout1.close();
-    }
-    else
-    {
-      std::cerr << "Error: Unable to open assembly_nodes.txt for writing!" << std::endl;
-    }
-  }
   _Ae[elem_id] = Ae;
   _be[elem_id] = be;
-
-  _console << "[Rank " << processor_id() << "] assembled elem " << elem_id << std::endl;
 }
 
 void
@@ -158,16 +163,13 @@ NodalPatchRecoveryBase::finalize()
   // information from other processors in this finalize() method.
 
   // Populate algebraically ghosted elements to query
-  // First issue: getEvaluableElementRange is not block restricted and cause some issues
   if (!_use_specific_elements)
     identifyGhostElementsFromOtherProcs();
 
-  /// It become super long in UO and do not know what happened
   if (_query_ids.empty())
     // No need to send or receive data
     return;
 
-  // std::cout << "_additional_elems size: " << _additional_elems.size() << std::endl;
   synchronizeAebe();
 }
 
@@ -182,8 +184,6 @@ NodalPatchRecoveryBase::identifyAdditionalElementsFromOtherProcs() const
     if (elem->processor_id() != processor_id())
       _query_ids[elem->processor_id()].push_back(elem->id());
   }
-
-  _console << "_query_ids size: " << _query_ids.size() << std::endl;
 }
 
 void
@@ -192,27 +192,8 @@ NodalPatchRecoveryBase::identifyGhostElementsFromOtherProcs() const
   const ConstElemRange evaluable_elem_range = _fe_problem.getEvaluableElementRange();
 
   for (const auto & elem : evaluable_elem_range)
-  {
-    // for (unsigned i = 0; i < elem->n_nodes(); ++i)
-    // {
-    //   const Node * node_ptr = elem->node_ptr(i);
-    //   const Point & node_pos = *node_ptr;
-
-    //   std::ofstream fout1("evaluable_elem.txt", std::ios::app);
-    //   if (fout1.is_open())
-    //   {
-    //     fout1 << node_pos(0) << ", " << node_pos(1) << "\n";
-    //     fout1.close();
-    //   }
-    //   else
-    //   {
-    //     std::cerr << "Error: Unable to open evaluable_elem.txt for writing!" << std::endl;
-    //   }
-    // }
-
     if (elem->processor_id() != processor_id())
       _query_ids[elem->processor_id()].push_back(elem->id());
-  }
 }
 
 void
@@ -226,12 +207,7 @@ NodalPatchRecoveryBase::synchronizeAebe() const
                             std::vector<AbPair> & ab_pairs)
   {
     for (const auto & elem_id : elem_ids)
-    {
-      if (!_Ae.count(elem_id))
-        std::cout << "_Ae does not contain elem_id: " << elem_id << std::endl;
-
       ab_pairs.emplace_back(_Ae.at(elem_id), _be.at(elem_id));
-    }
   };
 
   // Gather answers received from other processors

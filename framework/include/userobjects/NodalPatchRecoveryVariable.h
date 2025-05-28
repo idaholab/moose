@@ -18,7 +18,10 @@ public:
 protected:
   /// Returns the recovered value at the quadrature point (_qp)
   Real computeValue() override { return _var[_qp]; };
+  /// Returns the variable name
 
 private:
-  const VariableValue & _var; // Variable name
+  const VariableValue & _var; ///< Variable value
+
+  const VariableName _var_name; ///< Variable name
 };

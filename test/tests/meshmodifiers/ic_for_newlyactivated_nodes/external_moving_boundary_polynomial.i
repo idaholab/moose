@@ -1,5 +1,5 @@
-[Problem]
-  default_block = '1'
+[GlobalParams]
+  block = '1'
 []
 
 [Mesh]
@@ -48,7 +48,7 @@
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
-    inactive_subdomain_ID = 2
+    unsolved_blocks = '2'
     ic_strategy = "IC_POLYNOMIAL"
 
     nodal_patch_recovery_uo = 'extrapolation_patch'
