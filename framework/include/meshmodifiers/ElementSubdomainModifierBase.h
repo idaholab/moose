@@ -13,6 +13,7 @@
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 #include "NodalPatchRecoveryBase.h"
+#include "KDTree.h"
 
 namespace ICStrategyForNewlyActivated
 {
@@ -21,7 +22,8 @@ enum Type
   IC_DEFAULT,
   IC_EXTRAPOLATE_FIRST_LAYER,
   IC_POLYNOMIAL,
-  IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN
+  IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN,
+  IC_POLYNOMIAL_THRESHOLD,
 };
 }
 
@@ -76,6 +78,34 @@ protected:
 
   /// Boundary names associated with each moving boundary ID
   std::unordered_map<BoundaryID, BoundaryName> _moving_boundary_names;
+
+  inline void MPIAllgatherVectorAll_Int(const std::vector<int> & local_vec,
+                                        std::vector<int> & global_vec,
+                                        MPI_Comm comm = MPI_COMM_WORLD) const
+  {
+    int nProc, myRank;
+    MPI_Comm_size(comm, &nProc);
+    MPI_Comm_rank(comm, &myRank);
+
+    int local_size = static_cast<int>(local_vec.size());
+    std::vector<int> recv_counts(nProc);
+    MPI_Allgather(&local_size, 1, MPI_INT, recv_counts.data(), 1, MPI_INT, comm);
+
+    std::vector<int> displs(nProc, 0);
+    std::partial_sum(recv_counts.begin(), recv_counts.end() - 1, displs.begin() + 1);
+
+    int total_size = std::accumulate(recv_counts.begin(), recv_counts.end(), 0);
+    global_vec.resize(total_size);
+
+    MPI_Allgatherv(local_vec.data(),
+                   local_size,
+                   MPI_INT,
+                   global_vec.data(),
+                   recv_counts.data(),
+                   displs.data(),
+                   MPI_INT,
+                   comm);
+  }
 
 private:
   /// Create moving boundaries
@@ -178,8 +208,7 @@ private:
 
   /// @brief find the first layer of neighbors for each element
   /// @param sys
-  /// @param displaced
-  void computeFirstLayerNeighborInfo(SystemBase & sys, bool displaced);
+  void computeFirstLayerNeighborInfo(SystemBase & sys);
   void verifySecondNeighborInfo();
 
   /**
@@ -206,23 +235,6 @@ private:
   void identifyLocallyOwnedActivatedNodes(
       const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
 
-  inline ICStrategyForNewlyActivated::Type parseString2ICStrategy(const std::string & input)
-  {
-    if (input == "IC_EXTRAPOLATE_FIRST_LAYER")
-      return ICStrategyForNewlyActivated::IC_EXTRAPOLATE_FIRST_LAYER;
-    else if (input == "default_value")
-      return ICStrategyForNewlyActivated::IC_DEFAULT;
-    else if (input == "IC_POLYNOMIAL")
-      return ICStrategyForNewlyActivated::IC_POLYNOMIAL;
-    else if (input == "IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN")
-      return ICStrategyForNewlyActivated::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN;
-    else
-      throw std::invalid_argument("Invalid string for ICStrategyForNewlyActivated: " + input);
-  }
-
-  /// Using weighted averaging to obtain the solution on the newly-activated nodes
-  void setCurrentSolutionsOnNewlyActivatedNodes(SystemBase & sys);
-
   /// Elements that have been reinitialized due to subdomain changes,
   /// gathered across all processors using MPI
   std::vector<dof_id_type> _global_reinitialized_elems;
@@ -247,6 +259,40 @@ private:
   /// Indicates whether each node has had its initial condition (IC) applied.
   /// true = IC already set; false = IC not yet set.
   std::unordered_map<dof_id_type, bool> _node2IC_set;
+
+  /// @brief Names of the NodalPatchRecoveryBase user objects
+  const std::vector<UserObjectName> _npr_names;
+
+  /// @brief Apply initial conditions using polynomial extrapolation
+  std::vector<const NodalPatchRecoveryBase *> _npr_vec;
+
+  /// @brief List of neighbor elements that share nodes with reinitialized elements
+  std::vector<dof_id_type> _solved_elem_ids_for_npr;
+
+  /// IC_POLYNOMIAL_THRESHOLD related parameters
+  /// @brief Threshold for checking the closeness of element numbers in polynomial extrapolation
+  int _nearby_element_threshold = 1;
+
+  /// @brief centroids of the element
+  std::vector<Point> _centroids_elements;
+
+  /// @brief Maximum number of elements in a leaf node of the k-d tree
+  int _leaf_max_size = 10;
+
+  /// @brief k-d tree for neighbor element search in polynomial extrapolation
+  KDTree * _kd_tree = nullptr;
+
+  /// @brief  Map from k-d tree sequence index to element ID
+  std::vector<dof_id_type> _kd_tree_sequence_elem_id_map;
+
+  /// @brief Minimum diagonal length (criteria) for the k-d tree search
+  double _min_diag_length = std::numeric_limits<double>::max();
+
+  /// @brief Radius search threshold for k-d tree search
+  double _radius_search_threshold = -1;
+
+  /// Using weighted averaging to obtain the solution on the newly-activated nodes
+  void setCurrentSolutionsOnNewlyActivatedNodes(SystemBase & sys);
 
   /// Perform a global MPI gather of reinitialized element IDs across all processors.
   /// Results are stored in `_global_reinitialized_elems`.
@@ -274,19 +320,26 @@ private:
   /// @brief Apply initial conditions for a list of nodes
   void applyICForNodeList(SystemBase & sys, const std::vector<dof_id_type> & nodes);
 
-  /// @brief Names of the NodalPatchRecoveryBase user objects
-  const std::vector<UserObjectName> _npr_names;
-
-  /// @brief Apply initial conditions using polynomial extrapolation
-  std::vector<const NodalPatchRecoveryBase *> _npr_vec;
-
-  /// @brief List of neighbor elements that share nodes with reinitialized elements
-  std::vector<dof_id_type> _neighbor_solved_elem_ids;
-
   /// @brief Apply initial conditions using polynomial nodal patch recovery
   /// @param sys
   void applyIC_Polynomial(SystemBase & sys);
 
   /// @brief Gather neighbor elements for newly activated nodes
   void gatherNeighborElementsForActivatedNodes();
+
+  inline ICStrategyForNewlyActivated::Type parseString2ICStrategy(const std::string & input)
+  {
+    if (input == "IC_EXTRAPOLATE_FIRST_LAYER")
+      return ICStrategyForNewlyActivated::IC_EXTRAPOLATE_FIRST_LAYER;
+    else if (input == "default_value")
+      return ICStrategyForNewlyActivated::IC_DEFAULT;
+    else if (input == "IC_POLYNOMIAL")
+      return ICStrategyForNewlyActivated::IC_POLYNOMIAL;
+    else if (input == "IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN")
+      return ICStrategyForNewlyActivated::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN;
+    else if (input == "IC_POLYNOMIAL_THRESHOLD")
+      return ICStrategyForNewlyActivated::IC_POLYNOMIAL_THRESHOLD;
+    else
+      throw std::invalid_argument("Invalid string for ICStrategyForNewlyActivated: " + input);
+  }
 };
