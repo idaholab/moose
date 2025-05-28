@@ -12,6 +12,7 @@
 {#- LIBMESH_OPTIONS: Options to pass to the libMesh build script                              -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the libMesh build script                            -#}
 {#- METHODS: Methods to build (defaults to all methods)                                       -#}
+{#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
 
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
@@ -27,8 +28,10 @@
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
+{%- if SKIP_FINGERPRINTS is not defined %}
 # MOOSE-NCRC key
 Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
+{%- endif %}
 
 %environment
     # From moose-libmesh
