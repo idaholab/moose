@@ -44,8 +44,15 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
-[Debug]
-  output_process_domains = true
+[AuxVariables]
+  [pid]
+    family = MONOMIAL
+    order = CONSTANT
+    [AuxKernel]
+      type = ProcessorIDAux
+      execute_on = 'TIMESTEP_END'
+    []
+  []
 []
 
 [Outputs]
