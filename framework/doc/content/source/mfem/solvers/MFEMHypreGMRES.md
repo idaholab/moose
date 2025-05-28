@@ -13,6 +13,10 @@ equation system.
 
 Not compatible with use on partially assembled equation systems.
 
+A Low-Order-Refined (LOR) version of this solver may be used instead by setting the parameter 
+[!param](/Solver/MFEMHypreGMRES/low_order_refined) to `true`. Using an LOR solver improves performance for high polynomial 
+order systems.
+
 !syntax parameters /Solver/MFEMHypreGMRES
 
 !syntax inputs /Solver/MFEMHypreGMRES

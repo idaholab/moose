@@ -17,14 +17,14 @@ public:
 
   MFEMHypreFGMRES(const InputParameters & parameters);
 
-  std::shared_ptr<mfem::Solver> getSolver() override { return _solver; }
+  /// Updates the solver with the bilinear form in case LOR solve is required
+  void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
 
 protected:
   void constructSolver(const InputParameters & parameters) override;
 
 private:
-  std::shared_ptr<mfem::Solver> _preconditioner{nullptr};
-  std::shared_ptr<mfem::HypreFGMRES> _solver{nullptr};
+  std::shared_ptr<MFEMSolverBase> _preconditioner{nullptr};
 };
 
 #endif

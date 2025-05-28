@@ -11,6 +11,7 @@ MFEMSuperLU::validParams()
   InputParameters params = MFEMSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing direct solves of sparse systems in "
                              "parallel using the SuperLU_DIST library.");
+
   return params;
 }
 
@@ -24,6 +25,13 @@ MFEMSuperLU::constructSolver(const InputParameters &)
 {
   _solver = std::make_shared<Moose::MFEM::SuperLUSolver>(
       getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+}
+
+void
+MFEMSuperLU::updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &)
+{
+  if (_lor)
+    mooseError("SuperLU solver does not support LOR solve");
 }
 
 #endif
