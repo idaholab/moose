@@ -61,8 +61,8 @@ StandardizerTorched::set(const Real & mean, const Real & stdev, const Real & n)
     stdev_vec.push_back(stdev);
   }
   auto options = torch::TensorOptions().dtype(at::kDouble);
-  _mean = torch::from_blob(mean_vec.data(), {n, 1}, options).to(at::kDouble);
-  _stdev = torch::from_blob(stdev_vec.data(), {n, 1}, options).to(at::kDouble);
+  _mean = torch::from_blob(mean_vec.data(), {long(n), 1}, options).to(at::kDouble).clone();
+  _stdev = torch::from_blob(stdev_vec.data(), {long(n), 1}, options).to(at::kDouble).clone();
 }
 
 void
@@ -73,61 +73,42 @@ StandardizerTorched::set(const std::vector<Real> & mean, const std::vector<Real>
   auto mean_copy = mean;
   auto stdev_copy = stdev;
   auto options = torch::TensorOptions().dtype(at::kDouble);
-  _mean = torch::from_blob(mean_copy.data(), {mean.size(), 1}, options).to(at::kDouble);
-  _stdev = torch::from_blob(stdev_copy.data(), {stdev.size(), 1}, options).to(at::kDouble);
+  _mean =
+      torch::from_blob(mean_copy.data(), {long(mean.size()), 1}, options).to(at::kDouble).clone();
+  _stdev =
+      torch::from_blob(stdev_copy.data(), {long(stdev.size()), 1}, options).to(at::kDouble).clone();
+
+  /*
+  auto options = torch::TensorOptions().dtype(torch::kFloat32);
+  _mean = torch::empty({mean.size()}, options);
+  _stdev = torch::empty({stdev.size()}, options);
+  std::copy_n(mean, mean.size(), _mean.contiguous().data_ptr<Real>());
+  std::copy_n(stdev, stdev.size(), _stdev.contiguous().data_ptr<Real>());
+  */
 }
 
 void
 StandardizerTorched::computeSet(const torch::Tensor & input)
 {
-  //_mean.clear();
-  //_stdev.clear();
-  // unsigned int num_samples = input.sizes()[0];
-  // unsigned int n = input.sizes()[1];
-
-  // TODO: mean and stdev can be calculated using libtorch std and std_mean if torch tensor is
-  // provided
-
-  // comptue mean
-  // RealEigenVector mean = input.colwise().mean();
+  // comptue mean and standard deviation
   auto mean = torch::mean(input, 0, false);
-  // Compute standard deviation
-  /*
-  RealEigenVector stdev =
-      ((input.rowwise() - mean.transpose()).colwise().squaredNorm() / num_samples)
-          .transpose()
-          .array()
-          .sqrt();
-  */
-  // Store in std:vector format
-  auto stdev = torch::std(input, 1, true);
-  //_mean.resize(n);
-  //_stdev.resize(n);
+  auto stdev = torch::std(input, 0, 0, true);
   _mean = mean;
   _stdev = stdev;
-
-  // RealEigenVector::Map(&_mean[0], n) = mean;
-  // RealEigenVector::Map(&_stdev[0], n) = stdev;
 }
 
 void
 StandardizerTorched::getStandardized(torch::Tensor & input) const
 {
-  // Eigen::Map<const RealEigenVector> mean(_mean.data(), _mean.size());
-  // Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
-  // input = (input.rowwise() - mean.transpose()).array().rowwise() / stdev.transpose().array();
-  input = (input - torch::mean(input, 1, true));
-  input = input / torch::std(input);
+  // Standardize input tensor
+  input = (input - torch::mean(input, 0, false));
+  input = input / torch::std(input, 0, 0, true);
 }
 
 void
 StandardizerTorched::getDestandardized(torch::Tensor & input) const
 {
-  // Eigen::Map<const RealEigenVector> mean(_mean.data(), _mean.size());
-  // Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
-  // input =
-  //     (input.array().rowwise() * stdev.transpose().array()).rowwise() + mean.transpose().array();
-  input = (input * torch::std(input, 1, true) + torch::mean(input, 1, true));
+  input = (input * torch::std(input, 0, 0, true) + torch::mean(input, 0, false));
 }
 
 void
@@ -135,15 +116,15 @@ StandardizerTorched::getDescaled(torch::Tensor & input) const
 {
   // Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
   // input = input.array().rowwise() * stdev.transpose().array();
-  input = input * torch::std(input, 1, true);
+  input = input * torch::std(input, 0, 0, true);
 }
 
 /// Helper for dataStore
 void
 StandardizerTorched::storeHelper(std::ostream & stream, void * context) const
 {
-  Real * temp_mean = _mean.data<Real>();
-  Real * temp_stdev = _stdev.data<Real>();
+  Real * temp_mean = _mean.data_ptr<Real>();
+  Real * temp_stdev = _stdev.data_ptr<Real>();
   unsigned int n = _mean.size(0);
   dataStore(stream, n, context);
   for (unsigned int ii = 0; ii < n; ++ii)
