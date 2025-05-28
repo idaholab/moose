@@ -53,7 +53,7 @@
   line_search = 'none'
   solve_type = NEWTON
   nl_max_its = 5
-  nl_forced_its = 2
+  nl_forced_its = 3
   nl_abs_div_tol = 1e+3
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
   petsc_options_iname = '-pc_type -pc_hypre_type'
