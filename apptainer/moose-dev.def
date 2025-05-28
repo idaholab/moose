@@ -18,6 +18,7 @@
 {#- MOOSE_TOOLS_VERSION: The version to pin moose-tools to (if any)                           -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
+{#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
 {#- WITH_LIBTORCH: The libtorch distribution to use (cpu, cu121, etc); default: cpu           -#}
 {#- WITH_MFEM: Whether or not to build mfem (default: 1 to build, 0 to not build)             -#}
 
@@ -67,8 +68,10 @@
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
+{%- if SKIP_FINGERPRINTS is not defined %}
 # MOOSE-NCRC key
 Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
+{%- endif %}
 
 %environment
     export PATH={{ MOOSE_MINIFORGE }}/bin:/opt/code-server/bin:$PATH
