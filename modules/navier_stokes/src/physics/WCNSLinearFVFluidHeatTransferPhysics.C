@@ -361,14 +361,14 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyWallBC()
       params.set<LinearVariableName>("variable") =
           _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
       params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
-      params.set<MooseFunctorName>(NS::T_solid) = _energy_wall_functors[bc_ind];
-      if (_problem->hasFunctor("htc_" + wall_boundaries[bc_ind], 0))
-        params.set<MooseFunctorName>("h") = "htc_" + wall_boundaries[bc_ind];
-      else if (_problem->hasFunctor("htc", 0))
-        params.set<MooseFunctorName>("h") = "htc";
-      else
-        mooseError("Either 'htc' or 'htc_" + wall_boundaries[bc_ind] +
-                   "' must be defined as a functor (for example using a Function)");
+      const auto Tinf_htc_functors =
+          MooseUtils::split(_energy_wall_functors[bc_ind], /*delimiter=*/":", /*max_count=*/1);
+      if (Tinf_htc_functors.size() != 2)
+        paramError("energy_wall_functors",
+                   "'convection' wall types require two functors specified as "
+                   "<Tinf_functor>:<htc_functor>.");
+      params.set<MooseFunctorName>(NS::T_solid) = Tinf_htc_functors[0];
+      params.set<MooseFunctorName>("h") = Tinf_htc_functors[1];
       params.set<std::vector<BoundaryName>>("boundary") = {wall_boundaries[bc_ind]};
 
       getProblem().addLinearFVBC(
