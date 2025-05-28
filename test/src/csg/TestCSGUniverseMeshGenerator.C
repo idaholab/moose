@@ -120,7 +120,7 @@ TestCSGUniverseMeshGenerator::generateCSG()
       }
     }
 
-    // bounding box for new cell - located at the origin of the
+    // bounding box for new cell - located at the origin
     auto x_pos_surf = csg_mesh->createPlaneFromCoefficients(
         img + "_x_pos_surf", 1.0, 0, 0, x + 0.5 * side_lengths[i]);
     auto x_neg_surf = csg_mesh->createPlaneFromCoefficients(
