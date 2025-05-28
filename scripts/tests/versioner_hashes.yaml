@@ -1142,3 +1142,34 @@ bda476600e034d573d0bf2632f617a2d49794a42: #30485; Update mfem, libmesh, nlohmann
   wasp:
     full_version: 2025.05.13_0
     hash: 43d14da
+bdffa252314aafb659eaa62a242bd1c30e62b8f0: #28114; full stack cuda container, apptainer clang 19, apptainer min gcc 9
+  libmesh:
+    full_version: 2025.05.23_1
+    hash: d8d7544
+  libmesh-vtk:
+    full_version: 9.4.2_3
+    hash: 4c8eb27
+  moose-dev:
+    full_version: 2025.05.27
+    hash: 22e1151
+  mpi:
+    full_version: 2025.05.27
+    hash: e10279b
+  peacock:
+    full_version: 2025.05.27
+    hash: ee8b2f5
+  petsc:
+    full_version: 3.23.0.6.gd9d7fd11dca_2
+    hash: e7c8e06
+  pprof:
+    full_version: 2025.04.17_0
+    hash: f8fd1e3
+  seacas:
+    full_version: 2025.02.27_1
+    hash: 5d0701b
+  tools:
+    full_version: 2025.04.17
+    hash: 827cc6f
+  wasp:
+    full_version: 2025.05.13_0
+    hash: 43d14da
