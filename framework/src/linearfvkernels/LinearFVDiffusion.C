@@ -173,9 +173,14 @@ LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
         _current_face_info->normal() -
         1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
 
-    grad_contrib += _diffusion_coeff(face_arg, determineState()) *
-                    _var.gradSln(*_current_face_info->elemInfo()) * correction_vector *
-                    _current_face_area;
+    // We might be on a face which is an internal boundary so we want to make sure we
+    // get the gradient from the right side.
+    const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
+
+    grad_contrib += _diffusion_coeff(face_arg, determineState()) * _var.gradSln(*elem_info) *
+                    correction_vector * _current_face_area;
   }
 
   return grad_contrib;

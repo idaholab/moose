@@ -29,8 +29,6 @@ SIMPLESolveNonlinearAssembly::validParams()
   /*
    * The names of the different systems in the segregated solver
    */
-  params.addParam<SolverSystemName>("solid_energy_system",
-                                    "The solver system for the solid energy equation.");
   params.addParam<std::vector<SolverSystemName>>(
       "turbulence_systems", {}, "The solver system(s) for the turbulence equation(s).");
 
@@ -50,24 +48,11 @@ SIMPLESolveNonlinearAssembly::validParams()
       "The lower limit imposed on turbulent quantities. The recommended value for robustness "
       "is 1e-8.");
 
-  params.addParamNamesToGroup("energy_equation_relaxation "
-                              "turbulence_equation_relaxation",
-                              "Relaxation");
+  params.addParamNamesToGroup("turbulence_equation_relaxation", "Relaxation");
 
   /*
    * Petsc options for every equations in the system
    */
-  params.addParam<MultiMooseEnum>("solid_energy_petsc_options",
-                                  Moose::PetscSupport::getCommonPetscFlags(),
-                                  "Singleton PETSc options for the solid energy equation");
-  params.addParam<MultiMooseEnum>("solid_energy_petsc_options_iname",
-                                  Moose::PetscSupport::getCommonPetscKeys(),
-                                  "Names of PETSc name/value pairs for the solid energy equation");
-  params.addParam<std::vector<std::string>>(
-      "solid_energy_petsc_options_value",
-      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
-      "solid energy equation");
-
   params.addParam<MultiMooseEnum>("turbulence_petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
                                   "Singleton PETSc options for the turbulence equation(s)");
@@ -80,19 +65,13 @@ SIMPLESolveNonlinearAssembly::validParams()
       "turbulence equation");
 
   params.addParamNamesToGroup(
-      "solid_energy_petsc_options solid_energy_petsc_options_iname "
-      "solid_energy_petsc_options_value "
       "turbulence_petsc_options turbulence_petsc_options_iname turbulence_petsc_options_value",
       "PETSc Control");
 
   /*
    * Iteration tolerances for the different equations
    */
-  params.addRangeCheckedParam<Real>(
-      "solid_energy_absolute_tolerance",
-      1e-5,
-      "0.0<solid_energy_absolute_tolerance",
-      "The absolute tolerance on the normalized residual of the solid energy equation.");
+
   params.addParam<std::vector<Real>>(
       "turbulence_absolute_tolerance",
       std::vector<Real>(),
@@ -103,21 +82,6 @@ SIMPLESolveNonlinearAssembly::validParams()
   /*
    * Linear iteration tolerances for the different equations
    */
-  params.addRangeCheckedParam<Real>("solid_energy_l_tol",
-                                    1e-5,
-                                    "0.0<=solid_energy_l_tol & solid_energy_l_tol<1.0",
-                                    "The relative tolerance on the normalized residual in the "
-                                    "linear solver of the solid energy equation.");
-  params.addRangeCheckedParam<Real>("solid_energy_l_abs_tol",
-                                    1e-10,
-                                    "0.0<solid_energy_l_abs_tol",
-                                    "The absolute tolerance on the normalized residual in the "
-                                    "linear solver of the solid energy equation.");
-  params.addRangeCheckedParam<unsigned int>(
-      "solid_energy_l_max_its",
-      10000,
-      "0<solid_energy_l_max_its",
-      "The maximum allowed iterations in the linear solver of the solid energy equation.");
   params.addRangeCheckedParam<Real>("turbulence_l_tol",
                                     1e-5,
                                     "0.0<=turbulence_l_tol & turbulence_l_tol<1.0",
@@ -133,10 +97,9 @@ SIMPLESolveNonlinearAssembly::validParams()
       10000,
       "The maximum allowed iterations in the linear solver of the turbulence equation(s).");
 
-  params.addParamNamesToGroup(
-      "solid_energy_l_tol solid_energy_l_abs_tol solid_energy_l_max_its turbulence_l_tol "
-      "turbulence_l_abs_tol turbulence_l_max_its",
-      "Linear Iteration Control");
+  params.addParamNamesToGroup("turbulence_l_tol "
+                              "turbulence_l_abs_tol turbulence_l_max_its",
+                              "Linear Iteration Control");
 
   return params;
 }
@@ -145,7 +108,6 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
   : SIMPLESolveBase(ex),
     _pressure_sys_number(_problem.nlSysNum(getParam<SolverSystemName>("pressure_system"))),
     _pressure_system(_problem.getNonlinearSystemBase(_pressure_sys_number)),
-    _has_solid_energy_system(_has_energy_system && isParamValid("solid_energy_system")),
     _has_turbulence_systems(!getParam<std::vector<SolverSystemName>>("turbulence_systems").empty()),
     _energy_sys_number(_has_energy_system
                            ? _problem.nlSysNum(getParam<SolverSystemName>("energy_system"))
@@ -159,12 +121,10 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
     _solid_energy_system(_has_solid_energy_system
                              ? &_problem.getNonlinearSystemBase(_solid_energy_sys_number)
                              : nullptr),
-    _solid_energy_l_abs_tol(getParam<Real>("solid_energy_l_abs_tol")),
     _turbulence_system_names(getParam<std::vector<SolverSystemName>>("turbulence_systems")),
     _turbulence_equation_relaxation(getParam<std::vector<Real>>("turbulence_equation_relaxation")),
     _turbulence_field_min_limit(getParam<std::vector<Real>>("turbulence_field_min_limit")),
     _turbulence_l_abs_tol(getParam<Real>("turbulence_l_abs_tol")),
-    _solid_energy_absolute_tolerance(getParam<Real>("solid_energy_absolute_tolerance")),
     _turbulence_absolute_tolerance(getParam<std::vector<Real>>("turbulence_absolute_tolerance")),
     _pressure_tag_name(getParam<TagName>("pressure_gradient_tag")),
     _pressure_tag_id(_problem.addVectorTag(_pressure_tag_name))
@@ -232,48 +192,6 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
     paramError(
         "solid_energy_system",
         "We cannot solve a solid energy system without solving for the fluid energy as well!");
-
-  if (_has_energy_system)
-  {
-    // We disable this considering that this object passes petsc options a little differently
-    _energy_system->system().prefix_with_name(false);
-
-    // We only allow the solve for a solid energy system if we already solve for the fluid energy
-    if (_has_solid_energy_system)
-    {
-      // We disable this considering that this object passes petsc options a little differently
-      _solid_energy_system->system().prefix_with_name(false);
-
-      const auto & solid_energy_petsc_options =
-          getParam<MultiMooseEnum>("solid_energy_petsc_options");
-      const auto & solid_energy_petsc_pair_options = getParam<MooseEnumItem, std::string>(
-          "solid_energy_petsc_options_iname", "solid_energy_petsc_options_value");
-      Moose::PetscSupport::addPetscFlagsToPetscOptions(
-          solid_energy_petsc_options, "-", *this, _solid_energy_petsc_options);
-      Moose::PetscSupport::addPetscPairsToPetscOptions(solid_energy_petsc_pair_options,
-                                                       _problem.mesh().dimension(),
-                                                       "-",
-                                                       *this,
-                                                       _solid_energy_petsc_options);
-
-      _solid_energy_linear_control.real_valued_data["rel_tol"] =
-          getParam<Real>("solid_energy_l_tol");
-      _solid_energy_linear_control.real_valued_data["abs_tol"] =
-          getParam<Real>("solid_energy_l_abs_tol");
-      _solid_energy_linear_control.int_valued_data["max_its"] =
-          getParam<unsigned int>("solid_energy_l_max_its");
-    }
-    else
-      checkDependentParameterError("solid_energy_system",
-                                   {"solid_energy_petsc_options",
-                                    "solid_energy_petsc_options_iname",
-                                    "solid_energy_petsc_options_value",
-                                    "solid_energy_l_tol",
-                                    "solid_energy_l_abs_tol",
-                                    "solid_energy_l_max_its",
-                                    "solid_energy_absolute_tolerance"},
-                                   false);
-  }
 
   if (_has_turbulence_systems)
   {
