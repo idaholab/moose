@@ -64,6 +64,9 @@ protected:
                                                     libMesh::SolverConfiguration & solver_config,
                                                     const Real abs_tol);
 
+  /// Solve an equation which contains the solid energy conservation.
+  std::pair<unsigned int, Real> solveSolidEnergy();
+
   /// The number(s) of the system(s) corresponding to the momentum equation(s)
   std::vector<unsigned int> _momentum_system_numbers;
 
@@ -81,6 +84,12 @@ protected:
 
   /// Pointer to the nonlinear system corresponding to the fluid energy equation
   LinearSystem * _energy_system;
+
+  /// The number of the system corresponding to the solid energy equation
+  const unsigned int _solid_energy_sys_number;
+
+  /// Pointer to the nonlinear system corresponding to the solid energy equation
+  LinearSystem * _solid_energy_system;
 
   /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
   std::vector<LinearSystem *> _passive_scalar_systems;

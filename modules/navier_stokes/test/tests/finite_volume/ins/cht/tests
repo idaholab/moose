@@ -1,0 +1,29 @@
+[Tests]
+  issues = '#30281'
+  design = 'LinearFVConvectiveHeatTransferBC.md'
+  [flow_around_square]
+    type = Exodiff
+    input = flow-around-square-linear.i
+    exodiff = 'flow-around-square-linear_out.e'
+    requirement = 'The system shall be able to solve for wall-convection on an orthogonal grid with a user-specified heat transfer coefficient using finite volume discretization in a linear system setting.'
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [flow_around_square_fluidonly]
+    type = Exodiff
+    input = flow-around-square-linear-fluidonly.i
+    exodiff = 'flow-around-square-linear-fluidonly_out.e'
+    requirement = 'The system shall be able to solve for wall-convection with a user-specified heat transfer coefficient and wall temperature using finite volume discretization in a linear system setting.'
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [flow_around_square_tri]
+    type = Exodiff
+    input = flow-around-square-linear.i
+    exodiff = 'tri.e'
+    cli_args = 'Mesh/generated_mesh/elem_type=TRI3 Outputs/file_base=tri'
+    requirement = 'The system shall be able to solve for wall-convection on a nonorthogonal grid with a user-specified heat transfer coefficient using finite volume discretization in a linear system setting.'
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]

@@ -73,9 +73,6 @@ protected:
 
   // ************************ For quick equation check ********************* //
 
-  /// Boolean for easy check if a solid energy system shall be solved or not
-  const bool _has_solid_energy_system;
-
   /// Boolean for easy check if turbulence systems shall be solved or not
   const bool _has_turbulence_systems;
 
@@ -94,16 +91,6 @@ protected:
 
   /// Pointer to the nonlinear system corresponding to the solid energy equation
   NonlinearSystemBase * _solid_energy_system;
-
-  /// Options which hold the petsc settings for the solid energy equation
-  Moose::PetscSupport::PetscOptions _solid_energy_petsc_options;
-
-  /// Options for the linear solver of the solid energy equation
-  SIMPLESolverConfiguration _solid_energy_linear_control;
-
-  /// Absolute linear tolerance for the solid energy equations. We need to store this, because
-  /// it needs to be scaled with a representative flux.
-  const Real _solid_energy_l_abs_tol;
 
   // ********************* Passive Scalar Eq. Variables *********************** //
 
@@ -138,9 +125,6 @@ protected:
   const Real _turbulence_l_abs_tol;
 
   // ********************* SIMPLE iteration variables ********************** //
-
-  /// The user-defined absolute tolerance for determining the convergence in solid energy
-  const Real _solid_energy_absolute_tolerance;
 
   /// The user-defined absolute tolerance for determining the convergence in turbulence equations
   const std::vector<Real> _turbulence_absolute_tolerance;
