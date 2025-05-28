@@ -217,15 +217,16 @@ LIBTORCH_OPTIONS = {
 }
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
-def runCommand(cmd, cwd=None, force_mpi_command=False):
+def runCommand(cmd, force_mpi_command=False, **kwargs):
     # On Windows it is not allowed to close fds while redirecting output
     should_close = platform.system() != "Windows"
     if force_mpi_command:
         mpi_command = os.environ.get('MOOSE_MPI_COMMAND')
         if mpi_command is not None:
             cmd = f'{mpi_command} -n 1 {cmd}'
-    p = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
-    output = p.communicate()[0].decode('utf-8')
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                       close_fds=should_close, shell=True, text=True, **kwargs)
+    output = p.stdout
     if (p.returncode != 0):
         output = 'ERROR: ' + output
     return output
@@ -527,12 +528,31 @@ def checkLibtorchVersion(checks, test):
 
     return (checkVersion(checks, version_string, 'libtorch_version'), version_string)
 
+def outputHeader(header, ending=True):
+    """
+    Returns text for output with a visual separator, i.e.:
+    ##############################...
+    <header>
+    ##############################...
+    """
+    begin_sep = '#' * 80
+    end_sep = f'{begin_sep}\n' if ending else ''
+    return f'{begin_sep}\n{header}\n{end_sep}'
+
 def getCapabilities(exe):
     """
     Get capabilities JSON and compare it to the required capabilities
     """
     assert exe
-    output = runCommand(f"{exe} --show-capabilities", force_mpi_command=True)
+    try:
+        cmd = f'{exe} --show-capabilities'
+        output = runCommand(cmd, force_mpi_command=True, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f'ERROR: Failed to parse the application capabilities!')
+        print(f'Command ran: {cmd}\n')
+        print(outputHeader(f'Failed command output'))
+        print(e.stdout)
+        sys.exit(1)
     return parseMOOSEJSON(output, '--show-capabilities')
 
 def getCapability(exe, name):
