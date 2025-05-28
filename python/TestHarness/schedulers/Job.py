@@ -272,6 +272,10 @@ class Job(OutputInterface):
         """ Return the shorthand Test name """
         return self.__tester.getTestNameShort()
 
+    def getTestNameForFile(self):
+        """ return test short name for file creation ('/' to '.')"""
+        return self.__tester.getTestNameForFile()
+
     def getPrereqs(self):
         """ Wrapper method to return the testers prereqs """
         return self.__tester.getPrereqs()
@@ -663,7 +667,7 @@ class Job(OutputInterface):
 
         Should be used for all TestHarness produced files for this job
         """
-        return os.path.join(self.getOutputDirectory(), self.getTestNameShort().replace(os.sep, '.'))
+        return os.path.join(self.getOutputDirectory(), self.getTestNameForFile())
 
     def hasSeperateOutput(self):
         """

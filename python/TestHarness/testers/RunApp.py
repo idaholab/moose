@@ -48,6 +48,8 @@ class RunApp(Tester):
         params.addParam('no_error_deprecated', False, "Don't pass --error-deprecated on the command line even when running the TestHarness with --error-deprecated")
         params.addParam('no_additional_cli_args', False, "A Boolean indicating that no additional CLI args should be added from the TestHarness. Note: This parameter should be rarely used as it will not pass on additional options such as those related to mpi, threads, distributed mesh, errors, etc.")
 
+        params.addParam('capture_perf_graph', True, 'Whether or not to enable the capturing of PerfGraph output via Outputs/perf_graph_json_file and --capture-perf-graph')
+
         # Valgrind
         params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
@@ -131,6 +133,25 @@ class RunApp(Tester):
             self.addCaveats('hpc min_cpus=1')
             self.setStatus(self.skip)
             return False
+
+        # Setup the capturing of perf graph data, if enabled and not in a case
+        # where it doesn't make sense to do it
+        if options.capture_perf_graph:
+            assert 'perf_graph' not in self.json_metadata
+            skip = not self.specs['capture_perf_graph'] or \
+                self.specs['should_crash'] or \
+                self.specs['no_additional_cli_args'] or \
+                self.getCheckInput() or \
+                '--check-input' in self.specs['cli_args'] or \
+                '--mesh-only' in self.specs['cli_args'] or \
+                '--split-mesh' in self.specs['cli_args'] or \
+                (self.specs.isValid('input') and not self.specs['input']) or \
+                not self.specs['should_execute']
+            if skip:
+                self.addCaveats('no --capture-perf-graph')
+            else:
+                file = 'metadata_perf_graph_' + self.getTestNameForFile() + '.json'
+                self.json_metadata['perf_graph'] = Tester.JSONMetadata(file)
 
         return True
 
@@ -239,6 +260,11 @@ class RunApp(Tester):
             cli_args.append('--timing')
             cli_args.append('Outputs/perf_graph=true')
 
+        pg_metadata = self.json_metadata.get('perf_graph')
+        if pg_metadata:
+            path = os.path.join(self.getTestDir(), pg_metadata.path)
+            cli_args.append(f'Outputs/perf_graph_json_file={path}')
+
         if options.colored == False:
             cli_args.append('--color off')
 
@@ -297,7 +323,7 @@ class RunApp(Tester):
             if custom_module.custom_evaluation(runner_output):
                 return errors
             else:
-                errors += "#"*80 + "\n\n" + "Custom evaluation failed.\n"
+                errors += util.outputHeader('Custom evaluation failed', ending=False)
                 self.setStatus(self.fail, "CUSTOM EVAL FAILED")
                 return errors
 
@@ -336,7 +362,8 @@ class RunApp(Tester):
                 # Exclusive OR test
                 if attr['error_missing'] ^ have_expected_out:
                     reason = attr['reason']
-                    errors += "#"*80 + "\n\n" + attr['message'].format(match_type) + "\n\n" + specs[param] + "\n"
+                    errors += util.outputHeader(attr['message'].format(match_type) + "\n\n" + specs[param],
+                                                ending=False)
                     break
 
         if reason != '':

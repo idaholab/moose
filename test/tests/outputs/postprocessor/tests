@@ -6,6 +6,7 @@
     type = 'Exodiff'
     input = 'postprocessor.i'
     exodiff = 'postprocessor_exodus.e postprocessor_exodus2.e'
+    capture_perf_graph = false
 
     requirement = "The system shall support the ability to specify the output object for postprocessor data from within the input file block defining the postprocessor."
   [../]

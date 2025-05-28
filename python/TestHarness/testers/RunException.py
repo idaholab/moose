@@ -45,14 +45,12 @@ class RunException(RunApp):
         return RunApp.checkRunnable(self, options)
 
     def prepare(self, options):
-        if self.hasRedirectedOutput(options):
-            files = self.getRedirectedOutputFiles(options)
+        files = self.getRedirectedOutputFiles(options)
+        if files:
             util.deleteFilesAndFolders(self.getTestDir(), files, False)
 
     def getOutputFiles(self, options):
-        if self.hasRedirectedOutput(options):
-            return self.getRedirectedOutputFiles(options)
-        return []
+        return super().getOutputFiles(options) + self.getRedirectedOutputFiles(options)
 
     def testExitCodes(self, options, exit_code, runner_output):
         reason = super().testExitCodes(options, exit_code, runner_output)

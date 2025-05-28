@@ -11,6 +11,7 @@
 | old_vpp/value      | Postprocessor       | YES       |
 --------------------------------------------------------'
     match_literal = true
+    capture_perf_graph = false
 
     design = 'VectorPostprocessors/index.md'
     issues = '#30394'

@@ -29,7 +29,7 @@ class CheckFiles(FileTester):
             raise Exception('Either "check_files" or "check_not_exists" must be supplied for a CheckFiles test')
 
     def getOutputFiles(self, options):
-        return self.specs['check_files'] + self.specs['check_not_exists']
+        return super().getOutputFiles(options) + self.specs['check_files'] + self.specs['check_not_exists']
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
         output = super().processResults(moose_dir, options, exit_code, runner_output)

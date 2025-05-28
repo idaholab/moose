@@ -15,6 +15,7 @@
       required_python_packages = 'pandas matplotlib'
       installation_type = in_tree # see #26480
       hpc = false # see #26480
+      capture_perf_graph = false
     []
     [plot]
       type = CheckFiles
@@ -28,6 +29,7 @@
       detail = "demonstrates efficient parallel scaling of memory use."
       installation_type = in_tree # see #26480
       hpc = false # see #26480
+      capture_perf_graph = false
     []
   []
 []
