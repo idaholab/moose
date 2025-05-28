@@ -723,12 +723,6 @@ def parseMOOSEJSON(output: str, context: str) -> dict:
     except json.decoder.JSONDecodeError:
         raise Exception(f'Failed to parse JSON from {context}')
 
-def getExeJSON(exe: str) -> str:
-    """
-    Calls --json on the given executable
-    """
-    return runCommand(f"{exe} --json", force_mpi_command=True)
-
 def getExeObjects(json: dict) -> set[str]:
     """
     Gets a set of object names that are in the executable JSON dump.

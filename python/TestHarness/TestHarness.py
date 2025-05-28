@@ -315,15 +315,6 @@ class TestHarness:
 
             self.options._capabilities = util.getCapabilities(self.executable)
 
-        # Load app json output if we can
-        if self.executable:
-            self.options._app_json = util.parseMOOSEJSON(util.getExeJSON(self.executable),
-                                                         '--json')
-            self.options._app_objects = util.getExeObjects(self.options._app_json)
-        else:
-            self.options._app_json = None
-            self.options._app_objects = None
-
         checks = {}
         checks['platform'] = util.getPlatforms()
         checks['machine'] = util.getMachine()
