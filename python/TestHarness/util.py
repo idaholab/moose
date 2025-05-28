@@ -14,6 +14,9 @@ from collections import OrderedDict
 import json
 import yaml
 import sys
+import threading
+import typing
+import time
 
 MOOSE_OPTIONS = {
     'ad_size' : { 're_option' : r'#define\s+MOOSE_AD_MAX_DOFS_PER_ELEM\s+(\d+)',
@@ -838,13 +841,30 @@ def trimOutput(output, max_size=None):
     trimmed += f'\n{sep}\nOutput trimmed\n{sep}\n{output[-second_part:]}'
     return trimmed
 
-def outputHeader(header, ending=True):
+class ScopedTimer:
     """
-    Returns text for output with a visual separator, i.e.:
-    ##############################...
-    <header>
-    ##############################...
+    Helper class that will print out a message if a certain amount
+    of time has passed
     """
-    begin_sep = '#' * 80
-    end_sep = f'{begin_sep}\n' if ending else ''
-    return f'{begin_sep}\n{header}\n{end_sep}'
+    def __init__(self, timeout: typing.Union[int, float], message: str):
+        self.timeout = timeout
+        self.message = message
+        self._stop_event = threading.Event()
+        self._printed = False
+
+    def _check_timeout(self):
+        if not self._stop_event.wait(self.timeout):
+            print(self.message + '...', end='', flush=True)
+            self._printed = True
+
+    def __enter__(self):
+        self._thread = threading.Thread(target=self._check_timeout)
+        self._thread.start()
+        self.start_time = time.time()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._stop_event.set()
+        self._thread.join()
+        if self._printed:
+            elapsed_time = time.time() - self.start_time
+            print(f' {elapsed_time:.2f} seconds', flush=True)

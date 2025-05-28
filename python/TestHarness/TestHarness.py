@@ -313,7 +313,8 @@ class TestHarness:
             # if we fail
             import pycapabilities
 
-            self.options._capabilities = util.getCapabilities(self.executable)
+            with util.ScopedTimer(0.5, 'Parsing application capabilities'):
+                self.options._capabilities = util.getCapabilities(self.executable)
 
         checks = {}
         checks['platform'] = util.getPlatforms()
@@ -421,73 +422,75 @@ class TestHarness:
 
         try:
             testroot_params = {}
-            for dirpath, dirnames, filenames in os.walk(search_dir, followlinks=True):
-                # Prune submodule paths when searching for tests, allowing exception
-                # for a git submodule contained within the test/tests or tests folder
 
-                dir_name = os.path.basename(dirpath)
-                if (search_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git'))) or dir_name in [".git", ".svn"]:
-                    cdir = os.path.join(search_dir, 'test/tests/')
-                    if (os.path.commonprefix([dirpath, cdir]) == cdir):
-                        continue
+            with util.ScopedTimer(0.5, f'Parsing tests in {search_dir}'):
+                for dirpath, dirnames, filenames in os.walk(search_dir, followlinks=True):
+                    # Prune submodule paths when searching for tests, allowing exception
+                    # for a git submodule contained within the test/tests or tests folder
 
-                    cdir = os.path.join(search_dir, 'tests/')
-                    if (os.path.commonprefix([dirpath, cdir]) == cdir):
-                        continue
+                    dir_name = os.path.basename(dirpath)
+                    if (search_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git'))) or dir_name in [".git", ".svn"]:
+                        cdir = os.path.join(search_dir, 'test/tests/')
+                        if (os.path.commonprefix([dirpath, cdir]) == cdir):
+                            continue
 
-                    dirnames[:] = []
-                    filenames[:] = []
+                        cdir = os.path.join(search_dir, 'tests/')
+                        if (os.path.commonprefix([dirpath, cdir]) == cdir):
+                            continue
 
-                if self.options.use_subdir_exe and testroot_params and not dirpath.startswith(testroot_params["testroot_dir"]):
-                    # Reset the params when we go outside the current testroot base directory
-                    testroot_params = {}
+                        dirnames[:] = []
+                        filenames[:] = []
 
-                # walk into directories that aren't contrib directories
-                if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
-                    for file in filenames:
-                        if self.options.use_subdir_exe and file == "testroot":
-                            # Rely on the fact that os.walk does a depth first traversal.
-                            # Any directories below this one will use the executable specified
-                            # in this testroot file unless it is overridden.
-                            app_name, args, root_params = readTestRoot(os.path.join(dirpath, file))
-                            full_app_name = app_name + "-" + self.options.method
-                            if platform.system() == 'Windows':
-                                full_app_name += '.exe'
+                    if self.options.use_subdir_exe and testroot_params and not dirpath.startswith(testroot_params["testroot_dir"]):
+                        # Reset the params when we go outside the current testroot base directory
+                        testroot_params = {}
 
-                            testroot_params["executable"] = full_app_name
-                            if shutil.which(full_app_name) is None:
-                                testroot_params["executable"] = os.path.join(dirpath, full_app_name)
+                    # walk into directories that aren't contrib directories
+                    if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
+                        for file in filenames:
+                            if self.options.use_subdir_exe and file == "testroot":
+                                # Rely on the fact that os.walk does a depth first traversal.
+                                # Any directories below this one will use the executable specified
+                                # in this testroot file unless it is overridden.
+                                app_name, args, root_params = readTestRoot(os.path.join(dirpath, file))
+                                full_app_name = app_name + "-" + self.options.method
+                                if platform.system() == 'Windows':
+                                    full_app_name += '.exe'
 
-                            testroot_params["testroot_dir"] = dirpath
-                            caveats = [full_app_name]
-                            if args:
-                                caveats.append("Ignoring args %s" % args)
-                            testroot_params["caveats"] = caveats
-                            testroot_params["root_params"] = root_params
+                                testroot_params["executable"] = full_app_name
+                                if shutil.which(full_app_name) is None:
+                                    testroot_params["executable"] = os.path.join(dirpath, full_app_name)
 
-                        # See if there were other arguments (test names) passed on the command line
-                        if file == self.options.input_file_name \
-                               and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
+                                testroot_params["testroot_dir"] = dirpath
+                                caveats = [full_app_name]
+                                if args:
+                                    caveats.append("Ignoring args %s" % args)
+                                testroot_params["caveats"] = caveats
+                                testroot_params["root_params"] = root_params
 
-                            if self.notMySpecFile(dirpath, file):
-                                continue
+                            # See if there were other arguments (test names) passed on the command line
+                            if file == self.options.input_file_name \
+                                and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
 
-                            saved_cwd = os.getcwd()
-                            sys.path.append(os.path.abspath(dirpath))
-                            os.chdir(dirpath)
+                                if self.notMySpecFile(dirpath, file):
+                                    continue
 
-                            # Create the testers for this test
-                            testers = self.createTesters(dirpath, file, find_only, testroot_params)
+                                saved_cwd = os.getcwd()
+                                sys.path.append(os.path.abspath(dirpath))
+                                os.chdir(dirpath)
 
-                            # Schedule the testers (non blocking)
-                            self.scheduler.schedule(testers)
+                                # Create the testers for this test
+                                testers = self.createTesters(dirpath, file, find_only, testroot_params)
 
-                            # record these launched test to prevent this test from launching again
-                            # due to os.walk following symbolic links
-                            launched_tests.append(os.path.join(dirpath, file))
+                                # Schedule the testers (non blocking)
+                                self.scheduler.schedule(testers)
 
-                            os.chdir(saved_cwd)
-                            sys.path.pop()
+                                # record these launched test to prevent this test from launching again
+                                # due to os.walk following symbolic links
+                                launched_tests.append(os.path.join(dirpath, file))
+
+                                os.chdir(saved_cwd)
+                                sys.path.pop()
 
             # Wait for all the tests to complete (blocking)
             self.scheduler.waitFinish()
