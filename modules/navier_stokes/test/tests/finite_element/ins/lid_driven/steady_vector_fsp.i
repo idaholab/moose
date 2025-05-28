@@ -138,7 +138,7 @@ n=8
   []
 []
 
-[UserObjects]
+[Correctors]
   [set_pressure]
     type = NSPressurePin
     pin_type = 'average'

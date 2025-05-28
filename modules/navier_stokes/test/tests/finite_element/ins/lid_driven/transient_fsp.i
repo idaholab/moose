@@ -179,7 +179,7 @@ mu=2e-3
   []
 []
 
-[UserObjects]
+[Correctors]
   [set_pressure]
     type = NSPressurePin
     pin_type = 'average'
