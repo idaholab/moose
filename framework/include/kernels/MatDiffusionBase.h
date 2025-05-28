@@ -81,7 +81,10 @@ protected:
   const VariableGradient & _grad_v;
 
   /// Location of the order parameter for solid-pore surface in the list of args
-  unsigned int _surface_args_loc;
+  unsigned int _surface_op_loc;
+
+  /// For solid-pore systems, mame of the order parameter identifies the solid-pore surface
+  VariableName _surface_op_var;
 };
 
 template <typename T>
@@ -105,11 +108,11 @@ MatDiffusionBase<T>::validParams()
                        "Coupled concentration variable for kernel to operate on; if this "
                        "is not specified, the kernel's nonlinear variable will be used as "
                        "usual");
-  params.addParam<unsigned int>(
-      "surface_args_loc",
-      "Location of the order parameter for solid-pore surface in the "
-      "list of coupled variables (args), counting from 0. For use when diffusivity "
-      "depends on these OP gradients, leave un-set otherwise. ");
+  params.addParam<VariableName>(
+      "surface_op_var",
+      "Name of the order parameter for solid-pore surface, which should appear in the "
+      "list of coupled variables (args). For use when diffusivity depends on these OP gradients, "
+      "leave this parameter un-set otherwise. ");
 
   return params;
 }
@@ -128,8 +131,7 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
     _v_var(_is_coupled ? coupled("v") : (isCoupled("conc") ? coupled("conc") : _var.number())),
     _grad_v(_is_coupled ? coupledGradient("v")
                         : (isCoupled("conc") ? coupledGradient("conc") : _grad_u)),
-    _surface_args_loc(isParamValid("surface_args_loc") ? getParam<unsigned int>("surface_args_loc")
-                                                       : libMesh::invalid_uint)
+    _surface_op_loc(libMesh::invalid_uint)
 {
   // deprecated variable parameter conc
   if (isCoupled("conc"))
@@ -139,6 +141,26 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
   for (unsigned int i = 0; i < _dDdarg.size(); ++i)
     _dDdarg[i] = &getMaterialPropertyDerivative<T>(
         isParamValid("D_name") ? "D_name" : "diffusivity", _coupled_moose_vars[i]->name());
+
+  // find position of variable for solid-pore surface OP when diffusivity depends on its gradient
+  if (isParamValid("surface_op_var"))
+  {
+    _surface_op_var = getParam<VariableName>("surface_op_var");
+    unsigned int j = 0;
+    while (j < _coupled_moose_vars.size())
+    {
+      if (_surface_op_var == _coupled_moose_vars[j]->name())
+      {
+        _surface_op_loc = j;
+        break;
+      }
+      ++j;
+    }
+    if (j == _coupled_moose_vars.size())
+      mooseError(
+          "The variable set by the parameter surface_op_var was not found in the list of coupled "
+          "variables (args parameter).");
+  }
 }
 
 template <typename T>
@@ -175,7 +197,7 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   const unsigned int cvar = mapJvarToCvar(jvar);
 
   Real sum = (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
-  if ((_surface_args_loc != libMesh::invalid_uint) && (cvar == _surface_args_loc))
+  if ((_surface_op_loc != libMesh::invalid_uint) && (cvar == _surface_op_loc))
     sum += _dDdgradc[_qp] * _grad_phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
 
   if (_v_var == jvar)
