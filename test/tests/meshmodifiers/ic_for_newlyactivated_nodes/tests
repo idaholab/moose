@@ -1,6 +1,7 @@
 [Tests]
   issues = '#'
   design = 'ElementSubdomainModifier.md'
+
   [group]
     requirement = 'The framework shall include the ability to set initial condition on the newly-activated nodes during simulation'
 
@@ -10,5 +11,5 @@
       exodiff = 'external_moving_boundary_polynomial_out.e external_moving_boundary_polynomial_out.e-s002 external_moving_boundary_polynomial_out.e-s003 external_moving_boundary_polynomial_out.e-s004'
       detail = 'set initial condition on the newly-activated nodes during simulation'
     []
-
+  []
 []
