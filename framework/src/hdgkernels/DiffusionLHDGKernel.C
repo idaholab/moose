@@ -11,7 +11,6 @@
 #include "DiffusionLHDGKernel.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
-#include "Function.h"
 #include "SystemBase.h"
 #include "MooseMesh.h"
 #include "MooseObject.h"
