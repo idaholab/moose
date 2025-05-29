@@ -47,7 +47,6 @@ Since the update of the moving boundary only occurs over elements that change su
 
 !media large_media/mesh_modifiers/element_subdomain_modifier/partial.png style=float:center;width:100%; caption=The evolving sideset (green) around subdomain 1, including the external element sides, from an existing boundary.
 
-
 Even though the `moving_boundary_subdomain_pairs` defines the moving boundary to be between subdomains 1 and 2 only, the right side of subdomain 2 remains throughout, as no element sides belong to elements that change subdomain.
 
 Nodal and integrated BCs can be applied on the moving boundary.
@@ -100,7 +99,7 @@ Reinitialization can be further restricted by setting the parameter `old_subdoma
 
 ## Initial condition setting for the newly-activated nodes
 
-The `ElementSubdomainModifier` dynamically activates elements in the domain by changing their subdomain IDs. When a new set of elements becomes active from non-solved state, the nodes shared exclusively by either `newlyactivated` or non-solved elements (i.e., elements not yet part of the solution) are called *newly-activated nodes*. These nodes do not carry prior solution history and must be assigned appropriate initial conditions before being incorporated into the simulation.
+The `ElementSubdomainModifier` dynamically activates elements in the domain by changing their subdomain IDs. When a new set of elements becomes active from non-solved state, the nodes shared exclusively by either `newly-activated` or non-solved elements (i.e., elements not yet part of the solution) are called *newly-activated nodes*. These nodes do not carry prior solution history and must be assigned appropriate initial conditions before being incorporated into the simulation.
 
 Simply assigning zero values to these nodes (e.g., zero temperature or displacement) often causes numerical difficulties, especially when using nonlinear material models like those provided by the [`neml`](/modules/solid_mechanics/NEML/index.md) library. Poor convergence or unstable behavior can result.
 
@@ -111,7 +110,7 @@ To mitigate these issues, MOOSE supports two strategies for setting the initial 
 This approach uses a weighted average based on spatial proximity.
 
 For each newly-activated node, we identify neighboring nodes that are:
-- Part of the `newlyactivated` elements, and
+- Part of the `newly-activated` elements, and
 - Also shared with the previously solved elements.
 
 Once we gather solution values $u_i$ from these neighbors, we apply a distance-weighted formula:
