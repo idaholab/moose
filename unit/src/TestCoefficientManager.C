@@ -320,9 +320,48 @@ TEST_F(CheckCoefficientManager, ScalarPWIsDefined)
   EXPECT_FALSE(manager.matrixPropertyIsDefined("c", "42"));
 }
 
+TEST_F(CheckCoefficientManager, GetScalarLiteralReal)
+{
+  mfem::ConstantCoefficient * c =
+      dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarCoefficient("2."));
+  ASSERT_NE(c, nullptr);
+  EXPECT_EQ(c->Eval(fe_transform, point1), 2.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 2.0);
+  c =
+      dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarCoefficient("   3."));
+  ASSERT_NE(c, nullptr);
+  EXPECT_EQ(c->Eval(fe_transform, point1), 3.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 3.0);
+  c =
+      dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarCoefficient("1  "));
+  ASSERT_NE(c, nullptr);
+  EXPECT_EQ(c->Eval(fe_transform, point1), 1.0);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 1.0);
+}
+
+TEST_F(CheckCoefficientManager, DeclareScalarCoefficientFromLiteralReal)
+{
+  mfem::ConstantCoefficient * c =
+      dynamic_cast<mfem::ConstantCoefficient *>(&manager.declareScalar("resistivity", "4.771"));
+  ASSERT_NE(c, nullptr);
+  EXPECT_EQ(c->Eval(fe_transform, point1), 4.771);
+  EXPECT_EQ(c->Eval(fe_transform, point2), 4.771);  
+}
+
+TEST_F(CheckCoefficientManager, DeclarePropertyFromLiteralReal)
+{
+  mfem::Coefficient & cref =
+      manager.declareScalarProperty("resistivity", {"1", "2"}, "2.0000");
+  mfem::Coefficient & c = manager.getScalarCoefficient("resistivity");
+  fe_transform.Attribute = 1;
+  EXPECT_EQ(&cref, &c);
+  EXPECT_EQ(c.Eval(fe_transform, point1), 2.0);
+  fe_transform.Attribute = 10;
+  EXPECT_EQ(c.Eval(fe_transform, point1), 0.0);
+}
+
 TEST_F(CheckCoefficientManager, DeclareUniformVector)
 {
-
   auto & cref =
       manager.declareVector<mfem::VectorConstantCoefficient>("resistivity", mfem::Vector({1., 2.}));
   mfem::VectorConstantCoefficient * c =
@@ -681,6 +720,66 @@ TEST_F(CheckCoefficientManager, VectorPWIsDefined)
   EXPECT_FALSE(manager.matrixPropertyIsDefined("b", "-1"));
   EXPECT_FALSE(manager.scalarPropertyIsDefined("c", "42"));
   EXPECT_FALSE(manager.matrixPropertyIsDefined("c", "42"));
+}
+
+TEST_F(CheckCoefficientManager, GetVectorLiteralReal)
+{
+  mfem::VectorConstantCoefficient * c =
+      dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.getVectorCoefficient("2."));
+  ASSERT_NE(c, nullptr);
+  mfem::Vector vec;
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec.Size(), 1);
+  EXPECT_EQ(vec[0], 2.0);
+  c =
+      dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.getVectorCoefficient("   3. 4."));
+  ASSERT_NE(c, nullptr);
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec.Size(), 2);
+  EXPECT_EQ(vec[0], 3.0);
+  EXPECT_EQ(vec[1], 4.0);
+  c =
+      dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.getVectorCoefficient(" 1   5.  2.4 11 "));
+  ASSERT_NE(c, nullptr);
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec.Size(), 4);
+  EXPECT_EQ(vec[0], 1.0);
+  EXPECT_EQ(vec[1], 5.0);
+  EXPECT_EQ(vec[2], 2.4);
+  EXPECT_EQ(vec[3], 11.0);
+}
+
+TEST_F(CheckCoefficientManager, DeclareVectorCoefficientFromLiteralReal)
+{
+  mfem::VectorConstantCoefficient * c =
+      dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.declareVector("resistivity", "4. 2."));
+  ASSERT_NE(c, nullptr);
+  mfem::Vector vec;
+  c->Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec.Size(), 2);
+  EXPECT_EQ(vec[0], 4.0);
+  EXPECT_EQ(vec[1], 2.0);
+}
+
+TEST_F(CheckCoefficientManager, DeclareVectorPropertyFromLiteralReal)
+{
+  mfem::VectorCoefficient & cref =
+      manager.declareVectorProperty("resistivity", {"1", "2"}, "2.0000 3. 2.5");
+  mfem::VectorCoefficient & c = manager.getVectorCoefficient("resistivity");
+  fe_transform.Attribute = 1;
+  EXPECT_EQ(&cref, &c);
+  mfem::Vector vec;
+  c.Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec.Size(), 3);
+  EXPECT_EQ(vec[0], 2.0);
+  EXPECT_EQ(vec[1], 3.0);
+  EXPECT_EQ(vec[2], 2.5);
+  fe_transform.Attribute = 10;
+  c.Eval(vec, fe_transform, point1);
+  EXPECT_EQ(vec.Size(), 3);
+  EXPECT_EQ(vec[0], 0.0);
+  EXPECT_EQ(vec[1], 0.0);
+  EXPECT_EQ(vec[2], 0.0);
 }
 
 TEST_F(CheckCoefficientManager, DeclareUniformMatrix)
