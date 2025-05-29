@@ -92,7 +92,9 @@ DiffusionLHDGAssemblyHelper::checkCoupling()
 error:
   _moose_obj.mooseError(
       "This class encodes the full Jacobian regardless of user input file specification, "
-      "so please request full coupling in your Preconditioning block for consistency");
+      "so please request full coupling for system ",
+      _dhah_sys.name(),
+      "  in your Preconditioning block for consistency");
 }
 
 void
