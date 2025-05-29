@@ -1042,7 +1042,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
   auto local2Global =
       [&](const auto & local_ids,
           std::vector<typename std::decay<decltype(local_ids[0])>::type> & global_ids,
-          bool remove_duplicates = false) -> void
+          bool sort_and_remove_duplicates = false) -> void
   {
     using IDType = typename std::decay<decltype(local_ids[0])>::type;
 
@@ -1053,7 +1053,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
     for (const auto & vec : gathered)
       global_ids.insert(global_ids.end(), vec.begin(), vec.end());
 
-    if (remove_duplicates)
+    if (sort_and_remove_duplicates)
     { // remove duplicates cause issue for std::vector<Point>
       std::sort(global_ids.begin(), global_ids.end());
       global_ids.erase(std::unique(global_ids.begin(), global_ids.end()), global_ids.end());
@@ -1199,7 +1199,8 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
     }
   }
 
-  local2Global(_solved_elem_ids_for_npr, _solved_elem_ids_for_npr, true);
+  local2Global(
+      _solved_elem_ids_for_npr, _solved_elem_ids_for_npr, true /*sort_and_remove_duplicates*/);
 }
 
 void
@@ -1219,7 +1220,8 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys)
     std::vector<Real> recovered_vals;
     unsigned int num_components = _npr_vec.size();
     for (unsigned int comp = 0; comp < num_components; ++comp)
-      recovered_vals.push_back(_npr_vec[comp]->nodalPatchRecovery(x, _solved_elem_ids_for_npr));
+      recovered_vals.push_back(
+          _npr_vec[comp]->nodalPatchRecovery(x, _solved_elem_ids_for_npr /*has already sorted*/));
 
     std::vector<dof_id_type> dofs;
     dof_map.dof_indices(node, dofs);
