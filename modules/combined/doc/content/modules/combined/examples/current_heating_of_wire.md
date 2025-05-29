@@ -45,11 +45,11 @@ the relationship between the electric field and the magnetic vector potential:
   \vec{E} = -j \omega \vec{A} - \nabla V
 \end{equation}
 
-The third term, $\text{-}\nabla \left( V \right)$ is the gradient of the electrostatic potential. This
+The third term, $\text{-}\nabla V$ is the gradient of the electrostatic potential. This
 electrostatic potential is the source of the DC current, which is defined as:
 
 \begin{equation}
-  \vec{J}_{source} = - \sigma \nabla \left( V \right)
+  \vec{J}_{source} = - \sigma \nabla V
 \end{equation}
 
 Since the magnitude of the electric field is the term of interest for Joule heating, [AuxKernels](AuxKernels/index.md) are

@@ -33,7 +33,7 @@ In the case of the time domain formulation, the electric field can be
 defined using an electromagnetic solver (like the [electromagnetics module](modules/electromagnetics/index.md optional=true)) or using the electrostatic
 approximation, where:
 \begin{equation}
-  E = \nabla \left( V \right)
+  E = \nabla V
 \end{equation}
 
 - where $V$ is the electrostatic potential
