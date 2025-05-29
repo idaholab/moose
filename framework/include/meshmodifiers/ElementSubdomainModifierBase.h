@@ -246,7 +246,7 @@ private:
   int _nearby_element_threshold = 1;
 
   /// @brief centroids of the element
-  std::vector<Point> _centroids_elements;
+  std::vector<Point> _centroids_of_elements;
 
   /// @brief Maximum number of elements in a leaf node of the k-d tree
   int _leaf_max_size = 10;

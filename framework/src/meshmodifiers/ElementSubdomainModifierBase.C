@@ -1091,7 +1091,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
 
   if (_ic_strategy == ICStrategyForNewlyActivated::IC_POLYNOMIAL_THRESHOLD)
   {
-    _centroids_elements.resize(_mesh.nElem());
+    _centroids_of_elements.resize(_mesh.nElem());
     _kd_tree_sequence_elem_id_map.resize(_mesh.nElem());
     int i = 0;
     for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
@@ -1113,7 +1113,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
       Point box_vec = max_pt - min_pt;
       _min_diag_length = std::min(_min_diag_length, box_vec.norm());
 
-      _centroids_elements[i] = elem->vertex_average();
+      _centroids_of_elements[i] = elem->vertex_average();
 
       _kd_tree_sequence_elem_id_map[i] = elem->id();
       i++;
@@ -1122,9 +1122,9 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
     if (_radius_search_threshold < 0.0)
       _radius_search_threshold = _nearby_element_threshold * _min_diag_length;
 
-    local2Global(_centroids_elements, _centroids_elements);
+    local2Global(_centroids_of_elements, _centroids_of_elements);
 
-    _kd_tree = new KDTree(_centroids_elements, _leaf_max_size);
+    _kd_tree = new KDTree(_centroids_of_elements, _leaf_max_size);
 
     _mesh.comm().min(_min_diag_length); // TIMPI
 
