@@ -20,7 +20,7 @@ of the wire reaches the melting point. To model this be behavior, the follow equ
 Where:
 
 - $\vec{A}$ is the magnetic vector potential,
-- $j$ is the sqrt(-1),
+- $j$ is $\sqrt{-1}$,
 - $\mu$ is the permeability of free space,
 - $\omega$ is the angular frequency of the system (60 Hz for this example),
 - $\sigma$ is the electric conductivity of the wire,
@@ -29,7 +29,7 @@ Where:
 - $C_{p}$ is the heat capacity of copper,
 - $T$ is the temperature,
 - $k$ is the thermal conductivity of the wire, and
-- $Q$ is the Joule heating.
+- $Q$ is the Joule heating source.
 
 The Joule heating, $Q$, is defined by the magnitude of the electric field, $E$, such that:
 \begin{equation}
@@ -42,7 +42,7 @@ suppled DC current density. This implementation of a suppled DC current density 
 the relationship between the electric field and the magnetic vector potential:
 
 \begin{equation}
-  \vec{E} = -j \omega \vec{A} - \nabla \left( V \right)
+  \vec{E} = -j \omega \vec{A} - \nabla V
 \end{equation}
 
 The third term, $\text{-}\nabla \left( V \right)$ is the gradient of the electrostatic potential. This
@@ -52,7 +52,7 @@ electrostatic potential is the source of the DC current, which is defined as:
   \vec{J}_{source} = - \sigma \nabla \left( V \right)
 \end{equation}
 
-Since the magnitude of the electric field is the term of interest for Joule heating, Auxkernels are
+Since the magnitude of the electric field is the term of interest for Joule heating, [AuxKernels](AuxKernels/index.md) are
 used to calculate the electric field magnitude from the magnetic vector potential and the supplied
 DC current density.
 
@@ -60,9 +60,9 @@ DC current density.
   \lvert \vec{E} \rvert = \lvert -j \omega \vec{A} \rvert + \lvert \frac{\vec{J}_{source}}{\sigma} \rvert
 \end{equation}
 
-!alert note
-Defining the supplied current density as a volumetric term can not be
-used to solve for the electric field directly, as this would result in an ill-posed electric field.
+!alert! note
+We cannot define the supplied current density as a volumetric term when solving for the electric field directly, as this would result in an ill-posed electric field.
+!alert-end!
 
 ## Boundary Conditions
 
