@@ -149,8 +149,8 @@ SampledOutput::initSample()
     // query from one to the other safely on distributed meshes.
     _mesh_ptr->getMesh().skip_partitioning(true);
     mesh_refinement.uniformly_refine(_refinements);
-
-    // TODO: the nodesets dont seem to be propagated with the mesh refinement
+    // Note that nodesets are not propagated with mesh refinement, unless you built the nodesets
+    // from the sidesets again, which is what happens for the regular mesh with initial refinement
   }
 
   // We can't allow renumbering if we want to output multiple time
@@ -289,6 +289,7 @@ SampledOutput::updateSample()
       {
         _serialized_solution->clear();
         _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+        // Pull down a full copy of this vector on every processor so we can get values in parallel
         source_sys.solution->localize(*_serialized_solution);
       }
 
@@ -320,22 +321,15 @@ SampledOutput::updateSample()
       // Fill solution vectors by evaluating mesh functions on sampling mesh
       for (const auto var_num : index_range(_mesh_functions[sys_num]))
       {
-        // we serialized the mesh and the solution vector, we might as well just do this only on
-        // processor 0.
-        if (_serialize && processor_id() > 0)
-          break;
-
         const auto original_var_num = _variable_numbers_in_system[sys_num][var_num];
         const FEType & fe_type = source_sys.variable_type(original_var_num);
         // Loop over the mesh, nodes for nodal data, elements for element data
         if (isSampledAsNodal(fe_type))
         {
-          for (const auto & node : (_serialize ? _mesh_ptr->getMesh().node_ptr_range()
-                                               : _mesh_ptr->getMesh().local_node_ptr_range()))
+          for (const auto & node : _mesh_ptr->getMesh().local_node_ptr_range())
           {
             // Avoid working on ghosted dofs
-            if (node->n_dofs(sys_num, var_num) &&
-                (_serialize || processor_id() == node->processor_id()))
+            if (node->n_dofs(sys_num, var_num) && (processor_id() == node->processor_id()))
             {
               // the node has to be within the domain of the mesh function
               const auto value = (*_mesh_functions[sys_num][var_num])(*node - _position);
@@ -353,13 +347,10 @@ SampledOutput::updateSample()
         }
         else
         {
-          const auto elem_range = _serialize
-                                      ? _mesh_ptr->getMesh().active_element_ptr_range()
-                                      : _mesh_ptr->getMesh().active_local_element_ptr_range();
+          const auto elem_range = _mesh_ptr->getMesh().active_local_element_ptr_range();
           for (const auto & elem : elem_range)
           {
-            if (elem->n_dofs(sys_num, var_num) &&
-                (_serialize || processor_id() == elem->processor_id()))
+            if (elem->n_dofs(sys_num, var_num) && (processor_id() == elem->processor_id()))
             {
               const auto value =
                   (*_mesh_functions[sys_num][var_num])(elem->true_centroid() - _position);
@@ -444,15 +435,15 @@ SampledOutput::cloneMesh()
     mp->partition(_cloned_mesh_ptr->getMesh(), comm().size());
   }
 
+  // This should be called after changing the mesh (block restriction for example)
+  _cloned_mesh_ptr->meshChanged();
+
   // Prepare mesh, needed for the mesh functions
   if (_using_external_sampling_file)
     _cloned_mesh_ptr->prepare(/*mesh to clone*/ nullptr);
   else if (_serialize)
     // TODO: constraints have not been initialized?
     _cloned_mesh_ptr->getMesh().prepare_for_use();
-
-  // TODO: why is this needed? (or is it?)
-  _cloned_mesh_ptr->meshChanged();
 
   // Make sure that the mesh pointer points to the newly cloned mesh
   _mesh_ptr = _cloned_mesh_ptr.get();
