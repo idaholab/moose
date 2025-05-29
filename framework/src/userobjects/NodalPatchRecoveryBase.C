@@ -162,11 +162,9 @@ NodalPatchRecoveryBase::finalize()
   // information from other processors in this finalize() method.
 
   // Populate algebraically ghosted elements to query
-  // First issue: getEvaluableElementRange is not block restricted and cause some issues
   if (!_use_specific_elements)
     identifyGhostElementsFromOtherProcs();
 
-  /// It become super long in UO and do not know what happened
   if (_query_ids.empty())
     // No need to send or receive data
     return;
