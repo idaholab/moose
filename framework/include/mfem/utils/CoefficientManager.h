@@ -166,6 +166,9 @@ private:
   mfem::MatrixCoefficient & declareMatrixProperty(const std::string & name,
                                                   const std::vector<std::string> & blocks,
                                                   std::shared_ptr<mfem::MatrixCoefficient> coef);
+  std::shared_ptr<mfem::Coefficient> getScalarCoefficientPtr(const std::string name);
+  std::shared_ptr<mfem::VectorCoefficient> getVectorCoefficientPtr(const std::string name);
+  std::shared_ptr<mfem::MatrixCoefficient> getMatrixCoefficientPtr(const std::string name);
 };
 }
 
