@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#30038'
+  design = '/HDGKernels/index.md'
+  [ie]
+    type = Exodiff
+    input = simple-transient-diffusion.i
+    exodiff = simple-transient-diffusion_out.e
+    requirement = 'The system shall be able to solve a transient with an interior penalty hybridized discontinuous Galerkin spatial discretization of the diffusion equation using implicit Euler time integration.'
+  []
+[]
