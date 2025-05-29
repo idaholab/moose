@@ -25,8 +25,8 @@ MFEMGenericFunctorMaterial::validParams()
   params.addRequiredParam<std::vector<MFEMScalarCoefficientName>>(
       "prop_values",
       "The corresponding names of coefficients associated with the named properties. A coefficient "
-      "can be any "
-      "of the following: a variable, an MFEM material property, a function, or a post-processor.");
+      "can be any of the following: a variable, an MFEM material property, a function, a "
+      "post-processor, or a numeric value.");
 
   return params;
 }

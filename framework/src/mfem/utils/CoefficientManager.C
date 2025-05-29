@@ -78,7 +78,7 @@ CoefficientManager::declareVectorProperty(const std::string & name,
                                           const std::string & existing_or_literal)
 {
   std::shared_ptr<mfem::VectorCoefficient> coef =
-      this->getVectorCoefficientPtr(existing_coef);
+      this->getVectorCoefficientPtr(existing_or_literal);
   if (std::dynamic_pointer_cast<mfem::PWVectorCoefficient>(coef))
     mooseError("Properties must not be defined out of other properties or piecewise coefficients.");
   return this->declareVectorProperty(name, blocks, coef);

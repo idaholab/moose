@@ -21,8 +21,8 @@ MFEMScalarFunctorDirichletBC::validParams()
   params.addRequiredParam<MFEMScalarCoefficientName>(
       "coefficient",
       "The coefficient setting the values on the essential boundary. A coefficient can be any of "
-      "the "
-      "following: a variable, an MFEM material property, a function, or a post-processor.");
+      "the following: a variable, an MFEM material property, a function, a post-processor, or a "
+      "numeric value.");
   return params;
 }
 

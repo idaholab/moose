@@ -5,8 +5,6 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMObjectUnitTest.h"
 #include "MFEMScalarFunctorBoundaryIntegratedBC.h"
-#include "MFEMVectorBoundaryIntegratedBC.h"
-#include "MFEMVectorNormalIntegratedBC.h"
 #include "MFEMVectorFunctorBoundaryIntegratedBC.h"
 #include "MFEMVectorFunctorNormalIntegratedBC.h"
 #include "MFEMConvectiveHeatFluxBC.h"
@@ -26,17 +24,17 @@ public:
 };
 
 /**
- * Test MFEMVectorNormalIntegratedBC creates an mfem::BoundaryNormalLFIntegrator successfully.
+ * Test MFEMVectorFunctorNormalIntegratedBC creates an mfem::BoundaryNormalLFIntegrator successfully.
  */
-TEST_F(MFEMIntegratedBCTest, MFEMVectorNormalIntegratedBC)
+TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctorNormalIntegratedConstantBC)
 {
   // Construct boundary condition
-  InputParameters bc_params = _factory.getValidParams("MFEMVectorNormalIntegratedBC");
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctorNormalIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
-  bc_params.set<std::vector<Real>>("values") = {1., 2., 3.};
+  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  MFEMVectorNormalIntegratedBC & integrated_bc =
-      addObject<MFEMVectorNormalIntegratedBC>("MFEMVectorNormalIntegratedBC", "bc1", bc_params);
+  MFEMVectorFunctorNormalIntegratedBC & integrated_bc =
+      addObject<MFEMVectorFunctorNormalIntegratedBC>("MFEMVectorFunctorNormalIntegratedBC", "bc1", bc_params);
 
   // Test MFEMVectorNormalIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
@@ -50,7 +48,7 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorNormalIntegratedBC)
 }
 
 /**
- * Test MFEMVectorNormalIntegratedBC creates an mfem::BoundaryNormalLFIntegrator successfully.
+ * Test MFEMVectorFunctorNormalIntegratedBC creates an mfem::BoundaryNormalLFIntegrator successfully.
  */
 TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctorNormalIntegratedBC)
 {
@@ -86,10 +84,10 @@ TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctorNormalIntegratedBC)
 TEST_F(MFEMIntegratedBCTest, MFEMScalarFunctorBoundaryIntegratedBC)
 {
   // Build required BC inputs
-  InputParameters coef_params = _factory.getValidParams("MFEMGenericConstantFunctorMaterial");
+  InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctorMaterial");
   coef_params.set<std::vector<std::string>>("prop_names") = {"coef1"};
-  coef_params.set<std::vector<double>>("prop_values") = {3.0};
-  _mfem_problem->addFunctorMaterial("MFEMGenericConstantFunctorMaterial", "material1", coef_params);
+  coef_params.set<std::vector<MFEMScalarCoefficientName>>("prop_values") = {"3.0"};
+  _mfem_problem->addFunctorMaterial("MFEMGenericFunctorMaterial", "material1", coef_params);
 
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMScalarFunctorBoundaryIntegratedBC");
@@ -146,15 +144,15 @@ TEST_F(MFEMIntegratedBCTest, MFEMConvectiveHeatFluxBC)
   delete blf_integrator;
 }
 
-TEST_F(MFEMIntegratedBCTest, MFEMVectorBoundaryIntegratedBC)
+TEST_F(MFEMIntegratedBCTest, MFEMVectorFunctorBoundaryIntegratedConstantBC)
 {
   // Construct boundary condition
-  InputParameters bc_params = _factory.getValidParams("MFEMVectorBoundaryIntegratedBC");
+  InputParameters bc_params = _factory.getValidParams("MFEMVectorFunctorBoundaryIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  bc_params.set<std::vector<Real>>("values") = {1., 2., 3.};
+  bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   auto & bc =
-      addObject<MFEMVectorBoundaryIntegratedBC>("MFEMVectorBoundaryIntegratedBC", "bc1", bc_params);
+      addObject<MFEMVectorFunctorBoundaryIntegratedBC>("MFEMVectorFunctorBoundaryIntegratedBC", "bc1", bc_params);
 
   // Test MFEMVectorBoundaryIntegratedBC returns an integrator of the expected type
   auto lf_integrator = dynamic_cast<mfem::VectorBoundaryLFIntegrator *>(bc.createLFIntegrator());
