@@ -78,8 +78,8 @@ MooseStaticCondensationPreconditioner::MooseStaticCondensationPreconditioner(
   if (!implicit_sys)
     mooseError("Static condensation can only be used with implicit systems");
   implicit_sys->create_static_condensation();
-  _sc_dof_map = &implicit_sys->get_static_condensation_dof_map();
-  _sc_system_matrix = &implicit_sys->get_static_condensation_system_matrix();
+  _sc_dof_map = &implicit_sys->get_dof_map().get_static_condensation();
+  _sc_system_matrix = &implicit_sys->get_static_condensation();
   std::unordered_set<unsigned int> uncondensed_vars;
   for (auto & nl_var_name : getParam<std::vector<NonlinearVariableName>>("dont_condense_vars"))
     uncondensed_vars.insert(_nl.getVariable(0, nl_var_name).number());
