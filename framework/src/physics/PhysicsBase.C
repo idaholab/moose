@@ -15,6 +15,10 @@
 #include "AuxiliarySystem.h"
 #include "BlockRestrictable.h"
 #include "ActionComponent.h"
+#include "InitialConditionBase.h"
+#include "FVInitialConditionBase.h"
+#include "MooseVariableScalar.h"
+#include "LinearSystem.h"
 
 InputParameters
 PhysicsBase::validParams()
@@ -510,10 +514,24 @@ PhysicsBase::allMeshBlocks(const std::vector<SubdomainName> & blocks) const
 {
   mooseAssert(_mesh, "The mesh should exist already");
   for (const auto mesh_block : _mesh->meshSubdomains())
-    if (std::find(blocks.begin(), blocks.end(), _mesh->getSubdomainName(mesh_block)) ==
-        blocks.end())
+  {
+    const auto & subdomain_name = _mesh->getSubdomainName(mesh_block);
+    // Check subdomain name
+    if (!subdomain_name.empty() &&
+        std::find(blocks.begin(), blocks.end(), subdomain_name) == blocks.end())
       return false;
+    // no subdomain name, check the IDs being used as names instead
+    else if (std::find(blocks.begin(), blocks.end(), std::to_string(mesh_block)) == blocks.end())
+      return false;
+  }
   return true;
+}
+
+bool
+PhysicsBase::allMeshBlocks(const std::set<SubdomainName> & blocks) const
+{
+  std::vector<SubdomainName> blocks_vec(blocks.begin(), blocks.end());
+  return allMeshBlocks(blocks_vec);
 }
 
 void
@@ -528,4 +546,242 @@ PhysicsBase::addPetscPairsToPetscOptions(
         _problem->getSolverSystem(solver_sys_num).prefix(),
         *this,
         po);
+}
+
+bool
+PhysicsBase::isVariableFV(const VariableName & var_name) const
+{
+  const auto var = &_problem->getVariable(0, var_name);
+  if (const auto & field_var = dynamic_cast<MooseVariableFieldBase *>(var))
+    return field_var->isFV();
+  return false;
+}
+
+bool
+PhysicsBase::isVariableScalar(const VariableName & var_name) const
+{
+  return _problem->hasScalarVariable(var_name);
+}
+
+bool
+PhysicsBase::shouldCreateVariable(const VariableName & var_name,
+                                  const std::vector<SubdomainName> & blocks,
+                                  const bool error_if_aux)
+{
+  if (!variableExists(var_name, error_if_aux))
+    return true;
+  // check block restriction
+  auto & var = _problem->getVariable(0, var_name);
+  const bool not_block_restricted =
+      (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") != blocks.end()) ||
+      allMeshBlocks(blocks);
+  if (!var.blockRestricted() || (!not_block_restricted && var.hasBlocks(blocks)))
+    return false;
+
+  // This is an edge case, which might warrant a warning
+  if (allMeshBlocks(var.blocks()) && not_block_restricted)
+    return false;
+  else
+    mooseError("Variable '" + var_name + "' already exists with subdomain restriction '" +
+               Moose::stringify(var.blocks()) + "' which does not include the subdomains '" +
+               Moose::stringify(blocks) + "', required for this Physics.");
+}
+
+bool
+PhysicsBase::shouldCreateIC(const VariableName & var_name,
+                            const std::vector<SubdomainName> & blocks,
+                            const bool ic_is_default_ic,
+                            const bool error_if_already_defined) const
+{
+  // Handle recover
+  if (ic_is_default_ic && (_app.isRestarting() || _app.isRecovering()))
+    return false;
+  // do not set initial conditions if we are loading fields from the mesh file
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    return false;
+  // Different type of ICs, not block restrictable
+  mooseAssert(!isVariableScalar(var_name), "shouldCreateIC not implemented for scalar variables");
+
+  // Deal with block restriction
+  bool has_all_blocks;
+  std::set<SubdomainName> blocks_covered;
+  const bool not_block_restricted =
+      (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") != blocks.end()) ||
+      allMeshBlocks(blocks);
+  // use a set for simplicity. Note that subdomain names are unique, except maybe the empty one,
+  // which cannot be specified by the user to the Physics.
+  std::set<SubdomainName> blocks_set(blocks.begin(), blocks.end());
+  // Various routines cannot deal with the ANY_BLOCK_ID name
+  if (not_block_restricted)
+  {
+    const auto & mesh_blocks_id_set = _mesh->meshSubdomains();
+    const std::vector<SubdomainID> mesh_blocks_id_vec(mesh_blocks_id_set.begin(),
+                                                      mesh_blocks_id_set.end());
+    const std::vector<SubdomainName> mesh_blocks_names_vec =
+        _mesh->getSubdomainNames(mesh_blocks_id_vec);
+    std::set<SubdomainName> new_blocks_set(mesh_blocks_names_vec.begin(),
+                                           mesh_blocks_names_vec.end());
+    blocks_set = new_blocks_set;
+  }
+
+  // Check whether there are any ICs for this variable already in the problem
+  if (isVariableFV(var_name))
+    has_all_blocks = _problem->getFVInitialConditionWarehouse().hasObjectsForVariableAndBlocks(
+        var_name, blocks_set, blocks_covered, 0);
+  else
+    has_all_blocks = _problem->getInitialConditionWarehouse().hasObjectsForVariableAndBlocks(
+        var_name, blocks_set, blocks_covered, 0);
+
+  const bool has_some_blocks = !blocks_covered.empty();
+  if (!has_some_blocks)
+    return true;
+
+  if (has_all_blocks)
+  {
+    if (error_if_already_defined)
+      mooseError("ICs for variable '" + var_name + "' have already been defined for blocks '" +
+                 Moose::stringify(blocks) + "'.");
+    else
+      return false;
+  }
+
+  // Not implemented.
+  mooseError("There is a partial overlap between the subdomains covered by pre-existing initial "
+             "conditions (ICs), defined on blocks: " +
+             Moose::stringify(blocks_covered) + "\n and a newly created IC for variable " +
+             var_name + ", to be defined on blocks: " + Moose::stringify(blocks) +
+             ".\n We should be creating the Physics' IC only for non-covered blocks. This is not "
+             "implemented at this time.");
+}
+
+bool
+PhysicsBase::shouldCreateTimeDerivative(const VariableName & var_name,
+                                        const std::vector<SubdomainName> & blocks,
+                                        const bool error_if_already_defined) const
+{
+  // Follow the transient setting of the Physics
+  if (!isTransient())
+    return false;
+
+  // Variable is either nonlinear (FV/FE), nodal nonlinear (field of ODEs), linear, or scalar.
+  // The warehouses hosting the time kernels are different for each of these types
+  // Different type of time derivatives, not block restrictable
+  mooseAssert(!isVariableScalar(var_name),
+              "shouldCreateTimeDerivative not implemented for scalar variables");
+  mooseAssert(!_problem->hasAuxiliaryVariable(var_name),
+              "Should not be called with auxiliary variables");
+
+  // Get solver system type
+  const auto var = &_problem->getVariable(0, var_name);
+  const auto var_id = var->number();
+  const auto sys_num = var->sys().number();
+  const auto time_vector_tag =
+      (sys_num < _problem->numNonlinearSystems())
+          ? var->sys().timeVectorTag()
+          // this is not quite correct. Many kernels can contribute to RHS time vector on paper
+          : dynamic_cast<LinearSystem *>(&var->sys())->rightHandSideTimeVectorTag();
+
+  // We just use the warehouse, it should cover every time derivative object type
+  bool all_blocks_covered = true, some_block_covered = false;
+  std::set<SubdomainName> blocks_covered;
+  // we examine subdomain by subdomain, because mutiple kernels could be covering every block in
+  // the 'blocks' parameter
+  for (const auto & block : blocks)
+  {
+    std::vector<MooseObject *> time_kernels;
+    if (block != "ANY_BLOCK_ID")
+    {
+      const auto bid = _mesh->getSubdomainID(block);
+      _problem->theWarehouse()
+          .query()
+          .template condition<AttribSysNum>(sys_num)
+          .template condition<AttribVar>(var_id)
+          .template condition<AttribSubdomains>(bid)
+          // we use the time tag as a proxy for time derivatives
+          .template condition<AttribVectorTags>(time_vector_tag)
+          .queryInto(time_kernels);
+    }
+    else
+      _problem->theWarehouse()
+          .query()
+          .template condition<AttribSysNum>(sys_num)
+          .template condition<AttribVar>(var_id)
+          // we use the time tag as a proxy for time derivatives
+          .template condition<AttribVectorTags>(time_vector_tag)
+          .queryInto(time_kernels);
+
+    if (time_kernels.size())
+    {
+      some_block_covered = true;
+      if (block == "ANY_BLOCK_ID")
+      {
+        for (const auto & time_kernel : time_kernels)
+          if (const auto blk = dynamic_cast<BlockRestrictable *>(time_kernel))
+            blocks_covered.insert(blk->blocks().begin(), blk->blocks().end());
+      }
+      else
+        blocks_covered.insert(block);
+    }
+    else
+      all_blocks_covered = false;
+  }
+
+  // From the list of covered blocks, see if the blocks we needed are found
+  std::set<SubdomainName> blocks_set(blocks.begin(), blocks.end());
+  if (includes(blocks_covered.begin(), blocks_covered.end(), blocks_set.begin(), blocks_set.end()))
+    all_blocks_covered = true;
+  else if (allMeshBlocks(blocks_covered))
+    all_blocks_covered = true;
+  else if (blocks_covered.count("ANY_BLOCK_ID"))
+    all_blocks_covered = true;
+  else
+    all_blocks_covered = false;
+
+  if (!some_block_covered)
+    return true;
+  if (!error_if_already_defined && all_blocks_covered)
+    return false;
+  if (error_if_already_defined && all_blocks_covered)
+    mooseError("A time kernel for variable '" + var_name +
+               "' has already been defined on blocks '" + Moose::stringify(blocks) + "'.");
+  else
+    mooseError("There is a partial overlap between the subdomains covered by pre-existing time "
+               "derivatives, defined on blocks: " +
+               Moose::stringify(blocks_covered) +
+               "\nand a newly created time derivative kernel for variable " + var_name +
+               ", to be defined on blocks: " + Moose::stringify(blocks) +
+               ".\n We should be creating the Physics' time derivative only for non-covered "
+               "blocks. This is not implemented at this time.");
+}
+
+void
+PhysicsBase::reportPotentiallyMissedParameters(const std::vector<std::string> & param_names,
+                                               const std::string & object_type) const
+{
+  std::vector<std::string> defaults_unused;
+  std::vector<std::string> user_values_unused;
+  for (const auto & param : param_names)
+  {
+    if (isParamSetByUser(param))
+      user_values_unused.push_back(param);
+    else if (isParamValid(param))
+      defaults_unused.push_back(param);
+  }
+  if (defaults_unused.size() && _verbose)
+    mooseInfoRepeated("Defaults for parameters '" + Moose::stringify(defaults_unused) +
+                      "' for object of type '" + object_type +
+                      "' were not used because the object was not created by this Physics.");
+  if (user_values_unused.size())
+  {
+    if (_app.unusedFlagIsWarning())
+      mooseWarning(
+          "User-specifed values for parameters '" + Moose::stringify(user_values_unused) +
+          "' for object of type '" + object_type +
+          "' were not used because the corresponding object was not created by this Physics.");
+    else if (_app.unusedFlagIsError())
+      mooseError(
+          "User-specified values for parameters '" + Moose::stringify(user_values_unused) +
+          "' for object of type '" + object_type +
+          "' were not used because the corresponding object was not created by this Physics.");
+  }
 }
