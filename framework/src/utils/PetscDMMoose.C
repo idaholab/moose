@@ -282,7 +282,7 @@ DMMooseSetVariables(DM dm, const std::set<std::string> & vars)
             : static_cast<MooseVariableBase *>(&dmm->_nl->getScalarVariable(0, var_name));
     if (var->isArray())
       for (const auto i : make_range(var->count()))
-        processed_vars.insert(SubProblem::arrayVariableComponent(var_name, i));
+        processed_vars.insert(var->arrayVariableComponent(i));
     else
       processed_vars.insert(var_name);
   }
