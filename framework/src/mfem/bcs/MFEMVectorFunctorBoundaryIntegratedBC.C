@@ -20,8 +20,8 @@ MFEMVectorFunctorBoundaryIntegratedBC::validParams()
   params.addRequiredParam<MFEMVectorCoefficientName>(
       "vector_coefficient",
       "Vector coefficient used in the boundary integrator. A coefficient can be any of the "
-      "following: a "
-      "variable, an MFEM material property, a function, or a post-processor.");
+      "following: a variable, an MFEM material property, a function, a post-processor, or a "
+      "numerical value.");
   return params;
 }
 
