@@ -71,19 +71,11 @@ centre_y = 0.1
   []
 []
 
-[FunctorMaterials]
-  [Substance]
-    type = MFEMGenericConstantFunctorMaterial
-    prop_names = one
-    prop_values = 1.0
-  []
-[]
-
 [Kernels]
   [laplacian]
     type = MFEMDiffusionKernel
     variable = velocity_potential
-    coefficient = one
+    coefficient = 1.0
   []
 []
 
