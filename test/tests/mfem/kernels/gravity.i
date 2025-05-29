@@ -29,22 +29,22 @@
 
 [BCs]
   [dirichlet]
-    type = MFEMVectorDirichletBC
+    type = MFEMVectorFunctorDirichletBC
     variable = displacement
     boundary = '1'
-    values = '0.0 0.0 0.0'
+    vector_coefficient = '0.0 0.0 0.0'
   []
 []
 
 [FunctorMaterials]
   [Rigidium]
-    type = MFEMGenericConstantFunctorMaterial
+    type = MFEMGenericFunctorMaterial
     prop_names = 'lambda mu'
     prop_values = '50.0 50.0'
     block = 1
   []
   [Bendium]
-    type = MFEMGenericConstantFunctorMaterial
+    type = MFEMGenericFunctorMaterial
     prop_names = 'lambda mu'
     prop_values = '1.0 1.0'
     block = 2

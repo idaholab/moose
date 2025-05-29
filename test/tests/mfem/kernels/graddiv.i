@@ -79,25 +79,16 @@
   []
 []
 
-[FunctorMaterials]
-  [Beamium]
-    type = MFEMGenericConstantFunctorMaterial
-    prop_names = 'alpha beta'
-    prop_values = '1.0 1.0'
-    block = '1 2'
-  []
-[]
-
 [Kernels]
   [divdiv]
     type = MFEMDivDivKernel
     variable = F
-    coefficient = alpha
+    coefficient = 1.0
   []
   [mass]
     type = MFEMVectorFEMassKernel
     variable = F
-    coefficient = beta
+    coefficient = 1.0
   []
   [source]
     type = MFEMVectorFEDomainLFKernel
