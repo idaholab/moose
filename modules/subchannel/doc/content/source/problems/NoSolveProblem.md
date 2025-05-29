@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This problem class is used in the input file that creates the detailed mesh. Since the aim is to build
 a mesh for visualization purposes, there is no need to solve for anything.
