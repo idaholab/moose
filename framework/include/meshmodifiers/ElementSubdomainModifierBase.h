@@ -303,7 +303,7 @@ private:
   {
     if (input == "IC_EXTRAPOLATE_FIRST_LAYER")
       return ICStrategyForNewlyActivated::IC_EXTRAPOLATE_FIRST_LAYER;
-    else if (input == "default_value")
+    else if (input == "IC_DEFAULT")
       return ICStrategyForNewlyActivated::IC_DEFAULT;
     else if (input == "IC_POLYNOMIAL")
       return ICStrategyForNewlyActivated::IC_POLYNOMIAL;
