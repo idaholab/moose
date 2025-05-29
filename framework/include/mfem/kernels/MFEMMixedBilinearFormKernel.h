@@ -27,9 +27,17 @@ public:
   // Defaults to the name of the test variable labelling the weak form.
   virtual const VariableName & getTrialVariableName() const override;
 
+  // Create MFEM mixed bilinear form integrator. Ownership managed by the caller.
+  virtual mfem::BilinearFormIntegrator * createMBFIntegrator() { return nullptr; }
+
+  // We override this to optionally transpose the mixed bilinear form integrator.
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
+
 protected:
   // Name of the trial variable that the kernel is applied to.
   const VariableName _trial_var_name;
+  // Bool controlling whether to add the transpose of the integrator to the system
+  bool _transpose;
 };
 
 #endif
