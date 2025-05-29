@@ -17,7 +17,7 @@ AdvectionIPHDGDirichletBC::validParams()
 {
   auto params = IPHDGDirichletBC::validParams();
   params.addClassDescription("Weakly imposes Dirichlet boundary conditions for a "
-                             "hybridized discretization of a Advection equation");
+                             "hybridized discretization of an advection equation");
   params += AdvectionIPHDGAssemblyHelper::validParams();
   return params;
 }
