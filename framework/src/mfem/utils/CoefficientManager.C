@@ -15,9 +15,9 @@ CoefficientManager::declareScalar(const std::string & name, std::shared_ptr<mfem
 }
 
 mfem::Coefficient &
-CoefficientManager::declareScalar(const std::string & name, const std::string & existing_coef)
+CoefficientManager::declareScalar(const std::string & name, const std::string & existing_or_literal)
 {
-  return this->declareScalar(name, this->getScalarCoefficientPtr(existing_coef));
+  return this->declareScalar(name, this->getScalarCoefficientPtr(existing_or_literal));
 }
 
 mfem::Coefficient &
@@ -32,9 +32,9 @@ CoefficientManager::declareScalarProperty(const std::string & name,
 mfem::Coefficient &
 CoefficientManager::declareScalarProperty(const std::string & name,
                                           const std::vector<std::string> & blocks,
-                                          const std::string & existing_coef)
+                                          const std::string & existing_or_literal)
 {
-  std::shared_ptr<mfem::Coefficient> coef = this->getScalarCoefficientPtr(existing_coef);
+  std::shared_ptr<mfem::Coefficient> coef = this->getScalarCoefficientPtr(existing_or_literal);
   if (std::dynamic_pointer_cast<mfem::PWCoefficient>(coef))
     mooseError("Properties must not be defined out of other properties or piecewise coefficients.");
   return this->declareScalarProperty(name, blocks, coef);
@@ -49,9 +49,9 @@ CoefficientManager::declareVector(const std::string & name,
 }
 
 mfem::VectorCoefficient &
-CoefficientManager::declareVector(const std::string & name, const std::string & existing_coef)
+CoefficientManager::declareVector(const std::string & name, const std::string & existing_or_literal)
 {
-  return this->declareVector(name, this->getVectorCoefficientPtr(existing_coef));
+  return this->declareVector(name, this->getVectorCoefficientPtr(existing_or_literal));
 }
 
 mfem::VectorCoefficient &
@@ -66,7 +66,7 @@ CoefficientManager::declareVectorProperty(const std::string & name,
 mfem::VectorCoefficient &
 CoefficientManager::declareVectorProperty(const std::string & name,
                                           const std::vector<std::string> & blocks,
-                                          const std::string & existing_coef)
+                                          const std::string & existing_or_literal)
 {
   std::shared_ptr<mfem::VectorCoefficient> coef =
       this->getVectorCoefficientPtr(existing_coef);
