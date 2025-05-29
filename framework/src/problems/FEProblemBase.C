@@ -192,14 +192,6 @@ FEProblemBase::validParams()
                         "True to allow the user to specify initial conditions when restarting. "
                         "Initial conditions can override any restarted field");
 
-  /// One entry of coord system per block, the size of _blocks and _coord_sys has to match, except:
-  /// 1. _blocks.size() == 0, then there needs to be just one entry in _coord_sys, which will
-  ///    be set for the whole domain
-  /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
-  /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
-  /*params.addDeprecatedParam<std::vector<SubdomainName>>(
-      "block", {}, "Block IDs for the coordinate systems", "Please use 'Mesh/coord_block'
-     instead");*/
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
   MooseEnum rz_coord_axis("X=0 Y=1", "Y");
   params.addDeprecatedParam<MultiMooseEnum>("coord_type",
