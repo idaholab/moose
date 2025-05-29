@@ -26,9 +26,7 @@ TestCSGSphereAtPointMeshGenerator::validParams()
 }
 
 TestCSGSphereAtPointMeshGenerator::TestCSGSphereAtPointMeshGenerator(const InputParameters & params)
-  : MeshGenerator(params),
-    _radius(getParam<Real>("radius")),
-    _center(getParam<Point>("center"))
+  : MeshGenerator(params), _radius(getParam<Real>("radius")), _center(getParam<Point>("center"))
 {
 }
 
