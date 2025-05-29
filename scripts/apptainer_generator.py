@@ -713,6 +713,9 @@ class ApptainerGenerator:
                 apptainer_bootstrap, apptainer_from = self._dependency_from(dep_package)
             jinja_data['APPTAINER_BOOTSTRAP'] = apptainer_bootstrap
             jinja_data['APPTAINER_FROM'] = apptainer_from
+            # Don't require fingerprints if overriding a dependency
+            if self.args.dep or self.args.local:
+                jinja_data['SKIP_FINGERPRINTS'] = '1'
 
         # Add extra conditional vars
         self.add_definition_vars(jinja_data)

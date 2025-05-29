@@ -226,7 +226,7 @@ HttpServer::Processor::Processor(std::shared_ptr<IClientStream> stream, HttpServ
 
             keep_alive_check:
             self->mLastActive = std::chrono::system_clock::now();
-            
+
             #ifdef TINYHTTP_ALLOW_KEEPALIVE
             if (req["Connection"] != "keep-alive")
                 break;
@@ -267,11 +267,11 @@ bool HttpServer::Processor::isTimedOut() const noexcept {
 
 void HttpServer::Processor::shutdown() {
     #ifdef TINYHTTP_THREADING
-    std::unique_lock{mShutdownMutex};
+    std::unique_lock lock{mShutdownMutex};
     #endif
 
     mIsAlive = false;
-    
+
     if (mClientStream && mClientStream->isOpen())
         mClientStream->close();
 
@@ -295,7 +295,7 @@ void HttpServer::cleanupThreadProc() {
 
         if (mSocket == -1)
             continue;
-        
+
         mRequestProcessorListMutex.lock();
         for (auto it = mRequestProcessors.begin(); it != mRequestProcessors.end(); ++it) {
             auto& processor = *it;
@@ -394,7 +394,7 @@ void HttpServer::shutdown() {
     if (mSocket < 0) {
         return;
     }
-    
+
     mSocket = -1;
 
     puts("Shutting down server");

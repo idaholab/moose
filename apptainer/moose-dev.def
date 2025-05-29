@@ -18,6 +18,7 @@
 {#- MOOSE_TOOLS_VERSION: The version to pin moose-tools to (if any)                           -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
+{#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
 {#- WITH_LIBTORCH: The libtorch distribution to use (cpu, cu121, etc); default: cpu           -#}
 {#- WITH_MFEM: Whether or not to build mfem (default: 1 to build, 0 to not build)             -#}
 
@@ -67,8 +68,10 @@
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
+{%- if SKIP_FINGERPRINTS is not defined %}
 # MOOSE-NCRC key
 Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
+{%- endif %}
 
 %environment
     export PATH={{ MOOSE_MINIFORGE }}/bin:/opt/code-server/bin:$PATH
@@ -224,11 +227,18 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     cd ${MFEM_SRC_DIR}
     git checkout $MFEM_GIT_SHA
 
+    # Load mfem options, split by word so that globbing works correctly
+    IFS=' ' read -r -a MFEM_OPTIONS <<< "{{ MFEM_OPTIONS }}"
+    # Additional options with cuda
+    if [ -n "$CUDA_DIR" ]; then
+        MFEM_OPTIONS+=("-DMFEM_USE_CUDA=ON" "-DSuperLUDist_VERSION_OK=YES")
+    fi
+
     # Install conduit
     CONDUIT_DIR=${CONDUIT_DIR} CONDUIT_SRC_DIR=${CONDUIT_SRC_DIR} ${CONDUIT_BUILD_SCRIPT} {{ CONDUIT_OPTIONS }}
 
     # Install MFEM
-    MFEM_DIR=${MFEM_DIR} MFEM_SRC_DIR=${MFEM_SRC_DIR} CONDUIT_DIR=${CONDUIT_DIR} ${MFEM_BUILD_SCRIPT} {{ MFEM_OPTIONS }}
+    MFEM_DIR=${MFEM_DIR} MFEM_SRC_DIR=${MFEM_SRC_DIR} CONDUIT_DIR=${CONDUIT_DIR} ${MFEM_BUILD_SCRIPT} "${MFEM_OPTIONS[@]}"
 {%- endif %}
 
     # Install miniforge in MOOSE_MINIFORGE
@@ -247,9 +257,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         conda config --env --add channels ${CONDA_ALT_CHANNEL}
     fi
     # Create list of Conda Packages to install
-    MAMBA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
+    CONDA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
     # Install packages
-    conda install -yq python=${PYTHON_VERSION} ${MAMBA_PACKAGES}
+    conda install -yq python=${PYTHON_VERSION} ${CONDA_PACKAGES}
     # Needed for coverage
     pip3 --no-cache install lcov-cobertura
 

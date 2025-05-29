@@ -3,10 +3,15 @@
 {#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
 {#- REMOVE_CHANNEL_CONTAINS: Remove conda channels that contain this text in the URL          -#}
 
+{#- Optional jinja arguments                                                                  -#}
+{#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
+
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
+{%- if SKIP_FINGERPRINTS is not defined %}
 # MOOSE-NCRC key
 Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
+{%- endif %}
 
 %post
     readarray -t channels <<< "$(conda config --show channels)"

@@ -354,14 +354,13 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::initialSetup()
                _num_inputs,
                " inputs detected. Only five or six inputs currently supported.");
   if (_num_inputs == 6 && !_environmental)
-    this->template paramError(
+    this->paramError(
         "environmental_factor",
         "Number of ROM inputs indicate environmental factor is required to be coupled.");
   if (_num_inputs != 6 && _environmental)
-    this->template paramError(
-        "environmental_factor",
-        "Number of ROM inputs indicate environmental factor is not implemented, but "
-        "environmental factor coupled.");
+    this->paramError("environmental_factor",
+                     "Number of ROM inputs indicate environmental factor is not implemented, but "
+                     "environmental factor coupled.");
   _num_tiles.resize(_num_partitions);
   _num_coefs.resize(_num_partitions);
   _degree.resize(_num_partitions);
