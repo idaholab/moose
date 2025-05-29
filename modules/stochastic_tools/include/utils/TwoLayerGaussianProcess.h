@@ -44,51 +44,6 @@ public:
                   const std::vector<Real> & min = std::vector<Real>(),
                   const std::vector<Real> & max = std::vector<Real>());
 
-  /// Structure containing the optimization options for
-  /// hyperparameter-tuning
-  // struct TGPOptimizerOptions
-  // {
-  //   /// Default constructor
-  //   TGPOptimizerOptions();
-  //   /**
-  //    * Construct a new TGPOptimizerOptions object using
-  //    * input parameters that will control the optimization
-  //    * @param show_every_nth_iteration To show the loss value at every n-th iteration, if set to 0,
-  //    * nothing is displayed
-  //    * @param num_iter The number of iterations we want in the optimization of the TGP
-  //    * @param batch_size The number of samples in each batch
-  //    * @param learning_rate The learning rate for parameter updates
-  //    * @param b1 Tuning constant for the Adam algorithm
-  //    * @param b2 Tuning constant for the Adam algorithm
-  //    * @param eps Tuning constant for the Adam algorithm
-  //    * @param lambda Tuning constant for the Adam algorithm
-  //    */
-  //   TGPOptimizerOptions(const bool show_every_nth_iteration = 1,
-  //                      const unsigned int num_iter = 1000,
-  //                      const unsigned int batch_size = 0,
-  //                      const Real learning_rate = 1e-3,
-  //                      const Real b1 = 0.9,
-  //                      const Real b2 = 0.999,
-  //                      const Real eps = 1e-7,
-  //                      const Real lambda = 0.0);
-
-  //   /// Switch to enable verbose output for parameter tuning at every n-th iteration
-  //   const unsigned int show_every_nth_iteration = false;
-  //   /// The number of iterations for Adam optimizer
-  //   const unsigned int num_iter = 1000;
-  //   /// The batch isize for Adam optimizer
-  //   const unsigned int batch_size = 0;
-  //   /// The learning rate for Adam optimizer
-  //   const Real learning_rate = 1e-3;
-  //   /// Tuning parameter from the paper
-  //   const Real b1 = 0.9;
-  //   /// Tuning parameter from the paper
-  //   const Real b2 = 0.999;
-  //   /// Tuning parameter from the paper
-  //   const Real eps = 1e-7;
-  //   /// Tuning parameter from the paper
-  //   const Real lambda = 0.0;
-  // };
   /**
    * Sets up the covariance matrix given data and optimization options.
    * @param training_params The training parameter values (x values) for the
