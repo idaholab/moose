@@ -39,7 +39,7 @@ NodalPatchRecoveryBase::validParams()
   params.addParam<bool>(
       "use_specific_elements", false, "Whether to use specific elements for patch recovery");
 
-  params.addParam<bool>("verbose", false, "Set to true to print coefficient of the polynomial.");
+  params.addParam<bool>("verbose", false, "Set to true to print coefficients of the polynomial.");
 
   return params;
 }
