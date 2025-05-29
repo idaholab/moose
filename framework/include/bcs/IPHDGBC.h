@@ -42,10 +42,10 @@ protected:
   virtual ADReal computeQpResidual() override { mooseError("this will never be called"); }
 
   /// A data member used for determining when to compute the Jacobian
-  const Elem * _my_elem;
+  const Elem * _cached_elem;
 
   /// A cache variable to prevent multiple computations of Jacobians
-  unsigned int _my_side;
+  unsigned int _cached_side;
 };
 
 inline const IPHDGAssemblyHelper &
