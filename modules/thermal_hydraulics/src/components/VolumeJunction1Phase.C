@@ -9,8 +9,6 @@
 
 #include "VolumeJunction1Phase.h"
 #include "FlowModelSinglePhase.h"
-#include "SinglePhaseFluidProperties.h"
-#include "Function.h"
 #include "THMMesh.h"
 
 registerMooseObject("ThermalHydraulicsApp", VolumeJunction1Phase);
@@ -154,43 +152,15 @@ VolumeJunction1Phase::addVariables()
   if (isParamValid("initial_p") && isParamValid("initial_T") && isParamValid("initial_vel_x") &&
       isParamValid("initial_vel_y") && isParamValid("initial_vel_z"))
   {
-    Function & initial_p_fn = getTHMProblem().getFunction(getParam<FunctionName>("initial_p"));
-    Function & initial_T_fn = getTHMProblem().getFunction(getParam<FunctionName>("initial_T"));
-    Function & initial_vel_x_fn =
-        getTHMProblem().getFunction(getParam<FunctionName>("initial_vel_x"));
-    Function & initial_vel_y_fn =
-        getTHMProblem().getFunction(getParam<FunctionName>("initial_vel_y"));
-    Function & initial_vel_z_fn =
-        getTHMProblem().getFunction(getParam<FunctionName>("initial_vel_z"));
+    addVolumeJunctionIC(_rhoV_var_name, "rhoV");
+    addVolumeJunctionIC(_rhouV_var_name, "rhouV");
+    addVolumeJunctionIC(_rhovV_var_name, "rhovV");
+    addVolumeJunctionIC(_rhowV_var_name, "rhowV");
+    addVolumeJunctionIC(_rhoEV_var_name, "rhoEV");
 
-    initial_p_fn.initialSetup();
-    initial_T_fn.initialSetup();
-    initial_vel_x_fn.initialSetup();
-    initial_vel_y_fn.initialSetup();
-    initial_vel_z_fn.initialSetup();
-
-    const Real initial_p = initial_p_fn.value(0, _position);
-    const Real initial_T = initial_T_fn.value(0, _position);
-    const Real initial_vel_x = initial_vel_x_fn.value(0, _position);
-    const Real initial_vel_y = initial_vel_y_fn.value(0, _position);
-    const Real initial_vel_z = initial_vel_z_fn.value(0, _position);
-
-    SinglePhaseFluidProperties & fp =
-        getTHMProblem().getUserObject<SinglePhaseFluidProperties>(_fp_name);
-    fp.initialSetup();
-    const Real initial_rho = fp.rho_from_p_T(initial_p, initial_T);
-    const RealVectorValue vel(initial_vel_x, initial_vel_y, initial_vel_z);
-    const Real initial_E = fp.e_from_p_rho(initial_p, initial_rho) + 0.5 * vel * vel;
-
-    addJunctionIC(_rhoV_var_name, initial_rho * _volume);
-    addJunctionIC(_rhouV_var_name, initial_rho * initial_vel_x * _volume);
-    addJunctionIC(_rhovV_var_name, initial_rho * initial_vel_y * _volume);
-    addJunctionIC(_rhowV_var_name, initial_rho * initial_vel_z * _volume);
-    addJunctionIC(_rhoEV_var_name, initial_rho * initial_E * _volume);
-
-    addJunctionIC(_pressure_var_name, initial_p);
-    addJunctionIC(_temperature_var_name, initial_T);
-    addJunctionIC(_velocity_var_name, vel.norm());
+    addVolumeJunctionIC(_pressure_var_name, "p");
+    addVolumeJunctionIC(_temperature_var_name, "T");
+    addVolumeJunctionIC(_velocity_var_name, "vel");
   }
 }
 
@@ -349,4 +319,24 @@ void
 VolumeJunction1Phase::addJunctionIC(const VariableName & var, Real value)
 {
   getTHMProblem().addConstantIC(var, value, getSubdomainNames());
+}
+
+void
+VolumeJunction1Phase::addVolumeJunctionIC(const VariableName & var, const std::string & quantity)
+{
+  const std::string class_name = "VolumeJunction1PhaseIC";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+  params.set<VariableName>("variable") = var;
+  params.set<MooseEnum>("quantity") = quantity;
+  params.applySpecificParameters(parameters(),
+                                 {"initial_p",
+                                  "initial_T",
+                                  "initial_vel_x",
+                                  "initial_vel_y",
+                                  "initial_vel_z",
+                                  "volume",
+                                  "position"});
+  params.set<UserObjectName>("fluid_properties") = _fp_name;
+  getTHMProblem().addSimInitialCondition(class_name, genName(name(), var, "ic"), params);
 }
