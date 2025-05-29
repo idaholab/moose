@@ -157,6 +157,6 @@ protected:
   void updateRegion(const CSGRegion & region) { _region = region; }
 
   friend class CSGCellList; // needed for setName() access
-  friend class CSGBase; // needed for updateRegion() access
+  friend class CSGBase;     // needed for updateRegion() access
 };
 } // namespace CSG

@@ -20,7 +20,7 @@ class MeshGeneratorMesh;
 class MeshGenerator;
 namespace CSG
 {
-  class CSGBase;
+class CSGBase;
 }
 
 /**

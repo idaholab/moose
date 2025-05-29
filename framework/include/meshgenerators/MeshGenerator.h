@@ -220,7 +220,8 @@ protected:
   virtual void generateData();
 
   /**
-   * Generate the CSG representation of the mesh (or meshing operation) created by this mesh generator
+   * Generate the CSG representation of the mesh (or meshing operation) created by this mesh
+   * generator
    */
   virtual std::unique_ptr<CSG::CSGBase> generateCSG();
 

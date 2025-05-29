@@ -28,7 +28,7 @@ public:
    * @param name unique name of universe
    * @param is_root true to set universe as the root universe (default false)
    */
-  CSGUniverse(const std::string name, bool is_root=false);
+  CSGUniverse(const std::string name, bool is_root = false);
 
   /**
    * @brief Construct a new CSGUniverse object from list of cells
