@@ -75,9 +75,9 @@ IPHDGAssemblyHelper::taggingData() const
 }
 
 std::set<std::string>
-IPHDGAssemblyHelper::variablesCovered()
+IPHDGAssemblyHelper::additionalVariablesCovered()
 {
-  return {_u_var.name(), _u_face_var.name()};
+  return {_u_face_var.name()};
 }
 
 void

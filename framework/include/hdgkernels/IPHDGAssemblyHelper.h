@@ -75,9 +75,9 @@ public:
   std::array<ADResidualsPacket, 2> taggingData() const;
 
   /**
-   * @returns The names of the primal interior and LM facet variable as a set
+   * @returns The LM facet variable as a set
    */
-  std::set<std::string> variablesCovered();
+  std::set<std::string> additionalVariablesCovered();
 
   virtual ~IPHDGAssemblyHelper() = default;
 

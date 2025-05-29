@@ -107,7 +107,7 @@ IPHDGKernel::computeOffDiagJacobian(const unsigned int)
 std::set<std::string>
 IPHDGKernel::additionalVariablesCovered()
 {
-  return iphdgHelper().variablesCovered();
+  return iphdgHelper().additionalVariablesCovered();
 }
 
 const std::unordered_set<unsigned int> &
