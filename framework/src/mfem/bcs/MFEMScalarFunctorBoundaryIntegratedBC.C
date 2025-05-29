@@ -23,8 +23,8 @@ MFEMScalarFunctorBoundaryIntegratedBC::validParams()
   params.addRequiredParam<MFEMScalarCoefficientName>(
       "coefficient",
       "The coefficient which will be used in the integrated BC. A coefficient can be any of the "
-      "following: a "
-      "variable, an MFEM material property, a function, or a post-processor.");
+      "following: a variable, an MFEM material property, a function, a post-processor, or a "
+      "numeric value.");
   return params;
 }
 
