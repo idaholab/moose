@@ -15,7 +15,7 @@ namespace CSG
 {
 
 /**
- * CSGCellList creates a container for CSGCell objects to pass to CSGMesh
+ * CSGCellList creates a container for CSGCell objects to pass to CSGBase object
  */
 class CSGCellList
 {
