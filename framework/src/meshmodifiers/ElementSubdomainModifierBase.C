@@ -946,7 +946,7 @@ ElementSubdomainModifierBase::computeFirstLayerNeighborInfo(SystemBase & sys)
       info.distances.push_back(dist);
     }
 
-    _newlyactivated_node_to_first_neighbors[newly_activated_node_id] = std::move(info);
+    _newlyactivated_node_to_first_layer_neighbors_info[newly_activated_node_id] = std::move(info);
   }
 }
 
@@ -969,7 +969,7 @@ ElementSubdomainModifierBase::setCurrentSolutionsOnNewlyActivatedNodes(SystemBas
     dof_map.dof_indices(node, solution_indices);
     int solution_dofs = solution_indices.size();
 
-    auto info_extrapolation_pt = _newlyactivated_node_to_first_neighbors[point_dof_id];
+    auto info_extrapolation_pt = _newlyactivated_node_to_first_layer_neighbors_info[point_dof_id];
 
     int extrapolation_point_number = info_extrapolation_pt.distances.size();
 
@@ -1009,8 +1009,8 @@ ElementSubdomainModifierBase::applyICForNodeList(SystemBase & sys,
 
   for (auto nid : nodes)
   {
-    const auto it = _newlyactivated_node_to_first_neighbors.find(nid);
-    if (it == _newlyactivated_node_to_first_neighbors.end())
+    const auto it = _newlyactivated_node_to_first_layer_neighbors_info.find(nid);
+    if (it == _newlyactivated_node_to_first_layer_neighbors_info.end())
       continue;
     const NeighborInfo & info = it->second;
 
@@ -1229,40 +1229,6 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys)
   }
 
   vec.close();
-}
-
-void
-ElementSubdomainModifierBase::verifySecondNeighborInfo()
-{
-  mooseInfo("Verifying _newlyactivated_node_to_first_neighbors...");
-
-  if (_newlyactivated_node_to_first_neighbors.empty())
-  {
-    mooseWarning("_newlyactivated_node_to_first_neighbors is empty.");
-    return;
-  }
-
-  for (const auto & [bnode_id, neighbor_info] : _newlyactivated_node_to_first_neighbors)
-  {
-    mooseInfo("Boundary Node ID: {} has {} second-layer neighbors",
-              bnode_id,
-              neighbor_info.solution_values.size());
-
-    if (neighbor_info.solution_values.size() != neighbor_info.distances.size())
-    {
-      mooseError("Mismatch: solution_values.size() != distances.size() for node ID {}", bnode_id);
-    }
-
-    for (std::size_t i = 0; i < neighbor_info.solution_values.size(); ++i)
-    {
-      mooseInfo("  Neighbor {}: solution = {}, distance = {}",
-                i,
-                neighbor_info.solution_values[i],
-                neighbor_info.distances[i]);
-    }
-  }
-
-  mooseInfo("Verification complete.");
 }
 
 void
