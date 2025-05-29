@@ -69,11 +69,6 @@ public:
   virtual Moose::VarFieldType fieldType() const = 0;
 
   /**
-   * @returns true if this is an array variable, false otherwise.
-   */
-  virtual bool isArray() const = 0;
-
-  /**
    * Get the variable name of a component in libMesh
    */
   std::string componentName(const unsigned int comp) const;

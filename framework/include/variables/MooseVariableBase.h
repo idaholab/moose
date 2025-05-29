@@ -42,6 +42,9 @@ public:
 
   MooseVariableBase(const InputParameters & parameters);
 
+  /// Returns the variable name of a component of an array variable
+  std::string arrayVariableComponent(const unsigned int i) const;
+
   /**
    * Get variable number coming from libMesh
    * @return the libmesh variable number
@@ -178,7 +181,7 @@ public:
   /**
    * @return whether this is an array variable
    */
-  bool isArray() const { return _is_array; }
+  virtual bool isArray() const { return _is_array; }
 
   /**
    * @return whether this variable lives on lower dimensional blocks
@@ -247,6 +250,9 @@ protected:
 
   /// Whether this variable lives on lower dimensional blocks
   bool _is_lower_d;
+
+  /// Array variable names when _is_array is true
+  const std::vector<std::string> _array_var_component_names;
 };
 
 inline void
