@@ -11,7 +11,7 @@ MFEMHypreFGMRES::validParams()
   InputParameters params = MFEMSolverBase::validParams();
   params.addClassDescription("Hypre solver for the iterative solution of MFEM equation systems "
                              "using the flexible generalized minimal residual method.");
-  params.addParam<double>("l_tol", 1e-5, "Set the relative tolerance.");
+  params.addParam<mfem::real_t>("l_tol", 1e-5, "Set the relative tolerance.");
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("kdim", 10, "Set the k-dimension.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
@@ -22,11 +22,9 @@ MFEMHypreFGMRES::validParams()
 
 MFEMHypreFGMRES::MFEMHypreFGMRES(const InputParameters & parameters)
   : MFEMSolverBase(parameters),
-    _preconditioner(
-        isParamSetByUser("preconditioner")
-            ? const_cast<MFEMSolverBase &>(getUserObject<MFEMSolverBase>("preconditioner"))
-                  .getSolver()
-            : nullptr)
+    _preconditioner(isParamSetByUser("preconditioner")
+                        ? getMFEMProblem().getProblemData().jacobian_preconditioner
+                        : nullptr)
 {
   constructSolver(parameters);
 }
@@ -34,16 +32,54 @@ MFEMHypreFGMRES::MFEMHypreFGMRES(const InputParameters & parameters)
 void
 MFEMHypreFGMRES::constructSolver(const InputParameters &)
 {
-  auto hypre_preconditioner = std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner);
 
-  _solver = std::make_shared<mfem::HypreFGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
-  _solver->SetTol(getParam<double>("l_tol"));
-  _solver->SetMaxIter(getParam<int>("l_max_its"));
-  _solver->SetKDim(getParam<int>("kdim"));
-  _solver->SetPrintLevel(getParam<int>("print_level"));
+  auto solver =
+      std::make_shared<mfem::HypreFGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  solver->SetTol(getParam<mfem::real_t>("l_tol"));
+  solver->SetMaxIter(getParam<int>("l_max_its"));
+  solver->SetKDim(getParam<int>("kdim"));
+  solver->SetPrintLevel(getParam<int>("print_level"));
 
-  if (hypre_preconditioner)
-    _solver->SetPreconditioner(*hypre_preconditioner);
+  if (_preconditioner)
+  {
+    auto hypre_preconditioner =
+        std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
+    if (!hypre_preconditioner)
+      mooseError("Hypre FGMRES preconditioner must be a Hypre Solver");
+    solver->SetPreconditioner(*hypre_preconditioner);
+  }
+
+  _solver = solver;
+}
+
+void
+MFEMHypreFGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+{
+
+  if (_lor && _preconditioner)
+    mooseError("LOR solver cannot take a preconditioner");
+
+  if (_preconditioner)
+  {
+    _preconditioner->updateSolver(a, tdofs);
+    auto hypre_preconditioner =
+        std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
+    auto solver = std::dynamic_pointer_cast<mfem::HypreFGMRES>(_solver);
+    solver->SetPreconditioner(*hypre_preconditioner);
+    _solver = solver;
+  }
+  else if (_lor)
+  {
+    mfem::ParLORDiscretization lor_disc(a, tdofs);
+    auto lor_solver = new mfem::LORSolver<mfem::HypreFGMRES>(
+        lor_disc, getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+    lor_solver->GetSolver().SetTol(getParam<mfem::real_t>("l_tol"));
+    lor_solver->GetSolver().SetMaxIter(getParam<int>("l_max_its"));
+    lor_solver->GetSolver().SetKDim(getParam<int>("kdim"));
+    lor_solver->GetSolver().SetPrintLevel(getParam<int>("print_level"));
+
+    _solver.reset(lor_solver);
+  }
 }
 
 #endif

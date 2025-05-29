@@ -9,7 +9,7 @@
 
 #include "VectorCoupledOldAux.h"
 
-registerMooseObject("MooseApp", VectorCoupledOldAux);
+registerMooseObject("MooseTestApp", VectorCoupledOldAux);
 
 InputParameters
 VectorCoupledOldAux::validParams()

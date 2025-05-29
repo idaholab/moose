@@ -10,6 +10,7 @@ MFEMOperatorJacobiSmoother::validParams()
 {
   InputParameters params = MFEMSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing Jacobi smoothing of the equation system.");
+
   return params;
 }
 
@@ -22,7 +23,14 @@ MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & p
 void
 MFEMOperatorJacobiSmoother::constructSolver(const InputParameters &)
 {
-  _preconditioner = std::make_shared<mfem::OperatorJacobiSmoother>();
+  _solver = std::make_shared<mfem::OperatorJacobiSmoother>();
+}
+
+void
+MFEMOperatorJacobiSmoother::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+{
+  if (getParam<bool>("low_order_refined"))
+    _solver.reset(new mfem::LORSolver<mfem::OperatorJacobiSmoother>(a, tdofs));
 }
 
 #endif
