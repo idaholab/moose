@@ -51,7 +51,7 @@ CSGOnlyAction::act()
         else
         {
           // Store CSG mesh created by mesh generator for use by downstream MG's
-          _app.getMeshGeneratorSystem().saveOutputCSGMesh(name, csg_mesh);
+          _app.getMeshGeneratorSystem().saveOutputCSGBase(name, csg_mesh);
         }
       }
   }

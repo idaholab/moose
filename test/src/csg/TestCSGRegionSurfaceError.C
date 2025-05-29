@@ -25,9 +25,7 @@ TestCSGRegionSurfaceError::validParams()
 }
 
 TestCSGRegionSurfaceError::TestCSGRegionSurfaceError(const InputParameters & params)
-  : MeshGenerator(params),
-    _mesh_ptrs(getMeshes("input_meshes")),
-    _input_mgs(getParam<std::vector<MeshGeneratorName>>("input_meshes"))
+  : MeshGenerator(params), _mesh_ptrs(getMeshes("input_meshes"))
 {
 }
 
@@ -41,9 +39,9 @@ TestCSGRegionSurfaceError::generate()
 std::unique_ptr<CSG::CSGBase>
 TestCSGRegionSurfaceError::generateCSG()
 {
-
-  std::unique_ptr<CSG::CSGBase> csg_1 = std::move(getCSGMeshByName(_input_mgs[0]));
-  std::unique_ptr<CSG::CSGBase> csg_2 = std::move(getCSGMeshByName(_input_mgs[1]));
+  const auto csg_bases = getCSGBases("input_meshes");
+  std::unique_ptr<CSG::CSGBase> csg_1 = std::move(*csg_bases[0]);
+  std::unique_ptr<CSG::CSGBase> csg_2 = std::move(*csg_bases[1]);
 
   // both will have:
   //  cell: square_cell

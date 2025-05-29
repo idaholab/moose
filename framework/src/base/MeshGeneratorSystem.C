@@ -697,21 +697,21 @@ MeshGeneratorSystem::setCSGOnly()
 }
 
 void
-MeshGeneratorSystem::saveOutputCSGMesh(const MeshGeneratorName generator_name,
-                                       std::unique_ptr<CSG::CSGBase> & csg_mesh)
+MeshGeneratorSystem::saveOutputCSGBase(const MeshGeneratorName generator_name,
+                                       std::unique_ptr<CSG::CSGBase> & csg_base)
 {
-  mooseAssert(_csg_mesh_output.find(generator_name) == _csg_mesh_output.end(),
+  mooseAssert(_csg_base_output.find(generator_name) == _csg_base_output.end(),
               "CSG mesh already exists");
-  _csg_mesh_output[generator_name] = std::move(csg_mesh);
+  _csg_base_output[generator_name] = std::move(csg_base);
 }
 
 std::unique_ptr<CSG::CSGBase> &
-MeshGeneratorSystem::getCSGMeshGeneratorOutput(const MeshGeneratorName & name)
+MeshGeneratorSystem::getCSGBaseGeneratorOutput(const MeshGeneratorName & name)
 {
   mooseAssert(_app.actionWarehouse().getCurrentTaskName() == "execute_csg_generators",
               "Incorrect call time");
 
-  auto it = _csg_mesh_output.find(name);
-  mooseAssert(it != _csg_mesh_output.end(), "CSG mesh not initialized");
+  auto it = _csg_base_output.find(name);
+  mooseAssert(it != _csg_base_output.end(), "CSG mesh not initialized");
   return it->second;
 }

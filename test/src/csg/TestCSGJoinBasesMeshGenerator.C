@@ -26,9 +26,7 @@ TestCSGJoinBasesMeshGenerator::validParams()
 }
 
 TestCSGJoinBasesMeshGenerator::TestCSGJoinBasesMeshGenerator(const InputParameters & params)
-  : MeshGenerator(params),
-    _mesh_ptrs(getMeshes("input_meshes")),
-    _input_mgs(getParam<std::vector<MeshGeneratorName>>("input_meshes"))
+  : MeshGenerator(params), _mesh_ptrs(getMeshes("input_meshes"))
 {
 }
 
@@ -42,8 +40,9 @@ TestCSGJoinBasesMeshGenerator::generate()
 std::unique_ptr<CSG::CSGBase>
 TestCSGJoinBasesMeshGenerator::generateCSG()
 {
+  const auto csg_bases = getCSGBases("input_meshes");
   // first MG is the base, join all others to this one
-  std::unique_ptr<CSG::CSGBase> csg_mesh = std::move(getCSGMeshByName(_input_mgs[0]));
+  std::unique_ptr<CSG::CSGBase> csg_mesh = std::move(*csg_bases[0]);
 
   // rename first MG's root to demonstrate that all others are still joined into
   // root despite having different names
@@ -51,9 +50,9 @@ TestCSGJoinBasesMeshGenerator::generateCSG()
   csg_mesh->renameRootUniverse(mg_name + "_root");
 
   auto root_univ = csg_mesh->getRootUniverse();
-  for (auto it = _input_mgs.begin() + 1; it != _input_mgs.end(); ++it)
+  for (unsigned int i = 1; i < csg_bases.size(); ++i)
   {
-    std::unique_ptr<CSG::CSGBase> inp_csg_mesh = std::move(getCSGMeshByName(*it));
+    std::unique_ptr<CSG::CSGBase> inp_csg_mesh = std::move(*csg_bases[i]);
     csg_mesh->joinOtherBase(inp_csg_mesh);
   }
 

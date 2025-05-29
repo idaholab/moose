@@ -55,9 +55,10 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
   // start by joining the first two sets of cylinders at the same level and push
   // one level down from root.
-  std::unique_ptr<CSG::CSGBase> csg_mesh = std::move(getCSGMeshByName(_input_mgs[0]));
+  auto csg_bases = getCSGBasesByName(_input_mgs);
+  std::unique_ptr<CSG::CSGBase> csg_mesh = std::move(*csg_bases[0]);
   std::string new_base_name = _input_mgs[0] + "_univ";
-  std::unique_ptr<CSG::CSGBase> inp_csg_mesh = std::move(getCSGMeshByName(_input_mgs[1]));
+  std::unique_ptr<CSG::CSGBase> inp_csg_mesh = std::move(*csg_bases[1]);
   std::string new_join_name = _input_mgs[1] + "_univ";
 
   // joining via this method will move both roots into new universes;
@@ -77,7 +78,7 @@ TestCSGUniverseMeshGenerator::generateCSG()
     {
       // join this incoming base at the same level as the other bases that already
       // were joined, so incoming root is renamed but the current root remains
-      inp_csg_mesh = std::move(getCSGMeshByName(img));
+      inp_csg_mesh = std::move(*csg_bases[i]);
       new_join_name = img + "_univ";
       csg_mesh->joinOtherBase(inp_csg_mesh, new_join_name);
     }
