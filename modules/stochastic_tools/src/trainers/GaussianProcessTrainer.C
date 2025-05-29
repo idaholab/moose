@@ -40,6 +40,10 @@ GaussianProcessTrainer::validParams()
       "tune_method",
       0,
       "Select method for tuning hyperparameters");
+  params.addParam<unsigned int>(
+      "num_layers",
+      1,
+      "The number of Gaussian Process layers");
   params.addParam<Real>("learning_rate", 0.001, "The learning rate for Adam optimization");
   params.addParam<unsigned int>(
       "show_every_nth_iteration",
@@ -57,6 +61,7 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     CovarianceInterface(parameters),
     _predictor_row(getPredictorData()),
     _gp(declareModelData<StochasticTools::GaussianProcess>("_gp")),
+    _tgp(declareModelData<StochasticTools::TwoLayerGaussianProcess>("_tgp")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
@@ -66,6 +71,7 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
         getParam<unsigned int>("tune_method"),
+        getParam<unsigned int>("num_layers"),
         getParam<Real>("learning_rate"))),
     _sampler_row(getSamplerData())
 {
@@ -91,12 +97,23 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
   if (isParamValid("tuning_max"))
     upper_bounds = getParam<std::vector<Real>>("tuning_max");
 
-  _gp.initialize(getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
-                 tune_parameters,
-                 lower_bounds,
-                 upper_bounds);
+  if (_optimization_opts.num_layers == 1){
+    _gp.initialize(getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
+                  tune_parameters,
+                  lower_bounds,
+                  upper_bounds);
 
-  _n_outputs = _gp.getCovarFunction().numOutputs();
+    _n_outputs = _gp.getCovarFunction().numOutputs();
+  }
+
+  if (_optimization_opts.num_layers == 2){
+    _tgp.initialize(getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
+                  tune_parameters,
+                  lower_bounds,
+                  upper_bounds);
+
+    _n_outputs = _tgp.getCovarFunction().numOutputs();
+  }
 }
 
 void
@@ -141,20 +158,42 @@ GaussianProcessTrainer::postTrain()
       _training_data(ii, jj) = _data_buffer[ii][jj];
   }
 
-  // Standardize (center and scale) training params
-  if (_standardize_params)
-    _gp.standardizeParameters(_training_params);
-  // if not standardizing data set mean=0, std=1 for use in surrogate
-  else
-    _gp.paramStandardizer().set(0, 1, _n_dims);
+  if (_optimization_opts.num_layers == 1){
+    // Standardize (center and scale) training params
+    if (_standardize_params)
+      _gp.standardizeParameters(_training_params);
+    // if not standardizing data set mean=0, std=1 for use in surrogate
+    else
+      _gp.paramStandardizer().set(0, 1, _n_dims);
 
-  // Standardize (center and scale) training data
-  if (_standardize_data)
-    _gp.standardizeData(_training_data);
-  // if not standardizing data set mean=0, std=1 for use in surrogate
-  else
-    _gp.dataStandardizer().set(0, 1, _n_outputs);
+    // Standardize (center and scale) training data
+    if (_standardize_data)
+      _gp.standardizeData(_training_data);
+    // if not standardizing data set mean=0, std=1 for use in surrogate
+    else
+      _gp.dataStandardizer().set(0, 1, _n_outputs);
 
-  // Setup the covariance
-  _gp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
+    // Setup the covariance
+    _gp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
+  }
+
+  if (_optimization_opts.num_layers == 2){
+    // Standardize (center and scale) training params
+    if (_standardize_params)
+      _tgp.standardizeParameters(_training_params);
+    // if not standardizing data set mean=0, std=1 for use in surrogate
+    else
+      _tgp.paramStandardizer().set(0, 1, _n_dims);
+
+    // Standardize (center and scale) training data
+    if (_standardize_data)
+      _tgp.standardizeData(_training_data);
+    // if not standardizing data set mean=0, std=1 for use in surrogate
+    else
+      _tgp.dataStandardizer().set(0, 1, _n_outputs);
+
+    // Setup the covariance
+    _tgp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
+  }
+
 }

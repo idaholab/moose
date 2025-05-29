@@ -61,11 +61,13 @@ public:
      * @param eps Tuning constant for the Adam algorithm
      * @param lambda Tuning constant for the Adam algorithm
      * @param tune_method Method for tuning hyperparameters
+     * @param num_layers The number of Gaussian Process layers
      */
     GPOptimizerOptions(const bool show_every_nth_iteration = 1,
                        const unsigned int num_iter = 1000,
                        const unsigned int batch_size = 0,
-                       const unsigned int tune_method = 1,
+                       const unsigned int tune_method = 0,
+                       const unsigned int num_layers = 1,
                        const Real learning_rate = 1e-3,
                        const Real b1 = 0.9,
                        const Real b2 = 0.999,
@@ -80,6 +82,8 @@ public:
     const unsigned int batch_size = 0;
     /// Method for tuning hyperparameters
     const unsigned int tune_method = 0;
+    /// The number of Gaussian Process layers
+    const unsigned int num_layers = 1;
     /// The learning rate for Adam optimizer
     const Real learning_rate = 1e-3;
     /// Tuning parameter from the paper

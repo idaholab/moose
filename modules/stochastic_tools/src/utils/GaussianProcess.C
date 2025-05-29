@@ -32,6 +32,7 @@ GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const bool show_every_nt
                                                         const unsigned int num_iter,
                                                         const unsigned int batch_size,
                                                         const unsigned int tune_method,
+                                                        const unsigned int num_layers,
                                                         const Real learning_rate,
                                                         const Real b1,
                                                         const Real b2,
@@ -41,6 +42,7 @@ GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const bool show_every_nt
     num_iter(num_iter),
     batch_size(batch_size),
     tune_method(tune_method),
+    num_layers(num_layers),
     learning_rate(learning_rate),
     b1(b1),
     b2(b2),
@@ -81,6 +83,7 @@ GaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_params,
   _batch_size = batch_decision ? opts.batch_size : training_params.rows();
   _K.resize(_num_outputs * _batch_size, _num_outputs * _batch_size);
 
+  std::cout << "tune method is: " << opts.tune_method << " num layers is: " << opts.num_layers << std::endl;
   if (_tuning_data.size()) {
     if (opts.tune_method == 0) {
       tuneHyperParamsAdam(training_params, training_data, opts);

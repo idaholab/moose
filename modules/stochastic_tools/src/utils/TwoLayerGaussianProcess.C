@@ -25,28 +25,30 @@
 #include "Uniform.h"
 #include "Gamma.h"
 
+#include "GaussianProcess.h"
+
 
 namespace StochasticTools
 {
 
-TwoLayerGaussianProcess::TGPOptimizerOptions::TGPOptimizerOptions(const bool show_every_nth_iteration,
-                                                        const unsigned int num_iter,
-                                                        const unsigned int batch_size,
-                                                        const Real learning_rate,
-                                                        const Real b1,
-                                                        const Real b2,
-                                                        const Real eps,
-                                                        const Real lambda)
-  : show_every_nth_iteration(show_every_nth_iteration),
-    num_iter(num_iter),
-    batch_size(batch_size),
-    learning_rate(learning_rate),
-    b1(b1),
-    b2(b2),
-    eps(eps),
-    lambda(lambda)
-{
-}
+// TwoLayerGaussianProcess::TGPOptimizerOptions::TGPOptimizerOptions(const bool show_every_nth_iteration,
+//                                                         const unsigned int num_iter,
+//                                                         const unsigned int batch_size,
+//                                                         const Real learning_rate,
+//                                                         const Real b1,
+//                                                         const Real b2,
+//                                                         const Real eps,
+//                                                         const Real lambda)
+//   : show_every_nth_iteration(show_every_nth_iteration),
+//     num_iter(num_iter),
+//     batch_size(batch_size),
+//     learning_rate(learning_rate),
+//     b1(b1),
+//     b2(b2),
+//     eps(eps),
+//     lambda(lambda)
+// {
+// }
 
 TwoLayerGaussianProcess::TwoLayerGaussianProcess() {}
 
@@ -74,7 +76,7 @@ TwoLayerGaussianProcess::linkCovarianceFunction(CovarianceFunctionBase * covaria
 void
 TwoLayerGaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_params,
                                        const RealEigenMatrix & training_data,
-                                       const TGPOptimizerOptions & opts)
+                                       const GaussianProcess::GPOptimizerOptions & opts)
 {
   const bool batch_decision = opts.batch_size > 0 && (opts.batch_size <= training_params.rows());
   _batch_size = batch_decision ? opts.batch_size : training_params.rows();
@@ -539,127 +541,6 @@ TwoLayerGaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_pa
 
 }
 
-void
-TwoLayerGaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
-                                     const RealEigenMatrix & training_data,
-                                     const TGPOptimizerOptions & opts)
-{
-  std::vector<Real> theta(_num_tunable, 0.0);
-  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-
-  mapToVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
-
-  // Internal params for Adam; set to the recommended values in the paper
-  Real b1 = opts.b1;
-  Real b2 = opts.b2;
-  Real eps = opts.eps;
-
-  std::vector<Real> m0(_num_tunable, 0.0);
-  std::vector<Real> v0(_num_tunable, 0.0);
-
-  Real new_val;
-  Real m_hat;
-  Real v_hat;
-  Real store_loss = 0.0;
-  std::vector<Real> grad1;
-
-  // Initialize randomizer
-  std::vector<unsigned int> v_sequence(training_params.rows());
-  std::iota(std::begin(v_sequence), std::end(v_sequence), 0);
-  RealEigenMatrix inputs(_batch_size, training_params.cols());
-  RealEigenMatrix outputs(_batch_size, training_data.cols());
-  if (opts.show_every_nth_iteration)
-    Moose::out << "OPTIMIZING TGP HYPER-PARAMETERS USING Adam" << std::endl;
-  for (unsigned int ss = 0; ss < opts.num_iter; ++ss)
-  {
-    // Shuffle data
-    MooseRandom generator;
-    generator.seed(0, 1980);
-    generator.saveState();
-    MooseUtils::shuffle<unsigned int>(v_sequence, generator, 0);
-    for (unsigned int ii = 0; ii < _batch_size; ++ii)
-    {
-      for (unsigned int jj = 0; jj < training_params.cols(); ++jj)
-        inputs(ii, jj) = training_params(v_sequence[ii], jj);
-
-      for (unsigned int jj = 0; jj < training_data.cols(); ++jj)
-        outputs(ii, jj) = training_data(v_sequence[ii], jj);
-    }
-
-    store_loss = getLoss(inputs, outputs);
-    if (opts.show_every_nth_iteration && ((ss + 1) % opts.show_every_nth_iteration == 0))
-      Moose::out << "Iteration: " << ss + 1 << " LOSS: " << store_loss << std::endl;
-    grad1 = getGradient(inputs);
-    for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
-    {
-      const auto first_index = std::get<0>(iter->second);
-      const auto num_entries = std::get<1>(iter->second);
-      for (unsigned int ii = 0; ii < num_entries; ++ii)
-      {
-        const auto global_index = first_index + ii;
-        m0[global_index] = b1 * m0[global_index] + (1 - b1) * grad1[global_index];
-        v0[global_index] =
-            b2 * v0[global_index] + (1 - b2) * grad1[global_index] * grad1[global_index];
-        m_hat = m0[global_index] / (1 - std::pow(b1, (ss + 1)));
-        v_hat = v0[global_index] / (1 - std::pow(b2, (ss + 1)));
-        new_val = theta[global_index] - opts.learning_rate * m_hat / (std::sqrt(v_hat) + eps);
-
-        const auto min_value = std::get<2>(iter->second);
-        const auto max_value = std::get<3>(iter->second);
-
-        theta[global_index] = std::min(std::max(new_val, min_value), max_value);
-      }
-    }
-    vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
-    _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-  }
-  if (opts.show_every_nth_iteration)
-  {
-    Moose::out << "OPTIMIZED TGP HYPER-PARAMETERS:" << std::endl;
-    Moose::out << Moose::stringify(theta) << std::endl;
-    Moose::out << "FINAL LOSS: " << store_loss << std::endl;
-  }
-}
-
-Real
-TwoLayerGaussianProcess::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
-{
-  _covariance_function->computeCovarianceMatrix(_K, inputs, inputs, true);
-
-  RealEigenMatrix flattened_data = outputs.reshaped(outputs.rows() * outputs.cols(), 1);
-
-  setupStoredMatrices(flattened_data);
-
-  Real log_likelihood = 0;
-  log_likelihood += -(flattened_data.transpose() * _K_results_solve)(0, 0);
-  log_likelihood += -std::log(_K.determinant());
-  log_likelihood -= _batch_size * std::log(2 * M_PI);
-  log_likelihood = -log_likelihood / 2;
-  return log_likelihood;
-}
-
-std::vector<Real>
-TwoLayerGaussianProcess::getGradient(RealEigenMatrix & inputs) const
-{
-  RealEigenMatrix dKdhp(_batch_size, _batch_size);
-  RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
-  std::vector<Real> grad_vec;
-  grad_vec.resize(_num_tunable);
-  for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
-  {
-    std::string hyper_param_name = iter->first;
-    const auto first_index = std::get<0>(iter->second);
-    const auto num_entries = std::get<1>(iter->second);
-    for (unsigned int ii = 0; ii < num_entries; ++ii)
-    {
-      const auto global_index = first_index + ii;
-      _covariance_function->computedKdhyper(dKdhp, inputs, hyper_param_name, ii);
-      RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
-      grad_vec[global_index] = -tmp.trace() / 2.0;
-    }
-  }
-  return grad_vec;
-}
 
 void
 TwoLayerGaussianProcess::mapToVec(
