@@ -71,7 +71,7 @@ public:
   /// variable/side_variable pair (for element upwind/downwind of the face respectively)
   const Real _coeff;
 
-  /// Whether this kernel should advect itself, e.g. it's variable/side_variable pair (for element
+  /// Whether this kernel should advect itself, e.g. its variable/side_variable pair (for element
   /// upwind/downwind of the face respectively). If false, we will advect just the \p _coeff value
   const bool _self_advection;
 };

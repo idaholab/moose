@@ -7,14 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ActionWarehouse.h"
 #include "DiffusionLHDGAssemblyHelper.h"
 #include "MooseVariableDependencyInterface.h"
 #include "MooseVariableFE.h"
-#include "MooseVariableScalar.h"
-#include "Function.h"
 #include "SystemBase.h"
-#include "MooseMesh.h"
 #include "MooseObject.h"
 #include "MaterialPropertyInterface.h"
 #include "NonlinearThread.h"
