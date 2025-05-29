@@ -124,7 +124,8 @@ MooseApp::validParams()
       "csg_only",
       "--csg-only <optional path>",
       "",
-      "Setup and output the input mesh in CSG format only (Default: \"<input_file_name>_out_csg.json\")");
+      "Setup and output the input mesh in CSG format only (Default: "
+      "\"<input_file_name>_out_csg.json\")");
   params.addCommandLineParam<bool>(
       "show_input", "--show-input", "Shows the parsed input file before running the simulation");
   params.setGlobalCommandLineParam("show_input");

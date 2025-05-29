@@ -59,7 +59,8 @@ CSGOnlyAction::act()
   {
     const auto final_mg_name = _app.getMeshGeneratorSystem().getFinalMeshGeneratorName();
     if (!_csg_mesh)
-      mooseError("Expecting final generator with name " + final_mg_name + " but not found in mesh generator tree");
+      mooseError("Expecting final generator with name " + final_mg_name +
+                 " but not found in mesh generator tree");
 
     Moose::out << "Outputting CSGBase object for " + final_mg_name + "\n";
 
