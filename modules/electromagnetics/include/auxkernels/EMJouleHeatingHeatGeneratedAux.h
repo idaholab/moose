@@ -12,6 +12,12 @@
 #include "AuxKernel.h"
 
 /**
+ *  NOTE: This kernel will be deprecated in the near future (10/01/2025)
+ *        in favor of exclusively using the Heat Transfer module's
+ *        'JouleHeatingHeatGeneratedAux' for coupling electromagnetics to heat transfer problems.
+ */
+
+/**
  *  Computes the heating due to the electric field (E) in the form of
  *  0.5 Re( conductivity * E * E^* )
  *  where E^* is the complex conjugate of the electric field.

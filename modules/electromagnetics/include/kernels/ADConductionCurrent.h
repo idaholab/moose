@@ -27,10 +27,10 @@ protected:
 
 private:
   /// Vector variable of the real component of the electric field
-  const ADVectorVariableValue & _E_real;
+  const ADVectorVariableValue & _field_real;
 
   /// Vector variable of the imaginary component of the electric field
-  const ADVectorVariableValue & _E_imag;
+  const ADVectorVariableValue & _field_imag;
 
   /// Real component of the material conductivity (in S/m)
   const ADMaterialProperty<Real> & _cond_real;

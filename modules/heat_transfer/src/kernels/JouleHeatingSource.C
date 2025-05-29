@@ -37,6 +37,11 @@ JouleHeatingSource::JouleHeatingSource(const InputParameters & parameters)
   for (unsigned int i = 0; i < _delec_cond_darg.size(); ++i)
     _delec_cond_darg[i] = &getMaterialPropertyDerivative<Real>("electrical_conductivity",
                                                                _coupled_moose_vars[i]->name());
+
+  mooseDeprecated("The non-AD version of JouleHeatingSource will be deprecated in the near future "
+                  "(10/01/2025) in favor of exclusively using the AD version of "
+                  "JouleHeatingSource, since the ADJouleHeatingSource can calculate both "
+                  "electrostatic and electromagnetic Joule heating.");
 }
 
 void

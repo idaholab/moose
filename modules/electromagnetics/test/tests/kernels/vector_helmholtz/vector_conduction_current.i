@@ -1,5 +1,5 @@
 # Test for ADConductionCurrent
-# Manufactured solution: E_real = y^2 * x_hat - x^2 * y_hat
+# Manufactured solution: field_real =  y^2 * x_hat - x^2 * y_hat
 #                        E_imag = y^2 * x_hat - x^2 * y_hat
 
 [Mesh]
@@ -128,8 +128,8 @@
   [coeff_real]
     type = ADMatWaveReaction
     variable = E_real
-    E_real = E_real
-    E_imag = E_imag
+    field_real =  E_real
+    field_imag =  E_imag
     wave_coef_real = wave_equation_coefficient_real
     wave_coef_imag = wave_equation_coefficient_imaginary
     component = real
@@ -137,8 +137,8 @@
   [conduction_real]
     type = ADConductionCurrent
     variable = E_real
-    E_imag = E_imag
-    E_real = E_real
+    field_imag =  E_imag
+    field_real =  E_real
     conductivity_real = cond_real
     conductivity_imag = cond_imag
     ang_freq_real = k_real
@@ -160,8 +160,8 @@
   [coeff_imag]
     type = ADMatWaveReaction
     variable = E_imag
-    E_real = E_real
-    E_imag = E_imag
+    field_real =  E_real
+    field_imag =  E_imag
     wave_coef_real = wave_equation_coefficient_real
     wave_coef_imag = wave_equation_coefficient_imaginary
     component = imaginary
@@ -169,8 +169,8 @@
   [conduction_imag]
     type = ADConductionCurrent
     variable = E_imag
-    E_imag = E_imag
-    E_real = E_real
+    field_imag =  E_imag
+    field_real =  E_real
     conductivity_real = cond_real
     conductivity_imag = cond_imag
     ang_freq_real = k_real

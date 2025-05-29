@@ -1,7 +1,8 @@
-# Test for EMJouleHeatingSource
+# Test for JouleHeatingHeatGeneratedAux
 # Manufactured solution: E_real = cos(pi*y) * x_hat - cos(pi*x) * y_hat
 #                        E_imag = sin(pi*y) * x_hat - sin(pi*x) * y_hat
 #                        n = x^2*y^2
+#                        heating = '0.5*sigma_r*(sin(x*pi)^2 + sin(y*pi)^2 + cos(x*pi)^2 + cos(y*pi)^2)'
 
 [Mesh]
   [gmg]
@@ -52,6 +53,13 @@
     symbol_names = 'sigma_r'
     symbol_values = 'sigma'
     expression = '-2*x^2 - 2*y^2 - 0.5*sigma_r*(sin(x*pi)^2 + sin(y*pi)^2 + cos(x*pi)^2 + cos(y*pi)^2)'
+  []
+
+  [heating_func]
+    type = ParsedFunction
+    symbol_names = 'sigma_r'
+    symbol_values = 'sigma'
+    expression = '0.5*sigma_r*(sin(x*pi)^2 + sin(y*pi)^2 + cos(x*pi)^2 + cos(y*pi)^2)'
   []
 
   #Material Coefficients
@@ -123,6 +131,15 @@
     type = ADGenericFunctionMaterial
     prop_names = cond_imag
     prop_values = sigma
+  []
+  [ElectromagneticMaterial]
+    type = ElectromagneticHeatingMaterial
+    electric_field = E_real
+    complex_electric_field = E_imag
+    electric_field_heating_name = electric_field_heating
+    electrical_conductivity = cond_real
+    formulation = FREQUENCY
+    solver = ELECTROMAGNETIC
   []
 []
 
@@ -212,16 +229,29 @@
     variable = n
   []
   [microwave_heating]
-    type = EMJouleHeatingSource
+    type = ADJouleHeatingSource
     variable = n
-    E_imag = E_imag
-    E_real = E_real
-    conductivity = cond_real
+    heating_term = 'electric_field_heating'
   []
   [body_force_n]
     type = BodyForce
     variable = n
     function = source_n
+  []
+[]
+
+[AuxVariables]
+  [heating_term]
+    family = MONOMIAL
+    order = FIRST
+  []
+[]
+
+[AuxKernels]
+  [aux_microwave_heating]
+    type = JouleHeatingHeatGeneratedAux
+    variable = heating_term
+    heating_term = 'electric_field_heating'
   []
 []
 
@@ -266,6 +296,12 @@
     type = ElementL2Error
     variable = n
     function = exact_n
+  []
+
+  [error_aux_heating]
+    type = ElementL2Error
+    variable = heating_term
+    function = heating_func
   []
 
   [h]

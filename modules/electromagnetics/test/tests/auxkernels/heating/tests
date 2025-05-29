@@ -1,19 +1,19 @@
 [Tests]
-  [aux_microwave_heating]
+  [deprecated_aux_microwave_heating]
     type = Exodiff
     input = aux_microwave_heating.i
     exodiff = aux_microwave_heating_out.e
-    requirement = 'The system shall calculate the power deposition based on the material conductivity and electric field.'
+    requirement = 'The system shall calculate the power deposition based on the material conductivity and electric field using the deprecated method.'
     design = 'EMJouleHeatingHeatGeneratedAux.md'
-    issues = '#28758'
+    issues = '#28758 #30000'
   []
-  [aux_microwave_heating_csv]
+  [deprecated_aux_microwave_heating_csv]
     type = CSVDiff
     command = 'aux_microwave_heating_convergence.py'
     csvdiff = 'aux_microwave_heating_convergence.csv'
-    requirement = 'The system shall be able to perform a convergence analysis for the power deposition based on the material conductivity and electric field.'
+    requirement = 'The system shall be able to perform a convergence analysis for the power deposition based on the material conductivity and electric field using the deprecated method.'
     design = 'EMJouleHeatingHeatGeneratedAux.md'
-    issues = '#28758'
+    issues = '#28758 #30000'
     heavy = True
     recover = false
     valgrind = none
