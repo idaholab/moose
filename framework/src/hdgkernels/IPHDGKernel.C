@@ -19,7 +19,9 @@ IPHDGKernel::validParams()
   return params;
 }
 
-IPHDGKernel::IPHDGKernel(const InputParameters & params) : HDGKernel(params), _my_elem(nullptr) {}
+IPHDGKernel::IPHDGKernel(const InputParameters & params) : HDGKernel(params), _cached_elem(nullptr)
+{
+}
 
 void
 IPHDGKernel::compute()
@@ -89,16 +91,16 @@ IPHDGKernel::computeResidualAndJacobianOnSide()
 void
 IPHDGKernel::jacobianSetup()
 {
-  _my_elem = nullptr;
+  _cached_elem = nullptr;
 }
 
 void
 IPHDGKernel::computeOffDiagJacobian(const unsigned int)
 {
-  if (_my_elem != _current_elem)
+  if (_cached_elem != _current_elem)
   {
     computeJacobian();
-    _my_elem = _current_elem;
+    _cached_elem = _current_elem;
   }
 }
 

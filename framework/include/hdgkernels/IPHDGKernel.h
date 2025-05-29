@@ -49,7 +49,7 @@ protected:
   void computeOnSide();
 
   /// A data member used for determining when to compute the Jacobian
-  const Elem * _my_elem;
+  const Elem * _cached_elem;
 };
 
 inline const IPHDGAssemblyHelper &
