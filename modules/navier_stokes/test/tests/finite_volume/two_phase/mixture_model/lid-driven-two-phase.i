@@ -47,6 +47,9 @@ g = -9.81
     v = vel_y
     pressure = pressure
   []
+[]
+
+[Correctors]
   [pin_pressure]
     type = NSPressurePin
     variable = pressure
