@@ -1483,12 +1483,12 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
           const auto target_location =
               hasToMultiApp()
                   ? " on target app " + std::to_string(getGlobalTargetAppIndex(problem_id))
-                  : " on parent app ";
+                  : " on parent app";
           const auto info_msg = "\nThis check can be turned off by setting 'error_on_miss' to "
                                 "false. The 'extrapolation_constant' parameter will be used to set "
                                 "the local value at missed points.";
           if (is_nodal)
-            mooseError("No source value could be found for node ",
+            mooseError("No source value for node ",
                        dof_object_id,
                        target_location,
                        " could be located. Node details:\n",
@@ -1496,7 +1496,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
                        "\n",
                        info_msg);
           else
-            mooseError("No source value could be found for element ",
+            mooseError("No source value for element ",
                        dof_object_id,
                        target_location,
                        " could be located. Element details:\n",
