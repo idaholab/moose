@@ -1,0 +1,9 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = simple_transient_diffusion.i
+    csvdiff = simple_transient_diffusion_out.csv
+    min_parallel = 28 # 1/4 of a bitterroot/windriver node
+    max_time = 600 # takes ~300s
+  []
+[]
