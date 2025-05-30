@@ -354,6 +354,55 @@ petscNonlinearConverged(SNES /*snes*/,
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
+PetscErrorCode
+petscLinearConverged(
+    KSP /*ksp*/, PetscInt it, PetscReal /*norm*/, KSPConvergedReason * reason, void * ctx)
+{
+  PetscFunctionBegin;
+  FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
+
+  // execute objects that may be used in convergence check
+  // TODO: add a dedicated flag once support is fully implemented.
+  // Right now, setting objects to execute on this flag would be ignored except in the
+  // linear-system-only use case.
+  problem.execute(EXEC_NONLINEAR_CONVERGENCE);
+
+  // perform the convergence check
+  Convergence::MooseConvergenceStatus status;
+  // TODO: This API could become about the "solverConvergenceCheck" to apply to both linear and
+  // nonlinear system convergence checks.
+  if (problem.getFailNextNonlinearConvergenceCheck())
+  {
+    status = Convergence::MooseConvergenceStatus::DIVERGED;
+    problem.resetFailNextNonlinearConvergenceCheck();
+  }
+  else
+  {
+    auto & convergence = problem.getConvergence(
+        problem.getLinearConvergenceNames()[problem.currentLinearSystem().number()]);
+    status = convergence.checkConvergence(it);
+  }
+
+  // convert convergence status to PETSc converged reason
+  switch (status)
+  {
+    case Convergence::MooseConvergenceStatus::ITERATING:
+      *reason = KSP_CONVERGED_ITERATING;
+      break;
+
+      // TODO: find a KSP code that works better for this case
+    case Convergence::MooseConvergenceStatus::CONVERGED:
+      *reason = KSP_CONVERGED_RTOL_NORMAL;
+      break;
+
+    case Convergence::MooseConvergenceStatus::DIVERGED:
+      *reason = KSP_DIVERGED_DTOL;
+      break;
+  }
+
+  PetscFunctionReturn(PETSC_SUCCESS);
+}
+
 PCSide
 getPetscPCSide(Moose::PCSideType pcs)
 {
@@ -511,7 +560,16 @@ petscSetDefaults(FEProblemBase & problem)
     PetscLinearSolver<Number> * petsc_solver = dynamic_cast<PetscLinearSolver<Number> *>(
         lin_sys.linearImplicitSystem().get_linear_solver());
     KSP ksp = petsc_solver->ksp();
-    petscSetKSPDefaults(problem, ksp);
+
+    if (problem.hasLinearConvergenceObjects())
+    {
+      LibmeshPetscCallA(
+          lin_sys.comm().get(),
+          KSPSetConvergenceTest(ksp, petscLinearConverged, &problem, LIBMESH_PETSC_NULLPTR));
+    }
+
+    // We dont set the KSP defaults here because they seem to clash with the linear solve parameters
+    // set in FEProblemBase::solveLinearSystem
   }
 }
 

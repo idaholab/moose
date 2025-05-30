@@ -105,6 +105,10 @@ FEProblemSolve::validParams()
       "Name of the Convergence object(s) to use to assess convergence of the "
       "nonlinear system(s) solve. If not provided, the default Convergence "
       "associated with the Problem will be constructed internally.");
+  params.addParam<std::vector<ConvergenceName>>(
+      "linear_convergence",
+      "Name of the Convergence object(s) to use to assess convergence of the "
+      "linear system(s) solve. If not provided, the linear solver tolerance parameters are used");
   params.addParam<bool>(
       "snesmf_reuse_base",
       true,
@@ -198,7 +202,7 @@ FEProblemSolve::validParams()
                               "Linear Solver");
   params.addParamNamesToGroup(
       "solve_type snesmf_reuse_base use_pre_SMO_residual "
-      "num_grids residual_and_jacobian_together splitting nonlinear_convergence",
+      "num_grids residual_and_jacobian_together splitting nonlinear_convergence linear_convergence",
       "Nonlinear Solver");
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
@@ -265,6 +269,15 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   }
   else
     _problem.setNeedToAddDefaultNonlinearConvergence();
+  if (isParamValid("linear_convergence"))
+  {
+    if (_problem.numLinearSystems() == 0)
+      paramError(
+          "linear_convergence",
+          "Setting 'linear_convergence' is currently only possible for solving linear systems");
+    _problem.setLinearConvergenceNames(
+        getParam<std::vector<ConvergenceName>>("linear_convergence"));
+  }
 
   // Check whether the user has explicitly requested automatic scaling and is using a solve type
   // without a matrix. If so, then we warn them

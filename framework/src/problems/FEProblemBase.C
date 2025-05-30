@@ -6475,6 +6475,9 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
   const Moose::PetscSupport::PetscOptions & options = po ? *po : _petsc_options;
   auto & solver_params = _solver_params[numNonlinearSystems() + linear_sys_num];
 
+  // Set custom convergence criteria
+  Moose::PetscSupport::petscSetDefaults(*this);
+
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   LibmeshPetscCall(Moose::PetscSupport::petscSetOptions(
       options, solver_params)); // Make sure the PETSc options are setup for this app
@@ -8991,7 +8994,36 @@ FEProblemBase::getNonlinearConvergenceNames() const
   if (_set_nonlinear_convergence_names)
     return _nonlinear_convergence_names;
   else
-    mooseError("The nonlinear convergence name(s) have not been set.");
+    mooseError("The nonlinear system convergence name(s) have not been set.");
+}
+
+bool
+FEProblemBase::hasLinearConvergenceObjects() const
+{
+  if (_set_linear_convergence_names)
+    return _linear_convergence_names.size();
+  else
+    // at the moment, this means we have not set one, not that we are querying this too early
+    // TODO: once there is a default linear CV object, error on the 'not set' case
+    return false;
+}
+
+void
+FEProblemBase::setLinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names)
+{
+  if (convergence_names.size() != numLinearSystems())
+    paramError("linear_convergence", "There must be one convergence object per linear system");
+  _linear_convergence_names = convergence_names;
+  _set_linear_convergence_names = true;
+}
+
+std::vector<ConvergenceName>
+FEProblemBase::getLinearConvergenceNames() const
+{
+  if (_set_linear_convergence_names)
+    return _linear_convergence_names;
+  else
+    mooseError("The linear convergence name(s) have not been set.");
 }
 
 void
