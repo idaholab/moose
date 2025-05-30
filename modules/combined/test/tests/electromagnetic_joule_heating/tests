@@ -1,0 +1,55 @@
+[Tests]
+  [microwave_heating]
+    type = 'Exodiff'
+    input = 'microwave_heating.i'
+    exodiff = 'microwave_heating_out.e'
+    requirement = 'The system shall be capable of modeling the power deposition due to the electric field interactions.'
+    design = 'ADJouleHeatingSource.md'
+    issues = '#30000'
+  []
+  [microwave_heating_convergence_csv]
+    type = CSVDiff
+    command = microwave_heating_convergence.py
+    csvdiff = 'microwave_heating_convergence.csv'
+    requirement = 'The system shall be able to perform a convergence analysis for modeling the power deposition due to the electric field interactions.'
+    design = 'ADJouleHeatingSource.md'
+    issues = '#30000'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+    required_python_packages = 'sympy os'
+  []
+
+  [aux_microwave_heating]
+    type = Exodiff
+    input = aux_microwave_heating.i
+    exodiff = aux_microwave_heating_out.e
+    requirement = 'The system shall calculate the power deposition based on the material conductivity and electric field.'
+    design = 'JouleHeatingHeatGeneratedAux.md'
+    issues = '#30000'
+  []
+  [aux_microwave_heating_csv]
+    type = CSVDiff
+    command = 'aux_microwave_heating_convergence.py'
+    csvdiff = 'aux_microwave_heating_convergence.csv'
+    requirement = 'The system shall be able to perform a convergence analysis for the power deposition based on the material conductivity and electric field.'
+    design = 'JouleHeatingHeatGeneratedAux.md'
+    issues = '#30000'
+    heavy = True
+    recover = false
+    valgrind = none
+    method = opt
+    required_python_packages = 'sympy os'
+  []
+
+  [copper_wire_heating]
+    type = Exodiff
+    input = fusing_current_through_copper_wire.i
+    exodiff = fusing_current_through_copper_wire_out.e
+    requirement = 'The system shall calculate the heating of a copper wire when supplied with a current.'
+    design = 'ADJouleHeatingSource.md'
+    issues = '#30000'
+    abs_zero = 1e-8
+  []
+[]

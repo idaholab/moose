@@ -27,10 +27,10 @@ protected:
 
 private:
   /// Vector variable of the real component of the electric field
-  const ADVectorVariableValue & _E_real;
+  const ADVectorVariableValue & _field_real;
 
   /// Vector variable of the imaginary component of the electric field
-  const ADVectorVariableValue & _E_imag;
+  const ADVectorVariableValue & _field_imag;
 
   /// The real component of the coefficient for the Helmholtz wave equation
   const ADMaterialProperty<Real> & _coef_real;
