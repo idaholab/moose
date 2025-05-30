@@ -24,7 +24,13 @@ public:
   NavierStokesLHDGKernel(const InputParameters & parameters);
 
   virtual void computeResidual() override;
+  /**
+   * Compute this object's entire element interior Jacobian, both on- and off-diagonal
+   */
   virtual void computeJacobian() override;
+  /**
+   * Forwards to \p computeJacobian() the first time this is called for a given element
+   */
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
   virtual void computeResidualOnSide() override;
   virtual void computeJacobianOnSide() override;
