@@ -48,7 +48,7 @@
   type = Transient
   system_names = u_sys
   start_time = 0.0
-  end_time = 20.0
+  end_time = 19
   n_startup_steps = 2
   dtmax = 6.0
   [TimeStepper]
@@ -57,11 +57,36 @@
     dt = 1.0
   []
   verbose = true
+  linear_convergence = much_logic
+[]
+
+[Convergence]
+  [force_grow]
+    type = IterationCountConvergence
+    min_iterations = 0
+    max_iterations = 4
+    converge_at_max_iterations = true
+  []
+  [force_shrink]
+    type = IterationCountConvergence
+    min_iterations = 12
+    max_iterations = 13
+    converge_at_max_iterations = true
+  []
+  [much_logic]
+    type = ParsedConvergence
+    convergence_expression = 'if(time < 5, force_grow, force_shrink)'
+    symbol_names = 'time force_grow force_shrink'
+    symbol_values = 'time force_grow force_shrink'
+  []
 []
 
 [Postprocessors]
   [_dt]
     type = TimestepSize
+  []
+  [time]
+    type = TimePostprocessor
   []
 []
 

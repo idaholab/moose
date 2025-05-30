@@ -67,8 +67,6 @@
     input = 'adapt_linear_systems.i'
     csvdiff = 'adapt_linear_systems_out.csv'
     requirement = "The system shall support the ability to adapt the time step size based on the number of iterations from linear systems."
-    # Number of linear iterations varies a lot in parallel
-    max_parallel = 1
     max_threads = 1 # see libmesh issue #3808
   []
 
