@@ -6,17 +6,28 @@
 
 This auxiliary kernel performs a reduction operation on the values of an array variable $g$ (indexed as $g_i$).
 Reduction operations include max, min, sum, and average.
+The operations sum and average can optionally use weights by setting the [!param](/AuxKernels/ArrayVarReductionAux/weights) parameter.
 These perform the following operations:
 
-sum:
+sum without weights:
 
 !equation
 f = \sum\limits_{i=1}^I g_i.
 
-average:
+sum with weights:
+
+!equation
+f = \sum\limits_{i=1}^I g_i w_i.
+
+average without weights:
 
 !equation
 f = \frac{1}{I}\sum\limits_{i=1}^I g_i.
+
+average with weights:
+
+!equation
+f = \frac{1}{\sum\limits_{i=1}^I w_i}\sum\limits_{i=1}^I g_i w_i.
 
 min:
 
