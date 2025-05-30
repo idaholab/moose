@@ -103,6 +103,7 @@ protected:
   virtual void addMomentumTimeKernels() = 0;
   virtual void addMomentumPressureKernels() = 0;
   virtual void addMomentumGravityKernels() = 0;
+  virtual void addMomentumFrictionKernels() = 0;
   virtual void addMomentumBoussinesqKernels() = 0;
 
   /// Functions adding boundary conditions for the flow simulation.
@@ -179,6 +180,13 @@ protected:
 
   /// Can be set to a coupled turbulence physics
   const WCNSFVTurbulencePhysics * _turbulence_physics;
+
+  /// Subdomains where we want to have volumetric friction
+  std::vector<std::vector<SubdomainName>> _friction_blocks;
+  /// The friction correlation types used for each block
+  std::vector<std::vector<std::string>> _friction_types;
+  /// The coefficients used for each item if friction type
+  std::vector<std::vector<std::string>> _friction_coeffs;
 
   /// Boundaries with a flow inlet specified on them
   const std::vector<BoundaryName> _inlet_boundaries;

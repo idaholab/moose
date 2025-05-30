@@ -40,6 +40,8 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
   params.suppressParameter<bool>("effective_conductivity");
   // Not needed
   params.suppressParameter<bool>("add_energy_equation");
+  params.suppressParameter<MooseEnum>("preconditioning");
+
   return params;
 }
 
@@ -213,7 +215,8 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyExternalHeatSource()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>("source_density") =
       getParam<MooseFunctorName>("external_heat_source");
-  params.set<Real>("scaling_factor") = getParam<Real>("external_heat_source_coeff");
+  params.set<MooseFunctorName>("scaling_factor") =
+      std::to_string(getParam<Real>("external_heat_source_coeff"));
 
   getProblem().addLinearFVKernel(kernel_type, prefix() + "external_heat_source", params);
 }
@@ -308,7 +311,9 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyInletBC()
 void
 WCNSLinearFVFluidHeatTransferPhysics::addEnergyWallBC()
 {
-  const auto & wall_boundaries = _flow_equations_physics->getWallBoundaries();
+  const auto & wall_boundaries = isParamSetByUser("energy_wall_boundaries")
+                                     ? getParam<std::vector<BoundaryName>>("energy_wall_boundaries")
+                                     : _flow_equations_physics->getWallBoundaries();
   if (wall_boundaries.size() != _energy_wall_types.size())
     paramError("energy_wall_types",
                "Energy wall types (size " + std::to_string(_energy_wall_types.size()) +
@@ -341,6 +346,29 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyWallBC()
         getProblem().addLinearFVBC(
             bc_type, _fluid_enthalpy_name + "_" + wall_boundaries[bc_ind], params);
       }
+    }
+    else if (_energy_wall_types[bc_ind] == "heatflux")
+    {
+      const std::string bc_type = "LinearFVConvectiveHeatTransferBC";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<LinearVariableName>("variable") =
+          _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+      params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
+      params.set<MooseFunctorName>(NS::T_solid) = _energy_wall_functors[bc_ind];
+      if (_problem->hasFunctor("htc_" + wall_boundaries[bc_ind], 0))
+        params.set<MooseFunctorName>("h") = "htc_" + wall_boundaries[bc_ind];
+      else if (_problem->hasFunctor("htc", 0))
+        params.set<MooseFunctorName>("h") = "htc";
+      else
+        mooseError("Either 'htc' or 'htc_" + wall_boundaries[bc_ind] +
+                   "' must be defined as a functor (for example using a Function)");
+      params.set<std::vector<BoundaryName>>("boundary") = {wall_boundaries[bc_ind]};
+
+      getProblem().addLinearFVBC(
+          bc_type,
+          (_solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name) + "_" +
+              wall_boundaries[bc_ind],
+          params);
     }
     else
       paramError(
@@ -381,8 +409,12 @@ WCNSLinearFVFluidHeatTransferPhysics::addMaterials()
       const auto object_type = "ADParsedFunctorMaterial";
       InputParameters params = getFactory().getValidParams(object_type);
       assignBlocks(params, _blocks);
-      params.set<std::vector<std::string>>("functor_names") = {_thermal_conductivity_name[i],
-                                                               getSpecificHeatName()};
+      std::vector<std::string> f_names;
+      if (!MooseUtils::parsesToReal(_thermal_conductivity_name[i]))
+        f_names.push_back(_thermal_conductivity_name[i]);
+      if (!MooseUtils::parsesToReal(getSpecificHeatName()))
+        f_names.push_back(getSpecificHeatName());
+      params.set<std::vector<std::string>>("functor_names") = f_names;
       params.set<std::string>("expression") =
           _thermal_conductivity_name[i] + "/" + getSpecificHeatName();
       params.set<std::string>("property_name") = _thermal_conductivity_name[i] + "_by_cp";
