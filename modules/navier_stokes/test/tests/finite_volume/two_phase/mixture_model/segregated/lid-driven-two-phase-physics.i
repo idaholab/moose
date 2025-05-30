@@ -12,6 +12,7 @@ cp = 1
 cp_d = 1
 
 [Mesh]
+  inactive = 'make_skew'
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
@@ -21,6 +22,12 @@ cp_d = 1
     ymax = .1
     nx = 10
     ny = 10
+  []
+  [make_skew]
+    type = MoveNodeGenerator
+    input = 'gen'
+    node_id = 0
+    shift_position = '0.007 0.0021 0'
   []
 []
 

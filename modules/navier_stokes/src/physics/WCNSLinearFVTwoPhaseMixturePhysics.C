@@ -16,6 +16,7 @@
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics);
 registerWCNSFVScalarTransportBaseTasks("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics);
 registerMooseAction("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics, "add_material");
+registerMooseAction("NavierStokesApp", WCNSLinearFVTwoPhaseMixturePhysics, "check_integrity");
 
 InputParameters
 WCNSLinearFVTwoPhaseMixturePhysics::validParams()
@@ -127,6 +128,30 @@ WCNSLinearFVTwoPhaseMixturePhysics::WCNSLinearFVTwoPhaseMixturePhysics(
     errorDependentParameter("add_drift_flux_momentum_terms", "true", {"density_interp_method"});
   if (!getParam<bool>("use_dispersed_phase_drag_model"))
     errorDependentParameter("use_dispersed_phase_drag_model", "true", {"particle_diameter"});
+}
+
+void
+WCNSLinearFVTwoPhaseMixturePhysics::checkIntegrity() const
+{
+  if (!_flow_equations_physics)
+    mooseError("Expected a flow physics");
+
+  // Check the mesh for unsupported sknewness + buoyancy
+  if (_flow_equations_physics->gravityVector().norm() > 0)
+  {
+    const auto tol = 1e-2;
+    if (_problem->mesh().allFaceInfo().empty())
+      _problem->mesh().setupFiniteVolumeMeshData();
+    for (const auto & fi : _problem->mesh().allFaceInfo())
+    {
+      if (fi.skewnessCorrectionVector().norm() > tol * fi.dCNMag())
+        mooseError("Face with centroid ",
+                   fi.faceCentroid(),
+                   " requires skewness correction. We currently do not support mixture flow with "
+                   "buoyancy and mesh skewness. Please contact a MOOSE or Navier Stokes module "
+                   "developer if you require this.");
+    }
+  }
 }
 
 void
