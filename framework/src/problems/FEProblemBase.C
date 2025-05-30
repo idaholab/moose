@@ -395,8 +395,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
-    _set_nonlinear_convergence_names(false),
-    _need_to_add_default_nonlinear_convergence(false),
+    _set_solver_convergence_names(false),
+    _need_to_add_default_solver_convergence(false),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
     _linear_systems(_num_linear_sys, nullptr),
@@ -486,7 +486,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _force_restart(getParam<bool>("force_restart")),
     _allow_ics_during_restart(getParam<bool>("allow_initial_conditions_with_restart")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
-    _fail_next_nonlinear_convergence_check(false),
+    _fail_next_solver_convergence_check(false),
     _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
     _show_invalid_solution_console(getParam<bool>("show_invalid_solution_console")),
     _immediately_print_invalid_solution(getParam<bool>("immediately_print_invalid_solution")),
@@ -2497,14 +2497,14 @@ FEProblemBase::addConvergence(const std::string & type,
 }
 
 void
-FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_apply)
+FEProblemBase::addDefaultSolverConvergence(const InputParameters & params_to_apply)
 {
-  const std::string class_name = "DefaultNonlinearConvergence";
+  const std::string class_name = "DefaultSolverConvergence";
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  for (const auto & conv_name : getNonlinearConvergenceNames())
+  for (const auto & conv_name : getSolverConvergenceNames())
     addConvergence(class_name, conv_name, params);
 }
 
@@ -6350,7 +6350,7 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // reset flag so that residual evaluation does not get skipped
   // and the next non-linear iteration does not automatically fail with
   // "DIVERGED_NANORINF", when we throw  an exception and stop solve
-  _fail_next_nonlinear_convergence_check = false;
+  _fail_next_solver_convergence_check = false;
 
   if (_solve)
   {
@@ -6424,7 +6424,7 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 
       // Force the next non-linear convergence check to fail (and all further residual evaluation
       // to be skipped).
-      _fail_next_nonlinear_convergence_check = true;
+      _fail_next_solver_convergence_check = true;
 
       // Repropagate the exception, so it can be caught at a higher level, typically
       // this is NonlinearSystem::computeResidual().
@@ -8976,22 +8976,21 @@ FEProblemBase::resizeMaterialData(const Moose::MaterialDataType data_type,
 }
 
 void
-FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names)
+FEProblemBase::setSolverConvergenceNames(const std::vector<ConvergenceName> & convergence_names)
 {
-  if (convergence_names.size() != numNonlinearSystems())
-    paramError("nonlinear_convergence",
-               "There must be one convergence object per nonlinear system");
-  _nonlinear_convergence_names = convergence_names;
-  _set_nonlinear_convergence_names = true;
+  if (convergence_names.size() != numSolverSystems())
+    mooseError("There must be one convergence object per nonlinear system");
+  _solver_convergence_names = convergence_names;
+  _set_solver_convergence_names = true;
 }
 
 std::vector<ConvergenceName>
-FEProblemBase::getNonlinearConvergenceNames() const
+FEProblemBase::getSolverConvergenceNames() const
 {
-  if (_set_nonlinear_convergence_names)
-    return _nonlinear_convergence_names;
+  if (_set_solver_convergence_names)
+    return _solver_convergence_names;
   else
-    mooseError("The nonlinear convergence name(s) have not been set.");
+    mooseError("The solver convergence name(s) have not been set.");
 }
 
 void

@@ -31,22 +31,22 @@ AddDefaultConvergenceAction::AddDefaultConvergenceAction(const InputParameters &
 void
 AddDefaultConvergenceAction::act()
 {
-  if (_problem->needToAddDefaultNonlinearConvergence())
+  if (_problem->needToAddDefaultSolverConvergence())
   {
     const std::string default_name = "default_nonlinear_convergence";
     // Create a default convergence for every nonlinear system
     std::vector<ConvergenceName> default_name_vec;
     for (const auto & nl_sys_name : _problem->getNonlinearSystemNames())
       default_name_vec.push_back(default_name + nl_sys_name);
-    _problem->setNonlinearConvergenceNames(default_name_vec);
-    _problem->addDefaultNonlinearConvergence(getMooseApp().getExecutioner()->parameters());
+    _problem->setSolverConvergenceNames(default_name_vec);
+    _problem->addDefaultSolverConvergence(getMooseApp().getExecutioner()->parameters());
   }
 
-  checkUnusedNonlinearConvergenceParameters();
+  checkUnusedSolverConvergenceParameters();
 }
 
 void
-AddDefaultConvergenceAction::checkUnusedNonlinearConvergenceParameters()
+AddDefaultConvergenceAction::checkUnusedSolverConvergenceParameters()
 {
   // Only perform this check if the executioner uses Convergence objects
   auto & executioner_params = getMooseApp().getExecutioner()->parameters();
@@ -55,16 +55,16 @@ AddDefaultConvergenceAction::checkUnusedNonlinearConvergenceParameters()
 
   // Convergences may exist but be inactive
   bool has_convergence = false;
-  for (const auto & cv_name : _problem->getNonlinearConvergenceNames())
+  for (const auto & cv_name : _problem->getSolverConvergenceNames())
     if (_problem->hasConvergence(cv_name))
       has_convergence = true;
   if (!has_convergence)
     return;
 
-  // If a single convergence is a `DefaultNonlinearConvergence` they can handle the Executioner
+  // If a single convergence is a `DefaultSolverConvergence` they can handle the Executioner
   // parameters pertaining to the nonlinear system solve
   bool has_a_default_nl_conv = false;
-  for (const auto & cv_name : _problem->getNonlinearConvergenceNames())
+  for (const auto & cv_name : _problem->getSolverConvergenceNames())
   {
     if (!_problem->hasConvergence(cv_name))
       continue;
@@ -78,7 +78,7 @@ AddDefaultConvergenceAction::checkUnusedNonlinearConvergenceParameters()
   // share parameters with the executioner.
   if (!has_a_default_nl_conv)
   {
-    for (const auto & cv_name : _problem->getNonlinearConvergenceNames())
+    for (const auto & cv_name : _problem->getSolverConvergenceNames())
     {
       if (!_problem->hasConvergence(cv_name))
         continue;

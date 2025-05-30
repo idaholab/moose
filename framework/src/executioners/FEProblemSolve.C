@@ -105,6 +105,7 @@ FEProblemSolve::validParams()
       "Name of the Convergence object(s) to use to assess convergence of the "
       "nonlinear system(s) solve. If not provided, the default Convergence "
       "associated with the Problem will be constructed internally.");
+  params.renameParam("nonlinear_convergence", "solver_convergence", "");
   params.addParam<bool>(
       "snesmf_reuse_base",
       true,
@@ -198,7 +199,7 @@ FEProblemSolve::validParams()
                               "Linear Solver");
   params.addParamNamesToGroup(
       "solve_type snesmf_reuse_base use_pre_SMO_residual "
-      "num_grids residual_and_jacobian_together splitting nonlinear_convergence",
+      "num_grids residual_and_jacobian_together splitting solver_convergence",
       "Nonlinear Solver");
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
@@ -241,7 +242,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
     set_solver_params(*sys);
 
   // Set linear solve parameters in the equation system
-  // Nonlinear solve parameters are added in the DefaultNonlinearConvergence
+  // Nonlinear solve parameters are added in the DefaultSolverConvergence
   EquationSystems & es = _problem.es();
   es.parameters.set<Real>("linear solver tolerance") = getParam<Real>("l_tol");
   es.parameters.set<Real>("linear solver absolute tolerance") = getParam<Real>("l_abs_tol");
@@ -256,15 +257,15 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
                               _pars.isParamSetByUser("snesmf_reuse_base"));
   _problem.skipExceptionCheck(getParam<bool>("skip_exception_check"));
 
-  if (isParamValid("nonlinear_convergence"))
+  if (isParamValid("solver_convergence"))
   {
-    if (_problem.onlyAllowDefaultNonlinearConvergence())
-      mooseError("The selected problem does not allow 'nonlinear_convergence' to be set.");
-    _problem.setNonlinearConvergenceNames(
-        getParam<std::vector<ConvergenceName>>("nonlinear_convergence"));
+    if (_problem.onlyAllowDefaultSolverConvergence())
+      mooseError("The selected problem does not allow 'solver_convergence' to be set.");
+    _problem.setSolverConvergenceNames(
+        getParam<std::vector<ConvergenceName>>("solver_convergence"));
   }
   else
-    _problem.setNeedToAddDefaultNonlinearConvergence();
+    _problem.setNeedToAddDefaultSolverConvergence();
 
   // Check whether the user has explicitly requested automatic scaling and is using a solve type
   // without a matrix. If so, then we warn them
@@ -288,7 +289,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
             : (getMooseApp().defaultAutomaticScaling() &&
                std::any_of(_systems.begin(),
                            _systems.end(),
-                           [this](const auto & solver_sys) {
+                           [this](const auto & solver_sys)
+                           {
                              return _problem.solverParams(solver_sys->number())._type !=
                                     Moose::ST_JFNK;
                            })));
