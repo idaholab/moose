@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "HDGKernel.h"
+#include "TimeIntegrator.h"
 
 InputParameters
 HDGKernel::validParams()
@@ -17,7 +18,12 @@ HDGKernel::validParams()
   return params;
 }
 
-HDGKernel::HDGKernel(const InputParameters & parameters) : Kernel(parameters) {}
+HDGKernel::HDGKernel(const InputParameters & parameters) : Kernel(parameters)
+{
+  if (const auto * const ti = _sys.queryTimeIntegrator(_var.number()); ti && ti->isExplicit())
+    mooseError("HDGKernels do not currently work with explicit time integration. This is because "
+               "the facet Lagrange multiplier variable does not have a time derivative term.");
+}
 
 void
 HDGKernel::computeResidualAndJacobianOnSide()
