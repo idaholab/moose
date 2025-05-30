@@ -46,24 +46,16 @@
 
 [BCs]
   [bottom]
-    type = MFEMScalarDirichletBC
+    type = MFEMScalarFunctorDirichletBC
     variable = concentration
     boundary = '1'
-    value = 1.0
+    coefficient = 1.0
   []
   [low_terminal]
-    type = MFEMScalarDirichletBC
+    type = MFEMScalarFunctorDirichletBC
     variable = concentration
     boundary = '2'
-    value = 0.0
-  []
-[]
-
-[FunctorMaterials]
-  [Substance]
-    type = MFEMGenericConstantFunctorMaterial
-    prop_names = diffusivity
-    prop_values = 1.0
+    coefficient = 0.0
   []
 []
 
@@ -71,7 +63,7 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = concentration
-    coefficient = diffusivity
+    coefficient = 1.0
   []
 []
 
