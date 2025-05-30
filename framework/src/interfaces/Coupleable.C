@@ -22,6 +22,7 @@
 #include "ElementUserObject.h"
 #include "NodalUserObject.h"
 #include "NodeFaceConstraint.h"
+#include "NodeElemConstraintBase.h"
 
 Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   : _c_parameters(moose_object->parameters()),
@@ -882,10 +883,11 @@ Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
   const auto * euo = dynamic_cast<const ElementUserObject *>(this);
   const auto * nuo = dynamic_cast<const NodalUserObject *>(this);
   const auto * nfc = dynamic_cast<const NodeFaceConstraint *>(this);
+  const auto * nec = dynamic_cast<const NodeElemConstraintBase *>(this);
 
-  if (!aux && !euo && !nuo && !nfc)
+  if (!aux && !euo && !nuo && !nfc && !nec)
     mooseError("writableVariable() can only be called from AuxKernels, ElementUserObjects, "
-               "NodalUserObjects, or NodeFaceConstraints. '",
+               "NodalUserObjects, NodeFaceConstraints, or NodeElemConstraints. '",
                _obj->name(),
                "' is none of those.");
 
