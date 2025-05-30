@@ -50,15 +50,15 @@
     block = 2
   []
   [RigidiumWeightDensity]
-    type = MFEMGenericConstantVectorFunctorMaterial
+    type = MFEMGenericFunctorVectorMaterial
     prop_names = 'gravitational_force_density'
-    prop_values = '0.0 0.0 -1e-2'
+    prop_values = '{0.0 0.0 -1e-2}'
     block = 1
   []
   [BendiumWeightDensity]
-    type = MFEMGenericConstantVectorFunctorMaterial
+    type = MFEMGenericFunctorVectorMaterial
     prop_names = 'gravitational_force_density'
-    prop_values = '0.0 0.0 -5e-3'
+    prop_values = '{0.0 0.0 -5e-3}'
     block = 2
   []
 []
