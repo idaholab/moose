@@ -33,7 +33,7 @@
     [block_only_in_problem]
       type = RunException
       input = 'diffusion_with_null_material_block_only_in_problem.i'
-      expect_err = "The block parameter is valid in the Problem block, but this has no effect on the block restrictions of kernels, BCs, or other block-restrictable objects. If your intent was to apply this setting globally, please use GlobalParams instead."
+      expect_err = "The block parameter is set by user in the Problem block, but this has no effect on the block restrictions of kernels, BCs, or other block-restrictable objects. If your intent was to apply this setting globally, please use GlobalParams instead."
       detail = 'Verify that an warning is issued when users only set block in the Problem, which actually have no effect of block restrictions.'
     []
   []
