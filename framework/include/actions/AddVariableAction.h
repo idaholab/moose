@@ -77,7 +77,7 @@ protected:
    * If the user supplies a value for 'initial_condition' in the input file this
    * method will create the proper InitialCondition object.
    */
-  void createInitialConditionAction();
+  void createInitialConditionAction(const std::string var_name, const std::vector<Real> value);
 
   /**
    * Get the block ids from the input parameters
