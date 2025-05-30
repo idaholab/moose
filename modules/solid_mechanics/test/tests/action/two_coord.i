@@ -1,4 +1,7 @@
 [Mesh]
+  coord_type = 'XYZ RZ'
+  coord_block = '1 2'
+
   [generated_mesh]
     type = GeneratedMeshGenerator
     dim = 2
@@ -6,8 +9,6 @@
     ny = 8
     xmin = -1
     xmax = 1
-    coord_type = 'XYZ RZ'
-    coord_block = '1 2'
   []
   [block1]
     type = SubdomainBoundingBoxGenerator
