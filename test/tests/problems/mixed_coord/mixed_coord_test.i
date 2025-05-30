@@ -1,60 +1,62 @@
 [Mesh]
   file = rz_xyz.e
+  coord_type = 'RZ XYZ'
+  coord_block = '1 2'
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./one]
+  [one]
     initial_condition = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
-  [./left_middle]
+  []
+  [left_middle]
     type = DirichletBC
     variable = u
     boundary = left_middle
     value = 1
-  [../]
-  [./right_middle]
+  []
+  [right_middle]
     type = DirichletBC
     variable = u
     boundary = right_middle
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./volume]
+  [volume]
     type = ElementIntegralVariablePostprocessor
     variable = one
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]
@@ -66,9 +68,4 @@
 [Outputs]
   file_base = out
   exodus = true
-[]
-
-[Problem]
-  coord_type = 'RZ XYZ'
-  block = '1 2'
 []

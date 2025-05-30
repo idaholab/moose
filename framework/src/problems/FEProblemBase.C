@@ -519,7 +519,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     if ((isParamSetByUser(coverage_check) &&
          (coverage_check_mode == CoverageCheckMode::ONLY_LIST ||
           coverage_check_mode == CoverageCheckMode::SKIP_LIST)) &&
-        isParamValid("block"))
+        (_has_block_in_global || isParamSetByUser("block")))
       mooseError("Cannot set both '" + coverage_check +
                  "' as 'ONLY_LIST' or 'SKIP_LIST' and 'block'. Please set only one.");
   };
