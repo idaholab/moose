@@ -12,6 +12,27 @@
 #include "Kernel.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
+#include "RankThreeTensor.h"
+
+template <typename T>
+struct GradientType;
+
+template <>
+struct GradientType<Real>
+{
+  typedef RealVectorValue type;
+};
+
+/**
+ * In the long term the GradientType struct can be eliminated by using the specialization of
+ * libmesh::TensorTools::IncrementRank for RankTwoTensor, this will require changing the derived
+ * class MatAnisoDiffusion and several other classes from RealTensorValue to RankTwoTensor
+ */
+template <>
+struct GradientType<RealTensorValue>
+{
+  typedef RankThreeTensor type;
+};
 
 /**
  * This class template implements a diffusion kernel with a mobility that can vary
@@ -47,6 +68,9 @@ protected:
   /// diffusion coefficient derivatives w.r.t. coupled variables
   std::vector<const MaterialProperty<T> *> _dDdarg;
 
+  /// diffusion coefficient derivatives w.r.t. variables that have explicit dependence on gradients
+  const MaterialProperty<typename GradientType<T>::type> & _dDdgradc;
+
   /// is the kernel used in a coupled form?
   const bool _is_coupled;
 
@@ -55,6 +79,12 @@ protected:
 
   /// Gradient of the concentration
   const VariableGradient & _grad_v;
+
+  /// Location of the order parameter for solid-pore surface in the list of args
+  unsigned int _surface_op_loc;
+
+  /// For solid-pore systems, mame of the order parameter identifies the solid-pore surface
+  VariableName _surface_op_var;
 };
 
 template <typename T>
@@ -78,6 +108,12 @@ MatDiffusionBase<T>::validParams()
                        "Coupled concentration variable for kernel to operate on; if this "
                        "is not specified, the kernel's nonlinear variable will be used as "
                        "usual");
+  params.addParam<VariableName>(
+      "surface_op_var",
+      "Name of the order parameter for solid-pore surface, which should appear in the "
+      "list of coupled variables (args). For use when diffusivity depends on these OP gradients, "
+      "leave this parameter un-set otherwise. ");
+
   return params;
 }
 
@@ -89,10 +125,13 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
     _dDdc(getMaterialPropertyDerivative<T>(isParamValid("D_name") ? "D_name" : "diffusivity",
                                            _var.name())),
     _dDdarg(_coupled_moose_vars.size()),
+    _dDdgradc(getMaterialPropertyDerivative<typename GradientType<T>::type>(
+        isParamValid("D_name") ? "D_name" : "diffusivity", "gradc")),
     _is_coupled(isCoupled("v")),
     _v_var(_is_coupled ? coupled("v") : (isCoupled("conc") ? coupled("conc") : _var.number())),
     _grad_v(_is_coupled ? coupledGradient("v")
-                        : (isCoupled("conc") ? coupledGradient("conc") : _grad_u))
+                        : (isCoupled("conc") ? coupledGradient("conc") : _grad_u)),
+    _surface_op_loc(libMesh::invalid_uint)
 {
   // deprecated variable parameter conc
   if (isCoupled("conc"))
@@ -102,6 +141,26 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
   for (unsigned int i = 0; i < _dDdarg.size(); ++i)
     _dDdarg[i] = &getMaterialPropertyDerivative<T>(
         isParamValid("D_name") ? "D_name" : "diffusivity", _coupled_moose_vars[i]->name());
+
+  // find position of variable for solid-pore surface OP when diffusivity depends on its gradient
+  if (isParamValid("surface_op_var"))
+  {
+    _surface_op_var = getParam<VariableName>("surface_op_var");
+    unsigned int j = 0;
+    while (j < _coupled_moose_vars.size())
+    {
+      if (_surface_op_var == _coupled_moose_vars[j]->name())
+      {
+        _surface_op_loc = j;
+        break;
+      }
+      ++j;
+    }
+    if (j == _coupled_moose_vars.size())
+      mooseError(
+          "The variable set by the parameter surface_op_var was not found in the list of coupled "
+          "variables (args parameter).");
+  }
 }
 
 template <typename T>
@@ -138,6 +197,9 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   const unsigned int cvar = mapJvarToCvar(jvar);
 
   Real sum = (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+  if ((_surface_op_loc != libMesh::invalid_uint) && (cvar == _surface_op_loc))
+    sum += _dDdgradc[_qp] * _grad_phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+
   if (_v_var == jvar)
     sum += computeQpCJacobian();
 
