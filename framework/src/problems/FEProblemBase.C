@@ -524,8 +524,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   const auto & block_in_global = _app.builder().root()->find(
       _app.syntax().getSyntaxByAction("GlobalParamsAction").front() + "/block");
 
-  if (isParamValid("block") && !block_in_global)
-    mooseWarning("The block parameter is valid in the Problem block, but this has no effect "
+  if (isParamSetByUser("block") && !block_in_global)
+    mooseWarning("The block parameter is set by user in the Problem block, but this has no effect "
                  "on the block restrictions of kernels, BCs, or other block-restrictable objects. "
                  "If your intent was to apply this setting globally, please use GlobalParams "
                  "instead.");
