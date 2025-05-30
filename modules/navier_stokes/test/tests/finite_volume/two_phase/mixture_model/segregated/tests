@@ -25,4 +25,16 @@
     requirement = 'The system shall be able to model channel flow using a two phase mixture using the linear finite volume discretization.'
     max_threads = 1 # see libmesh issue #3808
   []
+
+  [errors]
+    requirement = "The system shall return an error if"
+    [skewness]
+      type = RunException
+      input = 'lid-driven-two-phase-physics.i'
+      cli_args = "Mesh/gen/elem_type=TRI3 Mesh/inactive='' Physics/NavierStokes/FlowSegregated/flow/gravity='1 0 1'"
+      expect_err = 'We currently do not support mixture flow with buoyancy and mesh skewness.'
+      detail = 'a mixture model is used with buoyancy and a skewed mesh, as buoyancy forces reconstruction has not yet been implemented.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
 []
