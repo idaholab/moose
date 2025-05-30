@@ -78,7 +78,7 @@
     [mismatch_exec_on_sibling]
       type = 'RunApp'
       input = 'exec_on_mismatch.i'
-      cli_args = "MultiApps/active='sub_sibling_1 sub_sibling_2' Transfers/active=from_sub Transfers/from_sub/type=MultiAppCopyTransfer Transfers/from_sub/variable=sub_u Transfers/from_sub/from_multi_app=sub_sibling_1 Transfers/from_sub/to_multi_app=sub_sibling_2"
+      cli_args = "MultiApps/active='sub_sibling_1 sub_sibling_2' Transfers/active=from_sub Transfers/from_sub/type=MultiAppGeneralFieldShapeEvaluationTransfer Transfers/from_sub/variable=sub_u Transfers/from_sub/from_multi_app=sub_sibling_1 Transfers/from_sub/to_multi_app=sub_sibling_2"
       expect_out = 'MultiAppTransfer execute_on flags do not match'
       allow_warnings = true
       max_parallel = 1

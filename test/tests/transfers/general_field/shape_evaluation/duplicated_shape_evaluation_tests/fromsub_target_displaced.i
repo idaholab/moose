@@ -79,6 +79,8 @@
     type = MultiAppGeneralFieldShapeEvaluationTransfer
     from_multi_app = sub
     displaced_target_mesh = true
+    # Test features non-overlapping meshes
+    error_on_miss = false
   [../]
   [./elemental_from_sub]
     source_variable = sub_u
@@ -86,5 +88,7 @@
     type = MultiAppGeneralFieldShapeEvaluationTransfer
     from_multi_app = sub
     displaced_target_mesh = true
+    # Test features non-overlapping meshes
+    error_on_miss = false
   [../]
 []

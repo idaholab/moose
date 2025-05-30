@@ -71,5 +71,7 @@
     variable = 'transferred_u elemental_transferred_u'
     type = MultiAppGeneralFieldShapeEvaluationTransfer
     from_multi_app = sub
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []

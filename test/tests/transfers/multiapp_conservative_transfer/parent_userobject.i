@@ -101,6 +101,8 @@
 
     from_postprocessors_to_be_preserved = 'from_postprocessor'
     to_postprocessors_to_be_preserved = 'to_nearest_point'
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
   [element_layered_transfer]
     source_user_object = layered_average
@@ -111,5 +113,7 @@
 
     from_postprocessors_to_be_preserved = 'from_postprocessor'
     to_postprocessors_to_be_preserved = 'to_nearest_point_element'
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []

@@ -71,7 +71,7 @@
     type = 'RunException'
     input = '3d_1d_parent.i'
     cli_args = 'Transfers/layered_transfer_from_sub_app/error_on_miss=true Transfers/layered_transfer_from_sub_app/from_app_must_contain_point=true'
-    expect_err = 'could not be located'
+    expect_err = 'No source value for element '
     prereq = transfer/3d_1d
 
     requirement = "The system shall report an error if a parent node/element is "

@@ -81,6 +81,8 @@
     skip_coordinate_collapsing = true
     from_app_must_contain_point = false
     bbox_factor = 1.0000001
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
   [element_layered_transfer]
     type = MultiAppGeneralFieldUserObjectTransfer
@@ -90,5 +92,7 @@
     skip_coordinate_collapsing = true
     from_app_must_contain_point = false
     bbox_factor = 1.0000001
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []

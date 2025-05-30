@@ -18,10 +18,10 @@
 []
 
 [AuxVariables]
-  [./from_sub_app_var]
+  [from_sub_app_var]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [UserObjects]
@@ -113,5 +113,7 @@
 
     fixed_bounding_box_size = '0.25 0.25 0'
     from_app_must_contain_point = false
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []

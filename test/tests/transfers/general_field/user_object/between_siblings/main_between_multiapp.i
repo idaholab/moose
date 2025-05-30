@@ -14,16 +14,20 @@
 []
 
 # This application use at most 3 processes
-[MultiApps/ma1]
-  type = TransientMultiApp
-  input_files = sub_between_diffusion1.i
-  max_procs_per_app = 3
+[MultiApps]
+  [ma1]
+    type = TransientMultiApp
+    input_files = sub_between_diffusion1.i
+    max_procs_per_app = 3
+  []
 []
 
 # This application will use as many processes as the main app
-[MultiApps/ma2]
-  type = TransientMultiApp
-  input_files = sub_between_diffusion2.i
+[MultiApps]
+  [ma2]
+    type = TransientMultiApp
+    input_files = sub_between_diffusion2.i
+  []
 []
 
 [Transfers]
@@ -35,6 +39,8 @@
     source_user_object = sent_nodal
     variable = received_nodal
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
   [app2_to_1_nodal_nodal]
     type = MultiAppGeneralFieldUserObjectTransfer
@@ -43,6 +49,8 @@
     source_user_object = sent_nodal
     variable = received_nodal
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   # Elemental to elemental variables
@@ -53,6 +61,8 @@
     source_user_object = sent_elem
     variable = received_elem
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
   [app2_to_1_elem_elem]
     type = MultiAppGeneralFieldUserObjectTransfer
@@ -61,6 +71,8 @@
     source_user_object = sent_elem
     variable = received_elem
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   # Elemental to nodal variables
@@ -71,6 +83,8 @@
     source_user_object = sent_elem
     variable = received_nodal
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
   [app2_to_1_elem_nodal]
     type = MultiAppGeneralFieldUserObjectTransfer
@@ -79,6 +93,8 @@
     source_user_object = sent_elem
     variable = received_nodal
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   # Nodal to elemental variables
@@ -89,6 +105,8 @@
     source_user_object = sent_nodal
     variable = received_elem
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
   [app2_to_1_nodal_elem]
     type = MultiAppGeneralFieldUserObjectTransfer
@@ -97,6 +115,8 @@
     source_user_object = sent_nodal
     variable = received_elem
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []
 

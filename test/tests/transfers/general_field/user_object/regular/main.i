@@ -101,6 +101,8 @@
     source_user_object = to_main
     variable = from_sub
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   [from_sub_elem]
@@ -109,5 +111,7 @@
     source_user_object = to_main_elem
     variable = from_sub_elem
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []
