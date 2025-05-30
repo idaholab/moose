@@ -79,7 +79,6 @@
 #include "UserObject.h"
 #include "OffDiagonalScalingMatrix.h"
 #include "HDGKernel.h"
-#include "HDGIntegratedBC.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -298,6 +297,9 @@ NonlinearSystemBase::initialSetup()
     else
       _scaling_matrix = std::make_unique<DiagonalMatrix<Number>>(_communicator);
   }
+
+  if (_preconditioner)
+    _preconditioner->initialSetup();
 }
 
 void
@@ -466,30 +468,13 @@ NonlinearSystemBase::addHDGKernel(const std::string & kernel_name,
                                   const std::string & name,
                                   InputParameters & parameters)
 {
-  // The hybridized objects require that the residual and Jacobian be computed together
-  residualAndJacobianTogether();
-
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    parameters.set<MooseObjectWarehouse<HDGIntegratedBC> *>("hibc_warehouse") = &_hybridized_ibcs;
     // Create the kernel object via the factory and add to warehouse
     auto kernel = _factory.create<HDGKernel>(kernel_name, name, parameters, tid);
     _kernels.addObject(kernel, tid);
     _hybridized_kernels.addObject(kernel, tid);
     postAddResidualObject(*kernel);
-  }
-}
-
-void
-NonlinearSystemBase::addHDGIntegratedBC(const std::string & bc_name,
-                                        const std::string & name,
-                                        InputParameters & parameters)
-{
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
-  {
-    // Create the bc object via the factory and add to warehouse
-    auto bc = _factory.create<HDGIntegratedBC>(bc_name, name, parameters, tid);
-    _hybridized_ibcs.addObject(bc, tid);
   }
 }
 
@@ -1960,6 +1945,10 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
         LibmeshPetscCall(
             MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
+      if (_fe_problem.ignoreZerosInJacobian())
+        LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                                      MAT_IGNORE_ZERO_ENTRIES,
+                                      PETSC_TRUE));
     }
   }
 
@@ -2800,6 +2789,10 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
         LibmeshPetscCall(
             MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
+      if (_fe_problem.ignoreZerosInJacobian())
+        LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                                      MAT_IGNORE_ZERO_ENTRIES,
+                                      PETSC_TRUE));
     }
   }
 
