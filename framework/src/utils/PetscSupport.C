@@ -323,15 +323,15 @@ petscNonlinearConverged(SNES /*snes*/,
 
   // perform the convergence check
   Convergence::MooseConvergenceStatus status;
-  if (problem.getFailNextNonlinearConvergenceCheck())
+  if (problem.getFailNextSolverConvergenceCheck())
   {
     status = Convergence::MooseConvergenceStatus::DIVERGED;
-    problem.resetFailNextNonlinearConvergenceCheck();
+    problem.resetFailNextSolverConvergenceCheck();
   }
   else
   {
     auto & convergence = problem.getConvergence(
-        problem.getNonlinearConvergenceNames()[problem.currentNonlinearSystem().number()]);
+        problem.getSolverConvergenceNames()[problem.currentNonlinearSystem().number()]);
     status = convergence.checkConvergence(it);
   }
 
@@ -348,6 +348,51 @@ petscNonlinearConverged(SNES /*snes*/,
 
     case Convergence::MooseConvergenceStatus::DIVERGED:
       *reason = SNES_DIVERGED_DTOL;
+      break;
+  }
+
+  PetscFunctionReturn(PETSC_SUCCESS);
+}
+
+PetscErrorCode
+petscLinearConverged(
+    KSP /*ksp*/, PetscInt it, PetscReal /*norm*/, KSPConvergedReason * reason, void * ctx)
+{
+  PetscFunctionBegin;
+  FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
+
+  // execute objects that may be used in convergence check
+  // NOTE: not the best name for the flag
+  problem.execute(EXEC_NONLINEAR_CONVERGENCE);
+
+  // perform the convergence check
+  Convergence::MooseConvergenceStatus status;
+  if (problem.getFailNextSolverConvergenceCheck())
+  {
+    status = Convergence::MooseConvergenceStatus::DIVERGED;
+    problem.resetFailNextSolverConvergenceCheck();
+  }
+  else
+  {
+    auto & convergence = problem.getConvergence(
+        problem.getSolverConvergenceNames()[problem.currentLinearSystem().number()]);
+    status = convergence.checkConvergence(it);
+  }
+
+  // convert convergence status to PETSc converged reason
+  switch (status)
+  {
+    case Convergence::MooseConvergenceStatus::ITERATING:
+      *reason = KSP_CONVERGED_ITERATING;
+      break;
+
+      // TODO: find a KSP code that works better for this case
+    case Convergence::MooseConvergenceStatus::CONVERGED:
+      *reason = KSP_CONVERGED_RTOL_NORMAL;
+      break;
+
+    case Convergence::MooseConvergenceStatus::DIVERGED:
+      *reason = KSP_DIVERGED_DTOL;
       break;
   }
 
@@ -511,6 +556,13 @@ petscSetDefaults(FEProblemBase & problem)
     PetscLinearSolver<Number> * petsc_solver = dynamic_cast<PetscLinearSolver<Number> *>(
         lin_sys.linearImplicitSystem().get_linear_solver());
     KSP ksp = petsc_solver->ksp();
+
+    {
+      LibmeshPetscCallA(
+          lin_sys.comm().get(),
+          KSPSetConvergenceTest(ksp, petscLinearConverged, &problem, LIBMESH_PETSC_NULLPTR));
+    }
+
     petscSetKSPDefaults(problem, ksp);
   }
 }

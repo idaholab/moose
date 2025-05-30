@@ -2499,7 +2499,7 @@ FEProblemBase::addConvergence(const std::string & type,
 void
 FEProblemBase::addDefaultSolverConvergence(const InputParameters & params_to_apply)
 {
-  const std::string class_name = "DefaultSolverConvergence";
+  const std::string class_name = "DefaultNonlinearConvergence";
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
@@ -6474,6 +6474,9 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
 
   const Moose::PetscSupport::PetscOptions & options = po ? *po : _petsc_options;
   auto & solver_params = _solver_params[numNonlinearSystems() + linear_sys_num];
+
+  // Set custom convergence criteria
+  Moose::PetscSupport::petscSetDefaults(*this);
 
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   LibmeshPetscCall(Moose::PetscSupport::petscSetOptions(
