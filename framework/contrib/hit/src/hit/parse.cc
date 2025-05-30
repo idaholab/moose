@@ -318,7 +318,7 @@ Node::insertChild(std::size_t index, Node * child)
 }
 
 std::vector<Node *>
-Node::children(NodeType t)
+Node::children(NodeType t) const
 {
   if (t == NodeType::All)
     return _children;

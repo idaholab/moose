@@ -223,7 +223,7 @@ public:
   void insertChild(std::size_t index, Node * child);
 
   /// children returns a list of this node's children of the given type t.
-  std::vector<Node *> children(NodeType t = NodeType::All);
+  std::vector<Node *> children(NodeType t = NodeType::All) const;
   /// parent returns a pointer to this node's parent node or nullptr if this node has no parent.
   ///@{
   Node * parent() { return _parent; }
