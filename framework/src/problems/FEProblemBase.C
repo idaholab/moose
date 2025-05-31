@@ -446,8 +446,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
-    _has_block_in_global(static_cast<bool>(_app.builder().root()->find(
-        _app.syntax().getSyntaxByAction("GlobalParamsAction").front() + "/block"))),
+    _has_block_in_global(_app.builder().root()
+                             ? static_cast<bool>(_app.builder().root()->find("GlobalParams/block"))
+                             : false),
     _kernel_coverage_check(
         isParamSetByUser("kernel_coverage_check") ||
                 (!_has_block_in_global && !isParamSetByUser("block"))
