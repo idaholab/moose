@@ -23,6 +23,6 @@ public:
 
   ReferenceResidualProblem(const InputParameters & params);
 
-  virtual void addDefaultNonlinearConvergence(const InputParameters & params) override;
-  virtual bool onlyAllowDefaultNonlinearConvergence() const override { return true; }
+  virtual void addDefaultSolverConvergence(const InputParameters & params) override;
+  virtual bool onlyAllowDefaultSolverConvergence() const override { return true; }
 };

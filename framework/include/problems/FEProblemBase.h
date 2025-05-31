@@ -632,31 +632,25 @@ public:
   /// Returns true if the problem has a Convergence object of the given name
   virtual bool hasConvergence(const std::string & name, const THREAD_ID tid = 0) const;
   /// Returns true if the problem needs to add the default nonlinear convergence
-  bool needToAddDefaultNonlinearConvergence() const
-  {
-    return _need_to_add_default_nonlinear_convergence;
-  }
-  /// Sets _need_to_add_default_nonlinear_convergence to true
-  void setNeedToAddDefaultNonlinearConvergence()
-  {
-    _need_to_add_default_nonlinear_convergence = true;
-  }
+  bool needToAddDefaultSolverConvergence() const { return _need_to_add_default_solver_convergence; }
+  /// Sets _need_to_add_default_solver_convergence to true
+  void setNeedToAddDefaultSolverConvergence() { _need_to_add_default_solver_convergence = true; }
   /**
    * Adds the default nonlinear Convergence associated with the problem
    *
-   * This is called if the user does not supply 'nonlinear_convergence'.
+   * This is called if the user does not supply 'solver_convergence'.
    *
    * @param[in] params   Parameters to apply to Convergence parameters
    */
-  virtual void addDefaultNonlinearConvergence(const InputParameters & params);
+  virtual void addDefaultSolverConvergence(const InputParameters & params);
   /**
-   * Returns true if an error will result if the user supplies 'nonlinear_convergence'
+   * Returns true if an error will result if the user supplies 'solver_convergence'
    *
    * Some problems are strongly tied to their convergence, and it does not make
    * sense to use any convergence other than their default and additionally
    * would be error-prone.
    */
-  virtual bool onlyAllowDefaultNonlinearConvergence() const { return false; }
+  virtual bool onlyAllowDefaultSolverConvergence() const { return false; }
 
   /**
    * add a MOOSE line search
@@ -2239,12 +2233,12 @@ public:
   /**
    * Sets the nonlinear convergence object name if there is one
    */
-  void setNonlinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names);
+  void setSolverConvergenceNames(const std::vector<ConvergenceName> & convergence_names);
 
   /**
    * Gets the nonlinear convergence object name(s).
    */
-  std::vector<ConvergenceName> getNonlinearConvergenceNames() const;
+  std::vector<ConvergenceName> getSolverConvergenceNames() const;
 
   /**
    * Setter for whether we're computing the scaling jacobian
@@ -2312,20 +2306,19 @@ public:
   /**
    * Whether it will skip further residual evaluations and fail the next nonlinear convergence check
    */
-  bool getFailNextNonlinearConvergenceCheck() const
-  {
-    return _fail_next_nonlinear_convergence_check;
-  }
+  bool getFailNextSolverConvergenceCheck() const { return _fail_next_solver_convergence_check; }
+  bool getFailNextNonlinearConvergenceCheck() const { return _fail_next_solver_convergence_check; }
 
   /**
    * Skip further residual evaluations and fail the next nonlinear convergence check
    */
-  void setFailNextNonlinearConvergenceCheck() { _fail_next_nonlinear_convergence_check = true; }
+  void setFailNextSolverConvergenceCheck() { _fail_next_solver_convergence_check = true; }
+  void setFailNextNonlinearConvergenceCheck() { _fail_next_solver_convergence_check = true; }
 
   /**
    * Do not skip further residual evaluations and fail the next nonlinear convergence check
    */
-  void resetFailNextNonlinearConvergenceCheck() { _fail_next_nonlinear_convergence_check = false; }
+  void resetFailNextSolverConvergenceCheck() { _fail_next_solver_convergence_check = false; }
   /*
    * Set the status of loop order of execution printing
    * @param print_exec set of execution flags to print on
@@ -2444,7 +2437,7 @@ protected:
   bool _initialized;
 
   /// Nonlinear system(s) convergence name(s)
-  std::vector<ConvergenceName> _nonlinear_convergence_names;
+  std::vector<ConvergenceName> _solver_convergence_names;
 
   std::set<TagID> _fe_vector_tags;
 
@@ -2467,9 +2460,9 @@ protected:
   Real & _dt_old;
 
   /// Flag that the nonlinear convergence name has been set
-  bool _set_nonlinear_convergence_names;
+  bool _set_solver_convergence_names;
   /// Flag that the problem needs to add the default nonlinear convergence
-  bool _need_to_add_default_nonlinear_convergence;
+  bool _need_to_add_default_solver_convergence;
 
   /// The linear system names
   const std::vector<LinearSystemName> _linear_sys_names;
@@ -2894,7 +2887,7 @@ private:
   const bool _force_restart;
   const bool _allow_ics_during_restart;
   const bool _skip_nl_system_check;
-  bool _fail_next_nonlinear_convergence_check;
+  bool _fail_next_solver_convergence_check;
   const bool _allow_invalid_solution;
   const bool _show_invalid_solution_console;
   const bool & _immediately_print_invalid_solution;
