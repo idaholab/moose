@@ -327,13 +327,11 @@ TEST_F(CheckCoefficientManager, GetScalarLiteralReal)
   ASSERT_NE(c, nullptr);
   EXPECT_EQ(c->Eval(fe_transform, point1), 2.0);
   EXPECT_EQ(c->Eval(fe_transform, point2), 2.0);
-  c =
-      dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarCoefficient("   3."));
+  c = dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarCoefficient("   3."));
   ASSERT_NE(c, nullptr);
   EXPECT_EQ(c->Eval(fe_transform, point1), 3.0);
   EXPECT_EQ(c->Eval(fe_transform, point2), 3.0);
-  c =
-      dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarCoefficient("1  "));
+  c = dynamic_cast<mfem::ConstantCoefficient *>(&manager.getScalarCoefficient("1  "));
   ASSERT_NE(c, nullptr);
   EXPECT_EQ(c->Eval(fe_transform, point1), 1.0);
   EXPECT_EQ(c->Eval(fe_transform, point2), 1.0);
@@ -345,13 +343,12 @@ TEST_F(CheckCoefficientManager, DeclareScalarCoefficientFromLiteralReal)
       dynamic_cast<mfem::ConstantCoefficient *>(&manager.declareScalar("resistivity", "4.771"));
   ASSERT_NE(c, nullptr);
   EXPECT_EQ(c->Eval(fe_transform, point1), 4.771);
-  EXPECT_EQ(c->Eval(fe_transform, point2), 4.771);  
+  EXPECT_EQ(c->Eval(fe_transform, point2), 4.771);
 }
 
 TEST_F(CheckCoefficientManager, DeclarePropertyFromLiteralReal)
 {
-  mfem::Coefficient & cref =
-      manager.declareScalarProperty("resistivity", {"1", "2"}, "2.0000");
+  mfem::Coefficient & cref = manager.declareScalarProperty("resistivity", {"1", "2"}, "2.0000");
   mfem::Coefficient & c = manager.getScalarCoefficient("resistivity");
   fe_transform.Attribute = 1;
   EXPECT_EQ(&cref, &c);
@@ -731,15 +728,14 @@ TEST_F(CheckCoefficientManager, GetVectorLiteralReal)
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec.Size(), 1);
   EXPECT_EQ(vec[0], 2.0);
-  c =
-      dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.getVectorCoefficient("   3. 4."));
+  c = dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.getVectorCoefficient("   3. 4."));
   ASSERT_NE(c, nullptr);
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec.Size(), 2);
   EXPECT_EQ(vec[0], 3.0);
   EXPECT_EQ(vec[1], 4.0);
-  c =
-      dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.getVectorCoefficient(" 1   5.  2.4 11 "));
+  c = dynamic_cast<mfem::VectorConstantCoefficient *>(
+      &manager.getVectorCoefficient(" 1   5.  2.4 11 "));
   ASSERT_NE(c, nullptr);
   c->Eval(vec, fe_transform, point1);
   EXPECT_EQ(vec.Size(), 4);
@@ -751,8 +747,8 @@ TEST_F(CheckCoefficientManager, GetVectorLiteralReal)
 
 TEST_F(CheckCoefficientManager, DeclareVectorCoefficientFromLiteralReal)
 {
-  mfem::VectorConstantCoefficient * c =
-      dynamic_cast<mfem::VectorConstantCoefficient *>(&manager.declareVector("resistivity", "4. 2."));
+  mfem::VectorConstantCoefficient * c = dynamic_cast<mfem::VectorConstantCoefficient *>(
+      &manager.declareVector("resistivity", "4. 2."));
   ASSERT_NE(c, nullptr);
   mfem::Vector vec;
   c->Eval(vec, fe_transform, point1);

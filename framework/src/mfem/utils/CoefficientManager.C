@@ -112,8 +112,7 @@ CoefficientManager::declareMatrixProperty(const std::string & name,
                                           const std::vector<std::string> & blocks,
                                           const std::string & existing_coef)
 {
-  std::shared_ptr<mfem::MatrixCoefficient> coef =
-      this->getMatrixCoefficientPtr(existing_coef);
+  std::shared_ptr<mfem::MatrixCoefficient> coef = this->getMatrixCoefficientPtr(existing_coef);
   if (std::dynamic_pointer_cast<mfem::PWMatrixCoefficient>(coef))
     mooseError("Properties must not be defined out of other properties or piecewise coefficients.");
   return this->declareMatrixProperty(name, blocks, coef);
@@ -122,7 +121,8 @@ CoefficientManager::declareMatrixProperty(const std::string & name,
 std::shared_ptr<mfem::Coefficient>
 CoefficientManager::getScalarCoefficientPtr(const std::string name)
 {
-  if (this->_scalar_coeffs.hasCoefficient(name)) return this->_scalar_coeffs.getCoefficientPtr(name);
+  if (this->_scalar_coeffs.hasCoefficient(name))
+    return this->_scalar_coeffs.getCoefficientPtr(name);
   // If name not present, check if it can be parsed cleanly into a real number
   std::istringstream ss(MooseUtils::trim(name));
   mfem::real_t real_value;
@@ -137,9 +137,10 @@ CoefficientManager::getScalarCoefficientPtr(const std::string name)
 std::shared_ptr<mfem::VectorCoefficient>
 CoefficientManager::getVectorCoefficientPtr(const std::string name)
 {
-  if (this->_vector_coeffs.hasCoefficient(name)) return this->_vector_coeffs.getCoefficientPtr(name);
+  if (this->_vector_coeffs.hasCoefficient(name))
+    return this->_vector_coeffs.getCoefficientPtr(name);
   // If name not present, check if it can be parsed cleanly into a vector of real numbers
-  std::vector<mfem::real_t> vec_values;  
+  std::vector<mfem::real_t> vec_values;
   if (MooseUtils::tokenizeAndConvert(name, vec_values) && vec_values.size() > 0)
   {
     this->declareVector<mfem::VectorConstantCoefficient>(
@@ -156,7 +157,6 @@ CoefficientManager::getMatrixCoefficientPtr(const std::string name)
   // TODO: Work out how to parse literal matrices from input.
 }
 
-  
 mfem::Coefficient &
 CoefficientManager::getScalarCoefficient(const std::string name)
 {
