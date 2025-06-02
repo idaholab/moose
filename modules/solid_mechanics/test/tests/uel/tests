@@ -96,6 +96,7 @@
     input = uel_test_print.i
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
+    # see #30641
     should_crash = true
     # Testing output
     max_parallel = 1
