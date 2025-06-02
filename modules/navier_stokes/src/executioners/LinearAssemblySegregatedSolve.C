@@ -454,9 +454,8 @@ LinearAssemblySegregatedSolve::solve()
   unsigned int simple_iteration_counter = 0;
 
   // Assign residuals to general residual vector
-  const unsigned int no_systems =
+  unsigned int no_systems =
       _momentum_systems.size() + 1 + _has_energy_system + _has_solid_energy_system;
-  unsigned int no_systems = _momentum_systems.size() + 1 + _has_energy_system;
 
   // Adding the turbulence system to the numbering
   if (_has_turbulence_systems)
