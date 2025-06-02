@@ -363,15 +363,6 @@ public:
   nlohmann::json generateOutput() const;
 
 private:
-  /// List of surfaces associated with CSG object
-  CSGSurfaceList _surface_list;
-
-  /// List of surfaces associated with CSG object
-  CSGCellList _cell_list;
-
-  /// List of universes associated with CSG object
-  CSGUniverseList _universe_list;
-
   /**
    * @brief Get the CSGSurfaceList object
    *
@@ -443,5 +434,14 @@ private:
 
   // check that surfaces used in this region are a part of this CSGBase instance
   void checkRegionSurfaces(const CSGRegion & region);
+
+  /// List of surfaces associated with CSG object
+  CSGSurfaceList _surface_list;
+
+  /// List of surfaces associated with CSG object
+  CSGCellList _cell_list;
+
+  /// List of universes associated with CSG object
+  CSGUniverseList _universe_list;
 };
 } // namespace CSG

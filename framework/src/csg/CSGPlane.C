@@ -24,7 +24,7 @@ CSGPlane::CSGPlane(const std::string name, const Real a, const Real b, const Rea
 }
 
 std::map<std::string, Real>
-CSGPlane::getCoeffs()
+CSGPlane::getCoeffs() const
 {
   std::map<std::string, Real> coeffs = {{"a", _a}, {"b", _b}, {"c", _c}, {"d", _d}};
   return coeffs;
@@ -47,13 +47,13 @@ CSGPlane::coeffsFromPoints(const Point p1, const Point p2, const Point p3)
 }
 
 CSGSurface::Direction
-CSGPlane::directionFromPoint(const Point p)
+CSGPlane::directionFromPoint(const Point p) const
 {
   // Compute dot product of <a, b, c> and p to determine if p lies
   // in the positive or negative halfspace of the plane
   const Real dot_prod = _a * p(0) + _b * p(1) + _c * p(2);
 
   // TODO add MooseAssert that point doesn't lie on plane
-  return (dot_prod > _d) ? CSGSurface::Direction::positive : CSGSurface::Direction::negative;
+  return (dot_prod > _d) ? CSGSurface::Direction::POSITIVE : CSGSurface::Direction::NEGATIVE;
 }
 } // namespace CSG

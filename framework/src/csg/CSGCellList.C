@@ -15,14 +15,14 @@ namespace CSG
 CSGCellList::CSGCellList() {}
 
 void
-CSGCellList::checkCellName(const std::string name)
+CSGCellList::checkCellName(const std::string name) const
 {
   if (_cells.find(name) != _cells.end())
     mooseError("Cell with name " + name + " already exists in geoemetry.");
 }
 
 const std::shared_ptr<CSGCell> &
-CSGCellList::getCell(const std::string name)
+CSGCellList::getCell(const std::string name) const
 {
   auto cell = _cells.find(name);
   if (cell == _cells.end())
@@ -31,16 +31,15 @@ CSGCellList::getCell(const std::string name)
     return cell->second;
 }
 
-std::shared_ptr<CSGCell>
+std::shared_ptr<CSGCell> &
 CSGCellList::addVoidCell(const std::string name, const CSGRegion & region)
 {
   checkCellName(name);
-  _cells.insert(
-      std::make_pair(name, std::make_shared<CSGCell>(name, CSGCell::FillType::VOID, region)));
+  _cells.insert(std::make_pair(name, std::make_shared<CSGCell>(name, region)));
   return _cells[name];
 }
 
-std::shared_ptr<CSGCell>
+std::shared_ptr<CSGCell> &
 CSGCellList::addMaterialCell(const std::string name,
                              const std::string mat_name,
                              const CSGRegion & region)
@@ -50,7 +49,7 @@ CSGCellList::addMaterialCell(const std::string name,
   return _cells[name];
 }
 
-std::shared_ptr<CSGCell>
+std::shared_ptr<CSGCell> &
 CSGCellList::addUniverseCell(const std::string name,
                              const std::shared_ptr<CSGUniverse> univ,
                              const CSGRegion & region)
@@ -61,7 +60,7 @@ CSGCellList::addUniverseCell(const std::string name,
 }
 
 void
-CSGCellList::addCell(const std::shared_ptr<CSGCell> cell)
+CSGCellList::addCell(const std::shared_ptr<CSGCell> & cell)
 {
   auto name = cell->getName();
   checkCellName(name);
@@ -69,7 +68,7 @@ CSGCellList::addCell(const std::shared_ptr<CSGCell> cell)
 }
 
 void
-CSGCellList::renameCell(const std::shared_ptr<CSGCell> cell, const std::string name)
+CSGCellList::renameCell(const std::shared_ptr<CSGCell> & cell, const std::string name)
 {
   // check that this cell passed in is actually in the same cell that is in the cell list
   auto prev_name = cell->getName();

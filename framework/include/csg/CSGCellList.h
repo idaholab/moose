@@ -19,7 +19,7 @@ namespace CSG
  */
 class CSGCellList
 {
-public:
+protected:
   /**
    * Default constructor
    */
@@ -40,7 +40,7 @@ public:
    * @return std::shared_ptr<CSGCell> pointer to CSGCell with material fill that was created and
    * added to this CSGCellList
    */
-  std::shared_ptr<CSGCell>
+  std::shared_ptr<CSGCell> &
   addMaterialCell(const std::string name, const std::string mat_name, const CSGRegion & region);
 
   /**
@@ -51,7 +51,7 @@ public:
    * @return std::shared_ptr<CSGCell>pointer to CSGCell with void fill that was created and
    * added to this CSGCellList
    */
-  std::shared_ptr<CSGCell> addVoidCell(const std::string name, const CSGRegion & region);
+  std::shared_ptr<CSGCell> & addVoidCell(const std::string name, const CSGRegion & region);
 
   /**
    * @brief Add a Universe Cell object to cell list
@@ -62,9 +62,9 @@ public:
    * @return std::shared_ptr<CSGCell> pointer to CSGCell with universe fill that was created and
    * added to this CSGCellList
    */
-  std::shared_ptr<CSGCell> addUniverseCell(const std::string name,
-                                           const std::shared_ptr<CSGUniverse> univ,
-                                           const CSGRegion & region);
+  std::shared_ptr<CSGCell> & addUniverseCell(const std::string name,
+                                             const std::shared_ptr<CSGUniverse> univ,
+                                             const CSGRegion & region);
 
   /**
    * @brief Get the all cells in CSGBase instance
@@ -80,27 +80,29 @@ public:
    * @param name
    * @return const std::shared_ptr<CSGCell>& pointer CSGCell of the specified name
    */
-  const std::shared_ptr<CSGCell> & getCell(const std::string name);
+  const std::shared_ptr<CSGCell> & getCell(const std::string name) const;
 
   /**
    * @brief add a cell to the CellList
    *
    * @param cell cell to add to the CellList
    */
-  void addCell(const std::shared_ptr<CSGCell> cell);
+  void addCell(const std::shared_ptr<CSGCell> & cell);
 
   /**
    * @brief rename the specified cell
    *
    * @param name new name
    */
-  void renameCell(const std::shared_ptr<CSGCell> cell, const std::string name);
+  void renameCell(const std::shared_ptr<CSGCell> & cell, const std::string name);
 
-protected:
   /// Checks whether cell name already exists within CSGCellList object
-  void checkCellName(const std::string name);
+  void checkCellName(const std::string name) const;
 
   /// Mapping of cell names to pointers of stored cell objects
   std::map<std::string, std::shared_ptr<CSGCell>> _cells;
+
+  // Only CSGBase should be calling the methods in CSGCellList
+  friend class CSGBase;
 };
 } // namespace CSG

@@ -12,11 +12,6 @@
 namespace CSG
 {
 
-CSGCell::CSGCell(const std::string name, const FillType fill_type, const CSGRegion & region)
-  : _name(name), _fill_type(fill_type), _region(region)
-{
-}
-
 CSGCell::CSGCell(const std::string name, const CSGRegion & region)
   : _name(name), _fill_type(FillType::VOID), _region(region)
 {
@@ -38,8 +33,8 @@ CSGCell::CSGCell(const std::string name,
 {
 }
 
-const std::shared_ptr<CSGUniverse>
-CSGCell::getFillUniverse()
+const std::shared_ptr<CSGUniverse> &
+CSGCell::getFillUniverse() const
 {
   if (getFillType() != FillType::UNIVERSE)
   {
@@ -50,7 +45,7 @@ CSGCell::getFillUniverse()
 }
 
 const std::string
-CSGCell::getFillMaterial()
+CSGCell::getFillMaterial() const
 {
   if (getFillType() != FillType::MATERIAL)
   {
@@ -61,7 +56,7 @@ CSGCell::getFillMaterial()
 }
 
 const std::string
-CSGCell::getFillTypeString()
+CSGCell::getFillTypeString() const
 {
   switch (_fill_type)
   {

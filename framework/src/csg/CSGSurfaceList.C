@@ -15,14 +15,14 @@ namespace CSG
 CSGSurfaceList::CSGSurfaceList() {}
 
 void
-CSGSurfaceList::checkSurfaceName(const std::string name)
+CSGSurfaceList::checkSurfaceName(const std::string name) const
 {
   if (_surfaces.find(name) != _surfaces.end())
     mooseError("Surface with name " + name + " already exists in geoemetry.");
 }
 
 const std::shared_ptr<CSGSurface> &
-CSGSurfaceList::getSurface(const std::string name)
+CSGSurfaceList::getSurface(const std::string name) const
 {
   auto surf = _surfaces.find(name);
   if (surf == _surfaces.end())
