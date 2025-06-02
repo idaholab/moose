@@ -24,7 +24,6 @@ public:
   /// An enum for type of surface that is being represented
   enum class SurfaceType
   {
-    INVALID,
     PLANE,
     SPHERE,
     XCYLINDER,
@@ -35,15 +34,15 @@ public:
   /// An enum for boundary type of surface
   enum class BoundaryType
   {
-    transmission,
-    vacuum
+    TRANSMISSION,
+    VACUUM
   };
 
   /// Enum for the direction of the halfspace being represented by a point and surface
   enum class Direction
   {
-    positive,
-    negative
+    POSITIVE,
+    NEGATIVE
   };
 
   /**
@@ -78,7 +77,7 @@ public:
    *
    * @return const std::string string representation of surface type
    */
-  const std::string getSurfaceTypeString();
+  const std::string getSurfaceTypeString() const;
 
   /**
    * @brief Set the Boundary Type (i.e. transmission or vacuum)
@@ -99,14 +98,14 @@ public:
    *
    * @return const std::string string representation of the boundary type
    */
-  const std::string getBoundaryTypeString();
+  const std::string getBoundaryTypeString() const;
 
   /**
    * @brief Get the coefficients that define the surface
    *
    * @return std::map<std::string, Real> map of coefficients and their values
    */
-  virtual std::map<std::string, Real> getCoeffs() = 0; // Pure virtual function
+  virtual std::map<std::string, Real> getCoeffs() const = 0; // Pure virtual function
 
   /**
    * @brief get direction from point to surface
@@ -114,7 +113,8 @@ public:
    * @param p point
    * @return CSGSurface::Direction
    */
-  virtual CSGSurface::Direction directionFromPoint(const Point p) = 0; // Pure virtual function
+  virtual CSGSurface::Direction
+  directionFromPoint(const Point p) const = 0; // Pure virtual function
 
   /**
    * @brief Get the name of surface
@@ -124,6 +124,10 @@ public:
   std::string getName() const { return _name; }
 
 protected:
+  // set the name of the surface - intentionally not public because
+  // name needs to be managed at the CSGSurfaceList level
+  void setName(const std::string name) { _name = name; }
+
   /// Name of surface
   std::string _name;
 
@@ -132,10 +136,6 @@ protected:
 
   /// Boundary type of surface
   BoundaryType _boundary_type;
-
-  // set the name of the surface - intentionally not public because
-  // name needs to be managed at the CSGSurfaceList level
-  void setName(const std::string name) { _name = name; }
 
   // CSGSurfaceList needs to be friend to access setName()
   friend class CSGSurfaceList;

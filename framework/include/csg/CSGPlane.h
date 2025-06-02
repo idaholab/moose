@@ -55,7 +55,7 @@ public:
    *
    * @return std::map<std::string, Real> map of coefficients (a, b, c, and d) and their values
    */
-  virtual std::map<std::string, Real> getCoeffs() override;
+  virtual std::map<std::string, Real> getCoeffs() const override;
 
   /**
    * @brief get direction from point p to plane
@@ -63,7 +63,7 @@ public:
    * @param p point
    * @return CSGSurface::Direction
    */
-  virtual CSGSurface::Direction directionFromPoint(const Point p) override;
+  virtual CSGSurface::Direction directionFromPoint(const Point p) const override;
 
 protected:
   // calculate the equivalent coeffients (aX + bY + cZ = d) from 3 points on a plane
