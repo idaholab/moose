@@ -52,7 +52,7 @@ make -j $NUM_THREADS
 
 ## Solving a problem with `MFEM-MOOSE`
 
-Much of the syntax of the usual `MOOSE` scripts is preserved when creating scripts for `MFEM-MOOSE`. Example scripts may be found in the [kernel tests directory](/test/tests/mfem/kernels/). Here, we lay out the step-by-step process of writing a `MOOSE-MFEM` script to solve a simple diffusion problem. The full script may be found [here](/test/tests/mfem/kernels/diffusion.i). We roughly split the script into five parts: Problem, Geometry, Equation System, Integration, and Output.
+Much of the syntax of the usual `MOOSE` scripts is preserved when creating scripts for `MFEM-MOOSE`. Example scripts may be found in the [kernel tests directory](/test/tests/mfem/kernels/). Here, we lay out the step-by-step process of writing a `MFEM-MOOSE` script to solve a simple diffusion problem. The full script may be found [here](/test/tests/mfem/kernels/diffusion.i). We roughly split the script into five parts: Problem, Geometry, Equation System, Integration, and Output.
 
 ### Problem
 
@@ -110,7 +110,7 @@ To set up the kernels corresponding to the differential equations we wish to sol
 []
 ```
 
-Then, within the `Kernels` block, we specify the weak forms to be added to our equation system. Typically, one would pick the `MFEM` integrators they wish to implement by checking the [linear form integrators page](https://mfem.org/lininteg/) and the [bilinear form integrators page](https://mfem.org/bilininteg/). Note that not all linear and bilinear forms that are available in `MFEM` have been implemented on `MOOSE-MFEM`, only the most common ones. Should you wish to implement an integrator that is not yet available, please raise an issue in the `MOOSE` repository.
+Then, within the `Kernels` block, we specify the weak forms to be added to our equation system. Typically, one would pick the `MFEM` integrators they wish to implement by checking the [linear form integrators page](https://mfem.org/lininteg/) and the [bilinear form integrators page](https://mfem.org/bilininteg/). Note that not all linear and bilinear forms that are available in `MFEM` have been implemented on `MFEM-MOOSE`, only the most common ones. Should you wish to implement an integrator that is not yet available, please raise an issue in the `MOOSE` repository.
 
 If the integrator you wish to implement is available, you can specify it in the `type` parameter simply by taking its `MFEM` integrator name, swapping the word `Integrator` for `Kernel`, and appending `MFEM` to the beginning of the name. The table below shows a few examples of this naming convention:
 
@@ -171,7 +171,7 @@ While in principle any solver may be used as main solver or preconditioner, the 
 []
 ```
 
-Static and time-dependent executioners may be implemented respectively with the [`MFEMSteady`](/framework/doc/content/source/mfem/executioners/MFEMSteady.md) and [`MFEMTransient`](/framework/doc/content/source/mfem/executioners/MFEMSteady.md) types. If `MFEM-MOOSE` has been built with GPU offloading capabilities, here it is possible to set [!param](/Executioner/device) to `cuda` or `hip` to make use of GPU acceleration. For GPU runs, it is advisable to choose [!param](/Executioner/assembly_level) other than `legacy`, otherwise the matrix assembly step will not be offloaded. The options for [!param](/Executioner/assembly_level) are `legacy`, `full`, `element`, `partial`, and `none` (the latter is only available if `MOOSE-MFEM` has been built with `libCEED` support).
+Static and time-dependent executioners may be implemented respectively with the [`MFEMSteady`](/framework/doc/content/source/mfem/executioners/MFEMSteady.md) and [`MFEMTransient`](/framework/doc/content/source/mfem/executioners/MFEMTransient.md) types. If `MFEM-MOOSE` has been built with GPU offloading capabilities, here it is possible to set [!param](/Executioner/device) to `cuda` or `hip` to make use of GPU acceleration. For GPU runs, it is advisable to choose [!param](/Executioner/assembly_level) other than `legacy`, otherwise the matrix assembly step will not be offloaded. The options for [!param](/Executioner/assembly_level) are `legacy`, `full`, `element`, `partial`, and `none` (the latter is only available if `MFEM-MOOSE` has been built with `libCEED` support).
 ```yaml
 [Executioner]
   type = MFEMSteady
