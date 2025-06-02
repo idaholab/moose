@@ -176,8 +176,10 @@ private:
   std::string _ic_strategy_string;
   ICStrategyForNewlyActivated::Type _ic_strategy;
 
-  /// Inactive subdomain ID
-  int _inactive_subdomain_ID;
+  /// Unsolved block names
+  std::vector<SubdomainName> _unsolved_blocks;
+  /// Unsolved block IDs
+  std::set<SubdomainID> _unsolved_block_ids;
 
   /// @brief find the first layer of neighbors for each element
   /// @param sys

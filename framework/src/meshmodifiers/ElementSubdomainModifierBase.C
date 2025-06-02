@@ -82,11 +82,11 @@ ElementSubdomainModifierBase::validParams()
       "default_value",
       "The strategy to set the initial condition on the newly activated elements. ");
 
-  params.addParam<int>(
-      "inactive_subdomain_ID",
-      -1,
-      "If the region has the inative element, you should set this parameter to turn on the "
-      "extrapolation of the solution to the newly activated elements. ");
+  params.addParam<std::vector<SubdomainName>>(
+      "unsolved_blocks",
+      {},
+      "If the region has the unsolved blocks, you should set this parameter to turn on the "
+      "extrapolation of the solution to the newly activated elements.");
 
   params.addParam<std::vector<UserObjectName>>(
       "nodal_patch_recovery_uo",
@@ -116,24 +116,27 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
     _old_subdomain_reinitialized(getParam<bool>("old_subdomain_reinitialized")),
     _ic_strategy_string(getParam<std::string>("ic_strategy")),
     _ic_strategy(parseString2ICStrategy(_ic_strategy_string)),
-    _inactive_subdomain_ID(getParam<int>("inactive_subdomain_ID")),
+    _unsolved_blocks(getParam<std::vector<SubdomainName>>("unsolved_blocks")),
     _npr_names(getParam<std::vector<UserObjectName>>("nodal_patch_recovery_uo")),
     _npr_vec(_npr_names.size()),
     _nearby_element_threshold(getParam<int>("nearby_element_threshold")),
     _leaf_max_size(getParam<int>("kd_tree_leaf_max_size")),
     _radius_search_threshold(getParam<double>("radius_search_threshold"))
 {
-  if (_ic_strategy != ICStrategyForNewlyActivated::IC_DEFAULT and _inactive_subdomain_ID == -1)
-    mooseError("The inactive subdomain ID must be set to use the extrapolation strategy.");
-  if (_ic_strategy == ICStrategyForNewlyActivated::IC_DEFAULT and _inactive_subdomain_ID != -1)
-    mooseError("The inactive subdomain ID should not be set to use the default strategy.");
+  if (_ic_strategy != ICStrategyForNewlyActivated::IC_DEFAULT and _unsolved_blocks.empty())
+    mooseError("The unsolved_blocks must be set to use the extrapolation strategy.");
+  if (_ic_strategy == ICStrategyForNewlyActivated::IC_DEFAULT and !_unsolved_blocks.empty())
+    mooseError("The unsolved_blocks should not be set to use the default strategy.");
   if ((_ic_strategy == ICStrategyForNewlyActivated::IC_POLYNOMIAL ||
        _ic_strategy == ICStrategyForNewlyActivated::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
-       _ic_strategy == ICStrategyForNewlyActivated::IC_POLYNOMIAL_THRESHOLD) and
-      (_inactive_subdomain_ID == -1 or _npr_vec.empty()))
-    mooseError(
-        "The inactive subdomain ID and the NodalPatchRecovery UserObject must be set to use the "
-        "polynomial strategy.");
+       _ic_strategy == ICStrategyForNewlyActivated::IC_POLYNOMIAL_THRESHOLD))
+  {
+    if ((_unsolved_blocks.empty() or _npr_vec.empty()))
+      mooseError("The unsolved_blocks and the NodalPatchRecovery UserObject must be set to use the "
+                 "polynomial strategy.");
+    const auto vec_ids = _mesh.getSubdomainIDs(_unsolved_blocks);
+    _unsolved_block_ids.insert(vec_ids.begin(), vec_ids.end());
+  }
 
   for (const auto & i : index_range(_npr_names))
     _npr_vec[i] = &getUserObjectByName<NodalPatchRecoveryBase>(_npr_names[i]);
@@ -261,7 +264,7 @@ ElementSubdomainModifierBase::modify(
   if (_displaced_mesh)
     applyMovingBoundaryChanges(*_displaced_mesh);
 
-  if (_inactive_subdomain_ID != -1)
+  if (!_unsolved_blocks.empty())
   {
     identifyGloballyActivatedNodes(moved_elems);
     identifyLocallyOwnedActivatedNodes(moved_elems);
@@ -688,8 +691,8 @@ ElementSubdomainModifierBase::nodeIsNewlyActivated(dof_id_type node_id) const
 
   total_neighbor_elems = 0;
   for (auto neighbor_elem_id : _mesh.nodeToElemMap().at(node_id))
-    if (_mesh.elemPtr(neighbor_elem_id)->subdomain_id() != _inactive_subdomain_ID
-        /*exclude the element which has the inative subdomainID*/)
+    if (!_unsolved_block_ids.count(_mesh.elemPtr(neighbor_elem_id)->subdomain_id())
+        /*exclude the element that belong to unsolved blocks*/)
       total_neighbor_elems++;
 
   int reinitialized_neighbor_elems = 0;
@@ -906,7 +909,7 @@ ElementSubdomainModifierBase::computeFirstLayerNeighborInfo(SystemBase & sys)
 
     for (auto elem_id : first_layer_elems)
     {
-      if (_mesh.elemPtr(elem_id)->subdomain_id() == _inactive_subdomain_ID)
+      if (_unsolved_block_ids.count(_mesh.elemPtr(elem_id)->subdomain_id()))
         continue;
 
       const Elem * elem = _mesh.elemPtr(elem_id);
@@ -1100,8 +1103,8 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
       if (reinit_elem_set.count(elem->id()))
         continue;
 
-      // Skip if element is not active
-      if (elem->subdomain_id() == _inactive_subdomain_ID)
+      // Skip if element is unsolved (inactive in computational domain)
+      if (_unsolved_block_ids.count(elem->subdomain_id()))
         continue;
 
       BoundingBox bbox = elem->loose_bounding_box();
@@ -1169,8 +1172,8 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
       if (patch_elem_set.count(eid))
         continue;
 
-      // (c) Skip if element is not active
-      if (elem->subdomain_id() == _inactive_subdomain_ID)
+      // (c) Skip if element is unsolved (inactive in computational domain)
+      if (_unsolved_block_ids.count(elem->subdomain_id()))
         continue;
 
       if (_ic_strategy == ICStrategyForNewlyActivated::IC_POLYNOMIAL)
