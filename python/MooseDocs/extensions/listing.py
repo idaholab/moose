@@ -177,7 +177,10 @@ class LocalListingCommand(command.CommandComponent):
                     )
                     if moose_node:
                         pl = node.line(name='type') - 1
-                        content_lines[pl] += self._stringifySyntaxData(moose_node, page)
+                        obj_data = self._stringifySyntaxData(moose_node, page)
+                        content_lines[pl] = content_lines[pl].replace(
+                            val, val + obj_data, 1
+                        )
                 # If it isn't a object, let's try to find the action
                 else:
                     fullpath = parent_path
