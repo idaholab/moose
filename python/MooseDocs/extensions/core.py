@@ -150,7 +150,8 @@ class CodeBlock(components.ReaderComponent):
         args = info['settings'].split()
         if args and ('=' not in args[0]):
             settings['language'] = args[0]
-
+        if settings['language'].lower() == 'c++':
+            settings['language'] = 'cpp'
         return Code(parent, content=info['code'], language=settings['language'],
                     **self.attributes(settings))
 
