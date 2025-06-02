@@ -97,7 +97,8 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarFunctorDirichletConstantBC)
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<MFEMScalarCoefficientName>("coefficient") = "1.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMScalarFunctorDirichletBC>("MFEMScalarFunctorDirichletBC", "bc1", bc_params);
+  auto & essential_bc =
+      addObject<MFEMScalarFunctorDirichletBC>("MFEMScalarFunctorDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -157,7 +158,8 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctorDirichletConstantBC)
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMVectorFunctorDirichletBC>("MFEMVectorFunctorDirichletBC", "bc1", bc_params);
+  auto & essential_bc =
+      addObject<MFEMVectorFunctorDirichletBC>("MFEMVectorFunctorDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -221,7 +223,8 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctorDirichletBC)
 }
 
 /**
- * Test MFEMVectorFunctorNormalDirichletBC can be constructed from a constant and applied successfully
+ * Test MFEMVectorFunctorNormalDirichletBC can be constructed from a constant and applied
+ * successfully
  */
 TEST_F(MFEMEssentialBCTest, MFEMVectorFunctorNormalDirichletConstantBC)
 {
@@ -230,8 +233,8 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctorNormalDirichletConstantBC)
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc =
-      addObject<MFEMVectorFunctorNormalDirichletBC>("MFEMVectorFunctorNormalDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<MFEMVectorFunctorNormalDirichletBC>(
+      "MFEMVectorFunctorNormalDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -298,7 +301,8 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorFunctorNormalDirichletBC)
 }
 
 /**
- * Test MFEMVectorFunctorTangentialDirichletBC can be constructed from a constant and applied successfully
+ * Test MFEMVectorFunctorTangentialDirichletBC can be constructed from a constant and applied
+ * successfully
  */
 TEST_F(MFEMEssentialBCTest, MFEMVectorFunctorTangentialDirichletConstantBC)
 {

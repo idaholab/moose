@@ -40,7 +40,8 @@ public:
   /// Declare an alias to an existing scalar coefficient or, if it
   /// does not exist, try interpreting the name as a number with which
   /// to create a new constant coefficient.
-  mfem::Coefficient & declareScalar(const std::string & name, const std::string & existing_or_literal);
+  mfem::Coefficient & declareScalar(const std::string & name,
+                                    const std::string & existing_or_literal);
   /// Create a new scalar coefficient, constructed from the argument pack
   template <class P, class... Args>
   P & declareScalar(const std::string & name, Args &&... args)
@@ -168,7 +169,7 @@ public:
   /// try interpreting the name as numbers with which to construct a
   /// constant matrix coefficient.
   mfem::MatrixCoefficient & getMatrixCoefficient(const std::string name);
-  
+
   bool scalarPropertyIsDefined(const std::string & name, const std::string & block) const;
   bool vectorPropertyIsDefined(const std::string & name, const std::string & block) const;
   bool matrixPropertyIsDefined(const std::string & name, const std::string & block) const;

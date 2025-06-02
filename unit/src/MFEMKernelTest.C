@@ -119,7 +119,9 @@ TEST_F(MFEMKernelTest, MFEMVectorDomainLFKernel)
   // Construct kernel
   InputParameters kernel_params = _factory.getValidParams("MFEMVectorDomainLFKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
-  kernel_params.set<MFEMVectorCoefficientName>("vector_coefficient") = std::to_string(expected1[0]) + " " + std::to_string(expected1[1]) + " " + std::to_string(expected1[2]);
+  kernel_params.set<MFEMVectorCoefficientName>("vector_coefficient") =
+      std::to_string(expected1[0]) + " " + std::to_string(expected1[1]) + " " +
+      std::to_string(expected1[2]);
   MFEMVectorDomainLFKernel & kernel =
       addObject<MFEMVectorDomainLFKernel>("MFEMVectorDomainLFKernel", "kernel1", kernel_params);
 
