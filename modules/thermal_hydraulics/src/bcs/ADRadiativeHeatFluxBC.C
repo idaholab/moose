@@ -8,17 +8,17 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADRadiativeHeatFluxBC.h"
-#include "Function.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADRadiativeHeatFluxBC);
 
 InputParameters
 ADRadiativeHeatFluxBC::validParams()
 {
-  InputParameters params = ADRadiativeHeatFluxBCBase::validParams();
+  InputParameters params = ADIntegratedBC::validParams();
 
-  params.addRequiredParam<Real>("boundary_emissivity", "Emissivity of the boundary.");
-  params.addParam<FunctionName>("view_factor", "1", "View factor function");
+  params.addRequiredParam<MooseFunctorName>("T_ambient", "Ambient temperature functor");
+  params.addRequiredParam<MooseFunctorName>("emissivity", "Emissivity functor");
+  params.addParam<MooseFunctorName>("view_factor", 1.0, "View factor functor");
   params.addDeprecatedParam<PostprocessorName>(
       "scale_pp",
       "1.0",
@@ -26,7 +26,9 @@ ADRadiativeHeatFluxBC::validParams()
       "The 'scale' parameter is replacing the 'scale_pp' parameter. 'scale' is a function "
       "parameter instead of a post-processor parameter. If you need to scale from a post-processor "
       "value, use a PostprocessorFunction.");
-  params.addParam<FunctionName>("scale", 1.0, "Function by which to scale the boundary condition");
+  params.addParam<MooseFunctorName>(
+      "scale", 1.0, "Functor by which to scale the boundary condition");
+  params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "Stefan-Boltzmann constant");
 
   params.addClassDescription(
       "Radiative heat transfer boundary condition for a plate heat structure");
@@ -35,17 +37,27 @@ ADRadiativeHeatFluxBC::validParams()
 }
 
 ADRadiativeHeatFluxBC::ADRadiativeHeatFluxBC(const InputParameters & parameters)
-  : ADRadiativeHeatFluxBCBase(parameters),
-    _eps_boundary(getParam<Real>("boundary_emissivity")),
-    _view_factor_fn(getFunction("view_factor")),
+  : ADIntegratedBC(parameters),
+    _T_ambient(getFunctor<ADReal>("T_ambient")),
+    _emissivity(getFunctor<ADReal>("emissivity")),
+    _view_factor(getFunctor<ADReal>("view_factor")),
     _scale_pp(getPostprocessorValue("scale_pp")),
-    _scale_fn(getFunction("scale"))
+    _scale(getFunctor<ADReal>("scale")),
+    _sigma(getParam<Real>("stefan_boltzmann_constant"))
 {
 }
 
 ADReal
-ADRadiativeHeatFluxBC::coefficient() const
+ADRadiativeHeatFluxBC::computeQpResidual()
 {
-  return _scale_pp * _scale_fn.value(_t, _q_point[_qp]) * _eps_boundary *
-         _view_factor_fn.value(_t, _q_point[_qp]);
+  const Moose::ElemSideQpArg space_arg = {_current_elem, _current_side, _qp, _qrule, _q_point[_qp]};
+  const auto scale = _scale(space_arg, Moose::currentState());
+  const auto emissivity = _emissivity(space_arg, Moose::currentState());
+  const auto view_factor = _view_factor(space_arg, Moose::currentState());
+  const auto T_ambient = _T_ambient(space_arg, Moose::currentState());
+
+  const auto T4 = MathUtils::pow(_u[_qp], 4);
+  const auto T4inf = MathUtils::pow(T_ambient, 4);
+
+  return _test[_i][_qp] * _sigma * _scale_pp * scale * emissivity * view_factor * (T4 - T4inf);
 }

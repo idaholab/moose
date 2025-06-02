@@ -9,28 +9,33 @@
 
 #pragma once
 
-#include "RadiativeHeatFluxBCBase.h"
+#include "ADIntegratedBC.h"
 
 /**
  * Radiative heat transfer boundary condition for a plate heat structure
  */
-class ADRadiativeHeatFluxBC : public ADRadiativeHeatFluxBCBase
+class ADRadiativeHeatFluxBC : public ADIntegratedBC
 {
 public:
   ADRadiativeHeatFluxBC(const InputParameters & parameters);
 
 protected:
-  virtual ADReal coefficient() const override;
+  virtual ADReal computeQpResidual() override;
 
-  /// Emissivity of the boundary
-  const Real _eps_boundary;
-  /// View factor function
-  const Function & _view_factor_fn;
+  /// Ambient temperature
+  const Moose::Functor<ADReal> & _T_ambient;
+  /// Emissivity
+  const Moose::Functor<ADReal> & _emissivity;
+  /// View factor
+  const Moose::Functor<ADReal> & _view_factor;
 
   /// Post-processor by which to scale boundary condition
   const PostprocessorValue & _scale_pp;
-  /// Function by which to scale the boundary condition
-  const Function & _scale_fn;
+  /// Functor by which to scale the boundary condition
+  const Moose::Functor<ADReal> & _scale;
+
+  /// Stefan-Boltzmann constant
+  const Real _sigma;
 
 public:
   static InputParameters validParams();

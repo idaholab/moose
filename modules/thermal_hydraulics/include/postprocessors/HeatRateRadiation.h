@@ -25,15 +25,15 @@ protected:
   /// Temperature
   const VariableValue & _T;
   /// Ambient temperature
-  const Function & _T_ambient;
+  const Moose::Functor<Real> & _T_ambient;
   /// Emissivity
-  const Real & _emissivity;
-  /// View factor function
-  const Function & _view_factor_fn;
+  const Moose::Functor<Real> & _emissivity;
+  /// View factor
+  const Moose::Functor<Real> & _view_factor;
   /// Stefan-Boltzmann constant
   const Real & _sigma_stefan_boltzmann;
-  /// Function by which to scale the heat flux
-  const Function & _scale_fn;
+  /// Functor by which to scale the heat flux
+  const Moose::Functor<Real> & _scale;
 
 public:
   static InputParameters validParams();
