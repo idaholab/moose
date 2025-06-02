@@ -15,11 +15,10 @@
     requirement = 'The system shall be able to specify to converge after a certain number of iterations.'
   []
   [max_iterations_diverge]
-    type = RunApp
+    type = RunException
     input = 'max_iterations_diverge.i'
-    expect_out = "Solve Did NOT Converge"
+    expect_err = "Solve Did NOT Converge"
     requirement = 'The system shall be able to specify to diverge if not converged after a certain number of iterations.'
-    should_crash = true
   []
   [error_max_greater_than_min]
     type = RunException

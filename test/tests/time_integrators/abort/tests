@@ -6,6 +6,7 @@
     input = 'abort.i'
     exodiff = 'out.e'
     recover = false
+    expect_out = 'Aborting as solve did not converge and input selected to abort'
     should_crash = true
 
     requirement = "The system shall include an option that aborts the solve immediately if a solve fails."

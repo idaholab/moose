@@ -44,12 +44,12 @@
   []
 
   [immediately_print_invalid_solution]
-    type = 'RunApp'
+    type = 'RunException'
     input = 'solution_invalid.i'
     allow_warnings = true
     cli_args = 'Problem/immediately_print_invalid_solution=true'
     expect_out = 'NonsafeMaterial: The diffusivity is greater than the threshold value!'
-    should_crash = true
+    expect_err = 'Aborting as solve did not converge'
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output to screen immediately a detailed reason as to why a solution is invalid'

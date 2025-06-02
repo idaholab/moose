@@ -29,7 +29,6 @@
     input = 'pbp_test_options.i'
     expect_out = 'Linear'
     max_parallel = 1
-    should_crash = true
 
     requirement = "The system shall support the ability to add arbitrary options to the solver when "
                   "using a physics based precondioner."
