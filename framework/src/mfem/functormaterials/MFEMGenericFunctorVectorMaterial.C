@@ -15,7 +15,8 @@
 registerMooseObject("MooseApp", MFEMGenericFunctorVectorMaterial);
 
 /// Handle any numerical vector values, which should be enclosed in curly braces
-std::vector<MFEMVectorCoefficientName> processLiteralVectors(const std::vector<MFEMVectorCoefficientName> & input)
+std::vector<MFEMVectorCoefficientName>
+processLiteralVectors(const std::vector<MFEMVectorCoefficientName> & input)
 {
   std::vector<MFEMVectorCoefficientName> result;
   bool in_literal = false;
@@ -40,9 +41,9 @@ std::vector<MFEMVectorCoefficientName> processLiteralVectors(const std::vector<M
         literal += " " + item;
       }
     }
-    else if(item.front() == '{')
+    else if (item.front() == '{')
     {
-      if(item.back() == '}')
+      if (item.back() == '}')
       {
         result.push_back(item.substr(1, item.size() - 2));
       }
@@ -60,7 +61,8 @@ std::vector<MFEMVectorCoefficientName> processLiteralVectors(const std::vector<M
   if (in_literal)
   {
     mooseError("No closing curly brace for vector value in "
-               "MFEMGenericFunctorVectorMaterial prop_values: '{" + literal + "'");
+               "MFEMGenericFunctorVectorMaterial prop_values: '{" +
+               literal + "'");
   }
   return result;
 }
@@ -86,7 +88,8 @@ MFEMGenericFunctorVectorMaterial::MFEMGenericFunctorVectorMaterial(
     const InputParameters & parameters)
   : MFEMFunctorMaterial(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
-    _prop_values(processLiteralVectors(getParam<std::vector<MFEMVectorCoefficientName>>("prop_values")))
+    _prop_values(
+        processLiteralVectors(getParam<std::vector<MFEMVectorCoefficientName>>("prop_values")))
 {
   if (_prop_names.size() != _prop_values.size())
     paramError("prop_names", "Must match the size of prop_values");
