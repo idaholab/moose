@@ -21,7 +21,7 @@ This term arises from the weak form of the forcing term
 
 ## Example Input File Syntax
 
-!listing mfem/kernels/curlcurl.i block=Kernels
+!listing mfem/kernels/curlcurl.i block=/Kernels
 
 !syntax parameters /Kernels/MFEMVectorFEDomainLFKernel
 
