@@ -24,7 +24,7 @@ std::vector<MFEMVectorCoefficientName> processLiteralVectors(const std::vector<M
   {
     if (in_literal)
     {
-      if (item.front() == '}')
+      if (item.front() == '{')
       {
         mooseError("Nested numeric vector values are not permitted in "
                    "MFEMGenericFunctorVectoMaterial prop_values.");
