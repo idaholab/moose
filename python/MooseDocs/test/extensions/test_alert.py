@@ -424,7 +424,7 @@ class TestAlertWithCode(MooseDocsTestCase):
         self.assertToken(ast(0)(0), 'AlertTitle', brand='error', prefix=True, icon=True, icon_name='report')
         self.assertToken(ast(0)(1), 'AlertContent', size=2, brand='error')
         self.assertToken(ast(0)(1)(0), 'Paragraph', size=6)
-        self.assertToken(ast(0)(1)(1), 'Code', content='\nintx;\n', language='c++')
+        self.assertToken(ast(0)(1)(1), 'Code', content='\nintx;\n', language='cpp')
 
     def testHTML(self):
         _, res = self.execute(self.TEXT)
@@ -461,8 +461,8 @@ class TestAlertWithCode(MooseDocsTestCase):
         self.assertHTMLString(res(0)(4), content='code')
         self.assertHTMLString(res(0)(5), content='.')
 
-        self.assertHTMLTag(res(1), 'pre', size=1, class_='moose-pre')
-        self.assertHTMLTag(res(1)(0), 'code', size=1, class_='language-c++')
+        self.assertHTMLTag(res(1), 'pre', size=1, class_='', style='')
+        self.assertHTMLTag(res(1)(0), 'code', size=1, class_='language-cpp')
         self.assertHTMLString(res(1)(0)(0), content='\nintx;\n')
 
     def testLatex(self):

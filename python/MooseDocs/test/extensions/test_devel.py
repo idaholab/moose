@@ -71,7 +71,7 @@ class TestRenderExample(MooseDocsTestCase):
         ast = self.tokenize('!devel example\ntest')
         res = self.render(ast, renderer=base.HTMLRenderer())
         self.assertHTMLTag(res, 'body', size=2)
-        self.assertHTMLTag(res(0), 'pre', size=1, class_='moose-pre')
+        self.assertHTMLTag(res(0), 'pre', size=1, class_='')
         self.assertHTMLTag(res(0,0), 'code', size=1, string='test')
         self.assertHTMLTag(res(1), 'p', string='test')
 
