@@ -88,7 +88,7 @@ creates a complete copy of the mesh for each processor.
 
 ```moose
 [Mesh]
-    parallel_type = replicated
+  parallel_type = replicated
 []
 ```
 
@@ -101,7 +101,7 @@ mesh owned by a processor is stored on that processor.
 
 ```moose
 [Mesh]
-    parallel_type = distributed
+  parallel_type = distributed
 []
 ```
 

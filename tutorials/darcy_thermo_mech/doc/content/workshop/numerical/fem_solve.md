@@ -124,7 +124,7 @@ J_{ij}(\vec{u}_n) = \frac{\partial \vec{R}_i(\vec{u}_n)}{\partial u_j}
 
 The solve type is specified in the `[Executioner]` block within the input file:
 
-```
+```moose
 [Executioner]
   solve_type = PJFNK
 ```
@@ -197,7 +197,7 @@ during linear iterations.
 
 Select a preconditioner using PETSC options, either in the executioner or in the `[Preconditioning]` block:
 
-```language=cpp
+```language=moose
 [Executioner]
   type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type'
