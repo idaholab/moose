@@ -75,7 +75,7 @@ Given that we wish to utilise `MFEM` as the backend, the mesh we import into the
 []
 ```
 
-Then, we must set up the finite element spaces our problem will make use of. They can be of [`MFEMScalarFESpace`](/framework/doc/content/source/mfem/fespaces/MFEMScalarFESpace) type, which allows for continuous `H1` or discontinuous `L2` elements, or [`MFEMVectorFESpace`](/framework/doc/content/source/mfem/fespaces/MFEMVectorFESpace) type, thereby allowing tangentially-continuous `ND` or normally-continuous `RT` elements.
+Then, we must set up the finite element spaces our problem will make use of. They can be of [`MFEMScalarFESpace`](/framework/doc/content/source/mfem/fespaces/MFEMScalarFESpace.md) type, which allows for continuous `H1` or discontinuous `L2` elements, or [`MFEMVectorFESpace`](/framework/doc/content/source/mfem/fespaces/MFEMVectorFESpace.md) type, thereby allowing tangentially-continuous `ND` or normally-continuous `RT` elements.
 ```yaml
 [FESpaces]
   [H1FESpace]
@@ -88,7 +88,7 @@ Then, we must set up the finite element spaces our problem will make use of. The
 
 ### Equation System - Variables, Kernels, and Boundary Conditions
 
-VARIABLES
+Having the necessary finite element spaces, we may now set up the variables to be solved for which we will need for the problem. They should be of type [`MFEMVariable`](/framework/doc/content/source/mfem/variables/MFEMVariable.md). Each variable should also be associated with a relevant finite element space.
 ```yaml
 [Variables]
   [concentration]
@@ -98,7 +98,8 @@ VARIABLES
 []
 ```
 
-KERNELS
+To set up the kernels corresponding to the differential equations we wish to solve, first we specify all materials we'll need within the `FunctorMaterials` block. In this case, we specify a `Substance` of type [`MFEMGenericConstantFunctorMaterial`](/framework/doc/content/source/mfem/functormaterials/MFEMGenericConstantFunctorMaterial.md). However, it is also possible to specify more general functors which may be piecewise, non-constant, and vectorial.
+
 ```yaml
 [FunctorMaterials]
   [Substance]
@@ -107,7 +108,20 @@ KERNELS
     prop_values = 1.0
   []
 []
+```
 
+Then, within the `Kernels` block, we specify the weak forms to be added to our equation system. Typically, one would pick the `MFEM` integrators they wish to implement by checking the [linear form integrators page](https://mfem.org/lininteg/) and the [bilinear form integrators page](https://mfem.org/bilininteg/). Note that not all linear and bilinear forms that are available in `MFEM` have been implemented on `MOOSE-MFEM`, only the most common ones. Should you wish to implement an integrator that is not yet available, please raise an issue in the `MOOSE` repository.
+
+If the integrator you wish to implement is available, you can specify it in the `type` parameter simply by taking its `MFEM` integrator name, swapping the word `Integrator` for `Kernel`, and appending `MFEM` to the beginning of the name. The table below shows a few examples of this naming convention:
+
+| MFEM name      | MFEM-MOOSE name      |
+| ------------- | ------------- |
+| `DiffusionIntegrator` | `MFEMDiffusionKernel` |
+| `CurlCurlIntegrator` | `MFEMCurlCurlKernel` |
+| `VectorDomainLFIntegrator` | `MFEMVectorDomainLFKernel` |
+
+Putting this together, our `Kernels` block might look as follows:
+```yaml
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
@@ -117,7 +131,7 @@ KERNELS
 []
 ```
 
-BCs
+Now we set up boundary conditions. The full list of boundary conditions available may be found in the [BCs directory](/framework/doc/content/source/mfem/bcs). Here, we choose scalar Dirichlet boundary conditions, which corresponds to the [`MFEMScalarDirichletBC`](/framework/doc/content/source/mfem/bcs/MFEMScalarDirichletBC.md) type.
 ```yaml
 [BCs]
   [bottom]
