@@ -110,8 +110,8 @@ class LocalListingCommand(command.CommandComponent):
         if 'inline' not in info and settings['language'] == 'moose':
             content = self.appendMooseSyntax(content, page)
 
-        code = core.Code(flt, style="max-height:{};".format(settings['max-height']),
-                         language=settings['language'], content=content)
+        code = core.Code(flt, language=settings['language'], content=content,
+                         max_height=settings['max-height'])
 
         if flt is parent:
             code.attributes.update(**self.attributes(settings))
@@ -317,8 +317,8 @@ class FileListingCommand(LocalListingCommand):
         flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   token_type=Listing)
 
-        code = core.Code(flt, style="max-height:{};".format(settings['max-height']),
-                         content=content, language=lang)
+        code = core.Code(flt, content=content, language=lang,
+                         max_height=settings['max-height'])
 
         if flt is parent:
             code.attributes.update(**self.attributes(settings))
