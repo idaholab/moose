@@ -19,10 +19,10 @@ CSGRegion::CSGRegion()
 };
 
 // halfspace constructor
-CSGRegion::CSGRegion(std::shared_ptr<CSGSurface> surf, const CSGSurface::Direction direction)
+CSGRegion::CSGRegion(std::shared_ptr<CSGSurface> & surf, const CSGSurface::Direction direction)
   : _region_type(CSGRegion::RegionType::HALFSPACE)
 {
-  _region_str = ((direction == CSGSurface::Direction::positive) ? "+" : "-") + surf->getName();
+  _region_str = ((direction == CSGSurface::Direction::POSITIVE) ? "+" : "-") + surf->getName();
   _surfaces.push_back(surf);
 }
 
@@ -76,7 +76,7 @@ CSGRegion::CSGRegion(const CSGRegion & region, const CSGRegion::RegionType regio
 }
 
 const std::string
-CSGRegion::getRegionTypeString()
+CSGRegion::getRegionTypeString() const
 {
   switch (_region_type)
   {
@@ -91,7 +91,7 @@ CSGRegion::getRegionTypeString()
     case RegionType::UNION:
       return "UNION";
     default:
-      return "INVALID";
+      mooseError("Detected invalid region type");
   }
 }
 
@@ -147,14 +147,14 @@ stripRegionString(std::string region_str, std::string op)
 const CSGRegion
 operator+(std::shared_ptr<CSGSurface> surf)
 {
-  return CSGRegion(surf, CSGSurface::Direction::positive);
+  return CSGRegion(surf, CSGSurface::Direction::POSITIVE);
 }
 
 // negative halfspace
 const CSGRegion
 operator-(std::shared_ptr<CSGSurface> surf)
 {
-  return CSGRegion(surf, CSGSurface::Direction::negative);
+  return CSGRegion(surf, CSGSurface::Direction::NEGATIVE);
 }
 
 // intersection

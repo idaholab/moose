@@ -15,7 +15,7 @@ namespace CSG
 CSGUniverse::CSGUniverse(const std::string name, bool is_root) : _name(name), _is_root(is_root) {}
 
 CSGUniverse::CSGUniverse(const std::string name,
-                         std::vector<std::shared_ptr<CSGCell>> cells,
+                         std::vector<std::shared_ptr<CSGCell>> & cells,
                          bool is_root)
   : _name(name), _is_root(is_root)
 {
@@ -24,7 +24,7 @@ CSGUniverse::CSGUniverse(const std::string name,
 }
 
 void
-CSGUniverse::addCell(const std::shared_ptr<CSGCell> cell)
+CSGUniverse::addCell(const std::shared_ptr<CSGCell> & cell)
 {
   auto cell_name = cell->getName();
   if (!hasCell(cell_name))
@@ -34,12 +34,12 @@ CSGUniverse::addCell(const std::shared_ptr<CSGCell> cell)
                  "Skipping cell insertion for cell with duplicate name.");
 }
 
-std::shared_ptr<CSGCell>
+const std::shared_ptr<CSGCell> &
 CSGUniverse::getCell(const std::string name)
 {
   if (!hasCell(name))
     mooseError("Cell with name " + name + " does not exist in universe " + _name + ".");
-  for (auto cell : _cells)
+  for (const auto & cell : _cells)
   {
     if (cell->getName() == name)
       return cell;

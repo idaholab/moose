@@ -68,7 +68,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
         surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
     const auto region_direction = plane_ptr->directionFromPoint(centroid);
     auto halfspace =
-        ((region_direction == CSG::CSGSurface::Direction::positive) ? +plane_ptr : -plane_ptr);
+        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +plane_ptr : -plane_ptr);
     // check if first halfspace to be added to the region
     if (region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
       region = halfspace;

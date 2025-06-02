@@ -44,7 +44,7 @@ public:
    *
    * @return std::map<std::string, Real> map of coefficients to their value
    */
-  virtual std::map<std::string, Real> getCoeffs() override;
+  virtual std::map<std::string, Real> getCoeffs() const override;
 
   /**
    * @brief get direction from point to surface
@@ -52,7 +52,7 @@ public:
    * @param p point
    * @return CSGSurface::Direction
    */
-  virtual CSGSurface::Direction directionFromPoint(const Point p) override;
+  virtual CSGSurface::Direction directionFromPoint(const Point p) const override;
 
 protected:
   /// Value of x0 in equation of an z-axis aligned cylinder

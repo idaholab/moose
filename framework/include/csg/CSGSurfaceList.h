@@ -19,7 +19,7 @@ namespace CSG
  */
 class CSGSurfaceList
 {
-public:
+protected:
   /**
    * Default constructor
    */
@@ -98,7 +98,7 @@ public:
    * @param name name of surface
    * @return const std::shared_ptr<CSGSurface>& pointer to CSGSurface of the specified name
    */
-  const std::shared_ptr<CSGSurface> & getSurface(const std::string name);
+  const std::shared_ptr<CSGSurface> & getSurface(const std::string name) const;
 
   /**
    * @brief add a surface object to existing SurfaceList
@@ -114,11 +114,13 @@ public:
    */
   void renameSurface(const std::shared_ptr<CSGSurface> surface, const std::string name);
 
-protected:
+  /// Checks whether surface name already exists within CSGSurfaceList object
+  void checkSurfaceName(const std::string name) const;
+
   /// Mapping of surface names to pointers of stored surface objects
   std::map<std::string, std::shared_ptr<CSGSurface>> _surfaces;
 
-  /// Checks whether surface name already exists within CSGSurfaceList object
-  void checkSurfaceName(const std::string name);
+  // Only CSGBase should be calling the methods in CSGSurfaceList
+  friend class CSGBase;
 };
 } // namespace CSG

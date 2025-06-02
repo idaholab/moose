@@ -43,7 +43,7 @@ public:
    *
    * @return std::map<std::string, Real> map of coefficients (x0, y0, z0, and r) and their values
    */
-  virtual std::map<std::string, Real> getCoeffs() override;
+  virtual std::map<std::string, Real> getCoeffs() const override;
 
   /**
    * @brief get direction from point to sphere surface
@@ -51,7 +51,7 @@ public:
    * @param p point
    * @return CSGSurface::Direction direction from point
    */
-  virtual CSGSurface::Direction directionFromPoint(const Point p) override;
+  virtual CSGSurface::Direction directionFromPoint(const Point p) const override;
 
 protected:
   /// Value of x0 in equation of sphere

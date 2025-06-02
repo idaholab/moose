@@ -40,7 +40,7 @@ public:
   /**
    * Constructor for halfspace
    */
-  CSGRegion(std::shared_ptr<CSGSurface> surf, const CSGSurface::Direction direction);
+  CSGRegion(std::shared_ptr<CSGSurface> & surf, const CSGSurface::Direction direction);
 
   /**
    * Constructor for union and intersection
@@ -71,7 +71,7 @@ public:
    *
    * @return const std::string string representation of the region type
    */
-  const std::string getRegionTypeString();
+  const std::string getRegionTypeString() const;
 
   /**
    * @brief Get the RegionType
