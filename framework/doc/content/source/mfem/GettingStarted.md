@@ -18,6 +18,7 @@ To enable `MFEM-MOOSE` capabilities, it is necessary to install all of its depen
 
 ```bash
 export METHOD=opt
+export MOOSE_JOBS=10
 
 ./scripts/update_and_rebuild_petsc.sh
 ./scripts/update_and_rebuild_libmesh.sh
@@ -26,7 +27,7 @@ export METHOD=opt
 ./scripts/update_and_rebuild_wasp.sh
 ```
 
-It may be necessary to include your desired configuration flags (for instance `--with-mpi`) to each script invocation. Alternatively, if you already have working `MFEM` or `Conduit` builds in a separate directory, you may set the variables `MFEM_DIR` and `CONDUIT_DIR` to their respective paths.
+It may be necessary to include your desired configuration flags (for instance `--with-mpi`) to each script invocation. Alternatively, if you already have working `MFEM` or `Conduit` builds in a separate directory, you may set the variables `MFEM_DIR` and `CONDUIT_DIR` to their respective install paths.
 
 2. Configure the `MOOSE` build by running
 
@@ -51,7 +52,130 @@ make -j $NUM_THREADS
 
 ## Solving a problem with `MFEM-MOOSE`
 
+Much of the syntax of the usual `MOOSE` scripts is preserved when creating scripts for `MFEM-MOOSE`. Example scripts may be found in the [kernel tests directory](/test/tests/mfem/kernels/). Here, we lay out the step-by-step process of writing a `MOOSE-MFEM` script to solve a simple diffusion problem. The full script may be found [here](/test/tests/mfem/kernels/diffusion.i). We roughly split the script into five parts: Problem, Geometry, Equation System, Integration, and Output.
 
+### Problem
+
+First of all, we must specify that the type of problem we wish to solve is an [`MFEMProblem`](/framework/doc/content/source/mfem/problem/MFEMProblem.md), so that we may take advantage of `MFEM` capabilities. 
+
+```yaml
+[Problem]
+  type = MFEMProblem
+[]
+```
+
+### Geometry - Mesh and Finite Element Spaces
+
+Given that we wish to utilise `MFEM` as the backend, the mesh we import into the problem must be of [`MFEMMesh`](/framework/doc/content/source/mfem/mesh/MFEMMesh.md) type. Therefore, this must be specified in the parameter [!param](/Mesh/type) within the `Mesh` block.
+```yaml
+[Mesh]
+  type = MFEMMesh
+  file = ../mesh/mug.e
+  dim = 3
+[]
+```
+
+Then, we must set up the finite element spaces our problem will make use of. They can be of [`MFEMScalarFESpace`](/framework/doc/content/source/mfem/fespaces/MFEMScalarFESpace) type, which allows for continuous `H1` or discontinuous `L2` elements, or [`MFEMVectorFESpace`](/framework/doc/content/source/mfem/fespaces/MFEMVectorFESpace) type, thereby allowing tangentially-continuous `ND` or normally-continuous `RT` elements.
+```yaml
+[FESpaces]
+  [H1FESpace]
+    type = MFEMScalarFESpace
+    fec_type = H1
+    fec_order = FIRST
+  []
+[]
+```
+
+### Equation System - Variables, Kernels, and Boundary Conditions
+
+VARIABLES
+```yaml
+[Variables]
+  [concentration]
+    type = MFEMVariable
+    fespace = H1FESpace
+  []
+[]
+```
+
+KERNELS
+```yaml
+[FunctorMaterials]
+  [Substance]
+    type = MFEMGenericConstantFunctorMaterial
+    prop_names = diffusivity
+    prop_values = 1.0
+  []
+[]
+
+[Kernels]
+  [diff]
+    type = MFEMDiffusionKernel
+    variable = concentration
+    coefficient = diffusivity
+  []
+[]
+```
+
+BCs
+```yaml
+[BCs]
+  [bottom]
+    type = MFEMScalarDirichletBC
+    variable = concentration
+    boundary = '1'
+    value = 1.0
+  []
+  [low_terminal]
+    type = MFEMScalarDirichletBC
+    variable = concentration
+    boundary = '2'
+    value = 0.0
+  []
+[]
+```
+
+### Integration - Solver and Executioner
+
+SOLVER
+```yaml
+[Preconditioner]
+  [boomeramg]
+    type = MFEMHypreBoomerAMG
+    low_order_refined = false
+  []
+[]
+
+[Solver]
+  type = MFEMHypreGMRES
+  preconditioner = boomeramg
+  l_tol = 1e-16
+  l_max_its = 1000
+  print_level = 1
+[]
+```
+
+EXECUTIONER
+```yaml
+[Executioner]
+  type = MFEMSteady
+  device = cpu
+  assembly_level = legacy
+[]
+```
+
+### Output
+
+```yaml
+[Outputs]
+  active = ParaViewDataCollection
+  [ParaViewDataCollection]
+    type = MFEMParaViewDataCollection
+    file_base = OutputData/Diffusion
+    vtk_format = ASCII
+  []
+[]
+```
 
 
 !if-end!
