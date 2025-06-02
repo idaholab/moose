@@ -10,22 +10,18 @@
 #pragma once
 
 #include "ElementPostprocessor.h"
-#include "GuaranteeConsumer.h"
-#include "ComputeStressBase.h"
+
 
 /**
- * Compute the critical time step for an explicit integration scheme by inferring an
- * effective_stiffness from element classes and density from the user.
+ * Compute the critical time step for an explicit integration scheme for heat
+ * conduction problems.
  */
-
-// Forward Declarations
-
-class CriticalTimeStep_HeatConduction : public ElementPostprocessor, public GuaranteeConsumer
+class CriticalTimeStepHeatConduction : public ElementPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  CriticalTimeStep_HeatConduction(const InputParameters & parameters);
+  CriticalTimeStepHeatConduction(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -48,10 +44,10 @@ protected:
   /// Specific heat capacity of the material
   const MaterialProperty<Real> & _specific_heat;
 
-  /// User defined factor in the denominator based on the spatial dimensionality. 
+  /// User defined factor in the denominator based on the spatial dimensionality.
   /// 1D->2 ; 2D->4 ; 3D->6
   const Real & _dimension_factor;
-  
+
   /// User defined factor to be multiplied to the critical time step
   const Real & _factor;
 

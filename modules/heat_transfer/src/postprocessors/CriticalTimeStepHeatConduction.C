@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CriticalTimeStep_HeatConduction.h"
+#include "CriticalTimeStepHeatConduction.h"
 #include "MooseTypes.h"
 
-registerMooseObject("SolidMechanicsApp", CriticalTimeStep_HeatConduction);
+registerMooseObject("HeatTransferApp", CriticalTimeStepHeatConduction);
 
 InputParameters
-CriticalTimeStep_HeatConduction::validParams()
+CriticalTimeStepHeatConduction::validParams()
 {
   InputParameters params = ElementPostprocessor::validParams();
   params.addClassDescription("Computes and reports the critical time step for the explicit solver "
@@ -39,9 +39,8 @@ CriticalTimeStep_HeatConduction::validParams()
   return params;
 }
 
-CriticalTimeStep_HeatConduction::CriticalTimeStep_HeatConduction(const InputParameters & parameters)
+CriticalTimeStepHeatConduction::CriticalTimeStepHeatConduction(const InputParameters & parameters)
   : ElementPostprocessor(parameters),
-    GuaranteeConsumer(this),
     _material_density(getMaterialPropertyByName<Real>(getParam<MaterialPropertyName>("density"))),
     _density_scaling(parameters.isParamSetByUser("density_scaling")
                          ? &getMaterialPropertyByName<Real>("density_scaling")
@@ -57,18 +56,18 @@ CriticalTimeStep_HeatConduction::CriticalTimeStep_HeatConduction(const InputPara
 }
 
 void
-CriticalTimeStep_HeatConduction::initialSetup()
+CriticalTimeStepHeatConduction::initialSetup()
 {
 }
 
 void
-CriticalTimeStep_HeatConduction::initialize()
+CriticalTimeStepHeatConduction::initialize()
 {
   _critical_time = std::numeric_limits<Real>::max();
 }
 
 void
-CriticalTimeStep_HeatConduction::execute()
+CriticalTimeStepHeatConduction::execute()
 {
   const Real dens = _material_density[0];
 
@@ -78,15 +77,15 @@ CriticalTimeStep_HeatConduction::execute()
   // Thermal diffusivity
   if (dens <= 0)
     mooseError(
-        "Non-positive effective density found in CriticalTimeStep_HeatConduction postprocessor.");
+        "Non-positive effective density found in CriticalTimeStepHeatConduction postprocessor.");
   if (c_p <= 0)
-    mooseError("Non-positive specific heat capacity found in CriticalTimeStep_HeatConduction "
+    mooseError("Non-positive specific heat capacity found in CriticalTimeStepHeatConduction "
                "postprocessor.");
 
   Real thm_diff = k / dens / c_p;
   if (thm_diff <= 0)
     mooseError(
-        "Non-positive thermal diffusivity found in CriticalTimeStep_HeatConduction postprocessor.");
+        "Non-positive thermal diffusivity found in CriticalTimeStepHeatConduction postprocessor.");
 
   // Critical Time Step
   _critical_time = std::min(_factor * _current_elem->hmin() * _current_elem->hmin() /
@@ -95,20 +94,20 @@ CriticalTimeStep_HeatConduction::execute()
 }
 
 void
-CriticalTimeStep_HeatConduction::finalize()
+CriticalTimeStepHeatConduction::finalize()
 {
   gatherMin(_critical_time);
 }
 
 Real
-CriticalTimeStep_HeatConduction::getValue() const
+CriticalTimeStepHeatConduction::getValue() const
 {
   return _critical_time;
 }
 
 void
-CriticalTimeStep_HeatConduction::threadJoin(const UserObject & y)
+CriticalTimeStepHeatConduction::threadJoin(const UserObject & y)
 {
-  const auto & pps = static_cast<const CriticalTimeStep_HeatConduction &>(y);
+  const auto & pps = static_cast<const CriticalTimeStepHeatConduction &>(y);
   _critical_time = std::min(pps._critical_time, _critical_time);
 }

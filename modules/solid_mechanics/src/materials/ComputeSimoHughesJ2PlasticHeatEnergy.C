@@ -7,10 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-//* Won't converge. Going to try explicit
-
 #include "ComputeSimoHughesJ2PlasticHeatEnergy.h"
-#include <cmath>
 
 registerMooseObject("SolidMechanicsApp", ComputeSimoHughesJ2PlasticHeatEnergy);
 
