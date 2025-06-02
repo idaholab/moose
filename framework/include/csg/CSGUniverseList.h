@@ -19,7 +19,7 @@ namespace CSG
  */
 class CSGUniverseList
 {
-public:
+protected:
   /**
    * Default constructor
    */
@@ -36,7 +36,7 @@ public:
    * @param name unique name of universe
    * @return std::shared_ptr<CSGUniverse> pointer to empty universe that is created
    */
-  std::shared_ptr<CSGUniverse> addUniverse(const std::string name);
+  const std::shared_ptr<CSGUniverse> & addUniverse(const std::string name);
 
   /**
    * @brief create a universe from list of cells
@@ -45,8 +45,8 @@ public:
    * @param cells list of cell pointers to add to the universe upon creation
    * @return std::shared_ptr<CSGUniverse> pointer to universe that is created
    */
-  std::shared_ptr<CSGUniverse> addUniverse(const std::string name,
-                                           std::vector<std::shared_ptr<CSGCell>> cells);
+  const std::shared_ptr<CSGUniverse> & addUniverse(const std::string name,
+                                                   std::vector<std::shared_ptr<CSGCell>> & cells);
 
   /**
    * @brief Get the all universes
@@ -65,7 +65,7 @@ public:
    * @param name name of universe
    * @return const std::shared_ptr<CSGUniverse>& pointer to CSGUniverse of the specified name
    */
-  const std::shared_ptr<CSGUniverse> & getUniverse(const std::string name);
+  const std::shared_ptr<CSGUniverse> & getUniverse(const std::string name) const;
 
   /**
    * @brief Get the root universe
@@ -79,23 +79,25 @@ public:
    *
    * @param universe
    */
-  void addUniverse(const std::shared_ptr<CSGUniverse> universe);
+  void addUniverse(const std::shared_ptr<CSGUniverse> & universe);
 
   /**
    * @brief rename the specified universe
    *
    * @param name new name
    */
-  void renameUniverse(const std::shared_ptr<CSGUniverse> universe, const std::string name);
+  void renameUniverse(const std::shared_ptr<CSGUniverse> & universe, const std::string name);
 
-protected:
+  /// Checks whether universe name already exists within CSGUniverseList object
+  void checkUniverseName(const std::string name) const;
+
   /// Mapping of universe names to pointers of stored universe objects
   std::map<std::string, std::shared_ptr<CSGUniverse>> _universes;
 
   /// root universe for the CSGBase instance
   std::shared_ptr<CSGUniverse> _root_universe;
 
-  /// Checks whether universe name already exists within CSGUniverseList object
-  void checkUniverseName(const std::string name);
+  // Only CSGBase should be calling the methods in CSGUniverseList
+  friend class CSGBase;
 };
 } // namespace CSG

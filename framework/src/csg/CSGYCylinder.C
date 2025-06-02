@@ -18,19 +18,19 @@ CSGYCylinder::CSGYCylinder(const std::string name, const Real x0, const Real z0,
 }
 
 std::map<std::string, Real>
-CSGYCylinder::getCoeffs()
+CSGYCylinder::getCoeffs() const
 {
   std::map<std::string, Real> coeffs = {{"x0", _x0}, {"z0", _z0}, {"r", _r}};
   return coeffs;
 }
 
 CSGSurface::Direction
-CSGYCylinder::directionFromPoint(const Point p)
+CSGYCylinder::directionFromPoint(const Point p) const
 {
   // Compute distance from the cylinder center to determine if inside (< r^2)
   // or outside (> r^2) the cylinder
   const Real dist_sq = pow((p(0) - _x0), 2) + pow((p(2) - _z0), 2);
 
-  return (dist_sq > pow(_r, 2)) ? CSGSurface::Direction::positive : CSGSurface::Direction::negative;
+  return (dist_sq > pow(_r, 2)) ? CSGSurface::Direction::POSITIVE : CSGSurface::Direction::NEGATIVE;
 }
 } // namespace CSG

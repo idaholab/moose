@@ -21,14 +21,14 @@ CSGUniverseList::CSGUniverseList()
 }
 
 void
-CSGUniverseList::checkUniverseName(const std::string name)
+CSGUniverseList::checkUniverseName(const std::string name) const
 {
   if (_universes.find(name) != _universes.end())
     mooseError("Universe with name " + name + " already exists in geoemetry.");
 }
 
 const std::shared_ptr<CSGUniverse> &
-CSGUniverseList::getUniverse(const std::string name)
+CSGUniverseList::getUniverse(const std::string name) const
 {
   auto univ = _universes.find(name);
   if (univ == _universes.end())
@@ -37,7 +37,7 @@ CSGUniverseList::getUniverse(const std::string name)
     return univ->second;
 }
 
-std::shared_ptr<CSGUniverse>
+const std::shared_ptr<CSGUniverse> &
 CSGUniverseList::addUniverse(const std::string name)
 {
   checkUniverseName(name);
@@ -45,8 +45,8 @@ CSGUniverseList::addUniverse(const std::string name)
   return _universes[name];
 }
 
-std::shared_ptr<CSGUniverse>
-CSGUniverseList::addUniverse(const std::string name, std::vector<std::shared_ptr<CSGCell>> cells)
+const std::shared_ptr<CSGUniverse> &
+CSGUniverseList::addUniverse(const std::string name, std::vector<std::shared_ptr<CSGCell>> & cells)
 {
   checkUniverseName(name);
   _universes.insert(std::make_pair(name, std::make_shared<CSGUniverse>(name, cells)));
@@ -54,7 +54,7 @@ CSGUniverseList::addUniverse(const std::string name, std::vector<std::shared_ptr
 }
 
 void
-CSGUniverseList::addUniverse(const std::shared_ptr<CSGUniverse> universe)
+CSGUniverseList::addUniverse(const std::shared_ptr<CSGUniverse> & universe)
 {
   auto name = universe->getName();
   checkUniverseName(name);
@@ -62,7 +62,8 @@ CSGUniverseList::addUniverse(const std::shared_ptr<CSGUniverse> universe)
 }
 
 void
-CSGUniverseList::renameUniverse(const std::shared_ptr<CSGUniverse> universe, const std::string name)
+CSGUniverseList::renameUniverse(const std::shared_ptr<CSGUniverse> & universe,
+                                const std::string name)
 {
   // check that this universe passed in is actually in the same universe that is in the universe
   // list

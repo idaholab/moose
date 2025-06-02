@@ -61,7 +61,7 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
     auto plane_ptr = input_mesh->createPlaneFromCoefficients(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
     const auto region_direction = plane_ptr->directionFromPoint(centroid);
     auto halfspace =
-        ((region_direction == CSG::CSGSurface::Direction::positive) ? +plane_ptr : -plane_ptr);
+        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +plane_ptr : -plane_ptr);
     cell_region &= halfspace;
   }
 

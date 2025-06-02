@@ -33,15 +33,6 @@ public:
   };
 
   /**
-   * Default constructor
-   *
-   * @param name name of cell
-   * @param fill_type fill type of the cell
-   * @param region cell region
-   */
-  CSGCell(const std::string name, const FillType fill_type, const CSGRegion & region);
-
-  /**
    * Constructor for void cell
    *
    * @param name name of cell
@@ -87,14 +78,14 @@ public:
    *
    * @return const std::string fill type
    */
-  const std::string getFillTypeString();
+  const std::string getFillTypeString() const;
 
   /**
    * @brief Get the cell fill if FillType is UNIVERSE
    *
    * @return CSGUniverse pointer
    */
-  const std::shared_ptr<CSGUniverse> getFillUniverse();
+  const std::shared_ptr<CSGUniverse> & getFillUniverse() const;
 
   /**
    * @brief Get the cell fill material name if FillType is MATERIAL
@@ -102,7 +93,7 @@ public:
    *
    * @return const std::string
    */
-  const std::string getFillMaterial();
+  const std::string getFillMaterial() const;
 
   /**
    * @brief Get the name of the fill
@@ -133,6 +124,14 @@ public:
   std::string getRegionAsString() const { return _region.toString(); }
 
 protected:
+  // set the name of the cell - intentionally not public because
+  // name needs to be managed at the CSGCellList level
+  void setName(const std::string name) { _name = name; }
+
+  // update the region of the cell to a new region - not public because
+  // it needs to be called from CSGBase so that the surfaces can be checked first.
+  void updateRegion(const CSGRegion & region) { _region = region; }
+
   /// Name of surface
   std::string _name;
 
@@ -147,14 +146,6 @@ protected:
 
   /// Fill object if fill is CSGUniverse
   const std::shared_ptr<CSGUniverse> _fill_universe;
-
-  // set the name of the cell - intentionally not public because
-  // name needs to be managed at the CSGCellList level
-  void setName(const std::string name) { _name = name; }
-
-  // update the region of the cell to a new region - not public because
-  // it needs to be called from CSGBase so that the surfaces can be checked first.
-  void updateRegion(const CSGRegion & region) { _region = region; }
 
   friend class CSGCellList; // needed for setName() access
   friend class CSGBase;     // needed for updateRegion() access

@@ -12,20 +12,13 @@
 namespace CSG
 {
 
-CSGSurface::CSGSurface(const std::string name)
-  : _name(name), _surface_type(SurfaceType::INVALID), _boundary_type(BoundaryType::transmission)
-{
-}
-
 CSGSurface::CSGSurface(const std::string name, SurfaceType surf_type)
-  : _name(name), _surface_type(surf_type), _boundary_type(BoundaryType::transmission)
+  : _name(name), _surface_type(surf_type), _boundary_type(BoundaryType::TRANSMISSION)
 {
-  if (_surface_type == SurfaceType::INVALID)
-    mooseError("Surface type of surface " + _name + " is being set to invalid");
 }
 
 const std::string
-CSGSurface::getSurfaceTypeString()
+CSGSurface::getSurfaceTypeString() const
 {
   switch (_surface_type)
   {
@@ -40,21 +33,21 @@ CSGSurface::getSurfaceTypeString()
     case SurfaceType::ZCYLINDER:
       return "zcylinder";
     default:
-      return "invalid";
+      mooseError("Detected invalid surface type");
   }
 }
 
 const std::string
-CSGSurface::getBoundaryTypeString()
+CSGSurface::getBoundaryTypeString() const
 {
   switch (_boundary_type)
   {
-    case BoundaryType::transmission:
+    case BoundaryType::TRANSMISSION:
       return "transmission";
-    case BoundaryType::vacuum:
+    case BoundaryType::VACUUM:
       return "vacuum";
     default:
-      return "invalid";
+      mooseError("Detected invalid surface boundary type");
   }
 }
 
