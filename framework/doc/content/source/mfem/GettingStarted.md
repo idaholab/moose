@@ -151,7 +151,9 @@ Now we set up boundary conditions. The full list of boundary conditions availabl
 
 ### Integration - Solver and Executioner
 
-SOLVER
+With the equation system set up, we specify how it is to be integrated. Firstly, we choose a preconditioner and solver. The list of available types may be found in the [solvers directory](/framework/doc/content/source/mfem/solvers). For problems with high polynomial order, setting [!param](/Solver/low_order_refined) to `true` may greatly increase performance, as explained [here](/framework/doc/content/source/mfem/solvers/MFEMSolverBase.md). 
+
+While in principle any solver may be used as main solver or preconditioner, the main limitation to keep in mind is that `Hypre` solvers may only be preconditioned by other `Hypre` solvers. Furthermore, when a `Hypre` solver has its `low_order_refined` parameter set to `true`, it ceases to be considered a `Hypre` solver for preconditioning purposes. 
 ```yaml
 [Preconditioner]
   [boomeramg]
@@ -169,7 +171,7 @@ SOLVER
 []
 ```
 
-EXECUTIONER
+Static and time-dependent executioners may be implemented respectively with the [`MFEMSteady`](/framework/doc/content/source/mfem/executioners/MFEMSteady.md) and [`MFEMTransient`](/framework/doc/content/source/mfem/executioners/MFEMSteady.md) types. If `MFEM-MOOSE` has been built with GPU offloading capabilities, here it is possible to set [!param](/Executioner/device) to `cuda` or `hip` to make use of GPU acceleration. For GPU runs, it is advisable to choose [!param](/Executioner/assembly_level) other than `legacy`, otherwise the matrix assembly step will not be offloaded. The options for [!param](/Executioner/assembly_level) are `legacy`, `full`, `element`, `partial`, and `none` (the latter is only available if `MOOSE-MFEM` has been built with `libCEED` support).
 ```yaml
 [Executioner]
   type = MFEMSteady
@@ -180,9 +182,9 @@ EXECUTIONER
 
 ### Output
 
+Finally, we can choose a data collection type for our result outputs. The types available may be found in the [outputs directory](/framework/doc/content/source/mfem/outputs/).
 ```yaml
 [Outputs]
-  active = ParaViewDataCollection
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/Diffusion
@@ -190,7 +192,6 @@ EXECUTIONER
   []
 []
 ```
-
 
 !if-end!
 
