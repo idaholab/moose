@@ -90,3 +90,5 @@ Extensions:
         background_position: bottom 30px center
         background_size: auto 4%
     MooseDocs.extensions.datetime: default
+    MooseDocs.extensions.appsyntax:
+        executable: ${MOOSE_DIR}/modules/combined
