@@ -67,16 +67,10 @@ FunctorExtremaPositions::FunctorExtremaPositions(const InputParameters & paramet
         "functor",
         "Postprocessors and constants do not have extrema, they are constant over the domain.");
 
-  if (!_fe_problem.hasFunction(functor_name))
-  {
-    // Obtain the positions by evaluating the functors
-    initialize();
-    // Sort if needed (user-specified)
-    finalize();
-  }
-  // Parsed functions are not initialized at construction
-  else if (getParam<ExecFlagEnum>("execute_on").contains(EXEC_NONE))
-    paramError("functor", "NONE execution flag not supported for a function.");
+  if (getParam<ExecFlagEnum>("execute_on").contains(EXEC_NONE))
+    paramError("execute_on",
+               "NONE execution flag not supported. Most functors (functions, variables, spatial "
+               "user objects for example) are not initialized at construction.");
 }
 
 void
