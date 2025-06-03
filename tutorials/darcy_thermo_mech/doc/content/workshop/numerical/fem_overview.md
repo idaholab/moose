@@ -231,7 +231,7 @@ The function $f(x)$ *is defined everywhere in the domain*.
 $f(x)$ can be evaluated at the point $x=0.8$, for example, by computing:
 
 !equation
-f(2) = \sum_{i=0}^2 c_i 0.8^i = \sum_{i=0}^2 c_i g_i(0.8),
+f(0.8) = \sum_{i=0}^2 c_i 0.8^i = \sum_{i=0}^2 c_i g_i(0.8),
 
 where the $c_i$ correspond to the coefficients in the solution vector, and the $g_i$ are the
 respective functions.
