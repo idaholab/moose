@@ -339,7 +339,7 @@ NavierStokesLHDGKernel::computeOffDiagJacobian(const unsigned int)
 }
 
 std::set<std::string>
-NavierStokesLHDGKernel::additionalVariablesCovered()
+NavierStokesLHDGKernel::additionalROVariables()
 {
   std::set<std::string> covered_vars = {_grad_u_var.name(),
                                         _u_face_var.name(),

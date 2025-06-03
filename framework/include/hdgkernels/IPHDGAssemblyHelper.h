@@ -77,7 +77,7 @@ public:
   /**
    * @returns The LM facet variable as a set
    */
-  std::set<std::string> additionalVariablesCovered();
+  std::set<std::string> additionalROVariables();
 
   virtual ~IPHDGAssemblyHelper() = default;
 

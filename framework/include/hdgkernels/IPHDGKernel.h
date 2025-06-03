@@ -37,7 +37,7 @@ public:
   virtual void computeJacobianOnSide() override;
   virtual void computeResidualAndJacobianOnSide() override;
 
-  virtual std::set<std::string> additionalVariablesCovered() override;
+  virtual std::set<std::string> additionalROVariables() override;
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override;
 
 protected:

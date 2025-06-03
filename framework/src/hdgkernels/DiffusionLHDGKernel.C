@@ -150,7 +150,7 @@ DiffusionLHDGKernel::computeOffDiagJacobian(const unsigned int)
 }
 
 std::set<std::string>
-DiffusionLHDGKernel::additionalVariablesCovered()
+DiffusionLHDGKernel::additionalROVariables()
 {
   return {_grad_u_var.name(), _u_face_var.name()};
 }

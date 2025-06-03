@@ -35,7 +35,7 @@ public:
   virtual void initialSetup() override;
   virtual void jacobianSetup() override;
 
-  virtual std::set<std::string> additionalVariablesCovered() override;
+  virtual std::set<std::string> additionalROVariables() override;
 
 protected:
   /// optional source
