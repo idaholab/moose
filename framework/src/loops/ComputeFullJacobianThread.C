@@ -318,6 +318,14 @@ ComputeFullJacobianThread::computeOnInternalFace()
   mooseAssert(_hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid),
               "We should not be called if we have no active HDG kernels");
   for (const auto & hdg_kernel : _hdg_warehouse->getActiveBlockObjects(_subdomain, _tid))
-    if (hdg_kernel->hasBlocks(_subdomain))
+  {
+    mooseAssert(
+        hdg_kernel->hasBlocks(_subdomain),
+        "We queried the warehouse for active blocks on this subdomain, so this better be active");
+    mooseAssert(
+        _neighbor_subdomain != Moose::INVALID_BLOCK_ID,
+        "We should have set a valid neighbor subdomain ID if we made it in side this method");
+    if (hdg_kernel->hasBlocks(_neighbor_subdomain))
       hdg_kernel->computeJacobianOnSide();
+  }
 }
