@@ -925,6 +925,14 @@ MooseVariableFV<OutputType>::determineBoundaryToFluxBCMap()
   _flux_map_setup = true;
 }
 
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::sizeMatrixTagData()
+{
+  _element_data->sizeMatrixTagData();
+  _neighbor_data->sizeMatrixTagData();
+}
+
 template class MooseVariableFV<Real>;
 // TODO: implement vector fv variable support. This will require some template
 // specializations for various member functions in this and the FV variable

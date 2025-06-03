@@ -17,6 +17,9 @@
 #include "LineSearch.h"
 #include "MooseEnum.h"
 
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/linear_implicit_system.h"
+
 registerMooseObject("MooseApp", FEProblem);
 
 InputParameters
@@ -70,11 +73,21 @@ FEProblem::FEProblem(const InputParameters & parameters)
 
   es().parameters.set<FEProblem *>("_fe_problem") = this;
 
-  // Create extra vectors and matrices if any
+  // Create extra vectors if any
   createTagVectors();
 
   // Create extra solution vectors if any
   createTagSolutions();
+}
+
+void
+FEProblem::init()
+{
+  for (const auto & sys : _solver_systems)
+    if (sys->system().has_static_condensation() && libMesh::n_threads() != 1)
+      mooseError("Static condensation may not be used with multiple threads");
+
+  FEProblemBase::init();
 }
 
 void

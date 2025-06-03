@@ -1821,7 +1821,6 @@ Assembly::reinit(const Elem * elem)
   mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
               "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
-
   setVolumeQRule(elem);
   reinitFE(elem);
 

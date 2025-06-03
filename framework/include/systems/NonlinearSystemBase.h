@@ -43,10 +43,10 @@ class NodalKernelBase;
 class Split;
 class KernelBase;
 class HDGKernel;
-class HDGIntegratedBC;
 class BoundaryCondition;
 class ResidualObject;
 class PenetrationInfo;
+class FieldSplitPreconditionerBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -57,6 +57,7 @@ template <typename T>
 class SparseMatrix;
 template <typename T>
 class DiagonalMatrix;
+class DofMapBase;
 } // namespace libMesh
 
 /**
@@ -101,13 +102,12 @@ public:
   virtual void jacobianSetup() override;
 
   virtual void setupFiniteDifferencedPreconditioner() = 0;
-  void setupFieldDecomposition();
 
   bool haveFiniteDifferencedPreconditioner() const
   {
     return _use_finite_differenced_preconditioner;
   }
-  bool haveFieldSplitPreconditioner() const { return _use_field_split_preconditioner; }
+  bool haveFieldSplitPreconditioner() const { return _fsp; }
 
   /**
    * Adds a kernel
@@ -128,16 +128,6 @@ public:
   virtual void addHDGKernel(const std::string & kernel_name,
                             const std::string & name,
                             InputParameters & parameters);
-
-  /**
-   * Adds a hybridized discontinuous Galerkin (HDG) bc
-   * @param bc_name The type of the hybridized bc
-   * @param name The name of the hybridized bc
-   * @param parameters HDG bc parameters
-   */
-  virtual void addHDGIntegratedBC(const std::string & bc_name,
-                                  const std::string & name,
-                                  InputParameters & parameters);
 
   /**
    * Adds a NodalKernel
@@ -461,16 +451,15 @@ public:
   }
 
   /**
-   * If called with a single string, it is used as the name of a the top-level decomposition split.
-   * If the array is empty, no decomposition is used.
-   * In all other cases an error occurs.
+   * If called with a non-null object true this system will use a field split preconditioner matrix.
    */
-  void setDecomposition(const std::vector<std::string> & decomposition);
+  void useFieldSplitPreconditioner(FieldSplitPreconditionerBase * fsp) { _fsp = fsp; }
 
   /**
-   * If called with true this system will use a field split preconditioner matrix.
+   * @returns A field split preconditioner. This will error if there is no field split
+   * preconditioner
    */
-  void useFieldSplitPreconditioner(bool use = true) { _use_field_split_preconditioner = use; }
+  FieldSplitPreconditionerBase & getFieldSplitPreconditioner();
 
   /**
    * If called with true this will add entries into the jacobian to link together degrees of freedom
@@ -610,6 +599,7 @@ public:
   {
     return _nodal_kernels;
   }
+  MooseObjectTagWarehouse<HDGKernel> & getHDGKernelWarehouse() { return _hybridized_kernels; }
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() const
   {
     return _element_dampers;
@@ -853,7 +843,7 @@ protected:
   ///@{
   /// Kernel Storage
   MooseObjectTagWarehouse<KernelBase> _kernels;
-  MooseObjectWarehouse<HDGKernel> _hybridized_kernels;
+  MooseObjectTagWarehouse<HDGKernel> _hybridized_kernels;
   MooseObjectTagWarehouse<ScalarKernelBase> _scalar_kernels;
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;
@@ -866,7 +856,6 @@ protected:
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
   MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
-  MooseObjectWarehouse<HDGIntegratedBC> _hybridized_ibcs;
   ///@}
 
   /// Dirac Kernel storage for each thread
@@ -900,12 +889,8 @@ protected:
 
   MatFDColoring _fdcoloring;
 
-  /// Whether or not the system can be decomposed into splits
-  bool _have_decomposition;
-  /// Name of the top-level split of the decomposition
-  std::string _decomposition_split;
-  /// Whether or not to use a FieldSplitPreconditioner matrix based on the decomposition
-  bool _use_field_split_preconditioner;
+  /// The field split preconditioner if this sytem is using one
+  FieldSplitPreconditionerBase * _fsp;
 
   /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
   bool _add_implicit_geometric_coupling_entries_to_jacobian;

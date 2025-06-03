@@ -641,8 +641,11 @@ FEProblemBase::createTagVectors()
       _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
       addNotZeroedVectorTag(tag);
     }
+}
 
-  // add matrices and their tags
+void
+FEProblemBase::createTagMatrices(CreateTaggedMatrixKey)
+{
   auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
   for (const auto nl_sys_num : index_range(matrices))
     for (auto & matrix : matrices[nl_sys_num])
@@ -650,6 +653,10 @@ FEProblemBase::createTagVectors()
       auto tag = addMatrixTag(matrix);
       _nl[nl_sys_num]->addMatrix(tag);
     }
+
+  for (auto & sys : _solver_systems)
+    sys->sizeVariableMatrixData();
+  _aux->sizeVariableMatrixData();
 }
 
 void
@@ -3002,22 +3009,6 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
   setResidualObjectParamsAndLog(
       bc_name, name, parameters, nl_sys_num, "BoundaryCondition", _reinit_displaced_face);
   _nl[nl_sys_num]->addBoundaryCondition(bc_name, name, parameters);
-}
-
-void
-FEProblemBase::addHDGIntegratedBC(const std::string & bc_name,
-                                  const std::string & name,
-                                  InputParameters & parameters)
-{
-  parallel_object_only();
-  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
-  if (!isSolverSystemNonlinear(nl_sys_num))
-    mooseError("You are trying to add a HDGIntegratedBC to a linear variable/system, which is not "
-               "supported at the moment!");
-  setResidualObjectParamsAndLog(
-      bc_name, name, parameters, nl_sys_num, "BoundaryCondition", _reinit_displaced_face);
-
-  _nl[nl_sys_num]->addHDGIntegratedBC(bc_name, name, parameters);
 }
 
 void
@@ -6874,7 +6865,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
         {
           auto & matrix = _current_nl_sys->getMatrix(tag);
           matrix.zero();
-          if (haveADObjects())
+          if (haveADObjects() && !_current_nl_sys->system().has_static_condensation())
             // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
             // diagonal dependence. With global AD indexing we only add non-zero
             // dependence, so PETSc will scream at us unless we artificially add the diagonals.
@@ -7259,7 +7250,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
           {
             auto & matrix = _current_nl_sys->getMatrix(tag);
             matrix.zero();
-            if (haveADObjects())
+            if (haveADObjects() && !_current_nl_sys->system().has_static_condensation())
               // PETSc algorithms require diagonal allocations regardless of whether there is
               // non-zero diagonal dependence. With global AD indexing we only add non-zero
               // dependence, so PETSc will scream at us unless we artificially add the diagonals.
