@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADConvectionHeatTransferBC.h"
-#include "Function.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADConvectionHeatTransferBC);
 
@@ -16,9 +15,9 @@ InputParameters
 ADConvectionHeatTransferBC::validParams()
 {
   InputParameters params = ADIntegratedBC::validParams();
-  params.addRequiredParam<FunctionName>("T_ambient", "Ambient temperature function");
-  params.addRequiredParam<FunctionName>("htc_ambient",
-                                        "Ambient heat transfer coefficient function");
+  params.addRequiredParam<MooseFunctorName>("T_ambient", "Ambient temperature functor");
+  params.addRequiredParam<MooseFunctorName>("htc_ambient",
+                                            "Ambient heat transfer coefficient functor");
   params.addParam<MooseFunctorName>(
       "scale", 1.0, "Functor by which to scale the boundary condition");
   params.addClassDescription("Adds a convective heat flux boundary condition with user-specified "
@@ -28,8 +27,8 @@ ADConvectionHeatTransferBC::validParams()
 
 ADConvectionHeatTransferBC::ADConvectionHeatTransferBC(const InputParameters & parameters)
   : ADIntegratedBC(parameters),
-    _T_ambient_fn(getFunction("T_ambient")),
-    _htc_ambient_fn(getFunction("htc_ambient")),
+    _T_ambient(getFunctor<ADReal>("T_ambient")),
+    _htc_ambient(getFunctor<ADReal>("htc_ambient")),
     _scale(getFunctor<ADReal>("scale"))
 {
 }
@@ -38,6 +37,9 @@ ADReal
 ADConvectionHeatTransferBC::computeQpResidual()
 {
   const Moose::ElemSideQpArg space_arg = {_current_elem, _current_side, _qp, _qrule, _q_point[_qp]};
-  return _scale(space_arg, Moose::currentState()) * _htc_ambient_fn.value(_t, _q_point[_qp]) *
-         (_u[_qp] - _T_ambient_fn.value(_t, _q_point[_qp])) * _test[_i][_qp];
+  const auto scale = _scale(space_arg, Moose::currentState());
+  const auto htc = _htc_ambient(space_arg, Moose::currentState());
+  const auto T_ambient = _T_ambient(space_arg, Moose::currentState());
+
+  return scale * htc * (_u[_qp] - T_ambient) * _test[_i][_qp];
 }
