@@ -38,12 +38,10 @@
   []
 []
 
-[Materials]
-  [steel]
-    type = ADGenericConstantMaterial
-    prop_names = thermal_conductivity
-    prop_values = 18 # K: (W/m*K) from wikipedia @296K
-  []
+[Materials/steel]
+  type = ADGenericConstantMaterial
+  prop_names = thermal_conductivity
+  prop_values = 18 # K: (W/m*K) from wikipedia @296K
 []
 
 [Problem]

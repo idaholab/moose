@@ -19,8 +19,7 @@ PackedColumn::validParams()
   InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("temperature", "The temperature (C) of the fluid.");
 
-  // Add a parameter to get the radius of the spheres in the column
-  // (used later to interpolate permeability).
+  // Parameter for radius of the spheres used to interpolate permeability.
   params.addParam<FunctionName>("radius",
                                 "1.0",
                                 "The radius of the steel spheres (mm) that are packed in the "
@@ -118,7 +117,8 @@ PackedColumn::validParams()
 
 PackedColumn::PackedColumn(const InputParameters & parameters)
   : Material(parameters),
-    // Get the one parameter from the input file
+
+    // Get the parameters from the input file
     _input_radius(getFunction("radius")),
     _input_porosity(getFunction("porosity")),
     _temperature(adCoupledValue("temperature")),
@@ -138,8 +138,8 @@ PackedColumn::PackedColumn(const InputParameters & parameters)
 
     // Material Properties being produced by this object
     _permeability(declareADProperty<Real>("permeability")),
-    _porosity(declareADProperty<Real>("porosity")),
     _viscosity(declareADProperty<Real>("viscosity")),
+    _porosity(declareADProperty<Real>("porosity")),
     _thermal_conductivity(declareADProperty<Real>("thermal_conductivity")),
     _specific_heat(declareADProperty<Real>("specific_heat")),
     _density(declareADProperty<Real>("density")),

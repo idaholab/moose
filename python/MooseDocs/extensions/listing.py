@@ -110,8 +110,8 @@ class LocalListingCommand(command.CommandComponent):
         if 'inline' not in info and settings['language'] == 'moose':
             content = self.appendMooseSyntax(content, page)
 
-        code = core.Code(flt, style="max-height:{};".format(settings['max-height']),
-                         language=settings['language'], content=content)
+        code = core.Code(flt, language=settings['language'], content=content,
+                         max_height=settings['max-height'])
 
         if flt is parent:
             code.attributes.update(**self.attributes(settings))
@@ -177,7 +177,10 @@ class LocalListingCommand(command.CommandComponent):
                     )
                     if moose_node:
                         pl = node.line(name='type') - 1
-                        content_lines[pl] += self._stringifySyntaxData(moose_node, page)
+                        obj_data = self._stringifySyntaxData(moose_node, page)
+                        content_lines[pl] = content_lines[pl].replace(
+                            val, val + obj_data, 1
+                        )
                 # If it isn't a object, let's try to find the action
                 else:
                     fullpath = parent_path
@@ -317,8 +320,8 @@ class FileListingCommand(LocalListingCommand):
         flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   token_type=Listing)
 
-        code = core.Code(flt, style="max-height:{};".format(settings['max-height']),
-                         content=content, language=lang)
+        code = core.Code(flt, content=content, language=lang,
+                         max_height=settings['max-height'])
 
         if flt is parent:
             code.attributes.update(**self.attributes(settings))

@@ -40,7 +40,7 @@ Element auxiliary variables can compute:
 AuxKernel objects computing elemental values can couple to nonlinear variables and both element and
 nodal auxiliary variables
 
-```text
+```moose
 [AuxVariables]
   [aux]
     order = CONSTANT
@@ -58,7 +58,7 @@ Nodal auxiliary variables are computed at each node and are stored as linear Lag
 AuxKernel objects computing nodal values can +only+ couple to nodal nonlinear variables and
 other nodal auxiliary variables
 
-```text
+```moose
 [AuxVariables]
   [aux]
     order = LAGRANGE
@@ -108,7 +108,7 @@ Directly compute a vector AuxVariable values by:
 
 The auxiliary variable will have to be one of the vector types (LAGRANCE_VEC, MONOMIAL_VEC or NEDELEC_VEC).
 
-```text
+```moose
 [AuxVariables]
   [aux]
     order = FIRST

@@ -15,10 +15,10 @@
 #include "LinearInterpolation.h"
 
 /**
- * Material-derived objects override the computeQpProperties()
- * function.  They must declare and compute material properties for
- * use by other objects in the calculation such as Kernels and
- * BoundaryConditions.
+ * Material objects inherit from Material and override computeQpProperties.
+ *
+ * Their job is to declare properties for use by other objects in the
+ * calculation such as Kernels and BoundaryConditions.
  */
 class PackedColumn : public Material
 {
@@ -28,10 +28,7 @@ public:
   PackedColumn(const InputParameters & parameters);
 
 protected:
-  /**
-   * Necessary override.  This is where the values of the properties
-   * are computed.
-   */
+  /// Necessary override. This is where the values of the properties are computed.
   virtual void computeQpProperties() override;
 
   /**
@@ -81,7 +78,7 @@ protected:
   const Real & _solid_rho;
   ADLinearInterpolation _solid_rho_interpolation;
 
-  /// Fluid specific heat
+  /// Solid specific heat
   bool _use_solid_cp_interp;
   const Real & _solid_cp;
   ADLinearInterpolation _solid_cp_interpolation;
@@ -89,11 +86,11 @@ protected:
   /// The permeability (K)
   ADMaterialProperty<Real> & _permeability;
 
-  /// The porosity (eps)
-  ADMaterialProperty<Real> & _porosity;
-
   /// The viscosity of the fluid (mu)
   ADMaterialProperty<Real> & _viscosity;
+
+  /// The porosity (eps)
+  ADMaterialProperty<Real> & _porosity;
 
   /// The bulk thermal conductivity
   ADMaterialProperty<Real> & _thermal_conductivity;

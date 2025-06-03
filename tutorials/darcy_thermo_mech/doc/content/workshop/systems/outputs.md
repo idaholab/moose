@@ -20,13 +20,13 @@ There exists a short-cut syntax for common output types as well as common parame
 
 The following two methods for creating an Output object are equivalent within the internals of MOOSE.
 
-```text
+```moose
 [Outputs]
   exodus = true
 []
 ```
 
-```text
+```moose
 [Outputs]
   [out]
     type = Exodus
@@ -40,7 +40,7 @@ The following two methods for creating an Output object are equivalent within th
 
 The content of each `Output` can customized, see for example for an [Exodus](Exodus.md) output:
 
-```
+```moose
 [Outputs]
   [out]
     type = Exodus
@@ -55,7 +55,7 @@ The content of each `Output` can customized, see for example for an [Exodus](Exo
 
 ## Common Parameters
 
-```text
+```moose
 [Outputs]
   interval = 10 # this is a time step interval
   [exo]
@@ -76,7 +76,7 @@ The default naming scheme for output files utilizes the input file name (e.g., i
 that differs depending on how the output is defined: An "_out" suffix is used for Outputs created
 using the short-cut syntax.  sub-blocks use the actual sub-block name as the suffix.
 
-```text
+```moose
 [Outputs]
   exodus = true    # creates input_out.e
   [other]          # creates input_other.e

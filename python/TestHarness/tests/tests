@@ -114,13 +114,6 @@
     issues = "#9249"
     collections = 'FAILURE_ANALYSIS'
   []
-  [required_objects]
-    type = PythonUnitTest
-    input = test_RequiredObjects.py
-    requirement = "The system shall report a failure if a test requires an object not present in the executable"
-    issues = '#6781'
-    collections = 'FAILURE_ANALYSIS'
-  []
   [required_apps]
     type = PythonUnitTest
     input = test_RequiredApps.py
@@ -256,12 +249,6 @@
     input = test_CustomEval.py
     issues = '#22946'
     requirement = "The system shall be able to evaluate a given test with a user-supplied evaluation function."
-  []
-  [test_failed_json]
-    type = PythonUnitTest
-    input = test_FailedJSON.py
-    requirement = "The system shall test for a valid json output dump"
-    issues = '#21967'
   []
   [test_install_type]
     type = PythonUnitTest

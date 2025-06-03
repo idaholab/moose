@@ -38,7 +38,7 @@ Add custom syntax to build objects that are common to all Darcy thermal mechanic
 
 ## Step 11: Input File
 
-!listing step11_action/problems/step11.i
+!listing step11_action/problems/step11.i diff=step09_mechanics/problems/step9.i
 
 !---
 

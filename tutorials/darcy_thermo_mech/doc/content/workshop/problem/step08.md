@@ -13,7 +13,7 @@ There are two main systems for aggregating data: Postprocessors and VectorPostpr
 
 ## Step 8: Input File
 
-!listing step08_postprocessors/problems/step8.i
+!listing step08_postprocessors/problems/step8.i diff=step06_coupled_darcy_heat_conduction/problems/step6a_coupled.i
 
 !---
 

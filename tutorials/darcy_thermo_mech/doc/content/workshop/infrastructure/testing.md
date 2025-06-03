@@ -41,7 +41,7 @@ tests/
 
 Test specifications use the hit format, the same format as the standard MOOSE input file.
 
-```text
+```moose
 [Tests]
    [my_kernel_test]
      type    = Exodiff

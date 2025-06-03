@@ -24,8 +24,8 @@ class TestCore(MooseDocsTestCase):
         self.assertToken(ast(0), 'Code', language='text', content='\nint x = 0;\n', escape=True)
 
         def helper(r):
-            self.assertHTMLTag(r(0), 'pre', class_='moose-pre')
-            self.assertHTMLTag(r(0)(0), 'code', class_='language-text')
+            self.assertHTMLTag(r(0), 'pre', class_='')
+            self.assertHTMLTag(r(0)(0), 'code', class_='language-text', style='max-height:350px;')
             self.assertHTMLString(r(0)(0)(0), '\nint x = 0;\n', escape=True)
 
         res = self.render(ast)

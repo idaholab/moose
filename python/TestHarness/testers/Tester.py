@@ -91,7 +91,6 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('env_vars_not_set', [], "A test that only runs if all the environment variables listed are not set")
         params.addParam('should_execute', True, 'Whether or not the executable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation')
         params.addParam('required_submodule', [], "A list of initialized submodules for which this test requires.")
-        params.addParam('required_objects', [], "A list of required objects that are in the executable.")
         params.addParam('required_applications', [], "A list of required registered applications that are in the executable.")
         params.addParam('check_input',    False, "Check for correct input file syntax")
         params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
@@ -692,14 +691,6 @@ class Tester(MooseObject, OutputInterface):
         for file in self.specs['depend_files']:
             if not os.path.isfile(os.path.join(self.specs['base_dir'], file)):
                 reasons['depend_files'] = 'DEPEND FILES'
-
-        # Check to see if we have the required object names
-        if self.specs['required_objects'] and options._app_objects is None:
-            raise Exception('Cannot used required_objects; app objects not available')
-        for var in self.specs['required_objects']:
-            if var not in options._app_objects:
-                reasons['required_objects'] = '%s not found in executable' % var
-                break
 
         # We extract the registered apps only if we need them
         if self.specs["required_applications"] and checks["registered_apps"] is None:

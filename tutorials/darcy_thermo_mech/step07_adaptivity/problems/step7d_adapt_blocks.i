@@ -1,6 +1,5 @@
 [Mesh]
-  uniform_refine = 3
-  [generate]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 40
@@ -10,7 +9,7 @@
   []
   [bottom]
     type = SubdomainBoundingBoxGenerator
-    input = generate
+    input = gmg
     location = inside
     bottom_left = '0 0 0'
     top_right = '0.304 0.01285 0'
@@ -18,6 +17,7 @@
   []
   coord_type = RZ
   rz_coord_axis = X
+  uniform_refine = 3
 []
 
 [Variables]
@@ -25,13 +25,6 @@
   []
   [temperature]
     initial_condition = 300 # Start at room temperature
-  []
-[]
-
-[AuxVariables]
-  [velocity]
-    order = CONSTANT
-    family = MONOMIAL_VEC
   []
 []
 
@@ -55,16 +48,18 @@
   []
 []
 
-[AuxKernels]
-  [velocity]
-    type = DarcyVelocity
-    variable = velocity
-    execute_on = timestep_end
-    pressure = pressure
-  []
-[]
-
 [BCs]
+  [inlet_temperature]
+    type = FunctionDirichletBC
+    variable = temperature
+    boundary = left
+    function = 'if(t<0,350+50*t,350)'
+  []
+  [outlet_temperature]
+    type = HeatConductionOutflow
+    variable = temperature
+    boundary = right
+  []
   [inlet]
     type = DirichletBC
     variable = pressure
@@ -76,17 +71,6 @@
     variable = pressure
     boundary = right
     value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm spheres
-  []
-  [inlet_temperature]
-    type = FunctionDirichletBC
-    variable = temperature
-    boundary = left
-    function = 'if(t<0,350+50*t,350)'
-  []
-  [outlet_temperature]
-    type = HeatConductionOutflow
-    variable = temperature
-    boundary = right
   []
 []
 
@@ -119,22 +103,33 @@
   []
 []
 
+[AuxVariables/velocity]
+  order = CONSTANT
+  family = MONOMIAL_VEC
+[]
+
+[AuxKernels/velocity]
+  type = DarcyVelocity
+  variable = velocity
+  execute_on = timestep_end
+  pressure = pressure
+[]
+
 [Problem]
   type = FEProblem
 []
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
-  automatic_scaling = true
-
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
-
   end_time = 100
   dt = 0.25
   start_time = -1
 
+  solve_type = NEWTON
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+
+  automatic_scaling = true
   steady_state_tolerance = 1e-5
   steady_state_detection = true
 
@@ -144,29 +139,23 @@
   []
 []
 
+[Outputs/out]
+  type = Exodus
+  output_material_properties = true
+[]
+
 [Adaptivity]
   marker = error_frac
   max_h_level = 3
-  [Indicators]
-    [temperature_jump]
-      type = GradientJumpIndicator
-      variable = temperature
-      scale_by_flux_faces = true
-    []
+  [Indicators/temperature_jump]
+    type = GradientJumpIndicator
+    variable = temperature
+    scale_by_flux_faces = true
   []
-  [Markers]
-    [error_frac]
-      type = ErrorFractionMarker
-      coarsen = 0.025
-      indicator = temperature_jump
-      refine = 0.9
-    []
-  []
-[]
-
-[Outputs]
-  [out]
-    type = Exodus
-    output_material_properties = true
+  [Markers/error_frac]
+    type = ErrorFractionMarker
+    coarsen = 0.025
+    indicator = temperature_jump
+    refine = 0.9
   []
 []

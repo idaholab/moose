@@ -14,6 +14,9 @@ from collections import OrderedDict
 import json
 import yaml
 import sys
+import threading
+import typing
+import time
 
 MOOSE_OPTIONS = {
     'ad_size' : { 're_option' : r'#define\s+MOOSE_AD_MAX_DOFS_PER_ELEM\s+(\d+)',
@@ -217,15 +220,16 @@ LIBTORCH_OPTIONS = {
 }
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
-def runCommand(cmd, cwd=None, force_mpi_command=False):
+def runCommand(cmd, force_mpi_command=False, **kwargs):
     # On Windows it is not allowed to close fds while redirecting output
     should_close = platform.system() != "Windows"
     if force_mpi_command:
         mpi_command = os.environ.get('MOOSE_MPI_COMMAND')
         if mpi_command is not None:
             cmd = f'{mpi_command} -n 1 {cmd}'
-    p = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
-    output = p.communicate()[0].decode('utf-8')
+    p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                       close_fds=should_close, shell=True, text=True, **kwargs)
+    output = p.stdout
     if (p.returncode != 0):
         output = 'ERROR: ' + output
     return output
@@ -391,34 +395,6 @@ def getMachine():
     machine.add(platform.machine().upper())
     return machine
 
-def runExecutable(libmesh_dir, location, bin, args):
-    # Installed location of libmesh executable
-    libmesh_installed   = libmesh_dir + '/' + location + '/' + bin
-
-    # Uninstalled location of libmesh executable
-    libmesh_uninstalled = libmesh_dir + '/' + bin
-
-    # Uninstalled location of libmesh executable
-    libmesh_uninstalled2 = libmesh_dir + '/contrib/bin/' + bin
-
-    # The eventual variable we will use to refer to libmesh's executable
-    libmesh_exe = ''
-
-    if os.path.exists(libmesh_installed):
-        libmesh_exe = libmesh_installed
-
-    elif os.path.exists(libmesh_uninstalled):
-        libmesh_exe = libmesh_uninstalled
-
-    elif os.path.exists(libmesh_uninstalled2):
-        libmesh_exe = libmesh_uninstalled2
-
-    else:
-        print(("Error! Could not find '" + bin + "' in any of the usual libmesh's locations!"))
-        exit(1)
-
-    return runCommand(libmesh_exe + " " + args).rstrip()
-
 def checkLogicVersionSingle(checks, iversion, package):
     logic, version = re.search(r'(.*?)\s*(\d\S+)', iversion).groups()
     if logic == '' or logic == '=':
@@ -527,12 +503,31 @@ def checkLibtorchVersion(checks, test):
 
     return (checkVersion(checks, version_string, 'libtorch_version'), version_string)
 
+def outputHeader(header, ending=True):
+    """
+    Returns text for output with a visual separator, i.e.:
+    ##############################...
+    <header>
+    ##############################...
+    """
+    begin_sep = '#' * 80
+    end_sep = f'{begin_sep}\n' if ending else ''
+    return f'{begin_sep}\n{header}\n{end_sep}'
+
 def getCapabilities(exe):
     """
     Get capabilities JSON and compare it to the required capabilities
     """
     assert exe
-    output = runCommand(f"{exe} --show-capabilities", force_mpi_command=True)
+    try:
+        cmd = f'{exe} --show-capabilities'
+        output = runCommand(cmd, force_mpi_command=True, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f'ERROR: Failed to parse the application capabilities!')
+        print(f'Command ran: {cmd}\n')
+        print(outputHeader(f'Failed command output'))
+        print(e.stdout)
+        sys.exit(1)
     return parseMOOSEJSON(output, '--show-capabilities')
 
 def getCapability(exe, name):
@@ -586,45 +581,6 @@ def checkCapabilities(supported: dict, requested: str, certain):
     [status, message, doc] = pycapabilities.check(requested, supported)
     success = status == pycapabilities.CERTAIN_PASS or (status == pycapabilities.POSSIBLE_PASS and not certain)
     return success, message
-
-def getConfigOption(config_files, option, options):
-    # Some tests work differently with parallel mesh enabled
-    # We need to detect this condition
-    option_set = set(['ALL'])
-
-    success = 0
-    for config_file in config_files:
-        if success == 1:
-            break
-
-        try:
-            f = open(config_file)
-            contents = f.read()
-            f.close()
-
-            info = options[option]
-            m = re.search(info['re_option'], contents)
-            if m != None:
-                if 'options' in info:
-                    for value, option in info['options'].items():
-                        if m.group(1) == option:
-                            option_set.add(value)
-                else:
-                    option_set.clear()
-                    option_set.add(m.group(1))
-            else:
-                option_set.add(info['default'])
-
-            success = 1
-
-        except IOError:
-            pass
-
-    if success == 0:
-        print("Error! Could not find libmesh_config.h in any of the usual locations!")
-        exit(1)
-
-    return option_set
 
 def getSharedOption(libmesh_dir):
     # Some tests may only run properly with shared libraries on/off
@@ -687,32 +643,6 @@ def checkInstalled(executable, app_name):
     option_set.add(resource_content.get('installation_type', 'ALL').upper())
     return option_set
 
-def addObjectsFromBlock(objs, node, block_name):
-    """
-    Utility function that iterates over a dictionary and adds keys
-    to the executable object name set.
-    """
-    data = node.get(block_name, {})
-    if data: # could be None so we can't just iterate over items
-        for name, block in data.items():
-            objs.add(name)
-            addObjectNames(objs, block)
-
-def addObjectNames(objs, node):
-    """
-    Add object names that reside in this node.
-    """
-    if not node:
-        return
-
-    addObjectsFromBlock(objs, node, "subblocks")
-    addObjectsFromBlock(objs, node, "subblock_types")
-    addObjectsFromBlock(objs, node, "types")
-
-    star = node.get("star")
-    if star:
-        addObjectNames(objs, star)
-
 def parseMOOSEJSON(output: str, context: str) -> dict:
     try:
         output = output.split('**START JSON DATA**\n')[1]
@@ -722,20 +652,6 @@ def parseMOOSEJSON(output: str, context: str) -> dict:
         raise Exception(f'Failed to find JSON header and footer from {context}')
     except json.decoder.JSONDecodeError:
         raise Exception(f'Failed to parse JSON from {context}')
-
-def getExeJSON(exe: str) -> str:
-    """
-    Calls --json on the given executable
-    """
-    return runCommand(f"{exe} --json", force_mpi_command=True)
-
-def getExeObjects(json: dict) -> set[str]:
-    """
-    Gets a set of object names that are in the executable JSON dump.
-    """
-    obj_names = set()
-    addObjectsFromBlock(obj_names, json, "blocks")
-    return obj_names
 
 def readResourceFile(exe, app_name):
     resource_path = os.path.join(os.path.dirname(os.path.abspath(exe)),
@@ -824,13 +740,30 @@ def trimOutput(output, max_size=None):
     trimmed += f'\n{sep}\nOutput trimmed\n{sep}\n{output[-second_part:]}'
     return trimmed
 
-def outputHeader(header, ending=True):
+class ScopedTimer:
     """
-    Returns text for output with a visual separator, i.e.:
-    ##############################...
-    <header>
-    ##############################...
+    Helper class that will print out a message if a certain amount
+    of time has passed
     """
-    begin_sep = '#' * 80
-    end_sep = f'{begin_sep}\n' if ending else ''
-    return f'{begin_sep}\n{header}\n{end_sep}'
+    def __init__(self, timeout: typing.Union[int, float], message: str):
+        self.timeout = timeout
+        self.message = message
+        self._stop_event = threading.Event()
+        self._printed = False
+
+    def _check_timeout(self):
+        if not self._stop_event.wait(self.timeout):
+            print(self.message + '...', end='', flush=True)
+            self._printed = True
+
+    def __enter__(self):
+        self._thread = threading.Thread(target=self._check_timeout)
+        self._thread.start()
+        self.start_time = time.time()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._stop_event.set()
+        self._thread.join()
+        if self._printed:
+            elapsed_time = time.time() - self.start_time
+            print(f' {elapsed_time:.2f} seconds', flush=True)

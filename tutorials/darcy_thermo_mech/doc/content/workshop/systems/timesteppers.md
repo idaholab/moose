@@ -53,7 +53,7 @@ By default, the minimum of all the time steps computed by all the time steppers 
 
 What steps will be taken, starting at time = 0s?
 
-```bash
+```moose
 [TimeSteppers]
   [constant]
     type = ConstantDT
