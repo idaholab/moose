@@ -20,9 +20,10 @@
     xmldiff = 'OutputData/CurlCurlLOR/Run0/Run0.pvd
                 OutputData/CurlCurlLOR/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
-    cli_args = 'FESpaces/HCurlFESpace/fec_order=THIRD Solver/type=MFEMGMRESSolver '
-               'Solver/l_tol=1e-14 Solver/preconditioner=ams Preconditioner/ams/low_order_refined=true '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/CurlCurlLOR '
+    cli_args = 'FESpaces/HCurlFESpace/fec_order=THIRD '
+               'Solver/type=MFEMGMRESSolver Solver/l_tol=1e-14 '
+               'Preconditioner/ams/low_order_refined=true '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/CurlCurlLOR'
     requirement = 'The system shall have the ability to solve a LOR definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
     max_parallel = 1
@@ -37,7 +38,6 @@
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
                 OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
-    cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=boomeramg'
     requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
     capabilities = 'mfem'
     max_parallel = 1
@@ -62,10 +62,11 @@
     xmldiff = 'OutputData/DiffusionLOR/Run0/Run0.pvd '
               'OutputData/DiffusionLOR/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
-    cli_args = 'FESpaces/H1FESpace/fec_order=SECOND Solver/type=MFEMCGSolver Solver/l_tol=1e-16 '
-               'Solver/preconditioner=boomeramg Preconditioner/boomeramg/low_order_refined=true '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/DiffusionLOR '
-    requirement = 'MOOSE shall have the ability to solve a diffusion problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
+    cli_args = 'FESpaces/H1FESpace/fec_order=SECOND '
+               'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
+               'Preconditioner/jacobi/low_order_refined=true '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/DiffusionLOR'
+    requirement = 'The system shall have the ability to solve a diffusion problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
@@ -89,9 +90,8 @@
                 OutputData/GradDivLOR/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     cli_args = 'Mesh/file=../mesh/beam-hex.mesh FESpaces/HDivFESpace/fec_order=THIRD '
-               'Solver/type=MFEMCGSolver Solver/l_tol=1e-14 Solver/preconditioner=ADS '
                'Preconditioner/ADS/low_order_refined=true '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/GradDivLOR '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/GradDivLOR'
     requirement = 'The system shall have the ability to solve a LOR grad-div problem with Raviart-Thomas elements using MFEM.'
     capabilities = 'mfem'
     max_parallel = 1
@@ -106,9 +106,7 @@
               'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
-               'Solver/type=MFEMCGSolver Solver/preconditioner=boomeramg '
-               'Executioner/assembly_level=element'
+               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
     capabilities = 'mfem'
@@ -141,10 +139,11 @@
     ignored_items = "root['VTKFile']['@version']"
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'FESpaces/H1FESpace/fec_order=SECOND Solver/type=MFEMCGSolver Solver/l_tol=1e-22 '
-               'Solver/preconditioner=boomeramg Preconditioner/boomeramg/low_order_refined=true '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConductionLOR '
-    requirement = 'MOOSE shall have the ability to solve a transient heat conduction problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
+               'FESpaces/H1FESpace/fec_order=SECOND '
+               'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
+               'Preconditioner/jacobi/low_order_refined=true '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConductionLOR'
+    requirement = 'The system shall have the ability to solve a transient heat conduction problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
@@ -153,8 +152,7 @@
     type = XMLDiff
     input = heattransfer.i
     xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
-               OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
-    cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=boomeramg '
+                OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
     capabilities = 'mfem'
