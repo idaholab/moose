@@ -13,6 +13,15 @@
 
 registerMooseObject("MooseApp", MFEMVectorFunctorTangentialDirichletBC);
 
+InputParameters
+MFEMVectorFunctorTangentialDirichletBC::validParams()
+{
+  InputParameters params = MFEMVectorFunctorDirichletBCBase::validParams();
+  params.addClassDescription(
+      "Applies a Dirichlet condition to the tangential components of a vector variable.");
+  return params;
+}
+
 MFEMVectorFunctorTangentialDirichletBC::MFEMVectorFunctorTangentialDirichletBC(
     const InputParameters & parameters)
   : MFEMVectorFunctorDirichletBCBase(parameters)

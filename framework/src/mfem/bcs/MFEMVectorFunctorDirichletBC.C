@@ -13,6 +13,15 @@
 
 registerMooseObject("MooseApp", MFEMVectorFunctorDirichletBC);
 
+InputParameters
+MFEMVectorFunctorDirichletBC::validParams()
+{
+  InputParameters params = MFEMVectorFunctorDirichletBCBase::validParams();
+  params.addClassDescription(
+      "Applies a Dirichlet condition to all components of a vector variable.");
+  return params;
+}
+
 MFEMVectorFunctorDirichletBC::MFEMVectorFunctorDirichletBC(const InputParameters & parameters)
   : MFEMVectorFunctorDirichletBCBase(parameters)
 {
