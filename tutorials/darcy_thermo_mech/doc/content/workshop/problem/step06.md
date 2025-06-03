@@ -70,13 +70,13 @@ when using imported input data.
 
 ## PackedColumn.h
 
-!listing step06_coupled_darcy_heat_conduction/include/materials/PackedColumn.h
+!listing step06_coupled_darcy_heat_conduction/include/materials/PackedColumn.h diff=step05_heat_conduction/include/materials/PackedColumn.h
 
 !---
 
 ## PackedColumn.C
 
-!listing step06_coupled_darcy_heat_conduction/src/materials/PackedColumn.C
+!listing step06_coupled_darcy_heat_conduction/src/materials/PackedColumn.C diff=step05_heat_conduction/src/materials/PackedColumn.C
 
 !---
 
@@ -94,7 +94,7 @@ when using imported input data.
 
 ## Step 6a: Coupled Pressure and Heat Equations
 
-!listing step06_coupled_darcy_heat_conduction/problems/step6a_coupled.i
+!listing step06_coupled_darcy_heat_conduction/problems/step6a_coupled.i diff=step05_heat_conduction/problems/step5c_outflow.i
 
 !---
 
@@ -200,7 +200,7 @@ as a function of temperature.
 
 ## Step 6b: Input File
 
-!listing step06_coupled_darcy_heat_conduction/problems/step6b_transient_inflow.i
+!listing step06_coupled_darcy_heat_conduction/problems/step6b_transient_inflow.i diff=step06_coupled_darcy_heat_conduction/problems/step6a_coupled.i
 
 !---
 
@@ -225,4 +225,4 @@ cd problems
 
 Pressure is changed to a constant linearly varying auxiliary variable. We only solve for velocity
 
-!listing step06_coupled_darcy_heat_conduction/problems/step6c_decoupled.i
+!listing step06_coupled_darcy_heat_conduction/problems/step6c_decoupled.i diff=step06_coupled_darcy_heat_conduction/problems/step6a_coupled.i

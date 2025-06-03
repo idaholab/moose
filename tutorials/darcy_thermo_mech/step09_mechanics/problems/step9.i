@@ -3,17 +3,17 @@
 []
 
 [Mesh]
-  [generate]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    ny = 200
     nx = 10
+    ny = 200
     ymax = 0.304 # Length of test chamber
     xmax = 0.0257 # Test chamber radius
   []
   [bottom]
     type = SubdomainBoundingBoxGenerator
-    input = generate
+    input = gmg
     location = inside
     bottom_left = '0 0 0'
     top_right = '0.01285 0.304 0'
@@ -27,13 +27,6 @@
   []
   [temperature]
     initial_condition = 300 # Start at room temperature
-  []
-[]
-
-[AuxVariables]
-  [velocity]
-    order = CONSTANT
-    family = MONOMIAL_VEC
   []
 []
 
@@ -69,16 +62,18 @@
   []
 []
 
-[AuxKernels]
-  [velocity]
-    type = DarcyVelocity
-    variable = velocity
-    execute_on = timestep_end
-    pressure = pressure
-  []
-[]
-
 [BCs]
+  [inlet_temperature]
+    type = FunctionDirichletBC
+    variable = temperature
+    boundary = bottom
+    function = 'if(t<0,350+50*t,350)'
+  []
+  [outlet_temperature]
+    type = HeatConductionOutflow
+    variable = temperature
+    boundary = top
+  []
   [inlet]
     type = DirichletBC
     variable = pressure
@@ -90,17 +85,6 @@
     variable = pressure
     boundary = top
     value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm spheres
-  []
-  [inlet_temperature]
-    type = FunctionDirichletBC
-    variable = temperature
-    boundary = bottom
-    function = 'if(t<0,350+50*t,350)'
-  []
-  [outlet_temperature]
-    type = HeatConductionOutflow
-    variable = temperature
-    boundary = top
   []
   [hold_inlet]
     type = DirichletBC
@@ -156,7 +140,6 @@
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 200e9 # (Pa) from wikipedia
     poissons_ratio = .3 # from wikipedia
-
   []
   [elastic_stress]
     type = ADComputeFiniteStrainElasticStress
@@ -166,15 +149,25 @@
     stress_free_temperature = 300
     eigenstrain_name = eigenstrain
     temperature = temperature
-    thermal_expansion_coeff = 1e-5 # TM modules doesn't support material property, but it will
+    thermal_expansion_coeff = 1e-5
   []
 []
 
-[Postprocessors]
-  [average_temperature]
-    type = ElementAverageValue
-    variable = temperature
-  []
+[Postprocessors/average_temperature]
+  type = ElementAverageValue
+  variable = temperature
+[]
+
+[AuxVariables/velocity]
+  order = CONSTANT
+  family = MONOMIAL_VEC
+[]
+
+[AuxKernels/velocity]
+  type = DarcyVelocity
+  variable = velocity
+  execute_on = timestep_end
+  pressure = pressure
 []
 
 [Problem]
@@ -183,28 +176,27 @@
 
 [Executioner]
   type = Transient
-  start_time = -1
   end_time = 200
-  steady_state_tolerance = 1e-7
-  steady_state_detection = true
   dt = 0.25
+  start_time = -1
+
   solve_type = PJFNK
-  automatic_scaling = true
-  compute_scaling_once = false
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
-  #petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  #petsc_options_value = 'hypre boomeramg 500'
   line_search = none
+
+  automatic_scaling = true
+  compute_scaling_once = false
+  steady_state_tolerance = 1e-7
+  steady_state_detection = true
+
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0,0.1,0.25)'
   []
 []
 
-[Outputs]
-  [out]
-    type = Exodus
-    elemental_as_nodal = true
-  []
+[Outputs/out]
+  type = Exodus
+  elemental_as_nodal = true
 []

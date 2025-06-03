@@ -42,7 +42,6 @@ Create a member variable, as a reference, for the vector data
 
 !listing WorkBalance.h line=_pid
 
-
 Initialize the reference using the `declareVector` method with a name
 
 !listing WorkBalance.C line=declareVector("pid")
@@ -58,7 +57,7 @@ MOOSE includes a large number built-in `VectorPostprocessors`: `NodalValueSample
 `VectorPostprocessors` output is optionally enabled using the `[Outputs]` block. A CSV file
 for each vector and timestep will be created.
 
-```text
+```moose
 [Output]
   csv = true
 []

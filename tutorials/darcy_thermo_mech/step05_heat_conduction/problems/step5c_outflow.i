@@ -42,12 +42,10 @@
   []
 []
 
-[Materials]
-  [steel]
-    type = ADGenericConstantMaterial
-    prop_names = 'thermal_conductivity specific_heat density'
-    prop_values = '18 466 8000' # W/m*K, J/kg-K, kg/m^3 @ 296K
-  []
+[Materials/steel]
+  type = ADGenericConstantMaterial
+  prop_names = 'thermal_conductivity specific_heat density'
+  prop_values = '18 0.466 8000' # W/m*K, J/kg-K, kg/m^3 @ 296K
 []
 
 [Problem]

@@ -174,10 +174,6 @@ pre[class*="language-"]
     line-height: 1.15;
 }
 
-pre.moose-pre{
-    max-height:350px;
-}
-
 code, kbd, pre, samp {
     font-family: monospace, monospace;
     font-size: 1em;
@@ -1207,7 +1203,7 @@ div.moose-mega-menu-content{
  nav, .btn, .btn-small, .btn-large, footer.page-footer {
    background-color: var(--dark-navbar);
  }
- pre.moose-pre {
+ pre {
    background-color: var(--pre-textbox);
  }
  h1, h2, h3, h4, h5, h6 {
