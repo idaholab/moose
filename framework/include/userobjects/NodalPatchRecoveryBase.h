@@ -78,9 +78,13 @@ public:
   /// in a parallel computing environment.
   void synchronizeAebe() const;
 
+  /// Returns the variable name
+  virtual const VariableName & variableName() const { return _var_name; }
+
 protected:
   /// Compute the quantity to recover using nodal patch recovery
   virtual Real computeValue() = 0;
+  void setVariableName(const VariableName & var_name) { _var_name = var_name; }
 
   unsigned int _qp;
 
@@ -134,4 +138,6 @@ private:
 
   /// Print coefficients of the polynomial to console
   const bool _verbose;
+
+  VariableName _var_name; ///< Variable name
 };

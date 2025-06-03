@@ -119,6 +119,8 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
     _unsolved_blocks(getParam<std::vector<SubdomainName>>("unsolved_blocks")),
     _npr_names(getParam<std::vector<UserObjectName>>("nodal_patch_recovery_uo")),
     _npr_vec(_npr_names.size()),
+    _init_vars_number(_npr_names.size()),
+    _init_vars_names(_npr_names.size()),
     _nearby_element_threshold(getParam<int>("nearby_element_threshold")),
     _leaf_max_size(getParam<int>("kd_tree_leaf_max_size")),
     _radius_search_threshold(getParam<double>("radius_search_threshold"))
@@ -140,6 +142,20 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
 
   for (const auto & i : index_range(_npr_names))
     _npr_vec[i] = &getUserObjectByName<NodalPatchRecoveryBase>(_npr_names[i]);
+
+  if (!_npr_vec.empty())
+    for (const int i : index_range(_npr_vec))
+    {
+      const auto & var_name = _npr_vec[i]->variableName();
+      // Get the variable
+      const auto & var = _sys.getVariable(_tid, var_name);
+
+      // Get the variable number
+      const auto var_num = var.number();
+
+      _init_vars_number[i] = var_num;
+      _init_vars_names[i] = var_name;
+    }
 
   if (isParamSetByUser("moving_boundary_name") ||
       isParamSetByUser("complement_moving_boundary_name"))
@@ -1214,23 +1230,28 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys)
   NumericVector<Number> & vec = sys.solution();
   DofMap & dof_map = sys.dofMap();
 
-  for (auto new_id : _newactivated_nodes)
+  const unsigned int num_components = _npr_vec.size();
+
+  for (const auto & new_id : _newactivated_nodes)
   {
-    const auto * node = _mesh.nodePtr(new_id);
-    const auto & x = *node;
+    const Node * node = _mesh.nodePtr(new_id);
+    const Point & x = *node;
 
-    // Recovery
-    std::vector<Real> recovered_vals;
-    unsigned int num_components = _npr_vec.size();
     for (unsigned int comp = 0; comp < num_components; ++comp)
-      recovered_vals.push_back(
-          _npr_vec[comp]->nodalPatchRecovery(x, _solved_elem_ids_for_npr /*has already sorted*/));
+    {
+      // Recover value using polynomial patch recovery
+      const Real recovered_val =
+          _npr_vec[comp]->nodalPatchRecovery(x, _solved_elem_ids_for_npr /*has already sorted*/);
 
-    std::vector<dof_id_type> dofs;
-    dof_map.dof_indices(node, dofs);
+      // Get the DOF index for this component's variable at this node
+      const auto var_num = _init_vars_number[comp];
 
-    for (unsigned int i = 0; i < dofs.size(); ++i)
-      vec.set(dofs[i], recovered_vals[i]);
+      std::vector<dof_id_type> dofs;
+      dof_map.dof_indices(node, dofs, var_num);
+
+      // Assign recovered value to the DOF
+      vec.set(dofs[0], recovered_val);
+    }
   }
 
   vec.close();

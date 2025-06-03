@@ -15,6 +15,7 @@ NodalPatchRecoveryVariable::validParams()
 }
 
 NodalPatchRecoveryVariable::NodalPatchRecoveryVariable(const InputParameters & params)
-  : NodalPatchRecoveryBase(params), _var(coupledValue("var"))
+  : NodalPatchRecoveryBase(params), _var(coupledValue("var")), _var_name(coupledName("var"))
 {
+  setVariableName(_var_name);
 }

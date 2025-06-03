@@ -240,6 +240,12 @@ private:
   /// @brief Apply initial conditions using polynomial extrapolation
   std::vector<const NodalPatchRecoveryBase *> _npr_vec;
 
+  /// @brief List of variable index number to be initialized (used to find corresponding DOFs) from Nodal Patch Recovery UserObjects
+  std::vector<unsigned int> _init_vars_number;
+
+  /// @brief List of variable names to be initialized (for debugging purposes) from Nodal Patch Recovery UserObjects
+  std::vector<VariableName> _init_vars_names;
+
   /// @brief List of neighbor elements that share nodes with reinitialized elements
   std::vector<dof_id_type> _solved_elem_ids_for_npr;
 
