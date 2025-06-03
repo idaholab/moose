@@ -65,9 +65,6 @@ MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
                                    InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
-  auto object_ptr = getUserObject<MFEMSolverBase>(name).getSharedPtr();
-
-  getProblemData().jacobian_preconditioner = std::dynamic_pointer_cast<MFEMSolverBase>(object_ptr);
 }
 
 void

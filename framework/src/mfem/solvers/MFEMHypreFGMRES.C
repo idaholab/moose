@@ -29,11 +29,7 @@ MFEMHypreFGMRES::validParams()
   return params;
 }
 
-MFEMHypreFGMRES::MFEMHypreFGMRES(const InputParameters & parameters)
-  : MFEMSolverBase(parameters),
-    _preconditioner(isParamSetByUser("preconditioner")
-                        ? getMFEMProblem().getProblemData().jacobian_preconditioner
-                        : nullptr)
+MFEMHypreFGMRES::MFEMHypreFGMRES(const InputParameters & parameters) : MFEMSolverBase(parameters)
 {
   constructSolver(parameters);
 }
@@ -49,8 +45,10 @@ MFEMHypreFGMRES::constructSolver(const InputParameters &)
   solver->SetKDim(getParam<int>("kdim"));
   solver->SetPrintLevel(getParam<int>("print_level"));
 
-  if (_preconditioner)
+  if (isParamSetByUser("preconditioner"))
   {
+    _preconditioner =
+        &const_cast<MFEMSolverBase &>(getUserObject<MFEMSolverBase>("preconditioner"));
     auto hypre_preconditioner =
         std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
     if (!hypre_preconditioner)

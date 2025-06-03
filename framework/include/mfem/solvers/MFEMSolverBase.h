@@ -32,7 +32,8 @@ public:
   /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
   virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
 
-  bool isLOR() const { return _lor; }
+  /// Returns whether or not this solver (or its preconditioner) uses LOR
+  bool isLOR() const { return _lor || (_preconditioner && _preconditioner->isLOR()); }
 
 protected:
   /// Override in derived classes to construct and set the solver options.
@@ -41,8 +42,9 @@ protected:
   // Variable defining whether to use LOR solver
   bool _lor;
 
-  // Solver to be used for the problem
+  // Solver and preconditioner to be used for the problem
   std::shared_ptr<mfem::Solver> _solver{nullptr};
+  MFEMSolverBase * _preconditioner{nullptr};
 };
 
 #endif
