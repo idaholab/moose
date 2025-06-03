@@ -19,7 +19,7 @@ MFEMDomainLFKernel::validParams()
 MFEMDomainLFKernel::MFEMDomainLFKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _coef_name(getParam<std::string>("coefficient")),
-    _coef(getMFEMProblem().getProperties().getScalarProperty(_coef_name))
+    _coef(getScalarCoefficient(_coef_name))
 {
 }
 

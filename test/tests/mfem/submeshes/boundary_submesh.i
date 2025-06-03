@@ -30,9 +30,9 @@
   []
 []
 
-[Materials]
+[FunctorMaterials]
   [Substance]
-    type = MFEMGenericConstantMaterial
+    type = MFEMGenericConstantFunctorMaterial
     prop_names = 'mass source'
     prop_values = '1.0 3.0'
   []
