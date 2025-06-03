@@ -7,7 +7,7 @@ starting point for users to adapt:
 
 ## Thermal Problems
 
-- [Steady State Diffusion](Diffusion.md): Steady state diffusion problem for the
+- [Steady State Diffusion](SteadyStateDiffusion.md): Steady state diffusion problem for the
   temperature profile across a mug with fixed temperatures on two boundaries.
 
 - [Transient Heat Transfer](HeatTransfer.md): Transient heat conduction problem with a
