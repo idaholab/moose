@@ -14,10 +14,7 @@
 #include "MooseMesh.h"
 #include "MooseObject.h"
 #include "NS.h"
-
-#include "libmesh/point.h"
-#include "libmesh/quadrature.h"
-#include "libmesh/elem.h"
+#include "TransientInterface.h"
 
 using namespace libMesh;
 

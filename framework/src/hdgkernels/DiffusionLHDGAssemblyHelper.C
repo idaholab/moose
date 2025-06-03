@@ -14,6 +14,7 @@
 #include "MooseObject.h"
 #include "MaterialPropertyInterface.h"
 #include "NonlinearThread.h"
+#include "TransientInterface.h"
 
 using namespace libMesh;
 
@@ -41,7 +42,7 @@ DiffusionLHDGAssemblyHelper::DiffusionLHDGAssemblyHelper(
     const FEProblemBase & fe_problem,
     SystemBase & sys,
     const THREAD_ID tid)
-  : NonADFunctorInterface(moose_obj),
+  : ADFunctorInterface(moose_obj),
     _u_var(sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("variable"))),
     _grad_u_var(sys.getFieldVariable<RealVectorValue>(
         tid, moose_obj->getParam<NonlinearVariableName>("gradient_variable"))),

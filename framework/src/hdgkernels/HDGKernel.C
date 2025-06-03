@@ -23,6 +23,11 @@ HDGKernel::HDGKernel(const InputParameters & parameters) : Kernel(parameters)
   if (const auto * const ti = _sys.queryTimeIntegrator(_var.number()); ti && ti->isExplicit())
     mooseError("HDGKernels do not currently work with explicit time integration. This is because "
                "the facet Lagrange multiplier variable does not have a time derivative term.");
+
+  const auto coord_system = _mesh.getUniqueCoordSystem();
+  if (coord_system != Moose::COORD_XYZ)
+    mooseError("HDGKernels have not yet been coded to include coordinate system information in its "
+               "residuals/Jacobians");
 }
 
 void

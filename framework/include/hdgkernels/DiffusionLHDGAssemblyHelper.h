@@ -12,11 +12,8 @@
 #include "Moose.h"
 #include "MooseTypes.h"
 #include "MooseArray.h"
-#include "MooseFunctor.h"
-#include "Function.h"
-#include "Kernel.h"
 #include "MooseVariableDependencyInterface.h"
-#include "NonADFunctorInterface.h"
+#include "ADFunctorInterface.h"
 
 #include "libmesh/vector_value.h"
 #include <vector>
@@ -31,6 +28,7 @@ class MooseMesh;
 class MooseObject;
 class MaterialPropertyInterface;
 class MooseVariableDependencyInterface;
+class TransientInterface;
 
 /**
  * Implements all the methods for assembling a hybridized local discontinuous Galerkin (LDG-H),
@@ -39,7 +37,7 @@ class MooseVariableDependencyInterface;
  * (but not exactly based) on "A superconvergent LDG-hybridizable Galerkin method for second-order
  * elliptic problems" by Cockburn
  */
-class DiffusionLHDGAssemblyHelper : public NonADFunctorInterface
+class DiffusionLHDGAssemblyHelper : public ADFunctorInterface
 {
 public:
   static InputParameters validParams();
