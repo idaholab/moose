@@ -26,6 +26,9 @@ public:
   virtual void SetTrialVariablesFromTrueVectors();
   virtual void Init(mfem::BlockVector & X);
   virtual void Solve() = 0;
+  virtual void UniformRefinement( int num_refinements=1 );
+  virtual void UpdateAfterRefinement();
+  virtual int  GetProblemSize();
 
   mfem::Array<int> _block_true_offsets_test;
   mfem::Array<int> _block_true_offsets_trial;
