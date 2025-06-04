@@ -379,6 +379,47 @@ EquationSystem::BuildMixedBilinearForms()
 }
 
 void
+EquationSystem::UpdateEquationSystem()
+{
+  // update these grid functions too
+  for (int i = 0; i < _test_var_names.size(); i++)
+  {
+    _xs.at(i)->Update();
+    _dxdts.at(i)->Update();
+  }
+
+  // Apply boundary conditions
+  ApplyEssentialBCs();
+
+  for (int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto test_var_name = _test_var_names.at(i);
+
+    // Assemble linear and bilinear forms for this test variable
+    auto lf  = _lfs.Get(test_var_name);
+    auto blf = _blfs.Get(test_var_name);
+    lf->Update();
+    lf->Assemble();
+    blf->Update();
+    blf->Assemble();
+
+    // Loop through and assemble mixed bilinear forms for this test variable
+    for (int j = 0; j < _test_var_names.size(); j++)
+    {
+      auto trial_var_name = _test_var_names.at(j);
+      if (_mblfs.Has(test_var_name) &&
+          _mblfs.Get(test_var_name)->Has(trial_var_name))
+      {
+        auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
+                                                                 _test_pfespaces.at(i));
+        mblf->Update();
+        mblf->Assemble();
+      }
+    }
+  }
+}
+
+void
 EquationSystem::BuildEquationSystem()
 {
   BuildBilinearForms();
@@ -576,7 +617,7 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 }
 
 void
-TimeDependentEquationSystem::UpdateEquationSystem()
+TimeDependentEquationSystem::RebuildEquationSystem()
 {
   BuildBilinearForms();
   BuildMixedBilinearForms();

@@ -16,8 +16,12 @@ public:
   virtual void SetTestVariablesFromTrueVectors();
   virtual void SetTrialVariablesFromTrueVectors();
   virtual void Init(mfem::BlockVector & X);
+  virtual void UniformRefinement( int num_refinements=1 );
+  virtual void UpdateAfterRefinement();
+  virtual int  GetProblemSize();
 
   mfem::Array<int> _block_true_offsets;
+  mfem::Array<int> _global_block_true_offsets;
 
   mfem::BlockVector _true_x, _true_rhs;
   mfem::OperatorHandle _equation_system_operator;
@@ -28,12 +32,12 @@ protected:
 
   // Vector of names of state gridfunctions used in formulation, ordered by appearance in block
   // vector during solve.
-  std::vector<std::string> _test_var_names;
+  std::vector<std::string>             _test_var_names;
   std::vector<mfem::ParGridFunction *> _test_variables;
 
   // Vector of names of state gridfunctions used in formulation, ordered by appearance in block
   // vector during solve.
-  std::vector<std::string> _trial_var_names;
+  std::vector<std::string>             _trial_var_names;
   std::vector<mfem::ParGridFunction *> _trial_variables;
 };
 }

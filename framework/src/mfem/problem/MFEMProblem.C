@@ -62,6 +62,44 @@ MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
 }
 
 void
+MFEMProblem::addIndicator(const std::string & user_object_name,
+                          const std::string & name,
+                          InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(user_object_name, name, parameters);
+
+  const UserObject * est_uo = &(getUserObjectBase(name));
+  if ( dynamic_cast<const MFEMEstimator *>(est_uo) != nullptr )
+  {
+    std::shared_ptr<MooseObject> object_ptr  = getUserObject<MFEMEstimator>(name).getSharedPtr();
+    std::shared_ptr<MFEMEstimator> estimator = std::dynamic_pointer_cast<MFEMEstimator>(object_ptr);
+
+    // fetch a pointer to the executioner; use this as our way to access the problem operator
+    auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
+    if (
+      mfem_exec_ptr != nullptr
+      and
+      mfem_exec_ptr->addEstimator( estimator )
+    )
+    {
+      // success
+    }
+
+    else
+    {
+      mooseError("Cannot add estimator :()");
+    }
+    // construct the estimator
+    // _problem_operator->AddEstimator(estimator);
+  }
+  
+  else
+  {
+    mooseError("Cannot add estimator :()");
+  }
+}
+
+void
 MFEMProblem::addMFEMSolver(const std::string & user_object_name,
                            const std::string & name,
                            InputParameters & parameters)
