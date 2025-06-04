@@ -122,9 +122,10 @@ class Tester(MooseObject, OutputInterface):
 
     @staticmethod
     def augmentParams(params):
+        # Augment our parameters with parameters from the validation test, if we
+        # have any validation tests
         script = params['validation_test']
         validation_classes = []
-
         if script:
             # Sanity checks
             if '..' in script:
@@ -151,10 +152,15 @@ class Tester(MooseObject, OutputInterface):
             subclasses = module.ValidationCase._subclasses.copy()
             module.ValidationCase._subclasses = []
             for subclass in subclasses:
+                validation_params = subclass.validParams()
+
                 params += subclass.validParams()
                 validation_classes.append(subclass)
 
+        # Store the classes that are used in validation so that they
+        # can be constructed within the Job at a leter time
         params.addPrivateParam('_validation_classes', validation_classes)
+
         return params
 
     # This is what will be checked for when we look for valid testers
