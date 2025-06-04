@@ -27,6 +27,8 @@ Gaussian::validParams()
       "file_column_name", "Name of column in CSV file to use, by default first column is used.");
   params.addParam<std::vector<Real>>(
       "exp_values", "User-specified experimental values when CSV file is not provided.");
+  params.addParam<FileName>("exp_groups_file_name",
+                            "Name of the CSV file with the experimental group indicators.");
   return params;
 }
 
@@ -34,7 +36,7 @@ Gaussian::Gaussian(const InputParameters & parameters)
   : LikelihoodFunctionBase(parameters),
     ReporterInterface(this),
     _log_likelihood(getParam<bool>("log_likelihood")),
-    _noise(getReporterValue<Real>("noise"))
+    _noise(getReporterValue<std::vector<Real>>("noise"))
 {
   if (isParamValid("exp_values") && isParamValid("file_name"))
     paramError("exp_values", "exp_values and file_name both cannot be set at the same time.");
@@ -52,19 +54,33 @@ Gaussian::Gaussian(const InputParameters & parameters)
   else
     mooseError("Either 'exp_values' or 'file_name' parameters must be specified to represent "
                "experimental data.");
+  // Read the experimental group indicators
+  if (isParamValid("exp_groups_file_name"))
+  {
+    MooseUtils::DelimitedFileReader reader1(getParam<FileName>("exp_groups_file_name"));
+    reader1.read();
+    _exp_groups = reader1.getData(0);
+    if (_exp_groups.size() != _exp_values.size())
+      mooseError("The number of rows in exp_groups_file_name should match those in file_name or exp_values.");
+  }
+  else
+    _exp_groups.assign(_exp_values.size(), 0);
 }
 
 Real
 Gaussian::function(const std::vector<Real> & exp,
+                   const std::vector<Real> & exp_group,
                    const std::vector<Real> & model,
-                   const Real & noise,
+                   const std::vector<Real> & noise,
                    const bool & log_likelihood)
 {
   Real result = 0.0;
   Real val1;
+  unsigned int group_ind;
   for (unsigned i = 0; i < exp.size(); ++i)
   {
-    val1 = Normal::pdf(exp[i], model[i], noise);
+    group_ind = exp_group[i];
+    val1 = Normal::pdf(exp[i], model[i], noise[group_ind]);
     val1 = std::log(val1);
     result += val1;
   }
@@ -76,5 +92,5 @@ Gaussian::function(const std::vector<Real> & exp,
 Real
 Gaussian::function(const std::vector<Real> & x) const
 {
-  return function(_exp_values, x, _noise, _log_likelihood);
+  return function(_exp_values, _exp_groups, x, _noise, _log_likelihood);
 }

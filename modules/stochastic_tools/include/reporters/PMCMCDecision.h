@@ -75,10 +75,10 @@ protected:
   std::vector<Real> & _tpm;
 
   /// Model variance term
-  std::vector<Real> & _variance;
+  std::vector<std::vector<Real>> & _variance;
 
   /// Model noise term to pass to Likelihoods object
-  Real & _noise;
+  std::vector<Real> & _noise;
 
   /// Storage for the likelihood objects to be utilized
   std::vector<const LikelihoodFunctionBase *> _likelihoods;
@@ -96,7 +96,7 @@ protected:
   const std::vector<Real> & _rnd_vec;
 
   /// Storage for new proposed variance samples
-  const std::vector<Real> & _new_var_samples;
+  const std::vector<std::vector<Real>> & _new_var_samples;
 
   /// Storage for the priors
   const std::vector<const Distribution *> _priors;
@@ -114,10 +114,13 @@ protected:
   DenseMatrix<Real> _data_prev;
 
   /// Storage for previous variances
-  std::vector<Real> _var_prev;
+  std::vector<std::vector<Real>> _var_prev;
 
   /// Storage for previous outputs
   std::vector<Real> _outputs_prev;
+
+  /// Number of variances to calibrate
+  unsigned int _num_variances;
 
 private:
   /// Communicator that was split based on samples that have rows

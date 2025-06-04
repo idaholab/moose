@@ -70,8 +70,8 @@
   []
   [noise_specified]
     type = ConstantReporter
-    real_names = 'noise_specified'
-    real_values = '0.05'
+    real_vector_names = 'noise_specified'
+    real_vector_values = '0.05'
   []
   [mcmc_reporter]
     type = AffineInvariantStretchDecision

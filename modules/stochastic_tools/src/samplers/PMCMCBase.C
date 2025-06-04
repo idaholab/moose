@@ -36,6 +36,7 @@ PMCMCBase::validParams()
   params.addParam<std::vector<Real>>("upper_bound", "Upper bounds for making the next proposal.");
   params.addRequiredParam<std::vector<Real>>("initial_values",
                                              "The starting values of the inputs to be calibrated.");
+  params.addParam<unsigned int>("num_exp_groups", 1, "The number of experimental groups.");
   params.addParam<unsigned int>(
       "num_random_seeds",
       100000,
@@ -53,6 +54,7 @@ PMCMCBase::PMCMCBase(const InputParameters & parameters)
                                              : nullptr),
     _check_step(0),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
+    _num_variances(getParam<unsigned int>("num_exp_groups")),
     _num_random_seeds(getParam<unsigned int>("num_random_seeds"))
 {
   // Filling the `priors` vector with the user-provided distributions.
@@ -92,8 +94,7 @@ PMCMCBase::PMCMCBase(const InputParameters & parameters)
   _new_samples_confg.resize(_num_parallel_proposals * _confg_values[0].size(),
                             std::vector<Real>(_priors.size() + _confg_values.size(), 0.0));
   _rnd_vec.resize(_num_parallel_proposals);
-  _new_var_samples.assign(_num_parallel_proposals, 0.0);
-
+  _new_var_samples.resize(_num_variances, std::vector<Real>(_num_parallel_proposals, 0.0));
   setNumberOfRandomSeeds(_num_random_seeds);
 
   _check_step = 0;
@@ -185,10 +186,16 @@ PMCMCBase::getRandomNumbers() const
   return _rnd_vec;
 }
 
-const std::vector<Real> &
+const std::vector<std::vector<Real>> &
 PMCMCBase::getVarSamples() const
 {
   return _new_var_samples;
+}
+
+const unsigned int &
+PMCMCBase::getNumExpGroups() const
+{
+  return _num_variances;
 }
 
 const std::vector<const Distribution *>
