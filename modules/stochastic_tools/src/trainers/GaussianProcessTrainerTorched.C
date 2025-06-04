@@ -136,20 +136,24 @@ GaussianProcessTrainerTorched::postTrain()
       _training_data(ii, jj) = _data_buffer[ii][jj];
   }
 
-  unsigned int num_samples = _params_buffer.size();
-  unsigned int num_inputs = _n_dims;
-
   auto options = torch::TensorOptions().dtype(at::kDouble);
-  torch::Tensor data_tensor =
-      torch::from_blob(_params_buffer.data(), {num_samples, num_inputs}, options).to(at::kDouble);
   torch::Tensor training_tensor =
-      torch::from_blob(_training_params.data(), {num_samples, num_inputs}, options).to(at::kDouble);
+      torch::from_blob(
+          _training_params.data(), {_training_params.cols(), _training_params.rows()}, options)
+          .clone();
+  torch::Tensor training_tensor_transposed = training_tensor.transpose(1, 0);
+
   torch::Tensor training_data_tensor =
-      torch::from_blob(_training_data.data(), {num_samples, num_inputs}, options).to(at::kDouble);
+      torch::from_blob(
+          _training_data.data(), {_training_data.rows(), _training_data.cols()}, options)
+          .to(at::kDouble);
 
   // Standardize (center and scale) training params
+
+  // TODO: After standardizing param and data tensor, update values of Eigen::matrix versions to
+  // match
   if (_standardize_params)
-    _gp.standardizeParameters(training_tensor);
+    _gp.standardizeParameters(training_tensor_transposed);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
     _gp.paramStandardizer().set(0, 1, _n_dims);
@@ -162,5 +166,16 @@ GaussianProcessTrainerTorched::postTrain()
     _gp.dataStandardizer().set(0, 1, _n_outputs);
 
   // Setup the covariance
-  _gp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
+  _gp.setupCovarianceMatrix(training_tensor_transposed, training_data_tensor, _optimization_opts);
+
+  // Update _training_params with values from tensor. Once _training_params is replaced with a
+  // torch::Tensor remove this
+  auto training_accessor = training_tensor_transposed.accessor<Real, 2>();
+  for (unsigned int ii = 0; ii < training_tensor_transposed.sizes()[0]; ii++)
+  {
+    for (unsigned int jj = 0; jj < training_tensor_transposed.sizes()[1]; jj++)
+    {
+      _training_params(ii, jj) = training_accessor[ii][jj];
+    }
+  }
 }

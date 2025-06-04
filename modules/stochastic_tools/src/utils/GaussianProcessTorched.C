@@ -67,31 +67,28 @@ GaussianProcessTorched::linkCovarianceFunction(CovarianceFunctionBase * covarian
 }
 
 void
-GaussianProcessTorched::setupCovarianceMatrix(const RealEigenMatrix & training_params,
-                                              const RealEigenMatrix & training_data,
+GaussianProcessTorched::setupCovarianceMatrix(const torch::Tensor & training_params,
+                                              const torch::Tensor & training_data,
                                               const GPOptimizerOptions & opts)
 {
-  const bool batch_decision = opts.batch_size > 0 && (opts.batch_size <= training_params.rows());
-  _batch_size = batch_decision ? opts.batch_size : training_params.rows();
+  const bool batch_decision =
+      opts.batch_size > 0 && (opts.batch_size <= training_params.sizes()[0]);
+  _batch_size = batch_decision ? opts.batch_size : training_params.sizes()[0];
   _K.resize(_num_outputs * _batch_size, _num_outputs * _batch_size);
 
   if (_tuning_data.size())
     tuneHyperParamsAdam(training_params, training_data, opts);
 
-  _K.resize(training_params.rows() * training_data.cols(),
-            training_params.rows() * training_data.cols());
-  _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
+  _K.resize(training_params.sizes()[0] * training_data.sizes()[1],
+            training_params.sizes()[0] * training_data.sizes()[1]);
+  Real * data = training_params.data_ptr<Real>();
+  Eigen::Map<RealEigenMatrix> training_matrix(
+      data, training_params.sizes()[0], training_params.sizes()[1]);
+  _covariance_function->computeCovarianceMatrix(_K, training_matrix, training_matrix, true);
 
-  RealEigenMatrix flattened_data =
-      training_data.reshaped(training_params.rows() * training_data.cols(), 1);
-
-  // Compute the Cholesky decomposition and inverse action of the covariance matrix
-  auto options = torch::TensorOptions().dtype(at::kDouble);
-  unsigned int num_samples = flattened_data.size();
-  unsigned int num_inputs = 1;
   torch::Tensor flattened_tensor =
-      torch::from_blob(flattened_data.data(), {num_samples, num_inputs}, options).to(at::kDouble);
-
+      torch::reshape(training_data, {training_params.sizes()[0] * training_data.sizes()[1], 1});
+  // Compute the Cholesky decomposition and inverse action of the covariance matrix
   setupStoredMatrices(flattened_tensor);
 
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
@@ -101,15 +98,13 @@ void
 GaussianProcessTorched::setupStoredMatrices(const torch::Tensor & input)
 {
   auto options = torch::TensorOptions().dtype(at::kDouble);
-  unsigned int num_samples = _K.size();
-  unsigned int num_inputs = 1;
   torch::Tensor _K_tensor =
-      torch::from_blob(_K.data(), {num_samples, num_inputs}, options).to(at::kDouble);
+      torch::from_blob(_K.data(), {_K.rows(), _K.cols()}, options).to(at::kDouble);
   // llt does the llt decomposition as part of the Cholesky module
   // If _K is replaced with a torch tensor this can be replaced with _K.cholesky()
-  auto _K_cho_decomp_copy = torch::linalg_cholesky(_K_tensor);
+  _K_cho_decomp = torch::linalg_cholesky(_K_tensor);
   // Replace with cholesky_solve()
-  auto _K_results_solve_copy = _K_cho_decomp_copy.cholesky_solve(input);
+  _K_results_solve = torch::cholesky_solve(input, _K_cho_decomp);
 }
 
 void
@@ -163,8 +158,8 @@ GaussianProcessTorched::standardizeData(torch::Tensor & data, bool keep_moments)
 }
 
 void
-GaussianProcessTorched::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
-                                            const RealEigenMatrix & training_data,
+GaussianProcessTorched::tuneHyperParamsAdam(const torch::Tensor & training_params,
+                                            const torch::Tensor & training_data,
                                             const GPOptimizerOptions & opts)
 {
   std::vector<Real> theta(_num_tunable, 0.0);
@@ -187,10 +182,10 @@ GaussianProcessTorched::tuneHyperParamsAdam(const RealEigenMatrix & training_par
   std::vector<Real> grad1;
 
   // Initialize randomizer
-  std::vector<unsigned int> v_sequence(training_params.rows());
+  std::vector<unsigned int> v_sequence(training_params.sizes()[0]);
   std::iota(std::begin(v_sequence), std::end(v_sequence), 0);
-  RealEigenMatrix inputs(_batch_size, training_params.cols());
-  RealEigenMatrix outputs(_batch_size, training_data.cols());
+  RealEigenMatrix inputs(_batch_size, training_params.sizes()[1]);
+  RealEigenMatrix outputs(_batch_size, training_data.sizes()[1]);
   if (opts.show_every_nth_iteration)
     Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING Adam" << std::endl;
   for (unsigned int ss = 0; ss < opts.num_iter; ++ss)
@@ -202,11 +197,21 @@ GaussianProcessTorched::tuneHyperParamsAdam(const RealEigenMatrix & training_par
     MooseUtils::shuffle<unsigned int>(v_sequence, generator, 0);
     for (unsigned int ii = 0; ii < _batch_size; ++ii)
     {
-      for (unsigned int jj = 0; jj < training_params.cols(); ++jj)
-        inputs(ii, jj) = training_params(v_sequence[ii], jj);
+      for (unsigned int jj = 0; jj < training_params.sizes()[1]; ++jj)
+      {
+        // inputs(ii, jj) = training_params(v_sequence[ii], jj);
+        auto tensor_accessor = training_params.accessor<float, 2>();
+        inputs(ii, jj) =
+            tensor_accessor[ii][jj]; // training_params.data_ptr<Real>()[v_sequence[ii]][jj];
+      }
 
-      for (unsigned int jj = 0; jj < training_data.cols(); ++jj)
-        outputs(ii, jj) = training_data(v_sequence[ii], jj);
+      for (unsigned int jj = 0; jj < training_data.sizes()[1]; ++jj)
+      {
+        // outputs(ii, jj) = training_data(v_sequence[ii], jj);
+        auto tensor_accessor = training_data.accessor<float, 2>();
+        outputs(ii, jj) =
+            tensor_accessor[ii][jj]; // training_data.data_ptr<Real>()[v_sequence[ii]][jj];
+      }
     }
 
     store_loss = getLoss(inputs, outputs);
@@ -260,7 +265,8 @@ GaussianProcessTorched::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outp
   setupStoredMatrices(flattened_tensor);
 
   Real log_likelihood = 0;
-  log_likelihood += -(flattened_data.transpose() * _K_results_solve)(0, 0);
+  log_likelihood +=
+      -(torch::mm(torch::transpose(flattened_tensor, 0, 1), _K_results_solve)).data_ptr<Real>()[0];
   log_likelihood += -std::log(_K.determinant());
   log_likelihood -= _batch_size * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
@@ -270,8 +276,9 @@ GaussianProcessTorched::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outp
 std::vector<Real>
 GaussianProcessTorched::getGradient(RealEigenMatrix & inputs) const
 {
-  RealEigenMatrix dKdhp(_batch_size, _batch_size);
-  RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
+  torch::Tensor dKdhp = torch::empty({_batch_size, _batch_size}, at::kDouble);
+  RealEigenMatrix dKdhp_matrix(_batch_size, _batch_size);
+  torch::Tensor alpha = torch::mm(_K_results_solve, torch::transpose(_K_results_solve, 0, 1));
   std::vector<Real> grad_vec;
   grad_vec.resize(_num_tunable);
   for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
@@ -282,9 +289,14 @@ GaussianProcessTorched::getGradient(RealEigenMatrix & inputs) const
     for (unsigned int ii = 0; ii < num_entries; ++ii)
     {
       const auto global_index = first_index + ii;
-      _covariance_function->computedKdhyper(dKdhp, inputs, hyper_param_name, ii);
-      RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
-      grad_vec[global_index] = -tmp.trace() / 2.0;
+      _covariance_function->computedKdhyper(dKdhp_matrix, inputs, hyper_param_name, ii);
+      // This is just temporary. Convert dKhp_matrix to tensor
+      auto options = torch::TensorOptions().dtype(at::kDouble);
+      torch::Tensor dKdhp_tensor =
+          torch::from_blob(dKdhp_matrix.data(), {_batch_size, _batch_size}, options)
+              .to(at::kDouble);
+      torch::Tensor tmp = torch::mm(alpha, dKdhp) - torch::cholesky_solve(dKdhp, _K_cho_decomp);
+      grad_vec[global_index] = -1 * (torch::trace(tmp).data_ptr<Real>()[0] / 2.0);
     }
   }
   return grad_vec;
@@ -338,21 +350,22 @@ GaussianProcessTorched::vecToMap(
 /*
 template <>
 void
-dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
+dataStore(std::ostream & stream, torch::Tensor & decomp, void * context)
 {
   // Store the L matrix as opposed to the full matrix to avoid compounding
   // roundoff error and decomposition error
-  RealEigenMatrix L(decomp.matrixL());
+  // torch::Tensor L(decomp.matrixL());
+  torch::Tensor L = decomp;
   dataStore(stream, L, context);
 }
 
 template <>
 void
-dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
+dataLoad(std::istream & stream, torch::Tensor & decomp, void * context)
 {
-  RealEigenMatrix L;
+  torch::Tensor L;
   dataLoad(stream, L, context);
-  decomp.compute(L * L.transpose());
+  decomp = torch::linalg_cholesky((torch::mm(L, torch::transpose(L, 0, 1))));
 }
 */
 
@@ -370,8 +383,8 @@ dataStore(std::ostream & stream,
   dataStore(stream, gp_utils.dependentCovarNames(), context);
   dataStore(stream, gp_utils.dependentCovarTypes(), context);
   dataStore(stream, gp_utils.K(), context);
-  dataStore(stream, gp_utils.KResultsSolve(), context);
-  dataStore(stream, gp_utils.KCholeskyDecomp(), context);
+  // dataStore(stream, gp_utils.KResultsSolve(), context);
+  // dataStore(stream, gp_utils.KCholeskyDecomp(), context);
   dataStore(stream, gp_utils.paramStandardizer(), context);
   dataStore(stream, gp_utils.dataStandardizer(), context);
 }
@@ -390,8 +403,8 @@ dataLoad(std::istream & stream,
   dataLoad(stream, gp_utils.dependentCovarNames(), context);
   dataLoad(stream, gp_utils.dependentCovarTypes(), context);
   dataLoad(stream, gp_utils.K(), context);
-  dataLoad(stream, gp_utils.KResultsSolve(), context);
-  dataLoad(stream, gp_utils.KCholeskyDecomp(), context);
+  // dataLoad(stream, gp_utils.KResultsSolve(), context);
+  // dataLoad(stream, gp_utils.KCholeskyDecomp(), context);
   dataLoad(stream, gp_utils.paramStandardizer(), context);
   dataLoad(stream, gp_utils.dataStandardizer(), context);
 }
