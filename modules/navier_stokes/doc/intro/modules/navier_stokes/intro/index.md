@@ -49,6 +49,25 @@ Utilizes the following techniques:
 
 !---
 
+# Applicability of each solver
+
+Nonlinear (Newton method) finite volume
+
+- 2D problems
+- only solver with support for porous medium
+- turbulence models (mixing-length, k-$\epsilon$)
+- fully compressible flow problems
+
+Linear (SIMPLE/PIMPLE) finite volume
+
+- 3D problems
+
+You can check that the combination of models you want is supported [in Table 2 on this page](modules/navier_stokes/index.md)
+The nonlinear (SIMPLE/PIMPLE) finite volume is being replaced by the linear implementation. It is currently still only used for
+two-phase flow studies.
+
+!---
+
 # The Porous Navier-Stokes equations  ([!cite](vafai2015handbook), [!cite](radman2021development))
   style=font-size:24pt
 
@@ -286,7 +305,7 @@ style=font-size:28pt
 
 !style! fontsize=70%
 
-- Check that the combination of modules you want is supported [in Table 2 there](modules/navier_stokes/index.md)
+- Check that the combination of models you want is supported [in Table 2 there](modules/navier_stokes/index.md)
 - Start from an example. If no example, find a test that looks similar.
 - If possible, use the Navier Stokes finite volume `Physics` syntax
 - Use Rhie-Chow interpolation for the advecting velocity
@@ -307,5 +326,13 @@ style=font-size:28pt
 !style! fontsize=60%
 $^*$ Because the complexity of the LU preconditioner is $N^3$ in the worst case scenario, its performance in general largely depends on the matrix sparsity pattern, and it is much more expensive compared with an iterative approach.
 !style-end!
+
+!---
+
+# Validation studies and additional examples
+
+[Turbulence modeling for Molten Salt Reactors](https://www.sciencedirect.com/science/article/pii/S0029549324008872)
+
+Open-Pronghorn flow test bed (to be released soon)
 
 !---
