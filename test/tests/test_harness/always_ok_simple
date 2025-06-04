@@ -1,0 +1,6 @@
+[Tests]
+  [test]
+    type = RunCommand
+    command = 'echo foo'
+  []
+[]
