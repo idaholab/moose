@@ -97,8 +97,8 @@ public:
    *                      covariance matrix.
    * @param opts The optimizer options.
    */
-  void setupCovarianceMatrix(const RealEigenMatrix & training_params,
-                             const RealEigenMatrix & training_data,
+  void setupCovarianceMatrix(const torch::Tensor & training_params,
+                             const torch::Tensor & training_data,
                              const GPOptimizerOptions & opts);
 
   /**
@@ -140,8 +140,8 @@ public:
   void standardizeData(torch::Tensor & data, bool keep_moments = false);
 
   // Tune hyperparameters using Adam
-  void tuneHyperParamsAdam(const RealEigenMatrix & training_params,
-                           const RealEigenMatrix & training_data,
+  void tuneHyperParamsAdam(const torch::Tensor & training_params,
+                           const torch::Tensor & training_data,
                            const GPOptimizerOptions & opts);
 
   // Computes the loss function
@@ -180,8 +180,8 @@ public:
     return _data_standardizer;
   }
   const RealEigenMatrix & getK() const { return _K; }
-  const RealEigenMatrix & getKResultsSolve() const { return _K_results_solve; }
-  const Eigen::LLT<RealEigenMatrix> & getKCholeskyDecomp() const { return _K_cho_decomp; }
+  const torch::Tensor & getKResultsSolve() const { return _K_results_solve; }
+  const torch::Tensor & getKCholeskyDecomp() const { return _K_cho_decomp; }
   const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
   const CovarianceFunctionBase * getCovarFunctionPtr() const { return _covariance_function; }
   const std::string & getCovarType() const { return _covar_type; }
@@ -211,8 +211,8 @@ public:
   StochasticToolsTorched::StandardizerTorched & paramStandardizer() { return _param_standardizer; }
   StochasticToolsTorched::StandardizerTorched & dataStandardizer() { return _data_standardizer; }
   RealEigenMatrix & K() { return _K; }
-  RealEigenMatrix & KResultsSolve() { return _K_results_solve; }
-  Eigen::LLT<RealEigenMatrix> & KCholeskyDecomp() { return _K_cho_decomp; }
+  torch::Tensor & KResultsSolve() { return _K_results_solve; }
+  torch::Tensor & KCholeskyDecomp() { return _K_cho_decomp; }
   CovarianceFunctionBase * covarFunctionPtr() { return _covariance_function; }
   CovarianceFunctionBase & covarFunction() { return *_covariance_function; }
   std::string & covarType() { return _covar_type; }
@@ -272,10 +272,10 @@ protected:
   RealEigenMatrix _K;
 
   /// A solve of Ax=b via Cholesky.
-  RealEigenMatrix _K_results_solve;
+  torch::Tensor _K_results_solve;
 
   /// Cholesky decomposition Eigen object
-  Eigen::LLT<RealEigenMatrix> _K_cho_decomp;
+  torch::Tensor _K_cho_decomp;
 
   /// Paramaters (x) used for training, along with statistics
   const RealEigenMatrix * _training_params;
@@ -291,9 +291,9 @@ protected:
 
 /*
 template <>
-void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
+void dataStore(std::ostream & stream, torch::Tensor & decomp, void * context);
 template <>
-void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
+void dataLoad(std::istream & stream, torch::Tensor & decomp, void * context);
 */
 
 template <>
