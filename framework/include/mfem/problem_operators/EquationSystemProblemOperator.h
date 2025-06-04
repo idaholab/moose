@@ -13,6 +13,7 @@
 
 #include "ProblemOperator.h"
 #include "EquationSystemInterface.h"
+#include "MFEMEstimator.h"
 
 namespace Moose::MFEM
 {
@@ -29,6 +30,14 @@ public:
   void Init(mfem::BlockVector & X) override;
   virtual void Solve() override;
 
+  //! Call this with the parameters for the Estimator
+  void AddEstimator(std::shared_ptr<MFEMEstimator> estimator) override;
+  void SetUpAMR() override;
+  bool HRefine()  override;
+  bool PRefine(std::shared_ptr<mfem::ParFiniteElementSpace> fespace) override;
+
+  ~EquationSystemProblemOperator() override = default;
+
   [[nodiscard]] Moose::MFEM::EquationSystem * GetEquationSystem() const override
   {
     if (!_equation_system)
@@ -40,7 +49,10 @@ public:
   }
 
 private:
+  bool _use_amr{false};
   std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};
+  std::shared_ptr<MFEMEstimator>               _estimator;
+  std::unique_ptr<mfem::ThresholdRefiner>      _refiner;
 };
 
 } // namespace Moose::MFEM

@@ -62,6 +62,9 @@ public:
   const std::vector<std::string> & GetTrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
+  // Update all forms after changing the mesh
+  virtual void UpdateEquationSystem();
+
 protected:
   /// Add test variable to EquationSystem.
   virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
