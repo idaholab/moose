@@ -12,7 +12,7 @@ TEST(StochasticToolsTorched, getMean)
   const std::vector<double> stddev_gold = {1.0, 0.0};
 
   torch::Tensor input_tensor = torch::tensor(
-      {{1.0, -1.0}, {1.0, -1.0}, {1.0, -1.0}, {-1.0, -1.0}, {-1.0, -1.0}, {-1.0, -1.0}},
+      {{1.0, -1.0}, {-1.0, -1.0}, {1.0, -1.0}, {-1.0, -1.0}, {1.0, -1.0}, {-1.0, -1.0}},
       {torch::kFloat64});
 
   StochasticToolsTorched::StandardizerTorched torch;
@@ -20,7 +20,7 @@ TEST(StochasticToolsTorched, getMean)
 
   auto mean = torch.getMean();
   auto stddev = torch.getStdDev();
-  unsigned int n = mean.size(-1);
+  unsigned int n = mean.sizes()[1];
   for (unsigned int i = 0; i < n; ++i)
   {
     EXPECT_EQ(mean[i].item<Real>(), mean_gold[i]);
@@ -37,6 +37,7 @@ TEST(StochasticToolsTorched, getStandardized)
   StochasticToolsTorched::StandardizerTorched torch;
   torch.computeSet(input_tensor);
   torch.getStandardized(input_tensor);
+
   for (unsigned int i = 0; i < gold.size(); ++i)
   {
     EXPECT_EQ(input_tensor.data_ptr<Real>()[i], gold[i]);
