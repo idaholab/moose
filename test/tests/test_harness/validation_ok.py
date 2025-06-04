@@ -26,7 +26,7 @@ class TestCase(ValidationCase):
     def initialize(self):
         # Get the CSV file that the CSVDiff tester produces. We could manually
         # search for the file, but instead we use getTesterOutputs() to get
-        # the paths to theoutput files that the TestHarness Tester was reading
+        # the paths to the output files that the TestHarness Tester was reading
         # from (in this case, from the CSVDiff)
         csv_file = self.getTesterOutputs(extension='csv')[0]
         df = pd.read_csv(csv_file)
