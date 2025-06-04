@@ -178,9 +178,38 @@ CSGBase::checkRegionSurfaces(const CSGRegion & region)
   }
 }
 
+void
+CSGBase::checkUnlinkedUniverses() const
+{
+  std::vector<std::string> linked_universe_names;
+
+  // Recursively figure out which universe names are linked to root universe
+  getLinkedUniverses(getRootUniverse(), linked_universe_names);
+
+  // Iterate through all universes in universe list and check that they exist in universes linked
+  // to root universe list
+  for (const auto & [name, univ_ptr] : getAllUniverses())
+    if (std::find(linked_universe_names.begin(), linked_universe_names.end(), name) ==
+        linked_universe_names.end())
+      mooseWarning("Universe with name ", name, " is not linked to root universe.");
+}
+
+void
+CSGBase::getLinkedUniverses(const std::shared_ptr<CSGUniverse> & univ,
+                            std::vector<std::string> & linked_universe_names) const
+{
+  linked_universe_names.push_back(univ->getName());
+  const auto univ_cells = univ->getAllCells();
+  for (const auto & cell : univ_cells)
+    if (cell->getFillType() == CSGCell::FillType::UNIVERSE)
+      getLinkedUniverses(cell->getFillUniverse(), linked_universe_names);
+}
+
 nlohmann::json
 CSGBase::generateOutput() const
 {
+  checkUnlinkedUniverses();
+
   nlohmann::json csg_json;
 
   csg_json["SURFACES"] = {};
