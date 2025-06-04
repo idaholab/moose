@@ -86,5 +86,5 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertIn('Encountered exception(s) while running tests', validation_output)
 
     def testBadPython(self):
-        out = self.runTests('-i', 'validation', '--re', 'bad_python'),output
-        self.assertIn('validation:   invalid syntax (validation_badpython.py, line 1)', out)
+        out = self.runTests('-i', 'validation_bad_python').output
+        self.assertIn('validation_bad_python:   invalid syntax (validation_badpython.py, line 1)', out)

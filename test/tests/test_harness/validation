@@ -18,9 +18,4 @@
     command = 'echo foo'
     validation_test = validation_exception.py
   []
-  [bad_python]
-    type = RunCommand
-    command = 'echo foo'
-    validation_test = validation_badpython.py
-  []
 []
