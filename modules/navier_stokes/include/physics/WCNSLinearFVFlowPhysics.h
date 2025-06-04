@@ -59,6 +59,7 @@ private:
   virtual bool hasForchheimerFriction() const override { return false; };
 
   virtual void addRhieChowUserObjects() override;
+  virtual void addFunctorMaterials() override;
 
   virtual MooseFunctorName getLinearFrictionCoefName() const override
   {
