@@ -1,3 +1,5 @@
+#pragma once
+
 // If VTK is built without an external nlohmann, then it assumes it
 // will never be compiled against another nlohmann, and it includes
 // its own copy but modified with macro tricks.  We have probably
