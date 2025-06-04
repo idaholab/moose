@@ -122,7 +122,7 @@ class Parser:
         # Check for unused parameters
         for key, _ in node.params():
             if key not in params:
-                self.error(f'unused parameter {key}', node=node, param=key)
+                self.error(f'unused parameter "{key}"', node=node, param=key)
 
         # Check for missing required parameters
         params_parsed = params['_params_parsed']
