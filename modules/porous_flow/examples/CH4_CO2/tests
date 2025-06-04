@@ -1,0 +1,12 @@
+[Tests]
+  [mixed_gas]
+    type = CSVDiff
+    input = 'CH4_CO2_vertical.i'
+    csvdiff = 'CH4_CO2_vertical_CSV_props_0001.csv'
+    cli_args = ' Executioner/num_steps=1 Outputs/sync_times=1000'
+    threading = '!pthreads'
+    issues = '#26795'
+    design = 'PorousFlowMultiComponentGasMixture.md'
+    requirement = 'The system shall be able to model a stratified gas mixture problem in a vertical porous media.'
+  []
+[]
