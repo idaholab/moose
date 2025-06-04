@@ -101,6 +101,47 @@ NavierStokesLHDGAssemblyHelper::NavierStokesLHDGAssemblyHelper(
   mvdi->addMooseVariableDependency(&const_cast<MooseVariableFE<RealVectorValue> &>(_grad_v_var));
   mvdi->addMooseVariableDependency(&const_cast<MooseVariableFE<Real> &>(_v_face_var));
   mvdi->addMooseVariableDependency(&const_cast<MooseVariableFE<Real> &>(_pressure_var));
+
+  const auto vel_type = _u_var.feType();
+  auto check_type = [&vel_type](const auto & var)
+  {
+    if (vel_type != var.feType())
+      mooseError(
+          var.name(),
+          "does not have the same finite element type as the x-component velocity. All scalar "
+          "field finite element types must be the same for the Navier-Stokes L-HDG implementation");
+  };
+  check_type(_v_var);
+  if (_w_var)
+    check_type(*_w_var);
+  check_type(_pressure_var);
+
+  const auto grad_type = _grad_u_var.feType();
+  auto check_grad_type = [&grad_type](const auto & var)
+  {
+    if (grad_type != var.feType())
+      mooseError(
+          var.name(),
+          "does not have the same finite element type as the x-component velocity gradient. All "
+          "vector field finite element types must be the same for the Navier-Stokes L-HDG "
+          "implementation");
+  };
+  check_grad_type(_grad_v_var);
+  if (_grad_w_var)
+    check_grad_type(*_grad_w_var);
+
+  const auto lm_type = _u_face_var.feType();
+  auto check_lm_type = [&lm_type](const auto & var)
+  {
+    if (lm_type != var.feType())
+      mooseError(var.name(),
+                 "does not have the same finite element type as the x-component face variable. All "
+                 "face variable finite element types must be the same for the Navier-Stokes L-HDG "
+                 "implementation");
+  };
+  check_lm_type(_v_face_var);
+  if (_w_face_var)
+    check_lm_type(*_w_face_var);
 }
 
 void
@@ -299,6 +340,10 @@ NavierStokesLHDGAssemblyHelper::pressureFaceJacobian(const MooseArray<Real> & Jx
                                                      DenseMatrix<Number> & p_lm_u_vel_jac,
                                                      DenseMatrix<Number> & p_lm_v_vel_jac)
 {
+  mooseAssert((p_lm_u_vel_jac.m() == p_lm_v_vel_jac.m()) &&
+                  (p_lm_u_vel_jac.n() == p_lm_v_vel_jac.n()),
+              "We already checked that lm finite element types are the same, so these matrices "
+              "should be the same size");
   for (const auto i : make_range(p_lm_u_vel_jac.m()))
     for (const auto j : make_range(p_lm_u_vel_jac.n()))
       for (const auto qp : make_range(qrule_face.n_points()))
