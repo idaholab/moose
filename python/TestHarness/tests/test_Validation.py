@@ -88,3 +88,7 @@ class TestHarnessTester(TestHarnessTestCase):
     def testBadPython(self):
         out = self.runTests('-i', 'validation_bad_python').output
         self.assertIn('validation_bad_python:   invalid syntax (validation_badpython.py, line 1)', out)
+
+    def testDuplicateParam(self):
+        out = self.runTests('-i', 'validation_duplicate_param', check=False)
+        self.assertIn('Duplicate parameter "type" from validation test', out)

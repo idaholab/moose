@@ -154,7 +154,14 @@ class Tester(MooseObject, OutputInterface):
             for subclass in subclasses:
                 validation_params = subclass.validParams()
 
+                # Don't allow duplicates
+                for key in validation_params.keys():
+                    if key in params:
+                        raise Exception(f'Duplicate parameter "{key}" from validation test')
+
+                # Extend this Tester's parameters
                 params += subclass.validParams()
+                # Store the class so that it can be used later
                 validation_classes.append(subclass)
 
         # Store the classes that are used in validation so that they
