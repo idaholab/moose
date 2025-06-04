@@ -145,4 +145,14 @@
       mesh_mode = REPLICATED
     []
   []
+  [warnings]
+    requirement = 'The system shall report a warning when generating a mesh in CSG only mode when'
+    [unlinked_universes]
+      type = 'RunException'
+      input = 'csg_cylinders_join_unlinked_universes.i'
+      detail = ' a universe is created in the CSGBase object that is not linked to the root universe.'
+      cli_args = '--csg-only'
+      expect_err = "Universe with name YCyls_univ is not linked to root universe."
+    []
+  []
 []

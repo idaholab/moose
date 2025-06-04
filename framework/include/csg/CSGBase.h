@@ -363,6 +363,18 @@ public:
   nlohmann::json generateOutput() const;
 
 private:
+  /// Check universes linked to root universe match universes defined in _universe_list
+  void checkUnlinkedUniverses() const;
+
+  /**
+   * @brief Recursive method to retrieve all universes linked to current universe
+   *
+   * @param univ Pointer to universe under consideration
+   * @param linked_universe_name List of universe names linked to current universe
+   */
+  void getLinkedUniverses(const std::shared_ptr<CSGUniverse> & univ,
+                          std::vector<std::string> & linked_universe_names) const;
+
   /**
    * @brief Get the CSGSurfaceList object
    *
