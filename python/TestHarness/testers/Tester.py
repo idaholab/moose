@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os, sys, shutil, json
+import re, os, sys, shutil, json, importlib.util
 import mooseutils
 from TestHarness import OutputInterface, util
 from TestHarness.StatusSystem import StatusSystem
@@ -120,6 +120,43 @@ class Tester(MooseObject, OutputInterface):
 
         return params
 
+    @staticmethod
+    def augmentParams(params):
+        script = params['validation_test']
+        validation_classes = []
+
+        if script:
+            # Sanity checks
+            if '..' in script:
+                message = f'validation_test={script} out of test directory'
+                raise Exception(message)
+            path = os.path.abspath(script)
+            if not os.path.exists(script):
+                message = f'validation_test={path} not found'
+                raise Exception(message)
+
+            # Load the script; throw an exception here if it fails
+            # so that the Parser can report a reasonable error
+            spec = importlib.util.spec_from_file_location(f'validation', path)
+            module = importlib.util.module_from_spec(spec)
+            try:
+                spec.loader.exec_module(module)
+            except Exception as e:
+                raise Exception(f'In validation_test={path}:\n{e}')
+
+            # Store each of the classes in the script that derives from
+            # ValidationCase, and add their parameters to this Tester's
+            # parameters
+            validation_classes = []
+            subclasses = module.ValidationCase._subclasses.copy()
+            module.ValidationCase._subclasses = []
+            for subclass in subclasses:
+                params += subclass.validParams()
+                validation_classes.append(subclass)
+
+        params.addPrivateParam('_validation_classes', validation_classes)
+        return params
+
     # This is what will be checked for when we look for valid testers
     IS_TESTER = True
 
@@ -175,6 +212,8 @@ class Tester(MooseObject, OutputInterface):
 
         # Paths to additional JSON metadata that can be collected
         self.json_metadata: dict[str, Tester.JSONMetadata] = {}
+
+        self._validation_classes = self.parameters()['_validation_classes']
 
     def getStatus(self):
         return self.test_status.getStatus()

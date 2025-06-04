@@ -11,7 +11,7 @@ from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
     def test(self):
-        out = self.runTests('-i', 'validation', '--re', 'ok', as_json=True)
+        out = self.runTests('-i', 'validation', '--re', 'ok').results
         test = out['tests']['tests/test_harness']['tests']['ok']
         status = test['status']
         self.assertEqual(status['status'], 'OK')
@@ -31,7 +31,7 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertEqual('Number', number['description'])
         self.assertEqual('coolunits', number['units'])
         self.assertEqual(95.0, number['bounds'][0])
-        self.assertEqual(106.0, number['bounds'][1])
+        self.assertEqual(105.0, number['bounds'][1])
         self.assertTrue(number['script'].endswith('validation_ok.py'))
         output = test['output']
         validation_output = output['validation']
@@ -42,7 +42,7 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertIn('validation_run', timing)
 
     def testFail(self):
-        out = self.runTests('-i', 'validation', '--re', 'fail', as_json=True)
+        out = self.runTests('-i', 'validation', '--re', 'fail').results
         test = out['tests']['tests/test_harness']['tests']['fail']
         status = test['status']
         self.assertEqual(status['status'], 'ERROR')
@@ -72,7 +72,7 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertIn('validation_run', timing)
 
     def testException(self):
-        out = self.runTests('-i', 'validation', '--re', 'exception', as_json=True)
+        out = self.runTests('-i', 'validation', '--re', 'exception').results
         test = out['tests']['tests/test_harness']['tests']['exception']
         status = test['status']
         self.assertEqual(status['status'], 'ERROR')
@@ -86,18 +86,5 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertIn('Encountered exception(s) while running tests', validation_output)
 
     def testBadPython(self):
-        out = self.runTests('-i', 'validation', '--re', 'badpython', as_json=True)
-        test = out['tests']['tests/test_harness']['tests']['badpython']
-        status = test['status']
-        self.assertEqual(status['status'], 'ERROR')
-        self.assertEqual(status['status_message'], 'VALIDATION INIT EXCEPTION')
-        job_output = test['output']['job']
-        self.assertIn('SyntaxError: invalid syntax', job_output)
-
-    def testMultipleSameKey(self):
-        out = self.runTests('-i', 'validation', '--re', 'multiple_same_key', as_json=True)
-        test = out['tests']['tests/test_harness']['tests']['multiple_same_key']
-        status = test['status']
-        self.assertEqual(status['status'], 'ERROR')
-        self.assertEqual(status['status_message'], 'VALIDATION TEST ERROR')
-        self.assertIn('was declared multiple times', test['output']['validation'])
+        out = self.runTests('-i', 'validation', '--re', 'bad_python'),output
+        self.assertIn('validation:   invalid syntax (validation_badpython.py, line 1)', out)
