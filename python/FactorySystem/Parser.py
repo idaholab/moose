@@ -69,6 +69,8 @@ class Parser:
             self.errors.append('{}: {}'.format(self.fname, msg))
 
     def extractParams(self, params, getpot_node):
+        # State that is kept within the parameters so that we
+        # can call this multiple times as we add in more parameters
         if not params.isValid('_have_parse_errors'):
             params.addPrivateParam('_have_parse_errors', False)
         if not params.isValid('_params_parsed'):
@@ -81,9 +83,14 @@ class Parser:
         have_err = False
         for key, value in getpot_node.params():
             param_path = os.path.join(getpot_node.fullpath, key)
+
+            # Parameter has already been parsed in the past; used
+            # when calling this multiple times
             if param_path in params_parsed:
                 continue
             params_parsed.add(key)
+
+            # Parameter is unused
             if key not in params:
                 continue
 
@@ -151,7 +158,7 @@ class Parser:
                     else:
                       params[key] = value
 
-            # Extract the parameters from the Getpot node
+            # Extract the parameters from the hit node
             self.extractParams(params, node)
 
             # Add factory and warehouse as private params of the object
@@ -162,9 +169,19 @@ class Parser:
 
             # Build the object
             try:
+                # Augment the parameters if needed. This allows an object
+                # to add additional parameters depending on its own parameters
+                # that have just been parsed
                 params = self.factory.augmentParams(moose_type, params)
+
+                # Extract any new parameters that may have been added
+                # from augmentParams()
                 self.extractParams(params, node)
+
+                # Check for unused parameters and parameter parse errors
                 self.checkParams(params, node)
+
+                # Build the object
                 moose_object = self.factory.create(moose_type, node.name, params)
 
                 # Put it in the warehouse
