@@ -42,9 +42,9 @@ class TestHarnessTester(TestHarnessTestCase):
     def testReplay(self):
         """ Test ability to replay back previous run results """
         with tempfile.TemporaryDirectory() as output_dir:
-            base_args = ['--verbose', '-c', '--timing', '--results-file', 'unittest_Replay', '-o', output_dir]
+            base_args = ['--verbose', '-c', '--results-file', 'unittest_Replay', '-o', output_dir]
             base_kwargs = {'tmp_output': False}
-            output_a = self.runTests(*base_args, '-i', 'always_ok', **base_kwargs)
+            output_a = self.runTests(*base_args, '-i', 'always_ok_simple', **base_kwargs)
             output_b = self.runTests(*base_args, '--show-last-run', **base_kwargs)
 
         # The only difference should be the total run time, so replace the run time
@@ -65,7 +65,7 @@ class TestHarnessTester(TestHarnessTestCase):
         with tempfile.TemporaryDirectory() as output_dir:
             base_args = ['--verbose', '--timing', '--results-file', 'unittest_Replay', '-o', output_dir]
             base_kwargs = {'tmp_output': False}
-            output_a = self.runTests(*base_args, '-i', 'always_ok', **base_kwargs)
+            output_a = self.runTests(*base_args, '-i', 'always_ok_simple', **base_kwargs)
             # --re=doesenotexist will produce no output (or rather different output than the above)
             output_b = self.runTests(*base_args, '--show-last-run', '--re=doesnotexist', **base_kwargs)
         self.assertIn('Ran 1 tests in', output_a)
