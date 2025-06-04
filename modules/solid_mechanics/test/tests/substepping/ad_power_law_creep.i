@@ -82,6 +82,9 @@
     # options for using substepping
     substep_strain_tolerance = 0.1
     max_inelastic_increment = 0.01
+    # output radial return materials
+    outputs = exodus
+    output_properties = "effective_creep_strain_rate effective_creep_strain"
   []
 []
 
@@ -96,11 +99,16 @@
   line_search = 'none'
 
   nl_max_its = 10
-  nl_rel_tol = 1e-6
+  nl_rel_tol = 1e-8
   nl_abs_tol = 1e-10
 
-  end_time = 0.1
+  end_time = 0.2
   dt = 0.1
+
+  [Predictor]
+    type = SimplePredictor
+    scale = 1
+  []
 []
 
 [Outputs]
