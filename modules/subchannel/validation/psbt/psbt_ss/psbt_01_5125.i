@@ -12,7 +12,7 @@ P_out = 14.74e6 # Pa
     type = SCMQuadSubChannelMeshGenerator
     nx = 6
     ny = 6
-    n_cells = 40
+    n_cells = 20
     pitch = 0.0126
     pin_diameter = 0.00950
     gap = 0.00095
@@ -20,54 +20,32 @@ P_out = 14.74e6 # Pa
     spacer_z = '0.0 0.229 0.457 0.686 0.914 1.143 1.372 1.600 1.829 2.057 2.286 2.515 2.743 2.972 3.200 3.429'
     spacer_k = '0.7 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4'
   []
-
-  [fuel_pins]
-    type = SCMQuadPinMeshGenerator
-    input = sub_channel
-    nx = 6
-    ny = 6
-    n_cells = 40
-    pitch = 0.0126
-    heated_length = 3.658
-  []
 []
 
 [AuxVariables]
   [mdot]
-    block = sub_channel
   []
   [SumWij]
-    block = sub_channel
   []
   [P]
-    block = sub_channel
   []
   [DP]
-    block = sub_channel
   []
   [h]
-    block = sub_channel
   []
   [T]
-    block = sub_channel
-  []
-  [Tpin]
-    block = fuel_pins
   []
   [rho]
-    block = sub_channel
-  []
-  [mu]
-    block = sub_channel
   []
   [S]
-    block = sub_channel
   []
   [w_perim]
-    block = sub_channel
   []
   [q_prime]
-    block = fuel_pins
+  []
+  [mu]
+  []
+  [displacement]
   []
 []
 
@@ -91,7 +69,6 @@ P_out = 14.74e6 # Pa
   segregated = false
   staggered_pressure = false
   monolithic_thermal = false
-  # interpolation_scheme = 'upwind'
   verbose_subchannel = true
 
 []
@@ -189,6 +166,7 @@ P_out = 14.74e6 # Pa
 
 [Outputs]
   exodus = true
+  csv = true
   [Temp_Out_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = T
@@ -217,6 +195,11 @@ P_out = 14.74e6 # Pa
     type = SubChannelDelta
     variable = P
     execute_on = "timestep_end"
+  []
+
+  [Total_power]
+    type = ElementIntegralVariablePostprocessor
+    variable = q_prime
   []
 []
 

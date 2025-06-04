@@ -43,13 +43,13 @@ P_out = 2.0e5 # Pa
   []
   [rho]
   []
+  [mu]
+  []
   [S]
   []
   [w_perim]
   []
   [q_prime]
-  []
-  [mu]
   []
   [displacement]
   []
@@ -70,15 +70,12 @@ P_out = 2.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-4
-  T_tol = 1.0e-4
   implicit = true
   segregated = false
   staggered_pressure = false
   monolithic_thermal = false
   verbose_multiapps = true
   verbose_subchannel = true
-  interpolation_scheme = 'upwind'
 []
 
 [ICs]
@@ -176,85 +173,96 @@ P_out = 2.0e5 # Pa
 []
 
 [Postprocessors]
-  [T1]
-    type = SubChannelPointValue
-    variable = T
-    index = 37
-    execute_on = "timestep_end"
-    height = 0.9144
-  []
-  [T2]
-    type = SubChannelPointValue
-    variable = T
-    index = 36
-    execute_on = "timestep_end"
-    height = 0.9144
-  []
-  [T3]
-    type = SubChannelPointValue
-    variable = T
-    index = 20
-    execute_on = "timestep_end"
-    height = 0.9144
-  []
-  [T4]
-    type = SubChannelPointValue
-    variable = T
-    index = 10
-    execute_on = "timestep_end"
-    height = 0.9144
-  []
-  [T5]
-    type = SubChannelPointValue
-    variable = T
-    index = 4
-    execute_on = "timestep_end"
-    height = 0.9144
-  []
-  [T6]
-    type = SubChannelPointValue
-    variable = T
-    index = 1
-    execute_on = "timestep_end"
-    height = 0.9144
-  []
-  [T7]
-    type = SubChannelPointValue
-    variable = T
-    index = 14
-    execute_on = "timestep_end"
-    height = 0.9144
-  []
-  [T8]
-    type = SubChannelPointValue
-    variable = T
-    index = 28
-    execute_on = "timestep_end"
-    height = 0.9144
-  []
+  # [T1]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 37
+  #   execute_on = "timestep_end"
+  #   height = 1.016
+  # []
+  # [T2]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 36
+  #   execute_on = "timestep_end"
+  #   height = 1.016
+  # []
+  # [T3]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 20
+  #   execute_on = "timestep_end"
+  #   height = 1.016
+  # []
+  # [T4]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 10
+  #   execute_on = "timestep_end"
+  #   height = 1.016
+  # []
+  # [T5]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 4
+  #   execute_on = "timestep_end"
+  #   height = 1.016
+  # []
+  # [T6]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 1
+  #   execute_on = "timestep_end"
+  #   height = 1.016
+  # []
+  # [T7]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 14
+  #   execute_on = "timestep_end"
+  #   height = 1.016
+  # []
+  # [T8]
+  #   type = SubChannelPointValue
+  #   variable = T
+  #   index = 28
+  #   execute_on = "timestep_end"
+  #   height = 1.016
+  # []
   ####### Assembly pressure drop
   [DP_SubchannelDelta]
     type = SubChannelDelta
     variable = P
     execute_on = 'TIMESTEP_END'
   []
-[]
-################################################################################
-# A multiapp that projects data to a detailed mesh
-################################################################################
+  #####
+  [Mean_Temp]
+    type = SCMPlanarMean
+    variable = T
+    height = 2
+  []
 
-[MultiApps]
-  [viz]
-    type = FullSolveMultiApp
-    input_files = "3d_ORNL_19.i"
-    execute_on = "timestep_end"
+  [Total_power]
+    type = ElementIntegralVariablePostprocessor
+    variable = q_prime
   []
 []
+# ################################################################################
+# # A multiapp that projects data to a detailed mesh
+# ################################################################################
 
-[Transfers]
-  [xfer]
-    type = SCMSolutionTransfer
-    to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
-  []
-[]
+# [MultiApps]
+#   [viz]
+#     type = FullSolveMultiApp
+#     input_files = "3d_ORNL_19.i"
+#     execute_on = "timestep_end"
+#   []
+# []
+
+# [Transfers]
+#   [xfer]
+#     type = SCMSolutionTransfer
+#     to_multi_app = viz
+#     variable = 'mdot SumWij P DP h T rho mu q_prime S'
+#   []
+# []

@@ -104,17 +104,30 @@ SCMTriPowerAux::initialSetup()
     auto z1 = z_grid[iz - 1];
     Point p1(0, 0, z1 - unheated_length_entry);
     Point p2(0, 0, z2 - unheated_length_entry);
-    // cycle through pins
 
-    if (z2 > unheated_length_entry && z2 <= unheated_length_entry + heated_length)
+    if (z2 > unheated_length_entry && z1 < unheated_length_entry + heated_length)
     {
+      // cycle through pins
       for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
       {
+        auto heat1 = _axial_heat_rate.value(_t, p1);
+        auto heat2 = _axial_heat_rate.value(_t, p2);
+        // calculation of power for the first heated segment if nodes don't align
+        if (z2 > unheated_length_entry && z1 < unheated_length_entry)
+        {
+          heat1 = 0.0;
+        }
+
+        // calculation of power for the last heated segment if nodes don't align
+        if (z2 > unheated_length_entry + heated_length &&
+            z1 < unheated_length_entry + heated_length)
+        {
+          heat2 = 0.0;
+        }
+
         // use of trapezoidal rule  to calculate local power. The summation gives the total
         // estimated power of the pin.
-        _estimate_power(i_pin) +=
-            _ref_qprime(i_pin) * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2)) *
-            dz / 2.0;
+        _estimate_power(i_pin) += _ref_qprime(i_pin) * (heat1 + heat2) * dz / 2.0;
       }
     }
   }
