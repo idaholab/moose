@@ -59,7 +59,8 @@ PorousFlowBrine::PorousFlowBrine(const InputParameters & parameters)
                                                _mass_fraction_variable_name))
                       : nullptr),
     _is_xnacl_nodal(isCoupled("xnacl") ? getFieldVar("xnacl", 0)->isNodal() : false),
-    _xnacl(_nodal_material && _is_xnacl_nodal ? coupledDofValues("xnacl") : coupledValue("xnacl"))
+    _xnacl(_nodal_material && _is_xnacl_nodal ? coupledDofValues("xnacl") : coupledValue("xnacl")),
+    _is_xnacl_pfvar(_dictator.isPorousFlowVariable(coupled("xnacl")))
 {
   if (parameters.isParamSetByUser("water_fp"))
   {
@@ -113,7 +114,8 @@ PorousFlowBrine::computeQpProperties()
     (*_density)[_qp] = rho;
     (*_ddensity_dp)[_qp] = drho_dp;
     (*_ddensity_dT)[_qp] = drho_dT;
-    (*_ddensity_dX)[_qp] = drho_dx;
+    if (_is_xnacl_pfvar)
+      (*_ddensity_dX)[_qp] = drho_dx;
 
     // Viscosity and derivatives wrt pressure and temperature
     Real mu, dmu_dp, dmu_dT, dmu_dx;
@@ -122,7 +124,8 @@ PorousFlowBrine::computeQpProperties()
     (*_viscosity)[_qp] = mu;
     (*_dviscosity_dp)[_qp] = dmu_dp;
     (*_dviscosity_dT)[_qp] = dmu_dT;
-    (*_dviscosity_dX)[_qp] = dmu_dx;
+    if (_is_xnacl_pfvar)
+      (*_dviscosity_dX)[_qp] = dmu_dx;
   }
 
   // Internal energy and derivatives wrt pressure and temperature
@@ -134,7 +137,8 @@ PorousFlowBrine::computeQpProperties()
     (*_internal_energy)[_qp] = e;
     (*_dinternal_energy_dp)[_qp] = de_dp;
     (*_dinternal_energy_dT)[_qp] = de_dT;
-    (*_dinternal_energy_dX)[_qp] = de_dx;
+    if (_is_xnacl_pfvar)
+      (*_dinternal_energy_dX)[_qp] = de_dx;
   }
 
   // Enthalpy and derivatives wrt pressure and temperature
@@ -146,6 +150,7 @@ PorousFlowBrine::computeQpProperties()
     (*_enthalpy)[_qp] = h;
     (*_denthalpy_dp)[_qp] = dh_dp;
     (*_denthalpy_dT)[_qp] = dh_dT;
-    (*_denthalpy_dX)[_qp] = dh_dx;
+    if (_is_xnacl_pfvar)
+      (*_denthalpy_dX)[_qp] = dh_dx;
   }
 }
