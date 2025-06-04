@@ -6,5 +6,6 @@
     input = test.i
     csvdiff = test_out.csv
     requirement = 'The system shall be able to solve a hybridized discontinuous Galerkin discretization on a displaced mesh.'
+    max_threads = 1 # static condensation doesn't support threads
   []
 []
