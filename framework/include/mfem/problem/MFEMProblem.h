@@ -152,6 +152,10 @@ public:
                              const std::string & name,
                              InputParameters & parameters);
 
+  void addIndicator(const std::string & type,
+                    const std::string & name,
+                    InputParameters & parameters) override;
+
   /**
    * Method called in AddMFEMSolverAction which will create the solver.
    */
