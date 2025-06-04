@@ -50,4 +50,7 @@ protected:
 
   /// NaCl mass fraction at the qps or nodes
   const VariableValue & _xnacl;
+
+  /// Flag to denote whether NaCl mass fraction is a nonlinear variable
+  const bool _is_xnacl_pfvar;
 };
