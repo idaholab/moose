@@ -14,6 +14,8 @@ import typing
 from typing import Optional
 from enum import Enum
 from dataclasses import dataclass
+from FactorySystem.MooseObject import MooseObject
+from FactorySystem.InputParameters import InputParameters
 
 class ExtendedEnum(Enum):
     """
@@ -29,7 +31,11 @@ class ExtendedEnum(Enum):
 
 data_types = typing.Union[float]
 
-class ValidationCase():
+class ValidationCase(MooseObject):
+    @staticmethod
+    def validParams():
+        return MooseObject.validParams()
+
     """
     Base class for a set of validation tests that can be attached
     to a TestHarness test case.
@@ -129,7 +135,10 @@ class ValidationCase():
         """
         ValidationCase._subclasses.append(cls)
 
-    def __init__(self, tester_outputs: Optional[list] = None):
+    def __init__(self, params: Optional[InputParameters] = None,
+                 tester_outputs: Optional[list] = None):
+        MooseObject.__init__(self, params)
+
         # Result storage
         self._results: list[ValidationCase.Result] = []
         # Data storage

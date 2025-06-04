@@ -533,35 +533,9 @@ class Job(OutputInterface):
         """
         Initilizes (constructs) the validation cases, if any
         """
-        assert self.specs['validation_test']
-
-        scripts = self.specs['validation_test'].split()
-
-        if len(set(scripts)) != len(scripts):
-            message = 'Duplicate validation script paths found'
-            self.appendOutput(message)
-            self.setStatus(self.error, 'VALIDATION TEST ERROR')
-
-        self.validation_cases = []
-        init_kwargs = {'tester_outputs': self.getOutputFiles(self.options)}
-        for i in range(len(scripts)):
-            script = scripts[i]
-            if '..' in script:
-                message = f'Validation script {script} out of test directory'
-                self.appendOutput(message)
-                self.setStatus(self.error, 'VALIDATION TEST ERROR')
-            path = os.path.join(self.getTestDir(), script)
-            if not os.path.exists(path):
-                message = f'Validation script {path} not found'
-                self.appendOutput(message)
-                self.setStatus(self.error, 'VALIDATION TEST ERROR')
-
-            spec = importlib.util.spec_from_file_location(f'validation{i}', path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            subclasses = module.ValidationCase._subclasses.copy()
-            module.ValidationCase._subclasses = []
-            self.validation_cases += [(path, subclass(**init_kwargs)) for subclass in subclasses]
+        init_kwargs = {'params': self.__tester.parameters(),
+                       'tester_outputs': self.getOutputFiles(self.options)}
+        self.validation_cases = [c(**init_kwargs) for c in self.__tester._validation_classes]
 
     def runValidation(self):
         """
@@ -572,7 +546,9 @@ class Job(OutputInterface):
         output = self.validation_output
 
         all_data = set()
-        for path, test_case in self.validation_cases:
+        path = os.path.abspath(self.specs['validation_test'])
+        run_exception = False
+        for test_case in self.validation_cases:
             name = type(test_case).__name__
             message = f'Running validation case(s) in {path}:{name}\n\n'
             output.appendOutput(message)
@@ -606,7 +582,7 @@ class Job(OutputInterface):
             self.setStatus(self.job_status.error, 'VALIDATION TEST EXCEPTION')
             return
 
-        num_failed = sum([c.getNumResultsByStatus(ValidationCase.Status.FAIL) for _, c in self.validation_cases])
+        num_failed = sum([c.getNumResultsByStatus(ValidationCase.Status.FAIL) for c in self.validation_cases])
         output.appendOutput(f'Ran validation case(s); {num_failed} result(s) failed')
         if num_failed > 0:
             self.setStatus(self.job_status.error, 'VALIDATION FAILED')
@@ -913,7 +889,8 @@ class Job(OutputInterface):
         # Append validation data, if any
         if self.validation_cases:
             job_data['validation'] = {'results': [], 'data': {}}
-            for path, case in self.validation_cases:
+            path = os.path.abspath(os.path.join(self.getTestDir(), self.specs['validation_test']))
+            for case in self.validation_cases:
                 results = [r for r in case.getResults() if r.validation]
                 for result in results:
                     value = asdict(result)
