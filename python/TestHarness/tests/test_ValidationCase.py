@@ -10,6 +10,7 @@
 # pylint: disable
 import unittest
 from TestHarness import ValidationCase
+from FactorySystem.InputParameters import InputParameters
 
 class TestValidationCase(unittest.TestCase):
     def testNoTests(self):
@@ -157,6 +158,31 @@ class TestValidationCase(unittest.TestCase):
         test = ValidationCase(tester_outputs = outputs)
         self.assertEqual(outputs, test.getTesterOutputs())
         self.assertEqual(['bar.e'], test.getTesterOutputs(extension='.e'))
+
+    def testWithParameters(self):
+        required_value = 500
+        default_value = 1.0
+        optional_value = 2.0
+
+        params = InputParameters()
+        params.addRequiredParam('required', 'A required value')
+        params.addParam('default', default_value, 'A default value')
+        params.addParam('optional', 'An optional value')
+
+        params['required'] = required_value
+        params['optional'] = optional_value
+
+        class Test(ValidationCase):
+            def initialize(self):
+                self.required = self.getParam('required')
+                self.default = self.getParam('default')
+                self.optional = self.getParam('optional')
+
+        test = Test(params=params)
+        test.initialize()
+        self.assertEqual(test.required, required_value)
+        self.assertEqual(test.default, default_value)
+        self.assertEqual(test.optional, optional_value)
 
 if __name__ == '__main__':
     unittest.main()
