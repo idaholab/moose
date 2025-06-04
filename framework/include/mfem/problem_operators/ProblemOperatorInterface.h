@@ -25,8 +25,12 @@ public:
   virtual void SetTestVariablesFromTrueVectors();
   virtual void SetTrialVariablesFromTrueVectors();
   virtual void Init(mfem::BlockVector & X);
+  virtual void UniformRefinement( int num_refinements=1 );
+  virtual void UpdateAfterRefinement();
+  virtual int  GetProblemSize();
 
   mfem::Array<int> _block_true_offsets;
+  mfem::Array<int> _global_block_true_offsets;
 
   mfem::BlockVector _true_x, _true_rhs;
   mfem::OperatorHandle _equation_system_operator;
