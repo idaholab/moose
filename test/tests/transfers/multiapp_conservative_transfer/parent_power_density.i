@@ -129,6 +129,8 @@
     # 1 pp is specified on the subapp side
     to_postprocessors_to_be_preserved = 'from_sub0 from_sub1'
     from_postprocessors_to_be_preserved = 'sink'
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []
 

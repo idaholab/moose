@@ -121,6 +121,8 @@
     # 1 pp is specified on the subapp side
     to_postprocessors_to_be_preserved = 'to_nearest_point'
     from_postprocessors_to_be_preserved = 'sink'
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []
 
