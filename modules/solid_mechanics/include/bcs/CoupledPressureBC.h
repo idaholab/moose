@@ -9,23 +9,31 @@
 
 #pragma once
 
-#include "IntegratedBC.h"
+#include "PressureBase.h"
+#include "PressureAction.h"
 
 /**
  * Pressure boundary condition using coupled variable to apply pressure in a given direction
  */
-class CoupledPressureBC : public IntegratedBC
+template <bool is_ad>
+class CoupledPressureBCTempl : public PressureParent<is_ad>
 {
 public:
   static InputParameters validParams();
+  static InputParameters actionParams();
 
-  CoupledPressureBC(const InputParameters & parameters);
+  CoupledPressureBCTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computePressure() const override;
 
-  /// Will hold 0, 1, or 2 corresponding to x, y, or z.
-  const unsigned int _component;
   /// The values of pressure to be imposed
-  const VariableValue & _pressure;
+  const GenericVariableValue<is_ad> & _pressure;
+
+  using PressureParent<is_ad>::_qp;
 };
+
+typedef CoupledPressureBCTempl<false> CoupledPressureBC;
+typedef CoupledPressureBCTempl<true> ADCoupledPressureBC;
+
+declareMoosePressureAction(CoupledPressureBC, CoupledPressureAction);
