@@ -549,42 +549,59 @@ TriSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz)
 Real
 TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz)
 {
-  auto dz = _z_grid[iz] - _z_grid[iz - 1];
+  // Compute axial location of nodes.
+  auto z2 = _z_grid[iz];
+  auto z1 = _z_grid[iz - 1];
+  // Compute the height of this element.
+  auto dz = z2 - z1;
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-
-  if (_pin_mesh_exist)
+  auto heated_length = _subchannel_mesh.getHeatedLength();
+  auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
+  if (z2 > unheated_length_entry && z1 < unheated_length_entry + heated_length)
   {
-    double factor;
-    switch (subch_type)
+    if (_pin_mesh_exist)
     {
-      case EChannelType::CENTER:
-        factor = 1.0 / 6.0;
-        break;
-      case EChannelType::EDGE:
-        factor = 1.0 / 4.0;
-        break;
-      case EChannelType::CORNER:
-        factor = 1.0 / 6.0;
-        break;
-      default:
-        return 0.0; // handle invalid subch_type if needed
+      double factor;
+      switch (subch_type)
+      {
+        case EChannelType::CENTER:
+          factor = 1.0 / 6.0;
+          break;
+        case EChannelType::EDGE:
+          factor = 1.0 / 4.0;
+          break;
+        case EChannelType::CORNER:
+          factor = 1.0 / 6.0;
+          break;
+        default:
+          return 0.0; // handle invalid subch_type if needed
+      }
+      double heat_rate_in = 0.0;
+      double heat_rate_out = 0.0;
+      for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
+      {
+        auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
+        auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
+        heat_rate_out += factor * (*_q_prime_soln)(node_out);
+        heat_rate_in += factor * (*_q_prime_soln)(node_in);
+        if (z2 > unheated_length_entry && z1 < unheated_length_entry)
+        {
+          _console << "heat_rate_in : " << (*_q_prime_soln)(node_in) << std::endl;
+          _console << "heat_rate_out : " << (*_q_prime_soln)(node_out) << std::endl;
+        }
+      }
+      return (heat_rate_in + heat_rate_out) * dz / 2.0;
     }
-    double heat_rate_in = 0.0;
-    double heat_rate_out = 0.0;
-    for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
+    else
     {
-      auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
-      auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
-      heat_rate_out += factor * (*_q_prime_soln)(node_out);
-      heat_rate_in += factor * (*_q_prime_soln)(node_in);
+      auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+      auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+      return ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
     }
-    return (heat_rate_in + heat_rate_out) * dz / 2.0;
   }
   else
   {
-    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-    return ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
+    return 0.0;
   }
 }
 
@@ -593,8 +610,6 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
   unsigned int first_node = iblock * _block_size + 1;
-  auto heated_length = _subchannel_mesh.getHeatedLength();
-  auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
   const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
   const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
   const Real & pitch = _subchannel_mesh.getPitch();
@@ -651,15 +666,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         Real sumWijPrimeDhij = 0.0;
         Real e_cond = 0.0;
 
-        Real added_enthalpy;
-        if (z_grid[iz] > unheated_length_entry &&
-            z_grid[iz] <= unheated_length_entry + heated_length)
-        {
-          added_enthalpy = computeAddedHeatPin(i_ch, iz);
-        }
-        else
-          added_enthalpy = 0.0;
-
+        Real added_enthalpy = computeAddedHeatPin(i_ch, iz);
         added_enthalpy += computeAddedHeatDuct(i_ch, iz);
 
         // compute the sweep flow enthalpy change
@@ -851,8 +858,6 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     {
       auto dz = _z_grid[iz] - _z_grid[iz - 1];
-      auto heated_length = _subchannel_mesh.getHeatedLength();
-      auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
       auto pitch = _subchannel_mesh.getPitch();
       auto pin_diameter = _subchannel_mesh.getPinDiameter();
       auto iz_ind = iz - first_node;
@@ -1371,12 +1376,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         }
 
         /// Add heat enthalpy from pin
-        PetscScalar added_enthalpy;
-        if (_z_grid[iz] > unheated_length_entry &&
-            _z_grid[iz] <= unheated_length_entry + heated_length)
-          added_enthalpy = computeAddedHeatPin(i_ch, iz);
-        else
-          added_enthalpy = 0.0;
+        PetscScalar added_enthalpy = computeAddedHeatPin(i_ch, iz);
         added_enthalpy += computeAddedHeatDuct(i_ch, iz);
         PetscInt row_vec_ht = i_ch + _n_channels * iz_ind;
         LibmeshPetscCall(

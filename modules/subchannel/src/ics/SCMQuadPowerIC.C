@@ -93,12 +93,13 @@ SCMQuadPowerIC::initialSetup()
 {
   auto nx = _mesh.getNx();
   auto ny = _mesh.getNy();
+  auto n_pins = (nx - 1) * (ny - 1);
   auto nz = _mesh.getNumOfAxialCells();
   auto z_grid = _mesh.getZGrid();
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
 
-  _estimate_power.resize((ny - 1) * (nx - 1), 1);
+  _estimate_power.resize(n_pins, 1);
   _estimate_power.setZero();
   for (unsigned int iz = 1; iz < nz + 1; iz++)
   {
@@ -109,31 +110,50 @@ SCMQuadPowerIC::initialSetup()
     auto z1 = z_grid[iz - 1];
     Point p1(0, 0, z1 - unheated_length_entry);
     Point p2(0, 0, z2 - unheated_length_entry);
-    // cycle through pins to estimate the total power of each pin
-    if (z2 > unheated_length_entry && z2 <= unheated_length_entry + heated_length)
+
+    if (z2 > unheated_length_entry && z1 < unheated_length_entry + heated_length)
     {
-      for (unsigned int i_pin = 0; i_pin < (ny - 1) * (nx - 1); i_pin++)
+      // cycle through pins
+      for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
       {
-        // use of trapezoidal rule to add to total power of pin
-        _estimate_power(i_pin) +=
-            _ref_qprime(i_pin) * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2)) *
-            dz / 2.0;
+        auto heat1 = _axial_heat_rate.value(_t, p1);
+        auto heat2 = _axial_heat_rate.value(_t, p2);
+        // calculation of power for the first heated segment if nodes don't align
+        if (z2 > unheated_length_entry && z1 < unheated_length_entry)
+        {
+          heat1 = 0.0;
+        }
+
+        // calculation of power for the first heated segment if nodes don't align
+        if (z2 > unheated_length_entry + heated_length &&
+            z1 < unheated_length_entry + heated_length)
+        {
+          heat2 = 0.0;
+        }
+
+        // use of trapezoidal rule  to calculate local power. The summation gives the total
+        // estimated power of the pin.
+        _estimate_power(i_pin) += _ref_qprime(i_pin) * (heat1 + heat2) * dz / 2.0;
       }
     }
   }
-
-  // if a Pin has zero power (_ref_qprime(j, i) = 0) then I need to avoid dividing by zero. I
+  // if a Pin has zero power (_ref_qprime(i_pin) = 0) then I need to avoid dividing by zero. I
   // divide by a wrong non-zero number which is not correct but this error doesn't mess things cause
   // _ref_qprime(i_pin) = 0.0
-  for (unsigned int i_pin = 0; i_pin < (ny - 1) * (nx - 1); i_pin++)
+  auto total_power = 0.0;
+  for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
   {
+    total_power += _estimate_power(i_pin);
     if (_estimate_power(i_pin) == 0.0)
       _estimate_power(i_pin) = 1.0;
+    // We need to correct the linear power assigned to the nodes of each pin
+    // so that the total power calculated  by the trapezoidal rule agrees with the power assigned by
+    // the user.
+    // _pin_power_correction(i_pin) = _ref_power(i_pin) / _estimate_power(i_pin);
   }
-  // We need to correct the linear power assigned to the nodes of each pin
-  // so that the total power calculated  by the trapezoidal rule agrees with the power assigned by
-  // the user.
   _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
+
+  _console << "Total power estimation: " << total_power << std::endl;
 }
 
 Real
