@@ -18,9 +18,9 @@ HSBoundaryAmbientConvection::validParams()
 {
   InputParameters params = HSBoundary::validParams();
 
-  params.addRequiredParam<FunctionName>(
-      "htc_ambient", "Ambient Convective heat transfer coefficient function [W/(m^2-K)]");
-  params.addRequiredParam<FunctionName>("T_ambient", "Ambient temperature function [K]");
+  params.addRequiredParam<MooseFunctorName>(
+      "htc_ambient", "Ambient Convective heat transfer coefficient functor [W/(m^2-K)]");
+  params.addRequiredParam<MooseFunctorName>("T_ambient", "Ambient temperature functor [K]");
   params.addParam<MooseFunctorName>(
       "scale", 1.0, "Functor by which to scale the boundary condition");
   params.addParam<bool>(
@@ -34,10 +34,7 @@ HSBoundaryAmbientConvection::validParams()
 }
 
 HSBoundaryAmbientConvection::HSBoundaryAmbientConvection(const InputParameters & params)
-  : HSBoundary(params),
-
-    _T_ambient_fn_name(getParam<FunctionName>("T_ambient")),
-    _htc_ambient_fn_name(getParam<FunctionName>("htc_ambient"))
+  : HSBoundary(params)
 {
 }
 
@@ -55,8 +52,8 @@ HSBoundaryAmbientConvection::addMooseObjects()
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
-    pars.set<FunctionName>("T_ambient") = _T_ambient_fn_name;
-    pars.set<FunctionName>("htc_ambient") = _htc_ambient_fn_name;
+    pars.set<MooseFunctorName>("T_ambient") = getParam<MooseFunctorName>("T_ambient");
+    pars.set<MooseFunctorName>("htc_ambient") = getParam<MooseFunctorName>("htc_ambient");
     if (is_cylindrical)
     {
       pars.set<Point>("axis_point") = hs_cyl->getPosition();
@@ -74,8 +71,8 @@ HSBoundaryAmbientConvection::addMooseObjects()
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
     pars.set<std::vector<VariableName>>("T") = {HeatConductionModel::TEMPERATURE};
-    pars.set<FunctionName>("T_ambient") = _T_ambient_fn_name;
-    pars.set<FunctionName>("htc") = _htc_ambient_fn_name;
+    pars.set<MooseFunctorName>("T_ambient") = getParam<MooseFunctorName>("T_ambient");
+    pars.set<MooseFunctorName>("htc") = getParam<MooseFunctorName>("htc_ambient");
     pars.set<Point>("axis_point") = hs_cyl->getPosition();
     pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
     if (getParam<bool>("scale_heat_rate_pp"))

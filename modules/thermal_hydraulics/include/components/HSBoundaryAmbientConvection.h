@@ -21,12 +21,5 @@ public:
 
   virtual void addMooseObjects() override;
 
-protected:
-  /// Ambient temperature function name
-  const FunctionName & _T_ambient_fn_name;
-  /// Convective heat transfer coefficient function name
-  const FunctionName & _htc_ambient_fn_name;
-
-public:
   static InputParameters validParams();
 };

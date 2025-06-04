@@ -22,6 +22,14 @@ scale = 0.8
 power = ${fparse scale * heat_flux * A}
 E_change = ${fparse power * t}
 
+[FunctorMaterials]
+  [test_fm]
+    type = ADGenericFunctorMaterial
+    prop_names = 'T_ambient_prop emissivity_prop view_factor_prop scale_prop'
+    prop_values = '${T_ambient} ${emissivity} ${view_factor} ${scale}'
+  []
+[]
+
 [SolidProperties]
   [hs_mat]
     type = ThermalFunctionSolidProperties
@@ -53,10 +61,10 @@ E_change = ${fparse power * t}
     type = HSBoundaryRadiation
     boundary = 'hs:outer'
     hs = hs
-    T_ambient = ${T_ambient}
-    emissivity = ${emissivity}
-    view_factor = ${view_factor}
-    scale = ${scale}
+    T_ambient = T_ambient_prop
+    emissivity = emissivity_prop
+    view_factor = view_factor_prop
+    scale = scale_prop
   []
 []
 

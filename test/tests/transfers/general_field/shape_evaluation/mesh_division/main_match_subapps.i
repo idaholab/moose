@@ -95,6 +95,8 @@
     variable = from_main
     from_mesh_division = middle
     from_mesh_division_usage = 'matching_subapp_index'
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   [to_sub_elem]
@@ -104,6 +106,8 @@
     variable = from_main_elem
     from_mesh_division = middle
     from_mesh_division_usage = 'matching_subapp_index'
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   [from_sub]
@@ -113,6 +117,8 @@
     variable = from_sub
     to_mesh_division = middle
     to_mesh_division_usage = 'matching_subapp_index'
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   [from_sub_elem]

@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "HeatRateRadiation.h"
-#include "Function.h"
 
 registerMooseObject("ThermalHydraulicsApp", HeatRateRadiation);
 
@@ -18,11 +17,11 @@ HeatRateRadiation::validParams()
   InputParameters params = SideIntegralPostprocessor::validParams();
 
   params.addRequiredCoupledVar("T", "Temperature");
-  params.addRequiredParam<FunctionName>("T_ambient", "Ambient temperature");
-  params.addRequiredParam<Real>("emissivity", "Emissivity");
-  params.addParam<FunctionName>("view_factor", "1", "View factor function");
+  params.addRequiredParam<MooseFunctorName>("T_ambient", "Ambient temperature functor");
+  params.addRequiredParam<MooseFunctorName>("emissivity", "Emissivity functor");
+  params.addParam<MooseFunctorName>("view_factor", 1.0, "View factor functor");
   params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "Stefan-Boltzmann constant");
-  params.addParam<FunctionName>("scale", 1.0, "Function by which to scale the heat flux");
+  params.addParam<MooseFunctorName>("scale", 1.0, "Functor by which to scale the heat flux");
 
   params.addClassDescription("Integrates a radiative heat flux over a boundary.");
 
@@ -33,19 +32,25 @@ HeatRateRadiation::HeatRateRadiation(const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
 
     _T(coupledValue("T")),
-    _T_ambient(getFunction("T_ambient")),
-    _emissivity(getParam<Real>("emissivity")),
-    _view_factor_fn(getFunction("view_factor")),
+    _T_ambient(getFunctor<Real>("T_ambient")),
+    _emissivity(getFunctor<Real>("emissivity")),
+    _view_factor(getFunctor<Real>("view_factor")),
     _sigma_stefan_boltzmann(getParam<Real>("stefan_boltzmann_constant")),
-    _scale_fn(getFunction("scale"))
+    _scale(getFunctor<Real>("scale"))
 {
 }
 
 Real
 HeatRateRadiation::computeQpIntegral()
 {
+  const Moose::ElemSideQpArg space_arg = {_current_elem, _current_side, _qp, _qrule, _q_point[_qp]};
+  const auto scale = _scale(space_arg, Moose::currentState());
+  const auto emissivity = _emissivity(space_arg, Moose::currentState());
+  const auto view_factor = _view_factor(space_arg, Moose::currentState());
+  const auto T_ambient = _T_ambient(space_arg, Moose::currentState());
+
   const Real T4 = MathUtils::pow(_T[_qp], 4);
-  const Real T4inf = MathUtils::pow(_T_ambient.value(_t, _q_point[_qp]), 4);
-  return _scale_fn.value(_t, _q_point[_qp]) * _sigma_stefan_boltzmann * _emissivity *
-         _view_factor_fn.value(_t, _q_point[_qp]) * (T4inf - T4);
+  const Real T4inf = MathUtils::pow(T_ambient, 4);
+
+  return scale * _sigma_stefan_boltzmann * emissivity * view_factor * (T4inf - T4);
 }

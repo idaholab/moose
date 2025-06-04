@@ -19,16 +19,17 @@ HSBoundaryRadiation::validParams()
 {
   InputParameters params = HSBoundary::validParams();
 
-  params.addRequiredParam<Real>("emissivity", "Emissivity of flow channel [-]");
-  params.addParam<FunctionName>("view_factor", "1", "View factor function [-]");
-  params.addRequiredParam<FunctionName>("T_ambient", "Temperature of environment [K]");
+  params.addRequiredParam<MooseFunctorName>("emissivity", "Emissivity functor [-]");
+  params.addParam<MooseFunctorName>("view_factor", 1.0, "View factor functor [-]");
+  params.addRequiredParam<MooseFunctorName>("T_ambient", "Ambient temperature functor [K]");
   params.addDeprecatedParam<PostprocessorName>(
       "scale_pp",
       "Post-processor by which to scale boundary condition",
       "The 'scale' parameter is replacing the 'scale_pp' parameter. 'scale' is a function "
       "parameter instead of a post-processor parameter. If you need to scale from a post-processor "
       "value, use a PostprocessorFunction.");
-  params.addParam<FunctionName>("scale", 1.0, "Function by which to scale the boundary condition");
+  params.addParam<MooseFunctorName>(
+      "scale", 1.0, "Functor by which to scale the boundary condition");
   params.addParam<bool>(
       "scale_heat_rate_pp",
       true,
@@ -55,15 +56,15 @@ HSBoundaryRadiation::addMooseObjects()
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
-    pars.set<Real>("boundary_emissivity") = getParam<Real>("emissivity");
-    pars.set<FunctionName>("Tinfinity") = getParam<FunctionName>("T_ambient");
-    pars.set<FunctionName>("view_factor") = getParam<FunctionName>("view_factor");
+    pars.set<MooseFunctorName>("emissivity") = getParam<MooseFunctorName>("emissivity");
+    pars.set<MooseFunctorName>("T_ambient") = getParam<MooseFunctorName>("T_ambient");
+    pars.set<MooseFunctorName>("view_factor") = getParam<MooseFunctorName>("view_factor");
     if (is_cylindrical)
     {
       pars.set<Point>("axis_point") = hs_cyl->getPosition();
       pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
     }
-    pars.set<FunctionName>("scale") = getParam<FunctionName>("scale");
+    pars.set<MooseFunctorName>("scale") = getParam<MooseFunctorName>("scale");
     if (isParamValid("scale_pp"))
       pars.set<PostprocessorName>("scale_pp") = getParam<PostprocessorName>("scale_pp");
 
@@ -77,13 +78,13 @@ HSBoundaryRadiation::addMooseObjects()
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
     pars.set<std::vector<VariableName>>("T") = {HeatConductionModel::TEMPERATURE};
-    pars.set<FunctionName>("T_ambient") = getParam<FunctionName>("T_ambient");
-    pars.set<Real>("emissivity") = getParam<Real>("emissivity");
-    pars.set<FunctionName>("view_factor") = getParam<FunctionName>("view_factor");
+    pars.set<MooseFunctorName>("T_ambient") = getParam<MooseFunctorName>("T_ambient");
+    pars.set<MooseFunctorName>("emissivity") = getParam<MooseFunctorName>("emissivity");
+    pars.set<MooseFunctorName>("view_factor") = getParam<MooseFunctorName>("view_factor");
     pars.set<Point>("axis_point") = hs_cyl->getPosition();
     pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
     if (getParam<bool>("scale_heat_rate_pp"))
-      pars.set<FunctionName>("scale") = getParam<FunctionName>("scale");
+      pars.set<MooseFunctorName>("scale") = getParam<MooseFunctorName>("scale");
     pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
     getTHMProblem().addPostprocessor(class_name, genSafeName(name(), "integral"), pars);
   }
