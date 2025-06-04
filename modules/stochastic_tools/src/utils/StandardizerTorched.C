@@ -77,14 +77,6 @@ StandardizerTorched::set(const std::vector<Real> & mean, const std::vector<Real>
       torch::from_blob(mean_copy.data(), {long(mean.size()), 1}, options).to(at::kDouble).clone();
   _stdev =
       torch::from_blob(stdev_copy.data(), {long(stdev.size()), 1}, options).to(at::kDouble).clone();
-
-  /*
-  auto options = torch::TensorOptions().dtype(torch::kFloat32);
-  _mean = torch::empty({mean.size()}, options);
-  _stdev = torch::empty({stdev.size()}, options);
-  std::copy_n(mean, mean.size(), _mean.contiguous().data_ptr<Real>());
-  std::copy_n(stdev, stdev.size(), _stdev.contiguous().data_ptr<Real>());
-  */
 }
 
 void
@@ -101,22 +93,20 @@ void
 StandardizerTorched::getStandardized(torch::Tensor & input) const
 {
   // Standardize input tensor
-  input = (input - torch::mean(input, 0, false));
-  input = input / torch::std(input, 0, 0, true);
+  input = input - _mean;
+  input = input / _stdev;
 }
 
 void
 StandardizerTorched::getDestandardized(torch::Tensor & input) const
 {
-  input = (input * torch::std(input, 0, 0, true) + torch::mean(input, 0, false));
+  input = (torch::mm(input, _stdev) + _mean);
 }
 
 void
 StandardizerTorched::getDescaled(torch::Tensor & input) const
 {
-  // Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
-  // input = input.array().rowwise() * stdev.transpose().array();
-  input = input * torch::std(input, 0, 0, true);
+  input = torch::mm(input, _stdev);
 }
 
 /// Helper for dataStore

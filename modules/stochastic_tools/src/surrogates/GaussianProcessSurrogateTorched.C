@@ -83,13 +83,16 @@ GaussianProcessSurrogateTorched::evaluate(const std::vector<Real> & x,
   for (unsigned int ii = 0; ii < n_dims; ++ii)
     test_points(0, ii) = x[ii];
 
-  unsigned int num_samples = test_points.size();
-  unsigned int num_inputs = n_dims;
-
   auto options = torch::TensorOptions().dtype(at::kDouble);
   torch::Tensor tensor_points =
-      torch::from_blob(test_points.data(), {num_samples, num_inputs}, options).to(at::kDouble);
+      torch::from_blob(test_points.data(), {test_points.rows(), test_points.cols()}, options)
+          .to(at::kDouble);
+
   _gp.getParamStandardizer().getStandardized(tensor_points);
+
+  auto points_accessor = tensor_points.accessor<Real, 2>();
+  for (unsigned int i = 0; i < test_points.cols(); i++)
+    test_points(0, i) = points_accessor[0][i];
 
   RealEigenMatrix K_train_test(_training_params.rows() * n_outputs, n_outputs);
 
@@ -98,28 +101,31 @@ GaussianProcessSurrogateTorched::evaluate(const std::vector<Real> & x,
   RealEigenMatrix K_test(n_outputs, n_outputs);
   _gp.getCovarFunction().computeCovarianceMatrix(K_test, test_points, test_points, true);
 
-  // Compute the predicted mean value (centered)
-  RealEigenMatrix pred_value = (K_train_test.transpose() * _gp.getKResultsSolve()).transpose();
+  torch::Tensor K_train_test_tensor =
+      torch::from_blob(K_train_test.data(), {K_train_test.rows(), K_train_test.cols()}, options)
+          .to(at::kDouble);
+  torch::Tensor K_test_tensor =
+      torch::from_blob(K_test.data(), {K_test.rows(), K_test.cols()}, options).to(at::kDouble);
 
-  unsigned int num_pred_samples = pred_value.size();
-  torch::Tensor pred_value_tensor =
-      torch::from_blob(pred_value.data(), {num_pred_samples, num_inputs}, options).to(at::kDouble);
-  // De-center/scale the value and store for return
-  _gp.getDataStandardizer().getDestandardized(pred_value_tensor);
+  //  Compute the predicted mean value (centered)
+  torch::Tensor pred_value = torch::transpose(
+      torch::mm(torch::transpose(K_train_test_tensor, 0, 1), _gp.getKResultsSolve()), 0, 1);
 
-  RealEigenMatrix pred_var =
-      K_test - (K_train_test.transpose() * _gp.getKCholeskyDecomp().solve(K_train_test));
+  //   De-center/scale the value and store for return
+  _gp.getDataStandardizer().getDestandardized(pred_value);
+
+  torch::Tensor pred_var =
+      K_test_tensor -
+      torch::mm(torch::transpose(K_train_test_tensor, 0, 1),
+                torch::cholesky_solve(K_train_test_tensor, _gp.getKCholeskyDecomp()));
 
   // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
-  RealEigenMatrix std_dev_mat = pred_var.array().sqrt();
-  torch::Tensor std_dev_mat_tensor =
-      torch::from_blob(std_dev_mat.data(), {std_dev_mat.size(), num_inputs}, options)
-          .to(at::kDouble);
-  _gp.getDataStandardizer().getDescaled(std_dev_mat_tensor);
+  torch::Tensor std_dev_mat = torch::sqrt(pred_var); // pred_var.array().sqrt();
+  _gp.getDataStandardizer().getDescaled(std_dev_mat);
 
   for (const auto output_i : make_range(n_outputs))
   {
-    y[output_i] = pred_value(0, output_i);
-    std[output_i] = std_dev_mat(output_i, output_i);
+    y[output_i] = pred_value.data_ptr<Real>()[output_i]; // pred_value(0, output_i);
+    std[output_i] = std_dev_mat[output_i][output_i].item<Real>();
   }
 }
