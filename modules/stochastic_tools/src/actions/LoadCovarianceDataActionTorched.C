@@ -23,7 +23,8 @@ LoadCovarianceDataActionTorched::validParams()
   return params;
 }
 
-LoadCovarianceDataActionTorched::LoadCovarianceDataActionTorched(const InputParameters & params) : Action(params)
+LoadCovarianceDataActionTorched::LoadCovarianceDataActionTorched(const InputParameters & params)
+  : Action(params)
 {
 }
 
