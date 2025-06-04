@@ -93,13 +93,13 @@ cp_d = 1
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'bottom'
     variable = phase_2
-    functor = '0'
+    functor = '1'
   []
   [top-phase-2]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'top'
     variable = phase_2
-    functor = '1'
+    functor = '0'
   []
 []
 

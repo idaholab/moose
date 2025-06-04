@@ -19,6 +19,7 @@
 registerWCNSFVFlowPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVFlowPhysics);
 registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_linear_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_linear_fv_bc");
+registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_functor_material");
 
 InputParameters
 WCNSLinearFVFlowPhysics::validParams()
@@ -341,11 +342,12 @@ WCNSLinearFVFlowPhysics::addMomentumGravityKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     const auto gravity_vector = getParam<RealVectorValue>("gravity");
+    const std::vector<std::string> comp_axis({"x", "y", "z"});
 
     for (const auto d : make_range(dimension()))
       if (gravity_vector(d) != 0)
       {
-        params.set<MooseFunctorName>("source_density") = std::to_string(gravity_vector(d));
+        params.set<MooseFunctorName>("source_density") = "rho_g_" + comp_axis[d];
         params.set<LinearVariableName>("variable") = _velocity_names[d];
 
         getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
@@ -607,6 +609,32 @@ WCNSLinearFVFlowPhysics::addRhieChowUserObjects()
   params.set<MooseFunctorName>(NS::density) = _density_name;
 
   getProblem().addUserObject(object_type, rhieChowUOName(), params);
+}
+
+void
+WCNSLinearFVFlowPhysics::addFunctorMaterials()
+{
+  if (parameters().isParamValid("gravity"))
+  {
+    const auto gravity_vector = getParam<RealVectorValue>("gravity");
+    const std::vector<std::string> comp_axis({"x", "y", "z"});
+    for (const auto d : make_range(dimension()))
+      if (gravity_vector(d) != 0)
+      {
+        // Add rho * g functor for each relevant direction
+        // TODO: we could avoid using an AD functor material for non-AD density functor
+        auto params = getFactory().getValidParams("ADParsedFunctorMaterial");
+        assignBlocks(params, _blocks);
+        params.set<std::string>("expression") =
+            _density_gravity_name + " * " + std::to_string(gravity_vector(d));
+        if (!MooseUtils::parsesToReal(_density_gravity_name))
+          params.set<std::vector<std::string>>("functor_names") = {_density_gravity_name};
+        params.set<std::string>("property_name") = "rho_g_" + comp_axis[d];
+        // We don't output this helper material
+        getProblem().addMaterial(
+            "ADParsedFunctorMaterial", prefix() + "gravity_helper_" + comp_axis[d], params);
+      }
+  }
 }
 
 UserObjectName
