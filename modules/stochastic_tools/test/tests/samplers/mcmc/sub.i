@@ -1,6 +1,6 @@
 left_bc = 0.13508909593042528
 right_bc = -1.5530467809139854
-mesh1 = 1
+mesh1 = 10
 
 param1 = '${fparse left_bc}'
 param2 = '${fparse right_bc}'

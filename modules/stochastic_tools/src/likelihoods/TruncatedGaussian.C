@@ -34,15 +34,21 @@ TruncatedGaussian::TruncatedGaussian(const InputParameters & parameters)
 
 Real
 TruncatedGaussian::function(const std::vector<Real> & exp,
+                            const std::vector<Real> & exp_group,
                             const std::vector<Real> & model,
-                            const Real & noise,
+                            const std::vector<Real> & noise,
                             const Real & lower_bound,
                             const Real & upper_bound,
                             const bool & log_likelihood)
 {
   Real result = 0.0;
+  unsigned int group_ind;
   for (unsigned i = 0; i < exp.size(); ++i)
-    result += std::log(TruncatedNormal::pdf(exp[i], model[i], noise, lower_bound, upper_bound));
+  {
+    group_ind = exp_group[i];
+    result += std::log(
+        TruncatedNormal::pdf(exp[i], model[i], noise[group_ind], lower_bound, upper_bound));
+  }
   if (!log_likelihood)
     result = std::exp(result);
   return result;
@@ -51,5 +57,5 @@ TruncatedGaussian::function(const std::vector<Real> & exp,
 Real
 TruncatedGaussian::function(const std::vector<Real> & x) const
 {
-  return function(_exp_values, x, _noise, _lower_bound, _upper_bound, _log_likelihood);
+  return function(_exp_values, _exp_groups, x, _noise, _lower_bound, _upper_bound, _log_likelihood);
 }

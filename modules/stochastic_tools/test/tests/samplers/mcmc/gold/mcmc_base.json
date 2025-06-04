@@ -24,7 +24,7 @@
                     "type": "std::vector<std::vector<double>>"
                 },
                 "noise": {
-                    "type": "double"
+                    "type": "std::vector<double>"
                 },
                 "outputs_required": {
                     "type": "std::vector<double>"
@@ -33,7 +33,7 @@
                     "type": "std::vector<double>"
                 },
                 "variance": {
-                    "type": "std::vector<double>"
+                    "type": "std::vector<std::vector<double>>"
                 }
             }
         },
@@ -41,7 +41,7 @@
             "type": "ConstantReporter",
             "values": {
                 "noise_specified": {
-                    "type": "double"
+                    "type": "std::vector<double>"
                 }
             }
         }
@@ -67,7 +67,9 @@
                         0.0
                     ]
                 ],
-                "noise": 0.0,
+                "noise": [
+                    0.0
+                ],
                 "outputs_required": [
                     0.0,
                     0.0,
@@ -79,12 +81,16 @@
                     0.0
                 ],
                 "variance": [
-                    0.0,
-                    0.0
+                    [
+                        0.0,
+                        0.0
+                    ]
                 ]
             },
             "noise_specified": {
-                "noise_specified": 0.05
+                "noise_specified": [
+                    0.05
+                ]
             },
             "time": 0.0,
             "time_step": 0
@@ -92,7 +98,7 @@
         {
             "constant": {
                 "reporter_transfer:average:value": [
-                    0.09743591614083168
+                    0.09743591614083164
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -101,18 +107,20 @@
             "mcmc_reporter": {
                 "inputs": [
                     [
-                        -1.151000508681518,
+                        -1.1510005086815185,
                         -1.2176210623575638
                     ],
                     [
-                        1.800129457073951,
+                        1.8001294570739512,
                         0.20059047788849593
                     ]
                 ],
-                "noise": 0.0,
+                "noise": [
+                    0.0
+                ],
                 "outputs_required": [
-                    0.09743591614083168,
-                    0.09743591614083168,
+                    0.09743591614083164,
+                    0.09743591614083164,
                     0.07329136264166623,
                     0.07329136264166623
                 ],
@@ -121,12 +129,16 @@
                     1.0
                 ],
                 "variance": [
-                    0.0,
-                    0.0
+                    [
+                        0.0,
+                        0.0
+                    ]
                 ]
             },
             "noise_specified": {
-                "noise_specified": 0.05
+                "noise_specified": [
+                    0.05
+                ]
             },
             "time": 1.0,
             "time_step": 1
@@ -134,7 +146,7 @@
         {
             "constant": {
                 "reporter_transfer:average:value": [
-                    0.17390354155392757
+                    0.1739035415539275
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -151,24 +163,30 @@
                         -0.6195897243113289
                     ]
                 ],
-                "noise": 0.0,
+                "noise": [
+                    0.0
+                ],
                 "outputs_required": [
-                    0.17390354155392757,
-                    0.3996728052737176,
-                    0.13081036268271634,
-                    0.3006341569875221
+                    0.1739035415539275,
+                    0.3996728052737238,
+                    0.13081036268271665,
+                    0.30063415698752244
                 ],
                 "tpm": [
                     1.0,
                     1.0
                 ],
                 "variance": [
-                    0.0,
-                    0.0
+                    [
+                        0.0,
+                        0.0
+                    ]
                 ]
             },
             "noise_specified": {
-                "noise_specified": 0.05
+                "noise_specified": [
+                    0.05
+                ]
             },
             "time": 2.0,
             "time_step": 2
@@ -176,7 +194,7 @@
         {
             "constant": {
                 "reporter_transfer:average:value": [
-                    -0.6944287487608779
+                    -0.6944287487608777
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -185,7 +203,7 @@
             "mcmc_reporter": {
                 "inputs": [
                     [
-                        -0.543417447980052,
+                        -0.5434174479800518,
                         -0.8819886574181426
                     ],
                     [
@@ -193,11 +211,13 @@
                         -0.5713184486246254
                     ]
                 ],
-                "noise": 0.0,
+                "noise": [
+                    0.0
+                ],
                 "outputs_required": [
-                    -0.6944287487608779,
-                    -0.8048977824137532,
-                    -0.522349778911921,
+                    -0.6944287487608777,
+                    -0.8048977824137546,
+                    -0.5223497789119212,
                     -0.6054446614441553
                 ],
                 "tpm": [
@@ -205,12 +225,16 @@
                     1.0
                 ],
                 "variance": [
-                    0.0,
-                    0.0
+                    [
+                        0.0,
+                        0.0
+                    ]
                 ]
             },
             "noise_specified": {
-                "noise_specified": 0.05
+                "noise_specified": [
+                    0.05
+                ]
             },
             "time": 3.0,
             "time_step": 3
@@ -218,7 +242,7 @@
         {
             "constant": {
                 "reporter_transfer:average:value": [
-                    -0.6867074746305079
+                    -0.6867074746305057
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -227,19 +251,21 @@
             "mcmc_reporter": {
                 "inputs": [
                     [
-                        -1.6316171989760926,
-                        0.22206002164752792
+                        -1.6316171989760924,
+                        0.2220600216475277
                     ],
                     [
                         1.3077906547599483,
-                        0.40060782333619493
+                        0.4006078233361947
                     ]
                 ],
-                "noise": 0.0,
+                "noise": [
+                    0.0
+                ],
                 "outputs_required": [
-                    -0.6867074746305079,
-                    0.8322968542340848,
-                    -0.516541831238754,
+                    -0.6867074746305057,
+                    0.8322968542340924,
+                    -0.5165418312387542,
                     0.6260542619730737
                 ],
                 "tpm": [
@@ -247,12 +273,16 @@
                     1.0
                 ],
                 "variance": [
-                    0.0,
-                    0.0
+                    [
+                        0.0,
+                        0.0
+                    ]
                 ]
             },
             "noise_specified": {
-                "noise_specified": 0.05
+                "noise_specified": [
+                    0.05
+                ]
             },
             "time": 4.0,
             "time_step": 4
@@ -260,7 +290,7 @@
         {
             "constant": {
                 "reporter_transfer:average:value": [
-                    0.22596666320572156
+                    0.22596666320572042
                 ],
                 "reporter_transfer:converged": [
                     true
@@ -277,24 +307,30 @@
                         0.3556470737526294
                     ]
                 ],
-                "noise": 0.0,
+                "noise": [
+                    0.0
+                ],
                 "outputs_required": [
-                    0.22596666320572156,
-                    -0.56491282263639,
+                    0.22596666320572042,
+                    -0.5649128226363901,
                     0.16997227833325587,
-                    -0.4249278108585866
+                    -0.4249278108585868
                 ],
                 "tpm": [
                     1.0,
                     1.0
                 ],
                 "variance": [
-                    0.0,
-                    0.0
+                    [
+                        0.0,
+                        0.0
+                    ]
                 ]
             },
             "noise_specified": {
-                "noise_specified": 0.05
+                "noise_specified": [
+                    0.05
+                ]
             },
             "time": 5.0,
             "time_step": 5
