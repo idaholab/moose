@@ -32,11 +32,11 @@
 
 !---
 
-!include user_workshop/systems_user/mesh.md
+!include user_workshop/systems_user/input_syntax_primer.md end=advanced
 
 !---
 
-!include user_workshop/systems_user/inputparameters.md
+!include user_workshop/systems_user/mesh.md end=mesh-advanced
 
 !---
 
@@ -60,11 +60,15 @@
 
 !---
 
-!include user_workshop/systems_user/input_syntax_primer.md
+!include user_workshop/systems_user/kernels.md
 
 !---
 
-!include user_workshop/systems_user/kernels.md
+!include user_workshop/systems_user/inputparameters.md
+
+!---
+
+!include user_workshop/systems_user/input_syntax_primer.md start=advanced
 
 !---
 
@@ -161,6 +165,10 @@
 !---
 
 !include workshop/modules/modules.md
+
+!---
+
+!include user_workshop/systems_user/mesh.md start=mesh-advanced
 
 !---
 

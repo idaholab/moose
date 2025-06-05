@@ -96,7 +96,7 @@
 
 !---
 
-!include workshop/systems/mesh.md
+!include workshop/systems/mesh.md end=mesh-advanced
 
 !---
 
@@ -235,6 +235,10 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 !---
 
 !include workshop/modules/modules.md
+
+!---
+
+!include workshop/systems/mesh.md start=mesh-advanced
 
 !---
 

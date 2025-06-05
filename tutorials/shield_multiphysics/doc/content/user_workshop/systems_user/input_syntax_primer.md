@@ -35,7 +35,7 @@ or after valid syntax:
   ...
 ```
 
-!---
+!!advanced
 
 ## Input file variables
 

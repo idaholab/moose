@@ -79,7 +79,9 @@ Names can be assigned to IDs for existing meshes to ease input file maintenance.
 
 !listing name_on_the_fly.i block=Mesh BCs Materials
 
-!---
+!!mesh-advanced
+
+# Mesh system (continued)
 
 ## Replicated Mesh
 
