@@ -554,13 +554,12 @@ TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int 
   auto z1 = _z_grid[iz - 1];
   // Compute the height of this element.
   auto dz = z2 - z1;
-  auto dz1 = dz / 2.;
-  auto dz2 = dz / 2.;
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
   auto heated_length = _subchannel_mesh.getHeatedLength();
   auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
-  if (MooseUtils::absoluteFuzzyGreaterEqual(z2, unheated_length_entry) &&
-      z1 <= unheated_length_entry + heated_length)
+  if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
+      MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
+  // if (z2 > unheated_length_entry && z1 < unheated_length_entry + heated_length)
   {
     if (_pin_mesh_exist)
     {
@@ -587,33 +586,33 @@ TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int 
         auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
         heat_rate_out += factor * (*_q_prime_soln)(node_out);
         heat_rate_in += factor * (*_q_prime_soln)(node_in);
-        if (z2 > unheated_length_entry && z1 < unheated_length_entry)
-        {
-          _console << "heat_rate_in : " << (*_q_prime_soln)(node_in) << std::endl;
-          _console << "heat_rate_out : " << (*_q_prime_soln)(node_out) << std::endl;
-        }
       }
       return (heat_rate_in + heat_rate_out) * dz / 2.0;
     }
     else
     {
-      // calculation of power for the first heated segment if nodes don't align
-      // if (z2 > unheated_length_entry && z1 < unheated_length_entry)
-      // {
-      //   // z1 = unheated_length_entry;
-      //   dz2 = z2 - unheated_length_entry;
-      // }
-
-      // // calculation of power for the last heated segment if nodes don't align
-      // if (z2 > unheated_length_entry + heated_length && z1 < unheated_length_entry +
-      // heated_length)
-      // {
-      //   // z2 = unheated_length_entry + heated_length;
-      //   dz1 = unheated_length_entry + heated_length - z1;
-      // }
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
       auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-      return ((*_q_prime_soln)(node_out)*dz2 + (*_q_prime_soln)(node_in)*dz1);
+      if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
+          MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry))
+      // if (z2 > unheated_length_entry && z1 < unheated_length_entry)
+      {
+        _console << "heat_rate_in first offset cell: " << (*_q_prime_soln)(node_in)
+                 << " z1 : " << z1 << std::endl;
+        _console << "heat_rate_out first offset cell : " << (*_q_prime_soln)(node_out)
+                 << " z2 : " << z2 << std::endl;
+      }
+      if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry + heated_length) &&
+          MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
+      // if (z2 > unheated_length_entry + heated_length && z1 < unheated_length_entry +
+      // heated_length)
+      {
+        _console << "heat_rate_in last offset cell: " << (*_q_prime_soln)(node_in) << " z1 : " << z1
+                 << std::endl;
+        _console << "heat_rate_out last offset cell : " << (*_q_prime_soln)(node_out)
+                 << " z2 : " << z2 << std::endl;
+      }
+      return ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
     }
   }
   else

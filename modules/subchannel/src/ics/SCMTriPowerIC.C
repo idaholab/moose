@@ -102,44 +102,38 @@ SCMTriPowerIC::initialSetup()
     Point p2(0, 0, z2 - unheated_length_entry);
     auto heat1 = _axial_heat_rate.value(_t, p1);
     auto heat2 = _axial_heat_rate.value(_t, p2);
-    if (MooseUtils::absoluteFuzzyGreaterEqual(z2, unheated_length_entry) &&
-        MooseUtils::absoluteFuzzyLessEqual(z1, unheated_length_entry + heated_length))
+    if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
+        MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
+    // if (z2 > unheated_length_entry && z1 < unheated_length_entry + heated_length)
     {
       // cycle through pins
       for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
       {
         // Compute the height of this element.
         auto dz = z2 - z1;
-        auto dz1 = dz / 2.;
-        auto dz2 = dz / 2.;
 
         // calculation of power for the first heated segment if nodes don't align
-        if (z2 >= unheated_length_entry && z1 < unheated_length_entry)
+        if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
+            MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry))
+        // if (z2 > unheated_length_entry && z1 < unheated_length_entry)
         {
-          // z1 = unheated_length_entry;
-          _console << "First heated cell" << endl;
+          _console << "first offset heated cell: dz:" << dz << " zero power at height z1: " << z1
+                   << endl;
           heat1 = 0.0;
-          // dz2 = z2 - unheated_length_entry;
         }
 
         // calculation of power for the last heated segment if nodes don't align
-        if (z2 > unheated_length_entry + heated_length &&
-            z1 <= unheated_length_entry + heated_length)
+        if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry + heated_length) &&
+            MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
+        // if (z2 > unheated_length_entry + heated_length &&
+        //     z1 < unheated_length_entry + heated_length)
         {
-          // z2 = unheated_length_entry + heated_length;
-          // dz1 = unheated_length_entry + heated_length - z1;
-          _console << "second heated cell: " << dz1 << " " << dz << endl;
+          _console << "second offset heated cell: dz:" << dz << " zero power at height z2: " << z2
+                   << endl;
           heat2 = 0.0;
         }
 
-        // Point p1(0, 0, z1 - unheated_length_entry);
-        // Point p2(0, 0, z2 - unheated_length_entry);
-        // auto heat1 = _axial_heat_rate.value(_t, p1);
-        // auto heat2 = _axial_heat_rate.value(_t, p2);
-
-        // use of trapezoidal rule to calculate local power. The summation gives the total
-        // estimated power of the pin.
-        _estimate_power(i_pin) += _ref_qprime(i_pin) * (heat1 * dz1 + heat2 * dz2);
+        _estimate_power(i_pin) += _ref_qprime(i_pin) * (heat1 + heat2) * dz / 2.0;
       }
     }
   }
@@ -156,16 +150,15 @@ SCMTriPowerIC::initialSetup()
     // We need to correct the linear power assigned to the nodes of each pin
     // so that the total power calculated  by the trapezoidal rule agrees with the power assigned by
     // the user.
-    // _pin_power_correction(i_pin) = _ref_power(i_pin) / _estimate_power(i_pin);
   }
 
   _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
-
   _console << Moose::stringify(_estimate_power) << std::endl;
+  _console << "###########################################" << std::endl;
   _console << Moose::stringify(_ref_power) << std::endl;
-
+  _console << "###########################################" << std::endl;
   _console << Moose::stringify(_pin_power_correction) << std::endl;
-
+  _console << "###########################################" << std::endl;
   _console << "Total power estimation: " << total_power << std::endl;
 }
 
@@ -183,7 +176,8 @@ SCMTriPowerIC::value(const Point & p)
   {
     // project axial heat rate on pins
     auto i_pin = _mesh.getPinIndexFromPoint(p);
-    if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
+    if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
+        MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
       return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
     else
       return 0.0;

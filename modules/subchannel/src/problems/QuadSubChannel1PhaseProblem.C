@@ -433,7 +433,8 @@ QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int
   auto dz = z2 - z1;
   auto heated_length = _subchannel_mesh.getHeatedLength();
   auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
-  if (z2 > unheated_length_entry && z1 < unheated_length_entry + heated_length)
+  if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
+      MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
   {
     if (_pin_mesh_exist)
     {

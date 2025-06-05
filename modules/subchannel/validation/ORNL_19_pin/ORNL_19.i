@@ -16,9 +16,9 @@ P_out = 2.0e5 # Pa
     nrings = 3
     n_cells = 100
     flat_to_flat = 3.41e-2
-    heated_length = 0.5334
-    unheated_length_entry = 0.4064
-    unheated_length_exit = 0.0762
+    heated_length = 1.0
+    unheated_length_entry = 0.4
+    unheated_length_exit = 0.6
     pin_diameter = 5.84e-3
     pitch = 7.26e-3
     dwire = 1.42e-3
@@ -92,7 +92,7 @@ P_out = 2.0e5 # Pa
   [q_prime_IC]
     type = SCMTriPowerIC
     variable = q_prime
-    power = 322525.0 #W
+    power = 100000.0 #322525.0 #W
     filename = "pin_power_profile19.txt"
   []
 
