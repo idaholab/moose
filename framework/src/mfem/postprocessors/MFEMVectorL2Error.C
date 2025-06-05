@@ -10,8 +10,8 @@ MFEMVectorL2Error::validParams()
 {
   InputParameters params = MFEMPostprocessor::validParams();
   params.addClassDescription(
-      "Computes L2 error $\\left\\Vert \vec u_{ex} - \vec u_{h}\\right\\Vert_{\rm L2}$ for vector "
-      "gridfucntions.");
+      "Computes L2 error $\\left\\Vert \\vec u_{ex} - \\vec u_{h}\\right\\Vert_{\rm L2}$ for "
+      "vector gridfucntions.");
   params.addParam<MFEMVectorCoefficientName>("function",
                                              "The analytic solution to compare against.");
   params.addParam<VariableName>(
