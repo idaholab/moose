@@ -2250,12 +2250,12 @@ public:
   /**
    * Gets the nonlinear system convergence object name(s).
    */
-  std::vector<ConvergenceName> getNonlinearConvergenceNames() const;
+  const std::vector<ConvergenceName> & getNonlinearConvergenceNames() const;
 
   /**
    * Gets the linear convergence object name(s).
    */
-  std::vector<ConvergenceName> getLinearConvergenceNames() const;
+  const std::vector<ConvergenceName> & getLinearConvergenceNames() const;
 
   /**
    * Setter for whether we're computing the scaling jacobian
@@ -2320,23 +2320,21 @@ public:
    */
   unsigned int systemNumForVariable(const VariableName & variable_name) const;
 
-  /**
-   * Whether it will skip further residual evaluations and fail the next nonlinear convergence check
-   */
-  bool getFailNextNonlinearConvergenceCheck() const
-  {
-    return _fail_next_nonlinear_convergence_check;
-  }
+  /// Whether it will skip further residual evaluations and fail the next nonlinear convergence check(s)
+  bool getFailNextNonlinearConvergenceCheck() const { return getFailNextSystemConvergenceCheck(); }
+  /// Whether it will fail the next system convergence check(s), triggering failed step behavior
+  bool getFailNextSystemConvergenceCheck() const { return _fail_next_system_convergence_check; }
 
-  /**
-   * Skip further residual evaluations and fail the next nonlinear convergence check
-   */
-  void setFailNextNonlinearConvergenceCheck() { _fail_next_nonlinear_convergence_check = true; }
+  /// Skip further residual evaluations and fail the next nonlinear convergence check(s)
+  void setFailNextNonlinearConvergenceCheck() { setFailNextSystemConvergenceCheck(); }
+  /// Tell the problem that the system(s) cannot be considered converged next time convergence is checked
+  void setFailNextSystemConvergenceCheck() { _fail_next_system_convergence_check = true; }
 
-  /**
-   * Do not skip further residual evaluations and fail the next nonlinear convergence check
-   */
-  void resetFailNextNonlinearConvergenceCheck() { _fail_next_nonlinear_convergence_check = false; }
+  /// Tell the problem that the nonlinear convergence check(s) may proceed as normal
+  void resetFailNextNonlinearConvergenceCheck() { resetFailNextSystemConvergenceCheck(); }
+  /// Tell the problem that the system convergence check(s) may proceed as normal
+  void resetFailNextSystemConvergenceCheck() { _fail_next_system_convergence_check = false; }
+
   /*
    * Set the status of loop order of execution printing
    * @param print_exec set of execution flags to print on
@@ -2909,7 +2907,7 @@ private:
   const bool _force_restart;
   const bool _allow_ics_during_restart;
   const bool _skip_nl_system_check;
-  bool _fail_next_nonlinear_convergence_check;
+  bool _fail_next_system_convergence_check;
   const bool _allow_invalid_solution;
   const bool _show_invalid_solution_console;
   const bool & _immediately_print_invalid_solution;
