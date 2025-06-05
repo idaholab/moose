@@ -4,6 +4,7 @@
     dim = 1
     nx = 5
   []
+  coord_type = RSPHERICAL
 []
 
 [Variables/u]
@@ -60,10 +61,6 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-[]
-
-[Problem]
-  coord_type = RSPHERICAL
 []
 
 [Outputs]

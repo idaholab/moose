@@ -6,16 +6,13 @@ sphere_outer_Tinf = 300 # K
   family = LAGRANGE
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   [file]
     type = FileMeshGenerator
     file = cyl2D.e
   []
   allow_renumbering = false
+  coord_type = RZ
 []
 
 [Functions]

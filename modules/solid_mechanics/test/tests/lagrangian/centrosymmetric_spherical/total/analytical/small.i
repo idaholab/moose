@@ -25,9 +25,6 @@
     xmax = 4
     nx = 100
   []
-[]
-
-[Problem]
   coord_type = RSPHERICAL
 []
 
