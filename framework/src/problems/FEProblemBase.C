@@ -192,16 +192,6 @@ FEProblemBase::validParams()
                         "True to allow the user to specify initial conditions when restarting. "
                         "Initial conditions can override any restarted field");
 
-  MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
-  MooseEnum rz_coord_axis("X=0 Y=1", "Y");
-  params.addDeprecatedParam<MultiMooseEnum>("coord_type",
-                                            coord_types,
-                                            "Type of the coordinate system per block param",
-                                            "Please use 'Mesh/coord_type' instead");
-  params.addDeprecatedParam<MooseEnum>("rz_coord_axis",
-                                       rz_coord_axis,
-                                       "The rotation axis (X | Y) for axisymetric coordinates",
-                                       "Please use 'Mesh/rz_coord_axis' instead");
   auto coverage_check_description = [](std::string scope, std::string list_param_name)
   {
     return "Controls, if and how a " + scope +
@@ -463,17 +453,16 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _previous_nl_solution_required(getParam<bool>("previous_nl_solution_required")),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
+    _has_block_in_global_params(
+        _app.builder().root() ? static_cast<bool>(_app.builder().root()->find("GlobalParams/block"))
+                              : false),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
-    _has_block_in_global(_app.builder().root()
-                             ? static_cast<bool>(_app.builder().root()->find("GlobalParams/block"))
-                             : false),
     _kernel_coverage_check(
-        isParamSetByUser("kernel_coverage_check") ||
-                (!_has_block_in_global && !isParamSetByUser("block"))
+        isParamSetByUser("kernel_coverage_check") || !isBlockSetByUserOrGlobalParams()
             ? getParam<MooseEnum>("kernel_coverage_check").getEnum<CoverageCheckMode>()
             : CoverageCheckMode::ONLY_LIST),
     _kernel_coverage_blocks(isParamSetByUser("kernel_coverage_check") ||
-                                    (!_has_block_in_global && !isParamSetByUser("block"))
+                                    !isBlockSetByUserOrGlobalParams()
                                 ? getParam<std::vector<SubdomainName>>("kernel_coverage_block_list")
                                 : _blocks),
     _boundary_restricted_node_integrity_check(
@@ -481,13 +470,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
     _material_coverage_check(
-        isParamSetByUser("material_coverage_check") ||
-                (!_has_block_in_global && !isParamSetByUser("block"))
+        isParamSetByUser("material_coverage_check") || !isBlockSetByUserOrGlobalParams()
             ? getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()
             : CoverageCheckMode::ONLY_LIST),
     _material_coverage_blocks(
-        isParamSetByUser("material_coverage_check") ||
-                (!_has_block_in_global && !isParamSetByUser("block"))
+        isParamSetByUser("material_coverage_check") || !isBlockSetByUserOrGlobalParams()
             ? getParam<std::vector<SubdomainName>>("material_coverage_block_list")
             : _blocks),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
@@ -544,19 +531,20 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     if ((isParamSetByUser(coverage_check) &&
          (coverage_check_mode == CoverageCheckMode::ONLY_LIST ||
           coverage_check_mode == CoverageCheckMode::SKIP_LIST)) &&
-        (_has_block_in_global || isParamSetByUser("block")))
-      mooseError("Cannot set both '" + coverage_check +
-                 "' as 'ONLY_LIST' or 'SKIP_LIST' and 'block'. Please set only one.");
+        isBlockSetByUserOrGlobalParams())
+      paramError("block",
+                 "Cannot set both '" + coverage_check +
+                     "' as 'ONLY_LIST' or 'SKIP_LIST' and 'block'. Please set only one.");
   };
 
   checkConflict(_kernel_coverage_check, "kernel_coverage_check");
   checkConflict(_material_coverage_check, "material_coverage_check");
 
-  if (isParamSetByUser("block") && !_has_block_in_global)
-    mooseWarning("The block parameter is set by user in the Problem block, but this has no effect "
-                 "on the block restrictions of kernels, BCs, or other block-restrictable objects. "
-                 "If your intent was to apply this setting globally, please use GlobalParams "
-                 "instead.");
+  if (isParamSetByUser("block") && !_has_block_in_global_params)
+    mooseWarning(
+        "The block parameter is set by user in the Problem block, but this has no effect on the "
+        "block restrictions of kernels, BCs, or other block-restrictable objects. If your intent "
+        "was to apply this setting globally, please use [GlobalParams/block] instead.");
 
   //  Initialize static do_derivatives member. We initialize this to true so that all the
   //  default AD things that we setup early in the simulation actually get their derivative
@@ -623,12 +611,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   es().parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 
-  if (parameters.isParamSetByUser("coord_type"))
-    setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
-                   getParam<MultiMooseEnum>("coord_type"));
-  if (parameters.isParamSetByUser("rz_coord_axis"))
-    setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
-
   if (isParamValid("restart_file_base"))
   {
     std::string restart_file_base = getParam<FileNameNoExtension>("restart_file_base");
@@ -669,6 +651,12 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     // We don't want petscSetOptions being called in solve and clearing the option that was just set
     _is_petsc_options_inserted = true;
   }
+}
+
+bool
+FEProblemBase::isBlockSetByUserOrGlobalParams() const
+{
+  return isParamSetByUser("block") || _has_block_in_global_params;
 }
 
 const MooseMesh &
