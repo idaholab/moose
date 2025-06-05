@@ -36,6 +36,10 @@ WCNSLinearFVTwoPhaseMixturePhysics::validParams()
                              "weakly-compressible Navier Stokes equations using the linearized "
                              "segregated finite volume discretization");
 
+  // This is added to match a nonlinear test result. If the underlying issue is fixed, remove it
+  params.addParam<bool>("add_gravity_term_in_slip_velocity",
+                        true,
+                        "Whether to add the gravity term in the slip velocity vector computation");
   return params;
 }
 
@@ -311,7 +315,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
       params.set<MooseFunctorName>(NS::density) = _phase_1_density;
       params.set<MooseFunctorName>(NS::mu) = "mu_mixture";
       params.set<MooseFunctorName>("rho_d") = _phase_2_density;
-      params.set<RealVectorValue>("gravity") = _flow_equations_physics->gravityVector();
+      if (getParam<bool>("add_gravity_term_in_slip_velocity"))
+        params.set<RealVectorValue>("gravity") = _flow_equations_physics->gravityVector();
       if (isParamValid("slip_linear_friction_name"))
         params.set<MooseFunctorName>("linear_coef_name") =
             getParam<MooseFunctorName>("slip_linear_friction_name");

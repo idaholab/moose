@@ -83,6 +83,8 @@ cp_d = 1
         use_dispersed_phase_drag_model = true
         particle_diameter = ${dp}
         add_advection_slip_term = false
+        # To match Rayleigh Bernard nonlinear test setup
+        add_gravity_term_in_slip_velocity = false
       []
     []
   []
