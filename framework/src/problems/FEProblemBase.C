@@ -208,7 +208,9 @@ FEProblemBase::validParams()
   params.addParam<std::vector<SubdomainName>>(
       "block",
       {},
-      "Default list of subdomains for block-restrictable objects such as kernels and materials.");
+      "List of subdomains for kernel coverage and material coverage checks. Setting this parameter "
+      "is equivalent to setting 'kernel_coverage_block_list' and 'material_coverage_block_list' as "
+      "well as using 'ONLY_LIST' as the coverage check mode.");
 
   MooseEnum kernel_coverage_check_modes("FALSE TRUE OFF ON SKIP_LIST ONLY_LIST", "TRUE");
   params.addParam<MooseEnum>("kernel_coverage_check",

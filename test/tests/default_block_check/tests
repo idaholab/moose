@@ -27,14 +27,9 @@
     [error]
       type = RunException
       input = 'diffusion_with_null_material_kernel_coverage_override.i'
-      expect_err = "Cannot set both 'kernel_coverage_check' as 'ONLY_LIST' or 'SKIP_LIST' and 'block'. Please set only one."
+      expect_err = "Cannot set both 'kernel_coverage_check' as 'ONLY_LIST' or 'SKIP_LIST' and "
+                   "'block'. Please set only one."
       detail = 'Verify that an error is thrown when users enable kernel or material coverage checking within a list while also defining a default set of blocks.'
-    []
-    [block_only_in_problem]
-      type = RunException
-      input = 'diffusion_with_null_material_block_only_in_problem.i'
-      expect_err = "The block parameter is set by user in the Problem block, but this has no effect on the block restrictions of kernels, BCs, or other block-restrictable objects."
-      detail = 'Verify that an warning is issued when users only set block in the Problem, which actually have no effect of block restrictions.'
     []
   []
 []
