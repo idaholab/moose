@@ -125,6 +125,7 @@ each input file runs well separately.
 !style fontsize=60%
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step11_multiapps
+moose-opt -i mesh2d_coarse.i --mesh-only
 moose-opt -i step11_local.i
 moose-opt -i step11_2d_fluid.i
 moose-opt -i step11_2d_heat_conduction.i MultiApps/active='' Transfers/active=''

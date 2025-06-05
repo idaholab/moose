@@ -39,6 +39,8 @@ properties defined in [HeatConductionMaterial](HeatConductionMaterial.md) automa
 
 !listing step04_heat_conduction/step4.i block=Kernels
 
+Note: we use kernels with automatic differentiation (AD) for simplicity.
+
 !---
 
 ## Step 4: Input File

@@ -58,14 +58,24 @@ Convection with air using [ConvectiveHeatFluxBC](ConvectiveHeatFluxBC.md).
 
 !listing step03_boundary_conditions/step3.i block=BCs/air_convection
 
+Note that sidesets are oriented. The variables on which the BC is applied must be defined on the
+primary side (opposite the normal) of the sideset. For an external boundary, this is never a concern.
+
 !---
 
 Convection with water
 
-We use the same boundary condition as for with for now. When we introduce a separate variable for the
+We use the same boundary condition for the water boundary as for the convection with air for now. When we introduce a separate variable for the
 water temperature, we will revisit this.
+We use the 'water_boundary_inwards' surface because the solid block is on its primary side.
 
 !listing step03_boundary_conditions/step3.i block=BCs/water_convection
+
+!---
+
+Summary of the boundary conditions:
+
+!media shield_multiphysics/results/step03_bcs.png
 
 !---
 
@@ -86,6 +96,8 @@ moose-opt -i step3.i
 !---
 
 ## Step 3: Result
+
+We only show the solid temperature. The water temperature is a constant for now.
 
 !media shield_multiphysics/results/step03.png
 

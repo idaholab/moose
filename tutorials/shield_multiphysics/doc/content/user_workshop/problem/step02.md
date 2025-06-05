@@ -21,6 +21,13 @@ volume integrals of a [!ac](PDE).
 
 ## CoefDiffusion Kernel
 
+The heat conduction equation amounts to a diffusion equation with a coefficient.
+
+!equation
+-\nabla \cdot k \nabla T = 0,
+
+where  $k$  is the thermal diffusivity.
+
 To implement the coefficient a new Kernel object must be used: [CoefDiffusion](CoefDiffusion.md).
 
 This object inherits from [Diffusion](Diffusion.md) and will use input parameters for specifying the

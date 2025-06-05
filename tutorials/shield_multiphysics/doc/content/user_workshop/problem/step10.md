@@ -14,7 +14,7 @@ Conservation of momentum:
 
 !equation id=fluid_velocity
 \frac{\partial \rho  \vec{u}}{\partial t} + \nabla \cdot \left(\rho \vec{u} \otimes \vec{u}\right)
-= \nabla \cdot \left(\mu_\text{eff} \left(\nabla\vec{u}_I + \left(\nabla \vec{u}_I\right)^T-\frac{2}{3}\nabla\cdot\vec{u}_I\mathbb{I}\right)\right) -\nabla p + \rho \vec{g}
+= \nabla \cdot \left(\mu_\text{eff} \left(\nabla\vec{u} + \left(\nabla \vec{u}\right)^T-\frac{2}{3}\nabla\cdot\vec{u}\mathbb{I}\right)\right) -\nabla p + \rho \vec{g}
 
 Conservation of Energy:
 
@@ -82,6 +82,7 @@ MOOSE includes the ability to either manually or automatically scale non-linear 
 ## Step 10: Run Input
 
 ```bash
+moose-opt -i mesh2d.i --mesh-only
 moose-opt -i step10.i
 ```
 

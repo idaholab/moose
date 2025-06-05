@@ -9,7 +9,7 @@
 We are not solving for the temperature in the water yet. To represent it as a variable that is
 not in the nonlinear system, we use an [auxiliary variable](AuxVariables/index.md).
 
-!listing step05_auxiliary_variables/step5.i block=AuxVariables
+!listing step05_auxiliary_variables/step5.i block=AuxVariables/T_fluid
 
 !---
 
@@ -26,7 +26,7 @@ q = - k \nabla T
 
 ## DiffusionFlux AuxKernel
 
-The primary unknown ("nonlinear variable") is the temperature
+The primary unknown ("nonlinear variable") is the temperature.
 
 Once the temperature is computed, the [AuxiliarySystem](AuxKernels/index.md) can compute and output the heat flux field using
 the coupled temperature variable and the thermal conductivity property via [DiffusionFluxAux](DiffusionFluxAux.md).
