@@ -1,4 +1,4 @@
-{% set version = "2025.05.28" %}
+{% set version = "2025.06.05" %}
 
 package:
   name: moose-pprof

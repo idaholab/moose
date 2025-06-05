@@ -7,13 +7,13 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2025.05.28
+    version: 2025.06.05
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
   # dependers: libmesh-vtk, peacock, petsc, libmesh, moose-dev
   mpi:
-    version: 2025.05.28
+    version: 2025.06.05
     conda: conda/mpi
     templates:
       conda/mpi/meta.yaml.template: conda/mpi/meta.yaml
@@ -38,7 +38,7 @@ packages:
   # dependers: libmesh, moose-dev
   petsc:
     version: 3.23.0.6.gd9d7fd11dca
-    build_number: 3
+    build_number: 2
     conda: conda/petsc
     templates:
       conda/petsc/conda_build_config.yaml.template: conda/petsc/conda_build_config.yaml
@@ -93,7 +93,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.05.28
+    version: 2025.06.05
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
@@ -124,7 +124,7 @@ packages:
       - framework/contrib/mfem
   # dependers: none
   pprof:
-    version: 2025.05.28
+    version: 2025.06.05
     conda: conda/pprof
     templates:
       conda/pprof/meta.yaml.template: conda/pprof/meta.yaml
