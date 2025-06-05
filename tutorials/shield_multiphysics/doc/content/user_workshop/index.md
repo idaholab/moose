@@ -60,7 +60,7 @@
 
 !---
 
-!include user_workshop/systems_user/input_syntax.md
+!include user_workshop/systems_user/input_syntax_primer.md
 
 !---
 

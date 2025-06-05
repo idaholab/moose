@@ -6,12 +6,14 @@ to process input files. Input files use a hierarchical syntax, with square brack
 ```
                        # These are comments
 [Variables]            # system name
-  [u]               # object name, opening sub-block
+  [u]                  # object name, opening sub-block
     family = LAGRANGE  # a parameter for this object
     order = FIRST      # another parameter for this object
   []                   # closing object sub-block
 []                     # closing system block
 ```
+
+More info on input syntax on [this page](input_syntax.md).
 
 !---
 
