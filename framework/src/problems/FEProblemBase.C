@@ -453,16 +453,12 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _previous_nl_solution_required(getParam<bool>("previous_nl_solution_required")),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
-    _has_block_in_global_params(
-        _app.builder().root() ? static_cast<bool>(_app.builder().root()->find("GlobalParams/block"))
-                              : false),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
     _kernel_coverage_check(
-        isParamSetByUser("kernel_coverage_check") || !isBlockSetByUserOrGlobalParams()
+        isParamSetByUser("kernel_coverage_check") || !isParamSetByUser("block")
             ? getParam<MooseEnum>("kernel_coverage_check").getEnum<CoverageCheckMode>()
             : CoverageCheckMode::ONLY_LIST),
-    _kernel_coverage_blocks(isParamSetByUser("kernel_coverage_check") ||
-                                    !isBlockSetByUserOrGlobalParams()
+    _kernel_coverage_blocks(isParamSetByUser("kernel_coverage_check") || !isParamSetByUser("block")
                                 ? getParam<std::vector<SubdomainName>>("kernel_coverage_block_list")
                                 : _blocks),
     _boundary_restricted_node_integrity_check(
@@ -470,11 +466,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
     _material_coverage_check(
-        isParamSetByUser("material_coverage_check") || !isBlockSetByUserOrGlobalParams()
+        isParamSetByUser("material_coverage_check") || !isParamSetByUser("block")
             ? getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()
             : CoverageCheckMode::ONLY_LIST),
     _material_coverage_blocks(
-        isParamSetByUser("material_coverage_check") || !isBlockSetByUserOrGlobalParams()
+        isParamSetByUser("material_coverage_check") || !isParamSetByUser("block")
             ? getParam<std::vector<SubdomainName>>("material_coverage_block_list")
             : _blocks),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
@@ -531,7 +527,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     if ((isParamSetByUser(coverage_check) &&
          (coverage_check_mode == CoverageCheckMode::ONLY_LIST ||
           coverage_check_mode == CoverageCheckMode::SKIP_LIST)) &&
-        isBlockSetByUserOrGlobalParams())
+        isParamSetByUser("block"))
       paramError("block",
                  "Cannot set both '" + coverage_check +
                      "' as 'ONLY_LIST' or 'SKIP_LIST' and 'block'. Please set only one.");
@@ -539,12 +535,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   checkConflict(_kernel_coverage_check, "kernel_coverage_check");
   checkConflict(_material_coverage_check, "material_coverage_check");
-
-  if (isParamSetByUser("block") && !_has_block_in_global_params)
-    mooseWarning(
-        "The block parameter is set by user in the Problem block, but this has no effect on the "
-        "block restrictions of kernels, BCs, or other block-restrictable objects. If your intent "
-        "was to apply this setting globally, please use [GlobalParams/block] instead.");
 
   //  Initialize static do_derivatives member. We initialize this to true so that all the
   //  default AD things that we setup early in the simulation actually get their derivative
@@ -651,12 +641,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     // We don't want petscSetOptions being called in solve and clearing the option that was just set
     _is_petsc_options_inserted = true;
   }
-}
-
-bool
-FEProblemBase::isBlockSetByUserOrGlobalParams() const
-{
-  return isParamSetByUser("block") || _has_block_in_global_params;
 }
 
 const MooseMesh &

@@ -74,6 +74,12 @@ CreateProblemDefaultAction::act()
       if (p)
         params.applyParameters(p->getObjectParams());
 
+      // apply global parameters
+      const auto global_params_block_name =
+          _app.syntax().getSyntaxByAction("GlobalParamsAction").front();
+      auto & builder = _app.builder();
+      builder.extractParams(global_params_block_name, params);
+
       params.set<MooseMesh *>("mesh") = _mesh.get();
       params.set<bool>("use_nonlinear") = _app.useNonlinear();
       if (_pars.isParamValid("_solve"))
