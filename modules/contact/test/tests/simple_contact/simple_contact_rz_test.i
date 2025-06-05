@@ -13,15 +13,12 @@
   # avoid PenetrationLocator warnings, which are currently treated as
   # errors by the TestHarness.
   patch_update_strategy = 'iteration'
+  coord_type = RZ
 []
 
 [GlobalParams]
   volumetric_locking_correction = false
   displacements = 'disp_x disp_y'
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [Functions]
