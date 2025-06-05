@@ -14,7 +14,7 @@ P_out = 2.0e5 # Pa
   [subchannel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 3
-    n_cells = 40
+    n_cells = 100
     flat_to_flat = 3.41e-2
     heated_length = 0.5334
     unheated_length_entry = 0.4064
@@ -173,62 +173,62 @@ P_out = 2.0e5 # Pa
 []
 
 [Postprocessors]
-  # [T1]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 37
-  #   execute_on = "timestep_end"
-  #   height = 1.016
-  # []
-  # [T2]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 36
-  #   execute_on = "timestep_end"
-  #   height = 1.016
-  # []
-  # [T3]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 20
-  #   execute_on = "timestep_end"
-  #   height = 1.016
-  # []
-  # [T4]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 10
-  #   execute_on = "timestep_end"
-  #   height = 1.016
-  # []
-  # [T5]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 4
-  #   execute_on = "timestep_end"
-  #   height = 1.016
-  # []
-  # [T6]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 1
-  #   execute_on = "timestep_end"
-  #   height = 1.016
-  # []
-  # [T7]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 14
-  #   execute_on = "timestep_end"
-  #   height = 1.016
-  # []
-  # [T8]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 28
-  #   execute_on = "timestep_end"
-  #   height = 1.016
-  # []
+  [T1]
+    type = SubChannelPointValue
+    variable = T
+    index = 37
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T2]
+    type = SubChannelPointValue
+    variable = T
+    index = 36
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T3]
+    type = SubChannelPointValue
+    variable = T
+    index = 20
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T4]
+    type = SubChannelPointValue
+    variable = T
+    index = 10
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T5]
+    type = SubChannelPointValue
+    variable = T
+    index = 4
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T6]
+    type = SubChannelPointValue
+    variable = T
+    index = 1
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T7]
+    type = SubChannelPointValue
+    variable = T
+    index = 14
+    execute_on = "timestep_end"
+    height = 1.016
+  []
+  [T8]
+    type = SubChannelPointValue
+    variable = T
+    index = 28
+    execute_on = "timestep_end"
+    height = 1.016
+  []
   ####### Assembly pressure drop
   [DP_SubchannelDelta]
     type = SubChannelDelta

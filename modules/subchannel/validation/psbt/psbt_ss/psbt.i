@@ -80,7 +80,7 @@ P_out = 14.72e6 # Pa
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.006
+  beta = 0.08
   CT = 2.6
   compute_density = true
   compute_viscosity = true
@@ -88,9 +88,8 @@ P_out = 14.72e6 # Pa
   P_out = ${P_out}
   implicit = true
   segregated = false
-  # interpolation_scheme = 'upwind'
   staggered_pressure = false
-  monolithic_thermal = true
+  monolithic_thermal = false
   verbose_subchannel = true
 []
 
