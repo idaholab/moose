@@ -20,8 +20,10 @@ class TestHarnessTestCase(unittest.TestCase):
     TestCase class for running TestHarness commands.
     """
 
-    def runTests(self, *args, tmp_output=True, as_json=False):
+    def runTests(self, *args, tmp_output=True, as_json=False, no_capabilities=True):
         cmd = ['./run_tests'] + list(args) + ['--term-format', 'njCst']
+        if no_capabilities:
+            cmd += ['--no-capabilities']
         sp_kwargs = {'cwd': os.path.join(os.getenv('MOOSE_DIR'), 'test'),
                      'text': True}
         context = tempfile.TemporaryDirectory if tmp_output else nullcontext
