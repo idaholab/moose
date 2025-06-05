@@ -554,10 +554,13 @@ TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int 
   auto z1 = _z_grid[iz - 1];
   // Compute the height of this element.
   auto dz = z2 - z1;
+  auto dz1 = dz / 2.;
+  auto dz2 = dz / 2.;
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
   auto heated_length = _subchannel_mesh.getHeatedLength();
   auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
-  if (z2 > unheated_length_entry && z1 < unheated_length_entry + heated_length)
+  if (MooseUtils::absoluteFuzzyGreaterEqual(z2, unheated_length_entry) &&
+      z1 <= unheated_length_entry + heated_length)
   {
     if (_pin_mesh_exist)
     {
@@ -594,9 +597,23 @@ TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int 
     }
     else
     {
+      // calculation of power for the first heated segment if nodes don't align
+      // if (z2 > unheated_length_entry && z1 < unheated_length_entry)
+      // {
+      //   // z1 = unheated_length_entry;
+      //   dz2 = z2 - unheated_length_entry;
+      // }
+
+      // // calculation of power for the last heated segment if nodes don't align
+      // if (z2 > unheated_length_entry + heated_length && z1 < unheated_length_entry +
+      // heated_length)
+      // {
+      //   // z2 = unheated_length_entry + heated_length;
+      //   dz1 = unheated_length_entry + heated_length - z1;
+      // }
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
       auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-      return ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
+      return ((*_q_prime_soln)(node_out)*dz2 + (*_q_prime_soln)(node_in)*dz1);
     }
   }
   else
