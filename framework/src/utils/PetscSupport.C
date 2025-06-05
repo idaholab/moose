@@ -362,19 +362,16 @@ petscLinearConverged(
   FEProblemBase & problem = *static_cast<FEProblemBase *>(ctx);
 
   // execute objects that may be used in convergence check
-  // TODO: add a dedicated flag once support is fully implemented.
   // Right now, setting objects to execute on this flag would be ignored except in the
   // linear-system-only use case.
-  problem.execute(EXEC_NONLINEAR_CONVERGENCE);
+  problem.execute(EXEC_LINEAR_CONVERGENCE);
 
   // perform the convergence check
   Convergence::MooseConvergenceStatus status;
-  // TODO: This API could become about the "solverConvergenceCheck" to apply to both linear and
-  // nonlinear system convergence checks.
-  if (problem.getFailNextNonlinearConvergenceCheck())
+  if (problem.getFailNextSystemConvergenceCheck())
   {
     status = Convergence::MooseConvergenceStatus::DIVERGED;
-    problem.resetFailNextNonlinearConvergenceCheck();
+    problem.resetFailNextSystemConvergenceCheck();
   }
   else
   {

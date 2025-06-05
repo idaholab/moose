@@ -486,7 +486,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _force_restart(getParam<bool>("force_restart")),
     _allow_ics_during_restart(getParam<bool>("allow_initial_conditions_with_restart")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
-    _fail_next_nonlinear_convergence_check(false),
+    _fail_next_system_convergence_check(false),
     _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
     _show_invalid_solution_console(getParam<bool>("show_invalid_solution_console")),
     _immediately_print_invalid_solution(getParam<bool>("immediately_print_invalid_solution")),
@@ -6350,7 +6350,7 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // reset flag so that residual evaluation does not get skipped
   // and the next non-linear iteration does not automatically fail with
   // "DIVERGED_NANORINF", when we throw  an exception and stop solve
-  _fail_next_nonlinear_convergence_check = false;
+  _fail_next_system_convergence_check = false;
 
   if (_solve)
   {
@@ -6424,7 +6424,7 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 
       // Force the next non-linear convergence check to fail (and all further residual evaluation
       // to be skipped).
-      _fail_next_nonlinear_convergence_check = true;
+      _fail_next_system_convergence_check = true;
 
       // Repropagate the exception, so it can be caught at a higher level, typically
       // this is NonlinearSystem::computeResidual().
@@ -8988,7 +8988,7 @@ FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> &
   _set_nonlinear_convergence_names = true;
 }
 
-std::vector<ConvergenceName>
+const std::vector<ConvergenceName> &
 FEProblemBase::getNonlinearConvergenceNames() const
 {
   if (_set_nonlinear_convergence_names)
@@ -9017,7 +9017,7 @@ FEProblemBase::setLinearConvergenceNames(const std::vector<ConvergenceName> & co
   _set_linear_convergence_names = true;
 }
 
-std::vector<ConvergenceName>
+const std::vector<ConvergenceName> &
 FEProblemBase::getLinearConvergenceNames() const
 {
   if (_set_linear_convergence_names)

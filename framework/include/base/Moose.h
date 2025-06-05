@@ -113,6 +113,7 @@ class FEProblemBase;
 using ExecFlagType = MooseEnumItem;
 extern const ExecFlagType EXEC_NONE;
 extern const ExecFlagType EXEC_INITIAL;
+extern const ExecFlagType EXEC_LINEAR_CONVERGENCE;
 extern const ExecFlagType EXEC_LINEAR;
 extern const ExecFlagType EXEC_NONLINEAR_CONVERGENCE;
 extern const ExecFlagType EXEC_NONLINEAR;
