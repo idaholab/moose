@@ -12,9 +12,6 @@ moose_wasp:
 moose_tools:
   - moose-tools __VERSIONER_TOOLS_VERSION__
 
-moose_peacock:
-  - moose-peacock __VERSIONER_PEACOCK_VERSION__
-
 zip_keys:
   - mpi
   - moose_libmesh

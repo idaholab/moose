@@ -46,6 +46,8 @@ outputs:
         - MOOSE_JOBS
         - REQUESTS_CA_BUNDLE
         - SSL_CERT_FILE
+        - CURL_CA_BUNDLE
+        - NODE_EXTRA_CA_CERTS
       run_exports:
         - {{ pin_subpackage('moose-wasp-base', max_pin='x.x')}}
     requirements:
