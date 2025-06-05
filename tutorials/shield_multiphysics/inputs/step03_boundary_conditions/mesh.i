@@ -3,9 +3,9 @@
 [Mesh]
   [add_concrete_outer_boundary]
     type = RenameBoundaryGenerator
-    input = rename_blocks
-    old_boundary = 'left right front bottom top back'
-    new_boundary = 'air_boundary air_boundary air_boundary air_boundary air_boundary ground'
+    input = rename_boundaries_step3
+    old_boundary = 'left         right        front        bottom top          back'
+    new_boundary = 'air_boundary air_boundary air_boundary ground air_boundary air_boundary'
   []
   [add_water_concrete_interface]
     type = SideSetsBetweenSubdomainsGenerator

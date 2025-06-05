@@ -76,5 +76,26 @@
     input = hollow_concrete
     old_block = '0 1 2 3'
     new_block = 'concrete_hd concrete water Al'
+    show_info = true
+  []
+  [rename_boundaries_step1]
+    type = RenameBoundaryGenerator
+    input = 'rename_blocks'
+    old_boundary = 'back  front'
+    new_boundary = 'temp1 temp2'
+    show_info = true
+  []
+  [rename_boundaries_step2]
+    type = RenameBoundaryGenerator
+    input = 'rename_boundaries_step1'
+    old_boundary = 'bottom top'
+    new_boundary = 'back   front'
+    show_info = true
+  []
+  [rename_boundaries_step3]
+    type = RenameBoundaryGenerator
+    input = 'rename_boundaries_step2'
+    old_boundary = 'temp1 temp2'
+    new_boundary = 'bottom top'
   []
 []
