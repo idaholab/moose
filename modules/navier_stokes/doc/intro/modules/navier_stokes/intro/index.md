@@ -20,11 +20,12 @@ Main capabilities:
   - Incompressible
   - Weakly-compressible
   - Compressible
+  - Two-phase mixture model
 
 - Flow regimes:
 
   - Laminar
-  - Limited turbulence handling (mixing length)
+  - Turbulent
 
 - Flow types:
 
@@ -38,12 +39,32 @@ Main capabilities:
 Utilizes the following techniques:
 
 - Stabilized Continuous Finite Element Discretization (maintained, but not intensely developed) ([!cite](peterson2018overview))
-- Finite Volume Discretization (current development direction) ([!cite](lindsay2023moose))
+- Finite Volume Discretization with nonlinear solver ([!cite](lindsay2023moose))
+- Finite Volume Discretization with linear solver
 
 !col-end!
 !row-end!
 
 !style-end!
+
+!---
+
+# Applicability of each solver
+
+Nonlinear (Newton method) finite volume
+
+- 2D problems
+- only solver with support for porous medium
+- turbulence models (mixing-length, k-$\epsilon$)
+- fully compressible flow problems
+
+Linear (SIMPLE/PIMPLE) finite volume
+
+- 3D problems
+
+You can check that the combination of models you want is supported [in Table 2 on this page](modules/navier_stokes/index.md)
+The nonlinear (SIMPLE/PIMPLE) finite volume is being replaced by the linear implementation. It is currently still only used for
+two-phase flow studies.
 
 !---
 
@@ -169,6 +190,7 @@ Few Examples:
 
 - +PINSFV:+ +P+orous-Medium +I+ncompressible +N+avier-+S+tokes +F+inite +V+olume
 - +WCNSFV:+ +W+eakly-+C+ompressible +N+avier-+S+tokes +F+inite +V+olume
+- +WCNSLinearFV:+ +W+eakly-+C+ompressible +N+avier-+S+tokes Linear +F+inite +V+olume
 
 !col-end!
 
@@ -179,7 +201,7 @@ Few Examples:
 # Building Input Files
 style=font-size:28pt
 
-The building blocks in MOOSE for terms in the PDEs are +Kernels+ for FE or +FVKernels+ for FV:
+The building blocks in MOOSE for terms in the PDEs are +Kernels+ for FE, +FVKernels+ for FV, and +LinearFVKernels+ for SIMPLE-FV:
 
 !style! fontsize=80%
 !equation
@@ -192,7 +214,7 @@ The building blocks in MOOSE for terms in the PDEs are +Kernels+ for FE or +FVKe
 + \underbrace{\gamma\rho \vec{g}}_{\text{PINSFVMomentumGravity~}}
 \underbrace{-  W  \vec{u}_I}_{\text{PINSFVMomentumFriction}}
 
-The building blocks in MOOSE for boundary conditions are +BCs+ for FE or +FVBCs+ for FV:
+The building blocks in MOOSE for boundary conditions are +BCs+ for FE, +FVBCs+ for Newton-FV, and +LinearFVBCs+ for SIMPLE-FV:
 
 - Inlet Velocity: $\text{INSFVInletVelocityBC}$
 - Inlet Temperature: $\text{FVFunctionDirichletBC}$
@@ -217,10 +239,17 @@ Let us consider the following (fictional) material properties:
 
 !---
 
-# Detailed Input File
+# Detailed Input File (nonlinear/Newton FV)
 style=font-size:26pt
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/2d-rc-no-slip.i
+
+!---
+
+# Detailed Input File (linear/SIMPLE FV)
+style=font-size:26pt
+
+!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/2d-velocity-pressure.i
 
 !---
 
@@ -259,13 +288,15 @@ $\Large\xrightarrow[\mathrm{Rhie-Chow~Interpolation}]{\vec{u}_{RC,f} = \vec{u}_{
 
 !---
 
-# The Navier-Stokes Finite Volume Action
+# The Navier-Stokes Physics
 style=font-size:26pt
 
-A simplified syntax has been developed, it relies on the `Action` system in MOOSE.
-For the documentation of the corresponding action, click [here](NSFVAction.md)!
+A simplified syntax has been developed, it relies on the `Physics` system in MOOSE.
+Each [Physics](syntax/Physics/index.md) is in charge of creating one equation. The input below shows the
+[flow](WCNSFVFlowPhysics.md) and [energy conservation](WCNSFVFluidHeatTransferPhysics.md) equations.
+Only the finite volume discretization, for the Newton and PIMPLE solvers, support this syntax.
 
-!listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/2d-rc-no-slip-action.i
+!listing tests/finite_volume/pins/channel-flow/heated/2d-rc-heated-physics.i
 
 !---
 
@@ -274,10 +305,12 @@ style=font-size:28pt
 
 !style! fontsize=70%
 
-- If possible, use the Navier Stokes Finite Volume Action syntax
+- Check that the combination of models you want is supported [in Table 2 there](modules/navier_stokes/index.md)
+- Start from an example. If no example, find a test that looks similar.
+- If possible, use the Navier Stokes finite volume `Physics` syntax
 - Use Rhie-Chow interpolation for the advecting velocity
 
-  - Other interpolation techniques may lead to checker-boarding/instability
+  - Other interpolation techniques may lead to checkerboarding/instability
 
 
 - Start with first-order advected-interpolation schemes (e.g. upwind)
@@ -293,5 +326,13 @@ style=font-size:28pt
 !style! fontsize=60%
 $^*$ Because the complexity of the LU preconditioner is $N^3$ in the worst case scenario, its performance in general largely depends on the matrix sparsity pattern, and it is much more expensive compared with an iterative approach.
 !style-end!
+
+!---
+
+# Validation studies and additional examples
+
+[Turbulence modeling for Molten Salt Reactors](https://www.sciencedirect.com/science/article/pii/S0029549324008872)
+
+Open-Pronghorn flow test bed (to be released soon)
 
 !---
