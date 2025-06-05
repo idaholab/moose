@@ -17,7 +17,7 @@ are supplied but are not used. As a developer you should use `paramError()` or `
 related to input file parameters. These "param" type errors will be used by the parser to generate line number information for the
 offending problematic parameters.
 
-# Simulation Sanity Checks.
+# Simulation Sanity Checks
 
 MOOSE performs several sanity checks just before the simulation runs. This includes several different kinds of checks
 

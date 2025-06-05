@@ -207,7 +207,6 @@ FEProblemBase::validParams()
 
   params.addParam<std::vector<SubdomainName>>(
       "block",
-      {},
       "List of subdomains for kernel coverage and material coverage checks. Setting this parameter "
       "is equivalent to setting 'kernel_coverage_block_list' and 'material_coverage_block_list' as "
       "well as using 'ONLY_LIST' as the coverage check mode.");
@@ -441,26 +440,25 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _previous_nl_solution_required(getParam<bool>("previous_nl_solution_required")),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
-    _blocks(getParam<std::vector<SubdomainName>>("block")),
     _kernel_coverage_check(
-        isParamSetByUser("kernel_coverage_check") || !isParamSetByUser("block")
+        isParamSetByUser("kernel_coverage_check") || !isParamValid("block")
             ? getParam<MooseEnum>("kernel_coverage_check").getEnum<CoverageCheckMode>()
             : CoverageCheckMode::ONLY_LIST),
-    _kernel_coverage_blocks(isParamSetByUser("kernel_coverage_check") || !isParamSetByUser("block")
+    _kernel_coverage_blocks(isParamSetByUser("kernel_coverage_check") || !isParamValid("block")
                                 ? getParam<std::vector<SubdomainName>>("kernel_coverage_block_list")
-                                : _blocks),
+                                : getParam<std::vector<SubdomainName>>("block")),
     _boundary_restricted_node_integrity_check(
         getParam<bool>("boundary_restricted_node_integrity_check")),
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
     _material_coverage_check(
-        isParamSetByUser("material_coverage_check") || !isParamSetByUser("block")
+        isParamSetByUser("material_coverage_check") || !isParamValid("block")
             ? getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()
             : CoverageCheckMode::ONLY_LIST),
     _material_coverage_blocks(
-        isParamSetByUser("material_coverage_check") || !isParamSetByUser("block")
+        isParamSetByUser("material_coverage_check") || !isParamValid("block")
             ? getParam<std::vector<SubdomainName>>("material_coverage_block_list")
-            : _blocks),
+            : getParam<std::vector<SubdomainName>>("block")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
     _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
@@ -510,7 +508,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     if ((isParamSetByUser(coverage_check) &&
          (coverage_check_mode == CoverageCheckMode::ONLY_LIST ||
           coverage_check_mode == CoverageCheckMode::SKIP_LIST)) &&
-        isParamSetByUser("block"))
+        isParamValid("block"))
       paramError("block",
                  "Cannot set both '" + coverage_check +
                      "' as 'ONLY_LIST' or 'SKIP_LIST' and 'block'. Please set only one.");
