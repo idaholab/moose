@@ -19,7 +19,7 @@
     cli_args = 'Executioner/end_time=1000'
     prereq = generate_2d_coarse_mesh
     requirement = "The shield multiphysics tutorial shall include a demonstration of performing a "
-                  "fluid simulation meant for coupling individually."
+                  "fluid flow simulation meant for coupling individually."
   []
   [heat_conduction]
     type = RunApp

@@ -43,6 +43,12 @@
 []
 
 [AuxVariables]
+  [T_fluid]
+    family = MONOMIAL
+    order = CONSTANT
+    block = 'water'
+    initial_condition = 300
+  []
   [heat_flux_x]
     family = MONOMIAL
     order = CONSTANT

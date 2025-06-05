@@ -194,8 +194,6 @@ power = '${fparse 5e4 / 144 * 0.5}'
 
 [AuxVariables]
   [T_fluid]
-    # family = MONOMIAL
-    # order = CONSTANT
     type = INSFVEnergyVariable
     initial_condition = 300
     block = 'water'
