@@ -86,6 +86,7 @@ Extensions:
     MooseDocs.extensions.layout: default
     MooseDocs.extensions.content: default
     MooseDocs.extensions.modal: default
+    MooseDocs.extensions.graph: default
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.listing:
