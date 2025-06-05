@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "ADIntegratedBC.h"
-#include "IntegratedBC.h"
+#include "PressureBase.h"
+#include "PressureAction.h"
 #include "MooseTypes.h"
 
 #include "MooseTypes.h"
@@ -23,27 +23,16 @@ class Function;
  */
 
 template <bool is_ad>
-using PressureParent = typename std::conditional<is_ad, ADIntegratedBC, IntegratedBC>::type;
-
-template <bool is_ad>
 class PressureTempl : public PressureParent<is_ad>
 {
 public:
   static InputParameters validParams();
+  static InputParameters actionParams();
 
   PressureTempl(const InputParameters & parameters);
 
 protected:
-  virtual void initialSetup() override;
-  virtual GenericReal<is_ad> computeQpResidual() override;
-
-  GenericReal<is_ad> computeFactor() const;
-
-  /// displacement component to apply the bc to
-  unsigned int _component;
-
-  /// Number of displacement variables
-  const unsigned int _ndisp;
+  GenericReal<is_ad> computePressure() const override;
 
   ///@{ Pressure value constant factor, function factor, and postprocessor factor
   const Real _factor;
@@ -54,51 +43,12 @@ protected:
   /// _alpha Parameter for HHT time integration scheme
   const Real _alpha;
 
-  /// Variable numbers of coupled displacement variables
-  std::vector<unsigned int> _disp_var;
-
-  const FEBase * const & _fe_side;
-  const std::vector<RealGradient> * _q_dxi;
-  const std::vector<RealGradient> * _q_deta;
-  const std::vector<std::vector<Real>> * _phi_dxi;
-  const std::vector<std::vector<Real>> * _phi_deta;
-  const bool _use_displaced_mesh;
-
-  // One FE for each thread
-  std::vector<std::unique_ptr<FEBase>> _fe;
-
-  std::map<unsigned int, unsigned int> _node_map;
-
-  /// Coordinate system type
-  Moose::CoordinateSystemType _coord_type;
-
   usingTransientInterfaceMembers;
-  using PressureParent<is_ad>::_assembly;
-  using PressureParent<is_ad>::_fe_problem;
-  using PressureParent<is_ad>::_i;
-  using PressureParent<is_ad>::_mesh;
-  using PressureParent<is_ad>::_name;
-  using PressureParent<is_ad>::_normals;
-  using PressureParent<is_ad>::_q_point;
   using PressureParent<is_ad>::_qp;
-  using PressureParent<is_ad>::_sys;
-  using PressureParent<is_ad>::_test;
-  using PressureParent<is_ad>::_var;
+  using PressureParent<is_ad>::_q_point;
 };
 
-class Pressure : public PressureTempl<false>
-{
-public:
-  using PressureTempl<false>::PressureTempl;
-
-protected:
-  virtual Real computeQpJacobian() override;
-  virtual void precalculateQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(const unsigned int jvar_num) override;
-  virtual void precalculateQpOffDiagJacobian(const MooseVariableFEBase & jvar) override;
-
-  Real computeStiffness(const unsigned int coupled_component);
-  Real computeFaceStiffness(const unsigned int local_j, const unsigned int coupled_component);
-};
-
+typedef PressureTempl<false> Pressure;
 typedef PressureTempl<true> ADPressure;
+
+declareMoosePressureAction(Pressure, PressureAction);
