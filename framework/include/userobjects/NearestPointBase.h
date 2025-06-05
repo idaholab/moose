@@ -121,7 +121,7 @@ NearestPointBase<UserObjectType, BaseType>::NearestPointBase(const InputParamete
 {
   if (this->template getParam<MooseEnum>("dist_norm") != "radius" &&
       parameters.isParamSetByUser("axis"))
-    this->template paramError("axis",
+    this->template paramError<>("axis",
                               "'axis' should only be set if 'dist_norm' is set to 'radius'");
 
   fillPoints();

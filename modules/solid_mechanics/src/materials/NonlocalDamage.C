@@ -44,7 +44,7 @@ NonlocalDamageTempl<is_ad>::initialSetup()
       &this->getMaterialByName(_local_damage_model_name));
 
   if (!_local_damage_model)
-    this->template paramError("damage_model",
+    this->template paramError<>("damage_model",
                               "Damage Model " + _local_damage_model_name +
                                   " is not compatible with NonlocalDamage model");
 }

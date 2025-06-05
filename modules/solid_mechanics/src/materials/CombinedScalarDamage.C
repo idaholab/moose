@@ -53,7 +53,7 @@ CombinedScalarDamageTempl<is_ad>::initialSetup()
     if (model)
       _damage_models.push_back(model);
     else
-      this->template paramError("damage_model",
+      this->template paramError<>("damage_model",
                                 "Damage Model " + _damage_models_names[i] +
                                     " is not compatible with CombinedScalarDamage");
   }
