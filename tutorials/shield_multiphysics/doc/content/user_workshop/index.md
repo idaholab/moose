@@ -32,6 +32,14 @@
 
 !---
 
+!include user_workshop/systems_user/mesh.md
+
+!---
+
+!include user_workshop/systems_user/inputparameters.md
+
+!---
+
 !include user_workshop/problem/step01.md
 
 !---
@@ -56,10 +64,6 @@
 
 !---
 
-!include user_workshop/systems_user/inputparameters.md
-
-!---
-
 !include user_workshop/systems_user/kernels.md
 
 !---
@@ -72,10 +76,6 @@
 
 !---
 
-!include user_workshop/systems_user/mesh.md
-
-!---
-
 !include user_workshop/systems_user/outputs.md
 
 !---
@@ -85,6 +85,10 @@
 !---
 
 !include user_workshop/systems_user/boundaryconditions.md
+
+!---
+
+!include user_workshop/systems_user/functions.md
 
 !---
 
@@ -101,10 +105,6 @@
 !---
 
 !include user_workshop/systems_user/materials.md
-
-!---
-
-!include user_workshop/systems_user/functions.md
 
 !---
 

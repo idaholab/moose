@@ -1,6 +1,6 @@
 #  [Time Stepper System](Executioner/TimeSteppers/index.md)
 
-A system for suggesting time steps for transient executioners.
+A system for computing time steps for transient executioners.
 
 !---
 
