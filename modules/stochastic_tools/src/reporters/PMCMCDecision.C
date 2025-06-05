@@ -43,8 +43,8 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
     _outputs_required(declareValue<std::vector<Real>>("outputs_required")),
     _inputs(declareValue<std::vector<std::vector<Real>>>("inputs")),
     _tpm(declareValue<std::vector<Real>>("tpm")),
-    _variance(declareValue<std::vector<Real>>("variance")),
-    _noise(declareValue<Real>("noise")),
+    _variance(declareValue<std::vector<std::vector<Real>>>("variance")),
+    _noise(declareValue<std::vector<Real>>("noise")),
     _sampler(getSampler("sampler")),
     _pmcmc(dynamic_cast<const PMCMCBase *>(&_sampler)),
     _rnd_vec(_pmcmc->getRandomNumbers()),
@@ -66,6 +66,7 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
   _props = _pmcmc->getNumParallelProposals();
   _num_confg_values = _pmcmc->getNumberOfConfigValues();
   _num_confg_params = _pmcmc->getNumberOfConfigParams();
+  _num_variances = _pmcmc->getNumExpGroups();
 
   // Resizing the data arrays to transmit to the output file
   _inputs.resize(_props);
@@ -73,7 +74,8 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
     _inputs[i].resize(_sampler.getNumberOfCols() - _num_confg_params);
   _outputs_required.resize(_sampler.getNumberOfRows());
   _tpm.resize(_props);
-  _variance.resize(_props);
+  _variance.resize(_num_variances, std::vector<Real>(_props, 0.0));
+  _noise.resize(_num_variances);
 }
 
 void
@@ -94,12 +96,16 @@ PMCMCDecision::computeEvidence(std::vector<Real> & evidence, const DenseMatrix<R
     }
     if (_var_prior)
     {
-      evidence[i] += (std::log(_var_prior->pdf(_new_var_samples[i])) -
-                      std::log(_var_prior->pdf(_var_prev[i])));
-      _noise = std::sqrt(_new_var_samples[i]);
+      for (unsigned int k = 0; k < _num_variances; ++k)
+      {
+        evidence[i] += (std::log(_var_prior->pdf(_new_var_samples[k][i])) -
+                        std::log(_var_prior->pdf(_var_prev[k][i])));
+        _noise[k] = std::sqrt(_new_var_samples[k][i]);
+      }
       for (unsigned int j = 0; j < _likelihoods.size(); ++j)
         evidence[i] += _likelihoods[j]->function(out1);
-      _noise = std::sqrt(_var_prev[i]);
+      for (unsigned int k = 0; k < _num_variances; ++k)
+        _noise[k] = std::sqrt(_var_prev[k][i]);
       for (unsigned int j = 0; j < _likelihoods.size(); ++j)
         evidence[i] -= _likelihoods[j]->function(out2);
     }
@@ -126,7 +132,8 @@ PMCMCDecision::nextSamples(std::vector<Real> & req_inputs,
   {
     for (unsigned int k = 0; k < _sampler.getNumberOfCols() - _num_confg_params; ++k)
       req_inputs[k] = input_matrix(parallel_index, k);
-    _variance[parallel_index] = _new_var_samples[parallel_index];
+    for (unsigned int k = 0; k < _num_variances; ++k)
+      _variance[k][parallel_index] = _new_var_samples[k][parallel_index];
   }
   else
   {
@@ -136,7 +143,8 @@ PMCMCDecision::nextSamples(std::vector<Real> & req_inputs,
       input_matrix(parallel_index, k) = _data_prev(parallel_index, k);
     }
     if (_var_prior)
-      _variance[parallel_index] = _var_prev[parallel_index];
+      for (unsigned int k = 0; k < _num_variances; ++k)
+        _variance[k][parallel_index] = _var_prev[k][parallel_index];
     for (unsigned int k = 0; k < _num_confg_values; ++k)
       _outputs_required[k * _props + parallel_index] = _outputs_prev[k * _props + parallel_index];
   }
