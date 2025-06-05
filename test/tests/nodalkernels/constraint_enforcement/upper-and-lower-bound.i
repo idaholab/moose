@@ -9,6 +9,10 @@ num_steps=10
   nx = ${nx}
 []
 
+[Problem]
+  use_hash_table_matrix_assembly = true
+[]
+
 [Variables]
   [u]
   []
