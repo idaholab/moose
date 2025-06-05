@@ -42,6 +42,8 @@
 *.blg
 *.spl
 *.idx
+*.mat
+*.info
 traceout*.txt
 temp_print_trace.*
 *.xda
@@ -115,6 +117,8 @@ test.cache
 !**/gold/**/*.vtk
 !**/gold/**/*.vtu
 !**/gold/**/*.pvtu
+!**/gold/**/*.mat
+!**/gold/**/*.info
 !**/gold/**/*.xml*
 !**/gold/**/*.json*
 
@@ -358,3 +362,6 @@ OutputData
 !**/gold/**/OutputData/**/*.pvtu
 !**/gold/**/OutputData/**/*.xml*
 !**/gold/**/OutputData/**/*.json*
+
+# PETSc binary output
+binaryoutput

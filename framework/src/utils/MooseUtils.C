@@ -1268,6 +1268,28 @@ canonicalPath(const std::string & path)
   return std::filesystem::weakly_canonical(path).c_str();
 }
 
+bool
+startsWith(const std::string & string1, const std::string & string2)
+{
+  if (string2.size() > string1.size())
+    return false;
+  return string1.compare(0, string2.size(), string2) == 0;
+}
+
+void
+replaceStart(std::string & string1, const std::string & string2, const std::string & string3)
+{
+  mooseAssert(startsWith(string1, string2),
+              "Cannot replace the start because it doesn't match the start string");
+  string1.replace(0, string2.size(), string3);
+}
+
+bool
+isAllLowercase(const std::string & str)
+{
+  return std::all_of(
+      str.begin(), str.end(), [](unsigned char c) { return !std::isalpha(c) || std::islower(c); });
+}
 } // MooseUtils namespace
 
 void

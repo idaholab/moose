@@ -136,23 +136,21 @@ Kernel::computeJacobian()
 void
 Kernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  const auto & jvar = getVariable(jvar_num);
-
   if (jvar_num == _var.number())
     computeJacobian();
   else
   {
+    const auto & jvar = getVariable(jvar_num);
     prepareMatrixTag(_assembly, _var.number(), jvar_num);
 
-    // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting
-    // on the displaced mesh
-    auto phi_size = jvar.dofIndices().size();
+    // phi_size may not be equal to _phi.size(), e.g. when jvar is a vector variable
+    const auto phi_size = jvar.dofIndices().size();
     mooseAssert(
         phi_size * jvar.count() == _local_ke.n(),
         "The size of the phi container does not match the number of local Jacobian columns");
 
-    if (_local_ke.m() != _test.size())
-      return;
+    mooseAssert(_local_ke.m() == _test.size(),
+                "If these are not the same, then we shouldn't even be calling this method");
 
     precalculateOffDiagJacobian(jvar_num);
     if (jvar.count() == 1)
@@ -164,14 +162,15 @@ Kernel::computeOffDiagJacobian(const unsigned int jvar_num)
     }
     else
     {
-      unsigned int n = phi_size;
+      const auto n = cast_int<unsigned int>(phi_size);
       for (_i = 0; _i < _test.size(); _i++)
-        for (_j = 0; _j < n; _j++)
+        for (_j = 0; _j < phi_size; _j++)
           for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           {
-            RealEigenVector v = _JxW[_qp] * _coord[_qp] *
-                                computeQpOffDiagJacobianArray(static_cast<ArrayMooseVariable &>(
-                                    const_cast<MooseVariableFieldBase &>(jvar)));
+            const RealEigenVector v =
+                _JxW[_qp] * _coord[_qp] *
+                computeQpOffDiagJacobianArray(
+                    static_cast<ArrayMooseVariable &>(const_cast<MooseVariableFieldBase &>(jvar)));
             for (unsigned int k = 0; k < v.size(); ++k)
               _local_ke(_i, _j + k * n) += v(k);
           }

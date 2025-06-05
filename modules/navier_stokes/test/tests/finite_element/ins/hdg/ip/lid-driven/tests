@@ -1,0 +1,104 @@
+[Tests]
+  design = 'NavierStokesStressIPHDGKernel.md'
+  issues = '#30038'
+  [lid-driven]
+    requirement = 'The system shall be able to solve a lid driven cavity using an interior penalty hybridizable discontinuous Galerkin discretization when'
+    [uncondensed]
+      type = Exodiff
+      input = lid-driven.i
+      exodiff = lid-driven_out.e
+      detail = 'the system is uncondensed, and when'
+    []
+    [condensed]
+      type = Exodiff
+      input = sc-lid-driven.i
+      cli_args = "Outputs/file_base=lid-driven_out"
+      exodiff = lid-driven_out.e
+      prereq = 'lid-driven/uncondensed'
+      detail = 'the system is condensed.'
+      max_threads = 1
+    []
+  []
+  [condensed_ns_asymmetric]
+    requirement = "The condensed matrix shall be asymmetric due to the presence of advection"
+    type = CSVDiff
+    input = 'sc-lid-driven.i'
+    csvdiff = 'sc-lid-driven_csv.csv'
+    max_threads = 1
+    prereq = 'lid-driven/condensed'
+  []
+  [condensed_stokes_symmetric]
+    requirement = "The condensed matrix shall be symmetric when the nonlinear advection term in the momentum equation is not taken into consideration."
+    type = CSVDiff
+    input = 'sc-lid-driven.i'
+    csvdiff = 'stokes-symmetric.csv'
+    max_threads = 1
+    prereq = 'condensed_ns_asymmetric'
+    cli_args = 'Outputs/csv/file_base=stokes-symmetric Outputs/csv/hide="lambda pressure_integral Re" Postprocessors/symmetric/mat_number_to_load=1'
+  []
+  [lid-mms]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestLid
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a cavity using a interior penalty hybridizable discontinuous Galerkin scheme and produce second order convergence for velocity variables and first order convergence for the pressure variable when using first and zeroth order polynomials respectively.'
+    min_parallel = 4
+    required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = 'in_tree'
+    method = '!dbg'
+    valgrind = 'none'
+  []
+  [lid-mms-second]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestLidSecond
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a cavity using a interior penalty hybridizable discontinuous Galerkin scheme and produce third order convergence for velocity variables and second order convergence for the pressure variable when using second and first order polynomials respectively.'
+    min_parallel = 4
+    required_python_packages = 'pandas matplotlib'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    method = '!dbg'
+    valgrind = 'none'
+    installation_type = 'in_tree'
+  []
+  [stokes_symmetric]
+    type = CSVDiff
+    input = stokes-lid-driven.i
+    csvdiff = stokes-lid-driven_out.csv
+    requirement = 'The interior penalty hybridizable discontinuous Galerkin discretization of Stokes flow shall be symmetric.'
+  []
+  [matrix_testing]
+    requirement = 'The system shall show that for an interior penalty based hybridizable discontinuous Galerkin method, 1) a grad-div finite element weak form is equivalent to the matrix product B_up M_p^-1 B_pu, where u denotes volumetric velocity degrees of freedom and p denotes volumetric pressure degrees of freedom, 2) a jump finite element weak form is equivalent to the matrix product B_upb M_pb^-1 B_pbu where pb denotes pressure degrees of freedom on the facets, 3) the matrix product B_pu M_u^-1 B_up is nonsingular, and 4) the matrix product B_pbu M_u^-1 B_upb is nonsingular for'
+    [first]
+      type = CSVDiff
+      input = matrix-testing.i
+      csvdiff = matrix-testing_out.csv
+      max_parallel = 1 # No MatLUFactor support for mpidense
+      method = "!dbg"
+      valgrind = 'none'
+      detail = 'first order polynomial bases (other than zeroth order volumetric pressure), and for'
+      allow_test_objects = true
+    []
+    [second]
+      type = CSVDiff
+      input = matrix-testing.i
+      cli_args = 'Outputs/file_base=second-order-matrix-testing Variables/vel_x/order=SECOND Variables/vel_y/order=SECOND Variables/pressure/order=FIRST Variables/vel_bar_x/order=SECOND Variables/vel_bar_y/order=SECOND Variables/pressure_bar/order=SECOND'
+      csvdiff = second-order-matrix-testing.csv
+      max_parallel = 1 # No MatLUFactor support for mpidense
+      method = "!dbg"
+      valgrind = 'none'
+      detail = 'second order polynomial bases (other than first order volumetric pressure).'
+      allow_test_objects = true
+    []
+  []
+  [lid_driven_fsp]
+    type = Exodiff
+    input = lid-driven-fsp.i
+    exodiff = lid-driven-fsp_out.e
+    requirement = 'The system shall be able to solve a lid-driven cavity problem with a Reynolds number of 1000 using a field split preconditioner adding grad-div and jump penalty stabilization such that the pressure mass matrix can effectively precondition the Schur complement.'
+    absent_out = 'iterations 4'
+    expect_out = 'iterations 2'
+    abs_zero = 1e-8
+    cli_args = "n=16 Outputs/active='out'"
+    valgrind = 'none'
+  []
+[]

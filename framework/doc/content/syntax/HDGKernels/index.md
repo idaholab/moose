@@ -1,7 +1,6 @@
 # HDG Kernels
 
-HDG kernels and their boundary condition counterparts,
-[HDGBCs/index.md], are advanced systems that should only be developed by
+HDG kernels are an advanced systems that should only be developed by
 users with a fair amount of finite element experience. For background on
 hybridization, we encourage the user to read [!citep](cockburn2009unified) which
 presents a unified framework for considering hybridization of discontinuous
@@ -45,49 +44,31 @@ that outlined in [!citep](rhebergen2017analysis), may be a good choice.
 
 ## Implementation in MOOSE
 
-HDG kernels derive from [Kernels](Kernels/index.md). However, the methods
-that must be overridden are quite different. These are `onElement` and
-`onInternalSide`, which implement integrations in the volume of elements and on
-internal faces respectively. External boundary condition integration occurs in
-[HDGBCs/index.md].
+HDG kernels derive from [Kernels](Kernels/index.md). However, they add additional interfaces:
+`computeResidualOnSide` and `computeJacobianOnSide` which must be overridden and
+`computeResidualAndJacobianOnSide` which may be optionally overridden if the HDG kernel developer
+wishes to enable the ability to compute the residual and Jacobian together. These interfaces will be
+called on internal faces on a per-element basis. This means that a given internal face will be
+visited twice, once from each element side. External boundary condition integration occurs with
+standard boundary condition classes, see [syntax/BCs/index.md].
 
-Within `onElement` and `onInternalSide`, hybridized kernel developers have eight
-different data structures they need to populate. Six are inherited from the `HDGData`
-class). These are
+There are currently two HDG implementations in MOOSE: L-HDG and IP-HDG. Both L-HDG and IP-HDG kernel
+classes inherit from `HDGKernel` but that is where their similarity ends. L-HDG currently implements
+physics monolithically, e.g. the L-HDG discretization of the Navier-Stokes equations, both mass and
+momentum, is contained entirely within a single kernel. However, the MOOSE IP-HDG implementation is
+modular; like is typically the case in MOOSE, there is a single kernel object per PDE term. So for a
+2D setup of the Navier-Stokes equations, there are five kernels. Two advection kernels for the x-
+and y-momentum component equations, two stress kernel (which contains both viscous stress and
+pressure) for the x- and y-momentum component equations, and one advection kernel for the mass
+equation.
 
-```
-  /// Matrix data structures for on-diagonal coupling
-  EigenMatrix _PrimalMat, _LMMat;
-  /// Vector data structures
-  EigenVector _PrimalVec, _LMVec;
-  /// Matrix data structures for off-diagonal coupling
-  EigenMatrix _PrimalLM, _LMPrimal;
-```
-And the two declared in `HDGKernel`:
-```
-  /// Containers for the global degree of freedom numbers for primal and LM variables
-  /// respectively
-  std::vector<dof_id_type> _primal_dof_indices;
-  std::vector<dof_id_type> _lm_dof_indices;
-```
+This difference in kernel design naturally has consequences for boundary conditions. The monolithic
+kernel design for L-HDG leads to monolithic boundary conditions. Modularity for IP-HDG kernels means
+modular boundary conditions, e.g. a user may end up specifying multiple integrated boundary
+conditions on a single boundary like is done in
 
-The `_PrimalMat` holds the Jacobian entries for the dependence of primal degrees
-of freedom on primal degrees of freedom; `_LMMat` is dependence of LM dofs on LM
-dofs; `_PrimalLM` is dependence of primal dofs on LM dofs; `_LMPrimal` is
-dependence of LM dofs on primal dofs. The `_PrimalVec` and `_LMVec` objects hold
-the residuals for the primal and LM degrees of freedom
-respectively. `_primal_dof_indices` and `_lm_dof_indices` hold the primal and LM
-global degree of freedom numbers respectively for the current
-element. `HDGIntegratedBC` classes also inherit from `HDGData` and must also fill
-the six matrix and vector structures within their `onBoundary` method.
+!listing hdgkernels/ip-advection-diffusion/mms-advection-diffusion.i block=BCs
 
-Note that local finite element assembly occurs twice within a single iteration
-of Newton's method. The first assembly occurs prior to the linear solve and adds
-into the global residual and Jacobian data structures which represent only the
-trace/Lagrange-multiplier degrees of freedom. The linear solve then occurs which
-computes the Newton update for the Lagrange multiplier degrees of freedom. This
-Lagrange multiplier increment is then used in the second assembly
-post-linear-solve to compute the primal variable solution increment. Because
-only the Lagrange multiplier variables and their degrees of freedom participate
-in the global solve, they are the only variables that live in the nonlinear
-system. The primal variables live in the auxiliary system.
+In the future we may make L-HDG design more modular, although the monolithic approach does have the
+advantage of less required user input. However, less user input may also be achieved in the future
+by leveraging the [Physics system][/Physics/index.md].

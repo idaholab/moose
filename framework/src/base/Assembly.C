@@ -33,6 +33,7 @@
 #include "libmesh/tensor_value.h"
 #include "libmesh/vector_value.h"
 #include "libmesh/fe.h"
+#include "libmesh/static_condensation.h"
 
 using namespace libMesh;
 
@@ -139,7 +140,8 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _calculate_face_xyz(false),
     _calculate_curvatures(false),
     _calculate_ad_coord(false),
-    _have_p_refinement(false)
+    _have_p_refinement(false),
+    _sc(nullptr)
 {
   const Order helper_order = _mesh.hasSecondOrderElements() ? SECOND : FIRST;
   _building_helpers = true;
@@ -1821,6 +1823,8 @@ Assembly::reinit(const Elem * elem)
   mooseAssert(_current_subdomain_id == _current_elem->subdomain_id(),
               "current subdomain has been set incorrectly");
   _current_elem_volume_computed = false;
+  if (_sc)
+    _sc->set_current_elem(*elem);
 
   setVolumeQRule(elem);
   reinitFE(elem);

@@ -43,7 +43,6 @@ class NodalKernelBase;
 class Split;
 class KernelBase;
 class HDGKernel;
-class HDGIntegratedBC;
 class BoundaryCondition;
 class ResidualObject;
 class PenetrationInfo;
@@ -128,16 +127,6 @@ public:
   virtual void addHDGKernel(const std::string & kernel_name,
                             const std::string & name,
                             InputParameters & parameters);
-
-  /**
-   * Adds a hybridized discontinuous Galerkin (HDG) bc
-   * @param bc_name The type of the hybridized bc
-   * @param name The name of the hybridized bc
-   * @param parameters HDG bc parameters
-   */
-  virtual void addHDGIntegratedBC(const std::string & bc_name,
-                                  const std::string & name,
-                                  InputParameters & parameters);
 
   /**
    * Adds a NodalKernel
@@ -610,6 +599,7 @@ public:
   {
     return _nodal_kernels;
   }
+  MooseObjectTagWarehouse<HDGKernel> & getHDGKernelWarehouse() { return _hybridized_kernels; }
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() const
   {
     return _element_dampers;
@@ -853,7 +843,7 @@ protected:
   ///@{
   /// Kernel Storage
   MooseObjectTagWarehouse<KernelBase> _kernels;
-  MooseObjectWarehouse<HDGKernel> _hybridized_kernels;
+  MooseObjectTagWarehouse<HDGKernel> _hybridized_kernels;
   MooseObjectTagWarehouse<ScalarKernelBase> _scalar_kernels;
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;
@@ -866,7 +856,6 @@ protected:
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
   MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
-  MooseObjectWarehouse<HDGIntegratedBC> _hybridized_ibcs;
   ///@}
 
   /// Dirac Kernel storage for each thread

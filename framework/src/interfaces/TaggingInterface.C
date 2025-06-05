@@ -26,7 +26,8 @@ TaggingInterface::validParams()
   MultiMooseEnum vtags("nontime time", "nontime", true);
   MultiMooseEnum mtags("nontime system", "system", true);
 
-  params.addPrivateParam<bool>("matrix_only", false);
+  params.addParam<bool>(
+      "matrix_only", false, "Whether this object is only doing assembly to matrices (no vectors)");
 
   params.addParam<MultiMooseEnum>(
       "vector_tags", vtags, "The tag for the vectors this Kernel should fill");
