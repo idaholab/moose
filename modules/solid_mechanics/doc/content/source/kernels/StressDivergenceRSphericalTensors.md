@@ -45,7 +45,7 @@ Using the solid mechanics quasi-static physics, as shown
 the `StressDivergenceRSphericalTensors` kernel will be automatically built when the coordinate system
 in the Problem block is specified for the spherical system,
 
-!listing modules/solid_mechanics/test/tests/1D_spherical/finiteStrain_1DSphere_hollow.i block=Problem
+!listing modules/solid_mechanics/test/tests/1D_spherical/finiteStrain_1DSphere_hollow.i block=Mesh
 
 and only a single displacement variable is provided:
 
