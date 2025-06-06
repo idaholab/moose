@@ -31,6 +31,34 @@ class ExtendedEnum(Enum):
 
 data_types = typing.Union[float]
 
+class DataKeyAlreadyExists(Exception):
+    """
+    Exception for when a data key already exists
+    """
+    def __init__(self, key: str):
+        self.key: str = key
+        super().__init__(f'Data "{self.key}" is already registered')
+
+class NoTestsDefined(Exception):
+    """
+    Exception for when no tests were defined
+    """
+    def __init__(self, obj):
+        super().__init__(f'No test functions defined in {obj.__class__.__name__}')
+
+class TestMissingResults(Exception):
+    """
+    Exception for when a test was ran without any results
+    """
+    def __init__(self, obj, function):
+        super().__init__(f'No results reported in {obj.__class__.__name__}.{function}')
+
+class TestRunException(Exception):
+    """
+    Exception for when an exception was found when running a test
+    """
+    pass
+
 class ValidationCase(MooseObject):
     @staticmethod
     def validParams():
@@ -172,14 +200,6 @@ class ValidationCase(MooseObject):
         print(f'[{status.value:>4}] {prefix}{message}')
         self._results.append(status_value)
 
-    class DataKeyAlreadyExists(Exception):
-        """
-        Exception for when a data key already exists
-        """
-        def __init__(self, key: str):
-            self.key: str = key
-            super().__init__(f'Data "{self.key}" is already registered')
-
     def addFloatData(self, key: str, value: float, units: Optional[str],
                      description: str, **kwargs):
         """
@@ -200,7 +220,7 @@ class ValidationCase(MooseObject):
             raise ValueError('value is not of type float')
 
         if key in self._data:
-            raise self.DataKeyAlreadyExists(key)
+            raise DataKeyAlreadyExists(key)
 
         data = self.FloatData(value=value,
                               units=units,
@@ -225,13 +245,15 @@ class ValidationCase(MooseObject):
             message += [f'max = {max:.5E}{units}']
             self.addResult(status, ' '.join(message), **result_kwargs)
 
-    def getResults(self) -> list['Result']:
+    @property
+    def results(self) -> list['Result']:
         """
         Get all of the results
         """
         return self._results
 
-    def getData(self) -> dict[str, 'Data']:
+    @property
+    def data(self) -> dict[str, 'Data']:
         """
         Get all of the data
         """
@@ -250,81 +272,60 @@ class ValidationCase(MooseObject):
         Args:
             status: The status
         """
-        return len([r for r in self.getResults() if r.status == status])
-
-    class NoTestsDefined(Exception):
-        """
-        Exception for when no tests were defined
-        """
-        def __init__(self, obj):
-            super().__init__(f'No test functions defined in {obj.__class__.__name__}')
-
-    class TestMissingResults(Exception):
-        """
-        Exception for when a test was ran without any results
-        """
-        def __init__(self, obj, function):
-            super().__init__(f'No results reported in {obj.__class__.__name__}.{function}')
-
-    class TestRunException(Exception):
-        """
-        Exception for when an exception was found when running a test
-        """
-        pass
+        return len([r for r in self.results if r.status == status])
 
     def run(self):
         """
         Runs all of the tests. Stores results and data.
         """
         all_functions = [v[0] for v in inspect.getmembers(self.__class__,
-                                                          predicate=inspect.isfunction)]
+                                                          predicate=inspect.isfunction) if len(v)]
         test_functions = [v for v in all_functions if v.startswith('test')]
         if not test_functions:
-            raise ValidationCase.NoTestsDefined(self)
+            raise NoTestsDefined(self)
 
-        prefix = '-' * 2
         name = self.__class__.__name__
-        print(f'{prefix} Running {len(test_functions)} test case(s) in {name}')
+        print_prefixed = lambda msg: print('-' * 2 + ' ', msg)
+        print_prefixed(f'Running {len(test_functions)} test case(s) in {name}')
 
         if 'initialize' in all_functions:
-            print(f'{prefix} Running {name}.initialize')
-            getattr(self, 'initialize')()
+            print_prefixed(f'Running {name}.initialize')
+            self.initialize()
 
         run_exceptions = 0
         for function in test_functions:
             self._current_test = f'{name}.{function}'
             self._current_not_validation = False
 
-            print(f'{prefix} Running {self._current_test}')
+            print_prefixed(f'Running {self._current_test}')
             try:
                 getattr(self, function)()
             except:
                 traceback.print_exc()
                 run_exceptions += 1
             else:
-                results = self.getResults()
-                if not [r for r in results if r.test == self._current_test]:
-                    raise self.TestMissingResults(self, function)
+                if not any(r.test == self._current_test for r in self.results):
+                    raise TestMissingResults(self, function)
 
             self._current_test = None
             self._current_not_validation = True
 
         if 'finalize' in all_functions:
-            print(f'{prefix} Running {name}.finalize')
-            getattr(self, 'finalize')()
+            print_prefixed(f'Running {name}.finalize')
+            self.finalize()
 
-        summary = f'Acquired {len(self.getData())} data value(s), '
+        summary = f'Acquired {len(self.data)} data value(s), '
         summary += f'{self.getNumResults()} result(s): '
         results = []
         for status in ValidationCase.Status.list():
             results.append(f'{self.getNumResultsByStatus(status)} {status.name.lower()}')
         if run_exceptions:
-            results.append(f'{run_exceptions} exception')
-        summary += ", ".join(results)
-        print(f'{prefix} {summary}')
+            results.append(f'{run_exceptions} exception(s)')
+        summary += ', '.join(results)
+        print_prefixed(summary)
 
         if run_exceptions:
-            raise self.TestRunException()
+            raise TestRunException()
 
     def getTesterOutputs(self, extension: str = None) -> list[str]:
         """

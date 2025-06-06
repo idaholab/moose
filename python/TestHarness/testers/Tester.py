@@ -138,7 +138,7 @@ class Tester(MooseObject, OutputInterface):
 
             # Load the script; throw an exception here if it fails
             # so that the Parser can report a reasonable error
-            spec = importlib.util.spec_from_file_location(f'validation', path)
+            spec = importlib.util.spec_from_file_location('validation', path)
             module = importlib.util.module_from_spec(spec)
             try:
                 spec.loader.exec_module(module)
@@ -165,7 +165,7 @@ class Tester(MooseObject, OutputInterface):
                 validation_classes.append(subclass)
 
         # Store the classes that are used in validation so that they
-        # can be constructed within the Job at a leter time
+        # can be constructed within the Job at a later time
         params.addPrivateParam('_validation_classes', validation_classes)
 
         return params

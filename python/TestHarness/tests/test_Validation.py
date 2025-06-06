@@ -8,7 +8,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from TestHarnessTestCase import TestHarnessTestCase
-
 class TestHarnessTester(TestHarnessTestCase):
     def test(self):
         out = self.runTests('-i', 'validation', '--re', 'ok').results
@@ -59,7 +58,7 @@ class TestHarnessTester(TestHarnessTestCase):
         number = data['number']
         self.assertEqual(100, int(number['value']))
         self.assertEqual('Number', number['description'])
-        self.assertEqual(None, number['units'])
+        self.assertIsNone(number['units'])
         self.assertEqual(101.0, number['bounds'][0])
         self.assertEqual(200.0, number['bounds'][1])
         output = test['output']
