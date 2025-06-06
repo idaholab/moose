@@ -15,6 +15,6 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test AD vector size
         """
-        output = self.runTests('-i', 'ad_size', '--no-color')
+        output = self.runTests('-i', 'ad_size', '--no-color', no_capabilities=False)
         self.assertRegex(output, r'tests/test_harness.enough \.* OK')
         self.assertRegex(output, r'tests/test_harness\.too_few \.* \[NEEDS: AD_SIZE>=1000\] SKIP')
