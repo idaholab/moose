@@ -135,7 +135,7 @@ class Parser:
         params_parsed = params['_params_parsed']
         missing = params.required_keys() - params_parsed
         if len(missing) > 0:
-            self.error('required missing parameter(s): ' + ', '.join(missing))
+            self.error('missing required parameter(s): ' + ', '.join(missing))
             params['_have_parse_errors'] = True
 
     # private:
