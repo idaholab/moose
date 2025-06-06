@@ -556,7 +556,6 @@ class Job(OutputInterface):
             # Do the actual execution; here we lazily mock around print()
             # in order to capture all output. This isn't exhaustive, but
             # is probably good enough for now
-            run_exception = False
             def wrapped_print(*args, **kwargs):
                 end = kwargs.get('end', '\n')
                 values = [f'{v}' for v in args]
