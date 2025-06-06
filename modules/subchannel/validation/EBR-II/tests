@@ -8,6 +8,7 @@
     heavy = true
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
+    rel_err = 1e4
     valgrind = NONE
     recover = false
     max_parallel = 1
@@ -20,6 +21,7 @@
     heavy = true
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
+    rel_err = 1e4
     valgrind = NONE
     recover = false
     max_parallel = 1

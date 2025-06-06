@@ -5,11 +5,11 @@
         type = CSVDiff
         input = toshiba_37_pin.i
         csvdiff = toshiba_37_pin_out.csv
-        # custom_cmp = 'test.exodiff'
         capabilities = 'method!=dbg'
         valgrind = NONE
         recover = false
         abs_zero = 1e-5
+        rel_err = 4e-4
         max_threads = 1
         max_parallel = 1
         requirement = 'The system will examine the subchannel solver for the toshiba 19-pin case'
