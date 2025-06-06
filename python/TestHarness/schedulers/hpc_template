@@ -20,6 +20,9 @@
 #SBATCH --time={{ WALLTIME }}
 #SBATCH --wckey={{ PROJECT }}
 #SBATCH --output={{ OUTPUT }}
+{%- if MEM_PER_CPU is defined %}
+#SBATCH --mem-per-cpu={{ MEM_PER_CPU }}
+{%- endif %}
 {%- if HOLD is defined %}
 #SBATCH --hold
 {%- endif %}

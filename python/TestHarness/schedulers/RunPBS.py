@@ -22,6 +22,15 @@ class RunPBS(RunHPC):
         if self.options.hpc_queue:
             submission_env['QUEUE'] = self.options.hpc_queue
 
+    def augmentJobs(self, jobs):
+        super().augmentJobs(jobs)
+
+        for job in jobs:
+            if job.isHold():
+                if job.getTester().isParamValid('hpc_mem_per_cpu'):
+                    job.setStatus(job.skip)
+                    job.addCaveats('no hpc_mem_per_cpu with PBS')
+
     def updateHPCJobs(self, hpc_jobs):
         # Poll for all of the jobs within a single call
         cmd = ['qstat', '-xf', '-F', 'json'] + [x.id for x in hpc_jobs]
