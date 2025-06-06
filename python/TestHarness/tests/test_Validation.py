@@ -16,6 +16,7 @@ class TestHarnessTester(TestHarnessTestCase):
         status = test['status']
         self.assertEqual(status['status'], 'OK')
         validation = test['validation']
+        self.assertTrue(validation['script'].endswith('validation_ok.py'))
         results = validation['results']
         self.assertEqual(len(results), 1)
         result = results[0]
@@ -23,7 +24,6 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertIn('within bounds', result['message'])
         self.assertEqual('TestCase.testValidation', result['test'],)
         self.assertEqual('number', result['data_key'])
-        self.assertTrue(result['script'].endswith('validation_ok.py'))
         data = validation['data']
         self.assertEqual(len(data), 1)
         number = data['number']
@@ -32,7 +32,6 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertEqual('coolunits', number['units'])
         self.assertEqual(95.0, number['bounds'][0])
         self.assertEqual(105.0, number['bounds'][1])
-        self.assertTrue(number['script'].endswith('validation_ok.py'))
         output = test['output']
         validation_output = output['validation']
         self.assertIn('Running validation case', validation_output)
