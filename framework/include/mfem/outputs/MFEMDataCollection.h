@@ -19,7 +19,7 @@ protected:
   void output() override;
 
   MFEMProblemData & _problem_data;
-  const std::string _submesh_name;
+  const std::string & _submesh_name;
   mfem::ParMesh & _pmesh;
 };
 

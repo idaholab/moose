@@ -17,7 +17,7 @@ public:
 protected:
   virtual void buildSubMesh() override;
 
-  std::vector<BoundaryName> _boundary_names;
+  const std::vector<BoundaryName> & _boundary_names;
   mfem::Array<int> _bdr_attributes;
 };
 

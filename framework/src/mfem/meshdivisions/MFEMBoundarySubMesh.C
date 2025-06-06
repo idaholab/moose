@@ -22,10 +22,8 @@ MFEMBoundarySubMesh::MFEMBoundarySubMesh(const InputParameters & parameters)
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary")),
     _bdr_attributes(_boundary_names.size())
 {
-  for (unsigned int i = 0; i < _boundary_names.size(); ++i)
-  {
+  for (const auto i : index_range(_boundary_names))
     _bdr_attributes[i] = std::stoi(_boundary_names[i]);
-  }
 }
 
 void

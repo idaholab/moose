@@ -29,15 +29,11 @@ MFEMDataCollection::registerFields()
   for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions)
   {
     if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
-    {
       dc.RegisterField(gf_name, gf_ptr.get());
-    }
     else
-    {
       mooseInfo("The variable ",
                 gf_name,
                 " is not defined on the same mesh as the output DataCollection.");
-    }
   }
 }
 

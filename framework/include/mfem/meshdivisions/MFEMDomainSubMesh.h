@@ -17,7 +17,7 @@ public:
 protected:
   virtual void buildSubMesh() override;
 
-  std::vector<SubdomainName> _subdomain_names;
+  const std::vector<SubdomainName> & _subdomain_names;
   mfem::Array<int> _subdomain_attributes;
 };
 
