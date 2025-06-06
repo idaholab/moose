@@ -198,29 +198,28 @@ WCNSFVFlowPhysics::addSolverVariables()
   }
 
   // Pressure
-  const bool using_pinsfv_pressure_var =
+  const bool using_bernouilli_pressure_var =
       _porous_medium_treatment &&
       getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic";
+  const auto pressure_type =
+      using_bernouilli_pressure_var ? "BernoulliPressureVariable" : "INSFVPressureVariable";
   if (!shouldCreateVariable(_pressure_name, _blocks, true))
   {
     std::vector<std::string> potentially_missed = {"system_names",
                                                    "mass_scaling",
                                                    "pressure_face_interpolation",
                                                    "pressure_two_term_bc_expansion"};
-    if (using_pinsfv_pressure_var)
+    if (using_bernouilli_pressure_var)
     {
       std::vector<std::string> other_missed = {"pressure_allow_expansion_on_bernoulli_faces",
                                                "pressure_drop_sidesets",
                                                "pressure_drop_form_factors"};
       potentially_missed.insert(potentially_missed.end(), other_missed.begin(), other_missed.end());
     }
-    reportPotentiallyMissedParameters(potentially_missed, "INSFVPressureVariable");
+    reportPotentiallyMissedParameters(potentially_missed, pressure_type);
   }
   else if (_define_variables)
   {
-    const auto pressure_type =
-        using_pinsfv_pressure_var ? "BernoulliPressureVariable" : "INSFVPressureVariable";
-
     auto params = getFactory().getValidParams(pressure_type);
     assignBlocks(params, _blocks);
     params.set<std::vector<Real>>("scaling") = {getParam<Real>("mass_scaling")};
@@ -229,7 +228,7 @@ WCNSFVFlowPhysics::addSolverVariables()
     params.set<bool>("two_term_boundary_expansion") =
         getParam<bool>("pressure_two_term_bc_expansion");
 
-    if (using_pinsfv_pressure_var)
+    if (using_bernouilli_pressure_var)
     {
       params.set<MooseFunctorName>("u") = _velocity_names[0];
       if (dimension() >= 2)

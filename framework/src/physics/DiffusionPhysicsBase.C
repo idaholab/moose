@@ -159,7 +159,8 @@ DiffusionPhysicsBase::addInitialConditions()
                   !parameters().hasDefault("initial_condition"),
               "Should not have a default");
   if (isParamValid("initial_condition") &&
-      shouldCreateIC(_var_name, remaining_blocks, /*ic is a default*/ false, true))
+      shouldCreateIC(
+          _var_name, remaining_blocks, /*ic is a default*/ false, /*error if defined*/ true))
   {
     params.set<VariableName>("variable") = _var_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_condition");
