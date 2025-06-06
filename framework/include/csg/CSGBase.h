@@ -364,7 +364,7 @@ public:
 
 private:
   /// Check universes linked to root universe match universes defined in _universe_list
-  void checkUnlinkedUniverses() const;
+  void checkUniverseLinking() const;
 
   /**
    * @brief Recursive method to retrieve all universes linked to current universe

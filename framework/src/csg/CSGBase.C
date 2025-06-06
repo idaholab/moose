@@ -179,7 +179,7 @@ CSGBase::checkRegionSurfaces(const CSGRegion & region)
 }
 
 void
-CSGBase::checkUnlinkedUniverses() const
+CSGBase::checkUniverseLinking() const
 {
   std::vector<std::string> linked_universe_names;
 
@@ -208,7 +208,8 @@ CSGBase::getLinkedUniverses(const std::shared_ptr<CSGUniverse> & univ,
 nlohmann::json
 CSGBase::generateOutput() const
 {
-  checkUnlinkedUniverses();
+  // Check that orphaned universes do not exist in universe list of CSGBase object
+  checkUniverseLinking();
 
   nlohmann::json csg_json;
 
