@@ -44,14 +44,14 @@ std::unique_ptr<CSG::CSGBase>
 TestCSGUnlinkedUniverseMeshGenerator::generateCSG()
 {
   auto mg_name = this->name();
-  std::unique_ptr<CSG::CSGBase> csg_mesh = std::move(getCSGMeshByName(_input_mgs[0]));
+  std::unique_ptr<CSG::CSGBase> csg_mesh = std::move(getCSGBaseByName(_input_mgs[0]));
 
   // for all input meshes from the second one onwards, join CSGBase as a universe without linking
   // to root universe of first one
   for (unsigned int i = 1; i < _input_mgs.size(); ++i)
   {
     auto img = _input_mgs[i];
-    auto inp_csg_mesh = std::move(getCSGMeshByName(img));
+    auto inp_csg_mesh = std::move(getCSGBaseByName(img));
     auto new_join_name = img + "_univ";
     csg_mesh->joinOtherBase(inp_csg_mesh, new_join_name);
   }
