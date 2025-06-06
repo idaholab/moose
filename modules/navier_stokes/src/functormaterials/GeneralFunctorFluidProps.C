@@ -9,7 +9,7 @@
 
 #include "GeneralFunctorFluidProps.h"
 #include "NS.h" // Variable Term Names
-#include "DimensionlessFlowNumbers.h"
+#include "HeatTransferUtils.h"
 #include "NavierStokesMethods.h"
 #include "SinglePhaseFluidProperties.h"
 
@@ -296,7 +296,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         {
           static constexpr Real small_number = 1e-8;
 
-          return fp::prandtl(cp(r, t), mu(r, t), std::max(k(r, t), small_number));
+          return HeatTransferUtils::prandtl(cp(r, t), mu(r, t), std::max(k(r, t), small_number));
         });
 
     addFunctorProperty<Real>(
@@ -334,10 +334,10 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         [this, &mu](const auto & r, const auto & t) -> GenericReal<is_ad>
         {
           static constexpr Real small_number = 1e-8;
-          return std::max(fp::reynolds(_rho(r, t),
-                                       _eps(r, t) * _speed(r, t),
-                                       _d(r, t),
-                                       std::max(mu(r, t), small_number)),
+          return std::max(HeatTransferUtils::reynolds(_rho(r, t),
+                                                      _eps(r, t) * _speed(r, t),
+                                                      _d(r, t),
+                                                      std::max(mu(r, t), small_number)),
                           small_number);
         });
 
@@ -621,7 +621,7 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         {
           static constexpr Real small_number = 1e-8;
 
-          return fp::prandtl(cp(r, t), mu(r, t), std::max(k(r, t), small_number));
+          return HeatTransferUtils::prandtl(cp(r, t), mu(r, t), std::max(k(r, t), small_number));
         });
 
     addFunctorProperty<Real>(
@@ -659,10 +659,10 @@ GeneralFunctorFluidPropsTempl<is_ad>::GeneralFunctorFluidPropsTempl(
         [this, &mu](const auto & r, const auto & t) -> GenericReal<is_ad>
         {
           static constexpr Real small_number = 1e-8;
-          return std::max(fp::reynolds(_rho(r, t),
-                                       _eps(r, t) * _speed(r, t),
-                                       _d(r, t),
-                                       std::max(mu(r, t), small_number)),
+          return std::max(HeatTransferUtils::reynolds(_rho(r, t),
+                                                      _eps(r, t) * _speed(r, t),
+                                                      _d(r, t),
+                                                      std::max(mu(r, t), small_number)),
                           small_number);
         });
 
