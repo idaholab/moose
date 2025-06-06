@@ -888,20 +888,18 @@ class Job(OutputInterface):
 
         # Append validation data, if any
         if self.validation_cases:
-            job_data['validation'] = {'results': [], 'data': {}}
             path = os.path.abspath(os.path.join(self.getTestDir(), self.specs['validation_test']))
+            job_data['validation'] = {'script': path, 'results': [], 'data': {}}
             for case in self.validation_cases:
                 results = [r for r in case.getResults() if r.validation]
                 for result in results:
                     value = asdict(result)
                     value.pop('validation')
-                    value['script'] = path
                     job_data['validation']['results'].append(value)
                 data = {k: v for k, v in case.getData().items() if v.validation}
                 for key, value in data.items():
                     value = asdict(value)
                     value.pop('validation')
-                    value['script'] = path
                     job_data['validation']['data'][key] = value
 
         # Extend with data from the scheduler, if any
