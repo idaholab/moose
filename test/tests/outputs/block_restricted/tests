@@ -9,7 +9,6 @@
     requirement = 'The system shall be able to block restrict exodus output by creating a mesh clone and reducing it to specified blocks, and serializing the solution.'
     # oversampling outputs a warning in recover
     allow_warnings = true
-    mesh_mode = 'replicated'
   []
   [elem_non_serialized]
     type = 'Exodiff'
