@@ -171,11 +171,23 @@ PseudoTimestep::execute()
   // at the end of each timestep call the postprocessor to set values for dt
   if (_current_execute_flag == EXEC_TIMESTEP_END)
   {
+    // This is all incase a timestep fails and needs to be re-done
+    // Otherwise this is a simply a push_back operation for the vectors
+    mooseAssert(_fe_problem.timeStep() >= 1, "Should at least be on the first time step.");
+    const std::size_t curr_step = _fe_problem.timeStep();
+    mooseAssert(_residual_norms_sequence.size() <= curr_step &&
+                    curr_step - _residual_norms_sequence.size() <= 1,
+                "Vector is improper length.");
+    mooseAssert(_residual_norms_sequence.size() == _iterations_step_sequence.size(),
+                "Vectors should be same length.");
+    _residual_norms_sequence.resize(curr_step);
+    _iterations_step_sequence.resize(curr_step);
+
     res_norm = currentResidualNorm();
-    _residual_norms_sequence.push_back(res_norm);
+    _residual_norms_sequence[curr_step - 1] = res_norm;
 
     curr_dt = transient->getDT();
-    _iterations_step_sequence.push_back(curr_dt);
+    _iterations_step_sequence[curr_step - 1] = curr_dt;
 
     _dt = curr_dt;
 

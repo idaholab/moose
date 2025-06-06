@@ -17,6 +17,7 @@
       command_proxy = 'control_reporter.py bool_value'
       required_python_packages = requests
       recover = false
+      restep = false
       detail = 'boolean'
       valgrind = 'none' # http library is not completely valgrind clean
     []
@@ -30,6 +31,7 @@
       command_proxy = 'control_reporter.py real_value'
       required_python_packages = requests
       recover = false
+      restep = false
       detail = 'double precision number'
       valgrind = 'none' # http library is not completely valgrind clean
     []
@@ -43,6 +45,7 @@
       command_proxy = 'control_reporter.py int_value'
       required_python_packages = requests
       recover = false
+      restep = false
       detail = 'integer'
       valgrind = 'none' # http library is not completely valgrind clean
     []
@@ -56,6 +59,7 @@
       command_proxy = 'control_reporter.py string_value'
       required_python_packages = requests
       recover = false
+      restep = false
       detail = 'string'
       valgrind = 'none' # http library is not completely valgrind clean
     []
@@ -69,6 +73,7 @@
       command_proxy = 'control_reporter.py vec_real_value'
       required_python_packages = requests
       recover = false
+      restep = false
       detail = 'vector of double precision numbers'
       valgrind = 'none' # http library is not completely valgrind clean
     []
@@ -82,6 +87,7 @@
       command_proxy = 'control_reporter.py vec_int_value'
       required_python_packages = requests
       recover = false
+      restep = false
       detail = 'vector of integers'
       valgrind = 'none' # http library is not completely valgrind clean
     []
@@ -95,6 +101,7 @@
       command_proxy = 'control_reporter.py vec_string_value'
       required_python_packages = requests
       recover = false
+      restep = false
       detail = 'vector of strings'
       valgrind = 'none' # http library is not completely valgrind clean
     []
@@ -107,6 +114,7 @@
     command_proxy = get_postprocessor.py
     required_python_packages = requests
     recover = false
+    restep = false
     requirement = 'The system shall support retreiving a postprocessor value via a REST API'
     valgrind = 'none' # http library is not completely valgrind clean
   []
@@ -117,6 +125,7 @@
     command_proxy = use_port.py
     required_python_packages = requests
     recover = False
+    restep = false
     requirement = 'The system shall support connecting to a REST API via a port'
     valgrind = 'none' # http library is not completely valgrind clean
   []
@@ -130,6 +139,7 @@
     command_proxy = 'control_reporter.py bool_value'
     required_python_packages = requests
     recover = false
+    restep = false
     requirement = 'The system shall support changing controllable parameters via a REST API in a manner that is parallel consistent'
     min_parallel = 2
     max_parallel = 2

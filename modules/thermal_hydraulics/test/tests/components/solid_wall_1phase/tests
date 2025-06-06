@@ -7,6 +7,7 @@
     type = 'Exodiff'
     input = 'phy.3eqn.i'
     exodiff = 'phy.3eqn_out.e'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to model a wall in a 1D single phase compressible flow simulation.'
   []
 
