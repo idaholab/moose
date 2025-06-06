@@ -68,7 +68,6 @@ private:
   /// Stores the constructed fespace.
   mutable std::shared_ptr<mfem::ParFiniteElementSpace> _fespace{nullptr};
 
-  const std::string & _submesh_name;
   mfem::ParMesh & _pmesh;
 };
 

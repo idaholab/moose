@@ -9,8 +9,8 @@ InputParameters
 MFEMDomainSubMesh::validParams()
 {
   InputParameters params = MFEMSubMeshBase::validParams();
-  params.addParam<std::vector<SubdomainName>>(
-      "block", {}, "The list of blocks (ids) comprising this SubMesh");
+  params.addRequiredParam<std::vector<SubdomainName>>(
+      "block", "The list of blocks (ids) comprising this SubMesh");
   return params;
 }
 
@@ -19,7 +19,7 @@ MFEMDomainSubMesh::MFEMDomainSubMesh(const InputParameters & parameters)
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _subdomain_attributes(_subdomain_names.size())
 {
-  for (const auto i :index_range(_subdomain_names))
+  for (const auto i : index_range(_subdomain_names))
     _subdomain_attributes[i] = std::stoi(_subdomain_names[i]);
 }
 

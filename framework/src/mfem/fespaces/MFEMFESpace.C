@@ -11,18 +11,18 @@ MFEMFESpace::validParams()
   MooseEnum ordering("NODES VDIM", "VDIM", false);
   params.addParam<MooseEnum>("ordering", ordering, "Ordering style to use for vector DoFs.");
   params.addParam<int>("vdim", 1, "The number of degrees of freedom per basis function.");
-  params.addParam<std::string>(
-      "submesh", "", "Submesh to define the FESpace on. Leave blank to use base mesh.");
+  params.addParam<std::string>("submesh",
+                               "Submesh to define the FESpace on. Leave blank to use base mesh.");
   return params;
 }
 
 MFEMFESpace::MFEMFESpace(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     _ordering(parameters.get<MooseEnum>("ordering")),
-    _submesh_name(getParam<std::string>("submesh")),
-    _pmesh(parameters.isParamSetByUser("submesh")
-               ? getMFEMProblem().getProblemData().submeshes.GetRef(_submesh_name)
-               : const_cast<mfem::ParMesh &>(getMFEMProblem().mesh().getMFEMParMesh()))
+    _pmesh(
+        parameters.isParamValid("submesh")
+            ? getMFEMProblem().getProblemData().submeshes.GetRef(getParam<std::string>("submesh"))
+            : const_cast<mfem::ParMesh &>(getMFEMProblem().mesh().getMFEMParMesh()))
 {
 }
 
