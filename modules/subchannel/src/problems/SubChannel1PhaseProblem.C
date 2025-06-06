@@ -55,7 +55,7 @@ formFunction(SNES, Vec x, Vec f, void * ctx)
 InputParameters
 SubChannel1PhaseProblem::validParams()
 {
-  MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
+  MooseEnum schemes("upwind downwind central_difference exponential", "exponential");
   InputParameters params = ExternalProblem::validParams();
   params += PostprocessorInterface::validParams();
   params.addClassDescription("Base class of the subchannel solvers");
@@ -68,10 +68,9 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
   params.addParam<PetscInt>("maxit", 1e4, "Maximum number of iterations for ksp solver");
-  params.addParam<MooseEnum>(
-      "interpolation_scheme",
-      schemes,
-      "Interpolation scheme used for the method. Default is central difference");
+  params.addParam<MooseEnum>("interpolation_scheme",
+                             schemes,
+                             "Interpolation scheme used for the method. Default is exponential");
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
   params.addParam<bool>(
