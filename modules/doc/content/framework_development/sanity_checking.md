@@ -89,30 +89,61 @@ to skip the material coverage check outside the computational domain.
 
 This manual setup is not only repetitive but also error-prone, especially when the same block list needs to be specified in multiple places.
 
-To simplify this process, MOOSE provides a convenient parameter called `block` under the \[`Problem`\] block. This allows users to specify the default computational domain and inform MOOSE to skip coverage checks outside the computational domain.
+To simplify this process, the `block` parameter can be specified under `[GlobalParams]` so that it applies to all block-restrictable objects. This allows users to specify the default computational domain and inform MOOSE to skip coverage checks outside the computational domain.
 
-Setting `block` will automatically:
+Setting `GlobalParams/block` will automatically:
 
 - Enable kernel coverage check with `ONLY_LIST` mode and assign the specified blocks to `kernel_coverage_block_list`
-
 - Enable material coverage check with `ONLY_LIST` mode and assign the specified blocks to `material_coverage_block_list`
 
 This provides a more user-friendly and centralized way to handle simulations with a preferred, non-default computational domain.
 
-Example Usage for  `block`:
+Example Usage for  `GlobalParams/block`:
 
 ```
 # Perform kernel and material coverage checks only for block 0, 1, and 3,
 # while excluding block 2 as an inactive region.
 
-[Problem]
+[GlobalParams]
   block = '0 1 3'
+[]
+
+[Variables]
+  [u]
+    # Now this variable will be block-restricted to blocks 0, 1, and 3.
+  []
+[]
+
+[Kernels]
+  [diffusion]
+    # And kernels are also block-restricted to blocks 0, 1, and 3.
+    type = Diffusion
+    variable = u
+  []
 []
 ```
 
-**Note 1:** If the user sets either `kernel_coverage_check` or `material_coverage_check` to `ONLY_LIST` or `SKIP_LIST`, and simultaneously provides a `kernel_coverage_block_list` or `material_coverage_block_list`, the presence of a `block` can introduce ambiguity in determining which blocks are subject to coverage checks. To avoid confusion, the system will throw an error in this case.
+**Note:** If the user sets either `kernel_coverage_check` or `material_coverage_check` to `ONLY_LIST` or `SKIP_LIST`, and simultaneously provides a `kernel_coverage_block_list` or `material_coverage_block_list`, the presence of a `GlobalParams/block` can introduce ambiguity in determining which blocks are subject to coverage checks. To avoid confusion, the system will throw an error in this case.
 This restriction is necessary to prevent unintended behavior. However, there are situations where the user may want to completely disable `kernel_coverage_check` while still using `block`. In such cases, the system will not throw any error.
 
-**Note 2:** Setting the `block` parameter only within the `[Problem]` block does **not** actually apply block restrictions to the `block` specified. We recommend users to set the `block` parameter inside the `[GlobalParams]` block instead. Doing so ensures that the `block` setting is automatically propagated to the `[Problem]` block and all other block-restrictable objects.
+Kernel coverage check will respect the `GlobalParams/block` parameter, i.e. the following setup would trigger the error about missing kernel on block 3:
 
-In particular, specifying `block` in `[GlobalParams]` restricts all block-restrictable objects (e.g., Kernels, BCs) to the designated block, unless explicitly overridden in individual objects. Conversely, if the `block` parameter is set only in `[Problem]` and not in `[GlobalParams]`, block restrictions will **not** be applied to Kernels, BCs, or other block-restrictable objects. In such cases, the system will issue a warning to inform the user.
+```
+[GlobalParams]
+  block = '0 1 3'
+[]
+
+[Variables]
+  [u]
+    block = '0 1'
+  []
+[]
+
+[Kernels]
+  [diffusion]
+    type = Diffusion
+    variable = u
+    block = '0 1'
+  []
+[]
+```
