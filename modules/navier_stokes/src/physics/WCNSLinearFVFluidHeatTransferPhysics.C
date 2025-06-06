@@ -40,6 +40,8 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
   params.suppressParameter<bool>("effective_conductivity");
   // Not needed
   params.suppressParameter<bool>("add_energy_equation");
+  params.suppressParameter<MooseEnum>("preconditioning");
+
   return params;
 }
 
@@ -213,7 +215,8 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyExternalHeatSource()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>("source_density") =
       getParam<MooseFunctorName>("external_heat_source");
-  params.set<Real>("scaling_factor") = getParam<Real>("external_heat_source_coeff");
+  params.set<MooseFunctorName>("scaling_factor") =
+      std::to_string(getParam<Real>("external_heat_source_coeff"));
 
   getProblem().addLinearFVKernel(kernel_type, prefix() + "external_heat_source", params);
 }
@@ -308,7 +311,9 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyInletBC()
 void
 WCNSLinearFVFluidHeatTransferPhysics::addEnergyWallBC()
 {
-  const auto & wall_boundaries = _flow_equations_physics->getWallBoundaries();
+  const auto & wall_boundaries = isParamSetByUser("energy_wall_boundaries")
+                                     ? getParam<std::vector<BoundaryName>>("energy_wall_boundaries")
+                                     : _flow_equations_physics->getWallBoundaries();
   if (wall_boundaries.size() != _energy_wall_types.size())
     paramError("energy_wall_types",
                "Energy wall types (size " + std::to_string(_energy_wall_types.size()) +
