@@ -1,4 +1,7 @@
 [Mesh]
+  coord_type = 'XYZ RZ'
+  coord_block = '1 2'
+
   [generated_mesh]
     type = GeneratedMeshGenerator
     dim = 2
@@ -23,89 +26,90 @@
   []
 []
 
-[Problem]
-  coord_type = 'XYZ RZ'
-  block      = '1   2'
-[]
-
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
-[Physics/SolidMechanics/QuasiStatic]
-  active = 'block1 block2'
-  [./error]
-    strain = SMALL
-    add_variables = true
-  [../]
-  [./block1]
-    strain = SMALL
-    add_variables = true
-    block = 1
-    use_automatic_differentiation = true
-  [../]
-  [./block2]
-    strain = SMALL
-    add_variables = true
-    block = 2
-    use_automatic_differentiation = true
-  [../]
+[Physics]
+
+  [SolidMechanics]
+
+    [QuasiStatic]
+      active = 'block1 block2'
+      [error]
+        strain = SMALL
+        add_variables = true
+      []
+      [block1]
+        strain = SMALL
+        add_variables = true
+        block = 1
+        use_automatic_differentiation = true
+      []
+      [block2]
+        strain = SMALL
+        add_variables = true
+        block = 2
+        use_automatic_differentiation = true
+      []
+    []
+  []
 []
 
 [AuxVariables]
-  [./vmstress]
+  [vmstress]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./vmstress]
+  [vmstress]
     type = ADRankTwoScalarAux
     rank_two_tensor = total_strain
     variable = vmstress
     scalar_type = VonMisesStress
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.345
-  [../]
-  [./_elastic_stress]
+  []
+  [_elastic_stress]
     type = ADComputeLinearElasticStress
     block = '1 2'
-  [../]
+  []
 []
 
 [BCs]
-  [./topx]
+  [topx]
     type = DirichletBC
     boundary = 'top'
     variable = disp_x
     value = 0.0
-  [../]
-  [./topy]
+  []
+  [topy]
     type = DirichletBC
     boundary = 'top'
     variable = disp_y
     value = 0.0
-  [../]
-  [./bottomx]
+  []
+  [bottomx]
     type = DirichletBC
     boundary = 'bottom'
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottomy]
+  []
+  [bottomy]
     type = DirichletBC
     boundary = 'bottom'
     variable = disp_y
     value = 0.05
-  [../]
+  []
 []
 
 [Debug]
@@ -113,10 +117,10 @@
 []
 
 [Preconditioning]
-  [./full]
+  [full]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

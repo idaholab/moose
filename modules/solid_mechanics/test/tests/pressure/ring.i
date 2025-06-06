@@ -27,9 +27,6 @@
     transform = rotate
     vector_value = '-20 0 0'
   []
-[]
-
-[Problem]
   coord_type = RZ
 []
 

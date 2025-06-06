@@ -17,7 +17,7 @@ are supplied but are not used. As a developer you should use `paramError()` or `
 related to input file parameters. These "param" type errors will be used by the parser to generate line number information for the
 offending problematic parameters.
 
-# Simulation Sanity Checks.
+# Simulation Sanity Checks
 
 MOOSE performs several sanity checks just before the simulation runs. This includes several different kinds of checks
 
@@ -53,5 +53,97 @@ pair of parameters used in testing can be used to disable the kernel coverage ch
 [Problem]
   kernel_coverage_check = false
   solve = false
+[]
+```
+
+By default, MOOSE assumes the computational domain to be the entire mesh. However, some simulations set up using subdomain modifiers or lower-dimensional blocks (such as mortar contact) describe the computational domain of the underlying problem on a subset of the mesh.
+
+In such cases, the common approach is to either:
+
+- Disable kernel coverage checks entirely by setting:
+
+```
+[Problem]
+  kernel_coverage_check = false
+[]
+```
+
+- Restrict the kernel coverage check to specific blocks by setting:
+
+```
+[Problem]
+  kernel_coverage_check = ONLY_LIST
+  kernel_coverage_block_list = 'block1 block2 block4'
+[]
+```
+
+In addition, when certain material properties are block restricted to the computational domain, users must also manually set:
+
+```
+[Problem]
+  material_coverage_check = ONLY_LIST
+  material_coverage_block_list = 'block1 block2 block4'
+[]
+```
+to skip the material coverage check outside the computational domain.
+
+This manual setup is not only repetitive but also error-prone, especially when the same block list needs to be specified in multiple places.
+
+To simplify this process, the `block` parameter can be specified under `[GlobalParams]` so that it applies to all block-restrictable objects. This allows users to specify the default computational domain and inform MOOSE to skip coverage checks outside the computational domain.
+
+Setting `GlobalParams/block` will automatically:
+
+- Enable kernel coverage check with `ONLY_LIST` mode and assign the specified blocks to `kernel_coverage_block_list`
+- Enable material coverage check with `ONLY_LIST` mode and assign the specified blocks to `material_coverage_block_list`
+
+This provides a more user-friendly and centralized way to handle simulations with a preferred, non-default computational domain.
+
+Example Usage for  `GlobalParams/block`:
+
+```
+# Perform kernel and material coverage checks only for block 0, 1, and 3,
+# while excluding block 2 as an inactive region.
+
+[GlobalParams]
+  block = '0 1 3'
+[]
+
+[Variables]
+  [u]
+    # Now this variable will be block-restricted to blocks 0, 1, and 3.
+  []
+[]
+
+[Kernels]
+  [diffusion]
+    # And kernels are also block-restricted to blocks 0, 1, and 3.
+    type = Diffusion
+    variable = u
+  []
+[]
+```
+
+**Note:** If the user sets either `kernel_coverage_check` or `material_coverage_check` to `ONLY_LIST` or `SKIP_LIST`, and simultaneously provides a `kernel_coverage_block_list` or `material_coverage_block_list`, the presence of a `GlobalParams/block` can introduce ambiguity in determining which blocks are subject to coverage checks. To avoid confusion, the system will throw an error in this case.
+This restriction is necessary to prevent unintended behavior. However, there are situations where the user may want to completely disable `kernel_coverage_check` while still using `block`. In such cases, the system will not throw any error.
+
+Kernel coverage check will respect the `GlobalParams/block` parameter, i.e. the following setup would trigger the error about missing kernel on block 3:
+
+```
+[GlobalParams]
+  block = '0 1 3'
+[]
+
+[Variables]
+  [u]
+    block = '0 1'
+  []
+[]
+
+[Kernels]
+  [diffusion]
+    type = Diffusion
+    variable = u
+    block = '0 1'
+  []
 []
 ```

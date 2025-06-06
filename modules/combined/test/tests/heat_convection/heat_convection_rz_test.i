@@ -47,15 +47,12 @@
 #  3) 1) and 2) should cause the cylinder to become soaked at 477.6 K after sufficient time(i.e. ~ 1/2 hr).
 # This is a simple thermal soak problem.
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]    # Mesh Start
 # 10cm x 20cm cylinder not so detailed mesh, 2 radial, 6 axial nodes
 # Only one block (Block 1), all concrete
 # Sideset 1 - top of cylinder, Sideset 2 - length of cylinder, Sideset 3 - bottom of cylinder
   file = heat_convection_rz_mesh.e
+  coord_type = RZ
 []    # Mesh END
 
 [Variables]  # Variables Start
