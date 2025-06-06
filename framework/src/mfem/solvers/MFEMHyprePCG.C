@@ -21,11 +21,7 @@ MFEMHyprePCG::validParams()
   return params;
 }
 
-MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters)
-  : MFEMSolverBase(parameters),
-    _preconditioner(isParamSetByUser("preconditioner")
-                        ? getMFEMProblem().getProblemData().jacobian_preconditioner
-                        : nullptr)
+MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters) : MFEMSolverBase(parameters)
 {
   constructSolver(parameters);
 }
@@ -41,8 +37,10 @@ MFEMHyprePCG::constructSolver(const InputParameters &)
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetPrintLevel(getParam<int>("print_level"));
 
-  if (_preconditioner)
+  if (isParamSetByUser("preconditioner"))
   {
+    auto & pre_ref = const_cast<MFEMSolverBase &>(getUserObject<MFEMSolverBase>("preconditioner"));
+    _preconditioner = std::dynamic_pointer_cast<MFEMSolverBase>(pre_ref.getSharedPtr());
     auto hypre_preconditioner =
         std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
     if (!hypre_preconditioner)
