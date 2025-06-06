@@ -150,12 +150,17 @@ SampledOutput::initSample()
     _mesh_ptr->getMesh().skip_partitioning(true);
     mesh_refinement.uniformly_refine(_refinements);
 
-    // TODO: the nodesets dont seem to be propagated with the mesh refinement
+    // Note that nodesets are not propagated with mesh refinement, unless you built the nodesets
+    // from the sidesets again, which is what happens for the regular mesh with initial refinement
   }
 
   // We can't allow renumbering if we want to output multiple time
   // steps to the same Exodus file
   _mesh_ptr->getMesh().allow_renumbering(false);
+
+  // This should be called after changing the mesh (block restriction for example)
+  if (_change_position || (_refinements > 0) || isParamValid("sampling_blocks"))
+    _cloned_mesh_ptr->meshChanged();
 
   // Create the new EquationSystems
   _oversample_es = std::make_unique<EquationSystems>(_mesh_ptr->getMesh());
@@ -269,7 +274,10 @@ SampledOutput::updateSample()
   // solution. We need this because the partitioning of the sampling mesh may not match the
   // partitioning of the source mesh
   if (_serialize)
+  {
     _problem_ptr->mesh().getMesh().gather_to_zero();
+    _mesh_ptr->getMesh().gather_to_zero();
+  }
 
   // Get a reference to actual equation system
   EquationSystems & source_es = _problem_ptr->es();
@@ -285,10 +293,11 @@ SampledOutput::updateSample()
       System & dest_sys = _oversample_es->get_system(sys_num);
 
       // Update the solution for the oversampled mesh
-      if (_serialize && _serialized_solution)
+      if (_serialize)
       {
         _serialized_solution->clear();
         _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
+        // Pull down a full copy of this vector on every processor so we can get values in parallel
         source_sys.solution->localize(*_serialized_solution);
       }
 
@@ -447,12 +456,13 @@ SampledOutput::cloneMesh()
   // Prepare mesh, needed for the mesh functions
   if (_using_external_sampling_file)
     _cloned_mesh_ptr->prepare(/*mesh to clone*/ nullptr);
-  else if (_serialize)
+  else if (_serialize && isParamValid("sampling_blocks"))
     // TODO: constraints have not been initialized?
     _cloned_mesh_ptr->getMesh().prepare_for_use();
 
-  // TODO: why is this needed? (or is it?)
-  _cloned_mesh_ptr->meshChanged();
+  if (_serialize)
+    // we want to avoid re-partitioning, as we will serialize anyway
+    _cloned_mesh_ptr->getMesh().skip_partitioning(true);
 
   // Make sure that the mesh pointer points to the newly cloned mesh
   _mesh_ptr = _cloned_mesh_ptr.get();
