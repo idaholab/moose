@@ -43,8 +43,8 @@ class TestModalLink(MooseDocsTestCase):
         self.assertHTMLTag(res(0), 'a', size=1, href='#{}'.format(uid), string='test')
         self.assertHTMLTag(res(1), 'div', size=1, class_='moose-modal modal', id_=uid)
         self.assertHTMLTag(res(1,0), 'div', size=1, class_='modal-content')
-        self.assertHTMLTag(res(1,0,0), 'pre', size=1, class_='')
-        self.assertHTMLTag(res(1,0,0,0), 'code', size=1, class_='language-text', string='1+2=3', style='max-height:350px;')
+        self.assertHTMLTag(res(1,0,0), 'pre', size=1, class_='', style='max-height:350px;')
+        self.assertHTMLTag(res(1,0,0,0), 'code', size=1, class_='language-text', string='1+2=3', style='')
 
         # Content as String
         ast = modal.ModalLink(None, string='test', content='1+2=3')
@@ -130,8 +130,8 @@ class TestModalSourceLink(MooseDocsTestCase):
         self.assertHTMLTag(res(1), 'div', size=2, class_='moose-modal modal', id_=uid)
         self.assertHTMLTag(res(1,0), 'div', size=2, class_='modal-content')
         self.assertHTMLTag(res(1,0,0), 'h4', size=1, string='(python/MooseDocs/test/extensions/framework/Makefile)')
-        self.assertHTMLTag(res(1,0,1), 'pre', size=1, class_='')
-        self.assertHTMLTag(res(1,0,1,0), 'code', size=1, class_='language-text', style='max-height:350px;')
+        self.assertHTMLTag(res(1,0,1), 'pre', size=1, class_='', style='max-height:350px;')
+        self.assertHTMLTag(res(1,0,1,0), 'code', size=1, class_='language-text', style='')
 
         self.assertIn('MOOSE Application Standard Makefile', res(1,0,1,0,0)['content'])
         self.assertHTMLTag(res(1,1), 'div', size=1, class_='modal-footer')
