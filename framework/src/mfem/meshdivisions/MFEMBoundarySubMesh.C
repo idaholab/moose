@@ -8,7 +8,7 @@ registerMooseObject("MooseApp", MFEMBoundarySubMesh);
 InputParameters
 MFEMBoundarySubMesh::validParams()
 {
-  InputParameters params = MFEMSubMeshBase::validParams();
+  InputParameters params = MFEMSubMesh::validParams();
   params.addParam<std::vector<BoundaryName>>(
       "boundary",
       {"-1"},
@@ -18,7 +18,7 @@ MFEMBoundarySubMesh::validParams()
 }
 
 MFEMBoundarySubMesh::MFEMBoundarySubMesh(const InputParameters & parameters)
-  : MFEMSubMeshBase(parameters),
+  : MFEMSubMesh(parameters),
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary")),
     _bdr_attributes(_boundary_names.size())
 {

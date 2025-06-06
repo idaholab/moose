@@ -1,18 +1,18 @@
 #ifdef MFEM_ENABLED
 
 #pragma once
-#include "MFEMSubMeshBase.h"
+#include "MFEMSubMesh.h"
 
 /**
  * Constructs and stores an mfem::ParSubMesh object. Access using the
  * getSubMesh() accessor.
  */
-class MFEMDomainSubMesh : public MFEMSubMeshBase
+class MFEMDomainSubMesh : public MFEMSubMesh
 {
 public:
   static InputParameters validParams();
   MFEMDomainSubMesh(const InputParameters & parameters);
-  mfem::Array<int> & getSubdomains() { return _subdomain_attributes; }
+  const mfem::Array<int> & getSubdomains() { return _subdomain_attributes; }
 
 protected:
   virtual void buildSubMesh() override;

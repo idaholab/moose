@@ -8,14 +8,14 @@ registerMooseObject("MooseApp", MFEMDomainSubMesh);
 InputParameters
 MFEMDomainSubMesh::validParams()
 {
-  InputParameters params = MFEMSubMeshBase::validParams();
+  InputParameters params = MFEMSubMesh::validParams();
   params.addRequiredParam<std::vector<SubdomainName>>(
       "block", "The list of blocks (ids) comprising this SubMesh");
   return params;
 }
 
 MFEMDomainSubMesh::MFEMDomainSubMesh(const InputParameters & parameters)
-  : MFEMSubMeshBase(parameters),
+  : MFEMSubMesh(parameters),
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _subdomain_attributes(_subdomain_names.size())
 {

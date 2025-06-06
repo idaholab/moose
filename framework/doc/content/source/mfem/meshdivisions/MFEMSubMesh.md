@@ -1,4 +1,4 @@
-# MFEMSubMeshBase
+# MFEMSubMesh
 
 !if! function=hasCapability('mfem')
 
@@ -18,7 +18,7 @@ problems where some `MFEMVariables` do not need to be defined across the entire 
 problem size and improve conditioning. [MFEM Examples 34 and 35](https://mfem.org/examples/) give
 some examples of problems in which they can be used.
 
-`MFEMSubMeshBase` is a virtual base class. Derived classes should override the `buildSubMesh` method
+`MFEMSubMesh` is a virtual base class. Derived classes should override the `buildSubMesh` method
 to construct the desired `mfem::ParSubMesh` from the parent mesh.
 
 !if-end!
