@@ -52,7 +52,7 @@ on finding issues is too long. We switch to 2D:
 
 !col! width=50%
 
-!media step10_mesh.png
+!media step10_mesh.png style=width:60%;
 
 !col-end!
 

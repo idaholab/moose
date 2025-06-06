@@ -93,7 +93,7 @@ Extensions:
         modal-link: False
     MooseDocs.extensions.reveal:
         translate: user_workshop/index.md
-        background_image: INL_Hex_Light_Presentation_Background_Thin.png
+        background_image: tutorials/INL_logo.png
         background_position: bottom 30px center
         background_size: auto 4%
     MooseDocs.extensions.datetime: default
