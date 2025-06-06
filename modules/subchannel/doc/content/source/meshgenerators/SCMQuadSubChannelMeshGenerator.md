@@ -15,7 +15,7 @@ by defining their axial location [!param](/Mesh/SCMQuadSubChannelMeshGenerator/s
 
 ## Example Input File Syntax
 
-!listing /test/tests/problems/psbt_transient/psbt.i block=QuadSubChannelMesh language=cpp
+!listing /test/tests/problems/psbt_transient/psbt.i block=QuadSubChannelMesh language=moose
 
 !syntax parameters /Mesh/SCMQuadSubChannelMeshGenerator
 

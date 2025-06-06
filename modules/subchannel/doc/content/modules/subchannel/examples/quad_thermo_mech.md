@@ -13,11 +13,11 @@ The input files are the following:
 
 `SCM` Model.
 
-!listing /examples/coupling/thermo_mech/quad/one_pin_problem.i language=cpp
+!listing /examples/coupling/thermo_mech/quad/one_pin_problem.i language=moose
 
 Fuel Pin Model.
 
-!listing /examples/coupling/thermo_mech/quad/one_pin_problem_sub.i language=cpp
+!listing /examples/coupling/thermo_mech/quad/one_pin_problem_sub.i language=moose
 
 ## Caveat
 

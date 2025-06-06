@@ -11,7 +11,7 @@ kernel can be used. In this kernel the user must define a total [!param](/AuxKer
 
 ## Example Input File Syntax
 
-!listing /test/tests/auxkernels/uniform_mass_flow_rate/test.i block=AuxKernels language=cpp
+!listing /test/tests/auxkernels/uniform_mass_flow_rate/test.i block=AuxKernels language=moose
 
 !syntax parameters /AuxKernels/SCMFlatMassFlowRateAux
 
