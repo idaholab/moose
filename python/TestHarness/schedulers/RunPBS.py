@@ -56,7 +56,6 @@ class RunPBS(RunHPC):
 
                 # Helper for parsing timings
                 def parse_time(name):
-                    time_format = '%a %b %d %H:%M:%S %Y'
                     entry = job_result.get(name)
                     if not entry:
                         return None
@@ -65,7 +64,7 @@ class RunPBS(RunHPC):
                         return datetime.datetime.strptime(entry, '%a %b %d %H:%M:%S %Y').timestamp()
                     except:
                         self.setHPCJobError(hpc_job, 'FAILED TO PARSE TIMING',
-                                            f'Failed to parse time "{time}" from entry "{name}"')
+                                            f'Failed to parse time "{entry}" from entry "{name}"')
                         return None
 
                 # Job is queued and it has switched to running
