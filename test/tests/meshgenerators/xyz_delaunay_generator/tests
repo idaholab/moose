@@ -19,12 +19,20 @@
       detail = "within an input boundary mesh containing surface elements"
       capabilities = 'netgen'
     []
-    [with_holes]
+    [with_3d_holes]
       type = 'CSVDiff'
       input = 'xyzdelaunay_with_holes_3d.i'
       csvdiff = 'xyzdelaunay_with_holes_out.csv'
       recover = false
       detail = "respecting any specified interior 'hole' meshes that contain volume elements"
+      capabilities = 'netgen'
+    []
+    [with_2d_holes]
+      type = 'CSVDiff'
+      input = 'xyzdelaunay_with_holes_2d.i'
+      csvdiff = 'xyzdelaunay_with_holes_out.csv'
+      recover = false
+      detail = "respecting any specified interior 'hole' meshes that contain surface elements"
       capabilities = 'netgen'
     []
     [stitching]
@@ -114,20 +122,21 @@
       valgrind = none
       capabilities = 'netgen'
     []
-    [2d_holes]
-      type = RunException
-      input = 'xyzdelaunay_with_holes_2d.i'
-      cli_args = '--mesh-only err.e'
-      expect_err = "2D hole meshes are currently not supported."
-      detail = "if a hole mesh contains 2D surface elements"
-      capabilities = 'netgen'
-    []
     [1d_holes]
       type = RunException
       input = 'xyzdelaunay_with_holes_1d.i'
       cli_args = '--mesh-only err.e'
-      expect_err = "All elements in a hole mesh must 3D."
+      expect_err = "Elements in a hole mesh must be all 3D or all 2D."
       detail = "if a hole mesh contains elements that are neither 2D nor 3D"
+      capabilities = 'netgen'
+    []
+    [stitch_2d_holes]
+      type = RunException
+      input = 'xyzdelaunay_with_holes_2d.i'
+      cli_args = '--mesh-only err.e 
+                  Mesh/triang/stitch_holes="true true"'
+      expect_err = "which is meaningless to be stitched"
+      detail = "if a 2D hole mesh is specified to be stitched"
       capabilities = 'netgen'
     []
     [inconsistent_stitch_num]

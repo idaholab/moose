@@ -21,11 +21,12 @@ input mesh contains volume elements with non-Tri3 surface sides or
 non-Tri3 surface elements, they can be converted automatically by this
 mesh generator.
 
-The [!param](/Mesh/XYZDelaunayGenerator/holes) input mesh can only contain
-3D volume elements. The 2D surface elements option is currently not supported
-for [!param](/Mesh/XYZDelaunayGenerator/holes). If one of the [!param](/Mesh/XYZDelaunayGenerator/holes)
-meshes contains non-Tet4 volume elements, it can also be converted
-automatically by this mesh generator.
+The [!param](/Mesh/XYZDelaunayGenerator/holes) input mesh can contain
+either all 3D volume elements, or all 2D surface elements.
+If one of the [!param](/Mesh/XYZDelaunayGenerator/holes)
+meshes contains non-Tri3 surface elements, or volume elements with non-Tri3
+side elements on its external surface, the non-Tri3 elements are converted
+automatically to facilitate mesh generation.
 
 If multiple disconnected manifolds exist in a boundary mesh, only the
 manifold enclosing the rest of the mesh is considered to be "the"

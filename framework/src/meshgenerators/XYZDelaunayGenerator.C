@@ -70,8 +70,9 @@ XYZDelaunayGenerator::validParams()
   params.addParam<std::vector<MeshGeneratorName>>(
       "holes",
       std::vector<MeshGeneratorName>(),
-      "The MeshGenerators that define mesh holes. A hole mesh must contain 3D volume elements and "
-      "its external surface works as the closed manifold that defines the hole.");
+      "The MeshGenerators that define mesh holes. A hole mesh must contain either 3D volume "
+      "elements with the external surface of the mesh works as the closed manifold that defines "
+      "the hole, or 2D surface elements that form the closed manifold that defines the hole.");
   params.addParam<std::vector<bool>>(
       "stitch_holes", std::vector<bool>(), "Whether to stitch to the mesh defining each hole.");
   params.addParam<bool>("convert_holes_for_stitching",
@@ -190,13 +191,14 @@ XYZDelaunayGenerator::generate()
     }
     else if (*hole_elem_dims.begin() == 2)
     {
-      // 2D hole meshes are currently not supported
-      paramError("holes",
-                 "2D hole meshes are currently not supported. Consider using separate "
-                 "XYZDelaunayGenerators to create 3D hole meshes.");
+      // There is no point to stitch a 2D hole mesh, so we throw an error if this is attempted
+      if (_stitch_holes.size() && _stitch_holes[hole_i])
+        paramError("holes",
+                   "the hole mesh with index " + std::to_string(hole_i) +
+                       " is a 2D mesh, which is meaningless to be stitched.");
     }
     else
-      paramError("holes", "All elements in a hole mesh must 3D.");
+      paramError("holes", "Elements in a hole mesh must be all 3D or all 2D.");
   }
 
   std::unique_ptr<std::vector<std::unique_ptr<UnstructuredMesh>>> ngholes =
