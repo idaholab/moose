@@ -11,6 +11,7 @@ import itertools, os, time, threading, traceback, io, importlib.util, typing
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
 from TestHarness.runners.Runner import Runner
+from TestHarness.validation import TestRunException
 from TestHarness import OutputInterface, util, ValidationCase
 from tempfile import TemporaryDirectory
 from collections import namedtuple
@@ -563,11 +564,11 @@ class Job(OutputInterface):
             with patch("builtins.print", wraps=wrapped_print):
                 try:
                     test_case.run()
-                except test_case.TestRunException:
+                except TestRunException:
                     run_exception = True
             output.appendOutput('\n')
 
-            for key in test_case.getData():
+            for key in test_case.data:
                 if key in all_data:
                     message = f'ERROR: Validation data with key "{key}" was declared multiple times'
                     output.appendOutput(message)
@@ -890,12 +891,12 @@ class Job(OutputInterface):
             path = os.path.abspath(os.path.join(self.getTestDir(), self.specs['validation_test']))
             job_data['validation'] = {'script': path, 'results': [], 'data': {}}
             for case in self.validation_cases:
-                results = [r for r in case.getResults() if r.validation]
+                results = [r for r in case.results if r.validation]
                 for result in results:
                     value = asdict(result)
                     value.pop('validation')
                     job_data['validation']['results'].append(value)
-                data = {k: v for k, v in case.getData().items() if v.validation}
+                data = {k: v for k, v in case.data.items() if v.validation}
                 for key, value in data.items():
                     value = asdict(value)
                     value.pop('validation')

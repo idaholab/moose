@@ -29,9 +29,7 @@ class TestHarnessTestCase(unittest.TestCase):
                      'stdout': subprocess.PIPE,
                      'stderr': subprocess.STDOUT,
                      'text': True,
-                     'check': check}
-        if as_json:
-            sp_kwargs['check'] = False
+                     'check': check and not as_json}
         context = tempfile.TemporaryDirectory if tmp_output else nullcontext
         with context() as c:
             if tmp_output:

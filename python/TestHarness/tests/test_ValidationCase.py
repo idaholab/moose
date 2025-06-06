@@ -10,12 +10,13 @@
 # pylint: disable
 import unittest
 from TestHarness import ValidationCase
+from TestHarness.validation import NoTestsDefined, TestMissingResults, TestRunException
 from FactorySystem.InputParameters import InputParameters
 
 class TestValidationCase(unittest.TestCase):
     def testNoTests(self):
         test = ValidationCase()
-        with self.assertRaises(ValidationCase.NoTestsDefined):
+        with self.assertRaises(NoTestsDefined):
             test.run()
 
     def testAddResult(self):
@@ -30,7 +31,7 @@ class TestValidationCase(unittest.TestCase):
                 test = Test()
                 test.run()
 
-                results = test.getResults()
+                results = test.results
                 self.assertEqual(len(results), 1)
 
                 result = results[0]
@@ -45,9 +46,9 @@ class TestValidationCase(unittest.TestCase):
                 pass
 
         test = Test()
-        with self.assertRaises(ValidationCase.TestMissingResults):
+        with self.assertRaises(TestMissingResults):
             test.run()
-        self.assertEqual(len(test.getResults()), 0)
+        self.assertEqual(len(test.results), 0)
 
     def testAddFloatData(self):
         args = {'key': 'peak_temperature',
@@ -57,12 +58,12 @@ class TestValidationCase(unittest.TestCase):
 
         test = ValidationCase()
         test.addFloatData(*args.values())
-        all_data = test.getData()
+        all_data = test.data
         self.assertEqual(len(all_data), 1)
-        data = test.getData()[args['key']]
+        data = test.data[args['key']]
         for key, value in args.items():
             self.assertEqual(getattr(data, key), value)
-        self.assertEqual(None, data.test)
+        self.assertIsNone(data.test)
 
     def testAddFloatDataNotFloat(self):
         test = ValidationCase()
@@ -76,7 +77,7 @@ class TestValidationCase(unittest.TestCase):
 
         test = ValidationCase()
         test.addFloatData(key, value, None, 'unused', bounds=bounds)
-        all_data = test.getData()
+        all_data = test.data
         self.assertEqual(len(all_data), 1)
         data = all_data[key]
         self.assertEqual(bounds, data.bounds)
@@ -86,7 +87,7 @@ class TestValidationCase(unittest.TestCase):
         nominal = 1.1
         test = ValidationCase()
         test.addFloatData(key, 1.0, None, 'unused', nominal=nominal)
-        all_data = test.getData()
+        all_data = test.data
         self.assertEqual(len(all_data), 1)
         self.assertEqual(nominal, all_data[key].nominal)
 
@@ -102,7 +103,7 @@ class TestValidationCase(unittest.TestCase):
         test = Test()
         test.run()
 
-        results = test.getResults()
+        results = test.results
         self.assertEqual(len(results), 3)
         for case in ['pass', 'fail_lower', 'fail_upper']:
             filtered = [r for r in results if r.test.endswith(case)]
@@ -111,7 +112,7 @@ class TestValidationCase(unittest.TestCase):
             status = test.Status.OK if case == 'pass' else test.Status.FAIL
             self.assertEqual(status, result.status)
             self.assertEqual(case, result.data_key)
-            data = test.getData()[case]
+            data = test.data[case]
             self.assertEqual(f'Test.test_{case}', data.test)
 
     def testInitialize(self):
@@ -150,7 +151,7 @@ class TestValidationCase(unittest.TestCase):
                 raise Exception('foo')
 
         test = Test()
-        with self.assertRaises(test.TestRunException):
+        with self.assertRaises(TestRunException):
             test.run()
 
     def testGetTesterOutputs(self):
