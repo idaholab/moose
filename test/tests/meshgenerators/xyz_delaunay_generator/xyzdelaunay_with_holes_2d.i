@@ -33,3 +33,24 @@
     desired_volume = 100000
   []
 []
+
+[Executioner]
+  type = Steady
+[]
+
+[Postprocessors]
+  [volume]
+    type = VolumePostprocessor
+  []
+[]
+
+[Problem]
+  solve = false
+[]
+
+[Outputs]
+  [output]
+    type = CSV
+    file_base = 'xyzdelaunay_with_holes_out'
+  []
+[]
