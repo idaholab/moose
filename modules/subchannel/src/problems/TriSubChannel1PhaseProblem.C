@@ -1342,29 +1342,27 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           // Calculation of turbulent mixing parameter
           auto beta = Cs * std::pow(Ar2 / A2, 0.5) * std::tan(theta);
 
-          auto wsweep_in = gedge_ave * beta * Sij;
-          auto wsweep_out = gedge_ave * beta * Sij;
+          auto wsweep = gedge_ave * beta * Sij;
+          PetscScalar neg_wsweep = -1.0 * wsweep;
           auto sweep_hin = (*_h_soln)(node_sin);
           auto sweep_hout = (*_h_soln)(node_in);
-          sweep_enthalpy = (wsweep_in * sweep_hin - wsweep_out * sweep_hout);
+          sweep_enthalpy = (wsweep * sweep_hin - wsweep * sweep_hout);
 
+          PetscInt row_sh = i_ch + _n_channels * iz_ind;
           if (iz == first_node)
           {
-            PetscInt row_sh = i_ch + _n_channels * iz_ind;
             PetscScalar value_hs = -sweep_enthalpy;
             LibmeshPetscCall(
                 VecSetValues(_hc_sweep_enthalpy_rhs, 1, &row_sh, &value_hs, ADD_VALUES));
           }
           else
           {
-            PetscInt row_sh = i_ch + _n_channels * (iz_ind - 1);
             PetscInt col_sh = i_ch + _n_channels * (iz_ind - 1);
-            LibmeshPetscCall(MatSetValues(
-                _hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &wsweep_out, ADD_VALUES));
             PetscInt col_sh_l = sweep_in + _n_channels * (iz_ind - 1);
-            PetscScalar neg_sweep_in = -1.0 * wsweep_in;
+            LibmeshPetscCall(
+                MatSetValues(_hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &wsweep, ADD_VALUES));
             LibmeshPetscCall(MatSetValues(
-                _hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh_l, &(neg_sweep_in), ADD_VALUES));
+                _hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh_l, &neg_wsweep, ADD_VALUES));
           }
         }
 

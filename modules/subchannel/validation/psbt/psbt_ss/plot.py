@@ -88,10 +88,10 @@ plt.show()
 # Plotting the second figure
 plt.figure()
 plt.plot(snumber, EXP, "ks-", label="Experimental measurements", markersize=marker_size)  # "ks-" adds black square markers
-plt.plot(snumber, monolithic_20, "ro:", label="SCM calculation (monolithic 20 cells, β = 0.08)", markersize=marker_size)  # "ro-" adds red round markers
-plt.plot(snumber, monolithic_40, "go:", label="SCM calculation (monolithic 40 cells, β = 0.08)", markersize=marker_size)  # "go-" adds green round markers
-plt.plot(snumber, monolithic_100, "co:", label="SCM calculation (monolithic 100 cells, β = 0.08)", markersize=marker_size)  # "co-" adds cyan round markers
-plt.plot(snumber, monolithic_100_beta, "co-", label="SCM calculation (monolithic 100 cells, β = 0.04)", markersize=marker_size)  # "co-" adds cyan round markers
+plt.plot(snumber, monolithic_20, "ro:", label="SCM calculation (monolithic 20 cells, beta = 0.08)", markersize=marker_size)  # "ro-" adds red round markers
+plt.plot(snumber, monolithic_40, "go:", label="SCM calculation (monolithic 40 cells, beta = 0.08)", markersize=marker_size)  # "go-" adds green round markers
+plt.plot(snumber, monolithic_100, "co:", label="SCM calculation (monolithic 100 cells, beta = 0.08)", markersize=marker_size)  # "co-" adds cyan round markers
+plt.plot(snumber, monolithic_100_beta, "co-", label="SCM calculation (monolithic 100 cells, beta = 0.04)", markersize=marker_size)  # "co-" adds cyan round markers
 plt.title(r"Temperature profile at the exit of the PSBT subassembly" "\n" "Experiment 01-5125, Run No 16", fontsize=13)
 plt.xlabel(r'$Subchannel~\#$', fontsize=14)
 plt.ylabel(r'$T_{outlet}[K]$', fontsize=14)

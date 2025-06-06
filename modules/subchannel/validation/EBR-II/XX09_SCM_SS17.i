@@ -142,6 +142,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   implicit = true
   segregated = false
   interpolation_scheme = 'upwind'
+  verbose_subchannel = true
 []
 
 [ICs]
