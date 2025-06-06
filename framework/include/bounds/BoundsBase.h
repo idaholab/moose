@@ -28,8 +28,8 @@ public:
   BoundsBase(const InputParameters & parameters);
 
 protected:
-  virtual void initialSetup() override;
-  virtual Real computeValue() override;
+  virtual void initialSetup() override final;
+  virtual Real computeValue() override final;
 
   /**
    * Method to get bound value for a variable.
