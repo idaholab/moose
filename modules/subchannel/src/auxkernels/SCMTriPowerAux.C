@@ -175,47 +175,47 @@ SCMTriPowerAux::computeValue()
   Point P = p - p1;
   auto pin_triMesh_exist = _triMesh.pinMeshExist();
 
-  if (pin_triMesh_exist)
+  /// assign power to the nodes located within the heated section
+  if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
+      MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
   {
-    // project axial heat rate on pins
-    auto i_pin = _triMesh.getPinIndexFromPoint(p);
-    if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
-        MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
-      return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
-    else
-      return 0.0;
-  }
-  else
-  {
-    // Determine which subchannel this point is in.
-    auto i_ch = _triMesh.getSubchannelIndexFromPoint(p);
-    auto subch_type = _triMesh.getSubchannelType(i_ch);
-    // project axial heat rate on subchannels
-    if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
-        MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
+    if (pin_triMesh_exist)
     {
-      double factor;
-      switch (subch_type)
+      // project axial heat rate on pins
+      auto i_pin = _triMesh.getPinIndexFromPoint(p);
+      return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
+    }
+    else
+    {
+      // Determine which subchannel this point is in.
+      auto i_ch = _triMesh.getSubchannelIndexFromPoint(p);
+      auto subch_type = _triMesh.getSubchannelType(i_ch);
+      // project axial heat rate on subchannels
       {
-        case EChannelType::CENTER:
-          factor = 1.0 / 6.0;
-          break;
-        case EChannelType::EDGE:
-          factor = 1.0 / 4.0;
-          break;
-        case EChannelType::CORNER:
-          factor = 1.0 / 6.0;
-          break;
-        default:
-          return 0.0; // handle invalid subch_type if needed
+        double factor;
+        switch (subch_type)
+        {
+          case EChannelType::CENTER:
+            factor = 1.0 / 6.0;
+            break;
+          case EChannelType::EDGE:
+            factor = 1.0 / 4.0;
+            break;
+          case EChannelType::CORNER:
+            factor = 1.0 / 6.0;
+            break;
+          default:
+            return 0.0; // handle invalid subch_type if needed
+        }
+        for (auto i_pin : _triMesh.getChannelPins(i_ch))
+        {
+          heat_rate += factor * _ref_qprime(i_pin) * _pin_power_correction(i_pin) *
+                       _axial_heat_rate.value(_t, P);
+        }
+        return heat_rate;
       }
-      for (auto i_pin : _triMesh.getChannelPins(i_ch))
-      {
-        heat_rate += factor * _ref_qprime(i_pin) * _pin_power_correction(i_pin) *
-                     _axial_heat_rate.value(_t, P);
-      }
-      return heat_rate;
     }
   }
-  return 0.0;
+  else
+    return 0.0;
 }

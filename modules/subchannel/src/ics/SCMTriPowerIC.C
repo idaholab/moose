@@ -104,7 +104,6 @@ SCMTriPowerIC::initialSetup()
     auto heat2 = _axial_heat_rate.value(_t, p2);
     if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
         MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
-    // if (z2 > unheated_length_entry && z1 < unheated_length_entry + heated_length)
     {
       // cycle through pins
       for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
@@ -115,21 +114,14 @@ SCMTriPowerIC::initialSetup()
         // calculation of power for the first heated segment if nodes don't align
         if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
             MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry))
-        // if (z2 > unheated_length_entry && z1 < unheated_length_entry)
         {
-          _console << "first offset heated cell: dz:" << dz << " zero power at height z1: " << z1
-                   << endl;
           heat1 = 0.0;
         }
 
         // calculation of power for the last heated segment if nodes don't align
         if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry + heated_length) &&
             MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
-        // if (z2 > unheated_length_entry + heated_length &&
-        //     z1 < unheated_length_entry + heated_length)
         {
-          _console << "second offset heated cell: dz:" << dz << " zero power at height z2: " << z2
-                   << endl;
           heat2 = 0.0;
         }
 
@@ -172,47 +164,47 @@ SCMTriPowerIC::value(const Point & p)
   Point P = p - p1;
   auto pin_mesh_exist = _mesh.pinMeshExist();
 
-  if (pin_mesh_exist)
+  /// assign power to the nodes located inside the heated section
+  if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
+      MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
   {
-    // project axial heat rate on pins
-    auto i_pin = _mesh.getPinIndexFromPoint(p);
-    if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
-        MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
-      return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
-    else
-      return 0.0;
-  }
-  else
-  {
-    // Determine which subchannel this point is in.
-    auto i_ch = _mesh.getSubchannelIndexFromPoint(p);
-    auto subch_type = _mesh.getSubchannelType(i_ch);
-    // project axial heat rate on subchannels
-    if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
-        MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
+    if (pin_mesh_exist)
     {
-      double factor;
-      switch (subch_type)
+      // project axial heat rate on pins
+      auto i_pin = _mesh.getPinIndexFromPoint(p);
+      return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
+    }
+    else
+    {
+      // Determine which subchannel this point is in.
+      auto i_ch = _mesh.getSubchannelIndexFromPoint(p);
+      auto subch_type = _mesh.getSubchannelType(i_ch);
+      // project axial heat rate on subchannels
       {
-        case EChannelType::CENTER:
-          factor = 1.0 / 6.0;
-          break;
-        case EChannelType::EDGE:
-          factor = 1.0 / 4.0;
-          break;
-        case EChannelType::CORNER:
-          factor = 1.0 / 6.0;
-          break;
-        default:
-          return 0.0; // handle invalid subch_type if needed
+        double factor;
+        switch (subch_type)
+        {
+          case EChannelType::CENTER:
+            factor = 1.0 / 6.0;
+            break;
+          case EChannelType::EDGE:
+            factor = 1.0 / 4.0;
+            break;
+          case EChannelType::CORNER:
+            factor = 1.0 / 6.0;
+            break;
+          default:
+            return 0.0; // handle invalid subch_type if needed
+        }
+        for (auto i_pin : _mesh.getChannelPins(i_ch))
+        {
+          heat_rate += factor * _ref_qprime(i_pin) * _pin_power_correction(i_pin) *
+                       _axial_heat_rate.value(_t, P);
+        }
+        return heat_rate;
       }
-      for (auto i_pin : _mesh.getChannelPins(i_ch))
-      {
-        heat_rate += factor * _ref_qprime(i_pin) * _pin_power_correction(i_pin) *
-                     _axial_heat_rate.value(_t, P);
-      }
-      return heat_rate;
     }
   }
-  return 0.0;
+  else
+    return 0.0;
 }
