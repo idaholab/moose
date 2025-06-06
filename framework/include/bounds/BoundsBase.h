@@ -28,6 +28,7 @@ public:
   BoundsBase(const InputParameters & parameters);
 
 protected:
+  virtual void initialSetup() override;
   virtual Real computeValue() override;
 
   /**
