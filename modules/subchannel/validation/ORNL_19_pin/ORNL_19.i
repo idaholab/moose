@@ -14,7 +14,7 @@ P_out = 2.0e5 # Pa
   [subchannel]
     type = SCMTriSubChannelMeshGenerator
     nrings = 3
-    n_cells = 100
+    n_cells = 50
     flat_to_flat = 3.41e-2
     heated_length = 1.0
     unheated_length_entry = 0.4

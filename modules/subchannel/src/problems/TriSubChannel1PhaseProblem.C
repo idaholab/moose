@@ -552,18 +552,17 @@ TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int 
   // Compute axial location of nodes.
   auto z2 = _z_grid[iz];
   auto z1 = _z_grid[iz - 1];
-  // Compute the height of this element.
-  auto dz = z2 - z1;
-  auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
   auto heated_length = _subchannel_mesh.getHeatedLength();
   auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
   if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
       MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
-  // if (z2 > unheated_length_entry && z1 < unheated_length_entry + heated_length)
   {
+    // Compute the height of this element.
+    auto dz = z2 - z1;
     if (_pin_mesh_exist)
     {
       double factor;
+      auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
       switch (subch_type)
       {
         case EChannelType::CENTER:
@@ -593,32 +592,11 @@ TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int 
     {
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
       auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-      if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
-          MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry))
-      // if (z2 > unheated_length_entry && z1 < unheated_length_entry)
-      {
-        _console << "heat_rate_in first offset cell: " << (*_q_prime_soln)(node_in)
-                 << " z1 : " << z1 << std::endl;
-        _console << "heat_rate_out first offset cell : " << (*_q_prime_soln)(node_out)
-                 << " z2 : " << z2 << std::endl;
-      }
-      if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry + heated_length) &&
-          MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
-      // if (z2 > unheated_length_entry + heated_length && z1 < unheated_length_entry +
-      // heated_length)
-      {
-        _console << "heat_rate_in last offset cell: " << (*_q_prime_soln)(node_in) << " z1 : " << z1
-                 << std::endl;
-        _console << "heat_rate_out last offset cell : " << (*_q_prime_soln)(node_out)
-                 << " z2 : " << z2 << std::endl;
-      }
       return ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
     }
   }
   else
-  {
     return 0.0;
-  }
 }
 
 void
@@ -683,7 +661,6 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         Real e_cond = 0.0;
 
         Real added_enthalpy = computeAddedHeatPin(i_ch, iz);
-        added_enthalpy += computeAddedHeatDuct(i_ch, iz);
 
         // compute the sweep flow enthalpy change
         auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
@@ -1393,7 +1370,6 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
 
         /// Add heat enthalpy from pin
         PetscScalar added_enthalpy = computeAddedHeatPin(i_ch, iz);
-        added_enthalpy += computeAddedHeatDuct(i_ch, iz);
         PetscInt row_vec_ht = i_ch + _n_channels * iz_ind;
         LibmeshPetscCall(
             VecSetValues(_hc_added_heat_rhs, 1, &row_vec_ht, &added_enthalpy, ADD_VALUES));

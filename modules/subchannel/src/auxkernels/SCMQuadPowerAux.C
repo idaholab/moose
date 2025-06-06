@@ -109,7 +109,6 @@ SCMQuadPowerAux::initialSetup()
     auto heat2 = _axial_heat_rate.value(_t, p2);
     if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
         MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
-    // if (z2 > unheated_length_entry && z1 < unheated_length_entry + heated_length)
     {
       // cycle through pins
       for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
@@ -120,21 +119,14 @@ SCMQuadPowerAux::initialSetup()
         // calculation of power for the first heated segment if nodes don't align
         if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
             MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry))
-        // if (z2 > unheated_length_entry && z1 < unheated_length_entry)
         {
-          _console << "first offset heated cell: dz:" << dz << " zero power at height z1: " << z1
-                   << std::endl;
           heat1 = 0.0;
         }
 
         // calculation of power for the last heated segment if nodes don't align
         if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry + heated_length) &&
             MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
-        // if (z2 > unheated_length_entry + heated_length &&
-        //     z1 < unheated_length_entry + heated_length)
         {
-          _console << "second offset heated cell: dz:" << dz << " zero power at height z2: " << z2
-                   << std::endl;
           heat2 = 0.0;
         }
 
@@ -177,26 +169,21 @@ SCMQuadPowerAux::computeValue()
   Point P = p - p1;
   auto pin_mesh_exist = _quadMesh.pinMeshExist();
 
-  if (pin_mesh_exist)
+  /// assign power to the nodes located within the heated section
+  if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
+      MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
   {
-    // project axial heat rate on pins
-    auto i_pin = _quadMesh.getPinIndexFromPoint(p);
+    if (pin_mesh_exist)
     {
-      if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
-          MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
-        return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
-      else
-        return 0.0;
+      // project axial heat rate on pins
+      auto i_pin = _quadMesh.getPinIndexFromPoint(p);
+      return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
     }
-  }
-  else
-  {
-    // project axial heat rate on subchannels
-    auto i_ch = _quadMesh.getSubchannelIndexFromPoint(p);
-    // if we are adjacent to the heated part of the fuel Pin
-    if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
-        MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
+    else
     {
+      // project axial heat rate on subchannels
+      auto i_ch = _quadMesh.getSubchannelIndexFromPoint(p);
+      // if we are adjacent to the heated part of the fuel Pin
       auto heat_rate = 0.0;
       for (auto i_pin : _quadMesh.getChannelPins(i_ch))
       {
@@ -205,7 +192,7 @@ SCMQuadPowerAux::computeValue()
       }
       return heat_rate;
     }
-    else
-      return 0.0;
   }
+  else
+    return 0.0;
 }

@@ -429,13 +429,13 @@ QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int
   // Compute axial location of nodes.
   auto z2 = _z_grid[iz];
   auto z1 = _z_grid[iz - 1];
-  // Compute the height of this element.
-  auto dz = z2 - z1;
   auto heated_length = _subchannel_mesh.getHeatedLength();
   auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
   if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
       MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
   {
+    // Compute the height of this element.
+    auto dz = z2 - z1;
     if (_pin_mesh_exist)
     {
       auto heat_rate_in = 0.0;
@@ -457,9 +457,7 @@ QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int
     }
   }
   else
-  {
     return 0.0;
-  }
 }
 
 void
