@@ -19,6 +19,7 @@ protected:
   void output() override;
 
   MFEMProblemData & _problem_data;
+  mfem::ParMesh & _pmesh;
 };
 
 #endif

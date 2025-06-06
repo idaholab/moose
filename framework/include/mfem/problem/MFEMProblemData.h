@@ -17,6 +17,7 @@ public:
   virtual ~MFEMProblemData() { ode_solver.reset(); };
 
   std::shared_ptr<mfem::ParMesh> pmesh{nullptr};
+  Moose::MFEM::SubMeshes submeshes;
   Moose::MFEM::CoefficientManager coefficients;
 
   std::unique_ptr<mfem::ODESolver> ode_solver{nullptr};
