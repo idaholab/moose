@@ -130,11 +130,11 @@ class Tester(MooseObject, OutputInterface):
             # Sanity checks
             if '..' in script:
                 message = f'validation_test={script} out of test directory'
-                raise Exception(message)
+                raise ValueError(message)
             path = os.path.abspath(script)
             if not os.path.exists(script):
                 message = f'validation_test={path} not found'
-                raise Exception(message)
+                raise FileNotFoundError(message)
 
             # Load the script; throw an exception here if it fails
             # so that the Parser can report a reasonable error
@@ -143,7 +143,7 @@ class Tester(MooseObject, OutputInterface):
             try:
                 spec.loader.exec_module(module)
             except Exception as e:
-                raise Exception(f'In validation_test={path}:\n{e}')
+                raise ImportError(f'In validation_test={path}:\n{e}')
 
             # Store each of the classes in the script that derives from
             # ValidationCase, and add their parameters to this Tester's
