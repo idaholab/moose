@@ -3,9 +3,9 @@
   parallel_scheduling = True
 
   [steady_no_converge]
-    type = 'RunApp'
+    type = 'RunException'
     input = 'steady_no_converge.i'
-    expect_out = 'Aborting as solve did not converge'
+    expect_err = 'Aborting as solve did not converge'
 
     requirement = 'The system shall report an error when the system solver is unable to find a converged solution.'
     design = 'Executioner/index.md'
@@ -594,10 +594,10 @@
   []
 
   [nan_no_trap_fpe_test]
-    type = 'RunApp'
+    type = 'RunException'
     input = 'nan_test.i'
     cli_args = '--no-trap-fpe'
-    expect_out = 'Solve Did NOT Converge'
+    expect_err = 'Solve Did NOT Converge'
 
     requirement = 'The system shall abort the solve and report a floating point error when a NaN is produced during user computation with the Steady executioner.'
     issues = '#374 #3614'

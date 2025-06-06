@@ -165,6 +165,8 @@
     issues = '#21329'
     type = 'Exodiff'
     input = frictional-penalty-weighted-vel.i
+    # this test does not converge, see #30642
+    should_crash = true
     exodiff = 'parallel-frictional-penalty-weighted-vel_out.e'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                "Postprocessors/active='' "

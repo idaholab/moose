@@ -43,6 +43,7 @@ SteadyBase::execute()
     _console << "\nCannot recover steady-state solves of type: " << this->type()
              << "!\nExiting...\n"
              << std::endl;
+    _last_solve_converged = true;
     return;
   }
 

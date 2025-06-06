@@ -10,9 +10,9 @@
                   'individual variables to reference quantities of those variables, using a convergence object.'
   []
   [scaled_bad]
-    type = RunApp
+    type = RunException
     input = 'reference_residual.i'
-    expect_out = 'Solve Did NOT Converge'
+    expect_err = 'Solve Did NOT Converge'
     cli_args = 'coef=1e17 Outputs/exodus=false -pc_type svd -pc_svd_monitor -ksp_max_it 10'
     requirement = 'The system shall fail to find a converged solution when basing convergence on '
                   'individual variable reference quantities with poor scaling, using a convergence object.'
