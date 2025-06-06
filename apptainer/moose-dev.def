@@ -45,7 +45,7 @@
 {#- The installation location for pprof                                                       -#}
 {%- set PPROF_DIR = '/opt/pprof' -%}
 {#- The installation location for libtorch                                                    -#}
-{%- set LIBTORCH_DEST = '/opt' -%}
+{%- set LIBTORCH_DIR = '/opt/libtorch' -%}
 {#- The script used to install conduit                                                        -#}
 {%- set CONDUIT_BUILD_SCRIPT = 'update_and_rebuild_conduit.sh' -%}
 {#- The installation location for conduit                                                     -#}
@@ -74,8 +74,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
 
 %environment
-    export PATH={{ MOOSE_MINIFORGE }}/bin:/opt/code-server/bin:$PATH
-    source activate {{ MOOSE_MINIFORGE }}
+    if [ -d "{{ MOOSE_MINIFORGE }}" ]; then
+        export PATH={{ MOOSE_MINIFORGE }}/bin:$PATH
+        source activate moose
+    fi
+
+    export PATH=/opt/code-server/bin:$PATH
 
     export WASP_DIR={{ WASP_DIR }}
     export PATH=${WASP_DIR}/bin:$PATH
@@ -85,8 +89,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export MFEM_DIR={{ MFEM_DIR }}
 {%- endif %}
 
-{%- if WITH_LIBTORCH %}
-    export LIBTORCH_DIR={{ LIBTORCH_DEST }}/libtorch
+{% if WITHOUT_PYTORCH is not defined %}
+    export LIBTORCH_DIR={{ LIBTOCH_DIR }}
     export NEML2_DIR={{ NEML2_DIR }}
     # Adding this to not get GPU initialization errors from MPICH
     export MPIR_CVAR_ENABLE_GPU=0
@@ -152,31 +156,46 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     rm -rf ${WASP_SRC_DIR}
     export WASP_DIR={{ WASP_DIR }}
 
-{%- if WITH_LIBTORCH %}
-    # Libtorch-related vars
-    LIBTORCH_DEST={{ LIBTORCH_DEST }}
-    LIBTORCH_VER=2.1.0
-    LIBTORCH_DISTRIBUTION={{ WITH_LIBTORCH }}
-
-    # Install libtorch from a precompiled package
+    # Install miniforge in MOOSE_MINIFORGE
     cd ${ROOT_BUILD_DIR}
-    ${ROOT_BUILD_DIR}/setup_libtorch.sh --version=${LIBTORCH_VER} --libtorch-dest=${LIBTORCH_DEST} --libtorch-distribution=${LIBTORCH_DISTRIBUTION} --cleanup
-    export LIBTORCH_DIR=${LIBTORCH_DEST}/libtorch
+    MINIFORGE_SCRIPT=${ROOT_BUILD_DIR}/miniforge3.sh
+    curl -L https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh -o ${MINIFORGE_SCRIPT}
+    bash ${MINIFORGE_SCRIPT} -b -p ${MOOSE_MINIFORGE}
+    rm ${MINIFORGE_SCRIPT}
+    export PATH=${MOOSE_MINIFORGE}/bin:$PATH
+    conda update -yq --all
 
-{%- if WITH_LIBTORCH.startswith('cu') %}
-    # We install CUDA Toolkit if the user wants cuda-based libtorch.
-    # Right now this assumes that cuda-based distributions start with -cu-
-    dnf -y install epel-release
-    CUDA_RPM=${BUILD_DIR}/cuda.rpm
-    curl -L https://developer.download.nvidia.com/compute/cuda/11.4.0/local_installers/cuda-repo-rhel8-11-4-local-11.4.0_470.42.01-1.x86_64.rpm -o ${CUDA_RPM}
-    rpm -i ${CUDA_RPM}
-    dnf -y install cuda
-    rm -rf ${CUDA_RPM}
-    # the CUDA libtorch needs a symlink for libnvrtc-builtins (the link removes the hash portion from the name)
-    cd ${LIBTORCH_DEST}/libtorch/lib
-    LIBNVRTC=$(ls libnvrtc-builtins-????????.so.*.* | head -n1)
-    ln -s $LIBNVRTC $(echo $LIBNVRTC | cut -d. -f1 | head -c-10).$(echo $LIBNVRTC | cut -d. -f2-)
-{%- endif %}
+{% if WITHOUT_PYTORCH is not defined %}
+    # Clone pytorch
+    PYTORCH_VER=2.6.0
+    cd ${ROOT_BUILD_DIR}
+    git clone --branch v${PYTORCH_VER} --single-branch --recursive https://github.com/pytorch/pytorch
+    PYTORCH_DIR=${ROOT_BUILD_DIR}/pytorch
+
+    # Create a temporary python environment for building pytorch
+    PYTORCH_CONDA_ENV=pytorch_build
+    conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.11
+    source activate ${MOOSE_MINIFORGE}/envs/${PYTORCH_CONDA_ENV}
+    pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
+    conda install cmake=3.31.6
+
+    # Build and install pytorch
+    PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
+    mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
+    CFLAGS="-Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict" \
+        CXXFLAGS="-Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict" \
+        cmake \
+        -DBUILD_SHARED_LIBS:BOOL=ON \
+        -DCMAKE_BUILD_TYPE:STRING=Release \
+        -DCMAKE_INSTALL_PREFIX:PATH={{ LIBTORCH_DIR }} ${PYTORCH_DIR}
+    cmake --build . --target install -- -j ${MOOSE_JOBS}
+    export LIBTORCH_DIR={{ LIBTORCH_DIR }}
+
+    # Cleanup the temporary python environment
+    source deactivate
+    conda env remove -n ${PYTORCH_CONDA_ENV}
+    rm -rf ${PYTORCH_DIR} ${PYTORCH_BUILD_DIR}
+    cd ${ROOT_BUILD_DIR}
 
     # TODO: Use a separate WITH_NEML2 for this stuff, or something like that
     # neml2 variables
@@ -241,15 +260,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     MFEM_DIR=${MFEM_DIR} MFEM_SRC_DIR=${MFEM_SRC_DIR} CONDUIT_DIR=${CONDUIT_DIR} ${MFEM_BUILD_SCRIPT} "${MFEM_OPTIONS[@]}"
 {%- endif %}
 
-    # Install miniforge in MOOSE_MINIFORGE
-    cd ${ROOT_BUILD_DIR}
-    MINIFORGE_SCRIPT=${ROOT_BUILD_DIR}/miniforge3.sh
-    curl -L https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh -o ${MINIFORGE_SCRIPT}
-    bash ${MINIFORGE_SCRIPT} -b -p ${MOOSE_MINIFORGE}
-    rm ${MINIFORGE_SCRIPT}
-    export PATH=${MOOSE_MINIFORGE}/bin:$PATH
-    conda update -yq --all
-
     # Add moose channels
     conda config --env --add channels https://conda.software.inl.gov/public
     # Add an alt channel if given
@@ -259,8 +269,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # Create list of Conda Packages to install
     CONDA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
     # Install packages
-    conda install -yq python=${PYTHON_VERSION} ${CONDA_PACKAGES}
+    conda create -yq -n moose python=${PYTHON_VERSION} ${CONDA_PACKAGES}
     # Needed for coverage
+    source activate moose
     pip3 --no-cache install lcov-cobertura
 
     # Install node.js. Requested by dschwen for bison
@@ -315,8 +326,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     {{ MOOSE_DIR }}/scripts/{{ MFEM_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ MFEM_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/{{ CONDUIT_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ CONDUIT_BUILD_SCRIPT }}
 {%- if WITH_LIBTORCH %}
-    # libtorch
-    {{ MOOSE_DIR }}/scripts/setup_libtorch.sh {{ ROOT_BUILD_DIR }}/setup_libtorch.sh
     # neml2
     {{ MOOSE_DIR }}/scripts/configure_neml2.sh {{ ROOT_BUILD_DIR }}/configure_neml2.sh
     {{ MOOSE_DIR }}/scripts/{{ NEML2_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ NEML2_BUILD_SCRIPT }}
