@@ -155,13 +155,9 @@ SCMTriPowerAux::initialSetup()
   }
 
   _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
-  _console << Moose::stringify(_estimate_power) << std::endl;
+  _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
   _console << "###########################################" << std::endl;
-  _console << Moose::stringify(_ref_power) << std::endl;
-  _console << "###########################################" << std::endl;
-  _console << Moose::stringify(_pin_power_correction) << std::endl;
-  _console << "###########################################" << std::endl;
-  _console << "Total power estimation: " << total_power << std::endl;
+  _console << "Total power estimation: " << total_power << " [W] " << std::endl;
 }
 
 Real
