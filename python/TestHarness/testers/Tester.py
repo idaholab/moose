@@ -112,7 +112,9 @@ class Tester(MooseObject, OutputInterface):
         params.addParam("collections", [], "A means for defining a collection of tests for SQA process.")
         params.addParam("classification", 'functional', "A means for defining a requirement classification for SQA process.")
 
+        # HPC
         params.addParam('hpc', True, 'Set to false to not run with HPC schedulers (PBS and slurm)')
+        params.addParam('hpc_mem_per_cpu', "Memory requirement per CPU to use for HPC submission")
 
         return params
 
