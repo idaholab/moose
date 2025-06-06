@@ -12,6 +12,7 @@ import mooseutils
 from TestHarness import OutputInterface, util
 from TestHarness.StatusSystem import StatusSystem
 from FactorySystem.MooseObject import MooseObject
+from FactorySystem.InputParameters import InputParameters
 from pathlib import Path
 from dataclasses import dataclass
 
@@ -151,18 +152,23 @@ class Tester(MooseObject, OutputInterface):
             validation_classes = []
             subclasses = module.ValidationCase._subclasses.copy()
             module.ValidationCase._subclasses = []
+            validation_params = InputParameters()
             for subclass in subclasses:
                 validation_params = subclass.validParams()
 
-                # Don't allow duplicates
+                # Don't allow validation parameters that override
+                # parameters from the Tester
                 for key in validation_params.keys():
                     if key in params:
                         raise Exception(f'Duplicate parameter "{key}" from validation test')
 
-                # Extend this Tester's parameters
-                params += subclass.validParams()
+                # Collect the cumulative validation params
+                validation_params += subclass.validParams()
                 # Store the class so that it can be used later
                 validation_classes.append(subclass)
+
+            # Extend the Tester parameters
+            params += validation_params
 
         # Store the classes that are used in validation so that they
         # can be constructed within the Job at a later time
