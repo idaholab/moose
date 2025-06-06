@@ -91,17 +91,24 @@ public:
    */
   bool hasObjects(THREAD_ID tid = 0) const;
   bool hasActiveObjects(THREAD_ID tid = 0) const;
-  bool hasObjectsForVariable(const VariableName & var_name, THREAD_ID tid /* = 0*/) const;
-  bool hasObjectsForVariableAndBlocks(const VariableName & var_name,
-                                      const std::set<SubdomainName> & blocks,
-                                      std::set<SubdomainName> & blocks_covered,
-                                      THREAD_ID tid /* = 0*/) const;
+  bool hasObjectsForVariable(const VariableName & var_name, THREAD_ID tid) const;
   bool hasActiveBlockObjects(THREAD_ID tid = 0) const;
   bool hasActiveBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
   bool hasActiveBoundaryObjects(THREAD_ID tid = 0) const;
   bool hasActiveBoundaryObjects(BoundaryID id, THREAD_ID tid = 0) const;
   bool hasBoundaryObjects(BoundaryID id, THREAD_ID tid = 0) const;
   ///@}
+
+  /**
+   * Whether there are objects for this variable and the set of blocks passed
+   * @param var_name name of the variable
+   * @param blocks blocks to consider
+   * @param blocks_covered subset of blocks for which there is an object
+   */
+  bool hasObjectsForVariableAndBlocks(const VariableName & var_name,
+                                      const std::set<SubdomainID> & blocks,
+                                      std::set<SubdomainID> & blocks_covered,
+                                      THREAD_ID tid) const;
 
   /**
    * Return a set of active SubdomainsIDs
@@ -118,8 +125,10 @@ public:
   ///@}
 
   /// Getter for objects that have the 'variable' set to a particular variable
+  /// Note that users should check whether there are objects using 'hasObjectsForVariable' before
+  /// calling this routine, because it will throw if there are no objects for this variable
   const std::vector<std::shared_ptr<T>> & getObjectsForVariable(const VariableName & var_name,
-                                                                THREAD_ID tid /* = 0*/) const;
+                                                                THREAD_ID tid) const;
 
   /**
    * Updates the active objects storage.
@@ -476,7 +485,7 @@ MooseObjectWarehouseBase<T>::hasActiveObjects(THREAD_ID tid /* = 0*/) const
 template <typename T>
 bool
 MooseObjectWarehouseBase<T>::hasObjectsForVariable(const VariableName & var_name,
-                                                   THREAD_ID tid /* = 0*/) const
+                                                   THREAD_ID tid) const
 {
   checkThreadID(tid);
   return _all_variable_objects[tid].count(var_name);
@@ -484,11 +493,10 @@ MooseObjectWarehouseBase<T>::hasObjectsForVariable(const VariableName & var_name
 
 template <typename T>
 bool
-MooseObjectWarehouseBase<T>::hasObjectsForVariableAndBlocks(
-    const VariableName & var_name,
-    const std::set<SubdomainName> & blocks,
-    std::set<SubdomainName> & blocks_covered,
-    THREAD_ID tid /* = 0*/) const
+MooseObjectWarehouseBase<T>::hasObjectsForVariableAndBlocks(const VariableName & var_name,
+                                                            const std::set<SubdomainID> & blocks,
+                                                            std::set<SubdomainID> & blocks_covered,
+                                                            THREAD_ID tid /* = 0*/) const
 {
   checkThreadID(tid);
   blocks_covered.clear();

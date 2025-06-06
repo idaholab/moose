@@ -169,6 +169,12 @@ protected:
    */
   bool allMeshBlocks(const std::vector<SubdomainName> & blocks) const;
   bool allMeshBlocks(const std::set<SubdomainName> & blocks) const;
+  // These APIs can deal with ANY_BLOCK_ID or ids with no names. They will be slower than the
+  // MooseMeshUtils' APIs, but are more convenient for setup purposes
+  /// Get the set of subdomain ids for the incoming vector of subdomain names
+  std::set<SubdomainID> getSubdomainIDs(const std::set<SubdomainName> & blocks) const;
+  /// Get the vector of subdomain names and ids for the incoming set of subdomain IDs
+  std::vector<std::string> getSubdomainNamesAndIDs(const std::set<SubdomainID> & blocks) const;
 
   /**
    * Process the given petsc option pairs into the system solver settings
