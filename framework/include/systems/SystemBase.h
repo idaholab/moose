@@ -424,6 +424,8 @@ public:
    */
   virtual NumericVector<Number> & serializedSolution();
 
+  virtual void cleanSerializedSolution();
+
   virtual NumericVector<Number> & residualCopy()
   {
     mooseError("This system does not support getting a copy of the residual");

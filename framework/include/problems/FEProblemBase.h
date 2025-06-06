@@ -2732,6 +2732,12 @@ protected:
 
   std::vector<SolverParams> _solver_params;
 
+  /// Default blocks for block restriction (kernel and material coverage check only for the default blocks)
+  std::vector<SubdomainName> _blocks;
+
+  /// Whether the user set a block in the GlobalParams
+  bool _has_block_in_global;
+
   /// Determines whether and which subdomains are to be checked to ensure that they have an active kernel
   CoverageCheckMode _kernel_coverage_check;
   std::vector<SubdomainName> _kernel_coverage_blocks;
