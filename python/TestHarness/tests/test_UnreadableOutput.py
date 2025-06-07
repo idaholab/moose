@@ -7,7 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import subprocess
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
@@ -16,7 +15,5 @@ class TestHarnessTester(TestHarnessTestCase):
         Test for bad output supplied by executed commands
         """
 
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'non_unicode')
-        e = cm.exception
-        self.assertIn('non-unicode characters in output', e.output)
+        out = self.runTests('-i', 'non_unicode', exit_code=132).output
+        self.assertIn('non-unicode characters in output', out)

@@ -6,13 +6,11 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-import subprocess
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
     def testUnknownParam(self):
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('--no-color', '-i', 'unknown_param')
+        out = self.runTests('--no-color', '-i', 'unknown_param', exit_code=128).output
 
         self.assertIn('unknown_param:5: unused parameter "not_a_parameter"',
-                      cm.exception.output)
+                      out)

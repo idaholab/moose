@@ -186,8 +186,8 @@ def findDepApps(dep_names, use_current_only=False):
 
 class TestHarness:
     @staticmethod
-    def buildAndRun(argv: list, app_name: str, moose_dir: str, moose_python: str = None,
-                    skip_testroot: bool = False) -> None:
+    def build(argv: list, app_name: str, moose_dir: str, moose_python: str = None,
+              skip_testroot: bool = False) -> None:
         # Cannot skip the testroot if we don't have an application name
         if skip_testroot and not app_name:
             raise ValueError(f'Must provide "app_name" when skip_testroot=True')
@@ -228,7 +228,11 @@ class TestHarness:
             elif app_name is not None:
                 raise RuntimeError(f'{test_root.root_dir}/testroot missing app_name')
 
-        harness = TestHarness(argv, moose_dir, moose_python_dir, test_root)
+        return TestHarness(argv, moose_dir, moose_python_dir, test_root)
+
+    @staticmethod
+    def buildAndRun(argv: list, app_name: str, moose_dir: str, *args, **kwargs) -> None:
+        harness = TestHarness.build(argv, app_name, moose_dir, *args, **kwargs)
         harness.findAndRunTests()
         sys.exit(harness.error_code)
 

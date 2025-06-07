@@ -7,7 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import subprocess
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
@@ -15,10 +14,7 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test for --longest-jobs in the TestHarness with 2 passing jobs, 1 failing job, and 1 skipped job.
         """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'longest_jobs', '--longest-jobs', '4')
-
-        output = cm.exception.output
+        output = self.runTests('-i', 'longest_jobs', '--longest-jobs', '4', exit_code=128).output
 
         self.assertIn('4 longest running jobs', output)
         self.assertRegex(output, r'(?s)longest running jobs.*run_1')
@@ -30,7 +26,7 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test for --longest-jobs in the TestHarness with no jobs ran.
         """
-        output = self.runTests('-i', 'longest_jobs', '--re', 'foo', '--longest-jobs', '100')
+        output = self.runTests('-i', 'longest_jobs', '--re', 'foo', '--longest-jobs', '100').output
 
         self.assertIn('100 longest running jobs', output)
         self.assertNotRegex(output, r'(?s)longest running jobs.*<No jobs were completed>')
