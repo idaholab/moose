@@ -20,27 +20,26 @@ class TestHarnessTestCase(unittest.TestCase):
     TestCase class for running TestHarness commands.
     """
 
-    def runTests(self, *args, tmp_output=True, as_json=False, no_capabilities=True):
+    def runTests(self, *args, tmp_output=True, as_json=False, no_capabilities=True,
+                 check=True):
         cmd = ['./run_tests'] + list(args) + ['--term-format', 'njCst']
         if no_capabilities:
             cmd += ['--no-capabilities']
         sp_kwargs = {'cwd': os.path.join(os.getenv('MOOSE_DIR'), 'test'),
-                     'text': True}
+                     'stdout': subprocess.PIPE,
+                     'stderr': subprocess.STDOUT,
+                     'text': True,
+                     'check': check and not as_json}
         context = tempfile.TemporaryDirectory if tmp_output else nullcontext
-        output = None
         with context() as c:
             if tmp_output:
                 cmd += ['-o', c]
-            try:
-                output = subprocess.check_output(cmd, **sp_kwargs)
-            except subprocess.CalledProcessError:
-                if not as_json:
-                    raise
+            p = subprocess.run(cmd, **sp_kwargs)
             if as_json:
                 with open(os.path.join(c, '.previous_test_results.json'), 'r') as f:
                     return json.loads(f.read())
             else:
-                return output
+                return p.stdout
 
     def runExceptionTests(self, *args, tmp_output=True):
         try:
