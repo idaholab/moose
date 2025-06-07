@@ -52,6 +52,7 @@ SingleVariableReturnMappingSolutionTempl<is_ad>::validParams()
   params.addParam<bool>("automatic_differentiation_return_mapping",
                         false,
                         "Whether to use automatic differentiation to compute the derivative.");
+  params.addParam<bool>("line_search", true, "Whether to use line search.");
   return params;
 }
 
@@ -59,7 +60,7 @@ template <bool is_ad>
 SingleVariableReturnMappingSolutionTempl<is_ad>::SingleVariableReturnMappingSolutionTempl(
     const InputParameters & parameters)
   : _check_range(false),
-    _line_search(true),
+    _line_search(parameters.get<bool>("line_search")),
     _bracket_solution(true),
     _internal_solve_output_on(
         parameters.get<MooseEnum>("internal_solve_output_on").getEnum<InternalSolveOutput>()),
