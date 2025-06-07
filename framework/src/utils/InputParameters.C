@@ -1157,6 +1157,10 @@ InputParameters::applyParameter(const InputParameters & common,
     // the parameter in the action
     at(local_name)._hit_node = common.getHitNode(common_name);
   }
+  else if (!local_exist && !common_exist)
+    mooseError("InputParameters::applyParameter(): Attempted to apply invalid parameter \"",
+               common_name,
+               "\"");
 
   // Enable deprecated message printing
   _show_deprecated_message = true;
