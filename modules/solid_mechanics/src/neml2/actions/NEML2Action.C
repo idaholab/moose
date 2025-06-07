@@ -251,23 +251,27 @@ NEML2Action::act()
                    param.moose.name);
     }
 
-    // The index generator UO
+    // do not add user objects if no MOOSE input or output mappings are defined
+    if (!_inputs.empty() || !_outputs.empty())
     {
-      auto type = "NEML2BatchIndexGenerator";
-      auto params = _factory.getValidParams(type);
-      params.applyParameters(parameters());
-      _problem->addUserObject(type, _idx_generator_name, params);
-    }
+      // The index generator UO
+      {
+        auto type = "NEML2BatchIndexGenerator";
+        auto params = _factory.getValidParams(type);
+        params.applyParameters(parameters());
+        _problem->addUserObject(type, _idx_generator_name, params);
+      }
 
-    // The Executor UO
-    {
-      auto type = "NEML2ModelExecutor";
-      auto params = _factory.getValidParams(type);
-      params.applyParameters(parameters());
-      params.set<UserObjectName>("batch_index_generator") = _idx_generator_name;
-      params.set<std::vector<UserObjectName>>("gatherers") = gatherers;
-      params.set<std::vector<UserObjectName>>("param_gatherers") = param_gatherers;
-      _problem->addUserObject(type, _executor_name, params);
+      // The Executor UO
+      {
+        auto type = "NEML2ModelExecutor";
+        auto params = _factory.getValidParams(type);
+        params.applyParameters(parameters());
+        params.set<UserObjectName>("batch_index_generator") = _idx_generator_name;
+        params.set<std::vector<UserObjectName>>("gatherers") = gatherers;
+        params.set<std::vector<UserObjectName>>("param_gatherers") = param_gatherers;
+        _problem->addUserObject(type, _executor_name, params);
+      }
     }
   }
 
