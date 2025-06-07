@@ -107,6 +107,12 @@ public:
    */
   virtual void prepareShapes(unsigned int var_num);
 
+  /**
+   * @returns Additional variables covered by this residual object in addition to \p variable(). A
+   * covered variable here means a variable for whom this object computes residuals/Jacobians
+   */
+  virtual std::set<std::string> additionalROVariables() { return {}; }
+
 protected:
   virtual void precalculateResidual() {}
   virtual void precalculateJacobian() {}

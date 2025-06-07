@@ -11,6 +11,7 @@
 #include "PetscOutput.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
+#include "CommonOutputAction.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_nonlinear_solver.h"
@@ -234,6 +235,11 @@ PetscOutput::solveSetup()
   if (_app.getInterfaceObjects<PetscOutputInterface>()[0] != this)
     return;
 
+  ActionWarehouse & awh = _app.actionWarehouse();
+  const auto actions = awh.getActions<CommonOutputAction>();
+  mooseAssert(actions.size() <= 1, "Should not be more than one CommonOutputAction");
+  const Action * common = actions.empty() ? nullptr : *actions.begin();
+
   // Extract the non-linear and linear solvers from PETSc
   NonlinearSystemBase & nl = _problem_ptr->currentNonlinearSystem();
   SNES snes = nl.getSNES();
@@ -244,10 +250,12 @@ PetscOutput::solveSetup()
   // get an updated nonlinear iteration number)
   // Not every Output should register its own DM monitor! Just register one each of nonlinear
   // and linear and dispatch all Outputs from there!
-  LibmeshPetscCallA(_communicator.get(),
-                    SNESMonitorSet(snes, petscNonlinearOutput, this, LIBMESH_PETSC_NULLPTR));
-  LibmeshPetscCallA(_communicator.get(),
-                    KSPMonitorSet(ksp, petscLinearOutput, this, LIBMESH_PETSC_NULLPTR));
+  if (common && common->getParam<bool>("print_nonlinear_residuals"))
+    LibmeshPetscCallA(_communicator.get(),
+                      SNESMonitorSet(snes, petscNonlinearOutput, this, LIBMESH_PETSC_NULLPTR));
+  if (common && common->getParam<bool>("print_linear_residuals"))
+    LibmeshPetscCallA(_communicator.get(),
+                      KSPMonitorSet(ksp, petscLinearOutput, this, LIBMESH_PETSC_NULLPTR));
 }
 
 Real

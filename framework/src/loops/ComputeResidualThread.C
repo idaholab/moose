@@ -14,6 +14,7 @@
 #include "IntegratedBCBase.h"
 #include "FVElementalKernel.h"
 #include "InterfaceKernelBase.h"
+#include "HDGKernel.h"
 #include "libmesh/threads.h"
 
 ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem,
@@ -84,6 +85,7 @@ ComputeResidualThread::determineObjectWarehouses()
     _dg_warehouse = &_dg_kernels;
     _ibc_warehouse = &_integrated_bcs;
     _ik_warehouse = &_interface_kernels;
+    _hdg_warehouse = &_hdg_kernels;
   }
   // If we have one tag only,
   // We call tag based storage
@@ -93,6 +95,7 @@ ComputeResidualThread::determineObjectWarehouses()
     _dg_warehouse = &(_dg_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
     _ibc_warehouse = &(_integrated_bcs.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
     _ik_warehouse = &(_interface_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
+    _hdg_warehouse = &(_hdg_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
   }
   // This one may be expensive
   else
@@ -101,6 +104,7 @@ ComputeResidualThread::determineObjectWarehouses()
     _dg_warehouse = &(_dg_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
     _ibc_warehouse = &(_integrated_bcs.getVectorTagsObjectWarehouse(_tags, _tid));
     _ik_warehouse = &(_interface_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
+    _hdg_warehouse = &(_hdg_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
   }
 
   if (_fe_problem.haveFV())
@@ -114,5 +118,23 @@ ComputeResidualThread::determineObjectWarehouses()
         .template condition<AttribThread>(_tid)
         .template condition<AttribVectorTags>(_tags)
         .queryInto(_fv_kernels);
+  }
+}
+
+void
+ComputeResidualThread::computeOnInternalFace()
+{
+  mooseAssert(_hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid),
+              "We should not be called if we have no active HDG kernels");
+  for (const auto & hdg_kernel : _hdg_warehouse->getActiveBlockObjects(_subdomain, _tid))
+  {
+    mooseAssert(
+        hdg_kernel->hasBlocks(_subdomain),
+        "We queried the warehouse for active blocks on this subdomain, so this better be active");
+    mooseAssert(
+        _neighbor_subdomain != Moose::INVALID_BLOCK_ID,
+        "We should have set a valid neighbor subdomain ID if we made it in side this method");
+    if (hdg_kernel->hasBlocks(_neighbor_subdomain))
+      hdg_kernel->computeResidualOnSide();
   }
 }

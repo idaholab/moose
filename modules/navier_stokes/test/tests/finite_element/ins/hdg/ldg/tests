@@ -1,0 +1,36 @@
+[Tests]
+  issues = '#26405'
+  design = 'NavierStokesLHDGKernel.md'
+  [lid]
+    type = Exodiff
+    input = lid.i
+    exodiff = lid_out.e
+    requirement = 'The system shall be able to solve a lid-driven cavity problem using a hybridized discontinuous Galerkin discretization.'
+    max_threads = 1
+  []
+  [channel]
+    type = Exodiff
+    input = channel.i
+    exodiff = channel_out.e
+    requirement = 'The system shall be able to solve a channel flow problem using a hybridized discontinuous Galerkin discretization.'
+    rel_err = 1e-5
+    max_threads = 1
+  []
+  [stokes_symmetric]
+    requirement = 'The system shall produce a symmetric matrix for a hybridizable discontinuous Galerkin discretization of the Stokes equation for a'
+    [lid]
+      type = CSVDiff
+      input = stokes-lid.i
+      csvdiff = stokes-lid_out.csv
+      detail = 'lid driven cavity problem, and'
+      max_threads = 1
+    []
+    [channel]
+      type = CSVDiff
+      input = stokes-channel.i
+      csvdiff = stokes-channel_out.csv
+      detail = 'channel flow problem.'
+      max_threads = 1
+    []
+  []
+[]

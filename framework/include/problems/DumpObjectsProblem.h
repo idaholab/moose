@@ -114,7 +114,6 @@ public:
   captureDump(addFVInitialCondition,  "FVICs")
   captureDump(addFVInterfaceKernel,   "FVInterfaceKernels")
   captureDump(addFVKernel,            "FVKernels")
-  captureDump(addHDGIntegratedBC,     "HDGBCs")
   captureDump(addHDGKernel,           "HDGKernels")
   captureDump(addIndicator,           "Adaptivity/Indicators")
   captureDump(addInitialCondition,    "ICs")

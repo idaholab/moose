@@ -52,6 +52,11 @@ public:
                             const unsigned int to_var,
                             NumericVector<Number> & to_vector);
 
+  /**
+   * Perform some setup tasks such as storing the PETSc options
+   */
+  virtual void initialSetup();
+
 protected:
   /// Setup the coupling matrix on the finite element problem
   void setCouplingMatrix(std::unique_ptr<libMesh::CouplingMatrix> cm);

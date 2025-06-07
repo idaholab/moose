@@ -95,8 +95,8 @@ class TestListingNumbers(MooseDocsTestCase):
         self.assertHTMLString(p(0,0), content=content + ': ')
         self.assertHTMLTag(p(1), 'span', class_='moose-caption-text')
 
-        self.assertHTMLTag(pre, 'pre', size=1, class_='')
-        self.assertHTMLTag(pre(0), 'code', size=1, class_='language-None', style=CODE_STYLE)
+        self.assertHTMLTag(pre, 'pre', size=1, class_='', style=CODE_STYLE)
+        self.assertHTMLTag(pre(0), 'code', size=1, class_='language-None', style='')
         self.assertHTMLString(pre(0,0), content=ref.capitalize())
 
         self.assertHTMLTag(a, 'a', size=1, href='#' + ref)
@@ -231,8 +231,8 @@ class TestListingCaptions(MooseDocsTestCase):
         self.assertHTMLString(res(1,0,0), content='File 1')
 
     def _assertHTML(self, res, content):
-        self.assertHTMLTag(res, 'pre', size=1, class_='')
-        self.assertHTMLTag(res(0), 'code', size=1, class_='language-None', style=CODE_STYLE)
+        self.assertHTMLTag(res, 'pre', size=1, class_='', style=CODE_STYLE)
+        self.assertHTMLTag(res(0), 'code', size=1, class_='language-None', style='')
         self.assertHTMLString(res(0,0), content=content)
 
     def testLatex(self):
@@ -316,8 +316,8 @@ class TestListingWithSpace(MooseDocsTestCase):
         self._assertHTML(res(0), self.CODE)
 
     def _assertHTML(self, res, content):
-        self.assertHTMLTag(res, 'pre', size=1, class_='')
-        self.assertHTMLTag(res(0), 'code', size=1, class_='language-None', style='max-height:92px;')
+        self.assertHTMLTag(res, 'pre', size=1, class_='', style='max-height:92px;')
+        self.assertHTMLTag(res(0), 'code', size=1, class_='language-None', style='')
         self.assertHTMLString(res(0,0), content=content)
 
     def testLatex(self):
@@ -349,8 +349,8 @@ class TestListingLanguage(MooseDocsTestCase):
         self._assertHTML(res(0), self.CODE)
 
     def _assertHTML(self, res, content):
-        self.assertHTMLTag(res, 'pre', size=1, class_='')
-        self.assertHTMLTag(res(0), 'code', size=1, class_='language-c++', style=CODE_STYLE)
+        self.assertHTMLTag(res, 'pre', size=1, class_='', style=CODE_STYLE)
+        self.assertHTMLTag(res(0), 'code', size=1, class_='language-c++', style='')
         self.assertHTMLString(res(0,0), content=content)
 
     def testLatex(self):
@@ -423,8 +423,8 @@ class TestFileListing(MooseDocsTestCase):
         self.assertHTMLTag(res(2), 'div', class_='moose-modal modal')
 
     def _assertHTML(self, res, style, content):
-        self.assertHTMLTag(res, 'pre', size=1, class_='')
-        self.assertHTMLTag(res(0), 'code', size=1, class_='language-cpp', style=style)
+        self.assertHTMLTag(res, 'pre', size=1, class_='', style=style)
+        self.assertHTMLTag(res(0), 'code', size=1, class_='language-cpp', style='')
         self.assertHTMLString(res(0,0), content=content)
 
     def testLatex(self):
@@ -484,8 +484,8 @@ class TestFileListingDiff(MooseDocsTestCase):
     def testHTML(self):
         _, res = self.execute(self.TEXT)
         self.assertHTMLTag(res, 'body', size=4)
-        self.assertHTMLTag(res(0), 'pre', size=1, class_='')
-        self.assertHTMLTag(res(0)(0), 'code', size=1, class_='language-diff-cpp diff-highlight', style=CODE_STYLE)
+        self.assertHTMLTag(res(0), 'pre', size=1, class_='', style=CODE_STYLE)
+        self.assertHTMLTag(res(0)(0), 'code', size=1, class_='language-diff-cpp diff-highlight', style='')
         self.assertHTMLString(res(0,0)(0), content=self.DIFF)
         self.assertHTMLTag(res(1), 'span', size=1, class_='moose-source-filename')
         self.assertHTMLString(res(1,0),
@@ -503,8 +503,8 @@ class TestFileListingDiff(MooseDocsTestCase):
     def testMaterialize(self):
         _, res = self.execute(self.TEXT, renderer=base.MaterializeRenderer())
         self.assertHTMLTag(res, 'div', size=6, class_='moose-content')
-        self.assertHTMLTag(res(0), 'pre', size=1, class_='')
-        self.assertHTMLTag(res(0)(0), 'code', size=1, class_='language-diff-cpp diff-highlight', style=CODE_STYLE)
+        self.assertHTMLTag(res(0), 'pre', size=1, class_='', style=CODE_STYLE)
+        self.assertHTMLTag(res(0)(0), 'code', size=1, class_='language-diff-cpp diff-highlight', style='')
         self.assertHTMLString(res(0,0)(0), content=self.DIFF)
         self.assertHTMLTag(res(1), 'a', size=1, class_='moose-source-filename tooltipped modal-trigger')
         self.assertHTMLString(res(1,0),
@@ -659,9 +659,9 @@ class TestInputListing(MooseDocsTestCase):
             self.assertHTMLString(res(1,0), content='({})'.format(self.FILE[i]))
 
     def _assertHTML(self, res, style, file, content):
-        self.assertHTMLTag(res, 'pre', size=1, class_='')
+        self.assertHTMLTag(res, 'pre', size=1, class_='', style=style)
         lang = common.get_language(file)
-        self.assertHTMLTag(res(0), 'code', size=1, class_=f'language-{lang}', style=style)
+        self.assertHTMLTag(res(0), 'code', size=1, class_=f'language-{lang}', style='')
         self.assertHTMLString(res(0,0), content=content)
 
     def testLatex(self):

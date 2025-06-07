@@ -19,8 +19,6 @@
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
 #include "SolutionInvalidity.h"
-#include "HDGPrimalSolutionUpdateThread.h"
-#include "HDGKernel.h"
 #include "AuxiliarySystem.h"
 #include "Console.h"
 
@@ -111,7 +109,6 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
   nonlinearSolver()->nullspace = Moose::compute_nullspace;
   nonlinearSolver()->transpose_nullspace = Moose::compute_transpose_nullspace;
   nonlinearSolver()->nearnullspace = Moose::compute_nearnullspace;
-  nonlinearSolver()->precheck_object = this;
 
   PetscNonlinearSolver<Real> * petsc_solver =
       static_cast<PetscNonlinearSolver<Real> *>(_nl_implicit_sys.nonlinear_solver.get());
@@ -124,15 +121,6 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
 }
 
 NonlinearSystem::~NonlinearSystem() {}
-
-void
-NonlinearSystem::preInit()
-{
-  NonlinearSystemBase::preInit();
-
-  if (_hybridized_kernels.hasObjects())
-    addVector(HDGKernel::lm_increment_vector_name, true, GHOSTED);
-}
 
 void
 NonlinearSystem::potentiallySetupFiniteDifferencing()
@@ -407,34 +395,4 @@ NonlinearSystem::residualAndJacobianTogether()
   nonlinearSolver()->residual_object = nullptr;
   nonlinearSolver()->jacobian = nullptr;
   nonlinearSolver()->residual_and_jacobian_object = &_resid_and_jac_functor;
-}
-
-void
-NonlinearSystem::precheck(const NumericVector<Number> & /*precheck_soln*/,
-                          NumericVector<Number> & search_direction,
-                          bool & /*changed*/,
-                          NonlinearImplicitSystem & /*S*/)
-{
-  if (!_hybridized_kernels.hasActiveObjects())
-    return;
-
-  auto & ghosted_increment = getVector(HDGKernel::lm_increment_vector_name);
-  ghosted_increment.zero();
-  // The search direction coming from PETSc is the negative of the solution update
-  ghosted_increment -= search_direction;
-
-  PARALLEL_TRY
-  {
-    TIME_SECTION("HDG kernel primal solution update",
-                 3 /*, "Computing hybridized kernel primal solution update"*/);
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    HDGPrimalSolutionUpdateThread pre_thread(_fe_problem, _hybridized_kernels);
-    Threads::parallel_reduce(elem_range, pre_thread);
-  }
-  PARALLEL_CATCH;
-  // The primal variables live in the aux system
-  auto & aux = _fe_problem.getAuxiliarySystem();
-  aux.solution().close();
-  // scatter into ghosted current local solution
-  aux.update();
 }

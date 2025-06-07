@@ -43,6 +43,7 @@ template <typename T>
 class NumericVector;
 template <typename T>
 class SparseMatrix;
+class StaticCondensation;
 }
 
 // MOOSE Forward Declares
@@ -284,7 +285,7 @@ public:
    * Get the coordinate system type
    * @return A reference to the coordinate system type
    */
-  const Moose::CoordinateSystemType & coordSystem() { return _coord_type; }
+  const Moose::CoordinateSystemType & coordSystem() const { return _coord_type; }
 
   /**
    * Returns the reference to the current quadrature being used on a current face
@@ -397,7 +398,7 @@ public:
    * Returns the reference to the current element volume
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const Real & elemVolume() { return _current_elem_volume; }
+  const Real & elemVolume() const { return _current_elem_volume; }
 
   /**
    * Returns the current side
@@ -421,7 +422,7 @@ public:
    * Returns the reference to the volume of current side element
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const Real & sideElemVolume() { return _current_side_volume; }
+  const Real & sideElemVolume() const { return _current_side_volume; }
 
   /**
    * Return the neighbor element
@@ -586,6 +587,16 @@ public:
    * Set the cached quadrature rules to nullptr
    */
   void clearCachedQRules();
+
+  /**
+   * Set the static condensation object
+   */
+  void addStaticCondensation(libMesh::StaticCondensation & sc) { _sc = &sc; }
+
+  /**
+   * @returns Whether we have static condensation
+   */
+  bool hasStaticCondensation() const { return _sc; }
 
 private:
   /**
@@ -2861,6 +2872,9 @@ protected:
 
   /// The current reference points on the neighbor element
   std::vector<Point> _current_neighbor_ref_points;
+
+  /// A pointer to the static condensation class. Null if not present
+  libMesh::StaticCondensation * _sc;
 };
 
 template <typename OutputType>
@@ -3094,10 +3108,11 @@ Assembly::cacheJacobian(const Residuals & residuals,
 #ifndef NDEBUG
   auto compare_dofs_set = std::set<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
 
-  for (auto resid_it = residuals.begin() + 1; resid_it != residuals.end(); ++resid_it)
+  for (const auto i : make_range(decltype(residuals.size())(1), residuals.size()))
   {
-    auto current_dofs_set = std::set<dof_id_type>(resid_it->derivatives().nude_indices().begin(),
-                                                  resid_it->derivatives().nude_indices().end());
+    const auto & residual = residuals[i];
+    auto current_dofs_set = std::set<dof_id_type>(residual.derivatives().nude_indices().begin(),
+                                                  residual.derivatives().nude_indices().end());
     mooseAssert(compare_dofs_set == current_dofs_set,
                 "We're going to see whether the dof sets are the same. IIRC the degree of freedom "
                 "dependence (as indicated by the dof index set held by the ADReal) has to be the "
