@@ -30,7 +30,7 @@ MooseVariableFieldBase::componentName(const unsigned int comp) const
     mooseError("Component index must be less than the number of components of variable ",
                _var_name);
   if (isArray())
-    return this->_subproblem.arrayVariableComponent(_var_name, comp);
+    return this->arrayVariableComponent(comp);
   else
     return _var_name;
 }

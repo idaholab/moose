@@ -737,10 +737,34 @@ SystemBase::addVariable(const std::string & var_type,
     if (fe_field_type == TYPE_VECTOR)
       mooseError("Vector family type cannot be used in an array variable");
 
+    std::vector<std::string> array_var_component_names;
+    const bool has_array_names = parameters.isParamValid("array_var_component_names");
+    if (has_array_names)
+    {
+      array_var_component_names =
+          parameters.get<std::vector<std::string>>("array_var_component_names");
+      if (array_var_component_names.size() != components)
+        mooseError("For variable ",
+                   name,
+                   ", parameter 'array_var_component_names' has ",
+                   array_var_component_names.size(),
+                   " name(s), but there are ",
+                   components,
+                   " array variable component(s).");
+    }
+
     // Build up the variable names
     std::vector<std::string> var_names;
     for (unsigned int i = 0; i < components; i++)
-      var_names.push_back(SubProblem::arrayVariableComponent(name, i));
+    {
+      if (!has_array_names)
+        array_var_component_names.push_back(std::to_string(i));
+      var_names.push_back(name + "_" + array_var_component_names[i]);
+    }
+
+    // makes sure there is always a name, either the provided one or '1 2 3 ...'
+    parameters.set<std::vector<std::string>>("array_var_component_names") =
+        array_var_component_names;
 
     // The number returned by libMesh is the _last_ variable number... we want to hold onto the
     // _first_
@@ -754,7 +778,13 @@ SystemBase::addVariable(const std::string & var_type,
     parameters.set<bool>("array") = true;
   }
   else
+  {
+    if (parameters.isParamSetByUser("array_var_component_names"))
+      mooseError("Variable '",
+                 name,
+                 "' is a regular variable. 'array_var_component_names' should not be set.");
     var_num = system().add_variable(name, fe_type, &blocks);
+  }
 
   parameters.set<unsigned int>("_var_num") = var_num;
   parameters.set<SystemBase *>("_system_base") = this;
@@ -1185,7 +1215,7 @@ SystemBase::copyVars(ExodusII_IO & io)
         const auto & array_var = getFieldVariable<RealEigenVector>(0, vci._dest_name);
         for (MooseIndex(var.count()) i = 0; i < var.count(); ++i)
         {
-          const auto exodus_var = _subproblem.arrayVariableComponent(vci._source_name, i);
+          const auto exodus_var = var.arrayVariableComponent(i);
           const auto system_var = array_var.componentName(i);
           if (var.isNodal())
             io.copy_nodal_solution(system(), exodus_var, system_var, timestep);
