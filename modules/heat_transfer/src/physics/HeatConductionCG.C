@@ -90,7 +90,7 @@ HeatConductionCG::addFEKernels()
       paramError("heat_source_functor", "Unsupported functor type.");
     getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_source_functor", params);
   }
-  if (shouldCreateTimeDerivative(_temperature_name, _blocks, false))
+  if (shouldCreateTimeDerivative(_temperature_name, _blocks, /*error if already defined*/ false))
   {
     const std::string kernel_type =
         _use_ad ? "ADHeatConductionTimeDerivative" : "SpecificHeatConductionTimeDerivative";
@@ -231,7 +231,7 @@ HeatConductionCG::addFEBCs()
 void
 HeatConductionCG::addSolverVariables()
 {
-  if (!shouldCreateVariable(_temperature_name, _blocks, true))
+  if (!shouldCreateVariable(_temperature_name, _blocks, /*error if aux*/ true))
   {
     reportPotentiallyMissedParameters({"system_names"}, "MooseVariable");
     return;

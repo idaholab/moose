@@ -104,7 +104,7 @@ HeatConductionFV::addFVKernels()
                  "Unsupported functor type. Consider using 'heat_source_var'.");
     getProblem().addFVKernel(kernel_type, prefix() + _temperature_name + "_source_functor", params);
   }
-  if (shouldCreateTimeDerivative(_temperature_name, _blocks, false))
+  if (shouldCreateTimeDerivative(_temperature_name, _blocks, /*error if already defined*/ false))
   {
     const bool use_functors =
         isParamValid("density_functor") || isParamValid("specific_heat_functor");
@@ -238,7 +238,7 @@ HeatConductionFV::addFVBCs()
 void
 HeatConductionFV::addSolverVariables()
 {
-  if (!shouldCreateVariable(_temperature_name, _blocks, true))
+  if (!shouldCreateVariable(_temperature_name, _blocks, /*error if aux*/ true))
   {
     reportPotentiallyMissedParameters({"system_names", "temperature_scaling"},
                                       "MooseVariableFVReal");

@@ -48,7 +48,7 @@ WCNSFVScalarTransportPhysics::addSolverVariables()
   for (const auto name_i : index_range(_passive_scalar_names))
   {
     // Dont add if the user already defined the variable
-    if (!shouldCreateVariable(_passive_scalar_names[name_i], _blocks, true))
+    if (!shouldCreateVariable(_passive_scalar_names[name_i], _blocks, /*error if aux*/ true))
     {
       reportPotentiallyMissedParameters({"system_names", "passive_scalar_scaling"},
                                         "INSFVScalarFieldVariable");
@@ -74,7 +74,7 @@ WCNSFVScalarTransportPhysics::addScalarTimeKernels()
     assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = vname;
 
-    if (shouldCreateTimeDerivative(vname, _blocks, false))
+    if (shouldCreateTimeDerivative(vname, _blocks, /* error if already defined */ false))
       getProblem().addFVKernel(kernel_type, prefix() + "ins_" + vname + "_time", params);
   }
 }
