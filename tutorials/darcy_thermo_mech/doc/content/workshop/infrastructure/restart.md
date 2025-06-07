@@ -74,7 +74,8 @@ Checkpoints are automatically enabled by default and are output every 1 hour of 
 []
 ```
 
-Checkpoints can be output at every time step with the following shortcut syntax:
+To enable automatic checkpoints using the default options (every time step, and keep last two) in
+a simulation simply add the following flag to your input file:
 
 ```moose
 [Outputs]

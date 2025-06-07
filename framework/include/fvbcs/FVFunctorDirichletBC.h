@@ -11,6 +11,10 @@
 
 #include "FVDirichletBCBase.h"
 
+/**
+ * A template class for finite volume dirichlet boundary conditions.
+ * @tparam whether automatic differentiation is used or not
+ */
 template <bool is_ad>
 class FVFunctorDirichletBCTempl : public FVDirichletBCBase
 {
