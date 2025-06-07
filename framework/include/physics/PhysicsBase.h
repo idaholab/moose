@@ -168,12 +168,81 @@ protected:
    * @param blocks the vector blocks to check for whether it contains every block in the mesh
    */
   bool allMeshBlocks(const std::vector<SubdomainName> & blocks) const;
+  bool allMeshBlocks(const std::set<SubdomainName> & blocks) const;
+  // These APIs can deal with ANY_BLOCK_ID or ids with no names. They will be slower than the
+  // MooseMeshUtils' APIs, but are more convenient for setup purposes
+  /// Get the set of subdomain ids for the incoming vector of subdomain names
+  std::set<SubdomainID> getSubdomainIDs(const std::set<SubdomainName> & blocks) const;
+  /// Get the vector of subdomain names and ids for the incoming set of subdomain IDs
+  std::vector<std::string> getSubdomainNamesAndIDs(const std::set<SubdomainID> & blocks) const;
 
   /**
    * Process the given petsc option pairs into the system solver settings
    */
   void addPetscPairsToPetscOptions(
       const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options);
+
+  // Helpers to check on variable types
+  /// Whether the variable is a finite volume variable
+  bool isVariableFV(const VariableName & var_name) const;
+  /// Whether the variable is a scalar variable (global single scalar, not a field)
+  bool isVariableScalar(const VariableName & var_name) const;
+
+  // Routines to help with deciding when to create objects
+  /**
+   * Returns whether this Physics should create the variable. Will return false if the variable
+   * already exists and has the necessary block restriction.
+   * @param var_name name of the variable
+   * @param blocks block restriction to use. If empty, no block restriction
+   * @param error_if_aux error if the variable is auxiliary
+   */
+  bool shouldCreateVariable(const VariableName & var_name,
+                            const std::vector<SubdomainName> & blocks,
+                            const bool error_if_aux);
+
+  /**
+   * Returns whether this Physics should create the variable. Will return false if the initial
+   * condition already exists and has the necessary block restriction.
+   * @param var_name name of the variable
+   * @param blocks block restriction to use. If empty, no block restriction
+   * @param ic_is_default_ic whether this IC is from a default parameter, and therefore should be
+   * skipped when recovering/restarting
+   * @param error_if_already_defined two ICs cannot be defined on the same subdomain, so if this is
+   * set to true, any overlap between the subdomains of two ICs for the same variable will cause an
+   * error. If set to false, the existing ICs will take priority, and this routine will return
+   * false. Setting 'error_if_already_defined' to '!ic_is_default_ic' is a good idea if it is ok to
+   * overwrite the default IC value of the Physics.
+   */
+  bool shouldCreateIC(const VariableName & var_name,
+                      const std::vector<SubdomainName> & blocks,
+                      const bool ic_is_default_ic,
+                      const bool error_if_already_defined) const;
+
+  /**
+   * Returns whether this Physics should create the variable. Will return false if the time
+   * derivative kernel already exists and has the necessary block restriction.
+   * @param var_name name of the variable
+   * @param blocks block restriction to use. If empty, no block restriction
+   * @param error_if_already_defined two time derivatives can be defined on the same subdomain, but
+   * it is usually not correct. So if this is set to true, any overlap between the subdomains of two
+   * time derivatives for the same variable will cause an error. If set to false, the existing time
+   * derivative will be deemed as sufficient, and this routine will return false.
+   */
+  bool shouldCreateTimeDerivative(const VariableName & var_name,
+                                  const std::vector<SubdomainName> & blocks,
+                                  const bool error_if_already_defined) const;
+
+  // Other conceivable "shouldCreate" routines for things that are unique to a variable
+  // - shouldCreateTimeIntegrator
+  // - shouldCreatePredictor/Corrector
+
+  /**
+   * When this is called, we are knowingly not using the value of these parameters. This routine
+   * checks whether these parameters simply have defaults or were passed by the user
+   * @param param_names the parameters we are ignoring
+   */
+  void reportPotentiallyMissedParameters(const std::vector<std::string> & param_names,
+                                         const std::string & object_type) const;
 
   /// System names for the system(s) owning the solver variables
   std::vector<SolverSystemName> _system_names;

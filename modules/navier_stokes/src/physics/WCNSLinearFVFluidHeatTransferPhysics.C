@@ -62,10 +62,8 @@ WCNSLinearFVFluidHeatTransferPhysics::addSolverVariables()
   const auto variable_name = _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
 
   // Dont add if the user already defined the variable
-  if (variableExists(variable_name,
-                     /*error_if_aux=*/true))
-    checkBlockRestrictionIdentical(variable_name,
-                                   getProblem().getVariable(0, variable_name).blocks());
+  if (!shouldCreateVariable(variable_name, _blocks, /*error if aux*/ true))
+    reportPotentiallyMissedParameters({"system_names"}, "MooseLinearVariableFVReal");
   else if (_define_variables)
   {
     const auto var_type = "MooseLinearVariableFVReal";

@@ -125,7 +125,8 @@ WCNSFVFluidHeatTransferPhysicsBase::addFVKernels()
   if (!_has_energy_equation)
     return;
 
-  if (isTransient())
+  if (shouldCreateTimeDerivative(
+          _fluid_temperature_name, _blocks, /*error if already defined*/ false))
     addEnergyTimeKernels();
 
   addEnergyAdvectionKernels();
@@ -213,9 +214,6 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
         "initial_temperature",
         "T_fluid is defined externally of WCNSFVFluidHeatTransferPhysicsBase, so should the inital "
         "condition");
-  // do not set initial conditions if we load from file
-  if (getParam<bool>("initialize_variables_from_mesh_file"))
-    return;
   // do not set initial conditions if we are not defining variables
   if (!_define_variables)
     return;
@@ -223,15 +221,21 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
   InputParameters params = getFactory().getValidParams("FunctionIC");
   assignBlocks(params, _blocks);
 
-  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_temperature"))
+  if (shouldCreateIC(_fluid_temperature_name,
+                     _blocks,
+                     /*whether IC is a default*/ !isParamSetByUser("initial_temperature"),
+                     /*error if already an IC*/ isParamSetByUser("initial_temperature")))
   {
     params.set<VariableName>("variable") = _fluid_temperature_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
 
     getProblem().addInitialCondition("FunctionIC", _fluid_temperature_name + "_ic", params);
   }
-  if ((!_app.isRestarting() && parameters().isParamValid("initial_enthalpy")) ||
-      parameters().isParamSetByUser("initial_enthalpy"))
+  if (parameters().isParamValid("initial_enthalpy") &&
+      shouldCreateIC(_fluid_enthalpy_name,
+                     _blocks,
+                     /*whether IC is a default*/ false,
+                     /*error if already an IC*/ true))
   {
     params.set<VariableName>("variable") = _fluid_enthalpy_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_enthalpy");
