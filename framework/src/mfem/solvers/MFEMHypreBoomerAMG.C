@@ -58,7 +58,6 @@ MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
 void
 MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
-
   if (_lor)
   {
     auto lor_solver = new mfem::LORSolver<mfem::HypreBoomerAMG>(a, tdofs);

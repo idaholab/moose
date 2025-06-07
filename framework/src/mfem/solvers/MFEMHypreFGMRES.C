@@ -44,18 +44,7 @@ MFEMHypreFGMRES::constructSolver(const InputParameters &)
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetKDim(getParam<int>("kdim"));
   solver->SetPrintLevel(getParam<int>("print_level"));
-
-  if (isParamSetByUser("preconditioner"))
-  {
-    _preconditioner =
-        &const_cast<MFEMSolverBase &>(getUserObject<MFEMSolverBase>("preconditioner"));
-    auto hypre_preconditioner =
-        std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
-    if (!hypre_preconditioner)
-      mooseError("Hypre FGMRES preconditioner must be a Hypre Solver");
-    solver->SetPreconditioner(*hypre_preconditioner);
-  }
-
+  setPreconditioner(solver);
   _solver = solver;
 }
 
@@ -69,11 +58,7 @@ MFEMHypreFGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
   if (_preconditioner)
   {
     _preconditioner->updateSolver(a, tdofs);
-    auto hypre_preconditioner =
-        std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
-    auto solver = std::dynamic_pointer_cast<mfem::HypreFGMRES>(_solver);
-    solver->SetPreconditioner(*hypre_preconditioner);
-    _solver = solver;
+    setPreconditioner(std::dynamic_pointer_cast<mfem::HypreFGMRES>(_solver));
   }
   else if (_lor)
   {

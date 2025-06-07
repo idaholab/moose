@@ -27,4 +27,34 @@ MFEMSolverBase::MFEMSolverBase(const InputParameters & parameters)
 {
 }
 
+template <typename T>
+void
+MFEMSolverBase::setPreconditioner(const std::shared_ptr<T> & solver)
+{
+  static_assert(std::is_base_of_v<mfem::Solver, T>);
+
+  if (isParamSetByUser("preconditioner"))
+  {
+    if (!_preconditioner)
+      _preconditioner =
+          &const_cast<MFEMSolverBase &>(getUserObject<MFEMSolverBase>("preconditioner"));
+
+    if constexpr (std::is_base_of_v<mfem::HypreSolver, T>)
+      if (auto hypre = std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver()))
+        solver->SetPreconditioner(*hypre);
+      else
+        mooseError("hypre solver preconditioners must themselves be hypre solvers");
+    else if constexpr (std::is_base_of_v<mfem::IterativeSolver, T>)
+      solver->SetPreconditioner(*_preconditioner->getSolver());
+    else
+      mooseError("Cannot set preconditioner for the given MFEM solver");
+  }
+}
+
+template void MFEMSolverBase::setPreconditioner(const std::shared_ptr<mfem::CGSolver> &);
+template void MFEMSolverBase::setPreconditioner(const std::shared_ptr<mfem::GMRESSolver> &);
+template void MFEMSolverBase::setPreconditioner(const std::shared_ptr<mfem::HypreFGMRES> &);
+template void MFEMSolverBase::setPreconditioner(const std::shared_ptr<mfem::HypreGMRES> &);
+template void MFEMSolverBase::setPreconditioner(const std::shared_ptr<mfem::HyprePCG> &);
+
 #endif

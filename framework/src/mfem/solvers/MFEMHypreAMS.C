@@ -50,7 +50,6 @@ MFEMHypreAMS::constructSolver(const InputParameters &)
 void
 MFEMHypreAMS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
-
   if (_lor)
   {
     if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=

@@ -26,6 +26,11 @@ public:
 
   MFEMSolverBase(const InputParameters & parameters);
 
+  /// Retrieves the preconditioner userobject if present, sets the member pointer to
+  /// said object if still unset, and sets the solver to use this preconditioner.
+  template <typename T>
+  void setPreconditioner(const std::shared_ptr<T> & solver);
+
   /// Returns a shared pointer to the instance of the Solver derived-class.
   virtual std::shared_ptr<mfem::Solver> getSolver() { return _solver; }
 

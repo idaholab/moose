@@ -44,14 +44,7 @@ MFEMCGSolver::constructSolver(const InputParameters &)
   solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetPrintLevel(getParam<int>("print_level"));
-
-  if (isParamSetByUser("preconditioner"))
-  {
-    _preconditioner =
-        &const_cast<MFEMSolverBase &>(getUserObject<MFEMSolverBase>("preconditioner"));
-    solver->SetPreconditioner(*_preconditioner->getSolver());
-  }
-
+  setPreconditioner(solver);
   _solver = solver;
 }
 
@@ -65,9 +58,7 @@ MFEMCGSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
   if (_preconditioner)
   {
     _preconditioner->updateSolver(a, tdofs);
-    auto solver = std::dynamic_pointer_cast<mfem::CGSolver>(_solver);
-    solver->SetPreconditioner(*_preconditioner->getSolver());
-    _solver = solver;
+    setPreconditioner(std::dynamic_pointer_cast<mfem::CGSolver>(_solver));
   }
   else if (_lor)
   {
