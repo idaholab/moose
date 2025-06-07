@@ -20,7 +20,14 @@ template <typename UserObjectType>
 class SpatialUserObjectFunctor : public UserObjectType, public Moose::FunctorBase<Real>
 {
 public:
-  static InputParameters validParams() { return UserObjectType::validParams(); }
+  static InputParameters validParams()
+  {
+    auto params = UserObjectType::validParams();
+    // Spatial UOs are used in the transfers
+    ExecFlagEnum & exec_enum = params.template set<ExecFlagEnum>("execute_on", true);
+    exec_enum.addAvailableFlags(EXEC_TRANSFER);
+    return params;
+  }
 
   SpatialUserObjectFunctor(const InputParameters & params);
   virtual bool hasBlocks(SubdomainID sub) const override;

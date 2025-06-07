@@ -51,6 +51,19 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
                5,
                "Performing transfer between a scalar variable and a postprocessor");
 
+  // Execute the postprocessor if it was specified to execute on TRANSFER
+  switch (_current_direction)
+  {
+    case TO_MULTIAPP:
+    {
+      _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::PRE_AUX, _from_pp_name);
+      _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, _from_pp_name);
+      break;
+    }
+    case FROM_MULTIAPP:
+      errorIfObjectExecutesOnTransfer(_from_pp_name, /*object is in from_multiapp*/ true);
+  }
+
   // Perform action based on the transfer direction
   switch (_current_direction)
   {

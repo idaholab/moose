@@ -32,6 +32,7 @@
     direction = z
     num_layers = 10
     variable = u
+    execute_on = 'TRANSFER'
   []
 []
 
