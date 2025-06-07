@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#27493'
+  design = 'NEML2/index.md NEML2Action.md'
+  [linear_isotropic]
+    type = Exodiff
+    requirement = 'The system shall be capable of interfacing with the NEML2 library to perform constitutive update to model isotropic elasticity.'
+    input = 'elasticity.i'
+    exodiff = 'elasticity_out.e'
+    capabilities = 'neml2'
+    valgrind = heavy
+  []
+[]
