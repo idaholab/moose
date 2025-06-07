@@ -6,14 +6,15 @@
 {#- BINARY_NAME: Name of the application binary                                               -#}
 
 {#- Optional jinja arguments                                                                  -#}
+{#- EXTRA_MAMBA_PACKAGES: Extra mamba packages to install                                     -#}
+{#- EXTRA_BINARIES: Colon separated list of extra binaries that this application installs     -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the build                                           -#}
 {#- MOOSE_OPTIONS: Options to pass to the MOOSE configure                                     -#}
 {#- MOOSE_SKIP_DOCS: Set to anything to skip the docs build                                   -#}
 {#- MOOSE_DOCS_FLAGS: Doc options to pass during the make install                             -#}
 {#- METHOD: The method to build; defaults to "opt"                                            -#}
+{#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
 {#- TEST_DIRS: Directories to test in the %test section; defaults to just "tests"             -#}
-{#- EXTRA_MAMBA_PACKAGES: Extra mamba packages to install                                     -#}
-{#- EXTRA_BINARIES: Colon separated list of extra binaries that this application installs     -#}
 
 {#- Civet Specific jinja arguments                                                            -#}
 {#- CIVET_STEP_ALLOWED_TO_FAIL: BOOL, specific to Civet. Available in %post, %test section    -#}
@@ -36,8 +37,10 @@
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
+{%- if SKIP_FINGERPRINTS is not defined %}
 # MOOSE-NCRC key
 Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
+{%- endif %}
 
 %setup
     # Load jinja vars

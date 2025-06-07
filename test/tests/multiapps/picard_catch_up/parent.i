@@ -62,8 +62,8 @@
   num_steps = 2
   dt = 0.1
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu mumps'
   fixed_point_max_its = 30
   nl_abs_tol = 1e-14
 []
