@@ -110,7 +110,7 @@ WCNSLinearFVFlowPhysics::addSolverVariables()
   // Velocities
   for (const auto d : make_range(dimension()))
   {
-    if (!shouldCreateVariable(_velocity_names[d], _blocks, true))
+    if (!shouldCreateVariable(_velocity_names[d], _blocks, /*error if aux*/ true))
       reportPotentiallyMissedParameters({"system_names"}, "MooseLinearVariableFVReal");
     else if (_define_variables)
     {
@@ -129,7 +129,7 @@ WCNSLinearFVFlowPhysics::addSolverVariables()
   }
 
   // Pressure
-  if (!shouldCreateVariable(_pressure_name, _blocks, true))
+  if (!shouldCreateVariable(_pressure_name, _blocks, /*error if aux*/ true))
     reportPotentiallyMissedParameters({"system_names"}, "MooseLinearVariableFVReal");
   else if (_define_variables)
   {
@@ -216,7 +216,7 @@ WCNSLinearFVFlowPhysics::addMomentumTimeKernels()
   for (const auto d : make_range(dimension()))
   {
     params.set<LinearVariableName>("variable") = _velocity_names[d];
-    if (shouldCreateTimeDerivative(_velocity_names[d], _blocks, false))
+    if (shouldCreateTimeDerivative(_velocity_names[d], _blocks, /*error if already defined*/ false))
       getProblem().addLinearFVKernel(kernel_type, kernel_name + "_" + NS::directions[d], params);
   }
 }

@@ -168,7 +168,7 @@ WCNSFVFlowPhysics::addSolverVariables()
   // Velocities
   for (const auto d : make_range(dimension()))
   {
-    if (!shouldCreateVariable(_velocity_names[d], _blocks, true))
+    if (!shouldCreateVariable(_velocity_names[d], _blocks, /*error if aux*/ true))
       reportPotentiallyMissedParameters({"system_names",
                                          "momentum_scaling",
                                          "momentum_face_interpolation",
@@ -203,7 +203,7 @@ WCNSFVFlowPhysics::addSolverVariables()
       getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic";
   const auto pressure_type =
       using_bernouilli_pressure_var ? "BernoulliPressureVariable" : "INSFVPressureVariable";
-  if (!shouldCreateVariable(_pressure_name, _blocks, true))
+  if (!shouldCreateVariable(_pressure_name, _blocks, /*error if aux*/ true))
   {
     std::vector<std::string> potentially_missed = {"system_names",
                                                    "mass_scaling",
@@ -278,7 +278,7 @@ WCNSFVFlowPhysics::addFVKernels()
 
   // Mass equation: time derivative
   if (_compressibility == "weakly-compressible" &&
-      shouldCreateTimeDerivative(_pressure_name, _blocks, false))
+      shouldCreateTimeDerivative(_pressure_name, _blocks, /*error if already defined*/ false))
     addMassTimeKernels();
 
   // Mass equation: divergence of momentum
@@ -411,7 +411,7 @@ WCNSFVFlowPhysics::addMomentumTimeKernels()
     params.set<NonlinearVariableName>("variable") = _velocity_names[d];
     params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
-    if (shouldCreateTimeDerivative(_velocity_names[d], _blocks, false))
+    if (shouldCreateTimeDerivative(_velocity_names[d], _blocks, /*error if already defined*/ false))
       getProblem().addFVKernel(kernel_type, kernel_name + _velocity_names[d], params);
   }
 }

@@ -40,7 +40,7 @@ WCNSFVFluidHeatTransferPhysics::addSolverVariables()
     return;
 
   // Dont add if the user already defined the variable
-  if (!shouldCreateVariable(_fluid_temperature_name, _blocks, true))
+  if (!shouldCreateVariable(_fluid_temperature_name, _blocks, /*error if aux*/ true))
     reportPotentiallyMissedParameters({"system_names",
                                        "energy_scaling",
                                        "energy_face_interpolation",
