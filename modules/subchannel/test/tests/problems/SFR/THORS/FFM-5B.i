@@ -88,6 +88,7 @@ P_out = 2.0e5 # Pa
   implicit = true
   segregated = false
   interpolation_scheme = 'upwind'
+  verbose_subchannel = true
 []
 
 [ICs]

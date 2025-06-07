@@ -1,11 +1,12 @@
 # M. Avramova et al., 2012,
 # OECD/NRC Benchmark Based on NUPEC PWR
 # Sub-channel and Bundle Tests (PSBT). Volume III: Departure from Nucleate Boiling
-# Case:01-5237
-T_in = 502.35
+# Case:01-5125
+T_in = 562.35
+Power = 1.5e6
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 16.95 / 3600.}
-P_out = 14.72e6 # Pa
+mass_flux_in = ${fparse 1e+6 * 10.94 / 3600.}
+P_out = 14.74e6 # Pa
 [QuadSubChannelMesh]
   [sub_channel]
     type = SCMQuadSubChannelMeshGenerator
@@ -19,54 +20,32 @@ P_out = 14.72e6 # Pa
     spacer_z = '0.0 0.229 0.457 0.686 0.914 1.143 1.372 1.600 1.829 2.057 2.286 2.515 2.743 2.972 3.200 3.429'
     spacer_k = '0.7 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4'
   []
-
-  [fuel_pins]
-    type = SCMQuadPinMeshGenerator
-    input = sub_channel
-    nx = 6
-    ny = 6
-    n_cells = 20
-    pitch = 0.0126
-    heated_length = 3.658
-  []
 []
 
 [AuxVariables]
   [mdot]
-    block = sub_channel
   []
   [SumWij]
-    block = sub_channel
   []
   [P]
-    block = sub_channel
   []
   [DP]
-    block = sub_channel
   []
   [h]
-    block = sub_channel
   []
   [T]
-    block = sub_channel
-  []
-  [Tpin]
-    block = fuel_pins
   []
   [rho]
-    block = sub_channel
-  []
-  [mu]
-    block = sub_channel
   []
   [S]
-    block = sub_channel
   []
   [w_perim]
-    block = sub_channel
   []
   [q_prime]
-    block = fuel_pins
+  []
+  [mu]
+  []
+  [displacement]
   []
 []
 
@@ -80,7 +59,7 @@ P_out = 14.72e6 # Pa
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.08
+  beta = 0.04
   CT = 2.6
   compute_density = true
   compute_viscosity = true
@@ -91,6 +70,7 @@ P_out = 14.72e6 # Pa
   staggered_pressure = false
   monolithic_thermal = false
   verbose_subchannel = true
+
 []
 
 [ICs]
@@ -107,7 +87,7 @@ P_out = 14.72e6 # Pa
   [q_prime_IC]
     type = SCMQuadPowerIC
     variable = q_prime
-    power = 3.23e6 # W
+    power = ${Power} # W
     filename = "power_profile.txt"
   []
 
@@ -186,6 +166,7 @@ P_out = 14.72e6 # Pa
 
 [Outputs]
   exodus = true
+  csv = true
   [Temp_Out_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = T
@@ -214,6 +195,11 @@ P_out = 14.72e6 # Pa
     type = SubChannelDelta
     variable = P
     execute_on = "timestep_end"
+  []
+
+  [Total_power]
+    type = ElementIntegralVariablePostprocessor
+    variable = q_prime
   []
 []
 

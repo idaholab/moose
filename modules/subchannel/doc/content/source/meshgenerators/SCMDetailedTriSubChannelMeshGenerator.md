@@ -12,7 +12,7 @@ with the [NoSolveProblem.md] because it is not used to perform any calculations.
 
 ## Example Input File Syntax
 
-!listing /test/tests/problems/Lead-LBE-19pin/3D_LBE-19pin.i block=Mesh language=cpp
+!listing /test/tests/problems/Lead-LBE-19pin/3D_LBE-19pin.i block=Mesh language=moose
 
 !syntax parameters /Mesh/SCMDetailedTriSubChannelMeshGenerator
 

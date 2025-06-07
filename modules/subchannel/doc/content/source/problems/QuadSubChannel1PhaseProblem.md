@@ -13,7 +13,7 @@ Pin surface temperature is calculated at the end of the solve, if there is a Pin
 
 ## Example Input File Syntax
 
-!listing /test/tests/problems/psbt/psbt_implicit.i block=SubChannel language=cpp
+!listing /test/tests/problems/psbt/psbt_implicit.i block=SubChannel language=moose
 
 !syntax parameters /Problem/QuadSubChannel1PhaseProblem
 
