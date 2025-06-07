@@ -53,7 +53,7 @@ endif
 ifeq ($(METHOD),devel)
 NEML2_SUFFIX := _RelWithDebInfo
 else ifeq ($(METHOD),oprof)
-NEML2_SUFFIX := _RelWithDebInfo
+NEML2_SUFFIX := _Profiling
 else ifeq ($(METHOD),dbg)
 NEML2_SUFFIX := _Debug
 endif
