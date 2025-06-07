@@ -76,12 +76,7 @@ MultiAppPostprocessorTransfer::execute()
     }
     case FROM_MULTIAPP:
     case BETWEEN_MULTIAPP:
-    {
-      getFromMultiApp()->problemBase().computeUserObjectByName(
-          EXEC_TRANSFER, Moose::PRE_AUX, _from_pp_name);
-      getFromMultiApp()->problemBase().computeUserObjectByName(
-          EXEC_TRANSFER, Moose::POST_AUX, _from_pp_name);
-    }
+      errorIfObjectExecutesOnTransfer(_from_pp_name, /*object is in from_multiapp*/ true);
   }
 
   switch (_current_direction)

@@ -79,12 +79,7 @@ MultiAppGeneralFieldUserObjectTransfer::execute()
       break;
     }
     case FROM_MULTIAPP:
-    {
-      getFromMultiApp()->problemBase().computeUserObjectByName(
-          EXEC_TRANSFER, Moose::PRE_AUX, _user_object_name);
-      getFromMultiApp()->problemBase().computeUserObjectByName(
-          EXEC_TRANSFER, Moose::POST_AUX, _user_object_name);
-    }
+      errorIfObjectExecutesOnTransfer(_user_object_name, /*object is in from_multiapp*/ true);
   }
 
   // Perfom the actual transfer

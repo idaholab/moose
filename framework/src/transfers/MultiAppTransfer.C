@@ -656,3 +656,33 @@ MultiAppTransfer::getLocalSourceAppIndex(unsigned int i_from) const
              ? 0
              : _from_local2global_map[i_from] - _from_local2global_map[0];
 }
+
+void
+MultiAppTransfer::errorIfObjectExecutesOnTransfer(const std::string & object_name,
+                                                  const bool is_from_multiapp) const
+{
+  if (is_from_multiapp && !hasFromMultiApp())
+    return;
+  if (!is_from_multiapp && !hasToMultiApp())
+    return;
+  // Get the app and problem
+  const auto & app = is_from_multiapp ? getFromMultiApp() : getToMultiApp();
+  if (!app->hasApp())
+    return;
+  const auto & problem = app->appProblemBase(app->firstLocalApp());
+  // Use the warehouse to find the object
+  std::vector<SetupInterface *> objects_with_exec_on;
+  problem.theWarehouse()
+      .query()
+      .template condition<AttribName>(object_name)
+      .queryInto(objects_with_exec_on);
+  for (const auto obj_ptr : objects_with_exec_on)
+    if (obj_ptr->getExecuteOnEnum().contains(EXEC_TRANSFER))
+      mooseError("Object '" + object_name +
+                 "' should not be executed on EXEC_TRANSFER, because this transfer has "
+                 "indicated it does not support it." +
+                 (is_from_multiapp ? "\nExecuting this object on TIMESTEP_END should be sufficient."
+                                   : ""));
+  mooseAssert(objects_with_exec_on.size(),
+              "Should have found object " + object_name + " in the multiapp");
+}

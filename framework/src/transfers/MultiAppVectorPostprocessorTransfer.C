@@ -81,12 +81,7 @@ MultiAppVectorPostprocessorTransfer::executeFromMultiapp()
   const VectorPostprocessorValue & vpp =
       getFromMultiApp()->problemBase().getVectorPostprocessorValueByName(_master_vpp_name,
                                                                          _vector_name);
-
-  // Execute the postprocessor if it was specified to execute on TRANSFER
-  getFromMultiApp()->problemBase().computeUserObjectByName(
-      EXEC_TRANSFER, Moose::PRE_AUX, _master_vpp_name);
-  getFromMultiApp()->problemBase().computeUserObjectByName(
-      EXEC_TRANSFER, Moose::POST_AUX, _master_vpp_name);
+  errorIfObjectExecutesOnTransfer(_sub_pp_name, /*object is in from_multiapp*/ true);
 
   if (vpp.size() != getFromMultiApp()->numGlobalApps())
     mooseError("VectorPostprocessor ",

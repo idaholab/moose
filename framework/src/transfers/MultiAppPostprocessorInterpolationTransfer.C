@@ -81,25 +81,6 @@ MultiAppPostprocessorInterpolationTransfer::execute()
                5,
                "Transferring/interpolating postprocessors");
 
-  // Execute the postprocessor if it was specified to execute on TRANSFER
-  switch (_current_direction)
-  {
-    case TO_MULTIAPP:
-    {
-      _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::PRE_AUX, _postprocessor);
-      _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, _postprocessor);
-      break;
-    }
-    case FROM_MULTIAPP:
-    case BETWEEN_MULTIAPP:
-    {
-      getFromMultiApp()->problemBase().computeUserObjectByName(
-          EXEC_TRANSFER, Moose::PRE_AUX, _postprocessor);
-      getFromMultiApp()->problemBase().computeUserObjectByName(
-          EXEC_TRANSFER, Moose::POST_AUX, _postprocessor);
-    }
-  }
-
   switch (_current_direction)
   {
     case TO_MULTIAPP:
@@ -110,6 +91,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
+      errorIfObjectExecutesOnTransfer(_postprocessor, /*object is in from_multiapp*/ true);
       std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> idi;
 
       switch (_interp_type)
