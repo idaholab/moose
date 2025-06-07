@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#30461'
+  design = 'NEML2/index.md NEML2Action.md'
+  [heat_conduction]
+    requirement = 'The system shall be capable of interfacing with the NEML2 library to solve the heat equation where the temperature-dependent thermal conductivity is defined by a neural network.'
+    type = Exodiff
+    input = 'heat_conduction.i'
+    exodiff = 'heat_conduction_out.e'
+    capabilities = 'neml2'
+    libtorch_devices = 'cpu cuda'
+  []
+[]

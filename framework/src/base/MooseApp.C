@@ -418,6 +418,13 @@ MooseApp::validParams()
       false,
       "Set true to enable data-driven mesh generation, which is an experimental feature");
 
+#ifdef NEML2_ENABLED
+  params.addCommandLineParam<bool>(
+      "parse_neml2_only",
+      "--parse-neml2-only",
+      "Executes the [NEML2] block to parse the input file and terminate.");
+#endif
+
   MooseApp::addAppParam(params);
 
   return params;
@@ -773,6 +780,16 @@ MooseApp::registerCapabilities()
                       "Install mfem using the scripts/update_and_rebuild_mfem.sh script after "
                       "first running scripts/update_and_rebuild_conduit.sh. Finally, configure "
                       "moose with ./configure --with-mfem");
+#endif
+  }
+
+  {
+    const auto doc = "New Engineering Material model Library, version 2";
+#ifdef NEML2_ENABLED
+    haveCapability("neml2", doc);
+#else
+    missingCapability(
+        "neml2", doc, "Install neml2 using the scripts/update_and_rebuild_neml2.sh script.");
 #endif
   }
 
@@ -1454,7 +1471,27 @@ MooseApp::setupOptions()
                    "or '!unknown | unknown<1.2.3'");
     }
 
-    if (isParamSetByUser("mesh_only"))
+    // Lambda to check for mutually exclusive parameters
+    auto isExclusiveParamSetByUser =
+        [this](const std::vector<std::string> & group, const std::string & param)
+    {
+      auto is_set = isParamSetByUser(param);
+      if (is_set)
+        for (const auto & p : group)
+          if (p != param && isParamSetByUser(p))
+            mooseError("Parameters '" + p + "' and '" + param +
+                       "' are mutually exclusive. Please choose only one of them.");
+      return is_set;
+    };
+
+    // The following parameters set the final task and so are mutually exclusive.
+    const std::vector<std::string> final_task_params = {"mesh_only",
+                                                        "split_mesh",
+#ifdef NEML2_ENABLED
+                                                        "parse_neml2_only"
+#endif
+    };
+    if (isExclusiveParamSetByUser(final_task_params, "mesh_only"))
     {
       // If we are looking to just check the input, there is no need to
       // call MeshOnlyAction and generate a mesh
@@ -1468,7 +1505,7 @@ MooseApp::setupOptions()
         _action_warehouse.setFinalTask("mesh_only");
       }
     }
-    else if (isParamSetByUser("split_mesh"))
+    else if (isExclusiveParamSetByUser(final_task_params, "split_mesh"))
     {
       _split_mesh = true;
       _syntax.registerTaskName("split_mesh", true);
@@ -1476,6 +1513,14 @@ MooseApp::setupOptions()
       _syntax.addDependency("determine_system_type", "split_mesh");
       _action_warehouse.setFinalTask("split_mesh");
     }
+#ifdef NEML2_ENABLED
+    else if (isExclusiveParamSetByUser(final_task_params, "parse_neml2_only"))
+    {
+      _syntax.registerTaskName("parse_neml2");
+      _syntax.addDependency("determine_system_type", "parse_neml2");
+      _action_warehouse.setFinalTask("parse_neml2");
+    }
+#endif
     _action_warehouse.build();
 
     // Setup the AppFileBase for use by the Outputs or other systems that need output file info
@@ -1604,6 +1649,13 @@ MooseApp::runInputFile()
     _early_exit_param = "--split-mesh";
     _ready_to_exit = true;
   }
+#ifdef NEML2_ENABLED
+  else if (isParamSetByUser("parse_neml2_only"))
+  {
+    _early_exit_param = "--parse-neml2-only";
+    _ready_to_exit = true;
+  }
+#endif
   else if (getParam<bool>("list_constructed_objects"))
   {
     // TODO: ask multiapps for their constructed objects

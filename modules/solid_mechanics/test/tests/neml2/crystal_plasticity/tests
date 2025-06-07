@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#27493'
+  design = 'NEML2/index.md NEML2Action.md'
+  [approx_kinematics]
+    type = Exodiff
+    requirement = 'The system shall be capable of interfacing with the NEML2 library to perform constitutive update to model crystal plasticity with approximate kinematics.'
+    input = 'approx_kinematics.i'
+    exodiff = 'approx_kinematics_out.e'
+    capabilities = 'neml2'
+    valgrind = heavy
+  []
+[]

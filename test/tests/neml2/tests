@@ -1,0 +1,83 @@
+[Tests]
+  # The original issue is idaholab/blackbear#333
+  issues = '#26450 #26920'
+  design = 'NEML2/index.md NEML2Action.md'
+  [neml2_error]
+    requirement = 'The framework shall be capable of capturing errors occurring during the evaluation of a NEML2 model.'
+    type = RunException
+    input = 'error.i'
+    expect_err = 'To debug NEML2 related issues'
+    collections = 'SYSTEM'
+    capabilities = 'neml2'
+    valgrind = none
+  []
+  [no_neml2]
+    requirement = 'The framework shall throw an error upon instantiation of NEML2 interface objects if NEML2 is not available.'
+    type = RunException
+    input = 'custom_model.i'
+    expect_err = 'The `NEML2` library is required but not enabled'
+    collections = 'SYSTEM'
+    capabilities = '!neml2'
+  []
+  [model_parameter]
+    requirement = 'The framework shall be capable of using MOOSE data as NEML2 model parameters.'
+    type = Exodiff
+    input = 'parameter.i'
+    exodiff = 'parameter_out.e'
+    capabilities = 'neml2'
+    valgrind = heavy
+  []
+  [custom_model]
+    requirement = 'The framework shall be capable of running custom NEML2 model implemented in MOOSE (optionally with automatic differentiation).'
+    type = Exodiff
+    input = 'custom_model.i'
+    exodiff = 'custom_model_out.e'
+    capabilities = 'neml2'
+    valgrind = heavy
+  []
+  [block_restriction]
+    issues = '#27493'
+    collections = 'SYSTEM'
+    requirement = 'The framework shall be capable of defining, for multiple subdomains, '
+    [same_model]
+      detail = 'the same NEML2 model running on the same device.'
+      type = Exodiff
+      input = 'blocks_same_model.i'
+      exodiff = 'blocks_same_model_out.e'
+      capabilities = 'neml2'
+      valgrind = heavy
+    []
+    [different_model]
+      detail = 'different NEML2 models running on the same device.'
+      type = Exodiff
+      input = 'blocks_different_model.i'
+      exodiff = 'blocks_different_model_out.e'
+      capabilities = 'neml2'
+      valgrind = heavy
+    []
+  []
+  [scheduler]
+    issues = '#27493'
+    requirement = 'The framework shall be capable of evaluating NEML2 models in heterogeneous computing environments'
+    [simple_scheduler]
+      detail = 'with NEML2 SimpleScheduler which dispatches to a single device'
+      type = Exodiff
+      input = 'simple_scheduler.i'
+      exodiff = 'simple_scheduler_out.e'
+      capabilities = 'neml2'
+      recover = false
+      valgrind = heavy
+    []
+    [simple_scheduler_async]
+      detail = 'with NEML2 SimpleScheduler which asynchronously dispatches to a single device'
+      prereq = 'scheduler/simple_scheduler'
+      type = Exodiff
+      input = 'simple_scheduler_async.i'
+      cli_args = 'Outputs/file_base=simple_scheduler_out'
+      exodiff = 'simple_scheduler_out.e'
+      capabilities = 'neml2'
+      recover = false
+      valgrind = heavy
+    []
+  []
+[]
