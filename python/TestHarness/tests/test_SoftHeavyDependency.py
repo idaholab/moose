@@ -14,7 +14,7 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Heavy test is skipped while non-heavy tests are not
         """
-        output = self.runTests('--no-color', '-i', 'heavy_on_not_heavy')
+        output = self.runTests('--no-color', '-i', 'heavy_on_not_heavy').output
         # The following should be skipped
         self.assertRegex(output, 'test_harness\.heavy_a .*? \[HEAVY\] SKIP')
         self.assertRegex(output, 'test_harness\.heavy_b .*? \[HEAVY\] SKIP')
@@ -49,7 +49,7 @@ class TestHarnessTester(TestHarnessTestCase):
 
         Non-heavy tests with non-heavy prereqs do not run/are not displayed.
         """
-        output = self.runTests('--no-color', '-i', 'heavy_on_not_heavy', '--heavy')
+        output = self.runTests('--no-color', '-i', 'heavy_on_not_heavy', '--heavy').output
         # The following should run, and mention the additional [implicit heavy] caveat.
         self.assertRegex(output, 'test_harness\.not_heavy .*? \[IMPLICIT HEAVY\] OK')
         self.assertRegex(output, 'test_harness\.not_heavy_a .*? \[IMPLICIT HEAVY\] OK')

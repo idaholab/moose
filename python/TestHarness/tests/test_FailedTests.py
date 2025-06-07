@@ -7,7 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import subprocess
 import tempfile
 from TestHarnessTestCase import TestHarnessTestCase
 
@@ -21,21 +20,13 @@ class TestHarnessTester(TestHarnessTestCase):
         with tempfile.TemporaryDirectory() as output_dir:
             args = ['--no-color', '--results-file', 'failed-unittest', '-o', output_dir]
             kwargs = {'tmp_output': False}
-            with self.assertRaises(subprocess.CalledProcessError) as cm:
-                self.runTests(*args, '-i', 'always_bad', **kwargs)
 
-            e = cm.exception
+            out = self.runTests(*args, '-i', 'always_bad', exit_code=128, **kwargs).output
+            self.assertRegex(out, r'tests/test_harness.always_ok.*?OK')
+            self.assertRegex(out, r'tests/test_harness.always_bad.*?FAILED \(CODE 1\)')
 
-            self.assertRegex(e.output, r'tests/test_harness.always_ok.*?OK')
-            self.assertRegex(e.output, r'tests/test_harness.always_bad.*?FAILED \(CODE 1\)')
-
-            with self.assertRaises(subprocess.CalledProcessError) as cm:
-                self.runTests(*args, '--failed-tests', **kwargs)
-
-            e = cm.exception
-
+            out = self.runTests(*args, '--failed-tests', exit_code=128, **kwargs).output
             # Verify the passing test is not present
-            self.assertNotRegex(e.output, r'tests/test_harness.always_ok.*?OK')
-
+            self.assertNotRegex(out, r'tests/test_harness.always_ok.*?OK')
             # Verify the caveat represents a previous result
-            self.assertRegex(e.output, r'tests/test_harness.always_bad.*?\[PREVIOUS RESULTS: CODE 1\] FAILED \(CODE 1\)')
+            self.assertRegex(out, r'tests/test_harness.always_bad.*?\[PREVIOUS RESULTS: CODE 1\] FAILED \(CODE 1\)')

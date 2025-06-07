@@ -40,7 +40,7 @@ class TestHarnessTester(TestHarnessTestCase):
         # regardless if that check(s) would otherwise cause this
         # test to be skipped.
         output = self.runTests('-c', '-i', 'extra_info', '--ignore', '-e',
-                               no_capabilities=False)
+                               no_capabilities=False).output
 
         # Parse the output, and find the caveat string
         raw_caveat_string = re.findall(r'\[(.*)\]', output)
