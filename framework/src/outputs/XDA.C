@@ -25,7 +25,7 @@ InputParameters
 XDA::validParams()
 {
   // Get the base class parameters
-  InputParameters params = OversampleOutput::validParams();
+  InputParameters params = SampledOutput::validParams();
 
   // Add description for the XDA class
   params.addClassDescription("Object for outputting data in the XDA/XDR format.");
@@ -39,7 +39,7 @@ XDA::validParams()
 }
 
 XDA::XDA(const InputParameters & parameters)
-  : OversampleOutput(parameters), _binary(getParam<bool>("_binary"))
+  : SampledOutput(parameters), _binary(getParam<bool>("_binary"))
 {
 }
 
