@@ -36,11 +36,12 @@
     issues = '#12234 #12350'
   []
   [signaling_nan_opt]
-    type = 'RunApp'
+    type = 'RunException'
     input = 'nan_interface.i'
     allow_test_objects = True
     capabilities = 'method=opt'
     threading = '!pthreads'
+    expect_err = 'Aborting as solve did not converge'
 
     requirement = 'The system should not report an error when a NaN is produced by a computation in OPT mode, by default'
     issues = '#12234 #12350'
@@ -55,6 +56,9 @@
     type = 'RunApp'
     input = 'nan_interface.i'
     cli_args = 'FluidProperties/fp/emit_on_nan=warning'
+    # A NaN is produced by the fluid property in the NaNInterfaceTestKernel, preventing the convergence
+    # Nonlinear solve did not converge due to DIVERGED_FNORM_NAN iterations 0
+    should_crash = true
     allow_test_objects = True
     allow_warnings = true
     expect_out = 'fp: A NaN was produced.'

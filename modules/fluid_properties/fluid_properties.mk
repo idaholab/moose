@@ -27,7 +27,7 @@ GEN_REVISION_save := ${GEN_REVISION}
 
 # AIR
 ifneq ($(AIR_FP_CONTENT),)
-ifneq ($(BUILDING_FP_APP), yes)
+ifneq ($(BUILDING_FP_APP), air)
   AIR_DIR            := $(AIR_FP_DIR)
 	APPLICATION_DIR    := $(AIR_FP_DIR)
 	APPLICATION_NAME   := air
@@ -41,7 +41,7 @@ endif
 
 # CARBON_DIOXIDE
 ifneq ($(CARBON_DIOXIDE_FP_CONTENT),)
-ifneq ($(BUILDING_FP_APP), yes)
+ifneq ($(BUILDING_FP_APP), carbon_dioxide)
   CARBON_DIOXIDE_DIR := $(CARBON_DIOXIDE_FP_DIR)
 	APPLICATION_DIR    := $(CARBON_DIOXIDE_FP_DIR)
 	APPLICATION_NAME   := carbon_dioxide
@@ -55,7 +55,7 @@ endif
 
 # NITROGEN
 ifneq ($(NITROGEN_FP_CONTENT),)
-ifneq ($(BUILDING_FP_APP), yes)
+ifneq ($(BUILDING_FP_APP), nitrogen)
 	NITROGEN_DIR       := $(NITROGEN_FP_DIR)
 	APPLICATION_DIR    := $(NITROGEN_FP_DIR)
 	APPLICATION_NAME   := nitrogen
@@ -69,7 +69,7 @@ endif
 
 # HELIUM
 ifneq ($(HELIUM_FP_CONTENT),)
-ifneq ($(BUILDING_FP_APP), yes)
+ifneq ($(BUILDING_FP_APP), helium)
 	HELIUM_DIR         := $(HELIUM_FP_DIR)
 	APPLICATION_DIR    := $(HELIUM_FP_DIR)
 	APPLICATION_NAME   := helium
@@ -83,7 +83,7 @@ endif
 
 # POTASSIUM
 ifneq ($(POTASSIUM_FP_CONTENT),)
-ifneq ($(BUILDING_FP_APP), yes)
+ifneq ($(BUILDING_FP_APP), potassium)
 	POTASSIUM_DIR      := $(POTASSIUM_FP_DIR)
 	APPLICATION_DIR    := $(POTASSIUM_FP_DIR)
 	APPLICATION_NAME   := potassium
@@ -97,7 +97,7 @@ endif
 
 # SODIUM
 ifneq ($(SODIUM_FP_CONTENT),)
-ifneq ($(BUILDING_FP_APP), yes)
+ifneq ($(BUILDING_FP_APP), sodium)
 	SODIUM_DIR         := $(SODIUM_FP_DIR)
 	APPLICATION_DIR    := $(SODIUM_FP_DIR)
 	APPLICATION_NAME   := sodium

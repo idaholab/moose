@@ -51,6 +51,7 @@
     orientation = '0 0 1'
     length = 1
     n_elems = 50
+    scaling_factor_1phase = '1 1 1e-1'
 
     A   = 9.6858407346e-01
     D_h  = 6.1661977237e+00

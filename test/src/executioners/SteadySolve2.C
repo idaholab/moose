@@ -52,12 +52,7 @@ SteadySolve2::SteadySolve2(const InputParameters & parameters)
 void
 SteadySolve2::init()
 {
-  if (_app.isRecovering())
-  {
-    _console << "\nCannot recover steady solves!\nExiting...\n" << std::endl;
-    return;
-  }
-
+  _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _problem.initialSetup();
 }
 
@@ -65,7 +60,11 @@ void
 SteadySolve2::execute()
 {
   if (_app.isRecovering())
+  {
+    _console << "\nCannot recover steady solves!\nExiting...\n" << std::endl;
+    _last_solve_converged = true;
     return;
+  }
 
   _time_step = 0;
   _problem.outputStep(EXEC_INITIAL);
@@ -112,12 +111,13 @@ SteadySolve2::execute()
       return _problem.converged(sys_num);
     };
 
-    bool converged = true;
+    _last_solve_converged = true;
 
     for (unsigned int i = 0; i < _number_of_iterations; i++)
     {
-      converged = converged && solve(_first_nl_sys) && solve(_second_nl_sys);
-      if (!converged)
+      _last_solve_converged =
+          _last_solve_converged && solve(_first_nl_sys) && solve(_second_nl_sys);
+      if (!_last_solve_converged)
       {
         _console << "Aborting as solve did not converge" << std::endl;
         break;
