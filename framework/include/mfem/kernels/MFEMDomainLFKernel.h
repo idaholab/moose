@@ -4,8 +4,10 @@
 #include "MFEMKernel.h"
 
 /*
-(f, u')
-*/
+ * \f[
+ * (f, u')
+ * \f]
+ */
 class MFEMDomainLFKernel : public MFEMKernel
 {
 public:

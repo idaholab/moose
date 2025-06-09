@@ -9,8 +9,10 @@ InputParameters
 MFEMDomainSubMesh::validParams()
 {
   InputParameters params = MFEMSubMesh::validParams();
+  params.addClassDescription("Class to construct an MFEMSubMesh formed from the subspace of the "
+                             "parent mesh restricted to the set of user-specified subdomains.");
   params.addRequiredParam<std::vector<SubdomainName>>(
-      "block", "The list of blocks (ids) comprising this SubMesh");
+      "block", "The list of subdomain blocks ids comprising this SubMesh");
   return params;
 }
 

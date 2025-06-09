@@ -4,8 +4,9 @@
 #include "MFEMSubMesh.h"
 
 /**
- * Constructs and stores an mfem::ParSubMesh object. Access using the
- * getSubMesh() accessor.
+ * Constructs and stores an mfem::ParSubMesh object as
+ * as a restriction of the parent mesh to the set of user-specified boundaries.
+ * Access using the getSubMesh() accessor.
  */
 class MFEMBoundarySubMesh : public MFEMSubMesh
 {

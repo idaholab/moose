@@ -10,8 +10,9 @@ MFEMSubMeshTransfer::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("MFEMSubMeshTransfer");
-  params.addClassDescription("Class for tranferring data for corresponding MFEM variables to the "
-                             "problem (`mfem::ParGridFunction`s).");
+  params.addClassDescription("Class to transfer MFEM variable data to or from a restricted copy of "
+                             "the variable defined on an "
+                             " a subspace of an MFEMMesh, represented as an MFEMSubMesh.");
   params.addRequiredParam<VariableName>("from_variable",
                                         "MFEM variable to transfer data from. Can be defined on "
                                         "either the parent mesh or a submesh of it.");

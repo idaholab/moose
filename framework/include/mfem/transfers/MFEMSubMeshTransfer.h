@@ -8,7 +8,8 @@
 #include "libmesh/restore_warnings.h"
 
 /**
- * Constructs and stores an mfem::ParGridFunction object.
+ * Class to transfer MFEM variable data to or from a restricted copy of the variable defined on an a
+ * subspace of an MFEMMesh, represented as an MFEMSubMesh.
  */
 class MFEMSubMeshTransfer : public MFEMGeneralUserObject
 {
@@ -21,7 +22,7 @@ public:
   virtual void execute() override;
 
 private:
-  // Name of source MFEMVariable to take the curl of.
+  // Name of source MFEMVariable to transfer DoF data from.
   const VariableName & _source_var_name;
   /// Reference to source gridfunction.
   const mfem::ParGridFunction & _source_var;
