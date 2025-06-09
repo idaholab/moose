@@ -15,14 +15,14 @@
 
 #include "Distribution.h"
 
-#include "CovarianceFunctionBase.h"
-#include "CovarianceInterface.h"
+#include "CovarianceFunctionBaseTorched.h"
+#include "CovarianceInterfaceTorched.h"
 
 #include "GaussianProcessTorched.h"
 
 #include "LibtorchUtils.h"
 
-class GaussianProcessTrainerTorched : public SurrogateTrainer, public CovarianceInterface
+class GaussianProcessTrainerTorched : public SurrogateTrainer, public CovarianceInterfaceTorched
 {
 public:
   static InputParameters validParams();
