@@ -68,6 +68,8 @@ private:
   /// Stores the constructed fespace.
   mutable std::shared_ptr<mfem::ParFiniteElementSpace> _fespace{nullptr};
 
+  /// Mesh FESpace is defined with respect to. May differ from main problem mesh if
+  /// FESpace is defined on an MFEMSubMesh.
   mfem::ParMesh & _pmesh;
 };
 
