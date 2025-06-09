@@ -419,7 +419,7 @@ addActionTypes(Syntax & syntax)
 
   // add SubMeshes
   registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);
-  addTaskDependency("add_mfem_submeshes", "init_mesh");
+  addTaskDependency("add_mfem_submeshes", "create_problem_complete");
 
   // add SubMesh transfers
   appendMooseObjectTask("add_transfer", MFEMSubMeshTransfer);
