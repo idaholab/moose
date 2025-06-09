@@ -10,7 +10,7 @@
 #include "GaussianProcessSurrogateTorched.h"
 #include "Sampler.h"
 
-#include "CovarianceFunctionBase.h"
+#include "CovarianceFunctionBaseTorched.h"
 
 registerMooseObject("StochasticToolsApp", GaussianProcessSurrogateTorched);
 
@@ -24,7 +24,7 @@ GaussianProcessSurrogateTorched::validParams()
 
 GaussianProcessSurrogateTorched::GaussianProcessSurrogateTorched(const InputParameters & parameters)
   : SurrogateModel(parameters),
-    CovarianceInterface(parameters),
+    CovarianceInterfaceTorched(parameters),
     _gp(declareModelData<StochasticToolsTorched::GaussianProcessTorched>("_gp")),
     _training_params(getModelData<RealEigenMatrix>("_training_params"))
 {

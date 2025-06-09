@@ -46,7 +46,7 @@ GaussianProcessTorched::GPOptimizerOptions::GPOptimizerOptions(const bool show_e
 GaussianProcessTorched::GaussianProcessTorched() {}
 
 void
-GaussianProcessTorched::initialize(CovarianceFunctionBase * covariance_function,
+GaussianProcessTorched::initialize(CovarianceFunctionBaseTorched * covariance_function,
                                    const std::vector<std::string> & params_to_tune,
                                    const std::vector<Real> & min,
                                    const std::vector<Real> & max)
@@ -56,7 +56,7 @@ GaussianProcessTorched::initialize(CovarianceFunctionBase * covariance_function,
 }
 
 void
-GaussianProcessTorched::linkCovarianceFunction(CovarianceFunctionBase * covariance_function)
+GaussianProcessTorched::linkCovarianceFunction(CovarianceFunctionBaseTorched * covariance_function)
 {
   _covariance_function = covariance_function;
   _covar_type = _covariance_function->type();
@@ -257,10 +257,10 @@ GaussianProcessTorched::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outp
   RealEigenMatrix flattened_data = outputs.reshaped(outputs.rows() * outputs.cols(), 1);
 
   auto options = torch::TensorOptions().dtype(at::kDouble);
-  unsigned int num_samples = flattened_data.size();
-  unsigned int num_inputs = 1;
-  torch::Tensor flattened_tensor =
-      torch::from_blob(flattened_data.data(), {num_samples, num_inputs}, options).to(at::kDouble);
+  torch::Tensor flattened_tensor = torch::from_blob(flattened_data.data(),
+                                                    {flattened_data.rows(), flattened_data.cols()},
+                                                    options)
+                                       .to(at::kDouble);
 
   setupStoredMatrices(flattened_tensor);
 
