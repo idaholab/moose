@@ -15,6 +15,7 @@
 
 #include "ADReal.h"
 #include "NavierStokesMethods.h"
+#include "HeatTransferUtils.h"
 
 using namespace libMesh;
 
@@ -116,7 +117,7 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5>
 auto
 Reynolds(const T1 & volume_fraction, const T2 & rho, const T3 & vel, const T4 & D_h, const T5 & mu)
 {
-  return volume_fraction * rho * std::fabs(vel) * D_h / mu;
+  return volume_fraction * HeatTransferUtils::reynolds(rho, vel, D_h, mu);
 }
 
 /**
@@ -131,7 +132,7 @@ template <typename T1, typename T2, typename T3>
 auto
 Prandtl(const T1 & cp, const T2 & mu, const T3 & k)
 {
-  return cp * mu / k;
+  return HeatTransferUtils::prandtl(cp, mu, k);
 }
 
 /**
@@ -156,7 +157,8 @@ Peclet(const T1 & volume_fraction,
        const T5 & D_h,
        const T6 & k)
 {
-  return volume_fraction * cp * D_h * rho * std::fabs(vel) / k;
+  const auto diffusivity = HeatTransferUtils::thermalDiffusivity(k, rho, cp);
+  return volume_fraction * HeatTransferUtils::peclet(vel, D_h, diffusivity);
 }
 
 /**
