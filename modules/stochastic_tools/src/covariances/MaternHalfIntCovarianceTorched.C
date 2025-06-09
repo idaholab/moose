@@ -41,12 +41,12 @@ MaternHalfIntCovarianceTorched::MaternHalfIntCovarianceTorched(const InputParame
 }
 
 void
-MaternHalfIntCovarianceTorched::computeCovarianceMatrix(RealEigenMatrix & K,
-                                                        const RealEigenMatrix & x,
-                                                        const RealEigenMatrix & xp,
+MaternHalfIntCovarianceTorched::computeCovarianceMatrix(torch::Tensor & K,
+                                                        const torch::Tensor & x,
+                                                        const torch::Tensor & xp,
                                                         const bool is_self_covariance) const
 {
-  if ((unsigned)x.cols() != _length_factor.size())
+  if ((unsigned)x.sizes()[1] != _length_factor.size())
     mooseError("length_factor size does not match dimension of trainer input.");
 
   maternHalfIntFunction(
@@ -54,20 +54,24 @@ MaternHalfIntCovarianceTorched::computeCovarianceMatrix(RealEigenMatrix & K,
 }
 
 void
-MaternHalfIntCovarianceTorched::maternHalfIntFunction(RealEigenMatrix & K,
-                                                      const RealEigenMatrix & x,
-                                                      const RealEigenMatrix & xp,
+MaternHalfIntCovarianceTorched::maternHalfIntFunction(torch::Tensor & K,
+                                                      const torch::Tensor & x,
+                                                      const torch::Tensor & xp,
                                                       const std::vector<Real> & length_factor,
                                                       const Real sigma_f_squared,
                                                       const Real sigma_n_squared,
                                                       const unsigned int p,
                                                       const bool is_self_covariance)
 {
-  unsigned int num_samples_x = x.rows();
-  unsigned int num_samples_xp = xp.rows();
-  unsigned int num_params_x = x.cols();
+  auto K_accessor = K.accessor<Real, 2>();
+  auto x_accessor = x.accessor<Real, 2>();
+  auto xp_accessor = xp.accessor<Real, 2>();
 
-  mooseAssert(num_params_x == xp.cols(),
+  unsigned int num_samples_x = x.sizes()[0];
+  unsigned int num_samples_xp = xp.sizes()[0];
+  unsigned int num_params_x = x.sizes()[1];
+
+  mooseAssert(num_params_x == xp.sizes()[1],
               "Number of parameters do not match in covariance kernel calculation");
 
   // This factor is used over and over, don't calculate each time
@@ -80,7 +84,7 @@ MaternHalfIntCovarianceTorched::maternHalfIntFunction(RealEigenMatrix & K,
       // Compute distance per parameter, scaled by length factor
       Real r_scaled = 0;
       for (unsigned int kk = 0; kk < num_params_x; ++kk)
-        r_scaled += pow((x(ii, kk) - xp(jj, kk)) / length_factor[kk], 2);
+        r_scaled += pow((x_accessor[ii][kk] - xp_accessor[jj][kk]) / length_factor[kk], 2);
       r_scaled = sqrt(r_scaled);
       // tgamma(x+1) == x! when x is a natural number, which should always be the case for
       // MaternHalfInt
@@ -88,17 +92,17 @@ MaternHalfIntCovarianceTorched::maternHalfIntFunction(RealEigenMatrix & K,
       for (unsigned int tt = 0; tt < p + 1; ++tt)
         summation += (tgamma(p + tt + 1) / (tgamma(tt + 1) * tgamma(p - tt + 1))) *
                      pow(2 * factor * r_scaled, p - tt);
-      K(ii, jj) = sigma_f_squared * std::exp(-factor * r_scaled) *
-                  (tgamma(p + 1) / (tgamma(2 * p + 1))) * summation;
+      K_accessor[ii][jj] = sigma_f_squared * std::exp(-factor * r_scaled) *
+                           (tgamma(p + 1) / (tgamma(2 * p + 1))) * summation;
     }
     if (is_self_covariance)
-      K(ii, ii) += sigma_n_squared;
+      K_accessor[ii][ii] += sigma_n_squared;
   }
 }
 
 bool
-MaternHalfIntCovarianceTorched::computedKdhyper(RealEigenMatrix & dKdhp,
-                                                const RealEigenMatrix & x,
+MaternHalfIntCovarianceTorched::computedKdhyper(torch::Tensor & dKdhp,
+                                                const torch::Tensor & x,
                                                 const std::string & hyper_param_name,
                                                 unsigned int ind) const
 {
@@ -129,17 +133,20 @@ MaternHalfIntCovarianceTorched::computedKdhyper(RealEigenMatrix & dKdhp,
 }
 
 void
-MaternHalfIntCovarianceTorched::computedKdlf(RealEigenMatrix & K,
-                                             const RealEigenMatrix & x,
+MaternHalfIntCovarianceTorched::computedKdlf(torch::Tensor & K,
+                                             const torch::Tensor & x,
                                              const std::vector<Real> & length_factor,
                                              const Real sigma_f_squared,
                                              const unsigned int p,
                                              const int ind)
 {
-  unsigned int num_samples_x = x.rows();
-  unsigned int num_params_x = x.cols();
+  auto K_accessor = K.accessor<Real, 2>();
+  auto x_accessor = x.accessor<Real, 2>();
 
-  mooseAssert(ind < x.cols(), "Incorrect length factor index");
+  unsigned int num_samples_x = x.sizes()[0];
+  unsigned int num_params_x = x.sizes()[1];
+
+  mooseAssert(ind < x.sizes()[1], "Incorrect length factor index");
 
   // This factor is used over and over, don't calculate each time
   Real factor = sqrt(2 * p + 1);
@@ -151,7 +158,7 @@ MaternHalfIntCovarianceTorched::computedKdlf(RealEigenMatrix & K,
       // Compute distance per parameter, scaled by length factor
       Real r_scaled = 0;
       for (unsigned int kk = 0; kk < num_params_x; ++kk)
-        r_scaled += pow((x(ii, kk) - x(jj, kk)) / length_factor[kk], 2);
+        r_scaled += pow((x_accessor[ii][kk] - x_accessor[jj][kk]) / length_factor[kk], 2);
       r_scaled = sqrt(r_scaled);
       if (r_scaled != 0)
       {
@@ -161,21 +168,21 @@ MaternHalfIntCovarianceTorched::computedKdlf(RealEigenMatrix & K,
         for (unsigned int tt = 0; tt < p + 1; ++tt)
           summation += (tgamma(p + tt + 1) / (tgamma(tt + 1) * tgamma(p - tt + 1))) *
                        pow(2 * factor * r_scaled, p - tt);
-        K(ii, jj) = -factor * std::exp(-factor * r_scaled) * summation;
+        K_accessor[ii][jj] = -factor * std::exp(-factor * r_scaled) * summation;
         // uv'
         // dont need tt=p, (p-tt) factor ->0. Also avoids unsigned integer subtraction wraparound
         summation = 0;
         for (unsigned int tt = 0; tt < p; ++tt)
           summation += (tgamma(p + tt + 1) / (tgamma(tt + 1) * tgamma(p - tt + 1))) * 2 * factor *
                        (p - tt) * pow(2 * factor * r_scaled, p - tt - 1);
-        K(ii, jj) += std::exp(-factor * r_scaled) * summation;
+        K_accessor[ii][jj] += std::exp(-factor * r_scaled) * summation;
         // Apply chain rule for dr_scaled/dl_i
-        K(ii, jj) *= -std::pow(x(ii, ind) - x(jj, ind), 2) /
-                     (std::pow(length_factor[ind], 3) * r_scaled) * sigma_f_squared *
-                     (tgamma(p + 1) / (tgamma(2 * p + 1)));
+        K_accessor[ii][jj] *= -std::pow(x_accessor[ii][ind] - x_accessor[jj][ind], 2) /
+                              (std::pow(length_factor[ind], 3) * r_scaled) * sigma_f_squared *
+                              (tgamma(p + 1) / (tgamma(2 * p + 1)));
       }
       else // avoid div by 0. 0/0=0 scenario.
-        K(ii, jj) = 0;
+        K_accessor[ii][jj] = 0;
     }
   }
 }

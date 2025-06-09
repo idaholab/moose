@@ -21,13 +21,13 @@ public:
   static InputParameters validParams();
   LMCTorched(const InputParameters & parameters);
 
-  void computeCovarianceMatrix(RealEigenMatrix & K,
-                               const RealEigenMatrix & x,
-                               const RealEigenMatrix & xp,
+  void computeCovarianceMatrix(torch::Tensor & K,
+                               const torch::Tensor & x,
+                               const torch::Tensor & xp,
                                const bool is_self_covariance) const override;
 
-  bool computedKdhyper(RealEigenMatrix & dKdhp,
-                       const RealEigenMatrix & x,
+  bool computedKdhyper(torch::Tensor & dKdhp,
+                       const torch::Tensor & x,
                        const std::string & hyper_param_name,
                        unsigned int ind) const override;
 
@@ -39,7 +39,7 @@ protected:
    * @param Bmat The matrix which should be populated by the covariance values
    * @param exp_i The expansion index in the latent space
    */
-  void computeBMatrix(RealEigenMatrix & Bmat, const unsigned int exp_i) const;
+  void computeBMatrix(torch::Tensor & Bmat, const unsigned int exp_i) const;
 
   /**
    * Computes the gradient of $B$ with respect to the entries in $a_i$ in the
@@ -48,9 +48,8 @@ protected:
    * @param exp_i The index of the expansion of B
    * @param index The index within the vector $a_i$
    */
-  void computeAGradient(RealEigenMatrix & grad,
-                        const unsigned int exp_i,
-                        const unsigned int index) const;
+  void
+  computeAGradient(torch::Tensor & grad, const unsigned int exp_i, const unsigned int index) const;
 
   /**
    * Computes the gradient of $B$ with respect to the entries in $lambda_i$ in the
@@ -59,7 +58,7 @@ protected:
    * @param exp_i The index of the expansion of B
    * @param index The index within the vector $lambda_i$
    */
-  void computeLambdaGradient(RealEigenMatrix & grad,
+  void computeLambdaGradient(torch::Tensor & grad,
                              const unsigned int exp_i,
                              const unsigned int index) const;
 
