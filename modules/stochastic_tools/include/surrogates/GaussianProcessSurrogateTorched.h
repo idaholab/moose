@@ -10,14 +10,14 @@
 #pragma once
 
 #include "SurrogateModel.h"
-#include "Standardizer.h"
+#include "StandardizerTorched.h"
 #include <Eigen/Dense>
-#include "CovarianceInterface.h"
+#include "CovarianceInterfaceTorched.h"
 #include "GaussianProcessTorched.h"
 
 #include "LibtorchUtils.h"
 
-class GaussianProcessSurrogateTorched : public SurrogateModel, public CovarianceInterface
+class GaussianProcessSurrogateTorched : public SurrogateModel, public CovarianceInterfaceTorched
 {
 public:
   static InputParameters validParams();

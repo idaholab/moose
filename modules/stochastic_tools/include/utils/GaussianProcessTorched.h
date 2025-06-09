@@ -12,7 +12,7 @@
 #include "StandardizerTorched.h"
 #include <Eigen/Dense>
 
-#include "CovarianceFunctionBase.h"
+#include "CovarianceFunctionBaseTorched.h"
 
 #include "LibtorchUtils.h"
 
@@ -39,7 +39,7 @@ public:
    * @param min List of lower bounds for the parameter tuning.
    * @param max List of upper bounds for parameter tuning.
    */
-  void initialize(CovarianceFunctionBase * covariance_function,
+  void initialize(CovarianceFunctionBaseTorched * covariance_function,
                   const std::vector<std::string> & params_to_tune,
                   const std::vector<Real> & min = std::vector<Real>(),
                   const std::vector<Real> & max = std::vector<Real>());
@@ -113,7 +113,7 @@ public:
    * @param covariance_function Pointer to the covariance function that
    *                            needs to be used for the Gaussian Process.
    */
-  void linkCovarianceFunction(CovarianceFunctionBase * covariance_function);
+  void linkCovarianceFunction(CovarianceFunctionBaseTorched * covariance_function);
 
   /**
    * Sets up the tuning map which is used if the user requires parameter tuning.
@@ -182,8 +182,8 @@ public:
   const RealEigenMatrix & getK() const { return _K; }
   const torch::Tensor & getKResultsSolve() const { return _K_results_solve; }
   const torch::Tensor & getKCholeskyDecomp() const { return _K_cho_decomp; }
-  const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
-  const CovarianceFunctionBase * getCovarFunctionPtr() const { return _covariance_function; }
+  const CovarianceFunctionBaseTorched & getCovarFunction() const { return *_covariance_function; }
+  const CovarianceFunctionBaseTorched * getCovarFunctionPtr() const { return _covariance_function; }
   const std::string & getCovarType() const { return _covar_type; }
   const std::string & getCovarName() const { return _covar_name; }
   const std::vector<UserObjectName> & getDependentCovarNames() const
@@ -213,8 +213,8 @@ public:
   RealEigenMatrix & K() { return _K; }
   torch::Tensor & KResultsSolve() { return _K_results_solve; }
   torch::Tensor & KCholeskyDecomp() { return _K_cho_decomp; }
-  CovarianceFunctionBase * covarFunctionPtr() { return _covariance_function; }
-  CovarianceFunctionBase & covarFunction() { return *_covariance_function; }
+  CovarianceFunctionBaseTorched * covarFunctionPtr() { return _covariance_function; }
+  CovarianceFunctionBaseTorched & covarFunction() { return *_covariance_function; }
   std::string & covarType() { return _covar_type; }
   std::string & covarName() { return _covar_name; }
   std::map<UserObjectName, std::string> & dependentCovarTypes() { return _dependent_covar_types; }
@@ -233,7 +233,7 @@ public:
 
 protected:
   /// Covariance function object
-  CovarianceFunctionBase * _covariance_function = nullptr;
+  CovarianceFunctionBaseTorched * _covariance_function = nullptr;
 
   /// Contains tuning inforation. Index of hyperparam, size, and min/max bounds
   std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> _tuning_data;
