@@ -11,6 +11,7 @@
 
 #include "PolycrystalDiffusivityTensorBase.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
+#include "RankThreeTensor.h"
 
 /**
  * Calculates mobilities for grand potential model. The potential mobility (\chi*D)
@@ -31,6 +32,7 @@ protected:
   std::string _chiD_name;
   MaterialProperty<RealTensorValue> & _chiD;
   MaterialProperty<RealTensorValue> * _dchiDdc;
+  MaterialProperty<RankThreeTensor> * _dchiDdgradc;
 
   /// grain boundary mobility
   std::string _Ls_name;

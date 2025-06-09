@@ -333,7 +333,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
    * Check if base is a default property and shortcut to returning zero, as
    * derivatives of constants are zero.
    */
-  if (this->template defaultGenericMaterialProperty<U, is_ad>(prop_name))
+  if (this->template defaultGenericMaterialProperty<Real, is_ad>(prop_name))
     return this->template getGenericZeroMaterialProperty<U, is_ad>();
 
   if (c3 != "")
