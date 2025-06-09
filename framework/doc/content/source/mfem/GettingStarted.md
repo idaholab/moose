@@ -22,8 +22,8 @@ export MOOSE_JOBS=10
 
 ./scripts/update_and_rebuild_petsc.sh
 ./scripts/update_and_rebuild_libmesh.sh
-./scripts/update_and_rebuild_mfem.sh
 ./scripts/update_and_rebuild_conduit.sh
+./scripts/update_and_rebuild_mfem.sh
 ./scripts/update_and_rebuild_wasp.sh
 ```
 
@@ -40,14 +40,14 @@ Again, you may wish to include other configuration flags.
 3. Finally, build the framework, module, and tests by running
 
 ```bash
-NUM_THREADS=10
+MOOSE_JOBS=10
 
 cd framework
-make -j $NUM_THREADS
+make -j $MOOSE_JOBS
 cd ../modules
-make -j $NUM_THREADS
+make -j $MOOSE_JOBS
 cd ../test
-make -j $NUM_THREADS
+make -j $MOOSE_JOBS
 ```
 
 ## Solving a problem with `MFEM-MOOSE`
@@ -112,7 +112,7 @@ To set up the kernels corresponding to the differential equations we wish to sol
 
 Then, within the `Kernels` block, we specify the weak forms to be added to our equation system. Typically, one would pick the `MFEM` integrators they wish to implement by checking the [linear form integrators page](https://mfem.org/lininteg/) and the [bilinear form integrators page](https://mfem.org/bilininteg/). Note that not all linear and bilinear forms that are available in `MFEM` have been implemented on `MFEM-MOOSE`, only the most common ones. Should you wish to implement an integrator that is not yet available, please raise an issue in the `MOOSE` repository.
 
-If the integrator you wish to implement is available, you can specify it in the `type` parameter simply by taking its `MFEM` integrator name, swapping the word `Integrator` for `Kernel`, and appending `MFEM` to the beginning of the name. The table below shows a few examples of this naming convention:
+If the integrator you wish to implement is available, you can specify it in the `type` parameter simply by taking its `MFEM` integrator name, swapping the word `Integrator` for `Kernel`, and prepending `MFEM` to the beginning of the name. The table below shows a few examples of this naming convention:
 
 | MFEM name      | MFEM-MOOSE name      |
 | ------------- | ------------- |
