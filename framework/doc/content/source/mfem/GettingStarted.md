@@ -40,7 +40,7 @@ Again, you may wish to include other configuration flags.
 3. Finally, build the framework, module, and tests by running
 
 ```bash
-MOOSE_JOBS=10
+export MOOSE_JOBS=10
 
 cd framework
 make -j $MOOSE_JOBS
@@ -56,37 +56,35 @@ Much of the syntax of the usual `MOOSE` scripts is preserved when creating scrip
 
 ### Problem
 
-First of all, we must specify that the type of problem we wish to solve is an [`MFEMProblem`](/framework/doc/content/source/mfem/problem/MFEMProblem.md), so that we may take advantage of `MFEM` capabilities. 
+First of all, we must specify that the type of problem we wish to solve is an [`MFEMProblem`](MFEMProblem.md), so that we may take advantage of `MFEM` capabilities. 
 
-!listing test/tests/mfem/kernels/diffusion.i block=Problem
+!listing test/tests/mfem/kernels/diffusion.i block=/Problem
 
 ### Geometry - Mesh and Finite Element Spaces
 
-Given that we wish to utilise `MFEM` as the backend, the mesh we import into the problem must be of [`MFEMMesh`](/framework/doc/content/source/mfem/mesh/MFEMMesh.md) type. Therefore, this must be specified in the parameter [!param](/Mesh/type) within the `Mesh` block.
+Given that we wish to utilise `MFEM` as the backend, the mesh we import into the problem must be of [`MFEMMesh`](MFEMMesh.md) type. Therefore, this must be specified in the parameter [!param](/Mesh/type) within the `Mesh` block.
 
-!listing test/tests/mfem/kernels/diffusion.i block=Mesh
+!listing test/tests/mfem/kernels/diffusion.i block=/Mesh
 
-Then, we must set up the finite element spaces our problem will make use of. They can be of [`MFEMScalarFESpace`](/framework/doc/content/source/mfem/fespaces/MFEMScalarFESpace.md) type, which allows for continuous `H1` or discontinuous `L2` elements, or [`MFEMVectorFESpace`](/framework/doc/content/source/mfem/fespaces/MFEMVectorFESpace.md) type, thereby allowing tangentially-continuous `ND` or normally-continuous `RT` elements. 
+Then, we must set up the finite element spaces our problem will make use of. They can be of [`MFEMScalarFESpace`](MFEMScalarFESpace.md) type, which allows for continuous `H1` or discontinuous `L2` elements, or [`MFEMVectorFESpace`](MFEMVectorFESpace.md) type, thereby allowing tangentially-continuous `ND` or normally-continuous `RT` elements. 
 
-!listing test/tests/mfem/kernels/diffusion.i block=FESpaces
+!listing test/tests/mfem/kernels/diffusion.i block=/FESpaces
 
 In this diffusion example, besides the usual `H1` space required to solve the system, we also include an `ND` space so that we may output the gradient of the result as an `AuxVariable` later on. However, if you only wish to visualize the scalar result, it is not necessary to include the `ND` space.
 
 ### Equation System - Variables, Kernels, and Boundary Conditions
 
-Having the necessary finite element spaces, we may now set up the variables to be solved for which we will need for the problem. They should be of type [`MFEMVariable`](/framework/doc/content/source/mfem/variables/MFEMVariable.md). Each variable should also be associated with a relevant finite element space.
+Having the necessary finite element spaces, we may now set up the variables to be solved for which we will need for the problem. They should be of type [`MFEMVariable`](MFEMVariable.md). Each variable should also be associated with a relevant finite element space.
 
-!listing test/tests/mfem/kernels/diffusion.i block=Variables
+!listing test/tests/mfem/kernels/diffusion.i block=/Variables
 
-Here, if we also wish to output the gradient of the result, we can add it as an `AuxVariable` and set up its corresponding [`AuxKernel`](/framework/doc/content/source/mfem/auxkernels/MFEMAuxKernel.md).
+Here, if we also wish to output the gradient of the result, we can add it as an `AuxVariable` and set up its corresponding [`AuxKernel`](MFEMAuxKernel.md).
 
-!listing test/tests/mfem/kernels/diffusion.i block=AuxVariables
+!listing test/tests/mfem/kernels/diffusion.i block=/AuxVariables AuxKernels
 
-!listing test/tests/mfem/kernels/diffusion.i block=AuxKernels
+To set up the kernels corresponding to the differential equations we wish to solve, first we specify all materials we'll need within the `FunctorMaterials` block. In this case, we specify a `Substance` of type [`MFEMGenericConstantFunctorMaterial`](MFEMGenericConstantFunctorMaterial.md). However, it is also possible to specify more general functors which may be piecewise, non-constant, and vectorial.
 
-To set up the kernels corresponding to the differential equations we wish to solve, first we specify all materials we'll need within the `FunctorMaterials` block. In this case, we specify a `Substance` of type [`MFEMGenericConstantFunctorMaterial`](/framework/doc/content/source/mfem/functormaterials/MFEMGenericConstantFunctorMaterial.md). However, it is also possible to specify more general functors which may be piecewise, non-constant, and vectorial.
-
-!listing test/tests/mfem/kernels/diffusion.i block=FunctorMaterials
+!listing test/tests/mfem/kernels/diffusion.i block=/FunctorMaterials
 
 Then, within the `Kernels` block, we specify the weak forms to be added to our equation system. Typically, one would pick the `MFEM` integrators they wish to implement by checking the [linear form integrators page](https://mfem.org/lininteg/) and the [bilinear form integrators page](https://mfem.org/bilininteg/). Note that not all linear and bilinear forms that are available in `MFEM` have been implemented on `MFEM-MOOSE`, only the most common ones. Should you wish to implement an integrator that is not yet available, please raise an issue in the `MOOSE` repository.
 
@@ -100,31 +98,29 @@ If the integrator you wish to implement is available, you can specify it in the 
 
 Putting this together, our `Kernels` block might look as follows:
 
-!listing test/tests/mfem/kernels/diffusion.i block=Kernels
+!listing test/tests/mfem/kernels/diffusion.i block=/Kernels
 
-Now we set up boundary conditions. The full list of boundary conditions available may be found in the [BCs directory](/framework/doc/content/source/mfem/bcs). Here, we choose scalar Dirichlet boundary conditions, which corresponds to the [`MFEMScalarDirichletBC`](/framework/doc/content/source/mfem/bcs/MFEMScalarDirichletBC.md) type.
+Now we set up boundary conditions. The full list of boundary conditions available may be found in the [BCs directory](source/mfem/bcs). Here, we choose scalar Dirichlet boundary conditions, which corresponds to the [`MFEMScalarDirichletBC`](MFEMScalarDirichletBC.md) type.
 
-!listing test/tests/mfem/kernels/diffusion.i block=BCs
+!listing test/tests/mfem/kernels/diffusion.i block=/BCs
 
 ### Integration - Solver and Executioner
 
-With the equation system set up, we specify how it is to be integrated. Firstly, we choose a preconditioner and solver. The list of available types may be found in the [solvers directory](/framework/doc/content/source/mfem/solvers). For problems with high polynomial order, setting [!param](/Solver/low_order_refined) to `true` may greatly increase performance, as explained [here](/framework/doc/content/source/mfem/solvers/MFEMSolverBase.md). 
+With the equation system set up, we specify how it is to be integrated. Firstly, we choose a preconditioner and solver. The list of available types may be found in the [solvers directory](source/mfem/solvers). For problems with high polynomial order, setting [!param](/Solver/low_order_refined) to `true` may greatly increase performance, as explained [here](MFEMSolverBase.md). 
 
 While in principle any solver may be used as main solver or preconditioner, the main limitation to keep in mind is that `Hypre` solvers may only be preconditioned by other `Hypre` solvers. Furthermore, when a `Hypre` solver has its `low_order_refined` parameter set to `true`, it ceases to be considered a `Hypre` solver for preconditioning purposes. 
 
-!listing test/tests/mfem/kernels/diffusion.i block=Preconditioner remove=jacobi
+!listing test/tests/mfem/kernels/diffusion.i block=/Preconditioner Solver remove=jacobi
 
-!listing test/tests/mfem/kernels/diffusion.i block=Solver
+Static and time-dependent executioners may be implemented respectively with the [`MFEMSteady`](MFEMSteady.md) and [`MFEMTransient`](MFEMTransient.md) types. If `MFEM-MOOSE` has been built with GPU offloading capabilities, here it is possible to set [!param](/Executioner/device) to `cuda` or `hip` to make use of GPU acceleration. For GPU runs, it is advisable to choose [!param](/Executioner/assembly_level) other than `legacy`, otherwise the matrix assembly step will not be offloaded. The options for [!param](/Executioner/assembly_level) are `legacy`, `full`, `element`, `partial`, and `none` (the latter is only available if `MFEM-MOOSE` has been built with `libCEED` support).
 
-Static and time-dependent executioners may be implemented respectively with the [`MFEMSteady`](/framework/doc/content/source/mfem/executioners/MFEMSteady.md) and [`MFEMTransient`](/framework/doc/content/source/mfem/executioners/MFEMTransient.md) types. If `MFEM-MOOSE` has been built with GPU offloading capabilities, here it is possible to set [!param](/Executioner/device) to `cuda` or `hip` to make use of GPU acceleration. For GPU runs, it is advisable to choose [!param](/Executioner/assembly_level) other than `legacy`, otherwise the matrix assembly step will not be offloaded. The options for [!param](/Executioner/assembly_level) are `legacy`, `full`, `element`, `partial`, and `none` (the latter is only available if `MFEM-MOOSE` has been built with `libCEED` support).
-
-!listing test/tests/mfem/kernels/diffusion.i block=Executioner
+!listing test/tests/mfem/kernels/diffusion.i block=/Executioner
 
 ### Output
 
-Finally, we can choose a data collection type for our result outputs. The types available may be found in the [outputs directory](/framework/doc/content/source/mfem/outputs/).
+Finally, we can choose a data collection type for our result outputs. The types available may be found in the [outputs directory](source/mfem/outputs/).
 
-!listing test/tests/mfem/kernels/diffusion.i block=Outputs remove=VisItDataCollection ConduitDataCollection
+!listing test/tests/mfem/kernels/diffusion.i block=/Outputs remove=VisItDataCollection ConduitDataCollection Outputs/active
 
 !if-end!
 
