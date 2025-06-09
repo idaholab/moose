@@ -91,7 +91,7 @@
   [GP_avg_trainer]
     type = GaussianProcessTrainerTorched
     execute_on = timestep_end
-    covariance_function = 'covar' #Choose a Matern with half-integer argument for the kernel
+    covariance_function_torched = 'covar' #Choose a Matern with half-integer argument for the kernel
     standardize_params = 'true' #Center and scale the training params
     standardize_data = 'true' #Center and scale the training data
     sampler = train_sample
@@ -106,9 +106,9 @@
   []
 []
 
-[Covariance]
+[CovarianceTorched]
   [covar]
-    type = MaternHalfIntCovariance
+    type = MaternHalfIntCovarianceTorched
     p = 2 #Define the exponential factor
     signal_variance = 1 #Use a signal variance of 1 in the kernel
     noise_variance = 1e-6 #A small amount of noise can help with numerical stability

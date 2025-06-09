@@ -28,7 +28,8 @@ GaussianProcessTrainerTorched::validParams()
   params.addClassDescription("Provides data preperation and training for a single- or multi-output "
                              "Gaussian Process surrogate model.");
 
-  params.addRequiredParam<UserObjectName>("covariance_function", "Name of covariance function.");
+  params.addRequiredParam<UserObjectName>("covariance_function_torched",
+                                          "Name of covariance function.");
   params.addParam<bool>(
       "standardize_params", true, "Standardize (center and scale) training parameters (x values)");
   params.addParam<bool>(
@@ -50,7 +51,7 @@ GaussianProcessTrainerTorched::validParams()
 
 GaussianProcessTrainerTorched::GaussianProcessTrainerTorched(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-    CovarianceInterface(parameters),
+    CovarianceInterfaceTorched(parameters),
     _predictor_row(getPredictorData()),
     _gp(declareModelData<StochasticToolsTorched::GaussianProcessTorched>("_gp")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
@@ -86,10 +87,11 @@ GaussianProcessTrainerTorched::GaussianProcessTrainerTorched(const InputParamete
   if (isParamValid("tuning_max"))
     upper_bounds = getParam<std::vector<Real>>("tuning_max");
 
-  _gp.initialize(getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
-                 tune_parameters,
-                 lower_bounds,
-                 upper_bounds);
+  _gp.initialize(
+      getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function_torched")),
+      tune_parameters,
+      lower_bounds,
+      upper_bounds);
 
   _n_outputs = _gp.getCovarFunction().numOutputs();
 }

@@ -12,7 +12,9 @@
 #include "FEProblem.h"
 #include "StochasticToolsApp.h"
 
-registerMooseAction("StochasticToolsApp", LoadCovarianceDataActionTorched, "load_covariance_data");
+registerMooseAction("StochasticToolsApp",
+                    LoadCovarianceDataActionTorched,
+                    "load_covariance_data_torched");
 
 InputParameters
 LoadCovarianceDataActionTorched::validParams()
@@ -96,7 +98,7 @@ LoadCovarianceDataActionTorched::load(GaussianProcessSurrogateTorched & model)
 
   InputParameters covar_params = _factory.getValidParams(covar_type);
   covar_params.set<unsigned int>("num_outputs") = num_outputs;
-  covar_params.set<std::vector<UserObjectName>>("covariance_functions") = dep_covar_names;
+  covar_params.set<std::vector<UserObjectName>>("covariance_functions_torched") = dep_covar_names;
 
   const auto param_list = covar_params.getParametersList();
   for (const auto & param : param_list)
