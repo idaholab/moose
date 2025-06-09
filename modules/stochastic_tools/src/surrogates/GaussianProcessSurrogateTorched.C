@@ -88,36 +88,36 @@ GaussianProcessSurrogateTorched::evaluate(const std::vector<Real> & x,
       torch::from_blob(test_points.data(), {test_points.rows(), test_points.cols()}, options)
           .to(at::kDouble);
 
+  // make non-const copy
+  auto training_copy = _training_params;
+  torch::Tensor training_tensor =
+      torch::from_blob(training_copy.data(), {training_copy.cols(), training_copy.rows()}, options)
+          .clone();
+  torch::Tensor training_tensor_transposed = training_tensor.transpose(1, 0);
   _gp.getParamStandardizer().getStandardized(tensor_points);
 
   auto points_accessor = tensor_points.accessor<Real, 2>();
   for (unsigned int i = 0; i < test_points.cols(); i++)
     test_points(0, i) = points_accessor[0][i];
 
-  RealEigenMatrix K_train_test(_training_params.rows() * n_outputs, n_outputs);
+  torch::Tensor K_train_test =
+      torch::empty({_training_params.rows() * n_outputs, n_outputs}).to(at::kDouble);
 
   _gp.getCovarFunction().computeCovarianceMatrix(
-      K_train_test, _training_params, test_points, false);
-  RealEigenMatrix K_test(n_outputs, n_outputs);
-  _gp.getCovarFunction().computeCovarianceMatrix(K_test, test_points, test_points, true);
-
-  torch::Tensor K_train_test_tensor =
-      torch::from_blob(K_train_test.data(), {K_train_test.rows(), K_train_test.cols()}, options)
-          .to(at::kDouble);
-  torch::Tensor K_test_tensor =
-      torch::from_blob(K_test.data(), {K_test.rows(), K_test.cols()}, options).to(at::kDouble);
+      K_train_test, training_tensor_transposed, tensor_points, false);
+  torch::Tensor K_test = torch::empty({n_outputs, n_outputs}).to(at::kDouble);
+  _gp.getCovarFunction().computeCovarianceMatrix(K_test, tensor_points, tensor_points, true);
 
   //  Compute the predicted mean value (centered)
   torch::Tensor pred_value = torch::transpose(
-      torch::mm(torch::transpose(K_train_test_tensor, 0, 1), _gp.getKResultsSolve()), 0, 1);
+      torch::mm(torch::transpose(K_train_test, 0, 1), _gp.getKResultsSolve()), 0, 1);
 
   //   De-center/scale the value and store for return
   _gp.getDataStandardizer().getDestandardized(pred_value);
 
   torch::Tensor pred_var =
-      K_test_tensor -
-      torch::mm(torch::transpose(K_train_test_tensor, 0, 1),
-                torch::cholesky_solve(K_train_test_tensor, _gp.getKCholeskyDecomp()));
+      K_test - torch::mm(torch::transpose(K_train_test, 0, 1),
+                         torch::cholesky_solve(K_train_test, _gp.getKCholeskyDecomp()));
 
   // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
   torch::Tensor std_dev_mat = torch::sqrt(pred_var); // pred_var.array().sqrt();

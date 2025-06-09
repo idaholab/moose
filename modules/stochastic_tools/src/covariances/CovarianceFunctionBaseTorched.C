@@ -42,8 +42,8 @@ CovarianceFunctionBaseTorched::CovarianceFunctionBaseTorched(const InputParamete
 }
 
 bool
-CovarianceFunctionBaseTorched::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
-                                               const RealEigenMatrix & /*x*/,
+CovarianceFunctionBaseTorched::computedKdhyper(torch::Tensor & /*dKdhp*/,
+                                               const torch::Tensor & /*x*/,
                                                const std::string & /*hyper_param_name*/,
                                                unsigned int /*ind*/) const
 {
