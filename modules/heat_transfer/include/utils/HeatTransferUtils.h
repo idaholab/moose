@@ -9,13 +9,9 @@
 
 #pragma once
 
-#include "ADReal.h"
+#include "MooseTypes.h"
 
-#include "libmesh/libmesh_common.h"
-
-using namespace libMesh;
-
-namespace fp
+namespace HeatTransferUtils
 {
 
 /**
@@ -27,8 +23,12 @@ namespace fp
  * @param mu  Dynamic viscosity [Pa-s]
  * @return Reynolds number
  */
-Real reynolds(Real rho, Real vel, Real L, Real mu);
-ADReal reynolds(const ADReal & rho, const ADReal & vel, const ADReal & L, const ADReal & mu);
+template <typename T1, typename T2, typename T3, typename T4>
+auto
+reynolds(const T1 & rho, const T2 & vel, const T3 & L, const T4 & mu)
+{
+  return rho * std::fabs(vel) * L / mu;
+}
 
 /**
  * Compute Prandtl number
@@ -38,8 +38,12 @@ ADReal reynolds(const ADReal & rho, const ADReal & vel, const ADReal & L, const 
  * @param k  Thermal conductivity [W/m-K]
  * @return Prandtl number
  */
-Real prandtl(Real cp, Real mu, Real k);
-ADReal prandtl(const ADReal & cp, const ADReal & mu, const ADReal & k);
+template <typename T1, typename T2, typename T3>
+auto
+prandtl(const T1 & cp, const T2 & mu, const T3 & k)
+{
+  return cp * mu / k;
+}
 
 /**
  * Compute Grashof number
@@ -53,14 +57,19 @@ ADReal prandtl(const ADReal & cp, const ADReal & mu, const ADReal & k);
  * @param gravity_magnitude  Gravitational acceleration magnitude
  * @return Grashof number
  */
-Real grashof(Real beta, Real T_s, Real T_bulk, Real L, Real rho, Real mu, Real gravity_magnitude);
-ADReal grashof(const ADReal & beta,
-               const ADReal & T_s,
-               const ADReal & T_bulk,
-               const ADReal & L,
-               const ADReal & rho,
-               const ADReal & mu,
-               const ADReal & gravity_magnitude);
+template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
+auto
+grashof(const T1 & beta,
+        const T2 & T_s,
+        const T3 & T_bulk,
+        const T4 & L,
+        const T5 & rho,
+        const T6 & mu,
+        Real gravity_magnitude)
+{
+  return gravity_magnitude * beta * std::abs(T_s - T_bulk) * std::pow(L, 3) * (rho * rho) /
+         (mu * mu);
+}
 
 /**
  * Compute Laplace number
@@ -71,8 +80,12 @@ ADReal grashof(const ADReal & beta,
  * @param mu  Dynamic viscosity [Pa-s]
  * @return Laplace number
  */
-Real laplace(Real sigma, Real rho, Real L, Real mu);
-ADReal laplace(const ADReal & sigma, const ADReal & rho, const ADReal & L, const ADReal & mu);
+template <typename T1, typename T2, typename T3, typename T4>
+auto
+laplace(const T1 & sigma, const T2 & rho, const T3 & L, const T4 & mu)
+{
+  return sigma * rho * L / (mu * mu);
+}
 
 /**
  * Compute thermal diffusivity
@@ -82,8 +95,12 @@ ADReal laplace(const ADReal & sigma, const ADReal & rho, const ADReal & L, const
  * @param cp Isobaric specific heat [J/K]
  * @return Thermal diffusivity
  */
-Real thermalDiffusivity(Real k, Real rho, Real cp);
-ADReal thermalDiffusivity(const ADReal & k, const ADReal & rho, const ADReal & cp);
+template <typename T1, typename T2, typename T3>
+auto
+thermalDiffusivity(const T1 & k, const T2 & rho, const T3 & cp)
+{
+  return k / (rho * cp);
+}
 
 /**
  * Compute Peclet number
@@ -93,9 +110,11 @@ ADReal thermalDiffusivity(const ADReal & k, const ADReal & rho, const ADReal & c
  * @param diffusivity Diffusivity
  * @return Peclet number
  */
-Real peclet(Real vel, Real L, Real diffusivity);
-ADReal peclet(const ADReal & vel, const ADReal & L, const ADReal & diffusivity);
+template <typename T1, typename T2, typename T3>
+auto
+peclet(const T1 & vel, const T2 & L, const T3 & diffusivity)
+{
+  return std::fabs(vel) * L / diffusivity;
+}
 
-void deprecatedMessage();
-
-} // namespace fp
+} // namespace HeatTransferUtils
