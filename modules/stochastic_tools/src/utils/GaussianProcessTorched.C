@@ -74,18 +74,15 @@ GaussianProcessTorched::setupCovarianceMatrix(const torch::Tensor & training_par
   const bool batch_decision =
       opts.batch_size > 0 && (opts.batch_size <= training_params.sizes()[0]);
   _batch_size = batch_decision ? opts.batch_size : training_params.sizes()[0];
-  _K.resize(_num_outputs * _batch_size, _num_outputs * _batch_size);
+  _K = torch::zeros({_num_outputs * _batch_size, _num_outputs * _batch_size}).to(at::kDouble);
 
   if (_tuning_data.size())
     tuneHyperParamsAdam(training_params, training_data, opts);
 
-  _K.resize(training_params.sizes()[0] * training_data.sizes()[1],
-            training_params.sizes()[0] * training_data.sizes()[1]);
-  Real * data = training_params.data_ptr<Real>();
-  Eigen::Map<RealEigenMatrix> training_matrix(
-      data, training_params.sizes()[0], training_params.sizes()[1]);
-  _covariance_function->computeCovarianceMatrix(_K, training_matrix, training_matrix, true);
-
+  _K = torch::zeros({training_params.sizes()[0] * training_data.sizes()[1],
+                     training_params.sizes()[0] * training_data.sizes()[1]})
+           .to(at::kDouble);
+  _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
   torch::Tensor flattened_tensor =
       torch::reshape(training_data, {training_params.sizes()[0] * training_data.sizes()[1], 1});
   // Compute the Cholesky decomposition and inverse action of the covariance matrix
@@ -97,13 +94,8 @@ GaussianProcessTorched::setupCovarianceMatrix(const torch::Tensor & training_par
 void
 GaussianProcessTorched::setupStoredMatrices(const torch::Tensor & input)
 {
-  auto options = torch::TensorOptions().dtype(at::kDouble);
-  torch::Tensor _K_tensor =
-      torch::from_blob(_K.data(), {_K.rows(), _K.cols()}, options).to(at::kDouble);
   // llt does the llt decomposition as part of the Cholesky module
-  // If _K is replaced with a torch tensor this can be replaced with _K.cholesky()
-  _K_cho_decomp = torch::linalg_cholesky(_K_tensor);
-  // Replace with cholesky_solve()
+  _K_cho_decomp = torch::linalg_cholesky(_K);
   _K_results_solve = torch::cholesky_solve(input, _K_cho_decomp);
 }
 
@@ -200,7 +192,7 @@ GaussianProcessTorched::tuneHyperParamsAdam(const torch::Tensor & training_param
       for (unsigned int jj = 0; jj < training_params.sizes()[1]; ++jj)
       {
         // inputs(ii, jj) = training_params(v_sequence[ii], jj);
-        auto tensor_accessor = training_params.accessor<float, 2>();
+        auto tensor_accessor = training_params.accessor<Real, 2>();
         inputs(ii, jj) =
             tensor_accessor[ii][jj]; // training_params.data_ptr<Real>()[v_sequence[ii]][jj];
       }
@@ -208,7 +200,7 @@ GaussianProcessTorched::tuneHyperParamsAdam(const torch::Tensor & training_param
       for (unsigned int jj = 0; jj < training_data.sizes()[1]; ++jj)
       {
         // outputs(ii, jj) = training_data(v_sequence[ii], jj);
-        auto tensor_accessor = training_data.accessor<float, 2>();
+        auto tensor_accessor = training_data.accessor<Real, 2>();
         outputs(ii, jj) =
             tensor_accessor[ii][jj]; // training_data.data_ptr<Real>()[v_sequence[ii]][jj];
       }
@@ -252,11 +244,13 @@ GaussianProcessTorched::tuneHyperParamsAdam(const torch::Tensor & training_param
 Real
 GaussianProcessTorched::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
 {
-  _covariance_function->computeCovarianceMatrix(_K, inputs, inputs, true);
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  torch::Tensor inputs_tensor =
+      torch::from_blob(inputs.data(), {inputs.rows(), inputs.cols()}, options).to(at::kDouble);
+  _covariance_function->computeCovarianceMatrix(_K, inputs_tensor, inputs_tensor, true);
 
   RealEigenMatrix flattened_data = outputs.reshaped(outputs.rows() * outputs.cols(), 1);
 
-  auto options = torch::TensorOptions().dtype(at::kDouble);
   torch::Tensor flattened_tensor = torch::from_blob(flattened_data.data(),
                                                     {flattened_data.rows(), flattened_data.cols()},
                                                     options)
@@ -267,7 +261,7 @@ GaussianProcessTorched::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outp
   Real log_likelihood = 0;
   log_likelihood +=
       -(torch::mm(torch::transpose(flattened_tensor, 0, 1), _K_results_solve)).data_ptr<Real>()[0];
-  log_likelihood += -std::log(_K.determinant());
+  log_likelihood += -std::log(torch::det(_K).data_ptr<Real>()[0]);
   log_likelihood -= _batch_size * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
   return log_likelihood;
@@ -276,8 +270,11 @@ GaussianProcessTorched::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outp
 std::vector<Real>
 GaussianProcessTorched::getGradient(RealEigenMatrix & inputs) const
 {
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  torch::Tensor input_tensor =
+      torch::from_blob(inputs.data(), {inputs.rows(), inputs.cols()}, options).to(at::kDouble);
   torch::Tensor dKdhp = torch::empty({_batch_size, _batch_size}, at::kDouble);
-  RealEigenMatrix dKdhp_matrix(_batch_size, _batch_size);
+  // torch::Tensor dKdhp_matrix(_batch_size, _batch_size);
   torch::Tensor alpha = torch::mm(_K_results_solve, torch::transpose(_K_results_solve, 0, 1));
   std::vector<Real> grad_vec;
   grad_vec.resize(_num_tunable);
@@ -289,12 +286,8 @@ GaussianProcessTorched::getGradient(RealEigenMatrix & inputs) const
     for (unsigned int ii = 0; ii < num_entries; ++ii)
     {
       const auto global_index = first_index + ii;
-      _covariance_function->computedKdhyper(dKdhp_matrix, inputs, hyper_param_name, ii);
+      _covariance_function->computedKdhyper(dKdhp, input_tensor, hyper_param_name, ii);
       // This is just temporary. Convert dKhp_matrix to tensor
-      auto options = torch::TensorOptions().dtype(at::kDouble);
-      torch::Tensor dKdhp_tensor =
-          torch::from_blob(dKdhp_matrix.data(), {_batch_size, _batch_size}, options)
-              .to(at::kDouble);
       torch::Tensor tmp = torch::mm(alpha, dKdhp) - torch::cholesky_solve(dKdhp, _K_cho_decomp);
       grad_vec[global_index] = -1 * (torch::trace(tmp).data_ptr<Real>()[0] / 2.0);
     }
@@ -382,7 +375,7 @@ dataStore(std::ostream & stream,
   dataStore(stream, gp_utils.covarNumOutputs(), context);
   dataStore(stream, gp_utils.dependentCovarNames(), context);
   dataStore(stream, gp_utils.dependentCovarTypes(), context);
-  dataStore(stream, gp_utils.K(), context);
+  // dataStore(stream, gp_utils.K(), context);
   // dataStore(stream, gp_utils.KResultsSolve(), context);
   // dataStore(stream, gp_utils.KCholeskyDecomp(), context);
   dataStore(stream, gp_utils.paramStandardizer(), context);
@@ -402,7 +395,7 @@ dataLoad(std::istream & stream,
   dataLoad(stream, gp_utils.covarNumOutputs(), context);
   dataLoad(stream, gp_utils.dependentCovarNames(), context);
   dataLoad(stream, gp_utils.dependentCovarTypes(), context);
-  dataLoad(stream, gp_utils.K(), context);
+  // dataLoad(stream, gp_utils.K(), context);
   // dataLoad(stream, gp_utils.KResultsSolve(), context);
   // dataLoad(stream, gp_utils.KCholeskyDecomp(), context);
   dataLoad(stream, gp_utils.paramStandardizer(), context);
