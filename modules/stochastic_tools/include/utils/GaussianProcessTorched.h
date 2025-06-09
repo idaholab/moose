@@ -179,7 +179,7 @@ public:
   {
     return _data_standardizer;
   }
-  const RealEigenMatrix & getK() const { return _K; }
+  const torch::Tensor & getK() const { return _K; }
   const torch::Tensor & getKResultsSolve() const { return _K_results_solve; }
   const torch::Tensor & getKCholeskyDecomp() const { return _K_cho_decomp; }
   const CovarianceFunctionBaseTorched & getCovarFunction() const { return *_covariance_function; }
@@ -210,7 +210,7 @@ public:
    */
   StochasticToolsTorched::StandardizerTorched & paramStandardizer() { return _param_standardizer; }
   StochasticToolsTorched::StandardizerTorched & dataStandardizer() { return _data_standardizer; }
-  RealEigenMatrix & K() { return _K; }
+  torch::Tensor & K() { return _K; }
   torch::Tensor & KResultsSolve() { return _K_results_solve; }
   torch::Tensor & KCholeskyDecomp() { return _K_cho_decomp; }
   CovarianceFunctionBaseTorched * covarFunctionPtr() { return _covariance_function; }
@@ -269,7 +269,7 @@ protected:
   StochasticToolsTorched::StandardizerTorched _data_standardizer;
 
   /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
-  RealEigenMatrix _K;
+  torch::Tensor _K;
 
   /// A solve of Ax=b via Cholesky.
   torch::Tensor _K_results_solve;
