@@ -62,11 +62,17 @@ public:
 
   void cacheAdditionalElements(const std::vector<dof_id_type> & additional_elems) const
   {
+    if (!_use_specific_elements)
+      return;
+
     _additional_elems = additional_elems;
   }
 
   void cleanQueryIDsAndAdditionalElements() const
   {
+    if (!_use_specific_elements)
+      return;
+
     _query_ids.clear();
     _additional_elems.clear();
   }
