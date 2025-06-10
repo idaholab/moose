@@ -43,7 +43,7 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
 void
 MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
 {
-  auto solver = std::make_shared<mfem::HypreBoomerAMG>();
+  auto solver = std::make_unique<mfem::HypreBoomerAMG>();
 
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
@@ -54,7 +54,7 @@ MFEMHypreBoomerAMG::constructSolver(const InputParameters &)
   if (_mfem_fespace && !mfem::HypreUsingGPU())
     solver->SetElasticityOptions(_mfem_fespace.get());
 
-  _solver = solver;
+  _solver = std::move(solver);
 }
 
 void

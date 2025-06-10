@@ -34,10 +34,10 @@ MFEMHypreADS::MFEMHypreADS(const InputParameters & parameters)
 void
 MFEMHypreADS::constructSolver(const InputParameters &)
 {
-  auto solver = std::make_shared<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
+  auto solver = std::make_unique<mfem::HypreADS>(_mfem_fespace.getFESpace().get());
   solver->SetPrintLevel(getParam<int>("print_level"));
 
-  _solver = solver;
+  _solver = std::move(solver);
 }
 
 void

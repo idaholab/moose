@@ -39,29 +39,27 @@ MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters) : MFEMSolverB
 void
 MFEMHypreGMRES::constructSolver(const InputParameters &)
 {
-
   auto solver =
-      std::make_shared<mfem::HypreGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+      std::make_unique<mfem::HypreGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
   solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetKDim(getParam<int>("kdim"));
   solver->SetPrintLevel(getParam<int>("print_level"));
-  setPreconditioner(solver);
-  _solver = solver;
+  setPreconditioner(*solver);
+  _solver = std::move(solver);
 }
 
 void
 MFEMHypreGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
-
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
     _preconditioner->updateSolver(a, tdofs);
-    setPreconditioner(std::dynamic_pointer_cast<mfem::HypreGMRES>(_solver));
+    setPreconditioner(static_cast<mfem::HypreGMRES &>(*_solver));
   }
   else if (_lor)
   {

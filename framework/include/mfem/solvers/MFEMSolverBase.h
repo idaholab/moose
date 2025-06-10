@@ -29,10 +29,10 @@ public:
   /// Retrieves the preconditioner userobject if present, sets the member pointer to
   /// said object if still unset, and sets the solver to use this preconditioner.
   template <typename T>
-  void setPreconditioner(const std::shared_ptr<T> & solver);
+  void setPreconditioner(T & solver);
 
-  /// Returns a shared pointer to the instance of the Solver derived-class.
-  virtual std::shared_ptr<mfem::Solver> getSolver() { return _solver; }
+  /// Returns the wrapped MFEM solver
+  mfem::Solver & getSolver();
 
   /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
   virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
@@ -48,8 +48,15 @@ protected:
   bool _lor;
 
   // Solver and preconditioner to be used for the problem
-  std::shared_ptr<mfem::Solver> _solver{nullptr};
-  MFEMSolverBase * _preconditioner{nullptr};
+  std::unique_ptr<mfem::Solver> _solver;
+  MFEMSolverBase * _preconditioner;
 };
+
+inline mfem::Solver &
+MFEMSolverBase::getSolver()
+{
+  mooseAssert(_solver, "Attempting to retrieve solver before it's been constructed");
+  return *_solver;
+}
 
 #endif

@@ -38,13 +38,13 @@ MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
 void
 MFEMHypreAMS::constructSolver(const InputParameters &)
 {
-  auto solver = std::make_shared<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
+  auto solver = std::make_unique<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
   if (getParam<bool>("singular"))
     solver->SetSingularProblem();
 
   solver->SetPrintLevel(getParam<int>("print_level"));
 
-  _solver = solver;
+  _solver = std::move(solver);
 }
 
 void
