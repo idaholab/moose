@@ -1,0 +1,35 @@
+name: Discussion Help Bot
+on:
+  discussion:
+    types:
+    # Use locked as trigger event until this chatbot is ready
+      - created
+    #  - locked
+jobs:
+  run_bot:
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: MOOSE_discussion_bot
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r python/MooseDiscussion/requirements.txt
+
+      - name: Run discuss bot
+        run: python python/MooseDiscussion/GitHubBot.py
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DB_DIR: "python/MooseDiscussion/database"
+          TOP_N: 5
+          THRESHOLD: 0.2
+          MODEL_NAME: "all-MiniLM-L12-v2"
+          GITHUB_ACTOR: "MOOSE bot"
