@@ -19,13 +19,9 @@
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
 {#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
 {#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
-{#- WITH_LIBTORCH: The libtorch distribution to use (cpu, cu121, etc); default: cpu           -#}
 {#- WITH_MFEM: Whether or not to build mfem (default: 1 to build, 0 to not build)             -#}
+{#- WITHOUT_PYTORCH: Set to anything to not build/download pytorch                            -#}
 
-{#- Set WITH_LIBTORCH default if not set                                                      -#}
-{%- if WITH_LIBTORCH is not defined %}
-{%- set WITH_LIBTORCH = 'cpu' %}
-{%- endif %}
 {#- Set WITH_MFEM default if not set                                                          -#}
 {%- if WITH_MFEM is not defined %}
 {%- set WITH_MFEM = '1' %}
@@ -166,36 +162,81 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     conda update -yq --all
 
 {% if WITHOUT_PYTORCH is not defined %}
-    # Clone pytorch
-    PYTORCH_VER=2.6.0
+    # Figure out compiler and version to see if we build torch or use prebuilt torch
+    COMPILER=$(mpicxx -show | awk '{ print $1 }')
+    BUILD_PYTORCH=1
+    BUILD_PYTORCH_CCXXFLAGS=""
+    BUILD_PYTORCH_FLAGS=()
+    BUILD_PYTORCH_PATCHES=()
+    if [ "$COMPILER" == "g++" ]; then
+        BUILD_PYTORCH_CCXXFLAGS="-Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict"
+        if [[ $(gcc --version) =~ [0-9]+.[0-9]+(.[0-9]+?) ]]; then
+            GCC_VERSION="${BASH_REMATCH[0]}"
+        else
+            echo "Failed to parse GCC version"
+            exit 1
+        fi
+        # GCC supported for 2.6.0 after GCC 9.3
+        if [ "$(printf '%s\n' "9.3" "$GCC_VERSION" | sort -V | head -n1)" != "9.3" ]; then
+            BUILD_PYTORCH=
+        fi
+    elif [ "$COMPILER" == "clang++" ]; then
+        # FBGEMM requires AVX512, which we don't get with clang
+        BUILD_PYTORCH_FLAGS+=("-DUSE_FBGEMM:BOOL=OFF")
+        # See github.com/pytorch/pytorch/issues/151316
+        BUILD_PYTORCH_PATCHES+=("${ROOT_BUILD_DIR}/pytorch_clang.patch")
+    else
+        echo "Unknown compiler $COMPILER"
+        exit 1
+    fi
+
+    if [ -n "$BUILD_PYTORCH" ]; then
+        # Clone pytorch for build
+        PYTORCH_VER=2.6.0
+        cd ${ROOT_BUILD_DIR}
+        git clone --branch v${PYTORCH_VER} --single-branch --recursive https://github.com/pytorch/pytorch
+        cd pytorch
+        PYTORCH_DIR=$(pwd)
+        # Apply patches
+        for patch in "${BUILD_PYTORCH_PATCHES[@]}"; do
+            git apply "$patch"
+        done
+        cd "$ROOT_BUILD_DIR"
+
+        # Create a temporary python environment for building pytorch
+        PYTORCH_CONDA_ENV=pytorch_build
+        conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.11
+        source activate ${MOOSE_MINIFORGE}/envs/${PYTORCH_CONDA_ENV}
+        pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
+        conda install cmake=3.31.6
+
+        # Build and install pytorch
+        PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
+        mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
+        CFLAGS="$BUILD_PYTORCH_CCXXFLAGS" CXXFLAGS="$BUILD_PYTORCH_CCXXFLAGS" cmake \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DCMAKE_BUILD_TYPE:STRING=Release \
+            -DCMAKE_INSTALL_PREFIX:PATH={{ LIBTORCH_DIR }} \
+            "${BUILD_PYTORCH_FLAGS[@]}" \
+            ${PYTORCH_DIR}
+        cmake --build . --target install -- -j ${MOOSE_JOBS}
+
+        # Cleanup the temporary python environment
+        source deactivate
+        conda env remove -n ${PYTORCH_CONDA_ENV}
+        rm -rf ${PYTORCH_DIR} ${PYTORCH_BUILD_DIR}
+    else
+        # Install from the script, we should only be doing this for CPU
+        LIBTORCH_VER=2.1.0
+        if [ -n "$CUDA_DIR" ]; then
+            echo "Should not use precompiled torch with cuda"
+            exit 1
+        fi
+        ${ROOT_BUILD_DIR}/setup_libtorch.sh --version=${LIBTORCH_VER} --libtorch-dest="$(dirname {{ LIBTORCH_DIR }})" --libtorch-distribution=cpu --cleanup
+    fi
+
     cd ${ROOT_BUILD_DIR}
-    git clone --branch v${PYTORCH_VER} --single-branch --recursive https://github.com/pytorch/pytorch
-    PYTORCH_DIR=${ROOT_BUILD_DIR}/pytorch
-
-    # Create a temporary python environment for building pytorch
-    PYTORCH_CONDA_ENV=pytorch_build
-    conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.11
-    source activate ${MOOSE_MINIFORGE}/envs/${PYTORCH_CONDA_ENV}
-    pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
-    conda install cmake=3.31.6
-
-    # Build and install pytorch
-    PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
-    mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
-    CFLAGS="-Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict" \
-        CXXFLAGS="-Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict" \
-        cmake \
-        -DBUILD_SHARED_LIBS:BOOL=ON \
-        -DCMAKE_BUILD_TYPE:STRING=Release \
-        -DCMAKE_INSTALL_PREFIX:PATH={{ LIBTORCH_DIR }} ${PYTORCH_DIR}
-    cmake --build . --target install -- -j ${MOOSE_JOBS}
     export LIBTORCH_DIR={{ LIBTORCH_DIR }}
-
-    # Cleanup the temporary python environment
-    source deactivate
-    conda env remove -n ${PYTORCH_CONDA_ENV}
-    rm -rf ${PYTORCH_DIR} ${PYTORCH_BUILD_DIR}
-    cd ${ROOT_BUILD_DIR}
 
     # TODO: Use a separate WITH_NEML2 for this stuff, or something like that
     # neml2 variables
@@ -325,7 +366,10 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # mfem
     {{ MOOSE_DIR }}/scripts/{{ MFEM_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ MFEM_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/{{ CONDUIT_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ CONDUIT_BUILD_SCRIPT }}
-{%- if WITH_LIBTORCH %}
+{% if WITHOUT_PYTORCH is not defined %}
+    # libtorch
+    {{ MOOSE_DIR }}/scripts/setup_libtorch.sh {{ ROOT_BUILD_DIR }}/setup_libtorch.sh
+    {{ FILES_DIR }}/pytorch_clang.patch {{ ROOT_BUILD_DIR }}/pytorch_clang.patch
     # neml2
     {{ MOOSE_DIR }}/scripts/configure_neml2.sh {{ ROOT_BUILD_DIR }}/configure_neml2.sh
     {{ MOOSE_DIR }}/scripts/{{ NEML2_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ NEML2_BUILD_SCRIPT }}
