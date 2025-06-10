@@ -1173,3 +1173,31 @@ bda476600e034d573d0bf2632f617a2d49794a42: #30485; Update mfem, libmesh, nlohmann
   wasp:
     full_version: 2025.05.13_0
     hash: 43d14da
+f54525955323c9b7a6f4f322f5f1c56c47bbe9bb: #30382; Support:Python 3.13, Drop:Python 3.9,Peacock
+  libmesh:
+    full_version: 2025.05.23_1
+    hash: 8c8b525
+  libmesh-vtk:
+    full_version: 9.4.2_3
+    hash: 6bb1cee
+  moose-dev:
+    full_version: 2025.06.10
+    hash: 55ed3dd
+  mpi:
+    full_version: 2025.06.10
+    hash: c4aae82
+  petsc:
+    full_version: 3.23.0.6.gd9d7fd11dca_2
+    hash: 830a9db
+  pprof:
+    full_version: 2025.06.10
+    hash: 0fc7cfa
+  seacas:
+    full_version: 2025.05.22_0
+    hash: '1278418'
+  tools:
+    full_version: 2025.06.10
+    hash: 12a015c
+  wasp:
+    full_version: 2025.05.13_1
+    hash: da55579
