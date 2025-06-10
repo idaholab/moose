@@ -6,6 +6,10 @@
   parallel_type = replicated
 []
 
+[Problem]
+  use_hash_table_matrix_assembly = true
+[]
+
 [Variables]
   [u]
   []
