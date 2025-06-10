@@ -44,7 +44,7 @@ protected:
   void accumulateNeighbor() override;
   virtual void accumulateNeighborLower() override;
   virtual void accumulateLower() override;
-  virtual void accumulate() override{};
+  virtual void accumulate() override {};
 
   virtual void compute(ResidualObject &) override { mooseError("Not implemented"); };
   void compute(KernelBase & kernel) override;
