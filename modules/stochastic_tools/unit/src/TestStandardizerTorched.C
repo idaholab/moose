@@ -52,6 +52,7 @@ TEST(StochasticToolsTorched, getDestandardized)
 
   StochasticToolsTorched::StandardizerTorched torch;
   torch.computeSet(input_tensor);
+  torch.getStandardized(input_tensor);
   torch.getDestandardized(input_tensor);
   for (unsigned int i = 0; i < gold.size(); ++i)
   {
