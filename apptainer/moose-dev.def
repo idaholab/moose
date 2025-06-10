@@ -90,7 +90,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
 
 {% if WITHOUT_PYTORCH is not defined %}
-    export LIBTORCH_DIR={{ LIBTOCH_DIR }}
+    export LIBTORCH_DIR={{ LIBTORCH_DIR }}
     export NEML2_DIR={{ NEML2_DIR }}
     # Adding this to not get GPU initialization errors from MPICH
     export MPIR_CVAR_ENABLE_GPU=0
