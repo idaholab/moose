@@ -7,9 +7,112 @@
 
     [IC_for_newlyactivated_nodes]
       type = 'Exodiff'
-      input = 'external_moving_boundary_polynomial.i'
-      exodiff = 'external_moving_boundary_polynomial_out.e external_moving_boundary_polynomial_out.e-s002 external_moving_boundary_polynomial_out.e-s003 external_moving_boundary_polynomial_out.e-s004'
+      input = 'external_moving_boundary_npr.i'
+      exodiff = 'external_moving_boundary_npr_out.e external_moving_boundary_npr_out.e-s002 external_moving_boundary_npr_out.e-s003 external_moving_boundary_npr_out.e-s004'
       detail = 'set initial condition on the newly-activated nodes during simulation'
+    []
+    [IC_for_newlyactivated_nodes_two_variables_different_IC]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable.i'
+      exodiff = 'external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable_out.e external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable_out.e-s002 external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable_out.e-s003 external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable_out.e-s004'
+      detail = 'User can set different initial conditions for different variables on the newly-activated nodes during simulation.
+                In this case, the initial condition for variable diff is follow nodal patch recovery, while the initial condition for variable diff2 is set to 10.0.'
+    []
+    [IC_for_newlyactivated_nodes_two_variables_same_IC]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_two_variables_npr_for_both.i'
+      exodiff = 'external_moving_boundary_npr_two_variables_npr_for_both_out.e external_moving_boundary_npr_two_variables_npr_for_both_out.e-s002 external_moving_boundary_npr_two_variables_npr_for_both_out.e-s003 external_moving_boundary_npr_two_variables_npr_for_both_out.e-s004'
+      detail = 'User can set same initial conditions for different variables on the newly-activated nodes during simulation. When setting only one ic_strategy, but two nodal_patch_recovery_uo, the same initial condition will be applied to both variables in nodal_patch_recovery_uo.'
+    []
+    [IC_for_newlyactivated_nodes_two_variables_normal_setting]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_two_variables_npr_normal_set.i'
+      exodiff = 'external_moving_boundary_npr_two_variables_npr_normal_set_out.e external_moving_boundary_npr_two_variables_npr_normal_set_out.e-s002 external_moving_boundary_npr_two_variables_npr_normal_set_out.e-s003 external_moving_boundary_npr_two_variables_npr_normal_set_out.e-s004'
+      detail = 'User can follow the normal approach to set IC: basically, the same vector size for ic_strategy, ic_variables, and nodal_patch_recovery_uo.'
+    []
+    [npr_element_not_specified_by_user]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_elem_not_provide.i'
+      exodiff = 'external_moving_boundary_npr_elem_not_provide_out.e external_moving_boundary_npr_elem_not_provide_out.e-s002'
+      detail = 'the system especially in the nodal patch recovery UO, the user can set `use_specific_elements = false` which the system will build matrix and vector used for nodal patch recovery using all elements that are block restricted.'
+    []
+
+    [IC_default]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_no_unsolved_blocks_all_IC_default.i'
+      exodiff = 'external_moving_boundary_no_unsolved_blocks_all_IC_default_out.e external_moving_boundary_no_unsolved_blocks_all_IC_default_out.e-s002 external_moving_boundary_no_unsolved_blocks_all_IC_default_out.e-s003 external_moving_boundary_no_unsolved_blocks_all_IC_default_out.e-s004'
+      detail = 'the system should run if the user set `ic_strategy` to be `IC_DEFAULT` and do not set any `nodal_patch_recovery_uo` or `unsolved_blocks`.'
+    []
+
+    [IC_for_newlyactivated_nodes_quad9]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_Quad9.i'
+      exodiff = 'external_moving_boundary_npr_Quad9_out.e external_moving_boundary_npr_Quad9_out.e-s002 external_moving_boundary_npr_Quad9_out.e-s003 external_moving_boundary_npr_Quad9_out.e-s004'
+      detail = 'set initial condition on the newly-activated nodes during simulation even for higher order elements.'
+    []
+
+
+  []
+
+  [error_test]
+    requirement = 'The system shall throw an error if the user sets (a) invalid ic_strategy name is provided (b) ic_strategy size not equal to 1, but also not equal to the size of ic_variables or nodal_patch_recovery_uo.'
+    [error_ic_strategy_not_valid]
+      type = RunException
+      input = 'ic_strategy_not_valid.i'
+      expect_err = 'Invalid option "IC_POLYNOMIAL_WHOLE" in MooseEnum.'
+      detail = 'ic_strategy is invalid.'
+    []
+    [error_ic_strategy_more_than_ic_variables]
+      type = RunException
+      input = 'external_moving_boundary_npr_two_variables_npr_more_ic_strategy.i'
+      expect_err = "The 'ic_strategy' parameter is not used correctly"
+      detail = 'ic_strategy size not equal to 1, but also not equal to the size of ic_variables or nodal_patch_recovery_uo.'
+    []
+    [npr_element_not_in_block]
+      type = RunException
+      input = 'external_moving_boundary_npr_element_not_in_block.i'
+      expect_err = "Please use nodalPatchRecovery with elements in the block only."
+      detail = 'the system should throw an error if the element user provided to do nodal patch recovery is not being assembled in the nodal patch recovery preprocess.'
+    []
+    [npr_no_UO_in_esm]
+      type = RunException
+      input = 'external_moving_boundary_npr_no_UO_in_esm.i'
+      expect_err = "The 'ic_strategy' parameter is set to use polynomial extrapolation, but no 'nodal_patch_recovery_uo' is specified."
+      detail = 'the system should throw an error if the user set ic_strategy to use polynomial extrapolation without providing a nodal_patch_recovery_uo.'
+    []
+    [npr_no_UO_in_esm_only_one_poly_ic]
+      type = RunException
+      input = 'external_moving_boundary_npr_one_poly_no_UO_in_esm.i'
+      expect_err = "The 'ic_strategy' parameter is set to use polynomial extrapolation, but no 'nodal_patch_recovery_uo' is specified."
+      detail = 'the system should throw an error if the user set one component in ic_strategy to use polynomial extrapolation without providing a nodal_patch_recovery_uo.'
+    []
+
+    [ic_no_unsolved_blocks]
+      type = RunException
+      input = 'external_moving_boundary_no_unsolved_blocks.i'
+      expect_err = "The unsolved_blocks must be set to use the extrapolation strategy."
+      detail = 'the system should throw an error if the user want to do IC extrapolation without providing unsolved_blocks.'
+    []
+
+    [mismatch_IC_poly_npr_UO]
+      type = RunException
+      input = 'external_moving_boundary_mismatch_IC_poly_npr_UO.i'
+      expect_err = "Mismatch between number of IC strategies using polynomial extrapolation and NPR UO"
+      detail = 'the system should throw an error if the user provides an incorrect number of NPR UO for the given IC strategies.'
+    []
+
+    [IC_default_with_unsolved_blocks]
+      type = RunException
+      input = 'external_moving_boundary_all_IC_default_unsolved_block_provided.i'
+      expect_err = "The unsolved_blocks should not be set to use the default strategy."
+      detail = 'the system should throw an error ic_strategy is default but unsolved_blocks is set.'
+    []
+
+    [IC_two_defaults_no_ic_variables]
+      type = RunException
+      input = 'external_moving_two_IC_default.i'
+      expect_err = "The 'ic_strategy' parameter has more than one value, but no 'ic_variables' are specified."
+      detail = 'the system should throw an warning if the user sets more than one ic_strategy but does not provide ic_variables.'
     []
   []
 []
