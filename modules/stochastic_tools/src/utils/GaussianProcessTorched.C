@@ -340,27 +340,25 @@ GaussianProcessTorched::vecToMap(
 
 } // StochasticTools namespace
 
-/*
 template <>
 void
-dataStore(std::ostream & stream, torch::Tensor & decomp, void * context)
+dataStore(std::ostream & stream, std::vector<torch::Tensor> & decomp, void * context)
 {
   // Store the L matrix as opposed to the full matrix to avoid compounding
   // roundoff error and decomposition error
   // torch::Tensor L(decomp.matrixL());
-  torch::Tensor L = decomp;
+  torch::Tensor L = decomp[0];
   dataStore(stream, L, context);
 }
 
 template <>
 void
-dataLoad(std::istream & stream, torch::Tensor & decomp, void * context)
+dataLoad(std::istream & stream, std::vector<torch::Tensor> & decomp, void * context)
 {
   torch::Tensor L;
   dataLoad(stream, L, context);
-  decomp = torch::linalg_cholesky((torch::mm(L, torch::transpose(L, 0, 1))));
+  decomp[0] = torch::linalg_cholesky((torch::mm(L, torch::transpose(L, 0, 1))));
 }
-*/
 
 template <>
 void
@@ -375,9 +373,9 @@ dataStore(std::ostream & stream,
   dataStore(stream, gp_utils.covarNumOutputs(), context);
   dataStore(stream, gp_utils.dependentCovarNames(), context);
   dataStore(stream, gp_utils.dependentCovarTypes(), context);
-  // dataStore(stream, gp_utils.K(), context);
-  // dataStore(stream, gp_utils.KResultsSolve(), context);
-  // dataStore(stream, gp_utils.KCholeskyDecomp(), context);
+  dataStore(stream, gp_utils.K(), context);
+  dataStore(stream, gp_utils.KResultsSolve(), context);
+  dataStore(stream, gp_utils.KCholeskyDecomp(), context);
   dataStore(stream, gp_utils.paramStandardizer(), context);
   dataStore(stream, gp_utils.dataStandardizer(), context);
 }
@@ -395,9 +393,9 @@ dataLoad(std::istream & stream,
   dataLoad(stream, gp_utils.covarNumOutputs(), context);
   dataLoad(stream, gp_utils.dependentCovarNames(), context);
   dataLoad(stream, gp_utils.dependentCovarTypes(), context);
-  // dataLoad(stream, gp_utils.K(), context);
-  // dataLoad(stream, gp_utils.KResultsSolve(), context);
-  // dataLoad(stream, gp_utils.KCholeskyDecomp(), context);
+  dataLoad(stream, gp_utils.K(), context);
+  dataLoad(stream, gp_utils.KResultsSolve(), context);
+  dataLoad(stream, gp_utils.KCholeskyDecomp(), context);
   dataLoad(stream, gp_utils.paramStandardizer(), context);
   dataLoad(stream, gp_utils.dataStandardizer(), context);
 }

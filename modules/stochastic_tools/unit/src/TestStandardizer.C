@@ -42,6 +42,7 @@ TEST(StochasticTools, getDestandardized)
   RealEigenMatrix input{{1.0, -1.0}, {-1.0, 1.0}};
   RealEigenMatrix gold{{1.0, -1.0}, {-1.0, 1.0}};
   eigen.computeSet(input);
+  eigen.getStandardized(input);
   eigen.getDestandardized(input);
   for (unsigned i = 0; i < input.size(); i++)
     EXPECT_EQ(input.data()[i], gold.data()[i]);
