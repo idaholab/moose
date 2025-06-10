@@ -7,7 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import subprocess
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
@@ -15,7 +14,7 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test that --recover returns two passing statuses (part1 and the OK)
         """
-        output = self.runTests('-i', 'always_ok', '--recover')
+        output = self.runTests('-i', 'always_ok', '--recover').output
 
         self.assertIn('PART1', output)
         self.assertIn('RECOVER', output)
@@ -29,9 +28,5 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test that --recover still checks status on Part1 tests
         """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-             self.runTests('-i', 'exception_transient', '--recover')
-
-        e = cm.exception
-        output = e.output
-        self.assertRegex(output, r'test_harness.*?part1.*?FAILED \(CRASH\)')
+        out = self.runTests('-i', 'exception_transient', '--recover', exit_code=128).output
+        self.assertRegex(out, r'test_harness.*?part1.*?FAILED \(CRASH\)')

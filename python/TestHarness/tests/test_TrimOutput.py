@@ -7,7 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import subprocess
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
@@ -15,14 +14,14 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Verify output exceeded buffer, and is therfore trimmed
         """
-        output = self.runTests('--no-color', '-i', 'trimmed_output', '-v')
+        output = self.runTests('--no-color', '-i', 'trimmed_output', '-v').output
         self.assertIn('Output trimmed', output)
 
     def testNoTrimOutput(self):
         """
         Verify trimming did not take place
         """
-        output = self.runTests('--no-color', '-i', 'always_ok', '-v')
+        output = self.runTests('--no-color', '-i', 'always_ok', '-v').output
         self.assertNotIn('Output trimmed', output)
 
     def testNoTrimmedOutputOnError(self):
@@ -30,8 +29,5 @@ class TestHarnessTester(TestHarnessTestCase):
         Verify trimming does not take place with a failed test using
         appropriate arguments
         """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('--no-color', '-i', 'no_trim_on_error', '--no-trimmed-output-on-error', '-v')
-
-        e = cm.exception
-        self.assertNotIn('Output trimmed', e.output)
+        output = self.runTests('--no-color', '-i', 'no_trim_on_error', '--no-trimmed-output-on-error', '-v', exit_code=128).output
+        self.assertNotIn('Output trimmed', output)

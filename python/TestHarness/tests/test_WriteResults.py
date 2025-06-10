@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import json, os, subprocess, tempfile
+import json, os, tempfile
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
@@ -17,18 +17,15 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         self.setUp()
 
-    def checkFilesExist(self, output_dir, tests, output_object_names, spec_file, unique_test_id=None):
+    def checkFilesExist(self, result, tests, output_object_names, spec_file, unique_test_id=None):
         # The directories within the test directory where these tests reside
         test_folder = os.path.join('tests', 'test_harness')
         # The complete path to the directory where the tests reside
         test_base_path = os.path.join(os.getenv('MOOSE_DIR'), 'test', test_folder)
         # The complete path where the output should reside
-        output_base_path = os.path.join(output_dir, test_folder)
+        output_base_path = os.path.join(result.harness.options.output_dir, test_folder)
 
-        # Load the previous results
-        with open(os.path.join(output_dir, '.previous_test_results.json')) as f:
-            results = json.load(f)
-        test_results = results['tests']
+        test_results = result.results['tests']
         # The test folder should be in the results
         test_spec_results = test_results[test_folder]
         # The number of tests in the test spec should be the number provided
@@ -57,10 +54,9 @@ class TestHarnessTester(TestHarnessTestCase):
     def testWriteAll(self):
         """ Test write all output files --sep-files """
         with tempfile.TemporaryDirectory() as output_dir:
-            with self.assertRaises(subprocess.CalledProcessError):
-                self.runTests('--no-color', '-i', 'diffs', '--sep-files', '-o', output_dir, tmp_output=False)
-            self.checkFilesExist(output_dir, ['csvdiff', 'exodiff'], ['runner_run', 'tester'], 'diffs')
+            result = self.runTests('--no-color', '-i', 'diffs', '--sep-files', '-o', output_dir, tmp_output=False, exit_code=129)
+            self.checkFilesExist(result, ['csvdiff', 'exodiff'], ['runner_run', 'tester'], 'diffs')
 
         with tempfile.TemporaryDirectory() as output_dir:
-            self.runTests('--no-color', '-i', 'always_ok', '--sep-files', '-o', output_dir, tmp_output=False)
-            self.checkFilesExist(output_dir, ['always_ok'], ['runner_run'], 'always_ok', unique_test_id='foo')
+            result = self.runTests('--no-color', '-i', 'always_ok', '--sep-files', '-o', output_dir, tmp_output=False)
+            self.checkFilesExist(result, ['always_ok'], ['runner_run'], 'always_ok', unique_test_id='foo')

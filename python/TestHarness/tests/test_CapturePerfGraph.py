@@ -12,7 +12,7 @@ import os
 
 class CapturePerfGraph(TestHarnessTestCase):
     def test(self):
-        out = self.runTests('-i', 'always_ok', '--capture-perf-graph', as_json=True)
+        out = self.runTests('-i', 'always_ok', '--capture-perf-graph').results
         test = out['tests']['tests/test_harness']['tests']['always_ok']
         status = test['status']
         self.assertEqual(status['status'], 'OK')
