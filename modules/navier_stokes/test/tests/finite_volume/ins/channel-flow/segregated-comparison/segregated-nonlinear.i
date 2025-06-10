@@ -171,5 +171,5 @@ pressure_tag = "pressure_grad"
 
 [Outputs]
   exodus = true
-  execute_on = FINAL
+  execute_on = TIMESTEP_END
 []

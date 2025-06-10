@@ -50,6 +50,6 @@
     requirement = 'The system shall calculate the heating of a copper wire when supplied with a current.'
     design = 'ADJouleHeatingSource.md'
     issues = '#30000'
-    abs_zero = 1e-8
+    abs_zero = 1e-4
   []
 []

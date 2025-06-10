@@ -1,0 +1,39 @@
+[Tests]
+  issues = '#27493'
+  design = 'NEML2/index.md NEML2Action.md'
+  [plasticity]
+    requirement = 'The system shall be capable of interfacing with the NEML2 library to perform constitutive update for plastic materials with'
+    [perfect]
+      detail = 'perfect plasticity, '
+      type = Exodiff
+      input = 'perfect.i'
+      exodiff = 'perfect_out.e'
+      capabilities = 'neml2'
+      valgrind = heavy
+    []
+    [isoharden]
+      detail = 'isotropic hardening, '
+      type = Exodiff
+      input = 'isoharden.i'
+      exodiff = 'isoharden_out.e'
+      capabilities = 'neml2'
+      valgrind = heavy
+    []
+    [kinharden]
+      detail = 'kinematic hardening, '
+      type = Exodiff
+      input = 'kinharden.i'
+      exodiff = 'kinharden_out.e'
+      capabilities = 'neml2'
+      valgrind = heavy
+    []
+    [isokinharden]
+      detail = 'and both isotropic and kinematic hardening.'
+      type = Exodiff
+      input = 'isokinharden.i'
+      exodiff = 'isokinharden_out.e'
+      capabilities = 'neml2'
+      valgrind = heavy
+    []
+  []
+[]

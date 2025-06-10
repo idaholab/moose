@@ -72,7 +72,7 @@ MooseVecView(NumericVector<Number> & vector)
 void
 MooseMatView(SparseMatrix<Number> & mat)
 {
-  PetscMatrix<Number> & petsc_mat = static_cast<PetscMatrix<Number> &>(mat);
+  PetscMatrixBase<Number> & petsc_mat = static_cast<PetscMatrix<Number> &>(mat);
   LibmeshPetscCallA(mat.comm().get(), MatView(petsc_mat.mat(), 0));
 }
 
@@ -87,7 +87,7 @@ MooseVecView(const NumericVector<Number> & vector)
 void
 MooseMatView(const SparseMatrix<Number> & mat)
 {
-  PetscMatrix<Number> & petsc_mat =
+  PetscMatrixBase<Number> & petsc_mat =
       static_cast<PetscMatrix<Number> &>(const_cast<SparseMatrix<Number> &>(mat));
   LibmeshPetscCallA(mat.comm().get(), MatView(petsc_mat.mat(), 0));
 }
@@ -523,6 +523,14 @@ processSingletonMooseWrappedOptions(FEProblemBase & fe_problem, const InputParam
   setMFFDTypeFromParams(fe_problem, params);
 }
 
+#define checkPrefix(prefix)                                                                        \
+  mooseAssert(prefix[0] == '-',                                                                    \
+              "Leading prefix character must be a '-'. Current prefix is '" << prefix << "'");     \
+  mooseAssert((prefix.size() == 1) || (prefix.back() == '_'),                                      \
+              "Terminating prefix character must be a '_'. Current prefix is '" << prefix << "'"); \
+  mooseAssert(MooseUtils::isAllLowercase(prefix),                                                  \
+              "PETSc prefixes should be all lower-case. What are you, a crazy person?")
+
 void
 storePetscOptions(FEProblemBase & fe_problem,
                   const std::string & prefix,
@@ -604,12 +612,6 @@ setMFFDTypeFromParams(FEProblemBase & fe_problem, const InputParameters & params
   }
 }
 
-#define checkPrefix(prefix)                                                                        \
-  mooseAssert(prefix[0] == '-',                                                                    \
-              "Leading prefix character must be a '-'. Current prefix is '" << prefix << "'");     \
-  mooseAssert((prefix.size() == 1) || (prefix.back() == '_'),                                      \
-              "Terminating prefix character must be a '_'. Current prefix is '" << prefix << "'")
-
 template <typename T>
 void
 checkUserProvidedPetscOption(const T & option, const ParallelParamObject & param_object)
@@ -644,23 +646,6 @@ addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags,
       mooseError("The PETSc option \"-log_summary\" or \"-log_view\" can only be used on the "
                  "command line.  Please "
                  "remove it from the input file");
-
-    // Warn about superseded PETSc options (Note: -snes is not a REAL option, but people used it in
-    // their input files)
-    else
-    {
-      std::string help_string;
-      if (option == "-snes" || option == "-snes_mf" || option == "-snes_mf_operator")
-        help_string = "Please set the solver type through \"solve_type\".";
-      else if (option == "-ksp_monitor")
-        help_string = "Please use \"Outputs/print_linear_residuals=true\"";
-
-      if (help_string != "")
-        mooseWarning("The PETSc option ",
-                     string_option,
-                     " should not be used directly in a MOOSE input file. ",
-                     help_string);
-    }
 
     // Update the stored items, but do not create duplicates
     const std::string prefixed_option = prefix + string_option.substr(1);
@@ -1202,6 +1187,24 @@ dontAddCommonSNESOptions(FEProblemBase & fe_problem)
   for (const auto & key : getCommonSNESKeys().getNames())
     if (!petsc_options.dont_add_these_options.contains(key))
       petsc_options.dont_add_these_options.setAdditionalValue(key);
+}
+
+std::unique_ptr<PetscMatrix<Number>>
+createMatrixFromFile(const libMesh::Parallel::Communicator & comm,
+                     Mat & mat,
+                     const std::string & binary_mat_file,
+                     const unsigned int mat_number_to_load)
+{
+  LibmeshPetscCallA(comm.get(), MatCreate(comm.get(), &mat));
+  PetscViewer matviewer;
+  LibmeshPetscCallA(
+      comm.get(),
+      PetscViewerBinaryOpen(comm.get(), binary_mat_file.c_str(), FILE_MODE_READ, &matviewer));
+  for (unsigned int i = 0; i < mat_number_to_load; ++i)
+    LibmeshPetscCallA(comm.get(), MatLoad(mat, matviewer));
+  LibmeshPetscCallA(comm.get(), PetscViewerDestroy(&matviewer));
+
+  return std::make_unique<PetscMatrix<Number>>(mat, comm);
 }
 
 } // Namespace PetscSupport

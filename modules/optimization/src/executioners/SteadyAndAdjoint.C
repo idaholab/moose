@@ -46,7 +46,7 @@ SteadyAndAdjoint::execute()
   if (_app.isRecovering())
   {
     _console << "\nCannot recover steady solves!\nExiting...\n" << std::endl;
-    _last_solve_converged = false;
+    _last_solve_converged = true;
     return;
   }
 

@@ -146,6 +146,7 @@ inlet_scalar = 1.2
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu       NONZERO'
   nl_rel_tol = 1e-9
+  nl_abs_tol = 5e-10
   nl_max_its = 50
   line_search = 'none'
 

@@ -1,10 +1,34 @@
 [Tests]
-  issues = '#22809'
+  issues = '#22809 #30618'
   design = '/auxkernels/ArrayVarReductionAux.md'
-  [test]
-    type = 'Exodiff'
-    input = 'array_var_reduction.i'
-    exodiff = 'array_var_reduction_out.e'
-    requirement = 'The system shall provide a way to reduce values in an array variable to a single variable using max/min/sum/average operations.'
+  [array_var_reduction]
+    requirement = 'The system shall provide a way to reduce values in an array variable to a single variable'
+    [test_basic_operations]
+      type = 'Exodiff'
+      input = 'array_var_reduction.i'
+      exodiff = 'array_var_reduction_out.e'
+      detail = ' using max/min/sum/average operations;'
+    []
+    [test_weights]
+      type = 'Exodiff'
+      input = 'array_var_reduction.i'
+      cli_args = "AuxKernels/sum_aux/weights='0.2 0.1 0.4 0.3' AuxKernels/average_aux/weights='0.1 0.1 0.1 0.1' Outputs/file_base=array_var_reduction_with_weights"
+      exodiff = 'array_var_reduction_with_weights.e'
+      detail = ' with weighted summation or averages;'
+    []
+    [test_weights_error]
+      type = 'RunException'
+      input = 'array_var_reduction.i'
+      cli_args = "AuxKernels/sum_aux/weights='0.2 0.1'"
+      expect_err = "The number of values provided is 2 but the number of components for the variable provided by 'array_variable' is 4"
+      detail = ' and inform a user when inconsistent weights are provided;'
+    []
+    [weights_param_not_valid]
+      type = 'RunException'
+      input = 'array_var_reduction.i'
+      cli_args = "AuxKernels/max_aux/weights='0.2 0.1 0.4 0.3'"
+      expect_err = "Is only meant to be be used when 'value_type' is average or sum"
+      detail = ' and inform a user when the weights param is not valid.'
+    []
   []
 []

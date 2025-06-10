@@ -44,6 +44,14 @@ template <typename>
 class TypeTensor;
 template <typename>
 class TensorValue;
+namespace TensorTools
+{
+template <>
+struct IncrementRank<RankTwoTensor>
+{
+  typedef RankThreeTensor type;
+};
+}
 }
 
 namespace MathUtils

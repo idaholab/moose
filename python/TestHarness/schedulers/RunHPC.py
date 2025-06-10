@@ -406,6 +406,8 @@ class RunHPC(RunParallel):
                                    'PLACE': tester.getHPCPlace(options)})
             if hold:
                 submission_env['HOLD'] = 1
+            if tester.isParamValid('hpc_mem_per_cpu'):
+                submission_env['MEM_PER_CPU'] = tester.getParam('hpc_mem_per_cpu')
 
             # Get the unescaped command
             command = tester.getCommand(options)

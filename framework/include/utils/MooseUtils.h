@@ -1196,6 +1196,22 @@ isFloat(const std::string & str)
  * Gets the canonical path of the given path
  */
 std::string canonicalPath(const std::string & path);
+
+/**
+ * @returns Whether the \p string1 starts with \p string2
+ */
+bool startsWith(const std::string & string1, const std::string & string2);
+
+/**
+ * Replace the starting string \p string2 of \p string1 with \p string3. A user should have checked
+ * that \p string1 \p startsWith \p string2
+ */
+void replaceStart(std::string & string1, const std::string & string2, const std::string & string3);
+
+/**
+ * @returns whether every alphabetic character in a string is lower-case
+ */
+bool isAllLowercase(const std::string & str);
 } // MooseUtils namespace
 
 namespace Moose

@@ -555,8 +555,10 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
     def _addItems(self, parent, info, page, group, objects, base=None):
 
         count = 0
+        obj_name_set = set()
         for obj in objects:
-            if (group in obj.groups()) and not (obj.removed or obj.test):
+            if (group in obj.groups()) and not (obj.removed or obj.test) and not (obj.name, obj.markdown) in obj_name_set:
+                obj_name_set.add((obj.name, obj.markdown))
                 count += 1
                 item = SyntaxListItem(parent, group=group, syntax=obj.name)
                 if base:

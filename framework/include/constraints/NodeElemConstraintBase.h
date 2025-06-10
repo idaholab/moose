@@ -115,7 +115,7 @@ protected:
 
 public:
   /// system Jacobian, provides pre-constraint Jacobian for nonAD kinematic constraints
-  SparseMatrix<Number> * _jacobian;
+  const SparseMatrix<Number> * _jacobian;
   /// dofs connected to the secondary node
   std::vector<dof_id_type> _connected_dof_indices;
   /// stiffness matrix holding primary-secondary jacobian

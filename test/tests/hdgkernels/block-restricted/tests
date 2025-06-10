@@ -1,0 +1,19 @@
+[Tests]
+  design = '/HDGKernels/index.md'
+  issues = '#30038'
+  [block_restriction]
+    requirement = 'The system shall be able to generate the same answer to a diffusion problem discretized using the hybridized discontinuous Galerkin method when'
+    [no_block_restriction]
+      type = CSVDiff
+      input = non-block-restricted.i
+      csvdiff = non-block-restricted_out.csv
+      detail = 'there is no subdomain block restriction and when'
+    []
+    [block_restriction]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      detail = 'there is subdomain block restriction.'
+    []
+  []
+[]

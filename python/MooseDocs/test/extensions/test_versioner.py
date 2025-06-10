@@ -24,6 +24,7 @@ class TestTemplate(MooseDocsTestCase):
     EXTENSIONS = [core, command, versioner]
 
     def setUp(self):
+      super().setUp()
       self.packages = Versioner().get_packages('HEAD')
 
     def setupExtension(self, ext):

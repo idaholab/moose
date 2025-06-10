@@ -461,7 +461,7 @@ class TestAlertWithCode(MooseDocsTestCase):
         self.assertHTMLString(res(0)(4), content='code')
         self.assertHTMLString(res(0)(5), content='.')
 
-        self.assertHTMLTag(res(1), 'pre', size=1, class_='', style='')
+        self.assertHTMLTag(res(1), 'pre', size=1, class_='', style='max-height:350px;')
         self.assertHTMLTag(res(1)(0), 'code', size=1, class_='language-cpp')
         self.assertHTMLString(res(1)(0)(0), content='\nintx;\n')
 

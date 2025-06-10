@@ -161,7 +161,7 @@ public:
    */
   void setCoupling(Moose::CouplingType type);
 
-  Moose::CouplingType coupling() { return _coupling; }
+  Moose::CouplingType coupling() const { return _coupling; }
 
   /**
    * Set custom coupling matrix
@@ -788,9 +788,6 @@ public:
   virtual void addBoundaryCondition(const std::string & bc_name,
                                     const std::string & name,
                                     InputParameters & parameters);
-  virtual void addHDGIntegratedBC(const std::string & kernel_name,
-                                  const std::string & name,
-                                  InputParameters & parameters);
   virtual void
   addConstraint(const std::string & c_name, const std::string & name, InputParameters & parameters);
 
@@ -1882,6 +1879,11 @@ public:
   MaterialData & getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid = 0);
 
   /**
+   * @returns Whether the original matrix nonzero pattern is restored before each Jacobian assembly
+   */
+  bool restoreOriginalNonzeroPattern() const { return _restore_original_nonzero_pattern; }
+
+  /**
    * Will return True if the user wants to get an error when
    * a nonzero is reallocated in the Jacobian by PETSc
    */
@@ -2565,7 +2567,6 @@ protected:
   ScalarInitialConditionWarehouse _scalar_ics; // use base b/c of setup methods
   ///@}
 
-protected:
   // material properties
   MaterialPropertyRegistry _material_prop_registry;
   MaterialPropertyStorage & _material_props;
@@ -2829,6 +2830,10 @@ protected:
   // loop state during projection of initial conditions
   unsigned short _current_ic_state;
 
+  /// Whether to assemble matrices using hash tables instead of preallocating matrix memory. This
+  /// can be a good option if the sparsity pattern changes throughout the course of the simulation
+  const bool _use_hash_table_matrix_assembly;
+
 private:
   /**
    * Handle exceptions. Note that the result of this call will be a thrown MooseException. The
@@ -2895,6 +2900,11 @@ private:
   // Parameters handling Jacobian sparsity pattern behavior
   /// Whether to error when the Jacobian is re-allocated, usually because the sparsity pattern changed
   bool _error_on_jacobian_nonzero_reallocation;
+  /// Whether we should restore the original nonzero pattern for every Jacobian evaluation. This
+  /// option is useful if the sparsity pattern is constantly changing and you are using hash table
+  /// assembly or if you wish to continually restore the matrix to the originally preallocated
+  /// sparsity pattern computed by relationship managers.
+  const bool _restore_original_nonzero_pattern;
   /// Whether to ignore zeros in the Jacobian, thereby leading to a reduced sparsity pattern
   bool _ignore_zeros_in_jacobian;
   /// Whether to preserve the system matrix / Jacobian sparsity pattern, using 0-valued entries usually

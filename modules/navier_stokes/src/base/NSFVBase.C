@@ -216,6 +216,15 @@ NSFVBase::commonFluidEnergyEquationParams()
       "Functions for fixed-value boundaries in the energy equation.");
 
   MultiMooseEnum en_wall_types("fixed-temperature heatflux wallfunction convection");
+  en_wall_types.addDocumentation("fixed-temperature",
+                                 "Set a constant fluid temperature on the wall");
+  en_wall_types.addDocumentation("heatflux", "Set a constant heat flux on the wall");
+  en_wall_types.addDocumentation(
+      "wallfunction",
+      "Use a wall function, defined by the turbulence Physics, to compute the wall heat flux");
+  en_wall_types.addDocumentation("convection",
+                                 "Computes the heat transfer as h(T_fluid - T_solid), where h "
+                                 "generally computed using a correlation");
   params.addParam<MultiMooseEnum>(
       "energy_wall_types", en_wall_types, "Types for the wall boundaries for the energy equation.");
 

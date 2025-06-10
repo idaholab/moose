@@ -54,9 +54,9 @@
   []
 
   [parallel_exception_initial_condition]
-    type = RunApp
+    type = RunException
     input = 'parallel_exception_initial_condition.i'
-    expect_out = 'MooseException thrown during initial condition computation'
+    expect_err = 'MooseException thrown during initial condition computation'
 
     requirement = 'The system shall support throwing an exception during the initial condition calculation, which will terminate the solve.'
   []

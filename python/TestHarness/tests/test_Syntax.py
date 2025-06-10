@@ -16,22 +16,22 @@ class TestHarnessTester(TestHarnessTestCase):
         """
 
         # Test that the SYNTAX PASS status message properly displays
-        output = self.runTests('-i', 'syntax')
+        output = self.runTests('-i', 'syntax').output
         self.assertIn('SYNTAX PASS', output)
 
         # Test that the SYNTAX PASS status message properly displays
-        output = self.runTests('--check-input', '-i', 'syntax')
+        output = self.runTests('--check-input', '-i', 'syntax').output
         self.assertIn('SYNTAX PASS', output)
 
         # Check that the _non_ SYNTAX test was not run
-        output = self.runTests('--check-input', '-i', 'no_syntax')
+        output = self.runTests('--check-input', '-i', 'no_syntax').output
         self.assertNotIn('SYNTAX PASS', output)
 
         # Check that _thee_ SYNTAX test is not run
-        output = self.runTests('--no-check-input', '-i', 'syntax')
+        output = self.runTests('--no-check-input', '-i', 'syntax').output
         self.assertNotIn('SYNTAX PASS', output)
 
         # Check that it is skipped when running valgrind
-        output = self.runTests('--valgrind', '-i', 'syntax')
-        self.assertIn('CHECK_INPUT==TRUE', output)
-        self.checkStatus(output, skipped=1)
+        result = self.runTests('--valgrind', '-i', 'syntax')
+        self.assertIn('CHECK_INPUT==TRUE', result.output)
+        self.checkStatus(result.harness, skipped=1)

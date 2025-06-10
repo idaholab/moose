@@ -9,7 +9,7 @@
 
 #include "GeneralFluidProps.h"
 #include "NS.h" // Variable Term Names
-#include "DimensionlessFlowNumbers.h"
+#include "HeatTransferUtils.h"
 #include "NavierStokesMethods.h"
 #include "SinglePhaseFluidProperties.h"
 
@@ -92,7 +92,7 @@ GeneralFluidProps::computeQpProperties()
 
   static constexpr Real small_number = 1e-8;
 
-  _Pr[_qp] = fp::prandtl(_cp[_qp], _mu[_qp], std::max(_k[_qp], small_number));
+  _Pr[_qp] = HeatTransferUtils::prandtl(_cp[_qp], _mu[_qp], std::max(_k[_qp], small_number));
   _dPr_dp[_qp] = NS::prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu[_qp]),
                                                MetaPhysicL::raw_value(_cp[_qp]),
                                                MetaPhysicL::raw_value(_k[_qp]),
@@ -109,8 +109,9 @@ GeneralFluidProps::computeQpProperties()
   // (pore / particle) Reynolds number based on superficial velocity and
   // characteristic length. Only call Reynolds() one time to compute all three so that
   // we don't redundantly check that viscosity is not too close to zero.
-  _Re[_qp] = std::max(
-      fp::reynolds(_rho[_qp], _eps[_qp] * _speed[_qp], _d, std::max(_mu[_qp], small_number)), 1.0);
+  _Re[_qp] = std::max(HeatTransferUtils::reynolds(
+                          _rho[_qp], _eps[_qp] * _speed[_qp], _d, std::max(_mu[_qp], small_number)),
+                      1.0);
   _dRe_dp[_qp] = NS::reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re[_qp]),
                                                 MetaPhysicL::raw_value(_rho[_qp]),
                                                 MetaPhysicL::raw_value(_mu[_qp]),

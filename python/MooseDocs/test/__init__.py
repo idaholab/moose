@@ -8,10 +8,11 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import unittest
-import collections
+import mooseutils
+from mock import patch
 from MooseDocs.common import load_extensions
 from MooseDocs import base
-from MooseDocs.tree import tokens, pages, html, latex
+from MooseDocs.tree import pages, html, latex
 from MooseDocs.extensions import command
 
 class MooseDocsTestCase(unittest.TestCase):
@@ -22,6 +23,9 @@ class MooseDocsTestCase(unittest.TestCase):
     READER = base.MarkdownReader
     RENDERER = base.HTMLRenderer
     EXECUTIONER = base.Serial
+
+    RUN_EXE_CACHE = {}
+    ORIG_RUN_EXE = mooseutils.runExe
 
     def __init__(self, *args, **kwargs):
         super(MooseDocsTestCase, self).__init__(*args, **kwargs)
@@ -52,6 +56,22 @@ class MooseDocsTestCase(unittest.TestCase):
         self.__translator = base.Translator(content, reader, renderer, ext, executioner)
         self.__translator.init()
         self.__translator.execute() # This is required to setup the meta data
+
+    def setUp(self):
+        # Wrap mooseutils.runExe so that we don't call the application
+        # with the same arguments more than once. The first time with
+        # a given set of arguments, it'll run the app. Every time after
+        # that, it'll use the cache
+        def run_exe_cached(app_path, args):
+            key = app_path + ''.join(args)
+            cache = MooseDocsTestCase.RUN_EXE_CACHE
+            if key not in cache:
+                result = MooseDocsTestCase.ORIG_RUN_EXE(app_path, args)
+                cache[key] = result
+            return cache[key]
+        patcher = patch.object(mooseutils, 'runExe', wraps=run_exe_cached)
+        self.addCleanup(patcher.stop)
+        self.mock_run_cmd = patcher.start()
 
     def setupExtension(self, ext):
         """Virtual method for child objects to update extension configuration."""

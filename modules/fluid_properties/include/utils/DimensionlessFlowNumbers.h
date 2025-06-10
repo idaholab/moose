@@ -96,4 +96,6 @@ ADReal thermalDiffusivity(const ADReal & k, const ADReal & rho, const ADReal & c
 Real peclet(Real vel, Real L, Real diffusivity);
 ADReal peclet(const ADReal & vel, const ADReal & L, const ADReal & diffusivity);
 
+void deprecatedMessage();
+
 } // namespace fp

@@ -344,6 +344,18 @@ FEProblemBase::validParams()
       "If we catch an exception during residual/Jacobian evaluaton for which we don't have "
       "specific handling, immediately error instead of allowing the time step to be cut");
 
+  params.addParam<bool>("use_hash_table_matrix_assembly",
+                        false,
+                        "Whether to assemble matrices using hash tables instead of preallocating "
+                        "matrix memory. This can be a good option if the sparsity pattern changes "
+                        "throughout the course of the simulation.");
+  params.addParam<bool>(
+      "restore_original_nonzero_pattern",
+      "Whether we should reset matrix memory for every Jacobian evaluation. This option is useful "
+      "if the sparsity pattern is constantly changing and you are using hash table assembly or if "
+      "you wish to continually restore the matrix to the originally preallocated sparsity pattern "
+      "computed by relationship managers.");
+
   params.addParamNamesToGroup(
       "skip_nl_system_check kernel_coverage_check kernel_coverage_block_list "
       "boundary_restricted_node_integrity_check "
@@ -352,7 +364,8 @@ FEProblemBase::validParams()
       "material_dependency_check check_uo_aux_state error_on_jacobian_nonzero_reallocation",
       "Simulation checks");
   params.addParamNamesToGroup("use_nonlinear previous_nl_solution_required nl_sys_names "
-                              "ignore_zeros_in_jacobian identify_variable_groups_in_nl",
+                              "ignore_zeros_in_jacobian identify_variable_groups_in_nl "
+                              "use_hash_table_matrix_assembly restore_original_nonzero_pattern",
                               "Nonlinear system(s)");
   params.addParamNamesToGroup(
       "restart_file_base force_restart allow_initial_conditions_with_restart", "Restart");
@@ -476,10 +489,14 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _line_search(nullptr),
     _using_ad_mat_props(false),
     _current_ic_state(0),
+    _use_hash_table_matrix_assembly(getParam<bool>("use_hash_table_matrix_assembly")),
     _error_on_jacobian_nonzero_reallocation(
         isParamValid("error_on_jacobian_nonzero_reallocation")
             ? getParam<bool>("error_on_jacobian_nonzero_reallocation")
             : _app.errorOnJacobianNonzeroReallocation()),
+    _restore_original_nonzero_pattern(isParamValid("restore_original_nonzero_pattern")
+                                          ? getParam<bool>("restore_original_nonzero_pattern")
+                                          : _use_hash_table_matrix_assembly),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
     _preserve_matrix_sparsity_pattern(true),
     _force_restart(getParam<bool>("force_restart")),
@@ -3010,22 +3027,6 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
   setResidualObjectParamsAndLog(
       bc_name, name, parameters, nl_sys_num, "BoundaryCondition", _reinit_displaced_face);
   _nl[nl_sys_num]->addBoundaryCondition(bc_name, name, parameters);
-}
-
-void
-FEProblemBase::addHDGIntegratedBC(const std::string & bc_name,
-                                  const std::string & name,
-                                  InputParameters & parameters)
-{
-  parallel_object_only();
-  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
-  if (!isSolverSystemNonlinear(nl_sys_num))
-    mooseError("You are trying to add a HDGIntegratedBC to a linear variable/system, which is not "
-               "supported at the moment!");
-  setResidualObjectParamsAndLog(
-      bc_name, name, parameters, nl_sys_num, "BoundaryCondition", _reinit_displaced_face);
-
-  _nl[nl_sys_num]->addHDGIntegratedBC(bc_name, name, parameters);
 }
 
 void
@@ -6941,7 +6942,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
         {
           auto & matrix = _current_nl_sys->getMatrix(tag);
           matrix.zero();
-          if (haveADObjects())
+          if (haveADObjects() && !assembly(0, _current_nl_sys->number()).hasStaticCondensation())
             // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
             // diagonal dependence. With global AD indexing we only add non-zero
             // dependence, so PETSc will scream at us unless we artificially add the diagonals.
@@ -7325,8 +7326,11 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
           if (_current_nl_sys->hasMatrix(tag))
           {
             auto & matrix = _current_nl_sys->getMatrix(tag);
-            matrix.zero();
-            if (haveADObjects())
+            if (_restore_original_nonzero_pattern)
+              matrix.restore_original_nonzero_pattern();
+            else
+              matrix.zero();
+            if (haveADObjects() && !assembly(0, _current_nl_sys->number()).hasStaticCondensation())
               // PETSc algorithms require diagonal allocations regardless of whether there is
               // non-zero diagonal dependence. With global AD indexing we only add non-zero
               // dependence, so PETSc will scream at us unless we artificially add the diagonals.

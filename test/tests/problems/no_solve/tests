@@ -10,9 +10,9 @@
     design = 'Problem/index.md'
   [../]
   [eigen_problem_solve_fail]
-    type = 'RunApp'
+    type = 'RunException'
     requirement = 'The system shall inform the user when the nonlinear-eigen system solve failed.'
-    expect_out = 'Aborting as solve did not converge'
+    expect_err = 'Aborting as solve did not converge'
     input = 'ne_fail.i'
     design = 'Problem/index.md'
     issues = '#27084'

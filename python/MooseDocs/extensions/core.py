@@ -414,14 +414,16 @@ class RenderHeading(components.RenderComponent):
 
 class RenderCode(components.RenderComponent):
     def createReveal(self, parent, token, page):
-        return self.createHTML(parent, token, page, code_style='font-size:65%')
+        # Reveal will oddly end up with double code blocks if we put
+        # the style within the pre entry; style_in_pre=False puts
+        # the style within the code entry
+        return self.createHTML(parent, token, page, style='font-size:65%', style_in_pre=False)
 
-    def createHTML(self, parent, token, page, code_style=''):
+    def createHTML(self, parent, token, page, style='', style_in_pre=True):
         language = 'language-{}'.format(token['language'])
-        code_style = f'max-height:{token["max_height"]};{code_style}'
-
-        pre = html.Tag(parent, 'pre', token)
-        code = html.Tag(pre, 'code', class_=language, style=code_style)
+        style = f'max-height:{token["max_height"]};{style}'
+        pre = html.Tag(parent, 'pre', token, style=(style if style_in_pre else ''))
+        code = html.Tag(pre, 'code', class_=language, style=('' if style_in_pre else style))
         html.String(code, content=token['content'], escape=token['escape'])
         return pre
 

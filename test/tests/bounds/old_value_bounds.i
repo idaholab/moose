@@ -112,13 +112,19 @@
   []
 []
 
+[Preconditioning]
+  [smp]
+    type = SMP
+    petsc_options_iname = '-snes_type'
+    petsc_options_value = 'vinewtonrsls'
+  []
+[]
+
 [Executioner]
   type = Transient
   num_steps = 2
 
   solve_type = 'PJFNK'
-  petsc_options_iname = '-snes_type'
-  petsc_options_value = 'vinewtonrsls'
 []
 
 [Outputs]

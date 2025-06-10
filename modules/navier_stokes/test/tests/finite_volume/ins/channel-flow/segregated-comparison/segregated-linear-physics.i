@@ -75,5 +75,5 @@ advected_interp_method = 'average'
 
 [Outputs]
   exodus = true
-  execute_on = FINAL
+  execute_on = TIMESTEP_END
 []

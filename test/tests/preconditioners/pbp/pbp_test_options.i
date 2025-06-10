@@ -92,7 +92,7 @@
   type = Steady
 
   l_max_its = 1
-  nl_max_its = 1
+  nl_max_its = 2
 
   solve_type = JFNK
 []
