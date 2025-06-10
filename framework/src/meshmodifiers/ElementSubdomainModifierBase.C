@@ -80,7 +80,7 @@ ElementSubdomainModifierBase::validParams()
   params.addParam<std::vector<VariableName>>(
       "ic_variables", {}, "Which variables to set IC on the newly activated nodes. ");
 
-  MooseEnum ic_strategy("IC_DEFAULT IC_EXTRAPOLATE_FIRST_LAYER IC_POLYNOMIAL "
+  MooseEnum ic_strategy("IC_DEFAULT IC_POLYNOMIAL "
                         "IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN IC_POLYNOMIAL_THRESHOLD",
                         "IC_DEFAULT");
 
@@ -888,13 +888,6 @@ ElementSubdomainModifierBase::applyIC(bool displaced)
           reinitializedElemRange(displaced),
           reinitializedBndNodeRange(displaced),
           {_ic_vars_number[i]});
-    else if (_ic_strategy[i] == ICStrategy::IC_EXTRAPOLATE_FIRST_LAYER)
-    {
-      computeFirstLayerNeighborInfo(_fe_problem.getNonlinearSystemBase(_sys.number()),
-                                    _ic_vars_number[i]);
-      setInverseDistWeighSolutionsOnNewlyActivatedNodes(
-          _fe_problem.getNonlinearSystemBase(_sys.number()), _ic_vars_number[i]);
-    }
     else if (_ic_strategy[i] == ICStrategy::IC_POLYNOMIAL ||
              _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
              _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_THRESHOLD)
@@ -1046,126 +1039,6 @@ ElementSubdomainModifierBase::setOldAndOlderSolutions(SystemBase & sys,
   old_solution.close();
   if (older_solution)
     older_solution->close();
-}
-
-void
-ElementSubdomainModifierBase::computeFirstLayerNeighborInfo(SystemBase & sys,
-                                                            const unsigned int var_num)
-{
-
-  // Access solution for postprocessing
-  NumericVector<Number> & ghosted = sys.solution();
-  ghosted.close();
-
-  NumericVector<Number> & serial = sys.serializedSolution();
-  ghosted.localize(serial);
-
-  NumericVector<Number> & current_solution = serial;
-
-  DofMap & dof_map = sys.dofMap();
-
-  for (const auto & newly_activated_node_id : _newactivated_nodes)
-  {
-    const Node * newly_activated_node = _mesh.nodePtr(newly_activated_node_id);
-    if (!newly_activated_node)
-    {
-      mooseWarning("Node pointer is null for node ID {}", newly_activated_node_id);
-      continue;
-    }
-
-    // find the DOF corresponding to the solution variable
-    std::vector<dof_id_type> dofs_on_newly_activated_node;
-    dof_map.dof_indices(newly_activated_node, dofs_on_newly_activated_node, var_num);
-
-    Point newly_activated_node_pos = *newly_activated_node;
-
-    const auto & first_layer_elems = _mesh.nodeToElemMap().at(newly_activated_node_id);
-    std::set<const Node *> first_layer_nodes;
-
-    for (auto elem_id : first_layer_elems)
-    {
-      if (_unsolved_block_ids.count(_mesh.elemPtr(elem_id)->subdomain_id()))
-        continue;
-
-      const Elem * elem = _mesh.elemPtr(elem_id);
-      for (unsigned int i = 0; i < elem->n_nodes(); ++i)
-      {
-        const Node * node = elem->node_ptr(i);
-
-        if (node)
-        {
-          // Exclude newly activated nodes
-          if (std::find(_complete_global_activated_nodes.begin(),
-                        _complete_global_activated_nodes.end(),
-                        node->id()) == _complete_global_activated_nodes.end())
-            first_layer_nodes.insert(node);
-        }
-      }
-    }
-
-    // Only use first layer neighbors
-    std::set<const Node *> selected_nodes = first_layer_nodes;
-
-    NeighborInfo info;
-    DofMap & dof_map = sys.dofMap();
-
-    for (const Node * node : selected_nodes)
-    {
-
-      std::vector<libMesh::dof_id_type> nodal_dofs;
-      dof_map.dof_indices(node, nodal_dofs, var_num);
-      Real solution_value = current_solution(nodal_dofs[0]);
-
-      const Real dist = (*node - newly_activated_node_pos).norm();
-
-      info.solution_values.push_back(solution_value);
-      info.distances.push_back(dist);
-    }
-
-    _newlyactivated_node_var_dof_to_first_layer_neighbors_info[dofs_on_newly_activated_node[0]] =
-        std::move(info);
-  }
-}
-
-void
-ElementSubdomainModifierBase::setInverseDistWeighSolutionsOnNewlyActivatedNodes(
-    SystemBase & sys, const unsigned int var_num)
-{
-  NumericVector<Number> & current_solution = sys.solution();
-
-  DofMap & dof_map = sys.dofMap();
-
-  // loop over the newly activated nodes
-  for (auto point_dof_id : _newactivated_nodes)
-  {
-    Node * node = _mesh.nodePtr(point_dof_id);
-
-    // find the DOF corresponding to the solution variable
-    std::vector<dof_id_type> dofs_on_newly_activated_node;
-    dof_map.dof_indices(node, dofs_on_newly_activated_node, var_num);
-
-    // inverse weighted average the solution values of the first layer neighbors
-    auto info_extrapolation_pt =
-        _newlyactivated_node_var_dof_to_first_layer_neighbors_info[dofs_on_newly_activated_node[0]];
-
-    int extrapolation_point_number = info_extrapolation_pt.distances.size();
-
-    Real weighted_averaged_solution = 0.0;
-    Real weighted_averaged_denominator = 0.0;
-
-    for (int pt_idx = 0; pt_idx < extrapolation_point_number; ++pt_idx)
-    {
-      auto & solutions_extrapolation_pt = info_extrapolation_pt.solution_values[pt_idx];
-      auto & distances_extrapolation_pt = info_extrapolation_pt.distances[pt_idx];
-
-      weighted_averaged_solution += solutions_extrapolation_pt / distances_extrapolation_pt;
-      weighted_averaged_denominator += 1.0 / distances_extrapolation_pt;
-    }
-
-    current_solution.set(dofs_on_newly_activated_node[0],
-                         weighted_averaged_solution / weighted_averaged_denominator);
-  }
-  current_solution.close();
 }
 
 void

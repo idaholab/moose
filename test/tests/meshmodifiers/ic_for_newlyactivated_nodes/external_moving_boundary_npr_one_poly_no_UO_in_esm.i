@@ -56,7 +56,7 @@
 
     # --- new for setting IC --- #
     unsolved_blocks = '2'
-    ic_strategy = "IC_DEFAULT IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN IC_EXTRAPOLATE_FIRST_LAYER"
+    ic_strategy = "IC_DEFAULT IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN IC_DEFAULT"
   []
 []
 

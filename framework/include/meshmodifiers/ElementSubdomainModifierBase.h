@@ -18,7 +18,6 @@
 enum class ICStrategy
 {
   IC_DEFAULT,
-  IC_EXTRAPOLATE_FIRST_LAYER,
   IC_POLYNOMIAL,
   IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN,
   IC_POLYNOMIAL_THRESHOLD
@@ -169,9 +168,6 @@ private:
   /// Range of reinitialized boundary nodes on the displaced mesh
   std::unique_ptr<ConstBndNodeRange> _reinitialized_displaced_bnd_node_range;
 
-  /// @brief Map from newly activated node DOF ID (note: different variables, such as u, v, T, disp, have different DOF IDs) to a NeighborInfo structure containing distances and solution values.
-  std::map<dof_id_type, NeighborInfo> _newlyactivated_node_var_dof_to_first_layer_neighbors_info;
-
   /// @brief Set of newly activated nodes
   std::unordered_set<dof_id_type> _newactivated_nodes;
   std::unordered_set<dof_id_type> _first_pass_local_activated_nodes;
@@ -201,11 +197,6 @@ private:
 
   /// @brief List of neighbor elements that share nodes with reinitialized elements
   std::vector<dof_id_type> _solved_elem_ids_for_npr;
-
-  /// @brief find the first layer of neighbors for each element
-  /// @param sys
-  /// @param var_num Variable number (e.g., disp, u, v) for which to compute neighbor information
-  void computeFirstLayerNeighborInfo(SystemBase & sys, const unsigned int var_num);
 
   /**
    * * Check if the node is newly activated.
@@ -277,10 +268,6 @@ private:
 
   /// @brief Radius search threshold for k-d tree search
   double _radius_search_threshold = -1;
-
-  /// Using weighted averaging to obtain the solution on the newly-activated nodes
-  void setInverseDistWeighSolutionsOnNewlyActivatedNodes(SystemBase & sys,
-                                                         const unsigned int var_num);
 
   /// Perform a global MPI gather of reinitialized element IDs across all processors.
   /// Results are stored in `_global_reinitialized_elems`.
