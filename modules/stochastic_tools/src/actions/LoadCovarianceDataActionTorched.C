@@ -118,7 +118,7 @@ LoadCovarianceDataActionTorched::load(GaussianProcessSurrogateTorched & model)
         covar_params.set<std::vector<Real>>(param) = vec_map_it->second;
     }
 
-  auto covar_object = _problem->addObject<CovarianceFunctionBase>(
+  auto covar_object = _problem->addObject<CovarianceFunctionBaseTorched>(
       covar_type, covar_name, covar_params, /* threaded = */ false);
   covar_object[0]->loadHyperParamMap(map, vec_map);
 
