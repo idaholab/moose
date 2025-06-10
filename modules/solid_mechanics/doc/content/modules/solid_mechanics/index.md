@@ -97,7 +97,6 @@ introductory theory pages on the various models:
 - [Reduced Order Models](/LAROMANCE.md)
 - [Frequency Domain Dynamics](/1d_elastic_waves.md)
 - [Isogeometric Analysis](solid_mechanics/examples/cframe_iga.md)
-- [NEML2 material models](solid_mechanics/NEML2.md)
 !col-end!
 !row-end!
 

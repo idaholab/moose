@@ -120,7 +120,7 @@ fi
 # opt   <--> Release
 # devel <--> RelWithDebInfo
 # dbg   <--> Debug
-# oprof <--> RelWithDebInfo + NEML2_CPU_PROFILER=ON
+# oprof <--> Profiling
 METHODS=${METHODS:-opt,dbg}
 if [[ -n "$METHOD" ]]; then
   METHODS=$METHOD
@@ -197,7 +197,7 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
   elif [[ ${METHOD} == "dbg" ]]; then
     CMAKE_BUILD_TYPE="Debug"
   elif [[ ${METHOD} == "oprof" ]]; then
-    CMAKE_BUILD_TYPE="RelWithDebInfo"
+    CMAKE_BUILD_TYPE="Profiling"
   else
     echo "Error: Unknown build method ${METHOD}"
     exit 1

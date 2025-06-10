@@ -102,7 +102,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.05.23
+    version: 2025.06.09
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
@@ -129,6 +129,7 @@ packages:
       - scripts/configure_neml2.sh
       - scripts/update_and_rebuild_neml2.sh
       - framework/contrib/neml2
+      - framework/contrib/neml2.mk
       # mfem
       - framework/contrib/conduit
       - framework/contrib/mfem

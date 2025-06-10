@@ -440,6 +440,10 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_mfem_solver", "add_mfem_preconditioner");
   addTaskDependency("add_mfem_solver", "add_mfem_problem_operator");
 #endif
+
+  registerTask("parse_neml2", /*required=*/false);
+  addTaskDependency("add_material", "parse_neml2");
+  addTaskDependency("add_user_object", "parse_neml2");
 }
 
 /**
@@ -698,6 +702,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
   registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
 #endif
+
+  registerSyntax("NEML2ActionCommon", "NEML2");
+  registerSyntax("NEML2Action", "NEML2/*");
 
   addActionTypes(syntax);
 }

@@ -41,6 +41,9 @@ GrandPotentialTensorMaterial::GrandPotentialTensorMaterial(const InputParameters
     _dchiDdc(isCoupledConstant(_c_name)
                  ? nullptr
                  : &declarePropertyDerivative<RealTensorValue>(_chiD_name, _c_name)),
+    _dchiDdgradc(isCoupledConstant(_c_name)
+                     ? nullptr
+                     : &declarePropertyDerivative<RankThreeTensor>(_chiD_name, "gradc")),
     _Ls_name(getParam<std::string>("solid_mobility")),
     _Ls(declareProperty<Real>(_Ls_name)),
     _Lv_name(getParam<std::string>("void_mobility")),
@@ -75,6 +78,8 @@ GrandPotentialTensorMaterial::computeProperties()
     _chiD[_qp] = _D[_qp] * _chi[_qp];
     if (_dchiDdc)
       (*_dchiDdc)[_qp] = (*_dDdc)[_qp] * _chi[_qp] + _D[_qp] * _dchidc[_qp];
+    if (_dchiDdgradc)
+      (*_dchiDdgradc)[_qp] = (*_dDdgradc)[_qp] * _chi[_qp];
     for (unsigned int i = 0; i < _op_num; ++i)
       if (_dchiDdeta[i])
         (*_dchiDdeta[i])[_qp] = _D[_qp] * (*_dchideta[i])[_qp] + (*_dDdeta[i])[_qp] * _chi[_qp];

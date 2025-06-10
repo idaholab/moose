@@ -1142,3 +1142,34 @@ bda476600e034d573d0bf2632f617a2d49794a42: #30485; Update mfem, libmesh, nlohmann
   wasp:
     full_version: 2025.05.13_0
     hash: 43d14da
+751d3c169c2c49eee6275c796745d3e942d7f775: #30696; Update neml2
+  libmesh:
+    full_version: 2025.05.23_0
+    hash: 982ea19
+  libmesh-vtk:
+    full_version: 9.4.2_2
+    hash: 042bd0b
+  moose-dev:
+    full_version: 2025.06.09
+    hash: 851e6ad
+  mpi:
+    full_version: 2025.04.17
+    hash: a9161d1
+  peacock:
+    full_version: 2025.04.17
+    hash: a231b10
+  petsc:
+    full_version: 3.23.0.6.gd9d7fd11dca_1
+    hash: ff9a7ec
+  pprof:
+    full_version: 2025.04.17_0
+    hash: f8fd1e3
+  seacas:
+    full_version: 2025.02.27_1
+    hash: 5d0701b
+  tools:
+    full_version: 2025.04.17
+    hash: 827cc6f
+  wasp:
+    full_version: 2025.05.13_0
+    hash: 43d14da

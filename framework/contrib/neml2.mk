@@ -30,12 +30,24 @@ endif
 ifeq ($(ENABLE_NEML2),true)
 ifneq ($(ENABLE_LIBTORCH),true)
 $(warning ******************************************************************************************)
-$(warning Found a NEML2 installation at $(NEML2_DIR), but libtorch is not enabled. )
-$(warning Disabling NEML2. To enable NEML2, please configure MOOSE following the instructions at )
-$(warning https://mooseframework.inl.gov/getting_started/installation/install_libtorch.html)
+$(warning Found a NEML2 installation at $(NEML2_DIR), but libtorch is not enabled. Therefore disabling NEML2. )
+$(warning To enable NEML2, please configure MOOSE with libtorch. See more details at:)
+$(warning https://mooseframework.inl.gov/getting_started/installation/install_neml2.html)
 $(warning ******************************************************************************************)
 ENABLE_NEML2 = false
 endif
+endif
+
+################################################################################
+# Helper target to check if NEML2 is enabled
+################################################################################
+.PHONY: check_neml2
+check_neml2:
+ifeq ($(ENABLE_NEML2),true)
+	@echo "NEML2 is enabled"
+	@echo "NEML2 directory: $(NEML2_DIR)"
+else
+	@echo "NEML2 is disabled"
 endif
 
 ################################################################################
@@ -53,7 +65,7 @@ endif
 ifeq ($(METHOD),devel)
 NEML2_SUFFIX := _RelWithDebInfo
 else ifeq ($(METHOD),oprof)
-NEML2_SUFFIX := _RelWithDebInfo
+NEML2_SUFFIX := _Profiling
 else ifeq ($(METHOD),dbg)
 NEML2_SUFFIX := _Debug
 endif
@@ -84,7 +96,10 @@ NEML2_LIB_FILES  := $(addprefix $(NEML2_LIB_DIR)/lib,$(addsuffix .$(DYLIB_SUFFIX
 # Compile flags for NEML2
 neml2_INCLUDES    += $(addprefix -iquote,$(NEML2_INCLUDE))
 neml2_CPPFLAGS    += -DNEML2_ENABLED
-neml2_LDFLAGS     += $(NO_AS_NEEDED_FLAG) -Wl,-rpath,$(NEML2_LIB_DIR) -L$(NEML2_LIB_DIR) $(NEML2_LINK_FLAGS)
+ifeq ($(HAVE_NO_AS_NEEDED),yes)
+  neml2_LDFLAGS += $(NO_AS_NEEDED_FLAG)
+endif
+neml2_LDFLAGS     += -Wl,-rpath,$(NEML2_LIB_DIR) -L$(NEML2_LIB_DIR) $(NEML2_LINK_FLAGS)
 libmesh_CXXFLAGS  += $(neml2_CPPFLAGS)
 libmesh_INCLUDE   += $(neml2_INCLUDES)
 libmesh_LIBS      += $(neml2_LDFLAGS)
