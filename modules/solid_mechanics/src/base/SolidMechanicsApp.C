@@ -19,9 +19,6 @@ SolidMechanicsApp::validParams()
   params.set<bool>("automatic_automatic_scaling") = false;
   params.set<bool>("use_legacy_material_output") = false;
   params.set<bool>("use_legacy_initial_residual_evaluation_behavior") = false;
-  params.addCommandLineParam<bool>("parse_neml2_only",
-                                   "--parse-neml2-only",
-                                   "Executes the [NEML2] block in the input file and terminate.");
   return params;
 }
 
@@ -33,35 +30,6 @@ SolidMechanicsApp::SolidMechanicsApp(const InputParameters & parameters) : Moose
 }
 
 SolidMechanicsApp::~SolidMechanicsApp() {}
-
-void
-SolidMechanicsApp::setupOptions()
-{
-  MooseApp::setupOptions();
-
-  if (getInputFileNames().size())
-  {
-    if (getParam<bool>("parse_neml2_only"))
-    {
-      // Let parse_neml2 run before anything else, and stop after that.
-      syntax().registerTaskName("parse_neml2");
-      syntax().addDependency("determine_system_type", "parse_neml2");
-      actionWarehouse().setFinalTask("parse_neml2");
-    }
-  }
-}
-
-void
-SolidMechanicsApp::runInputFile()
-{
-  MooseApp::runInputFile();
-
-  if (getParam<bool>("parse_neml2_only"))
-  {
-    _early_exit_param = "--parse-neml2-only";
-    _ready_to_exit = true;
-  }
-}
 
 static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
@@ -184,12 +152,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerTask("validate_coordinate_systems", /*is_required=*/false);
   addTaskDependency("validate_coordinate_systems", "create_problem_complete");
   addTaskDependency("setup_postprocessor_data", "validate_coordinate_systems");
-
-  registerTask("parse_neml2", /*required=*/false);
-  syntax.addDependency("add_material", "parse_neml2");
-  syntax.addDependency("add_user_object", "parse_neml2");
-  registerSyntax("NEML2ActionCommon", "NEML2");
-  registerSyntax("NEML2Action", "NEML2/*");
 }
 
 void
@@ -204,13 +166,6 @@ SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 void
 SolidMechanicsApp::registerApps()
 {
-  const std::string doc = "New Engineering Material model Library, version 2 ";
-#ifdef NEML2_ENABLED
-  addCapability("neml2", true, doc + "is available.");
-#else
-  addCapability("neml2", false, doc + "is not available.");
-#endif
-
   registerApp(SolidMechanicsApp);
 }
 

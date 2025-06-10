@@ -42,7 +42,6 @@ function configure_neml2()
     -DNEML2_RUNNER=OFF \
     -DNEML2_PYBIND=OFF \
     -DNEML2_DOC=OFF \
-    -DNEML2_CPU_PROFILER=OFF \
     -DNEML2_WORK_DISPATCHER=ON \
     -DNEML2_JSON=OFF \
     -DTorch_ROOT="$(get_variable LIBTORCH_DIR)" \
