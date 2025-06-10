@@ -1,5 +1,8 @@
-[Mesh]
+[Problem]
+  use_hash_table_matrix_assembly = true
+[]
 
+[Mesh]
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
