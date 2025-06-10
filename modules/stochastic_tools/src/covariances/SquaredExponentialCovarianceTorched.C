@@ -86,6 +86,7 @@ SquaredExponentialCovarianceTorched::SquaredExponentialFunction(
     if (is_self_covariance)
       K_accessor[ii][ii] += sigma_n_squared;
   }
+  K = K.to(at::kDouble);
 }
 
 bool
