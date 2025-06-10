@@ -1,10 +1,23 @@
 [Tests]
   design = 'ParsedPostprocessor.md'
-  issues = '#3447 #5954 #17901'
+  issues = '#3447 #5954 #17901 #30689'
   [test]
     type = 'CSVDiff'
     input = 'parsed_pp.i'
     csvdiff = 'parsed_pp_out.csv'
     requirement = 'The system shall be able to compute a postprocessor based on a parsed expression of other postprocessors.'
+  []
+  [pp_symbols]
+    prereq = test
+    type = 'CSVDiff'
+    input = 'pp_symbols.i'
+    csvdiff = 'parsed_pp_out.csv'
+    requirement = 'The system shall be able to compute a postprocessor based on a parsed expression of other postprocessors using postprocessor symbol inputs.'
+  []
+  [pp_symbols_invalid_length]
+    type = RunException
+    input = pp_symbols_invalid_length.i
+    expect_err = 'pp_symbols must be the same length as pp_names.'
+    requirement = 'The system shall detect when the given number of inut symbols does not match the number of postprocessor names adn will report an error.'
   []
 []

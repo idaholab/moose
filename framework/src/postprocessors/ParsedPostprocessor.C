@@ -23,6 +23,8 @@ ParsedPostprocessor::validParams()
 
   params.addParam<std::vector<PostprocessorName>>("pp_names", {}, "Post-processors arguments");
   params.addParam<std::vector<std::string>>(
+      "pp_symbols", {}, "Symbol associated with each post-processor argument");
+  params.addParam<std::vector<std::string>>(
       "constant_names",
       {},
       "Vector of constants used in the parsed function (use this for kB etc.)");
@@ -47,10 +49,23 @@ ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
   // build postprocessors argument
   std::string postprocessors;
 
-  // coupled  postprocessors
+  const std::vector<std::string> pp_symbols = getParam<std::vector<std::string>>("pp_symbols");
+  // sanity checks
+  if (!pp_symbols.empty() && (pp_symbols.size() != _n_pp))
+    paramError("pp_symbols", "pp_symbols must be the same length as pp_names.");
+
+  // coupled  postprocessors with capacity for symbol inputs
   std::vector<PostprocessorName> pp_names = getParam<std::vector<PostprocessorName>>("pp_names");
-  for (std::size_t i = 0; i < _n_pp; ++i)
-    postprocessors += (i == 0 ? "" : ",") + pp_names[i];
+  if (pp_symbols.empty())
+  {
+    for (std::size_t i = 0; i < _n_pp; ++i)
+      postprocessors += (i == 0 ? "" : ",") + pp_names[i];
+  }
+  else
+  {
+    for (std::size_t i = 0; i < _n_pp; ++i)
+      postprocessors += (i == 0 ? "" : ",") + pp_symbols[i];
+  }
 
   // add time if required
   if (_use_t)
