@@ -223,6 +223,23 @@ dataStore(std::ostream & stream, RealEigenMatrix & v, void * context)
     }
 }
 
+template <>
+void
+dataStore(std::ostream & stream, torch::Tensor & t, void * context)
+{
+  unsigned int m = t.sizes()[0];
+  stream.write((char *)&m, sizeof(m));
+  unsigned int n = t.sizes()[1];
+  stream.write((char *)&n, sizeof(n));
+  for (unsigned int i = 0; i < m; i++)
+    for (unsigned int j = 0; j < n; j++)
+    {
+      auto t_accessor = t.accessor<Real, 2>();
+      Real r = t_accessor[i][j];
+      dataStore(stream, r, context);
+    }
+}
+
 template <typename T>
 void
 dataStore(std::ostream & stream, TensorValue<T> & v, void * context)
@@ -567,6 +584,26 @@ dataLoad(std::istream & stream, RealEigenMatrix & v, void * context)
       Real r = 0;
       dataLoad(stream, r, context);
       v(i, j) = r;
+    }
+}
+
+template <>
+void
+dataLoad(std::istream & stream, torch::Tensor & t, void * context)
+{
+  // t = t.to(at::kDouble);
+  unsigned int m = t.sizes()[0];
+  stream.read((char *)&m, sizeof(m));
+  unsigned int n = t.sizes()[1];
+  stream.read((char *)&n, sizeof(n));
+  t = torch::empty({m, n}, at::kDouble);
+  auto t_accessor = t.accessor<Real, 2>();
+  for (unsigned int i = 0; i < m; i++)
+    for (unsigned int j = 0; j < n; j++)
+    {
+      Real r = 0;
+      dataLoad(stream, r, context);
+      t_accessor[i][j] = r;
     }
 }
 

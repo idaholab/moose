@@ -87,10 +87,14 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
 
   RealEigenMatrix K_train_test(_training_params.rows() * n_outputs, n_outputs);
 
+  std::cout << "K_train_test before:" << std::endl << K_train_test << std::endl;
   _gp.getCovarFunction().computeCovarianceMatrix(
       K_train_test, _training_params, test_points, false);
+  std::cout << "K_train_test after:" << std::endl << K_train_test << std::endl;
   RealEigenMatrix K_test(n_outputs, n_outputs);
+  std::cout << "K_test before:" << std::endl << K_test << std::endl;
   _gp.getCovarFunction().computeCovarianceMatrix(K_test, test_points, test_points, true);
+  std::cout << "K_test after:" << std::endl << K_test << std::endl;
 
   // Compute the predicted mean value (centered)
   RealEigenMatrix pred_value = (K_train_test.transpose() * _gp.getKResultsSolve()).transpose();

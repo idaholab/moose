@@ -289,12 +289,10 @@ protected:
 
 } // StochasticTools namespac
 
-/*
 template <>
-void dataStore(std::ostream & stream, torch::Tensor & decomp, void * context);
+void dataStore(std::ostream & stream, std::vector<torch::Tensor> & decomp, void * context);
 template <>
-void dataLoad(std::istream & stream, torch::Tensor & decomp, void * context);
-*/
+void dataLoad(std::istream & stream, std::vector<torch::Tensor> & decomp, void * context);
 
 template <>
 void dataStore(std::ostream & stream,

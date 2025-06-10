@@ -73,6 +73,12 @@ void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void
 template <>
 void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
 
+// Make a torch::tensor version of the above dataStore/dataLoad
+template <>
+void dataStore(std::ostream & stream, std::vector<torch::Tensor> & decomp, void * context);
+template <>
+void dataLoad(std::istream & stream, std::vector<torch::Tensor> & decomp, void * context);
+
 template <typename T, typename... Args>
 T &
 RestartableModelInterface::declareModelData(const std::string & data_name, Args &&... args)

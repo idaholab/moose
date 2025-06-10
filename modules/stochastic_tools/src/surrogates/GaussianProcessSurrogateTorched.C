@@ -103,10 +103,14 @@ GaussianProcessSurrogateTorched::evaluate(const std::vector<Real> & x,
   torch::Tensor K_train_test =
       torch::empty({_training_params.rows() * n_outputs, n_outputs}).to(at::kDouble);
 
+  std::cout << "K_train_test before:" << std::endl << K_train_test << std::endl;
   _gp.getCovarFunction().computeCovarianceMatrix(
       K_train_test, training_tensor_transposed, tensor_points, false);
+  std::cout << "K_train_test after:" << std::endl << K_train_test << std::endl;
   torch::Tensor K_test = torch::empty({n_outputs, n_outputs}).to(at::kDouble);
+  std::cout << "K_test before:" << std::endl << K_test << std::endl;
   _gp.getCovarFunction().computeCovarianceMatrix(K_test, tensor_points, tensor_points, true);
+  std::cout << "K_test after:" << std::endl << K_test << std::endl;
 
   //  Compute the predicted mean value (centered)
   torch::Tensor pred_value = torch::transpose(
