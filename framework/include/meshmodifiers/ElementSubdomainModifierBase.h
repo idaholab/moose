@@ -15,21 +15,18 @@
 #include "NodalPatchRecoveryBase.h"
 #include "KDTree.h"
 
-namespace ICStrategyForNewlyActivated
-{
-enum Type
+enum class ICStrategy
 {
   IC_DEFAULT,
   IC_EXTRAPOLATE_FIRST_LAYER,
   IC_POLYNOMIAL,
   IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN,
-  IC_POLYNOMIAL_THRESHOLD,
+  IC_POLYNOMIAL_THRESHOLD
 };
-}
 
 struct NeighborInfo
 {
-  std::vector<std::vector<Real>> solution_values;
+  std::vector<Real> solution_values;
   std::vector<Real> distances;
 };
 
@@ -78,6 +75,12 @@ protected:
 
   /// Boundary names associated with each moving boundary ID
   std::unordered_map<BoundaryID, BoundaryName> _moving_boundary_names;
+
+  /// Nonlinear system
+  NonlinearSystemBase & _nl_sys;
+
+  /// Auxiliary system
+  AuxiliarySystem & _aux_sys;
 
 private:
   /// Create moving boundaries
@@ -166,24 +169,43 @@ private:
   /// Range of reinitialized boundary nodes on the displaced mesh
   std::unique_ptr<ConstBndNodeRange> _reinitialized_displaced_bnd_node_range;
 
-  /// @brief Map from newly-activated node ID to a NeighborInfo structure (distances and solutions)
-  std::map<dof_id_type, NeighborInfo> _newlyactivated_node_to_first_layer_neighbors_info;
+  /// @brief Map from newly activated node DOF ID (note: different variables, such as u, v, T, disp, have different DOF IDs) to a NeighborInfo structure containing distances and solution values.
+  std::map<dof_id_type, NeighborInfo> _newlyactivated_node_var_dof_to_first_layer_neighbors_info;
 
   /// @brief Set of newly activated nodes
   std::unordered_set<dof_id_type> _newactivated_nodes;
   std::unordered_set<dof_id_type> _first_pass_local_activated_nodes;
 
-  std::string _ic_strategy_string;
-  ICStrategyForNewlyActivated::Type _ic_strategy;
+  /// The strategy used to apply IC on newly activated nodes
+  std::vector<ICStrategy> _ic_strategy;
 
   /// Unsolved block names
   std::vector<SubdomainName> _unsolved_blocks;
   /// Unsolved block IDs
   std::set<SubdomainID> _unsolved_block_ids;
 
+  /// @brief Names of the NodalPatchRecoveryBase user objects
+  const std::vector<UserObjectName> _npr_names;
+
+  /// @brief Apply initial conditions using polynomial extrapolation
+  std::vector<const NodalPatchRecoveryBase *> _npr_vec;
+
+  /// @brief List of variable names to be initialized for IC
+  std::vector<VariableName> _ic_vars_names;
+
+  /// @brief List of variable index number to be initialized (used to find corresponding DOFs) for IC
+  std::vector<unsigned int> _ic_vars_number;
+
+  /// @brief map from variable number to the index of the nodal patch recovery user object in `_npr_vec`
+  std::unordered_map<unsigned int, unsigned int> _var_number2_npr_idx;
+
+  /// @brief List of neighbor elements that share nodes with reinitialized elements
+  std::vector<dof_id_type> _solved_elem_ids_for_npr;
+
   /// @brief find the first layer of neighbors for each element
   /// @param sys
-  void computeFirstLayerNeighborInfo(SystemBase & sys);
+  /// @param var_num Variable number (e.g., disp, u, v) for which to compute neighbor information
+  void computeFirstLayerNeighborInfo(SystemBase & sys, const unsigned int var_num);
 
   /**
    * * Check if the node is newly activated.
@@ -234,21 +256,6 @@ private:
   /// true = IC already set; false = IC not yet set.
   std::unordered_map<dof_id_type, bool> _node2IC_set;
 
-  /// @brief Names of the NodalPatchRecoveryBase user objects
-  const std::vector<UserObjectName> _npr_names;
-
-  /// @brief Apply initial conditions using polynomial extrapolation
-  std::vector<const NodalPatchRecoveryBase *> _npr_vec;
-
-  /// @brief List of variable index number to be initialized (used to find corresponding DOFs) from Nodal Patch Recovery UserObjects
-  std::vector<unsigned int> _init_vars_number;
-
-  /// @brief List of variable names to be initialized (for debugging purposes) from Nodal Patch Recovery UserObjects
-  std::vector<VariableName> _init_vars_names;
-
-  /// @brief List of neighbor elements that share nodes with reinitialized elements
-  std::vector<dof_id_type> _solved_elem_ids_for_npr;
-
   /// IC_POLYNOMIAL_THRESHOLD related parameters
   /// @brief Threshold for checking the closeness of element numbers in polynomial extrapolation
   int _nearby_element_threshold = 1;
@@ -272,7 +279,8 @@ private:
   double _radius_search_threshold = -1;
 
   /// Using weighted averaging to obtain the solution on the newly-activated nodes
-  void setCurrentSolutionsOnNewlyActivatedNodes(SystemBase & sys);
+  void setInverseDistWeighSolutionsOnNewlyActivatedNodes(SystemBase & sys,
+                                                         const unsigned int var_num);
 
   /// Perform a global MPI gather of reinitialized element IDs across all processors.
   /// Results are stored in `_global_reinitialized_elems`.
@@ -297,29 +305,11 @@ private:
   /// @brief Identify the processor that is missing the newly activated nodes
   void findMissingNewlyActivatedNodes();
 
-  /// @brief Apply initial conditions for a list of nodes
-  void applyICForNodeList(SystemBase & sys, const std::vector<dof_id_type> & nodes);
-
   /// @brief Apply initial conditions using polynomial nodal patch recovery
   /// @param sys
-  void applyIC_Polynomial(SystemBase & sys);
+  /// @param var_num Variable number (e.g., disp, u, v) for which to apply initial conditions
+  void applyIC_Polynomial(SystemBase & sys, const unsigned int var_num);
 
   /// @brief Gather neighbor elements for newly activated nodes
   void gatherNeighborElementsForActivatedNodes();
-
-  inline ICStrategyForNewlyActivated::Type parseString2ICStrategy(const std::string & input)
-  {
-    if (input == "IC_EXTRAPOLATE_FIRST_LAYER")
-      return ICStrategyForNewlyActivated::IC_EXTRAPOLATE_FIRST_LAYER;
-    else if (input == "IC_DEFAULT")
-      return ICStrategyForNewlyActivated::IC_DEFAULT;
-    else if (input == "IC_POLYNOMIAL")
-      return ICStrategyForNewlyActivated::IC_POLYNOMIAL;
-    else if (input == "IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN")
-      return ICStrategyForNewlyActivated::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN;
-    else if (input == "IC_POLYNOMIAL_THRESHOLD")
-      return ICStrategyForNewlyActivated::IC_POLYNOMIAL_THRESHOLD;
-    else
-      throw std::invalid_argument("Invalid string for ICStrategyForNewlyActivated: " + input);
-  }
 };

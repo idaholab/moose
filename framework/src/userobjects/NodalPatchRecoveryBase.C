@@ -16,6 +16,7 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 #include "libmesh/parallel_eigen.h"
+#include <iomanip>
 
 InputParameters
 NodalPatchRecoveryBase::validParams()
@@ -39,7 +40,7 @@ NodalPatchRecoveryBase::validParams()
   params.addParam<bool>(
       "use_specific_elements", false, "Whether to use specific elements for patch recovery");
 
-  params.addParam<bool>("verbose", false, "Set to true to print coefficients of the polynomial.");
+  params.addParam<bool>("verbose", false, "Set to true to print coefficient of the polynomial.");
 
   return params;
 }
@@ -60,7 +61,6 @@ Real
 NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
                                            const std::vector<dof_id_type> & elem_ids) const
 {
-
   // Developer should sort vector of elem_ids outside of this function to prevent
   // sorting the key vector on every call (expensive).
   std::vector<dof_id_type> key = elem_ids;
@@ -83,6 +83,18 @@ NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
     RealEigenVector b = RealEigenVector::Zero(_q);
     for (auto elem_id : elem_ids)
     {
+
+      if (!hasBlocks(_mesh.elemPtr(elem_id)->subdomain_id()))
+        mooseError("Element with id = ",
+                   elem_id,
+                   " is not in the block. "
+                   "Please use nodalPatchRecovery with elements in the block only.");
+
+      if (_Ae.find(elem_id) == _Ae.end())
+        mooseError("Missing entry for elem_id = ", elem_id, " in _Ae.");
+      if (_be.find(elem_id) == _be.end())
+        mooseError("Missing entry for elem_id = ", elem_id, " in _be.");
+
       A += libmesh_map_find(_Ae, elem_id);
       b += libmesh_map_find(_be, elem_id);
     }
@@ -94,9 +106,12 @@ NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
 
     if (_verbose)
     {
+      _console << std::setprecision(15) << std::scientific;
       for (const auto & coef_i : coef)
         _console << coef_i << " ";
       _console << std::endl;
+
+      _console << std::defaultfloat;
     }
   }
 
@@ -163,12 +178,9 @@ NodalPatchRecoveryBase::finalize()
   // information from other processors in this finalize() method.
 
   // Populate algebraically ghosted elements to query
+  // First issue: getEvaluableElementRange is not block restricted and cause some issues
   if (!_use_specific_elements)
     identifyGhostElementsFromOtherProcs();
-
-  if (_query_ids.empty())
-    // No need to send or receive data
-    return;
 
   synchronizeAebe();
 }
@@ -176,6 +188,9 @@ NodalPatchRecoveryBase::finalize()
 void
 NodalPatchRecoveryBase::identifyAdditionalElementsFromOtherProcs() const
 {
+  if (!_use_specific_elements)
+    return;
+
   if (_additional_elems.empty())
     return;
   for (const auto & entry : _additional_elems)
@@ -189,11 +204,29 @@ NodalPatchRecoveryBase::identifyAdditionalElementsFromOtherProcs() const
 void
 NodalPatchRecoveryBase::identifyGhostElementsFromOtherProcs() const
 {
-  const ConstElemRange evaluable_elem_range = _fe_problem.getEvaluableElementRange();
+  // Each processor gathers information about all elements in the computational blocks,
+  // excluding deactivated blocks. This ensures that every processor is aware of all relevant
+  // elements, regardless of how users provide elements to the `nodalPatchRecovery` function.
+  // This approach does not affect the solution, as the actual patch used for recovery
+  // still depends on the elements passed to `nodalPatchRecovery` by the user.
+  // const auto evaluable_elem_range = _fe_problem.getBlockRestrictedEvaluableElementRange();
+  const auto evaluable_elem_range = _fe_problem.getEvaluableElementRange();
 
+  std::vector<dof_id_type> evaluable_elem_ids;
   for (const auto & elem : evaluable_elem_range)
-    if (elem->processor_id() != processor_id())
-      _query_ids[elem->processor_id()].push_back(elem->id());
+    if (hasBlocks(elem->subdomain_id())) // getEvaluableElementRange is not block restricted
+      evaluable_elem_ids.push_back(elem->id());
+
+  std::vector<std::vector<dof_id_type>> gathered_ids;
+  _mesh.comm().allgather(evaluable_elem_ids, gathered_ids);
+
+  for (const auto & elem_ids : gathered_ids)
+    for (const auto & elem_id : elem_ids)
+    {
+      const auto * elem = _mesh.elemPtr(elem_id);
+      if (elem->processor_id() != processor_id())
+        _query_ids[elem->processor_id()].push_back(elem_id);
+    }
 }
 
 void
