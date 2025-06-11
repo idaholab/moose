@@ -132,7 +132,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # by the "setup-code-server-extensions" script (in PATH)
     mkdir /opt/code-server/extensions
     # Download extensions for code-server, currently just moose language support
-    MOOSE_LANGUAGE_SUPPORT_VERSION=1.3.2
+    MOOSE_LANGUAGE_SUPPORT_VERSION=1.5.1
     cd /opt/code-server/extensions
     curl -L -O https://github.com/idaholab/moose-language-support/releases/download/v${MOOSE_LANGUAGE_SUPPORT_VERSION}/moose-language-support-${MOOSE_LANGUAGE_SUPPORT_VERSION}.vsix
 
