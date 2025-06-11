@@ -18,7 +18,11 @@ protected:
   void registerFields();
   void output() override;
 
+  /// Reference to the MFEMProblemData struct storing the output variables.
   MFEMProblemData & _problem_data;
+  /// Mesh set of output variables are defined on. May differ from main problem mesh if SubMesh
+  /// variables are in use.
+  mfem::ParMesh & _pmesh;
 };
 
 #endif
