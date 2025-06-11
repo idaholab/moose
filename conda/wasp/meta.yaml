@@ -33,19 +33,21 @@ source:
       - message.patch
 
 build:
-  number: 0
-  string: build_0
+  number: 1
+  string: build_1
 
 outputs:
   - name: moose-wasp-base
     build:
-      number: 0
-      string: build_0
+      number: 1
+      string: build_1
       script: ${RECIPE_DIR}/build_wasp.sh
       script_env:
         - MOOSE_JOBS
         - REQUESTS_CA_BUNDLE
         - SSL_CERT_FILE
+        - CURL_CA_BUNDLE
+        - NODE_EXTRA_CA_CERTS
       run_exports:
         - {{ pin_subpackage('moose-wasp-base', max_pin='x.x')}}
     requirements:
@@ -60,7 +62,7 @@ outputs:
 
   - name: moose-pyhit
     build:
-      number: 0
+      number: 1
       script: ${RECIPE_DIR}/build_pyhit.sh
       script_env:
         - MOOSE_JOBS

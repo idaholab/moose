@@ -1,6 +1,4 @@
-{% set version = "2025.04.17" %}
-{% set build = 0 %}
-{% set strbuild = "build_" + build|string %}
+{% set version = "2025.06.13" %}
 
 package:
   name: moose-pprof
@@ -11,10 +9,14 @@ source:
   - path: ../functions/retry_build.sh
 
 build:
-  number: {{ build }}
-  string: {{ strbuild }}
+  number: 0
+  string: build_0
   skip: true  # [win]
-
+  script_env:
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
+    - NODE_EXTRA_CA_CERTS
 requirements:
   build:
     - make
@@ -25,12 +27,10 @@ requirements:
     - sysroot_linux-64 2.17              # [linux64]
     - gnuconfig                          # [unix]
     - go
-
   run:
     - gperftools
     - graphviz
     - perl
-
 test:
   commands:
     - pprof --help

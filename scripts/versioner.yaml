@@ -7,13 +7,13 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2025.04.17
+    version: 2025.06.13
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
-  # dependers: libmesh-vtk, peacock, petsc, libmesh, moose-dev
+  # dependers: libmesh-vtk, petsc, libmesh, moose-dev
   mpi:
-    version: 2025.04.17
+    version: 2025.06.13
     conda: conda/mpi
     templates:
       conda/mpi/meta.yaml.template: conda/mpi/meta.yaml
@@ -26,7 +26,7 @@ packages:
   # dependers: libmesh, moose-dev
   libmesh-vtk:
     version: 9.4.2
-    build_number: 2
+    build_number: 3
     conda: conda/libmesh-vtk
     templates:
       conda/libmesh-vtk/conda_build_config.yaml.template: conda/libmesh-vtk/conda_build_config.yaml
@@ -35,19 +35,10 @@ packages:
       - mpi
     influential:
       - conda/libmesh-vtk/build.sh
-  # dependers: peacock
-  peacock:
-    version: 2025.04.17
-    conda: conda/peacock
-    templates:
-      conda/peacock/conda_build_config.yaml.template: conda/peacock/conda_build_config.yaml
-      conda/peacock/meta.yaml.template: conda/peacock/meta.yaml
-    dependencies:
-      - mpi
   # dependers: libmesh, moose-dev
   petsc:
     version: 3.23.0.6.gd9d7fd11dca
-    build_number: 1
+    build_number: 2
     conda: conda/petsc
     templates:
       conda/petsc/conda_build_config.yaml.template: conda/petsc/conda_build_config.yaml
@@ -66,7 +57,7 @@ packages:
   # dependers: moose-dev
   libmesh:
     version: 2025.05.23
-    build_number: 0
+    build_number: 1
     conda: conda/libmesh
     templates:
       conda/libmesh/conda_build_config.yaml.template: conda/libmesh/conda_build_config.yaml
@@ -85,7 +76,7 @@ packages:
   # dependers: moose-dev
   wasp:
     version: 2025.05.13
-    build_number: 0
+    build_number: 1
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
@@ -102,7 +93,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.06.09
+    version: 2025.06.13
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
@@ -110,7 +101,6 @@ packages:
     dependencies:
       - libmesh
       - wasp
-      - peacock
       - tools
     apptainer:
       from: libmesh
@@ -137,8 +127,7 @@ packages:
       - framework/contrib/mfem
   # dependers: none
   pprof:
-    version: 2025.04.17
-    build_number: 0
+    version: 2025.06.13
     conda: conda/pprof
     templates:
       conda/pprof/meta.yaml.template: conda/pprof/meta.yaml
@@ -146,8 +135,8 @@ packages:
       - conda/pprof/build.sh
   # dependers: none
   seacas:
-    version: 2025.02.27
-    build_number: 1
+    version: 2025.05.22
+    build_number: 0
     conda: conda/seacas
     templates:
       conda/seacas/meta.yaml.template: conda/seacas/meta.yaml
