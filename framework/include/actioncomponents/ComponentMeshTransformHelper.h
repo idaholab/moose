@@ -29,9 +29,9 @@ protected:
   virtual void addMeshGenerators() override;
 
   /// Rotation angles
-  const RealVectorValue _rotation;
+  const RealVectorValue * const _rotation;
   /// Direction vector (easier to conceptualize than rotation)
-  const RealVectorValue _direction;
+  const RealVectorValue * const _direction;
   /// Translation vector
   const Point _translation;
 };

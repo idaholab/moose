@@ -38,10 +38,8 @@ ComponentMeshTransformHelper::validParams()
 
 ComponentMeshTransformHelper::ComponentMeshTransformHelper(const InputParameters & params)
   : ActionComponent(params),
-    _rotation(isParamValid("rotation") ? getParam<RealVectorValue>("rotation")
-                                       : RealVectorValue(0, 0, 0)),
-    _direction(isParamValid("direction") ? getParam<RealVectorValue>("direction")
-                                         : RealVectorValue(0, 0, 1)),
+    _rotation(queryParam<RealVectorValue>("rotation")),
+    _direction(queryParam<RealVectorValue>("direction")),
     _translation(getParam<Point>("position"))
 {
   addRequiredTask("add_mesh_generator");
@@ -52,17 +50,17 @@ void
 ComponentMeshTransformHelper::addMeshGenerators()
 {
   // Rotate the mesh as desired
-  if (isParamValid("rotation") || isParamValid("direction"))
+  if (_rotation || _direction)
   {
     InputParameters params = _factory.getValidParams("TransformGenerator");
     params.set<MeshGeneratorName>("input") = _mg_names.back();
     params.set<MooseEnum>("transform") = "ROTATE";
-    if (isParamValid("rotation"))
-      params.set<RealVectorValue>("vector_value") = _rotation;
+    if (_rotation)
+      params.set<RealVectorValue>("vector_value") = *_rotation;
     else
     {
       const auto rotation_matrix =
-          RotationMatrix::rotVec1ToVec2<false>(RealVectorValue(1, 0, 0), _direction);
+          RotationMatrix::rotVec1ToVec2<false>(RealVectorValue(1, 0, 0), *_direction);
       RealVectorValue angles;
       angles(0) = std::atan2(rotation_matrix(1, 0), rotation_matrix(0, 0));
       angles(1) = std::asin(-rotation_matrix(2, 0));
