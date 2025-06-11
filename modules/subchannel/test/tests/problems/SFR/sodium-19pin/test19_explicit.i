@@ -85,10 +85,9 @@ P_out = 2.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  T_tol = 1.0e-6
-  P_tol = 1.0e-6
   implicit = false
   segregated = true
+  verbose_subchannel = true
 []
 
 [ICs]
