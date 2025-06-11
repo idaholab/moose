@@ -248,7 +248,8 @@ FixedPointSolve::solve()
       _main_fixed_point_it++;
 
       // Save variable values before the solve. Solving will provide new values
-      saveVariableValues(false);
+      if (!_app.isUltimateMaster())
+        saveVariableValues(false);
     }
     else
       _main_fixed_point_it = 0;
