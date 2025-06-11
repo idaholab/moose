@@ -10,7 +10,7 @@
 import os
 import unittest
 import tempfile
-import re
+import sys
 import json
 import typing
 from contextlib import nullcontext
@@ -47,9 +47,13 @@ class TestHarnessTestCase(unittest.TestCase):
         result = self.RunTestsResult()
 
         def wrapped_print(*args, **kwargs):
+            file = kwargs.get('file')
+            if file not in [None, sys.stdout, sys.stderr]:
+                return
             end = kwargs.get('end', '\n')
+            sep = kwargs.get('sep', ' ')
             values = [f'{v}' for v in args]
-            result.output += " ".join(values) + end
+            result.output += sep.join(values) + end
 
         with patch("builtins.print", wraps=wrapped_print):
             context = tempfile.TemporaryDirectory if tmp_output else nullcontext

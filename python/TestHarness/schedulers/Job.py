@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import itertools, os, time, threading, traceback, io, importlib.util, typing
+import itertools, os, sys, time, threading, traceback, typing
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
 from TestHarness.runners.Runner import Runner
@@ -558,7 +558,11 @@ class Job(OutputInterface):
             # in order to capture all output. This isn't exhaustive, but
             # is probably good enough for now
             def wrapped_print(*args, **kwargs):
+                file = kwargs.get('file')
+                if file not in [None, sys.stdout, sys.stderr]:
+                    return
                 end = kwargs.get('end', '\n')
+                sep = kwargs.get('sep', ' ')
                 values = [f'{v}' for v in args]
                 output.appendOutput(" ".join(values) + end)
             with patch("builtins.print", wraps=wrapped_print):
