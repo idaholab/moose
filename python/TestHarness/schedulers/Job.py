@@ -7,7 +7,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import itertools, os, sys, time, threading, traceback, typing
+import itertools, os, time, threading, traceback, typing
+from io import StringIO
+from contextlib import redirect_stdout
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
 from TestHarness.runners.Runner import Runner
@@ -16,7 +18,6 @@ from TestHarness import OutputInterface, util, ValidationCase
 from tempfile import TemporaryDirectory
 from collections import namedtuple
 from dataclasses import asdict
-from unittest.mock import patch
 
 from TestHarness import util
 
@@ -554,22 +555,15 @@ class Job(OutputInterface):
             message = f'Running validation case(s) in {path}:{name}\n\n'
             output.appendOutput(message)
 
-            # Do the actual execution; here we lazily mock around print()
-            # in order to capture all output. This isn't exhaustive, but
-            # is probably good enough for now
-            def wrapped_print(*args, **kwargs):
-                file = kwargs.get('file')
-                if file not in [None, sys.stdout, sys.stderr]:
-                    return
-                end = kwargs.get('end', '\n')
-                sep = kwargs.get('sep', ' ')
-                values = [f'{v}' for v in args]
-                output.appendOutput(" ".join(values) + end)
-            with patch("builtins.print", wraps=wrapped_print):
-                try:
+            stdout = StringIO()
+            try:
+                with redirect_stdout(stdout):
                     test_case.run()
-                except TestRunException:
-                    run_exception = True
+            except TestRunException:
+                run_exception = True
+            finally:
+                output.appendOutput(stdout.getvalue())
+                stdout.close()
             output.appendOutput('\n')
 
             for key in test_case.data:

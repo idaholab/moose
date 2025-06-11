@@ -11,6 +11,7 @@
 import inspect
 import traceback
 import typing
+import sys
 from typing import Optional
 from enum import Enum
 from dataclasses import dataclass
@@ -301,7 +302,9 @@ class ValidationCase(MooseObject):
             try:
                 getattr(self, function)()
             except:
-                traceback.print_exc()
+                # Print to stdout so that it is mingled in
+                # order with the rest of the output
+                traceback.print_exc(file=sys.stdout)
                 run_exceptions += 1
             else:
                 if not any(r.test == self._current_test for r in self.results):
