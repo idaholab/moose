@@ -37,6 +37,7 @@ MFEMHypreBoomerAMG::MFEMHypreBoomerAMG(const InputParameters & parameters)
     _mfem_fespace(isParamSetByUser("fespace") ? getUserObject<MFEMFESpace>("fespace").getFESpace()
                                               : nullptr)
 {
+  mfem::Hypre::Init();
   constructSolver(parameters);
 }
 
