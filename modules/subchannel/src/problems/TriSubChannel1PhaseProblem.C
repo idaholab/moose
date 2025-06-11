@@ -826,7 +826,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
       auto pitch = _subchannel_mesh.getPitch();
       auto pin_diameter = _subchannel_mesh.getPinDiameter();
       auto iz_ind = iz - first_node;
-
+      auto gap = _tri_sch_mesh.getDuctToPinGap();
+      auto Sij = dz * gap;
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
         auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
@@ -1065,10 +1066,9 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         }
 
         /// Radial Terms
-        PetscScalar sweep_enthalpy = 0.0;
+        // PetscScalar sweep_enthalpy = 0.0;
         unsigned int counter = 0;
         unsigned int cross_index = iz;
-        // Real radial_heat_conduction(0.0);
         for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
         {
           auto chans = _subchannel_mesh.getGapChannels(i_gap);
@@ -1140,11 +1140,52 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           }
 
           /// Sweep flow and turbulent diffusion
+          /// if gap is in the periphery
           if ((subch_type_i == EChannelType::CORNER || subch_type_i == EChannelType::EDGE) &&
               (subch_type_j == EChannelType::CORNER || subch_type_j == EChannelType::EDGE) &&
               (wire_lead_length != 0) && (wire_diameter != 0))
           {
-            /// Do nothing for now
+            // // donor channel and node of sweep flow
+            // auto sweep_in = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
+            // auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
+            // PetscScalar coeff;
+            // PetscInt col_sh;
+            // PetscInt row_sh;
+            // if ((ii_ch == sweep_in) || (jj_ch == sweep_in))
+            // {
+            //   sweep_enthalpy += _WijPrime(i_gap, iz) * (*_h_soln)(node_sin);
+            //   coeff = -_WijPrime(i_gap, iz);
+            //   col_sh = sweep_in + _n_channels * (iz_ind - 1);
+            //   _console << "channel : " << i_ch
+            //            << ", sweep enthalpy gain : " << _WijPrime(i_gap, iz) *
+            //            (*_h_soln)(node_sin)
+            //            << ", iz : " << iz << std::endl;
+            // }
+            // else
+            // {
+            //   sweep_enthalpy -= _WijPrime(i_gap, iz) * (*_h_soln)(node_in);
+            //   coeff = _WijPrime(i_gap, iz);
+            //   col_sh = i_ch + _n_channels * (iz_ind - 1);
+            //   _console << "channel : " << i_ch
+            //            << ", sweep enthalpy loss : " << -_WijPrime(i_gap, iz) *
+            //            (*_h_soln)(node_sin)
+            //            << ", iz : " << iz << std::endl;
+            // }
+
+            // if (iz == first_node)
+            // {
+            //   row_sh = i_ch + _n_channels * iz_ind;
+            //   PetscScalar value_hs = sweep_enthalpy;
+            //   LibmeshPetscCall(
+            //       VecSetValues(_hc_sweep_enthalpy_rhs, 1, &row_sh, &value_hs, ADD_VALUES));
+            // }
+            // else
+            // {
+            //   row_sh = i_ch + _n_channels * (iz_ind - 1);
+            //   LibmeshPetscCall(
+            //       MatSetValues(_hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &coeff,
+            //       ADD_VALUES));
+            // }
           }
           // Turbulent diffusion
           else
@@ -1256,6 +1297,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         Real gedge_ave = 0.0;
         Real mdot_sum = 0.0;
         Real si_sum = 0.0;
+        Real sweep_enthalpy = 0.0;
         for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
         {
           auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
