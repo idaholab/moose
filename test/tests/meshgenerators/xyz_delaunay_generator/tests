@@ -126,7 +126,7 @@
       type = RunException
       input = 'xyzdelaunay_with_holes_1d.i'
       cli_args = '--mesh-only err.e'
-      expect_err = "Elements in a hole mesh must be all 3D or all 2D."
+      expect_err = "All elements in a hole mesh must have the same dimension that is either 2D or 3D"
       detail = "if a hole mesh contains elements that are neither 2D nor 3D"
       capabilities = 'netgen'
     []
@@ -135,7 +135,7 @@
       input = 'xyzdelaunay_with_holes_2d.i'
       cli_args = '--mesh-only err.e 
                   Mesh/triang/stitch_holes="true true"'
-      expect_err = "which is meaningless to be stitched"
+      expect_err = "for which stitching onto a 3D mesh does not make sense."
       detail = "if a 2D hole mesh is specified to be stitched"
       capabilities = 'netgen'
     []
@@ -160,7 +160,7 @@
       type = RunException
       input = 'err_xyzdelaunay_with_holes_mix.i'
       cli_args = '--mesh-only err.e'
-      expect_err = "All elements in a hole mesh must have the same dimension"
+      expect_err = "All elements in a hole mesh must have the same dimension that is either 2D or 3D"
       detail = "if a hole mesh contains elements of mixed dimensions"
       capabilities = 'netgen'
     []
