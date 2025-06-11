@@ -246,14 +246,14 @@ class ValidationCase(MooseObject):
             self.addResult(status, ' '.join(message), **result_kwargs)
 
     @property
-    def results(self) -> list['Result']:
+    def results(self) -> list[Result]:
         """
         Get all of the results
         """
         return self._results
 
     @property
-    def data(self) -> dict[str, 'Data']:
+    def data(self) -> dict[str, Data]:
         """
         Get all of the data
         """
