@@ -19,24 +19,30 @@ class AbaqusUELStepUserObject;
 /**
  * Implements Abaqus essential boundary conditions
  */
-class AbaqusEssentialBC : public DirichletBCBase
+class AbaqusEssentialBC : public NodalBC
 {
 public:
   static InputParameters validParams();
 
   AbaqusEssentialBC(const InputParameters & parameters);
 
-  virtual bool shouldApply() const override;
+  void timestepSetup() override;
 
 protected:
-  Real computeQpValue() override;
+  Real computeQpResidual() override;
+  Real computeQpJacobian() override;
 
   const AbaqusUELStepUserObject & _step_uo;
 
   /// Abaqus ID of the current variable
   const Abaqus::AbaqusID _abaqus_var_id;
 
-  /// BC data for the current variable
-  // const std::unordered_map<Abaqus::Index, Real> * _node_value_map_previous;
-  // const std::unordered_map<Abaqus::Index, Real> & _node_value_map;
+  const Real & _current_step_fraction;
+
+  /// BC data for the current variable/step
+  typedef std::unordered_map<Abaqus::Index, Real> NodeValueMap;
+  const NodeValueMap * _current_step_begin_forces;
+  const NodeValueMap * _current_step_begin_solution;
+  const NodeValueMap * _current_step_begin_values;
+  const NodeValueMap * _current_step_end_values;
 };
