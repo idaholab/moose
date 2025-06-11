@@ -84,7 +84,9 @@ StandardizerTorched::computeSet(const torch::Tensor & input)
 {
   // comptue mean and standard deviation
   auto mean = torch::mean(input, 0, false);
-  auto stdev = torch::std(input, 0, 0, true);
+  auto stdev = torch::std(input, 0, 0, false);
+  mean = torch::resize(mean, {mean.sizes()[0], 1});
+  stdev = torch::resize(stdev, {stdev.sizes()[0], 1});
   _mean = mean;
   _stdev = stdev;
 }
@@ -92,21 +94,26 @@ StandardizerTorched::computeSet(const torch::Tensor & input)
 void
 StandardizerTorched::getStandardized(torch::Tensor & input) const
 {
-  // Standardize input tensor
-  input = input - _mean;
-  input = input / _stdev;
+  torch::Tensor mean = torch::transpose(_mean, 0, 1);
+  torch::Tensor stdev = torch::transpose(_stdev, 0, 1);
+  //  Standardize input tensor
+  input = input - mean;
+  input = input / stdev;
 }
 
 void
 StandardizerTorched::getDestandardized(torch::Tensor & input) const
 {
-  input = (torch::mm(input, _stdev) + _mean);
+  torch::Tensor mean = torch::transpose(_mean, 0, 1);
+  torch::Tensor stdev = torch::transpose(_stdev, 0, 1);
+  input = (torch::mm(input, stdev) + mean);
 }
 
 void
 StandardizerTorched::getDescaled(torch::Tensor & input) const
 {
-  input = torch::mm(input, _stdev);
+  torch::Tensor stdev = torch::transpose(_stdev, 0, 1);
+  input = torch::mm(input, stdev);
 }
 
 /// Helper for dataStore
