@@ -34,8 +34,6 @@ template <typename T>
 void
 MFEMSolverBase::setPreconditioner(T & solver)
 {
-  static_assert(std::is_base_of_v<mfem::Solver, T>);
-
   if (isParamSetByUser("preconditioner"))
   {
     if (!_preconditioner)
@@ -48,12 +46,8 @@ MFEMSolverBase::setPreconditioner(T & solver)
         solver.SetPreconditioner(*hypre_pre);
       else
         mooseError("hypre solver preconditioners must themselves be hypre solvers");
-    else if constexpr (std::is_base_of_v<mfem::IterativeSolver, T>)
-      solver.SetPreconditioner(mfem_pre);
     else
-      mooseAssert(
-          true,
-          "We should never get here because we only instantiate this method for iterative solvers");
+      solver.SetPreconditioner(mfem_pre);
   }
 }
 
