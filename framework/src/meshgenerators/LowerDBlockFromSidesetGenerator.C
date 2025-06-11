@@ -180,7 +180,7 @@ LowerDBlockFromSidesetGenerator::generate()
     const auto side = elem_side.side;
 
     // Build a non-proxy element from this side.
-    std::unique_ptr<Elem> side_elem(elem->build_side_ptr(side, /*proxy=*/false));
+    std::unique_ptr<Elem> side_elem(elem->build_side_ptr(side));
 
     // The side will be added with the same processor id as the parent.
     side_elem->processor_id() = elem->processor_id();
