@@ -49,7 +49,8 @@ XYZDelaunayGenerator::validParams()
 
   params.addRequiredParam<MeshGeneratorName>(
       "boundary",
-      "The input MeshGenerator defining the output outer boundary. The input mesh can either "
+      "The input MeshGenerator defining the output outer boundary. The input mesh (the output mesh "
+      "of the input mesh generator) can either "
       "include 3D volume elements or 2D surface elements.");
 
   params.addParam<SubdomainName>("output_subdomain_name",
@@ -71,7 +72,7 @@ XYZDelaunayGenerator::validParams()
       "holes",
       std::vector<MeshGeneratorName>(),
       "The MeshGenerators that define mesh holes. A hole mesh must contain either 3D volume "
-      "elements with the external surface of the mesh works as the closed manifold that defines "
+      "elements where the external surface of the mesh works as the closed manifold that defines "
       "the hole, or 2D surface elements that form the closed manifold that defines the hole.");
   params.addParam<std::vector<bool>>(
       "stitch_holes", std::vector<bool>(), "Whether to stitch to the mesh defining each hole.");
@@ -132,7 +133,7 @@ XYZDelaunayGenerator::generate()
 
   // The libMesh Netgen removes all the sideset info
   // But it keeps some nodeset info for the retained nodes
-  // We need to clear these nodeset info as they could be annoying
+  // We need to clear these nodeset info as they could overlap with upcoming boundary info
   mesh->get_boundary_info().clear_boundary_node_ids();
 
   // Get ready to triangulate its boundary
@@ -144,7 +145,7 @@ XYZDelaunayGenerator::generate()
 
   // The hole meshes will be used for hole boundary identification and optionally for stitching.
   // if a hole mesh contains 3D volume elements but has non-TRI3 surface side elements, it cannot be
-  // used directly for stitching. But it can be converted into a all-TET4 mesh to support hole
+  // used directly for stitching. But it can be converted into an all-TET4 mesh to support hole
   // boundary identification
   for (auto hole_i : index_range(_hole_ptrs))
   {
@@ -167,19 +168,20 @@ XYZDelaunayGenerator::generate()
             hole_elem_types.emplace(elem->side_ptr(s)->type());
         }
       // For a non-3D element, we just need to record the element type
-      // but an error will be thrown later
       else
         hole_elem_types.emplace(elem->type());
     }
-    if (hole_elem_dims.size() != 1)
-      paramError("holes", "All elements in a hole mesh must have the same dimension (3D).");
+    if (hole_elem_dims.size() != 1 || *hole_elem_dims.begin() < 2)
+      paramError(
+          "holes",
+          "All elements in a hole mesh must have the same dimension that is either 2D or 3D.");
     else if (*hole_elem_dims.begin() == 3)
     {
       // For 3D meshes, if there are non-TRI3 surface side elements
       // (1) if no stitching is needed, we can just convert the whole mesh into TET to facilitate
       // boundary identification (2) if stitching is needed, we can still convert and stitch, but
       // that would modify the input hole mesh
-      if (*hole_elem_types.begin() != ElemType::TRI3)
+      if (*hole_elem_types.begin() != ElemType::TRI3 || hole_elem_types.size() > 1)
       {
         if (_stitch_holes.size() && _stitch_holes[hole_i] && !_convert_holes_for_stitching)
           paramError("holes",
@@ -189,16 +191,14 @@ XYZDelaunayGenerator::generate()
           MeshTools::Modification::all_tri(**_hole_ptrs[hole_i]);
       }
     }
-    else if (*hole_elem_dims.begin() == 2)
+    else // if (*hole_elem_dims.begin() == 2)
     {
       // There is no point to stitch a 2D hole mesh, so we throw an error if this is attempted
       if (_stitch_holes.size() && _stitch_holes[hole_i])
         paramError("holes",
                    "the hole mesh with index " + std::to_string(hole_i) +
-                       " is a 2D mesh, which is meaningless to be stitched.");
+                       " is a 2D mesh, for which stitching onto a 3D mesh does not make sense.");
     }
-    else
-      paramError("holes", "Elements in a hole mesh must be all 3D or all 2D.");
   }
 
   std::unique_ptr<std::vector<std::unique_ptr<UnstructuredMesh>>> ngholes =
@@ -473,7 +473,7 @@ XYZDelaunayGenerator::generate()
   const auto temp_bcid_shift = MooseMeshUtils::getNextFreeBoundaryID(*mesh);
   // If we stitch holes, we want to make sure the netgen mesh has no conflicting boundary ids
   // with the hole meshes.
-  // If we assign custom boundary ids, we want to make sure no overwriting occurs.
+  // OR, if we assign custom boundary ids, we want to make sure no overwriting occurs.
   // So we shift all these boundary ids by temp_bcid_shift + free_boundary_id
   // before we assign the new boundary ids
   if (_stitch_holes.size() || output_boundary_id.size())
@@ -526,7 +526,7 @@ XYZDelaunayGenerator::generate()
         mooseError("Failed to stitch hole mesh ", hole_i, " to new tetrahedralization.");
     }
   }
-  // Boundary names
+  // Add user-specified sideset names
   if (hole_boundary_ids.size())
     for (auto h : index_range(_hole_ptrs))
       mesh->get_boundary_info().sideset_name(hole_boundary_ids[h]) = hole_boundaries[h];
