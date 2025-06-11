@@ -16,11 +16,11 @@ class TestHarnessTester(TestHarnessTestCase):
         """
 
         # Verify the distributed mesh test is skipped
-        output = self.runTests('-i', 'mesh_mode_distributed', '--no-color')
+        output = self.runTests('-i', 'mesh_mode_distributed', '--no-color').output
         self.assertIn('[MESH_MODE!=DISTRIBUTED] SKIP', output)
 
         # Verify the distributed mesh test is passing when providing --distributed
         # To be acurate, test for OK rather than asserting if 'distributed' is
         # missing from the output.
-        output = self.runTests('--distributed', '-i', 'mesh_mode_distributed')
+        output = self.runTests('--distributed', '-i', 'mesh_mode_distributed').output
         self.assertRegex(output, 'test_harness.distributed_mesh.*?OK')

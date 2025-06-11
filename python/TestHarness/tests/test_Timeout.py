@@ -15,26 +15,16 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test that timeout tests report TIMEOUT
         """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'timeout')
+        out = self.runTests('-i', 'timeout', exit_code=1).output
 
-        e = cm.exception
-        self.assertRegex(e.output, 'test_harness\.timeout.*?TIMEOUT')
-
-        # Verify return code is TIMEOUT related (0x1)
-        self.assertIs(0x1, e.returncode)
+        self.assertRegex(out, 'test_harness\.timeout.*?TIMEOUT')
 
     def testTimeoutEnv(self):
         """
         Test that timeout tests report TIMEOUT
         """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            os.environ['MOOSE_TEST_MAX_TIME'] = '2'
-            self.runTests('-i', 'timeout')
-            os.environ.pop('MOOSE_TEST_MAX_TIME')
+        os.environ['MOOSE_TEST_MAX_TIME'] = '2'
+        out = self.runTests('-i', 'timeout', exit_code=1).output
+        os.environ.pop('MOOSE_TEST_MAX_TIME')
 
-        e = cm.exception
-        self.assertRegex(e.output, 'test_harness\.timeout.*?TIMEOUT')
-
-        # Verify return code is TIMEOUT related (0x1)
-        self.assertIs(0x1, e.returncode)
+        self.assertRegex(out, 'test_harness\.timeout.*?TIMEOUT')

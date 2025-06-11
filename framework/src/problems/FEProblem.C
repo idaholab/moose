@@ -67,6 +67,8 @@ FEProblem::FEProblem(const InputParameters & parameters)
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
   newAssemblyArray(_solver_systems);
+  for (auto & solver_system : _solver_systems)
+    solver_system->system().prefer_hash_table_matrix_assembly(_use_hash_table_matrix_assembly);
 
   if (_num_nl_sys)
     initNullSpaceVectors(parameters, _nl);

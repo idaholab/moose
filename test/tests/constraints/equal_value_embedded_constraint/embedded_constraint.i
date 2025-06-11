@@ -4,6 +4,10 @@
 # two blocks to have the same value
 ###########################################################
 
+[Problem]
+  use_hash_table_matrix_assembly = true
+[]
+
 [Mesh]
 []
 

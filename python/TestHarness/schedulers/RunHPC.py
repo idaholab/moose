@@ -447,6 +447,18 @@ class RunHPC(RunParallel):
                     bindpath = self.options.hpc_apptainer_bindpath
                 else:
                     bindpath = '/' + os.path.abspath(tester.getTestDir()).split(os.path.sep)[1]
+
+                # The bind paths could be symlinks, so let's resolve those and remove duplicates
+                bindpath_list = bindpath.split(',')  # Make a list of all the paths
+                bindpath_rpath = list(
+                    map(os.path.realpath, bindpath_list)
+                )  # Get the real path (not symlinks)
+                bindpath_list = sum(
+                    map(list, zip(bindpath_list, bindpath_rpath)), []
+                )  # Join the two path lists
+                bindpath_list = list(dict.fromkeys(bindpath_list))  # Remove duplicates
+                bindpath = ','.join(bindpath_list)  # Join into a comma-separated string
+
                 submission_env['VARS']['APPTAINER_BINDPATH'] = bindpath + ',${APPTAINER_BINDPATH}'
 
                 serial_command = shlex.join(self.app_exec_prefix + self.app_exec_suffix)

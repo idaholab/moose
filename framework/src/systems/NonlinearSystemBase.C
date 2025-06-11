@@ -1098,7 +1098,6 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian()
       }
     }
     _fe_problem.addCachedJacobian(tid);
-    jacobian.close();
   }
 }
 
@@ -2280,7 +2279,8 @@ NonlinearSystemBase::addImplicitGeometricCouplingEntries(GeometricSearchData & g
 }
 
 void
-NonlinearSystemBase::constraintJacobians(bool displaced)
+NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_to_view,
+                                         bool displaced)
 {
   if (!hasMatrix(systemMatrixTag()))
     mooseError("A system matrix is required");
@@ -2291,7 +2291,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
     LibmeshPetscCall(MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                                   MAT_NEW_NONZERO_ALLOCATION_ERR,
                                   PETSC_FALSE));
-
   if (_fe_problem.ignoreZerosInJacobian())
     LibmeshPetscCall(MatSetOption(
         static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE));
@@ -2355,7 +2354,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   nfc->primaryBoundary() != primary_boundary)
                 continue;
 
-              nfc->_jacobian = &jacobian;
+              nfc->_jacobian = &jacobian_to_view;
 
               if (nfc->shouldApply())
               {
@@ -2595,7 +2594,7 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
               {
                 constraints_applied = true;
 
-                nec->_jacobian = &jacobian;
+                nec->_jacobian = &jacobian_to_view;
                 nec->prepareShapes(nec->variable().number());
                 nec->prepareNeighborShapes(nec->variable().number());
 
@@ -2947,7 +2946,8 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     static bool first = true;
 
     // This adds zeroes into geometric coupling entries to ensure they stay in the matrix
-    if (first && (_add_implicit_geometric_coupling_entries_to_jacobian))
+    if ((_fe_problem.restoreOriginalNonzeroPattern() || first) &&
+        _add_implicit_geometric_coupling_entries_to_jacobian)
     {
       first = false;
       addImplicitGeometricCouplingEntries(_fe_problem.geomSearchData());
@@ -2965,18 +2965,35 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     // Add in Jacobian contributions from other Constraints
     if (_fe_problem._has_constraints && tags.count(systemMatrixTag()))
     {
-      // Some constraints need values from the Jacobian
-      closeTaggedMatrices(tags);
+      // Some constraints need to be able to read values from the Jacobian, which requires that it
+      // be closed/assembled
+      auto & system_matrix = getMatrix(systemMatrixTag());
+#if PETSC_RELEASE_GREATER_EQUALS(3, 23, 0)
+      SparseMatrix<Number> * view_jac_ptr;
+      std::unique_ptr<SparseMatrix<Number>> hash_copy;
+      if (system_matrix.use_hash_table())
+      {
+        hash_copy = libMesh::cast_ref<PetscMatrix<Number> &>(system_matrix).copy_from_hash();
+        view_jac_ptr = hash_copy.get();
+      }
+      else
+        view_jac_ptr = &system_matrix;
+      auto & jacobian_to_view = *view_jac_ptr;
+#else
+      auto & jacobian_to_view = system_matrix;
+#endif
+      if (&jacobian_to_view == &system_matrix)
+        system_matrix.close();
 
       // Nodal Constraints
       enforceNodalConstraintsJacobian();
 
       // Undisplaced Constraints
-      constraintJacobians(false);
+      constraintJacobians(jacobian_to_view, false);
 
       // Displaced Constraints
       if (_fe_problem.getDisplacedProblem())
-        constraintJacobians(true);
+        constraintJacobians(jacobian_to_view, true);
     }
   }
   PARALLEL_CATCH;
