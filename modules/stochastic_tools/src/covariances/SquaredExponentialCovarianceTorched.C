@@ -143,7 +143,7 @@ SquaredExponentialCovarianceTorched::computedKdlf(torch::Tensor & K,
       Real r_squared_scaled = 0;
       for (unsigned int kk = 0; kk < num_params_x; ++kk)
         r_squared_scaled +=
-            std::pow((x_accessor[ii][jj] - x_accessor[jj][kk]) / length_factor[kk], 2);
+            std::pow((x_accessor[ii][kk] - x_accessor[jj][kk]) / length_factor[kk], 2);
       K_accessor[ii][jj] = sigma_f_squared * std::exp(-r_squared_scaled / 2.0);
       K_accessor[ii][jj] = std::pow(x_accessor[ii][ind] - x_accessor[jj][ind], 2) /
                            std::pow(length_factor[ind], 3) * K_accessor[ii][jj];
