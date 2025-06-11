@@ -187,22 +187,20 @@ GaussianProcessTorched::tuneHyperParamsAdam(const torch::Tensor & training_param
     generator.seed(0, 1980);
     generator.saveState();
     MooseUtils::shuffle<unsigned int>(v_sequence, generator, 0);
+    auto params_accessor = training_params.accessor<Real, 2>();
+    auto data_accessor = training_data.accessor<Real, 2>();
     for (unsigned int ii = 0; ii < _batch_size; ++ii)
     {
       for (unsigned int jj = 0; jj < training_params.sizes()[1]; ++jj)
       {
         // inputs(ii, jj) = training_params(v_sequence[ii], jj);
-        auto tensor_accessor = training_params.accessor<Real, 2>();
-        inputs(ii, jj) =
-            tensor_accessor[ii][jj]; // training_params.data_ptr<Real>()[v_sequence[ii]][jj];
+        inputs(ii, jj) = params_accessor[v_sequence[ii]][jj];
       }
 
       for (unsigned int jj = 0; jj < training_data.sizes()[1]; ++jj)
       {
         // outputs(ii, jj) = training_data(v_sequence[ii], jj);
-        auto tensor_accessor = training_data.accessor<Real, 2>();
-        outputs(ii, jj) =
-            tensor_accessor[ii][jj]; // training_data.data_ptr<Real>()[v_sequence[ii]][jj];
+        outputs(ii, jj) = data_accessor[v_sequence[ii]][jj];
       }
     }
 
@@ -246,8 +244,13 @@ GaussianProcessTorched::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outp
 {
   auto options = torch::TensorOptions().dtype(at::kDouble);
   torch::Tensor inputs_tensor =
-      torch::from_blob(inputs.data(), {inputs.rows(), inputs.cols()}, options).to(at::kDouble);
-  _covariance_function->computeCovarianceMatrix(_K, inputs_tensor, inputs_tensor, true);
+      torch::from_blob(inputs.data(), {inputs.cols(), inputs.rows()}, options)
+          .to(at::kDouble)
+          .clone();
+  torch::Tensor inputs_tensor_transpose = inputs_tensor.transpose(1, 0);
+  std::cout << std::endl << "inputs_tensor_transpose" << inputs_tensor_transpose << std::endl;
+  _covariance_function->computeCovarianceMatrix(
+      _K, inputs_tensor_transpose, inputs_tensor_transpose, true);
 
   RealEigenMatrix flattened_data = outputs.reshaped(outputs.rows() * outputs.cols(), 1);
 
@@ -258,9 +261,10 @@ GaussianProcessTorched::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outp
 
   setupStoredMatrices(flattened_tensor);
 
+  torch::Tensor product = torch::mm(torch::transpose(flattened_tensor, 0, 1), _K_results_solve);
+  auto product_accessor = product.accessor<Real, 2>();
   Real log_likelihood = 0;
-  log_likelihood +=
-      -(torch::mm(torch::transpose(flattened_tensor, 0, 1), _K_results_solve)).data_ptr<Real>()[0];
+  log_likelihood += -1 * product_accessor[0][0];
   log_likelihood += -std::log(torch::det(_K).data_ptr<Real>()[0]);
   log_likelihood -= _batch_size * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
@@ -272,7 +276,10 @@ GaussianProcessTorched::getGradient(RealEigenMatrix & inputs) const
 {
   auto options = torch::TensorOptions().dtype(at::kDouble);
   torch::Tensor input_tensor =
-      torch::from_blob(inputs.data(), {inputs.rows(), inputs.cols()}, options).to(at::kDouble);
+      torch::from_blob(inputs.data(), {inputs.cols(), inputs.rows()}, options)
+          .to(at::kDouble)
+          .clone();
+  torch::Tensor input_tensor_transpose = input_tensor.transpose(1, 0);
   torch::Tensor dKdhp = torch::empty({_batch_size, _batch_size}, at::kDouble);
   // torch::Tensor dKdhp_matrix(_batch_size, _batch_size);
   torch::Tensor alpha = torch::mm(_K_results_solve, torch::transpose(_K_results_solve, 0, 1));
@@ -286,7 +293,7 @@ GaussianProcessTorched::getGradient(RealEigenMatrix & inputs) const
     for (unsigned int ii = 0; ii < num_entries; ++ii)
     {
       const auto global_index = first_index + ii;
-      _covariance_function->computedKdhyper(dKdhp, input_tensor, hyper_param_name, ii);
+      _covariance_function->computedKdhyper(dKdhp, input_tensor_transpose, hyper_param_name, ii);
       // This is just temporary. Convert dKhp_matrix to tensor
       torch::Tensor tmp = torch::mm(alpha, dKdhp) - torch::cholesky_solve(dKdhp, _K_cho_decomp);
       grad_vec[global_index] = -1 * (torch::trace(tmp).data_ptr<Real>()[0] / 2.0);
