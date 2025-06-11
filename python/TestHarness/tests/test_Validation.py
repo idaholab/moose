@@ -48,7 +48,7 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertIn('validation_run', timing)
 
     def testFail(self):
-        out = self.runTests('-i', 'validation', '--re', 'fail').results
+        out = self.runTests('-i', 'validation', '--re', 'fail', exit_code=132).results
         test = out['tests']['tests/test_harness']['tests']['fail']
         status = test['status']
         self.assertEqual(status['status'], 'ERROR')
@@ -81,7 +81,7 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertIn('Acquired 1 data value(s), 1 result(s): 0 ok, 1 fail, 0 skip', validation_output)
 
     def testException(self):
-        out = self.runTests('-i', 'validation', '--re', 'exception').results
+        out = self.runTests('-i', 'validation', '--re', 'exception', exit_code=132).results
         test = out['tests']['tests/test_harness']['tests']['exception']
         status = test['status']
         self.assertEqual(status['status'], 'ERROR')
@@ -99,9 +99,9 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertIn('Encountered exception(s) while running tests', validation_output)
 
     def testBadPython(self):
-        out = self.runTests('-i', 'validation_bad_python').output
+        out = self.runTests('-i', 'validation_bad_python', exit_code=128).output
         self.assertIn('validation_bad_python:   invalid syntax (validation_badpython.py, line 1)', out)
 
     def testDuplicateParam(self):
-        out = self.runTests('-i', 'validation_duplicate_param').output
+        out = self.runTests('-i', 'validation_duplicate_param', exit_code=128).output
         self.assertIn('Duplicate parameter "type" from validation test', out)
