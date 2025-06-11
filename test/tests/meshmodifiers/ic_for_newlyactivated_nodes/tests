@@ -44,6 +44,14 @@
       detail = 'the system should run if the user set `ic_strategy` to be `IC_DEFAULT` and do not set any `nodal_patch_recovery_uo` or `unsolved_blocks`.'
     []
 
+    [IC_for_newlyactivated_nodes_quad9]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_Quad9.i'
+      exodiff = 'external_moving_boundary_npr_Quad9_out.e external_moving_boundary_npr_Quad9_out.e-s002 external_moving_boundary_npr_Quad9_out.e-s003 external_moving_boundary_npr_Quad9_out.e-s004'
+      detail = 'set initial condition on the newly-activated nodes during simulation even for higher order elements.'
+    []
+
+
   []
 
   [error_test]

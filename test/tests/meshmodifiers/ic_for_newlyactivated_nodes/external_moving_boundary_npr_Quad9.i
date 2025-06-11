@@ -8,6 +8,7 @@
     dim = 2
     nx = 16
     ny = 16
+    elem_type = QUAD9
   []
   [left]
     type = SubdomainBoundingBoxGenerator
@@ -33,13 +34,6 @@
     var = 'diff'
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  [extrapolation_patch2]
-    type = NodalPatchRecoveryVariable
-    patch_polynomial_order = FIRST
-    use_specific_elements = true
-    var = 'diff2'
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
 []
 
 [MeshModifiers]
@@ -56,8 +50,8 @@
 
     # --- new for setting IC --- #
     unsolved_blocks = '2'
-    ic_strategy = "IC_POLYNOMIAL IC_POLYNOMIAL"
-    ic_variables = 'diff'
+    ic_strategy = "IC_POLYNOMIAL"
+
     nodal_patch_recovery_uo = 'extrapolation_patch'
   []
 []
@@ -96,22 +90,14 @@
 
 [Variables]
   [diff]
-    order = FIRST
-  []
-  [diff2]
-    order = FIRST
+    order = SECOND
   []
 []
 
 [Kernels]
   [diffusion]
     type = MatDiffusion
-    variable = 'diff'
-    diffusivity = 'k'
-  []
-  [diffusion2]
-    type = MatDiffusion
-    variable = 'diff2'
+    variable = diff
     diffusivity = 'k'
   []
 []
@@ -127,28 +113,14 @@
 [BCs]
   [left]
     type = DirichletBC
-    variable = 'diff'
+    variable = diff
     boundary = left
     value = 10
   []
 
   [bottom]
     type = DirichletBC
-    variable = 'diff'
-    boundary = bottom
-    value = 0
-  []
-
-  [left2]
-    type = DirichletBC
-    variable = 'diff2'
-    boundary = left
-    value = 10
-  []
-
-  [bottom2]
-    type = DirichletBC
-    variable = 'diff2'
+    variable = diff
     boundary = bottom
     value = 0
   []

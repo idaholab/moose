@@ -846,6 +846,8 @@ ElementSubdomainModifierBase::nodeIsNewlyActivated(dof_id_type node_id) const
                   neighbor_elem_id) != _global_reinitialized_elems.end())
       reinitialized_neighbor_elems++;
 
+  // For quad 9 elements, it also works because the total_neighbor_elems is 1, and the
+  // reinitialized_neighbor_elems is also 1.
   if (reinitialized_neighbor_elems == total_neighbor_elems)
     return true;
 
