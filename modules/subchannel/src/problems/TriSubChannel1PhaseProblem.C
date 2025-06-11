@@ -1093,6 +1093,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         }
 
         /// Radial Terms
+        PetscScalar sweep_enthalpy = 0.0;
         unsigned int counter = 0;
         unsigned int cross_index = iz;
         // Real radial_heat_conduction(0.0);
@@ -1103,6 +1104,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           unsigned int jj_ch = chans.second;
           auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
           auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
+          auto subch_type_i = _subchannel_mesh.getSubchannelType(ii_ch);
+          auto subch_type_j = _subchannel_mesh.getSubchannelType(jj_ch);
           PetscScalar h_star;
           // figure out donor axial velocity
           if (_Wij(i_gap, cross_index) > 0.0)
@@ -1164,58 +1167,66 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
                 _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_ct, ADD_VALUES));
           }
 
-          // Turbulent cross flows
-          if (iz == first_node)
+          /// Sweep flow and turbulent diffusion
+          if ((subch_type_i == EChannelType::CORNER || subch_type_i == EChannelType::EDGE) &&
+              (subch_type_j == EChannelType::CORNER || subch_type_j == EChannelType::EDGE) &&
+              (wire_lead_length != 0) && (wire_diameter != 0))
           {
-            PetscScalar value_vec_ct =
-                -2.0 * alpha * (*_h_soln)(node_in)*_WijPrime(i_gap, cross_index);
-            value_vec_ct += alpha * (*_h_soln)(node_in_j)*_WijPrime(i_gap, cross_index);
-            value_vec_ct += alpha * (*_h_soln)(node_in_i)*_WijPrime(i_gap, cross_index);
-            PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
-            LibmeshPetscCall(
-                VecSetValues(_hc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES));
+            /// Do nothing for now
           }
+          // Turbulent diffusion
           else
           {
-            PetscScalar value_center_ct = 2.0 * alpha * _WijPrime(i_gap, cross_index);
+            if (iz == first_node)
+            {
+              PetscScalar value_vec_ct =
+                  -2.0 * alpha * (*_h_soln)(node_in)*_WijPrime(i_gap, cross_index);
+              value_vec_ct += alpha * (*_h_soln)(node_in_j)*_WijPrime(i_gap, cross_index);
+              value_vec_ct += alpha * (*_h_soln)(node_in_i)*_WijPrime(i_gap, cross_index);
+              PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
+              LibmeshPetscCall(VecSetValues(
+                  _hc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES));
+            }
+            else
+            {
+              PetscScalar value_center_ct = 2.0 * alpha * _WijPrime(i_gap, cross_index);
+              PetscInt row_ct = i_ch + _n_channels * iz_ind;
+              PetscInt col_ct = i_ch + _n_channels * (iz_ind - 1);
+              LibmeshPetscCall(MatSetValues(
+                  _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_center_ct, ADD_VALUES));
+
+              PetscScalar value_left_ct = -1.0 * alpha * _WijPrime(i_gap, cross_index);
+              row_ct = i_ch + _n_channels * iz_ind;
+              col_ct = jj_ch + _n_channels * (iz_ind - 1);
+              LibmeshPetscCall(MatSetValues(
+                  _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_left_ct, ADD_VALUES));
+
+              PetscScalar value_right_ct = -1.0 * alpha * _WijPrime(i_gap, cross_index);
+              row_ct = i_ch + _n_channels * iz_ind;
+              col_ct = ii_ch + _n_channels * (iz_ind - 1);
+              LibmeshPetscCall(MatSetValues(
+                  _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_right_ct, ADD_VALUES));
+            }
+            PetscScalar value_center_ct = 2.0 * (1.0 - alpha) * _WijPrime(i_gap, cross_index);
             PetscInt row_ct = i_ch + _n_channels * iz_ind;
-            PetscInt col_ct = i_ch + _n_channels * (iz_ind - 1);
+            PetscInt col_ct = i_ch + _n_channels * iz_ind;
             LibmeshPetscCall(MatSetValues(
                 _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_center_ct, ADD_VALUES));
 
-            PetscScalar value_left_ct = -1.0 * alpha * _WijPrime(i_gap, cross_index);
+            PetscScalar value_left_ct = -1.0 * (1.0 - alpha) * _WijPrime(i_gap, cross_index);
             row_ct = i_ch + _n_channels * iz_ind;
-            col_ct = jj_ch + _n_channels * (iz_ind - 1);
+            col_ct = jj_ch + _n_channels * iz_ind;
             LibmeshPetscCall(MatSetValues(
                 _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_left_ct, ADD_VALUES));
 
-            PetscScalar value_right_ct = -1.0 * alpha * _WijPrime(i_gap, cross_index);
+            PetscScalar value_right_ct = -1.0 * (1.0 - alpha) * _WijPrime(i_gap, cross_index);
             row_ct = i_ch + _n_channels * iz_ind;
-            col_ct = ii_ch + _n_channels * (iz_ind - 1);
+            col_ct = ii_ch + _n_channels * iz_ind;
             LibmeshPetscCall(MatSetValues(
                 _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_right_ct, ADD_VALUES));
           }
-          PetscScalar value_center_ct = 2.0 * (1.0 - alpha) * _WijPrime(i_gap, cross_index);
-          PetscInt row_ct = i_ch + _n_channels * iz_ind;
-          PetscInt col_ct = i_ch + _n_channels * iz_ind;
-          LibmeshPetscCall(MatSetValues(
-              _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_center_ct, ADD_VALUES));
-
-          PetscScalar value_left_ct = -1.0 * (1.0 - alpha) * _WijPrime(i_gap, cross_index);
-          row_ct = i_ch + _n_channels * iz_ind;
-          col_ct = jj_ch + _n_channels * iz_ind;
-          LibmeshPetscCall(MatSetValues(
-              _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_left_ct, ADD_VALUES));
-
-          PetscScalar value_right_ct = -1.0 * (1.0 - alpha) * _WijPrime(i_gap, cross_index);
-          row_ct = i_ch + _n_channels * iz_ind;
-          col_ct = ii_ch + _n_channels * iz_ind;
-          LibmeshPetscCall(MatSetValues(
-              _hc_cross_derivative_mat, 1, &row_ct, 1, &col_ct, &value_right_ct, ADD_VALUES));
 
           /// Radial heat conduction
-          auto subch_type_i = _subchannel_mesh.getSubchannelType(ii_ch);
-          auto subch_type_j = _subchannel_mesh.getSubchannelType(jj_ch);
           Real dist_ij = pitch;
 
           if (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::EDGE)
@@ -1247,8 +1258,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto base_value = harm_A * shape_factor * Sij / dist_ij;
           auto neg_base_value = -1.0 * base_value;
 
-          row_ct = ii_ch + _n_channels * iz_ind;
-          col_ct = ii_ch + _n_channels * iz_ind;
+          PetscInt row_ct = ii_ch + _n_channels * iz_ind;
+          PetscInt col_ct = ii_ch + _n_channels * iz_ind;
           LibmeshPetscCall(MatSetValues(
               _hc_radial_heat_conduction_mat, 1, &row_ct, 1, &col_ct, &base_value, ADD_VALUES));
 
@@ -1287,7 +1298,6 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         }
         gedge_ave = mdot_sum / si_sum;
         auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-        PetscScalar sweep_enthalpy = 0.0;
         if ((subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER) &&
             (wire_diameter != 0.0) && (wire_lead_length != 0.0))
         {
