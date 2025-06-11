@@ -11,7 +11,6 @@
 
 #include "SurrogateModel.h"
 #include "StandardizerTorched.h"
-#include <Eigen/Dense>
 #include "CovarianceInterfaceTorched.h"
 #include "GaussianProcessTorched.h"
 
@@ -43,5 +42,5 @@ private:
   StochasticToolsTorched::GaussianProcessTorched & _gp;
 
   /// Paramaters (x) used for training
-  const RealEigenMatrix & _training_params;
+  const torch::Tensor & _training_params;
 };

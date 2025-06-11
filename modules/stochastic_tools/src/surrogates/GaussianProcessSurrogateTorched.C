@@ -26,7 +26,7 @@ GaussianProcessSurrogateTorched::GaussianProcessSurrogateTorched(const InputPara
   : SurrogateModel(parameters),
     CovarianceInterfaceTorched(parameters),
     _gp(declareModelData<StochasticToolsTorched::GaussianProcessTorched>("_gp")),
-    _training_params(getModelData<RealEigenMatrix>("_training_params"))
+    _training_params(getModelData<torch::Tensor>("_training_params"))
 {
 }
 
@@ -69,7 +69,7 @@ GaussianProcessSurrogateTorched::evaluate(const std::vector<Real> & x,
                                           std::vector<Real> & y,
                                           std::vector<Real> & std) const
 {
-  const unsigned int n_dims = _training_params.cols();
+  const unsigned int n_dims = _training_params.sizes()[1];
 
   mooseAssert(x.size() == n_dims,
               "Number of parameters provided for evaluation does not match number of parameters "
@@ -79,34 +79,20 @@ GaussianProcessSurrogateTorched::evaluate(const std::vector<Real> & x,
   y = std::vector<Real>(n_outputs, 0.0);
   std = std::vector<Real>(n_outputs, 0.0);
 
-  RealEigenMatrix test_points(1, n_dims);
+  torch::Tensor test_points = torch::empty({1, n_dims}, at::kDouble);
+  auto points_accessor = test_points.accessor<Real, 2>();
   for (unsigned int ii = 0; ii < n_dims; ++ii)
-    test_points(0, ii) = x[ii];
+    points_accessor[0][ii] = x[ii];
 
-  auto options = torch::TensorOptions().dtype(at::kDouble);
-  torch::Tensor tensor_points =
-      torch::from_blob(test_points.data(), {test_points.rows(), test_points.cols()}, options)
-          .to(at::kDouble);
-
-  // make non-const copy
-  auto training_copy = _training_params;
-  torch::Tensor training_tensor =
-      torch::from_blob(training_copy.data(), {training_copy.cols(), training_copy.rows()}, options)
-          .clone();
-  torch::Tensor training_tensor_transposed = training_tensor.transpose(1, 0);
-  _gp.getParamStandardizer().getStandardized(tensor_points);
-
-  auto points_accessor = tensor_points.accessor<Real, 2>();
-  for (unsigned int i = 0; i < test_points.cols(); i++)
-    test_points(0, i) = points_accessor[0][i];
+  _gp.getParamStandardizer().getStandardized(test_points);
 
   torch::Tensor K_train_test =
-      torch::empty({_training_params.rows() * n_outputs, n_outputs}).to(at::kDouble);
+      torch::empty({_training_params.sizes()[0] * n_outputs, n_outputs}).to(at::kDouble);
 
   _gp.getCovarFunction().computeCovarianceMatrix(
-      K_train_test, training_tensor_transposed, tensor_points, false);
+      K_train_test, _training_params, test_points, false);
   torch::Tensor K_test = torch::empty({n_outputs, n_outputs}).to(at::kDouble);
-  _gp.getCovarFunction().computeCovarianceMatrix(K_test, tensor_points, tensor_points, true);
+  _gp.getCovarFunction().computeCovarianceMatrix(K_test, test_points, test_points, true);
 
   //  Compute the predicted mean value (centered)
   torch::Tensor pred_value = torch::transpose(
