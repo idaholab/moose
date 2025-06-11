@@ -94,6 +94,7 @@ Extensions:
                 Installing MOOSE: getting_started/installation/index.md
                 Creating an Application: getting_started/new_users.md
                 Examples and Tutorials: getting_started/examples_and_tutorials/index.md
+                MFEM Examples: https://mooseframework.inl.gov/syntax/MFEM/index.html
                 NCRC Applications: help/inl/applications.md
                 Virtual Test Bed: https://mooseframework.inl.gov/virtual_test_bed/
                 INL HPC Services: help/inl/index.md

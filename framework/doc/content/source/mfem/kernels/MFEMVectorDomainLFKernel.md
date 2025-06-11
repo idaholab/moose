@@ -21,7 +21,7 @@ This term arises from the weak form of the forcing term
 
 ## Example Input File Syntax
 
-!listing mfem/kernels/gravity.i block=Kernels
+!listing mfem/kernels/gravity.i block=/Kernels
 
 !syntax parameters /Kernels/MFEMVectorDomainLFKernel
 

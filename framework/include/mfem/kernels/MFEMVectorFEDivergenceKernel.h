@@ -4,21 +4,19 @@
 #include "MFEMMixedBilinearFormKernel.h"
 
 /*
- * \f[
- * (\sigma \nabla V, u')
- * \f]
- */
-class MFEMMixedVectorGradientKernel : public MFEMMixedBilinearFormKernel
+(k div u, v)
+*/
+class MFEMVectorFEDivergenceKernel : public MFEMMixedBilinearFormKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMMixedVectorGradientKernel(const InputParameters & parameters);
+  MFEMVectorFEDivergenceKernel(const InputParameters & parameters);
+  ~MFEMVectorFEDivergenceKernel() override = default;
 
   virtual mfem::BilinearFormIntegrator * createMBFIntegrator() override;
 
 protected:
-  const MFEMScalarCoefficientName & _coef_name;
   mfem::Coefficient & _coef;
 };
 
