@@ -540,8 +540,7 @@ TriSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz)
                std::pow(psi, gamma);
     }
     // Calculation of turbulent mixing parameter
-    // beta = Cs * std::pow(Ar2 / A2, 0.5) * std::tan(theta);
-    beta = 0.0;
+    beta = Cs * std::pow(Ar2 / A2, 0.5) * std::tan(theta);
   }
   // Calculation of Turbulent Crossflow for bare assemblies, from Kim and Chung (2001).
   else if ((wire_lead_length == 0) && (wire_diameter == 0))
@@ -664,23 +663,6 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
     {
       auto z_grid = _subchannel_mesh.getZGrid();
       auto dz = z_grid[iz] - z_grid[iz - 1];
-      Real gedge_ave = 0.0;
-      Real mdot_sum = 0.0;
-      Real si_sum = 0.0;
-      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-      {
-        auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-        if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
-        {
-          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-          auto Si = (*_S_flow_soln)(node_in);
-          auto mdot_in = (*_mdot_soln)(node_in);
-          mdot_sum = mdot_sum + mdot_in;
-          si_sum = si_sum + Si;
-        }
-      }
-      gedge_ave = mdot_sum / si_sum;
-
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
         auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
@@ -692,74 +674,9 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         auto h_out = 0.0;
         Real sumWijh = 0.0;
         Real sumWijPrimeDhij = 0.0;
-        Real e_cond = 0.0;
-
-        Real added_enthalpy = computeAddedHeatPin(i_ch, iz);
-
-        // compute the sweep flow enthalpy change
-        auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
         Real sweep_enthalpy = 0.0;
-
-        if ((subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER) &&
-            (wire_diameter != 0.0) && (wire_lead_length != 0.0))
-        {
-          const Real & pitch = _subchannel_mesh.getPitch();
-          const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
-          const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
-          const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
-          auto gap = _tri_sch_mesh.getDuctToPinGap();
-          auto w = pin_diameter + gap;
-          auto theta =
-              std::acos(wire_lead_length /
-                        std::sqrt(std::pow(wire_lead_length, 2) +
-                                  std::pow(libMesh::pi * (pin_diameter + wire_diameter), 2)));
-          auto Sij = dz * gap;
-          auto Si = (*_S_flow_soln)(node_in);
-          // in/out channels for i_ch
-          auto sweep_in = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
-          auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
-
-          // Calculation of flow regime
-          auto ReL = 320.0 * std::pow(10.0, pitch / pin_diameter - 1);
-          auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / pin_diameter - 1));
-          auto massflux = (*_mdot_soln)(node_in) / Si;
-          auto w_perim = (*_w_perim_soln)(node_in);
-          auto mu = (*_mu_soln)(node_in);
-          // hydraulic diameter
-          auto hD = 4.0 * Si / w_perim;
-          auto Re = massflux * hD / mu;
-          // Calculation of geometric parameters
-          auto Ar2 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 4.0;
-          auto A2prime =
-              pitch * (w - pin_diameter / 2.0) - libMesh::pi * std::pow(pin_diameter, 2) / 8.0;
-          auto A2 = A2prime - libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
-          auto Cs = 0.0;
-          if (Re < ReL)
-          {
-            Cs = 0.033 * std::pow(wire_lead_length / pin_diameter, 0.3);
-          }
-          else if (Re > ReT)
-          {
-            Cs = 0.75 * std::pow(wire_lead_length / pin_diameter, 0.3);
-          }
-          else
-          {
-            auto psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
-            auto gamma = 2.0 / 3.0;
-            Cs = 0.75 * std::pow(wire_lead_length / pin_diameter, 0.3) +
-                 (0.75 * std::pow(wire_lead_length / pin_diameter, 0.3) -
-                  0.033 * std::pow(wire_lead_length / pin_diameter, 0.3)) *
-                     std::pow(psi, gamma);
-          }
-          // Calculation of turbulent mixing parameter
-          auto beta = Cs * std::pow(Ar2 / A2, 0.5) * std::tan(theta);
-
-          auto wsweep_in = gedge_ave * beta * Sij;
-          auto wsweep_out = gedge_ave * beta * Sij;
-          auto sweep_hin = (*_h_soln)(node_sin);
-          auto sweep_hout = (*_h_soln)(node_in);
-          sweep_enthalpy = (wsweep_in * sweep_hin - wsweep_out * sweep_hout);
-        }
+        Real e_cond = 0.0;
+        Real added_enthalpy = computeAddedHeatPin(i_ch, iz);
 
         /// Calculate net sum of enthalpy into/out-of channel i from channels j around i
         /// (Turbulent difussion, Diversion Crossflow, Sweep flow Enthalpy, Radial heat conduction)
@@ -791,16 +708,16 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
               (wire_lead_length != 0) && (wire_diameter != 0))
           {
             // donor channel and node of sweep flow
-            // auto sweep_in = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
-            // auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
-            // if ((ii_ch == sweep_in) || (jj_ch == sweep_in))
-            // {
-            //   sweep_enthalpy += _WijPrime(i_gap, iz) * (*_h_soln)(node_sin);
-            // }
-            // else
-            // {
-            //   sweep_enthalpy -= _WijPrime(i_gap, iz) * (*_h_soln)(node_in);
-            // }
+            auto sweep_in = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
+            auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
+            if ((ii_ch == sweep_in) || (jj_ch == sweep_in))
+            {
+              sweep_enthalpy += _WijPrime(i_gap, iz) * (*_h_soln)(node_sin);
+            }
+            else
+            {
+              sweep_enthalpy -= _WijPrime(i_gap, iz) * (*_h_soln)(node_in);
+            }
           }
           /// Turbulent Diffusion
           else
