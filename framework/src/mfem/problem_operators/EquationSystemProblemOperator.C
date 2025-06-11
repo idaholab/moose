@@ -25,13 +25,12 @@ EquationSystemProblemOperator::AddEstimator(std::shared_ptr<MFEMEstimator> estim
   _estimator = estimator;
 }
 
-
 void
 EquationSystemProblemOperator::SetUpAMR()
 {
   _use_amr = true;
 
-  _refiner   = std::make_unique<mfem::ThresholdRefiner>( *_estimator->createEstimator() );
+  _refiner = std::make_unique<mfem::ThresholdRefiner>(*_estimator->createEstimator());
   _refiner->SetTotalErrorFraction(0.7);
 }
 
@@ -42,13 +41,14 @@ If we don't use AMR, we should just return false.
 TODO: should probably call an error if _use_amr is set to false
 
 */
-bool 
+bool
 EquationSystemProblemOperator::HRefine()
 {
   bool output = false;
-  if ( _use_amr ) {
-    _refiner->Apply( *_problem.pmesh );
-  
+  if (_use_amr)
+  {
+    _refiner->Apply(*_problem.pmesh);
+
     output = _refiner->Stop();
 
     // update after refinement as well; previously this was done in the executioner
@@ -57,23 +57,24 @@ EquationSystemProblemOperator::HRefine()
   return output;
 }
 
-bool 
+bool
 EquationSystemProblemOperator::PRefine(std::shared_ptr<mfem::ParFiniteElementSpace> fespace)
 {
   bool output = false;
-  if ( _use_amr ) {
+  if (_use_amr)
+  {
     mfem::Array<mfem::pRefinement> prefinements;
-    mfem::Array<mfem::Refinement>  refinements;
+    mfem::Array<mfem::Refinement> refinements;
 
     _refiner->MarkWithoutRefining(*_problem.pmesh, refinements);
 
     output = (_problem.pmesh->ReduceInt(refinements.Size()) == 0LL);
 
     prefinements.SetSize(refinements.Size());
-    for (int i=0; i<refinements.Size(); i++)
+    for (int i = 0; i < refinements.Size(); i++)
     {
       prefinements[i].index = refinements[i].index;
-      prefinements[i].delta = 1;  // Increase the element order by 1
+      prefinements[i].delta = 1; // Increase the element order by 1
     }
 
     fespace->PRefineAndUpdate(prefinements);
