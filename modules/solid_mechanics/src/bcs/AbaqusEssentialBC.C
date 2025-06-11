@@ -10,18 +10,17 @@
 #include "AbaqusEssentialBC.h"
 #include "AbaqusUELStepUserObject.h"
 #include "FEProblem.h"
+#include "libmesh/libmesh_common.h"
 
 registerMooseObject("SolidMechanicsApp", AbaqusEssentialBC);
 
 InputParameters
 AbaqusEssentialBC::validParams()
 {
-  InputParameters params = DirichletBCBase::validParams();
+  InputParameters params = NodalBC::validParams();
   params.addClassDescription(
       "Applies boundary conditions from an Abaqus input read through AbaqusUELMesh");
   params.addRequiredParam<Abaqus::AbaqusID>("abaqus_var_id", "Abaqus variable (DOF) id number.");
-  params.addParam<std::string>("abaqus_previous_step", "Step BC values to interpolate from.");
-  params.addParam<std::string>("abaqus_step", "If specified take the BC data from the given step");
   // we generate a union of all nodes where any BC applies and suss in the individual case
   // if we really need to set a value for the current variable (shouldApply)
   params.set<std::vector<BoundaryName>>("boundary") = {"abaqus_bc_union_boundary"};
@@ -29,43 +28,61 @@ AbaqusEssentialBC::validParams()
 }
 
 AbaqusEssentialBC::AbaqusEssentialBC(const InputParameters & parameters)
-  : DirichletBCBase(parameters),
+  : NodalBC(parameters),
     _step_uo(getUserObject<AbaqusUELStepUserObject>("step_user_object")),
-    _abaqus_var_id(getParam<Abaqus::AbaqusID>("abaqus_var_id")) //,
-    // _node_value_map_previous(
-    //     isParamValid("abaqus_previous_step")
-    //         ? &_uel_mesh->getBCFor(_abaqus_var_id, getParam<std::string>("abaqus_previous_step"))
-    //         : nullptr),
-    // _node_value_map(isParamValid("abaqus_step")
-    //                     ? _uel_mesh->getBCFor(_abaqus_var_id, getParam<std::string>("abaqus_step"))
-    //                     : _uel_mesh->getBCFor(_abaqus_var_id))
+    _abaqus_var_id(getParam<Abaqus::AbaqusID>("abaqus_var_id")),
+    _current_step_fraction(_step_uo.getStepFraction())
 {
-  if (isParamValid("abaqus_previous_step") && !isParamValid("abaqus_step"))
-    paramError("abaqus_previous_step", "Must supply `abaqus_step` parameter as well.");
 }
 
-bool
-AbaqusEssentialBC::shouldApply() const
+void
+AbaqusEssentialBC::timestepSetup()
 {
-  // return _node_value_map.find(_current_node->id()) != _node_value_map.end();
-  return false;
+  _current_step_begin_forces = _step_uo.getBeginForces(_abaqus_var_id);
+  _current_step_begin_solution = _step_uo.getBeginSolution(_abaqus_var_id);
+  _current_step_begin_values = _step_uo.getBeginValues(_abaqus_var_id);
+  _current_step_end_values = _step_uo.getEndValues(_abaqus_var_id);
 }
 
 Real
-AbaqusEssentialBC::computeQpValue()
+AbaqusEssentialBC::computeQpResidual()
 {
-  // Real previous = 0.0;
-  // if (_node_value_map_previous)
-  // {
-  //   const auto it = _node_value_map_previous->find(_current_node->id());
-  //   if (it != _node_value_map_previous->end())
-  //     previous = it->second;
-  // }
-  // const auto current = _node_value_map.at(_current_node->id());
+  const Real & d = _current_step_fraction;
 
-  // // we need to compute the current step time (use StepUserObject)
-  // const auto fraction = _fe_problem.time();
+  // BC is deactivated over the course of this step
+  const auto deactivated_it = _current_step_begin_forces->find(_current_node->id());
+  if (deactivated_it != _current_step_begin_forces->end())
+    return (1.0 - d) * deactivated_it->second;
 
-  // return previous + (current - previous) * fraction;
-  return 0.0;
+  const auto end_it = _current_step_end_values->find(_current_node->id());
+  if (end_it == _current_step_end_values->end())
+    mooseError("Missing step end value.");
+
+  // new BC is coming into effect this step
+  const auto activated_it = _current_step_begin_solution->find(_current_node->id());
+  if (activated_it != _current_step_begin_solution->end())
+  {
+    const Real value = d * end_it->second + (1.0 - d) * activated_it->second;
+    return _u[_qp] - value;
+  }
+
+  const auto begin_it = _current_step_begin_values->find(_current_node->id());
+  if (begin_it == _current_step_begin_values->end())
+    mooseError("Missing step begin value.");
+
+  // BC is staying in effect (but maybe changing value)
+  const Real value = d * end_it->second + (1.0 - d) * begin_it->second;
+  return _u[_qp] - value;
+}
+
+Real
+AbaqusEssentialBC::computeQpJacobian()
+{
+  // if the BC is deactivated it's force does not depend on the current solution
+  const auto deactivated_it = _current_step_begin_forces->find(_current_node->id());
+  if (deactivated_it == _current_step_begin_forces->end())
+    return 0.0;
+
+  // otherwise it has a linear dependence
+  return 1.0;
 }

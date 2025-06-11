@@ -26,8 +26,15 @@ public:
   /// Get initial dt
   Real getInitialDt() const { return _steps[_current_step]._dt; }
 
-  /// Get crrent step
-  std::size_t getStep() const { return _current_step; }
+  /// Get current step
+  unsigned int getStep() const { return _current_step; }
+  const Real & getStepFraction() const { return _current_step_fraction; }
+
+  /// get maps
+  const std::unordered_map<Abaqus::Index, Real> * getBeginForces(Abaqus::AbaqusID var_id) const;
+  const std::unordered_map<Abaqus::Index, Real> * getBeginSolution(Abaqus::AbaqusID var_id) const;
+  const std::unordered_map<Abaqus::Index, Real> * getBeginValues(Abaqus::AbaqusID var_id) const;
+  const std::unordered_map<Abaqus::Index, Real> * getEndValues(Abaqus::AbaqusID var_id) const;
 
 protected:
   void initialize() override;
@@ -40,9 +47,6 @@ protected:
   /// Current time
   const Real & _time;
 
-  /// Current step number
-  std::size_t _current_step;
-
   /// UEL Mesh object (stores BC data)
   AbaqusUELMesh & _uel_mesh;
 
@@ -50,13 +54,23 @@ protected:
   const Abaqus::ObjectStore<Abaqus::Step> _steps;
 
   /// Map from abaqus variable ID to MooseVariable*
-  std::unordered_map<Abaqus::AbaqusID, MooseVariableFieldBase*> _var_map;
+  std::unordered_map<Abaqus::AbaqusID, MooseVariableFieldBase *> _var_map;
 
-  /// beginning and end of step values
-  Abaqus::VariableValueMap<std::pair<Real, Real>> _bc_values;
+  /// Current step number
+  unsigned int _current_step;
+
+  /// Get current fraction (from 0 beginning to 1 end)
+  Real _current_step_fraction;
+
+  /// Boundary conditions for the start and end of the step
+  std::pair<const Abaqus::VariableValueMap<Real> *, const Abaqus::VariableValueMap<Real> *>
+      _current_step_bcs;
 
   /// applied forces for deactivated BCs
-  Abaqus::VariableValueMap<Real> _bc_forces;
+  Abaqus::VariableValueMap<Real> _current_step_begin_forces;
+
+  /// applied forces for deactivated BCs
+  Abaqus::VariableValueMap<Real> _current_step_begin_solution;
 
   /// tagged resodual with concentrated forces
   const NumericVector<Number> & _concentrated_forces;

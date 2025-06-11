@@ -63,6 +63,7 @@ public:
 
   /// number of contained objects
   std::size_t size() const { return _object.size(); }
+  bool empty() const { return _object.empty(); }
 
   ///@{ Iterators
   auto begin() { return _object.begin(); }
