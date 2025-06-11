@@ -229,7 +229,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
         # Cleanup the temporary python environment
         source deactivate
-        conda env remove -n ${PYTORCH_CONDA_ENV}
+        conda env remove -y -n ${PYTORCH_CONDA_ENV}
         rm -rf ${PYTORCH_DIR} ${PYTORCH_BUILD_DIR}
     else
         # Install from the script, we should only be doing this for CPU
