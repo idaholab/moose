@@ -248,7 +248,6 @@ GaussianProcessTorched::getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outp
           .to(at::kDouble)
           .clone();
   torch::Tensor inputs_tensor_transpose = inputs_tensor.transpose(1, 0);
-  std::cout << std::endl << "inputs_tensor_transpose" << inputs_tensor_transpose << std::endl;
   _covariance_function->computeCovarianceMatrix(
       _K, inputs_tensor_transpose, inputs_tensor_transpose, true);
 
