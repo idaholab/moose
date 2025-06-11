@@ -11,7 +11,6 @@
 
 #include "SurrogateTrainer.h"
 #include "Standardizer.h"
-#include <Eigen/Dense>
 
 #include "Distribution.h"
 
@@ -48,10 +47,10 @@ private:
   std::vector<std::vector<Real>> _data_buffer;
 
   /// Paramaters (x) used for training, along with statistics
-  RealEigenMatrix & _training_params;
+  torch::Tensor & _training_params;
 
   /// Data (y) used for training
-  RealEigenMatrix _training_data;
+  torch::Tensor _training_data;
 
   /// Switch for training param (x) standardization
   bool _standardize_params;
