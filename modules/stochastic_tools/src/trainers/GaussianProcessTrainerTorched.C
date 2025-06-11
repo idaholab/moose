@@ -54,7 +54,7 @@ GaussianProcessTrainerTorched::GaussianProcessTrainerTorched(const InputParamete
     CovarianceInterfaceTorched(parameters),
     _predictor_row(getPredictorData()),
     _gp(declareModelData<StochasticToolsTorched::GaussianProcessTorched>("_gp")),
-    _training_params(declareModelData<RealEigenMatrix>("_training_params")),
+    _training_params(declareModelData<torch::Tensor>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
     _do_tuning(isParamValid("tune_parameters")),
@@ -127,64 +127,33 @@ GaussianProcessTrainerTorched::postTrain()
   _communicator.allgather(_params_buffer);
   _communicator.allgather(_data_buffer);
 
-  _training_params.resize(_params_buffer.size(), _n_dims);
-  _training_data.resize(_data_buffer.size(), _n_outputs);
+  _training_params = torch::empty({long(_params_buffer.size()), _n_dims}, at::kDouble);
+  _training_data = torch::empty({long(_data_buffer.size()), _n_outputs}, at::kDouble);
 
-  for (auto ii : make_range(_training_params.rows()))
+  auto params_accessor = _training_params.accessor<Real, 2>();
+  auto data_accessor = _training_data.accessor<Real, 2>();
+
+  for (auto ii : make_range(_training_params.sizes()[0]))
   {
     for (auto jj : make_range(_n_dims))
-      _training_params(ii, jj) = _params_buffer[ii][jj];
+      params_accessor[ii][jj] = _params_buffer[ii][jj];
     for (auto jj : make_range(_n_outputs))
-      _training_data(ii, jj) = _data_buffer[ii][jj];
+      data_accessor[ii][jj] = _data_buffer[ii][jj];
   }
 
-  auto options = torch::TensorOptions().dtype(at::kDouble);
-  torch::Tensor training_tensor =
-      torch::from_blob(
-          _training_params.data(), {_training_params.cols(), _training_params.rows()}, options)
-          .clone();
-  torch::Tensor training_tensor_transposed = training_tensor.transpose(1, 0);
-
-  torch::Tensor training_data_tensor =
-      torch::from_blob(
-          _training_data.data(), {_training_data.rows(), _training_data.cols()}, options)
-          .to(at::kDouble);
-
   // Standardize (center and scale) training params
-
-  // TODO: After standardizing param and data tensor, update values of Eigen::matrix versions to
-  // match
   if (_standardize_params)
-    _gp.standardizeParameters(training_tensor_transposed);
+    _gp.standardizeParameters(_training_params);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
     _gp.paramStandardizer().set(0, 1, _n_dims);
   // Standardize (center and scale) training data
   if (_standardize_data)
-    _gp.standardizeData(training_data_tensor);
+    _gp.standardizeData(_training_data);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
     _gp.dataStandardizer().set(0, 1, _n_outputs);
 
   // Setup the covariance
-  _gp.setupCovarianceMatrix(training_tensor_transposed, training_data_tensor, _optimization_opts);
-
-  // Update _training_params with values from tensor. Once _training_params is replaced with a
-  // torch::Tensor remove this
-  auto training_accessor = training_tensor_transposed.accessor<Real, 2>();
-  for (unsigned int ii = 0; ii < training_tensor_transposed.sizes()[0]; ii++)
-  {
-    for (unsigned int jj = 0; jj < training_tensor_transposed.sizes()[1]; jj++)
-    {
-      _training_params(ii, jj) = training_accessor[ii][jj];
-    }
-  }
-  auto data_accessor = training_data_tensor.accessor<Real, 2>();
-  for (unsigned int ii = 0; ii < training_data_tensor.sizes()[0]; ii++)
-  {
-    for (unsigned int jj = 0; jj < training_data_tensor.sizes()[1]; jj++)
-    {
-      _training_data(ii, jj) = data_accessor[ii][jj];
-    }
-  }
+  _gp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
 }
