@@ -72,7 +72,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     if [ -d "{{ MINIFORGE_DIR }}" ]; then
         export PATH={{ MINIFORGE_DIR }}/bin:$PATH
     fi
-    if [ -d "{{ MINIFORGE_DIR }}/envs/{{ MOOSE_CONDA_ENV_NAME }}"]
+    if [ -d "{{ MINIFORGE_DIR }}/envs/{{ MOOSE_CONDA_ENV_NAME }}"]; then
         source activate {{ MINIFORGE_DIR }}/envs/{{ MOOSE_CONDA_ENV_NAME }}
     fi
 
