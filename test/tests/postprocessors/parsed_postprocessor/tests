@@ -18,6 +18,6 @@
     type = RunException
     input = pp_symbols_invalid_length.i
     expect_err = 'pp_symbols must be the same length as pp_names.'
-    requirement = 'The system shall detect when the given number of inut symbols does not match the number of postprocessor names adn will report an error.'
+    requirement = 'The system shall detect when the given number of input symbols does not match the number of postprocessor names and will report an error.'
   []
 []
