@@ -7,7 +7,7 @@
     max_parallel = 1
     max_threads = 1
     mesh_mode = REPLICATED
-    requirement = "The executioner system shall support the PETSc non-linear divergence tolerance."
+    requirement = "The system shall support execution using the PETSc non-linear divergence tolerance."
     issues = '#13991'
     expect_err = "Nonlinear solve did not converge due to DIVERGED_DTOL iterations 1"
   [../]
