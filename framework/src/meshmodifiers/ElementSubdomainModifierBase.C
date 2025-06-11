@@ -234,7 +234,8 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
   {
     const auto & var_name = _ic_vars_names[i];
     // Get the variable
-    const auto & var = _sys.getVariable(_tid, var_name);
+    const auto & var = (_nl_sys.hasVariable(var_name)) ? _nl_sys.getVariable(_tid, var_name)
+                                                       : _aux_sys.getVariable(_tid, var_name);
 
     // Get the variable number
     const auto var_num = var.number();
@@ -859,6 +860,7 @@ void
 ElementSubdomainModifierBase::applyIC(bool displaced)
 {
 
+  // Set of variable numbers that are not part of the extrapolated initial conditions
   std::set<unsigned int> ic_target_vars_number_except_ic_vars;
 
   auto insertNonICVars = [&](SystemBase & sys)
@@ -893,7 +895,12 @@ ElementSubdomainModifierBase::applyIC(bool displaced)
     else if (_ic_strategy[i] == ICStrategy::IC_POLYNOMIAL ||
              _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
              _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_THRESHOLD)
-      applyIC_Polynomial(_fe_problem.getNonlinearSystemBase(_sys.number()), _ic_vars_number[i]);
+    {
+      if (_nl_sys.hasVariable(_ic_vars_names[i]))
+        applyIC_Polynomial(_fe_problem.getNonlinearSystemBase(_sys.number()), _ic_vars_number[i]);
+      else
+        applyIC_Polynomial(_fe_problem.getAuxiliarySystem(), _ic_vars_number[i]);
+    }
     else
       mooseError("Unknown initial condition strategy");
   }
@@ -1241,6 +1248,25 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys, const unsigne
 
     // Assign recovered value to the DOF
     vec.set(dofs_on_newly_activated_node[0], recovered_val);
+  }
+
+  for (const auto & elem_id : _global_reinitialized_elems)
+  {
+    const Elem * elem = _mesh.elemPtr(elem_id);
+    if (!elem)
+      continue;
+
+    // Get the DOF indices for this variable at this element
+    std::vector<dof_id_type> dofs_on_reinitialized_elem;
+    dof_map.dof_indices(elem, dofs_on_reinitialized_elem, var_num);
+
+    // Recover value using polynomial patch recovery
+    const Point & centroid = elem->vertex_average();
+    const Real recovered_val = _npr_vec[_var_number2_npr_idx[var_num]]->nodalPatchRecovery(
+        centroid, _solved_elem_ids_for_npr /*has already sorted*/);
+
+    // Assign recovered value to the DOF
+    vec.set(dofs_on_reinitialized_elem[0], recovered_val);
   }
 
   vec.close();
