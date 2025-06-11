@@ -88,10 +88,10 @@ bool HttpRequest::parse(std::shared_ptr<IClientStream> stream) {
         path = path.substr(0, question);
     }
 
-    if (query.empty())
-        std::cout << methodString << " " << path << std::endl;
-    else
-        std::cout << methodString << " " << path << " (Query: " << query << ")" << std::endl;
+    // if (query.empty())
+    //     std::cout << methodString << " " << path << std::endl;
+    // else
+    //     std::cout << methodString << " " << path << " (Query: " << query << ")" << std::endl;
 
     while (true) {
         std::string line = stream->receiveLine();
@@ -226,7 +226,7 @@ HttpServer::Processor::Processor(std::shared_ptr<IClientStream> stream, HttpServ
 
             keep_alive_check:
             self->mLastActive = std::chrono::system_clock::now();
-            
+
             #ifdef TINYHTTP_ALLOW_KEEPALIVE
             if (req["Connection"] != "keep-alive")
                 break;
@@ -271,7 +271,7 @@ void HttpServer::Processor::shutdown() {
     #endif
 
     mIsAlive = false;
-    
+
     if (mClientStream && mClientStream->isOpen())
         mClientStream->close();
 
@@ -295,7 +295,7 @@ void HttpServer::cleanupThreadProc() {
 
         if (mSocket == -1)
             continue;
-        
+
         mRequestProcessorListMutex.lock();
         for (auto it = mRequestProcessors.begin(); it != mRequestProcessors.end(); ++it) {
             auto& processor = *it;
@@ -394,7 +394,7 @@ void HttpServer::shutdown() {
     if (mSocket < 0) {
         return;
     }
-    
+
     mSocket = -1;
 
     puts("Shutting down server");
