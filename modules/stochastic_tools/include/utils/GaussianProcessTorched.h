@@ -10,7 +10,6 @@
 #pragma once
 
 #include "StandardizerTorched.h"
-#include <Eigen/Dense>
 
 #include "CovarianceFunctionBaseTorched.h"
 
@@ -145,10 +144,10 @@ public:
                            const GPOptimizerOptions & opts);
 
   // Computes the loss function
-  Real getLoss(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
+  Real getLoss(torch::Tensor & inputs, torch::Tensor & outputs);
 
   // Computes Gradient of the loss function
-  std::vector<Real> getGradient(RealEigenMatrix & inputs) const;
+  std::vector<Real> getGradient(torch::Tensor & inputs) const;
 
   /// Function used to convert the hyperparameter maps in this object to
   /// vectors
@@ -274,14 +273,14 @@ protected:
   /// A solve of Ax=b via Cholesky.
   torch::Tensor _K_results_solve;
 
-  /// Cholesky decomposition Eigen object
+  /// Cholesky decomposition libtorch tensor object
   torch::Tensor _K_cho_decomp;
 
   /// Paramaters (x) used for training, along with statistics
-  const RealEigenMatrix * _training_params;
+  const torch::Tensor * _training_params;
 
   /// Data (y) used for training
-  const RealEigenMatrix * _training_data;
+  const torch::Tensor * _training_data;
 
   /// The batch size for Adam optimization
   unsigned int _batch_size;
