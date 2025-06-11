@@ -193,9 +193,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         exit 1
     fi
 
+    LIBTORCH_DIR={{ LIBTORCH_DIR }}
     if [ -n "$BUILD_PYTORCH" ]; then
-        LIBTORCH_DIR={{ LIBTORCH_DIR }}
-
         # Clone pytorch for build
         PYTORCH_VER=2.6.0
         cd ${ROOT_BUILD_DIR}
