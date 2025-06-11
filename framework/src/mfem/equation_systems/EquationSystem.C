@@ -382,7 +382,7 @@ void
 EquationSystem::UpdateEquationSystem()
 {
   // update these grid functions too
-  for (int i = 0; i < _test_var_names.size(); i++)
+  for (const auto i : index_range(_test_var_names))
   {
     _xs.at(i)->Update();
     _dxdts.at(i)->Update();
@@ -391,12 +391,12 @@ EquationSystem::UpdateEquationSystem()
   // Apply boundary conditions
   ApplyEssentialBCs();
 
-  for (int i = 0; i < _test_var_names.size(); i++)
+  for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
 
     // Assemble linear and bilinear forms for this test variable
-    auto lf  = _lfs.Get(test_var_name);
+    auto lf = _lfs.Get(test_var_name);
     auto blf = _blfs.Get(test_var_name);
     lf->Update();
     lf->Assemble();
@@ -404,11 +404,10 @@ EquationSystem::UpdateEquationSystem()
     blf->Assemble();
 
     // Loop through and assemble mixed bilinear forms for this test variable
-    for (int j = 0; j < _test_var_names.size(); j++)
+    for (const auto j : index_range(_test_var_names))
     {
       auto trial_var_name = _test_var_names.at(j);
-      if (_mblfs.Has(test_var_name) &&
-          _mblfs.Get(test_var_name)->Has(trial_var_name))
+      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
       {
         auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
                                                                  _test_pfespaces.at(i));
