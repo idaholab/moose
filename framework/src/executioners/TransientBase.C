@@ -492,15 +492,6 @@ TransientBase::takeStep(Real input_dt)
   {
     mooseAssert(!_testing_restep, "Should not be set");
 
-    // We shouldn't try to test resolving if the last solve was
-    // a failure. This might actually not be needed, but I'm
-    // not confident
-    // if (!lastSolveConverged())
-    //   mooseError("Solve not compatible with --test-restep because timestep ",
-    //              _t_step,
-    //              " failed to converge.\n\nSet `restep = false` in the test specification to "
-    //              "disable this test.");
-
     mooseInfo("Aborting and retrying solve for timestep ", _t_step, " due to --test-restep");
     _last_solve_converged = false;
     _testing_restep = true;
