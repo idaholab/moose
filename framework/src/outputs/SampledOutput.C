@@ -30,8 +30,8 @@ SampledOutput::validParams()
   params.addParam<unsigned int>("refinements",
                                 0,
                                 "Number of uniform refinements for oversampling "
-                                "(refinement levels beyond any uniform "
-                                "refinements)");
+                                "(refinement levels beyond any level of "
+                                "refinements already applied on the regular mesh)");
   params.addParam<Point>("position",
                          "Set a positional offset, this vector will get added to the "
                          "nodal coordinates to move the domain.");
@@ -48,8 +48,8 @@ SampledOutput::validParams()
   params.addDeprecatedParam<bool>("append_oversample",
                                   false,
                                   "Append '_oversample' to the output file base",
-                                  "This parameter is no longer operational, to append "
-                                  "'_oversample' utilize the output block name or 'file_base'");
+                                  "This parameter is deprecated. To append '_oversample' utilize "
+                                  "the output block name or the 'file_base'");
 
   // 'Oversampling' Group
   params.addParamNamesToGroup("refinements position file sampling_blocks serialize_sampling",
@@ -66,7 +66,7 @@ SampledOutput::SampledOutput(const InputParameters & parameters)
     _use_sampled_output(_refinements > 0 || _using_external_sampling_file ||
                         isParamValid("sampling_blocks") || _change_position),
     _position(_change_position ? getParam<Point>("position") : Point()),
-    _oversample_mesh_changed(true),
+    _sampling_mesh_changed(true),
     _mesh_subdomains_match(true),
     _serialize(getParam<bool>("serialize_sampling"))
 {
@@ -77,7 +77,7 @@ SampledOutput::initialSetup()
 {
   AdvancedOutput::initialSetup();
 
-  // Creates and initializes the oversampled mesh
+  // Creates and initializes the sampling mesh
   initSample();
 }
 
@@ -116,26 +116,26 @@ SampledOutput::outputStep(const ExecFlagType & type)
 SampledOutput::~SampledOutput()
 {
   // TODO: Remove once libmesh Issue #1184 is fixed
-  _oversample_es.reset();
-  _cloned_mesh_ptr.reset();
+  _sampling_es.reset();
+  _sampling_mesh_ptr.reset();
 }
 
 void
 SampledOutput::meshChanged()
 {
-  _oversample_mesh_changed = true;
+  _sampling_mesh_changed = true;
 }
 
 void
 SampledOutput::initSample()
 {
   // Perform the mesh cloning, if needed
-  if (_use_sampled_output)
-    cloneMesh();
-  else
+  if (!_use_sampled_output)
     return;
 
-  // Re-position the oversampled mesh
+  cloneMesh();
+
+  // Re-position the sampling mesh
   if (_change_position)
     for (auto & node : _mesh_ptr->getMesh().node_ptr_range())
       *node += _position;
@@ -160,18 +160,18 @@ SampledOutput::initSample()
 
   // This should be called after changing the mesh (block restriction for example)
   if (_change_position || (_refinements > 0) || isParamValid("sampling_blocks"))
-    _cloned_mesh_ptr->meshChanged();
+    _sampling_mesh_ptr->meshChanged();
 
   // Create the new EquationSystems
-  _oversample_es = std::make_unique<EquationSystems>(_mesh_ptr->getMesh());
-  _es_ptr = _oversample_es.get();
+  _sampling_es = std::make_unique<EquationSystems>(_mesh_ptr->getMesh());
+  _es_ptr = _sampling_es.get();
 
   // Reference the system from which we are copying
   EquationSystems & source_es = _problem_ptr->es();
 
   // If we're going to be copying from that system later, we need to keep its
   // original elements as ghost elements even if it gets grossly
-  // repartitioned, since we can't repartition the oversample mesh to
+  // repartitioned, since we can't repartition the sample mesh to
   // match.
   // FIXME: this is not enough. It assumes our initial partition of the sampling mesh
   // and the source mesh match. But that's usually only true in the 'refinement' case,
@@ -184,7 +184,7 @@ SampledOutput::initSample()
   }
 
   // Initialize the _mesh_functions vector
-  unsigned int num_systems = source_es.n_systems();
+  const auto num_systems = source_es.n_systems();
   _mesh_functions.resize(num_systems);
 
   // Keep track of the variable numbering in both regular and sampled system
@@ -198,10 +198,10 @@ SampledOutput::initSample()
   for (const auto sys_num : make_range(num_systems))
   {
     // Reference to the current system
-    System & source_sys = source_es.get_system(sys_num);
+    const auto & source_sys = source_es.get_system(sys_num);
 
     // Add the system to the new EquationsSystems
-    ExplicitSystem & dest_sys = _oversample_es->add_system<ExplicitSystem>(source_sys.name());
+    ExplicitSystem & dest_sys = _sampling_es->add_system<ExplicitSystem>(source_sys.name());
 
     // Loop through the variables in the System
     const auto num_vars = source_sys.n_vars();
@@ -222,13 +222,13 @@ SampledOutput::initSample()
         num_actual_vars++;
 
         // We do what we can to preserve the block restriction
-        const auto * subdomains = (_using_external_sampling_file && !_mesh_subdomains_match)
-                                      ? nullptr
-                                      : &source_sys.variable(var_num).active_subdomains();
+        const auto * const subdomains = (_using_external_sampling_file && !_mesh_subdomains_match)
+                                            ? nullptr
+                                            : &source_sys.variable(var_num).active_subdomains();
 
         // Add the variable. We essentially support nodal variables and constant monomials
         const FEType & fe_type = source_sys.variable_type(var_num);
-        if (isSampledAsNodal(fe_type))
+        if (isSampledAtNodes(fe_type))
         {
           dest_sys.add_variable(source_sys.variable_name(var_num), fe_type, subdomains);
           if (dist_mesh && !_serialize)
@@ -260,7 +260,7 @@ SampledOutput::initSample()
   }
 
   // Initialize the newly created EquationSystem
-  _oversample_es->init();
+  _sampling_es->init();
 }
 
 void
@@ -281,7 +281,7 @@ SampledOutput::updateSample()
 
   // Get a reference to actual equation system
   EquationSystems & source_es = _problem_ptr->es();
-  unsigned int num_systems = source_es.n_systems();
+  const auto num_systems = source_es.n_systems();
 
   // Loop through each system
   for (const auto sys_num : make_range(num_systems))
@@ -290,9 +290,9 @@ SampledOutput::updateSample()
     {
       // Get references to the source and destination systems
       System & source_sys = source_es.get_system(sys_num);
-      System & dest_sys = _oversample_es->get_system(sys_num);
+      System & dest_sys = _sampling_es->get_system(sys_num);
 
-      // Update the solution for the oversampled mesh
+      // Update the solution for the sampling mesh
       if (_serialize)
       {
         _serialized_solution->clear();
@@ -309,7 +309,7 @@ SampledOutput::updateSample()
         // If the mesh has changed, the MeshFunctions need to be re-built, otherwise simply clear it
         // for re-initialization
         // TODO: inherit from MeshChangedInterface and rebuild mesh functions on meshChanged()
-        if (!_mesh_functions[sys_num][var_num] || _oversample_mesh_changed)
+        if (!_mesh_functions[sys_num][var_num] || _sampling_mesh_changed)
           _mesh_functions[sys_num][var_num] = std::make_unique<MeshFunction>(
               source_es,
               _serialize ? *_serialized_solution : *source_sys.solution,
@@ -318,7 +318,7 @@ SampledOutput::updateSample()
         else
           _mesh_functions[sys_num][var_num]->clear();
 
-        // Initialize the MeshFunctions for application to the oversampled solution
+        // Initialize the MeshFunctions for application to the sampled solution
         _mesh_functions[sys_num][var_num]->init();
 
         // Mesh functions are still defined on the original mesh, which might not fully overlap with
@@ -337,7 +337,7 @@ SampledOutput::updateSample()
         const auto original_var_num = _variable_numbers_in_system[sys_num][var_num];
         const FEType & fe_type = source_sys.variable_type(original_var_num);
         // Loop over the mesh, nodes for nodal data, elements for element data
-        if (isSampledAsNodal(fe_type))
+        if (isSampledAtNodes(fe_type))
         {
           for (const auto & node : (_serialize ? _mesh_ptr->getMesh().node_ptr_range()
                                                : _mesh_ptr->getMesh().local_node_ptr_range()))
@@ -389,9 +389,9 @@ SampledOutput::updateSample()
     }
   }
 
-  // Set this to false so that new output files are not created, since the oversampled mesh
+  // Set this to false so that new output files are not created, since the sampling mesh
   // doesn't actually change
-  _oversample_mesh_changed = false;
+  _sampling_mesh_changed = false;
 }
 
 void
@@ -403,10 +403,10 @@ SampledOutput::cloneMesh()
     InputParameters mesh_params = _app.getFactory().getValidParams("FileMesh");
     mesh_params.applyParameters(parameters(), {}, true);
     mesh_params.set<bool>("nemesis") = false;
-    _cloned_mesh_ptr =
+    _sampling_mesh_ptr =
         _app.getFactory().createUnique<MooseMesh>("FileMesh", "output_problem_mesh", mesh_params);
-    _cloned_mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
-    _cloned_mesh_ptr->init();
+    _sampling_mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
+    _sampling_mesh_ptr->init();
   }
   // Clone the existing mesh
   else
@@ -414,7 +414,7 @@ SampledOutput::cloneMesh()
     if (_app.isRecovering())
       mooseWarning("Recovering or Restarting with oversampling may not work (especially with "
                    "adapted meshes)!!  Refs #2295");
-    _cloned_mesh_ptr = _mesh_ptr->safeClone();
+    _sampling_mesh_ptr = _mesh_ptr->safeClone();
   }
 
   // Remove unspecified blocks
@@ -422,50 +422,50 @@ SampledOutput::cloneMesh()
   {
     // Remove all elements not in the blocks
     const auto & blocks_to_keep_names = getParam<std::vector<SubdomainName>>("sampling_blocks");
-    const auto & blocks_to_keep = _cloned_mesh_ptr->getSubdomainIDs(blocks_to_keep_names);
-    for (const auto & elem_ptr : _cloned_mesh_ptr->getMesh().element_ptr_range())
+    const auto & blocks_to_keep = _sampling_mesh_ptr->getSubdomainIDs(blocks_to_keep_names);
+    for (const auto & elem_ptr : _sampling_mesh_ptr->getMesh().element_ptr_range())
       if (std::find(blocks_to_keep.begin(), blocks_to_keep.end(), elem_ptr->subdomain_id()) ==
           blocks_to_keep.end())
-        _cloned_mesh_ptr->getMesh().delete_elem(elem_ptr);
+        _sampling_mesh_ptr->getMesh().delete_elem(elem_ptr);
 
     // Deleting elements and isolated nodes would cause renumbering. Not renumbering might help
-    // user examining the sampled mesh and the regular mesh. Also if we end up partitioning the
+    // user examining the sampling mesh and the regular mesh. Also if we end up partitioning the
     // elements, the node partitioning is unlikely to match if the element numbering is different.
     // Still not enough of a guarantee, because of deleted elements the node partitioning could be
     // different. We will rely on ghosting to make it work
-    _cloned_mesh_ptr->getMesh().allow_renumbering(false);
+    _sampling_mesh_ptr->getMesh().allow_renumbering(false);
   }
 
   // Set a partitioner
   if (!_serialize)
   {
-    _cloned_mesh_ptr->setIsCustomPartitionerRequested(true);
+    _sampling_mesh_ptr->setIsCustomPartitionerRequested(true);
     InputParameters partition_params = _app.getFactory().getValidParams("CopyMeshPartitioner");
-    partition_params.set<MooseMesh *>("mesh") = _cloned_mesh_ptr.get();
+    partition_params.set<MooseMesh *>("mesh") = _sampling_mesh_ptr.get();
     partition_params.set<MooseMesh *>("source_mesh") = _mesh_ptr;
     std::shared_ptr<MoosePartitioner> mp = _factory.create<MoosePartitioner>(
         "CopyMeshPartitioner", "sampled_output_part", partition_params);
-    _cloned_mesh_ptr->setCustomPartitioner(mp.get());
+    _sampling_mesh_ptr->setCustomPartitioner(mp.get());
 
-    _cloned_mesh_ptr->getMesh().prepare_for_use();
+    _sampling_mesh_ptr->getMesh().prepare_for_use();
     // this should be called by prepare_for_use, but is not.
     // it also requires a prior call to prepare_for_use()
-    mp->partition(_cloned_mesh_ptr->getMesh(), comm().size());
+    mp->partition(_sampling_mesh_ptr->getMesh(), comm().size());
   }
 
   // Prepare mesh, needed for the mesh functions
   if (_using_external_sampling_file)
-    _cloned_mesh_ptr->prepare(/*mesh to clone*/ nullptr);
+    _sampling_mesh_ptr->prepare(/*mesh to clone*/ nullptr);
   else if (_serialize && isParamValid("sampling_blocks"))
     // TODO: constraints have not been initialized?
-    _cloned_mesh_ptr->getMesh().prepare_for_use();
+    _sampling_mesh_ptr->getMesh().prepare_for_use();
 
   if (_serialize)
     // we want to avoid re-partitioning, as we will serialize anyway
-    _cloned_mesh_ptr->getMesh().skip_partitioning(true);
+    _sampling_mesh_ptr->getMesh().skip_partitioning(true);
 
   // Make sure that the mesh pointer points to the newly cloned mesh
-  _mesh_ptr = _cloned_mesh_ptr.get();
+  _mesh_ptr = _sampling_mesh_ptr.get();
 
   // Check the source and target mesh in case their subdomains match
   const std::vector<SubdomainID> mesh_subdomain_ids_vec(_mesh_ptr->meshSubdomains().begin(),
@@ -491,7 +491,7 @@ SampledOutput::setFileBaseInternal(const std::string & file_base)
 }
 
 bool
-SampledOutput::isSampledAsNodal(const FEType & fe_type) const
+SampledOutput::isSampledAtNodes(const FEType & fe_type) const
 {
   // This is the same criterion as in MooseVariableData
   const auto continuity = FEInterface::get_continuity(fe_type);
