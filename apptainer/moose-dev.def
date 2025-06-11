@@ -144,14 +144,15 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # Build and install wasp
     # This is redundant; hopefully we can use the one from conda in the future
     cd ${ROOT_BUILD_DIR}
+    mkdir -p ${WASP_DIR}/logs
     WASP_SRC_DIR=${ROOT_BUILD_DIR}/wasp
     git clone ${WASP_GIT_REMOTE} ${WASP_SRC_DIR}
     cd ${WASP_SRC_DIR}
     git checkout ${WASP_GIT_SHA}
     git submodule update --init --recursive
-    WASP_SRC_DIR=${WASP_SRC_DIR} ${WASP_BUILD_SCRIPT} -D CMAKE_INSTALL_PREFIX:STRING=${WASP_DIR}
+    WASP_SRC_DIR=${WASP_SRC_DIR} ${WASP_BUILD_SCRIPT} -D CMAKE_INSTALL_PREFIX:STRING=${WASP_DIR} 2>&1 | tee ${WASP_DIR}/logs/build.log
     rm -rf ${WASP_SRC_DIR}
-    export WASP_DIR={{ WASP_DIR }}
+    export WASP_DIR
 
     # Install miniforge in MINIFORGE_DIR
     cd ${ROOT_BUILD_DIR}
@@ -166,11 +167,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # Figure out compiler and version to see if we build torch or use prebuilt torch
     COMPILER=$(mpicxx -show | awk '{ print $1 }')
     BUILD_PYTORCH=1
-    BUILD_PYTORCH_CCXXFLAGS=""
+    # Explicitly silence all warnings because the build is loud (>5MB of output...)
+    BUILD_PYTORCH_CCXXFLAGS="-w"
     BUILD_PYTORCH_FLAGS=()
     BUILD_PYTORCH_PATCHES=()
     if [ "$COMPILER" == "g++" ]; then
-        BUILD_PYTORCH_CCXXFLAGS="-Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict"
+        BUILD_PYTORCH_CCXXFLAGS+=" -Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict"
         if [[ $(gcc --version) =~ [0-9]+.[0-9]+(.[0-9]+?) ]]; then
             GCC_VERSION="${BASH_REMATCH[0]}"
         else
@@ -192,6 +194,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     fi
 
     if [ -n "$BUILD_PYTORCH" ]; then
+        LIBTORCH_DIR={{ LIBTORCH_DIR }}
+
         # Clone pytorch for build
         PYTORCH_VER=2.6.0
         cd ${ROOT_BUILD_DIR}
@@ -212,6 +216,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         conda install cmake=3.31.6
 
         # Build and install pytorch
+        mkdir -p $LIBTORCH_DIR/logs
         PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
         mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
         CFLAGS="$BUILD_PYTORCH_CCXXFLAGS" CXXFLAGS="$BUILD_PYTORCH_CCXXFLAGS" cmake \
@@ -219,8 +224,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
             -DCMAKE_BUILD_TYPE:STRING=Release \
             -DCMAKE_INSTALL_PREFIX:PATH={{ LIBTORCH_DIR }} \
             "${BUILD_PYTORCH_FLAGS[@]}" \
-            ${PYTORCH_DIR}
-        cmake --build . --target install -- -j ${MOOSE_JOBS}
+            ${PYTORCH_DIR} 2>&1 | tee ${LIBTORCH_DIR}/logs/cmake.log
+        cmake --build . --target install -- -j ${MOOSE_JOBS} 2>&1 | tee ${LIBTORCH_DIR}/logs/build.log
 
         # Cleanup the temporary python environment
         source deactivate
@@ -233,11 +238,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
             echo "Should not use precompiled torch with cuda"
             exit 1
         fi
-        ${ROOT_BUILD_DIR}/setup_libtorch.sh --version=${LIBTORCH_VER} --libtorch-dest="$(dirname {{ LIBTORCH_DIR }})" --libtorch-distribution=cpu --cleanup
+        ${ROOT_BUILD_DIR}/setup_libtorch.sh --version=${LIBTORCH_VER} --libtorch-dest="$(dirname "$LIBTORCH_DIR")" --libtorch-distribution=cpu --cleanup
     fi
 
+    export LIBTORCH_DIR
     cd ${ROOT_BUILD_DIR}
-    export LIBTORCH_DIR={{ LIBTORCH_DIR }}
 
     # TODO: Use a separate WITH_NEML2 for this stuff, or something like that
     # neml2 variables
@@ -248,6 +253,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Build and install neml2
     cd ${ROOT_BUILD_DIR}
+    mkdir -p ${NEML2_DIR}/logs
     NEML2_SRC_DIR=${ROOT_BUILD_DIR}/neml2
     git clone ${NEML2_GIT_REMOTE} ${NEML2_SRC_DIR}
     cd ${NEML2_SRC_DIR}
@@ -258,7 +264,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- else %}
     METHODS="opt devel dbg"
 {%- endif %}
-    METHODS="$METHODS" NEML2_SRC_DIR=${NEML2_SRC_DIR} NEML2_DIR=${NEML2_DIR} ${NEML2_BUILD_SCRIPT} --skip-submodule-update
+    METHODS="$METHODS" NEML2_SRC_DIR=${NEML2_SRC_DIR} NEML2_DIR=${NEML2_DIR} ${NEML2_BUILD_SCRIPT} --skip-submodule-update 2>&1 | tee ${NEML2_DIR}/logs/build.log
     rm -rf ${NEML2_SRC_DIR}
 {%- endif %}
 
@@ -296,10 +302,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     fi
 
     # Install conduit
-    CONDUIT_DIR=${CONDUIT_DIR} CONDUIT_SRC_DIR=${CONDUIT_SRC_DIR} ${CONDUIT_BUILD_SCRIPT} {{ CONDUIT_OPTIONS }}
+    mkdir -p ${CONDUIT_DIR}/logs
+    CONDUIT_DIR=${CONDUIT_DIR} CONDUIT_SRC_DIR=${CONDUIT_SRC_DIR} ${CONDUIT_BUILD_SCRIPT} {{ CONDUIT_OPTIONS }} 2>&1 | tee ${CONDUIT_DIR}/logs/build.log
 
     # Install MFEM
-    MFEM_DIR=${MFEM_DIR} MFEM_SRC_DIR=${MFEM_SRC_DIR} CONDUIT_DIR=${CONDUIT_DIR} ${MFEM_BUILD_SCRIPT} "${MFEM_OPTIONS[@]}"
+    mkdir -p ${MFEM_DIR}/logs
+    MFEM_DIR=${MFEM_DIR} MFEM_SRC_DIR=${MFEM_SRC_DIR} CONDUIT_DIR=${CONDUIT_DIR} ${MFEM_BUILD_SCRIPT} "${MFEM_OPTIONS[@]}" 2>&1 | tee ${MFEM_DIR}/logs/build.log
 {%- endif %}
 
     # Add moose channels
@@ -321,15 +329,17 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
 {% if PROFILING is defined %}
     # Install gperftools
+    GPERF_DIR={{ GPERF_DIR }}
     GPERFTOOLS_VERSION=gperftools-2.15
     cd ${ROOT_BUILD_DIR}
+    mkdir -p ${GPERF_DIR}/logs
     git clone -b ${GPERFTOOLS_VERSION} --single-branch https://github.com/gperftools/gperftools.git
     GPERFTOOLS_SRC=${ROOT_BUILD_DIR}/gperftools
     cd ${GPERFTOOLS_SRC}
-    ./autogen.sh
-    ./configure --prefix={{ GPERF_DIR }} --enable-frame-pointers
-    make -j ${MOOSE_JOBS}
-    make install
+    ./autogen.sh 2>&1 | tee ${GPERF_DIR}/logs/autogen.log
+    ./configure --prefix=${GPERF_DIR} --enable-frame-pointers 2>&1 | tee ${GPERF_DIR}/logs/configure.log
+    make -j ${MOOSE_JOBS} 2>&1 | tee ${GPERF_DIR}/logs/build.log
+    make install 2>&1 | tee ${GPERF_DIR}/logs/install.log
     cd ~
     rm -rf ${GPERFTOOLS_SRC}
 
@@ -345,7 +355,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Install pprof
     PPROF_VERSION=a0b0bb1d4134f37be44de6c328680339b0fc13ad
-    GOBIN={{ PPROF_DIR }}/bin go install github.com/google/pprof@${PPROF_VERSION}
+    PPROF_DIR={{ PPROF_DIR }}
+    mkdir -p ${PPROF_DIR}/logs
+    GOBIN=${PPROF_DIR}/bin go install github.com/google/pprof@${PPROF_VERSION} | tee ${PPROF_DIR}/logs/configure.log
 
     # Remove go now that pprof is installed
     go clean -cache -modcache
