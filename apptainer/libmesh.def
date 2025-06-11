@@ -64,8 +64,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         tar -xf $(basename ${VTK_URL})
 
         # Build VTK
+        mkdir -p ${VTK_DIR}/logs
         cd ${ROOT_BUILD_DIR}/$(basename ${VTK_URL} .tar.gz)
-
         mkdir -p build; cd build
         cmake .. \
             -Wno-dev \
@@ -83,8 +83,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
             -DVTK_GROUP_ENABLE_Rendering:STRING=DONT_WANT \
             -DVTK_GROUP_ENABLE_Qt::STRING=NO \
             -DVTK_GROUP_ENABLE_Views:STRING=NO \
-            -DVTK_GROUP_ENABLE_Web:STRING=NO
-        make install -j ${MOOSE_JOBS}
+            -DVTK_GROUP_ENABLE_Web:STRING=NO 2>&1 | tee ${VTK_DIR}/logs/cmake.log
+        make install -j ${MOOSE_JOBS} 2>&1 | tee ${VTK_DIR}/logs/install.log
         export VTKINCLUDE_DIR
         export VTKLIB_DIR
     fi
@@ -99,8 +99,10 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # Build libMesh
     umask 022
     cd ${ROOT_BUILD_DIR}
+    mkdir -p ${LIBMESH_DIR}/logs
     METHODS="{{ METHODS or "opt dbg oprof devel" }}"
-    LIBMESH_SRC_DIR=${LIBMESH_SRC_DIR} LIBMESH_DIR=${LIBMESH_DIR} MOOSE_JOBS=${MOOSE_JOBS} METHODS=${METHODS} ./scripts/{{ LIBMESH_BUILD_SCRIPT }} {{ LIBMESH_OPTIONS }} --skip-submodule-update
+    LIBMESH_SRC_DIR=${LIBMESH_SRC_DIR} LIBMESH_DIR=${LIBMESH_DIR} MOOSE_JOBS=${MOOSE_JOBS} METHODS=${METHODS} ./scripts/{{ LIBMESH_BUILD_SCRIPT }} \
+        {{ LIBMESH_OPTIONS }} --skip-submodule-update 2>&1 | tee ${LIBMESH_DIR}/logs/build.log
 
     # Fix possibly bad permissions
     chmod -R o=u-w,g=u-w ${LIBMESH_DIR}
