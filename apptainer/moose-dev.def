@@ -31,8 +31,7 @@
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
 
 {#- Location to install miniforge3                                                            -#}
-{%- set MOOSE_MINIFORGE = '/opt/miniforge3' -%}
-
+{%- set MINIFORGE_DIR = '/opt/miniforge3' -%}
 {#- Name of the environment to create in conda                                                -#}
 {%- set MOOSE_CONDA_ENV_NAME = 'moose' -%}
 
@@ -70,9 +69,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
 
 %environment
-    if [ -d "{{ MOOSE_MINIFORGE }}" ]; then
-        export PATH={{ MOOSE_MINIFORGE }}/bin:$PATH
-        source activate moose
+    if [ -d "{{ MINIFORGE_DIR }}" ]; then
+        export PATH={{ MINIFORGE_DIR }}/bin:$PATH
+    fi
+    if [ -d "{{ MINIFORGE_DIR }}/envs/{{ MOOSE_CONDA_ENV_NAME }}"]
+        source activate {{ MINIFORGE_DIR }}/envs/{{ MOOSE_CONDA_ENV_NAME }}
     fi
 
     export PATH=/opt/code-server/bin:$PATH
@@ -104,7 +105,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Load jinja vars
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
-    MOOSE_MINIFORGE={{ MOOSE_MINIFORGE }}
+    MINIFORGE_DIR={{ MINIFORGE_DIR }}
     MOOSE_CONDA_ENV_NAME={{ MOOSE_CONDA_ENV_NAME }}
     MOOSE_TOOLS_VERSION={{ MOOSE_TOOLS_VERSION }}
     CONDA_ALT_CHANNEL={{ CONDA_ALT_CHANNEL }}
@@ -152,13 +153,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     rm -rf ${WASP_SRC_DIR}
     export WASP_DIR={{ WASP_DIR }}
 
-    # Install miniforge in MOOSE_MINIFORGE
+    # Install miniforge in MINIFORGE_DIR
     cd ${ROOT_BUILD_DIR}
     MINIFORGE_SCRIPT=${ROOT_BUILD_DIR}/miniforge3.sh
     curl -L https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh -o ${MINIFORGE_SCRIPT}
-    bash ${MINIFORGE_SCRIPT} -b -p ${MOOSE_MINIFORGE}
+    bash ${MINIFORGE_SCRIPT} -b -p ${MINIFORGE_DIR}
     rm ${MINIFORGE_SCRIPT}
-    export PATH=${MOOSE_MINIFORGE}/bin:$PATH
+    export PATH=${MINIFORGE_DIR}/bin:$PATH
     conda update -yq --all
 
 {% if WITHOUT_PYTORCH is not defined %}
@@ -206,7 +207,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         # Create a temporary python environment for building pytorch
         PYTORCH_CONDA_ENV=pytorch_build
         conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.11
-        source activate ${MOOSE_MINIFORGE}/envs/${PYTORCH_CONDA_ENV}
+        source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
         pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
         conda install cmake=3.31.6
 
