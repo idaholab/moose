@@ -154,15 +154,11 @@ GaussianProcessTrainerTorched::postTrain()
 
   // TODO: After standardizing param and data tensor, update values of Eigen::matrix versions to
   // match
-  std::cout << "training_tensor_transposed before" << std::endl
-            << training_tensor_transposed << std::endl;
   if (_standardize_params)
     _gp.standardizeParameters(training_tensor_transposed);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
     _gp.paramStandardizer().set(0, 1, _n_dims);
-  std::cout << "training_tensor_transposed after" << std::endl
-            << training_tensor_transposed << std::endl;
   // Standardize (center and scale) training data
   if (_standardize_data)
     _gp.standardizeData(training_data_tensor);
