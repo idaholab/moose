@@ -15,6 +15,8 @@
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
 
+TagID SecantSolve::_default_tag_id = std::numeric_limits<TagID>::max();
+
 InputParameters
 SecantSolve::validParams()
 {
@@ -95,6 +97,16 @@ SecantSolve::saveVariableValues(const bool primary)
     fxn_m2_tagid = _secondary_fxn_m2_tagid;
     xn_m2_tagid = _secondary_xn_m2_tagid;
   }
+
+  // Check to make sure allocateStorage as been called
+  mooseAssert(fxn_m1_tagid != _default_tag_id,
+              "allocateStorage has not been called with primary = " + Moose::stringify(primary));
+  mooseAssert(xn_m1_tagid != _default_tag_id,
+              "allocateStorage has not been called with primary = " + Moose::stringify(primary));
+  mooseAssert(fxn_m2_tagid != _default_tag_id,
+              "allocateStorage has not been called with primary = " + Moose::stringify(primary));
+  mooseAssert(xn_m2_tagid != _default_tag_id,
+              "allocateStorage has not been called with primary = " + Moose::stringify(primary));
 
   // Save previous variable values
   NumericVector<Number> & solution = _solver_sys.solution();
