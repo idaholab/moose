@@ -524,6 +524,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   //  We will toggle this to false when doing residual evaluations
   ADReal::do_derivatives = true;
 
+  // Disable refinement/coarsening in EquationSystems::reinit because we already do this ourselves
+  es().disable_refine_in_reinit();
+
   _solver_params.reserve(_num_nl_sys + _num_linear_sys);
   // Default constructor fine for nonlinear because it will be populated later by framework
   // executioner/solve object parameters
@@ -7920,7 +7923,21 @@ FEProblemBase::adaptMesh()
     {
       mesh_changed = true;
 
-      meshChangedHelper(true); // This may be an intermediate change
+      meshChangedHelper(/*intermediate_change=*/true);
+      // Once vectors are restricted, we can delete
+      // children of coarsened elements
+      _mesh.getMesh().contract();
+      // Finally clean refinement flags so that if someone tries to project vectors again without
+      // an intervening mesh refinement to clean flags they won't run into trouble
+      MeshRefinement refinement(_mesh.getMesh());
+      refinement.clean_refinement_flags();
+      if (_displaced_mesh)
+      {
+        _displaced_mesh->getMesh().contract();
+        MeshRefinement displaced_refinement(_displaced_mesh->getMesh());
+        displaced_refinement.clean_refinement_flags();
+      }
+
       _cycles_completed++;
     }
     else
@@ -8032,8 +8049,17 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   if (intermediate_change)
     es().reinit_solutions();
   else
-  {
     es().reinit();
+
+  // Once vectors are restricted, we can delete children of coarsened elements
+  _mesh.getMesh().contract();
+  // Finally clear refinement flags so that if someone tries to project vectors again without
+  // an intervening mesh refinement to clear flags they won't run into trouble
+  MeshRefinement refinement(_mesh.getMesh());
+  refinement.clean_refinement_flags();
+
+  if (!intermediate_change)
+  {
     // Since the mesh has changed, we need to make sure that we update any of our
     // MOOSE-system specific data.
     for (auto & sys : _solver_systems)
