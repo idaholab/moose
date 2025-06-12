@@ -11,11 +11,18 @@ MFEMFESpace::validParams()
   MooseEnum ordering("NODES VDIM", "VDIM", false);
   params.addParam<MooseEnum>("ordering", ordering, "Ordering style to use for vector DoFs.");
   params.addParam<int>("vdim", 1, "The number of degrees of freedom per basis function.");
+  params.addParam<std::string>("submesh",
+                               "Submesh to define the FESpace on. Leave blank to use base mesh.");
   return params;
 }
 
 MFEMFESpace::MFEMFESpace(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters), _ordering(parameters.get<MooseEnum>("ordering"))
+  : MFEMGeneralUserObject(parameters),
+    _ordering(parameters.get<MooseEnum>("ordering")),
+    _pmesh(
+        parameters.isParamValid("submesh")
+            ? getMFEMProblem().getProblemData().submeshes.GetRef(getParam<std::string>("submesh"))
+            : const_cast<mfem::ParMesh &>(getMFEMProblem().mesh().getMFEMParMesh()))
 {
 }
 
@@ -49,9 +56,8 @@ MFEMFESpace::buildFEC(const std::string & fec_name) const
 void
 MFEMFESpace::buildFESpace(const int vdim) const
 {
-  mfem::ParMesh & pmesh = const_cast<mfem::ParMesh &>(getMFEMProblem().mesh().getMFEMParMesh());
-
-  _fespace = std::make_shared<mfem::ParFiniteElementSpace>(&pmesh, getFEC().get(), vdim, _ordering);
+  _fespace =
+      std::make_shared<mfem::ParFiniteElementSpace>(&_pmesh, getFEC().get(), vdim, _ordering);
 }
 
 #endif
