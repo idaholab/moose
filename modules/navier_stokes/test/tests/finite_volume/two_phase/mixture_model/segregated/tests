@@ -8,11 +8,21 @@
     requirement = 'The system shall be able to model a lid-driven cavity with a two phase mixture using the linear finite volume discretization.'
     max_threads = 1 # see libmesh issue #3808
   []
-  [rayleigh-bernard]
+  [rayleigh-benard]
     type = CSVDiff
     input = 'rayleigh-bernard-two-phase-physics.i'
     csvdiff = 'rayleigh-bernard-two-phase-physics_out.csv'
-    requirement = 'The system shall be able to model a lid-driven cavity with Rayleigh Bernard convection with a two phase mixture using the linear finite volume discretization.'
+    requirement = 'The system shall be able to model a lid-driven cavity with Rayleigh Benard convection with a two phase mixture using the linear finite volume discretization.'
+    max_threads = 1 # see libmesh issue #3808
+    # Times out
+    heavy = True
+    method = 'opt'
+  []
+  [rayleigh-benard_heated]
+    type = CSVDiff
+    input = 'rayleigh-bernard-two-phase-physics_heated.i'
+    csvdiff = 'rayleigh-bernard-two-phase-physics_heated_out.csv'
+    requirement = 'The system shall be able to model a lid-driven cavity with Rayleigh Benard convection with a heated two phase mixture using the linear finite volume discretization.'
     max_threads = 1 # see libmesh issue #3808
     # Times out
     heavy = True
