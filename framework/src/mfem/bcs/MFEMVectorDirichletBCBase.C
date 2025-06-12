@@ -1,9 +1,9 @@
 #ifdef MFEM_ENABLED
 
-#include "MFEMVectorFunctorDirichletBCBase.h"
+#include "MFEMVectorDirichletBCBase.h"
 
 InputParameters
-MFEMVectorFunctorDirichletBCBase::validParams()
+MFEMVectorDirichletBCBase::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
   params.addRequiredParam<MFEMVectorCoefficientName>(
@@ -14,7 +14,7 @@ MFEMVectorFunctorDirichletBCBase::validParams()
   return params;
 }
 
-MFEMVectorFunctorDirichletBCBase::MFEMVectorFunctorDirichletBCBase(
+MFEMVectorDirichletBCBase::MFEMVectorDirichletBCBase(
     const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
     _vec_coef_name(getParam<MFEMVectorCoefficientName>("vector_coefficient")),
