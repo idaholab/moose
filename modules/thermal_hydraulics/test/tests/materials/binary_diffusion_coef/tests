@@ -1,0 +1,10 @@
+[Tests]
+  design = 'BinaryDiffusionCoefMaterial.md'
+  issues = '#28335'
+  [test]
+    type = CSVDiff
+    input = 'binary_diffusion_coef.i'
+    csvdiff = 'binary_diffusion_coef_out.csv'
+    requirement = 'The system shall be able to compute a binary mass diffusion coefficient using the Stefan-Maxwell approximation.'
+  []
+[]
