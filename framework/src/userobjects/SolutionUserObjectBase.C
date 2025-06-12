@@ -174,10 +174,11 @@ SolutionUserObjectBase::SolutionUserObjectBase(const InputParameters & parameter
   if (isParamValid("timestep") && getParam<std::string>("timestep") == "-1")
     mooseError("A \"timestep\" of -1 is no longer supported for interpolation. Instead simply "
                "remove this parameter altogether for interpolation");
-  
+
   // check for possible inconsistencies between mesh and input data
   if (_fe_problem.mesh().hasSecondOrderElements())
-    mooseInfo("The mesh has second-order elements, be sure to set 'nodal_variable_order' or 'elemental_variable_order' if needed.");
+    mooseInfo("The mesh has second-order elements, be sure to set 'nodal_variable_order' or "
+              "'elemental_variable_order' if needed.");
 }
 
 void
@@ -326,7 +327,8 @@ SolutionUserObjectBase::readExodusII()
     _system->add_variable(var_name, Utility::string_to_enum<Order>(_nodal_variable_order));
 
   for (const auto & var_name : _elemental_variables)
-    _system->add_variable(var_name, Utility::string_to_enum<Order>(_elemental_variable_order), MONOMIAL);
+    _system->add_variable(
+        var_name, Utility::string_to_enum<Order>(_elemental_variable_order), MONOMIAL);
 
   for (const auto & var_name : _scalar_variables)
     _system->add_variable(var_name, FIRST, SCALAR);
@@ -347,7 +349,8 @@ SolutionUserObjectBase::readExodusII()
       _system2->add_variable(var_name, Utility::string_to_enum<Order>(_nodal_variable_order));
 
     for (const auto & var_name : _elemental_variables)
-      _system2->add_variable(var_name, Utility::string_to_enum<Order>(_elemental_variable_order), MONOMIAL);
+      _system2->add_variable(
+          var_name, Utility::string_to_enum<Order>(_elemental_variable_order), MONOMIAL);
 
     for (const auto & var_name : _scalar_variables)
       _system2->add_variable(var_name, FIRST, SCALAR);
