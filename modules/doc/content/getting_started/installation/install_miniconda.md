@@ -20,7 +20,7 @@ guide.
 !alert! note title=Intel Macs nearing End of Life
 Apple will cease support for all Intel based Macintosh machines in 2026, as will we at that time.
 
-*read: As our Continuous Integration Intel machines break, they are replaced with Apple Silicon. Limiting our ability to test new features.*
+*read: As our Continuous Integration Intel machines break, they are replaced with Apple Silicon. This will limit our ability to test new features for Intel compatibility.*
 
 +Macintosh Users with Intel processors:+
 
