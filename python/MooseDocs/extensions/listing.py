@@ -36,6 +36,10 @@ class ListingExtension(command.CommandExtension):
         config = command.CommandExtension.defaultConfig()
         config['prefix'] = ('Listing', "The caption prefix (e.g., Fig.).")
         config['modal-link'] = (True, "Insert modal links with complete files.")
+        config['parse-input-syntax'] = (
+            True,
+            "Whether to include links and tool-tips for rendered MOOSE inputs.",
+        )
         return config
 
     def extend(self, reader, renderer):
@@ -143,7 +147,7 @@ class LocalListingCommand(command.CommandComponent):
         `framework/doc/content/js/moose_input_parser.js` JavaScript file knows
         how to add the approriate HTML links and tooltips.
         """
-        if self.extension.syntax is None:
+        if self.extension.syntax is None or not self.extension['parse-input-syntax']:
             return content
 
         syntax_ext: appsyntax.AppSyntaxExtension = self.extension.syntax # Convenience
