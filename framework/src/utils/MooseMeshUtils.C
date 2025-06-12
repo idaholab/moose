@@ -183,13 +183,22 @@ getBoundaryIDSet(const MeshBase & mesh,
 }
 
 std::vector<subdomain_id_type>
-getSubdomainIDs(const MeshBase & mesh, const std::vector<SubdomainName> & subdomain_name)
+getSubdomainIDs(const MeshBase & mesh, const std::vector<SubdomainName> & subdomain_names)
 {
-  std::vector<SubdomainID> ids(subdomain_name.size());
+  std::vector<SubdomainID> ids(subdomain_names.size());
 
-  for (const auto i : index_range(subdomain_name))
-    ids[i] = MooseMeshUtils::getSubdomainID(subdomain_name[i], mesh);
+  for (const auto i : index_range(subdomain_names))
+    ids[i] = MooseMeshUtils::getSubdomainID(subdomain_names[i], mesh);
 
+  return ids;
+}
+
+std::set<subdomain_id_type>
+getSubdomainIDs(const MeshBase & mesh, const std::set<SubdomainName> & subdomain_names)
+{
+  std::set<SubdomainID> ids;
+  for (const auto & name : subdomain_names)
+    ids.insert(MooseMeshUtils::getSubdomainID(name, mesh));
   return ids;
 }
 

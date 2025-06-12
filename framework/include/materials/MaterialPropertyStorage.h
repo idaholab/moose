@@ -327,6 +327,7 @@ public:
   /**
    * @return The MaterialData for thread \p tid
    */
+  const MaterialData & getMaterialData(const THREAD_ID tid) const { return _material_data[tid]; }
   MaterialData & getMaterialData(const THREAD_ID tid) { return _material_data[tid]; }
 
   /**

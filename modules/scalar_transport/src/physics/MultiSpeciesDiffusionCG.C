@@ -117,7 +117,7 @@ MultiSpeciesDiffusionCG::addFEKernels()
     }
 
     // Time derivative term
-    if (isTransient())
+    if (shouldCreateTimeDerivative(var_name, _blocks, false))
     {
       const std::string kernel_type = _use_ad ? "ADTimeDerivative" : "TimeDerivative";
       InputParameters params = getFactory().getValidParams(kernel_type);

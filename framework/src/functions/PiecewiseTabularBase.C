@@ -21,7 +21,7 @@ PiecewiseTabularBase::validParams()
   MooseEnum axis("x=0 y=1 z=2");
   params.addParam<MooseEnum>(
       "axis", axis, "The axis used (x, y, or z) if this is to be a function of position");
-  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
+  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the output values");
   params.declareControllable("scale_factor");
 
   // Data from input file parameters

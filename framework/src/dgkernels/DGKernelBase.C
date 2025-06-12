@@ -61,6 +61,7 @@ DGKernelBase::validParams()
   params.addParam<std::vector<BoundaryName>>(
       "exclude_boundary", "The internal side sets to be excluded from this kernel.");
   params.registerBase("DGKernel");
+  params.registerSystemAttributeName("DGKernel");
 
   return params;
 }

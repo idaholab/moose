@@ -90,7 +90,7 @@ HeatConductionCG::addFEKernels()
       paramError("heat_source_functor", "Unsupported functor type.");
     getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_source_functor", params);
   }
-  if (isTransient())
+  if (shouldCreateTimeDerivative(_temperature_name, _blocks, /*error if already defined*/ false))
   {
     const std::string kernel_type =
         _use_ad ? "ADHeatConductionTimeDerivative" : "SpecificHeatConductionTimeDerivative";
@@ -231,8 +231,11 @@ HeatConductionCG::addFEBCs()
 void
 HeatConductionCG::addSolverVariables()
 {
-  if (variableExists(_temperature_name, /*error_if_aux=*/true))
+  if (!shouldCreateVariable(_temperature_name, _blocks, /*error if aux*/ true))
+  {
+    reportPotentiallyMissedParameters({"system_names"}, "MooseVariable");
     return;
+  }
 
   const std::string variable_type = "MooseVariable";
   // defaults to linear lagrange FE family

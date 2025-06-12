@@ -338,9 +338,10 @@ WCNSFVTurbulencePhysics::addSolverVariables()
   {
     // Dont add if the user already defined the variable
     // Add turbulent kinetic energy variable
-    if (variableExists(_tke_name,
-                       /*error_if_aux=*/true))
-      checkBlockRestrictionIdentical(_tke_name, getProblem().getVariable(0, _tke_name).blocks());
+    if (!shouldCreateVariable(_tke_name, _blocks, /*error if aux*/ true))
+      reportPotentiallyMissedParameters(
+          {"system_names", "tke_scaling", "tke_face_interpolation", "tke_two_term_bc_expansion"},
+          "INSFVEnergyVariable");
     else if (_define_variables)
     {
       auto params = getFactory().getValidParams("INSFVEnergyVariable");
@@ -358,9 +359,10 @@ WCNSFVTurbulencePhysics::addSolverVariables()
                      ") supplied to the WCNSFVTurbulencePhysics does not exist!");
 
     // Add turbulent kinetic energy dissipation variable
-    if (variableExists(_tked_name,
-                       /*error_if_aux=*/true))
-      checkBlockRestrictionIdentical(_tked_name, getProblem().getVariable(0, _tked_name).blocks());
+    if (!shouldCreateVariable(_tked_name, _blocks, /*error if aux*/ true))
+      reportPotentiallyMissedParameters(
+          {"system_names", "tked_scaling", "tked_face_interpolation", "tked_two_term_bc_expansion"},
+          "INSFVEnergyVariable");
     else if (_define_variables)
     {
       auto params = getFactory().getValidParams("INSFVEnergyVariable");
@@ -389,7 +391,11 @@ WCNSFVTurbulencePhysics::addAuxiliaryVariables()
     if (isParamValid("mixing_length_two_term_bc_expansion"))
       params.set<bool>("two_term_boundary_expansion") =
           getParam<bool>("mixing_length_two_term_bc_expansion");
-    getProblem().addAuxVariable("MooseVariableFVReal", _mixing_length_name, params);
+    if (!shouldCreateVariable(_tke_name, _blocks, /*error if aux*/ false))
+      reportPotentiallyMissedParameters({"mixing_length_two_term_bc_expansion"},
+                                        "MooseVariableFVReal");
+    else
+      getProblem().addAuxVariable("MooseVariableFVReal", _mixing_length_name, params);
   }
   if (_turbulence_model == "k-epsilon" && getParam<bool>("mu_t_as_aux_variable"))
   {
@@ -398,13 +404,18 @@ WCNSFVTurbulencePhysics::addAuxiliaryVariables()
     if (isParamValid("turbulent_viscosity_two_term_bc_expansion"))
       params.set<bool>("two_term_boundary_expansion") =
           getParam<bool>("turbulent_viscosity_two_term_bc_expansion");
-    getProblem().addAuxVariable("MooseVariableFVReal", _turbulent_viscosity_name, params);
+    if (!shouldCreateVariable(_turbulent_viscosity_name, _blocks, /*error if aux*/ false))
+      reportPotentiallyMissedParameters({"turbulent_viscosity_two_term_bc_expansion"},
+                                        "MooseVariableFVReal");
+    else
+      getProblem().addAuxVariable("MooseVariableFVReal", _turbulent_viscosity_name, params);
   }
   if (_turbulence_model == "k-epsilon" && getParam<bool>("k_t_as_aux_variable"))
   {
     auto params = getFactory().getValidParams("MooseVariableFVReal");
     assignBlocks(params, _blocks);
-    getProblem().addAuxVariable("MooseVariableFVReal", NS::k_t, params);
+    if (shouldCreateVariable(NS::k_t, _blocks, /*error if aux*/ false))
+      getProblem().addAuxVariable("MooseVariableFVReal", NS::k_t, params);
   }
 }
 
@@ -600,9 +611,11 @@ WCNSFVTurbulencePhysics::addKEpsilonTimeDerivatives()
   assignBlocks(params, _blocks);
 
   params.set<NonlinearVariableName>("variable") = _tke_name;
-  getProblem().addFVKernel(kernel_type, prefix() + "tke_time", params);
+  if (shouldCreateTimeDerivative(_tke_name, _blocks, /*error if already defined*/ false))
+    getProblem().addFVKernel(kernel_type, prefix() + "tke_time", params);
   params.set<NonlinearVariableName>("variable") = _tked_name;
-  getProblem().addFVKernel(kernel_type, prefix() + "tked_time", params);
+  if (shouldCreateTimeDerivative(_tked_name, _blocks, /*error if already defined*/ false))
+    getProblem().addFVKernel(kernel_type, prefix() + "tked_time", params);
 }
 
 void
@@ -816,9 +829,6 @@ WCNSFVTurbulencePhysics::addInitialConditions()
     mooseError("inital_mu_t/tke/tked should not be provided if we are restarting from a mesh file "
                "or not defining variables in the Physics");
 
-  // do not set initial conditions if we are loading from file
-  if (getParam<bool>("initialize_variables_from_mesh_file"))
-    return;
   // do not set initial conditions if we are not defining variables
   if (!_define_variables)
     return;
@@ -845,7 +855,10 @@ WCNSFVTurbulencePhysics::addInitialConditions()
 
     params.set<VariableName>("variable") = _turbulent_viscosity_name;
     // Always obey the user specification of an initial condition
-    if (!_app.isRestarting() || parameters().isParamSetByUser("initial_mu_t"))
+    if (shouldCreateIC(_turbulent_viscosity_name,
+                       _blocks,
+                       /*whether IC is a default*/ !isParamSetByUser("initial_mu_t"),
+                       /*error if already an IC*/ isParamSetByUser("initial_mu_t")))
       getProblem().addInitialCondition(ic_type, prefix() + "initial_mu_turb", params);
   }
   else if (isParamSetByUser("initial_mu_t"))
@@ -854,11 +867,17 @@ WCNSFVTurbulencePhysics::addInitialConditions()
 
   params.set<VariableName>("variable") = _tke_name;
   params.set<FunctionName>("function") = getParam<FunctionName>("initial_tke");
-  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_tke"))
+  if (shouldCreateIC(_tke_name,
+                     _blocks,
+                     /*whether IC is a default*/ !isParamSetByUser("initial_tke"),
+                     /*error if already an IC*/ isParamSetByUser("initial_tke")))
     getProblem().addInitialCondition(ic_type, prefix() + "initial_tke", params);
   params.set<VariableName>("variable") = _tked_name;
   params.set<FunctionName>("function") = getParam<FunctionName>("initial_tked");
-  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_tked"))
+  if (shouldCreateIC(_tked_name,
+                     _blocks,
+                     /*whether IC is a default*/ !isParamSetByUser("initial_tked"),
+                     /*error if already an IC*/ isParamSetByUser("initial_tked")))
     getProblem().addInitialCondition(ic_type, prefix() + "initial_tked", params);
 }
 

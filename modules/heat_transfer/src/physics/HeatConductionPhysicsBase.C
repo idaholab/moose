@@ -97,7 +97,10 @@ HeatConductionPhysicsBase::addInitialConditions()
     return;
 
   // Always obey the user, but dont set a hidden default when restarting
-  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_temperature"))
+  if (shouldCreateIC(_temperature_name,
+                     _blocks,
+                     /*whether IC is a default*/ !isParamSetByUser("initial_temperature"),
+                     /*error if already an IC*/ isParamSetByUser("initial_temperature")))
   {
     InputParameters params = getFactory().getValidParams("FunctionIC");
     assignBlocks(params, _blocks);
