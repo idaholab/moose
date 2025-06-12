@@ -131,6 +131,8 @@ packages:
       - framework/contrib/neml2
       - framework/contrib/neml2.mk
       # mfem
+      - scripts/update_and_rebuild_conduit.sh
+      - scripts/update_and_rebuild_mfem.sh
       - framework/contrib/conduit
       - framework/contrib/mfem
   # dependers: none
