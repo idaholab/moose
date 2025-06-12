@@ -321,27 +321,26 @@ WCNSFVFlowPhysicsBase::addInitialConditions()
                "The number of velocity components in the " + type() + " initial condition is not " +
                    std::to_string(dimension()) + " or 3!");
 
-  // do not set initial conditions if we load from file
-  if (getParam<bool>("initialize_variables_from_mesh_file"))
-    return;
-  // do not set initial conditions if we are not defining variables
-  if (!_define_variables)
-    return;
-
   InputParameters params = getFactory().getValidParams("FunctionIC");
   assignBlocks(params, _blocks);
   auto vvalue = getParam<std::vector<FunctionName>>("initial_velocity");
 
-  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_velocity"))
-    for (const auto d : make_range(dimension()))
-    {
-      params.set<VariableName>("variable") = _velocity_names[d];
-      params.set<FunctionName>("function") = vvalue[d];
+  for (const auto d : make_range(dimension()))
+  {
+    params.set<VariableName>("variable") = _velocity_names[d];
+    params.set<FunctionName>("function") = vvalue[d];
 
+    if (shouldCreateIC(_velocity_names[d],
+                       _blocks,
+                       /*whether IC is a default*/ !isParamSetByUser("initial_velocity"),
+                       /*error if already an IC*/ isParamSetByUser("initial_velocity")))
       getProblem().addInitialCondition("FunctionIC", prefix() + _velocity_names[d] + "_ic", params);
-    }
+  }
 
-  if (!_app.isRestarting() || parameters().isParamSetByUser("initial_pressure"))
+  if (shouldCreateIC(_pressure_name,
+                     _blocks,
+                     /*whether IC is a default*/ !isParamSetByUser("initial_pressure"),
+                     /*error if already an IC*/ isParamSetByUser("initial_pressure")))
   {
     params.set<VariableName>("variable") = _pressure_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_pressure");

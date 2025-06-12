@@ -70,6 +70,7 @@ AuxKernelTempl<ComputeValueType>::validParams()
 
   params.declareControllable("enable"); // allows Control to enable/disable this type of object
   params.registerBase("AuxKernel");
+  params.registerSystemAttributeName("AuxKernel");
 
   if (typeid(AuxKernelTempl<ComputeValueType>).name() == typeid(VectorAuxKernel).name())
     params.registerBase("VectorAuxKernel");

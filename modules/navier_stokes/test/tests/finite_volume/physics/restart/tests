@@ -39,6 +39,7 @@
       type = CSVDiff
       input = 2d_channel_scalar_turbulence_init.i
       csvdiff = 'restart_user_ics.csv'
+      prereq = 'restart/default'
       cli_args = "Physics/NavierStokes/Flow/all_flow/initial_velocity='0.1 1e-6 0'
                   Physics/NavierStokes/Flow/all_flow/initial_pressure=2e5
                   Physics/NavierStokes/FluidHeatTransfer/all_energy/initial_temperature='355'
