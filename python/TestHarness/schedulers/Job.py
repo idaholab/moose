@@ -7,14 +7,17 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import itertools, re, os, time, threading, traceback
-from timeit import default_timer as clock
+import itertools, os, time, threading, traceback, typing
+from io import StringIO
+from contextlib import redirect_stdout
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
 from TestHarness.runners.Runner import Runner
-from TestHarness import OutputInterface, util
+from TestHarness.validation import TestRunException
+from TestHarness import OutputInterface, util, ValidationCase
 from tempfile import TemporaryDirectory
 from collections import namedtuple
+from dataclasses import asdict
 
 from TestHarness import util
 
@@ -201,6 +204,16 @@ class Job(OutputInterface):
 
         # A temp directory for this Job, if requested
         self.tmp_dir = None
+
+        # A list of ValidationCase objects that were ran for this Job,
+        # if any. Stored so that the results and data can be captured
+        # within the JSON results at the end of the run
+        self.validation_cases: typing.Optional[list[ValidationCase]] = None
+        # The OutputInterface for the validation run, set only if
+        # validation cases were ran
+        self.validation_output: typing.Optional[OutputInterface] = None
+        if self.specs['validation_test']:
+            self.validation_output = OutputInterface()
 
     def __del__(self):
         # Do any cleaning that we can (removes the temp dir for now if it exists)
@@ -402,7 +415,7 @@ class Job(OutputInterface):
                 object.clearOutput()
 
         # Helper for trying and catching
-        def try_catch(do, exception_name, timer_name):
+        def try_catch(do, exception_name, timer_name, output=self):
             with self.timer.time(timer_name):
                 failed = False
                 try:
@@ -410,7 +423,7 @@ class Job(OutputInterface):
                 except:
                     trace = traceback.format_exc()
                     self.setStatus(self.error, f'{exception_name} EXCEPTION')
-                    self.appendOutput(util.outputHeader('Python exception encountered') + trace)
+                    output.appendOutput(util.outputHeader('Python exception encountered') + trace)
                     failed = True
 
             if failed:
@@ -424,6 +437,14 @@ class Job(OutputInterface):
             run_tester = lambda: tester.run(self.options, 0, '')
             try_catch(run_tester, 'TESTER RUN', 'tester_run')
             return
+
+        # Initialize the validation test, if any
+        # We do this now so that we can capture any invalid python
+        # in the script before we even try to do the actual run
+        if self.specs['validation_test']:
+            init_validation = lambda: self.initValidation()
+            if not try_catch(init_validation, 'VALIDATION INIT', 'validation_init'):
+                return
 
         if self.options.pedantic_checks and self.canParallel():
             # Before the job does anything, get the times files below it were last modified
@@ -486,14 +507,83 @@ class Job(OutputInterface):
                 self.modifiedFiles = self.fileChecker.check_changes(self.fileChecker.getOriginalTimes(),
                                                                     self.fileChecker.getNewTimes())
 
-        # Allow derived proccessResults to process the output and set a failing status (if it failed)
+        # Allow derived processResults to process the output and set a failing status (if it failed)
         runner_output = self._runner.getRunOutput().getOutput()
         exit_code = self._runner.getExitCode()
         run_tester = lambda: tester.run(self.options, exit_code, runner_output)
         try_catch(run_tester, 'TESTER RUN', 'tester_run')
 
+        # Run the validation case, if any and the execution succeeded
+        if self.specs['validation_test'] is not None:
+            if exit_code == 0:
+                run_validation = lambda: self.runValidation()
+                cwd = os.getcwd()
+                os.chdir(self.getTestDir())
+                success = try_catch(run_validation, 'VALIDATION RUN', 'validation_run',
+                                    output=self.validation_output)
+                os.chdir(cwd)
+                if not success:
+                    return
+            else:
+                message = 'Skipping validation due to non-zero exit code'
+                self.validation_output.appendOutput(message)
+
         # Run finalize now that we're done
         finalize()
+
+    def initValidation(self):
+        """
+        Initilizes (constructs) the validation cases, if any
+        """
+        init_kwargs = {'params': self.__tester.parameters(),
+                       'tester_outputs': self.getOutputFiles(self.options)}
+        self.validation_cases = [c(**init_kwargs) for c in self.__tester._validation_classes]
+
+    def runValidation(self):
+        """
+        Runs the validation cases, if any
+        """
+        assert self.specs['validation_test'] is not None
+        assert self.validation_output is not None
+        output = self.validation_output
+
+        all_data = set()
+        path = os.path.abspath(self.specs['validation_test'])
+        run_exception = False
+        for test_case in self.validation_cases:
+            name = type(test_case).__name__
+            message = f'Running validation case(s) in {path}:{name}\n\n'
+            output.appendOutput(message)
+
+            stdout = StringIO()
+            try:
+                with redirect_stdout(stdout):
+                    test_case.run()
+            except TestRunException:
+                run_exception = True
+            finally:
+                output.appendOutput(stdout.getvalue())
+                stdout.close()
+            output.appendOutput('\n')
+
+            for key in test_case.data:
+                if key in all_data:
+                    message = f'ERROR: Validation data with key "{key}" was declared multiple times'
+                    output.appendOutput(message)
+                    self.setStatus(self.job_status.error, 'VALIDATION TEST ERROR')
+                    return
+                all_data.add(key)
+
+        if run_exception:
+            output.appendOutput(f'\nEncountered exception(s) while running tests')
+            # TODO: Make this a failure, not an error
+            self.setStatus(self.job_status.error, 'VALIDATION TEST EXCEPTION')
+            return
+
+        num_failed = sum([c.getNumResultsByStatus(ValidationCase.Status.FAIL) for c in self.validation_cases])
+        output.appendOutput(f'Ran validation case(s); {num_failed} result(s) failed')
+        if num_failed > 0:
+            self.setStatus(self.job_status.error, 'VALIDATION FAILED')
 
     def killProcess(self):
         """ Kill remaining process that may be running """
@@ -515,6 +605,8 @@ class Job(OutputInterface):
             objects['runner_run'] = self.getRunner().getRunOutput()
             objects['runner'] = self.getRunner()
         objects['tester'] = self.getTester()
+        if self.validation_output is not None:
+            objects['validation'] = self.validation_output
         objects['job'] = self
         return objects
 
@@ -791,6 +883,22 @@ class Job(OutputInterface):
         unique_test_id = self.getTester().getUniqueTestID()
         if unique_test_id is not None:
             job_data['unique_test_id'] = unique_test_id
+
+        # Append validation data, if any
+        if self.validation_cases:
+            path = os.path.abspath(os.path.join(self.getTestDir(), self.specs['validation_test']))
+            job_data['validation'] = {'script': path, 'results': [], 'data': {}}
+            for case in self.validation_cases:
+                results = [r for r in case.results if r.validation]
+                for result in results:
+                    value = asdict(result)
+                    value.pop('validation')
+                    job_data['validation']['results'].append(value)
+                data = {k: v for k, v in case.data.items() if v.validation}
+                for key, value in data.items():
+                    value = asdict(value)
+                    value.pop('validation')
+                    job_data['validation']['data'][key] = value
 
         # Extend with data from the scheduler, if any
         job_data.update(scheduler.appendResultFileJob(self))

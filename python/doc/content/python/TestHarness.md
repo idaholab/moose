@@ -103,7 +103,7 @@ that MOOSE [uses](/application_usage/input_syntax.html optional=True). An exampl
 
 MOOSE has various configurations for evaluating whether a created test is successful or not. Depending on what type of Tester you specify in the "test specification" file, these can range from comparing the output of JSON, XML, CSV, or Exodus files, or matching a pattern in the output of the test using a regular expression.
 
-Sometimes, it may not be possible to properly evaluate a test with the built-in checks MOOSE provides. In this situation, MOOSE has functionality for evaluating a test using a custom, user-supplied evaluation function. 
+Sometimes, it may not be possible to properly evaluate a test with the built-in checks MOOSE provides. In this situation, MOOSE has functionality for evaluating a test using a custom, user-supplied evaluation function.
 
 To do this, create a Python script in the folder containing your test. The script should be blank aside from a single function named `custom_evaluation(output)`:
 
@@ -234,4 +234,13 @@ Ran 2 tests in 2.9 seconds.
 ```
 
 Caveats of MOOSE_TERM_COLS; If you specify too low a MOOSE_TERM_COLS, the TestHarness will only drop printing of the justification filler (see MOOSE_TERM_FORMAT above).
-   
+
+# Validation
+
+The TestHarness can also be utilized for performing validation. The results of the validation checks are stored within the JSON  output that each test harness execution produces, providing a method to store the validation results in a database.
+
+This validation is enabled via the `validation_test` parameter available within all TestHarness testers. This parameter is to be set to the path of a python script (within the tester directory) that contains the contents of the validation test(s).
+
+See the following for a commented example for a script that would be provided as the `validation_test`:
+
+!listing test_harness/validation_ok.py

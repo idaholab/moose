@@ -10,12 +10,11 @@
 import os
 import unittest
 import tempfile
-import re
 import json
 import typing
-from contextlib import nullcontext
+from io import StringIO
+from contextlib import nullcontext, redirect_stdout
 from TestHarness import TestHarness
-from unittest.mock import patch
 from dataclasses import dataclass
 
 MOOSE_DIR = os.getenv('MOOSE_DIR')
@@ -46,31 +45,29 @@ class TestHarnessTestCase(unittest.TestCase):
 
         result = self.RunTestsResult()
 
-        def wrapped_print(*args, **kwargs):
-            end = kwargs.get('end', '\n')
-            values = [f'{v}' for v in args]
-            result.output += " ".join(values) + end
-
-        with patch("builtins.print", wraps=wrapped_print):
-            context = tempfile.TemporaryDirectory if tmp_output else nullcontext
-            with context() as c:
-                if tmp_output:
-                    argv += ['-o', c]
-                cwd = os.getcwd()
-                os.chdir(TEST_DIR)
-                try:
+        context = tempfile.TemporaryDirectory if tmp_output else nullcontext
+        with context() as c:
+            if tmp_output:
+                argv += ['-o', c]
+            cwd = os.getcwd()
+            os.chdir(TEST_DIR)
+            stdout = StringIO()
+            try:
+                with redirect_stdout(stdout):
                     result.harness = TestHarness.build(argv, None, os.getenv('MOOSE_DIR'))
                     result.harness.findAndRunTests()
-                except SystemExit as e:
-                    self.assertEqual(e.code, exit_code)
-                    return result
-                finally:
-                    os.chdir(cwd)
+            except SystemExit as e:
+                self.assertEqual(e.code, exit_code)
+                return result
+            finally:
+                os.chdir(cwd)
+                result.output = stdout.getvalue()
+                stdout.close()
 
-                self.assertEqual(result.harness.error_code, exit_code)
-                if capture_results:
-                    with open(result.harness.options.results_file, 'r') as f:
-                        result.results = json.loads(f.read())
+            self.assertEqual(result.harness.error_code, exit_code)
+            if capture_results:
+                with open(result.harness.options.results_file, 'r') as f:
+                    result.results = json.loads(f.read())
 
         return result
 
