@@ -1,4 +1,4 @@
-mu = 1.0
+mu = 0.001
 rho = 1.0
 k = 5.0
 cp = 4816
@@ -7,6 +7,7 @@ alpha_b = 0.001
 Pr_t = 0.9
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
+g = 0.0
 
 pressure_tag = "pressure_grad"
 
@@ -16,8 +17,8 @@ pressure_tag = "pressure_grad"
     dim = 2
     dx = '10.0'
     dy = '1.0'
-    ix = '50'
-    iy = '10'
+    ix = '500'
+    iy = '50'
   []
 []
 
@@ -84,7 +85,7 @@ pressure_tag = "pressure_grad"
   [u_viscosity_turbulent]
     type = INSFVMomentumDiffusion
     variable = vel_x
-    mu = 'mu_t_torch'
+    mu = 'mu_t_torch_func'
     momentum_component = 'x'
     complete_expansion = true
     u = vel_x
@@ -101,7 +102,7 @@ pressure_tag = "pressure_grad"
     type = INSFVMomentumGravity
     momentum_component = 'x'
     variable = vel_x
-    gravity = '0 -9.81 0'
+    gravity = '0 ${g} 0'
     rho = ${rho}
   []
 
@@ -122,7 +123,7 @@ pressure_tag = "pressure_grad"
   [v_viscosity_turbulent]
     type = INSFVMomentumDiffusion
     variable = vel_y
-    mu = 'mu_t_torch'
+    mu = 'mu_t_torch_func'
     momentum_component = 'y'
     complete_expansion = true
     u = vel_x
@@ -140,7 +141,7 @@ pressure_tag = "pressure_grad"
     variable = vel_y
     momentum_component = 'y'
     T_fluid = T_fluid
-    gravity = '0 -9.81 0'
+    gravity = '0 ${g} 0'
     rho = ${rho}
     ref_temperature = 300.0
   []
@@ -148,7 +149,7 @@ pressure_tag = "pressure_grad"
     type = INSFVMomentumGravity
     variable = vel_y
     momentum_component = 'y'
-    gravity = '0 -9.81 0'
+    gravity = '0 ${g} 0'
     rho = ${rho}
   []
 
@@ -257,7 +258,7 @@ pressure_tag = "pressure_grad"
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
   energy_equation_relaxation = 0.5
-  num_iterations = 500
+  num_iterations = 200
   pressure_absolute_tolerance = 1e-10
   momentum_absolute_tolerance = 1e-10
   energy_absolute_tolerance = 1e-10
@@ -274,7 +275,20 @@ pressure_tag = "pressure_grad"
   []
 []
 
+[AuxVariables]
+  [mu_t_torch_func]
+    type = MooseVariableFVReal
+    initial_condition = 0.1
+  []
+[]
 
+[AuxKernels]
+ [populate_mu_t_torch_func]
+   type = MaterialRealAux
+   variable = mu_t_torch_func
+   property = 'mu_t_torch'
+ []
+[]
 
 [Materials]
   [const_functor]
@@ -282,22 +296,24 @@ pressure_tag = "pressure_grad"
     prop_names = 'cp alpha alpha_b'
     prop_values = '${cp} ${alpha} ${alpha_b}'
   []
-  [const_mu_t]
-    type = ADGenericFunctorMaterial
-    prop_names = 'mu_t'
-    prop_values = '0.1'
-  []
+  #[const_mu_t]
+  #  type = ADGenericFunctorMaterial
+  #  prop_names = 'mu_t'
+  #  prop_values = '0.1'
+  #[]
   [net_material] # Populates mu_t_torch
-    type = TorchScriptTurbulentViscosityMaterial
-    torch_script_userobject = cody_net
-    u = vel_x
-    v = vel_y
+   type = TorchScriptTurbulentViscosityMaterial
+   torch_script_userobject = cody_net
+   u = vel_x
+   v = vel_y
+   k = 1.0
+   debug = 0
   []
   [k_t]
     type = ADParsedFunctorMaterial
-    expression = 'mu_t * cp / Pr_t'
-    functor_names = 'mu_t ${cp} ${Pr_t}'
-    functor_symbols = 'mu_t cp Pr_t'
+    expression = 'mu_t_torch_func * cp / Pr_t'
+    functor_names = 'mu_t_torch_func ${cp} ${Pr_t}'
+    functor_symbols = 'mu_t_torch_func cp Pr_t'
     property_name = 'k_t'
   []
   [ins_fv]

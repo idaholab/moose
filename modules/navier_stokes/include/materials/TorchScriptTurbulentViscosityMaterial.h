@@ -38,6 +38,10 @@ protected:
   const Moose::Functor<ADReal> * _v_var;
   /// z-velocity
   const Moose::Functor<ADReal> * _w_var;
+  /// k for viscosity
+  const Real & _k;
+  /// Debug output flag
+  const bool & _debug;
 
   /// The user object that holds the torch module
   const TorchScriptUserObject & _torch_script_userobject;
