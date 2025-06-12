@@ -275,7 +275,7 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
   // Compute mixture properties
   if (!_use_external_mixture_properties)
   {
-    auto params = getFactory().getValidParams("NSFVMixtureFunctorMaterial");
+    auto params = getFactory().getValidParams("WCNSLinearFVMixtureFunctorMaterial");
     assignBlocks(params, _blocks);
     params.set<std::vector<MooseFunctorName>>("prop_names") = {
         "rho_mixture", "mu_mixture", "cp_mixture", "k_mixture"};
@@ -294,7 +294,8 @@ WCNSLinearFVTwoPhaseMixturePhysics::addMaterials()
     if (getParam<bool>("output_all_properties"))
       params.set<std::vector<OutputName>>("outputs") = {"all"};
     params.set<bool>("limit_phase_fraction") = true;
-    getProblem().addMaterial("NSFVMixtureFunctorMaterial", prefix() + "mixture_material", params);
+    getProblem().addMaterial(
+        "WCNSLinearFVMixtureFunctorMaterial", prefix() + "mixture_material", params);
   }
 
   // Compute slip terms as functors, used by the drift flux kernels
