@@ -93,7 +93,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyTimeKernels()
   if (!_solve_for_enthalpy)
     params.set<MooseFunctorName>("factor") = "rho_cp";
   else
-    params.set<MooseFunctorName>("factor") = "rho";
+    params.set<MooseFunctorName>("factor") = _density_name;
 
   getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
 }
@@ -111,7 +111,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyAdvectionKernels()
     params.set<LinearVariableName>("variable") = _fluid_temperature_name;
     params.set<MooseEnum>("advected_quantity") = "temperature";
     if (!MooseUtils::isFloat(_specific_heat_name))
-      paramError(NS::cp, "Must be a Real number. Functors not supported at this time");
+      paramError("specific_heat", "Must be a Real number. Functors not supported at this time");
     params.set<Real>("cp") = std::atof(_specific_heat_name.c_str());
   }
   else
