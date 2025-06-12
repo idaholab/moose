@@ -5,9 +5,6 @@
 []
 
 [Adaptivity]
-  marker = errormarker
-  steps  = 2
-
   [Indicators]
     [l2zz]
       type     = MFEMZienkiewiczZhuEstimator
@@ -15,16 +12,6 @@
       kernel   = diff
       fe_space = H1FESpace
       outputs  = none
-    []
-  []
-
-  [Markers]
-    [errormarker]
-      type = ErrorFractionMarker
-      indicator = l2zz
-      refine = 0.5 # split/refine elements in the upper half of the indicator error range
-      coarsen = 0 # dont do any coarsening
-      outputs = none
     []
   []
 []
@@ -43,7 +30,7 @@
     type = MFEMVectorFESpace
     fec_type = ND
     fec_order = FIRST
-  []  
+  []
 []
 
 [Variables]
@@ -111,7 +98,7 @@
   preconditioner = boomeramg
   l_tol = 1e-16
   l_abs_tol = 1e-16
-  l_max_its = 1000  
+  l_max_its = 1000
 []
 
 [Executioner]
