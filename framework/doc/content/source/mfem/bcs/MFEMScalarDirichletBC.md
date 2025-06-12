@@ -1,10 +1,10 @@
-# MFEMScalarFunctorDirichletBC
+# MFEMScalarDirichletBC
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /BCs/MFEMScalarFunctorDirichletBC
+!syntax description /BCs/MFEMScalarDirichletBC
 
 ## Overview
 
@@ -14,11 +14,11 @@ scalar coefficient on the boundary.
 
 ## Example Input File Syntax
 
-!syntax parameters /BCs/MFEMScalarFunctorDirichletBC
+!syntax parameters /BCs/MFEMScalarDirichletBC
 
-!syntax inputs /BCs/MFEMScalarFunctorDirichletBC
+!syntax inputs /BCs/MFEMScalarDirichletBC
 
-!syntax children /BCs/MFEMScalarFunctorDirichletBC
+!syntax children /BCs/MFEMScalarDirichletBC
 
 !if-end!
 

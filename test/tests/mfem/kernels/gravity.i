@@ -29,7 +29,7 @@
 
 [BCs]
   [dirichlet]
-    type = MFEMVectorFunctorDirichletBC
+    type = MFEMVectorDirichletBC
     variable = displacement
     boundary = '1'
     vector_coefficient = '0.0 0.0 0.0'

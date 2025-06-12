@@ -1,10 +1,10 @@
-# MFEMVectorFunctorDirichletBC
+# MFEMVectorDirichletBC
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /BCs/MFEMVectorFunctorDirichletBC
+!syntax description /BCs/MFEMVectorDirichletBC
 
 ## Overview
 
@@ -16,11 +16,11 @@ is a coefficient that may vary in space and/or time.
 
 !listing test/tests/mfem/kernels/linearelasticity.i block=BCs
 
-!syntax parameters /BCs/MFEMVectorFunctorDirichletBC
+!syntax parameters /BCs/MFEMVectorDirichletBC
 
-!syntax inputs /BCs/MFEMVectorFunctorDirichletBC
+!syntax inputs /BCs/MFEMVectorDirichletBC
 
-!syntax children /BCs/MFEMVectorFunctorDirichletBC
+!syntax children /BCs/MFEMVectorDirichletBC
 
 !if-end!
 

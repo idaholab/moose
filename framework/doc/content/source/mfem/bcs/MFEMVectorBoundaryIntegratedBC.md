@@ -1,10 +1,10 @@
-# MFEMVectorFunctorBoundaryIntegratedBC
+# MFEMVectorBoundaryIntegratedBC
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /BCs/MFEMVectorFunctorBoundaryIntegratedBC
+!syntax description /BCs/MFEMVectorBoundaryIntegratedBC
 
 ## Overview
 
@@ -17,11 +17,11 @@ where $v \in \vec H^1$ and $\vec f$ is a vector coefficient of the same dimensio
 
 ## Example Input File Syntax
 
-!syntax parameters /BCs/MFEMVectorFunctorBoundaryIntegratedBC
+!syntax parameters /BCs/MFEMVectorBoundaryIntegratedBC
 
-!syntax inputs /BCs/MFEMVectorFunctorBoundaryIntegratedBC
+!syntax inputs /BCs/MFEMVectorBoundaryIntegratedBC
 
-!syntax children /BCs/MFEMVectorFunctorBoundaryIntegratedBC
+!syntax children /BCs/MFEMVectorBoundaryIntegratedBC
 
 !if-end!
 

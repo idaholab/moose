@@ -50,7 +50,7 @@
 [BCs]
   active = 'bottom top_convective'
   [bottom]
-    type = MFEMScalarFunctorDirichletBC
+    type = MFEMScalarDirichletBC
     variable = temperature
     boundary = '1'
     coefficient = 1.0
@@ -63,7 +63,7 @@
     heat_transfer_coefficient = heat_transfer_coefficient
   []
   [top_dirichlet]
-    type = MFEMScalarFunctorDirichletBC
+    type = MFEMScalarDirichletBC
     variable = temperature
     boundary = '2'
     coefficient = 0.0

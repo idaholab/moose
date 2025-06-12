@@ -1,10 +1,10 @@
-# MFEMVectorFunctorNormalDirichletBC
+# MFEMVectorNormalDirichletBC
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /BCs/MFEMVectorFunctorNormalDirichletBC
+!syntax description /BCs/MFEMVectorNormalDirichletBC
 
 ## Overview
 
@@ -16,11 +16,11 @@ a coefficient that may vary in space and/or time.
 
 !listing test/tests/mfem/kernels/graddiv.i block=BCs
 
-!syntax parameters /BCs/MFEMVectorFunctorNormalDirichletBC
+!syntax parameters /BCs/MFEMVectorNormalDirichletBC
 
-!syntax inputs /BCs/MFEMVectorFunctorNormalDirichletBC
+!syntax inputs /BCs/MFEMVectorNormalDirichletBC
 
-!syntax children /BCs/MFEMVectorFunctorNormalDirichletBC
+!syntax children /BCs/MFEMVectorNormalDirichletBC
 
 !if-end!
 
