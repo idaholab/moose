@@ -8,7 +8,7 @@
                 OutputData/DomainPotential/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'MOOSE shall have the ability to solve a diffusion problem defined on an MFEM domain restricted submesh.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
   []
@@ -19,7 +19,7 @@
                 OutputData/BoundaryPotential/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'MOOSE shall have the ability to solve an FE problem defined on an MFEM boundary restricted submesh.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
   []
@@ -30,7 +30,7 @@
                 OutputData/DomainPotentialTransfer/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'MOOSE shall have the ability to transfer a domain restricted submesh variable data to a corresponding variable defined on the parent mesh.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
   []

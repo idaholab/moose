@@ -8,7 +8,7 @@
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
     max_threads = 1
@@ -24,7 +24,7 @@
                'Solver/l_tol=1e-14 Solver/preconditioner=ams Preconditioner/ams/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/CurlCurlLOR '
     requirement = 'The system shall have the ability to solve a LOR definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
     max_threads = 1
@@ -39,7 +39,7 @@
     ignored_items = "root['VTKFile']['@version']"
     cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=boomeramg'
     requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
   []
@@ -52,7 +52,7 @@
                'Executioner/assembly_level=partial'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
   []
@@ -66,7 +66,7 @@
                'Solver/preconditioner=boomeramg Preconditioner/boomeramg/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/DiffusionLOR '
     requirement = 'MOOSE shall have the ability to solve a diffusion problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
     abs_zero = 1e-6
@@ -78,7 +78,7 @@
                 OutputData/GradDiv/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a grad-div problem with Raviart-Thomas elements using MFEM.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
   []
@@ -93,7 +93,7 @@
                'Preconditioner/ADS/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/GradDivLOR '
     requirement = 'The system shall have the ability to solve a LOR grad-div problem with Raviart-Thomas elements using MFEM.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
     abs_zero = 1e-6
@@ -111,7 +111,7 @@
                'Executioner/assembly_level=element'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
   []
@@ -128,7 +128,7 @@
                'Executioner/assembly_level=element'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
   []
@@ -145,7 +145,7 @@
                'Solver/preconditioner=boomeramg Preconditioner/boomeramg/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConductionLOR '
     requirement = 'MOOSE shall have the ability to solve a transient heat conduction problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
   []
@@ -157,7 +157,7 @@
     cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=boomeramg '
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
   []
@@ -168,7 +168,7 @@
                 OutputData/LinearElasticity/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a linear elasticity problem using MFEM.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
   []
@@ -179,7 +179,7 @@
                 OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads using MFEM.'
-    mfem = true
+    capabilities = 'mfem'
     max_parallel = 1
     recover = false
     max_threads = 1
@@ -191,7 +191,7 @@
     csvdiff = 'OutputData/Irrotational.csv'
     requirement = 'The system shall have the ability to solve for an irrotational vortex in two dimensions using MFEM.'
     abs_zero = 1e-6
-    mfem = true
+    capabilities = 'mfem'
     recover = false
   []
 []

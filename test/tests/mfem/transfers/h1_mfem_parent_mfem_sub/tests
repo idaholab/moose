@@ -6,7 +6,7 @@
     [run]
       type = RunApp
       input = parent.i
-      mfem = true
+      capabilities = 'mfem'
       recover = false
       detail = 'running the inputs, and '
     []
@@ -18,7 +18,7 @@
                 u
                 OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
       prereq = FromSubToParent/run
-      mfem = true
+      capabilities = 'mfem'
       recover = false
       detail = 'checking the sub-application and parent application outputs against each other.'
     []
@@ -28,7 +28,7 @@
     [run]
       type = RunApp
       input = sub.i
-      mfem = true
+      capabilities = 'mfem'
       recover = false
       cli_args = 'MultiApps/active=subapp Transfers/active=to_sub '
                  'subapp:MultiApps/active="" subapp:Transfers/active=""'
@@ -42,7 +42,7 @@
                 u
                 OutputData/DiffusionSub/Run0/Cycle000001/proc000000.vtu'
       prereq = ToSubFromParent/run
-      mfem = true
+      capabilities = 'mfem'
       recover = false
       detail = 'checking the sub-application and parent application outputs against each other.'
     []
