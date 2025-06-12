@@ -12,6 +12,7 @@ import inspect
 import traceback
 import typing
 import sys
+import json
 from typing import Optional
 from enum import Enum
 from dataclasses import dataclass
@@ -30,7 +31,8 @@ class ExtendedEnum(Enum):
         """
         return list(cls)
 
-data_types = typing.Union[float]
+# The valid numeric data types
+numeric_data_types = typing.Union[float]
 
 class DataKeyAlreadyExists(Exception):
     """
@@ -104,43 +106,49 @@ class ValidationCase(MooseObject):
     class Data:
         """
         Base data structure that stores the information
-        about a piece of validation data to be stored.
+        about a piece of validation data to be stored
         """
-        # The data value
-        value: data_types
+        def __post_init__(self):
+            try:
+                json.dumps(self.value)
+            except (TypeError, OverflowError):
+                raise TypeError(f'Data type "{type(self.value)}" is not JSON serializable')
+
         # The data key
         key: str
+        # The data
+        value: typing.Any
         # Human readable description of the data
         description: str
-        # The test that added this data
+        # The test that added this data, if any
         test: Optional[str]
-        # Units for the data, if any
-        units: Optional[str]
         # Whether or not this result is considered
         # a validation result (enables running verification
         # cases but not storing them in a database)
-        validation: bool = True
-        # A nominal value for this data; unused
-        # in the test but useful in postprocessing
-        nominal: Optional[data_types] = None
-        # Bounds for the data (min and max)
-        bounds: Optional[tuple[data_types, data_types]] = None
+        validation: bool
 
         def printableValue(self) -> str:
-            """
-            Gets a printable version of the underlying value
-            """
             raise NotImplementedError
 
     @dataclass
-    class FloatData(Data):
+    class NumericData(Data):
         """
-        Data structure for a piece of validation data
-        that is of type float.
+        Data structure that stores the information about
+        a piece of numeric validation data that can be checked
         """
+        # Units for the data, if any
+        units: Optional[str]
+        # A nominal value for this data; unused
+        # in the test but useful in postprocessing
+        nominal: Optional[numeric_data_types] = None
+        # Bounds for the data (min and max)
+        bounds: Optional[tuple[numeric_data_types, numeric_data_types]] = None
+
         def printableValue(self) -> str:
-            units = f' {self.units}' if self.units is not None else ''
-            return f'{self.value:.5E}{units}'
+            if isinstance(self.value, float):
+                units = f' {self.units}' if self.units is not None else ''
+                return f'{self.value:.5E}{units}'
+            raise NotImplementedError
 
     # Stores classes that are instantiated that
     # are derived from this class
@@ -201,8 +209,43 @@ class ValidationCase(MooseObject):
         print(f'[{status.value:>4}] {prefix}{message}')
         self._results.append(status_value)
 
-    def addFloatData(self, key: str, value: float, units: Optional[str],
-                     description: str, **kwargs):
+    def _addData(self, data_type: typing.Type, key: str, value: typing.Any,
+                 description: str, **kwargs):
+        """
+        Internal method for creating and inserting data.
+        """
+        if key in self._data:
+            raise DataKeyAlreadyExists(key)
+
+        # Set defaults
+        defaults = [('validation', True)]
+        kwargs.update({k: v for k, v in defaults if k not in kwargs})
+
+        data = data_type(value=value,
+                         key=key,
+                         description=description,
+                         test=self._current_test,
+                         **kwargs)
+        self._data[key] = data
+        return data
+
+    def addData(self, key: str, value: typing.Any, description: str, **kwargs) -> None:
+        """
+        Adds a piece of arbitrary typed data to the validation data.
+
+        The data type must be JSON serializable.
+
+        Args:
+            key: The key to store the data
+            value: The value of the data
+            description: Human readable description of the data
+        Keyword arguments:
+            Additional arguments passed to Data
+        """
+        self._addData(self.Data, key, value, description)
+
+    def addFloatData(self, key: str, value: float, description: str,
+                     units: Optional[str], **kwargs):
         """
         Adds a piece of float data to the validation data.
 
@@ -212,24 +255,15 @@ class ValidationCase(MooseObject):
         Args:
             key: The key to store the data
             value: The value of the data
-            units: Human readable units for the data (can be None)
             description: Human readable description of the data
+            units: Human readable units for the data (can be None)
         Keyword arguments:
-            Additional arguments passed to FloatData
+            Additional arguments passed to NumericData
         """
         if not isinstance(value, float):
             raise ValueError('value is not of type float')
 
-        if key in self._data:
-            raise DataKeyAlreadyExists(key)
-
-        data = self.FloatData(value=value,
-                              units=units,
-                              key=key,
-                              description=description,
-                              test=self._current_test,
-                              **kwargs)
-        self._data[key] = data
+        data = self._addData(self.NumericData, key, value, description, units=units, **kwargs)
 
         result_kwargs = {'data_key': key,
                          'validation': kwargs.pop('validation', True)}

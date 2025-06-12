@@ -28,19 +28,24 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertEqual('number', result['data_key'])
         # Validation data
         data = validation['data']
-        self.assertEqual(len(data), 1)
+        self.assertEqual(len(data), 2)
+        # Numeric value
         number = data['number']
         self.assertEqual(100.0, number['value'])
         self.assertEqual('Number', number['description'])
         self.assertEqual('coolunits', number['units'])
         self.assertEqual(95.0, number['bounds'][0])
         self.assertEqual(105.0, number['bounds'][1])
+        # Arbitrary data (dict)
+        useless_dict = data['useless_dict']
+        self.assertEqual({'foo': 'bar'}, useless_dict['value'])
+        self.assertEqual('A useless dictionary', useless_dict['description'])
 
         # Check on-screen output
         output = test['output']
         validation_output = output['validation']
         self.assertIn('Running validation case', validation_output)
-        self.assertIn('Acquired 1 data value(s), 1 result(s): 1 ok, 0 fail, 0 skip', validation_output)
+        self.assertIn('Acquired 2 data value(s), 1 result(s): 1 ok, 0 fail, 0 skip', validation_output)
 
         # Check timing; validation execution exists
         timing = test['timing']

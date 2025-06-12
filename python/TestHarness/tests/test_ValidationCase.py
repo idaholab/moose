@@ -50,11 +50,28 @@ class TestValidationCase(unittest.TestCase):
             test.run()
         self.assertEqual(len(test.results), 0)
 
+    def testAddData(self):
+        args = {'key': 'some_dict',
+                'value': {'foo': 'bar'},
+                'description': 'Useless dictionary'}
+        test = ValidationCase()
+        test.addData(*args.values())
+        all_data = test.data
+        self.assertEqual(len(all_data), 1)
+        data = test.data[args['key']]
+        for key, value in args.items():
+            self.assertEqual(getattr(data, key), value)
+        self.assertIsNone(data.test)
+
+    def testAddDataNonSerializable(self):
+        with self.assertRaisesRegex(TypeError, 'not JSON serializable'):
+            ValidationCase().addData('key', b'1234', 'unused')
+
     def testAddFloatData(self):
         args = {'key': 'peak_temperature',
                 'value': 1.234,
-                'units': 'K',
-                'description': 'Peak temperature'}
+                'description': 'Peak temperature',
+                'units': 'K'}
 
         test = ValidationCase()
         test.addFloatData(*args.values())
@@ -68,7 +85,7 @@ class TestValidationCase(unittest.TestCase):
     def testAddFloatDataNotFloat(self):
         test = ValidationCase()
         with self.assertRaises(ValueError):
-            test.addFloatData('unused', int(1), None, 'unused')
+            test.addFloatData('unused', int(1), 'unused', None)
 
     def testAddFloatDataBounded(self):
         key = 'data'
@@ -76,7 +93,7 @@ class TestValidationCase(unittest.TestCase):
         bounds = (value - 1.0, value + 0.1)
 
         test = ValidationCase()
-        test.addFloatData(key, value, None, 'unused', bounds=bounds)
+        test.addFloatData(key, value, 'unused', None, bounds=bounds)
         all_data = test.data
         self.assertEqual(len(all_data), 1)
         data = all_data[key]
@@ -86,7 +103,7 @@ class TestValidationCase(unittest.TestCase):
         key = 'test'
         nominal = 1.1
         test = ValidationCase()
-        test.addFloatData(key, 1.0, None, 'unused', nominal=nominal)
+        test.addFloatData(key, 1.0, 'unused', None,  nominal=nominal)
         all_data = test.data
         self.assertEqual(len(all_data), 1)
         self.assertEqual(nominal, all_data[key].nominal)
@@ -94,11 +111,11 @@ class TestValidationCase(unittest.TestCase):
     def testAddFloatDataBoundedCheck(self):
         class Test(ValidationCase):
             def test_pass(self):
-                self.addFloatData('pass', 1.0, None, 'foo', bounds=(0.9, 1.1))
+                self.addFloatData('pass', 1.0, 'foo', None, bounds=(0.9, 1.1))
             def test_fail_lower(self):
-                self.addFloatData('fail_lower', 2.0, None, 'foo', bounds=(2.1, 3.0))
+                self.addFloatData('fail_lower', 2.0, 'foo', None, bounds=(2.1, 3.0))
             def test_fail_upper(self):
-                self.addFloatData('fail_upper', 3.0, None, 'foo', bounds=(2.0, 2.2))
+                self.addFloatData('fail_upper', 3.0, 'foo', None, bounds=(2.0, 2.2))
 
         test = Test()
         test.run()
