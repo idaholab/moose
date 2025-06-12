@@ -13,8 +13,7 @@ MFEMVectorNormalDirichletBC::validParams()
   return params;
 }
 
-MFEMVectorNormalDirichletBC::MFEMVectorNormalDirichletBC(
-    const InputParameters & parameters)
+MFEMVectorNormalDirichletBC::MFEMVectorNormalDirichletBC(const InputParameters & parameters)
   : MFEMVectorDirichletBCBase(parameters)
 {
 }

@@ -97,8 +97,7 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarDirichletConstantBC)
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<MFEMScalarCoefficientName>("coefficient") = "1.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc =
-      addObject<MFEMScalarDirichletBC>("MFEMScalarDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<MFEMScalarDirichletBC>("MFEMScalarDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -127,8 +126,7 @@ TEST_F(MFEMEssentialBCTest, MFEMScalarDirichletBC)
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<MFEMScalarCoefficientName>("coefficient") = "func1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc =
-      addObject<MFEMScalarDirichletBC>("MFEMScalarDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<MFEMScalarDirichletBC>("MFEMScalarDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -158,8 +156,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletConstantBC)
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc =
-      addObject<MFEMVectorDirichletBC>("MFEMVectorDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<MFEMVectorDirichletBC>("MFEMVectorDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -194,8 +191,7 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorDirichletBC)
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc =
-      addObject<MFEMVectorDirichletBC>("MFEMVectorDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<MFEMVectorDirichletBC>("MFEMVectorDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -233,8 +229,8 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorNormalDirichletConstantBC)
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMVectorNormalDirichletBC>(
-      "MFEMVectorNormalDirichletBC", "bc1", bc_params);
+  auto & essential_bc =
+      addObject<MFEMVectorNormalDirichletBC>("MFEMVectorNormalDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");
@@ -271,8 +267,8 @@ TEST_F(MFEMEssentialBCTest, MFEMVectorNormalDirichletBC)
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMVectorNormalDirichletBC>(
-      "MFEMVectorNormalDirichletBC", "bc1", bc_params);
+  auto & essential_bc =
+      addObject<MFEMVectorNormalDirichletBC>("MFEMVectorNormalDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_variable_name");

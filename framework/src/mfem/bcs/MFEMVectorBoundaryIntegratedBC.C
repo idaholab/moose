@@ -16,8 +16,7 @@ MFEMVectorBoundaryIntegratedBC::validParams()
   return params;
 }
 
-MFEMVectorBoundaryIntegratedBC::MFEMVectorBoundaryIntegratedBC(
-    const InputParameters & parameters)
+MFEMVectorBoundaryIntegratedBC::MFEMVectorBoundaryIntegratedBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
     _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
 {
