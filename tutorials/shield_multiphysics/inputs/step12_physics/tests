@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#4522'
+  design = 'examples_and_tutorials/index.md'
+  [test]
+    type = RunApp
+    input = '../step11_multiapps/mesh2d_coarse.i step12.i'
+    cli_args = "Mesh/inactive='fmg' Executioner/end_time=1000"
+    requirement = "The shield multiphysics tutorial shall include a demonstration of custom "
+                  "input syntax."
+    min_parallel = 8
+  []
+[]

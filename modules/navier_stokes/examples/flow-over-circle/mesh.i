@@ -19,14 +19,14 @@
     paired_block = 1
     new_boundary = 'circle'
   []
-  [delete]
+  [delete_circle]
     type = BlockDeletionGenerator
     input = in_between
     block = '1'
   []
   [final_ccmg]
     type = RenameBlockGenerator
-    input = delete
+    input = delete_circle
     old_block = '2 3'
     new_block = '0 0'
   []
