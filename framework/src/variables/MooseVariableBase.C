@@ -67,6 +67,15 @@ MooseVariableBase::validParams()
                         false,
                         "True to make this variable a array variable regardless of number of "
                         "components. If 'components' > 1, this will automatically be set to true.");
+
+  params.addParam<std::vector<std::string>>(
+      "array_var_component_names",
+      "Only for use with array variables, allows setting custom names for each array variable "
+      "component. If this not set, the default name for each array variable componenet is "
+      "`base_name`+'_'+component number. If used, a name must be provided for each component and "
+      "the values are used to name the components as `base_name`+'_'+ "
+      "`array_var_component_names[component]`.");
+
   params.addParam<SolverSystemName>("solver_sys",
                                     "nl0",
                                     "If this variable is a solver variable, this is the "
@@ -119,7 +128,10 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _count(getParam<unsigned int>("components")),
     _scaling_factor(_count, 1.0),
     _use_dual(getParam<bool>("use_dual")),
-    _is_array(getParam<bool>("array"))
+    _is_array(getParam<bool>("array")),
+    _array_var_component_names(isParamValid("array_var_component_names")
+                                   ? getParam<std::vector<std::string>>("array_var_component_names")
+                                   : std::vector<std::string>())
 {
   scalingFactor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
                                         : std::vector<Real>(_count, 1.));
@@ -129,8 +141,14 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     paramError("family", "finite volume (fv=true) variables must be have MONOMIAL family");
   if (getParam<bool>("fv") && _fe_type.order != 0)
     paramError("order", "finite volume (fv=true) variables currently support CONST order only");
+
+  // check parameters set automatically by SystemBase related to array variables
+  mooseAssert(
+      _is_array ? _count == _array_var_component_names.size() : true,
+      "An inconsistent numer of names or no names were provided for array variable components");
   if (_count > 1)
     mooseAssert(_is_array, "Must be true with component > 1");
+
   if (_is_array)
   {
     auto name0 = _sys.system().variable(_var_num).name();
@@ -169,6 +187,15 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
                    _mesh.getSubdomainName(*it) + "' (block-id " + std::to_string(*it) + ").");
 #endif
   }
+}
+
+std::string
+MooseVariableBase::arrayVariableComponent(const unsigned int i) const
+{
+  mooseAssert(
+      i < _array_var_component_names.size(),
+      "Requested array variable component number is greater than the number of component names.");
+  return _var_name + '_' + _array_var_component_names[i];
 }
 
 const std::vector<dof_id_type> &

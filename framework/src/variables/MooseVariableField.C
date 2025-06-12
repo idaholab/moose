@@ -85,7 +85,11 @@ template <typename OutputType>
 bool
 MooseVariableField<OutputType>::isArray() const
 {
-  return std::is_same<OutputType, RealEigenVector>::value;
+  const auto is_array = MooseVariableBase::isArray();
+  if (std::is_same<OutputType, RealEigenVector>::value != is_array)
+    mooseError("A variable is marked as an array variable in a base class, but in a derived class "
+               "the output type is not consistent.");
+  return is_array;
 }
 
 template <typename OutputType>

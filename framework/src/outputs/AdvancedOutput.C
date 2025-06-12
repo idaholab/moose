@@ -434,7 +434,7 @@ AdvancedOutput::initAvailableLists()
       {
         VariableName vname = var_name;
         if (var.isArray())
-          vname = SubProblem::arrayVariableComponent(var_name, i);
+          vname = var.arrayVariableComponent(i);
 
         // A note that if we have p-refinement we assume "worst-case" scenario that our constant
         // monomial/monomial-vec families have been refined and we can no longer write them as
@@ -526,7 +526,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
       {
         VariableName vname = var_name;
         if (var.isArray())
-          vname = SubProblem::arrayVariableComponent(var_name, i);
+          vname = var.arrayVariableComponent(i);
 
         if (type.order == CONSTANT)
           _execute_data["elemental"].show.insert(vname);
@@ -580,7 +580,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
       {
         VariableName vname = var_name;
         if (var.isArray())
-          vname = SubProblem::arrayVariableComponent(var_name, i);
+          vname = var.arrayVariableComponent(i);
 
         if (type.order == CONSTANT)
           _execute_data["elemental"].hide.insert(vname);
