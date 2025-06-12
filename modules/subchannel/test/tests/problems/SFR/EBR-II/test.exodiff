@@ -7,7 +7,7 @@ NODAL VARIABLES
 	SumWij relative 3e-3
 	T relative 1e-5
 	h
-	mdot relative 1e-5
+	mdot relative 1e-4
 	mu relative 1e-5
 	q_prime
 	rho

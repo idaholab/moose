@@ -40,7 +40,7 @@ THORS bundle 3A simulates the Fast Flux Test Facility and Clinch River Breeder R
 
 ## Results for central blockage
 
-Figure [fig:thors_val] presents the exit temperature distribution, expressed as $T-T_{in}$ along with the SCM calculation. For this case power was at $33kW/m$ per pin and $100$% flow at $54 gpm$. Predicted subchannel average temperatures agreed relatively well, with a bigger error in Subchannel 17(20).  It should be noted that SCM calculates surface averages while the experimental results are measured at the subchannel centers. As such, it is expected that SCM results will be a bit higher than the experimental values, since the location of the measurements is away from the heated pin walls. The discrepancy in Subchannel 17(20) might very well be attributed to the location of the thermocouples and the approximate relationship between the model and actual experiment geometry. For the center subchannels where the SCM model geometry is more representative, the agreement is better. The poorer agreement in the exterior subchannels may be due to steeper temperature gradients in that region since SCM calculates average channel temperatures, whereas the thermocouples might be in a subchannel temperature gradient.
+Figure [fig:thors_val] presents the exit temperature distribution, expressed as $T-T_{in}$ along with the SCM calculation. For this case power was at $33kW/m$ per pin and $100$% flow at $54 gpm$. Predicted subchannel average temperatures agreed relatively well, with a bigger error in Subchannel (37,36,20)  It should be noted that SCM calculates surface averages while the experimental results are measured at the subchannel centers. As such, it is expected that SCM results will be a bit higher than the experimental values, since the location of the measurements is away from the heated pin walls. The discrepancy in the outer subchannels might very well be attributed to the location of the thermocouples and the approximate relationship between the model and actual experiment geometry. For the center subchannels where the SCM model geometry is more representative, the agreement is better. The poorer agreement in the exterior subchannels may be due to steeper temperature gradients in that region since SCM calculates average channel temperatures, whereas the thermocouples might be in a subchannel temperature gradient.
 
 !media subchannel/v&v/thors/FFM-3A.png
     style=width:60%;margin-bottom:2%;margin:auto;
@@ -125,14 +125,19 @@ THORS bundle 5B has the same fuel configuration as bundle 2B, except that 0.0711
 
 ## Results for edge blockage
 
-The case presented here is the high flow case (FFM Series 6, Test 12, Run 101). The thermocouples are located at the middle of the exit region. There is a subchannel index correspondence between the Figure [fig:thors2] and the Pronhorn-SC model shown in Figure[fig:hex_index] as follows: 34(39), 33(38), 18(20), 9(19), 3(4), 0(1), 12(11) and 25(30). Where the number outside the parentheses refers to the SCM model and the number inside the parentheses, refers to the experimental convention. SCM calculation along with the experimental measurements is shown in Figure [fig:FFM-5B]. The code calculations excibits generally good agreement with the experimental measurements. The least agreement occurs at the edge subchannels ($34,33$) which is likely due to the model not accuretally replicating the flow area there. Prongohorn-SC uses an assembly-wide constant wire diameter, while in the experimental assembly the wires at the edge subchannels had half the diameter.
+
+The case presented here is the high flow case (FFM Series 6, Test 12, Run 101). The thermocouples are located at the middle of the exit region. There is a subchannel index correspondence between the Figure [fig:thors2] and the SCM model shown in Figure[fig:hex_index] as follows: 34(39), 33(38), 18(20), 9(19), 3(4), 0(1), 12(11) and 25(30). Where the number outside the parentheses refers to the SCM model and the number inside the parentheses, refers to the experimental convention. SCM calculation along with the experimental measurements is shown in Figure [fig:FFM-5B]. The code calculations excibits generally good agreement with the experimental measurements. The least agreement occurs at the edge subchannels ($34,33$) which is likely due to the model not accuretally replicating the flow area there. SCM uses an assembly-wide constant wire diameter, while in the experimental assembly the wires at the edge subchannels had half the diameter.
 
 !media subchannel/v&v/thors/FFM-5B_high.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:FFM-5B
     caption= Exit temperature profile for high flow case ($C_T = 2.2$).
 
-The second case presented here is the low flow case (FFM Series 6, Test 12, Run 109). The thermocouples are located at the middle of the exit region, same as before. SCM calculation along with the experimental measurements is shown in Figure [fig:FFM-5B2]. The code calculations excibits good agreement with the experimental measurements.
+The second case presented here is the low flow case (FFM Series 6, Test 12, Run 109).
+The thermocouples are located at the middle of the exit region, same as before.
+SCM calculation along with the experimental measurements is shown in Figure [fig:FFM-5B2].
+The code calculations excibits good agreement with the experimental measurements with the
+worst result being for subchannel 34.
 
 !media subchannel/v&v/thors/FFM-5B_low.png
     style=width:60%;margin-bottom:2%;margin:auto;

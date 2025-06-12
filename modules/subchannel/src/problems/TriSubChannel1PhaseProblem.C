@@ -435,7 +435,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
 }
 
 Real
-TriSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz)
+TriSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, bool enthalpy)
 {
   auto beta = 0.0;
   const Real & pitch = _subchannel_mesh.getPitch();
@@ -540,7 +540,8 @@ TriSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz)
                std::pow(psi, gamma);
     }
     // Calculation of turbulent mixing parameter
-    beta = Cs * std::pow(Ar2 / A2, 0.5) * std::tan(theta);
+    if (enthalpy)
+      beta = Cs * std::pow(Ar2 / A2, 0.5) * std::tan(theta);
   }
   // Calculation of Turbulent Crossflow for bare assemblies, from Kim and Chung (2001).
   else if ((wire_lead_length == 0) && (wire_diameter == 0))
@@ -575,7 +576,7 @@ TriSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz)
     // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
     beta = freq_factor * (rod_mixing + axial_mixing) * std::pow(Re, -b / 2.0);
   }
-  mooseAssert(beta > 0, "beta should be positive.");
+  mooseAssert(beta >= 0, "beta should be positive or zero.");
   return beta;
 }
 
@@ -663,6 +664,23 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
     {
       auto z_grid = _subchannel_mesh.getZGrid();
       auto dz = z_grid[iz] - z_grid[iz - 1];
+      // compute average mass flux for periphery subchannels
+      Real gedge_ave = 0.0;
+      Real mdot_sum = 0.0;
+      Real si_sum = 0.0;
+      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+      {
+        auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+        if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
+        {
+          auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+          auto Si = (*_S_flow_soln)(node_in);
+          auto mdot_in = (*_mdot_soln)(node_in);
+          mdot_sum = mdot_sum + mdot_in;
+          si_sum = si_sum + Si;
+        }
+      }
+      gedge_ave = mdot_sum / si_sum;
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
         auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
@@ -712,11 +730,13 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
             if ((ii_ch == sweep_in) || (jj_ch == sweep_in))
             {
-              sweep_enthalpy += _WijPrime(i_gap, iz) * (*_h_soln)(node_sin);
+              sweep_enthalpy +=
+                  computeBeta(i_gap, iz, true) * gedge_ave * Sij * (*_h_soln)(node_sin);
             }
             else
             {
-              sweep_enthalpy -= _WijPrime(i_gap, iz) * (*_h_soln)(node_in);
+              sweep_enthalpy -=
+                  computeBeta(i_gap, iz, true) * gedge_ave * Sij * (*_h_soln)(node_in);
             }
           }
           /// Turbulent Diffusion
@@ -1145,47 +1165,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
               (subch_type_j == EChannelType::CORNER || subch_type_j == EChannelType::EDGE) &&
               (wire_lead_length != 0) && (wire_diameter != 0))
           {
-            // // donor channel and donor node of sweep flow
-            // auto sweep_in = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
-            // auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
-            // PetscScalar coeff;
-            // PetscInt col_sh;
-            // PetscInt row_sh;
-            // if ((ii_ch == sweep_in) || (jj_ch == sweep_in))
-            // {
-            //   sweep_enthalpy -= _WijPrime(i_gap, iz) * (*_h_soln)(node_sin);
-            //   coeff = _WijPrime(i_gap, iz);
-            //   col_sh = sweep_in + _n_channels * (iz_ind);
-            //   _console << "channel : " << i_ch
-            //            << ", sweep enthalpy gain : " << _WijPrime(i_gap, iz) *
-            //            (*_h_soln)(node_sin)
-            //            << ", iz : " << iz << std::endl;
-            // }
-            // else
-            // {
-            //   sweep_enthalpy += _WijPrime(i_gap, iz) * (*_h_soln)(node_in);
-            //   coeff = -_WijPrime(i_gap, iz);
-            //   col_sh = i_ch + _n_channels * (iz_ind);
-            //   _console << "channel : " << i_ch
-            //            << ", sweep enthalpy loss : " << -_WijPrime(i_gap, iz) *
-            //            (*_h_soln)(node_sin)
-            //            << ", iz : " << iz << std::endl;
-            // }
-
-            // if (iz == first_node)
-            // {
-            //   row_sh = i_ch + _n_channels * iz_ind;
-            //   PetscScalar value_hs = sweep_enthalpy;
-            //   LibmeshPetscCall(
-            //       VecSetValues(_hc_sweep_enthalpy_rhs, 1, &row_sh, &value_hs, ADD_VALUES));
-            // }
-            // else
-            // {
-            //   row_sh = i_ch + _n_channels * (iz_ind - 1);
-            //   LibmeshPetscCall(
-            //       MatSetValues(_hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &coeff,
-            //       ADD_VALUES));
-            // }
+            /// Do nothing. For gaps in the periphery i calculate sweep flow not turbulent diffusion
           }
           // Turbulent diffusion
           else
@@ -1293,7 +1273,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           counter++;
         }
 
-        // compute the sweep flow enthalpy change
+        // compute average mass flux for periphery subchannels
         Real gedge_ave = 0.0;
         Real mdot_sum = 0.0;
         Real si_sum = 0.0;
@@ -1310,6 +1290,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           }
         }
         gedge_ave = mdot_sum / si_sum;
+        /// Sweep flow calculation
         auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
         if ((subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER) &&
             (wire_diameter != 0.0) && (wire_lead_length != 0.0))
@@ -1333,11 +1314,11 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             {
               if ((ii_ch == sweep_i_ch) || (jj_ch == sweep_i_ch))
               {
-                beta_in = computeBeta(i_gap, iz);
+                beta_in = computeBeta(i_gap, iz, true);
               }
               else
               {
-                beta_out = computeBeta(i_gap, iz);
+                beta_out = computeBeta(i_gap, iz, true);
               }
             }
           }

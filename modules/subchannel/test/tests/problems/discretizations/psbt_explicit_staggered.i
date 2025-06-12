@@ -188,6 +188,7 @@ P_out = 4.923e6 # Pa
 
 [Outputs]
   exodus = true
+  csv = true
   [Temp_Out_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = T
@@ -208,6 +209,14 @@ P_out = 4.923e6 # Pa
     execute_on = final
     file_base = "mdot_In.txt"
     height = 0.0
+  []
+[]
+
+[Postprocessors]
+  [total_pressure_drop]
+    type = SubChannelDelta
+    variable = P
+    execute_on = "timestep_end"
   []
 []
 
