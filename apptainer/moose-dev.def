@@ -218,6 +218,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         # Need BLAS and LAPACK libs for torch in neml2
         dnf install -y openblas-devel
 
+        # Require CUDA if we have cuda available
+        if [ -n "$CUDA_DIR" ]; then
+            BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON")
+        else
+            BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=OFF")
+        fi
         # Build and install pytorch
         mkdir -p $LIBTORCH_DIR/logs
         PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
@@ -226,8 +232,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
             -DBUILD_SHARED_LIBS:BOOL=ON \
             -DCMAKE_BUILD_TYPE:STRING=Release \
             -DCMAKE_INSTALL_PREFIX:PATH={{ LIBTORCH_DIR }} \
-            # No python build for now
-            -DBUILD_PYTHON:BOOL=OFF \
+            # Python libraries needed by neml2
+            -DBUILD_PYTHON:BOOL=ON \
             # BLAS and LAPACK needed by neml2
             -DUSE_BLAS:BOOL=ON \
             -DBLAS:STRING=OpenBLAS \
