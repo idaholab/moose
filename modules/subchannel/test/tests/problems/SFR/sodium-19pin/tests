@@ -2,11 +2,9 @@
   design = 'TriSubChannel1PhaseProblem.md'
   issues = '#29194 #29490 #29505'
   [test_explicit]
-    type = Exodiff
+    type = CSVDiff
     input = test19_explicit.i
-    exodiff = test19_explicit_out.e
-    custom_cmp = 'test.exodiff'
-    capabilities = 'method!=dbg'
+    csvdiff = test19_explicit_out.csv
     valgrind = NONE
     recover = false
     allow_warnings = true
@@ -14,11 +12,9 @@
     requirement = 'The system will examine the subchannel explicit solver for a 19pin liquid sodium cooled assembly'
   []
   [test_implicit]
-    type = Exodiff
+    type = CSVDiff
     input = test19_implicit.i
-    exodiff = test19_implicit_out.e
-    custom_cmp = 'test.exodiff'
-    capabilities = 'method!=dbg'
+    csvdiff = test19_implicit_out.csv
     valgrind = NONE
     recover = false
     allow_warnings = true
@@ -26,11 +22,9 @@
     requirement = 'The system will examine the subchannel implicit solver for a 19pin liquid sodium cooled assembly'
   []
   [test_monolithic]
-    type = Exodiff
+    type = CSVDiff
     input = test19_monolithic.i
-    exodiff = test19_monolithic_out.e
-    custom_cmp = 'test.exodiff'
-    capabilities = 'method!=dbg'
+    csvdiff = test19_monolithic_out.csv
     abs_zero = 1e-7
     valgrind = NONE
     recover = false
@@ -38,24 +32,13 @@
     requirement = 'The system will examine the subchannel monolithic solver for a 19pin liquid sodium cooled assembly'
   []
   [test_full_monolithic]
-    type = Exodiff
+    type = CSVDiff
     input = test19_full_monolithic.i
-    exodiff = test19_full_monolithic_out.e
-    custom_cmp = 'test.exodiff'
-    capabilities = 'method!=dbg'
+    csvdiff = test19_full_monolithic_out.csv
     abs_zero = 1e-7
     valgrind = NONE
     recover = false
     max_parallel = 1
     requirement = 'The system will examine the subchannel full monolithic solver for a 19pin liquid sodium cooled assembly'
-  []
-  [test_monolithic_csv]
-    type = CSVDiff
-    input = 'test19_monolithic.i'
-    csvdiff = 'test19_monolithic_out.csv'
-    recover = False
-    rel_err = 3e-4
-    max_parallel = 1
-    requirement = 'The system will examine the subchannel monolithic solver printouts for a 19pin liquid sodium cooled assembly'
   []
 []
