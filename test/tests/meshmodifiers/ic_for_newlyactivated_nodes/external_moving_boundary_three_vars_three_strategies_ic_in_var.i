@@ -47,6 +47,13 @@
     var = 'diff2'
     execute_on = 'INITIAL TIMESTEP_END'
   []
+  [extrapolation_patch3]
+    type = NodalPatchRecoveryVariable
+    patch_polynomial_order = FIRST
+    use_specific_elements = true
+    var = 'diff3'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
 []
 
 [MeshModifiers]
@@ -63,9 +70,9 @@
 
     # --- new for setting IC --- #
     unsolved_blocks = '2'
-    ic_strategy = "IC_POLYNOMIAL"
-
-    nodal_patch_recovery_uo = 'extrapolation_patch extrapolation_patch2'
+    ic_strategy = "IC_POLYNOMIAL IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN IC_POLYNOMIAL_THRESHOLD"
+    nearby_element_threshold = 3
+    nodal_patch_recovery_uo = 'extrapolation_patch extrapolation_patch2 extrapolation_patch3'
   []
 []
 
@@ -104,8 +111,12 @@
 [Variables]
   [diff]
     order = FIRST
+    initial_condition = 50
   []
   [diff2]
+    order = FIRST
+  []
+  [diff3]
     order = FIRST
   []
 []
@@ -119,6 +130,11 @@
   [diffusion2]
     type = MatDiffusion
     variable = 'diff2'
+    diffusivity = 'k'
+  []
+  [diffusion3]
+    type = MatDiffusion
+    variable = 'diff3'
     diffusivity = 'k'
   []
 []
@@ -156,6 +172,20 @@
   [bottom2]
     type = DirichletBC
     variable = 'diff2'
+    boundary = bottom
+    value = 0
+  []
+
+  [left3]
+    type = DirichletBC
+    variable = 'diff3'
+    boundary = left
+    value = 10
+  []
+
+  [bottom3]
+    type = DirichletBC
+    variable = 'diff3'
     boundary = bottom
     value = 0
   []

@@ -103,23 +103,9 @@ The `ElementSubdomainModifier` dynamically activates elements in the domain by c
 
 Simply assigning zero values to these nodes (e.g., zero temperature or displacement) often causes numerical difficulties, especially when using nonlinear material models like those provided by the [`neml2`](https://cardinal.cels.anl.gov/modules/solid_mechanics/NEML2.html) library. Poor convergence or unstable behavior can result.
 
-To mitigate these issues, MOOSE supports two strategies for setting the initial condition (IC) on newly-activated nodes using information from the previously solved region.
+To mitigate these issues, MOOSE supports strategies for setting the initial condition (IC) on newly-activated nodes using information from the previously solved region.
 
-### Approach 1: Distance-weighted averaging
-
-This approach uses a weighted average based on spatial proximity.
-
-For each newly-activated node, we identify neighboring nodes that are:
-- Part of the `newly-activated` elements, and
-- Also shared with the previously solved elements.
-
-Once we gather solution values $u_i$ from these neighbors, we apply a distance-weighted formula:
-
-\[
-u_{\text{new}} = \frac{\sum \frac{u_i}{d_i}}{\sum \frac{1}{d_i}}
-\]
-
-### Approach 2: Polynomial fitting from nearby values
+### Polynomial fitting from nearby values
 
 When newly-activated elements are not directly connected to previously solved ones, a lightweight polynomial fitting strategy is used.
 

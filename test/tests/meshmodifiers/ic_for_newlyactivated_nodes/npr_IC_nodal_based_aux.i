@@ -40,11 +40,11 @@
     var = 'diff'
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  [extrapolation_patch2]
+  [u_patch]
     type = NodalPatchRecoveryVariable
     patch_polynomial_order = FIRST
     use_specific_elements = true
-    var = 'diff2'
+    var = 'u_recovered'
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []
@@ -65,7 +65,7 @@
     unsolved_blocks = '2'
     ic_strategy = "IC_POLYNOMIAL"
 
-    nodal_patch_recovery_uo = 'extrapolation_patch extrapolation_patch2'
+    nodal_patch_recovery_uo = 'u_patch'
   []
 []
 
@@ -75,6 +75,10 @@
   []
   [proc]
     block = '1 2'
+  []
+  [u_recovered]
+    family = LAGRANGE
+    order = FIRST
   []
 []
 
@@ -99,13 +103,17 @@
     execute_on = initial
     block = '1 2'
   []
+  [u_recovered]
+    type = ParsedAux
+    variable = u_recovered
+    coupled_variables = 'diff'
+    expression = 'diff^2 -diff-0.5'
+    execute_on = 'TIMESTEP_END'
+  []
 []
 
 [Variables]
   [diff]
-    order = FIRST
-  []
-  [diff2]
     order = FIRST
   []
 []
@@ -113,12 +121,7 @@
 [Kernels]
   [diffusion]
     type = MatDiffusion
-    variable = 'diff'
-    diffusivity = 'k'
-  []
-  [diffusion2]
-    type = MatDiffusion
-    variable = 'diff2'
+    variable = diff
     diffusivity = 'k'
   []
 []
@@ -134,28 +137,14 @@
 [BCs]
   [left]
     type = DirichletBC
-    variable = 'diff'
+    variable = diff
     boundary = left
     value = 10
   []
 
   [bottom]
     type = DirichletBC
-    variable = 'diff'
-    boundary = bottom
-    value = 0
-  []
-
-  [left2]
-    type = DirichletBC
-    variable = 'diff2'
-    boundary = left
-    value = 10
-  []
-
-  [bottom2]
-    type = DirichletBC
-    variable = 'diff2'
+    variable = diff
     boundary = bottom
     value = 0
   []

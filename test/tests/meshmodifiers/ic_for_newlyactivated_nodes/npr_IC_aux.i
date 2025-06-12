@@ -2,6 +2,13 @@
   block = '1'
 []
 
+[Problem]
+  kernel_coverage_check = 'only_list'
+  kernel_coverage_block_list = '1'
+  material_coverage_check = 'only_list'
+  material_coverage_block_list = '1'
+[]
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -40,12 +47,6 @@
     var = 'u_recovered'
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  # [u_patch]
-  #   type = NodalPatchRecoveryMaterialProperty
-  #   patch_polynomial_order = FIRST
-  #   property = 'u'
-  #   execute_on = 'INITIAL TIMESTEP_END'
-  # []
 []
 
 [MeshModifiers]
@@ -61,16 +62,9 @@
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
-     unsolved_blocks = '2'
-     ic_strategy = "IC_POLYNOMIAL"
-
-    # ic_variables = "u_recovered"
-
-     nodal_patch_recovery_uo = 'u_patch'
-    #unsolved_blocks = '2'
-    #ic_strategy = "IC_POLYNOMIAL"
-
-    #nodal_patch_recovery_uo = 'extrapolation_patch'
+    unsolved_blocks = '2'
+    ic_strategy = "IC_POLYNOMIAL"
+    nodal_patch_recovery_uo = 'u_patch'
   []
 []
 
@@ -82,6 +76,8 @@
     block = '1 2'
   []
   [u_recovered]
+    family = MONOMIAL
+    order = CONSTANT
   []
 []
 
@@ -135,12 +131,6 @@
     prop_names = 'k'
     prop_values = 26.0
   []
-  # [u]
-  #   type = ParsedMaterial
-  #   expression = diff^2
-  #   property_name = u
-  #   coupled_variables = diff
-  # []
 []
 
 [BCs]

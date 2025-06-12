@@ -142,6 +142,12 @@ NodalPatchRecoveryBase::initialize()
 {
   _Ae.clear();
   _be.clear();
+  _query_ids.clear();
+  // make sure to clear the cached coefficients
+  // so that the next time we call nodalPatchRecovery, we will recompute the coefficients to make
+  // sure _Ae and _be has already been different but we do not use the same coefficients for the
+  // same element
+  _cached_coef.clear();
 }
 
 void
