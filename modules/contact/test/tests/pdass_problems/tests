@@ -128,6 +128,7 @@
                   "approach allows for maintaining reasonable system condition numbers and selecting "
                   "the 'Bussetta' and 'Simple' adaptivity strategies for the normal and frictional "
                   "penalty values, respectively."
+    recover = false # Only doing one timestep
   []
   [cylinder_friction_penalty_al_frictional_action_amg_bussetta_simple]
     type = 'CSVDiff'
@@ -144,6 +145,7 @@
                   "the 'Bussetta' and 'FrictionLimit' adaptivity strategies for the normal and frictional "
                   "penalty values, respectively."
     capabilities = 'method!=dbg'
+    recover = false # Only doing one timestep
   []
   [cylinder_friction_penalty_al_separation]
     type = 'CSVDiff'
