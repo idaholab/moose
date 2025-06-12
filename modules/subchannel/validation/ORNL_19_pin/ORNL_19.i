@@ -72,10 +72,13 @@ P_out = 2.0e5 # Pa
   compute_power = true
   implicit = true
   segregated = false
+  P_tol = 1e-4
+  T_tol = 1e-4
   staggered_pressure = false
   monolithic_thermal = false
   verbose_multiapps = true
   verbose_subchannel = true
+  # interpolation_scheme = upwind
 []
 
 [ICs]
@@ -247,22 +250,22 @@ P_out = 2.0e5 # Pa
     variable = q_prime
   []
 []
-################################################################################
-# A multiapp that projects data to a detailed mesh
-################################################################################
+# ################################################################################
+# # A multiapp that projects data to a detailed mesh
+# ################################################################################
 
-[MultiApps]
-  [viz]
-    type = FullSolveMultiApp
-    input_files = "3d_ORNL_19.i"
-    execute_on = "timestep_end"
-  []
-[]
+# [MultiApps]
+#   [viz]
+#     type = FullSolveMultiApp
+#     input_files = "3d_ORNL_19.i"
+#     execute_on = "timestep_end"
+#   []
+# []
 
-[Transfers]
-  [xfer]
-    type = SCMSolutionTransfer
-    to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
-  []
-[]
+# [Transfers]
+#   [xfer]
+#     type = SCMSolutionTransfer
+#     to_multi_app = viz
+#     variable = 'mdot SumWij P DP h T rho mu q_prime S'
+#   []
+# []
