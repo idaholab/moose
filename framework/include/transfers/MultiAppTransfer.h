@@ -214,15 +214,12 @@ protected:
   }
 
   /**
-   * Error if executing this MooseObject in the source multiapp on EXEC_TRANSFER. We error because:
-   * - it should be enough to execute this object on TIMESTEP_END to have an updated value
-   * - EXEC_TRANSFER in the child app is behavior that is not identical when ran independently
+   * Error if executing this MooseObject on EXEC_TRANSFER in a source application (from_multiapp)
+   * Note that when the parent app is the source application, it is usually desired to use
+   * EXEC_TRANSFER for a MooseObject that provides the values to transfer.
    * @param object_name name of the object to check the execute_on flags for
-   * @param is_from_multiapp true if the object should be in the from_multiapp, false if in
-   * to_multiapp
    */
-  void errorIfObjectExecutesOnTransfer(const std::string & object_name,
-                                       const bool is_from_multiapp) const;
+  void errorIfObjectExecutesOnTransferInSourceApp(const std::string & object_name) const;
 
   /**
    * Get the target app point from a point in the reference frame

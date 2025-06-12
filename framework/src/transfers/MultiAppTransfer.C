@@ -658,15 +658,13 @@ MultiAppTransfer::getLocalSourceAppIndex(unsigned int i_from) const
 }
 
 void
-MultiAppTransfer::errorIfObjectExecutesOnTransfer(const std::string & object_name,
-                                                  const bool is_from_multiapp) const
+MultiAppTransfer::errorIfObjectExecutesOnTransferInSourceApp(const std::string & object_name) const
 {
-  if (is_from_multiapp && !hasFromMultiApp())
-    return;
-  if (!is_from_multiapp && !hasToMultiApp())
+  // parent app is the source app, EXEC_TRANSFER is fine
+  if (!hasFromMultiApp())
     return;
   // Get the app and problem
-  const auto & app = is_from_multiapp ? getFromMultiApp() : getToMultiApp();
+  const auto & app = getFromMultiApp();
   if (!app->hasApp())
     return;
   const auto & problem = app->appProblemBase(app->firstLocalApp());
@@ -675,14 +673,11 @@ MultiAppTransfer::errorIfObjectExecutesOnTransfer(const std::string & object_nam
   problem.theWarehouse()
       .query()
       .template condition<AttribName>(object_name)
+      .template condition<AttribExecOns>(EXEC_TRANSFER)
       .queryInto(objects_with_exec_on);
-  for (const auto obj_ptr : objects_with_exec_on)
-    if (obj_ptr->getExecuteOnEnum().contains(EXEC_TRANSFER))
-      mooseError("Object '" + object_name +
-                 "' should not be executed on EXEC_TRANSFER, because this transfer has "
-                 "indicated it does not support it." +
-                 (is_from_multiapp ? "\nExecuting this object on TIMESTEP_END should be sufficient."
-                                   : ""));
-  mooseAssert(objects_with_exec_on.size(),
-              "Should have found object " + object_name + " in the multiapp");
+  if (objects_with_exec_on.size())
+    mooseError("Object '" + object_name +
+               "' should not be executed on EXEC_TRANSFER, because this transfer has "
+               "indicated it does not support it.\nExecuting this object on TIMESTEP_END should be "
+               "sufficient to get updated values.");
 }

@@ -79,7 +79,7 @@ MultiAppGeneralFieldUserObjectTransfer::execute()
       break;
     }
     case FROM_MULTIAPP:
-      errorIfObjectExecutesOnTransfer(_user_object_name, /*object is in from_multiapp*/ true);
+      errorIfObjectExecutesOnTransferInSourceApp(_user_object_name);
   }
 
   // Perfom the actual transfer

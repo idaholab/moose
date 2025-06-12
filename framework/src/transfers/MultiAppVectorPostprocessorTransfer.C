@@ -81,7 +81,7 @@ MultiAppVectorPostprocessorTransfer::executeFromMultiapp()
   const VectorPostprocessorValue & vpp =
       getFromMultiApp()->problemBase().getVectorPostprocessorValueByName(_master_vpp_name,
                                                                          _vector_name);
-  errorIfObjectExecutesOnTransfer(_sub_pp_name, /*object is in from_multiapp*/ true);
+  errorIfObjectExecutesOnTransferInSourceApp(_sub_pp_name);
 
   if (vpp.size() != getFromMultiApp()->numGlobalApps())
     mooseError("VectorPostprocessor ",
