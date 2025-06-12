@@ -17,6 +17,10 @@ do
     help=1;
   fi
 
+  if [ "$i" == "--fast" ]; then
+    go_fast=1;
+  fi
+
   if [ "$i" == "--skip-submodule-update" ]; then
     skip_sub_update=1
   else # Remove everything else before passing to cmake
@@ -29,6 +33,7 @@ if [ -n "$help" ]; then
   echo "Usage: $0 [-h | --help | --fast | --skip-submodule-update | <mfem cmake options> ]"
   echo
   echo "-h | --help              Display this message and list of available libmesh options"
+  echo "--fast                   Run MFEM 'make' only, do NOT run CMake"
   echo "--skip-submodule-update  Do not update the MFEM submodule, use the current version"
   echo
   echo "Influential variables"
@@ -40,6 +45,12 @@ if [ -n "$help" ]; then
   echo "PETSC_DIR                Path to PETSc install; default: ../petsc"
   echo "HDF5_DIR                 Path to HDF5 install; default: \$PETSC_DIR/\$PETSC_ARCH"
   exit 0
+fi
+
+if [[ -n "$go_fast" && $# != 1 ]]; then
+  echo "Error: --fast can only be used by itself or with --skip-submodule-update."
+  echo "Try again, removing either --fast or all other conflicting arguments!"
+  exit 1;
 fi
 
 set -e
@@ -82,40 +93,46 @@ if [ -z "$skip_sub_update" ]; then
   git submodule update --init --checkout framework/contrib/mfem
 fi
 
-# Build and install mfem
-mkdir -p "$MFEM_BUILD_DIR"
+# If we're not going fast, remove the build directory and reconfigure
+if [ -z "$go_fast" ]; then
+  rm -rf ${MFEM_BUILD_DIR}
+  mkdir -p "$MFEM_BUILD_DIR"
+  cd "$MFEM_BUILD_DIR"
+
+  cmake .. \
+      -DCMAKE_POSITION_INDEPENDENT_CODE=YES \
+      -DMFEM_USE_OPENMP=NO \
+      -DMFEM_THREAD_SAFE=NO \
+      -DHYPRE_DIR="$PETSC_DIR/$PETSC_ARCH" \
+      -DMFEM_USE_MPI=YES \
+      -DMFEM_USE_METIS=YES \
+      -DMFEM_USE_METIS_5=YES \
+      -DMETIS_DIR="$PETSC_DIR/$PETSC_ARCH" \
+      -DParMETIS_DIR="$PETSC_DIR/$PETSC_ARCH" \
+      -DMFEM_USE_SUPERLU=YES \
+      -DSuperLUDist_DIR="$PETSC_DIR/$PETSC_ARCH" \
+      -DBUILD_SHARED_LIBS=ON \
+      -DHDF5_DIR="$HDF5_DIR" \
+      -DBLAS_DIR="$PETSC_DIR/$PETSC_ARCH" \
+      -DMFEM_ENABLE_EXAMPLES=yes \
+      -DMFEM_ENABLE_MINIAPPS=yes \
+      -DBLAS_LIBRARIES="$PETSC_DIR//$PETSC_ARCH/lib/libfblas.a" \
+      -DLAPACK_LIBRARIES="$PETSC_DIR//$PETSC_ARCH/lib/libflapack.a" \
+      -DBLAS_INCLUDE_DIRS="$PETSC_DIR//$PETSC_ARCH/include" \
+      -DLAPACK_INCLUDE_DIRS="$PETSC_DIR//$PETSC_ARCH/include" \
+      -DCMAKE_INSTALL_PREFIX="$MFEM_DIR" \
+      -DMFEM_USE_PETSC=YES \
+      -DPETSC_DIR="$PETSC_DIR" \
+      -DPETSC_ARCH="$PETSC_ARCH" \
+      -DCMAKE_C_COMPILER=mpicc \
+      -DMFEM_USE_NETCDF=YES \
+      -DNETCDF_DIR="$LIBMESH_DIR" \
+      -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+      -DMFEM_USE_CONDUIT=YES \
+      -DCONDUIT_DIR="$CONDUIT_DIR" \
+      "$@"
+fi
+
 cd "$MFEM_BUILD_DIR"
-cmake .. \
-    -DCMAKE_POSITION_INDEPENDENT_CODE=YES \
-    -DMFEM_USE_OPENMP=NO \
-    -DMFEM_THREAD_SAFE=NO \
-    -DHYPRE_DIR="$PETSC_DIR/$PETSC_ARCH" \
-    -DMFEM_USE_MPI=YES \
-    -DMFEM_USE_METIS=YES \
-    -DMFEM_USE_METIS_5=YES \
-    -DMETIS_DIR="$PETSC_DIR/$PETSC_ARCH" \
-    -DParMETIS_DIR="$PETSC_DIR/$PETSC_ARCH" \
-    -DMFEM_USE_SUPERLU=YES \
-    -DSuperLUDist_DIR="$PETSC_DIR/$PETSC_ARCH" \
-    -DBUILD_SHARED_LIBS=ON \
-    -DHDF5_DIR="$HDF5_DIR" \
-    -DBLAS_DIR="$PETSC_DIR/$PETSC_ARCH" \
-    -DMFEM_ENABLE_EXAMPLES=yes \
-    -DMFEM_ENABLE_MINIAPPS=yes \
-    -DBLAS_LIBRARIES="$PETSC_DIR//$PETSC_ARCH/lib/libfblas.a" \
-    -DLAPACK_LIBRARIES="$PETSC_DIR//$PETSC_ARCH/lib/libflapack.a" \
-    -DBLAS_INCLUDE_DIRS="$PETSC_DIR//$PETSC_ARCH/include" \
-    -DLAPACK_INCLUDE_DIRS="$PETSC_DIR//$PETSC_ARCH/include" \
-    -DCMAKE_INSTALL_PREFIX="$MFEM_DIR" \
-    -DMFEM_USE_PETSC=YES \
-    -DPETSC_DIR="$PETSC_DIR" \
-    -DPETSC_ARCH="$PETSC_ARCH" \
-    -DCMAKE_C_COMPILER=mpicc \
-    -DMFEM_USE_NETCDF=YES \
-    -DNETCDF_DIR="$LIBMESH_DIR" \
-    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-    -DMFEM_USE_CONDUIT=YES \
-    -DCONDUIT_DIR="$CONDUIT_DIR" \
-    "$@"
 make -j ${MOOSE_JOBS:-4}
 make -j ${MOOSE_JOBS:-4} install
