@@ -72,7 +72,7 @@
 
 [BCs]
   [tangential_E_bdr]
-    type = MFEMVectorFunctorTangentialDirichletBC
+    type = MFEMVectorTangentialDirichletBC
     variable = e_field
     vector_coefficient = exact_e_field
   []

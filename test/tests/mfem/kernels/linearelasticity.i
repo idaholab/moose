@@ -29,13 +29,13 @@
 
 [BCs]
   [dirichlet]
-    type = MFEMVectorFunctorDirichletBC
+    type = MFEMVectorDirichletBC
     variable = displacement
     boundary = '1'
     vector_coefficient = '0.0 0.0 0.0'
   []
   [pull_down]
-    type = MFEMVectorFunctorBoundaryIntegratedBC
+    type = MFEMVectorBoundaryIntegratedBC
     variable = displacement
     boundary = '2'
     vector_coefficient = '0.0 0.0 -0.01'

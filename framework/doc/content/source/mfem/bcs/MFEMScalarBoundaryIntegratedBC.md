@@ -1,10 +1,10 @@
-# MFEMScalarFunctorBoundaryIntegratedBC
+# MFEMScalarBoundaryIntegratedBC
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /BCs/MFEMScalarFunctorBoundaryIntegratedBC
+!syntax description /BCs/MFEMScalarBoundaryIntegratedBC
 
 ## Overview
 
@@ -16,11 +16,11 @@ Adds the boundary integrator for integrating the linear form
 where the test variable $v \in H^1$ and $f$ is a scalar coefficient. Often used for representing
 Neumann-type boundary conditions.
 
-!syntax parameters /BCs/MFEMScalarFunctorBoundaryIntegratedBC
+!syntax parameters /BCs/MFEMScalarBoundaryIntegratedBC
 
-!syntax inputs /BCs/MFEMScalarFunctorBoundaryIntegratedBC
+!syntax inputs /BCs/MFEMScalarBoundaryIntegratedBC
 
-!syntax children /BCs/MFEMScalarFunctorBoundaryIntegratedBC
+!syntax children /BCs/MFEMScalarBoundaryIntegratedBC
 
 !if-end!
 
