@@ -61,7 +61,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
       break;
     }
     case FROM_MULTIAPP:
-      errorIfObjectExecutesOnTransfer(_from_pp_name, /*object is in from_multiapp*/ true);
+      errorIfObjectExecutesOnTransferInSourceApp(_from_pp_name);
   }
 
   // Perform action based on the transfer direction

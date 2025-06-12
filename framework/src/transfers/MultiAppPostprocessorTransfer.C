@@ -76,7 +76,7 @@ MultiAppPostprocessorTransfer::execute()
     }
     case FROM_MULTIAPP:
     case BETWEEN_MULTIAPP:
-      errorIfObjectExecutesOnTransfer(_from_pp_name, /*object is in from_multiapp*/ true);
+      errorIfObjectExecutesOnTransferInSourceApp(_from_pp_name);
   }
 
   switch (_current_direction)

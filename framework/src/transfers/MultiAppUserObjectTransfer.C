@@ -128,7 +128,7 @@ MultiAppUserObjectTransfer::execute()
       break;
     }
     case FROM_MULTIAPP:
-      errorIfObjectExecutesOnTransfer(_user_object_name, true);
+      errorIfObjectExecutesOnTransferInSourceApp(_user_object_name);
   }
 
   switch (_current_direction)
