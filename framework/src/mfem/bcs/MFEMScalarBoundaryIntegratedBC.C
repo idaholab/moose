@@ -9,12 +9,12 @@
 
 #ifdef MFEM_ENABLED
 
-#include "MFEMScalarFunctorBoundaryIntegratedBC.h"
+#include "MFEMScalarBoundaryIntegratedBC.h"
 
-registerMooseObject("MooseApp", MFEMScalarFunctorBoundaryIntegratedBC);
+registerMooseObject("MooseApp", MFEMScalarBoundaryIntegratedBC);
 
 InputParameters
-MFEMScalarFunctorBoundaryIntegratedBC::validParams()
+MFEMScalarBoundaryIntegratedBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
   params.addClassDescription("Adds the boundary integrator to an MFEM problem for the linear form "
@@ -28,7 +28,7 @@ MFEMScalarFunctorBoundaryIntegratedBC::validParams()
   return params;
 }
 
-MFEMScalarFunctorBoundaryIntegratedBC::MFEMScalarFunctorBoundaryIntegratedBC(
+MFEMScalarBoundaryIntegratedBC::MFEMScalarBoundaryIntegratedBC(
     const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
     _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
@@ -39,14 +39,14 @@ MFEMScalarFunctorBoundaryIntegratedBC::MFEMScalarFunctorBoundaryIntegratedBC(
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
 mfem::LinearFormIntegrator *
-MFEMScalarFunctorBoundaryIntegratedBC::createLFIntegrator()
+MFEMScalarBoundaryIntegratedBC::createLFIntegrator()
 {
   return new mfem::BoundaryLFIntegrator(_coef);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
 mfem::BilinearFormIntegrator *
-MFEMScalarFunctorBoundaryIntegratedBC::createBFIntegrator()
+MFEMScalarBoundaryIntegratedBC::createBFIntegrator()
 {
   return nullptr;
 }
