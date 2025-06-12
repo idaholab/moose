@@ -4,8 +4,7 @@
 
 registerMooseObject("MooseApp", MFEMVectorTangentialDirichletBC);
 
-MFEMVectorTangentialDirichletBC::MFEMVectorTangentialDirichletBC(
-    const InputParameters & parameters)
+MFEMVectorTangentialDirichletBC::MFEMVectorTangentialDirichletBC(const InputParameters & parameters)
   : MFEMVectorDirichletBCBase(parameters)
 {
 }
