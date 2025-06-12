@@ -13,15 +13,15 @@
 
 #include "MFEMEssentialBC.h"
 
-class MFEMVectorFunctorDirichletBCBase : public MFEMEssentialBC
+class MFEMVectorDirichletBCBase : public MFEMEssentialBC
 {
 public:
   static InputParameters validParams();
 
-  ~MFEMVectorFunctorDirichletBCBase() override = default;
+  ~MFEMVectorDirichletBCBase() override = default;
 
 protected:
-  MFEMVectorFunctorDirichletBCBase(const InputParameters & parameters);
+  MFEMVectorDirichletBCBase(const InputParameters & parameters);
   const MFEMVectorCoefficientName & _vec_coef_name;
   mfem::VectorCoefficient & _vec_coef;
 };

@@ -10,15 +10,20 @@
 #ifdef MFEM_ENABLED
 
 #pragma once
-#include "MFEMVectorFunctorDirichletBCBase.h"
+#include "MFEMEssentialBC.h"
 
-class MFEMVectorFunctorDirichletBC : public MFEMVectorFunctorDirichletBCBase
+class MFEMScalarDirichletBC : public MFEMEssentialBC
 {
-
 public:
-  MFEMVectorFunctorDirichletBC(const InputParameters & parameters);
-  ~MFEMVectorFunctorDirichletBC() override = default;
+  static InputParameters validParams();
+
+  MFEMScalarDirichletBC(const InputParameters & parameters);
+
   void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh) override;
+
+protected:
+  const MFEMScalarCoefficientName & _coef_name;
+  mfem::Coefficient & _coef;
 };
 
 #endif
