@@ -74,7 +74,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
         momentum_wall_functors = '${lid_velocity} 0; 0 0; 0 0; 0 0'
 
         pin_pressure = true
-        pinned_pressure_type = point-value-uo
+        pinned_pressure_type = point-value
         pinned_pressure_value = 0
         pinned_pressure_point = '0.01 0.099 0.0'
 
