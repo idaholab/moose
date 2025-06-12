@@ -3105,6 +3105,14 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
 }
 
 void
+FEProblemBase::addElementalFieldVariable(const std::string & var_type,
+                                         const std::string & var_name,
+                                         InputParameters & params)
+{
+  addAuxVariable(var_type, var_name, params);
+}
+
+void
 FEProblemBase::addAuxVariable(const std::string & var_name,
                               const FEType & type,
                               const std::set<SubdomainID> * const active_subdomains)
