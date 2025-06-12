@@ -37,6 +37,7 @@
     abs_zero = 4e-7
     # because output has execute_on = 'initial final'
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to impose a heat source from the component, computed "
                   "from the component power and shape shape, onto a plate heat structure component "
                   "and prove conservation of energy."
@@ -54,6 +55,7 @@
     abs_zero = 1e-7
     # because output has execute_on = 'initial final'
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to impose a heat source from the component, computed "
                   "from the component power and shape shape, onto a cylindrical heat structure "
                   "component and prove conservation of energy."
@@ -65,6 +67,7 @@
     abs_zero = 1e-7
     # because output has execute_on = 'final'
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to apply a heat source, computed from the component "
                   "power norm and shape, onto a component whose mesh is loaded from a mesh file."
   []
