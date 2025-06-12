@@ -6,6 +6,7 @@
     type = 'CSVDiff'
     input = 'phy.q_wall_multiple_3eqn.i'
     csvdiff = 'phy.q_wall_multiple_3eqn_out.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall allow application of multiple heat fluxes to a single-phase flow channel."
   []
 
@@ -24,6 +25,7 @@
     cli_args = "
       Components/pipe/name_multiple_ht_by_index=false
       Postprocessors/q_wall_name_check/mat_prop=q_wall:ht2"
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall allow heat transfer names to be named with the heat transfer object as a suffix when there are multiple heat fluxes applied to a single-phase flow channel."
   []
 []
