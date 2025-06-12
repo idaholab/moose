@@ -43,6 +43,7 @@
     input = 'phy.T_wall_transfer_3eqn_z.i'
     exodiff = 'phy.T_wall_transfer_3eqn_z_out.e'
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
 
     requirement = "The system shall be able to couple a flow channel and heat structure aligned with the z-axis."
     issues = '#19754'
