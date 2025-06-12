@@ -47,13 +47,13 @@
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = '1'
-    value = 1.0
+    coefficient = 1.0
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = '2'
-    value = 0.0
+    coefficient = 0.0
   []
 []
 
