@@ -24,4 +24,19 @@
     issues = '#15992'
     requirement = "The system shall not create scalar variables from global variables that have a name that matches a field variables's name when importing a solution from an exodus file"
   []
+
+  [write_exodus_second_order]
+    type = RunApp
+    input = "write_exodus_second_order.i"
+    issues = "#30729"
+    requirement = "The system shall be capable of writing out a second-order mesh containing second-order variables that will be read in for a subsquent analysis."
+  []
+  [read_exodus_second_order]
+    type = Exodiff
+    input = "read_exodus_second_order.i"
+    exodiff = "read_exodus_second_order_out.e"
+    prereq = "write_exodus_second_order"
+    issues = "#30729"
+    requirement = "The system shall be capable of reading second-order variable data from a previous solution."
+  []
 []

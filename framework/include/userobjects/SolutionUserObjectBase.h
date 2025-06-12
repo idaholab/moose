@@ -470,6 +470,12 @@ protected:
   /// Time index 2, used for interpolation
   int _exodus_index2;
 
+  /// Nodal variable order, used when reading in solution data
+  const MooseEnum _nodal_variable_order;
+
+  /// Elemental variable order, used when reading in solution data
+  const MooseEnum _elemental_variable_order;
+
   /// Scale parameter
   std::vector<Real> _scale;
 

@@ -61,6 +61,14 @@ SolutionUserObjectBase::validParams()
                                "the last timestep (exodusII only).  If not supplied, "
                                "time interpolation will occur.");
 
+  // Choose the interpolation order for incoming variables
+  params.addParam<MooseEnum>("nodal_variable_order",
+                             MooseEnum("FIRST SECOND", "FIRST"),
+                             "Specifies the order of the nodal solution data.");
+  params.addParam<MooseEnum>("elemental_variable_order",
+                             MooseEnum("CONSTANT FIRST SECOND", "CONSTANT"),
+                             "Specifies the order of the elemental solution data.");
+
   // Add ability to perform coordinate transformation: scale, factor
   params.addParam<std::vector<Real>>(
       "scale", std::vector<Real>(LIBMESH_DIM, 1), "Scale factor for points in the simulation");
@@ -124,6 +132,8 @@ SolutionUserObjectBase::SolutionUserObjectBase(const InputParameters & parameter
     _exodus_times(nullptr),
     _exodus_index1(-1),
     _exodus_index2(-1),
+    _nodal_variable_order(getParam<MooseEnum>("nodal_variable_order")),
+    _elemental_variable_order(getParam<MooseEnum>("elemental_variable_order")),
     _scale(getParam<std::vector<Real>>("scale")),
     _scale_multiplier(getParam<std::vector<Real>>("scale_multiplier")),
     _translation(getParam<std::vector<Real>>("translation")),
@@ -164,6 +174,10 @@ SolutionUserObjectBase::SolutionUserObjectBase(const InputParameters & parameter
   if (isParamValid("timestep") && getParam<std::string>("timestep") == "-1")
     mooseError("A \"timestep\" of -1 is no longer supported for interpolation. Instead simply "
                "remove this parameter altogether for interpolation");
+  
+  // check for possible inconsistencies between mesh and input data
+  if (_fe_problem.mesh().hasSecondOrderElements())
+    mooseInfo("The mesh has second-order elements, be sure to set 'nodal_variable_order' or 'elemental_variable_order' if needed.");
 }
 
 void
@@ -309,10 +323,10 @@ SolutionUserObjectBase::readExodusII()
 
   // Add the variables to the system
   for (const auto & var_name : _nodal_variables)
-    _system->add_variable(var_name, FIRST);
+    _system->add_variable(var_name, Utility::string_to_enum<Order>(_nodal_variable_order));
 
   for (const auto & var_name : _elemental_variables)
-    _system->add_variable(var_name, CONSTANT, MONOMIAL);
+    _system->add_variable(var_name, Utility::string_to_enum<Order>(_elemental_variable_order), MONOMIAL);
 
   for (const auto & var_name : _scalar_variables)
     _system->add_variable(var_name, FIRST, SCALAR);
@@ -330,10 +344,10 @@ SolutionUserObjectBase::readExodusII()
 
     // Add the variables to the system
     for (const auto & var_name : _nodal_variables)
-      _system2->add_variable(var_name, FIRST);
+      _system2->add_variable(var_name, Utility::string_to_enum<Order>(_nodal_variable_order));
 
     for (const auto & var_name : _elemental_variables)
-      _system2->add_variable(var_name, CONSTANT, MONOMIAL);
+      _system2->add_variable(var_name, Utility::string_to_enum<Order>(_elemental_variable_order), MONOMIAL);
 
     for (const auto & var_name : _scalar_variables)
       _system2->add_variable(var_name, FIRST, SCALAR);
