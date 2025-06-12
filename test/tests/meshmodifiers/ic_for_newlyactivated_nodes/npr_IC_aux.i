@@ -82,6 +82,8 @@
     block = '1 2'
   []
   [u_recovered]
+    family = MONOMIAL
+    order = CONSTANT
   []
 []
 

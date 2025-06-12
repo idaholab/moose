@@ -129,9 +129,9 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
     _ic_vars_names(getParam<std::vector<VariableName>>("ic_variables")),
     _nearby_element_threshold(getParam<int>("nearby_element_threshold")),
     _leaf_max_size(getParam<int>("kd_tree_leaf_max_size")),
-    _radius_search_threshold(getParam<double>("radius_search_threshold"))
+    _radius_search_threshold(getParam<double>("radius_search_threshold")),
+    _number_of_nl_variables(_nl_sys.nVariables())
 {
-
   // Check if the variables to set IC exist in the system
   for (auto var_name : _ic_vars_names)
     if (!_nl_sys.hasVariable(var_name) && !_aux_sys.hasVariable(var_name))
@@ -139,8 +139,6 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
 
   for (const auto & i : index_range(_npr_names))
     _npr_vec[i] = &getUserObjectByName<NodalPatchRecoveryBase>(_npr_names[i]);
-
-  const int number_of_nl_variables = _nl_sys.nVariables();
 
   // Ensure that the size of _ic_strategy is either 1 or matches the number of variables to
   // initialize
@@ -211,7 +209,7 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
                    "specified. "
                    "This will apply the same strategy to all variables in the non-linear system "
                    "based on your first value in ic_strategy.");
-    _ic_strategy.resize(number_of_nl_variables, ic_strategy_in[0].getEnum<ICStrategy>());
+    _ic_strategy.resize(_number_of_nl_variables, ic_strategy_in[0].getEnum<ICStrategy>());
     _ic_vars_names = _nl_sys.getVariableNames();
   }
   else if (!_ic_vars_names.empty() && ic_strategy_in.size() == 1)
@@ -240,7 +238,10 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
     // Get the variable number
     const auto var_num = var.number();
 
-    _ic_vars_number[i] = var_num;
+    // If the variable is not in the nonlinear system, we need to add the number of nonlinear
+    // variables to the variable number to ensure it is unique across all variables
+    _ic_vars_number[i] =
+        (_nl_sys.hasVariable(var_name)) ? var_num : var_num + _number_of_nl_variables;
   }
 
   if (!_unsolved_blocks.empty())
@@ -263,7 +264,9 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
   {
     // Count how many variables use NPR strategy
     unsigned int npr_count = 0;
+
     for (auto i : index_range(_ic_vars_names))
+    {
       if (_ic_strategy[i] == ICStrategy::IC_POLYNOMIAL ||
           _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
           _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_THRESHOLD)
@@ -271,6 +274,7 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
         _var_number2_npr_idx[_ic_vars_number[i]] = npr_count;
         npr_count++;
       }
+    }
 
     // Check size of npr_vec is equal to npr_count
     if (_npr_vec.size() != npr_count)
@@ -859,7 +863,6 @@ ElementSubdomainModifierBase::nodeIsNewlyActivated(dof_id_type node_id) const
 void
 ElementSubdomainModifierBase::applyIC(bool displaced)
 {
-
   // Set of variable numbers that are not part of the extrapolated initial conditions
   std::set<unsigned int> ic_target_vars_number_except_ic_vars;
 
@@ -896,10 +899,33 @@ ElementSubdomainModifierBase::applyIC(bool displaced)
              _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
              _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_THRESHOLD)
     {
-      if (_nl_sys.hasVariable(_ic_vars_names[i]))
-        applyIC_Polynomial(_fe_problem.getNonlinearSystemBase(_sys.number()), _ic_vars_number[i]);
+      const auto & var = _nl_sys.hasVariable(_ic_vars_names[i])
+                             ? _nl_sys.getVariable(_tid, _ic_vars_names[i])
+                             : _aux_sys.getVariable(_tid, _ic_vars_names[i]);
+      const FEType type = var.feType();
+
+      bool isElemental;
+
+      // Note: Both auxiliary and nonlinear variables can be nodal or elemental variables,
+      // depending on the chosen FEType (e.g., LAGRANGE = nodal, MONOMIAL = elemental).
+      if (type.family == MONOMIAL)
+        isElemental = true;
+      else if (type.family == LAGRANGE)
+        isElemental = false;
       else
-        applyIC_Polynomial(_fe_problem.getAuxiliarySystem(), _ic_vars_number[i]);
+        mooseError("Unsupported FEType for extrapolated initial condition: family = " +
+                   Utility::enum_to_string(type.family));
+
+      if (_nl_sys.hasVariable(_ic_vars_names[i]))
+        applyIC_Polynomial(_fe_problem.getNonlinearSystemBase(_sys.number()),
+                           _ic_vars_number[i],
+                           _ic_vars_number[i],
+                           isElemental);
+      else
+        applyIC_Polynomial(_fe_problem.getAuxiliarySystem(),
+                           _ic_vars_number[i],
+                           _ic_vars_number[i] - _number_of_nl_variables /*subtract back*/,
+                           isElemental);
     }
     else
       mooseError("Unknown initial condition strategy");
@@ -1226,48 +1252,53 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
 }
 
 void
-ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys, const unsigned int var_num)
+ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys,
+                                                 const unsigned int var_num_in_npr,
+                                                 const unsigned int var_num_for_nl_or_aux,
+                                                 const bool is_elemental)
 {
   // Pass: setting IC for newly activated nodes
-
   NumericVector<Number> & vec = sys.solution();
   DofMap & dof_map = sys.dofMap();
 
-  for (const auto & new_id : _newactivated_nodes)
-  {
-    const Node * node = _mesh.nodePtr(new_id);
-    const Point & x = *node;
+  if (is_elemental)
+    for (const auto & elem_id : _global_reinitialized_elems)
+    {
+      const Elem * elem = _mesh.elemPtr(elem_id);
+      if (!elem)
+        continue;
 
-    // Get the DOF index for this variable at this node
-    std::vector<dof_id_type> dofs_on_newly_activated_node;
-    dof_map.dof_indices(node, dofs_on_newly_activated_node, var_num);
+      // Get the DOF indices for this variable at this element
+      std::vector<dof_id_type> dofs_on_reinitialized_elem;
+      dof_map.dof_indices(elem, dofs_on_reinitialized_elem, var_num_for_nl_or_aux);
 
-    // Recover value using polynomial patch recovery
-    const Real recovered_val = _npr_vec[_var_number2_npr_idx[var_num]]->nodalPatchRecovery(
-        x, _solved_elem_ids_for_npr /*has already sorted*/);
+      // Recover value using polynomial patch recovery
+      const Point & centroid = elem->vertex_average();
+      const Real recovered_val = _npr_vec[_var_number2_npr_idx[var_num_in_npr]]->nodalPatchRecovery(
+          centroid, _solved_elem_ids_for_npr /*has already sorted*/);
 
-    // Assign recovered value to the DOF
-    vec.set(dofs_on_newly_activated_node[0], recovered_val);
-  }
+      // Assign recovered value to the DOF
+      if (!dofs_on_reinitialized_elem.empty())
+        vec.set(dofs_on_reinitialized_elem[0], recovered_val);
+    }
+  else
+    for (const auto & new_id : _newactivated_nodes)
+    {
+      const Node * node = _mesh.nodePtr(new_id);
+      const Point & x = *node;
 
-  for (const auto & elem_id : _global_reinitialized_elems)
-  {
-    const Elem * elem = _mesh.elemPtr(elem_id);
-    if (!elem)
-      continue;
+      // Get the DOF index for this variable at this node
+      std::vector<dof_id_type> dofs_on_newly_activated_node;
+      dof_map.dof_indices(node, dofs_on_newly_activated_node, var_num_for_nl_or_aux);
 
-    // Get the DOF indices for this variable at this element
-    std::vector<dof_id_type> dofs_on_reinitialized_elem;
-    dof_map.dof_indices(elem, dofs_on_reinitialized_elem, var_num);
+      // Recover value using polynomial patch recovery
+      const Real recovered_val = _npr_vec[_var_number2_npr_idx[var_num_in_npr]]->nodalPatchRecovery(
+          x, _solved_elem_ids_for_npr /*has already sorted*/);
 
-    // Recover value using polynomial patch recovery
-    const Point & centroid = elem->vertex_average();
-    const Real recovered_val = _npr_vec[_var_number2_npr_idx[var_num]]->nodalPatchRecovery(
-        centroid, _solved_elem_ids_for_npr /*has already sorted*/);
-
-    // Assign recovered value to the DOF
-    vec.set(dofs_on_reinitialized_elem[0], recovered_val);
-  }
+      // Assign recovered value to the DOF
+      if (!dofs_on_newly_activated_node.empty())
+        vec.set(dofs_on_newly_activated_node[0], recovered_val);
+    }
 
   vec.close();
 }
