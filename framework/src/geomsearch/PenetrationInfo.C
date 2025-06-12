@@ -222,7 +222,7 @@ dataLoad(std::istream & stream, PenetrationInfo *& pinfo, void * context)
     loadHelper(stream, pinfo->_elem, context);
     loadHelper(stream, pinfo->_side_num, context);
     // Rebuild the side element.
-    pinfo->_side = pinfo->_elem->build_side_ptr(pinfo->_side_num, false).release();
+    pinfo->_side = pinfo->_elem->build_side_ptr(pinfo->_side_num).release();
 
     loadHelper(stream, pinfo->_normal, context);
     loadHelper(stream, pinfo->_distance, context);

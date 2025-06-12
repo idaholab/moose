@@ -764,7 +764,7 @@ MooseMesh::buildLowerDMesh()
 
       if (build_side)
       {
-        std::unique_ptr<Elem> side_elem(elem->build_side_ptr(side, false));
+        std::unique_ptr<Elem> side_elem(elem->build_side_ptr(side));
 
         // The side will be added with the same processor id as the parent.
         side_elem->processor_id() = elem->processor_id();
