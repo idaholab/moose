@@ -21,6 +21,7 @@
     abs_zero = 1e-9
     # because output has execute_on = 'final'
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to apply a heat source, computed from a power density, "
                   "onto a component whose mesh is loaded from a mesh file."
   []
