@@ -12,43 +12,7 @@
 
 ## Installing `MFEM-MOOSE`
 
-To enable `MFEM-MOOSE` capabilities, it is necessary to install all of its dependencies, including `MFEM` itself and `Conduit`. You may do so by performing the following steps:
-
-1. After cloning the `MOOSE` repository, navigate to the root directory and run the following commands:
-
-```bash
-export METHOD=opt
-export MOOSE_JOBS=10
-
-./scripts/update_and_rebuild_petsc.sh
-./scripts/update_and_rebuild_libmesh.sh
-./scripts/update_and_rebuild_conduit.sh
-./scripts/update_and_rebuild_mfem.sh
-./scripts/update_and_rebuild_wasp.sh
-```
-
-It may be necessary to include your desired configuration flags (for instance `--with-mpi`) to each script invocation. Alternatively, if you already have working `MFEM` or `Conduit` builds in a separate directory, you may set the variables `MFEM_DIR` and `CONDUIT_DIR` to their respective install paths.
-
-2. Configure the `MOOSE` build by running
-
-```bash
-./configure --with-mfem
-```
-
-Again, you may wish to include other configuration flags.
-
-3. Finally, build the framework, module, and tests by running
-
-```bash
-export MOOSE_JOBS=10
-
-cd framework
-make -j $MOOSE_JOBS
-cd ../modules
-make -j $MOOSE_JOBS
-cd ../test
-make -j $MOOSE_JOBS
-```
+Installation instructions for `MFEM-MOOSE` can be found in [this page](/modules/doc/content/getting_started/installation/install_mfem.md).
 
 ## Solving a problem with `MFEM-MOOSE`
 
