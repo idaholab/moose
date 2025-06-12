@@ -32,13 +32,13 @@
 
 [BCs]
   [bottom]
-    type = MFEMScalarFunctorDirichletBC
+    type = MFEMScalarDirichletBC
     variable = scalar_var
     boundary = '1'
     coefficient = 1.0
   []
   [low_terminal]
-    type = MFEMScalarFunctorDirichletBC
+    type = MFEMScalarDirichletBC
     variable = scalar_var
     boundary = '2'
     coefficient = 0.0

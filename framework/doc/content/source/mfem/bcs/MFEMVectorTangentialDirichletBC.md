@@ -1,10 +1,10 @@
-# MFEMVectorFunctorTangentialDirichletBC
+# MFEMVectorTangentialDirichletBC
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /BCs/MFEMVectorFunctorTangentialDirichletBC
+!syntax description /BCs/MFEMVectorTangentialDirichletBC
 
 ## Overview
 
@@ -16,11 +16,11 @@ a coefficient that may vary in space and/or time.
 
 !listing test/tests/mfem/kernels/curlcurl.i block=BCs
 
-!syntax parameters /BCs/MFEMVectorFunctorTangentialDirichletBC
+!syntax parameters /BCs/MFEMVectorTangentialDirichletBC
 
-!syntax inputs /BCs/MFEMVectorFunctorTangentialDirichletBC
+!syntax inputs /BCs/MFEMVectorTangentialDirichletBC
 
-!syntax children /BCs/MFEMVectorFunctorTangentialDirichletBC
+!syntax children /BCs/MFEMVectorTangentialDirichletBC
 
 !if-end!
 
