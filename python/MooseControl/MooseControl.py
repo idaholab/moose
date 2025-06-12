@@ -36,7 +36,8 @@ class MooseControl:
                  moose_command: list[str] = None,
                  moose_port: int = None,
                  moose_control_name: str = None,
-                 inherit_environment: bool = True):
+                 inherit_environment: bool = True,
+                 poll_time: float = 0.1):
         """Constructor
 
         If "moose_port" is specified without "moose_command": Connect to the webserver at
@@ -57,6 +58,7 @@ class MooseControl:
             moose_port (int): The webserver port to connect to
             moose_control_name (str): The name of the input control object
             inherit_environment (bool): Whether or not the MOOSE command will inherit the current shell environment
+            poll_time (float): Time between successive message polls in seconds
         """
         # Setup a basic logger
         logging.basicConfig(level=logging.INFO,
@@ -86,7 +88,7 @@ class MooseControl:
         self._moose_reader = None
 
         # How often we want to poll MOOSE for its availability
-        self._poll_time = 0.1
+        self._poll_time = poll_time
 
         # Whether or not we called initialize()
         self._initialized = False
