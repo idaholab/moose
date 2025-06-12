@@ -9,12 +9,12 @@
 
 #ifdef MFEM_ENABLED
 
-#include "MFEMScalarFunctorDirichletBC.h"
+#include "MFEMScalarDirichletBC.h"
 
-registerMooseObject("MooseApp", MFEMScalarFunctorDirichletBC);
+registerMooseObject("MooseApp", MFEMScalarDirichletBC);
 
 InputParameters
-MFEMScalarFunctorDirichletBC::validParams()
+MFEMScalarDirichletBC::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
   params.addClassDescription("Applies a Dirichlet condition to a scalar variable.");
@@ -26,7 +26,7 @@ MFEMScalarFunctorDirichletBC::validParams()
   return params;
 }
 
-MFEMScalarFunctorDirichletBC::MFEMScalarFunctorDirichletBC(const InputParameters & parameters)
+MFEMScalarDirichletBC::MFEMScalarDirichletBC(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
     _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
     _coef(getScalarCoefficient(_coef_name))
@@ -34,7 +34,7 @@ MFEMScalarFunctorDirichletBC::MFEMScalarFunctorDirichletBC(const InputParameters
 }
 
 void
-MFEMScalarFunctorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
+MFEMScalarDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 {
   gridfunc.ProjectBdrCoefficient(_coef, getBoundaries());
 }
