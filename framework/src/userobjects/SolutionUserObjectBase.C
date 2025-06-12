@@ -29,6 +29,7 @@
 #include "libmesh/exodusII_io.h"
 #include "libmesh/exodusII_io_helper.h"
 #include "libmesh/enum_xdr_mode.h"
+#include "libmesh/string_to_enum.h"
 
 InputParameters
 SolutionUserObjectBase::validParams()
