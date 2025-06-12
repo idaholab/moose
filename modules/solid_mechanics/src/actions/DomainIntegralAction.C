@@ -133,13 +133,6 @@ DomainIntegralAction::validParams()
   params.addParam<bool>("use_automatic_differentiation",
                         false,
                         "Flag to use automatic differentiation (AD) objects when possible");
-  params.addParam<bool>(
-      "used_by_xfem_to_grow_crack",
-      false,
-      "Flag to trigger domainIntregal vector postprocessors to be executed on nonlinear.  This "
-      "updates the values in the vector postprocessor which will allow the crack to grow in XFEM "
-      "cutter objects that use the domainIntegral vector postprocssor values as a growth "
-      "criterion.");
   params.addParam<bool>("output_vpp",
                         true,
                         "Flag to control the vector postprocessor outputs. Select false to "
