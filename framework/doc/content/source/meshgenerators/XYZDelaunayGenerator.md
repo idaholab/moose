@@ -44,6 +44,9 @@ with the output mesh without modifications.
 [!param](/Mesh/XYZDelaunayGenerator/convert_holes_for_stitching) needs to
 be set as `true` to allow the stitching of such hole meshes after modifications.
 
+!alert note
+In distributed mesh mode, the [!param](/Mesh/XYZDelaunayGenerator/boundary) input mesh is temporarily serialized when it is set to be stitched with at least one of the [!param](/Mesh/XYZDelaunayGenerator/holes) input meshes. Additionally, the [!param](/Mesh/XYZDelaunayGenerator/holes) input meshes are always temporarily serialized to ensure compatibility with required processing methods.
+
 Interior vertices can be adjusted after mesh generation using the
 [!param](/Mesh/XYZDelaunayGenerator/smooth_triangulation) parameter,
 to produce a more "smooth" mesh, but currently the only mesh smoother
