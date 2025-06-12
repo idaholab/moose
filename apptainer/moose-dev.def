@@ -232,15 +232,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
             -DBUILD_SHARED_LIBS:BOOL=ON \
             -DCMAKE_BUILD_TYPE:STRING=Release \
             -DCMAKE_INSTALL_PREFIX:PATH={{ LIBTORCH_DIR }} \
-            # Python libraries needed by neml2
             -DBUILD_PYTHON:BOOL=ON \
-            # BLAS and LAPACK needed by neml2
             -DUSE_BLAS:BOOL=ON \
             -DBLAS:STRING=OpenBLAS \
             -DUSE_LAPACK:BOOL=ON \
-            # Could possibly enable in the future
             -DUSE_MPI:BOOL=OFF \
-            # Compiler specific flags (if any)
             "${BUILD_PYTORCH_FLAGS[@]}" \
             ${PYTORCH_DIR} 2>&1 | tee ${LIBTORCH_DIR}/logs/cmake.log
         cmake --build . --target install -- -j ${MOOSE_JOBS} 2>&1 | tee ${LIBTORCH_DIR}/logs/build.log
