@@ -175,7 +175,7 @@ AddVariableAction::act()
 
 void
 AddVariableAction::createInitialConditionAction(const std::string var_name,
-                                                const std::vector<Real> value)
+                                                const std::vector<Real> & value)
 {
   // Create the object name
   std::string long_name("");
