@@ -212,21 +212,34 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.11
         source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
         pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
+        # Need older cmake (we get cmake 4 from requirements.txt)
         conda install cmake=3.31.6
+
+        # Need BLAS and LAPACK libs for torch in neml2
+        dnf install -y openblas-devel
 
         # Build and install pytorch
         mkdir -p $LIBTORCH_DIR/logs
         PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
         mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
-        CFLAGS="$BUILD_PYTORCH_CCXXFLAGS" CXXFLAGS="$BUILD_PYTORCH_CCXXFLAGS" cmake \
+        CC= CXX= F77= F90= FC= CFLAGS="$BUILD_PYTORCH_CCXXFLAGS" CXXFLAGS="$BUILD_PYTORCH_CCXXFLAGS" cmake \
             -DBUILD_SHARED_LIBS:BOOL=ON \
             -DCMAKE_BUILD_TYPE:STRING=Release \
             -DCMAKE_INSTALL_PREFIX:PATH={{ LIBTORCH_DIR }} \
+            # No python build for now
+            -DBUILD_PYTHON:BOOL=OFF \
+            # BLAS and LAPACK needed by neml2
+            -DUSE_BLAS:BOOL=ON \
+            -DBLAS:STRING=OpenBLAS \
+            -DUSE_LAPACK:BOOL=ON \
+            # Could possibly enable in the future
+            -DUSE_MPI:BOOL=OFF \
+            # Compiler specific flags (if any)
             "${BUILD_PYTORCH_FLAGS[@]}" \
             ${PYTORCH_DIR} 2>&1 | tee ${LIBTORCH_DIR}/logs/cmake.log
         cmake --build . --target install -- -j ${MOOSE_JOBS} 2>&1 | tee ${LIBTORCH_DIR}/logs/build.log
 
-        # Cleanup the temporary python environment
+        # Cleanup the python build environment
         source deactivate
         conda env remove -y -n ${PYTORCH_CONDA_ENV}
         rm -rf ${PYTORCH_DIR} ${PYTORCH_BUILD_DIR}
