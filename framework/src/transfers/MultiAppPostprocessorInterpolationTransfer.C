@@ -91,6 +91,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
+      errorIfObjectExecutesOnTransferInSourceApp(_postprocessor);
       std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> idi;
 
       switch (_interp_type)
