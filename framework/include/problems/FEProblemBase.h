@@ -808,6 +808,13 @@ public:
                               const std::string & var_name,
                               InputParameters & params);
 
+  /**
+   * Add an elemental field variable for use in the adaptivity system
+   */
+  virtual void addElementalFieldVariable(const std::string & var_type,
+                                         const std::string & var_name,
+                                         InputParameters & params);
+
   virtual void addAuxVariable(const std::string & var_name,
                               const libMesh::FEType & type,
                               const std::set<SubdomainID> * const active_subdomains = NULL);
