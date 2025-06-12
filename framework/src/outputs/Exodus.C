@@ -536,12 +536,20 @@ Exodus::handleExodusIOMeshRenumbering()
   // We know exodus_io renumbered on the first write_timestep()
   if (!_exodus_initialized && !_mesh_contiguous_numbering)
   {
-    // We renumbered our mesh, so we need to allow the other mesh to do the same
+    // We renumbered our mesh, so we need the other mesh to do the same
     if (auto * const disp_problem = _problem_ptr->getDisplacedProblem().get(); disp_problem)
     {
       auto & disp_eq = disp_problem->es();
       auto & other_mesh = &disp_eq == _es_ptr ? _problem_ptr->mesh().getMesh() : disp_eq.get_mesh();
+      mooseAssert(
+          !other_mesh.allow_renumbering(),
+          "The only way we shouldn't have contiguous numbering is if we've disabled renumbering");
       other_mesh.allow_renumbering(true);
+      other_mesh.renumber_nodes_and_elements();
+      // Copying over the comment in MeshOutput::write_equation_systems
+      // Not sure what good going back to false will do here, the
+      // renumbering horses have already left the barn...
+      other_mesh.allow_renumbering(false);
     }
 
     // Objects that depend on element/node ids are no longer valid

@@ -187,7 +187,8 @@ public:
   //
   // Adaptivity /////
   virtual void initAdaptivity();
-  virtual void meshChanged() override;
+  using SubProblem::meshChanged;
+  void meshChanged(bool changed_through_amr);
 
   // reinit /////
   virtual void prepare(const Elem * elem, const THREAD_ID tid) override;

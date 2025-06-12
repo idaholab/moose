@@ -772,7 +772,7 @@ SubProblem::nLinearIterations(unsigned int) const
 void
 SubProblem::meshChanged()
 {
-  mooseError("This system does not support changing the mesh");
+  mooseError("This system does not support changing the mesh through this API");
 }
 
 std::string

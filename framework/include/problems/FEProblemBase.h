@@ -2628,7 +2628,7 @@ protected:
    * necessary to prepare for another mesh change
    * immediately-subsequent.
    */
-  void meshChangedHelper(bool intermediate_change = false);
+  void meshChangedHelper(bool intermediate_change, bool changed_through_amr);
 
   /// Helper to check for duplicate variable names across systems or within a single system
   bool duplicateVariableCheck(const std::string & var_name,
@@ -2975,6 +2975,8 @@ private:
   friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,
                                                         const std::string & value,
                                                         FEProblemBase * const problem);
+
+  friend class Adaptivity; // for calling meshChangedHelper
 };
 
 using FVProblemBase = FEProblemBase;
