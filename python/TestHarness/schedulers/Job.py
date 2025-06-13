@@ -17,20 +17,30 @@ from TestHarness.validation import TestRunException
 from TestHarness import OutputInterface, util, ValidationCase
 from tempfile import TemporaryDirectory
 from collections import namedtuple
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 
 from TestHarness import util
 
 def time_now():
     return time.time_ns() / (10 ** 9)
 
+@dataclass
+class TimerEntry:
+    """
+    Helper dataclass for an entry in the Timer
+    """
+    # Start time
+    start: float
+    # End time
+    end: typing.Optional[float] = None
+
 class Timer(object):
     """
     A helper class for testers to track the time it takes to run.
     """
     def __init__(self):
-        # Dict of time name -> (start,) or (start,end)
-        self.times = {}
+        # The times for each section
+        self.times: dict[str, TimerEntry] = {}
         # Threading lock for setting timers
         self.lock = threading.Lock()
 
@@ -44,7 +54,7 @@ class Timer(object):
         if not at_time:
             at_time = self.time_now()
         with self.lock:
-            self.times[name] = [at_time]
+            self.times[name] = TimerEntry(start=at_time)
 
     def stop(self, name: str, at_time: typing.Optional[float] = None) -> None:
         """ End the given timer """
@@ -54,9 +64,9 @@ class Timer(object):
             entry = self.times.get(name)
             if not entry:
                 raise Exception(f'Missing time entry {name}')
-            if len(entry) > 1:
+            if entry.end is not None:
                 raise Exception(f'Time entry {name} already stopped')
-            entry.append(at_time)
+            entry.end = at_time
 
     def startMain(self) -> None:
         """ Get the start time for the main timer """
@@ -77,7 +87,7 @@ class Timer(object):
             entry = self.times.get(name)
             if not entry:
                 return False
-            return len(entry) > 1
+            return entry.end is not None
 
     def totalTime(self, name: str = 'main') -> float:
         """ Get the total time for the given timer """
@@ -87,10 +97,7 @@ class Timer(object):
                 if name == 'main':
                     return 0.0
                 raise Exception(f'Missing time entry {name}')
-
-            if len(entry) > 1:
-                return entry[1] - entry[0]
-            return time_now() - entry[0]
+            return (time_now() if entry.end is None else entry.end) - entry.start
 
     def totalTimes(self) -> dict[str, float]:
         """ Get the total times """
@@ -105,7 +112,7 @@ class Timer(object):
             entry = self.times.get(name)
             if not entry:
                 raise Exception(f'Missing time entry {name}')
-            return entry[0]
+            return entry.start
 
     def reset(self, name: typing.Optional[str] = None) -> None:
         """ Resets a given timer or all timers """
