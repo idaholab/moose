@@ -31,13 +31,10 @@
 #
 #
 
-[Problem]
-  coord_type = RSPHERICAL
-[]
-
 [Mesh]
   file = gap_heat_transfer_htonly_rspherical.e
   construct_side_list_from_node_list = true
+  coord_type = RSPHERICAL
 []
 
 [Functions]

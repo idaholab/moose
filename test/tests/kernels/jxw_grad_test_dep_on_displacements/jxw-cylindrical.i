@@ -9,9 +9,6 @@
   nx = 3
   ny = 3
   elem_type = QUAD9
-[]
-
-[Problem]
   coord_type = RZ
 []
 
