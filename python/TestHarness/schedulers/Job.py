@@ -391,9 +391,6 @@ class Job(OutputInterface):
         """
         tester = self.__tester
 
-        # Start the main timer for running
-        self.timer.startMain()
-
         # Helper for exiting
         def finalize():
             # Run cleanup
@@ -401,8 +398,6 @@ class Job(OutputInterface):
                 self.cleanup()
             # Sanitize the output from all objects
             self.sanitizeAllOutput()
-            # Stop timing
-            self.timer.stopMain()
 
         # Set the output path if its separate and initialize the output
         if self.hasSeperateOutput():
