@@ -32,10 +32,10 @@ MFEMKernel::MFEMKernel(const InputParameters & parameters)
     _subdomain_attributes[i] = std::stoi(_subdomain_names[i]);
   }
   mfem::ParMesh & mesh(*getMFEMProblem()
-                      .getProblemData()
-                      .gridfunctions.GetRef(_test_var_name)
-                      .ParFESpace()
-                      ->GetParMesh());
+                            .getProblemData()
+                            .gridfunctions.GetRef(_test_var_name)
+                            .ParFESpace()
+                            ->GetParMesh());
   mfem::common::AttrToMarker(mesh.attributes.Max(), _subdomain_attributes, _subdomain_markers);
 }
 
