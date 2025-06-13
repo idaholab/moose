@@ -17,7 +17,7 @@
                   'OutputData/ConduitDataCollection/Run_000001.root'
     requirement = 'The system shall have the ability to write out MFEM solutions to '
                   'ParaView, VisIt and Conduit data collections.'
-    mfem = true
+    capabilities = 'mfem'
     recover = false
   []
 []

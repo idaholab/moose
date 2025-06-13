@@ -6,7 +6,7 @@
     [run]
       type = RunApp
       input = parent.i
-      mfem = true
+      capabilities = 'mfem'
       recover = false
       detail = 'running the inputs, and '
     []
@@ -18,7 +18,7 @@
                 send
                 OutputData/DiffusionSendApp/Run0/Cycle000001/proc000000.vtu'
       prereq = test/run
-      mfem = true
+      capabilities = 'mfem'
       recover = false
       detail = 'checking the sub-application and parent application outputs against each other.'
     []
