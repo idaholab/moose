@@ -20,6 +20,7 @@
     abs_zero = 1e-5
     max_threads = 1
     max_parallel = 1
+    restep = false # First, subchannel needs to work with recover to make sure multiapps are restored properly
   []
   [THM]
     type = CSVDiff
@@ -31,5 +32,6 @@
     abs_zero = 1e-5
     max_threads = 1
     max_parallel = 1
+    restep = false # First, subchannel needs to work with recover to make sure multiapps are restored properly
   []
 []

@@ -42,6 +42,9 @@
     type = 'Exodiff'
     input = 'restricted_node_parent.i'
     exodiff = 'restricted_node_parent_out.e restricted_node_parent_out_ch00.e restricted_node_parent_out_ch10.e'
+    # With restep, we need to execute UOs between the solution restore and transfer
+    cli_args = "UserObjects/S_avg_front/execute_on='multiapp_fixed_point_begin timestep_end'
+                UserObjects/S_avg_back/execute_on='multiapp_fixed_point_begin timestep_end'"
 
     requirement = "The system shall be able to transfer user-defined spatial data into block and boundary restricted nodal variables."
     design = "MultiAppGeneralFieldUserObjectTransfer.md"
@@ -52,6 +55,9 @@
     type = 'Exodiff'
     input = 'restricted_elem_parent.i'
     exodiff = 'restricted_elem_parent_out.e restricted_elem_parent_out_ch00.e restricted_elem_parent_out_ch10.e'
+    # With restep, we need to execute UOs between the solution restore and transfer
+    cli_args = "UserObjects/S_avg_front/execute_on='multiapp_fixed_point_begin timestep_end'
+                UserObjects/S_avg_back/execute_on='multiapp_fixed_point_begin timestep_end'"
 
     requirement = "The system shall be able to transfer user-defined spatial data into block and boundary restricted elemental variables."
     design = "MultiAppGeneralFieldUserObjectTransfer.md"

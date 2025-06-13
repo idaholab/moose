@@ -68,6 +68,7 @@ GeneralSensorPostprocessor::GeneralSensorPostprocessor(const InputParameters & p
     _input_signal_values(declareRestartableData<std::vector<Real>>("input_signal_values")),
     _integrand(declareRestartableData<std::vector<Real>>("integrand")),
     _R_function_values(declareRestartableData<std::vector<Real>>("R_function_values")),
+    _t_step_old(declareRestartableData<int>("gsp_t_step_old", -1)),
     _seed(getParam<unsigned int>("seed")),
     _delay_value(0)
 {
@@ -98,6 +99,17 @@ GeneralSensorPostprocessor::initialize()
   // if the problem is transient
   else
   {
+    // Remove last element if we are repeating the timestep
+    mooseAssert(_t_step_old <= _t_step,
+                "The old time step needs to be behind or the same as the current time step.");
+    if (_t_step_old == _t_step)
+    {
+      _time_values.pop_back();
+      _input_signal_values.pop_back();
+      _integrand.pop_back();
+      _R_function_values.pop_back();
+    }
+
     _time_values.push_back(_t);
     _input_signal_values.push_back(_input_signal);
 
@@ -121,6 +133,9 @@ GeneralSensorPostprocessor::initialize()
                     efficiency_value * (_proportional_weight * proportional_value +
                                         _integral_weight * _integration_value) +
                     uncertainty_value;
+
+    // Update old time step
+    _t_step_old = _t_step;
   }
 }
 

@@ -6,6 +6,7 @@
     abs_zero = 1e-4
     rel_err = 5e-5
     threading = '!pthreads'
+    restep = false # See mooseError in ExplicitRK2::solve()
 
     requirement = 'The system shall provide classes to use an RDG spatial discretization'
                   'with no slope reconstruction.'
@@ -20,6 +21,7 @@
     abs_zero = 1e-4
     rel_err = 5e-5
     threading = '!pthreads'
+    restep = false # See mooseError in ExplicitRK2::solve()
 
     requirement = 'The system shall provide classes to use an RDG spatial discretization'
                   'with Minmod slope reconstruction.'
@@ -34,6 +36,7 @@
     abs_zero = 1e-4
     rel_err = 5e-5
     threading = '!pthreads'
+    restep = false # See mooseError in ExplicitRK2::solve()
 
     requirement = 'The system shall provide classes to use an RDG spatial discretization'
                   'with MC slope reconstruction.'
@@ -48,6 +51,7 @@
     abs_zero = 1e-4
     rel_err = 5e-5
     threading = '!pthreads'
+    restep = false # See mooseError in ExplicitRK2::solve()
 
     requirement = 'The system shall provide classes to use an RDG spatial discretization'
                   'with Superbee slope reconstruction.'
@@ -61,6 +65,7 @@
     abs_zero = 1e-4
     rel_err = 5e-5
     threading = '!pthreads'
+    restep = false # See mooseError in ExplicitRK2::solve()
 
     requirement = 'The system shall allow RDG user objects to be block-restrictable.'
     design = 'rdg/index.md'

@@ -61,8 +61,8 @@
   [./time_period]
     type = TimePeriod
     enable_objects = '*::constant_rate'
-    start_time = 0.5
-    end_time = 1
+    start_time = 0.6
+    execute_on = 'timestep_begin'
   [../]
 []
 

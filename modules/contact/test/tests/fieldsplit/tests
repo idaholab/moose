@@ -16,6 +16,7 @@
     abs_zero = 1e-8
     requirement = 'The system shall allow split preconditioning of frictionless mortar contact.'
     capabilities = 'petsc>=3.16.6' # early versions of petsc can't handle change in sparsity pattern in field split
+    restep = false # Test is prescribed to abort on failed timestep
   []
   [mortar-FS-frictional]
     type = 'Exodiff'
@@ -24,5 +25,6 @@
     abs_zero = 1e-8
     requirement = 'The system shall allow split preconditioning of frictional mortar contact.'
     capabilities = 'petsc>=3.16.6' # early versions of petsc can't handle change in sparsity pattern in field split
+    restep = false # Test is prescribed to abort on failed timestep
   []
 []

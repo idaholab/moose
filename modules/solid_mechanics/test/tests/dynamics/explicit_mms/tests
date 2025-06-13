@@ -8,12 +8,14 @@
       type = Exodiff
       input = mms_direct_combined.i
       exodiff = mms_direct_combined_out.e
+      restep = false # ExplicitMixedOrder cannot handle repeating a timestep
       detail = "systems with both first and second order time derivatives"
     []
     [2nd_order_w_ics]
       type = Exodiff
       input = mms_direct_second_order_with_ic.i
       exodiff = mms_direct_second_order_with_ic_out.e
+      restep = false # ExplicitMixedOrder cannot handle repeating a timestep
       detail = "for systems with initial velocity conditions"
     []
   []
