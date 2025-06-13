@@ -137,7 +137,7 @@ EquationSystem::ApplyEssentialBCs()
     global_ess_markers = 0;
     for (auto & bc : bcs)
     {
-      bc->ApplyBC(trial_gf, *pmesh);
+      bc->ApplyBC(trial_gf);
 
       mfem::Array<int> ess_bdrs(bc->getBoundaries());
       for (auto it = 0; it != pmesh->bdr_attributes.Max(); ++it)

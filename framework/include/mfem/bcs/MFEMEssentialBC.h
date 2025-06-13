@@ -25,7 +25,7 @@ public:
   virtual const std::string & getTrialVariableName() const { return _test_var_name; }
 
   // Apply the essential BC, overwritign the values of gridfunc on the boundary as desired.
-  virtual void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh) = 0;
+  virtual void ApplyBC(mfem::GridFunction & gridfunc) = 0;
 };
 
 #endif

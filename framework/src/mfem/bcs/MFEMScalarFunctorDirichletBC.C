@@ -34,11 +34,9 @@ MFEMScalarFunctorDirichletBC::MFEMScalarFunctorDirichletBC(const InputParameters
 }
 
 void
-MFEMScalarFunctorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh)
+MFEMScalarFunctorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 {
-  mfem::Array<int> ess_bdrs(mesh.bdr_attributes.Max());
-  ess_bdrs = getBoundaries();
-  gridfunc.ProjectBdrCoefficient(_coef, ess_bdrs);
+  gridfunc.ProjectBdrCoefficient(_coef, getBoundaries());
 }
 
 #endif
