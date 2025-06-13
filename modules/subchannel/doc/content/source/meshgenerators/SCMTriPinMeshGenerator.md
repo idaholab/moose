@@ -13,7 +13,7 @@ Last, [!param](/Mesh/SCMTriPinMeshGenerator/input) is a parameter that takes the
 
 ## Example Input File Syntax
 
-!listing /test/tests/problems/SFR/sodium-19pin/test19_monolithic.i block=TriSubChannelMesh language=cpp
+!listing /test/tests/problems/SFR/sodium-19pin/test19_monolithic.i block=TriSubChannelMesh language=moose
 
 !syntax parameters /Mesh/SCMTriPinMeshGenerator
 

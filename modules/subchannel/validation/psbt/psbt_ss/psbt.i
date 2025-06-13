@@ -80,7 +80,7 @@ P_out = 14.72e6 # Pa
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  beta = 0.006
+  beta = 0.08
   CT = 2.6
   compute_density = true
   compute_viscosity = true
@@ -90,6 +90,7 @@ P_out = 14.72e6 # Pa
   segregated = false
   staggered_pressure = false
   monolithic_thermal = false
+  verbose_subchannel = true
 []
 
 [ICs]
@@ -205,6 +206,14 @@ P_out = 14.72e6 # Pa
     execute_on = final
     file_base = "mdot_In.txt"
     height = 0.0
+  []
+[]
+
+[Postprocessors]
+  [total_pressure_drop]
+    type = SubChannelDelta
+    variable = P
+    execute_on = "timestep_end"
   []
 []
 

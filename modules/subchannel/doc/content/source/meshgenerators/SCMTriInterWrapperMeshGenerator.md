@@ -14,7 +14,7 @@ The size of each subchannel sub-assembly including the duct is defined by [!para
 
 ## Example Input File Syntax
 
-!listing /test/tests/problems/interwrapper/tri_interwrapper_monolithic.i block=TriInterWrapperMesh language=cpp
+!listing /test/tests/problems/interwrapper/tri_interwrapper_monolithic.i block=TriInterWrapperMesh language=moose
 
 !syntax parameters /Mesh/SCMTriInterWrapperMeshGenerator
 

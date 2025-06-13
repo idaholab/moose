@@ -112,25 +112,25 @@ For both SHRT-17 and SHRT-45R, the stand-alone SCM calculated transient, underes
 
 To run the steady state problems use the following input files:
 
-!listing /validation/EBR-II/XX09_SCM_SS17.i language=cpp
-!listing /validation/EBR-II/XX09_SCM_SS45R.i language=cpp
+!listing /validation/EBR-II/XX09_SCM_SS17.i language=moose
+!listing /validation/EBR-II/XX09_SCM_SS45R.i language=moose
 
 To run the transient problems use the following input files:
 
-!listing /validation/EBR-II/XX09_SCM_TR17.i language=cpp
-!listing /validation/EBR-II/XX09_SCM_TR45R.i language=cpp
+!listing /validation/EBR-II/XX09_SCM_TR17.i language=moose
+!listing /validation/EBR-II/XX09_SCM_TR45R.i language=moose
 
 The corrected power profile is read by the following .txt file (pin_power_profile61.txt):
 
-!listing /validation/EBR-II/pin_power_profile61.txt language=cpp
+!listing /validation/EBR-II/pin_power_profile61.txt language=moose
 
 The uniform power profile is read by the following .txt file (pin_power_profile61_uniform.txt):
 
-!listing /validation/EBR-II/pin_power_profile61_uniform.txt language=cpp
+!listing /validation/EBR-II/pin_power_profile61_uniform.txt language=moose
 
 The Functions block defines the shape of the axial power profile:
 
-!listing /validation/EBR-II/XX09_SCM_SS17.i block=Functions language=cpp
+!listing /validation/EBR-II/XX09_SCM_SS17.i block=Functions language=moose
 
 ### Transient BC's
 
@@ -153,13 +153,13 @@ For the transient case the user needs to provide transient boundary conditions:
 
 - Then, define the transient evolution of the boundary conditions in the Functions block based on .csv files:
 
-!listing /validation/EBR-II/XX09_SCM_TR17.i block=Functions language=cpp
+!listing /validation/EBR-II/XX09_SCM_TR17.i block=Functions language=moose
 
 - The functions defined above are given normalized and they multiply the initial steady state conditions:
 
-!listing /validation/EBR-II/XX09_SCM_TR17.i block=Controls language=cpp
+!listing /validation/EBR-II/XX09_SCM_TR17.i block=Controls language=moose
 
-!listing /validation/EBR-II/XX09_SCM_TR17.i block=AuxKernels language=cpp
+!listing /validation/EBR-II/XX09_SCM_TR17.i block=AuxKernels language=moose
 
 
 
