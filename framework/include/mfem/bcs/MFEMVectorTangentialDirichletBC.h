@@ -18,7 +18,7 @@ class MFEMVectorTangentialDirichletBC : public MFEMVectorDirichletBCBase
 public:
   static InputParameters validParams();
   MFEMVectorTangentialDirichletBC(const InputParameters & parameters);
-  void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh) override;
+  void ApplyBC(mfem::GridFunction & gridfunc) override;
 };
 
 #endif

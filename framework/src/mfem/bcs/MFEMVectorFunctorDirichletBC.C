@@ -28,11 +28,9 @@ MFEMVectorFunctorDirichletBC::MFEMVectorFunctorDirichletBC(const InputParameters
 }
 
 void
-MFEMVectorFunctorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh)
+MFEMVectorFunctorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 {
-  mfem::Array<int> ess_bdrs(mesh.bdr_attributes.Max());
-  ess_bdrs = getBoundaries();
-  gridfunc.ProjectBdrCoefficient(_vec_coef, ess_bdrs);
+  gridfunc.ProjectBdrCoefficient(_vec_coef, getBoundaries());
 }
 
 #endif
