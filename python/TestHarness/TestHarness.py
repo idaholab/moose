@@ -742,16 +742,9 @@ class TestHarness:
             summary += fatal_error
             print(util.colorText(summary, "", html=True, colored=self.options.colored, code=self.options.code))
         else:
-            num_nonzero_timing = sum(1 if job.getTiming() > 0 else 0 for job in self.finished_jobs)
-            if num_nonzero_timing > 0:
-                timing_max = max(job.getTiming() for job in self.finished_jobs)
-                timing_avg = sum(job.getTiming() for job in self.finished_jobs) / num_nonzero_timing
-            else:
-                timing_max = 0
-                timing_avg = 0
             summary = f'Ran {self.num_passed + self.num_failed} tests in {stats["time_total"]:.1f} seconds.'
-            summary += f' Average test time {timing_avg:.1f} seconds,'
-            summary += f' maximum test time {timing_max:.1f} seconds.'
+            summary += f' Average test time {stats["time_average"]:.1f} seconds,'
+            summary += f' maximum test time {stats["time_max"]:.1f} seconds.'
             print(summary)
 
             # Get additional results from the scheduler
