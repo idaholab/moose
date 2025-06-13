@@ -1100,7 +1100,7 @@ DisplacedProblem::updateGeomSearch(GeometricSearchData::GeometricSearchType type
 void
 DisplacedProblem::meshChanged(const bool changed_through_amr)
 {
-  // The mesh changed. The displaced equations system object only holds ExplicitSystems, so calling
+  // The mesh changed. The displaced equations system object only holds Systems, so calling
   // EquationSystems::reinit only prolongs/restricts the solution vectors, which is something that
   // needs to happen for every step of mesh adaptivity.
   _eq.reinit();
