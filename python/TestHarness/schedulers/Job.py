@@ -9,7 +9,7 @@
 
 import itertools, os, time, threading, traceback, typing
 from io import StringIO
-from contextlib import redirect_stdout
+from contextlib import nullcontext, redirect_stdout
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
 from TestHarness.runners.Runner import Runner
@@ -89,9 +89,10 @@ class Timer(object):
                 return False
             return entry.end is not None
 
-    def totalTime(self, name: str = 'main') -> float:
+    def totalTime(self, name: str = 'main', lock: bool = True) -> float:
         """ Get the total time for the given timer """
-        with self.lock:
+        context = self.lock if lock else nullcontext()
+        with context:
             entry = self.times.get(name)
             if not entry:
                 if name == 'main':
@@ -101,10 +102,8 @@ class Timer(object):
 
     def totalTimes(self) -> dict[str, float]:
         """ Get the total times """
-        times = {}
-        for name in self.times:
-            times[name] = self.totalTime(name)
-        return times
+        with self.lock:
+            return {name: self.totalTime(name, lock=False) for name in self.times}
 
     def startTime(self, name: str) -> float:
         """ Get the start time """
