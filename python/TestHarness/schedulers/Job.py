@@ -39,14 +39,14 @@ class Timer(object):
         """ Helper for getting a precise now time """
         return float(time.time_ns() / (10 ** 9))
 
-    def start(self, name: str, at_time=None):
+    def start(self, name: str, at_time: typing.Optional[float] = None) -> None:
         """ Start the given timer """
         if not at_time:
             at_time = self.time_now()
         with self.lock:
             self.times[name] = [at_time]
 
-    def stop(self, name: str, at_time=None):
+    def stop(self, name: str, at_time: typing.Optional[float] = None) -> None:
         """ End the given timer """
         if not at_time:
             at_time = self.time_now()
@@ -58,20 +58,20 @@ class Timer(object):
                 raise Exception(f'Time entry {name} already stopped')
             entry.append(at_time)
 
-    def startMain(self):
+    def startMain(self) -> None:
         """ Get the start time for the main timer """
         self.start('main')
 
-    def stopMain(self):
+    def stopMain(self) -> None:
         """ Get the end time for the main timer """
         self.stop('main')
 
-    def hasTime(self, name: str):
+    def hasTime(self, name: str) -> bool:
         """ Whether or not the given timer exists """
         with self.lock:
             return name in self.times
 
-    def hasTotalTime(self, name: str):
+    def hasTotalTime(self, name: str) -> bool:
         """ Whether or not the given total time exists """
         with self.lock:
             entry = self.times.get(name)
@@ -79,27 +79,27 @@ class Timer(object):
                 return False
             return len(entry) > 1
 
-    def totalTime(self, name='main'):
+    def totalTime(self, name: str = 'main') -> float:
         """ Get the total time for the given timer """
         with self.lock:
             entry = self.times.get(name)
             if not entry:
                 if name == 'main':
-                    return 0
+                    return 0.0
                 raise Exception(f'Missing time entry {name}')
 
             if len(entry) > 1:
                 return entry[1] - entry[0]
             return time_now() - entry[0]
 
-    def totalTimes(self):
+    def totalTimes(self) -> dict[str, float]:
         """ Get the total times """
         times = {}
-        for name, entry in self.times.items():
+        for name in self.times:
             times[name] = self.totalTime(name)
         return times
 
-    def startTime(self, name):
+    def startTime(self, name: str) -> float:
         """ Get the start time """
         with self.lock:
             entry = self.times.get(name)
@@ -107,7 +107,7 @@ class Timer(object):
                 raise Exception(f'Missing time entry {name}')
             return entry[0]
 
-    def reset(self, name = None):
+    def reset(self, name: typing.Optional[str] = None) -> None:
         """ Resets a given timer or all timers """
         with self.lock:
             if name:
@@ -127,7 +127,7 @@ class Timer(object):
         def __exit__(self, exc_type, exc_val, exc_tb):
             self.timer.stop(self.name)
 
-    def time(self, name: str):
+    def time(self, name: str) -> TimeManager:
         """ Time a section using a context manager """
         return self.TimeManager(self, name)
 
@@ -769,7 +769,7 @@ class Job(OutputInterface):
         """
         return self.options.sep_files
 
-    def getTiming(self):
+    def getTiming(self) -> float:
         """ Return active time if available, if not return a comparison of start and end time """
         # Actual execution time
         if self.timer.hasTime('runner_run'):
