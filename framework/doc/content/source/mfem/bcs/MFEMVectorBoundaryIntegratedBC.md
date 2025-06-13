@@ -17,6 +17,8 @@ where $v \in \vec H^1$ and $\vec f$ is a vector coefficient of the same dimensio
 
 ## Example Input File Syntax
 
+!listing test/tests/mfem/kernels/linearelasticity.i block=BCs
+
 !syntax parameters /BCs/MFEMVectorBoundaryIntegratedBC
 
 !syntax inputs /BCs/MFEMVectorBoundaryIntegratedBC
