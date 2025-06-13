@@ -37,6 +37,10 @@
     type = ElementL2Norm
     variable = u
   [../]
+  [./L2:norm]
+    type = ElementL2Norm
+    variable = u
+  [../]
   [L1_norm]
     type = ElementL1Error
     function = 0
