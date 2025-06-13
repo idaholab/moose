@@ -27,21 +27,23 @@ class MeshFunction;
  *
  * This class performs the actual oversampling calculations and makes the correct
  * changes to the libMesh::EquationsSystems() pointer (_es_ptr), i.e., this pointer is
- * will point to the oversampled system, if oversamping is utilized.
+ * will point to the sampled system, if sampling/oversampling is utilized.
  *
- * The use of oversampling is triggered by setting the oversample input parameter to a
- * integer value greater than 0, indicating the number of refinements to perform.
- *
+ * The use of sampling is triggered by specifying one of the sampling parameters:
+ * - refinements
+ * - sampling block restriction
+ * - a mesh file to sample on
+ * - a position offset
  * @see Exodus
  */
-class OversampleOutput : public AdvancedOutput
+class SampledOutput : public AdvancedOutput
 {
 public:
   static InputParameters validParams();
 
-  OversampleOutput(const InputParameters & parameters);
+  SampledOutput(const InputParameters & parameters);
 
-  virtual ~OversampleOutput();
+  virtual ~SampledOutput();
 
   virtual void initialSetup() override;
   virtual void meshChanged() override;
@@ -49,9 +51,9 @@ public:
 
 protected:
   /**
-   * Performs the update of the solution vector for the oversample/re-positioned mesh
+   * Performs the update of the solution vector for the sample/re-positioned mesh
    */
-  virtual void updateOversample();
+  virtual void updateSample();
 
   /// Appends the base class's file base string
   virtual void setFileBaseInternal(const std::string & file_base) override;
@@ -59,45 +61,67 @@ protected:
   /// The number of oversampling refinements
   const unsigned int _refinements;
 
-  /// Flag indicating that oversampling is enabled
-  bool _oversample;
+  /// Flag indicating another file is being used for the sampling
+  const bool _using_external_sampling_file;
 
   /// Flag for re-positioning
-  bool _change_position;
+  const bool _change_position;
+
+  /// Flag indicating that the sampled output should be used to re-sample the underlying EquationSystem of the output
+  bool _use_sampled_output;
 
 private:
   /**
-   * Setups the output object to produce re-positioned and/or oversampled results.
+   * Setups the output object to produce re-positioned and/or sampled results.
    * This is accomplished by creating a new, finer mesh that the existing solution is projected
    * upon. This function is called by the creating action (addOutputAction) and should not be called
    * by the user as it will create a memory leak if called multiple times.
    */
-  void initOversample();
+  void initSample();
 
   /**
    * Clone mesh in preperation for re-positioning or oversampling.
    * This changes the pointer, _mesh_ptr, with a clone of the current mesh so that it may
-   * be modified to perform the necessary oversample/positioning actions
+   * be modified to perform the necessary sample/positioning/block-restriction actions
    */
   void cloneMesh();
 
+  /// Used to decide which variable is sampled at nodes, then output as a nodal variable for
+  /// (over)sampling purposes
+  /// If not sampled at nodes, it is sampled at centroids and output as a constant monomial
+  bool isSampledAtNodes(const FEType & fe_type) const;
+
   /**
-   * A vector of pointers to the mesh functions
-   * This is only populated when the oversample() function is called, it must
+   * A vector of pointers to the mesh functions on the sampled mesh
+   * This is only populated when the initSample() function is called, it must
    * be cleaned up by the destructor.
+   * Outer-indexing by system
+   * Inner-indexing for each variable in a system
    */
   std::vector<std::vector<std::unique_ptr<libMesh::MeshFunction>>> _mesh_functions;
+
+  /// A vector of vectors that keeps track of the variable numbers in each system for each mesh function
+  std::vector<std::vector<unsigned int>> _variable_numbers_in_system;
 
   /// When oversampling, the output is shift by this amount
   Point _position;
 
-  /// A flag indicating that the mesh has changed and the oversampled mesh needs to be re-initialized
-  bool _oversample_mesh_changed;
+  /// A flag indicating that the mesh has changed and the sampled mesh needs to be re-initialized
+  bool _sampling_mesh_changed;
 
-  std::unique_ptr<EquationSystems> _oversample_es;
-  std::unique_ptr<MooseMesh> _cloned_mesh_ptr;
+  /// A flag tracking whether the sampling and source meshes match in terms of subdomains
+  bool _mesh_subdomains_match;
 
-  /// Oversample solution vector
+  /// Flag indicating whether we are outputting in serial or parallel
+  bool _serialize;
+
+  /// Equation system holding the solution vectors for the sampled variables
+  std::unique_ptr<EquationSystems> _sampling_es;
+
+  /// Mesh used for sampling. The Output class' _mesh_ptr will refer to this mesh if sampling is being used
+  std::unique_ptr<MooseMesh> _sampling_mesh_ptr;
+
+  /// Sample solution vector
   /* Each of the MeshFunctions keeps a reference to this vector, the vector is updated for the
    * current system
    * and variable before the MeshFunction is applied. This allows for the same MeshFunction object

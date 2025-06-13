@@ -1,0 +1,22 @@
+[Tests]
+  issues = '#30317'
+  design = 'syntax/Outputs/index.md'
+  [serialized]
+    type = 'Exodiff'
+    input = 'block.i'
+    cli_args = " Outputs/out/hide='ignore'"
+    exodiff = 'block_out.e'
+    requirement = 'The system shall be able to block restrict exodus output by creating a mesh clone and reducing it to specified blocks, and serializing the solution.'
+    # oversampling outputs a warning in recover
+    allow_warnings = true
+  []
+  [elem_non_serialized]
+    type = 'Exodiff'
+    input = 'block.i'
+    cli_args = "Outputs/out/serialize_sampling=false Outputs/out/show=v Outputs/file_base=block_elem_out "
+    exodiff = 'block_elem_out.e'
+    requirement = 'The system shall be able to block restrict exodus output by creating a mesh clone and reducing it to specified blocks, and then output variables with elemental degrees of freedom without requiring the serialization of the solution.'
+    # oversampling outputs a warning in recover
+    allow_warnings = true
+  []
+[]

@@ -10,12 +10,12 @@
 #pragma once
 
 // MOOSE includes
-#include "OversampleOutput.h"
+#include "SampledOutput.h"
 
 /**
  * Class for output data to the TecplotII format
  */
-class Tecplot : public OversampleOutput
+class Tecplot : public SampledOutput
 {
 public:
   static InputParameters validParams();
