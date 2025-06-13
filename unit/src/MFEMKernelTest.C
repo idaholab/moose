@@ -57,9 +57,11 @@ TEST_F(MFEMKernelTest, MFEMDiffusionKernel)
   InputParameters kernel_params = _factory.getValidParams("MFEMDiffusionKernel");
   kernel_params.set<VariableName>("variable") = "test_variable_name";
   kernel_params.set<MFEMScalarCoefficientName>("coefficient") = "coef1";
+  kernel_params.set<std::vector<SubdomainName>>("block") = {"2"};
   MFEMDiffusionKernel & kernel =
       addObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "kernel1", kernel_params);
-
+  // Test MFEMKernel marker array has been constructed as expected
+  ASSERT_EQ(kernel.getSubdomains(), mfem::Array<int>({0, 1}));
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::DiffusionIntegrator *>(kernel.createBFIntegrator());
   ASSERT_NE(integrator, nullptr);

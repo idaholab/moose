@@ -10,6 +10,10 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMKernel.h"
+#include "MFEMProblem.h"
+#include "libmesh/ignore_warnings.h"
+#include "mfem/miniapps/common/mesh_extras.hpp"
+#include "libmesh/restore_warnings.h"
 
 InputParameters
 MFEMKernel::validParams()
@@ -36,6 +40,8 @@ MFEMKernel::MFEMKernel(const InputParameters & parameters)
   {
     _subdomain_attributes[i] = std::stoi(_subdomain_names[i]);
   }
+  mfem::ParMesh & mesh(getMFEMProblem().mesh().getMFEMParMesh());
+  mfem::common::AttrToMarker(mesh.attributes.Max(), _subdomain_attributes, _subdomain_markers);
 }
 
 #endif

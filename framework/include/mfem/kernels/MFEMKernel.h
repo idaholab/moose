@@ -39,13 +39,14 @@ public:
 
   bool isSubdomainRestricted() { return _subdomain_names.size(); }
 
-  mfem::Array<int> & getSubdomains() { return _subdomain_attributes; }
+  mfem::Array<int> & getSubdomains() { return _subdomain_markers; }
 
 protected:
   // Name of (the test variable associated with) the weak form that the kernel is applied to.
   const VariableName & _test_var_name;
   std::vector<SubdomainName> _subdomain_names;
   mfem::Array<int> _subdomain_attributes;
+  mfem::Array<int> _subdomain_markers;
 };
 
 #endif
