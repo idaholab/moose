@@ -15,13 +15,8 @@
 class DisplacedProblem;
 namespace libMesh
 {
-class ExplicitSystem;
-template <typename>
-class TransientSystem;
-typedef TransientSystem<ExplicitSystem> TransientExplicitSystem;
+class System;
 }
-
-using libMesh::TransientExplicitSystem;
 
 class DisplacedSystem : public SystemBase
 {
@@ -246,7 +241,7 @@ public:
     return _undisplaced_system.getMatrix(tag);
   }
 
-  virtual TransientExplicitSystem & sys() { return _sys; }
+  virtual libMesh::System & sys() { return _sys; }
 
   virtual System & system() override;
   virtual const System & system() const override;
@@ -260,7 +255,7 @@ protected:
   }
 
   SystemBase & _undisplaced_system;
-  TransientExplicitSystem & _sys;
+  libMesh::System & _sys;
 };
 
 inline void
