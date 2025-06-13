@@ -10,22 +10,22 @@
 import sys
 import platform
 import os, re, inspect, errno, copy, json
-from . import RaceChecker
 import subprocess
 import shutil
 import socket
 import datetime
 import getpass
+import argparse
 from collections import namedtuple
 
 from socket import gethostname
+
 from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
 from . import util
+from . import RaceChecker
 import pyhit
-
-import argparse
 
 # Directory the test harness is in
 testharness_dir = os.path.dirname(os.path.realpath(__file__))
@@ -275,7 +275,7 @@ class TestHarness:
         self.factory.loadPlugins(dirs, 'testers', "IS_TESTER")
 
         self.parse_errors = []
-        self.test_table = []
+        self.finished_jobs: list = []
         self.num_passed = 0
         self.num_failed = 0
         self.num_skipped = 0
@@ -670,11 +670,8 @@ class TestHarness:
                 caveats = True if caveats is None else caveats
                 print(util.formatResult(job, self.options, caveats=caveats), flush=True)
 
-                timing = job.getTiming()
-
-                # Save these results for 'Final Test Result' summary
-                self.test_table.append( (job, joint_status.sort_value, timing) )
-                self.postRun(job.specs, timing)
+                # Store job as finished for printing
+                self.finished_jobs.append(job)
 
                 if job.isSkip():
                     self.num_skipped += 1
@@ -694,10 +691,10 @@ class TestHarness:
         """
         Get cumulative stats for all runs
         """
-        num_nonzero_timing = sum(1 if float(tup[0].getTiming()) > 0 else 0 for tup in self.test_table)
+        num_nonzero_timing = sum(1 if job.getTiming() > 0 else 0 for job in self.finished_jobs)
         if num_nonzero_timing > 0:
-            time_max = max(float(tup[0].getTiming()) for tup in self.test_table)
-            time_average = sum(float(tup[0].getTiming()) for tup in self.test_table) / num_nonzero_timing
+            time_max = max(job.getTiming() for job in self.finished_jobs)
+            time_average = sum(job.getTiming() for job in self.finished_jobs) / num_nonzero_timing
         else:
             time_max = 0
             time_average = 0
@@ -723,7 +720,8 @@ class TestHarness:
 
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
             print(('\n\nFinal Test Results:\n' + ('-' * (self.options.term_cols))))
-            for (job, sort_value, timing) in sorted(self.test_table, key=lambda x: x[1]):
+            sorted_jobs = sorted(self.finished_jobs, key=lambda job: job.getJointStatus().sort_value)
+            for job in sorted_jobs:
                 print((util.formatResult(job, self.options, caveats=True)))
 
         time_total = (datetime.datetime.now() - self.start_time).total_seconds()
@@ -744,10 +742,10 @@ class TestHarness:
             summary += fatal_error
             print(util.colorText(summary, "", html=True, colored=self.options.colored, code=self.options.code))
         else:
-            num_nonzero_timing = sum(1 if float(tup[0].getTiming()) > 0 else 0 for tup in self.test_table)
+            num_nonzero_timing = sum(1 if job.getTiming() > 0 else 0 for job in self.finished_jobs)
             if num_nonzero_timing > 0:
-                timing_max = max(float(tup[0].getTiming()) for tup in self.test_table)
-                timing_avg = sum(float(tup[0].getTiming()) for tup in self.test_table) / num_nonzero_timing
+                timing_max = max(job.getTiming() for job in self.finished_jobs)
+                timing_avg = sum(job.getTiming() for job in self.finished_jobs) / num_nonzero_timing
             else:
                 timing_max = 0
                 timing_avg = 0
@@ -782,7 +780,9 @@ class TestHarness:
 
             if self.options.longest_jobs:
                 # Sort all jobs by run time
-                sorted_tups = sorted(self.test_table, key=lambda tup: float(tup[0].getTiming()), reverse=True)
+                longest_jobs = [job for job in self.finished_jobs if (not job.isSkip() and job.getTiming() > 0)]
+                longest_jobs = sorted(longest_jobs, key=lambda job: job.getTiming(), reverse=True)
+                longest_jobs = longest_jobs[0:self.options.longest_jobs]
 
                 print('\n%d longest running jobs:' % self.options.longest_jobs)
                 print(('-' * (self.options.term_cols)))
@@ -792,11 +792,9 @@ class TestHarness:
                 options_with_timing = copy.deepcopy(self.options)
                 options_with_timing.timing = True
 
-                for tup in sorted_tups[0:self.options.longest_jobs]:
-                    job = tup[0]
-                    if not job.isSkip() and float(job.getTiming()) > 0:
-                        print(util.formatResult(job, options_with_timing, caveats=True))
-                if len(sorted_tups) == 0 or float(sorted_tups[0][0].getTiming()) == 0:
+                for job in longest_jobs:
+                    print(util.formatResult(job, options_with_timing, caveats=True))
+                if not longest_jobs:
                     print('No jobs were completed.')
 
                 # The TestHarness receives individual jobs out of order (can't realistically use self.test_table)
@@ -1284,8 +1282,6 @@ class TestHarness:
             print('INFO: Setting --no-capabilities because there is not an application')
             self.options.no_capabilities = True
 
-    def postRun(self, specs, timing):
-        return
 
     def preRun(self):
         if self.options.json:
