@@ -8,16 +8,13 @@
 [Mesh]
   type = FileMesh
   file = circle_sector_2d.e
+  coord_type = RZ
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
   order = SECOND
   family = LAGRANGE
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [AuxVariables]

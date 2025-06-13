@@ -7,7 +7,6 @@ sphere_outer_Tinf = 300 # K
 []
 
 [Problem]
-  coord_type = RZ
   kernel_coverage_check = false
   material_coverage_check = false
 []
@@ -32,6 +31,7 @@ sphere_outer_Tinf = 300 # K
     input = secondary
   []
   allow_renumbering = false
+  coord_type = RZ
 []
 
 [Functions]

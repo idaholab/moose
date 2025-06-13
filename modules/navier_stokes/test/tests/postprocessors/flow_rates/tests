@@ -12,7 +12,7 @@
   [fe_diverging]
     type = CSVDiff
     input = conservation_INSFE.i
-    csvdiff =  diverging_INSFE.csv
+    csvdiff = diverging_INSFE.csv
     abs_zero = 1e-8
     requirement = 'The system shall be able to compute mass and momentum flow rates at internal and external boundaries of a diverging channel with a finite element incompressible Navier Stokes model.'
     cli_args = "Outputs/file_base='diverging_INSFE'"
@@ -20,15 +20,16 @@
   [insfv_straight]
     type = CSVDiff
     input = conservation_INSFV.i
-    csvdiff =  straight_INSFV.csv
+    csvdiff = straight_INSFV.csv
     abs_zero = 1e-8
     requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated straight channel with a finite volume incompressible Navier Stokes model.'
-    cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_INSFV' -pc_type lu -pc_factor_shift_type NONZERO"
+    cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_INSFV' -pc_type lu "
+               "-pc_factor_shift_type NONZERO"
   []
   [linearfv]
     type = CSVDiff
     input = conservation_LinearFV.i
-    csvdiff =  conservation_LinearFV_out.csv
+    csvdiff = conservation_LinearFV_out.csv
     abs_zero = 1e-8
     requirement = 'The system shall be able to compute flow rates and prove mass conservation at external boundaries.'
     max_threads = 1 # see libmesh issue #3808
@@ -50,7 +51,7 @@
       csvdiff = diverging_INSFV_quad_rz.csv
       abs_zero = 1e-8
       detail = 'with a quadrilateral mesh in RZ geometry,'
-      cli_args = "Problem/coord_type=RZ Outputs/file_base='diverging_INSFV_quad_rz'"
+      cli_args = "Mesh/coord_type=RZ Outputs/file_base='diverging_INSFV_quad_rz'"
     []
     [insfv_tri_xy]
       type = CSVDiff
@@ -58,7 +59,9 @@
       csvdiff = diverging_INSFV_tri_xy.csv
       abs_zero = 1e-8
       detail = 'with a triangular mesh in XY geometry,'
-      cli_args = "Mesh/diverging_mesh/file='expansion_tri.e' Outputs/file_base='diverging_INSFV_tri_xy' GlobalParams/two_term_boundary_expansion=false"
+      cli_args = "Mesh/diverging_mesh/file='expansion_tri.e' "
+                 "Outputs/file_base='diverging_INSFV_tri_xy' "
+                 "GlobalParams/two_term_boundary_expansion=false"
     []
     [insfv_quad_xy_upwind]
       type = CSVDiff
@@ -66,7 +69,8 @@
       csvdiff = diverging_INSFV_quad_xy_upwind.csv
       abs_zero = 1e-8
       detail = 'with upwind interpolation of advected quantities,'
-      cli_args = "advected_interp_method='upwind' Outputs/file_base='diverging_INSFV_quad_xy_upwind' Postprocessors/inactive='inlet_momentum_x inlet_momentum_y'"
+      cli_args = "advected_interp_method='upwind' Outputs/file_base='diverging_INSFV_quad_xy_upwind' "
+                 "Postprocessors/inactive='inlet_momentum_x inlet_momentum_y'"
     []
     [insfv_quad_xy_noslip]
       type = CSVDiff
@@ -74,7 +78,8 @@
       csvdiff = diverging_INSFV_quad_xy_noslip.csv
       abs_zero = 1e-8
       detail = 'with no-slip boundary conditions, for which momentum and energy will be dissipated at the wall.'
-      cli_args = "FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip'"
+      cli_args = "FVBCs/inactive='free-slip-u free-slip-v' "
+                 "Outputs/file_base='diverging_INSFV_quad_xy_noslip'"
     []
     [insfv_quad_xy_noslip_refined]
       type = CSVDiff
@@ -82,7 +87,8 @@
       csvdiff = diverging_INSFV_quad_xy_noslip.csv
       abs_zero = 1e-8
       detail = 'with uniform refinement near an internal interface.'
-      cli_args = "-r 1 FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip'"
+      cli_args = "-r 1 FVBCs/inactive='free-slip-u free-slip-v' "
+                 "Outputs/file_base='diverging_INSFV_quad_xy_noslip'"
     []
     [initial]
       type = CSVDiff
@@ -90,13 +96,18 @@
       csvdiff = diverging_INSFV_initial.csv
       abs_zero = 1e-8
       detail = 'at the very beginning of the simulation, with the initialized velocities'
-      cli_args = "Variables/temperature/initial_condition=290 Postprocessors/inlet_mass_variable/execute_on=initial Postprocessors/inlet_mass_constant/execute_on=initial Postprocessors/inlet_mass_matprop/execute_on=initial Postprocessors/outlet_mass/execute_on=INITIAL Outputs/file_base=diverging_INSFV_initial"
+      cli_args = "Variables/temperature/initial_condition=290 "
+                 "Postprocessors/inlet_mass_variable/execute_on=initial "
+                 "Postprocessors/inlet_mass_constant/execute_on=initial "
+                 "Postprocessors/inlet_mass_matprop/execute_on=initial "
+                 "Postprocessors/outlet_mass/execute_on=INITIAL "
+                 "Outputs/file_base=diverging_INSFV_initial"
     []
   []
   [pinsfv_straight]
     type = CSVDiff
     input = conservation_PINSFV.i
-    csvdiff =  straight_PINSFV.csv
+    csvdiff = straight_PINSFV.csv
     abs_zero = 1e-8
     requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated straight channel with a finite volume porous media incompressible Navier Stokes model.'
     cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_PINSFV'"
@@ -117,7 +128,7 @@
       csvdiff = diverging_PINSFV_quad_rz.csv
       abs_zero = 1e-8
       detail = 'with a quadrilateral mesh in RZ geometry,'
-      cli_args = "Problem/coord_type=RZ Outputs/file_base='diverging_PINSFV_quad_rz'"
+      cli_args = "Mesh/coord_type=RZ Outputs/file_base='diverging_PINSFV_quad_rz'"
     []
     [pinsfv_quad_xy_upwind]
       type = CSVDiff
@@ -125,7 +136,9 @@
       csvdiff = diverging_PINSFV_quad_xy_upwind.csv
       abs_zero = 1e-8
       detail = 'with upwind interpolation of advected quantities,'
-      cli_args = "advected_interp_method='upwind' Outputs/file_base='diverging_PINSFV_quad_xy_upwind' Postprocessors/inactive='inlet_momentum_x inlet_momentum_y'"
+      cli_args = "advected_interp_method='upwind' "
+                 "Outputs/file_base='diverging_PINSFV_quad_xy_upwind' "
+                 "Postprocessors/inactive='inlet_momentum_x inlet_momentum_y'"
     []
     [pinsfv_quad_xy_noslip]
       type = CSVDiff
@@ -133,7 +146,8 @@
       csvdiff = diverging_PINSFV_quad_xy_noslip.csv
       abs_zero = 1e-8
       detail = 'and with no-slip boundary conditions, for which momentum and energy will be dissipated at the wall.'
-      cli_args = "FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_PINSFV_quad_xy_noslip'"
+      cli_args = "FVBCs/inactive='free-slip-u free-slip-v' "
+                 "Outputs/file_base='diverging_PINSFV_quad_xy_noslip'"
     []
   []
 

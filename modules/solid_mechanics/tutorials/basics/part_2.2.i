@@ -6,14 +6,11 @@
   displacements = 'disp_r disp_z'
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = necking_quad4.e
   uniform_refine = 1
   second_order = true
+  coord_type = RZ
 []
 
 [Physics/SolidMechanics/QuasiStatic]

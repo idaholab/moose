@@ -56,9 +56,6 @@ rpv_blocks = '3'
     input = rename_inner_rpv_bdy
     block = 0
   []
-[]
-
-[Problem]
   coord_type = RZ
 []
 

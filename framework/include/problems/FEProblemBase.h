@@ -891,6 +891,15 @@ public:
   void projectInitialConditionOnCustomRange(libMesh::ConstElemRange & elem_range,
                                             ConstBndNodeRange & bnd_node_range);
 
+  /**
+   * Project initial conditions onto a specified set of elements and boundary nodes
+   * for a user-defined subset of variables.
+   */
+  void projectInitialConditionOnCustomRangeForSpecificVars(
+      libMesh::ConstElemRange & elem_range,
+      ConstBndNodeRange & bnd_node_range,
+      const std::set<unsigned int> & selected_var_nums);
+
   // Materials /////
   virtual void addMaterial(const std::string & material_name,
                            const std::string & name,

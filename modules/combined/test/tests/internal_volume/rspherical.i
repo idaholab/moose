@@ -12,13 +12,10 @@
   displacements = 'disp_x'
 []
 
-[Problem]
-  coord_type = RSPHERICAL
-[]
-
 [Mesh]
   file = meshes/rspherical.e
   construct_side_list_from_node_list = true
+  coord_type = RSPHERICAL
 []
 
 [Functions]
