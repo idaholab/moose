@@ -14,6 +14,8 @@ scalar coefficient on the boundary.
 
 ## Example Input File Syntax
 
+!listing test/tests/mfem/kernels/diffusion.i block=BCs
+
 !syntax parameters /BCs/MFEMScalarDirichletBC
 
 !syntax inputs /BCs/MFEMScalarDirichletBC
