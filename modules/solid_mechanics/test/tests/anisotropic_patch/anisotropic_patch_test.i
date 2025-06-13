@@ -23,7 +23,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  block = '1 2 3 4 5 6 7'
 []
 
 [Mesh]#Comment

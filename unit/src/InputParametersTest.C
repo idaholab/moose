@@ -182,6 +182,9 @@ TEST(InputParametersTest, applyParameter)
   p2.set<MultiMooseEnum>("enum") = "bar";
   p1.applyParameter(p2, "enum");
   EXPECT_TRUE(p1.get<MultiMooseEnum>("enum").contains("bar"));
+
+  // applyParameter should throw error if input parameter doesn't match any valid parameters
+  EXPECT_THROW(p1.applyParameter(p2, "invalid_param"), std::exception);
 }
 
 TEST(InputParametersTest, applyParametersVector)

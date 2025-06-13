@@ -10,12 +10,12 @@
 #pragma once
 
 // MOOSE includes
-#include "OversampleOutput.h"
+#include "SampledOutput.h"
 
 /**
  *
  */
-class VTKOutput : public OversampleOutput
+class VTKOutput : public SampledOutput
 {
 public:
   static InputParameters validParams();

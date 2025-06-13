@@ -9,34 +9,34 @@
 []
 
 [Variables]
-  [./diffused]
+  [diffused]
     order = SECOND
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = diffused
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./foo]
+  [foo]
     variable = diffused
     type = ConstantPointSource
     value = 1
     point = '0.3 0.3 0.0'
-  [../]
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DirichletBC
     variable = diffused
     boundary = 'bottom left right top'
     value = 0.0
-  [../]
+  []
 []
 
 [Executioner]
@@ -50,30 +50,32 @@
   marker = marker
   steps = 2
   initial_marker = marker
-  [./Indicators]
-    [./indicator]
+  [Indicators]
+    [indicator]
       type = GradientJumpIndicator
       variable = diffused
-    [../]
-  [../]
-  [./Markers]
-    [./marker]
+    []
+  []
+  [Markers]
+    [marker]
       type = ErrorFractionMarker
       indicator = indicator
       refine = 0.5
-    [../]
-  [../]
+    []
+  []
 []
 
 [Outputs]
   execute_on = 'timestep_end'
   exodus = true
-  [./os2]
+  [os2]
     type = Exodus
     refinements = 2
-  [../]
-  [./os4]
+    hide = 'marker indicator'
+  []
+  [os4]
     type = Exodus
     refinements = 4
-  [../]
+    hide = 'marker indicator'
+  []
 []

@@ -8,7 +8,6 @@
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
-  block = 1
   displacements = 'disp_x disp_y disp_z'
 []
 
