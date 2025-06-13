@@ -117,6 +117,15 @@ public:
                       InputParameters & parameters) override;
 
   /**
+   * Override of ExternalProblem::addElementalFieldVariable to be a no-op because we do not use the
+   * Marker/Indicator objects designed to work with libMesh infrastructure
+   */
+  void
+  addElementalFieldVariable(const std::string &, const std::string &, InputParameters &) override
+  {
+  }
+
+  /**
    * Override of ExternalProblem::addKernel. Uses ExternalProblem::addKernel to create a
    * MFEMGeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
    * to be used in the MFEM solve.
@@ -158,6 +167,10 @@ public:
   void addMFEMPreconditioner(const std::string & user_object_name,
                              const std::string & name,
                              InputParameters & parameters);
+
+  void addIndicator(const std::string & type,
+                    const std::string & name,
+                    InputParameters & parameters) override;
 
   /**
    * Method called in AddMFEMSolverAction which will create the solver.

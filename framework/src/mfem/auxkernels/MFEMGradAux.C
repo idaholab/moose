@@ -36,8 +36,20 @@ MFEMGradAux::MFEMGradAux(const InputParameters & parameters)
 void
 MFEMGradAux::execute()
 {
+  // TODO: should be called from outside
+  update();
+
   _result_var = 0.0;
   _grad.AddMult(_source_var, _result_var, _scale_factor);
 }
+
+void
+MFEMGradAux::update()
+{
+  _grad.Update();
+  _grad.Assemble();
+  _grad.Finalize();
+}
+
 
 #endif

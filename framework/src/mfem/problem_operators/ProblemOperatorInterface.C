@@ -52,6 +52,50 @@ ProblemOperatorInterface::SetTrialVariablesFromTrueVectors()
   }
 }
 
+void
+ProblemOperatorInterface::UpdateAfterRefinement()
+{
+  // Update the FE spaces
+  _problem.updateFESpaces();
+
+  if ( _problem.pmesh->Nonconforming() )
+  {
+    _problem.pmesh->Rebalance();
+    // Update FESpaces again to account for rebalancing
+    _problem.updateFESpaces();
+  }
+
+  // Reset the grid functions
+  SetGridFunctions();
+}
+
+void
+ProblemOperatorInterface::UniformRefinement(int num_refinements)
+{
+  // Uniformly refine the mesh
+  for (int i=0; i<num_refinements; i++)
+  {
+    _problem.pmesh->UniformRefinement();
+    UpdateAfterRefinement();
+  }
+}
+
+int
+ProblemOperatorInterface::GetProblemSize()
+{
+  // update the global block offsets first
+  _global_block_true_offsets.SetSize(_trial_variables.size() + 1);
+  _global_block_true_offsets[0] = 0;
+  for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
+  {
+     _global_block_true_offsets[ind + 1] = _trial_variables.at(ind)->ParFESpace()->GlobalTrueVSize();
+  }
+  _global_block_true_offsets.PartialSum();
+
+  // return the last element - this is the sum of all the FESpace sizes
+  return _global_block_true_offsets[ _trial_variables.size() ];
+}
+
 }
 
 #endif

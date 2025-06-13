@@ -45,6 +45,7 @@ public:
   virtual void BuildLinearForms();
   virtual void BuildBilinearForms();
   virtual void BuildMixedBilinearForms();
+  virtual void UpdateEquationSystem();
   virtual void BuildEquationSystem();
 
   // Form linear system, with essential boundary conditions accounted for
@@ -231,7 +232,7 @@ public:
   void AddTrialVariableNameIfMissing(const std::string & trial_var_name) override;
 
   virtual void SetTimeStep(double dt);
-  virtual void UpdateEquationSystem();
+  virtual void RebuildEquationSystem();
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   virtual void BuildBilinearForms() override;
