@@ -8,6 +8,14 @@
     csvdiff = 'test_converge_out.csv'
     requirement = 'The system shall be allow arbitrary convergence criteria based on Convergence objects, functions, post-processors, and constants.'
   []
+  [no_error_div]
+    type = RunApp
+    input = 'test_converge.i'
+    cli_args = 'Convergence/parsed_conv/convergence_expression=1'
+    requirement = 'The system shall be able to parse expressions that do not include any other convergence objects.'
+    # same output files
+    prereq = test_converge
+  []
   [test_diverge_default]
     type = RunException
     input = 'test_diverge_default.i'
