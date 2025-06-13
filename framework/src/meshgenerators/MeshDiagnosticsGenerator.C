@@ -243,7 +243,7 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
     // side next to it, in the same sideset
     // We'll consider pi / 2 to be the most steep angle we'll pass
     unsigned int num_normals_flipping = 0;
-    Real steepest_side_angles = 1;
+    Real steepest_side_angles = 0;
     for (const auto & [elem_id, side_id, side_bid] : side_tuples)
     {
       if (side_bid != bid)
@@ -285,7 +285,7 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
             {
               num_normals_flipping++;
               steepest_side_angles =
-                  std::min(std::acos(neigh_side_normal * side_normal), steepest_side_angles);
+                  std::max(std::acos(neigh_side_normal * side_normal), steepest_side_angles);
               if (num_normals_flipping <= _num_outputs)
                 _console << "Side normals changed by more than pi/2 for sideset "
                          << sideset_full_name << " between side " << side_id << " of element "
@@ -302,7 +302,8 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
     if (num_normals_flipping)
       message = "Sideset " + sideset_full_name +
                 " has two neighboring sides with a very large angle. Largest angle detected: " +
-                std::to_string(steepest_side_angles) + " rad.";
+                std::to_string(steepest_side_angles) + " rad (" +
+                std::to_string(steepest_side_angles * 180 / libMesh::pi) + " degrees).";
     else
       message = "Sideset " + sideset_full_name +
                 " does not appear to have side-to-neighbor-side orientation flips. All neighbor "
@@ -1464,7 +1465,11 @@ MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> 
     here->paulbourke.net/geometry/pointlineplane/
   */
   if (mesh->mesh_dimension() != 3)
-    mooseError("The edge intersection algorithm only works with 3D meshes");
+  {
+    mooseWarning("The edge intersection algorithm only works with 3D meshes. "
+                 "'examine_non_matching_edges' is skipped");
+    return;
+  }
   if (!mesh->is_serial())
     mooseError("Only serialized/replicated meshes are supported");
   unsigned int num_intersecting_edges = 0;

@@ -311,6 +311,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _pressure_variable_relaxation(getParam<Real>("pressure_variable_relaxation")),
     _pin_pressure(getParam<bool>("pin_pressure")),
     _pressure_pin_value(getParam<Real>("pressure_pin_value")),
+    _pressure_pin_dof(libMesh::invalid_uint),
     _has_energy_system(isParamValid("energy_system")),
     _energy_equation_relaxation(getParam<Real>("energy_equation_relaxation")),
     _energy_l_abs_tol(getParam<Real>("energy_l_abs_tol")),
