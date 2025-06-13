@@ -102,7 +102,6 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   {
     auto object_ptr = getUserObject<MFEMIntegratedBC>(name).getSharedPtr();
     auto bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(object_ptr);
-    bc->getBoundaries();
     if (getProblemData().eqn_system)
     {
       getProblemData().eqn_system->AddIntegratedBC(std::move(bc));
@@ -117,7 +116,6 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   {
     auto object_ptr = getUserObject<MFEMEssentialBC>(name).getSharedPtr();
     auto mfem_bc = std::dynamic_pointer_cast<MFEMEssentialBC>(object_ptr);
-    mfem_bc->getBoundaries();
     if (getProblemData().eqn_system)
     {
       getProblemData().eqn_system->AddEssentialBC(std::move(mfem_bc));
