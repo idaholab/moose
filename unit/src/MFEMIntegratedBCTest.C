@@ -1,5 +1,8 @@
 #ifdef MFEM_ENABLED
 
+#include "libmesh/ignore_warnings.h"
+#include "mfem/miniapps/common/mfem-common.hpp"
+#include "libmesh/restore_warnings.h"
 #include "MFEMObjectUnitTest.h"
 #include "MFEMScalarFunctorBoundaryIntegratedBC.h"
 #include "MFEMVectorBoundaryIntegratedBC.h"
@@ -11,7 +14,15 @@
 class MFEMIntegratedBCTest : public MFEMObjectUnitTest
 {
 public:
-  MFEMIntegratedBCTest() : MFEMObjectUnitTest("MooseUnitApp") {}
+  MFEMIntegratedBCTest() : MFEMObjectUnitTest("MooseUnitApp")
+  {
+    // Register a dummy (Par)GridFunction for the variable the BCs apply to
+    auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
+    mfem::common::H1_FESpace fe(pm, 1);
+    mfem::GridFunction gf(&fe);
+    auto pgf = std::make_shared<mfem::ParGridFunction>(pm, &gf);
+    _mfem_problem->getProblemData().gridfunctions.Register("test_variable_name", pgf);
+  }
 };
 
 /**
