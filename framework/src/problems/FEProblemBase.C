@@ -524,6 +524,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   //  We will toggle this to false when doing residual evaluations
   ADReal::do_derivatives = true;
 
+  // Disable refinement/coarsening in EquationSystems::reinit because we already do this ourselves
+  es().disable_refine_in_reinit();
+
   _solver_params.reserve(_num_nl_sys + _num_linear_sys);
   // Default constructor fine for nonlinear because it will be populated later by framework
   // executioner/solve object parameters
@@ -1519,7 +1522,7 @@ FEProblemBase::timestepSetup()
       //     re-displaced, we can perform our geometric searches, which will aid in determining the
       //     sparsity pattern of the matrix held by the libMesh::ImplicitSystem held by the
       //     NonlinearSystem held by this
-      meshChangedHelper(/*intermediate_change=*/true);
+      meshChangedHelper(/*intermediate_change=*/true, /*changed_through_amr=*/true);
     }
 
     // u4) Now that all the geometric searches have been done (both undisplaced and displaced),
@@ -7920,7 +7923,21 @@ FEProblemBase::adaptMesh()
     {
       mesh_changed = true;
 
-      meshChangedHelper(true); // This may be an intermediate change
+      meshChangedHelper(/*intermediate_change=*/true, /*changed_through_amr=*/true);
+      // Once vectors are restricted, we can delete
+      // children of coarsened elements
+      _mesh.getMesh().contract();
+      // Finally clean refinement flags so that if someone tries to project vectors again without
+      // an intervening mesh refinement to clean flags they won't run into trouble
+      MeshRefinement refinement(_mesh.getMesh());
+      refinement.clean_refinement_flags();
+      if (_displaced_mesh)
+      {
+        _displaced_mesh->getMesh().contract();
+        MeshRefinement displaced_refinement(_displaced_mesh->getMesh());
+        displaced_refinement.clean_refinement_flags();
+      }
+
       _cycles_completed++;
     }
     else
@@ -8005,11 +8022,11 @@ FEProblemBase::meshChanged()
 {
   TIME_SECTION("meshChanged", 3, "Handling Mesh Changes");
 
-  this->meshChangedHelper();
+  this->meshChangedHelper(/*intermediate_change=*/false, /*changed_through_amr=*/false);
 }
 
 void
-FEProblemBase::meshChangedHelper(bool intermediate_change)
+FEProblemBase::meshChangedHelper(const bool intermediate_change, const bool changed_through_amr)
 {
   TIME_SECTION("meshChangedHelper", 5);
 
@@ -8032,8 +8049,20 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   if (intermediate_change)
     es().reinit_solutions();
   else
-  {
     es().reinit();
+
+  if (changed_through_amr)
+  {
+    // Once vectors are restricted, we can delete children of coarsened elements
+    _mesh.getMesh().contract();
+    // Finally clear refinement flags so that if someone tries to project vectors again without
+    // an intervening mesh refinement to clear flags they won't run into trouble
+    MeshRefinement refinement(_mesh.getMesh());
+    refinement.clean_refinement_flags();
+  }
+
+  if (!intermediate_change)
+  {
     // Since the mesh has changed, we need to make sure that we update any of our
     // MOOSE-system specific data.
     for (auto & sys : _solver_systems)
@@ -8066,7 +8095,7 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
   if (_displaced_problem)
   {
-    _displaced_problem->meshChanged();
+    _displaced_problem->meshChanged(changed_through_amr);
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
   }
 
@@ -8873,7 +8902,7 @@ FEProblemBase::uniformRefine()
   if (_displaced_problem)
     Adaptivity::uniformRefine(&_displaced_problem->mesh(), 1);
 
-  meshChangedHelper(/*intermediate_change=*/false);
+  meshChangedHelper(/*intermediate_change=*/false, /*changed_through_amr=*/true);
 }
 
 void
