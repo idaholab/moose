@@ -604,7 +604,7 @@ class TestHarness:
             tester.setStatus(tester.fail, 'Max Fails Exceeded')
         elif self.num_failed > self.options.max_fails:
             tester.setStatus(tester.fail, 'Max Fails Exceeded')
-        elif tester.parameters().isValid('have_errors') and tester.parameters()['have_errors']:
+        elif tester.parameters().isValid('_have_parse_errors') and tester.parameters()['_have_parse_errors']:
             tester.setStatus(tester.fail, 'Parser Error')
 
     # This method splits a lists of tests into two pieces each, the first piece will run the test for
@@ -929,7 +929,8 @@ class TestHarness:
         # 1 - Initial tracking of version
         # 2 - Added 'unique_test_id' (tests/*/tests/*/unique_test_id) to Job output if set
         # 3 - Added 'json_metadata' (tests/*/tests/*/tester/json_metadata) to Tester output
-        testharness = {'version': 3,
+        # 4 - Added 'validation' (tests/*/tests/validation) to Job output if set
+        testharness = {'version': 4,
                        'start_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                        'end_time': None,
                        'args': sys.argv[1:],

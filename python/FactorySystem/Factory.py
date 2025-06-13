@@ -24,6 +24,10 @@ class Factory:
         return self.objects[type].validParams()
 
 
+    def augmentParams(self, type, params):
+        return self.objects[type].augmentParams(params)
+
+
     def create(self, type, *args, **kwargs):
         return self.objects[type](*args, **kwargs)
 

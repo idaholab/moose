@@ -8,7 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, re, time, sys
+import os, re, time
 import moosetree
 import pyhit
 
@@ -38,7 +38,6 @@ class Parser:
     def __init__(self, factory, warehouse, check_for_type=True):
         self.factory = factory
         self.warehouse = warehouse
-        self.params_parsed = set()
         self._check_for_type = check_for_type
         self.root = None
         self.errors = []
@@ -69,54 +68,75 @@ class Parser:
         else:
             self.errors.append('{}: {}'.format(self.fname, msg))
 
-    def extractParams(self, filename, params, getpot_node):
-        have_err = False
+    def extractParams(self, params, getpot_node):
+        # State that is kept within the parameters so that we
+        # can call this multiple times as we add in more parameters
+        if not params.isValid('_have_parse_errors'):
+            params.addPrivateParam('_have_parse_errors', False)
+        if not params.isValid('_params_parsed'):
+            params.addPrivateParam('_params_parsed', set())
+        params_parsed = params['_params_parsed']
 
         # Populate all of the parameters of this test node
         # using the GetPotParser.  We'll loop over the parsed node
         # so that we can keep track of ignored parameters as well
-        local_parsed = set()
+        have_err = False
         for key, value in getpot_node.params():
-            self.params_parsed.add(os.path.join(getpot_node.fullpath, key))
-            local_parsed.add(key)
-            if key in params:
-                if params.type(key) == list:
-                    if isinstance(value, str):
-                        value = value.replace('\n', ' ')
-                        params[key] = re.split(r'\s+', value)
-                    else:
-                        params[key] = [str(value)]
+            param_path = os.path.join(getpot_node.fullpath, key)
+
+            # Parameter has already been parsed in the past; used
+            # when calling this multiple times
+            if param_path in params_parsed:
+                continue
+            params_parsed.add(key)
+
+            # Parameter is unused
+            if key not in params:
+                continue
+
+            if params.type(key) == list:
+                if isinstance(value, str):
+                    value = value.replace('\n', ' ')
+                    params[key] = re.split(r'\s+', value)
                 else:
-                    if isinstance(value, str) and re.match('".*"', value):   # Strip quotes
-                        params[key] = value[1:-1]
-                    else:
-                        if key in params.strict_types:
-                            # The developer wants to enforce a specific type without setting a valid value
-                            strict_type = params.strict_types[key]
-
-                            if strict_type == time.struct_time:
-                                # Dates have to be parsed
-                                try:
-                                    params[key] = time.strptime(value, "%m/%d/%Y")
-                                except ValueError:
-                                    self.error("invalid date value: '{}=\"{}\"'".format(child.fullpath, value), node=child)
-                                    have_err = True
-                            elif strict_type != type(value):
-                                self.error("wrong data type for parameter value: '{}=\"{}\"'".format(child.fullpath, value), node=child)
-                                have_err = True
-                        else:
-                            # Otherwise, just do normal assignment
-                            params[key] = value
+                    params[key] = [str(value)]
             else:
-                self.error('unused parameter "{}"'.format(key), node=getpot_node, param=key)
+                if isinstance(value, str) and re.match('".*"', value):   # Strip quotes
+                    params[key] = value[1:-1]
+                else:
+                    if key in params.strict_types:
+                        # The developer wants to enforce a specific type without setting a valid value
+                        strict_type = params.strict_types[key]
 
-        # Make sure that all required parameters are supplied
-        required_params_missing = params.required_keys() - local_parsed
-        if len(required_params_missing) > 0:
-            self.error('required missing parameter(s): ' + ', '.join(required_params_missing))
-            have_err = True
+                        if strict_type == time.struct_time:
+                            # Dates have to be parsed
+                            try:
+                                params[key] = time.strptime(value, "%m/%d/%Y")
+                            except ValueError:
+                                self.error("invalid date value: '{}=\"{}\"'".format(child.fullpath, value), node=child)
+                                have_err = True
+                        elif strict_type != type(value):
+                            self.error("wrong data type for parameter value: '{}=\"{}\"'".format(child.fullpath, value), node=child)
+                            have_err = True
+                    else:
+                        # Otherwise, just do normal assignment
+                        params[key] = value
 
-        params['have_errors'] = have_err
+        if have_err:
+            params['_have_parse_errors'] = True
+
+    def checkParams(self, params, node):
+        # Check for unused parameters
+        for key, _ in node.params():
+            if key not in params:
+                self.error(f'unused parameter "{key}"', node=node, param=key)
+
+        # Check for missing required parameters
+        params_parsed = params['_params_parsed']
+        missing = params.required_keys() - params_parsed
+        if len(missing) > 0:
+            self.error('missing required parameter(s): ' + ', '.join(missing))
+            params['_have_parse_errors'] = True
 
     # private:
     def _parseNode(self, filename, node, default_values):
@@ -138,8 +158,8 @@ class Parser:
                     else:
                       params[key] = value
 
-            # Extract the parameters from the Getpot node
-            self.extractParams(filename, params, node)
+            # Extract the parameters from the hit node
+            self.extractParams(params, node)
 
             # Add factory and warehouse as private params of the object
             params.addPrivateParam('_factory', self.factory)
@@ -149,12 +169,30 @@ class Parser:
 
             # Build the object
             try:
+                # Augment the parameters if needed. This allows an object
+                # to add additional parameters depending on its own parameters
+                # that have just been parsed
+                params = self.factory.augmentParams(moose_type, params)
+
+                # Extract any new parameters that may have been added
+                # from augmentParams()
+                self.extractParams(params, node)
+
+                # Check for unused parameters and parameter parse errors
+                self.checkParams(params, node)
+
+                # Build the object
                 moose_object = self.factory.create(moose_type, node.name, params)
 
                 # Put it in the warehouse
                 self.warehouse.addObject(moose_object)
             except Exception as e:
-                self.error('failed to create Tester: {}'.format(e))
+                e_split = str(e).splitlines()
+                messages = [f'Failed to create Tester: {e_split[0]}']
+                if len(e_split) > 1:
+                    messages += [f'  {v}' for v in e_split[1:]]
+                for message in messages:
+                    self.error(message)
 
         # Are we in a tree node that "looks" like it should contain a buildable object?
         elif node.parent.fullpath == 'Tests' and self._check_for_type and not self._looksLikeValidSubBlock(node):

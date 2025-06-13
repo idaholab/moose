@@ -69,7 +69,7 @@ class InputParameters:
         # this InputParameters object
         for key in add_params.keys():
             if add_params.isRequired(key):
-                self.addRequiredParam(key, add_params[key], add_params.desc[key])
+                self.addRequiredParam(key, add_params.desc[key])
             elif add_params.isValid(key):
                 self.addParam(key, add_params[key], add_params.desc[key])
             else:

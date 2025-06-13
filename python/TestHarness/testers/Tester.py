@@ -7,11 +7,12 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os, sys, shutil, json
+import re, os, sys, shutil, json, importlib.util
 import mooseutils
 from TestHarness import OutputInterface, util
 from TestHarness.StatusSystem import StatusSystem
 from FactorySystem.MooseObject import MooseObject
+from FactorySystem.InputParameters import InputParameters
 from pathlib import Path
 from dataclasses import dataclass
 
@@ -116,6 +117,63 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('hpc', True, 'Set to false to not run with HPC schedulers (PBS and slurm)')
         params.addParam('hpc_mem_per_cpu', "Memory requirement per CPU to use for HPC submission")
 
+        params.addParam("validation_test", None, "List of validation scripts to run with this test")
+
+        return params
+
+    @staticmethod
+    def augmentParams(params):
+        # Augment our parameters with parameters from the validation test, if we
+        # have any validation tests
+        script = params['validation_test']
+        validation_classes = []
+        if script:
+            # Sanity checks
+            if '..' in script:
+                message = f'validation_test={script} out of test directory'
+                raise ValueError(message)
+            path = os.path.abspath(script)
+            if not os.path.exists(script):
+                message = f'validation_test={path} not found'
+                raise FileNotFoundError(message)
+
+            # Load the script; throw an exception here if it fails
+            # so that the Parser can report a reasonable error
+            spec = importlib.util.spec_from_file_location('validation', path)
+            module = importlib.util.module_from_spec(spec)
+            try:
+                spec.loader.exec_module(module)
+            except Exception as e:
+                raise ImportError(f'In validation_test={path}:\n{e}')
+
+            # Store each of the classes in the script that derives from
+            # ValidationCase, and add their parameters to this Tester's
+            # parameters
+            validation_classes = []
+            subclasses = module.ValidationCase._subclasses.copy()
+            module.ValidationCase._subclasses = []
+            validation_params = InputParameters()
+            for subclass in subclasses:
+                validation_params = subclass.validParams()
+
+                # Don't allow validation parameters that override
+                # parameters from the Tester
+                for key in validation_params.keys():
+                    if key in params:
+                        raise Exception(f'Duplicate parameter "{key}" from validation test')
+
+                # Collect the cumulative validation params
+                validation_params += subclass.validParams()
+                # Store the class so that it can be used later
+                validation_classes.append(subclass)
+
+            # Extend the Tester parameters
+            params += validation_params
+
+        # Store the classes that are used in validation so that they
+        # can be constructed within the Job at a later time
+        params.addPrivateParam('_validation_classes', validation_classes)
+
         return params
 
     # This is what will be checked for when we look for valid testers
@@ -173,6 +231,8 @@ class Tester(MooseObject, OutputInterface):
 
         # Paths to additional JSON metadata that can be collected
         self.json_metadata: dict[str, Tester.JSONMetadata] = {}
+
+        self._validation_classes = self.parameters()['_validation_classes']
 
     def getStatus(self):
         return self.test_status.getStatus()

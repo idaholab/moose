@@ -9,7 +9,6 @@
 
 // MOOSE includes
 #include "CylinderComponent.h"
-#include "RotationMatrix.h"
 
 registerMooseAction("MooseApp", CylinderComponent, "add_mesh_generator");
 // CylinderComponent is an example of ComponentPhysicsInterface
@@ -28,6 +27,7 @@ CylinderComponent::validParams()
   params += ComponentMaterialPropertyInterface::validParams();
   params += ComponentInitialConditionInterface::validParams();
   params += ComponentBoundaryConditionInterface::validParams();
+  params += ComponentMeshTransformHelper::validParams();
   params.addClassDescription("Cylindrical component.");
   MooseEnum dims("0 1 2 3");
   params.addRequiredParam<MooseEnum>("dimension",
@@ -37,8 +37,6 @@ CylinderComponent::validParams()
                                      "a 3D cylinder (not implemented)");
   params.addRequiredRangeCheckedParam<Real>("radius", "radius>0", "Radius of the cylinder");
   params.addRequiredRangeCheckedParam<Real>("length", "length>0", "Length/Height of the cylinder");
-  params.addRequiredParam<Point>("position", "Positional offset of the cylinder");
-  params.addRequiredParam<Point>("direction", "Direction of the cylinder");
 
   params.addRequiredParam<unsigned int>("n_axial", "Number of axial elements of the cylinder");
   params.addParam<unsigned int>("n_radial", "Number of radial elements of the cylinder");
@@ -55,6 +53,7 @@ CylinderComponent::CylinderComponent(const InputParameters & params)
     ComponentMaterialPropertyInterface(params),
     ComponentInitialConditionInterface(params),
     ComponentBoundaryConditionInterface(params),
+    ComponentMeshTransformHelper(params),
     _radius(getParam<Real>("radius")),
     _height(getParam<Real>("length"))
 {
@@ -103,33 +102,7 @@ CylinderComponent::addMeshGenerators()
       paramError("n_azimuthal", "Should be provided in 3D");
   }
 
-  // Place mesh into position
-  {
-    InputParameters params = _factory.getValidParams("TransformGenerator");
-    params.set<MeshGeneratorName>("input") = _mg_names.back();
-    params.set<MooseEnum>("transform") = "TRANSLATE";
-    params.set<RealVectorValue>("vector_value") = getParam<Point>("position");
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "TransformGenerator", name() + "_translated", params);
-    _mg_names.push_back(name() + "_translated");
-  }
-  // Rotate the mesh as desired
-  {
-    InputParameters params = _factory.getValidParams("TransformGenerator");
-    params.set<MeshGeneratorName>("input") = _mg_names.back();
-    params.set<MooseEnum>("transform") = "ROTATE";
-    const RealVectorValue direction = getParam<Point>("direction");
-    const auto rotation_matrix =
-        RotationMatrix::rotVec1ToVec2<false>(RealVectorValue(1, 0, 0), direction);
-    RealVectorValue angles;
-    angles(0) = std::atan2(rotation_matrix(1, 0), rotation_matrix(0, 0));
-    angles(1) = std::asin(-rotation_matrix(2, 0));
-    angles(2) = std::atan2(rotation_matrix(2, 1), rotation_matrix(2, 2));
-    params.set<RealVectorValue>("vector_value") = angles / M_PI_2 * 90;
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "TransformGenerator", name() + "_rotated", params);
-    _mg_names.push_back(name() + "_rotated");
-  }
+  ComponentMeshTransformHelper::addMeshGenerators();
 }
 
 void

@@ -15,6 +15,7 @@
 #include "ComponentMaterialPropertyInterface.h"
 #include "ComponentInitialConditionInterface.h"
 #include "ComponentBoundaryConditionInterface.h"
+#include "ComponentMeshTransformHelper.h"
 
 /**
  * Cylinder on which one can define a Physics. The mesh is automatically created
@@ -23,7 +24,8 @@ class CylinderComponent : public virtual ActionComponent,
                           public ComponentPhysicsInterface,
                           public ComponentMaterialPropertyInterface,
                           public ComponentInitialConditionInterface,
-                          public ComponentBoundaryConditionInterface
+                          public ComponentBoundaryConditionInterface,
+                          public ComponentMeshTransformHelper
 {
 public:
   static InputParameters validParams();
