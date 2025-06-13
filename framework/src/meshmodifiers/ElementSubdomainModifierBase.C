@@ -156,7 +156,8 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
    *     (b3) Otherwise -> error.
    * (c) If `ic_strategy` is set, but both `ic_variables` and NPR are empty:
    *     (c1) If one component in `ic_strategy` == IC_POLYNOMIAL... -> mooseError
-   *     (c2) If one strategy is provided -> apply to all nonlinear variables.
+   *     (c2) If one strategy is provided (basically only work for `IC_DEFAULT`) -> apply to all
+   *      nonlinear variables.
    *     (c3) If more than one strategy is provided -> warning + use first for all.
    * (d) If `ic_strategy` has one value and `ic_variables` is provided -> apply to all
    * `ic_variables`.

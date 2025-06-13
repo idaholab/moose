@@ -57,6 +57,7 @@
     # --- new for setting IC --- #
     unsolved_blocks = '2'
     ic_strategy = "IC_POLYNOMIAL"
+
     nodal_patch_recovery_uo = 'u_patch'
   []
 []
@@ -69,8 +70,8 @@
     block = '1 2'
   []
   [u_recovered]
-    family = MONOMIAL
-    order = CONSTANT
+    family = LAGRANGE
+    order = FIRST
   []
 []
 
@@ -99,7 +100,7 @@
     type = ParsedAux
     variable = u_recovered
     coupled_variables = 'diff'
-    expression = 'diff^2'
+    expression = 'diff^2 -diff-0.5'
     execute_on = 'TIMESTEP_END'
   []
 []

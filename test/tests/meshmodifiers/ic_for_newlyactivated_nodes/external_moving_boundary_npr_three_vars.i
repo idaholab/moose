@@ -25,23 +25,6 @@
   []
 []
 
-[UserObjects]
-  [extrapolation_patch]
-    type = NodalPatchRecoveryVariable
-    patch_polynomial_order = FIRST
-    use_specific_elements = true
-    var = 'diff'
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-  [u_patch]
-    type = NodalPatchRecoveryVariable
-    patch_polynomial_order = FIRST
-    use_specific_elements = true
-    var = 'u_recovered'
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-[]
-
 [MeshModifiers]
   [moving_circle]
     type = CoupledVarThresholdElementSubdomainModifier
@@ -55,9 +38,7 @@
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
-    unsolved_blocks = '2'
-    ic_strategy = "IC_POLYNOMIAL"
-    nodal_patch_recovery_uo = 'u_patch'
+    ic_strategy = "IC_DEFAULT"
   []
 []
 
@@ -67,10 +48,6 @@
   []
   [proc]
     block = '1 2'
-  []
-  [u_recovered]
-    family = MONOMIAL
-    order = CONSTANT
   []
 []
 
@@ -95,25 +72,37 @@
     execute_on = initial
     block = '1 2'
   []
-  [u_recovered]
-    type = ParsedAux
-    variable = u_recovered
-    coupled_variables = 'diff'
-    expression = 'diff^2'
-    execute_on = 'TIMESTEP_END'
-  []
 []
 
 [Variables]
   [diff]
     order = FIRST
+    initial_condition = 10
+  []
+  [diff2]
+    order = FIRST
+    initial_condition = 20
+  []
+  [diff3]
+    order = FIRST
+    initial_condition = 50
   []
 []
 
 [Kernels]
   [diffusion]
     type = MatDiffusion
-    variable = diff
+    variable = 'diff'
+    diffusivity = 'k'
+  []
+  [diffusion2]
+    type = MatDiffusion
+    variable = 'diff2'
+    diffusivity = 'k'
+  []
+  [diffusion3]
+    type = MatDiffusion
+    variable = 'diff3'
     diffusivity = 'k'
   []
 []
@@ -129,14 +118,35 @@
 [BCs]
   [left]
     type = DirichletBC
-    variable = diff
+    variable = 'diff'
     boundary = left
     value = 10
   []
 
   [bottom]
     type = DirichletBC
-    variable = diff
+    variable = 'diff'
+    boundary = bottom
+    value = 0
+  []
+
+  [left2]
+    type = DirichletBC
+    variable = 'diff2'
+    boundary = left
+    value = 10
+  []
+
+  [bottom2]
+    type = DirichletBC
+    variable = 'diff2'
+    boundary = bottom
+    value = 0
+  []
+
+  [bottom3]
+    type = DirichletBC
+    variable = 'diff3'
     boundary = bottom
     value = 0
   []
