@@ -1,6 +1,10 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMKernel.h"
+#include "MFEMProblem.h"
+#include "libmesh/ignore_warnings.h"
+#include "mfem/miniapps/common/mesh_extras.hpp"
+#include "libmesh/restore_warnings.h"
 
 InputParameters
 MFEMKernel::validParams()
