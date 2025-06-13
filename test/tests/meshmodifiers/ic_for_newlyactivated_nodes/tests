@@ -51,6 +51,13 @@
       detail = 'set initial condition on the newly-activated nodes during simulation even for higher order elements.'
     []
 
+    [IC_for_auxiliary_monomial_variables]
+      type = 'Exodiff'
+      input = 'npr_IC_aux.i'
+      exodiff = 'npr_IC_aux_out.e npr_IC_aux_out.e-s002 npr_IC_aux_out.e-s003 npr_IC_aux_out.e-s004'
+      detail = 'set initial condition on the newly-activated elements during simulation.'
+    []
+
 
   []
 
