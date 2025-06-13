@@ -38,12 +38,12 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = temperature
-    coefficient = thermal_conductivity
+    coefficient = 1.0
   []
   [dT_dt]
     type = MFEMTimeDerivativeMassKernel
     variable = temperature
-    coefficient = volumetric_heat_capacity
+    coefficient = 1.0
   []
 []
 
@@ -53,7 +53,7 @@
     type = MFEMScalarDirichletBC
     variable = temperature
     boundary = '1'
-    value = 1.0
+    coefficient = 1.0
   []
   [top_convective]
     type = MFEMConvectiveHeatFluxBC
@@ -66,15 +66,7 @@
     type = MFEMScalarDirichletBC
     variable = temperature
     boundary = '2'
-    value = 0.0
-  []
-[]
-
-[FunctorMaterials]
-  [Substance]
-    type = MFEMGenericConstantFunctorMaterial
-    prop_names = 'thermal_conductivity volumetric_heat_capacity'
-    prop_values = '1.0 1.0'
+    coefficient = 0.0
   []
 []
 

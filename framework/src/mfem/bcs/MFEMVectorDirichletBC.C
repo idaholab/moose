@@ -13,7 +13,6 @@ MFEMVectorDirichletBC::validParams()
   return params;
 }
 
-// TODO: Currently assumes the vector function coefficient is 3D
 MFEMVectorDirichletBC::MFEMVectorDirichletBC(const InputParameters & parameters)
   : MFEMVectorDirichletBCBase(parameters)
 {

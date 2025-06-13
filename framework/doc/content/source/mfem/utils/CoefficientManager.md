@@ -19,7 +19,9 @@ to the MFEMProblem should do so using the `CoefficientManager::declareXXXCoeffic
 method to create a global coefficient object or `CoefficientManager::declarXXXProperty`
 method to create a material property with values limited to certain blocks of the domain.
 Coefficients (including piecewise material properties) can be retrieved with
-`getScalarCoefficient`, `getVectorCoefficient`, and/or `getMatrixCoefficient`.
+`getScalarCoefficient`, `getVectorCoefficient`, and/or
+`getMatrixCoefficient`. These methods can also parse numbers to create
+new constant coefficients.
 
 !if-end!
 
