@@ -1101,6 +1101,30 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
     }
   };
 
+  auto local2GlobalPair =
+      [&](const auto & local_vals1,
+          const auto & local_vals2,
+          std::vector<typename std::decay<decltype(local_vals1[0])>::type> & global_vals1,
+          std::vector<typename std::decay<decltype(local_vals2[0])>::type> & global_vals2) -> void
+  {
+    using Type1 = typename std::decay<decltype(local_vals1[0])>::type;
+    using Type2 = typename std::decay<decltype(local_vals2[0])>::type;
+
+    std::vector<std::vector<Type1>> gathered1;
+    std::vector<std::vector<Type2>> gathered2;
+
+    _mesh.comm().allgather(local_vals1, gathered1);
+    _mesh.comm().allgather(local_vals2, gathered2);
+
+    global_vals1.clear();
+    global_vals2.clear();
+    for (std::size_t i = 0; i < gathered1.size(); ++i)
+    {
+      global_vals1.insert(global_vals1.end(), gathered1[i].begin(), gathered1[i].end());
+      global_vals2.insert(global_vals2.end(), gathered2[i].begin(), gathered2[i].end());
+    }
+  };
+
   auto inICStrategy = [this](const ICStrategy & strategy)
   {
     return std::all_of(_ic_strategy.begin(),
@@ -1139,9 +1163,8 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
 
   if (inICStrategy(ICStrategy::IC_POLYNOMIAL_THRESHOLD))
   {
-    _centroids_of_elements.resize(_mesh.nElem());
-    _kd_tree_sequence_elem_id_map.resize(_mesh.nElem());
-    int i = 0;
+    std::vector<Point> local_centroids;
+    std::vector<dof_id_type> local_elem_ids;
     for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
     {
       // Skip if this is a reinitialized element
@@ -1153,28 +1176,22 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
         continue;
 
       BoundingBox bbox = elem->loose_bounding_box();
-
-      const Point & min_pt = bbox.first;
-      const Point & max_pt = bbox.second;
-
-      // Calculate box_vec
-      Point box_vec = max_pt - min_pt;
+      const Point box_vec = bbox.second - bbox.first;
       _min_diag_length = std::min(_min_diag_length, box_vec.norm());
 
-      _centroids_of_elements[i] = elem->vertex_average();
-
-      _kd_tree_sequence_elem_id_map[i] = elem->id();
-      i++;
+      local_centroids.push_back(elem->vertex_average());
+      local_elem_ids.push_back(elem->id());
     }
 
-    if (_radius_search_threshold < 0.0)
-      _radius_search_threshold = _nearby_element_threshold * _min_diag_length;
-
-    local2Global(_centroids_of_elements, _centroids_of_elements);
+    local2GlobalPair(
+        local_centroids, local_elem_ids, _centroids_of_elements, _kd_tree_sequence_elem_id_map);
 
     _kd_tree = new KDTree(_centroids_of_elements, _leaf_max_size);
 
     _mesh.comm().min(_min_diag_length); // TIMPI
+
+    if (_radius_search_threshold < 0.0)
+      _radius_search_threshold = _nearby_element_threshold * _min_diag_length;
 
     for (const auto & elem_id : _global_reinitialized_elems)
     {
