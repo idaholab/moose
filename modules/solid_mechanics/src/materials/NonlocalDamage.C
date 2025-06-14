@@ -45,8 +45,8 @@ NonlocalDamageTempl<is_ad>::initialSetup()
 
   if (!_local_damage_model)
     this->template paramError<>("damage_model",
-                              "Damage Model " + _local_damage_model_name +
-                                  " is not compatible with NonlocalDamage model");
+                                "Damage Model " + _local_damage_model_name +
+                                    " is not compatible with NonlocalDamage model");
 }
 
 template <bool is_ad>
