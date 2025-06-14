@@ -95,7 +95,7 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
   if (this->_pars.isParamSetByUser("use_substep"))
   {
     if (this->_pars.isParamSetByUser("use_substepping"))
-      this->template paramError(
+      this->paramError(
           "use_substep", "Remove this parameter and just keep `use_substepping` in the input");
 
     if (parameters.get<bool>("use_substep"))
@@ -109,13 +109,13 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
 
   if (this->_pars.isParamSetByUser("maximum_number_substeps") &&
       _use_substepping == SubsteppingType::NONE)
-    this->template paramError(
+    this->paramError(
         "maximum_number_substeps",
         "The parameter maximum_number_substeps can only be used when the substepping option "
         "(use_substepping) is not set to NONE");
 
   if (_adaptive_substepping && _use_substepping == SubsteppingType::NONE)
-    this->template paramError(
+    this->paramError(
         "adaptive_substepping",
         "The parameter adaptive_substepping can only be used when the substepping option "
         "(use_substepping) is not set to NONE");

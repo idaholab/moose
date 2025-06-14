@@ -42,7 +42,7 @@ PorousFlowThermalConductivityFromPorosityTempl<
                                    "dPorousFlow_porosity_qp_dvar"))
 {
   if (_num_phases != 1)
-    this->template paramError("fluid_phase",
+    this->paramError("fluid_phase",
                               "The Dictator proclaims that the number of phases is ",
                               _dictator.numPhases(),
                               " whereas this material can only be used for single phase "
