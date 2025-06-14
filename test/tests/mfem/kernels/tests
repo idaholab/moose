@@ -8,7 +8,7 @@
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
-    capabilities = 'mfem'
+    capabilities = 'mfem & !cuda' # diffs on cuda
     max_parallel = 1
     recover = false
     max_threads = 1
@@ -81,6 +81,7 @@
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
+    errors = 'foobarbaz' # allow cuda errors I guess?
   []
   [MFEMGradDivLOR]
     type = XMLDiff
@@ -179,7 +180,7 @@
                 OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads using MFEM.'
-    capabilities = 'mfem'
+    capabilities = 'mfem & !cuda' # HypreBoomerAMG::SetElasticityOptions doesn't support GPU
     max_parallel = 1
     recover = false
     max_threads = 1

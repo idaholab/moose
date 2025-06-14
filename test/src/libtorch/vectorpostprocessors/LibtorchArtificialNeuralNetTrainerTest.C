@@ -46,6 +46,13 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
     _nn_values_1(declareVector("nn_values_1")),
     _nn_values_2(declareVector("nn_values_2"))
 {
+  if (comm().size() > 1)
+    mooseError("Should not be run in parallel");
+}
+
+void
+LibtorchArtificialNeuralNetTrainerTest::execute()
+{
   torch::manual_seed(11);
 
   unsigned int num_inputs = 3;

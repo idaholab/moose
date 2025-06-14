@@ -92,9 +92,8 @@ StressUpdateBaseTempl<is_ad, R2, R4>::updateStateSubstep(
     bool /*compute_full_tangent_operator*/,
     RankFourTensor & /*tangent_operator*/)
 {
-  this->template paramError(
-      "use_substep",
-      "updateStateSubstep called: it needs to be implemented by your inelastic model");
+  this->paramError("use_substep",
+                   "updateStateSubstep called: it needs to be implemented by your inelastic model");
 }
 
 template <bool is_ad, typename R2, typename R4>

@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2025.04.17" %}
+{% set version = "2025.06.13" %}
 
 package:
   name: moose-tools
@@ -17,7 +17,8 @@ build:
   script_env:
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
-
+    - CURL_CA_BUNDLE
+    - NODE_EXTRA_CA_CERTS
 requirements:
   build:
     - {{ moose_python }}

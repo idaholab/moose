@@ -1,24 +1,22 @@
 [Tests]
   design = 'syntax/Executioner/index.md'
   [./test]
-    type = 'Exodiff'
+    type = RunException
     input = 'nl_divergence_tolerance.i'
-    exodiff = 'nl_divergence_tolerance_out.e'
     capabilities = 'petsc>=3.8.0'
     max_parallel = 1
     max_threads = 1
     mesh_mode = REPLICATED
-    requirement = "The Executioner system shall support the PETSc non-linear divergence tolerance."
+    requirement = "The system shall support execution using the PETSc non-linear divergence tolerance."
     issues = '#13991'
+    expect_err = "Nonlinear solve did not converge due to DIVERGED_DTOL iterations 1"
   [../]
   [./test_abs_divtol]
-    type = RunApp
+    type = RunException
     input = 'nl_abs_divergence_tolerance.i'
-    expect_out = "Nonlinear solve did not converge due to DIVERGED_DTOL iterations 1"
+    expect_err = "Nonlinear solve did not converge due to DIVERGED_DTOL iterations 1"
     requirement = 'The system shall consider a nonlinear solve diverged if the nonlinear residual exceeds the absolute divergence tolerance while iterating'
     issues = '#16474'
     design = 'FEProblemSolve.md'
-    # Solver manages to converge at 10 parallel processes
-    max_parallel = 9
   [../]
 []

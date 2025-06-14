@@ -17,21 +17,32 @@
 {#- The system GCC version based on ALTERNATE_FROM clang or clang_min                         -#}
 {#- Note: harmless if not set                                                                 -#}
 {%- if ALTERNATE_FROM == "clang" %}
-{%- set CLANG_GCC_VERSION = '13' -%}
+{%- set CLANG_GCC_VERSION = '14' -%}
 {%- elif ALTERNATE_FROM == "clang_min" %}
 {%- set CLANG_GCC_VERSION = '10' -%}
 {%- else %}
 {%- set CLANG_GCC_VERSION = '' -%}
 {%- endif %}
 
+{#- The system GCC version for GCC min                                                        -#}
+{%- if ALTERNATE_FROM == "gcc_min" %}
+{%- set GCC_MIN_VERSION = '9' -%}
+{%- endif %}
+
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/mpi' -%}
+{#- Whether or not to enable openmpi                                                          -#}
+{%- set ENABLE_OPENMPI = ALTERNATE_FROM is not defined or ALTERNATE_FROM == "cuda" -%}
+{#- Whether or not to enable mpich                                                            -#}
+{%- set ENABLE_MPICH = ALTERNATE_FROM is not defined or ALTERNATE_FROM != "cuda" -%}
 
 Bootstrap: oras
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-From: mooseharbor.hpc.inl.gov/base/rocky-x86_64:8.10-0
+From: mooseharbor.hpc.inl.gov/base/rocky-x86_64:8.10-3
+{%- elif ALTERNATE_FROM == "cuda" %}
+From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-cuda-x86_64:8.10-cuda12.4-1
 {%- else %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-0
+From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-2
 {%- endif %}
 # Logan Harbour
 Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
@@ -39,6 +50,10 @@ Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
     # Fix locale warnings
     export LC_ALL=C
 
+{%- if ALTERNATE_FROM == "gcc_min" %}
+    # Alternate GCC used for Clang compile
+    source /opt/rh/gcc-toolset-{{ GCC_MIN_VERSION }}/enable
+{%- endif %}
 {%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
     # Alternate GCC used for Clang compile
     source /opt/rh/gcc-toolset-{{ CLANG_GCC_VERSION }}/enable
@@ -75,9 +90,11 @@ EOF
 
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
 
+{%- if ENABLE_MPICH %}
     # Install prefix for mpich
     export MOOSE_MPICH_DIR=/opt/mpich
-{%- if ALTERNATE_FROM is not defined %}
+{%- endif %}
+{%- if ENABLE_OPENMPI %}
     # Install prefix for openmpi
     export MOOSE_OPENMPI_DIR=/opt/openmpi
 {%- endif %}
@@ -96,11 +113,6 @@ EOF
     dnf config-manager --set-enabled powertools
     dnf install -y redhat-lsb-core.x86_64
 
-{%- if ALTERNATE_FROM == "gcc_min" %}
-    # Install gcc
-    dnf install -y gcc gcc-gfortran gcc-c++ gdb
-{%- endif %}
-
     # Additional installs
     dnf install -y tmux emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
         perl-JSON-PP libtirpc libtirpc-devel zlib-devel patch patchutils libpng \
@@ -110,7 +122,7 @@ EOF
 {%- if ALTERNATE_FROM == "clang" %}
     # Installing system Clang, and its GCC GNU dependencies
     dnf install -y clang.x86_64 clang-devel.x86_64 clang-libs.x86_64 clang-tools-extra.x86_64 \
-                   git-clang-format.x86_64 python3-clang.x86_64 clang-analyzer.noarch \
+                   git-clang-format.x86_64 python3.12-clang.x86_64 clang-analyzer.noarch \
                    libomp.x86_64 lldb
 
     # Clang will install a newer gcc, and we need to make sure that the version
@@ -126,6 +138,12 @@ EOF
     dnf install -y gcc-toolset-${CLANG_GCC_VERSION}
     # Set alternative gcc-toolchain paths required by Clang
     source /opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/enable
+{%- endif %}
+{%- if ALTERNATE_FROM == "gcc_min" %}
+    # Install gcc min
+    GCC_MIN_VERSION={{ GCC_MIN_VERSION }}
+    dnf install -y gcc-toolset-${GCC_MIN_VERSION}
+    source /opt/rh/gcc-toolset-${GCC_MIN_VERSION}/enable
 {%- endif %}
 
 {%- if ALTERNATE_FROM == "clang_min" %}
@@ -184,21 +202,23 @@ EOF
     make install -j ${MOOSE_JOBS}
 {%- endif %}
 
-    # Basic script for setting mpich environment
+    # Basic script for setting the MPI environment
     mkdir /opt/mpi
     USE_MPI_SCRIPT='export LD_LIBRARY_PATH=${MOOSE_MPI_DIR}/lib:${LD_LIBRARY_PATH}
 export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
 export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77'
 
+{%- if ENABLE_MPICH %}
     # Add script for loading mpich environment
     cat << EOF > /opt/mpi/use-mpich
 #!/bin/bash
 export MOOSE_MPI_DIR=${MOOSE_MPICH_DIR}
 ${USE_MPI_SCRIPT}
 EOF
+{%- endif %}
 
-{%- if ALTERNATE_FROM is not defined %}
+{%- if ENABLE_OPENMPI %}
     # Add script for loading openmpi environment
     cat << EOF > /opt/mpi/use-openmpi
 #!/bin/bash

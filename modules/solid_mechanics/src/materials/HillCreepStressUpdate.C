@@ -67,10 +67,9 @@ HillCreepStressUpdateTempl<is_ad>::HillCreepStressUpdateTempl(const InputParamet
         this->isParamValid("creep_prefactor") ? &this->getFunction("creep_prefactor") : nullptr)
 {
   if (_start_time < this->_app.getStartTime() && (std::trunc(_m_exponent) != _m_exponent))
-    this->template paramError(
-        "start_time",
-        "Start time must be equal to or greater than the Executioner start_time if a "
-        "non-integer m_exponent is used");
+    this->paramError("start_time",
+                     "Start time must be equal to or greater than the Executioner start_time if a "
+                     "non-integer m_exponent is used");
 }
 
 template <bool is_ad>

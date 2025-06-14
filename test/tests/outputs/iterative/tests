@@ -11,6 +11,7 @@
     max_threads = 1
 
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the ExodusII format."
+    capabilities = '!cuda'
   [../]
 
   [iterative]
@@ -26,6 +27,7 @@
       max_threads = 1
 
       detail = 'in a single file or'
+      capabilities = '!cuda' # boomeramg iteration counts different with gpu support
     [../]
     [./exodus_steady_sequence]
       # Test the output of linear and nonlinear iterations to Exodus for a Steady Executioner
@@ -51,6 +53,7 @@
       max_threads = 1
 
       detail = 'in a sequence of files.'
+      capabilities = '!cuda' # boomeramg iteration counts different with gpu support
     [../]
   []
   [./vtk]
@@ -61,7 +64,7 @@
     # This test relies on number of residuals being the same, so run it serially
     max_parallel = 1
     max_threads = 1
-    capabilities = 'vtk'
+    capabilities = 'vtk & !cuda' # boomeramg iteration counts different with gpu support
     mesh_mode = REPLICATED
 
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the VTK format."
@@ -95,6 +98,7 @@
       max_threads = 1
 
       detail = "with both the start and end times defined,"
+      capabilities = '!cuda' # boomeramg iteration counts different with gpu support
     []
     [exodus_start_time]
       # Test that the nonlinear residuals will operate with only a start time
@@ -107,6 +111,7 @@
       max_threads = 1
 
       detail = "with only the start time defined,"
+      capabilities = '!cuda' # boomeramg iteration counts different with gpu support
     []
     [output_step_window]
       # Test that outputs are done during the specified window

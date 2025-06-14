@@ -81,7 +81,7 @@
 [Executioner]
   type = Steady
   system_names = u_sys
-  l_abs_tol = 1e-10
+  l_tol = 1e-10
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []
