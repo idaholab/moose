@@ -698,8 +698,6 @@ EigenProblem::formNorm()
 }
 #endif
 
-#endif
-
 std::string
 EigenProblem::solverTypeString(const unsigned int solver_sys_num)
 {
