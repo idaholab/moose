@@ -63,6 +63,13 @@ class TestValidationCase(unittest.TestCase):
             self.assertEqual(getattr(data, key), value)
         self.assertIsNone(data.test)
 
+    def testAddDataCheckType(self):
+        case = ValidationCase()
+
+        # Description not a string
+        with self.assertRaisesRegex(TypeError, 'description is not of type str'):
+            case.addData('unused', None, None)
+
     def testAddDataNonSerializable(self):
         with self.assertRaisesRegex(TypeError, 'not JSON serializable'):
             ValidationCase().addData('key', b'1234', 'unused')
@@ -82,10 +89,49 @@ class TestValidationCase(unittest.TestCase):
             self.assertEqual(getattr(data, key), value)
         self.assertIsNone(data.test)
 
-    def testAddFloatDataNotFloat(self):
-        test = ValidationCase()
-        with self.assertRaises(ValueError):
-            test.addFloatData('unused', int(1), 'unused', None)
+    def testAddFloatDataCheckType(self):
+        case = ValidationCase()
+
+        # Non-numeric value
+        with self.assertRaisesRegex(TypeError, 'value: not of type float or int'):
+            ValidationCase().addFloatData('non_numeric', 'abcd', 'unused', None)
+
+        # Allow integers
+        value = int(1)
+        case.addFloatData('to_float', value, 'unused', None)
+        data = case.data['to_float']
+        self.assertTrue(isinstance(data.value, float))
+        self.assertEqual(data.value, float(value))
+
+        # Non string description
+        with self.assertRaisesRegex(TypeError, 'description: not of type str'):
+            ValidationCase().addFloatData('bad_description', 1, None, None)
+
+        # Non string units
+        with self.assertRaisesRegex(TypeError, 'units: not of type str or None'):
+            ValidationCase().addFloatData('bad_units', 1, 'unused', 1)
+
+        # Non-tuple bounds
+        with self.assertRaisesRegex(TypeError, 'bounds: not of type tuple'):
+            ValidationCase().addFloatData('bad_bounds', 1, 'unused', None, bounds=[])
+
+        # Bad-sized bounds
+        with self.assertRaisesRegex(TypeError, 'bounds: not of length 2'):
+            ValidationCase().addFloatData('bad_bounds_len', 1, 'unused', None, bounds=(None, None, None))
+
+        # Bad min bounds type
+        with self.assertRaisesRegex(TypeError, 'bounds: min bounds not of type int or float'):
+            ValidationCase().addFloatData('bad_bounds_len', 1, 'unused', None, bounds=(None, None))
+
+        # Bad max bounds type
+        with self.assertRaisesRegex(TypeError, 'bounds: max bounds not of type int or float'):
+            ValidationCase().addFloatData('bad_bounds_len', 1, 'unused', None, bounds=(1, None))
+
+        # Bounds int to float
+        case.addFloatData('bounds_to_float', 1, 'unused', None, bounds=(1, 2))
+        bounds_to_float_data = case.data['bounds_to_float']
+        assert isinstance(bounds_to_float_data.bounds[0], float)
+        assert isinstance(bounds_to_float_data.bounds[1], float)
 
     def testAddFloatDataBounded(self):
         key = 'data'

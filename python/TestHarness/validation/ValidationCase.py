@@ -13,7 +13,7 @@ import traceback
 import typing
 import sys
 import json
-from typing import Optional
+from typing import Optional, Tuple, Union
 from enum import Enum
 from dataclasses import dataclass
 from FactorySystem.MooseObject import MooseObject
@@ -32,7 +32,7 @@ class ExtendedEnum(Enum):
         return list(cls)
 
 # The valid numeric data types
-numeric_data_types = typing.Union[float]
+NumericDataType = Union[float, int]
 
 class DataKeyAlreadyExists(Exception):
     """
@@ -82,7 +82,7 @@ class ValidationCase(MooseObject):
         # Skipped test
         SKIP = 'SKIP'
 
-    @dataclass
+    @dataclass(kw_only=True)
     class Result:
         """
         Data structure that stores the information
@@ -102,13 +102,18 @@ class ValidationCase(MooseObject):
         # if any
         data_key: Optional[str] = None
 
-    @dataclass
+    @dataclass(kw_only=True)
     class Data:
         """
         Base data structure that stores the information
         about a piece of validation data to be stored
         """
         def __post_init__(self):
+            assert isinstance(self.key, str)
+            assert isinstance(self.description, str)
+            assert isinstance(self.test, (str, type(None)))
+            assert isinstance(self.validation, bool)
+
             try:
                 json.dumps(self.value)
             except (TypeError, OverflowError):
@@ -125,24 +130,32 @@ class ValidationCase(MooseObject):
         # Whether or not this result is considered
         # a validation result (enables running verification
         # cases but not storing them in a database)
-        validation: bool
+        validation: bool = True
 
         def printableValue(self) -> str:
             raise NotImplementedError
 
-    @dataclass
+    @dataclass(kw_only=True)
     class NumericData(Data):
         """
         Data structure that stores the information about
         a piece of numeric validation data that can be checked
         """
+        def __post_init__(self):
+            super().__post_init__()
+            assert isinstance(self.units, (str, type(None)))
+            assert isinstance(self.nominal, (float, type(None)))
+            if self.bounds is not None:
+                assert isinstance(self.bounds, tuple)
+                assert len(self.bounds) == 2
+
         # Units for the data, if any
         units: Optional[str]
         # A nominal value for this data; unused
         # in the test but useful in postprocessing
-        nominal: Optional[numeric_data_types] = None
+        nominal: Optional[float] = None
         # Bounds for the data (min and max)
-        bounds: Optional[tuple[numeric_data_types, numeric_data_types]] = None
+        bounds: Optional[tuple[float, float]] = None
 
         def printableValue(self) -> str:
             if isinstance(self.value, float):
@@ -217,10 +230,6 @@ class ValidationCase(MooseObject):
         if key in self._data:
             raise DataKeyAlreadyExists(key)
 
-        # Set defaults
-        defaults = [('validation', True)]
-        kwargs.update({k: v for k, v in defaults if k not in kwargs})
-
         data = data_type(value=value,
                          key=key,
                          description=description,
@@ -242,10 +251,30 @@ class ValidationCase(MooseObject):
         Keyword arguments:
             Additional arguments passed to Data
         """
+        if not isinstance(description, str):
+            raise TypeError('description is not of type str')
+
         self._addData(self.Data, key, value, description)
 
-    def addFloatData(self, key: str, value: float, description: str,
-                     units: Optional[str], **kwargs):
+    @staticmethod
+    def checkBounds(value: float, bounds: typing.Tuple[float, float], units: Optional[str]):
+        assert isinstance(bounds, tuple)
+        assert len(bounds) == 2
+        min, max = bounds
+        assert max > min
+
+        success = value >= min and value <= max
+        status = ValidationCase.Status.OK if success else ValidationCase.Status.FAIL
+
+        units = f' {units}' if units is not None else ''
+        message = [('within' if success else 'out of') + ' bounds;']
+        message += [f'min = {min:.5E}{units},']
+        message += [f'max = {max:.5E}{units}']
+
+        return status, ' '.join(message)
+
+    def addFloatData(self, key: str, value: NumericDataType, description: str,
+                     units: Optional[str], **kwargs) -> None:
         """
         Adds a piece of float data to the validation data.
 
@@ -260,24 +289,33 @@ class ValidationCase(MooseObject):
         Keyword arguments:
             Additional arguments passed to NumericData
         """
+        if isinstance(value, int):
+            value = float(value)
         if not isinstance(value, float):
-            raise ValueError('value is not of type float')
+            raise TypeError('value: not of type float or int')
+        if not isinstance(description, str):
+            raise TypeError('description: not of type str')
+        if units is not None and not isinstance(units, str):
+            raise TypeError('units: not of type str or None')
+        bounds = kwargs.get('bounds')
+        if bounds is not None:
+            if not isinstance(bounds, tuple):
+                raise TypeError('bounds: not of type tuple')
+            if not len(bounds) == 2:
+                raise TypeError('bounds: not of length 2 (min and max)')
+            if not isinstance(bounds[0], (int, float)):
+                raise TypeError('bounds: min bounds not of type int or float')
+            if not isinstance(bounds[1], (int, float)):
+                raise TypeError('bounds: max bounds not of type int or float')
+            kwargs['bounds'] = (float(bounds[0]), float(bounds[1]))
 
         data = self._addData(self.NumericData, key, value, description, units=units, **kwargs)
 
         result_kwargs = {'data_key': key,
                          'validation': kwargs.pop('validation', True)}
-        units = f' {data.units}' if data.units is not None else ''
 
         if data.bounds is not None:
-            assert len(data.bounds) == 2
-            min, max = data.bounds
-            assert max > min
-            success = value >= min and value <= max
-            status = self.Status.OK if success else self.Status.FAIL
-            message = [('within' if success else 'out of') + ' bounds;']
-            message += [f'min = {min:.5E}{units},']
-            message += [f'max = {max:.5E}{units}']
+            status, message = self.checkBounds(data.value, data.bounds, data.units)
             self.addResult(status, ' '.join(message), **result_kwargs)
 
     @property
