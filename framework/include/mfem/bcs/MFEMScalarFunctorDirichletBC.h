@@ -19,7 +19,7 @@ public:
 
   MFEMScalarFunctorDirichletBC(const InputParameters & parameters);
 
-  void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh) override;
+  void ApplyBC(mfem::GridFunction & gridfunc) override;
 
 protected:
   const MFEMScalarCoefficientName & _coef_name;

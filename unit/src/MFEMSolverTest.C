@@ -98,7 +98,7 @@ public:
     a.FormLinearSystem(ess_tdof_list, x, b, A, X, B);
 
     solver.updateSolver(a, ess_tdof_list);
-    auto solver_ptr = std::dynamic_pointer_cast<SolverType>(solver.getSolver()).get();
+    auto solver_ptr = dynamic_cast<SolverType *>(&solver.getSolver());
     // Test MFEMKernel returns an integrator of the expected type
     ASSERT_TRUE(solver_ptr != nullptr);
     solver_ptr->SetOperator(*A);
@@ -203,10 +203,10 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMG)
       addObject<MFEMHypreBoomerAMG>("MFEMHypreBoomerAMG", "solver1", solver_params);
 
   // Test MFEMSolver returns an solver of the expected type
-  auto solver_downcast = std::dynamic_pointer_cast<mfem::HypreBoomerAMG>(solver.getSolver());
+  auto solver_downcast = dynamic_cast<mfem::HypreBoomerAMG *>(&solver.getSolver());
   // HypreBoomerAMG warnings are tripped by zero rows in matrices; turn this off for this test
   solver_downcast->SetErrorMode(mfem::HypreSolver::ErrorMode::IGNORE_HYPRE_ERRORS);
-  ASSERT_NE(solver_downcast.get(), nullptr);
+  ASSERT_NE(solver_downcast, nullptr);
   testDiffusionSolve<mfem::HypreBoomerAMG>(solver, 1e-5);
 }
 
@@ -232,8 +232,8 @@ TEST_F(MFEMSolverTest, MFEMHypreADS)
   MFEMHypreADS & solver = addObject<MFEMHypreADS>("MFEMHypreADS", "solver1", solver_params);
 
   // Test MFEMSolver returns a solver of the expected type
-  auto solver_downcast = std::dynamic_pointer_cast<mfem::HypreADS>(solver.getSolver());
-  ASSERT_NE(solver_downcast.get(), nullptr);
+  auto solver_downcast = dynamic_cast<mfem::HypreADS *>(&solver.getSolver());
+  ASSERT_NE(solver_downcast, nullptr);
 }
 
 /**
@@ -258,8 +258,8 @@ TEST_F(MFEMSolverTest, MFEMHypreAMS)
   MFEMHypreAMS & solver = addObject<MFEMHypreAMS>("MFEMHypreAMS", "solver1", solver_params);
 
   // Test MFEMSolver returns an solver of the expected type
-  auto solver_downcast = std::dynamic_pointer_cast<mfem::HypreAMS>(solver.getSolver());
-  ASSERT_NE(solver_downcast.get(), nullptr);
+  auto solver_downcast = dynamic_cast<mfem::HypreAMS *>(&solver.getSolver());
+  ASSERT_NE(solver_downcast, nullptr);
 }
 
 /**
@@ -381,8 +381,7 @@ TEST_F(MFEMSolverTest, MFEMHypreBoomerAMGLOR)
 
   solver.updateSolver(a, ess_tdof_list);
 
-  auto solver_ptr =
-      std::dynamic_pointer_cast<mfem::LORSolver<mfem::HypreBoomerAMG>>(solver.getSolver()).get();
+  auto solver_ptr = dynamic_cast<mfem::LORSolver<mfem::HypreBoomerAMG> *>(&solver.getSolver());
   // Test MFEMKernel returns an integrator of the expected type
   ASSERT_TRUE(solver_ptr != nullptr);
 }

@@ -406,7 +406,7 @@ class InputListingCommand(FileListingCommand):
         hit = pyhit.load(filename)
         out = []
         for block in blocks.split():
-            node = moosetree.find(hit, lambda n: n.fullpath.endswith(block.strip('/')))
+            node = moosetree.find(hit, lambda n: n.fullpath.endswith(block.rstrip('/')))
             if node is None:
                 msg = "Unable to find block '{}' in {}."
                 raise exceptions.MooseDocsException(msg, block, filename)

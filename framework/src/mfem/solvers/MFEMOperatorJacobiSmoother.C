@@ -32,7 +32,7 @@ MFEMOperatorJacobiSmoother::MFEMOperatorJacobiSmoother(const InputParameters & p
 void
 MFEMOperatorJacobiSmoother::constructSolver(const InputParameters &)
 {
-  _solver = std::make_shared<mfem::OperatorJacobiSmoother>();
+  _solver = std::make_unique<mfem::OperatorJacobiSmoother>();
 }
 
 void

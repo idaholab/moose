@@ -13,6 +13,15 @@
 
 registerMooseObject("MooseApp", MFEMVectorFunctorTangentialDirichletBC);
 
+InputParameters
+MFEMVectorFunctorTangentialDirichletBC::validParams()
+{
+  InputParameters params = MFEMVectorFunctorDirichletBCBase::validParams();
+  params.addClassDescription(
+      "Applies a Dirichlet condition to the tangential components of a vector variable.");
+  return params;
+}
+
 MFEMVectorFunctorTangentialDirichletBC::MFEMVectorFunctorTangentialDirichletBC(
     const InputParameters & parameters)
   : MFEMVectorFunctorDirichletBCBase(parameters)
@@ -20,11 +29,9 @@ MFEMVectorFunctorTangentialDirichletBC::MFEMVectorFunctorTangentialDirichletBC(
 }
 
 void
-MFEMVectorFunctorTangentialDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh)
+MFEMVectorFunctorTangentialDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 {
-  mfem::Array<int> ess_bdrs(mesh.bdr_attributes.Max());
-  ess_bdrs = getBoundaries();
-  gridfunc.ProjectBdrCoefficientTangent(_vec_coef, ess_bdrs);
+  gridfunc.ProjectBdrCoefficientTangent(_vec_coef, getBoundaries());
 }
 
 #endif

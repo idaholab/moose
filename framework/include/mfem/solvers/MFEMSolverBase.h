@@ -26,13 +26,19 @@ public:
 
   MFEMSolverBase(const InputParameters & parameters);
 
-  /// Returns a shared pointer to the instance of the Solver derived-class.
-  virtual std::shared_ptr<mfem::Solver> getSolver() { return _solver; }
+  /// Retrieves the preconditioner userobject if present, sets the member pointer to
+  /// said object if still unset, and sets the solver to use this preconditioner.
+  template <typename T>
+  void setPreconditioner(T & solver);
+
+  /// Returns the wrapped MFEM solver
+  mfem::Solver & getSolver();
 
   /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
   virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) = 0;
 
-  bool isLOR() const { return _lor; }
+  /// Returns whether or not this solver (or its preconditioner) uses LOR
+  bool isLOR() const { return _lor || (_preconditioner && _preconditioner->isLOR()); }
 
 protected:
   /// Override in derived classes to construct and set the solver options.
@@ -41,8 +47,16 @@ protected:
   // Variable defining whether to use LOR solver
   bool _lor;
 
-  // Solver to be used for the problem
-  std::shared_ptr<mfem::Solver> _solver{nullptr};
+  // Solver and preconditioner to be used for the problem
+  std::unique_ptr<mfem::Solver> _solver;
+  MFEMSolverBase * _preconditioner;
 };
+
+inline mfem::Solver &
+MFEMSolverBase::getSolver()
+{
+  mooseAssert(_solver, "Attempting to retrieve solver before it's been constructed");
+  return *_solver;
+}
 
 #endif
