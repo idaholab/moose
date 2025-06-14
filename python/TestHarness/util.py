@@ -244,7 +244,7 @@ class FormatResultEntry:
     # Name of the entry
     name: str
     # Timing for the entry
-    timing: float
+    timing: float = None
     # JointStatus object for the entry, optional
     joint_status: str = None
     # Detailed status message for the entry, optional
@@ -301,7 +301,7 @@ def formatResult(entry: FormatResultEntry, options, timing: Optional[bool] = Non
         # Time; adjust the precision of time, so we can justify the length.
         # The higher the seconds, the lower the decimal point, ie:
         # [0.000s] - [100.0s]. Max: [99999s]
-        elif key_lower == 't' and (options.timing or timing):
+        elif key_lower == 't' and entry.timing is not None and (options.timing or timing):
             actual = float(entry.timing)
             int_len = len(str(int(actual)))
             precision = min(3, max(0,(4-int_len)))
