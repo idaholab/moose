@@ -16,7 +16,8 @@ import socket
 import datetime
 import getpass
 import argparse
-from collections import namedtuple
+import typing
+from collections import defaultdict, namedtuple, OrderedDict
 
 from socket import gethostname
 
@@ -292,7 +293,6 @@ class TestHarness:
             self.libmesh_dir = os.environ['LIBMESH_DIR']
         else:
             self.libmesh_dir = os.path.join(self.moose_dir, 'libmesh', 'installed')
-        self.file = None
 
         # Failed Tests file object
         self.writeFailedTest = None
@@ -668,7 +668,7 @@ class TestHarness:
 
                 # Print status with caveats (if caveats not overridden)
                 caveats = True if caveats is None else caveats
-                print(util.formatResult(job, self.options, caveats=caveats), flush=True)
+                print(util.formatJobResult(job, self.options, caveats=caveats), flush=True)
 
                 # Store job as finished for printing
                 self.finished_jobs.append(job)
@@ -681,11 +681,10 @@ class TestHarness:
                     self.num_failed += 1
                 else:
                     self.num_pending += 1
-
-            # Just print current status without saving results
+            # Just print current status without a status message
             else:
                 caveats = False if caveats is None else caveats
-                print(util.formatResult(job, self.options, result=job.getStatus().status, caveats=caveats), flush=True)
+                print(util.formatJobResult(job, self.options, status_message=False, caveats=caveats), flush=True)
 
     def getStats(self, time_total: float) -> dict:
         """
@@ -709,56 +708,125 @@ class TestHarness:
         stats.update(self.scheduler.appendStats())
         return stats
 
+    def getLongestJobs(self, num: int) -> list:
+        """
+        Get the longest running jobs after running all jobs
+        """
+        jobs = [j for j in self.finished_jobs if (not j.isSkip() and j.getTiming() > 0)]
+        jobs = sorted(jobs, key=lambda job: job.getTiming(), reverse=True)
+        return jobs[0:num]
+
+    def getLongestFolders(self, num: int) -> list[typing.Tuple[str, float]]:
+        """
+        Get the longest running folders after running all jobs
+        """
+        # Build a mapping for each folder -> jobs in that folder for jobs that ran
+        folder_jobs = defaultdict(list)
+        for job in [j for j in self.finished_jobs if not j.isSkip()]:
+            folder_jobs[job.getTestDir()].append(job)
+
+        folder_times = []
+        for folder, jobs in folder_jobs.items():
+            # Find the (start, end) time intervals for each job
+            intervals = []
+            for job in jobs:
+                timer = job.timer
+                if job.timer.hasTotalTime('runner_run'):
+                    time = timer.getTime('runner_run')
+                elif job.timer.hasTotalTime('main'):
+                    time = timer.getTime('main')
+                else:
+                    continue
+                intervals.append((time.start, time.end))
+
+            # We have no timing intervals for this folder
+            if not intervals:
+                continue
+
+            # Find the union of all times spent in this folder;
+            # this gives us the total time we ran tests in this folder,
+            # where multiple tests running at the same time in the same
+            # folder do not count twice
+            intervals.sort(key=lambda x: x[0])
+            merged_intervals = [intervals[0]]
+            for current in intervals:
+                last = merged_intervals[-1]
+                if current[0] <= last[1]:
+                    merged_intervals[-1] = (last[0], max(last[1], current[1]))
+                else:
+                    merged_intervals.append(current)
+
+            total_time = sum(v[1] - v[0] for v in merged_intervals)
+            folder_times.append((os.path.relpath(folder), total_time))
+
+        return sorted(folder_times, key=lambda v: v[1], reverse=True)[0:num]
+
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
-        # Print the results table again if a bunch of output was spewed to the screen between
-        # tests as they were running
-        if len(self.parse_errors) > 0:
-            print(('\n\nParser Errors:\n' + ('-' * (self.options.term_cols))))
-            for err in self.parse_errors:
-                print((util.colorText(err, 'RED', html=True, colored=self.options.colored, code=self.options.code)))
+        # Helper for printing a header
+        def header(title: typing.Optional[str] = None) -> str:
+            return (f'\n{title}:\n' if title else '') + '-' * self.options.term_cols
 
+        if not self.finished_jobs:
+            print('No tests ran')
+
+        # If something failed or verbosity is requested, print combined results
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
-            print(('\n\nFinal Test Results:\n' + ('-' * (self.options.term_cols))))
+            print(header('Final Test Results'))
             sorted_jobs = sorted(self.finished_jobs, key=lambda job: job.getJointStatus().sort_value)
             for job in sorted_jobs:
-                print((util.formatResult(job, self.options, caveats=True)))
+                print((util.formatJobResult(job, self.options, caveats=True)))
+
+        # Longest jobs and longest folders
+        if not self.options.dry_run and self.options.longest_jobs:
+            longest_jobs = self.getLongestJobs(self.options.longest_jobs)
+            if longest_jobs:
+                print(header(f'{self.options.longest_jobs} Longest Running Jobs'))
+                for job in longest_jobs:
+                    print(util.formatJobResult(job, self.options, caveats=True, timing=True))
+
+            longest_folders = self.getLongestFolders(self.options.longest_jobs)
+            if longest_folders:
+                print(header(f'{self.options.longest_jobs} Longest Running Folders'))
+                for folder, time in longest_folders:
+                    if self.options.colored and self.options.color_first_directory:
+                        first_directory = folder.split('/')[0]
+                        prefix = util.colorText(first_directory, 'CYAN')
+                        suffix = folder.replace(first_directory, '', 1)
+                        folder = prefix + suffix
+                    entry = util.FormatResultEntry(name=folder, timing=time)
+                    print(util.formatResult(entry, self.options, timing=True))
+
+        # Parser errors, near the bottom
+        if self.parse_errors:
+            self.error_code = self.error_code | 0x80
+            print(header('Parser Errors'))
+            for err in self.parse_errors:
+                print(err)
 
         time_total = (datetime.datetime.now() - self.start_time).total_seconds()
         stats = self.getStats(time_total)
 
-        print(('-' * (self.options.term_cols)))
-
-        # Mask off TestHarness error codes to report parser errors
-        fatal_error = ''
-        if len(self.parse_errors) > 0:
-            fatal_error += ', <r>FATAL PARSER ERROR</r>'
-            self.error_code = self.error_code | 0x80
-
-        # Print a different footer when performing a dry run
+        # Final summary for the bottom
+        summary = ''
         if self.options.dry_run:
-            print(f'Processed {self.num_passed + self.num_skipped} tests in {stats["time_total"]:.1f} seconds.')
-            summary = f'<b>{self.num_passed} would run</b>, <b>{self.num_skipped} would be skipped</b>'
-            summary += fatal_error
-            print(util.colorText(summary, "", html=True, colored=self.options.colored, code=self.options.code))
+            summary += f'Processed {self.num_passed + self.num_skipped} tests in {stats["time_total"]:.1f} seconds.\n'
+            summary += f'<b>{self.num_passed} would run</b>, <b>{self.num_skipped} would be skipped</b>'
         else:
-            summary = f'Ran {self.num_passed + self.num_failed} tests in {stats["time_total"]:.1f} seconds.'
+            summary += f'Ran {self.num_passed + self.num_failed} tests in {stats["time_total"]:.1f} seconds.'
             summary += f' Average test time {stats["time_average"]:.1f} seconds,'
-            summary += f' maximum test time {stats["time_max"]:.1f} seconds.'
-            print(summary)
+            summary += f' maximum test time {stats["time_max"]:.1f} seconds.\n'
 
             # Get additional results from the scheduler
             scheduler_summary = self.scheduler.appendResultFooter(stats)
             if scheduler_summary:
-                print(scheduler_summary)
+                summary += scheduler_summary + '\n'
 
             if self.num_passed:
-                summary = f'<g>{self.num_passed} passed</g>'
+                summary += f'<g>{self.num_passed} passed</g>'
             else:
-                summary = f'<b>{self.num_passed} passed</b>'
+                summary += f'<b>{self.num_passed} passed</b>'
             summary += f', <b>{self.num_skipped} skipped</b>'
-            if self.num_pending:
-                summary += f', <c>{self.num_pending} pending</c>'
             if self.num_failed:
                 summary += f', <r>{self.num_failed} FAILED</r>'
             else:
@@ -766,55 +834,12 @@ class TestHarness:
             if self.scheduler.maxFailures():
                 self.error_code = self.error_code | 0x80
                 summary += '\n<r>MAX FAILURES REACHED</r>'
+        if self.parse_errors:
+            summary += ', <r>FATAL PARSER ERROR</r>'
+        print('\n' + header())
+        print(util.colorText(summary, "", html=True, colored=self.options.colored))
 
-            summary += fatal_error
-
-            print(util.colorText(summary, "", html=True, colored=self.options.colored, code=self.options.code))
-
-            if self.options.longest_jobs:
-                # Sort all jobs by run time
-                longest_jobs = [job for job in self.finished_jobs if (not job.isSkip() and job.getTiming() > 0)]
-                longest_jobs = sorted(longest_jobs, key=lambda job: job.getTiming(), reverse=True)
-                longest_jobs = longest_jobs[0:self.options.longest_jobs]
-
-                print('\n%d longest running jobs:' % self.options.longest_jobs)
-                print(('-' * (self.options.term_cols)))
-
-                # Copy the current options and force timing to be true so that
-                # we get times when we call formatResult() below
-                options_with_timing = copy.deepcopy(self.options)
-                options_with_timing.timing = True
-
-                for job in longest_jobs:
-                    print(util.formatResult(job, options_with_timing, caveats=True))
-                if not longest_jobs:
-                    print('No jobs were completed.')
-
-                # The TestHarness receives individual jobs out of order (can't realistically use self.test_table)
-                tester_dirs = {}
-                dag_table = []
-                for jobs, dag in self.scheduler.retrieveDAGs():
-                    original_dag = dag.getOriginalDAG()
-                    total_time = float(0.0)
-                    tester = None
-                    for tester in dag.topological_sort(original_dag):
-                        if not tester.isSkip():
-                            total_time += tester.getTiming()
-                    if tester is not None:
-                        tester_dirs[tester.getTestDir()] = (tester_dirs.get(tester.getTestDir(), 0) + total_time)
-                for k, v in tester_dirs.items():
-                    rel_spec_path = f'{os.path.sep}'.join(k.split(os.path.sep)[-2:])
-                    dag_table.append([f'{rel_spec_path}{os.path.sep}{self.options.input_file_name}', f'{v:.3f}'])
-
-                sorted_table = sorted(dag_table, key=lambda dag_table: float(dag_table[1]), reverse=True)
-                if sorted_table[0:self.options.longest_jobs]:
-                    print(f'\n{self.options.longest_jobs} longest running folders:')
-                    print(('-' * (self.options.term_cols)))
-                    # We can't use util.formatResults, as we are representing a group of testers
-                    for group in sorted_table[0:self.options.longest_jobs]:
-                        print(str(group[0]).ljust((self.options.term_cols - (len(group[1]) + 4)), ' '), f'[{group[1]}s]')
-                    print('\n')
-
+        if not self.options.dry_run:
             all_jobs = self.scheduler.retrieveJobs()
 
             # Gather and print the jobs with race conditions after the jobs are finished
@@ -824,8 +849,6 @@ class TestHarness:
                 if checker.findRacePartners():
                     # Print the unique racer conditions and adjust our error code.
                     self.error_code = checker.printUniqueRacerSets()
-                else:
-                    print("There are no race conditions.")
 
             if not self.useExistingStorage():
                 # Store the results from each job
@@ -836,26 +859,6 @@ class TestHarness:
 
                 # And write the results, including the stats
                 self.writeResults(complete=True, stats=stats)
-
-        try:
-            # Write one file, with verbose information (--file)
-            if self.options.file:
-                with open(os.path.join(self.output_dir, self.options.file), 'w') as f:
-                    for job_group in all_jobs:
-                        for job in job_group:
-                            # Do not write information about silent tests
-                            if job.isSilent():
-                                continue
-
-                            formatted_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
-                            f.write(formatted_results + '\n')
-
-        except IOError:
-            print('Permission error while writing results to disc')
-            sys.exit(1)
-        except:
-            print('Error while writing results to disc')
-            sys.exit(1)
 
     def determineScheduler(self):
         if self.options.hpc_host and not self.options.hpc:
@@ -1143,7 +1146,6 @@ class TestHarness:
         outputgroup.add_argument('--no-report', action='store_false', dest='report_skipped', help='do not report skipped tests')
         outputgroup.add_argument('--show-directory', action='store_true', dest='show_directory', help='Print test directory path in out messages')
         outputgroup.add_argument('-o', '--output-dir', nargs=1, metavar='directory', dest='output_dir', default='', help='Save all output files in the directory, and create it if necessary')
-        outputgroup.add_argument('-f', '--file', nargs=1, action='store', dest='file', help='Write verbose output of each test to FILE and quiet output to terminal')
         outputgroup.add_argument('-x', '--sep-files', action='store_true', dest='sep_files', help='Write the output of each test to a separate file. Only quiet output to terminal.')
         outputgroup.add_argument('--include-input-file', action='store_true', dest='include_input', help='Include the contents of the input file when writing the results of a test to a file')
         outputgroup.add_argument("--testharness-unittest", action="store_true", help="Run the TestHarness unittests that test the TestHarness.")

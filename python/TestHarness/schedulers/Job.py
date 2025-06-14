@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import itertools, os, time, threading, traceback, typing
+import copy, itertools, os, time, threading, traceback, typing
 from io import StringIO
 from contextlib import nullcontext, redirect_stdout
 from TestHarness.StatusSystem import StatusSystem
@@ -112,6 +112,13 @@ class Timer(object):
             if not entry:
                 raise Exception(f'Missing time entry {name}')
             return entry.start
+
+    def getTime(self, name: str) -> TimerEntry:
+        with self.lock:
+            entry = self.times.get(name)
+            if not entry:
+                raise Exception(f'Missing time entry {name}')
+            return copy.deepcopy(entry)
 
     def reset(self, name: typing.Optional[str] = None) -> None:
         """ Resets a given timer or all timers """
