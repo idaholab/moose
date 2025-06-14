@@ -16,17 +16,15 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         output = self.runTests('-i', 'longest_jobs', '--longest-jobs', '4', exit_code=128).output
 
-        self.assertIn('4 longest running jobs', output)
-        self.assertRegex(output, r'(?s)longest running jobs.*run_1')
-        self.assertRegex(output, r'(?s)longest running jobs.*run_2')
-        self.assertRegex(output, r'(?s)longest running jobs.*run_fail')
-        self.assertNotRegex(output, r'(?s)longest running jobs.*run_skip')
+        self.assertIn('4 Longest Running Jobs', output)
+        self.assertRegex(output, r'(?s)Longest Running Jobs.*run_1')
+        self.assertRegex(output, r'(?s)Longest Running Jobs.*run_2')
+        self.assertRegex(output, r'(?s)Longest Running Jobs.*run_fail')
+        self.assertNotRegex(output, r'(?s)Longest Running Jobs.*run_skip')
 
     def testLongestJobsNoneCompleted(self):
         """
         Test for --longest-jobs in the TestHarness with no jobs ran.
         """
         output = self.runTests('-i', 'longest_jobs', '--re', 'foo', '--longest-jobs', '100').output
-
-        self.assertIn('100 longest running jobs', output)
-        self.assertNotRegex(output, r'(?s)longest running jobs.*<No jobs were completed>')
+        self.assertNotIn('Longest Running Jobs', output)
