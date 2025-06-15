@@ -930,7 +930,8 @@ class TestHarness:
         # 2 - Added 'unique_test_id' (tests/*/tests/*/unique_test_id) to Job output if set
         # 3 - Added 'json_metadata' (tests/*/tests/*/tester/json_metadata) to Tester output
         # 4 - Added 'validation' (tests/*/tests/validation) to Job output if set
-        testharness = {'version': 4,
+        # 5 - Added validation data types (tests/*/tests/data/type) to Job output if set
+        testharness = {'version': 5,
                        'start_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                        'end_time': None,
                        'args': sys.argv[1:],
