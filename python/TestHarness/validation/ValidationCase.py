@@ -316,7 +316,7 @@ class ValidationCase(MooseObject):
 
         if data.bounds is not None:
             status, message = self.checkBounds(data.value, data.bounds, data.units)
-            self.addResult(status, ' '.join(message), **result_kwargs)
+            self.addResult(status, message, **result_kwargs)
 
     @property
     def results(self) -> list[Result]:
