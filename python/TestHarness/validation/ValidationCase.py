@@ -159,14 +159,11 @@ class ValidationCase(MooseObject):
             assert isinstance(self.units, (str, type(None)))
             if self.nominal is not None:
                 assert isinstance(self.nominal, type(self.value))
-                if not isinstance(self.value, float):
-                    assert len(self.value) == len(self.nominal)
             if self.bounds is not None:
                 assert isinstance(self.bounds, tuple)
                 assert len(self.bounds) == 2
-                if not isinstance(self.value, float):
-                    assert len(self.value) == len(self.bounds[0])
-                    assert len(self.value) == len(self.bounds[1])
+                assert isinstance(self.bounds[0], type(self.value))
+                assert isinstance(self.bounds[1], type(self.value))
 
         # Units for the data, if any
         units: Optional[str]
@@ -177,13 +174,25 @@ class ValidationCase(MooseObject):
         bounds: Optional[Tuple[NumericDataType, NumericDataType]] = None
 
     @dataclass(kw_only=True)
-    class VectorNumericData(NumericData):
+    class ScalarData(NumericData):
+        """
+        Data structure that stores the information about
+        a piece of scalar numeric data that can be checked
+        """
+
+    @dataclass(kw_only=True)
+    class VectorData(NumericData):
         """
         Data structure that stores the information about
         a piece of array numeric validation data that can be checked
         """
         def __post_init__(self):
             super().__post_init__()
+            if self.nominal is not None:
+                assert len(self.value) == len(self.nominal)
+            if self.bounds is not None:
+                assert len(self.value) == len(self.bounds[0])
+                assert len(self.value) == len(self.bounds[1])
             assert isinstance(self.x, list)
             assert isinstance(self.x, type(self.value))
             assert len(self.x) == len(self.value)
@@ -370,7 +379,7 @@ class ValidationCase(MooseObject):
             description: Human readable description of the data
             units: Human readable units for the data (can be None)
         Keyword arguments:
-            Additional arguments passed to NumericData (bounds, nominal, etc)
+            Additional arguments passed to ScalarData (bounds, nominal, etc)
         """
         value = self.toFloat(value, 'value')
         if not isinstance(description, str):
@@ -389,7 +398,7 @@ class ValidationCase(MooseObject):
         if nominal is not None:
             kwargs['nominal'] = self.toFloat(nominal, 'nominal')
 
-        data = self._addData(self.NumericData, key, value, description, units=units, **kwargs)
+        data = self._addData(self.ScalarData, key, value, description, units=units, **kwargs)
 
         result_kwargs = {'data_key': key,
                          'validation': kwargs.pop('validation', True)}
@@ -442,7 +451,7 @@ class ValidationCase(MooseObject):
             x: The independent data (see VectorDataInputType above)
             value: The dependent data (see VectorDataInputType above)
         Keyword arguments:
-            Additional arguments passed to VectorNumericData (bounds, nominal, etc)
+            Additional arguments passed to VectorData (bounds, nominal, etc)
         """
         for k in ['x', 'value']:
             v = locals()[k]
@@ -486,7 +495,7 @@ class ValidationCase(MooseObject):
                 raise TypeError('nominal: not same length as data')
 
         # Store data
-        data = self._addData(self.VectorNumericData, key, values, description,
+        data = self._addData(self.VectorData, key, values, description,
                              units=units, x=x_values, x_description=x[1], x_units=x[2],
                              **kwargs)
 
