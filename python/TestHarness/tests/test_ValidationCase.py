@@ -175,6 +175,10 @@ class TestValidationCase(unittest.TestCase):
             status = test.Status.OK if case == 'pass' else test.Status.FAIL
             self.assertEqual(status, result.status)
             self.assertEqual(case, result.data_key)
+            if case == 'pass':
+                self.assertIn('within bounds', result.message)
+            else:
+                self.assertIn('out of bounds', result.message)
             data = test.data[case]
             self.assertEqual(f'Test.test_{case}', data.test)
 
