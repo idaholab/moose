@@ -62,7 +62,7 @@ TagAuxBase<T>::TagAuxBase(const InputParameters & parameters)
 {
   auto & execute_on = this->template getParam<ExecFlagEnum>("execute_on");
   if (execute_on.size() != 1 || !execute_on.isValueSet(EXEC_TIMESTEP_END))
-    paramError("execute_on", "must be set to EXEC_TIMESTEP_END");
+    paramError("execute_on", "must be set to TIMESTEP_END");
 }
 
 template <class T>
