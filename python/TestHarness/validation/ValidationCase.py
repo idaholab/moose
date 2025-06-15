@@ -17,7 +17,7 @@ import math
 from numbers import Number
 from typing import Optional, Tuple, Union
 from enum import Enum
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 from numpy.typing import NDArray
 import numpy as np
@@ -276,6 +276,12 @@ class ValidationCase(MooseObject):
                          description=description,
                          test=self._current_test,
                          **kwargs)
+
+        # Make sure that we can dump all of the data. The TestHarness
+        # relies on being able to call dump on these types, so we
+        # would rather die here instead of later
+        json.dumps(asdict(data))
+
         self._data[key] = data
         return data
 

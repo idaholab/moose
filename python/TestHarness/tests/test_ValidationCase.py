@@ -9,6 +9,8 @@
 
 # pylint: disable
 import unittest
+import typing
+from dataclasses import dataclass
 import numpy as np
 from TestHarness import ValidationCase
 from TestHarness.validation import NoTestsDefined, TestMissingResults, TestRunException
@@ -94,8 +96,16 @@ class TestValidationCase(unittest.TestCase):
         be serialized (must be JSON serializable so that the test harness
         can dump it)
         """
+        # Bad data value
         with self.assertRaisesRegex(TypeError, 'not JSON serializable'):
             ValidationCase().addData('key', b'1234', 'unused')
+
+        # Bad data class
+        @dataclass(kw_only=True)
+        class BadData(ValidationCase.Data):
+            bad_value: typing.Any
+        with self.assertRaisesRegex(TypeError, 'not JSON serializable'):
+            ValidationCase()._addData(BadData, 'key', 1234, 'unused', bad_value=b'1234')
 
     def testCheckBounds(self):
         """
