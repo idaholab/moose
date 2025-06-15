@@ -100,7 +100,12 @@ protected:
   /// cut the timestep by by this factor
   const Real & _cutback_factor;
 
-  /// Number of nonlinear iterations in previous solve
+  /// Number of outer solver iterations in previous solve.
+  /// For a single nonlinear system: number of nonlinear iterations
+  /// For a linear system: number of linear iterations
+  /// For multiple systems: sum of the number of iterations of each system
+  unsigned int & _outer_its;
+  // Compatibility with SAM
   unsigned int & _nl_its;
   /// Number of linear iterations in previous solve
   unsigned int & _l_its;
