@@ -44,6 +44,9 @@ class RunParallel(Scheduler):
             job.loadPreviousResults()
             return
 
+        # Start job timer
+        job.timer.startMain()
+
         # Anything that throws while running or processing a job should be caught
         # and the job should fail
         try:
@@ -57,6 +60,9 @@ class RunParallel(Scheduler):
             trace = traceback.format_exc()
             job.appendOutput(util.outputHeader('Python exception encountered in Job') + trace)
             job.setStatus(job.error, 'JOB EXCEPTION')
+        finally:
+            # Stop job timer
+            job.timer.stopMain()
 
     def buildRunner(self, job, options) -> Runner:
         """Builds the runner for a given tester

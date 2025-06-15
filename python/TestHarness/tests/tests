@@ -36,6 +36,12 @@
     issues = '#10647'
     collections = 'FAILURE_ANALYSIS'
   []
+  [format_result]
+    type = PythonUnitTest
+    input = test_FormatResult.py
+    requirement = "The system shall support the output of single-lined test results with a user configurable format string"
+    issues = '#30755'
+  []
   [min_ad_size]
     type = PythonUnitTest
     input = test_MinADSize.py
