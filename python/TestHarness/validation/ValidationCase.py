@@ -15,11 +15,13 @@ import sys
 import json
 import math
 from numbers import Number
-from numpy.typing import NDArray
-import numpy as np
 from typing import Optional, Tuple, Union
 from enum import Enum
 from dataclasses import dataclass
+
+from numpy.typing import NDArray
+import numpy as np
+
 from FactorySystem.MooseObject import MooseObject
 from FactorySystem.InputParameters import InputParameters
 
@@ -68,9 +70,13 @@ class TestRunException(Exception):
     """
     Exception for when an exception was found when running a test
     """
-    pass
 
 class ValidationCase(MooseObject):
+    """
+    Base class for a set of validation tests that can be attached
+    to a TestHarness test case.
+    """
+
     @staticmethod
     def validParams():
         return MooseObject.validParams()
@@ -78,10 +84,6 @@ class ValidationCase(MooseObject):
     # Output format for all numbers
     number_format = '.3E'
 
-    """
-    Base class for a set of validation tests that can be attached
-    to a TestHarness test case.
-    """
     class Status(str, ExtendedEnum):
         """
         The possible statuses for a validation result.
@@ -127,8 +129,8 @@ class ValidationCase(MooseObject):
 
             try:
                 json.dumps(self.value)
-            except (TypeError, OverflowError):
-                raise TypeError(f'Data type "{type(self.value)}" is not JSON serializable')
+            except (TypeError, OverflowError) as e:
+                raise TypeError(f'Data type "{type(self.value)}" is not JSON serializable') from e
 
         # The data key
         key: str
@@ -153,7 +155,7 @@ class ValidationCase(MooseObject):
             super().__post_init__()
             assert isinstance(self.units, (str, type(None)))
             if self.nominal is not None:
-                assert type(self.value) == type(self.nominal)
+                assert isinstance(self.nominal, type(self.value))
                 if not isinstance(self.value, float):
                     assert len(self.value) == len(self.nominal)
             if self.bounds is not None:
@@ -180,7 +182,7 @@ class ValidationCase(MooseObject):
         def __post_init__(self):
             super().__post_init__()
             assert isinstance(self.x, list)
-            assert type(self.x) == type(self.value)
+            assert isinstance(self.x, type(self.value))
             assert len(self.x) == len(self.value)
             assert isinstance(self.description, str)
             assert isinstance(self.x_units, (str, type(None)))
@@ -290,7 +292,7 @@ class ValidationCase(MooseObject):
         if not isinstance(description, str):
             raise TypeError('description is not of type str')
 
-        self._addData(self.Data, key, value, description)
+        self._addData(self.Data, key, value, description, **kwargs)
 
     @staticmethod
     def toFloat(value: typing.Any, context: Optional[str] = None) -> float:
@@ -384,7 +386,8 @@ class ValidationCase(MooseObject):
                          'validation': kwargs.pop('validation', True)}
 
         if data.bounds is not None:
-            status, message = self.checkBounds(data.value, data.bounds[0], data.bounds[1], data.units)
+            status, message = self.checkBounds(data.value, data.bounds[0],
+                                               data.bounds[1], data.units)
             self.addResult(status, message, **result_kwargs)
 
     @staticmethod
@@ -412,7 +415,8 @@ class ValidationCase(MooseObject):
                 raise ValueError(f'{prefix}value at index {i} is nan')
         return value
 
-    def addVectorData(self, key: str, x: VectorDataInputType, value: VectorDataInputType, **kwargs) -> None:
+    def addVectorData(self, key: str, x: VectorDataInputType,
+                      value: VectorDataInputType, **kwargs) -> None:
         """
         Adds a piece of vector (float or int) data to the validation data.
 
@@ -448,7 +452,7 @@ class ValidationCase(MooseObject):
         values = self.toListFloat(values, 'value: first entry (values)')
         x_values = self.toListFloat(x[0], 'x: first entry (values)')
         if len(values) != len(x_values):
-            raise ValueError(f'Length of x and value values not the same')
+            raise ValueError('Length of x and value values not the same')
 
         # Check bounds
         bounds = kwargs.get('bounds')
@@ -481,8 +485,8 @@ class ValidationCase(MooseObject):
                          'validation': kwargs.pop('validation', True)}
 
         if data.bounds is not None:
-            for i in range(len(values)):
-                status, message = self.checkBounds(values[i], data.bounds[0][i], data.bounds[1][i],
+            for i, v in enumerate(values):
+                status, message = self.checkBounds(v, data.bounds[0][i], data.bounds[1][i],
                                                    data.units)
                 x_units = f' {data.x_units}' if data.x_units is not None else ''
                 message = f'x = {x_values[i]:{self.number_format}}{x_units} (index {i}) {message}'
@@ -528,12 +532,13 @@ class ValidationCase(MooseObject):
             raise NoTestsDefined(self)
 
         name = self.__class__.__name__
-        print_prefixed = lambda msg: print('-' * 2 + ' ', msg)
+        def print_prefixed(msg: str) -> None:
+            print('-' * 2 + ' ', msg)
         print_prefixed(f'Running {len(test_functions)} test case(s) in {name}')
 
         if 'initialize' in all_functions:
             print_prefixed(f'Running {name}.initialize')
-            self.initialize()
+            self.initialize() # pylint: disable=no-member
 
         run_exceptions = 0
         for function in test_functions:
@@ -543,7 +548,7 @@ class ValidationCase(MooseObject):
             print_prefixed(f'Running {self._current_test}')
             try:
                 getattr(self, function)()
-            except:
+            except: # pylint: disable=bare-except
                 # Print to stdout so that it is mingled in
                 # order with the rest of the output
                 traceback.print_exc(file=sys.stdout)
@@ -557,7 +562,7 @@ class ValidationCase(MooseObject):
 
         if 'finalize' in all_functions:
             print_prefixed(f'Running {name}.finalize')
-            self.finalize()
+            self.finalize() # pylint: disable=no-member
 
         summary = f'Acquired {len(self.data)} data value(s), '
         summary += f'{self.getNumResults()} result(s): '
