@@ -75,6 +75,7 @@ class ValidationCase(MooseObject):
     def validParams():
         return MooseObject.validParams()
 
+    # Output format for all numbers
     number_format = '.3E'
 
     """
@@ -248,9 +249,19 @@ class ValidationCase(MooseObject):
         self._results.append(status_value)
 
     def _addData(self, data_type: typing.Type, key: str, value: typing.Any,
-                 description: str, **kwargs):
+                 description: str, **kwargs) -> Data:
         """
         Internal method for creating and inserting data.
+
+        Args:
+            data_type: The underlying data type (should derive from Data)
+            key: The key for the data
+            value: The value for the data
+            description: A description for the data
+        Keyword arguments:
+            Additional arguments to pass to the build
+        Returns:
+            The built Data object
         """
         if key in self._data:
             raise DataKeyAlreadyExists(key)
@@ -299,21 +310,38 @@ class ValidationCase(MooseObject):
         return value
 
     @staticmethod
-    def checkBounds(value: float, min_value: float, max_value: float, units: Optional[str]):
-        min_value = ValidationCase.toFloat(min_value, 'Min bound')
-        max_value = ValidationCase.toFloat(max_value, 'Max bound')
-        if min_value > max_value:
-            raise ValueError('Min bound greater than max')
+    def checkBounds(value: float,
+                    min_bound: float,
+                    max_bound: float,
+                    units: Optional[str]) -> Tuple[Status, str]:
+        """
+        Performs bounds checking for a scalar value and associates
+        a pass/fail with a status and a message
 
-        success = value >= min_value and value <= max_value
+        Args:
+            value: The value to check
+            min_bound: The minimum bound
+            max_bound: The max bound
+            units (optional): Units to add to the message
+        Returns:
+            Status: The associated status (ok or fail)
+            str: Message associated with the check
+        """
+        value = ValidationCase.toFloat(value, 'value')
+        min_bound = ValidationCase.toFloat(min_bound, 'min_bound')
+        max_bound = ValidationCase.toFloat(max_bound, 'max_bound')
+        if min_bound > max_bound:
+            raise ValueError('min_bound greater than max_bound')
+
+        success = value >= min_bound and value <= max_bound
         status = ValidationCase.Status.OK if success else ValidationCase.Status.FAIL
 
         units = f' {units}' if units is not None else ''
         number_format = ValidationCase.number_format
         message = [f'value {value:{number_format}}{units}']
         message += [('within' if success else 'out of') + ' bounds;']
-        message += [f'min = {min_value:{number_format}}{units},']
-        message += [f'max = {max_value:{number_format}}{units}']
+        message += [f'min = {min_bound:{number_format}}{units},']
+        message += [f'max = {max_bound:{number_format}}{units}']
 
         return status, ' '.join(message)
 
@@ -365,7 +393,11 @@ class ValidationCase(MooseObject):
         Attempts to convert the given value to a one-dimensional
         list of floating point values
 
-        If context is given, exceptions will be prefixed with that context
+        Args:
+            value: The number-like list value to convert
+            context (optional): Optional context to prefix exceptions with
+        Returns:
+            list[float]: The converted value
         """
         prefix = f'{context} ' if context else ''
         try:

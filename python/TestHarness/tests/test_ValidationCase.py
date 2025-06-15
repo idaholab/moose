@@ -116,14 +116,16 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(message, ' '.join(exp_message))
 
     def testCheckBoundsChecks(self):
-        # Bounds not numeric
-        with self.assertRaisesRegex(ValueError, 'Min bound: could not convert string'):
+        # Non-numeric values
+        with self.assertRaisesRegex(ValueError, 'value: could not convert string'):
+            ValidationCase.checkBounds('abc', 0, 1, None)
+        with self.assertRaisesRegex(ValueError, 'min_bound: could not convert string'):
             ValidationCase.checkBounds(0, 'abc', 1, None)
-        with self.assertRaisesRegex(ValueError, 'Max bound: could not convert string'):
+        with self.assertRaisesRegex(ValueError, 'max_bound: could not convert string'):
             ValidationCase.checkBounds(0, 1, 'abc', None)
 
         # Bound min greater than max
-        with self.assertRaisesRegex(ValueError, 'Min bound greater than max'):
+        with self.assertRaisesRegex(ValueError, 'min_bound greater than max_bound'):
             ValidationCase.checkBounds(0, 2, 1, None)
 
     def testToFloat(self):
