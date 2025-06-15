@@ -896,9 +896,10 @@ class Job(OutputInterface):
                     job_data['validation']['results'].append(value)
                 data = {k: v for k, v in case.data.items() if v.validation}
                 for key, value in data.items():
-                    value = asdict(value)
-                    value.pop('validation')
-                    job_data['validation']['data'][key] = value
+                    value_dict = asdict(value)
+                    value_dict['type'] = value.__class__.__name__.split('.')[-1]
+                    value_dict.pop('validation')
+                    job_data['validation']['data'][key] = value_dict
 
         # Extend with data from the scheduler, if any
         job_data.update(scheduler.appendResultFileJob(self))
