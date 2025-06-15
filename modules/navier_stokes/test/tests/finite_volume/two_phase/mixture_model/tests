@@ -17,7 +17,6 @@
     requirement = 'The system shall give the correct solution for two phase flow in a lid-driven cavity with a mixture model using Navier Stokes physics syntax.'
     recover = false
     allow_warnings = true
-    installation_type = in_tree
     valgrind = none
   []
   [mixture_rayleigh_bernard_two_phase]
@@ -65,7 +64,6 @@
     input = 'channel-advection-slip-physics.i'
     exodiff = 'channel-advection-slip-physics_out.e'
     requirement = 'The system shall be able to solve two-phase flow in a channel using amixture advection-slip model using Navier Stokes physics syntax.'
-    installation_type = in_tree
     # Negative viscosity during solve
     allow_warnings = true
     custom_cmp = 'mixture_physics_diff.cmp'
