@@ -568,13 +568,16 @@ class TestValidationCase(unittest.TestCase):
         """
         Tests that exceptions within individual tests are caught
         """
+        raised_exe = Exception('foo')
         class Test(ValidationCase):
             def test(self):
-                raise Exception('foo')
+                raise raised_exe
 
         test = Test()
-        with self.assertRaises(TestRunException):
+        with self.assertRaises(TestRunException) as exe:
             test.run()
+        self.assertEqual(len(exe.exception.exceptions), 1)
+        self.assertEqual(exe.exception.exceptions[0], raised_exe)
 
     def testGetTesterOutputs(self):
         """

@@ -70,6 +70,9 @@ class TestRunException(Exception):
     """
     Exception for when an exception was found when running a test
     """
+    def __init__(self, exceptions: list[Exception]):
+        super().__init__('Encountered exception(s) while running tests')
+        self.exceptions = exceptions
 
 class ValidationCase(MooseObject):
     """
@@ -540,7 +543,7 @@ class ValidationCase(MooseObject):
             print_prefixed(f'Running {name}.initialize')
             self.initialize() # pylint: disable=no-member
 
-        run_exceptions = 0
+        run_exceptions = []
         for function in test_functions:
             self._current_test = f'{name}.{function}'
             self._current_not_validation = False
@@ -548,11 +551,11 @@ class ValidationCase(MooseObject):
             print_prefixed(f'Running {self._current_test}')
             try:
                 getattr(self, function)()
-            except: # pylint: disable=bare-except
+            except Exception as e: # pylint: disable=broad-exception-caught
                 # Print to stdout so that it is mingled in
                 # order with the rest of the output
                 traceback.print_exc(file=sys.stdout)
-                run_exceptions += 1
+                run_exceptions.append(e)
             else:
                 if not any(r.test == self._current_test for r in self.results):
                     raise TestMissingResults(self, function)
@@ -575,7 +578,7 @@ class ValidationCase(MooseObject):
         print_prefixed(summary)
 
         if run_exceptions:
-            raise TestRunException()
+            raise TestRunException(run_exceptions)
 
     def getTesterOutputs(self, extension: str = None) -> list[str]:
         """
