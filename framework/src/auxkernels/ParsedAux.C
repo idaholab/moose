@@ -100,6 +100,9 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     variables += (variables.empty() ? "" : ",") + matprop;
   for (const auto & matprop : _ad_matprop_names)
     variables += (variables.empty() ? "" : ",") + matprop;
+  if (isNodal() && (_matprop_names.size() || _ad_matprop_names.size()))
+    mooseWarning("Material properties cannot be retrieved in a nodal auxkernel. Use a different "
+                 "auxiliary variable family.");
 
   // positions and time
   if (_use_xyzt)
