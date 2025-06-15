@@ -117,9 +117,9 @@ class TestValidationCase(unittest.TestCase):
 
     def testCheckBoundsChecks(self):
         # Bounds not numeric
-        with self.assertRaisesRegex(TypeError, 'Min bound not numeric'):
+        with self.assertRaisesRegex(ValueError, 'Min bound: could not convert string'):
             ValidationCase.checkBounds(0, 'abc', 1, None)
-        with self.assertRaisesRegex(TypeError, 'Max bound not numeric'):
+        with self.assertRaisesRegex(ValueError, 'Max bound: could not convert string'):
             ValidationCase.checkBounds(0, 1, 'abc', None)
 
         # Bound min greater than max

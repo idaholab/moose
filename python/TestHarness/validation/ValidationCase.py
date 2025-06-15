@@ -282,31 +282,6 @@ class ValidationCase(MooseObject):
         self._addData(self.Data, key, value, description)
 
     @staticmethod
-    def checkBounds(value: float, min_value: float, max_value: float, units: Optional[str]):
-        if isinstance(min_value, int):
-            min_value = float(min_value)
-        if not isinstance(min_value, float):
-            raise TypeError('Min bound not numeric')
-        if isinstance(max_value, int):
-            max_value = float(max_value)
-        if not isinstance(max_value, float):
-            raise TypeError('Max bound not numeric')
-        if min_value > max_value:
-            raise ValueError('Min bound greater than max')
-
-        success = value >= min_value and value <= max_value
-        status = ValidationCase.Status.OK if success else ValidationCase.Status.FAIL
-
-        units = f' {units}' if units is not None else ''
-        number_format = ValidationCase.number_format
-        message = [f'value {value:{number_format}}{units}']
-        message += [('within' if success else 'out of') + ' bounds;']
-        message += [f'min = {min_value:{number_format}}{units},']
-        message += [f'max = {max_value:{number_format}}{units}']
-
-        return status, ' '.join(message)
-
-    @staticmethod
     def toFloat(value: typing.Any, context: Optional[str] = None) -> float:
         """
         Converts the given value to float, if possible.
@@ -322,6 +297,25 @@ class ValidationCase(MooseObject):
                     raise type(e)(f'{context}: {e}') from e
                 raise
         return value
+
+    @staticmethod
+    def checkBounds(value: float, min_value: float, max_value: float, units: Optional[str]):
+        min_value = ValidationCase.toFloat(min_value, 'Min bound')
+        max_value = ValidationCase.toFloat(max_value, 'Max bound')
+        if min_value > max_value:
+            raise ValueError('Min bound greater than max')
+
+        success = value >= min_value and value <= max_value
+        status = ValidationCase.Status.OK if success else ValidationCase.Status.FAIL
+
+        units = f' {units}' if units is not None else ''
+        number_format = ValidationCase.number_format
+        message = [f'value {value:{number_format}}{units}']
+        message += [('within' if success else 'out of') + ' bounds;']
+        message += [f'min = {min_value:{number_format}}{units},']
+        message += [f'max = {max_value:{number_format}}{units}']
+
+        return status, ' '.join(message)
 
     def addScalarData(self, key: str, value: Number, description: str,
                       units: Optional[str], **kwargs) -> None:
