@@ -273,10 +273,10 @@ class ValidationCase(MooseObject):
 
         return status, ' '.join(message)
 
-    def addFloatData(self, key: str, value: NumericDataType, description: str,
-                     units: Optional[str], **kwargs) -> None:
+    def addScalarData(self, key: str, value: NumericDataType, description: str,
+                      units: Optional[str], **kwargs) -> None:
         """
-        Adds a piece of float data to the validation data.
+        Adds a piece of scalar (float or int) data to the validation data.
 
         Will also perform checking on the data if bounds are set and
         store an associated Result.

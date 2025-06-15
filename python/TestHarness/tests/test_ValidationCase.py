@@ -74,14 +74,14 @@ class TestValidationCase(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, 'not JSON serializable'):
             ValidationCase().addData('key', b'1234', 'unused')
 
-    def testAddFloatData(self):
+    def testAddScalarData(self):
         args = {'key': 'peak_temperature',
                 'value': 1.234,
                 'description': 'Peak temperature',
                 'units': 'K'}
 
         test = ValidationCase()
-        test.addFloatData(*args.values())
+        test.addScalarData(*args.values())
         all_data = test.data
         self.assertEqual(len(all_data), 1)
         data = test.data[args['key']]
@@ -89,79 +89,79 @@ class TestValidationCase(unittest.TestCase):
             self.assertEqual(getattr(data, key), value)
         self.assertIsNone(data.test)
 
-    def testAddFloatDataCheckType(self):
+    def testAddScalarDataCheckType(self):
         case = ValidationCase()
 
         # Non-numeric value
         with self.assertRaisesRegex(TypeError, 'value: not of type float or int'):
-            ValidationCase().addFloatData('non_numeric', 'abcd', 'unused', None)
+            ValidationCase().addScalarData('non_numeric', 'abcd', 'unused', None)
 
         # Allow integers
         value = int(1)
-        case.addFloatData('to_float', value, 'unused', None)
+        case.addScalarData('to_float', value, 'unused', None)
         data = case.data['to_float']
         self.assertTrue(isinstance(data.value, float))
         self.assertEqual(data.value, float(value))
 
         # Non string description
         with self.assertRaisesRegex(TypeError, 'description: not of type str'):
-            ValidationCase().addFloatData('bad_description', 1, None, None)
+            ValidationCase().addScalarData('bad_description', 1, None, None)
 
         # Non string units
         with self.assertRaisesRegex(TypeError, 'units: not of type str or None'):
-            ValidationCase().addFloatData('bad_units', 1, 'unused', 1)
+            ValidationCase().addScalarData('bad_units', 1, 'unused', 1)
 
         # Non-tuple bounds
         with self.assertRaisesRegex(TypeError, 'bounds: not of type tuple'):
-            ValidationCase().addFloatData('bad_bounds', 1, 'unused', None, bounds=[])
+            ValidationCase().addScalarData('bad_bounds', 1, 'unused', None, bounds=[])
 
         # Bad-sized bounds
         with self.assertRaisesRegex(TypeError, 'bounds: not of length 2'):
-            ValidationCase().addFloatData('bad_bounds_len', 1, 'unused', None, bounds=(None, None, None))
+            ValidationCase().addScalarData('bad_bounds_len', 1, 'unused', None, bounds=(None, None, None))
 
         # Bad min bounds type
         with self.assertRaisesRegex(TypeError, 'bounds: min bounds not of type int or float'):
-            ValidationCase().addFloatData('bad_bounds_len', 1, 'unused', None, bounds=(None, None))
+            ValidationCase().addScalarData('bad_bounds_len', 1, 'unused', None, bounds=(None, None))
 
         # Bad max bounds type
         with self.assertRaisesRegex(TypeError, 'bounds: max bounds not of type int or float'):
-            ValidationCase().addFloatData('bad_bounds_len', 1, 'unused', None, bounds=(1, None))
+            ValidationCase().addScalarData('bad_bounds_len', 1, 'unused', None, bounds=(1, None))
 
         # Bounds int to float
-        case.addFloatData('bounds_to_float', 1, 'unused', None, bounds=(1, 2))
+        case.addScalarData('bounds_to_float', 1, 'unused', None, bounds=(1, 2))
         bounds_to_float_data = case.data['bounds_to_float']
         assert isinstance(bounds_to_float_data.bounds[0], float)
         assert isinstance(bounds_to_float_data.bounds[1], float)
 
-    def testAddFloatDataBounded(self):
+    def testAddScalarDataBounded(self):
         key = 'data'
         value = 1.234
         bounds = (value - 1.0, value + 0.1)
 
         test = ValidationCase()
-        test.addFloatData(key, value, 'unused', None, bounds=bounds)
+        test.addScalarData(key, value, 'unused', None, bounds=bounds)
         all_data = test.data
         self.assertEqual(len(all_data), 1)
         data = all_data[key]
         self.assertEqual(bounds, data.bounds)
 
-    def testAddFloatDataNominal(self):
+    def testAddScalarDataNominal(self):
         key = 'test'
         nominal = 1.1
         test = ValidationCase()
-        test.addFloatData(key, 1.0, 'unused', None,  nominal=nominal)
+        test.addScalarData(key, 1.0, 'unused', None,  nominal=nominal)
         all_data = test.data
         self.assertEqual(len(all_data), 1)
         self.assertEqual(nominal, all_data[key].nominal)
 
-    def testAddFloatDataBoundedCheck(self):
+    def testAddScalarDataBoundedCheck(self):
         class Test(ValidationCase):
             def test_pass(self):
-                self.addFloatData('pass', 1.0, 'foo', None, bounds=(0.9, 1.1))
+                self.addScalarData('pass', 1.0, 'foo', None, bounds=(0.9, 1.1))
             def test_fail_lower(self):
-                self.addFloatData('fail_lower', 2.0, 'foo', None, bounds=(2.1, 3.0))
+                self.addScalarData('fail_lower', 2.0, 'foo', None, bounds=(2.1, 3.0))
             def test_fail_upper(self):
-                self.addFloatData('fail_upper', 3.0, 'foo', None, bounds=(2.0, 2.2))
+                self.addScalarData('fail_upper', 3.0, 'foo', None, bounds=(2.0, 2.2))
 
         test = Test()
         test.run()

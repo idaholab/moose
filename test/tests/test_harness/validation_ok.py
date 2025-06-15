@@ -52,8 +52,8 @@ class TestCase(ValidationCase):
         # we define the bounds here, the data will be checked
         # to be within bounds and will produce a validation
         # failure if it is without of bounds.
-        self.addFloatData('number', self.value, 'Number', 'coolunits',
-                          bounds=(self.lower_bound, self.upper_bound))
+        self.addScalarData('number', self.value, 'Number', 'coolunits',
+                           bounds=(self.lower_bound, self.upper_bound))
 
         # Store some arbitrary data. This data isn't particularly
         # meaningful, but it describes storing an arbitrary dictionary.
