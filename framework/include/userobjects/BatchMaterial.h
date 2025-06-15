@@ -86,33 +86,8 @@ struct TupleStd
   template <int I, typename T>
   using element = typename std::tuple_element<I, T>::type;
 };
-
-// this wrapper is yet untested
-#ifdef CUDA_SUPPORTED
-struct TupleCuda
-{
-  // the tuple type
-  template <typename... Args>
-  using type = cuda::std::tuple<Args...>;
-
-  // the element access function
-  template <int N, typename T>
-  static auto & get(T && t)
-  {
-    return cuda::std::get<N>(t);
-  }
-
-  // tuple size (number of elements)
-  template <typename T>
-  using size = cuda::std::tuple_size<T>;
-
-  // element type access
-  template <int I, typename T>
-  using element = typename cuda::std::tuple_element<I, T>::type;
-};
-#endif
-
 }
+
 template <typename Tuple, typename Output, typename... Input>
 class BatchMaterial : public ElementUserObject
 {

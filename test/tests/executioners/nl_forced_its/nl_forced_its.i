@@ -1,60 +1,61 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 15
-  ny = 15
+  nx = 5
+  ny = 5
 []
 
 [Variables]
   [./u]
-    scaling = 1e-5
+    type = MooseVariableFVReal
   [../]
 []
 
-[Kernels]
+[FVKernels]
   [./diff]
-    type = CoefDiffusion
+    type = FVDiffusion
     variable = u
-    coef = 0.1
+    coeff = 1
   [../]
-  [./time]
-    type = TimeDerivative
+  [force]
+    type = FVCoupledForce
+    v = v
     variable = u
-  [../]
+  []
 []
 
-[BCs]
+[FunctorMaterials]
+  [parsed]
+    type = ADParsedFunctorMaterial
+    property_name = 'v'
+    functor_names = 'u'
+    expression = 'if(u>0.1,1e6,0)'
+  []
+[]
+
+[FVBCs]
   [./left]
-    type = DirichletBC
+    type = FVDirichletBC
     variable = u
-    preset = false
     boundary = left
-    value = -1000
+    value = 0
   [../]
   [./right]
-    type = DirichletBC
+    type = FVDirichletBC
     variable = u
-    preset = false
     boundary = right
-    value = 100000
+    value = 1
   [../]
 []
 
 [Executioner]
-  type = Transient
-  scheme = 'implicit-euler'
+  type = Steady
   line_search = 'none'
-  solve_type = PJFNK
-
-  l_max_its = 20
-  nl_max_its = 20
-  nl_forced_its = 2
+  solve_type = NEWTON
+  nl_max_its = 5
+  nl_forced_its = 3
   nl_abs_div_tol = 1e+3
-
-  dt = 1
-  num_steps = 2
-
-  petsc_options = '-snes_converged_reason -ksp_converged_reason '
-  petsc_options_iname = '-pc_type -pc_hypre_type '
+  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

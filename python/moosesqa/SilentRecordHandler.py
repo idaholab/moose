@@ -17,7 +17,7 @@ class SilentRecordHandler(logging.NullHandler):
         super().__init__(*args, **kwargs)
         self._records = collections.defaultdict(set)
 
-    def getCount(self, level):
+    def get_count(self, level):
         return SilentRecordHandler.COUNTS[level]
 
     def getRecords(self):

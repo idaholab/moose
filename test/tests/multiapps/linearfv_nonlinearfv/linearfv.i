@@ -78,10 +78,9 @@
 [Executioner]
   type = Steady
   system_names = u_sys
-  l_abs_tol = 1e-12
   l_tol = 1e-10
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu mumps'
   fixed_point_rel_tol = 1e-10
 []
 

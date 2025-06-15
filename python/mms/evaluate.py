@@ -64,65 +64,67 @@ def evaluate(pde, soln, variable='u',
     # symbols with short names for use in code below
     x1 = getattr(R, coordinate_names[0])
     x2 = getattr(R, coordinate_names[1])
-    x3  = getattr(R, coordinate_names[2])
+    x3 = getattr(R, coordinate_names[2])
 
     # necessary declaration of names needed when running `eval`
-    locals()[coordinate_names[0]] = x1
-    locals()[coordinate_names[1]] = x2
-    locals()[coordinate_names[2]] = x3
+    context = {}
+    context[coordinate_names[0]] = x1
+    context[coordinate_names[1]] = x2
+    context[coordinate_names[2]] = x3
 
     t = Symbol('t')
     e_i = R.i
     e_j = R.j
     e_k = R.k
+    context.update({'t': t, 'R': R, 'e_i': e_i, 'e_j': e_j, 'e_k': e_k})
 
     # Define extra vectors, use _v_ in order to not collide with vector=['v']
     for _v_ in vectors:
         _check_reserved(_v_)
         for _c_ in [sx1, sx2, sx3]:
             _s_ = '{}_{}'.format(_v_, _c_)
-            locals()[_s_] = Symbol(_s_)
-        locals()[_v_] = locals()['{}_{}'.format(_v_,sx1)]*R.i + \
-                        locals()['{}_{}'.format(_v_,sx2)]*R.j + \
-                        locals()['{}_{}'.format(_v_,sx3)]*R.k
+            context[_s_] = Symbol(_s_)
+        context[_v_] = context['{}_{}'.format(_v_, sx1)] * R.i + \
+                       context['{}_{}'.format(_v_, sx2)] * R.j + \
+                       context['{}_{}'.format(_v_, sx3)] * R.k
 
     # Define extra scalars
     for _s_ in scalars:
         _check_reserved(_s_)
-        locals()[_s_] = Symbol(_s_)
+        context[_s_] = Symbol(_s_)
 
     # Define extra functions
     for _f_ in functions:
         _check_reserved(_f_)
-        locals()[_f_] = Function(_f_)(x1, x2, x3, t)
+        context[_f_] = Function(_f_)(x1, x2, x3, t)
 
     # Define extra vector functions
     for _vf_ in vectorfunctions:
         _check_reserved(_vf_)
         for _c_ in [sx1, sx2, sx3]:
             _s_ = '{}_{}'.format(_vf_, _c_)
-            locals()[_s_] = Function(_s_)(x1, x2, x3, t)
-        locals()[_vf_] = locals()['{}_{}'.format(_vf_,sx1)]*R.i + \
-                         locals()['{}_{}'.format(_vf_,sx2)]*R.j + \
-                         locals()['{}_{}'.format(_vf_,sx3)]*R.k
+            context[_s_] = Function(_s_)(x1, x2, x3, t)
+        context[_vf_] = context['{}_{}'.format(_vf_, sx1)] * R.i + \
+                        context['{}_{}'.format(_vf_, sx2)] * R.j + \
+                        context['{}_{}'.format(_vf_, sx3)] * R.k
 
     # Define known functions
     for _f_, _v_ in kwargs.items():
         _check_reserved(_f_)
-        locals()[_f_] = eval(_v_)
-        if isinstance(locals()[_f_], Vector):
-            locals()['{}_{}'.format(_f_,sx1)] = locals()[_f_].components.get(R.i, 0)
-            locals()['{}_{}'.format(_f_,sx2)] = locals()[_f_].components.get(R.j, 0)
-            locals()['{}_{}'.format(_f_,sx3)] = locals()[_f_].components.get(R.k, 0)
+        context[_f_] = eval(_v_, globals(), context)
+        if isinstance(context[_f_], Vector):
+            context['{}_{}'.format(_f_, sx1)] = context[_f_].components.get(R.i, 0)
+            context['{}_{}'.format(_f_, sx2)] = context[_f_].components.get(R.j, 0)
+            context['{}_{}'.format(_f_, sx3)] = context[_f_].components.get(R.k, 0)
 
     # Evaluate the supplied solution
-    _exact_ = eval(soln)
-    locals()[variable] = _exact_
+    _exact_ = eval(soln, globals(), context)
+    context[variable] = _exact_
 
     # Evaluate the PDE
     pde = pde.replace('grad', 'gradient')
     pde = pde.replace('div', 'divergence')
-    _func_ = eval(pde)
+    _func_ = eval(pde, globals(), context)
     if negative:
         _func_ = -1 * _func_
 

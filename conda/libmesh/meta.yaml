@@ -4,7 +4,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 0 %}
+{% set build = 1 %}
 {% set version = "2025.05.23" %}
 
 package:
@@ -24,6 +24,8 @@ build:
     - MOOSE_JOBS
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
+    - NODE_EXTRA_CA_CERTS
 
 requirements:
   build:

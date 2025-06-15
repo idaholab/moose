@@ -24,19 +24,12 @@ public:
   LibtorchArtificialNeuralNetTest(const InputParameters & params);
 
   virtual void initialize(){};
-  virtual void execute(){};
+  virtual void execute();
   virtual void finalize(){};
 
 protected:
-  /// Function to determine the torch data type to be used based on
-  /// an input enum
-  torch::ScalarType determineTorchDataType(const MooseEnum & data_enum);
-
   /// We create a vector to store the output of the neural net
   VectorPostprocessorValue & _nn_values;
-
-  /// The data type for the neural net this
-  const torch::ScalarType _data_type;
 };
 
 #endif

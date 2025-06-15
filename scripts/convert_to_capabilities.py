@@ -100,7 +100,7 @@ class SpecModifier:
     bool_params = ['unique_id', 'tecplot', 'vtk', 'petsc_debug', 'superlu',
                    'mumps', 'strumpack', 'slepc',
                    'parmetis', 'chaco', 'party', 'ptscotch', 'libpng',
-                   'libtorch']
+                   'libtorch', 'mfem']
     for param in bool_params:
       def do_bool_param(value):
         bool_value = None

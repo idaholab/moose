@@ -7,7 +7,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 1 %}
+{% set build = 2 %}
 {% set version = "3.23.0.6.gd9d7fd11dca" %}
 
 package:
@@ -30,6 +30,7 @@ build:
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
     - CURL_CA_BUNDLE
+    - NODE_EXTRA_CA_CERTS
   run_exports:
     - {{ pin_subpackage('moose-petsc', max_pin='x.x')}}
 

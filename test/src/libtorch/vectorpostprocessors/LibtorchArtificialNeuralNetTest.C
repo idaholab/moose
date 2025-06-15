@@ -30,14 +30,21 @@ LibtorchArtificialNeuralNetTest::validParams()
 }
 
 LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputParameters & params)
-  : GeneralVectorPostprocessor(params),
-    _nn_values(declareVector("nn_values")),
-    _data_type(determineTorchDataType(getParam<MooseEnum>("data_type")))
+  : GeneralVectorPostprocessor(params), _nn_values(declareVector("nn_values"))
 {
+  if (comm().size() > 1)
+    mooseError("Should not be run in parallel");
+}
+
+void
+LibtorchArtificialNeuralNetTest::execute()
+{
+  const torch::ScalarType data_type = "float" ? torch::kFloat : torch::kDouble;
+
   torch::manual_seed(11);
 
   torch::TensorOptions options(
-      torch::TensorOptions().dtype(_data_type).device(_app.getLibtorchDevice()));
+      torch::TensorOptions().dtype(data_type).device(_app.getLibtorchDevice()));
 
   // Define neurons per hidden layer: we will have two hidden layers with 4 neurons each
   std::vector<unsigned int> num_neurons_per_layer({4, 4});
@@ -51,7 +58,7 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
           num_neurons_per_layer,
           getParam<std::vector<std::string>>("activation_functions"),
           _app.getLibtorchDevice(),
-          _data_type);
+          data_type);
 
   // Create an Adam optimizer
   torch::optim::Adam optimizer(nn->parameters(), torch::optim::AdamOptions(0.02));
@@ -75,15 +82,6 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
   prediction = nn->forward(input);
   // We save our second prediction
   _nn_values.push_back(prediction.item<double>());
-}
-
-torch::ScalarType
-LibtorchArtificialNeuralNetTest::determineTorchDataType(const MooseEnum & data_enum)
-{
-  if (data_enum == "float")
-    return torch::kFloat;
-  else
-    return torch::kDouble;
 }
 
 #endif

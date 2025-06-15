@@ -24,7 +24,7 @@ public:
   LibtorchArtificialNeuralNetTrainerTest(const InputParameters & params);
 
   virtual void initialize(){};
-  virtual void execute(){};
+  virtual void execute();
   virtual void finalize(){};
 
 protected:

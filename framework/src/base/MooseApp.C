@@ -817,7 +817,7 @@ MooseApp::registerCapabilities()
 
   {
     const auto doc = "NVIDIA GPU parallel computing platform";
-#ifdef CUDA_SUPPORTED
+#ifdef PETSC_HAVE_CUDA
     haveCapability("cuda", doc);
 #else
     missingCapability("cuda", doc, "Add the CUDA bin directory to your path and rebuild PETSc.");
@@ -1112,8 +1112,8 @@ MooseApp::~MooseApp()
     HeapProfilerStop();
 #endif
   _action_warehouse.clear();
-  _executioner.reset();
   _the_warehouse.reset();
+  _executioner.reset();
 
   // Don't wait for implicit destruction of input parameter storage
   _input_parameter_warehouse.reset();

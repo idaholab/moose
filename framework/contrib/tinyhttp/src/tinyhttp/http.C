@@ -267,7 +267,7 @@ bool HttpServer::Processor::isTimedOut() const noexcept {
 
 void HttpServer::Processor::shutdown() {
     #ifdef TINYHTTP_THREADING
-    std::unique_lock{mShutdownMutex};
+    std::unique_lock lock{mShutdownMutex};
     #endif
 
     mIsAlive = false;
