@@ -58,3 +58,10 @@ class TestCase(ValidationCase):
         # Store some arbitrary data. This data isn't particularly
         # meaningful, but it describes storing an arbitrary dictionary.
         self.addData('useless_dict', {'foo': 'bar'}, 'A useless dictionary')
+
+        # Store some arbitrary vector data. Also not meaningful, but
+        # is an example.
+        self.addVectorData('vector',
+                           ([0, 1], 'Position', 'cm'),
+                           ([1, 2], 'Temperature', 'K'),
+                           bounds=(([0, 1], [2, 3])))
