@@ -37,7 +37,7 @@ error.
 Enter your application's directory, build your application and then run tests:
 
 ```bash
-cd {{PATH}}/YourAppName
+cd {{PATH}}/your_app_name
 make -j 6
 ./run_tests -j 6
 ```
