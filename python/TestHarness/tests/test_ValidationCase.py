@@ -140,12 +140,12 @@ class TestValidationCase(unittest.TestCase):
             self.assertEqual(getattr(data, key), value)
         self.assertIsNone(data.test)
 
-    def testAddScalarDataCheckType(self):
+    def testAddScalarDataChecks(self):
         case = ValidationCase()
 
         # Non-numeric value
-        with self.assertRaisesRegex(TypeError, 'value: not of type float or int'):
-            ValidationCase().addScalarData('non_numeric', 'abcd', 'unused', None)
+        with self.assertRaisesRegex(ValueError, 'value: could not convert string to float'):
+            ValidationCase().addScalarData('k', 'abcd', 'unused', None)
 
         # Allow integers
         value = int(1)
@@ -156,33 +156,44 @@ class TestValidationCase(unittest.TestCase):
 
         # Non string description
         with self.assertRaisesRegex(TypeError, 'description: not of type str'):
-            ValidationCase().addScalarData('bad_description', 1, None, None)
+            ValidationCase().addScalarData('k', 1, None, None)
 
         # Non string units
         with self.assertRaisesRegex(TypeError, 'units: not of type str or None'):
-            ValidationCase().addScalarData('bad_units', 1, 'unused', 1)
+            ValidationCase().addScalarData('k', 1, 'unused', 1)
 
         # Non-tuple bounds
         with self.assertRaisesRegex(TypeError, 'bounds: not of type tuple'):
-            ValidationCase().addScalarData('bad_bounds', 1, 'unused', None, bounds=[])
+            ValidationCase().addScalarData('k', 1, 'unused', None, bounds=[])
 
         # Bad-sized bounds
         with self.assertRaisesRegex(TypeError, 'bounds: not of length 2'):
-            ValidationCase().addScalarData('bad_bounds_len', 1, 'unused', None, bounds=(None, None, None))
+            ValidationCase().addScalarData('k', 1, 'unused', None, bounds=(None, None, None))
 
         # Bad min bounds type
-        with self.assertRaisesRegex(TypeError, 'bounds: min bounds not of type int or float'):
-            ValidationCase().addScalarData('bad_bounds_len', 1, 'unused', None, bounds=(None, None))
+        with self.assertRaisesRegex(TypeError, 'bounds min: float\\(\\) argument must be a string or a real number'):
+            ValidationCase().addScalarData('k', 1, 'unused', None, bounds=(None, None))
 
         # Bad max bounds type
-        with self.assertRaisesRegex(TypeError, 'bounds: max bounds not of type int or float'):
-            ValidationCase().addScalarData('bad_bounds_len', 1, 'unused', None, bounds=(1, None))
+        with self.assertRaisesRegex(ValueError, 'bounds max: could not convert string to float'):
+            ValidationCase().addScalarData('k', 1, 'unused', None, bounds=(1, 'abcd'))
 
         # Bounds int to float
         case.addScalarData('bounds_to_float', 1, 'unused', None, bounds=(1, 2))
         bounds_to_float_data = case.data['bounds_to_float']
         assert isinstance(bounds_to_float_data.bounds[0], float)
         assert isinstance(bounds_to_float_data.bounds[1], float)
+
+        # Non-numeric nominal
+        with self.assertRaisesRegex(ValueError, 'nominal: could not convert string to float'):
+            ValidationCase().addScalarData('k', 1, 'unused', None, nominal='abcd')
+
+        # Int nominal to float
+        nominal = int(1)
+        case.addScalarData('nominal_to_float', 1, 'unused', None, nominal=nominal)
+        data = case.data['nominal_to_float']
+        self.assertTrue(isinstance(data.nominal, float))
+        self.assertEqual(data.nominal, float(nominal))
 
     def testAddScalarDataBounded(self):
         key = 'data'

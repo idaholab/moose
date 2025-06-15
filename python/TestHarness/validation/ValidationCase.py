@@ -277,6 +277,23 @@ class ValidationCase(MooseObject):
 
         return status, ' '.join(message)
 
+    @staticmethod
+    def toFloat(value: typing.Any, context: Optional[str] = None) -> float:
+        """
+        Converts the given value to float, if possible.
+
+        If context is provided, will include it as the prefix
+        to the thrown exception
+        """
+        if not isinstance(value, float):
+            try:
+                value = float(value)
+            except Exception as e:
+                if context:
+                    raise type(e)(f'{context}: {e}') from e
+                raise
+        return value
+
     def addScalarData(self, key: str, value: NumericDataType, description: str,
                       units: Optional[str], **kwargs) -> None:
         """
@@ -293,10 +310,7 @@ class ValidationCase(MooseObject):
         Keyword arguments:
             Additional arguments passed to NumericData
         """
-        if isinstance(value, int):
-            value = float(value)
-        if not isinstance(value, float):
-            raise TypeError('value: not of type float or int')
+        value = self.toFloat(value, 'value')
         if not isinstance(description, str):
             raise TypeError('description: not of type str')
         if units is not None and not isinstance(units, str):
@@ -307,11 +321,11 @@ class ValidationCase(MooseObject):
                 raise TypeError('bounds: not of type tuple')
             if not len(bounds) == 2:
                 raise TypeError('bounds: not of length 2 (min and max)')
-            if not isinstance(bounds[0], (int, float)):
-                raise TypeError('bounds: min bounds not of type int or float')
-            if not isinstance(bounds[1], (int, float)):
-                raise TypeError('bounds: max bounds not of type int or float')
-            kwargs['bounds'] = (float(bounds[0]), float(bounds[1]))
+            kwargs['bounds'] = (self.toFloat(bounds[0], 'bounds min'),
+                                self.toFloat(bounds[1], 'bounds max'))
+        nominal = kwargs.get('nominal')
+        if nominal is not None:
+            kwargs['nominal'] = self.toFloat(nominal, 'nominal')
 
         data = self._addData(self.NumericData, key, value, description, units=units, **kwargs)
 
