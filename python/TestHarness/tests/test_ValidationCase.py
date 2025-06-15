@@ -125,6 +125,22 @@ class TestValidationCase(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Min bound greater than max'):
             ValidationCase.checkBounds(0, 2, 1, None)
 
+    def testToFloat(self):
+        # Success
+        value = float(1.01)
+        self.assertEqual(value, ValidationCase.toFloat(value))
+
+        # Integer to float
+        value = int(1)
+        to_value = ValidationCase.toFloat(value)
+        self.assertTrue(isinstance(to_value, float))
+        self.assertEqual(to_value, float(value))
+
+        # Catch exception
+        context = 'some context'
+        with self.assertRaisesRegex(ValueError, 'some context: could not convert string to float'):
+            ValidationCase.toFloat('abcd', context)
+
     def testAddScalarData(self):
         args = {'key': 'peak_temperature',
                 'value': 1.234,
