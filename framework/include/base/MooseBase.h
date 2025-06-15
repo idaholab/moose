@@ -10,6 +10,7 @@
 #pragma once
 
 #include <string>
+#include <optional>
 
 class InputParameters;
 class MooseApp;
@@ -63,18 +64,23 @@ public:
   std::string typeAndName() const;
 
   /**
-   * @returns A prefix to be used in errors that contains the input
+   * @returns A prefix to be used in messages that contain the input
    * file location associated with this object (if any) and the
    * name and type of the object.
    */
-  std::string errorPrefix(const std::string & error_type) const;
+  std::string messagePrefix() const;
+
+  /**
+   * Deprecated message prefix; the error type is no longer used
+   */
+  std::string errorPrefix(const std::string &) const { return messagePrefix(); }
 
   /**
    * Calls moose error with the message \p msg.
    *
    * Will prefix the message with the subapp name if one exists.
    *
-   * If \p with_prefix, then add the prefix from errorPrefix()
+   * If \p with_prefix, then add the prefix from messagePrefix()
    * to the error.
    */
   [[noreturn]] void callMooseError(std::string msg, const bool with_prefix) const;

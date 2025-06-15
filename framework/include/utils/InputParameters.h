@@ -46,7 +46,6 @@ class FEProblemBase;
 class InputParameters;
 class MooseEnum;
 class MooseObject;
-class MooseBase;
 class MultiMooseEnum;
 class Problem;
 namespace hit
@@ -979,10 +978,8 @@ public:
    * when returning most scalar and vector types.
    */
   template <typename T>
-  static const T & getParamHelper(const std::string & name,
-                                  const InputParameters & pars,
-                                  const T * the_type,
-                                  const MooseBase * moose_base = nullptr);
+  static const T &
+  getParamHelper(const std::string & name, const InputParameters & pars, const T * the_type);
   ///@}
 
   using Parameters::get;

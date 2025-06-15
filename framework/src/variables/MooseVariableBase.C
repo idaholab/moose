@@ -121,16 +121,6 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _use_dual(getParam<bool>("use_dual")),
     _is_array(getParam<bool>("array"))
 {
-  scalingFactor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
-                                        : std::vector<Real>(_count, 1.));
-  if (getParam<bool>("fv") && getParam<bool>("eigen"))
-    paramError("eigen", "finite volume (fv=true) variables do not have eigen support");
-  if (getParam<bool>("fv") && _fe_type.family != MONOMIAL)
-    paramError("family", "finite volume (fv=true) variables must be have MONOMIAL family");
-  if (getParam<bool>("fv") && _fe_type.order != 0)
-    paramError("order", "finite volume (fv=true) variables currently support CONST order only");
-  if (_count > 1)
-    mooseAssert(_is_array, "Must be true with component > 1");
   if (_is_array)
   {
     auto name0 = _sys.system().variable(_var_num).name();
@@ -147,6 +137,17 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
           "Component size of normal variable (_count) must be one. This is not the case for '" +
           _var_name + "' (_count equals " + std::to_string(_count) + ").");
   }
+
+  scalingFactor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
+                                        : std::vector<Real>(_count, 1.));
+  if (getParam<bool>("fv") && getParam<bool>("eigen"))
+    paramError("eigen", "finite volume (fv=true) variables do not have eigen support");
+  if (getParam<bool>("fv") && _fe_type.family != MONOMIAL)
+    paramError("family", "finite volume (fv=true) variables must be have MONOMIAL family");
+  if (getParam<bool>("fv") && _fe_type.order != 0)
+    paramError("order", "finite volume (fv=true) variables currently support CONST order only");
+  if (_count > 1)
+    mooseAssert(_is_array, "Must be true with component > 1");
 
   if (!blockRestricted())
     _is_lower_d = false;

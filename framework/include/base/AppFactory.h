@@ -13,9 +13,7 @@
 
 #include "MooseApp.h"
 #include "Capabilities.h"
-
-// Forward declarations
-class InputParameters;
+#include "InputParameters.h"
 
 /**
  * Macros
@@ -145,6 +143,9 @@ protected:
 private:
   // Private constructor for singleton pattern
   AppFactory() {}
+
+  // Storage of input parameters used in applications
+  std::vector<std::unique_ptr<const InputParameters>> _input_parameters;
 };
 
 template <typename T>
