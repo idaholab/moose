@@ -15,12 +15,21 @@ from TestHarness.validation import NoTestsDefined, TestMissingResults, TestRunEx
 from FactorySystem.InputParameters import InputParameters
 
 class TestValidationCase(unittest.TestCase):
+    """
+    Test cases for ValidationCase
+    """
     def testNoTests(self):
+        """
+        Checks that an exception is raised when running without tests
+        """
         test = ValidationCase()
         with self.assertRaises(NoTestsDefined):
             test.run()
 
     def testAddResult(self):
+        """
+        Tests the addition of a result message via ValidationCase.addResult()
+        """
         test_message = 'What a cool message'
 
         for validation in [True, False]:
@@ -42,6 +51,10 @@ class TestValidationCase(unittest.TestCase):
                 self.assertEqual(result.validation, validation)
 
     def testMissingResult(self):
+        """
+        Checks that an exception is thrown when tests are ran
+        but no results are stored
+        """
         class Test(ValidationCase):
             def test(self):
                 pass
@@ -52,6 +65,9 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(len(test.results), 0)
 
     def testAddData(self):
+        """
+        Tests the addition of arbitrary data via ValidationCase.addData()
+        """
         args = {'key': 'some_dict',
                 'value': {'foo': 'bar'},
                 'description': 'Useless dictionary'}
@@ -64,18 +80,27 @@ class TestValidationCase(unittest.TestCase):
             self.assertEqual(getattr(data, key), value)
         self.assertIsNone(data.test)
 
-    def testAddDataCheckType(self):
-        case = ValidationCase()
-
+    def testAddDataChecks(self):
+        """
+        Tests checks performed in ValidationCase.addData()
+        """
         # Description not a string
         with self.assertRaisesRegex(TypeError, 'description is not of type str'):
-            case.addData('unused', None, None)
+            ValidationCase().addData('unused', None, None)
 
     def testAddDataNonSerializable(self):
+        """
+        Checks that an exception is thrown when data is added that cannot
+        be serialized (must be JSON serializable so that the test harness
+        can dump it)
+        """
         with self.assertRaisesRegex(TypeError, 'not JSON serializable'):
             ValidationCase().addData('key', b'1234', 'unused')
 
     def testCheckBounds(self):
+        """
+        Tests the ValidationCase.checkBounds() method
+        """
         number_format = ValidationCase.number_format
         value, min_value, max_value, units = 1, 0, 2, 'coolunits'
 
@@ -116,6 +141,9 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(message, ' '.join(exp_message))
 
     def testCheckBoundsChecks(self):
+        """
+        Tests the data type checking performed in ValidationCase.checkBounds()
+        """
         # Non-numeric values
         with self.assertRaisesRegex(ValueError, 'value: could not convert string'):
             ValidationCase.checkBounds('abc', 0, 1, None)
@@ -129,6 +157,9 @@ class TestValidationCase(unittest.TestCase):
             ValidationCase.checkBounds(0, 2, 1, None)
 
     def testToFloat(self):
+        """
+        Tests the to-float conversion helper in ValidationCase.toFloat()
+        """
         # Success
         value = float(1.01)
         self.assertEqual(value, ValidationCase.toFloat(value))
@@ -145,6 +176,9 @@ class TestValidationCase(unittest.TestCase):
             ValidationCase.toFloat('abcd', context)
 
     def testAddScalarData(self):
+        """
+        Tests the storing of scalar data in ValidationCase.addScalarData()
+        """
         args = {'key': 'peak_temperature',
                 'value': 1.234,
                 'description': 'Peak temperature',
@@ -160,6 +194,9 @@ class TestValidationCase(unittest.TestCase):
         self.assertIsNone(data.test)
 
     def testAddScalarDataChecks(self):
+        """
+        Tests the data validation performed in ValidationCase.addScalarData()
+        """
         case = ValidationCase()
 
         # Non-numeric value
@@ -215,6 +252,10 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(data.nominal, float(nominal))
 
     def testAddScalarDataBounded(self):
+        """
+        Tests the addition of scalar data in ValidationCase.addScalarData()
+        with bounds via the 'bounds' keyword argument
+        """
         key = 'data'
         value = 1.234
         bounds = (value - 1.0, value + 0.1)
@@ -227,6 +268,10 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(bounds, data.bounds)
 
     def testAddScalarDataNominal(self):
+        """
+        Tests the addition of scalar data in ValidationCase.addScalarData()
+        with a nominal value via the 'nominal' keyword argument
+        """
         key = 'test'
         nominal = 1.1
         test = ValidationCase()
@@ -236,6 +281,9 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(nominal, all_data[key].nominal)
 
     def testAddScalarDataBoundedCheck(self):
+        """
+        Tests the checking of bounds for scalar data in ValidationCase.addScalarData()
+        """
         class Test(ValidationCase):
             def test_pass(self):
                 self.addScalarData('pass', 1.0, 'foo', None, bounds=(0.9, 1.1))
@@ -264,6 +312,9 @@ class TestValidationCase(unittest.TestCase):
             self.assertEqual(f'Test.test_{case}', data.test)
 
     def testToListFloat(self):
+        """
+        Tests the conversion helper ValidationCase.toListFloat()
+        """
         # Success list
         values = [1.0, 2.0]
         self.assertEqual(ValidationCase.toListFloat(values), values)
@@ -301,6 +352,9 @@ class TestValidationCase(unittest.TestCase):
             ValidationCase.toListFloat(values, 'foobar:')
 
     def testAddVectorDataChecks(self):
+        """
+        Tests the data validation performed in ValidationCase.addVectorData()
+        """
         good_args = {'x': ([0.0, 1.0], 'description_x', 'units_x'),
                      'value': ([1.0, 2.0], 'description_value', 'units_value')}
 
@@ -375,6 +429,9 @@ class TestValidationCase(unittest.TestCase):
             ValidationCase().addVectorData('k', *good_args.values(), nominal=[1, 2, 3])
 
     def testAddVectorData(self):
+        """
+        Tests the storing of vector data in ValidationCase.addVectorData()
+        """
         x = ([0.0, 1.0], 'Position', 'cm')
         value = ([1.0, 2.0], 'Temperature', 'K')
 
@@ -394,6 +451,10 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(data.x_units, x[2])
 
     def testAddVectorDataNominal(self):
+        """
+        Tests the addition of vector data in ValidationCase.addVectorData()
+        with a nominal value via the 'nominal' keyword argument
+        """
         key = 'k'
         x = ([0.0, 1.0], 'Position', 'cm')
         value = ([1.0, 2.0], 'Temperature', 'K')
@@ -406,6 +467,10 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(nominal, all_data[key].nominal)
 
     def testAddVectorDataBounded(self):
+        """
+        Tests the addition of vector data in ValidationCase.addVectorData()
+        with bounds via the 'bounds' keyword argument
+        """
         key = 'data'
         x = ([0, 1], 'description_x', 'units_x')
         value = ([1, 2], 'description_value', 'units_value')
@@ -417,6 +482,9 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(bounds, test.data[key].bounds)
 
     def testAddVectorDataBoundedCheck(self):
+        """
+        Tests the checking of bounds for vector data in ValidationCase.addVectorData()
+        """
         class TestValidationCase(ValidationCase):
             def test_pass(self):
                 self.addVectorData('pass',
@@ -459,6 +527,10 @@ class TestValidationCase(unittest.TestCase):
             check_result('fail_both', i, ValidationCase.Status.FAIL)
 
     def testInitialize(self):
+        """
+        Tests that a derived ValiationCase with an initialize()
+        method has that method called
+        """
         class Test(ValidationCase):
             def __init__(self):
                 self.value_set = False
@@ -474,6 +546,10 @@ class TestValidationCase(unittest.TestCase):
         self.assertTrue(test.value_set)
 
     def testFinalize(self):
+        """
+        Tests that a derived ValiationCase with an finalize()
+        method has that method called
+        """
         class Test(ValidationCase):
             def __init__(self):
                 self.value_set = False
@@ -489,6 +565,9 @@ class TestValidationCase(unittest.TestCase):
         self.assertTrue(test.value_set)
 
     def testTestException(self):
+        """
+        Tests that exceptions within individual tests are caught
+        """
         class Test(ValidationCase):
             def test(self):
                 raise Exception('foo')
@@ -498,12 +577,19 @@ class TestValidationCase(unittest.TestCase):
             test.run()
 
     def testGetTesterOutputs(self):
+        """
+        Tests getting tester outputs from within a case
+        """
         outputs = ['foo.csv', 'bar.e']
         test = ValidationCase(tester_outputs = outputs)
         self.assertEqual(outputs, test.getTesterOutputs())
         self.assertEqual(['bar.e'], test.getTesterOutputs(extension='.e'))
 
     def testWithParameters(self):
+        """
+        Tests that parameters set at construction of a ValidationCase
+        can be accessed within the tests.
+        """
         required_value = 500
         default_value = 1.0
         optional_value = 2.0
