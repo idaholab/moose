@@ -74,6 +74,57 @@ class TestValidationCase(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, 'not JSON serializable'):
             ValidationCase().addData('key', b'1234', 'unused')
 
+    def testCheckBounds(self):
+        number_format = ValidationCase.number_format
+        value, min_value, max_value, units = 1, 0, 2, 'coolunits'
+
+        # Success
+        status, message = ValidationCase.checkBounds(value, min_value, max_value, 'coolunits')
+        self.assertEqual(status, ValidationCase.Status.OK)
+        exp_message = [f'value {value:{number_format}} {units}']
+        exp_message += ['within bounds;']
+        exp_message += [f'min = {min_value:{number_format}} {units},']
+        exp_message += [f'max = {max_value:{number_format}} {units}']
+        self.assertEqual(message, ' '.join(exp_message))
+
+        # Success no units
+        status, message = ValidationCase.checkBounds(value, min_value, max_value, None)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        exp_message = [f'value {value:{number_format}}']
+        exp_message += ['within bounds;']
+        exp_message += [f'min = {min_value:{number_format}},']
+        exp_message += [f'max = {max_value:{number_format}}']
+        self.assertEqual(message, ' '.join(exp_message))
+
+        # Fail lower
+        status, message = ValidationCase.checkBounds(value, 1.5, max_value, None)
+        self.assertEqual(status, ValidationCase.Status.FAIL)
+        exp_message = [f'value {value:{number_format}}']
+        exp_message += ['out of bounds;']
+        exp_message += [f'min = {1.5:{number_format}},']
+        exp_message += [f'max = {max_value:{number_format}}']
+        self.assertEqual(message, ' '.join(exp_message))
+
+        # Fail upper
+        status, message = ValidationCase.checkBounds(value, min_value, 0.5, None)
+        self.assertEqual(status, ValidationCase.Status.FAIL)
+        exp_message = [f'value {value:{number_format}}']
+        exp_message += ['out of bounds;']
+        exp_message += [f'min = {min_value:{number_format}},']
+        exp_message += [f'max = {0.5:{number_format}}']
+        self.assertEqual(message, ' '.join(exp_message))
+
+    def testCheckBoundsChecks(self):
+        # Bounds not numeric
+        with self.assertRaisesRegex(TypeError, 'Min bound not numeric'):
+            ValidationCase.checkBounds(0, 'abc', 1, None)
+        with self.assertRaisesRegex(TypeError, 'Max bound not numeric'):
+            ValidationCase.checkBounds(0, 1, 'abc', None)
+
+        # Bound min greater than max
+        with self.assertRaisesRegex(ValueError, 'Min bound greater than max'):
+            ValidationCase.checkBounds(0, 2, 1, None)
+
     def testAddScalarData(self):
         args = {'key': 'peak_temperature',
                 'value': 1.234,

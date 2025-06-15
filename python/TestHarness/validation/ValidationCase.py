@@ -67,6 +67,8 @@ class ValidationCase(MooseObject):
     def validParams():
         return MooseObject.validParams()
 
+    number_format = '.3E'
+
     """
     Base class for a set of validation tests that can be attached
     to a TestHarness test case.
@@ -131,9 +133,6 @@ class ValidationCase(MooseObject):
         # a validation result (enables running verification
         # cases but not storing them in a database)
         validation: bool = True
-
-        def printableValue(self) -> str:
-            raise NotImplementedError
 
     @dataclass(kw_only=True)
     class NumericData(Data):
@@ -215,10 +214,7 @@ class ValidationCase(MooseObject):
         status_value = self.Result(status=status, message=message,
                                    test=self._current_test, **kwargs)
 
-        prefix = ''
-        if status_value.data_key is not None:
-            data = self._data[status_value.data_key]
-            prefix = f'{data.key} = {data.printableValue()} '
+        prefix = '' if status_value.data_key is None else f'{status_value.data_key}: '
         print(f'[{status.value:>4}] {prefix}{message}')
         self._results.append(status_value)
 
@@ -257,19 +253,27 @@ class ValidationCase(MooseObject):
         self._addData(self.Data, key, value, description)
 
     @staticmethod
-    def checkBounds(value: float, bounds: typing.Tuple[float, float], units: Optional[str]):
-        assert isinstance(bounds, tuple)
-        assert len(bounds) == 2
-        min, max = bounds
-        assert max > min
+    def checkBounds(value: float, min_value: float, max_value: float, units: Optional[str]):
+        if isinstance(min_value, int):
+            min_value = float(min_value)
+        if not isinstance(min_value, float):
+            raise TypeError('Min bound not numeric')
+        if isinstance(max_value, int):
+            max_value = float(max_value)
+        if not isinstance(max_value, float):
+            raise TypeError('Max bound not numeric')
+        if min_value > max_value:
+            raise ValueError('Min bound greater than max')
 
-        success = value >= min and value <= max
+        success = value >= min_value and value <= max_value
         status = ValidationCase.Status.OK if success else ValidationCase.Status.FAIL
 
         units = f' {units}' if units is not None else ''
-        message = [('within' if success else 'out of') + ' bounds;']
-        message += [f'min = {min:.5E}{units},']
-        message += [f'max = {max:.5E}{units}']
+        number_format = ValidationCase.number_format
+        message = [f'value {value:{number_format}}{units}']
+        message += [('within' if success else 'out of') + ' bounds;']
+        message += [f'min = {min_value:{number_format}}{units},']
+        message += [f'max = {max_value:{number_format}}{units}']
 
         return status, ' '.join(message)
 
