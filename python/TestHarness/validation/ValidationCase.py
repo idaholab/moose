@@ -13,6 +13,10 @@ import traceback
 import typing
 import sys
 import json
+import math
+from numbers import Number
+from numpy.typing import NDArray
+import numpy as np
 from typing import Optional, Tuple, Union
 from enum import Enum
 from dataclasses import dataclass
@@ -32,7 +36,11 @@ class ExtendedEnum(Enum):
         return list(cls)
 
 # The valid numeric data types
-NumericDataType = Union[float, int]
+NumericDataType = Union[float, list[float]]
+# Valid numeric vector types
+NumericVectorType = Union[NDArray[np.float64], list[float]]
+# Input type for addVectorData
+VectorDataInputType = Tuple[NumericVectorType, str, Optional[str]]
 
 class DataKeyAlreadyExists(Exception):
     """
@@ -143,24 +151,45 @@ class ValidationCase(MooseObject):
         def __post_init__(self):
             super().__post_init__()
             assert isinstance(self.units, (str, type(None)))
-            assert isinstance(self.nominal, (float, type(None)))
+            if self.nominal is not None:
+                assert type(self.value) == type(self.nominal)
+                if not isinstance(self.value, float):
+                    assert len(self.value) == len(self.nominal)
             if self.bounds is not None:
                 assert isinstance(self.bounds, tuple)
                 assert len(self.bounds) == 2
+                if not isinstance(self.value, float):
+                    assert len(self.value) == len(self.bounds[0])
+                    assert len(self.value) == len(self.bounds[1])
 
         # Units for the data, if any
         units: Optional[str]
         # A nominal value for this data; unused
         # in the test but useful in postprocessing
-        nominal: Optional[float] = None
+        nominal: Optional[NumericDataType] = None
         # Bounds for the data (min and max)
-        bounds: Optional[tuple[float, float]] = None
+        bounds: Optional[Tuple[NumericDataType, NumericDataType]] = None
 
-        def printableValue(self) -> str:
-            if isinstance(self.value, float):
-                units = f' {self.units}' if self.units is not None else ''
-                return f'{self.value:.5E}{units}'
-            raise NotImplementedError
+    @dataclass(kw_only=True)
+    class VectorNumericData(NumericData):
+        """
+        Data structure that stores the information about
+        a piece of array numeric validation data that can be checked
+        """
+        def __post_init__(self):
+            super().__post_init__()
+            assert isinstance(self.x, list)
+            assert type(self.x) == type(self.value)
+            assert len(self.x) == len(self.value)
+            assert isinstance(self.description, str)
+            assert isinstance(self.x_units, (str, type(None)))
+
+        # The x values for the data
+        x: list[float]
+        # The description for the x data
+        x_description: str
+        # Units for the x data, if any
+        x_units: Optional[str]
 
     # Stores classes that are instantiated that
     # are derived from this class
@@ -294,7 +323,7 @@ class ValidationCase(MooseObject):
                 raise
         return value
 
-    def addScalarData(self, key: str, value: NumericDataType, description: str,
+    def addScalarData(self, key: str, value: Number, description: str,
                       units: Optional[str], **kwargs) -> None:
         """
         Adds a piece of scalar (float or int) data to the validation data.
@@ -308,7 +337,7 @@ class ValidationCase(MooseObject):
             description: Human readable description of the data
             units: Human readable units for the data (can be None)
         Keyword arguments:
-            Additional arguments passed to NumericData
+            Additional arguments passed to NumericData (bounds, nominal, etc)
         """
         value = self.toFloat(value, 'value')
         if not isinstance(description, str):
@@ -333,8 +362,105 @@ class ValidationCase(MooseObject):
                          'validation': kwargs.pop('validation', True)}
 
         if data.bounds is not None:
-            status, message = self.checkBounds(data.value, data.bounds, data.units)
+            status, message = self.checkBounds(data.value, data.bounds[0], data.bounds[1], data.units)
             self.addResult(status, message, **result_kwargs)
+
+    @staticmethod
+    def toListFloat(value: typing.Any, context: Optional[str] = None) -> list[float]:
+        """
+        Attempts to convert the given value to a one-dimensional
+        list of floating point values
+
+        If context is given, exceptions will be prefixed with that context
+        """
+        prefix = f'{context} ' if context else ''
+        try:
+            arr = np.array(value, dtype=np.float64)
+        except Exception as e:
+            raise TypeError(f'{prefix}array conversion failed') from e
+        if arr.ndim != 1:
+            raise TypeError(f'{prefix}not one-dimensional')
+        value = arr.tolist()
+        for i, v in enumerate(value):
+            if math.isnan(v):
+                raise ValueError(f'{prefix}value at index {i} is nan')
+        return value
+
+    def addVectorData(self, key: str, x: VectorDataInputType, value: VectorDataInputType, **kwargs) -> None:
+        """
+        Adds a piece of vector (float or int) data to the validation data.
+
+        Will also perform checking on the data if bounds are set and
+        store an associated Result.
+
+        For x and value (VectorDataInputType), each should be provided as a
+        three-length tuple, where the first entry is the data, the second
+        is the description of the data, and the third is the units of the data
+        (optional, can be None)
+
+        Args:
+            key: The key to store the data
+            x: The independent data (see VectorDataInputType above)
+            value: The dependent data (see VectorDataInputType above)
+        Keyword arguments:
+            Additional arguments passed to VectorNumericData (bounds, nominal, etc)
+        """
+        for k in ['x', 'value']:
+            v = locals()[k]
+            if not isinstance(v, tuple):
+                raise TypeError(f'{k}: not a tuple')
+            if not len(v) == 3:
+                raise TypeError(f'{k}: not of length 3 (value, description, units)')
+            values, description, units = v
+            if not isinstance(description, str):
+                raise TypeError(f'{k}: second entry (description) not of type str')
+            if units is not None and not isinstance(units, str):
+                raise TypeError(f'{k}: third entry (units) is not of type str or None')
+
+        # Check and convert x and data values
+        values, description, units = value
+        values = self.toListFloat(values, 'value: first entry (values)')
+        x_values = self.toListFloat(x[0], 'x: first entry (values)')
+        if len(values) != len(x_values):
+            raise ValueError(f'Length of x and value values not the same')
+
+        # Check bounds
+        bounds = kwargs.get('bounds')
+        if bounds is not None:
+            if not isinstance(bounds, tuple):
+                raise TypeError('bounds: not of type tuple')
+            if not len(bounds) == 2:
+                raise TypeError('bounds: not of length 2 (min and max)')
+            kwargs['bounds'] = (self.toListFloat(bounds[0], 'bounds min:'),
+                                self.toListFloat(bounds[1], 'bounds max:'))
+            bounds = kwargs['bounds']
+            if len(bounds[0]) != len(values):
+                raise ValueError('bounds: min not same length as data')
+            if len(bounds[1]) != len(values):
+                raise ValueError('bounds: max not same length as data')
+
+        # Check nominal
+        nominal = kwargs.get('nominal')
+        if nominal is not None:
+            kwargs['nominal'] = self.toListFloat(nominal, 'nominal:')
+            if len(kwargs['nominal']) != len(values):
+                raise TypeError('nominal: not same length as data')
+
+        # Store data
+        data = self._addData(self.VectorNumericData, key, values, description,
+                             units=units, x=x_values, x_description=x[1], x_units=x[2],
+                             **kwargs)
+
+        result_kwargs = {'data_key': key,
+                         'validation': kwargs.pop('validation', True)}
+
+        if data.bounds is not None:
+            for i in range(len(values)):
+                status, message = self.checkBounds(values[i], data.bounds[0][i], data.bounds[1][i],
+                                                   data.units)
+                x_units = f' {data.x_units}' if data.x_units is not None else ''
+                message = f'x = {x_values[i]:{self.number_format}}{x_units} (index {i}) {message}'
+                self.addResult(status, message, **result_kwargs)
 
     @property
     def results(self) -> list[Result]:

@@ -9,6 +9,7 @@
 
 # pylint: disable
 import unittest
+import numpy as np
 from TestHarness import ValidationCase
 from TestHarness.validation import NoTestsDefined, TestMissingResults, TestRunException
 from FactorySystem.InputParameters import InputParameters
@@ -259,6 +260,201 @@ class TestValidationCase(unittest.TestCase):
                 self.assertIn('out of bounds', result.message)
             data = test.data[case]
             self.assertEqual(f'Test.test_{case}', data.test)
+
+    def testToListFloat(self):
+        # Success list
+        values = [1.0, 2.0]
+        self.assertEqual(ValidationCase.toListFloat(values), values)
+
+        # Success numpy array
+        values = [1.0, 2.0]
+        self.assertEqual(ValidationCase.toListFloat(np.array(values)), values)
+
+        # Success int to float
+        values = [int(1), int(2)]
+        to_values = ValidationCase.toListFloat(values)
+        self.assertTrue(isinstance(to_values[0], float))
+        self.assertTrue(isinstance(to_values[1], float))
+        self.assertEqual(to_values, [float(values[0]), float(values[1])])
+
+        # Failed numpy array
+        values = ['abcd']
+        with self.assertRaisesRegex(TypeError, 'array conversion failed'):
+            ValidationCase.toListFloat(values)
+        with self.assertRaisesRegex(TypeError, 'foobar: array conversion failed'):
+            ValidationCase.toListFloat(values, 'foobar:')
+
+        # Not one-dimensional
+        values = [[1], [1]]
+        with self.assertRaisesRegex(TypeError, 'not one-dimensional'):
+            ValidationCase.toListFloat(values)
+        with self.assertRaisesRegex(TypeError, 'foobar: not one-dimensional'):
+            ValidationCase.toListFloat(values, 'foobar:')
+
+        # Has nans
+        values = [None]
+        with self.assertRaisesRegex(ValueError, 'value at index 0 is nan'):
+            ValidationCase.toListFloat(values)
+        with self.assertRaisesRegex(ValueError, 'foobar: value at index 0 is nan'):
+            ValidationCase.toListFloat(values, 'foobar:')
+
+    def testAddVectorDataChecks(self):
+        good_args = {'x': ([0.0, 1.0], 'description_x', 'units_x'),
+                     'value': ([1.0, 2.0], 'description_value', 'units_value')}
+
+        for key in ['x', 'value']:
+            # Non-tuple entry
+            args = dict(good_args)
+            args[key] = None
+            with self.assertRaisesRegex(TypeError, f'{key}: not a tuple'):
+                ValidationCase().addVectorData('k', *args.values())
+            # Bad-length tuple
+            args = dict(good_args)
+            args[key] = (None, None)
+            with self.assertRaisesRegex(TypeError, f'{key}: not of length 3.*'):
+                ValidationCase().addVectorData('k', *args.values())
+
+            # Non-1D data
+            args = dict(good_args)
+            args[key] = (np.array([[0]]), 'unused', None)
+            with self.assertRaisesRegex(TypeError, f'{key}: first entry \\(values\\) not one-dimensional'):
+                ValidationCase().addVectorData('k', *args.values())
+            # To-array failed
+            args = dict(good_args)
+            args[key] = ([1., 'abcd'], 'unused', None)
+            with self.assertRaisesRegex(TypeError, f'{key}: first entry \\(values\\) array conversion failed'):
+                ValidationCase().addVectorData('k', *args.values())
+            # Cast int list values to floats
+            args = dict(good_args)
+            args[key] = ([1., 1], 'description', 'units')
+            case = ValidationCase()
+            data_key = f'{key}_cast_int'
+            case.addVectorData(data_key, *args.values())
+            data = getattr(case.data[data_key], key)
+            for v in data:
+                self.assertTrue(isinstance(v, float))
+
+            # Non-string description
+            args = dict(good_args)
+            args[key] = ([], None, None)
+            with self.assertRaisesRegex(TypeError, f'{key}: second entry \\(description\\) not of type str'):
+                ValidationCase().addVectorData('k', *args.values())
+
+            # Non-string units
+            args = dict(good_args)
+            args[key] = ([], 'desc', 1)
+            with self.assertRaisesRegex(TypeError, f'{key}: third entry \\(units\\) is not of type str or None'):
+                ValidationCase().addVectorData('k', *args.values())
+
+            # Value lengths inconsistent
+            args[key] = ([0.0], 'desc', None)
+            with self.assertRaisesRegex(ValueError, 'Length of x and value values not the same'):
+                ValidationCase().addVectorData('k', *args.values())
+
+        # Non-tuple bounds
+        with self.assertRaisesRegex(TypeError, 'bounds: not of type tuple'):
+            ValidationCase().addVectorData('k', *good_args.values(), bounds='foo')
+        # Bad-sized bounds
+        with self.assertRaisesRegex(TypeError, 'bounds: not of length 2'):
+            ValidationCase().addVectorData('k', *good_args.values(), bounds=(None, None, None))
+        # Bounds not same length as data
+        with self.assertRaisesRegex(ValueError, 'bounds: min not same length as data'):
+            ValidationCase().addVectorData('k', *good_args.values(),
+                                           bounds=([0.0], [0.0, 1.0]))
+        with self.assertRaisesRegex(ValueError, 'bounds: max not same length as data'):
+            ValidationCase().addVectorData('k', *good_args.values(),
+                                           bounds=([0.0, 1.0], [0.0]))
+
+        # Bad array for nominal
+        with self.assertRaisesRegex(TypeError, 'nominal: array conversion failed'):
+            ValidationCase().addVectorData('k', *good_args.values(), nominal=['abc'])
+        # Bad length for nominal
+        with self.assertRaisesRegex(TypeError, 'nominal: not same length as data'):
+            ValidationCase().addVectorData('k', *good_args.values(), nominal=[1, 2, 3])
+
+    def testAddVectorData(self):
+        x = ([0.0, 1.0], 'Position', 'cm')
+        value = ([1.0, 2.0], 'Temperature', 'K')
+
+        test = ValidationCase()
+        data_key = 'temperature'
+        test.addVectorData('temperature', x, value)
+
+        self.assertEqual(len(test.data), 1)
+        data = test.data[data_key]
+        self.assertEqual(data.key, data_key)
+        self.assertTrue(data.validation)
+        self.assertEqual(data.value, value[0])
+        self.assertEqual(data.description, value[1])
+        self.assertEqual(data.units, value[2])
+        self.assertEqual(data.x, x[0])
+        self.assertEqual(data.x_description, x[1])
+        self.assertEqual(data.x_units, x[2])
+
+    def testAddVectorDataNominal(self):
+        key = 'k'
+        x = ([0.0, 1.0], 'Position', 'cm')
+        value = ([1.0, 2.0], 'Temperature', 'K')
+        nominal = [2.0, 3.0]
+
+        test = ValidationCase()
+        test.addVectorData(key, x, value, nominal=nominal)
+        all_data = test.data
+        self.assertEqual(len(all_data), 1)
+        self.assertEqual(nominal, all_data[key].nominal)
+
+    def testAddVectorDataBounded(self):
+        key = 'data'
+        x = ([0, 1], 'description_x', 'units_x')
+        value = ([1, 2], 'description_value', 'units_value')
+        bounds = ([0, 1], [2, 3])
+
+        test = ValidationCase()
+        test.addVectorData(key, x, value, bounds=bounds)
+        self.assertEqual(len(test.data), 1)
+        self.assertEqual(bounds, test.data[key].bounds)
+
+    def testAddVectorDataBoundedCheck(self):
+        class TestValidationCase(ValidationCase):
+            def test_pass(self):
+                self.addVectorData('pass',
+                                   ([0, 1], 'x', 'x_units'),
+                                   ([1, 2], 'y', 'y_units'),
+                                   bounds=([0.9, 1.9], [1.1, 2.1]))
+            def test_fail_lower(self):
+                self.addVectorData('fail_lower',
+                                   ([0, 1], 'x', 'x_units'),
+                                   ([1, 2], 'y', 'y_units'),
+                                   bounds=([1.05, 2.05], [1.1, 2.1]))
+            def test_fail_upper(self):
+                self.addVectorData('fail_upper',
+                                   ([0, 1], 'x', 'x_units'),
+                                   ([1, 2], 'y', 'y_units'),
+                                   bounds=([0.9, 1.9], [0.95, 1.95]))
+            def test_fail_both(self):
+                self.addVectorData('fail_both',
+                                   ([0, 1], 'x', 'x_units'),
+                                   ([1, 2], 'y', 'y_units'),
+                                   bounds=([1.05, 1.9], [1.1, 1.95]))
+
+        case = TestValidationCase()
+        case.run()
+        self.assertEqual(len(case.results), 8)
+
+        def check_result(test, index, status):
+            results = [r for r in case.results if (r.test.endswith(test) and f'(index {index})' in r.message)]
+            self.assertEqual(len(results), 1)
+            result = results[0]
+            data = case.data[test]
+            x = data.x[index]
+            self.assertEqual(result.status, status)
+            self.assertTrue(result.message.startswith(f'x = {x:{ValidationCase.number_format}}'))
+
+        for i in range(2):
+            check_result('pass', i, ValidationCase.Status.OK)
+            check_result('fail_lower', i, ValidationCase.Status.FAIL)
+            check_result('fail_upper', i, ValidationCase.Status.FAIL)
+            check_result('fail_both', i, ValidationCase.Status.FAIL)
 
     def testInitialize(self):
         class Test(ValidationCase):
