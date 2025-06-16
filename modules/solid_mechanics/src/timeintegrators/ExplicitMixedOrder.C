@@ -1,6 +1,6 @@
 // MOOSE includes
 #include "Assembly.h"
-#include "ExplicitMixedOrder_fix.h"
+#include "ExplicitMixedOrder.h"
 #include "ExplicitTimeIntegrator.h"
 #include "Moose.h"
 #include "MooseError.h"
@@ -22,14 +22,14 @@
 #include <iterator>
 #include <utility>
 
-registerMooseObject("SolidMechanicsApp", ExplicitMixedOrder_fix);
+registerMooseObject("SolidMechanicsApp", ExplicitMixedOrder);
 registerMooseObjectRenamed("SolidMechanicsApp",
                            DirectCentralDifference,
                            "10/14/2025 00:00",
-                           ExplicitMixedOrder_fix);
+                           ExplicitMixedOrder);
 
 InputParameters
-ExplicitMixedOrder_fix::validParams()
+ExplicitMixedOrder::validParams()
 {
   InputParameters params = ExplicitTimeIntegrator::validParams();
 
@@ -69,7 +69,7 @@ ExplicitMixedOrder_fix::validParams()
   return params;
 }
 
-ExplicitMixedOrder_fix::ExplicitMixedOrder_fix(const InputParameters & parameters)
+ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
   : ExplicitTimeIntegrator(parameters),
     _constant_mass(getParam<bool>("use_constant_mass")),
     _constant_damping(getParam<bool>("use_constant_damp")),
@@ -89,7 +89,7 @@ ExplicitMixedOrder_fix::ExplicitMixedOrder_fix(const InputParameters & parameter
 }
 
 void
-ExplicitMixedOrder_fix::computeTimeDerivatives()
+ExplicitMixedOrder::computeTimeDerivatives()
 {
   /*
   Because this is called in NonLinearSystemBase
@@ -101,19 +101,19 @@ ExplicitMixedOrder_fix::computeTimeDerivatives()
 }
 
 TagID
-ExplicitMixedOrder_fix::massMatrixTagID() const
+ExplicitMixedOrder::massMatrixTagID() const
 {
   return _sys.subproblem().getMatrixTagID(_mass_matrix);
 }
 
 TagID
-ExplicitMixedOrder_fix::dampingMatrixTagID() const
+ExplicitMixedOrder::dampingMatrixTagID() const
 {
   return _sys.subproblem().getMatrixTagID(_damping_matrix);
 }
 
 void
-ExplicitMixedOrder_fix::solve()
+ExplicitMixedOrder::solve()
 {
   // Getting the tagID for the mass and damping matrix
   auto mass_tag = massMatrixTagID();
@@ -184,7 +184,7 @@ ExplicitMixedOrder_fix::solve()
 }
 
 void
-ExplicitMixedOrder_fix::postResidual(NumericVector<Number> & residual)
+ExplicitMixedOrder::postResidual(NumericVector<Number> & residual)
 {
   residual += *_Re_time;
   residual += *_Re_non_time;
@@ -195,7 +195,7 @@ ExplicitMixedOrder_fix::postResidual(NumericVector<Number> & residual)
 }
 
 bool
-ExplicitMixedOrder_fix::performExplicitSolve(SparseMatrix<Number> &)
+ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
 {
 
   bool converged = false;
@@ -278,7 +278,7 @@ ExplicitMixedOrder_fix::performExplicitSolve(SparseMatrix<Number> &)
 }
 
 void
-ExplicitMixedOrder_fix::init()
+ExplicitMixedOrder::init()
 {
   ExplicitTimeIntegrator::init();
 
@@ -345,7 +345,7 @@ ExplicitMixedOrder_fix::init()
 }
 
 void
-ExplicitMixedOrder_fix::computeICs()
+ExplicitMixedOrder::computeICs()
 {
   // Compute the first-order approximation of the velocity at the current time step
   // using the Euler scheme, where the velocity is estimated as the difference
@@ -357,8 +357,8 @@ ExplicitMixedOrder_fix::computeICs()
   vel->close();
 }
 
-ExplicitMixedOrder_fix::TimeOrder
-ExplicitMixedOrder_fix::findVariableTimeOrder(unsigned int var_num) const
+ExplicitMixedOrder::TimeOrder
+ExplicitMixedOrder::findVariableTimeOrder(unsigned int var_num) const
 {
   if (_vars_first.empty() && _vars_second.empty())
     mooseError("Time order sets are both empty.");
