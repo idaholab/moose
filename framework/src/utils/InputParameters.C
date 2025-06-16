@@ -1800,7 +1800,7 @@ InputParameters::paramMessageContext(const std::string & param) const
   else
     fullpath = param;
 
-  return {"(" + fullpath + "): ", node};
+  return {fullpath + ": ", node};
 }
 
 std::string
