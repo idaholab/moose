@@ -78,7 +78,7 @@ Factory::getValidParams(const std::string & obj_name) const
 
   // Return the parameters
   auto params = it->second->buildParameters();
-  params.addPrivateParam("_moose_app", &_app);
+  params.addPrivateParam(MooseBase::app_param, &_app);
 
   return params;
 }
@@ -306,8 +306,8 @@ Factory::initialize(const std::string & type,
     if (const auto hit_node = _app.getCurrentActionHitNode())
       params.setHitNode(*hit_node, {});
 
-  // Set the _type parameter
-  params.set<std::string>("_type") = type;
+  // Set the type parameter
+  params.set<std::string>(MooseBase::type_param) = type;
 
   // Check to make sure that all required parameters are supplied
   params.finalize(name);

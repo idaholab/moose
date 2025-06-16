@@ -55,8 +55,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
                                                      const std::set<BoundaryID> & boundary_ids)
   : _mi_moose_object(*moose_object),
     _mi_params(_mi_moose_object.parameters()),
-    _mi_name(_mi_params.get<std::string>("_object_name")),
-    _mi_moose_object_name(_mi_params.get<std::string>("_moose_base"), _mi_name, "::"),
+    _mi_name(moose_object->name()),
+    _mi_moose_object_name(_mi_moose_object.getBase(), _mi_name, "::"),
     _mi_feproblem(*_mi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _mi_subproblem(*_mi_params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),

@@ -35,7 +35,7 @@ TransientInterface::TransientInterface(const MooseObject * moose_object)
     _dt(_ti_feproblem.dt()),
     _dt_old(_ti_feproblem.dtOld()),
     _is_transient(_ti_feproblem.isTransient()),
-    _ti_name(MooseUtils::shortName(_ti_params.get<std::string>("_object_name")))
+    _ti_name(MooseUtils::shortName(moose_object->name()))
 {
 }
 

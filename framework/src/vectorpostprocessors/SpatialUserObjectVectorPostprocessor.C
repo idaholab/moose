@@ -35,7 +35,7 @@ SpatialUserObjectVectorPostprocessor::validParams()
 SpatialUserObjectVectorPostprocessor::SpatialUserObjectVectorPostprocessor(
     const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    _uo_vec(declareVector(MooseUtils::shortName(parameters.get<std::string>("_object_name")))),
+    _uo_vec(declareVector(MooseUtils::shortName(parameters.getObjectName()))),
     _uo(getUserObject<UserObject>("userobject"))
 {
   fillPoints();

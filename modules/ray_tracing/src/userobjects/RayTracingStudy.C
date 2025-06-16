@@ -371,12 +371,7 @@ RayTracingStudy::verifyDependenciesExist(const std::vector<RayTracingObject *> &
         }
 
       if (!found)
-        rto->paramError("depends_on",
-                        "The ",
-                        rto->parameters().get<std::string>("_moose_base"),
-                        " '",
-                        dep_name,
-                        "' does not exist");
+        rto->paramError("depends_on", "The ", rto->getBase(), " '", dep_name, "' does not exist");
     }
 }
 

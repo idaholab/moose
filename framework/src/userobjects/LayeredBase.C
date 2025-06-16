@@ -82,10 +82,10 @@ LayeredBase::validParams()
 
 LayeredBase::LayeredBase(const InputParameters & parameters)
   : Restartable(parameters.getCheckedPointerParam<SubProblem *>("_subproblem")->getMooseApp(),
-                parameters.get<std::string>("_object_name") + "_layered_base",
+                parameters.getObjectName() + "_layered_base",
                 "LayeredBase",
                 parameters.get<THREAD_ID>("_tid")),
-    _layered_base_name(parameters.get<std::string>("_object_name")),
+    _layered_base_name(parameters.getObjectName()),
     _layered_base_params(parameters),
     _direction_enum(parameters.get<MooseEnum>("direction")),
     _direction(_direction_enum),

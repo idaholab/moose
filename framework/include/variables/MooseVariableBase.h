@@ -67,11 +67,6 @@ public:
   const SystemBase & sys() const { return _sys; }
 
   /**
-   * Get the variable name
-   */
-  const std::string & name() const override { return _var_name; }
-
-  /**
    * Get dual mortar option
    */
   bool useDual() const { return _use_dual; }
@@ -239,9 +234,6 @@ protected:
   /// scaling factor for this variable
   std::vector<Real> _scaling_factor;
 
-  /// Variable name
-  std::string _var_name;
-
   /// If dual mortar approach is used
   bool _use_dual;
 
@@ -272,5 +264,4 @@ MooseVariableBase::setActiveTags(const std::set<TagID> &)
   using MooseVariableBase::_mesh;                                                                  \
   using MooseVariableBase::_tid;                                                                   \
   using MooseVariableBase::_count;                                                                 \
-  using MooseVariableBase::_scaling_factor;                                                        \
-  using MooseVariableBase::_var_name
+  using MooseVariableBase::_scaling_factor
