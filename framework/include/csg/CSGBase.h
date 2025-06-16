@@ -278,10 +278,42 @@ public:
    * @return std::shared_ptr<CSGUniverse> pointer CSGUniverse that is created
    */
   std::shared_ptr<CSGUniverse> createUniverse(const std::string name,
-                                              std::vector<std::shared_ptr<CSGCell>> cells)
-  {
-    return _universe_list.addUniverse(name, cells);
-  }
+                                              std::vector<std::shared_ptr<CSGCell>> cells);
+  /**
+   * @brief Add a cell to an existing universe
+   *
+   * @param universe universe to which to add the cell
+   * @param cell cell to add
+   */
+  void addCellToUniverse(const std::shared_ptr<CSGUniverse> universe,
+                         std::shared_ptr<CSGCell> cell);
+
+  /**
+   * @brief Add a list of cells to an existing universe
+   *
+   * @param universe universe to which to add the cells
+   * @param cells list of cells to add
+   */
+  void addCellsToUniverse(const std::shared_ptr<CSGUniverse> universe,
+                          std::vector<std::shared_ptr<CSGCell>> cells);
+
+  /**
+   * @brief Remove a cell from an existing universe
+   *
+   * @param universe universe from which to remove the cell
+   * @param cell cell to remove
+   */
+  void removeCellFromUniverse(const std::shared_ptr<CSGUniverse> universe,
+                              std::shared_ptr<CSGCell> cell);
+
+  /**
+   * @brief Remove a list of cells from an existing universe
+   *
+   * @param universe universe from which to remove the cells
+   * @param cells list of cells to remove
+   */
+  void removeCellsFromUniverse(const std::shared_ptr<CSGUniverse> universe,
+                               std::vector<std::shared_ptr<CSGCell>> cells);
 
   /**
    * @brief Get all universe objects
@@ -446,6 +478,9 @@ private:
 
   // check that surfaces used in this region are a part of this CSGBase instance
   void checkRegionSurfaces(const CSGRegion & region);
+
+  // check that cell being accessed is a part of this CSGBase instance
+  bool checkCellInBase(std::shared_ptr<CSGCell> cell);
 
   /// List of surfaces associated with CSG object
   CSGSurfaceList _surface_list;
