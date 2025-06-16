@@ -46,7 +46,7 @@ AbaqusEssentialBC::timestepSetup()
 }
 
 void
-AbaqusEssentialBC::computeResidual() const
+AbaqusEssentialBC::computeResidual()
 {
   const auto id = _current_node->id();
   const Real & d = _current_step_fraction;
@@ -56,6 +56,8 @@ AbaqusEssentialBC::computeResidual() const
   {
     if (const auto it = cbf->find(id); it != cbf->end())
     {
+      std::cout << "Add residual node " << id << " on (1.0 - " << d << ')' << " * " << it->second
+                << " = " << ((1.0 - d) * it->second) << '\n';
       addResidual(_sys, (1.0 - d) * it->second, _var);
       return;
     }
@@ -65,7 +67,8 @@ AbaqusEssentialBC::computeResidual() const
   const auto * cse = _current_step_end_values;
   if (cse)
   {
-    if (const auto it = cse->find(id); it == cse->end())
+    const auto it = cse->find(id);
+    if (it == cse->end())
       return;
     end_value = it->second;
   }
@@ -76,6 +79,8 @@ AbaqusEssentialBC::computeResidual() const
     if (const auto it = cbs->find(id); it != cbs->end())
     {
       const Real value = d * end_value + (1.0 - d) * it->second;
+      std::cout << "Set residual node " << id << " to " << _u[_qp] << "-" << value << " = "
+                << (_u[_qp] - value) << '\n';
       setResidual(_sys, _u[_qp] - value, _var);
       return;
     }
@@ -88,23 +93,42 @@ AbaqusEssentialBC::computeResidual() const
     {
       // BC is staying in effect (but maybe changing value)
       const Real value = d * end_value + (1.0 - d) * it->second;
+      std::cout << "Set residual node " << id << " to " << d << " * " << end_value << " + (1.0 - "
+                << d << ')' << " * " << it->second << " = " << (_u[_qp] - value) << '\n';
       setResidual(_sys, _u[_qp] - value, _var);
       return;
     }
   }
+  std::cout << "Ignore node\n";
 }
 
 Real
 AbaqusEssentialBC::computeQpJacobian()
 {
-  // if the BC is deactivated it's force does not depend on the current solution
-  if (_current_step_begin_forces)
-  {
-    const auto deactivated_it = _current_step_begin_forces->find(_current_node->id());
-    if (deactivated_it == _current_step_begin_forces->end())
-      return 0.0;
-  }
+  return 1.0;
+  const auto id = _current_node->id();
 
-  // otherwise it has a linear dependence
+  const auto * cbf = _current_step_begin_forces;
+  if (cbf && cbf->find(id) != cbf->end())
+    // if the BC is deactivated it's force does not depend on the current solution
+    return 0.0;
+
+  const auto * cse = _current_step_end_values;
+  if (cse && cse->find(id) == cse->end())
+    // BC does not apply
+    return 0.0;
+
+  const auto * cbs = _current_step_begin_solution;
+  if (cbs && cbs->find(id) != cbs->end())
+    // linear dependence (going from a solution at the beginning of the step to a prescribed BC
+    // value)
+    return 1.0;
+
+  const auto * csb = _current_step_begin_values;
+  if (csb && csb->find(id) == cse->end())
+    // BC does not apply
+    return 0.0;
+
+  // linear dependence (going from one prescribed value to the next)
   return 1.0;
 }
