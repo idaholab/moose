@@ -53,19 +53,6 @@ FunctionalExpansionToolsTestApp::registerApps()
   registerApp(FunctionalExpansionToolsTestApp);
 }
 
-void
-FunctionalExpansionToolsTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"FunctionalExpansionToolsTestApp"});
-}
-
-void
-FunctionalExpansionToolsTestApp::associateSyntax(Syntax & /*syntax*/,
-                                                 ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"FunctionalExpansionToolsTestApp"});
-}
-
 extern "C" void
 FunctionalExpansionToolsTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

@@ -142,24 +142,6 @@ CombinedTestApp::getInstallableInputs() const
   return COMBINED_INSTALLABLE_DIRS;
 }
 
-void
-CombinedTestApp::registerObjects(Factory & /*factory*/)
-{
-  mooseError("registerObjects is deprecated, fix the calling application");
-}
-
-void
-CombinedTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
-  mooseError("associateSyntax is deprecated, fix the calling application");
-}
-
-void
-CombinedTestApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseError("registerExecFlags is deprecated, fix the calling application");
-}
-
 extern "C" void
 CombinedTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

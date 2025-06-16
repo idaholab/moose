@@ -49,23 +49,6 @@ SolidMechanicsTestApp::registerApps()
   registerApp(SolidMechanicsTestApp);
 }
 
-void
-SolidMechanicsTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"SolidMechanicsTestApp"});
-}
-
-void
-SolidMechanicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"SolidMechanicsTestApp"});
-}
-
-void
-SolidMechanicsTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 SolidMechanicsTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
