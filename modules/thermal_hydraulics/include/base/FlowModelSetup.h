@@ -81,5 +81,5 @@ template <typename T>
 const T &
 FlowModelSetup::getParam(const std::string & name) const
 {
-  return InputParameters::getParamHelper(name, _this_params, static_cast<T *>(0));
+  return InputParameters::getParamHelper<T>(name, _this_params);
 }
