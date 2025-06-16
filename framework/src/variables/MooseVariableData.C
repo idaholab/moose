@@ -911,6 +911,16 @@ MooseVariableData<OutputType>::insertNodalValue(NumericVector<Number> & residual
   residual.set(_nodal_dof_index, v);
 }
 
+template <typename OutputType>
+void
+MooseVariableData<OutputType>::addNodalValue(NumericVector<Number> & residual, const OutputData & v)
+{
+  if constexpr (std::is_same_v<OutputData, Real>)
+    residual.add(_nodal_dof_index, v);
+  else
+    mooseError("Not implemented");
+}
+
 template <>
 void
 MooseVariableData<RealEigenVector>::insertNodalValue(NumericVector<Number> & residual,
