@@ -712,6 +712,14 @@ MooseVariableFE<OutputType>::insertNodalValue(NumericVector<Number> & residual, 
 }
 
 template <typename OutputType>
+void
+MooseVariableFE<OutputType>::addNodalValue(NumericVector<Number> & residual,
+                                              const OutputData & v)
+{
+  _element_data->addNodalValue(residual, v);
+}
+
+template <typename OutputType>
 const typename MooseVariableFE<OutputType>::FieldVariablePhiSecond &
 MooseVariableFE<OutputType>::secondPhi() const
 {
