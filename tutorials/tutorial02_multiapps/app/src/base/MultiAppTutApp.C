@@ -21,7 +21,7 @@ MultiAppTutApp::validParams()
   return params;
 }
 
-MultiAppTutApp::MultiAppTutApp(InputParameters parameters) : MooseApp(parameters)
+MultiAppTutApp::MultiAppTutApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   MultiAppTutApp::registerAll(_factory, _action_factory, _syntax);
 }

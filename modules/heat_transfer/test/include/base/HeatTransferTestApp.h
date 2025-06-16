@@ -14,7 +14,7 @@
 class HeatTransferTestApp : public MooseApp
 {
 public:
-  HeatTransferTestApp(InputParameters parameters);
+  HeatTransferTestApp(const InputParameters & parameters);
 
   static InputParameters validParams();
 

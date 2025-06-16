@@ -22,7 +22,7 @@ ThermalHydraulicsTestApp::validParams()
 
 registerKnownLabel("ThermalHydraulicsTestApp");
 
-ThermalHydraulicsTestApp::ThermalHydraulicsTestApp(InputParameters parameters)
+ThermalHydraulicsTestApp::ThermalHydraulicsTestApp(const InputParameters & parameters)
   : ThermalHydraulicsApp(parameters)
 {
   ThermalHydraulicsTestApp::registerAll(

@@ -26,7 +26,7 @@ OptimizationApp::validParams()
   return params;
 }
 
-OptimizationApp::OptimizationApp(InputParameters parameters) : MooseApp(parameters)
+OptimizationApp::OptimizationApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   OptimizationApp::registerAll(_factory, _action_factory, _syntax);
 }

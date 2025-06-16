@@ -16,7 +16,7 @@ class LevelSetApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  LevelSetApp(InputParameters parameters);
+  LevelSetApp(const InputParameters & parameters);
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);

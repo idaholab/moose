@@ -24,7 +24,7 @@ SolidPropertiesApp::validParams()
 
 registerKnownLabel("SolidPropertiesApp");
 
-SolidPropertiesApp::SolidPropertiesApp(InputParameters parameters) : MooseApp(parameters)
+SolidPropertiesApp::SolidPropertiesApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   SolidPropertiesApp::registerAll(_factory, _action_factory, _syntax);
 }
@@ -61,14 +61,14 @@ SolidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 void
 SolidPropertiesApp::registerObjects(Factory & factory)
 {
-  mooseDeprecated("use registerAll instead of registerObjects");
+  ::mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"SolidPropertiesApp"});
 }
 
 void
 SolidPropertiesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  mooseDeprecated("use registerAll instead of associateSyntax");
+  ::mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"SolidPropertiesApp"});
   associateSyntaxInner(syntax, action_factory);
 }

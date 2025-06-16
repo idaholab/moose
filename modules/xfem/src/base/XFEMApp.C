@@ -71,7 +71,7 @@ XFEMApp::registerObjectDepends(Factory & factory)
 void
 XFEMApp::registerObjects(Factory & factory)
 {
-  mooseDeprecated("use registerAll instead of registerObjects");
+  ::mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"XFEMApp"});
 }
 
@@ -85,7 +85,7 @@ XFEMApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
 void
 XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  mooseDeprecated("use registerAll instead of associateSyntax");
+  ::mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"XFEMApp"});
   associateSyntaxInner(syntax, action_factory);
 }
@@ -93,7 +93,7 @@ XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 void
 XFEMApp::registerExecFlags(Factory &)
 {
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
+  ::mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

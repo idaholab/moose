@@ -16,7 +16,7 @@ class ChemicalReactionsTestApp : public ChemicalReactionsApp
 public:
   static InputParameters validParams();
 
-  ChemicalReactionsTestApp(InputParameters parameters);
+  ChemicalReactionsTestApp(const InputParameters & parameters);
   virtual ~ChemicalReactionsTestApp();
 
   static void

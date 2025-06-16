@@ -16,7 +16,7 @@ class NavierStokesTestApp : public NavierStokesApp
 public:
   static InputParameters validParams();
 
-  NavierStokesTestApp(InputParameters parameters);
+  NavierStokesTestApp(const InputParameters & parameters);
   virtual ~NavierStokesTestApp();
 
   static void registerApps();

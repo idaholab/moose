@@ -107,7 +107,7 @@ MooseApp::addInputParam(InputParameters & params)
 InputParameters
 MooseApp::validParams()
 {
-  InputParameters params = emptyInputParameters();
+  InputParameters params = MooseBase::validParams();
 
   MooseApp::addAppParam(params);
   MooseApp::addInputParam(params);
@@ -387,8 +387,6 @@ MooseApp::validParams()
                                    false,
                                    "Show registered data paths for searching in the header");
 
-  params.addPrivateParam<std::string>("_app_name"); // the name passed to AppFactory::create
-  params.addPrivateParam<std::string>("_type");
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char **>("_argv");
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
@@ -425,19 +423,22 @@ MooseApp::validParams()
 
   MooseApp::addAppParam(params);
 
+  params.registerBase("Application");
+
   return params;
 }
 
 MooseApp::MooseApp(const InputParameters & parameters)
-  : ConsoleStreamInterface(*this),
-    PerfGraphInterface(*this, "MooseApp"),
+  : PerfGraphInterface(*this, "MooseApp"),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
         "_comm")), // Can't call getParam() before pars is set
-    MooseBase(parameters.get<std::string>("_type"),
-              parameters.get<std::string>("_app_name"),
-              *this,
-              parameters),
-    _pars(parameters),
+    // This is truly atrocious. However, a long time ago we decided to copy construct
+    // parameters in each derived application... which means that the "parameters"
+    // we get if someone derives from MooseApp are actually a copy of the ones
+    // built by the factory. Because we have unique application names, this allows
+    // us to reference (using _pars and MooseBase) the actual const parameters
+    // that the AppFactory made for this application
+    MooseBase(*this, AppFactory::instance().getAppParams(parameters.getObjectName())),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
     _file_base_set_by_user(false),
     _output_position_set(false),
@@ -448,13 +449,13 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
-    _parser(parameters.get<std::shared_ptr<Parser>>("_parser")),
+    _parser(getParam<std::shared_ptr<Parser>>("_parser")),
     _builder(*this, _action_warehouse, _parser),
     _restartable_data(libMesh::n_threads()),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),
     _rank_map(*_comm, _perf_graph),
-    _use_executor(parameters.get<bool>("use_executor")),
+    _use_executor(getParam<bool>("use_executor")),
     _null_executor(NULL),
     _use_nonlinear(true),
     _use_eigen_value(false),
@@ -469,8 +470,8 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _recover(false),
     _restart(false),
     _split_mesh(false),
-    _use_split(parameters.get<bool>("use_split")),
-    _force_restart(parameters.get<bool>("force_restart")),
+    _use_split(getParam<bool>("use_split")),
+    _force_restart(getParam<bool>("force_restart")),
 #ifdef DEBUG
     _trap_fpe(true),
 #else
@@ -478,15 +479,15 @@ MooseApp::MooseApp(const InputParameters & parameters)
 #endif
     _test_checkpoint_half_transient(false),
     _check_input(getParam<bool>("check_input")),
-    _multiapp_level(
-        isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
-    _multiapp_number(
-        isParamValid("_multiapp_number") ? parameters.get<unsigned int>("_multiapp_number") : 0),
-    _use_master_mesh(parameters.get<bool>("_use_master_mesh")),
-    _master_mesh(isParamValid("_master_mesh") ? parameters.get<const MooseMesh *>("_master_mesh")
+    _multiapp_level(isParamValid("_multiapp_level") ? getParam<unsigned int>("_multiapp_level")
+                                                    : 0),
+    _multiapp_number(isParamValid("_multiapp_number") ? getParam<unsigned int>("_multiapp_number")
+                                                      : 0),
+    _use_master_mesh(getParam<bool>("_use_master_mesh")),
+    _master_mesh(isParamValid("_master_mesh") ? getParam<const MooseMesh *>("_master_mesh")
                                               : nullptr),
     _master_displaced_mesh(isParamValid("_master_displaced_mesh")
-                               ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
+                               ? getParam<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
     _mesh_generator_system(*this),
     _chain_control_system(*this),
@@ -501,7 +502,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
 #endif
 {
   // Set the TIMPI sync type via --timpi-sync
-  const auto & timpi_sync = parameters.get<std::string>("timpi_sync");
+  const auto & timpi_sync = getParam<std::string>("timpi_sync");
   const_cast<Parallel::Communicator &>(comm()).sync_type(timpi_sync);
 
 #ifdef HAVE_GPERFTOOLS
@@ -701,7 +702,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
   // until all objects have been created and all Actions have been executed (i.e. initialSetup).
   registerRestartableDataMapName(MooseApp::MESH_META_DATA, MooseApp::MESH_META_DATA_SUFFIX);
 
-  if (parameters.have_parameter<bool>("use_legacy_dirichlet_bc"))
+  if (_pars.have_parameter<bool>("use_legacy_dirichlet_bc"))
     mooseDeprecated("The parameter 'use_legacy_dirichlet_bc' is no longer valid.\n\n",
                     "All Dirichlet boundary conditions are preset by default.\n\n",
                     "Remove said parameter in ",
@@ -1126,6 +1127,11 @@ MooseApp::~MooseApp()
   // belong to it in garbage collection. So... don't even give
   // dlclose an option
   _restartable_data.clear();
+
+  // Remove this app's parameters from the AppFactory. This allows
+  // for creating an app with this name again in the same execution,
+  // which needs to be done when resetting applications in MultiApp
+  AppFactory::instance().clearAppParams(name(), {});
 
 #ifdef LIBMESH_HAVE_DLOPEN
   // Close any open dynamic libraries

@@ -14,7 +14,7 @@
 class SubChannelTestApp : public SubChannelApp
 {
 public:
-  SubChannelTestApp(InputParameters parameters);
+  SubChannelTestApp(const InputParameters & parameters);
   virtual ~SubChannelTestApp();
 
   static void registerApps();

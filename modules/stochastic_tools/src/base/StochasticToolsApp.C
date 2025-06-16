@@ -25,7 +25,7 @@ StochasticToolsApp::validParams()
 
 registerKnownLabel("StochasticToolsApp");
 
-StochasticToolsApp::StochasticToolsApp(InputParameters parameters) : MooseApp(parameters)
+StochasticToolsApp::StochasticToolsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   StochasticToolsApp::registerAll(_factory, _action_factory, _syntax);
 }
@@ -107,14 +107,14 @@ StochasticToolsApp::registerApps()
 void
 StochasticToolsApp::registerObjects(Factory & factory)
 {
-  mooseDeprecated("use registerAll instead of registerObjects");
+  ::mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"StochasticToolsApp"});
 }
 
 void
 StochasticToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
-  mooseDeprecated("use registerAll instead of associateSyntax");
+  ::mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"StochasticToolsApp"});
 }
 
@@ -135,7 +135,7 @@ StochasticToolsApp::requiresTorch(const MooseObject &
 void
 StochasticToolsApp::registerExecFlags(Factory & /*factory*/)
 {
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
+  ::mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

@@ -63,6 +63,10 @@ public:
   virtual ~AppFactory();
 
   static InputParameters validParams();
+
+  /// The name for the "main" moose application
+  static const std::string main_app_name;
+
   /**
    * Helper function for creating a MooseApp from command-line arguments and a Parser.
    *
@@ -92,6 +96,35 @@ public:
    * @return Parameters of the object
    */
   InputParameters getValidParams(const std::string & name);
+
+  /**
+   * @return The parameters for the application named \p name
+   *
+   * This is needed because we poorly decided to not pass references
+   * of the InputParameters in all derived MooseApp objects. This enables
+   * the MooseApp to get the copy of the parameters that it was actually
+   * built with using this factory.
+   */
+  const InputParameters & getAppParams(const std::string & name) const;
+
+  /**
+   * Class that is used as a parameter to clearAppParams() that allows only
+   * MooseApp to call clearAppParams().
+   */
+  class ClearAppParamsKey
+  {
+    friend class MooseApp;
+    ClearAppParamsKey() {}
+    ClearAppParamsKey(const ClearAppParamsKey &) {}
+  };
+
+  /**
+   * Resets the stored parameters for the application named \p name
+   *
+   * This is needed upon destruction of MooseApp objects, which is done
+   * in the MultiApp system to reset an application.
+   */
+  void clearAppParams(const std::string & name, const ClearAppParamsKey);
 
   /**
    * Build an application object (must be registered)
@@ -144,8 +177,8 @@ private:
   // Private constructor for singleton pattern
   AppFactory() {}
 
-  // Storage of input parameters used in applications
-  std::vector<std::unique_ptr<const InputParameters>> _input_parameters;
+  // Storage of input parameters used in applications (name -> params)
+  std::map<std::string, std::unique_ptr<InputParameters>> _input_parameters;
 };
 
 template <typename T>

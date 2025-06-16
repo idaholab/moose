@@ -16,7 +16,7 @@ class MeshingTutorialApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  MeshingTutorialApp(InputParameters parameters);
+  MeshingTutorialApp(const InputParameters & parameters);
   virtual ~MeshingTutorialApp();
 
   static void registerApps();

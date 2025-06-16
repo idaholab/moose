@@ -16,7 +16,7 @@ class OptimizationApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  OptimizationApp(InputParameters parameters);
+  OptimizationApp(const InputParameters & parameters);
   virtual ~OptimizationApp();
 
   static void registerApps();

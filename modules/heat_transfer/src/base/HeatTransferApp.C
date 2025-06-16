@@ -99,7 +99,7 @@ HeatTransferApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 void
 HeatTransferApp::registerObjects(Factory & factory)
 {
-  mooseDeprecated("use registerAll instead of registerObjects");
+  ::mooseDeprecated("use registerAll instead of registerObjects");
   RayTracingApp::registerObjects(factory);
   Registry::registerObjectsTo(factory, {"HeatTransferApp"});
 }
@@ -107,7 +107,7 @@ HeatTransferApp::registerObjects(Factory & factory)
 void
 HeatTransferApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  mooseDeprecated("use registerAll instead of associateSyntax");
+  ::mooseDeprecated("use registerAll instead of associateSyntax");
   RayTracingApp::associateSyntax(syntax, action_factory);
   Registry::registerActionsTo(action_factory, {"HeatTransferApp"});
   associateSyntaxInner(syntax, action_factory);
@@ -116,7 +116,7 @@ HeatTransferApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
 void
 HeatTransferApp::registerExecFlags(Factory & /*factory*/)
 {
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
+  ::mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

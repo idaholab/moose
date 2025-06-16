@@ -46,7 +46,7 @@ PeridynamicsApp::registerApps()
 void
 PeridynamicsApp::registerObjects(Factory & factory)
 {
-  mooseDeprecated("use registerAll instead of registerObjects");
+  ::mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"PeridynamicsApp"});
 }
 
@@ -78,7 +78,7 @@ PeridynamicsApp::registerObjectDepends(Factory & factory)
 void
 PeridynamicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  mooseDeprecated("use registerAll instead of associateSyntax");
+  ::mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"PeridynamicsApp"});
   associateSyntaxInner(syntax, action_factory);
 }
@@ -93,7 +93,7 @@ PeridynamicsApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_
 void
 PeridynamicsApp::registerExecFlags(Factory & /*factory*/)
 {
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
+  ::mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void
