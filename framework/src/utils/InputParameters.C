@@ -1748,34 +1748,53 @@ InputParameters::queryDataFileNamePath(const std::string & name) const
   return at(checkForRename(name))._data_file_name_path;
 }
 
-std::string
-InputParameters::paramMessageHelper(const std::string & param, const std::string & msg) const
+std::pair<std::string, const hit::Node *>
+InputParameters::paramMessageContext(const std::string & param) const
 {
-  // Search for a prefix (path to something in input)
-  std::string prefix = "";
-  // Try first for the parameter directly
-  if (_values.count(param))
-    if (const auto node = getHitNode(param))
-      prefix = node->fileLocation() + ":\n(" + node->fullpath() + "): ";
-  // Couldn't find a parameter, search for the next level up
-  if (prefix.empty())
-    if (const auto node = getHitNode())
-      if (!node->isRoot())
-        prefix = node->fileLocation() + ":\n(" + node->fullpath() + "/" + param + "): ";
-  // Couldn't find anything, at least use the parameter
-  if (prefix.empty())
-    prefix = "(" + param + ")" + ": ";
+  const hit::Node * node = nullptr;
 
-  return prefix + msg;
+  std::string fullpath;
+  // First try to find the parameter
+  if (const hit::Node * param_node = getHitNode(param))
+  {
+    fullpath = param_node->fullpath();
+    node = param_node;
+  }
+  // If no parameter node, hope for a block node
+  else if (const hit::Node * block_node = getHitNode())
+  {
+    node = block_node;
+    fullpath = block_node->fullpath() + "/" + param;
+  }
+  // Didn't find anything, at least use the parameter
+  else
+    fullpath = param;
+
+  return {"(" + fullpath + "): ", node};
+}
+
+std::string
+InputParameters::paramMessagePrefix(const std::string & param) const
+{
+  auto [prefix, node] = paramMessageContext(param);
+  if (node)
+    prefix = Moose::hitMessagePrefix(*node) + prefix;
+  return prefix;
 }
 
 [[noreturn]] void
 InputParameters::callMooseErrorHelper(const std::string & msg,
-                                      const bool with_prefix /* = true */) const
+                                      const bool with_prefix /* = true */,
+                                      const hit::Node * node /* = nullptr */) const
 {
+  if (!node)
+    node = getHitNode();
+
+  // If we can, forward errors to the underlying moose object, adding
+  // context about the object (type and name) and the multiapp prefix if any
   if (have_parameter<const MooseBase *>("_moose_base_ptr"))
     if (const auto moose_base = get<const MooseBase *>("_moose_base_ptr"))
-      moose_base->callMooseError(msg, with_prefix);
+      moose_base->callMooseError(msg, with_prefix, node);
 
-  ::mooseError(msg);
+  moose::internal::mooseErrorRaw(msg, "", node);
 }

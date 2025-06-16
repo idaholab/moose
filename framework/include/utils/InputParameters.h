@@ -1085,12 +1085,6 @@ public:
   template <typename... Args>
   [[noreturn]] void mooseError(Args &&... args) const;
 
-  /*
-   * Emits an error.
-   */
-  template <typename... Args>
-  [[noreturn]] void mooseErrorNonPrefixed(Args &&... args) const;
-
   /**
    * Emits a parameter error prefixed with the parameter location and
    * object information if available.
@@ -1274,16 +1268,26 @@ private:
                                 const std::string & removal_date);
 
   /**
-   * Internal helper getting a parameer error context
+   * Get the context associated with a parameter for a message.
+   * @param param The parameter name
+   * @return Pair that is the string prefix for the parameter (fullpath) and a pointer to the best
+   * hit node that can be associated with the parameter (if any)
    */
-  std::string paramMessageHelper(const std::string & param, const std::string & msg) const;
+  std::pair<std::string, const hit::Node *> paramMessageContext(const std::string & param) const;
+  /**
+   * Get a prefix for messages associated with a parameter.
+   *
+   * Will include the best file path possible for the parameter and the parameter's fullpath.
+   */
+  std::string paramMessagePrefix(const std::string & param) const;
 
   /**
    * Internal helper for calling back to mooseError(), ideally from the underlying
    * MooseBase object if it is available (for more context)
    */
   [[noreturn]] void callMooseErrorHelper(const std::string & msg,
-                                         const bool with_prefix = true) const;
+                                         const bool with_prefix = true,
+                                         const hit::Node * node = nullptr) const;
 
   struct Metadata
   {
@@ -2345,16 +2349,7 @@ InputParameters::mooseError(Args &&... args) const
 {
   std::ostringstream oss;
   moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
-  callMooseErrorHelper(oss.str(), /* with_prefix = */ true);
-}
-
-template <typename... Args>
-[[noreturn]] void
-InputParameters::mooseErrorNonPrefixed(Args &&... args) const
-{
-  std::ostringstream oss;
-  moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
-  callMooseErrorHelper(oss.str(), /* with_prefix = */ false);
+  callMooseErrorHelper(oss.str());
 }
 
 template <typename... Args>
@@ -2363,15 +2358,19 @@ InputParameters::paramMessage(const std::string & param, Args... args) const
 {
   std::ostringstream oss;
   moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
-  return paramMessageHelper(param, oss.str());
+  return paramMessagePrefix(param) + oss.str();
 }
 
 template <typename... Args>
 [[noreturn]] void
 InputParameters::paramError(const std::string & param, Args... args) const
 {
+  std::ostringstream oss;
+  moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
+  const auto [prefix, node] = paramMessageContext(param);
+
   Moose::show_trace = false;
-  mooseErrorNonPrefixed(paramMessage(param, std::forward<Args>(args)...));
+  callMooseErrorHelper(prefix + oss.str(), false, node);
   Moose::show_trace = true;
 }
 

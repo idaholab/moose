@@ -22,6 +22,8 @@
 #include "MooseSyntax.h"
 #include "ExecFlagRegistry.h"
 
+#include "hit/parse.h"
+
 #include <unistd.h>
 
 const ExecFlagType EXEC_NONE = registerDefaultExecFlag("NONE");
@@ -756,6 +758,12 @@ setColorConsole(bool use_color, bool force)
 {
   _color_console = (isatty(fileno(stdout)) || force) && use_color;
   return _color_console;
+}
+
+std::string
+hitMessagePrefix(const hit::Node & node)
+{
+  return node.fileLocation() + ":\n";
 }
 
 bool _warnings_are_errors = false;
