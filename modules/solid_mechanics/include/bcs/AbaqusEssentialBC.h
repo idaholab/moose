@@ -27,10 +27,10 @@ public:
   AbaqusEssentialBC(const InputParameters & parameters);
 
   void timestepSetup() override;
-  virtual void computeResidual() override;
+  void computeResidual() override;
 
 protected:
-  Real computeQpResidual() {} override;
+  Real computeQpResidual() override { mooseError("Should not be called."); };
   Real computeQpJacobian() override;
 
   const AbaqusUELStepUserObject & _step_uo;

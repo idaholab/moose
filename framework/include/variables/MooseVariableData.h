@@ -384,6 +384,7 @@ public:
   /**
    * Write a nodal value to the passed-in solution vector
    */
+  void addNodalValue(libMesh::NumericVector<libMesh::Number> & residual, const OutputData & v);
   void insertNodalValue(libMesh::NumericVector<libMesh::Number> & residual, const OutputData & v);
   OutputData getNodalValue(const Node & node, Moose::SolutionState state) const;
   OutputData
