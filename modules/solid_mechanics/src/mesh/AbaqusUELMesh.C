@@ -160,8 +160,6 @@ AbaqusUELMesh::setupNodeSets()
   // add BC nodes to unified set
   auto add_bc_nodes = [&](const auto & step)
   {
-    std::cout << "Step with " << step._bc_var_node_value_map.size() << " vars with BCs\n";
-
     for (const auto & node_value_map : step._bc_var_node_value_map)
       for (const auto node_value : node_value_map.second)
       {
