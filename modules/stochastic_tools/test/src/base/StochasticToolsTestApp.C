@@ -49,23 +49,6 @@ StochasticToolsTestApp::registerApps()
   registerApp(StochasticToolsTestApp);
 }
 
-void
-StochasticToolsTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"StochasticToolsTestApp"});
-}
-
-void
-StochasticToolsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"StochasticToolsTestApp"});
-}
-
-void
-StochasticToolsTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 StochasticToolsTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

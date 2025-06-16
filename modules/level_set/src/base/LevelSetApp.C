@@ -50,25 +50,6 @@ LevelSetApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
   Registry::registerActionsTo(af, {"LevelSetApp"});
 }
 
-void
-LevelSetApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"LevelSetApp"});
-}
-
-void
-LevelSetApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"LevelSetApp"});
-}
-void
-LevelSetApp::registerExecFlags(Factory &)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
-}
-
 // Dynamic Library Entry Points - DO NOT MODIFY
 extern "C" void
 LevelSetApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)

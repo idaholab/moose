@@ -48,23 +48,6 @@ ContactTestApp::registerApps()
   registerApp(ContactTestApp);
 }
 
-void
-ContactTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"ContactTestApp"});
-}
-
-void
-ContactTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"ContactTestApp"});
-}
-
-void
-ContactTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 ContactTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

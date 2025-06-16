@@ -58,9 +58,6 @@ public:
   /**
    * Deprecated Methods
    */
-  static void registerObjects(Factory & factory);
-  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
-  static void registerExecFlags(Factory & factory);
 
   /**
    * Get the class name of a flow model corresponding to the flow model ID

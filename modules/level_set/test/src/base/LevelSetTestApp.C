@@ -49,23 +49,6 @@ LevelSetTestApp::registerApps()
   registerApp(LevelSetTestApp);
 }
 
-void
-LevelSetTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"LevelSetTestApp"});
-}
-
-void
-LevelSetTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"LevelSetTestApp"});
-}
-
-void
-LevelSetTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 LevelSetTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

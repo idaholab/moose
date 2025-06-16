@@ -51,24 +51,6 @@ ChemicalReactionsTestApp::registerApps()
   registerApp(ChemicalReactionsTestApp);
 }
 
-void
-ChemicalReactionsTestApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"ChemicalReactionsTestApp"});
-}
-void
-ChemicalReactionsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"ChemicalReactionsTestApp"});
-}
-void
-ChemicalReactionsTestApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
-}
-
 extern "C" void
 ChemicalReactionsTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

@@ -133,24 +133,6 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   XFEMApp::registerAll(f, af, s);
 }
 
-void
-CombinedApp::registerObjects(Factory & /*factory*/)
-{
-  mooseError("registerObjects is deprecated, fix the calling application");
-}
-
-void
-CombinedApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
-  mooseError("associateSyntax is deprecated, fix the calling application");
-}
-
-void
-CombinedApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseError("registerExecFlags is deprecated, fix the calling application");
-}
-
 extern "C" void
 CombinedApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

@@ -244,7 +244,6 @@ using libMesh::out;
 
 void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 
-void registerObjects(Factory & factory);
 void registerObjects(Factory & factory, const std::set<std::string> & obj_labels);
 void addActionTypes(Syntax & syntax);
 void registerActions(Syntax & syntax, ActionFactory & action_factory);

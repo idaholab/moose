@@ -105,20 +105,6 @@ StochasticToolsApp::registerApps()
 }
 
 void
-StochasticToolsApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"StochasticToolsApp"});
-}
-
-void
-StochasticToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"StochasticToolsApp"});
-}
-
-void
 StochasticToolsApp::requiresTorch(const MooseObject &
 #ifndef LIBTORCH_ENABLED
                                       obj
@@ -130,12 +116,6 @@ StochasticToolsApp::requiresTorch(const MooseObject &
                  "https://mooseframework.inl.gov/modules/stochastic_tools/install_pytorch.html for "
                  "instruction.");
 #endif
-}
-
-void
-StochasticToolsApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

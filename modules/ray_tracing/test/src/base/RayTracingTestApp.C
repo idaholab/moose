@@ -48,23 +48,6 @@ RayTracingTestApp::registerApps()
   registerApp(RayTracingTestApp);
 }
 
-void
-RayTracingTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"RayTracingTestApp"});
-}
-
-void
-RayTracingTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"RayTracingTestApp"});
-}
-
-void
-RayTracingTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 RayTracingTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

@@ -80,9 +80,31 @@ FluidPropertiesApp::registerApps()
 #endif
 }
 
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
+void
+FluidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
+#ifdef AIR_FP_ENABLED
+  AirApp::registerAll(f, af, syntax);
+#endif
+#ifdef CARBON_DIOXIDE_FP_ENABLED
+  CarbonDioxideApp::registerAll(f, af, syntax);
+#endif
+#ifdef HELIUM_FP_ENABLED
+  HeliumApp::registerAll(f, af, syntax);
+#endif
+#ifdef NITROGEN_FP_ENABLED
+  NitrogenApp::registerAll(f, af, syntax);
+#endif
+#ifdef POTASSIUM_FP_ENABLED
+  PotassiumApp::registerAll(f, af, syntax);
+#endif
+#ifdef SODIUM_FP_ENABLED
+  SodiumApp::registerAll(f, af, syntax);
+#endif
+
+  Registry::registerObjectsTo(f, {"FluidPropertiesApp"});
+  Registry::registerActionsTo(af, {"FluidPropertiesApp"});
+
   registerSyntaxTask(
       "AddFluidPropertiesDeprecatedAction", "Modules/FluidProperties/*", "add_fluid_properties");
   registerSyntaxTask("AddFluidPropertiesAction", "FluidProperties/*", "add_fluid_properties");
@@ -99,54 +121,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   syntax.registerActionSyntax("AddFluidPropertiesInterrogatorAction",
                               "FluidPropertiesInterrogator");
-}
-
-void
-FluidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
-{
-#ifdef AIR_FP_ENABLED
-  AirApp::registerAll(f, af, s);
-#endif
-#ifdef CARBON_DIOXIDE_FP_ENABLED
-  CarbonDioxideApp::registerAll(f, af, s);
-#endif
-#ifdef HELIUM_FP_ENABLED
-  HeliumApp::registerAll(f, af, s);
-#endif
-#ifdef NITROGEN_FP_ENABLED
-  NitrogenApp::registerAll(f, af, s);
-#endif
-#ifdef POTASSIUM_FP_ENABLED
-  PotassiumApp::registerAll(f, af, s);
-#endif
-#ifdef SODIUM_FP_ENABLED
-  SodiumApp::registerAll(f, af, s);
-#endif
-
-  Registry::registerObjectsTo(f, {"FluidPropertiesApp"});
-  Registry::registerActionsTo(af, {"FluidPropertiesApp"});
-  associateSyntaxInner(s, af);
-}
-
-void
-FluidPropertiesApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"FluidPropertiesApp"});
-}
-
-void
-FluidPropertiesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"FluidPropertiesApp"});
-  associateSyntaxInner(syntax, action_factory);
-}
-
-void
-FluidPropertiesApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

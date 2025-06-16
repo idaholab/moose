@@ -46,9 +46,14 @@ NavierStokesApp::registerApps()
   HeatTransferApp::registerApps();
 }
 
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
+void
+NavierStokesApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
+  FluidPropertiesApp::registerAll(f, af, syntax);
+  HeatTransferApp::registerAll(f, af, syntax);
+  Registry::registerObjectsTo(f, {"NavierStokesApp"});
+  Registry::registerActionsTo(af, {"NavierStokesApp"});
+
   // Physics syntax
   registerSyntax("WCNSFVFlowPhysics", "Physics/NavierStokes/Flow/*");
   registerSyntax("WCNSLinearFVFlowPhysics", "Physics/NavierStokes/FlowSegregated/*");
@@ -127,51 +132,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerTask("navier_stokes_copy_nodal_vars", /*is_required=*/false);
   addTaskDependency("navier_stokes_copy_nodal_vars", "copy_nodal_vars");
   addTaskDependency("add_material", "navier_stokes_copy_nodal_vars");
-}
-
-void
-NavierStokesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
-{
-  FluidPropertiesApp::registerAll(f, af, s);
-  HeatTransferApp::registerAll(f, af, s);
-  Registry::registerObjectsTo(f, {"NavierStokesApp"});
-  Registry::registerActionsTo(af, {"NavierStokesApp"});
-  associateSyntaxInner(s, af);
-}
-
-void
-NavierStokesApp::registerObjectDepends(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjectsDepends");
-  FluidPropertiesApp::registerObjects(factory);
-}
-
-void
-NavierStokesApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"NavierStokesApp"});
-}
-
-void
-NavierStokesApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntaxDepends");
-  FluidPropertiesApp::associateSyntax(syntax, action_factory);
-}
-
-void
-NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"NavierStokesApp"});
-  associateSyntaxInner(syntax, action_factory);
-}
-
-void
-NavierStokesApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

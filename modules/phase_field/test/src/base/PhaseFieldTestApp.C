@@ -50,23 +50,6 @@ PhaseFieldTestApp::registerApps()
   registerApp(PhaseFieldTestApp);
 }
 
-void
-PhaseFieldTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"PhaseFieldTestApp"});
-}
-
-void
-PhaseFieldTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"PhaseFieldTestApp"});
-}
-
-void
-PhaseFieldTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 PhaseFieldTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

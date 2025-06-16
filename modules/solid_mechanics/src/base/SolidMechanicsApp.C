@@ -31,9 +31,13 @@ SolidMechanicsApp::SolidMechanicsApp(const InputParameters & parameters) : Moose
 
 SolidMechanicsApp::~SolidMechanicsApp() {}
 
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
+void
+SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
+  Registry::registerObjectsTo(f, {"SolidMechanicsApp"});
+  Registry::registerActionsTo(af, {"SolidMechanicsApp"});
+  registerAppDataFilePath("solid_mechanics");
+
   registerSyntax("EmptyAction", "BCs/CavityPressure");
   registerSyntax("CavityPressureAction", "BCs/CavityPressure/*");
   registerSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
@@ -155,39 +159,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 }
 
 void
-SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
-{
-  Registry::registerObjectsTo(f, {"SolidMechanicsApp"});
-  Registry::registerActionsTo(af, {"SolidMechanicsApp"});
-  associateSyntaxInner(s, af);
-  registerAppDataFilePath("solid_mechanics");
-}
-
-void
 SolidMechanicsApp::registerApps()
 {
   registerApp(SolidMechanicsApp);
-}
-
-void
-SolidMechanicsApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"SolidMechanicsApp"});
-}
-
-void
-SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"SolidMechanicsApp"});
-  associateSyntaxInner(syntax, action_factory);
-}
-
-void
-SolidMechanicsApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

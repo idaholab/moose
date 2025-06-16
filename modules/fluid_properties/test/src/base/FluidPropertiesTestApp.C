@@ -49,23 +49,6 @@ FluidPropertiesTestApp::registerApps()
   registerApp(FluidPropertiesTestApp);
 }
 
-void
-FluidPropertiesTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"FluidPropertiesTestApp"});
-}
-
-void
-FluidPropertiesTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"FluidPropertiesTestApp"});
-}
-
-void
-FluidPropertiesTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 FluidPropertiesTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

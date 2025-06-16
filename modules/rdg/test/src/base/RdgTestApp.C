@@ -46,24 +46,6 @@ RdgTestApp::registerApps()
   RdgApp::registerApps();
   registerApp(RdgTestApp);
 }
-
-void
-RdgTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"RdgTestApp"});
-}
-
-void
-RdgTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"RdgTestApp"});
-}
-
-void
-RdgTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 RdgTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
