@@ -27,6 +27,8 @@ AppFactory::instance()
 
 AppFactory::~AppFactory() {}
 
+const std::string AppFactory::main_app_name = "main";
+
 InputParameters
 AppFactory::getValidParams(const std::string & name)
 {
@@ -34,6 +36,24 @@ AppFactory::getValidParams(const std::string & name)
     return it->second->buildParameters();
 
   mooseError(std::string("A '") + name + "' is not a registered object\n\n");
+}
+
+const InputParameters &
+AppFactory::getAppParams(const std::string & name) const
+{
+  const auto it = _input_parameters.find(name);
+  if (it == _input_parameters.end())
+    mooseError("AppFactory::getAppParams(): Parameters for app '", name, "' not found");
+  return *it->second;
+}
+
+void
+AppFactory::clearAppParams(const std::string & name, const ClearAppParamsKey)
+{
+  const auto it = _input_parameters.find(name);
+  if (it == _input_parameters.end())
+    mooseError("AppFactory::clearAppParams(): Parameters for app '", name, "' not found");
+  _input_parameters.erase(it);
 }
 
 MooseAppPtr
@@ -52,7 +72,7 @@ AppFactory::createAppShared(int argc, char ** argv, std::unique_ptr<Parser> pars
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
   app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
 
-  return AppFactory::instance().createShared(app_type, "main", app_params, MPI_COMM_WORLD);
+  return AppFactory::instance().createShared(app_type, main_app_name, app_params, MPI_COMM_WORLD);
 }
 
 MooseAppPtr
@@ -115,16 +135,16 @@ AppFactory::createShared(const std::string & app_type,
     mooseError("Object '" + app_type + "' was not registered.");
   auto & build_info = it->second;
 
+  auto comm = std::make_shared<Parallel::Communicator>(comm_world_in);
+
   // Take the app_type and add it to the parameters so that it can be retrieved in the Application
-  parameters.set<std::string>("_type") = app_type;
+  parameters.set<std::string>(MooseBase::type_param) = app_type;
+  parameters.set<std::string>(MooseBase::name_param) = name;
+  parameters.set<std::string>(MooseBase::unique_name_param) = "Application/" + name;
+  parameters.set<std::shared_ptr<Parallel::Communicator>>("_comm") = comm;
 
   // Check to make sure that all required parameters are supplied
   parameters.finalize("");
-
-  auto comm = std::make_shared<Parallel::Communicator>(comm_world_in);
-
-  parameters.set<std::shared_ptr<Parallel::Communicator>>("_comm") = comm;
-  parameters.set<std::string>("_app_name") = name;
 
   if (!parameters.isParamValid("_command_line"))
     mooseError("Valid CommandLine object required");
@@ -136,8 +156,12 @@ AppFactory::createShared(const std::string & app_type,
   command_line->populateCommandLineParams(parameters);
 
   // Copy the parameters into a set of parameters that we own
-  auto & params =
-      *_input_parameters.emplace_back(std::make_unique<const InputParameters>(parameters)).get();
+  auto [params_it, inserted] =
+      _input_parameters.emplace(name, std::make_unique<InputParameters>(parameters));
+  if (!inserted)
+    mooseError("Application with name '", name, "' has already been built");
+  auto & params = *params_it->second;
+  params.finalize("");
 
   build_info->_app_creation_count++;
 

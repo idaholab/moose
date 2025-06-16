@@ -21,7 +21,7 @@ SolidMechanicsTestApp::validParams()
 
 registerKnownLabel("SolidMechanicsTestApp");
 
-SolidMechanicsTestApp::SolidMechanicsTestApp(InputParameters parameters)
+SolidMechanicsTestApp::SolidMechanicsTestApp(const InputParameters & parameters)
   : SolidMechanicsApp(parameters)
 {
   SolidMechanicsTestApp::registerAll(

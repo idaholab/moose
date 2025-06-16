@@ -22,7 +22,8 @@ StochasticToolsTestApp::validParams()
 
 registerKnownLabel("StochasticToolsTestApp");
 
-StochasticToolsTestApp::StochasticToolsTestApp(InputParameters parameters) : MooseApp(parameters)
+StochasticToolsTestApp::StochasticToolsTestApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   StochasticToolsTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

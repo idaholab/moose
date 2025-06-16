@@ -25,8 +25,7 @@ FXValueBC::validParams()
 
 FXValueBC::FXValueBC(const InputParameters & parameters) : FunctionDirichletBC(parameters)
 {
-  FunctionSeries & fe_basis =
-      FunctionSeries::checkAndConvertFunction(_func, getParam<std::string>("_moose_base"), name());
+  FunctionSeries & fe_basis = FunctionSeries::checkAndConvertFunction(_func, getBase(), name());
 
   fe_basis.useCache(true);
 }

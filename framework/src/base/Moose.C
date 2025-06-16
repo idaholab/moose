@@ -71,7 +71,7 @@ registerAll(Factory & f, ActionFactory & af, Syntax & s)
 void
 registerObjects(Factory & factory)
 {
-  mooseDeprecated("use registerAll instead of registerObjects");
+  ::mooseDeprecated("use registerAll instead of registerObjects");
   registerObjects(factory, {"MooseApp"});
 }
 

@@ -22,7 +22,7 @@ HeatTransferTestApp::validParams()
 
 registerKnownLabel("HeatTransferTestApp");
 
-HeatTransferTestApp::HeatTransferTestApp(InputParameters parameters) : MooseApp(parameters)
+HeatTransferTestApp::HeatTransferTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   HeatTransferTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

@@ -69,14 +69,14 @@ ContactApp::registerApps()
 void
 ContactApp::registerObjects(Factory & factory)
 {
-  mooseDeprecated("use registerAll instead of registerObjects");
+  ::mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"ContactApp"});
 }
 
 void
 ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  mooseDeprecated("use registerAll instead of associateSyntax");
+  ::mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"ContactApp"});
   associateSyntaxInner(syntax, action_factory);
 }

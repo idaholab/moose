@@ -16,7 +16,7 @@ class SolidMechanicsTestApp : public SolidMechanicsApp
 public:
   static InputParameters validParams();
 
-  SolidMechanicsTestApp(InputParameters parameters);
+  SolidMechanicsTestApp(const InputParameters & parameters);
   virtual ~SolidMechanicsTestApp();
 
   static void registerApps();

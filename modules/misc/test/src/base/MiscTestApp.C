@@ -22,7 +22,7 @@ MiscTestApp::validParams()
 
 registerKnownLabel("MiscTestApp");
 
-MiscTestApp::MiscTestApp(InputParameters parameters) : MooseApp(parameters)
+MiscTestApp::MiscTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   MiscTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

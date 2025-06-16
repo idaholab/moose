@@ -22,7 +22,7 @@ RdgTestApp::validParams()
 
 registerKnownLabel("RdgTestApp");
 
-RdgTestApp::RdgTestApp(InputParameters parameters) : MooseApp(parameters)
+RdgTestApp::RdgTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   RdgTestApp::registerAll(_factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }

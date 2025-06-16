@@ -16,7 +16,7 @@ class PorousFlowTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  PorousFlowTestApp(InputParameters parameters);
+  PorousFlowTestApp(const InputParameters & parameters);
   virtual ~PorousFlowTestApp();
 
   static void registerApps();

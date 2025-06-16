@@ -18,7 +18,7 @@ class RayTracingTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  RayTracingTestApp(InputParameters parameters);
+  RayTracingTestApp(const InputParameters & parameters);
   virtual ~RayTracingTestApp();
 
   static void registerApps();

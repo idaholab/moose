@@ -16,7 +16,7 @@ class MiscTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  MiscTestApp(InputParameters parameters);
+  MiscTestApp(const InputParameters & parameters);
   virtual ~MiscTestApp();
 
   static void registerApps();

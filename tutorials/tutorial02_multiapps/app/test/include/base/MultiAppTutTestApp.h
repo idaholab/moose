@@ -16,7 +16,7 @@ class MultiAppTutTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  MultiAppTutTestApp(InputParameters parameters);
+  MultiAppTutTestApp(const InputParameters & parameters);
   virtual ~MultiAppTutTestApp();
 
   static void registerApps();

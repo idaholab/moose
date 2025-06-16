@@ -16,7 +16,7 @@ class BabblerTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  BabblerTestApp(InputParameters parameters);
+  BabblerTestApp(const InputParameters & parameters);
   virtual ~BabblerTestApp();
 
   static void registerApps();

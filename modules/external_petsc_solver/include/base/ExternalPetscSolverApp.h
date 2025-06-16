@@ -22,7 +22,7 @@ class ExternalPetscSolverApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  ExternalPetscSolverApp(InputParameters parameters);
+  ExternalPetscSolverApp(const InputParameters & parameters);
   virtual ~ExternalPetscSolverApp();
 
   static void registerApps();

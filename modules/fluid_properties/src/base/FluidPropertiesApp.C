@@ -42,7 +42,7 @@ FluidPropertiesApp::validParams()
 
 registerKnownLabel("FluidPropertiesApp");
 
-FluidPropertiesApp::FluidPropertiesApp(InputParameters parameters) : MooseApp(parameters)
+FluidPropertiesApp::FluidPropertiesApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   FluidPropertiesApp::registerAll(_factory, _action_factory, _syntax);
 }
@@ -131,14 +131,14 @@ FluidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 void
 FluidPropertiesApp::registerObjects(Factory & factory)
 {
-  mooseDeprecated("use registerAll instead of registerObjects");
+  ::mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"FluidPropertiesApp"});
 }
 
 void
 FluidPropertiesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  mooseDeprecated("use registerAll instead of associateSyntax");
+  ::mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"FluidPropertiesApp"});
   associateSyntaxInner(syntax, action_factory);
 }
@@ -146,7 +146,7 @@ FluidPropertiesApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
 void
 FluidPropertiesApp::registerExecFlags(Factory & /*factory*/)
 {
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
+  ::mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

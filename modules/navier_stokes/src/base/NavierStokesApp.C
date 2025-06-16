@@ -30,7 +30,7 @@ NavierStokesApp::validParams()
 
 registerKnownLabel("NavierStokesApp");
 
-NavierStokesApp::NavierStokesApp(InputParameters parameters) : MooseApp(parameters)
+NavierStokesApp::NavierStokesApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   NavierStokesApp::registerAll(_factory, _action_factory, _syntax);
 }
@@ -149,7 +149,7 @@ NavierStokesApp::registerObjectDepends(Factory & factory)
 void
 NavierStokesApp::registerObjects(Factory & factory)
 {
-  mooseDeprecated("use registerAll instead of registerObjects");
+  ::mooseDeprecated("use registerAll instead of registerObjects");
   Registry::registerObjectsTo(factory, {"NavierStokesApp"});
 }
 
@@ -163,7 +163,7 @@ NavierStokesApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_
 void
 NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  mooseDeprecated("use registerAll instead of associateSyntax");
+  ::mooseDeprecated("use registerAll instead of associateSyntax");
   Registry::registerActionsTo(action_factory, {"NavierStokesApp"});
   associateSyntaxInner(syntax, action_factory);
 }
@@ -171,7 +171,7 @@ NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
 void
 NavierStokesApp::registerExecFlags(Factory & /*factory*/)
 {
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
+  ::mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

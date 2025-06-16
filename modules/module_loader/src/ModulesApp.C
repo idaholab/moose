@@ -412,7 +412,7 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 void
 ModulesApp::registerExecFlags(Factory & factory)
 {
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
+  ::mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 #ifdef CHEMICAL_REACTIONS_ENABLED
   ChemicalReactionsApp::registerExecFlags(factory);
 #endif

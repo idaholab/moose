@@ -16,7 +16,7 @@ class DarcyThermoMechApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  DarcyThermoMechApp(InputParameters parameters);
+  DarcyThermoMechApp(const InputParameters & parameters);
 
   static void registerApps();
   static void registerAll(Factory & factory, ActionFactory & action_factory, Syntax & syntax);
