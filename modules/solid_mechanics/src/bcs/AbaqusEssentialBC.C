@@ -21,6 +21,7 @@ AbaqusEssentialBC::validParams()
   params.addClassDescription(
       "Applies boundary conditions from an Abaqus input read through AbaqusUELMesh");
   params.addRequiredParam<Abaqus::AbaqusID>("abaqus_var_id", "Abaqus variable (DOF) id number.");
+  params.addRequiredParam<UserObjectName>("step_user_object", "Step user object");
   // we generate a union of all nodes where any BC applies and suss in the individual case
   // if we really need to set a value for the current variable (shouldApply)
   params.set<std::vector<BoundaryName>>("boundary") = {"abaqus_bc_union_boundary"};
@@ -44,44 +45,65 @@ AbaqusEssentialBC::timestepSetup()
   _current_step_end_values = _step_uo.getEndValues(_abaqus_var_id);
 }
 
-Real
-AbaqusEssentialBC::computeQpResidual()
+void
+AbaqusEssentialBC::computeResidual() const
 {
+  const auto id = _current_node->id();
   const Real & d = _current_step_fraction;
 
-  // BC is deactivated over the course of this step
-  const auto deactivated_it = _current_step_begin_forces->find(_current_node->id());
-  if (deactivated_it != _current_step_begin_forces->end())
-    return (1.0 - d) * deactivated_it->second;
-
-  const auto end_it = _current_step_end_values->find(_current_node->id());
-  if (end_it == _current_step_end_values->end())
-    mooseError("Missing step end value.");
-
-  // new BC is coming into effect this step
-  const auto activated_it = _current_step_begin_solution->find(_current_node->id());
-  if (activated_it != _current_step_begin_solution->end())
+  const auto * cbf = _current_step_begin_forces;
+  if (cbf)
   {
-    const Real value = d * end_it->second + (1.0 - d) * activated_it->second;
-    return _u[_qp] - value;
+    if (const auto it = cbf->find(id); it != cbf->end())
+    {
+      addResidual(_sys, (1.0 - d) * it->second, _var);
+      return;
+    }
   }
 
-  const auto begin_it = _current_step_begin_values->find(_current_node->id());
-  if (begin_it == _current_step_begin_values->end())
-    mooseError("Missing step begin value.");
+  Real end_value;
+  const auto * cse = _current_step_end_values;
+  if (cse)
+  {
+    if (const auto it = cse->find(id); it == cse->end())
+      return;
+    end_value = it->second;
+  }
 
-  // BC is staying in effect (but maybe changing value)
-  const Real value = d * end_it->second + (1.0 - d) * begin_it->second;
-  return _u[_qp] - value;
+  const auto * cbs = _current_step_begin_solution;
+  if (cbs)
+  {
+    if (const auto it = cbs->find(id); it != cbs->end())
+    {
+      const Real value = d * end_value + (1.0 - d) * it->second;
+      setResidual(_sys, _u[_qp] - value, _var);
+      return;
+    }
+  }
+
+  const auto * csb = _current_step_begin_values;
+  if (csb)
+  {
+    if (const auto it = csb->find(id); it != cse->end())
+    {
+      // BC is staying in effect (but maybe changing value)
+      const Real value = d * end_value + (1.0 - d) * it->second;
+      setResidual(_sys, _u[_qp] - value, _var);
+      return;
+    }
+  }
 }
 
 Real
 AbaqusEssentialBC::computeQpJacobian()
 {
   // if the BC is deactivated it's force does not depend on the current solution
-  const auto deactivated_it = _current_step_begin_forces->find(_current_node->id());
-  if (deactivated_it == _current_step_begin_forces->end())
-    return 0.0;
+  if (_current_step_begin_forces)
+  {
+    const auto deactivated_it = _current_step_begin_forces->find(_current_node->id());
+    if (deactivated_it == _current_step_begin_forces->end())
+      return 0.0;
+  }
 
   // otherwise it has a linear dependence
   return 1.0;
