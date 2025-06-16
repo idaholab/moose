@@ -631,9 +631,7 @@ ParameterStudyAction::showObject(std::string type,
                                  const InputParameters & params) const
 {
   // Output basic information
-  std::string base_type = params.have_parameter<std::string>("_moose_base")
-                              ? params.get<std::string>("_moose_base")
-                              : "Unknown";
+  std::string base_type = params.hasBase() ? params.getBase() : "Unknown";
   _console << "[ParameterStudy] "
            << "Base Type:  " << COLOR_YELLOW << base_type << COLOR_DEFAULT << "\n"
            << "                 Type:       " << COLOR_YELLOW << type << COLOR_DEFAULT << "\n"

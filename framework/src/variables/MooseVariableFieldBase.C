@@ -27,12 +27,11 @@ const std::string &
 MooseVariableFieldBase::componentName(const unsigned int comp) const
 {
   if (comp >= _count)
-    mooseError("Component index must be less than the number of components of variable ",
-               _var_name);
+    mooseError("componentName(): Component index is not less than the number of components");
   if (isArray())
     return this->arrayVariableComponent(comp);
   else
-    return _var_name;
+    return name();
 }
 
 const std::set<SubdomainID> &
