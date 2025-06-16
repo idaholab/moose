@@ -13,8 +13,6 @@
 #include "InputParameters.h"
 #include "MooseApp.h"
 
-#include "hit/parse.h"
-
 MooseBase::MooseBase(const std::string & type,
                      const std::string & name,
                      MooseApp & app,
@@ -34,32 +32,28 @@ MooseBase::typeAndName() const
 }
 
 [[noreturn]] void
-MooseBase::callMooseError(std::string msg, const bool with_prefix) const
+MooseBase::callMooseError(std::string msg,
+                          const bool with_prefix,
+                          const hit::Node * node /* = nullptr */) const
 {
+  if (!node)
+    node = _params.getHitNode();
+
   _app.getOutputWarehouse().mooseConsole();
-  const std::string prefix = _app.isUltimateMaster() ? "" : _app.name();
+  const std::string multiapp_prefix = _app.isUltimateMaster() ? "" : _app.name();
   if (with_prefix)
     msg = messagePrefix() + "\n\n" + msg;
-  moose::internal::mooseErrorRaw(msg, prefix);
+  moose::internal::mooseErrorRaw(msg, multiapp_prefix, node);
 }
 
 std::string
 MooseBase::messagePrefix() const
 {
-  std::ostringstream oss;
-
-  // First prefix with the location to this object, if at all possible
-  if (const auto node = _params.getHitNode())
-    if (!node->isRoot())
-      oss << node->fileLocation() << ":\n";
-
-  // And then the name of the object producing the message
-  oss << "The following occurred in the ";
+  std::string prefix = "The following occurred in the ";
   const std::string base = _params.getBase() ? *_params.getBase() : "object";
-  oss << base;
+  prefix += base;
   if (base != name())
-    oss << " '" << name() << "'";
-  oss << " of type " << type() << ".";
-
-  return oss.str();
+    prefix += " '" + name() + "'";
+  prefix += " of type " + type() + ".";
+  return prefix;
 }
