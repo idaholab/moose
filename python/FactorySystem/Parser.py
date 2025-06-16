@@ -166,6 +166,7 @@ class Parser:
             params.addPrivateParam('_warehouse', self.warehouse)
             params.addPrivateParam('_parser', self)
             params.addPrivateParam('_root', self.root)
+            params.addPrivateParam('_node', node)
 
             # Build the object
             try:

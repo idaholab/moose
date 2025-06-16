@@ -654,7 +654,11 @@ class Job(OutputInterface):
         else:
             command = self.getCommand()
 
-        output = 'Working Directory: ' + self.getTestDir() + '\nRunning command: ' + command + '\n'
+        node = self.specs['_node']
+        header = [f'Test spec: {node.filename()}:{node.line()}',
+                  f'Working directory: {self.getTestDir()}',
+                  f'Running command: {command}']
+        output = '\n'.join(header) + '\n'
 
         # Whether or not to limit the runner_run output, which is the output from the
         # actual run (the process that the harness runs)
