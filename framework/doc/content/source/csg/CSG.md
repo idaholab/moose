@@ -50,6 +50,9 @@ Universes can then be optionally defined as a collection of cells, which can the
 
 # For Developers
 
+The `CSGBase` class contains the framework necessary for creating generic CSG definitions, but the methods for actually using it to generate the CSG definition have to be implemented for each mesh generator by overriding the `generateCSG()` class.
+
+
 overview of what the CSGBase framework does and how developers should implement this (ie for each MeshGenerator)
 
 ## generateCSG
