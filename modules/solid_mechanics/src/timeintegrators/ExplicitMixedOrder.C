@@ -1,15 +1,6 @@
-//* This file is part of the MOOSE framework
-//* https://mooseframework.inl.gov
-//*
-//* All rights reserved, see COPYRIGHT for full restrictions
-//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-//*
-//* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
-
 // MOOSE includes
 #include "Assembly.h"
-#include "ExplicitMixedOrder.h"
+#include "ExplicitMixedOrder_fix.h"
 #include "ExplicitTimeIntegrator.h"
 #include "Moose.h"
 #include "MooseError.h"
@@ -31,14 +22,14 @@
 #include <iterator>
 #include <utility>
 
-registerMooseObject("SolidMechanicsApp", ExplicitMixedOrder);
+registerMooseObject("SolidMechanicsApp", ExplicitMixedOrder_fix);
 registerMooseObjectRenamed("SolidMechanicsApp",
                            DirectCentralDifference,
                            "10/14/2025 00:00",
-                           ExplicitMixedOrder);
+                           ExplicitMixedOrder_fix);
 
 InputParameters
-ExplicitMixedOrder::validParams()
+ExplicitMixedOrder_fix::validParams()
 {
   InputParameters params = ExplicitTimeIntegrator::validParams();
 
@@ -49,7 +40,13 @@ ExplicitMixedOrder::validParams()
                         false,
                         "If set to true, will only compute the mass matrix in the first time step, "
                         "and keep using it throughout the simulation.");
+  params.addParam<bool>(
+      "use_constant_damp",
+      false,
+      "If set to true, will only compute the damping matrix in the first time step, "
+      "and keep using it throughout the simulation.");
   params.addParam<TagName>("mass_matrix_tag", "mass", "The tag for the mass matrix");
+  params.addParam<TagName>("damping_matrix_tag", "damping", "The tag for the damping matrix");
 
   params.addParam<std::vector<VariableName>>(
       "second_order_vars",
@@ -72,10 +69,12 @@ ExplicitMixedOrder::validParams()
   return params;
 }
 
-ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
+ExplicitMixedOrder_fix::ExplicitMixedOrder_fix(const InputParameters & parameters)
   : ExplicitTimeIntegrator(parameters),
     _constant_mass(getParam<bool>("use_constant_mass")),
+    _constant_damping(getParam<bool>("use_constant_damp")),
     _mass_matrix(getParam<TagName>("mass_matrix_tag")),
+    _damping_matrix(getParam<TagName>("damping_matrix_tag")),
     _solution_older(_sys.solutionState(2)),
     _vars_first(declareRestartableData<std::unordered_set<unsigned int>>("first_order_vars")),
     _local_first_order_indices(
@@ -90,7 +89,7 @@ ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
 }
 
 void
-ExplicitMixedOrder::computeTimeDerivatives()
+ExplicitMixedOrder_fix::computeTimeDerivatives()
 {
   /*
   Because this is called in NonLinearSystemBase
@@ -102,16 +101,23 @@ ExplicitMixedOrder::computeTimeDerivatives()
 }
 
 TagID
-ExplicitMixedOrder::massMatrixTagID() const
+ExplicitMixedOrder_fix::massMatrixTagID() const
 {
   return _sys.subproblem().getMatrixTagID(_mass_matrix);
 }
 
-void
-ExplicitMixedOrder::solve()
+TagID
+ExplicitMixedOrder_fix::dampingMatrixTagID() const
 {
-  // Getting the tagID for the mass matrix
+  return _sys.subproblem().getMatrixTagID(_damping_matrix);
+}
+
+void
+ExplicitMixedOrder_fix::solve()
+{
+  // Getting the tagID for the mass and damping matrix
   auto mass_tag = massMatrixTagID();
+  auto damping_tag = dampingMatrixTagID();
 
   // Reset iteration counts
   _n_nonlinear_iterations = 0;
@@ -119,21 +125,36 @@ ExplicitMixedOrder::solve()
 
   _current_time = _fe_problem.time();
 
+  // Get the lumped mass matrix
+  // Define the matrix with system size
   auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
-
   // Compute the mass matrix
   if (!_constant_mass || _t_step == 1)
   {
     // We only want to compute "inverted" lumped mass matrix once.
     _fe_problem.computeJacobianTag(
         *_nonlinear_implicit_system->current_local_solution, mass_matrix, mass_tag);
-
     // Calculating the lumped mass matrix for use in residual calculation
     mass_matrix.vector_mult(*_mass_matrix_diag_inverted, *_ones);
-
-    // "Invert" the diagonal mass matrix
-    _mass_matrix_diag_inverted->reciprocal();
+    // // "Invert" the diagonal mass matrix
+    // _mass_matrix_diag_inverted->reciprocal();
     _mass_matrix_diag_inverted->close();
+  }
+
+  // Get the lumped damping matrix
+  // Define the matrix with system size
+  auto & damping_matrix = _nonlinear_implicit_system->get_system_matrix();
+  // Compute the damping matrix
+  if (!_constant_damping || _t_step == 1)
+  {
+    // We only want to compute "inverted" lumped mass matrix once.
+    _fe_problem.computeJacobianTag(
+        *_nonlinear_implicit_system->current_local_solution, damping_matrix, damping_tag);
+    // Calculating the lumped damping matrix for use in residual calculation
+    damping_matrix.vector_mult(*_damping_matrix_diag_inverted, *_ones);
+    // // "Invert" the diagonal mass matrix
+    // _mass_matrix_diag_inverted->reciprocal();
+    _damping_matrix_diag_inverted->close();
   }
 
   // Set time to the time at which to evaluate the residual
@@ -163,7 +184,7 @@ ExplicitMixedOrder::solve()
 }
 
 void
-ExplicitMixedOrder::postResidual(NumericVector<Number> & residual)
+ExplicitMixedOrder_fix::postResidual(NumericVector<Number> & residual)
 {
   residual += *_Re_time;
   residual += *_Re_non_time;
@@ -174,7 +195,7 @@ ExplicitMixedOrder::postResidual(NumericVector<Number> & residual)
 }
 
 bool
-ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
+ExplicitMixedOrder_fix::performExplicitSolve(SparseMatrix<Number> &)
 {
 
   bool converged = false;
@@ -205,9 +226,13 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
   // Split diag mass and residual vectors into correct subvectors
   const std::unique_ptr<NumericVector<Real>> mass_second(
       NumericVector<Number>::build(_communicator));
+  const std::unique_ptr<NumericVector<Real>> damping_second(
+      NumericVector<Number>::build(_communicator));
   const std::unique_ptr<NumericVector<Real>> exp_res_second(
       NumericVector<Number>::build(_communicator));
   _mass_matrix_diag_inverted->create_subvector(*mass_second, _local_second_order_indices, false);
+  _damping_matrix_diag_inverted->create_subvector(
+      *damping_second, _local_second_order_indices, false);
   _explicit_residual->create_subvector(*exp_res_second, _local_second_order_indices, false);
 
   // Only need acceleration and old velocity vector for central difference
@@ -216,6 +241,12 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
   auto vel_second = vel->get_subvector(_local_second_order_indices);
 
   // Compute acceleration for central difference
+  auto damping_res = damping_second->clone();
+  damping_second->scale(_dt / 2);
+  *mass_second += *damping_second;
+  damping_res->pointwise_mult(*damping_res, *vel_second);
+  damping_res->scale(2 * _dt / (_dt + _dt_old));
+  *exp_res_second -= *damping_res;
   accel_second->pointwise_mult(*mass_second, *exp_res_second);
 
   // Scaling the acceleration
@@ -247,7 +278,7 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
 }
 
 void
-ExplicitMixedOrder::init()
+ExplicitMixedOrder_fix::init()
 {
   ExplicitTimeIntegrator::init();
 
@@ -314,7 +345,7 @@ ExplicitMixedOrder::init()
 }
 
 void
-ExplicitMixedOrder::computeICs()
+ExplicitMixedOrder_fix::computeICs()
 {
   // Compute the first-order approximation of the velocity at the current time step
   // using the Euler scheme, where the velocity is estimated as the difference
@@ -326,8 +357,8 @@ ExplicitMixedOrder::computeICs()
   vel->close();
 }
 
-ExplicitMixedOrder::TimeOrder
-ExplicitMixedOrder::findVariableTimeOrder(unsigned int var_num) const
+ExplicitMixedOrder_fix::TimeOrder
+ExplicitMixedOrder_fix::findVariableTimeOrder(unsigned int var_num) const
 {
   if (_vars_first.empty() && _vars_second.empty())
     mooseError("Time order sets are both empty.");

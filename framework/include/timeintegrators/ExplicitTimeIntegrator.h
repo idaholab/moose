@@ -79,6 +79,9 @@ protected:
   /// Diagonal of the lumped mass matrix (and its inversion)
   NumericVector<Real> * _mass_matrix_diag_inverted;
 
+  /// Diagonal of the lumped damping matrix (and its inversion)
+  NumericVector<Real> * _damping_matrix_diag_inverted;
+
   /// Vector of 1's to help with creating the lumped mass matrix
   NumericVector<Real> * _ones;
 

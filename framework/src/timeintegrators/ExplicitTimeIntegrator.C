@@ -49,7 +49,8 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
     _solve_type(getParam<MooseEnum>("solve_type")),
     _explicit_residual(addVector("explicit_residual", false, PARALLEL)),
     _solution_update(addVector("solution_update", true, PARALLEL)),
-    _mass_matrix_diag_inverted(addVector("mass_matrix_diag_inverted", true, GHOSTED))
+    _mass_matrix_diag_inverted(addVector("mass_matrix_diag_inverted", true, GHOSTED)),
+    _damping_matrix_diag_inverted(addVector("damping_matrix_diag_inverted", true, GHOSTED))
 {
   _Ke_time_tag = _fe_problem.getMatrixTagID("TIME");
 
@@ -166,6 +167,7 @@ ExplicitTimeIntegrator::meshChanged()
   if (_solve_type == LUMP_PRECONDITIONED)
   {
     _preconditioner = std::make_unique<LumpedPreconditioner>(*_mass_matrix_diag_inverted);
+    _preconditioner = std::make_unique<LumpedPreconditioner>(*_damping_matrix_diag_inverted);
     _linear_solver->attach_preconditioner(_preconditioner.get());
     _linear_solver->init();
   }
