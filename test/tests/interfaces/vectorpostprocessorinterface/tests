@@ -65,7 +65,7 @@
       type = RunException
       input = 'vppi_errors.i'
       cli_args = 'UserObjects/error_test/missing_vpp=true UserObjects/error_test/vpp=missing_vpp'
-      expect_err = 'vpp\)\:(.*)A VectorPostprocessor with the name \"missing_vpp\" was not found.'
+      expect_err = 'UserObjects/error_test/vpp: A VectorPostprocessor with the name \"missing_vpp\" was not found.'
 
       detail = 'by parameter and the VectorPostprocessor does not exist,'
     []
@@ -73,7 +73,7 @@
       type = RunException
       input = 'vppi_errors.i'
       cli_args = 'UserObjects/error_test/missing_vector=true'
-      expect_err = 'vpp\)\:(.*)The VectorPostprocessor \"constant_vpp\" does not have a vector named \"missing_vector\".'
+      expect_err = 'UserObjects/error_test/vpp: The VectorPostprocessor \"constant_vpp\" does not have a vector named \"missing_vector\".'
 
       detail = 'by parameter and the VectorPostprocessor exists but the requested vector does not,'
     []

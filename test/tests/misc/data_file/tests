@@ -25,7 +25,7 @@
     type = RunException
     input = test.i
     cli_args = 'UserObjects/data_file/data_file=this/file/does/not/exist/anywhere.dat'
-    expect_err = '\(UserObjects/data_file/data_file\): Unable to find the data file \'this/file/does/not/exist/anywhere.dat\' anywhere.\s+Paths searched:\s+moose data:(.*)/data\s+working directory:(.*)/misc/data_file'
+    expect_err = 'UserObjects/data_file/data_file: Unable to find the data file \'this/file/does/not/exist/anywhere.dat\' anywhere.\s+Paths searched:\s+moose data:(.*)/data\s+working directory:(.*)/misc/data_file'
     requirement = 'The system shall throw an exception if a data file by parameter cannot be found in any of the designated directories.'
   []
   [by_path]

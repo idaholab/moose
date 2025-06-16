@@ -17,7 +17,7 @@
     type = RunException
     input = 'subdomain_partitioner.i'
     cli_args = 'Mesh/Partitioner/blocks=1337'
-    expect_err = '\(Mesh/Partitioner/blocks\):.*The block 1337 was not found on the mesh'
+    expect_err = 'Mesh/Partitioner/blocks: The block 1337 was not found on the mesh'
 
     requirement = 'The parallel partitioning capability by subdomain shall report a reasonable error when a given subdomain does not exist'
   []
