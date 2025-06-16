@@ -71,7 +71,4 @@ protected:
 
   /// applied forces for deactivated BCs
   Abaqus::VariableValueMap<Real> _current_step_begin_solution;
-
-  /// tagged resodual with concentrated forces
-  const NumericVector<Number> & _concentrated_forces;
 };

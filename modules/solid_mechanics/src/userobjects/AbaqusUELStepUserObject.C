@@ -25,40 +25,14 @@ registerMooseObject("SolidMechanicsApp", AbaqusUELStepUserObject);
 InputParameters
 AbaqusUELStepUserObject::validParams()
 {
-  InputParameters params = NodalUserObject::validParams();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
       "Maps the time steps and the load step simulation times. It can be "
       "used in either direction depending on the simulation setup. It "
       "generates steps to be used in StepPeriod to control the enabled/disabled state of objects "
       "with user-provided simulation steps.");
-  params.addParam<std::vector<Real>>(
-      "step_start_times",
-      "The beginning of step times. The number of steps is inferred from the number of times. One "
-      "step is defined by its start time; and its end time is taken from the start time of the "
-      "next step (if it exists). This list needs to be in ascending value order.");
-
-  params.addParam<Real>("total_time_interval",
-                        "The total time interval in which the steps take place. This option needs "
-                        "to be used together with the 'number_steps'.");
-  params.addParam<unsigned int>(
-      "number_steps",
-      "Total number of steps in the total time interval (provided as total_time_interval).");
-
-  params.addParam<std::vector<Real>>(
-      "step_durations",
-      "The durations of the steps. 'n' of step time intervals define 'n+1' steps "
-      "starting at time equals zero.");
-
-  params.addParam<std::vector<NonlinearVariableName>>(
-      "bc_variables",
-      {},
-      "List of variables to store the residual and solution values for to support Abaqus boundary "
-      "conditions.");
 
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
-  params.addParam<TagName>("abaqus_bc_tag",
-                           "AbaqusBCTag",
-                           "Vector tag for the concentrated force vector applied by Abaqus BCs.");
   return params;
 }
 
@@ -78,8 +52,7 @@ AbaqusUELStepUserObject::AbaqusUELStepUserObject(const InputParameters & paramet
     _current_step(libMesh::invalid_uint),
     _current_step_fraction(0.0),
     _current_step_bcs({&_uel_mesh.getModel()._bc_var_node_value_map,
-                       &_uel_mesh.getModel()._bc_var_node_value_map}),
-    _concentrated_forces(_sys.getVector(getParam<TagName>("abaqus_bc_tag")))
+                       &_uel_mesh.getModel()._bc_var_node_value_map})
 {
   // Fill the time interval look-up table
   _times.resize(_steps.size() + 1);
@@ -96,7 +69,7 @@ AbaqusUELStepUserObject::AbaqusUELStepUserObject(const InputParameters & paramet
         _var_map[var_id] =
             &UserObject::_subproblem.getVariable(0,
                                                  _uel_mesh.getVarName(var_id),
-                                                 Moose::VarKindType::VAR_AUXILIARY,
+                                                 Moose::VarKindType::VAR_SOLVER,
                                                  Moose::VarFieldType::VAR_FIELD_STANDARD);
     }
   };
@@ -122,16 +95,16 @@ AbaqusUELStepUserObject::initialize()
   std::size_t next_step = 0;
   for (; next_step < _times.size() - 1; ++next_step)
   {
-    if (_time > _times[next_step] && _time <= _times[next_step + 1])
+    if (_time >= _times[next_step] && _time < _times[next_step + 1])
       break;
   }
 
-  if (next_step == _times.size())
+  if (next_step == _steps.size())
     mooseError("Simulation ran beyond the final step end time.");
 
   if (next_step != _current_step)
   {
-    if (next_step != _current_step + 1)
+    if (_current_step != libMesh::invalid_uint && next_step != _current_step + 1)
       mooseError("Cannot step backwards!");
 
     // shift bc state (beginning and end of new step) forward
@@ -139,6 +112,22 @@ AbaqusUELStepUserObject::initialize()
 
     // transitioning to a new step
     _current_step = next_step;
+
+    mooseInfoRepeated(_current_step);
+    std::cout << "BEGIN\n";
+    for (const auto & [k,m] : *_current_step_bcs.first)
+    {
+      std::cout << "  var " << k << '\n';
+      for (const auto & [n,v] : m)
+         std::cout << "    n: " << n << " v: " << v << '\n';
+    }
+    std::cout << "END\n";
+    for (const auto & [k,m] : *_current_step_bcs.second)
+    {
+      std::cout << "  var " << k << '\n';
+      for (const auto & [n,v] : m)
+         std::cout << "    n: " << n << " v: " << v << '\n';
+    }
 
     const auto & bc_begin = *_current_step_bcs.first;
     const auto & bc_end = *_current_step_bcs.second;
@@ -150,6 +139,8 @@ AbaqusUELStepUserObject::initialize()
     _current_step_begin_solution.clear();
 
     // fetch concentrated forces for all deactivated BCs
+    TagID tag = _fe_problem.getVectorTagID("AbaqusUELTag");
+    const auto & concentrated_forces = _sys.getVector(tag);
     for (const auto & [var_id, begin_node_value_map] : bc_begin)
     {
       // get the moose variable we're operating on
@@ -172,10 +163,13 @@ AbaqusUELStepUserObject::initialize()
                       "Each variable should have exactly one DOF at each node element");
 
           // get residual value
-          _concentrated_forces.get(var_dof_indices, var_dof_values);
+          concentrated_forces.get(var_dof_indices, var_dof_values);
 
-          // put into map
-          _current_step_begin_forces[var_id][pair.first] = var_dof_values[0];
+          // put into map (we got the concentrated forces from the bulk AbaqusUELMeshUserElement,
+          // the nodal reaction force should be the opposite of that - hence the minus sign)
+          _current_step_begin_forces[var_id][pair.first] = -var_dof_values[0];
+
+          std::cout << "BEGIN_FORCE " << var_id << ' ' << pair.first << ' ' << -var_dof_values[0] << '\n';
         }
     }
 
@@ -207,6 +201,8 @@ AbaqusUELStepUserObject::initialize()
 
           // put into map
           _current_step_begin_solution[var_id][pair.first] = var_dof_values[0];
+
+          std::cout << "BEGIN_SOLUTION " << var_id << ' ' << pair.first << ' ' << var_dof_values[0] << '\n';
         }
     }
   }
