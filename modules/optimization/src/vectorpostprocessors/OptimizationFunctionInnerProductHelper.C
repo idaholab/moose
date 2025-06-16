@@ -38,7 +38,7 @@ OptimizationFunctionInnerProductHelper::OptimizationFunctionInnerProductHelper(
     _simulation_time(_ip_problem.getMooseApp().getStartTime())
 {
   if (!_function)
-    paramError("function", "Function must be an OptimizationFunction.")
+    parameters.paramError("function", "Function must be an OptimizationFunction.");
 }
 
 void
