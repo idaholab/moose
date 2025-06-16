@@ -545,9 +545,9 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
         // See if the current Moose Object syntax belongs under this Action's block
         if ((buildable_types.empty() || // Not restricted
              std::find(buildable_types.begin(), buildable_types.end(), moose_obj_name) !=
-                 buildable_types.end()) &&                                 // Restricted but found
-            moose_obj_params.have_parameter<std::string>("_moose_base") && // Has a registered base
-            _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"),
+                 buildable_types.end()) && // Restricted but found
+            moose_obj_params.hasBase() &&  // Has a registered base
+            _syntax.verifyMooseObjectTask(moose_obj_params.getBase(),
                                           task) &&          // and that base is associated
             action_obj_params.mooseObjectSyntaxVisibility() // and the Action says it's visible
         )
@@ -684,9 +684,9 @@ Builder::buildFullTree(const std::string & search_string)
         // See if the current Moose Object syntax belongs under this Action's block
         if ((buildable_types.empty() || // Not restricted
              std::find(buildable_types.begin(), buildable_types.end(), moose_obj_name) !=
-                 buildable_types.end()) &&                                 // Restricted but found
-            moose_obj_params.have_parameter<std::string>("_moose_base") && // Has a registered base
-            _syntax.verifyMooseObjectTask(moose_obj_params.get<std::string>("_moose_base"),
+                 buildable_types.end()) && // Restricted but found
+            moose_obj_params.hasBase() &&  // Has a registered base
+            _syntax.verifyMooseObjectTask(moose_obj_params.getBase(),
                                           task) &&          // and that base is associated
             action_obj_params.mooseObjectSyntaxVisibility() // and the Action says it's visible
         )

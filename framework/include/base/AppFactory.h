@@ -68,6 +68,10 @@ public:
   virtual ~AppFactory();
 
   static InputParameters validParams();
+
+  /// The name for the "main" moose application
+  static const std::string main_app_name;
+
   /**
    * Helper function for creating a MooseApp from command-line arguments and a Parser.
    *

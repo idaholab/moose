@@ -26,7 +26,7 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
     _scalar_zero(_sc_fe_problem._scalar_zero[_sc_tid]),
     _point_zero(_sc_fe_problem._point_zero[_sc_tid]),
     _sc_parameters(moose_object->parameters()),
-    _sc_name(_sc_parameters.get<std::string>("_object_name")),
+    _sc_name(_sc_parameters.getObjectName()),
     _sc_is_implicit(_sc_parameters.have_parameter<bool>("implicit")
                         ? _sc_parameters.get<bool>("implicit")
                         : true)

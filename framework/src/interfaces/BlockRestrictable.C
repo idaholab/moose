@@ -46,7 +46,7 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object, bool init
                                                   : NULL),
     _boundary_ids(_empty_boundary_ids),
     _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
-    _blk_name(moose_object->getParam<std::string>("_object_name")),
+    _blk_name(moose_object->name()),
     _blk_dim(libMesh::invalid_uint)
 {
   if (initialize)
@@ -64,7 +64,7 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object,
                                                   : NULL),
     _boundary_ids(boundary_ids),
     _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
-    _blk_name(moose_object->getParam<std::string>("_object_name")),
+    _blk_name(moose_object->name()),
     _blk_dim(libMesh::invalid_uint)
 {
   initializeBlockRestrictable(moose_object);

@@ -38,7 +38,7 @@ MFEMConvectiveHeatFluxBC::MFEMConvectiveHeatFluxBC(const InputParameters & param
     _T_inf_coef(getScalarCoefficient("T_infinity")),
     _external_heat_flux_coef(
         getMFEMProblem().getCoefficients().declareScalar<mfem::ProductCoefficient>(
-            "__ConvectiveHeatFluxBC_" + parameters.get<std::string>("_unique_name"),
+            "__ConvectiveHeatFluxBC_" + parameters.get<std::string>(MooseBase::unique_name_param),
             _heat_transfer_coef,
             _T_inf_coef))
 {
