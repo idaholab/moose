@@ -50,7 +50,7 @@
     [missing_ny_procs]
       type = 'RunException'
       input = 'hierarchical_grid_partitioner_errors.i'
-      expect_err = '\(Mesh/Partitioner/ny_procs\): Required for 2D meshes'
+      expect_err = 'Mesh/Partitioner/ny_procs: Required for 2D meshes'
       cli_args = 'Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/nodes_grid_computation=automatic Mesh/Partitioner/nx_procs=2'
       detail = 'the number of processors in the Y-direction for a 2D manual grid mesh partition is missing,'
       min_parallel = 2
@@ -66,7 +66,7 @@
     [missing_nx_nodes]
       type = 'RunException'
       input = 'hierarchical_grid_partitioner_errors.i'
-      expect_err = 'Required for manual nodes grid specification'
+      expect_err = 'Mesh/Partitioner/nx_nodes: Required for manual nodes grid specification'
       cli_args = 'Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/processors_grid_computation=automatic'
       detail = 'the number of nodes in the X-direction for a 1D manual grid mesh partition is missing,'
       min_parallel = 2
@@ -74,7 +74,7 @@
     [missing_ny_nodes]
       type = 'RunException'
       input = 'hierarchical_grid_partitioner_errors.i'
-      expect_err = '\(Mesh/Partitioner/ny_nodes\): Required for 2D meshes'
+      expect_err = 'Mesh/Partitioner/ny_nodes: Required for 2D meshes'
       cli_args = 'Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/processors_grid_computation=automatic Mesh/Partitioner/nx_nodes=2'
       detail = 'the number of nodes in the Y-direction for a 2D manual grid mesh partition is missing,'
       min_parallel = 2
@@ -82,7 +82,7 @@
     [missing_nz_nodes]
       type = 'RunException'
       input = 'hierarchical_grid_partitioner_errors.i'
-      expect_err = 'Required for 3D meshes'
+      expect_err = 'Mesh/Partitioner/nz_nodes: Required for 3D meshes'
       cli_args = 'Mesh/Partitioner/number_nodes=4 Mesh/Partitioner/processors_grid_computation=automatic Mesh/dim=3 Mesh/Partitioner/nx_nodes=2 Mesh/Partitioner/ny_nodes=2'
       detail = 'the number of nodes in the Z-direction for a 3D manual grid mesh partition is missing,'
       min_parallel = 2
