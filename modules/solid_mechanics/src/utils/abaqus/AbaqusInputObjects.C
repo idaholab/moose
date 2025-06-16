@@ -394,7 +394,7 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
   if (key == "boundary")
   {
     // copy over BC data from previous step (unless this is a model level BC or OP=NEW)
-    const auto op = option._header.get<std::string>("op", "mod");
+    const auto op = MooseUtils::toLower(option._header.get<std::string>("op", "mod"));
     if (op != "mod" && op != "new")
       mooseError("Unknown value for *Boundary OP=", op);
     if (&_model != this && op == "mod")
