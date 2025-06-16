@@ -1,12 +1,3 @@
-//* This file is part of the MOOSE framework
-//* https://mooseframework.inl.gov
-//*
-//* All rights reserved, see COPYRIGHT for full restrictions
-//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-//*
-//* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
-
 #pragma once
 
 #include "ExplicitTimeIntegrator.h"
@@ -22,12 +13,12 @@ class SparseMatrix;
  * Implements a form of the central difference time integrator that calculates acceleration directly
  * from the residual forces.
  */
-class ExplicitMixedOrder : public ExplicitTimeIntegrator
+class ExplicitMixedOrder_fix : public ExplicitTimeIntegrator
 {
 public:
   static InputParameters validParams();
 
-  ExplicitMixedOrder(const InputParameters & parameters);
+  ExplicitMixedOrder_fix(const InputParameters & parameters);
 
   virtual int order() override { return 1; }
   virtual void computeTimeDerivatives() override;
@@ -65,12 +56,19 @@ public:
 
 protected:
   virtual TagID massMatrixTagID() const override;
+  virtual TagID dampingMatrixTagID() const;
 
   /// Whether we are reusing the mass matrix
   const bool & _constant_mass;
 
+  /// Whether we aare reusing the damping matrix
+  const bool & _constant_damping;
+
   /// Mass matrix name
   const TagName & _mass_matrix;
+
+  /// Damping matrix name
+  const TagName & _damping_matrix;
 
   /// The older solution
   const NumericVector<Number> & _solution_older;
@@ -99,10 +97,10 @@ protected:
 
 template <typename T, typename T2, typename T3, typename T4>
 void
-ExplicitMixedOrder::computeTimeDerivativeHelper(T & u_dot,
-                                                T2 & u_dotdot,
-                                                const T3 & u_old,
-                                                const T4 & u_older) const
+ExplicitMixedOrder_fix::computeTimeDerivativeHelper(T & u_dot,
+                                                    T2 & u_dotdot,
+                                                    const T3 & u_old,
+                                                    const T4 & u_older) const
 {
   // computing first derivative
   // using the Central Difference method
