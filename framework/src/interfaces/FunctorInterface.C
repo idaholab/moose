@@ -18,7 +18,7 @@ FunctorInterface::validParams()
 
 FunctorInterface::FunctorInterface(const MooseObject * const moose_object)
   : _fi_params(moose_object->parameters()),
-    _fi_name(_fi_params.get<std::string>("_object_name")),
+    _fi_name(moose_object->name()),
     _fi_subproblem(_fi_params.get<SubProblem *>("_subproblem")),
     _fi_tid(_fi_params.get<THREAD_ID>("_tid"))
 {

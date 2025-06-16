@@ -26,7 +26,7 @@ protected:
     eos_pars.set<Real>("q_prime") = 0;
     eos_pars.set<Real>("p_inf") = 1.e9;
     eos_pars.set<Real>("cv") = 1816;
-    eos_pars.set<std::string>("_object_name") = "name3";
+    eos_pars.set<std::string>(MooseBase::name_param) = "name3";
     _fe_problem->addUserObject("StiffenedGasFluidProperties", "fp", eos_pars);
     _fp = &_fe_problem->getUserObject<StiffenedGasFluidProperties>("fp");
   }

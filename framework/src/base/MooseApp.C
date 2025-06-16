@@ -107,7 +107,7 @@ MooseApp::addInputParam(InputParameters & params)
 InputParameters
 MooseApp::validParams()
 {
-  InputParameters params = emptyInputParameters();
+  InputParameters params = MooseBase::validParams();
 
   MooseApp::addAppParam(params);
   MooseApp::addInputParam(params);
@@ -387,8 +387,6 @@ MooseApp::validParams()
                                    false,
                                    "Show registered data paths for searching in the header");
 
-  params.addPrivateParam<std::string>("_app_name"); // the name passed to AppFactory::create
-  params.addPrivateParam<std::string>("_type");
   params.addPrivateParam<int>("_argc");
   params.addPrivateParam<char **>("_argv");
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
@@ -425,12 +423,13 @@ MooseApp::validParams()
 
   MooseApp::addAppParam(params);
 
+  params.registerBase("Application");
+
   return params;
 }
 
 MooseApp::MooseApp(const InputParameters & parameters)
-  : ConsoleStreamInterface(*this),
-    PerfGraphInterface(*this, "MooseApp"),
+  : PerfGraphInterface(*this, "MooseApp"),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
         "_comm")), // Can't call getParam() before pars is set
     // The use of AppFactory::getAppParams() is atrocious. However, a long time ago
@@ -454,13 +453,13 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
-    _parser(_pars.get<std::shared_ptr<Parser>>("_parser")),
+    _parser(getParam<std::shared_ptr<Parser>>("_parser")),
     _builder(*this, _action_warehouse, _parser),
     _restartable_data(libMesh::n_threads()),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),
     _rank_map(*_comm, _perf_graph),
-    _use_executor(_pars.get<bool>("use_executor")),
+    _use_executor(getParam<bool>("use_executor")),
     _null_executor(NULL),
     _use_nonlinear(true),
     _use_eigen_value(false),
@@ -475,8 +474,8 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _recover(false),
     _restart(false),
     _split_mesh(false),
-    _use_split(_pars.get<bool>("use_split")),
-    _force_restart(_pars.get<bool>("force_restart")),
+    _use_split(getParam<bool>("use_split")),
+    _force_restart(getParam<bool>("force_restart")),
 #ifdef DEBUG
     _trap_fpe(true),
 #else
@@ -484,15 +483,15 @@ MooseApp::MooseApp(const InputParameters & parameters)
 #endif
     _test_checkpoint_half_transient(false),
     _check_input(getParam<bool>("check_input")),
-    _multiapp_level(isParamValid("_multiapp_level") ? _pars.get<unsigned int>("_multiapp_level")
+    _multiapp_level(isParamValid("_multiapp_level") ? getParam<unsigned int>("_multiapp_level")
                                                     : 0),
-    _multiapp_number(isParamValid("_multiapp_number") ? _pars.get<unsigned int>("_multiapp_number")
+    _multiapp_number(isParamValid("_multiapp_number") ? getParam<unsigned int>("_multiapp_number")
                                                       : 0),
-    _use_master_mesh(_pars.get<bool>("_use_master_mesh")),
-    _master_mesh(isParamValid("_master_mesh") ? _pars.get<const MooseMesh *>("_master_mesh")
+    _use_master_mesh(getParam<bool>("_use_master_mesh")),
+    _master_mesh(isParamValid("_master_mesh") ? getParam<const MooseMesh *>("_master_mesh")
                                               : nullptr),
     _master_displaced_mesh(isParamValid("_master_displaced_mesh")
-                               ? _pars.get<const MooseMesh *>("_master_displaced_mesh")
+                               ? getParam<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
     _mesh_generator_system(*this),
     _chain_control_system(*this),
@@ -538,7 +537,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
   }
 
   // Set the TIMPI sync type via --timpi-sync
-  const auto & timpi_sync = _pars.get<std::string>("timpi_sync");
+  const auto & timpi_sync = getParam<std::string>("timpi_sync");
   const_cast<Parallel::Communicator &>(comm()).sync_type(timpi_sync);
 
 #ifdef HAVE_GPERFTOOLS

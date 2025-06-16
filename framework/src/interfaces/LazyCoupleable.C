@@ -19,7 +19,7 @@
 
 LazyCoupleable::LazyCoupleable(const MooseObject * moose_object)
   : _l_parameters(moose_object->parameters()),
-    _l_name(_l_parameters.get<std::string>("_object_name")),
+    _l_name(moose_object->name()),
     _l_fe_problem(nullptr),
     _l_app(moose_object->getMooseApp())
 {
