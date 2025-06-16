@@ -49,23 +49,6 @@ PeridynamicsTestApp::registerApps()
   registerApp(PeridynamicsTestApp);
 }
 
-void
-PeridynamicsTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"PeridynamicsTestApp"});
-}
-
-void
-PeridynamicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"PeridynamicsTestApp"});
-}
-
-void
-PeridynamicsTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 PeridynamicsTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

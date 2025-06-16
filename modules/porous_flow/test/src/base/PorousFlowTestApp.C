@@ -48,23 +48,6 @@ PorousFlowTestApp::registerApps()
   registerApp(PorousFlowTestApp);
 }
 
-void
-PorousFlowTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"PorousFlowTestApp"});
-}
-
-void
-PorousFlowTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"PorousFlowTestApp"});
-}
-
-void
-PorousFlowTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 PorousFlowTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

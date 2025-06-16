@@ -32,9 +32,12 @@ GeochemistryApp::GeochemistryApp(const InputParameters & parameters) : MooseApp(
 
 GeochemistryApp::~GeochemistryApp() {}
 
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
+void
+GeochemistryApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
+  Registry::registerObjectsTo(f, {"GeochemistryApp"});
+  Registry::registerActionsTo(af, {"GeochemistryApp"});
+
   registerSyntax("AddGeochemicalModelInterrogatorAction", "GeochemicalModelInterrogator");
 
   registerSyntax("AddTimeIndependentReactionSolverAction", "TimeIndependentReactionSolver");
@@ -49,17 +52,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   addTaskDependency("add_geochemistry_molality_aux",
                     "add_geochemistry_reactor"); // depends on the GeochemistryReactor
   addTaskDependency("add_distribution", "add_geochemistry_molality_aux");
-}
-
-void
-GeochemistryApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
-{
-  /* ModulesApp::registerAll(f, af, s); */
-  Registry::registerObjectsTo(f, {"GeochemistryApp"});
-  Registry::registerActionsTo(af, {"GeochemistryApp"});
-
-  /* register custom execute flags, action syntax, etc. here */
-  associateSyntaxInner(s, af);
 }
 
 void

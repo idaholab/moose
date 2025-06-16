@@ -48,23 +48,6 @@ HeatTransferTestApp::registerApps()
   registerApp(HeatTransferTestApp);
 }
 
-void
-HeatTransferTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"HeatTransferTestApp"});
-}
-
-void
-HeatTransferTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"HeatTransferTestApp"});
-}
-
-void
-HeatTransferTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 HeatTransferTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

@@ -52,23 +52,6 @@ ElectromagneticsTestApp::registerApps()
   registerApp(ElectromagneticsTestApp);
 }
 
-void
-ElectromagneticsTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"ElectromagneticsTestApp"});
-}
-
-void
-ElectromagneticsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"ElectromagneticsTestApp"});
-}
-
-void
-ElectromagneticsTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 /***************************************************************************************************
  *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
  **************************************************************************************************/

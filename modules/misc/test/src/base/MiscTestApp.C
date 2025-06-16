@@ -48,23 +48,6 @@ MiscTestApp::registerApps()
   registerApp(MiscTestApp);
 }
 
-void
-MiscTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"MiscTestApp"});
-}
-
-void
-MiscTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"MiscTestApp"});
-}
-
-void
-MiscTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 MiscTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

@@ -49,23 +49,6 @@ XFEMTestApp::registerApps()
   registerApp(XFEMTestApp);
 }
 
-void
-XFEMTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"XFEMTestApp"});
-}
-
-void
-XFEMTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"XFEMTestApp"});
-}
-
-void
-XFEMTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 XFEMTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

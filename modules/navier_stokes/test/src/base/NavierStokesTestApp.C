@@ -49,23 +49,6 @@ NavierStokesTestApp::registerApps()
   registerApp(NavierStokesTestApp);
 }
 
-void
-NavierStokesTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"NavierStokesTestApp"});
-}
-
-void
-NavierStokesTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"NavierStokesTestApp"});
-}
-
-void
-NavierStokesTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 NavierStokesTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

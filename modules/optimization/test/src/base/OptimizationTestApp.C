@@ -48,23 +48,6 @@ OptimizationTestApp::registerApps()
   registerApp(OptimizationTestApp);
 }
 
-void
-OptimizationTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"OptimizationTestApp"});
-}
-
-void
-OptimizationTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"OptimizationTestApp"});
-}
-
-void
-OptimizationTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 OptimizationTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

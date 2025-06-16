@@ -45,23 +45,6 @@ MiscApp::registerApps()
   registerApp(MiscApp);
 }
 
-void
-MiscApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"MiscApp"});
-}
-
-void
-MiscApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"MiscApp"});
-}
-
-void
-MiscApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 MiscApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
