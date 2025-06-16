@@ -23,7 +23,7 @@ MooseVariableFieldBase::MooseVariableFieldBase(const InputParameters & parameter
 {
 }
 
-std::string
+const std::string &
 MooseVariableFieldBase::componentName(const unsigned int comp) const
 {
   if (comp >= _count)

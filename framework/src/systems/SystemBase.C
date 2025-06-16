@@ -1215,8 +1215,8 @@ SystemBase::copyVars(ExodusII_IO & io)
         const auto & array_var = getFieldVariable<RealEigenVector>(0, vci._dest_name);
         for (MooseIndex(var.count()) i = 0; i < var.count(); ++i)
         {
-          const auto exodus_var = var.arrayVariableComponent(i);
-          const auto system_var = array_var.componentName(i);
+          const auto & exodus_var = var.arrayVariableComponent(i);
+          const auto & system_var = array_var.componentName(i);
           if (var.isNodal())
             io.copy_nodal_solution(system(), exodus_var, system_var, timestep);
           else

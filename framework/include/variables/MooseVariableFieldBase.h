@@ -71,7 +71,7 @@ public:
   /**
    * Get the variable name of a component in libMesh
    */
-  std::string componentName(const unsigned int comp) const;
+  const std::string & componentName(const unsigned int comp) const;
 
   /**
    * @returns true if this is a vector-valued element, false otherwise.
