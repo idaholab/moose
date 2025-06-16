@@ -569,6 +569,23 @@ public:
   std::vector<std::string> getVecMooseType(const std::string & name) const;
 
   /**
+   * @returns Whether or not these parameters are for a MooseBase object, that is,
+   * one with a name and type.
+   *
+   * Needed so that we can produce richer errors from within InputParameters
+   * that have the context of the underlying object, if possible.
+   */
+  bool isMooseBaseObject() const;
+  /**
+   * @returns The underlying owning object type, for MooseBase objects with parameters
+   */
+  const std::string & getObjectType() const;
+  /**
+   * @returns The underlying owning object name, for MooseBase objects with parameters
+   */
+  const std::string & getObjectName() const;
+
+  /**
    * This method adds a coupled variable name pair.  The parser will look for variable
    * name pair in the input file and can return a reference to the storage location
    * for the coupled variable.  If the coupled variable is not supplied in the input
@@ -679,9 +696,18 @@ public:
   void registerBase(const std::string & value);
 
   /**
-   * @return The base system of the object these parameters are for, if any
+   * @return Whether or not the object has a registered base
+   *
+   * The base is registered with registerBase()
    */
-  std::optional<std::string> getBase() const;
+  bool hasBase() const;
+
+  /**
+   * @return The base system of the object these parameters are for, if any
+   *
+   * Set via registerBase().
+   */
+  const std::string & getBase() const;
 
   /**
    * This method is used to define the MOOSE system name that is used by the TheWarehouse object
@@ -985,8 +1011,7 @@ public:
    * when returning most scalar and vector types.
    */
   template <typename T>
-  static const T &
-  getParamHelper(const std::string & name, const InputParameters & pars, const T * the_type);
+  static const T & getParamHelper(const std::string & name, const InputParameters & pars);
   ///@}
 
   using Parameters::get;
@@ -1281,14 +1306,6 @@ private:
    */
   std::string paramMessagePrefix(const std::string & param) const;
 
-  /**
-   * Internal helper for calling back to mooseError(), ideally from the underlying
-   * MooseBase object if it is available (for more context)
-   */
-  [[noreturn]] void callMooseErrorHelper(const std::string & msg,
-                                         const bool with_prefix = true,
-                                         const hit::Node * node = nullptr) const;
-
   struct Metadata
   {
     std::string _doc_string;
@@ -1386,6 +1403,14 @@ private:
                                  const std::string & syntax,
                                  const bool required,
                                  const bool value_required);
+
+  /**
+   * Internal helper for calling back to mooseError(), ideally from the underlying
+   * MooseBase object if it is available (for more context)
+   */
+  [[noreturn]] void callMooseError(std::string msg,
+                                   const bool with_prefix = true,
+                                   const hit::Node * node = nullptr) const;
 
   /// The actual parameter data. Each Metadata object contains attributes for the corresponding
   /// parameter.
@@ -2165,18 +2190,12 @@ void InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & 
 
 template <typename T>
 const T &
-InputParameters::getParamHelper(const std::string & name_in,
-                                const InputParameters & pars,
-                                const T *)
+InputParameters::getParamHelper(const std::string & name_in, const InputParameters & pars)
 {
   const auto name = pars.checkForRename(name_in);
 
   if (!pars.isParamValid(name))
-  {
-    std::stringstream err;
-    err << "The parameter \"" << name << "\" is being retrieved before being set.";
-    pars.callMooseErrorHelper(err.str(), true);
-  }
+    pars.mooseError("The parameter \"", name, "\" is being retrieved before being set.");
 
   return pars.get<T>(name);
 }
@@ -2186,13 +2205,12 @@ InputParameters::getParamHelper(const std::string & name_in,
 // we won't need to bring in *MooseEnum header files here.
 template <>
 const MooseEnum & InputParameters::getParamHelper<MooseEnum>(const std::string & name,
-                                                             const InputParameters & pars,
-                                                             const MooseEnum *);
+                                                             const InputParameters & pars);
 
 template <>
-const MultiMooseEnum & InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
-                                                                       const InputParameters & pars,
-                                                                       const MultiMooseEnum *);
+const MultiMooseEnum &
+InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
+                                                const InputParameters & pars);
 
 template <typename R1, typename R2, typename V1, typename V2>
 std::vector<std::pair<R1, R2>>
@@ -2349,7 +2367,7 @@ InputParameters::mooseError(Args &&... args) const
 {
   std::ostringstream oss;
   moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
-  callMooseErrorHelper(oss.str());
+  callMooseError(oss.str());
 }
 
 template <typename... Args>
@@ -2370,7 +2388,7 @@ InputParameters::paramError(const std::string & param, Args... args) const
   const auto [prefix, node] = paramMessageContext(param);
 
   Moose::show_trace = false;
-  callMooseErrorHelper(prefix + oss.str(), false, node);
+  callMooseError(prefix + oss.str(), false, node);
   Moose::show_trace = true;
 }
 

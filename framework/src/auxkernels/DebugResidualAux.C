@@ -36,12 +36,11 @@ DebugResidualAux::DebugResidualAux(const InputParameters & parameters)
   auto var_family = Utility::string_to_enum<FEFamily>(_var.getParam<MooseEnum>("family"));
   auto debug_family = Utility::string_to_enum<FEFamily>(_debug_var.getParam<MooseEnum>("family"));
   if (var_order != debug_order || var_family != debug_family)
-    mooseError("A mismatch was found between family and order parameters for ",
+    paramError("variable",
+               "A mismatch was found between family and order parameters for ",
                _var.name(),
                " and ",
-               _debug_var.name(),
-               " in ",
-               this->getParam<std::string>("_object_name"));
+               _debug_var.name());
   if (!_nodal && debug_order > 0)
     mooseWarning("Residual output is approximate for variable order " +
                  Moose::stringify(debug_order));

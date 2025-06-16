@@ -72,7 +72,7 @@ void
 BoundaryRestrictable::initializeBoundaryRestrictable()
 {
   // The name and id of the object
-  const std::string & name = _moose_object.getParam<std::string>("_object_name");
+  const std::string & name = _moose_object.name();
 
   // If the mesh pointer is not defined, but FEProblemBase is, get it from there
   if (_bnd_feproblem != NULL && _bnd_mesh == NULL)

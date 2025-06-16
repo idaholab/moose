@@ -152,15 +152,23 @@ InputParameters::operator=(const InputParameters & rhs)
   // correct constructor
   if (!rhs._allow_copy)
   {
-    const std::string & name =
-        rhs.get<std::string>("_object_name"); // If _allow_parameter_copy is set then so is name
-                                              // (see InputParameterWarehouse::addInputParameters)
-    mooseError("Copying of the InputParameters object for the ",
-               name,
-               " object is not allowed.\n\nThe likely cause for this error ",
-               "is having a constructor that does not use a const reference, all constructors\nfor "
-               "MooseObject based classes should be as follows:\n\n",
-               "    MyObject::MyObject(const InputParameters & parameters);");
+    // If _allow_parameter_copy is set, these should be too (see
+    // InputParameterWarehouse::addInputParameters)
+    const std::string & name = rhs.getObjectName();
+    const std::string & type = rhs.getObjectType(); // could be empty
+    const std::string name_example = type.size() ? type : "the " + name + " object";
+    const std::string type_example = type.size() ? type : "MyObject";
+    ::mooseError(
+        "Copying of the InputParameters object for ",
+        name_example,
+        " is not allowed.\n\nThe likely cause for this error ",
+        "is having a constructor that does not use a const reference, all constructors\nfor "
+        "MooseObject based classes should be as follows:\n\n",
+        "    ",
+        type_example,
+        "::",
+        type_example,
+        "(const InputParameters & parameters);");
   }
 
   Parameters::operator=(rhs);
@@ -489,16 +497,23 @@ InputParameters::getControllableExecuteOnTypes(const std::string & name_in) cons
 void
 InputParameters::registerBase(const std::string & value)
 {
-  InputParameters::set<std::string>("_moose_base") = value;
-  _params["_moose_base"]._is_private = true;
+  InputParameters::set<std::string>(MooseBase::moose_base_param) = value;
+  _params[MooseBase::moose_base_param]._is_private = true;
 }
 
-std::optional<std::string>
+bool
+InputParameters::hasBase() const
+{
+  return have_parameter<std::string>(MooseBase::moose_base_param);
+}
+
+const std::string &
 InputParameters::getBase() const
 {
-  if (have_parameter<std::string>("_moose_base"))
-    return get<std::string>("_moose_base");
-  return {};
+  if (!have_parameter<std::string>(MooseBase::moose_base_param))
+    mooseError("InputParameters::getBase(): Parameters do not have base; one needs to be set with "
+               "registerBase()");
+  return get<std::string>(MooseBase::moose_base_param);
 }
 
 void
@@ -925,6 +940,30 @@ InputParameters::getVecMooseType(const std::string & name_in) const
   }
 
   return svars;
+}
+
+bool
+InputParameters::isMooseBaseObject() const
+{
+  return have_parameter<std::string>(MooseBase::type_param) &&
+         get<std::string>(MooseBase::type_param).size() &&
+         have_parameter<std::string>(MooseBase::name_param);
+}
+
+const std::string &
+InputParameters::getObjectType() const
+{
+  if (!have_parameter<std::string>(MooseBase::type_param))
+    ::mooseError("InputParameters::getObjectType(): Missing '", MooseBase::type_param, "' param");
+  return get<std::string>(MooseBase::type_param);
+}
+
+const std::string &
+InputParameters::getObjectName() const
+{
+  if (!have_parameter<std::string>(MooseBase::name_param))
+    ::mooseError("InputParameters::getObjectName(): Missing '", MooseBase::name_param, "' param");
+  return get<std::string>(MooseBase::name_param);
 }
 
 void
@@ -1459,8 +1498,7 @@ InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & /*nam
 template <>
 const MooseEnum &
 InputParameters::getParamHelper<MooseEnum>(const std::string & name_in,
-                                           const InputParameters & pars,
-                                           const MooseEnum *)
+                                           const InputParameters & pars)
 {
   const auto name = pars.checkForRename(name_in);
   return pars.get<MooseEnum>(name);
@@ -1469,8 +1507,7 @@ InputParameters::getParamHelper<MooseEnum>(const std::string & name_in,
 template <>
 const MultiMooseEnum &
 InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name_in,
-                                                const InputParameters & pars,
-                                                const MultiMooseEnum *)
+                                                const InputParameters & pars)
 {
   const auto name = pars.checkForRename(name_in);
   return pars.get<MultiMooseEnum>(name);
@@ -1783,18 +1820,16 @@ InputParameters::paramMessagePrefix(const std::string & param) const
 }
 
 [[noreturn]] void
-InputParameters::callMooseErrorHelper(const std::string & msg,
-                                      const bool with_prefix /* = true */,
-                                      const hit::Node * node /* = nullptr */) const
+InputParameters::callMooseError(std::string msg,
+                                const bool with_prefix /* = true */,
+                                const hit::Node * node /* = nullptr */) const
 {
-  if (!node)
-    node = getHitNode();
+  // Find the context of the app if we can. This will let our errors be
+  // prefixed by the multiapp name (if applicable) and will flush the
+  // console before outputting an error
+  MooseApp * app = nullptr;
+  if (isMooseBaseObject() && have_parameter<MooseApp *>(MooseBase::app_param))
+    app = get<MooseApp *>(MooseBase::app_param);
 
-  // If we can, forward errors to the underlying moose object, adding
-  // context about the object (type and name) and the multiapp prefix if any
-  if (have_parameter<const MooseBase *>("_moose_base_ptr"))
-    if (const auto moose_base = get<const MooseBase *>("_moose_base_ptr"))
-      moose_base->callMooseError(msg, with_prefix, node);
-
-  moose::internal::mooseErrorRaw(msg, "", node);
+  MooseBase::callMooseError(app, *this, msg, with_prefix, node);
 }

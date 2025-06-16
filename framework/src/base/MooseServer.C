@@ -427,9 +427,9 @@ MooseServer::getObjectParameters(InputParameters & valid_params,
     InputParameters object_params = factory.getValidParams(object_type);
 
     // check if object has base associated with any MooseObjectAction tasks
-    if (object_params.have_parameter<std::string>("_moose_base"))
+    if (object_params.hasBase())
     {
-      const std::string & moose_base = object_params.get<std::string>("_moose_base");
+      const std::string & moose_base = object_params.getBase();
 
       for (const auto & obj_act_task : obj_act_tasks)
       {
@@ -736,9 +736,9 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
       req_params += req_params.size() ? "\n" + std::string(client_snippet_support ? "$0" : "") : "";
 
       // check if object has registered base parameter that can be verified
-      if (!object_params.have_parameter<std::string>("_moose_base"))
+      if (!object_params.hasBase())
         continue;
-      const std::string & moose_base = object_params.get<std::string>("_moose_base");
+      const std::string & moose_base = object_params.getBase();
 
       // walk over gathered MooseObjectAction tasks and add if base matches
       for (const auto & obj_act_task : obj_act_tasks)
@@ -1060,9 +1060,9 @@ MooseServer::getHoverDisplayText(std::string & display_text, int line, int chara
   if (request_context.type() == wasp::VALUE && paramkey == "type" && factory.isRegistered(paramval))
   {
     const InputParameters & object_params = factory.getValidParams(paramval);
-    if (object_params.have_parameter<std::string>("_moose_base"))
+    if (object_params.hasBase())
     {
-      const std::string moose_base = object_params.get<std::string>("_moose_base");
+      const std::string & moose_base = object_params.getBase();
       for (const auto & obj_act_task : obj_act_tasks)
       {
         if (syntax.verifyMooseObjectTask(moose_base, obj_act_task))
