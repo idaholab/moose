@@ -214,9 +214,10 @@ protected:
   }
 
   /**
-   * Error if executing this MooseObject on EXEC_TRANSFER in a source application (from_multiapp)
-   * Note that when the parent app is the source application, it is usually desired to use
-   * EXEC_TRANSFER for a MooseObject that provides the values to transfer.
+   * Error if executing this MooseObject on EXEC_TRANSFER in a source multiapp (from_multiapp, e.g.
+   * child/sibling app). Note that, conversely, when the parent app is the source application, it is
+   * usually \emph desired to use EXEC_TRANSFER for a MooseObject that provides the values to
+   * transfer.
    * @param object_name name of the object to check the execute_on flags for
    */
   void errorIfObjectExecutesOnTransferInSourceApp(const std::string & object_name) const;
