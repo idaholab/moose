@@ -38,7 +38,7 @@
       type = RunException
       input = 'ri_errors.i'
       cli_args = 'UserObjects/error_test/missing=true'
-      expect_err = 'reporter\)\:(.*)A Reporter value with the name "dummy/value" and type "int" was not found..'
+      expect_err = 'UserObjects/error_test/reporter: A Reporter value with the name "dummy/value" and type "int" was not found'
 
       detail = 'by parameter and the Reporter value does not exist and'
     []
