@@ -130,7 +130,7 @@ InputParameters
 dummyParams()
 {
   auto params = emptyInputParameters();
-  params.set<std::string>("_moose_base") = "dummy";
+  params.registerBase("dummy");
   return params;
 }
 

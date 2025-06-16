@@ -93,10 +93,7 @@ class Node;
  *
  * Each application should register its own objects and register its own special syntax
  */
-class MooseApp : public ConsoleStreamInterface,
-                 public PerfGraphInterface,
-                 public libMesh::ParallelObject,
-                 public MooseBase
+class MooseApp : public PerfGraphInterface, public libMesh::ParallelObject, public MooseBase
 {
 public:
   /// Get the device accelerated computations are supposed to be running on.
@@ -158,12 +155,6 @@ public:
   void setExitCode(const int exit_code) { _exit_code = exit_code; }
 
   /**
-   * Get the parameters of the object
-   * @return The parameters of the object
-   */
-  const InputParameters & parameters() const { return _pars; }
-
-  /**
    * The RankMap is a useful object for determining how the processes
    * are laid out on the physical nodes of the cluster
    */
@@ -181,33 +172,6 @@ public:
   SolutionInvalidity & solutionInvalidity() { return _solution_invalidity; }
   const SolutionInvalidity & solutionInvalidity() const { return _solution_invalidity; }
   ///@}
-
-  ///@{
-  /**
-   * Retrieve a parameter for the object
-   * @param name The name of the parameter
-   * @return The value of the parameter
-   */
-  template <typename T>
-  const T & getParam(const std::string & name);
-
-  template <typename T>
-  const T & getParam(const std::string & name) const;
-  ///@}
-
-  /**
-   * Retrieve a renamed parameter for the object. This helper makes sure we
-   * check both names before erroring, and that only one parameter is passed to avoid
-   * silent errors
-   * @param old_name the old name for the parameter
-   * @param new_name the new name for the parameter
-   */
-  template <typename T>
-  const T & getRenamedParam(const std::string & old_name, const std::string & new_name) const;
-
-  inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
-
-  inline bool isParamSetByUser(const std::string & nm) const { return _pars.isParamSetByUser(nm); }
 
   /**
    * Run the application
@@ -1168,9 +1132,6 @@ protected:
   addCapability(const std::string & capability, const char * value, const std::string & doc);
   //@}
 
-  /// Parameters of this object (owned by the AppFactory)
-  const InputParameters & _pars;
-
   /// The string representation of the type of this object as registered (see registerApp(AppName))
   const std::string _type;
 
@@ -1616,45 +1577,6 @@ private:
   friend class Restartable;
   friend class SubProblem;
 };
-
-template <typename T>
-const T &
-MooseApp::getParam(const std::string & name)
-{
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
-}
-
-template <typename T>
-const T &
-MooseApp::getParam(const std::string & name) const
-{
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
-}
-
-template <typename T>
-const T &
-MooseApp::getRenamedParam(const std::string & old_name, const std::string & new_name) const
-{
-  // this enables having a default on the new parameter but bypassing it with the old one
-  // Most important: accept new parameter
-  if (isParamSetByUser(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0));
-  // Second most: accept old parameter
-  else if (isParamValid(old_name) && !isParamSetByUser(new_name))
-    return InputParameters::getParamHelper(old_name, _pars, static_cast<T *>(0));
-  // Third most: accept default for new parameter
-  else if (isParamValid(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0));
-  // Refuse: no default, no value passed
-  else if (!isParamValid(old_name) && !isParamValid(new_name))
-    mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
-               "' is being retrieved without being set.\n"
-               "Did you mispell it?");
-  // Refuse: both old and new parameters set by user
-  else
-    mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
-               "' may not be provided alongside former parameter '" + old_name + "'");
-}
 
 template <class T>
 void

@@ -69,8 +69,8 @@ public:
   {
     auto params = Output::validParams();
     params.addPrivateParam<AutomaticMortarGeneration *>("_amg", nullptr);
-    params.addPrivateParam<MooseApp *>("_moose_app", nullptr);
-    params.set<std::string>("_type") = "MortarNodalGeometryOutput";
+    params.addPrivateParam<MooseApp *>(MooseBase::app_param, nullptr);
+    params.set<std::string>(MooseBase::type_param) = "MortarNodalGeometryOutput";
     return params;
   };
 
@@ -256,8 +256,8 @@ AutomaticMortarGeneration::initOutput()
   _output_params = std::make_unique<InputParameters>(MortarNodalGeometryOutput::validParams());
   _output_params->set<AutomaticMortarGeneration *>("_amg") = this;
   _output_params->set<FEProblemBase *>("_fe_problem_base") = &_app.feProblem();
-  _output_params->set<MooseApp *>("_moose_app") = &_app;
-  _output_params->set<std::string>("_object_name") =
+  _output_params->set<MooseApp *>(MooseBase::app_param) = &_app;
+  _output_params->set<std::string>(MooseBase::name_param) =
       "mortar_nodal_geometry_" +
       std::to_string(_primary_secondary_boundary_id_pairs.front().first) +
       std::to_string(_primary_secondary_boundary_id_pairs.front().second) + "_" +

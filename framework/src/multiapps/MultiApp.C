@@ -1135,6 +1135,10 @@ MultiApp::parentOutputPositionChanged()
 void
 MultiApp::createApp(unsigned int i, Real start_time)
 {
+  // Delete the old app if we're resetting
+  if (_apps[i])
+    _apps[i].reset();
+
   // Define the app name
   const std::string multiapp_name = getMultiAppName(name(), _first_local_app + i, _total_num_apps);
   std::string full_name;

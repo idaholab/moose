@@ -28,8 +28,7 @@ FXValuePenaltyBC::validParams()
 FXValuePenaltyBC::FXValuePenaltyBC(const InputParameters & parameters)
   : FunctionPenaltyDirichletBC(parameters)
 {
-  FunctionSeries & fe_basis =
-      FunctionSeries::checkAndConvertFunction(_func, getParam<std::string>("_moose_base"), name());
+  FunctionSeries & fe_basis = FunctionSeries::checkAndConvertFunction(_func, getBase(), name());
 
   fe_basis.useCache(true);
 }

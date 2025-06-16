@@ -109,7 +109,7 @@ Component::connectObject(const InputParameters & params,
                          const std::string & par_name) const
 {
   MooseObjectParameterName alias("component", this->name(), name, "::");
-  MooseObjectParameterName par_value(params.get<std::string>("_moose_base"), mooseName, par_name);
+  MooseObjectParameterName par_value(params.getBase(), mooseName, par_name);
   _app.getInputParameterWarehouse().addControllableParameterAlias(alias, par_value);
 }
 
@@ -180,8 +180,8 @@ Component::addRelationshipManager(
   // These need unique names
   static unsigned int unique_object_id = 0;
 
-  auto new_name = moose_object_pars.get<std::string>("_moose_base") + '_' + name() + '_' + rm_name +
-                  "_" + Moose::stringify(rm_type) + " " + std::to_string(unique_object_id);
+  auto new_name = moose_object_pars.getBase() + '_' + name() + '_' + rm_name + "_" +
+                  Moose::stringify(rm_type) + " " + std::to_string(unique_object_id);
 
   auto rm_params = _factory.getValidParams(rm_name);
   rm_params.set<Moose::RelationshipManagerType>("rm_type") = rm_type;

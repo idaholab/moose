@@ -171,8 +171,9 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
   {
     const auto & blk_ids = blockIDs();
     if (blk_ids.empty())
-      mooseError("Every variable should have at least one subdomain. For '" + _var_name +
-                 "' no subdomain is defined.");
+      paramError("block",
+                 "Every variable should have at least one subdomain. For '" + name() +
+                     "' no subdomain is defined.");
 
     _is_lower_d = _mesh.isLowerD(*blk_ids.begin());
 #ifdef DEBUG
@@ -180,7 +181,7 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
       if (_is_lower_d != _mesh.isLowerD(*it))
         mooseError("A user should not specify a mix of lower-dimensional and higher-dimensional "
                    "blocks for variable '" +
-                   _var_name + "'. This variable is " + (_is_lower_d ? "" : "not ") +
+                   name() + "'. This variable is " + (_is_lower_d ? "" : "not ") +
                    "recognised as lower-dimensional, but is also defined for the " +
                    (_is_lower_d ? "higher" : "lower") + "-dimensional block '" +
                    _mesh.getSubdomainName(*it) + "' (block-id " + std::to_string(*it) + ").");
