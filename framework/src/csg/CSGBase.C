@@ -74,6 +74,52 @@ CSGBase::updateCellRegion(const std::shared_ptr<CSGCell> cell, const CSGRegion &
   cell->updateRegion(region);
 }
 
+std::shared_ptr<CSGUniverse>
+CSGBase::createUniverse(const std::string name, std::vector<std::shared_ptr<CSGCell>> cells)
+{
+  auto univ = _universe_list.addUniverse(name);
+  addCellsToUniverse(univ, cells); // performs a check that cells are a part of this base
+  return univ;
+}
+
+void
+CSGBase::addCellToUniverse(const std::shared_ptr<CSGUniverse> universe,
+                           std::shared_ptr<CSGCell> cell)
+{
+  // make sure cell is a part of this CSGBase instance
+  if (!checkCellInBase(cell))
+    mooseError("Cannot add cell " + cell->getName() + " to universe " + universe->getName() +
+               " because cell does not exist in the CSGBase instance.");
+  universe->addCell(cell);
+}
+
+void
+CSGBase::addCellsToUniverse(const std::shared_ptr<CSGUniverse> universe,
+                            std::vector<std::shared_ptr<CSGCell>> cells)
+{
+  for (auto c : cells)
+    addCellToUniverse(universe, c);
+}
+
+void
+CSGBase::removeCellFromUniverse(const std::shared_ptr<CSGUniverse> universe,
+                                std::shared_ptr<CSGCell> cell)
+{
+  // make sure cell is a part of this CSGBase instance
+  if (!checkCellInBase(cell))
+    mooseError("Cannot remove cell " + cell->getName() + " from universe " + universe->getName() +
+               " because cell does not exist in the CSGBase instance.");
+  universe->removeCell(cell->getName());
+}
+
+void
+CSGBase::removeCellsFromUniverse(const std::shared_ptr<CSGUniverse> universe,
+                                 std::vector<std::shared_ptr<CSGCell>> cells)
+{
+  for (auto c : cells)
+    removeCellFromUniverse(universe, c);
+}
+
 void
 CSGBase::joinSurfaceList(CSGSurfaceList & surf_list)
 {
@@ -176,6 +222,16 @@ CSGBase::checkRegionSurfaces(const CSGRegion & region)
       mooseError("Region is being set with a surface named " + sname +
                  " that is different from the surface of the same name in the base instance.");
   }
+}
+
+bool
+CSGBase::checkCellInBase(std::shared_ptr<CSGCell> cell)
+{
+  auto name = cell->getName();
+  // if no cell by this name exists, an error will be produced by getCell
+  auto list_cell = _cell_list.getCell(name);
+  // return whether that the cell in the list is the same as the cell provided
+  return cell == list_cell;
 }
 
 void
