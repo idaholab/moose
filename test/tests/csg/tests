@@ -97,6 +97,20 @@
       cli_args = '--csg-only'
       expect_err = "Universe ROOT_UNIVERSE cannot be renamed to test_new_univ_name as it does not exist in this CSGBase instance."
     []
+    [add_cell_universe_error]
+      type = 'RunException'
+      input = 'csg_universe_cell_add_error.i'
+      detail = ' a cell being added to a universe does not exist in the CSGBase instance.'
+      cli_args = '--csg-only'
+      expect_err = 'A cell named square_cell is being added to universe new_univ_2 that is different from the cell of the same name in the base instance.'
+    []
+    [remove_cell_universe_error]
+      type = 'RunException'
+      input = 'csg_universe_cell_remove_error.i'
+      detail = ' a cell being removed from a universe does not exist in the CSGBase instance.'
+      cli_args = '--csg-only'
+      expect_err = 'A cell named square_cell is being removed from universe ROOT_UNIVERSE that is different from the cell of the same name in the base instance.'
+    []
     [distributed_mesh]
       type = RunException
       input = 'csg_only_inf_planes.i'
