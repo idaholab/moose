@@ -15,6 +15,11 @@
 class InputParameters;
 class MooseApp;
 
+namespace hit
+{
+class Node;
+}
+
 #define usingMooseBaseMembers                                                                      \
   using MooseBase::getMooseApp;                                                                    \
   using MooseBase::type;                                                                           \
@@ -81,9 +86,13 @@ public:
    * Will prefix the message with the subapp name if one exists.
    *
    * If \p with_prefix, then add the prefix from messagePrefix()
-   * to the error.
+   * to the error (the object information)
+   *
+   * If \p hit_node is set, then add file path context to the error
+   * from the given node.
    */
-  [[noreturn]] void callMooseError(std::string msg, const bool with_prefix) const;
+  [[noreturn]] void
+  callMooseError(std::string msg, const bool with_prefix, const hit::Node * node = nullptr) const;
 
 protected:
   /// The MOOSE application this is associated with
