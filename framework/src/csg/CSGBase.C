@@ -88,8 +88,10 @@ CSGBase::addCellToUniverse(const std::shared_ptr<CSGUniverse> universe,
 {
   // make sure cell is a part of this CSGBase instance
   if (!checkCellInBase(cell))
-    mooseError("Cannot add cell " + cell->getName() + " to universe " + universe->getName() +
-               " because cell does not exist in the CSGBase instance.");
+    mooseError(" A cell named " + cell->getName() + " is being added to universe " +
+               universe->getName() +
+               " that is different from the cell of the same name in the base instance.");
+
   universe->addCell(cell);
 }
 
@@ -107,8 +109,9 @@ CSGBase::removeCellFromUniverse(const std::shared_ptr<CSGUniverse> universe,
 {
   // make sure cell is a part of this CSGBase instance
   if (!checkCellInBase(cell))
-    mooseError("Cannot remove cell " + cell->getName() + " from universe " + universe->getName() +
-               " because cell does not exist in the CSGBase instance.");
+    mooseError(" A cell named " + cell->getName() + " is being removed from universe " +
+               universe->getName() +
+               " that is different from the cell of the same name in the base instance.");
   universe->removeCell(cell->getName());
 }
 
