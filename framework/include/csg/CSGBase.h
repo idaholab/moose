@@ -279,6 +279,7 @@ public:
    */
   std::shared_ptr<CSGUniverse> createUniverse(const std::string name,
                                               std::vector<std::shared_ptr<CSGCell>> cells);
+
   /**
    * @brief Add a cell to an existing universe
    *
