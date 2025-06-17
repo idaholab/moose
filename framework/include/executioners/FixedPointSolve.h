@@ -198,21 +198,17 @@ protected:
   /// Maximum fixed point iterations
   unsigned int _max_fixed_point_its;
   /// Whether or not we activate fixed point iteration
-  bool _has_fixed_point_its; // TODO: make const once picard parameters are removed
+  const bool _has_fixed_point_its;
   /// Whether or not to treat reaching maximum number of fixed point iteration as converged
-  bool _accept_max_it; // TODO: make const once picard parameters are removed
+  const bool _accept_max_it;
   /// Whether or not to use residual norm to check the fixed point convergence
-  bool _has_fixed_point_norm; // TODO: make const once picard parameters are removed
+  const bool _has_fixed_point_norm;
   /// Relative tolerance on residual norm
-  Real _fixed_point_rel_tol; // TODO: make const once picard parameters are removed
+  const Real _fixed_point_rel_tol;
   /// Absolute tolerance on residual norm
-  Real _fixed_point_abs_tol; // TODO: make const once picard parameters are removed
+  const Real _fixed_point_abs_tol;
   /// Whether or not we force evaluation of residual norms even without multiapps
-  bool _fixed_point_force_norms; // TODO: make const once picard parameters are removed
-
-  /// Postprocessor value for user-defined fixed point convergence check
-  const PostprocessorValue *
-      _fixed_point_custom_pp; // FIXME Make const and private once picard_custom_pp is gone
+  const bool _fixed_point_force_norms;
 
   /// Relaxation factor for fixed point Iteration
   const Real _relax_factor;
@@ -247,6 +243,8 @@ protected:
   MooseFixedPointConvergenceReason _fixed_point_status;
   ///@}
 private:
+  /// Postprocessor value for user-defined fixed point convergence check
+  const PostprocessorValue * const _fixed_point_custom_pp;
   /// Relative tolerance on postprocessor value
   const Real _custom_rel_tol;
   /// Absolute tolerance on postprocessor value
