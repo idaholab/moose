@@ -37,7 +37,7 @@ AbaqusEssentialBC::AbaqusEssentialBC(const InputParameters & parameters)
 }
 
 void
-AbaqusEssentialBC::timestepSetup()
+AbaqusEssentialBC::residualSetup()
 {
   _current_step_begin_forces = _step_uo.getBeginForces(_abaqus_var_id);
   _current_step_begin_solution = _step_uo.getBeginSolution(_abaqus_var_id);
@@ -68,6 +68,14 @@ AbaqusEssentialBC::shouldApply() const
 
   return true;
 }
+
+// bool
+// AbaqusEssentialBC::shouldApply() const
+// {
+//   const auto b = shouldApplyInternal();
+//   std::cout << "n " << _current_node->id() << ' ' << (b ? "yes" : "no") << '\n';
+//   return b;
+// }
 
 void
 AbaqusEssentialBC::computeResidual()
