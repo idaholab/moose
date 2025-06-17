@@ -27,13 +27,10 @@ public:
   AbaqusEssentialBC(const InputParameters & parameters);
 
   void residualSetup() override;
-  void computeResidual() override;
   bool shouldApply() const override;
-  // bool shouldApplyInternal() const;
 
 protected:
-  Real computeQpResidual() override { mooseError("Should not be called."); };
-  Real computeQpJacobian() override;
+  Real computeQpResidual() override;
 
   const AbaqusUELStepUserObject & _step_uo;
 
