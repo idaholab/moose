@@ -11,12 +11,12 @@
 
 #include "MeshGenerator.h"
 
-class TestCSGUniverseCellError : public MeshGenerator
+class TestCSGUniverseCellModificationError : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  TestCSGUniverseCellError(const InputParameters & parameters);
+  TestCSGUniverseCellModificationError(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -27,6 +27,7 @@ public:
 protected:
   /// Pointer to the input mesh
   std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
-  /// Mode (universe, surface, or cell) to throw error
+
+  /// Mode (add or remove cell) to throw error
   std::string _mode;
 };

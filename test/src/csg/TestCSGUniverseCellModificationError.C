@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TestCSGUniverseCellError.h"
+#include "TestCSGUniverseCellModificationError.h"
 #include "MeshGenerator.h"
 
-registerMooseObject("MooseTestApp", TestCSGUniverseCellError);
+registerMooseObject("MooseTestApp", TestCSGUniverseCellModificationError);
 
 InputParameters
-TestCSGUniverseCellError::validParams()
+TestCSGUniverseCellModificationError::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<std::vector<MeshGeneratorName>>("input_meshes", "list of MGs");
-  params.addRequiredParam<std::string>("mode", "universe, cell, or surface error");
+  params.addRequiredParam<std::string>("mode", "'add' or 'remove' cell");
   // Declare that this generator has a generateData method
   MeshGenerator::setHasGenerateData(params);
   // Declare that this generator has a generateCSG method
@@ -25,7 +25,8 @@ TestCSGUniverseCellError::validParams()
   return params;
 }
 
-TestCSGUniverseCellError::TestCSGUniverseCellError(const InputParameters & params)
+TestCSGUniverseCellModificationError::TestCSGUniverseCellModificationError(
+    const InputParameters & params)
   : MeshGenerator(params),
     _mesh_ptrs(getMeshes("input_meshes")),
     _mode(getParam<std::string>("mode"))
@@ -33,14 +34,14 @@ TestCSGUniverseCellError::TestCSGUniverseCellError(const InputParameters & param
 }
 
 std::unique_ptr<MeshBase>
-TestCSGUniverseCellError::generate()
+TestCSGUniverseCellModificationError::generate()
 {
   auto null_mesh = nullptr;
   return null_mesh;
 }
 
 std::unique_ptr<CSG::CSGBase>
-TestCSGUniverseCellError::generateCSG()
+TestCSGUniverseCellModificationError::generateCSG()
 {
   // get the two base instances of the input meshes
   // both will have:

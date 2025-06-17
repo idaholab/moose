@@ -8,7 +8,7 @@
     side_length = 10
   []
   [combo]
-    type=TestCSGUniverseCellError
+    type=TestCSGUniverseCellModificationError
     input_meshes = 'squareA squareB'
     mode = 'add'
   []
