@@ -553,7 +553,7 @@ Exodus::handleExodusIOMeshRenumbering()
     }
 
     // Objects that depend on element/node ids are no longer valid
-    _problem_ptr->meshChanged();
+    _problem_ptr->meshChanged(/*intermediate_change=*/false, /*changed_through_amr=*/false);
     _mesh_contiguous_numbering = true;
   }
 }

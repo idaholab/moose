@@ -1724,8 +1724,12 @@ public:
 
   /**
    * Update data after a mesh change.
+   * Iff intermediate_change is true, only perform updates as
+   * necessary to prepare for another mesh change
+   * immediately-subsequent. If \p changed_throug_amr then we will
+   * contract the mesh and clean refinement flags
    */
-  virtual void meshChanged() override;
+  void meshChanged(bool intermediate_change, bool changed_through_amr);
 
   /**
    * Register an object that derives from MeshChangedInterface
@@ -2621,15 +2625,6 @@ protected:
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
 
-  /**
-   * Helper method to update some or all data after a mesh change.
-   *
-   * Iff intermediate_change is true, only perform updates as
-   * necessary to prepare for another mesh change
-   * immediately-subsequent.
-   */
-  void meshChangedHelper(bool intermediate_change, bool changed_through_amr);
-
   /// Helper to check for duplicate variable names across systems or within a single system
   bool duplicateVariableCheck(const std::string & var_name,
                               const libMesh::FEType & type,
@@ -2975,8 +2970,6 @@ private:
   friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,
                                                         const std::string & value,
                                                         FEProblemBase * const problem);
-
-  friend class Adaptivity; // for calling meshChangedHelper
 };
 
 using FVProblemBase = FEProblemBase;

@@ -516,8 +516,6 @@ public:
 
   virtual GeometricSearchData & geomSearchData() = 0;
 
-  virtual void meshChanged();
-
   /**
    * Adds the given material property to a storage map based on block ids
    *

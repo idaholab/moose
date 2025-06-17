@@ -187,7 +187,6 @@ public:
   //
   // Adaptivity /////
   virtual void initAdaptivity();
-  using SubProblem::meshChanged;
   void meshChanged(bool changed_through_amr);
 
   // reinit /////

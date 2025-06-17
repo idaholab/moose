@@ -212,7 +212,7 @@ ElementSubdomainModifierBase::modify(
     applyMovingBoundaryChanges(*_displaced_mesh);
 
   // Reinit equation systems
-  _fe_problem.meshChanged();
+  _fe_problem.meshChanged(/*intermediate_change=*/false, /*changed_through_amr=*/false);
 
   // Initialize solution and stateful material properties
   applyIC(/*displaced=*/false);

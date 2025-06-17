@@ -1522,7 +1522,7 @@ FEProblemBase::timestepSetup()
       //     re-displaced, we can perform our geometric searches, which will aid in determining the
       //     sparsity pattern of the matrix held by the libMesh::ImplicitSystem held by the
       //     NonlinearSystem held by this
-      meshChangedHelper(/*intermediate_change=*/true, /*changed_through_amr=*/true);
+      meshChanged(/*intermediate_change=*/true, /*changed_through_amr=*/true);
     }
 
     // u4) Now that all the geometric searches have been done (both undisplaced and displaced),
@@ -7876,7 +7876,7 @@ FEProblemBase::initialAdaptMesh()
 
       if (_adaptivity.initialAdaptMesh())
       {
-        meshChanged();
+        meshChanged(/*intermediate_change=*/false, /*changed_through_amr=*/true);
 
         // reproject the initial condition
         projectSolution();
@@ -7923,7 +7923,7 @@ FEProblemBase::adaptMesh()
     {
       mesh_changed = true;
 
-      meshChangedHelper(/*intermediate_change=*/true, /*changed_through_amr=*/true);
+      meshChanged(/*intermediate_change=*/true, /*changed_through_amr=*/true);
       // Once vectors are restricted, we can delete
       // children of coarsened elements
       _mesh.getMesh().contract();
@@ -8004,12 +8004,12 @@ FEProblemBase::updateMeshXFEM()
   if (haveXFEM())
   {
     if (_xfem->updateHeal())
-      meshChanged();
+      meshChanged(/*intermediate_change=*/false, /*changed_through_amr=*/false);
 
     updated = _xfem->update(_time, _nl, *_aux);
     if (updated)
     {
-      meshChanged();
+      meshChanged(/*intermediate_change=*/false, /*changed_through_amr=*/false);
       _xfem->initSolution(_nl, *_aux);
       restoreSolutions();
     }
@@ -8018,17 +8018,9 @@ FEProblemBase::updateMeshXFEM()
 }
 
 void
-FEProblemBase::meshChanged()
+FEProblemBase::meshChanged(const bool intermediate_change, const bool changed_through_amr)
 {
   TIME_SECTION("meshChanged", 3, "Handling Mesh Changes");
-
-  this->meshChangedHelper(/*intermediate_change=*/false, /*changed_through_amr=*/false);
-}
-
-void
-FEProblemBase::meshChangedHelper(const bool intermediate_change, const bool changed_through_amr)
-{
-  TIME_SECTION("meshChangedHelper", 5);
 
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
       _neighbor_material_props.hasStatefulProperties())
@@ -8902,7 +8894,7 @@ FEProblemBase::uniformRefine()
   if (_displaced_problem)
     Adaptivity::uniformRefine(&_displaced_problem->mesh(), 1);
 
-  meshChangedHelper(/*intermediate_change=*/false, /*changed_through_amr=*/true);
+  meshChanged(/*intermediate_change=*/false, /*changed_through_amr=*/true);
 }
 
 void
