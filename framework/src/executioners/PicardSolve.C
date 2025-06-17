@@ -19,83 +19,10 @@ InputParameters
 PicardSolve::validParams()
 {
   InputParameters params = FixedPointSolve::validParams();
-
-  params.addDeprecatedParam<unsigned int>(
-      "picard_max_its",
-      1,
-      "Specifies the maximum number of Picard iterations. "
-      "Mainly used when  wanting to do Picard iterations with MultiApps "
-      "that are set to execute_on timestep_end or timestep_begin. "
-      "Setting this parameter to 1 turns off the Picard iterations.",
-      "Deprecated, use fixed_point_max_its");
-  params.addDeprecatedParam<bool>(
-      "accept_on_max_picard_iteration",
-      false,
-      "True to treat reaching the maximum number of Picard iterations as converged.",
-      "Deprecated, use accept_on_max_fixed_point_iteration");
-  params.addDeprecatedParam<bool>(
-      "disable_picard_residual_norm_check",
-      false,
-      "Disable the Picard residual norm evaluation thus the three parameters "
-      "picard_rel_tol, picard_abs_tol and picard_force_norms.",
-      "Deprecated, use disable_fixed_point_residual_norm_check");
-  params.addDeprecatedParam<Real>("picard_rel_tol",
-                                  1e-8,
-                                  "The relative nonlinear residual drop to shoot for "
-                                  "during Picard iterations. This check is "
-                                  "performed based on the Master app's nonlinear "
-                                  "residual.",
-                                  "Deprecated, use fixed_point_rel_tol");
-  params.addDeprecatedParam<Real>("picard_abs_tol",
-                                  1e-50,
-                                  "The absolute nonlinear residual to shoot for "
-                                  "during Picard iterations. This check is "
-                                  "performed based on the Master app's nonlinear "
-                                  "residual.",
-                                  "Deprecated, use fixed_point_abs_tol");
-  params.addParam<PostprocessorName>("picard_custom_pp",
-                                     "Postprocessor for custom picard convergence check.");
-  params.deprecateParam("picard_custom_pp", "custom_pp", "06/06/2024");
-
-  params.addDeprecatedParam<bool>(
-      "picard_force_norms",
-      false,
-      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
-      "existence of active MultiApps with those execute_on flags, default: false.",
-      "Deprecated, use fixed_point_force_norms");
-
   return params;
 }
 
-PicardSolve::PicardSolve(Executioner & ex) : FixedPointSolve(ex)
-{
-  // Handle deprecated parameters
-  if (!parameters().isParamSetByAddParam("picard_max_its"))
-  {
-    _max_fixed_point_its = getParam<unsigned int>("picard_max_its");
-    _has_fixed_point_its = _max_fixed_point_its > 1;
-  }
-
-  if (!parameters().isParamSetByAddParam("accept_on_max_picard_iteration"))
-    _accept_max_it = getParam<bool>("accept_on_max_picard_iteration");
-
-  if (!parameters().isParamSetByAddParam("disable_picard_residual_norm_check"))
-    _has_fixed_point_norm = !getParam<bool>("disable_picard_residual_norm_check");
-
-  if (!parameters().isParamSetByAddParam("picard_rel_tol"))
-    _fixed_point_rel_tol = getParam<Real>("picard_rel_tol");
-
-  if (!parameters().isParamSetByAddParam("picard_abs_tol"))
-    _fixed_point_abs_tol = getParam<Real>("picard_abs_tol");
-
-  if (isParamValid("picard_custom_pp"))
-    _fixed_point_custom_pp = &getPostprocessorValue("picard_custom_pp");
-
-  if (!parameters().isParamSetByAddParam("picard_force_norms"))
-    _fixed_point_force_norms = getParam<bool>("picard_force_norms");
-
-  allocateStorage(true);
-}
+PicardSolve::PicardSolve(Executioner & ex) : FixedPointSolve(ex) { allocateStorage(true); }
 
 void
 PicardSolve::allocateStorage(const bool primary)

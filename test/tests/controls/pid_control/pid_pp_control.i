@@ -62,7 +62,7 @@
   line_search = 'none'
 
   # For picard tests
-  picard_abs_tol = 1e-3
+  fixed_point_abs_tol = 1e-3
 []
 
 [Postprocessors]
