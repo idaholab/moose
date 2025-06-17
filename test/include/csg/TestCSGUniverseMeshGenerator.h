@@ -29,8 +29,10 @@ protected:
   std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
   /// list of MGs to add to the universe
   const std::vector<MeshGeneratorName> _input_mgs;
-
+  // side lengths for the bounding box
   const Real _x_side;
   const Real _y_side;
   const Real _z_side;
+  // whether to add to a new universe with addCell method or not
+  const bool _add_cell_mode;
 };
