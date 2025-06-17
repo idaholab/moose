@@ -45,6 +45,30 @@ AbaqusEssentialBC::timestepSetup()
   _current_step_end_values = _step_uo.getEndValues(_abaqus_var_id);
 }
 
+bool
+AbaqusEssentialBC::shouldApply() const
+{
+  const auto id = _current_node->id();
+
+  const auto * cbf = _current_step_begin_forces;
+  if (cbf && cbf->find(id) != cbf->end())
+    return true;
+
+  const auto * cse = _current_step_end_values;
+  if (cse && cse->find(id) == cse->end())
+    return false;
+
+  const auto * cbs = _current_step_begin_solution;
+  if (cbs && cbs->find(id) != cbs->end())
+    return true;
+
+  const auto * csb = _current_step_begin_values;
+  if (csb && csb->find(id) == cse->end())
+    return false;
+
+  return true;
+}
+
 void
 AbaqusEssentialBC::computeResidual()
 {
@@ -56,8 +80,6 @@ AbaqusEssentialBC::computeResidual()
   {
     if (const auto it = cbf->find(id); it != cbf->end())
     {
-      std::cout << "Add residual node " << id << " on (1.0 - " << d << ')' << " * " << it->second
-                << " = " << ((1.0 - d) * it->second) << '\n';
       addResidual(_sys, (1.0 - d) * it->second, _var);
       return;
     }
@@ -79,8 +101,6 @@ AbaqusEssentialBC::computeResidual()
     if (const auto it = cbs->find(id); it != cbs->end())
     {
       const Real value = d * end_value + (1.0 - d) * it->second;
-      std::cout << "Set residual node " << id << " to " << _u[_qp] << "-" << value << " = "
-                << (_u[_qp] - value) << '\n';
       setResidual(_sys, _u[_qp] - value, _var);
       return;
     }
@@ -93,19 +113,15 @@ AbaqusEssentialBC::computeResidual()
     {
       // BC is staying in effect (but maybe changing value)
       const Real value = d * end_value + (1.0 - d) * it->second;
-      std::cout << "Set residual node " << id << " to " << d << " * " << end_value << " + (1.0 - "
-                << d << ')' << " * " << it->second << " = " << (_u[_qp] - value) << '\n';
       setResidual(_sys, _u[_qp] - value, _var);
       return;
     }
   }
-  std::cout << "Ignore node\n";
 }
 
 Real
 AbaqusEssentialBC::computeQpJacobian()
 {
-  return 1.0;
   const auto id = _current_node->id();
 
   const auto * cbf = _current_step_begin_forces;
@@ -113,22 +129,6 @@ AbaqusEssentialBC::computeQpJacobian()
     // if the BC is deactivated it's force does not depend on the current solution
     return 0.0;
 
-  const auto * cse = _current_step_end_values;
-  if (cse && cse->find(id) == cse->end())
-    // BC does not apply
-    return 0.0;
-
-  const auto * cbs = _current_step_begin_solution;
-  if (cbs && cbs->find(id) != cbs->end())
-    // linear dependence (going from a solution at the beginning of the step to a prescribed BC
-    // value)
-    return 1.0;
-
-  const auto * csb = _current_step_begin_values;
-  if (csb && csb->find(id) == cse->end())
-    // BC does not apply
-    return 0.0;
-
-  // linear dependence (going from one prescribed value to the next)
+  // otherwise it's a linear dependence
   return 1.0;
 }
