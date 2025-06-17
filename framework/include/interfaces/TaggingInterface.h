@@ -378,12 +378,6 @@ protected:
                    Real scaling_factor);
 
   /**
-   * Add to residual using the variables' insertion API
-   */
-  template <typename T>
-  void addResidual(SystemBase & sys, const T & residual, MooseVariableFE<T> & var);
-
-  /**
    * Set residual using the variables' insertion API
    */
   template <typename T>
@@ -649,15 +643,6 @@ TaggingInterface::addJacobian(Assembly & assembly,
   for (const auto matrix_tag : _matrix_tags)
     assembly.cacheJacobianBlock(
         local_k, row_indices, column_indices, scaling_factor, Assembly::LocalDataKey{}, matrix_tag);
-}
-
-template <typename T>
-void
-TaggingInterface::addResidual(SystemBase & sys, const T & residual, MooseVariableFE<T> & var)
-{
-  for (const auto tag_id : _vector_tags)
-    if (sys.hasVector(tag_id))
-      var.addNodalValue(sys.getVector(tag_id), residual);
 }
 
 template <typename T>
