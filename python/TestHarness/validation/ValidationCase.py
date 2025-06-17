@@ -15,7 +15,7 @@ import sys
 import json
 import math
 from numbers import Number
-from typing import Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 from enum import Enum
 from dataclasses import asdict, dataclass
 
@@ -138,7 +138,7 @@ class ValidationCase(MooseObject):
         # The data key
         key: str
         # The data
-        value: typing.Any
+        value: Any
         # Human readable description of the data
         description: str
         # The test that added this data, if any
@@ -262,7 +262,7 @@ class ValidationCase(MooseObject):
         print(f'[{status.value:>4}] {prefix}{message}')
         self._results.append(status_value)
 
-    def _addData(self, data_type: typing.Type, key: str, value: typing.Any,
+    def _addData(self, data_type: typing.Type, key: str, value: Any,
                  description: str, **kwargs) -> Data:
         """
         Internal method for creating and inserting data.
@@ -294,7 +294,7 @@ class ValidationCase(MooseObject):
         self._data[key] = data
         return data
 
-    def addData(self, key: str, value: typing.Any, description: str, **kwargs) -> None:
+    def addData(self, key: str, value: Any, description: str, **kwargs) -> None:
         """
         Adds a piece of arbitrary typed data to the validation data.
 
@@ -313,7 +313,7 @@ class ValidationCase(MooseObject):
         self._addData(self.Data, key, value, description, **kwargs)
 
     @staticmethod
-    def toFloat(value: typing.Any, context: Optional[str] = None) -> float:
+    def toFloat(value: Any, context: Optional[str] = None) -> float:
         """
         Converts the given value to float, if possible.
 
@@ -333,7 +333,7 @@ class ValidationCase(MooseObject):
     def checkBounds(value: float,
                     min_bound: float,
                     max_bound: float,
-                    units: Optional[str]) -> Tuple[Status, str]:
+                    units: Union[str, None]) -> Tuple[Status, str]:
         """
         Performs bounds checking for a scalar value and associates
         a pass/fail with a status and a message
@@ -409,7 +409,7 @@ class ValidationCase(MooseObject):
             self.addResult(status, message, **result_kwargs)
 
     @staticmethod
-    def toListFloat(value: typing.Any, context: Optional[str] = None) -> list[float]:
+    def toListFloat(value: Any, context: Optional[str] = None) -> list[float]:
         """
         Attempts to convert the given value to a one-dimensional
         list of floating point values
@@ -427,11 +427,10 @@ class ValidationCase(MooseObject):
             raise TypeError(f'{prefix}array conversion failed') from e
         if arr.ndim != 1:
             raise TypeError(f'{prefix}not one-dimensional')
-        value = arr.tolist()
-        for i, v in enumerate(value):
-            if math.isnan(v):
-                raise ValueError(f'{prefix}value at index {i} is nan')
-        return value
+        nan_ind = np.argwhere(np.isnan(arr)).reshape((-1))
+        if nan_ind.size > 0:
+            raise ValueError(f'{prefix}value(s) at indices {nan_ind} are nan')
+        return arr.tolist()
 
     def addVectorData(self, key: str, x: VectorDataInputType,
                       value: VectorDataInputType, **kwargs) -> None:

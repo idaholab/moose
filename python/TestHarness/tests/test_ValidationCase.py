@@ -356,9 +356,9 @@ class TestValidationCase(unittest.TestCase):
 
         # Has nans
         values = [None]
-        with self.assertRaisesRegex(ValueError, 'value at index 0 is nan'):
+        with self.assertRaisesRegex(ValueError, 'value\\(s\\) at indices \\[0\\] are nan'):
             ValidationCase.toListFloat(values)
-        with self.assertRaisesRegex(ValueError, 'foobar: value at index 0 is nan'):
+        with self.assertRaisesRegex(ValueError, 'foobar: value\\(s\\) at indices \\[0\\] are nan'):
             ValidationCase.toListFloat(values, 'foobar:')
 
     def testAddVectorDataChecks(self):
