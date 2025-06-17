@@ -23,6 +23,9 @@ TestCSGUniverseMeshGenerator::validParams()
       "each of the side lengths of bounding boxes to contain each of the input mesh universes");
   params.addRequiredParam<std::vector<Real>>(
       "bounding_box", "side lengths (x, y, z) of bounding box for full universe");
+  params.addParam<bool>("add_cell_to_univ_mode",
+                        false,
+                        "use the add/removeCell method when adding the cells to the universe.");
   // Declare that this generator has a generateData method
   MeshGenerator::setHasGenerateData(params);
   // Declare that this generator has a generateCSG method
@@ -36,7 +39,8 @@ TestCSGUniverseMeshGenerator::TestCSGUniverseMeshGenerator(const InputParameters
     _input_mgs(getParam<std::vector<MeshGeneratorName>>("input_meshes")),
     _x_side(getParam<std::vector<Real>>("bounding_box")[0]),
     _y_side(getParam<std::vector<Real>>("bounding_box")[1]),
-    _z_side(getParam<std::vector<Real>>("bounding_box")[2])
+    _z_side(getParam<std::vector<Real>>("bounding_box")[2]),
+    _add_cell_mode(getParam<bool>("add_cell_to_univ_mode"))
 {
 }
 
@@ -67,6 +71,8 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
   // new universe to collect all others into a main one
   auto new_univ = csg_mesh->createUniverse(mg_name + "_univ");
+  // collect a list of cells to add to this new universe
+  std::vector<std::shared_ptr<CSG::CSGCell>> cells_to_add;
 
   // for all input meshes, create a containment cell, but only join CSGBases
   // for ones that were not joined above (i > 1)
@@ -133,7 +139,21 @@ TestCSGUniverseMeshGenerator::generateCSG()
     // create a cell and add it to the new universe
     auto univ_ptr = csg_mesh->getUniverseByName(current_univ_name);
     std::string new_cell_name = img + "_cell";
-    auto img_cell = csg_mesh->createCell(new_cell_name, univ_ptr, new_region, new_univ);
+    if (_add_cell_mode)
+    {
+      // don't add to the new universe right away, do so later with the addCellsToUniverse method
+      auto img_cell = csg_mesh->createCell(new_cell_name, univ_ptr, new_region);
+      cells_to_add.push_back(img_cell);
+    }
+    else // add to the new universe at time of creation
+      auto img_cell = csg_mesh->createCell(new_cell_name, univ_ptr, new_region, new_univ);
+  }
+
+  if (_add_cell_mode)
+  {
+    // add the list of cells to the new universe now and remove from root universe
+    csg_mesh->addCellsToUniverse(new_univ, cells_to_add);
+    csg_mesh->removeCellsFromUniverse(csg_mesh->getRootUniverse(), cells_to_add);
   }
 
   // make cell with surfaces from bounding_box input and fill cell with new universe containing the
