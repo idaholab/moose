@@ -66,7 +66,7 @@
     type = MFEMGradAux
     variable = submesh_grad_source_potential
     source = submesh_potential
-    scale_factor = -62.83185
+    scale_factor = 1.0
     execute_on = TIMESTEP_END
   []
 []
@@ -137,7 +137,7 @@
     type = MFEMSubMeshTransfer
     from_variable = submesh_grad_source_potential
     to_variable = grad_source_potential
-    execution_order_group=5
+    execution_order_group=2
   []
 []
 

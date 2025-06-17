@@ -54,7 +54,11 @@
   [grad_source_potential]
     type = MFEMVariable
     fespace = HCurlFESpace
-  []  
+  []
+  [current_density]
+    type = MFEMVariable
+    fespace = HCurlFESpace
+  []
 []
 
 [AuxKernels]
@@ -62,9 +66,19 @@
     type = MFEMGradAux
     variable = grad_potential
     source = potential
-    scale_factor = -62.83185
+    scale_factor = 1.0
     execute_on = TIMESTEP_END
+    execution_order_group = 1
   []
+  [sum]
+    type = MFEMSumAux
+    variable = current_density
+    source1 = grad_potential
+    source2 = grad_source_potential
+    scale_factor = -1.0
+    execute_on = TIMESTEP_END
+    execution_order_group = 2
+  []  
 []
 
 [FunctorMaterials]
