@@ -26,12 +26,48 @@
     fec_type = H1
     fec_order = FIRST
   []
+  [SubMeshHCurlFESpace]
+    type = MFEMVectorFESpace
+    fec_type = ND
+    fec_order = FIRST
+    submesh = cut
+  []
+  [HCurlFESpace]
+    type = MFEMVectorFESpace
+    fec_type = ND
+    fec_order = FIRST
+  []
 []
 
 [Variables]
   [submesh_potential]
     type = MFEMVariable
     fespace = SubMeshH1FESpace
+  [] 
+[]
+
+[AuxVariables]
+  [potential]
+    type = MFEMVariable
+    fespace = H1FESpace
+  [] 
+  [submesh_grad_source_potential]
+    type = MFEMVariable
+    fespace = SubMeshHCurlFESpace
+  []    
+  [grad_source_potential]
+    type = MFEMVariable
+    fespace = HCurlFESpace
+  []  
+[]
+
+[AuxKernels]
+  [grad]
+    type = MFEMGradAux
+    variable = submesh_grad_source_potential
+    source = submesh_potential
+    scale_factor = -62.83185
+    execute_on = TIMESTEP_END
   []
 []
 
@@ -60,11 +96,22 @@
 []
 
 [Kernels]
-  [diff]
+  [submesh_diff]
     type = MFEMDiffusionKernel
     variable = submesh_potential
     coefficient = diffusivity
   []
+  # [diff]
+  #   type = MFEMDiffusionKernel
+  #   variable = potential
+  #   coefficient = diffusivity
+  # []
+  # [source]
+  #   type = MFEMDomainLFGradKernel
+  #   variable = potential
+  #   vector_coefficient = grad_source_potential
+  #   block = '3'
+  # []    
 []
 
 [Preconditioner]
@@ -83,6 +130,15 @@
 [Executioner]
   type = MFEMSteady
   device = cpu
+[]
+
+[Transfers]
+  [submesh_transfer]
+    type = MFEMSubMeshTransfer
+    from_variable = submesh_grad_source_potential
+    to_variable = grad_source_potential
+    execution_order_group=5
+  []
 []
 
 [Outputs]
