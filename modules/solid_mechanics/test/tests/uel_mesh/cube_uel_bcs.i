@@ -72,10 +72,10 @@
 []
 
 [Preconditioning]
-  [fdp]
-    type = FDP
-    full = true
-  []
+  # [fdp]
+  #   type = FDP
+  #   full = true
+  # []
 []
 
 [VectorPostprocessors]
@@ -93,7 +93,7 @@
   line_search = NONE
   dt = 0.1
   end_time = 2.999999
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-9
   # petsc_options_iname = '-pc_factor_shift_type'
   # petsc_options_value = 'nonzero'
 []

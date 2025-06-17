@@ -50,6 +50,9 @@ XSYMM, 1, 1
 ** Name: YSYMM
 *Boundary
 YSYMM, 2, 2
+2, 1, 1, -0.020
+3, 1, 1, +0.020
+6, 1, 1, +0.000
 ** 
 *Initial Conditions, type=FIELD, variable=1
 ALL, 70.0
