@@ -95,7 +95,8 @@ AbaqusUELStepUserObject::timestepSetup()
   std::size_t next_step = 0;
   for (; next_step < _times.size() - 1; ++next_step)
   {
-    if (_time >= _times[next_step] && _time < _times[next_step + 1])
+    if ((_time > _times[next_step] || _current_step == libMesh::invalid_uint) &&
+        _time <= _times[next_step + 1])
       break;
   }
 
@@ -113,20 +114,20 @@ AbaqusUELStepUserObject::timestepSetup()
     // transitioning to a new step
     _current_step = next_step;
 
-    mooseInfoRepeated(_current_step);
+    mooseInfoRepeated("Step: ", _current_step);
     std::cout << "BEGIN\n";
-    for (const auto & [k,m] : *_current_step_bcs.first)
+    for (const auto & [k, m] : *_current_step_bcs.first)
     {
       std::cout << "  var " << k << '\n';
-      for (const auto & [n,v] : m)
-         std::cout << "    n: " << n << " v: " << v << '\n';
+      for (const auto & [n, v] : m)
+        std::cout << "    n: " << n << " v: " << v << '\n';
     }
     std::cout << "END\n";
-    for (const auto & [k,m] : *_current_step_bcs.second)
+    for (const auto & [k, m] : *_current_step_bcs.second)
     {
       std::cout << "  var " << k << '\n';
-      for (const auto & [n,v] : m)
-         std::cout << "    n: " << n << " v: " << v << '\n';
+      for (const auto & [n, v] : m)
+        std::cout << "    n: " << n << " v: " << v << '\n';
     }
 
     const auto & bc_begin = *_current_step_bcs.first;
@@ -169,7 +170,8 @@ AbaqusUELStepUserObject::timestepSetup()
           // the nodal reaction force should be the opposite of that - hence the minus sign)
           _current_step_begin_forces[var_id][pair.first] = -var_dof_values[0];
 
-          std::cout << "BEGIN_FORCE " << var_id << ' ' << pair.first << ' ' << -var_dof_values[0] << '\n';
+          std::cout << "BEGIN_FORCE " << var_id << ' ' << pair.first << ' ' << -var_dof_values[0]
+                    << '\n';
         }
     }
 
@@ -202,7 +204,8 @@ AbaqusUELStepUserObject::timestepSetup()
           // put into map
           _current_step_begin_solution[var_id][pair.first] = var_dof_values[0];
 
-          std::cout << "BEGIN_SOLUTION " << var_id << ' ' << pair.first << ' ' << var_dof_values[0] << '\n';
+          std::cout << "BEGIN_SOLUTION " << var_id << ' ' << pair.first << ' ' << var_dof_values[0]
+                    << '\n';
         }
     }
   }
