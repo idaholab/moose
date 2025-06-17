@@ -54,6 +54,21 @@
   []
 []
 
+[NodalKernels]
+  [disp_x]
+    type = AbaqusForceBC
+    abaqus_var_id = 1
+    variable = disp_x
+    step_user_object = step_uo
+  []
+  [disp_y]
+    type = AbaqusForceBC
+    abaqus_var_id = 2
+    variable = disp_y
+    step_user_object = step_uo
+  []
+[]
+
 [UserObjects]
   [uel]
     type = AbaqusUELMeshUserElement
@@ -69,6 +84,7 @@
 [Executioner]
   type = Transient
   dt = 0.01
+  dtmin = 0.01
   end_time = 1.9999
   nl_abs_tol = 1e-10
 []
