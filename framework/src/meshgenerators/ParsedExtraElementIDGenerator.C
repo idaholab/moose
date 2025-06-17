@@ -60,9 +60,15 @@ ParsedExtraElementIDGenerator::ParsedExtraElementIDGenerator(const InputParamete
   setParserFeatureFlags(_func_F);
 
   // add the constant expressions
-  addFParserConstants(_func_F,
-                      getParam<std::vector<std::string>>("constant_names"),
-                      getParam<std::vector<std::string>>("constant_expressions"));
+  auto c_names = getParam<std::vector<std::string>>("constant_names");
+  auto c_defs = getParam<std::vector<std::string>>("constant_expressions");
+  c_names.push_back("invalid_elem_id");
+  c_defs.push_back(std::to_string(DofObject::invalid_id));
+  addFParserConstants(_func_F, c_names, c_defs);
+
+  // Add constants
+  _func_F->AddConstant("pi", libMesh::pi);
+  _func_F->AddConstant("e", std::exp(Real(1)));
 
   // add the extra element integers
   std::string symbol_str = "x,y,z";
@@ -122,7 +128,12 @@ ParsedExtraElementIDGenerator::generate()
     _func_params[2] = centroid(2);
     for (const auto i : index_range(_eeid_indices))
       _func_params[3 + i] = elem->get_extra_integer(_eeid_indices[i]);
-    const auto id = evaluate(_func_F);
+    const auto id_real = evaluate(_func_F);
+
+    dof_id_type id = id_real;
+    // this is to ensure a more robust conversion between Real and dof_id_type
+    if (id_real == (Real)DofObject::invalid_id)
+      id = DofObject::invalid_id;
 
     elem->set_extra_integer(_extra_elem_id, id);
   }
