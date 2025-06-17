@@ -39,10 +39,9 @@ AbaqusEssentialBC::AbaqusEssentialBC(const InputParameters & parameters)
 void
 AbaqusEssentialBC::residualSetup()
 {
-  _current_step_begin_forces = _step_uo.getBeginForces(_abaqus_var_id);
+  _current_step_end_values = _step_uo.getEndValues(_abaqus_var_id);
   _current_step_begin_solution = _step_uo.getBeginSolution(_abaqus_var_id);
   _current_step_begin_values = _step_uo.getBeginValues(_abaqus_var_id);
-  _current_step_end_values = _step_uo.getEndValues(_abaqus_var_id);
 }
 
 bool
@@ -50,12 +49,8 @@ AbaqusEssentialBC::shouldApply() const
 {
   const auto id = _current_node->id();
 
-  const auto * cbf = _current_step_begin_forces;
-  if (cbf && cbf->find(id) != cbf->end())
-    return true;
-
   const auto * cse = _current_step_end_values;
-  if (cse && cse->find(id) == cse->end())
+  if (cse == nullptr || cse->find(id) == cse->end())
     return false;
 
   const auto * cbs = _current_step_begin_solution;
@@ -63,80 +58,36 @@ AbaqusEssentialBC::shouldApply() const
     return true;
 
   const auto * csb = _current_step_begin_values;
-  if (csb && csb->find(id) == cse->end())
-    return false;
+  if (csb && csb->find(id) != csb->end())
+    return true;
 
-  return true;
-}
-
-// bool
-// AbaqusEssentialBC::shouldApply() const
-// {
-//   const auto b = shouldApplyInternal();
-//   std::cout << "n " << _current_node->id() << ' ' << (b ? "yes" : "no") << '\n';
-//   return b;
-// }
-
-void
-AbaqusEssentialBC::computeResidual()
-{
-  const auto id = _current_node->id();
-  const Real & d = _current_step_fraction;
-
-  const auto * cbf = _current_step_begin_forces;
-  if (cbf)
-  {
-    if (const auto it = cbf->find(id); it != cbf->end())
-    {
-      addResidual(_sys, (1.0 - d) * it->second, _var);
-      return;
-    }
-  }
-
-  Real end_value;
-  const auto * cse = _current_step_end_values;
-  if (cse)
-  {
-    const auto it = cse->find(id);
-    if (it == cse->end())
-      return;
-    end_value = it->second;
-  }
-
-  const auto * cbs = _current_step_begin_solution;
-  if (cbs)
-  {
-    if (const auto it = cbs->find(id); it != cbs->end())
-    {
-      const Real value = d * end_value + (1.0 - d) * it->second;
-      setResidual(_sys, _u[_qp] - value, _var);
-      return;
-    }
-  }
-
-  const auto * csb = _current_step_begin_values;
-  if (csb)
-  {
-    if (const auto it = csb->find(id); it != cse->end())
-    {
-      // BC is staying in effect (but maybe changing value)
-      const Real value = d * end_value + (1.0 - d) * it->second;
-      setResidual(_sys, _u[_qp] - value, _var);
-      return;
-    }
-  }
+  return false;
 }
 
 Real
-AbaqusEssentialBC::computeQpJacobian()
+AbaqusEssentialBC::computeQpResidual()
 {
   const auto id = _current_node->id();
+  const Real & d = _current_step_fraction;
+  Real end_value = _current_step_end_values->at(id);
 
-  const auto * cbf = _current_step_begin_forces;
-  if (cbf && cbf->find(id) != cbf->end())
-    // if the BC is deactivated it's force does not depend on the current solution
-    return 0.0;
+  const auto * cbs = _current_step_begin_solution;
+  if (cbs && cbs->find(id) != cbs->end())
+  {
+    // BC is being actibated during this step
+    const auto begin_value = cbs->at(id);
+    const Real value = d * end_value + (1.0 - d) * begin_value;
+    return _u[_qp] - value;
+  }
 
-  // otherwise it's a linear dependence
-  return 1.0;
+  const auto * csb = _current_step_begin_values;
+  if (csb&& csb->find(id) != csb->end())
+  {
+    // BC is staying in effect (but maybe changing value)
+    const auto begin_value = csb->at(id);
+    const Real value = d * end_value + (1.0 - d) * begin_value;
+    return _u[_qp] - value;
+  }
+
+  mooseError("ShouldApply should have returned false!");
 }
