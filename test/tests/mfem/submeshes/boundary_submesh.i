@@ -30,24 +30,16 @@
   []
 []
 
-[FunctorMaterials]
-  [Substance]
-    type = MFEMGenericConstantFunctorMaterial
-    prop_names = 'mass source'
-    prop_values = '1.0 3.0'
-  []
-[]
-
 [Kernels]
   [mass]
     type = MFEMMassKernel
     variable = submesh_potential
-    coefficient = mass
+    coefficient = 1.0
   []
   [source]
     type = MFEMDomainLFKernel
     variable = submesh_potential
-    coefficient = source
+    coefficient = 3.0
   []
 []
 

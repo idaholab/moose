@@ -72,17 +72,9 @@
 
 [BCs]
   [tangential_E_bdr]
-    type = MFEMVectorFunctorTangentialDirichletBC
+    type = MFEMVectorTangentialDirichletBC
     variable = e_field
     vector_coefficient = exact_e_field
-  []
-[]
-
-[FunctorMaterials]
-  [Substance]
-    type = MFEMGenericConstantFunctorMaterial
-    prop_names = one
-    prop_values = 1.0
   []
 []
 
@@ -90,12 +82,12 @@
   [curlcurl]
     type = MFEMCurlCurlKernel
     variable = e_field
-    coefficient = one
+    coefficient = 1.
   []
   [mass]
     type = MFEMVectorFEMassKernel
     variable = e_field
-    coefficient = one
+    coefficient = 1.
   []
   [source]
     type = MFEMVectorFEDomainLFKernel

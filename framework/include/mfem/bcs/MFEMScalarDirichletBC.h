@@ -22,7 +22,8 @@ public:
   void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh) override;
 
 protected:
-  mfem::ConstantCoefficient & _coef;
+  const MFEMScalarCoefficientName & _coef_name;
+  mfem::Coefficient & _coef;
 };
 
 #endif

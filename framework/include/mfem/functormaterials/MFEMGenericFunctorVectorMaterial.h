@@ -28,7 +28,7 @@ public:
 
 protected:
   const std::vector<std::string> & _prop_names;
-  const std::vector<MFEMVectorCoefficientName> & _prop_values;
+  const std::vector<MFEMVectorCoefficientName> _prop_values;
 };
 
 #endif
