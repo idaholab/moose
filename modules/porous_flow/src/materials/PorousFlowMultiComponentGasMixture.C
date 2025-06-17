@@ -37,10 +37,10 @@ PorousFlowMultiComponentGasMixtureTempl<is_ad>::PorousFlowMultiComponentGasMixtu
     _X_components(this->coupledComponents("mass_fraction"))
 {
   if (_n_components < 2)
-    this->template paramError("fp", "At least two gas components are required");
+    this->paramError("fp", "At least two gas components are required");
 
   if (_X_components != (_n_components - 1))
-    this->template paramError(
+    this->paramError(
         "mass_fraction",
         "The number of mass fraction variable must be equal to the number of fluid components-1");
 
