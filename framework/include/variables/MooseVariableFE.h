@@ -526,11 +526,6 @@ public:
   void insertNodalValue(libMesh::NumericVector<libMesh::Number> & residual, const DofValue & v);
 
   /**
-   * Add to a nodal value to the passed-in solution vector
-   */
-  void addNodalValue(libMesh::NumericVector<libMesh::Number> & residual, const OutputData & v);
-
-  /**
    * Get the value of this variable at given node
    */
   DofValue getNodalValue(const Node & node) const;
