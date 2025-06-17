@@ -131,7 +131,7 @@ In theory, all universes in a model can be traced back to a singular overarching
 Because universes are a collection of cells and cells can be filled with universe, a tree of universes can be constructed such that the root universe is the collection of all cells in the model.
 When a `CSGBase` object is first initialized, a root `CSGUniverse` called `ROOT_UNIVERSE` is created by default.
 Every `CSGCell` that is created will be added to the root universe unless otherwise specified (as described [below](#adding-or-removing-cells)).
-The root universe exists by default and cannot be changed except when joining `CSGBase` objects, as described [below](#joining-csgbase-objects).
+The root universe exists by default and cannot be changed except when joining `CSGBase` objects, as described [below](#updating-existing-csgbase-objects).
 However, the name of the root universe can be updated, though it won't change the object and its contents directly.
 
 Methods available for managing the root universe:
@@ -213,10 +213,90 @@ for (unsigned int i = 0; i < x; ++i)
 }
 ```
 
-*Note: When adding and removing cells to/from universes, it is important to maintain the connectedness of all universes meaning  all universes should be able to be traced back to the root universe at the end, in order to have a consistent model at the end.*
+*Note: When adding and removing cells to/from universes, it is important to maintain the connectedness of all universes meaning all universes should be able to be traced back to the root universe at the end, in order to have a consistent model at the end.*
 
-## Joining CSGBase Objects
+## Updating Existing CSGBase Objects
 
+An empty `CSGBase` object can be [initialized](#initialization) on its own in each `generateCSG` method for each mesh generator.
+However, in most cases, it is necessary to update an existing `CSGBase` object from a previous `MeshGenerator` or join multiple together such that only one `CSGBase` object is ultimately produced at the end of the full generation process.
+There are two main ways to handle this: passing and joining.
+
+### Passing between Mesh Generators
+
+The `getCSGBase*` methods available for all [mesh generators](src/meshgenerators/MeshGenerator.md) can be used to access the `CSGBase` object associated with a different `MeshGenerator` and move it to be the current object. Example:
+
+```cpp
+// get the CSGBase from a different mesh generator and use in this mesh generator
+auto csg_base = getCSGBaseByName(other_mg_name);
+std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*csg_base);
+// csg_obj is now the object that will continue to get updated throughout
+// the generateCSG method.
+```
+
+### Joining Bases
+
+When two or more existing `CSGBase` objects need to be combined to continue to use and update, the `joinOtherBase` method should be used.
+This method is called from another `CSGBase` and at a minimum takes a different existing `CSGBase` object as input.
+There are 3 different behaviors for joining bases that are supported depending on the additional arguments that are passed:
+
+1. No additional arguments: All cells that are in the root universe of the incoming `CSGBase` object will be added to the existing root universe of the current base object, and the root universe from the incoming base will no longer exist.
+
+```cpp
+// get a list of bases associated with a list of mesh generator names
+const auto csg_bases = getCSGBases("input_mg");
+// first mesh generator base will be used as the main and all others will be joined to this one.
+std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*csg_bases[0]);
+for (unsigned int i = 1; i < csg_bases.size(); ++i)
+{
+  // get the specific base object from the input and join to the first
+  std::unique_ptr<CSG::CSGBase> inp_csg_obj = std::move(*csg_bases[i]);
+  // all cells in root for inp_csg_obj are moved to the root of the current csg_obj
+  csg_obj->joinOtherBase(inp_csg_obj);
+}
+```
+
+2. One new root universe name (`new_root_name_join`): All cells in the root universe of the incoming base will be used to create a new universe of the name specified by the `new_root_name_join` parameter. These cells will _not_ be added to the existing root universe. This new universe will be added as a new non-root universe in the existing base object. *Note: this newly created universe will not be connected to the root universe of the existing `CSGBase` object by default.*
+
+```cpp
+// get a list of bases associated with a list of mesh generator names
+const auto csg_bases = getCSGBasesByName(input_mg_names);
+// first mesh generator base will be used as the main
+// all others will be joined to this one creating a new universe based on the root of the incoming base.
+std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*csg_bases[0]);
+for (unsigned int i = 1; i < input_mg_names.size(); ++i)
+{
+  // get the CSGBase obj for the associated incoming MG
+  inp_csg_obj = std::move(*csg_bases[i]);
+  // specify a new name for the universe to be created from the incoming root universe
+  new_join_name = input_mg_names[i] + "_univ";
+  // the root universe of csg_obj will remain unchanged
+  // the root universe of inp_csg_obj will be renamed and maintained as a new separate universe
+  csg_obj->joinOtherBase(inp_csg_obj, new_join_name);
+}
+```
+
+3. Two new root universe names (`new_root_name_base` and `new_root_name_join`): The cells in the root universe of the current `CSGBase` object will be used to create a new non-root universe of the name specified by the `new_root_name_base` parameter, and the cells in the root universe of the incoming `CSGBase` object will be used to create a separate non-root universe of the name specified by the `new_root_name_join` parameter. *Note: At the end of this join method, the root universe of the current base object will be empty and neither of the two new non-root universes will be connected to the root universe by default.*
+
+```cpp
+// get a list of bases associated with a list of mesh generator names
+auto csg_bases = getCSGBasesByName(input_mg_names);
+// get the first two bases to join together
+std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*csg_bases[0]);
+std::unique_ptr<CSG::CSGBase> inp_csg_obj = std::move(*csg_bases[1]);
+// specify new names to be used for the new universes created from the root universes of the two bases
+std::string new_join_name = input_mg_names[1] + "_univ";
+std::string new_base_name = input_mg_names[0] + "_univ";
+// joining via this method will move both roots into new universes with new names
+csg_obj->joinOtherBase(inp_csg_obj, new_base_name, new_join_name);
+```
+
+For all of these join methods, any non-root universes will remain unchanged and simply added to the list of universes for the current `CSGBase` object.
+Similarly, all incoming cells and surfaces are added alongside existing cells and surfaces.
+
+It is very important when using the `joinOtherBase` method that all surfaces, cells, and universes are uniquely named.
+No two objects of the same type may have the same name.
+An error will be produced during the join process if an object of the same name already exists.
+See [recommendations for naming](#object-naming-recommendations).
 
 ## Accessing CSG Methods
 
