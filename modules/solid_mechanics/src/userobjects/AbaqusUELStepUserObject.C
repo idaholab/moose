@@ -80,7 +80,7 @@ AbaqusUELStepUserObject::AbaqusUELStepUserObject(const InputParameters & paramet
 }
 
 void
-AbaqusUELStepUserObject::initialize()
+AbaqusUELStepUserObject::timestepSetup()
 {
   // no steps - nothing to do
   if (_steps.empty())
@@ -211,16 +211,6 @@ AbaqusUELStepUserObject::initialize()
   if (_current_step != libMesh::invalid_uint)
     _current_step_fraction =
         (_time - _times[_current_step]) / (_times[_current_step + 1] - _times[_current_step]);
-}
-
-void
-AbaqusUELStepUserObject::execute()
-{
-}
-
-void
-AbaqusUELStepUserObject::finalize()
-{
 }
 
 const std::unordered_map<Abaqus::Index, Real> *
