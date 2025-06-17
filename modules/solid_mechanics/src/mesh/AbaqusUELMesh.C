@@ -119,7 +119,7 @@ AbaqusUELMesh::instantiateElements()
     // add the point node and element
     auto * node = _mesh->add_point(p, node_index);
     auto node_elem = Elem::build(NODEELEM);
-    node_elem->set_node(0) = node;
+    node_elem->set_node(0, node);
     node_elem->set_id() = node_index;
     node_elem->subdomain_id() = mask;
     _uel_block_ids.insert(mask);
@@ -174,8 +174,8 @@ AbaqusUELMesh::setupNodeSets()
     boundary_info.nodeset_name(nodeset_ids[i]) = nodeset_names[i];
 
   add_bc_nodes(*_model);
-  // for (const auto & step : _model->_step)
-  //   add_bc_nodes(step);
+  for (const auto & step : _model->_step)
+    add_bc_nodes(step);
 
   _mesh->set_isnt_prepared();
 }

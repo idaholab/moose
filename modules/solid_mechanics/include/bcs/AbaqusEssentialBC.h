@@ -26,9 +26,10 @@ public:
 
   AbaqusEssentialBC(const InputParameters & parameters);
 
-  void timestepSetup() override;
+  void residualSetup() override;
   void computeResidual() override;
   bool shouldApply() const override;
+  // bool shouldApplyInternal() const;
 
 protected:
   Real computeQpResidual() override { mooseError("Should not be called."); };
