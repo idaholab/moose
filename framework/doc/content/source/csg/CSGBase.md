@@ -1,14 +1,9 @@
 # CSGBase
 
-
-## Description
-
 `CSGBase` is the main class with which developers should interact.
 This class acts as a container and driver for all methods necessary for creating a CSG representation such as generating surfaces, cells, and universes.
 
-## CSG Construction
-
-### Initialization
+## Initialization
 
 A new `CSGBase` object can be initialized with:
 
@@ -28,7 +23,7 @@ auto sphere_at_origin = csg_obj->createSphere('my_new_sphere', 5);
 auto sphere_cell = csg_obj->createCell('my_new_cell', -sphere_at_origin, new_univ);
 ```
 
-### Surface Methods
+## Surface Methods
 
 Various methods exist to create `CSGSurface` objects (below).
 All surface creation methods will return a shared pointer to that generated surface.
@@ -79,7 +74,7 @@ auto ycyl = csg_obj->createCylinder('ycylinder', 1, 3, 5, 'y');
 auto zcyl = csg_obj->createCylinder('zcylinder', 1, 2, 5, 'z');
 ```
 
-### Cell Methods
+## Cell Methods
 
 A cell is an object defined by a region and a fill.
 To create any `CSGCell`, use the method `createCell` from `CSGBase` which will return a shared pointer to the `CSGCell` object that is created.
@@ -97,7 +92,7 @@ The `CSGRegion` objects can then be accessed or updated with the following metho
 - `renameCell`: change the name of the `CSGCell`
 - `updateCellRegion`: change the region of the cell; if used, all `CSGSurface` objects used to define the new `CSGRegion` must also be a part of the current `CSGBase`
 
-#### Region Definition
+### Region Definition
 
 As stated, the region for a cell is defined as boolean combinations of surfaces, more specifically the halfspace regions defined by the surfaces.
 Series of operations can be defined using parentheses `(` `)` to indicate which operations to perform first.
@@ -115,9 +110,7 @@ Here is an example of using a combination of all operators to define the space o
 
 `~((-cylinder_surf & -top_plane & +bottom_plane) | (+top_plane & -sphere_surf))`
 
-
-
-### Universe Methods
+## Universe Methods
 
 A universe is a collection of cells and is created by calling `createUniverse` from `CSGBase`.
 A `CSGUniverse` can be initialized as an empty universe, or by passing a vector of shared pointers to `CSGCell` objects.
@@ -132,7 +125,7 @@ auto empty_universe = csg_obj->createUniverse("empty_universe");
 auto new_universe = csg_obj->createUniverse("new_universe", list_of_cells);
 ```
 
-#### Root Universe
+### Root Universe
 
 In theory, all universes in a model can be traced back to a singular overarching universe known as the root universe.
 Because universes are a collection of cells and cells can be filled with universe, a tree of universes can be constructed such that the root universe is the collection of all cells in the model.
@@ -146,7 +139,7 @@ Methods available for managing the root universe:
 - `getRootUniverse`: returns a shared pointer to the root universe of the `CSGBase` instance
 - `renameRootUniverse`: change the name of the root universe
 
-#### Adding or Removing Cells
+### Adding or Removing Cells
 
 There are multiple ways in which cells can be added to a universe:
 
@@ -222,10 +215,10 @@ for (unsigned int i = 0; i < x; ++i)
 
 *Note: When adding and removing cells to/from universes, it is important to maintain the connectedness of all universes meaning  all universes should be able to be traced back to the root universe at the end, in order to have a consistent model at the end.*
 
-### Joining CSGBase Objects
+## Joining CSGBase Objects
 
 
-## A Note on Accessing CSG Methods
+## Accessing CSG Methods
 
 All CSG methods related to creating or changing a CSG object must be called through `CSGBase`.
 Calls that retrieve information only but do not manipulate an object (such as `getName` methods) can be called on the object directly.
@@ -235,7 +228,7 @@ Consult the Doxygen documentation for information on all object-specific methods
 ## Object Naming Recommendations
 
 For each new CSG element (`CSGSurface`, `CSGCell`, and `CSGUniverse`) that is created, a unique name identifier (of type `std::string`) must be provided (`name` parameter for all creation methods).
-A recommended best practice is to include the mesh generator name as a part of that object name.
+A recommended best practice is to include the mesh generator name (which can be accessed with `this->getName()` in any MeshGenerator class) as a part of that object name.
 This `name` is used as the unique identifier within the `CSGBase` instance.
 Methods for renaming objects are available to help prevent issues and errors.
 
