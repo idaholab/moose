@@ -314,7 +314,9 @@ AbaqusUELMeshUserElement::execute()
 
     // prepare residual and jacobian storage
     local_re.resize(ndofel);
+    local_re.zero();
     local_ke.resize(ndofel, ndofel);
+    local_ke.zero();
 
     int npredf = nvar_aux; // Number of external fields.
 
@@ -385,6 +387,9 @@ AbaqusUELMeshUserElement::execute()
                   all_dof_indices,
                   all_dof_indices,
                   1.0);
+
+    if (do_jacobian && do_residual)
+      mooseInfoRepeated("doing both");
   }
 
   _sys.solution().close();

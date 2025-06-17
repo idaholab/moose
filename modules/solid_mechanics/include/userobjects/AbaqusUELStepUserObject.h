@@ -36,10 +36,12 @@ public:
   const std::unordered_map<Abaqus::Index, Real> * getBeginValues(Abaqus::AbaqusID var_id) const;
   const std::unordered_map<Abaqus::Index, Real> * getEndValues(Abaqus::AbaqusID var_id) const;
 
+  void timestepSetup() override;
+
 protected:
-  void initialize() override;
-  void execute() override;
-  void finalize() override;
+  void initialize() override {}
+  void execute() override {}
+  void finalize() override {}
 
   /// Step start times
   std::vector<Real> _times;
