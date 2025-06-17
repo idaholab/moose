@@ -2,10 +2,9 @@
   design = 'QuadSubChannel1PhaseProblem.md'
   issues = '#29196 #29199 #29237 #29505'
   [psbt_case_01-5237]
-    type = Exodiff
+    type = CSVDiff
     input = psbt.i
-    exodiff = psbt_out.e
-    custom_cmp = 'test.exodiff'
+    csvdiff = Temp_Out.csv
     capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false

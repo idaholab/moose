@@ -190,7 +190,7 @@ P_out = 14.72e6 # Pa
     type = QuadSubChannelNormalSliceValues
     variable = T
     execute_on = final
-    file_base = "Temp_Out.txt"
+    file_base = "Temp_Out.csv"
     height = 3.658
   []
   [mdot_Out_MATRIX]
