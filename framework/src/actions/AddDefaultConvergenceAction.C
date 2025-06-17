@@ -11,15 +11,18 @@
 #include "FEProblem.h"
 #include "Executioner.h"
 #include "FEProblemSolve.h"
+#include "FixedPointSolve.h"
 #include "DefaultNonlinearConvergence.h"
+#include "DefaultFixedPointConvergence.h"
 
-registerMooseAction("MooseApp", AddDefaultConvergenceAction, "add_default_convergence");
+registerMooseAction("MooseApp", AddDefaultConvergenceAction, "add_default_nonlinear_convergence");
+registerMooseAction("MooseApp", AddDefaultConvergenceAction, "add_default_fixed_point_convergence");
 
 InputParameters
 AddDefaultConvergenceAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Add a default Convergence object to the simulation.");
+  params.addClassDescription("Adds default Convergence objects to the simulation.");
   return params;
 }
 
@@ -30,6 +33,15 @@ AddDefaultConvergenceAction::AddDefaultConvergenceAction(const InputParameters &
 
 void
 AddDefaultConvergenceAction::act()
+{
+  if (_current_task == "add_default_nonlinear_convergence")
+    addDefaultNonlinearConvergence();
+  else if (_current_task == "add_default_fixed_point_convergence")
+    addDefaultFixedPointConvergence();
+}
+
+void
+AddDefaultConvergenceAction::addDefaultNonlinearConvergence()
 {
   if (_problem->needToAddDefaultNonlinearConvergence())
   {
@@ -43,6 +55,19 @@ AddDefaultConvergenceAction::act()
   }
 
   checkUnusedNonlinearConvergenceParameters();
+}
+
+void
+AddDefaultConvergenceAction::addDefaultFixedPointConvergence()
+{
+  if (_problem->needToAddDefaultFixedPointConvergence())
+  {
+    const std::string conv_name = "default_fixed_point_convergence";
+    _problem->setFixedPointConvergenceName(conv_name);
+    _problem->addDefaultFixedPointConvergence(getMooseApp().getExecutioner()->parameters());
+  }
+
+  checkUnusedFixedPointConvergenceParameters();
 }
 
 void
@@ -98,6 +123,51 @@ AddDefaultConvergenceAction::checkUnusedNonlinearConvergenceParameters()
           msg << "  " << param << "\n";
         mooseError(msg.str());
       }
+    }
+  }
+}
+
+void
+AddDefaultConvergenceAction::checkUnusedFixedPointConvergenceParameters()
+{
+  // Abort check if executioner does not allow Convergence objects
+  auto & executioner_params = getMooseApp().getExecutioner()->parameters();
+  if (!executioner_params.have_parameter<ConvergenceName>("fixed_point_convergence"))
+    return;
+
+  // Abort if there is no fixed point convergence. For example, Executors may not have them.
+  if (!_problem->hasSetFixedPointConvergenceName())
+    return;
+
+  const auto conv_name = _problem->getFixedPointConvergenceName();
+
+  // Abort check if Convergence is inactive
+  if (!_problem->hasConvergence(conv_name))
+    return;
+
+  // If the convergence is a DefaultFixedPointConvergence they can handle the Executioner
+  // parameters pertaining to the fixed point solve
+  auto & conv = _problem->getConvergence(conv_name);
+  auto * default_conv = dynamic_cast<DefaultFixedPointConvergence *>(&conv);
+
+  // Only Convergence objects deriving from DefaultFixedPointConvergence should
+  // share parameters with the executioner
+  if (!default_conv)
+  {
+    auto fp_params = FixedPointSolve::fixedPointDefaultConvergenceParams();
+    std::vector<std::string> unused_params;
+    for (const auto & param : fp_params.getParametersList())
+      if (executioner_params.isParamSetByUser(param))
+        unused_params.push_back(param);
+
+    if (unused_params.size() > 0)
+    {
+      std::stringstream msg;
+      msg << "The following fixed point convergence parameters were set in the executioner, but "
+             "are not used:\n";
+      for (const auto & param : unused_params)
+        msg << "  " << param << "\n";
+      mooseError(msg.str());
     }
   }
 }
