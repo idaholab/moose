@@ -41,16 +41,16 @@
 # those will be added by the action
 [BCs]
   [disp_x]
-    type = AbaqusEssentialBC
-    abaqus_var_id = 1
+    type = FunctionDirichletBC
+    boundary = abaqus_bc_union_boundary
     variable = disp_x
-    step_user_object = step_uo
+    function = 0.1*y
   []
   [disp_y]
-    type = AbaqusEssentialBC
-    abaqus_var_id = 2
+    type = FunctionDirichletBC
+    boundary = abaqus_bc_union_boundary
     variable = disp_y
-    step_user_object = step_uo
+    function = 0.1*x
   []
 []
 
@@ -71,13 +71,6 @@
   []
 []
 
-[Preconditioning]
-  # [fdp]
-  #   type = FDP
-  #   full = true
-  # []
-[]
-
 [VectorPostprocessors]
   [statev]
     type = AbaqusUELStateVariables
@@ -87,6 +80,13 @@
   []
 []
 
+[Preconditioning]
+  # [fdp]
+  #   type = FDP
+  #   full = true
+  # []
+[]
+
 [Executioner]
   type = Transient
   solve_type = NEWTON
@@ -94,6 +94,9 @@
   dt = 0.1
   end_time = 2.999999
   nl_abs_tol = 1e-9
+  automatic_scaling = true
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   # petsc_options_iname = '-pc_factor_shift_type'
   # petsc_options_value = 'nonzero'
 []
