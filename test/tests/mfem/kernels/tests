@@ -26,6 +26,7 @@
                'Outputs/ParaViewDataCollection/file_base=OutputData/CurlCurlLOR'
     requirement = 'The system shall have the ability to solve a LOR definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
+    valgrind = heavy
     max_parallel = 1
     recover = false
     max_threads = 1
@@ -94,6 +95,7 @@
                'Outputs/ParaViewDataCollection/file_base=OutputData/GradDivLOR'
     requirement = 'The system shall have the ability to solve a LOR grad-div problem with Raviart-Thomas elements using MFEM.'
     capabilities = 'mfem'
+    valgrind = heavy
     max_parallel = 1
     recover = false
     abs_zero = 1e-6
@@ -127,6 +129,7 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
     capabilities = 'mfem'
+    valgrind = none
     max_parallel = 1
     recover = false
   []
