@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/DepletionIDGenerator.md'
-  issues = '#19617'
+  issues = '#19617 #30782'
   [2dcore]
     type = 'Exodiff'
     input = 'depletion_id.i'
@@ -14,6 +14,13 @@
     exodiff = 'depletion_id_exclude_material_out.e'
     cli_args = "Mesh/depl_map/exclude_id_name='material_id' Mesh/depl_map/exclude_id_value='3 4' Outputs/file_base='depletion_id_exclude_material_out'"
     requirement = 'The system shall support the generation of plane depletion IDs for 2D reactor cores with skipped materials'
+    recover = false
+  []
+  [2dcore_with_given_name]
+    type = 'Exodiff'
+    input = 'two_depletion_ids.i'
+    exodiff = 'two_depletion_ids_out.e'
+    requirement = 'The system shall support the generation of depletion IDs with a given extra element integer name for a 2D reactor core'
     recover = false
   []
   [subpin]
