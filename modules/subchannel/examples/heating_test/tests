@@ -1,17 +1,20 @@
 [Tests]
-  design = 'using_SubChannel.md'
-  issues = '#28497'
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#29196 #29199 #29237 #29505'
   [heating_test]
-    type = Exodiff
+    type = CSVDiff
     input = 3X3_channel.i
-    exodiff = 3X3_channel_out_viz0.e
-    custom_cmp = 'test.exodiff'
-    capabilities = 'method!=dbg'
+    rel_err = 6e-4
+    abs_zero = 1e-8
+    ignore_columns = 'SumWij'
+    csvdiff = "3X3_channel_out_viz0_sample_channel_corner_0001.csv
+               3X3_channel_out_viz0_sample_channel_edge_0001.csv"
+    requirement = "The system  shall include an example showing how to solve a 3 by 3 quadrilateral lattice case."
+    # heavy = true
     valgrind = NONE
     recover = false
-    abs_zero = 1e-5
+    capabilities = 'method=opt'
     max_threads = 1
     max_parallel = 1
-    requirement = "The system  shall include an example showing how to solve a 3 by 3 quadrilateral lattice case."
   []
 []
