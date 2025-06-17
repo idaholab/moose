@@ -4594,6 +4594,13 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 
   // Systems (includes system time derivative and aux kernel calculations)
   computeSystems(exec_type);
+  // With the auxiliary system solution computed, sync the displaced problem auxiliary solution
+  // before computation of post-aux user objects. The undisplaced auxiliary system current local
+  // solution is updated (via System::update) within the AuxiliarySystem class's variable
+  // computation methods (e.g. computeElementalVarsHelper, computeNodalVarsHelper), so it is safe to
+  // use it here
+  if (_displaced_problem)
+    _displaced_problem->syncAuxSolution(*getAuxiliarySystem().currentSolution());
 
   // Post-aux UserObjects
   computeUserObjects(exec_type, Moose::POST_AUX);
