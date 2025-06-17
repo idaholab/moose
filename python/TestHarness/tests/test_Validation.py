@@ -20,27 +20,56 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertTrue(validation['script'].endswith('validation_ok.py'))
         # Validation results
         results = validation['results']
-        self.assertEqual(len(results), 1)
-        result = results[0]
-        self.assertEqual('OK', result['status'])
-        self.assertIn('within bounds', result['message'])
-        self.assertEqual('TestCase.testValidation', result['test'],)
-        self.assertEqual('number', result['data_key'])
+        self.assertEqual(len(results), 3)
+        # Results from number
+        number_results = [r for r in results if r['data_key'] == 'number']
+        self.assertEqual(len(number_results), 1)
+        number_result = number_results[0]
+        self.assertEqual('OK', number_result['status'])
+        self.assertIn('within bounds', number_result['message'])
+        self.assertEqual('TestCase.testValidation', number_result['test'])
+        # Results from vector
+        vector_results = [r for r in results if r['data_key'] == 'vector']
+        self.assertEqual(len(vector_results), 2)
+        for i, result in enumerate(vector_results):
+            self.assertEqual('OK', result['status'])
+            self.assertIn('within bounds', result['message'])
+            self.assertIn(f'index {i}', result['message'])
+            self.assertEqual('TestCase.testValidation', result['test'])
+
         # Validation data
         data = validation['data']
-        self.assertEqual(len(data), 1)
+        self.assertEqual(len(data), 3)
+        # Numeric value
         number = data['number']
         self.assertEqual(100.0, number['value'])
         self.assertEqual('Number', number['description'])
         self.assertEqual('coolunits', number['units'])
         self.assertEqual(95.0, number['bounds'][0])
         self.assertEqual(105.0, number['bounds'][1])
+        self.assertEqual('ScalarData', number['type'])
+        # Arbitrary data (dict)
+        useless_dict = data['useless_dict']
+        self.assertEqual({'foo': 'bar'}, useless_dict['value'])
+        self.assertEqual('A useless dictionary', useless_dict['description'])
+        self.assertEqual('Data', useless_dict['type'])
+        # Vector data
+        vector = data['vector']
+        self.assertEqual([0, 1], vector['x'])
+        self.assertEqual([1, 2], vector['value'])
+        self.assertEqual('Position', vector['x_description'])
+        self.assertEqual('Temperature', vector['description'])
+        self.assertEqual('cm', vector['x_units'])
+        self.assertEqual('K', vector['units'])
+        self.assertEqual([0, 1], vector['bounds'][0])
+        self.assertEqual([2, 3], vector['bounds'][1])
+        self.assertEqual('VectorData', vector['type'])
 
         # Check on-screen output
         output = test['output']
         validation_output = output['validation']
         self.assertIn('Running validation case', validation_output)
-        self.assertIn('Acquired 1 data value(s), 1 result(s): 1 ok, 0 fail, 0 skip', validation_output)
+        self.assertIn('Acquired 3 data value(s), 3 result(s): 3 ok, 0 fail, 0 skip', validation_output)
 
         # Check timing; validation execution exists
         timing = test['timing']
