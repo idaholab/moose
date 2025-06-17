@@ -21,10 +21,8 @@
  1, 2
 **
 **
-*Initial Conditions, type=FIELD, variable=1
-TOP, 0.2
-*Initial Conditions, type=FIELD, variable=2
-TOP, 0.1
+*Boundary
+BOTTOM, 1, 2
 ** ----------------------------------------------------------------
 **
 ** STEP: Step-1
@@ -35,8 +33,27 @@ TOP, 0.1
 **
 ** BOUNDARY CONDITIONS
 *Boundary
-1, 1, 2, 0.0
-2, 1, 2, 0.0
+3, 1, 1, 1.0
+**
+** OUTPUT REQUESTS
+**
+*Restart, write, frequency=0
+**
+** FIELD OUTPUT: F-Output-1
+**
+*Output, field, variable=PRESELECT
+**
+** HISTORY OUTPUT: H-Output-1
+**
+*Output, history, variable=PRESELECT
+*End Step
+*Step, name=Step-2, nlgeom=NO, unsymm=YES
+*Static
+0.1, 1., 1e-05, 0.1
+**
+** BOUNDARY CONDITIONS
+*Boundary, OP=New
+BOTTOM, 1, 2
 **
 ** OUTPUT REQUESTS
 **
