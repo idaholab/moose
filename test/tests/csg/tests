@@ -41,6 +41,15 @@
         mesh_mode = REPLICATED
         detail = 'joins multiple CSGBase objects from various MeshGenerator types together into one universe and constructs sphere surfaces with and without a center point specified.'
     []
+    [csg_only_add_cells_new_universe]
+        type = 'JSONDiff'
+        input = 'csg_add_cells_new_univ.i'
+        cli_args = '--csg-only csg_cylinders_join_new_universes_out_csg.json'
+        jsondiff = 'csg_cylinders_join_new_universes_out_csg.json'
+        recover = false
+        mesh_mode = REPLICATED
+        detail = 'collects a list of cells to add to an empty universe and remove from another.'
+    []
     [csg_only_final_generator]
         type = 'JSONDiff'
         input = 'csg_only_chained.i'
