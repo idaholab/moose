@@ -409,7 +409,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
+    _set_fixed_point_convergence_name(false),
     _need_to_add_default_nonlinear_convergence(false),
+    _need_to_add_default_fixed_point_convergence(false),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
     _linear_systems(_num_linear_sys, nullptr),
@@ -2528,6 +2530,17 @@ FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_
   params.set<bool>("added_as_default") = true;
   for (const auto & conv_name : getNonlinearConvergenceNames())
     addConvergence(class_name, conv_name, params);
+}
+
+void
+FEProblemBase::addDefaultFixedPointConvergence(const InputParameters & params_to_apply)
+{
+  const std::string class_name = "DefaultFixedPointConvergence";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.applyParameters(params_to_apply);
+  params.applyParameters(parameters());
+  params.set<bool>("added_as_default") = true;
+  addConvergence(class_name, getFixedPointConvergenceName(), params);
 }
 
 bool
@@ -9035,6 +9048,13 @@ FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> &
   _nonlinear_convergence_names = convergence_names;
 }
 
+void
+FEProblemBase::setFixedPointConvergenceName(const ConvergenceName & convergence_name)
+{
+  _fixed_point_convergence_name = convergence_name;
+  _set_fixed_point_convergence_name = true;
+}
+
 const std::vector<ConvergenceName> &
 FEProblemBase::getNonlinearConvergenceNames() const
 {
@@ -9065,6 +9085,15 @@ FEProblemBase::getLinearConvergenceNames() const
   if (_linear_convergence_names)
     return *_linear_convergence_names;
   mooseError("The linear convergence name(s) have not been set.");
+}
+
+ConvergenceName
+FEProblemBase::getFixedPointConvergenceName() const
+{
+  if (_set_fixed_point_convergence_name)
+    return _fixed_point_convergence_name;
+  else
+    mooseError("The fixed point convergence name has not been set.");
 }
 
 void
