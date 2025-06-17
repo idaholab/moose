@@ -223,14 +223,13 @@ There are two main ways to handle this: passing and joining.
 
 ### Passing between Mesh Generators
 
-The `getCSGBase*` methods available for all [mesh generators](src/meshgenerators/MeshGenerator.md) can be used to access the `CSGBase` object associated with a different `MeshGenerator` and move it to be the current object. Example:
+The `getCSGBase*` methods available for all [mesh generators](source/meshgenerators/MeshGenerator.md) can be used to access the `CSGBase` object associated with a different `MeshGenerator` and move it to be the current object. Example:
 
 ```cpp
 // get the CSGBase from a different mesh generator and use in this mesh generator
 auto csg_base = getCSGBaseByName(other_mg_name);
 std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*csg_base);
-// csg_obj is now the object that will continue to get updated throughout
-// the generateCSG method.
+// csg_obj is now the object that will continue to get updated throughout the generateCSG method.
 ```
 
 ### Joining Bases
