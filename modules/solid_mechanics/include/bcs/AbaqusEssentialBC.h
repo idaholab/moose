@@ -28,6 +28,7 @@ public:
 
   void timestepSetup() override;
   void computeResidual() override;
+  bool shouldApply() const override;
 
 protected:
   Real computeQpResidual() override { mooseError("Should not be called."); };
