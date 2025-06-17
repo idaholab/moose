@@ -384,7 +384,7 @@ AbaqusUELMeshUserElement::execute()
                   local_ke,
                   all_dof_indices,
                   all_dof_indices,
-                  -1.0);
+                  1.0);
   }
 
   _sys.solution().close();

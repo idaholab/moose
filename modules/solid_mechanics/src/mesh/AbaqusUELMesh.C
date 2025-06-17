@@ -174,8 +174,8 @@ AbaqusUELMesh::setupNodeSets()
     boundary_info.nodeset_name(nodeset_ids[i]) = nodeset_names[i];
 
   add_bc_nodes(*_model);
-  for (const auto & step : _model->_step)
-    add_bc_nodes(step);
+  // for (const auto & step : _model->_step)
+  //   add_bc_nodes(step);
 
   _mesh->set_isnt_prepared();
 }
