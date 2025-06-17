@@ -1,6 +1,6 @@
 # CSGBase
 
-`CSGBase` is the main class with which developers should interact.
+`CSGBase` is the main class with which developers should interact with when implementing the `generateCSG` method for any mesh generator.
 This class acts as a container and driver for all methods necessary for creating a CSG representation such as generating surfaces, cells, and universes.
 
 ## Initialization
