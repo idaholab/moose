@@ -115,32 +115,21 @@ Here is an example of using a combination of all operators to define the space o
 
 `~((-cylinder_surf & -top_plane & +bottom_plane) | (+top_plane & -sphere_surf))`
 
-#### Adding the Cell to a Universe
 
-A universe, which is further described below, is a collection of cells.
-As such, when a `CSGCell` is created, it can be optionally added to an existing `CSGUniverse`.
-If no universe is specified to which to add it, it will automatically be added to the root universe.
-A cell that has a universe fill type cannot be added to the same universe that is being used for the fill.
-To specify adding the cell to an existing universe, pass the shared pointer to the `CSGUniverse` as a final argument during the cell creation method.
-For example, the first line below will create a cell that is added to the root universe, but if created with the second line, it will be created and added to the `new_univ` universe.
-
-```cpp
-auto new_cell_in_root = csg_obj->createCell('new_cell_root', region);
-auto new_cell_in_univ = csg_obj->createCell('new_cell_univ', region, new_univ);
-```
 
 ### Universe Methods
 
 A universe is a collection of cells and is created by calling `createUniverse` from `CSGBase`.
 A `CSGUniverse` can be initialized as an empty universe, or by passing a vector of shared pointers to `CSGCell` objects.
-If creating an empty universe, it should then be passed to the `createCell` to indicate the cell should be added to it as described [above](#adding-the-cell-to-a-universe).
 Any `CSGUniverse` object can be renamed (including the [root universe](#root-universe)) with `renameUniverse`.
 
 Example:
 
 ```cpp
-// creating an empty universe and adding cells as they are created
-tbd
+// create an empty universe which will get cells added to it later
+auto empty_universe = csg_obj->createUniverse("empty_universe");
+// create a universe that is initialized with an existing list of cells
+auto new_universe = csg_obj->createUniverse("new_universe", list_of_cells);
 ```
 
 #### Root Universe
@@ -148,8 +137,8 @@ tbd
 In theory, all universes in a model can be traced back to a singular overarching universe known as the root universe.
 Because universes are a collection of cells and cells can be filled with universe, a tree of universes can be constructed such that the root universe is the collection of all cells in the model.
 When a `CSGBase` object is first initialized, a root `CSGUniverse` called `ROOT_UNIVERSE` is created by default.
-Every `CSGCell` that is created will be added to the root universe unless otherwise specified (as described [above](#adding-the-cell-to-a-universe)).
-The root universe exists by default and cannot be changed except when joining `CSGBase` objects, as described [below](#linking-csgbase-objects-mesh-generators).
+Every `CSGCell` that is created will be added to the root universe unless otherwise specified (as described [below](#adding-or-removing-cells)).
+The root universe exists by default and cannot be changed except when joining `CSGBase` objects, as described [below](#joining-csgbase-objects).
 However, the name of the root universe can be updated, though it won't change the object and its contents directly.
 
 Methods available for managing the root universe:
@@ -157,7 +146,83 @@ Methods available for managing the root universe:
 - `getRootUniverse`: returns a shared pointer to the root universe of the `CSGBase` instance
 - `renameRootUniverse`: change the name of the root universe
 
-### Linking `CSGBase` objects Mesh Generators
+#### Adding or Removing Cells
+
+There are multiple ways in which cells can be added to a universe:
+
+1. At the time of universe creation, a list of pointers to `CSGCell` objects can be passed into `createUniverse` (as described [above](#universe-methods)). Example:
+
+```cpp
+auto new_universe = csg_obj->createUniverse("new_universe", list_of_cells);
+```
+
+2. When a `CSGCell` is created with `createCell`, a `CSGUniverse` can be passed as the final argument to indicate that the cell will be created and added directly to that specified universe. In this case, the cell will _not_ be added to the root universe. A cell that has a universe fill type cannot be added to the same universe that is being used for the fill. Example:
+
+```cpp
+// create an empty universe
+auto new_universe = csg_obj->createUniverse("new_univ");
+// create a new void cell and add it directly to the new empty universe;
+// do not add to the root universe
+auto new_cell_in_univ = csg_obj->createCell("new_cell", region, new_universe);
+```
+
+3. A cell or list of cells can be added to an existing universe with the `addCellToUniverse` and `addCellsToUniverse` methods. In this case, if a `CSGCell` exists in another `CSGUniverse` (such as the root universe), it will _not_ be removed when being added to another (i.e. if the same behavior as option 2 above is desired, the cell will have to be manually removed from the root universe). The following two examples will produce the same outcome:
+
+```cpp
+// create a list of cells and add to an existing universe after creating all of them
+std::vector<std::shared_ptr<CSG::CSGCell>> list_of_cells;
+for (unsigned int i = 0; i < x; ++i)
+{
+    // creating new_cell here will add it to the root universe
+    auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
+    list_of_cells.pushback(new_cell);
+}
+// add to an existing universe; cells will still remain in the root universe
+csg_obj->addCellsToUniverse(existing_universe, list_of_cells);
+```
+
+```cpp
+// create new cells and add them to an existing universe one-by-one
+// each cell will still exist in the root universe
+for (unsigned int i = 0; i < x; ++i)
+{
+    // creating new_cell here will add it to the root universe
+    auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
+    csg_obj->addCellToUniverse(existing_universe, new_cell);
+}
+```
+
+Cells can also be removed from a universe in the same way as method 3 above by using the `removeCellFromUniverse` and `removeCellsFromUniverse` methods.
+An example use would be to take the previous two examples and remove the cells from the root universe such that the desired outcome is the same as that of method 2 for adding cells to a universe:
+
+```cpp
+// create a list of cells and add to an existing universe after creating all of them
+std::vector<std::shared_ptr<CSG::CSGCell>> list_of_cells;
+for (unsigned int i = 0; i < x; ++i)
+{
+    // creating new_cell here will add it to the root universe
+    auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
+    list_of_cells.pushback(new_cell);
+}
+// add to an existing universe and explicitly remove them from root
+csg_obj->addCellsToUniverse(existing_universe, list_of_cells);
+csg_obj->removeCellsFromUniverse(csg_obj->getRootUniverse(), list_of_cells);
+```
+
+```cpp
+// create new cells and add them to an existing universe and remove them from root one-by-one
+for (unsigned int i = 0; i < x; ++i)
+{
+    // creating new_cell here will add it to the root universe
+    auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
+    csg_obj->addCellToUniverse(existing_universe, new_cell);
+    csg_obj->removeCellFromUniverse(csg_obj->getRootUniverse(), new_cell);
+}
+```
+
+*Note: When adding and removing cells to/from universes, it is important to maintain the connectedness of all universes meaning  all universes should be able to be traced back to the root universe at the end, in order to have a consistent model at the end.*
+
+### Joining CSGBase Objects
 
 
 ## A Note on Accessing CSG Methods
