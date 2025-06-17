@@ -1,7 +1,7 @@
 [Tests]
   [parsed_elem_id_generator]
     design = 'ParsedExtraElementIDGenerator.md'
-    issues = '#27589'
+    issues = '#27589 #30787'
     requirement = 'The system shall be able to assign extra ids to elements based on a parsed expression evaluated at the element centroids'
     type = 'Exodiff'
     input = 'elem_id_parsed.i'
