@@ -31,54 +31,36 @@ MFEMHypreGMRES::validParams()
   return params;
 }
 
-MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters)
-  : MFEMSolverBase(parameters),
-    _preconditioner(isParamSetByUser("preconditioner")
-                        ? getMFEMProblem().getProblemData().jacobian_preconditioner
-                        : nullptr)
+MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters) : MFEMSolverBase(parameters)
 {
+  mfem::Hypre::Init();
   constructSolver(parameters);
 }
 
 void
 MFEMHypreGMRES::constructSolver(const InputParameters &)
 {
-
   auto solver =
-      std::make_shared<mfem::HypreGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+      std::make_unique<mfem::HypreGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
   solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
   solver->SetKDim(getParam<int>("kdim"));
   solver->SetPrintLevel(getParam<int>("print_level"));
-
-  if (_preconditioner)
-  {
-    auto hypre_preconditioner =
-        std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
-    if (!hypre_preconditioner)
-      mooseError("Hypre GMRES preconditioner must be a Hypre Solver");
-    solver->SetPreconditioner(*hypre_preconditioner);
-  }
-
-  _solver = solver;
+  setPreconditioner(*solver);
+  _solver = std::move(solver);
 }
 
 void
 MFEMHypreGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
-
   if (_lor && _preconditioner)
     mooseError("LOR solver cannot take a preconditioner");
 
   if (_preconditioner)
   {
     _preconditioner->updateSolver(a, tdofs);
-    auto hypre_preconditioner =
-        std::dynamic_pointer_cast<mfem::HypreSolver>(_preconditioner->getSolver());
-    auto solver = std::dynamic_pointer_cast<mfem::HypreGMRES>(_solver);
-    solver->SetPreconditioner(*hypre_preconditioner);
-    _solver = solver;
+    setPreconditioner(static_cast<mfem::HypreGMRES &>(*_solver));
   }
   else if (_lor)
   {

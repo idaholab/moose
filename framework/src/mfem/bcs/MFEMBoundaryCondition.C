@@ -42,7 +42,11 @@ MFEMBoundaryCondition::MFEMBoundaryCondition(const InputParameters & parameters)
   {
     _bdr_attributes[i] = std::stoi(_boundary_names[i]);
   }
-  mfem::ParMesh & mesh(getMFEMProblem().mesh().getMFEMParMesh());
+  mfem::ParMesh & mesh(*getMFEMProblem()
+                            .getProblemData()
+                            .gridfunctions.GetRef(_test_var_name)
+                            .ParFESpace()
+                            ->GetParMesh());
   mfem::common::AttrToMarker(mesh.bdr_attributes.Max(), _bdr_attributes, _bdr_markers);
 }
 

@@ -19,7 +19,7 @@ public:
   static InputParameters validParams();
   MFEMVectorFunctorNormalDirichletBC(const InputParameters & parameters);
   ~MFEMVectorFunctorNormalDirichletBC() override = default;
-  void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh) override;
+  void ApplyBC(mfem::GridFunction & gridfunc) override;
 };
 
 #endif
