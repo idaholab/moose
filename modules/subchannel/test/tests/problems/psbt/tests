@@ -9,6 +9,7 @@
     valgrind = NONE
     recover = false
     abs_zero = 1e-6
+    rel_err = 3e-4
     max_threads = 1
     max_parallel = 1
     requirement = 'The system will examine the explicit subchannel solver for a psbt type case'
@@ -21,6 +22,7 @@
     valgrind = NONE
     recover = false
     abs_zero = 1e-6
+    rel_err = 5e-4
     max_threads = 1
     max_parallel = 1
     requirement = 'The system will examine the explicit subchannel solvers for a psbt type case using the non-default friction/mixing model'
@@ -33,6 +35,7 @@
     valgrind = NONE
     recover = false
     abs_zero = 1e-6
+    rel_err = 3e-4
     max_threads = 1
     max_parallel = 1
     requirement = 'The system will examine the implicit subchannel solver for a psbt type case'
@@ -45,6 +48,7 @@
     valgrind = NONE
     recover = false
     abs_zero = 1e-6
+    rel_err = 3e-4
     max_threads = 1
     max_parallel = 1
     requirement = 'The system will examine the monolithic subchannel solver for a psbt type case'

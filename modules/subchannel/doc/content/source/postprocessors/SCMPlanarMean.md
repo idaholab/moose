@@ -11,7 +11,7 @@ at a user specified [!param](/Postprocessors/SCMPlanarMean/height).
 
 ## Example Input File Syntax
 
-!listing /test/tests/problems/psbt/psbt.i block=Postprocessors language=moose
+!listing /test/tests/problems/psbt/psbt_explicit.i block=Postprocessors language=moose
 
 !syntax parameters /Postprocessors/SCMPlanarMean
 
