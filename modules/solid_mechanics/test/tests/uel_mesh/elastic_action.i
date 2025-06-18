@@ -38,34 +38,9 @@
   extra_tag_vectors = "AbaqusUELTag"
 []
 
-# those will be added by the action
+# the action adds the AbaqusEssentialBC, AbaqusForceBC, and AbaqusUELStepUserObject objects
 [BCs]
-  [disp_x]
-    type = AbaqusEssentialBC
-    abaqus_var_id = 1
-    variable = disp_x
-    step_user_object = step_uo
-  []
-  [disp_y]
-    type = AbaqusEssentialBC
-    abaqus_var_id = 2
-    variable = disp_y
-    step_user_object = step_uo
-  []
-[]
-
-[NodalKernels]
-  [disp_x]
-    type = AbaqusForceBC
-    abaqus_var_id = 1
-    variable = disp_x
-    step_user_object = step_uo
-  []
-  [disp_y]
-    type = AbaqusForceBC
-    abaqus_var_id = 2
-    variable = disp_y
-    step_user_object = step_uo
+  [Abaqus]
   []
 []
 
@@ -75,9 +50,6 @@
     uel_type = U1
     plugin = ../../plugins/small_strain_tri_uel
     element_sets = CUBE
-  []
-  [step_uo]
-    type = AbaqusUELStepUserObject
   []
 []
 
