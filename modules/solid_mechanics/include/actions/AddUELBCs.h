@@ -25,5 +25,5 @@ public:
 private:
   AbaqusUELMesh * _uel_mesh;
 
-  std::shared_ptr<UserObject> _step_uo;
+  std::shared_ptr<AbaqusUELStepUserObject> _step_uo;
 };

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#29382'
-  design = 'AbaqusUELMeshUserElement.md'
+  design = 'AbaqusUELMeshUserElement.md AbaqusEssentailBC.md AbaqusForceBC.md'
 
   [build_uel_plugin_opt]
     type = RunCommand
@@ -16,7 +16,7 @@
     command = "cd elasticity_uel; make METHOD=dbg"
     use_shell = True
     requirement = "The elastic UEL test plugin shall be built in dbg."
-    method = 'opt'
+    method = 'dbg'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
@@ -25,9 +25,22 @@
     type = Exodiff
     input = abaqus_uel_read.i
     exodiff = abaqus_uel_read_in.e
-    cli_args = '--mesh_only'
+    cli_args = '--mesh-only'
     method = 'opt dbg'
     requirement = 'The system shall be able to load an Abaqus input file with UEL user elements.'
     installation_type = in_tree
+  []
+
+  [elastic_bc]
+    type = Exodiff
+    input = elastic.i
+    exodiff = elastic_out.e
+    requirement = 'The system shall be able to apply essential boundary conditions from an Abaqus input file with UEL user elements.'
+  []
+  [elastic_action_bc]
+    type = Exodiff
+    input = elastic_action.i
+    exodiff = elastic_action_out.e
+    requirement = 'The system shall be able to apply essential boundary conditions set up by an action from an Abaqus input file with UEL user elements.'
   []
 []

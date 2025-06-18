@@ -255,8 +255,8 @@ AbaqusUELStepUserObject::getEndValues(Abaqus::AbaqusID var_id) const
 std::map<Abaqus::AbaqusID, std::string>
 AbaqusUELStepUserObject::getVariables() const
 {
-  std::map<Abaqus::AbaqusID> var_list;
+  std::map<Abaqus::AbaqusID, std::string> var_list;
   for (const auto & pair : _var_map)
-    var_list.push_back(pair->first, _uel_mesh.getVarName(pair->first));
+    var_list.emplace(pair.first, _uel_mesh.getVarName(pair.first));
   return var_list;
 }
