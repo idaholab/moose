@@ -77,7 +77,7 @@
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = '5' 
-    value = 1.0
+    value = 1000.0
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
@@ -111,7 +111,7 @@
   #   variable = potential
   #   vector_coefficient = grad_source_potential
   #   block = '3'
-  # []    
+  # []
 []
 
 [Preconditioner]
