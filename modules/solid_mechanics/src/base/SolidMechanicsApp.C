@@ -38,6 +38,8 @@ SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   Registry::registerActionsTo(af, {"SolidMechanicsApp"});
   registerAppDataFilePath("solid_mechanics");
 
+  registerSyntax("AddUELBCs", "BCs/Abaqus");
+
   registerSyntax("EmptyAction", "BCs/CavityPressure");
   registerSyntax("CavityPressureAction", "BCs/CavityPressure/*");
   registerSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
