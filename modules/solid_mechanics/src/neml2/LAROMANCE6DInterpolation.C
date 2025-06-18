@@ -245,7 +245,7 @@ LAROMANCE6DInterpolation::interpolate_and_transform() const
 
 Scalar
 LAROMANCE6DInterpolation::transform_data(const Scalar & data,
-                                         const std::vector<Real> & param,
+                                         const std::vector<double> & param,
                                          TransformEnum transform_type) const
 {
   switch (transform_type)
@@ -272,11 +272,11 @@ LAROMANCE6DInterpolation::transform_data(const Scalar & data,
 
 Scalar
 LAROMANCE6DInterpolation::transform_compress(const Scalar & data,
-                                             const std::vector<Real> & param) const
+                                             const std::vector<double> & param) const
 {
-  Real factor = param[0];
-  Real compressor = param[1];
-  Real original_min = param[2];
+  double factor = param[0];
+  double compressor = param[1];
+  double original_min = param[2];
   auto d1 = neml2::sign(data) * neml2::pow(neml2::abs(data * factor), compressor);
   auto transformed_data = neml2::log10(1.0 + d1 - original_min);
   return transformed_data;
@@ -284,11 +284,11 @@ LAROMANCE6DInterpolation::transform_compress(const Scalar & data,
 
 Scalar
 LAROMANCE6DInterpolation::transform_decompress(const Scalar & data,
-                                               const std::vector<Real> & param) const
+                                               const std::vector<double> & param) const
 {
-  Real factor = param[0];
-  Real compressor = param[1];
-  Real original_min = param[2];
+  double factor = param[0];
+  double compressor = param[1];
+  double original_min = param[2];
   auto d1 = neml2::pow(10.0, data) - 1.0 + original_min;
   auto transformed_data = neml2::sign(d1) * neml2::pow(neml2::abs(d1), 1.0 / compressor) / factor;
   return transformed_data;
@@ -296,15 +296,15 @@ LAROMANCE6DInterpolation::transform_decompress(const Scalar & data,
 
 Scalar
 LAROMANCE6DInterpolation::transform_log10_bounded(const Scalar & data,
-                                                  const std::vector<Real> & param) const
+                                                  const std::vector<double> & param) const
 
 {
-  Real factor = param[0];
-  Real lowerbound = param[1];
-  Real upperbound = param[2];
-  Real logmin = param[3];
-  Real logmax = param[4];
-  Real range = upperbound - lowerbound;
+  double factor = param[0];
+  double lowerbound = param[1];
+  double upperbound = param[2];
+  double logmin = param[3];
+  double logmax = param[4];
+  double range = upperbound - lowerbound;
   auto transformed_data =
       range * (neml2::log10(data + factor) - logmin) / (logmax - logmin) + lowerbound;
   return transformed_data;
@@ -312,14 +312,14 @@ LAROMANCE6DInterpolation::transform_log10_bounded(const Scalar & data,
 
 Scalar
 LAROMANCE6DInterpolation::transform_exp10_bounded(const Scalar & data,
-                                                  const std::vector<Real> & param) const
+                                                  const std::vector<double> & param) const
 {
-  Real factor = param[0];
-  Real lowerbound = param[1];
-  Real upperbound = param[2];
-  Real logmin = param[3];
-  Real logmax = param[4];
-  Real range = upperbound - lowerbound;
+  double factor = param[0];
+  double lowerbound = param[1];
+  double upperbound = param[2];
+  double logmin = param[3];
+  double logmax = param[4];
+  double range = upperbound - lowerbound;
   auto transformed_data =
       (neml2::pow(10.0, ((data - lowerbound) * (logmax - logmin) / range) + logmin) - factor);
   return transformed_data;
@@ -327,12 +327,12 @@ LAROMANCE6DInterpolation::transform_exp10_bounded(const Scalar & data,
 
 Scalar
 LAROMANCE6DInterpolation::transform_min_max(const Scalar & data,
-                                            const std::vector<Real> & param) const
+                                            const std::vector<double> & param) const
 {
-  Real data_min = param[0];
-  Real data_max = param[1];
-  Real scaled_min = param[2];
-  Real scaled_max = param[3];
+  double data_min = param[0];
+  double data_max = param[1];
+  double scaled_min = param[2];
+  double scaled_max = param[3];
   auto transformed_data =
       ((data - data_min) / (data_max - data_min)) * (scaled_max - scaled_min) + scaled_min;
   return transformed_data;
@@ -348,13 +348,13 @@ LAROMANCE6DInterpolation::json_to_string(const std::string & key) const
   return name;
 }
 
-std::vector<Real>
+std::vector<double>
 LAROMANCE6DInterpolation::json_to_vector(const std::string & key) const
 {
   if (!_json.contains(key))
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
 
-  std::vector<Real> data_vec = _json[key].get<std::vector<Real>>();
+  std::vector<double> data_vec = _json[key].get<std::vector<double>>();
   return data_vec;
 }
 
@@ -364,7 +364,7 @@ LAROMANCE6DInterpolation::json_vector_to_torch(const std::string & key) const
   if (!_json.contains(key))
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
 
-  std::vector<Real> in_data = _json[key].get<std::vector<Real>>();
+  std::vector<double> in_data = _json[key].get<std::vector<double>>();
   return Scalar::create(in_data).clone();
 }
 
@@ -375,8 +375,8 @@ LAROMANCE6DInterpolation::json_6Dvector_to_torch(const std::string & key) const
   if (!_json.contains(key))
     throw NEMLException("The key '" + std::string(key) + "' is missing from the JSON data file.");
 
-  vector<vector<vector<vector<vector<vector<Real>>>>>> out_data =
-      _json[key].get<vector<vector<vector<vector<vector<vector<Real>>>>>>>();
+  vector<vector<vector<vector<vector<vector<double>>>>>> out_data =
+      _json[key].get<vector<vector<vector<vector<vector<vector<double>>>>>>>();
 
   const int64_t sz_l0 = out_data.size();
   const int64_t sz_l1 = out_data[0].size();
@@ -392,7 +392,7 @@ LAROMANCE6DInterpolation::json_6Dvector_to_torch(const std::string & key) const
       throw NEMLException("Incorrect JSON interpolation grid size for '" + key + "'.");
   };
 
-  std::vector<Real> linearize_values;
+  std::vector<double> linearize_values;
   check_level_size(out_data.size(), sz_l0, key);
   for (auto && level1 : out_data)
   {

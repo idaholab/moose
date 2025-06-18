@@ -18,9 +18,6 @@ The `[NEML2]` block has two parts:
 
 In the above example, there is only one sub-block named `[all]`. However, there can be as many sub-blocks as appropriate. Most of the parameters specified in the common area are also applied to each sub-block. In the case where a parameter is defined both in the common area and under a sub-block, the parameter defined under the sub-block takes precedence.
 
-!alert note
-A notable exception to the above rule is the [!param](/NEML2/input) parameter which can only be specified in the common area.
-
 Sub-blocks are used to specify multiple NEML2 material models used in the same simulation. The following example demonstrates the use of sub-blocks to specify two NEML2 material models on two different subdomains.
 
 !listing test/tests/neml2/blocks_different_model.i block=NEML2

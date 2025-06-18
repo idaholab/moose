@@ -52,8 +52,12 @@ void
 LibtorchModel::to(const torch::TensorOptions & options)
 {
   Model::to(options);
-  _surrogate->to(options.device());
-  _surrogate->to(torch::Dtype(caffe2::typeMetaToScalarType(options.dtype())));
+
+  if (options.has_device())
+    _surrogate->to(options.device());
+
+  if (options.has_dtype())
+    _surrogate->to(torch::Dtype(caffe2::typeMetaToScalarType(options.dtype())));
 }
 
 void
