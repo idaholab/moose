@@ -58,4 +58,7 @@ private:
   // Mu_t evaluated at y+=30 for blending purposes
   const Real _mut_30 =
       (NS::von_karman_constant * 30.0 / std::log(NS::E_turb_constant * 30.0) - 1.0);
+
+  // Use old-state for turbulent quantities
+  const bool _lagged_quantities;
 };
