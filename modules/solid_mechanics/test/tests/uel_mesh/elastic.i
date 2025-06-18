@@ -83,9 +83,9 @@
 
 [Executioner]
   type = Transient
-  dt = 0.01
-  dtmin = 0.01
-  end_time = 1.9999
+  dt = 0.1
+  dtmin = 0.1
+  end_time = 2
   nl_abs_tol = 1e-10
 []
 

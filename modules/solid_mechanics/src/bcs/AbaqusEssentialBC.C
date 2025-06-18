@@ -72,21 +72,27 @@ AbaqusEssentialBC::computeQpResidual()
   Real end_value = _current_step_end_values->at(id);
 
   const auto * cbs = _current_step_begin_solution;
-  if (cbs && cbs->find(id) != cbs->end())
+  if (cbs)
   {
-    // BC is being actibated during this step
-    const auto begin_value = cbs->at(id);
-    const Real value = d * end_value + (1.0 - d) * begin_value;
-    return _u[_qp] - value;
+    if (const auto it = cbs->find(id); it != cbs->end())
+    {
+      // BC is being actibated during this step
+      const auto begin_value = it->second;
+      const Real value = d * end_value + (1.0 - d) * begin_value;
+      return _u[_qp] - value;
+    }
   }
 
   const auto * csb = _current_step_begin_values;
-  if (csb&& csb->find(id) != csb->end())
+  if (csb)
   {
-    // BC is staying in effect (but maybe changing value)
-    const auto begin_value = csb->at(id);
-    const Real value = d * end_value + (1.0 - d) * begin_value;
-    return _u[_qp] - value;
+    if (const auto it = csb->find(id); it != csb->end())
+    {
+      // BC is staying in effect (but maybe changing value)
+      const auto begin_value = it->second;
+      const Real value = d * end_value + (1.0 - d) * begin_value;
+      return _u[_qp] - value;
+    }
   }
 
   mooseError("ShouldApply should have returned false!");
