@@ -61,12 +61,37 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryNormalGradient() const
   return (gamma - beta * phi_n) / alpha;
 }
 
+RealVectorValue
+LinearFVAdvectionDiffusionFunctorRobinBC::computeFaceTangentVector() const()
+{
+  // returns distance vector from nearest cell centre to boundary face
+  const auto d_cf = computeCellToFaceVector();
+  const auto nhat = _current_face_info->normal();
+
+  // tangent along the face 
+  return d_cf - (d_cf * nhat) * nhat;
+}
+
+Real
+LinearFVAdvectionDiffusionFunctorRobinBC::computeRobinDenominatorTerm() const()
+{
+  const auto face = singleSidedFaceArg(_current_face_info);
+  const auto state = determineState();
+  // returns distance vector from nearest cell centre to boundary face
+  const auto d_cf  = computeCellToFaceVector();
+  // face normal
+  const auto nhat  = _current_face_info->normal();
+  // robin BC coefficients
+  const auto alpha = _functor-alpha(face, state);
+  const auto beta  = _functor-beta(face, state);
+
+  return 1.0 + (beta * d_cf * nhat / alpha);
+}
+
 Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValueMatrixContribution() const
 {
-  // Ths will not contribute to the matrix from the value considering that
-  // the value is independent of the solution.
-  return 0.0;
+  return 1.0/computeRobinDenominatorTerm();
 }
 
 Real
@@ -76,27 +101,31 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValueRHSContribution() 
   const auto state = determineState();
 
   const auto alpha = _functor-alpha(face, state);
-  const auto beta  =  _functor-beta(face, state);
   const auto gamma = _functor-gamma(face, state);
   const auto grad_phi = _var.gradSln(*_current_face_info->elemInfo());
 
-  const Real distance = computeCellToFaceDistance();
+  // returns distance vector from nearest cell centre to boundary face
   const auto d_cf = computeCellToFaceVector();
-  // For non-orthogonal meshes we compute an extra correction vector to increase order accuracy
-  // correction_vector is a vector orthogonal to the boundary normal
+  const auto tvec = computeFaceTangentVector();
+  const auto nhat = _current_face_info->normal();
 
-  return _functor(singleSidedFaceArg(_current_face_info), determineState()) /
-             _diffusion_coeff(face_arg, determineState()) * distance +
-         _var.gradSln(*_current_face_info->elemInfo()) * correction_vector;
-}
+  const Real dmag = std::sqrt(d_cf*d_cf);
+  const Real dnom = computeRobinDenominatorTerm();
+
+  return ( dmag * (grad_phi * tvec) / dnom) + 
+         ( (d_cf*nhat) * gamma / alpha / dnom);
 }
 
 Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryGradientMatrixContribution() const
 {
-  // The implicit term from the central difference approximation of the normal
-  // gradient.
-  return 1.0 / computeCellToFaceDistance();
+  const auto face = singleSidedFaceArg(_current_face_info);
+  const auto state = determineState();
+
+  const auto beta  =  _functor-beta(face, state);
+  const auto alpha = _functor-alpha(face, state);
+
+  return -beta/alpha/computeRobinDenominatorTerm();	
 }
 
 Real
@@ -104,6 +133,21 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryGradientRHSContribution
 {
   // The boundary term from the central difference approximation of the
   // normal gradient.
-  return _functor(singleSidedFaceArg(_current_face_info), determineState()) /
-         computeCellToFaceDistance();
+  const auto face = singleSidedFaceArg(_current_face_info);
+  const auto state = determineState();
+  const auto grad_phi = _var.gradSln(*_current_face_info->elemInfo());
+
+  const auto alpha = _functor-alpha(face, state);
+  const auto beta  =  _functor-beta(face, state);
+  const auto gamma = _functor-gamma(face, state);
+
+  const auto d_cf = computeCellToFaceVector();
+  const auto tvec = computeFaceTangentVector();
+  const auto nhat = _current_face_info->normal();
+
+  const Real dmag = std::sqrt(d_cf*d_cf);
+  const Real dnom = computeRobinDenominatorTerm();
+
+  return gamma - (beta/alpha/denom)*
+           ( (d_cf * nhat * gamma/alpha) + (dmag*grad_phi*tvec) );
 }

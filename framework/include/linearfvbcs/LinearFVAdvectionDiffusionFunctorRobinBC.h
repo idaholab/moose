@@ -40,7 +40,13 @@ public:
 
   virtual bool useBoundaryGradientExtrapolation() const override { return true; }
 
-protected:
+  /// Returns the tangential component of the distance vector along the face
+  RealVectorValue computeFaceTangentVector() const;
+
+  /// Returns the recurring denominator in the 2nd order Taylor Expansion of Robin BC terms
+  Real computeRobinDenominatorTerm() const;
+
+  protected:
   /// The functors for this BC (can be variable, function, etc)
   const Moose::Functor<Real> & _functor-alpha;
   const Moose::Functor<Real> & _functor-beta;
