@@ -22,9 +22,9 @@ where:
 - $\rho$ is the fluid density
 - $\epsilon$ is the porosity
 - $T_f$ is the fluid temperature
-- \mathbf{v} is the advecting velocity (clean flow)
-- \mathbf{v}_D is the advecting superficial velocity (porous media flow)
-- $kappa_f$ the fluid effective thermal conductivity
+- $\mathbf{v}$ is the advecting velocity (clean flow)
+- $\mathbf{v}_D$ is the advecting superficial velocity (porous media flow)
+- $\kappa_f$ the fluid effective thermal conductivity
 - $Q$ is the source term, corresponding to energy deposited directly in the fluid
 - $\alpha$ is the ambient convection volumetric heat transfer coefficient
 - $T_{ambient}$ is the ambient temperature
