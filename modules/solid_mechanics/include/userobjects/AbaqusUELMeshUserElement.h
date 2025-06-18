@@ -157,4 +157,11 @@ protected:
 
   /// timestep scaling factor
   Real _pnewdt;
+
+  /// Residual contribution returned from the UEL plugin
+  DenseVector<Real> _local_re;
+  /// Jacobian contribution returned from the UEL plugin
+  DenseMatrix<Real> _local_ke;
+  /// transpose of the Jacobian inserted into the MOOSE non-linear system
+  DenseMatrix<Real> _local_ke_T;
 };

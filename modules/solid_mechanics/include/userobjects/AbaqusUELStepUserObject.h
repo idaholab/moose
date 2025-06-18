@@ -36,6 +36,9 @@ public:
   const std::unordered_map<Abaqus::Index, Real> * getBeginValues(Abaqus::AbaqusID var_id) const;
   const std::unordered_map<Abaqus::Index, Real> * getEndValues(Abaqus::AbaqusID var_id) const;
 
+  /// get a vector of all variables that have BCs applied
+  std::map<Abaqus::AbaqusID, std::string> getVariables() const;
+
   void timestepSetup() override;
 
 protected:
