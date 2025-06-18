@@ -34,6 +34,8 @@ SolidMechanicsApp::~SolidMechanicsApp() {}
 static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
+  registerSyntax("AddUELBCs", "BCs/Abaqus");
+
   registerSyntax("EmptyAction", "BCs/CavityPressure");
   registerSyntax("CavityPressureAction", "BCs/CavityPressure/*");
   registerSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
@@ -57,6 +59,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
                            "The 'Kernels/DynamicSolidMechanics' syntax is deprecated. Please use "
                            "'Physics/SolidMechanics/Dynamic' instead.");
   registerSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
+
+  registerSyntax("AddUELVariables", "Variables/AddUELVariables");
+  registerSyntax("AddUELICs", "ICs/AddUELICs");
 
   registerSyntax("EmptyAction", "BCs/Pressure");
   registerSyntax("PressureAction", "BCs/Pressure/*");
