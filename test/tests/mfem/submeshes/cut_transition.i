@@ -77,13 +77,13 @@
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = '5' 
-    value = 1000.0
+    value = 500.0
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = '1'
-    value = 0.0
+    value = -500.0
   []
 []
 
@@ -101,17 +101,6 @@
     variable = submesh_potential
     coefficient = diffusivity
   []
-  # [diff]
-  #   type = MFEMDiffusionKernel
-  #   variable = potential
-  #   coefficient = diffusivity
-  # []
-  # [source]
-  #   type = MFEMDomainLFGradKernel
-  #   variable = potential
-  #   vector_coefficient = grad_source_potential
-  #   block = '3'
-  # []
 []
 
 [Preconditioner]
