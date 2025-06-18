@@ -1,0 +1,64 @@
+[Tests]
+  design = 'LinearFVAdvectionDiffusionFunctorRobinBC.md'
+  issues = '#30866'
+
+  [diffusion-1d-robin]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestDiffusion1DRobin
+    requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 1D steady diffusion equation, which shall be solved numerically using a central differencing scheme in a linear finite volume system with Robin boundary conditions.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [advection-1d-robin]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestAdvection1DRobin
+    requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 1D steady advection equation, which shall be solved numerically using a central differencing scheme in a linear finite volume system with Robin boundary conditions.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [diffusion-2d-robin]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestDiffusion2DRobin
+    requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady diffusion equation, which shall be solved numerically using a central differencing scheme in a linear finite volume system with Robin boundary conditions.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [advection-2d-robin]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestAdvection2DRobin
+    requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady diffusion equation, which shall be solved numerically using a central differencing scheme in a linear finite volume system with Robin boundary conditions.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [diffusion-2d-robin-nonorthogonal]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestDiffusion2DRobin
+    requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady diffusion equation, which shall be solved numerically on non-orthogonal cells using a central differencing scheme in a linear finite volume system with Robin boundary conditions.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [advection-2d-robin-nonorthogonal]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestAdvection2DRobin
+    requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady diffusion equation, which shall be solved numerically on non-orthogonal cells using a central differencing scheme in a linear finite volume system with Robin boundary conditions.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]
