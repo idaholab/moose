@@ -9,6 +9,7 @@
 
 #include "AbaqusUELMeshUserElement.h"
 #include "AbaqusUELMesh.h"
+#include "MooseError.h"
 #include "MooseTypes.h"
 #include "SystemBase.h"
 #include "AuxiliarySystem.h"
@@ -24,7 +25,7 @@ AbaqusUELMeshUserElement::validParams()
   auto params = GeneralUserObject::validParams();
   params += TaggingInterface::validParams();
   params.addClassDescription("Coupling UserObject to use Abaqus UEL plugins in MOOSE");
-  params.set<MultiMooseEnum>("vector_tags").push_back("AbaqusUELTag");
+  params.set<MultiMooseEnum>("vector_tags").setAdditionalValue("AbaqusUELTag");
 
   // execute during residual and Jacobian evaluation
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
@@ -187,9 +188,6 @@ AbaqusUELMeshUserElement::execute()
 
   std::vector<Real> coords(_uel_definition._n_nodes * dim);
 
-  DenseVector<Real> local_re;
-  DenseMatrix<Real> local_ke;
-
   std::array<Real, 8> dummy_energy;
 
   Real dt = _fe_problem.dt();
@@ -313,10 +311,8 @@ AbaqusUELMeshUserElement::execute()
       lflags[2] = 0;
 
     // prepare residual and jacobian storage
-    local_re.resize(ndofel);
-    local_re.zero();
-    local_ke.resize(ndofel, ndofel);
-    local_ke.zero();
+    _local_re.resize(ndofel);
+    _local_ke.resize(ndofel, ndofel);
 
     int npredf = nvar_aux; // Number of external fields.
 
@@ -324,17 +320,14 @@ AbaqusUELMeshUserElement::execute()
     Real rdummy = 0;
     int idummy = 0;
 
-    // std::cout << aux_var_values_to_uel.size() << ": " << Moose::stringify(aux_var_values_to_uel)
-    //           << '\n';
-
     // make sure stateful data storage is sized correctly
     auto & current_state = _statev[_statev_index_current][jelem];
     current_state = _statev[_statev_index_old][jelem];
     current_state.resize(_nstatev);
 
     // call the plugin
-    _uel(local_re.get_values().data(),
-         local_ke.get_values().data(),
+    _uel(_local_re.get_values().data(),
+         _local_ke.get_values().data(),
          current_state.data(),
          _use_energy ? _energy[jelem].data() : dummy_energy.data(),
          &ndofel,
@@ -378,33 +371,34 @@ AbaqusUELMeshUserElement::execute()
     // sign of 'residuals' has been tested with external loading and matches that of moose-umat
     // setups.
     if (do_residual)
-      addResiduals(_fe_problem.assembly(_tid, _sys.number()), local_re, all_dof_indices, -1.0);
+      addResiduals(_fe_problem.assembly(_tid, _sys.number()), _local_re, all_dof_indices, -1.0);
 
-    // write to the Jacobian (hope we don't have to transpose...)
+    // write to the Jacobian (unfortunately we have to transpose first)
     if (do_jacobian)
+    {
+      _local_ke_T.resize(ndofel, ndofel);
+      _local_ke.get_transpose(_local_ke_T);
       addJacobian(_fe_problem.assembly(_tid, _sys.number()),
-                  local_ke,
+                  _local_ke_T,
                   all_dof_indices,
                   all_dof_indices,
-                  1.0);
-
-    if (do_jacobian && do_residual)
-      mooseInfoRepeated("doing both");
+                  -1.0);
+    }
   }
 
   _sys.solution().close();
 }
 
-// const std::array<Real, 8> *
-// AbaqusUELMeshUserElement::getUELEnergy(dof_id_type element_id) const
-// {
-//   const auto it = _energy.find(element_id);
+const std::array<Real, 8> *
+AbaqusUELMeshUserElement::getUELEnergy(dof_id_type element_id) const
+{
+  const auto it = _energy.find(element_id);
 
-//   // if this UO does not have the data for the requested element we return null
-//   // this allows the querying object to try multiple (block restricted) AbaqusUELMeshUserElement
-//   // user objects until it finds the value (or else error out)
-//   if (it == _energy.end())
-//     return nullptr;
+  // if this UO does not have the data for the requested element we return null
+  // this allows the querying object to try multiple (block restricted) AbaqusUELMeshUserElement
+  // user objects until it finds the value (or else error out)
+  if (it == _energy.end())
+    return nullptr;
 
-//   return &it->second;
-// }
+  return &it->second;
+}
