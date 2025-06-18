@@ -44,6 +44,10 @@ StitchedMeshGenerator::validParams()
       true,
       "If the input meshes have boundaries with the same name (but different IDs), merge them");
   params.addParam<bool>(
+      "subdomain_remapping",
+      true,
+      "If the input meshes have boundaries with the same name (but different IDs), merge them");
+  params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
   params.addClassDescription(
       "Allows multiple mesh files to be stitched together to form a single mesh.");
@@ -237,7 +241,10 @@ StitchedMeshGenerator::generate()
                         TOLERANCE,
                         _clear_stitched_boundary_ids,
                         getParam<bool>("verbose_stitching"),
-                        use_binary_search);
+                        use_binary_search,
+                        /*enforce_all_nodes_match_on_boundaries=*/false,
+                        /*merge_boundary_nodes_all_or_nothing=*/false,
+                        getParam<bool>("subdomain_remapping"));
 
     if (_merge_boundaries_with_same_name)
       MooseMeshUtils::mergeBoundaryIDsWithSameName(*mesh);
