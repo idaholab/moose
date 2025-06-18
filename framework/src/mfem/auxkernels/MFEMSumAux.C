@@ -46,7 +46,9 @@ MFEMSumAux::MFEMSumAux(const InputParameters & parameters)
 void
 MFEMSumAux::execute()
 {
-  _result_var = *_source1_var + *_source2_var;
+  _result_var = 0.0;
+  _result_var += _source1_var;
+  _result_var -= _source2_var;
 }
 
 #endif
