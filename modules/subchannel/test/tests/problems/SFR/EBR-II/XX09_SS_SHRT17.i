@@ -211,8 +211,75 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
 []
 
+[Postprocessors]
+  [TTC-27]
+    type = SubChannelPointValue
+    variable = T
+    index = 91
+    execute_on = 'TIMESTEP_END'
+    height = 0.322
+  []
+  [TTC-28]
+    type = SubChannelPointValue
+    variable = T
+    index = 50
+    execute_on = 'TIMESTEP_END'
+    height = 0.322
+  []
+  [TTC-29]
+    type = SubChannelPointValue
+    variable = T
+    index = 21
+    execute_on = 'TIMESTEP_END'
+    height = 0.322
+  []
+  [TTC-30]
+    type = SubChannelPointValue
+    variable = T
+    index = 4
+    execute_on = 'TIMESTEP_END'
+    height = 0.322
+  []
+  [TTC-31]
+    type = SubChannelPointValue
+    variable = T
+    index = 2
+    execute_on = 'TIMESTEP_END'
+    height = 0.322
+  []
+  [TTC-32]
+    type = SubChannelPointValue
+    variable = T
+    index = 16
+    execute_on = 'TIMESTEP_END'
+    height = 0.322
+  []
+  [TTC-33]
+    type = SubChannelPointValue
+    variable = T
+    index = 42
+    execute_on = 'TIMESTEP_END'
+    height = 0.322
+  []
+  [TTC-34]
+    type = SubChannelPointValue
+    variable = T
+    index = 80
+    execute_on = 'TIMESTEP_END'
+    height = 0.322
+  []
+  [TTC-35]
+    type = SubChannelPointValue
+    variable = T
+    index = 107
+    execute_on = 'TIMESTEP_END'
+    height = 0.322
+  []
+[]
+
 [Outputs]
   exodus = true
+  csv = true
 []
 
 [Executioner]
