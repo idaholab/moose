@@ -3,9 +3,9 @@
   [gmg]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 5
-    ny = 5
-    nz = 5
+    nx = 2
+    ny = 2
+    nz = 2
   []
 []
 
@@ -57,7 +57,7 @@
 [Functions]
   [pressure_fcn]
     type = ParsedFunction
-    expression = 200 #MPa
+    expression = 'if(t<200,t,200)' #MPa
   []
 []
 
@@ -77,14 +77,14 @@
     device = 'cpu'
 
     moose_input_types = 'MATERIAL MATERIAL     MATERIAL         MATERIAL             MATERIAL          MATERIAL          MATERIAL       POSTPROCESSOR POSTPROCESSOR'
-    moose_inputs =      'T        neml2_strain inelastic_strain eff_inelastic_strain cell_dd           wall_dd           init_envFac    time          time'
-    neml2_inputs =      'forces/T forces/E     old_state/Ep     old_state/ep         old_state/cell_dd old_state/wall_dd forces/env_fac forces/t      old_forces/t'
+    moose_inputs = 'T        neml2_strain inelastic_strain eff_inelastic_strain cell_dd           wall_dd           init_envFac    time          time'
+    neml2_inputs = 'forces/T forces/E     old_state/Ep     old_state/ep         old_state/cell_dd old_state/wall_dd forces/env_fac forces/t      old_forces/t'
 
     moose_output_types = 'Material     MATERIAL         MATERIAL             MATERIAL                  MATERIAL        MATERIAL        MATERIAL        MATERIAL      MATERIAL'
-    moose_outputs =      'neml2_stress inelastic_strain eff_inelastic_strain eff_inelastic_strain_rate vonmises_stress cell_rate       wall_rate       cell_dd       wall_dd'
-    neml2_outputs =      'state/S      state/Ep         state/ep             state/ep_rate             state/s         state/cell_rate state/wall_rate state/cell_dd state/wall_dd'
+    moose_outputs = 'neml2_stress inelastic_strain eff_inelastic_strain eff_inelastic_strain_rate vonmises_stress cell_rate       wall_rate       cell_dd       wall_dd'
+    neml2_outputs = 'state/S      state/Ep         state/ep             state/ep_rate             state/s         state/cell_rate state/wall_rate state/cell_dd state/wall_dd'
 
-    initialize_outputs =       'wall_dd      cell_dd      init_envFac'
+    initialize_outputs = 'wall_dd      cell_dd      init_envFac'
     initialize_output_values = 'init_wall_dd init_cell_dd init_envFac'
 
     moose_derivative_types = 'MATERIAL'
@@ -112,7 +112,8 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   automatic_scaling = true
-  nl_rel_tol = 1e-5
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-12
   dt = 50
   dtmin = 50
   num_steps = 10

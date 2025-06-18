@@ -52,14 +52,5 @@ public:
 
   NEML2ActionCommon(const InputParameters &);
 
-  virtual void act() override;
-
-  const FileName & fname() const { return _fname; }
-
-protected:
-  /// Name of the NEML2 input file
-  const FileName _fname;
-
-  /// List of cli-args
-  const std::vector<std::string> _cli_args;
+  virtual void act() override {}
 };

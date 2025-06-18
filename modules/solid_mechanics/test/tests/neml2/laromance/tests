@@ -10,7 +10,7 @@
                   "wall dislocation density rate and inelastic strain rate from the the 6D input "
                   "grid."
   []
-  [radial_eturn]
+  [radial_return]
     type = 'CSVDiff'
     input = 'laromance_return_mapping.i'
     csvdiff = 'laromance_return_mapping_out.csv'
