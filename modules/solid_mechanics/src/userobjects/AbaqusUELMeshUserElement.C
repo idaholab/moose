@@ -24,7 +24,7 @@ AbaqusUELMeshUserElement::validParams()
   auto params = GeneralUserObject::validParams();
   params += TaggingInterface::validParams();
   params.addClassDescription("Coupling UserObject to use Abaqus UEL plugins in MOOSE");
-  params.set<MultiMooseEnum>("vector_tags").push_back("AbaqusUELTag");
+  params.set<MultiMooseEnum>("vector_tags").setAdditionalValue("AbaqusUELTag");
 
   // execute during residual and Jacobian evaluation
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);

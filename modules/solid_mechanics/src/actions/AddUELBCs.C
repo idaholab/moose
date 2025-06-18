@@ -15,6 +15,7 @@
 #include "AbaqusUELMesh.h"
 #include "MooseTypes.h"
 #include <dirent.h>
+#include <memory>
 
 registerMooseAction("SolidMechanicsApp", AddUELBCs, "add_user_object");
 registerMooseAction("SolidMechanicsApp", AddUELBCs, "add_bc");
@@ -43,7 +44,7 @@ AddUELBCs::act()
     const auto uos = _problem->addUserObject(uo_type, step_uo_name, params);
     // we remember the thread 0 copy
     mooseAssert(uos.size() > 0, "Error constructing the step user object");
-    _step_uo = uos[0];
+    _step_uo = std::dynamic_pointer_cast<AbaqusUELStepUserObject>(uos[0]);
     return;
   }
 
@@ -58,6 +59,7 @@ AddUELBCs::act()
     {
       std::string bc_type = "AbaqusEssentialBC";
       InputParameters params = _factory.getValidParams(bc_type);
+      params.set<Abaqus::AbaqusID>("abaqus_var_id") = var_id;
       params.set<NonlinearVariableName>("variable") = var_name;
       params.set<UserObjectName>("step_user_object") = step_uo_name;
       _problem->addBoundaryCondition(bc_type, "abaqus_essential_bc_" + var_name, params);
@@ -71,6 +73,7 @@ AddUELBCs::act()
     {
       std::string nk_type = "AbaqusForceBC";
       InputParameters params = _factory.getValidParams(nk_type);
+      params.set<Abaqus::AbaqusID>("abaqus_var_id") = var_id;
       params.set<NonlinearVariableName>("variable") = var_name;
       params.set<UserObjectName>("step_user_object") = step_uo_name;
       _problem->addNodalKernel(nk_type, "abaqus_force_bc_" + var_name, params);
