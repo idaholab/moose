@@ -25,6 +25,10 @@ dt_and_v0 = 0.00005
     type = ParsedFunction
     expression = '5*(x+y^2)*sin(t)'
   []
+  [v_init]
+    type = ParsedFunction
+    expression = '-5*(x+y^2)*${dt_and_v0}'
+  []
 []
 
 [Variables]
@@ -44,11 +48,13 @@ dt_and_v0 = 0.00005
 
 [ICs]
   [u_old]
-    type = ConstantIC
+    # type = ConstantIC
+    type = FunctionIC
     variable = u
     state = OLD
     # set's v_0 to 1
-    value = -${dt_and_v0}
+    # value = -${dt_and_v0}
+    function = v_init
   []
 []
 

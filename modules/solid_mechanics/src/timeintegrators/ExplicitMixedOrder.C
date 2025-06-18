@@ -105,6 +105,8 @@ ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
 void
 ExplicitMixedOrder::init()
 {
+  meshChanged();
+  
   if (_nl && _fe_problem.solverParams(_nl->number())._type != Moose::ST_LINEAR)
     mooseError(
         "The chosen time integrator requires 'solve_type = LINEAR' in the Executioner block.");
@@ -320,10 +322,16 @@ ExplicitMixedOrder::centralDifference()
   // Coorect RHS with damping
   auto vel = _sys.solutionUDot();
   auto vn = vel->get_subvector(_local_second_order_indices);
-  auto rc = C->clone();
-  rc->scale(_dt / (_dt + _dt_old));
-  rc->pointwise_mult(*rc, *vn);
-  r->add(-1.0, *rc);
+  auto rc1 = C->clone();
+  rc1->scale(_dt / (_dt + _dt_old));
+  rc1->pointwise_mult(*rc1, *vn);
+  r->add(-1.0, *rc1);
+
+  auto delta_u = _solution_update->clone();
+  auto rc2 = C->clone();
+  rc2->scale(1/(_dt+_dt_old));
+  rc2->pointwise_mult(*rc2, *delta_u);
+  r->add(-1.0, *rc2);
 
   // Calculate acceleration
   auto accel = _sys.solutionUDotDot();
