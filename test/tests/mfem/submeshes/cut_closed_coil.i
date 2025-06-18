@@ -75,7 +75,7 @@
     variable = current_density
     source1 = grad_potential
     source2 = grad_source_potential
-    scale_factor = 1.0
+    scale_factor = -1.0
     execute_on = TIMESTEP_END
     execution_order_group = 2
   []  
