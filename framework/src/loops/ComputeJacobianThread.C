@@ -154,7 +154,7 @@ ComputeJacobianThread::postElement(const Elem * /*elem*/)
   _fe_problem.cacheJacobian(_tid);
   _num_cached++;
 
-  if (_num_cached % 20 == 0 || _fe_problem.assembly(_tid, _nl.number()).hasStaticCondensation())
+  if (_num_cached % 20 == 0 || _nl.system().has_static_condensation())
     _fe_problem.addCachedJacobian(_tid);
 }
 

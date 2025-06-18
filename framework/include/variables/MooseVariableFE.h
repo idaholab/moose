@@ -709,6 +709,8 @@ public:
   virtual void residualSetup() override;
   virtual void jacobianSetup() override;
 
+  virtual void sizeMatrixTagData() override;
+
   bool supportsFaceArg() const override final { return true; }
   bool supportsElemSideQpArg() const override final { return true; }
 

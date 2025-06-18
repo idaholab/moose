@@ -9,24 +9,19 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "Action.h"
 
 /**
- *  Computes a finite element mass matrix
+ * Adds tagged matrices. This is its own action as opposed to being performed at problem
+ * construction time because other objects, such as preconditioners, may influence the underlying
+ * types of the added matrices
  */
-class MassMatrix : public Kernel
+class AddTaggedMatriesAction : public Action
 {
 public:
   static InputParameters validParams();
-  static void setMassMatrixParams(InputParameters & params);
 
-  MassMatrix(const InputParameters & parameters);
+  AddTaggedMatriesAction(const InputParameters & params);
 
-protected:
-  virtual Real computeQpResidual() override;
-
-  virtual Real computeQpJacobian() override;
-
-  /// The density of the material
-  const MaterialProperty<Real> & _density;
+  virtual void act() override;
 };
