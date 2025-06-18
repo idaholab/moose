@@ -23,7 +23,7 @@ MFEMVectorFESpace::validParams()
   MooseEnum fec_types("H1 ND RT L2", "H1", true);
   params.addParam<MooseEnum>("fec_type", fec_types, "Specifies the family of FE shape functions.");
   params.addParam<std::string>("closed_basis", "GaussLobatto", "Specifies the closed quadrature basis used for vector elements.");
-  params.addParam<std::string>("open_basis", "GaussLobatto", "Specifies the open quadrature basis used for vector elements.");
+  params.addParam<std::string>("open_basis", "GaussLegendre", "Specifies the open quadrature basis used for vector elements.");
   params.addParam<int>("range_dim",
                        0,
                        "The number of components of the vectors in reference space. Zero "
@@ -54,12 +54,12 @@ MFEMVectorFESpace::getFECName() const
   }
 
   char cb = mfem::BasisType::GetChar(getBasis(getParam<std::string>("closed_basis")));
+  std::string closed_basis(1,cb);
   char ob = mfem::BasisType::GetChar(getBasis(getParam<std::string>("open_basis")));
-  //std::cout << "FEC NAME = " << actual_type + "@" + cb + ob + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
-  return actual_type + "@" + cb + ob + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
+  std::string open_basis(1,ob);  
+  std::string basis = (closed_basis + open_basis == "Gg" ? "" : "@" + closed_basis + open_basis);
 
-
-  return actual_type + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
+  return actual_type + basis + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
 }
 
 int
