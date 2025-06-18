@@ -131,7 +131,8 @@ ActivateElementsUserObjectBase::finalize()
   }
 
   // Reinit equation systems
-  _fe_problem.meshChanged(/*intermediate_change=*/false, /*changed_through_amr=*/false);
+  _fe_problem.meshChanged(
+      /*intermediate_change=*/false, /*contract_mesh=*/false, /*clean_refinement_flags=*/false);
 
   // Get storage ranges for the newly activated elements and boundary nodes
   ConstElemRange & elem_range = *this->getNewlyActivatedElementRange();

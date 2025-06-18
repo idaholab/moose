@@ -1729,7 +1729,7 @@ public:
    * immediately-subsequent. If \p changed_throug_amr then we will
    * contract the mesh and clean refinement flags
    */
-  void meshChanged(bool intermediate_change, bool changed_through_amr);
+  void meshChanged(bool intermediate_change, bool contract_mesh, bool clean_refinement_flags);
 
   /**
    * Register an object that derives from MeshChangedInterface

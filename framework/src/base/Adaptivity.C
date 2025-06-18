@@ -319,7 +319,8 @@ Adaptivity::uniformRefineWithProjection()
 
     if (_displaced_problem)
       displaced_mesh_refinement.uniformly_refine(1);
-    _fe_problem.meshChanged(/*intermediate_step=*/false, /*changed_through_amr=*/true);
+    _fe_problem.meshChanged(
+        /*intermediate_step=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/true);
   }
 }
 

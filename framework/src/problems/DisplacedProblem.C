@@ -1098,16 +1098,17 @@ DisplacedProblem::updateGeomSearch(GeometricSearchData::GeometricSearchType type
 }
 
 void
-DisplacedProblem::meshChanged(const bool changed_through_amr)
+DisplacedProblem::meshChanged(const bool contract_mesh, const bool clean_refinement_flags)
 {
   // The mesh changed. The displaced equations system object only holds Systems, so calling
   // EquationSystems::reinit only prolongs/restricts the solution vectors, which is something that
   // needs to happen for every step of mesh adaptivity.
   _eq.reinit();
-  if (changed_through_amr)
-  {
+  if (contract_mesh)
     // Once vectors are restricted, we can delete children of coarsened elements
     _mesh.getMesh().contract();
+  if (clean_refinement_flags)
+  {
     // Finally clean refinement flags so that if someone tries to project vectors again without
     // an intervening mesh refinement to clean flags they won't run into trouble
     MeshRefinement refinement(_mesh.getMesh());

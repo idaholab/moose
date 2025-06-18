@@ -1522,7 +1522,8 @@ FEProblemBase::timestepSetup()
       //     re-displaced, we can perform our geometric searches, which will aid in determining the
       //     sparsity pattern of the matrix held by the libMesh::ImplicitSystem held by the
       //     NonlinearSystem held by this
-      meshChanged(/*intermediate_change=*/true, /*changed_through_amr=*/true);
+      meshChanged(
+          /*intermediate_change=*/true, /*contract_mesh=*/true, /*clean_refinement_flags=*/true);
     }
 
     // u4) Now that all the geometric searches have been done (both undisplaced and displaced),
@@ -7876,7 +7877,8 @@ FEProblemBase::initialAdaptMesh()
 
       if (_adaptivity.initialAdaptMesh())
       {
-        meshChanged(/*intermediate_change=*/false, /*changed_through_amr=*/true);
+        meshChanged(
+            /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/true);
 
         // reproject the initial condition
         projectSolution();
@@ -7923,7 +7925,8 @@ FEProblemBase::adaptMesh()
     {
       mesh_changed = true;
 
-      meshChanged(/*intermediate_change=*/true, /*changed_through_amr=*/true);
+      meshChanged(
+          /*intermediate_change=*/true, /*contract_mesh=*/true, /*clean_refinement_flags=*/true);
       // Once vectors are restricted, we can delete
       // children of coarsened elements
       _mesh.getMesh().contract();
@@ -8004,12 +8007,17 @@ FEProblemBase::updateMeshXFEM()
   if (haveXFEM())
   {
     if (_xfem->updateHeal())
-      meshChanged(/*intermediate_change=*/false, /*changed_through_amr=*/false);
+      // XFEM exodiff tests rely on a given numbering because they cannot use map = true due to
+      // having coincident elements. While conceptually speaking we do not need to contract the
+      // mesh, we need its call to renumber_nodes_and_elements in order to preserve these tests
+      meshChanged(
+          /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/false);
 
     updated = _xfem->update(_time, _nl, *_aux);
     if (updated)
     {
-      meshChanged(/*intermediate_change=*/false, /*changed_through_amr=*/false);
+      meshChanged(
+          /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/false);
       _xfem->initSolution(_nl, *_aux);
       restoreSolutions();
     }
@@ -8018,7 +8026,9 @@ FEProblemBase::updateMeshXFEM()
 }
 
 void
-FEProblemBase::meshChanged(const bool intermediate_change, const bool changed_through_amr)
+FEProblemBase::meshChanged(const bool intermediate_change,
+                           const bool contract_mesh,
+                           const bool clean_refinement_flags)
 {
   TIME_SECTION("meshChanged", 3, "Handling Mesh Changes");
 
@@ -8043,10 +8053,11 @@ FEProblemBase::meshChanged(const bool intermediate_change, const bool changed_th
   else
     es().reinit();
 
-  if (changed_through_amr)
-  {
+  if (contract_mesh)
     // Once vectors are restricted, we can delete children of coarsened elements
     _mesh.getMesh().contract();
+  if (clean_refinement_flags)
+  {
     // Finally clear refinement flags so that if someone tries to project vectors again without
     // an intervening mesh refinement to clear flags they won't run into trouble
     MeshRefinement refinement(_mesh.getMesh());
@@ -8087,7 +8098,7 @@ FEProblemBase::meshChanged(const bool intermediate_change, const bool changed_th
 
   if (_displaced_problem)
   {
-    _displaced_problem->meshChanged(changed_through_amr);
+    _displaced_problem->meshChanged(contract_mesh, clean_refinement_flags);
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
   }
 
@@ -8894,7 +8905,8 @@ FEProblemBase::uniformRefine()
   if (_displaced_problem)
     Adaptivity::uniformRefine(&_displaced_problem->mesh(), 1);
 
-  meshChanged(/*intermediate_change=*/false, /*changed_through_amr=*/true);
+  meshChanged(
+      /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/true);
 }
 
 void
