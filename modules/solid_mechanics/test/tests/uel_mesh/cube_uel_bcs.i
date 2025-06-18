@@ -71,13 +71,6 @@
   []
 []
 
-[Preconditioning]
-  # [fdp]
-  #   type = FDP
-  #   full = true
-  # []
-[]
-
 [VectorPostprocessors]
   [statev]
     type = AbaqusUELStateVariables
@@ -92,7 +85,8 @@
   solve_type = NEWTON
   line_search = NONE
   dt = 0.1
-  end_time = 2.999999
+  dtmin = 0.1
+  end_time = 3
   nl_abs_tol = 1e-9
   # petsc_options_iname = '-pc_factor_shift_type'
   # petsc_options_value = 'nonzero'
