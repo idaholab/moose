@@ -11,7 +11,7 @@ The user needs to specify the [!param](/Postprocessors/SubChannelPointValue/vari
 
 ## Example Input File Syntax
 
-!listing /test/tests/problems/SFR/THORS/FFM-5B.i block=Postprocessors language=moose
+!listing /test/tests/problems/SFR/EBR-II/XX09_SS_SHRT17.i block=Postprocessors language=moose
 
 !syntax parameters /Postprocessors/SubChannelPointValue
 

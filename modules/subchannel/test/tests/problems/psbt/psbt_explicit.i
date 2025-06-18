@@ -142,24 +142,6 @@ pin_diameter = 0.00950
   []
 []
 
-[Postprocessors]
-  [report_mass_flux_inlet]
-    type = Receiver
-    default = ${mass_flux_in}
-  []
-
-  [report_pressure_outlet]
-    type = Receiver
-    default = ${P_out}
-  []
-
-  [Mean_Temp_Out]
-    type = SCMPlanarMean
-    variable = T
-    height = 1.2
-  []
-[]
-
 [Outputs]
   exodus = true
   csv = true
@@ -173,6 +155,19 @@ pin_diameter = 0.00950
 []
 
 [Postprocessors]
+  [report_mass_flux_inlet]
+    type = Receiver
+    default = ${mass_flux_in}
+  []
+  [report_pressure_outlet]
+    type = Receiver
+    default = ${P_out}
+  []
+  [Mean_Temp_Out]
+    type = SCMPlanarMean
+    variable = T
+    height = 1.2
+  []
   [total_pressure_drop]
     type = SubChannelDelta
     variable = P

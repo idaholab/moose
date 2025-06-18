@@ -119,8 +119,6 @@ SCMTriPowerAux::initialSetup()
             MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry))
         // if (z2 > unheated_length_entry && z1 < unheated_length_entry)
         {
-          _console << "first offset heated cell: dz:" << dz << " zero power at height z1: " << z1
-                   << std::endl;
           heat1 = 0.0;
         }
 
@@ -130,8 +128,6 @@ SCMTriPowerAux::initialSetup()
         // if (z2 > unheated_length_entry + heated_length &&
         //     z1 < unheated_length_entry + heated_length)
         {
-          _console << "second offset heated cell: dz:" << dz << " zero power at height z2: " << z2
-                   << std::endl;
           heat2 = 0.0;
         }
 
