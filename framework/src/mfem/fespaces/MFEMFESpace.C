@@ -65,7 +65,7 @@ MFEMFESpace::buildFEC(const std::string & fec_name) const
 int
 MFEMFESpace::getBasis(const std::string & basis_name) const
 {
-      
+
   if (!strcmp(basis_name.c_str(), "GaussLegendre"))
     return mfem::BasisType::GaussLegendre;
   else if (!strcmp(basis_name.c_str(), "GaussLobatto"))
