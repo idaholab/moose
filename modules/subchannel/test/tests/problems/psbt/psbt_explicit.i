@@ -29,48 +29,6 @@ pin_diameter = 0.00950
   []
 []
 
-[AuxVariables]
-  [mdot]
-    block = sub_channel
-  []
-  [SumWij]
-    block = sub_channel
-  []
-  [P]
-    block = sub_channel
-  []
-  [DP]
-    block = sub_channel
-  []
-  [h]
-    block = sub_channel
-  []
-  [T]
-    block = sub_channel
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [Dpin]
-    block = fuel_pins
-  []
-  [rho]
-    block = sub_channel
-  []
-  [mu]
-    block = sub_channel
-  []
-  [S]
-    block = sub_channel
-  []
-  [w_perim]
-    block = sub_channel
-  []
-  [q_prime]
-    block = fuel_pins
-  []
-[]
-
 [FluidProperties]
   [water]
     type = Water97FluidProperties
@@ -86,9 +44,8 @@ pin_diameter = 0.00950
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_out = ${P_out}
-  default_friction_model = false
-  constant_beta = false
+  P_out = report_pressure_outlet
+  verbose_subchannel = true
 []
 
 [ICs]
@@ -100,6 +57,14 @@ pin_diameter = 0.00950
   [w_perim_IC]
     type = SCMQuadWettedPerimIC
     variable = w_perim
+  []
+
+  [q_prime_IC]
+    type = SCMQuadPowerIC
+    variable = q_prime
+    power = 1.0e6 # W
+    filename = "power_profile.txt" #type in name of file that describes radial power profile
+    block = fuel_pins
   []
 
   [T_ic]
@@ -164,32 +129,96 @@ pin_diameter = 0.00950
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
+    block = sub_channel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux
     variable = mdot
     boundary = inlet
     area = S
-    mass_flux = ${mass_flux_in}
+    mass_flux = report_mass_flux_inlet
     execute_on = 'timestep_begin'
+    block = sub_channel
   []
-  [q_prime_IC]
-    type = SCMQuadPowerAux
-    variable = q_prime
-    power = 1.0e6 # W
-    filename = "power_profile.txt" #type in name of file that describes radial power profile
-    execute_on = 'initial timestep_begin'
+[]
+
+[Postprocessors]
+  [report_mass_flux_inlet]
+    type = Receiver
+    default = ${mass_flux_in}
+  []
+
+  [report_pressure_outlet]
+    type = Receiver
+    default = ${P_out}
+  []
+
+  [Mean_Temp_Out]
+    type = SCMPlanarMean
+    variable = T
+    height = 1.2
   []
 []
 
 [Outputs]
   exodus = true
+  csv = true
   [Temp_Out_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = T
     execute_on = final
     file_base = "Temp_Out_Explicit.txt"
     height = 1.0
+  []
+[]
+
+[Postprocessors]
+  [total_pressure_drop]
+    type = SubChannelDelta
+    variable = P
+    execute_on = "timestep_end"
+  []
+  [T1]
+    type = SubChannelPointValue
+    variable = T
+    index = 0
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T2]
+    type = SubChannelPointValue
+    variable = T
+    index = 7
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T3]
+    type = SubChannelPointValue
+    variable = T
+    index = 14
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T4]
+    type = SubChannelPointValue
+    variable = T
+    index = 21
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T5]
+    type = SubChannelPointValue
+    variable = T
+    index = 28
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T6]
+    type = SubChannelPointValue
+    variable = T
+    index = 35
+    execute_on = "timestep_end"
+    height = 1
   []
 []
 

@@ -188,12 +188,63 @@ P_out = 4.923e6 # Pa
 
 [Outputs]
   exodus = true
+  csv = true
   [Temp_Out_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = T
     execute_on = final
     file_base = "Temp_Out_Implicit.txt"
     height = 1.0
+  []
+[]
+
+[Postprocessors]
+  [total_pressure_drop]
+    type = SubChannelDelta
+    variable = P
+    execute_on = "timestep_end"
+  []
+  [T1]
+    type = SubChannelPointValue
+    variable = T
+    index = 0
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T2]
+    type = SubChannelPointValue
+    variable = T
+    index = 7
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T3]
+    type = SubChannelPointValue
+    variable = T
+    index = 14
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T4]
+    type = SubChannelPointValue
+    variable = T
+    index = 21
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T5]
+    type = SubChannelPointValue
+    variable = T
+    index = 28
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T6]
+    type = SubChannelPointValue
+    variable = T
+    index = 35
+    execute_on = "timestep_end"
+    height = 1
   []
 []
 
