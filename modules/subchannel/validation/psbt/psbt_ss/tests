@@ -4,7 +4,7 @@
   [psbt_case_01-5237]
     type = CSVDiff
     input = psbt.i
-    csvdiff = Temp_Out.csv
+    csvdiff = psbt_out.csv
     capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
