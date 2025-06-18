@@ -58,7 +58,6 @@ ParsedPostprocessor::ParsedPostprocessor(const InputParameters & parameters)
   std::vector<PostprocessorName> pp_names = getParam<std::vector<PostprocessorName>>("pp_names");
   if (pp_symbols.empty())
   {
-    // postprocessors = MooseUtils::stringJoin(pp_names, ",");
     for (std::size_t i = 0; i < _n_pp; ++i)
       postprocessors += (i == 0 ? "" : ",") + pp_names[i];
   }
