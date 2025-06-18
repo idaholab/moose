@@ -17,6 +17,15 @@ heated_length = 1.0
   beta_rotation = 90
 []
 
+[Functions]
+  [volumetric_heat_rate] # Defined such as to be consistent with the IC in SCM
+      type = ParsedFunction
+      expression = '(4.0 * 1000 / (pi * D * D * L)) * (pi/2)*sin(pi*y/L)'
+      symbol_names = 'L D'
+      symbol_values = '${heated_length} ${pin_diameter}'
+  []
+[]
+
 [Variables]
   [temperature]
     order = SECOND
@@ -53,7 +62,7 @@ heated_length = 1.0
   [heat_source]
     type = HeatSource
     variable = temperature
-    value = '${fparse 4.0 * 1000 / (pi * pin_diameter * pin_diameter * heated_length)}'
+    function = volumetric_heat_rate
   []
 []
 
