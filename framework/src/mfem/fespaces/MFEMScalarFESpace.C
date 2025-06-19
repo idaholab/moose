@@ -42,7 +42,8 @@ MFEMScalarFESpace::getFECName() const
   else if (_fec_type == "L2")
   {
     if (basis != "g")
-      mooseWarning("L2 finite element collection only supports GaussLegendre basis. Ignoring " + getParam<std::string>("basis") + " basis choice and using GaussLegendre instead.");
+      mooseWarning("L2 finite element space only supports GaussLegendre basis. "
+        "Ignoring " + getParam<std::string>("basis") + " basis choice and using GaussLegendre instead.\n");
     basis = "";
   }
 
