@@ -29,8 +29,7 @@ LinearFVAdvectionDiffusionFunctorRobinBC::validParams()
 LinearFVAdvectionDiffusionFunctorRobinBC::LinearFVAdvectionDiffusionFunctorRobinBC(
     const InputParameters & parameters)
   : LinearFVAdvectionDiffusionBC(parameters), _functor_alpha(getFunctor<Real>("alpha")),
-    LinearFVAdvectionDiffusionBC(parameters),  _functor_beta(getFunctor<Real>("beta" )),
-    LinearFVAdvectionDiffusionBC(parameters), _functor_gamma(getFunctor<Real>("gamma"))
+    _functor_beta(getFunctor<Real>("beta" )), _functor_gamma(getFunctor<Real>("gamma"))
 {
 }
 
