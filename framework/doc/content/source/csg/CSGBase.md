@@ -23,7 +23,7 @@ auto sphere_at_origin = csg_obj->createSphere('my_new_sphere', 5);
 auto sphere_cell = csg_obj->createCell('my_new_cell', -sphere_at_origin, new_univ);
 ```
 
-## Surface Methods
+## Surfaces
 
 Various methods exist to create `CSGSurface` objects (below).
 All surface creation methods will return a shared pointer to that generated surface.
@@ -74,27 +74,11 @@ auto ycyl = csg_obj->createCylinder('ycylinder', 1, 3, 5, 'y');
 auto zcyl = csg_obj->createCylinder('zcylinder', 1, 2, 5, 'z');
 ```
 
-## Cell Methods
+## Regions
 
-A cell is an object defined by a region and a fill.
-To create any `CSGCell`, use the method `createCell` from `CSGBase` which will return a shared pointer to the `CSGCell` object that is created.
-At the time of calling `createCell`, a unique cell name, the cell region (`CSGRegion`), and an indicator of the fill must be provided.
-The `CSGRegion` is defined by boolean combinations of `CSGSurfaces` as described below.
-Three types of cell fills are currently supported: void, material, and universe.
-If creating a void cell, no fill has to be passed to the creation method.
-To create a cell with a material fill, simply provide it with a name of a material as a string.
-For a cell with a `CSGUniverse` fill, pass it a shared pointer to the `CSGUniverse`.
-
-The `CSGCell` objects can then be accessed or updated with the following methods from `CSGBase`:
-
-- `getAllCells`: retrieve a map of names to shared pointers for of all `CSGCell` objects
-- `getCellByName`: retrieve the shared pointer to the `CSGCell` of the specified name
-- `renameCell`: change the name of the `CSGCell`
-- `updateCellRegion`: change the region of the cell; if used, all `CSGSurface` objects used to define the new `CSGRegion` must also be a part of the current `CSGBase`
-
-### Region Definition
-
-As stated, the region for a cell is defined as boolean combinations of surfaces, more specifically the halfspace regions defined by the surfaces.
+A region is a space defined by boolean operations applied to surfaces and other regions.
+Halfspace regions are defined as the positive and negative space separated by a surface.
+These regions can be unioned, intersected, or the complement taken to further define more complex regions.
 Series of operations can be defined using parentheses `(` `)` to indicate which operations to perform first.
 The types of operators available to define a `CSGRegion` using `CSGSurface` objects are:
 
@@ -106,11 +90,11 @@ The types of operators available to define a `CSGRegion` using `CSGSurface` obje
 | `|`      | union              | `-surfA` `|` `+surfB` |
 | `~`      | complement         | `~(-surfA & +surfB)`  |
 
-Here is an example of using a combination of all operators to define the space outside a cylinder of a finite height that is topped with a half-sphere.
+The following is an example of using a combination of all operators to define the space outside a cylinder of a finite height that is topped with a half-sphere.
 Each of the halfspaces associated with each surface are shown in [!ref](fig:region_surfs).
 The cylinder and planes are then combined via intersection to form the region inside a finite cylinder, and the space above the top plane is intersected with the sphere to define a half sphere ([!ref](fig:region1)).
 These two regions are unioned as shown in [!ref](fig:region2).
-The complement of the previous combination then defines the final region used, as shown in blue in [!ref](fig:region2).
+The complement of the previous combination then defines the final region `~((-cylinder_surf & -top_plane & +bottom_plane) | (+top_plane & -sphere_surf))`, as shown in blue in [!ref](fig:region2).
 
 !media large_media/csg/region_surfs.png
        id=fig:region_surfs
@@ -128,7 +112,25 @@ The complement of the previous combination then defines the final region used, a
        id=fig:region3
        caption=A region defined as the *complement* of an existing region.
 
-## Universe Methods
+## Cells
+
+A cell is an object defined by a region and a fill.
+To create any `CSGCell`, use the method `createCell` from `CSGBase` which will return a shared pointer to the `CSGCell` object that is created.
+At the time of calling `createCell`, a unique cell name, the cell region (`CSGRegion`), and an indicator of the fill must be provided.
+The `CSGRegion` is defined by boolean combinations of `CSGSurfaces` as described below.
+Three types of cell fills are currently supported: void, material, and universe.
+If creating a void cell, no fill has to be passed to the creation method.
+To create a cell with a material fill, simply provide it with a name of a material as a string.
+For a cell with a `CSGUniverse` fill, pass it a shared pointer to the `CSGUniverse`.
+
+The `CSGCell` objects can then be accessed or updated with the following methods from `CSGBase`:
+
+- `getAllCells`: retrieve a map of names to shared pointers for of all `CSGCell` objects
+- `getCellByName`: retrieve the shared pointer to the `CSGCell` of the specified name
+- `renameCell`: change the name of the `CSGCell`
+- `updateCellRegion`: change the region of the cell; if used, all `CSGSurface` objects used to define the new `CSGRegion` must also be a part of the current `CSGBase`
+
+## Universes
 
 A universe is a collection of cells and is created by calling `createUniverse` from `CSGBase`.
 A `CSGUniverse` can be initialized as an empty universe, or by passing a vector of shared pointers to `CSGCell` objects.
