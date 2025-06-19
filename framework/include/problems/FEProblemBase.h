@@ -1729,7 +1729,8 @@ public:
    * immediately-subsequent. If \p changed_throug_amr then we will
    * contract the mesh and clean refinement flags
    */
-  void meshChanged(bool intermediate_change, bool contract_mesh, bool clean_refinement_flags);
+  virtual void
+  meshChanged(bool intermediate_change, bool contract_mesh, bool clean_refinement_flags);
 
   /**
    * Register an object that derives from MeshChangedInterface
@@ -2407,6 +2408,11 @@ public:
   const std::vector<SolverSystemName> & getSolverSystemNames() const { return _solver_sys_names; }
 
 protected:
+  /**
+   * Deprecated. Users should switch to overriding the meshChanged which takes arguments
+   */
+  virtual void meshChanged() {}
+
   /// Create extra tagged vectors and matrices
   void createTagVectors();
 

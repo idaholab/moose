@@ -8169,6 +8169,10 @@ FEProblemBase::meshChanged(const bool intermediate_change,
     setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
 
   _has_jacobian = false; // we have to recompute jacobian when mesh changed
+
+  // Now for backwards compatibility with user code that overrode the old no-arg meshChanged we must
+  // call it here
+  meshChanged();
 }
 
 void
