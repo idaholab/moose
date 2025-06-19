@@ -106,9 +106,27 @@ The types of operators available to define a `CSGRegion` using `CSGSurface` obje
 | `|`      | union              | `-surfA` `|` `+surfB` |
 | `~`      | complement         | `~(-surfA & +surfB)`  |
 
-Here is an example of using a combination of all operators to define the space outside a cylinder of a finite height that is topped with a half-sphere:
+Here is an example of using a combination of all operators to define the space outside a cylinder of a finite height that is topped with a half-sphere.
+Each of the halfspaces associated with each surface are shown in [!ref](fig:region_surfs).
+The cylinder and planes are then combined via intersection to form the region inside a finite cylinder, and the space above the top plane is intersected with the sphere to define a half sphere ([!ref](fig:region1)).
+These two regions are unioned as shown in [!ref](fig:region2).
+The complement of the previous combination then defines the final region used, as shown in blue in [!ref](fig:region2).
 
-`~((-cylinder_surf & -top_plane & +bottom_plane) | (+top_plane & -sphere_surf))`
+!media large_media/csg/region_surfs.png
+       id=fig:region_surfs
+       caption=Four different surfaces: an infinite cylinder (blue), a top plane (orange), a bottom plane (red), and a sphere (green)
+
+!media large_media/csg/region1.png
+       id=fig:region1
+       caption=Two separate regions both defined as *intersections* of *halfspaces*.
+
+!media large_media/csg/region2.png
+       id=fig:region2
+       caption=One region defined by the *union* of two other regions.
+
+!media large_media/csg/region3.png
+       id=fig:region3
+       caption=A region defined as the *complement* of an existing region.
 
 ## Universe Methods
 
