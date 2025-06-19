@@ -26,10 +26,8 @@ processLiteralVectors(const std::vector<MFEMVectorCoefficientName> & input)
     if (in_literal)
     {
       if (item.front() == '{')
-      {
         mooseError("Nested numeric vector values are not permitted in "
                    "MFEMGenericFunctorVectoMaterial prop_values.");
-      }
       else if (item.back() == '}')
       {
         in_literal = false;
@@ -37,16 +35,12 @@ processLiteralVectors(const std::vector<MFEMVectorCoefficientName> & input)
         result.push_back(literal);
       }
       else
-      {
         literal += " " + item;
-      }
     }
     else if (item.front() == '{')
     {
       if (item.back() == '}')
-      {
         result.push_back(item.substr(1, item.size() - 2));
-      }
       else
       {
         in_literal = true;
@@ -54,16 +48,12 @@ processLiteralVectors(const std::vector<MFEMVectorCoefficientName> & input)
       }
     }
     else
-    {
       result.push_back(item);
-    }
   }
   if (in_literal)
-  {
     mooseError("No closing curly brace for vector value in "
                "MFEMGenericFunctorVectorMaterial prop_values: '{" +
                literal + "'");
-  }
   return result;
 }
 
