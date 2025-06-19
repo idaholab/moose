@@ -1,4 +1,4 @@
-# Constructive Solid Geometry
+# CSG
 
 [!ac](CSG) is a geometry representation in which complex models are created through boolean combinations of surfaces, cells, and universes.
 [!ac](CSG) models are most commonly used for [!ac](MC) neutronics simulations.
