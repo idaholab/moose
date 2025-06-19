@@ -229,23 +229,22 @@ public:
   DupParamWalker() {}
   void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
   {
-    std::string prefix = n->type() == hit::NodeType::Field ? "parameter" : "section";
-
-    if (_have.count(fullpath) > 0)
+    const std::string prefix = n->type() == hit::NodeType::Field ? "parameter" : "section";
+    const auto it = _have.find(fullpath);
+    if (it != _have.end())
     {
-      auto existing = _have[fullpath];
+      auto existing = it->second;
       if (_duplicates.count(fullpath) == 0)
       {
-        errors.push_back(
-            hit::errormsg(existing, prefix, " '", fullpath, "' supplied multiple times"));
+        errors.emplace_back(prefix + " '" + fullpath + "' supplied multiple times", existing);
         _duplicates.insert(fullpath);
       }
-      errors.push_back(hit::errormsg(n, prefix, " '", fullpath, "' supplied multiple times"));
+      errors.emplace_back(prefix + " '" + fullpath + "' supplied multiple times", n);
     }
     _have[n->fullpath()] = n;
   }
 
-  std::vector<std::string> errors;
+  std::vector<hit::ErrorMessage> errors;
 
 private:
   std::set<std::string> _duplicates;
@@ -508,7 +507,6 @@ readMerged(const std::vector<std::string> & input_filenames)
   {
     std::string input = readInput(input_filename);
     std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
-    hit::explode(root.get());
 
     if (!combined_root)
       combined_root = std::move(root);
@@ -845,8 +843,8 @@ validate(int argc, char ** argv)
 
     DupParamWalker w;
     root->walk(&w, hit::NodeType::Field);
-    for (auto & msg : w.errors)
-      std::cout << msg << "\n";
+    for (const auto & error : w.errors)
+      std::cout << error.prefixed_message << "\n";
   }
   return ret;
 }

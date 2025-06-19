@@ -49,8 +49,7 @@
     design = 'InputParameters.md'
     issues = '#15497'
     no_error_deprecated = True
-    expect_out = "deprecate-old-for-new-param\.i:[0-9]+:.*coef.*:\n'coef' has been deprecated and "
-                 "will be removed on .+\. Please use 'coeff' instead"
+    expect_out = "deprecate-old-for-new-param.i:28.5:\nKernels/diff/coef: 'coef' has been deprecated and will be removed on 01/01/2040. Please use 'coeff' instead."
   []
 
   [deprecated_coupled_var]
@@ -61,8 +60,7 @@
     design = 'InputParameters.md'
     issues = '#15497'
     no_error_deprecated = True
-    expect_out = "deprecated_coupled_var\.i:[0-9]+:.*stupid_name.*:\n'stupid_name' has been "
-                 "deprecated and will be removed on.+\. Please use 'source' instead"
+    expect_out = "deprecated_coupled_var.i:33.5:\nKernels/deprecated_coupled_v/stupid_name: 'stupid_name' has been deprecated and will be removed on 01/01/2040. Please use 'source' instead."
   []
 
   [blessed_coupled_var]
