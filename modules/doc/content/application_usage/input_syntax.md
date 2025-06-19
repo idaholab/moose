@@ -134,70 +134,22 @@ can include other files. The only requirement is that the included files
 must contain a set of syntactically complete blocks or parameters.
 
 Functionally, including a file is equivalent to inserting the
-text of the file at the `!include` location. Therefore,
-for example, if the included file uses a value `${somevar}` defined in the parent file
-via `somevar = somval`, then the `!include` statement must occur *after* the
-`somevar` definition.
-
-!alert! warning title=Beware merge-related include ordering issues
-When an included file contains the same block as the parent file, the blocks get
-*merged*. The merge moves the second instance of the block into the first, not
-the first into the second. For example,
-
-`file1.i`:
-
-```
-[BlockA]
-  param1 = 4
-[]
-
-!include file2.i
-```
-
-`file2.i`:
-
-```
-val3 = 8
-
-[BlockA]
-  param2 = ${val3}
-[]
-```
-
-This effectively produces the input
-
-```
-[BlockA]
-  param1 = 4
-[]
-
-val3 = 8
-
-[BlockA]
-  param2 = ${val3}
-[]
-```
-
-and after the merge operation,
-
-```
-[BlockA]
-  param1 = 4
-  param2 = ${val3}
-[]
-
-val3 = 8
-```
-
-This results in an error, since `${val3}` is now used before it is defined.
-Therefore, files must be partitioned with this behavior in mind.
-!alert-end!
+text of the file at the `!include` location.
 
 !alert warning title=Included input parameters cannot be overridden by default
 Note that parameters from the parent or included files do not override each other by default,
 as this is just interpreted as providing the input parameter twice, resulting in a parsing error.
 To override parameters, you must either use command-line arguments or the explicit
 override syntax defined below.
+
+!alert! tip title=Viewing a single equivalent input file
+If you would like to view an equivalent input file after the include operations
+and parameter overrides (see the following section), you can use the `hit` utility:
+
+```
+~/projects/moose/framework/contrib/hit/hit braceexpr myinput.i
+```
+!alert-end!
 
 ## Parameter override syntax
 
