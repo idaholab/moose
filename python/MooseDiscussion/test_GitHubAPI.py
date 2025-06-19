@@ -105,13 +105,32 @@ class TestGitHubAPI(unittest.TestCase):
         self.api.fetch_data()
 
         # Check that a log was printed.
-        self.assertTrue(any("Remaining credit:" in call.args[0] for call in mock_print.call_args_list))
+        self.assertTrue(
+            any(
+                "Remaining credit:" in call.args[0]
+                for call in mock_print.call_args_list
+            )
+        )
 
         # Check that a file was written in the out_dir.
         # The filename is created from the begin and new end cursor values.
         expected_filename = "{}_{}.json".format("null", '"cursor1"')
         file_path = Path(self.out_dir) / expected_filename
         self.assertTrue(file_path.exists())
+
+    @patch("GitHubAPI.Path.read_text", new=fake_read_text)
+    @patch("builtins.print")
+    def test_fetch_comments_and_replies_dry_run(self, mock_print):
+        # Set dry_run True so the function only prints the dry run message.
+        self.api.dry_run = True
+        result = self.api.fetch_comments_and_replies("dummy_discussion")
+        self.assertEqual(result, {})
+        # Verify that the dry run message was printed.
+        mock_print.assert_any_call(
+            "Dry run: would execute comments query for discussion {} with cursor {}".format(
+                "dummy_discussion", "null"
+            )
+        )
 
     @patch("GitHubAPI.Path.read_text", new=fake_read_text)
     @patch("requests.post")
