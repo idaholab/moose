@@ -138,8 +138,6 @@ std::vector<std::pair<Real, unsigned int>> vertex_distances(const Elem & elem);
  * @param nid_4 id of the node on the second cut side of the triangle
  * @param single_elem_side_id subdomain id of the single element side
  * @param double_elem_side_id subdomain id of the double element side
- * @param new_boundary_id boundary id of the new boundary that divides the single element side and
- * the double element side
  */
 void triElemSplitter(libMesh::ReplicatedMesh & mesh,
                      const dof_id_type elem_id,
@@ -147,8 +145,7 @@ void triElemSplitter(libMesh::ReplicatedMesh & mesh,
                      const dof_id_type nid_3,
                      const dof_id_type nid_4,
                      const subdomain_id_type single_elem_side_id,
-                     const subdomain_id_type double_elem_side_id,
-                     const boundary_id_type new_boundary_id);
+                     const subdomain_id_type double_elem_side_id);
 
 /**
  * Split a TRI3 element into two TRI3 elements based on one node on one side of the triangle
@@ -159,15 +156,13 @@ void triElemSplitter(libMesh::ReplicatedMesh & mesh,
  * @param nid_m id of the node on the cut side of the triangle
  * @param first_elem_side_id subdomain id of the first element side
  * @param second_elem_side_id subdomain id of the second element side
- * @param new_boundary_id boundary id of the new boundary that divides the two elements
  */
 void triElemSplitter(libMesh::ReplicatedMesh & mesh,
                      const dof_id_type elem_id,
                      const unsigned short node_shift,
                      const dof_id_type nid_m,
                      const subdomain_id_type first_elem_side_id,
-                     const subdomain_id_type second_elem_side_id,
-                     const boundary_id_type new_boundary_id);
+                     const subdomain_id_type second_elem_side_id);
 
 /**
  * Split a QUAD4 element into two TRI3 elements
