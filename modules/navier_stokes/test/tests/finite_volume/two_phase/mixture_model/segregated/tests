@@ -28,11 +28,18 @@
     heavy = True
     method = 'opt'
   []
-  [channel]
+  [channel_regular]
+    type = CSVDiff
+    input = 'channel-drift-flux.i'
+    csvdiff = 'channel-drift-flux_out.csv'
+    requirement = 'The system shall be able to model channel flow using a two phase mixture using the linear finite volume discretization.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [channel_physics]
     type = CSVDiff
     input = 'channel-drift-flux-physics.i'
     csvdiff = 'channel-drift-flux-physics_out.csv'
-    requirement = 'The system shall be able to model channel flow using a two phase mixture using the linear finite volume discretization.'
+    requirement = 'The system shall be able to model channel flow using a two phase mixture using the linear finite volume discretization and a shorthand physics syntax.'
     max_threads = 1 # see libmesh issue #3808
   []
 
