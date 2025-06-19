@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 
 #include "MooseMain.h"
+#include "Parser.h"
 
 struct Args
 {

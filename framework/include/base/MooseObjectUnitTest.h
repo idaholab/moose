@@ -92,7 +92,7 @@ protected:
 
     InputParameters problem_params = _factory.getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
-    problem_params.set<std::string>(MooseBase::object_name) = "name2";
+    problem_params.set<std::string>(MooseBase::name_param) = "name2";
     _fe_problem = _factory.create<FEProblem>("FEProblem", "problem", problem_params);
 
     _fe_problem->createQRules(libMesh::QGAUSS, libMesh::FIRST, libMesh::FIRST, libMesh::FIRST);
