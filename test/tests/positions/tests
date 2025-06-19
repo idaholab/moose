@@ -52,11 +52,11 @@
       # Needs to be able to find the element containing the origin
       mesh_mode = replicated
     []
-    [parsed_expression]
+    [parsed_downselection_expression]
       type = 'JSONDiff'
       input = 'parsed_selection_positions.i'
       jsondiff = 'parsed_selection_positions_out.json'
-      detail = 'a parsed expression selecting element positions across the mesh,'
+      detail = 'a parsed expression selecting positions from other positions objects, depending on the value of a parsed expression,'
     []
     [functor_extrema]
       type = 'JSONDiff'
