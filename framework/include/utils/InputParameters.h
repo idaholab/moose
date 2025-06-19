@@ -159,8 +159,10 @@ public:
    */
   virtual void set_attributes(const std::string & name, bool inserted_only) override;
 
-  /// Prints the deprecated parameter message, assuming we have the right flags set
-  bool attemptPrintDeprecated(const std::string & name);
+  /**
+   * @return The deprecated parameter message for the given parameter, if any
+   */
+  std::optional<std::string> queryDeprecatedParamMessage(const std::string & name) const;
 
   /// This functions is called in set as a 'callback' to avoid code duplication
   template <typename T>
@@ -200,19 +202,24 @@ public:
 
   /**
    * Runs a range on the supplied parameter if it exists and throws an error if that check fails.
-   * @returns Boolean indicating whether range check exists
+   * @returns Optional of whether or not the error is a user error (false = developer error) and
+   * the associated error
+   *
+   * If \p include_param_path = true, include the parameter path in the error message
    */
+  ///@{
   template <typename T, typename UP_T>
-  void rangeCheck(const std::string & full_name,
-                  const std::string & short_name,
-                  InputParameters::Parameter<T> * param,
-                  std::ostream & oss = Moose::out);
+  std::optional<std::pair<bool, std::string>> rangeCheck(const std::string & full_name,
+                                                         const std::string & short_name,
+                                                         InputParameters::Parameter<T> * param,
+                                                         const bool include_param_path = true);
   template <typename T, typename UP_T>
-  void rangeCheck(const std::string & full_name,
-                  const std::string & short_name,
-                  InputParameters::Parameter<std::vector<T>> * param,
-                  std::ostream & oss = Moose::out);
-
+  std::optional<std::pair<bool, std::string>>
+  rangeCheck(const std::string & full_name,
+             const std::string & short_name,
+             InputParameters::Parameter<std::vector<T>> * param,
+             const bool include_param_path = true);
+  ///@}
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
    * The template parameter must be a pointer or an error will be thrown.
@@ -1514,16 +1521,20 @@ InputParameters::setParameters(const std::string & name,
 }
 
 template <typename T, typename UP_T>
-void
+std::optional<std::pair<bool, std::string>>
 InputParameters::rangeCheck(const std::string & full_name,
                             const std::string & short_name,
                             InputParameters::Parameter<std::vector<T>> * param,
-                            std::ostream & oss)
+                            const bool include_param_path)
 {
   mooseAssert(param, "Parameter is NULL");
 
-  if (!isParamValid(short_name) || _params[short_name]._range_function.empty())
-    return;
+  if (!isParamValid(short_name))
+    return {};
+
+  const auto & range_function = _params[short_name]._range_function;
+  if (range_function.empty())
+    return {};
 
   /**
    * Automatically detect the variables used in the range checking expression.
@@ -1538,11 +1549,10 @@ InputParameters::rangeCheck(const std::string & full_name,
    */
   FunctionParserBase<UP_T> fp;
   std::vector<std::string> vars;
-  if (fp.ParseAndDeduceVariables(_params[short_name]._range_function, vars) != -1) // -1 for success
-  {
-    oss << "Error parsing expression: " << _params[short_name]._range_function << '\n';
-    return;
-  }
+  if (fp.ParseAndDeduceVariables(range_function, vars) != -1) // -1 for success
+    return {
+        {false,
+         "Error parsing expression '" + range_function + "' for parameter '" + short_name + "'"}};
 
   // Fparser parameter buffer
   std::vector<UP_T> parbuf(vars.size());
@@ -1561,10 +1571,7 @@ InputParameters::rangeCheck(const std::string & full_name,
       if (vars[j] == short_name)
       {
         if (value.size() == 0)
-        {
-          oss << "Range checking empty vector: " << _params[short_name]._range_function << '\n';
-          return;
-        }
+          return {{true, "Range checking empty vector '" + range_function + "'"}};
 
         parbuf[j] = value[i];
         need_to_iterate = true;
@@ -1574,10 +1581,7 @@ InputParameters::rangeCheck(const std::string & full_name,
       else
       {
         if (vars[j].substr(0, short_name.size() + 1) != short_name + "_")
-        {
-          oss << "Error parsing expression: " << _params[short_name]._range_function << '\n';
-          return;
-        }
+          return {{false, "Error parsing expression '" + range_function + "'"}};
         std::istringstream iss(vars[j]);
         iss.seekg(short_name.size() + 1);
 
@@ -1585,19 +1589,15 @@ InputParameters::rangeCheck(const std::string & full_name,
         if (iss >> index && iss.eof())
         {
           if (index >= value.size())
-          {
-            oss << "Error parsing expression: " << _params[short_name]._range_function
-                << "\nOut of range variable " << vars[j] << '\n';
-            return;
-          }
+            return {{true,
+                     "Error parsing expression '" + range_function + "'; out of range variable '" +
+                         vars[j] + "'"}};
           parbuf[j] = value[index];
         }
         else
-        {
-          oss << "Error parsing expression: " << _params[short_name]._range_function
-              << "\nInvalid variable " << vars[j] << '\n';
-          return;
-        }
+          return {{false,
+                   "Error parsing expression '" + range_function + "; invalid variable '" +
+                       vars[j] + "'"}};
       }
     }
 
@@ -1610,41 +1610,47 @@ InputParameters::rangeCheck(const std::string & full_name,
 
     // test function using the parameters determined above
     if (fp.EvalError())
-    {
-      oss << "Error evaluating expression: " << _params[short_name]._range_function << '\n';
-      return;
-    }
+      return {{false, "Error evaluating expression '" + range_function + "'"}};
 
     if (!result)
     {
-      oss << "Range check failed for parameter " << full_name
-          << "\n\tExpression: " << _params[short_name]._range_function << "\n";
+      std::ostringstream oss;
+      oss << "Range check failed";
+      if (include_param_path)
+        oss << " for parameter '" << full_name << "'";
+      oss << "; expression = '" << range_function << "'";
       if (need_to_iterate)
-        oss << "\t Component: " << i << '\n';
+        oss << ", component " << i;
+      return {{true, oss.str()}};
     }
 
   } while (need_to_iterate && ++i < value.size());
+
+  return {};
 }
 
 template <typename T, typename UP_T>
-void
+std::optional<std::pair<bool, std::string>>
 InputParameters::rangeCheck(const std::string & full_name,
                             const std::string & short_name,
                             InputParameters::Parameter<T> * param,
-                            std::ostream & oss)
+                            const bool include_param_path)
 {
   mooseAssert(param, "Parameter is NULL");
 
-  if (!isParamValid(short_name) || _params[short_name]._range_function.empty())
-    return;
+  if (!isParamValid(short_name))
+    return {};
+
+  const auto & range_function = _params[short_name]._range_function;
+  if (range_function.empty())
+    return {};
 
   // Parse the expression
   FunctionParserBase<UP_T> fp;
-  if (fp.Parse(_params[short_name]._range_function, short_name) != -1) // -1 for success
-  {
-    oss << "Error parsing expression: " << _params[short_name]._range_function << '\n';
-    return;
-  }
+  if (fp.Parse(range_function, short_name) != -1) // -1 for success
+    return {{false,
+             "Error parsing expression '" + range_function + "'" + " for parameter '" + short_name +
+                 "'"}};
 
   // ensure range-checked input file parameter comparison functions
   // do absolute floating point comparisons instead of using a default epsilon.
@@ -1656,16 +1662,21 @@ InputParameters::rangeCheck(const std::string & full_name,
   fp.setEpsilon(tmp_eps);
 
   if (fp.EvalError())
-  {
-    oss << "Error evaluating expression: " << _params[short_name]._range_function
-        << "\nPerhaps you used the wrong variable name?\n";
-    return;
-  }
+    return {{false,
+             "Error evaluating expression '" + range_function + "' for '" + short_name +
+                 "'; perhaps you used the wrong variable name?"}};
 
   if (!result)
-    oss << "Range check failed for parameter " << full_name
-        << "\n\tExpression: " << _params[short_name]._range_function << "\n\tValue: " << value[0]
-        << '\n';
+  {
+    std::ostringstream oss;
+    oss << "Range check failed";
+    if (include_param_path)
+      oss << " for parameter '" << full_name << "'";
+    oss << "; expression = '" << range_function << "', value = " << value[0];
+    return {{true, oss.str()}};
+  }
+
+  return {};
 }
 
 template <typename T>
@@ -1679,7 +1690,7 @@ InputParameters::getCheckedPointerParam(const std::string & name_in,
 
   // Note: You will receive a compile error on this line if you attempt to pass a non-pointer
   // template type to this method
-  if (param == NULL)
+  if (!param)
     mooseError("Parameter ", name, " is NULL.\n", error_string);
   return this->get<T>(name);
 }

@@ -720,7 +720,6 @@ ParameterStudyAction::inferMultiAppMode()
   std::ifstream f(input_filename);
   std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
   std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
-  hit::explode(root.get());
 
   // Walk through the input and see if every param is controllable
   AreParametersControllableWalker control_walker(_parameters, _app);

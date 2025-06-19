@@ -59,8 +59,7 @@
     type = 'RunException'
     input = 'optionally_coupled_twovar.i'
     cli_args = 'Kernels/optional_coupling/v="3 v"'
-    expect_err = 'MOOSE does not currently support a coupled vector where some parameters are reals '
-                 'and others are variables'
+    expect_err = "CLI_ARGS: invalid value for 'Kernels/optional_coupling/v': coupled vectors where some parameters are reals and others are variables are not supported"
     requirement = "The system shall report an error when users couple constant values and variables "
                   "together"
     design = 'Coupleable.md'
