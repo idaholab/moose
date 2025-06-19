@@ -17,9 +17,7 @@ MFEMVectorDirichletBCBase::validParams()
   InputParameters params = MFEMEssentialBC::validParams();
   params.addRequiredParam<MFEMVectorCoefficientName>(
       "vector_coefficient",
-      "Vector coefficient specifying the values variable takes on the boundary. A coefficient "
-      "can be any of the following: a variable, an MFEM material property, a function, a "
-      "post-processor, or a numerical value.");
+      "Vector coefficient specifying the values the variable takes on the boundary");
   return params;
 }
 
