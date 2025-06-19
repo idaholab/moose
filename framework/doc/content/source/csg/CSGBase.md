@@ -1,7 +1,7 @@
 # CSGBase
 
-`CSGBase` is the main class with which developers should interact with when implementing the `generateCSG` method for any mesh generator.
-This class acts as a container and driver for all methods necessary for creating a CSG representation such as generating surfaces, cells, and universes.
+`CSGBase` is the main class developers should interact with when implementing the `generateCSG` method for any mesh generator.
+This class acts as a container and driver for all methods necessary for creating a CSG representation such as generating surfaces, cells, and universes of the mesh generator under consideration.
 
 ## Initialization
 
@@ -132,7 +132,7 @@ Example:
 ```cpp
 // create an empty universe which will get cells added to it later
 auto empty_universe = csg_obj->createUniverse("empty_universe");
-// create a universe that is initialized with an existing list of cells
+// create a universe that is initialized with an existing list of shared pointers to CSGCell objects
 auto new_universe = csg_obj->createUniverse("new_universe", list_of_cells);
 ```
 
@@ -143,7 +143,7 @@ Because universes are a collection of cells and cells can be filled with univers
 When a `CSGBase` object is first initialized, a root `CSGUniverse` called `ROOT_UNIVERSE` is created by default.
 Every `CSGCell` that is created will be added to the root universe unless otherwise specified (as described [below](#adding-or-removing-cells)).
 The root universe exists by default and cannot be changed except when joining `CSGBase` objects, as described [below](#updating-existing-csgbase-objects).
-However, the name of the root universe can be updated, though it won't change the object and its contents directly.
+However, the name of the root universe can be updated, though it won't change the object and its contents.
 
 Methods available for managing the root universe:
 
@@ -202,7 +202,7 @@ An example use would be to take the previous two examples and remove the cells f
 ```cpp
 // create a list of cells and add to an existing universe after creating all of them
 std::vector<std::shared_ptr<CSG::CSGCell>> list_of_cells;
-for (unsigned int i = 0; i < x; ++i)
+for (unsigned int i = 0; i < num_cells_to_add; ++i)
 {
     // creating new_cell here will add it to the root universe
     auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
@@ -215,7 +215,7 @@ csg_obj->removeCellsFromUniverse(csg_obj->getRootUniverse(), list_of_cells);
 
 ```cpp
 // create new cells and add them to an existing universe and remove them from root one-by-one
-for (unsigned int i = 0; i < x; ++i)
+for (unsigned int i = 0; i < num_cells_to_add; ++i)
 {
     // creating new_cell here will add it to the root universe
     auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
@@ -238,7 +238,8 @@ There are two main ways to handle this: passing and joining.
 
 ### Passing between Mesh Generators
 
-The `getCSGBase*` methods available for all [mesh generators](source/meshgenerators/MeshGenerator.md) can be used to access the `CSGBase` object associated with a different `MeshGenerator` and move it to be the current object. For example:
+The `getCSGBase*` methods available for all [mesh generators](source/meshgenerators/MeshGenerator.md) can be used to access the `CSGBase` object associated with a different `MeshGenerator` object and move it to be the current object.
+For example:
 
 ```cpp
 // get the CSGBase from a different mesh generator and use in this mesh generator
