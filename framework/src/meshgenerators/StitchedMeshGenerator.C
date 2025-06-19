@@ -46,7 +46,7 @@ StitchedMeshGenerator::validParams()
   params.addParam<bool>(
       "subdomain_remapping",
       true,
-      "If the input meshes have boundaries with the same name (but different IDs), merge them");
+      "Treat input subdomain names as primary, preserving them and remapping IDs as needed");
   params.addParam<bool>(
       "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
   params.addClassDescription(
