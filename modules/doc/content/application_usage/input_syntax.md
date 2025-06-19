@@ -134,11 +134,7 @@ can include other files. The only requirement is that the included files
 must contain a set of syntactically complete blocks or parameters.
 
 Functionally, including a file is equivalent to inserting the
-text of the file at the `!include` location. If a block already exists, then
-its sub-blocks and parameters are merged into the existing block to avoid
-having multiple blocks of the same name. Note, however, that this merging
-should no effect on the input, since all input, including user-defined parameters
-are order-independent.
+text of the file at the `!include` location.
 
 !alert warning title=Included input parameters cannot be overridden by default
 Note that parameters from the parent or included files do not override each other by default,
