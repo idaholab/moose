@@ -236,10 +236,11 @@ CommandLine::initSubAppCommandLine(const std::string & multiapp_name,
   return std::make_unique<CommandLine>(subapp_args);
 }
 
-std::string
+std::vector<std::string>
 CommandLine::buildHitParams()
 {
-  mooseAssert(_command_line_params_populated, "Must populate command line params first");
+  mooseAssert(!_hit_params_built, "Already built");
+  _hit_params_built = true;
 
   std::vector<std::string> params;
 
@@ -265,7 +266,7 @@ CommandLine::buildHitParams()
       {
         hit::check("CLI_ARG", arg);
       }
-      catch (hit::ParseError & err)
+      catch (hit::Error & err)
       {
         // bash might have eaten quotes around a hit string value or vector
         // so try quoting after the "=" and reparse
@@ -275,7 +276,7 @@ CommandLine::buildHitParams()
           hit::check("CLI_ARG", arg);
         }
         // At this point, we've failed to fix it
-        catch (hit::ParseError & err)
+        catch (hit::Error & err)
         {
           mooseError("Failed to parse HIT in command line argument '", arg, "'\n\n", err.what());
         }
@@ -287,7 +288,7 @@ CommandLine::buildHitParams()
       entry.used = true;
     }
 
-  return MooseUtils::stringJoin(params, " ");
+  return params;
 }
 
 void

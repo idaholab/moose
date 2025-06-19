@@ -148,9 +148,10 @@ public:
   {
   }
 
-private:
   /// Get the associated hit node, if any
-  const hit::Node * node() const { return _node; }
+  const hit::Node * getNode() const { return _node; }
+
+private:
   /// The associated hit node, if any
   const hit::Node * const _node;
 };
@@ -280,13 +281,8 @@ mooseDeprecatedStream(S & oss, const bool expired, const bool print_title, Args 
   mooseStreamAll(ss, args...);
 
   const auto color = expired ? COLOR_RED : COLOR_YELLOW;
-  std::string msg =
-      print_title
-          ? mooseMsgFmt(
-                ss.str(),
-                "*** Warning, This code is deprecated and will be removed in future versions:",
-                color)
-          : mooseMsgFmt(ss.str(), color);
+  std::string msg = print_title ? mooseMsgFmt(ss.str(), "*** Deprecation Warning ***", color)
+                                : mooseMsgFmt(ss.str(), color);
   oss << msg;
   ss.str("");
   if (Moose::show_trace)
