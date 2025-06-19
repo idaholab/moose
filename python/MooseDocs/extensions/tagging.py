@@ -167,11 +167,11 @@ class TaggingExtension(command.CommandExtension):
 
         # Find and replace 'data:' dict structure within supplied javascript template file content,
         # save to javascript file in destination.
-        with open(js_path,'r') as f:
+        with open(js_path,'r', encoding='utf-8') as f:
             content=f.readlines()
             f.close()
-        content[-1]=re.sub('\{data:\[\{.+\}\}\]\}',str(replace_str), content[-1])
-        with open(js_dest_path, 'w') as f:
+        content[-1]=re.sub(r'\{data:\[\{.+\}\}\]\}',str(replace_str), content[-1])
+        with open(js_dest_path, 'w', encoding='utf-8') as f:
             f.writelines(content)
             f.close()
 
@@ -191,7 +191,7 @@ class TaggingExtension(command.CommandExtension):
                 for key in all_keys:
                     name_key_val_dict[entry].setdefault(key, ' - ')
 
-            with open(csv_path,'w') as f:
+            with open(csv_path,'w', encoding='utf-8') as f:
                 # Write out 'names' (the word) then keys as a header
                 f.write('names,' + ",".join(all_keys) + "\n")
                 for entry in entry_names:
