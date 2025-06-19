@@ -39,6 +39,8 @@ public:
 protected:
   MFEMProblem & _mfem_problem;
   MFEMProblemData & _problem_data;
+  mfem::Device _device;
+  bool _use_amr = false;
 };
 
 #endif
