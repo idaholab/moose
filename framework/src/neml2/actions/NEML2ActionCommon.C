@@ -12,11 +12,6 @@
 #include "NEML2Utils.h"
 #include "NEML2ModelExecutor.h"
 
-#ifdef NEML2_ENABLED
-#include "neml2/base/Factory.h"
-#include "neml2/base/Parser.h"
-#endif
-
 registerMooseAction("MooseApp", NEML2ActionCommon, "parse_neml2");
 
 InputParameters
@@ -40,6 +35,10 @@ NEML2ActionCommon::commonParams()
       "neml2_inputs",
       {},
       NEML2Utils::docstring("List of NEML2 input variables corresponding to each MOOSE data."));
+  params.addParam<std::vector<std::string>>(
+      "moose_input_kernels",
+      {},
+      NEML2Utils::docstring("NEML2 kernels defined in MOOSE that provides input data."));
 
   // Model parameters
   params.addParam<MultiMooseEnum>(

@@ -66,6 +66,9 @@ public:
 protected:
   virtual TagID massMatrixTagID() const override;
 
+  /// Evaluate the RHS residual
+  virtual void evaluateRHSResidual();
+
   /// Whether we are reusing the mass matrix
   const bool & _constant_mass;
 
