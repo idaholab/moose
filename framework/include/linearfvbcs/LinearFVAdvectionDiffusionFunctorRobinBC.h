@@ -38,8 +38,6 @@ public:
 
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
-  virtual bool useBoundaryGradientExtrapolation() const override { return true; }
-
   /// Returns the tangential component of the distance vector along the face
   RealVectorValue computeFaceTangentVector() const;
 
