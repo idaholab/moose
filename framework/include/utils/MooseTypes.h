@@ -50,8 +50,16 @@
 #include <type_traits>
 #include <functional>
 
+// Include to define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS
+#include "VTKNlohmannUndefHack.h"
+
+// json_fwd.h actually contains default template argument definitions,
+// so only include it if json.h is not included
 #if !defined(INCLUDE_NLOHMANN_JSON_HPP_) && !defined(MOOSE_NLOHMANN_INCLUDED)
+// only need to undef header guard if VTK built with vendored nlohmann
+#if MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS
 #undef INCLUDE_NLOHMANN_JSON_FWD_HPP_
+#endif
 #include "nlohmann/json_fwd.h"
 #define MOOSE_NLOHMANN_INCLUDED
 #endif
