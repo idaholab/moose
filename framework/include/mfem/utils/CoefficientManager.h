@@ -157,18 +157,18 @@ public:
   /// Return a scalar coefficient with the given name or, if that
   /// doesn't exists, try interpreting the name as a number with which
   /// to build a new constant coefficient.
-  mfem::Coefficient & getScalarCoefficient(const std::string name);
+  mfem::Coefficient & getScalarCoefficient(const std::string & name);
 
   /// Return a vector coefficient with the given name or, if that
   /// doesn't exists, try interpreting the name as a vector of number with which
   /// to build a new constant vector coefficient.
-  mfem::VectorCoefficient & getVectorCoefficient(const std::string name);
+  mfem::VectorCoefficient & getVectorCoefficient(const std::string & name);
 
   /// Return scalar coefficient with the given name. Unlike for
   /// the scalar and vector counterparts, there is currently no way to
   /// try interpreting the name as numbers with which to construct a
   /// constant matrix coefficient.
-  mfem::MatrixCoefficient & getMatrixCoefficient(const std::string name);
+  mfem::MatrixCoefficient & getMatrixCoefficient(const std::string & name);
 
   bool scalarPropertyIsDefined(const std::string & name, const std::string & block) const;
   bool vectorPropertyIsDefined(const std::string & name, const std::string & block) const;
@@ -195,9 +195,9 @@ private:
   mfem::MatrixCoefficient & declareMatrixProperty(const std::string & name,
                                                   const std::vector<std::string> & blocks,
                                                   std::shared_ptr<mfem::MatrixCoefficient> coef);
-  std::shared_ptr<mfem::Coefficient> getScalarCoefficientPtr(const std::string name);
-  std::shared_ptr<mfem::VectorCoefficient> getVectorCoefficientPtr(const std::string name);
-  std::shared_ptr<mfem::MatrixCoefficient> getMatrixCoefficientPtr(const std::string name);
+  std::shared_ptr<mfem::Coefficient> getScalarCoefficientPtr(const std::string & name);
+  std::shared_ptr<mfem::VectorCoefficient> getVectorCoefficientPtr(const std::string & name);
+  std::shared_ptr<mfem::MatrixCoefficient> getMatrixCoefficientPtr(const std::string & name);
 };
 }
 
