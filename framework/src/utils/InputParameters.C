@@ -105,38 +105,24 @@ InputParameters::set_attributes(const std::string & name_in, bool inserted_only)
   }
 }
 
-bool
-InputParameters::attemptPrintDeprecated(const std::string & name_in)
+std::optional<std::string>
+InputParameters::queryDeprecatedParamMessage(const std::string & name_in) const
 {
   const auto name = checkForRename(name_in);
   if (_show_deprecated_message)
   {
-    auto emit_deprecation_message =
-        [this](const auto & deprecated_name, const auto & deprecation_message)
-    {
-      // This is user-facing, no need for a backtrace
-      const auto current_show_trace = Moose::show_trace;
-      Moose::show_trace = false;
-      moose::internal::mooseDeprecatedStream(Moose::out,
-                                             false,
-                                             true,
-                                             paramLocationPrefix(deprecated_name),
-                                             ":\n",
-                                             deprecation_message,
-                                             "\n");
-      Moose::show_trace = current_show_trace;
-      return true;
-    };
+    auto deprecation_message = [this](const auto & name, const auto & message) -> std::string
+    { return paramMessagePrefix(name) + message; };
 
     if (_params.count(name) && !libmesh_map_find(_params, name)._deprecation_message.empty())
-      return emit_deprecation_message(name,
-                                      "The parameter '" + name + "' is deprecated.\n" +
-                                          libmesh_map_find(_params, name)._deprecation_message);
+      return deprecation_message(name,
+                                 "The parameter '" + name + "' is deprecated.\n" +
+                                     libmesh_map_find(_params, name)._deprecation_message);
     else if (auto it = _old_to_new_name_and_dep.find(name_in);
              it != _old_to_new_name_and_dep.end() && !it->second.second.empty())
-      return emit_deprecation_message(name_in, it->second.second);
+      return deprecation_message(name_in, it->second.second);
   }
-  return false;
+  return {};
 }
 
 std::string
@@ -586,31 +572,29 @@ InputParameters::mooseObjectSyntaxVisibility() const
   return _moose_object_syntax_visibility;
 }
 
-#define dynamicCastRangeCheck(type, up_type, long_name, short_name, param, oss)                    \
+#define dynamicCastRangeCheck(type, up_type, long_name, short_name, param)                         \
   do                                                                                               \
   {                                                                                                \
     libMesh::Parameters::Value * val = MooseUtils::get(param);                                     \
-    InputParameters::Parameter<type> * scalar_p =                                                  \
-        dynamic_cast<InputParameters::Parameter<type> *>(val);                                     \
-    if (scalar_p)                                                                                  \
-      rangeCheck<type, up_type>(long_name, short_name, scalar_p, oss);                             \
-    InputParameters::Parameter<std::vector<type>> * vector_p =                                     \
-        dynamic_cast<InputParameters::Parameter<std::vector<type>> *>(val);                        \
-    if (vector_p)                                                                                  \
-      rangeCheck<type, up_type>(long_name, short_name, vector_p, oss);                             \
+    if (const auto scalar_p = dynamic_cast<InputParameters::Parameter<type> *>(val))               \
+      error = rangeCheck<type, up_type>(long_name, short_name, scalar_p, false);                   \
+    if (const auto vector_p = dynamic_cast<InputParameters::Parameter<std::vector<type>> *>(val))  \
+      error = rangeCheck<type, up_type>(long_name, short_name, vector_p, false);                   \
   } while (0)
 
 #define checkMooseType(param_type, name)                                                           \
   if (have_parameter<param_type>(name) || have_parameter<std::vector<param_type>>(name))           \
-    oss << inputLocation(param_name) << ": non-controllable type '" << type(name)                  \
-        << "' for parameter '" << paramFullpath(param_name) << "' marked controllable";
+    error = "non-controllable type '" + type(name) + "' for parameter '" +                         \
+            paramFullpath(param_name) + "' marked controllable";
 
 void
 InputParameters::checkParams(const std::string & parsing_syntax)
 {
-  std::string parampath = blockFullpath() != "" ? blockFullpath() : parsing_syntax;
-  std::ostringstream oss;
+  const std::string parampath = blockFullpath() != "" ? blockFullpath() : parsing_syntax;
+  std::vector<std::pair<const hit::Node *, std::string>> errors;
+
   // Required parameters
+  std::vector<std::string> required_param_errors;
   for (const auto & it : *this)
   {
     const auto param_name = checkForRename(it.first);
@@ -621,30 +605,43 @@ InputParameters::checkParams(const std::string & parsing_syntax)
       if (oit != _new_to_deprecated_coupled_vars.end() && isParamValid(oit->second))
         continue;
 
-      oss << blockLocation() << ": missing required parameter '" << parampath + "/" + param_name
-          << "'\n";
-      oss << "\tDoc String: \"" + getDocString(param_name) + "\"" << std::endl;
+      required_param_errors.push_back("missing required parameter '" + parampath + "/" +
+                                      param_name + "'\n\tDoc String: \"" +
+                                      getDocString(param_name) + "\"");
     }
   }
+
+  if (required_param_errors.size())
+    mooseError(MooseUtils::stringJoin(required_param_errors, "\n"));
 
   // Range checked parameters
   for (const auto & it : *this)
   {
-    std::string long_name(parampath + "/" + it.first);
+    const std::string long_name(parampath + "/" + it.first);
 
-    dynamicCastRangeCheck(Real, Real, long_name, it.first, it.second, oss);
-    dynamicCastRangeCheck(int, long, long_name, it.first, it.second, oss);
-    dynamicCastRangeCheck(long, long, long_name, it.first, it.second, oss);
-    dynamicCastRangeCheck(unsigned int, long, long_name, it.first, it.second, oss);
+    std::optional<std::pair<bool, std::string>> error;
+    dynamicCastRangeCheck(Real, Real, long_name, it.first, it.second);
+    dynamicCastRangeCheck(int, long, long_name, it.first, it.second);
+    dynamicCastRangeCheck(long, long, long_name, it.first, it.second);
+    dynamicCastRangeCheck(unsigned int, long, long_name, it.first, it.second);
+
+    if (error)
+    {
+      if (error->first)
+        paramError(it.first, error->second);
+      else
+        mooseError("For range checked parameter '" + it.first + "': " + error->second);
+    }
   }
 
   // Controllable parameters
   for (const auto & param_name : getControllableParameters())
   {
     if (isPrivate(param_name))
-      oss << inputLocation(param_name) << ": private parameter '" << paramFullpath(param_name)
-          << "' marked controllable";
+      paramError(param_name,
+                 "private parameter '" + paramFullpath(param_name) + "' marked controllable");
 
+    std::optional<std::string> error;
     checkMooseType(NonlinearVariableName, param_name);
     checkMooseType(AuxVariableName, param_name);
     checkMooseType(VariableName, param_name);
@@ -654,10 +651,9 @@ InputParameters::checkParams(const std::string & parsing_syntax)
     checkMooseType(VectorPostprocessorName, param_name);
     checkMooseType(UserObjectName, param_name);
     checkMooseType(MaterialPropertyName, param_name);
+    if (error)
+      paramError(param_name, *error);
   }
-
-  if (!oss.str().empty())
-    mooseError(oss.str());
 }
 
 void

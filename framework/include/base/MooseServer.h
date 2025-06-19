@@ -356,19 +356,54 @@ private:
   bool rootIsValid() const;
 
   /**
-   * @return The current root node
+   * Helper for storing the state for a single document
+   */
+  struct CheckState
+  {
+    CheckState(std::shared_ptr<Parser> & parser) : parser(parser) {}
+    std::shared_ptr<Parser> parser;
+    std::unique_ptr<MooseApp> app;
+  };
+
+  /**
+   * @return The check state for the current document path, if any
+   */
+  CheckState * queryCheckState();
+  /**
+   * @return The check app for the current document path, if any
+   */
+  MooseApp * queryCheckApp();
+  /**
+   * @return The check parser for the current document path, if any
+   */
+  Parser * queryCheckParser();
+  /**
+   * @return The root node from the check parser for the current document path, if any
+   */
+  hit::Node * queryRoot();
+  /**
+   * @return up to date text string associated with current document path, if any
+   */
+  const std::string * queryDocumentText();
+
+  /**
+   * @return The check app for the current document path, with error checking on if it exists
+   */
+  MooseApp & getCheckApp();
+  /**
+   * @return The check parser for the current document path, with error checking on if it exists
+   */
+  Parser & getCheckParser();
+  /**
+   * @return The root node from the check parser for the current document path, with error checking
+   * on if it exists
    */
   hit::Node & getRoot();
 
   /**
-   * @return Input check application for document path from current operation
-   */
-  std::shared_ptr<MooseApp> getCheckApp() const;
-
-  /**
    * @return up to date text string associated with current document path
    */
-  const std::string & getDocumentText() const;
+  const std::string & getDocumentText();
 
   /**
    * @brief _moose_app - reference to parent application that owns this server
@@ -376,14 +411,9 @@ private:
   MooseApp & _moose_app;
 
   /**
-   * @brief _check_apps - map from document paths to input check applications
+   * @brief _check_state - map from document paths to state (parser, app, text)
    */
-  std::map<std::string, std::shared_ptr<MooseApp>> _check_apps;
-
-  /**
-   * @brief _path_to_text - map of document paths to current text strings
-   */
-  std::map<std::string, std::string> _path_to_text;
+  std::map<std::string, CheckState> _check_state;
 
   /**
    * @brief _connection - shared pointer to this server's read / write iostream

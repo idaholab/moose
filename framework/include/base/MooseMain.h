@@ -20,7 +20,7 @@ namespace Moose
 /**
  * Create a MooseApp from command-line arguments.
  */
-std::shared_ptr<MooseApp>
+std::unique_ptr<MooseApp>
 createMooseApp(const std::string & default_app_type, int argc, char * argv[]);
 
 /**

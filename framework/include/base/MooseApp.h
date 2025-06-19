@@ -25,7 +25,6 @@
 
 // MOOSE includes
 #include "Moose.h"
-#include "Parser.h"
 #include "Builder.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
@@ -45,6 +44,8 @@
 #include "MooseBase.h"
 #include "Capabilities.h"
 #include "MoosePassKey.h"
+#include "SystemInfo.h"
+#include "Syntax.h"
 
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
@@ -65,7 +66,6 @@ class Executor;
 class NullExecutor;
 class FEProblemBase;
 class InputParameterWarehouse;
-class SystemInfo;
 class CommandLine;
 class RelationshipManager;
 class SolutionInvalidity;
@@ -548,7 +548,7 @@ public:
    * Get SystemInfo object
    * @return A pointer to the SystemInformation object
    */
-  const SystemInfo * getSystemInfo() const { return _sys_info.get(); }
+  const SystemInfo & getSystemInfo() const { return _sys_info; }
 
   ///@{
   /**
@@ -1159,9 +1159,6 @@ protected:
   /// Offset of the local App time to the "global" problem time
   Real _global_time_offset;
 
-  /// Command line object
-  std::shared_ptr<CommandLine> _command_line;
-
   /// Syntax of the input file
   Syntax _syntax;
 
@@ -1178,8 +1175,14 @@ protected:
   /// OutputWarehouse object for this App
   OutputWarehouse _output_warehouse;
 
-  /// Parser for parsing the input file
+  /// Parser for parsing the input file (owns the root hit node)
   const std::shared_ptr<Parser> _parser;
+
+  /// The CommandLine object
+  const std::shared_ptr<CommandLine> _command_line;
+
+  /// System Information
+  SystemInfo _sys_info;
 
   /// Builder for building app related parser tree
   Moose::Builder _builder;
@@ -1232,9 +1235,6 @@ protected:
 
   /// Boolean to indicate whether to use an eigenvalue executioner
   bool _use_eigen_value;
-
-  /// System Information
-  std::unique_ptr<SystemInfo> _sys_info;
 
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
   enum UNUSED_CHECK

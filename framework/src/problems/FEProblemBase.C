@@ -5251,7 +5251,6 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
   parallel_object_only();
 
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
-  parameters.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
 
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {

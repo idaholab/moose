@@ -113,7 +113,6 @@ TEST(HitTests, LineNumbers)
     try
     {
       std::unique_ptr<hit::Node> root(hit::parse("TESTCASE", test.input));
-      hit::explode(root.get());
       LineWalker w(i, test.line_nums);
       root->walk(&w, hit::NodeType::All);
     }
@@ -188,7 +187,6 @@ TEST(HitTests, ExplodeParentless)
 
   try
   {
-    n = hit::explode(n);
     EXPECT_EQ("[foo]\n  [bar]\n  []\n[]", n->render());
   }
   catch (std::exception & err)
@@ -556,7 +554,6 @@ TEST(HitTests, MergeTree)
   {
     auto root1 = hit::parse("TESTCASE", "[foo]bar=42[]");
     auto root2 = hit::parse("TESTCASE", "foo/baz/boo=42");
-    hit::explode(root2);
     hit::merge(root2, root1);
     EXPECT_EQ("[foo]\n  bar = 42\n  [baz]\n    boo = 42\n  []\n[]", root1->render());
   }
@@ -756,7 +753,7 @@ TEST(HitTests, unsigned_int)
   }
   catch (std::exception & err)
   {
-    EXPECT_EQ("negative value read from file 'TESTCASE' on line 1", std::string(err.what()));
+    EXPECT_EQ("TESTCASE:1.1: negative value read", std::string(err.what()));
   }
 }
 
@@ -771,7 +768,7 @@ TEST(HitTests, vector_unsigned_int)
   }
   catch (std::exception & err)
   {
-    EXPECT_EQ("negative value read from file 'TESTCASE' on line 1", std::string(err.what()));
+    EXPECT_EQ("TESTCASE:1.1: negative value read", std::string(err.what()));
   }
 }
 
@@ -921,7 +918,7 @@ TEST(HitTests, FileIncludeMissing)
   }
   catch (std::exception & err)
   {
-    EXPECT_EQ("TESTCASE:4.3: could not find 'missing_file.i'\n", std::string(err.what()));
+    EXPECT_EQ("TESTCASE:4.3: could not find 'missing_file.i'", std::string(err.what()));
   }
 }
 
@@ -964,7 +961,7 @@ TEST(HitTests, FileIncludeCircular)
   catch (std::exception & err)
   {
     EXPECT_EQ("./include_file_02.i:3.3: file include would create circular reference "
-              "'include_file_01.i'\n",
+              "'include_file_01.i'",
               std::string(err.what()));
   }
 
@@ -1244,7 +1241,7 @@ FILE-A:3.3: 'Block/param_01' specified more than once with override syntax
     hit::parse("FILE-A", file_a);
     FAIL() << "Exception was not thrown";
   }
-  catch (hit::ParseError & err)
+  catch (hit::Error & err)
   {
     EXPECT_EQ(error_expect, "\n" + std::string(err.what()) + "\n");
   }

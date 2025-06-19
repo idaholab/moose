@@ -9,12 +9,12 @@
 
     requirement = 'The system shall include an input file syntax that supports defining global options.'
   []
-  
+
   [test_suppress_ignore]
     type = 'RunException'
     input = 'suppress_check.i'
     cli_args = "Adaptivity/Markers/boundary/use_displaced_mesh=true"
-    expect_err = "The parameter 'Adaptivity/Markers/boundary/use_displaced_mesh' is a private parameter and should not be used in an input file."
+    expect_err = "CLI_ARGS: parameter 'Adaptivity/Markers/boundary/use_displaced_mesh' is private and cannot be set"
     mesh_mode = REPLICATED
     requirement = 'The system shall report an error if a private / suppressed parameter is set in the input file.'
   []

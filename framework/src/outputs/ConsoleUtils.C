@@ -49,8 +49,7 @@ outputFrameworkInformation(const MooseApp & app)
   std::stringstream oss;
   oss << std::left;
 
-  if (app.getSystemInfo() != NULL)
-    oss << app.getSystemInfo()->getInfo();
+  oss << app.getSystemInfo().getInfo();
 
   oss << "Input File(s):\n";
   for (const auto & entry : app.getInputFileNames())
