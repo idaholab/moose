@@ -12,16 +12,7 @@ auto csg_obj = std::make_unique<CSG::CSGBase>();
 ```
 
 Once initialized, surfaces, cells, and universes can be created and manipulated.
-For example:
-
-```cpp
-// create a universe to contain all the cells created
-auto new_univ = csg_obj->createUniverse('my_new_universe');
-// create a sphere surface with radius 5 at the origin
-auto sphere_at_origin = csg_obj->createSphere('my_new_sphere', 5);
-// create a void cell whose region is the inside of the sphere and add it to the new universe
-auto sphere_cell = csg_obj->createCell('my_new_cell', -sphere_at_origin, new_univ);
-```
+The following sections explain in detail how to do this as a part of the `generateCSG` method.
 
 ## Surfaces
 
@@ -330,7 +321,3 @@ For each new CSG element (`CSGSurface`, `CSGCell`, and `CSGUniverse`) that is cr
 A recommended best practice is to include the mesh generator name (which can be accessed with `this->getName()` in any MeshGenerator class) as a part of that object name.
 This `name` is used as the unique identifier within the `CSGBase` instance.
 Methods for renaming objects are available to help prevent issues and errors.
-
-## CSG Output
-
-describe the universe linking check
