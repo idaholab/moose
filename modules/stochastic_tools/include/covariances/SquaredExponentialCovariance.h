@@ -18,28 +18,28 @@ public:
   SquaredExponentialCovariance(const InputParameters & parameters);
 
   /// Generates the Covariance Matrix given two points in the parameter space
-  void computeCovarianceMatrix(RealEigenMatrix & K,
-                               const RealEigenMatrix & x,
-                               const RealEigenMatrix & xp,
+  void computeCovarianceMatrix(torch::Tensor & K,
+                               const torch::Tensor & x,
+                               const torch::Tensor & xp,
                                const bool is_self_covariance) const override;
 
-  static void SquaredExponentialFunction(RealEigenMatrix & K,
-                                         const RealEigenMatrix & x,
-                                         const RealEigenMatrix & xp,
+  static void SquaredExponentialFunction(torch::Tensor & K,
+                                         const torch::Tensor & x,
+                                         const torch::Tensor & xp,
                                          const std::vector<Real> & length_factor,
                                          const Real sigma_f_squared,
                                          const Real sigma_n_squared,
                                          const bool is_self_covariance);
 
   /// Redirect dK/dhp for hyperparameter "hp"
-  bool computedKdhyper(RealEigenMatrix & dKdhp,
-                       const RealEigenMatrix & x,
+  bool computedKdhyper(torch::Tensor & dKdhp,
+                       const torch::Tensor & x,
                        const std::string & hyper_param_name,
                        unsigned int ind) const override;
 
   /// Computes dK/dlf for individual length factors
-  static void computedKdlf(RealEigenMatrix & K,
-                           const RealEigenMatrix & x,
+  static void computedKdlf(torch::Tensor & K,
+                           const torch::Tensor & x,
                            const std::vector<Real> & length_factor,
                            const Real sigma_f_squared,
                            const int ind);
