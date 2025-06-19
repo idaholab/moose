@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#30850'
+  design = 'NEML2/index.md NEML2Action.md'
+  [explicit_dynamics]
+    type = Exodiff
+    requirement = 'The system shall be capable of interfacing with the NEML2 library to perform explicit dynamics simulations.'
+    input = 'neml2.i'
+    exodiff = 'neml2_exodus.e'
+    capabilities = 'neml2'
+    valgrind = heavy
+  []
+[]
