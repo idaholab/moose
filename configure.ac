@@ -80,6 +80,33 @@ AS_IF([test "$mfem_support" = yes],
         AC_MSG_RESULT([MFEM library path: $mfem_library])
       ])
 
+AC_ARG_WITH(neml2,
+            AS_HELP_STRING([--with-neml2@<:@=ARG@:>@],[Specify if neml2 support should be enabled @<:@ARG=yes or neml2 directory@:>@]),
+            [neml2_support=yes neml2_library="$withval"],
+            [neml2_support=no])
+
+AC_MSG_RESULT([configuring with neml2 support: $neml2_support])
+
+AS_IF([test "$neml2_support" = yes],
+      [
+        # Check if libtorch is enabled, since neml2 requires it
+        AS_IF([test "$libtorch_support" = no],
+              [
+                AC_MSG_ERROR([NEML2 depends on libtorch. Please enable libtorch support with --with-libtorch])
+              ])
+        AC_DEFINE(NEML2_ENABLED, 1, [Whether to use neml2-related code or not])
+        AC_SUBST([neml2_support],[true])
+        AS_IF([test "$neml2_library" = yes],
+              [
+                    AS_IF([test "${NEML2_DIR+set}" = set],
+                          [neml2_library="${NEML2_DIR}"],
+                          [neml2_library="$ac_pwd/framework/contrib/neml2/installed"])
+              ])
+        AC_DEFINE_UNQUOTED(NEML2_DIR, [$neml2_library], [The directory where neml2 is installed])
+        AC_SUBST([neml2_library])
+        AC_MSG_RESULT([NEML2 library path: $neml2_library])
+      ])
+
 AC_PATH_TOOL(PKG_CONFIG,pkg-config)
 if test x$PKG_CONFIG != x; then
   AC_SUBST(LIBPNG)

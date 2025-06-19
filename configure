@@ -621,6 +621,8 @@ LIBPNG_INCLUDES
 LIBPNG_LIBS
 LIBPNG
 PKG_CONFIG
+neml2_library
+neml2_support
 mfem_library
 mfem_support
 libtorch_library
@@ -670,6 +672,7 @@ enable_option_checking
 with_derivative_size
 with_libtorch
 with_mfem
+with_neml2
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1297,6 +1300,8 @@ Optional Packages:
                           [ARG=yes or libtorch directory]
   --with-mfem[=ARG]       Specify if mfem support should be enabled [ARG=yes
                           or mfem directory]
+  --with-neml2[=ARG]      Specify if neml2 support should be enabled [ARG=yes
+                          or neml2 directory]
 
 Report bugs to <https://github.com/idaholab/moose/discussions>.
 moose home page: <https://mooseframework.inl.gov>.
@@ -1870,6 +1875,54 @@ printf "%s\n" "#define MFEM_DIR $mfem_library" >>confdefs.h
 
         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: MFEM library path: $mfem_library" >&5
 printf "%s\n" "MFEM library path: $mfem_library" >&6; }
+
+fi
+
+
+# Check whether --with-neml2 was given.
+if test ${with_neml2+y}
+then :
+  withval=$with_neml2; neml2_support=yes neml2_library="$withval"
+else $as_nop
+  neml2_support=no
+fi
+
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: configuring with neml2 support: $neml2_support" >&5
+printf "%s\n" "configuring with neml2 support: $neml2_support" >&6; }
+
+if test "$neml2_support" = yes
+then :
+
+        # Check if libtorch is enabled, since neml2 requires it
+        if test "$libtorch_support" = no
+then :
+
+                as_fn_error $? "NEML2 depends on libtorch. Please enable libtorch support with --with-libtorch" "$LINENO" 5
+
+fi
+
+printf "%s\n" "#define NEML2_ENABLED 1" >>confdefs.h
+
+        neml2_support=true
+
+        if test "$neml2_library" = yes
+then :
+
+                    if test "${NEML2_DIR+set}" = set
+then :
+  neml2_library="${NEML2_DIR}"
+else $as_nop
+  neml2_library="$ac_pwd/framework/contrib/neml2/installed"
+fi
+
+fi
+
+printf "%s\n" "#define NEML2_DIR $neml2_library" >>confdefs.h
+
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: NEML2 library path: $neml2_library" >&5
+printf "%s\n" "NEML2 library path: $neml2_library" >&6; }
 
 fi
 
