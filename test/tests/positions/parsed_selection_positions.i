@@ -10,8 +10,13 @@
 []
 
 [Positions]
-  [functors]
-    type = ParsedSelectionPositions
+  [all_elems]
+    type = ElementCentroidPositions
+    outputs = 'none'
+  []
+  [functors_downselection]
+    type = ParsedDownSelectionPositions
+    input_positions = 'all_elems'
     expression = '(t > 1) & (x > 0.4) & (sym_var_y > 0.7) & (f1 > 2)'
     functor_symbols = 'sym_var_y f1'
     functor_names = 'var_y       f1'

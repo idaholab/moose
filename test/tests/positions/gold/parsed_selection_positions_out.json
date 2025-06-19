@@ -1,7 +1,7 @@
 {
   "reporters": {
-    "functors": {
-      "type": "ParsedSelectionPositions",
+    "functors_downselection": {
+      "type": "ParsedDownSelectionPositions",
       "values": {
         "positions_1d": {
           "type": "std::vector<libMesh::Point>"
@@ -11,21 +11,21 @@
   },
   "time_steps": [
     {
-      "functors": {
+      "functors_downselection": {
         "positions_1d": []
       },
       "time": 0.0,
       "time_step": 0
     },
     {
-      "functors": {
+      "functors_downselection": {
         "positions_1d": []
       },
       "time": 1.0,
       "time_step": 1
     },
     {
-      "functors": {
+      "functors_downselection": {
         "positions_1d": [
           {
             "x": 0.625,

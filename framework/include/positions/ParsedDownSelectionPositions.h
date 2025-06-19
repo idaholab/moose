@@ -18,15 +18,15 @@
 /**
  * Positions of the centroids of all elements meeting the parsed expression criterion
  */
-class ParsedSelectionPositions : public Positions,
-                                 public NonADFunctorInterface,
-                                 public BlockRestrictable,
-                                 public FunctionParserUtils<false>
+class ParsedDownSelectionPositions : public Positions,
+                                     public NonADFunctorInterface,
+                                     public BlockRestrictable,
+                                     public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
-  ParsedSelectionPositions(const InputParameters & parameters);
-  virtual ~ParsedSelectionPositions() = default;
+  ParsedDownSelectionPositions(const InputParameters & parameters);
+  virtual ~ParsedDownSelectionPositions() = default;
 
   void initialize() override;
 
@@ -53,4 +53,7 @@ private:
 
   /// Vector of pointers to functors
   std::vector<const Moose::Functor<Real> *> _functors;
+
+  /// Vector of pointers to positions objects
+  std::vector<const Positions *> _positions_ptrs;
 };
