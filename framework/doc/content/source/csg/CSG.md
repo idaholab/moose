@@ -12,20 +12,19 @@ This section describes in theory what these components are.
 
 Surfaces are defined explicitly through surface equations (such as equations of a plane, sphere, etc.).
 Each surface inherently separates two halfspace regions: positive and negative halfspaces.
-For example, these regions can be thought of as the area of space above or below a plane, or the area inside or outside a sphere.
-Combinations of these halfspaces it what defines a region.
-
-!row!
-
-!col! class=s12 m6 l6
+For example, for a plane with the equation `Ax + By + Cz = D` the positive halfspace represents the region `Ax + By + Cz > D`, while the negative halfspace represents the region `Ax + By + Cz < D`. Similarly, for a spherical surface defined by the equation `x^2 + y^2 + z^2 = r^2`, the negative halfspace represents the region `x^2 + y^2 + z^2 < r^2` within the sphere while the positive halfspace represents the region `x^2 + y^2 + z^2 > r^2` outside the sphere.
+Example halfspaces are shown in [!ref](fig:halfspaces).
 
 !media large_media/csg/halfspaces.png
-       id=halfspaces
+       id=fig:halfspaces
        caption=Example depiction of the positive and negative halfspaces defined by a plane (left) and sphere (right).
 
-!col-end!
+These halfspace regions defined by the surfaces can be combined using series of boolean operators for unions, intersections, and complements to further define more complex regions.
+For example, if we wanted to use the surfaces from [!ref](fig:halfspaces) to define just the left hemisphere, we would define the cell region as the intersection of the negative halfspace of the plane and the positive halfspace of the sphere ([!ref](fig:intersection)).
 
-!row-end!
+!media large_media/csg/region_intersection.png
+       id=fig:intersection
+       caption=Example depiction of a closed region defined by an intersection of two halfspaces.
 
 These halfspace regions defined by the surfaces are combined using series of boolean operators for unions, intersections, and complements to define complete regions.
 For example, if we wanted to use the surfaces from Figure 1 (FIGURE OUT HOW TO REF) to define just the left hemisphere of the cell, we would define the cell region as the intersection of the negative halfspace of the plane and the positive halfspace of the sphere.
