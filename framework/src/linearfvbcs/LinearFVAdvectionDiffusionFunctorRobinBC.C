@@ -69,7 +69,7 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeFaceTangentVector() const
 }
 
 Real
-LinearFVAdvectionDiffusionFunctorRobinBC::computeRobinDenominatorTerm() const()
+LinearFVAdvectionDiffusionFunctorRobinBC::computeRobinDenominatorTerm() const
 {
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
