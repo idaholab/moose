@@ -29,17 +29,15 @@ LinearFVAdvectionDiffusionFunctorRobinBC::validParams()
 LinearFVAdvectionDiffusionFunctorRobinBC::LinearFVAdvectionDiffusionFunctorRobinBC(
     const InputParameters & parameters)
   : LinearFVAdvectionDiffusionBC(parameters), _functor_alpha(getFunctor<Real>("alpha")),
-  : LinearFVAdvectionDiffusionBC(parameters),  _functor_beta(getFunctor<Real>("beta" )),
-  : LinearFVAdvectionDiffusionBC(parameters), _functor_gamma(getFunctor<Real>("gamma"))
+    LinearFVAdvectionDiffusionBC(parameters),  _functor_beta(getFunctor<Real>("beta" )),
+    LinearFVAdvectionDiffusionBC(parameters), _functor_gamma(getFunctor<Real>("gamma"))
 {
 }
 
 Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValue() const
 {
-  return _functor_alpha(singleSidedFaceArg(_current_face_info), determineState());
-  return  _functor_beta(singleSidedFaceArg(_current_face_info), determineState());
-  return _functor_gamma(singleSidedFaceArg(_current_face_info), determineState());
+  return 1.0;
 }
 
 Real
