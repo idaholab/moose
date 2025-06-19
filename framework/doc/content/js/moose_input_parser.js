@@ -2,7 +2,6 @@
 function getSyntaxData(element) {
     // Use regex to extract the text we want to display and meta data for the element
     const content = element.textContent;
-    console.log(content);
     const match = /(\w+)\<\<\<(.*?)\>\>\>/.exec(content);
     if (!match || match.length < 3) {
         return element;
@@ -35,7 +34,7 @@ window.addEventListener('load', function () {
     const parsed_classes = ["moose-parsed-syntax", "moose-parsed-class", "moose-parsed-parameter"];
 
     // Get all the elements with the prism-specific classes
-    const elementsArray = parsed_classes.flatMap(parsed_class => 
+    const elementsArray = parsed_classes.flatMap(parsed_class =>
         Array.from(document.getElementsByClassName(parsed_class))
     );
 
