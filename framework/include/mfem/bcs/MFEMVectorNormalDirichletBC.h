@@ -18,7 +18,7 @@ class MFEMVectorNormalDirichletBC : public MFEMVectorDirichletBCBase
 public:
   static InputParameters validParams();
   MFEMVectorNormalDirichletBC(const InputParameters & parameters);
-  void ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh) override;
+  void ApplyBC(mfem::GridFunction & gridfunc) override;
 };
 
 #endif

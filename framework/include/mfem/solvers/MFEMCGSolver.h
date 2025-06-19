@@ -31,9 +31,6 @@ public:
 
 protected:
   void constructSolver(const InputParameters & parameters) override;
-
-private:
-  std::shared_ptr<MFEMSolverBase> _preconditioner{nullptr};
 };
 
 #endif

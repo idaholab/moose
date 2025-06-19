@@ -87,6 +87,11 @@ public:
   const std::vector<std::string> & TestVarNames() const { return _test_var_names; }
 
 protected:
+  // Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
+  // and then proceeds to delete all dynamically allocated memory for _h_blocks
+  // itself, resetting all dimensions to zero.
+  void DeleteAllBlocks();
+
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 

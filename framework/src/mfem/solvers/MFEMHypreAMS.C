@@ -32,25 +32,25 @@ MFEMHypreAMS::validParams()
 MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
   : MFEMSolverBase(parameters), _mfem_fespace(getUserObject<MFEMFESpace>("fespace"))
 {
+  mfem::Hypre::Init();
   constructSolver(parameters);
 }
 
 void
 MFEMHypreAMS::constructSolver(const InputParameters &)
 {
-  auto solver = std::make_shared<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
+  auto solver = std::make_unique<mfem::HypreAMS>(_mfem_fespace.getFESpace().get());
   if (getParam<bool>("singular"))
     solver->SetSingularProblem();
 
   solver->SetPrintLevel(getParam<int>("print_level"));
 
-  _solver = solver;
+  _solver = std::move(solver);
 }
 
 void
 MFEMHypreAMS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
-
   if (_lor)
   {
     if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=

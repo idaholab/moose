@@ -54,6 +54,14 @@ pressure_tag = "pressure_grad"
     nx = 12
     ny = 12
   []
+  [break_symmetries]
+    type = ParsedNodeTransformGenerator
+    input = gen
+    constant_names = 'side_length'
+    constant_expressions = '${side_length}'
+    x_function = 'if(x<side_length*1.001 / 2 & x > side_length * 0.999 / 2, x * 1.05, x)'
+    y_function = 'if(y<side_length*1.001 / 2 & y > side_length * 0.999 / 2, y * 1.05, y)'
+  []
 []
 
 [Problem]
@@ -73,13 +81,11 @@ pressure_tag = "pressure_grad"
 [Variables]
   [vel_x]
     type = INSFVVelocityVariable
-    initial_condition = 0.0
     solver_sys = u_system
     two_term_boundary_expansion = false
   []
   [vel_y]
     type = INSFVVelocityVariable
-    initial_condition = 0.0
     solver_sys = v_system
     two_term_boundary_expansion = false
   []
@@ -98,6 +104,19 @@ pressure_tag = "pressure_grad"
     type = INSFVEnergyVariable
     solver_sys = TKED_system
     initial_condition = ${eps_init}
+  []
+[]
+
+[ICs]
+  [vx]
+    type = FunctionIC
+    variable = vel_x
+    function = 'if(y>0.09, 0.1, -0.001)'
+  []
+  [vy]
+    type = FunctionIC
+    variable = vel_y
+    function = 'if(x>0.05, -0.001, 0.001)'
   []
 []
 

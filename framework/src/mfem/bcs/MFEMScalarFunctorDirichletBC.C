@@ -17,6 +17,7 @@ InputParameters
 MFEMScalarFunctorDirichletBC::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
+  params.addClassDescription("Applies a Dirichlet condition to a scalar variable.");
   params.addRequiredParam<MFEMScalarCoefficientName>(
       "coefficient",
       "The coefficient setting the values on the essential boundary. A coefficient can be any of "
@@ -33,11 +34,9 @@ MFEMScalarFunctorDirichletBC::MFEMScalarFunctorDirichletBC(const InputParameters
 }
 
 void
-MFEMScalarFunctorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc, mfem::Mesh & mesh)
+MFEMScalarFunctorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 {
-  mfem::Array<int> ess_bdrs(mesh.bdr_attributes.Max());
-  ess_bdrs = getBoundaries();
-  gridfunc.ProjectBdrCoefficient(_coef, ess_bdrs);
+  gridfunc.ProjectBdrCoefficient(_coef, getBoundaries());
 }
 
 #endif
