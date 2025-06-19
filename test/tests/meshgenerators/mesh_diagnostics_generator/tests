@@ -34,7 +34,7 @@
       input = 'consistent_domains.i'
       cli_args = '--mesh-only'
       mesh_mode = 'replicated'
-      expect_out = 'Sideset bad_one \(4\) has two neighboring sides with a very large angle'
+      expect_out = 'Sideset bad_one \(4\) has two neighboring sides with a very large angle. Largest angle detected: 3.141593 rad'
       detail = 'inconsistently oriented sidesets between two neighbor sides within the sideset,'
     []
     [2D_watertight_sidesets]
