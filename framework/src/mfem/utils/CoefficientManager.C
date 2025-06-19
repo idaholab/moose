@@ -119,7 +119,7 @@ CoefficientManager::declareMatrixProperty(const std::string & name,
 }
 
 std::shared_ptr<mfem::Coefficient>
-CoefficientManager::getScalarCoefficientPtr(const std::string name)
+CoefficientManager::getScalarCoefficientPtr(const std::string & name)
 {
   if (this->_scalar_coeffs.hasCoefficient(name))
     return this->_scalar_coeffs.getCoefficientPtr(name);
@@ -135,7 +135,7 @@ CoefficientManager::getScalarCoefficientPtr(const std::string name)
 }
 
 std::shared_ptr<mfem::VectorCoefficient>
-CoefficientManager::getVectorCoefficientPtr(const std::string name)
+CoefficientManager::getVectorCoefficientPtr(const std::string & name)
 {
   if (this->_vector_coeffs.hasCoefficient(name))
     return this->_vector_coeffs.getCoefficientPtr(name);
@@ -151,26 +151,26 @@ CoefficientManager::getVectorCoefficientPtr(const std::string name)
 }
 
 std::shared_ptr<mfem::MatrixCoefficient>
-CoefficientManager::getMatrixCoefficientPtr(const std::string name)
+CoefficientManager::getMatrixCoefficientPtr(const std::string & name)
 {
   return this->_matrix_coeffs.getCoefficientPtr(name);
   // TODO: Work out how to parse literal matrices from input.
 }
 
 mfem::Coefficient &
-CoefficientManager::getScalarCoefficient(const std::string name)
+CoefficientManager::getScalarCoefficient(const std::string & name)
 {
   return *this->getScalarCoefficientPtr(name);
 }
 
 mfem::VectorCoefficient &
-CoefficientManager::getVectorCoefficient(const std::string name)
+CoefficientManager::getVectorCoefficient(const std::string & name)
 {
   return *this->getVectorCoefficientPtr(name);
 }
 
 mfem::MatrixCoefficient &
-CoefficientManager::getMatrixCoefficient(const std::string name)
+CoefficientManager::getMatrixCoefficient(const std::string & name)
 {
   return *this->getMatrixCoefficientPtr(name);
 }
