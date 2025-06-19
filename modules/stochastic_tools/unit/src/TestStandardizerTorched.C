@@ -2,11 +2,11 @@
 
 #include "gtest/gtest.h"
 #include <torch/torch.h>
-#include "StandardizerTorched.h"
+#include "Standardizer.h"
 
-using namespace StochasticToolsTorched;
+using namespace StochasticTools;
 
-TEST(StochasticToolsTorched, getMean)
+TEST(StochasticTools, getMean)
 {
   const std::vector<double> mean_gold = {0.0, -1.0};
   const std::vector<double> stddev_gold = {1.0, 0.0};
@@ -15,7 +15,7 @@ TEST(StochasticToolsTorched, getMean)
       {{1.0, -1.0}, {-1.0, -1.0}, {1.0, -1.0}, {-1.0, -1.0}, {1.0, -1.0}, {-1.0, -1.0}},
       {torch::kFloat64});
 
-  StochasticToolsTorched::StandardizerTorched torch;
+  StochasticTools::Standardizer torch;
   torch.computeSet(input_tensor);
 
   auto mean = torch.getMean();
@@ -28,13 +28,13 @@ TEST(StochasticToolsTorched, getMean)
   }
 }
 
-TEST(StochasticToolsTorched, getStandardized)
+TEST(StochasticTools, getStandardized)
 {
   const std::vector<double> gold = {1.0, -1.0, -1.0, 1.0};
 
   torch::Tensor input_tensor = torch::tensor({{1.0, -1.0}, {-1.0, 1.0}}, {torch::kFloat64});
 
-  StochasticToolsTorched::StandardizerTorched torch;
+  StochasticTools::Standardizer torch;
   torch.computeSet(input_tensor);
   torch.getStandardized(input_tensor);
 
@@ -44,13 +44,13 @@ TEST(StochasticToolsTorched, getStandardized)
   }
 }
 
-TEST(StochasticToolsTorched, getDestandardized)
+TEST(StochasticTools, getDestandardized)
 {
   const std::vector<double> gold = {1.0, -1.0, -1.0, 1.0};
 
   torch::Tensor input_tensor = torch::tensor({{1.0, -1.0}, {-1.0, 1.0}}, {torch::kFloat64});
 
-  StochasticToolsTorched::StandardizerTorched torch;
+  StochasticTools::Standardizer torch;
   torch.computeSet(input_tensor);
   torch.getStandardized(input_tensor);
   torch.getDestandardized(input_tensor);
@@ -60,10 +60,10 @@ TEST(StochasticToolsTorched, getDestandardized)
   }
 }
 
-TEST(StochasticToolsTorched, getDescaled)
+TEST(StochasticTools, getDescaled)
 {
   // input = input.array().rowwise() * stdev.transpose().array();
-  StochasticToolsTorched::StandardizerTorched torch;
+  StochasticTools::Standardizer torch;
   torch::Tensor input_tensor = torch::tensor({{1.0, -1.0}, {1.0, 1.0}}, {torch::kFloat64});
   const std::vector<double> gold = {0.0, -1.0, 0.0, 1.0};
 
