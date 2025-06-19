@@ -67,9 +67,7 @@ MFEMGenericFunctorVectorMaterial::validParams()
       "prop_names", "The names of the properties this material will have");
   params.addRequiredParam<std::vector<MFEMVectorCoefficientName>>(
       "prop_values",
-      "The corresponding names of coefficients associated with the named properties. A coefficient "
-      "can be any of the following: a variable, an MFEM material property, a function, "
-      "a post-processor, or a numeric vector value (enclosed in curly braces).");
+      "The corresponding names of coefficients associated with the named properties");
 
   return params;
 }

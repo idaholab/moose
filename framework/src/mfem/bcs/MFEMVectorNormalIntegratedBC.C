@@ -21,9 +21,7 @@ MFEMVectorNormalIntegratedBC::validParams()
                              "$(\\vec f \\cdot \\hat n, v)_{\\partial\\Omega}$");
   params.addRequiredParam<MFEMVectorCoefficientName>(
       "vector_coefficient",
-      "Vector coefficient whose normal component will be used in the integrated BC. A coefficient "
-      "can be any of the following: a variable, an MFEM material property, a function, a "
-      "post-processor, or a numeric value.");
+      "Vector coefficient whose normal component will be used in the integrated BC");
   return params;
 }
 

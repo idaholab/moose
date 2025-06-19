@@ -1353,14 +1353,6 @@ InputParameters::addDeprecatedParam<std::vector<MooseEnum>>(
              "using addDeprecatedParam, even if the parameter is not required!");
 }
 
-std::string
-InputParameters::appendFunctorDescription(const std::string & doc_string) const
-{
-  return MooseUtils::trim(doc_string, ". ") +
-         ". A functor is any of the following: a variable, a functor material property, a "
-         "function, a post-processor, or a number.";
-}
-
 template <>
 void
 InputParameters::setParamHelper<PostprocessorName, Real>(const std::string & /*name*/,

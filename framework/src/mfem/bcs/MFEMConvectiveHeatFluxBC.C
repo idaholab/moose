@@ -24,15 +24,10 @@ MFEMConvectiveHeatFluxBC::validParams()
       "Convective heat transfer boundary condition with temperature and heat "
       "transfer coefficent given by material properties to add to MFEM problems.");
   params.addRequiredParam<MFEMScalarCoefficientName>(
-      "T_infinity",
-      "Name of a coefficient specifying the far-field temperature. A coefficient can be any of the "
-      "following: a variable, an MFEM material property, a function, a post-processor, or a "
-      "numeric value.");
+      "T_infinity", "Name of a coefficient specifying the far-field temperature");
   params.addRequiredParam<MFEMScalarCoefficientName>(
       "heat_transfer_coefficient",
-      "Name of the coefficient specifying the heat transfer coefficient. A coefficient can be any "
-      "of the following: a variable, an MFEM material property, a function, a post-processor, or "
-      "a numeric value.");
+      "Name of the coefficient specifying the heat transfer coefficient");
   return params;
 }
 

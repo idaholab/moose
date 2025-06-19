@@ -19,10 +19,7 @@ MFEMScalarDirichletBC::validParams()
   InputParameters params = MFEMEssentialBC::validParams();
   params.addClassDescription("Applies a Dirichlet condition to a scalar variable.");
   params.addRequiredParam<MFEMScalarCoefficientName>(
-      "coefficient",
-      "The coefficient setting the values on the essential boundary. A coefficient can be any of "
-      "the following: a variable, an MFEM material property, a function, a post-processor, or a "
-      "numeric value.");
+      "coefficient", "The coefficient setting the values on the essential boundary");
   return params;
 }
 

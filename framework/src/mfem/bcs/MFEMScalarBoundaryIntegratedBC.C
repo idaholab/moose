@@ -21,10 +21,7 @@ MFEMScalarBoundaryIntegratedBC::validParams()
                              "$(f, v)_\\Omega$ "
                              "arising from the weak form of the forcing term $f$.");
   params.addRequiredParam<MFEMScalarCoefficientName>(
-      "coefficient",
-      "The coefficient which will be used in the integrated BC. A coefficient can be any of the "
-      "following: a variable, an MFEM material property, a function, a post-processor, or a "
-      "numeric value.");
+      "coefficient", "The coefficient which will be used in the integrated BC");
   return params;
 }
 
