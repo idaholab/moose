@@ -75,6 +75,27 @@
       detail = 'The system shall support setting initial conditions to all non-linear variables if the user set ic_strategy == IC_DEFAULT and no nodal_patch_recovery_uo and ic_variables is provided.'
     []
 
+    [IC_three_variables_three_IC_strategies]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_three_vars_three_strategies.i'
+      exodiff = 'external_moving_boundary_three_vars_three_strategies_out.e external_moving_boundary_three_vars_three_strategies_out.e-s002 external_moving_boundary_three_vars_three_strategies_out.e-s003 external_moving_boundary_three_vars_three_strategies_out.e-s004'
+      detail = 'The system shall support assigning different initial condition strategies -- namely, nearby element-based, k-d tree-based, and whole domain-based—to different variables.'
+    []
+
+    [IC_three_variables_three_IC_strategies_default]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_three_vars_three_strategies_default.i'
+      exodiff = 'external_moving_boundary_three_vars_three_strategies_default_out.e external_moving_boundary_three_vars_three_strategies_default_out.e-s002 external_moving_boundary_three_vars_three_strategies_default_out.e-s003 external_moving_boundary_three_vars_three_strategies_default_out.e-s004'
+      detail = 'The system shall support assigning different initial condition strategies -- namely, nearby element-based, whole domain-based, and default -- to different variables.'
+    []
+
+    [IC_strategies_npr_with_IC_in_var]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_three_vars_three_strategies_ic_in_var.i'
+      exodiff = 'external_moving_boundary_three_vars_three_strategies_ic_in_var_out.e external_moving_boundary_three_vars_three_strategies_ic_in_var_out.e-s002 external_moving_boundary_three_vars_three_strategies_ic_in_var_out.e-s003 external_moving_boundary_three_vars_three_strategies_ic_in_var_out.e-s004'
+      detail = 'The system shall support assigning an initial condition directly within the Variable block as a value; however, if nodal patch recovery is enabled, the behavior shall be consistent with specifying the value in `nodal_patch_recovery_uo`.'
+    []
+
   []
 
   [error_test]

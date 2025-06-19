@@ -196,7 +196,7 @@ private:
   std::unordered_map<unsigned int, unsigned int> _var_number2_npr_idx;
 
   /// @brief List of neighbor elements that share nodes with reinitialized elements
-  std::vector<dof_id_type> _solved_elem_ids_for_npr;
+  std::vector<std::vector<dof_id_type>> _solved_elem_ids_for_npr;
 
   /**
    * * Check if the node is newly activated.
@@ -306,5 +306,5 @@ private:
                           const bool is_elemental);
 
   /// @brief Gather neighbor elements for newly activated nodes
-  void gatherNeighborElementsForActivatedNodes();
+  void gatherNeighborElementsForActivatedNodes(const unsigned int ic_idx);
 };

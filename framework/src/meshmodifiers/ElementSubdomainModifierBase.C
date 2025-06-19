@@ -282,6 +282,8 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
       mooseError("Mismatch between number of IC strategies using polynomial "
                  "extrapolation and NPR UO (expected: " +
                  std::to_string(npr_count) + ", given: " + std::to_string(_npr_vec.size()) + ").");
+
+    _solved_elem_ids_for_npr.resize(_npr_vec.size());
   }
 
   if (isParamSetByUser("moving_boundary_name") ||
@@ -413,15 +415,21 @@ ElementSubdomainModifierBase::modify(
     identifyLocallyOwnedActivatedNodes(moved_elems);
     computeSetDifference();
     findMissingNewlyActivatedNodes();
-    gatherNeighborElementsForActivatedNodes();
 
     if (!_npr_vec.empty())
-      for (const auto & _npr : _npr_vec)
+      for (auto i : index_range(_ic_vars_number))
       {
-        _npr->cacheAdditionalElements(_solved_elem_ids_for_npr);
-        _npr->identifyAdditionalElementsFromOtherProcs();
-        _npr->synchronizeAebe();
-        _npr->cleanQueryIDsAndAdditionalElements();
+        const auto var_number = _ic_vars_number[i];
+        if (_var_number2_npr_idx.find(var_number) == _var_number2_npr_idx.end())
+          continue;
+
+        const int npr_idx = _var_number2_npr_idx[var_number];
+
+        gatherNeighborElementsForActivatedNodes(i);
+        _npr_vec[npr_idx]->cacheAdditionalElements(_solved_elem_ids_for_npr[npr_idx]);
+        _npr_vec[npr_idx]->identifyAdditionalElementsFromOtherProcs();
+        _npr_vec[npr_idx]->synchronizeAebe();
+        _npr_vec[npr_idx]->cleanQueryIDsAndAdditionalElements();
       }
   }
 
@@ -865,18 +873,16 @@ ElementSubdomainModifierBase::nodeIsNewlyActivated(dof_id_type node_id) const
 void
 ElementSubdomainModifierBase::applyIC(bool displaced)
 {
-  // Set of variable numbers that are not part of the extrapolated initial conditions
-  std::set<unsigned int> ic_target_vars_number_except_ic_vars;
+  // Set of variable names that are not part of the extrapolated initial conditions
+  std::set<std::string> ic_target_vars_names_except_ic_vars;
 
-  auto insertNonICVars = [&](SystemBase & sys)
+  auto insertNonICVars = [&](SystemBase & sys) -> void
   {
     const auto & vars = sys.getVariables(_tid);
     for (const auto & ivar : vars)
-    {
-      if (std::find(_ic_vars_number.begin(), _ic_vars_number.end(), ivar->number()) ==
-          _ic_vars_number.end())
-        ic_target_vars_number_except_ic_vars.insert(ivar->number());
-    }
+      if (std::find(_ic_vars_names.begin(), _ic_vars_names.end(), ivar->name()) ==
+          _ic_vars_names.end())
+        ic_target_vars_names_except_ic_vars.insert(ivar->name());
   };
 
   insertNonICVars(_nl_sys);
@@ -886,7 +892,7 @@ ElementSubdomainModifierBase::applyIC(bool displaced)
   _fe_problem.projectInitialConditionOnCustomRangeForSpecificVars(
       reinitializedElemRange(displaced),
       reinitializedBndNodeRange(displaced),
-      ic_target_vars_number_except_ic_vars);
+      ic_target_vars_names_except_ic_vars);
 
   // Loop over each variable and initialize
   for (auto i : index_range(_ic_vars_number))
@@ -896,7 +902,7 @@ ElementSubdomainModifierBase::applyIC(bool displaced)
       _fe_problem.projectInitialConditionOnCustomRangeForSpecificVars(
           reinitializedElemRange(displaced),
           reinitializedBndNodeRange(displaced),
-          {_ic_vars_number[i]});
+          {_ic_vars_names[i]});
     else if (_ic_strategy[i] == ICStrategy::IC_POLYNOMIAL ||
              _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
              _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_THRESHOLD)
@@ -1079,7 +1085,7 @@ ElementSubdomainModifierBase::setOldAndOlderSolutions(SystemBase & sys,
 }
 
 void
-ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
+ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(const unsigned int ic_idx)
 {
 
   auto local2Global =
@@ -1127,19 +1133,13 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
     }
   };
 
-  auto inICStrategy = [this](const ICStrategy & strategy)
-  {
-    return std::all_of(_ic_strategy.begin(),
-                       _ic_strategy.end(),
-                       [&strategy](const ICStrategy & e) { return e == strategy; });
-  };
-
-  if (!inICStrategy(ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN) &&
-      !inICStrategy(ICStrategy::IC_POLYNOMIAL) &&
-      !inICStrategy(ICStrategy::IC_POLYNOMIAL_THRESHOLD))
+  if (_ic_strategy[ic_idx] != ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN &&
+      _ic_strategy[ic_idx] != ICStrategy::IC_POLYNOMIAL &&
+      _ic_strategy[ic_idx] != ICStrategy::IC_POLYNOMIAL_THRESHOLD)
     return;
 
-  _solved_elem_ids_for_npr.clear();
+  const unsigned int ic_var_number = _ic_vars_number[ic_idx];
+  _solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]].clear();
 
   // 0.  Pre-checks and caching
   if (_global_reinitialized_elems.empty())
@@ -1163,7 +1163,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
 
   std::unordered_set<dof_id_type> patch_elem_set; // Prevent duplicates
 
-  if (inICStrategy(ICStrategy::IC_POLYNOMIAL_THRESHOLD))
+  if (_ic_strategy[ic_idx] == ICStrategy::IC_POLYNOMIAL_THRESHOLD)
   {
     std::vector<Point> local_centroids;
     std::vector<dof_id_type> local_elem_ids;
@@ -1216,7 +1216,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
         if (patch_elem_set.count(neighbor_elem_id))
           continue;
 
-        _solved_elem_ids_for_npr.push_back(neighbor_elem_id);
+        _solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]].push_back(neighbor_elem_id);
         patch_elem_set.insert(neighbor_elem_id);
       }
     }
@@ -1240,7 +1240,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
       if (_unsolved_block_ids.count(elem->subdomain_id()))
         continue;
 
-      if (inICStrategy(ICStrategy::IC_POLYNOMIAL))
+      if (_ic_strategy[ic_idx] == ICStrategy::IC_POLYNOMIAL)
       {
         // (d) Check if any node is in reinit_node_set
         bool share_with_reinit = false;
@@ -1255,19 +1255,20 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes()
         if (share_with_reinit)
         {
           patch_elem_set.insert(eid);
-          _solved_elem_ids_for_npr.push_back(eid);
+          _solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]].push_back(eid);
         }
       }
-      else if (inICStrategy(ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN))
+      else if (_ic_strategy[ic_idx] == ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN)
       {
         patch_elem_set.insert(eid);
-        _solved_elem_ids_for_npr.push_back(eid);
+        _solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]].push_back(eid);
       }
     }
   }
 
-  local2Global(
-      _solved_elem_ids_for_npr, _solved_elem_ids_for_npr, true /*sort_and_remove_duplicates*/);
+  local2Global(_solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]],
+               _solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]],
+               true /*sort_and_remove_duplicates*/);
 }
 
 void
@@ -1294,7 +1295,8 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys,
       // Recover value using polynomial patch recovery
       const Point & centroid = elem->vertex_average();
       const Real recovered_val = _npr_vec[_var_number2_npr_idx[var_num_in_npr]]->nodalPatchRecovery(
-          centroid, _solved_elem_ids_for_npr /*has already sorted*/);
+          centroid,
+          _solved_elem_ids_for_npr[_var_number2_npr_idx[var_num_in_npr]] /*has already sorted*/);
 
       // Assign recovered value to the DOF
       if (!dofs_on_reinitialized_elem.empty())
@@ -1312,7 +1314,7 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys,
 
       // Recover value using polynomial patch recovery
       const Real recovered_val = _npr_vec[_var_number2_npr_idx[var_num_in_npr]]->nodalPatchRecovery(
-          x, _solved_elem_ids_for_npr /*has already sorted*/);
+          x, _solved_elem_ids_for_npr[_var_number2_npr_idx[var_num_in_npr]] /*has already sorted*/);
 
       // Assign recovered value to the DOF
       if (!dofs_on_newly_activated_node.empty())
