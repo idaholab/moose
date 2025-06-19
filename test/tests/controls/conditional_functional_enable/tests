@@ -5,6 +5,7 @@
     type = CSVDiff
     input = conditional_function_enable.i
     csvdiff = conditional_function_enable_out.csv
+    restep = false # Explicitly needs to abort on solve failed
     requirement = "The Control system shall be capable of activating or deactivating"
       " MOOSE objects using a conditional function."
   [../]

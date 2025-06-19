@@ -9,6 +9,7 @@
     allow_test_objects = true
     # 0 time steps taken
     recover = false
+    restep = false
 
     requirement = 'The system shall provide an interface to compute an axial coordinate from an arbitrary spatial point.'
   []
@@ -22,6 +23,7 @@
     allow_test_objects = true
     # 0 time steps taken
     recover = false
+    restep = false
 
     requirement = 'The system shall provide an interface to compute a radial coordinate from an arbitrary spatial point.'
   []
@@ -35,6 +37,7 @@
     allow_test_objects = true
     # 0 time steps taken
     recover = false
+    restep = false
 
     requirement = 'The system shall provide an interface to get the axial section index for an arbitrary spatial point.'
   []
@@ -52,6 +55,7 @@
     allow_test_objects = true
     # 0 time steps taken
     recover = false
+    restep = false
 
     requirement = 'The system shall provide an interface to get the axial element index for an arbitrary spatial point.'
   []

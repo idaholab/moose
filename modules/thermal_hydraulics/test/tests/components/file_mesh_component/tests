@@ -18,6 +18,7 @@
     exodiff = 'file_mesh_component.e'
     # Prereq does not test recover
     recover = False
+    restep = false # Test is prescribed to abort on failed timestep
 
     requirement = 'The system shall provide a component that loads a mesh from an ExodusII file.'
   []
