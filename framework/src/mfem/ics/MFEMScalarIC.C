@@ -28,9 +28,9 @@ MFEMScalarIC::MFEMScalarIC(const InputParameters & params) : MFEMGeneralUserObje
 void
 MFEMScalarIC::execute()
 {
-  auto coeff = getMFEMProblem().getScalarFunctionCoefficient(getParam<FunctionName>("coefficient"));
+  auto & coeff = getScalarCoefficient(getParam<FunctionName>("coefficient"));
   auto grid_function = getMFEMProblem().getGridFunction(getParam<std::string>("variable"));
-  grid_function->ProjectCoefficient(*coeff);
+  grid_function->ProjectCoefficient(coeff);
 }
 
 #endif

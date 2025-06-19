@@ -21,7 +21,7 @@ class MFEMFunctorMaterial : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
-  static std::vector<std::string> subdomainsToStrings(const std::vector<SubdomainName> & blocks);
+  std::vector<std::string> subdomainsToStrings(const std::vector<SubdomainName> & blocks);
   static libMesh::Point pointFromMFEMVector(const mfem::Vector & vec);
 
   MFEMFunctorMaterial(const InputParameters & parameters);
