@@ -40,7 +40,14 @@ MFEMScalarFESpace::getFECName() const
   if (_fec_type == "H1")
     basis = (basis == "G" ? "" : "@" + basis);
   else if (_fec_type == "L2")
-    basis = (basis == "g" ? "" : "_T" + basis);
+  {
+    if (basis != "g")
+      mooseWarning("L2 finite element space only supports GaussLegendre basis. "
+                   "Ignoring " +
+                   getParam<std::string>("basis") +
+                   " basis choice and using GaussLegendre instead.\n");
+    basis = "";
+  }
 
   return _fec_type + basis + "_" + std::to_string(getProblemDim()) + "D_P" +
          std::to_string(_fec_order);
