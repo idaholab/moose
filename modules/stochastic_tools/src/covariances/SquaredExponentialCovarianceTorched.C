@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SquaredExponentialCovarianceTorched.h"
+#include "SquaredExponentialCovariance.h"
 #include <cmath>
 
-registerMooseObject("StochasticToolsApp", SquaredExponentialCovarianceTorched);
+registerMooseObject("StochasticToolsApp", SquaredExponentialCovariance);
 
 InputParameters
-SquaredExponentialCovarianceTorched::validParams()
+SquaredExponentialCovariance::validParams()
 {
-  InputParameters params = CovarianceFunctionBaseTorched::validParams();
+  InputParameters params = CovarianceFunctionBase::validParams();
   params.addClassDescription("Squared Exponential covariance function.");
   params.addRequiredParam<std::vector<Real>>("length_factor",
                                              "Length factors to use for Covariance Kernel");
@@ -26,9 +26,8 @@ SquaredExponentialCovarianceTorched::validParams()
   return params;
 }
 
-SquaredExponentialCovarianceTorched::SquaredExponentialCovarianceTorched(
-    const InputParameters & parameters)
-  : CovarianceFunctionBaseTorched(parameters),
+SquaredExponentialCovariance::SquaredExponentialCovariance(const InputParameters & parameters)
+  : CovarianceFunctionBase(parameters),
     _length_factor(addVectorRealHyperParameter(
         "length_factor", getParam<std::vector<Real>>("length_factor"), true)),
     _sigma_f_squared(
@@ -39,10 +38,10 @@ SquaredExponentialCovarianceTorched::SquaredExponentialCovarianceTorched(
 }
 
 void
-SquaredExponentialCovarianceTorched::computeCovarianceMatrix(torch::Tensor & K,
-                                                             const torch::Tensor & x,
-                                                             const torch::Tensor & xp,
-                                                             const bool is_self_covariance) const
+SquaredExponentialCovariance::computeCovarianceMatrix(torch::Tensor & K,
+                                                      const torch::Tensor & x,
+                                                      const torch::Tensor & xp,
+                                                      const bool is_self_covariance) const
 {
   if ((unsigned)x.sizes()[1] != _length_factor.size())
     mooseError("length_factor size does not match dimension of trainer input.");
@@ -52,14 +51,13 @@ SquaredExponentialCovarianceTorched::computeCovarianceMatrix(torch::Tensor & K,
 }
 
 void
-SquaredExponentialCovarianceTorched::SquaredExponentialFunction(
-    torch::Tensor & K,
-    const torch::Tensor & x,
-    const torch::Tensor & xp,
-    const std::vector<Real> & length_factor,
-    const Real sigma_f_squared,
-    const Real sigma_n_squared,
-    const bool is_self_covariance)
+SquaredExponentialCovariance::SquaredExponentialFunction(torch::Tensor & K,
+                                                         const torch::Tensor & x,
+                                                         const torch::Tensor & xp,
+                                                         const std::vector<Real> & length_factor,
+                                                         const Real sigma_f_squared,
+                                                         const Real sigma_n_squared,
+                                                         const bool is_self_covariance)
 {
   auto K_accessor = K.accessor<Real, 2>();
   auto x_accessor = x.accessor<Real, 2>();
@@ -90,10 +88,10 @@ SquaredExponentialCovarianceTorched::SquaredExponentialFunction(
 }
 
 bool
-SquaredExponentialCovarianceTorched::computedKdhyper(torch::Tensor & dKdhp,
-                                                     const torch::Tensor & x,
-                                                     const std::string & hyper_param_name,
-                                                     unsigned int ind) const
+SquaredExponentialCovariance::computedKdhyper(torch::Tensor & dKdhp,
+                                              const torch::Tensor & x,
+                                              const std::string & hyper_param_name,
+                                              unsigned int ind) const
 {
   if (name().length() + 1 > hyper_param_name.length())
     return false;
@@ -122,11 +120,11 @@ SquaredExponentialCovarianceTorched::computedKdhyper(torch::Tensor & dKdhp,
 }
 
 void
-SquaredExponentialCovarianceTorched::computedKdlf(torch::Tensor & K,
-                                                  const torch::Tensor & x,
-                                                  const std::vector<Real> & length_factor,
-                                                  const Real sigma_f_squared,
-                                                  const int ind)
+SquaredExponentialCovariance::computedKdlf(torch::Tensor & K,
+                                           const torch::Tensor & x,
+                                           const std::vector<Real> & length_factor,
+                                           const Real sigma_f_squared,
+                                           const int ind)
 {
   unsigned int num_samples_x = x.sizes()[0];
   unsigned int num_params_x = x.sizes()[1];

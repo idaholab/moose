@@ -53,7 +53,7 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     CovarianceInterface(parameters),
     _predictor_row(getPredictorData()),
     _gp(declareModelData<StochasticTools::GaussianProcess>("_gp")),
-    _training_params(declareModelData<RealEigenMatrix>("_training_params")),
+    _training_params(declareModelData<torch::Tensor>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
     _do_tuning(isParamValid("tune_parameters")),
@@ -125,15 +125,18 @@ GaussianProcessTrainer::postTrain()
   _communicator.allgather(_params_buffer);
   _communicator.allgather(_data_buffer);
 
-  _training_params.resize(_params_buffer.size(), _n_dims);
-  _training_data.resize(_data_buffer.size(), _n_outputs);
+  _training_params = torch::empty({long(_params_buffer.size()), _n_dims}, at::kDouble);
+  _training_data = torch::empty({long(_data_buffer.size()), _n_outputs}, at::kDouble);
 
-  for (auto ii : make_range(_training_params.rows()))
+  auto params_accessor = _training_params.accessor<Real, 2>();
+  auto data_accessor = _training_data.accessor<Real, 2>();
+
+  for (auto ii : make_range(_training_params.sizes()[0]))
   {
     for (auto jj : make_range(_n_dims))
-      _training_params(ii, jj) = _params_buffer[ii][jj];
+      params_accessor[ii][jj] = _params_buffer[ii][jj];
     for (auto jj : make_range(_n_outputs))
-      _training_data(ii, jj) = _data_buffer[ii][jj];
+      data_accessor[ii][jj] = _data_buffer[ii][jj];
   }
 
   // Standardize (center and scale) training params
@@ -142,7 +145,6 @@ GaussianProcessTrainer::postTrain()
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
     _gp.paramStandardizer().set(0, 1, _n_dims);
-
   // Standardize (center and scale) training data
   if (_standardize_data)
     _gp.standardizeData(_training_data);
