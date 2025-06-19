@@ -763,6 +763,12 @@ setColorConsole(bool use_color, bool force)
 std::string
 hitMessagePrefix(const hit::Node & node)
 {
+  // Strip meaningless line and column number for CLI args
+  if (node.filename() == "CLI_ARGS")
+    return "CLI_ARGS:\n";
+  // If using the root node, don't add line info
+  if (node.isRoot())
+    return node.filename() + ":\n";
   return node.fileLocation() + ":\n";
 }
 

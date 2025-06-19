@@ -16,7 +16,7 @@
   [range_check_param]
     type = 'RunException'
     input = 'range_check_param.i'
-    expect_err = 'Range check failed for parameter \S'
+    expect_err = "range_check_param.i:6.3: Range check failed for parameter 'Mesh/bias_x'; expression = 'bias_x>=0.5 & bias_x<=2', value = 0.1"
 
     requirement = 'The system shall report an error message when a range-checked parameter is out of range.'
     issues = '#2777'
@@ -26,7 +26,7 @@
   [checked_pointer_param_test]
     type = 'RunException'
     input = 'checked_pointer_param_test.i'
-    expect_err = "checked_pointer_param_test.i:3.2: syntax error, unexpected invalid token, expecting ="
+    expect_err = "checked_pointer_param_test.i:3.2-3.3: syntax error, unexpected invalid token, expecting ="
     requirement = 'The system shall report an error when a null pointer-checked parameter is retrieved from the InputParameters object.'
     issues = '#10356'
   []
@@ -750,7 +750,7 @@
     type = 'RunException'
     input = 'wrong_moose_object_test.i'
     cli_args = "AAAKErnels/type=Diffusion BCs/active=''"
-    expect_err = "section '\[AAAKErnels\]' does not have an associated \"Action\""
+    expect_err = "CLI_ARGS: section '\[AAAKErnels]\' does not have an associated Action; you likely misspelled the Action/section name or the app you are running does not support this Action/syntax"
 
     requirement = 'The system shall report an error when an input file block associated with a pluggable system is misspelled.'
     issues = '#20062'

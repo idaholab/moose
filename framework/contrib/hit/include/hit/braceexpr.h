@@ -107,7 +107,7 @@ public:
   std::string expand(Field * n, const std::string & input);
 
   std::vector<std::string> used;
-  std::vector<std::string> errors;
+  std::vector<ErrorMessage> errors;
 
 private:
   std::string expand(Field * n, BraceNode & expr);

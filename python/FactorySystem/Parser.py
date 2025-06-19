@@ -50,7 +50,8 @@ class Parser:
         try:
             root = pyhit.load(self.fname)
         except Exception as err:
-            self.error(err)
+            # Syntax errors from pyhit come with file context
+            self.errors.extend(str(err).splitlines())
             return
         self.root = root(0) # make the [Tests] block the root
 
@@ -64,7 +65,8 @@ class Parser:
 
     def error(self, msg, node=None, param=None):
         if node is not None:
-            self.errors.append('{}:{}: {}'.format(self.fname, node.line(param), msg))
+            line = node.line(param) if param else node.line()
+            self.errors.append('{}:{}: {}'.format(self.fname, line, msg))
         else:
             self.errors.append('{}: {}'.format(self.fname, msg))
 
@@ -193,7 +195,7 @@ class Parser:
                 if len(e_split) > 1:
                     messages += [f'  {v}' for v in e_split[1:]]
                 for message in messages:
-                    self.error(message)
+                    self.error(message, node=node)
 
         # Are we in a tree node that "looks" like it should contain a buildable object?
         elif node.parent.fullpath == 'Tests' and self._check_for_type and not self._looksLikeValidSubBlock(node):

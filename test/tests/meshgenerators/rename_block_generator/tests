@@ -132,7 +132,7 @@
     input = 'rename_block.i'
     cli_args = 'Mesh/rename/old_block_id=0
                 Mesh/rename/old_block_name=dummy'
-    expect_err = "old_block_id\):.*Cannot use in combination with 'old_block_name'. Please use 'old_block' instead; 'old_block_id' and 'old_block_name' are deprecated."
+    expect_err = "Mesh\/rename\/old_block_id: Cannot use in combination with 'old_block_name'. Please use 'old_block' instead; 'old_block_id' and 'old_block_name' are deprecated."
 
     detail = 'both old block IDs and old block names are provided'
   []
@@ -141,7 +141,7 @@
     input = 'rename_block.i'
     cli_args = 'Mesh/rename/new_block_id=0
                 Mesh/rename/new_block_name=dummy'
-    expect_err = "new_block_id\):.*Cannot use in combination with 'new_block_name'. Please use 'new_block' instead; 'new_block_id' and 'new_block_name' are deprecated."
+    expect_err = "Mesh/rename/new_block_id: Cannot use in combination with 'new_block_name'. Please use 'new_block' instead; 'new_block_id' and 'new_block_name' are deprecated."
 
     detail = 'both new block IDs and new block names are provided'
   []
@@ -150,7 +150,7 @@
     input = 'rename_block.i'
     cli_args = 'Mesh/rename/old_block=0
                 Mesh/rename/old_block_id=0'
-    expect_err = "old_block_id\):.*Cannot use with 'old_block'. Use only 'old_block'; 'old_block_id' is deprecated."
+    expect_err = "Mesh/rename/old_block_id: Cannot use with 'old_block'. Use only 'old_block'; 'old_block_id' is deprecated."
 
     detail = 'the deprecated syntax for old block id and the new syntax for old block is used'
   []
@@ -159,7 +159,7 @@
     input = 'rename_block.i'
     cli_args = 'Mesh/rename/old_block=0
                 Mesh/rename/old_block_name=dummy'
-    expect_err = "old_block_name\):.*Cannot use with 'old_block'. Use only 'old_block'; 'old_block_name' is deprecated."
+    expect_err = "Mesh/rename/old_block_name: Cannot use with 'old_block'. Use only 'old_block'; 'old_block_name' is deprecated"
 
     detail = 'the deprecated syntax for old block name and the new syntax for old block is used'
   []
@@ -168,7 +168,7 @@
     input = 'rename_block.i'
     cli_args = 'Mesh/rename/new_block=0
                 Mesh/rename/new_block_id=0'
-    expect_err = "new_block_id\):.*Cannot use with 'new_block'. Use only 'new_block'; 'new_block_id' is deprecated."
+    expect_err = "Mesh/rename/new_block_id: Cannot use with 'new_block'. Use only 'new_block'; 'new_block_id' is deprecated."
 
     detail = 'the deprecated syntax for new block id and the new syntax for new block is used'
   []
@@ -177,7 +177,7 @@
     input = 'rename_block.i'
     cli_args = 'Mesh/rename/new_block=0
                 Mesh/rename/new_block_name=dummy'
-    expect_err = "new_block_name\):.*Cannot use with 'new_block'. Use only 'new_block'; 'new_block_name' is deprecated."
+    expect_err = "Mesh/rename/new_block_name: Cannot use with 'new_block'. Use only 'new_block'; 'new_block_name' is deprecated."
 
     detail = 'the deprecated syntax for new block name and the new syntax for new block is used'
   []
