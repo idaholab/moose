@@ -40,6 +40,7 @@
   []
   [stitch_block_names]
     type = 'Exodiff'
+    design = 'meshgenerators/StitchedMeshGenerator.md'
     input = 'stitch_block_names.i'
     cli_args = '--mesh-only'
     exodiff = 'stitch_block_names_in.e'
@@ -50,6 +51,7 @@
   []
   [dont_stitch_block_names]
     type = 'Exodiff'
+    design = 'meshgenerators/StitchedMeshGenerator.md'
     input = 'stitch_block_names.i'
     cli_args = '--mesh-only dont_stitch_block_names_in.e Mesh/stitch/subdomain_remapping=false'
     exodiff = 'dont_stitch_block_names_in.e'
