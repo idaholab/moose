@@ -1,7 +1,9 @@
-libPNG_LIBS    := @LIBPNG_LIBS@
-libPNG_INCLUDE := @LIBPNG_INCLUDES@
-PREFIX         := @prefix@
+libPNG_LIBS     := @LIBPNG_LIBS@
+libPNG_INCLUDE  := @LIBPNG_INCLUDES@
+PREFIX          := @prefix@
 ENABLE_LIBTORCH := @libtorch_support@
-LIBTORCH_DIR := @libtorch_library@
-ENABLE_MFEM := @mfem_support@
-MFEM_DIR := @mfem_library@
+LIBTORCH_DIR    := @libtorch_library@
+ENABLE_MFEM     := @mfem_support@
+MFEM_DIR        := @mfem_library@
+ENABLE_NEML2    := @neml2_support@
+NEML2_DIR       := @neml2_library@
