@@ -167,6 +167,7 @@ ParsedDownSelectionPositions::initialize()
   for (const auto pos_ptr : _positions_ptrs)
     n_points += pos_ptr->getNumPositions(initial);
   _positions.reserve(n_points);
+  mooseAssert(_communicator.verify(n_points), "We should have a synchronized number of points");
 
   // Rather than synchronize all ranks at every point, we will figure out whether to keep (1),
   // discard (2) or error (0, due to no ranks having made the decision) for each position
@@ -219,6 +220,18 @@ ParsedDownSelectionPositions::initialize()
       else
         keep_positions[i_pos - 1] = 2;
     }
+
+#ifdef DEBUG
+  for (const auto keep_position : keep_positions)
+  {
+    const short * keep_position_ptr = nullptr;
+    if (keep_position != 0)
+      keep_position_ptr = &keep_position;
+    mooseAssert(_communicator.semiverify(keep_position_ptr),
+                "Processors that made a decision about this position should all agree on the "
+                "decision or else our functor is evaluating differently on different processes?");
+  }
+#endif
 
   // Synchronize which positions to keep across all ranks
   comm().max(keep_positions);
