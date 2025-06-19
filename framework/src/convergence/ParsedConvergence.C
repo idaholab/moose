@@ -63,7 +63,8 @@ ParsedConvergence::initialSetup()
   const auto divergence_expression = isParamValid("divergence_expression")
                                          ? getParam<std::string>("divergence_expression")
                                          : MooseUtils::join(_convergence_symbol_names, "|");
-  _divergence_function = makeParsedFunction(divergence_expression);
+  if (divergence_expression.size())
+    _divergence_function = makeParsedFunction(divergence_expression);
 }
 
 void
@@ -160,7 +161,9 @@ ParsedConvergence::checkConvergence(unsigned int iter)
   updateSymbolValues(iter);
 
   const Real converged_real = evaluate(_convergence_function, _convergence_function_params, name());
-  const Real diverged_real = evaluate(_divergence_function, _divergence_function_params, name());
+  const Real diverged_real =
+      _divergence_function ? evaluate(_divergence_function, _divergence_function_params, name())
+                           : 0;
 
   if (convertRealToBool(diverged_real, "divergence_expression"))
     return MooseConvergenceStatus::DIVERGED;
