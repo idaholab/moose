@@ -46,7 +46,7 @@ public:
 
   protected:
   /// The functors for this BC (can be variable, function, etc)
-  const Moose::Functor<Real> & _functor-alpha;
-  const Moose::Functor<Real> & _functor-beta;
-  const Moose::Functor<Real> & _functor-gamma;
+  const Moose::Functor<Real> & _functor_alpha;
+  const Moose::Functor<Real> & _functor_beta;
+  const Moose::Functor<Real> & _functor_gamma;
 };
