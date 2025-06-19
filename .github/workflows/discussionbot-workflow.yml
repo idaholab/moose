@@ -4,14 +4,13 @@ on:
     types:
     # Use locked as trigger event until this chatbot is ready
       - created
-    #  - locked
 jobs:
   run_bot:
-    runs-on: [self-hosted, linux]
+    runs-on: [ubuntu-latest]
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: MOOSE_discussion_bot
 
@@ -23,11 +22,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r python/MooseDiscussion/requirements.txt
 
-      - name: Run discuss bot
+      - name: Run discussion bot
         run: python python/MooseDiscussion/GitHubBot.py
 
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DB_DIR: "python/MooseDiscussion/database"
           TOP_N: 5
           THRESHOLD: 0.2
