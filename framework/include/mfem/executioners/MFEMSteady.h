@@ -15,6 +15,8 @@ public:
   virtual void init() override;
   virtual void execute() override;
 
+  virtual bool addEstimator( std::shared_ptr<MFEMEstimator> ) override;
+
 protected:
   // Time variables used for consistency with MOOSE, needed for outputs.
   // Important for future synchronisation of solves in MultiApps
@@ -24,6 +26,8 @@ protected:
 
   /// Iteration number obtained from the main application
   unsigned int _output_iteration_number;
+
+  std::string _fe_space_name;
 
 private:
   std::unique_ptr<Moose::MFEM::ProblemOperator> _problem_operator{nullptr};

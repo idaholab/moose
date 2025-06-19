@@ -21,6 +21,7 @@ public:
   // Computes the auxvariable.
   virtual void execute() override;
 
+  // Updates grad operator
   virtual void update() override;
 
 protected:

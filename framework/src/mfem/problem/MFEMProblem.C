@@ -89,8 +89,6 @@ MFEMProblem::addIndicator(const std::string & user_object_name,
     {
       mooseError("Cannot add estimator :()");
     }
-    // construct the estimator
-    // _problem_operator->AddEstimator(estimator);
   }
   
   else

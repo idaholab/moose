@@ -102,10 +102,8 @@
 []
 
 [Executioner]
-  type       = MFEMAMR
+  type       = MFEMSteady
   device     = cpu
-  variable   = concentration
-  kernel     = diff
   fe_space   = H1FESpace
 []
 

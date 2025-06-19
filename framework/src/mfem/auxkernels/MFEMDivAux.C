@@ -40,4 +40,12 @@ MFEMDivAux::execute()
   _div.AddMult(_source_var, _result_var, _scale_factor);
 }
 
+void
+MFEMDivAux::update()
+{
+  _div.Update();
+  _div.Assemble();
+  _div.Finalize();
+}
+
 #endif

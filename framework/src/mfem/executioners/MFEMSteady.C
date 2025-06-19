@@ -11,6 +11,8 @@ MFEMSteady::validParams()
   InputParameters params = MFEMExecutioner::validParams();
   params.addClassDescription("Executioner for steady state MFEM problems.");
   params.addParam<Real>("time", 0.0, "System time");
+
+  params.addParam<std::string>("fe_space", "none", "FE Space to perform p-refinement in");
   return params;
 }
 
@@ -19,7 +21,8 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _system_time(getParam<Real>("time")),
     _time_step(_mfem_problem.timeStep()),
     _time(_mfem_problem.time()),
-    _output_iteration_number(0)
+    _output_iteration_number(0),
+    _fe_space_name(getParam<std::string>("fe_space"))
 {
   _time = _system_time;
 }
@@ -75,7 +78,19 @@ MFEMSteady::execute()
 
   // Solve equation system.
   if (_mfem_problem.shouldSolve())
+  {
     _problem_operator->Solve(_problem_data.f);
+
+    if ( _use_amr and _fe_space_name != "none" )
+    {
+      // p-refine
+      auto fespace = _problem_data.fespaces.GetShared( _fe_space_name );
+      _problem_operator->PRefine( fespace );
+      _problem_operator->Solve(_problem_data.f);
+
+    }
+
+  }
 
   // Displace mesh, if required
   _mfem_problem.displaceMesh();
@@ -103,5 +118,21 @@ MFEMSteady::execute()
 
   postExecute();
 }
+
+bool
+MFEMSteady::addEstimator( std::shared_ptr<MFEMEstimator> estimator )
+{
+  if (estimator)
+  {
+    _use_amr = true;
+    _problem_operator->AddEstimator(estimator);
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
 
 #endif

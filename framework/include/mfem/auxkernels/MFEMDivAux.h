@@ -21,6 +21,9 @@ public:
   // Computes the auxvariable.
   virtual void execute() override;
 
+  // Updates divergence operator
+  virtual void update() override;
+
 protected:
   // Name of source MFEMVariable to take the divergence of.
   const VariableName _source_var_name;
