@@ -358,7 +358,7 @@ NEML2ModelExecutor::extractOutputs()
 
     // retrieve outputs
     for (auto & [y, target] : _retrieved_outputs)
-      target = _out[y].to(torch::kCPU);
+      target = _out[y].to(output_device());
 
     // retrieve parameter derivatives
     for (auto & [y, dy] : _retrieved_parameter_derivatives)
@@ -368,7 +368,7 @@ NEML2ModelExecutor::extractOutputs()
                                /*retain_graph=*/true,
                                /*create_graph=*/false,
                                /*allow_unused=*/false)
-                     .to(torch::kCPU);
+                     .to(output_device());
 
     // clear output
     _out.clear();
@@ -379,7 +379,7 @@ NEML2ModelExecutor::extractOutputs()
       {
         const auto & source = _dout_din[y][x];
         if (source.defined())
-          target = source.to(torch::kCPU).batch_expand({neml2::Size(N)});
+          target = source.to(output_device()).batch_expand({neml2::Size(N)});
       }
 
     // clear derivatives

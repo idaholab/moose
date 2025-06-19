@@ -52,6 +52,9 @@ protected:
   /// Get the target compute device
   const neml2::Device & device() const { return _device; }
 
+  /// Get the target output device
+  const neml2::Device & output_device() const { return _output_device; }
+
   using RJType = std::tuple<neml2::ValueMap, neml2::DerivMap>;
   using DispatcherType =
       neml2::WorkDispatcher<neml2::ValueMap, RJType, RJType, neml2::ValueMap, RJType>;
@@ -64,6 +67,8 @@ protected:
 private:
   /// The device on which to evaluate the NEML2 model
   const neml2::Device _device;
+  /// The device on which to store the outputs
+  const neml2::Device _output_device;
   /// The NEML2 factory
   std::unique_ptr<neml2::Factory> _factory;
   /// The NEML2 material model
@@ -108,6 +113,10 @@ NEML2ModelInterface<T>::validParams()
           "type, and :<device-index> optionally specifies a device index. For example, "
           "device='cpu' sets the target compute device to be CPU, and device='cuda:1' sets the "
           "target compute device to be CUDA with device ID 1."));
+  params.addParam<std::string>("output_device",
+                               "cpu",
+                               "Similar to the 'device' parameter, this parameter specifies the "
+                               "device on which to store the outputs. Default is 'cpu'.");
 
   params.addParam<std::string>(
       "scheduler",
@@ -137,6 +146,7 @@ template <typename... P>
 NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&... args)
   : T(params, args...),
     _device(params.get<std::string>("device")),
+    _output_device(params.get<std::string>("output_device")),
     _scheduler(nullptr),
     _async_dispatch(params.get<bool>("async_dispatch"))
 {
