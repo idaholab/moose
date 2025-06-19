@@ -86,7 +86,7 @@ class GitHubBot:
 
         for idx, node in enumerate(filtered_nodes):
             result.append(
-                f"{idx + 1}. Title: [{node.metadata['url']}]({node.metadata['url']})"
+                f"{idx + 1}. [{node.metadata['url']}]({node.metadata['url']})"
             )
 
         return "\n".join(result)
