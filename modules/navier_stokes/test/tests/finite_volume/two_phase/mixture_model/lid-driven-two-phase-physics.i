@@ -21,8 +21,8 @@ cp_d = 1
     xmax = .1
     ymin = 0
     ymax = .1
-    nx = 10
-    ny = 10
+    nx = 5
+    ny = 5
   []
 []
 
@@ -41,7 +41,7 @@ cp_d = 1
 
         # Pressure pin
         pin_pressure = true
-        pinned_pressure_type = 'point-value-uo'
+        pinned_pressure_type = 'point-value'
         pinned_pressure_point = '0 0 0'
         pinned_pressure_value = '0'
 
@@ -191,6 +191,7 @@ cp_d = 1
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
+
   [TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 7
@@ -199,11 +200,12 @@ cp_d = 1
     cutback_factor = 0.5
     dt = 1e-3
   []
-  nl_max_its = 10
+  nl_max_its = 20
   nl_rel_tol = 1e-03
   nl_abs_tol = 1e-9
   l_max_its = 5
   end_time = 1e8
+  line_search=none
 []
 
 [Outputs]
@@ -211,5 +213,6 @@ cp_d = 1
   [CSV]
     type = CSV
     execute_on = 'FINAL'
+    execute_scalars_on = NONE
   []
 []
