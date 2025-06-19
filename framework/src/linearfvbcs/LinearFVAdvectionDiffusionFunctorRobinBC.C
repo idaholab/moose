@@ -20,17 +20,17 @@ LinearFVAdvectionDiffusionFunctorRobinBC::validParams()
       "which can be used for the assembly of linear "
       "finite volume system and whose face values are determined using three functors. This kernel is "
       "only designed to work with advection-diffusion problems.");
-  params.addRequiredParam<MooseFunctorName>("functor-alpha", "The functor which is the coefficient of the normal gradient term.");
-  params.addRequiredParam<MooseFunctorName>("functor-beta", "The functor which is the coefficient of the scalar term.");
-  params.addRequiredParam<MooseFunctorName>("functor-gamma", "The functor which is the constant term on the RHS of the Robin BC expression.");
+  params.addRequiredParam<MooseFunctorName>("alpha", "The functor which is the coefficient of the normal gradient term.");
+  params.addRequiredParam<MooseFunctorName>("beta", "The functor which is the coefficient of the scalar term.");
+  params.addRequiredParam<MooseFunctorName>("gamma", "The functor which is the constant term on the RHS of the Robin BC expression.");
   return params;
 }
 
 LinearFVAdvectionDiffusionFunctorRobinBC::LinearFVAdvectionDiffusionFunctorRobinBC(
     const InputParameters & parameters)
-  : LinearFVAdvectionDiffusionBC(parameters), _functor-alpha(getFunctor<Real>("functor-alpha")),
-  : LinearFVAdvectionDiffusionBC(parameters),  _functor-beta(getFunctor<Real>("functor-beta" )),
-  : LinearFVAdvectionDiffusionBC(parameters), _functor-gamma(getFunctor<Real>("functor-gamma"))
+  : LinearFVAdvectionDiffusionBC(parameters), _functor-alpha(getFunctor<Real>("alpha")),
+  : LinearFVAdvectionDiffusionBC(parameters),  _functor-beta(getFunctor<Real>("beta" )),
+  : LinearFVAdvectionDiffusionBC(parameters), _functor-gamma(getFunctor<Real>("gamma"))
 {
 }
 
