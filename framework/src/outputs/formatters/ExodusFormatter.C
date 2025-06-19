@@ -32,17 +32,12 @@ ExodusFormatter::printInputFile(ActionWarehouse & wh)
 
   // Grab the command line arguments first
   _ss << "### Command Line Arguments ###\n";
-  if (wh.mooseApp().commandLine())
-  {
-    for (const auto & arg : wh.mooseApp().commandLine()->getArguments())
-      _ss << " " << arg;
-  }
-  if (wh.mooseApp().getSystemInfo() != NULL)
-  {
-    _ss << "### Version Info ###\n"
-        << std::setw(25) << "App Version: " << wh.mooseApp().getVersion() << "\n"
-        << wh.mooseApp().getSystemInfo()->getInfo() << "\n";
-  }
+  for (const auto & arg : wh.mooseApp().commandLine()->getArguments())
+    _ss << " " << arg;
+
+  _ss << "### Version Info ###\n"
+      << std::setw(25) << "App Version: " << wh.mooseApp().getVersion() << "\n"
+      << wh.mooseApp().getSystemInfo().getInfo() << "\n";
 
   _ss << std::left << "### Parallelism ###\n"
       << std::setw(25) << "Num Processors: " << wh.mooseApp().n_processors() << "\n"

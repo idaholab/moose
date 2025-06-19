@@ -49,8 +49,7 @@ outputFrameworkInformation(const MooseApp & app)
   std::stringstream oss;
   oss << std::left;
 
-  if (app.getSystemInfo() != NULL)
-    oss << app.getSystemInfo()->getInfo();
+  oss << app.getSystemInfo().getInfo();
 
   oss << "Input File(s):\n";
   for (const auto & entry : app.getInputFileNames())
@@ -463,8 +462,8 @@ outputOutputInformation(MooseApp & app)
       const OutputOnWarehouse & adv_on = out->advancedExecuteOn();
       for (const auto & adv_it : adv_on)
         if (execute_on != adv_it.second)
-          oss << "    " << std::setw(console_field_width - 4) << adv_it.first + ":"
-              << "\"" << adv_it.second << "\"" << std::endl;
+          oss << "    " << std::setw(console_field_width - 4) << adv_it.first + ":" << "\""
+              << adv_it.second << "\"" << std::endl;
     }
   }
 

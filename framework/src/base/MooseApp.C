@@ -55,6 +55,7 @@
 #include "StringInputStream.h"
 #include "MooseMain.h"
 #include "FEProblemBase.h"
+#include "Parser.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -387,8 +388,6 @@ MooseApp::validParams()
                                    false,
                                    "Show registered data paths for searching in the header");
 
-  params.addPrivateParam<int>("_argc");
-  params.addPrivateParam<char **>("_argv");
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<std::shared_ptr<Parallel::Communicator>>("_comm");
   params.addPrivateParam<unsigned int>("_multiapp_level");
@@ -449,8 +448,9 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
-    _parser(getParam<std::shared_ptr<Parser>>("_parser")),
-    _builder(*this, _action_warehouse, _parser),
+    _parser(getCheckedPointerParam<std::shared_ptr<Parser>>("_parser")),
+    _command_line(getCheckedPointerParam<std::shared_ptr<CommandLine>>("_command_line")),
+    _builder(*this, _action_warehouse, *_parser),
     _restartable_data(libMesh::n_threads()),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),
@@ -501,6 +501,9 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("libtorch_device")))
 #endif
 {
+  mooseAssert(_command_line->hasParsed(), "Command line has not parsed");
+  mooseAssert(_parser->queryRoot() && _parser->queryCommandLineRoot(), "Parser has not parsed");
+
   // Set the TIMPI sync type via --timpi-sync
   const auto & timpi_sync = getParam<std::string>("timpi_sync");
   const_cast<Parallel::Communicator &>(comm()).sync_type(timpi_sync);
@@ -616,18 +619,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
   _the_warehouse->registerAttribute<AttribDisplaced>("displaced", -1);
 
   _perf_graph.enableLivePrint();
-
-  if (isParamValid("_argc") && isParamValid("_argv"))
-  {
-    int argc = getParam<int>("_argc");
-    char ** argv = getParam<char **>("_argv");
-
-    _sys_info = std::make_unique<SystemInfo>(argc, argv);
-  }
-  if (isParamValid("_command_line"))
-    _command_line = getParam<std::shared_ptr<CommandLine>>("_command_line");
-  else
-    mooseError("Valid CommandLine object required");
 
   if (_check_input && isParamSetByUser("recover"))
     mooseError("Cannot run --check-input with --recover. Recover files might not exist");
@@ -1440,11 +1431,6 @@ MooseApp::setupOptions()
         _restart_recover_base = recover;
     }
 
-    // In the event that we've parsed once before already in MooseMain, we
-    // won't need to parse again
-    if (!_parser->root())
-      _parser->parse();
-
     _builder.build();
 
     if (isParamValid("required_capabilities"))
@@ -2099,6 +2085,16 @@ MooseApp::run()
     TIME_SECTION("setup", 2, "Setting Up");
     setupOptions();
     runInputFile();
+  }
+  catch (Parser::Error & err)
+  {
+    mooseAssert(_parser->getThrowOnError(), "Should be true");
+    throw err;
+  }
+  catch (MooseRuntimeError & err)
+  {
+    mooseAssert(Moose::_throw_on_error, "Should be true");
+    throw err;
   }
   catch (std::exception & err)
   {
