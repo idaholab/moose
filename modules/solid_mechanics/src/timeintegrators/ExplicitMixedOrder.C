@@ -140,13 +140,8 @@ ExplicitMixedOrder::solve()
   _fe_problem.time() = _fe_problem.timeOld();
   _nonlinear_implicit_system->update();
 
-  // Compute the residual
-  _explicit_residual->zero();
-  _fe_problem.computeResidual(
-      *_nonlinear_implicit_system->current_local_solution, *_explicit_residual, _nl->number());
-
-  // Move the residual to the RHS
-  *_explicit_residual *= -1.0;
+  // Evaluate residual and move it to the RHS
+  evaluateRHSResidual();
 
   // Perform the linear solve
   bool converged = performExplicitSolve(mass_matrix);
@@ -160,6 +155,18 @@ ExplicitMixedOrder::solve()
 
   _nl->setSolution(*_nonlinear_implicit_system->current_local_solution);
   _nonlinear_implicit_system->nonlinear_solver->converged = converged;
+}
+
+void
+ExplicitMixedOrder::evaluateRHSResidual()
+{
+  // Compute the residual
+  _explicit_residual->zero();
+  _fe_problem.computeResidual(
+      *_nonlinear_implicit_system->current_local_solution, *_explicit_residual, _nl->number());
+
+  // Move the residual to the RHS
+  *_explicit_residual *= -1.0;
 }
 
 void
