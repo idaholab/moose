@@ -33,7 +33,7 @@ All surface creation methods will return a shared pointer to that generated surf
 | Plane | `createPlaneFromPoints` | create a plane defined by 3 points |
 | Plane | `createPlaneFromCoefficients` | creates a plane based on the coefficients `a`, `b`, `c`, and `d` for the equation `ax + by + cz = d` |
 | Sphere | `createSphere` | creates a sphere of radius `r` at an optionally specified center point (default is `(0, 0, 0)`) |
-| Axis-Aligned Cylinder | `createCylinder` | creates a cylinder aligned with the specified axis (`x`, `y`, or `z`) at the specified center location (`x0`, `x1`), where (`x0`, `x1`) is (`y`, `z`) for x-axis, (`x`, `z`) for y-axis, (`x`, `y`) for z-axis |
+| Axis-Aligned Cylinder | `createCylinder` | creates a cylinder aligned with the specified axis (`x`, `y`, or `z`) at the specified center location (`x0`, `x1`), where (`x0`, `x1`) is (`y`, `z`) for X-Cylinder, (`x`, `z`) for Y-Cylinder, (`x`, `y`) for Z-Cylinder |
 
 The `CSGSurface` objects can then be accessed or updated with the following methods from `CSGBase`:
 
@@ -85,7 +85,7 @@ If creating a void cell, no fill has to be passed to the creation method.
 To create a cell with a material fill, simply provide it with a name of a material as a string.
 For a cell with a `CSGUniverse` fill, pass it a shared pointer to the `CSGUniverse`.
 
-The `CSGRegion` objects can then be accessed or updated with the following methods from `CSGBase`:
+The `CSGCell` objects can then be accessed or updated with the following methods from `CSGBase`:
 
 - `getAllCells`: retrieve a map of names to shared pointers for of all `CSGCell` objects
 - `getCellByName`: retrieve the shared pointer to the `CSGCell` of the specified name
@@ -149,7 +149,7 @@ There are multiple ways in which cells can be added to a universe:
 auto new_universe = csg_obj->createUniverse("new_universe", list_of_cells);
 ```
 
-2. When a `CSGCell` is created with `createCell`, a `CSGUniverse` can be passed as the final argument to indicate that the cell will be created and added directly to that specified universe. In this case, the cell will _not_ be added to the root universe. A cell that has a universe fill type cannot be added to the same universe that is being used for the fill. Example:
+2. When a `CSGCell` is created with `createCell`, a `CSGUniverse` can be passed as the final argument to indicate that the cell will be created and added directly to that specified universe. In this case, the cell will *not* be added to the root universe. A cell that has a universe fill type cannot be added to the same universe that is being used for the fill. For example:
 
 ```cpp
 // create an empty universe
@@ -159,7 +159,7 @@ auto new_universe = csg_obj->createUniverse("new_univ");
 auto new_cell_in_univ = csg_obj->createCell("new_cell", region, new_universe);
 ```
 
-3. A cell or list of cells can be added to an existing universe with the `addCellToUniverse` and `addCellsToUniverse` methods. In this case, if a `CSGCell` exists in another `CSGUniverse` (such as the root universe), it will _not_ be removed when being added to another (i.e. if the same behavior as option 2 above is desired, the cell will have to be manually removed from the root universe). The following two examples will produce the same outcome:
+3. A cell or list of cells can be added to an existing universe with the `addCellToUniverse` and `addCellsToUniverse` methods. In this case, if a `CSGCell` exists in another `CSGUniverse` (such as the root universe), it will *not* be removed when being added to another (i.e. if the same behavior as option 2 above is desired, the cell will have to be manually removed from the root universe). The following two examples will produce the same outcome:
 
 ```cpp
 // create a list of cells and add to an existing universe after creating all of them
@@ -168,7 +168,7 @@ for (unsigned int i = 0; i < x; ++i)
 {
     // creating new_cell here will add it to the root universe
     auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
-    list_of_cells.pushback(new_cell);
+    list_of_cells.push_back(new_cell);
 }
 // add to an existing universe; cells will still remain in the root universe
 csg_obj->addCellsToUniverse(existing_universe, list_of_cells);
@@ -195,7 +195,7 @@ for (unsigned int i = 0; i < x; ++i)
 {
     // creating new_cell here will add it to the root universe
     auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
-    list_of_cells.pushback(new_cell);
+    list_of_cells.push_back(new_cell);
 }
 // add to an existing universe and explicitly remove them from root
 csg_obj->addCellsToUniverse(existing_universe, list_of_cells);
@@ -223,7 +223,7 @@ There are two main ways to handle this: passing and joining.
 
 ### Passing between Mesh Generators
 
-The `getCSGBase*` methods available for all [mesh generators](source/meshgenerators/MeshGenerator.md) can be used to access the `CSGBase` object associated with a different `MeshGenerator` and move it to be the current object. Example:
+The `getCSGBase*` methods available for all [mesh generators](source/meshgenerators/MeshGenerator.md) can be used to access the `CSGBase` object associated with a different `MeshGenerator` and move it to be the current object. For example:
 
 ```cpp
 // get the CSGBase from a different mesh generator and use in this mesh generator
@@ -254,7 +254,7 @@ for (unsigned int i = 1; i < csg_bases.size(); ++i)
 }
 ```
 
-2. One new root universe name (`new_root_name_join`): All cells in the root universe of the incoming base will be used to create a new universe of the name specified by the `new_root_name_join` parameter. These cells will _not_ be added to the existing root universe. This new universe will be added as a new non-root universe in the existing base object. *Note: this newly created universe will not be connected to the root universe of the existing `CSGBase` object by default.*
+2. One new root universe name (`new_root_name_join`): All cells in the root universe of the incoming base will be used to create a new universe of the name specified by the `new_root_name_join` parameter. These cells will *not* be added to the existing root universe. This new universe will be added as a new non-root universe in the existing base object. *Note: this newly created universe will not be connected to the root universe of the existing `CSGBase` object by default.*
 
 ```cpp
 // get a list of bases associated with a list of mesh generator names
