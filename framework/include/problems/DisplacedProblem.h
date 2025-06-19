@@ -99,17 +99,22 @@ public:
   virtual void restoreOldSolutions();
 
   /**
+   * Copy the provided solution into the displaced auxiliary system
+   */
+  void syncAuxSolution(const NumericVector<Number> & aux_soln);
+
+  /**
    * Copy the solutions on the undisplaced systems to the displaced systems.
    */
-  virtual void syncSolutions();
+  void syncSolutions();
 
   /**
    * Synchronize the solutions on the displaced systems to the given solutions. The nonlinear
    * solutions argument is a map from the nonlinear system number to the solution that we want to
    * set that nonlinear system's solution to
    */
-  virtual void syncSolutions(const std::map<unsigned int, const NumericVector<Number> *> & nl_solns,
-                             const NumericVector<Number> & aux_soln);
+  void syncSolutions(const std::map<unsigned int, const NumericVector<Number> *> & nl_solns,
+                     const NumericVector<Number> & aux_soln);
 
   /**
    * Copy the solutions on the undisplaced systems to the displaced systems and
