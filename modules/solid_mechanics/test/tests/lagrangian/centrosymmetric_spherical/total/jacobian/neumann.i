@@ -10,9 +10,6 @@
     dim = 1
     nx = 5
   []
-[]
-
-[Problem]
   coord_type = RSPHERICAL
 []
 

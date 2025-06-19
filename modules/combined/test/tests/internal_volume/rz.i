@@ -12,12 +12,9 @@
   displacements = 'disp_x disp_y'
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = meshes/rz.e
+  coord_type = RZ
 []
 
 [Functions]
