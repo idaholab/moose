@@ -214,6 +214,15 @@ protected:
   }
 
   /**
+   * Error if executing this MooseObject on EXEC_TRANSFER in a source multiapp (from_multiapp, e.g.
+   * child/sibling app). Note that, conversely, when the parent app is the source application, it is
+   * usually \emph desired to use EXEC_TRANSFER for a MooseObject that provides the values to
+   * transfer.
+   * @param object_name name of the object to check the execute_on flags for
+   */
+  void errorIfObjectExecutesOnTransferInSourceApp(const std::string & object_name) const;
+
+  /**
    * Get the target app point from a point in the reference frame
    * @param p the point in the reference frame
    * @param local_i_to the local target problem into

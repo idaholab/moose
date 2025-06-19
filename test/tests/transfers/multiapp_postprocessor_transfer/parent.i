@@ -41,6 +41,7 @@
   [average]
     type = ElementAverageValue
     variable = u
+    execute_on = 'TRANSFER'
   []
 []
 
