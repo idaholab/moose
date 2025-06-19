@@ -224,7 +224,11 @@ for (unsigned int i = 0; i < x; ++i)
 }
 ```
 
-*Note: When adding and removing cells to/from universes, it is important to maintain the connectedness of all universes meaning all universes should be able to be traced back to the root universe at the end, in order to have a consistent model at the end.*
+!alert! note title=Maintaining Connectivity
+
+When adding and removing cells to/from universes, it is important to maintain the connectivity of all universes meaning all universes should be able to be traced back to the root universe at the end of the generation process, in order to have a consistent model.
+
+!alert-end!
 
 ## Updating Existing CSGBase Objects
 
@@ -265,7 +269,7 @@ for (unsigned int i = 1; i < csg_bases.size(); ++i)
 }
 ```
 
-2. One new root universe name (`new_root_name_join`): All cells in the root universe of the incoming base will be used to create a new universe of the name specified by the `new_root_name_join` parameter. These cells will *not* be added to the existing root universe. This new universe will be added as a new non-root universe in the existing base object. *Note: this newly created universe will not be connected to the root universe of the existing `CSGBase` object by default.*
+2. One new root universe name (`new_root_name_join`): All cells in the root universe of the incoming base will be used to create a new universe of the name specified by the `new_root_name_join` parameter. These cells will *not* be added to the existing root universe. This new universe will be added as a new non-root universe in the existing base object. *This newly created universe will not be connected to the root universe of the existing `CSGBase` object by default.*
 
 ```cpp
 // get a list of bases associated with a list of mesh generator names
@@ -285,7 +289,7 @@ for (unsigned int i = 1; i < input_mg_names.size(); ++i)
 }
 ```
 
-3. Two new root universe names (`new_root_name_base` and `new_root_name_join`): The cells in the root universe of the current `CSGBase` object will be used to create a new non-root universe of the name specified by the `new_root_name_base` parameter, and the cells in the root universe of the incoming `CSGBase` object will be used to create a separate non-root universe of the name specified by the `new_root_name_join` parameter. *Note: At the end of this join method, the root universe of the current base object will be empty and neither of the two new non-root universes will be connected to the root universe by default.*
+3. Two new root universe names (`new_root_name_base` and `new_root_name_join`): The cells in the root universe of the current `CSGBase` object will be used to create a new non-root universe of the name specified by the `new_root_name_base` parameter, and the cells in the root universe of the incoming `CSGBase` object will be used to create a separate non-root universe of the name specified by the `new_root_name_join` parameter. *At the end of this join method, the root universe of the current base object will be empty and neither of the two new non-root universes will be connected to the root universe by default.*
 
 ```cpp
 // get a list of bases associated with a list of mesh generator names
@@ -303,10 +307,13 @@ csg_obj->joinOtherBase(inp_csg_obj, new_base_name, new_join_name);
 For all of these join methods, any non-root universes will remain unchanged and simply added to the list of universes for the current `CSGBase` object.
 Similarly, all incoming cells and surfaces are added alongside existing cells and surfaces.
 
-It is very important when using the `joinOtherBase` method that all surfaces, cells, and universes are uniquely named.
-No two objects of the same type may have the same name.
+!alert! note title=Object Naming Uniqueness
+
+It is very important when using the `joinOtherBase` method that all `CSGSurfaces`, `CSGCells`, and `CSGSurfaces` are uniquely named so that errors are not encountered when combining sets of objects.
 An error will be produced during the join process if an object of the same name already exists.
-See [recommendations for naming](#object-naming-recommendations).
+See [recommendations for naming](#object-naming-recommendations) below.
+
+!alert-end!
 
 ## Accessing CSG Methods
 
@@ -320,4 +327,4 @@ Consult the Doxygen documentation for information on all object-specific methods
 For each new CSG element (`CSGSurface`, `CSGCell`, and `CSGUniverse`) that is created, a unique name identifier (of type `std::string`) must be provided (`name` parameter for all creation methods).
 A recommended best practice is to include the mesh generator name (which can be accessed with `this->getName()` in any MeshGenerator class) as a part of that object name.
 This `name` is used as the unique identifier within the `CSGBase` instance.
-Methods for renaming objects are available to help prevent issues and errors.
+Methods for renaming objects are available as described in the above sections to help prevent issues and errors.
