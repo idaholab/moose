@@ -58,7 +58,7 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryNormalGradient() const
 }
 
 RealVectorValue
-LinearFVAdvectionDiffusionFunctorRobinBC::computeFaceTangentVector() const()
+LinearFVAdvectionDiffusionFunctorRobinBC::computeFaceTangentVector() const
 {
   // returns distance vector from nearest cell centre to boundary face
   const auto d_cf = computeCellToFaceVector();
