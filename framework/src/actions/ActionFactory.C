@@ -12,6 +12,7 @@
 #include "MooseApp.h"
 #include "InputParameterWarehouse.h"
 #include "MooseObjectAction.h"
+#include "Parser.h"
 
 ActionFactory::ActionFactory(MooseApp & app) : _app(app) {}
 
@@ -62,7 +63,7 @@ ActionFactory::create(const std::string & action,
       action_params.setHitNode(*hit_node, {});
     // Don't have one, so just use the root
     else
-      action_params.setHitNode(*_app.parser().root(), {});
+      action_params.setHitNode(_app.parser().getRoot(), {});
   }
 
   incoming_parser_params.set<std::string>("_unique_action_name") = unique_action_name;
