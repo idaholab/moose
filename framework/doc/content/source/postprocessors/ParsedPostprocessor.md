@@ -4,6 +4,8 @@
 
 The [!param](/Postprocessors/ParsedPostprocessor/expression) to parse may only include other postprocessors, the time variable and
 constants from the input file.
+The expression may use post-processor names directly, or the user may specify [!param](/Postprocessors/ParsedPostprocessor/pp_symbols) to associate a symbol for each of the post-processors in 
+[!param](/Postprocessors/ParsedPostprocessor/pp_names) to use in the expression.
 
 !alert note
 Derivatives and integrals are not natively supported by the parsing operation, unless the
