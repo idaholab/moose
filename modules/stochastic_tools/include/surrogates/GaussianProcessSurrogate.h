@@ -11,9 +11,10 @@
 
 #include "SurrogateModel.h"
 #include "Standardizer.h"
-#include <Eigen/Dense>
 #include "CovarianceInterface.h"
 #include "GaussianProcess.h"
+
+#include "LibtorchUtils.h"
 
 class GaussianProcessSurrogate : public SurrogateModel, public CovarianceInterface
 {
@@ -41,5 +42,5 @@ private:
   StochasticTools::GaussianProcess & _gp;
 
   /// Paramaters (x) used for training
-  const RealEigenMatrix & _training_params;
+  const torch::Tensor & _training_params;
 };

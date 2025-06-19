@@ -13,6 +13,8 @@
 #include <vector>
 #include "DataIO.h"
 
+#include "LibtorchUtils.h"
+
 namespace StochasticTools
 {
 
@@ -34,28 +36,28 @@ public:
   void set(const std::vector<Real> & mean, const std::vector<Real> & stdev);
 
   /// Get the mean vector
-  const std::vector<Real> & getMean() const { return _mean; }
+  const torch::Tensor & getMean() const { return _mean; }
   /// Get the standard deviation vector
-  const std::vector<Real> & getStdDev() const { return _stdev; }
+  const torch::Tensor & getStdDev() const { return _stdev; }
 
   /// Methods for computing and setting mean and standard deviation
-  void computeSet(const RealEigenMatrix & input);
+  void computeSet(const torch::Tensor & input);
 
   /// Helper for dataStore
   void storeHelper(std::ostream & stream, void * context) const;
 
   /// Returns the standardized (centered and scaled) of the provided input
-  void getStandardized(RealEigenMatrix & input) const;
+  void getStandardized(torch::Tensor & input) const;
 
   /// De-standardizes (de-centered and de-scaled) the assumed standardized input
-  void getDestandardized(RealEigenMatrix & input) const;
+  void getDestandardized(torch::Tensor & input) const;
 
   /// De-scales the assumed scaled input
-  void getDescaled(RealEigenMatrix & input) const;
+  void getDescaled(torch::Tensor & input) const;
 
 protected:
-  std::vector<Real> _mean;
-  std::vector<Real> _stdev;
+  torch::Tensor _mean;
+  torch::Tensor _stdev;
 };
 
 } // StochasticTools namespace
