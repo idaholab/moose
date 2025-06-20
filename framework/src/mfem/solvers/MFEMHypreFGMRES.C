@@ -61,6 +61,10 @@ MFEMHypreFGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
   }
   else if (_lor)
   {
+    if (!checkSpectralEquivalence(a))
+      mooseError("Low-Order-Refined solver requires the FESpace closed_basis to be GaussLobatto "
+                 "and the open-basis to be IntegratedGLL for ND and RT elements.");
+
     mfem::ParLORDiscretization lor_disc(a, tdofs);
     auto lor_solver = new mfem::LORSolver<mfem::HypreFGMRES>(
         lor_disc, getMFEMProblem().mesh().getMFEMParMesh().GetComm());
