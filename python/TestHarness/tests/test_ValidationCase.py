@@ -166,6 +166,45 @@ class TestValidationCase(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'min_bound greater than max_bound'):
             ValidationCase.checkBounds(0, 2, 1, None)
 
+    def testCheckRelativeError(self):
+        """
+        Tests the ValidationCase.checkRelativeError() method
+        """
+        value, nominal, rel_err, units = 100, 100.01, 1e-3, 'someunit'
+
+        # Success
+        status, message = ValidationCase.checkRelativeError(value, nominal, rel_err, units)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        self.assertRegex(message, '\d+.\d+E[-+]\d+ someunit relative error \d+.\d+E[-+]\d+ <')
+
+        # Success without units
+        status, message = ValidationCase.checkRelativeError(value, nominal, rel_err, None)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        self.assertRegex(message, '\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ <')
+
+        # Fail
+        status, message = ValidationCase.checkRelativeError(value, nominal, 1e-6, None)
+        self.assertEqual(status, ValidationCase.Status.FAIL)
+        self.assertRegex(message, '\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ >')
+
+    def testCheckRelativeErrorChecks(self):
+        """
+        Tests the data type checking performed in ValidationCase.checkRelativeError()
+        """
+        # Non-numeric values
+        with self.assertRaisesRegex(ValueError, 'value: could not convert string'):
+            ValidationCase.checkRelativeError('abc', None, None, None)
+        with self.assertRaisesRegex(ValueError, 'nominal: could not convert string'):
+            ValidationCase.checkRelativeError(0, 'abc', None, None)
+        with self.assertRaisesRegex(ValueError, 'rel_err: could not convert string'):
+            ValidationCase.checkRelativeError(0, 0, 'abc', None)
+
+        # Non-positive rel_err
+        with self.assertRaisesRegex(ValueError, 'rel_err not positive'):
+            ValidationCase.checkRelativeError(0, 0, 0, None)
+        with self.assertRaisesRegex(ValueError, 'rel_err not positive'):
+            ValidationCase.checkRelativeError(0, 0, -1, None)
+
     def testToFloat(self):
         """
         Tests the to-float conversion helper in ValidationCase.toFloat()
