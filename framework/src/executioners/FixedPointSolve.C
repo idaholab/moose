@@ -41,6 +41,15 @@ FixedPointSolve::fixedPointDefaultConvergenceParams()
                                     "during fixed point iterations. This check is "
                                     "performed based on the main app's nonlinear "
                                     "residual.");
+
+  params.addParam<PostprocessorName>("custom_pp",
+                                     "Postprocessor for custom fixed point convergence check.");
+  params.addParam<bool>("direct_pp_value",
+                        false,
+                        "True to use direct postprocessor value "
+                        "(scaled by value on first iteration). "
+                        "False (default) to use difference in postprocessor "
+                        "value between fixed point iterations.");
   params.addRangeCheckedParam<Real>("custom_rel_tol",
                                     1e-8,
                                     "custom_rel_tol>0",
@@ -58,7 +67,7 @@ FixedPointSolve::fixedPointDefaultConvergenceParams()
 
   params.addParamNamesToGroup(
       "accept_on_max_fixed_point_iteration fixed_point_rel_tol fixed_point_abs_tol "
-      "custom_abs_tol custom_rel_tol",
+      "custom_pp direct_pp_value custom_abs_tol custom_rel_tol",
       "Fixed point iterations");
 
   return params;
@@ -83,15 +92,6 @@ FixedPointSolve::validParams()
       false,
       "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
       "existence of active MultiApps with those execute_on flags, default: false.");
-
-  params.addParam<PostprocessorName>("custom_pp",
-                                     "Postprocessor for custom fixed point convergence check.");
-  params.addParam<bool>("direct_pp_value",
-                        false,
-                        "True to use direct postprocessor value "
-                        "(scaled by value on first iteration). "
-                        "False (default) to use difference in postprocessor "
-                        "value between fixed point iterations.");
 
   params.addParam<ConvergenceName>(
       "fixed_point_convergence",
@@ -125,7 +125,7 @@ FixedPointSolve::validParams()
 
   params.addParamNamesToGroup(
       "fixed_point_min_its fixed_point_max_its disable_fixed_point_residual_norm_check "
-      "fixed_point_force_norms custom_pp direct_pp_value fixed_point_convergence "
+      "fixed_point_force_norms fixed_point_convergence "
       "relaxation_factor transformed_variables transformed_postprocessors auto_advance",
       "Fixed point iterations");
 
@@ -157,11 +157,6 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _secondary_relaxation_factor(1.0),
     _fixed_point_it(0),
     _fixed_point_status(MooseFixedPointConvergenceReason::UNSOLVED),
-    _fixed_point_custom_pp(isParamValid("custom_pp") ? &getPostprocessorValue("custom_pp")
-                                                     : nullptr),
-    _pp_old(0.0),
-    _pp_new(std::numeric_limits<Real>::max()),
-    _pp_scaling(1),
     _max_xfem_update(getParam<unsigned int>("max_xfem_update")),
     _update_xfem_at_timestep_begin(getParam<bool>("update_xfem_at_timestep_begin")),
     _xfem_update_count(0),
@@ -270,6 +265,12 @@ FixedPointSolve::solve()
       _main_fixed_point_it = 0;
   }
 
+  if (_has_fixed_point_its)
+  {
+    auto & convergence = _problem.getConvergence(_problem.getFixedPointConvergenceName());
+    convergence.initialize();
+  }
+
   for (_fixed_point_it = 0; _fixed_point_it < _max_fixed_point_its; ++_fixed_point_it)
   {
     if (_has_fixed_point_its)
@@ -363,10 +364,6 @@ FixedPointSolve::solve()
 
   if (_has_fixed_point_its)
     printFixedPointConvergenceReason();
-
-  // clear history to avoid displaying it again on next solve that can happen for example during
-  // transient
-  _pp_history.str("");
 
   return converged;
 }
@@ -506,30 +503,9 @@ FixedPointSolve::solveStep(Real & begin_norm,
   return true;
 }
 
-void
-FixedPointSolve::computeCustomConvergencePostprocessor()
-{
-  if (_fixed_point_it > 0 && !getParam<bool>("direct_pp_value"))
-    _pp_old = _pp_new;
-
-  if ((_fixed_point_it == 0 && getParam<bool>("direct_pp_value")) ||
-      !getParam<bool>("direct_pp_value"))
-    _pp_scaling = *_fixed_point_custom_pp;
-  _pp_new = *_fixed_point_custom_pp;
-
-  auto ppname = getParam<PostprocessorName>("custom_pp");
-  _pp_history << std::setw(2) << _fixed_point_it + 1 << " fixed point " << ppname << " = "
-              << Console::outputNorm(std::numeric_limits<Real>::max(), _pp_new, 8) << std::endl;
-  _console << _pp_history.str();
-}
-
 bool
 FixedPointSolve::examineFixedPointConvergence(bool & converged)
 {
-  // Get new value and print history for the custom postprocessor convergence criterion
-  if (_fixed_point_custom_pp)
-    computeCustomConvergencePostprocessor();
-
   auto & convergence = _problem.getConvergence(_problem.getFixedPointConvergenceName());
   const auto status = convergence.checkConvergence(_fixed_point_it);
   switch (status)

@@ -2,12 +2,10 @@
 
 [Convergence]
   [fp_conv]
+    custom_pp = small_value
+    direct_pp_value = true
     custom_abs_tol = 1e-8
   []
-[]
-
-[Executioner]
-  custom_pp = small_value
 []
 
 [Postprocessors]

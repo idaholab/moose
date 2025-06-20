@@ -24,6 +24,7 @@ public:
   DefaultFixedPointConvergence(const InputParameters & parameters);
 
   virtual void initialSetup() override;
+  virtual void initialize() override;
 
   virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
 
@@ -58,6 +59,9 @@ private:
   std::vector<std::string> _duplicate_shared_executioner_params;
 
 protected:
+  /// Computes and prints the user-specified postprocessor assessing convergence
+  void computeCustomConvergencePostprocessor(unsigned int iter);
+
   /// Whether or not to treat reaching maximum number of fixed point iteration as converged
   const bool _accept_max_it;
   /// Relative tolerance on residual norm
@@ -68,6 +72,17 @@ protected:
   const Real _custom_pp_rel_tol;
   /// Absolute tolerance on postprocessor value
   const Real _custom_pp_abs_tol;
+
+  /// Postprocessor value for user-defined fixed point convergence check
+  const PostprocessorValue * const _fixed_point_custom_pp;
+  /// Old value of the custom convergence check postprocessor
+  Real _pp_old;
+  /// Current value of the custom convergence check postprocessor
+  Real _pp_new;
+  /// Scaling of custom convergence check postprocessor (its initial value)
+  Real _pp_scaling;
+  /// Convergence history of the custom convergence check postprocessor
+  std::ostringstream _pp_history;
 
   /// Fixed point solve
   FixedPointSolve & _fp_solve;
