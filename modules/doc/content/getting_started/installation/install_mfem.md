@@ -15,7 +15,7 @@ First, we need to build `PETSc`. To do that, we can run the `PETSc` installer sc
 ./scripts/update_and_rebuild_petsc.sh [options]
 ```
 
-You may substitute `[options]` by any `PETSc` configure flags, which are discussed in the [`PETSc` install page](https://petsc.org/release/install/install). If you intend to build `MFEM-MOOSE` with GPU offloading capabilities, make sure to include `--with-cuda` or `--with-hip` to the flags. If desired, you may also specify the GPU architecture with `--with-cuda-arch=[arch]` or `--with-hip-arch=[arch]`.
+You may substitute `[options]` by any `PETSc` configure flags, which are discussed in the [`PETSc` install page](https://petsc.org/release/install/install). If you intend to build `MFEM-MOOSE` with GPU offloading capabilities, make sure to include `--with-cuda` or `--with-hip` to the flags. If desired, you may also specify the GPU architecture with `--with-cuda-arch=[arch]` or `--with-hip-arch=[arch]`. To maximize performance and avoid errors, you should also make sure that your underlying MPI compiler has been built with GPU awareness.
 
 !alert note
 The `PETSc` GPU architecture specification takes in only the architecture number for `CUDA` builds, for instance for the `sm_80` architecture you would add the flag `--with-cuda-arch=80`. For `HIP` builds you should use the entire label, for instance `--with-hip-arch=gfx908`.
@@ -39,6 +39,9 @@ Here, in `[options]`, you may wish to include `MFEM`'s cmake options, which are 
 
 !alert note
 The `MFEM` GPU architecture specification takes in the entire label, for instance `-DCUDA_ARCH=sm_80`, or for a `HIP` build, you may use `-DHIP_ARCH=gfx908`.
+
+!alert note
+When building MFEM with GPU support, there is a known bug whereby the configure step may return an error claiming not to have been able to find a valid version of `SuperLU_Dist`, despite the user (or in this case the install script) providing one. If you encounter this error, you can bypass it by passing the `MFEM` flag `-DSuperLUDist_VERSION_OK=YES` to the build script.
 
 !alert tip
 Alternatively, if you already have a working `MFEM` build in a separate directory, you may set the variable `MFEM_DIR` to its install path instead of running the `MFEM` install script.
