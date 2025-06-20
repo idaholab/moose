@@ -7,11 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "MooseError.h"
 #include "ParameterMesh.h"
 
+#include "KDTree.h"
+#include "libmesh/enum_elem_type.h"
 #include "libmesh/enum_point_locator_type.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/elem.h"
+#include "libmesh/face_quad.h"
 #include "libmesh/fe_compute_data.h"
 #include "libmesh/fe_interface.h"
 #include "libmesh/numeric_vector.h"
@@ -21,8 +25,9 @@ using namespace libMesh;
 
 ParameterMesh::ParameterMesh(const FEType & param_type,
                              const std::string & exodus_mesh,
-                             const std::vector<std::string> & var_names)
-  : _communicator(MPI_COMM_SELF), _mesh(_communicator)
+                             const std::vector<std::string> & var_names,
+                             const bool find_closest)
+  : _communicator(MPI_COMM_SELF), _mesh(_communicator), _find_closest(find_closest)
 {
   _mesh.allow_renumbering(false);
   _mesh.prepare_for_use();
@@ -93,6 +98,19 @@ ParameterMesh::ParameterMesh(const FEType & param_type,
   std::set<dof_id_type> var_indices;
   _sys->local_dof_indices(var_id, var_indices);
   _param_dofs = var_indices.size();
+
+  if (_find_closest)
+  {
+    std::vector<Point> pts;
+    pts.reserve(_mesh.n_elem());
+    for (const auto & elem : _mesh.element_ptr_range())
+    {
+      if (elem->default_order() != FIRST)
+        mooseError("Closet point projection option cannot work with second order elements.");
+      pts.push_back(elem->true_centroid());
+    }
+    _kd_tree = std::make_unique<KDTree>(pts, 20);
+  }
 }
 
 void
@@ -100,10 +118,11 @@ ParameterMesh::getIndexAndWeight(const Point & pt,
                                  std::vector<dof_id_type> & dof_indices,
                                  std::vector<Real> & weights) const
 {
-  // Locate the element the point is in
-  const Elem * elem = (*_point_locator)(pt);
+  Point test_point = (_find_closest ? projectToMesh(pt) : pt);
+
+  const Elem * elem = (*_point_locator)(test_point);
   if (!elem)
-    mooseError("No element was found to contain point ", pt);
+    mooseError("No element was found to contain point ", test_point);
 
   // Get the  in the dof_indices for our element
   // variable name is hard coded to _parameter_mesh_var
@@ -113,7 +132,7 @@ ParameterMesh::getIndexAndWeight(const Point & pt,
   dof_map.dof_indices(elem, dof_indices, var);
 
   // Map the physical co-ordinates to the reference co-ordinates
-  Point coor = FEMap::inverse_map(elem->dim(), elem, pt);
+  Point coor = FEMap::inverse_map(elem->dim(), elem, test_point);
   // get the shape function value via the FEInterface
   FEType fe_type = dof_map.variable_type(var);
   FEComputeData fe_data(*_eq, coor);
@@ -132,8 +151,9 @@ ParameterMesh::getIndexAndWeight(const Point & pt,
 {
   if (!_sys->has_variable("_parameter_mesh_var"))
     mooseError("Internal error: System being read does not contain _parameter_mesh_var.");
+  Point test_point = (_find_closest ? projectToMesh(pt) : pt);
   // Locate the element the point is in
-  const Elem * elem = (*_point_locator)(pt);
+  const Elem * elem = (*_point_locator)(test_point);
 
   // Get the  in the dof_indices for our element
   // variable name is hard coded to _parameter_mesh_var
@@ -143,7 +163,7 @@ ParameterMesh::getIndexAndWeight(const Point & pt,
   dof_map.dof_indices(elem, dof_indices, var);
 
   // Map the physical co-ordinates to the reference co-ordinates
-  Point coor = FEMap::inverse_map(elem->dim(), elem, pt);
+  Point coor = FEMap::inverse_map(elem->dim(), elem, test_point);
   // get the shape function value via the FEInterface
   FEType fe_type = dof_map.variable_type(var);
   FEComputeData fe_data(*_eq, coor);
@@ -191,4 +211,50 @@ ParameterMesh::getParameterValues(std::string var_name, unsigned int time_step) 
   std::vector<Real> parameter_values;
   _sys->solution->localize(parameter_values, var_indices_vector);
   return parameter_values;
+}
+
+Point
+ParameterMesh::projectToMesh(const Point & p) const
+{
+  // quick path: p already inside an element
+  if ((*_point_locator)(p))
+    return p;
+  // use KD-tree to collect k nearest element IDs
+  constexpr unsigned int k = 20;
+  std::vector<dof_id_type> elem_ids;
+  elem_ids.reserve(k);
+  _kd_tree->neighborSearch(p, k, elem_ids);
+  Real best_d2 = std::numeric_limits<Real>::max();
+  Point best_x = p;
+  for (auto id : elem_ids)
+  {
+    const Elem * e = _mesh.elem_ptr(id);
+    unsigned int dim = e->dim();
+    Point xi = FEMap::inverse_map(dim, e, p);
+    // clamp xi
+    auto clamp = [](Real & s) { s = std::max<Real>(-1., std::min(s, 1.)); };
+    switch (e->type())
+    {
+      case HEX8:
+      case EDGE2:
+      case QUAD4:
+        clamp(xi(0));
+        clamp(xi(1));
+        if (dim == 3)
+          clamp(xi(2));
+        break;
+      default:
+        mooseError("Unsupported element type ", e->type(), " for projection of parameter mesh.");
+    }
+    Point x = FEMap::map(dim, e, xi);
+    Real d2 = (x - p).norm_sq();
+    if (d2 < best_d2)
+    {
+      best_d2 = d2;
+      best_x = x;
+    }
+  }
+  if (best_d2 == std::numeric_limits<Real>::max())
+    mooseError("project_to_mesh failed - no candidate elements.");
+  return best_x;
 }

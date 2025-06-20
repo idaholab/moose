@@ -13,6 +13,9 @@ This function is similar to [NearestReporterCoordinatesFunction.md], except it u
 | Linear | `LAGRANGE` | `FIRST` |
 | Quadratic | `LAGRANGE` | `SECOND` |
 
+The
+[!param](/Functions/ParameterMeshFunction/project_points) allows for parameter mesh to be an Edge, Quad, or Hex mesh that doesn't fully encompass the simulation mesh. A point not encompassed by the parameter mesh will be projected onto the nearest mesh element on the parameter mesh to determine the function value.
+
 !alert warning
 The mesh created +must+ be replicated. Ensure this by having `Mesh/parallel_type=REPLICATED` when creating the mesh.
 

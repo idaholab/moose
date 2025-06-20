@@ -10,9 +10,11 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "KDTree.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/fe_type.h"
+#include "libmesh/point.h"
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/point_locator_base.h"
@@ -39,7 +41,8 @@ class ParameterMesh
 public:
   ParameterMesh(const libMesh::FEType & param_type,
                 const std::string & exodus_mesh,
-                const std::vector<std::string> & var_names = {});
+                const std::vector<std::string> & var_names = {},
+                const bool find_closest = false);
 
   /**
    * @return the number of parameters read from the mesh for a single timestep
@@ -77,10 +80,22 @@ public:
 protected:
   libMesh::Parallel::Communicator _communicator;
   libMesh::ReplicatedMesh _mesh;
+  /// Find closest projection points
+  bool _find_closest;
   std::unique_ptr<libMesh::EquationSystems> _eq;
   libMesh::System * _sys;
   std::unique_ptr<libMesh::PointLocatorBase> _point_locator;
   std::unique_ptr<libMesh::ExodusII_IO> _exodusII_io;
 
   dof_id_type _param_dofs;
+  // KDTree for efficiency
+  std::unique_ptr<KDTree> _kd_tree;
+
+private:
+  /**
+   * Returns the point on the parameter mesh that is projected from the test point
+   * @param p test point
+   * @return Point
+   */
+  Point projectToMesh(const Point & p) const;
 };
