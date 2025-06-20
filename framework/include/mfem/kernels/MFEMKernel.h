@@ -13,11 +13,12 @@
 
 #include "MFEMGeneralUserObject.h"
 #include "MFEMContainers.h"
+#include "MFEMBlockRestrictable.h"
 
 /*
 Class to construct an MFEM integrator to apply to the equation system.
 */
-class MFEMKernel : public MFEMGeneralUserObject
+class MFEMKernel : public MFEMGeneralUserObject, public MFEMBlockRestrictable
 {
 public:
   static InputParameters validParams();
@@ -37,16 +38,9 @@ public:
   // Defaults to the name of the test variable labelling the weak form.
   virtual const VariableName & getTrialVariableName() const { return _test_var_name; }
 
-  bool isSubdomainRestricted() { return _subdomain_names.size(); }
-
-  mfem::Array<int> & getSubdomains() { return _subdomain_markers; }
-
 protected:
   // Name of (the test variable associated with) the weak form that the kernel is applied to.
   const VariableName & _test_var_name;
-  std::vector<SubdomainName> _subdomain_names;
-  mfem::Array<int> _subdomain_attributes;
-  mfem::Array<int> _subdomain_markers;
 };
 
 #endif
