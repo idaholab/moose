@@ -10,7 +10,11 @@
 from TestHarnessTestCase import TestHarnessTestCase
 class TestHarnessTester(TestHarnessTestCase):
     def test(self):
-        out = self.runTests('-i', 'validation', '--re', 'ok').results
+        results = self.runTests('-i', 'validation', '--re', 'ok')
+        out = results.results
+        self.assertEqual(out['testharness']['validation_version'],
+                         results.harness.VALIDATION_VERSION)
+
         test = out['tests']['tests/test_harness']['tests']['ok']
         status = test['status']
         self.assertEqual(status['status'], 'OK')
