@@ -1,6 +1,6 @@
 # Eigenvalue
 
-!syntax description /Executioner/Eigenvalue
+This [/Executioner.md] solves a standard/generalized linear or nonlinear eigenvalue problem.
 
 !syntax parameters /Executioner/Eigenvalue
 

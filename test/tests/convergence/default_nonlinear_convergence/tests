@@ -10,7 +10,7 @@
     requirement = 'The system shall be able to determine convergence of the nonlinear solve using default criteria through an object.'
   []
   [error_reporting]
-    requirement = 'The system shall report an error for the default convergence class'
+    requirement = 'The system shall report an error for the default nonlinear convergence class'
     [multiple_objects]
       type = RunException
       input = 'default_nonlinear_convergence.i'

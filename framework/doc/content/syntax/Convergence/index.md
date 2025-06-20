@@ -6,8 +6,8 @@ iteration in various solves:
 - Nonlinear system solves
 - Linear system solves (not yet implemented)
 - Steady-state detection in [Transient.md] (not yet implemented)
-- Fixed point solves with [MultiApps](syntax/MultiApps/index.md) (not yet implemented)
-- Fixed point solves with multiple systems (not yet implemented)
+- Fixed point solves with [MultiApps](syntax/MultiApps/index.md)
+- Fixed point solves with multiple systems
 
 Instead of supplying convergence-related parameters directly to the executioner,
 the user creates `Convergence` objects whose names are then supplied to the
