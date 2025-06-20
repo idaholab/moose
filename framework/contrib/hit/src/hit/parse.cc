@@ -1036,13 +1036,12 @@ parse(const std::string & fname,
   if (!interpreter->parseStream(input_stream, fname))
   {
     for (const auto & d : interpreter->error_diagnostics())
-    {
-      // These messages seemed to be prefixed with ": " and suffixed with a new line
-      std::string message = std::regex_replace(d.message(), std::regex("^:(\\s+)?"), "");
-      message = std::regex_replace(message, std::regex("\n$"), "");
-      errors.emplace_back(
-          message, d.filename(), d.start_line(), d.start_column(), d.end_line(), d.end_column());
-    }
+      errors.emplace_back(d.message(),
+                          d.filename(),
+                          d.start_line(),
+                          d.start_column(),
+                          d.end_line(),
+                          d.end_column());
 
     if (syntax_errors)
       *syntax_errors = errors;
