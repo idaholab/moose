@@ -65,6 +65,9 @@ protected:
   /// in this finite element space.
   virtual int getVDim() const = 0;
 
+  /// Get the quadrature basis type corresponding to the given basis name.
+  int getBasis(const std::string & basis_name) const;
+
 private:
   /// Constructs the fec from the fec name.
   void buildFEC(const std::string & fec_name) const;
