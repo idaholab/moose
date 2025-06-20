@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <string>
+
 #ifdef NEML2_ENABLED
 
 #include "neml2/tensors/tensors.h"

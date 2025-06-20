@@ -9,10 +9,11 @@
 
 #pragma once
 
-#include "NEML2Utils.h"
 #include <thread>
 #include <utility>
 #include <tuple>
+#include "NEML2Utils.h"
+#include "InputParameters.h"
 
 #ifdef NEML2_ENABLED
 #include <ATen/Parallel.h>
@@ -22,8 +23,6 @@
 #include "neml2/dispatchers/WorkDispatcher.h"
 #include "neml2/dispatchers/valuemap_helpers.h"
 #include "neml2/dispatchers/derivmap_helpers.h"
-#include "Material.h"
-#include "UserObject.h"
 #endif
 
 /**
