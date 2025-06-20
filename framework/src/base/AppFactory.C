@@ -116,7 +116,7 @@ AppFactory::createAppShared(const std::string & default_app_type,
   app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
 
-  return std::move(AppFactory::instance().create(app_type, "main", app_params, comm_world_in));
+  return AppFactory::instance().create(app_type, "main", app_params, comm_world_in);
 }
 
 std::unique_ptr<MooseApp>

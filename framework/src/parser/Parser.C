@@ -509,7 +509,7 @@ Parser::parseError(std::vector<hit::ErrorMessage> messages) const
   //    the future with a WASP update.
   for (auto & em : messages)
     if (em.node && queryCommandLineRoot())
-      if (const auto cli_node = getCommandLineRoot().find(em.node->fullpath()))
+      if (getCommandLineRoot().find(em.node->fullpath()))
         em = hit::ErrorMessage(em.message, "CLI_ARGS");
 
   if (_throw_on_error)
