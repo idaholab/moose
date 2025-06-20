@@ -23,14 +23,14 @@ MooseVariableFieldBase::MooseVariableFieldBase(const InputParameters & parameter
 {
 }
 
-std::string
+const std::string &
 MooseVariableFieldBase::componentName(const unsigned int comp) const
 {
   if (comp >= _count)
     mooseError("Component index must be less than the number of components of variable ",
                _var_name);
   if (isArray())
-    return this->_subproblem.arrayVariableComponent(_var_name, comp);
+    return this->arrayVariableComponent(comp);
   else
     return _var_name;
 }
