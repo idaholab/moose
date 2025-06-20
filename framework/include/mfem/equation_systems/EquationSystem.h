@@ -187,7 +187,7 @@ EquationSystem::ApplyDomainBLFIntegrators(
       if (integ != nullptr)
       {
         kernel->isSubdomainRestricted()
-            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomains())
+            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ));
       }
     }
@@ -210,7 +210,7 @@ EquationSystem::ApplyDomainLFIntegrators(
       if (integ != nullptr)
       {
         kernel->isSubdomainRestricted()
-            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomains())
+            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ));
       }
     }
@@ -237,7 +237,7 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
       if (integ != nullptr)
       {
         bc->isBoundaryRestricted()
-            ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaries())
+            ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ));
       }
     }
@@ -261,7 +261,7 @@ EquationSystem::ApplyBoundaryLFIntegrators(
       if (integ != nullptr)
       {
         bc->isBoundaryRestricted()
-            ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaries())
+            ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ));
       }
     }

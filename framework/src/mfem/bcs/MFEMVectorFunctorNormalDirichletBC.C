@@ -31,7 +31,7 @@ MFEMVectorFunctorNormalDirichletBC::MFEMVectorFunctorNormalDirichletBC(
 void
 MFEMVectorFunctorNormalDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 {
-  gridfunc.ProjectBdrCoefficientNormal(_vec_coef, getBoundaries());
+  gridfunc.ProjectBdrCoefficientNormal(_vec_coef, getBoundaryMarkers());
 }
 
 #endif

@@ -15,9 +15,8 @@
 #include "libmesh/restore_warnings.h"
 
 /**
- * Base class for construction of a mfem::ParSubMesh object. Access using the
- * getSubMesh() accessor.
- */
+ * Base class for construction of an object that is restricted to a subset
+ * of boundaries of the problem mesh. */
 class MFEMBoundaryRestrictable
 {
 public:
@@ -33,14 +32,18 @@ public:
     return !(_boundary_attributes.Size() == 1 && _boundary_attributes[0] == -1);
   }
 
-  mfem::Array<int> & getBoundaries() { return _boundary_markers; }
   const mfem::ParMesh & getMesh() { return _mfem_mesh; }
+  mfem::Array<int> & getBoundaryAttributes() { return _boundary_attributes; }
+  mfem::Array<int> & getBoundaryMarkers() { return _boundary_markers; }
 
 protected:
   /// Stores the names of the boundaries.
   const mfem::ParMesh & _mfem_mesh;
+  /// Stores the names of the boundaries.
   std::vector<BoundaryName> _boundary_names;
+  /// Array storing boundary attribute IDs for this object.
   mfem::Array<int> _boundary_attributes;
+  /// Boolean array indicating which boundaries are active in this object.
   mfem::Array<int> _boundary_markers;
 };
 

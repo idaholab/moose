@@ -34,7 +34,7 @@ void
 MFEMDomainSubMesh::buildSubMesh()
 {
   _submesh = std::make_shared<mfem::ParSubMesh>(
-      mfem::ParSubMesh::CreateFromDomain(getMesh(), getSubdomains()));
+      mfem::ParSubMesh::CreateFromDomain(getMesh(), getSubdomainAttributes()));
 }
 
 #endif

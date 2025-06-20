@@ -31,7 +31,7 @@ MFEMVectorDirichletBC::MFEMVectorDirichletBC(const InputParameters & parameters)
 void
 MFEMVectorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 {
-  gridfunc.ProjectBdrCoefficient(_vec_coef, getBoundaries());
+  gridfunc.ProjectBdrCoefficient(_vec_coef, getBoundaryMarkers());
 }
 
 #endif
