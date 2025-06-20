@@ -72,6 +72,7 @@ ExplicitMixedOrder::validParams()
 ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     MeshChangedInterface(parameters),
+    _has_damping(false),
     _constant_mass(getParam<bool>("use_constant_mass")),
     _constant_damping(getParam<bool>("use_constant_damping")),
     _mass_matrix(getParam<TagName>("mass_matrix_tag")),
@@ -112,8 +113,10 @@ ExplicitMixedOrder::meshChanged()
 void
 ExplicitMixedOrder::init()
 {
+  _has_damping = _sys.subproblem().matrixTagExists(_damping_matrix);
+
   meshChanged();
-  
+
   if (_nl && _fe_problem.solverParams(_nl->number())._type != Moose::ST_LINEAR)
     mooseError(
         "The chosen time integrator requires 'solve_type = LINEAR' in the Executioner block.");
@@ -218,10 +221,6 @@ ExplicitMixedOrder::dampingMatrixTagID() const
 void
 ExplicitMixedOrder::solve()
 {
-  // Getting the tagID for the mass and damping matrix
-  auto mass_tag = massMatrixTagID();
-  auto damping_tag = dampingMatrixTagID();
-
   // Reset iteration counts
   _n_nonlinear_iterations = 0;
   _n_linear_iterations = 0;
@@ -238,6 +237,7 @@ ExplicitMixedOrder::solve()
 
   // Get the lumped mass matrix
   // We may only want to compute lumped mass matrix once.
+  auto mass_tag = massMatrixTagID();
   if (!_constant_mass || _t_step == 1)
   {
     _fe_problem.computeJacobianTag(sol, sytem_matrix, mass_tag);
@@ -248,12 +248,16 @@ ExplicitMixedOrder::solve()
 
   // Get the lumped damping matrix
   // We may only want to compute lumped damping matrix once.
-  if (!_constant_damping || _t_step == 1)
+  if (_has_damping)
   {
-    _fe_problem.computeJacobianTag(sol, sytem_matrix, damping_tag);
-    // lump
-    sytem_matrix.vector_mult(*_damping_matrix_lumped, *_ones);
-    _damping_matrix_lumped->close();
+    auto damping_tag = dampingMatrixTagID();
+    if (!_constant_damping || _t_step == 1)
+    {
+      _fe_problem.computeJacobianTag(sol, sytem_matrix, damping_tag);
+      // lump
+      sytem_matrix.vector_mult(*_damping_matrix_lumped, *_ones);
+      _damping_matrix_lumped->close();
+    }
   }
 
   // Set time to the time at which to evaluate the residual
@@ -271,6 +275,7 @@ ExplicitMixedOrder::solve()
   forwardEuler();
   centralDifference();
   const bool converged = solutionUpdate();
+  // _console << "u_update: " << *_solution_update << std::endl;
 
   // Apply constraints
   _nl->overwriteNodeFace(*_nonlinear_implicit_system->solution);
@@ -311,47 +316,52 @@ ExplicitMixedOrder::centralDifference()
   // Split lumped mass matrix for first-order variables
   auto M = NumericVector<Number>::build(_communicator);
   _mass_matrix_lumped->create_subvector(*M, _local_second_order_indices, false);
+  // _console << "M: " << *M << std::endl;
 
-  // Split lumped mass matrix for first-order variables
-  auto C = NumericVector<Number>::build(_communicator);
-  _damping_matrix_lumped->create_subvector(*C, _local_second_order_indices, false);
-
-  // Split residual vector for first-order variables
   const auto r = NumericVector<Number>::build(_communicator);
   _explicit_residual->create_subvector(*r, _local_second_order_indices, false);
+  // _console << "r: " << *r << std::endl;
 
-  // Coorect RHS with damping
-  auto vel = _sys.solutionUDot();
-  auto vn = vel->get_subvector(_local_second_order_indices);
-  auto rc1 = C->clone();
-  rc1->scale(_dt / (_dt + _dt_old));
-  rc1->pointwise_mult(*rc1, *vn);
-  r->add(-1.0, *rc1);
-
-  auto delta_u = _solution_update->clone();
-  auto rc2 = C->clone();
-  rc2->scale(1/(_dt+_dt_old));
-  rc2->pointwise_mult(*rc2, *delta_u);
-  r->add(-1.0, *rc2);
-
-  // Calculate acceleration
+  // Split lumped mass matrix for first-order variables
   auto accel = _sys.solutionUDotDot();
   auto a = accel->get_subvector(_local_second_order_indices);
-  auto coef = C->clone();
-  coef->scale(_dt / 2);
-  coef->add(*M);
-  coef->reciprocal();
-  a->pointwise_mult(*coef, *r);
+  auto vel = _sys.solutionUDot();
+  auto vn = vel->get_subvector(_local_second_order_indices);
+  if (_has_damping)
+  {
+    auto C = NumericVector<Number>::build(_communicator);
+    _damping_matrix_lumped->create_subvector(*C, _local_second_order_indices, false);
+
+    auto rc = C->clone();
+    rc->pointwise_mult(*rc, *vn);
+    r->add(-1.0, *rc);
+
+    auto coef = C->clone();
+    coef->scale(_dt / 2);
+    coef->add(*M);
+    coef->reciprocal();
+    a->pointwise_mult(*coef, *r);
+  }
+  else
+  {
+    auto coef = M->clone();
+    coef->reciprocal();
+    a->pointwise_mult(*coef, *r);
+  }
+  // _console << "accel: " << *a << std::endl;
 
   // Calculate velocity
   auto delta_v = a->clone();
   delta_v->scale((_dt + _dt_old) / 2);
   vn->add(*delta_v);
+  // _console << "vel: " << *vn << std::endl;
 
   // close the vectors
   accel->restore_subvector(std::move(a), _local_second_order_indices);
+  // _console << "acceleration: " << *accel << std::endl;
   accel->close();
   vel->restore_subvector(std::move(vn), _local_second_order_indices);
+  // _console << "velocity: " << *vel << std::endl;
   vel->close();
 }
 

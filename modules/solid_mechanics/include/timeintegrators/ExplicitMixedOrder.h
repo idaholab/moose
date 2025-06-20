@@ -75,6 +75,9 @@ protected:
   /// Update the solution vector. @return true if the solution converged, false otherwise.
   virtual bool solutionUpdate();
 
+  /// Whether damping is present
+  bool _has_damping;
+
   /// Whether we are reusing the mass matrix
   const bool & _constant_mass;
 

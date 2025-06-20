@@ -38,8 +38,12 @@ protected:
    */
   virtual Real computeQpValue() = 0;
 
-  /// The diagonal of the mass matrix
-  const NumericVector<Number> & _mass_diag;
+  // /// The diagonal of the mass matrix
+  // const NumericVector<Number> & _mass_diag;
+
+  /// The lumped mass and damping matrix
+  const NumericVector<Number> & _mass_lumped;
+  const NumericVector<Number> & _damping_lumped;
 
   const Real & _u_old;
   const Real & _u_dot_old;
@@ -55,5 +59,9 @@ private:
    * Initialize the lumped mass matrix.
    * @return lumped mass matrix vector
    */
-  const NumericVector<Number> & initLumpedMass();
+  // const NumericVector<Number> & initLumpedMass();
+
+  /// Initialize the lumped matrix for ExplicitMixedOrder
+  const NumericVector<Number> & initMassLumped();
+  const NumericVector<Number> & initDampingLumped();
 };
