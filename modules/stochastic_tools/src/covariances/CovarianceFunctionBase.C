@@ -39,8 +39,8 @@ CovarianceFunctionBase::CovarianceFunctionBase(const InputParameters & parameter
 }
 
 bool
-CovarianceFunctionBase::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
-                                        const RealEigenMatrix & /*x*/,
+CovarianceFunctionBase::computedKdhyper(torch::Tensor & /*dKdhp*/,
+                                        const torch::Tensor & /*x*/,
                                         const std::string & /*hyper_param_name*/,
                                         unsigned int /*ind*/) const
 {
