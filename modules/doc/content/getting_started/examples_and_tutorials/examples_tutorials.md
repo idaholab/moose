@@ -94,6 +94,12 @@ for some of the individual physics modules as listed below.
 - [Stochastic Tools](modules/stochastic_tools/examples/index.md)
 - [Solid Mechanics](modules/solid_mechanics/examples_index.md)
 
+## Optional Package Examples and Tutorials
+
+MOOSE contains several optional packages that may be installed alongside it to expand MOOSE's base capabilities. Pages containing guidance for using these optional packages are listed below.
+
+- [MFEM](framework/doc/content/source/mfem/GettingStarted.md)
+
 ## C++ Programming References id=programming
 
 MOOSE developers need only a basic understanding of computer programming with C++ to get started. If possible, it may be helpful to review the following resources:
