@@ -4,7 +4,7 @@
 
 ## Overview
 
-Steady is a general solver for discrete steady-state nonlinear or linear problem:
+This [/Executioner.md] is a general solver for discrete steady-state nonlinear or linear problem:
 
 !equation id=eq:problem
 \mathbf{R}(\mathbf{u}) = \mathbf{0}.

@@ -1,0 +1,26 @@
+[Tests]
+  design = 'DefaultFixedPointConvergence.md'
+  issues = '#30784'
+
+  [residual]
+    type = CSVDiff
+    input = 'residual.i'
+    csvdiff = 'residual.csv'
+    requirement = "The system shall allow fixed point convergence to be assessed with the nonlinear residual norm."
+  []
+  [pp]
+    type = CSVDiff
+    input = 'pp.i'
+    csvdiff = 'pp.csv'
+    requirement = "The system shall allow fixed point convergence to be assessed with a post-processor value."
+  []
+  [error_reporting]
+    requirement = "The system shall report an error for the default fixed point convergence class"
+    [duplicate_params]
+      type = RunException
+      input = 'duplicate_params.i'
+      expect_err = "The following parameters were set in both this Convergence object and the executioner:\s+fixed_point_abs_tol"
+      detail = 'if any parameter is supplied in both the convergence object and executioner.'
+    []
+  []
+[]
