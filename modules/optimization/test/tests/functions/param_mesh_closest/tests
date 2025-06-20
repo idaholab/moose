@@ -1,0 +1,68 @@
+[Tests]
+  issues = '#30796'
+  design = 'ParameterMeshFunction.md'
+  [parameter_mesh]
+    requirement = 'The system shall be able to evaluate a mesh-based interpolation function by '
+    [create_1d]
+      type = CheckFiles
+      input = create_mesh_1d.i
+      check_files = 'create_mesh_1d_out.e create_mesh_1d_out_param_vec_0001.csv'
+      detail = 'creating 1D mesh and '
+    []
+    [evaluate]
+      type = Exodiff
+      input = parameter_mesh_1d.i
+      allow_test_objects = True
+      prereq = parameter_mesh/create_1d
+      exodiff = parameter_mesh_1d_out.e
+      detail = 'evaluating the 1d parameter values;'
+    []
+    [create_2d]
+      type = CheckFiles
+      input = create_mesh_2d.i
+      check_files = 'create_mesh_2d_out.e create_mesh_2d_out_param_vec_0001.csv'
+      detail = 'creating 2D mesh and'
+    []
+    [evaluate_2d]
+      type = Exodiff
+      input = parameter_mesh_2d.i
+      allow_test_objects = True
+      prereq = parameter_mesh/create_2d
+      exodiff = parameter_mesh_2d_out.e
+      detail = 'evaluating the 2D mesh parameter values;'
+    []
+  []
+  [check_dbgs]
+    requirement = 'The system shall prevent'
+    [create_second]
+      type = CheckFiles
+      input = create_mesh_2d.i
+      cli_args = 'Mesh/gmg/elem_type=QUAD8'
+      check_files = 'create_mesh_2d_out.e create_mesh_2d_out_param_vec_0001.csv'
+      detail = 'using second order element meshes'
+    []
+    [evaluate_second]
+      type = RunException
+      input = parameter_mesh_2d.i
+      allow_test_objects = True
+      prereq = check_dbgs/create_second
+      expect_err = "Closet point projection option cannot work with second order elements."
+      detail = 'with projection methods;'
+    []
+    [create_tri]
+      type = CheckFiles
+      input = create_mesh_2d.i
+      cli_args = 'Mesh/gmg/elem_type=TRI'
+      check_files = 'create_mesh_2d_out.e create_mesh_2d_out_param_vec_0001.csv'
+      detail = 'using triangle element meshes'
+    []
+    [evaluate_tri]
+      type = RunException
+      input = parameter_mesh_2d.i
+      allow_test_objects = True
+      prereq = check_dbgs/create_tri
+      expect_err = "Unsupported element 3 for projection of parameter mesh."
+      detail = 'with projection methods;'
+    []
+  []
+[]
