@@ -81,7 +81,6 @@ ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
     _solution_update(addVector("solution_update", true, PARALLEL)),
     _mass_matrix_lumped(addVector("mass_matrix_lumped", true, GHOSTED)),
     _damping_matrix_lumped(addVector("damping_matrix_lumped", true, GHOSTED)),
-    _ones(addVector("ones", true, GHOSTED)),
     _vars_first(declareRestartableData<std::unordered_set<unsigned int>>("first_order_vars")),
     _local_first_order_indices(
         declareRestartableData<std::vector<dof_id_type>>("first_local_indices")),
@@ -98,8 +97,16 @@ ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
   if (_nl)
     _fe_problem.solverParams(_nl->number())._type = Moose::ST_LINEAR;
 
+  _ones = addVector("ones", true, PARALLEL);
+
   // don't set any of the common SNES-related petsc options to prevent unused option warnings
   Moose::PetscSupport::dontAddCommonSNESOptions(_fe_problem);
+}
+
+void
+ExplicitMixedOrder::meshChanged()
+{
+  *_ones = 1.;
 }
 
 void
@@ -171,12 +178,6 @@ ExplicitMixedOrder::init()
                var_dof_indices.end(),
                std::back_inserter(_local_second_order_indices));
   }
-}
-
-void
-ExplicitMixedOrder::meshChanged()
-{
-  *_ones = 1.;
 }
 
 void
