@@ -104,8 +104,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
 
   // Adds a diagnostic from a hit::ErrorMessage if the context is valid
   const auto hit_error_message_diagnostic =
-      [&diagnostic, &hit_node_diagnostic, &zero_line_diagnostic, &parse_file_path](
-          const hit::ErrorMessage & err)
+      [&diagnostic, &zero_line_diagnostic, &parse_file_path](const hit::ErrorMessage & err)
   {
     // Has a filename
     if (err.filename)
@@ -1617,8 +1616,10 @@ MooseServer::queryRoot()
 {
   if (auto parser_ptr = queryCheckParser())
   {
+#ifndef NDEBUG
     if (const auto app_ptr = queryCheckApp())
       mooseAssert(&app_ptr->parser() == parser_ptr, "App should have this parser");
+#endif
     if (auto root_ptr = parser_ptr->queryRoot())
       if (!root_ptr->getNodeView().is_null())
         return root_ptr;
@@ -1680,8 +1681,10 @@ MooseServer::getCheckParser()
   if (auto parser_ptr = queryCheckParser())
   {
     auto & parser = *parser_ptr;
+#ifndef NDEBUG
     if (const auto app_ptr = queryCheckApp())
       mooseAssert(&app_ptr->parser() == parser_ptr, "App should have this parser");
+#endif
     return parser;
   }
   mooseError("MooseServer::getCheckParser(): Parser not available");
