@@ -44,12 +44,17 @@ LibtorchANNSurrogate::evaluate(const std::vector<Real> & x) const
   const auto & input_mean = _input_standardizer.getMean();
   const auto & input_std = _input_standardizer.getStdDev();
 
-  mooseAssert(input_mean.size() == converted_input.size() &&
-                  input_std.size() == converted_input.size(),
+  auto input_mean_accessor = input_mean.accessor<Real, 2>();
+  auto input_std_accessor = input_std.accessor<Real, 2>();
+
+  unsigned int i_mean = input_mean.sizes()[0];
+  unsigned int i_std = input_std.sizes()[0];
+  mooseAssert(i_mean == converted_input.size() && i_std == converted_input.size(),
               "The input standardizer's dimensions should be the same as the input dimension!");
 
   for (auto input_i : index_range(converted_input))
-    converted_input[input_i] = (x[input_i] - input_mean[input_i]) / input_std[input_i];
+    converted_input[input_i] =
+        (x[input_i] - input_mean_accessor[input_i][0]) / input_std_accessor[input_i][0];
 
   torch::Tensor x_tf =
       torch::tensor(torch::ArrayRef<Real>(converted_input.data(), converted_input.size()))
@@ -58,12 +63,15 @@ LibtorchANNSurrogate::evaluate(const std::vector<Real> & x) const
   const auto & output_mean = _output_standardizer.getMean();
   const auto & output_std = _output_standardizer.getStdDev();
 
-  mooseAssert(output_mean.size() == 1 && output_std.size() == 1,
+  auto output_mean_accessor = output_mean.accessor<Real, 2>();
+  auto output_std_accessor = output_std.accessor<Real, 2>();
+
+  mooseAssert(output_mean.sizes()[0] == 1 && output_std.sizes()[0] == 1,
               "The output standardizer's dimensions should be 1!");
 
   // Compute prediction
   val = _nn->forward(x_tf).item<double>();
-  val = val * output_std[0] + output_mean[0];
+  val = val * output_std_accessor[0][0] + output_mean_accessor[0][0];
 
   return val;
 }

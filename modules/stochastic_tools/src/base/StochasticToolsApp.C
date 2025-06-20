@@ -75,11 +75,6 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   addTaskDependency("add_covariance", "add_user_object");
   addTaskDependency("add_distribution", "add_covariance");
 
-  // Covariance functions with libtorch (Gaussian Process)
-  registerSyntaxTask("AddCovarianceActionTorched", "CovarianceTorched/*", "add_covariance_torched");
-  registerMooseObjectTask("add_covariance_torched", CovarianceFunctionBaseTorched, false);
-  addTaskDependency("add_covariance_torched", "add_user_object");
-  addTaskDependency("add_distribution", "add_covariance_torched");
   // Mapping objects
   registerSyntaxTask("AddVariableMappingAction", "VariableMappings/*", "add_variable_mapping");
   registerMooseObjectTask("add_variable_mapping", VariableMappingBase, false);
@@ -88,10 +83,6 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   registerTask("load_covariance_data", true);
   addTaskDependency("load_covariance_data", "load_surrogate_data");
   addTaskDependency("setup_function_complete", "load_covariance_data");
-  // Adds action for loading Covariance data in model (libtorch version)
-  registerTask("load_covariance_data_torched", true);
-  addTaskDependency("load_covariance_data_torched", "load_surrogate_data");
-  addTaskDependency("setup_function_complete", "load_covariance_data_torched");
   addTaskDependency("setup_mesh", "auto_create_mesh");
   addTaskDependency("create_problem", "auto_create_problem");
   addTaskDependency("setup_executioner", "auto_create_executioner");
