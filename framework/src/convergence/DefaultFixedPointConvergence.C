@@ -9,6 +9,7 @@
 
 #include "DefaultFixedPointConvergence.h"
 #include "FixedPointSolve.h"
+#include "Console.h"
 
 registerMooseObject("MooseApp", DefaultFixedPointConvergence);
 
@@ -33,6 +34,11 @@ DefaultFixedPointConvergence::DefaultFixedPointConvergence(const InputParameters
     _fixed_point_abs_tol(getSharedExecutionerParam<Real>("fixed_point_abs_tol")),
     _custom_pp_rel_tol(getSharedExecutionerParam<Real>("custom_rel_tol")),
     _custom_pp_abs_tol(getSharedExecutionerParam<Real>("custom_abs_tol")),
+    _fixed_point_custom_pp(isParamValid("custom_pp") ? &getPostprocessorValue("custom_pp")
+                                                     : nullptr),
+    _pp_old(0.0),
+    _pp_new(std::numeric_limits<Real>::max()),
+    _pp_scaling(1.0),
     _fp_solve(getMooseApp().getExecutioner()->fixedPointSolve())
 {
 }
@@ -45,10 +51,19 @@ DefaultFixedPointConvergence::initialSetup()
   checkDuplicateSetSharedExecutionerParams();
 }
 
+void
+DefaultFixedPointConvergence::initialize()
+{
+  _pp_history.str("");
+}
+
 Convergence::MooseConvergenceStatus
 DefaultFixedPointConvergence::checkConvergence(unsigned int iter)
 {
   TIME_SECTION(_perfid_check_convergence);
+
+  if (_fixed_point_custom_pp)
+    computeCustomConvergencePostprocessor(iter);
 
   if (iter + 2 > _fp_solve.minFixedPointIts())
   {
@@ -70,16 +85,13 @@ DefaultFixedPointConvergence::checkConvergence(unsigned int iter)
       return MooseConvergenceStatus::CONVERGED;
     }
 
-    const auto pp_new = _fp_solve.getCustomPPNewValue();
-    const auto pp_old = _fp_solve.getCustomPPOldValue();
-    const auto pp_scale = _fp_solve.getCustomPPScaleValue();
-    if (std::abs(pp_new - pp_old) < _custom_pp_abs_tol)
+    if (std::abs(_pp_new - _pp_old) < _custom_pp_abs_tol)
     {
       _fp_solve.setFixedPointStatus(
           FixedPointSolve::MooseFixedPointConvergenceReason::CONVERGED_CUSTOM);
       return MooseConvergenceStatus::CONVERGED;
     }
-    if (std::abs((pp_new - pp_old) / pp_scale) < _custom_pp_rel_tol)
+    if (std::abs((_pp_new - _pp_old) / _pp_scaling) < _custom_pp_rel_tol)
     {
       _fp_solve.setFixedPointStatus(
           FixedPointSolve::MooseFixedPointConvergenceReason::CONVERGED_CUSTOM);
@@ -118,4 +130,20 @@ DefaultFixedPointConvergence::checkDuplicateSetSharedExecutionerParams() const
       oss << "  " << param << "\n";
     mooseError(oss.str());
   }
+}
+
+void
+DefaultFixedPointConvergence::computeCustomConvergencePostprocessor(unsigned int iter)
+{
+  if (iter > 0 && !getParam<bool>("direct_pp_value"))
+    _pp_old = _pp_new;
+
+  if ((iter == 0 && getParam<bool>("direct_pp_value")) || !getParam<bool>("direct_pp_value"))
+    _pp_scaling = *_fixed_point_custom_pp;
+  _pp_new = *_fixed_point_custom_pp;
+
+  const auto pp_name = getParam<PostprocessorName>("custom_pp");
+  _pp_history << std::setw(2) << iter + 1 << " fixed point " << pp_name << " = "
+              << Console::outputNorm(std::numeric_limits<Real>::max(), _pp_new, 8) << std::endl;
+  _console << _pp_history.str() << std::flush;
 }
