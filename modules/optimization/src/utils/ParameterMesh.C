@@ -221,7 +221,7 @@ ParameterMesh::projectToMesh(const Point & p) const
     return p;
   // use KD-tree to collect k nearest element IDs
   constexpr unsigned int k = 20;
-  std::vector<dof_id_type> elem_ids;
+  std::vector<std::size_t> elem_ids;
   elem_ids.reserve(k);
   _kd_tree->neighborSearch(p, k, elem_ids);
   Real best_d2 = std::numeric_limits<Real>::max();
