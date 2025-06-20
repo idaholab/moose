@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://mooseframework.inl.gov
+//* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,19 +11,17 @@
 
 #include "SmearedCrackSofteningBase.h"
 
-// Forward declaration
-
 /**
- * AbruptSoftening is a smeared crack softening model that abruptly
- * drops the stress upon crack initiation. It is for use with
- * ComputeSmearedCrackingStress.
+ * ExponentialEnergyBasedSoftening is a smeared crack softening model that
+ * uses an exponential softening curve where the softening slope is 
+ * dependent on each element size and the fracture toughness.
  */
-class AbruptSoftening : public SmearedCrackSofteningBase
+class ExponentialEnergyBasedSoftening : public SmearedCrackSofteningBase
 {
 public:
   static InputParameters validParams();
 
-  AbruptSoftening(const InputParameters & parameters);
+  ExponentialEnergyBasedSoftening(const InputParameters & parameters);
 
   virtual void computeCrackingRelease(Real & stress,
                                       Real & stiffness_ratio,
@@ -36,6 +34,16 @@ public:
                                       const Real poissons_ratio) override;
 
 protected:
+
   /// Residual stress after full softening
   const Real & _residual_stress;
+
+  /// Fracture toughness
+  const Real & _fracture_toughness;
+
+  /// Strain rate exponent 
+  const Real & _rate_exponent; 
+
+  /// Reference strain rate 
+  const Real & _ref_strain_rate;
 };

@@ -46,8 +46,10 @@ public:
                                       const Real strain,
                                       const Real crack_initiation_strain,
                                       const Real crack_max_strain,
+                                      const Real crack_max_strain_old,
                                       const Real cracking_stress,
-                                      const Real youngs_modulus) = 0;
+                                      const Real youngs_modulus, 
+                                      const Real poissons_ratio) = 0;
 
   ///@{ Retained as empty methods to avoid a warning from Material.C in framework. These methods are unused in all inheriting classes and should not be overwritten.
   void resetQpProperties() final {}
