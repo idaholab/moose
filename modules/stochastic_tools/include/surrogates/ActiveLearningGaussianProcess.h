@@ -11,7 +11,7 @@
 
 #include "ActiveLearningGaussianProcess.h"
 #include "Standardizer.h"
-#include <Eigen/Dense>
+#include "LibtorchUtils.h"
 
 #include "StochasticToolsApp.h"
 #include "LoadSurrogateDataAction.h"
@@ -67,7 +67,7 @@ private:
   StochasticTools::GaussianProcess & _gp;
 
   /// Paramaters (x) used for training, along with statistics
-  RealEigenMatrix & _training_params;
+  torch::Tensor & _training_params;
 
   /// Outputs (y) used for training, along with statistics
   RealEigenMatrix & _training_data;
