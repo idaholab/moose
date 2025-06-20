@@ -52,6 +52,6 @@
     url = https://github.com/LLNL/conduit.git
     update = none
 [submodule "framework/contrib/neml2"]
-    path = framework/contrib/neml2
-    url = ../../applied-material-modeling/neml2.git
+	path = framework/contrib/neml2
+	url = ../../loganharbour/neml2.git
     update = none
