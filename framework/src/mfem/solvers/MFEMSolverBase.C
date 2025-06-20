@@ -27,4 +27,24 @@ MFEMSolverBase::MFEMSolverBase(const InputParameters & parameters)
 {
 }
 
+bool MFEMSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf)
+{
+  bool equiv = true;
+
+  if (auto fec = dynamic_cast<const mfem::ND_FECollection *>(blf.FESpace()->FEColl()))
+  {
+    if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
+        fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
+      equiv = false;
+  }
+  else if (auto fec = dynamic_cast<const mfem::RT_FECollection *>(blf.FESpace()->FEColl()))
+  {
+    if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
+        fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
+      equiv = false;
+  }
+
+  return equiv;
+}
+
 #endif
