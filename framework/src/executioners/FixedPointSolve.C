@@ -134,8 +134,6 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _fixed_point_rel_tol(getParam<Real>("fixed_point_rel_tol")),
     _fixed_point_abs_tol(getParam<Real>("fixed_point_abs_tol")),
     _fixed_point_force_norms(getParam<bool>("fixed_point_force_norms")),
-    _fixed_point_custom_pp(isParamValid("custom_pp") ? &getPostprocessorValue("custom_pp")
-                                                     : nullptr),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
     _transformed_pps(getParam<std::vector<PostprocessorName>>("transformed_postprocessors")),
@@ -143,6 +141,8 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _secondary_relaxation_factor(1.0),
     _fixed_point_it(0),
     _fixed_point_status(MooseFixedPointConvergenceReason::UNSOLVED),
+    _fixed_point_custom_pp(isParamValid("custom_pp") ? &getPostprocessorValue("custom_pp")
+                                                     : nullptr),
     _custom_rel_tol(getParam<Real>("custom_rel_tol")),
     _custom_abs_tol(getParam<Real>("custom_abs_tol")),
     _pp_old(0.0),

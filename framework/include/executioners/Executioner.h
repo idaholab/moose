@@ -78,12 +78,12 @@ public:
   virtual void postExecute() {}
 
   /**
-   * Override this for actions that should take place before execution, called by PicardSolve
+   * Override this for actions that should take place before execution, called by FixedPointSolve
    */
   virtual void preSolve() {}
 
   /**
-   * Override this for actions that should take place after execution, called by PicardSolve
+   * Override this for actions that should take place after execution, called by FixedPointSolve
    */
   virtual void postSolve() {}
 
@@ -121,25 +121,7 @@ public:
    */
   virtual bool lastSolveConverged() const = 0;
 
-  /// Return underlying PicardSolve object.
-  PicardSolve & picardSolve()
-  {
-    mooseDeprecated("picardSolve() is deprecated. Use fixedPointSolve() instead.");
-    if (_iteration_method == "picard")
-      return *(dynamic_cast<PicardSolve *>(_fixed_point_solve.get()));
-    else
-      mooseError("Cannot return a PicardSolve if the iteration method is not Picard.");
-  }
-
   FixedPointSolve & fixedPointSolve() { return *_fixed_point_solve; }
-
-  /// Augmented Picard convergence check to be called by PicardSolve and can be overridden by derived executioners
-  virtual bool augmentedPicardConvergenceCheck() const
-  {
-    mooseDeprecated(
-        "augmentedPicardConvergenceCheck() is deprecated. Use augmentedCouplingConvergenceCheck.");
-    return false;
-  }
 
   /**
    * Get the verbose output flag
