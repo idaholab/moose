@@ -8,11 +8,6 @@
   block = '0 1 2'
 []
 
-[Problem]
-  # switch to an axisymmetric coordinate system
-  coord_type = RZ
-[]
-
 [Mesh]
   # inner cylinder
   [inner]
@@ -78,6 +73,9 @@
   []
 
   patch_update_strategy = iteration
+
+  # switch to an axisymmetric coordinate system
+  coord_type = RZ
 []
 
 [Variables]

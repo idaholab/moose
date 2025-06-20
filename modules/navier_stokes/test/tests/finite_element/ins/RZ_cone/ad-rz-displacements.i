@@ -7,9 +7,6 @@
 [Mesh]
   file = '2d_cone.msh'
   displacements = 'disp_x disp_y'
-[]
-
-[Problem]
   coord_type = RZ
 []
 

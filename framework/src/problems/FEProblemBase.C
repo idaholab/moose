@@ -191,23 +191,6 @@ FEProblemBase::validParams()
                         "True to allow the user to specify initial conditions when restarting. "
                         "Initial conditions can override any restarted field");
 
-  /// One entry of coord system per block, the size of _blocks and _coord_sys has to match, except:
-  /// 1. _blocks.size() == 0, then there needs to be just one entry in _coord_sys, which will
-  ///    be set for the whole domain
-  /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
-  /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
-  params.addDeprecatedParam<std::vector<SubdomainName>>(
-      "block", {}, "Block IDs for the coordinate systems", "Please use 'Mesh/coord_block' instead");
-  MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
-  MooseEnum rz_coord_axis("X=0 Y=1", "Y");
-  params.addDeprecatedParam<MultiMooseEnum>("coord_type",
-                                            coord_types,
-                                            "Type of the coordinate system per block param",
-                                            "Please use 'Mesh/coord_type' instead");
-  params.addDeprecatedParam<MooseEnum>("rz_coord_axis",
-                                       rz_coord_axis,
-                                       "The rotation axis (X | Y) for axisymetric coordinates",
-                                       "Please use 'Mesh/rz_coord_axis' instead");
   auto coverage_check_description = [](std::string scope, std::string list_param_name)
   {
     return "Controls, if and how a " + scope +
@@ -221,6 +204,13 @@ FEProblemBase::validParams()
            "be used (again, using the parameter '" +
            list_param_name + "').";
   };
+
+  params.addParam<std::vector<SubdomainName>>(
+      "block",
+      "List of subdomains for kernel coverage and material coverage checks. Setting this parameter "
+      "is equivalent to setting 'kernel_coverage_block_list' and 'material_coverage_block_list' as "
+      "well as using 'ONLY_LIST' as the coverage check mode.");
+
   MooseEnum kernel_coverage_check_modes("FALSE TRUE OFF ON SKIP_LIST ONLY_LIST", "TRUE");
   params.addParam<MooseEnum>("kernel_coverage_check",
                              kernel_coverage_check_modes,
@@ -464,15 +454,24 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(
-        getParam<MooseEnum>("kernel_coverage_check").getEnum<CoverageCheckMode>()),
-    _kernel_coverage_blocks(getParam<std::vector<SubdomainName>>("kernel_coverage_block_list")),
+        isParamSetByUser("kernel_coverage_check") || !isParamValid("block")
+            ? getParam<MooseEnum>("kernel_coverage_check").getEnum<CoverageCheckMode>()
+            : CoverageCheckMode::ONLY_LIST),
+    _kernel_coverage_blocks(isParamSetByUser("kernel_coverage_check") || !isParamValid("block")
+                                ? getParam<std::vector<SubdomainName>>("kernel_coverage_block_list")
+                                : getParam<std::vector<SubdomainName>>("block")),
     _boundary_restricted_node_integrity_check(
         getParam<bool>("boundary_restricted_node_integrity_check")),
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
     _material_coverage_check(
-        getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()),
-    _material_coverage_blocks(getParam<std::vector<SubdomainName>>("material_coverage_block_list")),
+        isParamSetByUser("material_coverage_check") || !isParamValid("block")
+            ? getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()
+            : CoverageCheckMode::ONLY_LIST),
+    _material_coverage_blocks(
+        isParamSetByUser("material_coverage_check") || !isParamValid("block")
+            ? getParam<std::vector<SubdomainName>>("material_coverage_block_list")
+            : getParam<std::vector<SubdomainName>>("block")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
     _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
@@ -519,9 +518,25 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _identify_variable_groups_in_nl(getParam<bool>("identify_variable_groups_in_nl")),
     _regard_general_exceptions_as_errors(getParam<bool>("regard_general_exceptions_as_errors"))
 {
-  //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
-  //  things that we setup early in the simulation actually get their derivative vectors initalized.
-  //  We will toggle this to false when doing residual evaluations
+
+  auto checkConflict =
+      [this](const CoverageCheckMode & coverage_check_mode, const std::string & coverage_check)
+  {
+    if ((isParamSetByUser(coverage_check) &&
+         (coverage_check_mode == CoverageCheckMode::ONLY_LIST ||
+          coverage_check_mode == CoverageCheckMode::SKIP_LIST)) &&
+        isParamValid("block"))
+      paramError("block",
+                 "Cannot set both '" + coverage_check +
+                     "' as 'ONLY_LIST' or 'SKIP_LIST' and 'block'. Please set only one.");
+  };
+
+  checkConflict(_kernel_coverage_check, "kernel_coverage_check");
+  checkConflict(_material_coverage_check, "material_coverage_check");
+
+  //  Initialize static do_derivatives member. We initialize this to true so that all the
+  //  default AD things that we setup early in the simulation actually get their derivative
+  //  vectors initalized. We will toggle this to false when doing residual evaluations
   ADReal::do_derivatives = true;
 
   _solver_params.reserve(_num_nl_sys + _num_linear_sys);
@@ -580,12 +595,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _interface_mat_side_cache.resize(n_threads);
 
   es().parameters.set<FEProblemBase *>("_fe_problem_base") = this;
-
-  if (parameters.isParamSetByUser("coord_type"))
-    setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
-                   getParam<MultiMooseEnum>("coord_type"));
-  if (parameters.isParamSetByUser("rz_coord_axis"))
-    setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
 
   if (isParamValid("restart_file_base"))
   {
@@ -2700,7 +2709,6 @@ FEProblemBase::duplicateVariableCheck(const std::string & var_name,
                                       bool is_aux,
                                       const std::set<SubdomainID> * const active_subdomains)
 {
-
   std::set<SubdomainID> subdomainIDs;
   if (active_subdomains->size() == 0)
   {
@@ -3681,6 +3689,65 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
     for (const auto & ic : ics)
     {
       MooseVariableScalar & var = ic->variable();
+      var.reinit();
+
+      DenseVector<Number> vals(var.order());
+      ic->compute(vals);
+
+      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      {
+        const dof_id_type global_index = var.dofIndices()[i];
+        var.sys().solution().set(global_index, vals(i));
+        var.setValue(i, vals(i));
+      }
+    }
+  }
+
+  for (auto & nl : _nl)
+  {
+    nl->solution().close();
+    nl->solution().localize(*nl->system().current_local_solution, nl->dofMap().get_send_list());
+  }
+
+  _aux->solution().close();
+  _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
+}
+
+void
+FEProblemBase::projectInitialConditionOnCustomRangeForSpecificVars(
+    ConstElemRange & elem_range,
+    ConstBndNodeRange & bnd_nodes,
+    const std::set<unsigned int> & ic_target_vars)
+{
+  ComputeInitialConditionThread cic(*this);
+  Threads::parallel_reduce(elem_range, cic);
+
+  // Need to close the solution vector here so that boundary ICs take precendence
+  for (auto & nl : _nl)
+    nl->solution().close();
+  _aux->solution().close();
+
+  ComputeBoundaryInitialConditionThread cbic(*this);
+  Threads::parallel_reduce(bnd_nodes, cbic);
+
+  for (auto & nl : _nl)
+    nl->solution().close();
+  _aux->solution().close();
+
+  // Also, load values into the SCALAR dofs
+  // Note: We assume that all SCALAR dofs are on the
+  // processor with highest ID
+  if (processor_id() == (n_processors() - 1) && _scalar_ics.hasActiveObjects())
+  {
+    const auto & ics = _scalar_ics.getActiveObjects();
+    for (const auto & ic : ics)
+    {
+      MooseVariableScalar & var = ic->variable();
+
+      if (!ic_target_vars.empty() && !ic_target_vars.count(var.number()))
+        continue;
+
       var.reinit();
 
       DenseVector<Number> vals(var.order());

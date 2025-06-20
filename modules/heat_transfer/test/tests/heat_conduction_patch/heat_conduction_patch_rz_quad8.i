@@ -18,12 +18,9 @@
 #   14 1.00016e3 8e-2       40
 #   17 1.00024e3 1.2e-1     60
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]#Comment
   file = heat_conduction_patch_rz_quad8.e
+  coord_type = RZ
 [] # Mesh
 
 [Functions]
