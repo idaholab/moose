@@ -392,6 +392,8 @@ class ValidationCase(MooseObject):
         rel_err = ValidationCase.toFloat(rel_err, 'rel_err')
         if rel_err <= 0.0:
             raise ValueError('rel_err not positive')
+        if nominal == 0.0:
+            raise ValueError('nominal value is zero')
 
         error = abs((nominal - value) / nominal)
         success = error < rel_err
