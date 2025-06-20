@@ -31,7 +31,7 @@ MFEMVectorFunctorTangentialDirichletBC::MFEMVectorFunctorTangentialDirichletBC(
 void
 MFEMVectorFunctorTangentialDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 {
-  gridfunc.ProjectBdrCoefficientTangent(_vec_coef, getBoundaries());
+  gridfunc.ProjectBdrCoefficientTangent(_vec_coef, getBoundaryMarkers());
 }
 
 #endif

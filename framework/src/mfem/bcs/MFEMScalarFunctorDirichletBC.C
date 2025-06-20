@@ -36,7 +36,7 @@ MFEMScalarFunctorDirichletBC::MFEMScalarFunctorDirichletBC(const InputParameters
 void
 MFEMScalarFunctorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 {
-  gridfunc.ProjectBdrCoefficient(_coef, getBoundaries());
+  gridfunc.ProjectBdrCoefficient(_coef, getBoundaryMarkers());
 }
 
 #endif
