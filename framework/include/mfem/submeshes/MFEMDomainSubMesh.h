@@ -17,18 +17,14 @@
  * as a restriction of the parent mesh to the set of user-specified subdomains.
  * Access using the getSubMesh() accessor.
  */
-class MFEMDomainSubMesh : public MFEMSubMesh
+class MFEMDomainSubMesh : public MFEMSubMesh, public MFEMBlockRestrictable
 {
 public:
   static InputParameters validParams();
   MFEMDomainSubMesh(const InputParameters & parameters);
-  const mfem::Array<int> & getSubdomains() { return _subdomain_attributes; }
 
 protected:
   virtual void buildSubMesh() override;
-
-  const std::vector<SubdomainName> & _subdomain_names;
-  mfem::Array<int> _subdomain_attributes;
 };
 
 #endif
