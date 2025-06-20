@@ -365,6 +365,42 @@ class ValidationCase(MooseObject):
 
         return status, ' '.join(message)
 
+    @staticmethod
+    def checkRelativeError(value: float,
+                           nominal: float,
+                           rel_err: float,
+                           units: Union[str, None]) -> Tuple[Status, str]:
+        """
+        Performs relative error checking for a scalar value and associates
+        a pass/fail with a status and a message
+
+        Args:
+            value: The value to check
+            nominal: The nominal value
+            rel_err: The relative error
+            units (optional): Units to add to the message
+        Returns:
+            Status: The associated status (ok or fail)
+            str: Message associated with the check
+        """
+        value = ValidationCase.toFloat(value, 'value')
+        nominal = ValidationCase.toFloat(nominal, 'nominal')
+        rel_err = ValidationCase.toFloat(rel_err, 'rel_err')
+        if rel_err <= 0.0:
+            raise ValueError('rel_err not positive')
+
+        error = abs((nominal - value) / nominal)
+        success = error < rel_err
+        status = ValidationCase.Status.OK if success else ValidationCase.Status.FAIL
+
+        units = f' {units}' if units is not None else ''
+        number_format = ValidationCase.number_format
+        message = [f'value {value:{number_format}}{units} relative error']
+        message += [f'{error:{number_format}} ' + ('<' if success else '>')]
+        message += [f'required {rel_err:{number_format}}']
+
+        return status, ' '.join(message)
+
     def addScalarData(self, key: str, value: Number, description: str,
                       units: Optional[str], **kwargs) -> None:
         """
