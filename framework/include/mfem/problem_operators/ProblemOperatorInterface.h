@@ -17,7 +17,10 @@ public:
   virtual void SetTrialVariablesFromTrueVectors();
   virtual void Init(mfem::BlockVector & X);
   virtual void UniformRefinement( int num_refinements=1 );
+
+  /// Update FESpaces and gridfunctions, then tells the equation system to update. Typically used after mesh updates.
   virtual void UpdateAfterRefinement();
+  virtual void UpdateFESpaces();
   virtual int  GetProblemSize();
 
   mfem::Array<int> _block_true_offsets;

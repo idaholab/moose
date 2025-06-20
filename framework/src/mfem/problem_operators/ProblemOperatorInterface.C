@@ -56,13 +56,13 @@ void
 ProblemOperatorInterface::UpdateAfterRefinement()
 {
   // Update the FE spaces
-  _problem.updateFESpaces();
+  UpdateFESpaces();
 
   if ( _problem.pmesh->Nonconforming() )
   {
     _problem.pmesh->Rebalance();
     // Update FESpaces again to account for rebalancing
-    _problem.updateFESpaces();
+    UpdateFESpaces();
   }
 
   // Reset the grid functions
@@ -78,6 +78,20 @@ ProblemOperatorInterface::UniformRefinement(int num_refinements)
     _problem.pmesh->UniformRefinement();
     UpdateAfterRefinement();
   }
+}
+
+void
+ProblemOperatorInterface::UpdateFESpaces()
+{
+  for (const auto & fe_space_pair : _problem.fespaces)
+  {
+    fe_space_pair.second->Update();
+  }
+  for (const auto & gridfunction_pair : _problem.gridfunctions)
+  {
+    gridfunction_pair.second->Update();
+  }
+  _problem.eqn_system->UpdateEquationSystem();
 }
 
 int
