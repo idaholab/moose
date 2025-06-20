@@ -42,6 +42,11 @@ public:
   virtual void initialSetup() override{};
 
   /**
+   * Method that gets called before each iteration loop
+   */
+  virtual void initialize() {};
+
+  /**
    * Returns convergence status.
    *
    * @param[in] iter   Iteration index

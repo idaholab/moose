@@ -105,13 +105,6 @@ public:
   /// Get the initial residual norm
   Real fixedPointInitialNorm() const { return _fixed_point_initial_norm; }
 
-  /// Get the new value of the custom post-processor
-  Real getCustomPPNewValue() const { return _pp_new; }
-  /// Get the old value of the custom post-processor
-  Real getCustomPPOldValue() const { return _pp_old; }
-  /// Get the scale value of the custom post-processor
-  Real getCustomPPScaleValue() const { return _pp_scaling; }
-
   /// Set relaxation factor for the current solve as a SubApp
   void setMultiAppRelaxationFactor(Real factor) { _secondary_relaxation_factor = factor; }
 
@@ -214,9 +207,6 @@ protected:
   /// Print the convergence history of the coupling, at every fixed point iteration
   virtual void printFixedPointConvergenceHistory() = 0;
 
-  /// Computes and prints the user-specified postprocessor assessing convergence
-  void computeCustomConvergencePostprocessor();
-
   /// Examine the various convergence metrics
   bool examineFixedPointConvergence(bool & converged);
 
@@ -267,17 +257,6 @@ protected:
   MooseFixedPointConvergenceReason _fixed_point_status;
   ///@}
 private:
-  /// Postprocessor value for user-defined fixed point convergence check
-  const PostprocessorValue * const _fixed_point_custom_pp;
-  /// Old value of the custom convergence check postprocessor
-  Real _pp_old;
-  /// Current value of the custom convergence check postprocessor
-  Real _pp_new;
-  /// Scaling of custom convergence check postprocessor (its initial value)
-  Real _pp_scaling;
-  /// Convergence history of the custom convergence check postprocessor
-  std::ostringstream _pp_history;
-
   /// Maximum number of xfem updates per step
   const unsigned int _max_xfem_update;
   /// Controls whether xfem should update the mesh at the beginning of the time step
