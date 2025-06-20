@@ -15,7 +15,7 @@ Duct surface temperature is calculated at the end of the solve, if there is a Pi
 
 ## Example Input File Syntax
 
-!listing /test/tests/problems/interwrapper/tri_interwrapper_monolithic.i block=SubChannel language=cpp
+!listing /test/tests/problems/interwrapper/tri_interwrapper_monolithic.i block=SubChannel language=moose
 
 !syntax parameters /Problem/TriInterWrapper1PhaseProblem
 

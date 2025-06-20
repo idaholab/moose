@@ -47,4 +47,4 @@ This illustrates the fact that modeling parameters like $\beta$ should ideally b
 
 ## Input file for case: 01-5237
 
-!listing /validation/psbt/psbt_ss/psbt.i language=cpp
+!listing /validation/psbt/psbt_ss/psbt.i language=moose

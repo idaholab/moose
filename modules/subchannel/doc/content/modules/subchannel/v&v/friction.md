@@ -30,4 +30,4 @@ The analytical prediction is compared with the code results in [friction-ver]. T
 
 ## Input file
 
-!listing /verification/friction_model_verification/two_channel.i language=cpp
+!listing /verification/friction_model_verification/two_channel.i language=moose
