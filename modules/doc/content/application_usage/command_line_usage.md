@@ -89,7 +89,7 @@ Below are a few important command-line options you should be aware of:
 
 ### `-i`
 
-The most important option is `-i` this is how you specify an input file to read like so:
+The most important option is `-i`, which is how the input file(s) are specified:
 
 ```
 ./yourapp-opt -i input.i
@@ -107,7 +107,10 @@ The input files are processed from left to right, so in this example, `base.i`
 is processed before `input.i`. This feature is useful when you have multiple
 input files that share input: you can factor out the common input into another
 file (e.g., `base.i`) so that you do not duplicate it (and thus risk changing
-it in one input file but not another).
+it in one input file but not another). Note that if the same input parameter
+appears in multiple input files, the value in the rightmost input file on the
+command line takes precedence, i.e., files to the right override the files to
+the left.
 
 ### `--dump`
 

@@ -42,12 +42,14 @@
     direction = x
     num_layers = 10
     variable = to_sub
+    execute_on = 'TRANSFER'
   []
   [to_sub_elem]
     type = LayeredAverage
     direction = x
     num_layers = 10
     variable = to_sub_elem
+    execute_on = 'TRANSFER'
   []
 []
 

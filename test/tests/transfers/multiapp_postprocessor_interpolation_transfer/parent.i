@@ -63,9 +63,9 @@
 
 [Transfers]
   [pp_transfer]
+    type = MultiAppPostprocessorInterpolationTransfer
     postprocessor = average
     variable = from_sub
-    type = MultiAppPostprocessorInterpolationTransfer
     from_multi_app = sub
   []
 []
