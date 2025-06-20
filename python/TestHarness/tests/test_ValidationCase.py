@@ -205,6 +205,10 @@ class TestValidationCase(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'rel_err not positive'):
             ValidationCase.checkRelativeError(0, 0, -1, None)
 
+        # Zero nominal value
+        with self.assertRaisesRegex(ValueError, 'nominal value is zero'):
+            ValidationCase.checkRelativeError(0, 0, 1, None)
+
     def testToFloat(self):
         """
         Tests the to-float conversion helper in ValidationCase.toFloat()
