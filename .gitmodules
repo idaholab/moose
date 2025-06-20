@@ -53,5 +53,5 @@
     update = none
 [submodule "framework/contrib/neml2"]
 	path = framework/contrib/neml2
-	url = ../../applied-material-modeling/neml2.git
+	url = ../../loganharbour/neml2.git
     update = none
