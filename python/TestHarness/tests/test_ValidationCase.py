@@ -293,12 +293,18 @@ class TestValidationCase(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'nominal: could not convert string to float'):
             ValidationCase().addScalarData('k', 1, 'unused', None, nominal='abcd')
 
-        # Int nominal to float
-        nominal = int(1)
-        case.addScalarData('nominal_to_float', 1, 'unused', None, nominal=nominal)
-        data = case.data['nominal_to_float']
+        # Other int values to float
+        int_value = int(1)
+        case.addScalarData(f'values_to_float', 1, 'unused', None, nominal=int_value, rel_err=int_value)
+        data = case.data[f'values_to_float']
         self.assertTrue(isinstance(data.nominal, float))
-        self.assertEqual(data.nominal, float(nominal))
+        self.assertTrue(isinstance(data.rel_err, float))
+        self.assertEqual(data.nominal, float(int_value))
+        self.assertEqual(data.rel_err, float(int_value))
+
+        # rel_err requires nominal
+        with self.assertRaisesRegex(KeyError, "Must provide 'nominal' with 'rel_err'"):
+            ValidationCase().addScalarData('k', 1, 'unused', None, rel_err=1)
 
     def testAddScalarDataBounded(self):
         """
@@ -329,6 +335,19 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(len(all_data), 1)
         self.assertEqual(nominal, all_data[key].nominal)
 
+    def testAddScalarDataRelativeError(self):
+        """
+        Tests the addition of scalar data in ValidationCase.addScalarData()
+        with a relative error via the 'rel_err' keyword argument
+        """
+        key = 'test'
+        rel_err = 1e-4
+        test = ValidationCase()
+        test.addScalarData(key, 1.0, 'unused', None,  nominal=1, rel_err=rel_err)
+        all_data = test.data
+        self.assertEqual(len(all_data), 1)
+        self.assertEqual(rel_err, all_data[key].rel_err)
+
     def testAddScalarDataBoundedCheck(self):
         """
         Tests the checking of bounds for scalar data in ValidationCase.addScalarData()
@@ -357,6 +376,35 @@ class TestValidationCase(unittest.TestCase):
                 self.assertIn('within bounds', result.message)
             else:
                 self.assertIn('out of bounds', result.message)
+            data = test.data[case]
+            self.assertEqual(f'Test.test_{case}', data.test)
+
+    def testAddScalarRelativeErrorCheck(self):
+        """
+        Tests the checking of rel_err for scalar data in ValdationCase.addScalarData()
+        """
+        class Test(ValidationCase):
+            def test_pass(self):
+                self.addScalarData('pass', 1.0, 'foo', None, nominal=1.1, rel_err=1e-1)
+            def test_fail(self):
+                self.addScalarData('fail', 2.0, 'foo', None, nominal=1.9, rel_err=1e-2)
+
+        test = Test()
+        test.run()
+
+        results = test.results
+        self.assertEqual(len(results), 2)
+        for case in ['pass', 'fail']:
+            filtered = [r for r in results if r.test.endswith(case)]
+            self.assertEqual(len(filtered), 1)
+            result = filtered[0]
+            status = test.Status.OK if case == 'pass' else test.Status.FAIL
+            self.assertEqual(status, result.status)
+            self.assertEqual(case, result.data_key)
+            if case == 'pass':
+                self.assertIn('< required', result.message)
+            else:
+                self.assertIn('> required', result.message)
             data = test.data[case]
             self.assertEqual(f'Test.test_{case}', data.test)
 
@@ -476,6 +524,10 @@ class TestValidationCase(unittest.TestCase):
         # Bad length for nominal
         with self.assertRaisesRegex(TypeError, 'nominal: not same length as data'):
             ValidationCase().addVectorData('k', *good_args.values(), nominal=[1, 2, 3])
+
+        # Unsupported rel_err
+        with self.assertRaisesRegex(KeyError, "'rel_err' not supported"):
+            ValidationCase().addVectorData('k', *good_args.values(), rel_err=1e-1)
 
     def testAddVectorData(self):
         """
