@@ -300,18 +300,10 @@ FixedPointSolve::solve()
                << std::endl;
     }
 
-    // Save last postprocessor value as value before solve
-    if (_fixed_point_custom_pp && _fixed_point_it > 0 && !getParam<bool>("direct_pp_value"))
-      _pp_old = *_fixed_point_custom_pp;
-
     // Solve a single application for one time step
     bool solve_converged = solveStep(_fixed_point_timestep_begin_norm[_fixed_point_it],
                                      _fixed_point_timestep_end_norm[_fixed_point_it],
                                      transformed_dofs);
-
-    // Get new value and print history for the custom postprocessor convergence criterion
-    if (_fixed_point_custom_pp)
-      computeCustomConvergencePostprocessor();
 
     if (solve_converged)
     {
@@ -517,6 +509,9 @@ FixedPointSolve::solveStep(Real & begin_norm,
 void
 FixedPointSolve::computeCustomConvergencePostprocessor()
 {
+  if (_fixed_point_it > 0 && !getParam<bool>("direct_pp_value"))
+    _pp_old = _pp_new;
+
   if ((_fixed_point_it == 0 && getParam<bool>("direct_pp_value")) ||
       !getParam<bool>("direct_pp_value"))
     _pp_scaling = *_fixed_point_custom_pp;
@@ -531,6 +526,10 @@ FixedPointSolve::computeCustomConvergencePostprocessor()
 bool
 FixedPointSolve::examineFixedPointConvergence(bool & converged)
 {
+  // Get new value and print history for the custom postprocessor convergence criterion
+  if (_fixed_point_custom_pp)
+    computeCustomConvergencePostprocessor();
+
   auto & convergence = _problem.getConvergence(_problem.getFixedPointConvergenceName());
   const auto status = convergence.checkConvergence(_fixed_point_it);
   switch (status)
