@@ -21,7 +21,7 @@ SolidMechanicsTestApp::validParams()
 
 registerKnownLabel("SolidMechanicsTestApp");
 
-SolidMechanicsTestApp::SolidMechanicsTestApp(InputParameters parameters)
+SolidMechanicsTestApp::SolidMechanicsTestApp(const InputParameters & parameters)
   : SolidMechanicsApp(parameters)
 {
   SolidMechanicsTestApp::registerAll(
@@ -47,23 +47,6 @@ SolidMechanicsTestApp::registerApps()
 {
   SolidMechanicsApp::registerApps();
   registerApp(SolidMechanicsTestApp);
-}
-
-void
-SolidMechanicsTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"SolidMechanicsTestApp"});
-}
-
-void
-SolidMechanicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"SolidMechanicsTestApp"});
-}
-
-void
-SolidMechanicsTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

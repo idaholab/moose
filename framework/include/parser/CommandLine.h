@@ -124,7 +124,7 @@ public:
    *
    * This will also mark all found HIT parameters as used.
    */
-  std::string buildHitParams();
+  std::vector<std::string> buildHitParams();
 
   /**
    * @return The raw argv arguments as a vector
@@ -233,6 +233,8 @@ private:
   bool _has_parsed = false;
   /// Whether or not command line parameters have been populated
   bool _command_line_params_populated = false;
+  /// Whether or not the HIT parameters have been built (set as used)
+  bool _hit_params_built = false;
 };
 
 template <typename T>

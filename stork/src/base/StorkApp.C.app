@@ -13,7 +13,7 @@ StorkApp::validParams()
   return params;
 }
 
-StorkApp::StorkApp(InputParameters parameters) : MooseApp(parameters)
+StorkApp::StorkApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   StorkApp::registerAll(_factory, _action_factory, _syntax);
 }

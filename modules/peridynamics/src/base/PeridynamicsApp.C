@@ -44,56 +44,16 @@ PeridynamicsApp::registerApps()
 }
 
 void
-PeridynamicsApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"PeridynamicsApp"});
-}
-
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
-{
-  registerSyntax("MechanicsActionPD", "Modules/Peridynamics/Mechanics/Master/*");
-  registerSyntax("GeneralizedPlaneStrainActionPD",
-                 "Modules/Peridynamics/Mechanics/GeneralizedPlaneStrain/*");
-}
-
-void
-PeridynamicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+PeridynamicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
   Registry::registerObjectsTo(f, {"PeridynamicsApp"});
   Registry::registerActionsTo(af, {"PeridynamicsApp"});
-  associateSyntaxInner(s, af);
 
-  SolidMechanicsApp::registerAll(f, af, s);
-}
+  registerSyntax("MechanicsActionPD", "Modules/Peridynamics/Mechanics/Master/*");
+  registerSyntax("GeneralizedPlaneStrainActionPD",
+                 "Modules/Peridynamics/Mechanics/GeneralizedPlaneStrain/*");
 
-void
-PeridynamicsApp::registerObjectDepends(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjectsDepends");
-  SolidMechanicsApp::registerObjects(factory);
-}
-
-void
-PeridynamicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"PeridynamicsApp"});
-  associateSyntaxInner(syntax, action_factory);
-}
-
-void
-PeridynamicsApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjectsDepends");
-  SolidMechanicsApp::associateSyntax(syntax, action_factory);
-}
-
-void
-PeridynamicsApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
+  SolidMechanicsApp::registerAll(f, af, syntax);
 }
 
 extern "C" void

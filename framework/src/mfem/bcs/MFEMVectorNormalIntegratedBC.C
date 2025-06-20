@@ -29,7 +29,7 @@ MFEMVectorNormalIntegratedBC::MFEMVectorNormalIntegratedBC(const InputParameters
   : MFEMIntegratedBC(parameters),
     _vec_value(getParam<std::vector<Real>>("values")),
     _vec_coef(getMFEMProblem().getCoefficients().declareVector<mfem::VectorConstantCoefficient>(
-        "__VectorNormalIntegratedBC_" + parameters.get<std::string>("_unique_name"),
+        "__VectorNormalIntegratedBC_" + parameters.get<std::string>(MooseBase::unique_name_param),
         mfem::Vector(_vec_value.data(), _vec_value.size())))
 {
 }

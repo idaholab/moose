@@ -23,7 +23,7 @@ XFEMTestApp::validParams()
 
 registerKnownLabel("XFEMTestApp");
 
-XFEMTestApp::XFEMTestApp(InputParameters parameters) : MooseApp(parameters)
+XFEMTestApp::XFEMTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   XFEMTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -47,23 +47,6 @@ XFEMTestApp::registerApps()
 {
   XFEMApp::registerApps();
   registerApp(XFEMTestApp);
-}
-
-void
-XFEMTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"XFEMTestApp"});
-}
-
-void
-XFEMTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"XFEMTestApp"});
-}
-
-void
-XFEMTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

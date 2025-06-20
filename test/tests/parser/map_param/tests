@@ -11,7 +11,7 @@
     type = RunException
     input = test.i
     requirement = 'The system shall report an error if a user supplies an odd number of entries, implying an unbalanced key-value set, to a map parameter.'
-    expect_err = 'There must be an even number or else you will end up with a key without a value'
+    expect_err = "test.i:47.5: odd number of entries in string vector for map parameter 'Kernels/odd_entries/coupled_var_multipliers'; there must be an even number or else you will end up with a key without a value"
     cli_args = "Kernels/inactive='map bad_value'"
   []
   [bad_value]

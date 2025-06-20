@@ -22,7 +22,7 @@ RichardsTestApp::validParams()
 
 registerKnownLabel("RichardsTestApp");
 
-RichardsTestApp::RichardsTestApp(InputParameters parameters) : MooseApp(parameters)
+RichardsTestApp::RichardsTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   mooseDeprecated("Please use the PorousFlow module instead.  If Richards contains functionality "
                   "not included in PorousFlow, please contact the moose-users google group");
@@ -48,23 +48,6 @@ RichardsTestApp::registerApps()
 {
   RichardsApp::registerApps();
   registerApp(RichardsTestApp);
-}
-
-void
-RichardsTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"RichardsTestApp"});
-}
-
-void
-RichardsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"RichardsTestApp"});
-}
-
-void
-RichardsTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

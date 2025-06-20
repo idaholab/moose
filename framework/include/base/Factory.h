@@ -312,9 +312,12 @@ Factory::copyConstruct(const T & object)
   static_assert(std::is_base_of_v<MooseObject, T>, "Not a MooseObject");
 
   const auto type = static_cast<const MooseBase &>(object).type();
-  const auto base = object.parameters().getBase();
-  if (!base || (*base != "MooseMesh" && *base != "RelationshipManager"))
-    mooseError("Copy construction of ", type, " objects is not supported.");
+  if (object.hasBase())
+  {
+    const auto & base = object.getBase();
+    if (base != "MooseMesh" && base != "RelationshipManager")
+      mooseError("Copy construction of ", type, " objects is not supported.");
+  }
 
   _currently_constructing.push_back(&object.parameters());
   auto cloned_object = std::make_unique<T>(object);

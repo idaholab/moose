@@ -24,7 +24,7 @@ SolidPropertiesApp::validParams()
 
 registerKnownLabel("SolidPropertiesApp");
 
-SolidPropertiesApp::SolidPropertiesApp(InputParameters parameters) : MooseApp(parameters)
+SolidPropertiesApp::SolidPropertiesApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   SolidPropertiesApp::registerAll(_factory, _action_factory, _syntax);
 }
@@ -37,9 +37,13 @@ SolidPropertiesApp::registerApps()
   HeatTransferApp::registerApps();
 }
 
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
+void
+SolidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
+  HeatTransferApp::registerAll(f, af, syntax);
+  Registry::registerObjectsTo(f, {"SolidPropertiesApp"});
+  Registry::registerActionsTo(af, {"SolidPropertiesApp"});
+
   registerSyntaxTask(
       "AddSolidPropertiesDeprecatedAction", "Modules/SolidProperties/*", "add_solid_properties");
   registerSyntaxTask("AddSolidPropertiesAction", "SolidProperties/*", "add_solid_properties");
@@ -47,36 +51,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   syntax.addDependency("add_solid_properties", "add_function");
   syntax.addDependency("add_user_object", "add_solid_properties");
-}
-
-void
-SolidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
-{
-  HeatTransferApp::registerAll(f, af, s);
-  Registry::registerObjectsTo(f, {"SolidPropertiesApp"});
-  Registry::registerActionsTo(af, {"SolidPropertiesApp"});
-  associateSyntaxInner(s, af);
-}
-
-void
-SolidPropertiesApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"SolidPropertiesApp"});
-}
-
-void
-SolidPropertiesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"SolidPropertiesApp"});
-  associateSyntaxInner(syntax, action_factory);
-}
-
-void
-SolidPropertiesApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("use registerAll instead of registerExecFlags");
 }
 
 extern "C" void

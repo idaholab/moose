@@ -14,7 +14,7 @@
 class ThermalHydraulicsTestApp : public ThermalHydraulicsApp
 {
 public:
-  ThermalHydraulicsTestApp(InputParameters parameters);
+  ThermalHydraulicsTestApp(const InputParameters & parameters);
   virtual ~ThermalHydraulicsTestApp();
 
 public:

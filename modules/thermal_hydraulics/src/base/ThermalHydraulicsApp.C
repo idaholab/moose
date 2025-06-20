@@ -58,30 +58,13 @@ ThermalHydraulicsApp::validParams()
 
 registerKnownLabel("ThermalHydraulicsApp");
 
-ThermalHydraulicsApp::ThermalHydraulicsApp(InputParameters parameters) : MooseApp(parameters)
+ThermalHydraulicsApp::ThermalHydraulicsApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   ThermalHydraulicsApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 ThermalHydraulicsApp::~ThermalHydraulicsApp() {}
-
-void
-ThermalHydraulicsApp::registerObjects(Factory & /*factory*/)
-{
-  mooseError("registerObjects() is deprecated and not supported in THM");
-}
-
-void
-ThermalHydraulicsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
-  mooseError("associateSyntax() is deprecated and not supported in THM");
-}
-
-void
-ThermalHydraulicsApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseError("registerExecFlags() is deprecated and not supported in THM");
-}
 
 void
 ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)

@@ -121,6 +121,11 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _use_dual(getParam<bool>("use_dual")),
     _is_array(getParam<bool>("array"))
 {
+  if (!_is_array && _count != 1)
+    mooseError(
+        "Component size of normal variable (_count) must be one. This is not the case for '" +
+        name() + "' (_count equals " + std::to_string(_count) + ").");
+
   scalingFactor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
                                         : std::vector<Real>(_count, 1.));
   if (getParam<bool>("fv") && getParam<bool>("eigen"))
@@ -131,22 +136,6 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     paramError("order", "finite volume (fv=true) variables currently support CONST order only");
   if (_count > 1)
     mooseAssert(_is_array, "Must be true with component > 1");
-  if (_is_array)
-  {
-    auto name0 = _sys.system().variable(_var_num).name();
-    std::size_t found = name0.find_last_of("_");
-    if (found == std::string::npos)
-      mooseError("Error creating ArrayMooseVariable name with base name ", name0);
-    _var_name = name0.substr(0, found);
-  }
-  else
-  {
-    _var_name = _sys.system().variable(_var_num).name();
-    if (_count != 1)
-      mooseError(
-          "Component size of normal variable (_count) must be one. This is not the case for '" +
-          _var_name + "' (_count equals " + std::to_string(_count) + ").");
-  }
 
   if (!blockRestricted())
     _is_lower_d = false;
@@ -154,8 +143,9 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
   {
     const auto & blk_ids = blockIDs();
     if (blk_ids.empty())
-      mooseError("Every variable should have at least one subdomain. For '" + _var_name +
-                 "' no subdomain is defined.");
+      paramError("block",
+                 "Every variable should have at least one subdomain. For '" + name() +
+                     "' no subdomain is defined.");
 
     _is_lower_d = _mesh.isLowerD(*blk_ids.begin());
 #ifdef DEBUG
@@ -163,7 +153,7 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
       if (_is_lower_d != _mesh.isLowerD(*it))
         mooseError("A user should not specify a mix of lower-dimensional and higher-dimensional "
                    "blocks for variable '" +
-                   _var_name + "'. This variable is " + (_is_lower_d ? "" : "not ") +
+                   name() + "'. This variable is " + (_is_lower_d ? "" : "not ") +
                    "recognised as lower-dimensional, but is also defined for the " +
                    (_is_lower_d ? "higher" : "lower") + "-dimensional block '" +
                    _mesh.getSubdomainName(*it) + "' (block-id " + std::to_string(*it) + ").");

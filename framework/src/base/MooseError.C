@@ -50,10 +50,16 @@ mooseMsgFmt(const std::string & msg, const std::string & color)
 }
 
 [[noreturn]] void
-mooseErrorRaw(std::string msg, const std::string prefix)
+mooseErrorRaw(std::string msg,
+              const std::string & prefix /* = "" */,
+              const hit::Node * node /* = nullptr */)
 {
   if (Moose::_throw_on_error)
-    throw std::runtime_error(msg);
+    throw MooseRuntimeError(msg, node);
+
+  // If we have a node available, add in the hit context (file location)
+  if (node)
+    msg = Moose::hitMessagePrefix(*node) + msg;
 
   msg = mooseMsgFmt(msg, "*** ERROR ***", COLOR_RED);
 

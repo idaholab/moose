@@ -46,9 +46,15 @@ PorousFlowApp::registerApps()
   ChemicalReactionsApp::registerApps();
 }
 
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
+void
+PorousFlowApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
+  SolidMechanicsApp::registerAll(f, af, syntax);
+  FluidPropertiesApp::registerAll(f, af, syntax);
+  ChemicalReactionsApp::registerAll(f, af, syntax);
+  Registry::registerObjectsTo(f, {"PorousFlowApp"});
+  Registry::registerActionsTo(af, {"PorousFlowApp"});
+
   registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_user_object");
   registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_kernel");
   registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_material");
@@ -82,56 +88,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   addTaskDependency("add_master_action_material", "add_joiners");
 
   registerSyntaxTask("PorousFlowAddMaterialJoiner", "Materials", "add_joiners");
-}
-
-void
-PorousFlowApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
-{
-  SolidMechanicsApp::registerAll(f, af, s);
-  FluidPropertiesApp::registerAll(f, af, s);
-  ChemicalReactionsApp::registerAll(f, af, s);
-  Registry::registerObjectsTo(f, {"PorousFlowApp"});
-  Registry::registerActionsTo(af, {"PorousFlowApp"});
-  associateSyntaxInner(s, af);
-}
-
-void
-PorousFlowApp::registerObjectDepends(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjectsDepends");
-  SolidMechanicsApp::registerObjects(factory);
-  FluidPropertiesApp::registerObjects(factory);
-  ChemicalReactionsApp::registerObjects(factory);
-}
-
-void
-PorousFlowApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"PorousFlowApp"});
-}
-
-void
-PorousFlowApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntaxDepends");
-  SolidMechanicsApp::associateSyntax(syntax, action_factory);
-  FluidPropertiesApp::associateSyntax(syntax, action_factory);
-  ChemicalReactionsApp::associateSyntax(syntax, action_factory);
-}
-
-void
-PorousFlowApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"PorousFlowApp"});
-  associateSyntaxInner(syntax, action_factory);
-}
-
-void
-PorousFlowApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void
