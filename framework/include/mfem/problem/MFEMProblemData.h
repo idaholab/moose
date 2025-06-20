@@ -44,11 +44,6 @@ public:
   MPI_Comm comm;
   int myid;
   int num_procs;
-
-  /**
-   * Update the FESpaces and everything derived from them. Used after changes to mesh.
-   */
-  void updateFESpaces();
 };
 
 #endif
