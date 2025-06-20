@@ -16,6 +16,8 @@ MFEMBlockRestrictable::validParams()
 {
   // Create InputParameters object that will be appended to the parameters for the inheriting object
   InputParameters params = emptyInputParameters();
+  // Create user-facing 'boundary' input for restricting inheriting object to boundaries
+  // MFEM uses the boundary -1 to signify every sideset
   params.addParam<std::vector<SubdomainName>>(
       "block",
       {},
