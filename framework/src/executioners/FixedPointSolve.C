@@ -16,24 +16,17 @@
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
 #include "EigenExecutionerBase.h"
+#include "Convergence.h"
 
 InputParameters
-FixedPointSolve::validParams()
+FixedPointSolve::fixedPointDefaultConvergenceParams()
 {
   InputParameters params = emptyInputParameters();
 
-  params.addParam<unsigned int>(
-      "fixed_point_min_its", 1, "Specifies the minimum number of fixed point iterations.");
-  params.addParam<unsigned int>(
-      "fixed_point_max_its", 1, "Specifies the maximum number of fixed point iterations.");
   params.addParam<bool>(
       "accept_on_max_fixed_point_iteration",
       false,
       "True to treat reaching the maximum number of fixed point iterations as converged.");
-  params.addParam<bool>("disable_fixed_point_residual_norm_check",
-                        false,
-                        "Disable the residual norm evaluation thus the three parameters "
-                        "fixed_point_rel_tol, fixed_point_abs_tol and fixed_point_force_norms.");
   params.addRangeCheckedParam<Real>("fixed_point_rel_tol",
                                     1e-8,
                                     "fixed_point_rel_tol>0",
@@ -48,15 +41,6 @@ FixedPointSolve::validParams()
                                     "during fixed point iterations. This check is "
                                     "performed based on the main app's nonlinear "
                                     "residual.");
-  params.addParam<bool>(
-      "fixed_point_force_norms",
-      false,
-      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
-      "existence of active MultiApps with those execute_on flags, default: false.");
-
-  // Parameters for using a custom postprocessor for convergence checks
-  params.addParam<PostprocessorName>("custom_pp",
-                                     "Postprocessor for custom fixed point convergence check.");
   params.addRangeCheckedParam<Real>("custom_rel_tol",
                                     1e-8,
                                     "custom_rel_tol>0",
@@ -71,12 +55,49 @@ FixedPointSolve::validParams()
                                     "during fixed point iterations. This check is "
                                     "performed based on postprocessor defined by "
                                     "the custom_pp residual.");
+
+  params.addParamNamesToGroup(
+      "accept_on_max_fixed_point_iteration fixed_point_rel_tol fixed_point_abs_tol "
+      "custom_abs_tol custom_rel_tol",
+      "Fixed point iterations");
+
+  return params;
+}
+
+InputParameters
+FixedPointSolve::validParams()
+{
+  InputParameters params = emptyInputParameters();
+  params += FixedPointSolve::fixedPointDefaultConvergenceParams();
+
+  params.addParam<unsigned int>(
+      "fixed_point_min_its", 1, "Specifies the minimum number of fixed point iterations.");
+  params.addParam<unsigned int>(
+      "fixed_point_max_its", 1, "Specifies the maximum number of fixed point iterations.");
+  params.addParam<bool>("disable_fixed_point_residual_norm_check",
+                        false,
+                        "Disable the residual norm evaluation thus the three parameters "
+                        "fixed_point_rel_tol, fixed_point_abs_tol and fixed_point_force_norms.");
+  params.addParam<bool>(
+      "fixed_point_force_norms",
+      false,
+      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
+      "existence of active MultiApps with those execute_on flags, default: false.");
+
+  params.addParam<PostprocessorName>("custom_pp",
+                                     "Postprocessor for custom fixed point convergence check.");
   params.addParam<bool>("direct_pp_value",
                         false,
                         "True to use direct postprocessor value "
                         "(scaled by value on first iteration). "
                         "False (default) to use difference in postprocessor "
                         "value between fixed point iterations.");
+
+  params.addParam<ConvergenceName>(
+      "fixed_point_convergence",
+      "Name of the Convergence object to use to assess convergence of the "
+      "fixed point solve. If not provided, a default Convergence "
+      "will be constructed internally from the executioner parameters.");
 
   // Parameters for relaxing the fixed point process
   params.addRangeCheckedParam<Real>("relaxation_factor",
@@ -103,11 +124,9 @@ FixedPointSolve::validParams()
                         "their solve converges, for transient executioners only.");
 
   params.addParamNamesToGroup(
-      "fixed_point_min_its fixed_point_max_its accept_on_max_fixed_point_iteration "
-      "disable_fixed_point_residual_norm_check fixed_point_rel_tol fixed_point_abs_tol "
-      "fixed_point_force_norms custom_pp fixed_point_rel_tol fixed_point_abs_tol direct_pp_value "
-      "relaxation_factor transformed_variables transformed_postprocessors auto_advance "
-      "custom_abs_tol custom_rel_tol",
+      "fixed_point_min_its fixed_point_max_its disable_fixed_point_residual_norm_check "
+      "fixed_point_force_norms custom_pp direct_pp_value fixed_point_convergence "
+      "relaxation_factor transformed_variables transformed_postprocessors auto_advance",
       "Fixed point iterations");
 
   params.addParam<unsigned int>(
@@ -129,10 +148,7 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _min_fixed_point_its(getParam<unsigned int>("fixed_point_min_its")),
     _max_fixed_point_its(getParam<unsigned int>("fixed_point_max_its")),
     _has_fixed_point_its(_max_fixed_point_its > 1),
-    _accept_max_it(getParam<bool>("accept_on_max_fixed_point_iteration")),
     _has_fixed_point_norm(!getParam<bool>("disable_fixed_point_residual_norm_check")),
-    _fixed_point_rel_tol(getParam<Real>("fixed_point_rel_tol")),
-    _fixed_point_abs_tol(getParam<Real>("fixed_point_abs_tol")),
     _fixed_point_force_norms(getParam<bool>("fixed_point_force_norms")),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
@@ -143,8 +159,6 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _fixed_point_status(MooseFixedPointConvergenceReason::UNSOLVED),
     _fixed_point_custom_pp(isParamValid("custom_pp") ? &getPostprocessorValue("custom_pp")
                                                      : nullptr),
-    _custom_rel_tol(getParam<Real>("custom_rel_tol")),
-    _custom_abs_tol(getParam<Real>("custom_abs_tol")),
     _pp_old(0.0),
     _pp_new(std::numeric_limits<Real>::max()),
     _pp_scaling(1),
@@ -189,6 +203,11 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     paramWarning("disable_fixed_point_residual_norm_check",
                  "fixed_point_force_norms will be ignored because the fixed point residual check "
                  "is disabled.");
+
+  if (isParamValid("fixed_point_convergence"))
+    _problem.setFixedPointConvergenceName(getParam<ConvergenceName>("fixed_point_convergence"));
+  else
+    _problem.setNeedToAddDefaultFixedPointConvergence();
 }
 
 bool
@@ -512,49 +531,23 @@ FixedPointSolve::computeCustomConvergencePostprocessor()
 bool
 FixedPointSolve::examineFixedPointConvergence(bool & converged)
 {
-  if (_fixed_point_it + 2 > _min_fixed_point_its)
+  auto & convergence = _problem.getConvergence(_problem.getFixedPointConvergenceName());
+  const auto status = convergence.checkConvergence(_fixed_point_it);
+  switch (status)
   {
-    Real max_norm = std::max(_fixed_point_timestep_begin_norm[_fixed_point_it],
-                             _fixed_point_timestep_end_norm[_fixed_point_it]);
-
-    Real max_relative_drop = max_norm / _fixed_point_initial_norm;
-
-    if (_has_fixed_point_norm && max_norm < _fixed_point_abs_tol)
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_ABS;
-      return true;
-    }
-    if (_has_fixed_point_norm && max_relative_drop < _fixed_point_rel_tol)
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_RELATIVE;
-      return true;
-    }
-    if (std::abs(_pp_new - _pp_old) < _custom_abs_tol)
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
-      return true;
-    }
-    if (std::abs((_pp_new - _pp_old) / _pp_scaling) < _custom_rel_tol)
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
-      return true;
-    }
-  }
-  if (_fixed_point_it + 1 == _max_fixed_point_its)
-  {
-    if (_accept_max_it)
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::REACH_MAX_ITS;
+    case Convergence::MooseConvergenceStatus::CONVERGED:
       converged = true;
-    }
-    else
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_MAX_ITS;
+      return true;
+    case Convergence::MooseConvergenceStatus::DIVERGED:
       converged = false;
-    }
-    return true;
+      return true;
+    case Convergence::MooseConvergenceStatus::ITERATING:
+      converged = false;
+      return false;
+    default:
+      mooseAssert(false, "Impossible");
+      return false;
   }
-  return false;
 }
 
 void

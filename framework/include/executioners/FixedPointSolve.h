@@ -21,6 +21,7 @@ public:
 
   virtual ~FixedPointSolve() = default;
 
+  static InputParameters fixedPointDefaultConvergenceParams();
   static InputParameters validParams();
 
   /**
@@ -76,11 +77,40 @@ public:
   /// This function checks the _xfem_repeat_step flag set by solve.
   bool XFEMRepeatStep() const { return _xfem_repeat_step; }
 
+  /// Set fixed point status
+  void setFixedPointStatus(MooseFixedPointConvergenceReason status)
+  {
+    _fixed_point_status = status;
+  }
+
   /// Clear fixed point status
   void clearFixedPointStatus() { _fixed_point_status = MooseFixedPointConvergenceReason::UNSOLVED; }
 
   /// Whether or not this has fixed point iterations
   bool hasFixedPointIteration() { return _has_fixed_point_its; }
+
+  /// Whether or not the fixed point residual norm should be checked
+  bool checkFixedPointResidualNorm() const { return _has_fixed_point_norm; }
+
+  /// Get the current iteration's TIMESTEP_BEGIN residual norm
+  Real fixedPointTimestepBeginNorm(unsigned int iter) const
+  {
+    return _fixed_point_timestep_begin_norm[iter];
+  }
+  /// Get the current iteration's TIMESTEP_END residual norm
+  Real fixedPointTimestepEndNorm(unsigned int iter) const
+  {
+    return _fixed_point_timestep_end_norm[iter];
+  }
+  /// Get the initial residual norm
+  Real fixedPointInitialNorm() const { return _fixed_point_initial_norm; }
+
+  /// Get the new value of the custom post-processor
+  Real getCustomPPNewValue() const { return _pp_new; }
+  /// Get the old value of the custom post-processor
+  Real getCustomPPOldValue() const { return _pp_old; }
+  /// Get the scale value of the custom post-processor
+  Real getCustomPPScaleValue() const { return _pp_scaling; }
 
   /// Set relaxation factor for the current solve as a SubApp
   void setMultiAppRelaxationFactor(Real factor) { _secondary_relaxation_factor = factor; }
@@ -199,14 +229,8 @@ protected:
   unsigned int _max_fixed_point_its;
   /// Whether or not we activate fixed point iteration
   const bool _has_fixed_point_its;
-  /// Whether or not to treat reaching maximum number of fixed point iteration as converged
-  const bool _accept_max_it;
   /// Whether or not to use residual norm to check the fixed point convergence
   const bool _has_fixed_point_norm;
-  /// Relative tolerance on residual norm
-  const Real _fixed_point_rel_tol;
-  /// Absolute tolerance on residual norm
-  const Real _fixed_point_abs_tol;
   /// Whether or not we force evaluation of residual norms even without multiapps
   const bool _fixed_point_force_norms;
 
@@ -245,10 +269,6 @@ protected:
 private:
   /// Postprocessor value for user-defined fixed point convergence check
   const PostprocessorValue * const _fixed_point_custom_pp;
-  /// Relative tolerance on postprocessor value
-  const Real _custom_rel_tol;
-  /// Absolute tolerance on postprocessor value
-  const Real _custom_abs_tol;
   /// Old value of the custom convergence check postprocessor
   Real _pp_old;
   /// Current value of the custom convergence check postprocessor
