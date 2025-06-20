@@ -38,6 +38,30 @@
       detail = "be able to utilize the resulting mesh in a simulation."
     []
   []
+  [stitch_block_names]
+    type = 'Exodiff'
+    design = 'meshgenerators/StitchedMeshGenerator.md'
+    issues = '#30801'
+    input = 'stitch_block_names.i'
+    cli_args = '--mesh-only'
+    exodiff = 'stitch_block_names_in.e'
+    exodiff_opts = '-match_by_name'
+    recover = false
+
+    requirement = "The system shall be able to combine subdomain names when stitching meshes"
+  []
+  [dont_stitch_block_names]
+    type = 'Exodiff'
+    design = 'meshgenerators/StitchedMeshGenerator.md'
+    issues = '#30801'
+    input = 'stitch_block_names.i'
+    cli_args = '--mesh-only dont_stitch_block_names_in.e Mesh/stitch/subdomain_remapping=false'
+    exodiff = 'dont_stitch_block_names_in.e'
+    exodiff_opts = '-match_by_name'
+    recover = false
+
+    requirement = "The system shall retain backwards compatibility with older stitching behavior"
+  []
   [samename-warning]
     type = RunException
     design = 'meshgenerators/StitchedMeshGenerator.md'
