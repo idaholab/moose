@@ -19,7 +19,8 @@
     input = 'array_variable_size_one_test.i'
     cli_args = 'Variables/u/components=2 Variables/u/array=false'
     requirement = 'The system shall report a reasonable error when defining a variable with multiple components not as an array variable.'
-    expect_err = "'array' is set to false."
+    expect_err = "Variables/u/array: Must be set to true for variable 'u' because 'components' > 1 (is an array variable)"
+    match_literal = true
   []
   [action]
     type = 'Exodiff'
@@ -31,20 +32,22 @@
     type = 'RunException'
     input = 'array_variable_size_one_test.i'
     cli_args = 'Variables/u/array=false Variables/u/array_var_component_names=name'
-    expect_err = "Variable 'u' is a regular variable. 'array_var_component_names' should not be set."
+    expect_err = "Variables/u/array_var_component_names: Should not be set because this variable (u) is a non-array variable"
+    match_literal = true
     requirement = 'The system shall error when custom array variable naming has been specified for a normal variable.'
   []
   [array_naming_incorrect_length_error]
     type = 'RunException'
     input = 'array_variable_test.i'
     cli_args = 'Variables/uu/array_var_component_names=name'
-    expect_err = "For variable uu, parameter 'array_var_component_names' has 1 name\(s\), but there are 2 array variable component\(s\)."
+    expect_err = "Variables/uu/array_var_component_names: Must be the same size as 'components' (size 2) for array variable 'uu'"
+    match_literal = true
     requirement = 'The system shall error when custom array variable naming does not match the number or array components.'
   []
   [array_custom_naming]
     type = 'Exodiff'
     input = 'array_variable_custom_name.i'
     exodiff = 'array_variable_custom_name_out.e'
-    requirement = 'The system shall allow custom naming conventions for array variable components.'    
+    requirement = 'The system shall allow custom naming conventions for array variable components.'
   []
 []
