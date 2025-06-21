@@ -212,14 +212,15 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   InputParameters app_params = _moose_app.parameters();
   app_params.set<std::shared_ptr<Parser>>("_parser") = parser;
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
-  const std::string name = "_moose_server_" + std::to_string(_check_state.size());
 
   // Try to instantiate the application
   std::unique_ptr<MooseApp> app = nullptr;
-  const auto do_build_app = [this, &name, &app_params, &app]()
+  const auto do_build_app = [this, &app_params, &app]()
   {
-    app = AppFactory::instance().create(
-        _moose_app.type(), name, app_params, _moose_app.getCommunicator()->get());
+    app = AppFactory::instance().create(_moose_app.type(),
+                                        AppFactory::main_app_name,
+                                        app_params,
+                                        _moose_app.getCommunicator()->get());
   };
   if (!try_catch(do_build_app))
   {
