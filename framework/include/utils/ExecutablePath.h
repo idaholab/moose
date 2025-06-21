@@ -15,6 +15,14 @@ namespace Moose
 {
 
 /**
+ * This function returns the running executable.
+ * There is not a portable way to do this function implements
+ * this function for Mac OS X and Linux boxes containing a
+ * normal /proc tree
+ */
+std::string getExec();
+
+/**
  * This function returns the PATH of the running executable.
  * There is not a portable way to do this function implements
  * this function for Mac OS X and Linux boxes containing a
