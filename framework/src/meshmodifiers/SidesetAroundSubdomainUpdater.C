@@ -212,5 +212,6 @@ SidesetAroundSubdomainUpdater::finalize()
     sync(_displaced_problem->mesh());
 
   // Reinit equation systems
-  _fe_problem.meshChanged();
+  _fe_problem.meshChanged(
+      /*intermediate_change=*/false, /*contract_mesh=*/false, /*clean_refinement_flags=*/false);
 }

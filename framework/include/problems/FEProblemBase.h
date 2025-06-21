@@ -1724,8 +1724,13 @@ public:
 
   /**
    * Update data after a mesh change.
+   * Iff intermediate_change is true, only perform updates as
+   * necessary to prepare for another mesh change
+   * immediately-subsequent. If \p changed_throug_amr then we will
+   * contract the mesh and clean refinement flags
    */
-  virtual void meshChanged() override;
+  virtual void
+  meshChanged(bool intermediate_change, bool contract_mesh, bool clean_refinement_flags);
 
   /**
    * Register an object that derives from MeshChangedInterface
@@ -2403,6 +2408,11 @@ public:
   const std::vector<SolverSystemName> & getSolverSystemNames() const { return _solver_sys_names; }
 
 protected:
+  /**
+   * Deprecated. Users should switch to overriding the meshChanged which takes arguments
+   */
+  virtual void meshChanged() {}
+
   /// Create extra tagged vectors and matrices
   void createTagVectors();
 
@@ -2620,15 +2630,6 @@ protected:
 
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
-
-  /**
-   * Helper method to update some or all data after a mesh change.
-   *
-   * Iff intermediate_change is true, only perform updates as
-   * necessary to prepare for another mesh change
-   * immediately-subsequent.
-   */
-  void meshChangedHelper(bool intermediate_change = false);
 
   /// Helper to check for duplicate variable names across systems or within a single system
   bool duplicateVariableCheck(const std::string & var_name,

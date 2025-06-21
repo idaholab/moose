@@ -207,7 +207,4 @@ private:
 
   /// Flag to output HDF5 format (when available) in Exodus
   bool _write_hdf5;
-
-  /// whether the mesh is contiguously numbered (exodus output will force that)
-  bool _mesh_contiguous_numbering;
 };

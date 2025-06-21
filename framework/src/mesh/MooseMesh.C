@@ -4327,8 +4327,6 @@ MooseMesh::getPRefinementMapHelper(
     const Elem & elem,
     const std::map<std::pair<ElemType, unsigned int>, std::vector<QpMap>> & map) const
 {
-  mooseAssert(elem.active() && elem.p_refinement_flag() == Elem::JUST_REFINED,
-              "These are the conditions that should be met for requesting a refinement map");
   // We are actually seeking the map stored with the p_level - 1 key, e.g. the refinement map that
   // maps from the previous p_level to this element's p_level
   return libmesh_map_find(map,
