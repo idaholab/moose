@@ -115,7 +115,7 @@ public:
    * the MooseApp to get the copy of the parameters that it was actually
    * built with using this factory.
    */
-  const InputParameters & getAppParams(const std::string & name) const;
+  const InputParameters & getAppParams(const InputParameters & params) const;
 
   /**
    * Class that is used as a parameter to clearAppParams() that allows only
@@ -129,12 +129,11 @@ public:
   };
 
   /**
-   * Resets the stored parameters for the application named \p name
+   * Clears the stored parameters for the application \p app
    *
-   * This is needed upon destruction of MooseApp objects, which is done
-   * in the MultiApp system to reset an application.
+   * See getAppParams() for why this is needed.
    */
-  void clearAppParams(const std::string & name, const ClearAppParamsKey);
+  void clearAppParams(const MooseApp & app, const ClearAppParamsKey);
 
   /**
    * Returns a reference to the map from names to AppFactoryBuildInfo pointers
@@ -172,11 +171,27 @@ protected:
   AppFactoryBuildInfoMap _name_to_build_info;
 
 private:
-  // Private constructor for singleton pattern
+  /**
+   * Get the ID for the InputParameters associated with an application, used
+   * in storing them in _input_parameters.
+   *
+   * This is needed until app constructors do not copy construct parameters.
+   * See getAppParams() for more information.
+   *
+   * The parameters passed in here (from the app) could be copy-constructed
+   * parameters, but will contain a "_app_params_id" parameter that allows
+   * us to get the actual parameters (owned by this factory).
+   */
+  std::size_t getAppParamsID(const InputParameters & params) const;
+
+  /// Private constructor for singleton pattern
   AppFactory() {}
 
-  // Storage of input parameters used in applications (name -> params)
-  std::map<std::string, std::unique_ptr<InputParameters>> _input_parameters;
+  /// Storage of input parameters used in applications (ID (from getAppParamsID()) -> params)
+  std::map<std::size_t, std::unique_ptr<InputParameters>> _input_parameters;
+
+  /// The number of applications that have been created
+  std::size_t _app_creation_count = 0;
 };
 
 template <typename T>

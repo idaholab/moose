@@ -437,7 +437,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     // built by the factory. Because we have unique application names, this allows
     // us to reference (using _pars and MooseBase) the actual const parameters
     // that the AppFactory made for this application
-    MooseBase(*this, AppFactory::instance().getAppParams(parameters.getObjectName())),
+    MooseBase(*this, AppFactory::instance().getAppParams(parameters)),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
     _file_base_set_by_user(false),
     _output_position_set(false),
@@ -1122,7 +1122,7 @@ MooseApp::~MooseApp()
   // Remove this app's parameters from the AppFactory. This allows
   // for creating an app with this name again in the same execution,
   // which needs to be done when resetting applications in MultiApp
-  AppFactory::instance().clearAppParams(name(), {});
+  AppFactory::instance().clearAppParams(*this, {});
 
 #ifdef LIBMESH_HAVE_DLOPEN
   // Close any open dynamic libraries
