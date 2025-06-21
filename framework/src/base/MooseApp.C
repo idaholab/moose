@@ -446,11 +446,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     // actually a copy of the ones built by the factory. Because we have unique
     // application names, this allows us to reference (using _pars and MooseBase)
     // the actual const parameters that the AppFactory made for this application
-    MooseBase(AppFactory::instance().getAppParams(parameters).get<std::string>("_type"),
-              AppFactory::instance().getAppParams(parameters).get<std::string>("_app_name"),
-              *this,
-              AppFactory::instance().getAppParams(parameters)),
-    _pars(AppFactory::instance().getAppParams(parameters)),
+    MooseBase(*this, AppFactory::instance().getAppParams(parameters)),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
     _file_base_set_by_user(false),
     _output_position_set(false),
