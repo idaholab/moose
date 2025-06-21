@@ -12,7 +12,13 @@
 obtained from coefficients on one or more subdomains of the mesh, given by the [!param](/FunctorMaterials/MFEMGenericFunctorVectorMaterial/block) parameter
 if provided, or applied to the entire mesh if missing. The vector material properties are named
 according to members in the [!param](/FunctorMaterials/MFEMGenericFunctorVectorMaterial/prop_names) parameter, with respective coefficients used to get property
-values given by the members of [!param](/FunctorMaterials/MFEMGenericFunctorVectorMaterial/prop_values). The coefficients in [!param](/FunctorMaterials/MFEMGenericFunctorVectorMaterial/prop_names) must be vector-valued.
+values given by the members of
+[!param](/FunctorMaterials/MFEMGenericFunctorVectorMaterial/prop_values). The
+coefficients in
+[!param](/FunctorMaterials/MFEMGenericFunctorVectorMaterial/prop_names)
+must be vector-valued. Numeric constant vector values can also be
+specified, but must be enclosed in curly braces to mark the start and
+end of the vector, e.g. `{1. 0. 0.}`.
 
 !syntax parameters /FunctorMaterials/MFEMGenericFunctorVectorMaterial
 

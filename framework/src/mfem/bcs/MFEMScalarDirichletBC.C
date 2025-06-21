@@ -10,7 +10,6 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMScalarDirichletBC.h"
-#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMScalarDirichletBC);
 
@@ -19,15 +18,15 @@ MFEMScalarDirichletBC::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
   params.addClassDescription("Applies a Dirichlet condition to a scalar variable.");
-  params.addRequiredParam<Real>("value", "The scalar value to use in the Dirichlet condition");
+  params.addRequiredParam<MFEMScalarCoefficientName>(
+      "coefficient", "The coefficient setting the values on the essential boundary");
   return params;
 }
 
 MFEMScalarDirichletBC::MFEMScalarDirichletBC(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
-    _coef(getMFEMProblem().getCoefficients().declareScalar<mfem::ConstantCoefficient>(
-        "__ScalarDirichletBC_" + parameters.get<std::string>("_unique_name"),
-        getParam<Real>("value")))
+    _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
+    _coef(getScalarCoefficient(_coef_name))
 {
 }
 

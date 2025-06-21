@@ -32,33 +32,33 @@
     type = MFEMVectorDirichletBC
     variable = displacement
     boundary = '1'
-    values = '0.0 0.0 0.0'
+    vector_coefficient = '0.0 0.0 0.0'
   []
 []
 
 [FunctorMaterials]
   [Rigidium]
-    type = MFEMGenericConstantFunctorMaterial
+    type = MFEMGenericFunctorMaterial
     prop_names = 'lambda mu'
     prop_values = '50.0 50.0'
     block = 1
   []
   [Bendium]
-    type = MFEMGenericConstantFunctorMaterial
+    type = MFEMGenericFunctorMaterial
     prop_names = 'lambda mu'
     prop_values = '1.0 1.0'
     block = 2
   []
   [RigidiumWeightDensity]
-    type = MFEMGenericConstantVectorFunctorMaterial
+    type = MFEMGenericFunctorVectorMaterial
     prop_names = 'gravitational_force_density'
-    prop_values = '0.0 0.0 -1e-2'
+    prop_values = '{0.0 0.0 -1e-2}'
     block = 1
   []
   [BendiumWeightDensity]
-    type = MFEMGenericConstantVectorFunctorMaterial
+    type = MFEMGenericFunctorVectorMaterial
     prop_names = 'gravitational_force_density'
-    prop_values = '0.0 0.0 -5e-3'
+    prop_values = '{0.0 0.0 -5e-3}'
     block = 2
   []
 []

@@ -40,21 +40,13 @@
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = '1'
-    value = 1.0
+    coefficient = 1.0
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = '2'
-    value = 0.0
-  []
-[]
-
-[FunctorMaterials]
-  [Substance]
-    type = MFEMGenericConstantFunctorMaterial
-    prop_names = diffusivity
-    prop_values = 1.0
+    coefficient = 0.0
   []
 []
 
@@ -62,7 +54,7 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = submesh_potential
-    coefficient = diffusivity
+    coefficient = 1.0
   []
 []
 

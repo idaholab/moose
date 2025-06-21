@@ -28,21 +28,13 @@
     type = MFEMScalarDirichletBC
     variable = u
     boundary = 2
-    value = 1.0
+    coefficient = 1.0
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
     variable = u
     boundary = 4
-    value = 0.0
-  []
-[]
-
-[FunctorMaterials]
-  [Substance]
-    type = MFEMGenericConstantFunctorMaterial
-    prop_names = diffusivity
-    prop_values = 1.0
+    coefficient = 0.0
   []
 []
 
@@ -50,7 +42,7 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = u
-    coefficient = diffusivity
+    coefficient = 1.0
   []
 []
 
