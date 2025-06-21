@@ -7927,20 +7927,6 @@ FEProblemBase::adaptMesh()
 
       meshChanged(
           /*intermediate_change=*/true, /*contract_mesh=*/true, /*clean_refinement_flags=*/true);
-      // Once vectors are restricted, we can delete
-      // children of coarsened elements
-      _mesh.getMesh().contract();
-      // Finally clean refinement flags so that if someone tries to project vectors again without
-      // an intervening mesh refinement to clean flags they won't run into trouble
-      MeshRefinement refinement(_mesh.getMesh());
-      refinement.clean_refinement_flags();
-      if (_displaced_mesh)
-      {
-        _displaced_mesh->getMesh().contract();
-        MeshRefinement displaced_refinement(_displaced_mesh->getMesh());
-        displaced_refinement.clean_refinement_flags();
-      }
-
       _cycles_completed++;
     }
     else
