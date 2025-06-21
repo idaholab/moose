@@ -26,7 +26,7 @@ InputParameters
 Executioner::validParams()
 {
   InputParameters params = MooseObject::validParams();
-  params += PicardSolve::validParams();
+  params += FixedPointSolve::validParams();
   params += Reporter::validParams();
   params += ReporterInterface::validParams();
 

@@ -21,6 +21,7 @@ public:
 
   virtual ~FixedPointSolve() = default;
 
+  static InputParameters fixedPointDefaultConvergenceParams();
   static InputParameters validParams();
 
   /**
@@ -76,11 +77,33 @@ public:
   /// This function checks the _xfem_repeat_step flag set by solve.
   bool XFEMRepeatStep() const { return _xfem_repeat_step; }
 
+  /// Set fixed point status
+  void setFixedPointStatus(MooseFixedPointConvergenceReason status)
+  {
+    _fixed_point_status = status;
+  }
+
   /// Clear fixed point status
   void clearFixedPointStatus() { _fixed_point_status = MooseFixedPointConvergenceReason::UNSOLVED; }
 
   /// Whether or not this has fixed point iterations
   bool hasFixedPointIteration() { return _has_fixed_point_its; }
+
+  /// Whether or not the fixed point residual norm should be checked
+  bool checkFixedPointResidualNorm() const { return _has_fixed_point_norm; }
+
+  /// Get the current iteration's TIMESTEP_BEGIN residual norm
+  Real fixedPointTimestepBeginNorm(unsigned int iter) const
+  {
+    return _fixed_point_timestep_begin_norm[iter];
+  }
+  /// Get the current iteration's TIMESTEP_END residual norm
+  Real fixedPointTimestepEndNorm(unsigned int iter) const
+  {
+    return _fixed_point_timestep_end_norm[iter];
+  }
+  /// Get the initial residual norm
+  Real fixedPointInitialNorm() const { return _fixed_point_initial_norm; }
 
   /// Set relaxation factor for the current solve as a SubApp
   void setMultiAppRelaxationFactor(Real factor) { _secondary_relaxation_factor = factor; }
@@ -184,9 +207,6 @@ protected:
   /// Print the convergence history of the coupling, at every fixed point iteration
   virtual void printFixedPointConvergenceHistory() = 0;
 
-  /// Computes and prints the user-specified postprocessor assessing convergence
-  void computeCustomConvergencePostprocessor();
-
   /// Examine the various convergence metrics
   bool examineFixedPointConvergence(bool & converged);
 
@@ -198,21 +218,11 @@ protected:
   /// Maximum fixed point iterations
   unsigned int _max_fixed_point_its;
   /// Whether or not we activate fixed point iteration
-  bool _has_fixed_point_its; // TODO: make const once picard parameters are removed
-  /// Whether or not to treat reaching maximum number of fixed point iteration as converged
-  bool _accept_max_it; // TODO: make const once picard parameters are removed
+  const bool _has_fixed_point_its;
   /// Whether or not to use residual norm to check the fixed point convergence
-  bool _has_fixed_point_norm; // TODO: make const once picard parameters are removed
-  /// Relative tolerance on residual norm
-  Real _fixed_point_rel_tol; // TODO: make const once picard parameters are removed
-  /// Absolute tolerance on residual norm
-  Real _fixed_point_abs_tol; // TODO: make const once picard parameters are removed
+  const bool _has_fixed_point_norm;
   /// Whether or not we force evaluation of residual norms even without multiapps
-  bool _fixed_point_force_norms; // TODO: make const once picard parameters are removed
-
-  /// Postprocessor value for user-defined fixed point convergence check
-  const PostprocessorValue *
-      _fixed_point_custom_pp; // FIXME Make const and private once picard_custom_pp is gone
+  const bool _fixed_point_force_norms;
 
   /// Relaxation factor for fixed point Iteration
   const Real _relax_factor;
@@ -247,19 +257,6 @@ protected:
   MooseFixedPointConvergenceReason _fixed_point_status;
   ///@}
 private:
-  /// Relative tolerance on postprocessor value
-  const Real _custom_rel_tol;
-  /// Absolute tolerance on postprocessor value
-  const Real _custom_abs_tol;
-  /// Old value of the custom convergence check postprocessor
-  Real _pp_old;
-  /// Current value of the custom convergence check postprocessor
-  Real _pp_new;
-  /// Scaling of custom convergence check postprocessor (its initial value)
-  Real _pp_scaling;
-  /// Convergence history of the custom convergence check postprocessor
-  std::ostringstream _pp_history;
-
   /// Maximum number of xfem updates per step
   const unsigned int _max_xfem_update;
   /// Controls whether xfem should update the mesh at the beginning of the time step
