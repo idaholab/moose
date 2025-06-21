@@ -144,19 +144,14 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     std::size_t found = name0.find_last_of("_");
     if (found == std::string::npos)
       mooseError("Error creating ArrayMooseVariable name with base name ", name0);
-    _var_name = name0.substr(0, found);
+    const auto name_base = name0.substr(0, found);
     const auto & name_endings = getParam<std::vector<std::string>>("array_var_component_names");
     for (const auto & name : name_endings)
-      _array_var_component_names.push_back(_var_name + '_' + name);
+      _array_var_component_names.push_back(name_base + '_' + name);
   }
-  else
-  {
-    _var_name = _sys.system().variable(_var_num).name();
-    if (_count != 1)
-      mooseError(
-          "Component size of normal variable (_count) must be one. This is not the case for '" +
-          _var_name + "' (_count equals " + std::to_string(_count) + ").");
-  }
+  else if (_count != 1)
+    mooseError("Component size of normal variable (_count) must be one; equals " +
+               std::to_string(_count) + "");
 
   // check parameters set automatically by SystemBase related to array variables
   mooseAssert(
