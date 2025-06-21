@@ -179,7 +179,20 @@ protected:
   AppFactoryBuildInfoMap _name_to_build_info;
 
 private:
-  // Private constructor for singleton pattern
+  /**
+   * Get the ID for the InputParameters associated with an application, used
+   * in storing them in _input_parameters.
+   *
+   * This is needed until app constructors do not copy construct parameters.
+   * See getAppParams() for more information.
+   *
+   * The parameters passed in here (from the app) could be copy-constructed
+   * parameters, but will contain a "_app_params_id" parameter that allows
+   * us to get the actual parameters (owned by this factory).
+   */
+  std::size_t getAppParamsID(const InputParameters & params) const;
+
+  /// Private constructor for singleton pattern
   AppFactory() {}
 
   /**
