@@ -21,18 +21,6 @@
     type = NEML2TestModel
     ad = false
   []
-  [model_A_non_ad]
-    type = NEML2TestModel
-    p1 = 2
-    p2 = 3
-    ad = false
-  []
-  [model_B_non_ad]
-    type = NEML2TestModel
-    p1 = 4
-    p2 = 5
-    ad = false
-  []
 []
 
 [Schedulers]

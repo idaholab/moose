@@ -18,6 +18,12 @@
 /* Whether to use mfem-related code or not */
 #undef MFEM_ENABLED
 
+/* The directory where neml2 is installed */
+#undef NEML2_DIR
+
+/* Whether to use neml2-related code or not */
+#undef NEML2_ENABLED
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 

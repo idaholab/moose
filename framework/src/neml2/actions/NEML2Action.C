@@ -102,6 +102,16 @@ NEML2Action::NEML2Action(const InputParameters & params)
                "export_outputs should have the same length as export_output_targets");
   for (auto i : index_range(outputs))
     _export_output_targets[outputs[i]] = output_targets[i];
+
+#ifdef NEML2_ENABLED
+  // File name and CLI args
+  _fname = getParam<DataFileName>("input");
+  _cli_args = getParam<std::vector<std::string>>("cli_args");
+
+  // Load input file
+  auto factory = neml2::load_input(std::string(_fname), neml2::utils::join(_cli_args, " "));
+  _model = NEML2Utils::getModel(*factory, getParam<std::string>("model"));
+#endif
 }
 
 const NEML2ActionCommon &
@@ -129,22 +139,18 @@ NEML2Action::act()
     if (_app.parameters().have_parameter<bool>("parse_neml2_only"))
       if (!_app.parameters().get<bool>("parse_neml2_only"))
         return;
-    auto & model = NEML2Utils::getModel(getParam<std::string>("model"));
-    printSummary(model);
+    printSummary();
   }
 
   if (_current_task == "add_user_object")
   {
-    // Get the NEML2 model so that we can introspect variable tensor types
-    auto & model = NEML2Utils::getModel(getParam<std::string>("model"));
+    setupInputMappings(*_model);
+    setupParameterMappings(*_model);
+    setupOutputMappings(*_model);
+    setupDerivativeMappings(*_model);
+    setupParameterDerivativeMappings(*_model);
 
-    setupInputMappings(model);
-    setupParameterMappings(model);
-    setupOutputMappings(model);
-    setupDerivativeMappings(model);
-    setupParameterDerivativeMappings(model);
-
-    printSummary(model);
+    printSummary();
 
     // MOOSEToNEML2 input gatherers
     std::vector<UserObjectName> gatherers;
@@ -470,7 +476,7 @@ NEML2Action::setupParameterDerivativeMappings(const neml2::Model & model)
 }
 
 void
-NEML2Action::printSummary(const neml2::Model & model) const
+NEML2Action::printSummary() const
 {
   if (!_app.parameters().have_parameter<bool>("parse_neml2_only"))
     return;
@@ -487,13 +493,13 @@ NEML2Action::printSummary(const neml2::Model & model) const
            << std::endl;
 
   // Metadata
-  _console << "NEML2 input file location: " << getCommonAction().fname() << std::endl;
+  _console << "NEML2 input file location: " << fname() << std::endl;
   _console << "NEML2 action path:         " << parameters().blockFullpath() << std::endl;
 
   // List inputs, outputs, and parameters of the model
   _console << COLOR_CYAN << std::setw(width) << std::setfill('-') << std::left
            << "Material model structure " << std::setfill(' ') << COLOR_DEFAULT << std::endl;
-  _console << model;
+  _console << *_model;
 
   // List transfer between MOOSE and NEML2
   if (!_app.parameters().get<bool>("parse_neml2_only"))

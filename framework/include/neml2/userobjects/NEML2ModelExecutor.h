@@ -36,8 +36,9 @@ public:
   void finalize() override {}
 #else
   void initialize() override;
+  void meshChanged() override;
   void execute() override;
-  void finalize() override {}
+  void finalize() override;
 
   void initialSetup() override;
 
@@ -75,7 +76,7 @@ protected:
   virtual void applyPredictor();
 
   /// Perform the material update
-  virtual void solve();
+  virtual bool solve();
 
   /// Extract output derivatives with respect to input variables and model parameters
   virtual void extractOutputs();
@@ -122,5 +123,11 @@ protected:
   /// set of parameter derivatives that were retrieved (by other objects)
   mutable std::map<neml2::VariableName, std::map<std::string, neml2::Tensor>>
       _retrieved_parameter_derivatives;
+
+private:
+  /// Whether an error was encountered
+  bool _error;
+  /// Error message
+  std::string _error_message;
 #endif
 };

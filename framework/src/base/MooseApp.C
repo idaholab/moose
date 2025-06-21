@@ -786,8 +786,10 @@ MooseApp::registerCapabilities()
 #ifdef NEML2_ENABLED
     haveCapability("neml2", doc);
 #else
-    missingCapability(
-        "neml2", doc, "Install neml2 using the scripts/update_and_rebuild_neml2.sh script.");
+    missingCapability("neml2",
+                      doc,
+                      "Install neml2 using the scripts/update_and_rebuild_neml2.sh script, then "
+                      "configure moose with ./configure --with-neml2 --with-libtorch");
 #endif
   }
 

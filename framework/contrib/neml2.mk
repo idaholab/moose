@@ -1,55 +1,3 @@
-# Influential environment variables:
-#
-# NEML2_SRC_DIR: The path to the NEML2 source directory.
-# NEML2_DIR:     The path to the installed NEML2.
-#
-# If NEML2_DIR is set, no lookup is done for the installed NEML2, and the
-# specified directory is used.
-#
-# If NEML2_DIR is not set, by default we look for an installed NEML2 in
-# the NEML2 submodule directory. If NEML2_SRC_DIR is set, we instead look for
-# the installed NEML2 in NEML2_SRC_DIR/installed.
-
-# Try out best to find the installed NEML2
-ifeq ($(NEML2_DIR),)
-ifneq ($(NEML2_SRC_DIR),)
-NEML2_DIR := $(NEML2_SRC_DIR)/installed
-else
-NEML2_DIR := $(MOOSE_DIR)/framework/contrib/neml2/installed
-endif
-endif
-
-# If the NEML2 directory does not exist, disable NEML2
-ifeq ($(wildcard $(NEML2_DIR)/.),)
-ENABLE_NEML2 = false
-else
-ENABLE_NEML2 = true
-endif
-
-# If MOOSE is not configured with libtorch, warn the user that NEML2 is disabled
-ifeq ($(ENABLE_NEML2),true)
-ifneq ($(ENABLE_LIBTORCH),true)
-$(warning ******************************************************************************************)
-$(warning Found a NEML2 installation at $(NEML2_DIR), but libtorch is not enabled. Therefore disabling NEML2. )
-$(warning To enable NEML2, please configure MOOSE with libtorch. See more details at:)
-$(warning https://mooseframework.inl.gov/getting_started/installation/install_neml2.html)
-$(warning ******************************************************************************************)
-ENABLE_NEML2 = false
-endif
-endif
-
-################################################################################
-# Helper target to check if NEML2 is enabled
-################################################################################
-.PHONY: check_neml2
-check_neml2:
-ifeq ($(ENABLE_NEML2),true)
-	@echo "NEML2 is enabled"
-	@echo "NEML2 directory: $(NEML2_DIR)"
-else
-	@echo "NEML2 is disabled"
-endif
-
 ################################################################################
 # ENABLE_NEML2 = true
 ################################################################################
@@ -104,4 +52,19 @@ libmesh_CXXFLAGS  += $(neml2_CPPFLAGS)
 libmesh_INCLUDE   += $(neml2_INCLUDES)
 libmesh_LIBS      += $(neml2_LDFLAGS)
 
+endif
+
+################################################################################
+# Helper target to check if NEML2 is enabled and show relevant flags
+################################################################################
+.PHONY: check_neml2
+check_neml2:
+ifeq ($(ENABLE_NEML2),true)
+	@echo "NEML2 is enabled"
+	@echo "NEML2 directory: $(NEML2_DIR)"
+	@echo "NEML2 cppflags: $(neml2_CPPFLAGS)"
+	@echo "NEML2 includes: $(neml2_INCLUDES)"
+	@echo "NEML2 ldflags: $(neml2_LDFLAGS)"
+else
+	@echo "NEML2 is disabled"
 endif

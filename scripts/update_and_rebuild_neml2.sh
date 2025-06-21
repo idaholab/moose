@@ -257,7 +257,8 @@ if [[ $? -eq 0 ]]; then
   echo "****************************************************************************************************"
   echo "NEML2 has been successfully installed. "
   echo
-  echo "If you have not already done so, you may want to configure MOOSE with"
-  echo "  ./configure --with-libtorch=${LIBTORCH_DIR}"
+  echo "To configure MOOSE with NEML2, run the following commands:"
+  echo "  cd ${MOOSE_DIR}"
+  echo "  ./configure --with-neml2=${NEML2_DIR} --with-libtorch=${LIBTORCH_DIR}"
   echo "****************************************************************************************************"
 fi

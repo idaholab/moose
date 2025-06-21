@@ -265,6 +265,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     NEML2_DIR={{ NEML2_DIR }}
     NEML2_BUILD_SCRIPT=${ROOT_BUILD_DIR}/{{ NEML2_BUILD_SCRIPT }}
 
+    # Make ninja available for neml2 builds
+    dnf install -y ninja-build
+
     # Build and install neml2
     cd ${ROOT_BUILD_DIR}
     mkdir -p ${NEML2_DIR}/logs

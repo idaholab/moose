@@ -10,6 +10,15 @@ NEML2 extends the key philosophy of its predecessor, i.e., material models are f
 
 NEML2 depends on libtorch. See the [libtorch installation guide](getting_started/installation/install_libtorch.md optional=True) for instructions on obtaining libtorch.
 
+!alert! tip
+If libtorch was downloaded/installed to a non-default location, it is a good idea to set the environment variable `LIBTORCH_DIR` to make sure the same libtorch installation is consistently used throughout the build process.
+
+```bash
+export LIBTORCH=/path/to/libtorch
+```
+
+!alert-end!
+
 To install NEML2, simply run the following script
 
 ```bash
@@ -20,23 +29,22 @@ cd ~/projects/moose
 !alert tip
 The setup script uses sensible defaults that work out-of-the-box. The script is also extensively customizable. Use the `--help` argument to print out a detailed help message.
 
-After that, you can follow the [getting started](getting_started/installation/index_content.md optional=True) instructions to build MOOSE as usual.
-
-!alert! tip
-Before compiling MOOSE, it is a good idea to make sure NEML2 has been successfully enabled. To do so, run
+Once NEML2 is successfully installed, you can configure MOOSE to use NEML2 by
 
 ```bash
-make check_neml2
+./configure --with-neml2 --with-libtorch
 ```
 
-If NEML2 is enabled, the following message will be print out
+!alert! tip
+The `--with-neml2` configure option accepts an optional path argument, which could be useful if NEML2 was installed to a non-default location, i.e.
 
-```text
-NEML2 is enabled
-NEML2 directory: /path/to/neml2/directory
+```bash
+./configure --with-neml2=/path/to/neml2 --with-libtorch
 ```
 
 !alert-end!
+
+After that, you can follow the [getting started](getting_started/installation/index_content.md optional=True) instructions to build MOOSE as usual. The `make check_neml2` command can be used to check whether NEML2 is successfully enabled within MOOSE and inspect additional compile/link flags.
 
 ## Using NEML2 in a MOOSE simulation
 
