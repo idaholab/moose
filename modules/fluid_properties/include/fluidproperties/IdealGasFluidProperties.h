@@ -135,6 +135,10 @@ public:
   virtual Real c_from_p_T(Real p, Real T) const override;
   virtual ADReal c_from_p_T(const ADReal & p, const ADReal & T) const override;
   virtual void c_from_p_T(Real /*p*/, Real T, Real & c, Real & dc_dp, Real & dc_dT) const override;
+  virtual Real beta_from_p_T(Real p, Real T) const override;
+  virtual ADReal beta_from_p_T(const ADReal & p, const ADReal & T) const override;
+  virtual void
+  beta_from_p_T(Real p, Real T, Real & beta, Real & dbeta_dp, Real & dbeta_dT) const override;
 
   virtual Real pp_sat_from_p_T(Real /*p*/, Real /*T*/) const override;
 
