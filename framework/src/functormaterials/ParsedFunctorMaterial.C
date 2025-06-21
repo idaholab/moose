@@ -95,7 +95,7 @@ ParsedFunctorMaterialTempl<is_ad>::buildParsedFunction()
   setParserFeatureFlags(_parsed_function);
 
   // Add constants
-  _parsed_function->AddConstant("pi", std::acos(Real(-1)));
+  _parsed_function->AddConstant("pi", libMesh::pi);
   _parsed_function->AddConstant("e", std::exp(Real(1)));
 
   // Collect the symbols corresponding to the _func_params values
