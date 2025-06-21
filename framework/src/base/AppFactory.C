@@ -39,21 +39,23 @@ AppFactory::getValidParams(const std::string & name)
 }
 
 const InputParameters &
-AppFactory::getAppParams(const std::string & name) const
+AppFactory::getAppParams(const InputParameters & params) const
 {
-  const auto it = _input_parameters.find(name);
-  if (it == _input_parameters.end())
-    mooseError("AppFactory::getAppParams(): Parameters for app '", name, "' not found");
-  return *it->second;
+  const auto id = getAppParamsID(params);
+  if (const auto it = _input_parameters.find(id); it != _input_parameters.end())
+    return *it->second;
+  mooseError("AppFactory::getAppParams(): Parameters for application with ID ", id, " not found");
 }
 
 void
-AppFactory::clearAppParams(const std::string & name, const ClearAppParamsKey)
+AppFactory::clearAppParams(const MooseApp & app, const ClearAppParamsKey)
 {
-  const auto it = _input_parameters.find(name);
-  if (it == _input_parameters.end())
-    mooseError("AppFactory::clearAppParams(): Parameters for app '", name, "' not found");
-  _input_parameters.erase(it);
+  const auto id = getAppParamsID(app.parameters());
+  if (const auto it = _input_parameters.find(id); it != _input_parameters.end())
+    _input_parameters.erase(it);
+  else
+    mooseError(
+        "AppFactory::clearAppParams(): Parameters for application with ID ", id, " not found");
 }
 
 std::unique_ptr<MooseApp>
@@ -149,14 +151,19 @@ AppFactory::create(const std::string & app_type,
   mooseAssert(command_line->hasParsed(), "Command line has not parsed");
   command_line->populateCommandLineParams(parameters);
 
-  // Copy the parameters into a set of parameters that we own
-  auto [params_it, inserted] =
-      _input_parameters.emplace(name, std::make_unique<InputParameters>(parameters));
-  if (!inserted)
-    mooseError("Application with name '", name, "' has already been built");
-  auto & params = *params_it->second;
+  // Historically we decided to non-const copy construct all application parameters. In
+  // order to get around that while apps are fixed (by taking a const reference instead),
+  // we store the app params here and the MooseApp constructor will query the InputParameters
+  // owned by ths factory instead of the ones that are passed to it (likely a const ref to a
+  // copy of the derived app's parmeters)
+  parameters.addPrivateParam<std::size_t>("_app_params_id", _app_creation_count);
+  const auto it_inserted_pair =
+      _input_parameters.emplace(_app_creation_count, std::make_unique<InputParameters>(parameters));
+  mooseAssert(it_inserted_pair.second, "Already exists");
+  auto & params = *it_inserted_pair.first->second;
   params.finalize("");
 
+  _app_creation_count++;
   build_info->_app_creation_count++;
 
   return build_info->build(params);
@@ -171,4 +178,13 @@ AppFactory::createdAppCount(const std::string & app_type) const
     mooseError("AppFactory::createdAppCount(): '", app_type, "' is not a registered app");
 
   return it->second->_app_creation_count;
+}
+
+std::size_t
+AppFactory::getAppParamsID(const InputParameters & params) const
+{
+  if (!params.have_parameter<std::size_t>("_app_params_id"))
+    mooseError("AppFactory::getAppParamsID(): Invalid application parameters (missing "
+               "'_app_params_id')");
+  return params.get<std::size_t>("_app_params_id");
 }
