@@ -23,7 +23,7 @@
     neml2_derivatives = 'state/k_T forces/T'
     moose_derivatives = 'dk_T/dT'
 
-    export_outputs = 'k_T dk_T/dT'
+    export_outputs = 'k_T dK_T/dT'
     export_output_targets = 'exodus; exodus'
   []
 []
@@ -72,8 +72,11 @@
   type = Transient
   scheme = BDF2
   solve_type = NEWTON
+  automatic_scaling = true
   num_steps = 50
   dt = 0.1
+  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-10
 []
 
 [Outputs]
