@@ -101,47 +101,22 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   for (const auto & matprop : _ad_matprop_names)
     variables += (variables.empty() ? "" : ",") + matprop;
   if (isNodal() && (_matprop_names.size() || _ad_matprop_names.size()))
-    mooseWarning("Material properties cannot be retrieved in a nodal auxkernel. Use a different "
-                 "auxiliary variable family.");
+    mooseError("Material properties cannot be retrieved in a nodal auxkernel. Use a different "
+               "auxiliary variable family.");
 
   // positions and time
   if (_use_xyzt)
     for (auto & v : _xyzt)
       variables += (variables.empty() ? "" : ",") + v;
 
-  // base function object
+  // Create parsed function
   _func_F = std::make_shared<SymFunction>();
-
-  // set FParser internal feature flags
-  setParserFeatureFlags(_func_F);
-
-  // add the constant expressions
-  addFParserConstants(_func_F,
+  parsedFunctionSetup(_func_F,
+                      _function,
+                      variables,
                       getParam<std::vector<std::string>>("constant_names"),
-                      getParam<std::vector<std::string>>("constant_expressions"));
-
-  // parse function
-  if (_func_F->Parse(_function, variables) >= 0)
-    mooseError(
-        "Invalid function\n", _function, "\nin ParsedAux ", name(), ".\n", _func_F->ErrorMsg());
-
-  // optimize
-  if (!_disable_fpoptimizer)
-    _func_F->Optimize();
-
-  // just-in-time compile
-  if (_enable_jit)
-  {
-    // let rank 0 do the JIT compilation first
-    if (_communicator.rank() != 0)
-      _communicator.barrier();
-
-    _func_F->JITCompile();
-
-    // wait for ranks > 0 to catch up
-    if (_communicator.rank() == 0)
-      _communicator.barrier();
-  }
+                      getParam<std::vector<std::string>>("constant_expressions"),
+                      comm());
 
   // reserve storage for parameter passing buffer
   _func_params.resize(_nargs + _n_functors + _n_matprops + _n_ad_matprops + (_use_xyzt ? 4 : 0));

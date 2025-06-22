@@ -78,6 +78,8 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
     _pp[i] = &getPostprocessorValueByName(pp_names[i]);
   }
 
+  // Note: we do not use the FunctionParsedUtils::parsedFunctionSetup because we are building
+  // multiple expressions, and we can share the MPI barriers by keeping the code here.
   // base function object
   _func_F = std::make_shared<SymFunction>();
 

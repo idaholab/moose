@@ -102,33 +102,9 @@ ParsedDownSelectionPositions::ParsedDownSelectionPositions(const InputParameters
   for (auto & v : _xyzt)
     variables += (variables.empty() ? "" : ",") + v;
 
-  // base function object
+  // Create parsed function
   _func_F = std::make_shared<SymFunction>();
-
-  // set FParser internal feature flags
-  setParserFeatureFlags(_func_F);
-
-  // parse function
-  if (_func_F->Parse(_expression, variables) >= 0)
-    mooseError("Invalid function\n", _expression, "\nError:\n", _func_F->ErrorMsg());
-
-  // optimize
-  if (!_disable_fpoptimizer)
-    _func_F->Optimize();
-
-  // just-in-time compile
-  if (_enable_jit)
-  {
-    // let rank 0 do the JIT compilation first
-    if (_communicator.rank() != 0)
-      _communicator.barrier();
-
-    _func_F->JITCompile();
-
-    // wait for ranks > 0 to catch up
-    if (_communicator.rank() == 0)
-      _communicator.barrier();
-  }
+  parsedFunctionSetup(_func_F, _expression, variables, {}, {}, comm());
 
   // reserve storage for parameter passing buffer
   _func_params.resize(_n_functors + 4);

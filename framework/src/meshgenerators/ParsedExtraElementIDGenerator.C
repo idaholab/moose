@@ -53,36 +53,24 @@ ParsedExtraElementIDGenerator::ParsedExtraElementIDGenerator(const InputParamete
     _eeid_names(getParam<std::vector<ExtraElementIDName>>("extra_element_id_names")),
     _elem_id_name(getParam<std::string>("extra_elem_integer_name"))
 {
-  // base function object
-  _func_F = std::make_shared<SymFunction>();
-
-  // set FParser internal feature flags
-  setParserFeatureFlags(_func_F);
-
-  // add the constant expressions
+  // Form the vectors of constants names (symbols in the expression) and expression (values)
   auto c_names = getParam<std::vector<std::string>>("constant_names");
   auto c_defs = getParam<std::vector<std::string>>("constant_expressions");
   c_names.push_back("invalid_elem_id");
   c_defs.push_back(std::to_string(DofObject::invalid_id));
-  addFParserConstants(_func_F, c_names, c_defs);
-
-  // Add constants
-  _func_F->AddConstant("pi", libMesh::pi);
-  _func_F->AddConstant("e", std::exp(Real(1)));
+  c_names.push_back("pi");
+  c_defs.push_back(std::to_string(libMesh::pi));
+  c_names.push_back("e");
+  c_defs.push_back(std::to_string(std::exp(Real(1))));
 
   // add the extra element integers
   std::string symbol_str = "x,y,z";
   for (const auto & eeid_name : _eeid_names)
     symbol_str += "," + eeid_name;
 
-  // parse function
-  if (_func_F->Parse(_function, symbol_str) >= 0)
-    mooseError("Invalid function\n",
-               _function,
-               "\nin ParsedExtraElementIDGenerator ",
-               name(),
-               ".\n",
-               _func_F->ErrorMsg());
+  // base function object
+  _func_F = std::make_shared<SymFunction>();
+  parsedFunctionSetup(_func_F, _function, symbol_str, c_names, c_defs, comm());
 
   _func_params.resize(3 + _eeid_names.size());
 }
