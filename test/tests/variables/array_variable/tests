@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#19564'
+  issues = '#19564 #30656'
   design = 'ArrayMooseVariable.md'
 
   [block_aux_kernel_test]
@@ -26,5 +26,25 @@
     input = 'array_variable_action.i'
     exodiff = 'array_variable_action_out.e'
     requirement = 'The system shall support the automated creation of array variables.'
+  []
+  [normal_var_with_array_naming_error]
+    type = 'RunException'
+    input = 'array_variable_size_one_test.i'
+    cli_args = 'Variables/u/array=false Variables/u/array_var_component_names=name'
+    expect_err = "Variable 'u' is a regular variable. 'array_var_component_names' should not be set."
+    requirement = 'The system shall error when custom array variable naming has been specified for a normal variable.'
+  []
+  [array_naming_incorrect_length_error]
+    type = 'RunException'
+    input = 'array_variable_test.i'
+    cli_args = 'Variables/uu/array_var_component_names=name'
+    expect_err = "For variable uu, parameter 'array_var_component_names' has 1 name\(s\), but there are 2 array variable component\(s\)."
+    requirement = 'The system shall error when custom array variable naming does not match the number or array components.'
+  []
+  [array_custom_naming]
+    type = 'Exodiff'
+    input = 'array_variable_custom_name.i'
+    exodiff = 'array_variable_custom_name_out.e'
+    requirement = 'The system shall allow custom naming conventions for array variable components.'    
   []
 []

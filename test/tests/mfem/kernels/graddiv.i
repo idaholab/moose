@@ -72,19 +72,10 @@
 
 [BCs]
   [dirichlet]
-    type = MFEMVectorFunctorNormalDirichletBC
+    type = MFEMVectorNormalDirichletBC
     variable = F
     boundary = '1 2 3'
     vector_coefficient = F_exact
-  []
-[]
-
-[FunctorMaterials]
-  [Beamium]
-    type = MFEMGenericConstantFunctorMaterial
-    prop_names = 'alpha beta'
-    prop_values = '1.0 1.0'
-    block = '1 2'
   []
 []
 
@@ -92,12 +83,12 @@
   [divdiv]
     type = MFEMDivDivKernel
     variable = F
-    coefficient = alpha
+    coefficient = 1.0
   []
   [mass]
     type = MFEMVectorFEMassKernel
     variable = F
-    coefficient = beta
+    coefficient = 1.0
   []
   [source]
     type = MFEMVectorFEDomainLFKernel

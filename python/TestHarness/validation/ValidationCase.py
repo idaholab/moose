@@ -164,6 +164,8 @@ class ValidationCase(MooseObject):
                 assert len(self.bounds) == 2
                 assert isinstance(self.bounds[0], type(self.value))
                 assert isinstance(self.bounds[1], type(self.value))
+            if self.rel_err is not None:
+                assert isinstance(self.rel_err, float)
 
         # Units for the data, if any
         units: Optional[str]
@@ -172,6 +174,8 @@ class ValidationCase(MooseObject):
         nominal: Optional[NumericDataType] = None
         # Bounds for the data (min and max)
         bounds: Optional[Tuple[NumericDataType, NumericDataType]] = None
+        # Allowed relative error for the data
+        rel_err: Optional[float] = None
 
     @dataclass(kw_only=True)
     class ScalarData(NumericData):
@@ -365,6 +369,44 @@ class ValidationCase(MooseObject):
 
         return status, ' '.join(message)
 
+    @staticmethod
+    def checkRelativeError(value: float,
+                           nominal: float,
+                           rel_err: float,
+                           units: Union[str, None]) -> Tuple[Status, str]:
+        """
+        Performs relative error checking for a scalar value and associates
+        a pass/fail with a status and a message
+
+        Args:
+            value: The value to check
+            nominal: The nominal value
+            rel_err: The relative error
+            units (optional): Units to add to the message
+        Returns:
+            Status: The associated status (ok or fail)
+            str: Message associated with the check
+        """
+        value = ValidationCase.toFloat(value, 'value')
+        nominal = ValidationCase.toFloat(nominal, 'nominal')
+        rel_err = ValidationCase.toFloat(rel_err, 'rel_err')
+        if rel_err <= 0.0:
+            raise ValueError('rel_err not positive')
+        if nominal == 0.0:
+            raise ValueError('nominal value is zero')
+
+        error = abs((nominal - value) / nominal)
+        success = error < rel_err
+        status = ValidationCase.Status.OK if success else ValidationCase.Status.FAIL
+
+        units = f' {units}' if units is not None else ''
+        number_format = ValidationCase.number_format
+        message = [f'value {value:{number_format}}{units} relative error']
+        message += [f'{error:{number_format}} ' + ('<' if success else '>')]
+        message += [f'required {rel_err:{number_format}}']
+
+        return status, ' '.join(message)
+
     def addScalarData(self, key: str, value: Number, description: str,
                       units: Optional[str], **kwargs) -> None:
         """
@@ -379,7 +421,7 @@ class ValidationCase(MooseObject):
             description: Human readable description of the data
             units: Human readable units for the data (can be None)
         Keyword arguments:
-            Additional arguments passed to ScalarData (bounds, nominal, etc)
+            Additional arguments passed to ScalarData (bounds, nominal, rel_err, etc)
         """
         value = self.toFloat(value, 'value')
         if not isinstance(description, str):
@@ -394,14 +436,24 @@ class ValidationCase(MooseObject):
                 raise TypeError('bounds: not of length 2 (min and max)')
             kwargs['bounds'] = (self.toFloat(bounds[0], 'bounds min'),
                                 self.toFloat(bounds[1], 'bounds max'))
-        nominal = kwargs.get('nominal')
-        if nominal is not None:
-            kwargs['nominal'] = self.toFloat(nominal, 'nominal')
+        for k in ['nominal', 'rel_err']:
+            v = kwargs.get(k)
+            if v is not None:
+                kwargs[k] = self.toFloat(v, k)
 
         data = self._addData(self.ScalarData, key, value, description, units=units, **kwargs)
 
         result_kwargs = {'data_key': key,
                          'validation': kwargs.pop('validation', True)}
+
+        if data.rel_err is not None:
+            if data.nominal is None:
+                raise KeyError("Must provide 'nominal' with 'rel_err'")
+            status, message = self.checkRelativeError(data.value,
+                                                      data.nominal,
+                                                      data.rel_err,
+                                                      data.units)
+            self.addResult(status, message, **result_kwargs)
 
         if data.bounds is not None:
             status, message = self.checkBounds(data.value, data.bounds[0],
@@ -492,6 +544,10 @@ class ValidationCase(MooseObject):
             kwargs['nominal'] = self.toListFloat(nominal, 'nominal:')
             if len(kwargs['nominal']) != len(values):
                 raise TypeError('nominal: not same length as data')
+
+        # rel_err not supported yet
+        if kwargs.get('rel_err') is not None:
+            raise KeyError("'rel_err' not supported")
 
         # Store data
         data = self._addData(self.VectorData, key, values, description,

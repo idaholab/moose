@@ -27,8 +27,8 @@ public:
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
 protected:
-  std::vector<Real> _vec_value;
-  mfem::VectorConstantCoefficient & _vec_coef;
+  const MFEMVectorCoefficientName & _vec_coef_name;
+  mfem::VectorCoefficient & _vec_coef;
 };
 
 #endif
