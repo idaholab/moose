@@ -83,9 +83,9 @@ ParsedDownSelectionPositions::ParsedDownSelectionPositions(const InputParameters
       paramError("functor_symbols", "x, y, z, and t cannot be used in 'functor_symbols'.");
   for (const auto & name : _functor_names)
     if (std::find(_xyzt.begin(), _xyzt.end(), name) != _xyzt.end())
-      paramError(
-          "functor_names",
-          "x, y, z, and t cannot be used in 'functor_names'. Use functor_symbols to disambiguate");
+      paramError("functor_names",
+                 "x, y, z, and t cannot be used in 'functor_names'. Use functor_symbols to "
+                 "disambiguate by using a different symbol in the expression.");
 
   // build variables argument
   std::string variables;
@@ -167,9 +167,10 @@ ParsedDownSelectionPositions::initialize()
   for (const auto pos_ptr : _positions_ptrs)
     n_points += pos_ptr->getNumPositions(initial);
   _positions.reserve(n_points);
+  mooseAssert(comm().verify(n_points), "Input positions should be synchronized");
 
-  // Rather than synchronize all ranks at every point, we will figure out whether to keep (1),
-  // discard (2) or error (0, due to no ranks having made the decision) for each position
+  // Rather than synchronize all ranks at every point, we will figure out whether to keep (2),
+  // discard (1) or error (0, due to no ranks having made the decision) for each position
   std::vector<short> keep_positions(n_points, 0);
 
   const auto state = determineState();
@@ -183,41 +184,48 @@ ParsedDownSelectionPositions::initialize()
     for (const auto & pos : pos_ptr->getPositions(initial))
     {
       i_pos++;
-      // Find the position in an element
-      auto * const elem = (*pl)(pos);
+      // Get all possible elements the position may be in
+      std::set<const Elem *> candidate_elements;
+      (*pl)(pos, candidate_elements);
 
-      // If not found, another rank will have found it and made the decision
-      if (!elem)
-        continue;
-
-      // Check block restriction
-      if (!hasBlocks(elem->subdomain_id()))
+      for (const auto elem : candidate_elements)
       {
-        keep_positions[i_pos - 1] = 2;
-        continue;
+        // Check block restriction
+        if (!hasBlocks(elem->subdomain_id()))
+        {
+          keep_positions[i_pos - 1] = 1;
+          continue;
+        }
+
+        // We can't guarantee we have enough algebraic ghosting for variable functors. Might as well
+        // skip, another process will take care of it
+        if (elem->processor_id() != processor_id())
+          continue;
+
+        // Form a functor argument
+        const Moose::ElemPointArg elem_arg = {elem, pos, false};
+
+        // Fill arguments to the parsed expression
+        // Functors
+        for (const auto i : index_range(_functors))
+          _func_params[i] = (*_functors[i])(elem_arg, state);
+
+        // Positions and time
+        for (const auto j : make_range(Moose::dim))
+          _func_params[_n_functors + j] = pos(j);
+        _func_params[_n_functors + 3] = _t;
+
+        // Evaluate parsed expression
+        const auto value = evaluate(_func_F);
+
+        // Keep points matching the criterion
+        if (value > 0)
+          keep_positions[i_pos - 1] = 2;
+        // Dont exclude a point we already chose to keep. This 'inclusivity'
+        // means that a position at a node on the edge of a block gets included
+        else if (keep_positions[i_pos - 1] != 1)
+          keep_positions[i_pos - 1] = 1;
       }
-
-      // Form a functor argument
-      const Moose::ElemPointArg elem_arg = {elem, pos, false};
-
-      // Fill arguments to the parsed expression
-      // Functors
-      for (const auto i : index_range(_functors))
-        _func_params[i] = (*_functors[i])(elem_arg, state);
-
-      // Positions and time
-      for (const auto j : make_range(LIBMESH_DIM))
-        _func_params[_n_functors + j] = pos(j);
-      _func_params[_n_functors + 3] = _t;
-
-      // Evaluate parsed expression
-      const auto value = evaluate(_func_F);
-
-      // Keep points matching the criterion
-      if (value > 0)
-        keep_positions[i_pos - 1] = 1;
-      else
-        keep_positions[i_pos - 1] = 2;
     }
 
   // Synchronize which positions to keep across all ranks
@@ -226,7 +234,7 @@ ParsedDownSelectionPositions::initialize()
   for (const auto & pos_ptr : _positions_ptrs)
     for (const auto & pos : pos_ptr->getPositions(initial))
     {
-      if (keep_positions[i_pos] == 1)
+      if (keep_positions[i_pos] == 2)
         _positions.push_back(pos);
       else if (keep_positions[i_pos] == 0)
         mooseError(

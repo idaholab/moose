@@ -189,7 +189,7 @@ ParsedAux::computeValue()
   // Positions and time
   if (_use_xyzt)
   {
-    for (const auto j : make_range(LIBMESH_DIM))
+    for (const auto j : make_range(Moose::dim))
       _func_params[_nargs + _n_functors + _n_matprops + _n_ad_matprops + j] =
           isNodal() ? (*_current_node)(j) : _q_point[_qp](j);
     _func_params[_nargs + _n_functors + _n_matprops + _n_ad_matprops + 3] = _t;

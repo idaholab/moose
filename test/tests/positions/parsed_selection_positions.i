@@ -13,6 +13,8 @@
   [all_elems]
     type = ElementCentroidPositions
     outputs = 'none'
+    # sorting by coordinates
+    auto_sort = true
   []
   [functors_downselection]
     type = ParsedDownSelectionPositions
