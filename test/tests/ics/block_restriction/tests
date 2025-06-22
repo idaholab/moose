@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#30825'
+  design = 'ICs/index.md BlockRestrictable.md'
+  [generate_restart]
+    type = RunApp
+    input = 'test.i'
+    cli_args = "Mesh/main/ymax=1 UserObjects/active='' ICs/active=top_c1 ICs/top_c1/block=0 Outputs/file_base=start_out"
+    requirement = 'The system shall be able to generate a restart file for checking block restrictions of nodal initial conditions.'
+  []
+  [block_ic]
+    type = RunApp
+    input = 'test.i'
+    cli_args = 'ICs/top_c1/value=3 Mesh/second_order=true'
+    # this test would error if the SolutionIC is called outside of block 0, due to the extent of start.e
+    requirement = 'The system shall be able to block restrict nodal initial conditions.'
+    prereq = 'generate_restart'
+  []
+[]
