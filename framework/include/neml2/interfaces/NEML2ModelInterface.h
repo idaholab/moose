@@ -18,7 +18,6 @@
 #ifdef NEML2_ENABLED
 #include <ATen/Parallel.h>
 #include "neml2/models/Model.h"
-#include "neml2/base/Parser.h"
 #include "neml2/dispatchers/WorkScheduler.h"
 #include "neml2/dispatchers/WorkDispatcher.h"
 #include "neml2/dispatchers/valuemap_helpers.h"
@@ -51,7 +50,7 @@ protected:
   neml2::Model & model() const { return *_model; }
 
   /// Get the target compute device
-  const torch::Device & device() const { return _device; }
+  const neml2::Device & device() const { return _device; }
 
   using RJType = std::tuple<neml2::ValueMap, neml2::DerivMap>;
   using DispatcherType =
@@ -64,7 +63,7 @@ protected:
 
 private:
   /// The device on which to evaluate the NEML2 model
-  const torch::Device _device;
+  const neml2::Device _device;
   /// The NEML2 factory
   std::unique_ptr<neml2::Factory> _factory;
   /// The NEML2 material model

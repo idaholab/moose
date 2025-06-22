@@ -20,6 +20,7 @@ getModel(neml2::Factory & factory, const std::string & name, neml2::Dtype dtype)
   const auto prev_dtype = neml2::get_default_dtype();
   neml2::set_default_dtype(dtype);
   auto model = factory.get_model(name);
+  model->to(dtype);
   neml2::set_default_dtype(prev_dtype);
   return model;
 }
