@@ -128,8 +128,10 @@ WCNSFVFluidHeatTransferPhysicsBase::addFVKernels()
   if (!_has_energy_equation)
     return;
 
-  if (shouldCreateTimeDerivative(
-          _fluid_temperature_name, _blocks, /*error if already defined*/ false))
+  if (shouldCreateTimeDerivative(_solve_for_enthalpy ? _fluid_enthalpy_name
+                                                     : _fluid_temperature_name,
+                                 _blocks,
+                                 /*error if already defined*/ false))
     addEnergyTimeKernels();
 
   addEnergyAdvectionKernels();

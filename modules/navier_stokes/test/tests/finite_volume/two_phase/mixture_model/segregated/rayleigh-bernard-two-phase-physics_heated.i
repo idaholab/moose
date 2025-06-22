@@ -32,6 +32,8 @@ cp_d = 1
   linear_sys_names = 'u_system v_system pressure_system energy_system phi_system'
 []
 
+# We are using a Materials block to order the functor creation.
+# See #30827
 [Materials]
   [T_from_p_h]
     type = ParsedFunctorMaterial
@@ -107,7 +109,7 @@ cp_d = 1
         phase_1_fraction_name = 'phase_1'
         phase_2_fraction_name = 'phase_2'
 
-        # fully mixed initialization
+        # not fully mixed initialization
         initial_phase_fraction = 'unstable'
 
         add_phase_transport_equation = true
