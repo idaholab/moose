@@ -1726,8 +1726,15 @@ public:
    * Update data after a mesh change.
    * Iff intermediate_change is true, only perform updates as
    * necessary to prepare for another mesh change
-   * immediately-subsequent. If \p changed_throug_amr then we will
-   * contract the mesh and clean refinement flags
+   * immediately-subsequent. An example of data that is not updated during an intermediate change is
+   * libMesh System matrix data. An example of data that \emph is updated during an intermediate
+   * change is libMesh System vectors. These vectors are projected or restricted based off of
+   * adaptive mesh refinement or the changing of element subdomain IDs. The flags \p contract_mesh
+   * and \p clean_refinement_flags should generally only be set to true when the mesh has changed
+   * due to mesh refinement. \p contract_mesh deletes children of coarsened elements and renumbers
+   * nodes and elements. \p clean_refinement_flags resets refinement flags such that any subsequent
+   * calls to \p System::restrict_vectors or \p System::prolong_vectors before another AMR step do
+   * not mistakenly attempt to re-do the restriction/prolongation which occurred in this method
    */
   virtual void
   meshChanged(bool intermediate_change, bool contract_mesh, bool clean_refinement_flags);
