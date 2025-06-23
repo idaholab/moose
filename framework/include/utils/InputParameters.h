@@ -1596,7 +1596,7 @@ InputParameters::rangeCheck(const std::string & full_name,
         }
         else
           return {{false,
-                   "Error parsing expression '" + range_function + "; invalid variable '" +
+                   "Error parsing expression '" + range_function + "'; invalid variable '" +
                        vars[j] + "'"}};
       }
     }
@@ -1662,8 +1662,8 @@ InputParameters::rangeCheck(const std::string & full_name,
   fp.setEpsilon(tmp_eps);
 
   if (fp.EvalError())
-    return {{false,
-             "Error evaluating expression '" + range_function + "' for '" + short_name +
+    return {{true,
+             "Error evaluating expression '" + range_function + "' for parameter '" + short_name +
                  "'; perhaps you used the wrong variable name?"}};
 
   if (!result)

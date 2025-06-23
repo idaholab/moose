@@ -1191,7 +1191,9 @@ MooseApp::~MooseApp()
   // dlclose an option
   _restartable_data.clear();
 
-  // Remove this app's parameters from the AppFactory
+  // Remove this app's parameters from the AppFactory. This allows
+  // for creating an app with this name again in the same execution,
+  // which needs to be done when resetting applications in MultiApp
   AppFactory::instance().clearAppParams(parameters(), {});
 
 #ifdef LIBMESH_HAVE_DLOPEN
