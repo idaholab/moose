@@ -69,11 +69,11 @@ LMC::computeCovarianceMatrix(torch::Tensor & K,
                              const bool is_self_covariance) const
 {
   // Create temporary vectors for constructing the covariance matrix
-  torch::Tensor K_params = torch::zeros({x.sizes()[0], xp.sizes()[0]});
-  torch::Tensor B = torch::zeros({_num_outputs, _num_outputs});
-  K = torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs});
+  torch::Tensor K_params = torch::zeros({x.sizes()[0], xp.sizes()[0]}, at::kDouble);
+  torch::Tensor B = torch::zeros({_num_outputs, _num_outputs}, at::kDouble);
+  K = torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs}, at::kDouble);
   torch::Tensor K_working =
-      torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs});
+      torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs}, at::kDouble);
 
   // For every expansion term we add the contribution to the covariance matrix
   for (const auto exp_i : make_range(_num_expansion_terms))
@@ -107,8 +107,8 @@ LMC::computedKdhyper(torch::Tensor & dKdhp,
     const std::string lambda_prefix = "lambda_";
 
     // Allocate storage for the factors of the total gradient matrix
-    torch::Tensor dBdhp = torch::zeros({_num_outputs, _num_outputs});
-    torch::Tensor K_params = torch::zeros({x.sizes()[0], x.sizes()[0]});
+    torch::Tensor dBdhp = torch::zeros({_num_outputs, _num_outputs}, at::kDouble);
+    torch::Tensor K_params = torch::zeros({x.sizes()[0], x.sizes()[0]}, at::kDouble);
 
     if (name_without_prefix.find(acoeff_prefix) != std::string::npos)
     {
@@ -131,9 +131,9 @@ LMC::computedKdhyper(torch::Tensor & dKdhp,
   else
   {
     // Allocate storage for the matrix factors
-    torch::Tensor B_tmp = torch::zeros({_num_outputs, _num_outputs});
-    torch::Tensor B = torch::zeros({_num_outputs, _num_outputs});
-    torch::Tensor dKdhp_sub = torch::zeros({x.sizes()[0], x.sizes()[0]});
+    torch::Tensor B_tmp = torch::zeros({_num_outputs, _num_outputs}, at::kDouble);
+    torch::Tensor B = torch::zeros({_num_outputs, _num_outputs}, at::kDouble);
+    torch::Tensor dKdhp_sub = torch::zeros({x.sizes()[0], x.sizes()[0]}, at::kDouble);
 
     // First, check the dependent covariances
     bool found = false;
@@ -181,10 +181,10 @@ LMC::computeAGradient(torch::Tensor & grad,
                       const unsigned int exp_i,
                       const unsigned int index) const
 {
-  auto grad_accessor = grad.accessor<Real, 2>();
   const auto & a_coeffs = *_a_coeffs[exp_i];
   // Add asserts here
-  grad = torch::zeros({grad.sizes()[0], grad.sizes()[1]});
+  grad = torch::zeros({grad.sizes()[0], grad.sizes()[1]}, at::kDouble);
+  auto grad_accessor = grad.accessor<Real, 2>();
   for (const auto col_i : make_range(_num_outputs))
     grad_accessor[index][col_i] = a_coeffs[col_i];
   const torch::Tensor transpose = torch::transpose(grad, 0, 1);
@@ -197,7 +197,7 @@ LMC::computeLambdaGradient(torch::Tensor & grad,
                            const unsigned int index) const
 {
   // grad.setZero();
-  grad = torch::zeros({grad.sizes()[0], grad.sizes()[1]});
+  grad = torch::zeros({grad.sizes()[0], grad.sizes()[1]}, at::kDouble);
   auto grad_accessor = grad.accessor<Real, 2>();
   grad_accessor[index][index] = 1.0;
 }
