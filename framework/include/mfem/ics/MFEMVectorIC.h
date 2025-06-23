@@ -13,11 +13,11 @@
 
 #include "MFEMGeneralUserObject.h"
 
-class MFEMScalarIC : public MFEMGeneralUserObject
+class MFEMVectorIC : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
-  MFEMScalarIC(const InputParameters & params);
+  MFEMVectorIC(const InputParameters & params);
   virtual void execute() override;
 };
 
