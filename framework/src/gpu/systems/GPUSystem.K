@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GPUSystem.h"
+#include "GPUNodalBCBase.h"
 
 #include "MooseMesh.h"
 #include "Assembly.h"
@@ -31,7 +32,10 @@ GPUSystem::init()
   setupDofs();
 
   if (dynamic_cast<NonlinearSystemBase *>(&_system))
+  {
     setupSparsity();
+    checkNodalBCs();
+  }
 
   _qp_solutions.create(MAX_TAG);
   _qp_solutions_grad.create(MAX_TAG);
@@ -250,6 +254,74 @@ GPUSystem::setupSparsity()
   _sparsity.col_idx = col_idx;
   _sparsity.row_idx = row_idx;
   _sparsity.row_ptr = row_ptr;
+}
+
+void
+GPUSystem::checkNodalBCs()
+{
+  auto & nl_system = static_cast<NonlinearSystemBase &>(_system);
+
+  _nbc_residual_tag_dof.create(MAX_TAG);
+  _nbc_matrix_tag_dof.create(MAX_TAG);
+
+  for (auto bc : nl_system.getGPUNodalBCWarehouse().getActiveObjects())
+  {
+    auto nbc = static_cast<GPUNodalBCBase *>(bc.get());
+
+    std::set<TagID> extra_vector_tags;
+    std::set<TagID> extra_matrix_tags;
+
+    if (nbc->isParamValid("extra_vector_tags"))
+      for (auto tag : nbc->getParam<std::vector<TagName>>("extra_vector_tags"))
+        extra_vector_tags.insert(_system.feProblem().getVectorTagID(tag));
+
+    if (nbc->isParamValid("extra_matrix_tags"))
+      for (auto tag : nbc->getParam<std::vector<TagName>>("extra_matrix_tags"))
+        extra_matrix_tags.insert(_system.feProblem().getMatrixTagID(tag));
+
+    getNodalBCDofs(nbc, _nbc_dof);
+
+    for (auto tag : extra_vector_tags)
+      getNodalBCDofs(nbc, _nbc_residual_tag_dof[tag]);
+
+    for (auto tag : extra_matrix_tags)
+      getNodalBCDofs(nbc, _nbc_matrix_tag_dof[tag]);
+  }
+
+  _nbc_dof.copy();
+  _nbc_residual_tag_dof.copyNested();
+  _nbc_matrix_tag_dof.copyNested();
+}
+
+void
+GPUSystem::getNodalBCDofs(const GPUNodalBCBase * nbc, GPUArray<bool> & dofs)
+{
+  auto var = nbc->variable().number();
+
+  if (!dofs.isAlloc())
+  {
+    dofs.create(_n_local_dofs + _n_ghost_dofs);
+    dofs = false;
+  }
+
+  for (auto node : nbc->getNodes())
+    dofs[_local_node_dof_index[var][node]] = true;
+
+  // Let remote processes know about ghost DOFs associated with nodal BCs not to compute
+  // residual on them
+
+  std::vector<std::vector<char>> send(_n_procs), recv(_n_procs);
+
+  for (processor_id_type proc = 0; proc < _n_procs; proc++)
+    for (auto dof : _local_comm_list[proc])
+      send[proc].push_back(dofs[dof]);
+
+  for (processor_id_type proc = 0; proc < _n_procs; proc++)
+    _comm->scatter(send, recv[proc], proc);
+
+  for (processor_id_type proc = 0; proc < _n_procs; proc++)
+    for (dof_id_type i = 0; i < _ghost_comm_list[proc].size(); ++i)
+      dofs[_ghost_comm_list[proc][i]] = recv[proc][i];
 }
 
 void
