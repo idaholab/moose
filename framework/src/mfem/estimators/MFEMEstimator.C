@@ -25,4 +25,12 @@ MFEMEstimator::MFEMEstimator(const InputParameters & params)
     _kernel_name( getParam<std::string>("kernel") ), _fe_space_name( getParam<std::string>("fe_space") )
 {}
 
+std::shared_ptr<mfem::ParFiniteElementSpace>
+MFEMEstimator::getFESpace()
+{
+  MFEMProblemData & problem = getMFEMProblem().getProblemData();
+  return problem.fespaces.GetShared( _fe_space_name );
+}
+
+
 #endif
