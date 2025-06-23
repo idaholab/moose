@@ -21,6 +21,8 @@
                 OutputData/CurlCurlLOR/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     cli_args = 'FESpaces/HCurlFESpace/fec_order=THIRD '
+               'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
+               'FESpaces/HCurlFESpace/open_basis=IntegratedGLL '
                'Solver/type=MFEMGMRESSolver Solver/l_tol=1e-14 '
                'Preconditioner/ams/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/CurlCurlLOR'
@@ -93,6 +95,8 @@
                 OutputData/GradDivLOR/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     cli_args = 'Mesh/file=../mesh/beam-hex.mesh FESpaces/HDivFESpace/fec_order=THIRD '
+               'FESpaces/HDivFESpace/closed_basis=GaussLobatto '
+               'FESpaces/HDivFESpace/closed_basis=IntegratedGLL '
                'Preconditioner/ADS/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/GradDivLOR'
     requirement = 'The system shall have the ability to solve a LOR grad-div problem with Raviart-Thomas elements using MFEM.'
