@@ -23,7 +23,7 @@ MFEMVectorFEMassKernel::validParams()
                              "arising from the weak form of the mass operator "
                              "$k \\vec u$.");
   params.addParam<MFEMScalarCoefficientName>(
-      "coefficient", "1.", "Name of property k to multiply the Laplacian by");
+      "coefficient", "1.", "Name of property k to multiply the integrator by");
   return params;
 }
 
