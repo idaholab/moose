@@ -20,11 +20,13 @@ DistributionInterface::validParams()
   return params;
 }
 
-DistributionInterface::DistributionInterface(const MooseObject * moose_object)
+DistributionInterface::DistributionInterface(const MooseObject * moose_object, bool initialize)
   : _dni_params(moose_object->parameters()),
     _dni_feproblem(*_dni_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _dni_moose_object_ptr(moose_object)
 {
+  if (!initialize)
+    return;
 }
 
 const Distribution &

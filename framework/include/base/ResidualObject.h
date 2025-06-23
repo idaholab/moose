@@ -52,8 +52,9 @@ public:
    * Class constructor.
    * @param parameters The InputParameters for the object
    * @param nodal Whether this object is applied to nodes or not
+   * @param initialize Whether this object will be initialized (not a temporary object) or not
    */
-  ResidualObject(const InputParameters & parameters, bool nodal = false);
+  ResidualObject(const InputParameters & parameters, bool nodal = false, bool initialize = true);
 
   /// Compute this object's contribution to the residual
   virtual void computeResidual() = 0;

@@ -52,7 +52,8 @@ boundaryRestricted(const std::set<BoundaryID> & boundary_ids)
 
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
                                                      const std::set<SubdomainID> & block_ids,
-                                                     const std::set<BoundaryID> & boundary_ids)
+                                                     const std::set<BoundaryID> & boundary_ids,
+                                                     bool initialize)
   : _mi_moose_object(*moose_object),
     _mi_params(_mi_moose_object.parameters()),
     _mi_name(moose_object->name()),
@@ -70,6 +71,9 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_block_ids(block_ids),
     _mi_boundary_ids(boundary_ids)
 {
+  if (!initialize)
+    return;
+
   moose_object->getMooseApp().registerInterfaceObject(*this);
 }
 

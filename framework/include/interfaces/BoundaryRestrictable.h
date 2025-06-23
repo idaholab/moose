@@ -38,8 +38,9 @@ public:
    * with the 'boundary' input parameter
    * @param parameters The input parameters
    * @param nodal True indicates that the object is operating on nodesets, false for sidesets
+   * @param initialize Whether this object will be initialized (not a temporary object) or not
    */
-  BoundaryRestrictable(const MooseObject * moose_object, bool nodal);
+  BoundaryRestrictable(const MooseObject * moose_object, bool nodal, bool initialize = true);
 
   static InputParameters validParams();
 

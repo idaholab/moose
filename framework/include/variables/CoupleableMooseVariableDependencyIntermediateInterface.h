@@ -25,7 +25,8 @@ class CoupleableMooseVariableDependencyIntermediateInterface
 public:
   CoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,
                                                          bool nodal,
-                                                         bool is_fv = false);
+                                                         bool is_fv = false,
+                                                         bool initialize = true);
 
   /**
    * Returns value of a coupled variable give the variable name
