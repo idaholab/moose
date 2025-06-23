@@ -63,7 +63,6 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = concentration
-    coefficient = 1.0
   []
 []
 

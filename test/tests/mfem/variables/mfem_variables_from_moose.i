@@ -49,7 +49,6 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = scalar_var
-    coefficient = 1.0
   []
 []
 

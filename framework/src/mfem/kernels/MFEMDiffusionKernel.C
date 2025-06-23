@@ -22,8 +22,8 @@ MFEMDiffusionKernel::validParams()
                              "$(k\\vec\\nabla u, \\vec\\nabla v)_\\Omega$ "
                              "arising from the weak form of the Laplacian operator "
                              "$- \\vec\\nabla \\cdot \\left( k \\vec \\nabla u \\right)$.");
-  params.addParam<MFEMScalarCoefficientName>("coefficient",
-                                             "Name of property for diffusion coefficient k.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient", "1.", "Name of property for diffusion coefficient k.");
   return params;
 }
 
