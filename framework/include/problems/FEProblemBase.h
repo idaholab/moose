@@ -1024,6 +1024,10 @@ public:
                                   const std::string & name,
                                   InputParameters & parameters);
 
+  virtual void addGPUMaterial(const std::string & material_name,
+                              const std::string & name,
+                              InputParameters & parameters);
+
   /**
    * Add the MooseVariables and the material properties that the current materials depend on to the
    * dependency list.
@@ -1997,6 +2001,11 @@ public:
   const MaterialWarehouse & getDiscreteMaterialWarehouse() const { return _discrete_materials; }
   const MaterialWarehouse & getInterfaceMaterialsWarehouse() const { return _interface_materials; }
 
+  /*
+   * Return a reference to the material warehouse of GPUMaterial objects to be computed.
+   */
+  const MaterialWarehouse & getGPUMaterialsWarehouse() const { return _gpu_materials; }
+
   /**
    * Return a pointer to a MaterialBase object.  If no_warn is true, suppress
    * warning about retrieving a material reference potentially during the
@@ -2797,6 +2806,8 @@ protected:
   MaterialWarehouse _interface_materials; // interface materials
   MaterialWarehouse _discrete_materials;  // Materials that the user must compute
   MaterialWarehouse _all_materials; // All materials for error checking and MaterialData storage
+
+  MaterialWarehouse _gpu_materials; // GPU materials
   ///@}
 
   ///@{

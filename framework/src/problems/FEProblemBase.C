@@ -1147,6 +1147,8 @@ FEProblemBase::initialSetup()
       }
     }
 
+    _gpu_materials.sort();
+
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
 
@@ -4149,6 +4151,14 @@ FEProblemBase::addInterfaceMaterial(const std::string & mat_name,
 }
 
 void
+FEProblemBase::addGPUMaterial(const std::string & mat_name,
+                              const std::string & name,
+                              InputParameters & parameters)
+{
+  addMaterialHelper({&_gpu_materials}, mat_name, name, parameters);
+}
+
+void
 FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
                                  const std::string & mat_name,
                                  const std::string & name,
@@ -5407,6 +5417,8 @@ FEProblemBase::updateActiveObjects()
   _to_multi_app_transfers.updateActive();
   _from_multi_app_transfers.updateActive();
   _between_multi_app_transfers.updateActive();
+
+  _gpu_materials.updateActive();
 }
 
 void

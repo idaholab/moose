@@ -602,6 +602,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddMaterialAction", "Materials/*");
   syntax.registerSyntaxType("Materials/*", "MaterialName");
 
+  registerSyntax("AddGPUMaterialAction", "GPUMaterials/*");
+  syntax.registerSyntaxType("GPUMaterials/*", "MaterialName");
+
   registerSyntax("AddFunctorMaterialAction", "FunctorMaterials/*");
   syntax.registerSyntaxType("FunctorMaterials/*", "MaterialName");
 
