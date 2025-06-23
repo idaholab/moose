@@ -16,7 +16,7 @@
 #include "Problem.h"
 #include "SubProblem.h"
 
-ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
+ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object, bool initialize)
   : _sc_fe_problem(
         *moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sc_tid(moose_object->parameters().isParamValid("_tid")
@@ -31,6 +31,9 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
                         ? _sc_parameters.get<bool>("implicit")
                         : true)
 {
+  if (!initialize)
+    return;
+
   SubProblem & problem = *_sc_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
 
   // Coupling

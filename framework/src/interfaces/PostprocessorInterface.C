@@ -18,11 +18,13 @@ PostprocessorInterface::validParams()
   return emptyInputParameters();
 }
 
-PostprocessorInterface::PostprocessorInterface(const MooseObject * moose_object)
+PostprocessorInterface::PostprocessorInterface(const MooseObject * moose_object, bool initialize)
   : _ppi_moose_object(*moose_object),
     _ppi_params(_ppi_moose_object.parameters()),
     _ppi_feproblem(*_ppi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
+  if (!initialize)
+    return;
 }
 
 PostprocessorInterface::PostprocessorInterface(const FEProblemBase * problem)

@@ -34,7 +34,7 @@ class MooseObject;
 class PostprocessorInterface
 {
 public:
-  PostprocessorInterface(const MooseObject * moose_object);
+  PostprocessorInterface(const MooseObject * moose_object, bool initialize = true);
 
   PostprocessorInterface(const FEProblemBase * problem);
 

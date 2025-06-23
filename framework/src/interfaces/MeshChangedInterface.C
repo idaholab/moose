@@ -19,8 +19,11 @@ MeshChangedInterface::validParams()
   return params;
 }
 
-MeshChangedInterface::MeshChangedInterface(const InputParameters & params)
+MeshChangedInterface::MeshChangedInterface(const InputParameters & params, bool initialize)
   : _mci_feproblem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
+  if (!initialize)
+    return;
+
   _mci_feproblem.notifyWhenMeshChanges(this);
 }
