@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #include "LoadCovarianceDataAction.h"
 #include "GaussianProcessSurrogate.h"
 #include "FEProblem.h"
@@ -121,3 +123,5 @@ LoadCovarianceDataAction::load(GaussianProcessSurrogate & model)
 
   model.setupCovariance(covar_name);
 }
+
+#endif
