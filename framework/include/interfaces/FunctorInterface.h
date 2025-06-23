@@ -30,7 +30,7 @@ class FunctorInterface
 public:
   static InputParameters validParams();
 
-  FunctorInterface(const MooseObject * moose_object);
+  FunctorInterface(const MooseObject * moose_object, bool initialize = true);
 
   /**
    * Helper to look up a functor name through the input parameter keys

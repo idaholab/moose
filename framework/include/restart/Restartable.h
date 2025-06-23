@@ -70,11 +70,14 @@ public:
    * @param moose_object The MooseObject that this interface is being implemented on.
    * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly
    * correspond to the section in the input file so errors are easy to understand.
+   * @param initialize Whether this object will be initialized (not a temporary object) or not
    *
    * This method will forward the thread id if it exists in the moose_object parameters. Delegates
    * to the "MooseApp &" constructor.
    */
-  Restartable(const MooseObject * moose_object, const std::string & system_name);
+  Restartable(const MooseObject * moose_object,
+              const std::string & system_name,
+              bool initialize = true);
 
   /**
    * Class constructor
@@ -97,13 +100,15 @@ public:
    * @param tid The thread ID.
    * @param read_only Switch to restrict the data for read-only.
    * @param metaname The name of the datamap where the restartable objects should be registered to.
+   * @param initialize Whether this object will be initialized (not a temporary object) or not.
    */
   Restartable(MooseApp & moose_app,
               const std::string & name,
               const std::string & system_name,
               THREAD_ID tid,
               const bool read_only = false,
-              const RestartableDataMapName & metaname = "");
+              const RestartableDataMapName & metaname = "",
+              bool initialize = true);
 
 protected:
   /**
