@@ -15,6 +15,7 @@
       abs_zero = 1e-6
       heavy = true
       recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
     []
     [run]
       type = 'Exodiff'
@@ -24,6 +25,7 @@
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-std-wall_short'
       abs_zero = 1e-6
       recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
     []
   []
   [lid_driven_turb_non_eq_wall_linear]

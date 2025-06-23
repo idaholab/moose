@@ -306,18 +306,14 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     variable = TKED
     use_two_term_expansion = false
   []
-[]
-
-[FVBCs]
   [walls_mu_t]
-    type = INSFVTurbulentViscosityWallFunction
+    type = LinearFVTurbulentViscosityWallFunctionBC
     boundary = 'bottom top'
-    variable = mu_t
+    variable = 'mu_t'
     u = vel_x
     v = vel_y
     rho = ${rho}
     mu = ${mu}
-    mu_t = 'mu_t'
     tke = TKE
     wall_treatment = ${wall_treatment}
   []
@@ -325,18 +321,15 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
 
 [AuxVariables]
   [mu_t]
-    type = MooseVariableFVReal
+    type = MooseLinearVariableFVReal
     initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
-    two_term_boundary_expansion = false
   []
   [yplus]
-    type = MooseVariableFVReal
-    two_term_boundary_expansion = false
+    type = MooseLinearVariableFVReal
   []
   [mu_eff]
-    type = MooseVariableFVReal
+    type = MooseLinearVariableFVReal
     initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
-    two_term_boundary_expansion = false
   []
 []
 
