@@ -529,7 +529,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("CopyNodalVarsAction", "AuxVariables/*", "copy_nodal_aux_vars");
 
   registerSyntaxTask("AddKernelAction", "Kernels/*", "add_kernel");
+  registerSyntaxTask("AddGPUKernelAction", "GPUKernels/*", "add_kernel");
   registerSyntaxTask("AddNodalKernelAction", "NodalKernels/*", "add_nodal_kernel");
+  registerSyntaxTask("AddGPUNodalKernelAction", "GPUNodalKernels/*", "add_nodal_kernel");
   registerSyntaxTask("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
 
   registerSyntaxTask("AddHDGKernelAction", "HDGKernels/*", "add_hybridized_kernel");
@@ -540,6 +542,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
 
   registerSyntaxTask("AddBCAction", "BCs/*", "add_bc");
+  registerSyntaxTask("AddGPUBCAction", "GPUBCs/*", "add_bc");
 
   registerSyntax("CreateProblemAction", "Problem");
   registerSyntax("DynamicObjectRegistrationAction", "Problem");

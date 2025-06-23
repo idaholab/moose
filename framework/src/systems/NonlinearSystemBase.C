@@ -124,9 +124,14 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _Re_non_time_tag(-1),
     _Re_non_time(NULL),
     _scalar_kernels(/*threaded=*/false),
+    _gpu_kernels(/*threaded=*/false),
     _nodal_bcs(/*threaded=*/false),
     _preset_nodal_bcs(/*threaded=*/false),
     _ad_preset_nodal_bcs(/*threaded=*/false),
+    _gpu_integrated_bcs(/*threaded=*/false),
+    _gpu_nodal_bcs(/*threaded=*/false),
+    _gpu_preset_nodal_bcs(/*threaded=*/false),
+    _gpu_nodal_kernels(/*threaded=*/false),
     _splits(/*threaded=*/false),
     _increment_vec(NULL),
     _use_finite_differenced_preconditioner(false),
@@ -188,6 +193,9 @@ NonlinearSystemBase::preInit()
 
   if (_residual_copy.get())
     _residual_copy->init(_sys.n_dofs(), false, SERIAL);
+
+  if (_fe_problem.hasGPUObjects())
+    _sys.get_dof_map().full_sparsity_pattern_needed();
 }
 
 void
@@ -259,6 +267,11 @@ NonlinearSystemBase::initialSetup()
     _constraints.initialSetup();
     _general_dampers.initialSetup();
     _nodal_bcs.initialSetup();
+
+    _gpu_kernels.initialSetup();
+    _gpu_nodal_kernels.initialSetup();
+    _gpu_integrated_bcs.initialSetup();
+    _gpu_nodal_bcs.initialSetup();
   }
 
   {
@@ -364,6 +377,11 @@ NonlinearSystemBase::timestepSetup()
   _constraints.timestepSetup();
   _general_dampers.timestepSetup();
   _nodal_bcs.timestepSetup();
+
+  _gpu_kernels.timestepSetup();
+  _gpu_nodal_kernels.timestepSetup();
+  _gpu_integrated_bcs.timestepSetup();
+  _gpu_nodal_bcs.timestepSetup();
 }
 
 void
@@ -418,6 +436,11 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
   _constraints.customSetup(exec_type);
   _general_dampers.customSetup(exec_type);
   _nodal_bcs.customSetup(exec_type);
+
+  _gpu_kernels.customSetup(exec_type);
+  _gpu_nodal_kernels.customSetup(exec_type);
+  _gpu_integrated_bcs.customSetup(exec_type);
+  _gpu_nodal_bcs.customSetup(exec_type);
 }
 
 void
@@ -1698,6 +1721,11 @@ NonlinearSystemBase::residualSetup()
   _general_dampers.residualSetup();
   _nodal_bcs.residualSetup();
 
+  _gpu_kernels.residualSetup();
+  _gpu_nodal_kernels.residualSetup();
+  _gpu_integrated_bcs.residualSetup();
+  _gpu_nodal_bcs.residualSetup();
+
   // Avoid recursion
   if (this == &_fe_problem.currentNonlinearSystem())
     _fe_problem.residualSetup();
@@ -2764,6 +2792,11 @@ NonlinearSystemBase::jacobianSetup()
   _general_dampers.jacobianSetup();
   _nodal_bcs.jacobianSetup();
 
+  _gpu_kernels.jacobianSetup();
+  _gpu_nodal_kernels.jacobianSetup();
+  _gpu_integrated_bcs.jacobianSetup();
+  _gpu_nodal_bcs.jacobianSetup();
+
   // Avoid recursion
   if (this == &_fe_problem.currentNonlinearSystem())
     _fe_problem.jacobianSetup();
@@ -3288,6 +3321,7 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
   _dirac_kernels.updateActive(tid);
   _kernels.updateActive(tid);
   _nodal_kernels.updateActive(tid);
+
   if (tid == 0)
   {
     _general_dampers.updateActive();
@@ -3296,6 +3330,12 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
     _ad_preset_nodal_bcs.updateActive();
     _constraints.updateActive();
     _scalar_kernels.updateActive();
+
+    _gpu_kernels.updateActive();
+    _gpu_nodal_kernels.updateActive();
+    _gpu_integrated_bcs.updateActive();
+    _gpu_nodal_bcs.updateActive();
+    _gpu_preset_nodal_bcs.updateActive();
   }
 }
 
@@ -3589,6 +3629,9 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
   _nodal_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _scalar_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _constraints.subdomainsCovered(input_subdomains, kernel_variables);
+
+  _gpu_kernels.subdomainsCovered(input_subdomains, kernel_variables);
+  _gpu_nodal_kernels.subdomainsCovered(input_subdomains, kernel_variables);
 
   if (_fe_problem.haveFV())
   {

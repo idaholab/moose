@@ -3061,6 +3061,144 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
 }
 
 void
+FEProblemBase::addGPUKernel(const std::string & kernel_name,
+                            const std::string & name,
+                            InputParameters & parameters)
+{
+#ifndef MOOSE_HAVE_GPU
+  mooseError("addGPUKernel() was called but MOOSE was not compiled with GPU support.");
+#endif
+
+  parallel_object_only();
+
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError("You are trying to add a Kernel to a linear variable/system, which is not "
+               "supported at the moment!");
+
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
+    _reinit_displaced_elem = true;
+  }
+  else
+  {
+    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow Kernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this Kernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
+  }
+
+  logAdd("GPUKernel", name, kernel_name, parameters);
+
+#ifdef MOOSE_HAVE_GPU
+  _nl[nl_sys_num]->addGPUKernel(kernel_name, name, parameters);
+#endif
+
+  _have_GPU_objects = true;
+}
+
+void
+FEProblemBase::addGPUNodalKernel(const std::string & kernel_name,
+                                 const std::string & name,
+                                 InputParameters & parameters)
+{
+#ifndef MOOSE_HAVE_GPU
+  mooseError("addGPUNodalKernel() was called but MOOSE was not compiled with GPU support.");
+#endif
+
+  parallel_object_only();
+
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
+    _reinit_displaced_elem = true;
+  }
+  else
+  {
+    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow Kernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this Kernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
+  }
+
+  logAdd("GPUNodalKernel", name, kernel_name, parameters);
+
+#ifdef MOOSE_HAVE_GPU
+  _nl[nl_sys_num]->addGPUNodalKernel(kernel_name, name, parameters);
+#endif
+
+  _have_GPU_objects = true;
+}
+
+void
+FEProblemBase::addGPUBoundaryCondition(const std::string & bc_name,
+                                       const std::string & name,
+                                       InputParameters & parameters)
+{
+#ifndef MOOSE_HAVE_GPU
+  mooseError("addGPUBoundaryCondition() was called but MOOSE was not compiled with GPU support.");
+#endif
+
+  parallel_object_only();
+
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError(
+        "You are trying to add a BoundaryCondition to a linear variable/system, which is not "
+        "supported at the moment!");
+
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
+    _reinit_displaced_face = true;
+  }
+  else
+  {
+    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow Materials to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this Material.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
+  }
+
+  logAdd("GPUBoundaryCondition", name, bc_name, parameters);
+
+#ifdef MOOSE_HAVE_GPU
+  _nl[nl_sys_num]->addGPUBoundaryCondition(bc_name, name, parameters);
+#endif
+
+  _have_GPU_objects = true;
+}
+
+void
 FEProblemBase::addConstraint(const std::string & c_name,
                              const std::string & name,
                              InputParameters & parameters)
