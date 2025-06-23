@@ -25,7 +25,7 @@ MFEMDivDivKernel::validParams()
       "$-\\vec\\nabla \\left( k \\vec\\nabla \\cdot \\vec u \\right)$.");
 
   params.addParam<MFEMScalarCoefficientName>(
-      "coefficient", "1.", "Name of property k to multiply the Laplacian by");
+      "coefficient", "1.", "Name of property k to multiply the integrator by");
 
   return params;
 }
