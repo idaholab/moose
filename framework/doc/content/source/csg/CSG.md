@@ -91,8 +91,8 @@ ExampleMeshGenerator::generateCSG()
 `CSGBase` objects from other mesh generators can be accessed through methods that parallel those available for accessing other [source/meshgenerators/MeshGenerator.md] objects.
 For all methods listed below, a unique pointer to the `CSGBase` object(s) created by `generateCSG` for the specified [source/meshgenerators/MeshGenerator.md] names are returned.
 
-- `getCSGBase`: get the `CSGBase` object given a mesh generator name represented as a `std::string`
-- `getCSGBases`: get all `CSGBase` objects given a list of mesh generator names represented as `std::string`s
+- `getCSGBase`: get the `CSGBase` object given a parameter name represented as a `std::string` that stores the mesh generator name
+- `getCSGBases`: get the `CSGBase` objects given a parameter name represented as a `std::string` that stores a list of mesh generator names
 - `getCSGBaseByName`: get the `CSGBase` object given a `MeshGeneratorName`
 - `getCSGBasesByName`: get all `CSGBase` objects given a list of `MeshGeneratorName`s
 
