@@ -31,8 +31,6 @@ INSFVTurbulentViscosityWallFunction::validParams()
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
   params.addParam<MooseEnum>(
       "wall_treatment", wall_treatment, "The method used for computing the wall functions");
-
-  params.addParam<bool>("lagged_quantities", true, "Use lagged turbulent quantities in the model?");
   return params;
 }
 
@@ -49,8 +47,7 @@ INSFVTurbulentViscosityWallFunction::INSFVTurbulentViscosityWallFunction(
     _k(getFunctor<ADReal>(NS::TKE)),
     _C_mu(getParam<Real>("C_mu")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
-    _preserve_sparsity_pattern(_fv_problem.preserveMatrixSparsityPattern()),
-    _lagged_quantities(getParam<bool>("lagged_quantities"))
+    _preserve_sparsity_pattern(_fv_problem.preserveMatrixSparsityPattern())
 {
 }
 
@@ -62,9 +59,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
   const Elem & _current_elem = fi.elem();
   const auto current_argument = makeElemArg(&_current_elem);
   // Get the previous non linear iteration values
-  const auto old_state = _lagged_quantities
-                             ? Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear)
-                             : determineState();
+  const auto old_state = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
   const auto mu = _mu(current_argument, old_state);
   const auto rho = _rho(current_argument, old_state);
 
@@ -92,6 +87,17 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
     y_plus = wall_dist * u_tau * rho / mu;
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
     mut_log = mu_wall - mu;
+
+    // if(fi.elem().vertex_average()(0) >= 0 && fi.elem().vertex_average()(1) > 0)
+    // {
+    //  _console << "wall_dist: " << wall_dist << std::endl;
+    //  _console << "parallel_speed: " << parallel_speed << std::endl;
+    //  _console << "u_tau: " << u_tau << std::endl;
+    //  _console << "rho: " << rho << std::endl;
+    //  _console << "mu: " << mu << std::endl;
+    //  _console << "mu_wall: " << mu_wall << std::endl;
+    //  _console << "------------------------" << std::endl;
+    // }
   }
   else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)
   {
