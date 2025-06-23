@@ -86,6 +86,15 @@ public:
 
   MaterialBase(const InputParameters & parameters);
 
+#ifdef MOOSE_GPU_SCOPE
+  /**
+   * Class copy constructor
+   * Used for dispatching GPU parallel calculation.
+   * Only defined for GPU objects.
+   */
+  MaterialBase(const MaterialBase & object);
+#endif
+
   /**
    * Initialize stateful properties (if material has some)
    *
@@ -228,6 +237,11 @@ public:
    * @return Whether this material has stateful properties
    */
   bool hasStatefulProperties() const { return _has_stateful_property; }
+
+  /**
+   * @return Whether this material has restored properties
+   */
+  bool hasRestoredProperties() const;
 
   /**
    * Whether this material supports ghosted computations. This is important for finite volume
@@ -374,6 +388,9 @@ protected:
 
   const FaceInfo * _face_info = nullptr;
 
+  /// Suffix to append to the name of the material property/ies when declaring it/them
+  const MaterialPropertyName _declare_suffix;
+
 private:
   /**
    * Helper method for adding a material property name to the material property requested set
@@ -404,9 +421,6 @@ private:
    * @return The maximum number of quadrature points in use on any element in this problem.
    */
   unsigned int getMaxQps() const;
-
-  /// Suffix to append to the name of the material property/ies when declaring it/them
-  const MaterialPropertyName _declare_suffix;
 
   /// Whether or not to force stateful init; see forceStatefulInit()
   const bool _force_stateful_init;

@@ -46,4 +46,10 @@ FEProblemBase::initGPU()
   auto & aux = getAuxiliarySystem();
   new (&_gpu_systems[aux.number()]) GPUSystem(aux);
   _gpu_systems[aux.number()].init();
+
+  // Initialize GPU material properties
+
+  _gpu_material_props.allocateGPUProperties();
+  _gpu_bnd_material_props.allocateGPUProperties();
+  _gpu_neighbor_material_props.allocateGPUProperties();
 }

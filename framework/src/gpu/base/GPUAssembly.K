@@ -87,6 +87,22 @@ GPUAssembly::initQuadrature()
   _max_qps_per_elem.create(_n_subdomains + 1);
   _max_qps_per_elem = 0;
 
+  // Find boundaries where material properties should be computed
+
+  auto & boundary_objects =
+      _problem.getMaterialPropertyStorageConsumers(Moose::BOUNDARY_MATERIAL_DATA, true);
+
+  for (auto object : boundary_objects)
+  {
+    auto boundary_restriction = dynamic_cast<const BoundaryRestrictable *>(object);
+
+    if (boundary_restriction)
+      for (auto boundary : boundary_restriction->boundaryIDs())
+        _material_boundaries.insert(boundary);
+    else
+      mooseError("GPUAssembly error: ", object->name(), " is not boundary-restricted.");
+  }
+
   // Cache quadrature data
 
   for (auto subdomain : _mesh.meshSubdomains())
@@ -165,7 +181,7 @@ GPUAssembly::initQuadrature()
     std::exclusive_scan(_qp_offset[sid].begin(), _qp_offset[sid].end(), _qp_offset[sid].begin(), 0);
   }
 
-  for (auto boundary : _mesh.meshBoundaryIDs())
+  for (auto boundary : _material_boundaries)
     for (auto elem_id : _mesh.getBoundaryActiveSemiLocalElemIds(boundary))
     {
       auto elem = _mesh.elemPtr(elem_id);
