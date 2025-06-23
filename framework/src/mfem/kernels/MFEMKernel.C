@@ -41,7 +41,8 @@ MFEMKernel::MFEMKernel(const InputParameters & parameters)
     _subdomain_attributes[i] = std::stoi(_subdomain_names[i]);
   }
   mfem::ParMesh & mesh(getMFEMProblem().mesh().getMFEMParMesh());
-  mfem::common::AttrToMarker(mesh.attributes.Max(), _subdomain_attributes, _subdomain_markers);
+  if (!_subdomain_attributes.IsEmpty())
+    mfem::common::AttrToMarker(mesh.attributes.Max(), _subdomain_attributes, _subdomain_markers);
 }
 
 #endif
