@@ -1,0 +1,64 @@
+[Tests]
+  issues = '#39655'
+  design = 'syntax/Materials/index.md'
+
+  [restart]
+    [write_checkpoint]
+      type = RunApp
+      input = 'gpu_stateful_prop_spatial_test.i'
+      requirement = 'The GPU system shall be able to write stateful material properties into a checkpoint file.'
+      capabilities = 'kokkos'
+    []
+    [load_checkpoint]
+      type = Exodiff
+      input = 'gpu_stateful_prop_spatial_test_restart.i'
+      exodiff = 'out_spatial_gpu.e'
+      requirement = 'The GPU system shall be able to restart a transient calculation by loading a checkpoint file that includes stateful material properties.'
+      capabilities = 'kokkos'
+      prereq = 'restart/write_checkpoint'
+    []
+  []
+
+  [error]
+    [not_stored]
+      type = RunException
+      input = 'gpu_stateful_prop_spatial_test_restart.i'
+      expect_err = 'The stateful material properties in GPUStatefulSpatialTest \"stateful\" that are being restarted do not match the stored properties in the same material object from the checkpoint.'
+      cli_args = 'GPUKernels/heat/prop_name=other
+                  GPUBCs/right/prop_name=other
+                  GPUMaterials/stateful/prop_name=other'
+      requirement = 'The GPU system shall error when a restarted material declares a stateful material property that was not stored.'
+      capabilities = 'kokkos'
+      prereq = 'restart/write_checkpoint'
+    []
+    [state_mismatch]
+      type = RunException
+      input = 'gpu_stateful_prop_spatial_test_restart.i'
+      expect_err = 'The number of states for the restarted stateful material property \'thermal_conductivity\' do not match.'
+      cli_args = 'GPUMaterials/stateful/declare_older=true'
+      requirement = 'The GPU system shall error when a restarted material declares a stateful material property that has different number of states with the stored property.'
+      capabilities = 'kokkos'
+      prereq = 'restart/write_checkpoint'
+    []
+    [ambiguity]
+      type = RunException
+      input = 'gpu_stateful_prop_spatial_test_restart.i'
+      expect_err = 'The stateful material property \'thermal_conductivity\' was declared in GPUStatefulSpatialTest \"another_stateful\" but was not declared in that object on checkpoint.'
+      cli_args = 'GPUMaterials/active=another_stateful'
+      requirement = 'The GPU system shall error when '
+      capabilities = 'kokkos'
+      prereq = 'restart/write_checkpoint'
+    []
+    [pass]
+      type = RunApp
+      input = 'gpu_stateful_prop_spatial_test_restart.i'
+      cli_args = 'GPUKernels/heat/prop_name=other
+                  GPUBCs/right/prop_name=other
+                  GPUMaterials/another_stateful/prop_name=other
+                  GPUMaterials/active=another_stateful'
+      requirement = 'The GPU system shall not error when a new material declares a new stateful property in the restarted calculation.'
+      capabilities = 'kokkos'
+      prereq = 'restart/write_checkpoint'
+    []
+  []
+[]
