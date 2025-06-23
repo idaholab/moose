@@ -86,6 +86,8 @@ The types of operators available to define a `CSGRegion` using `CSGSurface` obje
 | `&`      | intersection       | `-surfA & +surfB`     |
 | `|`      | union              | `-surfA` `|` `+surfB` |
 | `~`      | complement         | `~(-surfA & +surfB)`  |
+| `&=`     | update existing region with an intersection | `region1 &= -surfA` |
+| `|``=`   | update existing region with a union | `region1` `|``= +surfB` |
 
 The following is an example of using a combination of all operators to define the space outside a cylinder of a finite height that is topped with a half-sphere.
 Each of the halfspaces associated with each surface are shown in [!ref](fig:region_surfs).
