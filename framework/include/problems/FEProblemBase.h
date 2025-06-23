@@ -9,6 +9,11 @@
 
 #pragma once
 
+#ifdef MOOSE_HAVE_GPU
+#include "GPUAssembly.h"
+#include "GPUSystem.h"
+#endif
+
 // MOOSE includes
 #include "SubProblem.h"
 #include "GeometricSearchData.h"
@@ -314,6 +319,11 @@ public:
   virtual Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) override;
   virtual const Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) const override;
 
+#ifdef MOOSE_HAVE_GPU
+  GPUAssembly & gpuAssembly() { return _gpu_assembly; }
+  const GPUAssembly & gpuAssembly() const { return _gpu_assembly; }
+#endif
+
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
    */
@@ -389,6 +399,10 @@ public:
 
   virtual void init() override;
   virtual void solve(const unsigned int nl_sys_num);
+
+#ifdef MOOSE_HAVE_GPU
+  void initGPU();
+#endif
 
   /**
    * Build and solve a linear system
@@ -755,6 +769,11 @@ public:
   virtual SystemBase & systemBaseAuxiliary() override;
 
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
+
+#ifdef MOOSE_HAVE_GPU
+  GPUArray<GPUSystem> & getGPUSystems() { return _gpu_systems; }
+  const GPUArray<GPUSystem> & getGPUSystems() const { return _gpu_systems; }
+#endif
 
   /**
    * Get constant reference to a system in this problem
@@ -2543,6 +2562,8 @@ public:
 
   void createTagMatrices(CreateTaggedMatrixKey);
 
+  bool hasGPUObjects() { return _have_GPU_objects; }
+
 protected:
   /**
    * Deprecated. Users should switch to overriding the meshChanged which takes arguments
@@ -2687,12 +2708,20 @@ protected:
   Moose::CouplingType _coupling;                             ///< Type of variable coupling
   std::vector<std::unique_ptr<libMesh::CouplingMatrix>> _cm; ///< Coupling matrix for variables.
 
+#ifdef MOOSE_HAVE_GPU
+  GPUArray<GPUSystem> _gpu_systems;
+#endif
+
   /// Dimension of the subspace spanned by the vectors with a given prefix
   std::map<std::string, unsigned int> _subspace_dim;
 
   /// The Assembly objects. The first index corresponds to the thread ID and the second index
   /// corresponds to the nonlinear system number
   std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
+
+#ifdef MOOSE_HAVE_GPU
+  GPUAssembly _gpu_assembly;
+#endif
 
   /// Warehouse to store mesh divisions
   /// NOTE: this could probably be moved to the MooseMesh instead of the Problem
@@ -3130,6 +3159,9 @@ private:
 
   /// nonlocal coupling requirement flag
   bool _requires_nonlocal_coupling;
+
+  /// Whether we have any GPU objects
+  bool _have_GPU_objects = false;
 
   friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,
                                                         const std::string & value,
