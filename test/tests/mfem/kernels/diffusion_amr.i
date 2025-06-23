@@ -104,7 +104,6 @@
 [Executioner]
   type       = MFEMSteady
   device     = cpu
-  fe_space   = H1FESpace
 []
 
 [Outputs]
