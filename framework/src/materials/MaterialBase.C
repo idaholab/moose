@@ -151,6 +151,16 @@ MaterialBase::checkStatefulSanity() const
                  "' is undefined");
 }
 
+bool
+MaterialBase::hasRestoredProperties() const
+{
+  for (auto & prop : _supplied_props)
+    if (materialData().getMaterialPropertyStorage().isRestoredProperty(prop))
+      return true;
+
+  return false;
+}
+
 void
 MaterialBase::registerPropName(const std::string & prop_name, bool is_get, const unsigned int state)
 {
