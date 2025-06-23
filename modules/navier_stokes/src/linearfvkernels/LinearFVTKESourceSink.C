@@ -201,7 +201,6 @@ LinearFVTKESourceSink::computeRightHandSideContribution()
     auto production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
     // k-Production limiter (needed for flows with stagnation zones)
-    // const auto old_state = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
     const Real production_limit = _C_pl * _rho(elem_arg, state) * _epsilon(elem_arg, state);
 
     // Apply production limiter
