@@ -28,8 +28,7 @@ MFEMVectorNormalIntegratedBC::validParams()
 // TODO: Currently assumes the vector function coefficient is 3D
 MFEMVectorNormalIntegratedBC::MFEMVectorNormalIntegratedBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _vec_coef_name(getParam<MFEMVectorCoefficientName>("vector_coefficient")),
-    _vec_coef(getVectorCoefficient(_vec_coef_name))
+    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
 {
 }
 

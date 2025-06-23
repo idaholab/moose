@@ -27,8 +27,7 @@ MFEMScalarBoundaryIntegratedBC::validParams()
 
 MFEMScalarBoundaryIntegratedBC::MFEMScalarBoundaryIntegratedBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
-    _coef(getScalarCoefficient(_coef_name))
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
 {
 }
 
