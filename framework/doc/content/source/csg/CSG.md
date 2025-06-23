@@ -240,7 +240,7 @@ ExampleAxialSurfaceMeshGenerator::generateCSG()
   csg_obj->updateCellRegion(cell_ptr, cell_region);
 
   // rename the root universe which currently contains just the cell defined by cell_ptr
-  csg_obj->renameRootUniverse(mg_name + "_finite_prism");
+  csg_obj->renameRootUniverse(mg_name + "_finite_prism_univ");
 
   return csg_obj;
 }
@@ -248,10 +248,106 @@ ExampleAxialSurfaceMeshGenerator::generateCSG()
 
 If the above methods were to be used, the following input would generate the corresponding [!ac](JSON) input below.
 
-add example input block
+Example Input:
 
-add example json output block
+```
+[Mesh]
+  [Prism]
+    type = ExamplePrismCSGMeshGenerator
+    side_length = 4
+  []
+  [Cube]
+    type = ExampleAxialSurfaceMeshGenerator
+    input = InfSq
+    axial_height = 5
+  []
+[]
+```
 
+Example Output:
+
+```json
+{
+  "CELLS": {
+    "Prism_square_cell": {
+      "FILL": "square_material",
+      "FILLTYPE": "MATERIAL",
+      "REGION":
+          "(+Prism_surf_plus_x & -Prism_surf_minus_x & -Prism_surf_plus_y & +Prism_surf_minus_y & -Cube_surf_plus_z & +Cube_surf_minus_z)"
+    }
+  },
+  "SURFACES": {
+    "Prism_surf_minus_x": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 2.0
+      },
+      "TYPE": "plane"
+    },
+    "Prism_surf_minus_y": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -2.0
+      },
+      "TYPE": "plane"
+    },
+    "Cube_surf_minus_z": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": -2.5
+      },
+      "TYPE": "plane"
+    },
+    "Prism_surf_plus_x": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -2.0
+      },
+      "TYPE": "plane"
+    },
+    "Prism_surf_plus_y": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 2.0
+      },
+      "TYPE": "plane"
+    },
+    "Cube_surf_plus_z": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": 2.5
+      },
+      "TYPE": "plane"
+    }
+  },
+  "UNIVERSES": {
+    "Prism_finite_prism_univ": {
+      "CELLS": [
+        "Prism_square_cell"
+      ],
+      "ROOT": true
+    }
+  }
+}
+```
 
 ### Output
 
