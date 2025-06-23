@@ -62,6 +62,7 @@ class RandomData;
 class MeshChangedInterface;
 class MultiMooseEnum;
 class MaterialPropertyStorage;
+class GPUMaterialPropertyStorage;
 class MaterialData;
 class MooseEnum;
 class Assembly;
@@ -1680,6 +1681,18 @@ public:
   {
     return _neighbor_material_props;
   }
+
+#ifdef MOOSE_HAVE_GPU
+  GPUMaterialPropertyStorage & getGPUMaterialPropertyStorage() { return _gpu_material_props; }
+  GPUMaterialPropertyStorage & getGPUBndMaterialPropertyStorage()
+  {
+    return _gpu_bnd_material_props;
+  }
+  GPUMaterialPropertyStorage & getGPUNeighborMaterialPropertyStorage()
+  {
+    return _gpu_neighbor_material_props;
+  }
+#endif
   ///@}
 
   /**
@@ -1907,10 +1920,19 @@ public:
                                             const THREAD_ID tid = 0,
                                             bool no_warn = false);
 
-  /*
+  /**
    * @return The MaterialData for the type \p type for thread \p tid
    */
-  MaterialData & getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid = 0) const;
+  MaterialData & getMaterialData(Moose::MaterialDataType type,
+                                 const THREAD_ID tid = 0,
+                                 const MooseObject * object = nullptr,
+                                 bool is_gpu = false) const;
+
+  /**
+   * @return The consumers of the MaterialPropertyStorage for the type \p type
+   */
+  const std::set<const MooseObject *> &
+  getMaterialPropertyStorageConsumers(Moose::MaterialDataType type, bool is_gpu = false) const;
 
   /**
    * @returns Whether the original matrix nonzero pattern is restored before each Jacobian assembly
@@ -2635,6 +2657,11 @@ protected:
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;
 
+#ifdef MOOSE_HAVE_GPU
+  GPUMaterialPropertyStorage & _gpu_material_props;
+  GPUMaterialPropertyStorage & _gpu_bnd_material_props;
+  GPUMaterialPropertyStorage & _gpu_neighbor_material_props;
+#endif
   ///@{
   // Material Warehouses
   MaterialWarehouse _materials;           // regular materials
