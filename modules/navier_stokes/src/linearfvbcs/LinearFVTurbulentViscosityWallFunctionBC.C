@@ -28,7 +28,7 @@ LinearFVTurbulentViscosityWallFunctionBC::validParams()
 
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
   params.addParam<MooseEnum>(
-    "wall_treatment", wall_treatment, "The method used for computing the wall functions");
+      "wall_treatment", wall_treatment, "The method used for computing the wall functions");
   return params;
 }
 
@@ -54,7 +54,7 @@ LinearFVTurbulentViscosityWallFunctionBC::computeTurbulentViscosity() const
   // Utility functions
   const Real wall_dist = computeCellToFaceDistance();
   const auto re = makeElemArg(&_current_face_info->elem());
-  const auto t = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear); //determineState();
+  const auto t = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear); // determineState();
   const auto mu = _mu(re, t);
   const auto rho = _rho(re, t);
 
@@ -66,8 +66,8 @@ LinearFVTurbulentViscosityWallFunctionBC::computeTurbulentViscosity() const
     velocity(2) = (*_w_var)(re, t);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
-  const auto parallel_speed =
-      NS::computeSpeed<Real>(velocity - velocity * (_current_face_info->normal()) * (_current_face_info->normal()));
+  const auto parallel_speed = NS::computeSpeed<Real>(
+      velocity - velocity * (_current_face_info->normal()) * (_current_face_info->normal()));
 
   // Switch for determining the near wall quantities
   // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
@@ -83,7 +83,8 @@ LinearFVTurbulentViscosityWallFunctionBC::computeTurbulentViscosity() const
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
     mut_log = mu_wall - mu;
 
-    // if(_current_face_info->elem().vertex_average()(0) >= 0 && _current_face_info->elem().vertex_average()(1) > 0)
+    // if(_current_face_info->elem().vertex_average()(0) >= 0 &&
+    // _current_face_info->elem().vertex_average()(1) > 0)
     // {
     //  _console << "wall_dist: " << wall_dist << std::endl;
     //  _console << "parallel_speed: " << parallel_speed << std::endl;
@@ -107,7 +108,7 @@ LinearFVTurbulentViscosityWallFunctionBC::computeTurbulentViscosity() const
     // Linearized approximation to the wall function to find the near-wall quantities faster
     const Real a_c = 1 / NS::von_karman_constant;
     const Real b_c = 1 / NS::von_karman_constant *
-                       (std::log(NS::E_turb_constant * std::max(wall_dist, 1.0) / mu) + 1.0);
+                     (std::log(NS::E_turb_constant * std::max(wall_dist, 1.0) / mu) + 1.0);
     const Real c_c = parallel_speed;
 
     const auto u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
@@ -118,8 +119,7 @@ LinearFVTurbulentViscosityWallFunctionBC::computeTurbulentViscosity() const
   else if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
   {
     // Assign non-equilibrium wall function value
-    y_plus =
-        std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(re, t)) * rho / mu;
+    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(re, t)) * rho / mu;
     mu_wall = mu * (NS::von_karman_constant * y_plus /
                     std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)));
     mut_log = mu_wall - mu;
@@ -160,8 +160,7 @@ LinearFVTurbulentViscosityWallFunctionBC::computeBoundaryNormalGradient() const
                                         ? _current_face_info->elemPtr()
                                         : _current_face_info->neighborPtr());
   const Real distance = computeCellToFaceDistance();
-  return (this->computeTurbulentViscosity() -
-          raw_value(_var(elem_arg, determineState()))) /
+  return (this->computeTurbulentViscosity() - raw_value(_var(elem_arg, determineState()))) /
          distance;
 }
 
@@ -193,6 +192,5 @@ LinearFVTurbulentViscosityWallFunctionBC::computeBoundaryGradientRHSContribution
 {
   // The boundary term from the central difference approximation of the
   // normal gradient.
-  return this->computeTurbulentViscosity() /
-         computeCellToFaceDistance();
+  return this->computeTurbulentViscosity() / computeCellToFaceDistance();
 }

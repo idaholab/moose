@@ -10,6 +10,7 @@
 #pragma once
 
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "NS.h"
 
 /**
  * Class implementing a Dirichlet boundary condition for linear finite
