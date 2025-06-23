@@ -32,6 +32,7 @@ void
 EquationSystemProblemOperator::AddEstimator(std::shared_ptr<MFEMEstimator> estimator)
 {
   _estimator = estimator;
+  SetUpAMR();
 }
 
 void
