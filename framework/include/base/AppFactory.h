@@ -20,6 +20,13 @@ class GTEST_TEST_CLASS_NAME_(AppFactoryTest, manageAppParams);
 class GTEST_TEST_CLASS_NAME_(AppFactoryTest, appCopyConstructParams);
 #endif
 
+#ifdef MOOSE_UNIT_TEST
+// forward declare unit tests
+#include "gtest/gtest.h"
+class GTEST_TEST_CLASS_NAME_(AppFactoryTest, manageAppParams);
+class GTEST_TEST_CLASS_NAME_(AppFactoryTest, createNotRegistered);
+#endif
+
 /**
  * Macros
  */
@@ -179,6 +186,13 @@ protected:
   AppFactoryBuildInfoMap _name_to_build_info;
 
 private:
+  /**
+   * Stores the given parameters within _input_parameters for app construction
+   *
+   * Also calls finalize() on the parameters
+   */
+  const InputParameters & storeAppParams(InputParameters & params);
+
   /**
    * Get the ID for the InputParameters associated with an application, used
    * in storing them in _input_parameters.

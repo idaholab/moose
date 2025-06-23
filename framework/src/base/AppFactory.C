@@ -128,7 +128,7 @@ AppFactory::create(const std::string & app_type,
   // Error if the application type is not located
   const auto it = _name_to_build_info.find(app_type);
   if (it == _name_to_build_info.end())
-    mooseError("Application '" + app_type + "' was not registered.");
+    mooseError("AppFactory::Create(): Application '" + app_type + "' was not registered");
   auto & build_info = it->second;
 
   auto comm = std::make_shared<Parallel::Communicator>(comm_world_in);
