@@ -15,31 +15,13 @@ namespace StochasticTools
 void
 Standardizer::set(const Real & n)
 {
-  std::vector<Real> mean;
-  std::vector<Real> stdev;
-  //_mean.clear();
-  //_stdev.clear();
-  for (unsigned int ii = 0; ii < n; ++ii)
-  {
-    mean.push_back(0);
-    stdev.push_back(1);
-  }
-  auto options = torch::TensorOptions().dtype(at::kDouble);
-  unsigned int num_samples = n;
-  unsigned int num_inputs = 1;
-  _mean = torch::from_blob(mean.data(), {num_samples, num_inputs}, options).to(at::kDouble);
-  //_mean = torch::from_blob(mean_vector);
-  _stdev = torch::from_blob(stdev.data(), {num_samples, num_inputs}, options).to(at::kDouble);
+  _mean = torch::zeros({long(n), 1}, at::kDouble);
+  _stdev = torch::ones({long(n), 1}, at::kDouble);
 }
 
 void
 Standardizer::set(const Real & mean, const Real & stdev)
 {
-  //_mean.clear();
-  //_stdev.clear();
-  //_mean.push_back(mean);
-  //_stdev.push_back(stdev);
-
   std::vector<Real> mean_vec;
   std::vector<Real> stdev_vec;
   mean_vec.push_back(mean);
@@ -53,16 +35,9 @@ Standardizer::set(const Real & mean, const Real & stdev)
 void
 Standardizer::set(const Real & mean, const Real & stdev, const Real & n)
 {
-  std::vector<Real> mean_vec;
-  std::vector<Real> stdev_vec;
-  for (unsigned int ii = 0; ii < n; ++ii)
-  {
-    mean_vec.push_back(mean);
-    stdev_vec.push_back(stdev);
-  }
   auto options = torch::TensorOptions().dtype(at::kDouble);
-  _mean = torch::from_blob(mean_vec.data(), {long(n), 1}, options).to(at::kDouble).clone();
-  _stdev = torch::from_blob(stdev_vec.data(), {long(n), 1}, options).to(at::kDouble).clone();
+  _mean = mean * torch::ones({long(n), 1}, options).to(at::kDouble).clone();
+  _stdev = stdev * torch::ones({long(n), 1}, options).to(at::kDouble).clone();
 }
 
 void
@@ -106,14 +81,14 @@ Standardizer::getDestandardized(torch::Tensor & input) const
 {
   torch::Tensor mean = torch::transpose(_mean, 0, 1);
   torch::Tensor stdev = torch::transpose(_stdev, 0, 1);
-  input = (torch::mm(input, stdev) + mean);
+  input = ((input * stdev) + mean);
 }
 
 void
 Standardizer::getDescaled(torch::Tensor & input) const
 {
   torch::Tensor stdev = torch::transpose(_stdev, 0, 1);
-  input = torch::mm(input, stdev);
+  input = (input * stdev);
 }
 
 /// Helper for dataStore
