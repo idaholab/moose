@@ -304,6 +304,10 @@ public:
 
   void setInitialSolution();
 
+#ifdef MOOSE_HAVE_GPU
+  void setGPUInitialSolution();
+#endif
+
   /**
    * Sets the value of constrained variables in the solution vector.
    */
@@ -763,6 +767,13 @@ protected:
   void computeResidualInternal(const std::set<TagID> & tags);
 
   /**
+   * Compute residual on GPU
+   */
+#ifdef MOOSE_HAVE_GPU
+  void computeGPUResidual(const std::set<TagID> & tags);
+#endif
+
+  /**
    * Enforces nodal boundary conditions. The boundary condition will be implemented
    * in the residual using all the tags in the system.
    */
@@ -787,6 +798,13 @@ protected:
    * Form multiple matrices for all the tags. Users should not call this func directly.
    */
   void computeJacobianInternal(const std::set<TagID> & tags);
+
+  /**
+   * Compute Jacobian on GPU
+   */
+#ifdef MOOSE_HAVE_GPU
+  void computeGPUJacobian(const std::set<TagID> & tags);
+#endif
 
   void computeDiracContributions(const std::set<TagID> & tags, bool is_jacobian);
 

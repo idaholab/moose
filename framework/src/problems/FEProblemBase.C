@@ -8580,6 +8580,11 @@ FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const
     Threads::parallel_reduce(elem_range, cmt);
   else
     cmt(elem_range, true);
+
+#ifdef MOOSE_HAVE_GPU
+  if (_have_GPU_objects)
+    initGPUStatefulProps();
+#endif
 }
 
 void

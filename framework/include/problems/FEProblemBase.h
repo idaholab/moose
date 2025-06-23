@@ -1093,6 +1093,11 @@ public:
   void
   reinitMaterialsInterface(BoundaryID boundary_id, const THREAD_ID tid, bool swap_stateful = true);
 
+#ifdef MOOSE_HAVE_GPU
+  void prepareGPUMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props);
+  void reinitGPUMaterials();
+#endif
+
   /*
    * Swap back underlying data storing stateful material properties
    */
@@ -1887,6 +1892,10 @@ public:
    * at an intermediate step
    */
   void initElementStatefulProps(const libMesh::ConstElemRange & elem_range, const bool threaded);
+
+#ifdef MOOSE_HAVE_GPU
+  void initGPUStatefulProps();
+#endif
 
   /**
    * Method called to perform a series of sanity checks before a simulation is run. This method
