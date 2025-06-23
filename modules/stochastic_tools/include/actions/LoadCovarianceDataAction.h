@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
 #include "Action.h"
@@ -22,3 +24,5 @@ public:
 private:
   void load(GaussianProcessSurrogate & model);
 };
+
+#endif

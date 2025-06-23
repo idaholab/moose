@@ -47,9 +47,8 @@ LibtorchANNSurrogate::evaluate(const std::vector<Real> & x) const
   auto input_mean_accessor = input_mean.accessor<Real, 2>();
   auto input_std_accessor = input_std.accessor<Real, 2>();
 
-  unsigned int i_mean = input_mean.sizes()[0];
-  unsigned int i_std = input_std.sizes()[0];
-  mooseAssert(i_mean == converted_input.size() && i_std == converted_input.size(),
+  mooseAssert(input_mean.sizes()[0] == converted_input.size() &&
+                  input_std.sizes()[0] == converted_input.size(),
               "The input standardizer's dimensions should be the same as the input dimension!");
 
   for (auto input_i : index_range(converted_input))
