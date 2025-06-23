@@ -9,6 +9,10 @@
 
 #pragma once
 
+#ifdef MOOSE_GPU_SCOPE
+#include "GPUVariableValue.h"
+#endif
+
 #include <unordered_map>
 #include "MooseTypes.h"
 #include "MooseArray.h"
@@ -1812,6 +1816,88 @@ private:
 
   /// keep a set of allocated writable variable references to make sure only one object can obtain them per thread
   std::vector<std::set<MooseWritableVariable *>> _writable_coupled_variables;
+
+  /**
+   * GPU-related variables and methods
+   */
+private:
+  const Real _GPU_default_value_zero = 0;
+
+#ifdef MOOSE_GPU_SCOPE
+  GPUVariable GPUCoupledVectorTagVariable(const std::string & var_name,
+                                          const std::string & tag_name,
+                                          unsigned int comp);
+  GPUVariable GPUCoupledVectorTagVariables(const std::string & var_name,
+                                           const std::string & tag_name);
+  GPUVariable GPUZeroVariable();
+
+public:
+  GPUVariableValue GPUCoupledVectorTagValueByName(const std::string & var_name,
+                                                  const std::string & tag_name,
+                                                  unsigned int comp = 0);
+  GPUVariableValue GPUCoupledVectorTagValuesByName(const std::string & var_name,
+                                                   const std::string & tag_name);
+  GPUVariableGradient GPUCoupledVectorTagGradientByName(const std::string & var_name,
+                                                        const std::string & tag_name,
+                                                        unsigned int comp = 0);
+  GPUVariableGradient GPUCoupledVectorTagGradientsByName(const std::string & var_name,
+                                                         const std::string & tag_name);
+  GPUVariableNodalValue GPUCoupledVectorTagNodalValueByName(const std::string & var_name,
+                                                            const std::string & tag_name,
+                                                            unsigned int comp = 0);
+  GPUVariableNodalValue GPUCoupledVectorTagNodalValuesByName(const std::string & var_name,
+                                                             const std::string & tag_name);
+
+  GPUVariableValue GPUCoupledVectorTagValue(const std::string & var_name,
+                                            const std::string & tag_param_name,
+                                            unsigned int comp = 0);
+  GPUVariableValue GPUCoupledVectorTagValues(const std::string & var_name,
+                                             const std::string & tag_param_name);
+  GPUVariableGradient GPUCoupledVectorTagGradient(const std::string & var_name,
+                                                  const std::string & tag_param_name,
+                                                  unsigned int comp = 0);
+  GPUVariableGradient GPUCoupledVectorTagGradients(const std::string & var_name,
+                                                   const std::string & tag_param_name);
+  GPUVariableNodalValue GPUCoupledVectorTagNodalValue(const std::string & var_name,
+                                                      const std::string & tag_param_name,
+                                                      unsigned int comp = 0);
+  GPUVariableNodalValue GPUCoupledVectorTagNodalValues(const std::string & var_name,
+                                                       const std::string & tag_param_name);
+
+  GPUVariableValue GPUCoupledValue(const std::string & var_name, unsigned int comp = 0);
+  GPUVariableValue GPUCoupledValues(const std::string & var_name);
+  GPUVariableGradient GPUCoupledGradient(const std::string & var_name, unsigned int comp = 0);
+  GPUVariableGradient GPUCoupledGradients(const std::string & var_name);
+  GPUVariableNodalValue GPUCoupledNodalValue(const std::string & var_name, unsigned int comp = 0);
+  GPUVariableNodalValue GPUCoupledNodalValues(const std::string & var_name);
+
+  GPUVariableValue GPUCoupledValueOld(const std::string & var_name, unsigned int comp = 0);
+  GPUVariableValue GPUCoupledValuesOld(const std::string & var_name);
+  GPUVariableGradient GPUCoupledGradientOld(const std::string & var_name, unsigned int comp = 0);
+  GPUVariableGradient GPUCoupledGradientsOld(const std::string & var_name);
+  GPUVariableNodalValue GPUCoupledNodalValueOld(const std::string & var_name,
+                                                unsigned int comp = 0);
+  GPUVariableNodalValue GPUCoupledNodalValuesOld(const std::string & var_name);
+
+  GPUVariableValue GPUCoupledValueOlder(const std::string & var_name, unsigned int comp = 0);
+  GPUVariableValue GPUCoupledValuesOlder(const std::string & var_name);
+  GPUVariableGradient GPUCoupledGradientOlder(const std::string & var_name, unsigned int comp = 0);
+  GPUVariableGradient GPUCoupledGradientsOlder(const std::string & var_name);
+  GPUVariableNodalValue GPUCoupledNodalValueOlder(const std::string & var_name,
+                                                  unsigned int comp = 0);
+  GPUVariableNodalValue GPUCoupledNodalValuesOlder(const std::string & var_name);
+
+  GPUVariableValue GPUCoupledDot(const std::string & var_name, unsigned int comp = 0);
+  GPUVariableValue GPUCoupledDots(const std::string & var_name);
+  GPUVariableNodalValue GPUCoupledNodalDot(const std::string & var_name, unsigned int comp = 0);
+  GPUVariableNodalValue GPUCoupledNodalDots(const std::string & var_name);
+
+  GPUScalar<const Real> GPUCoupledDotDu(const std::string & var_name, unsigned int comp = 0);
+
+  GPUVariableValue GPUZeroValue();
+  GPUVariableGradient GPUZeroGradient();
+  GPUVariableNodalValue GPUZeroNodalValue();
+#endif
 };
 
 template <typename T>
