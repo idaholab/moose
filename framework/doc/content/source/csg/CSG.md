@@ -57,6 +57,7 @@ InputParameters
 ExampleMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
+  // Example input parameter that is an existing mesh generator
   params.addRequiredParam<MeshGeneratorName>("input_mg", "The input MeshGenerator.");
   ...
   // Declare that this generator has a generateData method
@@ -99,7 +100,158 @@ Once a `CSGBase` object is obtained, it can be updated or joined to another exis
 
 ### Example Implementation
 
-provide an example of building a basic geometry using the CSGBase
+Provided here is an example implementation of the `generateCSG` method for a simple example [source/meshgenerators/MeshGenerator.md] that creates an infinite rectangular prism given an input parameter for `side_length`.
+The code snippets provided here correspond to the `.C` file.
+
+```cpp
+#include "CSGBase.h"
+
+InputParameters
+ExamplePrismCSGMeshGenerator::validParams()
+{
+  InputParameters params = MeshGenerator::validParams();
+  params.addRequiredParam<Real>("side_length", "Side length of infinite prism.");
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
+  // Declare that this generator has a generateCSG method
+  MeshGenerator::setHasGenerateCSG(params);
+  return params;
+}
+
+
+std::unique_ptr<CSG::CSGBase>
+ExamplePrismCSGMeshGenerator::generateCSG()
+{
+  // name of the current mesh generator to use for naming generated objects
+  auto mg_name = this->getName();
+
+  // initialize a CSGBase object
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+
+  // sets of points to use to define the 4 surfaces of the infinite prism
+  std::vector<std::vector<Point>> points_on_planes{{Point(1. * _side_length / 2., 0., 0.),
+                                                    Point(1. * _side_length / 2., 1., 0.),
+                                                    Point(1. * _side_length / 2., 0., 1.)},
+                                                   {Point(-1. * _side_length / 2., 0., 0.),
+                                                    Point(-1. * _side_length / 2., 1., 0.),
+                                                    Point(-1. * _side_length / 2., 0., 1.)},
+                                                   {Point(0., 1. * _side_length / 2., 0.),
+                                                    Point(1., 1. * _side_length / 2., 0.),
+                                                    Point(0., 1. * _side_length / 2., 1.)},
+                                                   {Point(0., -1. * _side_length / 2., 0.),
+                                                    Point(1., -1. * _side_length / 2., 0.),
+                                                    Point(0., -1. * _side_length / 2., 1.)}};
+  std::vector<std::string> surf_names{"plus_x", "minus_x", "plus_y", "minus_y"};
+
+  // initialize cell region to be updated
+  CSG::CSGRegion region;
+
+  // set the center of the prism to be used for determining halfspaces
+  const auto centroid = Point(0, 0, 0);
+
+  // create each plane and update the region to be used for the cell as each new plane is created
+  for (unsigned int i = 0; i < points_on_planes.size(); ++i)
+  {
+    // object name includes the mesh generator name for uniqueness
+    const auto surf_name = mg_name + "_surf_" + surf_names[i];
+    // create the plane for one face of the prism
+    auto plane_ptr = csg_obj->createPlaneFromPoints(
+        surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
+    // determine where the plane is in relation to the centroid to be able to set the halfspace
+    const auto region_direction = plane_ptr->directionFromPoint(centroid);
+    // halfspace is either positive (+plane_ptr) or negative (-plane_ptr)
+    / /depending on the direction to the centroid
+    auto halfspace =
+        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +plane_ptr : -plane_ptr);
+    // check if this is the first halfspace to be added to the region,
+    // if not, update the existing region with the intersection of the regions (&=)
+    if (region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
+      region = halfspace;
+    else
+      region &= halfspace;
+  }
+
+  // create the cell defined by the surfaces and region just created
+  const auto cell_name = mg_name + "_square_cell";
+  const auto material_name = "square_material";
+  csg_obj->createCell(cell_name, material_name, region);
+
+  return csg_obj;
+}
+```
+
+The following example builds on the infinite prism example above by taking a `MeshGeneratorName` for an existing `ExamplePrismCSGMeshGenerator` as input and adding planes to create a finite rectangular prism.
+
+```cpp
+InputParameters
+ExampleAxialSurfaceMeshGenerator::validParams()
+{
+  InputParameters params = MeshGenerator::validParams();
+  params.addRequiredParam<MeshGeneratorName>("input", "The input MeshGenerator.");
+  params.addRequiredParam<Real>("axial_height", "Axial height of output.");
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
+  // Declare that this generator has a generateCSG method
+  MeshGenerator::setHasGenerateCSG(params);
+  return params;
+}
+
+std::unique_ptr<CSG::CSGBase>
+ExampleAxialSurfaceMeshGenerator::generateCSG()
+{
+  // get the existing CSGBase associated with the input mesh generator
+  // this is the CSGBase object that will be updated
+  std::unique_ptr<CSG::CSGBase> csg_obj = std::move(getCSGBase("input"));
+
+  // get the names of the current mesh generator and the input mesh generator
+  // so that unique object naming can be enforced
+  auto mg_name = this->getName();
+  auto inp_name = getParam<MeshGeneratorName>("input");
+
+  // get the expected existing cell
+  const auto cell_name = inp_name + "_square_cell";
+  auto cell_ptr = csg_obj->getCellByName(cell_name);
+  // get the existing cell region to update
+  auto cell_region = cell_ptr->getRegion();
+
+  // centroid used to determine direction for halfspace
+  const auto centroid = Point(0, 0, 0);
+
+  // Add surfaces and halfspaces corresponding to top and bottom axial planes
+  std::vector<std::string> surf_names{"plus_z", "minus_z"};
+  std::vector<Real> coeffs{0.5 * _axial_height, -0.5 * _axial_height};
+  for (unsigned int i = 0; i < coeffs.size(); ++i)
+  {
+    // unique surface name
+    const auto surf_name = mg_name + "_surf_" + surf_names[i];
+
+    // create the plane
+    // z plane equation: 0.0*x + 0.0*y + 1.0*z = (+/-)0.5 * axial_height
+    auto plane_ptr = csg_obj->createPlaneFromCoefficients(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
+    // determine the halfspace to add as an updated intersection
+    const auto region_direction = plane_ptr->directionFromPoint(centroid);
+    auto halfspace =
+        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +plane_ptr : -plane_ptr);
+    // update the existing region with a halfspace
+    cell_region &= halfspace;
+  }
+
+  // set the new region for the existing cell
+  csg_obj->updateCellRegion(cell_ptr, cell_region);
+
+  // rename the root universe which currently contains just the cell defined by cell_ptr
+  csg_obj->renameRootUniverse(mg_name + "_finite_prism");
+
+  return csg_obj;
+}
+```
+
+If the above methods were to be used, the following input would generate the corresponding [!ac](JSON) input below.
+
+add example input block
+
+add example json output block
+
 
 ### Output
 
