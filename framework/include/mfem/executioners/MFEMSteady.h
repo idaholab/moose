@@ -27,8 +27,6 @@ protected:
   /// Iteration number obtained from the main application
   unsigned int _output_iteration_number;
 
-  std::string _fe_space_name;
-
 private:
   std::unique_ptr<Moose::MFEM::ProblemOperator> _problem_operator{nullptr};
 };

@@ -58,7 +58,7 @@ EquationSystemProblemOperator::HRefine()
 }
 
 bool
-EquationSystemProblemOperator::PRefine(std::shared_ptr<mfem::ParFiniteElementSpace> fespace)
+EquationSystemProblemOperator::PRefine()
 {
   bool output = false;
   if (_use_amr)
@@ -77,7 +77,7 @@ EquationSystemProblemOperator::PRefine(std::shared_ptr<mfem::ParFiniteElementSpa
       prefinements[i].delta = 1; // Increase the element order by 1
     }
 
-    fespace->PRefineAndUpdate(prefinements);
+    _estimator->getFESpace()->PRefineAndUpdate(prefinements);
     UpdateAfterRefinement();
   }
   return output;

@@ -21,8 +21,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _system_time(getParam<Real>("time")),
     _time_step(_mfem_problem.timeStep()),
     _time(_mfem_problem.time()),
-    _output_iteration_number(0),
-    _fe_space_name(getParam<std::string>("fe_space"))
+    _output_iteration_number(0)
 {
   _time = _system_time;
 }
@@ -81,13 +80,11 @@ MFEMSteady::execute()
   {
     _problem_operator->Solve(_problem_data.f);
 
-    if ( _use_amr and _fe_space_name != "none" )
+    if ( _use_amr )
     {
       // p-refine
-      auto fespace = _problem_data.fespaces.GetShared( _fe_space_name );
-      _problem_operator->PRefine( fespace );
+      _problem_operator->PRefine();
       _problem_operator->Solve(_problem_data.f);
-
     }
 
   }
