@@ -14,11 +14,15 @@
 CoupleableMooseVariableDependencyIntermediateInterface::
     CoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,
                                                            bool nodal,
-                                                           bool is_fv)
-  : Coupleable(moose_object, nodal, is_fv),
-    ScalarCoupleable(moose_object),
-    MooseVariableDependencyInterface(moose_object)
+                                                           bool is_fv,
+                                                           bool initialize)
+  : Coupleable(moose_object, nodal, is_fv, initialize),
+    ScalarCoupleable(moose_object, initialize),
+    MooseVariableDependencyInterface(moose_object, initialize)
 {
+  if (!initialize)
+    return;
+
   for (MooseVariableFEBase * coupled_var : getCoupledMooseVars())
     addMooseVariableDependency(coupled_var);
 }

@@ -23,7 +23,7 @@ SetupInterface::validParams()
   return params;
 }
 
-SetupInterface::SetupInterface(const MooseObject * moose_object)
+SetupInterface::SetupInterface(const MooseObject * moose_object, bool initialize)
   : _execute_enum(moose_object->parameters().isParamValid("execute_on")
                       ? moose_object->parameters().get<ExecFlagEnum>("execute_on")
                       : _empty_execute_enum),
@@ -31,6 +31,9 @@ SetupInterface::SetupInterface(const MooseObject * moose_object)
         (moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
             ->getCurrentExecuteOnFlag())
 {
+  if (!initialize)
+    return;
+
   _empty_execute_enum
       .clearSetValues(); // remove any flags for the case when "execute_on" is not used
 }

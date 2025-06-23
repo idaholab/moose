@@ -33,7 +33,9 @@ BoundaryRestrictable::validParams()
 }
 
 // Standard constructor
-BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object, bool nodal)
+BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object,
+                                           bool nodal,
+                                           bool initialize)
   : _bnd_feproblem(moose_object->isParamValid("_fe_problem_base")
                        ? moose_object->getParam<FEProblemBase *>("_fe_problem_base")
                        : NULL),
@@ -46,7 +48,8 @@ BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object, boo
     _bnd_nodal(nodal),
     _moose_object(*moose_object)
 {
-  initializeBoundaryRestrictable();
+  if (initialize)
+    initializeBoundaryRestrictable();
 }
 
 // Dual restricted constructor
