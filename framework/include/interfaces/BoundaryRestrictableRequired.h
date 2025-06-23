@@ -21,7 +21,9 @@
 class BoundaryRestrictableRequired : public BoundaryRestrictable
 {
 public:
-  BoundaryRestrictableRequired(const MooseObject * moose_object, bool nodal);
+  BoundaryRestrictableRequired(const MooseObject * moose_object,
+                               bool nodal,
+                               bool initialize = true);
 
   static InputParameters validParams();
 };

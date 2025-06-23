@@ -31,7 +31,10 @@ BoundaryRestrictableRequired::validParams()
 }
 
 BoundaryRestrictableRequired::BoundaryRestrictableRequired(const MooseObject * moose_object,
-                                                           bool nodal)
-  : BoundaryRestrictable(moose_object, nodal)
+                                                           bool nodal,
+                                                           bool initialize)
+  : BoundaryRestrictable(moose_object, nodal, initialize)
 {
+  if (!initialize)
+    return;
 }

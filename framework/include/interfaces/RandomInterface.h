@@ -31,7 +31,8 @@ public:
   RandomInterface(const InputParameters & parameters,
                   FEProblemBase & problem,
                   THREAD_ID tid,
-                  bool is_nodal);
+                  bool is_nodal,
+                  bool initialize = true);
 
   ~RandomInterface();
 

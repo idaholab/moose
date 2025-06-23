@@ -21,7 +21,7 @@ class ADFunctorInterface : public FunctorInterface
 public:
   static InputParameters validParams();
 
-  ADFunctorInterface(const MooseObject * moose_object);
+  ADFunctorInterface(const MooseObject * moose_object, bool initialize = true);
 
 private:
   virtual bool isADObject() const override { return true; }

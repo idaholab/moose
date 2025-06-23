@@ -24,7 +24,7 @@ TransientInterface::validParams()
   return params;
 }
 
-TransientInterface::TransientInterface(const MooseObject * moose_object)
+TransientInterface::TransientInterface(const MooseObject * moose_object, bool initialize)
   : _ti_params(moose_object->parameters()),
     _ti_feproblem(*_ti_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _is_implicit(_ti_params.have_parameter<bool>("implicit") ? _ti_params.get<bool>("implicit")
@@ -37,6 +37,8 @@ TransientInterface::TransientInterface(const MooseObject * moose_object)
     _is_transient(_ti_feproblem.isTransient()),
     _ti_name(MooseUtils::shortName(_ti_params.get<std::string>("_object_name")))
 {
+  if (!initialize)
+    return;
 }
 
 TransientInterface::~TransientInterface() {}

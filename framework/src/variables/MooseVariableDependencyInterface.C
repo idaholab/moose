@@ -18,7 +18,12 @@
 
 using namespace libMesh;
 
-MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject * const) {}
+MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject * const,
+                                                                   bool initialize)
+{
+  if (!initialize)
+    return;
+}
 
 template <typename DofObjectType>
 std::set<MooseVariableFieldBase *>
