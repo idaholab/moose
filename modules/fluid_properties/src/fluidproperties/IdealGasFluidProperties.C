@@ -194,6 +194,27 @@ IdealGasFluidProperties::c_from_p_T(
   dc_dT = 0.5 / c * _cp * _R / (_cv * _molar_mass);
 }
 
+Real
+IdealGasFluidProperties::beta_from_p_T(Real /*p*/, Real T) const
+{
+  return 1.0 / T;
+}
+
+ADReal
+IdealGasFluidProperties::beta_from_p_T(const ADReal & /*p*/, const ADReal & T) const
+{
+  return 1.0 / T;
+}
+
+void
+IdealGasFluidProperties::beta_from_p_T(
+    const Real /*p*/, const Real T, Real & beta, Real & dbeta_dp, Real & dbeta_dT) const
+{
+  beta = 1.0 / T;
+  dbeta_dp = 0;
+  dbeta_dT = -1.0 / Utility::pow<2>(T);
+}
+
 Real IdealGasFluidProperties::cp_from_v_e(Real, Real) const { return _cp; }
 
 void

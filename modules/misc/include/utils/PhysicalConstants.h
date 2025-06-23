@@ -31,4 +31,7 @@ const auto ideal_gas_constant = 8.31446261815324;
 // Stefan-Boltzmann constant [W/(m2-K^4)]
 // https://physics.nist.gov/cgi-bin/cuu/Value?sigma|search_for=Stefan-Boltzmann
 const auto stefan_boltzmann_constant = 5.670374419e-8;
+// Standard acceleration of gravity [m/s^2]
+// https://physics.nist.gov/cgi-bin/cuu/Value?gn
+const auto acceleration_of_gravity = 9.80665;
 } // namespace PhysicalConstants
