@@ -47,7 +47,8 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object, bool init
     _boundary_ids(_empty_boundary_ids),
     _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
     _blk_name(moose_object->name()),
-    _blk_dim(libMesh::invalid_uint)
+    _blk_dim(libMesh::invalid_uint),
+    _moose_object(moose_object)
 {
   if (initialize)
     initializeBlockRestrictable(moose_object);
@@ -176,6 +177,11 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
     _blk_dim = _blk_mesh->getBlocksMaxDimension(_blocks);
   else
     _blk_dim = _blk_mesh->dimension();
+
+#ifdef MOOSE_HAVE_GPU
+  if (moose_object->isParamValid("_gpu_object"))
+    initializeGPUBlockRestrictable(_blk_mesh->getGPUMesh());
+#endif
 }
 
 bool
