@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#39655'
+  design = 'bcs/NeumannBC.md'
+
+  [./test]
+    type = 'Exodiff'
+    input = 'gpu_1d_neumann.i'
+    exodiff = 'gpu_1d_neumann_out.e'
+    requirement = 'The GPU system shall support Neumann type boundary conditions for a 1D problem.'
+    capabilities = 'kokkos'
+  [../]
+[]
