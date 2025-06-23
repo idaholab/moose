@@ -1,4 +1,4 @@
-# CSG
+# Constructive Solid Geometry
 
 [!ac](CSG) is a geometry representation in which complex models are created through boolean combinations of surfaces, cells, and universes.
 [!ac](CSG) models are most commonly used for [!ac](MC) neutronics simulations.
@@ -58,6 +58,7 @@ InputParameters
 ExampleMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
+  params.addRequiredParam<MeshGeneratorName>("input_mg", "The input MeshGenerator.");
   ...
   // Declare that this generator has a generateData method
   MeshGenerator::setHasGenerateData(params);
