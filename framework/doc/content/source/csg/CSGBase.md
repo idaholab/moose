@@ -1,7 +1,7 @@
 # CSGBase
 
 `CSGBase` is the main class developers should interact with when implementing the `generateCSG` method for any mesh generator.
-This class acts as a container and driver for all methods necessary for creating a [constructive solid geometry (CSG)](source/csg/CSG.md) representation such as generating surfaces, cells, and universes of the mesh generator under consideration.
+This framework class acts as a container and driver for all methods necessary for creating a [constructive solid geometry (CSG)](source/csg/CSG.md) representation such as generating surfaces, cells, and universes of the mesh generator under consideration.
 
 !alert! note
 
@@ -9,7 +9,47 @@ Throughout this documentation, `csg_obj` will be used in example code blocks to 
 
 !alert-end!
 
-## Initialization
+## setHasGenerateCSG
+
+In order to call `generateCSG`, the `setHaseGenerateCSG` method must be called on the mesh generator to tell it that the method has been implemented.
+
+```cpp
+#include "CSGBase.h"
+
+InputParameters
+ExampleMeshGenerator::validParams()
+{
+  InputParameters params = MeshGenerator::validParams();
+  // Example input parameter that is an existing mesh generator
+  params.addRequiredParam<MeshGeneratorName>("input_mg", "The input MeshGenerator.");
+  ...
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
+  // Declare that this generator has a generateCSG method
+  MeshGenerator::setHasGenerateCSG(params);
+  return params;
+}
+```
+
+## generateCSG
+
+This section will describe the various components developers should implement into the `generateCSG` method for a given [source/meshgenerators/MeshGenerator.md].
+This method will return a unique pointer to the `CSGBase` object that was created or modified by the mesh generator in the `generateCSG` method.
+
+```cpp
+std::unique_ptr<CSG::CSGBase>
+ExampleMeshGenerator::generateCSG()
+{
+  // initialize a new CSGBase object
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+
+  // add in logic to make surface, cells, and universes as appropriate
+
+  return csg_obj;
+}
+```
+
+### Initialization
 
 A new `CSGBase` object can be initialized with:
 
@@ -20,12 +60,12 @@ auto csg_obj = std::make_unique<CSG::CSGBase>();
 Once initialized, surfaces, cells, and universes can be created and manipulated.
 The following sections explain in detail how to do this as a part of the `generateCSG` method.
 
-## Surfaces
+### Surfaces
 
 Various methods exist to create `CSGSurface` objects (below).
 All surface creation methods will return a shared pointer to that generated surface (`std::shared_ptr<CSGSurface>`).
 
-| Surface | Method | Description |
+| Surface Type | Method | Description |
 |---------|--------|------------|
 | Plane | `createPlaneFromPoints` | create a plane defined by 3 points |
 | Plane | `createPlaneFromCoefficients` | creates a plane based on the coefficients `a`, `b`, `c`, and `d` for the equation `ax + by + cz = d` |
@@ -71,7 +111,7 @@ auto ycyl = csg_obj->createCylinder('ycylinder', 1, 3, 5, 'y');
 auto zcyl = csg_obj->createCylinder('zcylinder', 1, 2, 5, 'z');
 ```
 
-## Regions
+### Regions
 
 A region is a space defined by boolean operations applied to surfaces and other regions.
 Halfspace regions are defined as the positive and negative space separated by a surface.
@@ -111,7 +151,7 @@ The complement of the previous combination then defines the final region `~((-cy
        id=fig:region3
        caption=A region defined as the *complement* of an existing region.
 
-## Cells
+### Cells
 
 A cell is an object defined by a region and a fill.
 To create any `CSGCell`, use the method `createCell` from `CSGBase` which will return a shared pointer to the `CSGCell` object that is created (`std::shared_ptr<CSGCell>`).
@@ -129,7 +169,7 @@ The `CSGCell` objects can then be accessed or updated with the following methods
 - `renameCell`: change the name of the `CSGCell`
 - `updateCellRegion`: change the region of the cell; if used, all `CSGSurface` objects used to define the new `CSGRegion` must also be a part of the current `CSGBase`
 
-## Universes
+### Universes
 
 A universe is a collection of cells and is created by calling `createUniverse` from `CSGBase` which will return a shared pointer to the `CSGUniverse` object (`std::shared_ptr<CSGUniverse>`).
 A `CSGUniverse` can be initialized as an empty universe, or by passing a vector of shared pointers to `CSGCell` objects.
@@ -144,7 +184,7 @@ auto empty_universe = csg_obj->createUniverse("empty_universe");
 auto new_universe = csg_obj->createUniverse("new_universe", list_of_cells);
 ```
 
-### Root Universe
+#### Root Universe
 
 In theory, all universes in a model can be traced back to a singular overarching universe known as the root universe.
 Because universes are a collection of cells and cells can be filled with universe, a tree of universes can be constructed such that the root universe is the collection of all cells in the model.
@@ -158,7 +198,7 @@ Methods available for managing the root universe:
 - `getRootUniverse`: returns a shared pointer to the root universe of the `CSGBase` instance
 - `renameRootUniverse`: change the name of the root universe
 
-### Adding or Removing Cells
+#### Adding or Removing Cells
 
 There are multiple ways in which cells can be added to a universe:
 
@@ -183,7 +223,7 @@ auto new_cell_in_univ = csg_obj->createCell("new_cell", region, new_universe);
 ```cpp
 // create a list of cells and add to an existing universe after creating all of them
 std::vector<std::shared_ptr<CSG::CSGCell>> list_of_cells;
-for (unsigned int i = 0; i < x; ++i)
+for (unsigned int i = 0; i < num_cells_to_add; ++i)
 {
     // creating new_cell here will add it to the root universe
     auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
@@ -246,7 +286,14 @@ There are two main ways to handle this: passing and joining.
 
 ### Passing between Mesh Generators
 
-The `getCSGBase*` methods available for all [source/meshgenerators/MeshGenerator.md] objects can be used to access the `CSGBase` object associated with a different `MeshGenerator` object and move it to be the current object.
+`CSGBase` objects from other mesh generators can be accessed through methods that parallel those available for accessing other [source/meshgenerators/MeshGenerator.md] objects.
+For all methods listed below, a unique pointer to the `CSGBase` object(s) created by `generateCSG` for the specified [source/meshgenerators/MeshGenerator.md] names are returned.
+
+- `getCSGBase`: get the `CSGBase` object given a parameter name represented as a `std::string` that stores the mesh generator name
+- `getCSGBases`: get the `CSGBase` objects given a parameter name represented as a `std::string` that stores a list of mesh generator names
+- `getCSGBaseByName`: get the `CSGBase` object given a `MeshGeneratorName`
+- `getCSGBasesByName`: get all `CSGBase` objects given a list of `MeshGeneratorName`s
+
 For example:
 
 ```cpp
@@ -332,7 +379,7 @@ See [recommendations for naming](#object-naming-recommendations) below.
 
 !alert-end!
 
-## Accessing CSG Methods
+## Accessing CSG-related Methods
 
 All [!ac](CSG) methods related to creating or changing a [!ac](CSG) object must be called through `CSGBase`.
 Calls that retrieve information only but do not manipulate an object (such as `getName` methods) can be called on the object directly.
@@ -358,3 +405,253 @@ For each new [!ac](CSG) element (`CSGSurface`, `CSGCell`, and `CSGUniverse`) tha
 A recommended best practice is to include the mesh generator name (which can be accessed with `this->getName()` in any MeshGenerator class) as a part of that object name.
 This `name` is used as the unique identifier within the `CSGBase` instance.
 Methods for renaming objects are available as described in the above sections to help prevent issues and errors.
+
+## Example Implementation
+
+Provided here is an example implementation of the `generateCSG` method for a simple example [source/meshgenerators/MeshGenerator.md] that creates an infinite rectangular prism given an input parameter for `side_length`.
+The code snippets provided here correspond to the `.C` file.
+
+```cpp
+#include "CSGBase.h"
+
+InputParameters
+ExamplePrismCSGMeshGenerator::validParams()
+{
+  InputParameters params = MeshGenerator::validParams();
+  params.addRequiredParam<Real>("side_length", "Side length of infinite prism.");
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
+  // Declare that this generator has a generateCSG method
+  MeshGenerator::setHasGenerateCSG(params);
+  return params;
+}
+
+
+std::unique_ptr<CSG::CSGBase>
+ExamplePrismCSGMeshGenerator::generateCSG()
+{
+  // name of the current mesh generator to use for naming generated objects
+  auto mg_name = this->getName();
+
+  // initialize a CSGBase object
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+
+  // sets of points to use to define the 4 surfaces of the infinite prism
+  std::vector<std::vector<Point>> points_on_planes{{Point(1. * _side_length / 2., 0., 0.),
+                                                    Point(1. * _side_length / 2., 1., 0.),
+                                                    Point(1. * _side_length / 2., 0., 1.)},
+                                                   {Point(-1. * _side_length / 2., 0., 0.),
+                                                    Point(-1. * _side_length / 2., 1., 0.),
+                                                    Point(-1. * _side_length / 2., 0., 1.)},
+                                                   {Point(0., 1. * _side_length / 2., 0.),
+                                                    Point(1., 1. * _side_length / 2., 0.),
+                                                    Point(0., 1. * _side_length / 2., 1.)},
+                                                   {Point(0., -1. * _side_length / 2., 0.),
+                                                    Point(1., -1. * _side_length / 2., 0.),
+                                                    Point(0., -1. * _side_length / 2., 1.)}};
+  std::vector<std::string> surf_names{"plus_x", "minus_x", "plus_y", "minus_y"};
+
+  // initialize cell region to be updated
+  CSG::CSGRegion region;
+
+  // set the center of the prism to be used for determining halfspaces
+  const auto centroid = Point(0, 0, 0);
+
+  // create each plane and update the region to be used for the cell as each new plane is created
+  for (unsigned int i = 0; i < points_on_planes.size(); ++i)
+  {
+    // object name includes the mesh generator name for uniqueness
+    const auto surf_name = mg_name + "_surf_" + surf_names[i];
+    // create the plane for one face of the prism
+    auto plane_ptr = csg_obj->createPlaneFromPoints(
+        surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
+    // determine where the plane is in relation to the centroid to be able to set the halfspace
+    const auto region_direction = plane_ptr->directionFromPoint(centroid);
+    // halfspace is either positive (+plane_ptr) or negative (-plane_ptr)
+    / /depending on the direction to the centroid
+    auto halfspace =
+        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +plane_ptr : -plane_ptr);
+    // check if this is the first halfspace to be added to the region,
+    // if not, update the existing region with the intersection of the regions (&=)
+    if (region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
+      region = halfspace;
+    else
+      region &= halfspace;
+  }
+
+  // create the cell defined by the surfaces and region just created
+  const auto cell_name = mg_name + "_square_cell";
+  const auto material_name = "square_material";
+  csg_obj->createCell(cell_name, material_name, region);
+
+  return csg_obj;
+}
+```
+
+The following example builds on the infinite prism example above by taking a `MeshGeneratorName` for an existing `ExamplePrismCSGMeshGenerator` as input and adding planes to create a finite rectangular prism.
+
+```cpp
+InputParameters
+ExampleAxialSurfaceMeshGenerator::validParams()
+{
+  InputParameters params = MeshGenerator::validParams();
+  params.addRequiredParam<MeshGeneratorName>("input", "The input MeshGenerator.");
+  params.addRequiredParam<Real>("axial_height", "Axial height of output.");
+  // Declare that this generator has a generateData method
+  MeshGenerator::setHasGenerateData(params);
+  // Declare that this generator has a generateCSG method
+  MeshGenerator::setHasGenerateCSG(params);
+  return params;
+}
+
+std::unique_ptr<CSG::CSGBase>
+ExampleAxialSurfaceMeshGenerator::generateCSG()
+{
+  // get the existing CSGBase associated with the input mesh generator
+  // this is the CSGBase object that will be updated
+  std::unique_ptr<CSG::CSGBase> csg_obj = std::move(getCSGBase("input"));
+
+  // get the names of the current mesh generator and the input mesh generator
+  // so that unique object naming can be enforced
+  auto mg_name = this->getName();
+  auto inp_name = getParam<MeshGeneratorName>("input");
+
+  // get the expected existing cell
+  const auto cell_name = inp_name + "_square_cell";
+  auto cell_ptr = csg_obj->getCellByName(cell_name);
+  // get the existing cell region to update
+  auto cell_region = cell_ptr->getRegion();
+
+  // centroid used to determine direction for halfspace
+  const auto centroid = Point(0, 0, 0);
+
+  // Add surfaces and halfspaces corresponding to top and bottom axial planes
+  std::vector<std::string> surf_names{"plus_z", "minus_z"};
+  std::vector<Real> coeffs{0.5 * _axial_height, -0.5 * _axial_height};
+  for (unsigned int i = 0; i < coeffs.size(); ++i)
+  {
+    // unique surface name
+    const auto surf_name = mg_name + "_surf_" + surf_names[i];
+    // create the plane
+    // z plane equation: 0.0*x + 0.0*y + 1.0*z = (+/-)0.5 * axial_height
+    auto plane_ptr = csg_obj->createPlaneFromCoefficients(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
+    // determine the halfspace to add as an updated intersection
+    const auto region_direction = plane_ptr->directionFromPoint(centroid);
+    auto halfspace =
+        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +plane_ptr : -plane_ptr);
+    // update the existing region with a halfspace
+    cell_region &= halfspace;
+  }
+
+  // set the new region for the existing cell
+  csg_obj->updateCellRegion(cell_ptr, cell_region);
+
+  // rename the root universe which currently contains just the cell defined by cell_ptr
+  csg_obj->renameRootUniverse(mg_name + "_finite_prism_univ");
+
+  return csg_obj;
+}
+```
+
+If the above methods were to be used, the following input would generate the corresponding [!ac](JSON) output below.
+
+Example Input:
+
+```
+[Mesh]
+  [Prism]
+    type = ExamplePrismCSGMeshGenerator
+    side_length = 4
+  []
+  [Cube]
+    type = ExampleAxialSurfaceMeshGenerator
+    input = Prism
+    axial_height = 5
+  []
+[]
+```
+
+Example Output:
+
+```json
+{
+  "CELLS": {
+    "Prism_square_cell": {
+      "FILL": "square_material",
+      "FILLTYPE": "MATERIAL",
+      "REGION":
+          "(+Prism_surf_plus_x & -Prism_surf_minus_x & -Prism_surf_plus_y & +Prism_surf_minus_y & -Cube_surf_plus_z & +Cube_surf_minus_z)"
+    }
+  },
+  "SURFACES": {
+    "Prism_surf_minus_x": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 2.0
+      },
+      "TYPE": "plane"
+    },
+    "Prism_surf_minus_y": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -2.0
+      },
+      "TYPE": "plane"
+    },
+    "Cube_surf_minus_z": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": -2.5
+      },
+      "TYPE": "plane"
+    },
+    "Prism_surf_plus_x": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -2.0
+      },
+      "TYPE": "plane"
+    },
+    "Prism_surf_plus_y": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 2.0
+      },
+      "TYPE": "plane"
+    },
+    "Cube_surf_plus_z": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": 2.5
+      },
+      "TYPE": "plane"
+    }
+  },
+  "UNIVERSES": {
+    "Prism_finite_prism_univ": {
+      "CELLS": [
+        "Prism_square_cell"
+      ],
+      "ROOT": true
+    }
+  }
+}
+```
