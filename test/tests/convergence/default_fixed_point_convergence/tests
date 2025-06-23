@@ -14,6 +14,12 @@
     csvdiff = 'pp.csv'
     requirement = "The system shall allow fixed point convergence to be assessed with a post-processor value."
   []
+  [other_convergence]
+    type = CSVDiff
+    input = 'other_convergence.i'
+    csvdiff = 'other_convergence.csv'
+    requirement = "The system shall allow fixed point convergence to be assessed with a non-default convergence criteria."
+  []
   [error_reporting]
     requirement = "The system shall report an error for the default fixed point convergence class"
     [duplicate_params]

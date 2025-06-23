@@ -316,8 +316,21 @@ FixedPointSolve::solve()
 
         // Examine convergence metrics & properties and set the convergence reason
         bool break_out = examineFixedPointConvergence(converged);
+
         if (break_out)
+        {
+          // Except DefaultFixedPointConvergence, convergence objects will not
+          // update _fixed_point_status, so we give those cases generic values:
+          if (_fixed_point_status == MooseFixedPointConvergenceReason::CONVERGED_NONLINEAR)
+          {
+            if (converged)
+              _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_OBJECT;
+            else
+              _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_OBJECT;
+          }
+
           break;
+        }
       }
     }
     else
@@ -543,6 +556,9 @@ FixedPointSolve::printFixedPointConvergenceReason()
     case MooseFixedPointConvergenceReason::REACH_MAX_ITS:
       _console << "REACH_MAX_ITS";
       break;
+    case MooseFixedPointConvergenceReason::CONVERGED_OBJECT:
+      _console << "CONVERGED_OBJECT";
+      break;
     case MooseFixedPointConvergenceReason::DIVERGED_MAX_ITS:
       _console << "DIVERGED_MAX_ITS";
       break;
@@ -551,6 +567,9 @@ FixedPointSolve::printFixedPointConvergenceReason()
       break;
     case MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP:
       _console << "DIVERGED_FAILED_MULTIAPP";
+      break;
+    case MooseFixedPointConvergenceReason::DIVERGED_OBJECT:
+      _console << "DIVERGED_OBJECT";
       break;
     default:
       // UNSOLVED and CONVERGED_NONLINEAR should not be hit when coupling
