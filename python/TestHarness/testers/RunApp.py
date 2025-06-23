@@ -32,7 +32,7 @@ class RunApp(Tester):
         # RunApp can also run arbitrary commands. If the "command" parameter is supplied
         # it'll be used in lieu of building up the command automatically
         params.addParam('command',       "The command line to execute for this test")
-        params.addParam('command_proxy', "A proxy command to run that will execute the underlying test via wrapper; the intended command is set in the env variable RUNAPP_COMMAND")
+        params.addParam('command_proxy', "A proxy command to run that will execute the underlying test via wrapper; the intended command is set in the env variable TESTHARNESS_RUNAPP_COMMAND")
 
         # Parallel/Thread testing
         params.addParam('max_parallel', 1000, "Maximum number of MPI processes this test can be run with      (Default: 1000)")
@@ -300,7 +300,7 @@ class RunApp(Tester):
         # Arbitrary proxy command, but keep track of the command so that someone could use it later
         if specs.isValid('command_proxy'):
             command = command.replace('"', r'\"')
-            return f'RUNAPP_COMMAND="{command}" {os.path.join(specs["test_dir"], specs["command_proxy"])}'
+            return f'TESTHARNESS_RUNAPP_COMMAND="{command}" {os.path.join(specs["test_dir"], specs["command_proxy"])}'
 
         return command
 

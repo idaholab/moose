@@ -46,7 +46,10 @@ class SubprocessRunner(Runner):
                           'stderr': self.errfile,
                           'close_fds': False,
                           'shell': use_shell,
-                          'cwd': tester.getTestDir()}
+                          'cwd': tester.getTestDir(),
+                          'env': os.environ.copy()}
+        process_env = process_kwargs['env']
+
         # On Windows, there is an issue with path translation when the command is passed in
         # as a list.
         if platform.system() == "Windows":
@@ -54,16 +57,16 @@ class SubprocessRunner(Runner):
         else:
             process_kwargs['preexec_fn'] = os.setsid
 
+        # Set resources in an env variable so running scripts can test it
+        process_env['TESTHARNESS_NUM_PROCS'] = str(tester.getProcs(self.options))
+        process_env['TESTHARNESS_NUM_THREADS'] = str(tester.getThreads(self.options))
+
         # Special logic for openmpi runs
         if tester.hasOpenMPI():
-            process_env = os.environ.copy()
-
             # Don't clobber state
             process_env['OMPI_MCA_orte_tmpdir_base'] = self.job.getTempDirectory().name
             # Allow oversubscription for hosts that don't have a hostfile
             process_env['PRTE_MCA_rmaps_default_mapping_policy'] = ':oversubscribe'
-
-            process_kwargs['env'] = process_env
 
         try:
             self.process = subprocess.Popen(*process_args, **process_kwargs)
