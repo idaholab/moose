@@ -109,13 +109,11 @@ MFEMSteady::execute()
   {
     _problem_operator->Solve(_problem_data.f);
 
-    if ( _use_amr and _fe_space_name != "none" )
+    if ( _use_amr )
     {
       // p-refine
-      auto fespace = _problem_data.fespaces.GetShared( _fe_space_name );
-      _problem_operator->PRefine( fespace );
+      _problem_operator->PRefine();
       _problem_operator->Solve(_problem_data.f);
-
     }
 
   }
