@@ -61,8 +61,10 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_feproblem(*_mi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _mi_subproblem(*_mi_params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
+    _is_gpu_object(_mi_params.isParamValid("_gpu_object")),
     _material_data_type(getMaterialDataType(boundary_ids)),
-    _material_data(_mi_feproblem.getMaterialData(_material_data_type, _mi_tid)),
+    _material_data(
+        _mi_feproblem.getMaterialData(_material_data_type, _mi_tid, moose_object, _is_gpu_object)),
     _stateful_allowed(true),
     _get_material_property_called(false),
     _get_suffix(_mi_params.get<MaterialPropertyName>("prop_getter_suffix")),

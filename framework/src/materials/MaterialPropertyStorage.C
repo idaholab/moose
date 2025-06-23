@@ -20,8 +20,10 @@
 
 #include <optional>
 
-MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry)
-  : _max_state(0),
+MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry,
+                                                 FEProblemBase & problem)
+  : _problem(problem),
+    _max_state(0),
     _spin_mtx(libMesh::Threads::spin_mtx),
     _registry(registry),
     _restart_in_place(false),
