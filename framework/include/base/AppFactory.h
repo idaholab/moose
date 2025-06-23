@@ -15,6 +15,13 @@
 #include "Capabilities.h"
 #include "InputParameters.h"
 
+#ifdef MOOSE_UNIT_TEST
+// forward declare unit tests
+#include "gtest/gtest.h"
+class GTEST_TEST_CLASS_NAME_(AppFactoryTest, manageAppParams);
+class GTEST_TEST_CLASS_NAME_(AppFactoryTest, createNotRegistered);
+#endif
+
 /**
  * Macros
  */
@@ -124,16 +131,19 @@ public:
   class ClearAppParamsKey
   {
     friend class MooseApp;
+#ifdef MOOSE_UNIT_TEST
+    FRIEND_TEST(::AppFactoryTest, manageAppParams);
+#endif
     ClearAppParamsKey() {}
     ClearAppParamsKey(const ClearAppParamsKey &) {}
   };
 
   /**
-   * Clears the stored parameters for the application \p app
+   * Clears the stored parameters for the given application parameteres
    *
    * See getAppParams() for why this is needed.
    */
-  void clearAppParams(const MooseApp & app, const ClearAppParamsKey);
+  void clearAppParams(const InputParameters & params, const ClearAppParamsKey);
 
   /**
    * Returns a reference to the map from names to AppFactoryBuildInfo pointers
@@ -172,6 +182,13 @@ protected:
 
 private:
   /**
+   * Stores the given parameters within _input_parameters for app construction
+   *
+   * Also calls finalize() on the parameters
+   */
+  const InputParameters & storeAppParams(InputParameters & params);
+
+  /**
    * Get the ID for the InputParameters associated with an application, used
    * in storing them in _input_parameters.
    *
@@ -186,6 +203,11 @@ private:
 
   /// Private constructor for singleton pattern
   AppFactory() {}
+
+#ifdef MOOSE_UNIT_TEST
+  FRIEND_TEST(::AppFactoryTest, manageAppParams);
+  FRIEND_TEST(::AppFactoryTest, createNotRegistered);
+#endif
 
   /// Storage of input parameters used in applications (ID (from getAppParamsID()) -> params)
   std::map<std::size_t, std::unique_ptr<InputParameters>> _input_parameters;

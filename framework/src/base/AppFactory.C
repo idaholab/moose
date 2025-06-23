@@ -48,9 +48,9 @@ AppFactory::getAppParams(const InputParameters & params) const
 }
 
 void
-AppFactory::clearAppParams(const MooseApp & app, const ClearAppParamsKey)
+AppFactory::clearAppParams(const InputParameters & params, const ClearAppParamsKey)
 {
-  const auto id = getAppParamsID(app.parameters());
+  const auto id = getAppParamsID(params);
   if (const auto it = _input_parameters.find(id); it != _input_parameters.end())
     _input_parameters.erase(it);
   else
@@ -128,7 +128,7 @@ AppFactory::create(const std::string & app_type,
   // Error if the application type is not located
   const auto it = _name_to_build_info.find(app_type);
   if (it == _name_to_build_info.end())
-    mooseError("Application '" + app_type + "' was not registered.");
+    mooseError("AppFactory::Create(): Application '" + app_type + "' was not registered");
   auto & build_info = it->second;
 
   auto comm = std::make_shared<Parallel::Communicator>(comm_world_in);
@@ -156,12 +156,7 @@ AppFactory::create(const std::string & app_type,
   // we store the app params here and the MooseApp constructor will query the InputParameters
   // owned by ths factory instead of the ones that are passed to it (likely a const ref to a
   // copy of the derived app's parmeters)
-  parameters.addPrivateParam<std::size_t>("_app_params_id", _app_creation_count);
-  const auto it_inserted_pair =
-      _input_parameters.emplace(_app_creation_count, std::make_unique<InputParameters>(parameters));
-  mooseAssert(it_inserted_pair.second, "Already exists");
-  auto & params = *it_inserted_pair.first->second;
-  params.finalize("");
+  const auto & params = storeAppParams(parameters);
 
   _app_creation_count++;
   build_info->_app_creation_count++;
@@ -178,6 +173,18 @@ AppFactory::createdAppCount(const std::string & app_type) const
     mooseError("AppFactory::createdAppCount(): '", app_type, "' is not a registered app");
 
   return it->second->_app_creation_count;
+}
+
+const InputParameters &
+AppFactory::storeAppParams(InputParameters & params)
+{
+  params.addPrivateParam<std::size_t>("_app_params_id", _app_creation_count);
+  const auto it_inserted_pair =
+      _input_parameters.emplace(_app_creation_count, std::make_unique<InputParameters>(params));
+  mooseAssert(it_inserted_pair.second, "Already exists");
+  auto & stored_params = *it_inserted_pair.first->second;
+  stored_params.finalize("");
+  return stored_params;
 }
 
 std::size_t

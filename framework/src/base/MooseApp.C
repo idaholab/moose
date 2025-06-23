@@ -1122,7 +1122,7 @@ MooseApp::~MooseApp()
   // Remove this app's parameters from the AppFactory. This allows
   // for creating an app with this name again in the same execution,
   // which needs to be done when resetting applications in MultiApp
-  AppFactory::instance().clearAppParams(*this, {});
+  AppFactory::instance().clearAppParams(parameters(), {});
 
 #ifdef LIBMESH_HAVE_DLOPEN
   // Close any open dynamic libraries
