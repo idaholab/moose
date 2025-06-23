@@ -10,8 +10,8 @@ The `CSGBase` class provides the framework in MOOSE for creating these generic [
 As stated, a [!ac](CSG) representation is defined minimally as a series of surfaces, cells, and universes.
 This section describes in theory what these components are.
 
-Surfaces are defined explicitly through surface equations (such as equations of a plane, sphere, etc.).
-Each surface inherently separates two halfspace regions: positive and negative halfspaces.
+[Surfaces]((source/csg/CSGBase.md#surfaces)) are defined explicitly through surface equations (such as equations of a plane, sphere, etc.).
+Each surface inherently separates two halfspace [regions](source/csg/CSGBase.md#regions): positive and negative halfspaces.
 For example, for a plane with the equation `Ax + By + Cz = D` the positive halfspace represents the region `Ax + By + Cz > D`, while the negative halfspace represents the region `Ax + By + Cz < D`. Similarly, for a spherical surface defined by the equation `x^2 + y^2 + z^2 = r^2`, the negative halfspace represents the region `x^2 + y^2 + z^2 < r^2` within the sphere while the positive halfspace represents the region `x^2 + y^2 + z^2 > r^2` outside the sphere.
 Example halfspaces are shown in [!ref](fig:halfspaces).
 
@@ -26,11 +26,11 @@ For example, if we wanted to use the surfaces from [!ref](fig:halfspaces) to def
        id=fig:intersection
        caption=Example depiction of a closed region defined by an intersection of two halfspaces.
 
-Cells are defined by two main characteristics: a region and a fill.
+[Cells](source/csg/CSGBase.md#cells) are defined by two main characteristics: a region and a fill.
 The region is defined as described above and defines the domain of the cell.
-The fill can typically be set as void, a material, a universe, or a lattice.
+The fill can typically be set as void (i.e., nothing), a material (typically specified by provided the name of the material), a [universe](source/csg/CSGBase.md#universes), or a lattice (note, lattices are not yet supported for MOOSE implementation).
 
-Universes can then be optionally defined as a collection of cells, which can then be used to either fill other cells, or used repeatedly throughout a geometry (such as in a repeated lattice).
+[Universes](source/csg/CSGBase.md#universes) can then be optionally defined as a collection of cells, which can then be used to either fill other cells, or used repeatedly throughout a geometry (such as in a repeated lattice).
 
 ## How to Invoke
 
@@ -44,8 +44,7 @@ This process is run as a data-only mode so no finite element mesh is produced.
 
 ## For Developers
 
-The `CSGBase` class contains the framework necessary for creating generic [!ac](CSG) definitions, but the methods for actually using it to generate the [!ac](CSG) definition have to be implemented for each mesh generator by overriding the `generateCSG` method.
-Information on how to build the `CSGBase` object in `generateCSG` is provided [here](source/csg/CSGBase.md).
+The `CSGBase` class contains the framework necessary for creating generic [!ac](CSG) definitions, but the methods for actually using it to generate the [!ac](CSG) definition have to be implemented for each mesh generator by overriding the `generateCSG` method according to the information provided [here](source/csg/CSGBase.md).
 
 ### setHasGenerateCSG
 
