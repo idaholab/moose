@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "GaussianProcess.h"
 #include "FEProblemBase.h"
@@ -336,26 +337,6 @@ GaussianProcess::vecToMap(
 
 template <>
 void
-dataStore(std::ostream & stream, std::vector<torch::Tensor> & decomp, void * context)
-{
-  // Store the L matrix as opposed to the full matrix to avoid compounding
-  // roundoff error and decomposition error
-  // torch::Tensor L(decomp.matrixL());
-  torch::Tensor L = decomp[0];
-  dataStore(stream, L, context);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, std::vector<torch::Tensor> & decomp, void * context)
-{
-  torch::Tensor L;
-  dataLoad(stream, L, context);
-  decomp[0] = torch::linalg_cholesky((torch::mm(L, torch::transpose(L, 0, 1))));
-}
-
-template <>
-void
 dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, void * context)
 {
   dataStore(stream, gp_utils.hyperparamMap(), context);
@@ -389,3 +370,5 @@ dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, voi
   dataLoad(stream, gp_utils.paramStandardizer(), context);
   dataLoad(stream, gp_utils.dataStandardizer(), context);
 }
+
+#endif

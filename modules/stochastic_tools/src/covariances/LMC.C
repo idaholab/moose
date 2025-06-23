@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "LMC.h"
 #include "MooseRandom.h"
@@ -201,3 +202,5 @@ LMC::computeLambdaGradient(torch::Tensor & grad,
   auto grad_accessor = grad.accessor<Real, 2>();
   grad_accessor[index][index] = 1.0;
 }
+
+#endif
