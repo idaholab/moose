@@ -9,20 +9,20 @@
 
 #ifdef MFEM_ENABLED
 
-#include "MFEMScalarIC.h"
+#include "MFEMVectorIC.h"
 #include "MFEMProblem.h"
 #include <libmesh/libmesh_common.h>
 #include <mfem.hpp>
 
-registerMooseObject("MooseApp", MFEMScalarIC);
+registerMooseObject("MooseApp", MFEMVectorIC);
 
 InputParameters
-MFEMScalarIC::validParams()
+MFEMVectorIC::validParams()
 {
   auto params = MFEMGeneralUserObject::validParams();
   params.addRequiredParam<std::string>("variable",
                                        "The variable to apply the initial condition for");
-  params.addRequiredParam<MFEMScalarCoefficientName>("coefficient", "The scalar coefficient");
+  params.addRequiredParam<MFEMVectorCoefficientName>("coefficient", "The vector coefficient");
   params.registerBase("InitialCondition");
   // We cannot generally execute this at construction time since the coefficient may be based on a
   // MOOSE function which is not itself setup until its initialSetup is called. UserObject initial
@@ -32,12 +32,12 @@ MFEMScalarIC::validParams()
   return params;
 }
 
-MFEMScalarIC::MFEMScalarIC(const InputParameters & params) : MFEMGeneralUserObject(params) {}
+MFEMVectorIC::MFEMVectorIC(const InputParameters & params) : MFEMGeneralUserObject(params) {}
 
 void
-MFEMScalarIC::execute()
+MFEMVectorIC::execute()
 {
-  auto & coeff = getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient"));
+  auto & coeff = getVectorCoefficient(getParam<MFEMVectorCoefficientName>("coefficient"));
   auto grid_function = getMFEMProblem().getGridFunction(getParam<std::string>("variable"));
   grid_function->ProjectCoefficient(coeff);
 }
