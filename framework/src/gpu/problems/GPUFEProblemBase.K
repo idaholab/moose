@@ -53,3 +53,106 @@ FEProblemBase::initGPU()
   _gpu_bnd_material_props.allocateGPUProperties();
   _gpu_neighbor_material_props.allocateGPUProperties();
 }
+
+void
+FEProblemBase::initGPUStatefulProps()
+{
+  // Resolve dependencies
+
+  std::set<MooseVariableFieldBase *> needed_moose_vars;
+  std::set<TagID> needed_fe_var_vector_tags;
+
+  for (auto block : _mesh.meshSubdomains())
+  {
+    _gpu_materials.updateBlockVariableDependency(block, needed_moose_vars);
+    _gpu_materials.updateBlockFEVariableCoupledVectorTagDependency(block,
+                                                                   needed_fe_var_vector_tags);
+  }
+
+  // Copy data and preallocate quadature point solution vectors
+
+  for (auto & system : _gpu_systems)
+    if (system.initialized())
+    {
+      system.setActiveVariables(needed_moose_vars);
+      system.setActiveVariableTags(needed_fe_var_vector_tags);
+      system.sync(GPUMemcpyKind::HOST_TO_DEVICE);
+      system.preallocate();
+    }
+
+  _gpu_systems.copy();
+
+  // Initialize stateful properties
+
+  for (auto & material : _gpu_materials.getActiveObjects())
+    if (!material->hasRestoredProperties() && !material->boundaryRestricted())
+      material->initStatefulProperties(0);
+
+  for (auto & material : _gpu_materials[Moose::FACE_MATERIAL_DATA].getActiveObjects())
+    if (!material->hasRestoredProperties())
+      material->initStatefulProperties(0);
+
+  for (auto & material : _gpu_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveObjects())
+    if (!material->hasRestoredProperties())
+      material->initStatefulProperties(0);
+
+  for (auto & material : _gpu_materials.getActiveObjects())
+    if (!material->hasRestoredProperties() && material->boundaryRestricted())
+      material->initStatefulProperties(0);
+
+  // Copy to old and older states
+
+  _gpu_material_props.copy();
+  _gpu_bnd_material_props.copy();
+  _gpu_neighbor_material_props.copy();
+
+  // Clear
+
+  for (auto & system : _gpu_systems)
+    if (system.initialized())
+    {
+      system.clearActiveVariables();
+      system.clearActiveVariableTags();
+      system.clearProjectionFlags();
+    }
+}
+
+void
+FEProblemBase::prepareGPUMaterials(
+    const std::unordered_set<unsigned int> & consumer_needed_mat_props)
+{
+  std::unordered_set<unsigned int> needed_mat_props;
+
+  for (auto block : mesh().meshSubdomains())
+    _gpu_materials.updateBlockMatPropDependency(block, needed_mat_props);
+
+  for (auto boundary : mesh().meshBoundaryIds())
+    _gpu_materials.updateBoundaryMatPropDependency(boundary, needed_mat_props);
+
+  needed_mat_props.insert(consumer_needed_mat_props.begin(), consumer_needed_mat_props.end());
+
+  setActiveMaterialProperties(needed_mat_props, 0);
+}
+
+void
+FEProblemBase::reinitGPUMaterials()
+{
+  if (hasActiveMaterialProperties(0))
+  {
+    for (auto & material : _gpu_materials.getActiveObjects())
+      if (!material->boundaryRestricted())
+        material->computeProperties();
+
+    for (auto & material : _gpu_materials[Moose::FACE_MATERIAL_DATA].getActiveObjects())
+      material->computeProperties();
+
+    for (auto & material : _gpu_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveObjects())
+      material->computeProperties();
+
+    for (auto & material : _gpu_materials.getActiveObjects())
+      if (material->boundaryRestricted())
+        material->computeProperties();
+  }
+
+  Kokkos::fence();
+}
