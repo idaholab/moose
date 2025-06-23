@@ -175,6 +175,11 @@ BoundaryRestrictable::initializeBoundaryRestrictable()
       _moose_object.paramError("boundary", msg.str());
     }
   }
+
+#ifdef MOOSE_HAVE_GPU
+  if (_moose_object.isParamValid("_gpu_object"))
+    initializeGPUBoundaryRestrictable(_bnd_mesh);
+#endif
 }
 
 BoundaryRestrictable::~BoundaryRestrictable() {}
