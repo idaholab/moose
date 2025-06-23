@@ -1,7 +1,13 @@
 # CSGBase
 
 `CSGBase` is the main class developers should interact with when implementing the `generateCSG` method for any mesh generator.
-This class acts as a container and driver for all methods necessary for creating a CSG representation such as generating surfaces, cells, and universes of the mesh generator under consideration.
+This class acts as a container and driver for all methods necessary for creating a [constructive solid geometry (CSG)](source/csg/CSG.md) representation such as generating surfaces, cells, and universes of the mesh generator under consideration.
+
+!alert! note
+
+Throughout this documentation, `csg_obj` will be used in example code blocks to refer to a `CSGBase` instance.
+
+!alert-end!
 
 ## Initialization
 
@@ -17,7 +23,7 @@ The following sections explain in detail how to do this as a part of the `genera
 ## Surfaces
 
 Various methods exist to create `CSGSurface` objects (below).
-All surface creation methods will return a shared pointer to that generated surface.
+All surface creation methods will return a shared pointer to that generated surface (`std::shared_ptr<CSGSurface>`).
 
 | Surface | Method | Description |
 |---------|--------|------------|
@@ -106,7 +112,7 @@ The complement of the previous combination then defines the final region `~((-cy
 ## Cells
 
 A cell is an object defined by a region and a fill.
-To create any `CSGCell`, use the method `createCell` from `CSGBase` which will return a shared pointer to the `CSGCell` object that is created.
+To create any `CSGCell`, use the method `createCell` from `CSGBase` which will return a shared pointer to the `CSGCell` object that is created (`std::shared_ptr<CSGCell>`).
 At the time of calling `createCell`, a unique cell name, the cell region (`CSGRegion`), and an indicator of the fill must be provided.
 The `CSGRegion` is defined by boolean combinations of `CSGSurfaces` as described below.
 Three types of cell fills are currently supported: void, material, and universe.
@@ -123,7 +129,7 @@ The `CSGCell` objects can then be accessed or updated with the following methods
 
 ## Universes
 
-A universe is a collection of cells and is created by calling `createUniverse` from `CSGBase`.
+A universe is a collection of cells and is created by calling `createUniverse` from `CSGBase` which will return a shared pointer to the `CSGUniverse` object (`std::shared_ptr<CSGUniverse>`).
 A `CSGUniverse` can be initialized as an empty universe, or by passing a vector of shared pointers to `CSGCell` objects.
 Any `CSGUniverse` object can be renamed (including the [root universe](#root-universe)) with `renameUniverse`.
 
@@ -140,7 +146,7 @@ auto new_universe = csg_obj->createUniverse("new_universe", list_of_cells);
 
 In theory, all universes in a model can be traced back to a singular overarching universe known as the root universe.
 Because universes are a collection of cells and cells can be filled with universe, a tree of universes can be constructed such that the root universe is the collection of all cells in the model.
-When a `CSGBase` object is first initialized, a root `CSGUniverse` called `ROOT_UNIVERSE` is created by default.
+When a `CSGBase` object is first [initialized](#initialization), a root `CSGUniverse` called `ROOT_UNIVERSE` is created by default.
 Every `CSGCell` that is created will be added to the root universe unless otherwise specified (as described [below](#adding-or-removing-cells)).
 The root universe exists by default and cannot be changed except when joining `CSGBase` objects, as described [below](#updating-existing-csgbase-objects).
 However, the name of the root universe can be updated, though it won't change the object and its contents.
@@ -238,15 +244,23 @@ There are two main ways to handle this: passing and joining.
 
 ### Passing between Mesh Generators
 
-The `getCSGBase*` methods available for all [mesh generators](source/meshgenerators/MeshGenerator.md) can be used to access the `CSGBase` object associated with a different `MeshGenerator` object and move it to be the current object.
+The `getCSGBase*` methods available for all [source/meshgenerators/MeshGenerator.md] objects can be used to access the `CSGBase` object associated with a different `MeshGenerator` object and move it to be the current object.
 For example:
 
 ```cpp
 // get the CSGBase from a different mesh generator and use in this mesh generator
+// other_mg_name is a MeshGeneratorName object
 auto csg_base = getCSGBaseByName(other_mg_name);
 std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*csg_base);
 // csg_obj is now the object that will continue to get updated throughout the generateCSG method.
 ```
+
+!alert! note title=Accessing other MeshGenerator objects by name
+
+[source/meshgenerators/MeshGenerator.md] object(s) can be passed to another mesh generator as input by providing `InputParameters` of type `MeshGeneratorName`.
+See the [For Developers section](source/csg/CSG.md#for-developers) for an example of this.
+
+!alert-end!
 
 ### Joining Bases
 
@@ -311,21 +325,34 @@ Similarly, all incoming cells and surfaces are added alongside existing cells an
 !alert! note title=Object Naming Uniqueness
 
 It is very important when using the `joinOtherBase` method that all `CSGSurfaces`, `CSGCells`, and `CSGSurfaces` are uniquely named so that errors are not encountered when combining sets of objects.
-An error will be produced during the join process if an object of the same name already exists.
+An error will be produced during the join process if an object of the same type and name already exists.
 See [recommendations for naming](#object-naming-recommendations) below.
 
 !alert-end!
 
 ## Accessing CSG Methods
 
-All CSG methods related to creating or changing a CSG object must be called through `CSGBase`.
+All [!ac](CSG) methods related to creating or changing a [!ac](CSG) object must be called through `CSGBase`.
 Calls that retrieve information only but do not manipulate an object (such as `getName` methods) can be called on the object directly.
-This ensures proper accounting of all CSG-related objects in the `CSGBase` instance.
+For example, if a cell were to be created, the current name and region could be retrieved directly from the `CSGCell` object, but if the name or region needed to be changed, that would need to be handled through `CSGBase`:
+
+```cpp
+// a cell is created using CSGBase
+auto cell = csg_obj->createCell("cell_name", region);
+// the current name and region of that cell can be retrieved directly from the CSGCell object
+auto name = cell->getName();
+auto region = cell->getRegion();
+// changing the name and region requires using methods in CSGBase
+csg_obj->renameCell(cell, "new_name");
+csg_obj->updateCellRegion(cell, new_region);
+```
+
+This ensures proper accounting of all [!ac](CSG)-related objects in the `CSGBase` instance.
 Consult the Doxygen documentation for information on all object-specific methods.
 
 ## Object Naming Recommendations
 
-For each new CSG element (`CSGSurface`, `CSGCell`, and `CSGUniverse`) that is created, a unique name identifier (of type `std::string`) must be provided (`name` parameter for all creation methods).
+For each new [!ac](CSG) element (`CSGSurface`, `CSGCell`, and `CSGUniverse`) that is created, a unique name identifier (of type `std::string`) must be provided (`name` parameter for all creation methods).
 A recommended best practice is to include the mesh generator name (which can be accessed with `this->getName()` in any MeshGenerator class) as a part of that object name.
 This `name` is used as the unique identifier within the `CSGBase` instance.
 Methods for renaming objects are available as described in the above sections to help prevent issues and errors.
