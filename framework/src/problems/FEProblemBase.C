@@ -417,6 +417,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _solver_systems(_num_nl_sys + _num_linear_sys, nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
+#ifdef MOOSE_HAVE_GPU
+    _gpu_assembly(*this),
+#endif
     _mesh_divisions(/*threaded=*/true),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
         "material_props", &_mesh, _material_prop_registry)),
@@ -6379,6 +6382,11 @@ FEProblemBase::init()
 
   if (_displaced_problem)
     _displaced_problem->init();
+
+#ifdef MOOSE_HAVE_GPU
+  if (_have_GPU_objects)
+    initGPU();
+#endif
 
   _initialized = true;
 }
