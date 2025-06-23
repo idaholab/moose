@@ -33,6 +33,8 @@ public:
 #ifdef MOOSE_GPU_SCOPE
   // Get the FE type number
   auto getFETypeNum(FEType type) const { return _fe_type_map.at(type); }
+  // Get the boundaries to evaluate face material properties
+  const auto & getMaterialBoundaries() const { return _material_boundaries; }
   // Get the number of quadrature points
   KOKKOS_FUNCTION auto getMaxQpsPerElem() const { return _max_qps_per_elem.last(); }
   KOKKOS_FUNCTION auto getMaxQpsPerElem(SubdomainID subdomain) const
@@ -223,6 +225,8 @@ private:
   GPUArray<GPUArray<unsigned int>> _n_qps;
   GPUArray<GPUArray2D<unsigned int>> _n_qps_face;
   GPUArray<unsigned int> _max_qps_per_elem;
+  // Boundaries to evaluate face material properties
+  std::set<BoundaryID> _material_boundaries;
 
 private:
   // Reference quadrature data
