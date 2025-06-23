@@ -4,7 +4,7 @@
 #include "mfem/miniapps/common/mfem-common.hpp"
 #include "libmesh/restore_warnings.h"
 #include "MFEMObjectUnitTest.h"
-#include "MFEMScalarBoundaryIntegratedBC.h"
+#include "MFEMBoundaryIntegratedBC.h"
 #include "MFEMVectorBoundaryIntegratedBC.h"
 #include "MFEMBoundaryNormalIntegratedBC.h"
 #include "MFEMConvectiveHeatFluxBC.h"
@@ -79,10 +79,10 @@ TEST_F(MFEMIntegratedBCTest, MFEMBoundaryNormalIntegratedBC)
 }
 
 /**
- * Test MFEMScalarBoundaryIntegratedBC creates the expected mfem::BoundaryIntegrator
+ * Test MFEMBoundaryIntegratedBC creates the expected mfem::BoundaryIntegrator
  * successfully.
  */
-TEST_F(MFEMIntegratedBCTest, MFEMScalarBoundaryIntegratedBC)
+TEST_F(MFEMIntegratedBCTest, MFEMBoundaryIntegratedBC)
 {
   // Build required BC inputs
   InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctorMaterial");
@@ -91,14 +91,14 @@ TEST_F(MFEMIntegratedBCTest, MFEMScalarBoundaryIntegratedBC)
   _mfem_problem->addFunctorMaterial("MFEMGenericFunctorMaterial", "material1", coef_params);
 
   // Construct boundary condition
-  InputParameters bc_params = _factory.getValidParams("MFEMScalarBoundaryIntegratedBC");
+  InputParameters bc_params = _factory.getValidParams("MFEMBoundaryIntegratedBC");
   bc_params.set<VariableName>("variable") = "test_variable_name";
   bc_params.set<MFEMScalarCoefficientName>("coefficient") = "coef1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  MFEMScalarBoundaryIntegratedBC & integrated_bc =
-      addObject<MFEMScalarBoundaryIntegratedBC>("MFEMScalarBoundaryIntegratedBC", "bc1", bc_params);
+  MFEMBoundaryIntegratedBC & integrated_bc =
+      addObject<MFEMBoundaryIntegratedBC>("MFEMBoundaryIntegratedBC", "bc1", bc_params);
 
-  // Test MFEMScalarBoundaryIntegratedBC returns an integrator of the expected type
+  // Test MFEMBoundaryIntegratedBC returns an integrator of the expected type
   auto lf_integrator =
       dynamic_cast<mfem::BoundaryLFIntegrator *>(integrated_bc.createLFIntegrator());
   ASSERT_NE(lf_integrator, nullptr);
