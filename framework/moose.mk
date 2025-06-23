@@ -485,6 +485,19 @@ endif
 wasp_submodule_status:
 	@if [ x$(wasp_submodule_message) != "x" ]; then printf $(wasp_submodule_message); exit 1; fi
 
+# Kokkos for MOOSE
+
+ifeq ($(KOKKOS),true)
+
+MOOSE_KOKKOS_SRC_FILES := $(shell find $(FRAMEWORK_DIR) -name "*.K")
+
+KOKKOS_OBJECTS := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(MOOSE_KOKKOS_SRC_FILES))
+KOKKOS_DEPS    := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(KOKKOS_OBJECTS))
+
+-include $(KOKKOS_DEPS)
+
+endif
+
 # Pre-make for checking current dependency versions and showing useful warnings
 # if things like conda packages are out of date. The variable is such that
 # rules can use $(prebuild), instead of prebuild, as a prerequisite. In those
@@ -691,9 +704,10 @@ app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 #    clean' will only clean debug object and executable files.
 # .) Calling 'make clean' in an app should not remove MOOSE object
 #    files, libraries, etc.
-clean:
+clean: $(KOKKOS_CLEAN)
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
 	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(app_unity_srcfiles)
+	@rm -rf $(app_KOKKOS_LIB) $(KOKKOS_OBJECTS) $(KOKKOS_DEPS) KokkosCore_Config_PostInclude.tmp desul
 	@rm -rf $(APPLICATION_DIR)/build
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
@@ -775,3 +789,9 @@ echo_app_objects:
 
 echo_app_deps:
 	@echo $(app_deps)
+
+echo_kokkos_objects:
+	@echo $(KOKKOS_OBJECTS)
+
+echo_kokkos_deps:
+	@echo $(KOKKOS_DEPS)
