@@ -19,7 +19,7 @@
     capabilities = 'method!=dbg'
     min_parallel = 4
     requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid.'
-    # TODO: Figure out how to make pressure second order, pressure shift maybe instead of pin
+    # TODO: Figure out how to make pressure second order (probably the cell gradient != face gradient assumption)
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree
     max_threads = 1 # see libmesh issue #3808

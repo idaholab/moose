@@ -335,6 +335,8 @@ RhieChowMassFlux::computeFaceMassFlux()
 
       const ElemInfo & elem_info =
           hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+
+      bc_pointer->setupFaceData(fi, fi->faceType(std::make_pair(_p->number(),_global_pressure_system_number)));
       const auto p_elem_value = _p->getElemValue(elem_info, time_arg);
       const auto matrix_contribution =
           _p_diffusion_kernel->computeBoundaryMatrixContribution(*bc_pointer);
