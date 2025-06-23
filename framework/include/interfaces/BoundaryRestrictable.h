@@ -9,6 +9,10 @@
 
 #pragma once
 
+#ifdef MOOSE_HAVE_GPU
+#include "GPUTypes.h"
+#endif
+
 // MOOSE includes
 #include "InputParameters.h"
 #include "MaterialData.h"
@@ -55,6 +59,15 @@ public:
   BoundaryRestrictable(const MooseObject * moose_object,
                        const std::set<SubdomainID> & block_ids,
                        bool nodal);
+
+#ifdef MOOSE_GPU_SCOPE
+  /**
+   * Class copy constructor
+   * Used for dispatching GPU parallel calculation.
+   * Only defined for GPU objects.
+   */
+  BoundaryRestrictable(const BoundaryRestrictable & object);
+#endif
 
   /**
    * Helper for determining if the object is boundary restricted. This is needed for the
@@ -221,12 +234,39 @@ private:
    */
   void initializeBoundaryRestrictable();
 
+#ifdef MOOSE_HAVE_GPU
+  void initializeGPUBoundaryRestrictable(MooseMesh * mesh);
+#endif
+
 protected:
   /**
    * A helper method to avoid circular #include problems.
    * @see hasBoundaryMaterialProperty
    */
   bool hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const;
+
+#ifdef MOOSE_HAVE_GPU
+  /**
+   * GPU-related variables and methods
+   */
+private:
+  /// List of local node IDs this GPU object is operating on
+  GPUArray<dof_id_type> _node_ids;
+  /// List of local element ID - side index pairs this GPU object is operating on
+  GPUArray<GPUPair<dof_id_type, unsigned int>> _element_side_ids;
+#endif
+
+#ifdef MOOSE_GPU_SCOPE
+protected:
+  /// Get the number of local nodes this GPU object is operating on
+  KOKKOS_FUNCTION auto numBoundaryNodes() const { return _node_ids.size(); }
+  /// Get the number of local sides this GPU object is operating on
+  KOKKOS_FUNCTION auto numBoundarySides() const { return _element_side_ids.size(); }
+  /// Get the local node ID this GPU thread is operating on
+  KOKKOS_FUNCTION auto boundaryNodeID(size_t idx) const { return _node_ids[idx]; }
+  /// Get the local element ID - side index pair this GPU thread is operating on
+  KOKKOS_FUNCTION auto boundaryElementSideID(size_t idx) const { return _element_side_ids[idx]; }
+#endif
 };
 
 template <typename T, bool is_ad>
