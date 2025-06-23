@@ -57,9 +57,6 @@ MFEMVectorFESpace::getFECName() const
     actual_type += "_R" + std::to_string(pdim) + "D";
   }
 
-<<<<<<< HEAD
-  return actual_type + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
-=======
   char cb = mfem::BasisType::GetChar(getBasis(getParam<std::string>("closed_basis")));
   std::string closed_basis(1, cb);
   char ob = mfem::BasisType::GetChar(getBasis(getParam<std::string>("open_basis")));
@@ -67,7 +64,6 @@ MFEMVectorFESpace::getFECName() const
   std::string basis = (closed_basis + open_basis == "Gg" ? "" : "@" + closed_basis + open_basis);
 
   return actual_type + basis + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
->>>>>>> 6164145e86 (Fix default basis choice MFEM errors)
 }
 
 int
