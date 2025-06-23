@@ -33,11 +33,11 @@ TEST(InputParametersTest, checkControlParamPrivateError)
   }
 }
 
-// This tests for the bug https://github.com/idaholab/moose/issues/8586.
-// It makes sure that range-checked input file parameters comparison functions
-// do absolute floating point comparisons instead of using a default epsilon.
 TEST(InputParametersTest, checkRangeCheckedParam)
 {
+  // This tests for the bug https://github.com/idaholab/moose/issues/8586.
+  // It makes sure that range-checked input file parameters comparison functions
+  // do absolute floating point comparisons instead of using a default epsilon.
   try
   {
     InputParameters params = emptyInputParameters();
@@ -52,6 +52,53 @@ TEST(InputParametersTest, checkRangeCheckedParam)
                 std::string::npos)
         << "Range check failed with unexpected error: " << msg;
   }
+
+  const auto test_vector_error = [this](const std::vector<Real> & value,
+                                        const std::string & range_function,
+                                        const bool is_user_error,
+                                        const std::string expect_error)
+  {
+    InputParameters params = emptyInputParameters();
+    const std::string name = "p";
+    params.addRangeCheckedParam<std::vector<Real>>(name, value, range_function, "Some doc");
+    const auto param = dynamic_cast<libMesh::Parameters::Parameter<std::vector<Real>> *>(
+        params.begin()->second.get());
+    const auto result = params.rangeCheck<Real, Real>(name, name, param);
+    EXPECT_TRUE(result.has_value());
+    ASSERT_EQ(is_user_error, result->first);
+    ASSERT_EQ(expect_error, result->second);
+  };
+
+  // Invalid range function
+  test_vector_error({}, "!", false, "Error parsing expression '!' for parameter 'p'");
+  // Check all values, vector has no values
+  test_vector_error({}, "p = 1", true, "Range checking empty vector 'p = 1'");
+  // Check all values, invalid variable
+  test_vector_error({1}, "a = 1", false, "Error parsing expression 'a = 1'");
+  // Index check out of range
+  test_vector_error(
+      {1}, "p_1 = 1", true, "Error parsing expression 'p_1 = 1'; out of range variable 'p_1'");
+  // Index check invalid variable
+  test_vector_error(
+      {1}, "p_a = 1", false, "Error parsing expression 'p_a = 1'; invalid variable 'p_a'");
+
+  const auto test_scalar_error = [this](const std::string & range_function,
+                                        const bool is_user_error,
+                                        const std::string expect_error)
+  {
+    InputParameters params = emptyInputParameters();
+    const std::string name = "p";
+    params.addRangeCheckedParam<Real>(name, 1, range_function, "Some doc");
+    const auto param =
+        dynamic_cast<libMesh::Parameters::Parameter<Real> *>(params.begin()->second.get());
+    const auto result = params.rangeCheck<Real, Real>(name, name, param);
+    EXPECT_TRUE(result.has_value());
+    ASSERT_EQ(is_user_error, result->first);
+    ASSERT_EQ(expect_error, result->second);
+  };
+
+  // Invalid range function
+  test_scalar_error("!", false, "Error parsing expression '!' for parameter 'p'");
 }
 
 TEST(InputParametersTest, checkControlParamTypeError)
