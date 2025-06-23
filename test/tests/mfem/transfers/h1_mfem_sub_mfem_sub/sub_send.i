@@ -42,7 +42,6 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = send
-    coefficient = 1.0
   []
 []
 

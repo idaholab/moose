@@ -82,12 +82,10 @@
   [curlcurl]
     type = MFEMCurlCurlKernel
     variable = e_field
-    coefficient = 1.
   []
   [mass]
     type = MFEMVectorFEMassKernel
     variable = e_field
-    coefficient = 1.
   []
   [source]
     type = MFEMVectorFEDomainLFKernel

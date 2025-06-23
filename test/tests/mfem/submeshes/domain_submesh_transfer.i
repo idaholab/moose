@@ -61,7 +61,6 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = submesh_potential
-    coefficient = 1.0
   []
 []
 

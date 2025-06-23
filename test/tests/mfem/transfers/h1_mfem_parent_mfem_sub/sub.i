@@ -42,7 +42,6 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = u
-    coefficient = 1.0
   []
 []
 

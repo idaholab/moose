@@ -23,7 +23,7 @@ MFEMVectorFEWeakDivergenceKernel::validParams()
       "$(-k\\vec u, \\vec\\nabla v)_\\Omega$ "
       "arising from the weak form of the divergence operator "
       "$\\vec \\nabla \\cdot (k\\vec u)$.");
-  params.addParam<MFEMScalarCoefficientName>("coefficient", "Name of property k to use.");
+  params.addParam<MFEMScalarCoefficientName>("coefficient", "1.", "Name of property k to use.");
   return params;
 }
 
