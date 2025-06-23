@@ -65,6 +65,7 @@ public:
     friend class LinearSystemContributionObject;
     template <typename>
     friend class MooseObjectTagWarehouse;
+    friend class GPUResidualObject;
 
     VectorTagsKey() {}
     VectorTagsKey(const VectorTagsKey &) {}
@@ -81,6 +82,7 @@ public:
     friend class LinearSystemContributionObject;
     template <typename>
     friend class MooseObjectTagWarehouse;
+    friend class GPUResidualObject;
 
     MatrixTagsKey() {}
     MatrixTagsKey(const MatrixTagsKey &) {}

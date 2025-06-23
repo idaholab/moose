@@ -20,6 +20,7 @@
 
 class MooseMesh;
 class SystemBase;
+class GPUNodalBCBase;
 
 class GPUSystem : public GPUMeshHolder, public GPUAssemblyHolder
 {
@@ -27,6 +28,10 @@ private:
   void setupVariables();
   void setupDofs();
   void setupSparsity();
+  void checkNodalBCs();
+
+private:
+  void getNodalBCDofs(const GPUNodalBCBase * nbc, GPUArray<bool> & dofs);
 
 public:
   /**
@@ -165,6 +170,32 @@ public:
    * @param tag Matrix tag
    */
   KOKKOS_FUNCTION auto isMatrixTagActive(TagID tag) const { return _matrix_tag_active[tag]; }
+  /**
+   * Check whether a local DOF index is associated with a nodal BC
+   * @param dof Local DOF index
+   */
+  KOKKOS_FUNCTION auto hasNodalBC(dof_id_type dof) const
+  {
+    return _nbc_dof.isAlloc() && _nbc_dof[dof];
+  }
+  /**
+   * Check whether a local DOF index is associated with a nodal BC for an extra residual tag
+   * @param dof Local DOF index
+   * @param tag Residual tag
+   */
+  KOKKOS_FUNCTION auto hasNodalBCResidualTag(dof_id_type dof, TagID tag) const
+  {
+    return _nbc_residual_tag_dof[tag].isAlloc() && _nbc_residual_tag_dof[tag][dof];
+  }
+  /**
+   * Check whether a local DOF index is associated with a nodal BC for an extra matrix tag
+   * @param dof Local DOF index
+   * @param tag Matrix tag
+   */
+  KOKKOS_FUNCTION auto hasNodalBCMatrixTag(dof_id_type dof, TagID tag) const
+  {
+    return _nbc_matrix_tag_dof[tag].isAlloc() && _nbc_matrix_tag_dof[tag][dof];
+  }
   /**
    * Get the FE type number of a variable
    * @param var Variable number
@@ -466,6 +497,11 @@ private:
   GPUArray<bool> _residual_tag_active;
   // Whether a matrix tag is active
   GPUArray<bool> _matrix_tag_active;
+  // Whether a DOF is associated with a nodal BC
+  GPUArray<bool> _nbc_dof;
+  // Whether a DOF is associated with a nodal BC for extra tags
+  GPUArray<GPUArray<bool>> _nbc_residual_tag_dof;
+  GPUArray<GPUArray<bool>> _nbc_matrix_tag_dof;
   // List of DOFs to send and receive
   GPUArray<GPUArray<dof_id_type>> _local_comm_list;
   GPUArray<GPUArray<dof_id_type>> _ghost_comm_list;
