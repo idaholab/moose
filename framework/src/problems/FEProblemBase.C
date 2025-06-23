@@ -7,6 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef MOOSE_HAVE_GPU
+#include "GPUMaterialPropertyStorage.h"
+#endif
+
 #include "FEProblemBase.h"
 #include "AuxiliarySystem.h"
 #include "MaterialPropertyStorage.h"
@@ -422,11 +426,19 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 #endif
     _mesh_divisions(/*threaded=*/true),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "material_props", &_mesh, _material_prop_registry)),
+        "material_props", &_mesh, _material_prop_registry, *this)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "bnd_material_props", &_mesh, _material_prop_registry)),
+        "bnd_material_props", &_mesh, _material_prop_registry, *this)),
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "neighbor_material_props", &_mesh, _material_prop_registry)),
+        "neighbor_material_props", &_mesh, _material_prop_registry, *this)),
+#ifdef MOOSE_HAVE_GPU
+    _gpu_material_props(declareRestartableDataWithContext<GPUMaterialPropertyStorage>(
+        "gpu_material_props", &_mesh, _material_prop_registry, *this)),
+    _gpu_bnd_material_props(declareRestartableDataWithContext<GPUMaterialPropertyStorage>(
+        "gpu_bnd_material_props", &_mesh, _material_prop_registry, *this)),
+    _gpu_neighbor_material_props(declareRestartableDataWithContext<GPUMaterialPropertyStorage>(
+        "gpu_neighbor_material_props", &_mesh, _material_prop_registry, *this)),
+#endif
     _reporter_data(_app),
     // TODO: delete the following line after apps have been updated to not call getUserObjects
     _all_user_objects(_app.getExecuteOnEnum()),
@@ -3985,21 +3997,91 @@ FEProblemBase::getMaterial(std::string name,
 }
 
 MaterialData &
-FEProblemBase::getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid) const
+FEProblemBase::getMaterialData(Moose::MaterialDataType type,
+                               const THREAD_ID tid,
+                               const MooseObject * object,
+                               bool is_gpu) const
 {
+  if (is_gpu)
+#ifdef MOOSE_HAVE_GPU
+    switch (type)
+    {
+      case Moose::BLOCK_MATERIAL_DATA:
+        if (object)
+          _gpu_material_props.addConsumer(type, object);
+        return _gpu_material_props.getMaterialData(tid);
+      case Moose::NEIGHBOR_MATERIAL_DATA:
+        if (object)
+          _gpu_neighbor_material_props.addConsumer(type, object);
+        return _gpu_neighbor_material_props.getMaterialData(tid);
+      case Moose::BOUNDARY_MATERIAL_DATA:
+      case Moose::FACE_MATERIAL_DATA:
+      case Moose::INTERFACE_MATERIAL_DATA:
+        if (object)
+          _gpu_bnd_material_props.addConsumer(type, object);
+        return _gpu_bnd_material_props.getMaterialData(tid);
+    }
+#else
+    mooseError("FEProblemBase::getMaterialData(): Attempted to get GPU material data but MOOSE was "
+               "not compiled with GPU support.");
+#endif
+
   switch (type)
   {
     case Moose::BLOCK_MATERIAL_DATA:
+      if (object)
+        _material_props.addConsumer(type, object);
       return _material_props.getMaterialData(tid);
     case Moose::NEIGHBOR_MATERIAL_DATA:
+      if (object)
+        _neighbor_material_props.addConsumer(type, object);
       return _neighbor_material_props.getMaterialData(tid);
     case Moose::BOUNDARY_MATERIAL_DATA:
     case Moose::FACE_MATERIAL_DATA:
     case Moose::INTERFACE_MATERIAL_DATA:
+      if (object)
+        _bnd_material_props.addConsumer(type, object);
       return _bnd_material_props.getMaterialData(tid);
   }
 
   mooseError("FEProblemBase::getMaterialData(): Invalid MaterialDataType ", type);
+}
+
+const std::set<const MooseObject *> &
+FEProblemBase::getMaterialPropertyStorageConsumers(Moose::MaterialDataType type, bool is_gpu) const
+{
+  if (is_gpu)
+#ifdef MOOSE_HAVE_GPU
+    switch (type)
+    {
+      case Moose::BLOCK_MATERIAL_DATA:
+        return _gpu_material_props.getConsumers(type);
+      case Moose::NEIGHBOR_MATERIAL_DATA:
+        return _gpu_neighbor_material_props.getConsumers(type);
+      case Moose::BOUNDARY_MATERIAL_DATA:
+      case Moose::FACE_MATERIAL_DATA:
+      case Moose::INTERFACE_MATERIAL_DATA:
+        return _gpu_bnd_material_props.getConsumers(type);
+    }
+#else
+    mooseError("FEProblemBase::getMaterialPropertyStorageConsumers(): Attempted to get GPU "
+               "material data but MOOSE was not compiled with GPU support.");
+#endif
+
+  switch (type)
+  {
+    case Moose::BLOCK_MATERIAL_DATA:
+      return _material_props.getConsumers(type);
+    case Moose::NEIGHBOR_MATERIAL_DATA:
+      return _neighbor_material_props.getConsumers(type);
+    case Moose::BOUNDARY_MATERIAL_DATA:
+    case Moose::FACE_MATERIAL_DATA:
+    case Moose::INTERFACE_MATERIAL_DATA:
+      return _bnd_material_props.getConsumers(type);
+  }
+
+  mooseError("FEProblemBase::getMaterialPropertyStorageConsumers(): Invalid MaterialDataType ",
+             type);
 }
 
 void
@@ -6855,6 +6937,17 @@ FEProblemBase::advanceState()
 
   if (_neighbor_material_props.hasStatefulProperties())
     _neighbor_material_props.shift();
+
+#ifdef MOOSE_HAVE_GPU
+  if (_gpu_material_props.hasStatefulProperties())
+    _gpu_material_props.shift();
+
+  if (_gpu_bnd_material_props.hasStatefulProperties())
+    _gpu_bnd_material_props.shift();
+
+  if (_gpu_neighbor_material_props.hasStatefulProperties())
+    _gpu_neighbor_material_props.shift();
+#endif
 }
 
 void
@@ -8736,13 +8829,9 @@ FEProblemBase::checkDependMaterialsHelper(
 
     for (const auto & mat1 : it.second)
     {
-      const std::set<std::string> & depend_props = mat1->getRequestedItems();
-      block_depend_props.insert(depend_props.begin(), depend_props.end());
-
       auto & alldeps = mat1->getMatPropDependencies(); // includes requested stateful props
       for (auto & dep : alldeps)
-        if (const auto name = _material_props.queryStatefulPropName(dep))
-          block_depend_props.insert(*name);
+        block_depend_props.insert(_material_prop_registry.getName(dep));
 
       // See if any of the active materials supply this property
       for (const auto & mat2 : it.second)
