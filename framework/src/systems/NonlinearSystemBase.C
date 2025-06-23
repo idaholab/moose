@@ -1001,6 +1001,11 @@ NonlinearSystemBase::setInitialSolution()
     }
   }
 
+#ifdef MOOSE_HAVE_GPU
+  if (_gpu_preset_nodal_bcs.hasObjects())
+    setGPUInitialSolution();
+#endif
+
   _sys.solution->close();
   update();
 
@@ -1756,6 +1761,11 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   TIME_SECTION("computeResidualInternal", 3);
 
   residualSetup();
+
+#ifdef MOOSE_HAVE_GPU
+  if (_fe_problem.hasGPUObjects())
+    computeGPUResidual(tags);
+#endif
 
   const auto vector_tag_data = _fe_problem.getVectorTags(tags);
 
@@ -2849,6 +2859,11 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   }
 
   jacobianSetup();
+
+#ifdef MOOSE_HAVE_GPU
+  if (_fe_problem.hasGPUObjects())
+    computeGPUJacobian(tags);
+#endif
 
   // Jacobian contributions from UOs - for now this is used for ray tracing
   // and ray kernels that contribute to the Jacobian (think line sources)
