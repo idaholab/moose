@@ -212,7 +212,7 @@ IdealGasFluidProperties::beta_from_p_T(
 {
   beta = 1.0 / T;
   dbeta_dp = 0;
-  dbeta_dT = -1.0 / std::pow(T, 2);
+  dbeta_dT = -1.0 / Utility::pow<2>(T);
 }
 
 Real IdealGasFluidProperties::cp_from_v_e(Real, Real) const { return _cp; }
