@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #pragma once
 
@@ -62,3 +63,5 @@ private:
   /// Struct holding parameters necessary for parameter tuning
   const StochasticTools::GaussianProcess::GPOptimizerOptions _optimization_opts;
 };
+
+#endif

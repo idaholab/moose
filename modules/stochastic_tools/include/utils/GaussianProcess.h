@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #pragma once
 
@@ -283,11 +284,8 @@ protected:
 } // StochasticTools namespac
 
 template <>
-void dataStore(std::ostream & stream, std::vector<torch::Tensor> & decomp, void * context);
-template <>
-void dataLoad(std::istream & stream, std::vector<torch::Tensor> & decomp, void * context);
-
-template <>
 void dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);
 template <>
 void dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, void * context);
+
+#endif

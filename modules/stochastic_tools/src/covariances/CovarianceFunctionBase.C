@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "CovarianceFunctionBase.h"
 
@@ -169,3 +170,5 @@ CovarianceFunctionBase::dependentCovarianceTypes(
     name_type_map.insert(std::make_pair(dependent_covar->name(), dependent_covar->type()));
   }
 }
+
+#endif

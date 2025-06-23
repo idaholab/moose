@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "SquaredExponentialCovariance.h"
 #include <cmath>
@@ -148,3 +149,5 @@ SquaredExponentialCovariance::computedKdlf(torch::Tensor & K,
     }
   }
 }
+
+#endif

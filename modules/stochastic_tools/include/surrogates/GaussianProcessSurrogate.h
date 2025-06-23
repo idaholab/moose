@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #pragma once
 
@@ -44,3 +45,5 @@ private:
   /// Paramaters (x) used for training
   const torch::Tensor & _training_params;
 };
+
+#endif

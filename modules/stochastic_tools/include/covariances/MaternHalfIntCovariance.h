@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #pragma once
 
@@ -59,3 +60,5 @@ private:
   /// non-negative p factor for use in Matern half-int. \nu = p+(1/2) in terms of general Matern
   unsigned int _p;
 };
+
+#endif

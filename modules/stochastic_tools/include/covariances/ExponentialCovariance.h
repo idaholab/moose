@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #pragma once
 
@@ -59,3 +60,5 @@ private:
   /// gamma exponential factor for use in kernel
   const Real & _gamma;
 };
+
+#endif
