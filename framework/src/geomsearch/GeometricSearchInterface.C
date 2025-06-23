@@ -23,12 +23,15 @@ GeometricSearchInterface::validParams()
   return emptyInputParameters();
 }
 
-GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_object)
+GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_object,
+                                                   bool initialize)
   : _geometric_search_data(moose_object->parameters()
                                .getCheckedPointerParam<SubProblem *>("_subproblem")
                                ->geomSearchData()),
     _requires_geometric_search(false)
 {
+  if (!initialize)
+    return;
 }
 
 PenetrationLocator &

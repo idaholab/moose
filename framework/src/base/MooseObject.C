@@ -42,9 +42,12 @@ MooseObject::validParams()
   return params;
 }
 
-MooseObject::MooseObject(const InputParameters & parameters)
+MooseObject::MooseObject(const InputParameters & parameters, bool initialize)
   : ParallelParamObject(parameters), _enabled(getParam<bool>("enable"))
 {
+  if (!initialize)
+    return;
+
   if (Registry::isRegisteredObj(type()) && _app.getFactory().currentlyConstructing() != &parameters)
     mooseError(
         "This registered object was not constructed using the Factory, which is not supported.");

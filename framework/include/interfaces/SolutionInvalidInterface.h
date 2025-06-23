@@ -37,7 +37,7 @@ class FEProblemBase;
 class SolutionInvalidInterface
 {
 public:
-  SolutionInvalidInterface(MooseObject * const moose_object);
+  SolutionInvalidInterface(const MooseObject * const moose_object, bool initialize = true);
 
 protected:
   template <bool warning>
@@ -49,8 +49,8 @@ protected:
 
 private:
   /// The MooseObject that owns this interface
-  MooseObject & _si_moose_object;
+  const MooseObject & _si_moose_object;
 
   /// A reference to FEProblem base
-  FEProblemBase & _si_problem;
+  const FEProblemBase & _si_problem;
 };

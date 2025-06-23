@@ -35,8 +35,9 @@ public:
   /**
    * Constructing the object
    * @param parameters Parameters that come from constructing the object
+   * @param initialize Whether this object will be initialized (not a temporary object) or not
    */
-  ScalarCoupleable(const MooseObject * moose_object);
+  ScalarCoupleable(const MooseObject * moose_object, bool initialize = true);
 
   /**
    * Get the list of coupled scalar variables

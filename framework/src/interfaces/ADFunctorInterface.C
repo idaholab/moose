@@ -16,7 +16,9 @@ ADFunctorInterface::validParams()
   return FunctorInterface::validParams();
 }
 
-ADFunctorInterface::ADFunctorInterface(const MooseObject * const moose_object)
-  : FunctorInterface(moose_object)
+ADFunctorInterface::ADFunctorInterface(const MooseObject * const moose_object, bool initialize)
+  : FunctorInterface(moose_object, initialize)
 {
+  if (!initialize)
+    return;
 }

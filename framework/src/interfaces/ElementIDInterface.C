@@ -25,11 +25,13 @@ ElementIDInterface::validParams()
   return emptyInputParameters();
 }
 
-ElementIDInterface::ElementIDInterface(const MooseObject * moose_object)
+ElementIDInterface::ElementIDInterface(const MooseObject * moose_object, bool initialize)
   : _obj_parameters(moose_object->parameters()),
     _id_mesh(moose_object->getMooseApp().actionWarehouse().mesh()),
     _ei_name(moose_object->name())
 {
+  if (!initialize)
+    return;
 }
 
 unsigned int
