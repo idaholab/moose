@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#39655'
+  design = '/CoupledTimeDerivative.md'
+
+  [test]
+    type = 'Exodiff'
+    input = 'gpu_coupled_time_derivative_test.i'
+    exodiff = 'gpu_coupled_time_derivative_test_out.e'
+    requirement = 'A coupled time derivative GPU kernel shall be provided'
+  []
+  [jac_test]
+    type = 'PetscJacobianTester'
+    input = 'gpu_coupled_time_derivative_test.i'
+    cli_args = 'Outputs/exodus=false'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The Jacobian from GPUCoupledTimeDerivative shall be perfect'
+  []
+[]
