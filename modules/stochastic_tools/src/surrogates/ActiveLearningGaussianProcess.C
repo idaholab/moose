@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "ActiveLearningGaussianProcess.h"
 
@@ -129,3 +130,5 @@ ActiveLearningGaussianProcess::getNormTrainingOuts(std::vector<Real> & norm_trai
   for (unsigned int i = 0; i < norm_training_outs.size(); ++i)
     norm_training_outs[i] = _training_data(i, 0);
 }
+
+#endif

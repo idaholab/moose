@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "Standardizer.h"
 
@@ -135,3 +136,5 @@ dataLoad(std::istream & stream, StochasticTools::Standardizer & standardizer, vo
     dataLoad(stream, stdev[ii], context);
   standardizer.set(mean, stdev);
 }
+
+#endif

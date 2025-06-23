@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "GaussianProcessSurrogate.h"
 #include "Sampler.h"
@@ -115,3 +116,5 @@ GaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
     std[output_i] = std_dev_mat[output_i][output_i].item<Real>();
   }
 }
+
+#endif
