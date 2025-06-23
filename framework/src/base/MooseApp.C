@@ -747,6 +747,10 @@ MooseApp::MooseApp(const InputParameters & parameters)
 
   registerCapabilities();
   Moose::out << std::flush;
+
+#ifdef MOOSE_HAVE_GPU
+  queryGPUs();
+#endif
 }
 
 void
@@ -860,6 +864,28 @@ MooseApp::registerCapabilities()
     haveCapability("cuda", doc);
 #else
     missingCapability("cuda", doc, "Add the CUDA bin directory to your path and rebuild PETSc.");
+#endif
+  }
+
+  {
+    const auto doc = "Kokkos performance portability programming ecosystem";
+#ifdef MOOSE_HAVE_GPU
+    haveCapability("kokkos", doc);
+#else
+    missingCapability("kokkos",
+                      doc,
+                      "Rebuild PETSc with Kokkos support and libMesh, or checkout the Kokkos "
+                      "submodule. Then, rebuild MOOSE with KOKKOS=true.");
+#endif
+  }
+
+  {
+    const auto doc = "Kokkos support for PETSc";
+#ifdef PETSC_HAVE_KOKKOS
+    haveCapability("petsc_kokkos", doc);
+#else
+    missingCapability(
+        "kokkos", doc, "Rebuild PETSc with Kokkos support, then rebuild libMesh and MOOSE.");
 #endif
   }
 
