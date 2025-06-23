@@ -10,7 +10,7 @@ The `CSGBase` class provides the framework in MOOSE for creating these generic [
 As stated, a [!ac](CSG) representation is defined minimally as a series of surfaces, cells, and universes.
 This section describes in theory what these components are.
 
-[Surfaces]((source/csg/CSGBase.md#surfaces)) are defined explicitly through surface equations (such as equations of a plane, sphere, etc.).
+[Surfaces](source/csg/CSGBase.md#surfaces) are defined explicitly through surface equations (such as equations of a plane, sphere, etc.).
 Each surface inherently separates two halfspace [regions](source/csg/CSGBase.md#regions): positive and negative halfspaces.
 For example, for a plane with the equation `Ax + By + Cz = D` the positive halfspace represents the region `Ax + By + Cz > D`, while the negative halfspace represents the region `Ax + By + Cz < D`. Similarly, for a spherical surface defined by the equation `x^2 + y^2 + z^2 = r^2`, the negative halfspace represents the region `x^2 + y^2 + z^2 < r^2` within the sphere while the positive halfspace represents the region `x^2 + y^2 + z^2 > r^2` outside the sphere.
 Example halfspaces are shown in [!ref](fig:halfspaces).
@@ -224,7 +224,6 @@ ExampleAxialSurfaceMeshGenerator::generateCSG()
   {
     // unique surface name
     const auto surf_name = mg_name + "_surf_" + surf_names[i];
-
     // create the plane
     // z plane equation: 0.0*x + 0.0*y + 1.0*z = (+/-)0.5 * axial_height
     auto plane_ptr = csg_obj->createPlaneFromCoefficients(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
