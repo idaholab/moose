@@ -864,6 +864,17 @@ public:
   virtual void addBoundaryCondition(const std::string & bc_name,
                                     const std::string & name,
                                     InputParameters & parameters);
+
+  virtual void addGPUKernel(const std::string & kernel_name,
+                            const std::string & name,
+                            InputParameters & parameters);
+  virtual void addGPUNodalKernel(const std::string & kernel_name,
+                                 const std::string & name,
+                                 InputParameters & parameters);
+  virtual void addGPUBoundaryCondition(const std::string & bc_name,
+                                       const std::string & name,
+                                       InputParameters & parameters);
+
   virtual void
   addConstraint(const std::string & c_name, const std::string & name, InputParameters & parameters);
 
