@@ -160,3 +160,27 @@ TEST(AppFactoryTest, appCopyConstructParams)
   EXPECT_EQ(af._input_parameters.size(), 1);
   af._input_parameters.clear();
 }
+
+TEST(AppFactoryTest, createNotRegistered)
+{
+  AppFactory af;
+
+  try
+  {
+    af.create("fooapp", "unused", emptyInputParameters(), MPI_COMM_WORLD);
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("AppFactory::Create(): Application 'fooapp' was not registered") !=
+                std::string::npos)
+        << msg;
+  }
+}
+
+TEST(AppFactoryTest, createAppShared)
+{
+  const char * argv[2] = {"foo", "\0"};
+  auto app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
+  ASSERT_NE(app, nullptr);
+}
