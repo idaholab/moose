@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#39655'
+  design = 'source/bcs/PostprocessorNeumannBC.md'
+
+  [./test]
+    type = 'Exodiff'
+    input = 'gpu_pp_neumann.i'
+    exodiff = 'gpu_pp_neumann_out.e'
+    requirement = 'The system shall support the application of a Neumann boundary condition computed via Postprocessor object.'
+    capabilities = 'kokkos'
+  [../]
+[]
