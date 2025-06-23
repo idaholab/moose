@@ -143,8 +143,7 @@ MooseBase::messagePrefix(const InputParameters & params, const bool hit_prefix)
 
   const auto & name = params.getObjectName();
   const std::string base = params.hasBase() ? params.getBase() : "object";
-  const bool is_main_app = base == "Application" && (name == AppFactory::main_app_name ||
-                                                     (name.rfind("_moose_server", 0) == 0));
+  const bool is_main_app = base == "Application" && name == AppFactory::main_app_name;
   prefix += "The following occurred in the ";
   if (is_main_app)
     prefix += "main " + base;
