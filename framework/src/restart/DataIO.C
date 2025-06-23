@@ -248,6 +248,7 @@ dataStore(std::ostream & stream, RealEigenMatrix & v, void * context)
     }
 }
 
+#ifdef LIBTORCH_ENABLED
 template <>
 void
 dataStore(std::ostream & stream, torch::Tensor & t, void * context)
@@ -264,6 +265,7 @@ dataStore(std::ostream & stream, torch::Tensor & t, void * context)
       dataStore(stream, r, context);
     }
 }
+#endif
 
 template <typename T>
 void
@@ -634,6 +636,7 @@ dataLoad(std::istream & stream, RealEigenMatrix & v, void * context)
     }
 }
 
+#ifdef LIBTORCH_ENABLED
 template <>
 void
 dataLoad(std::istream & stream, torch::Tensor & t, void * context)
@@ -653,6 +656,7 @@ dataLoad(std::istream & stream, torch::Tensor & t, void * context)
       t_accessor[i][j] = r;
     }
 }
+#endif
 
 template <typename T>
 void
