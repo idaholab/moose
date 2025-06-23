@@ -76,7 +76,7 @@
 
 [FunctorMaterials]
   [Substance]
-    type = MFEMGenericConstantFunctorMaterial
+    type = MFEMGenericFunctorMaterial
     prop_names = diffusivity
     prop_values = 1.0
     block = 'the_domain'
