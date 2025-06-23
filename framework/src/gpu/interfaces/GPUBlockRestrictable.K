@@ -21,6 +21,9 @@ BlockRestrictable::BlockRestrictable(const BlockRestrictable & object)
 void
 BlockRestrictable::initializeGPUBlockRestrictable(const GPUMesh * mesh)
 {
+  if (_moose_object->isParamValid("_gpu_material"))
+    return;
+
   auto & blocks = blockRestricted() ? blockIDs() : meshBlockIDs();
 
   std::set<dof_id_type> element_ids;

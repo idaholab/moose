@@ -23,6 +23,9 @@ BoundaryRestrictable::BoundaryRestrictable(const BoundaryRestrictable & object)
 void
 BoundaryRestrictable::initializeGPUBoundaryRestrictable(MooseMesh * mesh)
 {
+  if (_moose_object.isParamValid("_gpu_material"))
+    return;
+
   auto & boundaries = boundaryRestricted() ? boundaryIDs() : meshBoundaryIDs();
 
   auto gpu_mesh = mesh->getGPUMesh();
