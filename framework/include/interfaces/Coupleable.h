@@ -50,8 +50,12 @@ public:
    * @param parameters Parameters that come from constructing the object
    * @param nodal true if we need to couple with nodal values, otherwise false
    * @param is_fv Whether the \p MooseObject is a finite volume object
+   * @param initialize Whether this object will be initialized (not a temporary object) or not
    */
-  Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv = false);
+  Coupleable(const MooseObject * moose_object,
+             bool nodal,
+             bool is_fv = false,
+             bool initialize = true);
 
   /**
    * Get the list of coupled variables

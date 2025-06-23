@@ -28,7 +28,8 @@ RandomInterface::validParams()
 RandomInterface::RandomInterface(const InputParameters & parameters,
                                  FEProblemBase & problem,
                                  THREAD_ID tid,
-                                 bool is_nodal)
+                                 bool is_nodal,
+                                 bool initialize)
   : _random_data(nullptr),
     _generator(nullptr),
     _ri_problem(problem),
@@ -39,6 +40,8 @@ RandomInterface::RandomInterface(const InputParameters & parameters,
     _curr_node(problem.assembly(tid, 0).node()),
     _curr_element(problem.assembly(tid, 0).elem())
 {
+  if (!initialize)
+    return;
 }
 
 RandomInterface::~RandomInterface() {}

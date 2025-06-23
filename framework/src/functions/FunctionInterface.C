@@ -19,11 +19,13 @@ FunctionInterface::validParams()
   return emptyInputParameters();
 }
 
-FunctionInterface::FunctionInterface(const MooseObject * moose_object)
+FunctionInterface::FunctionInterface(const MooseObject * moose_object, bool initialize)
   : _fni_params(moose_object->parameters()),
     _fni_feproblem(*_fni_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _fni_tid(_fni_params.have_parameter<THREAD_ID>("_tid") ? _fni_params.get<THREAD_ID>("_tid") : 0)
 {
+  if (!initialize)
+    return;
 }
 
 const Function &

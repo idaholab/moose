@@ -17,7 +17,6 @@
 InputParameters
 OutputInterface::validParams()
 {
-
   InputParameters params = emptyInputParameters();
   params.addClassDescription("Interface to handle the restriction of outputs from objects");
   params.addParam<std::vector<OutputName>>("outputs",
@@ -32,12 +31,16 @@ OutputInterface::validParams()
   return params;
 }
 
-OutputInterface::OutputInterface(const InputParameters & parameters, bool build_list)
+OutputInterface::OutputInterface(const InputParameters & parameters,
+                                 bool build_list,
+                                 bool initialize)
   : _oi_moose_app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
     _oi_output_warehouse(_oi_moose_app.getOutputWarehouse()),
     _oi_outputs(parameters.get<std::vector<OutputName>>("outputs").begin(),
                 parameters.get<std::vector<OutputName>>("outputs").end())
 {
+  if (!initialize)
+    return;
 
   // By default it is assumed that the variable name associated with 'outputs' is the name
   // of the block, this is the case for Markers, Indicators, VectorPostprocessors, and

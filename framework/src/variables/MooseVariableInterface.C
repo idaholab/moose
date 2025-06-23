@@ -24,9 +24,13 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
                                                   bool nodal,
                                                   std::string var_param_name,
                                                   Moose::VarKindType expected_var_type,
-                                                  Moose::VarFieldType expected_var_field_type)
+                                                  Moose::VarFieldType expected_var_field_type,
+                                                  bool initialize)
   : _nodal(nodal), _moose_object(*moose_object)
 {
+  if (!initialize)
+    return;
+
   const InputParameters & parameters = _moose_object.parameters();
 
   SubProblem & problem = *parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
