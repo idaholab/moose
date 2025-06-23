@@ -224,6 +224,15 @@ public:
   libMesh::QBase * const & writeableQRule() { return _current_qrule; }
 
   /**
+   * Returns the reference to the quadrature of specified block and dimension
+   * @return A _reference_ to the unique pointer.  Make sure to store this as a reference!
+   */
+  const std::unique_ptr<libMesh::QBase> & writeableQRule(unsigned int dim, SubdomainID block)
+  {
+    return qrules(dim, block).vol;
+  }
+
+  /**
    * Returns the reference to the quadrature points
    * @return A _reference_.  Make sure to store this as a reference!
    */
@@ -298,6 +307,15 @@ public:
    * @return A _reference_.  Make sure to store this as a reference!
    */
   libMesh::QBase * const & writeableQRuleFace() { return _current_qrule_face; }
+
+  /**
+   * Returns the reference to the quadrature used on a face of specified block and dimension
+   * @return A _reference_ to the unique pointer.  Make sure to store this as a reference!
+   */
+  const std::unique_ptr<libMesh::QBase> & writeableQRuleFace(unsigned int dim, SubdomainID block)
+  {
+    return qrules(dim, block).face;
+  }
 
   /**
    * Returns the reference to the current quadrature being used
