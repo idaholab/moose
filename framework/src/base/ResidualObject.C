@@ -28,25 +28,26 @@ ResidualObject::validParams()
   return params;
 }
 
-ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal)
-  : MooseObject(parameters),
-    SetupInterface(this),
-    FunctionInterface(this),
-    UserObjectInterface(this),
-    TransientInterface(this),
-    PostprocessorInterface(this),
+ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal, bool initialize)
+  : MooseObject(parameters, initialize),
+    SetupInterface(this, initialize),
+    FunctionInterface(this, initialize),
+    UserObjectInterface(this, initialize),
+    TransientInterface(this, initialize),
+    PostprocessorInterface(this, initialize),
     // VPPs used by ScalarKernels must be broadcast because we don't know where the
     // ScalarKernel will end up being evaluated
     // Note: residual objects should have a valid _moose_base.
-    VectorPostprocessorInterface(this,
-                                 parameters.get<std::string>("_moose_base") == "ScalarKernel"),
+    VectorPostprocessorInterface(
+        this, parameters.get<std::string>("_moose_base") == "ScalarKernel", initialize),
     RandomInterface(parameters,
                     *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
                     parameters.get<THREAD_ID>("_tid"),
-                    is_nodal),
-    Restartable(this, parameters.get<std::string>("_moose_base") + "s"),
-    MeshChangedInterface(parameters),
-    TaggingInterface(this),
+                    is_nodal,
+                    initialize),
+    Restartable(this, parameters.get<std::string>("_moose_base") + "s", initialize),
+    MeshChangedInterface(parameters, initialize),
+    TaggingInterface(this, initialize),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
@@ -54,6 +55,8 @@ ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal
     _assembly(_subproblem.assembly(_tid, _sys.number())),
     _mesh(_subproblem.mesh())
 {
+  if (!initialize)
+    return;
 }
 
 void

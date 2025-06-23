@@ -26,7 +26,7 @@ class MooseVariableDependencyInterface
 {
 public:
   // Must be a pointer in order to disambiguate with default copy constructor
-  MooseVariableDependencyInterface(const MooseObject *);
+  MooseVariableDependencyInterface(const MooseObject *, bool initialize = true);
 
   /**
    * Retrieve the set of MooseVariableFieldBase that _this_ object depends on.

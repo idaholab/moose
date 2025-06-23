@@ -24,7 +24,7 @@
 #include "NodeFaceConstraint.h"
 #include "NodeElemConstraintBase.h"
 
-Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
+Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv, bool initialize)
   : _c_parameters(moose_object->parameters()),
     _c_name(_c_parameters.get<std::string>("_object_name")),
     _c_type(_c_parameters.get<std::string>("_type")),
@@ -59,6 +59,9 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     _obj(moose_object),
     _writable_coupled_variables(libMesh::n_threads())
 {
+  if (!initialize)
+    return;
+
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
   _obj->getMooseApp().registerInterfaceObject(*this);
 

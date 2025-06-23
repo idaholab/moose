@@ -14,11 +14,14 @@
 #include "FEProblemBase.h"
 #include "SolutionInvalidityRegistry.h"
 
-SolutionInvalidInterface::SolutionInvalidInterface(MooseObject * const moose_object)
+SolutionInvalidInterface::SolutionInvalidInterface(const MooseObject * const moose_object,
+                                                   bool initialize)
   : _si_moose_object(*moose_object),
     _si_problem(
         *_si_moose_object.parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
+  if (!initialize)
+    return;
 }
 
 /// Set solution invalid mark for the given solution ID
