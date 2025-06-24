@@ -12,14 +12,23 @@
 namespace CSG
 {
 
-CSGPlane::CSGPlane(const std::string name, const Point p1, const Point p2, const Point p3)
-  : CSGSurface(name, SurfaceType::PLANE)
+CSGPlane::CSGPlane(const std::string name,
+                   const Point p1,
+                   const Point p2,
+                   const Point p3,
+                   CSGSurface::BoundaryType boundary)
+  : CSGSurface(name, SurfaceType::PLANE, boundary)
 {
   coeffsFromPoints(p1, p2, p3);
 }
 
-CSGPlane::CSGPlane(const std::string name, const Real a, const Real b, const Real c, const Real d)
-  : CSGSurface(name, SurfaceType::PLANE), _a(a), _b(b), _c(c), _d(d)
+CSGPlane::CSGPlane(const std::string name,
+                   const Real a,
+                   const Real b,
+                   const Real c,
+                   const Real d,
+                   CSGSurface::BoundaryType boundary)
+  : CSGSurface(name, SurfaceType::PLANE, boundary), _a(a), _b(b), _c(c), _d(d)
 {
 }
 

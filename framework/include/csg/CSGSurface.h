@@ -35,7 +35,8 @@ public:
   enum class BoundaryType
   {
     TRANSMISSION,
-    VACUUM
+    VACUUM,
+    REFLECTIVE
   };
 
   /// Enum for the direction of the halfspace being represented by a point and surface
@@ -57,8 +58,9 @@ public:
    *
    * @param name unique name of surface
    * @param surf_type surface type
+   * @param boundary CSGSurface::BoundaryType boundary condition for the surface
    */
-  CSGSurface(const std::string name, SurfaceType surf_type);
+  CSGSurface(const std::string name, SurfaceType surf_type, CSGSurface::BoundaryType boundary);
 
   /**
    * Destructor

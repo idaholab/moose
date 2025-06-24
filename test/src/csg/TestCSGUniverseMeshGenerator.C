@@ -158,18 +158,19 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
   // make cell with surfaces from bounding_box input and fill cell with new universe containing the
   // other cells
-  auto x_pos_surf =
-      csg_mesh->createPlaneFromCoefficients(mg_name + "_bb_x_pos_surf", 1.0, 0, 0, 0.5 * _x_side);
-  auto x_neg_surf =
-      csg_mesh->createPlaneFromCoefficients(mg_name + "_bb_x_neg_surf", 1.0, 0, 0, -0.5 * _x_side);
-  auto y_pos_surf =
-      csg_mesh->createPlaneFromCoefficients(mg_name + "_bb_y_pos_surf", 0, 1.0, 0, 0.5 * _y_side);
-  auto y_neg_surf =
-      csg_mesh->createPlaneFromCoefficients(mg_name + "_bb_y_neg_surf", 0, 1.0, 0, -0.5 * _y_side);
-  auto z_pos_surf =
-      csg_mesh->createPlaneFromCoefficients(mg_name + "_bb_z_pos_surf", 0, 0, 1.0, 0.5 * _z_side);
-  auto z_neg_surf =
-      csg_mesh->createPlaneFromCoefficients(mg_name + "_bb_z_neg_surf", 0, 0, 1.0, -0.5 * _z_side);
+  auto bc_vac = CSG::CSGSurface::BoundaryType::VACUUM; // vacuum bc for bounding box
+  auto x_pos_surf = csg_mesh->createPlaneFromCoefficients(
+      mg_name + "_bb_x_pos_surf", 1.0, 0, 0, 0.5 * _x_side, bc_vac);
+  auto x_neg_surf = csg_mesh->createPlaneFromCoefficients(
+      mg_name + "_bb_x_neg_surf", 1.0, 0, 0, -0.5 * _x_side, bc_vac);
+  auto y_pos_surf = csg_mesh->createPlaneFromCoefficients(
+      mg_name + "_bb_y_pos_surf", 0, 1.0, 0, 0.5 * _y_side, bc_vac);
+  auto y_neg_surf = csg_mesh->createPlaneFromCoefficients(
+      mg_name + "_bb_y_neg_surf", 0, 1.0, 0, -0.5 * _y_side, bc_vac);
+  auto z_pos_surf = csg_mesh->createPlaneFromCoefficients(
+      mg_name + "_bb_z_pos_surf", 0, 0, 1.0, 0.5 * _z_side, bc_vac);
+  auto z_neg_surf = csg_mesh->createPlaneFromCoefficients(
+      mg_name + "_bb_z_neg_surf", 0, 0, 1.0, -0.5 * _z_side, bc_vac);
   auto bb_region =
       -x_pos_surf & +x_neg_surf & -y_pos_surf & +y_neg_surf & -z_pos_surf & +z_neg_surf;
 

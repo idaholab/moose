@@ -35,43 +35,55 @@ std::shared_ptr<CSGSurface>
 CSGSurfaceList::addPlaneFromPoints(const std::string name,
                                    const Point p1,
                                    const Point p2,
-                                   const Point p3)
+                                   const Point p3,
+                                   CSGSurface::BoundaryType boundary)
 {
   checkSurfaceName(name);
-  _surfaces.insert(std::make_pair(name, std::make_shared<CSGPlane>(name, p1, p2, p3)));
+  _surfaces.insert(std::make_pair(name, std::make_shared<CSGPlane>(name, p1, p2, p3, boundary)));
   return _surfaces[name];
 }
 
 std::shared_ptr<CSGSurface>
-CSGSurfaceList::addPlaneFromCoefficients(
-    const std::string name, const Real a, const Real b, const Real c, const Real d)
+CSGSurfaceList::addPlaneFromCoefficients(const std::string name,
+                                         const Real a,
+                                         const Real b,
+                                         const Real c,
+                                         const Real d,
+                                         CSGSurface::BoundaryType boundary)
 {
   checkSurfaceName(name);
-  _surfaces.insert(std::make_pair(name, std::make_shared<CSGPlane>(name, a, b, c, d)));
+  _surfaces.insert(std::make_pair(name, std::make_shared<CSGPlane>(name, a, b, c, d, boundary)));
   return _surfaces[name];
 }
 
 std::shared_ptr<CSGSurface>
-CSGSurfaceList::addSphere(const std::string name, const Point center, const Real r)
+CSGSurfaceList::addSphere(const std::string name,
+                          const Point center,
+                          const Real r,
+                          CSGSurface::BoundaryType boundary)
 {
   checkSurfaceName(name);
-  _surfaces.insert(std::make_pair(name, std::make_shared<CSGSphere>(name, center, r)));
+  _surfaces.insert(std::make_pair(name, std::make_shared<CSGSphere>(name, center, r, boundary)));
   return _surfaces[name];
 }
 
 std::shared_ptr<CSGSurface>
-CSGSurfaceList::addCylinder(
-    const std::string name, const Real x0, const Real x1, const Real r, const std::string axis)
+CSGSurfaceList::addCylinder(const std::string name,
+                            const Real x0,
+                            const Real x1,
+                            const Real r,
+                            const std::string axis,
+                            CSGSurface::BoundaryType boundary)
 {
   checkSurfaceName(name);
   std::shared_ptr<CSGSurface> surf;
 
   if (axis == "x" || axis == "X")
-    surf = std::make_shared<CSGXCylinder>(name, x0, x1, r);
+    surf = std::make_shared<CSGXCylinder>(name, x0, x1, r, boundary);
   else if (axis == "y" || axis == "Y")
-    surf = std::make_shared<CSGYCylinder>(name, x0, x1, r);
+    surf = std::make_shared<CSGYCylinder>(name, x0, x1, r, boundary);
   else if (axis == "z" || axis == "Z")
-    surf = std::make_shared<CSGZCylinder>(name, x0, x1, r);
+    surf = std::make_shared<CSGZCylinder>(name, x0, x1, r, boundary);
   else
     mooseError("Axis " + axis + " not recognized for CSG cylinder. Options are x, y, or z.");
 
