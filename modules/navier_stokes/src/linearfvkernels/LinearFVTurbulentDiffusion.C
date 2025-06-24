@@ -14,7 +14,7 @@
 #include "NavierStokesMethods.h"
 #include "NS.h"
 
-registerMooseObject("MooseApp", LinearFVTurbulentDiffusion);
+registerMooseObject("NavierStokesApp", LinearFVTurbulentDiffusion);
 
 InputParameters
 LinearFVTurbulentDiffusion::validParams()
