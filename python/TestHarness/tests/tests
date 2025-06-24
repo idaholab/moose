@@ -304,4 +304,10 @@
     requirement = 'The system shall support storing results and data for validation cases that are combined with a standard test'
     issues = '#30517'
   []
+  [resultsreader_results]
+    type = PythonUnitTest
+    input = test_resultsreader_results.py
+    requirement = 'The system shall provide a python interface to interacting with previous test results stored in a database'
+    issues = '#30819'
+  []
 []

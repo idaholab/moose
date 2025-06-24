@@ -132,3 +132,8 @@ class ValidationVectorData(ValidationNumericData):
     x_description: str
     # Units for the x data, if any
     x_units: Optional[str]
+
+# The valid data types that can be stored
+ValidationDataTypes = [ValidationData, ValidationScalarData, ValidationVectorData]
+# The valid data types that can be stored, in string form
+ValidationDataTypesStr: list[str] = [v.__name__ for v in ValidationDataTypes]
