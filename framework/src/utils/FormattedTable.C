@@ -303,7 +303,7 @@ FormattedTable::printTablePiece(std::ostream & out,
                                 std::vector<std::string>::iterator & col_begin,
                                 std::vector<std::string>::iterator & col_end)
 {
-  fillEmptyValues();
+  fillEmptyValues(last_n_entries);
   /**
    * Print out the header row
    */
@@ -572,10 +572,16 @@ FormattedTable::clear()
 }
 
 void
-FormattedTable::fillEmptyValues()
+FormattedTable::fillEmptyValues(unsigned int last_n_entries)
 {
-  for (auto & [time, datamap] : _data)
+  auto begin = _data.begin();
+  auto end = _data.end();
+  if (last_n_entries && (last_n_entries < _data.size()))
+    begin = end - last_n_entries;
+
+  for (auto it = begin; it != end; ++it)
   {
+    auto & datamap = it->second;
     if (datamap.size() != _column_names.size())
     {
       for (const auto & col_name : _column_names)
