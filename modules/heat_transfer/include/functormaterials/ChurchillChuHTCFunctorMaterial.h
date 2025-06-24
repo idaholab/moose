@@ -23,12 +23,14 @@ public:
   ChurchillChuHTCFunctorMaterialTempl(const InputParameters & parameters);
 
 protected:
-  /// Heat transfer coefficient
-  const Moose::Functor<GenericReal<is_ad>> & _htc;
-  /// Solid temperature
-  const Moose::Functor<GenericReal<is_ad>> & _T_solid;
-  /// Fluid temperature
-  const Moose::Functor<GenericReal<is_ad>> & _T_fluid;
+  /// Fluid Prandtl number
+  const Moose::Functor<GenericReal<is_ad>> & _Pr;
+  /// Grashof number
+  const Moose::Functor<GenericReal<is_ad>> & _Gr;
+  /// Fluid thermal conductivity
+  const Moose::Functor<GenericReal<is_ad>> & _k_fluid;
+  /// Characteristic length
+  const Real _length;
 };
 
 typedef ChurchillChuHTCFunctorMaterialTempl<false> ChurchillChuHTCFunctorMaterial;

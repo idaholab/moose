@@ -19,11 +19,14 @@ ChurchillChuHTCFunctorMaterialTempl<is_ad>::validParams()
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Computes a heat transfer coefficient using the Churchill-Chu "
                              "correlation for natural convection.");
-  params.addRequiredParam<MooseFunctorName>("htc", "Heat transfer coefficient functor");
-  params.addRequiredParam<MooseFunctorName>("T_solid", "Solid temperature functor");
-  params.addRequiredParam<MooseFunctorName>("T_fluid", "Fluid temperature functor");
-  params.addRequiredParam<std::string>("heat_flux_name",
-                                       "Name to give the heat flux functor material property");
+  params.addRequiredParam<MooseFunctorName>("Pr", "Fluid Prandtl number functor");
+  params.addRequiredParam<MooseFunctorName>("Gr", "Grashof number functor");
+  params.addRequiredParam<MooseFunctorName>("k_fluid",
+                                            "Fluid thermal conductivity functor [W/(m-K)]");
+  params.addRequiredParam<Real>("length", "Characteristic length [m]");
+  params.addRequiredParam<std::string>(
+      "htc_name", "Name to give the heat transfer coefficient functor material property");
+
   return params;
 }
 
@@ -31,18 +34,25 @@ template <bool is_ad>
 ChurchillChuHTCFunctorMaterialTempl<is_ad>::ChurchillChuHTCFunctorMaterialTempl(
     const InputParameters & parameters)
   : FunctorMaterial(parameters),
-    _htc(getFunctor<GenericReal<is_ad>>("htc")),
-    _T_solid(getFunctor<GenericReal<is_ad>>("T_solid")),
-    _T_fluid(getFunctor<GenericReal<is_ad>>("T_fluid"))
+    _Pr(getFunctor<GenericReal<is_ad>>("Pr")),
+    _Gr(getFunctor<GenericReal<is_ad>>("Gr")),
+    _k_fluid(getFunctor<GenericReal<is_ad>>("k_fluid")),
+    _length(getParam<Real>("length"))
 {
   addFunctorProperty<GenericReal<is_ad>>(
-      getParam<std::string>("heat_flux_name"),
+      getParam<std::string>("htc_name"),
       [this](const auto & r, const auto & t) -> GenericReal<is_ad>
       {
-        const auto htc = _htc(r, t);
-        const auto T_solid = _T_solid(r, t);
-        const auto T_fluid = _T_fluid(r, t);
-        return htc * (T_solid - T_fluid);
+        const auto Pr = _Pr(r, t);
+        const auto Gr = _Gr(r, t);
+        const auto k_fluid = _k_fluid(r, t);
+        const auto Ra = Gr * Pr;
+        const auto numerator = 0.387 * std::pow(Ra, 1 / 6);
+        const auto denominator = std::pow(1 + std::pow(0.559 / Pr, 9 / 16), 8 / 27);
+        const auto root_Nu = 0.6 + numerator / denominator;
+        const auto Nu = Utility::pow<2>(root_Nu);
+
+        return Nu * k_fluid / _length;
       });
 }
 
