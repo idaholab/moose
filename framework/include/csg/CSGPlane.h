@@ -30,8 +30,13 @@ public:
    * @param p1 point 1
    * @param p2 point 2
    * @param p3 point 3
+   * @param boundary CSGSurface::BoundaryType boundary condition for the surface
    */
-  CSGPlane(const std::string name, const Point p1, const Point p2, const Point p3);
+  CSGPlane(const std::string name,
+           const Point p1,
+           const Point p2,
+           const Point p3,
+           CSGSurface::BoundaryType boundary);
 
   /**
    * @brief Construct a new CSGPlane surface from coefficients (a, b, c, d) for the
@@ -42,8 +47,14 @@ public:
    * @param b coefficient b
    * @param c coefficient c
    * @param d coefficient d
+   * @param boundary CSGSurface::BoundaryType boundary condition for the surface
    */
-  CSGPlane(const std::string name, const Real a, const Real b, const Real c, const Real d);
+  CSGPlane(const std::string name,
+           const Real a,
+           const Real b,
+           const Real c,
+           const Real d,
+           CSGSurface::BoundaryType boundary);
 
   /**
    * Destructor

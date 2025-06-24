@@ -79,7 +79,14 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
   const auto cell_name = "square_cell";
   const auto material_name = "square_material";
 
-  csg_mesh->createCell(cell_name, material_name, region);
+  auto cell_ptr = csg_mesh->createCell(cell_name, material_name, region);
+
+  // set all surface boundary conditions to reflective
+  auto all_surfs = cell_ptr->getRegion().getSurfaces();
+  for (auto s : all_surfs)
+  {
+    csg_mesh->updateSurfaceBoundaryCondition(s, CSG::CSGSurface::BoundaryType::REFLECTIVE);
+  }
 
   return csg_mesh;
 }
