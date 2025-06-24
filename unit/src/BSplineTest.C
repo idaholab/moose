@@ -9,6 +9,8 @@
 
 #include "gtest/gtest.h"
 #include "BSpline.h"
+#include "libmesh/point.h"
+#include "MooseError.h"
 
 //* The following tests check that the BSpline utility and its submethods work as intended.
 //* Degrees 2, 3, and 4 interpolating polynomials will be evaluated at prescribed values of
@@ -16,12 +18,12 @@
 //*
 //* All expected points were independently calculated and verified.
 
-const Real t0 = 0;
-const Real t1 = 0.4;
-const Real t2 = 0.8;
-const Real t3 = 1.0;
+const libMesh::Real t0 = 0;
+const libMesh::Real t1 = 0.4;
+const libMesh::Real t2 = 0.8;
+const libMesh::Real t3 = 1.0;
 const std::vector<libMesh::Point> control_points = {
-      {1, 2, 0}, {1, 2, 0}, {1.5, 2.5, 0}, {3, 1, 0}, {3, 1, 0}};
+    {1, 2, 0}, {1, 2, 0}, {1.5, 2.5, 0}, {3, 1, 0}, {3, 1, 0}};
 
 TEST(BSplineTest, Degree2Test)
 {
@@ -43,7 +45,6 @@ TEST(BSplineTest, Degree2Test)
   EXPECT_NEAR((point_1 - expected_point_1).norm(), 0, 1e-9);
   EXPECT_NEAR((point_2 - expected_point_2).norm(), 0, 1e-9);
   EXPECT_NEAR((point_3 - expected_point_3).norm(), 0, 1e-9);
-
 }
 
 TEST(BSplineTest, Degree3Test)
@@ -66,13 +67,11 @@ TEST(BSplineTest, Degree3Test)
   EXPECT_NEAR((point_1 - expected_point_1).norm(), 0, 1e-9);
   EXPECT_NEAR((point_2 - expected_point_2).norm(), 0, 1e-9);
   EXPECT_NEAR((point_3 - expected_point_3).norm(), 0, 1e-9);
-
 }
 
 TEST(BSplineTest, Degree4Test)
 {
   const unsigned int degree = 4;
-  
 
   Moose::BSpline b_spline(degree, control_points);
 
@@ -90,7 +89,6 @@ TEST(BSplineTest, Degree4Test)
   EXPECT_NEAR((point_1 - expected_point_1).norm(), 0, 1e-9);
   EXPECT_NEAR((point_2 - expected_point_2).norm(), 0, 1e-9);
   EXPECT_NEAR((point_3 - expected_point_3).norm(), 0, 1e-9);
-
 }
 
 /**
