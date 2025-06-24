@@ -17,7 +17,6 @@ namespace Moose
 {
 BSpline::BSpline(const unsigned int degree, const std::vector<libMesh::Point> & control_points)
   : _degree(degree), _control_points(control_points), _knot_vector(buildKnotVector())
-
 {
 }
 
@@ -33,11 +32,12 @@ BSpline::getPoint(const Real t) const
   libMesh::Point returnPoint(0, 0, 0);
   for (const auto i : index_range(_control_points))
     returnPoint += BSpline::CdBBasis(t, i, _degree) * _control_points[i];
+
   return returnPoint;
 }
 
 /**
- * Creates normalized knot vector.
+ * Creates normalized open uniform knot vector.
  */
 std::vector<Real>
 BSpline::buildKnotVector() const
@@ -45,7 +45,7 @@ BSpline::buildKnotVector() const
   const unsigned int num_points_left = _control_points.size() - _degree;
 
   if (num_points_left <= 0)
-    mooseError("Number of control points must be equal to degree + 1!");
+    mooseError("Number of control points must be greater than or equal to degree + 1!");
 
   std::vector<Real> knot_vector(_degree, 0); // initialize bottom to zeros
   for (const auto i : make_range(num_points_left))
@@ -61,6 +61,7 @@ BSpline::buildKnotVector() const
   // This must be done to have a constant domain of t to be between 0 and 1 (inclusive).
   for (Real & value : knot_vector)
     value /= num_points_left;
+
   return knot_vector;
 }
 
