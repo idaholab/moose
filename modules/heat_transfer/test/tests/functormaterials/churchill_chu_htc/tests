@@ -1,6 +1,6 @@
 [Tests]
   design = 'ChurchillChuFunctorMaterial.md'
-  issues = '#30651'
+  issues = '#30847'
   [test]
     type = CSVDiff
     input = 'churchill_chu_htc.i'
