@@ -16,8 +16,13 @@
 ComputeLinearFVFaceThread::ComputeLinearFVFaceThread(FEProblemBase & fe_problem,
                                                      const unsigned int linear_system_num,
                                                      const Moose::FV::LinearFVComputationMode mode,
-                                                     const std::set<TagID> & tags)
-  : _fe_problem(fe_problem), _linear_system_number(linear_system_num), _mode(mode), _tags(tags)
+                                                     const std::set<TagID> & vector_tags,
+                                                     const std::set<TagID> & matrix_tags)
+  : _fe_problem(fe_problem),
+    _linear_system_number(linear_system_num),
+    _mode(mode),
+    _vector_tags(vector_tags),
+    _matrix_tags(matrix_tags)
 {
 }
 
@@ -27,7 +32,8 @@ ComputeLinearFVFaceThread::ComputeLinearFVFaceThread(ComputeLinearFVFaceThread &
   : _fe_problem(x._fe_problem),
     _linear_system_number(x._linear_system_number),
     _mode(x._mode),
-    _tags(x._tags)
+    _vector_tags(x._vector_tags),
+    _matrix_tags(x._matrix_tags)
 {
 }
 
@@ -93,9 +99,9 @@ ComputeLinearFVFaceThread::fetchSystemContributionObjects()
                           .template condition<AttribThread>(_tid);
 
     if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
-      base_query.condition<AttribMatrixTags>(_tags).queryInto(_elem_fv_flux_kernels);
+      base_query.condition<AttribMatrixTags>(_matrix_tags).queryInto(_elem_fv_flux_kernels);
     else
-      base_query.condition<AttribVectorTags>(_tags).queryInto(_elem_fv_flux_kernels);
+      base_query.condition<AttribVectorTags>(_vector_tags).queryInto(_elem_fv_flux_kernels);
     _old_subdomain = _subdomain;
   }
   _fv_flux_kernels.insert(_elem_fv_flux_kernels.begin(), _elem_fv_flux_kernels.end());
@@ -112,9 +118,9 @@ ComputeLinearFVFaceThread::fetchSystemContributionObjects()
                           .template condition<AttribThread>(_tid);
 
     if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
-      base_query.condition<AttribMatrixTags>(_tags).queryInto(_neighbor_fv_flux_kernels);
+      base_query.condition<AttribMatrixTags>(_matrix_tags).queryInto(_neighbor_fv_flux_kernels);
     else
-      base_query.condition<AttribVectorTags>(_tags).queryInto(_neighbor_fv_flux_kernels);
+      base_query.condition<AttribVectorTags>(_vector_tags).queryInto(_neighbor_fv_flux_kernels);
     _old_neighbor_subdomain = _neighbor_subdomain;
   }
   _fv_flux_kernels.insert(_neighbor_fv_flux_kernels.begin(), _neighbor_fv_flux_kernels.end());

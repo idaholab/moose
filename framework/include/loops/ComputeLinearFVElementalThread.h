@@ -32,14 +32,16 @@ public:
    * @param fe_problem Reference to the problem
    * @param linear_system_num The number of the linear system which is assembled by this thread
    * @param mode Computation mode (rhs, matrix or both)
-   * @param tags The vector/matrix tags this thread should contribute to. These are used to query
-   * the warehouse for the objects that should contribute to the linear system matrix and right hand
-   * side. When mode == FullSystem, these tags should be vector tags
+   * @param vector_tags The vector tags this thread should contribute to. These are used to
+   * query the warehouse for the objects that should contribute to the right hand side.
+   * @param matrix_tags The matrix tags this thread should contribute to. These are used to
+   * query the warehouse for the objects that should contribute to the matrix.
    */
   ComputeLinearFVElementalThread(FEProblemBase & fe_problem,
                                  const unsigned int linear_system_num,
                                  const Moose::FV::LinearFVComputationMode mode,
-                                 const std::set<TagID> & tags);
+                                 const std::set<TagID> & vector_tags,
+                                 const std::set<TagID> & matrix_tags);
   /**
    * Splitting constructor.
    * @param x Reference to the other thread
@@ -75,8 +77,11 @@ protected:
   /// The mode in which this thread is operating
   const Moose::FV::LinearFVComputationMode _mode;
 
-  /// The vector/matrix tags this thread contributes to
-  const std::set<TagID> & _tags;
+  /// The vector tags this thread contributes to
+  const std::set<TagID> & _vector_tags;
+
+  /// The matrix tags this thread contributes to
+  const std::set<TagID> & _matrix_tags;
 
   /// Thread ID
   THREAD_ID _tid;
