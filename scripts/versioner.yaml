@@ -7,7 +7,7 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2025.06.13
+    version: 2025.06.26
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
@@ -93,7 +93,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.06.25
+    version: 2025.06.26
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml

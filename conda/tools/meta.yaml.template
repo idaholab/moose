@@ -55,6 +55,7 @@ requirements:
     - pyflakes
     - pylatexenc
     - pylint
+    - pymongo
     - python
     - pyyaml
     - requests
@@ -89,6 +90,7 @@ test:
     - pyflakes
     - pylatexenc
     - pylint
+    - pymongo
     - requests
     - skimage
     - sympy
