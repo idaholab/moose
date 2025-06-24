@@ -11,6 +11,9 @@
 
 #pragma once
 
+/**
+ * Class used to set the initial value(s) on a scalar valued MFEMVariable.
+ */
 #include "MFEMGeneralUserObject.h"
 
 class MFEMScalarIC : public MFEMGeneralUserObject
