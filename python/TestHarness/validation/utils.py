@@ -7,4 +7,16 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from .case import ValidationCase
+from enum import Enum
+
+class ExtendedEnum(Enum):
+    """
+    Extension to Enum that allows getting
+    all possible enumerations in a list
+    """
+    @classmethod
+    def list(cls) -> list:
+        """
+        Get all possible enumerations in a list
+        """
+        return list(cls)

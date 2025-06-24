@@ -12,8 +12,9 @@ import unittest
 import typing
 from dataclasses import dataclass
 import numpy as np
-from TestHarness import ValidationCase
-from TestHarness.validation import NoTestsDefined, TestMissingResults, TestRunException
+from TestHarness.validation import ValidationCase
+from TestHarness.validation.dataclasses import *
+from TestHarness.validation.exceptions import *
 from FactorySystem.InputParameters import InputParameters
 
 class TestValidationCase(unittest.TestCase):
@@ -25,7 +26,7 @@ class TestValidationCase(unittest.TestCase):
         Checks that an exception is raised when running without tests
         """
         test = ValidationCase()
-        with self.assertRaises(NoTestsDefined):
+        with self.assertRaises(ValidationNoTestsDefined):
             test.run()
 
     def testAddResult(self):
@@ -62,7 +63,7 @@ class TestValidationCase(unittest.TestCase):
                 pass
 
         test = Test()
-        with self.assertRaises(TestMissingResults):
+        with self.assertRaises(ValidationTestMissingResults):
             test.run()
         self.assertEqual(len(test.results), 0)
 
@@ -102,7 +103,7 @@ class TestValidationCase(unittest.TestCase):
 
         # Bad data class
         @dataclass(kw_only=True)
-        class BadData(ValidationCase.Data):
+        class BadData(ValidationData):
             bad_value: typing.Any
         with self.assertRaisesRegex(TypeError, 'not JSON serializable'):
             ValidationCase()._addData(BadData, 'key', 1234, 'unused', bad_value=b'1234')
@@ -679,7 +680,7 @@ class TestValidationCase(unittest.TestCase):
                 raise raised_exe
 
         test = Test()
-        with self.assertRaises(TestRunException) as exe:
+        with self.assertRaises(ValidationTestRunException) as exe:
             test.run()
         self.assertEqual(len(exe.exception.exceptions), 1)
         self.assertEqual(exe.exception.exceptions[0], raised_exe)

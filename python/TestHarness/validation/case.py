@@ -13,66 +13,18 @@ import traceback
 import typing
 import sys
 import json
-import math
 from numbers import Number
 from typing import Any, Optional, Tuple, Union
-from enum import Enum
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 
-from numpy.typing import NDArray
 import numpy as np
 
 from FactorySystem.MooseObject import MooseObject
 from FactorySystem.InputParameters import InputParameters
 
-class ExtendedEnum(Enum):
-    """
-    Extension to Enum that allows getting
-    all possible enumerations in a list
-    """
-    @classmethod
-    def list(cls) -> list:
-        """
-        Get all possible enumerations in a list
-        """
-        return list(cls)
-
-# The valid numeric data types
-NumericDataType = Union[float, list[float]]
-# Valid numeric vector types
-NumericVectorType = Union[NDArray[np.float64], list[float]]
-# Input type for addVectorData
-VectorDataInputType = Tuple[NumericVectorType, str, Optional[str]]
-
-class DataKeyAlreadyExists(Exception):
-    """
-    Exception for when a data key already exists
-    """
-    def __init__(self, key: str):
-        self.key: str = key
-        super().__init__(f'Data "{self.key}" is already registered')
-
-class NoTestsDefined(Exception):
-    """
-    Exception for when no tests were defined
-    """
-    def __init__(self, obj):
-        super().__init__(f'No test functions defined in {obj.__class__.__name__}')
-
-class TestMissingResults(Exception):
-    """
-    Exception for when a test was ran without any results
-    """
-    def __init__(self, obj, function):
-        super().__init__(f'No results reported in {obj.__class__.__name__}.{function}')
-
-class TestRunException(Exception):
-    """
-    Exception for when an exception was found when running a test
-    """
-    def __init__(self, exceptions: list[Exception]):
-        super().__init__('Encountered exception(s) while running tests')
-        self.exceptions = exceptions
+from TestHarness.validation.dataclasses import *
+from TestHarness.validation.exceptions import *
+from TestHarness.validation.utils import ExtendedEnum
 
 class ValidationCase(MooseObject):
     """
@@ -97,118 +49,6 @@ class ValidationCase(MooseObject):
         FAIL = 'FAIL'
         # Skipped test
         SKIP = 'SKIP'
-
-    @dataclass(kw_only=True)
-    class Result:
-        """
-        Data structure that stores the information
-        about a single validation result.
-        """
-        # The status
-        status: None
-        # A human readable message
-        message: str
-        # The test method the result came from
-        test: str
-        # Whether or not this result is considered
-        # a validation result (enables running verification
-        # cases but not storing them in a database)
-        validation: bool = True
-        # The data that this result is attached to,
-        # if any
-        data_key: Optional[str] = None
-
-    @dataclass(kw_only=True)
-    class Data:
-        """
-        Base data structure that stores the information
-        about a piece of validation data to be stored
-        """
-        def __post_init__(self):
-            assert isinstance(self.key, str)
-            assert isinstance(self.description, str)
-            assert isinstance(self.test, (str, type(None)))
-            assert isinstance(self.validation, bool)
-
-            try:
-                json.dumps(self.value)
-            except (TypeError, OverflowError) as e:
-                raise TypeError(f'Data type "{type(self.value)}" is not JSON serializable') from e
-
-        # The data key
-        key: str
-        # The data
-        value: Any
-        # Human readable description of the data
-        description: str
-        # The test that added this data, if any
-        test: Optional[str]
-        # Whether or not this result is considered
-        # a validation result (enables running verification
-        # cases but not storing them in a database)
-        validation: bool = True
-
-    @dataclass(kw_only=True)
-    class NumericData(Data):
-        """
-        Data structure that stores the information about
-        a piece of numeric validation data that can be checked
-        """
-        def __post_init__(self):
-            super().__post_init__()
-            assert isinstance(self.units, (str, type(None)))
-            if self.nominal is not None:
-                assert isinstance(self.nominal, type(self.value))
-            if self.bounds is not None:
-                assert isinstance(self.bounds, tuple)
-                assert len(self.bounds) == 2
-                assert isinstance(self.bounds[0], type(self.value))
-                assert isinstance(self.bounds[1], type(self.value))
-            if self.rel_err is not None:
-                assert isinstance(self.rel_err, float)
-
-        # Units for the data, if any
-        units: Optional[str]
-        # A nominal value for this data; unused
-        # in the test but useful in postprocessing
-        nominal: Optional[NumericDataType] = None
-        # Bounds for the data (min and max)
-        bounds: Optional[Tuple[NumericDataType, NumericDataType]] = None
-        # Allowed relative error for the data
-        rel_err: Optional[float] = None
-
-    @dataclass(kw_only=True)
-    class ScalarData(NumericData):
-        """
-        Data structure that stores the information about
-        a piece of scalar numeric data that can be checked
-        """
-
-    @dataclass(kw_only=True)
-    class VectorData(NumericData):
-        """
-        Data structure that stores the information about
-        a piece of array numeric validation data that can be checked
-        """
-        def __post_init__(self):
-            super().__post_init__()
-            if self.nominal is not None:
-                assert len(self.value) == len(self.nominal)
-            if self.bounds is not None:
-                assert len(self.value) == len(self.bounds[0])
-                assert len(self.value) == len(self.bounds[1])
-            assert isinstance(self.x, list)
-            assert isinstance(self.x, type(self.value))
-            assert len(self.x) == len(self.value)
-            assert isinstance(self.description, str)
-            assert isinstance(self.x_units, (str, type(None)))
-
-        # The x values for the data
-        x: list[float]
-        # The description for the x data
-        x_description: str
-        # Units for the x data, if any
-        x_units: Optional[str]
 
     # Stores classes that are instantiated that
     # are derived from this class
@@ -259,15 +99,15 @@ class ValidationCase(MooseObject):
         """
         assert isinstance(status, self.Status)
         assert isinstance(message, str)
-        status_value = self.Result(status=status, message=message,
-                                   test=self._current_test, **kwargs)
+        status_value = ValidationResult(status=status, message=message,
+                                        test=self._current_test, **kwargs)
 
         prefix = '' if status_value.data_key is None else f'{status_value.data_key}: '
         print(f'[{status.value:>4}] {prefix}{message}')
         self._results.append(status_value)
 
     def _addData(self, data_type: typing.Type, key: str, value: Any,
-                 description: str, **kwargs) -> Data:
+                 description: str, **kwargs) -> ValidationData:
         """
         Internal method for creating and inserting data.
 
@@ -282,7 +122,7 @@ class ValidationCase(MooseObject):
             The built Data object
         """
         if key in self._data:
-            raise DataKeyAlreadyExists(key)
+            raise ValidationDataKeyAlreadyExists(key)
 
         data = data_type(value=value,
                          key=key,
@@ -314,7 +154,7 @@ class ValidationCase(MooseObject):
         if not isinstance(description, str):
             raise TypeError('description is not of type str')
 
-        self._addData(self.Data, key, value, description, **kwargs)
+        self._addData(ValidationData, key, value, description, **kwargs)
 
     @staticmethod
     def toFloat(value: Any, context: Optional[str] = None) -> float:
@@ -441,7 +281,7 @@ class ValidationCase(MooseObject):
             if v is not None:
                 kwargs[k] = self.toFloat(v, k)
 
-        data = self._addData(self.ScalarData, key, value, description, units=units, **kwargs)
+        data = self._addData(ValidationScalarData, key, value, description, units=units, **kwargs)
 
         result_kwargs = {'data_key': key,
                          'validation': kwargs.pop('validation', True)}
@@ -484,23 +324,23 @@ class ValidationCase(MooseObject):
             raise ValueError(f'{prefix}value(s) at indices {nan_ind} are nan')
         return arr.tolist()
 
-    def addVectorData(self, key: str, x: VectorDataInputType,
-                      value: VectorDataInputType, **kwargs) -> None:
+    def addVectorData(self, key: str, x: ValidationVectorDataInputType,
+                      value: ValidationVectorDataInputType, **kwargs) -> None:
         """
         Adds a piece of vector (float or int) data to the validation data.
 
         Will also perform checking on the data if bounds are set and
         store an associated Result.
 
-        For x and value (VectorDataInputType), each should be provided as a
+        For x and value (ValidationVectorDataInputType), each should be provided as a
         three-length tuple, where the first entry is the data, the second
         is the description of the data, and the third is the units of the data
         (optional, can be None)
 
         Args:
             key: The key to store the data
-            x: The independent data (see VectorDataInputType above)
-            value: The dependent data (see VectorDataInputType above)
+            x: The independent data (see ValidationVectorDataInputType above)
+            value: The dependent data (see ValidationVectorDataInputType above)
         Keyword arguments:
             Additional arguments passed to VectorData (bounds, nominal, etc)
         """
@@ -550,7 +390,7 @@ class ValidationCase(MooseObject):
             raise KeyError("'rel_err' not supported")
 
         # Store data
-        data = self._addData(self.VectorData, key, values, description,
+        data = self._addData(ValidationVectorData, key, values, description,
                              units=units, x=x_values, x_description=x[1], x_units=x[2],
                              **kwargs)
 
@@ -566,14 +406,14 @@ class ValidationCase(MooseObject):
                 self.addResult(status, message, **result_kwargs)
 
     @property
-    def results(self) -> list[Result]:
+    def results(self) -> list[ValidationResult]:
         """
         Get all of the results
         """
         return self._results
 
     @property
-    def data(self) -> dict[str, Data]:
+    def data(self) -> dict[str, ValidationData]:
         """
         Get all of the data
         """
@@ -602,7 +442,7 @@ class ValidationCase(MooseObject):
                                                           predicate=inspect.isfunction) if len(v)]
         test_functions = [v for v in all_functions if v.startswith('test')]
         if not test_functions:
-            raise NoTestsDefined(self)
+            raise ValidationNoTestsDefined(self)
 
         name = self.__class__.__name__
         def print_prefixed(msg: str) -> None:
@@ -628,7 +468,7 @@ class ValidationCase(MooseObject):
                 run_exceptions.append(e)
             else:
                 if not any(r.test == self._current_test for r in self.results):
-                    raise TestMissingResults(self, function)
+                    raise ValidationTestMissingResults(self, function)
 
             self._current_test = None
             self._current_not_validation = True
@@ -648,7 +488,7 @@ class ValidationCase(MooseObject):
         print_prefixed(summary)
 
         if run_exceptions:
-            raise TestRunException(run_exceptions)
+            raise ValidationTestRunException(run_exceptions)
 
     def getTesterOutputs(self, extension: str = None) -> list[str]:
         """

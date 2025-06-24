@@ -13,8 +13,9 @@ from contextlib import nullcontext, redirect_stdout
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
 from TestHarness.runners.Runner import Runner
-from TestHarness.validation import TestRunException
-from TestHarness import OutputInterface, util, ValidationCase
+from TestHarness.validation.exceptions import ValidationTestRunException
+from TestHarness.validation import ValidationCase
+from TestHarness import OutputInterface, util
 from tempfile import TemporaryDirectory
 from collections import namedtuple
 from dataclasses import asdict, dataclass
@@ -567,7 +568,7 @@ class Job(OutputInterface):
             try:
                 with redirect_stdout(stdout):
                     test_case.run()
-            except TestRunException:
+            except ValidationTestRunException:
                 run_exception = True
             finally:
                 output.appendOutput(stdout.getvalue())

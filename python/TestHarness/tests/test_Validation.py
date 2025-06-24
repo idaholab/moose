@@ -51,12 +51,12 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertEqual('coolunits', number['units'])
         self.assertEqual(95.0, number['bounds'][0])
         self.assertEqual(105.0, number['bounds'][1])
-        self.assertEqual('ScalarData', number['type'])
+        self.assertEqual('ValidationScalarData', number['type'])
         # Arbitrary data (dict)
         useless_dict = data['useless_dict']
         self.assertEqual({'foo': 'bar'}, useless_dict['value'])
         self.assertEqual('A useless dictionary', useless_dict['description'])
-        self.assertEqual('Data', useless_dict['type'])
+        self.assertEqual('ValidationData', useless_dict['type'])
         # Vector data
         vector = data['vector']
         self.assertEqual([0, 1], vector['x'])
@@ -67,7 +67,7 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertEqual('K', vector['units'])
         self.assertEqual([0, 1], vector['bounds'][0])
         self.assertEqual([2, 3], vector['bounds'][1])
-        self.assertEqual('VectorData', vector['type'])
+        self.assertEqual('ValidationVectorData', vector['type'])
 
         # Check on-screen output
         output = test['output']
