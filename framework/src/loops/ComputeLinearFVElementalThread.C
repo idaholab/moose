@@ -17,11 +17,13 @@ ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(
     FEProblemBase & fe_problem,
     const unsigned int linear_system_num,
     const Moose::FV::LinearFVComputationMode mode,
-    const std::set<TagID> & tags)
+    const std::set<TagID> & vector_tags,
+    const std::set<TagID> & matrix_tags)
   : _fe_problem(fe_problem),
     _linear_system_number(linear_system_num),
     _mode(mode),
-    _tags(tags),
+    _vector_tags(vector_tags),
+    _matrix_tags(matrix_tags),
     _subdomain(Moose::INVALID_BLOCK_ID),
     _old_subdomain(Moose::INVALID_BLOCK_ID)
 {
@@ -33,7 +35,8 @@ ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(ComputeLinearFVEl
   : _fe_problem(x._fe_problem),
     _linear_system_number(x._linear_system_number),
     _mode(x._mode),
-    _tags(x._tags),
+    _vector_tags(x._vector_tags),
+    _matrix_tags(x._matrix_tags),
     _subdomain(x._subdomain),
     _old_subdomain(x._old_subdomain)
 {
@@ -93,9 +96,9 @@ ComputeLinearFVElementalThread::fetchSystemContributionObjects()
                         .template condition<AttribThread>(_tid);
 
   if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
-    base_query.condition<AttribMatrixTags>(_tags).queryInto(kernels);
+    base_query.condition<AttribMatrixTags>(_matrix_tags).queryInto(kernels);
   else
-    base_query.condition<AttribVectorTags>(_tags).queryInto(kernels);
+    base_query.condition<AttribVectorTags>(_vector_tags).queryInto(kernels);
   _old_subdomain = _subdomain;
 
   _fv_kernels = std::vector<LinearFVElementalKernel *>(kernels.begin(), kernels.end());
