@@ -62,7 +62,7 @@
   },
   "SURFACES": {
     "CylsUniverse_bb_x_neg_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "vacuum",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -72,7 +72,7 @@
       "TYPE": "plane"
     },
     "CylsUniverse_bb_x_pos_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "vacuum",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -82,7 +82,7 @@
       "TYPE": "plane"
     },
     "CylsUniverse_bb_y_neg_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "vacuum",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -92,7 +92,7 @@
       "TYPE": "plane"
     },
     "CylsUniverse_bb_y_pos_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "vacuum",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -102,7 +102,7 @@
       "TYPE": "plane"
     },
     "CylsUniverse_bb_z_neg_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "vacuum",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -112,7 +112,7 @@
       "TYPE": "plane"
     },
     "CylsUniverse_bb_z_pos_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "vacuum",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
