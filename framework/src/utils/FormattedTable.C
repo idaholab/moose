@@ -310,8 +310,7 @@ FormattedTable::printTablePiece(std::ostream & out,
   printRowDivider(out, col_widths, col_begin, col_end);
   out << "|";
   if (_output_time)
-    out << std::setw(_column_width) << std::left << " time"
-        << " |";
+    out << std::setw(_column_width) << std::left << " time" << " |";
   for (auto header_it = col_begin; header_it != col_end; ++header_it)
     out << " " << std::setw(col_widths[*header_it]) << *header_it << "|";
   out << "\n";
@@ -575,11 +574,22 @@ FormattedTable::clear()
 void
 FormattedTable::fillEmptyValues()
 {
-  for (auto & it : _data)
-    for (const auto & col_name : _column_names)
-      if (!it.second[col_name])
-        it.second[col_name] =
-            std::dynamic_pointer_cast<TableValueBase>(std::make_shared<TableValue<char>>('0'));
+  for (auto & [time, datamap] : _data)
+  {
+    if (datamap.size() != _column_names.size())
+    {
+      for (const auto & col_name : _column_names)
+        if (!datamap[col_name])
+          datamap[col_name] =
+              std::dynamic_pointer_cast<TableValueBase>(std::make_shared<TableValue<char>>('0'));
+    }
+    else
+    {
+      for (auto & [key, val] : datamap)
+        if (!val)
+          val = std::dynamic_pointer_cast<TableValueBase>(std::make_shared<TableValue<char>>('0'));
+    }
+  }
 }
 
 MooseEnum
