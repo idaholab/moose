@@ -66,22 +66,6 @@ TransientBase::validParams()
                                 "The number of timesteps in a transient run");
   params.addParam<int>("n_startup_steps", 0, "The number of timesteps during startup");
 
-  params.addDeprecatedParam<bool>("trans_ss_check",
-                                  false,
-                                  "Whether or not to check for steady state conditions",
-                                  "Use steady_state_detection instead");
-  params.addDeprecatedParam<Real>("ss_check_tol",
-                                  1.0e-08,
-                                  "Whenever the relative residual changes by less "
-                                  "than this the solution will be considered to be "
-                                  "at steady state.",
-                                  "Use steady_state_tolerance instead");
-  params.addDeprecatedParam<Real>(
-      "ss_tmin",
-      0.0,
-      "Minimum amount of time to run before checking for steady state conditions.",
-      "Use steady_state_start_time instead");
-
   params.addParam<bool>(
       "steady_state_detection", false, "Whether or not to check for steady state conditions");
   params.addParam<Real>("steady_state_tolerance",
@@ -130,8 +114,8 @@ TransientBase::validParams()
       "steady_state_detection steady_state_tolerance steady_state_start_time check_aux",
       "Steady State Detection");
 
-  params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol "
-                              "ss_tmin abort_on_solve_fail timestep_tolerance use_multiapp_dt",
+  params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps "
+                              "abort_on_solve_fail timestep_tolerance use_multiapp_dt",
                               "Advanced");
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
@@ -173,16 +157,6 @@ TransientBase::TransientBase(const InputParameters & parameters)
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
     _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt"))
 {
-  // Handle deprecated parameters
-  if (!parameters.isParamSetByAddParam("trans_ss_check"))
-    _steady_state_detection = getParam<bool>("trans_ss_check");
-
-  if (!parameters.isParamSetByAddParam("ss_check_tol"))
-    _steady_state_tolerance = getParam<Real>("ss_check_tol");
-
-  if (!parameters.isParamSetByAddParam("ss_tmin"))
-    _steady_state_start_time = getParam<Real>("ss_tmin");
-
   _t_step = 0;
   _dt = 0;
   _next_interval_output_time = 0.0;
