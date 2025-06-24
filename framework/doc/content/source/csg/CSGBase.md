@@ -133,7 +133,7 @@ The following is an example of using a combination of all operators to define th
 Each of the halfspaces associated with each surface are shown in [!ref](fig:region_surfs).
 The cylinder and planes are then combined via intersection to form the region inside a finite cylinder, and the space above the top plane is intersected with the sphere to define a half sphere ([!ref](fig:region1)).
 These two regions are unioned as shown in [!ref](fig:region2).
-The complement of the previous combination then defines the final region `~((-cylinder_surf & -top_plane & +bottom_plane) | (+top_plane & -sphere_surf))`, as shown in blue in [!ref](fig:region2).
+The complement of the previous combination then defines the final region `~((-cylinder_surf & -top_plane & +bottom_plane) | (+top_plane & -sphere_surf))`, as shown in blue in [!ref](fig:region3).
 
 !media large_media/csg/region_surfs.png
        id=fig:region_surfs
@@ -202,7 +202,7 @@ Methods available for managing the root universe:
 
 There are multiple ways in which cells can be added to a universe:
 
-1. At the time of universe creation, a list of pointers to `CSGCell` objects can be passed into `createUniverse` (as described [above](#universe-methods)). Example:
+1. At the time of universe creation, a list of pointers to `CSGCell` objects can be passed into `createUniverse` (as described [above](#universes)). Example:
 
 ```cpp
 auto new_universe = csg_obj->createUniverse("new_universe", list_of_cells);
@@ -306,8 +306,8 @@ std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*csg_base);
 
 !alert! note title=Accessing other MeshGenerator objects by name
 
-[source/meshgenerators/MeshGenerator.md] object(s) can be passed to another mesh generator as input by providing `InputParameters` of type `MeshGeneratorName`.
-See the [For Developers section](source/csg/CSG.md#for-developers) for an example of this.
+A [source/meshgenerators/MeshGenerator.md] object(s) can be passed to another mesh generator as input by providing `InputParameters` of type `MeshGeneratorName`.
+See the `ExampleAxialSurfaceMeshGenerator` implementation [below](#example-implementation) for an example of this.
 
 !alert-end!
 
