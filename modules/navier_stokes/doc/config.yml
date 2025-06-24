@@ -29,6 +29,9 @@ Extensions:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.bibtex:
+        duplicates:
+            - rhebergen2017analysis # referenced also in framework
     MooseDocs.extensions.sqa:
         active: True
         reports: !include modules/navier_stokes/doc/sqa_reports.yml
