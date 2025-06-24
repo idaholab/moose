@@ -2,7 +2,7 @@
   design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
   issues = '#29846'
   [channel_ERCOFTAC_linear_transient]
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a backward facing step, '
+    requirement = 'The system shall be able to solve transient fluid flow problems with k-epsilon turbulence model for a channel, '
     [result]
       type = 'Exodiff'
       input = 'channel_ERCOFTAC.i'
