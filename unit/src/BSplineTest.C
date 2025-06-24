@@ -109,7 +109,8 @@ TEST(BSplineTest, ControlPointErrorTest)
         }
         catch (const std::exception & e)
         {
-          EXPECT_STREQ(e.what(), "Number of control points must be equal to degree + 1!");
+          EXPECT_STREQ(e.what(),
+                       "Number of control points must be greater than or equal to degree + 1!");
           throw;
         }
       },
