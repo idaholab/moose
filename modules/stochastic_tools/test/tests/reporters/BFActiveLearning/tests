@@ -9,6 +9,7 @@
       max_parallel = 1
       jsondiff = 'single_proc_single_row_ufunction.json'
       detail = 'a single row in the sampler using the U learning function;'
+      capabilities = 'libtorch'
     []
     [MultipleProc_MultipleRow_Ufunction]
       type = 'JSONDiff'
@@ -19,6 +20,7 @@
       cli_args = "Samplers/mc/num_batch=2 Outputs/file_base='multiple_proc_multiple_row_ufunction'"
       detail = 'multiple rows in the sampler using the U learning function;'
       rel_err = 1.0e-4
+      capabilities = 'libtorch'
     []
   []
 []

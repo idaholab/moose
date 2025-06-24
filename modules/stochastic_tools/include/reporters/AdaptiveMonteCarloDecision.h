@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #pragma once
 
@@ -86,3 +87,5 @@ private:
   /// Store the GP training samples
   const int * const _gp_training_samples;
 };
+
+#endif
