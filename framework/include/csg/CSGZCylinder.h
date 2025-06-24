@@ -30,7 +30,7 @@ public:
    * @param x0 x coordinate of center
    * @param y0 y coordinate of center
    * @param r radius
-   * @param boundary CSGSurface::BoundaryType boundary condition for the surface
+   * @param boundary CSGSurface::BoundaryType boundary type for the surface
    */
   CSGZCylinder(const std::string name,
                const Real x0,

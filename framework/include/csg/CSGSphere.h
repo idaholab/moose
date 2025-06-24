@@ -29,7 +29,7 @@ public:
    * @param name unique name for the sphere surface
    * @param center center point of sphere
    * @param r radius of sphere
-   * @param boundary CSGSurface::BoundaryType boundary condition for the surface
+   * @param boundary CSGSurface::BoundaryType boundary type for the surface
    */
   CSGSphere(const std::string name,
             const Point center,

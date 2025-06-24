@@ -11,7 +11,7 @@ As stated, a [!ac](CSG) representation is defined minimally as a series of surfa
 This section describes in theory what these components are.
 
 [Surfaces](source/csg/CSGBase.md#surfaces) are defined explicitly through surface equations (such as equations of a plane, sphere, etc.).
-Surfaces are usually assigned boundary conditions (vacuum, transmission, reflective, etc.) which are relevant for proper physics handling in [!ac](MC) simulations.
+Surfaces are usually assigned a boundary type (vacuum, transmission, reflective, etc.) which is relevant for proper physics handling in [!ac](MC) simulations.
 Each surface inherently separates two halfspace [regions](source/csg/CSGBase.md#regions): positive and negative halfspaces.
 For example, for a plane with the equation $ax + by + cz = d$ the positive halfspace represents the region $ax + by + cz > d$, while the negative halfspace represents the region $ax + by + cz < d$. Similarly, for a spherical surface defined by the equation $x^2 + y^2 + z^2 = r^2$, the negative halfspace represents the region $x^2 + y^2 + z^2 < r^2$ within the sphere while the positive halfspace represents the region $x^2 + y^2 + z^2 > r^2$ outside the sphere.
 Example halfspaces are shown in [!ref](fig:halfspaces).
