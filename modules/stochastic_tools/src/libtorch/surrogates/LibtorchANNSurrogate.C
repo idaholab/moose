@@ -47,10 +47,10 @@ LibtorchANNSurrogate::evaluate(const std::vector<Real> & x) const
   auto input_mean_accessor = input_mean.accessor<Real, 2>();
   auto input_std_accessor = input_std.accessor<Real, 2>();
 
-  // unsigned int i_mean = input_mean.sizes()[0]*;
-  // unsigned int i_std = input_std.sizes()[0];
-  mooseAssert(torch::size(input_mean, 0) == converted_input.size() &&
-                  torch::size(input_std, 0) == converted_input.size(),
+  // unsigned long int i_mean = (unsigned long int)torch::size(input_mean, 0);
+  // unsigned long int i_std = (unsigned long int)torch::size(input_std, 0);
+  mooseAssert((unsigned long int)torch::size(input_mean, 0) == converted_input.size() &&
+                  (unsigned long int)torch::size(input_std, 0) == converted_input.size(),
               "The input standardizer's dimensions should be the same as the input dimension!");
 
   for (auto input_i : index_range(converted_input))
