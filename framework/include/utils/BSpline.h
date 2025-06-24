@@ -11,6 +11,9 @@
 
 #include <vector>
 #include "libmesh/point.h"
+#include "libMeshReducedNamespace.h"
+
+using namespace libMesh;
 
 namespace Moose
 {
@@ -22,24 +25,33 @@ public:
   /**
    * Get the point on the spline evaluated at \p t
    */
-  libMesh::Point getPoint(const double t) const;
+  libMesh::Point getPoint(const Real t) const;
 
   /**
    * Get the built knot vector associated with the degree and control points
    */
-  const std::vector<double> & getKnotVector() const { return _knot_vector; }
+  const std::vector<Real> & getKnotVector() const { return _knot_vector; }
 
 private:
   /**
-   * Internal method for building the knot vector given the degree and control points
+   * Internal method for building the knot vector given the degree and control points.
    */
-  std::vector<double> buildKnotVector() const;
+  std::vector<Real> buildKnotVector() const;
 
-  /// The polynomial degree
+  /**
+   * Internal method for evaluating the Cox-de-Boor basis functions.
+   * Two additional functions, firstCoeff and secondCoeff, are submethods for CdBBasis
+   * function to evaluate front coefficients in the recursive formula.
+   */
+  Real CdBBasis(const Real & t, const unsigned int i, const unsigned int j) const;
+  Real firstCoeff(const Real & t, const unsigned int i, const unsigned int j) const;
+  Real secondCoeff(const Real & t, const unsigned int i, const unsigned int j) const;
+
+  /// The polynomial degree.
   const unsigned int _degree;
-  /// The control points
+  /// The control points.
   const std::vector<libMesh::Point> _control_points;
-  /// The knot vector
-  const std::vector<double> _knot_vector;
+  /// The knot vector.
+  const std::vector<Real> _knot_vector;
 };
 }
