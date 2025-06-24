@@ -9,13 +9,14 @@
 
 #pragma once
 
-#ifdef NEML2_ENABLED
+#include <string>
 
-#include <optional>
+#ifdef NEML2_ENABLED
 
 #include "neml2/tensors/tensors.h"
 #include "neml2/base/LabeledAxisAccessor.h"
 #include "neml2/base/Parser.h"
+#include "neml2/base/Factory.h"
 #include "neml2/models/Model.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
@@ -24,8 +25,6 @@
 #include "MaterialProperty.h"
 
 #endif
-
-#include "InputParameters.h"
 
 class MooseObject;
 class Action;
@@ -42,9 +41,8 @@ namespace NEML2Utils
  * dtype and sends the model to the target device.
  * @return neml2::Model&
  */
-neml2::Model & getModel(const std::string & name,
-                        std::optional<neml2::Device> device = std::nullopt,
-                        neml2::Dtype dtype = neml2::kFloat64);
+std::shared_ptr<neml2::Model>
+getModel(neml2::Factory & factory, const std::string & name, neml2::Dtype dtype = neml2::kFloat64);
 
 /// Assert that the NEML2 variable name sits on either the forces or the state subaxis
 void assertVariable(const neml2::VariableName &);

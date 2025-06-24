@@ -83,14 +83,14 @@ private:
 
   /// transform data
   Scalar transform_data(const Scalar & data,
-                        const std::vector<Real> & param,
+                        const std::vector<double> & param,
                         TransformEnum transform_type) const;
 
   /// read in json axes transform name
   std::string json_to_string(const std::string & key) const;
 
   /// read in json axes transform constants
-  std::vector<Real> json_to_vector(const std::string & key) const;
+  std::vector<double> json_to_vector(const std::string & key) const;
 
   ///read 6D grid date from json and store in Torch tensor
   Scalar json_6Dvector_to_torch(const std::string & key) const;
@@ -113,27 +113,27 @@ private:
   TransformEnum _env_transform_enum;
 
   /// input transform values
-  std::vector<Real> _stress_transform_values;
-  std::vector<Real> _temperature_transform_values;
-  std::vector<Real> _plastic_strain_transform_values;
-  std::vector<Real> _cell_transform_values;
-  std::vector<Real> _wall_transform_values;
-  std::vector<Real> _env_transform_values;
+  std::vector<double> _stress_transform_values;
+  std::vector<double> _temperature_transform_values;
+  std::vector<double> _plastic_strain_transform_values;
+  std::vector<double> _cell_transform_values;
+  std::vector<double> _wall_transform_values;
+  std::vector<double> _env_transform_values;
 
   /// output transform rate name
   std::string _output_rate_name;
   /// output transform values
-  std::vector<Real> _output_transform_values;
+  std::vector<double> _output_transform_values;
   /// output transform enum
   TransformEnum _output_transform_enum;
 
   /// LAROMANCE transforms for input axes and output axis
   // @{
-  Scalar transform_compress(const Scalar & data, const std::vector<Real> & params) const;
-  Scalar transform_decompress(const Scalar & data, const std::vector<Real> & params) const;
-  Scalar transform_log10_bounded(const Scalar & data, const std::vector<Real> & params) const;
-  Scalar transform_exp10_bounded(const Scalar & data, const std::vector<Real> & params) const;
-  Scalar transform_min_max(const Scalar & data, const std::vector<Real> & params) const;
+  Scalar transform_compress(const Scalar & data, const std::vector<double> & params) const;
+  Scalar transform_decompress(const Scalar & data, const std::vector<double> & params) const;
+  Scalar transform_log10_bounded(const Scalar & data, const std::vector<double> & params) const;
+  Scalar transform_exp10_bounded(const Scalar & data, const std::vector<double> & params) const;
+  Scalar transform_min_max(const Scalar & data, const std::vector<double> & params) const;
   // @}
 };
 } // namespace neml2

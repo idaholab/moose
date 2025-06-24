@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#30793'
+  design = 'NEML2ModelExecutor.md'
+  [solve_failure]
+    type = Exodiff
+    requirement = 'The system shall be capable of handling exceptions from the NEML2 library and mark the solve as failed gracefully.'
+    input = 'moose.i'
+    exodiff = 'moose_out.e'
+    allow_warnings = true
+    capabilities = 'neml2'
+    valgrind = heavy
+  []
+[]

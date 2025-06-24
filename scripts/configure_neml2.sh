@@ -32,10 +32,14 @@ function get_variable()
 # Remaining arguments will be appended to the cmake command verbatim
 function configure_neml2()
 {
-  ARGS=( "${@:3}" )
+  ARGS=()
   if [ -n "$HIT_SRC_DIR" ]; then
     ARGS+=("-DHIT_SOURCE_DIR=$HIT_SRC_DIR")
   fi
+  if which ninja &> /dev/null; then
+    ARGS+=("-GNinja")
+  fi
+  ARGS+=("${@:3}")
   cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DNEML2_TESTS=OFF \
