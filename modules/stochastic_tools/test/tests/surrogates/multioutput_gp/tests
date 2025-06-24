@@ -11,6 +11,7 @@
       detail = "without tuning the hyperparameters."
       abs_zero = 1e-6
       rel_err = 1e-4
+      capabilities = 'libtorch'
     []
     [tuned]
       type = 'JSONDiff'
@@ -19,6 +20,7 @@
       detail = "with tuning the hyperparameters."
       abs_zero = 1e-6
       rel_err = 1e-4
+      capabilities = 'libtorch'
     []
     [load]
       type = 'JSONDiff'
@@ -29,6 +31,7 @@
       skip_keys = "reporters train_params"
       abs_zero = 1e-6
       rel_err = 1e-4
+      capabilities = 'libtorch'
     []
   []
 []

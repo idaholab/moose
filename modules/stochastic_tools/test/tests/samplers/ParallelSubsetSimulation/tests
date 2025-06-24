@@ -11,6 +11,7 @@
       cli_args = 'Samplers/sample/num_samplessub=4 Samplers/sample/num_subsets=3 Samplers/sample/subset_probability=0.5 Outputs/file_base=pss_reduced'
       jsondiff = 'pss_reduced.json'
       detail = 'controllable and '
+      capabilities = 'libtorch'
     []
     [not_controllable]
       type = 'JSONDiff'
@@ -19,6 +20,7 @@
       cli_args = 'Outputs/file_base=pss_reduced'
       jsondiff = 'pss_reduced.json'
       detail = 'not controllable.'
+      capabilities = 'libtorch'
     []
   []
   [pss1]
@@ -29,6 +31,7 @@
     jsondiff = 'pss_out.json'
     valgrind = none
     heavy = true
+    capabilities = 'libtorch'
   []
   [pss_errors]
     requirement = 'The system shall throw an error when '
@@ -37,6 +40,7 @@
       input = 'pss_error1.i'
       detail = 'the selected sampler type is not of an adaptive type. '
       expect_err = "The selected sampler is not an adaptive sampler."
+      capabilities = 'libtorch'
     []
   []
 []
