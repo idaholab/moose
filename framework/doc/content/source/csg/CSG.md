@@ -12,7 +12,7 @@ This section describes in theory what these components are.
 
 [Surfaces](source/csg/CSGBase.md#surfaces) are defined explicitly through surface equations (such as equations of a plane, sphere, etc.).
 Each surface inherently separates two halfspace [regions](source/csg/CSGBase.md#regions): positive and negative halfspaces.
-For example, for a plane with the equation `Ax + By + Cz = D` the positive halfspace represents the region `Ax + By + Cz > D`, while the negative halfspace represents the region `Ax + By + Cz < D`. Similarly, for a spherical surface defined by the equation `x^2 + y^2 + z^2 = r^2`, the negative halfspace represents the region `x^2 + y^2 + z^2 < r^2` within the sphere while the positive halfspace represents the region `x^2 + y^2 + z^2 > r^2` outside the sphere.
+For example, for a plane with the equation $ax + by + cz = d$ the positive halfspace represents the region $ax + by + cz > d$, while the negative halfspace represents the region $ax + by + cz < d$. Similarly, for a spherical surface defined by the equation $x^2 + y^2 + z^2 = r^2$, the negative halfspace represents the region $x^2 + y^2 + z^2 < r^2$ within the sphere while the positive halfspace represents the region $x^2 + y^2 + z^2 > r^2$ outside the sphere.
 Example halfspaces are shown in [!ref](fig:halfspaces).
 
 !media large_media/csg/halfspaces.png
