@@ -19,7 +19,7 @@ Example halfspaces are shown in [!ref](fig:halfspaces).
        id=fig:halfspaces
        caption=Example depiction of the positive and negative halfspaces defined by a plane (left) and sphere (right).
 
-These halfspace regions defined by the surfaces can be combined further series of boolean operators for unions, intersections, and complements to further define more complex regions.
+These halfspace regions defined by the surfaces can be combined further as series of boolean operators for unions, intersections, and complements to further define more complex regions.
 For example, if we wanted to use the surfaces from [!ref](fig:halfspaces) to define just the left hemisphere, we would define the cell region as the intersection of the negative halfspace of the plane and the negative halfspace of the sphere ([!ref](fig:intersection)).
 
 !media large_media/csg/region_intersection.png
@@ -63,7 +63,7 @@ Surfaces contain the following information:
 
 - `TYPE`: the type of surface
 - `COEFFICIENTS`: the values for each coefficient in the equation defining the surface type (shown in the table below)
-- `BOUNDARY`: type of boundary, either `transmission` or `vacuum`
+- `BOUNDARY`: type of boundary condition applied to the surface, either `transmission` or `vacuum`
 
 | `TYPE`      | Equation                                        | COEFFICIENTS          |
 |-------------|-------------------------------------------------|-----------------------|
@@ -73,7 +73,7 @@ Surfaces contain the following information:
 | `ycylinder` | $(x - x_0)^2 + (z - z_0)^2 = r^2$               | `x0`, `z0`, `r`       |
 | `zcylinder` | $(x - x_0)^2 + (y - y_0)^2 = r^2$               | `x0`, `y0`, `r`       |
 
-Below is example [!ac](JSON) surface output for a `plane` at x=5, `zcylinder` of radius 2 centered at $(1, 3)$, and a `sphere` at $(-2, -3, 7)$ with radius 5.
+Below is example [!ac](JSON) surface output for a `plane` at x=5, `zcylinder` of radius 2 centered at $(1, 3)$, and a `sphere` centered at $(-2, -3, 7)$ with radius 5.
 
 ```json
 {
@@ -115,7 +115,7 @@ Below is example [!ac](JSON) surface output for a `plane` at x=5, `zcylinder` of
 
 The cells output contains the following information:
 
-- `REGION`: the string representation of the equation of boolean operators (listed below) and surface names
+- `REGION`: the string representation of the equation of boolean operators (listed below) and surface names that defines the cell region
 - `FILLTYPE`: type of fill in the cell (`VOID`, `MATERIAL`, or `UNIVERSE`)
 - `FILL`: for `MATERIAL` or `UNIVERSE` `FILLTYPE`, the name of the fill (if `VOID` type, then name is an empty string `""`)
 
