@@ -47,8 +47,8 @@ ChurchillChuHTCFunctorMaterialTempl<is_ad>::ChurchillChuHTCFunctorMaterialTempl(
         const auto Gr = _Gr(r, t);
         const auto k_fluid = _k_fluid(r, t);
         const auto Ra = Gr * Pr;
-        const auto numerator = 0.387 * std::pow(Ra, 1 / 6);
-        const auto denominator = std::pow(1 + std::pow(0.559 / Pr, 9 / 16), 8 / 27);
+        const auto numerator = 0.387 * std::pow(Ra, 1.0 / 6.0);
+        const auto denominator = std::pow(1 + std::pow(0.559 / Pr, 9.0 / 16.0), 8.0 / 27.0);
         const auto root_Nu = 0.6 + numerator / denominator;
         const auto Nu = Utility::pow<2>(root_Nu);
 

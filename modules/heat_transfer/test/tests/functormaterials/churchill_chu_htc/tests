@@ -1,10 +1,10 @@
 [Tests]
-  design = 'ConjugateHTNumbersFunctorMaterial.md'
+  design = 'ChurchillChuFunctorMaterial.md'
   issues = '#30651'
   [test]
     type = CSVDiff
-    input = 'conjugate_ht_numbers.i'
-    csvdiff = 'conjugate_ht_numbers_out.csv'
-    requirement = 'The system shall be able to compute non-dimensional numbers for conjugate heat transfer as functor material properties.'
+    input = 'churchill_chu_htc.i'
+    csvdiff = 'churchill_chu_htc_out.csv'
+    requirement = 'The system shall be able to compute a heat transfer coefficient for natural convection using the Churchill-Chu correlation.'
   []
 []
