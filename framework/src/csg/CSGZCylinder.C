@@ -12,8 +12,12 @@
 namespace CSG
 {
 
-CSGZCylinder::CSGZCylinder(const std::string name, const Real x0, const Real y0, const Real r)
-  : CSGSurface(name, SurfaceType::ZCYLINDER), _x0(x0), _y0(y0), _r(r)
+CSGZCylinder::CSGZCylinder(const std::string name,
+                           const Real x0,
+                           const Real y0,
+                           const Real r,
+                           CSGSurface::BoundaryType boundary)
+  : CSGSurface(name, SurfaceType::ZCYLINDER, boundary), _x0(x0), _y0(y0), _r(r)
 {
 }
 
