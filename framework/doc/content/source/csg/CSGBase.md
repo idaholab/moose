@@ -105,7 +105,7 @@ auto sphere1 = csg_obj->createSphere('origin_sphere', 5.0);
 ```
 
 ```cpp
-// create a plane at the point (1, 2, 3) of radius 4
+// create a sphere at the point (1, 2, 3) of radius 4
 auto center = Point(1, 2, 3);
 auto sphere2 = csg_obj->createSphere('new_sphere', center, 4.0);
 ```
