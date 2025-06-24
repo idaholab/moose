@@ -236,7 +236,7 @@ csg_obj->addCellsToUniverse(existing_universe, list_of_cells);
 ```cpp
 // create new cells and add them to an existing universe one-by-one
 // each cell will still exist in the root universe
-for (unsigned int i = 0; i < x; ++i)
+for (unsigned int i = 0; i < num_cells_to_add; ++i)
 {
     // creating new_cell here will add it to the root universe
     auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
