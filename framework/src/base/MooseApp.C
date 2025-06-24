@@ -1599,8 +1599,7 @@ MooseApp::setupOptions()
       // Error checking on incompatible command line options
       if (_distributed_mesh_on_command_line)
         mooseError("--csg-only cannot be used in conjunction with --distributed-mesh");
-      const bool has_mesh_split =
-          isParamValid("split_mesh") || isParamSetByUser("split_file") || _use_split;
+      const bool has_mesh_split = isParamSetByUser("split_file") || _use_split;
       if (has_mesh_split)
         mooseError("--csg-only is not compatible with any mesh splitting options");
       if (isParamSetByUser("refinements"))
