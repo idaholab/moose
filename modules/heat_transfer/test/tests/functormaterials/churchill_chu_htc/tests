@@ -1,0 +1,10 @@
+[Tests]
+  design = 'ConvectionHeatFluxFunctorMaterial.md'
+  issues = '#27244'
+  [test]
+    type = CSVDiff
+    input = 'convection_heat_flux.i'
+    csvdiff = 'convection_heat_flux_out.csv'
+    requirement = 'The system shall be able to compute a convection heat flux functor material property.'
+  []
+[]
