@@ -25,8 +25,7 @@
       type = 'CSVDiff'
       input = 'ne_two_variables.i'
       csvdiff = 'ne_two_variables_out_eigenvalues_0001.csv'
-      cli_args = 'Executioner/precond_matrix_includes_eigen=true -pc_type  lu  lu '
-                 '-pc_factor_mat_solver_type superlu_dist'
+      cli_args = 'Executioner/precond_matrix_includes_eigen=true -pc_type lu'
       expect_out = '6 Linear \|R\|'
       # Include B into the preconditioning matrix in general is a bad idea
       # If there is no good guess, free power iteration may converge a different mode
