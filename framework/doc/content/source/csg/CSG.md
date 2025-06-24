@@ -33,6 +33,8 @@ The fill can typically be set as void (i.e., nothing), a material (typically spe
 [Universes](source/csg/CSGBase.md#universes) can then be optionally defined as a collection of cells, which can then be used to either fill other cells, or used repeatedly throughout a geometry (such as in a repeated lattice).
 By default, every model will have a [root universe](source/csg/CSGBase.md#root-universe), which is the singular overarching universe that all other universes can be traced back to through the tree defined by universes containing cells and cells filled with universes.
 
+For a more detailed description of how surfaces, cells, and universes are represented within the MOOSE mesh generator system, please refer to [source/csg/CSGBase.md].
+
 ## How to Invoke
 
 The [!ac](CSG) model generation can be invoked at the command line using the `--csg-only` option with any MOOSE mesh input file.
