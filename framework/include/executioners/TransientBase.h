@@ -265,9 +265,9 @@ protected:
   /**
    * Steady state detection variables:
    */
-  bool _steady_state_detection;
-  Real _steady_state_tolerance;
-  Real _steady_state_start_time;
+  const bool _steady_state_detection;
+  const Real _steady_state_tolerance;
+  const Real _steady_state_start_time;
 
   std::set<Real> & _sync_times;
 
