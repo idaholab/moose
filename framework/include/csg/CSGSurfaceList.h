@@ -37,7 +37,7 @@ protected:
    * @param p1 point 1
    * @param p2 point 2
    * @param p3 point 3
-   * @param boundary CSGSurface::BoundaryType boundary condition for the surface
+   * @param boundary CSGSurface::BoundaryType boundary type for the surface
    * @return std::shared_ptr<CSGSurface> pointer to plane surface created
    */
   std::shared_ptr<CSGSurface> addPlaneFromPoints(const std::string name,
@@ -55,7 +55,7 @@ protected:
    * @param b coefficient b
    * @param c coefficient c
    * @param d coefficient d
-   * @param boundary CSGSurface::BoundaryType boundary condition for the surface
+   * @param boundary CSGSurface::BoundaryType boundary type for the surface
    * @return std::shared_ptr<CSGSurface> pointer to plane surface created
    */
   std::shared_ptr<CSGSurface> addPlaneFromCoefficients(const std::string name,
@@ -71,7 +71,7 @@ protected:
    * @param name unique name for the sphere surface
    * @param center center point of sphere
    * @param r radius of sphere
-   * @param boundary CSGSurface::BoundaryType boundary condition for the surface
+   * @param boundary CSGSurface::BoundaryType boundary type for the surface
    * @return std::shared_ptr<CSGSurface> pointer to sphere surface created
    */
   std::shared_ptr<CSGSurface> addSphere(const std::string name,
@@ -87,7 +87,7 @@ protected:
    * @param x1 second coordinate of origin
    * @param r radius
    * @param axis axis alignment (x, y, or z)
-   * @param boundary CSGSurface::BoundaryType boundary condition for the surface
+   * @param boundary CSGSurface::BoundaryType boundary type for the surface
    * @return std::shared_ptr<CSGSurface>
    */
   std::shared_ptr<CSGSurface> addCylinder(const std::string name,
