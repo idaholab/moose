@@ -9,6 +9,7 @@
       input = mogp_lmc.i
       jsondiff = "mogp_lmc_out.json"
       detail = "without tuning the hyperparameters."
+      capabilities = 'libtorch'
     []
     [tuned]
       type = 'JSONDiff'
@@ -16,6 +17,7 @@
       jsondiff = "mogp_lmc_tuned_out.json"
       detail = "with tuning the hyperparameters."
       abs_zero = 1e-6
+      capabilities = 'libtorch'
     []
     [load]
       type = 'JSONDiff'
@@ -24,6 +26,7 @@
       detail = "and load the trained surrogate from a file."
       prereq = lmc/tuned
       skip_keys = "reporters train_params"
+      capabilities = 'libtorch'
     []
   []
 []

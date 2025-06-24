@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "CovarianceInterface.h"
 #include "CovarianceFunctionBase.h"
@@ -34,3 +35,5 @@ CovarianceInterface::getCovarianceFunctionByName(const UserObjectName & name) co
     mooseError("Unable to find a CovarianceFunction object with the name '" + name + "'");
   return models[0];
 }
+
+#endif

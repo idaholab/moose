@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "AddCovarianceAction.h"
 #include "Factory.h"
@@ -33,3 +34,5 @@ AddCovarianceAction::act()
   _problem->addObject<CovarianceFunctionBase>(
       _type, _name, _moose_object_pars, /* threaded = */ false);
 }
+
+#endif

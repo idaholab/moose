@@ -20,7 +20,7 @@
     []
     [cv_no_libtorch]
       type = JSONDiff
-      input = all_trainers_uniform_cv.i
+      input = all_trainers_uniform_cv_no_gp.i
       capabilities = '!libtorch'
       cli_args = "GlobalParams/cv_n_trials=3
                   GlobalParams/cv_splits=2
@@ -31,7 +31,7 @@
                   Trainers/ann_max/num_neurons_per_layer='8'
                   Trainers/inactive=ann_max
                   Surrogates/inactive=ann_surr
-                  Reporters/cv_scores/models='pr_surr pc_surr np_surr gp_surr'
+                  Reporters/cv_scores/models='pr_surr pc_surr np_surr'
                   Outputs/out/file_base='all_trainers_no_libtorch'
                   "
       jsondiff = 'all_trainers_no_libtorch.json'
