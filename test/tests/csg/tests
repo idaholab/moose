@@ -131,7 +131,7 @@
       type = RunException
       input = 'csg_only_inf_planes.i'
       detail = ' used in conjunction with split mesh command line option'
-      cli_args = '--split-mesh split_mesh --csg-only'
+      cli_args = '--use-split --csg-only'
       expect_err = "--csg-only is not compatible with any mesh splitting options"
       mesh_mode = REPLICATED
     []
