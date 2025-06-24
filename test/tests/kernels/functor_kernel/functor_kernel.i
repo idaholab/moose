@@ -73,7 +73,6 @@ source_coef_B = 1e4
   type = Steady
   solve_type = NEWTON
   nl_max_its = 10
-  l_max_its = 10
   l_tol = 1e-3
 []
 

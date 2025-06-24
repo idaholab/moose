@@ -14,7 +14,7 @@ registerMooseObject("MooseApp", FunctorKernel);
 InputParameters
 FunctorKernel::validParams()
 {
-  InputParameters params = ADKernel::validParams();
+  InputParameters params = ADKernelValue::validParams();
 
   params.addClassDescription("Adds a term from a functor.");
 
@@ -28,15 +28,15 @@ FunctorKernel::validParams()
 }
 
 FunctorKernel::FunctorKernel(const InputParameters & parameters)
-  : ADKernel(parameters),
+  : ADKernelValue(parameters),
     _functor(getFunctor<ADReal>("functor")),
     _sign(getParam<bool>("functor_on_rhs") ? -1.0 : 1.0)
 {
 }
 
 ADReal
-FunctorKernel::computeQpResidual()
+FunctorKernel::precomputeQpResidual()
 {
   const Moose::ElemQpArg space_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
-  return _sign * _functor(space_arg, Moose::currentState()) * _test[_i][_qp];
+  return _sign * _functor(space_arg, Moose::currentState());
 }

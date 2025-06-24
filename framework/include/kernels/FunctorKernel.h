@@ -14,7 +14,7 @@
 /**
  * Adds a term from a functor.
  */
-class FunctorKernel : public ADKernel
+class FunctorKernel : public ADKernelValue
 {
 public:
   static InputParameters validParams();
@@ -22,7 +22,7 @@ public:
   FunctorKernel(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual() override;
+  virtual ADReal precomputeQpResidual() override;
 
   /// Functor to add
   const Moose::Functor<ADReal> & _functor;
