@@ -72,20 +72,26 @@ All surface creation methods will return a shared pointer to that generated surf
 | Sphere | `createSphere` | creates a sphere of radius `r` at an optionally specified center point (default is `(0, 0, 0)`) |
 | Axis-Aligned Cylinder | `createCylinder` | creates a cylinder aligned with the specified axis (`x`, `y`, or `z`) at the specified center location (`x0`, `x1`), where (`x0`, `x1`) is (`y`, `z`) for X-Cylinder, (`x`, `z`) for Y-Cylinder, and (`x`, `y`) for Z-Cylinder |
 
+At the time of surface creation, the type of boundary (`CSGSurface::BoundaryType`) can be optionally set.
+Options for boundary conditions are `TRANSMISSION` (default), `VACUUM`, and `REFLECTIVE`.
+
 The `CSGSurface` objects can then be accessed or updated with the following methods from `CSGBase`:
 
 - `getAllSurfaces`: retrieve a map of names to shared pointers for of all `CSGSurface` objects
 - `getSurfaceByName`: retrieve the shared pointer to the `CSGSurface` of the specified name
 - `renameSurface`: change the name of the `CSGSurface`
+- `updateSurfaceBoundaryCondition`: change the boundary condition of the `CSGSurface` (transmission, reflective, or vacuum)
 
 Examples:
 
 ```cpp
 // create a plane defined by the points (1, 2, 3), (1, 1, 0), and (0, 0, 0)
+// set a reflective boundary type at the time of creation
 auto p1 = Point(1, 2, 3);
 auto p2 = Point(1, 1, 0);
 auto p3 = Point(0, 0, 0);
-auto plane = csg_object->createPlane('new_plane', p1, p2, p3);
+auto bc_refl = CSG::CSGSurface::BoundaryType::REFLECTIVE;
+auto plane = csg_object->createPlane('new_plane', p1, p2, p3, bc_refl);
 ```
 
 ```cpp
