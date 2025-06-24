@@ -13,6 +13,9 @@
 
 #include "MFEMGeneralUserObject.h"
 
+/**
+ * Class used to set the initial value(s) on a vector valued MFEMVariable.
+ */
 class MFEMVectorIC : public MFEMGeneralUserObject
 {
 public:
