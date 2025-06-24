@@ -73,14 +73,14 @@ All surface creation methods will return a shared pointer to that generated surf
 | Axis-Aligned Cylinder | `createCylinder` | creates a cylinder aligned with the specified axis (`x`, `y`, or `z`) at the specified center location (`x0`, `x1`), where (`x0`, `x1`) is (`y`, `z`) for X-Cylinder, (`x`, `z`) for Y-Cylinder, and (`x`, `y`) for Z-Cylinder |
 
 At the time of surface creation, the type of boundary (`CSGSurface::BoundaryType`) can be optionally set.
-Options for boundary conditions are `TRANSMISSION` (default), `VACUUM`, and `REFLECTIVE`.
+Options for boundary types are `TRANSMISSION` (default), `VACUUM`, and `REFLECTIVE`.
 
 The `CSGSurface` objects can then be accessed or updated with the following methods from `CSGBase`:
 
 - `getAllSurfaces`: retrieve a map of names to shared pointers for of all `CSGSurface` objects
 - `getSurfaceByName`: retrieve the shared pointer to the `CSGSurface` of the specified name
 - `renameSurface`: change the name of the `CSGSurface`
-- `updateSurfaceBoundaryCondition`: change the boundary condition of the `CSGSurface` (transmission, reflective, or vacuum)
+- `updateSurfaceBoundaryType`: change the boundary type of the `CSGSurface` (`TRANSMISSION`, `VACUUM`, or `REFLECTIVE`)
 
 Examples:
 
