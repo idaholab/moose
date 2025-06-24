@@ -20,6 +20,8 @@ InputParameters
 MFEMVectorIC::validParams()
 {
   auto params = MFEMGeneralUserObject::validParams();
+  params.addClassDescription("Sets the initial values of an MFEM vector variable from a "
+                             "user-specified vector coefficient.");
   params.addRequiredParam<std::string>("variable",
                                        "The variable to apply the initial condition for");
   params.addRequiredParam<MFEMVectorCoefficientName>("coefficient", "The vector coefficient");

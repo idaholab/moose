@@ -64,7 +64,6 @@
 []
 
 [Outputs]
-  active = ParaViewDataCollection
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/ScalarIC

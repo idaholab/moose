@@ -20,6 +20,8 @@ InputParameters
 MFEMScalarIC::validParams()
 {
   auto params = MFEMGeneralUserObject::validParams();
+  params.addClassDescription("Sets the initial values of an MFEM scalar variable from a "
+                             "user-specified scalar coefficient.");
   params.addRequiredParam<std::string>("variable",
                                        "The variable to apply the initial condition for");
   params.addRequiredParam<MFEMScalarCoefficientName>("coefficient", "The scalar coefficient");
