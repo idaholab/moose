@@ -10,7 +10,7 @@
 #include "LinearFVTurbulentViscosityWallFunctionBC.h"
 #include "NavierStokesMethods.h"
 
-registerMooseObject("MooseApp", LinearFVTurbulentViscosityWallFunctionBC);
+registerMooseObject("NavierStokesApp", LinearFVTurbulentViscosityWallFunctionBC);
 
 InputParameters
 LinearFVTurbulentViscosityWallFunctionBC::validParams()
