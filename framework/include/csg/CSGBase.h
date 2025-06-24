@@ -179,13 +179,13 @@ public:
   }
 
   /**
-   * @brief change the boundary condition of a surface
+   * @brief change the boundary type of a surface
    *
    * @param surface CSGSurface to update
    * @param boundary CSGSurface::BoundaryType to set
    */
-  void updateSurfaceBoundaryCondition(const std::shared_ptr<CSGSurface> surface,
-                                      CSGSurface::BoundaryType boundary)
+  void updateSurfaceBoundaryType(const std::shared_ptr<CSGSurface> surface,
+                                 CSGSurface::BoundaryType boundary)
   {
     surface->setBoundaryType(boundary);
   }
