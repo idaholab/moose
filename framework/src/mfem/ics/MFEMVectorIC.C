@@ -22,7 +22,7 @@ MFEMVectorIC::validParams()
   auto params = MFEMGeneralUserObject::validParams();
   params.addClassDescription("Sets the initial values of an MFEM vector variable from a "
                              "user-specified vector coefficient.");
-  params.addRequiredParam<std::string>("variable",
+  params.addRequiredParam<VariableName>("variable",
                                        "The variable to apply the initial condition for");
   params.addRequiredParam<MFEMVectorCoefficientName>("coefficient", "The vector coefficient");
   params.registerBase("InitialCondition");
@@ -40,7 +40,7 @@ void
 MFEMVectorIC::execute()
 {
   auto & coeff = getVectorCoefficient(getParam<MFEMVectorCoefficientName>("coefficient"));
-  auto grid_function = getMFEMProblem().getGridFunction(getParam<std::string>("variable"));
+  auto grid_function = getMFEMProblem().getGridFunction(getParam<VariableName>("variable"));
   grid_function->ProjectCoefficient(coeff);
 }
 

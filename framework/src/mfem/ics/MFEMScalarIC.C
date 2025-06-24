@@ -22,7 +22,7 @@ MFEMScalarIC::validParams()
   auto params = MFEMGeneralUserObject::validParams();
   params.addClassDescription("Sets the initial values of an MFEM scalar variable from a "
                              "user-specified scalar coefficient.");
-  params.addRequiredParam<std::string>("variable",
+  params.addRequiredParam<VariableName>("variable",
                                        "The variable to apply the initial condition for");
   params.addRequiredParam<MFEMScalarCoefficientName>("coefficient", "The scalar coefficient");
   params.registerBase("InitialCondition");
@@ -40,7 +40,7 @@ void
 MFEMScalarIC::execute()
 {
   auto & coeff = getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient"));
-  auto grid_function = getMFEMProblem().getGridFunction(getParam<std::string>("variable"));
+  auto grid_function = getMFEMProblem().getGridFunction(getParam<VariableName>("variable"));
   grid_function->ProjectCoefficient(coeff);
 }
 
