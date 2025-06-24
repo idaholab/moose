@@ -12,7 +12,7 @@
 #include "SubProblem.h"
 #include "NavierStokesMethods.h"
 
-registerMooseObject("MooseApp", LinearFVTKESourceSink);
+registerMooseObject("NavierStokesApp", LinearFVTKESourceSink);
 
 InputParameters
 LinearFVTKESourceSink::validParams()
