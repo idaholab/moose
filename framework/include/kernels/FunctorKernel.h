@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADKernel.h"
+#include "ADKernelValue.h"
 
 /**
  * Adds a term from a functor.
