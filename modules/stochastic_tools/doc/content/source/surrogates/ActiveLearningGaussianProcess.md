@@ -1,5 +1,6 @@
 # ActiveLearningGaussianProcess
 
+!if function=hasCapability('libtorch')
 !syntax description /Trainers/ActiveLearningGaussianProcess
 
 ## Description
@@ -25,8 +26,14 @@ Just like the `GaussianProcessTrainer` class, the GP model during active learnin
 Please refer to [ActiveLearningGPDecision](ActiveLearningGPDecision.md) on a detailed description on
 using active learning.
 
+!if! function=hasCapability('libtorch')
 !syntax parameters /Trainers/ActiveLearningGaussianProcess
 
 !syntax inputs /Trainers/ActiveLearningGaussianProcess
 
 !syntax children /Trainers/ActiveLearningGaussianProcess
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md

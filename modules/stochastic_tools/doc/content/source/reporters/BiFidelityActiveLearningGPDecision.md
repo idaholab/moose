@@ -1,5 +1,6 @@
 # BiFidelityActiveLearningGPDecision
 
+!if function=hasCapability('libtorch')
 !syntax description /Reporters/BiFidelityActiveLearningGPDecision
 
 ## Description
@@ -24,8 +25,14 @@ Third, instead of relying on [ActiveLearningGPDecision](ActiveLearningGPDecision
 
 !listing modules/stochastic_tools/test/tests/reporters/BFActiveLearning/main_adam.i block=Reporters
 
+!if! function=hasCapability('libtorch')
 !syntax parameters /Reporters/BiFidelityActiveLearningGPDecision
 
 !syntax inputs /Reporters/BiFidelityActiveLearningGPDecision
 
 !syntax children /Reporters/BiFidelityActiveLearningGPDecision
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md

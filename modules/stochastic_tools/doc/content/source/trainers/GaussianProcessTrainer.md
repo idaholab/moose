@@ -238,8 +238,14 @@ with $M$ outputs, each training iteration of Adam has a cost of $\mathcal{O}
 (M^3N^3)$. Adam permits using $n < N$ random training points during each iteration
 (mini-batches) which has a cost of $\mathcal{O}(M^3n^3)<<\mathcal{O}(M^3N^3)$.
 
+!if! function=hasCapability('libtorch')
 !syntax parameters /Trainers/GaussianProcessTrainer
 
 !syntax inputs /Trainers/GaussianProcessTrainer
 
 !syntax children /Trainers/GaussianProcessTrainer
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md
