@@ -60,7 +60,6 @@ const std::unordered_set<FEFamily> SubProblem::_default_families_without_p_refin
 SubProblem::SubProblem(const InputParameters & parameters)
   : Problem(parameters),
     _factory(_app.getFactory()),
-    _requires_nonlocal_coupling(false),
     _default_ghosting(getParam<bool>("default_ghosting")),
     _currently_computing_jacobian(false),
     _currently_computing_residual_and_jacobian(false),

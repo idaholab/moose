@@ -379,7 +379,7 @@ public:
   virtual bool haveFV() const override;
 
   virtual bool hasNonlocalCoupling() const override;
-
+  virtual bool checkNonlocalCouplingRequirement() const override;
   virtual const libMesh::CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const override;
 
 protected:

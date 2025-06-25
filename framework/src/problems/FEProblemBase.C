@@ -517,7 +517,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _num_grid_steps(0),
     _print_execution_on(),
     _identify_variable_groups_in_nl(getParam<bool>("identify_variable_groups_in_nl")),
-    _regard_general_exceptions_as_errors(getParam<bool>("regard_general_exceptions_as_errors"))
+    _regard_general_exceptions_as_errors(getParam<bool>("regard_general_exceptions_as_errors")),
+    _requires_nonlocal_coupling(false)
 {
   //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
   //  things that we setup early in the simulation actually get their derivative vectors initalized.
@@ -9259,4 +9260,10 @@ const libMesh::CouplingMatrix &
 FEProblemBase::nonlocalCouplingMatrix(const unsigned i) const
 {
   return _nonlocal_cm[i];
+}
+
+bool
+FEProblemBase::checkNonlocalCouplingRequirement() const
+{
+  return _requires_nonlocal_coupling;
 }

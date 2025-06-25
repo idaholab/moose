@@ -88,7 +88,11 @@ public:
   virtual const MooseMesh & mesh() const = 0;
   virtual const MooseMesh & mesh(bool use_displaced) const = 0;
 
-  virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
+  /**
+   * @returns whether there will be nonlocal coupling at any point in the simulation, e.g. whether
+   * there are any active \emph or inactive nonlocal kernels or boundary conditions
+   */
+  virtual bool checkNonlocalCouplingRequirement() const = 0;
 
   /**
    * @return whether the given solver system \p sys_num is converged
@@ -980,7 +984,9 @@ public:
   void reinitFVFace(const THREAD_ID tid, const FaceInfo & fi);
 
   /**
-   * Whether the simulation has nonlocal coupling which should be accounted for in the Jacobian
+   * Whether the simulation has active nonlocal coupling which should be accounted for in the
+   * Jacobian. For this to return true, there must be at least one active nonlocal kernel or
+   * boundary condition
    */
   virtual bool hasNonlocalCoupling() const = 0;
 
@@ -1076,9 +1082,6 @@ protected:
   std::vector<std::set<TagID>> _active_sc_var_coupleable_matrix_tags;
 
   std::vector<std::set<TagID>> _active_sc_var_coupleable_vector_tags;
-
-  /// nonlocal coupling requirement flag
-  bool _requires_nonlocal_coupling;
 
   /// Whether or not to use default libMesh coupling
   bool _default_ghosting;

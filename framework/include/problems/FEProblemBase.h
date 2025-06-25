@@ -2404,6 +2404,8 @@ public:
 
   virtual const libMesh::CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const override;
 
+  virtual bool checkNonlocalCouplingRequirement() const override;
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2976,6 +2978,9 @@ private:
 
   /// nonlocal coupling matrix
   std::vector<libMesh::CouplingMatrix> _nonlocal_cm;
+
+  /// nonlocal coupling requirement flag
+  bool _requires_nonlocal_coupling;
 
   friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,
                                                         const std::string & value,
