@@ -57,6 +57,8 @@
 {%- set NEML2_BUILD_SCRIPT = 'update_and_rebuild_neml2.sh' -%}
 {#- The installation location for neml2                                                       -#}
 {%- set NEML2_DIR = '/opt/neml2' -%}
+{#- The installation location for lcov                                                       -#}
+{%- set LCOV_DIR = '/opt/lcov' -%}
 
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/moose-dev' -%}
@@ -100,6 +102,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export METHOD=oprof
 {%- endif %}
 
+    export PATH={{ LCOV_DIR }}/bin:$PATH
+
 %post
     umask 022
 
@@ -140,6 +144,20 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     find /opt/code-server -type d -exec chmod 755 {} +
     chmod 755 /opt/code-server/bin/*
     chmod 644 /opt/code-server/extensions/*
+
+    # Install a newer (faster) lcov
+    dnf install -y perl-Capture-Tiny perl-Module-Load-Conditional perl-DateTime perl-Time-HiRes
+    LCOV_VERSION=2.3.1
+    LCOV_NAME=lcov-${LCOV_VERSION}
+    cd ${ROOT_BUILD_DIR}
+    curl -fOL https://github.com/linux-test-project/lcov/releases/download/v${LCOV_VERSION}/${LCOV_NAME}.tar.gz
+    tar -xf ${LCOV_NAME}.tar.gz
+    rm ${LCOV_NAME}.tar.gz
+    cd ${LCOV_NAME}
+    make PREFIX={{ LCOV_DIR }} install
+    {{ LCOV_DIR }}/bin/lcov --help || exit $?
+    rm -rf ${ROOT_BUILD_DIR}/${LCOV_NAME}
+    cd ${ROOT_BUILD_DIR}
 
     # Build and install wasp
     # This is redundant; hopefully we can use the one from conda in the future
