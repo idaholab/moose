@@ -8,6 +8,13 @@
   solve = false
 []
 
+[Functions]
+  [height]
+    type = ParsedFunction
+    expression = 'z'
+  []  
+[]
+
 [FESpaces]
   [H1FESpace]
     type = MFEMScalarFESpace
@@ -25,18 +32,15 @@
   [h1_scalar]
     type = MFEMVariable
     fespace = H1FESpace
+    [./InitialCondition]
+      type = MFEMScalarIC
+      coefficient = height
+    [../]
   []
   [l2_scalar]
     type = MFEMVariable
     fespace = L2FESpace
-  []
-[]
-
-[Functions]
-  [height]
-    type = ParsedFunction
-    expression = 'z'
-  []
+  []  
 []
 
 [ICs]
@@ -44,11 +48,6 @@
     type = MFEMScalarIC
     variable = l2_scalar
     coefficient = 2.0
-  []
-  [h1_scalar_ic]
-    type = MFEMScalarIC
-    variable = h1_scalar
-    coefficient = height
   []
 []
 
