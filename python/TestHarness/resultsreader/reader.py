@@ -99,10 +99,41 @@ class TestHarnessResultsReader:
         """
         return TestHarnessResultsReader.loadEnvironmentAuthentication() is not None
 
+    @staticmethod
+    def _testFilter(folder_name: str, test_name: str) -> dict:
+        """
+        Helper for getting the mongo filter for a given test
+        """
+        return {"folder_name": {"$eq": folder_name}, "test_name": {"$eq": test_name}}
+
+    def _getTestsPREntry(self, folder_name: str, test_name: str, pr_num: int,
+                         filter: Optional[dict] = {}) -> dict | None:
+        """
+        Internal method for getting the pull request entry for a given test
+
+        Args:
+            folder_name: The folder name for the test
+            test_name: The test name for the test
+            pr_num: The pull request number
+        Keyword args:
+            filter: Additional filters to pass to the query
+        """
+        assert isinstance(folder_name, str)
+        assert isinstance(test_name, str)
+        assert isinstance(pr_num, int)
+
+        find = {"pr_num": {"eq": pr_num}}
+        find.update(self._testFilter(folder_name, test_name))
+        find.update(filter)
+
+        entry = self.db.tests.find_one(filter, sort=self.mongo_sort_id)
+        if entry:
+            return dict(entry)
+        return None
+
     def _getTestsEntry(self, folder_name: str, test_name: str,
                        limit: int = 50, unique_event: bool = True,
-                       filter: Optional[dict] = None,
-                       pr_num: Optional[int] = None) -> list[dict]:
+                       filter: dict = {}, pr_num: Optional[int] = None) -> list[dict]:
         """
         Internal helper for getting the raw database entries for a specific test.
 
@@ -122,22 +153,16 @@ class TestHarnessResultsReader:
 
         values = []
 
-        # Base filter for searching for this specific test
-        filter_base = {"folder_name": {"$eq": folder_name}, "test_name": {"$eq": test_name}}
-        if filter is not None:
-            filter_base.update(filter)
-
         # Find a single entry for this pull request, if requested and put at the top
         if pr_num is not None:
-            filter_pr = {'pr_num': {"$eq": pr_num}}
-            filter_pr.update(filter_base)
-            entry = self.db.tests.find_one(filter_pr, sort=self.mongo_sort_id)
-            if entry:
-                values.append(entry)
+            pr_entry = self._getTestsPREntry(folder_name, test_name, pr_num, filter=filter)
+            if pr_entry:
+                values.append(pr_entry)
 
-        # Filtering for a non-pr
-        filter_non_pr_base = {"event_cause": {"$ne": "pr"}}
-        filter_non_pr_base.update(filter_base)
+        # Filtering for a non-pr for these tests
+        find_base = {"event_cause": {"$ne": "pr"}}
+        find_base.update(self._testFilter(folder_name, test_name))
+        find_base.update(filter)
 
         # Last ID to filter less than, if any
         last_id = None
@@ -156,7 +181,7 @@ class TestHarnessResultsReader:
             filter_non_pr = {}
             if last_id is not None:
                 filter_non_pr['_id'] = {'$lt': last_id}
-            filter_non_pr.update(filter_non_pr_base)
+            filter_non_pr.update(find_base)
 
             cursor = self.db.tests.find(filter_non_pr, limit=find_event_limit, sort=self.mongo_sort_id)
 

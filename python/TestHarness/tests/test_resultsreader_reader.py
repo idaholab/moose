@@ -23,22 +23,29 @@ from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTes
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
 HAS_AUTH = TestHarnessResultsReader.hasEnvironmentAuthentication()
 
-# Gold file for testing get_test_results
-GET_TEST_RESULTS_GOLD_PATH = os.path.join(os.path.dirname(__file__), 'gold', 'resultsreader', 'get_test_results.json')
+# Production database file for testing get_test_results
+PROD_GET_TEST_RESULTS_GOLD_PATH = os.path.join(os.path.dirname(__file__), 'gold', 'resultsreader', 'prod_get_test_results.json')
+# Production database name for testing real results
+PROD_DATABASE_NAME = 'civet_tests_moose_performance'
+# Arguments for using the production database for getting real results
+PROD_GET_TEST_RESULTS_ARGS = {'folder_name': 'simple_transient_diffusion',
+                              'test_name': 'test'}
 
-DATABASE_NAME = 'civet_tests_moose_performance'
-GET_TEST_RESULTS_ARGS = {'folder_name': 'simple_transient_diffusion',
-                         'test_name': 'test'}
+# Production database name for testing real results
+TEST_DATABASE_NAME = 'civet_tests_moose_test_results'
+# Arguments for using the production database for getting real results
+TEST_GET_TEST_RESULTS_ARGS = {'folder_name': 'tests/test_harness',
+                              'test_name': 'ok'}
 
 class FakeMongoClient(MongoClient):
     def __init__(self, *args, **kwargs):
         pass
 
     def list_database_names(self):
-        return [DATABASE_NAME]
+        return [PROD_DATABASE_NAME]
 
     def get_database(self, name):
-        assert name == DATABASE_NAME
+        assert name == PROD_DATABASE_NAME
 
     def close(self):
         pass
@@ -47,10 +54,10 @@ class TestResultsReaderReader(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def buildGetTestResultsGold(self):
+    def buildProdGetTestResultsGold(self):
         """
         Helper for building the gold file for testing getTestResults(),
-        using the live database
+        using a live production database
         """
         # Static set of test IDs (test entires in the database) that we
         # will always test with
@@ -62,11 +69,11 @@ class TestResultsReaderReader(unittest.TestCase):
         # This can be set to true once to overwrite the gold file
         rewrite_gold = False
 
-        reader = TestHarnessResultsReader(DATABASE_NAME)
+        reader = TestHarnessResultsReader(PROD_DATABASE_NAME)
 
         # Get only the specific tests that we've golded on
         id_filter = {"$or": [{"_id": ObjectId(id)} for id in gold_test_ids]}
-        tests = reader._getTestsEntry(**GET_TEST_RESULTS_ARGS, filter=id_filter)
+        tests = reader._getTestsEntry(**PROD_GET_TEST_RESULTS_ARGS, filter=id_filter)
         self.assertEqual(len(tests), len(gold_test_ids))
 
         # Load the results separately
@@ -84,7 +91,7 @@ class TestResultsReaderReader(unittest.TestCase):
 
         # Rewrite the gold file if we set to do so
         if rewrite_gold:
-            with open(GET_TEST_RESULTS_GOLD_PATH, 'w') as f:
+            with open(PROD_GET_TEST_RESULTS_GOLD_PATH, 'w') as f:
                 f.write(values_dumped)
 
         return values_dumped
@@ -94,7 +101,7 @@ class TestResultsReaderReader(unittest.TestCase):
         """
         Helper for getting the golded entries for the getTestResults() tests
         """
-        with open(GET_TEST_RESULTS_GOLD_PATH, 'r') as f:
+        with open(PROD_GET_TEST_RESULTS_GOLD_PATH, 'r') as f:
             gold = json.load(f)
 
         # Convert datetime strings to objects
@@ -113,9 +120,9 @@ class TestResultsReaderReader(unittest.TestCase):
         Tests that generating the gold file (using static test entries) using
         the live server gets us the same gold file that we currently have
         """
-        new_gold = self.buildGetTestResultsGold()
+        new_gold = self.buildProdGetTestResultsGold()
 
-        with open(GET_TEST_RESULTS_GOLD_PATH, 'r') as f:
+        with open(PROD_GET_TEST_RESULTS_GOLD_PATH, 'r') as f:
             gold = json.load(f)
 
         self.assertEqual(gold, json.loads(new_gold))
@@ -125,7 +132,7 @@ class TestResultsReaderReader(unittest.TestCase):
         Helper for testing getTestResults(), regardless of if
         the data was produced from a gold file or live
         """
-        results = reader.getTestResults(**GET_TEST_RESULTS_ARGS, **kwargs)
+        results = reader.getTestResults(**PROD_GET_TEST_RESULTS_ARGS, **kwargs)
 
         for result in results:
             self.assertIsInstance(result, TestHarnessTestResult)
@@ -164,7 +171,7 @@ class TestResultsReaderReader(unittest.TestCase):
         # Mock getting the tests from mongodb
         patch_get_tests_entry.return_value = gold_tests
 
-        reader = TestHarnessResultsReader(DATABASE_NAME, FakeMongoClient())
+        reader = TestHarnessResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
         results = self._testGetTestResults(reader)
         self.assertEqual(len(results), len(gold_tests))
 
@@ -173,7 +180,7 @@ class TestResultsReaderReader(unittest.TestCase):
         """
         Tests calling getTestResults() using the real server, if available
         """
-        reader = TestHarnessResultsReader(DATABASE_NAME)
+        reader = TestHarnessResultsReader(PROD_DATABASE_NAME)
         limit = 10
         results = self._testGetTestResults(reader, limit=limit)
         self.assertEqual(len(results), limit)
@@ -202,8 +209,8 @@ class TestResultsReaderReader(unittest.TestCase):
             def list_database_names(self):
                 return ['foo']
 
-        with self.assertRaisesRegex(ValueError, f'Database {DATABASE_NAME} not found'):
-            TestHarnessResultsReader(DATABASE_NAME, BadDatabaseClient())
+        with self.assertRaisesRegex(ValueError, f'Database {PROD_DATABASE_NAME} not found'):
+            TestHarnessResultsReader(PROD_DATABASE_NAME, BadDatabaseClient())
 
     @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
     def testMissingDatabaseLive(self):
@@ -219,10 +226,56 @@ class TestResultsReaderReader(unittest.TestCase):
         """
         Tests an exception being thrown from _getResultsEntry() with an invalid id
         """
-        reader = TestHarnessResultsReader(DATABASE_NAME)
+        reader = TestHarnessResultsReader(PROD_DATABASE_NAME)
         id = '1234'
-        with self.assertRaisesRegex(KeyError, f'No {DATABASE_NAME}.results entry with _id={id}'):
+        with self.assertRaisesRegex(KeyError, f'No {PROD_DATABASE_NAME}.results entry with _id={id}'):
             reader._getResultsEntry(id)
+
+    @unittest.skipUnless(os.environ.get('TEST_RESULTSREADER_READER'), f"Skipping because TEST_RESULTSREADER_READER not set")
+    def testGetTestsWithPRLive(self):
+        """
+        Tests getTestsResults when we have PR data.
+
+        This is explicitly tested with CIVET, where a step before this
+        or a dependency is able to contribute to TEST_DATABASE_NAME
+        """
+        self.assertTrue(HAS_AUTH)
+
+        head_sha = os.environ.get('CIVET_HEAD_SHA')
+        self.assertIsNotNone(head_sha)
+        self.assertEqual(len(head_sha), 40)
+
+        event_cause = os.environ.get('CIVET_EVENT_CAUSE')
+        self.assertIsNotNone(event_cause)
+        is_pr = event_cause.startswith('Pull')
+        pr_num = None
+
+        if is_pr:
+            pr_num = os.environ.get('CIVET_PR_NUM')
+            self.assertIsNotNone('CIVET_PR_NUM')
+            pr_num = int(pr_num)
+
+        reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
+        results = reader.getTestResults(**TEST_GET_TEST_RESULTS_ARGS, pr_num=pr_num)
+        self.assertGreater(len(results), 0)
+
+        if is_pr:
+            pr_result = results[0]
+            self.assertEqual(pr_result.pr_num, pr_num)
+            self.assertEqual(pr_result.event_sha, head_sha)
+            self.assertEqual(pr_result.event_cause, 'pr')
+        else:
+            self.assertIsNone(results[0].pr_num)
+            self.assertEqual(results[0].event_cause, 'push')
+
+            event_results = [r for r in results if r.event_sha == head_sha]
+            self.assertEqual(len(event_results), 1)
+
+        start_index = 0
+        if is_pr:
+            start_index = 1
+        for result in results[start_index:]:
+            self.assertNotEqual(result.event_cause, 'pr')
 
 if __name__ == '__main__':
     unittest.main()
