@@ -24,7 +24,7 @@ MeshingTutorialApp::validParams()
   return params;
 }
 
-MeshingTutorialApp::MeshingTutorialApp(InputParameters parameters) : MooseApp(parameters)
+MeshingTutorialApp::MeshingTutorialApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   MeshingTutorialApp::registerAll(_factory, _action_factory, _syntax);
 }

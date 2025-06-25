@@ -27,7 +27,7 @@ RayTracingApp::validParams()
 
 registerKnownLabel("RayTracingApp");
 
-RayTracingApp::RayTracingApp(InputParameters parameters) : MooseApp(parameters)
+RayTracingApp::RayTracingApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   RayTracingApp::registerAll(_factory, _action_factory, _syntax);
 }
@@ -57,26 +57,6 @@ void
 RayTracingApp::registerApps()
 {
   registerApp(RayTracingApp);
-}
-
-void
-RayTracingApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"RayTracingApp"});
-}
-
-void
-RayTracingApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"RayTracingApp"});
-}
-
-void
-RayTracingApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

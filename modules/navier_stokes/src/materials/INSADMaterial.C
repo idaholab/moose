@@ -63,7 +63,7 @@ INSADMaterial::INSADMaterial(const InputParameters & parameters)
   if (!_fe_problem.hasUserObject("ins_ad_object_tracker"))
   {
     InputParameters tracker_params = INSADObjectTracker::validParams();
-    tracker_params.addPrivateParam("_moose_app", &_app);
+    tracker_params.addPrivateParam(MooseBase::app_param, &_app);
 
     _fe_problem.addUserObject("INSADObjectTracker", "ins_ad_object_tracker", tracker_params);
   }

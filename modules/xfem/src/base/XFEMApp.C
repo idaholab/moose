@@ -35,22 +35,17 @@ XFEMApp::XFEMApp(const InputParameters & parameters) : MooseApp(parameters)
 
 XFEMApp::~XFEMApp() {}
 
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
-{
-  registerTask("setup_xfem", false);
-  syntax.addDependency("setup_xfem", "setup_adaptivity");
-  registerSyntax("XFEMAction", "XFEM");
-}
-
 void
-XFEMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+XFEMApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
   Registry::registerObjectsTo(f, {"XFEMApp"});
   Registry::registerActionsTo(af, {"XFEMApp"});
-  associateSyntaxInner(s, af);
 
-  SolidMechanicsApp::registerAll(f, af, s);
+  registerTask("setup_xfem", false);
+  syntax.addDependency("setup_xfem", "setup_adaptivity");
+  registerSyntax("XFEMAction", "XFEM");
+
+  SolidMechanicsApp::registerAll(f, af, syntax);
 }
 
 void
@@ -59,41 +54,6 @@ XFEMApp::registerApps()
   registerApp(XFEMApp);
 
   SolidMechanicsApp::registerApps();
-}
-
-void
-XFEMApp::registerObjectDepends(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjectsDepends");
-  SolidMechanicsApp::registerObjects(factory);
-}
-
-void
-XFEMApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"XFEMApp"});
-}
-
-void
-XFEMApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntaxDepends");
-  SolidMechanicsApp::associateSyntax(syntax, action_factory);
-}
-
-void
-XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"XFEMApp"});
-  associateSyntaxInner(syntax, action_factory);
-}
-
-void
-XFEMApp::registerExecFlags(Factory &)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

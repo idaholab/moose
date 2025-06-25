@@ -22,7 +22,7 @@ ContactTestApp::validParams()
 
 registerKnownLabel("ContactTestApp");
 
-ContactTestApp::ContactTestApp(InputParameters parameters) : MooseApp(parameters)
+ContactTestApp::ContactTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   ContactTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -46,23 +46,6 @@ ContactTestApp::registerApps()
 {
   ContactApp::registerApps();
   registerApp(ContactTestApp);
-}
-
-void
-ContactTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"ContactTestApp"});
-}
-
-void
-ContactTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"ContactTestApp"});
-}
-
-void
-ContactTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

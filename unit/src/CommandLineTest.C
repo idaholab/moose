@@ -867,10 +867,12 @@ TEST(CommandLineTest, optionalValuedParam)
     // Because --mesh-only is optional, we shouldn't associate
     // the value foo=bar with it because it could be seen as
     // a hit parameter (this preserves old behavior)
+    const std::vector<std::string> hit_args{"foo=bar"};
     CommandLine cl;
     cl.addArgument("/path/to/exe");
     cl.addArgument("--mesh-only");
-    cl.addArgument("foo=bar");
+    for (const auto & arg : hit_args)
+      cl.addArgument(arg);
     cl.parse();
 
     InputParameters params = emptyInputParameters();
@@ -879,7 +881,7 @@ TEST(CommandLineTest, optionalValuedParam)
 
     ASSERT_TRUE(params.isParamSetByUser("mesh_only"));
     ASSERT_TRUE(params.get<std::string>("mesh_only").empty());
-    ASSERT_EQ(cl.buildHitParams(), "foo=bar");
+    ASSERT_EQ(cl.buildHitParams(), hit_args);
   }
 
   {
@@ -901,16 +903,17 @@ TEST(CommandLineTest, optionalValuedParam)
 
 TEST(CommandLineTest, mergeHIT)
 {
+  const std::vector<std::string> args{"Foo/bar=baz", "Foo/bar=bang"};
   CommandLine cl;
   cl.addArgument("/path/to/exe");
-  cl.addArgument("Foo/bar=baz");
-  cl.addArgument("Foo/bar=bang");
+  for (const auto & arg : args)
+    cl.addArgument(arg);
   cl.parse();
 
   InputParameters params = emptyInputParameters();
   cl.populateCommandLineParams(params);
 
-  ASSERT_EQ(cl.buildHitParams(), "Foo/bar=baz Foo/bar=bang");
+  ASSERT_EQ(cl.buildHitParams(), args);
 }
 
 TEST(CommandLineTest, removeArgument)

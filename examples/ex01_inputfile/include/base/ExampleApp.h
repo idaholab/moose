@@ -14,7 +14,7 @@
 class ExampleApp : public MooseApp
 {
 public:
-  ExampleApp(InputParameters parameters);
+  ExampleApp(const InputParameters & parameters);
 
   static InputParameters validParams();
 

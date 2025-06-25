@@ -22,7 +22,7 @@ OptimizationTestApp::validParams()
 
 registerKnownLabel("OptimizationTestApp");
 
-OptimizationTestApp::OptimizationTestApp(InputParameters parameters) : MooseApp(parameters)
+OptimizationTestApp::OptimizationTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   OptimizationTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -46,23 +46,6 @@ OptimizationTestApp::registerApps()
 {
   OptimizationApp::registerApps();
   registerApp(OptimizationTestApp);
-}
-
-void
-OptimizationTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"OptimizationTestApp"});
-}
-
-void
-OptimizationTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"OptimizationTestApp"});
-}
-
-void
-OptimizationTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

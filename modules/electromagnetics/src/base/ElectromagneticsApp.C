@@ -25,7 +25,7 @@ ElectromagneticsApp::validParams()
 
 registerKnownLabel("ElectromagneticsApp");
 
-ElectromagneticsApp::ElectromagneticsApp(InputParameters parameters) : MooseApp(parameters)
+ElectromagneticsApp::ElectromagneticsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   ElectromagneticsApp::registerAll(_factory, _action_factory, _syntax);
 }
@@ -45,26 +45,6 @@ void
 ElectromagneticsApp::registerApps()
 {
   registerApp(ElectromagneticsApp);
-}
-
-void
-ElectromagneticsApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"ElectromagneticsApp"});
-}
-
-void
-ElectromagneticsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"ElectromagneticsApp"});
-}
-
-void
-ElectromagneticsApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 /***************************************************************************************************

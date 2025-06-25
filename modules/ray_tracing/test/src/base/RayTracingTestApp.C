@@ -22,7 +22,7 @@ RayTracingTestApp::validParams()
 
 registerKnownLabel("RayTracingTestApp");
 
-RayTracingTestApp::RayTracingTestApp(InputParameters parameters) : MooseApp(parameters)
+RayTracingTestApp::RayTracingTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   RayTracingTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -46,23 +46,6 @@ RayTracingTestApp::registerApps()
 {
   RayTracingApp::registerApps();
   registerApp(RayTracingTestApp);
-}
-
-void
-RayTracingTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"RayTracingTestApp"});
-}
-
-void
-RayTracingTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"RayTracingTestApp"});
-}
-
-void
-RayTracingTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

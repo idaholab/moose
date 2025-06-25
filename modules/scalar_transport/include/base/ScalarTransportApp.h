@@ -16,7 +16,7 @@ class ScalarTransportApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  ScalarTransportApp(InputParameters parameters);
+  ScalarTransportApp(const InputParameters & parameters);
   virtual ~ScalarTransportApp();
 
   static void registerApps();

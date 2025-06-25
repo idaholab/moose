@@ -16,12 +16,9 @@ class RayTracingApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  RayTracingApp(InputParameters parameters);
+  RayTracingApp(const InputParameters & parameters);
   virtual ~RayTracingApp();
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-  static void registerObjects(Factory & factory);
-  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
-  static void registerExecFlags(Factory & factory);
 };

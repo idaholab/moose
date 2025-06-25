@@ -19,7 +19,8 @@ SolidPropertiesTestApp::validParams()
   return params;
 }
 
-SolidPropertiesTestApp::SolidPropertiesTestApp(InputParameters parameters) : MooseApp(parameters)
+SolidPropertiesTestApp::SolidPropertiesTestApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   SolidPropertiesTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

@@ -33,14 +33,14 @@
     [test_soln_var_err]
       type = RunException
       input = 'save_in_soln_var_err_test.i'
-      expect_err = 'diff/save_in\).*?cannot use solution variable as save-in variable'
+      expect_err = 'Kernels/diff/save_in: cannot use solution variable as save-in variable'
 
       detail = "on-diagonal and"
     []
     [test_diag_sol_var_err]
       type = RunException
       input = 'diag_save_in_soln_var_err_test.i'
-      expect_err = '\(.*diff/diag_save_in\).*?cannot use solution variable as diag save-in variable'
+      expect_err = 'Kernels/diff/diag_save_in: cannot use solution variable as diag save-in variable'
 
       detail = "off-diagonal terms."
     []
