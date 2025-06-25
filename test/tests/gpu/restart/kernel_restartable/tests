@@ -3,7 +3,7 @@
   issues = '#39655'
 
   [kernel]
-    requirement = "The GPU system shall support the ability to"
+    requirement = "The Kokkos system shall support the ability to"
 
     [test]
       type = 'Exodiff'

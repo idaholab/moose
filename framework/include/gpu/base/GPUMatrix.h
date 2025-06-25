@@ -13,9 +13,14 @@
 
 #include "libmesh/petsc_matrix.h"
 
-class GPUSystem;
+namespace Moose
+{
+namespace Kokkos
+{
 
-class GPUMatrix
+class System;
+
+class Matrix
 {
 private:
   // The PETSc matrix
@@ -23,28 +28,28 @@ private:
   // Number of rows
   PetscCount _nr = 0;
   // Column index vector
-  GPUArray<PetscInt> _col_idx;
+  Array<PetscInt> _col_idx;
   // Row index vector
-  GPUArray<PetscInt> _row_idx;
+  Array<PetscInt> _row_idx;
   // Row pointer vector
-  GPUArray<PetscInt> _row_ptr;
+  Array<PetscInt> _row_ptr;
   // Nonzero value vector
-  GPUArray<PetscScalar> _val;
+  Array<PetscScalar> _val;
   // Flag whether the PETSc matrix is a host matrix
   bool _is_host = false;
   // Flag whether the matrix was allocated
   bool _is_alloc = false;
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 public:
   // Destructor
-  ~GPUMatrix() { destroy(); }
+  ~Matrix() { destroy(); }
 
 public:
   // Whether the matrix was allocated
   bool isAlloc() { return _is_alloc; }
   // Create from libMesh PetscMatrix
-  void create(libMesh::SparseMatrix<PetscScalar> & matrix, const GPUSystem & system);
+  void create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & system);
   // Free all the matrix data
   void destroy();
   // Copy from device buffer to PETSc matrix
@@ -61,8 +66,8 @@ public:
 private:
   KOKKOS_FUNCTION PetscInt find(PetscInt i,
                                 PetscInt j,
-                                const GPUArray<PetscInt> & col_idx,
-                                const GPUArray<PetscInt> & row_ptr) const
+                                const Array<PetscInt> & col_idx,
+                                const Array<PetscInt> & row_ptr) const
   {
     auto left = col_idx.data() + row_ptr[i];
     auto right = col_idx.data() + row_ptr[i + 1] - 1;
@@ -104,3 +109,6 @@ public:
   }
 #endif
 };
+
+} // namespace Kokkos
+} // namespace Moose

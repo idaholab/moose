@@ -5,7 +5,7 @@
     type = Exodiff
     input = 'gpu_2d_diffusion_test.i'
     exodiff = 'out_gpu.e'
-    requirement = 'The GPU system shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions.'
+    requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions.'
     design = '/DirichletBC.md'
     capabilities = 'kokkos'
   [../]
@@ -14,7 +14,7 @@
     type = Exodiff
     input = 'gpu_2d_diffusion_neumannbc_test.i'
     exodiff = 'neumannbc_out_gpu.e'
-    requirement = 'The GPU system shall provide an ability to solve a 2D diffusion problem with Neumann boundary conditions.'
+    requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem with Neumann boundary conditions.'
     design = '/NeumannBC.md'
     capabilities = 'kokkos'
   [../]
@@ -23,7 +23,7 @@
     type = Exodiff
     input = 'gpu_2d_diffusion_bodyforce_test.i'
     exodiff = 'bodyforce_out_gpu.e'
-    requirement = 'The GPU system shall provide an ability to solve a 2D diffusion problem including a volumetric source term.'
+    requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem including a volumetric source term.'
     design = '/BodyForce.md'
     capabilities = 'kokkos'
   [../]
@@ -33,7 +33,7 @@
     input = 'gpu_2d_diffusion_test.i'
     cli_args = 'Outputs/exodus=false'
     recover = false
-    requirement = 'The GPU system shall provide a tester that checks hand-coded Jacobian against finite difference Jacobian using -snes_type=test option.'
+    requirement = 'The Kokkos system shall provide a tester that checks hand-coded Jacobian against finite difference Jacobian using -snes_type=test option.'
     design = 'framework_stp.md'
     capabilities = 'kokkos'
   [../]
@@ -44,7 +44,7 @@
     exodiff = 'out_gpu.e'
     cli_args = 'Executioner/nl_abs_tol=1e+1 Executioner/petsc_options_iname=-snes_force_iteration Executioner/petsc_options_value=1'
     prereq = testdirichlet
-    requirement = 'The GPU system shall force the solver to take at least one iteration regardless of the initial residual norm when the snes_force_iteration option is specified.'
+    requirement = 'The Kokkos system shall force the solver to take at least one iteration regardless of the initial residual norm when the snes_force_iteration option is specified.'
     design = 'Transient.md'
     capabilities = 'kokkos'
   [../]
@@ -54,7 +54,7 @@
     input = 'gpu_2d_diffusion_test.i'
     cli_args = 'Executioner/solve_type=linear Outputs/exodus=false'
     absent_out = 'Nonlinear \|R\|'
-    requirement = 'The GPU system shall not compute an extra residual if the linear solver is used.'
+    requirement = 'The Kokkos system shall not compute an extra residual if the linear solver is used.'
     design = 'FEProblem.md'
     capabilities = 'kokkos'
   [../]

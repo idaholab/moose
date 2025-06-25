@@ -10,30 +10,31 @@
 #include "AddGPUNodalKernelAction.h"
 #include "FEProblem.h"
 
-registerMooseAction("MooseApp", AddGPUNodalKernelAction, "add_nodal_kernel");
+registerMooseAction("MooseApp", AddKokkosNodalKernelAction, "add_nodal_kernel");
 
 InputParameters
-AddGPUNodalKernelAction::validParams()
+AddKokkosNodalKernelAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add a GPUNodalKernel object to the simulation.");
+  params.addClassDescription("Add a Kokkos NodalKernel object to the simulation.");
   return params;
 }
 
-AddGPUNodalKernelAction::AddGPUNodalKernelAction(const InputParameters & params)
+AddKokkosNodalKernelAction::AddKokkosNodalKernelAction(const InputParameters & params)
   : MooseObjectAction(params)
 {
 }
 
 void
-AddGPUNodalKernelAction::act()
+AddKokkosNodalKernelAction::act()
 {
-#ifndef MOOSE_HAVE_GPU
-  mooseError("Attempted to add a GPU nodal kernel but MOOSE was not compiled with GPU support.");
+#ifndef MOOSE_HAVE_KOKKOS
+  mooseError(
+      "Attempted to add a Kokkos nodal kernel but MOOSE was not compiled with Kokkos support.");
 #else
   if (!_app.hasGPUs())
-    mooseError("Attempted to add a GPU nodal kernel but no GPU was detected in the system.");
+    mooseError("Attempted to add a Kokkos nodal kernel but no GPU was detected in the system.");
   else
-    _problem->addGPUNodalKernel(_type, _name, _moose_object_pars);
+    _problem->addKokkosNodalKernel(_type, _name, _moose_object_pars);
 #endif
 }

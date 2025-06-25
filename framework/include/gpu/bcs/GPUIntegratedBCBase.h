@@ -14,15 +14,23 @@
 #include "MaterialPropertyInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
-class GPUIntegratedBCBase : public GPUBoundaryCondition,
-                            public CoupleableMooseVariableDependencyIntermediateInterface,
-                            public MaterialPropertyInterface
+namespace Moose
+{
+namespace Kokkos
+{
+
+class IntegratedBCBase : public BoundaryCondition,
+                         public CoupleableMooseVariableDependencyIntermediateInterface,
+                         public MaterialPropertyInterface
 {
 public:
   static InputParameters validParams();
 
-  GPUIntegratedBCBase(const InputParameters & parameters, Moose::VarFieldType field_type);
-  GPUIntegratedBCBase(const GPUIntegratedBCBase & object);
+  IntegratedBCBase(const InputParameters & parameters, Moose::VarFieldType field_type);
+  IntegratedBCBase(const IntegratedBCBase & object);
 };
 
-#define usingGPUIntegratedBCBaseMembers usingGPUBoundaryConditionMembers;
+} // namespace Kokkos
+} // namespace Moose
+
+#define usingKokkosIntegratedBCBaseMembers usingKokkosBoundaryConditionMembers;

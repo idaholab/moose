@@ -11,12 +11,14 @@
 
 #include "GPUKernelGrad.h"
 
-class GPUDiffusionPrecompute final : public GPUKernelGrad<GPUDiffusionPrecompute>
+class KokkosDiffusionPrecompute final : public Moose::Kokkos::KernelGrad<KokkosDiffusionPrecompute>
 {
+  using Real3 = Moose::Kokkos::Real3;
+
 public:
   static InputParameters validParams();
 
-  GPUDiffusionPrecompute(const InputParameters & parameters);
+  KokkosDiffusionPrecompute(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real3 precomputeQpResidual(const unsigned int qp, ResidualDatum & datum) const
   {

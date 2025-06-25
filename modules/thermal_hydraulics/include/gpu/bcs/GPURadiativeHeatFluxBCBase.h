@@ -16,14 +16,14 @@
  * temperature of a body in radiative heat transfer are specified.
  */
 template <typename RadiativeHeatFluxBC>
-class GPURadiativeHeatFluxBCBase : public GPUIntegratedBC<RadiativeHeatFluxBC>
+class KokkosRadiativeHeatFluxBCBase : public Moose::Kokkos::IntegratedBC<RadiativeHeatFluxBC>
 {
-  usingGPUIntegratedBCMembers(RadiativeHeatFluxBC);
+  usingKokkosIntegratedBCMembers(RadiativeHeatFluxBC);
 
 public:
   static InputParameters validParams()
   {
-    InputParameters params = GPUIntegratedBC<RadiativeHeatFluxBC>::validParams();
+    InputParameters params = Moose::Kokkos::IntegratedBC<RadiativeHeatFluxBC>::validParams();
     params.addParam<Real>(
         "stefan_boltzmann_constant", 5.670367e-8, "The Stefan-Boltzmann constant.");
     params.addParam<Real>("Tinfinity", 0, "Temperature of the body in radiative heat transfer.");
@@ -34,8 +34,8 @@ public:
     return params;
   }
 
-  GPURadiativeHeatFluxBCBase(const InputParameters & parameters)
-    : GPUIntegratedBC<RadiativeHeatFluxBC>(parameters),
+  KokkosRadiativeHeatFluxBCBase(const InputParameters & parameters)
+    : Moose::Kokkos::IntegratedBC<RadiativeHeatFluxBC>(parameters),
       _sigma_stefan_boltzmann(this->template getParam<Real>("stefan_boltzmann_constant")),
       _tinf(this->template getParam<Real>("Tinfinity")),
       _eps_boundary(this->template getParam<Real>("boundary_emissivity"))

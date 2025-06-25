@@ -9,12 +9,12 @@
 
 #include "GPUCoupledVarNeumannBC.h"
 
-registerMooseObject("MooseApp", GPUCoupledVarNeumannBC);
+registerMooseObject("MooseApp", KokkosCoupledVarNeumannBC);
 
 InputParameters
-GPUCoupledVarNeumannBC::validParams()
+KokkosCoupledVarNeumannBC::validParams()
 {
-  InputParameters params = GPUIntegratedBC::validParams();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredCoupledVar("v", "Coupled variable setting the gradient on the boundary.");
   params.addCoupledVar("scale_factor", 1., "Scale factor to multiply the heat flux with");
   params.addParam<Real>(
@@ -24,11 +24,11 @@ GPUCoupledVarNeumannBC::validParams()
                              "where $v$ is a variable.");
   return params;
 }
-GPUCoupledVarNeumannBC::GPUCoupledVarNeumannBC(const InputParameters & parameters)
-  : GPUIntegratedBC(parameters),
-    _coupled_var(GPUCoupledValue("v")),
+KokkosCoupledVarNeumannBC::KokkosCoupledVarNeumannBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
+    _coupled_var(KokkosCoupledValue("v")),
     _coupled_num(coupled("v")),
     _coef(getParam<Real>("coef")),
-    _scale_factor(GPUCoupledValue("scale_factor"))
+    _scale_factor(KokkosCoupledValue("scale_factor"))
 {
 }

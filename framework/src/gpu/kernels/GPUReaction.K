@@ -9,12 +9,12 @@
 
 #include "GPUReaction.h"
 
-registerMooseObject("MooseApp", GPUReaction);
+registerMooseObject("MooseApp", KokkosReaction);
 
 InputParameters
-GPUReaction::validParams()
+KokkosReaction::validParams()
 {
-  InputParameters params = GPUKernel::validParams();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Implements a simple consuming reaction term with weak form $(\\psi_i, \\lambda u_h)$.");
   params.addParam<Real>(
@@ -23,7 +23,7 @@ GPUReaction::validParams()
   return params;
 }
 
-GPUReaction::GPUReaction(const InputParameters & parameters)
-  : GPUKernel(parameters), _rate(getParam<Real>("rate"))
+KokkosReaction::KokkosReaction(const InputParameters & parameters)
+  : Kernel(parameters), _rate(getParam<Real>("rate"))
 {
 }

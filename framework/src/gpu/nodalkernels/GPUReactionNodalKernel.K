@@ -9,18 +9,18 @@
 
 #include "GPUReactionNodalKernel.h"
 
-registerMooseObject("MooseApp", GPUReactionNodalKernel);
+registerMooseObject("MooseApp", KokkosReactionNodalKernel);
 
 InputParameters
-GPUReactionNodalKernel::validParams()
+KokkosReactionNodalKernel::validParams()
 {
-  InputParameters params = GPUNodalKernel::validParams();
+  InputParameters params = NodalKernel::validParams();
   params.addClassDescription("Implements a simple consuming reaction term at nodes");
   params.addParam<Real>("coeff", 1., "A coefficient for multiplying the reaction term");
   return params;
 }
 
-GPUReactionNodalKernel::GPUReactionNodalKernel(const InputParameters & parameters)
-  : GPUNodalKernel(parameters), _coeff(getParam<Real>("coeff"))
+KokkosReactionNodalKernel::KokkosReactionNodalKernel(const InputParameters & parameters)
+  : NodalKernel(parameters), _coeff(getParam<Real>("coeff"))
 {
 }

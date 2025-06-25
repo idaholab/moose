@@ -21,29 +21,29 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
 
   [./diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
   [../]
 
   [./diff1]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
     extra_matrix_tags = 'mat_tag2'
     vector_tags = vec_tag1
   [../]
 
   [./diff2]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
     vector_tags = vec_tag1
   [../]
 
   [./diff3]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
     vector_tags = vec_tag1
   [../]
@@ -59,9 +59,9 @@
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 3
     value = 0
@@ -69,7 +69,7 @@
   [../]
 
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 1
     value = 1

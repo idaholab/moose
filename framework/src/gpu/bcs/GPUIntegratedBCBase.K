@@ -9,10 +9,15 @@
 
 #include "GPUIntegratedBCBase.h"
 
-InputParameters
-GPUIntegratedBCBase::validParams()
+namespace Moose
 {
-  auto params = GPUBoundaryCondition::validParams();
+namespace Kokkos
+{
+
+InputParameters
+IntegratedBCBase::validParams()
+{
+  auto params = BoundaryCondition::validParams();
   params += MaterialPropertyInterface::validParams();
 
   // Integrated BCs always rely on Boundary MaterialData
@@ -21,17 +26,20 @@ GPUIntegratedBCBase::validParams()
   return params;
 }
 
-GPUIntegratedBCBase::GPUIntegratedBCBase(const InputParameters & parameters,
-                                         Moose::VarFieldType field_type)
-  : GPUBoundaryCondition(parameters, field_type, false),
+IntegratedBCBase::IntegratedBCBase(const InputParameters & parameters,
+                                   Moose::VarFieldType field_type)
+  : BoundaryCondition(parameters, field_type, false),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs())
 {
 }
 
-GPUIntegratedBCBase::GPUIntegratedBCBase(const GPUIntegratedBCBase & object)
-  : GPUBoundaryCondition(object),
+IntegratedBCBase::IntegratedBCBase(const IntegratedBCBase & object)
+  : BoundaryCondition(object),
     CoupleableMooseVariableDependencyIntermediateInterface(&object, false, false, false),
     MaterialPropertyInterface(&object, Moose::EMPTY_BLOCK_IDS, boundaryIDs(), false)
 {
 }
+
+} // namespace Kokkos
+} // namespace Moose

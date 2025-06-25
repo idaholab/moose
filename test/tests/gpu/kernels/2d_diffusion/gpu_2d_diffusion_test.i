@@ -1,7 +1,7 @@
 ###########################################################
-# This is a simple test of the GPUKernel System.
+# This is a simple test of the KokkosKernel System.
 # It solves the Laplacian equation on a small 2x2 grid.
-# The "GPUDiffusion" kernel is used to calculate the
+# The "KokkosDiffusion" kernel is used to calculate the
 # residuals of the weak form of this operator.
 #
 # @Requirement F3.30
@@ -25,21 +25,21 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   active = 'diff'
 
   [./diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   # BCs cannot be preset due to Jacobian test
   active = 'left right'
 
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     preset = false
     boundary = 3
@@ -47,7 +47,7 @@
   [../]
 
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     preset = false
     boundary = 1

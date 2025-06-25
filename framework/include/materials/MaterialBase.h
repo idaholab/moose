@@ -86,11 +86,11 @@ public:
 
   MaterialBase(const InputParameters & parameters);
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Class copy constructor
-   * Used for dispatching GPU parallel calculation.
-   * Only defined for GPU objects.
+   * Used for dispatching Kokkos functor.
+   * Only defined for Kokkos objects.
    */
   MaterialBase(const MaterialBase & object);
 #endif

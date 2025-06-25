@@ -18,14 +18,14 @@
  * Note: without the constant term, a zero initial guess gives you a
  * zero row in the Jacobian, which is a bad thing.
  */
-class GPUCoupledDirichletBC final : public GPUDirichletBC<GPUCoupledDirichletBC>
+class KokkosCoupledDirichletBC final : public KokkosDirichletBC<KokkosCoupledDirichletBC>
 {
-  GPUDirichletBCMembers(GPUCoupledDirichletBC);
+  usingKokkosDirichletBCMembers(KokkosCoupledDirichletBC);
 
 public:
   static InputParameters validParams();
 
-  GPUCoupledDirichletBC(const InputParameters & parameters);
+  KokkosCoupledDirichletBC(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const
   {
@@ -43,7 +43,7 @@ public:
 
 protected:
   // The coupled variable
-  GPUVariableNodalValue _v;
+  Moose::Kokkos::VariableNodalValue _v;
 
   /// The id of the coupled variable
   unsigned int _v_num;

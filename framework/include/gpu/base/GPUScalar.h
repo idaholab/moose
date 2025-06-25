@@ -13,11 +13,16 @@
 
 // TODO: add support for arithmetic operators
 
+namespace Moose
+{
+namespace Kokkos
+{
+
 template <typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value>::type>
-class GPUScalar : public GPUReferenceWrapper<T>
+class Scalar : public ReferenceWrapper<T>
 {
 public:
-  GPUScalar(T & value) : GPUReferenceWrapper<T>(value) {}
+  Scalar(T & value) : ReferenceWrapper<T>(value) {}
 
   auto & operator=(T value)
   {
@@ -28,11 +33,14 @@ public:
 };
 
 template <typename T>
-class GPUScalar<const T, typename std::enable_if<std::is_arithmetic<T>::value>::type>
-  : public GPUReferenceWrapper<const T>
+class Scalar<const T, typename std::enable_if<std::is_arithmetic<T>::value>::type>
+  : public ReferenceWrapper<const T>
 {
 public:
-  GPUScalar(const T & value) : GPUReferenceWrapper<const T>(value) {}
+  Scalar(const T & value) : ReferenceWrapper<const T>(value) {}
 };
 
-using GPUPostprocessorValue = GPUScalar<const PostprocessorValue>;
+using PostprocessorValue = Scalar<const PostprocessorValue>;
+
+} // namespace Kokkos
+} // namespace Moose

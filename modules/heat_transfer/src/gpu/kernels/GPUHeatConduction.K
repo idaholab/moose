@@ -9,12 +9,12 @@
 
 #include "GPUHeatConduction.h"
 
-registerMooseObject("HeatTransferApp", GPUHeatConduction);
+registerMooseObject("HeatTransferApp", KokkosHeatConduction);
 
 InputParameters
-GPUHeatConduction::validParams()
+KokkosHeatConduction::validParams()
 {
-  InputParameters params = GPUDiffusion::validParams();
+  InputParameters params = KokkosDiffusion::validParams();
   params.addClassDescription(
       "Computes residual/Jacobian contribution for $(k \\nabla T, \\nabla \\psi)$ term.");
   params.addParam<MaterialPropertyName>(
@@ -28,10 +28,11 @@ GPUHeatConduction::validParams()
   return params;
 }
 
-GPUHeatConduction::GPUHeatConduction(const InputParameters & parameters) : GPUDiffusion(parameters)
+KokkosHeatConduction::KokkosHeatConduction(const InputParameters & parameters)
+  : KokkosDiffusion(parameters)
 {
-  _diffusion_coefficient = getGPUMaterialProperty<Real>("diffusion_coefficient");
+  _diffusion_coefficient = getKokkosMaterialProperty<Real>("diffusion_coefficient");
 
-  if (hasGPUMaterialProperty<Real>("diffusion_coefficient_dT"))
-    _diffusion_coefficient_dT = getGPUMaterialProperty<Real>("diffusion_coefficient_dT");
+  if (hasKokkosMaterialProperty<Real>("diffusion_coefficient_dT"))
+    _diffusion_coefficient_dT = getKokkosMaterialProperty<Real>("diffusion_coefficient_dT");
 }
