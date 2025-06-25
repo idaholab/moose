@@ -19,32 +19,32 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./diff]
-    type = GPUMatDiffusionTest
+    type = KokkosMatDiffusionTest
     variable = u
     prop_name = diffusion
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = right
     value = 1
   [../]
 []
 
-[GPUMaterials]
+[KokkosMaterials]
   [./coupling_u]
-    type = GPUVarCouplingMaterial
+    type = KokkosVarCouplingMaterial
     block = 0
     var = u
   [../]

@@ -11,26 +11,27 @@
 
 #include "GPUTimeKernel.h"
 
-template <typename Kernel>
-class GPUTimeDerivative : public GPUTimeKernel<Kernel>
+template <typename Derived>
+class KokkosTimeDerivative : public Moose::Kokkos::TimeKernel<Derived>
 {
-  usingGPUTimeKernelMembers(Kernel);
+  usingKokkosTimeKernelMembers(Derived);
 
 public:
   static InputParameters validParams()
   {
-    InputParameters params = GPUTimeKernel<Kernel>::validParams();
+    InputParameters params = Moose::Kokkos::TimeKernel<Derived>::validParams();
     params.addParam<bool>("lumping", false, "True for mass matrix lumping, false otherwise");
     return params;
   }
 
-  GPUTimeDerivative::GPUTimeDerivative(const InputParameters & parameters)
-    : GPUTimeKernel<Kernel>(parameters), _lumping(this->template getParam<bool>("lumping"))
+  KokkosTimeDerivative::KokkosTimeDerivative(const InputParameters & parameters)
+    : Moose::Kokkos::TimeKernel<Derived>(parameters),
+      _lumping(this->template getParam<bool>("lumping"))
   {
   }
 
   KOKKOS_FUNCTION void
-  computeJacobianInternal(const Kernel * kernel, ResidualDatum & datum, Real * local_ke) const
+  computeJacobianInternal(const Derived * kernel, ResidualDatum & datum, Real * local_ke) const
   {
     if (_lumping)
     {
@@ -47,7 +48,7 @@ public:
         accumulateTaggedLocalMatrix(local_ke[i], datum.elem().id, i, i, datum.jvar());
     }
     else
-      GPUTimeKernel<Kernel>::computeJacobianInternal(kernel, datum, local_ke);
+      Moose::Kokkos::TimeKernel<Derived>::computeJacobianInternal(kernel, datum, local_ke);
   }
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
@@ -68,10 +69,10 @@ protected:
   const bool _lumping;
 };
 
-class GPUTimeDerivativeKernel final : public GPUTimeDerivative<GPUTimeDerivativeKernel>
+class KokkosTimeDerivativeKernel final : public KokkosTimeDerivative<KokkosTimeDerivativeKernel>
 {
 public:
   static InputParameters validParams();
 
-  GPUTimeDerivativeKernel(const InputParameters & parameters);
+  KokkosTimeDerivativeKernel(const InputParameters & parameters);
 };

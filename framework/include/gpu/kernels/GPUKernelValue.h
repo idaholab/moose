@@ -11,20 +11,25 @@
 
 #include "GPUKernel.h"
 
-template <typename Kernel>
-class GPUKernelValue : public GPUKernel<Kernel>
+namespace Moose
 {
-  usingGPUKernelMembers(Kernel);
+namespace Kokkos
+{
+
+template <typename Derived>
+class KernelValue : public Kernel<Derived>
+{
+  usingKokkosKernelMembers(Derived);
 
 public:
   static InputParameters validParams()
   {
-    InputParameters params = GPUKernel<Kernel>::validParams();
+    InputParameters params = Kernel<Derived>::validParams();
     return params;
   }
 
   // Constructor
-  GPUKernelValue(const InputParameters & parameters) : GPUKernel<Kernel>(parameters) {}
+  KernelValue(const InputParameters & parameters) : Kernel<Derived>(parameters) {}
 
   // Empty method to prevent compile errors even when this method was not hidden by the derived
   // class
@@ -36,7 +41,7 @@ public:
   }
 
   KOKKOS_FUNCTION void
-  computeResidualInternal(const Kernel * kernel, ResidualDatum & datum, Real * local_re) const
+  computeResidualInternal(const Derived * kernel, ResidualDatum & datum, Real * local_re) const
   {
     for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
     {
@@ -52,7 +57,7 @@ public:
       accumulateTaggedLocalResidual(local_re[i], datum.elem().id, i);
   }
   KOKKOS_FUNCTION void
-  computeJacobianInternal(const Kernel * kernel, ResidualDatum & datum, Real * local_ke) const
+  computeJacobianInternal(const Derived * kernel, ResidualDatum & datum, Real * local_ke) const
   {
     for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
     {
@@ -76,8 +81,11 @@ public:
 protected:
   virtual bool defaultJacobian() const override
   {
-    return &Kernel::precomputeQpJacobian == &GPUKernelValue::precomputeQpJacobian;
+    return &Derived::precomputeQpJacobian == &KernelValue::precomputeQpJacobian;
   }
 };
 
-#define usingGPUKernelValueMembers(T) usingGPUKernelMembers(T)
+} // namespace Kokkos
+} // namespace Moose
+
+#define usingKokkosKernelValueMembers(T) usingKokkosKernelMembers(T)

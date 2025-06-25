@@ -11,10 +11,15 @@
 
 #include "FEProblemBase.h"
 
-InputParameters
-GPUResidualObject::validParams()
+namespace Moose
 {
-  auto params = ResidualObject::validParams();
+namespace Kokkos
+{
+
+InputParameters
+ResidualObject::validParams()
+{
+  auto params = ::ResidualObject::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
@@ -27,18 +32,18 @@ GPUResidualObject::validParams()
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");
 
-  params.addPrivateParam<bool>("_gpu_object", true);
+  params.addPrivateParam<bool>("_kokkos_object", true);
 
   return params;
 }
 
-GPUResidualObject::GPUResidualObject(const InputParameters & parameters,
-                                     Moose::VarFieldType field_type,
-                                     bool nodal)
-  : ResidualObject(parameters, nodal),
-    GPUMeshHolder(*_fe_problem.mesh().getGPUMesh()),
-    GPUAssemblyHolder(_fe_problem.gpuAssembly()),
-    GPUSystemHolder(_fe_problem.getGPUSystems()),
+ResidualObject::ResidualObject(const InputParameters & parameters,
+                               Moose::VarFieldType field_type,
+                               bool nodal)
+  : ::ResidualObject(parameters, nodal),
+    MeshHolder(*_fe_problem.mesh().getKokkosMesh()),
+    AssemblyHolder(_fe_problem.kokkosAssembly()),
+    SystemHolder(_fe_problem.getKokkosSystems()),
     _var(_subproblem.getVariable(_tid,
                                  getParam<NonlinearVariableName>("variable"),
                                  Moose::VarKindType::VAR_SOLVER,
@@ -83,14 +88,14 @@ GPUResidualObject::GPUResidualObject(const InputParameters & parameters,
   _is_extra_vector_tag.copy();
   _is_extra_matrix_tag.copy();
 
-  _gpu_var.init(_var);
+  _kokkos_var.init(_var);
 }
 
-GPUResidualObject::GPUResidualObject(const GPUResidualObject & object)
-  : ResidualObject(object.parameters(), object.isNodal(), false),
-    GPUMeshHolder(object),
-    GPUAssemblyHolder(object),
-    GPUSystemHolder(object),
+ResidualObject::ResidualObject(const ResidualObject & object)
+  : ::ResidualObject(object.parameters(), object.isNodal(), false),
+    MeshHolder(object),
+    AssemblyHolder(object),
+    SystemHolder(object),
     _var(object._var),
     _t(object._t),
     _t_old(object._t_old),
@@ -98,7 +103,7 @@ GPUResidualObject::GPUResidualObject(const GPUResidualObject & object)
     _dt(object._dt),
     _dt_old(object._dt_old)
 {
-  _gpu_var = object._gpu_var;
+  _kokkos_var = object._kokkos_var;
   _thread = object._thread;
 
   _vector_tags = object._vector_tags;
@@ -107,3 +112,6 @@ GPUResidualObject::GPUResidualObject(const GPUResidualObject & object)
   _is_extra_vector_tag = object._is_extra_vector_tag;
   _is_extra_matrix_tag = object._is_extra_matrix_tag;
 }
+
+} // namespace Kokkos
+} // namespace Moose

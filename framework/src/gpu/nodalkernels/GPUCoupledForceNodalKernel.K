@@ -9,12 +9,12 @@
 
 #include "GPUCoupledForceNodalKernel.h"
 
-registerMooseObject("MooseApp", GPUCoupledForceNodalKernel);
+registerMooseObject("MooseApp", KokkosCoupledForceNodalKernel);
 
 InputParameters
-GPUCoupledForceNodalKernel::validParams()
+KokkosCoupledForceNodalKernel::validParams()
 {
-  InputParameters params = GPUNodalKernel::validParams();
+  InputParameters params = NodalKernel::validParams();
   params.addClassDescription("Adds a force proportional to the value of the coupled variable");
   params.addRequiredCoupledVar("v", "The coupled variable which provides the force");
   params.addParam<Real>(
@@ -23,10 +23,10 @@ GPUCoupledForceNodalKernel::validParams()
   return params;
 }
 
-GPUCoupledForceNodalKernel::GPUCoupledForceNodalKernel(const InputParameters & parameters)
-  : GPUNodalKernel(parameters),
+KokkosCoupledForceNodalKernel::KokkosCoupledForceNodalKernel(const InputParameters & parameters)
+  : NodalKernel(parameters),
     _v_var(coupled("v")),
-    _v(GPUCoupledNodalValue("v")),
+    _v(KokkosCoupledNodalValue("v")),
     _coef(getParam<Real>("coef"))
 {
   if (_var.number() == _v_var)

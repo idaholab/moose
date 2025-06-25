@@ -12,47 +12,47 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./diff_x]
-    type = GPUCoefDiffusion
+    type = KokkosCoefDiffusion
     variable = u_x
     coef = 0.1
   [../]
   [./diff_y]
-    type = GPUCoefDiffusion
+    type = KokkosCoefDiffusion
     variable = u_y
     coef = 0.1
   [../]
 []
 
-[GPUNodalKernels]
+[KokkosNodalKernels]
   [./test_y]
-    type = GPUJacobianCheck
+    type = KokkosJacobianCheck
     variable = u_y
   [../]
   [./test_x]
-    type = GPUJacobianCheck
+    type = KokkosJacobianCheck
     variable = u_x
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./left_x]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u_x
     preset = false
     boundary = left
     value = 0
   [../]
   [./right_x]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u_x
     preset = false
     boundary = right
     value = 1
   [../]
   [./left_y]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u_y
     preset = false
     boundary = left

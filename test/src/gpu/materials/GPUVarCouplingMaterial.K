@@ -9,12 +9,12 @@
 
 #include "GPUVarCouplingMaterial.h"
 
-registerMooseObject("MooseTestApp", GPUVarCouplingMaterial);
+registerMooseObject("MooseTestApp", KokkosVarCouplingMaterial);
 
 InputParameters
-GPUVarCouplingMaterial::validParams()
+KokkosVarCouplingMaterial::validParams()
 {
-  InputParameters params = GPUMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("var", "The variable to be coupled in");
   params.addParam<Real>("base", 0.0, "The baseline of the property");
   params.addParam<Real>("coef", 1.0, "The linear coefficient of the coupled var");
@@ -32,14 +32,14 @@ GPUVarCouplingMaterial::validParams()
   return params;
 }
 
-GPUVarCouplingMaterial::GPUVarCouplingMaterial(const InputParameters & parameters)
-  : GPUMaterial(parameters),
-    _var(getParam<bool>("use_tag") ? GPUCoupledVectorTagValue("var", "tag")
-                                   : GPUCoupledValue("var")),
+KokkosVarCouplingMaterial::KokkosVarCouplingMaterial(const InputParameters & parameters)
+  : Material(parameters),
+    _var(getParam<bool>("use_tag") ? KokkosCoupledVectorTagValue("var", "tag")
+                                   : KokkosCoupledValue("var")),
     _base(getParam<Real>("base")),
     _coef(getParam<Real>("coef")),
-    _coupled_prop(declareGPUProperty<Real>("coupled_prop_name"))
+    _coupled_prop(declareKokkosProperty<Real>("coupled_prop_name"))
 {
   if (getParam<bool>("declare_old"))
-    _coupled_prop_old = getGPUMaterialPropertyOld<Real>("coupled_prop_name");
+    _coupled_prop_old = getKokkosMaterialPropertyOld<Real>("coupled_prop_name");
 }

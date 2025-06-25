@@ -11,12 +11,15 @@
 
 #include "GPUKernelValue.h"
 
-class GPUConvectionPrecompute final : public GPUKernelValue<GPUConvectionPrecompute>
+class KokkosConvectionPrecompute final
+  : public Moose::Kokkos::KernelValue<KokkosConvectionPrecompute>
 {
+  using Real3 = Moose::Kokkos::Real3;
+
 public:
   static InputParameters validParams();
 
-  GPUConvectionPrecompute(const InputParameters & parameters);
+  KokkosConvectionPrecompute(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, ResidualDatum & datum) const
   {

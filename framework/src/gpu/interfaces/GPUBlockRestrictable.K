@@ -19,9 +19,9 @@ BlockRestrictable::BlockRestrictable(const BlockRestrictable & object)
 }
 
 void
-BlockRestrictable::initializeGPUBlockRestrictable(const GPUMesh * mesh)
+BlockRestrictable::initializeKokkosBlockRestrictable(const Moose::Kokkos::Mesh * mesh)
 {
-  if (_moose_object->isParamValid("_gpu_material"))
+  if (_moose_object->isParamValid("_kokkos_material"))
     return;
 
   auto & blocks = blockRestricted() ? blockIDs() : meshBlockIDs();
@@ -31,10 +31,10 @@ BlockRestrictable::initializeGPUBlockRestrictable(const GPUMesh * mesh)
 
   for (auto block : blocks)
   {
-    element_ids.insert(mesh->getGPUSubdomainElementIDs(block).begin(),
-                       mesh->getGPUSubdomainElementIDs(block).end());
-    node_ids.insert(mesh->getGPUSubdomainNodeIDs(block).begin(),
-                    mesh->getGPUSubdomainNodeIDs(block).end());
+    element_ids.insert(mesh->getSubdomainElementIDs(block).begin(),
+                       mesh->getSubdomainElementIDs(block).end());
+    node_ids.insert(mesh->getSubdomainNodeIDs(block).begin(),
+                    mesh->getSubdomainNodeIDs(block).end());
   }
 
   _element_ids = element_ids;
@@ -46,10 +46,10 @@ BlockRestrictable::initializeGPUBlockRestrictable(const GPUMesh * mesh)
       _moose_object->getParam<Moose::MaterialDataType>("_material_data_type") !=
           Moose::BOUNDARY_MATERIAL_DATA)
   {
-    std::set<GPUPair<dof_id_type, unsigned int>> element_side_ids;
+    std::set<Moose::Kokkos::Pair<dof_id_type, unsigned int>> element_side_ids;
 
     for (auto block : blocks)
-      for (const auto & [elem, id] : mesh->getGPUSubdomainElementMap(block))
+      for (const auto & [elem, id] : mesh->getSubdomainElementMap(block))
         for (unsigned int side = 0; side < elem->n_sides(); ++side)
           element_side_ids.insert({id, side});
 

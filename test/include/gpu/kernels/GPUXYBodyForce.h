@@ -11,18 +11,18 @@
 
 #include "GPUBodyForce.h"
 
-class GPUXYBodyForce final : public GPUBodyForce<GPUXYBodyForce>
+class KokkosXYBodyForce final : public KokkosBodyForce<KokkosXYBodyForce>
 {
 public:
   static InputParameters validParams();
 
-  GPUXYBodyForce(const InputParameters & parameters);
+  KokkosXYBodyForce(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          ResidualDatum & datum) const
   {
     return (datum.q_point(qp)(0) + datum.q_point(qp)(1)) *
-           GPUBodyForce::computeQpResidual(i, qp, datum);
+           KokkosBodyForce::computeQpResidual(i, qp, datum);
   }
 };

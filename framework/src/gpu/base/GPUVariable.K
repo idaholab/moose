@@ -12,14 +12,19 @@
 #include "SystemBase.h"
 #include "FEProblemBase.h"
 
+namespace Moose
+{
+namespace Kokkos
+{
+
 void
-GPUVariable::init(const MooseVariableBase & variable, const TagName & tag_name)
+Variable::init(const MooseVariableBase & variable, const TagName & tag_name)
 {
   init(variable, variable.sys().feProblem().getVectorTagID(tag_name));
 }
 
 void
-GPUVariable::init(const MooseVariableBase & variable, const TagID tag)
+Variable::init(const MooseVariableBase & variable, const TagID tag)
 {
   _coupled = true;
   _components = variable.count();
@@ -37,3 +42,6 @@ GPUVariable::init(const MooseVariableBase & variable, const TagID tag)
   _var.copy();
   _sys.copy();
 }
+
+} // namespace Kokkos
+} // namespace Moose

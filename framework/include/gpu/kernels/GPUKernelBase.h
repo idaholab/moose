@@ -15,16 +15,21 @@
 #include "MaterialPropertyInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
-class GPUKernelBase : public GPUResidualObject,
-                      public BlockRestrictable,
-                      public CoupleableMooseVariableDependencyIntermediateInterface,
-                      public MaterialPropertyInterface
+namespace Moose
+{
+namespace Kokkos
+{
+
+class KernelBase : public ResidualObject,
+                   public BlockRestrictable,
+                   public CoupleableMooseVariableDependencyIntermediateInterface,
+                   public MaterialPropertyInterface
 {
 public:
   static InputParameters validParams();
 
-  GPUKernelBase(const InputParameters & parameters, Moose::VarFieldType field_type);
-  GPUKernelBase(const GPUKernelBase & object);
+  KernelBase(const InputParameters & parameters, Moose::VarFieldType field_type);
+  KernelBase(const KernelBase & object);
 
 protected:
   // Sets the variables this object depend on
@@ -34,8 +39,11 @@ protected:
   void setProjectionFlags();
 };
 
-#define usingGPUKernelBaseMembers                                                                  \
-  usingGPUResidualObjectMembers;                                                                   \
+} // namespace Kokkos
+} // namespace Moose
+
+#define usingKokkosKernelBaseMembers                                                               \
+  usingKokkosResidualObjectMembers;                                                                \
                                                                                                    \
 protected:                                                                                         \
-  using GPUKernelBase::blockElementID;
+  using Moose::Kokkos::KernelBase::blockElementID;

@@ -1585,12 +1585,12 @@ private:
    */
 public:
   /// Return whether GPUs exist
-  bool hasGPUs() { return _has_GPUs > 0; }
+  bool hasGPUs() { return _has_gpus; }
 
 private:
-  bool _has_GPUs = false;
+  bool _has_gpus = false;
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
   /// Query whether GPUs exist
   void queryGPUs();
 #endif

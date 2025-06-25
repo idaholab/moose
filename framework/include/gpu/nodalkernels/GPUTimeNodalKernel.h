@@ -11,15 +11,20 @@
 
 #include "GPUNodalKernel.h"
 
-template <typename NodalKernel>
-class GPUTimeNodalKernel : public GPUNodalKernel<NodalKernel>
+namespace Moose
 {
-  usingGPUNodalKernelMembers(NodalKernel);
+namespace Kokkos
+{
+
+template <typename Derived>
+class TimeNodalKernel : public NodalKernel<Derived>
+{
+  usingKokkosNodalKernelMembers(Derived);
 
 public:
   static InputParameters validParams()
   {
-    InputParameters params = GPUNodalKernel<NodalKernel>::validParams();
+    InputParameters params = NodalKernel<Derived>::validParams();
 
     params.set<MultiMooseEnum>("vector_tags") = "time";
     params.set<MultiMooseEnum>("matrix_tags") = "system time";
@@ -27,23 +32,26 @@ public:
     return params;
   }
 
-  GPUTimeNodalKernel(const InputParameters & parameters)
-    : GPUNodalKernel<NodalKernel>(parameters),
-      _u_dot(systems(), _var, Moose::SOLUTION_DOT_TAG),
+  TimeNodalKernel(const InputParameters & parameters)
+    : NodalKernel<Derived>(parameters),
+      _u_dot(kokkosSystems(), _var, Moose::SOLUTION_DOT_TAG),
       _du_dot_du(_var.sys().duDotDu(_var.number()))
   {
   }
 
 protected:
   /// Time derivative of u
-  GPUVariableNodalValue _u_dot;
+  VariableNodalValue _u_dot;
   /// Derivative of u_dot with respect to u
-  GPUScalar<const Real> _du_dot_du;
+  Scalar<const Real> _du_dot_du;
 };
 
-#define usingGPUTimeNodalKernelMembers(T)                                                          \
-  usingGPUNodalKernelMembers(T);                                                                   \
+} // namespace Kokkos
+} // namespace Moose
+
+#define usingKokkosTimeNodalKernelMembers(T)                                                       \
+  usingKokkosNodalKernelMembers(T);                                                                \
                                                                                                    \
 protected:                                                                                         \
-  using GPUTimeNodalKernel<T>::_u_dot;                                                             \
-  using GPUTimeNodalKernel<T>::_du_dot_du;
+  using Moose::Kokkos::TimeNodalKernel<T>::_u_dot;                                                 \
+  using Moose::Kokkos::TimeNodalKernel<T>::_du_dot_du;

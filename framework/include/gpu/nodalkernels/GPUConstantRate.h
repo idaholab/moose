@@ -11,15 +11,15 @@
 
 #include "GPUNodalKernel.h"
 
-class GPUConstantRate final : public GPUNodalKernel<GPUConstantRate>
+class KokkosConstantRate final : public Moose::Kokkos::NodalKernel<KokkosConstantRate>
 {
 public:
   static InputParameters validParams();
 
-  GPUConstantRate(const InputParameters & parameters);
+  KokkosConstantRate(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type /* node */) const { return -_rate; }
 
 protected:
-  GPUScalar<const Real> _rate;
+  Moose::Kokkos::Scalar<const Real> _rate;
 };

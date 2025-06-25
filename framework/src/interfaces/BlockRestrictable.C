@@ -47,8 +47,12 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object, bool init
     _boundary_ids(_empty_boundary_ids),
     _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
     _blk_name(moose_object->name()),
+#ifdef MOOSE_HAVE_KOKKOS
     _blk_dim(libMesh::invalid_uint),
     _moose_object(moose_object)
+#else
+    _blk_dim(libMesh::invalid_uint)
+#endif
 {
   if (initialize)
     initializeBlockRestrictable(moose_object);
@@ -66,7 +70,12 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object,
     _boundary_ids(boundary_ids),
     _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
     _blk_name(moose_object->name()),
+#ifdef MOOSE_HAVE_KOKKOS
+    _blk_dim(libMesh::invalid_uint),
+    _moose_object(moose_object)
+#else
     _blk_dim(libMesh::invalid_uint)
+#endif
 {
   initializeBlockRestrictable(moose_object);
 }
@@ -85,8 +94,11 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
 
   // Populate the MaterialData pointer
   if (_blk_feproblem != NULL)
-    _blk_material_data = &_blk_feproblem->getMaterialData(
-        Moose::BLOCK_MATERIAL_DATA, _blk_tid, nullptr, moose_object->isParamValid("_gpu_object"));
+    _blk_material_data =
+        &_blk_feproblem->getMaterialData(Moose::BLOCK_MATERIAL_DATA,
+                                         _blk_tid,
+                                         nullptr,
+                                         moose_object->isParamValid("_kokkos_object"));
 
   // The 'block' input is defined
   if (moose_object->isParamValid("block"))
@@ -179,9 +191,9 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
   else
     _blk_dim = _blk_mesh->dimension();
 
-#ifdef MOOSE_HAVE_GPU
-  if (moose_object->isParamValid("_gpu_object"))
-    initializeGPUBlockRestrictable(_blk_mesh->getGPUMesh());
+#ifdef MOOSE_HAVE_KOKKOS
+  if (moose_object->isParamValid("_kokkos_object"))
+    initializeKokkosBlockRestrictable(_blk_mesh->getKokkosMesh());
 #endif
 }
 

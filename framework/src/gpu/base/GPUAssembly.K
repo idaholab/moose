@@ -19,24 +19,29 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/reference_elem.h"
 
-GPUAssembly::GPUAssembly(FEProblemBase & problem)
-  : GPUMeshHolder(*problem.mesh().getGPUMesh()), _problem(problem), _mesh(problem.mesh())
+namespace Moose
+{
+namespace Kokkos
+{
+
+Assembly::Assembly(FEProblemBase & problem)
+  : MeshHolder(*problem.mesh().getKokkosMesh()), _problem(problem), _mesh(problem.mesh())
 {
 }
 
 void
-GPUAssembly::init()
+Assembly::init()
 {
   // Cache mesh information
 
   _n_subdomains = _mesh.meshSubdomains().size();
-  _n_elem_types = mesh().getGPUElementTypeMap().size();
+  _n_elem_types = kokkosMesh().getElementTypeMap().size();
   _dimension = _mesh.dimension();
 
   _coord_type.create(_n_subdomains);
 
   for (auto subdomain : _mesh.meshSubdomains())
-    _coord_type[mesh().getGPUSubdomainID(subdomain)] = _mesh.getCoordSystem(subdomain);
+    _coord_type[kokkosMesh().getSubdomainID(subdomain)] = _mesh.getCoordSystem(subdomain);
 
   _coord_type.copy();
 
@@ -45,7 +50,7 @@ GPUAssembly::init()
     _rz_axis.create(_n_subdomains);
 
     for (auto subdomain : _mesh.meshSubdomains())
-      _rz_axis[mesh().getGPUSubdomainID(subdomain)] =
+      _rz_axis[kokkosMesh().getSubdomainID(subdomain)] =
           _mesh.getGeneralAxisymmetricCoordAxis(subdomain);
 
     _rz_axis.copy();
@@ -57,7 +62,7 @@ GPUAssembly::init()
 
   std::set<FEType> fe_types;
 
-  auto getFETypes = [&](System & system)
+  auto getFETypes = [&](::System & system)
   {
     for (unsigned int var = 0; var < system.n_vars(); var++)
       fe_types.insert(system.variable_type(var));
@@ -73,7 +78,7 @@ GPUAssembly::init()
 }
 
 void
-GPUAssembly::initQuadrature()
+Assembly::initQuadrature()
 {
   _q_points.create(_n_subdomains, _n_elem_types);
   _q_points_face.create(_n_subdomains, _n_elem_types);
@@ -100,23 +105,23 @@ GPUAssembly::initQuadrature()
       for (auto boundary : boundary_restriction->boundaryIDs())
         _material_boundaries.insert(boundary);
     else
-      mooseError("GPUAssembly error: ", object->name(), " is not boundary-restricted.");
+      mooseError("Kokkos assembly error: ", object->name(), " is not boundary-restricted.");
   }
 
   // Cache quadrature data
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    auto sid = mesh().getGPUSubdomainID(subdomain);
+    auto sid = kokkosMesh().getSubdomainID(subdomain);
 
     std::map<ElemType, unsigned int> n_qps;
     std::map<ElemType, std::vector<unsigned int>> n_qps_face;
 
     auto & assembly = _problem.assembly(0, 0);
-    auto & qrule = assembly.writeableQRule(_dimension, subdomain);
-    auto & qrule_face = assembly.writeableQRuleFace(_dimension, subdomain);
+    auto qrule = assembly.writeableQRule(_dimension, subdomain);
+    auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain);
 
-    for (auto & [elem_type, elem_type_id] : mesh().getGPUElementTypeMap())
+    for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
     {
       auto elem = &libMesh::ReferenceElem::get(elem_type);
 
@@ -155,7 +160,7 @@ GPUAssembly::initQuadrature()
       }
     }
 
-    auto & map = mesh().getGPUSubdomainLocalElementMap(subdomain);
+    auto & map = kokkosMesh().getSubdomainLocalElementMap(subdomain);
 
     _n_qps[sid].create(map.size());
     _n_qps_face[sid].create(_mesh.getMaxSidesPerElem(), map.size());
@@ -188,8 +193,8 @@ GPUAssembly::initQuadrature()
 
       if (elem->processor_id() == _problem.processor_id())
       {
-        auto sid = mesh().getGPUSubdomainID(elem->subdomain_id());
-        auto eid = mesh().getGPUSubdomainLocalElementID(elem);
+        auto sid = kokkosMesh().getSubdomainID(elem->subdomain_id());
+        auto eid = kokkosMesh().getSubdomainLocalElementID(elem);
         auto side = _mesh.sideWithBoundaryID(elem, boundary);
 
         _qp_offset_face[sid](side, eid) = _n_qps_face[sid](side, eid);
@@ -198,7 +203,7 @@ GPUAssembly::initQuadrature()
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    auto sid = mesh().getGPUSubdomainID(subdomain);
+    auto sid = kokkosMesh().getSubdomainID(subdomain);
 
     std::exclusive_scan(
         _qp_offset_face[sid].begin(), _qp_offset_face[sid].end(), _qp_offset_face[sid].begin(), 0);
@@ -217,7 +222,7 @@ GPUAssembly::initQuadrature()
 }
 
 void
-GPUAssembly::initShape()
+Assembly::initShape()
 {
   // Cache reference shape data
 
@@ -238,7 +243,7 @@ GPUAssembly::initShape()
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    auto sid = mesh().getGPUSubdomainID(subdomain);
+    auto sid = kokkosMesh().getSubdomainID(subdomain);
 
     for (unsigned int t = 0; t < _n_elem_types; ++t)
     {
@@ -270,22 +275,22 @@ GPUAssembly::initShape()
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    auto sid = mesh().getGPUSubdomainID(subdomain);
-    auto & map = mesh().getGPUSubdomainLocalElementMap(subdomain);
+    auto sid = kokkosMesh().getSubdomainID(subdomain);
+    auto & map = kokkosMesh().getSubdomainLocalElementMap(subdomain);
 
     auto & assembly = _problem.assembly(0, 0);
-    auto & qrule = assembly.writeableQRule(_dimension, subdomain);
-    auto & qrule_face = assembly.writeableQRuleFace(_dimension, subdomain);
+    auto qrule = assembly.writeableQRule(_dimension, subdomain);
+    auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain);
 
     for (auto & [fe_type, fe_type_id] : _fe_type_map)
     {
       std::unique_ptr<FEBase> fe(FEBase::build(_dimension, fe_type));
       std::unique_ptr<FEBase> fe_face(FEBase::build(_dimension, fe_type));
 
-      fe->attach_quadrature_rule(qrule.get());
-      fe_face->attach_quadrature_rule(qrule_face.get());
+      fe->attach_quadrature_rule(qrule);
+      fe_face->attach_quadrature_rule(qrule_face);
 
-      for (auto & [elem_type, elem_type_id] : mesh().getGPUElementTypeMap())
+      for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
       {
         auto elem = &libMesh::ReferenceElem::get(elem_type);
 
@@ -320,7 +325,7 @@ GPUAssembly::initShape()
       }
     }
 
-    for (auto & [elem_type, elem_type_id] : mesh().getGPUElementTypeMap())
+    for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
     {
       auto elem = &libMesh::ReferenceElem::get(elem_type);
 
@@ -329,8 +334,8 @@ GPUAssembly::initShape()
       std::unique_ptr<FEBase> fe_face(
           FEBase::build(_dimension, FEType(elem->default_order(), LAGRANGE)));
 
-      fe->attach_quadrature_rule(qrule.get());
-      fe_face->attach_quadrature_rule(qrule_face.get());
+      fe->attach_quadrature_rule(qrule);
+      fe_face->attach_quadrature_rule(qrule_face);
 
       auto & phi = fe->get_phi();
       auto & grad_phi = fe->get_dphi();
@@ -389,3 +394,6 @@ GPUAssembly::initShape()
 
   _n_dofs.copy();
 }
+
+} // namespace Kokkos
+} // namespace Moose

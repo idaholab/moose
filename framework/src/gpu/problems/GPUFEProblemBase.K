@@ -15,15 +15,15 @@
 #include "MaterialBase.h"
 
 void
-FEProblemBase::initGPU()
+FEProblemBase::initKokkos()
 {
-  // Initialize GPU assembly
+  // Initialize Kokkos assembly
 
-  _gpu_assembly.init();
-  _gpu_assembly.initQuadrature();
-  _gpu_assembly.initShape();
+  _kokkos_assembly.init();
+  _kokkos_assembly.initQuadrature();
+  _kokkos_assembly.initShape();
 
-  // Initialize GPU systems
+  // Initialize Kokkos systems
 
   unsigned int max_system_number = 0;
 
@@ -32,30 +32,30 @@ FEProblemBase::initGPU()
 
   max_system_number = std::max(max_system_number, getAuxiliarySystem().number());
 
-  // GPUSystem does not have a default constructor, so this simply allocates buffer to which we
+  // Kokkos system does not have a default constructor, so this simply allocates buffer to which we
   // should do placement new later
-  _gpu_systems.create(max_system_number + 1);
+  _kokkos_systems.create(max_system_number + 1);
 
   for (unsigned int s = 0; s < numNonlinearSystems(); ++s)
   {
     auto & nl = getNonlinearSystemBase(s);
-    new (&_gpu_systems[nl.number()]) GPUSystem(nl);
-    _gpu_systems[nl.number()].init();
+    new (&_kokkos_systems[nl.number()]) Moose::Kokkos::System(nl);
+    _kokkos_systems[nl.number()].init();
   }
 
   auto & aux = getAuxiliarySystem();
-  new (&_gpu_systems[aux.number()]) GPUSystem(aux);
-  _gpu_systems[aux.number()].init();
+  new (&_kokkos_systems[aux.number()]) Moose::Kokkos::System(aux);
+  _kokkos_systems[aux.number()].init();
 
-  // Initialize GPU material properties
+  // Initialize Kokkos material properties
 
-  _gpu_material_props.allocateGPUProperties();
-  _gpu_bnd_material_props.allocateGPUProperties();
-  _gpu_neighbor_material_props.allocateGPUProperties();
+  _kokkos_material_props.allocateKokkosProperties();
+  _kokkos_bnd_material_props.allocateKokkosProperties();
+  _kokkos_neighbor_material_props.allocateKokkosProperties();
 }
 
 void
-FEProblemBase::initGPUStatefulProps()
+FEProblemBase::initKokkosStatefulProps()
 {
   // Resolve dependencies
 
@@ -64,51 +64,51 @@ FEProblemBase::initGPUStatefulProps()
 
   for (auto block : _mesh.meshSubdomains())
   {
-    _gpu_materials.updateBlockVariableDependency(block, needed_moose_vars);
-    _gpu_materials.updateBlockFEVariableCoupledVectorTagDependency(block,
-                                                                   needed_fe_var_vector_tags);
+    _kokkos_materials.updateBlockVariableDependency(block, needed_moose_vars);
+    _kokkos_materials.updateBlockFEVariableCoupledVectorTagDependency(block,
+                                                                      needed_fe_var_vector_tags);
   }
 
   // Copy data and preallocate quadature point solution vectors
 
-  for (auto & system : _gpu_systems)
+  for (auto & system : _kokkos_systems)
     if (system.initialized())
     {
       system.setActiveVariables(needed_moose_vars);
       system.setActiveVariableTags(needed_fe_var_vector_tags);
-      system.sync(GPUMemcpyKind::HOST_TO_DEVICE);
+      system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
       system.preallocate();
     }
 
-  _gpu_systems.copy();
+  _kokkos_systems.copy();
 
   // Initialize stateful properties
 
-  for (auto & material : _gpu_materials.getActiveObjects())
+  for (auto & material : _kokkos_materials.getActiveObjects())
     if (!material->hasRestoredProperties() && !material->boundaryRestricted())
       material->initStatefulProperties(0);
 
-  for (auto & material : _gpu_materials[Moose::FACE_MATERIAL_DATA].getActiveObjects())
+  for (auto & material : _kokkos_materials[Moose::FACE_MATERIAL_DATA].getActiveObjects())
     if (!material->hasRestoredProperties())
       material->initStatefulProperties(0);
 
-  for (auto & material : _gpu_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveObjects())
+  for (auto & material : _kokkos_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveObjects())
     if (!material->hasRestoredProperties())
       material->initStatefulProperties(0);
 
-  for (auto & material : _gpu_materials.getActiveObjects())
+  for (auto & material : _kokkos_materials.getActiveObjects())
     if (!material->hasRestoredProperties() && material->boundaryRestricted())
       material->initStatefulProperties(0);
 
   // Copy to old and older states
 
-  _gpu_material_props.copy();
-  _gpu_bnd_material_props.copy();
-  _gpu_neighbor_material_props.copy();
+  _kokkos_material_props.copy();
+  _kokkos_bnd_material_props.copy();
+  _kokkos_neighbor_material_props.copy();
 
   // Clear
 
-  for (auto & system : _gpu_systems)
+  for (auto & system : _kokkos_systems)
     if (system.initialized())
     {
       system.clearActiveVariables();
@@ -118,16 +118,16 @@ FEProblemBase::initGPUStatefulProps()
 }
 
 void
-FEProblemBase::prepareGPUMaterials(
+FEProblemBase::prepareKokkosMaterials(
     const std::unordered_set<unsigned int> & consumer_needed_mat_props)
 {
   std::unordered_set<unsigned int> needed_mat_props;
 
   for (auto block : mesh().meshSubdomains())
-    _gpu_materials.updateBlockMatPropDependency(block, needed_mat_props);
+    _kokkos_materials.updateBlockMatPropDependency(block, needed_mat_props);
 
   for (auto boundary : mesh().meshBoundaryIds())
-    _gpu_materials.updateBoundaryMatPropDependency(boundary, needed_mat_props);
+    _kokkos_materials.updateBoundaryMatPropDependency(boundary, needed_mat_props);
 
   needed_mat_props.insert(consumer_needed_mat_props.begin(), consumer_needed_mat_props.end());
 
@@ -135,21 +135,21 @@ FEProblemBase::prepareGPUMaterials(
 }
 
 void
-FEProblemBase::reinitGPUMaterials()
+FEProblemBase::reinitKokkosMaterials()
 {
   if (hasActiveMaterialProperties(0))
   {
-    for (auto & material : _gpu_materials.getActiveObjects())
+    for (auto & material : _kokkos_materials.getActiveObjects())
       if (!material->boundaryRestricted())
         material->computeProperties();
 
-    for (auto & material : _gpu_materials[Moose::FACE_MATERIAL_DATA].getActiveObjects())
+    for (auto & material : _kokkos_materials[Moose::FACE_MATERIAL_DATA].getActiveObjects())
       material->computeProperties();
 
-    for (auto & material : _gpu_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveObjects())
+    for (auto & material : _kokkos_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveObjects())
       material->computeProperties();
 
-    for (auto & material : _gpu_materials.getActiveObjects())
+    for (auto & material : _kokkos_materials.getActiveObjects())
       if (material->boundaryRestricted())
         material->computeProperties();
   }

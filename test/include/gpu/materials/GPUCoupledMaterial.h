@@ -14,12 +14,12 @@
 /**
  * A material that couples a material property
  */
-class GPUCoupledMaterial : public GPUMaterial<GPUCoupledMaterial>
+class KokkosCoupledMaterial : public Moose::Kokkos::Material<KokkosCoupledMaterial>
 {
 public:
   static InputParameters validParams();
 
-  GPUCoupledMaterial(const InputParameters & parameters);
+  KokkosCoupledMaterial(const InputParameters & parameters);
 
   KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int qp, Datum & datum) const
   {
@@ -33,6 +33,6 @@ public:
 
 protected:
   std::string _mat_prop_name;
-  GPUMaterialProperty<Real> _mat_prop;
-  GPUMaterialProperty<Real> _coupled_mat_prop;
+  Moose::Kokkos::MaterialProperty<Real> _mat_prop;
+  Moose::Kokkos::MaterialProperty<Real> _coupled_mat_prop;
 };

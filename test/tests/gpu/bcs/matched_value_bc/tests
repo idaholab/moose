@@ -6,7 +6,7 @@
     type = 'Exodiff'
     input = 'gpu_matched_value_bc_test.i'
     exodiff = 'out_gpu.e'
-    requirement = 'The GPU system shall support matching variable values on a boundary.'
+    requirement = 'The Kokkos system shall support matching variable values on a boundary.'
     capabilities = 'kokkos'
   [../]
 []

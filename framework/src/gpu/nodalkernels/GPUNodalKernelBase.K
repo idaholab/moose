@@ -9,29 +9,36 @@
 
 #include "GPUNodalKernelBase.h"
 
-InputParameters
-GPUNodalKernelBase::validParams()
+namespace Moose
 {
-  InputParameters params = GPUResidualObject::validParams();
+namespace Kokkos
+{
+
+InputParameters
+NodalKernelBase::validParams()
+{
+  InputParameters params = ResidualObject::validParams();
   params += BlockRestrictable::validParams();
   params += BoundaryRestrictable::validParams();
   params.registerBase("NodalKernel");
   return params;
 }
 
-GPUNodalKernelBase::GPUNodalKernelBase(const InputParameters & parameters,
-                                       Moose::VarFieldType field_type)
-  : GPUResidualObject(parameters, field_type),
+NodalKernelBase::NodalKernelBase(const InputParameters & parameters, Moose::VarFieldType field_type)
+  : ResidualObject(parameters, field_type),
     BlockRestrictable(this),
     BoundaryRestrictable(this, true), // true for applying to nodesets
     CoupleableMooseVariableDependencyIntermediateInterface(this, true)
 {
 }
 
-GPUNodalKernelBase::GPUNodalKernelBase(const GPUNodalKernelBase & object)
-  : GPUResidualObject(object),
+NodalKernelBase::NodalKernelBase(const NodalKernelBase & object)
+  : ResidualObject(object),
     BlockRestrictable(object),
     BoundaryRestrictable(object),
     CoupleableMooseVariableDependencyIntermediateInterface(&object, true, false, false)
 {
 }
+
+} // namespace Kokkos
+} // namespace Moose

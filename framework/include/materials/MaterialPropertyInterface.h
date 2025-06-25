@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
 #include "GPUMaterialPropertyStorage.h"
 #endif
 
@@ -158,13 +158,13 @@ public:
   }
   ///@}
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
   template <typename T, unsigned int dimension, unsigned int state>
-  GPUMaterialProperty<T, dimension>
-  getGPUGenericMaterialPropertyByName(const std::string & prop_name)
+  Moose::Kokkos::MaterialProperty<T, dimension>
+  getKokkosGenericMaterialPropertyByName(const std::string & prop_name)
   {
-    if (!_is_gpu_object)
-      mooseError("Attempted to retrieve a GPU material property from a non-GPU object.");
+    if (!_is_kokkos_object)
+      mooseError("Attempted to retrieve a Kokkos material property from a standard MOOSE object.");
 
     if constexpr (std::is_same_v<T, Real>)
     {
@@ -173,7 +173,7 @@ public:
 
       // check if the string parsed cleanly into a Real number
       if (ss >> value && ss.eof())
-        return GPUMaterialProperty<T, dimension>(value);
+        return Moose::Kokkos::MaterialProperty<T, dimension>(value);
     }
 
     checkExecutionStage();
@@ -186,7 +186,7 @@ public:
     _get_material_property_called = true;
 
     // Call first so that the ID gets registered
-    auto prop = _material_data.getGPUProperty<T, dimension, state>(prop_name);
+    auto prop = _material_data.getKokkosProperty<T, dimension, state>(prop_name);
 
     // Does the material data used here matter?
     _material_property_dependencies.insert(_material_data.getPropertyId(prop_name));
@@ -197,40 +197,47 @@ public:
     return prop;
   }
   template <typename T, unsigned int dimension = 0>
-  GPUMaterialProperty<T, dimension> getGPUMaterialPropertyByName(const std::string & prop_name)
+  Moose::Kokkos::MaterialProperty<T, dimension>
+  getKokkosMaterialPropertyByName(const std::string & prop_name)
   {
-    return getGPUGenericMaterialPropertyByName<T, dimension, 0>(prop_name);
+    return getKokkosGenericMaterialPropertyByName<T, dimension, 0>(prop_name);
   }
   template <typename T, unsigned int dimension = 0>
-  GPUMaterialProperty<T, dimension> getGPUMaterialPropertyOldByName(const std::string & prop_name)
+  Moose::Kokkos::MaterialProperty<T, dimension>
+  getKokkosMaterialPropertyOldByName(const std::string & prop_name)
   {
-    return getGPUGenericMaterialPropertyByName<T, dimension, 1>(prop_name);
+    return getKokkosGenericMaterialPropertyByName<T, dimension, 1>(prop_name);
   }
   template <typename T, unsigned int dimension = 0>
-  GPUMaterialProperty<T, dimension> getGPUMaterialPropertyOlderByName(const std::string & prop_name)
+  Moose::Kokkos::MaterialProperty<T, dimension>
+  getKokkosMaterialPropertyOlderByName(const std::string & prop_name)
   {
-    return getGPUGenericMaterialPropertyByName<T, dimension, 2>(prop_name);
+    return getKokkosGenericMaterialPropertyByName<T, dimension, 2>(prop_name);
   }
 
   template <typename T, unsigned int dimension, unsigned int state>
-  GPUMaterialProperty<T, dimension> getGPUGenericMaterialProperty(const std::string & name)
+  Moose::Kokkos::MaterialProperty<T, dimension>
+  getKokkosGenericMaterialProperty(const std::string & name)
   {
-    return getGPUGenericMaterialPropertyByName<T, dimension, state>(getMaterialPropertyName(name));
+    return getKokkosGenericMaterialPropertyByName<T, dimension, state>(
+        getMaterialPropertyName(name));
   }
   template <typename T, unsigned int dimension = 0>
-  GPUMaterialProperty<T, dimension> getGPUMaterialProperty(const std::string & name)
+  Moose::Kokkos::MaterialProperty<T, dimension> getKokkosMaterialProperty(const std::string & name)
   {
-    return getGPUGenericMaterialPropertyByName<T, dimension, 0>(getMaterialPropertyName(name));
+    return getKokkosGenericMaterialPropertyByName<T, dimension, 0>(getMaterialPropertyName(name));
   }
   template <typename T, unsigned int dimension = 0>
-  GPUMaterialProperty<T, dimension> getGPUMaterialPropertyOld(const std::string & name)
+  Moose::Kokkos::MaterialProperty<T, dimension>
+  getKokkosMaterialPropertyOld(const std::string & name)
   {
-    return getGPUGenericMaterialPropertyByName<T, dimension, 1>(getMaterialPropertyName(name));
+    return getKokkosGenericMaterialPropertyByName<T, dimension, 1>(getMaterialPropertyName(name));
   }
   template <typename T, unsigned int dimension = 0>
-  GPUMaterialProperty<T, dimension> getGPUMaterialPropertyOlder(const std::string & name)
+  Moose::Kokkos::MaterialProperty<T, dimension>
+  getKokkosMaterialPropertyOlder(const std::string & name)
   {
-    return getGPUGenericMaterialPropertyByName<T, dimension, 2>(getMaterialPropertyName(name));
+    return getKokkosGenericMaterialPropertyByName<T, dimension, 2>(getMaterialPropertyName(name));
   }
 #endif
 
@@ -367,11 +374,11 @@ public:
   bool hasADMaterialProperty(const std::string & name);
   template <typename T>
   bool hasADMaterialPropertyByName(const std::string & name);
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
   template <typename T, unsigned int dimension = 0>
-  bool hasGPUMaterialProperty(const std::string & name);
+  bool hasKokkosMaterialProperty(const std::string & name);
   template <typename T, unsigned int dimension = 0>
-  bool hasGPUMaterialPropertyByName(const std::string & name);
+  bool hasKokkosMaterialPropertyByName(const std::string & name);
 #endif
   ///@}
 
@@ -561,8 +568,8 @@ protected:
   /// Current threaded it
   const THREAD_ID _mi_tid;
 
-  /// Whether the MOOSE object is a GPU object
-  const bool _is_gpu_object;
+  /// Whether the MOOSE object is a Kokkos object
+  const bool _is_kokkos_object;
 
   /// The type of data
   const Moose::MaterialDataType _material_data_type;
@@ -781,24 +788,24 @@ MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name_in
   return _material_data.haveProperty<T>(name);
 }
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 template <typename T, unsigned int dimension>
 bool
-MaterialPropertyInterface::hasGPUMaterialProperty(const std::string & name)
+MaterialPropertyInterface::hasKokkosMaterialProperty(const std::string & name)
 {
   // Check if the supplied parameter is a valid input parameter key
   const auto prop_name = getMaterialPropertyName(name);
-  return hasGPUMaterialPropertyByName<T, dimension>(prop_name);
+  return hasKokkosMaterialPropertyByName<T, dimension>(prop_name);
 }
 
 template <typename T, unsigned int dimension>
 bool
-MaterialPropertyInterface::hasGPUMaterialPropertyByName(const std::string & name_in)
+MaterialPropertyInterface::hasKokkosMaterialPropertyByName(const std::string & name_in)
 {
   const auto name = _get_suffix.empty()
                         ? name_in
                         : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
-  return _material_data.haveGPUProperty<T, dimension>(name);
+  return _material_data.haveKokkosProperty<T, dimension>(name);
 }
 #endif
 
@@ -911,8 +918,8 @@ MaterialPropertyInterface::getGenericMaterialPropertyByName(const MaterialProper
                                                             MaterialData & material_data,
                                                             const unsigned int state)
 {
-  if (_is_gpu_object)
-    mooseError("Attempted to retrieve a non-GPU material property from a GPU object.");
+  if (_is_kokkos_object)
+    mooseError("Attempted to retrieve a standard MOOSE material property from a Kokkos object.");
 
   if (_use_interpolated_state)
   {

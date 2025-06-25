@@ -11,12 +11,12 @@
 
 #include "GPUMaterial.h"
 
-class GPUStatefulSpatialTest final : public GPUMaterial<GPUStatefulSpatialTest>
+class KokkosStatefulSpatialTest final : public Moose::Kokkos::Material<KokkosStatefulSpatialTest>
 {
 public:
   static InputParameters validParams();
 
-  GPUStatefulSpatialTest(const InputParameters & parameters);
+  KokkosStatefulSpatialTest(const InputParameters & parameters);
 
   KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int qp, Datum & datum) const
   {
@@ -29,6 +29,6 @@ public:
   }
 
 protected:
-  GPUMaterialProperty<Real> _thermal_conductivity;
-  GPUMaterialProperty<Real> _thermal_conductivity_old;
+  Moose::Kokkos::MaterialProperty<Real> _thermal_conductivity;
+  Moose::Kokkos::MaterialProperty<Real> _thermal_conductivity_old;
 };

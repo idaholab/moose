@@ -17,12 +17,12 @@
  * m_j is a vector of material properties, and v_j is a vector
  * of variables
  */
-class GPUMatCoupledForce final : public GPUKernel<GPUMatCoupledForce>
+class KokkosMatCoupledForce final : public Moose::Kokkos::Kernel<KokkosMatCoupledForce>
 {
 public:
   static InputParameters validParams();
 
-  GPUMatCoupledForce(const InputParameters & parameters);
+  KokkosMatCoupledForce(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -59,8 +59,8 @@ private:
   const unsigned int _n_coupled;
   const bool _coupled_props;
   std::vector<unsigned int> _v_var;
-  GPUVariableValue _v;
-  GPUArray<Real> _coef;
-  GPUMap<unsigned int, unsigned int> _v_var_to_index;
-  GPUArray<GPUMaterialProperty<Real>> _mat_props;
+  Moose::Kokkos::VariableValue _v;
+  Moose::Kokkos::Array<Real> _coef;
+  Moose::Kokkos::Map<unsigned int, unsigned int> _v_var_to_index;
+  Moose::Kokkos::Array<Moose::Kokkos::MaterialProperty<Real>> _mat_props;
 };

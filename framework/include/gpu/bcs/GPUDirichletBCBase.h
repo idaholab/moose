@@ -11,15 +11,20 @@
 
 #include "GPUNodalBC.h"
 
-template <typename DirichletBC>
-class GPUDirichletBCBase : public GPUNodalBC<DirichletBC>
+namespace Moose
 {
-  usingGPUNodalBCMembers(DirichletBC);
+namespace Kokkos
+{
+
+template <typename Derived>
+class DirichletBCBase : public NodalBC<Derived>
+{
+  usingKokkosNodalBCMembers(Derived);
 
 public:
   static InputParameters validParams()
   {
-    InputParameters params = GPUNodalBC<DirichletBC>::validParams();
+    InputParameters params = NodalBC<Derived>::validParams();
     params.addParam<bool>(
         "preset",
         true,
@@ -27,13 +32,13 @@ public:
     return params;
   }
 
-  GPUDirichletBCBase(const InputParameters & parameters)
-    : GPUNodalBC<DirichletBC>(parameters), _preset(this->template getParam<bool>("preset"))
+  DirichletBCBase(const InputParameters & parameters)
+    : NodalBC<Derived>(parameters), _preset(this->template getParam<bool>("preset"))
   {
   }
 
-  GPUDirichletBCBase(const GPUDirichletBCBase<DirichletBC> & object)
-    : GPUNodalBC<DirichletBC>(object), _preset(object._preset)
+  DirichletBCBase(const DirichletBCBase<Derived> & object)
+    : NodalBC<Derived>(object), _preset(object._preset)
   {
     _solution_tag = object._solution_tag;
   }
@@ -44,25 +49,25 @@ public:
   {
     _solution_tag = tag;
 
-    Kokkos::parallel_for(
-        Kokkos::RangePolicy<Kokkos::IndexType<size_t>>(0, this->numBoundaryNodes()),
-        *static_cast<DirichletBC *>(this));
+    ::Kokkos::parallel_for(
+        ::Kokkos::RangePolicy<::Kokkos::IndexType<size_t>>(0, this->numBoundaryNodes()),
+        *static_cast<Derived *>(this));
   }
 
   KOKKOS_FUNCTION void operator()(const size_t tid) const
   {
-    auto bc = static_cast<const DirichletBC *>(this);
+    auto bc = static_cast<const Derived *>(this);
     auto node = boundaryNodeID(tid);
 
-    auto & sys = system(_gpu_var.sys());
-    auto dof = sys.getNodeLocalDofIndex(node, _gpu_var.var());
+    auto & sys = kokkosSystem(_kokkos_var.sys());
+    auto dof = sys.getNodeLocalDofIndex(node, _kokkos_var.var());
 
     sys.getVectorDofValue(dof, _solution_tag) = bc->computeValue(node);
   }
 
   KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const
   {
-    auto bc = static_cast<const DirichletBC *>(this);
+    auto bc = static_cast<const Derived *>(this);
 
     return _u(node) - bc->computeValue(node);
   }
@@ -74,8 +79,11 @@ private:
   TagID _solution_tag;
 };
 
-#define usingGPUDirichletBCBaseMembers(T)                                                          \
-  usingGPUNodalBCMembers(T);                                                                       \
+} // namespace Kokkos
+} // namespace Moose
+
+#define usingKokkosDirichletBCBaseMembers(T)                                                       \
+  usingKokkosNodalBCMembers(T);                                                                    \
                                                                                                    \
 public:                                                                                            \
-  using GPUDirichletBCBase<T>::operator();
+  using Moose::Kokkos::DirichletBCBase<T>::operator();

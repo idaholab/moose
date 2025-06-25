@@ -14,23 +14,28 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/dof_map.h"
 
-class GPUSystem;
+namespace Moose
+{
+namespace Kokkos
+{
 
-class GPUVector
+class System;
+
+class Vector
 {
 private:
   struct MPIBuffer
   {
     // List of DOFs to send/receive for each process
-    GPUArray<GPUArray<libMesh::dof_id_type>> list;
+    Array<Array<libMesh::dof_id_type>> list;
     // Number of DOFs to send/receive for each process
-    GPUArray<int> count;
+    Array<int> count;
     // Offset of each process in the buffer
-    GPUArray<int> offset;
+    Array<int> offset;
     // Send/receive buffer
-    GPUArray<PetscScalar> buffer;
+    Array<PetscScalar> buffer;
     // Allocate data
-    void create(const GPUArray<GPUArray<libMesh::dof_id_type>> & list);
+    void create(const Array<Array<libMesh::dof_id_type>> & list);
     // Free data
     void destroy();
   };
@@ -42,8 +47,8 @@ private:
   Vec _local_vector = PETSC_NULLPTR;
   // The raw array of PETSc vector
   PetscScalar * _array = PETSC_NULLPTR;
-  // Pointer to the GPU system
-  const GPUSystem * _system;
+  // Pointer to the Kokkos system
+  const System * _system;
   // Pointer to the libMesh communicator
   const libMesh::Parallel::Communicator * _comm = nullptr;
   // Send buffer
@@ -51,9 +56,9 @@ private:
   // Receive buffer
   MPIBuffer _recv;
   // Data that is used locally
-  GPUArray<PetscScalar> _local;
+  Array<PetscScalar> _local;
   // Data that should be sent to ghost processes
-  GPUArray<PetscScalar> _ghost;
+  Array<PetscScalar> _ghost;
   // Flag whether the vector will be assembled
   bool _assemble = false;
   // Flag whether the vector is ghosted
@@ -63,12 +68,16 @@ private:
   // Flag whether the vector was allocated
   bool _is_alloc = false;
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 public:
+  /**
+   * Constructor
+   */
+  Vector() = default;
   /**
    * Destructor
    */
-  ~GPUVector() { destroy(); }
+  ~Vector() { destroy(); }
 
 public:
   /**
@@ -78,16 +87,14 @@ public:
   /**
    * Create this vector from a libMesh PetscVector
    * @param vector libMesh NumericVector that can be downcast to a PetscVector
-   * @param system GPU system
+   * @param system Kokkos system
    * @param assemble Whether the vector will be assembled
    */
-  void create(libMesh::NumericVector<PetscScalar> & vector,
-              const GPUSystem & system,
-              bool assemble = false);
+  void create(libMesh::NumericVector<PetscScalar> & vector, const System & system, bool assemble);
   /**
    * Copy from/to the libMesh PetscVector
    */
-  void copy(GPUMemcpyKind dir = GPUMemcpyKind::HOST_TO_DEVICE);
+  void copy(MemcpyKind dir = MemcpyKind::HOST_TO_DEVICE);
   /**
    * Free all the vector data
    */
@@ -102,21 +109,25 @@ public:
   void close();
 
 public:
-  // GPU function tags
+  /** Kokkos function tags
+   *
+   */
+  ///@{
   struct PackBuffer
   {
   };
   struct UnpackBuffer
   {
   };
+  ///@}
 
   /**
-   * The GPU function of packing data into MPI send buffer
+   * The Kokkos function of packing data into MPI send buffer
    * @param tid Thread index
    */
   KOKKOS_FUNCTION void operator()(PackBuffer, const PetscCount tid) const;
   /**
-   * The GPU function of unpacking data from MPI receive buffer
+   * The Kokkos function of unpacking data from MPI receive buffer
    * @param tid Thread index
    */
   KOKKOS_FUNCTION void operator()(UnpackBuffer, const PetscCount tid) const;
@@ -155,3 +166,6 @@ private:
   unsigned int _current_proc;
 #endif
 };
+
+} // namespace Kokkos
+} // namespace Moose

@@ -9,8 +9,14 @@
 
 #include "GPUArray.h"
 
-void
-KokkosFree(void * ptr)
+namespace Moose
 {
-  Kokkos::kokkos_free(ptr);
+namespace Kokkos
+{
+void
+free(void * ptr)
+{
+  ::Kokkos::kokkos_free(ptr);
 }
+} // namespace Kokkos
+} // namespace Moose
