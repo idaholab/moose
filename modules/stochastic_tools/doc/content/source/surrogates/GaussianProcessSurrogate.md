@@ -1,5 +1,6 @@
 # GaussianProcessSurrogate
 
+!if function=hasCapability('libtorch')
 !syntax description /Surrogates/GaussianProcessSurrogate
 
 The theory and use this object is provided within a discussion of the [GaussianProcessTrainer.md] training
@@ -16,8 +17,14 @@ the mean and standard deviation estimates using the following function:
 
 !listing surrogates/GaussianProcessSurrogate.C re=void\sGaussianProcessSurrogate::evaluate\(const std::vector<Real> & x,\s*?std::vector<Real> & y,.*?\) const
 
+!if! function=hasCapability('libtorch')
 !syntax parameters /Surrogates/GaussianProcessSurrogate
 
 !syntax inputs /Surrogates/GaussianProcessSurrogate
 
 !syntax children /Surrogates/GaussianProcessSurrogate
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md
