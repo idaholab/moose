@@ -9,8 +9,7 @@
 ## Overview
 
 `MFEMScalarIC` is used to set initial conditions of scalar valued MFEM variables from an
-`mfem::Coefficient`. They may be defined on one or more subdomains (blocks); if no subdomains
-are provided, the initial condition will be applied on all subdomains in the mesh.
+`mfem::Coefficient`. The initial condition will be applied on all subdomains in the mesh.
 
 ## Example Input File Syntax
 
