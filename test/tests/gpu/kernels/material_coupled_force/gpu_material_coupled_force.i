@@ -43,22 +43,22 @@
   [../]
 []
 
-[GPUMaterials]
+[KokkosMaterials]
   [./mat]
-    type = GPUGenericConstantMaterial
+    type = KokkosGenericConstantMaterial
     prop_names = 'm1 m2'
     prop_values = '-1 15'
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./reaction]
-    type = GPUReaction
+    type = KokkosReaction
     variable = u
   [../]
 
   [./coupled]
-    type = GPUMatCoupledForce
+    type = KokkosMatCoupledForce
     variable = u
     v = 'v1 v2'
     coef = '3.5 1.2'

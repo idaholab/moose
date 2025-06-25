@@ -15,19 +15,21 @@
  * This kernel implements the Laplacian operator:
  * $\nabla u \cdot \nabla \phi_i$
  */
-template <typename Kernel>
-class GPUDiffusion : public GPUKernel<Kernel>
+template <typename Derived>
+class KokkosDiffusion : public Moose::Kokkos::Kernel<Derived>
 {
-  usingGPUKernelMembers(Kernel);
+  usingKokkosKernelMembers(Derived);
 
 public:
   static InputParameters validParams()
   {
-    InputParameters params = GPUKernel<Kernel>::validParams();
+    InputParameters params = Moose::Kokkos::Kernel<Derived>::validParams();
     return params;
   }
 
-  GPUDiffusion(const InputParameters & parameters) : GPUKernel<Kernel>(parameters) {}
+  KokkosDiffusion(const InputParameters & parameters) : Moose::Kokkos::Kernel<Derived>(parameters)
+  {
+  }
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -44,10 +46,10 @@ public:
   }
 };
 
-class GPUDiffusionKernel final : public GPUDiffusion<GPUDiffusionKernel>
+class KokkosDiffusionKernel final : public KokkosDiffusion<KokkosDiffusionKernel>
 {
 public:
   static InputParameters validParams();
 
-  GPUDiffusionKernel(const InputParameters & parameters);
+  KokkosDiffusionKernel(const InputParameters & parameters);
 };

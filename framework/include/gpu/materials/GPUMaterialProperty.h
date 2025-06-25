@@ -13,17 +13,22 @@
 
 #include "MooseMesh.h"
 
-class GPUMaterialPropertyStorage;
+namespace Moose
+{
+namespace Kokkos
+{
+
+class MaterialPropertyStorage;
 
 template <typename T, unsigned int dimension>
-class GPUMaterialPropertyValueBase;
+class MaterialPropertyValueBase;
 
 template <typename T, unsigned int dimension>
-class GPUMaterialPropertyValue;
+class MaterialPropertyValue;
 
 class Datum;
 
-struct GPUPropRecord
+struct PropRecord
 {
   /// The declaring materials of this property
   std::set<const MaterialBase *> declarers;
@@ -39,25 +44,25 @@ struct GPUPropRecord
   bool bnd = false;
 };
 
-using GPUPropertyKey = std::pair<std::type_index, unsigned int>;
-using GPUPropertyStore = std::function<void(std::ostream &, void *)>;
-using GPUPropertyLoad = std::function<void(std::istream &, void *)>;
+using PropertyKey = std::pair<std::type_index, unsigned int>;
+using PropertyStore = std::function<void(std::ostream &, void *)>;
+using PropertyLoad = std::function<void(std::istream &, void *)>;
 
-class GPUMaterialPropertyBase
+class MaterialPropertyBase
 {
-  friend class GPUMaterialPropertyStorage;
+  friend class MaterialPropertyStorage;
 
 protected:
   // Shared function pointer map for propertyStore and propertyLoad
-  static std::unordered_map<GPUPropertyKey, GPUPropertyStore> _store;
-  static std::unordered_map<GPUPropertyKey, GPUPropertyLoad> _load;
+  static std::unordered_map<PropertyKey, PropertyStore> _store;
+  static std::unordered_map<PropertyKey, PropertyLoad> _load;
 
   // Key to access data functions
-  virtual GPUPropertyKey key() = 0;
+  virtual PropertyKey key() = 0;
 
 protected:
   // Pointer to the record
-  const GPUPropRecord * _record = nullptr;
+  const PropRecord * _record = nullptr;
   // The property ID
   unsigned int _id = libMesh::invalid_uint;
   // Whether this property has a default value
@@ -88,8 +93,8 @@ public:
   }
 
 private:
-#ifdef MOOSE_GPU_SCOPE
-  void init(const GPUPropRecord & record)
+#ifdef MOOSE_KOKKOS_SCOPE
+  void init(const PropRecord & record)
   {
     _record = &record;
     _id = record.id;
@@ -98,12 +103,12 @@ private:
 
   // Allocate data
   virtual void allocate(const MooseMesh & mesh,
-                        const GPUAssembly & assembly,
+                        const Assembly & assembly,
                         const std::set<SubdomainID> & subdomains,
                         const bool bnd) = 0;
 
 public:
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
   // Whether this material property is valid
   KOKKOS_FUNCTION operator bool() const { return _id != libMesh::invalid_uint || _default; }
 
@@ -115,10 +120,10 @@ public:
 #endif
 
   // Deep copy another material property
-  virtual void copy(const GPUMaterialPropertyBase & prop) = 0;
+  virtual void copy(const MaterialPropertyBase & prop) = 0;
 
   // Swap two material properties
-  virtual void swap(GPUMaterialPropertyBase & prop) = 0;
+  virtual void swap(MaterialPropertyBase & prop) = 0;
 };
 
 template <typename T, unsigned int dimension>
@@ -127,24 +132,24 @@ template <typename T, unsigned int dimension>
 void propertyLoad(std::istream & stream, void * prop);
 
 template <typename T, unsigned int dimension = 0>
-class GPUMaterialProperty : public GPUMaterialPropertyBase
+class MaterialProperty : public MaterialPropertyBase
 {
-  friend class GPUMaterialPropertyValueBase<T, dimension>;
+  friend class MaterialPropertyValueBase<T, dimension>;
 
   friend void propertyStore<T, dimension>(std::ostream &, void *);
   friend void propertyLoad<T, dimension>(std::istream &, void *);
 
 protected:
   // Key to access data functions
-  virtual GPUPropertyKey key() override
+  virtual PropertyKey key() override
   {
     return std::make_pair(std::type_index(typeid(T)), dimension);
   }
 
 public:
-  GPUMaterialProperty() {}
+  MaterialProperty() {}
   // Constructor for default material property
-  GPUMaterialProperty(const T value)
+  MaterialProperty(const T value)
   {
     _default = true;
     _value = value;
@@ -152,13 +157,13 @@ public:
 
 private:
   // Reference property
-  const GPUMaterialProperty<T, dimension> * _reference = nullptr;
+  const MaterialProperty<T, dimension> * _reference = nullptr;
   // Data array
-  GPUArray<GPUArray<T, dimension + 1>> _data;
+  Array<Array<T, dimension + 1>> _data;
   // Default value
   T _value;
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 public:
   // Register the data functions for this type
   void registerLoadStore()
@@ -170,7 +175,7 @@ public:
 private:
   // Allocate data
   virtual void allocate(const MooseMesh & mesh,
-                        const GPUAssembly & assembly,
+                        const Assembly & assembly,
                         const std::set<SubdomainID> & subdomains,
                         const bool bnd) override
   {
@@ -179,7 +184,7 @@ private:
 
     for (auto subdomain : subdomains)
     {
-      auto sid = mesh.getGPUMesh()->getGPUSubdomainID(subdomain);
+      auto sid = mesh.getKokkosMesh()->getSubdomainID(subdomain);
 
       std::vector<uint64_t> n;
 
@@ -197,7 +202,7 @@ private:
 
 public:
   // Copy constructor
-  GPUMaterialProperty(const GPUMaterialProperty<T, dimension> & property)
+  MaterialProperty(const MaterialProperty<T, dimension> & property)
   {
     if (!property._reference)
     {
@@ -212,9 +217,9 @@ public:
   }
 
   // Deep copy another material property
-  virtual void copy(const GPUMaterialPropertyBase & prop) override
+  virtual void copy(const MaterialPropertyBase & prop) override
   {
-    auto & prop_cast = static_cast<const GPUMaterialProperty<T, dimension> &>(prop);
+    auto & prop_cast = static_cast<const MaterialProperty<T, dimension> &>(prop);
 
     for (uint64_t i = 0; i < prop_cast._data.size(); ++i)
       if (prop_cast._data[i].isAlloc())
@@ -224,18 +229,18 @@ public:
   }
 
   // Swap two material properties
-  virtual void swap(GPUMaterialPropertyBase & prop) override
+  virtual void swap(MaterialPropertyBase & prop) override
   {
-    auto & prop_cast = static_cast<GPUMaterialProperty<T, dimension> &>(prop);
+    auto & prop_cast = static_cast<MaterialProperty<T, dimension> &>(prop);
 
     _data.swap(prop_cast._data);
   }
 
   // Get the mirror property
-  GPUMaterialProperty<T, dimension> mirror() { return GPUMaterialProperty<T, dimension>(*this); }
+  MaterialProperty<T, dimension> mirror() { return MaterialProperty<T, dimension>(*this); }
   // Get the quadrature point data
-  KOKKOS_FUNCTION GPUMaterialPropertyValue<T, dimension> operator()(Datum & datum,
-                                                                    unsigned int qp) const;
+  KOKKOS_FUNCTION MaterialPropertyValue<T, dimension> operator()(Datum & datum,
+                                                                 unsigned int qp) const;
 #endif
 };
 
@@ -243,7 +248,7 @@ template <typename T, unsigned int dimension>
 void
 propertyStore(std::ostream & stream, void * prop)
 {
-  auto property = static_cast<GPUMaterialProperty<T, dimension> *>(prop);
+  auto property = static_cast<MaterialProperty<T, dimension> *>(prop);
 
   dataStore(stream, property->_data, nullptr);
 }
@@ -251,13 +256,16 @@ template <typename T, unsigned int dimension>
 void
 propertyLoad(std::istream & stream, void * prop)
 {
-  auto property = static_cast<GPUMaterialProperty<T, dimension> *>(prop);
+  auto property = static_cast<MaterialProperty<T, dimension> *>(prop);
 
   dataLoad(stream, property->_data, nullptr);
 }
 
 template <typename T>
-struct GPUArrayDeepCopy<GPUMaterialProperty<T>>
+struct ArrayDeepCopy<MaterialProperty<T>>
 {
   static const bool value = true;
 };
+
+} // namespace Kokkos
+} // namespace Moose

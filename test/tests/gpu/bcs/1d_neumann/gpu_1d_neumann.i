@@ -10,22 +10,22 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
   [./right]
-    type = GPUNeumannBC
+    type = KokkosNeumannBC
     variable = u
     boundary = right
     value = 2

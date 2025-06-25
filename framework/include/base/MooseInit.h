@@ -22,7 +22,7 @@
  */
 class MooseInit : public libMesh::LibMeshInit
 {
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
 private:
   void initGPUs();
 #endif

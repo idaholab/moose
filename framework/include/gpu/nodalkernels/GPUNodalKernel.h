@@ -11,28 +11,32 @@
 
 #include "GPUNodalKernelBase.h"
 
-template <typename NodalKernel>
-class GPUNodalKernel : public GPUNodalKernelBase
+namespace Moose
+{
+namespace Kokkos
+{
+
+template <typename Derived>
+class NodalKernel : public NodalKernelBase
 {
 public:
   static InputParameters validParams()
   {
-    InputParameters params = GPUNodalKernelBase::validParams();
+    InputParameters params = NodalKernelBase::validParams();
     return params;
   }
 
-  GPUNodalKernel(const InputParameters & parameters)
-    : GPUNodalKernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-      _u(systems(), _var),
+  NodalKernel(const InputParameters & parameters)
+    : NodalKernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
+      _u(kokkosSystems(), _var),
       _boundary_restricted(boundaryRestricted()),
-      _default_diag(&NodalKernel::computeQpJacobian == &GPUNodalKernel::computeQpJacobian),
-      _default_offdiag(&NodalKernel::computeQpOffDiagJacobian ==
-                       &GPUNodalKernel::computeQpOffDiagJacobian)
+      _default_diag(&Derived::computeQpJacobian == &NodalKernel::computeQpJacobian),
+      _default_offdiag(&Derived::computeQpOffDiagJacobian == &NodalKernel::computeQpOffDiagJacobian)
   {
   }
 
-  GPUNodalKernel(const GPUNodalKernel<NodalKernel> & object)
-    : GPUNodalKernelBase(object),
+  NodalKernel(const NodalKernel<Derived> & object)
+    : NodalKernelBase(object),
       _u(object._u),
       _boundary_restricted(object._boundary_restricted),
       _default_diag(object._default_diag),
@@ -46,10 +50,10 @@ public:
     if (!_var.isNodalDefined())
       return;
 
-    Kokkos::RangePolicy<ResidualLoop, Kokkos::IndexType<size_t>> policy(
+    ::Kokkos::RangePolicy<ResidualLoop, ::Kokkos::IndexType<size_t>> policy(
         0, _boundary_restricted ? numBoundaryNodes() : numBlockNodes());
-    Kokkos::parallel_for(policy, *static_cast<NodalKernel *>(this));
-    Kokkos::fence();
+    ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
+    ::Kokkos::fence();
   }
   // Dispatch Jacobian calculation to GPU
   virtual void computeJacobian() override
@@ -59,22 +63,23 @@ public:
 
     if (!_default_diag)
     {
-      Kokkos::RangePolicy<JacobianLoop, Kokkos::IndexType<size_t>> policy(
+      ::Kokkos::RangePolicy<JacobianLoop, ::Kokkos::IndexType<size_t>> policy(
           0, _boundary_restricted ? numBoundaryNodes() : numBlockNodes());
-      Kokkos::parallel_for(policy, *static_cast<NodalKernel *>(this));
-      Kokkos::fence();
+      ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
+      ::Kokkos::fence();
     }
 
     if (!_default_offdiag)
     {
-      auto & sys = system(_gpu_var.sys());
+      auto & sys = kokkosSystem(_kokkos_var.sys());
 
-      _thread.resize({sys.getCoupling(_gpu_var.var()).size(),
+      _thread.resize({sys.getCoupling(_kokkos_var.var()).size(),
                       _boundary_restricted ? numBoundaryNodes() : numBlockNodes()});
 
-      Kokkos::RangePolicy<OffDiagJacobianLoop, Kokkos::IndexType<size_t>> policy(0, _thread.size());
-      Kokkos::parallel_for(policy, *static_cast<NodalKernel *>(this));
-      Kokkos::fence();
+      ::Kokkos::RangePolicy<OffDiagJacobianLoop, ::Kokkos::IndexType<size_t>> policy(
+          0, _thread.size());
+      ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
+      ::Kokkos::fence();
     }
   }
 
@@ -90,7 +95,7 @@ public:
   // Overloaded operators called by Kokkos::parallel_for
   KOKKOS_FUNCTION void operator()(ResidualLoop, const size_t tid) const
   {
-    auto kernel = static_cast<const NodalKernel *>(this);
+    auto kernel = static_cast<const Derived *>(this);
     auto node = _boundary_restricted ? boundaryNodeID(tid) : blockNodeID(tid);
 
     Real local_re = kernel->computeQpResidual(node);
@@ -99,21 +104,21 @@ public:
   }
   KOKKOS_FUNCTION void operator()(JacobianLoop, const size_t tid) const
   {
-    auto kernel = static_cast<const NodalKernel *>(this);
+    auto kernel = static_cast<const Derived *>(this);
     auto node = _boundary_restricted ? boundaryNodeID(tid) : blockNodeID(tid);
 
     Real local_ke = kernel->computeQpJacobian(node);
 
-    setTaggedLocalMatrix(true, local_ke, node, _gpu_var.var());
+    setTaggedLocalMatrix(true, local_ke, node, _kokkos_var.var());
   }
   KOKKOS_FUNCTION void operator()(OffDiagJacobianLoop, const size_t tid) const
   {
-    auto kernel = static_cast<const NodalKernel *>(this);
+    auto kernel = static_cast<const Derived *>(this);
     auto node =
         _boundary_restricted ? boundaryNodeID(_thread(tid, 1)) : blockNodeID(_thread(tid, 1));
 
-    auto & sys = system(_gpu_var.sys());
-    auto jvar = sys.getCoupling(_gpu_var.var())[_thread(tid, 0)];
+    auto & sys = kokkosSystem(_kokkos_var.sys());
+    auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];
 
     Real local_ke = kernel->computeQpOffDiagJacobian(jvar, node);
 
@@ -122,7 +127,7 @@ public:
 
 protected:
   // Value of the unknown variable this is acting on
-  GPUVariableNodalValue _u;
+  VariableNodalValue _u;
 
 private:
   // Whether this kernel is boundary-restricted
@@ -133,11 +138,14 @@ private:
   const bool _default_offdiag;
 };
 
-#define usingGPUNodalKernelMembers(T)                                                              \
-  usingGPUNodalKernelBaseMembers;                                                                  \
+} // namespace Kokkos
+} // namespace Moose
+
+#define usingKokkosNodalKernelMembers(T)                                                           \
+  usingKokkosNodalKernelBaseMembers;                                                               \
                                                                                                    \
 protected:                                                                                         \
-  using GPUNodalKernel<T>::_u;                                                                     \
+  using Moose::Kokkos::NodalKernel<T>::_u;                                                         \
                                                                                                    \
 public:                                                                                            \
-  using GPUNodalKernel<T>::operator();
+  using Moose::Kokkos::NodalKernel<T>::operator();

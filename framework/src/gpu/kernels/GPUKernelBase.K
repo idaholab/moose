@@ -15,10 +15,15 @@
 #include "SystemBase.h"
 #include "NonlinearSystem.h"
 
-InputParameters
-GPUKernelBase::validParams()
+namespace Moose
 {
-  auto params = GPUResidualObject::validParams();
+namespace Kokkos
+{
+
+InputParameters
+KernelBase::validParams()
+{
+  auto params = ResidualObject::validParams();
   params += BlockRestrictable::validParams();
   params += MaterialPropertyInterface::validParams();
 
@@ -30,16 +35,16 @@ GPUKernelBase::validParams()
   return params;
 }
 
-GPUKernelBase::GPUKernelBase(const InputParameters & parameters, Moose::VarFieldType field_type)
-  : GPUResidualObject(parameters, field_type),
+KernelBase::KernelBase(const InputParameters & parameters, Moose::VarFieldType field_type)
+  : ResidualObject(parameters, field_type),
     BlockRestrictable(this),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS)
 {
 }
 
-GPUKernelBase::GPUKernelBase(const GPUKernelBase & object)
-  : GPUResidualObject(object),
+KernelBase::KernelBase(const KernelBase & object)
+  : ResidualObject(object),
     BlockRestrictable(object),
     CoupleableMooseVariableDependencyIntermediateInterface(&object, false, false, false),
     MaterialPropertyInterface(&object, blockIDs(), Moose::EMPTY_BOUNDARY_IDS, false)
@@ -47,21 +52,24 @@ GPUKernelBase::GPUKernelBase(const GPUKernelBase & object)
 }
 
 void
-GPUKernelBase::setVariableDependency()
+KernelBase::setVariableDependency()
 {
   auto needed_moose_vars = getMooseVariableDependencies();
 
-  for (auto & system : systems())
+  for (auto & system : kokkosSystems())
     if (system.initialized())
       system.setActiveVariables(needed_moose_vars);
 
-  systems().copy();
+  kokkosSystems().copy();
 }
 
 void
-GPUKernelBase::setProjectionFlags()
+KernelBase::setProjectionFlags()
 {
-  for (auto & system : systems())
+  for (auto & system : kokkosSystems())
     if (system.initialized())
       system.setProjectionFlags(blockIDs());
 }
+
+} // namespace Kokkos
+} // namespace Moose

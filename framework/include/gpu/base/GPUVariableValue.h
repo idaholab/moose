@@ -13,10 +13,15 @@
 
 #include "MooseVariableBase.h"
 
-class GPUVariablePhiValue : public GPUAssemblyHolder
+namespace Moose
+{
+namespace Kokkos
+{
+
+class VariablePhiValue : public AssemblyHolder
 {
 public:
-  GPUVariablePhiValue(GPUAssembly & assembly) : GPUAssemblyHolder(assembly) {}
+  VariablePhiValue(Assembly & assembly) : AssemblyHolder(assembly) {}
 
   KOKKOS_FUNCTION Real operator()(ResidualDatum & datum, unsigned int i, unsigned int qp) const
   {
@@ -25,15 +30,15 @@ public:
     auto fe = datum.jfe();
 
     return side == libMesh::invalid_uint
-               ? assembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
-               : assembly().getPhiFace(elem.subdomain, elem.type, fe)(i, qp, side);
+               ? kokkosAssembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
+               : kokkosAssembly().getPhiFace(elem.subdomain, elem.type, fe)(i, qp, side);
   }
 };
 
-class GPUVariablePhiGradient : public GPUAssemblyHolder
+class VariablePhiGradient : public AssemblyHolder
 {
 public:
-  GPUVariablePhiGradient(GPUAssembly & assembly) : GPUAssemblyHolder(assembly) {}
+  VariablePhiGradient(Assembly & assembly) : AssemblyHolder(assembly) {}
 
   KOKKOS_FUNCTION Real3 operator()(ResidualDatum & datum, unsigned int i, unsigned int qp) const
   {
@@ -43,15 +48,15 @@ public:
 
     return datum.J(qp) *
            (side == libMesh::invalid_uint
-                ? assembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-                : assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(i, qp, side));
+                ? kokkosAssembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+                : kokkosAssembly().getGradPhiFace(elem.subdomain, elem.type, fe)(i, qp, side));
   }
 };
 
-class GPUVariableTestValue : public GPUAssemblyHolder
+class VariableTestValue : public AssemblyHolder
 {
 public:
-  GPUVariableTestValue(GPUAssembly & assembly) : GPUAssemblyHolder(assembly) {}
+  VariableTestValue(Assembly & assembly) : AssemblyHolder(assembly) {}
 
   KOKKOS_FUNCTION Real operator()(ResidualDatum & datum, unsigned int i, unsigned int qp) const
   {
@@ -60,15 +65,15 @@ public:
     auto fe = datum.ife();
 
     return side == libMesh::invalid_uint
-               ? assembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
-               : assembly().getPhiFace(elem.subdomain, elem.type, fe)(i, qp, side);
+               ? kokkosAssembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
+               : kokkosAssembly().getPhiFace(elem.subdomain, elem.type, fe)(i, qp, side);
   }
 };
 
-class GPUVariableTestGradient : public GPUAssemblyHolder
+class VariableTestGradient : public AssemblyHolder
 {
 public:
-  GPUVariableTestGradient(GPUAssembly & assembly) : GPUAssemblyHolder(assembly) {}
+  VariableTestGradient(Assembly & assembly) : AssemblyHolder(assembly) {}
 
   KOKKOS_FUNCTION Real3 operator()(ResidualDatum & datum, unsigned int i, unsigned int qp) const
   {
@@ -78,25 +83,22 @@ public:
 
     return datum.J(qp) *
            (side == libMesh::invalid_uint
-                ? assembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-                : assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(i, qp, side));
+                ? kokkosAssembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+                : kokkosAssembly().getGradPhiFace(elem.subdomain, elem.type, fe)(i, qp, side));
   }
 };
 
-class GPUVariableValue : public GPUSystemHolder
+class VariableValue : public SystemHolder
 {
 private:
-  GPUVariable _var;
+  Variable _var;
 
 public:
-  GPUVariableValue(GPUArray<GPUSystem> & systems, GPUVariable var)
-    : GPUSystemHolder(systems), _var(var)
-  {
-  }
-  GPUVariableValue(GPUArray<GPUSystem> & systems,
-                   const MooseVariableBase & var,
-                   const TagName & tag = Moose::SOLUTION_TAG)
-    : GPUSystemHolder(systems), _var(var, tag)
+  VariableValue(Array<System> & systems, Variable var) : SystemHolder(systems), _var(var) {}
+  VariableValue(Array<System> & systems,
+                const MooseVariableBase & var,
+                const TagName & tag = Moose::SOLUTION_TAG)
+    : SystemHolder(systems), _var(var, tag)
   {
   }
 
@@ -111,9 +113,9 @@ public:
       auto qp_offset = datum.qpOffset();
 
       return side == libMesh::invalid_uint
-                 ? system(_var.sys(comp))
+                 ? kokkosSystem(_var.sys(comp))
                        .getVectorQpValue(elem, qp_offset + qp, _var.var(comp), _var.tag())
-                 : system(_var.sys(comp))
+                 : kokkosSystem(_var.sys(comp))
                        .getVectorQpValueFace(elem, side, qp, _var.var(comp), _var.tag());
     }
     else
@@ -121,20 +123,17 @@ public:
   }
 };
 
-class GPUVariableNodalValue : public GPUSystemHolder
+class VariableNodalValue : public SystemHolder
 {
 private:
-  GPUVariable _var;
+  Variable _var;
 
 public:
-  GPUVariableNodalValue(GPUArray<GPUSystem> & systems, GPUVariable var)
-    : GPUSystemHolder(systems), _var(var)
-  {
-  }
-  GPUVariableNodalValue(GPUArray<GPUSystem> & systems,
-                        const MooseVariableBase & var,
-                        const TagName & tag = Moose::SOLUTION_TAG)
-    : GPUSystemHolder(systems), _var(var, tag)
+  VariableNodalValue(Array<System> & systems, Variable var) : SystemHolder(systems), _var(var) {}
+  VariableNodalValue(Array<System> & systems,
+                     const MooseVariableBase & var,
+                     const TagName & tag = Moose::SOLUTION_TAG)
+    : SystemHolder(systems), _var(var, tag)
   {
   }
 
@@ -144,29 +143,26 @@ public:
   {
     if (_var.coupled())
     {
-      auto dof = system(_var.sys(comp)).getNodeLocalDofIndex(node, _var.var(comp));
+      auto dof = kokkosSystem(_var.sys(comp)).getNodeLocalDofIndex(node, _var.var(comp));
 
-      return system(_var.sys(comp)).getVectorDofValue(dof, _var.tag());
+      return kokkosSystem(_var.sys(comp)).getVectorDofValue(dof, _var.tag());
     }
     else
       return _var.value(comp);
   }
 };
 
-class GPUVariableGradient : public GPUSystemHolder
+class VariableGradient : public SystemHolder
 {
 private:
-  GPUVariable _var;
+  Variable _var;
 
 public:
-  GPUVariableGradient(GPUArray<GPUSystem> & systems, GPUVariable var)
-    : GPUSystemHolder(systems), _var(var)
-  {
-  }
-  GPUVariableGradient(GPUArray<GPUSystem> & systems,
-                      const MooseVariableBase & var,
-                      const TagName & tag = Moose::SOLUTION_TAG)
-    : GPUSystemHolder(systems), _var(var, tag)
+  VariableGradient(Array<System> & systems, Variable var) : SystemHolder(systems), _var(var) {}
+  VariableGradient(Array<System> & systems,
+                   const MooseVariableBase & var,
+                   const TagName & tag = Moose::SOLUTION_TAG)
+    : SystemHolder(systems), _var(var, tag)
   {
   }
 
@@ -181,9 +177,9 @@ public:
       auto qp_offset = datum.qpOffset();
 
       return side == libMesh::invalid_uint
-                 ? system(_var.sys(comp))
+                 ? kokkosSystem(_var.sys(comp))
                        .getVectorQpGrad(elem, qp_offset + qp, _var.var(comp), _var.tag())
-                 : system(_var.sys(comp))
+                 : kokkosSystem(_var.sys(comp))
                        .getVectorQpGradFace(
                            elem, side, datum.J(qp), qp, _var.var(comp), _var.tag());
     }
@@ -191,3 +187,6 @@ public:
       return Real3(0);
   }
 };
+
+} // namespace Kokkos
+} // namespace Moose

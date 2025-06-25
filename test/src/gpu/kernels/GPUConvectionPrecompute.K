@@ -9,21 +9,21 @@
 
 #include "GPUConvectionPrecompute.h"
 
-registerMooseObject("MooseTestApp", GPUConvectionPrecompute);
+registerMooseObject("MooseTestApp", KokkosConvectionPrecompute);
 
 /**
  * This function defines the valid parameters for
  * this Kernel and their default values
  */
 InputParameters
-GPUConvectionPrecompute::validParams()
+KokkosConvectionPrecompute::validParams()
 {
-  InputParameters params = GPUKernelValue::validParams();
+  InputParameters params = KernelValue::validParams();
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
   return params;
 }
 
-GPUConvectionPrecompute::GPUConvectionPrecompute(const InputParameters & parameters)
-  : GPUKernelValue(parameters), _velocity(getParam<RealVectorValue>("velocity"))
+KokkosConvectionPrecompute::KokkosConvectionPrecompute(const InputParameters & parameters)
+  : KernelValue(parameters), _velocity(getParam<RealVectorValue>("velocity"))
 {
 }

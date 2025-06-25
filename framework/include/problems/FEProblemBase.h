@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
 #include "GPUAssembly.h"
 #include "GPUSystem.h"
 #endif
@@ -63,7 +63,6 @@ class MeshChangedInterface;
 class MeshDisplacedInterface;
 class MultiMooseEnum;
 class MaterialPropertyStorage;
-class GPUMaterialPropertyStorage;
 class MaterialData;
 class MooseEnum;
 class Assembly;
@@ -98,6 +97,14 @@ class Convergence;
 class MooseAppCoordTransform;
 class MortarUserObject;
 class SolutionInvalidity;
+
+namespace Moose
+{
+namespace Kokkos
+{
+class MaterialPropertyStorage;
+} // namespace Kokkos
+} // namespace Moose
 
 // libMesh forward declarations
 namespace libMesh
@@ -320,9 +327,9 @@ public:
   virtual Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) override;
   virtual const Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) const override;
 
-#ifdef MOOSE_HAVE_GPU
-  GPUAssembly & gpuAssembly() { return _gpu_assembly; }
-  const GPUAssembly & gpuAssembly() const { return _gpu_assembly; }
+#ifdef MOOSE_HAVE_KOKKOS
+  Moose::Kokkos::Assembly & kokkosAssembly() { return _kokkos_assembly; }
+  const Moose::Kokkos::Assembly & kokkosAssembly() const { return _kokkos_assembly; }
 #endif
 
   /**
@@ -401,8 +408,8 @@ public:
   virtual void init() override;
   virtual void solve(const unsigned int nl_sys_num);
 
-#ifdef MOOSE_HAVE_GPU
-  void initGPU();
+#ifdef MOOSE_HAVE_KOKKOS
+  void initKokkos();
 #endif
 
   /**
@@ -748,9 +755,12 @@ public:
 
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
 
-#ifdef MOOSE_HAVE_GPU
-  GPUArray<GPUSystem> & getGPUSystems() { return _gpu_systems; }
-  const GPUArray<GPUSystem> & getGPUSystems() const { return _gpu_systems; }
+#ifdef MOOSE_HAVE_KOKKOS
+  Moose::Kokkos::Array<Moose::Kokkos::System> & getKokkosSystems() { return _kokkos_systems; }
+  const Moose::Kokkos::Array<Moose::Kokkos::System> & getKokkosSystems() const
+  {
+    return _kokkos_systems;
+  }
 #endif
 
   /**
@@ -837,15 +847,15 @@ public:
                                     const std::string & name,
                                     InputParameters & parameters);
 
-  virtual void addGPUKernel(const std::string & kernel_name,
-                            const std::string & name,
-                            InputParameters & parameters);
-  virtual void addGPUNodalKernel(const std::string & kernel_name,
-                                 const std::string & name,
-                                 InputParameters & parameters);
-  virtual void addGPUBoundaryCondition(const std::string & bc_name,
-                                       const std::string & name,
-                                       InputParameters & parameters);
+  virtual void addKokkosKernel(const std::string & kernel_name,
+                               const std::string & name,
+                               InputParameters & parameters);
+  virtual void addKokkosNodalKernel(const std::string & kernel_name,
+                                    const std::string & name,
+                                    InputParameters & parameters);
+  virtual void addKokkosBoundaryCondition(const std::string & bc_name,
+                                          const std::string & name,
+                                          InputParameters & parameters);
 
   virtual void
   addConstraint(const std::string & c_name, const std::string & name, InputParameters & parameters);
@@ -964,9 +974,9 @@ public:
                                   const std::string & name,
                                   InputParameters & parameters);
 
-  virtual void addGPUMaterial(const std::string & material_name,
-                              const std::string & name,
-                              InputParameters & parameters);
+  virtual void addKokkosMaterial(const std::string & material_name,
+                                 const std::string & name,
+                                 InputParameters & parameters);
 
   /**
    * Add the MooseVariables and the material properties that the current materials depend on to the
@@ -1033,9 +1043,9 @@ public:
   void
   reinitMaterialsInterface(BoundaryID boundary_id, const THREAD_ID tid, bool swap_stateful = true);
 
-#ifdef MOOSE_HAVE_GPU
-  void prepareGPUMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props);
-  void reinitGPUMaterials();
+#ifdef MOOSE_HAVE_KOKKOS
+  void prepareKokkosMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props);
+  void reinitKokkosMaterials();
 #endif
 
   /*
@@ -1714,15 +1724,18 @@ public:
     return _neighbor_material_props;
   }
 
-#ifdef MOOSE_HAVE_GPU
-  GPUMaterialPropertyStorage & getGPUMaterialPropertyStorage() { return _gpu_material_props; }
-  GPUMaterialPropertyStorage & getGPUBndMaterialPropertyStorage()
+#ifdef MOOSE_HAVE_KOKKOS
+  Moose::Kokkos::MaterialPropertyStorage & getKokkosMaterialPropertyStorage()
   {
-    return _gpu_bnd_material_props;
+    return _kokkos_material_props;
   }
-  GPUMaterialPropertyStorage & getGPUNeighborMaterialPropertyStorage()
+  Moose::Kokkos::MaterialPropertyStorage & getKokkosBndMaterialPropertyStorage()
   {
-    return _gpu_neighbor_material_props;
+    return _kokkos_bnd_material_props;
+  }
+  Moose::Kokkos::MaterialPropertyStorage & getKokkosNeighborMaterialPropertyStorage()
+  {
+    return _kokkos_neighbor_material_props;
   }
 #endif
   ///@}
@@ -1833,8 +1846,8 @@ public:
    */
   void initElementStatefulProps(const libMesh::ConstElemRange & elem_range, const bool threaded);
 
-#ifdef MOOSE_HAVE_GPU
-  void initGPUStatefulProps();
+#ifdef MOOSE_HAVE_KOKKOS
+  void initKokkosStatefulProps();
 #endif
 
   /**
@@ -1951,9 +1964,9 @@ public:
   const MaterialWarehouse & getInterfaceMaterialsWarehouse() const { return _interface_materials; }
 
   /*
-   * Return a reference to the material warehouse of GPUMaterial objects to be computed.
+   * Return a reference to the material warehouse of Kokkos Material objects to be computed.
    */
-  const MaterialWarehouse & getGPUMaterialsWarehouse() const { return _gpu_materials; }
+  const MaterialWarehouse & getKokkosMaterialsWarehouse() const { return _kokkos_materials; }
 
   /**
    * Return a pointer to a MaterialBase object.  If no_warn is true, suppress
@@ -1973,13 +1986,13 @@ public:
   MaterialData & getMaterialData(Moose::MaterialDataType type,
                                  const THREAD_ID tid = 0,
                                  const MooseObject * object = nullptr,
-                                 bool is_gpu = false) const;
+                                 bool is_kokkos = false) const;
 
   /**
    * @return The consumers of the MaterialPropertyStorage for the type \p type
    */
   const std::set<const MooseObject *> &
-  getMaterialPropertyStorageConsumers(Moose::MaterialDataType type, bool is_gpu = false) const;
+  getMaterialPropertyStorageConsumers(Moose::MaterialDataType type, bool is_kokkos = false) const;
 
   /**
    * @returns Whether the original matrix nonzero pattern is restored before each Jacobian assembly
@@ -2534,7 +2547,7 @@ public:
 
   virtual Moose::FEBackend feBackend() const { return Moose::FEBackend::LibMesh; }
 
-  bool hasGPUObjects() { return _have_GPU_objects; }
+  bool hasKokkosObjects() { return _have_kokkos_objects; }
 
 protected:
   /**
@@ -2676,8 +2689,8 @@ protected:
   Moose::CouplingType _coupling;                             ///< Type of variable coupling
   std::vector<std::unique_ptr<libMesh::CouplingMatrix>> _cm; ///< Coupling matrix for variables.
 
-#ifdef MOOSE_HAVE_GPU
-  GPUArray<GPUSystem> _gpu_systems;
+#ifdef MOOSE_HAVE_KOKKOS
+  Moose::Kokkos::Array<Moose::Kokkos::System> _kokkos_systems;
 #endif
 
   /// Dimension of the subspace spanned by the vectors with a given prefix
@@ -2687,8 +2700,8 @@ protected:
   /// corresponds to the nonlinear system number
   std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
 
-#ifdef MOOSE_HAVE_GPU
-  GPUAssembly _gpu_assembly;
+#ifdef MOOSE_HAVE_KOKKOS
+  Moose::Kokkos::Assembly _kokkos_assembly;
 #endif
 
   /// Warehouse to store mesh divisions
@@ -2721,10 +2734,10 @@ protected:
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;
 
-#ifdef MOOSE_HAVE_GPU
-  GPUMaterialPropertyStorage & _gpu_material_props;
-  GPUMaterialPropertyStorage & _gpu_bnd_material_props;
-  GPUMaterialPropertyStorage & _gpu_neighbor_material_props;
+#ifdef MOOSE_HAVE_KOKKOS
+  Moose::Kokkos::MaterialPropertyStorage & _kokkos_material_props;
+  Moose::Kokkos::MaterialPropertyStorage & _kokkos_bnd_material_props;
+  Moose::Kokkos::MaterialPropertyStorage & _kokkos_neighbor_material_props;
 #endif
   ///@{
   // Material Warehouses
@@ -2733,7 +2746,7 @@ protected:
   MaterialWarehouse _discrete_materials;  // Materials that the user must compute
   MaterialWarehouse _all_materials; // All materials for error checking and MaterialData storage
 
-  MaterialWarehouse _gpu_materials; // GPU materials
+  MaterialWarehouse _kokkos_materials; // Kokkos materials
   ///@}
 
   ///@{
@@ -3135,8 +3148,8 @@ private:
   /// nonlocal coupling requirement flag
   bool _requires_nonlocal_coupling;
 
-  /// Whether we have any GPU objects
-  bool _have_GPU_objects = false;
+  /// Whether we have any Kokkos objects
+  bool _have_kokkos_objects = false;
 
   friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,
                                                         const std::string & value,

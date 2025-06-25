@@ -11,12 +11,12 @@
 
 #include "GPUIntegratedBC.h"
 
-class GPUNeumannBC final : public GPUIntegratedBC<GPUNeumannBC>
+class KokkosNeumannBC final : public Moose::Kokkos::IntegratedBC<KokkosNeumannBC>
 {
 public:
   static InputParameters validParams();
 
-  GPUNeumannBC(const InputParameters & parameters);
+  KokkosNeumannBC(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,

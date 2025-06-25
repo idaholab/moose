@@ -28,27 +28,27 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
 
   [./reaction1]
-    type = GPUReaction
+    type = KokkosReaction
     variable = u
     extra_vector_tags = 'vec_tag1 vec_tag2'
   [../]
 
   [./reaction2]
-    type = GPUReaction
+    type = KokkosReaction
     variable = u
     extra_vector_tags = 'vec_tag1 vec_tag2'
   [../]
 
   [./reaction3]
-    type = GPUReaction
+    type = KokkosReaction
     variable = u
   [../]
 
   [./reaction4]
-    type = GPUReaction
+    type = KokkosReaction
     variable = u
   [../]
 
@@ -71,11 +71,11 @@
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   active = 'left right'
 
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     preset = false
     boundary = 3
@@ -84,7 +84,7 @@
   [../]
 
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     preset = false
     boundary = 1
@@ -93,7 +93,7 @@
   [../]
 
   [./right1]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     preset = false
     boundary = 1
@@ -101,7 +101,7 @@
   [../]
 
   [./right2]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     preset = false
     boundary = 1
