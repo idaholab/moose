@@ -8,6 +8,18 @@
   solve = false
 []
 
+[Functions]
+  [external_vector_field]
+    type = ParsedVectorFunction
+    expression_x = 'sin(kappa * y)'
+    expression_y = 'sin(kappa * z)'
+    expression_z = 'sin(kappa * x)'
+
+    symbol_names = kappa
+    symbol_values = 3.1415926535
+  []  
+[]
+
 [FESpaces]
   [H1VectorFESpace]
     type = MFEMVectorFESpace
@@ -28,14 +40,18 @@
     type = MFEMVectorFESpace
     fec_type = L2
     fec_order = CONSTANT
-  []
+  []  
 []
 
 [Variables]
   [h1_vector]
     type = MFEMVariable
     fespace = H1VectorFESpace
-  []
+    [./InitialCondition]
+      type = MFEMVectorIC
+      coefficient = external_vector_field
+    [../]    
+  []  
   [nd_vector]
     type = MFEMVariable
     fespace = HCurlFESpace
@@ -43,41 +59,23 @@
   [rt_vector]
     type = MFEMVariable
     fespace = HDivFESpace
-  []
+  []  
   [l2_vector]
     type = MFEMVariable
     fespace = L2VectorFESpace
-  []
+    [./InitialCondition]
+      type = MFEMVectorIC
+      coefficient = external_vector_field
+    [../]       
+  []  
 []
 
-[Functions]
-  [external_vector_field]
-    type = ParsedVectorFunction
-    expression_x = 'sin(kappa * y)'
-    expression_y = 'sin(kappa * z)'
-    expression_z = 'sin(kappa * x)'
-
-    symbol_names = kappa
-    symbol_values = 3.1415926535
-  []
-[]
-
-[ICs]
-  [h1_vector_ic]
-    type = MFEMVectorIC
-    variable = h1_vector
-    coefficient = external_vector_field
-  []
-  [l2_vector_ic]
-    type = MFEMVectorIC
-    variable = l2_vector
-    coefficient = external_vector_field
-  []
+[ICs]    
   [nd_vector_ic]
     type = MFEMVectorIC
     variable = nd_vector
     coefficient = external_vector_field
-  []
+  []  
   [rt_vector_ic]
     type = MFEMVectorIC
     variable = rt_vector

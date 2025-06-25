@@ -5,7 +5,6 @@
 
 [Problem]
   type = MFEMProblem
-  solve = false
 []
 
 [FESpaces]
@@ -26,17 +25,20 @@
     type = MFEMVariable
     fespace = H1FESpace
   []
+[]
+
+[AuxVariables]
   [l2_scalar]
     type = MFEMVariable
     fespace = L2FESpace
-  []
+  []  
 []
 
 [Functions]
   [height]
     type = ParsedFunction
     expression = 'z'
-  []
+  []  
 []
 
 [ICs]
@@ -48,6 +50,34 @@
   [h1_scalar_ic]
     type = MFEMScalarIC
     variable = h1_scalar
+    coefficient = 0.0
+  []
+[]
+
+[Kernels]
+  [h1_laplacian]
+    type = MFEMDiffusionKernel
+    variable = h1_scalar
+    coefficient = 1.0
+  []
+  [dh1_dt]
+    type = MFEMTimeDerivativeMassKernel
+    variable = h1_scalar
+    coefficient = 1.0
+  []
+[]
+
+[BCs]
+  [bottom]
+    type = MFEMScalarDirichletBC
+    variable = h1_scalar
+    boundary = '1'
+    coefficient = height
+  []
+  [top_dirichlet]
+    type = MFEMScalarDirichletBC
+    variable = h1_scalar
+    boundary = '2'
     coefficient = height
   []
 []
@@ -58,15 +88,25 @@
   []
 []
 
+[Solver]
+  type = MFEMHypreGMRES
+  preconditioner = boomeramg
+  l_tol = 1e-8
+  l_max_its = 100
+[]
+
 [Executioner]
-  type = MFEMSteady
+  type = MFEMTransient
   device = cpu
+  dt = 2.0
+  start_time = 0.0
+  end_time = 6.0
 []
 
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/ScalarIC
+    file_base = OutputData/TransientScalarZeroIC
     vtk_format = ASCII
   []
 []
