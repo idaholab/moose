@@ -1,12 +1,15 @@
 ##################################################################
-k     = 1.0 # diffusion coeff.
+c     = 0.1 # advection veclocity (+x direction)
 amp   = 1.0 # sinusoid amplitude, for u_exact
+
+#x_l   = ${fparse 0.1*pi} # domain bound (left)
+#x_r   = ${fparse pi}     # domain bound (right)
 
 x_l   = ${fparse 0.0*pi} # domain bound (left)
 x_r   = ${fparse 0.9*pi}     # domain bound (right)
 
-alpha = 2.000 # robin BC coeff for gradient term
-beta  = 5.000 # robin BC coeff for variable term
+alpha = 0.001 # robin BC coeff for gradient term
+beta  = 0.999 # robin BC coeff for variable term
 #gamma = ${fparse (-alpha*amp*sin(x_l))+(beta*amp*cos(x_l))} # RHS of Robin BC, applied at left boundary
 gamma = ${fparse (-alpha*amp*sin(x_r))+(beta*amp*cos(x_r))} # RHS of Robin BC, applied at right boundary
 
@@ -38,20 +41,20 @@ npts = 1000
 [Functions]
   [u_exact]
     type = ParsedFunction
-    expression = '${fparse amp}*sin(x)'
+    expression = '${fparse amp}*cos(x)'
   []
   [source_fn]
     type = ParsedFunction
-    expression = '${fparse k*amp}*sin(x)'
+    expression = '${fparse -c*amp}*sin(x)'
   []
 []
 
 [LinearFVKernels]
-  [diffusion]
-    type = LinearFVDiffusion
+  [advection]
+    type = LinearFVAdvection
     variable = u
-    diffusion_coeff = ${fparse k}
-    use_nonorthogonal_correction = False
+    velocity = "${fparse c} 0 0"
+    advected_interp_method = upwind
   []
   [source]
     type = LinearFVSource
@@ -61,16 +64,22 @@ npts = 1000
 []
 
 [LinearFVBCs]
-  [dir_r]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+#  [dir_r]
+#    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+#    variable = u
+#    boundary = "right"
+#    functor = 0
+#  []
+  [outflow]
+    type = LinearFVAdvectionDiffusionOutflowBC
     variable = u
-    boundary = "left"
-    functor = 0
+    boundary = "right"
+    use_two_term_expansion = false
   []
   [rob_l]
     type = LinearFVAdvectionDiffusionFunctorRobinBC
     variable = u
-    boundary = "right"
+    boundary = "left"
     alpha = ${fparse alpha}
     beta  = ${fparse beta} 
     gamma = ${fparse gamma}
@@ -111,6 +120,16 @@ npts = 1000
   []
 []
 
+[Executioner]
+  type = Steady
+  system_names = u_sys
+  l_tol = 1e-10
+#  petsc_options_iname = '-pc_type'
+#  petsc_options_value = 'lu'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+[]
+
 [Outputs]
   [csv]
     type = CSV
@@ -121,32 +140,3 @@ npts = 1000
 #    execute_on = FINAL
   []
 []
-[Convergence]
-  [linear]
-    type = IterationCountConvergence
-    max_iterations = 10
-    converge_at_max_iterations = true
-  []
-[]
-
-[Executioner]
-  type = Steady
-  system_names = u_sys
-  l_tol = 1e-10
-  multi_system_fixed_point=true
-  multi_system_fixed_point_convergence=linear
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
-[]
-
-
-#[Executioner]
-#  type = Steady
-#  system_names = u_sys
-#  l_tol = 1e-10
-##  petsc_options_iname = '-pc_type'
-##  petsc_options_value = 'lu'
-#  petsc_options_iname = '-pc_type -pc_hypre_type'
-#  petsc_options_value = 'hypre boomeramg'
-#[]
-#

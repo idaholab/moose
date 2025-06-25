@@ -38,15 +38,14 @@ public:
 
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
-  /// Returns the tangential component of the distance vector along the face
-  RealVectorValue computeFaceTangentVector() const;
-
-  /// Returns the recurring denominator in the 2nd order Taylor Expansion of Robin BC terms
-  Real computeRobinDenominatorTerm() const;
+  RealVectorValue computeOrthogonalProjectionVector() const;
+  RealVectorValue computeNonOrthogonalProjectionVector() const;
+  Real computePhiDenomFactor() const;
 
   protected:
+
   /// The functors for this BC (can be variable, function, etc)
-  const Moose::Functor<Real> & _functor_alpha;
-  const Moose::Functor<Real> & _functor_beta;
-  const Moose::Functor<Real> & _functor_gamma;
+  const Moose::Functor<Real> & _alpha;
+  const Moose::Functor<Real> & _beta;
+  const Moose::Functor<Real> & _gamma;
 };

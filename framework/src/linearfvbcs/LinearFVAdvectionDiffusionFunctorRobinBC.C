@@ -28,20 +28,104 @@ LinearFVAdvectionDiffusionFunctorRobinBC::validParams()
 
 LinearFVAdvectionDiffusionFunctorRobinBC::LinearFVAdvectionDiffusionFunctorRobinBC(
     const InputParameters & parameters)
-  : LinearFVAdvectionDiffusionBC(parameters), _functor_alpha(getFunctor<Real>("alpha")),
-    _functor_beta(getFunctor<Real>("beta" )), _functor_gamma(getFunctor<Real>("gamma"))
+  : LinearFVAdvectionDiffusionBC(parameters), 
+    _alpha(getFunctor<Real>("alpha")),
+    _beta(getFunctor<Real>("beta" )),
+    _gamma(getFunctor<Real>("gamma"))
 {
+}
+
+RealVectorValue
+LinearFVAdvectionDiffusionFunctorRobinBC::computeOrthogonalProjectionVector() const
+{
+  const auto nhat = _current_face_info->normal();
+
+//  // option 1: PG/AC
+//  const auto d_cb = computeCellToFaceVector();
+//  
+//  return d_cb*nhat*nhat; // projection of d_cb along surface normal, denominator |d_cb| cancels out
+
+  // option 2: Moukalled
+   RealVectorValue d_cb_hat = computeCellToFaceVector() /
+          std::sqrt(computeCellToFaceVector()*computeCellToFaceVector());
+  
+   return _current_face_info->faceArea()/(nhat*d_cb_hat) * d_cb_hat; // corresponds to over-relaxed 
+}
+
+RealVectorValue
+LinearFVAdvectionDiffusionFunctorRobinBC::computeNonOrthogonalProjectionVector() const
+{
+  return ( _current_face_info->normal() * _current_face_info->faceArea() ) -
+     computeOrthogonalProjectionVector();
+}
+
+Real
+LinearFVAdvectionDiffusionFunctorRobinBC::computePhiDenomFactor() const
+{
+  const auto face = singleSidedFaceArg(_current_face_info);
+  const auto state = determineState();
+
+  const auto alpha = _alpha(face, state);
+  const auto beta  = _beta(face, state);
+
+  const Real d_o_mag   = std::sqrt(computeOrthogonalProjectionVector()
+             * computeOrthogonalProjectionVector() );
+  const Real d_cb_mag  = std::sqrt(computeCellToFaceVector()
+             * computeCellToFaceVector() );
+
+  const auto d_no = computeNonOrthogonalProjectionVector();
+
+  const auto nhat = _current_face_info->normal();
+  const auto d_cb_hat = computeCellToFaceVector()/d_cb_mag;
+  const auto d_t_hat = nhat - ( (d_cb_hat * nhat) * nhat);
+  const Real d_s_cos = d_cb_hat * nhat;
+
+  // return (alpha * d_o_mag) + (beta * d_cb_mag);
+  return (alpha ) + (beta * d_cb_mag * d_s_cos);
 }
 
 Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValue() const
 {
-  return 1.0;
+
+  const auto face = singleSidedFaceArg(_current_face_info);
+  const auto elem_arg = makeElemArg(_current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                                        ? _current_face_info->elemPtr()
+                                        : _current_face_info->neighborPtr());
+  const auto state = determineState();
+
+  const auto alpha = _alpha(face, state);
+  const auto gamma = _gamma(face, state);
+
+  const auto phi = raw_value(_var(elem_arg, state));
+  const auto grad_phi = _var.gradSln(*_current_face_info->elemInfo());
+
+  const Real d_o_mag   = std::sqrt(computeOrthogonalProjectionVector()
+             * computeOrthogonalProjectionVector() );
+  const Real d_cb_mag  = std::sqrt(computeCellToFaceVector()
+             * computeCellToFaceVector() );
+  const auto d_no = computeNonOrthogonalProjectionVector();
+
+  const auto nhat = _current_face_info->normal();
+  const auto d_cb_hat = computeCellToFaceVector()/d_cb_mag;
+  const auto d_t_hat = nhat - ( (d_cb_hat * nhat) * nhat);
+  const Real d_s_cos = d_cb_hat * nhat;
+
+  return ( (alpha * d_o_mag * phi) 
+           - ( alpha * d_cb_mag * grad_phi * d_no)
+           + (gamma * d_cb_mag)
+         ) / computePhiDenomFactor();
+
+//  return ( (alpha *  phi) 
+//           + ( alpha * d_cb_mag * grad_phi * d_t_hat)
+//           + (gamma * d_cb_mag * d_s_cos)
+//         ) / computePhiDenomFactor();
 }
 
 Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryNormalGradient() const
 {
+
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
 
@@ -49,101 +133,132 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryNormalGradient() const
                                         ? _current_face_info->elemPtr()
                                         : _current_face_info->neighborPtr());
 
-  const auto alpha = _functor_alpha(face, state);
-  const auto beta  =  _functor_beta(face, state);
-  const auto gamma = _functor_gamma(face, state);
-  const auto phi_n = raw_value(_var(elem_arg, state));
+  const auto alpha = _alpha(face, state);
+  const auto beta  = _beta(face, state);
+  const auto gamma = _gamma(face, state);
+  const auto phi   = raw_value(_var(elem_arg, state));
 
-  return (gamma - beta * phi_n) / alpha;
+  return (gamma - beta * phi) / alpha;
 }
 
-RealVectorValue
-LinearFVAdvectionDiffusionFunctorRobinBC::computeFaceTangentVector() const
-{
-  // returns distance vector from nearest cell centre to boundary face
-  const auto d_cf = computeCellToFaceVector();
-  const auto nhat = _current_face_info->normal();
-
-  // tangent along the face 
-  return d_cf - (d_cf * nhat) * nhat;
-}
-
-Real
-LinearFVAdvectionDiffusionFunctorRobinBC::computeRobinDenominatorTerm() const
-{
-  const auto face = singleSidedFaceArg(_current_face_info);
-  const auto state = determineState();
-  // returns distance vector from nearest cell centre to boundary face
-  const auto d_cf  = computeCellToFaceVector();
-  // face normal
-  const auto nhat  = _current_face_info->normal();
-  // robin BC coefficients
-  const auto alpha = _functor_alpha(face, state);
-  const auto beta  = _functor_beta(face, state);
-
-  return 1.0 + (beta * d_cf * nhat / alpha);
-}
-
+// implicit terms for advection kernel
 Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValueMatrixContribution() const
 {
-  return 1.0/computeRobinDenominatorTerm();
+  const auto face = singleSidedFaceArg(_current_face_info);
+  const auto state = determineState();
+
+  const auto alpha = _alpha(face, state);
+  const Real d_o_mag   = std::sqrt(computeOrthogonalProjectionVector()
+             * computeOrthogonalProjectionVector() );
+
+  // std::cout<<"Adv. Imp. Term 1: "<< alpha * d_o_mag / (computePhiDenomFactor()) <<std::endl;
+  // return alpha * d_o_mag / computePhiDenomFactor();
+
+  std::cout<<"Adv. Imp. Term 1: "<< alpha / (computePhiDenomFactor()) <<std::endl;
+  return alpha / computePhiDenomFactor();
 }
 
+// explicit terms for advection kernel
 Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValueRHSContribution() const
 {
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
 
-  const auto alpha = _functor_alpha(face, state);
-  const auto gamma = _functor_gamma(face, state);
+  const auto alpha = _alpha(face, state);
+  const auto gamma = _gamma(face, state);
   const auto grad_phi = _var.gradSln(*_current_face_info->elemInfo());
 
-  // returns distance vector from nearest cell centre to boundary face
-  const auto d_cf = computeCellToFaceVector();
-  const auto tvec = computeFaceTangentVector();
+  const auto d_no = computeNonOrthogonalProjectionVector();
+  const auto d_no_hat = std::sqrt(d_no * d_no);
+  const Real d_cb_mag  = std::sqrt(computeCellToFaceVector()
+             * computeCellToFaceVector() );
+
+  // option 1: PG/AC
   const auto nhat = _current_face_info->normal();
+  const auto d_cb_hat = computeCellToFaceVector()/d_cb_mag;
+  const auto d_t_hat = nhat - ( (d_cb_hat * nhat) * nhat);
+  const Real d_s_cos = d_cb_hat * nhat;
 
-  const Real dmag = std::sqrt(d_cf*d_cf);
-  const Real dnom = computeRobinDenominatorTerm();
+  std::cout<<"Adv. Exp. Term 1: "<<( alpha * d_cb_mag * grad_phi * d_t_hat)<<std::endl;
+  std::cout<<"Adv. Exp. Term 2: "<<(gamma * d_cb_mag * d_s_cos)<<std::endl;
+  std::cout<<"Adv. Exp. Term 3: "<<computePhiDenomFactor()<<std::endl;
+  return ( ( alpha * d_cb_mag * grad_phi * d_t_hat) + (gamma * d_cb_mag * d_s_cos)
+         ) / computePhiDenomFactor();
 
-  return ( dmag * (grad_phi * tvec) / dnom) + 
-         ( (d_cf*nhat) * gamma / alpha / dnom);
+//  const Real term1 = alpha * d_cb_mag * grad_phi * d_no;
+//  const Real term2 = gamma * d_cb_mag;
+//  const Real term3 = computePhiDenomFactor();
+//
+//  // option 2: Moukalled
+//  std::cout<<"Adv. Exp. Term 1: "<<( - alpha * d_cb_mag * grad_phi * d_no)<<std::endl;
+//  std::cout<<"Adv. Exp. Term 2: "<<(gamma * d_cb_mag)<<std::endl;
+//  std::cout<<"Adv. Exp. Term 3: "<<computePhiDenomFactor()<<std::endl;
+//  return ( ( - alpha * d_cb_mag * grad_phi * d_no) + (gamma * d_cb_mag)
+//         ) / computePhiDenomFactor();
 }
 
+// implicit terms for diffusion kernel
 Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryGradientMatrixContribution() const
 {
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
 
-  const auto beta  =  _functor_beta(face, state);
-  const auto alpha = _functor_alpha(face, state);
+  const auto alpha  = _alpha(face, state);
+  const auto beta   =  _beta(face, state);
 
-  return -beta/alpha/computeRobinDenominatorTerm();	
+  const Real d_o_mag   = std::sqrt(computeOrthogonalProjectionVector()
+             * computeOrthogonalProjectionVector() );
+
+  std::cout<<"Diff. Imp. Term 1: "<< -beta / (computePhiDenomFactor()) <<std::endl;
+  return   beta / alpha; //computePhiDenomFactor();
+
+  // option 2: WIP
+//  std::cout<<"Diff. Imp. Term 1: "<< -beta * d_o_mag/ computePhiDenomFactor() <<std::endl;
+//  return -beta * d_o_mag/computePhiDenomFactor();
 }
 
+// explicit terms for diffusion kernel
 Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryGradientRHSContribution() const
 {
-  // The boundary term from the central difference approximation of the
+  // The boundary term from the ce ntral difference approximation of the
   // normal gradient.
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
   const auto grad_phi = _var.gradSln(*_current_face_info->elemInfo());
 
-  const auto alpha = _functor_alpha(face, state);
-  const auto beta  =  _functor_beta(face, state);
-  const auto gamma = _functor_gamma(face, state);
+  const auto alpha = _alpha(face, state);
+  const auto beta  =  _beta(face, state);
+  const auto gamma = _gamma(face, state);
 
-  const auto d_cf = computeCellToFaceVector();
-  const auto tvec = computeFaceTangentVector();
+  const Real d_cb_mag  = std::sqrt(computeCellToFaceVector()
+             * computeCellToFaceVector() );
+  const auto d_no = computeNonOrthogonalProjectionVector();
+  const Real dnom = computePhiDenomFactor();
+
+
+  // option 1: PG/AC
   const auto nhat = _current_face_info->normal();
+  const auto d_cb_hat = computeCellToFaceVector()/d_cb_mag;
+  const auto d_t_hat = nhat - ( (d_cb_hat * nhat) * nhat);
+  const Real d_s_cos = d_cb_hat * nhat;
+ 
+  std::cout<<"Adv. Exp. Term 1: "<<( - (beta * d_cb_mag * grad_phi * d_t_hat) / dnom)<<std::endl;
+  std::cout<<"Adv. Exp. Term 2: "<<- ( beta * gamma * d_cb_mag * d_s_cos /alpha / dnom )<<std::endl;
+  std::cout<<"Adv. Exp. Term 3: "<<(gamma / alpha)<<std::endl;
+ 
+  return  0.0*( - (beta * d_cb_mag * grad_phi * d_t_hat) / dnom)
+        - 0.0*( beta * gamma * d_cb_mag * d_s_cos /alpha / dnom )
+        - (gamma / alpha);
 
-  const Real dmag = std::sqrt(d_cf*d_cf);
-  const Real dnom = computeRobinDenominatorTerm();
-
-  return gamma - (beta/alpha/dnom)*
-           ( (d_cf * nhat * gamma/alpha) + (dmag*grad_phi*tvec) );
+  // option 2: WIP
+//  std::cout<<"Adv. Exp. Term 1: "<< ( (beta * d_cb_mag * grad_phi * d_no) / dnom)<<std::endl;
+//  std::cout<<"Adv. Exp. Term 2: "<< - ( beta * gamma * d_cb_mag /alpha / dnom )<<std::endl;
+//  std::cout<<"Adv. Exp. Term 3: "<<(gamma / alpha)<<std::endl;
+//  return  ( (beta * d_cb_mag * grad_phi * d_no) / dnom)
+//        - ( beta * gamma * d_cb_mag /alpha / dnom )
+//        + (gamma / alpha);
 }
