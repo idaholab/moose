@@ -31,14 +31,14 @@
   [l2_scalar]
     type = MFEMVariable
     fespace = L2FESpace
-  []  
+  []
 []
 
 [Functions]
   [height]
     type = ParsedFunction
     expression = 'z'
-  []  
+  []
 []
 
 [ICs]
