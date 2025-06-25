@@ -21,55 +21,55 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 2
   [../]
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = right
     value = 3
   [../]
 []
 
-[GPUMaterials]
+[KokkosMaterials]
   [left_real_1D]
-    type = GPU1DRealProperty
+    type = Kokkos1DRealProperty
     block = 0
     name = 'prop_a'
     dims = '1'
   []
   [right_real_1D]
-    type = GPU1DRealProperty
+    type = Kokkos1DRealProperty
     block = 10
     name = 'prop_a'
     dims = '2'
   []
   [right_real_1D_correct]
-    type = GPU1DRealProperty
+    type = Kokkos1DRealProperty
     block = 10
     name = 'prop_a'
     dims = '1'
   []
   [right_real_2D]
-    type = GPU2DRealProperty
+    type = Kokkos2DRealProperty
     block = 10
     name = 'prop_a'
     dims = '1 1'
   []
   [right_int_1D]
-    type = GPU1DIntProperty
+    type = Kokkos1DIntProperty
     block = 10
     name = 'prop_a'
     dims = '1'

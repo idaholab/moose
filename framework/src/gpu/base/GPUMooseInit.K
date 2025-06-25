@@ -24,11 +24,11 @@ finalizeGPUs()
 void
 MooseInit::initGPUs()
 {
-  unsigned int num_GPUs = Kokkos::num_devices();
+  unsigned int num_gpus = Kokkos::num_devices();
 
-  bool has_GPUs = comm().verify(num_GPUs > 0);
+  bool has_gpus = comm().verify(num_gpus > 0);
 
-  if (!has_GPUs)
+  if (!has_gpus)
     return;
 
   Kokkos::InitializationSettings settings;
@@ -39,10 +39,10 @@ MooseInit::initGPUs()
 
   // The number of processes in each node is usually larger than the number of
   // GPU devices in the node, so multiple processes share the same GPU
-  unsigned int my_GPU_id = local_comm.rank() % num_GPUs;
+  unsigned int my_gpu_id = local_comm.rank() % num_gpus;
 
   // Override the default GPU ID
-  settings.set_device_id(my_GPU_id);
+  settings.set_device_id(my_gpu_id);
 
   Kokkos::initialize(settings);
 

@@ -16,18 +16,18 @@ public:
   NotTriviallyCopyable(const NotTriviallyCopyable &) {}
 };
 
-class GPUNontrivialStateful final : public GPUMaterial<GPUNontrivialStateful>
+class KokkosNontrivialStateful final : public Moose::Kokkos::Material<KokkosNontrivialStateful>
 {
 public:
   static InputParameters validParams();
 
-  GPUNontrivialStateful(const InputParameters & parameters);
+  KokkosNontrivialStateful(const InputParameters & parameters);
 
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int /* qp */, Datum & /* datum */) const
   {
   }
 
 protected:
-  GPUMaterialProperty<NotTriviallyCopyable> _prop;
-  GPUMaterialProperty<NotTriviallyCopyable> _old_prop;
+  Moose::Kokkos::MaterialProperty<NotTriviallyCopyable> _prop;
+  Moose::Kokkos::MaterialProperty<NotTriviallyCopyable> _old_prop;
 };

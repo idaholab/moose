@@ -9,19 +9,19 @@
 
 #include "GPUConstantRate.h"
 
-registerMooseObject("MooseApp", GPUConstantRate);
+registerMooseObject("MooseApp", KokkosConstantRate);
 
 InputParameters
-GPUConstantRate::validParams()
+KokkosConstantRate::validParams()
 {
-  InputParameters params = GPUNodalKernel::validParams();
+  InputParameters params = NodalKernel::validParams();
   params.addClassDescription("Computes residual or the rate in a simple ODE of du/dt = rate.");
   params.addRequiredParam<Real>("rate", "The constant rate in 'du/dt = rate'");
   params.declareControllable("rate");
   return params;
 }
 
-GPUConstantRate::GPUConstantRate(const InputParameters & parameters)
-  : GPUNodalKernel(parameters), _rate(getParam<Real>("rate"))
+KokkosConstantRate::KokkosConstantRate(const InputParameters & parameters)
+  : NodalKernel(parameters), _rate(getParam<Real>("rate"))
 {
 }

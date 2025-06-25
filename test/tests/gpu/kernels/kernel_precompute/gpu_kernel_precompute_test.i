@@ -18,33 +18,33 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   active = 'diff conv'
 
   [./diff]
-    type = GPUDiffusionPrecompute
+    type = KokkosDiffusionPrecompute
     variable = convected
   [../]
 
   [./conv]
-    type = GPUConvectionPrecompute
+    type = KokkosConvectionPrecompute
     variable = convected
     velocity = '1.0 0.0 0.0'
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   active = 'bottom top'
 
   [./bottom]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = convected
     boundary = 'left'
     value = 0
   [../]
 
   [./top]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = convected
     boundary = 'right'
     value = 1

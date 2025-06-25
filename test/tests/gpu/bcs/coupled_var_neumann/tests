@@ -6,7 +6,7 @@
     type = 'Exodiff'
     input = 'gpu_coupled_var_neumann.i'
     exodiff = 'gpu_coupled_var_neumann_out.e'
-    requirement = 'The GPU system shall support coupled Neumann type boundary conditions.'
+    requirement = 'The Kokkos system shall support coupled Neumann type boundary conditions.'
     capabilities = 'kokkos'
   [../]
 
@@ -14,12 +14,12 @@
     type = 'Exodiff'
     input = 'gpu_on_off.i'
     exodiff = 'gpu_on_off_out.e'
-    requirement = 'The GPU system shall enable scaling of the Neumann type boundary conditions.'
+    requirement = 'The Kokkos system shall enable scaling of the Neumann type boundary conditions.'
     capabilities = 'kokkos'
   [../]
 
   [nonlinear]
-    requirement = 'When coupling nonlinear variables into a Neumann type boundary condition, the GPU system shall'
+    requirement = 'When coupling nonlinear variables into a Neumann type boundary condition, the Kokkos system shall'
     [exo]
       type = Exodiff
       input = 'gpu_coupled_var_neumann_nl.i'

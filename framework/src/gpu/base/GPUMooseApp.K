@@ -14,7 +14,7 @@
 void
 MooseApp::queryGPUs()
 {
-  unsigned int num_GPUs = Kokkos::num_devices();
+  unsigned int num_gpus = Kokkos::num_devices();
 
-  _has_GPUs = comm().verify(num_GPUs > 0);
+  _has_gpus = comm().verify(num_gpus > 0);
 }

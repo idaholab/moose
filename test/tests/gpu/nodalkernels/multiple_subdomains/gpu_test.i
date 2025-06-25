@@ -19,20 +19,20 @@
   []
 []
 
-[GPUKernels]
+[KokkosKernels]
   [diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
   []
   [rxn]
-    type = GPUReaction
+    type = KokkosReaction
     variable = u
   []
 []
 
-[GPUNodalKernels]
+[KokkosNodalKernels]
   [source]
-    type = GPUConstantRate
+    type = KokkosConstantRate
     variable = u
     block = '0 1'
     rate = 1

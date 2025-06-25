@@ -3,12 +3,12 @@
   design = 'syntax/Materials/index.md'
 
   [stateful]
-    requirement = 'The GPU material system shall be able to generate current, old, and older states of material properties and '
+    requirement = 'The Kokkos material system shall be able to generate current, old, and older states of material properties and '
     [current]
       type = Exodiff
       input = 'gpu_stateful_prop_test.i'
       exodiff = 'out_current_gpu.e'
-      cli_args = 'GPUKernels/heat/prop_state=\'current\'
+      cli_args = 'KokkosKernels/heat/prop_state=\'current\'
                   Outputs/file_base=out_current_gpu'
       detail = 'use current state in other calculations.'
       capabilities = 'kokkos'
@@ -17,7 +17,7 @@
       type = Exodiff
       input = 'gpu_stateful_prop_test.i'
       exodiff = 'out_old_gpu.e'
-      cli_args = 'GPUKernels/heat/prop_state=\'old\'
+      cli_args = 'KokkosKernels/heat/prop_state=\'old\'
                   Outputs/file_base=out_old_gpu'
       detail = 'use old state in other calculations.'
       capabilities = 'kokkos'
@@ -26,7 +26,7 @@
       type = Exodiff
       input = 'gpu_stateful_prop_test.i'
       exodiff = 'out_older_gpu.e'
-      cli_args = 'GPUKernels/heat/prop_state=\'older\'
+      cli_args = 'KokkosKernels/heat/prop_state=\'older\'
                   Outputs/file_base=out_older_gpu'
       detail = 'use older state in other calculations.'
       capabilities = 'kokkos'
@@ -34,7 +34,7 @@
   []
 
   [storage]
-    requirement = 'The GPU system shall store stateful properties that vary at every quadrature point '
+    requirement = 'The Kokkos system shall store stateful properties that vary at every quadrature point '
     [spatial_test]
       type = Exodiff
       input = 'gpu_stateful_prop_spatial_test.i'

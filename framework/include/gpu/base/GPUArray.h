@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 #include "GPUHeader.h"
 #endif
 
@@ -18,9 +18,27 @@
 
 #include <cstdint>
 
-void KokkosFree(void * ptr);
+#define usingKokkosArrayBaseMembers(T, dimension)                                                  \
+private:                                                                                           \
+  using ArrayBase<T, dimension>::_n;                                                               \
+  using ArrayBase<T, dimension>::_s;                                                               \
+  using ArrayBase<T, dimension>::_d;                                                               \
+                                                                                                   \
+public:                                                                                            \
+  using ArrayBase<T, dimension>::create;                                                           \
+  using ArrayBase<T, dimension>::createHost;                                                       \
+  using ArrayBase<T, dimension>::createDevice;                                                     \
+  using ArrayBase<T, dimension>::offset;                                                           \
+  using ArrayBase<T, dimension>::operator=;
 
-enum class GPUMemcpyKind
+namespace Moose
+{
+namespace Kokkos
+{
+
+void free(void * ptr);
+
+enum class MemcpyKind
 {
   HOST_TO_DEVICE,
   DEVICE_TO_HOST,
@@ -28,37 +46,24 @@ enum class GPUMemcpyKind
 };
 
 template <typename T, unsigned int dimension = 1>
-class GPUArray
+class Array
 {
 };
 
 template <typename T>
-struct GPUArrayDeepCopy
+struct ArrayDeepCopy
 {
   static const bool value = false;
 };
 
 template <typename T, unsigned int dimension>
-struct GPUArrayDeepCopy<GPUArray<T, dimension>>
+struct ArrayDeepCopy<Array<T, dimension>>
 {
-  static const bool value = GPUArrayDeepCopy<T>::value;
+  static const bool value = ArrayDeepCopy<T>::value;
 };
 
-#define usingGPUArrayBaseMembers(T, dimension)                                                     \
-private:                                                                                           \
-  using GPUArrayBase<T, dimension>::_n;                                                            \
-  using GPUArrayBase<T, dimension>::_s;                                                            \
-  using GPUArrayBase<T, dimension>::_d;                                                            \
-                                                                                                   \
-public:                                                                                            \
-  using GPUArrayBase<T, dimension>::create;                                                        \
-  using GPUArrayBase<T, dimension>::createHost;                                                    \
-  using GPUArrayBase<T, dimension>::createDevice;                                                  \
-  using GPUArrayBase<T, dimension>::offset;                                                        \
-  using GPUArrayBase<T, dimension>::operator=;
-
 template <typename T, unsigned int dimension>
-class GPUArrayBase
+class ArrayBase
 {
 public:
   // Iterator for host data
@@ -117,9 +122,9 @@ public:
   // Free all array data
   void destroy();
   // Destructor
-  ~GPUArrayBase() { destroy(); }
+  ~ArrayBase() { destroy(); }
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 protected:
   template <bool host, bool device>
   void createInternal(const std::vector<uint64_t> n);
@@ -129,11 +134,11 @@ protected:
 
 public:
   // Default constructor
-  GPUArrayBase() {}
+  ArrayBase() {}
   // Copy constructor
-  GPUArrayBase(const GPUArrayBase<T, dimension> & array)
+  ArrayBase(const ArrayBase<T, dimension> & array)
   {
-    if constexpr (GPUArrayDeepCopy<T>::value)
+    if constexpr (ArrayDeepCopy<T>::value)
       deepCopy(array);
     else
       shallowCopy(array);
@@ -194,25 +199,25 @@ public:
   // Apply offsets to each dimension
   void offset(const std::vector<int64_t> d);
   // Copy between host and device buffers
-  void copy(GPUMemcpyKind dir = GPUMemcpyKind::HOST_TO_DEVICE);
+  void copy(MemcpyKind dir = MemcpyKind::HOST_TO_DEVICE);
   // Copy in from external buffer
-  void copyIn(const T * ptr, GPUMemcpyKind dir, uint64_t n, uint64_t offset = 0);
+  void copyIn(const T * ptr, MemcpyKind dir, uint64_t n, uint64_t offset = 0);
   // Copy out to external buffer
-  void copyOut(T * ptr, GPUMemcpyKind dir, uint64_t n, uint64_t offset = 0);
-  // Copy of nested GPUArrays
+  void copyOut(T * ptr, MemcpyKind dir, uint64_t n, uint64_t offset = 0);
+  // Copy of nested Kokkos arrays
   void copyNested();
-  // Shallow copy a GPUArray
-  void shallowCopy(const GPUArrayBase<T, dimension> & array);
-  // Deep copy a GPUArray
-  void deepCopy(const GPUArrayBase<T, dimension> & array);
-  // Swap two GPUArrays
-  void swap(GPUArrayBase<T, dimension> & array);
+  // Shallow copy a Kokkos arrays
+  void shallowCopy(const ArrayBase<T, dimension> & array);
+  // Deep copy a Kokkos Array
+  void deepCopy(const ArrayBase<T, dimension> & array);
+  // Swap two Arrays
+  void swap(ArrayBase<T, dimension> & array);
 
 public:
   // Scalar copy operator
   auto & operator=(const T & scalar);
   // Shallow copy operator
-  auto & operator=(const GPUArrayBase<T, dimension> & array)
+  auto & operator=(const ArrayBase<T, dimension> & array)
   {
     shallowCopy(array);
 
@@ -223,7 +228,7 @@ public:
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::destroy()
+ArrayBase<T, dimension>::destroy()
 {
   if (!_counter)
     return;
@@ -262,9 +267,9 @@ GPUArrayBase<T, dimension>::destroy()
       }
     }
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
     if (_is_device_alloc && !_is_device_alias)
-      KokkosFree(_device_data);
+      Moose::Kokkos::free(_device_data);
 #endif
 
     delete _counter;
@@ -277,13 +282,13 @@ GPUArrayBase<T, dimension>::destroy()
   _is_device_alias = false;
 }
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::aliasHost(T * ptr)
+ArrayBase<T, dimension>::aliasHost(T * ptr)
 {
   if (_is_host_alloc && !_is_host_alias)
-    mooseError("GPUArray error: cannot alias host data because host data was not aliased.");
+    mooseError("Kokkos array error: cannot alias host data because host data was not aliased.");
 
   _host_data = ptr;
   _is_host_alloc = true;
@@ -292,10 +297,10 @@ GPUArrayBase<T, dimension>::aliasHost(T * ptr)
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::aliasDevice(T * ptr)
+ArrayBase<T, dimension>::aliasDevice(T * ptr)
 {
   if (_is_device_alloc && !_is_device_alias)
-    mooseError("GPUArray error: cannot alias device data because device data was not aliased.");
+    mooseError("Kokkos array error: cannot alias device data because device data was not aliased.");
 
   _device_data = ptr;
   _is_device_alloc = true;
@@ -304,7 +309,7 @@ GPUArrayBase<T, dimension>::aliasDevice(T * ptr)
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::allocHost()
+ArrayBase<T, dimension>::allocHost()
 {
   if (_is_host_alloc)
     return;
@@ -319,12 +324,12 @@ GPUArrayBase<T, dimension>::allocHost()
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::allocDevice()
+ArrayBase<T, dimension>::allocDevice()
 {
   if (_is_device_alloc)
     return;
 
-  _device_data = static_cast<T *>(Kokkos::kokkos_malloc(_size * sizeof(T)));
+  _device_data = static_cast<T *>(::Kokkos::kokkos_malloc(_size * sizeof(T)));
 
   _is_device_alloc = true;
 }
@@ -332,10 +337,10 @@ GPUArrayBase<T, dimension>::allocDevice()
 template <typename T, unsigned int dimension>
 template <bool host, bool device>
 void
-GPUArrayBase<T, dimension>::createInternal(const std::vector<uint64_t> n)
+ArrayBase<T, dimension>::createInternal(const std::vector<uint64_t> n)
 {
   if (n.size() != dimension)
-    mooseError("GPUArray error: the number of dimensions provided (",
+    mooseError("Kokkos array error: the number of dimensions provided (",
                n.size(),
                ") must match the array dimension (",
                dimension,
@@ -368,7 +373,7 @@ GPUArrayBase<T, dimension>::createInternal(const std::vector<uint64_t> n)
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::createInternal(const std::vector<uint64_t> n, bool host, bool device)
+ArrayBase<T, dimension>::createInternal(const std::vector<uint64_t> n, bool host, bool device)
 {
   if (host && device)
     createInternal<true, true>(n);
@@ -383,18 +388,18 @@ GPUArrayBase<T, dimension>::createInternal(const std::vector<uint64_t> n, bool h
 template <typename T, unsigned int dimension>
 template <typename TargetSpace, typename SourceSpace>
 void
-GPUArrayBase<T, dimension>::copyInternal(T * target, const T * source, uint64_t n)
+ArrayBase<T, dimension>::copyInternal(T * target, const T * source, uint64_t n)
 {
-  Kokkos::Impl::DeepCopy<TargetSpace, SourceSpace>(target, source, n * sizeof(T));
-  Kokkos::fence();
+  ::Kokkos::Impl::DeepCopy<TargetSpace, SourceSpace>(target, source, n * sizeof(T));
+  ::Kokkos::fence();
 }
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::offset(const std::vector<int64_t> d)
+ArrayBase<T, dimension>::offset(const std::vector<int64_t> d)
 {
   if (d.size() > dimension)
-    mooseError("GPUArray error: the number of offsets provided (",
+    mooseError("Kokkos array error: the number of offsets provided (",
                d.size(),
                ") cannot be larger than the array dimension (",
                dimension,
@@ -406,9 +411,9 @@ GPUArrayBase<T, dimension>::offset(const std::vector<int64_t> d)
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::copy(GPUMemcpyKind dir)
+ArrayBase<T, dimension>::copy(MemcpyKind dir)
 {
-  if (dir == GPUMemcpyKind::HOST_TO_DEVICE)
+  if (dir == MemcpyKind::HOST_TO_DEVICE)
   {
     // If host side memory is not allocated, do nothing
     if (!_is_host_alloc)
@@ -422,14 +427,14 @@ GPUArrayBase<T, dimension>::copy(GPUMemcpyKind dir)
         allocDevice();
       else
         // print error if this array is shared with other arrays
-        mooseError("GPUArray error: cannot copy from host to device because device side memory was "
-                   "not allocated and array is being shared with other arrays.");
+        mooseError("Kokkos array error: cannot copy from host to device because device side memory "
+                   "was not allocated and array is being shared with other arrays.");
     }
 
     // Copy from host to device
-    copyInternal<MemSpace, Kokkos::HostSpace>(_device_data, _host_data, _size);
+    copyInternal<MemSpace, ::Kokkos::HostSpace>(_device_data, _host_data, _size);
   }
-  else if (dir == GPUMemcpyKind::DEVICE_TO_HOST)
+  else if (dir == MemcpyKind::DEVICE_TO_HOST)
   {
     // If device side memory is not allocated, do nothing
     if (!_is_device_alloc)
@@ -443,35 +448,35 @@ GPUArrayBase<T, dimension>::copy(GPUMemcpyKind dir)
         allocHost();
       else
         // print error if this array is shared with other arrays
-        mooseError("GPUArray error: cannot copy from device to host because host side memory was "
-                   "not allocated and array is being shared with other arrays.");
+        mooseError("Kokkos array error: cannot copy from device to host because host side memory "
+                   "was not allocated and array is being shared with other arrays.");
     }
 
     // Copy from device to host
-    copyInternal<Kokkos::HostSpace, MemSpace>(_host_data, _device_data, _size);
+    copyInternal<::Kokkos::HostSpace, MemSpace>(_host_data, _device_data, _size);
   }
 }
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::copyIn(const T * ptr, GPUMemcpyKind dir, uint64_t n, uint64_t offset)
+ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, uint64_t n, uint64_t offset)
 {
   if (n > _size)
-    mooseError("GPUArray error: cannot copyin data larger than the array size.");
+    mooseError("Kokkos array error: cannot copyin data larger than the array size.");
 
   if (offset > _size)
-    mooseError("GPUArray error: offset cannot be larger than the array size.");
+    mooseError("Kokkos array error: offset cannot be larger than the array size.");
 
-  if (dir == GPUMemcpyKind::HOST_TO_DEVICE)
+  if (dir == MemcpyKind::HOST_TO_DEVICE)
   {
     // If device side memory is not allocated, do nothing
     if (!_is_device_alloc)
       return;
 
     // Copy from host to device
-    copyInternal<MemSpace, Kokkos::HostSpace>(_device_data + offset, ptr, n);
+    copyInternal<MemSpace, ::Kokkos::HostSpace>(_device_data + offset, ptr, n);
   }
-  else if (dir == GPUMemcpyKind::DEVICE_TO_DEVICE)
+  else if (dir == MemcpyKind::DEVICE_TO_DEVICE)
   {
     // If device side memory is not allocated, do nothing
     if (!_is_device_alloc)
@@ -480,37 +485,37 @@ GPUArrayBase<T, dimension>::copyIn(const T * ptr, GPUMemcpyKind dir, uint64_t n,
     // Copy from device to device
     copyInternal<MemSpace, MemSpace>(_device_data + offset, ptr, n);
   }
-  else if (dir == GPUMemcpyKind::DEVICE_TO_HOST)
+  else if (dir == MemcpyKind::DEVICE_TO_HOST)
   {
     // If host side memory is not allocated, do nothing
     if (!_is_host_alloc)
       return;
 
     // Copy from device to host
-    copyInternal<Kokkos::HostSpace, MemSpace>(_host_data + offset, ptr, n);
+    copyInternal<::Kokkos::HostSpace, MemSpace>(_host_data + offset, ptr, n);
   }
 }
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::copyOut(T * ptr, GPUMemcpyKind dir, uint64_t n, uint64_t offset)
+ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyKind dir, uint64_t n, uint64_t offset)
 {
   if (n > _size)
-    mooseError("GPUArray error: cannot copyout data larger than the array size.");
+    mooseError("Kokkos array error: cannot copyout data larger than the array size.");
 
   if (offset > _size)
-    mooseError("GPUArray error: offset cannot be larger than the array size.");
+    mooseError("Kokkos array error: offset cannot be larger than the array size.");
 
-  if (dir == GPUMemcpyKind::DEVICE_TO_HOST)
+  if (dir == MemcpyKind::DEVICE_TO_HOST)
   {
     // If device side memory is not allocated, do nothing
     if (!_is_device_alloc)
       return;
 
     // Copy from device to host
-    copyInternal<Kokkos::HostSpace, MemSpace>(ptr, _device_data + offset, n);
+    copyInternal<::Kokkos::HostSpace, MemSpace>(ptr, _device_data + offset, n);
   }
-  else if (dir == GPUMemcpyKind::DEVICE_TO_DEVICE)
+  else if (dir == MemcpyKind::DEVICE_TO_DEVICE)
   {
     // If device side memory is not allocated, do nothing
     if (!_is_device_alloc)
@@ -519,14 +524,14 @@ GPUArrayBase<T, dimension>::copyOut(T * ptr, GPUMemcpyKind dir, uint64_t n, uint
     // Copy from device to device
     copyInternal<MemSpace, MemSpace>(ptr, _device_data + offset, n);
   }
-  else if (dir == GPUMemcpyKind::HOST_TO_DEVICE)
+  else if (dir == MemcpyKind::HOST_TO_DEVICE)
   {
     // If host side memory is not allocated, do nothing
     if (!_is_host_alloc)
       return;
 
     // Copy from host to device
-    copyInternal<MemSpace, Kokkos::HostSpace>(ptr, _host_data + offset, n);
+    copyInternal<MemSpace, ::Kokkos::HostSpace>(ptr, _host_data + offset, n);
   }
 }
 
@@ -538,14 +543,14 @@ copyInner(T & data)
 
 template <typename T, unsigned int dimension>
 void
-copyInner(GPUArray<T, dimension> & data)
+copyInner(Array<T, dimension> & data)
 {
   data.copyNested();
 }
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::copyNested()
+ArrayBase<T, dimension>::copyNested()
 {
   for (unsigned int i = 0; i < _size; ++i)
     copyInner(_host_data[i]);
@@ -555,7 +560,7 @@ GPUArrayBase<T, dimension>::copyNested()
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::shallowCopy(const GPUArrayBase<T, dimension> & array)
+ArrayBase<T, dimension>::shallowCopy(const ArrayBase<T, dimension> & array)
 {
   destroy();
 
@@ -584,16 +589,17 @@ GPUArrayBase<T, dimension>::shallowCopy(const GPUArrayBase<T, dimension> & array
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::deepCopy(const GPUArrayBase<T, dimension> & array)
+ArrayBase<T, dimension>::deepCopy(const ArrayBase<T, dimension> & array)
 {
-  if (GPUArrayDeepCopy<T>::value && !array._is_host_alloc)
-    mooseError("GPUArray error: cannot deep copy using constructor from array without host data.");
+  if (ArrayDeepCopy<T>::value && !array._is_host_alloc)
+    mooseError(
+        "Kokkos array error: cannot deep copy using constructor from array without host data.");
 
   std::vector<uint64_t> n(std::begin(array._n), std::end(array._n));
 
   createInternal(n, array._is_host_alloc, array._is_device_alloc);
 
-  if constexpr (GPUArrayDeepCopy<T>::value)
+  if constexpr (ArrayDeepCopy<T>::value)
   {
     for (uint64_t i = 0; i < _size; ++i)
       new (_host_data + i) T(array._host_data[i]);
@@ -618,9 +624,9 @@ GPUArrayBase<T, dimension>::deepCopy(const GPUArrayBase<T, dimension> & array)
 
 template <typename T, unsigned int dimension>
 void
-GPUArrayBase<T, dimension>::swap(GPUArrayBase<T, dimension> & array)
+ArrayBase<T, dimension>::swap(ArrayBase<T, dimension> & array)
 {
-  GPUArrayBase<T, dimension> clone;
+  ArrayBase<T, dimension> clone;
 
   clone.shallowCopy(*this);
   this->shallowCopy(array);
@@ -629,23 +635,26 @@ GPUArrayBase<T, dimension>::swap(GPUArrayBase<T, dimension> & array)
 
 template <typename T, unsigned int dimension>
 auto &
-GPUArrayBase<T, dimension>::operator=(const T & scalar)
+ArrayBase<T, dimension>::operator=(const T & scalar)
 {
   if (_is_host_alloc)
     std::fill_n(_host_data, _size, scalar);
 
   if (_is_device_alloc)
   {
-    Kokkos::View<T *, MemSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> data(_device_data, _size);
-    Kokkos::Experimental::fill_n(Kokkos::DefaultExecutionSpace(), data, _size, scalar);
+    ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> data(_device_data,
+                                                                                    _size);
+    ::Kokkos::Experimental::fill_n(::Kokkos::DefaultExecutionSpace(), data, _size, scalar);
   }
 
   return *this;
 }
 
+using ::dataStore;
+
 template <typename T, unsigned int dimension>
 void
-dataStore(std::ostream & stream, GPUArray<T, dimension> & array, void * context)
+dataStore(std::ostream & stream, Array<T, dimension> & array, void * context)
 {
   bool is_alloc = array.isAlloc();
   dataStore(stream, is_alloc, nullptr);
@@ -668,12 +677,12 @@ dataStore(std::ostream & stream, GPUArray<T, dimension> & array, void * context)
   if (array.isDeviceAlloc())
   {
     // We use malloc/free because we just want a memory copy
-    // If T is a GPUArray and we use new/delete or vector to copy it out,
+    // If T is a Kokkos array and we use new/delete or vector to copy it out,
     // the arrays will be destroyed on cleanup
 
     T * data = static_cast<T *>(std::malloc(array.size() * sizeof(T)));
 
-    array.copyOut(data, GPUMemcpyKind::DEVICE_TO_HOST, array.size());
+    array.copyOut(data, MemcpyKind::DEVICE_TO_HOST, array.size());
 
     for (uint64_t i = 0; i < array.size(); ++i)
       dataStore(stream, data[i], context);
@@ -687,9 +696,11 @@ dataStore(std::ostream & stream, GPUArray<T, dimension> & array, void * context)
   }
 }
 
+using ::dataLoad;
+
 template <typename T, unsigned int dimension>
 void
-dataLoad(std::istream & stream, GPUArray<T, dimension> & array, void * context)
+dataLoad(std::istream & stream, Array<T, dimension> & array, void * context)
 {
   bool is_alloc;
   dataLoad(stream, is_alloc, nullptr);
@@ -701,7 +712,7 @@ dataLoad(std::istream & stream, GPUArray<T, dimension> & array, void * context)
   dataLoad(stream, from_type_name, nullptr);
 
   if (from_type_name != typeid(T).name())
-    mooseError("GPUArray error: cannot load an array because the stored array is of type '",
+    mooseError("Kokkos array error: cannot load an array because the stored array is of type '",
                MooseUtils::prettyCppType(libMesh::demangle(from_type_name.c_str())),
                "' but the loading array is of type '",
                MooseUtils::prettyCppType(libMesh::demangle(typeid(T).name())),
@@ -711,7 +722,7 @@ dataLoad(std::istream & stream, GPUArray<T, dimension> & array, void * context)
   dataLoad(stream, from_dimension, nullptr);
 
   if (from_dimension != dimension)
-    mooseError("GPUArray error: cannot load an array because the stored array is ",
+    mooseError("Kokkos array error: cannot load an array because the stored array is ",
                from_dimension,
                "D but the loading array is ",
                dimension,
@@ -727,7 +738,7 @@ dataLoad(std::istream & stream, GPUArray<T, dimension> & array, void * context)
   }
 
   if (from_n != n)
-    mooseError("GPUArray error: cannot load an array because the stored array has dimensions (",
+    mooseError("Kokkos array error: cannot load an array because the stored array has dimensions (",
                Moose::stringify(from_n),
                ") but the loading array has dimensions (",
                Moose::stringify(n),
@@ -748,27 +759,27 @@ dataLoad(std::istream & stream, GPUArray<T, dimension> & array, void * context)
     for (auto & value : data)
       dataLoad(stream, value, context);
 
-    array.copyIn(data.data(), GPUMemcpyKind::HOST_TO_DEVICE, array.size());
+    array.copyIn(data.data(), MemcpyKind::HOST_TO_DEVICE, array.size());
   }
 }
 #endif
 
 template <typename T>
-class GPUArray<T, 1> : public GPUArrayBase<T, 1>
+class Array<T, 1> : public ArrayBase<T, 1>
 {
-#ifdef MOOSE_GPU_SCOPE
-  usingGPUArrayBaseMembers(T, 1);
+#ifdef MOOSE_KOKKOS_SCOPE
+  usingKokkosArrayBaseMembers(T, 1);
 
 public:
-  GPUArray(uint64_t n0) { create(n0); }
-  GPUArray(const std::vector<T> & vector) { *this = vector; }
-  GPUArray() {}
+  Array(uint64_t n0) { create(n0); }
+  Array(const std::vector<T> & vector) { *this = vector; }
+  Array() {}
 
   void init(uint64_t n0) { this->template createInternal<false, false>({n0}); }
   void create(uint64_t n0) { this->template createInternal<true, true>({n0}); }
   void createHost(uint64_t n0) { this->template createInternal<true, false>({n0}); }
   void createDevice(uint64_t n0) { this->template createInternal<false, true>({n0}); }
-  void offset(int64_t d0) { GPUArrayBase<T, 1>::offset({d0}); }
+  void offset(int64_t d0) { ArrayBase<T, 1>::offset({d0}); }
 
   template <bool host = true, bool device = true>
   void copyVector(const std::vector<T> & vector)
@@ -779,7 +790,7 @@ public:
       std::memcpy(this->host_data(), vector.data(), this->size() * sizeof(T));
 
     if (device)
-      this->template copyInternal<MemSpace, Kokkos::HostSpace>(
+      this->template copyInternal<MemSpace, ::Kokkos::HostSpace>(
           this->device_data(), vector.data(), this->size());
   }
   template <bool host = true, bool device = true>
@@ -813,14 +824,14 @@ public:
 };
 
 template <typename T>
-class GPUArray<T, 2> : public GPUArrayBase<T, 2>
+class Array<T, 2> : public ArrayBase<T, 2>
 {
-#ifdef MOOSE_GPU_SCOPE
-  usingGPUArrayBaseMembers(T, 2);
+#ifdef MOOSE_KOKKOS_SCOPE
+  usingKokkosArrayBaseMembers(T, 2);
 
 public:
-  GPUArray(uint64_t n0, uint64_t n1) { create(n0, n1); }
-  GPUArray() {}
+  Array(uint64_t n0, uint64_t n1) { create(n0, n1); }
+  Array() {}
 
   void init(uint64_t n0, uint64_t n1) { this->template createInternal<false, false>({n0, n1}); }
   void create(uint64_t n0, uint64_t n1) { this->template createInternal<true, true>({n0, n1}); }
@@ -832,7 +843,7 @@ public:
   {
     this->template createInternal<false, true>({n0, n1});
   }
-  void offset(int64_t d0, int64_t d1) { GPUArrayBase<T, 2>::offset({d0, d1}); }
+  void offset(int64_t d0, int64_t d1) { ArrayBase<T, 2>::offset({d0, d1}); }
 
   KOKKOS_FUNCTION T & operator()(int64_t i0, int64_t i1) const
   {
@@ -845,14 +856,14 @@ public:
 };
 
 template <typename T>
-class GPUArray<T, 3> : public GPUArrayBase<T, 3>
+class Array<T, 3> : public ArrayBase<T, 3>
 {
-#ifdef MOOSE_GPU_SCOPE
-  usingGPUArrayBaseMembers(T, 3);
+#ifdef MOOSE_KOKKOS_SCOPE
+  usingKokkosArrayBaseMembers(T, 3);
 
 public:
-  GPUArray(uint64_t n0, uint64_t n1, uint64_t n2) { create(n0, n1, n2); }
-  GPUArray() {}
+  Array(uint64_t n0, uint64_t n1, uint64_t n2) { create(n0, n1, n2); }
+  Array() {}
 
   void init(uint64_t n0, uint64_t n1, uint64_t n2)
   {
@@ -870,7 +881,7 @@ public:
   {
     this->template createInternal<false, true>({n0, n1, n2});
   }
-  void offset(int64_t d0, int64_t d1, int64_t d2) { GPUArrayBase<T, 3>::offset({d0, d1, d2}); }
+  void offset(int64_t d0, int64_t d1, int64_t d2) { ArrayBase<T, 3>::offset({d0, d1, d2}); }
 
   KOKKOS_FUNCTION T & operator()(int64_t i0, int64_t i1, int64_t i2) const
   {
@@ -884,14 +895,14 @@ public:
 };
 
 template <typename T>
-class GPUArray<T, 4> : public GPUArrayBase<T, 4>
+class Array<T, 4> : public ArrayBase<T, 4>
 {
-#ifdef MOOSE_GPU_SCOPE
-  usingGPUArrayBaseMembers(T, 4);
+#ifdef MOOSE_KOKKOS_SCOPE
+  usingKokkosArrayBaseMembers(T, 4);
 
 public:
-  GPUArray(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3) { create(n0, n1, n2, n3); }
-  GPUArray() {}
+  Array(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3) { create(n0, n1, n2, n3); }
+  Array() {}
 
   void init(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3)
   {
@@ -911,7 +922,7 @@ public:
   }
   void offset(int64_t d0, int64_t d1, int64_t d2, int64_t d3)
   {
-    GPUArrayBase<T, 4>::offset({d0, d1, d2, d3});
+    ArrayBase<T, 4>::offset({d0, d1, d2, d3});
   }
 
   KOKKOS_FUNCTION T & operator()(int64_t i0, int64_t i1, int64_t i2, int64_t i3) const
@@ -928,17 +939,17 @@ public:
 };
 
 template <typename T>
-class GPUArray<T, 5> : public GPUArrayBase<T, 5>
+class Array<T, 5> : public ArrayBase<T, 5>
 {
-#ifdef MOOSE_GPU_SCOPE
-  usingGPUArrayBaseMembers(T, 5);
+#ifdef MOOSE_KOKKOS_SCOPE
+  usingKokkosArrayBaseMembers(T, 5);
 
 public:
-  GPUArray(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3, uint64_t n4)
+  Array(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3, uint64_t n4)
   {
     create(n0, n1, n2, n3, n4);
   }
-  GPUArray() {}
+  Array() {}
 
   void init(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3, uint64_t n4)
   {
@@ -958,7 +969,7 @@ public:
   }
   void offset(int64_t d0, int64_t d1, int64_t d2, int64_t d3, int64_t d4)
   {
-    GPUArrayBase<T, 5>::offset({d0, d1, d2, d3, d4});
+    ArrayBase<T, 5>::offset({d0, d1, d2, d3, d4});
   }
 
   KOKKOS_FUNCTION T & operator()(int64_t i0, int64_t i1, int64_t i2, int64_t i3, int64_t i4) const
@@ -976,12 +987,15 @@ public:
 };
 
 template <typename T>
-using GPUArray1D = GPUArray<T, 1>;
+using Array1D = Array<T, 1>;
 template <typename T>
-using GPUArray2D = GPUArray<T, 2>;
+using Array2D = Array<T, 2>;
 template <typename T>
-using GPUArray3D = GPUArray<T, 3>;
+using Array3D = Array<T, 3>;
 template <typename T>
-using GPUArray4D = GPUArray<T, 4>;
+using Array4D = Array<T, 4>;
 template <typename T>
-using GPUArray5D = GPUArray<T, 5>;
+using Array5D = Array<T, 5>;
+
+} // namespace Kokkos
+} // namespace Moose

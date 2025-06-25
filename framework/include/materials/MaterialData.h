@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
 #include "GPUMaterialProperty.h"
 #endif
 
@@ -102,16 +102,16 @@ public:
     return haveGenericProperty<T, true>(prop_name);
   }
 
-#ifdef MOOSE_GPU_SCOPE
-  /// Returns true if the GPU material property exists - defined by any material.
+#ifdef MOOSE_KOKKOS_SCOPE
+  /// Returns true if the Kokkos material property exists - defined by any material.
   template <typename T, unsigned int dimension>
-  bool haveGPUProperty(const std::string & prop_name) const
+  bool haveKokkosProperty(const std::string & prop_name) const
   {
-    if (!haveGPUPropertyHelper(prop_name))
+    if (!haveKokkosPropertyHelper(prop_name))
       return false;
 
-    auto & prop = getGPUPropertyHelper(prop_name);
-    return dynamic_cast<GPUMaterialProperty<T, dimension> *>(&prop) != nullptr;
+    auto & prop = getKokkosPropertyHelper(prop_name);
+    return dynamic_cast<Moose::Kokkos::MaterialProperty<T, dimension> *>(&prop) != nullptr;
   }
 #endif
 
@@ -146,16 +146,16 @@ public:
     return getPropertyHelper<T, is_ad, true>(prop_name, 0, requestor);
   }
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
   template <typename T, unsigned int dimension, unsigned int state>
-  GPUMaterialProperty<T, dimension> getGPUProperty(const std::string & prop_name)
+  Moose::Kokkos::MaterialProperty<T, dimension> getKokkosProperty(const std::string & prop_name)
   {
     for (unsigned int s = 0; s <= state; ++s)
     {
-      auto shell = std::make_shared<GPUMaterialProperty<T, dimension>>();
+      auto shell = std::make_shared<Moose::Kokkos::MaterialProperty<T, dimension>>();
 
       // Initialize old states too
-      addGPUPropertyHelper(prop_name, typeid(T), state, nullptr, shell);
+      addKokkosPropertyHelper(prop_name, typeid(T), state, nullptr, shell);
 
       // Only instantiate load and store functions for stateful properties to avoid requiring users
       // to provide custom dataLoad and dataStore for non-trivially-copyable types that are never
@@ -164,13 +164,13 @@ public:
         shell->registerLoadStore();
     }
 
-    auto & prop_base = getGPUPropertyHelper(prop_name, state, nullptr);
-    auto prop_cast = dynamic_cast<GPUMaterialProperty<T, dimension> *>(&prop_base);
+    auto & prop_base = getKokkosPropertyHelper(prop_name, state, nullptr);
+    auto prop_cast = dynamic_cast<Moose::Kokkos::MaterialProperty<T, dimension> *>(&prop_base);
 
     if (!prop_cast)
       mooseError("The requested ",
                  dimension,
-                 "D GPU material property '",
+                 "D Kokkos material property '",
                  prop_name,
                  "' of type '",
                  MooseUtils::prettyCppType<T>(),
@@ -184,21 +184,22 @@ public:
   }
 
   template <typename T, unsigned int dimension>
-  GPUMaterialProperty<T, dimension> declareGPUProperty(const std::string & prop_name,
-                                                       const std::vector<unsigned int> & dims,
-                                                       const MooseObject & requestor,
-                                                       const bool bnd)
+  Moose::Kokkos::MaterialProperty<T, dimension>
+  declareKokkosProperty(const std::string & prop_name,
+                        const std::vector<unsigned int> & dims,
+                        const MooseObject & requestor,
+                        const bool bnd)
   {
-    auto shell = std::make_shared<GPUMaterialProperty<T, dimension>>();
+    auto shell = std::make_shared<Moose::Kokkos::MaterialProperty<T, dimension>>();
 
-    auto & prop_base = declareGPUPropertyHelper(
+    auto & prop_base = declareKokkosPropertyHelper(
         prop_name, typeid(T), 0, &castRequestorToDeclarer(requestor), dims, bnd, shell);
-    auto prop_cast = dynamic_cast<GPUMaterialProperty<T, dimension> *>(&prop_base);
+    auto prop_cast = dynamic_cast<Moose::Kokkos::MaterialProperty<T, dimension> *>(&prop_base);
 
     if (!prop_cast)
       mooseError("The declared ",
                  dimension,
-                 "D GPU material property '",
+                 "D Kokkos material property '",
                  prop_name,
                  "' of type '",
                  MooseUtils::prettyCppType<T>(),
@@ -299,28 +300,28 @@ private:
                                                         const unsigned int state,
                                                         const MooseObject & requestor);
 
-#ifdef MOOSE_HAVE_GPU
-  GPUMaterialPropertyBase &
-  addGPUPropertyHelper(const std::string & prop_name,
-                       const std::type_info & type,
-                       const unsigned int state,
-                       const MaterialBase * declarer,
-                       std::shared_ptr<GPUMaterialPropertyBase> shell) const;
-  GPUMaterialPropertyBase &
-  declareGPUPropertyHelper(const std::string & prop_name,
-                           const std::type_info & type,
-                           const unsigned int state,
-                           const MaterialBase * declarer,
-                           const std::vector<unsigned int> & dims,
-                           const bool bnd,
-                           std::shared_ptr<GPUMaterialPropertyBase> shell) const;
+#ifdef MOOSE_HAVE_KOKKOS
+  Moose::Kokkos::MaterialPropertyBase &
+  addKokkosPropertyHelper(const std::string & prop_name,
+                          const std::type_info & type,
+                          const unsigned int state,
+                          const MaterialBase * declarer,
+                          std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell) const;
+  Moose::Kokkos::MaterialPropertyBase &
+  declareKokkosPropertyHelper(const std::string & prop_name,
+                              const std::type_info & type,
+                              const unsigned int state,
+                              const MaterialBase * declarer,
+                              const std::vector<unsigned int> & dims,
+                              const bool bnd,
+                              std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell) const;
 
-  GPUMaterialPropertyBase &
-  getGPUPropertyHelper(const std::string & prop_name,
-                       const unsigned int state = 0,
-                       std::shared_ptr<GPUMaterialPropertyBase> shell = nullptr) const;
+  Moose::Kokkos::MaterialPropertyBase & getKokkosPropertyHelper(
+      const std::string & prop_name,
+      const unsigned int state = 0,
+      std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell = nullptr) const;
 
-  bool haveGPUPropertyHelper(const std::string & prop_name) const;
+  bool haveKokkosPropertyHelper(const std::string & prop_name) const;
 #endif
 
   static void mooseErrorHelper(const MooseObject & object, const std::string_view & error);

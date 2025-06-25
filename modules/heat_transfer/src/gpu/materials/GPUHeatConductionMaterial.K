@@ -9,12 +9,12 @@
 
 #include "GPUHeatConductionMaterial.h"
 
-registerMooseObject("HeatTransferApp", GPUHeatConductionMaterial);
+registerMooseObject("HeatTransferApp", KokkosHeatConductionMaterial);
 
 InputParameters
-GPUHeatConductionMaterial::validParams()
+KokkosHeatConductionMaterial::validParams()
 {
-  InputParameters params = GPUMaterial::validParams();
+  InputParameters params = Material::validParams();
 
   params.addCoupledVar("temp", "Coupled Temperature");
 
@@ -30,16 +30,16 @@ GPUHeatConductionMaterial::validParams()
   return params;
 }
 
-GPUHeatConductionMaterial::GPUHeatConductionMaterial(const InputParameters & parameters)
-  : GPUMaterial(parameters),
+KokkosHeatConductionMaterial::KokkosHeatConductionMaterial(const InputParameters & parameters)
+  : Material(parameters),
     _has_temp(isCoupled("temp")),
-    _temperature(_has_temp ? GPUCoupledValue("temp") : GPUZeroValue()),
+    _temperature(_has_temp ? KokkosCoupledValue("temp") : KokkosZeroValue()),
     _my_thermal_conductivity(getParam<Real>("thermal_conductivity")),
     _my_specific_heat(getParam<Real>("specific_heat")),
-    _thermal_conductivity(declareGPUProperty<Real>("thermal_conductivity")),
-    _thermal_conductivity_dT(declareGPUProperty<Real>("thermal_conductivity_dT")),
-    _specific_heat(declareGPUProperty<Real>("specific_heat")),
-    _specific_heat_dT(declareGPUProperty<Real>("specific_heat_dT")),
+    _thermal_conductivity(declareKokkosProperty<Real>("thermal_conductivity")),
+    _thermal_conductivity_dT(declareKokkosProperty<Real>("thermal_conductivity_dT")),
+    _specific_heat(declareKokkosProperty<Real>("specific_heat")),
+    _specific_heat_dT(declareKokkosProperty<Real>("specific_heat_dT")),
     _min_T(getParam<Real>("min_T"))
 {
 }

@@ -48,27 +48,32 @@ MaterialBase::MaterialBase(const MaterialBase & object)
 {
 }
 
-InputParameters
-GPUMaterialBase::validParams()
+namespace Moose
 {
-  InputParameters params = MaterialBase::validParams();
+namespace Kokkos
+{
+
+InputParameters
+MaterialBase::validParams()
+{
+  InputParameters params = ::MaterialBase::validParams();
 
   params.suppressParameter<bool>("use_displaced_mesh");
   params.suppressParameter<bool>("compute");
   params.suppressParameter<std::vector<OutputName>>("outputs");
   params.suppressParameter<std::vector<std::string>>("output_properties");
 
-  params.addPrivateParam<bool>("_gpu_object", true);
-  params.addPrivateParam<bool>("_gpu_material", true);
+  params.addPrivateParam<bool>("_kokkos_object", true);
+  params.addPrivateParam<bool>("_kokkos_material", true);
 
   return params;
 }
 
-GPUMaterialBase::GPUMaterialBase(const InputParameters & parameters)
-  : MaterialBase(parameters),
-    GPUMeshHolder(*_fe_problem.mesh().getGPUMesh()),
-    GPUAssemblyHolder(_fe_problem.gpuAssembly()),
-    GPUSystemHolder(_fe_problem.getGPUSystems()),
+MaterialBase::MaterialBase(const InputParameters & parameters)
+  : ::MaterialBase(parameters),
+    MeshHolder(*_fe_problem.mesh().getKokkosMesh()),
+    AssemblyHolder(_fe_problem.kokkosAssembly()),
+    SystemHolder(_fe_problem.getKokkosSystems()),
     _t(TransientInterface::_t),
     _t_old(TransientInterface::_t_old),
     _t_step(TransientInterface::_t_step),
@@ -77,11 +82,11 @@ GPUMaterialBase::GPUMaterialBase(const InputParameters & parameters)
 {
 }
 
-GPUMaterialBase::GPUMaterialBase(const GPUMaterialBase & object)
-  : MaterialBase(object),
-    GPUMeshHolder(object),
-    GPUAssemblyHolder(object),
-    GPUSystemHolder(object),
+MaterialBase::MaterialBase(const MaterialBase & object)
+  : ::MaterialBase(object),
+    MeshHolder(object),
+    AssemblyHolder(object),
+    SystemHolder(object),
     _t(object._t),
     _t_old(object._t_old),
     _t_step(object._t_step),
@@ -93,15 +98,15 @@ GPUMaterialBase::GPUMaterialBase(const GPUMaterialBase & object)
 }
 
 void
-GPUMaterialBase::initialSetup()
+MaterialBase::initialSetup()
 {
   if (materialDataType() == Moose::BLOCK_MATERIAL_DATA)
   {
     std::set<dof_id_type> element_ids;
 
     for (auto block : blockIDs())
-      element_ids.insert(_mesh.getGPUMesh()->getGPUSubdomainElementIDs(block).begin(),
-                         _mesh.getGPUMesh()->getGPUSubdomainElementIDs(block).end());
+      element_ids.insert(_mesh.getKokkosMesh()->getSubdomainElementIDs(block).begin(),
+                         _mesh.getKokkosMesh()->getSubdomainElementIDs(block).end());
 
     _element_ids = element_ids;
   }
@@ -109,7 +114,7 @@ GPUMaterialBase::initialSetup()
   {
     auto & restricted_blocks = boundaryRestricted() ? meshBlockIDs() : blockIDs();
     auto & restricted_boundaries = boundaryRestricted() ? boundaryIDs() : meshBoundaryIDs();
-    auto & material_boundaries = assembly().getMaterialBoundaries();
+    auto & material_boundaries = kokkosAssembly().getMaterialBoundaries();
 
     std::vector<BoundaryID> boundaries;
 
@@ -119,7 +124,7 @@ GPUMaterialBase::initialSetup()
                           material_boundaries.end(),
                           std::back_inserter(boundaries));
 
-    std::set<GPUPair<dof_id_type, unsigned int>> element_side_ids;
+    std::set<Pair<dof_id_type, unsigned int>> element_side_ids;
 
     for (auto boundary : boundaries)
       for (auto elem_id : _mesh.getBoundaryActiveSemiLocalElemIds(boundary))
@@ -128,7 +133,7 @@ GPUMaterialBase::initialSetup()
 
         if (elem->processor_id() == processor_id() &&
             restricted_blocks.find(elem->subdomain_id()) != restricted_blocks.end())
-          element_side_ids.insert({_mesh.getGPUMesh()->getGPUElementID(elem),
+          element_side_ids.insert({_mesh.getKokkosMesh()->getElementID(elem),
                                    _mesh.sideWithBoundaryID(elem, boundary)});
       }
 
@@ -137,21 +142,24 @@ GPUMaterialBase::initialSetup()
 }
 
 void
-GPUMaterialBase::setVariableDependency()
+MaterialBase::setVariableDependency()
 {
   auto needed_moose_vars = getMooseVariableDependencies();
 
-  for (auto & system : systems())
+  for (auto & system : kokkosSystems())
     if (system.initialized())
       system.setActiveVariables(needed_moose_vars);
 
-  systems().copy();
+  kokkosSystems().copy();
 }
 
 void
-GPUMaterialBase::setProjectionFlags()
+MaterialBase::setProjectionFlags()
 {
-  for (auto & system : systems())
+  for (auto & system : kokkosSystems())
     if (system.initialized())
       system.setProjectionFlags(blockIDs());
 }
+
+} // namespace Kokkos
+} // namespace Moose

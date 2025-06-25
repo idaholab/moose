@@ -14,12 +14,12 @@
 /**
  * Implements a simple coupled boundary condition where u=v on the boundary.
  */
-class GPUMatchedValueBC final : public GPUNodalBC<GPUMatchedValueBC>
+class KokkosMatchedValueBC final : public Moose::Kokkos::NodalBC<KokkosMatchedValueBC>
 {
 public:
   static InputParameters validParams();
 
-  GPUMatchedValueBC(const InputParameters & parameters);
+  KokkosMatchedValueBC(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const
   {
@@ -35,7 +35,7 @@ public:
   }
 
 protected:
-  GPUVariableNodalValue _v;
+  Moose::Kokkos::VariableNodalValue _v;
 
   /// The id of the coupled variable
   unsigned int _v_num;

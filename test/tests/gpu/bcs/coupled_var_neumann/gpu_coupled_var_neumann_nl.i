@@ -9,38 +9,38 @@
   [v][]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
   []
   [diff_v]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = v
   []
 []
 
-[GPUBCs]
+[KokkosBCs]
   [left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 'left'
     value = 0
   []
   [right]
-    type = GPUCoupledVarNeumannBC
+    type = KokkosCoupledVarNeumannBC
     variable = u
     boundary = 'right'
     v = v
   []
   [v_left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = v
     boundary = 'left'
     value = 0
   []
   [v_right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = v
     boundary = 'right'
     value = 1

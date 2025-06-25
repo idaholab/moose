@@ -11,19 +11,19 @@
 
 #include "GPUTimeDerivativeNodalKernel.h"
 
-registerMooseObject("MooseApp", GPUTimeDerivativeNodalKernel);
+registerMooseObject("MooseApp", KokkosTimeDerivativeNodalKernel);
 
 InputParameters
-GPUTimeDerivativeNodalKernel::validParams()
+KokkosTimeDerivativeNodalKernel::validParams()
 {
-  InputParameters params = GPUTimeNodalKernel::validParams();
+  InputParameters params = TimeNodalKernel::validParams();
   params.addClassDescription(
       "Forms the contribution to the residual and jacobian of the time derivative term from an ODE "
       "being solved at all nodes.");
   return params;
 }
 
-GPUTimeDerivativeNodalKernel::GPUTimeDerivativeNodalKernel(const InputParameters & parameters)
-  : GPUTimeNodalKernel(parameters)
+KokkosTimeDerivativeNodalKernel::KokkosTimeDerivativeNodalKernel(const InputParameters & parameters)
+  : TimeNodalKernel(parameters)
 {
 }

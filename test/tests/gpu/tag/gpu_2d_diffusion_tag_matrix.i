@@ -26,9 +26,9 @@
   []
 []
 
-[GPUKernels]
+[KokkosKernels]
   [diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
   []
@@ -50,9 +50,9 @@
   []
 []
 
-[GPUBCs]
+[KokkosBCs]
   [left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 3
     value = 0
@@ -60,7 +60,7 @@
   []
 
   [right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 1
     value = 1

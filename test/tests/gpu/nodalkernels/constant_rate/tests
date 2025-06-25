@@ -8,7 +8,7 @@
     exodiff = 'gpu_constant_rate_out.e'
     rel_err = 1e-05
     abs_zero = 1e-08
-    requirement = "The GPU system shall include ability to include contributions to the residual nodes "
+    requirement = "The Kokkos system shall include ability to include contributions to the residual nodes "
                   "of a finite element mesh."
     capabilities = 'kokkos'
   []

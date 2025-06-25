@@ -14,12 +14,12 @@
 /**
  *  Implements a simple consuming reaction term with weak form $(\\psi_i, \\lambda u_h)$.
  */
-class GPUReaction final : public GPUKernel<GPUReaction>
+class KokkosReaction final : public Moose::Kokkos::Kernel<KokkosReaction>
 {
 public:
   static InputParameters validParams();
 
-  GPUReaction(const InputParameters & parameters);
+  KokkosReaction(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -37,5 +37,5 @@ public:
 
 protected:
   /// Scalar coefficient representing the relative amount consumed per unit time
-  GPUScalar<const Real> _rate;
+  Moose::Kokkos::Scalar<const Real> _rate;
 };

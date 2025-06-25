@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
 #include "GPUTypes.h"
 #endif
 
@@ -60,11 +60,11 @@ public:
                        const std::set<SubdomainID> & block_ids,
                        bool nodal);
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Class copy constructor
-   * Used for dispatching GPU parallel calculation.
-   * Only defined for GPU objects.
+   * Used for dispatching Kokkos functor.
+   * Only defined for Kokkos objects.
    */
   BoundaryRestrictable(const BoundaryRestrictable & object);
 #endif
@@ -234,8 +234,8 @@ private:
    */
   void initializeBoundaryRestrictable();
 
-#ifdef MOOSE_HAVE_GPU
-  void initializeGPUBoundaryRestrictable(MooseMesh * mesh);
+#ifdef MOOSE_HAVE_KOKKOS
+  void initializeKokkosBoundaryRestrictable(MooseMesh * mesh);
 #endif
 
 protected:
@@ -245,26 +245,26 @@ protected:
    */
   bool hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const;
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
   /**
-   * GPU-related variables and methods
+   * Kokkos-related variables and methods
    */
 private:
-  /// List of local node IDs this GPU object is operating on
-  GPUArray<dof_id_type> _node_ids;
-  /// List of local element ID - side index pairs this GPU object is operating on
-  GPUArray<GPUPair<dof_id_type, unsigned int>> _element_side_ids;
+  /// List of local node IDs this Kokkos object is operating on
+  Moose::Kokkos::Array<dof_id_type> _node_ids;
+  /// List of local element ID - side index pairs this Kokkos object is operating on
+  Moose::Kokkos::Array<Moose::Kokkos::Pair<dof_id_type, unsigned int>> _element_side_ids;
 #endif
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 protected:
-  /// Get the number of local nodes this GPU object is operating on
+  /// Get the number of local nodes this Kokkos object is operating on
   KOKKOS_FUNCTION auto numBoundaryNodes() const { return _node_ids.size(); }
-  /// Get the number of local sides this GPU object is operating on
+  /// Get the number of local sides this Kokkos object is operating on
   KOKKOS_FUNCTION auto numBoundarySides() const { return _element_side_ids.size(); }
-  /// Get the local node ID this GPU thread is operating on
+  /// Get the local node ID this Kokkos thread is operating on
   KOKKOS_FUNCTION auto boundaryNodeID(size_t idx) const { return _node_ids[idx]; }
-  /// Get the local element ID - side index pair this GPU thread is operating on
+  /// Get the local element ID - side index pair this Kokkos thread is operating on
   KOKKOS_FUNCTION auto boundaryElementSideID(size_t idx) const { return _element_side_ids[idx]; }
 #endif
 };

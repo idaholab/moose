@@ -18,37 +18,37 @@
 #include "FEProblemBase.h"
 
 void
-NonlinearSystemBase::addGPUKernel(const std::string & kernel_name,
-                                  const std::string & name,
-                                  InputParameters & parameters)
+NonlinearSystemBase::addKokkosKernel(const std::string & kernel_name,
+                                     const std::string & name,
+                                     InputParameters & parameters)
 {
   // Create the kernel object via the factory and add to warehouse
-  std::shared_ptr<GPUKernelBase> kernel =
-      _factory.create<GPUKernelBase>(kernel_name, name, parameters);
-  _gpu_kernels.addObject(kernel, 0);
+  std::shared_ptr<Moose::Kokkos::KernelBase> kernel =
+      _factory.create<Moose::Kokkos::KernelBase>(kernel_name, name, parameters);
+  _kokkos_kernels.addObject(kernel, 0);
   postAddResidualObject(*kernel);
 }
 
 void
-NonlinearSystemBase::addGPUNodalKernel(const std::string & kernel_name,
-                                       const std::string & name,
-                                       InputParameters & parameters)
+NonlinearSystemBase::addKokkosNodalKernel(const std::string & kernel_name,
+                                          const std::string & name,
+                                          InputParameters & parameters)
 {
   // Create the kernel object via the factory and add to warehouse
-  std::shared_ptr<GPUNodalKernelBase> kernel =
-      _factory.create<GPUNodalKernelBase>(kernel_name, name, parameters);
-  _gpu_nodal_kernels.addObject(kernel, 0);
+  std::shared_ptr<Moose::Kokkos::NodalKernelBase> kernel =
+      _factory.create<Moose::Kokkos::NodalKernelBase>(kernel_name, name, parameters);
+  _kokkos_nodal_kernels.addObject(kernel, 0);
   postAddResidualObject(*kernel);
 }
 
 void
-NonlinearSystemBase::addGPUBoundaryCondition(const std::string & bc_name,
-                                             const std::string & name,
-                                             InputParameters & parameters)
+NonlinearSystemBase::addKokkosBoundaryCondition(const std::string & bc_name,
+                                                const std::string & name,
+                                                InputParameters & parameters)
 {
   // Create the object
-  std::shared_ptr<GPUBoundaryCondition> bc =
-      _factory.create<GPUBoundaryCondition>(bc_name, name, parameters, 0);
+  std::shared_ptr<Moose::Kokkos::BoundaryCondition> bc =
+      _factory.create<Moose::Kokkos::BoundaryCondition>(bc_name, name, parameters, 0);
   postAddResidualObject(*bc);
 
   // Active BoundaryIDs for the object
@@ -57,10 +57,12 @@ NonlinearSystemBase::addGPUBoundaryCondition(const std::string & bc_name,
   _vars[0].addBoundaryVar(boundary_ids, bc_var);
 
   // Cast to the various types of BCs
-  std::shared_ptr<GPUNodalBCBase> nbc = std::dynamic_pointer_cast<GPUNodalBCBase>(bc);
-  std::shared_ptr<GPUIntegratedBCBase> ibc = std::dynamic_pointer_cast<GPUIntegratedBCBase>(bc);
+  std::shared_ptr<Moose::Kokkos::NodalBCBase> nbc =
+      std::dynamic_pointer_cast<Moose::Kokkos::NodalBCBase>(bc);
+  std::shared_ptr<Moose::Kokkos::IntegratedBCBase> ibc =
+      std::dynamic_pointer_cast<Moose::Kokkos::IntegratedBCBase>(bc);
 
-  // GPUNodalBCBase
+  // NodalBCBase
   if (nbc)
   {
     if (!nbc->variable().isNodal())
@@ -70,29 +72,29 @@ NonlinearSystemBase::addGPUBoundaryCondition(const std::string & bc_name,
                  nbc->variable().name(),
                  "'.");
 
-    _gpu_nodal_bcs.addObject(nbc);
+    _kokkos_nodal_bcs.addObject(nbc);
     _vars[0].addBoundaryVars(boundary_ids, nbc->getCoupledVars());
 
-    // GPUDirichletBCs that are preset
+    // DirichletBCs that are preset
     if (nbc->preset())
-      _gpu_preset_nodal_bcs.addObject(nbc);
+      _kokkos_preset_nodal_bcs.addObject(nbc);
   }
 
-  // GPUIntegratedBCBase
+  // IntegratedBCBase
   else if (ibc)
   {
-    _gpu_integrated_bcs.addObject(ibc);
+    _kokkos_integrated_bcs.addObject(ibc);
     _vars[0].addBoundaryVars(boundary_ids, ibc->getCoupledVars());
   }
 
   else
-    mooseError("Unknown GPUBoundaryCondition type for object named ", bc->name());
+    mooseError("Unknown Kokkos BoundaryCondition type for object named ", bc->name());
 }
 
 void
-NonlinearSystemBase::setGPUInitialSolution()
+NonlinearSystemBase::setKokkosInitialSolution()
 {
-  auto & systems = _fe_problem.getGPUSystems();
+  auto & systems = _fe_problem.getKokkosSystems();
 
   auto tag = _fe_problem.addVectorTag("_solution", Moose::VECTOR_TAG_SOLUTION);
 
@@ -101,31 +103,31 @@ NonlinearSystemBase::setGPUInitialSolution()
   std::set<TagID> needed_fe_var_vector_tags = {tag};
 
   for (auto boundary : _fe_problem.mesh().meshBoundaryIds())
-    _gpu_nodal_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(boundary,
-                                                                      needed_fe_var_vector_tags);
+    _kokkos_nodal_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(boundary,
+                                                                         needed_fe_var_vector_tags);
 
   for (auto & system : systems)
     if (system.initialized())
-      system.sync(needed_fe_var_vector_tags, GPUMemcpyKind::HOST_TO_DEVICE);
+      system.sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
 
   systems.copy();
 
-  for (auto nbc : _gpu_preset_nodal_bcs.getActiveObjects())
-    std::static_pointer_cast<GPUNodalBCBase>(nbc)->presetSolution(tag);
+  for (auto nbc : _kokkos_preset_nodal_bcs.getActiveObjects())
+    std::static_pointer_cast<Moose::Kokkos::NodalBCBase>(nbc)->presetSolution(tag);
 
   Kokkos::fence();
 
-  systems[number()].sync({tag}, GPUMemcpyKind::DEVICE_TO_HOST);
+  systems[number()].sync({tag}, Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
 
   disassociateVectorFromTag(solution(), tag);
 }
 
 void
-NonlinearSystemBase::computeGPUResidual(const std::set<TagID> & tags)
+NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
 {
-  TIME_SECTION("computeGPUResidual", 1);
+  TIME_SECTION("computeKokkosResidual", 1);
 
-  auto & systems = _fe_problem.getGPUSystems();
+  auto & systems = _fe_problem.getKokkosSystems();
 
   systems[number()].setActiveResidualTags(tags);
 
@@ -140,28 +142,30 @@ NonlinearSystemBase::computeGPUResidual(const std::set<TagID> & tags)
 
   for (auto block : _fe_problem.mesh().meshSubdomains())
   {
-    _fe_problem.getGPUMaterialsWarehouse().updateBlockVariableDependency(block, needed_moose_vars);
-    _fe_problem.getGPUMaterialsWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
+    _fe_problem.getKokkosMaterialsWarehouse().updateBlockVariableDependency(block,
+                                                                            needed_moose_vars);
+    _fe_problem.getKokkosMaterialsWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
         block, needed_fe_var_vector_tags);
 
-    _gpu_kernels.updateBlockVariableDependency(block, needed_moose_vars);
-    _gpu_kernels.updateBlockFEVariableCoupledVectorTagDependency(block, needed_fe_var_vector_tags);
-    _gpu_kernels.updateBlockMatPropDependency(block, needed_mat_props);
+    _kokkos_kernels.updateBlockVariableDependency(block, needed_moose_vars);
+    _kokkos_kernels.updateBlockFEVariableCoupledVectorTagDependency(block,
+                                                                    needed_fe_var_vector_tags);
+    _kokkos_kernels.updateBlockMatPropDependency(block, needed_mat_props);
   }
 
   for (auto boundary : _fe_problem.mesh().meshBoundaryIds())
   {
-    _gpu_integrated_bcs.updateBoundaryVariableDependency(boundary, needed_moose_vars);
-    _gpu_integrated_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(
+    _kokkos_integrated_bcs.updateBoundaryVariableDependency(boundary, needed_moose_vars);
+    _kokkos_integrated_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(
         boundary, needed_fe_var_vector_tags);
 
-    _gpu_nodal_bcs.updateBoundaryVariableDependency(boundary, needed_moose_vars);
-    _gpu_nodal_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(boundary,
-                                                                      needed_fe_var_vector_tags);
+    _kokkos_nodal_bcs.updateBoundaryVariableDependency(boundary, needed_moose_vars);
+    _kokkos_nodal_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(boundary,
+                                                                         needed_fe_var_vector_tags);
   }
 
   for (auto boundary : _fe_problem.mesh().meshBoundaryIds())
-    _gpu_integrated_bcs.updateBoundaryMatPropDependency(boundary, needed_mat_props);
+    _kokkos_integrated_bcs.updateBoundaryMatPropDependency(boundary, needed_mat_props);
 
   // Copy data and preallocate quadature point solution vectors
 
@@ -172,8 +176,8 @@ NonlinearSystemBase::computeGPUResidual(const std::set<TagID> & tags)
       system.setActiveVariableTags(needed_fe_var_vector_tags);
 
       {
-        TIME_SECTION("GPUCopy", 1);
-        system.sync(GPUMemcpyKind::HOST_TO_DEVICE);
+        TIME_SECTION("KokkosCopy", 1);
+        system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
         system.preallocate();
       }
     }
@@ -181,38 +185,38 @@ NonlinearSystemBase::computeGPUResidual(const std::set<TagID> & tags)
   systems.copy();
 
   {
-    TIME_SECTION("GPUMaterial", 1);
+    TIME_SECTION("KokkosMaterial", 1);
 
     // Compute material properties
 
-    _fe_problem.prepareGPUMaterials(needed_mat_props);
-    _fe_problem.reinitGPUMaterials();
+    _fe_problem.prepareKokkosMaterials(needed_mat_props);
+    _fe_problem.reinitKokkosMaterials();
   }
 
   {
-    TIME_SECTION("GPUKernel", 1);
+    TIME_SECTION("KokkosKernel", 1);
 
     // Compute kernels
 
-    for (auto kernel : _gpu_kernels.getVectorTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto kernel : _kokkos_kernels.getVectorTagsObjectWarehouse(tags, 0).getActiveObjects())
       kernel->computeResidual();
 
     for (auto nodal_kernel :
-         _gpu_nodal_kernels.getVectorTagsObjectWarehouse(tags, 0).getActiveObjects())
+         _kokkos_nodal_kernels.getVectorTagsObjectWarehouse(tags, 0).getActiveObjects())
       nodal_kernel->computeResidual();
 
-    for (auto ibc : _gpu_integrated_bcs.getVectorTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto ibc : _kokkos_integrated_bcs.getVectorTagsObjectWarehouse(tags, 0).getActiveObjects())
       ibc->computeResidual();
 
-    for (auto nbc : _gpu_nodal_bcs.getVectorTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto nbc : _kokkos_nodal_bcs.getVectorTagsObjectWarehouse(tags, 0).getActiveObjects())
       nbc->computeResidual();
   }
 
   // Copy back residual
 
   {
-    TIME_SECTION("GPUCopy", 1);
-    systems[number()].sync(GPUMemcpyKind::DEVICE_TO_HOST);
+    TIME_SECTION("KokkosCopy", 1);
+    systems[number()].sync(Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
   }
 
   // Clear
@@ -229,11 +233,11 @@ NonlinearSystemBase::computeGPUResidual(const std::set<TagID> & tags)
 }
 
 void
-NonlinearSystemBase::computeGPUJacobian(const std::set<TagID> & tags)
+NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
 {
-  TIME_SECTION("computeGPUJacobian", 1);
+  TIME_SECTION("computeKokkosJacobian", 1);
 
-  auto & systems = _fe_problem.getGPUSystems();
+  auto & systems = _fe_problem.getKokkosSystems();
 
   systems[number()].setActiveMatrixTags(tags);
 
@@ -248,28 +252,30 @@ NonlinearSystemBase::computeGPUJacobian(const std::set<TagID> & tags)
 
   for (auto block : _fe_problem.mesh().meshSubdomains())
   {
-    _fe_problem.getGPUMaterialsWarehouse().updateBlockVariableDependency(block, needed_moose_vars);
-    _fe_problem.getGPUMaterialsWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
+    _fe_problem.getKokkosMaterialsWarehouse().updateBlockVariableDependency(block,
+                                                                            needed_moose_vars);
+    _fe_problem.getKokkosMaterialsWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
         block, needed_fe_var_vector_tags);
 
-    _gpu_kernels.updateBlockVariableDependency(block, needed_moose_vars);
-    _gpu_kernels.updateBlockFEVariableCoupledVectorTagDependency(block, needed_fe_var_vector_tags);
-    _gpu_kernels.updateBlockMatPropDependency(block, needed_mat_props);
+    _kokkos_kernels.updateBlockVariableDependency(block, needed_moose_vars);
+    _kokkos_kernels.updateBlockFEVariableCoupledVectorTagDependency(block,
+                                                                    needed_fe_var_vector_tags);
+    _kokkos_kernels.updateBlockMatPropDependency(block, needed_mat_props);
   }
 
   for (auto boundary : _fe_problem.mesh().meshBoundaryIds())
   {
-    _gpu_integrated_bcs.updateBoundaryVariableDependency(boundary, needed_moose_vars);
-    _gpu_integrated_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(
+    _kokkos_integrated_bcs.updateBoundaryVariableDependency(boundary, needed_moose_vars);
+    _kokkos_integrated_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(
         boundary, needed_fe_var_vector_tags);
 
-    _gpu_nodal_bcs.updateBoundaryVariableDependency(boundary, needed_moose_vars);
-    _gpu_nodal_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(boundary,
-                                                                      needed_fe_var_vector_tags);
+    _kokkos_nodal_bcs.updateBoundaryVariableDependency(boundary, needed_moose_vars);
+    _kokkos_nodal_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(boundary,
+                                                                         needed_fe_var_vector_tags);
   }
 
   for (auto boundary : _fe_problem.mesh().meshBoundaryIds())
-    _gpu_integrated_bcs.updateBoundaryMatPropDependency(boundary, needed_mat_props);
+    _kokkos_integrated_bcs.updateBoundaryMatPropDependency(boundary, needed_mat_props);
 
   // Copy data and preallocate quadature point solution vectors
 
@@ -280,8 +286,8 @@ NonlinearSystemBase::computeGPUJacobian(const std::set<TagID> & tags)
       system.setActiveVariableTags(needed_fe_var_vector_tags);
 
       {
-        TIME_SECTION("GPUPreallocate", 1);
-        system.sync(GPUMemcpyKind::HOST_TO_DEVICE);
+        TIME_SECTION("KokkosPreallocate", 1);
+        system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
         system.preallocate();
       }
     }
@@ -289,38 +295,38 @@ NonlinearSystemBase::computeGPUJacobian(const std::set<TagID> & tags)
   systems.copy();
 
   {
-    TIME_SECTION("GPUMaterial", 1);
+    TIME_SECTION("KokkosMaterial", 1);
 
     // Compute material properties
 
-    _fe_problem.prepareGPUMaterials(needed_mat_props);
-    _fe_problem.reinitGPUMaterials();
+    _fe_problem.prepareKokkosMaterials(needed_mat_props);
+    _fe_problem.reinitKokkosMaterials();
   }
 
   {
-    TIME_SECTION("GPUKernel", 1);
+    TIME_SECTION("KokkosKernel", 1);
 
     // Compute kernels
 
-    for (auto kernel : _gpu_kernels.getMatrixTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto kernel : _kokkos_kernels.getMatrixTagsObjectWarehouse(tags, 0).getActiveObjects())
       kernel->computeJacobian();
 
     for (auto nodal_kernel :
-         _gpu_nodal_kernels.getMatrixTagsObjectWarehouse(tags, 0).getActiveObjects())
+         _kokkos_nodal_kernels.getMatrixTagsObjectWarehouse(tags, 0).getActiveObjects())
       nodal_kernel->computeJacobian();
 
-    for (auto ibc : _gpu_integrated_bcs.getMatrixTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto ibc : _kokkos_integrated_bcs.getMatrixTagsObjectWarehouse(tags, 0).getActiveObjects())
       ibc->computeJacobian();
 
-    for (auto nbc : _gpu_nodal_bcs.getMatrixTagsObjectWarehouse(tags, 0).getActiveObjects())
+    for (auto nbc : _kokkos_nodal_bcs.getMatrixTagsObjectWarehouse(tags, 0).getActiveObjects())
       nbc->computeJacobian();
   }
 
   // Copy back matrix
 
   {
-    TIME_SECTION("GPUCopy", 1);
-    systems[number()].sync(GPUMemcpyKind::DEVICE_TO_HOST);
+    TIME_SECTION("KokkosCopy", 1);
+    systems[number()].sync(Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
   }
 
   // Clear

@@ -15,7 +15,8 @@
  * Implements a constant Neumann BC where grad(u) is a equal to a postprocessor on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class GPUPostprocessorNeumannBC final : public GPUIntegratedBC<GPUPostprocessorNeumannBC>
+class KokkosPostprocessorNeumannBC final
+  : public Moose::Kokkos::IntegratedBC<KokkosPostprocessorNeumannBC>
 {
 public:
   /**
@@ -24,7 +25,7 @@ public:
    */
   static InputParameters validParams();
 
-  GPUPostprocessorNeumannBC(const InputParameters & parameters);
+  KokkosPostprocessorNeumannBC(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -35,5 +36,5 @@ public:
 
 protected:
   /// Value of grad(u) on the boundary.
-  GPUPostprocessorValue _value;
+  Moose::Kokkos::PostprocessorValue _value;
 };

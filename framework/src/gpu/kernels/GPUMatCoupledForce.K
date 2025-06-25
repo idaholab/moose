@@ -11,12 +11,12 @@
 
 #include "MooseVariable.h"
 
-registerMooseObject("MooseApp", GPUMatCoupledForce);
+registerMooseObject("MooseApp", KokkosMatCoupledForce);
 
 InputParameters
-GPUMatCoupledForce::validParams()
+KokkosMatCoupledForce::validParams()
 {
-  InputParameters params = GPUKernel::validParams();
+  InputParameters params = Kernel::validParams();
 
   params.addClassDescription(
       "Implements a forcing term RHS of the form PDE = RHS, where RHS = Sum_j c_j * m_j * v_j. "
@@ -30,12 +30,12 @@ GPUMatCoupledForce::validParams()
   return params;
 }
 
-GPUMatCoupledForce::GPUMatCoupledForce(const InputParameters & parameters)
-  : GPUKernel(parameters),
+KokkosMatCoupledForce::KokkosMatCoupledForce(const InputParameters & parameters)
+  : Kernel(parameters),
     _n_coupled(coupledComponents("v")),
     _coupled_props(isParamValid("material_properties")),
     _v_var(coupledIndices("v")),
-    _v(GPUCoupledValues("v")),
+    _v(KokkosCoupledValues("v")),
     _coef(isParamValid("coef") ? getParam<std::vector<Real>>("coef")
                                : std::vector<Real>(_n_coupled, 1))
 {
@@ -62,6 +62,6 @@ GPUMatCoupledForce::GPUMatCoupledForce(const InputParameters & parameters)
     if (names.size() != _n_coupled)
       paramError("material_properties", "Size must be equal to number of coupled variables");
     for (unsigned int j = 0; j < _n_coupled; ++j)
-      _mat_props[j] = getGPUMaterialPropertyByName<Real>(names[j]);
+      _mat_props[j] = getKokkosMaterialPropertyByName<Real>(names[j]);
   }
 }

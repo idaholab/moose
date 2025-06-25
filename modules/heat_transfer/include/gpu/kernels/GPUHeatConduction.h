@@ -11,32 +11,33 @@
 
 #include "GPUDiffusion.h"
 
-class GPUHeatConduction final : public GPUDiffusion<GPUHeatConduction>
+class KokkosHeatConduction final : public KokkosDiffusion<KokkosHeatConduction>
 {
 public:
   static InputParameters validParams();
 
-  GPUHeatConduction(const InputParameters & parameters);
+  KokkosHeatConduction(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
                                          ResidualDatum & datum) const
   {
-    return _diffusion_coefficient(datum, qp) * GPUDiffusion::computeQpResidual(i, qp, datum);
+    return _diffusion_coefficient(datum, qp) * KokkosDiffusion::computeQpResidual(i, qp, datum);
   }
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
                                          ResidualDatum & datum) const
   {
-    Real jac = _diffusion_coefficient(datum, qp) * GPUDiffusion::computeQpJacobian(i, j, qp, datum);
+    Real jac =
+        _diffusion_coefficient(datum, qp) * KokkosDiffusion::computeQpJacobian(i, j, qp, datum);
     if (_diffusion_coefficient_dT)
       jac += _diffusion_coefficient_dT(datum, qp) * _phi(datum, j, qp) *
-             GPUDiffusion::computeQpResidual(i, qp, datum);
+             KokkosDiffusion::computeQpResidual(i, qp, datum);
     return jac;
   }
 
 private:
-  GPUMaterialProperty<Real> _diffusion_coefficient;
-  GPUMaterialProperty<Real> _diffusion_coefficient_dT;
+  Moose::Kokkos::MaterialProperty<Real> _diffusion_coefficient;
+  Moose::Kokkos::MaterialProperty<Real> _diffusion_coefficient_dT;
 };
