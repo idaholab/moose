@@ -16,7 +16,7 @@ CSGRegion::CSGRegion()
 {
   _region_str = "";
   _region_type = CSGRegion::RegionType::EMPTY;
-};
+}
 
 // halfspace constructor
 CSGRegion::CSGRegion(std::shared_ptr<CSGSurface> & surf, const CSGSurface::Direction direction)
