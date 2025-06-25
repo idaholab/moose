@@ -628,6 +628,38 @@ relativeFuzzyLessThan(const T & var1,
 }
 
 /**
+ * Function which takes the intersection of \p vector1 and \p vector2 and copies them
+ * to \p common while removing the intersection from the original vectors. Depending on
+ * the data type this can be very expensive!
+ */
+template <typename T>
+void
+removeCommonSet(std::vector<T> & vector1, std::vector<T> & vector2, std::vector<T> & common)
+{
+  // Build lookup set from vector1, this should speed up lookups if the vector is long.
+  std::unordered_set<T> set_v1(vector1.begin(), vector1.end());
+
+  // We will collect the common elements into a set (which will speed up the deletion later)
+  std::unordered_set<T> common_set;
+  for (const auto entry : vector2)
+    if (set_v1.count(entry))
+      common_set.insert(entry);
+
+  // We remove common elements from the original vectors
+  vector1.erase(std::remove_if(vector1.begin(),
+                               vector1.end(),
+                               [&](const T & k) { return common_set.count(k); }),
+                vector1.end());
+  vector2.erase(std::remove_if(vector2.begin(),
+                               vector2.end(),
+                               [&](const T & k) { return common_set.count(k); }),
+                vector2.end());
+
+  // Now we just populate the vector
+  common.assign(common_set.begin(), common_set.end());
+}
+
+/**
  * Taken from https://stackoverflow.com/a/257382
  * Evaluating constexpr (Has_size<T>::value) in a templated method over class T will
  * return whether T is a standard container or a singleton
@@ -1030,12 +1062,11 @@ template <typename C, typename It, typename M1, typename M2>
 auto
 findPair(C & container, It start_iterator, const M1 & first, const M2 & second)
 {
-  return std::find_if(start_iterator,
-                      container.end(),
-                      [&](auto & item) {
-                        return wildcardEqual(first, item.first) &&
-                               wildcardEqual(second, item.second);
-                      });
+  return std::find_if(
+      start_iterator,
+      container.end(),
+      [&](auto & item)
+      { return wildcardEqual(first, item.first) && wildcardEqual(second, item.second); });
 }
 
 /**
