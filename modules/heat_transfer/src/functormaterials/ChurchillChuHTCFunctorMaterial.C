@@ -23,7 +23,7 @@ ChurchillChuHTCFunctorMaterialTempl<is_ad>::validParams()
   params.addRequiredParam<MooseFunctorName>("Gr", "Grashof number functor");
   params.addRequiredParam<MooseFunctorName>("k_fluid",
                                             "Fluid thermal conductivity functor [W/(m-K)]");
-  params.addRequiredParam<Real>("length", "Characteristic length [m]");
+  params.addRequiredParam<Real>("diameter", "Cylinder diameter [m]");
   params.addRequiredParam<std::string>(
       "htc_name", "Name to give the heat transfer coefficient functor material property");
 
@@ -37,7 +37,7 @@ ChurchillChuHTCFunctorMaterialTempl<is_ad>::ChurchillChuHTCFunctorMaterialTempl(
     _Pr(getFunctor<GenericReal<is_ad>>("Pr")),
     _Gr(getFunctor<GenericReal<is_ad>>("Gr")),
     _k_fluid(getFunctor<GenericReal<is_ad>>("k_fluid")),
-    _length(getParam<Real>("length"))
+    _diameter(getParam<Real>("diameter"))
 {
   addFunctorProperty<GenericReal<is_ad>>(
       getParam<std::string>("htc_name"),
@@ -52,7 +52,7 @@ ChurchillChuHTCFunctorMaterialTempl<is_ad>::ChurchillChuHTCFunctorMaterialTempl(
         const auto root_Nu = 0.6 + numerator / denominator;
         const auto Nu = Utility::pow<2>(root_Nu);
 
-        return Nu * k_fluid / _length;
+        return Nu * k_fluid / _diameter;
       });
 }
 

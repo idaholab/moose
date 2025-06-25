@@ -1,5 +1,5 @@
 [Tests]
-  design = 'ChurchillChuFunctorMaterial.md'
+  design = 'ChurchillChuHTCFunctorMaterial.md'
   issues = '#30847'
   [test]
     type = CSVDiff

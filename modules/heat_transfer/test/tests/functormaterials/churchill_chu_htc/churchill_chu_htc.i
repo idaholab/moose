@@ -15,7 +15,7 @@ Pr = 0.7
     Pr = ${Pr}
     Gr = ${Gr}
     k_fluid = ${k_fluid}
-    length = ${dia}
+    diameter = ${dia}
     htc_name = htc
   []
 []

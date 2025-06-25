@@ -29,8 +29,8 @@ protected:
   const Moose::Functor<GenericReal<is_ad>> & _Gr;
   /// Fluid thermal conductivity
   const Moose::Functor<GenericReal<is_ad>> & _k_fluid;
-  /// Characteristic length
-  const Real _length;
+  /// Cylinder diameter
+  const Real _diameter;
 };
 
 typedef ChurchillChuHTCFunctorMaterialTempl<false> ChurchillChuHTCFunctorMaterial;
