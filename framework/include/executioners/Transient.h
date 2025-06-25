@@ -27,7 +27,7 @@ public:
   /**
    * The relative L2 norm of the difference between solution and old solution vector.
    */
-  virtual Real relativeSolutionDifferenceNorm() override;
+  virtual Real relativeSolutionDifferenceNorm() const override;
 
 protected:
   virtual std::set<TimeIntegrator *> getTimeIntegrators() const override;
