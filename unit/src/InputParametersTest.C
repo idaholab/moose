@@ -53,10 +53,10 @@ TEST(InputParametersTest, checkRangeCheckedParam)
         << "Range check failed with unexpected error: " << msg;
   }
 
-  const auto test_vector_error = [this](const std::vector<Real> & value,
-                                        const std::string & range_function,
-                                        const bool is_user_error,
-                                        const std::string expect_error)
+  const auto test_vector_error = [](const std::vector<Real> & value,
+                                    const std::string & range_function,
+                                    const bool is_user_error,
+                                    const std::string expect_error)
   {
     InputParameters params = emptyInputParameters();
     const std::string name = "p";
@@ -82,9 +82,9 @@ TEST(InputParametersTest, checkRangeCheckedParam)
   test_vector_error(
       {1}, "p_a = 1", false, "Error parsing expression 'p_a = 1'; invalid variable 'p_a'");
 
-  const auto test_scalar_error = [this](const std::string & range_function,
-                                        const bool is_user_error,
-                                        const std::string expect_error)
+  const auto test_scalar_error = [](const std::string & range_function,
+                                    const bool is_user_error,
+                                    const std::string expect_error)
   {
     InputParameters params = emptyInputParameters();
     const std::string name = "p";
