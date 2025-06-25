@@ -43,7 +43,7 @@ PIMPLE::init()
 }
 
 Real
-PIMPLE::relativeSolutionDifferenceNorm()
+PIMPLE::relativeSolutionDifferenceNorm() const
 {
   if (_check_aux)
     return _aux.solution().l2_norm_diff(_aux.solutionOld()) / _aux.solution().l2_norm();

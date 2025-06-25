@@ -105,9 +105,9 @@ public:
   virtual void setTimeOld(Real t) { _time_old = t; };
 
   /**
-   * Get the Relative L2 norm of the change in the solution.
+   * Compute the relative L2 norm of the change in the solution.
    */
-  Real getSolutionChangeNorm();
+  Real computeSolutionChangeNorm() const;
 
   /**
    * Pointer to the TimeStepper
@@ -213,7 +213,7 @@ public:
   /**
    * The relative L2 norm of the difference between solution and old solution vector.
    */
-  virtual Real relativeSolutionDifferenceNorm() = 0;
+  virtual Real relativeSolutionDifferenceNorm() const = 0;
 
   /**
    * Set the number of time steps
@@ -286,8 +286,6 @@ protected:
   Real _timestep_tolerance;
   Real & _target_time;
   bool _use_multiapp_dt;
-
-  Real & _solution_change_norm;
 
   void setupTimeIntegrator();
 
