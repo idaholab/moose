@@ -28,8 +28,7 @@ GET_TEST_RESULTS_GOLD_PATH = os.path.join(os.path.dirname(__file__), 'gold', 're
 
 DATABASE_NAME = 'civet_tests_moose_performance'
 GET_TEST_RESULTS_ARGS = {'folder_name': 'simple_transient_diffusion',
-                         'test_name': 'test',
-                         'limit': 2}
+                         'test_name': 'test'}
 
 class FakeMongoClient(MongoClient):
     def __init__(self, *args, **kwargs):
@@ -54,18 +53,16 @@ class TestResultsReaderReader(unittest.TestCase):
         using the live database
         """
         # Static set of test IDs (test entires in the database) that we
-        # will always test with. These can be statically updated in the future
-        # by uncommenting the lines a btit below
-        gold_test_ids = ['685b0fdf4110325560e2cc2f', '6857a572bbcb03d9dccfb1a7']
+        # will always test with
+        gold_test_ids = [# civet version 0 tests
+                         '685b0fdf4110325560e2cc2f',
+                         '6857a572bbcb03d9dccfb1a7',
+                         # civet version 1 tests
+                         '685c623b4022db39df9590c3']
         # This can be set to true once to overwrite the gold file
         rewrite_gold = False
 
         reader = TestHarnessResultsReader(DATABASE_NAME)
-
-        # Uncomment this to update the latest test IDs for regolding
-        # (should staticly set the values above from this if needed)
-        # last_ids = [v['_id'] for v in reader._getTestsEntry(**GET_TEST_RESULTS_ARGS)]
-        # print(last_ids)
 
         # Get only the specific tests that we've golded on
         id_filter = {"$or": [{"_id": ObjectId(id)} for id in gold_test_ids]}
@@ -77,6 +74,9 @@ class TestResultsReaderReader(unittest.TestCase):
         for test in tests:
             result = reader._getResultsEntry(test['result_id'])
             results[str(result['_id'])] = result
+
+            # Remove json_metadata as it's lengthy binary
+            test['tester']['json_metadata'] = {}
 
         # Dump the values so that we can load them
         values = {'tests': tests, 'results': results}
@@ -120,13 +120,12 @@ class TestResultsReaderReader(unittest.TestCase):
 
         self.assertEqual(gold, json.loads(new_gold))
 
-    def _testGetTestResults(self, reader: TestHarnessResultsReader) -> list[TestHarnessTestResult]:
+    def _testGetTestResults(self, reader: TestHarnessResultsReader, **kwargs) -> list[TestHarnessTestResult]:
         """
         Helper for testing getTestResults(), regardless of if
         the data was produced from a gold file or live
         """
-        results = reader.getTestResults(**GET_TEST_RESULTS_ARGS)
-        self.assertEqual(len(results), 2)
+        results = reader.getTestResults(**GET_TEST_RESULTS_ARGS, **kwargs)
 
         for result in results:
             self.assertIsInstance(result, TestHarnessTestResult)
@@ -166,7 +165,8 @@ class TestResultsReaderReader(unittest.TestCase):
         patch_get_tests_entry.return_value = gold_tests
 
         reader = TestHarnessResultsReader(DATABASE_NAME, FakeMongoClient())
-        self._testGetTestResults(reader)
+        results = self._testGetTestResults(reader)
+        self.assertEqual(len(results), len(gold_tests))
 
     @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
     def testGetTestResultsLive(self):
@@ -174,7 +174,9 @@ class TestResultsReaderReader(unittest.TestCase):
         Tests calling getTestResults() using the real server, if available
         """
         reader = TestHarnessResultsReader(DATABASE_NAME)
-        self._testGetTestResults(reader)
+        limit = 10
+        results = self._testGetTestResults(reader, limit=limit)
+        self.assertEqual(len(results), limit)
 
     @unittest.skipIf(HAS_AUTH, f"Skipping because authentication is not available")
     def testMissingClient(self):
