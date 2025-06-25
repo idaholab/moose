@@ -126,11 +126,8 @@ EquationSystem::ApplyEssentialBCs()
     // Set default value of gridfunction used in essential BC. Values
     // overwritten in applyEssentialBCs
     mfem::ParGridFunction & trial_gf(*(_xs.at(i)));
-    mfem::ParGridFunction & trial_gf_time_derivatives(*(_dxdts.at(i)));
     auto * const pmesh = _test_pfespaces.at(i)->GetParMesh();
     mooseAssert(pmesh, "parallel mesh is null");
-    trial_gf = 0.0;
-    trial_gf_time_derivatives = 0.0;
 
     auto bcs = _essential_bc_map.GetRef(test_var_name);
     mfem::Array<int> global_ess_markers(pmesh->bdr_attributes.Max());
