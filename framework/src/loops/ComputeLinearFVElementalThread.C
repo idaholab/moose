@@ -13,15 +13,12 @@
 #include "LinearFVElementalKernel.h"
 #include "FEProblemBase.h"
 
-ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(
-    FEProblemBase & fe_problem,
-    const unsigned int linear_system_num,
-    const Moose::FV::LinearFVComputationMode mode,
-    const std::set<TagID> & vector_tags,
-    const std::set<TagID> & matrix_tags)
+ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(FEProblemBase & fe_problem,
+                                                               const unsigned int system_num,
+                                                               const std::set<TagID> & vector_tags,
+                                                               const std::set<TagID> & matrix_tags)
   : _fe_problem(fe_problem),
-    _linear_system_number(linear_system_num),
-    _mode(mode),
+    _system_number(system_num),
     _vector_tags(vector_tags),
     _matrix_tags(matrix_tags),
     _subdomain(Moose::INVALID_BLOCK_ID),
@@ -33,8 +30,7 @@ ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(
 ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(ComputeLinearFVElementalThread & x,
                                                                Threads::split /*split*/)
   : _fe_problem(x._fe_problem),
-    _linear_system_number(x._linear_system_number),
-    _mode(x._mode),
+    _system_number(x._system_number),
     _vector_tags(x._vector_tags),
     _matrix_tags(x._matrix_tags),
     _subdomain(x._subdomain),
@@ -63,16 +59,29 @@ ComputeLinearFVElementalThread::operator()(const ElemInfoRange & range)
     }
 
     const Real elem_volume = elem_info->volume() * elem_info->coordFactor();
-    for (auto kernel : _fv_kernels)
+
+    // First, we execute the kernels that contribute to both the matrix and
+    // right hand side
+    for (auto kernel : _fv_kernels_system)
     {
       kernel->setCurrentElemInfo(elem_info);
       kernel->setCurrentElemVolume(elem_volume);
-      if (_mode == Moose::FV::LinearFVComputationMode::Matrix ||
-          _mode == Moose::FV::LinearFVComputationMode::FullSystem)
-        kernel->addMatrixContribution();
-      if (_mode == Moose::FV::LinearFVComputationMode::RHS ||
-          _mode == Moose::FV::LinearFVComputationMode::FullSystem)
-        kernel->addRightHandSideContribution();
+      kernel->addMatrixContribution();
+      kernel->addRightHandSideContribution();
+    }
+    // Second, we execute the kernels that contribute to the matrix only
+    for (auto kernel : _fv_kernels_matrix)
+    {
+      kernel->setCurrentElemInfo(elem_info);
+      kernel->setCurrentElemVolume(elem_volume);
+      kernel->addMatrixContribution();
+    }
+    // Lastly, we execute the kernels that contribute to the right hand side only
+    for (auto kernel : _fv_kernels_rhs)
+    {
+      kernel->setCurrentElemInfo(elem_info);
+      kernel->setCurrentElemVolume(elem_volume);
+      kernel->addRightHandSideContribution();
     }
   }
 }
@@ -85,23 +94,21 @@ ComputeLinearFVElementalThread::join(const ComputeLinearFVElementalThread & /*y*
 void
 ComputeLinearFVElementalThread::fetchSystemContributionObjects()
 {
-  const auto system_number = _fe_problem.getLinearSystem(_linear_system_number).number();
-  _fv_kernels.clear();
-  std::vector<LinearFVElementalKernel *> kernels;
+  // std::vector<LinearFVElementalKernel *> kernels_rhs;
+  // std::vector<LinearFVElementalKernel *> kernels_matrix;
   auto base_query = _fe_problem.theWarehouse()
                         .query()
-                        .template condition<AttribSysNum>(system_number)
+                        .template condition<AttribSysNum>(_system_number)
                         .template condition<AttribSubdomains>(_subdomain)
                         .template condition<AttribSystem>("LinearFVElementalKernel")
                         .template condition<AttribThread>(_tid);
 
-  if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
-    base_query.condition<AttribMatrixTags>(_matrix_tags).queryInto(kernels);
-  else
-    base_query.condition<AttribVectorTags>(_vector_tags).queryInto(kernels);
+  base_query.condition<AttribMatrixTags>(_matrix_tags).queryInto(_fv_kernels_matrix);
+  base_query.condition<AttribVectorTags>(_vector_tags).queryInto(_fv_kernels_rhs);
   _old_subdomain = _subdomain;
 
-  _fv_kernels = std::vector<LinearFVElementalKernel *>(kernels.begin(), kernels.end());
+  // This will remove the common elements
+  MooseUtils::removeCommonSet(_fv_kernels_matrix, _fv_kernels_rhs, _fv_kernels_system);
 }
 
 void
@@ -121,7 +128,8 @@ ComputeLinearFVElementalThread::printGeneralExecutionInformation() const
 void
 ComputeLinearFVElementalThread::printBlockExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_fv_kernels.size())
+  if (!_fe_problem.shouldPrintExecution(_tid) || !_fv_kernels_matrix.size() ||
+      !_fv_kernels_rhs.size() || !_fv_kernels_system.size())
     return;
 
   auto & console = _fe_problem.console();
@@ -130,8 +138,13 @@ ComputeLinearFVElementalThread::printBlockExecutionInformation() const
 
   // Print the list of objects
   std::vector<MooseObject *> kernels_to_print;
-  for (const auto & kernel : _fv_kernels)
+  for (const auto & kernel : _fv_kernels_matrix)
     kernels_to_print.push_back(dynamic_cast<MooseObject *>(kernel));
+  for (const auto & kernel : _fv_kernels_rhs)
+    kernels_to_print.push_back(dynamic_cast<MooseObject *>(kernel));
+  for (const auto & kernel : _fv_kernels_system)
+    kernels_to_print.push_back(dynamic_cast<MooseObject *>(kernel));
+
   console << ConsoleUtils::formatString(ConsoleUtils::mooseObjectVectorToString(kernels_to_print),
                                         "[DBG]")
           << std::endl;

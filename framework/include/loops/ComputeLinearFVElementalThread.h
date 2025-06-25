@@ -39,7 +39,6 @@ public:
    */
   ComputeLinearFVElementalThread(FEProblemBase & fe_problem,
                                  const unsigned int linear_system_num,
-                                 const Moose::FV::LinearFVComputationMode mode,
                                  const std::set<TagID> & vector_tags,
                                  const std::set<TagID> & matrix_tags);
   /**
@@ -72,10 +71,7 @@ protected:
   FEProblemBase & _fe_problem;
 
   /// The number of the linear system we are contributing to
-  const unsigned int _linear_system_number;
-
-  /// The mode in which this thread is operating
-  const Moose::FV::LinearFVComputationMode _mode;
+  const unsigned int _system_number;
 
   /// The vector tags this thread contributes to
   const std::set<TagID> & _vector_tags;
@@ -93,6 +89,17 @@ protected:
   SubdomainID _old_subdomain;
 
   /// The set of cached elemental kernels which will be executed on a given element.
-  /// This member variable is changed on a per-block basis.
-  std::vector<LinearFVElementalKernel *> _fv_kernels;
+  /// This member variable is changed on a per-block basis. Will contribute to the
+  /// matrix only.
+  std::vector<LinearFVElementalKernel *> _fv_kernels_matrix;
+
+  /// The set of cached elemental kernels which will be executed on a given element.
+  /// This member variable is changed on a per-block basis. Will contribute to the
+  /// right hand side only.
+  std::vector<LinearFVElementalKernel *> _fv_kernels_rhs;
+
+  /// The set of cached elemental kernels which will be executed on a given element.
+  /// This member variable is changed on a per-block basis. Will contribute to the
+  /// matrix and the right hand side.
+  std::vector<LinearFVElementalKernel *> _fv_kernels_system;
 };
