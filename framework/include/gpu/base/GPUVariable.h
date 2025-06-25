@@ -16,9 +16,14 @@
 
 class Coupleable;
 
-class GPUVariable
+namespace Moose
 {
-  friend class Coupleable;
+namespace Kokkos
+{
+
+class Variable
+{
+  friend class ::Coupleable;
 
 private:
   // Whether this variable was coupled
@@ -28,20 +33,20 @@ private:
   // The vector tag ID
   TagID _tag = Moose::INVALID_TAG_ID;
   // Variable number of each component
-  GPUArray<unsigned int> _var;
+  Array<unsigned int> _var;
   // System number of each component
-  GPUArray<unsigned int> _sys;
+  Array<unsigned int> _sys;
   // Default value of each component
-  GPUArray<Real> _default_value;
+  Array<Real> _default_value;
 
 public:
-  GPUVariable() {}
-  GPUVariable(const MooseVariableBase & variable, const TagID tag) { init(variable, tag); }
-  GPUVariable(const MooseVariableBase & variable, const TagName & tag_name = Moose::SOLUTION_TAG)
+  Variable() {}
+  Variable(const MooseVariableBase & variable, const TagID tag) { init(variable, tag); }
+  Variable(const MooseVariableBase & variable, const TagName & tag_name = Moose::SOLUTION_TAG)
   {
     init(variable, tag_name);
   }
-  // Initialize this GPU variable from a MOOSE variable
+  // Initialize this Kokkos variable from a MOOSE variable
   void init(const MooseVariableBase & variable, const TagName & tag_name = Moose::SOLUTION_TAG);
   void init(const MooseVariableBase & variable, const TagID tag);
 
@@ -53,3 +58,6 @@ public:
   KOKKOS_FUNCTION unsigned int sys(unsigned int comp = 0) const { return _sys[comp]; }
   KOKKOS_FUNCTION Real value(unsigned int comp = 0) const { return _default_value[comp]; }
 };
+
+} // namespace Kokkos
+} // namespace Moose

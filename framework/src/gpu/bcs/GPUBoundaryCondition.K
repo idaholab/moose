@@ -9,10 +9,15 @@
 
 #include "GPUBoundaryCondition.h"
 
-InputParameters
-GPUBoundaryCondition::validParams()
+namespace Moose
 {
-  InputParameters params = GPUResidualObject::validParams();
+namespace Kokkos
+{
+
+InputParameters
+BoundaryCondition::validParams()
+{
+  InputParameters params = ResidualObject::validParams();
   params += BoundaryRestrictableRequired::validParams();
 
   params.registerBase("BoundaryCondition");
@@ -20,14 +25,17 @@ GPUBoundaryCondition::validParams()
   return params;
 }
 
-GPUBoundaryCondition::GPUBoundaryCondition(const InputParameters & parameters,
-                                           Moose::VarFieldType field_type,
-                                           bool nodal)
-  : GPUResidualObject(parameters, field_type, nodal), BoundaryRestrictableRequired(this, nodal)
+BoundaryCondition::BoundaryCondition(const InputParameters & parameters,
+                                     Moose::VarFieldType field_type,
+                                     bool nodal)
+  : ResidualObject(parameters, field_type, nodal), BoundaryRestrictableRequired(this, nodal)
 {
 }
 
-GPUBoundaryCondition::GPUBoundaryCondition(const GPUBoundaryCondition & object)
-  : GPUResidualObject(object), BoundaryRestrictableRequired(object)
+BoundaryCondition::BoundaryCondition(const BoundaryCondition & object)
+  : ResidualObject(object), BoundaryRestrictableRequired(object)
 {
 }
+
+} // namespace Kokkos
+} // namespace Moose

@@ -9,18 +9,18 @@
 
 #include "GPUDiffusion.h"
 
-registerMooseObjectAliased("MooseApp", GPUDiffusionKernel, "GPUDiffusion");
+registerMooseObjectAliased("MooseApp", KokkosDiffusionKernel, "KokkosDiffusion");
 
 InputParameters
-GPUDiffusionKernel::validParams()
+KokkosDiffusionKernel::validParams()
 {
-  InputParameters params = GPUDiffusion::validParams();
+  InputParameters params = KokkosDiffusion::validParams();
   params.addClassDescription("The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak "
                              "form of $(\\nabla \\phi_i, \\nabla u_h)$.");
   return params;
 }
 
-GPUDiffusionKernel::GPUDiffusionKernel(const InputParameters & parameters)
-  : GPUDiffusion(parameters)
+KokkosDiffusionKernel::KokkosDiffusionKernel(const InputParameters & parameters)
+  : KokkosDiffusion(parameters)
 {
 }

@@ -21,14 +21,14 @@ BoundaryRestrictable::BoundaryRestrictable(const BoundaryRestrictable & object)
 }
 
 void
-BoundaryRestrictable::initializeGPUBoundaryRestrictable(MooseMesh * mesh)
+BoundaryRestrictable::initializeKokkosBoundaryRestrictable(MooseMesh * mesh)
 {
-  if (_moose_object.isParamValid("_gpu_material"))
+  if (_moose_object.isParamValid("_kokkos_material"))
     return;
 
   auto & boundaries = boundaryRestricted() ? boundaryIDs() : meshBoundaryIDs();
 
-  auto gpu_mesh = mesh->getGPUMesh();
+  auto kokkos_mesh = mesh->getKokkosMesh();
 
   if (_bnd_nodal)
   {
@@ -38,13 +38,13 @@ BoundaryRestrictable::initializeGPUBoundaryRestrictable(MooseMesh * mesh)
       for (const auto node : as_range(mesh->getMesh().bid_nodes_begin(boundary),
                                       mesh->getMesh().bid_nodes_end(boundary)))
         if (node->processor_id() == _moose_object.processor_id())
-          node_ids.insert(gpu_mesh->getGPUNodeID(node));
+          node_ids.insert(kokkos_mesh->getNodeID(node));
 
     _node_ids = node_ids;
   }
   else
   {
-    std::set<GPUPair<dof_id_type, unsigned int>> element_side_ids;
+    std::set<Moose::Kokkos::Pair<dof_id_type, unsigned int>> element_side_ids;
 
     for (auto boundary : boundaries)
       for (auto elem_id : mesh->getBoundaryActiveSemiLocalElemIds(boundary))
@@ -53,7 +53,7 @@ BoundaryRestrictable::initializeGPUBoundaryRestrictable(MooseMesh * mesh)
 
         if (elem->processor_id() == _moose_object.processor_id())
           element_side_ids.insert(
-              {gpu_mesh->getGPUElementID(elem), mesh->sideWithBoundaryID(elem, boundary)});
+              {kokkos_mesh->getElementID(elem), mesh->sideWithBoundaryID(elem, boundary)});
       }
 
     _element_side_ids = element_side_ids;

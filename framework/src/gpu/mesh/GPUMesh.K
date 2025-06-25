@@ -11,18 +11,23 @@
 
 #include "MooseMesh.h"
 
+namespace Moose
+{
+namespace Kokkos
+{
+
 void
-GPUMesh::update()
+Mesh::update()
 {
   initMap();
   initElement();
 }
 
 void
-GPUMesh::initMap()
+Mesh::initMap()
 {
   if (!_maps)
-    _maps = std::make_shared<GPUMeshMap>();
+    _maps = std::make_shared<MeshMap>();
 
   _maps->_subdomain_id_mapping.clear();
   _maps->_elem_type_id_mapping.clear();
@@ -68,11 +73,11 @@ GPUMesh::initMap()
 }
 
 void
-GPUMesh::initElement()
+Mesh::initElement()
 {
   // Cache element data
 
-  auto num_elems = getGPULocalElementMap().size();
+  auto num_elems = getLocalElementMap().size();
 
   _elem_info.create(num_elems);
   _elem_neighbor.create(_mesh.getMaxSidesPerElem(), num_elems);
@@ -80,12 +85,12 @@ GPUMesh::initElement()
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    auto sid = getGPUSubdomainID(subdomain);
+    auto sid = getSubdomainID(subdomain);
 
-    for (auto & [elem, local_id] : getGPUSubdomainLocalElementMap(subdomain))
+    for (auto & [elem, local_id] : getSubdomainLocalElementMap(subdomain))
     {
-      auto eid = getGPUElementID(elem);
-      auto elem_type = getGPUElementTypeID(elem);
+      auto eid = getElementID(elem);
+      auto elem_type = getElementTypeID(elem);
 
       _elem_info[eid].type = elem_type;
       _elem_info[eid].id = eid;
@@ -104,23 +109,23 @@ GPUMesh::initElement()
 
   // Cache node data
 
-  auto num_nodes = getGPULocalNodeMap().size();
+  auto num_nodes = getLocalNodeMap().size();
 
   _points.create(num_nodes);
   _nodes.create(_mesh.getMaxNodesPerElem(), num_elems);
   _nodes_face.create(_mesh.getMaxNodesPerSide(), _mesh.getMaxSidesPerElem(), num_elems);
 
-  for (auto & [node, nid] : getGPULocalNodeMap())
+  for (auto & [node, nid] : getLocalNodeMap())
     _points[nid] = *node;
 
-  for (auto & [elem, eid] : getGPULocalElementMap())
+  for (auto & [elem, eid] : getLocalElementMap())
   {
     for (unsigned int node = 0; node < elem->n_nodes(); ++node)
-      _nodes(node, eid) = getGPUNodeID(elem->node_ptr(node));
+      _nodes(node, eid) = getNodeID(elem->node_ptr(node));
 
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
       for (unsigned int node = 0; node < elem->side_ptr(side)->n_nodes(); ++node)
-        _nodes_face(node, side, eid) = getGPUNodeID(elem->side_ptr(side)->node_ptr(node));
+        _nodes_face(node, side, eid) = getNodeID(elem->side_ptr(side)->node_ptr(node));
   }
 
   _points.copy();
@@ -129,54 +134,57 @@ GPUMesh::initElement()
 }
 
 SubdomainID
-GPUMesh::getGPUSubdomainID(const SubdomainID subdomain) const
+Mesh::getSubdomainID(const SubdomainID subdomain) const
 {
   if (!_maps->_subdomain_id_mapping.count(subdomain))
-    mooseError("Subdomain ", subdomain, " does not have GPU subdomain ID");
+    mooseError("Subdomain ", subdomain, " does not have Kokkos subdomain ID");
 
   return _maps->_subdomain_id_mapping.at(subdomain);
 }
 
 unsigned int
-GPUMesh::getGPUElementTypeID(const Elem * elem) const
+Mesh::getElementTypeID(const Elem * elem) const
 {
   mooseAssert(elem, "Element pointer is null");
 
   if (!_maps->_elem_type_id_mapping.count(elem->type()))
-    mooseError("Element type ", elem->type(), " does not have GPU element type ID");
+    mooseError("Element type ", elem->type(), " does not have Kokkos element type ID");
 
   return _maps->_elem_type_id_mapping.at(elem->type());
 }
 
 dof_id_type
-GPUMesh::getGPUElementID(const Elem * elem) const
+Mesh::getElementID(const Elem * elem) const
 {
   mooseAssert(elem, "Element pointer is null");
 
   if (!_maps->_local_elem_id_mapping.count(elem))
-    mooseError("Element ", elem->id(), " does not have GPU element ID");
+    mooseError("Element ", elem->id(), " does not have Kokkos element ID");
 
   return _maps->_local_elem_id_mapping.at(elem);
 }
 
 dof_id_type
-GPUMesh::getGPUSubdomainLocalElementID(const Elem * elem) const
+Mesh::getSubdomainLocalElementID(const Elem * elem) const
 {
   mooseAssert(elem, "Element pointer is null");
 
   if (!_maps->_subdomain_local_elem_id_mapping.at(elem->subdomain_id()).count(elem))
-    mooseError("Element ", elem->id(), " does not have GPU element ID");
+    mooseError("Element ", elem->id(), " does not have Kokkos element ID");
 
   return _maps->_subdomain_local_elem_id_mapping.at(elem->subdomain_id()).at(elem);
 }
 
 dof_id_type
-GPUMesh::getGPUNodeID(const Node * node) const
+Mesh::getNodeID(const Node * node) const
 {
   mooseAssert(node, "Node pointer is null");
 
   if (!_maps->_local_node_id_mapping.count(node))
-    mooseError("Node ", node->id(), " does not have GPU node ID");
+    mooseError("Node ", node->id(), " does not have Kokkos node ID");
 
   return _maps->_local_node_id_mapping.at(node);
 }
+
+} // namespace Kokkos
+} // namespace Moose

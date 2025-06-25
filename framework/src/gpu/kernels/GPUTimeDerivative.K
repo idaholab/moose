@@ -9,18 +9,18 @@
 
 #include "GPUTimeDerivative.h"
 
-registerMooseObjectAliased("MooseApp", GPUTimeDerivativeKernel, "GPUTimeDerivative");
+registerMooseObjectAliased("MooseApp", KokkosTimeDerivativeKernel, "KokkosTimeDerivative");
 
 InputParameters
-GPUTimeDerivativeKernel::validParams()
+KokkosTimeDerivativeKernel::validParams()
 {
-  InputParameters params = GPUTimeDerivative::validParams();
+  InputParameters params = KokkosTimeDerivative::validParams();
   params.addClassDescription("The time derivative operator with the weak form of $(\\psi_i, "
                              "\\frac{\\partial u_h}{\\partial t})$.");
   return params;
 }
 
-GPUTimeDerivativeKernel::GPUTimeDerivativeKernel(const InputParameters & parameters)
-  : GPUTimeDerivative(parameters)
+KokkosTimeDerivativeKernel::KokkosTimeDerivativeKernel(const InputParameters & parameters)
+  : KokkosTimeDerivative(parameters)
 {
 }

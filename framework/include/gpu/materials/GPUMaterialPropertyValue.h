@@ -12,26 +12,31 @@
 #include "GPUMaterialProperty.h"
 #include "GPUDatum.h"
 
-#define usingGPUMaterialPropertyValueBaseMembers(T, dimension)                                     \
-  using GPUMaterialPropertyValueBase<T, dimension>::_qp;                                           \
-  using GPUMaterialPropertyValueBase<T, dimension>::_data;                                         \
-  using GPUMaterialPropertyValueBase<T, dimension>::_value;
+#define usingKokkosMaterialPropertyValueBaseMembers(T, dimension)                                  \
+  using MaterialPropertyValueBase<T, dimension>::_qp;                                              \
+  using MaterialPropertyValueBase<T, dimension>::_data;                                            \
+  using MaterialPropertyValueBase<T, dimension>::_value;
+
+namespace Moose
+{
+namespace Kokkos
+{
 
 template <typename T, unsigned int dimension>
-class GPUMaterialPropertyValueBase
+class MaterialPropertyValueBase
 {
 protected:
   // Current quadrature point
   const dof_id_type _qp;
   // Data array
-  const GPUArray<T, dimension + 1> * _data;
+  const Array<T, dimension + 1> * _data;
   // Default value
   const T & _value;
 
 public:
-  KOKKOS_FUNCTION GPUMaterialPropertyValueBase(const GPUMaterialProperty<T, dimension> & property,
-                                               SubdomainID sid,
-                                               dof_id_type qp)
+  KOKKOS_FUNCTION MaterialPropertyValueBase(const MaterialProperty<T, dimension> & property,
+                                            SubdomainID sid,
+                                            dof_id_type qp)
     : _qp(qp), _data(property._default ? nullptr : &property._data[sid]), _value(property._value)
   {
   }
@@ -40,21 +45,19 @@ public:
 };
 
 template <typename T, unsigned int dimension>
-class GPUMaterialPropertyValue
+class MaterialPropertyValue
 {
 };
 
 template <typename T>
-class GPUMaterialPropertyValue<T, 0> : public GPUMaterialPropertyValueBase<T, 0>
+class MaterialPropertyValue<T, 0> : public MaterialPropertyValueBase<T, 0>
 {
-  usingGPUMaterialPropertyValueBaseMembers(T, 0);
+  usingKokkosMaterialPropertyValueBaseMembers(T, 0);
 
 public:
   KOKKOS_FUNCTION
-  GPUMaterialPropertyValue(const GPUMaterialProperty<T, 0> & property,
-                           SubdomainID sid,
-                           dof_id_type qp)
-    : GPUMaterialPropertyValueBase<T, 0>(property, sid, qp)
+  MaterialPropertyValue(const MaterialProperty<T, 0> & property, SubdomainID sid, dof_id_type qp)
+    : MaterialPropertyValueBase<T, 0>(property, sid, qp)
   {
   }
   KOKKOS_FUNCTION operator const T &() const { return _data ? (*_data)(_qp) : _value; }
@@ -64,7 +67,7 @@ public:
 
     return *this;
   }
-  KOKKOS_FUNCTION auto & operator=(const GPUMaterialPropertyValue<T, 0> & property)
+  KOKKOS_FUNCTION auto & operator=(const MaterialPropertyValue<T, 0> & property)
   {
     (*_data)(_qp) = static_cast<T>(property);
 
@@ -73,16 +76,14 @@ public:
 };
 
 template <typename T>
-class GPUMaterialPropertyValue<T, 1> : public GPUMaterialPropertyValueBase<T, 1>
+class MaterialPropertyValue<T, 1> : public MaterialPropertyValueBase<T, 1>
 {
-  usingGPUMaterialPropertyValueBaseMembers(T, 1);
+  usingKokkosMaterialPropertyValueBaseMembers(T, 1);
 
 public:
   KOKKOS_FUNCTION
-  GPUMaterialPropertyValue(const GPUMaterialProperty<T, 1> & property,
-                           SubdomainID sid,
-                           dof_id_type qp)
-    : GPUMaterialPropertyValueBase<T, 1>(property, sid, qp)
+  MaterialPropertyValue(const MaterialProperty<T, 1> & property, SubdomainID sid, dof_id_type qp)
+    : MaterialPropertyValueBase<T, 1>(property, sid, qp)
   {
   }
   KOKKOS_FUNCTION T & operator()(unsigned int x) { return (*_data)(x, _qp); }
@@ -93,16 +94,14 @@ public:
 };
 
 template <typename T>
-class GPUMaterialPropertyValue<T, 2> : public GPUMaterialPropertyValueBase<T, 2>
+class MaterialPropertyValue<T, 2> : public MaterialPropertyValueBase<T, 2>
 {
-  usingGPUMaterialPropertyValueBaseMembers(T, 2);
+  usingKokkosMaterialPropertyValueBaseMembers(T, 2);
 
 public:
   KOKKOS_FUNCTION
-  GPUMaterialPropertyValue(const GPUMaterialProperty<T, 2> & property,
-                           SubdomainID sid,
-                           dof_id_type qp)
-    : GPUMaterialPropertyValueBase<T, 2>(property, sid, qp)
+  MaterialPropertyValue(const MaterialProperty<T, 2> & property, SubdomainID sid, dof_id_type qp)
+    : MaterialPropertyValueBase<T, 2>(property, sid, qp)
   {
   }
   KOKKOS_FUNCTION T & operator()(unsigned int x, unsigned int y) { return (*_data)(x, y, _qp); }
@@ -113,16 +112,14 @@ public:
 };
 
 template <typename T>
-class GPUMaterialPropertyValue<T, 3> : public GPUMaterialPropertyValueBase<T, 3>
+class MaterialPropertyValue<T, 3> : public MaterialPropertyValueBase<T, 3>
 {
-  usingGPUMaterialPropertyValueBaseMembers(T, 3);
+  usingKokkosMaterialPropertyValueBaseMembers(T, 3);
 
 public:
   KOKKOS_FUNCTION
-  GPUMaterialPropertyValue(const GPUMaterialProperty<T, 3> & property,
-                           SubdomainID sid,
-                           dof_id_type qp)
-    : GPUMaterialPropertyValueBase<T, 3>(property, sid, qp)
+  MaterialPropertyValue(const MaterialProperty<T, 3> & property, SubdomainID sid, dof_id_type qp)
+    : MaterialPropertyValueBase<T, 3>(property, sid, qp)
   {
   }
   KOKKOS_FUNCTION T & operator()(unsigned int x, unsigned int y, unsigned int z)
@@ -136,16 +133,14 @@ public:
 };
 
 template <typename T>
-class GPUMaterialPropertyValue<T, 4> : public GPUMaterialPropertyValueBase<T, 4>
+class MaterialPropertyValue<T, 4> : public MaterialPropertyValueBase<T, 4>
 {
-  usingGPUMaterialPropertyValueBaseMembers(T, 4);
+  usingKokkosMaterialPropertyValueBaseMembers(T, 4);
 
 public:
   KOKKOS_FUNCTION
-  GPUMaterialPropertyValue(const GPUMaterialProperty<T, 4> & property,
-                           SubdomainID sid,
-                           dof_id_type qp)
-    : GPUMaterialPropertyValueBase<T, 4>(property, sid, qp)
+  MaterialPropertyValue(const MaterialProperty<T, 4> & property, SubdomainID sid, dof_id_type qp)
+    : MaterialPropertyValueBase<T, 4>(property, sid, qp)
   {
   }
   KOKKOS_FUNCTION T & operator()(unsigned int x, unsigned int y, unsigned int z, unsigned int w)
@@ -160,11 +155,14 @@ public:
 };
 
 template <typename T, unsigned int dimension>
-KOKKOS_FUNCTION GPUMaterialPropertyValue<T, dimension>
-GPUMaterialProperty<T, dimension>::operator()(Datum & datum, unsigned int qp) const
+KOKKOS_FUNCTION MaterialPropertyValue<T, dimension>
+MaterialProperty<T, dimension>::operator()(Datum & datum, unsigned int qp) const
 {
   auto & elem = datum.elem();
   auto qp_offset = datum.qpOffset();
 
-  return GPUMaterialPropertyValue<T, dimension>(*this, elem.subdomain, qp_offset + qp);
+  return MaterialPropertyValue<T, dimension>(*this, elem.subdomain, qp_offset + qp);
 }
+
+} // namespace Kokkos
+} // namespace Moose

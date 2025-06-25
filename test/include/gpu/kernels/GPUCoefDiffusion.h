@@ -11,12 +11,12 @@
 
 #include "GPUKernel.h"
 
-class GPUCoefDiffusion final : public GPUKernel<GPUCoefDiffusion>
+class KokkosCoefDiffusion final : public Moose::Kokkos::Kernel<KokkosCoefDiffusion>
 {
 public:
   static InputParameters validParams();
 
-  GPUCoefDiffusion(const InputParameters & parameters);
+  KokkosCoefDiffusion(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -34,5 +34,5 @@ public:
   }
 
 protected:
-  GPUScalar<const Real> _coef;
+  Moose::Kokkos::Scalar<const Real> _coef;
 };

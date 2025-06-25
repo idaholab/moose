@@ -9,107 +9,107 @@
 
 #include "GPUMultiDProperty.h"
 
-registerMooseObject("MooseTestApp", GPU1DRealProperty);
-registerMooseObject("MooseTestApp", GPU2DRealProperty);
-registerMooseObject("MooseTestApp", GPU3DRealProperty);
-registerMooseObject("MooseTestApp", GPU4DRealProperty);
-registerMooseObject("MooseTestApp", GPU1DIntProperty);
-registerMooseObject("MooseTestApp", GPU2DIntProperty);
-registerMooseObject("MooseTestApp", GPU3DIntProperty);
-registerMooseObject("MooseTestApp", GPU4DIntProperty);
+registerMooseObject("MooseTestApp", Kokkos1DRealProperty);
+registerMooseObject("MooseTestApp", Kokkos2DRealProperty);
+registerMooseObject("MooseTestApp", Kokkos3DRealProperty);
+registerMooseObject("MooseTestApp", Kokkos4DRealProperty);
+registerMooseObject("MooseTestApp", Kokkos1DIntProperty);
+registerMooseObject("MooseTestApp", Kokkos2DIntProperty);
+registerMooseObject("MooseTestApp", Kokkos3DIntProperty);
+registerMooseObject("MooseTestApp", Kokkos4DIntProperty);
 
 InputParameters
-GPU1DRealProperty::validParams()
+Kokkos1DRealProperty::validParams()
 {
-  InputParameters params = GPUMultiDProperty<1, Real>::validParams();
+  InputParameters params = KokkosMultiDProperty<1, Real>::validParams();
   return params;
 }
 
-GPU1DRealProperty::GPU1DRealProperty(const InputParameters & parameters)
-  : GPUMultiDProperty<1, Real>(parameters)
-{
-}
-
-InputParameters
-GPU2DRealProperty::validParams()
-{
-  InputParameters params = GPUMultiDProperty<2, Real>::validParams();
-  return params;
-}
-
-GPU2DRealProperty::GPU2DRealProperty(const InputParameters & parameters)
-  : GPUMultiDProperty<2, Real>(parameters)
+Kokkos1DRealProperty::Kokkos1DRealProperty(const InputParameters & parameters)
+  : KokkosMultiDProperty<1, Real>(parameters)
 {
 }
 
 InputParameters
-GPU3DRealProperty::validParams()
+Kokkos2DRealProperty::validParams()
 {
-  InputParameters params = GPUMultiDProperty<3, Real>::validParams();
+  InputParameters params = KokkosMultiDProperty<2, Real>::validParams();
   return params;
 }
 
-GPU3DRealProperty::GPU3DRealProperty(const InputParameters & parameters)
-  : GPUMultiDProperty<3, Real>(parameters)
+Kokkos2DRealProperty::Kokkos2DRealProperty(const InputParameters & parameters)
+  : KokkosMultiDProperty<2, Real>(parameters)
 {
 }
 
 InputParameters
-GPU4DRealProperty::validParams()
+Kokkos3DRealProperty::validParams()
 {
-  InputParameters params = GPUMultiDProperty<4, Real>::validParams();
+  InputParameters params = KokkosMultiDProperty<3, Real>::validParams();
   return params;
 }
 
-GPU4DRealProperty::GPU4DRealProperty(const InputParameters & parameters)
-  : GPUMultiDProperty<4, Real>(parameters)
+Kokkos3DRealProperty::Kokkos3DRealProperty(const InputParameters & parameters)
+  : KokkosMultiDProperty<3, Real>(parameters)
 {
 }
 
 InputParameters
-GPU1DIntProperty::validParams()
+Kokkos4DRealProperty::validParams()
 {
-  InputParameters params = GPUMultiDProperty<1, int>::validParams();
+  InputParameters params = KokkosMultiDProperty<4, Real>::validParams();
   return params;
 }
 
-GPU1DIntProperty::GPU1DIntProperty(const InputParameters & parameters)
-  : GPUMultiDProperty<1, int>(parameters)
+Kokkos4DRealProperty::Kokkos4DRealProperty(const InputParameters & parameters)
+  : KokkosMultiDProperty<4, Real>(parameters)
 {
 }
 
 InputParameters
-GPU2DIntProperty::validParams()
+Kokkos1DIntProperty::validParams()
 {
-  InputParameters params = GPUMultiDProperty<2, int>::validParams();
+  InputParameters params = KokkosMultiDProperty<1, int>::validParams();
   return params;
 }
 
-GPU2DIntProperty::GPU2DIntProperty(const InputParameters & parameters)
-  : GPUMultiDProperty<2, int>(parameters)
+Kokkos1DIntProperty::Kokkos1DIntProperty(const InputParameters & parameters)
+  : KokkosMultiDProperty<1, int>(parameters)
 {
 }
 
 InputParameters
-GPU3DIntProperty::validParams()
+Kokkos2DIntProperty::validParams()
 {
-  InputParameters params = GPUMultiDProperty<3, int>::validParams();
+  InputParameters params = KokkosMultiDProperty<2, int>::validParams();
   return params;
 }
 
-GPU3DIntProperty::GPU3DIntProperty(const InputParameters & parameters)
-  : GPUMultiDProperty<3, int>(parameters)
+Kokkos2DIntProperty::Kokkos2DIntProperty(const InputParameters & parameters)
+  : KokkosMultiDProperty<2, int>(parameters)
 {
 }
 
 InputParameters
-GPU4DIntProperty::validParams()
+Kokkos3DIntProperty::validParams()
 {
-  InputParameters params = GPUMultiDProperty<4, int>::validParams();
+  InputParameters params = KokkosMultiDProperty<3, int>::validParams();
   return params;
 }
 
-GPU4DIntProperty::GPU4DIntProperty(const InputParameters & parameters)
-  : GPUMultiDProperty<4, int>(parameters)
+Kokkos3DIntProperty::Kokkos3DIntProperty(const InputParameters & parameters)
+  : KokkosMultiDProperty<3, int>(parameters)
+{
+}
+
+InputParameters
+Kokkos4DIntProperty::validParams()
+{
+  InputParameters params = KokkosMultiDProperty<4, int>::validParams();
+  return params;
+}
+
+Kokkos4DIntProperty::Kokkos4DIntProperty(const InputParameters & parameters)
+  : KokkosMultiDProperty<4, int>(parameters)
 {
 }

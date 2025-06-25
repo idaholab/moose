@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
 #include "GPUMaterialPropertyStorage.h"
 #endif
 
@@ -427,8 +427,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _solver_systems(_num_nl_sys + _num_linear_sys, nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
-#ifdef MOOSE_HAVE_GPU
-    _gpu_assembly(*this),
+#ifdef MOOSE_HAVE_KOKKOS
+    _kokkos_assembly(*this),
 #endif
     _mesh_divisions(/*threaded=*/true),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
@@ -437,13 +437,16 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         "bnd_material_props", &_mesh, _material_prop_registry, *this)),
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
         "neighbor_material_props", &_mesh, _material_prop_registry, *this)),
-#ifdef MOOSE_HAVE_GPU
-    _gpu_material_props(declareRestartableDataWithContext<GPUMaterialPropertyStorage>(
-        "gpu_material_props", &_mesh, _material_prop_registry, *this)),
-    _gpu_bnd_material_props(declareRestartableDataWithContext<GPUMaterialPropertyStorage>(
-        "gpu_bnd_material_props", &_mesh, _material_prop_registry, *this)),
-    _gpu_neighbor_material_props(declareRestartableDataWithContext<GPUMaterialPropertyStorage>(
-        "gpu_neighbor_material_props", &_mesh, _material_prop_registry, *this)),
+#ifdef MOOSE_HAVE_KOKKOS
+    _kokkos_material_props(
+        declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(
+            "kokkos_material_props", &_mesh, _material_prop_registry, *this)),
+    _kokkos_bnd_material_props(
+        declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(
+            "kokkos_bnd_material_props", &_mesh, _material_prop_registry, *this)),
+    _kokkos_neighbor_material_props(
+        declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(
+            "kokkos_neighbor_material_props", &_mesh, _material_prop_registry, *this)),
 #endif
     _reporter_data(_app),
     // TODO: delete the following line after apps have been updated to not call getUserObjects
@@ -1135,7 +1138,7 @@ FEProblemBase::initialSetup()
       }
     }
 
-    _gpu_materials.sort();
+    _kokkos_materials.sort();
 
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
@@ -3043,12 +3046,12 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
 }
 
 void
-FEProblemBase::addGPUKernel(const std::string & kernel_name,
-                            const std::string & name,
-                            InputParameters & parameters)
+FEProblemBase::addKokkosKernel(const std::string & kernel_name,
+                               const std::string & name,
+                               InputParameters & parameters)
 {
-#ifndef MOOSE_HAVE_GPU
-  mooseError("addGPUKernel() was called but MOOSE was not compiled with GPU support.");
+#ifndef MOOSE_HAVE_KOKKOS
+  mooseError("addKokkosKernel() was called but MOOSE was not compiled with Kokkos support.");
 #endif
 
   parallel_object_only();
@@ -3080,22 +3083,22 @@ FEProblemBase::addGPUKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  logAdd("GPUKernel", name, kernel_name, parameters);
+  logAdd("KokkosKernel", name, kernel_name, parameters);
 
-#ifdef MOOSE_HAVE_GPU
-  _nl[nl_sys_num]->addGPUKernel(kernel_name, name, parameters);
+#ifdef MOOSE_HAVE_KOKKOS
+  _nl[nl_sys_num]->addKokkosKernel(kernel_name, name, parameters);
 #endif
 
-  _have_GPU_objects = true;
+  _have_kokkos_objects = true;
 }
 
 void
-FEProblemBase::addGPUNodalKernel(const std::string & kernel_name,
-                                 const std::string & name,
-                                 InputParameters & parameters)
+FEProblemBase::addKokkosNodalKernel(const std::string & kernel_name,
+                                    const std::string & name,
+                                    InputParameters & parameters)
 {
-#ifndef MOOSE_HAVE_GPU
-  mooseError("addGPUNodalKernel() was called but MOOSE was not compiled with GPU support.");
+#ifndef MOOSE_HAVE_KOKKOS
+  mooseError("addKokkosNodalKernel() was called but MOOSE was not compiled with Kokkos support.");
 #endif
 
   parallel_object_only();
@@ -3123,22 +3126,23 @@ FEProblemBase::addGPUNodalKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  logAdd("GPUNodalKernel", name, kernel_name, parameters);
+  logAdd("KokkosNodalKernel", name, kernel_name, parameters);
 
-#ifdef MOOSE_HAVE_GPU
-  _nl[nl_sys_num]->addGPUNodalKernel(kernel_name, name, parameters);
+#ifdef MOOSE_HAVE_KOKKOS
+  _nl[nl_sys_num]->addKokkosNodalKernel(kernel_name, name, parameters);
 #endif
 
-  _have_GPU_objects = true;
+  _have_kokkos_objects = true;
 }
 
 void
-FEProblemBase::addGPUBoundaryCondition(const std::string & bc_name,
-                                       const std::string & name,
-                                       InputParameters & parameters)
+FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
+                                          const std::string & name,
+                                          InputParameters & parameters)
 {
-#ifndef MOOSE_HAVE_GPU
-  mooseError("addGPUBoundaryCondition() was called but MOOSE was not compiled with GPU support.");
+#ifndef MOOSE_HAVE_KOKKOS
+  mooseError(
+      "addKokkosBoundaryCondition() was called but MOOSE was not compiled with Kokkos support.");
 #endif
 
   parallel_object_only();
@@ -3171,13 +3175,13 @@ FEProblemBase::addGPUBoundaryCondition(const std::string & bc_name,
     parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
   }
 
-  logAdd("GPUBoundaryCondition", name, bc_name, parameters);
+  logAdd("KokkosBoundaryCondition", name, bc_name, parameters);
 
-#ifdef MOOSE_HAVE_GPU
-  _nl[nl_sys_num]->addGPUBoundaryCondition(bc_name, name, parameters);
+#ifdef MOOSE_HAVE_KOKKOS
+  _nl[nl_sys_num]->addKokkosBoundaryCondition(bc_name, name, parameters);
 #endif
 
-  _have_GPU_objects = true;
+  _have_kokkos_objects = true;
 }
 
 void
@@ -3898,30 +3902,31 @@ MaterialData &
 FEProblemBase::getMaterialData(Moose::MaterialDataType type,
                                const THREAD_ID tid,
                                const MooseObject * object,
-                               bool is_gpu) const
+                               bool is_kokkos) const
 {
-  if (is_gpu)
-#ifdef MOOSE_HAVE_GPU
+  if (is_kokkos)
+#ifdef MOOSE_HAVE_KOKKOS
     switch (type)
     {
       case Moose::BLOCK_MATERIAL_DATA:
         if (object)
-          _gpu_material_props.addConsumer(type, object);
-        return _gpu_material_props.getMaterialData(tid);
+          _kokkos_material_props.addConsumer(type, object);
+        return _kokkos_material_props.getMaterialData(tid);
       case Moose::NEIGHBOR_MATERIAL_DATA:
         if (object)
-          _gpu_neighbor_material_props.addConsumer(type, object);
-        return _gpu_neighbor_material_props.getMaterialData(tid);
+          _kokkos_neighbor_material_props.addConsumer(type, object);
+        return _kokkos_neighbor_material_props.getMaterialData(tid);
       case Moose::BOUNDARY_MATERIAL_DATA:
       case Moose::FACE_MATERIAL_DATA:
       case Moose::INTERFACE_MATERIAL_DATA:
         if (object)
-          _gpu_bnd_material_props.addConsumer(type, object);
-        return _gpu_bnd_material_props.getMaterialData(tid);
+          _kokkos_bnd_material_props.addConsumer(type, object);
+        return _kokkos_bnd_material_props.getMaterialData(tid);
     }
 #else
-    mooseError("FEProblemBase::getMaterialData(): Attempted to get GPU material data but MOOSE was "
-               "not compiled with GPU support.");
+    mooseError(
+        "FEProblemBase::getMaterialData(): Attempted to get Kokkos material data but MOOSE was "
+        "not compiled with Kokkos support.");
 #endif
 
   switch (type)
@@ -3946,24 +3951,25 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type,
 }
 
 const std::set<const MooseObject *> &
-FEProblemBase::getMaterialPropertyStorageConsumers(Moose::MaterialDataType type, bool is_gpu) const
+FEProblemBase::getMaterialPropertyStorageConsumers(Moose::MaterialDataType type,
+                                                   bool is_kokkos) const
 {
-  if (is_gpu)
-#ifdef MOOSE_HAVE_GPU
+  if (is_kokkos)
+#ifdef MOOSE_HAVE_KOKKOS
     switch (type)
     {
       case Moose::BLOCK_MATERIAL_DATA:
-        return _gpu_material_props.getConsumers(type);
+        return _kokkos_material_props.getConsumers(type);
       case Moose::NEIGHBOR_MATERIAL_DATA:
-        return _gpu_neighbor_material_props.getConsumers(type);
+        return _kokkos_neighbor_material_props.getConsumers(type);
       case Moose::BOUNDARY_MATERIAL_DATA:
       case Moose::FACE_MATERIAL_DATA:
       case Moose::INTERFACE_MATERIAL_DATA:
-        return _gpu_bnd_material_props.getConsumers(type);
+        return _kokkos_bnd_material_props.getConsumers(type);
     }
 #else
-    mooseError("FEProblemBase::getMaterialPropertyStorageConsumers(): Attempted to get GPU "
-               "material data but MOOSE was not compiled with GPU support.");
+    mooseError("FEProblemBase::getMaterialPropertyStorageConsumers(): Attempted to get Kokkos "
+               "material data but MOOSE was not compiled with Kokkos support.");
 #endif
 
   switch (type)
@@ -4047,11 +4053,11 @@ FEProblemBase::addInterfaceMaterial(const std::string & mat_name,
 }
 
 void
-FEProblemBase::addGPUMaterial(const std::string & mat_name,
-                              const std::string & name,
-                              InputParameters & parameters)
+FEProblemBase::addKokkosMaterial(const std::string & mat_name,
+                                 const std::string & name,
+                                 InputParameters & parameters)
 {
-  addMaterialHelper({&_gpu_materials}, mat_name, name, parameters);
+  addMaterialHelper({&_kokkos_materials}, mat_name, name, parameters);
 }
 
 void
@@ -5298,7 +5304,7 @@ FEProblemBase::updateActiveObjects()
   _from_multi_app_transfers.updateActive();
   _between_multi_app_transfers.updateActive();
 
-  _gpu_materials.updateActive();
+  _kokkos_materials.updateActive();
 }
 
 void
@@ -6494,9 +6500,9 @@ FEProblemBase::init()
   if (_displaced_problem)
     _displaced_problem->init();
 
-#ifdef MOOSE_HAVE_GPU
-  if (_have_GPU_objects)
-    initGPU();
+#ifdef MOOSE_HAVE_KOKKOS
+  if (_have_kokkos_objects)
+    initKokkos();
 #endif
 
   _initialized = true;
@@ -6828,15 +6834,15 @@ FEProblemBase::advanceState()
   if (_neighbor_material_props.hasStatefulProperties())
     _neighbor_material_props.shift();
 
-#ifdef MOOSE_HAVE_GPU
-  if (_gpu_material_props.hasStatefulProperties())
-    _gpu_material_props.shift();
+#ifdef MOOSE_HAVE_KOKKOS
+  if (_kokkos_material_props.hasStatefulProperties())
+    _kokkos_material_props.shift();
 
-  if (_gpu_bnd_material_props.hasStatefulProperties())
-    _gpu_bnd_material_props.shift();
+  if (_kokkos_bnd_material_props.hasStatefulProperties())
+    _kokkos_bnd_material_props.shift();
 
-  if (_gpu_neighbor_material_props.hasStatefulProperties())
-    _gpu_neighbor_material_props.shift();
+  if (_kokkos_neighbor_material_props.hasStatefulProperties())
+    _kokkos_neighbor_material_props.shift();
 #endif
 }
 
@@ -8438,9 +8444,9 @@ FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const
   else
     cmt(elem_range, true);
 
-#ifdef MOOSE_HAVE_GPU
-  if (_have_GPU_objects)
-    initGPUStatefulProps();
+#ifdef MOOSE_HAVE_KOKKOS
+  if (_have_kokkos_objects)
+    initKokkosStatefulProps();
 #endif
 }
 

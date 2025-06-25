@@ -10,29 +10,30 @@
 #include "AddGPUKernelAction.h"
 #include "FEProblem.h"
 
-registerMooseAction("MooseApp", AddGPUKernelAction, "add_kernel");
+registerMooseAction("MooseApp", AddKokkosKernelAction, "add_kernel");
 
 InputParameters
-AddGPUKernelAction::validParams()
+AddKokkosKernelAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add a GPUKernel object to the simulation.");
+  params.addClassDescription("Add a Kokkos Kernel object to the simulation.");
   return params;
 }
 
-AddGPUKernelAction::AddGPUKernelAction(const InputParameters & params) : MooseObjectAction(params)
+AddKokkosKernelAction::AddKokkosKernelAction(const InputParameters & params)
+  : MooseObjectAction(params)
 {
 }
 
 void
-AddGPUKernelAction::act()
+AddKokkosKernelAction::act()
 {
-#ifndef MOOSE_HAVE_GPU
-  mooseError("Attempted to add a GPU kernel but MOOSE was not compiled with GPU support.");
+#ifndef MOOSE_HAVE_KOKKOS
+  mooseError("Attempted to add a Kokkos kernel but MOOSE was not compiled with Kokkos support.");
 #else
   if (!_app.hasGPUs())
-    mooseError("Attempted to add a GPU kernel but no GPU was detected in the system.");
+    mooseError("Attempted to add a Kokkos kernel but no GPU was detected in the system.");
   else
-    _problem->addGPUKernel(_type, _name, _moose_object_pars);
+    _problem->addKokkosKernel(_type, _name, _moose_object_pars);
 #endif
 }

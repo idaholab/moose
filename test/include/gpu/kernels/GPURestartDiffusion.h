@@ -11,12 +11,12 @@
 
 #include "GPUDiffusion.h"
 
-class GPURestartDiffusion final : public GPUDiffusion<GPURestartDiffusion>
+class KokkosRestartDiffusion final : public KokkosDiffusion<KokkosRestartDiffusion>
 {
 public:
   static InputParameters validParams();
 
-  GPURestartDiffusion(const InputParameters & parameters);
+  KokkosRestartDiffusion(const InputParameters & parameters);
 
   virtual void timestepSetup();
 
@@ -24,17 +24,17 @@ public:
                                          const unsigned int qp,
                                          ResidualDatum & datum) const
   {
-    return _coef(_step) * GPUDiffusion::computeQpResidual(i, qp, datum);
+    return _coef(_step) * KokkosDiffusion::computeQpResidual(i, qp, datum);
   }
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
                                          ResidualDatum & datum) const
   {
-    return _coef(_step) * GPUDiffusion::computeQpJacobian(i, j, qp, datum);
+    return _coef(_step) * KokkosDiffusion::computeQpJacobian(i, j, qp, datum);
   }
 
 protected:
-  GPUScalar<unsigned int> _step;
-  GPUReferenceWrapper<GPUArray<Real>> _coef;
+  Moose::Kokkos::Scalar<unsigned int> _step;
+  Moose::Kokkos::ReferenceWrapper<Moose::Kokkos::Array<Real>> _coef;
 };

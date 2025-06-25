@@ -9,16 +9,16 @@
 
 #include "GPUBodyForce.h"
 
-registerMooseObjectAliased("MooseApp", GPUBodyForceKernel, "GPUBodyForce");
+registerMooseObjectAliased("MooseApp", KokkosBodyForceKernel, "KokkosBodyForce");
 
 InputParameters
-GPUBodyForceKernel::validParams()
+KokkosBodyForceKernel::validParams()
 {
-  InputParameters params = GPUBodyForce::validParams();
+  InputParameters params = KokkosBodyForce::validParams();
   return params;
 }
 
-GPUBodyForceKernel::GPUBodyForceKernel(const InputParameters & parameters)
-  : GPUBodyForce(parameters)
+KokkosBodyForceKernel::KokkosBodyForceKernel(const InputParameters & parameters)
+  : KokkosBodyForce(parameters)
 {
 }

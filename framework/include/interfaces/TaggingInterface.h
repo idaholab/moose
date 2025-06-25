@@ -27,6 +27,14 @@ class MooseObject;
 class SubProblem;
 class Assembly;
 
+namespace Moose
+{
+namespace Kokkos
+{
+class ResidualObject;
+} // namespace Kokkos
+} // namespace Moose
+
 template <typename T>
 InputParameters validParams();
 
@@ -64,7 +72,7 @@ public:
     friend class NonlinearEigenSystem;
     template <typename>
     friend class MooseObjectTagWarehouse;
-    friend class GPUResidualObject;
+    friend class Moose::Kokkos::ResidualObject;
 
     VectorTagsKey() {}
     VectorTagsKey(const VectorTagsKey &) {}
@@ -80,7 +88,7 @@ public:
     friend class NonlinearEigenSystem;
     template <typename>
     friend class MooseObjectTagWarehouse;
-    friend class GPUResidualObject;
+    friend class Moose::Kokkos::ResidualObject;
 
     MatrixTagsKey() {}
     MatrixTagsKey(const MatrixTagsKey &) {}
