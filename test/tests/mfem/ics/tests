@@ -22,5 +22,17 @@
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
+  []
+  [MFEMTransientScalarIC]
+    type = XMLDiff
+    input = transient_scalar_ic.i
+    xmldiff = 'OutputData/TransientScalarIC/Run0/Run0.pvd
+                OutputData/TransientScalarIC/Run0/Cycle000000/proc000000.vtu
+                OutputData/TransientScalarIC/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
+    requirement = 'The system shall have the ability to set initial conditions on a scalar variable in transient simulations.'
+    capabilities = 'mfem'
+    max_parallel = 1
+    recover = false
   []  
 []
