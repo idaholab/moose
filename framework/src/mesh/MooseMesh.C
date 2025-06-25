@@ -368,6 +368,11 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
   }
 
   updateCoordTransform();
+
+#ifdef MOOSE_HAVE_KOKKOS
+  if (_app.hasGPUs())
+    _kokkos_mesh = std::make_unique<Moose::Kokkos::Mesh>(*this);
+#endif
 }
 
 MooseMesh::~MooseMesh()
@@ -657,7 +662,7 @@ MooseMesh::update()
   _doing_p_refinement = _doing_p_refinement || (_max_p_level > 0);
 
 #ifdef MOOSE_HAVE_KOKKOS
-  if (_app.hasGPUs())
+  if (_app.hasKokkosObjects() || (_app.getExecutioner() && _app.feProblem().hasKokkosObjects()))
     _kokkos_mesh->update();
 #endif
 

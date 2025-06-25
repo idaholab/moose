@@ -17,6 +17,7 @@ AddKokkosKernelAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription("Add a Kokkos Kernel object to the simulation.");
+  params.addPrivateParam<bool>("_kokkos_action", true);
   return params;
 }
 
