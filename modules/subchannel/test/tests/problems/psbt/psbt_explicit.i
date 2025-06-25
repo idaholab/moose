@@ -2,15 +2,16 @@ T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 P_out = 4.923e6 # Pa
+pin_diameter = 0.00950
 
 [QuadSubChannelMesh]
   [sub_channel]
     type = SCMQuadSubChannelMeshGenerator
     nx = 6
     ny = 6
-    n_cells = 5
+    n_cells = 10
     pitch = 0.0126
-    pin_diameter = 0.00950
+    pin_diameter = ${pin_diameter}
     gap = 0.00095 # the half gap between sub-channel assemblies
     heated_length = 1.0
     spacer_z = '0.0'
@@ -22,51 +23,9 @@ P_out = 4.923e6 # Pa
     input = sub_channel
     nx = 6
     ny = 6
-    n_cells = 5
+    n_cells = 10
     pitch = 0.0126
     heated_length = 1.0
-  []
-[]
-
-[AuxVariables]
-  [mdot]
-    block = sub_channel
-  []
-  [SumWij]
-    block = sub_channel
-  []
-  [P]
-    block = sub_channel
-  []
-  [DP]
-    block = sub_channel
-  []
-  [h]
-    block = sub_channel
-  []
-  [T]
-    block = sub_channel
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [Dpin]
-    block = fuel_pins
-  []
-  [rho]
-    block = sub_channel
-  []
-  [mu]
-    block = sub_channel
-  []
-  [S]
-    block = sub_channel
-  []
-  [w_perim]
-    block = sub_channel
-  []
-  [q_prime]
-    block = fuel_pins
   []
 []
 
@@ -86,13 +45,7 @@ P_out = 4.923e6 # Pa
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
-  implicit = false
-  segregated = true
-  monolithic_thermal = false
-  staggered_pressure = false
-  interpolation_scheme = 'central_difference'
-  P_tol = 1e-04
-  T_tol = 1e-04
+  verbose_subchannel = true
 []
 
 [ICs]
@@ -111,6 +64,7 @@ P_out = 4.923e6 # Pa
     variable = q_prime
     power = 1.0e6 # W
     filename = "power_profile.txt" #type in name of file that describes radial power profile
+    block = fuel_pins
   []
 
   [T_ic]
@@ -122,7 +76,7 @@ P_out = 4.923e6 # Pa
   [Dpin_ic]
     type = ConstantIC
     variable = Dpin
-    value = 0.00950
+    value = ${pin_diameter}
   []
 
   [P_ic]
@@ -175,28 +129,75 @@ P_out = 4.923e6 # Pa
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
+    block = sub_channel
   []
   [mdot_in_bc]
     type = SCMMassFlowRateAux
     variable = mdot
     boundary = inlet
     area = S
-    mass_flux = ${mass_flux_in}
+    mass_flux = report_mass_flux_inlet
     execute_on = 'timestep_begin'
+    block = sub_channel
   []
 []
 
-[Outputs]
-  exodus = true
-  csv = true
-[]
-
 [Postprocessors]
+  [report_mass_flux_inlet]
+    type = Receiver
+    default = ${mass_flux_in}
+  []
   [total_pressure_drop]
     type = SubChannelDelta
     variable = P
     execute_on = "timestep_end"
   []
+  [T1]
+    type = SubChannelPointValue
+    variable = T
+    index = 0
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T2]
+    type = SubChannelPointValue
+    variable = T
+    index = 7
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T3]
+    type = SubChannelPointValue
+    variable = T
+    index = 14
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T4]
+    type = SubChannelPointValue
+    variable = T
+    index = 21
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T5]
+    type = SubChannelPointValue
+    variable = T
+    index = 28
+    execute_on = "timestep_end"
+    height = 1
+  []
+  [T6]
+    type = SubChannelPointValue
+    variable = T
+    index = 35
+    execute_on = "timestep_end"
+    height = 1
+  []
+[]
+
+[Outputs]
+  csv = true
 []
 
 [Executioner]
