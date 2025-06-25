@@ -2626,7 +2626,7 @@ public:
 
   void createTagMatrices(CreateTaggedMatrixKey);
 
-  bool hasKokkosObjects() { return _have_kokkos_objects; }
+  bool hasKokkosObjects() { return _has_kokkos_objects; }
 
 protected:
   /**
@@ -3232,7 +3232,7 @@ private:
   bool _requires_nonlocal_coupling;
 
   /// Whether we have any Kokkos objects
-  bool _have_kokkos_objects = false;
+  bool _has_kokkos_objects = false;
 
   friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,
                                                         const std::string & value,

@@ -1674,6 +1674,12 @@ MooseApp::setupOptions()
     _exit_code = 1;
   }
 
+#ifdef MOOSE_HAVE_KOKKOS
+  for (auto & action : _action_warehouse.allActionBlocks())
+    if (action->isParamValid("_kokkos_action"))
+      _has_kokkos_objects = true;
+#endif
+
   Moose::out << std::flush;
 }
 
