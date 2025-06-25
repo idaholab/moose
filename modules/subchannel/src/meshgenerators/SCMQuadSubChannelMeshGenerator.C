@@ -28,10 +28,10 @@ SCMQuadSubChannelMeshGenerator::validParams()
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
-  params.addRequiredParam<std::vector<Real>>("spacer_z",
-                                             "Axial location of spacers/vanes/mixing_vanes [m]");
-  params.addRequiredParam<std::vector<Real>>(
-      "spacer_k", "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
+  params.addParam<std::vector<Real>>(
+      "spacer_z", std::vector<Real>({0.0}), "Axial location of spacers/vanes/mixing_vanes [m]");
+  params.addParam<std::vector<Real>>(
+      "spacer_k", std::vector<Real>({0.0}), "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
   params.addParam<std::vector<Real>>("z_blockage",
                                      std::vector<Real>({0.0, 0.0}),
                                      "axial location of blockage (inlet, outlet) [m]");

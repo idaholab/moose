@@ -10,7 +10,7 @@ This mesh generator creates the mesh were the variables associated with the duct
 
 ## Example Input File Syntax
 
-!listing /examples/duct/test.i block=TriSubChannelMesh language=cpp
+!listing /examples/duct/test.i block=TriSubChannelMesh language=moose
 
 !syntax parameters /Mesh/SCMTriDuctMeshGenerator
 

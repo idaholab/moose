@@ -12,7 +12,7 @@ with the [NoSolveProblem.md] because it is not used to perform any calculations.
 
 ## Example Input File Syntax
 
-!listing /examples/mesh_generator/inter_wrapper_3d.i block=Mesh language=cpp
+!listing /examples/mesh_generator/inter_wrapper_3d.i block=Mesh language=moose
 
 !syntax parameters /Mesh/SCMDetailedQuadInterWrapperMeshGenerator
 

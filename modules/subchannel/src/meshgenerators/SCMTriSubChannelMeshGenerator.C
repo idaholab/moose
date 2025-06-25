@@ -36,10 +36,10 @@ SCMTriSubChannelMeshGenerator::validParams()
                                 "Flat to flat distance for the hexagonal assembly [m]");
   params.addRequiredParam<Real>("dwire", "Wire diameter [m]");
   params.addRequiredParam<Real>("hwire", "Wire lead length [m]");
-  params.addRequiredParam<std::vector<Real>>("spacer_z",
-                                             "Axial location of spacers/vanes/mixing_vanes [m]");
-  params.addRequiredParam<std::vector<Real>>(
-      "spacer_k", "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
+  params.addParam<std::vector<Real>>(
+      "spacer_z", std::vector<Real>({0.0}), "Axial location of spacers/vanes/mixing_vanes [m]");
+  params.addParam<std::vector<Real>>(
+      "spacer_k", std::vector<Real>({0.0}), "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
   params.addParam<Real>("Kij", 0.5, "Lateral form loss coefficient [-]");
   params.addParam<std::vector<Real>>("z_blockage",
                                      std::vector<Real>({0.0, 0.0}),
@@ -529,40 +529,50 @@ SCMTriSubChannelMeshGenerator::SCMTriSubChannelMeshGenerator(const InputParamete
     } // i
   } // j
 
+  /// Create the mapping of the Edge and Corner SubChannels to the two indexes of the adjacent
+  /// corner or edge subchannels, on the periphery of the assembly
   for (unsigned int k = 0; k < _n_channels; k++)
   {
     if (_subch_type[k] == EChannelType::EDGE)
     {
+      /// index of gaps (k1,k2) around the EDGE subchannel k that connect to other EDGE or CORNER SUBCHANNELS
       _gap_pairs_sf[k].first = _chan_to_gap_map[k][0];
       _gap_pairs_sf[k].second = _chan_to_gap_map[k][2];
-      auto k1 = _gap_pairs_sf[k].first;
-      auto k2 = _gap_pairs_sf[k].second;
+      auto k1 = _gap_pairs_sf[k].first;  // Gap k1
+      auto k2 = _gap_pairs_sf[k].second; // Gap k2
+      /// if first channel next to Gap k1 == subchhanel k
+      /// the first neighbor of subchannel k is the second subchannel next to gap k1
       if (_gap_to_chan_map[k1].first == k)
       {
         _chan_pairs_sf[k].first = _gap_to_chan_map[k1].second;
       }
+      /// if first channel next to Gap k1 != subchhanel k
+      /// the first neighbor of subchannel k is the first subchannel next to gap k1
       else
       {
         _chan_pairs_sf[k].first = _gap_to_chan_map[k1].first;
       }
 
+      /// if first channel next to Gap k2 == subchhanel k
+      /// the second neighbor of subchannel k is the second subchannel next to gap k2
       if (_gap_to_chan_map[k2].first == k)
       {
         _chan_pairs_sf[k].second = _gap_to_chan_map[k2].second;
       }
+      /// if first channel next to Gap k2 != subchhanel k
+      /// the second neighbor of subchannel k is the first subchannel next to gap k2
       else
       {
         _chan_pairs_sf[k].second = _gap_to_chan_map[k2].first;
       }
     }
+    /// similar logic for corner subchannels applies
     else if (_subch_type[k] == EChannelType::CORNER)
     {
       _gap_pairs_sf[k].first = _chan_to_gap_map[k][1];
       _gap_pairs_sf[k].second = _chan_to_gap_map[k][0];
-
       auto k1 = _gap_pairs_sf[k].first;
       auto k2 = _gap_pairs_sf[k].second;
-
       if (_gap_to_chan_map[k1].first == k)
       {
         _chan_pairs_sf[k].first = _gap_to_chan_map[k1].second;

@@ -1,5 +1,6 @@
 T_in = 297.039 # K
 P_out = 101325 # Pa
+heated_length = 1.0
 
 [QuadSubChannelMesh]
   [sub_channel]
@@ -10,7 +11,7 @@ P_out = 101325 # Pa
     pitch = 0.014605
     pin_diameter = 0.012065
     gap = 0.0015875
-    heated_length = 1.0
+    heated_length = ${heated_length}
     spacer_z = '0.0'
     spacer_k = '0.0'
   []
@@ -22,7 +23,7 @@ P_out = 101325 # Pa
     ny = 2
     n_cells = 10
     pitch = 0.014605
-    heated_length = 1.0
+    heated_length = ${heated_length}
   []
 []
 
@@ -77,6 +78,15 @@ P_out = 101325 # Pa
   []
 []
 
+[Functions]
+  [axial_heat_rate]
+    type = ParsedFunction
+    expression = '(pi/2)*sin(pi*z/L)'
+    symbol_names = 'L'
+    symbol_values = '${heated_length}'
+  []
+[]
+
 [SubChannel]
   type = QuadSubChannel1PhaseProblem
   n_blocks = 1
@@ -105,6 +115,7 @@ P_out = 101325 # Pa
     variable = q_prime
     power = 1000 # W
     filename = "power_profile.txt"
+    axial_heat_rate = axial_heat_rate
   []
 
   [T_ic]
@@ -205,6 +216,11 @@ P_out = 101325 # Pa
     positions = '0   0   0 '
     bounding_box_padding = '0 0 0.01'
   []
+  [viz]
+    type = FullSolveMultiApp
+    input_files = '3d.i'
+    execute_on = 'timestep_end'
+  []
 []
 
 [Transfers]
@@ -222,6 +238,20 @@ P_out = 101325 # Pa
     variable = q_prime
     source_variable = q_prime
     from_boundaries = right
+    execute_on = 'timestep_end'
+  []
+
+  [subchannel_transfer]
+    type = SCMSolutionTransfer
+    to_multi_app = viz
+    variable = 'mdot SumWij P DP h T rho mu S'
+    execute_on = 'timestep_end'
+  []
+
+  [pin_transfer]
+    type = SCMPinSolutionTransfer
+    to_multi_app = viz
+    variable = 'Tpin q_prime Dpin'
     execute_on = 'timestep_end'
   []
 []

@@ -24,7 +24,7 @@ protected:
   virtual void initializeSolution() override;
   virtual Real computeFrictionFactor(FrictionStruct friction_args) override;
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) override;
-  virtual Real computeBeta(unsigned int i_gap, unsigned int iz) override;
+  virtual Real computeBeta(unsigned int i_gap, unsigned int iz, bool /*enthalpy*/) override;
   virtual void computeh(int iblock) override;
   QuadSubChannelMesh & _subchannel_mesh;
 
