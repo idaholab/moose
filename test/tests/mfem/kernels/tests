@@ -96,7 +96,7 @@
     ignored_items = "root['VTKFile']['@version']"
     cli_args = 'Mesh/file=../mesh/beam-hex.mesh FESpaces/HDivFESpace/fec_order=THIRD '
                'FESpaces/HDivFESpace/closed_basis=GaussLobatto '
-               'FESpaces/HDivFESpace/closed_basis=IntegratedGLL '
+               'FESpaces/HDivFESpace/open_basis=IntegratedGLL '
                'Preconditioner/ADS/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/GradDivLOR'
     requirement = 'The system shall have the ability to solve a LOR grad-div problem with Raviart-Thomas elements using MFEM.'
