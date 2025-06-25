@@ -3,10 +3,10 @@
   issues = '#26450 #26920'
   design = 'NEML2/index.md NEML2Action.md'
   [neml2_error]
-    requirement = 'The framework shall be capable of capturing errors occurring during the evaluation of a NEML2 model.'
+    requirement = 'The framework shall be capable of capturing errors that occur during the evaluation of a NEML2 model.'
     type = RunException
     input = 'error.i'
-    expect_err = 'To debug NEML2 related issues'
+    expect_err = 'NEML2 model execution failed on at least one processor'
     collections = 'SYSTEM'
     capabilities = 'neml2'
     valgrind = none
@@ -55,6 +55,22 @@
       capabilities = 'neml2'
       valgrind = heavy
     []
+  []
+  [multiple_inputs]
+    requirement = 'The framework shall be capable of running custom NEML2 models defined in different NEML2 input files.'
+    type = Exodiff
+    input = 'multiple_input_files.i'
+    exodiff = 'multiple_input_files_out.e'
+    capabilities = 'neml2'
+    valgrind = heavy
+  []
+  [mesh_change]
+    requirement = 'The framework shall be capable of running NEML2 models after a mesh change.'
+    type = Exodiff
+    input = 'mesh_change.i'
+    exodiff = 'mesh_change_out.e mesh_change_out.e-s002 mesh_change_out.e-s003 mesh_change_out.e-s004 mesh_change_out.e-s005'
+    capabilities = 'neml2'
+    valgrind = heavy
   []
   [scheduler]
     issues = '#27493'

@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <memory>
+
 #ifdef NEML2_ENABLED
 #include "neml2/models/Model.h"
 #endif
@@ -33,6 +35,8 @@ protected:
   const NEML2ActionCommon & getCommonAction() const;
 
 #ifdef NEML2_ENABLED
+
+  const FileName & fname() const { return _fname; }
 
   enum class MOOSEIOType
   {
@@ -106,6 +110,15 @@ protected:
   /// Set up MOOSE-NEML2 parameter derivative mappings
   void setupParameterDerivativeMappings(const neml2::Model &);
 
+  /// Name of the NEML2 input file
+  FileName _fname;
+
+  /// List of cli-args
+  std::vector<std::string> _cli_args;
+
+  /// The neml2 model
+  std::shared_ptr<neml2::Model> _model;
+
   /// MOOSE-NEML2 input variable mappings
   std::vector<VariableMapping> _inputs;
 
@@ -159,7 +172,7 @@ private:
   }
 
   /// Print a summary of the NEML2 model
-  void printSummary(const neml2::Model &) const;
+  void printSummary() const;
 #endif
 
   /// Get the maximum length of all MOOSE names (for printing purposes)
