@@ -16,10 +16,8 @@ registerMooseObject("MooseApp", DefaultFixedPointConvergence);
 InputParameters
 DefaultFixedPointConvergence::validParams()
 {
-  InputParameters params = Convergence::validParams();
+  InputParameters params = DefaultConvergenceBase::validParams();
   params += FixedPointSolve::fixedPointDefaultConvergenceParams();
-
-  params.addPrivateParam<bool>("added_as_default", false);
 
   params.addClassDescription("Default fixed point convergence criteria.");
 
@@ -27,8 +25,7 @@ DefaultFixedPointConvergence::validParams()
 }
 
 DefaultFixedPointConvergence::DefaultFixedPointConvergence(const InputParameters & parameters)
-  : Convergence(parameters),
-    _added_as_default(getParam<bool>("added_as_default")),
+  : DefaultConvergenceBase(parameters),
     _accept_max_it(getSharedExecutionerParam<bool>("accept_on_max_fixed_point_iteration")),
     _fixed_point_rel_tol(getSharedExecutionerParam<Real>("fixed_point_rel_tol")),
     _fixed_point_abs_tol(getSharedExecutionerParam<Real>("fixed_point_abs_tol")),
@@ -41,14 +38,6 @@ DefaultFixedPointConvergence::DefaultFixedPointConvergence(const InputParameters
     _pp_scaling(1.0),
     _fp_solve(getMooseApp().getExecutioner()->fixedPointSolve())
 {
-}
-
-void
-DefaultFixedPointConvergence::initialSetup()
-{
-  Convergence::initialSetup();
-
-  checkDuplicateSetSharedExecutionerParams();
 }
 
 void
@@ -116,20 +105,6 @@ DefaultFixedPointConvergence::checkConvergence(unsigned int iter)
   }
 
   return MooseConvergenceStatus::ITERATING;
-}
-
-void
-DefaultFixedPointConvergence::checkDuplicateSetSharedExecutionerParams() const
-{
-  if (_duplicate_shared_executioner_params.size() > 0 && !_added_as_default)
-  {
-    std::ostringstream oss;
-    oss << "The following parameters were set in both this Convergence object and the "
-           "executioner:\n";
-    for (const auto & param : _duplicate_shared_executioner_params)
-      oss << "  " << param << "\n";
-    mooseError(oss.str());
-  }
 }
 
 void
