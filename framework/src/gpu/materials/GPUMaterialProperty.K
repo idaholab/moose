@@ -9,5 +9,11 @@
 
 #include "GPUMaterialProperty.h"
 
-std::unordered_map<GPUPropertyKey, GPUPropertyStore> GPUMaterialPropertyBase::_store;
-std::unordered_map<GPUPropertyKey, GPUPropertyLoad> GPUMaterialPropertyBase::_load;
+namespace Moose
+{
+namespace Kokkos
+{
+std::unordered_map<PropertyKey, PropertyStore> MaterialPropertyBase::_store;
+std::unordered_map<PropertyKey, PropertyLoad> MaterialPropertyBase::_load;
+} // namespace Kokkos
+} // namespace Moose

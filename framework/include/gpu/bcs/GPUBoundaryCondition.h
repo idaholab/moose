@@ -13,20 +13,26 @@
 
 #pragma once
 
-class GPUBoundaryCondition : public GPUResidualObject, public BoundaryRestrictableRequired
+namespace Moose
+{
+namespace Kokkos
+{
+
+class BoundaryCondition : public ResidualObject, public BoundaryRestrictableRequired
 {
 public:
   static InputParameters validParams();
 
-  GPUBoundaryCondition(const InputParameters & parameters,
-                       Moose::VarFieldType field_type,
-                       bool nodal);
-  GPUBoundaryCondition(const GPUBoundaryCondition & object);
+  BoundaryCondition(const InputParameters & parameters, Moose::VarFieldType field_type, bool nodal);
+  BoundaryCondition(const BoundaryCondition & object);
 };
 
-#define usingGPUBoundaryConditionMembers                                                           \
-  usingGPUResidualObjectMembers;                                                                   \
+} // namespace Kokkos
+} // namespace Moose
+
+#define usingKokkosBoundaryConditionMembers                                                        \
+  usingKokkosResidualObjectMembers;                                                                \
                                                                                                    \
 protected:                                                                                         \
-  using GPUBoundaryCondition::boundaryElementSideID;                                               \
-  using GPUBoundaryCondition::boundaryNodeID;
+  using Moose::Kokkos::BoundaryCondition::boundaryElementSideID;                                   \
+  using Moose::Kokkos::BoundaryCondition::boundaryNodeID;

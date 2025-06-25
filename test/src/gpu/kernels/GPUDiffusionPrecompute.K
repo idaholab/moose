@@ -9,16 +9,16 @@
 
 #include "GPUDiffusionPrecompute.h"
 
-registerMooseObject("MooseTestApp", GPUDiffusionPrecompute);
+registerMooseObject("MooseTestApp", KokkosDiffusionPrecompute);
 
 InputParameters
-GPUDiffusionPrecompute::validParams()
+KokkosDiffusionPrecompute::validParams()
 {
-  InputParameters p = GPUKernelGrad::validParams();
+  InputParameters p = KernelGrad::validParams();
   return p;
 }
 
-GPUDiffusionPrecompute::GPUDiffusionPrecompute(const InputParameters & parameters)
-  : GPUKernelGrad(parameters)
+KokkosDiffusionPrecompute::KokkosDiffusionPrecompute(const InputParameters & parameters)
+  : KernelGrad(parameters)
 {
 }

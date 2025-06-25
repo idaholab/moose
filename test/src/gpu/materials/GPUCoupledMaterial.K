@@ -9,12 +9,12 @@
 
 #include "GPUCoupledMaterial.h"
 
-registerMooseObject("MooseTestApp", GPUCoupledMaterial);
+registerMooseObject("MooseTestApp", KokkosCoupledMaterial);
 
 InputParameters
-GPUCoupledMaterial::validParams()
+KokkosCoupledMaterial::validParams()
 {
-  InputParameters params = GPUMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<MaterialPropertyName>("mat_prop",
                                                 "Name of the property this material defines");
   params.addRequiredParam<MaterialPropertyName>(
@@ -26,12 +26,12 @@ GPUCoupledMaterial::validParams()
   return params;
 }
 
-GPUCoupledMaterial::GPUCoupledMaterial(const InputParameters & parameters)
-  : GPUMaterial(parameters),
+KokkosCoupledMaterial::KokkosCoupledMaterial(const InputParameters & parameters)
+  : Material(parameters),
     _mat_prop_name(getParam<MaterialPropertyName>("mat_prop")),
-    _mat_prop(declareGPUProperty<Real>(_mat_prop_name)),
+    _mat_prop(declareKokkosProperty<Real>(_mat_prop_name)),
     _coupled_mat_prop(getParam<bool>("use_old_prop")
-                          ? getGPUMaterialPropertyOld<Real>("coupled_mat_prop")
-                          : getGPUMaterialProperty<Real>("coupled_mat_prop"))
+                          ? getKokkosMaterialPropertyOld<Real>("coupled_mat_prop")
+                          : getKokkosMaterialProperty<Real>("coupled_mat_prop"))
 {
 }

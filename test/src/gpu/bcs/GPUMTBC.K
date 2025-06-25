@@ -9,21 +9,21 @@
 
 #include "GPUMTBC.h"
 
-registerMooseObject("MooseTestApp", GPUMTBC);
+registerMooseObject("MooseTestApp", KokkosMTBC);
 
 InputParameters
-GPUMTBC::validParams()
+KokkosMTBC::validParams()
 {
-  InputParameters params = GPUIntegratedBC::validParams();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "prop_name", "the name of the material property we are going to use");
   params.addRequiredParam<Real>("grad", "the value of the gradient");
   return params;
 }
 
-GPUMTBC::GPUMTBC(const InputParameters & parameters)
-  : GPUIntegratedBC(parameters),
+KokkosMTBC::KokkosMTBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _value(getParam<Real>("grad")),
-    _mat(getGPUMaterialProperty<Real>("prop_name"))
+    _mat(getKokkosMaterialProperty<Real>("prop_name"))
 {
 }

@@ -17,16 +17,21 @@
 
 #include "libmesh/system.h"
 
-GPUSystem::GPUSystem(SystemBase & system)
-  : GPUMeshHolder(*system.mesh().getGPUMesh()),
-    GPUAssemblyHolder(system.feProblem().gpuAssembly()),
+namespace Moose
+{
+namespace Kokkos
+{
+
+System::System(SystemBase & system)
+  : MeshHolder(*system.mesh().getKokkosMesh()),
+    AssemblyHolder(system.feProblem().kokkosAssembly()),
     _system(system),
     _mesh(system.mesh())
 {
 }
 
 void
-GPUSystem::init()
+System::init()
 {
   setupVariables();
   setupDofs();
@@ -45,7 +50,7 @@ GPUSystem::init()
 }
 
 void
-GPUSystem::setupVariables()
+System::setupVariables()
 {
   auto & sys = _system.system();
 
@@ -56,10 +61,10 @@ GPUSystem::setupVariables()
 
   for (unsigned int var = 0; var < _n_vars; ++var)
   {
-    _var_fe_types[var] = assembly().getFETypeNum(sys.variable_type(var));
+    _var_fe_types[var] = kokkosAssembly().getFETypeNum(sys.variable_type(var));
 
     for (auto subdomain : _mesh.meshSubdomains())
-      _var_subdomain_active(var, mesh().getGPUSubdomainID(subdomain)) =
+      _var_subdomain_active(var, kokkosMesh().getSubdomainID(subdomain)) =
           sys.variable(var).active_on_subdomain(subdomain);
   }
 
@@ -90,13 +95,13 @@ GPUSystem::setupVariables()
 }
 
 void
-GPUSystem::setupDofs()
+System::setupDofs()
 {
   auto & sys = _system.system();
   auto & dof_map = _system.dofMap();
 
-  _n_elems = mesh().getGPULocalElementMap().size();
-  _n_nodes = mesh().getGPULocalNodeMap().size();
+  _n_elems = kokkosMesh().getLocalElementMap().size();
+  _n_nodes = kokkosMesh().getLocalNodeMap().size();
   _n_local_dofs = sys.n_local_dofs();
   _n_ghost_dofs = dof_map.get_send_list().size();
 
@@ -122,7 +127,7 @@ GPUSystem::setupDofs()
 
   for (unsigned int var = 0; var < _n_vars; ++var)
   {
-    for (auto & [elem, id] : mesh().getGPULocalElementMap())
+    for (auto & [elem, id] : kokkosMesh().getLocalElementMap())
     {
       dof_map.dof_indices(elem, dof_indices, var);
 
@@ -135,7 +140,7 @@ GPUSystem::setupDofs()
     _local_node_dof_index[var].create(_n_nodes);
     _local_node_dof_index[var] = libMesh::DofObject::invalid_id;
 
-    for (auto & [elem, id] : mesh().getGPULocalElementMap())
+    for (auto & [elem, id] : kokkosMesh().getLocalElementMap())
     {
       dof_map.dof_indices(elem, dof_indices, var);
 
@@ -146,7 +151,7 @@ GPUSystem::setupDofs()
       }
     }
 
-    for (auto & [node, id] : mesh().getGPULocalNodeMap())
+    for (auto & [node, id] : kokkosMesh().getLocalNodeMap())
     {
       dof_map.dof_indices(node, dof_indices, var);
 
@@ -195,7 +200,7 @@ GPUSystem::setupDofs()
 }
 
 void
-GPUSystem::setupSparsity()
+System::setupSparsity()
 {
   auto & dof_map = _system.dofMap();
   auto pattern = dof_map.get_sparsity_pattern();
@@ -257,16 +262,16 @@ GPUSystem::setupSparsity()
 }
 
 void
-GPUSystem::checkNodalBCs()
+System::checkNodalBCs()
 {
   auto & nl_system = static_cast<NonlinearSystemBase &>(_system);
 
   _nbc_residual_tag_dof.create(MAX_TAG);
   _nbc_matrix_tag_dof.create(MAX_TAG);
 
-  for (auto bc : nl_system.getGPUNodalBCWarehouse().getActiveObjects())
+  for (auto bc : nl_system.getKokkosNodalBCWarehouse().getActiveObjects())
   {
-    auto nbc = static_cast<GPUNodalBCBase *>(bc.get());
+    auto nbc = static_cast<NodalBCBase *>(bc.get());
 
     std::set<TagID> extra_vector_tags;
     std::set<TagID> extra_matrix_tags;
@@ -294,7 +299,7 @@ GPUSystem::checkNodalBCs()
 }
 
 void
-GPUSystem::getNodalBCDofs(const GPUNodalBCBase * nbc, GPUArray<bool> & dofs)
+System::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 {
   auto var = nbc->variable().number();
 
@@ -325,15 +330,15 @@ GPUSystem::getNodalBCDofs(const GPUNodalBCBase * nbc, GPUArray<bool> & dofs)
 }
 
 void
-GPUSystem::sync(GPUMemcpyKind dir)
+System::sync(MemcpyKind dir)
 {
-  if (dir == GPUMemcpyKind::HOST_TO_DEVICE)
+  if (dir == MemcpyKind::HOST_TO_DEVICE)
   {
     for (auto tag : _active_variable_tags)
     {
       auto & vector = _system.getVector(tag);
 
-      _vectors[tag].create(vector, *this);
+      _vectors[tag].create(vector, *this, false);
       _vectors[tag].copy(dir);
     }
 
@@ -356,7 +361,7 @@ GPUSystem::sync(GPUMemcpyKind dir)
     _vectors.copy();
     _matrices.copy();
   }
-  else if (dir == GPUMemcpyKind::DEVICE_TO_HOST)
+  else if (dir == MemcpyKind::DEVICE_TO_HOST)
   {
     for (auto tag : _active_variable_tags)
       _vectors[tag].restore();
@@ -370,9 +375,9 @@ GPUSystem::sync(GPUMemcpyKind dir)
 }
 
 void
-GPUSystem::sync(std::set<TagID> tags, GPUMemcpyKind dir)
+System::sync(std::set<TagID> tags, MemcpyKind dir)
 {
-  if (dir == GPUMemcpyKind::HOST_TO_DEVICE)
+  if (dir == MemcpyKind::HOST_TO_DEVICE)
   {
     for (auto tag : tags)
     {
@@ -381,13 +386,13 @@ GPUSystem::sync(std::set<TagID> tags, GPUMemcpyKind dir)
 
       auto & vector = _system.getVector(tag);
 
-      _vectors[tag].create(vector, *this);
+      _vectors[tag].create(vector, *this, false);
       _vectors[tag].copy(dir);
     }
 
     _vectors.copy();
   }
-  else if (dir == GPUMemcpyKind::DEVICE_TO_HOST)
+  else if (dir == MemcpyKind::DEVICE_TO_HOST)
   {
     for (auto tag : tags)
     {
@@ -401,7 +406,7 @@ GPUSystem::sync(std::set<TagID> tags, GPUMemcpyKind dir)
 }
 
 void
-GPUSystem::setActiveVariables(std::set<MooseVariableFieldBase *> vars)
+System::setActiveVariables(std::set<MooseVariableFieldBase *> vars)
 {
   std::set<unsigned int> active_variables;
 
@@ -414,7 +419,7 @@ GPUSystem::setActiveVariables(std::set<MooseVariableFieldBase *> vars)
 }
 
 void
-GPUSystem::setActiveVariableTags(std::set<TagID> tags)
+System::setActiveVariableTags(std::set<TagID> tags)
 {
   if (!_active_variables.size())
     return;
@@ -429,7 +434,7 @@ GPUSystem::setActiveVariableTags(std::set<TagID> tags)
 }
 
 void
-GPUSystem::setActiveResidualTags(std::set<TagID> tags)
+System::setActiveResidualTags(std::set<TagID> tags)
 {
   std::set<TagID> active_residual_tags;
 
@@ -446,7 +451,7 @@ GPUSystem::setActiveResidualTags(std::set<TagID> tags)
 }
 
 void
-GPUSystem::setActiveMatrixTags(std::set<TagID> tags)
+System::setActiveMatrixTags(std::set<TagID> tags)
 {
   std::set<TagID> active_matrix_tags;
 
@@ -463,13 +468,13 @@ GPUSystem::setActiveMatrixTags(std::set<TagID> tags)
 }
 
 void
-GPUSystem::setProjectionFlags(std::set<SubdomainID> subdomains)
+System::setProjectionFlags(std::set<SubdomainID> subdomains)
 {
   for (auto tag : _active_variable_tags)
   {
     for (auto subdomain : subdomains)
     {
-      auto sid = mesh().getGPUSubdomainID(subdomain);
+      auto sid = kokkosMesh().getSubdomainID(subdomain);
 
       for (auto var : _active_variables)
       {
@@ -485,7 +490,7 @@ GPUSystem::setProjectionFlags(std::set<SubdomainID> subdomains)
 }
 
 void
-GPUSystem::preallocate()
+System::preallocate()
 {
   for (auto tag : _active_variable_tags)
   {
@@ -503,7 +508,7 @@ GPUSystem::preallocate()
 
     for (auto subdomain : _mesh.meshSubdomains())
     {
-      auto sid = mesh().getGPUSubdomainID(subdomain);
+      auto sid = kokkosMesh().getSubdomainID(subdomain);
 
       for (auto var : _active_variables)
       {
@@ -511,10 +516,10 @@ GPUSystem::preallocate()
           continue;
 
         if (!_qp_solutions[tag](sid, var).isAlloc())
-          _qp_solutions[tag](sid, var).createDevice(assembly().getNumQps(sid));
+          _qp_solutions[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
 
         if (!_qp_solutions_grad[tag](sid, var).isAlloc())
-          _qp_solutions_grad[tag](sid, var).createDevice(assembly().getNumQps(sid));
+          _qp_solutions_grad[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
       }
     }
 
@@ -526,3 +531,6 @@ GPUSystem::preallocate()
   _qp_solutions_grad.copy();
   _variable_on_qp.copy();
 }
+
+} // namespace Kokkos
+} // namespace Moose

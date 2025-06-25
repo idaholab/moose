@@ -9,23 +9,23 @@
 
 #include "GPUStatefulSpatialTest.h"
 
-registerMooseObject("MooseTestApp", GPUStatefulSpatialTest);
+registerMooseObject("MooseTestApp", KokkosStatefulSpatialTest);
 
 InputParameters
-GPUStatefulSpatialTest::validParams()
+KokkosStatefulSpatialTest::validParams()
 {
-  InputParameters params = GPUMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addParam<MaterialPropertyName>("prop_name", "thermal_conductivity", "Property name");
   params.addParam<bool>("declare_older", false, "Whether older property will be declared");
   return params;
 }
 
-GPUStatefulSpatialTest::GPUStatefulSpatialTest(const InputParameters & parameters)
-  : GPUMaterial(parameters),
-    _thermal_conductivity(declareGPUProperty<Real>(getParam<MaterialPropertyName>("prop_name"))),
+KokkosStatefulSpatialTest::KokkosStatefulSpatialTest(const InputParameters & parameters)
+  : Material(parameters),
+    _thermal_conductivity(declareKokkosProperty<Real>(getParam<MaterialPropertyName>("prop_name"))),
     _thermal_conductivity_old(
-        getGPUMaterialPropertyOld<Real>(getParam<MaterialPropertyName>("prop_name")))
+        getKokkosMaterialPropertyOld<Real>(getParam<MaterialPropertyName>("prop_name")))
 {
   if (getParam<bool>("declare_older"))
-    getGPUMaterialPropertyOlder<Real>(getParam<MaterialPropertyName>("prop_name"));
+    getKokkosMaterialPropertyOlder<Real>(getParam<MaterialPropertyName>("prop_name"));
 }

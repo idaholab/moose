@@ -1,9 +1,9 @@
 ###########################################################
-# This is a simple test of the GPUKernel System.
+# This is a simple test of the KokkosKernel System.
 # It solves the Laplacian equation on a small 2x2 grid.
-# The "GPUDiffusion" kernel is used to calculate the
+# The "KokkosDiffusion" kernel is used to calculate the
 # residuals of the weak form of this operator. The
-# "GPUBodyForce" kernel is used to apply a time-dependent
+# "KokkosBodyForce" kernel is used to apply a time-dependent
 # volumetric source.
 ###########################################################
 
@@ -25,13 +25,13 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
   [../]
   [./bf]
-    type = GPUBodyForce
+    type = KokkosBodyForce
     variable = u
     postprocessor = ramp
   [../]
@@ -52,18 +52,18 @@
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   active = 'left right'
 
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 3
     value = 0
   [../]
 
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 1
     value = 0

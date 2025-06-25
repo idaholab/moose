@@ -9,12 +9,12 @@
 
 #include "GPUMatchedValueBC.h"
 
-registerMooseObject("MooseApp", GPUMatchedValueBC);
+registerMooseObject("MooseApp", KokkosMatchedValueBC);
 
 InputParameters
-GPUMatchedValueBC::validParams()
+KokkosMatchedValueBC::validParams()
 {
-  InputParameters params = GPUNodalBC::validParams();
+  InputParameters params = NodalBC::validParams();
   params.addRequiredCoupledVar("v", "The variable whose value we are to match.");
   params.addParam<Real>("u_coeff", 1.0, " A coefficient for primary variable u");
   params.addParam<Real>("v_coeff", 1.0, " A coefficient for coupled variable v");
@@ -23,9 +23,9 @@ GPUMatchedValueBC::validParams()
   return params;
 }
 
-GPUMatchedValueBC::GPUMatchedValueBC(const InputParameters & parameters)
-  : GPUNodalBC(parameters),
-    _v(GPUCoupledNodalValue("v")),
+KokkosMatchedValueBC::KokkosMatchedValueBC(const InputParameters & parameters)
+  : NodalBC(parameters),
+    _v(KokkosCoupledNodalValue("v")),
     _v_num(coupled("v")),
     _u_coeff(getParam<Real>("u_coeff")),
     _v_coeff(getParam<Real>("v_coeff"))

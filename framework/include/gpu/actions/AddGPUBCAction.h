@@ -11,12 +11,12 @@
 
 #include "MooseObjectAction.h"
 
-class AddGPUBCAction : public MooseObjectAction
+class AddKokkosBCAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  AddGPUBCAction(const InputParameters & params);
+  AddKokkosBCAction(const InputParameters & params);
 
   virtual void act() override;
 };
