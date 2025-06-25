@@ -96,9 +96,12 @@ for some of the individual physics modules as listed below.
 
 ## Optional Package Examples and Tutorials
 
-MOOSE contains several optional packages that may be installed alongside it to expand MOOSE's base capabilities. Pages containing guidance for using these optional packages are listed below.
+MOOSE integrates with several optional packages that may be installed alongside it to expand MOOSE's base capabilities.
+Pages containing guidance for using these optional packages are listed below.
 
-- [MFEM](framework/doc/content/source/mfem/GettingStarted.md)
+- [LibTorch](source/libtorch/utils/LibtorchArtificialNeuralNet.md optional=True)
+- [NEML2](syntax/NEML2/index.md optional=True)
+- [MFEM](source/mfem/GettingStarted.md optional=True)
 
 ## C++ Programming References id=programming
 
