@@ -1,21 +1,26 @@
 mass_flux_in = 3500 # kg /sec m2
 T_in = 297.039 # K
 P_out = 101325 # Pa
+pitch = 0.0126
+unheated_length_entry = 2.5
+heated_length = 5.0
+unheated_length_exit = 2.5
+n_cells = 20
 
 [QuadSubChannelMesh]
   [sub_channel]
     type = SCMQuadSubChannelMeshGenerator
     nx = 3
     ny = 3
-    n_cells = 20
-    pitch = 0.0126
+    n_cells = '${n_cells}'
+    pitch = '${pitch}'
     pin_diameter = 0.00950
     gap = 0.00095
-    unheated_length_entry = 2.5
-    heated_length = 5.0
-    unheated_length_exit = 2.5
-    spacer_z = '0.0'
-    spacer_k = '0.0'
+    unheated_length_entry = '${unheated_length_entry}'
+    heated_length = '${heated_length}'
+    unheated_length_exit = '${unheated_length_exit}'
+    spacer_z ='0.0'
+    spacer_k ='0.0'
   []
 []
 
