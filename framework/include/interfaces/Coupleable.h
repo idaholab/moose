@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 #include "GPUVariableValue.h"
 #endif
 
@@ -1818,85 +1818,95 @@ private:
   std::vector<std::set<MooseWritableVariable *>> _writable_coupled_variables;
 
   /**
-   * GPU-related variables and methods
+   * Kokkos-related variables and methods
    */
 private:
-  const Real _GPU_default_value_zero = 0;
+  const Real _kokkos_default_value_zero = 0;
 
-#ifdef MOOSE_GPU_SCOPE
-  GPUVariable GPUCoupledVectorTagVariable(const std::string & var_name,
-                                          const std::string & tag_name,
-                                          unsigned int comp);
-  GPUVariable GPUCoupledVectorTagVariables(const std::string & var_name,
-                                           const std::string & tag_name);
-  GPUVariable GPUZeroVariable();
+#ifdef MOOSE_KOKKOS_SCOPE
+  Moose::Kokkos::Variable KokkosCoupledVectorTagVariable(const std::string & var_name,
+                                                         const std::string & tag_name,
+                                                         unsigned int comp);
+  Moose::Kokkos::Variable KokkosCoupledVectorTagVariables(const std::string & var_name,
+                                                          const std::string & tag_name);
+  Moose::Kokkos::Variable KokkosZeroVariable();
 
 public:
-  GPUVariableValue GPUCoupledVectorTagValueByName(const std::string & var_name,
-                                                  const std::string & tag_name,
+  Moose::Kokkos::VariableValue KokkosCoupledVectorTagValueByName(const std::string & var_name,
+                                                                 const std::string & tag_name,
+                                                                 unsigned int comp = 0);
+  Moose::Kokkos::VariableValue KokkosCoupledVectorTagValuesByName(const std::string & var_name,
+                                                                  const std::string & tag_name);
+  Moose::Kokkos::VariableGradient KokkosCoupledVectorTagGradientByName(const std::string & var_name,
+                                                                       const std::string & tag_name,
+                                                                       unsigned int comp = 0);
+  Moose::Kokkos::VariableGradient
+  KokkosCoupledVectorTagGradientsByName(const std::string & var_name, const std::string & tag_name);
+  Moose::Kokkos::VariableNodalValue KokkosCoupledVectorTagNodalValueByName(
+      const std::string & var_name, const std::string & tag_name, unsigned int comp = 0);
+  Moose::Kokkos::VariableNodalValue
+  KokkosCoupledVectorTagNodalValuesByName(const std::string & var_name,
+                                          const std::string & tag_name);
+
+  Moose::Kokkos::VariableValue KokkosCoupledVectorTagValue(const std::string & var_name,
+                                                           const std::string & tag_param_name,
+                                                           unsigned int comp = 0);
+  Moose::Kokkos::VariableValue KokkosCoupledVectorTagValues(const std::string & var_name,
+                                                            const std::string & tag_param_name);
+  Moose::Kokkos::VariableGradient KokkosCoupledVectorTagGradient(const std::string & var_name,
+                                                                 const std::string & tag_param_name,
+                                                                 unsigned int comp = 0);
+  Moose::Kokkos::VariableGradient
+  KokkosCoupledVectorTagGradients(const std::string & var_name, const std::string & tag_param_name);
+  Moose::Kokkos::VariableNodalValue KokkosCoupledVectorTagNodalValue(
+      const std::string & var_name, const std::string & tag_param_name, unsigned int comp = 0);
+  Moose::Kokkos::VariableNodalValue
+  KokkosCoupledVectorTagNodalValues(const std::string & var_name,
+                                    const std::string & tag_param_name);
+
+  Moose::Kokkos::VariableValue KokkosCoupledValue(const std::string & var_name,
                                                   unsigned int comp = 0);
-  GPUVariableValue GPUCoupledVectorTagValuesByName(const std::string & var_name,
-                                                   const std::string & tag_name);
-  GPUVariableGradient GPUCoupledVectorTagGradientByName(const std::string & var_name,
-                                                        const std::string & tag_name,
+  Moose::Kokkos::VariableValue KokkosCoupledValues(const std::string & var_name);
+  Moose::Kokkos::VariableGradient KokkosCoupledGradient(const std::string & var_name,
                                                         unsigned int comp = 0);
-  GPUVariableGradient GPUCoupledVectorTagGradientsByName(const std::string & var_name,
-                                                         const std::string & tag_name);
-  GPUVariableNodalValue GPUCoupledVectorTagNodalValueByName(const std::string & var_name,
-                                                            const std::string & tag_name,
+  Moose::Kokkos::VariableGradient KokkosCoupledGradients(const std::string & var_name);
+  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalValue(const std::string & var_name,
                                                             unsigned int comp = 0);
-  GPUVariableNodalValue GPUCoupledVectorTagNodalValuesByName(const std::string & var_name,
-                                                             const std::string & tag_name);
+  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalValues(const std::string & var_name);
 
-  GPUVariableValue GPUCoupledVectorTagValue(const std::string & var_name,
-                                            const std::string & tag_param_name,
-                                            unsigned int comp = 0);
-  GPUVariableValue GPUCoupledVectorTagValues(const std::string & var_name,
-                                             const std::string & tag_param_name);
-  GPUVariableGradient GPUCoupledVectorTagGradient(const std::string & var_name,
-                                                  const std::string & tag_param_name,
-                                                  unsigned int comp = 0);
-  GPUVariableGradient GPUCoupledVectorTagGradients(const std::string & var_name,
-                                                   const std::string & tag_param_name);
-  GPUVariableNodalValue GPUCoupledVectorTagNodalValue(const std::string & var_name,
-                                                      const std::string & tag_param_name,
-                                                      unsigned int comp = 0);
-  GPUVariableNodalValue GPUCoupledVectorTagNodalValues(const std::string & var_name,
-                                                       const std::string & tag_param_name);
+  Moose::Kokkos::VariableValue KokkosCoupledValueOld(const std::string & var_name,
+                                                     unsigned int comp = 0);
+  Moose::Kokkos::VariableValue KokkosCoupledValuesOld(const std::string & var_name);
+  Moose::Kokkos::VariableGradient KokkosCoupledGradientOld(const std::string & var_name,
+                                                           unsigned int comp = 0);
+  Moose::Kokkos::VariableGradient KokkosCoupledGradientsOld(const std::string & var_name);
+  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalValueOld(const std::string & var_name,
+                                                               unsigned int comp = 0);
+  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalValuesOld(const std::string & var_name);
 
-  GPUVariableValue GPUCoupledValue(const std::string & var_name, unsigned int comp = 0);
-  GPUVariableValue GPUCoupledValues(const std::string & var_name);
-  GPUVariableGradient GPUCoupledGradient(const std::string & var_name, unsigned int comp = 0);
-  GPUVariableGradient GPUCoupledGradients(const std::string & var_name);
-  GPUVariableNodalValue GPUCoupledNodalValue(const std::string & var_name, unsigned int comp = 0);
-  GPUVariableNodalValue GPUCoupledNodalValues(const std::string & var_name);
+  Moose::Kokkos::VariableValue KokkosCoupledValueOlder(const std::string & var_name,
+                                                       unsigned int comp = 0);
+  Moose::Kokkos::VariableValue KokkosCoupledValuesOlder(const std::string & var_name);
+  Moose::Kokkos::VariableGradient KokkosCoupledGradientOlder(const std::string & var_name,
+                                                             unsigned int comp = 0);
+  Moose::Kokkos::VariableGradient KokkosCoupledGradientsOlder(const std::string & var_name);
+  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalValueOlder(const std::string & var_name,
+                                                                 unsigned int comp = 0);
+  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalValuesOlder(const std::string & var_name);
 
-  GPUVariableValue GPUCoupledValueOld(const std::string & var_name, unsigned int comp = 0);
-  GPUVariableValue GPUCoupledValuesOld(const std::string & var_name);
-  GPUVariableGradient GPUCoupledGradientOld(const std::string & var_name, unsigned int comp = 0);
-  GPUVariableGradient GPUCoupledGradientsOld(const std::string & var_name);
-  GPUVariableNodalValue GPUCoupledNodalValueOld(const std::string & var_name,
+  Moose::Kokkos::VariableValue KokkosCoupledDot(const std::string & var_name,
                                                 unsigned int comp = 0);
-  GPUVariableNodalValue GPUCoupledNodalValuesOld(const std::string & var_name);
+  Moose::Kokkos::VariableValue KokkosCoupledDots(const std::string & var_name);
+  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalDot(const std::string & var_name,
+                                                          unsigned int comp = 0);
+  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalDots(const std::string & var_name);
 
-  GPUVariableValue GPUCoupledValueOlder(const std::string & var_name, unsigned int comp = 0);
-  GPUVariableValue GPUCoupledValuesOlder(const std::string & var_name);
-  GPUVariableGradient GPUCoupledGradientOlder(const std::string & var_name, unsigned int comp = 0);
-  GPUVariableGradient GPUCoupledGradientsOlder(const std::string & var_name);
-  GPUVariableNodalValue GPUCoupledNodalValueOlder(const std::string & var_name,
-                                                  unsigned int comp = 0);
-  GPUVariableNodalValue GPUCoupledNodalValuesOlder(const std::string & var_name);
+  Moose::Kokkos::Scalar<const Real> KokkosCoupledDotDu(const std::string & var_name,
+                                                       unsigned int comp = 0);
 
-  GPUVariableValue GPUCoupledDot(const std::string & var_name, unsigned int comp = 0);
-  GPUVariableValue GPUCoupledDots(const std::string & var_name);
-  GPUVariableNodalValue GPUCoupledNodalDot(const std::string & var_name, unsigned int comp = 0);
-  GPUVariableNodalValue GPUCoupledNodalDots(const std::string & var_name);
-
-  GPUScalar<const Real> GPUCoupledDotDu(const std::string & var_name, unsigned int comp = 0);
-
-  GPUVariableValue GPUZeroValue();
-  GPUVariableGradient GPUZeroGradient();
-  GPUVariableNodalValue GPUZeroNodalValue();
+  Moose::Kokkos::VariableValue KokkosZeroValue();
+  Moose::Kokkos::VariableGradient KokkosZeroGradient();
+  Moose::Kokkos::VariableNodalValue KokkosZeroNodalValue();
 #endif
 };
 

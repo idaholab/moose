@@ -9,12 +9,12 @@
 
 #include "GPUConvectiveHeatFluxBC.h"
 
-registerMooseObject("HeatTransferApp", GPUConvectiveHeatFluxBC);
+registerMooseObject("HeatTransferApp", KokkosConvectiveHeatFluxBC);
 
 InputParameters
-GPUConvectiveHeatFluxBC::validParams()
+KokkosConvectiveHeatFluxBC::validParams()
 {
-  InputParameters params = GPUIntegratedBC::validParams();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription(
       "Convective heat transfer boundary condition with temperature and heat "
       "transfer coefficent given by material properties.");
@@ -30,10 +30,10 @@ GPUConvectiveHeatFluxBC::validParams()
   return params;
 }
 
-GPUConvectiveHeatFluxBC::GPUConvectiveHeatFluxBC(const InputParameters & parameters)
-  : GPUIntegratedBC(parameters),
-    _T_infinity(getGPUMaterialProperty<Real>("T_infinity")),
-    _htc(getGPUMaterialProperty<Real>("heat_transfer_coefficient")),
-    _htc_dT(getGPUMaterialProperty<Real>("heat_transfer_coefficient_dT"))
+KokkosConvectiveHeatFluxBC::KokkosConvectiveHeatFluxBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
+    _T_infinity(getKokkosMaterialProperty<Real>("T_infinity")),
+    _htc(getKokkosMaterialProperty<Real>("heat_transfer_coefficient")),
+    _htc_dT(getKokkosMaterialProperty<Real>("heat_transfer_coefficient_dT"))
 {
 }

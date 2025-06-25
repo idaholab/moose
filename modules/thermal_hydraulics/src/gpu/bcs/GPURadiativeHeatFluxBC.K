@@ -9,12 +9,12 @@
 
 #include "GPURadiativeHeatFluxBC.h"
 
-registerMooseObject("HeatTransferApp", GPURadiativeHeatFluxBC);
+registerMooseObject("HeatTransferApp", KokkosRadiativeHeatFluxBC);
 
 InputParameters
-GPURadiativeHeatFluxBC::validParams()
+KokkosRadiativeHeatFluxBC::validParams()
 {
-  InputParameters params = GPURadiativeHeatFluxBCBase::validParams();
+  InputParameters params = KokkosRadiativeHeatFluxBCBase::validParams();
 
   params.addParam<PostprocessorName>(
       "scale_pp", 1.0, "Post-processor by which to scale boundary condition");
@@ -25,7 +25,7 @@ GPURadiativeHeatFluxBC::validParams()
   return params;
 }
 
-GPURadiativeHeatFluxBC::GPURadiativeHeatFluxBC(const InputParameters & parameters)
-  : GPURadiativeHeatFluxBCBase(parameters), _scale_pp(getPostprocessorValue("scale_pp"))
+KokkosRadiativeHeatFluxBC::KokkosRadiativeHeatFluxBC(const InputParameters & parameters)
+  : KokkosRadiativeHeatFluxBCBase(parameters), _scale_pp(getPostprocessorValue("scale_pp"))
 {
 }

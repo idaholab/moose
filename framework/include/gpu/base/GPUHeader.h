@@ -9,8 +9,8 @@
 
 #pragma once
 
-#ifndef MOOSE_GPU_SCOPE
-#error GPU header was included in a source file which is not in the GPU compilation scope
+#ifndef MOOSE_KOKKOS_SCOPE
+#error Kokkos header was included in a source file which is not in the Kokkos compilation scope
 #endif
 
 // NVCC invokes compile error due to conflicting built-in and PETSc complex operators
@@ -31,13 +31,13 @@
 
 // Architecture-dependent execution spaces
 #ifdef KOKKOS_ENABLE_CUDA
-#define MemSpace Kokkos::CudaSpace
+#define MemSpace ::Kokkos::CudaSpace
 #endif
 #ifdef KOKKOS_ENABLE_HIP
-#define MemSpace Kokkos::HIPSpace
+#define MemSpace ::Kokkos::HIPSpace
 #endif
 #ifdef KOKKOS_ENABLE_SYCL
-#define MemSpace Kokkos::Experimental::SYCL
+#define MemSpace ::Kokkos::Experimental::SYCL
 #endif
 
 // Predefined maximum values

@@ -19,11 +19,16 @@
 
 #include "libmesh/tensor_tools.h"
 
+namespace Moose
+{
+namespace Kokkos
+{
+
 struct Real33
 {
   Real a[3][3];
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
   KOKKOS_INLINE_FUNCTION Real33() { *this = 0; }
   KOKKOS_INLINE_FUNCTION Real33(const Real & scalar) { *this = scalar; }
 
@@ -107,7 +112,7 @@ struct Real3
 {
   Real v[3];
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
   KOKKOS_INLINE_FUNCTION Real3()
   {
     v[0] = 0;
@@ -215,7 +220,7 @@ struct Real3
 #endif
 };
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 KOKKOS_INLINE_FUNCTION Real3
 operator*(Real left, Real3 right)
 {
@@ -283,7 +288,7 @@ operator-(Real3 left, Real3 right)
 #endif
 
 template <typename T1, typename T2>
-struct GPUPair
+struct Pair
 {
   T1 first;
   T2 second;
@@ -300,15 +305,10 @@ struct GPUPair
 
 template <typename T1, typename T2>
 bool
-operator<(const GPUPair<T1, T2> & left, const GPUPair<T1, T2> & right)
+operator<(const Pair<T1, T2> & left, const Pair<T1, T2> & right)
 {
   return std::make_pair(left.first, left.second) < std::make_pair(right.first, right.second);
 }
 
-template <typename T1, typename T2, typename T3>
-struct GPUTuple
-{
-  T1 first;
-  T2 second;
-  T3 third;
-};
+} // namespace Kokkos
+} // namespace Moose

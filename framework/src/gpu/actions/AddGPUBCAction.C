@@ -10,28 +10,29 @@
 #include "AddGPUBCAction.h"
 #include "FEProblem.h"
 
-registerMooseAction("MooseApp", AddGPUBCAction, "add_bc");
+registerMooseAction("MooseApp", AddKokkosBCAction, "add_bc");
 
 InputParameters
-AddGPUBCAction::validParams()
+AddKokkosBCAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add a GPU Kernel object to the simulation.");
+  params.addClassDescription("Add a Kokkos BoundaryCondition object to the simulation.");
   return params;
 }
 
-AddGPUBCAction::AddGPUBCAction(const InputParameters & params) : MooseObjectAction(params) {}
+AddKokkosBCAction::AddKokkosBCAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
-AddGPUBCAction::act()
+AddKokkosBCAction::act()
 {
-#ifndef MOOSE_HAVE_GPU
-  mooseError(
-      "Attempted to add a GPU boundary condition but MOOSE was not compiled with GPU support.");
+#ifndef MOOSE_HAVE_KOKKOS
+  mooseError("Attempted to add a Kokkos boundary condition but MOOSE was not compiled with Kokkos "
+             "support.");
 #else
   if (!_app.hasGPUs())
-    mooseError("Attempted to add a GPU boundary condition but no GPU was detected in the system.");
+    mooseError(
+        "Attempted to add a Kokkos boundary condition but no GPU was detected in the system.");
   else
-    _problem->addGPUBoundaryCondition(_type, _name, _moose_object_pars);
+    _problem->addKokkosBoundaryCondition(_type, _name, _moose_object_pars);
 #endif
 }

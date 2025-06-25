@@ -17,37 +17,37 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./diff_u]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
   [../]
 
   [./coupled_force_u]
-    type = GPUCoupledForce
+    type = KokkosCoupledForce
     variable = u
     v = v
   [../]
 
   [./diff_v]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = v
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   # BCs on left
   # u: u=1
   # v: v=2
   [./left_u]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 3
     value = 1
   [../]
 
   [./left_v]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = v
     boundary = 3
     value = 2
@@ -57,7 +57,7 @@
   # u: c*u + u^2 + v^2 = 9
   # v: no flux
   [./right_u]
-    type = GPUCoupledDirichletBC
+    type = KokkosCoupledDirichletBC
     variable = u
     boundary = 1
     value = 9

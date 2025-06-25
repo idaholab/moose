@@ -7,6 +7,7 @@
     input = 'gpu_material_coupled_force.i'
     exodiff = 'gpu_material_coupled_force_out.e'
     abs_zero = 1e-6
-    requirement = 'The GPU system shall support a kernel for coupling the sum of several products of material properties with variables and constant coefficients'
+    requirement = 'The Kokkos system shall support a kernel for coupling the sum of several products of material properties with variables and constant coefficients'
+    capabilities = 'kokkos'
   [../]
 []

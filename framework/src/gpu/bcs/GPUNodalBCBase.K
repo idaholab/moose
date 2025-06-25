@@ -9,28 +9,33 @@
 
 #include "GPUNodalBCBase.h"
 
-InputParameters
-GPUNodalBCBase::validParams()
+namespace Moose
 {
-  auto params = GPUBoundaryCondition::validParams();
+namespace Kokkos
+{
+
+InputParameters
+NodalBCBase::validParams()
+{
+  auto params = BoundaryCondition::validParams();
 
   return params;
 }
 
-GPUNodalBCBase::GPUNodalBCBase(const InputParameters & parameters, Moose::VarFieldType field_type)
-  : GPUBoundaryCondition(parameters, field_type, true),
+NodalBCBase::NodalBCBase(const InputParameters & parameters, Moose::VarFieldType field_type)
+  : BoundaryCondition(parameters, field_type, true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true)
 {
 }
 
-GPUNodalBCBase::GPUNodalBCBase(const GPUNodalBCBase & object)
-  : GPUBoundaryCondition(object),
+NodalBCBase::NodalBCBase(const NodalBCBase & object)
+  : BoundaryCondition(object),
     CoupleableMooseVariableDependencyIntermediateInterface(&object, true, false, false)
 {
 }
 
 std::vector<dof_id_type>
-GPUNodalBCBase::getNodes() const
+NodalBCBase::getNodes() const
 {
   std::vector<dof_id_type> nodes;
 
@@ -39,3 +44,6 @@ GPUNodalBCBase::getNodes() const
 
   return nodes;
 }
+
+} // namespace Kokkos
+} // namespace Moose

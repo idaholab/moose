@@ -9,12 +9,12 @@
 
 #include "GPUGenericConstantMaterial.h"
 
-registerMooseObject("MooseApp", GPUGenericConstantMaterial);
+registerMooseObject("MooseApp", KokkosGenericConstantMaterial);
 
 InputParameters
-GPUGenericConstantMaterial::validParams()
+KokkosGenericConstantMaterial::validParams()
 {
-  InputParameters params = GPUMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Declares material properties based on names and values prescribed by input parameters.");
   params.addRequiredParam<std::vector<std::string>>(
@@ -26,8 +26,8 @@ GPUGenericConstantMaterial::validParams()
   return params;
 }
 
-GPUGenericConstantMaterial::GPUGenericConstantMaterial(const InputParameters & parameters)
-  : GPUMaterial(parameters),
+KokkosGenericConstantMaterial::KokkosGenericConstantMaterial(const InputParameters & parameters)
+  : Material(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
     _prop_values(getParam<std::vector<Real>>("prop_values")),
     _num_props(_prop_names.size())
@@ -37,10 +37,10 @@ GPUGenericConstantMaterial::GPUGenericConstantMaterial(const InputParameters & p
 
   if (num_names != num_values)
     mooseError("Number of prop_names must match the number of prop_values for a "
-               "GPUGenericConstantMaterial!");
+               "KokkosGenericConstantMaterial!");
 
   _props.create(_num_props);
 
   for (unsigned int i = 0; i < _num_props; ++i)
-    _props[i] = declareGPUProperty<Real>(_prop_names[i]);
+    _props[i] = declareKokkosProperty<Real>(_prop_names[i]);
 }

@@ -11,15 +11,15 @@
 
 #include "GPUKernel.h"
 
-template <typename Kernel>
-class GPUBodyForce : public GPUKernel<Kernel>
+template <typename Derived>
+class KokkosBodyForce : public Moose::Kokkos::Kernel<Derived>
 {
-  usingGPUKernelMembers(Kernel);
+  usingKokkosKernelMembers(Derived);
 
 public:
   static InputParameters validParams()
   {
-    InputParameters params = GPUKernel<Kernel>::validParams();
+    InputParameters params = Moose::Kokkos::Kernel<Derived>::validParams();
     params.addParam<Real>("value", 1.0, "Coefficient to multiply by the body force term");
     params.addParam<PostprocessorName>(
         "postprocessor", 1, "A postprocessor whose value is multiplied by the body force");
@@ -27,8 +27,8 @@ public:
     return params;
   }
 
-  GPUBodyForce(const InputParameters & parameters)
-    : GPUKernel<Kernel>(parameters),
+  KokkosBodyForce(const InputParameters & parameters)
+    : Moose::Kokkos::Kernel<Derived>(parameters),
       _scale(this->template getParam<Real>("value")),
       _postprocessor(getPostprocessorValue("postprocessor"))
   {
@@ -43,16 +43,16 @@ public:
 
 protected:
   /// Scale factor
-  GPUScalar<const Real> _scale;
+  Moose::Kokkos::Scalar<const Real> _scale;
 
   /// Optional Postprocessor value
-  GPUPostprocessorValue _postprocessor;
+  Moose::Kokkos::PostprocessorValue _postprocessor;
 };
 
-class GPUBodyForceKernel final : public GPUBodyForce<GPUBodyForceKernel>
+class KokkosBodyForceKernel final : public KokkosBodyForce<KokkosBodyForceKernel>
 {
 public:
   static InputParameters validParams();
 
-  GPUBodyForceKernel(const InputParameters & parameters);
+  KokkosBodyForceKernel(const InputParameters & parameters);
 };

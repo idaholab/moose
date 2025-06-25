@@ -9,18 +9,18 @@
 
 #include "GPUDirichletBC.h"
 
-registerMooseObjectAliased("MooseApp", GPUDirichletBCKernel, "GPUDirichletBC");
+registerMooseObjectAliased("MooseApp", KokkosDirichletBCKernel, "KokkosDirichletBC");
 
 InputParameters
-GPUDirichletBCKernel::validParams()
+KokkosDirichletBCKernel::validParams()
 {
-  InputParameters params = GPUDirichletBC::validParams();
+  InputParameters params = KokkosDirichletBC::validParams();
   params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
                              "is a constant, controllable value.");
   return params;
 }
 
-GPUDirichletBCKernel::GPUDirichletBCKernel(const InputParameters & parameters)
-  : GPUDirichletBC(parameters)
+KokkosDirichletBCKernel::KokkosDirichletBCKernel(const InputParameters & parameters)
+  : KokkosDirichletBC(parameters)
 {
 }

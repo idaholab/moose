@@ -9,25 +9,25 @@
 
 #include "GPUNontrivialStateful.h"
 
-registerMooseObject("MooseApp", GPUNontrivialStateful);
+registerMooseObject("MooseApp", KokkosNontrivialStateful);
 
-// The purpose of this material is to confirm that the load and store functions for GPU material
+// The purpose of this material is to confirm that the load and store functions for Kokkos material
 // properties are only instantiated when they were requested as stateful, so that it doesn't error
-// when a user uses a non-trivially-copyable type as a GPU material property without writing custom
-// dataStore but never requests it as stateful
+// when a user uses a non-trivially-copyable type as a Kokkos material property without writing
+// custom dataStore but never requests it as stateful
 
 InputParameters
-GPUNontrivialStateful::validParams()
+KokkosNontrivialStateful::validParams()
 {
-  InputParameters params = GPUMaterial::validParams();
+  InputParameters params = Material::validParams();
   return params;
 }
 
-GPUNontrivialStateful::GPUNontrivialStateful(const InputParameters & parameters)
-  : GPUMaterial(parameters)
+KokkosNontrivialStateful::KokkosNontrivialStateful(const InputParameters & parameters)
+  : Material(parameters)
 {
-  _prop = declareGPUProperty<NotTriviallyCopyable>("prop");
+  _prop = declareKokkosProperty<NotTriviallyCopyable>("prop");
   // Uncommenting the following line will lead to a compile error that custom dataStore should be
   // provided
-  // _old_prop = getGPUMaterialPropertyOld<NotTriviallyCopyable>("prop");
+  // _old_prop = getKokkosMaterialPropertyOld<NotTriviallyCopyable>("prop");
 }

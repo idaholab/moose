@@ -11,29 +11,29 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
   [../]
 
   [./body_force]
     # Corresponds to BodyForce with function = 'x + y'
-    type = GPUXYBodyForce
+    type = KokkosXYBodyForce
     variable = u
     block = 1
     value = 10
   [../]
 
   [./time]
-    type = GPUTimeDerivative
+    type = KokkosTimeDerivative
     variable = u
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 2
     value = 1

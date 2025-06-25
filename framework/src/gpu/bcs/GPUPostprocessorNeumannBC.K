@@ -9,12 +9,12 @@
 
 #include "GPUPostprocessorNeumannBC.h"
 
-registerMooseObject("MooseApp", GPUPostprocessorNeumannBC);
+registerMooseObject("MooseApp", KokkosPostprocessorNeumannBC);
 
 InputParameters
-GPUPostprocessorNeumannBC::validParams()
+KokkosPostprocessorNeumannBC::validParams()
 {
-  InputParameters params = GPUIntegratedBC::validParams();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription(
       "Neumann boundary condition with value prescribed by a Postprocessor value.");
   params.addParam<PostprocessorName>(
@@ -22,7 +22,7 @@ GPUPostprocessorNeumannBC::validParams()
   return params;
 }
 
-GPUPostprocessorNeumannBC::GPUPostprocessorNeumannBC(const InputParameters & parameters)
-  : GPUIntegratedBC(parameters), _value(getPostprocessorValue("postprocessor"))
+KokkosPostprocessorNeumannBC::KokkosPostprocessorNeumannBC(const InputParameters & parameters)
+  : IntegratedBC(parameters), _value(getPostprocessorValue("postprocessor"))
 {
 }

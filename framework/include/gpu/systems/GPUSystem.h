@@ -20,9 +20,15 @@
 
 class MooseMesh;
 class SystemBase;
-class GPUNodalBCBase;
 
-class GPUSystem : public GPUMeshHolder, public GPUAssemblyHolder
+namespace Moose
+{
+namespace Kokkos
+{
+
+class NodalBCBase;
+
+class System : public MeshHolder, public AssemblyHolder
 {
 private:
   void setupVariables();
@@ -31,35 +37,35 @@ private:
   void checkNodalBCs();
 
 private:
-  void getNodalBCDofs(const GPUNodalBCBase * nbc, GPUArray<bool> & dofs);
+  void getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs);
 
 public:
   /**
    * Constructor
    * @param system Associated MOOSE system
    */
-  GPUSystem(SystemBase & system);
+  System(SystemBase & system);
   /**
-   * Initialize the GPU system
+   * Initialize this system
    */
   void init();
   /**
-   * Check whether the GPU system was initialized
+   * Check whether this system was initialized
    */
   auto initialized() { return _initialized; }
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Prepare and copy in or out vectors and matrices
    * @param dir Copy direction
    */
-  void sync(GPUMemcpyKind dir);
+  void sync(MemcpyKind dir);
   /**
    * Copy in or out vectors corresponding to the given tags
    * @param tags A set of vector tags to be copied in or out
    * @param dir Copy direction
    */
-  void sync(std::set<TagID> tags, GPUMemcpyKind dir);
+  void sync(std::set<TagID> tags, MemcpyKind dir);
   /**
    * Preallocate quadrature point solution vectors
    */
@@ -299,7 +305,7 @@ public:
    * @param tag Vector tag
    */
   KOKKOS_FUNCTION auto &
-  getVectorQpValue(GPUElementInfo info, dof_id_type qp, unsigned int var, TagID tag) const
+  getVectorQpValue(ElementInfo info, dof_id_type qp, unsigned int var, TagID tag) const
   {
     return _qp_solutions[tag](info.subdomain, var)[qp];
   }
@@ -311,7 +317,7 @@ public:
    * @param tag Vector tag
    */
   KOKKOS_FUNCTION auto &
-  getVectorQpGrad(GPUElementInfo info, dof_id_type qp, unsigned int var, TagID tag) const
+  getVectorQpGrad(ElementInfo info, dof_id_type qp, unsigned int var, TagID tag) const
   {
     return _qp_solutions_grad[tag](info.subdomain, var)[qp];
   }
@@ -323,15 +329,12 @@ public:
    * @param var Variable number
    * @param tag Vector tag
    */
-  KOKKOS_FUNCTION auto getVectorQpValueFace(GPUElementInfo info,
-                                            unsigned int side,
-                                            unsigned int qp_local,
-                                            unsigned int var,
-                                            TagID tag) const
+  KOKKOS_FUNCTION auto getVectorQpValueFace(
+      ElementInfo info, unsigned int side, unsigned int qp_local, unsigned int var, TagID tag) const
   {
     auto fe = _var_fe_types[var];
-    auto n_dofs = assembly().getNumDofs(info.type, fe);
-    auto & phi = assembly().getPhiFace(info.subdomain, info.type, fe);
+    auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
+    auto & phi = kokkosAssembly().getPhiFace(info.subdomain, info.type, fe);
 
     Real value = 0;
 
@@ -350,7 +353,7 @@ public:
    * @param var Variable number
    * @param tag Vector tag
    */
-  KOKKOS_FUNCTION auto getVectorQpGradFace(GPUElementInfo info,
+  KOKKOS_FUNCTION auto getVectorQpGradFace(ElementInfo info,
                                            unsigned int side,
                                            Real33 jacobian,
                                            unsigned int qp_local,
@@ -358,8 +361,8 @@ public:
                                            TagID tag) const
   {
     auto fe = _var_fe_types[var];
-    auto n_dofs = assembly().getNumDofs(info.type, fe);
-    auto & grad_phi = assembly().getGradPhiFace(info.subdomain, info.type, fe);
+    auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
+    auto & grad_phi = kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe);
 
     Real3 grad = 0;
 
@@ -374,7 +377,7 @@ public:
    * Check whether reinit should be called to compute quadrature point values
    * @param info Element information object
    */
-  KOKKOS_FUNCTION bool needReinit(GPUElementInfo info)
+  KOKKOS_FUNCTION bool needReinit(ElementInfo info)
   {
     auto subdomain = info.subdomain;
 
@@ -398,7 +401,7 @@ public:
    * @param qp_local Element-local quadrature point index
    */
   KOKKOS_FUNCTION void
-  reinit(GPUElementInfo info, Real33 jacobian, unsigned int qp, unsigned int qp_local)
+  reinit(ElementInfo info, Real33 jacobian, unsigned int qp, unsigned int qp_local)
   {
     auto elem = info.id;
     auto elem_type = info.type;
@@ -414,10 +417,10 @@ public:
           continue;
 
         auto fe = _var_fe_types[var];
-        auto n_dofs = assembly().getNumDofs(elem_type, fe);
+        auto n_dofs = kokkosAssembly().getNumDofs(elem_type, fe);
 
-        auto & phi = assembly().getPhi(subdomain, elem_type, fe);
-        auto & grad_phi = assembly().getGradPhi(subdomain, elem_type, fe);
+        auto & phi = kokkosAssembly().getPhi(subdomain, elem_type, fe);
+        auto & grad_phi = kokkosAssembly().getGradPhi(subdomain, elem_type, fe);
 
         Real value = 0;
         Real3 grad = 0;
@@ -437,32 +440,32 @@ public:
 #endif
 
 private:
-  // Whether the GPU system was initialized
+  // Whether this system was initialized
   bool _initialized = false;
   // GPU copy of vectors
-  GPUArray<GPUVector> _vectors;
+  Array<Vector> _vectors;
   // GPU copy of matrices
-  GPUArray<GPUMatrix> _matrices;
+  Array<Matrix> _matrices;
   // Element quadrature point values of variables
-  GPUArray<GPUArray2D<GPUArray<Real>>> _qp_solutions;
+  Array<Array2D<Array<Real>>> _qp_solutions;
   // Element quadrature point gradients of variables
-  GPUArray<GPUArray2D<GPUArray<Real3>>> _qp_solutions_grad;
+  Array<Array2D<Array<Real3>>> _qp_solutions_grad;
   // Whether variables were projected to quadrature points
-  GPUArray<GPUArray2D<bool>> _variable_on_qp;
+  Array<Array2D<bool>> _variable_on_qp;
   // Local DOF index of each variable at elements
-  GPUArray<GPUArray2D<dof_id_type>> _local_elem_dof_index;
+  Array<Array2D<dof_id_type>> _local_elem_dof_index;
   // Local DOF index of each variable at nodes
-  GPUArray<GPUArray<dof_id_type>> _local_node_dof_index;
+  Array<Array<dof_id_type>> _local_node_dof_index;
   // Local DOF index to global DOF index
-  GPUArray<dof_id_type> _local_to_global_dof_index;
+  Array<dof_id_type> _local_to_global_dof_index;
   // Maximum number of DOFs per element of each variable
-  GPUArray<dof_id_type> _max_dofs_per_elem;
+  Array<dof_id_type> _max_dofs_per_elem;
   // FE type number of variables
-  GPUArray<unsigned int> _var_fe_types;
+  Array<unsigned int> _var_fe_types;
   // Whether variables are active on subdomains
-  GPUArray2D<bool> _var_subdomain_active;
+  Array2D<bool> _var_subdomain_active;
   // Coupled variables
-  GPUArray<GPUArray<unsigned int>> _coupling;
+  Array<Array<unsigned int>> _coupling;
 
 private:
   // Reference to the MOOSE system
@@ -486,32 +489,32 @@ private:
 
 private:
   // List of active variable numbers
-  GPUArray<unsigned int> _active_variables;
+  Array<unsigned int> _active_variables;
   // List of active variable tags
-  GPUArray<TagID> _active_variable_tags;
+  Array<TagID> _active_variable_tags;
   // List of active residual tags
-  GPUArray<TagID> _active_residual_tags;
+  Array<TagID> _active_residual_tags;
   // List of active matrix tags
-  GPUArray<TagID> _active_matrix_tags;
+  Array<TagID> _active_matrix_tags;
   // Whether a residual tag is active
-  GPUArray<bool> _residual_tag_active;
+  Array<bool> _residual_tag_active;
   // Whether a matrix tag is active
-  GPUArray<bool> _matrix_tag_active;
+  Array<bool> _matrix_tag_active;
   // Whether a DOF is associated with a nodal BC
-  GPUArray<bool> _nbc_dof;
+  Array<bool> _nbc_dof;
   // Whether a DOF is associated with a nodal BC for extra tags
-  GPUArray<GPUArray<bool>> _nbc_residual_tag_dof;
-  GPUArray<GPUArray<bool>> _nbc_matrix_tag_dof;
+  Array<Array<bool>> _nbc_residual_tag_dof;
+  Array<Array<bool>> _nbc_matrix_tag_dof;
   // List of DOFs to send and receive
-  GPUArray<GPUArray<dof_id_type>> _local_comm_list;
-  GPUArray<GPUArray<dof_id_type>> _ghost_comm_list;
+  Array<Array<dof_id_type>> _local_comm_list;
+  Array<Array<dof_id_type>> _ghost_comm_list;
 
 public:
   struct Sparsity
   {
-    GPUArray<PetscInt> col_idx;
-    GPUArray<PetscInt> row_idx;
-    GPUArray<PetscInt> row_ptr;
+    Array<PetscInt> col_idx;
+    Array<PetscInt> row_idx;
+    Array<PetscInt> row_ptr;
   };
 
 private:
@@ -519,32 +522,32 @@ private:
   Sparsity _sparsity;
 };
 
-class GPUSystemHolder
+class SystemHolder
 {
 private:
-  // Copy of GPU systems
-  GPUArray<GPUSystem> _systems_device;
-  // Reference to GPU systems
-  GPUArray<GPUSystem> & _systems_host;
+  // Copy of Kokkos systems
+  Array<System> _systems_device;
+  // Reference to Kokkos systems
+  Array<System> & _systems_host;
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 public:
-  KOKKOS_FUNCTION const GPUArray<GPUSystem> & systems() const
+  KOKKOS_FUNCTION const Array<System> & kokkosSystems() const
   {
     KOKKOS_IF_ON_HOST(return _systems_host;)
     KOKKOS_IF_ON_DEVICE(return _systems_device;)
   }
-  KOKKOS_FUNCTION GPUArray<GPUSystem> & systems()
+  KOKKOS_FUNCTION Array<System> & kokkosSystems()
   {
     KOKKOS_IF_ON_HOST(return _systems_host;)
     KOKKOS_IF_ON_DEVICE(return _systems_device;)
   }
-  KOKKOS_FUNCTION const GPUSystem & system(unsigned int sys) const
+  KOKKOS_FUNCTION const System & kokkosSystem(unsigned int sys) const
   {
     KOKKOS_IF_ON_HOST(return _systems_host[sys];)
     KOKKOS_IF_ON_DEVICE(return _systems_device[sys];)
   }
-  KOKKOS_FUNCTION GPUSystem & system(unsigned int sys)
+  KOKKOS_FUNCTION System & kokkosSystem(unsigned int sys)
   {
     KOKKOS_IF_ON_HOST(return _systems_host[sys];)
     KOKKOS_IF_ON_DEVICE(return _systems_device[sys];)
@@ -552,11 +555,12 @@ public:
 #endif
 
 public:
-  GPUSystemHolder(GPUArray<GPUSystem> & systems) : _systems_device(systems), _systems_host(systems)
-  {
-  }
-  GPUSystemHolder(const GPUSystemHolder & holder)
+  SystemHolder(Array<System> & systems) : _systems_device(systems), _systems_host(systems) {}
+  SystemHolder(const SystemHolder & holder)
     : _systems_device(holder._systems_host), _systems_host(holder._systems_host)
   {
   }
 };
+
+} // namespace Kokkos
+} // namespace Moose

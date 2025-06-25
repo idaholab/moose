@@ -18,35 +18,35 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./time_u]
-    type = GPUTimeDerivative
+    type = KokkosTimeDerivative
     variable = u
   [../]
   [./fn_u]
-    type = GPUBodyForce
+    type = KokkosBodyForce
     variable = u
   [../]
   [./time_v]
-    type = GPUCoupledTimeDerivative
+    type = KokkosCoupledTimeDerivative
     variable = v
     v = u
   [../]
   [./diff_v]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = v
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = v
     boundary = 'left'
     value = 0
   [../]
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = v
     boundary = 'right'
     value = 1

@@ -15,12 +15,13 @@
  * Implements a Neumann BC where grad(u)=_coupled_var on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class GPUCoupledVarNeumannBC final : public GPUIntegratedBC<GPUCoupledVarNeumannBC>
+class KokkosCoupledVarNeumannBC final
+  : public Moose::Kokkos::IntegratedBC<KokkosCoupledVarNeumannBC>
 {
 public:
   static InputParameters validParams();
 
-  GPUCoupledVarNeumannBC(const InputParameters & parameters);
+  KokkosCoupledVarNeumannBC(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -42,7 +43,7 @@ public:
 
 protected:
   /// Variable providing the value of grad(u) on the boundary.
-  GPUVariableValue _coupled_var;
+  Moose::Kokkos::VariableValue _coupled_var;
 
   /// The identifying number of the coupled variable
   const unsigned int _coupled_num;
@@ -51,5 +52,5 @@ protected:
   const Real _coef;
 
   /// Scale factor
-  GPUVariableValue _scale_factor;
+  Moose::Kokkos::VariableValue _scale_factor;
 };

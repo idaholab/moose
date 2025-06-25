@@ -12,8 +12,13 @@
 
 // #define GPU_ASSEMBLY
 
+namespace Moose
+{
+namespace Kokkos
+{
+
 void
-GPUVector::MPIBuffer::create(const GPUArray<GPUArray<libMesh::dof_id_type>> & list)
+Vector::MPIBuffer::create(const Array<Array<libMesh::dof_id_type>> & list)
 {
   this->list = list;
 
@@ -33,7 +38,7 @@ GPUVector::MPIBuffer::create(const GPUArray<GPUArray<libMesh::dof_id_type>> & li
 }
 
 void
-GPUVector::MPIBuffer::destroy()
+Vector::MPIBuffer::destroy()
 {
   list.destroy();
   count.destroy();
@@ -42,13 +47,11 @@ GPUVector::MPIBuffer::destroy()
 }
 
 void
-GPUVector::create(libMesh::NumericVector<PetscScalar> & vector,
-                  const GPUSystem & system,
-                  bool assemble)
+Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & system, bool assemble)
 {
   auto petsc_vector = dynamic_cast<libMesh::PetscVector<PetscScalar> *>(&vector);
 
-  mooseAssert(petsc_vector, "GPUVector error: provided vector is not a PetscVector.");
+  mooseAssert(petsc_vector, "Kokkos vector error: provided vector is not a PetscVector.");
 
   PetscScalar * array;
   PetscMemType mtype;
@@ -131,17 +134,17 @@ GPUVector::create(libMesh::NumericVector<PetscScalar> & vector,
 }
 
 void
-GPUVector::copy(GPUMemcpyKind dir)
+Vector::copy(MemcpyKind dir)
 {
   if (_assemble)
-    mooseError("GPUVector error: copy() should not be called for an assembled vector.");
+    mooseError("Kokkos vector error: copy() should not be called for an assembled vector.");
 
   if (_is_alloc && _is_host)
     _local.copy(dir);
 }
 
 void
-GPUVector::destroy()
+Vector::destroy()
 {
   if (!_is_alloc)
     return;
@@ -164,7 +167,7 @@ GPUVector::destroy()
 }
 
 void
-GPUVector::restore()
+Vector::restore()
 {
   LibmeshPetscCallQ(
       VecRestoreArrayAndMemType(_local_vector ? _local_vector : _vector, PETSC_NULLPTR));
@@ -172,10 +175,10 @@ GPUVector::restore()
 }
 
 void
-GPUVector::close()
+Vector::close()
 {
   if (!_assemble)
-    mooseError("GPUVector error: close() should not be called for a non-assembled vector.");
+    mooseError("Kokkos vector error: close() should not be called for a non-assembled vector.");
 
   if (!_is_alloc)
     return;
@@ -218,7 +221,7 @@ GPUVector::close()
 
 #else
 
-  _ghost.copy(GPUMemcpyKind::DEVICE_TO_HOST);
+  _ghost.copy(MemcpyKind::DEVICE_TO_HOST);
 
   LibmeshPetscCallQ(
       VecSetValues(_vector,
@@ -232,7 +235,7 @@ GPUVector::close()
   // Copy to the host vector if needed
 
   if (_is_host)
-    _local.copy(GPUMemcpyKind::DEVICE_TO_HOST);
+    _local.copy(MemcpyKind::DEVICE_TO_HOST);
 
   // Restore the PETSc vector
 
@@ -240,13 +243,16 @@ GPUVector::close()
 }
 
 KOKKOS_FUNCTION void
-GPUVector::operator()(PackBuffer, const PetscCount tid) const
+Vector::operator()(PackBuffer, const PetscCount tid) const
 {
   _send.buffer[_send.offset[_current_proc] + tid] = _ghost(_send.list[_current_proc][tid]);
 }
 
 KOKKOS_FUNCTION void
-GPUVector::operator()(UnpackBuffer, const PetscCount tid) const
+Vector::operator()(UnpackBuffer, const PetscCount tid) const
 {
   _local[_recv.list[_current_proc][tid]] += _recv.buffer[_recv.offset[_current_proc] + tid];
 }
+
+} // namespace Kokkos
+} // namespace Moose

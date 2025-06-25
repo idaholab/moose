@@ -16,24 +16,24 @@
   []
 []
 
-[GPUKernels]
+[KokkosKernels]
   active = 'diff'
   [diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
   []
 []
 
-[GPUBCs]
+[KokkosBCs]
   active = 'left right'
   [left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 3
     value = 0
   []
   [right]
-    type = GPUNeumannBC
+    type = KokkosNeumannBC
     variable = u
     boundary = 1
     value = 1

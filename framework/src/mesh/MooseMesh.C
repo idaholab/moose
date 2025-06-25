@@ -286,9 +286,9 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
 
   determineUseDistributedMesh();
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
   if (_app.hasGPUs())
-    _gpu_mesh = std::make_unique<GPUMesh>(*this);
+    _kokkos_mesh = std::make_unique<Moose::Kokkos::Mesh>(*this);
 #endif
 }
 
@@ -656,9 +656,9 @@ MooseMesh::update()
   // the flag might have been set by calling doingPRefinement(true)
   _doing_p_refinement = _doing_p_refinement || (_max_p_level > 0);
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
   if (_app.hasGPUs())
-    _gpu_mesh->update();
+    _kokkos_mesh->update();
 #endif
 
   _finite_volume_info_dirty = true;

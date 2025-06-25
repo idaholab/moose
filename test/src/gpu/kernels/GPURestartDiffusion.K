@@ -9,25 +9,25 @@
 
 #include "GPURestartDiffusion.h"
 
-registerMooseObject("MooseTestApp", GPURestartDiffusion);
+registerMooseObject("MooseTestApp", KokkosRestartDiffusion);
 
 InputParameters
-GPURestartDiffusion::validParams()
+KokkosRestartDiffusion::validParams()
 {
-  InputParameters params = GPUDiffusion::validParams();
+  InputParameters params = KokkosDiffusion::validParams();
   return params;
 }
 
-GPURestartDiffusion::GPURestartDiffusion(const InputParameters & parameters)
-  : GPUDiffusion(parameters),
+KokkosRestartDiffusion::KokkosRestartDiffusion(const InputParameters & parameters)
+  : KokkosDiffusion(parameters),
     _step(declareRestartableData<unsigned int>("step", 0)),
-    _coef(declareRestartableData<GPUArray<Real>>("coef", 100))
+    _coef(declareRestartableData<Moose::Kokkos::Array<Real>>("coef", 100))
 {
   *_coef = 1;
 }
 
 void
-GPURestartDiffusion::timestepSetup()
+KokkosRestartDiffusion::timestepSetup()
 {
   _step = _step + 1;
   _coef(_step) = _coef(_step - 1) + 1;

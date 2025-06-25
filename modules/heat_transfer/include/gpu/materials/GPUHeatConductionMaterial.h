@@ -14,12 +14,13 @@
 /**
  * Simple material with properties set as constants.
  */
-class GPUHeatConductionMaterial final : public GPUMaterial<GPUHeatConductionMaterial>
+class KokkosHeatConductionMaterial final
+  : public Moose::Kokkos::Material<KokkosHeatConductionMaterial>
 {
 public:
   static InputParameters validParams();
 
-  GPUHeatConductionMaterial(const InputParameters & parameters);
+  KokkosHeatConductionMaterial(const InputParameters & parameters);
 
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const
   {
@@ -31,16 +32,16 @@ public:
 
 private:
   const bool _has_temp;
-  GPUVariableValue _temperature;
+  Moose::Kokkos::VariableValue _temperature;
 
   const Real _my_thermal_conductivity;
   const Real _my_specific_heat;
 
-  GPUMaterialProperty<Real> _thermal_conductivity;
-  GPUMaterialProperty<Real> _thermal_conductivity_dT;
+  Moose::Kokkos::MaterialProperty<Real> _thermal_conductivity;
+  Moose::Kokkos::MaterialProperty<Real> _thermal_conductivity_dT;
 
-  GPUMaterialProperty<Real> _specific_heat;
-  GPUMaterialProperty<Real> _specific_heat_dT;
+  Moose::Kokkos::MaterialProperty<Real> _specific_heat;
+  Moose::Kokkos::MaterialProperty<Real> _specific_heat_dT;
 
   /// Minimum temperature, below which temperature is "clipped" before evaluating functions
   const Real _min_T;

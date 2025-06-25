@@ -12,19 +12,24 @@
 #include "FEProblemBase.h"
 #include "MaterialBase.h"
 
-GPUMaterialPropertyBase &
-GPUMaterialPropertyStorage::addGPUProperty(const std::string & prop_name,
+namespace Moose
+{
+namespace Kokkos
+{
+
+MaterialPropertyBase &
+MaterialPropertyStorage::addKokkosProperty(const std::string & prop_name,
                                            const std::type_info & type,
                                            const unsigned int state,
                                            const MaterialBase * declarer,
-                                           std::shared_ptr<GPUMaterialPropertyBase> shell)
+                                           std::shared_ptr<MaterialPropertyBase> shell)
 {
   auto id = addProperty(prop_name, type, state, declarer);
 
   if (state)
-    return addGPUPropertyState(prop_name, state, shell);
+    return addKokkosPropertyState(prop_name, state, shell);
 
-  auto & record = _gpu_prop_records[prop_name];
+  auto & record = _kokkos_prop_records[prop_name];
 
   if (record.id == libMesh::invalid_uint)
   {
@@ -35,47 +40,47 @@ GPUMaterialPropertyStorage::addGPUProperty(const std::string & prop_name,
   if (declarer)
     record.declarers.insert(declarer);
 
-  if (!_gpu_props[0].count(prop_name))
+  if (!_kokkos_props[0].count(prop_name))
   {
-    _gpu_props[0][prop_name] = shell;
-    _gpu_props[0][prop_name]->init(record);
+    _kokkos_props[0][prop_name] = shell;
+    _kokkos_props[0][prop_name]->init(record);
   }
 
-  return *_gpu_props[0][prop_name];
+  return *_kokkos_props[0][prop_name];
 }
 
-GPUMaterialPropertyBase &
-GPUMaterialPropertyStorage::addGPUPropertyState(const std::string & prop_name,
+MaterialPropertyBase &
+MaterialPropertyStorage::addKokkosPropertyState(const std::string & prop_name,
                                                 const unsigned int state,
-                                                std::shared_ptr<GPUMaterialPropertyBase> shell)
+                                                std::shared_ptr<MaterialPropertyBase> shell)
 {
-  auto & record = _gpu_prop_records[prop_name];
+  auto & record = _kokkos_prop_records[prop_name];
 
-  if (!_gpu_props[state].count(prop_name))
+  if (!_kokkos_props[state].count(prop_name))
   {
-    _gpu_props[state][prop_name] = shell;
-    _gpu_props[state][prop_name]->init(record);
+    _kokkos_props[state][prop_name] = shell;
+    _kokkos_props[state][prop_name]->init(record);
   }
 
-  return *_gpu_props[state][prop_name];
+  return *_kokkos_props[state][prop_name];
 }
 
-GPUMaterialPropertyBase &
-GPUMaterialPropertyStorage::declareGPUProperty(const std::string & prop_name,
+MaterialPropertyBase &
+MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
                                                const std::type_info & type,
                                                const unsigned int state,
                                                const MaterialBase * declarer,
                                                const std::vector<unsigned int> & dims,
                                                const bool bnd,
-                                               std::shared_ptr<GPUMaterialPropertyBase> shell)
+                                               std::shared_ptr<MaterialPropertyBase> shell)
 {
-  auto & record = _gpu_prop_records[prop_name];
+  auto & record = _kokkos_prop_records[prop_name];
 
   if (record.declarers.size() && record.dims != dims)
   {
     std::stringstream ss;
 
-    ss << "The declared " << dims.size() << "D GPU material property '" << prop_name << "'";
+    ss << "The declared " << dims.size() << "D Kokkos material property '" << prop_name << "'";
     if (dims.size())
       ss << " with dimensions (" << Moose::stringify(dims) << ")";
     ss << " was already declared as a " << record.dims.size() << "D property";
@@ -92,25 +97,25 @@ GPUMaterialPropertyStorage::declareGPUProperty(const std::string & prop_name,
     record.bnd = bnd;
   }
 
-  return addGPUProperty(prop_name, type, state, declarer, shell);
+  return addKokkosProperty(prop_name, type, state, declarer, shell);
 }
 
-GPUMaterialPropertyBase &
-GPUMaterialPropertyStorage::getGPUProperty(std::string prop_name, unsigned int state)
+MaterialPropertyBase &
+MaterialPropertyStorage::getKokkosProperty(std::string prop_name, unsigned int state)
 {
-  return *_gpu_props[state][prop_name];
+  return *_kokkos_props[state][prop_name];
 }
 
 void
-GPUMaterialPropertyStorage::allocateGPUProperties()
+MaterialPropertyStorage::allocateKokkosProperties()
 {
   auto & mesh = _problem.mesh();
-  auto & assembly = _problem.gpuAssembly();
+  auto & assembly = _problem.kokkosAssembly();
 
   for (unsigned int state = 0; state < numStates(); ++state)
-    for (auto & [name, prop] : _gpu_props[state])
+    for (auto & [name, prop] : _kokkos_props[state])
     {
-      auto & record = _gpu_prop_records[name];
+      auto & record = _kokkos_prop_records[name];
 
       for (auto declarer : record.declarers)
       {
@@ -123,36 +128,39 @@ GPUMaterialPropertyStorage::allocateGPUProperties()
 }
 
 bool
-GPUMaterialPropertyStorage::haveGPUProperty(std::string prop_name, unsigned int state)
+MaterialPropertyStorage::haveKokkosProperty(std::string prop_name, unsigned int state)
 {
-  return _gpu_props[state].count(prop_name);
+  return _kokkos_props[state].count(prop_name);
 }
 
 void
-GPUMaterialPropertyStorage::shift()
+MaterialPropertyStorage::shift()
 {
   for (unsigned int state = maxState(); state != 0; --state)
-    for (auto & [name, prop] : _gpu_props[state])
-      prop->swap(*_gpu_props[state - 1][name]);
+    for (auto & [name, prop] : _kokkos_props[state])
+      prop->swap(*_kokkos_props[state - 1][name]);
 }
 
 void
-GPUMaterialPropertyStorage::copy()
+MaterialPropertyStorage::copy()
 {
   for (unsigned int state : statefulIndexRange())
-    for (auto & [name, prop] : _gpu_props[state])
-      prop->copy(*_gpu_props[0][name]);
+    for (auto & [name, prop] : _kokkos_props[state])
+      prop->copy(*_kokkos_props[0][name]);
 }
 
+} // namespace Kokkos
+} // namespace Moose
+
 void
-dataStore(std::ostream & stream, GPUMaterialPropertyStorage & storage, void * context)
+dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, void * context)
 {
   auto & base = static_cast<MaterialPropertyStorage &>(storage);
 
   dataStore(stream, base, context);
 
-  auto & props = storage._gpu_props;
-  auto & records = storage._gpu_prop_records;
+  auto & props = storage._kokkos_props;
+  auto & records = storage._kokkos_prop_records;
 
   unsigned int num_stateful_properties = 0;
 
@@ -192,15 +200,15 @@ dataStore(std::ostream & stream, GPUMaterialPropertyStorage & storage, void * co
 }
 
 void
-dataLoad(std::istream & stream, GPUMaterialPropertyStorage & storage, void * context)
+dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, void * context)
 {
   auto & base = static_cast<MaterialPropertyStorage &>(storage);
 
   // All exceptions are expected to be handled here
   dataLoad(stream, base, context);
 
-  auto & props = storage._gpu_props;
-  auto & records = storage._gpu_prop_records;
+  auto & props = storage._kokkos_props;
+  auto & records = storage._kokkos_prop_records;
 
   unsigned int num_stateful_properties;
   dataLoad(stream, num_stateful_properties, nullptr);

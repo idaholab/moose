@@ -12,14 +12,19 @@
 #include "GPUBoundaryCondition.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
-class GPUNodalBCBase : public GPUBoundaryCondition,
-                       public CoupleableMooseVariableDependencyIntermediateInterface
+namespace Moose
+{
+namespace Kokkos
+{
+
+class NodalBCBase : public BoundaryCondition,
+                    public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   static InputParameters validParams();
 
-  GPUNodalBCBase(const InputParameters & parameters, Moose::VarFieldType field_type);
-  GPUNodalBCBase(const GPUNodalBCBase & object);
+  NodalBCBase(const InputParameters & parameters, Moose::VarFieldType field_type);
+  NodalBCBase(const NodalBCBase & object);
 
   virtual bool preset() const { return false; }
   virtual void presetSolution(TagID tag) {}
@@ -27,4 +32,7 @@ public:
   std::vector<dof_id_type> getNodes() const;
 };
 
-#define usingGPUNodalBCBaseMembers usingGPUBoundaryConditionMembers;
+} // namespace Kokkos
+} // namespace Moose
+
+#define usingKokkosNodalBCBaseMembers usingKokkosBoundaryConditionMembers;

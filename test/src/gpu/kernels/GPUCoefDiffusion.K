@@ -9,12 +9,12 @@
 
 #include "GPUCoefDiffusion.h"
 
-registerMooseObject("MooseTestApp", GPUCoefDiffusion);
+registerMooseObject("MooseTestApp", KokkosCoefDiffusion);
 
 InputParameters
-GPUCoefDiffusion::validParams()
+KokkosCoefDiffusion::validParams()
 {
-  InputParameters params = GPUKernel::validParams();
+  InputParameters params = Kernel::validParams();
   params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
   params.addPrivateParam<Real>("_test_private_param", 12345);
   params.addParam<Real>("non_controllable", "A parameter we cannot control.");
@@ -24,7 +24,7 @@ GPUCoefDiffusion::validParams()
   return params;
 }
 
-GPUCoefDiffusion::GPUCoefDiffusion(const InputParameters & parameters)
-  : GPUKernel(parameters), _coef(getParam<Real>("coef"))
+KokkosCoefDiffusion::KokkosCoefDiffusion(const InputParameters & parameters)
+  : Kernel(parameters), _coef(getParam<Real>("coef"))
 {
 }

@@ -12,12 +12,12 @@
 #include "GPUKernel.h"
 #include "GPUMaterialProperty.h"
 
-class GPUMatDiffusionTest final : public GPUKernel<GPUMatDiffusionTest>
+class KokkosMatDiffusionTest final : public Moose::Kokkos::Kernel<KokkosMatDiffusionTest>
 {
 public:
   static InputParameters validParams();
 
-  GPUMatDiffusionTest(const InputParameters & parameters);
+  KokkosMatDiffusionTest(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -37,5 +37,5 @@ public:
 
 private:
   std::string _prop_name;
-  GPUMaterialProperty<Real> _diff;
+  Moose::Kokkos::MaterialProperty<Real> _diff;
 };

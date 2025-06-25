@@ -3,13 +3,14 @@
   design = '/BlockRestrictable.md'
 
   [block_restriction]
-    requirement = 'The GPU system shall support the ability to apply a kernel to a subset of the domain'
+    requirement = 'The Kokkos system shall support the ability to apply a kernel to a subset of the domain'
 
     [kernel]
       type = 'Exodiff'
       input = 'gpu_block_kernel_test.i'
       exodiff = 'out_gpu.e'
       detail = 'through a subdomain restriction on the kernel, and'
+      capabilities = 'kokkos'
     []
 
     [variable]
@@ -17,6 +18,7 @@
       input = 'gpu_block_vars.i'
       exodiff = 'out_vars_gpu.e'
       detail = 'through a subdomain restriction on the variable.'
+      capabilities = 'kokkos'
     []
   []
 []

@@ -10,12 +10,17 @@
 #include "GPUMatrix.h"
 #include "GPUSystem.h"
 
+namespace Moose
+{
+namespace Kokkos
+{
+
 void
-GPUMatrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const GPUSystem & system)
+Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & system)
 {
   auto petsc_matrix = dynamic_cast<libMesh::PetscMatrix<PetscScalar> *>(&matrix);
 
-  mooseAssert(petsc_matrix, "GPUMatrix error: provided matrix is not a PetscMatrix.");
+  mooseAssert(petsc_matrix, "Kokkos matrix error: provided matrix is not a PetscMatrix.");
 
   PetscBool is_host;
   LibmeshPetscCallQ(MatBoundToCPU(petsc_matrix->mat(), &is_host));
@@ -44,7 +49,7 @@ GPUMatrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const GPUSystem &
 }
 
 void
-GPUMatrix::destroy()
+Matrix::destroy()
 {
   _matrix = PETSC_NULLPTR;
   _nr = 0;
@@ -59,11 +64,14 @@ GPUMatrix::destroy()
 }
 
 void
-GPUMatrix::close()
+Matrix::close()
 {
   if (_is_host)
-    _val.copy(GPUMemcpyKind::DEVICE_TO_HOST);
+    _val.copy(MemcpyKind::DEVICE_TO_HOST);
 
   LibmeshPetscCallQ(
       MatSetValuesCOO(_matrix, _is_host ? _val.host_data() : _val.device_data(), ADD_VALUES));
 }
+
+} // namespace Kokkos
+} // namespace Moose

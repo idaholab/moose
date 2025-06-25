@@ -9,17 +9,17 @@
 
 #include "GPUCoupledDirichletBC.h"
 
-registerMooseObject("MooseTestApp", GPUCoupledDirichletBC);
+registerMooseObject("MooseTestApp", KokkosCoupledDirichletBC);
 
 InputParameters
-GPUCoupledDirichletBC::validParams()
+KokkosCoupledDirichletBC::validParams()
 {
-  InputParameters params = GPUDirichletBC::validParams();
+  InputParameters params = KokkosDirichletBC::validParams();
   params.addRequiredCoupledVar("v", "The coupled variable");
   return params;
 }
 
-GPUCoupledDirichletBC::GPUCoupledDirichletBC(const InputParameters & parameters)
-  : GPUDirichletBC(parameters), _v(GPUCoupledNodalValue("v")), _v_num(coupled("v")), _c(1.0)
+KokkosCoupledDirichletBC::KokkosCoupledDirichletBC(const InputParameters & parameters)
+  : KokkosDirichletBC(parameters), _v(KokkosCoupledNodalValue("v")), _v_num(coupled("v")), _c(1.0)
 {
 }

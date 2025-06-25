@@ -13,7 +13,12 @@
 
 class MooseMesh;
 
-struct GPUElementInfo
+namespace Moose
+{
+namespace Kokkos
+{
+
+struct ElementInfo
 {
   // Element type ID
   unsigned int type;
@@ -31,11 +36,11 @@ struct GPUElementInfo
   unsigned int n_nodes_side[6];
 };
 
-class GPUMesh
+class Mesh
 {
 public:
   // Constructor
-  GPUMesh(const MooseMesh & mesh) : _mesh(mesh) {}
+  Mesh(const MooseMesh & mesh) : _mesh(mesh) {}
   // Get the underyling MooseMesh
   const MooseMesh & getMesh() { return _mesh; }
   // Update the mesh information
@@ -51,37 +56,37 @@ public:
   /**
    * Get GPU subdomain ID of a subdomain (local to each process)
    */
-  SubdomainID getGPUSubdomainID(const SubdomainID subdomain) const;
+  SubdomainID getSubdomainID(const SubdomainID subdomain) const;
 
   /**
    * Get GPU element type ID of an element pointer (local to each process)
    */
-  unsigned int getGPUElementTypeID(const Elem * elem) const;
+  unsigned int getElementTypeID(const Elem * elem) const;
 
   /**
    * Get GPU element ID of an element pointer (local to each process)
    */
-  dof_id_type getGPUElementID(const Elem * elem) const;
+  dof_id_type getElementID(const Elem * elem) const;
 
   /**
    * Get GPU subdomain-local element ID of an element pointer (local to each process)
    */
-  dof_id_type getGPUSubdomainLocalElementID(const Elem * elem) const;
+  dof_id_type getSubdomainLocalElementID(const Elem * elem) const;
 
   /**
    * Get element type to GPU element type ID map (local to each process)
    */
-  const auto & getGPUElementTypeMap() const { return _maps->_elem_type_id_mapping; }
+  const auto & getElementTypeMap() const { return _maps->_elem_type_id_mapping; }
 
   /**
    * Get element pointer to GPU local element ID map (local to each process)
    */
-  const auto & getGPULocalElementMap() const { return _maps->_local_elem_id_mapping; }
+  const auto & getLocalElementMap() const { return _maps->_local_elem_id_mapping; }
 
   /**
    * Get element pointer to GPU local element ID map for a subdomain (local to each process)
    */
-  const auto & getGPUSubdomainElementMap(const SubdomainID subdomain) const
+  const auto & getSubdomainElementMap(const SubdomainID subdomain) const
   {
     return _maps->_subdomain_elem_id_mapping.at(subdomain);
   }
@@ -89,7 +94,7 @@ public:
   /**
    * Get element pointer to GPU subdomain-local element ID map (local to each process)
    */
-  const auto & getGPUSubdomainLocalElementMap(const SubdomainID subdomain) const
+  const auto & getSubdomainLocalElementMap(const SubdomainID subdomain) const
   {
     return _maps->_subdomain_local_elem_id_mapping.at(subdomain);
   }
@@ -97,7 +102,7 @@ public:
   /**
    * Get the list of GPU local element IDs for a subdomain (local to each process)
    */
-  const auto & getGPUSubdomainElementIDs(const SubdomainID subdomain) const
+  const auto & getSubdomainElementIDs(const SubdomainID subdomain) const
   {
     return _maps->_subdomain_elem_ids.at(subdomain);
   }
@@ -105,22 +110,22 @@ public:
   /**
    * Get GPU node ID of a node pointer (local to each process)
    */
-  dof_id_type getGPUNodeID(const Node * node) const;
+  dof_id_type getNodeID(const Node * node) const;
 
   /**
    * Get node pointer to GPU local node ID map (local to each process)
    */
-  const auto & getGPULocalNodeMap() const { return _maps->_local_node_id_mapping; }
+  const auto & getLocalNodeMap() const { return _maps->_local_node_id_mapping; }
 
   /**
    * Get the list of GPU local node IDs for a subdomain (local to each process)
    */
-  const auto & getGPUSubdomainNodeIDs(const SubdomainID subdomain) const
+  const auto & getSubdomainNodeIDs(const SubdomainID subdomain) const
   {
     return _maps->_subdomain_node_ids.at(subdomain);
   }
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get the element information
    */
@@ -153,7 +158,7 @@ private:
   // Pointer to the MooseMesh
   const MooseMesh & _mesh;
   // Collection of maps
-  struct GPUMeshMap
+  struct MeshMap
   {
     // Map from subdomain to serialized GPU subdomain ID (local to each process)
     std::map<SubdomainID, SubdomainID> _subdomain_id_mapping;
@@ -174,31 +179,31 @@ private:
     std::map<SubdomainID, std::set<dof_id_type>> _subdomain_node_ids;
   };
   // A shared pointer holding all maps to avoid deep copy
-  std::shared_ptr<GPUMeshMap> _maps;
+  std::shared_ptr<MeshMap> _maps;
 
 private:
   // Element information
-  GPUArray<GPUElementInfo> _elem_info;
+  Array<ElementInfo> _elem_info;
   // Neighbor elements of each element
-  GPUArray2D<dof_id_type> _elem_neighbor;
+  Array2D<dof_id_type> _elem_neighbor;
   // Physical node points
-  GPUArray<Real3> _points;
+  Array<Real3> _points;
   // Node indices for each element and side
-  GPUArray2D<dof_id_type> _nodes;
-  GPUArray3D<dof_id_type> _nodes_face;
+  Array2D<dof_id_type> _nodes;
+  Array3D<dof_id_type> _nodes_face;
 };
 
-class GPUMeshHolder
+class MeshHolder
 {
 private:
-  // Copy of GPU assembly
-  GPUMesh _mesh_device;
-  // Reference to GPU assembly
-  const GPUMesh & _mesh_host;
+  // Copy of Kokkos mesh
+  Mesh _mesh_device;
+  // Reference to Kokkos mesh
+  const Mesh & _mesh_host;
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 public:
-  KOKKOS_FUNCTION const GPUMesh & mesh() const
+  KOKKOS_FUNCTION const Mesh & kokkosMesh() const
   {
     KOKKOS_IF_ON_HOST(return _mesh_host;)
     KOKKOS_IF_ON_DEVICE(return _mesh_device;)
@@ -206,9 +211,12 @@ public:
 #endif
 
 public:
-  GPUMeshHolder(const GPUMesh & mesh) : _mesh_device(mesh), _mesh_host(mesh) {}
-  GPUMeshHolder(const GPUMeshHolder & holder)
+  MeshHolder(const Mesh & mesh) : _mesh_device(mesh), _mesh_host(mesh) {}
+  MeshHolder(const MeshHolder & holder)
     : _mesh_device(holder._mesh_host), _mesh_host(holder._mesh_host)
   {
   }
 };
+
+} // namespace Kokkos
+} // namespace Moose

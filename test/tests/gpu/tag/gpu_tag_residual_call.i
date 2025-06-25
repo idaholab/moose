@@ -17,14 +17,14 @@
   []
 []
 
-[GPUKernels]
+[KokkosKernels]
   [diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
     extra_vector_tags = 'vec_tag1'
   []
   [react]
-    type = GPUReaction
+    type = KokkosReaction
     variable = u
     extra_vector_tags = 'vec_tag1 vec_tag2'
   []

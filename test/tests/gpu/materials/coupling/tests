@@ -6,7 +6,7 @@
     type = 'Exodiff'
     input = 'gpu_var_coupling.i'
     exodiff = 'gpu_var_coupling_out.e'
-    requirement = 'The GPU material system shall be able to couple in variables to compute material properties.'
+    requirement = 'The Kokkos material system shall be able to couple in variables to compute material properties.'
     capabilities = 'kokkos'
   [../]
 
@@ -14,9 +14,9 @@
     type = 'Exodiff'
     input = 'gpu_var_coupling.i'
     exodiff = 'gpu_var_stateful_coupling_out.e'
-    cli_args = 'GPUMaterials/coupling_u/declare_old=true
+    cli_args = 'KokkosMaterials/coupling_u/declare_old=true
                 Outputs/file_base=gpu_var_stateful_coupling_out'
-    requirement = 'The GPU material system shall be able to couple in variables to initialize stateful material properties.'
+    requirement = 'The Kokkos material system shall be able to couple in variables to initialize stateful material properties.'
     capabilities = 'kokkos'
   [../]
 
@@ -24,9 +24,9 @@
     type = 'Exodiff'
     input = 'gpu_var_coupling.i'
     exodiff = 'gpu_var_stateful_coupling_out.e'
-    cli_args = 'GPUMaterials/coupling_u/var=v
+    cli_args = 'KokkosMaterials/coupling_u/var=v
                 Outputs/file_base=gpu_var_stateful_coupling_out'
-    requirement = 'The GPU material system shall be able to couple in aux variables to compute material properties.'
+    requirement = 'The Kokkos material system shall be able to couple in aux variables to compute material properties.'
     capabilities = 'kokkos'
     prereq = var_stateful_coupling
   [../]
@@ -35,10 +35,10 @@
     type = 'Exodiff'
     input = 'gpu_var_coupling.i'
     exodiff = 'gpu_var_stateful_coupling_out.e'
-    cli_args = 'GPUMaterials/coupling_u/var=v
-                GPUMaterials/coupling_u/declare_old=true
+    cli_args = 'KokkosMaterials/coupling_u/var=v
+                KokkosMaterials/coupling_u/declare_old=true
                 Outputs/file_base=gpu_var_stateful_coupling_out'
-    requirement = 'The GPU material system shall be able to couple in aux variables to initialize stateful material properties.'
+    requirement = 'The Kokkos material system shall be able to couple in aux variables to initialize stateful material properties.'
     capabilities = 'kokkos'
     prereq = aux_coupling
   [../]
@@ -47,9 +47,9 @@
     type = 'Exodiff'
     input = 'gpu_prop_stateful_coupling.i'
     exodiff = 'gpu_prop_coupling_out.e'
-    cli_args = 'GPUMaterials/coupled_mat/use_old_prop=false
+    cli_args = 'KokkosMaterials/coupled_mat/use_old_prop=false
                 Outputs/file_base=gpu_prop_coupling_out'
-    requirement = 'The GPU material system shall be able to couple in other material properties to compute material properties.'
+    requirement = 'The Kokkos material system shall be able to couple in other material properties to compute material properties.'
     capabilities = 'kokkos'
   [../]
 
@@ -57,7 +57,7 @@
     type = 'Exodiff'
     input = 'gpu_prop_stateful_coupling.i'
     exodiff = 'gpu_prop_stateful_coupling_out.e'
-    requirement = 'The GPU material system shall be able to couple in other stateful material properties to compute material properties.'
+    requirement = 'The Kokkos material system shall be able to couple in other stateful material properties to compute material properties.'
     capabilities = 'kokkos'
   [../]
 []
