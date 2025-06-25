@@ -56,7 +56,7 @@ protected:
 
 private:
   /// Helper function to retrieve the property or functor
-  const PropertyType & getPropertyHelper() const;
+  const PropertyType & getPropertyHelper();
 
   /// Multiplier for the material property
   const Real _factor;
@@ -111,7 +111,7 @@ MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::MaterialAuxBaseTempl(
 
 template <typename T, bool is_ad, bool is_functor, typename RT>
 const typename MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::PropertyType &
-MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::getPropertyHelper() const
+MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::getPropertyHelper()
 {
   if constexpr (is_functor)
     return this->template getFunctor<Moose::GenericType<T, is_ad>>("functor");
