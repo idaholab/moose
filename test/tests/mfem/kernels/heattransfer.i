@@ -53,7 +53,6 @@
     type = MFEMScalarDirichletBC
     variable = temperature
     boundary = '2'
-    coefficient = 0.0
   []
 []
 

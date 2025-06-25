@@ -15,8 +15,9 @@ InputParameters
 MFEMVectorDirichletBCBase::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
-  params.addRequiredParam<MFEMVectorCoefficientName>(
+  params.addParam<MFEMVectorCoefficientName>(
       "vector_coefficient",
+      "0. 0. 0.",
       "Vector coefficient specifying the values the variable takes on the boundary");
   return params;
 }
