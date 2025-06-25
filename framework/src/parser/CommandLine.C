@@ -361,9 +361,9 @@ CommandLine::populateCommandLineParams(InputParameters & params)
       if (param.metadata.global)
         entry.global = true;
 
-      // If the arg is of form "--key=value", PETSc will recognize it as an unused
+      // If the arg is of the form "--key=value", PETSc will recognize it as an unused
       // argument. That is, setting "--key" as a known command line argument is not
-      // sufficient for PETSc consider "--key=value" as known. Thus, we explicitly
+      // sufficient for PETSc to consider "--key=value" as known. Thus, we explicitly
       // add "--key=value" args as known when we come across them.
       if (entry.value_separator && *entry.value_separator == "=")
       {
