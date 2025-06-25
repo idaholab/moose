@@ -71,6 +71,8 @@ ref_delta_P = ${fparse f * L / D * rho * bulk_u^2 / 2}
     old_boundary = 'top'
     new_boundary = 'wall'
   []
+  rz_coord_axis = 'X'
+  coord_type = 'RZ'
 []
 
 [Outputs]
@@ -80,8 +82,6 @@ ref_delta_P = ${fparse f * L / D * rho * bulk_u^2 / 2}
 [Problem]
   kernel_coverage_check = false
   fv_bcs_integrity_check = true
-  coord_type = 'RZ'
-  rz_coord_axis = 'X'
 []
 
 [GlobalParams]

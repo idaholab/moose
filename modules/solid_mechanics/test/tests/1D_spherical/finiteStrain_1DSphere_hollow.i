@@ -27,14 +27,11 @@
   xmin = 4
   xmax = 9
   nx = 5
+  coord_type = RSPHERICAL
 []
 
 [GlobalParams]
   displacements = 'disp_r'
-[]
-
-[Problem]
-  coord_type = RSPHERICAL
 []
 
 [Physics/SolidMechanics/QuasiStatic]
