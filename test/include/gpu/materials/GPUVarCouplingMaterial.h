@@ -14,12 +14,12 @@
 /**
  * A material that couples a variable
  */
-class GPUVarCouplingMaterial final : public GPUMaterial<GPUVarCouplingMaterial>
+class KokkosVarCouplingMaterial final : public Moose::Kokkos::Material<KokkosVarCouplingMaterial>
 {
 public:
   static InputParameters validParams();
 
-  GPUVarCouplingMaterial(const InputParameters & parameters);
+  KokkosVarCouplingMaterial(const InputParameters & parameters);
 
   KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int qp, Datum & datum) const
   {
@@ -36,9 +36,9 @@ public:
   }
 
 protected:
-  GPUVariableValue _var;
+  Moose::Kokkos::VariableValue _var;
   Real _base;
   Real _coef;
-  GPUMaterialProperty<Real> _coupled_prop;
-  GPUMaterialProperty<Real> _coupled_prop_old;
+  Moose::Kokkos::MaterialProperty<Real> _coupled_prop;
+  Moose::Kokkos::MaterialProperty<Real> _coupled_prop_old;
 };

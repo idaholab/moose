@@ -9,13 +9,18 @@
 
 #pragma once
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 #include "GPUHeader.h"
 #endif
 
 #include "MooseTypes.h"
 
-class GPUThread
+namespace Moose
+{
+namespace Kokkos
+{
+
+class Thread
 {
 private:
   // Total thread pool size
@@ -25,7 +30,7 @@ private:
   // Thread ID divisor of each dimension
   size_t _divisor[10];
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 public:
   void resize(std::vector<size_t> dims)
   {
@@ -46,3 +51,6 @@ public:
   }
 #endif
 };
+
+} // namespace Kokkos
+} // namespace Moose

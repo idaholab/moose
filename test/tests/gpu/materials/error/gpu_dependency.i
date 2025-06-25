@@ -18,33 +18,33 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./diff]
-    type = GPUCoefDiffusion
+    type = KokkosCoefDiffusion
     variable = u
     coef = 0.1
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 'left'
     value = 1
   [../]
 
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 'right'
     value = 2
   [../]
 []
 
-[GPUMaterials]
+[KokkosMaterials]
   [./mat1]
-    type = GPUCoupledMaterial
+    type = KokkosCoupledMaterial
     mat_prop = 'prop-a'
     coupled_mat_prop = 'prop-b'
     use_old_prop = true
@@ -52,7 +52,7 @@
   [../]
 
   [./mat2]
-    type = GPUCoupledMaterial
+    type = KokkosCoupledMaterial
     mat_prop = 'prop-b'
     coupled_mat_prop = 'prop-a'
     use_old_prop = false

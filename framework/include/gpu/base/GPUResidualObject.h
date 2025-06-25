@@ -15,20 +15,28 @@
 #include "MooseVariableBase.h"
 #include "ResidualObject.h"
 
-class GPUResidualObject : public ResidualObject,
-                          public GPUMeshHolder,
-                          public GPUAssemblyHolder,
-                          public GPUSystemHolder
+namespace Moose
+{
+namespace Kokkos
+{
+
+class ResidualObject : public ::ResidualObject,
+                       public MeshHolder,
+                       public AssemblyHolder,
+                       public SystemHolder
 {
 public:
   static InputParameters validParams();
 
-  GPUResidualObject(const InputParameters & parameters,
-                    Moose::VarFieldType field_type,
-                    bool nodal = false);
-  GPUResidualObject(const GPUResidualObject & object);
+  ResidualObject(const InputParameters & parameters,
+                 Moose::VarFieldType field_type,
+                 bool nodal = false);
+  ResidualObject(const ResidualObject & object);
 
-  // GPU function tags
+  /** Kokkos function tags
+   *
+   */
+  ///@{
   struct ResidualLoop
   {
   };
@@ -38,12 +46,13 @@ public:
   struct OffDiagJacobianLoop
   {
   };
+  ///@}
 
   virtual const MooseVariableBase & variable() const override { return _var; }
 
   virtual void computeOffDiagJacobian(unsigned int) override final
   {
-    mooseError("computeOffDiagJacobian() is not used for GPU residual objects.");
+    mooseError("computeOffDiagJacobian() is not used for Kokkos residual objects.");
   }
   virtual void computeResidualAndJacobian() override final
   {
@@ -54,31 +63,31 @@ public:
 protected:
   // Reference to MooseVariableFieldBase
   MooseVariableFieldBase & _var;
-  // GPU variable this object operates on
-  GPUVariable _gpu_var;
-  // GPU thread object
-  GPUThread _thread;
+  // Kokkos variable this object operates on
+  Variable _kokkos_var;
+  // Kokkos thread object
+  Thread _thread;
 
 protected:
   // TODO: Move to TransientInterface
   // Time
-  GPUScalar<Real> _t;
+  Scalar<Real> _t;
   // Old time
-  GPUScalar<const Real> _t_old;
+  Scalar<const Real> _t_old;
   // The number of the time step
-  GPUScalar<int> _t_step;
+  Scalar<int> _t_step;
   // Time step size
-  GPUScalar<Real> _dt;
+  Scalar<Real> _dt;
   // Size of the old time step
-  GPUScalar<Real> _dt_old;
+  Scalar<Real> _dt_old;
 
 private:
   // Tags this object operates on
-  GPUArray<TagID> _vector_tags;
-  GPUArray<TagID> _matrix_tags;
+  Array<TagID> _vector_tags;
+  Array<TagID> _matrix_tags;
   // Whether the tags are extra
-  GPUArray<bool> _is_extra_vector_tag;
-  GPUArray<bool> _is_extra_matrix_tag;
+  Array<bool> _is_extra_vector_tag;
+  Array<bool> _is_extra_matrix_tag;
 
 protected:
   // Accumulate local residual to tagged vectors
@@ -90,8 +99,8 @@ protected:
     if (!local_re)
       return;
 
-    auto & sys = system(_gpu_var.sys());
-    auto dof = sys.getElemLocalDofIndex(elem, i, _gpu_var.var(comp));
+    auto & sys = kokkosSystem(_kokkos_var.sys());
+    auto dof = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
 
     for (size_t t = 0; t < _vector_tags.size(); ++t)
     {
@@ -103,7 +112,7 @@ protected:
             _is_extra_vector_tag[t] ? sys.hasNodalBCResidualTag(dof, tag) : sys.hasNodalBC(dof);
 
         if (!has_nodal_bc)
-          Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), local_re);
+          ::Kokkos::atomic_add(&sys.getVectorDofValue(dof, tag), local_re);
       }
     }
   }
@@ -114,8 +123,8 @@ protected:
     if (!local_re)
       return;
 
-    auto & sys = system(_gpu_var.sys());
-    auto dof = sys.getNodeLocalDofIndex(node, _gpu_var.var(comp));
+    auto & sys = kokkosSystem(_kokkos_var.sys());
+    auto dof = sys.getNodeLocalDofIndex(node, _kokkos_var.var(comp));
 
     for (size_t t = 0; t < _vector_tags.size(); ++t)
     {
@@ -141,8 +150,8 @@ protected:
     if (!local_ke)
       return;
 
-    auto & sys = system(_gpu_var.sys());
-    auto row = sys.getElemLocalDofIndex(elem, i, _gpu_var.var(comp));
+    auto & sys = kokkosSystem(_kokkos_var.sys());
+    auto row = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
     auto col = sys.getElemGlobalDofIndex(elem, j, jvar);
 
     for (size_t t = 0; t < _matrix_tags.size(); ++t)
@@ -155,7 +164,7 @@ protected:
             _is_extra_matrix_tag[t] ? sys.hasNodalBCMatrixTag(row, tag) : sys.hasNodalBC(row);
 
         if (!has_nodal_bc)
-          Kokkos::atomic_add(&sys.getMatrixDofValue(row, col, tag), local_ke);
+          ::Kokkos::atomic_add(&sys.getMatrixDofValue(row, col, tag), local_ke);
       }
     }
   }
@@ -166,8 +175,8 @@ protected:
     if (!local_ke)
       return;
 
-    auto & sys = system(_gpu_var.sys());
-    auto row = sys.getNodeLocalDofIndex(node, _gpu_var.var(comp));
+    auto & sys = kokkosSystem(_kokkos_var.sys());
+    auto row = sys.getNodeLocalDofIndex(node, _kokkos_var.var(comp));
     auto col = sys.getNodeGlobalDofIndex(node, jvar);
 
     for (size_t t = 0; t < _matrix_tags.size(); ++t)
@@ -190,28 +199,31 @@ protected:
   }
 };
 
-#define usingGPUResidualObjectMembers                                                              \
+} // namespace Kokkos
+} // namespace Moose
+
+#define usingKokkosResidualObjectMembers                                                           \
 public:                                                                                            \
   usingPostprocessorInterfaceMembers;                                                              \
                                                                                                    \
 protected:                                                                                         \
-  using GPUResidualObject::assembly;                                                               \
-  using GPUResidualObject::systems;                                                                \
-  using GPUResidualObject::system;                                                                 \
-  using GPUResidualObject::accumulateTaggedLocalResidual;                                          \
-  using GPUResidualObject::setTaggedLocalResidual;                                                 \
-  using GPUResidualObject::accumulateTaggedLocalMatrix;                                            \
-  using GPUResidualObject::setTaggedLocalMatrix;                                                   \
-  using GPUResidualObject::_var;                                                                   \
-  using GPUResidualObject::_gpu_var;                                                               \
-  using GPUResidualObject::_thread;                                                                \
-  using GPUResidualObject::_t;                                                                     \
-  using GPUResidualObject::_t_old;                                                                 \
-  using GPUResidualObject::_t_step;                                                                \
-  using GPUResidualObject::_dt;                                                                    \
-  using GPUResidualObject::_dt_old;                                                                \
+  using Moose::Kokkos::ResidualObject::kokkosAssembly;                                             \
+  using Moose::Kokkos::ResidualObject::kokkosSystems;                                              \
+  using Moose::Kokkos::ResidualObject::kokkosSystem;                                               \
+  using Moose::Kokkos::ResidualObject::accumulateTaggedLocalResidual;                              \
+  using Moose::Kokkos::ResidualObject::setTaggedLocalResidual;                                     \
+  using Moose::Kokkos::ResidualObject::accumulateTaggedLocalMatrix;                                \
+  using Moose::Kokkos::ResidualObject::setTaggedLocalMatrix;                                       \
+  using Moose::Kokkos::ResidualObject::_var;                                                       \
+  using Moose::Kokkos::ResidualObject::_kokkos_var;                                                \
+  using Moose::Kokkos::ResidualObject::_thread;                                                    \
+  using Moose::Kokkos::ResidualObject::_t;                                                         \
+  using Moose::Kokkos::ResidualObject::_t_old;                                                     \
+  using Moose::Kokkos::ResidualObject::_t_step;                                                    \
+  using Moose::Kokkos::ResidualObject::_dt;                                                        \
+  using Moose::Kokkos::ResidualObject::_dt_old;                                                    \
                                                                                                    \
 public:                                                                                            \
-  using GPUResidualObject::ResidualLoop;                                                           \
-  using GPUResidualObject::JacobianLoop;                                                           \
-  using GPUResidualObject::OffDiagJacobianLoop;
+  using Moose::Kokkos::ResidualObject::ResidualLoop;                                               \
+  using Moose::Kokkos::ResidualObject::JacobianLoop;                                               \
+  using Moose::Kokkos::ResidualObject::OffDiagJacobianLoop;

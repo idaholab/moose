@@ -16,12 +16,13 @@
  * given by auxiliary variables.  Typically used in multi-app coupling scenario. It is possible to
  * couple in a vector variable where each entry corresponds to a "phase".
  */
-class GPUCoupledConvectiveHeatFluxBC final : public GPUIntegratedBC<GPUCoupledConvectiveHeatFluxBC>
+class KokkosCoupledConvectiveHeatFluxBC final
+  : public Moose::Kokkos::IntegratedBC<KokkosCoupledConvectiveHeatFluxBC>
 {
 public:
   static InputParameters validParams();
 
-  GPUCoupledConvectiveHeatFluxBC(const InputParameters & parameters);
+  KokkosCoupledConvectiveHeatFluxBC(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -49,11 +50,11 @@ private:
   /// The number of components
   const unsigned int _n_components;
   /// Far-field temperature fields for each component
-  GPUVariableValue _T_infinity;
+  Moose::Kokkos::VariableValue _T_infinity;
   /// Convective heat transfer coefficient
-  GPUVariableValue _htc;
+  Moose::Kokkos::VariableValue _htc;
   /// Volume fraction of individual phase
-  GPUVariableValue _alpha;
+  Moose::Kokkos::VariableValue _alpha;
   /// Scale factor
-  GPUVariableValue _scale_factor;
+  Moose::Kokkos::VariableValue _scale_factor;
 };

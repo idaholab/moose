@@ -12,39 +12,39 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./diff]
-    type = GPUCoefDiffusion
+    type = KokkosCoefDiffusion
     variable = u
     coef = 0.1
   [../]
   [./time]
-    type = GPUTimeDerivative
+    type = KokkosTimeDerivative
     variable = u
   [../]
 []
 
-[GPUNodalKernels]
+[KokkosNodalKernels]
   [./td]
-    type = GPUTimeDerivativeNodalKernel
+    type = KokkosTimeDerivativeNodalKernel
     variable = nodal_ode
   [../]
   [./constant_rate]
-    type = GPUConstantRate
+    type = KokkosConstantRate
     variable = nodal_ode
     rate = 1.0
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 0
   [../]
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = right
     value = 1

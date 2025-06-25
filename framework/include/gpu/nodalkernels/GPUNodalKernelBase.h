@@ -15,21 +15,29 @@
 #include "BoundaryRestrictable.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
-class GPUNodalKernelBase : public GPUResidualObject,
-                           public BlockRestrictable,
-                           public BoundaryRestrictable,
-                           public CoupleableMooseVariableDependencyIntermediateInterface
+namespace Moose
+{
+namespace Kokkos
+{
+
+class NodalKernelBase : public ResidualObject,
+                        public BlockRestrictable,
+                        public BoundaryRestrictable,
+                        public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   static InputParameters validParams();
 
-  GPUNodalKernelBase(const InputParameters & parameters, Moose::VarFieldType field_type);
-  GPUNodalKernelBase(const GPUNodalKernelBase & object);
+  NodalKernelBase(const InputParameters & parameters, Moose::VarFieldType field_type);
+  NodalKernelBase(const NodalKernelBase & object);
 };
 
-#define usingGPUNodalKernelBaseMembers                                                             \
-  usingGPUResidualObjectMembers;                                                                   \
+} // namespace Kokkos
+} // namespace Moose
+
+#define usingKokkosNodalKernelBaseMembers                                                          \
+  usingKokkosResidualObjectMembers;                                                                \
                                                                                                    \
 protected:                                                                                         \
-  using GPUNodalKernelBase::blockNodeID;                                                           \
-  using GPUNodalKernelBase::boundaryNodeID;
+  using Moose::Kokkos::NodalKernelBase::blockNodeID;                                               \
+  using Moose::Kokkos::NodalKernelBase::boundaryNodeID;

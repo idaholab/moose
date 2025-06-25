@@ -14,46 +14,46 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./diff]
-    type = GPUMatDiffusionTest
+    type = KokkosMatDiffusionTest
     variable = u
     prop_name = 'some_prop'
   [../]
 
   [./time]
-    type = GPUTimeDerivative
+    type = KokkosTimeDerivative
     variable = u
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 'left'
     value = 1
   [../]
 
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 'right'
     value = 2
   [../]
 []
 
-[GPUMaterials]
+[KokkosMaterials]
   # This material couples in a stateful property from StatefulTest
   [./coupled_mat]
-    type = GPUCoupledMaterial
+    type = KokkosCoupledMaterial
     mat_prop = 'some_prop'
     coupled_mat_prop = 'thermal_conductivity'
     use_old_prop = true
   [../]
 
   [./stateful_mat]
-    type = GPUStatefulTest
+    type = KokkosStatefulTest
     prop_names = thermal_conductivity
     prop_values = 1.0
   [../]

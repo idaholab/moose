@@ -11,12 +11,12 @@
 
 #include "GPUNodalKernel.h"
 
-class GPUReactionNodalKernel final : public GPUNodalKernel<GPUReactionNodalKernel>
+class KokkosReactionNodalKernel final : public Moose::Kokkos::NodalKernel<KokkosReactionNodalKernel>
 {
 public:
   static InputParameters validParams();
 
-  GPUReactionNodalKernel(const InputParameters & parameters);
+  KokkosReactionNodalKernel(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const { return _coeff * _u(node); }
   KOKKOS_FUNCTION Real computeQpJacobian(const dof_id_type /* node */) const { return _coeff; }

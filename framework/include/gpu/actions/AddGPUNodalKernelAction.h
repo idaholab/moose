@@ -11,12 +11,12 @@
 
 #include "MooseObjectAction.h"
 
-class AddGPUNodalKernelAction : public MooseObjectAction
+class AddKokkosNodalKernelAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  AddGPUNodalKernelAction(const InputParameters & params);
+  AddKokkosNodalKernelAction(const InputParameters & params);
 
   virtual void act() override;
 };

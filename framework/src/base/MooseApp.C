@@ -748,7 +748,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
   registerCapabilities();
   Moose::out << std::flush;
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
   queryGPUs();
 #endif
 }
@@ -869,7 +869,7 @@ MooseApp::registerCapabilities()
 
   {
     const auto doc = "Kokkos performance portability programming ecosystem";
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
     haveCapability("kokkos", doc);
 #else
     missingCapability("kokkos",

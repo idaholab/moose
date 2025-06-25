@@ -15,12 +15,13 @@
  * Boundary condition for convective heat flux where temperature and heat transfer coefficient are
  * given by material properties.
  */
-class GPUConvectiveHeatFluxBC final : public GPUIntegratedBC<GPUConvectiveHeatFluxBC>
+class KokkosConvectiveHeatFluxBC final
+  : public Moose::Kokkos::IntegratedBC<KokkosConvectiveHeatFluxBC>
 {
 public:
   static InputParameters validParams();
 
-  GPUConvectiveHeatFluxBC(const InputParameters & parameters);
+  KokkosConvectiveHeatFluxBC(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -39,11 +40,11 @@ public:
 
 private:
   /// Far-field temperature variable
-  GPUMaterialProperty<Real> _T_infinity;
+  Moose::Kokkos::MaterialProperty<Real> _T_infinity;
 
   /// Convective heat transfer coefficient
-  GPUMaterialProperty<Real> _htc;
+  Moose::Kokkos::MaterialProperty<Real> _htc;
 
   /// Derivative of convective heat transfer coefficient with respect to temperature
-  GPUMaterialProperty<Real> _htc_dT;
+  Moose::Kokkos::MaterialProperty<Real> _htc_dT;
 };

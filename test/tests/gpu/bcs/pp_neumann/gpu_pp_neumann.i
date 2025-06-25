@@ -18,22 +18,22 @@
   []
 []
 
-[GPUKernels]
+[KokkosKernels]
   [diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
   []
 []
 
-[GPUBCs]
+[KokkosBCs]
   [left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 0
   []
   [right]
-    type = GPUPostprocessorNeumannBC
+    type = KokkosPostprocessorNeumannBC
     variable = u
     boundary = right
     postprocessor = right_pp

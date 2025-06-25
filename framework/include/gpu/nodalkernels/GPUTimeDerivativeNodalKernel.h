@@ -11,14 +11,15 @@
 
 #include "GPUTimeNodalKernel.h"
 
-class GPUTimeDerivativeNodalKernel final : public GPUTimeNodalKernel<GPUTimeDerivativeNodalKernel>
+class KokkosTimeDerivativeNodalKernel final
+  : public Moose::Kokkos::TimeNodalKernel<KokkosTimeDerivativeNodalKernel>
 {
-  usingGPUTimeNodalKernelMembers(GPUTimeDerivativeNodalKernel);
+  usingKokkosTimeNodalKernelMembers(KokkosTimeDerivativeNodalKernel);
 
 public:
   static InputParameters validParams();
 
-  GPUTimeDerivativeNodalKernel(const InputParameters & parameters);
+  KokkosTimeDerivativeNodalKernel(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const { return _u_dot(node); }
   KOKKOS_FUNCTION Real computeQpJacobian(const dof_id_type node) const { return _du_dot_du; }

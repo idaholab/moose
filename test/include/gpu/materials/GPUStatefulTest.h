@@ -11,12 +11,12 @@
 
 #include "GPUMaterial.h"
 
-class GPUStatefulTest final : public GPUMaterial<GPUStatefulTest>
+class KokkosStatefulTest final : public Moose::Kokkos::Material<KokkosStatefulTest>
 {
 public:
   static InputParameters validParams();
 
-  GPUStatefulTest(const InputParameters & parameters);
+  KokkosStatefulTest(const InputParameters & parameters);
 
   KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int qp, Datum & datum) const
   {
@@ -37,14 +37,14 @@ public:
 
 private:
   // optional coupled variable
-  GPUVariableValue _coupled_val;
+  Moose::Kokkos::VariableValue _coupled_val;
 
   std::vector<std::string> _prop_names;
-  GPUArray<Real> _prop_values;
+  Moose::Kokkos::Array<Real> _prop_values;
 
   unsigned int _num_props;
 
-  GPUArray<GPUMaterialProperty<Real>> _properties;
-  GPUArray<GPUMaterialProperty<Real>> _properties_old;
-  GPUArray<GPUMaterialProperty<Real>> _properties_older;
+  Moose::Kokkos::Array<Moose::Kokkos::MaterialProperty<Real>> _properties;
+  Moose::Kokkos::Array<Moose::Kokkos::MaterialProperty<Real>> _properties_old;
+  Moose::Kokkos::Array<Moose::Kokkos::MaterialProperty<Real>> _properties_older;
 };
