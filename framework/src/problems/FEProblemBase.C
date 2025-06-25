@@ -3089,7 +3089,7 @@ FEProblemBase::addKokkosKernel(const std::string & kernel_name,
   _nl[nl_sys_num]->addKokkosKernel(kernel_name, name, parameters);
 #endif
 
-  _have_kokkos_objects = true;
+  _has_kokkos_objects = true;
 }
 
 void
@@ -3132,7 +3132,7 @@ FEProblemBase::addKokkosNodalKernel(const std::string & kernel_name,
   _nl[nl_sys_num]->addKokkosNodalKernel(kernel_name, name, parameters);
 #endif
 
-  _have_kokkos_objects = true;
+  _has_kokkos_objects = true;
 }
 
 void
@@ -3181,7 +3181,7 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
   _nl[nl_sys_num]->addKokkosBoundaryCondition(bc_name, name, parameters);
 #endif
 
-  _have_kokkos_objects = true;
+  _has_kokkos_objects = true;
 }
 
 void
@@ -6501,7 +6501,7 @@ FEProblemBase::init()
     _displaced_problem->init();
 
 #ifdef MOOSE_HAVE_KOKKOS
-  if (_have_kokkos_objects)
+  if (_has_kokkos_objects)
     initKokkos();
 #endif
 
@@ -8445,7 +8445,7 @@ FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const
     cmt(elem_range, true);
 
 #ifdef MOOSE_HAVE_KOKKOS
-  if (_have_kokkos_objects)
+  if (_has_kokkos_objects)
     initKokkosStatefulProps();
 #endif
 }
