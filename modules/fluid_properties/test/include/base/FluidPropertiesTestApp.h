@@ -16,7 +16,7 @@ class FluidPropertiesTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  FluidPropertiesTestApp(InputParameters parameters);
+  FluidPropertiesTestApp(const InputParameters & parameters);
   virtual ~FluidPropertiesTestApp();
 
   static void registerApps();

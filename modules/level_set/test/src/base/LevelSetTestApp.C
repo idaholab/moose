@@ -22,7 +22,7 @@ LevelSetTestApp::validParams()
 
 registerKnownLabel("LevelSetTestApp");
 
-LevelSetTestApp::LevelSetTestApp(InputParameters parameters) : MooseApp(parameters)
+LevelSetTestApp::LevelSetTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   srand(processor_id());
   LevelSetTestApp::registerAll(

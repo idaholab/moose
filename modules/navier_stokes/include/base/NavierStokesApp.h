@@ -16,7 +16,7 @@ class NavierStokesApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  NavierStokesApp(InputParameters parameters);
+  NavierStokesApp(const InputParameters & parameters);
   virtual ~NavierStokesApp();
 
   static void registerApps();

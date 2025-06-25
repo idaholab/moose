@@ -21,7 +21,7 @@ ReactorApp::validParams()
   return params;
 }
 
-ReactorApp::ReactorApp(InputParameters parameters) : MooseApp(parameters)
+ReactorApp::ReactorApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   ReactorApp::registerAll(_factory, _action_factory, _syntax);
 }

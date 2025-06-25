@@ -19,7 +19,7 @@ SubChannelTestApp::validParams()
   return params;
 }
 
-SubChannelTestApp::SubChannelTestApp(InputParameters parameters) : SubChannelApp(parameters)
+SubChannelTestApp::SubChannelTestApp(const InputParameters & parameters) : SubChannelApp(parameters)
 {
   SubChannelTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

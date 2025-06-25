@@ -22,7 +22,7 @@ PorousFlowTestApp::validParams()
 
 registerKnownLabel("PorousFlowTestApp");
 
-PorousFlowTestApp::PorousFlowTestApp(InputParameters parameters) : MooseApp(parameters)
+PorousFlowTestApp::PorousFlowTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   PorousFlowTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

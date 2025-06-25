@@ -16,7 +16,7 @@ class ContactTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  ContactTestApp(InputParameters parameters);
+  ContactTestApp(const InputParameters & parameters);
   virtual ~ContactTestApp();
 
   static void registerApps();

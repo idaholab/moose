@@ -16,7 +16,7 @@ class PeridynamicsTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  PeridynamicsTestApp(InputParameters parameters);
+  PeridynamicsTestApp(const InputParameters & parameters);
   virtual ~PeridynamicsTestApp();
 
   static void registerApps();

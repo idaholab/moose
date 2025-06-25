@@ -30,7 +30,7 @@ NavierStokesApp::validParams()
 
 registerKnownLabel("NavierStokesApp");
 
-NavierStokesApp::NavierStokesApp(InputParameters parameters) : MooseApp(parameters)
+NavierStokesApp::NavierStokesApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   NavierStokesApp::registerAll(_factory, _action_factory, _syntax);
 }

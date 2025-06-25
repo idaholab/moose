@@ -26,7 +26,7 @@ RdgApp::validParams()
 
 registerKnownLabel("RdgApp");
 
-RdgApp::RdgApp(InputParameters parameters) : MooseApp(parameters)
+RdgApp::RdgApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   RdgApp::registerAll(_factory, _action_factory, _syntax);
 }

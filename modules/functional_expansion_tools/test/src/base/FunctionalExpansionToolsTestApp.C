@@ -23,7 +23,7 @@ FunctionalExpansionToolsTestApp::validParams()
 
 registerKnownLabel("FunctionalExpansionToolsTestApp");
 
-FunctionalExpansionToolsTestApp::FunctionalExpansionToolsTestApp(InputParameters parameters)
+FunctionalExpansionToolsTestApp::FunctionalExpansionToolsTestApp(const InputParameters & parameters)
   : MooseApp(parameters)
 {
   FunctionalExpansionToolsTestApp::registerAll(

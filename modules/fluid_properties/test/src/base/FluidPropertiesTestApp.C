@@ -22,7 +22,8 @@ FluidPropertiesTestApp::validParams()
 
 registerKnownLabel("FluidPropertiesTestApp");
 
-FluidPropertiesTestApp::FluidPropertiesTestApp(InputParameters parameters) : MooseApp(parameters)
+FluidPropertiesTestApp::FluidPropertiesTestApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   FluidPropertiesTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

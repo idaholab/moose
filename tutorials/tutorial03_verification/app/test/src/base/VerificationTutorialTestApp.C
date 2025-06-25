@@ -20,7 +20,7 @@ VerificationTutorialTestApp::validParams()
   return params;
 }
 
-VerificationTutorialTestApp::VerificationTutorialTestApp(InputParameters parameters)
+VerificationTutorialTestApp::VerificationTutorialTestApp(const InputParameters & parameters)
   : MooseApp(parameters)
 {
   VerificationTutorialTestApp::registerAll(

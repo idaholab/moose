@@ -25,7 +25,7 @@ GeochemistryApp::validParams()
 
 registerKnownLabel("GeochemistryApp");
 
-GeochemistryApp::GeochemistryApp(InputParameters parameters) : MooseApp(parameters)
+GeochemistryApp::GeochemistryApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   GeochemistryApp::registerAll(_factory, _action_factory, _syntax);
 }

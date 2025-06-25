@@ -16,7 +16,7 @@ class ElectromagneticsTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  ElectromagneticsTestApp(InputParameters parameters);
+  ElectromagneticsTestApp(const InputParameters & parameters);
   virtual ~ElectromagneticsTestApp();
 
   static void registerApps();

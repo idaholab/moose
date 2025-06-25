@@ -24,7 +24,7 @@ SolidPropertiesApp::validParams()
 
 registerKnownLabel("SolidPropertiesApp");
 
-SolidPropertiesApp::SolidPropertiesApp(InputParameters parameters) : MooseApp(parameters)
+SolidPropertiesApp::SolidPropertiesApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   SolidPropertiesApp::registerAll(_factory, _action_factory, _syntax);
 }

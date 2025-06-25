@@ -16,7 +16,7 @@ class RdgTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  RdgTestApp(InputParameters parameters);
+  RdgTestApp(const InputParameters & parameters);
   virtual ~RdgTestApp();
 
   static void registerApps();

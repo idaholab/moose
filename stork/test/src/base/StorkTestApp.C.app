@@ -21,7 +21,7 @@ StorkTestApp::validParams()
   return params;
 }
 
-StorkTestApp::StorkTestApp(InputParameters parameters) : MooseApp(parameters)
+StorkTestApp::StorkTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   StorkTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

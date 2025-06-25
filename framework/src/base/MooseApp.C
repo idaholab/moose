@@ -428,7 +428,7 @@ MooseApp::validParams()
   return params;
 }
 
-MooseApp::MooseApp(InputParameters parameters)
+MooseApp::MooseApp(const InputParameters & parameters)
   : ConsoleStreamInterface(*this),
     PerfGraphInterface(*this, "MooseApp"),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(

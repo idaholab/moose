@@ -16,7 +16,7 @@ class SolidPropertiesApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  SolidPropertiesApp(InputParameters parameters);
+  SolidPropertiesApp(const InputParameters & parameters);
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);

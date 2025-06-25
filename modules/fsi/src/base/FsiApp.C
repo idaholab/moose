@@ -24,7 +24,7 @@ FsiApp::validParams()
   return params;
 }
 
-FsiApp::FsiApp(InputParameters parameters) : MooseApp(parameters)
+FsiApp::FsiApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   FsiApp::registerAll(_factory, _action_factory, _syntax);
 }

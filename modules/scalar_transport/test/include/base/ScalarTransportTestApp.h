@@ -16,7 +16,7 @@ class ScalarTransportTestApp : public ScalarTransportApp
 public:
   static InputParameters validParams();
 
-  ScalarTransportTestApp(InputParameters parameters);
+  ScalarTransportTestApp(const InputParameters & parameters);
   virtual ~ScalarTransportTestApp();
 
   static void registerApps();

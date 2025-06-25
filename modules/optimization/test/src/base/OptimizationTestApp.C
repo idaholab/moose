@@ -22,7 +22,7 @@ OptimizationTestApp::validParams()
 
 registerKnownLabel("OptimizationTestApp");
 
-OptimizationTestApp::OptimizationTestApp(InputParameters parameters) : MooseApp(parameters)
+OptimizationTestApp::OptimizationTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   OptimizationTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

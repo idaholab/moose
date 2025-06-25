@@ -14,7 +14,7 @@
 class FunctionalExpansionToolsTestApp : public MooseApp
 {
 public:
-  FunctionalExpansionToolsTestApp(InputParameters parameters);
+  FunctionalExpansionToolsTestApp(const InputParameters & parameters);
   virtual ~FunctionalExpansionToolsTestApp();
 
   static InputParameters validParams();

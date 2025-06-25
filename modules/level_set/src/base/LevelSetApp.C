@@ -31,7 +31,7 @@ LevelSetApp::validParams()
 
 registerKnownLabel("LevelSetApp");
 
-LevelSetApp::LevelSetApp(InputParameters parameters) : MooseApp(parameters)
+LevelSetApp::LevelSetApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   srand(processor_id());
   LevelSetApp::registerAll(_factory, _action_factory, _syntax);

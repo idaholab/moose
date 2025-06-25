@@ -16,7 +16,7 @@ class LevelSetTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  LevelSetTestApp(InputParameters parameters);
+  LevelSetTestApp(const InputParameters & parameters);
   virtual ~LevelSetTestApp();
 
   static void registerApps();

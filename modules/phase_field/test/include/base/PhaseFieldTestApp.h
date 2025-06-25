@@ -16,7 +16,7 @@ class PhaseFieldTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  PhaseFieldTestApp(InputParameters parameters);
+  PhaseFieldTestApp(const InputParameters & parameters);
   virtual ~PhaseFieldTestApp();
 
   static void registerApps();

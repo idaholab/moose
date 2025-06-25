@@ -16,7 +16,7 @@ class XFEMTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  XFEMTestApp(InputParameters parameters);
+  XFEMTestApp(const InputParameters & parameters);
   virtual ~XFEMTestApp();
 
   static void registerApps();

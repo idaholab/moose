@@ -22,7 +22,7 @@ ChemicalReactionsTestApp::validParams()
 
 registerKnownLabel("ChemicalReactionsTestApp");
 
-ChemicalReactionsTestApp::ChemicalReactionsTestApp(InputParameters parameters)
+ChemicalReactionsTestApp::ChemicalReactionsTestApp(const InputParameters & parameters)
   : ChemicalReactionsApp(parameters)
 {
   ChemicalReactionsTestApp::registerAll(

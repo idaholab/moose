@@ -49,7 +49,7 @@ static const size_t MAX_VARIABLE_LENGTH = 31;
 class ThermalHydraulicsApp : public MooseApp
 {
 public:
-  ThermalHydraulicsApp(InputParameters parameters);
+  ThermalHydraulicsApp(const InputParameters & parameters);
   virtual ~ThermalHydraulicsApp();
 
   static void registerApps();

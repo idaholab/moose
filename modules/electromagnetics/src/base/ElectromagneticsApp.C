@@ -25,7 +25,7 @@ ElectromagneticsApp::validParams()
 
 registerKnownLabel("ElectromagneticsApp");
 
-ElectromagneticsApp::ElectromagneticsApp(InputParameters parameters) : MooseApp(parameters)
+ElectromagneticsApp::ElectromagneticsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   ElectromagneticsApp::registerAll(_factory, _action_factory, _syntax);
 }

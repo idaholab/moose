@@ -22,7 +22,7 @@ ContactTestApp::validParams()
 
 registerKnownLabel("ContactTestApp");
 
-ContactTestApp::ContactTestApp(InputParameters parameters) : MooseApp(parameters)
+ContactTestApp::ContactTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   ContactTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

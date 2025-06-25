@@ -42,7 +42,7 @@ FluidPropertiesApp::validParams()
 
 registerKnownLabel("FluidPropertiesApp");
 
-FluidPropertiesApp::FluidPropertiesApp(InputParameters parameters) : MooseApp(parameters)
+FluidPropertiesApp::FluidPropertiesApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   FluidPropertiesApp::registerAll(_factory, _action_factory, _syntax);
 }

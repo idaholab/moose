@@ -27,7 +27,7 @@ RayTracingApp::validParams()
 
 registerKnownLabel("RayTracingApp");
 
-RayTracingApp::RayTracingApp(InputParameters parameters) : MooseApp(parameters)
+RayTracingApp::RayTracingApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   RayTracingApp::registerAll(_factory, _action_factory, _syntax);
 }

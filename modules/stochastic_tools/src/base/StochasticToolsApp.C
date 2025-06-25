@@ -25,7 +25,7 @@ StochasticToolsApp::validParams()
 
 registerKnownLabel("StochasticToolsApp");
 
-StochasticToolsApp::StochasticToolsApp(InputParameters parameters) : MooseApp(parameters)
+StochasticToolsApp::StochasticToolsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   StochasticToolsApp::registerAll(_factory, _action_factory, _syntax);
 }

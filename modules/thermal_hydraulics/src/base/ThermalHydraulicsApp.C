@@ -58,7 +58,8 @@ ThermalHydraulicsApp::validParams()
 
 registerKnownLabel("ThermalHydraulicsApp");
 
-ThermalHydraulicsApp::ThermalHydraulicsApp(InputParameters parameters) : MooseApp(parameters)
+ThermalHydraulicsApp::ThermalHydraulicsApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   ThermalHydraulicsApp::registerAll(_factory, _action_factory, _syntax);
 }
