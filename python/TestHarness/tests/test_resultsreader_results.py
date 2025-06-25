@@ -15,9 +15,10 @@ from datetime import datetime
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult
 
-FAKE_CIVET_VERSION = 1
+FAKE_CIVET_VERSION = 2
 FAKE_CIVET_JOB_URL = 'civet.inl.gov/job/12345'
 FAKE_EVENT_SHA = 'abcd1234ababcd1234ababcd1234ababcd1234ab'
+FAKE_BASE_SHA = '1234abcdab1234abcdab1234abcdab1234abcdab'
 FAKE_EVENT_CAUSE = 'pr'
 FAKE_PR_NUM = 1234
 FAKE_HPC_QUEUED_TIME = 1.234
@@ -27,16 +28,21 @@ class TestResultsReaderResults(TestHarnessTestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.results, self.tests, self.harness = self.captureResult()
+        self.run_tests_result = self.runTests('-i', 'validation', '--capture-perf-graph', exit_code=132)
 
-    def captureResult(self):
-        args = ['-i', 'validation', '--capture-perf-graph']
-
-        run_tests_result = self.runTests(*args, exit_code=132)
-        values = run_tests_result.results
-        harness = run_tests_result.harness
+    def captureResult(self, remove_civet_keys=[], civet_version=FAKE_CIVET_VERSION):
+        values = self.run_tests_result.results.copy()
 
         tests = []
+
+        # Faked values that CIVET would add
+        civet_values = {'event_sha': FAKE_EVENT_SHA,
+                        'event_cause': FAKE_EVENT_CAUSE,
+                        'pr_num': FAKE_PR_NUM,
+                        'base_sha': FAKE_BASE_SHA,
+                        'time': FAKE_TIME}
+        for k in remove_civet_keys:
+            del civet_values[k]
 
         # Perform fixups that CIVET would do
         for folder_name, folder_values in values['tests'].items():
@@ -57,10 +63,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
                 test_values['test_name'] = test_name
 
                 # Fake values from civet
-                test_values['event_sha'] = FAKE_EVENT_SHA
-                test_values['event_cause'] = FAKE_EVENT_CAUSE
-                test_values['pr_num'] = FAKE_PR_NUM
-                test_values['time'] = FAKE_TIME
+                test_values.update(civet_values)
                 # Fake values from HPC
                 test_values['timing']['hpc_queued'] = FAKE_HPC_QUEUED_TIME
                 tests.append(test_values)
@@ -69,17 +72,14 @@ class TestResultsReaderResults(TestHarnessTestCase):
         results = values.copy()
         del results['tests']
         results['civet'] = {'job_url': FAKE_CIVET_JOB_URL,
-                            'version': FAKE_CIVET_VERSION}
-        results['event_sha'] = FAKE_EVENT_SHA
-        results['event_cause'] = FAKE_EVENT_CAUSE
-        results['pr_num'] = FAKE_PR_NUM
-        results['time'] = FAKE_TIME
+                            'version': civet_version}
+        results.update(civet_values)
 
-        return results, tests, harness
+        return results, tests
 
     def testTestHarnessResult(self):
-        results = self.results.copy()
-        result = TestHarnessResults(self.results.copy())
+        results, _ = self.captureResult()
+        result = TestHarnessResults(results)
 
         self.assertEqual(result.data, results)
         self.assertEqual(result.testharness, results['testharness'])
@@ -92,19 +92,20 @@ class TestResultsReaderResults(TestHarnessTestCase):
         self.assertEqual(result.event_sha, FAKE_EVENT_SHA)
         self.assertEqual(result.event_cause, FAKE_EVENT_CAUSE)
         self.assertEqual(result.pr_num, FAKE_PR_NUM)
+        self.assertEqual(result.base_sha, FAKE_BASE_SHA)
         self.assertEqual(result.time, FAKE_TIME)
 
     def testTestResult(self):
-        test_harness_results = TestHarnessResults(self.results.copy())
-
-        tests = self.tests.copy()
+        results, tests = self.captureResult()
+        test_harness_results = TestHarnessResults(results)
+        harness = self.run_tests_result.harness
 
         for entry in tests:
             # Get the actual Job object from the TestHarness
             folder_name = entry["folder_name"]
             test_name = entry["test_name"]
             full_test_name = f'{folder_name}.{test_name}'
-            jobs = [j for j in self.harness.finished_jobs if j.getTestName() == full_test_name]
+            jobs = [j for j in harness.finished_jobs if j.getTestName() == full_test_name]
             self.assertEqual(len(jobs), 1)
             job = jobs[0]
 
@@ -120,6 +121,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
             self.assertEqual(test_result.event_sha, FAKE_EVENT_SHA)
             self.assertEqual(test_result.event_cause, FAKE_EVENT_CAUSE)
             self.assertEqual(test_result.pr_num, FAKE_PR_NUM)
+            self.assertEqual(test_result.base_sha, FAKE_BASE_SHA)
             self.assertEqual(test_result.time, FAKE_TIME)
 
             # Status properties
@@ -148,6 +150,22 @@ class TestResultsReaderResults(TestHarnessTestCase):
                 # Validation data is equivalent to the actual Data objects
                 for k, v in case.data.items():
                     self.assertEqual(v, test_result.validation_data[k])
+
+    def testDeprecatedBaseSHA(self):
+        """
+        Tests when base_sha didn't exist in the database (civet version < 2)
+        """
+        civet_version = 1
+        results, tests = self.captureResult(remove_civet_keys=['base_sha'],
+                                            civet_version=civet_version)
+
+        test_harness_results = TestHarnessResults(results)
+        self.assertEqual(test_harness_results.civet_version, civet_version)
+        self.assertIsNone(test_harness_results.base_sha)
+
+        for entry in tests:
+            test_result = TestHarnessTestResult(entry, test_harness_results)
+            self.assertIsNone(test_result.base_sha)
 
 if __name__ == '__main__':
     unittest.main()

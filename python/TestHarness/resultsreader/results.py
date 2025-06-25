@@ -46,6 +46,9 @@ class TestHarnessResults:
         assert len(self.event_sha) == 40
         assert isinstance(self.event_cause, str)
         assert isinstance(self.pr_num, (int, NoneType))
+        assert isinstance(self.base_sha, (str, NoneType))
+        if self.base_sha:
+            assert len(self.base_sha) == 40
         assert isinstance(self.time, datetime)
 
     @property
@@ -128,6 +131,15 @@ class TestHarnessResults:
         return self.data['pr_num']
 
     @property
+    def base_sha(self) -> Union[str, None]:
+        """
+        Get the base commit that these tests were ran on
+        """
+        if self.civet_version < 2:
+            return None
+        return self.data['base_sha']
+
+    @property
     def time(self) -> datetime:
         """
         Get the time these tests were added to the database
@@ -159,6 +171,9 @@ class TestHarnessTestResult:
         assert len(self.event_sha) == 40
         assert isinstance(self.event_cause, str)
         assert isinstance(self.pr_num, (int, NoneType))
+        assert isinstance(self.base_sha, (str, NoneType))
+        if self.base_sha:
+            assert len(self.base_sha) == 40
         assert isinstance(self.time, datetime)
         assert isinstance(self.tester, dict)
         assert isinstance(self.json_metadata, dict)
@@ -241,6 +256,7 @@ class TestHarnessTestResult:
         """
         Get the commit that this test was ran on
         """
+        assert(self.data['event_sha'] == self.results.event_sha)
         return self.data['event_sha']
 
     @property
@@ -248,6 +264,7 @@ class TestHarnessTestResult:
         """
         Get the cause for the test that was ran
         """
+        assert(self.data['event_cause'] == self.results.event_cause)
         return self.data['event_cause']
 
     @property
@@ -255,7 +272,19 @@ class TestHarnessTestResult:
         """
         Get the PR number associated with the test (if any)
         """
+        assert(self.data['pr_num'] == self.results.pr_num)
         return self.data['pr_num']
+
+    @property
+    def base_sha(self) -> Union[str, None]:
+        """
+        Get the base commit that these tests were ran on
+        """
+        value = None
+        if self.results.civet_version > 1:
+            value = self.data['base_sha']
+        assert(value == self.results.base_sha)
+        return value
 
     @property
     def time(self) -> datetime:
