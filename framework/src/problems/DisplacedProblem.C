@@ -1380,3 +1380,9 @@ DisplacedProblem::solverSysNum(const SolverSystemName & sys_name) const
 {
   return _mproblem.solverSysNum(sys_name);
 }
+
+const libMesh::CouplingMatrix &
+DisplacedProblem::nonlocalCouplingMatrix(const unsigned i) const
+{
+  return _mproblem.nonlocalCouplingMatrix(i);
+}

@@ -380,6 +380,8 @@ public:
 
   virtual bool hasNonlocalCoupling() const override;
 
+  virtual const libMesh::CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const override;
+
 protected:
   FEProblemBase & _mproblem;
   MooseMesh & _mesh;

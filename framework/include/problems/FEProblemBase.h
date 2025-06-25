@@ -2402,6 +2402,8 @@ public:
    */
   const std::vector<SolverSystemName> & getSolverSystemNames() const { return _solver_sys_names; }
 
+  virtual const libMesh::CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const override;
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2971,6 +2973,9 @@ private:
   /// If we catch an exception during residual/Jacobian evaluaton for which we don't have specific
   /// handling, immediately error instead of allowing the time step to be cut
   const bool _regard_general_exceptions_as_errors;
+
+  /// nonlocal coupling matrix
+  std::vector<libMesh::CouplingMatrix> _nonlocal_cm;
 
   friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,
                                                         const std::string & value,

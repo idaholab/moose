@@ -9254,3 +9254,9 @@ FEProblemBase::makeLinearSolverParams()
   solver_params._line_search = Moose::LineSearchType::LS_NONE;
   return solver_params;
 }
+
+const libMesh::CouplingMatrix &
+FEProblemBase::nonlocalCouplingMatrix(const unsigned i) const
+{
+  return _nonlocal_cm[i];
+}
