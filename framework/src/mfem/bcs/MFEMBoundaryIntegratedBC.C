@@ -20,8 +20,8 @@ MFEMBoundaryIntegratedBC::validParams()
   params.addClassDescription("Adds the boundary integrator to an MFEM problem for the linear form "
                              "$(f, v)_\\Omega$ "
                              "arising from the weak form of the forcing term $f$.");
-  params.addRequiredParam<MFEMScalarCoefficientName>(
-      "coefficient", "The coefficient which will be used in the integrated BC");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient", "1.", "The coefficient which will be used in the integrated BC");
   return params;
 }
 
