@@ -200,7 +200,7 @@ MeshGeneratorSystem::createAddedMeshGenerators()
   if (csg_only && _data_driven_generator_name)
     moose_mesh->paramError(data_driven_generator_param,
                            "This parameter should not be set in conjunction with --csg-only");
-  if (libMesh::n_threads() > 1)
+  if (csg_only && libMesh::n_threads() > 1)
     mooseWarning("--csg-only option does not currently support multi-threading");
 
   // Construct all of the mesh generators that we know exist
