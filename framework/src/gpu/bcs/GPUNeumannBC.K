@@ -9,12 +9,12 @@
 
 #include "GPUNeumannBC.h"
 
-registerMooseObject("MooseApp", GPUNeumannBC);
+registerMooseObject("MooseApp", KokkosNeumannBC);
 
 InputParameters
-GPUNeumannBC::validParams()
+KokkosNeumannBC::validParams()
 {
-  InputParameters params = GPUIntegratedBC::validParams();
+  InputParameters params = IntegratedBC::validParams();
   params.addParam<Real>("value",
                         0.0,
                         "For a Laplacian problem, the value of the gradient dotted with the "
@@ -26,7 +26,7 @@ GPUNeumannBC::validParams()
   return params;
 }
 
-GPUNeumannBC::GPUNeumannBC(const InputParameters & parameters)
-  : GPUIntegratedBC(parameters), _value(getParam<Real>("value"))
+KokkosNeumannBC::KokkosNeumannBC(const InputParameters & parameters)
+  : IntegratedBC(parameters), _value(getParam<Real>("value"))
 {
 }

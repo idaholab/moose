@@ -15,12 +15,12 @@
  * Implements a source term proportional to the value of a coupled variable. Weak form: $(\\psi_i,
  * -\\sigma v)$.
  */
-class GPUCoupledForce final : public GPUKernel<GPUCoupledForce>
+class KokkosCoupledForce final : public Moose::Kokkos::Kernel<KokkosCoupledForce>
 {
 public:
   static InputParameters validParams();
 
-  GPUCoupledForce(const InputParameters & parameters);
+  KokkosCoupledForce(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -33,7 +33,7 @@ private:
   /// Coupled variable number
   unsigned int _v_var;
   /// Coupled variable
-  GPUVariableValue _v;
+  Moose::Kokkos::VariableValue _v;
   /// Multiplier for the coupled force term
   const Real _coef;
 };

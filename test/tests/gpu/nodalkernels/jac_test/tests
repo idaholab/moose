@@ -3,7 +3,7 @@
   issues = '#39655'
 
   [group]
-    requirement = "The gpu system shall include ability to include contributions to the residual nodes "
+    requirement = "The Kokkos system shall include ability to include contributions to the residual nodes "
                   "of a finite element mesh and compute the correct Jacobian terms for"
 
     [block_jacobian_test]
@@ -12,6 +12,7 @@
       ratio_tol = 1E-7
       difference_tol = 1E-10
       detail = "subdomain and"
+      capabilities = 'kokkos'
     []
 
     [bc_jacobian_test]
@@ -20,6 +21,7 @@
       ratio_tol = 1E-7
       difference_tol = 1E-10
       detail = "boundary restricted terms."
+      capabilities = 'kokkos'
     []
   []
 []

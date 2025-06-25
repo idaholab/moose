@@ -13,12 +13,12 @@
 #include "SystemBase.h"
 #include "FEProblemBase.h"
 
-GPUVariable
-Coupleable::GPUCoupledVectorTagVariable(const std::string & var_name,
-                                        const std::string & tag_name,
-                                        unsigned int comp)
+Moose::Kokkos::Variable
+Coupleable::KokkosCoupledVectorTagVariable(const std::string & var_name,
+                                           const std::string & tag_name,
+                                           unsigned int comp)
 {
-  GPUVariable variable;
+  Moose::Kokkos::Variable variable;
 
   const auto coupled = isCoupled(var_name);
 
@@ -58,10 +58,11 @@ Coupleable::GPUCoupledVectorTagVariable(const std::string & var_name,
   return variable;
 }
 
-GPUVariable
-Coupleable::GPUCoupledVectorTagVariables(const std::string & var_name, const std::string & tag_name)
+Moose::Kokkos::Variable
+Coupleable::KokkosCoupledVectorTagVariables(const std::string & var_name,
+                                            const std::string & tag_name)
 {
-  GPUVariable variable;
+  Moose::Kokkos::Variable variable;
 
   const auto coupled = isCoupled(var_name);
   const auto components = coupledComponents(var_name);
@@ -108,10 +109,10 @@ Coupleable::GPUCoupledVectorTagVariables(const std::string & var_name, const std
   return variable;
 }
 
-GPUVariable
-Coupleable::GPUZeroVariable()
+Moose::Kokkos::Variable
+Coupleable::KokkosZeroVariable()
 {
-  GPUVariable variable;
+  Moose::Kokkos::Variable variable;
 
   variable._default_value.create(1);
   variable._default_value[0] = 0;
@@ -120,90 +121,65 @@ Coupleable::GPUZeroVariable()
   return variable;
 }
 
-GPUVariableValue
-Coupleable::GPUCoupledVectorTagValueByName(const std::string & var_name,
-                                           const std::string & tag_name,
-                                           unsigned int comp)
-{
-  GPUVariable variable = GPUCoupledVectorTagVariable(var_name, tag_name, comp);
-
-  return GPUVariableValue(_c_fe_problem.getGPUSystems(), variable);
-}
-
-GPUVariableValue
-Coupleable::GPUCoupledVectorTagValuesByName(const std::string & var_name,
-                                            const std::string & tag_name)
-{
-  GPUVariable variable = GPUCoupledVectorTagVariables(var_name, tag_name);
-
-  return GPUVariableValue(_c_fe_problem.getGPUSystems(), variable);
-}
-
-GPUVariableGradient
-Coupleable::GPUCoupledVectorTagGradientByName(const std::string & var_name,
+Moose::Kokkos::VariableValue
+Coupleable::KokkosCoupledVectorTagValueByName(const std::string & var_name,
                                               const std::string & tag_name,
                                               unsigned int comp)
 {
-  GPUVariable variable = GPUCoupledVectorTagVariable(var_name, tag_name, comp);
+  auto variable = KokkosCoupledVectorTagVariable(var_name, tag_name, comp);
 
-  return GPUVariableGradient(_c_fe_problem.getGPUSystems(), variable);
+  return Moose::Kokkos::VariableValue(_c_fe_problem.getKokkosSystems(), variable);
 }
 
-GPUVariableGradient
-Coupleable::GPUCoupledVectorTagGradientsByName(const std::string & var_name,
+Moose::Kokkos::VariableValue
+Coupleable::KokkosCoupledVectorTagValuesByName(const std::string & var_name,
                                                const std::string & tag_name)
 {
-  GPUVariable variable = GPUCoupledVectorTagVariables(var_name, tag_name);
+  auto variable = KokkosCoupledVectorTagVariables(var_name, tag_name);
 
-  return GPUVariableGradient(_c_fe_problem.getGPUSystems(), variable);
+  return Moose::Kokkos::VariableValue(_c_fe_problem.getKokkosSystems(), variable);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUCoupledVectorTagNodalValueByName(const std::string & var_name,
-                                                const std::string & tag_name,
-                                                unsigned int comp)
+Moose::Kokkos::VariableGradient
+Coupleable::KokkosCoupledVectorTagGradientByName(const std::string & var_name,
+                                                 const std::string & tag_name,
+                                                 unsigned int comp)
 {
-  GPUVariable variable = GPUCoupledVectorTagVariable(var_name, tag_name, comp);
+  auto variable = KokkosCoupledVectorTagVariable(var_name, tag_name, comp);
 
-  return GPUVariableNodalValue(_c_fe_problem.getGPUSystems(), variable);
+  return Moose::Kokkos::VariableGradient(_c_fe_problem.getKokkosSystems(), variable);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUCoupledVectorTagNodalValuesByName(const std::string & var_name,
-                                                 const std::string & tag_name)
+Moose::Kokkos::VariableGradient
+Coupleable::KokkosCoupledVectorTagGradientsByName(const std::string & var_name,
+                                                  const std::string & tag_name)
 {
-  GPUVariable variable = GPUCoupledVectorTagVariables(var_name, tag_name);
+  auto variable = KokkosCoupledVectorTagVariables(var_name, tag_name);
 
-  return GPUVariableNodalValue(_c_fe_problem.getGPUSystems(), variable);
+  return Moose::Kokkos::VariableGradient(_c_fe_problem.getKokkosSystems(), variable);
 }
 
-GPUVariableValue
-Coupleable::GPUCoupledVectorTagValue(const std::string & var_name,
-                                     const std::string & tag_param_name,
-                                     unsigned int comp)
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosCoupledVectorTagNodalValueByName(const std::string & var_name,
+                                                   const std::string & tag_name,
+                                                   unsigned int comp)
 {
-  if (!_c_parameters.isParamValid(tag_param_name))
-    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+  auto variable = KokkosCoupledVectorTagVariable(var_name, tag_name, comp);
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
-
-  return GPUCoupledVectorTagValueByName(var_name, tag_name, comp);
+  return Moose::Kokkos::VariableNodalValue(_c_fe_problem.getKokkosSystems(), variable);
 }
 
-GPUVariableValue
-Coupleable::GPUCoupledVectorTagValues(const std::string & var_name,
-                                      const std::string & tag_param_name)
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosCoupledVectorTagNodalValuesByName(const std::string & var_name,
+                                                    const std::string & tag_name)
 {
-  if (!_c_parameters.isParamValid(tag_param_name))
-    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+  auto variable = KokkosCoupledVectorTagVariables(var_name, tag_name);
 
-  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
-
-  return GPUCoupledVectorTagValuesByName(var_name, tag_name);
+  return Moose::Kokkos::VariableNodalValue(_c_fe_problem.getKokkosSystems(), variable);
 }
 
-GPUVariableGradient
-Coupleable::GPUCoupledVectorTagGradient(const std::string & var_name,
+Moose::Kokkos::VariableValue
+Coupleable::KokkosCoupledVectorTagValue(const std::string & var_name,
                                         const std::string & tag_param_name,
                                         unsigned int comp)
 {
@@ -212,11 +188,11 @@ Coupleable::GPUCoupledVectorTagGradient(const std::string & var_name,
 
   TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
 
-  return GPUCoupledVectorTagGradientByName(var_name, tag_name, comp);
+  return KokkosCoupledVectorTagValueByName(var_name, tag_name, comp);
 }
 
-GPUVariableGradient
-Coupleable::GPUCoupledVectorTagGradients(const std::string & var_name,
+Moose::Kokkos::VariableValue
+Coupleable::KokkosCoupledVectorTagValues(const std::string & var_name,
                                          const std::string & tag_param_name)
 {
   if (!_c_parameters.isParamValid(tag_param_name))
@@ -224,197 +200,222 @@ Coupleable::GPUCoupledVectorTagGradients(const std::string & var_name,
 
   TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
 
-  return GPUCoupledVectorTagGradientsByName(var_name, tag_name);
+  return KokkosCoupledVectorTagValuesByName(var_name, tag_name);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUCoupledVectorTagNodalValue(const std::string & var_name,
-                                          const std::string & tag_param_name,
-                                          unsigned int comp)
+Moose::Kokkos::VariableGradient
+Coupleable::KokkosCoupledVectorTagGradient(const std::string & var_name,
+                                           const std::string & tag_param_name,
+                                           unsigned int comp)
 {
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
   TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
 
-  return GPUCoupledVectorTagNodalValueByName(var_name, tag_name, comp);
+  return KokkosCoupledVectorTagGradientByName(var_name, tag_name, comp);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUCoupledVectorTagNodalValues(const std::string & var_name,
-                                           const std::string & tag_param_name)
+Moose::Kokkos::VariableGradient
+Coupleable::KokkosCoupledVectorTagGradients(const std::string & var_name,
+                                            const std::string & tag_param_name)
 {
   if (!_c_parameters.isParamValid(tag_param_name))
     mooseError("Tag name parameter '", tag_param_name, "' is invalid");
 
   TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
 
-  return GPUCoupledVectorTagNodalValuesByName(var_name, tag_name);
+  return KokkosCoupledVectorTagGradientsByName(var_name, tag_name);
 }
 
-GPUVariableValue
-Coupleable::GPUCoupledValue(const std::string & var_name, unsigned int comp)
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosCoupledVectorTagNodalValue(const std::string & var_name,
+                                             const std::string & tag_param_name,
+                                             unsigned int comp)
 {
-  return GPUCoupledVectorTagValueByName(var_name, Moose::SOLUTION_TAG, comp);
+  if (!_c_parameters.isParamValid(tag_param_name))
+    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+
+  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+
+  return KokkosCoupledVectorTagNodalValueByName(var_name, tag_name, comp);
 }
 
-GPUVariableValue
-Coupleable::GPUCoupledValues(const std::string & var_name)
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosCoupledVectorTagNodalValues(const std::string & var_name,
+                                              const std::string & tag_param_name)
 {
-  return GPUCoupledVectorTagValuesByName(var_name, Moose::SOLUTION_TAG);
+  if (!_c_parameters.isParamValid(tag_param_name))
+    mooseError("Tag name parameter '", tag_param_name, "' is invalid");
+
+  TagName tag_name = _c_parameters.get<TagName>(tag_param_name);
+
+  return KokkosCoupledVectorTagNodalValuesByName(var_name, tag_name);
 }
 
-GPUVariableGradient
-Coupleable::GPUCoupledGradient(const std::string & var_name, unsigned int comp)
+Moose::Kokkos::VariableValue
+Coupleable::KokkosCoupledValue(const std::string & var_name, unsigned int comp)
 {
-  return GPUCoupledVectorTagGradientByName(var_name, Moose::SOLUTION_TAG, comp);
+  return KokkosCoupledVectorTagValueByName(var_name, Moose::SOLUTION_TAG, comp);
 }
 
-GPUVariableGradient
-Coupleable::GPUCoupledGradients(const std::string & var_name)
+Moose::Kokkos::VariableValue
+Coupleable::KokkosCoupledValues(const std::string & var_name)
 {
-  return GPUCoupledVectorTagGradientsByName(var_name, Moose::SOLUTION_TAG);
+  return KokkosCoupledVectorTagValuesByName(var_name, Moose::SOLUTION_TAG);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUCoupledNodalValue(const std::string & var_name, unsigned int comp)
+Moose::Kokkos::VariableGradient
+Coupleable::KokkosCoupledGradient(const std::string & var_name, unsigned int comp)
 {
-  return GPUCoupledVectorTagNodalValueByName(var_name, Moose::SOLUTION_TAG, comp);
+  return KokkosCoupledVectorTagGradientByName(var_name, Moose::SOLUTION_TAG, comp);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUCoupledNodalValues(const std::string & var_name)
+Moose::Kokkos::VariableGradient
+Coupleable::KokkosCoupledGradients(const std::string & var_name)
 {
-  return GPUCoupledVectorTagNodalValuesByName(var_name, Moose::SOLUTION_TAG);
+  return KokkosCoupledVectorTagGradientsByName(var_name, Moose::SOLUTION_TAG);
 }
 
-GPUVariableValue
-Coupleable::GPUCoupledValueOld(const std::string & var_name, unsigned int comp)
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosCoupledNodalValue(const std::string & var_name, unsigned int comp)
 {
-  return GPUCoupledVectorTagValueByName(var_name, Moose::OLD_SOLUTION_TAG, comp);
+  return KokkosCoupledVectorTagNodalValueByName(var_name, Moose::SOLUTION_TAG, comp);
 }
 
-GPUVariableValue
-Coupleable::GPUCoupledValuesOld(const std::string & var_name)
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosCoupledNodalValues(const std::string & var_name)
 {
-  return GPUCoupledVectorTagValuesByName(var_name, Moose::OLD_SOLUTION_TAG);
+  return KokkosCoupledVectorTagNodalValuesByName(var_name, Moose::SOLUTION_TAG);
 }
 
-GPUVariableGradient
-Coupleable::GPUCoupledGradientOld(const std::string & var_name, unsigned int comp)
+Moose::Kokkos::VariableValue
+Coupleable::KokkosCoupledValueOld(const std::string & var_name, unsigned int comp)
 {
-  return GPUCoupledVectorTagGradientByName(var_name, Moose::OLD_SOLUTION_TAG, comp);
+  return KokkosCoupledVectorTagValueByName(var_name, Moose::OLD_SOLUTION_TAG, comp);
 }
 
-GPUVariableGradient
-Coupleable::GPUCoupledGradientsOld(const std::string & var_name)
+Moose::Kokkos::VariableValue
+Coupleable::KokkosCoupledValuesOld(const std::string & var_name)
 {
-  return GPUCoupledVectorTagGradientsByName(var_name, Moose::OLD_SOLUTION_TAG);
+  return KokkosCoupledVectorTagValuesByName(var_name, Moose::OLD_SOLUTION_TAG);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUCoupledNodalValueOld(const std::string & var_name, unsigned int comp)
+Moose::Kokkos::VariableGradient
+Coupleable::KokkosCoupledGradientOld(const std::string & var_name, unsigned int comp)
 {
-  return GPUCoupledVectorTagNodalValueByName(var_name, Moose::OLD_SOLUTION_TAG, comp);
+  return KokkosCoupledVectorTagGradientByName(var_name, Moose::OLD_SOLUTION_TAG, comp);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUCoupledNodalValuesOld(const std::string & var_name)
+Moose::Kokkos::VariableGradient
+Coupleable::KokkosCoupledGradientsOld(const std::string & var_name)
 {
-  return GPUCoupledVectorTagNodalValuesByName(var_name, Moose::OLD_SOLUTION_TAG);
+  return KokkosCoupledVectorTagGradientsByName(var_name, Moose::OLD_SOLUTION_TAG);
 }
 
-GPUVariableValue
-Coupleable::GPUCoupledValueOlder(const std::string & var_name, unsigned int comp)
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosCoupledNodalValueOld(const std::string & var_name, unsigned int comp)
 {
-  return GPUCoupledVectorTagValueByName(var_name, Moose::OLDER_SOLUTION_TAG, comp);
+  return KokkosCoupledVectorTagNodalValueByName(var_name, Moose::OLD_SOLUTION_TAG, comp);
 }
 
-GPUVariableValue
-Coupleable::GPUCoupledValuesOlder(const std::string & var_name)
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosCoupledNodalValuesOld(const std::string & var_name)
 {
-  return GPUCoupledVectorTagValuesByName(var_name, Moose::OLDER_SOLUTION_TAG);
+  return KokkosCoupledVectorTagNodalValuesByName(var_name, Moose::OLD_SOLUTION_TAG);
 }
 
-GPUVariableGradient
-Coupleable::GPUCoupledGradientOlder(const std::string & var_name, unsigned int comp)
+Moose::Kokkos::VariableValue
+Coupleable::KokkosCoupledValueOlder(const std::string & var_name, unsigned int comp)
 {
-  return GPUCoupledVectorTagGradientByName(var_name, Moose::OLDER_SOLUTION_TAG, comp);
+  return KokkosCoupledVectorTagValueByName(var_name, Moose::OLDER_SOLUTION_TAG, comp);
 }
 
-GPUVariableGradient
-Coupleable::GPUCoupledGradientsOlder(const std::string & var_name)
+Moose::Kokkos::VariableValue
+Coupleable::KokkosCoupledValuesOlder(const std::string & var_name)
 {
-  return GPUCoupledVectorTagGradientsByName(var_name, Moose::OLDER_SOLUTION_TAG);
+  return KokkosCoupledVectorTagValuesByName(var_name, Moose::OLDER_SOLUTION_TAG);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUCoupledNodalValueOlder(const std::string & var_name, unsigned int comp)
+Moose::Kokkos::VariableGradient
+Coupleable::KokkosCoupledGradientOlder(const std::string & var_name, unsigned int comp)
 {
-  return GPUCoupledVectorTagNodalValueByName(var_name, Moose::OLDER_SOLUTION_TAG, comp);
+  return KokkosCoupledVectorTagGradientByName(var_name, Moose::OLDER_SOLUTION_TAG, comp);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUCoupledNodalValuesOlder(const std::string & var_name)
+Moose::Kokkos::VariableGradient
+Coupleable::KokkosCoupledGradientsOlder(const std::string & var_name)
 {
-  return GPUCoupledVectorTagNodalValuesByName(var_name, Moose::OLDER_SOLUTION_TAG);
+  return KokkosCoupledVectorTagGradientsByName(var_name, Moose::OLDER_SOLUTION_TAG);
 }
 
-GPUVariableValue
-Coupleable::GPUCoupledDot(const std::string & var_name, unsigned int comp)
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosCoupledNodalValueOlder(const std::string & var_name, unsigned int comp)
 {
-  return GPUCoupledVectorTagValueByName(var_name, Moose::SOLUTION_DOT_TAG, comp);
+  return KokkosCoupledVectorTagNodalValueByName(var_name, Moose::OLDER_SOLUTION_TAG, comp);
 }
 
-GPUVariableValue
-Coupleable::GPUCoupledDots(const std::string & var_name)
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosCoupledNodalValuesOlder(const std::string & var_name)
 {
-  return GPUCoupledVectorTagValuesByName(var_name, Moose::SOLUTION_DOT_TAG);
+  return KokkosCoupledVectorTagNodalValuesByName(var_name, Moose::OLDER_SOLUTION_TAG);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUCoupledNodalDot(const std::string & var_name, unsigned int comp)
+Moose::Kokkos::VariableValue
+Coupleable::KokkosCoupledDot(const std::string & var_name, unsigned int comp)
 {
-  return GPUCoupledVectorTagNodalValueByName(var_name, Moose::SOLUTION_DOT_TAG, comp);
+  return KokkosCoupledVectorTagValueByName(var_name, Moose::SOLUTION_DOT_TAG, comp);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUCoupledNodalDots(const std::string & var_name)
+Moose::Kokkos::VariableValue
+Coupleable::KokkosCoupledDots(const std::string & var_name)
 {
-  return GPUCoupledVectorTagNodalValuesByName(var_name, Moose::SOLUTION_DOT_TAG);
+  return KokkosCoupledVectorTagValuesByName(var_name, Moose::SOLUTION_DOT_TAG);
 }
 
-GPUScalar<const Real>
-Coupleable::GPUCoupledDotDu(const std::string & var_name, unsigned int comp)
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosCoupledNodalDot(const std::string & var_name, unsigned int comp)
+{
+  return KokkosCoupledVectorTagNodalValueByName(var_name, Moose::SOLUTION_DOT_TAG, comp);
+}
+
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosCoupledNodalDots(const std::string & var_name)
+{
+  return KokkosCoupledVectorTagNodalValuesByName(var_name, Moose::SOLUTION_DOT_TAG);
+}
+
+Moose::Kokkos::Scalar<const Real>
+Coupleable::KokkosCoupledDotDu(const std::string & var_name, unsigned int comp)
 {
   const auto var = getVar(var_name, comp);
 
   if (!var)
-    return GPUScalar<const Real>(_GPU_default_value_zero);
+    return Moose::Kokkos::Scalar<const Real>(_kokkos_default_value_zero);
   else
-    return GPUScalar<const Real>(var->sys().duDotDu(var->number() + comp));
+    return Moose::Kokkos::Scalar<const Real>(var->sys().duDotDu(var->number() + comp));
 }
 
-GPUVariableValue
-Coupleable::GPUZeroValue()
+Moose::Kokkos::VariableValue
+Coupleable::KokkosZeroValue()
 {
-  GPUVariable variable = GPUZeroVariable();
+  auto variable = KokkosZeroVariable();
 
-  return GPUVariableValue(_c_fe_problem.getGPUSystems(), variable);
+  return Moose::Kokkos::VariableValue(_c_fe_problem.getKokkosSystems(), variable);
 }
 
-GPUVariableGradient
-Coupleable::GPUZeroGradient()
+Moose::Kokkos::VariableGradient
+Coupleable::KokkosZeroGradient()
 {
-  GPUVariable variable = GPUZeroVariable();
+  auto variable = KokkosZeroVariable();
 
-  return GPUVariableGradient(_c_fe_problem.getGPUSystems(), variable);
+  return Moose::Kokkos::VariableGradient(_c_fe_problem.getKokkosSystems(), variable);
 }
 
-GPUVariableNodalValue
-Coupleable::GPUZeroNodalValue()
+Moose::Kokkos::VariableNodalValue
+Coupleable::KokkosZeroNodalValue()
 {
-  GPUVariable variable = GPUZeroVariable();
+  auto variable = KokkosZeroVariable();
 
-  return GPUVariableNodalValue(_c_fe_problem.getGPUSystems(), variable);
+  return Moose::Kokkos::VariableNodalValue(_c_fe_problem.getKokkosSystems(), variable);
 }

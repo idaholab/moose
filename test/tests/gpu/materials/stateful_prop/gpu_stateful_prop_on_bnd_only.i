@@ -16,29 +16,29 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./heat]
-    type = GPUMatDiffusionTest
+    type = KokkosMatDiffusionTest
     variable = u
     prop_name = thermal_conductivity
   [../]
 
   [./ie]
-    type = GPUTimeDerivative
+    type = KokkosTimeDerivative
     variable = u
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 0.0
   [../]
 
   [./right]
-    type = GPUMTBC
+    type = KokkosMTBC
     variable = u
     boundary = right
     grad = 1.0
@@ -46,16 +46,16 @@
   [../]
 []
 
-[GPUMaterials]
+[KokkosMaterials]
   [./volatile]
-    type = GPUGenericConstantMaterial
+    type = KokkosGenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = 10
     block = 0
   [../]
 
   [./stateful_on_boundary]
-    type = GPUStatefulSpatialTest
+    type = KokkosStatefulSpatialTest
     boundary = right
   [../]
 []

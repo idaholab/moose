@@ -12,40 +12,41 @@
 #include "GPUDirichletBCBase.h"
 
 template <typename DirichletBC>
-class GPUDirichletBC : public GPUDirichletBCBase<DirichletBC>
+class KokkosDirichletBC : public Moose::Kokkos::DirichletBCBase<DirichletBC>
 {
-  usingGPUDirichletBCBaseMembers(DirichletBC);
+  usingKokkosDirichletBCBaseMembers(DirichletBC);
 
 public:
   static InputParameters validParams()
   {
-    InputParameters params = GPUDirichletBCBase<DirichletBC>::validParams();
+    InputParameters params = Moose::Kokkos::DirichletBCBase<DirichletBC>::validParams();
     params.addRequiredParam<Real>("value", "Value of the BC");
     params.declareControllable("value");
     return params;
   }
 
-  GPUDirichletBC(const InputParameters & parameters)
-    : GPUDirichletBCBase<DirichletBC>(parameters), _value(this->template getParam<Real>("value"))
+  KokkosDirichletBC(const InputParameters & parameters)
+    : Moose::Kokkos::DirichletBCBase<DirichletBC>(parameters),
+      _value(this->template getParam<Real>("value"))
   {
   }
 
   KOKKOS_FUNCTION Real computeValue(const dof_id_type /* node */) const { return _value; }
 
 protected:
-  GPUScalar<const Real> _value;
+  Moose::Kokkos::Scalar<const Real> _value;
 };
 
-class GPUDirichletBCKernel final : public GPUDirichletBC<GPUDirichletBCKernel>
+class KokkosDirichletBCKernel final : public KokkosDirichletBC<KokkosDirichletBCKernel>
 {
 public:
   static InputParameters validParams();
 
-  GPUDirichletBCKernel(const InputParameters & parameters);
+  KokkosDirichletBCKernel(const InputParameters & parameters);
 };
 
-#define GPUDirichletBCMembers(T)                                                                   \
-  usingGPUDirichletBCBaseMembers(T);                                                               \
+#define usingKokkosDirichletBCMembers(T)                                                           \
+  usingKokkosDirichletBCBaseMembers(T);                                                            \
                                                                                                    \
 protected:                                                                                         \
-  using GPUDirichletBC<T>::_value;
+  using KokkosDirichletBC<T>::_value;

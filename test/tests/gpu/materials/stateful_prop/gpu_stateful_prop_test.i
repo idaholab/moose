@@ -17,16 +17,16 @@
 #   [../]
 # []
 
-[GPUKernels]
+[KokkosKernels]
   [./heat]
-    type = GPUMatDiffusionTest
+    type = KokkosMatDiffusionTest
     variable = u
     prop_name = thermal_conductivity
     prop_state = 'older'                  # Use the "Older" value to compute conductivity
   [../]
 
   [./ie]
-    type = GPUTimeDerivative
+    type = KokkosTimeDerivative
     variable = u
   [../]
 []
@@ -46,25 +46,25 @@
 #   [../]
 # []
 
-[GPUBCs]
+[KokkosBCs]
   [./bottom]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 1
     value = 0.0
   [../]
 
   [./top]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = 2
     value = 1.0
   [../]
 []
 
-[GPUMaterials]
+[KokkosMaterials]
   [./stateful]
-    type = GPUStatefulTest
+    type = KokkosStatefulTest
     prop_names = thermal_conductivity
     prop_values = 1.0
   [../]

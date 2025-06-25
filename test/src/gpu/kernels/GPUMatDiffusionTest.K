@@ -9,12 +9,12 @@
 
 #include "GPUMatDiffusionTest.h"
 
-registerMooseObject("MooseTestApp", GPUMatDiffusionTest);
+registerMooseObject("MooseTestApp", KokkosMatDiffusionTest);
 
 InputParameters
-GPUMatDiffusionTest::validParams()
+KokkosMatDiffusionTest::validParams()
 {
-  InputParameters params = GPUKernel::validParams();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "prop_name", "the name of the material property we are going to use");
 
@@ -24,14 +24,15 @@ GPUMatDiffusionTest::validParams()
   return params;
 }
 
-GPUMatDiffusionTest::GPUMatDiffusionTest(const InputParameters & parameters) : GPUKernel(parameters)
+KokkosMatDiffusionTest::KokkosMatDiffusionTest(const InputParameters & parameters)
+  : Kernel(parameters)
 {
   MooseEnum prop_state = getParam<MooseEnum>("prop_state");
 
   if (prop_state == "current")
-    _diff = getGPUMaterialProperty<Real>("prop_name");
+    _diff = getKokkosMaterialProperty<Real>("prop_name");
   else if (prop_state == "old")
-    _diff = getGPUMaterialPropertyOld<Real>("prop_name");
+    _diff = getKokkosMaterialPropertyOld<Real>("prop_name");
   else if (prop_state == "older")
-    _diff = getGPUMaterialPropertyOlder<Real>("prop_name");
+    _diff = getKokkosMaterialPropertyOlder<Real>("prop_name");
 }

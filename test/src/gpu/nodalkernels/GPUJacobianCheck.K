@@ -9,15 +9,16 @@
 
 #include "GPUJacobianCheck.h"
 
-registerMooseObject("MooseTestApp", GPUJacobianCheck);
+registerMooseObject("MooseTestApp", KokkosJacobianCheck);
 
 InputParameters
-GPUJacobianCheck::validParams()
+KokkosJacobianCheck::validParams()
 {
-  InputParameters params = GPUNodalKernel::validParams();
+  InputParameters params = NodalKernel::validParams();
   return params;
 }
 
-GPUJacobianCheck::GPUJacobianCheck(const InputParameters & parameters) : GPUNodalKernel(parameters)
+KokkosJacobianCheck::KokkosJacobianCheck(const InputParameters & parameters)
+  : NodalKernel(parameters)
 {
 }

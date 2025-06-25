@@ -12,65 +12,74 @@
 #include "MaterialPropertyStorage.h"
 
 class FEProblemBase;
-class GPUMaterialPropertyStorage;
 
-void dataStore(std::ostream & stream, GPUMaterialPropertyStorage & storage, void * context);
-void dataLoad(std::istream & stream, GPUMaterialPropertyStorage & storage, void * context);
+void
+dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, void * context);
+void
+dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, void * context);
 
-class GPUMaterialPropertyStorage : protected MaterialPropertyStorage
+namespace Moose
 {
-  friend void dataStore(std::ostream &, GPUMaterialPropertyStorage &, void *);
-  friend void dataLoad(std::istream &, GPUMaterialPropertyStorage &, void *);
+namespace Kokkos
+{
+
+class MaterialPropertyStorage : protected ::MaterialPropertyStorage
+{
+  friend void ::dataStore(std::ostream &, MaterialPropertyStorage &, void *);
+  friend void ::dataLoad(std::istream &, MaterialPropertyStorage &, void *);
 
 public:
-  GPUMaterialPropertyStorage(MaterialPropertyRegistry & registry, FEProblemBase & problem)
-    : MaterialPropertyStorage(registry, problem)
+  MaterialPropertyStorage(MaterialPropertyRegistry & registry, FEProblemBase & problem)
+    : ::MaterialPropertyStorage(registry, problem)
   {
   }
 
-  static GPUMaterialPropertyStorage & cast(MaterialPropertyStorage & storage)
+  static MaterialPropertyStorage & cast(::MaterialPropertyStorage & storage)
   {
-    return static_cast<GPUMaterialPropertyStorage &>(storage);
+    return static_cast<MaterialPropertyStorage &>(storage);
   }
 
-  using MaterialPropertyStorage::addConsumer;
-  using MaterialPropertyStorage::getConsumers;
-  using MaterialPropertyStorage::getMaterialData;
-  using MaterialPropertyStorage::getMaterialPropertyRegistry;
-  using MaterialPropertyStorage::hasStatefulProperties;
+  using ::MaterialPropertyStorage::addConsumer;
+  using ::MaterialPropertyStorage::getConsumers;
+  using ::MaterialPropertyStorage::getMaterialData;
+  using ::MaterialPropertyStorage::getMaterialPropertyRegistry;
+  using ::MaterialPropertyStorage::hasStatefulProperties;
 
-#ifdef MOOSE_GPU_SCOPE
-  // Add a GPU material property to the storage
-  GPUMaterialPropertyBase & addGPUProperty(const std::string & prop_name,
+#ifdef MOOSE_KOKKOS_SCOPE
+  // Add a Kokkos material property to the storage
+  MaterialPropertyBase & addKokkosProperty(const std::string & prop_name,
                                            const std::type_info & type,
                                            const unsigned int state,
                                            const MaterialBase * declarer,
-                                           std::shared_ptr<GPUMaterialPropertyBase> shell);
-  GPUMaterialPropertyBase & addGPUPropertyState(const std::string & prop_name,
+                                           std::shared_ptr<MaterialPropertyBase> shell);
+  MaterialPropertyBase & addKokkosPropertyState(const std::string & prop_name,
                                                 const unsigned int state,
-                                                std::shared_ptr<GPUMaterialPropertyBase> shell);
-  GPUMaterialPropertyBase & declareGPUProperty(const std::string & prop_name,
+                                                std::shared_ptr<MaterialPropertyBase> shell);
+  MaterialPropertyBase & declareKokkosProperty(const std::string & prop_name,
                                                const std::type_info & type,
                                                const unsigned int state,
                                                const MaterialBase * declarer,
                                                const std::vector<unsigned int> & dims,
                                                const bool bnd,
-                                               std::shared_ptr<GPUMaterialPropertyBase> shell);
-  // Get a GPU material property
-  GPUMaterialPropertyBase & getGPUProperty(std::string prop_name, unsigned int state = 0);
-  // Allocate all the GPU material property storages
-  void allocateGPUProperties();
-  // Check whether a GPU material property exists
-  bool haveGPUProperty(std::string prop_name, unsigned int state = 0);
+                                               std::shared_ptr<MaterialPropertyBase> shell);
+  // Get a Kokkos material property
+  MaterialPropertyBase & getKokkosProperty(std::string prop_name, unsigned int state = 0);
+  // Allocate all the Kokkos material property storages
+  void allocateKokkosProperties();
+  // Check whether a Kokkos material property exists
+  bool haveKokkosProperty(std::string prop_name, unsigned int state = 0);
 #endif
 
   void shift();
   void copy();
 
 private:
-  // GPU material properties
-  std::map<std::string, std::shared_ptr<GPUMaterialPropertyBase>>
-      _gpu_props[MaterialData::max_state + 1];
-  // Records of each GPU material property
-  std::map<std::string, GPUPropRecord> _gpu_prop_records;
+  // Kokkos material properties
+  std::map<std::string, std::shared_ptr<MaterialPropertyBase>>
+      _kokkos_props[MaterialData::max_state + 1];
+  // Records of each Kokkos material property
+  std::map<std::string, Moose::Kokkos::PropRecord> _kokkos_prop_records;
 };
+
+} // namespace Kokkos
+} // namespace Moose

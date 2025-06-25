@@ -14,15 +14,16 @@
 /**
  * Radiative heat transfer boundary condition for a plate heat structure
  */
-class GPURadiativeHeatFluxBC final : public GPURadiativeHeatFluxBCBase<GPURadiativeHeatFluxBC>
+class KokkosRadiativeHeatFluxBC final
+  : public KokkosRadiativeHeatFluxBCBase<KokkosRadiativeHeatFluxBC>
 {
 public:
   static InputParameters validParams();
-  GPURadiativeHeatFluxBC(const InputParameters & parameters);
+  KokkosRadiativeHeatFluxBC(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real coefficient() const { return _scale_pp * _eps_boundary; }
 
 private:
   /// Post-processor by which to scale boundary condition
-  GPUPostprocessorValue _scale_pp;
+  PostprocessorValue _scale_pp;
 };

@@ -12,30 +12,30 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./diff]
-    type = GPUDiffusion
+    type = KokkosDiffusion
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
   [../]
   [./time]
-    type = GPUTimeDerivative
+    type = KokkosTimeDerivative
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
   [../]
 []
 
-[GPUNodalKernels]
+[KokkosNodalKernels]
   [./td]
-    type = GPUTimeDerivativeNodalKernel
+    type = KokkosTimeDerivativeNodalKernel
     variable = nodal_ode
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
   [../]
   [./constant_rate]
-    type = GPUConstantRate
+    type = KokkosConstantRate
     variable = nodal_ode
     rate = 1.0
     extra_matrix_tags = 'mat_tag1 mat_tag2'
@@ -43,9 +43,9 @@
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 0
@@ -53,7 +53,7 @@
     extra_vector_tags = 'vec_tag1'
   [../]
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = right
     value = 10

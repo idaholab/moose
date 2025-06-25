@@ -9,22 +9,22 @@
 
 #include "GPUCoupledTimeDerivative.h"
 
-registerMooseObject("MooseApp", GPUCoupledTimeDerivative);
+registerMooseObject("MooseApp", KokkosCoupledTimeDerivative);
 
 InputParameters
-GPUCoupledTimeDerivative::validParams()
+KokkosCoupledTimeDerivative::validParams()
 {
-  InputParameters params = GPUKernel::validParams();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Time derivative Kernel that acts on a coupled variable. Weak form: "
                              "$(\\psi_i, \\frac{\\partial v_h}{\\partial t})$.");
   params.addRequiredCoupledVar("v", "Coupled variable");
   return params;
 }
 
-GPUCoupledTimeDerivative::GPUCoupledTimeDerivative(const InputParameters & parameters)
-  : GPUKernel(parameters),
-    _v_dot(GPUCoupledDot("v")),
-    _dv_dot(GPUCoupledDotDu("v")),
+KokkosCoupledTimeDerivative::KokkosCoupledTimeDerivative(const InputParameters & parameters)
+  : Kernel(parameters),
+    _v_dot(KokkosCoupledDot("v")),
+    _dv_dot(KokkosCoupledDotDu("v")),
     _v_var(coupled("v"))
 {
 }

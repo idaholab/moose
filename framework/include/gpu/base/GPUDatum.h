@@ -14,19 +14,24 @@
 #include "GPUSystem.h"
 #include "GPUVariable.h"
 
+namespace Moose
+{
+namespace Kokkos
+{
+
 class Datum
 {
 public:
   KOKKOS_FUNCTION
   Datum(const dof_id_type elem,
         const unsigned int side,
-        const GPUAssembly & assembly,
-        const GPUArray<GPUSystem> & systems)
+        const Assembly & assembly,
+        const Array<System> & systems)
     : _assembly(assembly),
       _systems(systems),
-      _elem(assembly.mesh().getElementInfo(elem)),
+      _elem(assembly.kokkosMesh().getElementInfo(elem)),
       _side(side),
-      _neighbor(_side != libMesh::invalid_uint ? assembly.mesh().getNeighbor(_elem.id, side)
+      _neighbor(_side != libMesh::invalid_uint ? assembly.kokkosMesh().getNeighbor(_elem.id, side)
                                                : libMesh::DofObject::invalid_id),
       _n_qps(side == libMesh::invalid_uint ? assembly.getNumQps(_elem)
                                            : assembly.getNumFaceQps(_elem, side)),
@@ -35,7 +40,7 @@ public:
   {
   }
   KOKKOS_FUNCTION
-  Datum(const dof_id_type elem, const GPUAssembly & assembly, const GPUArray<GPUSystem> & systems)
+  Datum(const dof_id_type elem, const Assembly & assembly, const Array<System> & systems)
     : Datum(elem, libMesh::invalid_uint, assembly, systems)
   {
   }
@@ -102,12 +107,12 @@ protected:
   }
 
 protected:
-  // Reference to the GPU assembly
-  const GPUAssembly & _assembly;
-  // Reference to the GPU system
-  const GPUArray<GPUSystem> & _systems;
+  // Reference to the Kokkos assembly
+  const Assembly & _assembly;
+  // Reference to the Kokkos systems
+  const Array<System> & _systems;
   // Element information
-  const GPUElementInfo _elem;
+  const ElementInfo _elem;
   // Side index
   const unsigned int _side;
   // Neighbor local element ID
@@ -130,9 +135,9 @@ public:
   KOKKOS_FUNCTION
   ResidualDatum(const dof_id_type elem,
                 const unsigned int side,
-                const GPUAssembly & assembly,
-                const GPUArray<GPUSystem> & systems,
-                const GPUVariable & ivar,
+                const Assembly & assembly,
+                const Array<System> & systems,
+                const Variable & ivar,
                 const unsigned int jvar,
                 const unsigned int comp = 0)
     : Datum(elem, side, assembly, systems),
@@ -148,9 +153,9 @@ public:
   }
   KOKKOS_FUNCTION
   ResidualDatum(const dof_id_type elem,
-                const GPUAssembly & assembly,
-                const GPUArray<GPUSystem> & systems,
-                const GPUVariable & ivar,
+                const Assembly & assembly,
+                const Array<System> & systems,
+                const Variable & ivar,
                 const unsigned int jvar,
                 const unsigned int comp = 0)
     : ResidualDatum(elem, libMesh::invalid_uint, assembly, systems, ivar, jvar, comp)
@@ -169,8 +174,8 @@ public:
 protected:
   // Solution tag ID
   const TagID _tag;
-  // Reference to the solution system
-  const GPUSystem & _system;
+  // Reference to the Kokkos system
+  const System & _system;
   // Variable numbers
   const unsigned int _ivar, _jvar;
   // FE type numbers of variables
@@ -178,3 +183,9 @@ protected:
   // Number of DOFs
   const unsigned int _n_idofs, _n_jdofs;
 };
+
+} // namespace Kokkos
+} // namespace Moose
+
+using Datum = Moose::Kokkos::Datum;
+using ResidualDatum = Moose::Kokkos::ResidualDatum;

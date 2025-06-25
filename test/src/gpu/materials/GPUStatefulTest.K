@@ -9,12 +9,12 @@
 
 #include "GPUStatefulTest.h"
 
-registerMooseObject("MooseTestApp", GPUStatefulTest);
+registerMooseObject("MooseTestApp", KokkosStatefulTest);
 
 InputParameters
-GPUStatefulTest::validParams()
+KokkosStatefulTest::validParams()
 {
-  InputParameters params = GPUMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addParam<std::vector<std::string>>("prop_names",
                                             "The names of the properties this material will have");
   params.addParam<std::vector<Real>>("prop_values",
@@ -23,9 +23,9 @@ GPUStatefulTest::validParams()
   return params;
 }
 
-GPUStatefulTest::GPUStatefulTest(const InputParameters & parameters)
-  : GPUMaterial(parameters),
-    _coupled_val(isParamValid("coupled") ? GPUCoupledValue("coupled") : GPUZeroValue()),
+KokkosStatefulTest::KokkosStatefulTest(const InputParameters & parameters)
+  : Material(parameters),
+    _coupled_val(isParamValid("coupled") ? KokkosCoupledValue("coupled") : KokkosZeroValue()),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
     _prop_values(getParam<std::vector<Real>>("prop_values"))
 {
@@ -44,8 +44,8 @@ GPUStatefulTest::GPUStatefulTest(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _num_props; ++i)
   {
-    _properties[i] = declareGPUProperty<Real>(_prop_names[i]);
-    _properties_old[i] = getGPUMaterialPropertyOld<Real>(_prop_names[i]);
-    _properties_older[i] = getGPUMaterialPropertyOlder<Real>(_prop_names[i]);
+    _properties[i] = declareKokkosProperty<Real>(_prop_names[i]);
+    _properties_old[i] = getKokkosMaterialPropertyOld<Real>(_prop_names[i]);
+    _properties_older[i] = getKokkosMaterialPropertyOlder<Real>(_prop_names[i]);
   }
 }

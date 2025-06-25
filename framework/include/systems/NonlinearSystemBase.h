@@ -161,36 +161,36 @@ public:
                             const std::string & name,
                             InputParameters & parameters);
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
   /**
-   * Adds a GPU kernel
+   * Adds a Kokkos kernel
    * @param kernel_name The type of the kernel
    * @param name The name of the kernel
    * @param parameters Kernel parameters
    */
-  virtual void addGPUKernel(const std::string & kernel_name,
-                            const std::string & name,
-                            InputParameters & parameters);
+  virtual void addKokkosKernel(const std::string & kernel_name,
+                               const std::string & name,
+                               InputParameters & parameters);
 
   /**
-   * Adds a GPU nodal kernel
+   * Adds a Kokkos nodal kernel
    * @param kernel_name The type of the nodal kernel
    * @param name The name of the kernel
    * @param parameters Kernel parameters
    */
-  virtual void addGPUNodalKernel(const std::string & kernel_name,
-                                 const std::string & name,
-                                 InputParameters & parameters);
+  virtual void addKokkosNodalKernel(const std::string & kernel_name,
+                                    const std::string & name,
+                                    InputParameters & parameters);
 
   /**
-   * Adds a GPU boundary condition
+   * Adds a Kokkos boundary condition
    * @param bc_name The type of the boundary condition
    * @param name The name of the boundary condition
    * @param parameters Boundary condition parameters
    */
-  void addGPUBoundaryCondition(const std::string & bc_name,
-                               const std::string & name,
-                               InputParameters & parameters);
+  void addKokkosBoundaryCondition(const std::string & bc_name,
+                                  const std::string & name,
+                                  InputParameters & parameters);
 #endif
 
   /**
@@ -304,8 +304,8 @@ public:
 
   void setInitialSolution();
 
-#ifdef MOOSE_HAVE_GPU
-  void setGPUInitialSolution();
+#ifdef MOOSE_HAVE_KOKKOS
+  void setKokkosInitialSolution();
 #endif
 
   /**
@@ -622,7 +622,7 @@ public:
    */
   MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
   const MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() const { return _kernels; }
-  MooseObjectTagWarehouse<ResidualObject> & getGPUKernelWarehouse() { return _gpu_kernels; }
+  MooseObjectTagWarehouse<ResidualObject> & getKokkosKernelWarehouse() { return _kokkos_kernels; }
   MooseObjectTagWarehouse<DGKernelBase> & getDGKernelWarehouse() { return _dg_kernels; }
   MooseObjectTagWarehouse<InterfaceKernelBase> & getInterfaceKernelWarehouse()
   {
@@ -638,9 +638,9 @@ public:
   {
     return _nodal_kernels;
   }
-  MooseObjectTagWarehouse<ResidualObject> & getGPUNodalKernelWarehouse()
+  MooseObjectTagWarehouse<ResidualObject> & getKokkosNodalKernelWarehouse()
   {
-    return _gpu_nodal_kernels;
+    return _kokkos_nodal_kernels;
   }
   MooseObjectTagWarehouse<HDGKernel> & getHDGKernelWarehouse() { return _hybridized_kernels; }
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() const
@@ -657,7 +657,10 @@ public:
    * Return the NodalBCBase warehouse
    */
   const MooseObjectTagWarehouse<NodalBCBase> & getNodalBCWarehouse() const { return _nodal_bcs; }
-  MooseObjectTagWarehouse<ResidualObject> & getGPUNodalBCWarehouse() { return _gpu_nodal_bcs; }
+  MooseObjectTagWarehouse<ResidualObject> & getKokkosNodalBCWarehouse()
+  {
+    return _kokkos_nodal_bcs;
+  }
 
   /**
    * Return the IntegratedBCBase warehouse
@@ -666,9 +669,9 @@ public:
   {
     return _integrated_bcs;
   }
-  MooseObjectTagWarehouse<ResidualObject> & getGPUIntegratedBCWarehouse()
+  MooseObjectTagWarehouse<ResidualObject> & getKokkosIntegratedBCWarehouse()
   {
-    return _gpu_integrated_bcs;
+    return _kokkos_integrated_bcs;
   }
 
   //@}
@@ -767,10 +770,10 @@ protected:
   void computeResidualInternal(const std::set<TagID> & tags);
 
   /**
-   * Compute residual on GPU
+   * Compute residual with Kokkos objects
    */
-#ifdef MOOSE_HAVE_GPU
-  void computeGPUResidual(const std::set<TagID> & tags);
+#ifdef MOOSE_HAVE_KOKKOS
+  void computeKokkosResidual(const std::set<TagID> & tags);
 #endif
 
   /**
@@ -800,10 +803,10 @@ protected:
   void computeJacobianInternal(const std::set<TagID> & tags);
 
   /**
-   * Compute Jacobian on GPU
+   * Compute Jacobian with Kokkos objects
    */
-#ifdef MOOSE_HAVE_GPU
-  void computeGPUJacobian(const std::set<TagID> & tags);
+#ifdef MOOSE_HAVE_KOKKOS
+  void computeKokkosJacobian(const std::set<TagID> & tags);
 #endif
 
   void computeDiracContributions(const std::set<TagID> & tags, bool is_jacobian);
@@ -910,7 +913,7 @@ protected:
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;
 
-  MooseObjectTagWarehouse<ResidualObject> _gpu_kernels;
+  MooseObjectTagWarehouse<ResidualObject> _kokkos_kernels;
   ///@}
 
   ///@{
@@ -920,9 +923,9 @@ protected:
   MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
   MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
 
-  MooseObjectTagWarehouse<ResidualObject> _gpu_integrated_bcs;
-  MooseObjectTagWarehouse<ResidualObject> _gpu_nodal_bcs;
-  MooseObjectWarehouse<ResidualObject> _gpu_preset_nodal_bcs;
+  MooseObjectTagWarehouse<ResidualObject> _kokkos_integrated_bcs;
+  MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_bcs;
+  MooseObjectWarehouse<ResidualObject> _kokkos_preset_nodal_bcs;
   ///@}
 
   /// Dirac Kernel storage for each thread
@@ -939,7 +942,7 @@ protected:
 
   /// NodalKernels for each thread
   MooseObjectTagWarehouse<NodalKernelBase> _nodal_kernels;
-  MooseObjectTagWarehouse<ResidualObject> _gpu_nodal_kernels;
+  MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_kernels;
 
   /// Decomposition splits
   MooseObjectWarehouseBase<Split> _splits; // use base b/c there are no setup methods

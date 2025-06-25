@@ -225,11 +225,11 @@ public:
 
   /**
    * Returns the reference to the quadrature of specified block and dimension
-   * @return A _reference_ to the unique pointer.  Make sure to store this as a reference!
+   * @return A pointer.
    */
-  const std::unique_ptr<libMesh::QBase> & writeableQRule(unsigned int dim, SubdomainID block)
+  libMesh::QBase * writeableQRule(unsigned int dim, SubdomainID block)
   {
-    return qrules(dim, block).vol;
+    return qrules(dim, block).vol.get();
   }
 
   /**
@@ -310,11 +310,11 @@ public:
 
   /**
    * Returns the reference to the quadrature used on a face of specified block and dimension
-   * @return A _reference_ to the unique pointer.  Make sure to store this as a reference!
+   * @return A pointer.
    */
-  const std::unique_ptr<libMesh::QBase> & writeableQRuleFace(unsigned int dim, SubdomainID block)
+  libMesh::QBase * writeableQRuleFace(unsigned int dim, SubdomainID block)
   {
-    return qrules(dim, block).face;
+    return qrules(dim, block).face.get();
   }
 
   /**

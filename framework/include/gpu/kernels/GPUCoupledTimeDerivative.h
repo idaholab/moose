@@ -14,12 +14,12 @@
 /**
  * This calculates the time derivative for a coupled variable
  **/
-class GPUCoupledTimeDerivative final : public GPUKernel<GPUCoupledTimeDerivative>
+class KokkosCoupledTimeDerivative final : public Moose::Kokkos::Kernel<KokkosCoupledTimeDerivative>
 {
 public:
   static InputParameters validParams();
 
-  GPUCoupledTimeDerivative(const InputParameters & parameters);
+  KokkosCoupledTimeDerivative(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -40,7 +40,7 @@ public:
   }
 
 protected:
-  GPUVariableValue _v_dot;
-  GPUScalar<const Real> _dv_dot;
+  Moose::Kokkos::VariableValue _v_dot;
+  Moose::Kokkos::Scalar<const Real> _dv_dot;
   const unsigned int _v_var;
 };

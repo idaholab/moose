@@ -9,14 +9,19 @@
 
 #pragma once
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
 #include "GPUHeader.h"
 #endif
 
 #include "MooseTypes.h"
 
+namespace Moose
+{
+namespace Kokkos
+{
+
 template <typename T>
-class GPUReferenceWrapper
+class ReferenceWrapper
 {
 protected:
   // Reference
@@ -25,13 +30,13 @@ protected:
   T _copy;
 
 public:
-  GPUReferenceWrapper(T & reference) : _reference(reference) {}
-  GPUReferenceWrapper(const GPUReferenceWrapper<T> & object) : _reference(object._reference)
+  ReferenceWrapper(T & reference) : _reference(reference) {}
+  ReferenceWrapper(const ReferenceWrapper<T> & object) : _reference(object._reference)
   {
     _copy = object._reference;
   }
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
   KOKKOS_FUNCTION operator const T &() const
   {
     KOKKOS_IF_ON_HOST(return _reference;)
@@ -78,7 +83,7 @@ public:
 };
 
 template <typename T>
-class GPUReferenceWrapper<const T>
+class ReferenceWrapper<const T>
 {
 protected:
   // Reference
@@ -87,13 +92,13 @@ protected:
   T _copy;
 
 public:
-  GPUReferenceWrapper(const T & reference) : _reference(reference) {}
-  GPUReferenceWrapper(const GPUReferenceWrapper<const T> & object) : _reference(object._reference)
+  ReferenceWrapper(const T & reference) : _reference(reference) {}
+  ReferenceWrapper(const ReferenceWrapper<const T> & object) : _reference(object._reference)
   {
     _copy = object._reference;
   }
 
-#ifdef MOOSE_GPU_SCOPE
+#ifdef MOOSE_KOKKOS_SCOPE
   KOKKOS_FUNCTION operator const T &() const
   {
     KOKKOS_IF_ON_HOST(return _reference;)
@@ -128,3 +133,6 @@ public:
   }
 #endif
 };
+
+} // namespace Kokkos
+} // namespace Moose

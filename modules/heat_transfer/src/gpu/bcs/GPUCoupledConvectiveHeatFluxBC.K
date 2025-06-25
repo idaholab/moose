@@ -9,12 +9,12 @@
 
 #include "GPUCoupledConvectiveHeatFluxBC.h"
 
-registerMooseObject("HeatTransferApp", GPUCoupledConvectiveHeatFluxBC);
+registerMooseObject("HeatTransferApp", KokkosCoupledConvectiveHeatFluxBC);
 
 InputParameters
-GPUCoupledConvectiveHeatFluxBC::validParams()
+KokkosCoupledConvectiveHeatFluxBC::validParams()
 {
-  InputParameters params = GPUIntegratedBC::validParams();
+  InputParameters params = IntegratedBC::validParams();
   params.addClassDescription(
       "Convective heat transfer boundary condition with temperature and heat "
       "transfer coefficent given by auxiliary variables.");
@@ -26,13 +26,14 @@ GPUCoupledConvectiveHeatFluxBC::validParams()
   return params;
 }
 
-GPUCoupledConvectiveHeatFluxBC::GPUCoupledConvectiveHeatFluxBC(const InputParameters & parameters)
-  : GPUIntegratedBC(parameters),
+KokkosCoupledConvectiveHeatFluxBC::KokkosCoupledConvectiveHeatFluxBC(
+    const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _n_components(coupledComponents("T_infinity")),
-    _T_infinity(GPUCoupledValues("T_infinity")),
-    _htc(GPUCoupledValues("htc")),
-    _alpha(GPUCoupledValues("alpha")),
-    _scale_factor(GPUCoupledValue("scale_factor"))
+    _T_infinity(KokkosCoupledValues("T_infinity")),
+    _htc(KokkosCoupledValues("htc")),
+    _alpha(KokkosCoupledValues("alpha")),
+    _scale_factor(KokkosCoupledValue("scale_factor"))
 {
   if (coupledComponents("alpha") != _n_components)
     paramError(

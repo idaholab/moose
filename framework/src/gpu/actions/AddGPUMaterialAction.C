@@ -10,32 +10,32 @@
 #include "AddGPUMaterialAction.h"
 #include "FEProblem.h"
 
-registerMooseAction("MooseApp", AddGPUMaterialAction, "add_material");
+registerMooseAction("MooseApp", AddKokkosMaterialAction, "add_material");
 
 InputParameters
-AddGPUMaterialAction::validParams()
+AddKokkosMaterialAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add a GPUMaterial object to the simulation.");
+  params.addClassDescription("Add a Kokkos Material object to the simulation.");
   return params;
 }
 
-AddGPUMaterialAction::AddGPUMaterialAction(const InputParameters & params)
+AddKokkosMaterialAction::AddKokkosMaterialAction(const InputParameters & params)
   : MooseObjectAction(params)
 {
 }
 
 void
-AddGPUMaterialAction::act()
+AddKokkosMaterialAction::act()
 {
-#ifndef MOOSE_HAVE_GPU
-  mooseError("Attempted to add a GPU material but MOOSE was not compiled with GPU support.");
+#ifndef MOOSE_HAVE_KOKKOS
+  mooseError("Attempted to add a Kokkos material but MOOSE was not compiled with Kokkos support.");
 #else
   if (!_app.hasGPUs())
-    mooseError("Attempted to add a GPU material but no GPU was detected in the system.");
+    mooseError("Attempted to add a Kokkos material but no GPU was detected in the system.");
   else if (!_moose_object_pars.get<bool>("_interface"))
-    _problem->addGPUMaterial(_type, _name, _moose_object_pars);
+    _problem->addKokkosMaterial(_type, _name, _moose_object_pars);
     // else
-    //  _problem->addGPUInterfaceMaterial(_type, _name, _moose_object_pars);
+    //  _problem->addKokkosInterfaceMaterial(_type, _name, _moose_object_pars);
 #endif
 }

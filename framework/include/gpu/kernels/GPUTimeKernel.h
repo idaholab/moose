@@ -11,15 +11,20 @@
 
 #include "GPUKernel.h"
 
-template <typename Kernel>
-class GPUTimeKernel : public GPUKernel<Kernel>
+namespace Moose
 {
-  usingGPUKernelMembers(Kernel);
+namespace Kokkos
+{
+
+template <typename Derived>
+class TimeKernel : public Kernel<Derived>
+{
+  usingKokkosKernelMembers(Derived);
 
 public:
   static InputParameters validParams()
   {
-    InputParameters params = GPUKernel<Kernel>::validParams();
+    InputParameters params = Kernel<Derived>::validParams();
 
     params.set<MultiMooseEnum>("vector_tags") = "time";
     params.set<MultiMooseEnum>("matrix_tags") = "system time";
@@ -28,9 +33,9 @@ public:
   }
 
   // Constructor
-  GPUTimeKernel(const InputParameters & parameters)
-    : GPUKernel<Kernel>(parameters),
-      _u_dot(systems(), _var, Moose::SOLUTION_DOT_TAG),
+  TimeKernel(const InputParameters & parameters)
+    : Kernel<Derived>(parameters),
+      _u_dot(kokkosSystems(), _var, Moose::SOLUTION_DOT_TAG),
       _du_dot_du(_var.sys().duDotDu(_var.number()))
   {
   }
@@ -43,7 +48,7 @@ public:
   }
 
   KOKKOS_FUNCTION void
-  computeResidualInternal(const Kernel * kernel, ResidualDatum & datum, Real * local_re) const
+  computeResidualInternal(const Derived * kernel, ResidualDatum & datum, Real * local_re) const
   {
     for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
     {
@@ -61,14 +66,17 @@ public:
 
 protected:
   /// Time derivative of u
-  GPUVariableValue _u_dot;
+  VariableValue _u_dot;
   /// Derivative of u_dot with respect to u
-  GPUScalar<const Real> _du_dot_du;
+  Scalar<const Real> _du_dot_du;
 };
 
-#define usingGPUTimeKernelMembers(T)                                                               \
-  usingGPUKernelMembers(T);                                                                        \
+} // namespace Kokkos
+} // namespace Moose
+
+#define usingKokkosTimeKernelMembers(T)                                                            \
+  usingKokkosKernelMembers(T);                                                                     \
                                                                                                    \
 protected:                                                                                         \
-  using GPUTimeKernel<T>::_u_dot;                                                                  \
-  using GPUTimeKernel<T>::_du_dot_du;
+  using Moose::Kokkos::TimeKernel<T>::_u_dot;                                                      \
+  using Moose::Kokkos::TimeKernel<T>::_du_dot_du;

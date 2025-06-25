@@ -9,12 +9,12 @@
 
 #include "GPUCoupledForce.h"
 
-registerMooseObject("MooseApp", GPUCoupledForce);
+registerMooseObject("MooseApp", KokkosCoupledForce);
 
 InputParameters
-GPUCoupledForce::validParams()
+KokkosCoupledForce::validParams()
 {
-  InputParameters params = GPUKernel::validParams();
+  InputParameters params = Kernel::validParams();
 
   params.addClassDescription("Implements a source term proportional to the value of a coupled "
                              "variable. Weak form: $(\\psi_i, -\\sigma v)$.");
@@ -25,13 +25,13 @@ GPUCoupledForce::validParams()
   return params;
 }
 
-GPUCoupledForce::GPUCoupledForce(const InputParameters & parameters)
-  : GPUKernel(parameters),
+KokkosCoupledForce::KokkosCoupledForce(const InputParameters & parameters)
+  : Kernel(parameters),
     _v_var(coupled("v")),
-    _v(GPUCoupledValue("v")),
+    _v(KokkosCoupledValue("v")),
     _coef(getParam<Real>("coef"))
 {
   if (_var.number() == _v_var)
-    paramError("v",
-               "Coupled variable 'v' needs to be different from 'variable' with GPUCoupledForce.");
+    paramError(
+        "v", "Coupled variable 'v' needs to be different from 'variable' with KokkosCoupledForce.");
 }

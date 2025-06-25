@@ -11,12 +11,13 @@
 
 #include "GPUNodalKernel.h"
 
-class GPUCoupledForceNodalKernel final : public GPUNodalKernel<GPUCoupledForceNodalKernel>
+class KokkosCoupledForceNodalKernel final
+  : public Moose::Kokkos::NodalKernel<KokkosCoupledForceNodalKernel>
 {
 public:
   static InputParameters validParams();
 
-  GPUCoupledForceNodalKernel(const InputParameters & parameters);
+  KokkosCoupledForceNodalKernel(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const { return -_coef * _v(node); }
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
@@ -32,7 +33,7 @@ private:
   const unsigned int _v_var;
 
   /// The value of the coupled variable
-  GPUVariableNodalValue _v;
+  Moose::Kokkos::VariableNodalValue _v;
 
   /// A multiplicative factor for computing the coupled force
   const Real _coef;

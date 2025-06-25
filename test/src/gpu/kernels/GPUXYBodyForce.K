@@ -9,13 +9,16 @@
 
 #include "GPUXYBodyForce.h"
 
-registerMooseObject("MooseTestApp", GPUXYBodyForce);
+registerMooseObject("MooseTestApp", KokkosXYBodyForce);
 
 InputParameters
-GPUXYBodyForce::validParams()
+KokkosXYBodyForce::validParams()
 {
-  InputParameters params = GPUBodyForce::validParams();
+  InputParameters params = KokkosBodyForce::validParams();
   return params;
 }
 
-GPUXYBodyForce::GPUXYBodyForce(const InputParameters & parameters) : GPUBodyForce(parameters) {}
+KokkosXYBodyForce::KokkosXYBodyForce(const InputParameters & parameters)
+  : KokkosBodyForce(parameters)
+{
+}

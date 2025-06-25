@@ -21,39 +21,39 @@
   [../]
 []
 
-[GPUKernels]
+[KokkosKernels]
   [./diff]
-    type = GPUMatDiffusionTest
+    type = KokkosMatDiffusionTest
     variable = u
     prop_name = 'p'
   [../]
 []
 
-[GPUBCs]
+[KokkosBCs]
   [./left]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 2
   [../]
   [./right]
-    type = GPUDirichletBC
+    type = KokkosDirichletBC
     variable = u
     boundary = right
     value = 3
   [../]
 []
 
-[GPUMaterials]
+[KokkosMaterials]
 
   [./all]
-    type = GPUGenericConstantMaterial
+    type = KokkosGenericConstantMaterial
     prop_names =  'f f_prime p'
     prop_values = '2 2.5     2.468'
   [../]
 
   [./left]
-    type = GPUGenericConstantMaterial
+    type = KokkosGenericConstantMaterial
     prop_names =  'f f_prime p'
     prop_values = '1 0.5     1.2345'
   [../]

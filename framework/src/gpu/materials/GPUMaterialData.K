@@ -11,49 +11,52 @@
 
 #include "MaterialData.h"
 
-GPUMaterialPropertyBase &
-MaterialData::addGPUPropertyHelper(const std::string & prop_name,
-                                   const std::type_info & type,
-                                   const unsigned int state,
-                                   const MaterialBase * declarer,
-                                   std::shared_ptr<GPUMaterialPropertyBase> shell) const
+Moose::Kokkos::MaterialPropertyBase &
+MaterialData::addKokkosPropertyHelper(
+    const std::string & prop_name,
+    const std::type_info & type,
+    const unsigned int state,
+    const MaterialBase * declarer,
+    std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell) const
 {
-  auto & storage = GPUMaterialPropertyStorage::cast(_storage);
+  auto & storage = Moose::Kokkos::MaterialPropertyStorage::cast(_storage);
 
-  return storage.addGPUProperty(prop_name, type, state, declarer, shell);
+  return storage.addKokkosProperty(prop_name, type, state, declarer, shell);
 }
 
-GPUMaterialPropertyBase &
-MaterialData::declareGPUPropertyHelper(const std::string & prop_name,
-                                       const std::type_info & type,
-                                       const unsigned int state,
-                                       const MaterialBase * declarer,
-                                       const std::vector<unsigned int> & dims,
-                                       const bool bnd,
-                                       std::shared_ptr<GPUMaterialPropertyBase> shell) const
+Moose::Kokkos::MaterialPropertyBase &
+MaterialData::declareKokkosPropertyHelper(
+    const std::string & prop_name,
+    const std::type_info & type,
+    const unsigned int state,
+    const MaterialBase * declarer,
+    const std::vector<unsigned int> & dims,
+    const bool bnd,
+    std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell) const
 {
-  auto & storage = GPUMaterialPropertyStorage::cast(_storage);
+  auto & storage = Moose::Kokkos::MaterialPropertyStorage::cast(_storage);
 
-  return storage.declareGPUProperty(prop_name, type, state, declarer, dims, bnd, shell);
+  return storage.declareKokkosProperty(prop_name, type, state, declarer, dims, bnd, shell);
 }
 
-GPUMaterialPropertyBase &
-MaterialData::getGPUPropertyHelper(const std::string & prop_name,
-                                   const unsigned int state,
-                                   std::shared_ptr<GPUMaterialPropertyBase> shell) const
+Moose::Kokkos::MaterialPropertyBase &
+MaterialData::getKokkosPropertyHelper(
+    const std::string & prop_name,
+    const unsigned int state,
+    std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell) const
 {
-  auto & storage = GPUMaterialPropertyStorage::cast(_storage);
+  auto & storage = Moose::Kokkos::MaterialPropertyStorage::cast(_storage);
 
   if (state)
-    return storage.addGPUPropertyState(prop_name, state, shell);
+    return storage.addKokkosPropertyState(prop_name, state, shell);
   else
-    return storage.getGPUProperty(prop_name);
+    return storage.getKokkosProperty(prop_name);
 }
 
 bool
-MaterialData::haveGPUPropertyHelper(const std::string & prop_name) const
+MaterialData::haveKokkosPropertyHelper(const std::string & prop_name) const
 {
-  auto & storage = GPUMaterialPropertyStorage::cast(_storage);
+  auto & storage = Moose::Kokkos::MaterialPropertyStorage::cast(_storage);
 
-  return storage.haveGPUProperty(prop_name);
+  return storage.haveKokkosProperty(prop_name);
 }

@@ -14,23 +14,31 @@
 
 #include "MaterialBase.h"
 
-class GPUMaterialBase : public MaterialBase,
-                        public GPUMeshHolder,
-                        public GPUAssemblyHolder,
-                        public GPUSystemHolder
+namespace Moose
+{
+namespace Kokkos
+{
+
+class MaterialBase : public ::MaterialBase,
+                     public MeshHolder,
+                     public AssemblyHolder,
+                     public SystemHolder
 {
 public:
   static InputParameters validParams();
 
-  GPUMaterialBase(const InputParameters & parameters);
-  GPUMaterialBase(const GPUMaterialBase & object);
+  MaterialBase(const InputParameters & parameters);
+  MaterialBase(const MaterialBase & object);
 
   virtual void initialSetup() override;
 
-  // Unused for GPUs
+  // Unused because all elements are computed in parallel
   virtual void subdomainSetup() override final {}
 
-  // GPU function tags
+  /**
+   * Kokkos function tags
+   */
+  ///@{
   struct ElementInit
   {
   };
@@ -49,36 +57,38 @@ public:
   struct NeighborCompute
   {
   };
+  ///@}
 
 protected:
-  // Declare GPU material property
+  // Declare Kokkos material property
   template <typename T, unsigned int dimension = 0>
-  GPUMaterialProperty<T, dimension> declareGPUProperty(const std::string & name,
+  MaterialProperty<T, dimension> declareKokkosProperty(const std::string & name,
                                                        const std::vector<unsigned int> dims = {})
   {
     std::string prop_name = name;
     if (_pars.have_parameter<MaterialPropertyName>(name))
       prop_name = _pars.get<MaterialPropertyName>(name);
 
-    return declareGPUPropertyByName<T, dimension>(prop_name, dims);
+    return declareKokkosPropertyByName<T, dimension>(prop_name, dims);
   }
   template <typename T, unsigned int dimension = 0>
-  GPUMaterialProperty<T, dimension>
-  declareGPUPropertyByName(const std::string & prop_name, const std::vector<unsigned int> dims = {})
+  MaterialProperty<T, dimension>
+  declareKokkosPropertyByName(const std::string & prop_name,
+                              const std::vector<unsigned int> dims = {})
   {
-    return declareGPUPropertyInternal<T, dimension>(prop_name, dims);
+    return declareKokkosPropertyInternal<T, dimension>(prop_name, dims);
   }
 
 private:
   template <typename T, unsigned int dimension>
-  GPUMaterialProperty<T, dimension>
-  declareGPUPropertyInternal(const std::string & prop_name,
-                             const std::vector<unsigned int> dims = {})
+  MaterialProperty<T, dimension>
+  declareKokkosPropertyInternal(const std::string & prop_name,
+                                const std::vector<unsigned int> dims = {})
   {
-    static_assert(dimension <= 4, "Up to four-dimensional GPU material properties are allowed.");
+    static_assert(dimension <= 4, "Up to four-dimensional Kokkos material properties are allowed.");
 
     if (dims.size() != dimension)
-      mooseError("The declared GPU material property '",
+      mooseError("The declared Kokkos material property '",
                  prop_name,
                  "'\nhas a different dimension (",
                  dimension,
@@ -91,7 +101,7 @@ private:
             ? prop_name
             : MooseUtils::join(std::vector<std::string>({prop_name, _declare_suffix}), "_");
 
-    auto prop = materialData().declareGPUProperty<T, dimension>(
+    auto prop = materialData().declareKokkosProperty<T, dimension>(
         prop_name_modified, dims, *this, isBoundaryMaterial());
 
     registerPropName(prop_name_modified, false, 0);
@@ -100,37 +110,37 @@ private:
   }
 
 private:
-  // List of local element IDs this GPU material is operating on for element material property
+  // List of local element IDs this Kokkos material is operating on for element material property
   // evaluation
-  GPUArray<dof_id_type> _element_ids;
-  // List of local element ID - side index pairs this GPU material is operating on for face material
-  // property evaluation
-  GPUArray<GPUPair<dof_id_type, unsigned int>> _element_side_ids;
+  Array<dof_id_type> _element_ids;
+  // List of local element ID - side index pairs this Kokkos material is operating on for face
+  // material property evaluation
+  Array<Pair<dof_id_type, unsigned int>> _element_side_ids;
 
 protected:
-  // Get the number of local elements this GPU material is operating on for element material
+  // Get the number of local elements this Kokkos material is operating on for element material
   // property evaluation
   KOKKOS_FUNCTION auto numElements() const { return _element_ids.size(); }
-  // Get the number of local sides this GPU material is operating on for face material property
+  // Get the number of local sides this Kokkos material is operating on for face material property
   // evaluation
   KOKKOS_FUNCTION auto numElementSides() const { return _element_side_ids.size(); }
-  /// Get the local element ID this GPU thread is operating on
+  /// Get the local element ID this Kokkos thread is operating on
   KOKKOS_FUNCTION auto elementID(size_t idx) const { return _element_ids[idx]; }
-  // Get the local element ID - side index pair this GPU thread is operating on
+  // Get the local element ID - side index pair this Kokkos thread is operating on
   KOKKOS_FUNCTION auto elementSideID(size_t idx) const { return _element_side_ids[idx]; }
 
 protected:
   // TODO: Move to TransientInterface
   // Time
-  GPUScalar<Real> _t;
+  Scalar<Real> _t;
   // Old time
-  GPUScalar<const Real> _t_old;
+  Scalar<const Real> _t_old;
   // The number of the time step
-  GPUScalar<int> _t_step;
+  Scalar<int> _t_step;
   // Time step size
-  GPUScalar<Real> _dt;
+  Scalar<Real> _dt;
   // Size of the old time step
-  GPUScalar<Real> _dt_old;
+  Scalar<Real> _dt_old;
 
 protected:
   // Sets the variables this object depend on
@@ -143,3 +153,6 @@ protected:
   // Get the material data type
   virtual Moose::MaterialDataType materialDataType() = 0;
 };
+
+} // namespace Kokkos
+} // namespace Moose

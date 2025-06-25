@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_HAVE_GPU
+#ifdef MOOSE_HAVE_KOKKOS
 #include "GPUMesh.h"
 #endif
 
@@ -668,10 +668,10 @@ public:
   const MeshBase * getMeshPtr() const;
 
   /**
-   * Accessor for GPU mesh object.
+   * Accessor for Kokkos mesh object.
    */
-#ifdef MOOSE_HAVE_GPU
-  const GPUMesh * getGPUMesh() const { return _gpu_mesh.get(); }
+#ifdef MOOSE_HAVE_KOKKOS
+  const Moose::Kokkos::Mesh * getKokkosMesh() const { return _kokkos_mesh.get(); }
 #endif
 
   /**
@@ -1458,9 +1458,9 @@ protected:
   /// Pointer to underlying libMesh mesh object
   std::unique_ptr<libMesh::MeshBase> _mesh;
 
-  /// Pointer to GPU mesh object
-#ifdef MOOSE_HAVE_GPU
-  std::unique_ptr<GPUMesh> _gpu_mesh;
+  /// Pointer to Kokkos mesh object
+#ifdef MOOSE_HAVE_KOKKOS
+  std::unique_ptr<Moose::Kokkos::Mesh> _kokkos_mesh;
 #endif
 
   /// The partitioner used on this mesh

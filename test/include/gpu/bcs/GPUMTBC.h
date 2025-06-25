@@ -12,12 +12,12 @@
 #include "GPUIntegratedBC.h"
 #include "GPUMaterialProperty.h"
 
-class GPUMTBC final : public GPUIntegratedBC<GPUMTBC>
+class KokkosMTBC final : public Moose::Kokkos::IntegratedBC<KokkosMTBC>
 {
 public:
   static InputParameters validParams();
 
-  GPUMTBC(const InputParameters & parameters);
+  KokkosMTBC(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -32,5 +32,5 @@ private:
    */
   Real _value;
   std::string _prop_name;
-  const GPUMaterialProperty<Real> _mat;
+  const Moose::Kokkos::MaterialProperty<Real> _mat;
 };
