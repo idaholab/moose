@@ -33,7 +33,7 @@ if [ -n "$help" ]; then
   echo "Usage: $0 [-h | --help | --fast | --skip-submodule-update | <mfem cmake options> ]"
   echo
   echo "-h | --help              Display this message and list of available libmesh options"
-  echo "--fast                   Run MFEM 'make' only, do NOT run configure"
+  echo "--fast                   Run MFEM 'make' only, do NOT run CMake"
   echo "--skip-submodule-update  Do not update the MFEM submodule, use the current version"
   echo
   echo "Influential variables"
