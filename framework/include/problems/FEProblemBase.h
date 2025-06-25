@@ -2506,7 +2506,7 @@ public:
    */
   const std::vector<SolverSystemName> & getSolverSystemNames() const { return _solver_sys_names; }
 
-  bool hasKokkosObjects() { return _have_kokkos_objects; }
+  bool hasKokkosObjects() { return _has_kokkos_objects; }
 
 protected:
   /**
@@ -3094,7 +3094,7 @@ private:
   const bool _regard_general_exceptions_as_errors;
 
   /// Whether we have any Kokkos objects
-  bool _have_kokkos_objects = false;
+  bool _has_kokkos_objects = false;
 
   friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,
                                                         const std::string & value,
