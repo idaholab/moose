@@ -1,5 +1,6 @@
 # AdaptiveMonteCarloDecision
 
+!if function=hasCapability('libtorch')
 !syntax description /Reporters/AdaptiveMonteCarloDecision
 
 ## Description
@@ -37,8 +38,14 @@ The following adaptive Monte Carlo samplers have been implemented in MOOSE:
   Similar to the AIS method, except that instead of calling the full model every time, a Gaussian Process surrogate is called as part
   of an active learning scheme. See [AISActiveLearning](AISActiveLearning.md) for more information.
 
+!if! function=hasCapability('libtorch')
 !syntax parameters /Reporters/AdaptiveMonteCarloDecision
 
 !syntax inputs /Reporters/AdaptiveMonteCarloDecision
 
 !syntax children /Reporters/AdaptiveMonteCarloDecision
+
+!if-end!
+
+!else
+!include libtorch/libtorch_warning.md
