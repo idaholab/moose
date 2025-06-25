@@ -100,8 +100,9 @@ class TestHarnessResultsReader:
         return TestHarnessResultsReader.loadEnvironmentAuthentication() is not None
 
     def _getTestsEntry(self, folder_name: str, test_name: str,
-                       limit: int = 50, unique_event: bool = False,
-                       filter: Optional[dict] = None) -> list[dict]:
+                       limit: int = 50, unique_event: bool = True,
+                       filter: Optional[dict] = None,
+                       pr_num: Optional[int] = None) -> list[dict]:
         """
         Internal helper for getting the raw database entries for a specific test.
 
@@ -112,31 +113,78 @@ class TestHarnessResultsReader:
             limit: Limit of entries to return
             unique_event: Whether or not to only return one test per event
             filter: Additional filters to pass to the query
+            pr_num: Number of a PR to include in results if available
         """
         assert isinstance(limit, int)
         assert isinstance(unique_event, bool)
         assert isinstance(filter, (dict, NoneType))
-
-        find = {"event_cause": {"$ne": "pr"},
-                "folder_name": {"$eq": folder_name},
-                "test_name": {"$eq": test_name}}
-        if filter is not None:
-            find.update(filter)
-
-        entries = self.db.tests.find(find, limit=limit, sort=self.mongo_sort_id)
+        assert isinstance(pr_num, (int, NoneType))
 
         values = []
+
+        # Base filter for searching for this specific test
+        filter_base = {"folder_name": {"$eq": folder_name}, "test_name": {"$eq": test_name}}
+        if filter is not None:
+            filter_base.update(filter)
+
+        # Find a single entry for this pull request, if requested and put at the top
+        if pr_num is not None:
+            filter_pr = {'pr_num': {"$eq": pr_num}}
+            filter_pr.update(filter_base)
+            entry = self.db.tests.find_one(filter_pr, sort=self.mongo_sort_id)
+            if entry:
+                values.append(entry)
+
+        # Filtering for a non-pr
+        filter_non_pr_base = {"event_cause": {"$ne": "pr"}}
+        filter_non_pr_base.update(filter_base)
+
+        # Last ID to filter less than, if any
+        last_id = None
+
+        # Due to the fact that we could have multiple entries for one event
+        # (with invalidation), we might need to do multiple queries to obtain
+        # the number of entries requested
         unique_shas = set()
-        for entry in entries:
-            # Only get the most recent value for this sha (in case of invalidation)
-            if unique_event:
-                event_sha = entry['event_sha']
-                if event_sha in unique_shas:
-                    continue
+        # Be able to decrease the limit if we need to do extra loops
+        find_event_limit = limit
+        # Decrease how many we need to find if we found a PR
+        if pr_num is not None and values:
+            find_event_limit -= 1
 
-                unique_shas.add(event_sha)
+        while True:
+            filter_non_pr = {}
+            if last_id is not None:
+                filter_non_pr['_id'] = {'$lt': last_id}
+            filter_non_pr.update(filter_non_pr_base)
 
-            values.append(entry)
+            cursor = self.db.tests.find(filter_non_pr, limit=find_event_limit, sort=self.mongo_sort_id)
+
+            entry_count = 0
+            for entry in cursor:
+                if len(values) == limit:
+                    break
+
+                last_id = entry['_id']
+                entry_count += 1
+
+                # Only get the most recent value for this sha (in case of invalidation)
+                if unique_event:
+                    event_sha = entry['event_sha']
+                    if event_sha in unique_shas:
+                        continue
+                    unique_shas.add(event_sha)
+
+                values.append(dict(entry))
+
+            # Didn't find anything; done
+            if not entry_count:
+                break
+
+            # If we're running again, decrease the limit to
+            # however many we need left
+            if len(values) < limit:
+                find_event_limit = len(values) - limit
 
         return values
 
