@@ -23,7 +23,7 @@ MFEMScalarIC::validParams()
   params.addClassDescription("Sets the initial values of an MFEM scalar variable from a "
                              "user-specified scalar coefficient.");
   params.addRequiredParam<VariableName>("variable",
-                                       "The variable to apply the initial condition for");
+                                        "The variable to apply the initial condition for");
   params.addRequiredParam<MFEMScalarCoefficientName>("coefficient", "The scalar coefficient");
   params.registerBase("InitialCondition");
   // We cannot generally execute this at construction time since the coefficient may be based on a
