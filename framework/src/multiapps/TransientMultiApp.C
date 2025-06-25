@@ -355,7 +355,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
             }
           }
 
-          Real solution_change_norm = ex->getSolutionChangeNorm();
+          Real solution_change_norm = ex->computeSolutionChangeNorm();
 
           if (_detect_steady_state && _fe_problem.verboseMultiApps())
             _console << "Solution change norm: " << solution_change_norm << std::endl;

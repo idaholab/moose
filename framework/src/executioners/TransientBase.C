@@ -171,7 +171,6 @@ TransientBase::TransientBase(const InputParameters & parameters)
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRecoverableData<Real>("target_time", -std::numeric_limits<Real>::max())),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
-    _solution_change_norm(declareRecoverableData<Real>("solution_change_norm", 0.0)),
     _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt"))
 {
   // Handle deprecated parameters
@@ -446,9 +445,6 @@ TransientBase::takeStep(Real input_dt)
 
   _time_stepper->postSolve();
 
-  _solution_change_norm =
-      relativeSolutionDifferenceNorm() / (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
-
   return;
 }
 
@@ -596,12 +592,6 @@ TransientBase::keepGoing()
           // Output last solve if not output previously by forcing it
           keep_going = false;
         }
-        else // keep going
-        {
-          // Print steady-state relative error norm
-          _console << "Steady-State Relative Differential Norm: " << _solution_change_norm
-                   << std::endl;
-        }
       }
 
       // Check for stop condition based upon number of simulation steps and/or solution end time:
@@ -650,9 +640,9 @@ TransientBase::setTargetTime(Real target_time)
 }
 
 Real
-TransientBase::getSolutionChangeNorm()
+TransientBase::computeSolutionChangeNorm() const
 {
-  return _solution_change_norm;
+  return relativeSolutionDifferenceNorm() / (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
 }
 
 void
@@ -762,35 +752,25 @@ TransientBase::convergedToSteadyState() const
 {
   bool converged;
 
+  Real norm = 0.0;
   if (_check_aux)
   {
-    // Get the relative change in the norm of each auxvariable
-    std::vector<Number> aux_soln_change_norms;
-    _aux.variableWiseRelativeSolutionDifferenceNorm(aux_soln_change_norms);
+    std::vector<Number> aux_var_change_norms;
+    _aux.variableWiseRelativeSolutionDifferenceNorm(aux_var_change_norms);
+    for (auto & aux_var_change_norm : aux_var_change_norms)
+      aux_var_change_norm /= (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
 
-    converged = true;
-    for (auto & norm_diff : aux_soln_change_norms)
-    {
-      // Normalize by timestep
-      norm_diff /= (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
-      if (norm_diff >= _steady_state_tolerance)
-      {
-        converged = false;
-        // No point in checking the rest of the auxvariables
-        break;
-      }
-    }
-
-    // This line is useful since _solution_change_norm will be printed
-    _solution_change_norm =
-        *std::max_element(aux_soln_change_norms.begin(), aux_soln_change_norms.end());
+    norm = *std::max_element(aux_var_change_norms.begin(), aux_var_change_norms.end());
   }
-
-  // If not using _check_aux, use relative change in norm from nonlinear system
-  else if (_solution_change_norm < _steady_state_tolerance)
-    converged = true;
   else
-    converged = false;
+    norm = computeSolutionChangeNorm();
+
+  _console << "Steady-State Relative Differential Norm: " << norm << std::endl;
+
+  if (norm < _steady_state_tolerance)
+    return true;
+  else
+    return false;
 
   return converged;
 }
