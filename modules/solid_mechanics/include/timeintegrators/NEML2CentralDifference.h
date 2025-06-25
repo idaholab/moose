@@ -40,9 +40,6 @@ private:
 
   /// Empty node vector to help zero out the algebraic range
   std::vector<const Node *> _no_node = {};
-
-  /// Empty boundary node vector to help zero out the algebraic range
-  std::vector<const BndNode *> _no_bnd_node = {};
 };
 
 #endif // NEML2_ENABLED
