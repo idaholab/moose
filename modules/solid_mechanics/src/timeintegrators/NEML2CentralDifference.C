@@ -10,7 +10,6 @@
 #ifdef NEML2_ENABLED
 
 // MOOSE includes
-#include "MooseMesh.h"
 #include "NEML2CentralDifference.h"
 
 registerMooseObject("SolidMechanicsApp", NEML2CentralDifference);
@@ -58,9 +57,6 @@ NEML2CentralDifference::evaluateRHSResidual()
 
     libMesh::ConstNodeRange null_node_range(&_no_node);
     _fe_problem.setCurrentAlgebraicNodeRange(&null_node_range);
-
-    ConstBndNodeRange null_bnd_node_range(&_no_bnd_node);
-    _fe_problem.setCurrentAlgebraicBndNodeRange(&null_bnd_node_range);
   }
 
   ExplicitMixedOrder::evaluateRHSResidual();
@@ -68,7 +64,6 @@ NEML2CentralDifference::evaluateRHSResidual()
   // Reset the algebraic ranges
   _fe_problem.setCurrentAlgebraicElementRange(nullptr);
   _fe_problem.setCurrentAlgebraicNodeRange(nullptr);
-  _fe_problem.setCurrentAlgebraicBndNodeRange(nullptr);
 }
 
 #endif // NEML2_ENABLED
