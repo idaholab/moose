@@ -46,10 +46,6 @@ Here, if we also wish to output the gradient of the result, we can add it as an 
 
 !listing test/tests/mfem/kernels/diffusion.i block=/AuxVariables AuxKernels
 
-To set up the kernels corresponding to the differential equations we wish to solve, first we specify all materials we'll need within the `FunctorMaterials` block. In this case, we specify a `Substance` of type [`MFEMGenericConstantFunctorMaterial`](MFEMGenericConstantFunctorMaterial.md). However, it is also possible to specify more general functors which may be piecewise, non-constant, and vectorial.
-
-!listing test/tests/mfem/kernels/diffusion.i block=/FunctorMaterials
-
 Then, within the `Kernels` block, we specify the weak forms to be added to our equation system. Typically, one would pick the `MFEM` integrators they wish to implement by checking the [linear form integrators page](https://mfem.org/lininteg/) and the [bilinear form integrators page](https://mfem.org/bilininteg/). Note that not all linear and bilinear forms that are available in `MFEM` have been implemented in `MFEM-MOOSE`. Should you wish to implement an integrator that is not yet available, please raise an issue in the `MOOSE` repository.
 
 If the integrator you wish to use is available, you can specify it in the `type` parameter simply by taking its `MFEM` integrator name, swapping the word `Integrator` for `Kernel`, and prepending `MFEM` to the beginning of its name. The table below shows a few examples of this naming convention:
