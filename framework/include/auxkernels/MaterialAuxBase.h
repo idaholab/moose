@@ -55,6 +55,9 @@ protected:
   Moose::GenericType<T, is_ad> _full_value;
 
 private:
+  /// Helper function to retrieve the property or functor
+  const PropertyType & getPropertyHelper() const;
+
   /// Multiplier for the material property
   const Real _factor;
 
@@ -96,14 +99,7 @@ template <typename T, bool is_ad, bool is_functor, typename RT>
 MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::MaterialAuxBaseTempl(
     const InputParameters & parameters)
   : AuxKernelTempl<RT>(parameters),
-    _prop(
-        [this]() -> const auto &
-        {
-          if constexpr (is_functor)
-            return this->template getFunctor<Moose::GenericType<T, is_ad>>("functor");
-          else
-            return this->template getGenericMaterialProperty<T, is_ad>("property");
-        }()),
+    _prop(getPropertyHelper()),
     _selected_qp(this->isParamValid("selected_qp")
                      ? this->template getParam<unsigned int>("selected_qp")
                      : libMesh::invalid_uint),
@@ -111,6 +107,16 @@ MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::MaterialAuxBaseTempl(
     _offset(this->template getParam<RT>("offset")),
     _current_subdomain_id(this->_assembly.currentSubdomainID())
 {
+}
+
+template <typename T, bool is_ad, bool is_functor, typename RT>
+const typename MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::PropertyType &
+MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::getPropertyHelper() const
+{
+  if constexpr (is_functor)
+    return this->template getFunctor<Moose::GenericType<T, is_ad>>("functor");
+  else
+    return this->template getGenericMaterialProperty<T, is_ad>("property");
 }
 
 template <typename T, bool is_ad, bool is_functor, typename RT>
