@@ -188,6 +188,27 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(status, ValidationCase.Status.FAIL)
         self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ >')
 
+        # Success due to absolute zero default
+        status, message = ValidationCase.checkRelativeError(0, 0, rel_err, None)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error skipped due to absolute zero')
+
+        # Success due to absolute zero with override
+        status, message = ValidationCase.checkRelativeError(0, 0.01, rel_err, None, abs_zero=0.1)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error skipped due to absolute zero')
+        status, message = ValidationCase.checkRelativeError(0.01, 0, rel_err, None, abs_zero=0.1)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error skipped due to absolute zero')
+
+        # Success with a single zero value using abolute zero (dumb, but it could happen)
+        status, message = ValidationCase.checkRelativeError(0, 0.01, 1.01, None)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ <')
+        status, message = ValidationCase.checkRelativeError(0.01, 0, 1.01, None)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ <')
+
     def testCheckRelativeErrorChecks(self):
         """
         Tests the data type checking performed in ValidationCase.checkRelativeError()
@@ -206,9 +227,9 @@ class TestValidationCase(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'rel_err not positive'):
             ValidationCase.checkRelativeError(0, 0, -1, None)
 
-        # Zero nominal value
-        with self.assertRaisesRegex(ValueError, 'nominal value is zero'):
-            ValidationCase.checkRelativeError(0, 0, 1, None)
+        # Negative abs_zero
+        with self.assertRaisesRegex(ValueError, 'abs_zero is negative'):
+            ValidationCase.checkRelativeError(0, 0, 1, None, abs_zero=-0.1)
 
     def testToFloat(self):
         """

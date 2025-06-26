@@ -211,7 +211,8 @@ class ValidationCase(MooseObject):
     def checkRelativeError(value: float,
                            nominal: float,
                            rel_err: float,
-                           units: Union[str, None]) -> Tuple[Status, str]:
+                           units: Union[str, None],
+                           abs_zero: float = 1.e-10) -> Tuple[Status, str]:
         """
         Performs relative error checking for a scalar value and associates
         a pass/fail with a status and a message
@@ -221,6 +222,8 @@ class ValidationCase(MooseObject):
             nominal: The nominal value
             rel_err: The relative error
             units (optional): Units to add to the message
+        Keyword args:
+            abs_zero (optional): The value to use as absolute zero
         Returns:
             Status: The associated status (ok or fail)
             str: Message associated with the check
@@ -230,18 +233,32 @@ class ValidationCase(MooseObject):
         rel_err = ValidationCase.toFloat(rel_err, 'rel_err')
         if rel_err <= 0.0:
             raise ValueError('rel_err not positive')
-        if nominal == 0.0:
-            raise ValueError('nominal value is zero')
-
-        error = abs((nominal - value) / nominal)
-        success = error < rel_err
-        status = ValidationCase.Status.OK if success else ValidationCase.Status.FAIL
+        abs_zero = ValidationCase.toFloat(abs_zero, 'abs_zero')
+        if abs_zero < 0.0:
+            raise ValueError('abs_zero is negative')
 
         units = f' {units}' if units is not None else ''
         number_format = ValidationCase.number_format
         message = [f'value {value:{number_format}}{units} relative error']
-        message += [f'{error:{number_format}} ' + ('<' if success else '>')]
-        message += [f'required {rel_err:{number_format}}']
+
+        if abs(value) < abs_zero:
+            value = 0.0
+        if abs(nominal) < abs_zero:
+            nominal = 0.0
+
+        if value == 0.0 and nominal == 0.0:
+            status = ValidationCase.Status.OK
+            message += ['skipped due to absolute zero']
+        else:
+            error = 0.0
+            max_val = max(abs(value), abs(nominal))
+            if max_val > 0.0:
+                error = abs((nominal - value) / max_val)
+            success = error < rel_err
+            status = ValidationCase.Status.OK if success else ValidationCase.Status.FAIL
+
+            message += [f'{error:{number_format}} ' + ('<' if success else '>')]
+            message += [f'required {rel_err:{number_format}}']
 
         return status, ' '.join(message)
 
