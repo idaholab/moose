@@ -481,7 +481,7 @@ class ValidationCase(MooseObject):
         for status in ValidationCase.Status.list():
             results.append(f'{self.getNumResultsByStatus(status)} {status.name.lower()}')
         if run_exceptions:
-            results.append(f'{run_exceptions} exception(s)')
+            results.append(f'{len(run_exceptions)} exception(s)')
         summary += ', '.join(results)
         print_prefixed(summary)
 
