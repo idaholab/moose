@@ -408,7 +408,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
-    _set_nonlinear_convergence_names(false),
     _need_to_add_default_nonlinear_convergence(false),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
@@ -9019,27 +9018,22 @@ FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> &
     paramError("nonlinear_convergence",
                "There must be one convergence object per nonlinear system");
   _nonlinear_convergence_names = convergence_names;
-  _set_nonlinear_convergence_names = true;
 }
 
 const std::vector<ConvergenceName> &
 FEProblemBase::getNonlinearConvergenceNames() const
 {
-  if (_set_nonlinear_convergence_names)
-    return _nonlinear_convergence_names;
-  else
-    mooseError("The nonlinear system convergence name(s) have not been set.");
+  if (_nonlinear_convergence_names)
+    return *_nonlinear_convergence_names;
+  mooseError("The nonlinear system convergence name(s) have not been set.");
 }
 
 bool
 FEProblemBase::hasLinearConvergenceObjects() const
 {
-  if (_set_linear_convergence_names)
-    return _linear_convergence_names.size();
-  else
-    // at the moment, this means we have not set one, not that we are querying this too early
-    // TODO: once there is a default linear CV object, error on the 'not set' case
-    return false;
+  // If false,this means we have not set one, not that we are querying this too early
+  // TODO: once there is a default linear CV object, error on the 'not set' case
+  return _linear_convergence_names.has_value();
 }
 
 void
@@ -9048,16 +9042,14 @@ FEProblemBase::setLinearConvergenceNames(const std::vector<ConvergenceName> & co
   if (convergence_names.size() != numLinearSystems())
     paramError("linear_convergence", "There must be one convergence object per linear system");
   _linear_convergence_names = convergence_names;
-  _set_linear_convergence_names = true;
 }
 
 const std::vector<ConvergenceName> &
 FEProblemBase::getLinearConvergenceNames() const
 {
-  if (_set_linear_convergence_names)
-    return _linear_convergence_names;
-  else
-    mooseError("The linear convergence name(s) have not been set.");
+  if (_linear_convergence_names)
+    return *_linear_convergence_names;
+  mooseError("The linear convergence name(s) have not been set.");
 }
 
 void
