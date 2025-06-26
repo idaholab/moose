@@ -46,14 +46,7 @@ This idea works perfectly in MOOSE with `Transient`: just simply only apply [`Ti
 
 ## Solving To Steady State
 
-Another use-case is to use `Transient` to solve to a steady state.  In this case there are a few built-in parameters to help detect steady state and stop the solve when it's reached.  You can see them down below in the "Steady State Detection Parameters" section.
-
-It is important to know that you must turn _on_ steady state detection using `steady_state_detection = true` before the other two parameters will do anything.
-The parameter `steady_state_tolerance` corresponds to $\tau$ in the following
-steady-state convergence criteria:
-\begin{equation}
-  \frac{\|u^{n+1} - u^n\|}{\Delta t} < \tau \|u\|^{n+1} \,.
-\end{equation}
+Another use-case is to use `Transient` to solve to a steady state. By default, steady-state detection is disabled; it must be enabled by setting [!param](/Executioner/Transient/steady_state_detection) to `true`. The parameter [!param](/Executioner/Transient/steady_state_convergence) is used to specify the name of a [Convergence](Convergence/index.md) object to detect convergence; if not provided, a [DefaultSteadyConvergence.md] is created using the shared steady-state convergence parameters (see "Steady State Detection Parameters" section below).
 
 !syntax parameters /Executioner/Transient
 

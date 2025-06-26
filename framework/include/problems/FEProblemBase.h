@@ -643,6 +643,8 @@ public:
   {
     return _need_to_add_default_multiapp_fixed_point_convergence;
   }
+  /// Returns true if the problem needs to add the default steady convergence
+  bool needToAddDefaultSteadyConvergence() const { return _need_to_add_default_steady_convergence; }
   /// Sets _need_to_add_default_nonlinear_convergence to true
   void setNeedToAddDefaultNonlinearConvergence()
   {
@@ -653,11 +655,15 @@ public:
   {
     _need_to_add_default_multiapp_fixed_point_convergence = true;
   }
+  /// Sets _need_to_add_default_steady_convergence to true
+  void setNeedToAddDefaultSteadyConvergence() { _need_to_add_default_steady_convergence = true; }
   /// Returns true if the problem has set the fixed point convergence name
   bool hasSetMultiAppFixedPointConvergenceName() const
   {
     return _multiapp_fixed_point_convergence_name.has_value();
   }
+  /// Returns true if the problem has set the steady convergence name
+  bool hasSetSteadyConvergenceName() const { return _steady_convergence_name.has_value(); }
   /**
    * Adds the default nonlinear Convergence associated with the problem
    *
@@ -682,6 +688,14 @@ public:
    * @param[in] params   Parameters to apply to Convergence parameters
    */
   void addDefaultMultiAppFixedPointConvergence(const InputParameters & params);
+  /**
+   * Adds the default steady Convergence
+   *
+   * This is called if the user does not supply 'steady_state_convergence'.
+   *
+   * @param[in] params   Parameters to apply to Convergence parameters
+   */
+  void addDefaultSteadyConvergence(const InputParameters & params);
 
   /**
    * add a MOOSE line search
@@ -2295,6 +2309,11 @@ public:
    */
   void setMultiAppFixedPointConvergenceName(const ConvergenceName & convergence_name);
   /**
+   * Sets the steady convergence object name if there is one
+   */
+  void setSteadyConvergenceName(const ConvergenceName & convergence_name);
+
+  /**
    * Gets the nonlinear system convergence object name(s).
    */
   const std::vector<ConvergenceName> & getNonlinearConvergenceNames() const;
@@ -2306,6 +2325,10 @@ public:
    * Gets the MultiApp fixed point convergence object name.
    */
   const ConvergenceName & getMultiAppFixedPointConvergenceName() const;
+  /**
+   * Gets the steady convergence object name.
+   */
+  const ConvergenceName & getSteadyConvergenceName() const;
 
   /**
    * Setter for whether we're computing the scaling jacobian
@@ -2524,6 +2547,8 @@ protected:
   std::optional<std::vector<ConvergenceName>> _linear_convergence_names;
   /// MultiApp fixed point convergence name
   std::optional<ConvergenceName> _multiapp_fixed_point_convergence_name;
+  /// Steady convergence name
+  std::optional<ConvergenceName> _steady_convergence_name;
 
   std::set<TagID> _fe_vector_tags;
 
@@ -2549,6 +2574,8 @@ protected:
   bool _need_to_add_default_nonlinear_convergence;
   /// Flag that the problem needs to add the default fixed point convergence
   bool _need_to_add_default_multiapp_fixed_point_convergence;
+  /// Flag that the problem needs to add the default steady convergence
+  bool _need_to_add_default_steady_convergence;
 
   /// The linear system names
   const std::vector<LinearSystemName> _linear_sys_names;
