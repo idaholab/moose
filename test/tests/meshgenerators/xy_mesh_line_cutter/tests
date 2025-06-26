@@ -5,16 +5,42 @@
     type = 'Exodiff'
     input = 'simple_cut.i'
     exodiff = 'simple_cut_elem.e'
+    exodiff_opts = '-pedantic'
     mesh_mode = 'REPLICATED'
     recover = false
     requirement = 'The system shall be able to cut a simple one-subdomain mesh using the triangle element cutting method.'
     allow_warnings = true
     cli_args = '--mesh-only simple_cut_elem.e'
   []
+  [simple_cut_elem_aligned_quad]
+    type = 'Exodiff'
+    input = 'simple_cut.i'
+    exodiff = 'simple_cut_elem_al.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall be able to cut a simple one-subdomain mesh using the triangle element cutting method (cutting line aligned with QUAD element boundaries).'
+    allow_warnings = true
+    cli_args = '--mesh-only simple_cut_elem_al.e
+                Mesh/mlc/cut_line_params="0 1 0"'
+  []
+  [simple_cut_elem_aligned_tri]
+    type = 'Exodiff'
+    input = 'simple_cut.i'
+    exodiff = 'simple_cut_elem_alh.e'
+    exodiff_opts = '-pedantic'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall be able to cut a simple one-subdomain mesh using the triangle element cutting method (cutting line aligned with converted TRI element boundaries).'
+    allow_warnings = true
+    cli_args = '--mesh-only simple_cut_elem_alh.e
+                Mesh/mlc/cut_line_params="1 1 0"'
+  []
   [simple_cut_node]
     type = 'Exodiff'
     input = 'simple_cut.i'
     exodiff = 'simple_cut_node.e'
+    exodiff_opts = '-pedantic'
     mesh_mode = 'REPLICATED'
     recover = false
     requirement = 'The system shall be able to cut a simple one-subdomain mesh using the node moving method.'
