@@ -14,12 +14,12 @@
 #include "FEProblemBase.h"
 
 ComputeLinearFVFaceThread::ComputeLinearFVFaceThread(FEProblemBase & fe_problem,
-                                                     const unsigned int linear_system_num,
+                                                     const unsigned int system_num,
                                                      const Moose::FV::LinearFVComputationMode mode,
                                                      const std::set<TagID> & vector_tags,
                                                      const std::set<TagID> & matrix_tags)
   : _fe_problem(fe_problem),
-    _linear_system_number(linear_system_num),
+    _system_number(system_num),
     _mode(mode),
     _vector_tags(vector_tags),
     _matrix_tags(matrix_tags)
@@ -30,7 +30,7 @@ ComputeLinearFVFaceThread::ComputeLinearFVFaceThread(FEProblemBase & fe_problem,
 ComputeLinearFVFaceThread::ComputeLinearFVFaceThread(ComputeLinearFVFaceThread & x,
                                                      Threads::split /*split*/)
   : _fe_problem(x._fe_problem),
-    _linear_system_number(x._linear_system_number),
+    _system_number(x._system_number),
     _mode(x._mode),
     _vector_tags(x._vector_tags),
     _matrix_tags(x._matrix_tags)
@@ -62,16 +62,28 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
 
     Real face_area = face_info->faceArea() * face_info->faceCoord();
 
-    for (auto kernel : _fv_flux_kernels)
+    // First, we execute the kernels that contribute to both the matrix and
+    // right hand side
+    for (auto kernel : _fv_flux_kernels_system)
     {
       kernel->setupFaceData(face_info);
       kernel->setCurrentFaceArea(face_area);
-      if (_mode == Moose::FV::LinearFVComputationMode::Matrix ||
-          _mode == Moose::FV::LinearFVComputationMode::FullSystem)
-        kernel->addMatrixContribution();
-      if (_mode == Moose::FV::LinearFVComputationMode::RHS ||
-          _mode == Moose::FV::LinearFVComputationMode::FullSystem)
-        kernel->addRightHandSideContribution();
+      kernel->addMatrixContribution();
+      kernel->addRightHandSideContribution();
+    }
+    // Second, we execute the kernels that contribute to the matrix only
+    for (auto kernel : _fv_flux_kernels_matrix)
+    {
+      kernel->setupFaceData(face_info);
+      kernel->setCurrentFaceArea(face_area);
+      kernel->addMatrixContribution();
+    }
+    // Lastly, we execute the kernels that contribute to the right hand side only
+    for (auto kernel : _fv_flux_kernels_rhs)
+    {
+      kernel->setupFaceData(face_info);
+      kernel->setCurrentFaceArea(face_area);
+      kernel->addRightHandSideContribution();
     }
   }
 }
@@ -84,46 +96,54 @@ ComputeLinearFVFaceThread::join(const ComputeLinearFVFaceThread & /*y*/)
 void
 ComputeLinearFVFaceThread::fetchSystemContributionObjects()
 {
-  const auto system_number = _fe_problem.getLinearSystem(_linear_system_number).number();
-  _fv_flux_kernels.clear();
+  _fv_flux_kernels_matrix.clear();
+  _fv_flux_kernels_rhs.clear();
 
+  // For flux kernels we will have to check both sides of the face
   if (_subdomain != _old_subdomain)
   {
-    _elem_fv_flux_kernels.clear();
-
     auto base_query = _fe_problem.theWarehouse()
                           .query()
-                          .template condition<AttribSysNum>(system_number)
+                          .template condition<AttribSysNum>(_system_number)
                           .template condition<AttribSubdomains>(_subdomain)
                           .template condition<AttribSystem>("LinearFVFluxKernel")
                           .template condition<AttribThread>(_tid);
 
-    if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
-      base_query.condition<AttribMatrixTags>(_matrix_tags).queryInto(_elem_fv_flux_kernels);
-    else
-      base_query.condition<AttribVectorTags>(_vector_tags).queryInto(_elem_fv_flux_kernels);
+    base_query.condition<AttribMatrixTags>(_matrix_tags).queryInto(_fv_flux_kernels_matrix_elem);
+    base_query.condition<AttribVectorTags>(_vector_tags).queryInto(_fv_flux_kernels_rhs_elem);
     _old_subdomain = _subdomain;
   }
-  _fv_flux_kernels.insert(_elem_fv_flux_kernels.begin(), _elem_fv_flux_kernels.end());
+  _fv_flux_kernels_matrix.insert(_fv_flux_kernels_matrix.end(),
+                                 _fv_flux_kernels_matrix_elem.begin(),
+                                 _fv_flux_kernels_matrix_elem.end());
+  _fv_flux_kernels_rhs.insert(_fv_flux_kernels_rhs.end(),
+                              _fv_flux_kernels_rhs_elem.begin(),
+                              _fv_flux_kernels_rhs_elem.end());
 
   if (_neighbor_subdomain != _old_neighbor_subdomain)
   {
-    _neighbor_fv_flux_kernels.clear();
-
     auto base_query = _fe_problem.theWarehouse()
                           .query()
-                          .template condition<AttribSysNum>(system_number)
+                          .template condition<AttribSysNum>(_system_number)
                           .template condition<AttribSubdomains>(_neighbor_subdomain)
                           .template condition<AttribSystem>("LinearFVFluxKernel")
                           .template condition<AttribThread>(_tid);
 
-    if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
-      base_query.condition<AttribMatrixTags>(_matrix_tags).queryInto(_neighbor_fv_flux_kernels);
-    else
-      base_query.condition<AttribVectorTags>(_vector_tags).queryInto(_neighbor_fv_flux_kernels);
+    base_query.condition<AttribMatrixTags>(_matrix_tags)
+        .queryInto(_fv_flux_kernels_matrix_neighbor);
+    base_query.condition<AttribVectorTags>(_vector_tags).queryInto(_fv_flux_kernels_rhs_neighbor);
     _old_neighbor_subdomain = _neighbor_subdomain;
   }
-  _fv_flux_kernels.insert(_neighbor_fv_flux_kernels.begin(), _neighbor_fv_flux_kernels.end());
+  _fv_flux_kernels_matrix.insert(_fv_flux_kernels_matrix.end(),
+                                 _fv_flux_kernels_matrix_neighbor.begin(),
+                                 _fv_flux_kernels_matrix_neighbor.end());
+  _fv_flux_kernels_rhs.insert(_fv_flux_kernels_rhs.end(),
+                              _fv_flux_kernels_rhs_neighbor.begin(),
+                              _fv_flux_kernels_rhs_neighbor.end());
+
+  // This will remove the common elements and add them to the last argument
+  MooseUtils::removeCommonSet(
+      _fv_flux_kernels_matrix, _fv_flux_kernels_rhs, _fv_flux_kernels_system);
 }
 
 void
@@ -143,7 +163,9 @@ ComputeLinearFVFaceThread::printGeneralExecutionInformation() const
 void
 ComputeLinearFVFaceThread::printBlockExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_fv_flux_kernels.size())
+  if (!_fe_problem.shouldPrintExecution(_tid) ||
+      (_fv_flux_kernels_matrix.empty() && _fv_flux_kernels_rhs.empty() &&
+       _fv_flux_kernels_system.empty()))
     return;
 
   // Print the location of the execution
@@ -158,7 +180,11 @@ ComputeLinearFVFaceThread::printBlockExecutionInformation() const
 
   // Print the list of objects
   std::vector<MooseObject *> kernels_to_print;
-  for (const auto & kernel : _fv_flux_kernels)
+  for (const auto & kernel : _fv_flux_kernels_matrix)
+    kernels_to_print.push_back(dynamic_cast<MooseObject *>(kernel));
+  for (const auto & kernel : _fv_flux_kernels_rhs)
+    kernels_to_print.push_back(dynamic_cast<MooseObject *>(kernel));
+  for (const auto & kernel : _fv_flux_kernels_system)
     kernels_to_print.push_back(dynamic_cast<MooseObject *>(kernel));
   console << ConsoleUtils::formatString(ConsoleUtils::mooseObjectVectorToString(kernels_to_print),
                                         "[DBG]")
