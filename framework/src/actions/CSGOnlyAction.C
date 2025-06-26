@@ -10,6 +10,7 @@
 #include "MooseApp.h"
 #include "CSGOnlyAction.h"
 #include "CSGBase.h"
+#include "MeshGenerator.h"
 
 registerMooseAction("MooseApp", CSGOnlyAction, "csg_only");
 registerMooseAction("MooseApp", CSGOnlyAction, "setup_mesh");

@@ -55,6 +55,7 @@
 #include "StringInputStream.h"
 #include "MooseMain.h"
 #include "FEProblemBase.h"
+#include "CSGBase.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
