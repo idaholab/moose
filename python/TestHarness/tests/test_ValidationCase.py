@@ -176,17 +176,17 @@ class TestValidationCase(unittest.TestCase):
         # Success
         status, message = ValidationCase.checkRelativeError(value, nominal, rel_err, units)
         self.assertEqual(status, ValidationCase.Status.OK)
-        self.assertRegex(message, '\d+.\d+E[-+]\d+ someunit relative error \d+.\d+E[-+]\d+ <')
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ someunit relative error \d+.\d+E[-+]\d+ <')
 
         # Success without units
         status, message = ValidationCase.checkRelativeError(value, nominal, rel_err, None)
         self.assertEqual(status, ValidationCase.Status.OK)
-        self.assertRegex(message, '\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ <')
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ <')
 
         # Fail
         status, message = ValidationCase.checkRelativeError(value, nominal, 1e-6, None)
         self.assertEqual(status, ValidationCase.Status.FAIL)
-        self.assertRegex(message, '\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ >')
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ >')
 
     def testCheckRelativeErrorChecks(self):
         """
