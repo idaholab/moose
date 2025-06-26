@@ -55,6 +55,7 @@ class NonlinearSystem;
 class RandomInterface;
 class RandomData;
 class MeshChangedInterface;
+class MeshDisplacedInterface;
 class MultiMooseEnum;
 class MaterialPropertyStorage;
 class MaterialData;
@@ -1746,6 +1747,12 @@ public:
   void notifyWhenMeshChanges(MeshChangedInterface * mci);
 
   /**
+   * Register an object that derives from MeshDisplacedInterface
+   * to be notified when the displaced mesh gets updated.
+   */
+  void notifyWhenMeshDisplaces(MeshDisplacedInterface * mdi);
+
+  /**
    * Initialize stateful properties for elements in a specific \p elem_range
    * This is needed when elements/boundary nodes are added to a specific subdomain
    * at an intermediate step
@@ -2442,6 +2449,11 @@ protected:
   void createTagSolutions();
 
   /**
+   * Update data after a mesh displaced.
+   */
+  virtual void meshDisplaced();
+
+  /**
    * Do generic system computations
    */
   void computeSystems(const ExecFlagType & type);
@@ -2652,6 +2664,9 @@ protected:
 
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
+
+  /// Objects to be notified when the mesh displaces
+  std::vector<MeshDisplacedInterface *> _notify_when_mesh_displaces;
 
   /// Helper to check for duplicate variable names across systems or within a single system
   bool duplicateVariableCheck(const std::string & var_name,

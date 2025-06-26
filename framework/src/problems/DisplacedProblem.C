@@ -321,6 +321,9 @@ DisplacedProblem::updateMesh(bool mesh_changing)
     _mproblem.setException(e.what());
   }
 
+  if (udmt.hasDisplacement())
+    _mproblem.meshDisplaced();
+
   // The below call will throw an exception on all processes if any of our processes had an
   // exception above. This exception will be caught higher up the call stack and the error message
   // will be printed there
@@ -364,6 +367,9 @@ DisplacedProblem::updateMesh(const std::map<unsigned int, const NumericVector<Nu
   {
     _mproblem.setException(e.what());
   }
+
+  if (udmt.hasDisplacement())
+    _mproblem.meshDisplaced();
 
   // The below call will throw an exception on all processes if any of our processes had an
   // exception above. This exception will be caught higher up the call stack and the error message
