@@ -19,12 +19,15 @@ FunctionInterface::validParams()
   return emptyInputParameters();
 }
 
-FunctionInterface::FunctionInterface(const MooseObject * moose_object, bool initialize)
+FunctionInterface::FunctionInterface(const MooseObject * moose_object)
   : _fni_params(moose_object->parameters()),
     _fni_feproblem(*_fni_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _fni_tid(_fni_params.have_parameter<THREAD_ID>("_tid") ? _fni_params.get<THREAD_ID>("_tid") : 0)
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 }
 

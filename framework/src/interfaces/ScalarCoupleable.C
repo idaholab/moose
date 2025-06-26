@@ -16,7 +16,7 @@
 #include "Problem.h"
 #include "SubProblem.h"
 
-ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object, bool initialize)
+ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
   : _sc_fe_problem(
         *moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sc_tid(moose_object->parameters().isParamValid("_tid")
@@ -31,7 +31,10 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object, bool initia
                         ? _sc_parameters.get<bool>("implicit")
                         : true)
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 
   SubProblem & problem = *_sc_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");

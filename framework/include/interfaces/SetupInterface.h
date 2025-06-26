@@ -23,7 +23,7 @@ InputParameters validParams();
 class SetupInterface
 {
 public:
-  SetupInterface(const MooseObject * moose_object, bool initialize = true);
+  SetupInterface(const MooseObject * moose_object);
 
   virtual ~SetupInterface();
 

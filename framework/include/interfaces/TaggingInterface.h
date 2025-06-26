@@ -56,7 +56,7 @@ struct ADResidualsPacket
 class TaggingInterface
 {
 public:
-  TaggingInterface(const MooseObject * moose_object, bool initialize = true);
+  TaggingInterface(const MooseObject * moose_object);
 
   virtual ~TaggingInterface();
 
