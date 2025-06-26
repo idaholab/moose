@@ -47,7 +47,7 @@ MFEMBlockRestrictable::subdomainsToAttributes(const std::vector<SubdomainName> &
       subdomain_names.begin(),
       subdomain_names.end(),
       attributes.begin(),
-      [this, &mesh](const SubdomainName & subdomain) -> int
+      [&mesh](const SubdomainName & subdomain) -> int
       {
         try
         {

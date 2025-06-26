@@ -44,7 +44,7 @@ MFEMBoundaryRestrictable::boundariesToAttributes(const std::vector<BoundaryName>
       boundary_names.begin(),
       boundary_names.end(),
       attributes.begin(),
-      [this, &mesh](const BoundaryName & boundary) -> int
+      [&mesh](const BoundaryName & boundary) -> int
       {
         try
         {
