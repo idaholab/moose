@@ -127,13 +127,13 @@ public:
    * mesh solution because it may be out-of-sync, whereas our displaced mesh solution should be in
    * the correct state after getting restricted/prolonged in EquationSystems::reinit
    */
-  virtual void updateMesh(bool mesh_changing = false);
+  virtual bool updateMesh(bool mesh_changing = false);
 
   /**
    * Synchronize the solutions on the displaced systems to the given solutions and
    * reinitialize the geometry search data and Dirac kernel information due to mesh displacement.
    */
-  virtual void updateMesh(const std::map<unsigned int, const NumericVector<Number> *> & nl_soln,
+  virtual bool updateMesh(const std::map<unsigned int, const NumericVector<Number> *> & nl_soln,
                           const NumericVector<Number> & aux_soln);
 
   virtual TagID addVectorTag(const TagName & tag_name,
