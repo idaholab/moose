@@ -12,6 +12,7 @@
 #include "MFEMProblem.h"
 #include "MFEMVariable.h"
 #include "MFEMSubMesh.h"
+#include "MFEMFunctorMaterial.h"
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
