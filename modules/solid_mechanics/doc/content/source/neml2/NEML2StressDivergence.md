@@ -1,5 +1,7 @@
 # NEML2StressDivergence
 
+!if! function=hasCapability('neml2')
+
 For a batch of material points, calculate the residual at each point in the form of $\phi^\alpha_{,j} \sigma_{ij}$, for $\alpha = 1..n$ where $n$ is the number of displacement variables.
 
 The kernel then assembles the integrated residual into the global residual vector.
@@ -11,3 +13,9 @@ The kernel then assembles the integrated residual into the global residual vecto
 ## Example input files
 
 !syntax inputs /UserObjects/NEML2StressDivergence
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md
