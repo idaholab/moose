@@ -35,7 +35,7 @@ InputParameters validParams();
 class FunctionInterface
 {
 public:
-  FunctionInterface(const MooseObject * moose_object, bool initialize = true);
+  FunctionInterface(const MooseObject * moose_object);
 
   static InputParameters validParams();
 

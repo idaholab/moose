@@ -21,8 +21,7 @@ VectorPostprocessorInterface::validParams()
 }
 
 VectorPostprocessorInterface::VectorPostprocessorInterface(const MooseObject * moose_object,
-                                                           bool broadcast_by_default,
-                                                           bool initialize)
+                                                           bool broadcast_by_default)
   : _broadcast_by_default(broadcast_by_default),
     _vpi_moose_object(*moose_object),
     _vpi_feproblem(*_vpi_moose_object.parameters().getCheckedPointerParam<FEProblemBase *>(
@@ -31,7 +30,10 @@ VectorPostprocessorInterface::VectorPostprocessorInterface(const MooseObject * m
                  ? _vpi_moose_object.parameters().get<THREAD_ID>("_tid")
                  : 0)
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 }
 
