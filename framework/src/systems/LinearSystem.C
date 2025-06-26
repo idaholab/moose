@@ -228,7 +228,7 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
     Threads::parallel_reduce(elem_info_range, elem_thread);
 
     ComputeLinearFVFaceThread face_thread(_fe_problem,
-                                          _fe_problem.linearSysNum(name()),
+                                          this->number(),
                                           Moose::FV::LinearFVComputationMode::FullSystem,
                                           vector_tags,
                                           matrix_tags);
