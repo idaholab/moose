@@ -147,7 +147,7 @@ ParsedDownSelectionPositions::initialize()
 
   // Rather than synchronize all ranks at every point, we will figure out whether to keep (2),
   // discard (1) or error (0, due to no ranks having made the decision) for each position
-  std::vector<short> keep_positions(n_points, 0);
+  std::vector<short> keep_positions(n_points, PositionSelection::Error);
 
   const auto state = determineState();
   auto pl = _fe_problem.mesh().getMesh().sub_point_locator();
@@ -155,11 +155,12 @@ ParsedDownSelectionPositions::initialize()
 
   // Loop over the positions, find them in the mesh to form the adequate functor arguments
   // Note that every positions object is assumed replicated over every rank already
-  unsigned int i_pos = 0;
+  unsigned int i_pos, counter = 0;
   for (const auto & pos_ptr : _positions_ptrs)
     for (const auto & pos : pos_ptr->getPositions(initial))
     {
-      i_pos++;
+      counter++;
+      i_pos = counter - 1;
       // Get all possible elements the position may be in
       std::set<const Elem *> candidate_elements;
       (*pl)(pos, candidate_elements);
@@ -167,9 +168,11 @@ ParsedDownSelectionPositions::initialize()
       for (const auto elem : candidate_elements)
       {
         // Check block restriction
-        if (!hasBlocks(elem->subdomain_id()))
+        // Dont exclude a point we already chose to keep. This 'inclusivity' means that a position
+        // at a node can be included if at least one element it borders is in the block restriction
+        if (!hasBlocks(elem->subdomain_id()) && (keep_positions[i_pos] != PositionSelection::Keep))
         {
-          keep_positions[i_pos - 1] = 1;
+          keep_positions[i_pos] = PositionSelection::Discard;
           continue;
         }
 
@@ -196,11 +199,12 @@ ParsedDownSelectionPositions::initialize()
 
         // Keep points matching the criterion
         if (value > 0)
-          keep_positions[i_pos - 1] = 2;
+          keep_positions[i_pos] = PositionSelection::Keep;
         // Dont exclude a point we already chose to keep. This 'inclusivity'
-        // means that a position at a node on the edge of a block gets included
-        else if (keep_positions[i_pos - 1] != 1)
-          keep_positions[i_pos - 1] = 1;
+        // means that a position at an interface between elements can get included if the functor
+        // evaluates greater than 0 for any of the elements used in forming ElemPointArgs
+        else if (keep_positions[i_pos] != PositionSelection::Keep)
+          keep_positions[i_pos] = PositionSelection::Discard;
       }
     }
 
@@ -210,9 +214,9 @@ ParsedDownSelectionPositions::initialize()
   for (const auto & pos_ptr : _positions_ptrs)
     for (const auto & pos : pos_ptr->getPositions(initial))
     {
-      if (keep_positions[i_pos] == 2)
+      if (keep_positions[i_pos] == PositionSelection::Keep)
         _positions.push_back(pos);
-      else if (keep_positions[i_pos] == 0)
+      else if (keep_positions[i_pos] == PositionSelection::Error)
         mooseError(
             "No process has made a decision on whether position '",
             pos,
