@@ -546,7 +546,12 @@ class Job(OutputInterface):
         """
         init_kwargs = {'params': self.__tester.parameters(),
                        'tester_outputs': self.getOutputFiles(self.options)}
-        self.validation_cases = [c(**init_kwargs) for c in self.__tester._validation_classes]
+        cwd = os.getcwd()
+        os.chdir(self.getTestDir())
+        try:
+            self.validation_cases = [c(**init_kwargs) for c in self.__tester._validation_classes]
+        finally:
+            os.chdir(cwd)
 
     def runValidation(self):
         """
