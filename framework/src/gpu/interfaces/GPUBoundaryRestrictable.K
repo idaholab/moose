@@ -14,7 +14,7 @@
 #include "MooseMesh.h"
 
 BoundaryRestrictable::BoundaryRestrictable(const BoundaryRestrictable & object)
-  : BoundaryRestrictable(&object._moose_object, object._bnd_nodal, false)
+  : BoundaryRestrictable(&object._moose_object, object._bnd_nodal)
 {
   _node_ids = object._node_ids;
   _element_side_ids = object._element_side_ids;

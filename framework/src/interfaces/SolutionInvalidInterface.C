@@ -14,13 +14,15 @@
 #include "FEProblemBase.h"
 #include "SolutionInvalidityRegistry.h"
 
-SolutionInvalidInterface::SolutionInvalidInterface(const MooseObject * const moose_object,
-                                                   bool initialize)
+SolutionInvalidInterface::SolutionInvalidInterface(const MooseObject * const moose_object)
   : _si_moose_object(*moose_object),
     _si_problem(
         *_si_moose_object.parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 }
 

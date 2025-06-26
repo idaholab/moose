@@ -36,7 +36,7 @@ NodalKernelBase::NodalKernelBase(const NodalKernelBase & object)
   : ResidualObject(object),
     BlockRestrictable(object),
     BoundaryRestrictable(object),
-    CoupleableMooseVariableDependencyIntermediateInterface(&object, true, false, false)
+    CoupleableMooseVariableDependencyIntermediateInterface(&object, true)
 {
 }
 

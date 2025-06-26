@@ -30,7 +30,7 @@ class MooseObject : public ParallelParamObject, public std::enable_shared_from_t
 public:
   static InputParameters validParams();
 
-  MooseObject(const InputParameters & parameters, bool initialize = true);
+  MooseObject(const InputParameters & parameters);
 
   virtual ~MooseObject() = default;
 

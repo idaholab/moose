@@ -51,8 +51,8 @@ public:
   // Copy constructor
   Material(const Material & object)
     : MaterialBase(object),
-      Coupleable(&object, false, false, false),
-      MaterialPropertyInterface(&object, object.blockIDs(), object.boundaryIDs(), false),
+      Coupleable(&object, false),
+      MaterialPropertyInterface(&object, object.blockIDs(), object.boundaryIDs()),
       _bnd(object._bnd),
       _neighbor(object._neighbor),
       _default_init(object._default_init),

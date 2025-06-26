@@ -37,7 +37,7 @@ class FEProblemBase;
 class SolutionInvalidInterface
 {
 public:
-  SolutionInvalidInterface(const MooseObject * const moose_object, bool initialize = true);
+  SolutionInvalidInterface(const MooseObject * const moose_object);
 
 protected:
   template <bool warning>

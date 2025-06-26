@@ -31,7 +31,7 @@ InputParameters validParams();
 class TransientInterface
 {
 public:
-  TransientInterface(const MooseObject * moose_object, bool initialize = true);
+  TransientInterface(const MooseObject * moose_object);
 
   virtual ~TransientInterface();
 

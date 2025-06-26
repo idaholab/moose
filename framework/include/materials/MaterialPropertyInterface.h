@@ -71,8 +71,7 @@ class MaterialPropertyInterface
 public:
   MaterialPropertyInterface(const MooseObject * moose_object,
                             const std::set<SubdomainID> & block_ids,
-                            const std::set<BoundaryID> & boundary_ids,
-                            bool initialize = true);
+                            const std::set<BoundaryID> & boundary_ids);
 
   static InputParameters validParams();
 
