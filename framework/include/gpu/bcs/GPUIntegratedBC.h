@@ -1,0 +1,248 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
+
+#include "GPUIntegratedBCBase.h"
+
+namespace Moose
+{
+namespace Kokkos
+{
+
+template <typename Derived>
+class IntegratedBC : public IntegratedBCBase
+{
+public:
+  static InputParameters validParams()
+  {
+    InputParameters params = IntegratedBCBase::validParams();
+
+    return params;
+  }
+
+  IntegratedBC(const InputParameters & parameters)
+    : IntegratedBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
+      _test(kokkosAssembly()),
+      _grad_test(kokkosAssembly()),
+      _phi(kokkosAssembly()),
+      _grad_phi(kokkosAssembly()),
+      _u(kokkosSystems(), _var),
+      _grad_u(kokkosSystems(), _var)
+  {
+    addMooseVariableDependency(&_var);
+  }
+
+  IntegratedBC(const IntegratedBC<Derived> & object)
+    : IntegratedBCBase(object),
+      _test(object._test),
+      _grad_test(object._grad_test),
+      _phi(object._phi),
+      _grad_phi(object._grad_phi),
+      _u(object._u),
+      _grad_u(object._grad_u)
+  {
+  }
+
+  // Dispatch residual calculation to GPU
+  virtual void computeResidual() override
+  {
+    ::Kokkos::RangePolicy<ResidualLoop, ::Kokkos::IndexType<size_t>> policy(0, numBoundarySides());
+    ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
+    ::Kokkos::fence();
+  }
+  // Dispatch diagonal Jacobian calculation to GPU
+  virtual void computeJacobian() override
+  {
+    if (!defaultJacobian())
+    {
+      ::Kokkos::RangePolicy<JacobianLoop, ::Kokkos::IndexType<size_t>> policy(0,
+                                                                              numBoundarySides());
+      ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
+      ::Kokkos::fence();
+    }
+
+    if (!defaultOffDiagJacobian())
+    {
+      auto & sys = kokkosSystem(_kokkos_var.sys());
+
+      _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numBoundarySides()});
+
+      ::Kokkos::RangePolicy<OffDiagJacobianLoop, ::Kokkos::IndexType<size_t>> policy(
+          0, _thread.size());
+      ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
+      ::Kokkos::fence();
+    }
+  }
+
+  // Empty methods to prevent compile errors even when these methods were not hidden by the derived
+  // class
+  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* i */,
+                                         const unsigned int /* j */,
+                                         const unsigned int /* qp */,
+                                         ResidualDatum & /* datum */) const
+  {
+    return 0;
+  }
+  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int /* i */,
+                                                const unsigned int /* j */,
+                                                const unsigned int /* jvar */,
+                                                const unsigned int /* qp */,
+                                                ResidualDatum & /* datum */) const
+  {
+    return 0;
+  }
+
+  // Overloaded operators called by Kokkos::parallel_for
+  KOKKOS_FUNCTION void operator()(ResidualLoop, const size_t tid) const
+  {
+    auto bc = static_cast<const Derived *>(this);
+    auto elem = boundaryElementSideID(tid);
+
+    ResidualDatum datum(
+        elem.first, elem.second, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+
+    Real local_re[MAX_DOF];
+
+    for (unsigned int i = 0; i < datum.n_dofs(); ++i)
+      local_re[i] = 0;
+
+    computeResidualInternal(bc, datum, local_re);
+  }
+  KOKKOS_FUNCTION void operator()(JacobianLoop, const size_t tid) const
+  {
+    auto bc = static_cast<const Derived *>(this);
+    auto elem = boundaryElementSideID(tid);
+
+    ResidualDatum datum(
+        elem.first, elem.second, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+
+    Real local_ke[MAX_DOF * MAX_DOF];
+
+    for (unsigned int i = 0; i < datum.n_idofs(); ++i)
+      for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
+        local_ke[i * datum.n_jdofs() + j] = 0;
+
+    computeJacobianInternal(bc, datum, local_ke);
+  }
+  KOKKOS_FUNCTION void operator()(OffDiagJacobianLoop, const size_t tid) const
+  {
+    auto bc = static_cast<const Derived *>(this);
+    auto elem = boundaryElementSideID(_thread(tid, 1));
+
+    auto & sys = kokkosSystem(_kokkos_var.sys());
+    auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];
+
+    if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem.first).subdomain))
+      return;
+
+    ResidualDatum datum(
+        elem.first, elem.second, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+
+    Real local_ke[MAX_DOF * MAX_DOF];
+
+    for (unsigned int i = 0; i < datum.n_idofs(); ++i)
+      for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
+        local_ke[i * datum.n_jdofs() + j] = 0;
+
+    computeOffDiagJacobianInternal(bc, datum, local_ke);
+  }
+
+  KOKKOS_FUNCTION void
+  computeResidualInternal(const Derived * bc, ResidualDatum & datum, Real * local_re) const
+  {
+    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+    {
+      datum.reinit(qp);
+
+      for (unsigned int i = 0; i < datum.n_dofs(); ++i)
+        local_re[i] += datum.JxW(qp) * bc->computeQpResidual(i, qp, datum);
+    }
+
+    for (unsigned int i = 0; i < datum.n_dofs(); ++i)
+      accumulateTaggedLocalResidual(local_re[i], datum.elem().id, i);
+  }
+  KOKKOS_FUNCTION void
+  computeJacobianInternal(const Derived * bc, ResidualDatum & datum, Real * local_ke) const
+  {
+    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+    {
+      datum.reinit(qp);
+
+      for (unsigned int i = 0; i < datum.n_idofs(); ++i)
+        for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
+          local_ke[i * datum.n_jdofs() + j] +=
+              datum.JxW(qp) * bc->computeQpJacobian(i, j, qp, datum);
+    }
+
+    for (unsigned int i = 0; i < datum.n_idofs(); ++i)
+      for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
+        accumulateTaggedLocalMatrix(
+            local_ke[i * datum.n_jdofs() + j], datum.elem().id, i, j, datum.jvar());
+  }
+  KOKKOS_FUNCTION void
+  computeOffDiagJacobianInternal(const Derived * bc, ResidualDatum & datum, Real * local_ke) const
+  {
+    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+    {
+      datum.reinit(qp);
+
+      for (unsigned int i = 0; i < datum.n_idofs(); ++i)
+        for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
+          local_ke[i * datum.n_jdofs() + j] +=
+              datum.JxW(qp) * bc->computeQpOffDiagJacobian(i, j, datum.jvar(), qp, datum);
+    }
+
+    for (unsigned int i = 0; i < datum.n_idofs(); ++i)
+      for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
+        accumulateTaggedLocalMatrix(
+            local_ke[i * datum.n_jdofs() + j], datum.elem().id, i, j, datum.jvar());
+  }
+
+protected:
+  // The current test function
+  VariableTestValue _test;
+  // Gradient of the test function
+  VariableTestGradient _grad_test;
+  // The current shape functions
+  VariablePhiValue _phi;
+  // Gradient of the shape function
+  VariablePhiGradient _grad_phi;
+  // Holds the solution at current quadrature points
+  VariableValue _u;
+  // Holds the solution gradient at the current quadrature points
+  VariableGradient _grad_u;
+
+protected:
+  virtual bool defaultJacobian() const
+  {
+    return &Derived::computeQpJacobian == &IntegratedBC::computeQpJacobian;
+  }
+  virtual bool defaultOffDiagJacobian() const
+  {
+    return &Derived::computeQpOffDiagJacobian == &IntegratedBC::computeQpOffDiagJacobian;
+  }
+};
+
+} // namespace Kokkos
+} // namespace Moose
+
+#define usingKokkosIntegratedBCMembers(T)                                                          \
+  usingKokkosIntegratedBCBaseMembers;                                                              \
+                                                                                                   \
+protected:                                                                                         \
+  using Moose::Kokkos::IntegratedBC<T>::_test;                                                     \
+  using Moose::Kokkos::IntegratedBC<T>::_grad_test;                                                \
+  using Moose::Kokkos::IntegratedBC<T>::_phi;                                                      \
+  using Moose::Kokkos::IntegratedBC<T>::_grad_phi;                                                 \
+  using Moose::Kokkos::IntegratedBC<T>::_u;                                                        \
+  using Moose::Kokkos::IntegratedBC<T>::_grad_u;                                                   \
+                                                                                                   \
+public:                                                                                            \
+  using Moose::Kokkos::IntegratedBC<T>::operator();

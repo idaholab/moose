@@ -369,6 +369,11 @@ public:
                          const InputParameters & params);
 
   /**
+   * Returns whether the simulation is currently executing actions
+   */
+  bool currentlyExecutingActions() const { return _currently_executing_actions; }
+
+  /**
    * @return The Parser
    **/
   Parser & parser();
@@ -1529,6 +1534,9 @@ private:
    */
   const ExecFlagEnum _execute_flags;
 
+  /// Indicates if simulation is currently executing actions
+  bool _currently_executing_actions;
+
   /// Cache output buffer so the language server can turn it off then back on
   std::streambuf * _output_buffer_cache;
 
@@ -1565,6 +1573,28 @@ private:
   friend class FEProblemBase;
   friend class Restartable;
   friend class SubProblem;
+
+  /**
+   * GPU-related variables and methods
+   */
+public:
+  /// Return whether GPUs exist
+  bool hasGPUs() const { return _has_gpus; }
+
+  /// Return whether Kokkos objects added by actions exist
+  bool hasKokkosObjects() const { return _has_kokkos_objects; }
+
+private:
+  /// Whether GPUs exist
+  bool _has_gpus = false;
+
+  /// Whether we have any Kokkos object added by actions
+  bool _has_kokkos_objects = false;
+
+#ifdef MOOSE_HAVE_KOKKOS
+  /// Query whether GPUs exist
+  void queryGPUs();
+#endif
 };
 
 template <typename T>

@@ -492,6 +492,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _chain_control_system(*this),
     _rd_reader(*this, _restartable_data, forceRestart()),
     _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
+    _currently_executing_actions(false),
     _output_buffer_cache(nullptr),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
@@ -710,6 +711,10 @@ MooseApp::MooseApp(InputParameters parameters)
 
   registerCapabilities();
   Moose::out << std::flush;
+
+#ifdef MOOSE_HAVE_KOKKOS
+  queryGPUs();
+#endif
 }
 
 void
@@ -823,6 +828,28 @@ MooseApp::registerCapabilities()
     haveCapability("cuda", doc);
 #else
     missingCapability("cuda", doc, "Add the CUDA bin directory to your path and rebuild PETSc.");
+#endif
+  }
+
+  {
+    const auto doc = "Kokkos performance portability programming ecosystem";
+#ifdef MOOSE_HAVE_KOKKOS
+    haveCapability("kokkos", doc);
+#else
+    missingCapability("kokkos",
+                      doc,
+                      "Rebuild PETSc with Kokkos support and libMesh, or checkout the Kokkos "
+                      "submodule. Then, rebuild MOOSE with KOKKOS=true.");
+#endif
+  }
+
+  {
+    const auto doc = "Kokkos support for PETSc";
+#ifdef PETSC_HAVE_KOKKOS
+    haveCapability("petsc_kokkos", doc);
+#else
+    missingCapability(
+        "kokkos", doc, "Rebuild PETSc with Kokkos support, then rebuild libMesh and MOOSE.");
 #endif
   }
 
@@ -1580,6 +1607,12 @@ MooseApp::setupOptions()
     _exit_code = 1;
   }
 
+#ifdef MOOSE_HAVE_KOKKOS
+  for (auto & action : _action_warehouse.allActionBlocks())
+    if (action->isParamValid("_kokkos_action"))
+      _has_kokkos_objects = true;
+#endif
+
   Moose::out << std::flush;
 }
 
@@ -1631,7 +1664,11 @@ MooseApp::runInputFile()
   if (_ready_to_exit)
     return;
 
+  _currently_executing_actions = true;
+
   _action_warehouse.executeAllActions();
+
+  _currently_executing_actions = false;
 
   if (isParamSetByUser("mesh_only"))
   {

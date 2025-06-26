@@ -8,7 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BoundaryRestrictableRequired.h"
-
+#include "MooseApp.h"
+#include "MooseObject.h"
 #include "InputParameters.h"
 
 InputParameters
@@ -34,4 +35,9 @@ BoundaryRestrictableRequired::BoundaryRestrictableRequired(const MooseObject * m
                                                            bool nodal)
   : BoundaryRestrictable(moose_object, nodal)
 {
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
 }

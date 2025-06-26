@@ -32,8 +32,10 @@ class TransientInterface
 {
 public:
   TransientInterface(const MooseObject * moose_object);
-  static InputParameters validParams();
+
   virtual ~TransientInterface();
+
+  static InputParameters validParams();
 
   bool isImplicit() { return _is_implicit; }
 

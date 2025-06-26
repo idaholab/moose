@@ -26,6 +26,7 @@ public:
   static InputParameters validParams();
 
   MeshChangedInterface(const InputParameters & params);
+
   virtual ~MeshChangedInterface() = default;
 
   /**

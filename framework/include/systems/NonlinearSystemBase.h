@@ -158,6 +158,38 @@ public:
                             const std::string & name,
                             InputParameters & parameters);
 
+#ifdef MOOSE_HAVE_KOKKOS
+  /**
+   * Adds a Kokkos kernel
+   * @param kernel_name The type of the kernel
+   * @param name The name of the kernel
+   * @param parameters Kernel parameters
+   */
+  virtual void addKokkosKernel(const std::string & kernel_name,
+                               const std::string & name,
+                               InputParameters & parameters);
+
+  /**
+   * Adds a Kokkos nodal kernel
+   * @param kernel_name The type of the nodal kernel
+   * @param name The name of the kernel
+   * @param parameters Kernel parameters
+   */
+  virtual void addKokkosNodalKernel(const std::string & kernel_name,
+                                    const std::string & name,
+                                    InputParameters & parameters);
+
+  /**
+   * Adds a Kokkos boundary condition
+   * @param bc_name The type of the boundary condition
+   * @param name The name of the boundary condition
+   * @param parameters Boundary condition parameters
+   */
+  void addKokkosBoundaryCondition(const std::string & bc_name,
+                                  const std::string & name,
+                                  InputParameters & parameters);
+#endif
+
   /**
    * Adds a Constraint
    * @param c_name The type of the constraint
@@ -268,6 +300,10 @@ public:
   void zeroVectorForResidual(const std::string & vector_name);
 
   void setInitialSolution();
+
+#ifdef MOOSE_HAVE_KOKKOS
+  void setKokkosInitialSolution();
+#endif
 
   /**
    * Sets the value of constrained variables in the solution vector.
@@ -584,6 +620,7 @@ public:
    */
   MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
   const MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() const { return _kernels; }
+  MooseObjectTagWarehouse<ResidualObject> & getKokkosKernelWarehouse() { return _kokkos_kernels; }
   MooseObjectTagWarehouse<DGKernelBase> & getDGKernelWarehouse() { return _dg_kernels; }
   MooseObjectTagWarehouse<InterfaceKernelBase> & getInterfaceKernelWarehouse()
   {
@@ -598,6 +635,10 @@ public:
   const MooseObjectTagWarehouse<NodalKernelBase> & getNodalKernelWarehouse() const
   {
     return _nodal_kernels;
+  }
+  MooseObjectTagWarehouse<ResidualObject> & getKokkosNodalKernelWarehouse()
+  {
+    return _kokkos_nodal_kernels;
   }
   MooseObjectTagWarehouse<HDGKernel> & getHDGKernelWarehouse() { return _hybridized_kernels; }
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() const
@@ -614,6 +655,10 @@ public:
    * Return the NodalBCBase warehouse
    */
   const MooseObjectTagWarehouse<NodalBCBase> & getNodalBCWarehouse() const { return _nodal_bcs; }
+  MooseObjectTagWarehouse<ResidualObject> & getKokkosNodalBCWarehouse()
+  {
+    return _kokkos_nodal_bcs;
+  }
 
   /**
    * Return the IntegratedBCBase warehouse
@@ -621,6 +666,10 @@ public:
   const MooseObjectTagWarehouse<IntegratedBCBase> & getIntegratedBCWarehouse() const
   {
     return _integrated_bcs;
+  }
+  MooseObjectTagWarehouse<ResidualObject> & getKokkosIntegratedBCWarehouse()
+  {
+    return _kokkos_integrated_bcs;
   }
 
   //@}
@@ -719,6 +768,13 @@ protected:
   void computeResidualInternal(const std::set<TagID> & tags);
 
   /**
+   * Compute residual with Kokkos objects
+   */
+#ifdef MOOSE_HAVE_KOKKOS
+  void computeKokkosResidual(const std::set<TagID> & tags);
+#endif
+
+  /**
    * Enforces nodal boundary conditions. The boundary condition will be implemented
    * in the residual using all the tags in the system.
    */
@@ -743,6 +799,13 @@ protected:
    * Form multiple matrices for all the tags. Users should not call this func directly.
    */
   void computeJacobianInternal(const std::set<TagID> & tags);
+
+  /**
+   * Compute Jacobian with Kokkos objects
+   */
+#ifdef MOOSE_HAVE_KOKKOS
+  void computeKokkosJacobian(const std::set<TagID> & tags);
+#endif
 
   void computeDiracContributions(const std::set<TagID> & tags, bool is_jacobian);
 
@@ -848,6 +911,7 @@ protected:
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;
 
+  MooseObjectTagWarehouse<ResidualObject> _kokkos_kernels;
   ///@}
 
   ///@{
@@ -856,6 +920,10 @@ protected:
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
   MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
+
+  MooseObjectTagWarehouse<ResidualObject> _kokkos_integrated_bcs;
+  MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_bcs;
+  MooseObjectWarehouse<ResidualObject> _kokkos_preset_nodal_bcs;
   ///@}
 
   /// Dirac Kernel storage for each thread
@@ -872,6 +940,7 @@ protected:
 
   /// NodalKernels for each thread
   MooseObjectTagWarehouse<NodalKernelBase> _nodal_kernels;
+  MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_kernels;
 
   /// Decomposition splits
   MooseObjectWarehouseBase<Split> _splits; // use base b/c there are no setup methods

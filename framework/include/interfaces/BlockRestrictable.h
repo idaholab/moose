@@ -9,6 +9,10 @@
 
 #pragma once
 
+#ifdef MOOSE_HAVE_KOKKOS
+#include "GPUTypes.h"
+#endif
+
 // MOOSE includes
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
@@ -19,6 +23,14 @@
 
 class FEProblemBase;
 class MooseMesh;
+
+namespace Moose
+{
+namespace Kokkos
+{
+class Mesh;
+} // namespace Kokkos
+} // namespace Moose
 
 class MooseVariableFieldBase;
 
@@ -78,6 +90,15 @@ public:
    * @param boundary_ids The boundary ids that the object is restricted to
    */
   BlockRestrictable(const MooseObject * moose_object, const std::set<BoundaryID> & boundary_ids);
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Class copy constructor
+   * Used for dispatching Kokkos functor.
+   * Only defined for Kokkos objects.
+   */
+  BlockRestrictable(const BlockRestrictable & object);
+#endif
 
   /**
    * Destructor: does nothing but needs to be marked as virtual since
@@ -225,11 +246,33 @@ protected:
    */
   void initializeBlockRestrictable(const MooseObject * moose_object);
 
+#ifdef MOOSE_HAVE_KOKKOS
+  void initializeKokkosBlockRestrictable(const Moose::Kokkos::Mesh * mesh);
+#endif
+
   /**
    * Check if the blocks this object operates on all have the same coordinate system,
    * and if so return it.
    */
   Moose::CoordinateSystemType getBlockCoordSystem();
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Kokkos-related methods
+   */
+  /// Get the number of local elements this Kokkos object is operating on
+  KOKKOS_FUNCTION auto numBlockElements() const { return _element_ids.size(); }
+  /// Get the number of local nodes this Kokkos object is operating on
+  KOKKOS_FUNCTION auto numBlockNodes() const { return _node_ids.size(); }
+  /// Get the number of local sides this Kokkos object is operating on
+  KOKKOS_FUNCTION auto numBlockSides() const { return _element_side_ids.size(); }
+  /// Get the local element ID this Kokkos thread is operating on
+  KOKKOS_FUNCTION auto blockElementID(size_t idx) const { return _element_ids[idx]; }
+  /// Get the local node index this Kokkos thread is operating on
+  KOKKOS_FUNCTION auto blockNodeID(size_t idx) const { return _node_ids[idx]; }
+  /// Get the local element ID - side index pair this Kokkos thread is operating on
+  KOKKOS_FUNCTION auto blockElementSideID(size_t idx) const { return _element_side_ids[idx]; }
+#endif
 
 private:
   /// Set of block ids supplied by the user via the input file (for error checking)
@@ -264,6 +307,20 @@ private:
 
   /// Largest mesh dimension of the elements in the blocks for this object
   unsigned int _blk_dim;
+
+#ifdef MOOSE_HAVE_KOKKOS
+  /**
+   * Kokkos-related variables
+   */
+  /// Pointer to the MOOSE object
+  const MooseObject * _moose_object;
+  /// List of local element IDs this Kokkos object is operating on
+  Moose::Kokkos::Array<dof_id_type> _element_ids;
+  /// List of local node IDs this Kokkos object is operating on
+  Moose::Kokkos::Array<dof_id_type> _node_ids;
+  /// List of local element ID - side index pairs this Kokkos object is operating on
+  Moose::Kokkos::Array<Moose::Kokkos::Pair<dof_id_type, unsigned int>> _element_side_ids;
+#endif
 };
 
 template <typename T, bool is_ad>

@@ -23,6 +23,11 @@ PostprocessorInterface::PostprocessorInterface(const MooseObject * moose_object)
     _ppi_params(_ppi_moose_object.parameters()),
     _ppi_feproblem(*_ppi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
 }
 
 PostprocessorInterface::PostprocessorInterface(const FEProblemBase * problem)
