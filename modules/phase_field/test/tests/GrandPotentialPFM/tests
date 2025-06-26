@@ -112,6 +112,7 @@
     cli_args = 'Outputs/exodus=false Executioner/num_steps=1'
     ratio_tol = 1e-7
     difference_tol = 1e-4
+    heavy = true
     issues = '#15573'
     design = '/ACSwitching.md /CoupledSwitchingTimeDerivative.md'
     requirement = 'The jacobian for the AD Allen-Cahn problem with a variable dependent coeffecients shall be perfect'
