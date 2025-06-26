@@ -233,7 +233,7 @@ class TestHarnessResultsReader:
             values.append(test_result)
         return values
 
-    def _getResultsEntry(self, id: ObjectId) -> dict:
+    def _getResultsEntry(self, id: ObjectId | str) -> dict:
         """
         Internal helper for getting the raw JSON entry
         for a entry in the "results" collection given the ID
@@ -241,7 +241,7 @@ class TestHarnessResultsReader:
         This is separate so that we can mock it in unit tests
         """
         assert isinstance(id, (ObjectId, str))
-        if isinstance(id, int):
+        if isinstance(id, str):
             id = ObjectId(id)
 
         value = self.db.results.find_one({"_id": id})
@@ -249,13 +249,13 @@ class TestHarnessResultsReader:
             raise KeyError(f'No {self.database}.results entry with _id={id}')
         return value
 
-    def _getTestHarnessResult(self, id: ObjectId) -> TestHarnessResults:
+    def _getTestHarnessResult(self, id: ObjectId | str) -> TestHarnessResults:
         """
         Internal helper for getting the TestHarnessResults representation
         of a specific results entry in the database, with caching
         """
         assert isinstance(id, (ObjectId, str))
-        if isinstance(id, int):
+        if isinstance(id, str):
             id = ObjectId(id)
 
         # Cached this result already

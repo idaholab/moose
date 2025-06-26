@@ -166,7 +166,7 @@ class TestResultsReaderReader(unittest.TestCase):
         gold_results, gold_tests = self.getGetTestResultsGold()
         # Mock getting the results from mongodb
         def get_results_entry(id):
-            return gold_results[id]
+            return gold_results[str(id)]
         patch_get_results_entry.side_effect = get_results_entry
         # Mock getting the tests from mongodb
         patch_get_tests_entry.return_value = gold_tests
@@ -227,7 +227,7 @@ class TestResultsReaderReader(unittest.TestCase):
         Tests an exception being thrown from _getResultsEntry() with an invalid id
         """
         reader = TestHarnessResultsReader(PROD_DATABASE_NAME)
-        id = '1234'
+        id = ObjectId('400b0fdf4110325560e2cc2f')
         with self.assertRaisesRegex(KeyError, f'No {PROD_DATABASE_NAME}.results entry with _id={id}'):
             reader._getResultsEntry(id)
 
