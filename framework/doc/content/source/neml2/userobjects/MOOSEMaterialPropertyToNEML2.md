@@ -1,5 +1,7 @@
 # MOOSEMaterialPropertyToNEML2
 
+!if! function=hasCapability('neml2')
+
 !alert note
 Users are +NOT+ expected to directly use this object in an input file. Instead, it is always recommended to use the [NEML2 action](syntax/NEML2/index.md).
 
@@ -25,3 +27,9 @@ MOOSE[Old]<Type>MaterialPropertyToNEML2
 For example, `MOOSEOldRealMaterialPropertyToNEML2` gathers the `Real`-valued material property from the previous time step.
 
 !syntax parameters /UserObjects/MOOSERealMaterialPropertyToNEML2
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md

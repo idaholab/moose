@@ -1,5 +1,7 @@
 # NEML2ToMOOSEMaterialProperty
 
+!if! function=hasCapability('neml2')
+
 !alert note
 Users are +NOT+ expected to directly use this object in an input file. Instead, it is always recommended to use the [NEML2 action](syntax/NEML2/index.md).
 
@@ -19,3 +21,9 @@ The following flavors exist:
 | `NEML2ToMOOSEStdVectorMaterialProperty`               | `std::vector<Real>`         |
 
 !syntax parameters /Materials/NEML2ToMOOSERealMaterialProperty
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md
