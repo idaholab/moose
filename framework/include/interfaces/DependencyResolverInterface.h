@@ -28,11 +28,7 @@ public:
   /**
    * Constructor.
    */
-  DependencyResolverInterface(bool initialize = true)
-  {
-    if (!initialize)
-      return;
-  }
+  DependencyResolverInterface() {}
 
   /**
    * Return a set containing the names of items requested by the object.

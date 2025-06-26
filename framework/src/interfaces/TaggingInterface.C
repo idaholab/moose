@@ -53,12 +53,15 @@ TaggingInterface::validParams()
   return params;
 }
 
-TaggingInterface::TaggingInterface(const MooseObject * moose_object, bool initialize)
+TaggingInterface::TaggingInterface(const MooseObject * moose_object)
   : _subproblem(*moose_object->parameters().getCheckedPointerParam<SubProblem *>("_subproblem")),
     _moose_object(*moose_object),
     _tag_params(_moose_object.parameters())
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 
   auto & vector_tag_names = _tag_params.get<MultiMooseEnum>("vector_tags");

@@ -23,7 +23,7 @@ class MooseObject;
 class ElementIDInterface
 {
 public:
-  ElementIDInterface(const MooseObject * moose_object, bool initialize = true);
+  ElementIDInterface(const MooseObject * moose_object);
   static InputParameters validParams();
 
   virtual ~ElementIDInterface() {}
