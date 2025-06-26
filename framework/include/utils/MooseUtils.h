@@ -634,29 +634,24 @@ relativeFuzzyLessThan(const T & var1,
  */
 template <typename T>
 void
-removeCommonSet(std::vector<T> & vector1, std::vector<T> & vector2, std::vector<T> & common)
+removeCommonSet(std::vector<T> & vector1, std::vector<T> & vector2, std::unordered_set<T> & common)
 {
   // Build lookup set from vector1, this should speed up lookups if the vector is long.
   std::unordered_set<T> set_v1(vector1.begin(), vector1.end());
 
   // We will collect the common elements into a set (which will speed up the deletion later)
-  std::unordered_set<T> common_set;
+  common.clear();
   for (const auto entry : vector2)
     if (set_v1.count(entry))
-      common_set.insert(entry);
+      common.insert(entry);
 
   // We remove common elements from the original vectors
-  vector1.erase(std::remove_if(vector1.begin(),
-                               vector1.end(),
-                               [&](const T & k) { return common_set.count(k); }),
-                vector1.end());
-  vector2.erase(std::remove_if(vector2.begin(),
-                               vector2.end(),
-                               [&](const T & k) { return common_set.count(k); }),
-                vector2.end());
-
-  // Now we just populate the vector
-  common.assign(common_set.begin(), common_set.end());
+  vector1.erase(
+      std::remove_if(vector1.begin(), vector1.end(), [&](const T & k) { return common.count(k); }),
+      vector1.end());
+  vector2.erase(
+      std::remove_if(vector2.begin(), vector2.end(), [&](const T & k) { return common.count(k); }),
+      vector2.end());
 }
 
 /**
