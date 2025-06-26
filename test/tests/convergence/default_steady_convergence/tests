@@ -1,0 +1,26 @@
+[Tests]
+  design = 'DefaultSteadyConvergence.md'
+  issues = '#30858'
+
+  [default]
+    type = CSVDiff
+    input = 'default.i'
+    csvdiff = 'default_out.csv'
+    requirement = "The system shall allow steady convergence to be assessed with the nonlinear residual norm."
+  []
+  [pp]
+    type = CSVDiff
+    input = 'pp.i'
+    csvdiff = 'pp_out.csv'
+    requirement = "The system shall allow steady convergence to be assessed with a non-default convergence criteria."
+  []
+  [error_reporting]
+    requirement = "The system shall report an error for the default steady convergence class"
+    [duplicate_params]
+      type = RunException
+      input = 'duplicate_params.i'
+      expect_err = "The following parameters were set in both this Convergence object and the executioner:\s+steady_state_tolerance"
+      detail = 'if any parameter is supplied in both the convergence object and executioner.'
+    []
+  []
+[]

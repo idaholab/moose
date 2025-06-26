@@ -23,6 +23,7 @@
 #include "TimeIntegrator.h"
 #include "Console.h"
 #include "AuxiliarySystem.h"
+#include "Convergence.h"
 
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -37,9 +38,38 @@
 #include <iomanip>
 
 InputParameters
+TransientBase::steadyDefaultConvergenceParams()
+{
+  InputParameters params = emptyInputParameters();
+
+  params.addParam<Real>("steady_state_tolerance",
+                        1.0e-08,
+                        "Whenever the relative residual changes by less "
+                        "than this the solution will be considered to be "
+                        "at steady state.");
+  params.addParam<bool>("check_aux",
+                        false,
+                        "Whether to check the auxiliary system for convergence to steady-state. If "
+                        "false, then the nonlinear system is used.");
+  params.addParam<bool>(
+      "normalize_solution_diff_norm_by_dt",
+      true,
+      "Whether to divide the solution difference norm by dt. If taking 'small' "
+      "time steps you probably want this to be true. If taking very 'large' timesteps in an "
+      "attempt to *reach* a steady-state, you probably want this parameter to be false.");
+
+  params.addParamNamesToGroup("steady_state_tolerance check_aux normalize_solution_diff_norm_by_dt",
+                              "Steady State Detection");
+
+  return params;
+}
+
+InputParameters
 TransientBase::validParams()
 {
   InputParameters params = Executioner::validParams();
+  params += TransientBase::steadyDefaultConvergenceParams();
+
   params.addClassDescription("Executioner for time varying simulations.");
 
   std::vector<Real> sync_times(1);
@@ -68,21 +98,15 @@ TransientBase::validParams()
 
   params.addParam<bool>(
       "steady_state_detection", false, "Whether or not to check for steady state conditions");
-  params.addParam<Real>("steady_state_tolerance",
-                        1.0e-08,
-                        "Whenever the relative residual changes by less "
-                        "than this the solution will be considered to be "
-                        "at steady state.");
+  params.addParam<ConvergenceName>(
+      "steady_state_convergence",
+      "Name of the Convergence object to use to assess whether the solution has reached a steady "
+      "state. If not provided, a default Convergence will be constructed internally from the "
+      "executioner parameters.");
   params.addParam<Real>(
       "steady_state_start_time",
       0.0,
       "Minimum amount of time to run before checking for steady state conditions.");
-  params.addParam<bool>(
-      "normalize_solution_diff_norm_by_dt",
-      true,
-      "Whether to divide the solution difference norm by dt. If taking 'small' "
-      "time steps you probably want this to be true. If taking very 'large' timesteps in an "
-      "attempt to *reach* a steady-state, you probably want this parameter to be false.");
 
   params.addParam<std::vector<std::string>>("time_periods", "The names of periods");
   params.addParam<std::vector<Real>>("time_period_starts", "The start times of time periods");
@@ -105,13 +129,8 @@ TransientBase::validParams()
                         "default) then the minimum over the master dt "
                         "and the MultiApps is used");
 
-  params.addParam<bool>("check_aux",
-                        false,
-                        "Whether to check the auxiliary system for convergence to steady-state. If "
-                        "false, then the nonlinear system is used.");
-
   params.addParamNamesToGroup(
-      "steady_state_detection steady_state_tolerance steady_state_start_time check_aux",
+      "steady_state_detection steady_state_convergence steady_state_start_time",
       "Steady State Detection");
 
   params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps "
@@ -127,7 +146,6 @@ TransientBase::TransientBase(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
     _aux(_fe_problem.getAuxiliarySystem()),
-    _check_aux(getParam<bool>("check_aux")),
     _time_scheme(getParam<MooseEnum>("scheme").getEnum<Moose::TimeIntegratorType>()),
     _time_stepper(nullptr),
     _t_step(_problem.timeStep()),
@@ -145,7 +163,6 @@ TransientBase::TransientBase(const InputParameters & parameters)
     _num_steps(getParam<unsigned int>("num_steps")),
     _n_startup_steps(getParam<int>("n_startup_steps")),
     _steady_state_detection(getParam<bool>("steady_state_detection")),
-    _steady_state_tolerance(getParam<Real>("steady_state_tolerance")),
     _steady_state_start_time(getParam<Real>("steady_state_start_time")),
     _sync_times(_app.getOutputWarehouse().getSyncTimes()),
     _abort(getParam<bool>("abort_on_solve_fail")),
@@ -155,6 +172,7 @@ TransientBase::TransientBase(const InputParameters & parameters)
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRecoverableData<Real>("target_time", -std::numeric_limits<Real>::max())),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
+    _check_aux(getParam<bool>("check_aux")),
     _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt"))
 {
   _t_step = 0;
@@ -181,6 +199,11 @@ TransientBase::TransientBase(const InputParameters & parameters)
     if (_num_steps == 0) // Always do one step in the first half
       _num_steps = 1;
   }
+
+  if (isParamValid("steady_state_convergence"))
+    _problem.setSteadyConvergenceName(getParam<ConvergenceName>("steady_state_convergence"));
+  else
+    _problem.setNeedToAddDefaultSteadyConvergence();
 }
 
 void
@@ -616,7 +639,19 @@ TransientBase::setTargetTime(Real target_time)
 Real
 TransientBase::computeSolutionChangeNorm() const
 {
-  return relativeSolutionDifferenceNorm() / (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
+  return computeSolutionChangeNorm(_check_aux, _normalize_solution_diff_norm_by_dt);
+}
+
+Real
+TransientBase::computeSolutionChangeNorm(bool check_aux, bool normalize_by_dt) const
+{
+  return relativeSolutionDifferenceNorm(check_aux) / (normalize_by_dt ? _dt : Real(1));
+}
+
+Real
+TransientBase::relativeSolutionDifferenceNorm() const
+{
+  return relativeSolutionDifferenceNorm(_check_aux);
 }
 
 void
@@ -724,29 +759,18 @@ TransientBase::setTimeStepper(TimeStepper & ts)
 bool
 TransientBase::convergedToSteadyState() const
 {
-  bool converged;
+  auto & convergence = _problem.getConvergence(_problem.getSteadyConvergenceName());
+  const auto status = convergence.checkConvergence(_t_step);
 
-  Real norm = 0.0;
-  if (_check_aux)
+  if (status == Convergence::MooseConvergenceStatus::DIVERGED)
   {
-    std::vector<Number> aux_var_change_norms;
-    _aux.variableWiseRelativeSolutionDifferenceNorm(aux_var_change_norms);
-    for (auto & aux_var_change_norm : aux_var_change_norms)
-      aux_var_change_norm /= (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
-
-    norm = *std::max_element(aux_var_change_norms.begin(), aux_var_change_norms.end());
-  }
-  else
-    norm = computeSolutionChangeNorm();
-
-  _console << "Steady-State Relative Differential Norm: " << norm << std::endl;
-
-  if (norm < _steady_state_tolerance)
-    return true;
-  else
+    _console << "Steady-state Convergence object reported divergence" << std::endl;
     return false;
-
-  return converged;
+  }
+  else if (status == Convergence::MooseConvergenceStatus::CONVERGED)
+    return true;
+  else // status == Convergence::MooseConvergenceStatus::ITERATING
+    return false;
 }
 
 void

@@ -34,9 +34,9 @@ Transient::Transient(const InputParameters & parameters)
 }
 
 Real
-Transient::relativeSolutionDifferenceNorm() const
+Transient::relativeSolutionDifferenceNorm(bool check_aux) const
 {
-  if (_check_aux)
+  if (check_aux)
     return _aux.solution().l2_norm_diff(_aux.solutionOld()) / _aux.solution().l2_norm();
   else
   {
