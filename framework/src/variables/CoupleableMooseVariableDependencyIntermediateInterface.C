@@ -14,13 +14,15 @@
 CoupleableMooseVariableDependencyIntermediateInterface::
     CoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,
                                                            bool nodal,
-                                                           bool is_fv,
-                                                           bool initialize)
-  : Coupleable(moose_object, nodal, is_fv, initialize),
-    ScalarCoupleable(moose_object, initialize),
-    MooseVariableDependencyInterface(moose_object, initialize)
+                                                           bool is_fv)
+  : Coupleable(moose_object, nodal, is_fv),
+    ScalarCoupleable(moose_object),
+    MooseVariableDependencyInterface(moose_object)
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 
   for (MooseVariableFEBase * coupled_var : getCoupledMooseVars())

@@ -347,6 +347,11 @@ public:
                          const InputParameters & params);
 
   /**
+   * Returns whether the simulation is currently executing actions
+   */
+  bool currentlyExecutingActions() const { return _currently_executing_actions; }
+
+  /**
    * @return The Parser
    **/
   ///@{
@@ -1534,6 +1539,9 @@ private:
    * registered.
    */
   const ExecFlagEnum _execute_flags;
+
+  /// Indicates if simulation is currently executing actions
+  bool _currently_executing_actions;
 
   /// Cache output buffer so the language server can turn it off then back on
   std::streambuf * _output_buffer_cache;

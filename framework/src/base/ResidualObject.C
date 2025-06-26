@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ResidualObject.h"
-#include "SubProblem.h"
+#include "FEProblemBase.h"
 #include "InputParameters.h"
 
 InputParameters
@@ -28,25 +28,24 @@ ResidualObject::validParams()
   return params;
 }
 
-ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal, bool initialize)
-  : MooseObject(parameters, initialize),
-    SetupInterface(this, initialize),
-    FunctionInterface(this, initialize),
-    UserObjectInterface(this, initialize),
-    TransientInterface(this, initialize),
-    PostprocessorInterface(this, initialize),
+ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal)
+  : MooseObject(parameters),
+    SetupInterface(this),
+    FunctionInterface(this),
+    UserObjectInterface(this),
+    TransientInterface(this),
+    PostprocessorInterface(this),
     // VPPs used by ScalarKernels must be broadcast because we don't know where the
     // ScalarKernel will end up being evaluated
     // Note: residual objects should have a valid _moose_base.
-    VectorPostprocessorInterface(this, getBase() == "ScalarKernel", initialize),
+    VectorPostprocessorInterface(this, getBase() == "ScalarKernel"),
     RandomInterface(parameters,
                     *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
                     parameters.get<THREAD_ID>("_tid"),
-                    is_nodal,
-                    initialize),
-    Restartable(this, getBase() + "s", initialize),
-    MeshChangedInterface(parameters, initialize),
-    TaggingInterface(this, initialize),
+                    is_nodal),
+    Restartable(this, getBase() + "s"),
+    MeshChangedInterface(parameters),
+    TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
@@ -54,7 +53,10 @@ ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal
     _assembly(_subproblem.assembly(_tid, _sys.number())),
     _mesh(_subproblem.mesh())
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (parameters.isParamValid("_kokkos_object") &&
+      !_fe_problem.getMooseApp().currentlyExecutingActions())
     return;
 }
 

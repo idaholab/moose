@@ -29,11 +29,8 @@ public:
    *
    * @param broadcast_by_default Set to true if the system inheriting from this interface always
    * needs the VPPs to be broadcast
-   * @param initialize Whether this object will be initialized (not a temporary object) or not
    */
-  VectorPostprocessorInterface(const MooseObject * moose_object,
-                               bool broadcast_by_default = false,
-                               bool initialize = true);
+  VectorPostprocessorInterface(const MooseObject * moose_object, bool broadcast_by_default = false);
 
   /**
    * This class has virtual methods, so it needs a virtual dtor.

@@ -15,19 +15,19 @@
 #include "MooseMesh.h"
 #include "MeshMetaDataInterface.h"
 
-Restartable::Restartable(const MooseObject * moose_object,
-                         const std::string & system_name,
-                         bool initialize)
+Restartable::Restartable(const MooseObject * moose_object, const std::string & system_name)
   : Restartable(moose_object->getMooseApp(),
                 moose_object->name(),
                 system_name,
                 moose_object->parameters().isParamValid("_tid")
                     ? moose_object->parameters().get<THREAD_ID>("_tid")
-                    : 0,
-                false,
-                "",
-                initialize)
+                    : 0)
 {
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
 }
 
 Restartable::Restartable(const MooseObject * moose_object,
@@ -42,8 +42,7 @@ Restartable::Restartable(MooseApp & moose_app,
                          const std::string & system_name,
                          THREAD_ID tid,
                          const bool read_only,
-                         const RestartableDataMapName & metaname,
-                         bool initialize)
+                         const RestartableDataMapName & metaname)
   : _restartable_app(moose_app),
     _restartable_system_name(system_name),
     _restartable_tid(tid),
@@ -51,8 +50,6 @@ Restartable::Restartable(MooseApp & moose_app,
     _metaname(metaname),
     _restartable_name(name)
 {
-  if (!initialize)
-    return;
 }
 
 RestartableDataValue &

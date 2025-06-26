@@ -23,14 +23,16 @@ GeometricSearchInterface::validParams()
   return emptyInputParameters();
 }
 
-GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_object,
-                                                   bool initialize)
+GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_object)
   : _geometric_search_data(moose_object->parameters()
                                .getCheckedPointerParam<SubProblem *>("_subproblem")
                                ->geomSearchData()),
     _requires_geometric_search(false)
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 }
 

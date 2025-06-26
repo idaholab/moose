@@ -52,8 +52,7 @@ boundaryRestricted(const std::set<BoundaryID> & boundary_ids)
 
 MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_object,
                                                      const std::set<SubdomainID> & block_ids,
-                                                     const std::set<BoundaryID> & boundary_ids,
-                                                     bool initialize)
+                                                     const std::set<BoundaryID> & boundary_ids)
   : _mi_moose_object(*moose_object),
     _mi_params(_mi_moose_object.parameters()),
     _mi_name(moose_object->name()),
@@ -73,7 +72,10 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_block_ids(block_ids),
     _mi_boundary_ids(boundary_ids)
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 
   moose_object->getMooseApp().registerInterfaceObject(*this);

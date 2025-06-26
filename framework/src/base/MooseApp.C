@@ -503,6 +503,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _chain_control_system(*this),
     _rd_reader(*this, _restartable_data, forceRestart()),
     _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
+    _currently_executing_actions(false),
     _output_buffer_cache(nullptr),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
@@ -1731,7 +1732,11 @@ MooseApp::runInputFile()
   if (_ready_to_exit)
     return;
 
+  _currently_executing_actions = true;
+
   _action_warehouse.executeAllActions();
+
+  _currently_executing_actions = false;
 
   if (isParamSetByUser("mesh_only"))
   {

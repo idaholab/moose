@@ -26,7 +26,7 @@ class UserObjectInterface
 public:
   static InputParameters validParams();
 
-  UserObjectInterface(const MooseObject * moose_object, bool initialize = true);
+  UserObjectInterface(const MooseObject * moose_object);
 
   /**
    * @return The name of the user object associated with the parameter \p param_name
