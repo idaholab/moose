@@ -96,14 +96,14 @@ Standardizer::getDescaled(torch::Tensor & input) const
 void
 Standardizer::storeHelper(std::ostream & stream, void * context) const
 {
-  Real * temp_mean = _mean.data_ptr<Real>();
-  Real * temp_stdev = _stdev.data_ptr<Real>();
+  auto mean_accessor = _mean.accessor<Real, 2>();
+  auto stdev_accessor = _stdev.accessor<Real, 2>();
   unsigned int n = _mean.size(0);
   dataStore(stream, n, context);
   for (unsigned int ii = 0; ii < n; ++ii)
-    dataStore(stream, temp_mean[ii], context);
+    dataStore(stream, mean_accessor[ii][0], context);
   for (unsigned int ii = 0; ii < n; ++ii)
-    dataStore(stream, temp_stdev[ii], context);
+    dataStore(stream, stdev_accessor[ii][0], context);
 }
 
 } // StochasticTools namespace

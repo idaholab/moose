@@ -232,10 +232,10 @@ dataStore(std::ostream & stream, torch::Tensor & t, void * context)
   stream.write((char *)&m, sizeof(m));
   unsigned int n = t.sizes()[1];
   stream.write((char *)&n, sizeof(n));
+  auto t_accessor = t.accessor<Real, 2>();
   for (unsigned int i = 0; i < m; i++)
     for (unsigned int j = 0; j < n; j++)
     {
-      auto t_accessor = t.accessor<Real, 2>();
       Real r = t_accessor[i][j];
       dataStore(stream, r, context);
     }
