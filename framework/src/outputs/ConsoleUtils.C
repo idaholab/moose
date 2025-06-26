@@ -172,11 +172,11 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
           << "  Max h-Refinement Level: " << static_cast<std::size_t>(mesh.maxHLevel()) << '\n';
   }
 
-  if (verbose && fe_backend == Moose::FEBackend::LibMesh)
+  if (verbose)
   {
     oss << std::setw(console_field_width)
         << "  Num Subdomains: " << static_cast<std::size_t>(mesh.nSubdomains()) << '\n';
-    if (mesh.n_processors() > 1)
+    if (mesh.n_processors() > 1 && fe_backend == Moose::FEBackend::LibMesh)
     {
       oss << std::setw(console_field_width)
           << "  Num Partitions: " << static_cast<std::size_t>(mesh.nPartitions()) << '\n'

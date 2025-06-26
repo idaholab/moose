@@ -83,6 +83,7 @@ public:
 
   unsigned int dimension() const override { return _mfem_par_mesh->Dimension(); }
   unsigned int spatialDimension() const override { return _mfem_par_mesh->SpaceDimension(); }
+  SubdomainID nSubdomains() const override { return _mfem_par_mesh->attributes.Size(); }
   dof_id_type nActiveElem() const override { return _mfem_par_mesh->GetGlobalNE(); }
   dof_id_type nActiveLocalElem() const override { return _mfem_par_mesh->GetNE(); }
 
