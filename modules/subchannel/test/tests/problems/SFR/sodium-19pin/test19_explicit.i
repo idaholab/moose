@@ -254,6 +254,13 @@ P_out = 2.0e5 # Pa
     variable = q_prime
     block = subchannel
   []
+  [mdot-8]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 28
+    execute_on = 'TIMESTEP_END'
+    height = 0.5
+  []
 []
 
 [Executioner]

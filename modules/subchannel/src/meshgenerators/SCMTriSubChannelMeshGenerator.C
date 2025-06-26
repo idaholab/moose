@@ -36,10 +36,10 @@ SCMTriSubChannelMeshGenerator::validParams()
                                 "Flat to flat distance for the hexagonal assembly [m]");
   params.addRequiredParam<Real>("dwire", "Wire diameter [m]");
   params.addRequiredParam<Real>("hwire", "Wire lead length [m]");
-  params.addParam<std::vector<Real>>(
-      "spacer_z", std::vector<Real>({0.0}), "Axial location of spacers/vanes/mixing_vanes [m]");
-  params.addParam<std::vector<Real>>(
-      "spacer_k", std::vector<Real>({0.0}), "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
+  params.addParam<std::vector<Real>>("spacer_z",
+                                     "Axial location of spacers/vanes/mixing_vanes [m]");
+  params.addParam<std::vector<Real>>("spacer_k",
+                                     "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
   params.addParam<Real>("Kij", 0.5, "Lateral form loss coefficient [-]");
   params.addParam<std::vector<Real>>("z_blockage",
                                      std::vector<Real>({0.0, 0.0}),

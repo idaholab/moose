@@ -88,6 +88,18 @@ heated_length = 1.0
   []
 []
 
+[VectorPostprocessors]
+  # These samplers are used for testing purposes.
+  [sample_center_line]
+    type = LineValueSampler
+    variable = 'temperature'
+    sort_by = 'y'
+    num_points = 11
+    start_point = '0 0 0'
+    end_point = '0 1.0 0'
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
@@ -97,4 +109,5 @@ heated_length = 1.0
 
 [Outputs]
   exodus = true
+  csv = true
 []

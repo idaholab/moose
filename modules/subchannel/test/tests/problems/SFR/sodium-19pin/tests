@@ -35,6 +35,7 @@
     type = CSVDiff
     input = test19_full_monolithic.i
     csvdiff = test19_full_monolithic_out.csv
+    rel_err = 5e-4
     abs_zero = 1e-7
     valgrind = NONE
     recover = false

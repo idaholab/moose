@@ -11,7 +11,7 @@
     abs_zero = 1e-6
     max_threads = 1
     max_parallel = 1
-    requirement = 'The system will examine the explicit subchannel solver for a psbt type case'
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an explicit algorithm.'
   []
   [psbt_regression_test_explicit_friction2]
     type = CSVDiff
@@ -23,7 +23,7 @@
     abs_zero = 1e-6
     max_threads = 1
     max_parallel = 1
-    requirement = 'The system will examine the explicit subchannel solvers for a psbt type case using the non-default friction/mixing model'
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using the non-default friction/mixing model.'
   []
   [psbt_regression_test_explicit_staggered]
     type = CSVDiff
@@ -35,7 +35,7 @@
     abs_zero = 1e-6
     max_threads = 1
     max_parallel = 1
-    requirement = 'The system will examine the explicit subchannel solver in a staggered pressure formulation for a psbt type case'
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an explicit algorithm and a staggered pressure formulation.'
   []
   [psbt_regression_test_implicit]
     type = CSVDiff
@@ -47,7 +47,7 @@
     abs_zero = 1e-6
     max_threads = 1
     max_parallel = 1
-    requirement = 'The system will examine the implicit subchannel solver for a psbt type case'
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an implicit algorithm.'
   []
   [psbt_regression_test_monolithic]
     type = CSVDiff
@@ -59,7 +59,7 @@
     abs_zero = 1e-6
     max_threads = 1
     max_parallel = 1
-    requirement = 'The system will examine the monolithic subchannel solver for a psbt type case'
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a monolithic algorithm.'
   []
   [psbt_regression_test_full_monolithic]
     type = CSVDiff
@@ -71,7 +71,7 @@
     abs_zero = 1e-6
     max_threads = 1
     max_parallel = 1
-    requirement = 'The system will examine the monolithic subchannel solver for a psbt type case'
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a full-monolithic algorithm.'
   []
   [psbt_regression_test_full_monolithic_staggered]
     type = CSVDiff
@@ -84,6 +84,6 @@
     rel_err = 6e-5
     max_threads = 1
     max_parallel = 1
-    requirement = 'The system will examine the monolithic subchannel solver for a psbt type case'
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a full-monolithic algorithm and a staggered pressure formulation.'
   []
 []

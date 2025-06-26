@@ -5,12 +5,12 @@ P_out = 155e+5 # Pa
 [QuadSubChannelMesh]
   [sub_channel]
     type = SCMQuadSubChannelMeshGenerator
-    nx = 1
-    ny = 2
+    nx = 2
+    ny = 1
     n_cells = 100
     pitch = 0.0126
     pin_diameter = 0.00950
-    gap = 0.00095
+    gap = 0.00095 # the half gap between sub-channel assemblies
     heated_length = 10.0
     spacer_z = '0.0'
     spacer_k = '0.0'
@@ -20,7 +20,7 @@ P_out = 155e+5 # Pa
 [Functions]
   [S_fn]
     type = ParsedFunction
-    expression = if(y>0.0,0.002,0.001)
+    value = if(x>0.0,0.002,0.001)
   []
 []
 
@@ -36,13 +36,11 @@ P_out = 155e+5 # Pa
   n_blocks = 1
   beta = 0.006
   CT = 0.0
-  P_tol = 1e-6
-  T_tol = 1e-6
-  implicit = false
   compute_density = true
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
+  default_friction_model = false
 []
 
 [ICs]
@@ -131,10 +129,6 @@ P_out = 155e+5 # Pa
   []
 []
 
-[Outputs]
-  csv = true
-[]
-
 [Postprocessors]
   [mdot_1]
     type = SubChannelPointValue
@@ -152,26 +146,10 @@ P_out = 155e+5 # Pa
   []
 []
 
+[Outputs]
+  csv = true
+[]
+
 [Executioner]
   type = Steady
-[]
-
-################################################################################
-# A multiapp that projects data to a detailed mesh
-################################################################################
-
-[MultiApps]
-  [viz]
-    type = FullSolveMultiApp
-    input_files = "3d.i"
-    execute_on = "timestep_end"
-  []
-[]
-
-[Transfers]
-  [xfer]
-    type = SCMSolutionTransfer
-    to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
-  []
 []

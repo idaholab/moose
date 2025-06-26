@@ -12,8 +12,8 @@ TTC_DASSH = np.genfromtxt("TTC_DASSH.csv", skip_header=1, delimiter=',')
 NETFLOW = np.genfromtxt("TTC-31_NETFLOW.csv", skip_header=1, delimiter=',')
 NETFLOW45 = np.genfromtxt("TTC-31_NETFLOW45.csv", skip_header=1, delimiter=',')
 TTC17_nominal = np.genfromtxt("TTC17_nominal.csv", skip_header=2, delimiter=',')
-TTC31_TR17 = np.genfromtxt("XX09_SCM_TR17_out.csv", skip_header=2, delimiter=',')
-TTC31_TR45R = np.genfromtxt("XX09_SCM_TR45R_out.csv", skip_header=2, delimiter=',')
+# TTC31_TR17 = np.genfromtxt("XX09_SCM_TR17_out.csv", skip_header=2, delimiter=',')
+# TTC31_TR45R = np.genfromtxt("XX09_SCM_TR45R_out.csv", skip_header=2, delimiter=',')
 TTC45R_nominal = np.genfromtxt("TTC45R_nominal.csv", skip_header=2, delimiter=',')
 TTC17_nominal_corrected = np.genfromtxt("TTC17_nominal_corrected.csv", skip_header=2, delimiter=',')
 TTC45R_nominal_corrected = np.genfromtxt("TTC45R_nominal_corrected.csv", skip_header=2, delimiter=',')
@@ -57,8 +57,8 @@ rho = (A12 + A13 * inlet_temperature + A14 *
 print(rho)
 
 plt.figure()
-plt.plot(TTC31_TR17[6:, 0], TTC31_TR17[6:, 1], "g-.",
-         label="SCM caclulation at TTC-31")
+# plt.plot(TTC31_TR17[6:, 0], TTC31_TR17[6:, 1], "g-.",
+#          label="SCM caclulation at TTC-31")
 plt.plot(EXP[:, 0], EXP[:, 1], marker='o', markerfacecolor="r", linestyle='none', label="Measurement at TTC-31")
 plt.plot(NETFLOW[:, 0], NETFLOW[:, 1], ":b",
          label="NETFLOW++/COBRA-IV-I at TTC-31")
@@ -73,8 +73,8 @@ plt.grid()
 plt.show()
 
 plt.figure()
-plt.plot(TTC31_TR45R[7:, 0], TTC31_TR45R[7:, 1], "g-.",
-         label="SCM caclulation at TTC-31")
+# plt.plot(TTC31_TR45R[7:, 0], TTC31_TR45R[7:, 1], "g-.",
+#          label="SCM caclulation at TTC-31")
 plt.plot(EXP45[:, 0], EXP45[:, 1], marker='o', markerfacecolor="r", linestyle='none', label="Measurement at TTC-31")
 plt.plot(NETFLOW45[:, 0], NETFLOW45[:, 1], ":b",
          label="NETFLOW++/COBRA-IV-I at TTC-31")

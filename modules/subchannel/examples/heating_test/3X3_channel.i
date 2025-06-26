@@ -209,6 +209,6 @@ n_cells = 20
   [xfer]
     type = SCMSolutionTransfer
     to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu q_prime S'
+    variable = 'mdot SumWij P DP h T rho mu q_prime S w_perim'
   []
 []

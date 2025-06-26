@@ -275,6 +275,26 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     execute_on = 'TIMESTEP_END'
     height = 0.322
   []
+  ####### Assembly pressure drop
+  [DP_SubchannelDelta]
+    type = SubChannelDelta
+    variable = P
+    execute_on = 'TIMESTEP_END'
+  []
+  #####
+  [Mean_Temp]
+    type = SCMPlanarMean
+    variable = T
+    height = 2
+  []
+  #####
+  [mdot-35]
+    type = SubChannelPointValue
+    variable = mdot
+    index = 107
+    execute_on = 'TIMESTEP_END'
+    height = 0.322
+  []
 []
 
 [Outputs]
