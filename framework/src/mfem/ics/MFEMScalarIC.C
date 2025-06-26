@@ -19,22 +19,14 @@ registerMooseObject("MooseApp", MFEMScalarIC);
 InputParameters
 MFEMScalarIC::validParams()
 {
-  auto params = MFEMGeneralUserObject::validParams();
+  auto params = MFEMInitialCondition::validParams();
   params.addClassDescription("Sets the initial values of an MFEM scalar variable from a "
                              "user-specified scalar coefficient.");
-  params.addRequiredParam<VariableName>("variable",
-                                        "The variable to apply the initial condition for");
   params.addRequiredParam<MFEMScalarCoefficientName>("coefficient", "The scalar coefficient");
-  params.registerBase("InitialCondition");
-  // We cannot generally execute this at construction time since the coefficient may be based on a
-  // MOOSE function which is not itself setup until its initialSetup is called. UserObject initial
-  // execution occurs after function initialSetup
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
-  params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
 }
 
-MFEMScalarIC::MFEMScalarIC(const InputParameters & params) : MFEMGeneralUserObject(params) {}
+MFEMScalarIC::MFEMScalarIC(const InputParameters & params) : MFEMInitialCondition(params) {}
 
 void
 MFEMScalarIC::execute()

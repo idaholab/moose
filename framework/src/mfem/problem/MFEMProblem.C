@@ -521,7 +521,7 @@ MFEMProblem::addInitialCondition(const std::string & ic_name,
                                  InputParameters & parameters)
 {
   FEProblemBase::addUserObject(ic_name, name, parameters);
-  getUserObject<MFEMScalarIC>(name); // error check
+  getUserObject<MFEMInitialCondition>(name); // error check
 }
 
 std::string
