@@ -20,7 +20,6 @@
 
 #pragma once
 #include "FileMesh.h"
-#include "libmesh/face_quad4.h"
 #include "libmesh/ignore_warnings.h"
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
@@ -81,6 +80,11 @@ public:
    * Does not update FE spaces for variables.
    */
   void displace(mfem::GridFunction const & displacement);
+
+  unsigned int dimension() const override { return _mfem_par_mesh->Dimension(); }
+  unsigned int spatialDimension() const override { return _mfem_par_mesh->SpaceDimension(); }
+  dof_id_type nActiveElem() const override { return _mfem_par_mesh->GetGlobalNE(); }
+  dof_id_type nActiveLocalElem() const override { return _mfem_par_mesh->GetNE(); }
 
 private:
   /**

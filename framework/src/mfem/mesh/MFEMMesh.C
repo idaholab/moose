@@ -19,6 +19,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MFEMMesh.h"
+#include "libmesh/face_quad4.h"
 
 registerMooseObject("MooseApp", MFEMMesh);
 
@@ -68,7 +69,7 @@ MFEMMesh::buildMesh()
                                                       : getParam<unsigned int>("uniform_refine"));
 
   // multi app should take the mpi comm from moose so is split correctly??
-  auto comm = _app.comm().get();
+  auto comm = this->comm().get();
   _mfem_par_mesh = std::make_shared<mfem::ParMesh>(comm, mfem_ser_mesh);
 
   // Perform parallel refinements

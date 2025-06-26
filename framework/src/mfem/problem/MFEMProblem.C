@@ -10,6 +10,9 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMProblem.h"
+#include "MFEMVariable.h"
+#include "MFEMSubMesh.h"
+#include "libmesh/string_to_enum.h"
 
 #include <vector>
 #include <algorithm>
@@ -502,6 +505,13 @@ MFEMProblem::addTransfer(const std::string & transfer_name,
     FEProblemBase::addUserObject(transfer_name, name, parameters);
   else
     FEProblemBase::addTransfer(transfer_name, name, parameters);
+}
+
+std::string
+MFEMProblem::solverTypeString(const unsigned int libmesh_dbg_var(solver_sys_num))
+{
+  mooseAssert(solver_sys_num == 0, "No support for multi-system with MFEM right now");
+  return MooseUtils::prettyCppType(getProblemData().jacobian_solver.get());
 }
 
 #endif

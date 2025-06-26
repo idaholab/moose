@@ -10,26 +10,10 @@
 #ifdef MFEM_ENABLED
 
 #pragma once
-#include <map>
-#include "libmesh/ignore_warnings.h"
-#include "mfem/miniapps/common/pfem_extras.hpp"
-#include "libmesh/restore_warnings.h"
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
-#include "MFEMFunctorMaterial.h"
-#include "MFEMSubMesh.h"
-#include "MFEMVariable.h"
-#include "MFEMBoundaryCondition.h"
-#include "MFEMKernel.h"
-#include "MFEMMixedBilinearFormKernel.h"
 #include "MFEMExecutioner.h"
-#include "MFEMDataCollection.h"
-#include "MFEMFESpace.h"
-#include "MFEMSolverBase.h"
-#include "Function.h"
-#include "MooseEnum.h"
-#include "libmesh/string_to_enum.h"
 
 class MFEMProblem : public ExternalProblem
 {
@@ -211,6 +195,10 @@ public:
    */
   std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
   getMeshDisplacementGridFunction();
+
+  Moose::FEBackend feBackend() const override { return Moose::FEBackend::MFEM; }
+
+  std::string solverTypeString(unsigned int solver_sys_num) override;
 
 protected:
   MFEMProblemData _problem_data;
