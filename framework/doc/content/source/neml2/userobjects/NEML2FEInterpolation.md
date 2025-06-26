@@ -1,5 +1,7 @@
 # NEML2FEInterpolation
 
+!if! function=hasCapability('neml2')
+
 This userobject loops through elements to cache shape functions and gradient of shape functions. Variables coupled through this userobject will be interpolated onto their corresponding function spaces.
 
 ## Implementation details
@@ -16,3 +18,9 @@ Several getter methods are provided to access cached data:
 ## Syntax
 
 !syntax parameters /UserObjects/NEML2FEInterpolation
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md
