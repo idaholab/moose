@@ -87,7 +87,7 @@ class TestResultsReaderReader(unittest.TestCase):
 
         # Dump the values so that we can load them
         values = {'tests': tests, 'results': results}
-        values_dumped = json.dumps(values, default=str)
+        values_dumped = json.dumps(values, default=str, indent=2, sort_keys=True)
 
         # Rewrite the gold file if we set to do so
         if rewrite_gold:
