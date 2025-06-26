@@ -49,7 +49,7 @@ TEST_F(MFEMKernelTest, MFEMDiffusionKernel)
   MFEMDiffusionKernel & kernel =
       addObject<MFEMDiffusionKernel>("MFEMDiffusionKernel", "kernel1", kernel_params);
   // Test MFEMKernel marker array has been constructed as expected
-  ASSERT_EQ(kernel.getSubdomains(), mfem::Array<int>({0, 1}));
+  ASSERT_EQ(kernel.getSubdomainMarkers(), mfem::Array<int>({0, 1}));
   // Test MFEMKernel returns an integrator of the expected type
   auto integrator = dynamic_cast<mfem::DiffusionIntegrator *>(kernel.createBFIntegrator());
   ASSERT_NE(integrator, nullptr);
