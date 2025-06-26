@@ -11,6 +11,7 @@
 
 #pragma once
 #include "MFEMSubMesh.h"
+#include "MFEMBlockRestrictable.h"
 
 /**
  * Constructs and stores an mfem::ParSubMesh object as
