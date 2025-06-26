@@ -56,4 +56,11 @@ private:
 
   /// Vector of pointers to positions objects
   std::vector<const Positions *> _positions_ptrs;
+
+  enum PositionSelection : short
+  {
+    Error = 0,
+    Discard = 1,
+    Keep = 2
+  };
 };
