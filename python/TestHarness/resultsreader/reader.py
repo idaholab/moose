@@ -47,7 +47,7 @@ class TestHarnessResultsReader:
         port: int | None = None
 
     def __init__(self, database: str, client: Optional[pymongo.MongoClient | Authentication] = None):
-        self.client = None
+        self.client: pymongo.MongoClient = None
         assert isinstance(database, str)
 
         # No client; test the environment
