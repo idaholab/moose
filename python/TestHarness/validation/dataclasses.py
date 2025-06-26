@@ -89,6 +89,8 @@ class ValidationNumericData(ValidationData):
             assert isinstance(self.bounds[1], type(self.value))
         if self.rel_err is not None:
             assert isinstance(self.rel_err, float)
+        if self.abs_zero is not None:
+            assert isinstance(self.abs_zero, float)
 
     # Units for the data, if any
     units: Optional[str]
@@ -99,6 +101,8 @@ class ValidationNumericData(ValidationData):
     bounds: Optional[Tuple[ValidationNumericDataType, ValidationNumericDataType]] = None
     # Allowed relative error for the data
     rel_err: Optional[float] = None
+    # Allowed absolute zero for the data
+    abs_zero: Optional[float] = None
 
 @dataclass(kw_only=True)
 class ValidationScalarData(ValidationNumericData):

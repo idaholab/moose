@@ -274,6 +274,8 @@ class TestValidationCase(unittest.TestCase):
         for key, value in args.items():
             self.assertEqual(getattr(data, key), value)
         self.assertIsNone(data.test)
+        # Not provided if it isn't used
+        self.assertIsNone(data.abs_zero)
 
     def testAddScalarDataChecks(self):
         """
@@ -328,12 +330,15 @@ class TestValidationCase(unittest.TestCase):
 
         # Other int values to float
         int_value = int(1)
-        case.addScalarData(f'values_to_float', 1, 'unused', None, nominal=int_value, rel_err=int_value)
+        case.addScalarData(f'values_to_float', 1, 'unused', None, nominal=int_value,
+                           rel_err=int_value, abs_zero=int_value)
         data = case.data[f'values_to_float']
         self.assertTrue(isinstance(data.nominal, float))
         self.assertTrue(isinstance(data.rel_err, float))
+        self.assertTrue(isinstance(data.abs_zero, float))
         self.assertEqual(data.nominal, float(int_value))
         self.assertEqual(data.rel_err, float(int_value))
+        self.assertEqual(data.abs_zero, float(int_value))
 
         # rel_err requires nominal
         with self.assertRaisesRegex(KeyError, "Must provide 'nominal' with 'rel_err'"):
@@ -376,7 +381,7 @@ class TestValidationCase(unittest.TestCase):
         key = 'test'
         rel_err = 1e-4
         test = ValidationCase()
-        test.addScalarData(key, 1.0, 'unused', None,  nominal=1, rel_err=rel_err)
+        test.addScalarData(key, 1.0, 'unused', None, nominal=1, rel_err=rel_err)
         all_data = test.data
         self.assertEqual(len(all_data), 1)
         self.assertEqual(rel_err, all_data[key].rel_err)
@@ -416,30 +421,45 @@ class TestValidationCase(unittest.TestCase):
         """
         Tests the checking of rel_err for scalar data in ValdationCase.addScalarData()
         """
+        cases = {'pass': {'nominal': 1.1, 'rel_err': 1e-1},
+                 'pass_abs_zero': {'nominal': 0, 'rel_err': 1e-12},
+                 'pass_abs_zero_override': {'nominal': 0, 'rel_err': 1e-12, 'abs_zero': 1e-2},
+                 'fail': {'nominal': 1.9, 'rel_err': 1e-2}}
+
         class Test(ValidationCase):
             def test_pass(self):
-                self.addScalarData('pass', 1.0, 'foo', None, nominal=1.1, rel_err=1e-1)
+                self.addScalarData('pass', 1.0, 'foo', None, **cases['pass'])
+            def test_pass_abs_zero(self):
+                self.addScalarData('pass_abs_zero', 0, 'foo', None, **cases['pass_abs_zero'])
+            def test_pass_abs_zero_override(self):
+                self.addScalarData('pass_abs_zero_override', 0, 'foo', None, **cases['pass_abs_zero_override'])
             def test_fail(self):
-                self.addScalarData('fail', 2.0, 'foo', None, nominal=1.9, rel_err=1e-2)
+                self.addScalarData('fail', 2.0, 'foo', None, **cases['fail'])
 
         test = Test()
         test.run()
 
         results = test.results
-        self.assertEqual(len(results), 2)
-        for case in ['pass', 'fail']:
-            filtered = [r for r in results if r.test.endswith(case)]
+        self.assertEqual(len(results), len(cases))
+        for name, case in cases.items():
+            filtered = [r for r in results if r.test.endswith(name)]
             self.assertEqual(len(filtered), 1)
             result = filtered[0]
-            status = test.Status.OK if case == 'pass' else test.Status.FAIL
+            status = test.Status.OK if name.startswith('pass') else test.Status.FAIL
             self.assertEqual(status, result.status)
-            self.assertEqual(case, result.data_key)
-            if case == 'pass':
+            self.assertEqual(name, result.data_key)
+            if name == 'pass':
                 self.assertIn('< required', result.message)
+            elif name.startswith('pass_abs_zero'):
+                self.assertIn('skipped due to absolute zero', result.message)
             else:
                 self.assertIn('> required', result.message)
-            data = test.data[case]
-            self.assertEqual(f'Test.test_{case}', data.test)
+
+            data = test.data[name]
+            self.assertEqual(f'Test.test_{name}', data.test)
+            self.assertEqual(data.abs_zero, case.get('abs_zero', test.DEFAULT_ABS_ZERO))
+            self.assertEqual(data.nominal, case['nominal'])
+            self.assertEqual(data.rel_err, case['rel_err'])
 
     def testToListFloat(self):
         """

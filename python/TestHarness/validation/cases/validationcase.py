@@ -39,6 +39,9 @@ class ValidationCase(MooseObject):
     # Output format for all numbers
     number_format = '.3E'
 
+    # Default value for absolute zero
+    DEFAULT_ABS_ZERO = 1.0e-10
+
     class Status(str, ExtendedEnum):
         """
         The possible statuses for a validation result.
@@ -262,8 +265,8 @@ class ValidationCase(MooseObject):
 
         return status, ' '.join(message)
 
-    def addScalarData(self, key: str, value: Number, description: str,
-                      units: Optional[str], **kwargs) -> None:
+    def addScalarData(self, key: str, value: Number, description: str, units: Optional[str],
+                      abs_zero: float = DEFAULT_ABS_ZERO, **kwargs) -> None:
         """
         Adds a piece of scalar (float or int) data to the validation data.
 
@@ -276,6 +279,7 @@ class ValidationCase(MooseObject):
             description: Human readable description of the data
             units: Human readable units for the data (can be None)
         Keyword arguments:
+            abs_zero: Absolute zero to use in comparisons
             Additional arguments passed to ScalarData (bounds, nominal, rel_err, etc)
         """
         value = self.toFloat(value, 'value')
@@ -295,6 +299,11 @@ class ValidationCase(MooseObject):
             v = kwargs.get(k)
             if v is not None:
                 kwargs[k] = self.toFloat(v, k)
+        abs_zero = self.toFloat(abs_zero, 'abs_zero')
+
+        # Only add this information if it is used
+        if kwargs.get('rel_err') is not None:
+            kwargs['abs_zero'] = abs_zero
 
         data = self._addData(ValidationScalarData, key, value, description, units=units, **kwargs)
 
@@ -307,7 +316,8 @@ class ValidationCase(MooseObject):
             status, message = self.checkRelativeError(data.value,
                                                       data.nominal,
                                                       data.rel_err,
-                                                      data.units)
+                                                      data.units,
+                                                      abs_zero=abs_zero)
             self.addResult(status, message, **result_kwargs)
 
         if data.bounds is not None:

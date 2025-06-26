@@ -196,7 +196,8 @@ class TestHarness:
 
     # Validation version history:
     # 1 - Initial tracking of version
-    VALIDATION_VERSION = 1
+    # 2 - Added 'abs_zero' key to ValidationNumericData
+    VALIDATION_VERSION = 2
 
     @staticmethod
     def build(argv: list, app_name: str, moose_dir: str, moose_python: str = None,
