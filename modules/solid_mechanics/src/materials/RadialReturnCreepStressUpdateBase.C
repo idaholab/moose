@@ -71,5 +71,38 @@ RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeStressFinalize(
   _creep_strain[_qp] = _creep_strain_old[_qp] + plastic_strain_increment;
 }
 
+template <bool is_ad>
+GenericReal<is_ad>
+RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeCreepStrainRate(
+    const GenericReal<is_ad> & /*stress_eq*/)
+{
+  mooseError("This is a base class. Developers need to write their own creep law");
+}
+
+template <bool is_ad>
+Real
+RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeStrainEnergyRateDensity(
+    const GenericMaterialProperty<RankTwoTensor, is_ad> & stress,
+    const GenericMaterialProperty<RankTwoTensor, is_ad> & strain_rate)
+{
+  // Gaussian quadrature weights and points for 5-point rule
+  const Real weights[5] = {0.2369268851, 0.4786286705, 0.5688888889, 0.4786286705, 0.2369268851};
+  const Real points[5] = {-0.9061798459, -0.5384693101, 0.0, 0.5384693101, 0.9061798459};
+  const GenericReal<is_ad> sigma_eq = std::sqrt(3.0 * stress[_qp].secondInvariant());
+  const GenericReal<is_ad> eps_eq =
+      std::sqrt(2.0 / 3.0 * strain_rate[_qp].doubleContraction(strain_rate[_qp]));
+
+  Real integral = MetaPhysicL::raw_value(sigma_eq * eps_eq);
+  // Perform the integral using Gaussian quadrature
+  for (unsigned int k = 0; k < 5; ++k)
+  {
+    // Transform Gaussian points to the interval [0, sigma]
+    GenericReal<is_ad> sigma_eq_tmp = 0.5 * (points[k] + 1) * sigma_eq; // Map to [0, sigma_eq]
+    GenericReal<is_ad> strain_rate_tmp = computeCreepStrainRate(sigma_eq_tmp);
+    integral -= 0.5 * weights[k] * MetaPhysicL::raw_value(sigma_eq * strain_rate_tmp);
+  }
+  return integral;
+}
+
 template class RadialReturnCreepStressUpdateBaseTempl<false>;
 template class RadialReturnCreepStressUpdateBaseTempl<true>;
