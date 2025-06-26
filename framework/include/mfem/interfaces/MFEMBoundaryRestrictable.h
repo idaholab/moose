@@ -13,8 +13,8 @@
 #include "GeneralUserObject.h"
 #include "libmesh/ignore_warnings.h"
 #include <mfem.hpp>
+#include "mfem/miniapps/common/mfem-common.hpp"
 #include "libmesh/restore_warnings.h"
-
 /**
  * Base class for construction of an object that is restricted to a subset
  * of boundaries of the problem mesh. */
