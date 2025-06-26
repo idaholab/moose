@@ -47,6 +47,7 @@
 #include "MooseEigenSystem.h"
 #include "MooseParsedFunction.h"
 #include "MeshChangedInterface.h"
+#include "MeshDisplacedInterface.h"
 #include "ComputeJacobianBlocksThread.h"
 #include "ScalarInitialCondition.h"
 #include "FVInitialConditionTempl.h"
@@ -8175,6 +8176,19 @@ void
 FEProblemBase::notifyWhenMeshChanges(MeshChangedInterface * mci)
 {
   _notify_when_mesh_changes.push_back(mci);
+}
+
+void
+FEProblemBase::notifyWhenMeshDisplaces(MeshDisplacedInterface * mdi)
+{
+  _notify_when_mesh_displaces.push_back(mdi);
+}
+
+void
+FEProblemBase::meshDisplaced()
+{
+  for (const auto & mdi : _notify_when_mesh_displaces)
+    mdi->meshDisplaced();
 }
 
 void

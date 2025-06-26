@@ -33,7 +33,17 @@ public:
 
   virtual void onNode(NodeRange::const_iterator & nd) override;
 
-  void join(const UpdateDisplacedMeshThread & /*y*/);
+  void join(const UpdateDisplacedMeshThread & y)
+  {
+    if (y._has_displacement)
+      _has_displacement = true;
+  }
+  virtual void post() override;
+
+  /**
+   * Whether the displaced mesh is modified by the latest call to operator()
+   */
+  bool hasDisplacement() const { return _has_displacement; }
 
 protected:
   void init();
@@ -53,4 +63,8 @@ protected:
 private:
   std::map<unsigned int, std::pair<std::vector<unsigned int>, std::vector<unsigned int>>>
       _sys_to_var_num_and_direction;
+
+  /// A flag to be set by operator() for indicating whether the displaced mesh is
+  /// indeed modified
+  bool _has_displacement;
 };

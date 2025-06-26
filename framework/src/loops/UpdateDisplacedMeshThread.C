@@ -24,7 +24,8 @@ UpdateDisplacedMeshThread::UpdateDisplacedMeshThread(FEProblemBase & fe_problem,
     _displaced_problem(displaced_problem),
     _ref_mesh(_displaced_problem.refMesh()),
     _nl_soln(_displaced_problem._nl_solution),
-    _aux_soln(*_displaced_problem._aux_solution)
+    _aux_soln(*_displaced_problem._aux_solution),
+    _has_displacement(false)
 {
   this->init();
 }
@@ -37,7 +38,8 @@ UpdateDisplacedMeshThread::UpdateDisplacedMeshThread(UpdateDisplacedMeshThread &
     _nl_soln(x._nl_soln),
     _aux_soln(x._aux_soln),
     _sys_to_nonghost_and_ghost_soln(x._sys_to_nonghost_and_ghost_soln),
-    _sys_to_var_num_and_direction(x._sys_to_var_num_and_direction)
+    _sys_to_var_num_and_direction(x._sys_to_var_num_and_direction),
+    _has_displacement(x._has_displacement)
 {
 }
 
@@ -96,6 +98,8 @@ UpdateDisplacedMeshThread::init()
         soln->size(), soln->local_size(), send_list.send_list(), true, libMesh::GHOSTED);
     soln->localize(*ghost_soln, send_list.send_list());
   }
+
+  _has_displacement = false;
 }
 
 void
@@ -113,15 +117,22 @@ UpdateDisplacedMeshThread::onNode(NodeRange::const_iterator & nd)
     {
       const auto direction = directions[i];
       if (reference_node.n_dofs(sys_num, var_numbers[i]) > 0)
-        displaced_node(direction) =
-            reference_node(direction) +
-            (*libmesh_map_find(_sys_to_nonghost_and_ghost_soln, sys_num).second)(
-                reference_node.dof_number(sys_num, var_numbers[i], 0));
+      {
+        Real coord = reference_node(direction) +
+                     (*libmesh_map_find(_sys_to_nonghost_and_ghost_soln, sys_num).second)(
+                         reference_node.dof_number(sys_num, var_numbers[i], 0));
+        if (displaced_node(direction) != coord)
+        {
+          displaced_node(direction) = coord;
+          _has_displacement = true;
+        }
+      }
     }
   }
 }
 
 void
-UpdateDisplacedMeshThread::join(const UpdateDisplacedMeshThread & /*y*/)
+UpdateDisplacedMeshThread::post()
 {
+  _ref_mesh.comm().max(_has_displacement);
 }
