@@ -173,6 +173,11 @@ InitialConditionTempl<T>::compute()
   // From here on out we won't be sampling at nodes anymore
   _current_node = nullptr;
 
+  // If we are not defined on the element,
+  // we have no business running on its sides and edges
+  if (!hasBlocks(_current_elem->subdomain_id()))
+    return;
+
   auto & dof_map = _var.dofMap();
   const bool add_p_level =
       dof_map.should_p_refine(dof_map.var_group_from_var_number(_var.number()));
@@ -249,7 +254,7 @@ InitialConditionTempl<T>::compute()
 
   // Make sure every DoF got reached!
   for (unsigned int i = 0; i != n_dofs; ++i)
-    libmesh_assert(_dof_is_fixed[i]);
+    libmesh_assert(_dof_is_fixed[i] || !mask(i));
 
   // Lock the new_vector since it is shared among threads.
   {
