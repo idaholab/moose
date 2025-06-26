@@ -25,12 +25,15 @@ ElementIDInterface::validParams()
   return emptyInputParameters();
 }
 
-ElementIDInterface::ElementIDInterface(const MooseObject * moose_object, bool initialize)
+ElementIDInterface::ElementIDInterface(const MooseObject * moose_object)
   : _obj_parameters(moose_object->parameters()),
     _id_mesh(moose_object->getMooseApp().actionWarehouse().mesh()),
     _ei_name(moose_object->name())
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 }
 

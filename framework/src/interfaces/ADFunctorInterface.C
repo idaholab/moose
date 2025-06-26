@@ -16,9 +16,12 @@ ADFunctorInterface::validParams()
   return FunctorInterface::validParams();
 }
 
-ADFunctorInterface::ADFunctorInterface(const MooseObject * const moose_object, bool initialize)
-  : FunctorInterface(moose_object, initialize)
+ADFunctorInterface::ADFunctorInterface(const MooseObject * const moose_object)
+  : FunctorInterface(moose_object)
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 }

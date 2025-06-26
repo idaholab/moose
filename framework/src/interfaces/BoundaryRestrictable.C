@@ -33,9 +33,7 @@ BoundaryRestrictable::validParams()
 }
 
 // Standard constructor
-BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object,
-                                           bool nodal,
-                                           bool initialize)
+BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object, bool nodal)
   : _bnd_feproblem(moose_object->isParamValid("_fe_problem_base")
                        ? moose_object->getParam<FEProblemBase *>("_fe_problem_base")
                        : NULL),
@@ -52,8 +50,13 @@ BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object,
     _bnd_nodal(nodal),
     _moose_object(*moose_object)
 {
-  if (initialize)
-    initializeBoundaryRestrictable();
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
+
+  initializeBoundaryRestrictable();
 }
 
 // Dual restricted constructor

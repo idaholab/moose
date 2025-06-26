@@ -23,7 +23,7 @@ SetupInterface::validParams()
   return params;
 }
 
-SetupInterface::SetupInterface(const MooseObject * moose_object, bool initialize)
+SetupInterface::SetupInterface(const MooseObject * moose_object)
   : _execute_enum(moose_object->parameters().isParamValid("execute_on")
                       ? moose_object->parameters().get<ExecFlagEnum>("execute_on")
                       : _empty_execute_enum),
@@ -31,7 +31,10 @@ SetupInterface::SetupInterface(const MooseObject * moose_object, bool initialize
         (moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
             ->getCurrentExecuteOnFlag())
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 
   _empty_execute_enum

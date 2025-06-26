@@ -24,7 +24,7 @@
 #include "NodeFaceConstraint.h"
 #include "NodeElemConstraintBase.h"
 
-Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv, bool initialize)
+Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   : _c_parameters(moose_object->parameters()),
     _c_name(moose_object->name()),
     _c_type(moose_object->type()),
@@ -59,7 +59,10 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv,
     _obj(moose_object),
     _writable_coupled_variables(libMesh::n_threads())
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");

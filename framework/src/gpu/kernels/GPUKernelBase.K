@@ -46,8 +46,8 @@ KernelBase::KernelBase(const InputParameters & parameters, Moose::VarFieldType f
 KernelBase::KernelBase(const KernelBase & object)
   : ResidualObject(object),
     BlockRestrictable(object),
-    CoupleableMooseVariableDependencyIntermediateInterface(&object, false, false, false),
-    MaterialPropertyInterface(&object, blockIDs(), Moose::EMPTY_BOUNDARY_IDS, false)
+    CoupleableMooseVariableDependencyIntermediateInterface(&object, false),
+    MaterialPropertyInterface(&object, blockIDs(), Moose::EMPTY_BOUNDARY_IDS)
 {
 }
 

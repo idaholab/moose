@@ -24,7 +24,7 @@ TransientInterface::validParams()
   return params;
 }
 
-TransientInterface::TransientInterface(const MooseObject * moose_object, bool initialize)
+TransientInterface::TransientInterface(const MooseObject * moose_object)
   : _ti_params(moose_object->parameters()),
     _ti_feproblem(*_ti_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _is_implicit(_ti_params.have_parameter<bool>("implicit") ? _ti_params.get<bool>("implicit")
@@ -37,7 +37,10 @@ TransientInterface::TransientInterface(const MooseObject * moose_object, bool in
     _is_transient(_ti_feproblem.isTransient()),
     _ti_name(MooseUtils::shortName(moose_object->name()))
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 }
 
