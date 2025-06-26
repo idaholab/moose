@@ -1,5 +1,7 @@
 # NEML2CentralDifference
 
+!if! function=hasCapability('neml2')
+
 This object functions in much the similar way as [ExplicitMixedOrder](ExplicitMixedOrder.md), but completely skips the regular element/node loops when evaluating the right-hand-side residual. This object is designed to interface with [NEML2](NEML2/index.md) to perform the material model evaluation and residual assembly.
 
 ## Implementation details
@@ -15,3 +17,9 @@ In addition, this object zeros out the algebraic element/node ranges before eval
 ## Example input files
 
 !syntax inputs /Executioner/TimeIntegrators/NEML2CentralDifference
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md

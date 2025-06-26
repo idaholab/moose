@@ -13,8 +13,8 @@ InputParameters
 MOOSEToNEML2::validParams()
 {
   auto params = emptyInputParameters();
-  params.addRequiredParam<std::string>(
-      "to_neml2", NEML2Utils::docstring("Name of the NEML2 variable or parameter to write to"));
+  params.addRequiredParam<std::string>("to_neml2",
+                                       "Name of the NEML2 variable or parameter to write to");
   return params;
 }
 
