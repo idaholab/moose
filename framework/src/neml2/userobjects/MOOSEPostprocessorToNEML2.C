@@ -17,11 +17,10 @@ InputParameters
 MOOSEPostprocessorToNEML2Templ<state>::validParams()
 {
   auto params = MOOSEToNEML2Unbatched::validParams();
-  params.addClassDescription(NEML2Utils::docstring(
+  params.addClassDescription(
       "Gather a MOOSE postprocessor value for insertion into the specified input variable or "
-      "model parameter of a NEML2 model."));
-  params.addRequiredParam<PostprocessorName>(
-      "from_moose", NEML2Utils::docstring("MOOSE postprocessor to read from"));
+      "model parameter of a NEML2 model.");
+  params.addRequiredParam<PostprocessorName>("from_moose", "MOOSE postprocessor to read from");
   return params;
 }
 

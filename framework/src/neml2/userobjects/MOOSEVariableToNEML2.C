@@ -17,10 +17,9 @@ InputParameters
 MOOSEVariableToNEML2Templ<state>::validParams()
 {
   auto params = MOOSEToNEML2Batched::validParams();
-  params.addClassDescription(
-      NEML2Utils::docstring("Gather a MOOSE variable for insertion into the specified input or "
-                            "model parameter of a NEML2 model."));
-  params.addRequiredCoupledVar("from_moose", NEML2Utils::docstring("MOOSE variable to read from"));
+  params.addClassDescription("Gather a MOOSE variable for insertion into the specified input or "
+                             "model parameter of a NEML2 model.");
+  params.addRequiredCoupledVar("from_moose", "MOOSE variable to read from");
   return params;
 }
 

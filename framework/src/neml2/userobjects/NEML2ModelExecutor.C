@@ -28,10 +28,9 @@ NEML2ModelExecutor::actionParams()
   params.addParam<std::vector<std::string>>(
       "skip_inputs",
       {},
-      NEML2Utils::docstring(
-          "List of NEML2 variables to skip error checking when setting up the model input. If an "
-          "input variable is skipped, its value will stay zero. If a required input variable is "
-          "not skipped, an error will be raised."));
+      "List of NEML2 variables to skip error checking when setting up the model input. If an "
+      "input variable is skipped, its value will stay zero. If a required input variable is "
+      "not skipped, an error will be raised.");
   return params;
 }
 
@@ -40,7 +39,7 @@ NEML2ModelExecutor::validParams()
 {
   auto params = NEML2ModelInterface<GeneralUserObject>::validParams();
   params += NEML2ModelExecutor::actionParams();
-  params.addClassDescription(NEML2Utils::docstring("Execute the specified NEML2 model"));
+  params.addClassDescription("Execute the specified NEML2 model");
 
   params.addRequiredParam<UserObjectName>(
       "batch_index_generator",
@@ -48,13 +47,11 @@ NEML2ModelExecutor::validParams()
   params.addParam<std::vector<UserObjectName>>(
       "gatherers",
       {},
-      NEML2Utils::docstring(
-          "List of MOOSE*ToNEML2 user objects gathering MOOSE data as NEML2 input variables"));
+      "List of MOOSE*ToNEML2 user objects gathering MOOSE data as NEML2 input variables");
   params.addParam<std::vector<UserObjectName>>(
       "param_gatherers",
       {},
-      NEML2Utils::docstring(
-          "List of MOOSE*ToNEML2 user objects gathering MOOSE data as NEML2 model parameters"));
+      "List of MOOSE*ToNEML2 user objects gathering MOOSE data as NEML2 model parameters");
 
   // Since we use the NEML2 model to evaluate the residual AND the Jacobian at the same time, we
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
