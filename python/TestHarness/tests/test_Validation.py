@@ -8,7 +8,37 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from TestHarnessTestCase import TestHarnessTestCase
+
+from copy import deepcopy
+import json
+import os
+
 class TestHarnessTester(TestHarnessTestCase):
+    def compareGold(self, validation: dict, name: str, rewrite: bool = False):
+        """
+        Helper for comparing against a gold file, which contains the 'validation'
+        entry for the given test.
+
+        When running this, you can set rewrite=True to rewrite the gold.
+        """
+        gold_path = os.path.join('gold', 'validation', f'validation_{name}.json')
+
+        # Take a copy as we'll change this
+        validation = deepcopy(validation)
+
+        # Rewrite the script path so that it is relative and we don't
+        # diff based on where this is ran
+        validation['script'] = os.path.relpath(validation['script'])
+
+        if rewrite:
+            with open(gold_path, 'w') as f:
+                json.dump(validation, f, indent=2, sort_keys=True)
+
+        with open(gold_path, 'r') as f:
+            validation_gold = json.load(f)
+
+        self.assertEqual(validation, validation_gold)
+
     def test(self):
         results = self.runTests('-i', 'validation', '--re', 'ok')
         out = results.results
@@ -19,8 +49,14 @@ class TestHarnessTester(TestHarnessTestCase):
         status = test['status']
         self.assertEqual(status['status'], 'OK')
 
-        # Check validation output
+        # Validation entry
         validation = test['validation']
+
+        # Compare against the golded values
+        # If this fails, you can regold by setting rewrite = true in compareGold
+        self.compareGold(validation, 'test')
+
+        # Check validation output
         self.assertTrue(validation['script'].endswith('validation_ok.py'))
         # Validation results
         results = validation['results']
@@ -87,8 +123,12 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertEqual(status['status'], 'ERROR')
         self.assertEqual(status['status_message'], 'VALIDATION FAILED')
 
-        # Check validation output
         validation = test['validation']
+
+        # Compare against the golded values
+        # If this fails, you can regold by setting rewrite = true in compareGold
+        self.compareGold(validation, 'testfail')
+
         # Validation results (one should have failed)
         results = validation['results']
         self.assertEqual(len(results), 1)

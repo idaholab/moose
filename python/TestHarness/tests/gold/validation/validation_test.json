@@ -1,0 +1,79 @@
+{
+  "data": {
+    "number": {
+      "abs_zero": null,
+      "bounds": [
+        95.0,
+        105.0
+      ],
+      "description": "Number",
+      "key": "number",
+      "nominal": null,
+      "rel_err": null,
+      "test": "TestCase.testValidation",
+      "type": "ValidationScalarData",
+      "units": "coolunits",
+      "value": 100.0
+    },
+    "useless_dict": {
+      "description": "A useless dictionary",
+      "key": "useless_dict",
+      "test": "TestCase.testValidation",
+      "type": "ValidationData",
+      "value": {
+        "foo": "bar"
+      }
+    },
+    "vector": {
+      "abs_zero": null,
+      "bounds": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          2.0,
+          3.0
+        ]
+      ],
+      "description": "Temperature",
+      "key": "vector",
+      "nominal": null,
+      "rel_err": null,
+      "test": "TestCase.testValidation",
+      "type": "ValidationVectorData",
+      "units": "K",
+      "value": [
+        1.0,
+        2.0
+      ],
+      "x": [
+        0.0,
+        1.0
+      ],
+      "x_description": "Position",
+      "x_units": "cm"
+    }
+  },
+  "results": [
+    {
+      "data_key": "number",
+      "message": "value 1.000E+02 coolunits within bounds; min = 9.500E+01 coolunits, max = 1.050E+02 coolunits",
+      "status": "OK",
+      "test": "TestCase.testValidation"
+    },
+    {
+      "data_key": "vector",
+      "message": "x = 0.000E+00 cm (index 0) value 1.000E+00 K within bounds; min = 0.000E+00 K, max = 2.000E+00 K",
+      "status": "OK",
+      "test": "TestCase.testValidation"
+    },
+    {
+      "data_key": "vector",
+      "message": "x = 1.000E+00 cm (index 1) value 2.000E+00 K within bounds; min = 1.000E+00 K, max = 3.000E+00 K",
+      "status": "OK",
+      "test": "TestCase.testValidation"
+    }
+  ],
+  "script": "../../../test/tests/test_harness/validation_ok.py"
+}
