@@ -26,8 +26,8 @@ ifeq ($(ALL_MODULES),yes)
         HEAT_TRANSFER               := yes
         LEVEL_SET                   := yes
         MISC                        := yes
-        OPTIMIZATION                := yes
         NAVIER_STOKES               := yes
+        OPTIMIZATION                := yes
         PERIDYNAMICS                := yes
         PHASE_FIELD                 := yes
         POROUS_FLOW                 := yes
