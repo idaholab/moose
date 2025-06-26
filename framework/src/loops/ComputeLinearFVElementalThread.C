@@ -94,8 +94,6 @@ ComputeLinearFVElementalThread::join(const ComputeLinearFVElementalThread & /*y*
 void
 ComputeLinearFVElementalThread::fetchSystemContributionObjects()
 {
-  // std::vector<LinearFVElementalKernel *> kernels_rhs;
-  // std::vector<LinearFVElementalKernel *> kernels_matrix;
   auto base_query = _fe_problem.theWarehouse()
                         .query()
                         .template condition<AttribSysNum>(_system_number)
@@ -107,7 +105,7 @@ ComputeLinearFVElementalThread::fetchSystemContributionObjects()
   base_query.condition<AttribVectorTags>(_vector_tags).queryInto(_fv_kernels_rhs);
   _old_subdomain = _subdomain;
 
-  // This will remove the common elements
+  // This will remove the common elements and add them to the last argument
   MooseUtils::removeCommonSet(_fv_kernels_matrix, _fv_kernels_rhs, _fv_kernels_system);
 }
 
@@ -128,8 +126,8 @@ ComputeLinearFVElementalThread::printGeneralExecutionInformation() const
 void
 ComputeLinearFVElementalThread::printBlockExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_fv_kernels_matrix.size() ||
-      !_fv_kernels_rhs.size() || !_fv_kernels_system.size())
+  if (!_fe_problem.shouldPrintExecution(_tid) ||
+      (_fv_kernels_matrix.empty() && _fv_kernels_rhs.empty() && _fv_kernels_system.empty()))
     return;
 
   auto & console = _fe_problem.console();

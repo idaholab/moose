@@ -73,7 +73,7 @@ protected:
   FEProblemBase & _fe_problem;
 
   /// The number of the linear system we are contributing to
-  const unsigned int _linear_system_number;
+  const unsigned int _system_number;
 
   /// The mode in which this thread is operating
   const Moose::FV::LinearFVComputationMode _mode;
@@ -99,12 +99,42 @@ protected:
   /// Thread ID
   THREAD_ID _tid;
 
-  /// LinearFVFluxKernels for the element
-  std::vector<LinearFVFluxKernel *> _elem_fv_flux_kernels;
+  /// Kernels which will only contribute to a matrix from the
+  /// element-side of the face. This member is
+  /// unfiltered, used for caching, might have overlaps with the
+  /// container holding the vector tags.
+  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_matrix_elem;
 
-  /// LinearFVFluxKernels for the neighbor
-  std::vector<LinearFVFluxKernel *> _neighbor_fv_flux_kernels;
+  /// Kernels which will only contribute to a right hand side from the
+  /// element-side of the face. This member is
+  /// unfiltered, used for caching, might have overlaps with the
+  /// container holding the matrix tags.
+  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_rhs_elem;
 
-  /// Combined LinearFVFluxKernels which will be used to contribute to a system
-  std::set<LinearFVFluxKernel *> _fv_flux_kernels;
+  /// Kernels which will only contribute to a matrix from the
+  /// neighbor-side of the face. This member is
+  /// unfiltered, used for caching, might have overlaps with the
+  /// container holding the vector tags.
+  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_matrix_neighbor;
+
+  /// Kernels which will only contribute to a right hand side from the
+  /// neighbor-side of the face. This member is
+  /// unfiltered, used for caching, might have overlaps with the
+  /// container holding the matrix tags.
+  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_rhs_neighbor;
+
+  /// Kernels which will only contribute the right hand side, this is
+  /// the union of `_fv_flux_kernels_matrix_elem` and `_fv_flux_kernels_matrix_neighbor`
+  /// with substracting the common elements with ` _fv_flux_kernels_rhs`.
+  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_matrix;
+
+  /// Kernels which will only contribute the right hand side, this is
+  /// the union of `_fv_flux_kernels_rhs_elem` and `_fv_flux_kernels_rhs_neighbor`
+  /// with substracting the common elements with ` _fv_flux_kernels_matrix`.
+  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_rhs;
+
+  /// Combined kernels which will be used to contribute to the full system, so
+  /// this holds the intersection of `_fv_flux_kernels_matrix` and
+  /// `_fv_flux_kernels_rhs`.
+  std::unordered_set<LinearFVFluxKernel *> _fv_flux_kernels_system;
 };

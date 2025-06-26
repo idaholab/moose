@@ -101,5 +101,5 @@ protected:
   /// The set of cached elemental kernels which will be executed on a given element.
   /// This member variable is changed on a per-block basis. Will contribute to the
   /// matrix and the right hand side.
-  std::vector<LinearFVElementalKernel *> _fv_kernels_system;
+  std::unordered_set<LinearFVElementalKernel *> _fv_kernels_system;
 };

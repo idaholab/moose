@@ -205,7 +205,7 @@
       type = RunApp
       input = 'show_execution_linear_fv_elemental.i'
       cli_args = '--color off'
-      expect_out = '\[DBG\] reaction_2 source_2'
+      expect_out = '\[DBG\] (source_2|reaction_2) (source_2|reaction_2)'
       detail = 'linear finite volume elemental kernels,'
       # in parallel, no guarantee block 1 is present on rank 0
       max_parallel = 1
