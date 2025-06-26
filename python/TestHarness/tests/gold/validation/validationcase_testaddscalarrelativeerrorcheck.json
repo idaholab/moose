@@ -1,0 +1,82 @@
+{
+  "data": {
+    "fail": {
+      "abs_zero": 1e-10,
+      "bounds": null,
+      "description": "foo",
+      "key": "fail",
+      "nominal": 1.9,
+      "rel_err": 0.01,
+      "test": "Test.test_fail",
+      "units": null,
+      "validation": true,
+      "value": 2.0
+    },
+    "pass": {
+      "abs_zero": 1e-10,
+      "bounds": null,
+      "description": "foo",
+      "key": "pass",
+      "nominal": 1.1,
+      "rel_err": 0.1,
+      "test": "Test.test_pass",
+      "units": null,
+      "validation": true,
+      "value": 1.0
+    },
+    "pass_abs_zero": {
+      "abs_zero": 1e-10,
+      "bounds": null,
+      "description": "foo",
+      "key": "pass_abs_zero",
+      "nominal": 0.0,
+      "rel_err": 1e-12,
+      "test": "Test.test_pass_abs_zero",
+      "units": null,
+      "validation": true,
+      "value": 0.0
+    },
+    "pass_abs_zero_override": {
+      "abs_zero": 0.01,
+      "bounds": null,
+      "description": "foo",
+      "key": "pass_abs_zero_override",
+      "nominal": 0.0,
+      "rel_err": 1e-12,
+      "test": "Test.test_pass_abs_zero_override",
+      "units": null,
+      "validation": true,
+      "value": 0.0
+    }
+  },
+  "results": [
+    {
+      "data_key": "fail",
+      "message": "value 2.000E+00 relative error 5.000E-02 > required 1.000E-02",
+      "status": "FAIL",
+      "test": "Test.test_fail",
+      "validation": true
+    },
+    {
+      "data_key": "pass",
+      "message": "value 1.000E+00 relative error 9.091E-02 < required 1.000E-01",
+      "status": "OK",
+      "test": "Test.test_pass",
+      "validation": true
+    },
+    {
+      "data_key": "pass_abs_zero",
+      "message": "value 0.000E+00 relative error skipped due to absolute zero",
+      "status": "OK",
+      "test": "Test.test_pass_abs_zero",
+      "validation": true
+    },
+    {
+      "data_key": "pass_abs_zero_override",
+      "message": "value 0.000E+00 relative error skipped due to absolute zero",
+      "status": "OK",
+      "test": "Test.test_pass_abs_zero_override",
+      "validation": true
+    }
+  ]
+}

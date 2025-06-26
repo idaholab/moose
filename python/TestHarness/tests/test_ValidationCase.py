@@ -10,8 +10,9 @@
 # pylint: disable
 import unittest
 import typing
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import numpy as np
+import os
 from TestHarness.validation import ValidationCase
 from TestHarness.validation.dataclasses import *
 from TestHarness.validation.exceptions import *
@@ -21,6 +22,28 @@ class TestValidationCase(unittest.TestCase):
     """
     Test cases for ValidationCase
     """
+    def compareGold(self, case: ValidationCase, name: str, rewrite: bool = False):
+        """
+        Helper for comparing against a gold file.
+
+        When running this, you can set rewrite=True to rewrite the gold.
+        """
+        gold_path = os.path.join('gold', 'validation', f'validationcase_{name}.json')
+
+        data = {'results': [asdict(v) for v in case.results],
+                'data': {k: asdict(v) for k, v in case.data.items()}}
+        data_dumped = json.dumps(data, indent=2, sort_keys=True)
+        data_loaded = json.loads(data_dumped)
+
+        if rewrite:
+            with open(gold_path, 'w') as f:
+                f.write(data_dumped)
+
+        with open(gold_path, 'r') as f:
+            gold_data = json.load(f)
+
+        self.assertEqual(data_loaded, gold_data)
+
     def testNoTests(self):
         """
         Checks that an exception is raised when running without tests
@@ -82,6 +105,7 @@ class TestValidationCase(unittest.TestCase):
         for key, value in args.items():
             self.assertEqual(getattr(data, key), value)
         self.assertIsNone(data.test)
+        self.compareGold(test, 'testadddata')
 
     def testAddDataChecks(self):
         """
@@ -276,6 +300,7 @@ class TestValidationCase(unittest.TestCase):
         self.assertIsNone(data.test)
         # Not provided if it isn't used
         self.assertIsNone(data.abs_zero)
+        self.compareGold(test, 'testaddscalardata')
 
     def testAddScalarDataChecks(self):
         """
@@ -350,8 +375,8 @@ class TestValidationCase(unittest.TestCase):
         with bounds via the 'bounds' keyword argument
         """
         key = 'data'
-        value = 1.234
-        bounds = (value - 1.0, value + 0.1)
+        value = 1.2
+        bounds = (value - 1, value + 1)
 
         test = ValidationCase()
         test.addScalarData(key, value, 'unused', None, bounds=bounds)
@@ -359,6 +384,7 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(len(all_data), 1)
         data = all_data[key]
         self.assertEqual(bounds, data.bounds)
+        self.compareGold(test, 'testaddscalardatabounded')
 
     def testAddScalarDataNominal(self):
         """
@@ -372,6 +398,7 @@ class TestValidationCase(unittest.TestCase):
         all_data = test.data
         self.assertEqual(len(all_data), 1)
         self.assertEqual(nominal, all_data[key].nominal)
+        self.compareGold(test, 'testaddscalardatanominal')
 
     def testAddScalarDataRelativeError(self):
         """
@@ -385,6 +412,7 @@ class TestValidationCase(unittest.TestCase):
         all_data = test.data
         self.assertEqual(len(all_data), 1)
         self.assertEqual(rel_err, all_data[key].rel_err)
+        self.compareGold(test, 'testaddscalardatarelativeerror')
 
     def testAddScalarDataBoundedCheck(self):
         """
@@ -416,6 +444,8 @@ class TestValidationCase(unittest.TestCase):
                 self.assertIn('out of bounds', result.message)
             data = test.data[case]
             self.assertEqual(f'Test.test_{case}', data.test)
+
+        self.compareGold(test, 'testaddscalardataboundedcheck')
 
     def testAddScalarRelativeErrorCheck(self):
         """
@@ -460,6 +490,8 @@ class TestValidationCase(unittest.TestCase):
             self.assertEqual(data.abs_zero, case.get('abs_zero', test.DEFAULT_ABS_ZERO))
             self.assertEqual(data.nominal, case['nominal'])
             self.assertEqual(data.rel_err, case['rel_err'])
+
+        self.compareGold(test, 'testaddscalarrelativeerrorcheck')
 
     def testToListFloat(self):
         """
@@ -604,6 +636,8 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(data.x_description, x[1])
         self.assertEqual(data.x_units, x[2])
 
+        self.compareGold(test, 'testaddvectordata')
+
     def testAddVectorDataNominal(self):
         """
         Tests the addition of vector data in ValidationCase.addVectorData()
@@ -619,6 +653,7 @@ class TestValidationCase(unittest.TestCase):
         all_data = test.data
         self.assertEqual(len(all_data), 1)
         self.assertEqual(nominal, all_data[key].nominal)
+        self.compareGold(test, 'testaddvectordatanominal')
 
     def testAddVectorDataBounded(self):
         """
@@ -634,6 +669,8 @@ class TestValidationCase(unittest.TestCase):
         test.addVectorData(key, x, value, bounds=bounds)
         self.assertEqual(len(test.data), 1)
         self.assertEqual(bounds, test.data[key].bounds)
+
+        self.compareGold(test, 'testaddvectordatabounded')
 
     def testAddVectorDataBoundedCheck(self):
         """
@@ -679,6 +716,8 @@ class TestValidationCase(unittest.TestCase):
             check_result('fail_lower', i, ValidationCase.Status.FAIL)
             check_result('fail_upper', i, ValidationCase.Status.FAIL)
             check_result('fail_both', i, ValidationCase.Status.FAIL)
+
+        self.compareGold(case, 'testaddvectordataboundedcheck')
 
     def testInitialize(self):
         """

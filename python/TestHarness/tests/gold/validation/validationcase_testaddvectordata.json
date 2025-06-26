@@ -1,0 +1,26 @@
+{
+  "data": {
+    "temperature": {
+      "abs_zero": null,
+      "bounds": null,
+      "description": "Temperature",
+      "key": "temperature",
+      "nominal": null,
+      "rel_err": null,
+      "test": null,
+      "units": "K",
+      "validation": true,
+      "value": [
+        1.0,
+        2.0
+      ],
+      "x": [
+        0.0,
+        1.0
+      ],
+      "x_description": "Position",
+      "x_units": "cm"
+    }
+  },
+  "results": []
+}
