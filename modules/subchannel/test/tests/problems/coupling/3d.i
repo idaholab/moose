@@ -75,8 +75,6 @@
 
 [VectorPostprocessors]
   # These samplers are used for testing purposes.
-  # Sampling over all nodes would creates megabytes of data
-  # Ordering the samples by z-coordinate is consistent in parallel
   [sample_center_pin]
     type = LineValueSampler
     variable = 'q_prime Tpin Dpin'

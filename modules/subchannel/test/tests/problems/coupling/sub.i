@@ -97,4 +97,5 @@ heated_length = 1.0
 
 [Outputs]
   exodus = true
+  csv = true
 []
