@@ -22,7 +22,7 @@ DisplacedSystem::DisplacedSystem(DisplacedProblem & problem,
                                  Moose::VarKindType var_kind)
   : SystemBase(problem, fe_problem, name, var_kind),
     _undisplaced_system(undisplaced_system),
-    _sys(problem.es().add_system<TransientExplicitSystem>(name))
+    _sys(problem.es().add_system<libMesh::System>(name))
 {
   if (!problem.defaultGhosting())
   {

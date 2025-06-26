@@ -192,7 +192,7 @@ public:
   //
   // Adaptivity /////
   virtual void initAdaptivity();
-  virtual void meshChanged() override;
+  void meshChanged(bool contract_mesh, bool clean_refinement_flags);
 
   // reinit /////
   virtual void prepare(const Elem * elem, const THREAD_ID tid) override;
