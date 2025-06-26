@@ -1138,7 +1138,7 @@ FEProblemBase::initialSetup()
       }
     }
 
-    _kokkos_materials.sort();
+    _kokkos_materials.sort(0, true);
 
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
