@@ -25,7 +25,7 @@ class GeometricSearchInterface
 public:
   static InputParameters validParams();
 
-  GeometricSearchInterface(const MooseObject * moose_object, bool initialize = true);
+  GeometricSearchInterface(const MooseObject * moose_object);
 
   /**
    * Retrieve the PenetrationLocator associated with the two sides.

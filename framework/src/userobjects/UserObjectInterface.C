@@ -21,7 +21,7 @@ UserObjectInterface::validParams()
   return emptyInputParameters();
 }
 
-UserObjectInterface::UserObjectInterface(const MooseObject * moose_object, bool initialize)
+UserObjectInterface::UserObjectInterface(const MooseObject * moose_object)
   : _uoi_moose_object(*moose_object),
     _uoi_feproblem(*_uoi_moose_object.parameters().getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base")),
@@ -29,7 +29,10 @@ UserObjectInterface::UserObjectInterface(const MooseObject * moose_object, bool 
                  ? _uoi_moose_object.parameters().get<THREAD_ID>("_tid")
                  : 0)
 {
-  if (!initialize)
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
     return;
 }
 
