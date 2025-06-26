@@ -62,6 +62,14 @@
     when specifying the values of t and dt in the TimeStepper after a restart."
   []
 
+  [adapt_tstep_linear_system]
+    type = 'CSVDiff'
+    input = 'adapt_linear_systems.i'
+    csvdiff = 'adapt_linear_systems_out.csv'
+    requirement = "The system shall support the ability to adapt the time step size based on the number of iterations from linear systems."
+    max_threads = 1 # see libmesh issue #3808
+  []
+
   [shrink_init_dt]
     type = 'Exodiff'
     input = 'adapt_tstep_shrink_init_dt.i'
