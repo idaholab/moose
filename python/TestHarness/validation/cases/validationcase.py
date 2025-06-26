@@ -164,14 +164,12 @@ class ValidationCase(MooseObject):
         If context is provided, will include it as the prefix
         to the thrown exception
         """
-        if not isinstance(value, float):
-            try:
-                value = float(value)
-            except Exception as e:
-                if context:
-                    raise type(e)(f'{context}: {e}') from e
-                raise
-        return value
+        try:
+            return float(value)
+        except Exception as e:
+            if context:
+                raise type(e)(f'{context}: {e}') from e
+            raise
 
     @staticmethod
     def checkBounds(value: float,

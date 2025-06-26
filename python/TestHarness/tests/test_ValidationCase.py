@@ -221,7 +221,14 @@ class TestValidationCase(unittest.TestCase):
         # Integer to float
         value = int(1)
         to_value = ValidationCase.toFloat(value)
-        self.assertTrue(isinstance(to_value, float))
+        self.assertIsInstance(to_value, float)
+        self.assertEqual(to_value, float(value))
+
+        # Special case where np.float64 is derived from float,
+        # and we want to explicitly convert it
+        value = np.float64(1)
+        to_value = ValidationCase.toFloat(value)
+        self.assertIsInstance(to_value, float)
         self.assertEqual(to_value, float(value))
 
         # Catch exception
