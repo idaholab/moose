@@ -4,7 +4,7 @@
 
 ## Summary
 
-Base class for MFEM classes that are restricted to a subset of mesh subdomains.
+Base class for MFEM classes that are restricted to a subset of mesh boundaries.
 
 ## Overview
 
