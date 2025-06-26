@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/mug.e
+  file = ../mesh/cylinder-hex-q2.gen
 []
 
 [Problem]
@@ -100,7 +100,7 @@
   device = cpu
   dt = 2.0
   start_time = 0.0
-  end_time = 4.0
+  end_time = 2.0
 []
 
 [Outputs]
