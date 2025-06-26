@@ -8,6 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGSurfaceList.h"
+#include "CSGPlane.h"
+#include "CSGSphere.h"
+#include "CSGXCylinder.h"
+#include "CSGYCylinder.h"
+#include "CSGZCylinder.h"
 
 namespace CSG
 {
