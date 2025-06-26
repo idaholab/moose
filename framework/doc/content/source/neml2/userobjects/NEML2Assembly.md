@@ -1,5 +1,7 @@
 # NEML2Assembly
 
+!if! function=hasCapability('neml2')
+
 This userobject loops through elements to cache common assembly information such as element transformation Jacobian, quadrature weight, and coordinate transformation factor.
 
 ## Implementation details
@@ -11,3 +13,9 @@ The method `JxWxT()` returns a NEML2 tensor with batch shape $(n_e, n_q)$, where
 ## Syntax
 
 !syntax parameters /UserObjects/NEML2Assembly
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md

@@ -48,22 +48,18 @@ InputParameters
 NEML2Action::validParams()
 {
   InputParameters params = NEML2ActionCommon::commonParams();
-  params.addClassDescription(NEML2Utils::docstring("Set up the NEML2 material model"));
-  params.addParam<std::string>(
-      "executor_name",
-      NEML2Utils::docstring("Name of the NEML2ModelExecutor user object. The default name is "
-                            "'neml2_<model-name>_<block-name>' where <model-name> is the NEML2 "
-                            "model's name, and <block-name> is this action sub-block's name."));
+  params.addClassDescription("Set up the NEML2 material model");
+  params.addParam<std::string>("executor_name",
+                               "Name of the NEML2ModelExecutor user object. The default name is "
+                               "'neml2_<model-name>_<block-name>' where <model-name> is the NEML2 "
+                               "model's name, and <block-name> is this action sub-block's name.");
   params.addParam<std::string>(
       "batch_index_generator_name",
-      NEML2Utils::docstring(
-          "Name of the NEML2BatchIndexGenerator user object. The default name is "
-          "'neml2_index_<model-name>_<block-name>' where <model-name> is the NEML2 model's name, "
-          "and <block-name> is this action sub-block's name."));
+      "Name of the NEML2BatchIndexGenerator user object. The default name is "
+      "'neml2_index_<model-name>_<block-name>' where <model-name> is the NEML2 model's name, and "
+      "<block-name> is this action sub-block's name.");
   params.addParam<std::vector<SubdomainName>>(
-      "block",
-      {},
-      NEML2Utils::docstring("List of blocks (subdomains) where the material model is defined"));
+      "block", {}, "List of blocks (subdomains) where the material model is defined");
   return params;
 }
 
