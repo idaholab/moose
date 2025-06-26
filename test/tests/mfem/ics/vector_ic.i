@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/mug.e
+  file = ../mesh/cylinder-hex-q2.gen
 []
 
 [Problem]
