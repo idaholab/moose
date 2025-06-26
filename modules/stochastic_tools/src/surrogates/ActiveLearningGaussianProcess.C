@@ -80,9 +80,8 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
   if (inputs.empty())
     mooseError("There is no data for retraining.");
 
-  torch::Tensor training_data;
   _training_params = torch::zeros({long(outputs.size()), long(inputs[0].size())}, at::kDouble);
-  training_data = torch::zeros({long(outputs.size()), 1}, at::kDouble);
+  torch::Tensor training_data = torch::zeros({long(outputs.size()), 1}, at::kDouble);
 
   auto params_accessor = _training_params.accessor<Real, 2>();
   auto data_accessor = training_data.accessor<Real, 2>();

@@ -87,7 +87,7 @@ GaussianProcess::setupCovarianceMatrix(const torch::Tensor & training_params,
   torch::Tensor training_data_transpose = torch::transpose(training_data, 0, 1);
   torch::Tensor flattened_tensor = torch::reshape(
       training_data_transpose, {training_params.sizes()[0] * training_data.sizes()[1], 1});
-  // training_data = torch::transpose(training_data, 0, 1);
+
   //  Compute the Cholesky decomposition and inverse action of the covariance matrix
   setupStoredMatrices(flattened_tensor);
 
