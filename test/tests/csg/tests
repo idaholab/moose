@@ -84,6 +84,7 @@
       detail = ' a CSG object from an input mesh generator is not moved upon retrieval'
       cli_args = '--csg-only'
       expect_err = "The CSG mesh from input TestCSGInfiniteSquareMeshGenerator 'csg_inf_square' was not moved."
+      mesh_mode = REPLICATED
     []
     [region_surfaces_error]
       max_threads = 1
@@ -92,6 +93,7 @@
       detail = ' a cell region is updated with surfaces not present in the CSGBase instance'
       cli_args = '--csg-only'
       expect_err = "Region is being set with a surface named surf_plus_x that is different from the surface of the same name in the base instance."
+      mesh_mode = REPLICATED
     []
     [rename_surface_error]
       max_threads = 1
@@ -100,6 +102,7 @@
       detail = ' a surface is renamed but the surface object does not match that of the same current name in the base.'
       cli_args = '--csg-only'
       expect_err = "Surface surf_plus_x cannot be renamed to test_new_surf_name as it does not exist in this CSGBase instance."
+      mesh_mode = REPLICATED
     []
     [rename_cell_error]
       max_threads = 1
@@ -108,6 +111,7 @@
       detail = ' a cell is renamed but the cell object does not match that of the same current name in the base.'
       cli_args = '--csg-only'
       expect_err = "Cell square_cell cannot be renamed to test_new_cell_name as it does not exist in this CSGBase instance."
+      mesh_mode = REPLICATED
     []
     [rename_universe_error]
       max_threads = 1
@@ -116,6 +120,7 @@
       detail = ' a universe is renamed but the universe object does not match that of the same current name in the base.'
       cli_args = '--csg-only'
       expect_err = "Universe ROOT_UNIVERSE cannot be renamed to test_new_univ_name as it does not exist in this CSGBase instance."
+      mesh_mode = REPLICATED
     []
     [add_cell_universe_error]
       max_threads = 1
@@ -124,6 +129,7 @@
       detail = ' a cell being added to a universe does not exist in the CSGBase instance.'
       cli_args = '--csg-only'
       expect_err = 'A cell named square_cell is being added to universe new_univ_2 that is different from the cell of the same name in the base instance.'
+      mesh_mode = REPLICATED
     []
     [remove_cell_universe_error]
       max_threads = 1
@@ -132,6 +138,7 @@
       detail = ' a cell being removed from a universe does not exist in the CSGBase instance.'
       cli_args = '--csg-only'
       expect_err = 'A cell named square_cell is being removed from universe ROOT_UNIVERSE that is different from the cell of the same name in the base instance.'
+      mesh_mode = REPLICATED
     []
     [distributed_mesh]
       max_threads = 1
@@ -205,6 +212,7 @@
       detail = ' a universe is created in the CSGBase object that is not linked to the root universe.'
       cli_args = '--csg-only'
       expect_err = "Universe with name YCyls_univ is not linked to root universe."
+      mesh_mode = REPLICATED
     []
   []
 []
