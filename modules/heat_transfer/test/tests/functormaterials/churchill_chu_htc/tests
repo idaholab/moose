@@ -1,0 +1,10 @@
+[Tests]
+  design = 'ChurchillChuHTCFunctorMaterial.md'
+  issues = '#30847'
+  [test]
+    type = CSVDiff
+    input = 'churchill_chu_htc.i'
+    csvdiff = 'churchill_chu_htc_out.csv'
+    requirement = 'The system shall be able to compute a heat transfer coefficient for natural convection using the Churchill-Chu correlation.'
+  []
+[]
