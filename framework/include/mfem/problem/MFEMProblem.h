@@ -20,6 +20,7 @@
 #include "MFEMFunctorMaterial.h"
 #include "MFEMSubMesh.h"
 #include "MFEMVariable.h"
+#include "MFEMInitialCondition.h"
 #include "MFEMBoundaryCondition.h"
 #include "MFEMKernel.h"
 #include "MFEMMixedBilinearFormKernel.h"

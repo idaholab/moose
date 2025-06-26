@@ -10,7 +10,6 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMProblem.h"
-#include "MFEMScalarIC.h"
 
 #include <vector>
 #include <algorithm>
@@ -517,7 +516,7 @@ MFEMProblem::addInitialCondition(const std::string & ic_name,
                                  InputParameters & parameters)
 {
   FEProblemBase::addUserObject(ic_name, name, parameters);
-  getUserObject<MFEMScalarIC>(name); // error check
+  getUserObject<MFEMInitialCondition>(name); // error check
 }
 
 #endif

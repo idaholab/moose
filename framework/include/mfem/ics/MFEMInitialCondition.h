@@ -10,17 +10,17 @@
 #ifdef MFEM_ENABLED
 
 #pragma once
-#include "MFEMInitialCondition.h"
 
 /**
- * Class used to set the initial value(s) on a vector valued MFEMVariable.
+ * Base class used to set the initial value(s) on an MFEMVariable.
  */
-class MFEMVectorIC : public MFEMInitialCondition
+#include "MFEMGeneralUserObject.h"
+
+class MFEMInitialCondition : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
-  MFEMVectorIC(const InputParameters & params);
-  virtual void execute() override;
+  MFEMInitialCondition(const InputParameters & params);
 };
 
 #endif

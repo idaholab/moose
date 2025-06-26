@@ -19,22 +19,14 @@ registerMooseObject("MooseApp", MFEMVectorIC);
 InputParameters
 MFEMVectorIC::validParams()
 {
-  auto params = MFEMGeneralUserObject::validParams();
+  auto params = MFEMInitialCondition::validParams();
   params.addClassDescription("Sets the initial values of an MFEM vector variable from a "
                              "user-specified vector coefficient.");
-  params.addRequiredParam<VariableName>("variable",
-                                        "The variable to apply the initial condition for");
   params.addRequiredParam<MFEMVectorCoefficientName>("coefficient", "The vector coefficient");
-  params.registerBase("InitialCondition");
-  // We cannot generally execute this at construction time since the coefficient may be based on a
-  // MOOSE function which is not itself setup until its initialSetup is called. UserObject initial
-  // execution occurs after function initialSetup
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
-  params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
 }
 
-MFEMVectorIC::MFEMVectorIC(const InputParameters & params) : MFEMGeneralUserObject(params) {}
+MFEMVectorIC::MFEMVectorIC(const InputParameters & params) : MFEMInitialCondition(params) {}
 
 void
 MFEMVectorIC::execute()
