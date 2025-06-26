@@ -13,6 +13,7 @@
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
+#include "MFEMInitialCondition.h"
 #include "MFEMExecutioner.h"
 
 class MFEMProblem : public ExternalProblem

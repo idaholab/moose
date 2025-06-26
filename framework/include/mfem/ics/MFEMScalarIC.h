@@ -10,13 +10,12 @@
 #ifdef MFEM_ENABLED
 
 #pragma once
+#include "MFEMInitialCondition.h"
 
 /**
  * Class used to set the initial value(s) on a scalar valued MFEMVariable.
  */
-#include "MFEMGeneralUserObject.h"
-
-class MFEMScalarIC : public MFEMGeneralUserObject
+class MFEMScalarIC : public MFEMInitialCondition
 {
 public:
   static InputParameters validParams();
