@@ -1,5 +1,7 @@
 # NEML2Action
 
+!if! function=hasCapability('neml2')
+
 !syntax description /NEML2/NEML2Action
 
 !alert note
@@ -68,3 +70,9 @@ The last step is creating the `NEML2ToMOOSE` retrievers to retrieve NEML2 model 
 !syntax parameters /NEML2/NEML2ActionCommon
 
 These input parameters correspond to the sub-blocks under the `[NEML2]` block. The usage of the `[NEML2]` block is explained in details in the [NEML2 syntax](syntax/NEML2/index.md) documentation.
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md
