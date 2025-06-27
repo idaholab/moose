@@ -115,14 +115,24 @@ LinearSystem::initialSetup()
   // Calling initial setup for the linear kernels
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    std::vector<LinearFVKernel *> fv_kernels;
+    std::vector<LinearFVElementalKernel *> fv_elemental_kernels;
     _fe_problem.theWarehouse()
         .query()
-        .template condition<AttribSystem>("LinearFVKernel")
+        .template condition<AttribSystem>("LinearFVElementalKernel")
         .template condition<AttribThread>(tid)
-        .queryInto(fv_kernels);
+        .queryInto(fv_elemental_kernels);
 
-    for (auto * fv_kernel : fv_kernels)
+    for (auto * fv_kernel : fv_elemental_kernels)
+      fv_kernel->initialSetup();
+
+    std::vector<LinearFVFluxKernel *> fv_flux_kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("LinearFVFluxKernel")
+        .template condition<AttribThread>(tid)
+        .queryInto(fv_flux_kernels);
+
+    for (auto * fv_kernel : fv_flux_kernels)
       fv_kernel->initialSetup();
   }
 }

@@ -40,6 +40,6 @@ private:
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
 
-  /// Maps for wall bounded elements
-  std::map<const Elem *, bool> _wall_bounded;
+  /// List for wall bounded elements
+  std::unordered_set<const Elem *> _wall_bounded;
 };
