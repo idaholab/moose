@@ -10,6 +10,7 @@
 #include "BSpline.h"
 #include "libmesh/point.h"
 #include "libMeshReducedNamespace.h"
+#include "MooseError.h"
 
 using namespace libMesh;
 
@@ -27,7 +28,7 @@ BSpline::BSpline(const unsigned int degree, const std::vector<libMesh::Point> & 
  * @return libMesh::Point type with format (x,y,z)
  */
 libMesh::Point
-BSpline::getPoint(const Real t) const
+BSpline::getPoint(const libMesh::Real t) const
 {
   libMesh::Point returnPoint(0, 0, 0);
   for (const auto i : index_range(_control_points))
@@ -39,7 +40,7 @@ BSpline::getPoint(const Real t) const
 /**
  * Creates normalized open uniform knot vector.
  */
-std::vector<Real>
+std::vector<libMesh::Real>
 BSpline::buildKnotVector() const
 {
   const unsigned int num_points_left = _control_points.size() - _degree;
@@ -47,9 +48,13 @@ BSpline::buildKnotVector() const
   if (num_points_left <= 0)
     mooseError("Number of control points must be greater than or equal to degree + 1!");
 
-  std::vector<Real> knot_vector(_degree, 0); // initialize bottom to zeros
+  std::vector<libMesh::Real> knot_vector(_degree, 0); // initialize bottom to zeros
   for (const auto i : make_range(num_points_left))
+  {
     knot_vector.push_back(i); // count up
+    mooseAssert(i < _control_points.size(),
+                "i must be less than the number of control points because of 0 indexing.");
+  }
 
   for (const auto i : make_range(_degree))
   {
@@ -59,26 +64,22 @@ BSpline::buildKnotVector() const
 
   // Normalize values s.t. the the max value is 1.
   // This must be done to have a constant domain of t to be between 0 and 1 (inclusive).
-  for (Real & value : knot_vector)
+  for (libMesh::Real & value : knot_vector)
+  {
     value /= num_points_left;
+    mooseAssert(value <= 1.0 && value >= 0.0,
+                "knot_vector must be normalized to 1 with minimum value 0.");
+  }
 
   return knot_vector;
 }
 
-/**
- * Evaluates the the basis function for a B-Spline according to the Cox-de-Boor
- * recursive formula.
- *
- * @param t,i,j parameter t in [0,1], index corresponding to which control point, and the degree of
- * the basis funtion
- * @return scalar quantity for the contribution of the basis function at i in the sum.
- */
-Real
-BSpline::CdBBasis(const Real & t, const unsigned int i, const unsigned int j) const
+libMesh::Real
+BSpline::CdBBasis(const libMesh::Real & t, const unsigned int i, const unsigned int j) const
 {
   if (j == 0)
   {
-    Real basis_return =
+    libMesh::Real basis_return =
         (t <= _knot_vector[i + 1] && _knot_vector[i] <= t && _knot_vector[i] < _knot_vector[i + 1])
             ? 1
             : 0;
@@ -92,11 +93,11 @@ BSpline::CdBBasis(const Real & t, const unsigned int i, const unsigned int j) co
 /**
  * Submethod to aid in computing the basis function in CdBBasis.
  */
-Real
-BSpline::firstCoeff(const Real & t, const unsigned int i, const unsigned int j) const
+libMesh::Real
+BSpline::firstCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const
 {
-  Real ti = _knot_vector[i];
-  Real tij = _knot_vector[i + j];
+  libMesh::Real ti = _knot_vector[i];
+  libMesh::Real tij = _knot_vector[i + j];
   if (ti != tij)
     return (t - ti) / (tij - ti);
   else
@@ -106,11 +107,11 @@ BSpline::firstCoeff(const Real & t, const unsigned int i, const unsigned int j) 
 /**
  * Submethod to aid in computing the basis function in CdBBasis.
  */
-Real
-BSpline::secondCoeff(const Real & t, const unsigned int i, const unsigned int j) const
+libMesh::Real
+BSpline::secondCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const
 {
-  Real ti1 = _knot_vector[i + 1];
-  Real tij1 = _knot_vector[i + j + 1];
+  libMesh::Real ti1 = _knot_vector[i + 1];
+  libMesh::Real tij1 = _knot_vector[i + j + 1];
   if (ti1 != tij1)
     return (tij1 - t) / (tij1 - ti1);
   else
