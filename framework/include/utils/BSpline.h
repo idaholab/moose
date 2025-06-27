@@ -11,58 +11,47 @@
 
 #include <vector>
 #include "libmesh/point.h"
+#include "libMeshReducedNamespace.h"
+
+using namespace libMesh;
 
 namespace Moose
 {
-/**
- * Class implementing a B-Spline curve
- */
 class BSpline
 {
 public:
   BSpline(const unsigned int degree, const std::vector<libMesh::Point> & control_points);
 
   /**
-   * Evaluate the BSpline interpolation at given value of t.
-   *
-   * @param t the parameter value, must lie in [0,1]
-   * @return libMesh::Point type with format (x,y,z)
+   * Get the point on the spline evaluated at \p t
    */
-  libMesh::Point getPoint(const libMesh::Real t) const;
+  libMesh::Point getPoint(const Real t) const;
 
   /**
-   * Get the built knot vector associated with the degree and control points.
+   * Get the built knot vector associated with the degree and control points
    */
-  const std::vector<libMesh::Real> & getKnotVector() const { return _knot_vector; }
+  const std::vector<Real> & getKnotVector() const { return _knot_vector; }
 
 private:
   /**
    * Internal method for building the knot vector given the degree and control points.
    */
-  std::vector<libMesh::Real> buildKnotVector() const;
+  std::vector<Real> buildKnotVector() const;
 
   /**
-   * Evaluates the the basis function for a B-Spline according to the Cox-de-Boor
-   * recursive formula.
-   *
-   * @param t,i,j parameter t in [0,1], index corresponding to which control point, and the degree
-   * of the basis funtion
-   * @return scalar quantity for the contribution of the basis function at i in the sum.
+   * Internal method for evaluating the Cox-de-Boor basis functions.
+   * Two additional functions, firstCoeff and secondCoeff, are submethods for CdBBasis
+   * function to evaluate front coefficients in the recursive formula.
    */
-  libMesh::Real CdBBasis(const libMesh::Real & t, const unsigned int i, const unsigned int j) const;
-  /**
-   * firstCoeff and secondCoeff are submethods for CdBBasis method.
-   */
-  libMesh::Real
-  firstCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const;
-  libMesh::Real
-  secondCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const;
+  Real CdBBasis(const Real & t, const unsigned int i, const unsigned int j) const;
+  Real firstCoeff(const Real & t, const unsigned int i, const unsigned int j) const;
+  Real secondCoeff(const Real & t, const unsigned int i, const unsigned int j) const;
 
   /// The polynomial degree.
   const unsigned int _degree;
   /// The control points.
   const std::vector<libMesh::Point> _control_points;
   /// The knot vector.
-  const std::vector<libMesh::Real> _knot_vector;
+  const std::vector<Real> _knot_vector;
 };
 }
