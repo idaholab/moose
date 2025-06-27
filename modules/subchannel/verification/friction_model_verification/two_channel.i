@@ -132,7 +132,6 @@ P_out = 155e+5 # Pa
 []
 
 [Outputs]
-  exodus = true
   csv = true
 []
 

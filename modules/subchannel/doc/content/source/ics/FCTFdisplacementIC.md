@@ -18,11 +18,11 @@ subchannels that is taken into consideration, since the perimetric subchannels a
 
 An example input file that uses this initial condition kernel is shown below:
 
-!listing /validation/areva_FCTF/FCTF_deformed.i language=cpp
+!listing /validation/areva_FCTF/FCTF_deformed.i language=moose
 
 In this input file the variable `displacement` is populated in the Initial Conditions block (ICs), using the custom kernel `FCTFdisplacementIC`.
 
-!listing /validation/areva_FCTF/FCTF_deformed.i block=ICs language=cpp
+!listing /validation/areva_FCTF/FCTF_deformed.i block=ICs language=moose
 
 !syntax parameters /ICs/FCTFdisplacementIC
 
