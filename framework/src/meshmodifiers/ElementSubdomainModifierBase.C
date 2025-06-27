@@ -1322,6 +1322,7 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys,
     }
 
   vec.close();
+  vec.localize(*sys.system().current_local_solution, sys.dofMap().get_send_list());
 }
 
 void
