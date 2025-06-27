@@ -96,6 +96,13 @@
       detail = 'The system shall support assigning an initial condition directly within the Variable block as a value; however, if nodal patch recovery is enabled, the behavior shall be consistent with specifying the value in `nodal_patch_recovery_uo`.'
     []
 
+    [IC_for_newlyactivated_nodes_old_test]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_npr_output_old_older.i'
+      exodiff = 'external_moving_boundary_npr_output_old_older_out.e external_moving_boundary_npr_output_old_older_out.e-s002 external_moving_boundary_npr_output_old_older_out.e-s003 external_moving_boundary_npr_output_old_older_out.e-s004'
+      detail = 'The system shall correctly update the old and older solutions after setting the current solution on newly activated nodes.'
+    []
+
   []
 
   [error_test]
