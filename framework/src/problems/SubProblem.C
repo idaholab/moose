@@ -769,12 +769,6 @@ SubProblem::nLinearIterations(unsigned int) const
   return 0;
 }
 
-void
-SubProblem::meshChanged()
-{
-  mooseError("This system does not support changing the mesh");
-}
-
 std::string
 SubProblem::restrictionSubdomainCheckName(SubdomainID check_id)
 {

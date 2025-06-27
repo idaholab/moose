@@ -20,38 +20,38 @@
     path = framework/contrib/wasp
     url = https://code.ornl.gov/neams-workbench/wasp.git
 [submodule "modules/fluid_properties/contrib/sodium"]
-	path = modules/fluid_properties/contrib/sodium
-	url = https://github.com/idaholab/sodium.git
+    path = modules/fluid_properties/contrib/sodium
+    url = https://github.com/idaholab/sodium.git
     update = none
 [submodule "modules/fluid_properties/contrib/potassium"]
-	path = modules/fluid_properties/contrib/potassium
-	url = https://github.com/idaholab/potassium.git
+    path = modules/fluid_properties/contrib/potassium
+    url = https://github.com/idaholab/potassium.git
     update = none
 [submodule "modules/fluid_properties/contrib/nitrogen"]
-	path = modules/fluid_properties/contrib/nitrogen
-	url = https://github.com/idaholab/nitrogen.git
+    path = modules/fluid_properties/contrib/nitrogen
+    url = https://github.com/idaholab/nitrogen.git
     update = none
 [submodule "modules/fluid_properties/contrib/helium"]
-	path = modules/fluid_properties/contrib/helium
-	url = https://github.com/idaholab/helium.git
+    path = modules/fluid_properties/contrib/helium
+    url = https://github.com/idaholab/helium.git
     update = none
 [submodule "modules/fluid_properties/contrib/air"]
-	path = modules/fluid_properties/contrib/air
-	url = https://github.com/idaholab/air.git
+    path = modules/fluid_properties/contrib/air
+    url = https://github.com/idaholab/air.git
     update = none
 [submodule "modules/fluid_properties/contrib/carbon_dioxide"]
-	path = modules/fluid_properties/contrib/carbon_dioxide
-	url = https://github.com/idaholab/carbon_dioxide.git
+    path = modules/fluid_properties/contrib/carbon_dioxide
+    url = https://github.com/idaholab/carbon_dioxide.git
     update = none
 [submodule "framework/contrib/mfem"]
-	path = framework/contrib/mfem
+    path = framework/contrib/mfem
     url = ../../mfem/mfem.git
     update = none
 [submodule "framework/contrib/conduit"]
-	path = framework/contrib/conduit
-	url = https://github.com/LLNL/conduit.git
+    path = framework/contrib/conduit
+    url = https://github.com/LLNL/conduit.git
     update = none
 [submodule "framework/contrib/neml2"]
-	path = framework/contrib/neml2
-	url = ../../applied-material-modeling/neml2.git
+    path = framework/contrib/neml2
+    url = ../../applied-material-modeling/neml2.git
     update = none

@@ -524,6 +524,9 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   //  We will toggle this to false when doing residual evaluations
   ADReal::do_derivatives = true;
 
+  // Disable refinement/coarsening in EquationSystems::reinit because we already do this ourselves
+  es().disable_refine_in_reinit();
+
   _solver_params.reserve(_num_nl_sys + _num_linear_sys);
   // Default constructor fine for nonlinear because it will be populated later by framework
   // executioner/solve object parameters
@@ -1519,7 +1522,8 @@ FEProblemBase::timestepSetup()
       //     re-displaced, we can perform our geometric searches, which will aid in determining the
       //     sparsity pattern of the matrix held by the libMesh::ImplicitSystem held by the
       //     NonlinearSystem held by this
-      meshChangedHelper(/*intermediate_change=*/true);
+      meshChanged(
+          /*intermediate_change=*/true, /*contract_mesh=*/true, /*clean_refinement_flags=*/true);
     }
 
     // u4) Now that all the geometric searches have been done (both undisplaced and displaced),
@@ -7880,7 +7884,8 @@ FEProblemBase::initialAdaptMesh()
 
       if (_adaptivity.initialAdaptMesh())
       {
-        meshChanged();
+        meshChanged(
+            /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/true);
 
         // reproject the initial condition
         projectSolution();
@@ -7927,7 +7932,8 @@ FEProblemBase::adaptMesh()
     {
       mesh_changed = true;
 
-      meshChangedHelper(true); // This may be an intermediate change
+      meshChanged(
+          /*intermediate_change=*/true, /*contract_mesh=*/true, /*clean_refinement_flags=*/true);
       _cycles_completed++;
     }
     else
@@ -7994,12 +8000,17 @@ FEProblemBase::updateMeshXFEM()
   if (haveXFEM())
   {
     if (_xfem->updateHeal())
-      meshChanged();
+      // XFEM exodiff tests rely on a given numbering because they cannot use map = true due to
+      // having coincident elements. While conceptually speaking we do not need to contract the
+      // mesh, we need its call to renumber_nodes_and_elements in order to preserve these tests
+      meshChanged(
+          /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/false);
 
     updated = _xfem->update(_time, _nl, *_aux);
     if (updated)
     {
-      meshChanged();
+      meshChanged(
+          /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/false);
       _xfem->initSolution(_nl, *_aux);
       restoreSolutions();
     }
@@ -8008,17 +8019,11 @@ FEProblemBase::updateMeshXFEM()
 }
 
 void
-FEProblemBase::meshChanged()
+FEProblemBase::meshChanged(const bool intermediate_change,
+                           const bool contract_mesh,
+                           const bool clean_refinement_flags)
 {
   TIME_SECTION("meshChanged", 3, "Handling Mesh Changes");
-
-  this->meshChangedHelper();
-}
-
-void
-FEProblemBase::meshChangedHelper(bool intermediate_change)
-{
-  TIME_SECTION("meshChangedHelper", 5);
 
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
       _neighbor_material_props.hasStatefulProperties())
@@ -8039,8 +8044,21 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   if (intermediate_change)
     es().reinit_solutions();
   else
-  {
     es().reinit();
+
+  if (contract_mesh)
+    // Once vectors are restricted, we can delete children of coarsened elements
+    _mesh.getMesh().contract();
+  if (clean_refinement_flags)
+  {
+    // Finally clear refinement flags so that if someone tries to project vectors again without
+    // an intervening mesh refinement to clear flags they won't run into trouble
+    MeshRefinement refinement(_mesh.getMesh());
+    refinement.clean_refinement_flags();
+  }
+
+  if (!intermediate_change)
+  {
     // Since the mesh has changed, we need to make sure that we update any of our
     // MOOSE-system specific data.
     for (auto & sys : _solver_systems)
@@ -8073,7 +8091,7 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
 
   if (_displaced_problem)
   {
-    _displaced_problem->meshChanged();
+    _displaced_problem->meshChanged(contract_mesh, clean_refinement_flags);
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
   }
 
@@ -8144,6 +8162,10 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
     setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
 
   _has_jacobian = false; // we have to recompute jacobian when mesh changed
+
+  // Now for backwards compatibility with user code that overrode the old no-arg meshChanged we must
+  // call it here
+  meshChanged();
 }
 
 void
@@ -8880,7 +8902,8 @@ FEProblemBase::uniformRefine()
   if (_displaced_problem)
     Adaptivity::uniformRefine(&_displaced_problem->mesh(), 1);
 
-  meshChangedHelper(/*intermediate_change=*/false);
+  meshChanged(
+      /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/true);
 }
 
 void
