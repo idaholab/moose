@@ -21,6 +21,9 @@ BSpline::BSpline(const unsigned int degree, const std::vector<libMesh::Point> & 
 {
 }
 
+/**
+ * Evaluate B-Spline at given t value using the control points.
+ */
 libMesh::Point
 BSpline::getPoint(const Real t) const
 {
@@ -73,7 +76,7 @@ BSpline::buildKnotVector() const
 Real
 BSpline::CdBBasis(const Real & t, const unsigned int i, const unsigned int j) const
 {
-  mooseAssert(j >= 0, "j (spline degree) must be >= 0.");
+  mooseAssert(j >= 0, "j (polynomial degree) must be positive.");
   if (j == 0)
   {
     Real basis_return =
