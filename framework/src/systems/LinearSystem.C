@@ -79,9 +79,6 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
     _sys(fe_problem.es().add_system<LinearImplicitSystem>(name)),
     _rhs_time_tag(-1),
     _rhs_time(NULL),
-    // We add this vector tag so that objects acting on the aux system inheriting
-    // from the tagging interface can still be used without any nonlinear systems
-    // _rhs_non_time_tag(_fe_problem.addVectorTag("NONTIME")),
     _rhs_non_time_tag(-1),
     _rhs_non_time(NULL),
     _n_linear_iters(0),
@@ -116,28 +113,16 @@ LinearSystem::initialSetup()
                  name);
 
   // Calling initial setup for the linear kernels
-  // Note: if we ever create a kernel not inheriting from LinearFVElementalKernel
-  // or LinearFVFluxKernel, we will need to add the initialsetup here
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    std::vector<LinearFVElementalKernel *> fv_elemental_kernels;
+    std::vector<LinearFVKernel *> fv_kernels;
     _fe_problem.theWarehouse()
         .query()
-        .template condition<AttribSystem>("LinearFVElementalKernel")
+        .template condition<AttribSystem>("LinearFVKernel")
         .template condition<AttribThread>(tid)
-        .queryInto(fv_elemental_kernels);
+        .queryInto(fv_kernels);
 
-    for (auto * fv_kernel : fv_elemental_kernels)
-      fv_kernel->initialSetup();
-
-    std::vector<LinearFVFluxKernel *> fv_flux_kernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .template condition<AttribSystem>("LinearFVFluxKernel")
-        .template condition<AttribThread>(tid)
-        .queryInto(fv_flux_kernels);
-
-    for (auto * fv_kernel : fv_flux_kernels)
+    for (auto * fv_kernel : fv_kernels)
       fv_kernel->initialSetup();
   }
 }
