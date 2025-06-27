@@ -82,18 +82,6 @@ LinearFVTurbulentViscosityWallFunctionBC::computeTurbulentViscosity() const
     y_plus = wall_dist * u_tau * rho / mu;
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
     mut_log = mu_wall - mu;
-
-    // if(_current_face_info->elem().vertex_average()(0) >= 0 &&
-    // _current_face_info->elem().vertex_average()(1) > 0)
-    // {
-    //  _console << "wall_dist: " << wall_dist << std::endl;
-    //  _console << "parallel_speed: " << parallel_speed << std::endl;
-    //  _console << "u_tau: " << u_tau << std::endl;
-    //  _console << "rho: " << rho << std::endl;
-    //  _console << "mu: " << mu << std::endl;
-    //  _console << "mu_wall: " << mu_wall << std::endl;
-    //  _console << "------------------------" << std::endl;
-    // }
   }
   else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)
   {
