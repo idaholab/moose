@@ -13,8 +13,8 @@
 #include "NS.h"
 
 /**
- * Class implementing a Dirichlet boundary condition for linear finite
- * volume variables. This is only applicable for advection-diffusion problems.
+ * Class implementing a Dirichlet boundary condition for the turbulent viscosity wall function
+ * in a RANS simulation
  */
 class LinearFVTurbulentViscosityWallFunctionBC : public LinearFVAdvectionDiffusionBC
 {
@@ -66,9 +66,9 @@ protected:
   const Real _C_mu;
 
   /// Method used for wall treatment
-  NS::WallTreatmentEnum _wall_treatment;
+  const NS::WallTreatmentEnum _wall_treatment;
 
   // Mu_t evaluated at y+=30 for blending purposes
-  const Real _mut_30 =
+  static constexpr Real _mut_30 =
       (NS::von_karman_constant * 30.0 / std::log(NS::E_turb_constant * 30.0) - 1.0);
 };

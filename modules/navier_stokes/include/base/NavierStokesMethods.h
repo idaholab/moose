@@ -140,7 +140,7 @@ void getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_name
                             const FEProblemBase & fe_problem,
                             const SubProblem & subproblem,
                             const std::set<SubdomainID> & block_ids,
-                            std::map<const Elem *, bool> & wall_bounded_map);
+                            std::unordered_set<const Elem *> & wall_bounded);
 
 /**
  * Map storing wall ditance for near-wall marked elements
