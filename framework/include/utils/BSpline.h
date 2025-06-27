@@ -14,18 +14,24 @@
 
 namespace Moose
 {
+/**
+ * Class implementing a B-Spline curve.
+ */
 class BSpline
 {
 public:
   BSpline(const unsigned int degree, const std::vector<libMesh::Point> & control_points);
 
   /**
-   * Get the point on the spline evaluated at \p t
+   * Evaluate the BSpline interpolation at given value of t.
+   *
+   * @param t the parameter value, must lie in [0,1]
+   * @return libMesh::Point type with format (x,y,z)
    */
   libMesh::Point getPoint(const libMesh::Real t) const;
 
   /**
-   * Get the built knot vector associated with the degree and control points
+   * Get the built knot vector associated with the degree and control points.
    */
   const std::vector<libMesh::Real> & getKnotVector() const { return _knot_vector; }
 

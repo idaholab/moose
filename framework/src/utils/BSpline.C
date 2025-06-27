@@ -22,10 +22,7 @@ BSpline::BSpline(const unsigned int degree, const std::vector<libMesh::Point> & 
 }
 
 /**
- * Evaluate the BSpline interpolation at given value of t.
- *
- * @param t the parameter value, must lie in [0,1]
- * @return libMesh::Point type with format (x,y,z)
+ * Evaluate B-Spline at given t value using the control points.
  */
 libMesh::Point
 BSpline::getPoint(const libMesh::Real t) const
@@ -77,6 +74,7 @@ BSpline::buildKnotVector() const
 libMesh::Real
 BSpline::CdBBasis(const libMesh::Real & t, const unsigned int i, const unsigned int j) const
 {
+  mooseAssert(j >= 0, "j (polynomial degree) must be positive.");
   if (j == 0)
   {
     libMesh::Real basis_return =
