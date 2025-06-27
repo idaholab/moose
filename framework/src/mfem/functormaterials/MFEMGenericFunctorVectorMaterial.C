@@ -84,7 +84,7 @@ MFEMGenericFunctorVectorMaterial::MFEMGenericFunctorVectorMaterial(
 
   for (const auto i : index_range(_prop_names))
     _properties.declareVectorProperty(
-        _prop_names[i], subdomainsToStrings(_block_ids), _prop_values[i]);
+        _prop_names[i], subdomainsToStrings(_subdomain_names), _prop_values[i]);
 }
 
 MFEMGenericFunctorVectorMaterial::~MFEMGenericFunctorVectorMaterial() {}

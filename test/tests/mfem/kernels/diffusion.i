@@ -44,18 +44,42 @@
   []
 []
 
+[ICs]
+  [diffused_ic]
+    type = MFEMScalarIC
+    coefficient = one
+    variable = concentration
+  []
+[]
+
+[Functions]
+  [one]
+    type = ParsedFunction
+    expression = 1.0
+  []
+[]
+
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
     variable = concentration
-    boundary = '1'
+    boundary = 'bottom'
     coefficient = 1.0
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
     variable = concentration
-    boundary = '2'
+    boundary = 'top'
     coefficient = 0.0
+  []
+[]
+
+[FunctorMaterials]
+  [Substance]
+    type = MFEMGenericFunctorMaterial
+    prop_names = diffusivity
+    prop_values = 1.0
+    block = 'the_domain'
   []
 []
 
