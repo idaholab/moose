@@ -63,17 +63,17 @@ protected:
   const bool _linearized_model;
 
   /// Method used for wall treatment
-  NS::WallTreatmentEnum _wall_treatment;
+  const NS::WallTreatmentEnum _wall_treatment;
 
   /// C_mu constant
   const Real _C_mu;
 
-  // Production Limiter Constant
+  /// Production Limiter Constant
   const Real _C_pl;
 
   ///@{
   /// Maps for wall treatement
-  std::map<const Elem *, bool> _wall_bounded;
+  std::unordered_set<const Elem *> _wall_bounded;
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
   ///@}

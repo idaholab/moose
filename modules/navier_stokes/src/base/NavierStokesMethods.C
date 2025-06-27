@@ -242,10 +242,10 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_names,
                        const FEProblemBase & fe_problem,
                        const SubProblem & subproblem,
                        const std::set<SubdomainID> & block_ids,
-                       std::map<const Elem *, bool> & wall_bounded_map)
+                       std::unordered_set<const Elem *> & wall_bounded)
 {
 
-  wall_bounded_map.clear();
+  wall_bounded.clear();
   const auto wall_boundary_ids = subproblem.mesh().getBoundaryIDs(wall_boundary_names);
 
   for (const auto & elem : fe_problem.mesh().getMesh().active_element_ptr_range())
@@ -258,7 +258,7 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_names,
         {
           for (const auto side_id : side_bnds)
             if (side_id == wall_id)
-              wall_bounded_map[elem] = true;
+              wall_bounded.insert(elem);
         }
       }
   }

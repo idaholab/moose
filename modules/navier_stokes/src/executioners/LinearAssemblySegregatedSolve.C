@@ -454,7 +454,6 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
                                                    const Real relaxation_factor,
                                                    SolverConfiguration & solver_config,
                                                    const Real absolute_tol,
-                                                   const bool relax_fields,
                                                    const Real field_relaxation)
 {
   _problem.setCurrentLinearSystem(system_num);
@@ -511,7 +510,7 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   }
 
   // Relax the field update for the next momentum predictor
-  if (relax_fields)
+  if (field_relaxation != 1.0)
   {
     const auto & old_local_solution = *(system.solutionPreviousNewton());
     NS::FV::relaxSolutionUpdate(current_local_solution, old_local_solution, field_relaxation);
@@ -651,7 +650,6 @@ LinearAssemblySegregatedSolve::solve()
                                 _turbulence_equation_relaxation[i],
                                 _turbulence_linear_control,
                                 _turbulence_l_abs_tol,
-                                true,
                                 _turbulence_field_relaxation[i]);
 
         // Limiting turbulence solution

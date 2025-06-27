@@ -65,7 +65,6 @@ protected:
                                                     const Real relaxation_factor,
                                                     libMesh::SolverConfiguration & solver_config,
                                                     const Real abs_tol,
-                                                    const bool relax_fields = false,
                                                     const Real field_relaxation = 1.0);
 
   /// Solve an equation which contains the solid energy conservation.
