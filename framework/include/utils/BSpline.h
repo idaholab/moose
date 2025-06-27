@@ -11,9 +11,6 @@
 
 #include <vector>
 #include "libmesh/point.h"
-#include "libMeshReducedNamespace.h"
-
-using namespace libMesh;
 
 namespace Moose
 {
@@ -25,33 +22,41 @@ public:
   /**
    * Get the point on the spline evaluated at \p t
    */
-  libMesh::Point getPoint(const Real t) const;
+  libMesh::Point getPoint(const libMesh::Real t) const;
 
   /**
    * Get the built knot vector associated with the degree and control points
    */
-  const std::vector<Real> & getKnotVector() const { return _knot_vector; }
+  const std::vector<libMesh::Real> & getKnotVector() const { return _knot_vector; }
 
 private:
   /**
    * Internal method for building the knot vector given the degree and control points.
    */
-  std::vector<Real> buildKnotVector() const;
+  std::vector<libMesh::Real> buildKnotVector() const;
 
   /**
-   * Internal method for evaluating the Cox-de-Boor basis functions.
-   * Two additional functions, firstCoeff and secondCoeff, are submethods for CdBBasis
-   * function to evaluate front coefficients in the recursive formula.
+   * Evaluates the the basis function for a B-Spline according to the Cox-de-Boor
+   * recursive formula.
+   *
+   * @param t,i,j parameter t in [0,1], index corresponding to which control point, and the degree
+   * of the basis funtion
+   * @return scalar quantity for the contribution of the basis function at i in the sum.
    */
-  Real CdBBasis(const Real & t, const unsigned int i, const unsigned int j) const;
-  Real firstCoeff(const Real & t, const unsigned int i, const unsigned int j) const;
-  Real secondCoeff(const Real & t, const unsigned int i, const unsigned int j) const;
+  libMesh::Real CdBBasis(const libMesh::Real & t, const unsigned int i, const unsigned int j) const;
+  /**
+   * firstCoeff and secondCoeff are submethods used in CdBBasis routine.
+   */
+  libMesh::Real
+  firstCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const;
+  libMesh::Real
+  secondCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const;
 
   /// The polynomial degree.
   const unsigned int _degree;
   /// The control points.
   const std::vector<libMesh::Point> _control_points;
   /// The knot vector.
-  const std::vector<Real> _knot_vector;
+  const std::vector<libMesh::Real> _knot_vector;
 };
 }
