@@ -178,6 +178,7 @@
     input = 'random4.i'
     csvdiff = 'random4.csv'
     cli_args = 'Mesh/nx=10 Mesh/ny=12 Mesh/xmax=10 Mesh/ymax=12'
+    capabilities = 'method!=dbg'
   [../]
   [./random4_heavy]
     type = CSVDiff

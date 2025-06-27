@@ -42,6 +42,7 @@
                "Physics/SolidMechanics/QuasiStatic/all/formulation=TOTAL "
                "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true"
     design = 'source/actions/TensorMechanicsAction.md'
+    heavy = true
   []
   [action_small_no_stab]
     type = Exodiff
@@ -55,6 +56,7 @@
                "Physics/SolidMechanics/QuasiStatic/all/formulation=TOTAL "
                "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
     design = 'source/actions/TensorMechanicsAction.md'
+    heavy = true
   []
   [action_1D]
     type = Exodiff

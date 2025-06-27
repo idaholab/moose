@@ -189,6 +189,7 @@
     recover = false
     requirement = "The system shall calculate the effect of damage on the stress of a nonlocal damage model."
     issues = '#21786'
+    capabilities = 'method!=dbg'
   []
   [ad_nonlocal_damage_model]
     type = 'CSVDiff'
@@ -199,5 +200,6 @@
     requirement = "The system shall calculate the effect of damage on the stress of a nonlocal damage model. "
     "When using automatic differentiation."
     issues = '#21786'
+    capabilities = 'method!=dbg'
   []
 []

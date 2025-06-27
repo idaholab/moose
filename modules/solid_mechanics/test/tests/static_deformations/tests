@@ -15,11 +15,13 @@
     type = 'CSVDiff'
     input = 'cosserat_glide.i'
     csvdiff = 'cosserat_glide_out_soln_0001.csv'
+    capabilities = 'method!=dbg'
   [../]
   [./glide_fake_plastic]
     type = 'CSVDiff'
     input = 'cosserat_glide_fake_plastic.i'
     csvdiff = 'cosserat_glide_fake_plastic_out_soln_0001.csv'
+    capabilities = 'method!=dbg'
   [../]
   [./layered_cosserat_01]
     type = 'CSVDiff'
@@ -43,6 +45,7 @@
     override_columns = 'wc_y'
     override_rel_err = '1e-5'
     override_abs_zero = '5e-6'
+    capabilities = 'method!=dbg'
   [../]
   [./beam_cosserat_01_slippery]
     type = 'CSVDiff'

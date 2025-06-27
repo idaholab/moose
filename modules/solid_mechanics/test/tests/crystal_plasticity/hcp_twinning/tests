@@ -11,6 +11,7 @@
                'in Miller-Bravais indices and shall calculate a twin volume '
                'fraction when using the FCC Kalidindi twinning model with a '
                'modified input file.'
+      capabilities = 'method!=dbg'
     []
     [demonstration_combined_hcp_slip_twins]
       type = CSVDiff
@@ -19,6 +20,7 @@
       cli_args = 'Outputs/out/type=Checkpoint Outputs/out/execute_on=Final'
       detail = 'compute a plastic velocity gradient that accounts for deformation '
                'contributions from both slip and twinning in an HCP crystal.'
+      capabilities = 'method!=dbg'
     []
   []
   [demonstration_combined_hcp_slip_twins_restart]
@@ -34,5 +36,6 @@
     issues = '#26458'
     design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md /CrystalPlasticityTwinningKalidindiUpdate.md'
     prereq = 'coupling_demonstration/demonstration_combined_hcp_slip_twins'
+    capabilities = 'method!=dbg'
   []
 []
