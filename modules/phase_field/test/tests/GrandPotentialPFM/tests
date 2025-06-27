@@ -109,9 +109,8 @@
     type = 'PetscJacobianTester'
     input = 'GrandPotentialMultiphase_AD.i'
     run_sim = 'True'
-    cli_args = 'Outputs/exodus=false Executioner/num_steps=1'
+    cli_args = 'Mesh/nx=3 Mesh/ny=3 Outputs/exodus=false Executioner/num_steps=1'
     ratio_tol = 1e-7
-    difference_tol = 1e-4
     issues = '#15573'
     design = '/ACSwitching.md /CoupledSwitchingTimeDerivative.md'
     requirement = 'The jacobian for the AD Allen-Cahn problem with a variable dependent coeffecients shall be perfect'

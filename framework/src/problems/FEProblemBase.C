@@ -408,7 +408,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
-    _set_nonlinear_convergence_names(false),
     _need_to_add_default_nonlinear_convergence(false),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
@@ -503,7 +502,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _force_restart(getParam<bool>("force_restart")),
     _allow_ics_during_restart(getParam<bool>("allow_initial_conditions_with_restart")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
-    _fail_next_nonlinear_convergence_check(false),
+    _fail_next_system_convergence_check(false),
     _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
     _show_invalid_solution_console(getParam<bool>("show_invalid_solution_console")),
     _immediately_print_invalid_solution(getParam<bool>("immediately_print_invalid_solution")),
@@ -6362,7 +6361,7 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
   // reset flag so that residual evaluation does not get skipped
   // and the next non-linear iteration does not automatically fail with
   // "DIVERGED_NANORINF", when we throw  an exception and stop solve
-  _fail_next_nonlinear_convergence_check = false;
+  _fail_next_system_convergence_check = false;
 
   if (_solve)
   {
@@ -6436,7 +6435,7 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 
       // Force the next non-linear convergence check to fail (and all further residual evaluation
       // to be skipped).
-      _fail_next_nonlinear_convergence_check = true;
+      _fail_next_system_convergence_check = true;
 
       // Repropagate the exception, so it can be caught at a higher level, typically
       // this is NonlinearSystem::computeResidual().
@@ -6486,6 +6485,9 @@ FEProblemBase::solveLinearSystem(const unsigned int linear_sys_num,
 
   const Moose::PetscSupport::PetscOptions & options = po ? *po : _petsc_options;
   auto & solver_params = _solver_params[numNonlinearSystems() + linear_sys_num];
+
+  // Set custom convergence criteria
+  Moose::PetscSupport::petscSetDefaults(*this);
 
 #if PETSC_RELEASE_LESS_THAN(3, 12, 0)
   LibmeshPetscCall(Moose::PetscSupport::petscSetOptions(
@@ -9016,16 +9018,38 @@ FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> &
     paramError("nonlinear_convergence",
                "There must be one convergence object per nonlinear system");
   _nonlinear_convergence_names = convergence_names;
-  _set_nonlinear_convergence_names = true;
 }
 
-std::vector<ConvergenceName>
+const std::vector<ConvergenceName> &
 FEProblemBase::getNonlinearConvergenceNames() const
 {
-  if (_set_nonlinear_convergence_names)
-    return _nonlinear_convergence_names;
-  else
-    mooseError("The nonlinear convergence name(s) have not been set.");
+  if (_nonlinear_convergence_names)
+    return *_nonlinear_convergence_names;
+  mooseError("The nonlinear system convergence name(s) have not been set.");
+}
+
+bool
+FEProblemBase::hasLinearConvergenceObjects() const
+{
+  // If false,this means we have not set one, not that we are querying this too early
+  // TODO: once there is a default linear CV object, error on the 'not set' case
+  return _linear_convergence_names.has_value();
+}
+
+void
+FEProblemBase::setLinearConvergenceNames(const std::vector<ConvergenceName> & convergence_names)
+{
+  if (convergence_names.size() != numLinearSystems())
+    paramError("linear_convergence", "There must be one convergence object per linear system");
+  _linear_convergence_names = convergence_names;
+}
+
+const std::vector<ConvergenceName> &
+FEProblemBase::getLinearConvergenceNames() const
+{
+  if (_linear_convergence_names)
+    return *_linear_convergence_names;
+  mooseError("The linear convergence name(s) have not been set.");
 }
 
 void

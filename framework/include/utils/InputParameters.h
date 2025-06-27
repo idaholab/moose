@@ -1872,13 +1872,9 @@ InputParameters::addCommandLineParam(const std::string & name,
 
   auto constexpr is_bool = std::is_same_v<T, bool>;
   if constexpr (is_bool)
-  {
     addParam<T>(name, false, doc_string);
-  }
   else
-  {
     addParam<T>(name, doc_string);
-  }
 
   addCommandLineParamHelper<T>(
       name, syntax, /* required = */ false, /* value_required = */ !is_bool);

@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2025.06.13" %}
+{% set version = "2025.06.26" %}
 
 package:
   name: moose-tools
@@ -55,6 +55,7 @@ requirements:
     - pyflakes
     - pylatexenc
     - pylint
+    - pymongo
     - python
     - pyyaml
     - requests
@@ -89,6 +90,7 @@ test:
     - pyflakes
     - pylatexenc
     - pylint
+    - pymongo
     - requests
     - skimage
     - sympy

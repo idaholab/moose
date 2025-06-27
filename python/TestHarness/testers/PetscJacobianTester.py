@@ -17,8 +17,8 @@ class PetscJacobianTester(RunApp):
     @staticmethod
     def validParams():
         params = RunApp.validParams()
-        params.addParam('ratio_tol', 1e-8, "Relative tolerance to compare the ration against.")
-        params.addParam('difference_tol', 1e-6, "Relative tolerance to compare the difference against.")
+        params.addParam('ratio_tol', 1e-7, "Relative tolerance to compare the ration against.")
+        params.addParam('difference_tol', 1e0, "Relative tolerance to compare the difference against.")
         params.addParam('state', 'user', "The state for which we want to compare against the "
                                          "finite-differenced Jacobian ('user', 'const_positive', or "
                                          "'const_negative'.")

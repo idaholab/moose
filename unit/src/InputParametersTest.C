@@ -825,3 +825,29 @@ TEST(InputParametersTest, isCommandLineParameter)
   EXPECT_TRUE(params.isCommandLineParameter("cliparam"));
   EXPECT_FALSE(params.isCommandLineParameter("noncliparam"));
 }
+
+TEST(InputParametersTest, commandLineParamKnownArg)
+{
+  // Helper for checking if a command line name is registered
+  const auto have_cl_name = [](const std::string & var) -> bool
+  {
+    const auto names = libMesh::command_line_names();
+    return std::find(names.begin(), names.end(), var) != names.end();
+  };
+
+  const std::vector<std::string> switches{"-iptest_knownarg", "--iptest_anotherarg"};
+
+  // These arguments should not be recognized yet; these need to be unique
+  // names because the libMesh command line is shared across unit tests
+  for (const auto & v : switches)
+    ASSERT_FALSE(have_cl_name(v));
+
+  // Adding these arguments should call back to libMesh::add_command_line_name
+  InputParameters params = emptyInputParameters();
+  const auto combined_switches = MooseUtils::stringJoin(switches, " ");
+  params.addCommandLineParam<std::string>("foo", combined_switches, "Doc");
+
+  // Should now be recognized
+  for (const auto & v : switches)
+    ASSERT_TRUE(have_cl_name(v));
+}
