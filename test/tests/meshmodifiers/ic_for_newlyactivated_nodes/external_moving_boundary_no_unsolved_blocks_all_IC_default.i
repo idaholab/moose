@@ -2,6 +2,13 @@
   block = '1'
 []
 
+[Problem]
+  kernel_coverage_check = 'only_list'
+  kernel_coverage_block_list = '1'
+  material_coverage_check = 'only_list'
+  material_coverage_block_list = '1'
+[]
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
