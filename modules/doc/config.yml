@@ -185,6 +185,7 @@ Extensions:
             meshdivisions: syntax/MeshDivisions/index.md
             meshgenerators: syntax/Mesh/index.md
             meshmodifiers: syntax/MeshModifiers/index.md
+            mfem: syntax/MFEM/index.md
             multiapps: syntax/MultiApps/index.md
             neml2: syntax/NEML2/index.md
             nodalkernels: syntax/NodalKernels/index.md
