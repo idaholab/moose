@@ -10,7 +10,6 @@
 #include "BSpline.h"
 #include "libmesh/point.h"
 #include "libMeshReducedNamespace.h"
-#include "MooseError.h"
 
 using namespace libMesh;
 
@@ -21,6 +20,12 @@ BSpline::BSpline(const unsigned int degree, const std::vector<libMesh::Point> & 
 {
 }
 
+/**
+ * Evaluate the BSpline interpolation at given value of t.
+ *
+ * @param t the parameter value, must lie in [0,1]
+ * @return libMesh::Point type with format (x,y,z)
+ */
 libMesh::Point
 BSpline::getPoint(const Real t) const
 {
@@ -44,11 +49,7 @@ BSpline::buildKnotVector() const
 
   std::vector<Real> knot_vector(_degree, 0); // initialize bottom to zeros
   for (const auto i : make_range(num_points_left))
-  {
     knot_vector.push_back(i); // count up
-    mooseAssert(i < _control_points.size(),
-                "i should not be larger than the number of control points - 1.");
-  }
 
   for (const auto i : make_range(_degree))
   {
@@ -61,19 +62,20 @@ BSpline::buildKnotVector() const
   for (Real & value : knot_vector)
     value /= num_points_left;
 
-  mooseAssert(*std::max_element(knot_vector.begin(), knot_vector.end()) == 1.0,
-              "Max knot value must be 1.");
-
   return knot_vector;
 }
 
 /**
- * Method to evaluate the basis function.
+ * Evaluates the the basis function for a B-Spline according to the Cox-de-Boor
+ * recursive formula.
+ *
+ * @param t,i,j parameter t in [0,1], index corresponding to which control point, and the degree of
+ * the basis funtion
+ * @return scalar quantity for the contribution of the basis function at i in the sum.
  */
 Real
 BSpline::CdBBasis(const Real & t, const unsigned int i, const unsigned int j) const
 {
-  mooseAssert(j >= 0, "j (spline degree) must be >= 0.");
   if (j == 0)
   {
     Real basis_return =
