@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "CovarianceFunctionBase.h"
 
@@ -39,8 +40,8 @@ CovarianceFunctionBase::CovarianceFunctionBase(const InputParameters & parameter
 }
 
 bool
-CovarianceFunctionBase::computedKdhyper(RealEigenMatrix & /*dKdhp*/,
-                                        const RealEigenMatrix & /*x*/,
+CovarianceFunctionBase::computedKdhyper(torch::Tensor & /*dKdhp*/,
+                                        const torch::Tensor & /*x*/,
                                         const std::string & /*hyper_param_name*/,
                                         unsigned int /*ind*/) const
 {
@@ -169,3 +170,5 @@ CovarianceFunctionBase::dependentCovarianceTypes(
     name_type_map.insert(std::make_pair(dependent_covar->name(), dependent_covar->type()));
   }
 }
+
+#endif
