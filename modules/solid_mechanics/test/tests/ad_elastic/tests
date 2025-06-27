@@ -19,6 +19,7 @@
     prereq = 'finite_elastic-noad'
     requirement = 'We shall be able to reproduce finite strain elasticity results of the hand-coded simulation using automatic differentiation.'
     design = 'ADComputeFiniteStrain.md'
+    capabilities = 'method!=dbg'
   [../]
   [./finite_elastic-jac]
     type = 'PetscJacobianTester'

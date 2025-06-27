@@ -26,6 +26,7 @@
     csvdiff = 'small_deform2.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
+    capabilities = 'method!=dbg'
   [../]
   [./small2_small_strain]
     type = 'CSVDiff'
@@ -33,6 +34,7 @@
     csvdiff = 'small_deform2_small_strain.csv'
     rel_err = 1.0E-5
     abs_zero = 1.0E-5
+    capabilities = 'method!=dbg'
   [../]
   [./small3]
     type = 'CSVDiff'

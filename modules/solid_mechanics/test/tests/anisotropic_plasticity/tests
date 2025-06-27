@@ -8,6 +8,7 @@
     csvdiff = 'anis_plasticity_test_out.csv'
     requirement = 'Anisotropic plasticity must yield same results as finite strain elasticity if '
                   'yield condition is never met'
+    capabilities = 'method!=dbg'
   []
 
   [anis_elasticity_test]
@@ -16,6 +17,7 @@
     csvdiff = 'anis_elasticity_test_out.csv'
     requirement = 'Anisotropic plasticity must yield same results as finite strain elasticity if '
                   'yield condition is never met --elasticity'
+    capabilities = 'method!=dbg'
   []
 
   [ad_aniso_plasticity_x]
