@@ -375,7 +375,7 @@ class Tester(MooseObject, OutputInterface):
         """
         Gets the default max run time
         """
-        return int(os.getenv('MOOSE_TEST_MAX_TIME', 300))
+        return int(os.getenv('MOOSE_TEST_MAX_TIME', 30))
 
     def getUniqueTestID(self):
         """ return unique hash for test """
