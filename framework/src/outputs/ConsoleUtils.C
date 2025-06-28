@@ -105,18 +105,18 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
 
   if (verbose)
   {
-    bool forced = mesh.isParallelTypeForced();
-    bool pre_split = mesh.isSplit();
-
     oss << "\nMesh: " << '\n' << std::setw(console_field_width);
 
+    oss << "  Parallel Type: " << (mesh.isDistributedMesh() ? "distributed" : "replicated");
     if (fe_backend == Moose::FEBackend::LibMesh)
     {
-      oss << "  Parallel Type: " << (mesh.isDistributedMesh() ? "distributed" : "replicated")
-          << (forced || pre_split ? " (" : "") << (forced ? "forced" : "")
+      bool forced = mesh.isParallelTypeForced();
+      bool pre_split = mesh.isSplit();
+      oss << (forced || pre_split ? " (" : "") << (forced ? "forced" : "")
           << (forced && pre_split ? ", " : "") << (pre_split ? "pre-split" : "")
-          << (forced || pre_split ? ")" : "") << '\n';
+          << (forced || pre_split ? ")" : "");
     }
+    oss << '\n';
     oss << std::setw(console_field_width) << "  Mesh Dimension: " << mesh.dimension() << '\n'
         << std::setw(console_field_width) << "  Spatial Dimension: " << mesh.spatialDimension()
         << '\n';

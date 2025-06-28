@@ -43,7 +43,7 @@
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
-    expect_out = 'Mesh Dimension.*3.*Spatial Dimension.*3.*Elems.*2476.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
+    expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*3.*Spatial Dimension.*3.*Elems.*2476.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
   []
   [MFEMDiffusionPartial]
     type = XMLDiff

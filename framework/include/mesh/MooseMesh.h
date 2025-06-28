@@ -998,7 +998,7 @@ public:
   /**
    * Returns the final Mesh distribution type.
    */
-  bool isDistributedMesh() const { return _use_distributed_mesh; }
+  virtual bool isDistributedMesh() const { return _use_distributed_mesh; }
 
   /**
    * Tell the user if the distribution was overriden for any reason

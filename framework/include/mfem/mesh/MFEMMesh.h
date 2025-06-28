@@ -81,6 +81,7 @@ public:
    */
   void displace(mfem::GridFunction const & displacement);
 
+  bool isDistributedMesh() const override { return true; }
   unsigned int dimension() const override { return _mfem_par_mesh->Dimension(); }
   unsigned int spatialDimension() const override { return _mfem_par_mesh->SpaceDimension(); }
   SubdomainID nSubdomains() const override { return _mfem_par_mesh->attributes.Size(); }
