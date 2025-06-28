@@ -7,7 +7,7 @@
 MFEM-MOOSE is a part of the MOOSE framework which utilizes [MFEM](https://mfem.org) as its main Finite Element Method backend. It expands upon MOOSE's base capabilities to support functionalities including but not limited to:
 
 - High-order H(Div) and H(Curl) elements
-- Various assembly levels (including matrix-free)
+- Various assembly levels (including partial assembly targeting matrix-free algorithms)
 - GPU offloading (CUDA or HIP)
 - Low-Order-Refined solvers
 
@@ -18,7 +18,7 @@ Installation instructions for MFEM-MOOSE can be found in [this page](getting_sta
 
 ## Solving a problem with MFEM-MOOSE
 
-Much of the syntax of the usual MOOSE scripts is preserved when creating scripts for MFEM-MOOSE. Example scripts may be found in the kernel tests directory, `test/tests/mfem/kernels/`. Here, we lay out the step-by-step process of writing a MFEM-MOOSE script to solve a simple diffusion problem. The full script may be found [here](/test/tests/mfem/kernels/diffusion.i). We roughly split the script into five parts: Problem, Geometry, Equation System, Solver and Executioner, and Output.
+Much of the syntax of the usual MOOSE input file is preserved when creating input files for MFEM-MOOSE. Example input files may be found in the kernel tests directory, `test/tests/mfem/kernels/`. Here, we lay out the step-by-step process of writing a MFEM-MOOSE input file to solve a simple diffusion problem. The full input file may be found [here](/test/tests/mfem/kernels/diffusion.i). We roughly split the input file into five parts: Problem, Geometry, Equation System, Solver and Executioner, and Output.
 
 ### Problem
 
@@ -48,7 +48,7 @@ Here, if we also wish to output the gradient of the result, we can add it as an 
 
 !listing test/tests/mfem/kernels/diffusion.i block=/AuxVariables AuxKernels
 
-Then, within the `Kernels` block, we specify the weak forms to be added to our equation system. Typically, one would pick the MFEM integrators they wish to implement by checking the [linear form integrators page](https://mfem.org/lininteg/) and the [bilinear form integrators page](https://mfem.org/bilininteg/). Note that not all linear and bilinear forms that are available in MFEM have been implemented in MFEM-MOOSE. For a full list, check the kernels directory, `framework/src/mfem/kernels`. Should you wish to implement an integrator that is not yet available, please raise an issue in the MOOSE repository.
+Then, within the `Kernels` block, we specify the weak forms to be added to our equation system. Typically, one would pick the MFEM integrators they wish to implement by checking the [linear form integrators page](https://mfem.org/lininteg/) and the [bilinear form integrators page](https://mfem.org/bilininteg/). Note that not all linear and bilinear forms that are available in MFEM have been implemented in MFEM-MOOSE. For a full list, check the kernels directory, `framework/src/mfem/kernels`. Should you wish to implement an integrator that is not yet available, please submit a [feature request](https://github.com/idaholab/moose/issues/new?template=feature-request.yml).
 
 If the integrator you wish to use is available, you can specify it in the `type` parameter simply by taking its MFEM integrator name, swapping the word `Integrator` for `Kernel`, and prepending MFEM to the beginning of its name. The table below shows a few examples of this naming convention:
 
@@ -70,7 +70,7 @@ Now we set up boundary conditions. The full list of boundary conditions availabl
 
 With the equation system set up, we specify how it is to be solved. Firstly, we choose a preconditioner and solver. The list of available types may be found in the solvers directory, `framework/src/mfem/solvers`. For problems with high polynomial order, setting [!param](/Solver/MFEMHypreGMRES/low_order_refined) to `true` may greatly increase performance, as explained [here](MFEMSolverBase.md).
 
-While in principle any solver may be used as main solver or preconditioner, the main limitation to keep in mind is that Hypre solvers may only be preconditioned by other Hypre solvers. Furthermore, when a Hypre solver has its `low_order_refined` parameter set to `true`, it ceases to be considered a Hypre solver for preconditioning purposes.
+While in principle any solver may be used as the main solver or preconditioner, the main limitation to keep in mind is that Hypre solvers may only be preconditioned by other Hypre solvers. Furthermore, when a Hypre solver has its `low_order_refined` parameter set to `true`, it ceases to be considered a Hypre solver for preconditioning purposes.
 
 !listing test/tests/mfem/kernels/diffusion.i block=/Preconditioner Solver remove=jacobi
 

@@ -2,7 +2,7 @@
 
 To enable MOOSE's MFEM capabilities, it is necessary to install all of its dependencies, including MFEM itself and Conduit. You may do so by performing the following steps:
 
-1. After cloning the MOOSE repository, navigate to the root directory and run the following commands:
+1. After cloning the MOOSE repository, navigate to the root directory and run the following commands (you may replace `10` with however many cpus you wish to use for compilation):
 
 ```bash
 export METHOD=opt
@@ -55,7 +55,7 @@ Alternatively, if you already have a working MFEM build in a separate directory,
 
 You may also wish to include other MOOSE configuration flags as necessary.
 
-3. Finally, build the framework, module, and tests by running
+3. Finally, build the framework, module, and tests as desired by running
 
 ```bash
 cd framework
