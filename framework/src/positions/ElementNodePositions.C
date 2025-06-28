@@ -78,7 +78,7 @@ ElementNodePositions::finalize()
   // We always need to sort the positions as nodes on the boundary between different mesh partitions
   // are duplicated. We sort by X, then Y, then Z, and prune the positions list.
   std::sort(_positions.begin(), _positions.end());
-  _positions.erase(std::unique( _positions.begin(), _positions.end()), _positions.end());
+  _positions.erase(std::unique(_positions.begin(), _positions.end()), _positions.end());
 
   // Make a KDTree with the positions
   _positions_kd_tree = std::make_unique<KDTree>(_positions, 1);
