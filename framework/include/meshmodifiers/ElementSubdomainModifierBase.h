@@ -168,10 +168,6 @@ private:
   /// Range of reinitialized boundary nodes on the displaced mesh
   std::unique_ptr<ConstBndNodeRange> _reinitialized_displaced_bnd_node_range;
 
-  /// @brief Set of newly activated nodes
-  std::unordered_set<dof_id_type> _newactivated_nodes;
-  std::unordered_set<dof_id_type> _first_pass_local_activated_nodes;
-
   /// The strategy used to apply IC on newly activated nodes
   std::vector<ICStrategy> _ic_strategy;
 
@@ -208,40 +204,20 @@ private:
   /// @brief Collect the complete set of newly activated nodes globally across processors
   /// @param moved_elems Map from element ID to a pair of (old subdomain ID, new subdomain ID)
   /// @details This function gathers all nodes associated with moved elements that are newly
-  /// activated, regardless of processor ownership. This is the authoritative global pass
-  /// in a parallel algorithm and is used to build the correct global view.
+  /// activated, regardless of processor ownership.
   void identifyGloballyActivatedNodes(
-      const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
-
-  /// @brief Identify newly activated nodes that are locally owned by the current processor
-  /// @param moved_elems Map from element ID to a pair of (old subdomain ID, new subdomain ID)
-  /// @details This function processes only the nodes owned by the local processor and stores
-  /// the locally owned subset of newly activated nodes. This step is typically performed
-  /// after the global gather step to ensure that only owned nodes are used for further
-  /// operations such as mesh updates or DoF assignments.
-  void identifyLocallyOwnedActivatedNodes(
       const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
 
   /// Elements that have been reinitialized due to subdomain changes,
   /// gathered across all processors using MPI
   std::vector<dof_id_type> _global_reinitialized_elems;
 
-  /// First-pass global collection of all newly activated node IDs from every processor.
-  /// This is the authoritative set, as it does not rely on node ownership.
-  /// Includes all nodes connected to reinitialized elements, regardless of processor.
-  /// Used as a reference for correctness in parallel settings.
+  /// @brief Set of newly activated nodes
+  std::unordered_set<dof_id_type> _newactivated_nodes;
+
+  /// Global collection of all newly activated node IDs, gathered across all processors.
+  /// This set is independent of processor ownership and ensures consistency in parallel runs.
   std::vector<dof_id_type> _complete_global_activated_nodes;
-
-  /// Final (second-pass) collection of newly activated node IDs,
-  /// filtered to include only those locally owned by this processor.
-  /// May miss some nodes in parallel runs due to ownership mismatch.
-  /// Used for applying ICs but validated against `_complete_global_activated_nodes`.
-  std::vector<dof_id_type> _local_own_gather_global_activated_nodes;
-
-  /// Difference between `_complete_global_activated_nodes` and `_local_own_gather_global_activated_nodes`.
-  /// Helps identify missing nodes that should have been activated but were skipped due to
-  /// processor ownership constraints. Useful for debugging MPI consistency issues.
-  std::vector<dof_id_type> _local_own_gather_global_and_complete_activated_nodes_diff;
 
   /// Indicates whether each node has had its initial condition (IC) applied.
   /// true = IC already set; false = IC not yet set.
@@ -276,24 +252,8 @@ private:
   /// Results are stored in `_global_reinitialized_elems`.
   void synchronizeReinitializedElems();
 
-  /// First-pass: Perform a global MPI gather of newly activated node IDs from all processors.
-  /// This does **not** check for local ownership and is considered the complete and correct set.
-  /// Stores result in `_complete_global_activated_nodes`.
-  void gatherCompleteActivatedNodesGlobally();
-
-  /// Second-pass: Gather newly activated nodes that are **locally owned** by this processor only.
-  /// This subset may be incomplete in MPI runs, and should be validated against the first pass.
-  /// Stores result in `_local_own_gather_global_activated_nodes`.
-  void gatherLocalActivatedNodesGlobally();
-
-  /// @brief  An additional check ensures that the number of globally activated nodes
-  /// in the second pass is not less than that of the first pass.
-  /// If a mismatch is detected, we identify which processor is missing the expected node
-  /// using findMissingNewlyActivatedNodes()
-  void computeSetDifference();
-
-  /// @brief Identify the processor that is missing the newly activated nodes
-  void findMissingNewlyActivatedNodes();
+  /// @brief Filters the globally activated nodes and stores only those owned by this processor.
+  void identifyProcessorOwnedActivatedNodes();
 
   /// @brief Apply initial conditions using polynomial nodal patch recovery
   /// @param sys

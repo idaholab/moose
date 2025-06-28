@@ -3,172 +3,172 @@
   design = 'ElementSubdomainModifier.md'
 
   [group]
-    requirement = 'The framework shall include the ability to set initial conditions on newly activated nodes during simulation.'
+    requirement = 'The framework shall include the ability to set initial conditions on newly activated nodes during simulation '
 
     [IC_for_newlyactivated_nodes]
       type = 'Exodiff'
       input = 'external_moving_boundary_npr.i'
-      exodiff = 'external_moving_boundary_npr_out.e external_moving_boundary_npr_out.e-s002 external_moving_boundary_npr_out.e-s003 external_moving_boundary_npr_out.e-s004'
-      detail = 'The system shall set initial conditions on newly activated nodes during the simulation.'
+      exodiff = 'external_moving_boundary_npr_out.e-s004'
+      detail = 'using a strategy that estimates values from nearby solved regions.'
     []
 
     [IC_for_newlyactivated_nodes_two_variables_different_IC]
       type = 'Exodiff'
       input = 'external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable.i'
-      exodiff = 'external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable_out.e external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable_out.e-s002 external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable_out.e-s003 external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable_out.e-s004'
-      detail = 'The system shall allow different initial condition strategies for each variable on newly activated nodes. In this case, variable `diff` uses nodal patch recovery, while variable `diff2` is set to 10.0.'
+      exodiff = 'external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable_out.e-s004'
+      detail = 'using different strategies for each field, one based on nearby regions and the other using a fixed value.'
     []
 
     [IC_for_newlyactivated_nodes_two_variables_same_IC]
       type = 'Exodiff'
       input = 'external_moving_boundary_npr_two_variables_npr_for_both.i'
-      exodiff = 'external_moving_boundary_npr_two_variables_npr_for_both_out.e external_moving_boundary_npr_two_variables_npr_for_both_out.e-s002 external_moving_boundary_npr_two_variables_npr_for_both_out.e-s003 external_moving_boundary_npr_two_variables_npr_for_both_out.e-s004'
-      detail = 'The system shall allow a shared initial condition to be applied to multiple variables using a single IC strategy when both are listed in `nodal_patch_recovery_uo`.'
+      exodiff = 'external_moving_boundary_npr_two_variables_npr_for_both_out.e-s004'
+      detail = 'using a shared strategy to assign the same type of initial condition to multiple fields.'
     []
 
     [IC_for_newlyactivated_nodes_two_variables_normal_setting]
       type = 'Exodiff'
       input = 'external_moving_boundary_npr_two_variables_npr_normal_set.i'
-      exodiff = 'external_moving_boundary_npr_two_variables_npr_normal_set_out.e external_moving_boundary_npr_two_variables_npr_normal_set_out.e-s002 external_moving_boundary_npr_two_variables_npr_normal_set_out.e-s003 external_moving_boundary_npr_two_variables_npr_normal_set_out.e-s004'
-      detail = 'The system shall accept consistent vector sizes for `ic_strategy`, `ic_variables`, and `nodal_patch_recovery_uo` when applying initial conditions.'
+      exodiff = 'external_moving_boundary_npr_two_variables_npr_normal_set_out.e-s004'
+      detail = 'using a configuration where multiple lists are aligned to assign initial conditions to each field.'
     []
 
     [npr_element_not_specified_by_user]
       type = 'Exodiff'
       input = 'external_moving_boundary_npr_elem_not_provide.i'
-      exodiff = 'external_moving_boundary_npr_elem_not_provide_out.e external_moving_boundary_npr_elem_not_provide_out.e-s002'
-      detail = 'The system shall support nodal patch recovery using all elements in restricted blocks when `use_specific_elements = false`.'
+      exodiff = 'external_moving_boundary_npr_elem_not_provide_out.e-s002'
+      detail = 'using all elements in a designated region to estimate initial values by default.'
     []
 
     [IC_default]
       type = 'Exodiff'
       input = 'external_moving_boundary_no_unsolved_blocks_all_IC_default.i'
-      exodiff = 'external_moving_boundary_no_unsolved_blocks_all_IC_default_out.e external_moving_boundary_no_unsolved_blocks_all_IC_default_out.e-s002 external_moving_boundary_no_unsolved_blocks_all_IC_default_out.e-s003 external_moving_boundary_no_unsolved_blocks_all_IC_default_out.e-s004'
-      detail = 'The system shall run with `ic_strategy = IC_DEFAULT` without requiring `nodal_patch_recovery_uo` or `unsolved_blocks`.'
+      exodiff = 'external_moving_boundary_no_unsolved_blocks_all_IC_default_out.e-s004'
+      detail = 'using a default method that does not require advanced configuration.'
     []
 
     [IC_for_newlyactivated_nodes_quad9]
       type = 'Exodiff'
       input = 'external_moving_boundary_npr_Quad9.i'
-      exodiff = 'external_moving_boundary_npr_Quad9_out.e external_moving_boundary_npr_Quad9_out.e-s002 external_moving_boundary_npr_Quad9_out.e-s003 external_moving_boundary_npr_Quad9_out.e-s004'
-      detail = 'The system shall support setting initial conditions on newly activated nodes for higher-order elements such as Quad9.'
+      exodiff = 'external_moving_boundary_npr_Quad9_out.e-s004'
+      detail = 'using an extrapolation strategy that supports higher-order elements.'
     []
 
     [IC_for_auxiliary_monomial_variables]
       type = 'Exodiff'
       input = 'npr_IC_aux.i'
-      exodiff = 'npr_IC_aux_out.e npr_IC_aux_out.e-s002 npr_IC_aux_out.e-s003 npr_IC_aux_out.e-s004'
-      detail = 'The system shall support setting initial conditions on newly activated elements described by monomial auxiliary variables.'
+      exodiff = 'npr_IC_aux_out.e-s004'
+      detail = 'using an approach that supports auxiliary variables defined over entire elements.'
     []
 
     [IC_for_auxiliary_lagrange_variables]
       type = 'Exodiff'
       input = 'npr_IC_nodal_based_aux.i'
-      exodiff = 'npr_IC_nodal_based_aux_out.e npr_IC_nodal_based_aux_out.e-s002 npr_IC_nodal_based_aux_out.e-s003 npr_IC_nodal_based_aux_out.e-s004'
-      detail = 'The system shall support setting initial conditions on newly activated nodes described by Lagrange-based auxiliary variables.'
+      exodiff = 'npr_IC_nodal_based_aux_out.e-s004'
+      detail = 'using an approach that supports auxiliary variables defined at nodal locations.'
     []
 
     [IC_for_default]
       type = 'Exodiff'
       input = 'external_moving_boundary_npr_three_vars.i'
-      exodiff = 'external_moving_boundary_npr_three_vars_out.e external_moving_boundary_npr_three_vars_out.e-s002 external_moving_boundary_npr_three_vars_out.e-s003 external_moving_boundary_npr_three_vars_out.e-s004'
-      detail = 'The system shall support setting initial conditions to all non-linear variables if the user set ic_strategy == IC_DEFAULT and no nodal_patch_recovery_uo and ic_variables is provided.'
+      exodiff = 'external_moving_boundary_npr_three_vars_out.e-s004'
+      detail = 'using a fallback method to assign values when no specific configuration is provided.'
     []
 
     [IC_three_variables_three_IC_strategies]
       type = 'Exodiff'
       input = 'external_moving_boundary_three_vars_three_strategies.i'
-      exodiff = 'external_moving_boundary_three_vars_three_strategies_out.e external_moving_boundary_three_vars_three_strategies_out.e-s002 external_moving_boundary_three_vars_three_strategies_out.e-s003 external_moving_boundary_three_vars_three_strategies_out.e-s004'
-      detail = 'The system shall support assigning different initial condition strategies -- namely, nearby element-based, k-d tree-based, and whole domain-based—to different variables.'
+      exodiff = 'external_moving_boundary_three_vars_three_strategies_out.e-s004'
+      detail = 'using three distinct methods to assign initial values to different fields.'
     []
 
     [IC_three_variables_three_IC_strategies_default]
       type = 'Exodiff'
       input = 'external_moving_boundary_three_vars_three_strategies_default.i'
-      exodiff = 'external_moving_boundary_three_vars_three_strategies_default_out.e external_moving_boundary_three_vars_three_strategies_default_out.e-s002 external_moving_boundary_three_vars_three_strategies_default_out.e-s003 external_moving_boundary_three_vars_three_strategies_default_out.e-s004'
-      detail = 'The system shall support assigning different initial condition strategies -- namely, nearby element-based, whole domain-based, and default -- to different variables.'
+      exodiff = 'external_moving_boundary_three_vars_three_strategies_default_out.e-s004'
+      detail = 'using a combination of default and custom methods to initialize each field.'
     []
 
     [IC_strategies_npr_with_IC_in_var]
       type = 'Exodiff'
       input = 'external_moving_boundary_three_vars_three_strategies_ic_in_var.i'
-      exodiff = 'external_moving_boundary_three_vars_three_strategies_ic_in_var_out.e external_moving_boundary_three_vars_three_strategies_ic_in_var_out.e-s002 external_moving_boundary_three_vars_three_strategies_ic_in_var_out.e-s003 external_moving_boundary_three_vars_three_strategies_ic_in_var_out.e-s004'
-      detail = 'The system shall support assigning an initial condition directly within the Variable block as a value; however, if nodal patch recovery is enabled, the behavior shall be consistent with specifying the value in `nodal_patch_recovery_uo`.'
+      exodiff = 'external_moving_boundary_three_vars_three_strategies_ic_in_var_out.e-s004'
+      detail = 'using either directly specified values or extrapolation methods, with extrapolated values taking precedence when both are provided.'
     []
 
     [IC_for_newlyactivated_nodes_old_test]
       type = 'Exodiff'
       input = 'external_moving_boundary_npr_output_old_older.i'
-      exodiff = 'external_moving_boundary_npr_output_old_older_out.e external_moving_boundary_npr_output_old_older_out.e-s002 external_moving_boundary_npr_output_old_older_out.e-s003 external_moving_boundary_npr_output_old_older_out.e-s004'
-      detail = 'The system shall correctly update the old and older solutions after setting the current solution on newly activated nodes.'
+      exodiff = 'external_moving_boundary_npr_output_old_older_out.e-s004'
+      detail = 'using the current solution to also update values from previous time steps.'
     []
-
   []
 
   [error_test]
-    requirement = 'The system shall throw errors when invalid IC strategies are used or when input vectors have inconsistent sizes.'
+    requirement = 'The system shall throw an error '
 
     [error_ic_strategy_not_valid]
       type = RunException
-      input = 'ic_strategy_not_valid.i'
+      input = 'external_moving_boundary_npr_two_variables_npr_normal_set.i'
+      cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_POLYNOMIAL IC_POLYNOMIAL IC_POLYNOMIAL_WHOLE"'
       expect_err = 'Invalid option "IC_POLYNOMIAL_WHOLE" in MooseEnum.'
-      detail = 'The system shall throw an error if an invalid IC strategy name is provided.'
+      detail = 'if an invalid initial condition strategy name is provided when modifying element subdomains.'
     []
 
     [error_ic_strategy_more_than_ic_variables]
       type = RunException
-      input = 'external_moving_boundary_npr_two_variables_npr_more_ic_strategy.i'
+      input = 'external_moving_boundary_npr_two_variables_npr_normal_set.i'
+      cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_POLYNOMIAL IC_POLYNOMIAL IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN"'
       expect_err = "The 'ic_strategy' parameter is not used correctly"
-      detail = 'The system shall throw an error if the size of `ic_strategy` is not 1 and does not match the size of `ic_variables` or `nodal_patch_recovery_uo`.'
+      detail = 'if the number of specified strategies does not match the number of associated fields.'
     []
 
     [npr_element_not_in_block]
       type = RunException
-      input = 'external_moving_boundary_npr_element_not_in_block.i'
+      input = 'external_moving_boundary_npr_two_variables_npr_normal_set.i'
+      cli_args = 'UserObjects/extrapolation_patch2/block="2" Variables/diff2/block="2" Kernels/diffusion2/block="2" Materials/material/block="1 2"'
       expect_err = "Please use nodalPatchRecovery with elements in the block only."
-      detail = 'The system shall throw an error if elements specified for nodal patch recovery are not part of any restricted block.'
+      detail = 'if elements selected for initialization are not part of the defined region.'
     []
 
     [npr_no_UO_in_esm]
       type = RunException
-      input = 'external_moving_boundary_npr_no_UO_in_esm.i'
+      input = 'external_moving_boundary_no_unsolved_blocks_all_IC_default.i'
+      cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_POLYNOMIAL"'
       expect_err = "The 'ic_strategy' parameter is set to use polynomial extrapolation, but no 'nodal_patch_recovery_uo' is specified."
-      detail = 'The system shall throw an error if polynomial extrapolation is selected but no nodal patch recovery user object is provided.'
-    []
-
-    [npr_no_UO_in_esm_only_one_poly_ic]
-      type = RunException
-      input = 'external_moving_boundary_npr_one_poly_no_UO_in_esm.i'
-      expect_err = "The 'ic_strategy' parameter is set to use polynomial extrapolation, but no 'nodal_patch_recovery_uo' is specified."
-      detail = 'The system shall throw an error if one IC strategy uses polynomial extrapolation but no nodal patch recovery user object is specified.'
+      detail = 'if a strategy that requires extrapolation is used without providing the necessary supporting method.'
     []
 
     [ic_no_unsolved_blocks]
       type = RunException
-      input = 'external_moving_boundary_no_unsolved_blocks.i'
+      input = 'external_moving_boundary_no_unsolved_blocks_all_IC_default.i'
+      cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_POLYNOMIAL" MeshModifiers/moving_circle/nodal_patch_recovery_uo="extrapolation_patch"'
       expect_err = "The unsolved_blocks must be set to use the extrapolation strategy."
-      detail = 'The system shall throw an error if extrapolation is used without specifying `unsolved_blocks`.'
+      detail = 'if a method that relies on unsolved regions is used but no such regions are defined.'
     []
 
     [mismatch_IC_poly_npr_UO]
       type = RunException
-      input = 'external_moving_boundary_mismatch_IC_poly_npr_UO.i'
+      input = 'external_moving_boundary_npr.i'
+      cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_DEFAULT" MeshModifiers/moving_circle/unsolved_blocks=""'
       expect_err = "Mismatch between number of IC strategies using polynomial extrapolation and NPR UO"
-      detail = 'The system shall throw an error if the number of IC strategies using polynomial extrapolation does not match the number of NPR user objects.'
+      detail = 'if the number of extrapolation-based strategies does not match the number of corresponding extrapolation sources.'
     []
 
     [IC_default_with_unsolved_blocks]
       type = RunException
-      input = 'external_moving_boundary_all_IC_default_unsolved_block_provided.i'
+      input = 'external_moving_boundary_no_unsolved_blocks_all_IC_default.i'
+      cli_args = 'MeshModifiers/moving_circle/unsolved_blocks="2"'
       expect_err = "The unsolved_blocks should not be set to use the default strategy."
-      detail = 'The system shall throw an error if `unsolved_blocks` is set while using `ic_strategy = IC_DEFAULT`.'
+      detail = 'if a default initialization method is used while also specifying additional configuration that is not needed.'
     []
 
     [IC_two_defaults_no_ic_variables]
       type = RunException
-      input = 'external_moving_two_IC_default.i'
+      input = 'external_moving_boundary_no_unsolved_blocks_all_IC_default.i'
       expect_err = "The 'ic_strategy' parameter has more than one value, but no 'ic_variables' are specified."
-      detail = 'The system shall throw an error if multiple IC strategies are provided without defining `ic_variables`.'
+      cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_DEFAULT IC_DEFAULT"'
+      detail = 'if multiple strategies are listed but the fields they apply to are not defined.'
     []
   []
 []

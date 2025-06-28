@@ -6,8 +6,8 @@
  *
  * Derived from NodalPatchRecoveryBase.
  * Reads any coupled variable using `coupledValue(<var_name>)[_qp]`.
- * Suitable for all scalar variables; for vector variables, split them in the input file as <var>_x,
- * <var>_y, etc., and couple them separately.
+ * Suitable for all field scalar-valued variables; for vector variables, split them in the input
+ * file as <var>_x, <var>_y, etc., and couple them separately.
  */
 class NodalPatchRecoveryVariable : public NodalPatchRecoveryBase
 {
@@ -18,10 +18,11 @@ public:
 protected:
   /// Returns the recovered value at the quadrature point (_qp)
   Real computeValue() override { return _var[_qp]; };
-  /// Returns the variable name
 
 private:
-  const VariableValue & _var; ///< Variable value
+  /// Variable value
+  const VariableValue & _var;
 
-  const VariableName _var_name; ///< Variable name
+  /// Variable name
+  const VariableName _var_name;
 };
