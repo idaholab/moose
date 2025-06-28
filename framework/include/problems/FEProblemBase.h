@@ -2423,6 +2423,10 @@ public:
    */
   const std::vector<SolverSystemName> & getSolverSystemNames() const { return _solver_sys_names; }
 
+  virtual const libMesh::CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const override;
+
+  virtual bool checkNonlocalCouplingRequirement() const override;
+
 protected:
   /**
    * Deprecated. Users should switch to overriding the meshChanged which takes arguments
@@ -2988,6 +2992,12 @@ private:
   /// If we catch an exception during residual/Jacobian evaluaton for which we don't have specific
   /// handling, immediately error instead of allowing the time step to be cut
   const bool _regard_general_exceptions_as_errors;
+
+  /// nonlocal coupling matrix
+  std::vector<libMesh::CouplingMatrix> _nonlocal_cm;
+
+  /// nonlocal coupling requirement flag
+  bool _requires_nonlocal_coupling;
 
   friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,
                                                         const std::string & value,
