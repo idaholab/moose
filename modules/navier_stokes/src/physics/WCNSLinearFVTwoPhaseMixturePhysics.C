@@ -94,17 +94,16 @@ WCNSLinearFVTwoPhaseMixturePhysics::WCNSLinearFVTwoPhaseMixturePhysics(
   if (_has_energy_equation)
   {
     if (_fluid_energy_physics->densityName() != "rho_mixture")
-      mooseError("Density name should for Physics '",
-                 _fluid_energy_physics->name(),
-                 "' should be 'rho_mixture'");
+      mooseError(
+          "Density name for Physics '", _fluid_energy_physics->name(), "' should be 'rho_mixture'");
     if (_fluid_energy_physics->getSpecificHeatName() != "cp_mixture")
-      mooseError("Specific heat name should for Physics '",
+      mooseError("Specific heat name for Physics '",
                  _fluid_energy_physics->name(),
                  "' should be 'cp_mixture'");
   }
   if (_flow_equations_physics)
     if (_flow_equations_physics->densityName() != "rho_mixture")
-      mooseError("Density name should for Physics ,",
+      mooseError("Density name for Physics ,",
                  _flow_equations_physics->name(),
                  "' should be 'rho_mixture'");
 

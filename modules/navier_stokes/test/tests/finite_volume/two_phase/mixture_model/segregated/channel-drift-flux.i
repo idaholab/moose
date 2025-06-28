@@ -35,24 +35,15 @@ k_d = 1
 [Variables]
   [vel_x]
     type = MooseLinearVariableFVReal
-    family = MONOMIAL
-    fv = true
-    order = CONSTANT
     solver_sys = u_system
     initial_condition = 1
   []
   [vel_y]
     type = MooseLinearVariableFVReal
-    family = MONOMIAL
-    fv = true
-    order = CONSTANT
     solver_sys = v_system
   []
   [pressure]
     type = MooseLinearVariableFVReal
-    family = MONOMIAL
-    fv = true
-    order = CONSTANT
     solver_sys = pressure_system
   []
 []
@@ -338,9 +329,6 @@ k_d = 1
 [Variables]
   [phase_2]
     type = MooseLinearVariableFVReal
-    family = MONOMIAL
-    fv = true
-    order = CONSTANT
     solver_sys = phi_system
   []
 []
