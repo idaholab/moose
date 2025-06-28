@@ -348,7 +348,9 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   dt = 1.0
-  end_time = 10
+  # NOTE: Change 'end_time' to 10s to accurately simulate the fusing current
+  # end_time = 10
+  end_time = 5
   automatic_scaling = true
 []
 
