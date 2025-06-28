@@ -27,7 +27,7 @@ Multi-physics Object Oriented Simulation Environment
 ## MOOSE By The Numbers
 
 - 250 contributors
-- 46,000 commits
+- 56,000 commits
 - 5000 unique visitors per month
 - ~40 new Discussion participants per week
 - 1500 citations for the MOOSE papers
