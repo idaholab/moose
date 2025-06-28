@@ -50,20 +50,19 @@ LinearFVTurbulentViscosityWallFunctionBC::LinearFVTurbulentViscosityWallFunction
 Real
 LinearFVTurbulentViscosityWallFunctionBC::computeTurbulentViscosity() const
 {
-
   // Utility functions
-  const Real wall_dist = computeCellToFaceDistance();
+  const auto wall_dist = computeCellToFaceDistance();
   const auto re = makeElemArg(&_current_face_info->elem());
-  const auto t = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear); // determineState();
-  const auto mu = _mu(re, t);
-  const auto rho = _rho(re, t);
+  const auto old_state = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
+  const auto mu = _mu(re, old_state);
+  const auto rho = _rho(re, old_state);
 
   // Get the velocity vector
-  RealVectorValue velocity(_u_var(re, t));
+  RealVectorValue velocity(_u_var(re, old_state));
   if (_v_var)
-    velocity(1) = (*_v_var)(re, t);
+    velocity(1) = (*_v_var)(re, old_state);
   if (_w_var)
-    velocity(2) = (*_w_var)(re, t);
+    velocity(2) = (*_w_var)(re, old_state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
   const auto parallel_speed = NS::computeSpeed<Real>(
@@ -72,7 +71,6 @@ LinearFVTurbulentViscosityWallFunctionBC::computeTurbulentViscosity() const
   // Switch for determining the near wall quantities
   // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
   Real y_plus = 0.0;
-  Real mut_log = 0.0; // turbulent log-layer viscosity
   Real mu_wall = 0.0; // total wall viscosity to obtain the shear stress at the wall
 
   if (_wall_treatment == NS::WallTreatmentEnum::EQ_NEWTON)
@@ -81,7 +79,6 @@ LinearFVTurbulentViscosityWallFunctionBC::computeTurbulentViscosity() const
     const auto u_tau = NS::findUStar<Real>(mu, rho, parallel_speed, wall_dist);
     y_plus = wall_dist * u_tau * rho / mu;
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
-    mut_log = mu_wall - mu;
   }
   else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)
   {
@@ -89,7 +86,6 @@ LinearFVTurbulentViscosityWallFunctionBC::computeTurbulentViscosity() const
     y_plus = NS::findyPlus<Real>(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
     mu_wall = mu * (NS::von_karman_constant * y_plus /
                     std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
-    mut_log = mu_wall - mu;
   }
   else if (_wall_treatment == NS::WallTreatmentEnum::EQ_LINEARIZED)
   {
@@ -102,19 +98,19 @@ LinearFVTurbulentViscosityWallFunctionBC::computeTurbulentViscosity() const
     const auto u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
     y_plus = wall_dist * u_tau * rho / mu;
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
-    mut_log = mu_wall - mu;
   }
   else if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
   {
     // Assign non-equilibrium wall function value
-    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(re, t)) * rho / mu;
+    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(re, old_state)) * rho / mu;
     mu_wall = mu * (NS::von_karman_constant * y_plus /
                     std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)));
-    mut_log = mu_wall - mu;
   }
   else
     mooseAssert(false,
                 "For `INSFVTurbulentViscosityWallFunction` , wall treatment should not reach here");
+
+  const Real mut_log = mu_wall - mu; // turbulent log-layer viscosity
 
   Real mu_t = 0;
 
@@ -155,30 +151,27 @@ LinearFVTurbulentViscosityWallFunctionBC::computeBoundaryNormalGradient() const
 Real
 LinearFVTurbulentViscosityWallFunctionBC::computeBoundaryValueMatrixContribution() const
 {
-  // Ths will not contribute to the matrix from the value considering that
-  // the value is independent of the solution.
-  return 0.0;
+  mooseError("We should not solve for the turbulent viscosity directly meaning that this should "
+             "contribute to neither vector nor a right hand side.");
 }
 
 Real
 LinearFVTurbulentViscosityWallFunctionBC::computeBoundaryValueRHSContribution() const
 {
-  // Fetch the boundary value from the provided functor.
-  return this->computeTurbulentViscosity();
+  mooseError("We should not solve for the turbulent viscosity directly meaning that this should "
+             "contribute to neither vector nor a right hand side.");
 }
 
 Real
 LinearFVTurbulentViscosityWallFunctionBC::computeBoundaryGradientMatrixContribution() const
 {
-  // The implicit term from the central difference approximation of the normal
-  // gradient.
-  return 1.0 / computeCellToFaceDistance();
+  mooseError("We should not solve for the turbulent viscosity directly meaning that this should "
+             "contribute to neither vector nor a right hand side.");
 }
 
 Real
 LinearFVTurbulentViscosityWallFunctionBC::computeBoundaryGradientRHSContribution() const
 {
-  // The boundary term from the central difference approximation of the
-  // normal gradient.
-  return this->computeTurbulentViscosity() / computeCellToFaceDistance();
+  mooseError("We should not solve for the turbulent viscosity directly meaning that this should "
+             "contribute to neither vector nor a right hand side.");
 }
