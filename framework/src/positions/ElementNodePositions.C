@@ -1,0 +1,88 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ElementNodePositions.h"
+
+#include "libmesh/parallel_algebra.h"
+
+registerMooseObject("MooseApp", ElementNodePositions);
+
+InputParameters
+ElementNodePositions::validParams()
+{
+  InputParameters params = Positions::validParams();
+  params.addClassDescription("Positions of element nodes.");
+  params += BlockRestrictable::validParams();
+
+  // Element nodes could be sorted by XYZ or by id. Default to not sorting
+  params.set<bool>("auto_sort") = false;
+  // Gathered locally, should be broadcast on every process
+  params.set<bool>("auto_broadcast") = true;
+
+  return params;
+}
+
+ElementNodePositions::ElementNodePositions(const InputParameters & parameters)
+  : Positions(parameters), BlockRestrictable(this), _mesh(_fe_problem.mesh())
+{
+  // Mesh is ready at construction
+  initialize();
+  // Trigger synchronization as the initialization is distributed
+  finalize();
+}
+
+void
+ElementNodePositions::initialize()
+{
+  clearPositions();
+
+  for (const auto & [node_id, elems_ids] : _fe_problem.mesh().nodeToActiveSemilocalElemMap())
+  {
+    if (!_mesh.queryNodePtr(node_id))
+      continue;
+
+    // Check the elements associated with the node to see if they're in the block
+    // we're block-restricting. If so, add the node to the positions vector and move
+    // on to the next node (to minimize duplicates).
+    for (const auto & elem_id : elems_ids)
+    {
+      const auto e = _mesh.queryElemPtr(elem_id);
+      if (e && blockIDs().count(e->subdomain_id()) > 0)
+      {
+        _positions.emplace_back(_mesh.nodeRef(node_id));
+        break;
+      }
+    }
+  }
+
+  _initialized = true;
+}
+
+void
+ElementNodePositions::finalize()
+{
+  // Gather up the positions vector on all ranks
+  mooseAssert(initialized(false), "Positions vector has not been initialized.");
+  if (_need_broadcast)
+    // The consumer/producer reporter interface can keep track of whether a reduction is needed
+    // (for example if a consumer needs replicated data, but the producer is distributed) however,
+    // we have currently made the decision that positions should ALWAYS be replicated
+    _communicator.allgather(_positions, /* identical buffer lengths = */ false);
+
+  // We always need to sort the positions as nodes on the boundary between different mesh partitions
+  // are duplicated. We sort by X, then Y, then Z, and prune the positions list.
+  std::sort(_positions.begin(), _positions.end());
+  _positions.erase(std::unique( _positions.begin(), _positions.end()), _positions.end());
+
+  // Make a KDTree with the positions
+  _positions_kd_tree = std::make_unique<KDTree>(_positions, 1);
+
+  // For now at least, we expect positions to be the same on all ranks
+  mooseAssert(comm().verify(_positions), "Positions should be the same across all MPI processes.");
+}
