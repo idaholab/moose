@@ -20,7 +20,7 @@ LinearFVTurbulentAdvection::validParams()
 {
   InputParameters params = LinearFVScalarAdvection::validParams();
   params.addClassDescription("Represents the matrix and right hand side contributions of an "
-                             "advection term for a turbulent variable.");
+                             "advection term for a turbulence variable.");
 
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
