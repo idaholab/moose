@@ -234,9 +234,6 @@ SIMPLESolveNonlinearAssembly::solveMomentumPredictor()
       _console << Moose::stringify(momentum_solver.get_initial_residual()) << std::endl;
     }
 
-    // We clear the gradient caches of the velocity variables since the deviatoric terms will
-    // need the updated cell gradients. This will also help the turbulence routines which will
-    // need the latest cell gradients.
     _momentum_systems[system_i]->setSolution(*(momentum_system.current_local_solution));
     _momentum_systems[system_i]->copyPreviousNonlinearSolutions();
   }
@@ -347,6 +344,7 @@ SIMPLESolveNonlinearAssembly::solveAdvectedSystem(const unsigned int system_num,
   {
     _console << system.name() << " system matrix" << std::endl;
     mmat.print();
+    _console << system.name() << " RHS vector" << std::endl;
     rhs.print();
   }
 

@@ -179,6 +179,7 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
     const auto elem_arg = makeElemArg(_current_elem_info->elem());
     const Real rho = _rho(elem_arg, state);
     const Real TKE = _k(elem_arg, state);
+    const Real TKED = _var.getElemValue(*_current_elem_info, state);
 
     // Compute production of TKE
     const auto symmetric_strain_tensor_sq_norm =
@@ -186,12 +187,11 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
     Real production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
     // Limit TKE production (needed for flows with stagnation zones)
-    const Real production_limit = _C_pl * rho * _var.getElemValue(*_current_elem_info, state);
+    const Real production_limit = _C_pl * rho * TKED;
     production = std::min(production, production_limit);
 
     // Compute production - recasted with mu_t definition to avoid division by epsilon
-    const auto production_epsilon =
-        _C1_eps * production * _var.getElemValue(*_current_elem_info, state) / TKE;
+    const auto production_epsilon = _C1_eps * production * TKED / TKE;
 
     // Assign to matrix (term gets multiplied by TKED)
     return production_epsilon * _current_elem_volume;
