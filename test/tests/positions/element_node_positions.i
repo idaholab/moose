@@ -21,10 +21,14 @@
 [Positions]
   [nodes]
     type = ElementNodePositions
+    # For testing reproducibility
+    auto_sort = true
   []
   [nodes_block_1]
     type = ElementNodePositions
     block = 1
+    # For testing reproducibility
+    auto_sort = true
   []
 []
 
