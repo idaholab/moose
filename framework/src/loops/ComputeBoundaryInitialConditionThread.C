@@ -17,13 +17,15 @@
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
     FEProblemBase & fe_problem)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+    _target_var_names({})
 {
 }
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
     ComputeBoundaryInitialConditionThread & x, Threads::split split)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+    _target_var_names(x._target_var_names)
 {
 }
 

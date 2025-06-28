@@ -14,13 +14,13 @@
 #include "InitialCondition.h"
 
 ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblemBase & fe_problem)
-  : _fe_problem(fe_problem)
+  : _fe_problem(fe_problem), _target_var_names({})
 {
 }
 
 ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialConditionThread & x,
                                                              Threads::split /*split*/)
-  : _fe_problem(x._fe_problem)
+  : _fe_problem(x._fe_problem), _target_var_names(x._target_var_names)
 {
 }
 

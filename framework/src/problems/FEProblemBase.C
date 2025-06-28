@@ -3636,10 +3636,10 @@ FEProblemBase::projectSolution()
       DenseVector<Number> vals(var.order());
       ic->compute(vals);
 
-      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      const unsigned int n_scalar_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_scalar_dofs; i++)
       {
-        const dof_id_type global_index = var.dofIndices()[i];
+        const auto global_index = var.dofIndices()[i];
         var.sys().solution().set(global_index, vals(i));
         var.setValue(i, vals(i));
       }
@@ -3689,10 +3689,10 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
       DenseVector<Number> vals(var.order());
       ic->compute(vals);
 
-      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      const unsigned int n_scalar_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_scalar_dofs; i++)
       {
-        const dof_id_type global_index = var.dofIndices()[i];
+        const auto global_index = var.dofIndices()[i];
         var.sys().solution().set(global_index, vals(i));
         var.setValue(i, vals(i));
       }
@@ -3717,11 +3717,6 @@ FEProblemBase::projectInitialConditionOnCustomRangeForSpecificVars(
 {
   ComputeInitialConditionThread cic(*this, target_var_names);
   Threads::parallel_reduce(elem_range, cic);
-
-  // Need to close the solution vector here so that boundary ICs take precendence
-  for (auto & nl : _nl)
-    nl->solution().close();
-  _aux->solution().close();
 
   ComputeBoundaryInitialConditionThread cbic(*this, target_var_names);
   Threads::parallel_reduce(bnd_nodes, cbic);
@@ -3748,10 +3743,10 @@ FEProblemBase::projectInitialConditionOnCustomRangeForSpecificVars(
       DenseVector<Number> vals(var.order());
       ic->compute(vals);
 
-      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      const unsigned int n_scalar_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_scalar_dofs; i++)
       {
-        const dof_id_type global_index = var.dofIndices()[i];
+        const auto global_index = var.dofIndices()[i];
         var.sys().solution().set(global_index, vals(i));
         var.setValue(i, vals(i));
       }
