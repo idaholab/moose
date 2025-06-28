@@ -35,25 +35,20 @@ k_d = 1
 [Variables]
   [vel_x]
     type = MooseLinearVariableFVReal
-    family = MONOMIAL
-    fv = true
-    order = CONSTANT
     solver_sys = u_system
     initial_condition = 1
   []
   [vel_y]
     type = MooseLinearVariableFVReal
-    family = MONOMIAL
-    fv = true
-    order = CONSTANT
     solver_sys = v_system
   []
   [pressure]
     type = MooseLinearVariableFVReal
-    family = MONOMIAL
-    fv = true
-    order = CONSTANT
     solver_sys = pressure_system
+  []
+  [phase_2]
+    type = MooseLinearVariableFVReal
+    solver_sys = phi_system
   []
 []
 
@@ -94,6 +89,28 @@ k_d = 1
     v = vel_y
     variable = vel_y
   []
+  [mixture_drift_flux_x]
+    type = LinearWCNSFV2PMomentumDriftFlux
+    density_interp_method = average
+    fraction_dispersed = phase_2
+    momentum_component = x
+    rhie_chow_user_object = ins_rhie_chow_interpolator
+    rho_d = ${rho_d}
+    u_slip = vel_slip_x
+    v_slip = vel_slip_y
+    variable = vel_x
+  []
+  [mixture_drift_flux_y]
+    type = LinearWCNSFV2PMomentumDriftFlux
+    density_interp_method = average
+    fraction_dispersed = phase_2
+    momentum_component = y
+    rhie_chow_user_object = ins_rhie_chow_interpolator
+    rho_d = ${rho_d}
+    u_slip = vel_slip_x
+    v_slip = vel_slip_y
+    variable = vel_y
+  []
   [flow_ins_momentum_pressure_x]
     type = LinearFVMomentumPressure
     momentum_component = x
@@ -119,6 +136,27 @@ k_d = 1
     momentum_component = y
     mu = mu_mixture
     variable = vel_y
+  []
+
+  # Mixture phase equation
+  [mixture_ins_phase_2_advection]
+    type = LinearFVScalarAdvection
+    advected_interp_method = upwind
+    rhie_chow_user_object = ins_rhie_chow_interpolator
+    u_slip = vel_slip_x
+    v_slip = vel_slip_y
+    variable = phase_2
+  []
+  [mixture_phase_interface_reaction]
+    type = LinearFVReaction
+    coeff = 0.1
+    variable = phase_2
+  []
+  [mixture_phase_interface_source]
+    type = LinearFVSource
+    scaling_factor = 0.1
+    source_density = phase_1
+    variable = phase_2
   []
 []
 
@@ -189,31 +227,7 @@ k_d = 1
     use_two_term_expansion = true
     variable = pressure
   []
-[]
 
-[FunctorMaterials]
-  [flow_ins_speed_material]
-    type = ADVectorMagnitudeFunctorMaterial
-    execute_on = ALWAYS
-    outputs = none
-    vector_magnitude_name = speed
-    x_functor = vel_x
-    y_functor = vel_y
-  []
-[]
-
-[UserObjects]
-  [ins_rhie_chow_interpolator]
-    type = RhieChowMassFlux
-    p_diffusion_kernel = flow_p_diffusion
-    pressure = pressure
-    rho = rho_mixture
-    u = vel_x
-    v = vel_y
-  []
-[]
-
-[LinearFVBCs]
   [phase_2_left]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = left
@@ -228,51 +242,16 @@ k_d = 1
   []
 []
 
-[LinearFVKernels]
-  [mixture_ins_phase_2_advection]
-    type = LinearFVScalarAdvection
-    advected_interp_method = upwind
-    rhie_chow_user_object = ins_rhie_chow_interpolator
-    u_slip = vel_slip_x
-    v_slip = vel_slip_y
-    variable = phase_2
-  []
-  [mixture_phase_interface_reaction]
-    type = LinearFVReaction
-    coeff = 0.1
-    variable = phase_2
-  []
-  [mixture_phase_interface_source]
-    type = LinearFVSource
-    scaling_factor = 0.1
-    source_density = phase_1
-    variable = phase_2
-  []
-  [mixture_drift_flux_x]
-    type = LinearWCNSFV2PMomentumDriftFlux
-    density_interp_method = average
-    fraction_dispersed = phase_2
-    momentum_component = x
-    rhie_chow_user_object = ins_rhie_chow_interpolator
-    rho_d = ${rho_d}
-    u_slip = vel_slip_x
-    v_slip = vel_slip_y
-    variable = vel_x
-  []
-  [mixture_drift_flux_y]
-    type = LinearWCNSFV2PMomentumDriftFlux
-    density_interp_method = average
-    fraction_dispersed = phase_2
-    momentum_component = y
-    rhie_chow_user_object = ins_rhie_chow_interpolator
-    rho_d = ${rho_d}
-    u_slip = vel_slip_x
-    v_slip = vel_slip_y
-    variable = vel_y
-  []
-[]
-
 [FunctorMaterials]
+  [flow_ins_speed_material]
+    type = ADVectorMagnitudeFunctorMaterial
+    execute_on = ALWAYS
+    outputs = none
+    vector_magnitude_name = speed
+    x_functor = vel_x
+    y_functor = vel_y
+  []
+
   [mixture_phase_1_fraction]
     type = ParsedFunctorMaterial
     execute_on = ALWAYS
@@ -335,16 +314,16 @@ k_d = 1
   []
 []
 
-[Variables]
-  [phase_2]
-    type = MooseLinearVariableFVReal
-    family = MONOMIAL
-    fv = true
-    order = CONSTANT
-    solver_sys = phi_system
+[UserObjects]
+  [ins_rhie_chow_interpolator]
+    type = RhieChowMassFlux
+    p_diffusion_kernel = flow_p_diffusion
+    pressure = pressure
+    rho = rho_mixture
+    u = vel_x
+    v = vel_y
   []
 []
-
 
 [Executioner]
   type = SIMPLE

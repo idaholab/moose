@@ -173,7 +173,7 @@ computeNormalizationFactor(const NumericVector<Number> & solution,
   // make this consistent and use the l2 norm of the vector. We add a small number to
   // avoid normalizing with 0.
   // TODO: Would be nice to see if we can do l1 norms in the linear solve.
-  return (A_times_average_solution->l2_norm() + 1e-8);
+  return (A_times_average_solution->l2_norm() + libMesh::TOLERANCE * libMesh::TOLERANCE);
 }
 
 void

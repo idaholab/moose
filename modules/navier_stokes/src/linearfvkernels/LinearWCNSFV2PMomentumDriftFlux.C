@@ -66,16 +66,14 @@ LinearWCNSFV2PMomentumDriftFlux ::LinearWCNSFV2PMomentumDriftFlux(const InputPar
     mooseError(
         "In three dimensions, the w_slip velocity must be supplied using the 'w_slip' parameter");
 
-  // Phase fraction could be a nonlinear variable
-  const auto & fraction_name = getParam<MooseFunctorName>("fraction_dispersed");
-  if (isParamValid("fraction_dispersed") && _fe_problem.hasVariable(fraction_name))
-    addMooseVariableDependency(&_fe_problem.getVariable(_tid, fraction_name));
+  // Note that since this is used in a segregated solver at this time, we don't need to declare
+  // that this kernel may depend on a phase fraction variable
 }
 
 void
 LinearWCNSFV2PMomentumDriftFlux::computeFlux()
 {
-  const auto normal = _current_face_info->normal();
+  const auto & normal = _current_face_info->normal();
   const auto state = determineState();
   const bool on_boundary = Moose::FV::onBoundary(*this, *_current_face_info);
 
@@ -180,9 +178,6 @@ LinearWCNSFV2PMomentumDriftFlux::setupFaceData(const FaceInfo * face_info)
 
   // Caching the interpolation coefficients so they will be reused for the matrix and right hand
   // side terms
-  // Note: We should use Rhie Chow coefficients here, because the way we split the flux is:
-  // phi = u * (Matrix term) phi / u_old + (RHS) phi (u / u_old - 1)
-  // This will be a fine approximation for now
   _velocity_interp_coeffs =
       Moose::FV::interpCoeffs(_density_interp_method,
                               *_current_face_info,
