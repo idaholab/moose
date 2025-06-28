@@ -189,7 +189,7 @@ computeShearStrainRateNormSquared(const Moose::Functor<T> & u,
   T grad_zy = 0.0;
   T grad_zz = 0.0;
 
-  T trace = 2.0 * Sij_xx / 3.0;
+  T trace = Sij_xx / 3.0;
 
   if (v) // dim >= 2
   {
@@ -201,7 +201,7 @@ computeShearStrainRateNormSquared(const Moose::Functor<T> & u,
     grad_yx = grad_v(0);
     grad_yy = grad_v(1);
 
-    trace += 2.0 * Sij_yy / 3.0;
+    trace += Sij_yy / 3.0;
 
     if (w) // dim >= 3
     {
@@ -217,7 +217,7 @@ computeShearStrainRateNormSquared(const Moose::Functor<T> & u,
       grad_zy = grad_w(1);
       grad_zz = grad_w(2);
 
-      trace += 2.0 * Sij_zz / 3.0;
+      trace += Sij_zz / 3.0;
     }
   }
 

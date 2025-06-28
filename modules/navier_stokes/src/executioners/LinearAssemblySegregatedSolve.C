@@ -642,6 +642,7 @@ LinearAssemblySegregatedSolve::solve()
       // tolerances will be overridden within the solver.
       Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
       for (const auto i : index_range(_turbulence_system_names))
+      {
         ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
                      _active_scalar_system_names.size() + i] =
             solveAdvectedSystem(_turbulence_system_numbers[i],
@@ -651,62 +652,62 @@ LinearAssemblySegregatedSolve::solve()
                                 _turbulence_l_abs_tol,
                                 _turbulence_field_relaxation[i]);
 
-      // Limiting turbulence solution
-      LinearImplicitSystem & li_system =
-          libMesh::cast_ref<LinearImplicitSystem &>(_turbulence_systems[i]->system());
-      NumericVector<Number> & current_solution = *(li_system.solution);
-      NS::FV::limitSolutionUpdate(current_solution, _turbulence_field_min_limit[i]);
+        // Limiting turbulence solution
+        LinearImplicitSystem & li_system =
+            libMesh::cast_ref<LinearImplicitSystem &>(_turbulence_systems[i]->system());
+        NumericVector<Number> & current_solution = *(li_system.solution);
+        NS::FV::limitSolutionUpdate(current_solution, _turbulence_field_min_limit[i]);
 
-      // Overwrite old solution
-      _turbulence_systems[i]->setSolution(current_solution);
+        // Overwrite old solution
+        _turbulence_systems[i]->setSolution(current_solution);
+      }
     }
+
+    _problem.execute(EXEC_NONLINEAR);
+
+    converged = NS::FV::converged(ns_residuals, ns_abs_tols);
   }
 
-  _problem.execute(EXEC_NONLINEAR);
-
-  converged = NS::FV::converged(ns_residuals, ns_abs_tols);
-}
-
-// If we have passive scalar equations, solve them here. We assume the material properties in the
-// Navier-Stokes equations do not depend on passive scalars, as they are passive, therefore we
-// solve outside of the velocity-pressure loop
-if (_has_passive_scalar_systems && (converged || _continue_on_max_its))
-{
-  // The reason why we need more than one iteration is due to the matrix relaxation
-  // which can be used to stabilize the equations
-  bool passive_scalar_converged = false;
-  unsigned int ps_iteration_counter = 0;
-
-  _console << "Passive scalar iteration " << ps_iteration_counter
-           << " Initial residual norms:" << std::endl;
-
-  while (ps_iteration_counter < _num_iterations && !passive_scalar_converged)
+  // If we have passive scalar equations, solve them here. We assume the material properties in the
+  // Navier-Stokes equations do not depend on passive scalars, as they are passive, therefore we
+  // solve outside of the velocity-pressure loop
+  if (_has_passive_scalar_systems && (converged || _continue_on_max_its))
   {
-    ps_iteration_counter++;
-    std::vector<std::pair<unsigned int, Real>> scalar_residuals(_passive_scalar_system_names.size(),
-                                                                std::make_pair(0, 1.0));
-    std::vector<Real> scalar_abs_tols;
-    for (const auto scalar_tol : _passive_scalar_absolute_tolerance)
-      scalar_abs_tols.push_back(scalar_tol);
+    // The reason why we need more than one iteration is due to the matrix relaxation
+    // which can be used to stabilize the equations
+    bool passive_scalar_converged = false;
+    unsigned int ps_iteration_counter = 0;
 
-    // We set the preconditioner/controllable parameters through petsc options. Linear
-    // tolerances will be overridden within the solver.
-    Moose::PetscSupport::petscSetOptions(_passive_scalar_petsc_options, solver_params);
-    for (const auto i : index_range(_passive_scalar_system_names))
-      scalar_residuals[i] = solveAdvectedSystem(_passive_scalar_system_numbers[i],
-                                                *_passive_scalar_systems[i],
-                                                _passive_scalar_equation_relaxation[i],
-                                                _passive_scalar_linear_control,
-                                                _passive_scalar_l_abs_tol);
+    _console << "Passive scalar iteration " << ps_iteration_counter
+             << " Initial residual norms:" << std::endl;
 
-    passive_scalar_converged = NS::FV::converged(scalar_residuals, scalar_abs_tols);
+    while (ps_iteration_counter < _num_iterations && !passive_scalar_converged)
+    {
+      ps_iteration_counter++;
+      std::vector<std::pair<unsigned int, Real>> scalar_residuals(
+          _passive_scalar_system_names.size(), std::make_pair(0, 1.0));
+      std::vector<Real> scalar_abs_tols;
+      for (const auto scalar_tol : _passive_scalar_absolute_tolerance)
+        scalar_abs_tols.push_back(scalar_tol);
+
+      // We set the preconditioner/controllable parameters through petsc options. Linear
+      // tolerances will be overridden within the solver.
+      Moose::PetscSupport::petscSetOptions(_passive_scalar_petsc_options, solver_params);
+      for (const auto i : index_range(_passive_scalar_system_names))
+        scalar_residuals[i] = solveAdvectedSystem(_passive_scalar_system_numbers[i],
+                                                  *_passive_scalar_systems[i],
+                                                  _passive_scalar_equation_relaxation[i],
+                                                  _passive_scalar_linear_control,
+                                                  _passive_scalar_l_abs_tol);
+
+      passive_scalar_converged = NS::FV::converged(scalar_residuals, scalar_abs_tols);
+    }
+
+    // Both flow and scalars must converge
+    converged = passive_scalar_converged && converged;
   }
 
-  // Both flow and scalars must converge
-  converged = passive_scalar_converged && converged;
-}
+  converged = _continue_on_max_its ? true : converged;
 
-converged = _continue_on_max_its ? true : converged;
-
-return converged;
+  return converged;
 }
