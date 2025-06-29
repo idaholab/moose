@@ -311,7 +311,13 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
 
   if (_use_deviatoric_terms)
   {
-    const auto u_grad_elem = _u_var->gradSln(*_current_face_info->elemInfo());
+    // We might be on a face which is an internal boundary so we want to make sure we
+    // get the gradient from the right side.
+    const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
+
+    const auto u_grad_elem = _u_var->gradSln(*elem_info);
 
     Real trace_elem = 0;
     RealVectorValue frace_grad_approx;
@@ -323,13 +329,13 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
 
     if (_dim > 1)
     {
-      const auto v_grad_elem = _v_var->gradSln(*_current_face_info->elemInfo());
+      const auto v_grad_elem = _v_var->gradSln(*elem_info);
       trace_elem += v_grad_elem(1);
       frace_grad_approx(1) = v_grad_elem(_index);
 
       if (_dim > 2)
       {
-        const auto w_grad_elem = _w_var->gradSln(*_current_face_info->elemInfo());
+        const auto w_grad_elem = _w_var->gradSln(*elem_info);
         trace_elem += w_grad_elem(2);
         frace_grad_approx(2) = w_grad_elem(_index);
       }
