@@ -61,9 +61,8 @@ Real
 NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
                                            const std::vector<dof_id_type> & elem_ids) const
 {
-  // Developer should sort vector of elem_ids outside of this function to prevent
-  // sorting the key vector on every call (expensive).
   std::vector<dof_id_type> key = elem_ids;
+  std::sort(key.begin(), key.end());
 
   // Check cache
   auto it = _cached_coef.find(key);
