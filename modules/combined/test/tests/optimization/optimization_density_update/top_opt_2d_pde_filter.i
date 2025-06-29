@@ -172,8 +172,8 @@ power = 2
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type '
-  petsc_options_value = 'lu'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'gamg'
   nl_abs_tol = 1e-10
   line_search = none
   dt = 1.0
