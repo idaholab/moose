@@ -22,7 +22,7 @@ MiscTestApp::validParams()
 
 registerKnownLabel("MiscTestApp");
 
-MiscTestApp::MiscTestApp(InputParameters parameters) : MooseApp(parameters)
+MiscTestApp::MiscTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   MiscTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -46,23 +46,6 @@ MiscTestApp::registerApps()
 {
   MiscApp::registerApps();
   registerApp(MiscTestApp);
-}
-
-void
-MiscTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"MiscTestApp"});
-}
-
-void
-MiscTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"MiscTestApp"});
-}
-
-void
-MiscTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

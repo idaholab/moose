@@ -19,7 +19,7 @@ GeochemistryTestApp::validParams()
   return params;
 }
 
-GeochemistryTestApp::GeochemistryTestApp(InputParameters parameters) : MooseApp(parameters)
+GeochemistryTestApp::GeochemistryTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   GeochemistryTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

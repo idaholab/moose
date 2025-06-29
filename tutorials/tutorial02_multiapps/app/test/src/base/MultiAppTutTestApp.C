@@ -20,7 +20,7 @@ MultiAppTutTestApp::validParams()
   return params;
 }
 
-MultiAppTutTestApp::MultiAppTutTestApp(InputParameters parameters) : MooseApp(parameters)
+MultiAppTutTestApp::MultiAppTutTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   MultiAppTutTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

@@ -16,7 +16,7 @@ class VerificationTutorialApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  VerificationTutorialApp(InputParameters parameters);
+  VerificationTutorialApp(const InputParameters & parameters);
   virtual ~VerificationTutorialApp();
 
   static void registerApps();

@@ -31,7 +31,7 @@ LevelSetApp::validParams()
 
 registerKnownLabel("LevelSetApp");
 
-LevelSetApp::LevelSetApp(InputParameters parameters) : MooseApp(parameters)
+LevelSetApp::LevelSetApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   srand(processor_id());
   LevelSetApp::registerAll(_factory, _action_factory, _syntax);
@@ -48,25 +48,6 @@ LevelSetApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
 {
   Registry::registerObjectsTo(f, {"LevelSetApp"});
   Registry::registerActionsTo(af, {"LevelSetApp"});
-}
-
-void
-LevelSetApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"LevelSetApp"});
-}
-
-void
-LevelSetApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"LevelSetApp"});
-}
-void
-LevelSetApp::registerExecFlags(Factory &)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 // Dynamic Library Entry Points - DO NOT MODIFY

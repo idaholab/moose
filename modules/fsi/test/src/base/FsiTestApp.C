@@ -19,7 +19,7 @@ FsiTestApp::validParams()
   return params;
 }
 
-FsiTestApp::FsiTestApp(InputParameters parameters) : MooseApp(parameters)
+FsiTestApp::FsiTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   FsiTestApp::registerAll(_factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }

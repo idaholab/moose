@@ -22,7 +22,7 @@ RdgTestApp::validParams()
 
 registerKnownLabel("RdgTestApp");
 
-RdgTestApp::RdgTestApp(InputParameters parameters) : MooseApp(parameters)
+RdgTestApp::RdgTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   RdgTestApp::registerAll(_factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
@@ -46,24 +46,6 @@ RdgTestApp::registerApps()
   RdgApp::registerApps();
   registerApp(RdgTestApp);
 }
-
-void
-RdgTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"RdgTestApp"});
-}
-
-void
-RdgTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"RdgTestApp"});
-}
-
-void
-RdgTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 RdgTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

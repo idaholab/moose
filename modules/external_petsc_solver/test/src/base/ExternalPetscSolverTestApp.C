@@ -19,7 +19,7 @@ ExternalPetscSolverTestApp::validParams()
   return params;
 }
 
-ExternalPetscSolverTestApp::ExternalPetscSolverTestApp(InputParameters parameters)
+ExternalPetscSolverTestApp::ExternalPetscSolverTestApp(const InputParameters & parameters)
   : ExternalPetscSolverApp(parameters)
 {
   ExternalPetscSolverTestApp::registerAll(

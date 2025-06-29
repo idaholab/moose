@@ -20,7 +20,7 @@ BabblerTestApp::validParams()
   return params;
 }
 
-BabblerTestApp::BabblerTestApp(InputParameters parameters) : MooseApp(parameters)
+BabblerTestApp::BabblerTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   BabblerTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

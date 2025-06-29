@@ -22,7 +22,8 @@ ElectromagneticsTestApp::validParams()
 
 registerKnownLabel("ElectromagneticsTestApp");
 
-ElectromagneticsTestApp::ElectromagneticsTestApp(InputParameters parameters) : MooseApp(parameters)
+ElectromagneticsTestApp::ElectromagneticsTestApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   ElectromagneticsTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -49,23 +50,6 @@ ElectromagneticsTestApp::registerApps()
 {
   ElectromagneticsApp::registerApps();
   registerApp(ElectromagneticsTestApp);
-}
-
-void
-ElectromagneticsTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"ElectromagneticsTestApp"});
-}
-
-void
-ElectromagneticsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"ElectromagneticsTestApp"});
-}
-
-void
-ElectromagneticsTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 /***************************************************************************************************
