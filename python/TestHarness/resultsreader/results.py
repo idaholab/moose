@@ -372,7 +372,7 @@ class TestHarnessTestResult:
 
         for k, v in input.items():
             # Bounds is saved as a list; convert to tuple
-            if 'bounds' in v:
+            if v.get('bounds') is not None:
                 v['bounds'] = tuple(v['bounds'])
 
             # Before version 1, the data type was not stored
