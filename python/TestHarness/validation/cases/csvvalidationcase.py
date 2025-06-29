@@ -93,7 +93,8 @@ class CSVValidationCase(ValidationCase):
 
     def addScalarCSVData(self, key: str, index: int, description: str,
                          units: Optional[str], check: bool = True,
-                         store_key: Optional[str] = None) -> None:
+                         store_key: Optional[str] = None,
+                         **kwargs) -> None:
         """
         Adds a scalar data entry from the CSV file with bounds checking
         against the gold value
@@ -107,17 +108,27 @@ class CSVValidationCase(ValidationCase):
             check: Whether or not to check the data (default: True)
             store_key: The key to store the data as in the database,
                 otherwise just use 'key'
+            Remaining arguments passed to addScalarData()
         """
         assert isinstance(key, str)
         assert isinstance(index, int)
         assert isinstance(store_key, (str, NoneType))
 
+        # Key that we're storing the data as isn't the
+        # same as the column name in the CSV
         if not store_key:
             store_key = key
 
+        # Load both values from CSV
         value = self._getScalarCSV(key, index, False)
         gold_value = self._getScalarCSV(key, index, True)
-        rel_err = self._rel_err if check else None
 
-        self.addScalarData(store_key, value, description, units,
-                           nominal=gold_value, rel_err=rel_err)
+        # "nominal" value is the gold value
+        kwargs['nominal'] = gold_value
+
+        # If check=True (default), set the relative error
+        # that the data will checked with
+        if check:
+            kwargs['rel_err'] = self._rel_err
+
+        self.addScalarData(store_key, value, description, units, **kwargs)
