@@ -1,0 +1,13 @@
+[Tests]
+#  design = 'LinearFVDiffusion.md'
+#  issues = '#25722 #30146'
+  [mms-diffusion-1d-robin]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = TestDiffusion1DRobin
+    requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a one-dimensional domain with Robin boundary conditions.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]
