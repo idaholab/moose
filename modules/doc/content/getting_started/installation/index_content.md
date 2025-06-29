@@ -16,6 +16,7 @@ choice:
 
   - [installation/install_libtorch.md]
   - [installation/install_neml2.md]
+  - [installation/install_mfem.md]
 
 When the above does not quite fit your needs, the following instructions are available:
 

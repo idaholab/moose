@@ -5,7 +5,7 @@ Notation (SON) format for use by the Hierarchical Input Validation Engine
 (HIVE) in the NEAMS Workbench. It takes its input from JsonSyntaxTree.
 
 This formatter is used for the `--definition` command line option, described
-[here](modules/doc/content/application_usage/command_line_usage.md optional=True). It is also available for the
+[here](application_usage/command_line_usage.md optional=True). It is also available for the
 application developer, either directly or using an [AdvancedOutput](syntax/Outputs/index.md#advanced-output).
 
 ## Example output
