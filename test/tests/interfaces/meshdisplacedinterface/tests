@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = 'Exodiff'
+    input = 'mesh_displaced_interface_test.i'
+    exodiff = 'mesh_displaced_interface_test_out.e'
+    requirement = 'The system shall support the ability to update objects built with the displace mesh when displaced mesh gets updated.'
+    issues = '#30852'
+    design = 'MeshDisplacedInterface.md'
+  []
+[]

@@ -260,7 +260,7 @@ DisplacedProblem::syncSolutions(
   syncAuxSolution(aux_soln);
 }
 
-void
+bool
 DisplacedProblem::updateMesh(bool mesh_changing)
 {
   TIME_SECTION("updateMesh", 3, "Updating Displaced Mesh");
@@ -328,9 +328,11 @@ DisplacedProblem::updateMesh(bool mesh_changing)
 
   // Since the Mesh changed, update the PointLocator object used by DiracKernels.
   _dirac_kernel_info.updatePointLocator(_mesh);
+
+  return udmt.hasDisplacement();
 }
 
-void
+bool
 DisplacedProblem::updateMesh(const std::map<unsigned int, const NumericVector<Number> *> & nl_solns,
                              const NumericVector<Number> & aux_soln)
 {
@@ -372,6 +374,8 @@ DisplacedProblem::updateMesh(const std::map<unsigned int, const NumericVector<Nu
 
   // Since the Mesh changed, update the PointLocator object used by DiracKernels.
   _dirac_kernel_info.updatePointLocator(_mesh);
+
+  return udmt.hasDisplacement();
 }
 
 TagID

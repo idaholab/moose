@@ -47,6 +47,7 @@
 #include "MooseEigenSystem.h"
 #include "MooseParsedFunction.h"
 #include "MeshChangedInterface.h"
+#include "MeshDisplacedInterface.h"
 #include "ComputeJacobianBlocksThread.h"
 #include "ScalarInitialCondition.h"
 #include "FVInitialConditionTempl.h"
@@ -1252,12 +1253,7 @@ FEProblemBase::initialSetup()
   // We need to move the mesh in order to build a map between mortar secondary and primary
   // interfaces. This map will then be used by the AgumentSparsityOnInterface ghosting functor to
   // know which dofs we need ghosted when we call EquationSystems::reinit
-  if (_displaced_problem && _mortar_data.hasDisplacedObjects())
-  {
-    _displaced_problem->updateMesh();
-    // if displacements were applied to the mesh, the mortar mesh should be updated too
-    updateMortarMesh();
-  }
+  updateDisplacement(EXEC_INITIAL);
 
   // Possibly reinit one more time to get ghosting correct
   reinitBecauseOfGhostingOrNewGeomObjects();
@@ -6609,8 +6605,7 @@ FEProblemBase::restoreSolutions()
     _console << "Restoring postprocessor, vector-postprocessor, and reporter data..." << std::endl;
   _reporter_data.restoreState(_verbose_restore);
 
-  if (_displaced_problem)
-    _displaced_problem->updateMesh();
+  updateDisplacement(EXEC_NONE);
 }
 
 void
@@ -6928,13 +6923,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
       _aux->residualSetup();
 
-      if (_displaced_problem)
-      {
-        computeSystems(EXEC_PRE_DISPLACE);
-        _displaced_problem->updateMesh();
-        if (_mortar_data.hasDisplacedObjects())
-          updateMortarMesh();
-      }
+      updateDisplacement(EXEC_LINEAR);
 
       for (THREAD_ID tid = 0; tid < n_threads; tid++)
       {
@@ -7160,13 +7149,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
       _aux->residualSetup();
 
-      if (_displaced_problem)
-      {
-        computeSystems(EXEC_PRE_DISPLACE);
-        _displaced_problem->updateMesh();
-        if (_mortar_data.hasDisplacedObjects())
-          updateMortarMesh();
-      }
+      updateDisplacement(EXEC_LINEAR);
 
       for (THREAD_ID tid = 0; tid < n_threads; tid++)
       {
@@ -7308,11 +7291,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
         _aux->jacobianSetup();
 
-        if (_displaced_problem)
-        {
-          computeSystems(EXEC_PRE_DISPLACE);
-          _displaced_problem->updateMesh();
-        }
+        updateDisplacement(EXEC_NONLINEAR);
 
         for (unsigned int tid = 0; tid < n_threads; tid++)
         {
@@ -7366,11 +7345,7 @@ FEProblemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
   TIME_SECTION("computeTransientImplicitJacobian", 2);
   setCurrentNonlinearSystem(nl_sys_num);
 
-  if (_displaced_problem)
-  {
-    computeSystems(EXEC_PRE_DISPLACE);
-    _displaced_problem->updateMesh();
-  }
+  updateDisplacement(EXEC_NONLINEAR);
 
   computeSystems(EXEC_NONLINEAR);
 
@@ -8175,6 +8150,35 @@ void
 FEProblemBase::notifyWhenMeshChanges(MeshChangedInterface * mci)
 {
   _notify_when_mesh_changes.push_back(mci);
+}
+
+void
+FEProblemBase::notifyWhenMeshDisplaces(MeshDisplacedInterface * mdi)
+{
+  _notify_when_mesh_displaces.push_back(mdi);
+}
+
+bool
+FEProblemBase::updateDisplacement(const ExecFlagType & exec_type)
+{
+  if (!_displaced_problem)
+    return false;
+
+  if (exec_type == EXEC_LINEAR || exec_type == EXEC_NONLINEAR)
+    computeSystems(EXEC_PRE_DISPLACE);
+
+  bool is_displaced = _displaced_problem->updateMesh();
+  // if the displaced mesh does not have any change, we have a fast return
+  if (!is_displaced)
+    return false;
+
+  if (_mortar_data.hasDisplacedObjects())
+    updateMortarMesh();
+
+  for (const auto & mdi : _notify_when_mesh_displaces)
+    mdi->meshDisplaced();
+
+  return true;
 }
 
 void

@@ -17,6 +17,7 @@
 #include "VectorPostprocessorInterface.h"
 #include "ReporterInterface.h"
 #include "MeshChangedInterface.h"
+#include "MeshDisplacedInterface.h"
 #include "MooseObject.h"
 #include "MooseTypes.h"
 #include "Restartable.h"
@@ -48,6 +49,7 @@ class UserObject : public MooseObject,
                    protected Restartable,
                    protected MeshMetaDataInterface,
                    protected MeshChangedInterface,
+                   protected MeshDisplacedInterface,
                    protected PerfGraphInterface,
                    public DependencyResolverInterface
 {
