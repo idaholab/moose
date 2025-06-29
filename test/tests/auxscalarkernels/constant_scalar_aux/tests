@@ -1,6 +1,6 @@
 [Tests]
   issues = '#1933'
-  design = 'auxkernels/ConstantScalarAux.md'
+  design = 'auxscalarkernels/ConstantScalarAux.md'
   [./test]
     type = 'Exodiff'
     input = 'constant_scalar_aux.i'

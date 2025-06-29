@@ -4,7 +4,7 @@
 
 ## Example syntax
 
-!listing test/tests/auxkernels/aux_scalar_deps/aux_scalar_deps.i block=AuxScalarKernels
+!listing test/tests/auxscalarkernels/aux_scalar_deps/aux_scalar_deps.i block=AuxScalarKernels
 
 !syntax parameters /AuxScalarKernels/QuotientScalarAux
 
