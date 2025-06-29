@@ -1,0 +1,10 @@
+[Tests]
+  [crit_time_heat]
+    type = 'CSVDiff'
+    input = 'crit_time_heat.i'
+    csvdiff = 'crit_time_heat_out.csv'
+    design = 'CriticalTimeStepHeatConduction.md'
+    issues = '#30588'
+    requirement = 'The system shall correctly compute the critical time step for a heat transfer problem.'
+  []
+[]
