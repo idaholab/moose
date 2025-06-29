@@ -41,6 +41,10 @@ class TestValidation(TestHarnessTestCase):
         self.assertEqual(validation, validation_gold)
 
     def test(self):
+        """
+        Tests running a basic validation case with the TestHarness,
+        using the `ok` test in the `validation` test spec
+        """
         results = self.runTests('-i', 'validation', '--re', 'ok')
         out = results.results
         self.assertEqual(out['testharness']['validation_version'],
@@ -118,6 +122,11 @@ class TestValidation(TestHarnessTestCase):
         self.assertIn('validation_run', timing)
 
     def testFail(self):
+        """
+        Tests running a basic validation case with the TestHarness
+        that fails, using the `fail` test in the `validation`
+        test spec
+        """
         out = self.runTests('-i', 'validation', '--re', 'fail', exit_code=132).results
         test = out['tests']['tests/test_harness']['tests']['fail']
         status = test['status']
@@ -155,6 +164,11 @@ class TestValidation(TestHarnessTestCase):
         self.assertIn('Acquired 1 data value(s), 1 result(s): 0 ok, 1 fail, 0 skip', validation_output)
 
     def testException(self):
+        """
+        Tests running a basic validation case with the TestHarness
+        that throws a python exception, using the `exception` test
+        in the `validation` test spec
+        """
         out = self.runTests('-i', 'validation', '--re', 'exception', exit_code=132).results
         test = out['tests']['tests/test_harness']['tests']['exception']
         status = test['status']
@@ -173,10 +187,19 @@ class TestValidation(TestHarnessTestCase):
         self.assertIn('Encountered exception(s) while running tests', validation_output)
 
     def testBadPython(self):
+        """
+        Tests running a validation case with the TestHarness that
+        has invalid python syntax, using the `validation_bad_python`
+        test spec
+        """
         out = self.runTests('-i', 'validation_bad_python', exit_code=128).output
         self.assertIn('validation_bad_python:   invalid syntax (validation_badpython.py, line 1)', out)
 
     def testDuplicateParam(self):
+        """
+        Tests a validation case that specifies the same parameter
+        multiple times from different cases
+        """
         out = self.runTests('-i', 'validation_duplicate_param', exit_code=128).output
         self.assertIn('Duplicate parameter "type" from validation test', out)
 
