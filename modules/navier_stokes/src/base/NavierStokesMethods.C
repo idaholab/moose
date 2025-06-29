@@ -272,7 +272,6 @@ getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
                 const std::set<SubdomainID> & block_ids,
                 std::map<const Elem *, std::vector<Real>> & dist_map)
 {
-
   dist_map.clear();
 
   for (const auto & elem : fe_problem.mesh().getMesh().active_element_ptr_range())
@@ -286,8 +285,18 @@ getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
           for (const auto side_id : side_bnds)
             if (side_id == wall_id)
             {
-              const FaceInfo * const fi = subproblem.mesh().faceInfo(elem, i_side);
-              const Real dist = std::abs((fi->elemCentroid() - fi->faceCentroid()) * fi->normal());
+              // The list below stores the face infos with respect to their owning elements,
+              // depending on the block restriction we might encounter situations where the
+              // element outside of the block owns the face info.
+              const auto & neighbor = elem->neighbor_ptr(i_side);
+              const auto elem_has_fi = Moose::FV::elemHasFaceInfo(*elem, neighbor);
+              const auto & elem_for_fi = elem_has_fi ? elem : neighbor;
+              const auto side = elem_has_fi ? i_side : neighbor->which_neighbor_am_i(elem);
+
+              const FaceInfo * const fi = subproblem.mesh().faceInfo(elem_for_fi, side);
+              const auto & elem_centroid =
+                  elem_has_fi ? fi->elemCentroid() : fi->neighborCentroid();
+              const Real dist = std::abs((elem_centroid - fi->faceCentroid()) * fi->normal());
               dist_map[elem].push_back(dist);
             }
         }
@@ -302,7 +311,6 @@ getElementFaceArgs(const std::vector<BoundaryName> & wall_boundary_name,
                    const std::set<SubdomainID> & block_ids,
                    std::map<const Elem *, std::vector<const FaceInfo *>> & face_info_map)
 {
-
   face_info_map.clear();
 
   for (const auto & elem : fe_problem.mesh().getMesh().active_element_ptr_range())
@@ -316,7 +324,15 @@ getElementFaceArgs(const std::vector<BoundaryName> & wall_boundary_name,
           for (const auto side_id : side_bnds)
             if (side_id == wall_id)
             {
-              const FaceInfo * fi = subproblem.mesh().faceInfo(elem, i_side);
+              // The list below stores the face infos with respect to their owning elements,
+              // depending on the block restriction we might encounter situations where the
+              // element outside of the block owns the face info.
+              const auto & neighbor = elem->neighbor_ptr(i_side);
+              const auto elem_has_fi = Moose::FV::elemHasFaceInfo(*elem, neighbor);
+              const auto & elem_for_fi = elem_has_fi ? elem : neighbor;
+              const auto side = elem_has_fi ? i_side : neighbor->which_neighbor_am_i(elem);
+
+              const FaceInfo * const fi = subproblem.mesh().faceInfo(elem_for_fi, side);
               face_info_map[elem].push_back(fi);
             }
         }
