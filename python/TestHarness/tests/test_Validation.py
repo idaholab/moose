@@ -8,15 +8,60 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from TestHarnessTestCase import TestHarnessTestCase
-class TestHarnessTester(TestHarnessTestCase):
+
+import unittest
+from copy import deepcopy
+import json
+import os
+
+class TestValidation(TestHarnessTestCase):
+    def compareGold(self, validation: dict, name: str, rewrite: bool = False):
+        """
+        Helper for comparing against a gold file, which contains the 'validation'
+        entry for the given test.
+
+        When running this, you can set rewrite=True to rewrite the gold.
+        """
+        gold_path = os.path.join('gold', 'validation', f'validation_{name}.json')
+
+        # Take a copy as we'll change this
+        validation = deepcopy(validation)
+
+        # Rewrite the script path so that it is relative and we don't
+        # diff based on where this is ran
+        validation['script'] = os.path.relpath(validation['script'])
+
+        if rewrite:
+            with open(gold_path, 'w') as f:
+                json.dump(validation, f, indent=2, sort_keys=True)
+
+        with open(gold_path, 'r') as f:
+            validation_gold = json.load(f)
+
+        self.assertEqual(validation, validation_gold)
+
     def test(self):
-        out = self.runTests('-i', 'validation', '--re', 'ok').results
+        """
+        Tests running a basic validation case with the TestHarness,
+        using the `ok` test in the `validation` test spec
+        """
+        results = self.runTests('-i', 'validation', '--re', 'ok')
+        out = results.results
+        self.assertEqual(out['testharness']['validation_version'],
+                         results.harness.VALIDATION_VERSION)
+
         test = out['tests']['tests/test_harness']['tests']['ok']
         status = test['status']
         self.assertEqual(status['status'], 'OK')
 
-        # Check validation output
+        # Validation entry
         validation = test['validation']
+
+        # Compare against the golded values
+        # If this fails, you can regold by setting rewrite = true in compareGold
+        self.compareGold(validation, 'test')
+
+        # Check validation output
         self.assertTrue(validation['script'].endswith('validation_ok.py'))
         # Validation results
         results = validation['results']
@@ -47,12 +92,12 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertEqual('coolunits', number['units'])
         self.assertEqual(95.0, number['bounds'][0])
         self.assertEqual(105.0, number['bounds'][1])
-        self.assertEqual('ScalarData', number['type'])
+        self.assertEqual('ValidationScalarData', number['type'])
         # Arbitrary data (dict)
         useless_dict = data['useless_dict']
         self.assertEqual({'foo': 'bar'}, useless_dict['value'])
         self.assertEqual('A useless dictionary', useless_dict['description'])
-        self.assertEqual('Data', useless_dict['type'])
+        self.assertEqual('ValidationData', useless_dict['type'])
         # Vector data
         vector = data['vector']
         self.assertEqual([0, 1], vector['x'])
@@ -63,7 +108,7 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertEqual('K', vector['units'])
         self.assertEqual([0, 1], vector['bounds'][0])
         self.assertEqual([2, 3], vector['bounds'][1])
-        self.assertEqual('VectorData', vector['type'])
+        self.assertEqual('ValidationVectorData', vector['type'])
 
         # Check on-screen output
         output = test['output']
@@ -76,15 +121,45 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertIn('validation_init', timing)
         self.assertIn('validation_run', timing)
 
+    def testCSV(self):
+        """
+        Tests running a basic CSV validation case with the TestHarness,
+        using the `csv` test in the `validation` test spec.
+        """
+        results = self.runTests('-i', 'validation', '--re', 'csv')
+        out = results.results
+        self.assertEqual(out['testharness']['validation_version'],
+                         results.harness.VALIDATION_VERSION)
+
+        test = out['tests']['tests/test_harness']['tests']['csv']
+        status = test['status']
+        self.assertEqual(status['status'], 'OK')
+
+        # Validation entry
+        validation = test['validation']
+
+        # Compare against the golded values
+        # If this fails, you can regold by setting rewrite = true in compareGold
+        self.compareGold(validation, 'testcsv')
+
     def testFail(self):
+        """
+        Tests running a basic validation case with the TestHarness
+        that fails, using the `fail` test in the `validation`
+        test spec
+        """
         out = self.runTests('-i', 'validation', '--re', 'fail', exit_code=132).results
         test = out['tests']['tests/test_harness']['tests']['fail']
         status = test['status']
         self.assertEqual(status['status'], 'ERROR')
         self.assertEqual(status['status_message'], 'VALIDATION FAILED')
 
-        # Check validation output
         validation = test['validation']
+
+        # Compare against the golded values
+        # If this fails, you can regold by setting rewrite = true in compareGold
+        self.compareGold(validation, 'testfail')
+
         # Validation results (one should have failed)
         results = validation['results']
         self.assertEqual(len(results), 1)
@@ -110,6 +185,11 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertIn('Acquired 1 data value(s), 1 result(s): 0 ok, 1 fail, 0 skip', validation_output)
 
     def testException(self):
+        """
+        Tests running a basic validation case with the TestHarness
+        that throws a python exception, using the `exception` test
+        in the `validation` test spec
+        """
         out = self.runTests('-i', 'validation', '--re', 'exception', exit_code=132).results
         test = out['tests']['tests/test_harness']['tests']['exception']
         status = test['status']
@@ -128,9 +208,21 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertIn('Encountered exception(s) while running tests', validation_output)
 
     def testBadPython(self):
+        """
+        Tests running a validation case with the TestHarness that
+        has invalid python syntax, using the `validation_bad_python`
+        test spec
+        """
         out = self.runTests('-i', 'validation_bad_python', exit_code=128).output
         self.assertIn('validation_bad_python:   invalid syntax (validation_badpython.py, line 1)', out)
 
     def testDuplicateParam(self):
+        """
+        Tests a validation case that specifies the same parameter
+        multiple times from different cases
+        """
         out = self.runTests('-i', 'validation_duplicate_param', exit_code=128).output
         self.assertIn('Duplicate parameter "type" from validation test', out)
+
+if __name__ == '__main__':
+    unittest.main()

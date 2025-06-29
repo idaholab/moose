@@ -1,5 +1,5 @@
 # Import the base class that will be used for all validation cases
-from TestHarness import ValidationCase
+from TestHarness.validation import ValidationCase
 # Convenience import for loading app CSV output with pandas
 import pandas as pd
 

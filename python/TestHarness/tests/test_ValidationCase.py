@@ -10,22 +10,46 @@
 # pylint: disable
 import unittest
 import typing
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import numpy as np
-from TestHarness import ValidationCase
-from TestHarness.validation import NoTestsDefined, TestMissingResults, TestRunException
+import os
+from TestHarness.validation import ValidationCase
+from TestHarness.validation.dataclasses import *
+from TestHarness.validation.exceptions import *
 from FactorySystem.InputParameters import InputParameters
 
 class TestValidationCase(unittest.TestCase):
     """
     Test cases for ValidationCase
     """
+    def compareGold(self, case: ValidationCase, name: str, rewrite: bool = False):
+        """
+        Helper for comparing against a gold file.
+
+        When running this, you can set rewrite=True to rewrite the gold.
+        """
+        gold_path = os.path.join('gold', 'validation', f'validationcase_{name}.json')
+
+        data = {'results': [asdict(v) for v in case.results],
+                'data': {k: asdict(v) for k, v in case.data.items()}}
+        data_dumped = json.dumps(data, indent=2, sort_keys=True)
+        data_loaded = json.loads(data_dumped)
+
+        if rewrite:
+            with open(gold_path, 'w') as f:
+                f.write(data_dumped)
+
+        with open(gold_path, 'r') as f:
+            gold_data = json.load(f)
+
+        self.assertEqual(data_loaded, gold_data)
+
     def testNoTests(self):
         """
         Checks that an exception is raised when running without tests
         """
         test = ValidationCase()
-        with self.assertRaises(NoTestsDefined):
+        with self.assertRaises(ValidationNoTestsDefined):
             test.run()
 
     def testAddResult(self):
@@ -62,7 +86,7 @@ class TestValidationCase(unittest.TestCase):
                 pass
 
         test = Test()
-        with self.assertRaises(TestMissingResults):
+        with self.assertRaises(ValidationTestMissingResults):
             test.run()
         self.assertEqual(len(test.results), 0)
 
@@ -81,6 +105,7 @@ class TestValidationCase(unittest.TestCase):
         for key, value in args.items():
             self.assertEqual(getattr(data, key), value)
         self.assertIsNone(data.test)
+        self.compareGold(test, 'testadddata')
 
     def testAddDataChecks(self):
         """
@@ -102,7 +127,7 @@ class TestValidationCase(unittest.TestCase):
 
         # Bad data class
         @dataclass(kw_only=True)
-        class BadData(ValidationCase.Data):
+        class BadData(ValidationData):
             bad_value: typing.Any
         with self.assertRaisesRegex(TypeError, 'not JSON serializable'):
             ValidationCase()._addData(BadData, 'key', 1234, 'unused', bad_value=b'1234')
@@ -175,17 +200,38 @@ class TestValidationCase(unittest.TestCase):
         # Success
         status, message = ValidationCase.checkRelativeError(value, nominal, rel_err, units)
         self.assertEqual(status, ValidationCase.Status.OK)
-        self.assertRegex(message, '\d+.\d+E[-+]\d+ someunit relative error \d+.\d+E[-+]\d+ <')
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ someunit relative error \d+.\d+E[-+]\d+ <')
 
         # Success without units
         status, message = ValidationCase.checkRelativeError(value, nominal, rel_err, None)
         self.assertEqual(status, ValidationCase.Status.OK)
-        self.assertRegex(message, '\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ <')
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ <')
 
         # Fail
         status, message = ValidationCase.checkRelativeError(value, nominal, 1e-6, None)
         self.assertEqual(status, ValidationCase.Status.FAIL)
-        self.assertRegex(message, '\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ >')
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ >')
+
+        # Success due to absolute zero default
+        status, message = ValidationCase.checkRelativeError(0, 0, rel_err, None)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error skipped due to absolute zero')
+
+        # Success due to absolute zero with override
+        status, message = ValidationCase.checkRelativeError(0, 0.01, rel_err, None, abs_zero=0.1)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error skipped due to absolute zero')
+        status, message = ValidationCase.checkRelativeError(0.01, 0, rel_err, None, abs_zero=0.1)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error skipped due to absolute zero')
+
+        # Success with a single zero value using abolute zero (dumb, but it could happen)
+        status, message = ValidationCase.checkRelativeError(0, 0.01, 1.01, None)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ <')
+        status, message = ValidationCase.checkRelativeError(0.01, 0, 1.01, None)
+        self.assertEqual(status, ValidationCase.Status.OK)
+        self.assertRegex(message, r'\d+.\d+E[-+]\d+ relative error \d+.\d+E[-+]\d+ <')
 
     def testCheckRelativeErrorChecks(self):
         """
@@ -205,9 +251,9 @@ class TestValidationCase(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'rel_err not positive'):
             ValidationCase.checkRelativeError(0, 0, -1, None)
 
-        # Zero nominal value
-        with self.assertRaisesRegex(ValueError, 'nominal value is zero'):
-            ValidationCase.checkRelativeError(0, 0, 1, None)
+        # Negative abs_zero
+        with self.assertRaisesRegex(ValueError, 'abs_zero is negative'):
+            ValidationCase.checkRelativeError(0, 0, 1, None, abs_zero=-0.1)
 
     def testToFloat(self):
         """
@@ -220,7 +266,14 @@ class TestValidationCase(unittest.TestCase):
         # Integer to float
         value = int(1)
         to_value = ValidationCase.toFloat(value)
-        self.assertTrue(isinstance(to_value, float))
+        self.assertIsInstance(to_value, float)
+        self.assertEqual(to_value, float(value))
+
+        # Special case where np.float64 is derived from float,
+        # and we want to explicitly convert it
+        value = np.float64(1)
+        to_value = ValidationCase.toFloat(value)
+        self.assertIsInstance(to_value, float)
         self.assertEqual(to_value, float(value))
 
         # Catch exception
@@ -245,6 +298,9 @@ class TestValidationCase(unittest.TestCase):
         for key, value in args.items():
             self.assertEqual(getattr(data, key), value)
         self.assertIsNone(data.test)
+        # Not provided if it isn't used
+        self.assertIsNone(data.abs_zero)
+        self.compareGold(test, 'testaddscalardata')
 
     def testAddScalarDataChecks(self):
         """
@@ -299,12 +355,15 @@ class TestValidationCase(unittest.TestCase):
 
         # Other int values to float
         int_value = int(1)
-        case.addScalarData(f'values_to_float', 1, 'unused', None, nominal=int_value, rel_err=int_value)
+        case.addScalarData(f'values_to_float', 1, 'unused', None, nominal=int_value,
+                           rel_err=int_value, abs_zero=int_value)
         data = case.data[f'values_to_float']
         self.assertTrue(isinstance(data.nominal, float))
         self.assertTrue(isinstance(data.rel_err, float))
+        self.assertTrue(isinstance(data.abs_zero, float))
         self.assertEqual(data.nominal, float(int_value))
         self.assertEqual(data.rel_err, float(int_value))
+        self.assertEqual(data.abs_zero, float(int_value))
 
         # rel_err requires nominal
         with self.assertRaisesRegex(KeyError, "Must provide 'nominal' with 'rel_err'"):
@@ -316,8 +375,8 @@ class TestValidationCase(unittest.TestCase):
         with bounds via the 'bounds' keyword argument
         """
         key = 'data'
-        value = 1.234
-        bounds = (value - 1.0, value + 0.1)
+        value = 1.2
+        bounds = (value - 1, value + 1)
 
         test = ValidationCase()
         test.addScalarData(key, value, 'unused', None, bounds=bounds)
@@ -325,6 +384,7 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(len(all_data), 1)
         data = all_data[key]
         self.assertEqual(bounds, data.bounds)
+        self.compareGold(test, 'testaddscalardatabounded')
 
     def testAddScalarDataNominal(self):
         """
@@ -338,6 +398,7 @@ class TestValidationCase(unittest.TestCase):
         all_data = test.data
         self.assertEqual(len(all_data), 1)
         self.assertEqual(nominal, all_data[key].nominal)
+        self.compareGold(test, 'testaddscalardatanominal')
 
     def testAddScalarDataRelativeError(self):
         """
@@ -347,10 +408,11 @@ class TestValidationCase(unittest.TestCase):
         key = 'test'
         rel_err = 1e-4
         test = ValidationCase()
-        test.addScalarData(key, 1.0, 'unused', None,  nominal=1, rel_err=rel_err)
+        test.addScalarData(key, 1.0, 'unused', None, nominal=1, rel_err=rel_err)
         all_data = test.data
         self.assertEqual(len(all_data), 1)
         self.assertEqual(rel_err, all_data[key].rel_err)
+        self.compareGold(test, 'testaddscalardatarelativeerror')
 
     def testAddScalarDataBoundedCheck(self):
         """
@@ -383,34 +445,53 @@ class TestValidationCase(unittest.TestCase):
             data = test.data[case]
             self.assertEqual(f'Test.test_{case}', data.test)
 
+        self.compareGold(test, 'testaddscalardataboundedcheck')
+
     def testAddScalarRelativeErrorCheck(self):
         """
         Tests the checking of rel_err for scalar data in ValdationCase.addScalarData()
         """
+        cases = {'pass': {'nominal': 1.1, 'rel_err': 1e-1},
+                 'pass_abs_zero': {'nominal': 0, 'rel_err': 1e-12},
+                 'pass_abs_zero_override': {'nominal': 0, 'rel_err': 1e-12, 'abs_zero': 1e-2},
+                 'fail': {'nominal': 1.9, 'rel_err': 1e-2}}
+
         class Test(ValidationCase):
             def test_pass(self):
-                self.addScalarData('pass', 1.0, 'foo', None, nominal=1.1, rel_err=1e-1)
+                self.addScalarData('pass', 1.0, 'foo', None, **cases['pass'])
+            def test_pass_abs_zero(self):
+                self.addScalarData('pass_abs_zero', 0, 'foo', None, **cases['pass_abs_zero'])
+            def test_pass_abs_zero_override(self):
+                self.addScalarData('pass_abs_zero_override', 0, 'foo', None, **cases['pass_abs_zero_override'])
             def test_fail(self):
-                self.addScalarData('fail', 2.0, 'foo', None, nominal=1.9, rel_err=1e-2)
+                self.addScalarData('fail', 2.0, 'foo', None, **cases['fail'])
 
         test = Test()
         test.run()
 
         results = test.results
-        self.assertEqual(len(results), 2)
-        for case in ['pass', 'fail']:
-            filtered = [r for r in results if r.test.endswith(case)]
+        self.assertEqual(len(results), len(cases))
+        for name, case in cases.items():
+            filtered = [r for r in results if r.test.endswith(name)]
             self.assertEqual(len(filtered), 1)
             result = filtered[0]
-            status = test.Status.OK if case == 'pass' else test.Status.FAIL
+            status = test.Status.OK if name.startswith('pass') else test.Status.FAIL
             self.assertEqual(status, result.status)
-            self.assertEqual(case, result.data_key)
-            if case == 'pass':
+            self.assertEqual(name, result.data_key)
+            if name == 'pass':
                 self.assertIn('< required', result.message)
+            elif name.startswith('pass_abs_zero'):
+                self.assertIn('skipped due to absolute zero', result.message)
             else:
                 self.assertIn('> required', result.message)
-            data = test.data[case]
-            self.assertEqual(f'Test.test_{case}', data.test)
+
+            data = test.data[name]
+            self.assertEqual(f'Test.test_{name}', data.test)
+            self.assertEqual(data.abs_zero, case.get('abs_zero', test.DEFAULT_ABS_ZERO))
+            self.assertEqual(data.nominal, case['nominal'])
+            self.assertEqual(data.rel_err, case['rel_err'])
+
+        self.compareGold(test, 'testaddscalarrelativeerrorcheck')
 
     def testToListFloat(self):
         """
@@ -555,6 +636,8 @@ class TestValidationCase(unittest.TestCase):
         self.assertEqual(data.x_description, x[1])
         self.assertEqual(data.x_units, x[2])
 
+        self.compareGold(test, 'testaddvectordata')
+
     def testAddVectorDataNominal(self):
         """
         Tests the addition of vector data in ValidationCase.addVectorData()
@@ -570,6 +653,7 @@ class TestValidationCase(unittest.TestCase):
         all_data = test.data
         self.assertEqual(len(all_data), 1)
         self.assertEqual(nominal, all_data[key].nominal)
+        self.compareGold(test, 'testaddvectordatanominal')
 
     def testAddVectorDataBounded(self):
         """
@@ -585,6 +669,8 @@ class TestValidationCase(unittest.TestCase):
         test.addVectorData(key, x, value, bounds=bounds)
         self.assertEqual(len(test.data), 1)
         self.assertEqual(bounds, test.data[key].bounds)
+
+        self.compareGold(test, 'testaddvectordatabounded')
 
     def testAddVectorDataBoundedCheck(self):
         """
@@ -630,6 +716,8 @@ class TestValidationCase(unittest.TestCase):
             check_result('fail_lower', i, ValidationCase.Status.FAIL)
             check_result('fail_upper', i, ValidationCase.Status.FAIL)
             check_result('fail_both', i, ValidationCase.Status.FAIL)
+
+        self.compareGold(case, 'testaddvectordataboundedcheck')
 
     def testInitialize(self):
         """
@@ -679,7 +767,7 @@ class TestValidationCase(unittest.TestCase):
                 raise raised_exe
 
         test = Test()
-        with self.assertRaises(TestRunException) as exe:
+        with self.assertRaises(ValidationTestRunException) as exe:
             test.run()
         self.assertEqual(len(exe.exception.exceptions), 1)
         self.assertEqual(exe.exception.exceptions[0], raised_exe)
