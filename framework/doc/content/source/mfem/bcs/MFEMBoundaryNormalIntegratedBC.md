@@ -1,10 +1,10 @@
-# MFEMVectorNormalIntegratedBC
+# MFEMBoundaryNormalIntegratedBC
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /BCs/MFEMVectorNormalIntegratedBC
+!syntax description /BCs/MFEMBoundaryNormalIntegratedBC
 
 ## Overview
 
@@ -16,11 +16,11 @@ Adds the boundary integrator for integrating the linear form
 where $v \in H^1$, $\vec f$ is a vector coefficient, and $\hat n$ is the outward facing unit normal
 vector on the boundary.
 
-!syntax parameters /BCs/MFEMVectorNormalIntegratedBC
+!syntax parameters /BCs/MFEMBoundaryNormalIntegratedBC
 
-!syntax inputs /BCs/MFEMVectorNormalIntegratedBC
+!syntax inputs /BCs/MFEMBoundaryNormalIntegratedBC
 
-!syntax children /BCs/MFEMVectorNormalIntegratedBC
+!syntax children /BCs/MFEMBoundaryNormalIntegratedBC
 
 !if-end!
 

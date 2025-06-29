@@ -9,41 +9,39 @@
 
 #ifdef MFEM_ENABLED
 
-#include "MFEMVectorNormalIntegratedBC.h"
+#include "MFEMBoundaryIntegratedBC.h"
 
-registerMooseObject("MooseApp", MFEMVectorNormalIntegratedBC);
+registerMooseObject("MooseApp", MFEMBoundaryIntegratedBC);
 
 InputParameters
-MFEMVectorNormalIntegratedBC::validParams()
+MFEMBoundaryIntegratedBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
   params.addClassDescription("Adds the boundary integrator to an MFEM problem for the linear form "
-                             "$(\\vec f \\cdot \\hat n, v)_{\\partial\\Omega}$");
-  params.addRequiredParam<MFEMVectorCoefficientName>(
-      "vector_coefficient",
-      "Vector coefficient whose normal component will be used in the integrated BC");
+                             "$(f, v)_\\Omega$ "
+                             "arising from the weak form of the forcing term $f$.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient", "1.", "The coefficient which will be used in the integrated BC");
   return params;
 }
 
-// TODO: Currently assumes the vector function coefficient is 3D
-MFEMVectorNormalIntegratedBC::MFEMVectorNormalIntegratedBC(const InputParameters & parameters)
+MFEMBoundaryIntegratedBC::MFEMBoundaryIntegratedBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _vec_coef_name(getParam<MFEMVectorCoefficientName>("vector_coefficient")),
-    _vec_coef(getVectorCoefficient(_vec_coef_name))
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
 {
 }
 
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
 mfem::LinearFormIntegrator *
-MFEMVectorNormalIntegratedBC::createLFIntegrator()
+MFEMBoundaryIntegratedBC::createLFIntegrator()
 {
-  return new mfem::BoundaryNormalLFIntegrator(_vec_coef);
+  return new mfem::BoundaryLFIntegrator(_coef);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
 mfem::BilinearFormIntegrator *
-MFEMVectorNormalIntegratedBC::createBFIntegrator()
+MFEMBoundaryIntegratedBC::createBFIntegrator()
 {
   return nullptr;
 }

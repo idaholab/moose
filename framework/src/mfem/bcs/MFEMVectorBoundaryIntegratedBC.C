@@ -19,8 +19,8 @@ MFEMVectorBoundaryIntegratedBC::validParams()
   InputParameters params = MFEMIntegratedBC::validParams();
   params.addClassDescription("Adds the boundary integrator to an MFEM problem for the linear form "
                              "$(\\vec f, \\vec v)_{\\partial\\Omega}$");
-  params.addRequiredParam<MFEMVectorCoefficientName>(
-      "vector_coefficient", "Vector coefficient used in the boundary integrator");
+  params.addParam<MFEMVectorCoefficientName>(
+      "vector_coefficient", "1. 1. 1.", "Vector coefficient used in the boundary integrator");
   return params;
 }
 

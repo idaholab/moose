@@ -75,7 +75,6 @@ centre_y = 0.1
   [laplacian]
     type = MFEMDiffusionKernel
     variable = velocity_potential
-    coefficient = 1.0
   []
 []
 

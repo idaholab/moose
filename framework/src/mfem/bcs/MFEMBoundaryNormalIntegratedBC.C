@@ -9,40 +9,41 @@
 
 #ifdef MFEM_ENABLED
 
-#include "MFEMScalarBoundaryIntegratedBC.h"
+#include "MFEMBoundaryNormalIntegratedBC.h"
 
-registerMooseObject("MooseApp", MFEMScalarBoundaryIntegratedBC);
+registerMooseObject("MooseApp", MFEMBoundaryNormalIntegratedBC);
 
 InputParameters
-MFEMScalarBoundaryIntegratedBC::validParams()
+MFEMBoundaryNormalIntegratedBC::validParams()
 {
   InputParameters params = MFEMIntegratedBC::validParams();
   params.addClassDescription("Adds the boundary integrator to an MFEM problem for the linear form "
-                             "$(f, v)_\\Omega$ "
-                             "arising from the weak form of the forcing term $f$.");
-  params.addRequiredParam<MFEMScalarCoefficientName>(
-      "coefficient", "The coefficient which will be used in the integrated BC");
+                             "$(\\vec f \\cdot \\hat n, v)_{\\partial\\Omega}$");
+  params.addParam<MFEMVectorCoefficientName>(
+      "vector_coefficient",
+      "1. 1. 1.",
+      "Vector coefficient whose normal component will be used in the integrated BC");
   return params;
 }
 
-MFEMScalarBoundaryIntegratedBC::MFEMScalarBoundaryIntegratedBC(const InputParameters & parameters)
+// TODO: Currently assumes the vector function coefficient is 3D
+MFEMBoundaryNormalIntegratedBC::MFEMBoundaryNormalIntegratedBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
-    _coef(getScalarCoefficient(_coef_name))
+    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
 {
 }
 
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
 mfem::LinearFormIntegrator *
-MFEMScalarBoundaryIntegratedBC::createLFIntegrator()
+MFEMBoundaryNormalIntegratedBC::createLFIntegrator()
 {
-  return new mfem::BoundaryLFIntegrator(_coef);
+  return new mfem::BoundaryNormalLFIntegrator(_vec_coef);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
 mfem::BilinearFormIntegrator *
-MFEMScalarBoundaryIntegratedBC::createBFIntegrator()
+MFEMBoundaryNormalIntegratedBC::createBFIntegrator()
 {
   return nullptr;
 }

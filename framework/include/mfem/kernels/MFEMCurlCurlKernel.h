@@ -27,7 +27,6 @@ public:
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
 protected:
-  const MFEMScalarCoefficientName & _coef_name;
   mfem::Coefficient & _coef;
 };
 

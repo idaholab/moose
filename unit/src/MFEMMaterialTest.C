@@ -64,12 +64,8 @@ check_vector(mfem::VectorCoefficient & coef,
   mfem::Vector vec;
   coef.Eval(vec, fe_transform, point);
   int errors = 0;
-  if (vec[0] != expected[0])
-    errors++;
-  if (vec[1] != expected[1])
-    errors++;
-  if (vec[2] != expected[2])
-    errors++;
+  for (const auto i : make_range(vec.Size()))
+    errors += vec[i] != expected[i];
   if (errors > 1)
   {
     return testing::AssertionFailure() << "Vector [" << vec[0] << ", " << vec[1] << ", " << vec[2]

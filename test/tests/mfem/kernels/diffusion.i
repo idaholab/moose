@@ -51,11 +51,10 @@
     boundary = '1'
     coefficient = 1.0
   []
-  [low_terminal]
+  [top]
     type = MFEMScalarDirichletBC
     variable = concentration
     boundary = '2'
-    coefficient = 0.0
   []
 []
 
@@ -63,7 +62,6 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = concentration
-    coefficient = 1.0
   []
 []
 

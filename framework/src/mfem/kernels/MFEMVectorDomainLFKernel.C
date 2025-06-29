@@ -21,15 +21,14 @@ MFEMVectorDomainLFKernel::validParams()
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the linear form "
                              "$(\\vec f, \\vec v)_\\Omega$ "
                              "arising from the weak form of the forcing term $\\vec f$.");
-  params.addParam<MFEMVectorCoefficientName>("vector_coefficient",
-                                             "Name of body force density $\\vec f$.");
+  params.addParam<MFEMVectorCoefficientName>(
+      "vector_coefficient", "1. 1. 1.", "Name of body force density f.");
   return params;
 }
 
 MFEMVectorDomainLFKernel::MFEMVectorDomainLFKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
-    _vec_coef_name(getParam<MFEMVectorCoefficientName>("vector_coefficient")),
-    _vec_coef(getVectorCoefficient(_vec_coef_name))
+    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
 {
 }
 

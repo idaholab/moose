@@ -29,9 +29,9 @@ MFEMLinearElasticityKernel::validParams()
       "where $E$ is Young's modulus and $\\nu$ is Poisson's ratio.");
 
   params.addParam<MFEMScalarCoefficientName>(
-      "lambda", "Name of MFEM Lame constant lambda to multiply the div(u)*I term by");
+      "lambda", "1.", "Name of MFEM Lame constant lambda to multiply the div(u)*I term by");
   params.addParam<MFEMScalarCoefficientName>(
-      "mu", "Name of MFEM Lame constant mu to multiply the gradients term by");
+      "mu", "1.", "Name of MFEM Lame constant mu to multiply the gradients term by");
 
   return params;
 }

@@ -83,12 +83,10 @@
   [divdiv]
     type = MFEMDivDivKernel
     variable = F
-    coefficient = 1.0
   []
   [mass]
     type = MFEMVectorFEMassKernel
     variable = F
-    coefficient = 1.0
   []
   [source]
     type = MFEMVectorFEDomainLFKernel
