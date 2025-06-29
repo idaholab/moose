@@ -33,6 +33,12 @@ ParameterMeshFunction::validParams()
   params.addParam<ReporterName>("time_name",
                                 "Name of vector-postprocessor or reporter vector containing time, "
                                 "default assumes time independence.");
+  params.addParam<bool>(
+      "project_points", false, "Whether to find the closest point on parameter mesh.");
+  params.addParam<unsigned int>(
+      "kdtree_candidates",
+      5,
+      "Number of nearest node candidates to consider when projecting points to parameter mesh.");
 
   return params;
 }
@@ -40,7 +46,11 @@ ParameterMeshFunction::validParams()
 ParameterMeshFunction::ParameterMeshFunction(const InputParameters & parameters)
   : OptimizationFunction(parameters),
     ReporterInterface(this),
-    _parameter_mesh(AddVariableAction::feType(parameters), getParam<FileName>("exodus_mesh")),
+    _parameter_mesh(AddVariableAction::feType(parameters),
+                    getParam<FileName>("exodus_mesh"),
+                    {},
+                    getParam<bool>("project_points"),
+                    getParam<unsigned int>("kdtree_candidates")),
     _values(getReporterValue<std::vector<Real>>("parameter_name")),
     _coordt(isParamValid("time_name") ? getReporterValue<std::vector<Real>>("time_name")
                                       : _empty_vec)
@@ -58,6 +68,7 @@ ParameterMeshFunction::value(Real t, const Point & p) const
 
   std::vector<dof_id_type> dof_indices;
   std::vector<Real> weights;
+
   _parameter_mesh.getIndexAndWeight(p, dof_indices, weights);
 
   Real val = 0;
