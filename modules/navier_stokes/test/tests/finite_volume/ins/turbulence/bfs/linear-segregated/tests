@@ -1,0 +1,27 @@
+[Tests]
+  design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
+  issues = '#29846'
+  [BFS_ERCOFTAC_linear]
+    requirement = 'The system shall be able to solve fluid flow problems with the linear k-epsilon turbulence model for a backward facing step, '
+    [result]
+      type = 'Exodiff'
+      input = 'BFS_ERCOFTAC.i'
+      exodiff = 'BFS_ERCOFTAC_out.e'
+      detail = 'and reach converged results with segregated solvers,'
+      abs_zero = 1e-6
+      heavy = true
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [run]
+      type = 'Exodiff'
+      input = 'BFS_ERCOFTAC.i'
+      exodiff = 'BFS_ERCOFTAC_short.e'
+      detail = 'and pass debugging checks.'
+      abs_zero = 1e-6
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=BFS_ERCOFTAC_short'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
+[]
