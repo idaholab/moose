@@ -121,6 +121,27 @@ class TestValidation(TestHarnessTestCase):
         self.assertIn('validation_init', timing)
         self.assertIn('validation_run', timing)
 
+    def testCSV(self):
+        """
+        Tests running a basic CSV validation case with the TestHarness,
+        using the `csv` test in the `validation` test spec.
+        """
+        results = self.runTests('-i', 'validation', '--re', 'csv')
+        out = results.results
+        self.assertEqual(out['testharness']['validation_version'],
+                         results.harness.VALIDATION_VERSION)
+
+        test = out['tests']['tests/test_harness']['tests']['csv']
+        status = test['status']
+        self.assertEqual(status['status'], 'OK')
+
+        # Validation entry
+        validation = test['validation']
+
+        # Compare against the golded values
+        # If this fails, you can regold by setting rewrite = true in compareGold
+        self.compareGold(validation, 'testcsv')
+
     def testFail(self):
         """
         Tests running a basic validation case with the TestHarness

@@ -1,0 +1,25 @@
+{
+  "data": {
+    "data": {
+      "abs_zero": 1e-10,
+      "bounds": null,
+      "description": "data_description",
+      "key": "data",
+      "nominal": 1.0,
+      "rel_err": 1e-06,
+      "test": "TestCase.test",
+      "units": "data_units",
+      "validation": true,
+      "value": 1.0
+    }
+  },
+  "results": [
+    {
+      "data_key": "data",
+      "message": "value 1.000E+00 data_units relative error 0.000E+00 < required 1.000E-06",
+      "status": "OK",
+      "test": "TestCase.test",
+      "validation": true
+    }
+  ]
+}
