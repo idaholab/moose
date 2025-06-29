@@ -45,7 +45,7 @@ protected:
   const MaterialProperty<RankTwoTensor> & _F;
 
   /// stress
-  const MaterialProperty<RankTwoTensor> & _cauchy_stress;
+  const MaterialProperty<RankTwoTensor> & _stress;
 
   /// computed property: stress * (plastic_strain - plastic_strain_old) / dt
   MaterialProperty<Real> & _plastic_heat;
