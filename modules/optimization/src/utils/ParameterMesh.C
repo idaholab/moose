@@ -16,13 +16,19 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/explicit_system.h"
+#include "libmesh/quadrature_gauss.h"
+#include "libmesh/fe_base.h"
 
 using namespace libMesh;
 
 ParameterMesh::ParameterMesh(const FEType & param_type,
                              const std::string & exodus_mesh,
                              const std::vector<std::string> & var_names)
-  : _communicator(MPI_COMM_SELF), _mesh(_communicator)
+  : _communicator(MPI_COMM_SELF),
+    _mesh(_communicator),
+    _param_var_id(0),
+    _dof_map(nullptr),
+    _fe_type(param_type)
 {
   _mesh.allow_renumbering(false);
   _mesh.prepare_for_use();
@@ -93,6 +99,11 @@ ParameterMesh::ParameterMesh(const FEType & param_type,
   std::set<dof_id_type> var_indices;
   _sys->local_dof_indices(var_id, var_indices);
   _param_dofs = var_indices.size();
+
+  // Update cached values for gradient computations
+  const_cast<unsigned short int &>(_param_var_id) = var_id;
+  const_cast<const DofMap *&>(_dof_map) = &_sys->get_dof_map();
+  const_cast<FEType &>(_fe_type) = _dof_map->variable_type(_param_var_id);
 }
 
 void
@@ -108,16 +119,13 @@ ParameterMesh::getIndexAndWeight(const Point & pt,
   // Get the  in the dof_indices for our element
   // variable name is hard coded to _parameter_mesh_var
   // this is probably the only variable in the ParameterMesh system used by ParameterMeshFunction
-  const unsigned short int var = _sys->variable_number("_parameter_mesh_var");
-  const DofMap & dof_map = _sys->get_dof_map();
-  dof_map.dof_indices(elem, dof_indices, var);
+  _dof_map->dof_indices(elem, dof_indices, _param_var_id);
 
   // Map the physical co-ordinates to the reference co-ordinates
   Point coor = FEMap::inverse_map(elem->dim(), elem, pt);
   // get the shape function value via the FEInterface
-  FEType fe_type = dof_map.variable_type(var);
   FEComputeData fe_data(*_eq, coor);
-  FEInterface::compute_data(elem->dim(), fe_type, elem, fe_data);
+  FEInterface::compute_data(elem->dim(), _fe_type, elem, fe_data);
   // Set weights to the value of the shape functions
   weights = fe_data.shape;
 
@@ -138,17 +146,14 @@ ParameterMesh::getIndexAndWeight(const Point & pt,
   // Get the  in the dof_indices for our element
   // variable name is hard coded to _parameter_mesh_var
   // this is probably the only variable in the ParameterMesh system used by ParameterMeshFunction
-  const unsigned short int var = _sys->variable_number("_parameter_mesh_var");
-  const DofMap & dof_map = _sys->get_dof_map();
-  dof_map.dof_indices(elem, dof_indices, var);
+  _dof_map->dof_indices(elem, dof_indices, _param_var_id);
 
   // Map the physical co-ordinates to the reference co-ordinates
   Point coor = FEMap::inverse_map(elem->dim(), elem, pt);
   // get the shape function value via the FEInterface
-  FEType fe_type = dof_map.variable_type(var);
   FEComputeData fe_data(*_eq, coor);
   fe_data.enable_derivative();
-  FEInterface::compute_data(elem->dim(), fe_type, elem, fe_data);
+  FEInterface::compute_data(elem->dim(), _fe_type, elem, fe_data);
   // Set weights to the value of the shape functions
   weights = fe_data.dshape;
 
@@ -191,4 +196,104 @@ ParameterMesh::getParameterValues(std::string var_name, unsigned int time_step) 
   std::vector<Real> parameter_values;
   _sys->solution->localize(parameter_values, var_indices_vector);
   return parameter_values;
+}
+
+Real
+ParameterMesh::computeGradientL2RegularizationObjective(
+    const std::vector<Real> & parameter_values) const
+{
+  if (parameter_values.size() != _param_dofs)
+    mooseError("Parameter values size (",
+               parameter_values.size(),
+               ") does not match mesh DOFs (",
+               _param_dofs,
+               ")");
+
+  Real total_variation = 0.0;
+
+  // Iterate over all elements in the mesh
+  for (const auto & elem : _mesh.element_ptr_range())
+  {
+    // Get DOF indices for this element
+    std::vector<dof_id_type> dof_indices;
+    _dof_map->dof_indices(elem, dof_indices, _param_var_id);
+
+    // Get quadrature rule for this element
+    const unsigned int dim = elem->dim();
+    QGauss qrule(dim, _fe_type.default_quadrature_order());
+
+    // Create finite element objects
+    std::unique_ptr<FEBase> fe(FEBase::build(dim, _fe_type));
+    fe->attach_quadrature_rule(&qrule);
+    // Reinitialize for current element
+    fe->reinit(elem);
+
+    const std::vector<Real> & JxW = fe->get_JxW();
+    const std::vector<std::vector<RealGradient>> & dphi = fe->get_dphi();
+
+    // Loop over quadrature points
+    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+    {
+      // Compute parameter gradient at this quadrature point
+      RealGradient param_grad;
+      for (unsigned int i = 0; i < dof_indices.size(); i++)
+        param_grad += parameter_values[dof_indices[i]] * dphi[i][qp];
+
+      // Add L2 norm squared of gradient for regularization
+      total_variation += param_grad.norm_sq() * JxW[qp];
+    }
+  }
+
+  return total_variation;
+}
+
+std::vector<Real>
+ParameterMesh::computeGradientL2RegularizationGradient(
+    const std::vector<Real> & parameter_values) const
+{
+  if (parameter_values.size() != _param_dofs)
+    mooseError("Parameter values size (",
+               parameter_values.size(),
+               ") does not match mesh DOFs (",
+               _param_dofs,
+               ")");
+
+  std::vector<Real> l2_gradient(_param_dofs, 0.0);
+
+  // Iterate over all elements in the mesh
+  for (const auto & elem : _mesh.element_ptr_range())
+  {
+    // Get DOF indices for this element
+    std::vector<dof_id_type> dof_indices;
+    _dof_map->dof_indices(elem, dof_indices, _param_var_id);
+
+    // Get quadrature rule for this element
+    const unsigned int dim = elem->dim();
+    QGauss qrule(dim, _fe_type.default_quadrature_order());
+
+    // Create finite element objects
+    std::unique_ptr<FEBase> fe(FEBase::build(dim, _fe_type));
+    fe->attach_quadrature_rule(&qrule);
+
+    // Reinitialize for current element
+    fe->reinit(elem);
+
+    const std::vector<Real> & JxW = fe->get_JxW();
+    const std::vector<std::vector<RealGradient>> & dphi = fe->get_dphi();
+
+    // Loop over quadrature points
+    for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
+    {
+      // Compute parameter gradient at this quadrature point
+      RealGradient param_grad;
+      for (unsigned int i = 0; i < dof_indices.size(); i++)
+        param_grad += parameter_values[dof_indices[i]] * dphi[i][qp];
+
+      // Compute gradient contribution: 2 * grad(p) * dphi_j
+      for (unsigned int j = 0; j < dof_indices.size(); j++)
+        l2_gradient[dof_indices[j]] += 2.0 * param_grad * dphi[j][qp] * JxW[qp];
+    }
+  }
+
+  return l2_gradient;
 }
