@@ -52,7 +52,10 @@ LinearFVTurbulentViscosityWallFunctionBC::computeTurbulentViscosity() const
 {
   // Utility functions
   const auto wall_dist = computeCellToFaceDistance();
-  const auto re = makeElemArg(&_current_face_info->elem());
+  const auto & elem = _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR
+                          ? _current_face_info->neighborPtr()
+                          : _current_face_info->elemPtr();
+  const auto re = makeElemArg(elem);
   const auto old_state = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
   const auto mu = _mu(re, old_state);
   const auto rho = _rho(re, old_state);
