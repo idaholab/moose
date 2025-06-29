@@ -99,6 +99,15 @@ for some of the individual physics modules as listed below.
 - [Stochastic Tools](modules/stochastic_tools/examples/index.md)
 - [Solid Mechanics](modules/solid_mechanics/examples_index.md)
 
+## Optional Package Examples and Tutorials
+
+MOOSE integrates with several optional packages that may be installed alongside it to expand MOOSE's base capabilities.
+Pages containing guidance for using these optional packages are listed below.
+
+- [LibTorch](source/libtorch/utils/LibtorchArtificialNeuralNet.md optional=True)
+- [NEML2](syntax/NEML2/index.md optional=True)
+- [MFEM](syntax/MFEM/index.md optional=True)
+
 ## C++ Programming References id=programming
 
 MOOSE developers need only a basic understanding of computer programming with C++ to get started. If possible, it may be helpful to review the following resources:
