@@ -37,7 +37,6 @@
     variable = tag_variable1
     v = u
     vector_tag = vec_tag2
-    execute_on = timestep_end
   [../]
 
   [./TagVectorAux2]
@@ -45,7 +44,6 @@
     variable = tag_variable2
     v = u
     matrix_tag = mat_tag2
-    execute_on = timestep_end
   [../]
 []
 

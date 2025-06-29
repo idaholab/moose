@@ -73,46 +73,40 @@ mu='mu'
     execute_on = timestep_end
   []
   [e_time]
+    type = TagVectorAux
     variable = e_time
     vector_tag = e_time
     v = T
-    execute_on = 'timestep_end'
-    type = TagVectorAux
   []
   [e_advection]
+    type = TagVectorAux
     variable = e_advection
     vector_tag = e_advection
     v = T
-    execute_on = 'timestep_end'
-    type = TagVectorAux
   []
   [e_mesh_advection]
+    type = TagVectorAux
     variable = e_mesh_advection
     vector_tag = e_mesh_advection
     v = T
-    execute_on = 'timestep_end'
-    type = TagVectorAux
   []
   [e_conduction]
+    type = TagVectorAux
     variable = e_conduction
     vector_tag = e_conduction
     v = T
-    execute_on = 'timestep_end'
-    type = TagVectorAux
   []
   [e_laser]
+    type = TagVectorAux
     variable = e_laser
     vector_tag = e_laser
     v = T
-    execute_on = 'timestep_end'
-    type = TagVectorAux
   []
   [e_radiation]
+    type = TagVectorAux
     variable = e_radiation
     vector_tag = e_radiation
     v = T
-    execute_on = 'timestep_end'
-    type = TagVectorAux
   []
 []
 

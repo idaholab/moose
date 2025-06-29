@@ -64,8 +64,8 @@ public:
   /// Shorthand for an smart pointer to an autodiff function parser object.
   typedef std::shared_ptr<SymFunction> SymFunctionPtr;
 
-  /// apply input paramters to internal feature flags of the parser object
-  void setParserFeatureFlags(SymFunctionPtr &);
+  /// apply input parameters to internal feature flags of the parser object
+  void setParserFeatureFlags(SymFunctionPtr &) const;
 
 protected:
   /// Evaluate FParser object and check EvalError
@@ -84,10 +84,26 @@ protected:
   /// add constants (which can be complex expressions) to the parser object
   void addFParserConstants(SymFunctionPtr & parser,
                            const std::vector<std::string> & constant_names,
-                           const std::vector<std::string> & constant_expressions);
+                           const std::vector<std::string> & constant_expressions) const;
 
   /// run FPOptimizer on the parsed function
   virtual void functionsOptimize(SymFunctionPtr & parsed_function);
+
+  /**
+   * Performs setup steps on a SymFunction
+   * @param function reference to pointer to the function to set up
+   * @param expression expression to parse
+   * @param variables comma separated string holding all the variables of the expression
+   * @param constant_names vector of names (symbols) of constants in the expression
+   * @param constant_expressions vectors of expressions (=values) of constants in the expression
+   * @param comm communicator used to stagger JIT file creations
+   */
+  void parsedFunctionSetup(SymFunctionPtr & function,
+                           const std::string & expression,
+                           const std::string & variables,
+                           const std::vector<std::string> & constant_names,
+                           const std::vector<std::string> & constant_expressions,
+                           const libMesh::Parallel::Communicator & comm) const;
 
   ///@{ feature flags
   bool _enable_jit;

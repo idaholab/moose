@@ -95,32 +95,19 @@ ParsedSubdomainGeneratorBase::generate()
 void
 ParsedSubdomainGeneratorBase::functionInitialize(const std::string & function_expression)
 {
-  // base function object
-  _func_F = std::make_shared<SymFunction>();
-
-  // set FParser internal feature flags
-  setParserFeatureFlags(_func_F);
-
-  // add the constant expressions
-  addFParserConstants(_func_F,
-                      getParam<std::vector<std::string>>("constant_names"),
-                      getParam<std::vector<std::string>>("constant_expressions"));
-
   // add the extra element integers
   std::string symbol_str = "x,y,z";
   for (const auto & eeid_name : _eeid_names)
     symbol_str += "," + eeid_name;
 
-  // parse function
-  if (_func_F->Parse(function_expression, symbol_str) >= 0)
-    mooseError("Invalid function\n",
-               function_expression,
-               "\nin ",
-               type(),
-               " ",
-               name(),
-               ".\n",
-               _func_F->ErrorMsg());
+  // Create parsed function
+  _func_F = std::make_shared<SymFunction>();
+  parsedFunctionSetup(_func_F,
+                      function_expression,
+                      symbol_str,
+                      getParam<std::vector<std::string>>("constant_names"),
+                      getParam<std::vector<std::string>>("constant_expressions"),
+                      comm());
 
   _func_params.resize(3 + _eeid_names.size());
 }

@@ -40,20 +40,14 @@ CutMeshByLevelSetGenerator::validParams()
 CutMeshByLevelSetGenerator::CutMeshByLevelSetGenerator(const InputParameters & parameters)
   : CutMeshByLevelSetGeneratorBase(parameters), _level_set(getParam<std::string>("level_set"))
 {
+  // Create parsed function
   _func_level_set = std::make_shared<SymFunction>();
-  // set FParser internal feature flags
-  setParserFeatureFlags(_func_level_set);
-  if (isParamValid("constant_names") && isParamValid("constant_expressions"))
-    addFParserConstants(_func_level_set,
-                        getParam<std::vector<std::string>>("constant_names"),
-                        getParam<std::vector<std::string>>("constant_expressions"));
-  if (_func_level_set->Parse(_level_set, "x,y,z") >= 0)
-    mooseError("Invalid function f(x,y,z)\n",
-               _func_level_set,
-               "\nin CutMeshByLevelSetGenerator ",
-               name(),
-               ".\n",
-               _func_level_set->ErrorMsg());
+  parsedFunctionSetup(_func_level_set,
+                      _level_set,
+                      "x,y,z",
+                      getParam<std::vector<std::string>>("constant_names"),
+                      getParam<std::vector<std::string>>("constant_expressions"),
+                      comm());
 
   _func_params.resize(3);
 }

@@ -87,9 +87,6 @@ ParsedVectorAux::ParsedVectorAux(const InputParameters & parameters)
     // base function object
     _func_F[i] = std::make_shared<SymFunction>();
 
-    // set FParser internal feature flags
-    setParserFeatureFlags(_func_F[i]);
-
     // add the constant expressions
     auto constant_names = isParamValid("constant_names")
                               ? getParam<std::vector<std::vector<std::string>>>("constant_names")
@@ -98,43 +95,20 @@ ParsedVectorAux::ParsedVectorAux(const InputParameters & parameters)
         isParamValid("constant_expressions")
             ? getParam<std::vector<std::vector<std::string>>>("constant_expressions")
             : std::vector<std::vector<std::string>>{};
+    if (constant_names.size() && i > constant_names.size())
+      paramError("constant_names",
+                 "Constant names must be specified for each component. Use ';' for outer-indexing "
+                 "of double-indexed vector of constants.");
+    if (constant_expressions.size() && i > constant_expressions.size())
+      paramError("constant_expressions",
+                 "Constant expressions must be specified for each component. Use ';' for "
+                 "outer-indexing of double-indexed vector of constants.");
+    const std::vector<std::string> empty_vec{};
+    const auto names = constant_names.size() ? constant_names[i] : empty_vec;
+    const auto expressions = constant_expressions.size() ? constant_expressions[i] : empty_vec;
 
-    if (constant_names.size() != constant_expressions.size())
-      paramError("constant_names", "Must be same length as constant_expressions");
-
-    if (isParamValid("constant_names") && isParamValid("constant_expressions"))
-      addFParserConstants(_func_F[i], constant_names[i], constant_expressions[i]);
-
-    // parse function
-    if (_func_F[i]->Parse(_function[i], variables) >= 0)
-      mooseError("Invalid function\n",
-                 _function[i],
-                 "\nin ParsedVectorAux '",
-                 name(),
-                 "' component ",
-                 i == 0   ? "x"
-                 : i == 1 ? "y"
-                          : "z",
-                 ".\n",
-                 _func_F[i]->ErrorMsg());
-
-    // optimize
-    if (!_disable_fpoptimizer)
-      _func_F[i]->Optimize();
-
-    // just-in-time compile
-    if (_enable_jit)
-    {
-      // let rank 0 do the JIT compilation first
-      if (_communicator.rank() != 0)
-        _communicator.barrier();
-
-      _func_F[i]->JITCompile();
-
-      // wait for ranks > 0 to catch up
-      if (_communicator.rank() == 0)
-        _communicator.barrier();
-    }
+    // Create parsed function for the component
+    parsedFunctionSetup(_func_F[i], _function[i], variables, names, expressions, comm());
   }
   // reserve storage for parameter passing buffer
   _func_params.resize(_nargs + _n_vector_args + (_use_xyzt ? 4 : 0));

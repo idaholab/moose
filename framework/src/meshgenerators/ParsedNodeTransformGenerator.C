@@ -47,19 +47,14 @@ ParsedNodeTransformGenerator::ParsedNodeTransformGenerator(const InputParameters
 {
   for (const auto i : index_range(_functions))
   {
+    // Create parsed function
     _functions[i] = std::make_shared<SymFunction>();
-
-    // set FParser internal feature flags
-    setParserFeatureFlags(_functions[i]);
-
-    // add the constant expressions
-    addFParserConstants(_functions[i],
+    parsedFunctionSetup(_functions[i],
+                        getParam<ParsedFunctionExpression>(_func_name[i]),
+                        "x,y,z",
                         getParam<std::vector<std::string>>("constant_names"),
-                        getParam<std::vector<std::string>>("constant_expressions"));
-
-    // parse function
-    if (_functions[i]->Parse(getParam<ParsedFunctionExpression>(_func_name[i]), "x,y,z") >= 0)
-      paramError(_func_name[i], "Invalid function: ", _functions[i]->ErrorMsg());
+                        getParam<std::vector<std::string>>("constant_expressions"),
+                        comm());
   }
 
   _func_params.resize(3);

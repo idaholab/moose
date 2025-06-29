@@ -92,12 +92,6 @@ ParsedFunctorMaterialTempl<is_ad>::buildParsedFunction()
 {
   _parsed_function = std::make_shared<SymFunction>();
 
-  setParserFeatureFlags(_parsed_function);
-
-  // Add constants
-  _parsed_function->AddConstant("pi", libMesh::pi);
-  _parsed_function->AddConstant("e", std::exp(Real(1)));
-
   // Collect the symbols corresponding to the _func_params values
   std::vector<std::string> symbols(_functor_symbols);
   std::string symbols_str = Moose::stringify(symbols);
@@ -107,20 +101,16 @@ ParsedFunctorMaterialTempl<is_ad>::buildParsedFunction()
     mooseError("ParsedFunctorMaterial assumes the dimension is always equal to 3.");
   symbols_str += symbols_str.empty() ? "t" : ",t";
 
-  // Parse the expression
-  if (_parsed_function->Parse(_expression, symbols_str) >= 0)
-    mooseError("The expression\n'",
-               _expression,
-               "'\nwith symbols\n'",
-               symbols_str,
-               "'\ncould not be parsed:\n",
-               _parsed_function->ErrorMsg());
+  // Create parsed function
+  this->parsedFunctionSetup(_parsed_function,
+                            _expression,
+                            symbols_str,
+                            {"pi", "e"},
+                            {std::to_string(libMesh::pi), std::to_string(std::exp(Real(1)))},
+                            comm());
 
   // Resize the values vector
   _func_params.resize(_n_functors + Moose::dim + 1);
-
-  // Optimize the parsed function
-  functionsOptimize(_parsed_function);
 }
 
 template class ParsedFunctorMaterialTempl<false>;
