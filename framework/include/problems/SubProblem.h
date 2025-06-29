@@ -1401,9 +1401,9 @@ SubProblem::addFunctor(const std::string & name,
       {
         auto & [requested_functor_is_ad, requestor_is_ad] = request_info_it->second;
         if (!requested_functor_is_ad && requestor_is_ad && added_functor_is_ad)
-          mooseError("We are requesting a non-AD functor from an AD object, but the true functor "
-                     "is AD. This means we could be dropping important derivatives. We will not "
-                     "allow this");
+          mooseError("We are requesting a non-AD functor '" + name +
+                     "' from an AD object, but the true functor is AD. This means we could be "
+                     "dropping important derivatives. We will not allow this");
         // We're going to eventually check whether we've fulfilled all functor requests and our
         // check will be that the multimap is empty. This request is fulfilled, so erase it from the
         // map now

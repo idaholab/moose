@@ -48,6 +48,7 @@ private:
   void addMomentumFluxKernels();
   virtual void addMomentumPressureKernels() override;
   virtual void addMomentumGravityKernels() override;
+  virtual void addMomentumFrictionKernels() override;
   virtual void addMomentumBoussinesqKernels() override;
 
   virtual void addInletBC() override;
@@ -58,6 +59,7 @@ private:
   virtual bool hasForchheimerFriction() const override { return false; };
 
   virtual void addRhieChowUserObjects() override;
+  virtual void addFunctorMaterials() override;
 
   virtual MooseFunctorName getLinearFrictionCoefName() const override
   {

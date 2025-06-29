@@ -40,6 +40,8 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
   params.suppressParameter<bool>("effective_conductivity");
   // Not needed
   params.suppressParameter<bool>("add_energy_equation");
+  params.suppressParameter<MooseEnum>("preconditioning");
+
   return params;
 }
 
@@ -91,7 +93,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyTimeKernels()
   if (!_solve_for_enthalpy)
     params.set<MooseFunctorName>("factor") = "rho_cp";
   else
-    params.set<MooseFunctorName>("factor") = "rho";
+    params.set<MooseFunctorName>("factor") = _density_name;
 
   getProblem().addLinearFVKernel(kernel_type, kernel_name, params);
 }
@@ -109,7 +111,7 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyAdvectionKernels()
     params.set<LinearVariableName>("variable") = _fluid_temperature_name;
     params.set<MooseEnum>("advected_quantity") = "temperature";
     if (!MooseUtils::isFloat(_specific_heat_name))
-      paramError(NS::cp, "Must be a Real number. Functors not supported at this time");
+      paramError("specific_heat", "Must be a Real number. Functors not supported at this time");
     params.set<Real>("cp") = std::atof(_specific_heat_name.c_str());
   }
   else
@@ -211,7 +213,8 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyExternalHeatSource()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>("source_density") =
       getParam<MooseFunctorName>("external_heat_source");
-  params.set<Real>("scaling_factor") = getParam<Real>("external_heat_source_coeff");
+  params.set<MooseFunctorName>("scaling_factor") =
+      std::to_string(getParam<Real>("external_heat_source_coeff"));
 
   getProblem().addLinearFVKernel(kernel_type, prefix() + "external_heat_source", params);
 }
@@ -306,7 +309,9 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyInletBC()
 void
 WCNSLinearFVFluidHeatTransferPhysics::addEnergyWallBC()
 {
-  const auto & wall_boundaries = _flow_equations_physics->getWallBoundaries();
+  const auto & wall_boundaries = isParamSetByUser("energy_wall_boundaries")
+                                     ? getParam<std::vector<BoundaryName>>("energy_wall_boundaries")
+                                     : _flow_equations_physics->getWallBoundaries();
   if (wall_boundaries.size() != _energy_wall_types.size())
     paramError("energy_wall_types",
                "Energy wall types (size " + std::to_string(_energy_wall_types.size()) +
