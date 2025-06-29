@@ -9,11 +9,12 @@
 
 from TestHarnessTestCase import TestHarnessTestCase
 
+import unittest
 from copy import deepcopy
 import json
 import os
 
-class TestHarnessTester(TestHarnessTestCase):
+class TestValidation(TestHarnessTestCase):
     def compareGold(self, validation: dict, name: str, rewrite: bool = False):
         """
         Helper for comparing against a gold file, which contains the 'validation'
@@ -178,3 +179,6 @@ class TestHarnessTester(TestHarnessTestCase):
     def testDuplicateParam(self):
         out = self.runTests('-i', 'validation_duplicate_param', exit_code=128).output
         self.assertIn('Duplicate parameter "type" from validation test', out)
+
+if __name__ == '__main__':
+    unittest.main()

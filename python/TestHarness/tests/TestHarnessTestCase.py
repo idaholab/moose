@@ -64,7 +64,10 @@ class TestHarnessTestCase(unittest.TestCase):
                 result.output = stdout.getvalue()
                 stdout.close()
 
+            if result.harness.error_code != exit_code:
+                print(result.output)
             self.assertEqual(result.harness.error_code, exit_code)
+
             if capture_results:
                 with open(result.harness.options.results_file, 'r') as f:
                     result.results = json.loads(f.read())

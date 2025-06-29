@@ -53,28 +53,6 @@ class ValidationCase(MooseObject):
         # Skipped test
         SKIP = 'SKIP'
 
-    # Stores classes that are instantiated that
-    # are derived from this class
-    _subclasses = []
-
-    @classmethod
-    def getSubclasses(cls) -> list:
-        """
-        Get the classes that are loaded that are derived
-        from this class.
-
-        Used within a TestHarness Job to load the user's
-        derived test cases.
-        """
-        return list(cls._subclasses)
-
-    def __init_subclass__(cls):
-        """
-        Helper for storing derived classes so that they
-        can be loaded with getSubclasses
-        """
-        ValidationCase._subclasses.append(cls)
-
     def __init__(self, params: Optional[InputParameters] = None,
                  tester_outputs: Optional[list] = None):
         MooseObject.__init__(self, params)
