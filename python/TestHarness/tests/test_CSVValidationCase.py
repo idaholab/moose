@@ -257,6 +257,53 @@ class TestCSVValidationCase(unittest.TestCase):
 
         self.compareGold(case, 'testaddscalarcsvdatastorekey')
 
+    def testAddScalarCSVDataAbsZero(self):
+        """
+        Tests calling addScalarCSVData with an absolute zero
+        from a parameter
+        """
+        key = 'data'
+        gold_data = {'time': [0], key: [0.0]}
+        data = deepcopy(gold_data)
+        data[key][0] = data[key][0] + 0.09
+        gold_value, value = gold_data[key][-1], data[key][-1]
+        self.assertNotEqual(gold_value, value)
+
+        abs_zero = 0.1
+        class TestCase(CSVValidationCase):
+            def test(self):
+                self.addScalarCSVData(key, -1, 'description', None)
+
+        # Run the case where it should pass due to absolute zero
+        abs_zero = 0.1
+        pass_case = self.runValidationCase(gold_data, data, TestCase,
+                                      set_params={'validation_abs_zero': abs_zero})
+        # Check passed result, which passed due to abs zero
+        self.assertEqual(len(pass_case.results), 1)
+        case_result = pass_case.results[0]
+        self.assertEqual(case_result.status, pass_case.Status.OK)
+        self.assertIn('skipped due to absolute zero', case_result.message)
+        # Check data abs_zero, which is overridden
+        self.assertEqual(len(pass_case.data), 1)
+        case_data = pass_case.data[key]
+        self.assertEqual(case_data.rel_err, DEFAULT_REL_ERR)
+        self.assertEqual(case_data.abs_zero, abs_zero)
+        # Compare against gold
+        self.compareGold(pass_case, 'testaddscalarcsvdataabszeropass')
+
+        # Should not pass without abs_zero being set
+        fail_case = self.runValidationCase(gold_data, data, TestCase)
+        # Check failed result
+        self.assertEqual(len(fail_case.results), 1)
+        case_result = fail_case.results[0]
+        self.assertEqual(case_result.status, fail_case.Status.FAIL)
+        # Check data abs_zero, not overridden
+        self.assertEqual(len(fail_case.data), 1)
+        case_data = fail_case.data[key]
+        self.assertEqual(case_data.rel_err, DEFAULT_REL_ERR)
+        self.assertEqual(case_data.abs_zero, CSVValidationCase.DEFAULT_ABS_ZERO)
+        # Compare against gold
+        self.compareGold(pass_case, 'testaddscalarcsvdataabszerofail')
 
 if __name__ == '__main__':
     unittest.main()
