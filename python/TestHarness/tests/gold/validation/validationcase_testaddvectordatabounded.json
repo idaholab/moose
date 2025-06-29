@@ -1,0 +1,50 @@
+{
+  "data": {
+    "data": {
+      "abs_zero": null,
+      "bounds": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          2.0,
+          3.0
+        ]
+      ],
+      "description": "description_value",
+      "key": "data",
+      "nominal": null,
+      "rel_err": null,
+      "test": null,
+      "units": "units_value",
+      "validation": true,
+      "value": [
+        1.0,
+        2.0
+      ],
+      "x": [
+        0.0,
+        1.0
+      ],
+      "x_description": "description_x",
+      "x_units": "units_x"
+    }
+  },
+  "results": [
+    {
+      "data_key": "data",
+      "message": "x = 0.000E+00 units_x (index 0) value 1.000E+00 units_value within bounds; min = 0.000E+00 units_value, max = 2.000E+00 units_value",
+      "status": "OK",
+      "test": null,
+      "validation": true
+    },
+    {
+      "data_key": "data",
+      "message": "x = 1.000E+00 units_x (index 1) value 2.000E+00 units_value within bounds; min = 1.000E+00 units_value, max = 3.000E+00 units_value",
+      "status": "OK",
+      "test": null,
+      "validation": true
+    }
+  ]
+}

@@ -7,10 +7,11 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os, sys, shutil, json, importlib.util
+import re, os, sys, shutil, json, importlib.util, inspect
 import mooseutils
 from TestHarness import OutputInterface, util
 from TestHarness.StatusSystem import StatusSystem
+from TestHarness.validation import ValidationCase, ValidationCaseClasses
 from FactorySystem.MooseObject import MooseObject
 from FactorySystem.InputParameters import InputParameters
 from pathlib import Path
@@ -139,19 +140,24 @@ class Tester(MooseObject, OutputInterface):
 
             # Load the script; throw an exception here if it fails
             # so that the Parser can report a reasonable error
-            spec = importlib.util.spec_from_file_location('validation', path)
+            spec = importlib.util.spec_from_file_location('validation_load', path)
             module = importlib.util.module_from_spec(spec)
             try:
                 spec.loader.exec_module(module)
             except Exception as e:
                 raise ImportError(f'In validation_test={path}:\n{e}')
 
+            # Find the classes that are derived from the base validation
+            # classes in the module (the user's python script)
+            module_classes = inspect.getmembers(module, inspect.isclass)
+            base_classes = [c[1] for c in module_classes if c[1] in ValidationCaseClasses]
+            other_classes = [c[1] for c in module_classes if c[1] not in base_classes]
+            subclasses = [c for c in other_classes if issubclass(c, ValidationCase)]
+
             # Store each of the classes in the script that derives from
             # ValidationCase, and add their parameters to this Tester's
             # parameters
             validation_classes = []
-            subclasses = module.ValidationCase._subclasses.copy()
-            module.ValidationCase._subclasses = []
             validation_params = InputParameters()
             for subclass in subclasses:
                 validation_params = subclass.validParams()
