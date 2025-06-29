@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#4522'
+  design = 'examples_and_tutorials/index.md'
+  [step]
+    type = RunApp
+    input = '../step03_boundary_conditions/mesh.i step5.i'
+    cli_args = "Mesh/inactive='fmg'"
+    requirement = "The shield multiphysics tutorial shall include a demonstration of directly "
+                  "computing a field variable."
+  []
+[]
