@@ -28,6 +28,7 @@ class CSVValidationCase(ValidationCase):
         params = ValidationCase.validParams()
         params.addRequiredParam('validation_csv', 'The CSV file')
         params.addParam('validation_rel_err', 1.0e-6, 'The relative error')
+        params.addParam('validation_abs_zero', ValidationCase.DEFAULT_ABS_ZERO, 'Absolute zero cutoff used in comparisons')
         return params
 
     def __init__(self, *args, **kwargs):
@@ -42,6 +43,8 @@ class CSVValidationCase(ValidationCase):
         self._gold_csv: str = os.path.join(os.getcwd(), 'gold', csv)
         # The relative error to check against
         self._rel_err: float = float(self.getParam('validation_rel_err'))
+        # Cutoff used in comparisons:
+        self._abs_zero: float = float(self.getParam('validation_abs_zero'))
         # Whether or not initialize was called
         self._called_csv_initialize = False
 
@@ -125,6 +128,8 @@ class CSVValidationCase(ValidationCase):
 
         # "nominal" value is the gold value
         kwargs['nominal'] = gold_value
+        # Use abs_zero from parameters
+        kwargs['abs_zero'] = self._abs_zero
 
         # If check=True (default), set the relative error
         # that the data will checked with
