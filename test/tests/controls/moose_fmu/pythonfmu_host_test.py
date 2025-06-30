@@ -1,24 +1,17 @@
+"""Define the abstract facade class."""
 import json
 import datetime
 from collections import OrderedDict, namedtuple
 from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Optional
-
 from xml.etree.ElementTree import Element, SubElement
 
-from _version import __version__ as VERSION
-from pythonfmu.enums import (
-    Fmi2Type,
-    Fmi2Status,
-    Fmi2Causality,
-    Fmi2Initial,
-    Fmi2Variability,
-)
+from pythonfmu.enums import Fmi2Type, Fmi2Status, Fmi2Causality, Fmi2Initial, Fmi2Variability
 from pythonfmu.variables import Boolean, Integer, Real, ScalarVariable, String
 from pythonfmu import Fmi2Slave
+from MooseControl import MooseControl
 
 ModelOptions = namedtuple("ModelOptions", ["name", "value", "cli"])
-
 
 FMI2_MODEL_OPTIONS: List[ModelOptions] = [
     ModelOptions("needsExecutionTool", True, "no-external-tool"),
@@ -26,12 +19,12 @@ FMI2_MODEL_OPTIONS: List[ModelOptions] = [
     ModelOptions("canInterpolateInputs", False, "interpolate-inputs"),
     ModelOptions("canBeInstantiatedOnlyOncePerProcess", False, "only-one-per-process"),
     ModelOptions("canGetAndSetFMUstate", False, "handle-state"),
-    ModelOptions("canSerializeFMUstate", False, "serialize-state"),
+    ModelOptions("canSerializeFMUstate", False, "serialize-state")
 ]
 
 
-class MOOSE2fmu(Fmi2Slave):
-    """Abstract class for the creation of FMU from an OpenMOOSE case
+class MOOSE2Fmu(Fmi2Slave):
+    """Abstract class for the creation of FMU from an OpenFOAM case
 
     Args:
         Fmi2Slave: Abstract class defining FMU in details see pythomfmu
@@ -39,49 +32,46 @@ class MOOSE2fmu(Fmi2Slave):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        self.host = '"127.0.0.1"'
-        self.port = "12345"
+        self.host = "127.0.0.1" #local host aka this computer
+        self.port = 12345
         self.outputPath = "MOOSECase"
-
         self.oscmd = "bash -i"
         self.arguments = ""
+        self.t = 0.0
 
-        self.register_variable(
-            String(
-                "host",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
-        self.register_variable(
-            Integer(
-                "port",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
-        self.register_variable(
-            String(
-                "outputPath",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
-        self.register_variable(
-            String(
-                "oscmd",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
-        self.register_variable(
-            String(
-                "arguments",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
+        self.register_variable(String(
+            'host',
+            causality=Fmi2Causality.parameter,
+            variability=Fmi2Variability.tunable
+        ))
+        self.register_variable(Integer(
+            'port',
+            causality=Fmi2Causality.parameter,
+            variability=Fmi2Variability.tunable
+        ))
+        self.register_variable(String(
+            'outputPath',
+            causality=Fmi2Causality.parameter,
+            variability=Fmi2Variability.tunable
+        ))
+        self.register_variable(String(
+            'oscmd',
+            causality=Fmi2Causality.parameter,
+            variability=Fmi2Variability.tunable
+        ))
+        self.register_variable(String(
+            'arguments',
+            causality=Fmi2Causality.parameter,
+            variability=Fmi2Variability.tunable
+        ))
+        # Register MOOSE post-processor 't' as an output variable
+        self.register_variable(Real(
+            't',
+            causality=Fmi2Causality.output,
+            variability=Fmi2Variability.continuous
+        ))
+
+        self.control = None
 
     def to_xml(self, model_options: Dict[str, str] = dict()) -> Element:
         """Build the XML representation of the model.
@@ -100,9 +90,9 @@ class MOOSE2fmu(Fmi2Slave):
             fmiVersion="2.0",
             modelName=self.modelName,
             guid=f"{self.guid!s}",
-            generationTool=f"FMU4MOOSE {VERSION}",
+            generationTool=f"FMU4MOOSE 0.1.0",
             generationDateAndTime=date_str,
-            variableNamingConvention="structured",
+            variableNamingConvention="structured"
         )
         if self.description is not None:
             attrib["description"] = self.description
@@ -184,10 +174,54 @@ class MOOSE2fmu(Fmi2Slave):
         elif isinstance(var, String):
             refs = self.get_string(vrs)
         else:
-            raise Exception(f"Unsupported type!")
+            raise Exception(f"Unsupported type: {type(var)}")
 
         var.start = refs[0]
 
-    def do_step(self, current_time: float, step_size: float) -> bool:
-        "not expected to be implemented"
+    # CamelCase hook delegates to snake_case
+    def exitInitializationMode(self) -> bool:
+        return self.exit_initialization_mode()
+
+    def exitInitializationMode(self) -> bool:
+        super().exitInitializationMode()
+        # fetch overridden port
+        vr_port = self.vars["port"].value_reference
+        port = self.get_integer(vrs=[vr_port])[0]
+        print(f"[DEBUG] exitInitializationMode: port={port}")
+
+        # initialize MooseControl
+        self.control = MooseControl(moose_port=port)
+        print("[DEBUG] calling control.initialize()")
+        self.control.initialize()
+        print("[DEBUG] waiting for 'INITIAL'")
+        self.control.wait("INITIAL")
+        print("[DEBUG] control.setContinue()")
+        self.control.setContinue()
+
         return True
+
+    def do_step(self, current_time: float, step_size: float) -> bool:
+        print(f"[DEBUG] do_step: time={current_time}, step_size={step_size}")
+
+        self.control.wait("TIMESTEP_BEGIN")
+        print("[DEBUG] got TIMESTEP_BEGIN")
+
+        # pull 't' and set into FMU
+        t_val = self.control.getPostprocessor("t")
+        print(f"[DEBUG] t from control={t_val}")
+        vr_t = self.vars["t"].value_reference
+        self.set_real(vrs=[vr_t], values=[t_val])
+
+        # continue simulation
+        self.control.setContinue()
+        print("[DEBUG] continue to next step")
+        return True
+
+    def terminateSlave(self):
+        # Finalize MooseControl cleanly
+        if self.control is not None:
+            print("[DEBUG] terminateSlave: finalizing MooseControl")
+            self.control.finalize()
+        # Terminate FMU
+        super().terminateSlave()
+

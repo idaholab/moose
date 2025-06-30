@@ -61,7 +61,7 @@ class FMUBase(ABC):
             var = (k, ext_inputs[k])
             self.setValue(self.setVar, var)
 
-    def to_OF(self) -> str:
+    def to_MOOSE(self) -> str:
         d = {}
         for k in self.coupleData.to_OF:
             d[k] = self.getValue(self.getVar, k)
