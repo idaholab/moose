@@ -1,4 +1,4 @@
-<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian">
+<VTKFile type="UnstructuredGrid" version="2.2" byte_order="LittleEndian">
 <UnstructuredGrid>
 <Piece NumberOfPoints="512" NumberOfCells="64">
 <Points>
