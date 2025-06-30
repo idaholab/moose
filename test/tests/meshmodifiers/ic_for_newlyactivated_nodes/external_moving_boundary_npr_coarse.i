@@ -13,8 +13,8 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 16
-    ny = 16
+    nx = 4
+    ny = 4
   []
   [left]
     type = SubdomainBoundingBoxGenerator
@@ -55,12 +55,10 @@
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
+    ic_strategy = "IC_POLYNOMIAL"
     apply_initial_conditions = true
     old_subdomain_reinitialized = false
     reinitialize_subdomain_ids = '1'
-
-    ic_strategy = "IC_POLYNOMIAL"
-
     nodal_patch_recovery_uo = 'extrapolation_patch'
   []
 []
@@ -101,21 +99,12 @@
   [diff]
     order = FIRST
   []
-  [diff2]
-    order = FIRST
-    initial_condition = 10
-  []
 []
 
 [Kernels]
   [diffusion]
     type = MatDiffusion
-    variable = 'diff'
-    diffusivity = 'k'
-  []
-  [diffusion2]
-    type = MatDiffusion
-    variable = 'diff2'
+    variable = diff
     diffusivity = 'k'
   []
 []
@@ -131,28 +120,14 @@
 [BCs]
   [left]
     type = DirichletBC
-    variable = 'diff'
+    variable = diff
     boundary = left
     value = 10
   []
 
   [bottom]
     type = DirichletBC
-    variable = 'diff'
-    boundary = bottom
-    value = 0
-  []
-
-  [left2]
-    type = DirichletBC
-    variable = 'diff2'
-    boundary = left
-    value = 10
-  []
-
-  [bottom2]
-    type = DirichletBC
-    variable = 'diff2'
+    variable = diff
     boundary = bottom
     value = 0
   []

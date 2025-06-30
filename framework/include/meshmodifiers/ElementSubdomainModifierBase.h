@@ -194,30 +194,13 @@ private:
   /// @brief List of neighbor elements that share nodes with reinitialized elements
   std::vector<std::vector<dof_id_type>> _solved_elem_ids_for_npr;
 
-  /**
-   * * Check if the node is newly activated.
-   * * If all elements (excluding inactive elements) with the node are reinitialized, then the node
-   * is newly reinitialized.
-   */
-  bool nodeIsNewlyActivated(dof_id_type node_id) const;
-
-  /// @brief Collect the complete set of newly activated nodes globally across processors
-  /// @param moved_elems Map from element ID to a pair of (old subdomain ID, new subdomain ID)
-  /// @details This function gathers all nodes associated with moved elements that are newly
-  /// activated, regardless of processor ownership.
-  void identifyGloballyActivatedNodes(
-      const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems);
-
   /// Elements that have been reinitialized due to subdomain changes,
   /// gathered across all processors using MPI
   std::vector<dof_id_type> _global_reinitialized_elems;
 
-  /// @brief Set of newly activated nodes
-  std::unordered_set<dof_id_type> _newactivated_nodes;
-
   /// Global collection of all newly activated node IDs, gathered across all processors.
   /// This set is independent of processor ownership and ensures consistency in parallel runs.
-  std::vector<dof_id_type> _complete_global_activated_nodes;
+  std::vector<dof_id_type> _complete_reinitialized_nodes;
 
   /// Indicates whether each node has had its initial condition (IC) applied.
   /// true = IC already set; false = IC not yet set.
@@ -252,8 +235,8 @@ private:
   /// Results are stored in `_global_reinitialized_elems`.
   void synchronizeReinitializedElems();
 
-  /// @brief Filters the globally activated nodes and stores only those owned by this processor.
-  void identifyProcessorOwnedActivatedNodes();
+  /// @brief Filters the globally reinitialized nodes and stores only those owned by this processor.
+  void identifyProcessorOwnedReinitializedNodes();
 
   /// @brief Apply initial conditions using polynomial nodal patch recovery
   /// @param sys

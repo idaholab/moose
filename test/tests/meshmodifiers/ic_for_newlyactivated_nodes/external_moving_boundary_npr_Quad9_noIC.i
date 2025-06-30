@@ -54,12 +54,6 @@
     moving_boundary_subdomain_pairs = '1 2; 1'
     block = '1 2'
     execute_on = 'INITIAL TIMESTEP_END'
-
-    # --- new for setting IC --- #
-    #unsolved_blocks = '2'
-    #ic_strategy = "IC_POLYNOMIAL"
-
-    #nodal_patch_recovery_uo = 'extrapolation_patch'
   []
 []
 

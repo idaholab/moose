@@ -56,7 +56,9 @@
 
     # --- new for setting IC --- #
     ic_strategy = "IC_DEFAULT"
-    unsolved_blocks = '2'
+    apply_initial_conditions = true
+    old_subdomain_reinitialized = false
+    reinitialize_subdomain_ids = '1'
   []
 []
 
