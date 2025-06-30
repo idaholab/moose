@@ -37,11 +37,10 @@ MFEMKernel::MFEMKernel(const InputParameters & parameters)
     _subdomain_attributes(_subdomain_names.size())
 {
   for (unsigned int i = 0; i < _subdomain_names.size(); ++i)
-  {
     _subdomain_attributes[i] = std::stoi(_subdomain_names[i]);
-  }
   mfem::ParMesh & mesh(getMFEMProblem().mesh().getMFEMParMesh());
-  mfem::common::AttrToMarker(mesh.attributes.Max(), _subdomain_attributes, _subdomain_markers);
+  if (_subdomain_attributes.Size())
+    mfem::common::AttrToMarker(mesh.attributes.Max(), _subdomain_attributes, _subdomain_markers);
 }
 
 #endif
