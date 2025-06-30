@@ -227,7 +227,7 @@ running "configure" is an optional step when building MOOSE or a MOOSE-based app
 
 - `framework/include/base/MooseConfig.h.in` - This file is auto-generated from running `autoheader`.
 
-- `framework/conf_var.mk.in` - This file is where you put your new expansion expressions. Typically
+- `framework/conf_vars.mk.in` - This file is where you put your new expansion expressions. Typically
   these are in the form of "@VARIABLE@".
 
 ### Make Install
