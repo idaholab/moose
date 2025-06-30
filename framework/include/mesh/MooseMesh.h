@@ -177,6 +177,11 @@ public:
   virtual unsigned int dimension() const;
 
   /**
+   * Returns MeshBase::spatial_dimension
+   */
+  virtual unsigned int spatialDimension() const { return _mesh->spatial_dimension(); }
+
+  /**
    * Returns the effective spatial dimension determined by the coordinates actually used by the
    * mesh. This means that a 1D mesh that has non-zero z or y coordinates is actually a 2D or 3D
    * mesh, respectively. Likewise a 2D mesh that has non-zero z coordinates is actually 3D mesh.
@@ -315,6 +320,14 @@ public:
    */
   virtual dof_id_type nNodes() const;
   virtual dof_id_type nElem() const;
+
+  virtual dof_id_type nLocalNodes() const { return _mesh->n_local_nodes(); }
+  virtual dof_id_type nActiveElem() const { return _mesh->n_active_elem(); }
+  virtual dof_id_type nActiveLocalElem() const { return _mesh->n_active_local_elem(); }
+  virtual SubdomainID nSubdomains() const { return _mesh->n_subdomains(); }
+  virtual unsigned int nPartitions() const { return _mesh->n_partitions(); }
+  virtual bool skipPartitioning() const { return _mesh->skip_partitioning(); }
+  virtual bool skipNoncriticalPartitioning() const;
 
   /**
    * Calls max_node/elem_id() on the underlying libMesh mesh object.
@@ -985,7 +998,7 @@ public:
   /**
    * Returns the final Mesh distribution type.
    */
-  bool isDistributedMesh() const { return _use_distributed_mesh; }
+  virtual bool isDistributedMesh() const { return _use_distributed_mesh; }
 
   /**
    * Tell the user if the distribution was overriden for any reason

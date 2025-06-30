@@ -331,9 +331,12 @@ std::string prettyCppType(const std::string & cpp_type);
  */
 template <typename T>
 std::string
-prettyCppType(const T * = nullptr)
+prettyCppType(const T * obj = nullptr)
 {
-  return prettyCppType(libMesh::demangle(typeid(T).name()));
+  if (obj)
+    return prettyCppType(libMesh::demangle(typeid(*obj).name()));
+  else
+    return prettyCppType(libMesh::demangle(typeid(T).name()));
 }
 
 /**

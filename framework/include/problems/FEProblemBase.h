@@ -2427,6 +2427,8 @@ public:
 
   virtual bool checkNonlocalCouplingRequirement() const override;
 
+  virtual Moose::FEBackend feBackend() const { return Moose::FEBackend::LibMesh; }
+
 protected:
   /**
    * Deprecated. Users should switch to overriding the meshChanged which takes arguments
