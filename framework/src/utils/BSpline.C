@@ -27,6 +27,7 @@ BSpline::BSpline(const unsigned int degree, const std::vector<libMesh::Point> & 
 libMesh::Point
 BSpline::getPoint(const libMesh::Real t) const
 {
+  mooseAssert((t>=0) && (t <= 1), "t should be in [0, 1]. t=" + std::to_string(t));
   libMesh::Point returnPoint(0, 0, 0);
   for (const auto i : index_range(_control_points))
     returnPoint += BSpline::CdBBasis(t, i, _degree) * _control_points[i];
@@ -75,6 +76,7 @@ libMesh::Real
 BSpline::CdBBasis(const libMesh::Real & t, const unsigned int i, const unsigned int j) const
 {
   mooseAssert(j >= 0, "j (polynomial degree) must be positive.");
+  mooseAssert(i < knot_vector.size() - 1, "knot index must stay within bounds");
   if (j == 0)
   {
     libMesh::Real basis_return =
@@ -94,8 +96,9 @@ BSpline::CdBBasis(const libMesh::Real & t, const unsigned int i, const unsigned 
 libMesh::Real
 BSpline::firstCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const
 {
-  libMesh::Real ti = _knot_vector[i];
-  libMesh::Real tij = _knot_vector[i + j];
+  mooseAssert(i + j < _knot_vector.size(), "Index must stay within bounds");
+  const auto ti = _knot_vector[i];
+  const auto tij = _knot_vector[i + j];
   if (ti != tij)
     return (t - ti) / (tij - ti);
   else
