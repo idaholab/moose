@@ -16,7 +16,8 @@ from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult
 
 FAKE_CIVET_VERSION = 2
-FAKE_CIVET_JOB_URL = 'civet.inl.gov/job/12345'
+FAKE_CIVET_JOB_ID = 12345
+FAKE_CIVET_JOB_URL = f'civet.inl.gov/job/{FAKE_CIVET_JOB_ID}'
 FAKE_EVENT_SHA = 'abcd1234ababcd1234ababcd1234ababcd1234ab'
 FAKE_BASE_SHA = '1234abcdab1234abcdab1234abcdab1234abcdab'
 FAKE_EVENT_CAUSE = 'pr'
@@ -72,6 +73,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         results = values.copy()
         del results['tests']
         results['civet'] = {'job_url': FAKE_CIVET_JOB_URL,
+                            'job_id': FAKE_CIVET_JOB_ID,
                             'version': civet_version}
         results.update(civet_values)
 
@@ -88,6 +90,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
 
         # Faked entries for civet
         self.assertEqual(result.civet_job_url, FAKE_CIVET_JOB_URL)
+        self.assertEqual(result.civet_job_id, FAKE_CIVET_JOB_ID)
         self.assertEqual(result.civet_version, FAKE_CIVET_VERSION)
         self.assertEqual(result.event_sha, FAKE_EVENT_SHA)
         self.assertEqual(result.event_cause, FAKE_EVENT_CAUSE)

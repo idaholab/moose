@@ -250,6 +250,10 @@ class TestResultsReaderReader(unittest.TestCase):
         is_pr = event_cause.startswith('Pull')
         pr_num = None
 
+        job_id = os.environ.get('CIVET_JOB_ID')
+        self.assertIsNotNone(job_id)
+        job_id = int(job_id)
+
         if is_pr:
             pr_num = os.environ.get('CIVET_PR_NUM')
             self.assertIsNotNone('CIVET_PR_NUM')
@@ -260,16 +264,20 @@ class TestResultsReaderReader(unittest.TestCase):
         self.assertGreater(len(results), 0)
 
         if is_pr:
-            pr_result = results[0]
-            self.assertEqual(pr_result.pr_num, pr_num)
-            self.assertEqual(pr_result.event_sha, head_sha)
-            self.assertEqual(pr_result.event_cause, 'pr')
+            result = results[0]
+            self.assertEqual(result.pr_num, pr_num)
+            self.assertEqual(result.event_sha, head_sha)
+            self.assertEqual(result.event_cause, 'pr')
         else:
             self.assertIsNone(results[0].pr_num)
             self.assertEqual(results[0].event_cause, 'push')
 
             event_results = [r for r in results if r.event_sha == head_sha]
             self.assertEqual(len(event_results), 1)
+
+            result = event_results[0]
+
+        self.assertEqual(result.results.civet_job_id, job_id)
 
         start_index = 0
         if is_pr:

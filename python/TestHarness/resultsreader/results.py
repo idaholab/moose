@@ -41,6 +41,7 @@ class TestHarnessResults:
         assert isinstance(self.civet, dict)
         assert isinstance(self.civet_version, int)
         assert isinstance(self.civet_job_url, str)
+        assert isinstance(self.civet_job_id, int)
         assert isinstance(self.hpc, dict)
         assert isinstance(self.event_sha, str)
         assert len(self.event_sha) == 40
@@ -100,6 +101,13 @@ class TestHarnessResults:
         Get the URL to the CIVET job that ran this test
         """
         return self.civet['job_url']
+
+    @property
+    def civet_job_id(self) -> int:
+        """
+        Get the ID of the civet job that ran this test
+        """
+        return self.civet['job_id']
 
     @property
     def hpc(self) -> dict:
