@@ -412,9 +412,7 @@ ElementSubdomainModifierBase::modify(
   if (!_unsolved_blocks.empty())
   {
     identifyGloballyActivatedNodes(moved_elems);
-    identifyLocallyOwnedActivatedNodes(moved_elems);
-    computeSetDifference();
-    findMissingNewlyActivatedNodes();
+    identifyProcessorOwnedActivatedNodes();
 
     if (!_npr_vec.empty())
       for (auto i : index_range(_ic_vars_number))
@@ -746,8 +744,8 @@ void
 ElementSubdomainModifierBase::identifyGloballyActivatedNodes(
     const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems)
 {
-  // Clear cached element reinitialization data
-  _first_pass_local_activated_nodes.clear();
+  // (a) Collect locally newly activated node IDs
+  std::unordered_set<dof_id_type> local_newly_activated_nodes;
 
   for (const auto & [elem_id, subdomain] : moved_elems)
   {
@@ -761,60 +759,40 @@ ElementSubdomainModifierBase::identifyGloballyActivatedNodes(
       if (!nodeIsNewlyActivated(node_id))
         continue;
 
-      // Insert if not already in set
-      _first_pass_local_activated_nodes.insert(node_id);
+      // Insert into local set
+      local_newly_activated_nodes.insert(node_id);
     }
   }
 
-  gatherCompleteActivatedNodesGlobally();
+  // (b) Convert to vector and allgather across processors
+  std::vector<dof_id_type> local(local_newly_activated_nodes.begin(),
+                                 local_newly_activated_nodes.end());
+
+  std::vector<std::vector<dof_id_type>> gathered;
+  _mesh.comm().allgather(local, gathered);
+
+  // (c) Collect globally unique activated nodes
+  std::unordered_set<dof_id_type> unique_nodes;
+  for (const auto & vec : gathered)
+    unique_nodes.insert(vec.begin(), vec.end());
+
+  // (d) Store globally activated node list
+  _complete_global_activated_nodes.assign(unique_nodes.begin(), unique_nodes.end());
 }
 
 void
-ElementSubdomainModifierBase::identifyLocallyOwnedActivatedNodes(
-    const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems)
+ElementSubdomainModifierBase::identifyProcessorOwnedActivatedNodes()
 {
-  // Clear cached element reinitialization data
+
+  // Clear newly activated node set
   _newactivated_nodes.clear();
 
-  for (const auto & [elem_id, subdomain] : moved_elems)
-  {
-    const Elem * elem = _mesh.elemPtr(elem_id);
-
-    for (unsigned int i = 0; i < elem->n_nodes(); ++i)
-    {
-      const dof_id_type node_id = elem->node_id(i);
-      const Node * node = _mesh.nodePtr(node_id);
-
-      // Skip if node is not owned by this processor (the main difference with
-      // identifyGloballyActivatedNodes)
-      if (node->processor_id() != _mesh.processor_id())
-        continue;
-      // this previously cause a bug given that the node is not owned by this processor, but also
-      // not belong to any moved_elems
-
-      // Skip if not newly activated
-      if (!nodeIsNewlyActivated(node_id))
-        continue;
-
-      // Insert if not already in set
-      _newactivated_nodes.insert(node_id);
-    }
-  }
-
-  gatherLocalActivatedNodesGlobally();
-}
-
-void
-ElementSubdomainModifierBase::findMissingNewlyActivatedNodes()
-{
-  for (auto id : _local_own_gather_global_and_complete_activated_nodes_diff)
+  for (auto id : _complete_global_activated_nodes)
   {
     auto node = _mesh.nodePtr(id);
     if (node->processor_id() == _mesh.processor_id())
       _newactivated_nodes.insert(id);
   }
-
-  gatherLocalActivatedNodesGlobally();
 }
 
 bool
@@ -1282,7 +1260,7 @@ ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys,
   DofMap & dof_map = sys.dofMap();
 
   if (is_elemental)
-    for (const auto & elem_id : _global_reinitialized_elems)
+    for (const auto & elem_id : _reinitialized_elems)
     {
       const Elem * elem = _mesh.elemPtr(elem_id);
       if (!elem)
@@ -1335,62 +1313,4 @@ ElementSubdomainModifierBase::synchronizeReinitializedElems()
   _global_reinitialized_elems.clear();
   for (const auto & vec : gathered)
     _global_reinitialized_elems.insert(_global_reinitialized_elems.end(), vec.begin(), vec.end());
-}
-
-void
-ElementSubdomainModifierBase::gatherCompleteActivatedNodesGlobally()
-{
-  std::vector<dof_id_type> local(_first_pass_local_activated_nodes.begin(),
-                                 _first_pass_local_activated_nodes.end());
-
-  std::vector<std::vector<dof_id_type>> gathered;
-
-  _mesh.comm().allgather(local, gathered);
-
-  std::unordered_set<dof_id_type> unique_nodes;
-
-  for (const auto & vec : gathered)
-    unique_nodes.insert(vec.begin(), vec.end());
-
-  _complete_global_activated_nodes.assign(unique_nodes.begin(), unique_nodes.end());
-}
-
-void
-ElementSubdomainModifierBase::gatherLocalActivatedNodesGlobally()
-{
-  std::vector<dof_id_type> local(_newactivated_nodes.begin(), _newactivated_nodes.end());
-  std::vector<std::vector<dof_id_type>> gathered;
-
-  _mesh.comm().allgather(local, gathered);
-
-  _local_own_gather_global_activated_nodes.clear();
-  for (const auto & vec : gathered)
-    _local_own_gather_global_activated_nodes.insert(
-        _local_own_gather_global_activated_nodes.end(), vec.begin(), vec.end());
-}
-
-void
-ElementSubdomainModifierBase::computeSetDifference()
-{
-  _local_own_gather_global_and_complete_activated_nodes_diff.clear();
-  if (_local_own_gather_global_activated_nodes == _complete_global_activated_nodes)
-    return;
-
-  std::vector<dof_id_type> nodes_sorted = _local_own_gather_global_activated_nodes;
-  std::vector<dof_id_type> temp_sorted = _complete_global_activated_nodes;
-
-  std::sort(nodes_sorted.begin(), nodes_sorted.end());
-  std::sort(temp_sorted.begin(), temp_sorted.end());
-
-  std::vector<dof_id_type> difference;
-  difference.reserve(nodes_sorted.size());
-
-  std::set_difference(temp_sorted.begin(),
-                      temp_sorted.end(),
-                      nodes_sorted.begin(),
-                      nodes_sorted.end(),
-                      std::back_inserter(difference));
-
-  // Store result
-  _local_own_gather_global_and_complete_activated_nodes_diff = std::move(difference);
 }
