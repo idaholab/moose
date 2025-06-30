@@ -2326,7 +2326,7 @@ getNullptrExample()
   return nullptr;
 }
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 template <typename T>
 constexpr bool
@@ -2350,7 +2350,7 @@ constexpr bool
 isScalarFunctorNameTypeHelper(T *)
 {
   return std::is_same_v<T, MooseFunctorName>
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
          || std::is_same_v<T, MFEMScalarCoefficientName>
 #endif
       ;
@@ -2367,7 +2367,7 @@ template <typename T>
 constexpr bool
 isVectorFunctorNameTypeHelper(T *)
 {
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
   return std::is_same_v<T, MFEMVectorCoefficientName>;
 #else
   return false;
@@ -2418,7 +2418,7 @@ InputParameters::appendFunctorDescription(const std::string & doc_string) const
 
   return MooseUtils::trim(doc_string, ". ") + ". A functor is any of the following: a variable, " +
          (
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
              Moose::internal::isMFEMFunctorNameTypeHelper(Moose::internal::getNullptrExample<T>())
                  ? "an MFEM"
                  :
