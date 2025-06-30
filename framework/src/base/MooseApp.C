@@ -807,7 +807,7 @@ MooseApp::registerCapabilities()
 
   {
     const auto doc = "MFEM finite element library";
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
     haveCapability("mfem", doc);
 #else
     missingCapability("mfem",
