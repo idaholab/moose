@@ -37,6 +37,8 @@ MFEMScalarFESpace::getFECName() const
   char b = mfem::BasisType::GetChar(getBasis(getParam<std::string>("basis")));
   std::string basis(1, b);
 
+  // This is to get around an MFEM bug where if you pass the full name of the default element type,
+  // it crashes
   if (_fec_type == "H1")
     basis = (basis == "G" ? "" : "@" + basis);
   else if (_fec_type == "L2")
