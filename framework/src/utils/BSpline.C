@@ -27,7 +27,7 @@ BSpline::BSpline(const unsigned int degree, const std::vector<libMesh::Point> & 
 libMesh::Point
 BSpline::getPoint(const libMesh::Real t) const
 {
-  mooseAssert((t>=0) && (t <= 1), "t should be in [0, 1]. t=" + std::to_string(t));
+  mooseAssert((t >= 0) && (t <= 1), "t should be in [0, 1]. t=" + std::to_string(t));
   libMesh::Point returnPoint(0, 0, 0);
   for (const auto i : index_range(_control_points))
     returnPoint += BSpline::CdBBasis(t, i, _degree) * _control_points[i];
