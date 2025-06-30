@@ -14,13 +14,19 @@
 #include "InitialCondition.h"
 
 ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblemBase & fe_problem)
-  : _fe_problem(fe_problem)
+  : _fe_problem(fe_problem), _target_var_names({})
 {
 }
 
 ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialConditionThread & x,
                                                              Threads::split /*split*/)
-  : _fe_problem(x._fe_problem)
+  : _fe_problem(x._fe_problem), _target_var_names(x._target_var_names)
+{
+}
+
+ComputeInitialConditionThread::ComputeInitialConditionThread(
+    FEProblemBase & fe_problem, const std::set<std::string> & target_var_names)
+  : _fe_problem(fe_problem), _target_var_names(target_var_names)
 {
 }
 
@@ -69,6 +75,10 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
           if ((id != elem->subdomain_id() && !ic->variable().isNodal()) ||
               ic->getState() != current_ic_state)
             continue;
+
+          if (!_target_var_names.empty() && !_target_var_names.count(ic->variable().name()))
+            continue;
+
           order.push_back(&(ic->variable()));
           groups[&(ic->variable())].push_back(ic);
         }

@@ -34,9 +34,37 @@ public:
   virtual void threadJoin(const UserObject &) override;
   virtual void finalize() override;
 
+  void cacheAdditionalElements(const std::vector<dof_id_type> & additional_elems) const
+  {
+    if (!_use_specific_elements)
+      return;
+
+    _additional_elems = additional_elems;
+  }
+
+  void cleanQueryIDsAndAdditionalElements() const
+  {
+    if (!_use_specific_elements)
+      return;
+
+    _query_ids.clear();
+    _additional_elems.clear();
+  }
+
+  void identifyAdditionalElementsFromOtherProcs() const;
+
+  /// @brief Synchronizes local matrices and vectors (_Ae, _be) across processors
+  /// by gathering and distributing data for specified element IDs (_query_ids)
+  /// in a parallel computing environment.
+  void synchronizeAebe() const;
+
+  /// Returns the variable name
+  virtual const VariableName & variableName() const { return _var_name; }
+
 protected:
   /// Compute the quantity to recover using nodal patch recovery
   virtual Real computeValue() = 0;
+  void setVariableName(const VariableName & var_name) { _var_name = var_name; }
 
   unsigned int _qp;
 
@@ -65,8 +93,29 @@ private:
   const unsigned int _q;
 
   /// The element-level A matrix
-  std::map<dof_id_type, RealEigenMatrix> _Ae;
+  mutable std::map<dof_id_type, RealEigenMatrix> _Ae;
 
   /// The element-level b vector
-  std::map<dof_id_type, RealEigenVector> _be;
+  mutable std::map<dof_id_type, RealEigenVector> _be;
+
+  // Map to track which elements are needed from each processor
+  mutable std::unordered_map<processor_id_type, std::vector<dof_id_type>> _query_ids;
+
+  /// Additional elements to query
+  mutable std::vector<dof_id_type> _additional_elems;
+
+  /// Iterates over all evaluable elements and records their IDs in a query map
+  /// if they belong to a different processor.
+  void identifyGhostElementsFromOtherProcs() const;
+
+  /// @brief Whether we want to specify the elements for the patch recovery
+  bool _use_specific_elements;
+
+  /// @brief Cache for least-squares coefficients used in nodal patch recovery.
+  mutable std::map<std::vector<dof_id_type>, RealEigenVector> _cached_coef;
+
+  /// Print coefficients of the polynomial to console
+  const bool _verbose;
+
+  VariableName _var_name; ///< Variable name
 };

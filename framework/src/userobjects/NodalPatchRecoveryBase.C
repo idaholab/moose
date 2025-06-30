@@ -16,6 +16,7 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 #include "libmesh/parallel_eigen.h"
+#include <iomanip>
 
 InputParameters
 NodalPatchRecoveryBase::validParams()
@@ -36,6 +37,11 @@ NodalPatchRecoveryBase::validParams()
 
   params.addParamNamesToGroup("patch_polynomial_order", "Advanced");
 
+  params.addParam<bool>(
+      "use_specific_elements", false, "Whether to use specific elements for patch recovery");
+
+  params.addParam<bool>("verbose", false, "Set to true to print coefficient of the polynomial.");
+
   return params;
 }
 
@@ -45,7 +51,9 @@ NodalPatchRecoveryBase::NodalPatchRecoveryBase(const InputParameters & parameter
     _patch_polynomial_order(
         static_cast<unsigned int>(getParam<MooseEnum>("patch_polynomial_order"))),
     _multi_index(MathUtils::multiIndex(_mesh.dimension(), _patch_polynomial_order)),
-    _q(_multi_index.size())
+    _q(_multi_index.size()),
+    _use_specific_elements(getParam<bool>("use_specific_elements")),
+    _verbose(getParam<bool>("verbose"))
 {
 }
 
@@ -53,22 +61,58 @@ Real
 NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
                                            const std::vector<dof_id_type> & elem_ids) const
 {
-  // Before we go, check if we have enough sample points for solving the least square fitting
-  if (_q_point.size() * elem_ids.size() < _q)
-    mooseError("There are not enough sample points to recover the nodal value, try reducing the "
-               "polynomial order or using a higher-order quadrature scheme.");
+  std::vector<dof_id_type> key = elem_ids;
+  std::sort(key.begin(), key.end());
 
-  // Assemble the least squares problem over the patch
-  RealEigenMatrix A = RealEigenMatrix::Zero(_q, _q);
-  RealEigenVector b = RealEigenVector::Zero(_q);
-  for (auto elem_id : elem_ids)
+  // Check cache
+  auto it = _cached_coef.find(key);
+  RealEigenVector coef;
+
+  if (it != _cached_coef.end())
+    coef = it->second;
+  else
   {
-    A += libmesh_map_find(_Ae, elem_id);
-    b += libmesh_map_find(_be, elem_id);
-  }
+    // Before we go, check if we have enough sample points for solving the least square fitting
+    if (_q_point.size() * elem_ids.size() < _q)
+      mooseError("There are not enough sample points to recover the nodal value, try reducing the "
+                 "polynomial order or using a higher-order quadrature scheme.");
 
-  // Solve the least squares fitting
-  RealEigenVector coef = A.completeOrthogonalDecomposition().solve(b);
+    // Assemble the least squares problem over the patch
+    RealEigenMatrix A = RealEigenMatrix::Zero(_q, _q);
+    RealEigenVector b = RealEigenVector::Zero(_q);
+    for (auto elem_id : elem_ids)
+    {
+
+      if (!hasBlocks(_mesh.elemPtr(elem_id)->subdomain_id()))
+        mooseError("Element with id = ",
+                   elem_id,
+                   " is not in the block. "
+                   "Please use nodalPatchRecovery with elements in the block only.");
+
+      if (_Ae.find(elem_id) == _Ae.end())
+        mooseError("Missing entry for elem_id = ", elem_id, " in _Ae.");
+      if (_be.find(elem_id) == _be.end())
+        mooseError("Missing entry for elem_id = ", elem_id, " in _be.");
+
+      A += libmesh_map_find(_Ae, elem_id);
+      b += libmesh_map_find(_be, elem_id);
+    }
+
+    // Solve the least squares fitting
+    coef = A.completeOrthogonalDecomposition().solve(b);
+
+    _cached_coef[key] = coef; // Save to cache
+
+    if (_verbose)
+    {
+      _console << std::setprecision(15) << std::scientific;
+      for (const auto & coef_i : coef)
+        _console << coef_i << " ";
+      _console << std::endl;
+
+      _console << std::defaultfloat;
+    }
+  }
 
   // Compute the fitted nodal value
   RealEigenVector p = evaluateBasisFunctions(x);
@@ -97,6 +141,12 @@ NodalPatchRecoveryBase::initialize()
 {
   _Ae.clear();
   _be.clear();
+  _query_ids.clear();
+  // make sure to clear the cached coefficients
+  // so that the next time we call nodalPatchRecovery, we will recompute the coefficients to make
+  // sure _Ae and _be has already been different but we do not use the same coefficients for the
+  // same element
+  _cached_coef.clear();
 }
 
 void
@@ -112,6 +162,7 @@ NodalPatchRecoveryBase::execute()
   }
 
   dof_id_type elem_id = _current_elem->id();
+
   _Ae[elem_id] = Ae;
   _be[elem_id] = be;
 }
@@ -132,12 +183,60 @@ NodalPatchRecoveryBase::finalize()
   // information from other processors in this finalize() method.
 
   // Populate algebraically ghosted elements to query
-  std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
-  const ConstElemRange evaluable_elem_range = _fe_problem.getEvaluableElementRange();
-  for (auto elem : evaluable_elem_range)
-    if (elem->processor_id() != processor_id())
-      query_ids[elem->processor_id()].push_back(elem->id());
+  // First issue: getEvaluableElementRange is not block restricted and cause some issues
+  if (!_use_specific_elements)
+    identifyGhostElementsFromOtherProcs();
 
+  synchronizeAebe();
+}
+
+void
+NodalPatchRecoveryBase::identifyAdditionalElementsFromOtherProcs() const
+{
+  if (!_use_specific_elements)
+    return;
+
+  if (_additional_elems.empty())
+    return;
+  for (const auto & entry : _additional_elems)
+  {
+    const Elem * elem = _mesh.elemPtr(entry);
+    if (elem->processor_id() != processor_id())
+      _query_ids[elem->processor_id()].push_back(elem->id());
+  }
+}
+
+void
+NodalPatchRecoveryBase::identifyGhostElementsFromOtherProcs() const
+{
+  // Each processor gathers information about all elements in the computational blocks,
+  // excluding deactivated blocks. This ensures that every processor is aware of all relevant
+  // elements, regardless of how users provide elements to the `nodalPatchRecovery` function.
+  // This approach does not affect the solution, as the actual patch used for recovery
+  // still depends on the elements passed to `nodalPatchRecovery` by the user.
+  // const auto evaluable_elem_range = _fe_problem.getBlockRestrictedEvaluableElementRange();
+  const auto evaluable_elem_range = _fe_problem.getEvaluableElementRange();
+
+  std::vector<dof_id_type> evaluable_elem_ids;
+  for (const auto & elem : evaluable_elem_range)
+    if (hasBlocks(elem->subdomain_id())) // getEvaluableElementRange is not block restricted
+      evaluable_elem_ids.push_back(elem->id());
+
+  std::vector<std::vector<dof_id_type>> gathered_ids;
+  _mesh.comm().allgather(evaluable_elem_ids, gathered_ids);
+
+  for (const auto & elem_ids : gathered_ids)
+    for (const auto & elem_id : elem_ids)
+    {
+      const auto * elem = _mesh.elemPtr(elem_id);
+      if (elem->processor_id() != processor_id())
+        _query_ids[elem->processor_id()].push_back(elem_id);
+    }
+}
+
+void
+NodalPatchRecoveryBase::synchronizeAebe() const
+{
   typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
 
   // Answer queries received from other processors
@@ -145,11 +244,8 @@ NodalPatchRecoveryBase::finalize()
                             const std::vector<dof_id_type> & elem_ids,
                             std::vector<AbPair> & ab_pairs)
   {
-    for (const auto i : index_range(elem_ids))
-    {
-      const auto elem_id = elem_ids[i];
-      ab_pairs.emplace_back(libmesh_map_find(_Ae, elem_id), libmesh_map_find(_be, elem_id));
-    }
+    for (const auto & elem_id : elem_ids)
+      ab_pairs.emplace_back(_Ae.at(elem_id), _be.at(elem_id));
   };
 
   // Gather answers received from other processors
@@ -166,6 +262,7 @@ NodalPatchRecoveryBase::finalize()
     }
   };
 
+  // the send and receive are called inside the pull_parallel_vector_data function
   libMesh::Parallel::pull_parallel_vector_data<AbPair>(
-      _communicator, query_ids, gather_data, act_on_data, 0);
+      _communicator, _query_ids, gather_data, act_on_data, 0);
 }

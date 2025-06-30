@@ -17,13 +17,22 @@
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
     FEProblemBase & fe_problem)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+    _target_var_names({})
 {
 }
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
     ComputeBoundaryInitialConditionThread & x, Threads::split split)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+    _target_var_names(x._target_var_names)
+{
+}
+
+ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
+    FEProblemBase & fe_problem, const std::set<std::string> & target_var_names)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+    _target_var_names(target_var_names)
 {
 }
 
@@ -44,8 +53,14 @@ ComputeBoundaryInitialConditionThread::onNode(ConstBndNodeRange::const_iterator 
   {
     const auto & ics = warehouse.getActiveBoundaryObjects(boundary_id, _tid);
     for (const auto & ic : ics)
+    {
+
+      if (!_target_var_names.empty() && !_target_var_names.count(ic->variable().name()))
+        continue;
+
       if (node->processor_id() == _fe_problem.processor_id())
         ic->computeNodal(*node);
+    }
   }
 }
 
