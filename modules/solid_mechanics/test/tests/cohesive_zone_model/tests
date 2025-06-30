@@ -38,6 +38,7 @@
       recover = false
       detail = "The finite strain cohesive zone model shall converge quadratically when using the "
                "hand-coded Jacobian"
+    capabilities = 'method!=dbg'
     []
     [small_strain_incremental]
       type = Exodiff
@@ -74,6 +75,7 @@
       detail = "The finite strain cohesive zone model shall return the same results of the total "
                "formulation when using an incremental material"
       allow_test_objects = true
+      capabilities = 'method!=dbg'
     []
     [multiple_action_and_materials]
       type = Exodiff
@@ -250,6 +252,7 @@
       mesh_mode = 'REPLICATED'
       recover = false
       allow_test_objects = true
+      capabilities = 'method!=dbg'
     []
     [czm_total_stretch_rotate_total_lagrangian]
       type = Exodiff
@@ -260,6 +263,7 @@
                "and interface rotations when using a total strain material."
       mesh_mode = 'REPLICATED'
       recover = false
+      capabilities = 'method!=dbg'
     []
   []
 
@@ -283,6 +287,7 @@
       abs_zero = 1e-6
       rel_err = 1e-5
       detail = "under mode I loading with scaled normal strength."
+      capabilities = 'method!=dbg'
     []
     [shear]
       type = Exodiff
@@ -341,6 +346,7 @@
       recover = false
       detail = "The system shall converge quadratically when using the handcoded Jacobian of the 3DC "
                "traction separation model"
+      capabilities = 'method!=dbg'
     []
     [normal_load]
       type = Exodiff
@@ -409,6 +415,7 @@
       recover = false
       detail = "The solution obtained using AD CZM shall match"
       abs_zero = 1e-6
+      capabilities = 'method!=dbg'
     []
     [non_AD_solution]
       type = Exodiff
@@ -436,6 +443,7 @@
       recover = false
       detail = "The solution obtained using AD CZM shall match"
       abs_zero = 1e-6
+      capabilities = 'method!=dbg'
     []
     [non_AD_solution]
       type = Exodiff

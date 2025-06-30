@@ -21,9 +21,9 @@
     type = Exodiff
     input = 'ad_inclined_bc_3d.i'
     exodiff = 'ad_inclined_bc_3d_out.e'
-    capabilities = 'superlu'
     issues = '#24910'
     design = 'PenaltyInclinedNoDisplacementBC.md InclinedNoDisplacementBCAction.md'
     requirement = 'The SolidMechanics module shall have the capabilty to enforce inclined boundary conditions while using automatic differentiation.'
+    capabilities = 'superlu & method!=dbg'
   []
 []

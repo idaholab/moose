@@ -7,5 +7,6 @@
     csvdiff = 'plastic_j2_out.csv'
     requirement = "Resulting flow curve matches analytic calculation with the updated Lagrangian "
                   "formulation"
+    capabilities = 'method!=dbg'
   []
 []

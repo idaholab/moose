@@ -8,5 +8,6 @@
     requirement = "Small strain solution in 2D axisymmetric RZ coordinates matches analytical "
                   "solution"
     abs_zero = 1e-6
+    capabilities = 'method!=dbg'
   []
 []
