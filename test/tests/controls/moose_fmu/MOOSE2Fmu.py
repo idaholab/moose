@@ -1,24 +1,20 @@
+"""Define the abstract facade class."""
 import json
 import datetime
 from collections import OrderedDict, namedtuple
 from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Optional
-
+# from uuid import uuid1
 from xml.etree.ElementTree import Element, SubElement
 
-from _version import __version__ as VERSION
-from pythonfmu.enums import (
-    Fmi2Type,
-    Fmi2Status,
-    Fmi2Causality,
-    Fmi2Initial,
-    Fmi2Variability,
-)
+# from .logmsg import LogMsg
+# from .default_experiment import DefaultExperiment
+
+from pythonfmu.enums import Fmi2Type, Fmi2Status, Fmi2Causality, Fmi2Initial, Fmi2Variability
 from pythonfmu.variables import Boolean, Integer, Real, ScalarVariable, String
 from pythonfmu import Fmi2Slave
 
 ModelOptions = namedtuple("ModelOptions", ["name", "value", "cli"])
-
 
 FMI2_MODEL_OPTIONS: List[ModelOptions] = [
     ModelOptions("needsExecutionTool", True, "no-external-tool"),
@@ -26,11 +22,11 @@ FMI2_MODEL_OPTIONS: List[ModelOptions] = [
     ModelOptions("canInterpolateInputs", False, "interpolate-inputs"),
     ModelOptions("canBeInstantiatedOnlyOncePerProcess", False, "only-one-per-process"),
     ModelOptions("canGetAndSetFMUstate", False, "handle-state"),
-    ModelOptions("canSerializeFMUstate", False, "serialize-state"),
+    ModelOptions("canSerializeFMUstate", False, "serialize-state")
 ]
 
 
-class MOOSE2fmu(Fmi2Slave):
+class MOOSE2Fmu(Fmi2Slave):
     """Abstract class for the creation of FMU from an OpenMOOSE case
 
     Args:
@@ -39,49 +35,19 @@ class MOOSE2fmu(Fmi2Slave):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        self.host = '"127.0.0.1"'
-        self.port = "12345"
+        self.host = '"127.0.0.1"' #local host aka this computer
+        self.port = 8000
         self.outputPath = "MOOSECase"
-
         self.oscmd = "bash -i"
         self.arguments = ""
+        self.control = None
 
-        self.register_variable(
-            String(
-                "host",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
-        self.register_variable(
-            Integer(
-                "port",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
-        self.register_variable(
-            String(
-                "outputPath",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
-        self.register_variable(
-            String(
-                "oscmd",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
-        self.register_variable(
-            String(
-                "arguments",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
+        self.register_variable(String("host", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(Integer("port", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(String("outputPath", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(String("oscmd", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(String("arguments", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+
 
     def to_xml(self, model_options: Dict[str, str] = dict()) -> Element:
         """Build the XML representation of the model.
@@ -100,9 +66,9 @@ class MOOSE2fmu(Fmi2Slave):
             fmiVersion="2.0",
             modelName=self.modelName,
             guid=f"{self.guid!s}",
-            generationTool=f"FMU4MOOSE {VERSION}",
+            generationTool=f"FMU4MOOSE 0.1.0",
             generationDateAndTime=date_str,
-            variableNamingConvention="structured",
+            variableNamingConvention="structured"
         )
         if self.description is not None:
             attrib["description"] = self.description
@@ -191,3 +157,6 @@ class MOOSE2fmu(Fmi2Slave):
     def do_step(self, current_time: float, step_size: float) -> bool:
         "not expected to be implemented"
         return True
+
+
+
