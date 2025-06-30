@@ -10,7 +10,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMProblem.h"
-#include "MFEMScalarIC.h"
+#include "MFEMInitialCondition.h"
 #include "MFEMVariable.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
