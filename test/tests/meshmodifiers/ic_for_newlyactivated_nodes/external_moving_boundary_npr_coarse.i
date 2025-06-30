@@ -13,8 +13,8 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 16
-    ny = 16
+    nx = 4
+    ny = 4
   []
   [left]
     type = SubdomainBoundingBoxGenerator

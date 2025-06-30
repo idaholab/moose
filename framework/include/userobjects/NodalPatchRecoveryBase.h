@@ -112,7 +112,10 @@ private:
   bool _use_specific_elements;
 
   /// @brief Cache for least-squares coefficients used in nodal patch recovery.
-  mutable std::map<std::vector<dof_id_type>, RealEigenVector> _cached_coef;
+  /// Typically, there is a one-to-one mapping from element to coefficients,
+  /// so only a single set of coefficients is cached rather than a full map.
+  mutable std::vector<dof_id_type> _cached_elem_ids;
+  mutable RealEigenVector _cached_coef;
 
   /// Print coefficients of the polynomial to console
   const bool _verbose;

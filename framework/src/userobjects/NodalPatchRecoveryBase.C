@@ -63,13 +63,11 @@ NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
 {
   std::vector<dof_id_type> key = elem_ids;
   std::sort(key.begin(), key.end());
+  RealEigenVector coef(_q);
 
   // Check cache
-  auto it = _cached_coef.find(key);
-  RealEigenVector coef;
-
-  if (it != _cached_coef.end())
-    coef = it->second;
+  if (key == _cached_elem_ids)
+    coef = _cached_coef;
   else
   {
     // Before we go, check if we have enough sample points for solving the least square fitting
@@ -101,7 +99,8 @@ NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
     // Solve the least squares fitting
     coef = A.completeOrthogonalDecomposition().solve(b);
 
-    _cached_coef[key] = coef; // Save to cache
+    _cached_elem_ids = key; // Update the cached element IDs
+    _cached_coef = coef;    // Update the cached coefficients
 
     if (_verbose)
     {
@@ -146,7 +145,8 @@ NodalPatchRecoveryBase::initialize()
   // so that the next time we call nodalPatchRecovery, we will recompute the coefficients to make
   // sure _Ae and _be has already been different but we do not use the same coefficients for the
   // same element
-  _cached_coef.clear();
+  _cached_elem_ids.clear();
+  _cached_coef = RealEigenVector::Zero(_q);
 }
 
 void

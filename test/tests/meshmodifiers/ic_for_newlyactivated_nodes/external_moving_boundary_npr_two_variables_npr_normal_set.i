@@ -62,7 +62,10 @@
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
-    unsolved_blocks = '2'
+
+    old_subdomain_reinitialized = false
+    reinitialize_subdomain_ids = '1'
+
     ic_strategy = "IC_POLYNOMIAL IC_POLYNOMIAL"
     ic_variables = 'diff diff2'
     nodal_patch_recovery_uo = 'extrapolation_patch extrapolation_patch2'

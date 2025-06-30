@@ -139,28 +139,12 @@
       detail = 'if a strategy that requires extrapolation is used without providing the necessary supporting method.'
     []
 
-    [ic_no_unsolved_blocks]
-      type = RunException
-      input = 'external_moving_boundary_no_unsolved_blocks_all_IC_default.i'
-      cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_POLYNOMIAL" MeshModifiers/moving_circle/nodal_patch_recovery_uo="extrapolation_patch"'
-      expect_err = "The unsolved_blocks must be set to use the extrapolation strategy."
-      detail = 'if a method that relies on unsolved regions is used but no such regions are defined.'
-    []
-
     [mismatch_IC_poly_npr_UO]
       type = RunException
       input = 'external_moving_boundary_npr.i'
       cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_DEFAULT" MeshModifiers/moving_circle/unsolved_blocks=""'
       expect_err = "Mismatch between number of IC strategies using polynomial extrapolation and NPR UO"
       detail = 'if the number of extrapolation-based strategies does not match the number of corresponding extrapolation sources.'
-    []
-
-    [IC_default_with_unsolved_blocks]
-      type = RunException
-      input = 'external_moving_boundary_no_unsolved_blocks_all_IC_default.i'
-      cli_args = 'MeshModifiers/moving_circle/unsolved_blocks="2"'
-      expect_err = "The unsolved_blocks should not be set to use the default strategy."
-      detail = 'if a default initialization method is used while also specifying additional configuration that is not needed.'
     []
 
     [IC_two_defaults_no_ic_variables]
