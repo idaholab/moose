@@ -4366,3 +4366,9 @@ MooseMesh::getPCoarseningSideMap(const Elem & elem) const
 {
   return getPCoarseningMapHelper(elem, _elem_type_to_p_coarsening_side_map);
 }
+
+bool
+MooseMesh::skipNoncriticalPartitioning() const
+{
+  return _mesh->skip_noncritical_partitioning();
+}
