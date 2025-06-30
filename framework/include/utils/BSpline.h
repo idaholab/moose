@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+// Reference for B-Spline: https://mat.fsv.cvut.cz/gcg/sbornik/prochazkova.pdf
+
 #pragma once
 
 #include <vector>

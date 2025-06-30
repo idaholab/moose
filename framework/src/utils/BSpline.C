@@ -27,7 +27,7 @@ BSpline::BSpline(const unsigned int degree, const std::vector<libMesh::Point> & 
 libMesh::Point
 BSpline::getPoint(const libMesh::Real t) const
 {
-  mooseAssert((t>=0) && (t <= 1), "t should be in [0, 1]. t=" + std::to_string(t));
+  mooseAssert((t >= 0) && (t <= 1), "t should be in [0, 1]. t=" + std::to_string(t));
   libMesh::Point returnPoint(0, 0, 0);
   for (const auto i : index_range(_control_points))
     returnPoint += BSpline::CdBBasis(t, i, _degree) * _control_points[i];
@@ -47,7 +47,8 @@ BSpline::buildKnotVector() const
     mooseError("Number of control points must be greater than or equal to degree + 1!");
 
   std::vector<libMesh::Real> knot_vector(_degree, 0); // initialize bottom to zeros
-  for (const auto i : make_range(num_points_left))
+
+  for (const auto i : make_range(num_points_left + 1))
   {
     knot_vector.push_back(i); // count up
     mooseAssert(i < _control_points.size(),
@@ -75,8 +76,7 @@ BSpline::buildKnotVector() const
 libMesh::Real
 BSpline::CdBBasis(const libMesh::Real & t, const unsigned int i, const unsigned int j) const
 {
-  mooseAssert(j >= 0, "j (polynomial degree) must be positive.");
-  mooseAssert(i < knot_vector.size() - 1, "knot index must stay within bounds");
+  mooseAssert(i < _knot_vector.size() - 1, "knot index must stay within bounds");
   if (j == 0)
   {
     libMesh::Real basis_return =
