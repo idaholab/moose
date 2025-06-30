@@ -36,7 +36,9 @@ MFEMCurlAux::MFEMCurlAux(const InputParameters & parameters)
 void
 MFEMCurlAux::execute()
 {
-  update();
+  // ask MFEMProblem if the mesh has changed recently
+  if (getMFEMProblem().getMeshChanged())
+    update();
 
   _result_var = 0.0;
   _curl.AddMult(_source_var, _result_var, _scale_factor);

@@ -493,6 +493,35 @@ MFEMProblem::getMeshDisplacementGridFunction()
   }
 }
 
+void
+MFEMProblem::updateAfterRefinement()
+{
+  setMeshChanged(true);
+
+  updateFESpaces();
+
+  if ( _problem_data.pmesh->Nonconforming() )
+  {
+    _problem_data.pmesh->Rebalance();
+    // Update FESpaces again to account for rebalancing
+    updateFESpaces();
+  }
+}
+
+void
+MFEMProblem::updateFESpaces()
+{
+  for (const auto & fe_space_pair : _problem_data.fespaces)
+  {
+    fe_space_pair.second->Update();
+  }
+  for (const auto & gridfunction_pair : _problem_data.gridfunctions)
+  {
+    gridfunction_pair.second->Update();
+  }
+  _problem_data.eqn_system->UpdateEquationSystem();
+}
+
 std::vector<VariableName>
 MFEMProblem::getAuxVariableNames()
 {

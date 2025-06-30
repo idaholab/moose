@@ -52,48 +52,6 @@ ProblemOperatorInterface::SetTrialVariablesFromTrueVectors()
   }
 }
 
-void
-ProblemOperatorInterface::UpdateAfterRefinement()
-{
-  // Update the FE spaces
-  UpdateFESpaces();
-
-  if ( _problem.pmesh->Nonconforming() )
-  {
-    _problem.pmesh->Rebalance();
-    // Update FESpaces again to account for rebalancing
-    UpdateFESpaces();
-  }
-
-  // Reset the grid functions
-  SetGridFunctions();
-}
-
-void
-ProblemOperatorInterface::UniformRefinement(int num_refinements)
-{
-  // Uniformly refine the mesh
-  for (int i=0; i<num_refinements; i++)
-  {
-    _problem.pmesh->UniformRefinement();
-    UpdateAfterRefinement();
-  }
-}
-
-void
-ProblemOperatorInterface::UpdateFESpaces()
-{
-  for (const auto & fe_space_pair : _problem.fespaces)
-  {
-    fe_space_pair.second->Update();
-  }
-  for (const auto & gridfunction_pair : _problem.gridfunctions)
-  {
-    gridfunction_pair.second->Update();
-  }
-  _problem.eqn_system->UpdateEquationSystem();
-}
-
 int
 ProblemOperatorInterface::GetProblemSize()
 {

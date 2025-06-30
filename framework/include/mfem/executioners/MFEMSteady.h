@@ -16,6 +16,9 @@ public:
   virtual void execute() override;
 
   virtual bool addEstimator( std::shared_ptr<MFEMEstimator> ) override;
+  virtual bool PRefine() override;
+  virtual bool HRefine() override;
+  virtual void UpdateAfterRefinement() override;
 
 protected:
   // Time variables used for consistency with MOOSE, needed for outputs.

@@ -36,8 +36,9 @@ MFEMGradAux::MFEMGradAux(const InputParameters & parameters)
 void
 MFEMGradAux::execute()
 {
-  // TODO: should be called from outside
-  update();
+  // ask MFEMProblem if the mesh has changed recently
+  if (getMFEMProblem().getMeshChanged())
+    update();
 
   _result_var = 0.0;
   _grad.AddMult(_source_var, _result_var, _scale_factor);

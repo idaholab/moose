@@ -35,6 +35,8 @@ public:
   MPI_Comm comm;
   int myid;
   int num_procs;
+
+  bool _mesh_changed{false};
 };
 
 #endif

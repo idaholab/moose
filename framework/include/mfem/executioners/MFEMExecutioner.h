@@ -22,6 +22,11 @@ public:
   // Executioners should not support estimators by default
   virtual bool addEstimator( std::shared_ptr<MFEMEstimator> ) { return false; }
 
+  // Return false if it's time to stop
+  virtual bool PRefine() {return false;};
+  virtual bool HRefine() {return false;};
+  virtual void UpdateAfterRefinement() {};
+
   /**
    * Set the device to use to solve the FE problem.
    */

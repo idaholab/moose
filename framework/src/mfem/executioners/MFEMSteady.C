@@ -83,7 +83,7 @@ MFEMSteady::execute()
     if ( _use_amr )
     {
       // p-refine
-      _problem_operator->PRefine();
+      PRefine();
       _problem_operator->Solve(_problem_data.f);
     }
 
@@ -99,6 +99,8 @@ MFEMSteady::execute()
   _time = _time_step;
   // Execute user objects at timestep end
   _mfem_problem.execute(EXEC_TIMESTEP_END);
+  _mfem_problem.setMeshChanged(false);
+
   _mfem_problem.outputStep(EXEC_TIMESTEP_END);
   _time = _system_time;
 
@@ -130,6 +132,38 @@ MFEMSteady::addEstimator( std::shared_ptr<MFEMEstimator> estimator )
     return false;
   }
 }
+
+bool
+MFEMSteady::PRefine()
+{
+  // Call PRefine in the problem operator
+  bool output = _problem_operator->PRefine();
+
+  UpdateAfterRefinement();
+
+  return output;
+}
+
+bool
+MFEMSteady::HRefine()
+{
+  // Call PRefine in the problem operator
+  bool output = _problem_operator->HRefine();
+
+  UpdateAfterRefinement();
+
+  return output;
+}
+
+void 
+MFEMSteady::UpdateAfterRefinement()
+{
+  // Update in the mfem problem
+  _mfem_problem.updateAfterRefinement();
+
+  _problem_operator->SetGridFunctions();
+}
+
 
 
 #endif

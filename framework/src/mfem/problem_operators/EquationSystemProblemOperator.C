@@ -51,9 +51,6 @@ EquationSystemProblemOperator::HRefine()
     _refiner->Apply(*_problem.pmesh);
 
     output = _refiner->Stop();
-
-    // update after refinement as well; previously this was done in the executioner
-    UpdateAfterRefinement();
   }
   return output;
 }
@@ -79,7 +76,6 @@ EquationSystemProblemOperator::PRefine()
     }
 
     _estimator->getFESpace()->PRefineAndUpdate(prefinements);
-    UpdateAfterRefinement();
   }
   return output;
 }
