@@ -78,7 +78,6 @@ BSpline::buildKnotVector() const
 Real
 BSpline::CdBBasis(const Real & t, const unsigned int i, const unsigned int j) const
 {
-  mooseAssert(j >= 0, "j (polynomial degree) must be positive.");
   mooseAssert(i < _knot_vector.size() - 1, "knot index must stay within bounds");
   if (j == 0)
   {
