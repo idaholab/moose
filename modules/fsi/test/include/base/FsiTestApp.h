@@ -16,7 +16,7 @@ class FsiTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  FsiTestApp(InputParameters parameters);
+  FsiTestApp(const InputParameters & parameters);
   virtual ~FsiTestApp();
 
   static void registerApps();

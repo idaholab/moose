@@ -24,7 +24,8 @@ VerificationTutorialApp::validParams()
   return params;
 }
 
-VerificationTutorialApp::VerificationTutorialApp(InputParameters parameters) : MooseApp(parameters)
+VerificationTutorialApp::VerificationTutorialApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   VerificationTutorialApp::registerAll(_factory, _action_factory, _syntax);
 }

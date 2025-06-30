@@ -23,7 +23,7 @@ ReactorTestApp::validParams()
   return params;
 }
 
-ReactorTestApp::ReactorTestApp(InputParameters parameters) : MooseApp(parameters)
+ReactorTestApp::ReactorTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   ReactorTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

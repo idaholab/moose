@@ -24,7 +24,7 @@ BabblerApp::validParams()
   return params;
 }
 
-BabblerApp::BabblerApp(InputParameters parameters) : MooseApp(parameters)
+BabblerApp::BabblerApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   BabblerApp::registerAll(_factory, _action_factory, _syntax);
 }

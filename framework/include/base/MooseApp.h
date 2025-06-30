@@ -1139,7 +1139,7 @@ protected:
                                   bool load_dependencies = true);
 
   /// Constructor is protected so that this object is constructed through the AppFactory object
-  MooseApp(InputParameters parameters);
+  MooseApp(const InputParameters & parameters);
 
   /**
    * NOTE: This is an internal function meant for MOOSE use only!

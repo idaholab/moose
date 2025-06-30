@@ -24,7 +24,7 @@ PhaseFieldTestApp::validParams()
 
 registerKnownLabel("PhaseFieldTestApp");
 
-PhaseFieldTestApp::PhaseFieldTestApp(InputParameters parameters) : MooseApp(parameters)
+PhaseFieldTestApp::PhaseFieldTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   PhaseFieldTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -48,23 +48,6 @@ PhaseFieldTestApp::registerApps()
 {
   PhaseFieldApp::registerApps();
   registerApp(PhaseFieldTestApp);
-}
-
-void
-PhaseFieldTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"PhaseFieldTestApp"});
-}
-
-void
-PhaseFieldTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"PhaseFieldTestApp"});
-}
-
-void
-PhaseFieldTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

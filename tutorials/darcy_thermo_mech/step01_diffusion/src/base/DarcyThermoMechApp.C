@@ -27,7 +27,7 @@ DarcyThermoMechApp::validParams()
   return params;
 }
 
-DarcyThermoMechApp::DarcyThermoMechApp(InputParameters parameters) : MooseApp(parameters)
+DarcyThermoMechApp::DarcyThermoMechApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   DarcyThermoMechApp::registerAll(_factory, _action_factory, _syntax);
 }

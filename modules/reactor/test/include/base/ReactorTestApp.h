@@ -16,7 +16,7 @@ class ReactorTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  ReactorTestApp(InputParameters parameters);
+  ReactorTestApp(const InputParameters & parameters);
   virtual ~ReactorTestApp();
 
   static void registerApps();

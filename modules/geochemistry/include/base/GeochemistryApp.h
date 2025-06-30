@@ -16,7 +16,7 @@ class GeochemistryApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  GeochemistryApp(InputParameters parameters);
+  GeochemistryApp(const InputParameters & parameters);
   virtual ~GeochemistryApp();
 
   static void registerApps();

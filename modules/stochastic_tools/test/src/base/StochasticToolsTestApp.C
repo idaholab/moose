@@ -22,7 +22,8 @@ StochasticToolsTestApp::validParams()
 
 registerKnownLabel("StochasticToolsTestApp");
 
-StochasticToolsTestApp::StochasticToolsTestApp(InputParameters parameters) : MooseApp(parameters)
+StochasticToolsTestApp::StochasticToolsTestApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   StochasticToolsTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -46,23 +47,6 @@ StochasticToolsTestApp::registerApps()
 {
   StochasticToolsApp::registerApps();
   registerApp(StochasticToolsTestApp);
-}
-
-void
-StochasticToolsTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"StochasticToolsTestApp"});
-}
-
-void
-StochasticToolsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"StochasticToolsTestApp"});
-}
-
-void
-StochasticToolsTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

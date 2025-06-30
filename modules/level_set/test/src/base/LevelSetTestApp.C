@@ -22,7 +22,7 @@ LevelSetTestApp::validParams()
 
 registerKnownLabel("LevelSetTestApp");
 
-LevelSetTestApp::LevelSetTestApp(InputParameters parameters) : MooseApp(parameters)
+LevelSetTestApp::LevelSetTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   srand(processor_id());
   LevelSetTestApp::registerAll(
@@ -47,23 +47,6 @@ LevelSetTestApp::registerApps()
 {
   LevelSetApp::registerApps();
   registerApp(LevelSetTestApp);
-}
-
-void
-LevelSetTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"LevelSetTestApp"});
-}
-
-void
-LevelSetTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"LevelSetTestApp"});
-}
-
-void
-LevelSetTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

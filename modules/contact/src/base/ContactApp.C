@@ -34,9 +34,12 @@ ContactApp::ContactApp(const InputParameters & parameters) : MooseApp(parameters
 
 ContactApp::~ContactApp() {}
 
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
+void
+ContactApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
+  Registry::registerObjectsTo(f, {"ContactApp"});
+  Registry::registerActionsTo(af, {"ContactApp"});
+
   registerSyntax("ContactAction", "Contact/*");
   registerSyntax("ExplicitDynamicsContactAction", "ExplicitDynamicsContact/*");
 
@@ -46,16 +49,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   syntax.addDependency("add_postprocessor", "output_penetration_info_vars");
   syntax.addDependency("add_contact_aux_variable", "add_variable");
   syntax.addDependency("setup_variable_complete", "add_contact_aux_variable");
-}
 
-void
-ContactApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
-{
-  Registry::registerObjectsTo(f, {"ContactApp"});
-  Registry::registerActionsTo(af, {"ContactApp"});
-  associateSyntaxInner(s, af);
-
-  SolidMechanicsApp::registerAll(f, af, s);
+  SolidMechanicsApp::registerAll(f, af, syntax);
 }
 
 void
@@ -64,35 +59,6 @@ ContactApp::registerApps()
   registerApp(ContactApp);
 
   SolidMechanicsApp::registerApps();
-}
-
-void
-ContactApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"ContactApp"});
-}
-
-void
-ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"ContactApp"});
-  associateSyntaxInner(syntax, action_factory);
-}
-
-void
-ContactApp::registerObjectDepends(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjectsDepends");
-  SolidMechanicsApp::registerObjects(factory);
-}
-
-void
-ContactApp::associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjectsDepends");
-  SolidMechanicsApp::associateSyntax(syntax, action_factory);
 }
 
 extern "C" void

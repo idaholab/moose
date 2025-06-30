@@ -16,7 +16,7 @@ class StorkTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  StorkTestApp(InputParameters parameters);
+  StorkTestApp(const InputParameters & parameters);
   virtual ~StorkTestApp();
 
   static void registerApps();

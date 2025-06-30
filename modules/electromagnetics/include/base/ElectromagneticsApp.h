@@ -16,12 +16,9 @@ class ElectromagneticsApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  ElectromagneticsApp(InputParameters parameters);
+  ElectromagneticsApp(const InputParameters & parameters);
   virtual ~ElectromagneticsApp();
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-  static void registerObjects(Factory & factory);
-  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
-  static void registerExecFlags(Factory & factory);
 };

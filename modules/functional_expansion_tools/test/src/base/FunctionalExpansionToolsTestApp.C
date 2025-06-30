@@ -23,7 +23,7 @@ FunctionalExpansionToolsTestApp::validParams()
 
 registerKnownLabel("FunctionalExpansionToolsTestApp");
 
-FunctionalExpansionToolsTestApp::FunctionalExpansionToolsTestApp(InputParameters parameters)
+FunctionalExpansionToolsTestApp::FunctionalExpansionToolsTestApp(const InputParameters & parameters)
   : MooseApp(parameters)
 {
   FunctionalExpansionToolsTestApp::registerAll(
@@ -51,19 +51,6 @@ FunctionalExpansionToolsTestApp::registerApps()
 {
   FunctionalExpansionToolsApp::registerApps();
   registerApp(FunctionalExpansionToolsTestApp);
-}
-
-void
-FunctionalExpansionToolsTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"FunctionalExpansionToolsTestApp"});
-}
-
-void
-FunctionalExpansionToolsTestApp::associateSyntax(Syntax & /*syntax*/,
-                                                 ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"FunctionalExpansionToolsTestApp"});
 }
 
 extern "C" void

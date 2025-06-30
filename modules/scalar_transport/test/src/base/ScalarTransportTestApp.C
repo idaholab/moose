@@ -20,7 +20,7 @@ ScalarTransportTestApp::validParams()
   return params;
 }
 
-ScalarTransportTestApp::ScalarTransportTestApp(InputParameters parameters)
+ScalarTransportTestApp::ScalarTransportTestApp(const InputParameters & parameters)
   : ScalarTransportApp(parameters)
 {
   ScalarTransportTestApp::registerAll(
