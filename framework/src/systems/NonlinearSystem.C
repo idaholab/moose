@@ -316,7 +316,7 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
   LibmeshPetscCallA(_communicator.get(), MatFDColoringSetFromOptions(_fdcoloring));
   // clang-format off
   LibmeshPetscCallA(_communicator.get(), MatFDColoringSetFunction(_fdcoloring,
-                                                                  (PetscErrorCode(*)(void))(void (*)(void)) &
+                                                                  (MatFDColoringFn *)(void (*)(void)) &
                                                                       libMesh::libmesh_petsc_snes_fd_residual,
                                                                   &petsc_nonlinear_solver));
   // clang-format on
