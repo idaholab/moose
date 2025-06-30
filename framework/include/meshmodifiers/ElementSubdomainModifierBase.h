@@ -23,12 +23,6 @@ enum class ICStrategy
   IC_POLYNOMIAL_THRESHOLD = 3
 };
 
-struct NeighborInfo
-{
-  std::vector<Real> solution_values;
-  std::vector<Real> distances;
-};
-
 /**
  * Base class for mesh modifiers modifying element subdomains
  */
@@ -171,11 +165,6 @@ private:
   /// The strategy used to apply IC on newly activated nodes
   std::vector<ICStrategy> _ic_strategy;
 
-  /// Unsolved block names
-  std::vector<SubdomainName> _unsolved_blocks;
-  /// Unsolved block IDs
-  std::set<SubdomainID> _unsolved_block_ids;
-
   /// @brief Names of the NodalPatchRecoveryBase user objects
   const std::vector<UserObjectName> _npr_names;
 
@@ -201,10 +190,6 @@ private:
   /// Global collection of all newly activated node IDs, gathered across all processors.
   /// This set is independent of processor ownership and ensures consistency in parallel runs.
   std::vector<dof_id_type> _complete_reinitialized_nodes;
-
-  /// Indicates whether each node has had its initial condition (IC) applied.
-  /// true = IC already set; false = IC not yet set.
-  std::unordered_map<dof_id_type, bool> _node2IC_set;
 
   /// IC_POLYNOMIAL_THRESHOLD related parameters
   /// @brief Threshold for checking the closeness of element numbers in polynomial extrapolation
