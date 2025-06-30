@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 
 #include "AppFactory.h"
+#include "CommandLine.h"
 
 TEST(AppFactoryTest, manageAppParams)
 {
@@ -86,4 +87,76 @@ TEST(AppFactoryTest, manageAppParams)
           << msg;
     }
   }
+}
+
+class CopyConstructParamsApp : public MooseApp
+{
+public:
+  CopyConstructParamsApp(InputParameters parameters);
+
+  static InputParameters validParams();
+  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+};
+
+InputParameters
+CopyConstructParamsApp::validParams()
+{
+  return MooseApp::validParams();
+}
+
+CopyConstructParamsApp::CopyConstructParamsApp(InputParameters parameters) : MooseApp(parameters)
+{
+  CopyConstructParamsApp::registerAll(_factory, _action_factory, _syntax);
+}
+
+void
+CopyConstructParamsApp::registerAll(Factory & f, ActionFactory &, Syntax &)
+{
+  Registry::registerObjectsTo(f, {"CopyConstructParamsApp"});
+}
+
+TEST(AppFactoryTest, appCopyConstructParams)
+{
+  const std::string app_type = "CopyConstructParamsApp";
+
+  auto & af = AppFactory::instance();
+  af.reg<CopyConstructParamsApp>(app_type);
+  auto params = af.getValidParams(app_type);
+
+  auto command_line = std::make_shared<CommandLine>();
+  command_line->addArguments({"exe", "--disable-perf-graph-live"});
+  command_line->parse();
+  params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
+
+  params.set<std::shared_ptr<Parser>>("_parser") =
+      std::make_shared<Parser>(std::vector<std::string>());
+
+  const auto deprecated_is_error = Moose::_deprecated_is_error;
+  Moose::_deprecated_is_error = true;
+
+  EXPECT_THROW(
+      {
+        try
+        {
+          af.createShared(app_type, "test", params, MPI_COMM_WORLD);
+        }
+        catch (const std::exception & e)
+        {
+          EXPECT_NE(std::string(e.what()).rfind(
+                        "CopyConstructParamsApp copy-constructs its input parameters"),
+                    std::string::npos)
+              << e.what();
+          throw;
+        }
+      },
+      std::exception);
+
+  Moose::_deprecated_is_error = deprecated_is_error;
+
+  const auto it = af._name_to_build_info.find(app_type);
+  EXPECT_NE(it, af._name_to_build_info.end());
+  af._name_to_build_info.erase(it);
+
+  EXPECT_EQ(af._input_parameters.size(), 1);
+  af._input_parameters.clear();
 }
