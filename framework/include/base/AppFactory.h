@@ -14,6 +14,11 @@
 #include "MooseApp.h"
 #include "Capabilities.h"
 
+#ifdef MOOSE_UNIT_TEST
+#include "gtest/gtest.h"
+class GTEST_TEST_CLASS_NAME_(AppFactoryTest, manageAppParams);
+#endif
+
 // Forward declarations
 class InputParameters;
 
@@ -96,6 +101,37 @@ public:
   InputParameters getValidParams(const std::string & name);
 
   /**
+   * @return The parameters for the application named \p name
+   *
+   * This is needed because we poorly decided to not pass references
+   * of the InputParameters in all derived MooseApp objects. This enables
+   * the MooseApp to get the copy of the parameters that it was actually
+   * built with using this factory.
+   */
+  const InputParameters & getAppParams(const InputParameters & params) const;
+
+  /**
+   * Class that is used as a parameter to clearAppParams() that allows only
+   * MooseApp to call clearAppParams().
+   */
+  class ClearAppParamsKey
+  {
+    friend class MooseApp;
+#ifdef MOOSE_UNIT_TEST
+    FRIEND_TEST(::AppFactoryTest, manageAppParams);
+#endif
+    ClearAppParamsKey() {}
+    ClearAppParamsKey(const ClearAppParamsKey &) {}
+  };
+
+  /**
+   * Clears the stored parameters for the given application parameteres
+   *
+   * See getAppParams() for why this is needed.
+   */
+  void clearAppParams(const InputParameters & params, const ClearAppParamsKey);
+
+  /**
    * Build an application object (must be registered)
    * @param app_type Type of the application being constructed
    * @param name Name for the object
@@ -145,6 +181,33 @@ protected:
 private:
   // Private constructor for singleton pattern
   AppFactory() {}
+
+  /**
+   * Stores the given parameters within _input_parameters for app construction
+   *
+   * Also calls finalize() on the parameters.
+   */
+  const InputParameters & storeAppParams(InputParameters & params);
+
+  /**
+   * Get the ID for the InputParameters associated with an application, used
+   * in storing them in _input_parameters.
+   *
+   * This is needed until app constructors do not copy construct parameters.
+   * See getAppParams() for more information.
+   *
+   * The parameters passed in here (from the app) could be copy-constructed
+   * parameters, but will contain a "_app_params_id" parameter that allows
+   * us to get the actual parameters (owned by this factory).
+   */
+  std::size_t getAppParamsID(const InputParameters & params) const;
+
+#ifdef MOOSE_UNIT_TEST
+  FRIEND_TEST(::AppFactoryTest, manageAppParams);
+#endif
+
+  /// Storage of input parameters used in applications (ID (from getAppParamsID()) -> params)
+  std::map<std::size_t, std::unique_ptr<InputParameters>> _input_parameters;
 };
 
 template <typename T>
