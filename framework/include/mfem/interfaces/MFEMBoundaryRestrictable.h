@@ -36,7 +36,7 @@ public:
   }
 
   const mfem::ParMesh & getMesh() { return _mfem_mesh; }
-  mfem::Array<int> & getBoundaryAttributes() { return _boundary_attributes; }
+  const mfem::Array<int> & getBoundaryAttributes() { return _boundary_attributes; }
   mfem::Array<int> & getBoundaryMarkers() { return _boundary_markers; }
 
 protected:

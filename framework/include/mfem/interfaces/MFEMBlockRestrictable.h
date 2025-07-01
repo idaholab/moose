@@ -33,7 +33,7 @@ public:
   /// Returns a bool indicating if the object is restricted to a subset of subdomains.
   bool isSubdomainRestricted() { return _subdomain_names.size(); }
 
-  mfem::Array<int> & getSubdomainAttributes() { return _subdomain_attributes; }
+  const mfem::Array<int> & getSubdomainAttributes() { return _subdomain_attributes; }
   mfem::Array<int> & getSubdomainMarkers() { return _subdomain_markers; }
   const mfem::ParMesh & getMesh() const { return _mfem_mesh; }
 
