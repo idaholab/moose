@@ -69,7 +69,7 @@ T_ambient = 300.0
 
 [Convergence]
   [fp_conv]
-    type = DefaultFixedPointConvergence
+    type = DefaultMultiAppFixedPointConvergence
   []
 []
 

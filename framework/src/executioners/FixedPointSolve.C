@@ -320,7 +320,7 @@ FixedPointSolve::solve()
 
         if (break_out)
         {
-          // Except DefaultFixedPointConvergence, convergence objects will not
+          // Except DefaultMultiAppFixedPointConvergence, convergence objects will not
           // update _fixed_point_status, so we give those cases generic values:
           if (_fixed_point_status == MooseFixedPointConvergenceReason::CONVERGED_NONLINEAR)
           {

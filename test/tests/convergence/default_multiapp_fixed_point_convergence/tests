@@ -1,5 +1,5 @@
 [Tests]
-  design = 'DefaultFixedPointConvergence.md'
+  design = 'DefaultMultiAppFixedPointConvergence.md'
   issues = '#30784'
 
   [residual]

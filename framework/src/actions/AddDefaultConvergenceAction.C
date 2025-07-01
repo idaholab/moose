@@ -13,7 +13,7 @@
 #include "FEProblemSolve.h"
 #include "FixedPointSolve.h"
 #include "DefaultNonlinearConvergence.h"
-#include "DefaultFixedPointConvergence.h"
+#include "DefaultMultiAppFixedPointConvergence.h"
 
 registerMooseAction("MooseApp", AddDefaultConvergenceAction, "add_default_nonlinear_convergence");
 registerMooseAction("MooseApp",
@@ -147,12 +147,12 @@ AddDefaultConvergenceAction::checkUnusedMultiAppFixedPointConvergenceParameters(
   if (!_problem->hasConvergence(conv_name))
     return;
 
-  // If the convergence is a DefaultFixedPointConvergence they can handle the Executioner
+  // If the convergence is a DefaultMultiAppFixedPointConvergence they can handle the Executioner
   // parameters pertaining to the fixed point solve
   auto & conv = _problem->getConvergence(conv_name);
-  auto * default_conv = dynamic_cast<DefaultFixedPointConvergence *>(&conv);
+  auto * default_conv = dynamic_cast<DefaultMultiAppFixedPointConvergence *>(&conv);
 
-  // Only Convergence objects deriving from DefaultFixedPointConvergence should
+  // Only Convergence objects deriving from DefaultMultiAppFixedPointConvergence should
   // share parameters with the executioner
   if (!default_conv)
   {

@@ -1,4 +1,4 @@
-# DefaultFixedPointConvergence
+# DefaultMultiAppFixedPointConvergence
 
 This [Convergence](Convergence/index.md) is the default convergence for fixed point solves,
 using a combination of criteria to determine convergence.
@@ -34,9 +34,9 @@ where
 - $\|\mathbf{r}\|^\text{end}_\ell$ is the `TIMESTEP_END` norm for iteration $\ell$.
 - $\|\mathbf{r}\|^\text{init}$ is the `MULTIAPP_FIXED_POINT_BEGIN` norm.
 - $\tau_\text{abs}$ is the absolute residual tolerance, provided by
-  [!param](/Convergence/DefaultFixedPointConvergence/fixed_point_abs_tol).
+  [!param](/Convergence/DefaultMultiAppFixedPointConvergence/fixed_point_abs_tol).
 - $\tau_\text{rel}$ is the relative residual tolerance, provided by
-  [!param](/Convergence/DefaultFixedPointConvergence/fixed_point_rel_tol).
+  [!param](/Convergence/DefaultMultiAppFixedPointConvergence/fixed_point_rel_tol).
 
 ## Post-processor Checks
 
@@ -51,9 +51,9 @@ For the post-processor checks, activated by specifying [!param](/Executioner/Ste
 where
 
 - $\tau^\text{pp}_\text{abs}$ is the absolute post-processor tolerance., provided by
-  [!param](/Convergence/DefaultFixedPointConvergence/custom_abs_tol).
+  [!param](/Convergence/DefaultMultiAppFixedPointConvergence/custom_abs_tol).
 - $\tau^\text{pp}_\text{rel}$ is the relative post-processor tolerance., provided by
-  [!param](/Convergence/DefaultFixedPointConvergence/custom_rel_tol).
+  [!param](/Convergence/DefaultMultiAppFixedPointConvergence/custom_rel_tol).
 
 If [!param](/Executioner/Steady/direct_pp_value) is set to `false`, convergence is declared if either of the following are true:
 
@@ -63,8 +63,8 @@ If [!param](/Executioner/Steady/direct_pp_value) is set to `false`, convergence 
 !equation
 \left|\frac{y_\ell - y_{\ell-1}}{y_\ell}\right| < \tau^\text{pp}_\text{rel} \,.
 
-!syntax parameters /Convergence/DefaultFixedPointConvergence
+!syntax parameters /Convergence/DefaultMultiAppFixedPointConvergence
 
-!syntax inputs /Convergence/DefaultFixedPointConvergence
+!syntax inputs /Convergence/DefaultMultiAppFixedPointConvergence
 
-!syntax children /Convergence/DefaultFixedPointConvergence
+!syntax children /Convergence/DefaultMultiAppFixedPointConvergence
