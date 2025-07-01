@@ -408,7 +408,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
-    _set_fixed_point_convergence_name(false),
     _need_to_add_default_nonlinear_convergence(false),
     _need_to_add_default_fixed_point_convergence(false),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
@@ -9038,7 +9037,6 @@ void
 FEProblemBase::setFixedPointConvergenceName(const ConvergenceName & convergence_name)
 {
   _fixed_point_convergence_name = convergence_name;
-  _set_fixed_point_convergence_name = true;
 }
 
 const std::vector<ConvergenceName> &
@@ -9076,8 +9074,8 @@ FEProblemBase::getLinearConvergenceNames() const
 ConvergenceName
 FEProblemBase::getFixedPointConvergenceName() const
 {
-  if (_set_fixed_point_convergence_name)
-    return _fixed_point_convergence_name;
+  if (_fixed_point_convergence_name)
+    return _fixed_point_convergence_name.value();
   else
     mooseError("The fixed point convergence name has not been set.");
 }
