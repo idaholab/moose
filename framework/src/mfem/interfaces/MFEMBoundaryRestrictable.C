@@ -31,6 +31,7 @@ MFEMBoundaryRestrictable::MFEMBoundaryRestrictable(const InputParameters & param
     _boundary_attributes(_boundary_names.size())
 {
   _boundary_attributes = boundariesToAttributes(_boundary_names);
+  if (_boundary_names.size())
   mfem::common::AttrToMarker(
       _mfem_mesh.bdr_attributes.Max(), _boundary_attributes, _boundary_markers);
 }
