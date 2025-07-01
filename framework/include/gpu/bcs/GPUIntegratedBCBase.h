@@ -19,6 +19,9 @@ namespace Moose
 namespace Kokkos
 {
 
+/**
+ * The base class for Kokkos integrated boundary conditions
+ */
 class IntegratedBCBase : public BoundaryCondition,
                          public CoupleableMooseVariableDependencyIntermediateInterface,
                          public MaterialPropertyInterface
@@ -26,7 +29,14 @@ class IntegratedBCBase : public BoundaryCondition,
 public:
   static InputParameters validParams();
 
+  /**
+   * Constructor
+   * @param field_type The MOOSE variable field type
+   */
   IntegratedBCBase(const InputParameters & parameters, Moose::VarFieldType field_type);
+  /**
+   * Copy constructor for parallel dispatch
+   */
   IntegratedBCBase(const IntegratedBCBase & object);
 };
 

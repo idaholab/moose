@@ -20,6 +20,9 @@ namespace Moose
 namespace Kokkos
 {
 
+/**
+ * The base class for Kokkos kernels
+ */
 class KernelBase : public ResidualObject,
                    public BlockRestrictable,
                    public CoupleableMooseVariableDependencyIntermediateInterface,
@@ -28,14 +31,25 @@ class KernelBase : public ResidualObject,
 public:
   static InputParameters validParams();
 
+  /**
+   * Constructor
+   * @param field_type The MOOSE variable field type
+   */
   KernelBase(const InputParameters & parameters, Moose::VarFieldType field_type);
+  /**
+   * Copy constructor for parallel dispatch
+   */
   KernelBase(const KernelBase & object);
 
 protected:
-  // Sets the variables this object depend on
+  /**
+   * Set the variables this object depend on to the Kokkos systems
+   */
   void setVariableDependency();
-  // Sets the quadrature cache status flags for the variables, tags, and subdomains covered by
-  // this object
+  /**
+   * Set the quadrature cache status flags for the variables, tags, and subdomains covered by this
+   * object to the Kokkos systems
+   */
   void setCacheFlags();
 };
 
