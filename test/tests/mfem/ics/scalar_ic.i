@@ -52,12 +52,6 @@
   []
 []
 
-[Preconditioner]
-  [boomeramg]
-    type = MFEMHypreBoomerAMG
-  []
-[]
-
 [Executioner]
   type = MFEMSteady
   device = cpu
