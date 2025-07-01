@@ -164,19 +164,23 @@ AddVariableAction::act()
   init();
 
   // Get necessary data for creating a variable
-  std::string var_name = name();
+  const auto var_name = varName();
   addVariable(var_name);
 
   // Set the initial condition
-  auto value = _pars.get<std::vector<Real>>("initial_condition");
   if (_pars.isParamValid("initial_condition"))
-    createInitialConditionAction(var_name, value);
+  {
+    const auto value = _pars.get<std::vector<Real>>("initial_condition");
+    createInitialConditionAction(value);
+  }
 }
 
 void
-AddVariableAction::createInitialConditionAction(const std::string var_name,
-                                                const std::vector<Real> & value)
+AddVariableAction::createInitialConditionAction(const std::vector<Real> & value)
 {
+  // Variable name
+  const auto var_name = varName();
+
   // Create the object name
   std::string long_name("");
   long_name += var_name;
