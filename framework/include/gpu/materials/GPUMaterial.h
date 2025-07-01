@@ -81,7 +81,7 @@ public:
           ::Kokkos::RangePolicy<ElementInit, ::Kokkos::IndexType<size_t>>(0, numElements()),
           *static_cast<Derived *>(this));
 
-      setProjectionFlags();
+      setCacheFlags();
     }
     else if (_bnd && !_neighbor)
       ::Kokkos::parallel_for(
@@ -104,7 +104,7 @@ public:
           ::Kokkos::RangePolicy<ElementCompute, ::Kokkos::IndexType<size_t>>(0, numElements()),
           *static_cast<Derived *>(this));
 
-      setProjectionFlags();
+      setCacheFlags();
     }
     else if (_bnd && !_neighbor)
       ::Kokkos::parallel_for(

@@ -29,26 +29,14 @@ public:
 
   // Constructor
   Kernel(const InputParameters & parameters)
-    : KernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-      _test(kokkosAssembly()),
-      _grad_test(kokkosAssembly()),
-      _phi(kokkosAssembly()),
-      _grad_phi(kokkosAssembly()),
-      _u(kokkosSystems(), _var),
-      _grad_u(kokkosSystems(), _var)
+    : KernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD), _u(_var), _grad_u(_var)
   {
     addMooseVariableDependency(&_var);
   }
 
   // Copy constructor
   Kernel(const Kernel<Derived> & object)
-    : KernelBase(object),
-      _test(object._test),
-      _grad_test(object._grad_test),
-      _phi(object._phi),
-      _grad_phi(object._grad_phi),
-      _u(object._u),
-      _grad_u(object._grad_u)
+    : KernelBase(object), _u(object._u), _grad_u(object._grad_u)
   {
   }
 
@@ -61,7 +49,7 @@ public:
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
 
-    setProjectionFlags();
+    setCacheFlags();
   }
   // Dispatch Jacobian calculation to GPU
   virtual void computeJacobian() override
@@ -75,7 +63,7 @@ public:
       ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
       ::Kokkos::fence();
 
-      setProjectionFlags();
+      setCacheFlags();
     }
 
     if (!defaultOffDiagJacobian())
@@ -173,7 +161,7 @@ public:
     }
 
     for (unsigned int i = 0; i < datum.n_dofs(); ++i)
-      accumulateTaggedLocalResidual(local_re[i], datum.elem().id, i);
+      accumulateTaggedElementalResidual(local_re[i], datum.elem().id, i);
   }
   KOKKOS_FUNCTION void
   computeJacobianInternal(const Derived * kernel, ResidualDatum & datum, Real * local_ke) const
@@ -190,7 +178,7 @@ public:
 
     for (unsigned int i = 0; i < datum.n_idofs(); ++i)
       for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-        accumulateTaggedLocalMatrix(
+        accumulateTaggedElementalMatrix(
             local_ke[i * datum.n_jdofs() + j], datum.elem().id, i, j, datum.jvar());
   }
   KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived * kernel,
@@ -209,7 +197,7 @@ public:
 
     for (unsigned int i = 0; i < datum.n_idofs(); ++i)
       for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-        accumulateTaggedLocalMatrix(
+        accumulateTaggedElementalMatrix(
             local_ke[i * datum.n_jdofs() + j], datum.elem().id, i, j, datum.jvar());
   }
 
