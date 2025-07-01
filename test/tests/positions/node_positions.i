@@ -20,10 +20,10 @@
 
 [Positions]
   [nodes]
-    type = ElementNodePositions
+    type = NodePositions
   []
   [nodes_block_1]
-    type = ElementNodePositions
+    type = NodePositions
     block = 1
   []
 []

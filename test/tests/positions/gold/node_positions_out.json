@@ -1,7 +1,7 @@
 {
   "reporters": {
       "nodes": {
-          "type": "ElementNodePositions",
+          "type": "NodePositions",
           "values": {
               "positions_1d": {
                   "type": "std::vector<libMesh::Point>"
@@ -9,7 +9,7 @@
           }
       },
       "nodes_block_1": {
-          "type": "ElementNodePositions",
+          "type": "NodePositions",
           "values": {
               "positions_1d": {
                   "type": "std::vector<libMesh::Point>"
