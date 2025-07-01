@@ -12,6 +12,7 @@
 #include "MFEMProblem.h"
 #include "MFEMInitialCondition.h"
 #include "MFEMVariable.h"
+#include "MFEMComplexVariable.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
 #include "libmesh/string_to_enum.h"
@@ -182,7 +183,9 @@ MFEMProblem::addGridFunction(const std::string & var_type,
                              const std::string & var_name,
                              InputParameters & parameters)
 {
-  if (var_type == "MFEMVariable")
+
+  std::cout << "GOT HERE" << std::endl;
+  if (var_type == "MFEMVariable" || var_type == "MFEMComplexVariable")
   {
     // Add MFEM variable directly.
     FEProblemBase::addUserObject(var_type, var_name, parameters);
@@ -198,14 +201,34 @@ MFEMProblem::addGridFunction(const std::string & var_type,
   }
 
   // Register gridfunction.
-  MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
-  getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
-  if (mfem_variable.getFESpace().isScalar())
-    getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
+  if (var_type == "MFEMComplexVariable")
+  {
+    MFEMComplexVariable & mfem_variable = getUserObject<MFEMComplexVariable>(var_name);
+    getProblemData().complex_gridfunctions.Register(var_name, mfem_variable.getComplexGridFunction());
+    if (mfem_variable.getFESpace().isScalar())
+    {
+      getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
+        var_name+"_real", &mfem_variable.getComplexGridFunction()->real());
+      getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
+        var_name+"_imag", &mfem_variable.getComplexGridFunction()->imag());
+    }
+    else
+      getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
+        var_name+"_real", &mfem_variable.getComplexGridFunction()->real());
+      getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
+        var_name+"_imag", &mfem_variable.getComplexGridFunction()->imag());
+  } 
+  else // must be real, but may have been set up indirectly from a MOOSE variable
+  {
+    MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
+    getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+    if (mfem_variable.getFESpace().isScalar())
+      getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
         var_name, mfem_variable.getGridFunction().get());
-  else
-    getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
+    else
+      getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
         var_name, mfem_variable.getGridFunction().get());
+  }
 }
 
 void
