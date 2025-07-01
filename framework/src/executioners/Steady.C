@@ -36,6 +36,8 @@ Steady::init()
   checkIntegrity();
   _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _problem.initialSetup();
+  _fixed_point_solve->initialSetup();
+  _feproblem_solve.initialSetup();
 }
 
 void

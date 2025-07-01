@@ -70,10 +70,10 @@ T_ambient = 300.0
 [Executioner]
   type = Steady
   solve_type = NEWTON
-  nl_max_its = 10
-  nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-8
-  l_tol = 1e-3
+  # nl_max_its = 10
+  # nl_abs_tol = 1e-8
+  # nl_rel_tol = 1e-8
+  # l_tol = 1e-3
 
   multiapp_fixed_point_convergence = fp_conv
 []
