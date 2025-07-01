@@ -1,4 +1,4 @@
-from TestHarness import ValidationCase
+from TestHarness.validation import ValidationCase
 
 class TestCase(ValidationCase):
     def testValidation(self):
