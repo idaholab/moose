@@ -16,6 +16,9 @@ namespace Moose
 namespace Kokkos
 {
 
+/**
+ * The base Kokkos boundary condition of a Dirichlet type
+ */
 template <typename Derived>
 class DirichletBCBase : public NodalBC<Derived>
 {
@@ -32,39 +35,44 @@ public:
     return params;
   }
 
+  /**
+   * Constructor
+   */
   DirichletBCBase(const InputParameters & parameters)
     : NodalBC<Derived>(parameters), _preset(this->template getParam<bool>("preset"))
   {
   }
 
+  /**
+   * Copy constructor for parallel dispatch
+   */
   DirichletBCBase(const DirichletBCBase<Derived> & object)
-    : NodalBC<Derived>(object), _preset(object._preset)
+    : NodalBC<Derived>(object), _preset(object._preset), _solution_tag(object._solution_tag)
   {
-    _solution_tag = object._solution_tag;
   }
 
+  /**
+   * Get whether the value is to be preset
+   * @returns Whether the value is to be preset
+   */
   virtual bool preset() const override { return _preset; }
 
-  virtual void presetSolution(TagID tag) override
-  {
-    _solution_tag = tag;
+  /**
+   * Dispatch solution vector preset
+   * @param tag The tag associated with the solution vector to be preset
+   */
+  virtual void presetSolution(TagID tag) override;
 
-    ::Kokkos::parallel_for(
-        ::Kokkos::RangePolicy<::Kokkos::IndexType<size_t>>(0, this->numBoundaryNodes()),
-        *static_cast<Derived *>(this));
-  }
+  /**
+   * The preset function called by Kokkos
+   */
+  KOKKOS_FUNCTION void operator()(const size_t tid) const;
 
-  KOKKOS_FUNCTION void operator()(const size_t tid) const
-  {
-    auto bc = static_cast<const Derived *>(this);
-    auto node = boundaryNodeID(tid);
-
-    auto & sys = kokkosSystem(_kokkos_var.sys());
-    auto dof = sys.getNodeLocalDofIndex(node, _kokkos_var.var());
-
-    sys.getVectorDofValue(dof, _solution_tag) = bc->computeValue(node);
-  }
-
+  /**
+   * Compute residual contribution on a node
+   * @param node The node ID
+   * @returns The residual contribution
+   */
   KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const
   {
     auto bc = static_cast<const Derived *>(this);
@@ -73,11 +81,39 @@ public:
   }
 
 private:
-  // Whether or not the value is to be preset
+  /**
+   * Flag whether the value is to be preset
+   */
   const bool _preset;
-  // The solution tag to be preset
+  /**
+   * Tag associated with the solution vector to be preset
+   */
   TagID _solution_tag;
 };
+
+template <typename Derived>
+void
+DirichletBCBase<Derived>::presetSolution(TagID tag)
+{
+  _solution_tag = tag;
+
+  ::Kokkos::parallel_for(
+      ::Kokkos::RangePolicy<::Kokkos::IndexType<size_t>>(0, this->numBoundaryNodes()),
+      *static_cast<Derived *>(this));
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+DirichletBCBase<Derived>::operator()(const size_t tid) const
+{
+  auto bc = static_cast<const Derived *>(this);
+  auto node = boundaryNodeID(tid);
+
+  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto dof = sys.getNodeLocalDofIndex(node, _kokkos_var.var());
+
+  sys.getVectorDofValue(dof, _solution_tag) = bc->computeValue(node);
+}
 
 } // namespace Kokkos
 } // namespace Moose

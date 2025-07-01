@@ -18,12 +18,23 @@ namespace Moose
 namespace Kokkos
 {
 
+/**
+ * The base class for Kokkos boundary conditions
+ */
 class BoundaryCondition : public ResidualObject, public BoundaryRestrictableRequired
 {
 public:
   static InputParameters validParams();
 
+  /**
+   * Constructor
+   * @param field_type The MOOSE variable field type
+   * @param nodal Whether the boundary condition is a nodal boundary condition
+   */
   BoundaryCondition(const InputParameters & parameters, Moose::VarFieldType field_type, bool nodal);
+  /**
+   * Copy constructor for parallel dispatch
+   */
   BoundaryCondition(const BoundaryCondition & object);
 };
 

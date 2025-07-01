@@ -20,6 +20,9 @@ namespace Moose
 namespace Kokkos
 {
 
+/**
+ * The base class for Kokkos nodal kernels
+ */
 class NodalKernelBase : public ResidualObject,
                         public BlockRestrictable,
                         public BoundaryRestrictable,
@@ -28,7 +31,14 @@ class NodalKernelBase : public ResidualObject,
 public:
   static InputParameters validParams();
 
+  /**
+   * Constructor
+   * @param field_type The MOOSE variable field type
+   */
   NodalKernelBase(const InputParameters & parameters, Moose::VarFieldType field_type);
+  /**
+   * Copy constructor for parallel dispatch
+   */
   NodalKernelBase(const NodalKernelBase & object);
 };
 
