@@ -18,15 +18,15 @@ The [!param](/Mesh/XYZDelaunayGenerator/boundary) input mesh can either
 include 2D surface elements or 3D volume elements whose external faces
 comprise the boundary manifold. If the [!param](/Mesh/XYZDelaunayGenerator/boundary)
 input mesh contains volume elements with non-Tri3 surface sides or
-non-Tri3 surface elements, they can be converted automatically by this
-mesh generator.
+non-Tri3 surface elements, the elements (from the entire boundary input mesh) can be converted automatically by this
+mesh generator to ensure Tri-3 surface elements.
 
 The [!param](/Mesh/XYZDelaunayGenerator/holes) input mesh can contain
 either all 3D volume elements, or all 2D surface elements.
 If one of the [!param](/Mesh/XYZDelaunayGenerator/holes)
 meshes contains non-Tri3 surface elements, or volume elements with non-Tri3
-side elements on its external surface, the non-Tri3 elements are converted
-automatically to facilitate mesh generation.
+side elements on its external surface, the elements (from the entire holes) can be converted automatically by this
+mesh generator to ensure Tri-3 surface elements.
 
 If multiple disconnected manifolds exist in a boundary mesh, only the
 manifold enclosing the rest of the mesh is considered to be "the"
