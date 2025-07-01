@@ -131,7 +131,8 @@ gtest%.$(no-method-obj-suffix) : gtest%.cc | prebuild
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(ADDITIONAL_CPPFLAGS) $(gtest_INCLUDE) $(CXXFLAGS) -w -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
-%.$(obj-suffix) : %.cc
+.SECONDEXPANSION:
+%.$(obj-suffix) : %.cc | $$(moose_config)
 	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(ADDITIONAL_CPPFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
@@ -149,7 +150,8 @@ endef
 # Instantiate Rules
 $(eval $(call CXX_RULE_TEMPLATE,))
 
-%.$(obj-suffix) : %.cpp
+.SECONDEXPANSION:
+%.$(obj-suffix) : %.cpp | $$(moose_config)
 	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(ADDITIONAL_CPPFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
@@ -315,9 +317,8 @@ endif
 #
 PLUGIN_FLAGS := -shared -fPIC -Wl,-undefined,dynamic_lookup
 
-# we add include/base so that MooseConfig.h can be found, which is absent from the symlink dirs
 %-$(METHOD).plugin : %.C
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -I $(FRAMEWORK_DIR)/include/base $< -o $@
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.c
 	@echo "Compiling C Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@

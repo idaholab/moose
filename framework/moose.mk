@@ -110,9 +110,6 @@ ifeq ($(ENABLE_LIBTORCH),true)
 	LIBTORCH_LIB := libtorch.$(lib_suffix)
 
   ifneq ($(wildcard $(LIBTORCH_DIR)/lib/$(LIBTORCH_LIB)),)
-    # Enabling parts that have pytorch dependencies
-    libmesh_CXXFLAGS += -DLIBTORCH_ENABLED
-
     # Adding the include directories, we use -isystem to silence the warning coming from
     # libtorch (which would cause errors in the testing phase)
     libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include/torch/csrc/api/include
@@ -158,9 +155,6 @@ ifeq ($(ENABLE_MFEM),true)
 	MFEM_COMMON_LIB := libmfem-common.$(lib_suffix)
 
   ifneq ($(and $(wildcard $(MFEM_DIR)/lib/$(MFEM_LIB)), $(wildcard $(MFEM_DIR)/lib/$(MFEM_COMMON_LIB))),)
-    # Enabling parts that have MFEM dependencies
-    libmesh_CXXFLAGS += -DMFEM_ENABLED
-
     # Adding the include directories
 	  include $(MFEM_DIR)/share/mfem/config.mk
 	  libmesh_CXXFLAGS += $(MFEM_INCFLAGS)
@@ -253,6 +247,8 @@ moose_default_config := $(FRAMEWORK_DIR)/include/base/MooseDefaultConfig.h
 $(moose_config): | prebuild
 	@echo "Copying default MOOSE configuration to: "$@"..."
 	@cp $(moose_default_config) $(moose_config)
+
+libmesh_CPPFLAGS += -imacros $(moose_config)
 
 #
 # header symlinks
