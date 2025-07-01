@@ -35,7 +35,7 @@ public:
 
   mfem::Array<int> & getSubdomainAttributes() { return _subdomain_attributes; }
   mfem::Array<int> & getSubdomainMarkers() { return _subdomain_markers; }
-  const mfem::ParMesh & getMesh() { return _mfem_mesh; }
+  const mfem::ParMesh & getMesh() const { return _mfem_mesh; }
 
 protected:
   /// Stores the names of the subdomains.

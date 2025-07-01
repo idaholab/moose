@@ -10,8 +10,6 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMInitialCondition.h"
-#include "MFEMProblem.h"
-#include <libmesh/libmesh_common.h>
 #include <mfem.hpp>
 
 InputParameters

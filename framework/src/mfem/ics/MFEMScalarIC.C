@@ -11,7 +11,6 @@
 
 #include "MFEMScalarIC.h"
 #include "MFEMProblem.h"
-#include <libmesh/libmesh_common.h>
 #include <mfem.hpp>
 
 registerMooseObject("MooseApp", MFEMScalarIC);
