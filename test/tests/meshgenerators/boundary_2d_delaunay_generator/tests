@@ -1,0 +1,133 @@
+[Tests]
+  design = 'meshgenerators/Boundary2DDelaunayGenerator.md'
+  issues = '#31182'
+  [mesh_gen]
+    requirement = 'The system shall have the capability of create a new 2D triangulated mesh'
+    [simple_no_refinement]
+      type = 'CSVDiff'
+      input = 'cube.i'
+      csvdiff = 'cube_nrf.csv'
+      recover = false
+      cli_args = 'Outputs/csv/file_base=cube_nrf'
+
+      detail = 'from a flat 2D boundary in a given 3D mesh without refinement'
+      mesh_mode = replicated # block to mesh conversion only supports replicated meshes
+    []
+    [simple_refinement]
+      type = 'CSVDiff'
+      input = 'cube.i'
+      csvdiff = 'cube_rf.csv'
+      recover = false
+      cli_args = 'Outputs/csv/file_base=cube_rf
+                  Mesh/b2dd/use_auto_area_func=true'
+      
+      detail = 'from a flat 2D boundary in a given 3D mesh with refinement'
+      mesh_mode = replicated # block to mesh conversion only supports replicated meshes
+    []
+    [curved_boundary]
+      type = 'CSVDiff'
+      input = 'cylinder.i'
+      csvdiff = 'curved_surf.csv'
+      override_columns = 'area'
+      override_rel_err = '0.02'
+      override_abs_zero = '1.0e-10'
+      recover = false
+      cli_args = 'Outputs/csv/file_base=curved_surf
+                  Mesh/final_generator=bd_1'
+      
+      detail = 'from a curved 2D boundary in a given 3D mesh without a reference level set'
+      mesh_mode = replicated # block to mesh conversion only supports replicated meshes
+    []
+    [curved_boundary_ls]
+      type = 'CSVDiff'
+      input = 'cylinder.i'
+      csvdiff = 'curved_surf_ls.csv'
+      override_columns = 'area'
+      override_rel_err = '0.02'
+      override_abs_zero = '1.0e-10'
+      recover = false
+      cli_args = 'Outputs/csv/file_base=curved_surf_ls
+                  Mesh/final_generator=bd_1
+                  Mesh/bd_1/level_set="x^2+y^2-1"'
+      
+      detail = 'from a curved 2D boundary in a given 3D mesh with a reference level set'
+      mesh_mode = replicated # block to mesh conversion only supports replicated meshes
+    []
+    [curved_boundary_hole]
+      type = 'CSVDiff'
+      input = 'sphere.i'
+      csvdiff = 'sphere_surf.csv'
+      override_columns = 'area'
+      override_rel_err = '0.02'
+      override_abs_zero = '1.0e-10'
+      recover = false
+      cli_args = 'Outputs/csv/file_base=sphere_surf'
+      
+      detail = 'from a curved 2D boundary in a given 3D mesh with a hole boundary in the same mesh'
+      mesh_mode = replicated # block to mesh conversion only supports replicated meshes
+    []
+    [cylinder]
+      type = 'CSVDiff'
+      input = 'cylinder.i'
+      csvdiff = 'cylinder.csv'
+      override_columns = 'area'
+      override_rel_err = '0.02'
+      override_abs_zero = '1.0e-10'
+      recover = false
+      cli_args = 'Outputs/csv/file_base=cylinder
+                  Mesh/bd_1/level_set="x^2+y^2-1"
+                  Mesh/bd_2/level_set="x^2+y^2-1"
+                  Mesh/bd_3/level_set="x^2+y^2-1"
+                  Mesh/bd_4/level_set="x^2+y^2-1"'
+
+      detail = 'from an arbitrary 2D boundary in a given 3D mesh. And the output put meshes '
+               'can be combined to be used as input for 3D Delaunay mesh generation'
+      mesh_mode = replicated # block to mesh conversion only supports replicated meshes
+    []
+  []
+  [errors]
+    requirement = 'The system shall throw an error if'
+    [distributed_mesh]
+      type = RunException
+      input = 'cube.i'
+      cli_args = '--mesh-only err.e'
+      expect_err = 'This generator does not support distributed meshes'
+      detail = 'the mesh mode is distributed'
+      mesh_mode = distributed
+    []
+    [no_bdry]
+      type = RunException
+      input = 'cube.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/b2dd/boundary_names=no'
+      expect_err = 'was not found within the mesh'
+      detail = 'the given boundary names do not exist in the input mesh'
+    []
+    [no_hole]
+      type = RunException
+      input = 'cube.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/b2dd/hole_boundary_names=no'
+      expect_err = 'was not found within the mesh'
+      detail = 'the given hole boundary names do not exist in the input mesh'
+    []
+    [large_angle_deviation]
+      type = RunException
+      input = 'sphere.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/b2dd/max_angle_deviation=10'
+      expect_err = 'deviates too much from the global average normal vector'
+      detail = 'the angle deviation of the mesh normal vector is larger than the maximum allowed'
+      mesh_mode = replicated # block to mesh conversion only supports replicated meshes
+    []
+    [wrong_level_set]
+      type = RunException
+      input = 'sphere.i'
+      cli_args = '--mesh-only err.e
+                  Mesh/b2dd/level_set="x^2+y^2-2"'
+      expect_err = 'does not match the nodes'
+      detail = 'the level set function is not consistent with the nodes of 2D surface'
+      mesh_mode = replicated # block to mesh conversion only supports replicated meshes
+    []
+  []
+[]
