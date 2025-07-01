@@ -30,7 +30,7 @@ public:
   mfem::Array<int> subdomainsToAttributes(const std::vector<SubdomainName> & subdomain_names);
   std::vector<std::string> subdomainsToStrings(const std::vector<SubdomainName> & subdomain_names);
 
-  /// Returns a shared pointer to the constructed fespace.
+  /// Returns a bool indicating if the object is restricted to a subset of subdomains.
   bool isSubdomainRestricted() { return _subdomain_names.size(); }
 
   mfem::Array<int> & getSubdomainAttributes() { return _subdomain_attributes; }

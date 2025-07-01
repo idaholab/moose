@@ -10,12 +10,11 @@
 #ifdef MFEM_ENABLED
 
 #pragma once
+#include "MFEMGeneralUserObject.h"
 
 /**
  * Base class used to set the initial value(s) on an MFEMVariable.
  */
-#include "MFEMGeneralUserObject.h"
-
 class MFEMInitialCondition : public MFEMGeneralUserObject
 {
 public:
