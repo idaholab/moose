@@ -57,18 +57,16 @@ KernelBase::setVariableDependency()
   auto needed_moose_vars = getMooseVariableDependencies();
 
   for (auto & system : kokkosSystems())
-    if (system.initialized())
-      system.setActiveVariables(needed_moose_vars);
+    system.setActiveVariables(needed_moose_vars);
 
   kokkosSystems().copy();
 }
 
 void
-KernelBase::setProjectionFlags()
+KernelBase::setCacheFlags()
 {
   for (auto & system : kokkosSystems())
-    if (system.initialized())
-      system.setProjectionFlags(blockIDs());
+    system.setCacheFlags(blockIDs());
 }
 
 } // namespace Kokkos

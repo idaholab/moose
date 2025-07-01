@@ -25,7 +25,10 @@ namespace Kokkos
 {
 
 Assembly::Assembly(FEProblemBase & problem)
-  : MeshHolder(*problem.mesh().getKokkosMesh()), _problem(problem), _mesh(problem.mesh())
+  : MeshHolder(*problem.mesh().getKokkosMesh()),
+    _problem(problem),
+    _mesh(problem.mesh()),
+    _dimension(_mesh.dimension())
 {
 }
 
@@ -34,11 +37,9 @@ Assembly::init()
 {
   // Cache mesh information
 
-  _n_subdomains = _mesh.meshSubdomains().size();
-  _n_elem_types = kokkosMesh().getElementTypeMap().size();
-  _dimension = _mesh.dimension();
+  auto num_subdomains = _mesh.meshSubdomains().size();
 
-  _coord_type.create(_n_subdomains);
+  _coord_type.create(num_subdomains);
 
   for (auto subdomain : _mesh.meshSubdomains())
     _coord_type[kokkosMesh().getSubdomainID(subdomain)] = _mesh.getCoordSystem(subdomain);
@@ -47,7 +48,7 @@ Assembly::init()
 
   if (_mesh.usingGeneralAxisymmetricCoordAxes())
   {
-    _rz_axis.create(_n_subdomains);
+    _rz_axis.create(num_subdomains);
 
     for (auto subdomain : _mesh.meshSubdomains())
       _rz_axis[kokkosMesh().getSubdomainID(subdomain)] =
@@ -58,38 +59,28 @@ Assembly::init()
   else
     _rz_radial_coord = _mesh.getAxisymmetricRadialCoord();
 
-  // Generate the list of unique FE types
+  // Initialize quadrature and shape data
 
-  std::set<FEType> fe_types;
-
-  auto getFETypes = [&](::System & system)
-  {
-    for (unsigned int var = 0; var < system.n_vars(); var++)
-      fe_types.insert(system.variable_type(var));
-  };
-
-  for (unsigned int nl = 0; nl < _problem.numNonlinearSystems(); ++nl)
-    getFETypes(_problem.getNonlinearSystemBase(nl).system());
-
-  getFETypes(_problem.getAuxiliarySystem().system());
-
-  for (auto & fet : fe_types)
-    _fe_type_map[fet] = _fe_type_map.size();
+  initQuadrature();
+  initShape();
 }
 
 void
 Assembly::initQuadrature()
 {
-  _q_points.create(_n_subdomains, _n_elem_types);
-  _q_points_face.create(_n_subdomains, _n_elem_types);
-  _weights.create(_n_subdomains, _n_elem_types);
-  _weights_face.create(_n_subdomains, _n_elem_types);
+  auto num_subdomains = _mesh.meshSubdomains().size();
+  auto num_elem_types = kokkosMesh().getElementTypeMap().size();
 
-  _n_qps.create(_n_subdomains);
-  _n_qps_face.create(_n_subdomains);
-  _qp_offset.create(_n_subdomains);
-  _qp_offset_face.create(_n_subdomains);
-  _max_qps_per_elem.create(_n_subdomains + 1);
+  _q_points.create(num_subdomains, num_elem_types);
+  _q_points_face.create(num_subdomains, num_elem_types);
+  _weights.create(num_subdomains, num_elem_types);
+  _weights_face.create(num_subdomains, num_elem_types);
+
+  _n_qps.create(num_subdomains);
+  _n_qps_face.create(num_subdomains);
+  _qp_offset.create(num_subdomains);
+  _qp_offset_face.create(num_subdomains);
+  _max_qps_per_elem.create(num_subdomains + 1);
   _max_qps_per_elem = 0;
 
   // Find boundaries where material properties should be computed
@@ -224,28 +215,51 @@ Assembly::initQuadrature()
 void
 Assembly::initShape()
 {
+  // Generate the list of unique FE types
+
+  std::set<FEType> fe_types;
+
+  auto getFETypes = [&](::System & system)
+  {
+    for (unsigned int var = 0; var < system.n_vars(); var++)
+      fe_types.insert(system.variable_type(var));
+  };
+
+  for (unsigned int nl = 0; nl < _problem.numNonlinearSystems(); ++nl)
+    getFETypes(_problem.getNonlinearSystemBase(nl).system());
+
+  getFETypes(_problem.getAuxiliarySystem().system());
+
+  _fe_type_map.clear();
+
+  for (auto & fet : fe_types)
+    _fe_type_map[fet] = _fe_type_map.size();
+
   // Cache reference shape data
 
-  _phi.create(_n_subdomains, _n_elem_types, _fe_type_map.size());
-  _phi_face.create(_n_subdomains, _n_elem_types, _fe_type_map.size());
-  _grad_phi.create(_n_subdomains, _n_elem_types, _fe_type_map.size());
-  _grad_phi_face.create(_n_subdomains, _n_elem_types, _fe_type_map.size());
+  auto num_subdomains = _mesh.meshSubdomains().size();
+  auto num_elem_types = kokkosMesh().getElementTypeMap().size();
 
-  _map_phi.create(_n_subdomains, _n_elem_types);
-  _map_phi_face.create(_n_subdomains, _n_elem_types);
-  _map_psi_face.create(_n_subdomains, _n_elem_types);
-  _map_grad_phi.create(_n_subdomains, _n_elem_types);
-  _map_grad_phi_face.create(_n_subdomains, _n_elem_types);
-  _map_grad_psi_face.create(_n_subdomains, _n_elem_types);
+  _phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
+  _grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
 
-  _n_dofs.create(_n_elem_types, _fe_type_map.size());
+  _map_phi.create(num_subdomains, num_elem_types);
+  _map_phi_face.create(num_subdomains, num_elem_types);
+  _map_psi_face.create(num_subdomains, num_elem_types);
+  _map_grad_phi.create(num_subdomains, num_elem_types);
+  _map_grad_phi_face.create(num_subdomains, num_elem_types);
+  _map_grad_psi_face.create(num_subdomains, num_elem_types);
+
+  _n_dofs.create(num_elem_types, _fe_type_map.size());
   _n_dofs = 0;
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
     auto sid = kokkosMesh().getSubdomainID(subdomain);
 
-    for (unsigned int t = 0; t < _n_elem_types; ++t)
+    for (unsigned int t = 0; t < num_elem_types; ++t)
     {
       _map_phi(sid, t).create(MAX_DOF, _max_qps_per_elem[sid]);
       _map_phi_face(sid, t).create(MAX_DOF, _max_qps_per_elem[sid], _mesh.getMaxSidesPerElem());

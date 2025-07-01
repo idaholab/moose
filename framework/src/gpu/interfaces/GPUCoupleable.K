@@ -128,7 +128,7 @@ Coupleable::KokkosCoupledVectorTagValueByName(const std::string & var_name,
 {
   auto variable = KokkosCoupledVectorTagVariable(var_name, tag_name, comp);
 
-  return Moose::Kokkos::VariableValue(_c_fe_problem.getKokkosSystems(), variable);
+  return Moose::Kokkos::VariableValue(variable);
 }
 
 Moose::Kokkos::VariableValue
@@ -137,7 +137,7 @@ Coupleable::KokkosCoupledVectorTagValuesByName(const std::string & var_name,
 {
   auto variable = KokkosCoupledVectorTagVariables(var_name, tag_name);
 
-  return Moose::Kokkos::VariableValue(_c_fe_problem.getKokkosSystems(), variable);
+  return Moose::Kokkos::VariableValue(variable);
 }
 
 Moose::Kokkos::VariableGradient
@@ -147,7 +147,7 @@ Coupleable::KokkosCoupledVectorTagGradientByName(const std::string & var_name,
 {
   auto variable = KokkosCoupledVectorTagVariable(var_name, tag_name, comp);
 
-  return Moose::Kokkos::VariableGradient(_c_fe_problem.getKokkosSystems(), variable);
+  return Moose::Kokkos::VariableGradient(variable);
 }
 
 Moose::Kokkos::VariableGradient
@@ -156,7 +156,7 @@ Coupleable::KokkosCoupledVectorTagGradientsByName(const std::string & var_name,
 {
   auto variable = KokkosCoupledVectorTagVariables(var_name, tag_name);
 
-  return Moose::Kokkos::VariableGradient(_c_fe_problem.getKokkosSystems(), variable);
+  return Moose::Kokkos::VariableGradient(variable);
 }
 
 Moose::Kokkos::VariableNodalValue
@@ -401,7 +401,7 @@ Coupleable::KokkosZeroValue()
 {
   auto variable = KokkosZeroVariable();
 
-  return Moose::Kokkos::VariableValue(_c_fe_problem.getKokkosSystems(), variable);
+  return Moose::Kokkos::VariableValue(variable);
 }
 
 Moose::Kokkos::VariableGradient
@@ -409,7 +409,7 @@ Coupleable::KokkosZeroGradient()
 {
   auto variable = KokkosZeroVariable();
 
-  return Moose::Kokkos::VariableGradient(_c_fe_problem.getKokkosSystems(), variable);
+  return Moose::Kokkos::VariableGradient(variable);
 }
 
 Moose::Kokkos::VariableNodalValue

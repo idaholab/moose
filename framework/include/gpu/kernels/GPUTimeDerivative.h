@@ -45,7 +45,7 @@ public:
       }
 
       for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-        accumulateTaggedLocalMatrix(local_ke[i], datum.elem().id, i, i, datum.jvar());
+        accumulateTaggedElementalMatrix(local_ke[i], datum.elem().id, i, i, datum.jvar());
     }
     else
       Moose::Kokkos::TimeKernel<Derived>::computeJacobianInternal(kernel, datum, local_ke);
