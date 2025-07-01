@@ -97,20 +97,18 @@ ResidualObject::ResidualObject(const ResidualObject & object)
     AssemblyHolder(object),
     SystemHolder(object),
     _var(object._var),
+    _kokkos_var(object._kokkos_var),
+    _thread(object._thread),
     _t(object._t),
     _t_old(object._t_old),
     _t_step(object._t_step),
     _dt(object._dt),
-    _dt_old(object._dt_old)
+    _dt_old(object._dt_old),
+    _vector_tags(object._vector_tags),
+    _matrix_tags(object._matrix_tags),
+    _is_extra_vector_tag(object._is_extra_vector_tag),
+    _is_extra_matrix_tag(object._is_extra_matrix_tag)
 {
-  _kokkos_var = object._kokkos_var;
-  _thread = object._thread;
-
-  _vector_tags = object._vector_tags;
-  _matrix_tags = object._matrix_tags;
-
-  _is_extra_vector_tag = object._is_extra_vector_tag;
-  _is_extra_matrix_tag = object._is_extra_matrix_tag;
 }
 
 } // namespace Kokkos

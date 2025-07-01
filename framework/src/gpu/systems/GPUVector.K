@@ -10,7 +10,7 @@
 #include "GPUVector.h"
 #include "GPUSystem.h"
 
-// #define GPU_ASSEMBLY
+// #define DEVICE_ASSEMBLY
 
 namespace Moose
 {
@@ -18,7 +18,7 @@ namespace Kokkos
 {
 
 void
-Vector::MPIBuffer::create(const Array<Array<libMesh::dof_id_type>> & list)
+Vector::DeviceAssembly::create(const Array<Array<libMesh::dof_id_type>> & list)
 {
   this->list = list;
 
@@ -38,7 +38,7 @@ Vector::MPIBuffer::create(const Array<Array<libMesh::dof_id_type>> & list)
 }
 
 void
-Vector::MPIBuffer::destroy()
+Vector::DeviceAssembly::destroy()
 {
   list.destroy();
   count.destroy();
@@ -64,7 +64,7 @@ Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & syst
   bool realloc =
       !_is_alloc || _assemble != assemble || _is_host != is_host || _is_ghosted != is_ghosted;
 
-  _vector = petsc_vector->vec();
+  _global_vector = petsc_vector->vec();
   _array = array;
   _system = &system;
   _assemble = assemble;
@@ -84,7 +84,7 @@ Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & syst
   {
     if (realloc)
     {
-#ifdef GPU_ASSEMBLY
+#ifdef DEVICE_ASSEMBLY
       _comm = &_system->getComm();
       _send.create(_system->getGhostCommList());
       _recv.create(_system->getLocalCommList());
@@ -144,34 +144,11 @@ Vector::copy(MemcpyKind dir)
 }
 
 void
-Vector::destroy()
-{
-  if (!_is_alloc)
-    return;
-
-  _local_vector = PETSC_NULLPTR;
-  _vector = PETSC_NULLPTR;
-  _array = PETSC_NULLPTR;
-  _system = nullptr;
-  _comm = nullptr;
-
-  _send.destroy();
-  _recv.destroy();
-  _local.destroy();
-  _ghost.destroy();
-
-  _assemble = false;
-  _is_ghosted = false;
-  _is_host = false;
-  _is_alloc = false;
-}
-
-void
 Vector::restore()
 {
   LibmeshPetscCallQ(
-      VecRestoreArrayAndMemType(_local_vector ? _local_vector : _vector, PETSC_NULLPTR));
-  LibmeshPetscCallQ(VecGhostRestoreLocalForm(_vector, &_local_vector));
+      VecRestoreArrayAndMemType(_local_vector ? _local_vector : _global_vector, PETSC_NULLPTR));
+  LibmeshPetscCallQ(VecGhostRestoreLocalForm(_global_vector, &_local_vector));
 }
 
 void
@@ -183,7 +160,7 @@ Vector::close()
   if (!_is_alloc)
     return;
 
-#ifdef GPU_ASSEMBLY
+#ifdef DEVICE_ASSEMBLY
 
   // Pack data into send buffer
 
@@ -224,7 +201,7 @@ Vector::close()
   _ghost.copy(MemcpyKind::DEVICE_TO_HOST);
 
   LibmeshPetscCallQ(
-      VecSetValues(_vector,
+      VecSetValues(_global_vector,
                    _system->getNumGhostDofs(),
                    reinterpret_cast<const PetscInt *>(_system->getDofMap().get_send_list().data()),
                    _ghost.data(),

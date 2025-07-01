@@ -11,6 +11,10 @@
 
 #include "MooseObjectAction.h"
 
+/**
+ * Adds a Kokkos boundary condition for GPU computation
+ * Associated with the [KokkosBCs] syntax
+ */
 class AddKokkosBCAction : public MooseObjectAction
 {
 public:
