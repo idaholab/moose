@@ -22,5 +22,11 @@
       expect_err = "The following parameters were set in both this Convergence object and the executioner:\s+steady_state_tolerance"
       detail = 'if any parameter is supplied in both the convergence object and executioner.'
     []
+    [invalid_iteration_type]
+      type = RunException
+      input = 'invalid_iteration_type.i'
+      expect_err = "DefaultSteadyConvergence can only be used with steady-state detection"
+      detail = 'if used with an invalid iteration type.'
+    []
   []
 []

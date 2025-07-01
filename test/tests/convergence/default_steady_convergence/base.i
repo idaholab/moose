@@ -132,11 +132,6 @@ ss_tol = 1e-6
   steady_state_convergence = steady_conv
 
   solve_type = NEWTON
-  nl_max_its = 10
-  nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-8
-  l_max_its = 10
-  l_tol = 1e-3
 []
 
 [Postprocessors]
