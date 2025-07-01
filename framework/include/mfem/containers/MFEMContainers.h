@@ -198,6 +198,7 @@ GetTimeDerivativeName(std::string name)
 using FECollections = Moose::MFEM::NamedFieldsMap<mfem::FiniteElementCollection>;
 using FESpaces = Moose::MFEM::NamedFieldsMap<mfem::ParFiniteElementSpace>;
 using GridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParGridFunction>;
+using ComplexGridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParComplexGridFunction>;
 using SubMeshes = Moose::MFEM::NamedFieldsMap<mfem::ParSubMesh>;
 
 } // namespace Moose::MFEM
