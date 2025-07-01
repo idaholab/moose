@@ -1404,6 +1404,16 @@ Builder::setScalarParameter(const std::string & full_name,
       throw;
   }
 
+  // Make sure that derivative string types have no spaces
+  if constexpr (std::is_base_of_v<std::string, T> && !std::is_same_v<std::string, T>)
+  {
+    if (param->get().find_first_of("\t\n ") != std::string::npos)
+      _errmsg += hit::errormsg(root()->find(full_name),
+                               "parameter " + full_name + " of type " +
+                                   MooseUtils::prettyCppType<T>() + " may not contain whitespace") +
+                 "\n";
+  }
+
   if (in_global)
   {
     global_block->remove(short_name);
