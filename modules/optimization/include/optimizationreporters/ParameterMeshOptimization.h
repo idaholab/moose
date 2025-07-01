@@ -23,6 +23,9 @@ public:
   static InputParameters validParams();
   ParameterMeshOptimization(const InputParameters & parameters);
 
+  virtual Real computeObjective() override;
+  virtual void computeGradient(libMesh::PetscVector<Number> & gradient) const override;
+
 protected:
   virtual void setICsandBounds() override;
 
@@ -35,4 +38,9 @@ private:
                                     const ParameterMesh & pmesh,
                                     const std::string & mesh_var_name,
                                     unsigned int ntimes) const;
+
+  /// Store parameter meshes for L2 gradient regularization computation
+  std::vector<std::unique_ptr<ParameterMesh>> _parameter_meshes;
+  /// L2 Gradient Regularization Coefficient
+  const Real _gradient_l2_coeff;
 };
