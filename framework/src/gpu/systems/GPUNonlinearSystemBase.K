@@ -107,8 +107,7 @@ NonlinearSystemBase::setKokkosInitialSolution()
                                                                          needed_fe_var_vector_tags);
 
   for (auto & system : systems)
-    if (system.initialized())
-      system.sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
+    system.sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
 
   systems.copy();
 
@@ -170,17 +169,16 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   // Copy data and preallocate quadature point solution vectors
 
   for (auto & system : systems)
-    if (system.initialized())
-    {
-      system.setActiveVariables(needed_moose_vars);
-      system.setActiveVariableTags(needed_fe_var_vector_tags);
+  {
+    system.setActiveVariables(needed_moose_vars);
+    system.setActiveVariableTags(needed_fe_var_vector_tags);
 
-      {
-        TIME_SECTION("KokkosCopy", 1);
-        system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
-        system.preallocate();
-      }
+    {
+      TIME_SECTION("KokkosCopy", 1);
+      system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
+      system.preallocate();
     }
+  }
 
   systems.copy();
 
@@ -224,12 +222,11 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   systems[number()].clearActiveResidualTags();
 
   for (auto & system : systems)
-    if (system.initialized())
-    {
-      system.clearActiveVariables();
-      system.clearActiveVariableTags();
-      system.clearProjectionFlags();
-    }
+  {
+    system.clearActiveVariables();
+    system.clearActiveVariableTags();
+    system.clearCacheFlags();
+  }
 }
 
 void
@@ -280,17 +277,16 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   // Copy data and preallocate quadature point solution vectors
 
   for (auto & system : systems)
-    if (system.initialized())
-    {
-      system.setActiveVariables(needed_moose_vars);
-      system.setActiveVariableTags(needed_fe_var_vector_tags);
+  {
+    system.setActiveVariables(needed_moose_vars);
+    system.setActiveVariableTags(needed_fe_var_vector_tags);
 
-      {
-        TIME_SECTION("KokkosPreallocate", 1);
-        system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
-        system.preallocate();
-      }
+    {
+      TIME_SECTION("KokkosPreallocate", 1);
+      system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
+      system.preallocate();
     }
+  }
 
   systems.copy();
 
@@ -334,10 +330,9 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   systems[number()].clearActiveMatrixTags();
 
   for (auto & system : systems)
-    if (system.initialized())
-    {
-      system.clearActiveVariables();
-      system.clearActiveVariableTags();
-      system.clearProjectionFlags();
-    }
+  {
+    system.clearActiveVariables();
+    system.clearActiveVariableTags();
+    system.clearCacheFlags();
+  }
 }

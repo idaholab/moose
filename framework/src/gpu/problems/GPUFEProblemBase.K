@@ -20,8 +20,6 @@ FEProblemBase::initKokkos()
   // Initialize Kokkos assembly
 
   _kokkos_assembly.init();
-  _kokkos_assembly.initQuadrature();
-  _kokkos_assembly.initShape();
 
   // Initialize Kokkos systems
 
@@ -40,12 +38,10 @@ FEProblemBase::initKokkos()
   {
     auto & nl = getNonlinearSystemBase(s);
     new (&_kokkos_systems[nl.number()]) Moose::Kokkos::System(nl);
-    _kokkos_systems[nl.number()].init();
   }
 
   auto & aux = getAuxiliarySystem();
   new (&_kokkos_systems[aux.number()]) Moose::Kokkos::System(aux);
-  _kokkos_systems[aux.number()].init();
 
   // Initialize Kokkos material properties
 
@@ -72,13 +68,12 @@ FEProblemBase::initKokkosStatefulProps()
   // Copy data and preallocate quadature point solution vectors
 
   for (auto & system : _kokkos_systems)
-    if (system.initialized())
-    {
-      system.setActiveVariables(needed_moose_vars);
-      system.setActiveVariableTags(needed_fe_var_vector_tags);
-      system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
-      system.preallocate();
-    }
+  {
+    system.setActiveVariables(needed_moose_vars);
+    system.setActiveVariableTags(needed_fe_var_vector_tags);
+    system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
+    system.preallocate();
+  }
 
   _kokkos_systems.copy();
 
@@ -109,12 +104,11 @@ FEProblemBase::initKokkosStatefulProps()
   // Clear
 
   for (auto & system : _kokkos_systems)
-    if (system.initialized())
-    {
-      system.clearActiveVariables();
-      system.clearActiveVariableTags();
-      system.clearProjectionFlags();
-    }
+  {
+    system.clearActiveVariables();
+    system.clearActiveVariableTags();
+    system.clearCacheFlags();
+  }
 }
 
 void
