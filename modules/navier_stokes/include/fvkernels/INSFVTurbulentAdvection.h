@@ -37,8 +37,8 @@ protected:
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
 
-  /// Maps for wall treatment
-  std::map<const Elem *, bool> _wall_bounded;
+  /// List for wall treatment
+  std::unordered_set<const Elem *> _wall_bounded;
 
   /// Whether to remove the derivative of this term wrt to velocity
   const bool _neglect_advection_derivatives;
