@@ -275,7 +275,6 @@ ExplicitMixedOrder::solve()
   forwardEuler();
   centralDifference();
   const bool converged = solutionUpdate();
-  // _console << "u_update: " << *_solution_update << std::endl;
 
   // Apply constraints
   _nl->overwriteNodeFace(*_nonlinear_implicit_system->solution);
@@ -316,11 +315,9 @@ ExplicitMixedOrder::centralDifference()
   // Split lumped mass matrix for first-order variables
   auto M = NumericVector<Number>::build(_communicator);
   _mass_matrix_lumped->create_subvector(*M, _local_second_order_indices, false);
-  // _console << "M: " << *M << std::endl;
 
   const auto r = NumericVector<Number>::build(_communicator);
   _explicit_residual->create_subvector(*r, _local_second_order_indices, false);
-  // _console << "r: " << *r << std::endl;
 
   // Split lumped mass matrix for first-order variables
   auto accel = _sys.solutionUDotDot();
@@ -353,8 +350,6 @@ ExplicitMixedOrder::centralDifference()
   auto delta_v = a->clone();
   delta_v->scale((_dt + _dt_old) / 2);
   vn->add(*delta_v);
-
-  // _console << "vel: " << *vn << std::endl;
 
   // close the vectors
   accel->restore_subvector(std::move(a), _local_second_order_indices);

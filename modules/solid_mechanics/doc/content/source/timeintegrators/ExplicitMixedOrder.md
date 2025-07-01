@@ -40,9 +40,9 @@ Additionally, the time integrator must be used with `MassMatrix`, with a properl
 An example input file is shown below. The file solves the equations:
 \begin{equation}
     \begin{aligned}
-        \ddot{disp_x} + \dot{disp_x} = 0\\
-        \dot{disp_y}
-    \end{aligned} = 0
+        \ddot{disp_x} + 0.8\dot{disp_x} = 0\\
+        \dot{disp_y} = 0
+    \end{aligned}
 \end{equation}
 
 ```
