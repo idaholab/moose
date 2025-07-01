@@ -101,6 +101,7 @@ ElementGenerator::generate()
     }
   }
 
+  // We just added an element
   mesh->set_isnt_prepared();
 
   if (getParam<bool>("create_sidesets"))

@@ -70,8 +70,9 @@ XYZDelaunayGenerator::validParams()
                         "Whether to do Laplacian mesh smoothing on the generated triangles.");
   params.addParam<std::vector<MeshGeneratorName>>(
       "holes",
-      std::vector<MeshGeneratorName>(),
-      "The MeshGenerators that define mesh holes. A hole mesh must contain either 3D volume "
+      {},
+      "The MeshGenerators that create meshes defining the holes. A hole mesh must contain either "
+      "3D volume "
       "elements where the external surface of the mesh works as the closed manifold that defines "
       "the hole, or 2D surface elements that form the closed manifold that defines the hole.");
   params.addParam<std::vector<bool>>(
@@ -147,7 +148,7 @@ XYZDelaunayGenerator::generate()
   // if a hole mesh contains 3D volume elements but has non-TRI3 surface side elements, it cannot be
   // used directly for stitching. But it can be converted into an all-TET4 mesh to support hole
   // boundary identification
-  for (auto hole_i : index_range(_hole_ptrs))
+  for (const auto hole_i : index_range(_hole_ptrs))
   {
     UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(**_hole_ptrs[hole_i]);
     libMesh::MeshSerializer serial_hole(hole_mesh);
@@ -164,6 +165,7 @@ XYZDelaunayGenerator::generate()
       if (elem->dim() == 3)
         for (auto s : make_range(elem->n_sides()))
         {
+          // Note that the entire external boundary is used for defining the hole at this time
           if (!elem->neighbor_ptr(s))
             hole_elem_types.emplace(elem->side_ptr(s)->type());
         }
@@ -354,7 +356,7 @@ XYZDelaunayGenerator::generate()
       new_hole_bcid = std::max(new_hole_bcid, boundary_id_type(*local_hole_bcids.rbegin() + 1));
     hole_mesh.comm().max(new_hole_bcid);
 
-    if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
+    if (_stitch_holes.size() && _stitch_holes[hole_i])
       doing_stitching = true;
   }
   // Now we can define boundaries to assist with stitching
@@ -443,7 +445,7 @@ XYZDelaunayGenerator::generate()
           if (it != mesh_faces.end())
           {
             auto [main_elem, main_side] = it->second.first;
-            if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
+            if (_stitch_holes.size() && _stitch_holes[hole_i])
             {
               hole_boundary_info.add_side(elem, s, new_hole_bcid);
               mesh_boundary_info.add_side(main_elem, main_side, inner_bcid);
@@ -507,7 +509,7 @@ XYZDelaunayGenerator::generate()
   {
     UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(**_hole_ptrs[hole_i]);
 
-    if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
+    if (_stitch_holes.size() && _stitch_holes[hole_i])
     {
       // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
       // subdomain map
