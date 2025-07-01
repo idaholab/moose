@@ -304,7 +304,9 @@ WCNSFVFluidHeatTransferPhysics::addEnergyInletBC()
 void
 WCNSFVFluidHeatTransferPhysics::addEnergyWallBC()
 {
-  const auto & wall_boundaries = _flow_equations_physics->getWallBoundaries();
+  const auto & wall_boundaries = isParamSetByUser("energy_wall_boundaries")
+                                     ? getParam<std::vector<BoundaryName>>("energy_wall_boundaries")
+                                     : _flow_equations_physics->getWallBoundaries();
   if (wall_boundaries.size() != _energy_wall_types.size())
     paramError("energy_wall_types",
                "Energy wall types (size " + std::to_string(_energy_wall_types.size()) +

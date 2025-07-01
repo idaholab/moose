@@ -56,7 +56,7 @@ k_d = 1
 
         # Friction is done in drift flux term
         friction_types = "Darcy"
-        friction_coeffs = "Darcy_vec"
+        friction_coeffs = "Darcy_coefficient_vec"
         standard_friction_formulation = true
 
         mass_advection_interpolation = '${advected_interp_method}'
@@ -74,6 +74,7 @@ k_d = 1
         add_phase_transport_equation = true
         alpha_exchange = 0.1
         phase_advection_interpolation = 'upwind'
+
         # see flow for inlet boundaries
         phase_fraction_inlet_type = 'fixed-value'
         phase_fraction_inlet_functors = '${inlet_phase_2}'
@@ -84,7 +85,8 @@ k_d = 1
         # Drift flux parameters
         add_drift_flux_momentum_terms = true
         density_interp_method = 'average'
-        slip_linear_friction_name = 'Darcy'
+        # This has to be consistent with the friction model
+        slip_linear_friction_name = 'Darcy_coefficient'
 
         # Base phase material properties
         phase_1_density_name = ${rho}
@@ -92,8 +94,9 @@ k_d = 1
         phase_1_specific_heat_name = ${cp}
         phase_1_thermal_conductivity_name = ${k}
 
+        # Not used because the 'slip_linear_friction_name' is set
         use_dispersed_phase_drag_model = true
-        particle_diameter = 0.01
+        particle_diameter = ${dp}
 
         # Other phase material properties
         phase_2_density_name = ${rho_d}
@@ -103,20 +106,6 @@ k_d = 1
         output_all_properties = true
       []
     []
-  []
-[]
-
-[FunctorMaterials]
-  [CD]
-    type = NSFVDispersePhaseDragFunctorMaterial
-    drag_coef_name = 'Darcy'
-    rho = 'rho_mixture'
-    mu = mu_mixture
-    u = 'vel_x'
-    v = 'vel_y'
-    particle_diameter = ${dp}
-    outputs = 'all'
-    output_properties = 'Darcy_coefficient'
   []
 []
 
@@ -141,7 +130,7 @@ k_d = 1
   dofmap = true
   [out]
     type = Exodus
-    hide = 'Re lin cum_lin'
+    hide = 'Re lin cum_lin dp'
   []
   [perf]
     type = PerfGraphOutput
@@ -159,5 +148,12 @@ k_d = 1
   [cum_lin]
     type = CumulativeValuePostprocessor
     postprocessor = lin
+  []
+  [dp]
+    type = PressureDrop
+    pressure = 'pressure'
+    upstream_boundary = 'left'
+    downstream_boundary = 'right'
+    boundary = 'left right'
   []
 []

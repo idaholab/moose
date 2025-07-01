@@ -14,19 +14,20 @@
 /**
  * This is the material class used to compute phase averaged properties of mixtures
  */
-class NSFVMixtureFunctorMaterial : public FunctorMaterial
+template <bool is_ad>
+class NSFVMixtureFunctorMaterialTempl : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  NSFVMixtureFunctorMaterial(const InputParameters & parameters);
+  NSFVMixtureFunctorMaterialTempl(const InputParameters & parameters);
 
 protected:
   /// Vector of phase 1 properties
-  std::vector<const Moose::Functor<ADReal> *> _phase_1_properties;
+  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _phase_1_properties;
 
   /// Vector of phase 2 properties
-  std::vector<const Moose::Functor<ADReal> *> _phase_2_properties;
+  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _phase_2_properties;
 
   /// Vector of phase 1 properties names
   const std::vector<MooseFunctorName> _phase_1_names;
@@ -38,8 +39,11 @@ protected:
   const std::vector<MooseFunctorName> _mixture_names;
 
   /// Phase 1 fraction
-  const Moose::Functor<ADReal> & _phase_1_fraction;
+  const Moose::Functor<GenericReal<is_ad>> & _phase_1_fraction;
 
   /// Whether to bound the phase fraction between 0 and 1 to avoid outlandish properties
   const bool _limit_pf;
 };
+
+typedef NSFVMixtureFunctorMaterialTempl<false> WCNSLinearFVMixtureFunctorMaterial;
+typedef NSFVMixtureFunctorMaterialTempl<true> NSFVMixtureFunctorMaterial;
