@@ -2507,7 +2507,7 @@ protected:
   /// Linear system(s) convergence name(s) (if any)
   std::optional<std::vector<ConvergenceName>> _linear_convergence_names;
   /// Fixed point convergence name
-  ConvergenceName _fixed_point_convergence_name;
+  std::optional<ConvergenceName> _fixed_point_convergence_name;
 
   std::set<TagID> _fe_vector_tags;
 
@@ -2529,8 +2529,6 @@ protected:
   Real & _dt;
   Real & _dt_old;
 
-  /// Flag that the fixed point convergence name has been set
-  bool _set_fixed_point_convergence_name;
   /// Flag that the problem needs to add the default nonlinear convergence
   bool _need_to_add_default_nonlinear_convergence;
   /// Flag that the problem needs to add the default fixed point convergence

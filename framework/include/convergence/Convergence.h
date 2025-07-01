@@ -39,12 +39,12 @@ public:
 
   Convergence(const InputParameters & parameters);
 
-  virtual void initialSetup() override{};
+  virtual void initialSetup() override {}
 
   /**
    * Method that gets called before each iteration loop
    */
-  virtual void initialize() {};
+  virtual void initialize() {}
 
   /**
    * Returns convergence status.

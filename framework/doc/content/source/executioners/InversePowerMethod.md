@@ -1,6 +1,6 @@
 # InversePowerMethod
 
-This [/Executioner.md] that solves an eigenproblem by an inverse power method.
+This [/Executioner.md] solves an eigenproblem by an inverse power method.
 
 ## Overview
 
