@@ -20,8 +20,9 @@ ElementNodePositions::validParams()
   params.addClassDescription("Positions of element nodes.");
   params += BlockRestrictable::validParams();
 
-  // Element nodes could be sorted by XYZ or by id. Default to not sorting
-  params.set<bool>("auto_sort") = false;
+  // Element nodes must be sorted to remove duplicates.
+  params.suppressParameter<bool>("auto_sort");
+  params.set<bool>("auto_sort") = true;
   // Gathered locally, should be broadcast on every process
   params.set<bool>("auto_broadcast") = true;
 
@@ -42,7 +43,7 @@ ElementNodePositions::initialize()
 {
   clearPositions();
 
-  for (const auto & [node_id, elems_ids] : _fe_problem.mesh().nodeToActiveSemilocalElemMap())
+  for (const auto & [node_id, elems_ids] : _fe_problem.mesh().nodeToElemMap())
   {
     if (!_mesh.queryNodePtr(node_id))
       continue;
@@ -50,10 +51,10 @@ ElementNodePositions::initialize()
     // Check the elements associated with the node to see if they're in the block
     // we're block-restricting. If so, add the node to the positions vector and move
     // on to the next node (to minimize duplicates).
-    for (const auto & elem_id : elems_ids)
+    for (const auto elem_id : elems_ids)
     {
       const auto e = _mesh.queryElemPtr(elem_id);
-      if (e && blockIDs().count(e->subdomain_id()) > 0)
+      if (e && hasBlocks(e->subdomain_id()))
       {
         _positions.emplace_back(_mesh.nodeRef(node_id));
         break;
@@ -78,7 +79,7 @@ ElementNodePositions::finalize()
   // We always need to sort the positions as nodes on the boundary between different mesh partitions
   // are duplicated. We sort by X, then Y, then Z, and prune the positions list.
   std::sort(_positions.begin(), _positions.end());
-  _positions.erase(std::unique( _positions.begin(), _positions.end()), _positions.end());
+  _positions.erase(std::unique(_positions.begin(), _positions.end()), _positions.end());
 
   // Make a KDTree with the positions
   _positions_kd_tree = std::make_unique<KDTree>(_positions, 1);
