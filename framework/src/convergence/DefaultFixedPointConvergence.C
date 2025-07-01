@@ -77,13 +77,13 @@ DefaultFixedPointConvergence::checkConvergence(unsigned int iter)
     if (std::abs(_pp_new - _pp_old) < _custom_pp_abs_tol)
     {
       _fp_solve.setFixedPointStatus(
-          FixedPointSolve::MooseFixedPointConvergenceReason::CONVERGED_CUSTOM);
+          FixedPointSolve::MooseFixedPointConvergenceReason::CONVERGED_PP);
       return MooseConvergenceStatus::CONVERGED;
     }
     if (std::abs((_pp_new - _pp_old) / _pp_scaling) < _custom_pp_rel_tol)
     {
       _fp_solve.setFixedPointStatus(
-          FixedPointSolve::MooseFixedPointConvergenceReason::CONVERGED_CUSTOM);
+          FixedPointSolve::MooseFixedPointConvergenceReason::CONVERGED_PP);
       return MooseConvergenceStatus::CONVERGED;
     }
   }
