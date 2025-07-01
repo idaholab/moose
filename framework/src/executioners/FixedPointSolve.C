@@ -550,8 +550,8 @@ FixedPointSolve::printFixedPointConvergenceReason()
     case MooseFixedPointConvergenceReason::CONVERGED_RELATIVE:
       _console << "CONVERGED_RELATIVE";
       break;
-    case MooseFixedPointConvergenceReason::CONVERGED_CUSTOM:
-      _console << "CONVERGED_CUSTOM";
+    case MooseFixedPointConvergenceReason::CONVERGED_PP:
+      _console << "CONVERGED_PP";
       break;
     case MooseFixedPointConvergenceReason::REACH_MAX_ITS:
       _console << "REACH_MAX_ITS";
