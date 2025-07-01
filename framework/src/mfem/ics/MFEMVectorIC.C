@@ -11,7 +11,6 @@
 
 #include "MFEMVectorIC.h"
 #include "MFEMProblem.h"
-#include <libmesh/libmesh_common.h>
 #include <mfem.hpp>
 
 registerMooseObject("MooseApp", MFEMVectorIC);
