@@ -9,7 +9,7 @@
 []
 
 [Executioner]
-  fixed_point_convergence := it_conv
+  multiapp_fixed_point_convergence := it_conv
 []
 
 [Outputs]

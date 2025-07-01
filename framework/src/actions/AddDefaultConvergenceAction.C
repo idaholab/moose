@@ -16,7 +16,9 @@
 #include "DefaultFixedPointConvergence.h"
 
 registerMooseAction("MooseApp", AddDefaultConvergenceAction, "add_default_nonlinear_convergence");
-registerMooseAction("MooseApp", AddDefaultConvergenceAction, "add_default_fixed_point_convergence");
+registerMooseAction("MooseApp",
+                    AddDefaultConvergenceAction,
+                    "add_default_multiapp_fixed_point_convergence");
 
 InputParameters
 AddDefaultConvergenceAction::validParams()
@@ -36,8 +38,8 @@ AddDefaultConvergenceAction::act()
 {
   if (_current_task == "add_default_nonlinear_convergence")
     addDefaultNonlinearConvergence();
-  else if (_current_task == "add_default_fixed_point_convergence")
-    addDefaultFixedPointConvergence();
+  else if (_current_task == "add_default_multiapp_fixed_point_convergence")
+    addDefaultMultiAppFixedPointConvergence();
 }
 
 void
@@ -58,16 +60,16 @@ AddDefaultConvergenceAction::addDefaultNonlinearConvergence()
 }
 
 void
-AddDefaultConvergenceAction::addDefaultFixedPointConvergence()
+AddDefaultConvergenceAction::addDefaultMultiAppFixedPointConvergence()
 {
-  if (_problem->needToAddDefaultFixedPointConvergence())
+  if (_problem->needToAddDefaultMultiAppFixedPointConvergence())
   {
-    const std::string conv_name = "default_fixed_point_convergence";
-    _problem->setFixedPointConvergenceName(conv_name);
-    _problem->addDefaultFixedPointConvergence(getMooseApp().getExecutioner()->parameters());
+    const std::string conv_name = "default_multiapp_fixed_point_convergence";
+    _problem->setMultiAppFixedPointConvergenceName(conv_name);
+    _problem->addDefaultMultiAppFixedPointConvergence(getMooseApp().getExecutioner()->parameters());
   }
 
-  checkUnusedFixedPointConvergenceParameters();
+  checkUnusedMultiAppFixedPointConvergenceParameters();
 }
 
 void
@@ -128,18 +130,18 @@ AddDefaultConvergenceAction::checkUnusedNonlinearConvergenceParameters()
 }
 
 void
-AddDefaultConvergenceAction::checkUnusedFixedPointConvergenceParameters()
+AddDefaultConvergenceAction::checkUnusedMultiAppFixedPointConvergenceParameters()
 {
   // Abort check if executioner does not allow Convergence objects
   auto & executioner_params = getMooseApp().getExecutioner()->parameters();
-  if (!executioner_params.have_parameter<ConvergenceName>("fixed_point_convergence"))
+  if (!executioner_params.have_parameter<ConvergenceName>("multiapp_fixed_point_convergence"))
     return;
 
   // Abort if there is no fixed point convergence. For example, Executors may not have them.
-  if (!_problem->hasSetFixedPointConvergenceName())
+  if (!_problem->hasSetMultiAppFixedPointConvergenceName())
     return;
 
-  const auto conv_name = _problem->getFixedPointConvergenceName();
+  const auto conv_name = _problem->getMultiAppFixedPointConvergenceName();
 
   // Abort check if Convergence is inactive
   if (!_problem->hasConvergence(conv_name))

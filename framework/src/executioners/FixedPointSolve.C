@@ -94,9 +94,9 @@ FixedPointSolve::validParams()
       "existence of active MultiApps with those execute_on flags, default: false.");
 
   params.addParam<ConvergenceName>(
-      "fixed_point_convergence",
+      "multiapp_fixed_point_convergence",
       "Name of the Convergence object to use to assess convergence of the "
-      "fixed point solve. If not provided, a default Convergence "
+      "MultiApp fixed point solve. If not provided, a default Convergence "
       "will be constructed internally from the executioner parameters.");
 
   // Parameters for relaxing the fixed point process
@@ -125,7 +125,7 @@ FixedPointSolve::validParams()
 
   params.addParamNamesToGroup(
       "fixed_point_min_its fixed_point_max_its disable_fixed_point_residual_norm_check "
-      "fixed_point_force_norms fixed_point_convergence "
+      "fixed_point_force_norms multiapp_fixed_point_convergence "
       "relaxation_factor transformed_variables transformed_postprocessors auto_advance",
       "Fixed point iterations");
 
@@ -199,10 +199,11 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
                  "fixed_point_force_norms will be ignored because the fixed point residual check "
                  "is disabled.");
 
-  if (isParamValid("fixed_point_convergence"))
-    _problem.setFixedPointConvergenceName(getParam<ConvergenceName>("fixed_point_convergence"));
+  if (isParamValid("multiapp_fixed_point_convergence"))
+    _problem.setMultiAppFixedPointConvergenceName(
+        getParam<ConvergenceName>("multiapp_fixed_point_convergence"));
   else
-    _problem.setNeedToAddDefaultFixedPointConvergence();
+    _problem.setNeedToAddDefaultMultiAppFixedPointConvergence();
 }
 
 bool
@@ -267,7 +268,7 @@ FixedPointSolve::solve()
 
   if (_has_fixed_point_its)
   {
-    auto & convergence = _problem.getConvergence(_problem.getFixedPointConvergenceName());
+    auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
     convergence.initialize();
   }
 
@@ -519,7 +520,7 @@ FixedPointSolve::solveStep(Real & begin_norm,
 bool
 FixedPointSolve::examineFixedPointConvergence(bool & converged)
 {
-  auto & convergence = _problem.getConvergence(_problem.getFixedPointConvergenceName());
+  auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
   const auto status = convergence.checkConvergence(_fixed_point_it);
   switch (status)
   {
