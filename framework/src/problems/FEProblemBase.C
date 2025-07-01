@@ -409,7 +409,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
     _need_to_add_default_nonlinear_convergence(false),
-    _need_to_add_default_fixed_point_convergence(false),
+    _need_to_add_default_multiapp_fixed_point_convergence(false),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
     _linear_systems(_num_linear_sys, nullptr),
@@ -2531,14 +2531,14 @@ FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_
 }
 
 void
-FEProblemBase::addDefaultFixedPointConvergence(const InputParameters & params_to_apply)
+FEProblemBase::addDefaultMultiAppFixedPointConvergence(const InputParameters & params_to_apply)
 {
   const std::string class_name = "DefaultFixedPointConvergence";
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());
   params.set<bool>("added_as_default") = true;
-  addConvergence(class_name, getFixedPointConvergenceName(), params);
+  addConvergence(class_name, getMultiAppFixedPointConvergenceName(), params);
 }
 
 bool
@@ -9034,9 +9034,9 @@ FEProblemBase::setNonlinearConvergenceNames(const std::vector<ConvergenceName> &
 }
 
 void
-FEProblemBase::setFixedPointConvergenceName(const ConvergenceName & convergence_name)
+FEProblemBase::setMultiAppFixedPointConvergenceName(const ConvergenceName & convergence_name)
 {
-  _fixed_point_convergence_name = convergence_name;
+  _multiapp_fixed_point_convergence_name = convergence_name;
 }
 
 const std::vector<ConvergenceName> &
@@ -9072,10 +9072,10 @@ FEProblemBase::getLinearConvergenceNames() const
 }
 
 ConvergenceName
-FEProblemBase::getFixedPointConvergenceName() const
+FEProblemBase::getMultiAppFixedPointConvergenceName() const
 {
-  if (_fixed_point_convergence_name)
-    return _fixed_point_convergence_name.value();
+  if (_multiapp_fixed_point_convergence_name)
+    return _multiapp_fixed_point_convergence_name.value();
   else
     mooseError("The fixed point convergence name has not been set.");
 }

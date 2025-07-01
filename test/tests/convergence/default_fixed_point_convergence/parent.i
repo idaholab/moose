@@ -83,7 +83,7 @@ T_ambient = 300.0
   l_tol = 1e-3
 
   fixed_point_max_its = 15
-  fixed_point_convergence = fp_conv
+  multiapp_fixed_point_convergence = fp_conv
 []
 
 [MultiApps]
