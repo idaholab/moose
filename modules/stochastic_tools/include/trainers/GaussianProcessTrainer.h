@@ -20,6 +20,8 @@
 
 #include "GaussianProcess.h"
 
+#include "TwoLayerGaussianProcess.h"
+
 class GaussianProcessTrainer : public SurrogateTrainer, public CovarianceInterface
 {
 public:
@@ -32,12 +34,17 @@ public:
   StochasticTools::GaussianProcess & gp() { return _gp; }
   const StochasticTools::GaussianProcess & gp() const { return _gp; }
 
+  StochasticTools::TwoLayerGaussianProcess & tgp() { return _tgp; }
+  const StochasticTools::TwoLayerGaussianProcess & tgp() const { return _tgp; }
+
 private:
   /// Data from the current predictor row
   const std::vector<Real> & _predictor_row;
 
   /// Gaussian process handler responsible for managing training related tasks
   StochasticTools::GaussianProcess & _gp;
+
+  StochasticTools::TwoLayerGaussianProcess & _tgp;
 
   /// Parameters (x) used for training -- we'll allgather these in postTrain().
   std::vector<std::vector<Real>> _params_buffer;
