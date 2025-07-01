@@ -11,6 +11,10 @@
 
 #include "MooseObjectAction.h"
 
+/**
+ * Adds a Kokkos material for GPU computation
+ * Associated with the [KokkosMaterials] syntax
+ */
 class AddKokkosMaterialAction : public MooseObjectAction
 {
 public:

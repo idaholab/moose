@@ -28,13 +28,7 @@ public:
   }
 
   IntegratedBC(const InputParameters & parameters)
-    : IntegratedBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-      _test(kokkosAssembly()),
-      _grad_test(kokkosAssembly()),
-      _phi(kokkosAssembly()),
-      _grad_phi(kokkosAssembly()),
-      _u(kokkosSystems(), _var),
-      _grad_u(kokkosSystems(), _var)
+    : IntegratedBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD), _u(_var), _grad_u(_var)
   {
     addMooseVariableDependency(&_var);
   }
@@ -166,7 +160,7 @@ public:
     }
 
     for (unsigned int i = 0; i < datum.n_dofs(); ++i)
-      accumulateTaggedLocalResidual(local_re[i], datum.elem().id, i);
+      accumulateTaggedElementalResidual(local_re[i], datum.elem().id, i);
   }
   KOKKOS_FUNCTION void
   computeJacobianInternal(const Derived * bc, ResidualDatum & datum, Real * local_ke) const
@@ -183,7 +177,7 @@ public:
 
     for (unsigned int i = 0; i < datum.n_idofs(); ++i)
       for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-        accumulateTaggedLocalMatrix(
+        accumulateTaggedElementalMatrix(
             local_ke[i * datum.n_jdofs() + j], datum.elem().id, i, j, datum.jvar());
   }
   KOKKOS_FUNCTION void
@@ -201,7 +195,7 @@ public:
 
     for (unsigned int i = 0; i < datum.n_idofs(); ++i)
       for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-        accumulateTaggedLocalMatrix(
+        accumulateTaggedElementalMatrix(
             local_ke[i * datum.n_jdofs() + j], datum.elem().id, i, j, datum.jvar());
   }
 

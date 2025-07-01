@@ -54,7 +54,7 @@ public:
     }
 
     for (unsigned int i = 0; i < datum.n_dofs(); ++i)
-      accumulateTaggedLocalResidual(local_re[i], datum.elem().id, i);
+      accumulateTaggedElementalResidual(local_re[i], datum.elem().id, i);
   }
   KOKKOS_FUNCTION void
   computeJacobianInternal(const Derived * kernel, ResidualDatum & datum, Real * local_ke) const
@@ -74,7 +74,7 @@ public:
 
     for (unsigned int i = 0; i < datum.n_idofs(); ++i)
       for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-        accumulateTaggedLocalMatrix(
+        accumulateTaggedElementalMatrix(
             local_ke[i * datum.n_jdofs() + j], datum.elem().id, i, j, datum.jvar());
   }
 
