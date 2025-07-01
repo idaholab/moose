@@ -16,6 +16,9 @@ namespace Moose
 namespace Kokkos
 {
 
+/**
+ * The base class for Kokkos time-derivative nodal kernels
+ */
 template <typename Derived>
 class TimeNodalKernel : public NodalKernel<Derived>
 {
@@ -32,6 +35,9 @@ public:
     return params;
   }
 
+  /**
+   * Constructor
+   */
   TimeNodalKernel(const InputParameters & parameters)
     : NodalKernel<Derived>(parameters),
       _u_dot(kokkosSystems(), _var, Moose::SOLUTION_DOT_TAG),
@@ -40,9 +46,13 @@ public:
   }
 
 protected:
-  /// Time derivative of u
+  /**
+   * Time derivative of the current solution at nodes
+   */
   VariableNodalValue _u_dot;
-  /// Derivative of u_dot with respect to u
+  /**
+   * Derivative of u_dot with respect to u
+   */
   Scalar<const Real> _du_dot_du;
 };
 
