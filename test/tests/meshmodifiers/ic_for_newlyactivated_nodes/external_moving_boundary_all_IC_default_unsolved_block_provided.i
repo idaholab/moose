@@ -56,7 +56,7 @@
 
     # --- new for setting IC --- #
     ic_strategy = "IC_DEFAULT"
-    apply_initial_conditions = true
+
     old_subdomain_reinitialized = false
     reinitialize_subdomain_ids = '1'
   []
