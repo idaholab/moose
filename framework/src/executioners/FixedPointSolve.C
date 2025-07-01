@@ -533,8 +533,7 @@ FixedPointSolve::examineFixedPointConvergence(bool & converged)
       converged = false;
       return false;
     default:
-      mooseAssert(false, "Impossible");
-      return false;
+      mooseError("Should not reach here");
   }
 }
 
