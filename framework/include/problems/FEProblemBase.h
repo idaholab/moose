@@ -654,7 +654,7 @@ public:
     _need_to_add_default_fixed_point_convergence = true;
   }
   /// Returns true if the problem has set the fixed point convergence name
-  bool hasSetFixedPointConvergenceName() const { return _set_fixed_point_convergence_name; }
+  bool hasSetFixedPointConvergenceName() const { return _fixed_point_convergence_name.has_value(); }
   /**
    * Adds the default nonlinear Convergence associated with the problem
    *
