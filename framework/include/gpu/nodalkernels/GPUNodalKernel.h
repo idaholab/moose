@@ -100,7 +100,7 @@ public:
 
     Real local_re = kernel->computeQpResidual(node);
 
-    setTaggedLocalResidual(true, local_re, node);
+    accumulateTaggedNodalResidual(true, local_re, node);
   }
   KOKKOS_FUNCTION void operator()(JacobianLoop, const size_t tid) const
   {
@@ -109,7 +109,7 @@ public:
 
     Real local_ke = kernel->computeQpJacobian(node);
 
-    setTaggedLocalMatrix(true, local_ke, node, _kokkos_var.var());
+    accumulateTaggedNodalMatrix(true, local_ke, node, _kokkos_var.var());
   }
   KOKKOS_FUNCTION void operator()(OffDiagJacobianLoop, const size_t tid) const
   {
@@ -122,7 +122,7 @@ public:
 
     Real local_ke = kernel->computeQpOffDiagJacobian(jvar, node);
 
-    setTaggedLocalMatrix(true, local_ke, node, jvar);
+    accumulateTaggedNodalMatrix(true, local_ke, node, jvar);
   }
 
 protected:

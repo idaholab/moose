@@ -18,11 +18,20 @@ namespace Moose
 namespace Kokkos
 {
 
-class VariablePhiValue : public AssemblyHolder
+/**
+ * The Kokkos wrapper classes for MOOSE-like shape function access
+ */
+///@{
+class VariablePhiValue
 {
 public:
-  VariablePhiValue(Assembly & assembly) : AssemblyHolder(assembly) {}
-
+  /**
+   * Get the current shape function
+   * @param datum The ResidualDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The shape function
+   */
   KOKKOS_FUNCTION Real operator()(ResidualDatum & datum, unsigned int i, unsigned int qp) const
   {
     auto & elem = datum.elem();
@@ -30,16 +39,21 @@ public:
     auto fe = datum.jfe();
 
     return side == libMesh::invalid_uint
-               ? kokkosAssembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
-               : kokkosAssembly().getPhiFace(elem.subdomain, elem.type, fe)(i, qp, side);
+               ? datum.assembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
+               : datum.assembly().getPhiFace(elem.subdomain, elem.type, fe)(i, qp, side);
   }
 };
 
-class VariablePhiGradient : public AssemblyHolder
+class VariablePhiGradient
 {
 public:
-  VariablePhiGradient(Assembly & assembly) : AssemblyHolder(assembly) {}
-
+  /**
+   * Get the gradient of the current shape function
+   * @param datum The ResidualDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The gradient of the shape function
+   */
   KOKKOS_FUNCTION Real3 operator()(ResidualDatum & datum, unsigned int i, unsigned int qp) const
   {
     auto & elem = datum.elem();
@@ -48,16 +62,21 @@ public:
 
     return datum.J(qp) *
            (side == libMesh::invalid_uint
-                ? kokkosAssembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-                : kokkosAssembly().getGradPhiFace(elem.subdomain, elem.type, fe)(i, qp, side));
+                ? datum.assembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+                : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(i, qp, side));
   }
 };
 
-class VariableTestValue : public AssemblyHolder
+class VariableTestValue
 {
 public:
-  VariableTestValue(Assembly & assembly) : AssemblyHolder(assembly) {}
-
+  /**
+   * Get the current test function
+   * @param datum The ResidualDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The test function
+   */
   KOKKOS_FUNCTION Real operator()(ResidualDatum & datum, unsigned int i, unsigned int qp) const
   {
     auto & elem = datum.elem();
@@ -65,16 +84,21 @@ public:
     auto fe = datum.ife();
 
     return side == libMesh::invalid_uint
-               ? kokkosAssembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
-               : kokkosAssembly().getPhiFace(elem.subdomain, elem.type, fe)(i, qp, side);
+               ? datum.assembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
+               : datum.assembly().getPhiFace(elem.subdomain, elem.type, fe)(i, qp, side);
   }
 };
 
-class VariableTestGradient : public AssemblyHolder
+class VariableTestGradient
 {
 public:
-  VariableTestGradient(Assembly & assembly) : AssemblyHolder(assembly) {}
-
+  /**
+   * Get the gradient of the current test function
+   * @param datum The ResidualDatum object of the current thread
+   * @param i The element-local DOF index
+   * @param qp The local quadrature point index
+   * @returns The gradient of the test function
+   */
   KOKKOS_FUNCTION Real3 operator()(ResidualDatum & datum, unsigned int i, unsigned int qp) const
   {
     auto & elem = datum.elem();
@@ -83,27 +107,47 @@ public:
 
     return datum.J(qp) *
            (side == libMesh::invalid_uint
-                ? kokkosAssembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-                : kokkosAssembly().getGradPhiFace(elem.subdomain, elem.type, fe)(i, qp, side));
+                ? datum.assembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
+                : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(i, qp, side));
   }
 };
+///@}
 
-class VariableValue : public SystemHolder
+/**
+ * The Kokkos wrapper classes for MOOSE-like variable value access
+ */
+///@{
+class VariableValue
 {
-private:
-  Variable _var;
-
 public:
-  VariableValue(Array<System> & systems, Variable var) : SystemHolder(systems), _var(var) {}
-  VariableValue(Array<System> & systems,
-                const MooseVariableBase & var,
-                const TagName & tag = Moose::SOLUTION_TAG)
-    : SystemHolder(systems), _var(var, tag)
+  /**
+   * Constructor
+   * @param var The Kokkos variable
+   */
+  VariableValue(Variable var) : _var(var) {}
+  /**
+   * Constructor
+   * @param var The MOOSE variable
+   * @param tag The vector tag name
+   */
+  VariableValue(const MooseVariableBase & var, const TagName & tag = Moose::SOLUTION_TAG)
+    : _var(var, tag)
   {
   }
 
+  /**
+   * Get whether the variable was coupled
+   * @returns Whether the variable was coupled
+   */
   KOKKOS_FUNCTION operator bool() const { return _var.coupled(); }
 
+  /**
+   * Get the current variable value
+   * @param datum The Datum object of the current thread
+   * @param qp The local quadrature-point index
+   * @param comp The variable component
+   * @returns The variable value
+   */
   KOKKOS_FUNCTION Real operator()(Datum & datum, unsigned int qp, unsigned int comp = 0) const
   {
     if (_var.coupled())
@@ -113,23 +157,37 @@ public:
       auto qp_offset = datum.qpOffset();
 
       return side == libMesh::invalid_uint
-                 ? kokkosSystem(_var.sys(comp))
+                 ? datum.system(_var.sys(comp))
                        .getVectorQpValue(elem, qp_offset + qp, _var.var(comp), _var.tag())
-                 : kokkosSystem(_var.sys(comp))
+                 : datum.system(_var.sys(comp))
                        .getVectorQpValueFace(elem, side, qp, _var.var(comp), _var.tag());
     }
     else
       return _var.value(comp);
   }
+
+private:
+  /**
+   * Coupled Kokkos variable
+   */
+  Variable _var;
 };
 
 class VariableNodalValue : public SystemHolder
 {
-private:
-  Variable _var;
-
 public:
+  /**
+   * Constructor
+   * @param systems The Kokkos systems
+   * @param var The Kokkos variable
+   */
   VariableNodalValue(Array<System> & systems, Variable var) : SystemHolder(systems), _var(var) {}
+  /**
+   * Constructor
+   * @param systems The Kokkos systems
+   * @param var The MOOSE variable
+   * @param tag The vector tag name
+   */
   VariableNodalValue(Array<System> & systems,
                      const MooseVariableBase & var,
                      const TagName & tag = Moose::SOLUTION_TAG)
@@ -137,8 +195,18 @@ public:
   {
   }
 
+  /**
+   * Get whether the variable was coupled
+   * @returns Whether the variable was coupled
+   */
   KOKKOS_FUNCTION operator bool() const { return _var.coupled(); }
 
+  /**
+   * Get the current variable nodal value
+   * @param node The current node ID
+   * @param comp The variable component
+   * @returns The variable nodal value
+   */
   KOKKOS_FUNCTION Real operator()(dof_id_type node, unsigned int comp = 0) const
   {
     if (_var.coupled())
@@ -150,24 +218,45 @@ public:
     else
       return _var.value(comp);
   }
+
+private:
+  /**
+   * Coupled Kokkos variable
+   */
+  Variable _var;
 };
 
-class VariableGradient : public SystemHolder
+class VariableGradient
 {
-private:
-  Variable _var;
-
 public:
-  VariableGradient(Array<System> & systems, Variable var) : SystemHolder(systems), _var(var) {}
-  VariableGradient(Array<System> & systems,
-                   const MooseVariableBase & var,
-                   const TagName & tag = Moose::SOLUTION_TAG)
-    : SystemHolder(systems), _var(var, tag)
+  /**
+   * Constructor
+   * @param var The Kokkos variable
+   */
+  VariableGradient(Variable var) : _var(var) {}
+  /**
+   * Constructor
+   * @param var The MOOSE variable
+   * @param tag The vector tag name
+   */
+  VariableGradient(const MooseVariableBase & var, const TagName & tag = Moose::SOLUTION_TAG)
+    : _var(var, tag)
   {
   }
 
+  /**
+   * Get whether the variable was coupled
+   * @returns Whether the variable was coupled
+   */
   KOKKOS_FUNCTION operator bool() const { return _var.coupled(); }
 
+  /**
+   * Get the current variable gradient
+   * @param datum The Datum object of the current thread
+   * @param qp The local quadrature-point index
+   * @param comp The variable component
+   * @returns The variable gradient
+   */
   KOKKOS_FUNCTION Real3 operator()(Datum & datum, unsigned int qp, unsigned int comp = 0) const
   {
     if (_var.coupled())
@@ -177,16 +266,23 @@ public:
       auto qp_offset = datum.qpOffset();
 
       return side == libMesh::invalid_uint
-                 ? kokkosSystem(_var.sys(comp))
+                 ? datum.system(_var.sys(comp))
                        .getVectorQpGrad(elem, qp_offset + qp, _var.var(comp), _var.tag())
-                 : kokkosSystem(_var.sys(comp))
+                 : datum.system(_var.sys(comp))
                        .getVectorQpGradFace(
                            elem, side, datum.J(qp), qp, _var.var(comp), _var.tag());
     }
     else
       return Real3(0);
   }
+
+private:
+  /**
+   * Coupled Kokkos variable
+   */
+  Variable _var;
 };
+///@}
 
 } // namespace Kokkos
 } // namespace Moose

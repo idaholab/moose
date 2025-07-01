@@ -34,9 +34,9 @@ public:
 protected:
   // Sets the variables this object depend on
   void setVariableDependency();
-  // Sets the quadrature projection status flags for the variables, tags, and subdomains covered by
+  // Sets the quadrature cache status flags for the variables, tags, and subdomains covered by
   // this object
-  void setProjectionFlags();
+  void setCacheFlags();
 };
 
 } // namespace Kokkos

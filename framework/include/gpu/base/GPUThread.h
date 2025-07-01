@@ -20,36 +20,55 @@ namespace Moose
 namespace Kokkos
 {
 
+/**
+ * The Kokkos thread object that aids in converting the one-dimensional thread index into
+ * multi-dimensional thread indices
+ */
 class Thread
 {
-private:
-  // Total thread pool size
-  size_t _size = 0;
-  // Thread pool dimensions
-  size_t _dims[10];
-  // Thread ID divisor of each dimension
-  size_t _divisor[10];
-
 #ifdef MOOSE_KOKKOS_SCOPE
 public:
-  void resize(std::vector<size_t> dims)
-  {
-    _size = 1;
-
-    for (unsigned int dim = 0; dim < dims.size(); ++dim)
-    {
-      _dims[dim] = dims[dim];
-      _divisor[dim] = dim ? _divisor[dim - 1] * dims[dim - 1] : 1;
-      _size *= dims[dim];
-    }
-  }
+  /**
+   * Set the thread pool size and dimension
+   * @param dims The vector containing the size of each dimension
+   */
+  void resize(std::vector<size_t> dims);
+  /**
+   * Get the total thread pool size
+   * @returns The total thread pool size
+   */
   auto size() const { return _size; }
-
+  /**
+   * Get the multi-dimensional thread index of a dimension given a one-dimensional thread index
+   * @param tid The one-dimensional thread index
+   * @param dim for which the multi-dimensional thread index is to be returned
+   * @returns The multi-dimensional thread index of the dimension
+   */
   KOKKOS_FUNCTION auto operator()(size_t tid, unsigned int dim) const
   {
-    return (tid / _divisor[dim]) % _dims[dim];
+    KOKKOS_ASSERT(dim < _dim);
+
+    return (tid / _strides[dim]) % _dims[dim];
   }
 #endif
+
+private:
+  /**
+   * Total thread pool size
+   */
+  size_t _size = 0;
+  /**
+   * Thread pool dimension
+   */
+  unsigned int _dim = 0;
+  /**
+   * Thread pool size of each dimension
+   */
+  size_t _dims[10];
+  /**
+   * Thread pool stride of each dimension
+   */
+  size_t _strides[10];
 };
 
 } // namespace Kokkos
