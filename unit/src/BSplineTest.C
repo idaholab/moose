@@ -41,10 +41,10 @@ TEST(BSplineTest, Degree2Test)
   const libMesh::Point expected_point_2(2.73, 1.2699999999999996, 0);
   const libMesh::Point expected_point_3(3, 1, 0);
 
-  EXPECT_NEAR((point_0 - expected_point_0).norm(), 0, 1e-9);
-  EXPECT_NEAR((point_1 - expected_point_1).norm(), 0, 1e-9);
-  EXPECT_NEAR((point_2 - expected_point_2).norm(), 0, 1e-9);
-  EXPECT_NEAR((point_3 - expected_point_3).norm(), 0, 1e-9);
+  EXPECT_NEAR((point_0 - expected_point_0).norm(), 0, libMesh::Tolerance);
+  EXPECT_NEAR((point_1 - expected_point_1).norm(), 0, libMesh::Tolerance);
+  EXPECT_NEAR((point_2 - expected_point_2).norm(), 0, libMesh::Tolerance);
+  EXPECT_NEAR((point_3 - expected_point_3).norm(), 0, libMesh::Tolerance);
 }
 
 TEST(BSplineTest, Degree3Test)
@@ -63,10 +63,10 @@ TEST(BSplineTest, Degree3Test)
   const libMesh::Point expected_point_2(2.7039999999999997, 1.2799999999999998, 0);
   const libMesh::Point expected_point_3(3, 1, 0);
 
-  EXPECT_NEAR((point_0 - expected_point_0).norm(), 0, 1e-9);
-  EXPECT_NEAR((point_1 - expected_point_1).norm(), 0, 1e-9);
-  EXPECT_NEAR((point_2 - expected_point_2).norm(), 0, 1e-9);
-  EXPECT_NEAR((point_3 - expected_point_3).norm(), 0, 1e-9);
+  EXPECT_NEAR((point_0 - expected_point_0).norm(), 0, libMesh::Tolerance);
+  EXPECT_NEAR((point_1 - expected_point_1).norm(), 0, libMesh::Tolerance);
+  EXPECT_NEAR((point_2 - expected_point_2).norm(), 0, libMesh::Tolerance);
+  EXPECT_NEAR((point_3 - expected_point_3).norm(), 0, libMesh::Tolerance);
 }
 
 TEST(BSplineTest, Degree4Test)
@@ -85,10 +85,10 @@ TEST(BSplineTest, Degree4Test)
   const libMesh::Point expected_point_2(2.7152000000000003, 1.2576, 0);
   const libMesh::Point expected_point_3(3, 1, 0);
 
-  EXPECT_NEAR((point_0 - expected_point_0).norm(), 0, 1e-9);
-  EXPECT_NEAR((point_1 - expected_point_1).norm(), 0, 1e-9);
-  EXPECT_NEAR((point_2 - expected_point_2).norm(), 0, 1e-9);
-  EXPECT_NEAR((point_3 - expected_point_3).norm(), 0, 1e-9);
+  EXPECT_NEAR((point_0 - expected_point_0).norm(), 0, libMesh::Tolerance);
+  EXPECT_NEAR((point_1 - expected_point_1).norm(), 0, libMesh::Tolerance);
+  EXPECT_NEAR((point_2 - expected_point_2).norm(), 0, libMesh::Tolerance);
+  EXPECT_NEAR((point_3 - expected_point_3).norm(), 0, libMesh::Tolerance);
 }
 
 /**
