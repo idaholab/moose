@@ -26,12 +26,12 @@ System::System(SystemBase & system)
   : MeshHolder(*system.mesh().getKokkosMesh()),
     AssemblyHolder(system.feProblem().kokkosAssembly()),
     _system(system),
-    _mesh(system.mesh())
-{
-}
-
-void
-System::init()
+    _mesh(system.mesh()),
+    _dof_map(system.dofMap()),
+    _comm(system.dofMap().comm()),
+    _num_vars(system.system().n_vars()),
+    _num_local_dofs(system.system().n_local_dofs()),
+    _num_ghost_dofs(system.dofMap().get_send_list().size())
 {
   setupVariables();
   setupDofs();
@@ -45,8 +45,6 @@ System::init()
   _qp_solutions.create(MAX_TAG);
   _qp_solutions_grad.create(MAX_TAG);
   _variable_on_qp.create(MAX_TAG);
-
-  _initialized = true;
 }
 
 void
@@ -54,14 +52,12 @@ System::setupVariables()
 {
   auto & sys = _system.system();
 
-  _n_vars = sys.n_vars();
+  _var_fe_types.create(_num_vars);
+  _var_subdomain_active.create(_num_vars, _mesh.meshSubdomains().size());
 
-  _var_fe_types.create(_n_vars);
-  _var_subdomain_active.create(_n_vars, _mesh.meshSubdomains().size());
-
-  for (unsigned int var = 0; var < _n_vars; ++var)
+  for (unsigned int var = 0; var < _num_vars; ++var)
   {
-    _var_fe_types[var] = kokkosAssembly().getFETypeNum(sys.variable_type(var));
+    _var_fe_types[var] = kokkosAssembly().getFETypeID(sys.variable_type(var));
 
     for (auto subdomain : _mesh.meshSubdomains())
       _var_subdomain_active(var, kokkosMesh().getSubdomainID(subdomain)) =
@@ -77,7 +73,7 @@ System::setupVariables()
 
   if (nl_system)
   {
-    _coupling.create(_n_vars);
+    _coupling.create(_num_vars);
 
     std::map<unsigned int, std::vector<unsigned int>> coupling;
 
@@ -87,7 +83,7 @@ System::setupVariables()
       if (ivar->number() != jvar->number())
         coupling[ivar->number()].push_back(jvar->number());
 
-    for (unsigned int var = 0; var < _n_vars; ++var)
+    for (unsigned int var = 0; var < _num_vars; ++var)
       _coupling[var] = coupling[var];
 
     _coupling.copy();
@@ -98,12 +94,9 @@ void
 System::setupDofs()
 {
   auto & sys = _system.system();
-  auto & dof_map = _system.dofMap();
 
-  _n_elems = kokkosMesh().getLocalElementMap().size();
-  _n_nodes = kokkosMesh().getLocalNodeMap().size();
-  _n_local_dofs = sys.n_local_dofs();
-  _n_ghost_dofs = dof_map.get_send_list().size();
+  auto num_elems = kokkosMesh().getLocalElementMap().size();
+  auto num_nodes = kokkosMesh().getLocalNodeMap().size();
 
   _residual_tag_active.create(MAX_TAG);
   _residual_tag_active = false;
@@ -114,35 +107,35 @@ System::setupDofs()
   _vectors.create(MAX_TAG);
   _matrices.create(MAX_TAG);
 
-  _local_elem_dof_index.create(_n_vars);
-  _local_node_dof_index.create(_n_vars);
-  _local_to_global_dof_index.create(_n_local_dofs + _n_ghost_dofs);
+  _local_elem_dof_index.create(_num_vars);
+  _local_node_dof_index.create(_num_vars);
+  _local_to_global_dof_index.create(_num_local_dofs + _num_ghost_dofs);
 
-  _max_dofs_per_elem.create(_n_vars);
+  _max_dofs_per_elem.create(_num_vars);
   _max_dofs_per_elem = 0;
 
   auto solution = dynamic_cast<PetscVector<Number> *>(sys.current_local_solution.get());
 
   std::vector<dof_id_type> dof_indices;
 
-  for (unsigned int var = 0; var < _n_vars; ++var)
+  for (unsigned int var = 0; var < _num_vars; ++var)
   {
     for (auto & [elem, id] : kokkosMesh().getLocalElementMap())
     {
-      dof_map.dof_indices(elem, dof_indices, var);
+      _dof_map.dof_indices(elem, dof_indices, var);
 
       _max_dofs_per_elem[var] = std::max(_max_dofs_per_elem[var], dof_indices.size());
     }
 
-    _local_elem_dof_index[var].create(_n_elems, _max_dofs_per_elem[var]);
+    _local_elem_dof_index[var].create(num_elems, _max_dofs_per_elem[var]);
     _local_elem_dof_index[var] = libMesh::DofObject::invalid_id;
 
-    _local_node_dof_index[var].create(_n_nodes);
+    _local_node_dof_index[var].create(num_nodes);
     _local_node_dof_index[var] = libMesh::DofObject::invalid_id;
 
     for (auto & [elem, id] : kokkosMesh().getLocalElementMap())
     {
-      dof_map.dof_indices(elem, dof_indices, var);
+      _dof_map.dof_indices(elem, dof_indices, var);
 
       for (unsigned int dof = 0; dof < dof_indices.size(); ++dof)
       {
@@ -153,7 +146,7 @@ System::setupDofs()
 
     for (auto & [node, id] : kokkosMesh().getLocalNodeMap())
     {
-      dof_map.dof_indices(node, dof_indices, var);
+      _dof_map.dof_indices(node, dof_indices, var);
 
       if (dof_indices.size())
         _local_node_dof_index[var][id] = solution->map_global_to_local_index(dof_indices[0]);
@@ -168,22 +161,21 @@ System::setupDofs()
 
   // Setup DOF communication maps
 
-  _comm = &dof_map.comm();
-  _n_procs = _comm->size();
+  auto num_procs = _comm.size();
 
-  std::vector<std::vector<dof_id_type>> send_list(_n_procs);
-  std::vector<std::vector<dof_id_type>> recv_list(_n_procs);
+  std::vector<std::vector<dof_id_type>> send_list(num_procs);
+  std::vector<std::vector<dof_id_type>> recv_list(num_procs);
 
-  for (auto dof : dof_map.get_send_list())
-    recv_list[dof_map.dof_owner(dof)].push_back(dof);
+  for (auto dof : _dof_map.get_send_list())
+    recv_list[_dof_map.dof_owner(dof)].push_back(dof);
 
-  for (processor_id_type proc = 0; proc < _n_procs; proc++)
-    _comm->scatter(recv_list, send_list[proc], proc);
+  for (processor_id_type proc = 0; proc < num_procs; proc++)
+    _comm.scatter(recv_list, send_list[proc], proc);
 
-  _local_comm_list.create(_n_procs);
-  _ghost_comm_list.create(_n_procs);
+  _local_comm_list.create(num_procs);
+  _ghost_comm_list.create(num_procs);
 
-  for (processor_id_type proc = 0; proc < _n_procs; proc++)
+  for (processor_id_type proc = 0; proc < num_procs; proc++)
   {
     _local_comm_list[proc].create(send_list[proc].size());
     _ghost_comm_list[proc].create(recv_list[proc].size());
@@ -202,16 +194,15 @@ System::setupDofs()
 void
 System::setupSparsity()
 {
-  auto & dof_map = _system.dofMap();
-  auto pattern = dof_map.get_sparsity_pattern();
+  auto pattern = _dof_map.get_sparsity_pattern();
 
   std::vector<PetscInt> col_idx;
   std::vector<PetscInt> row_idx;
   std::vector<PetscInt> row_ptr = {0};
 
-  for (PetscInt r = dof_map.first_dof(); r < dof_map.end_dof(); ++r)
+  for (PetscInt r = _dof_map.first_dof(); r < _dof_map.end_dof(); ++r)
   {
-    auto & cols = pattern->get_sparsity_pattern().at(r - dof_map.first_dof());
+    auto & cols = pattern->get_sparsity_pattern().at(r - _dof_map.first_dof());
 
     for (auto col : cols)
     {
@@ -222,10 +213,12 @@ System::setupSparsity()
     row_ptr.push_back(col_idx.size());
   }
 
-  std::vector<std::vector<PetscInt>> send_cols(_n_procs), send_num_cols(_n_procs);
-  std::vector<std::vector<PetscInt>> recv_cols(_n_procs), recv_num_cols(_n_procs);
+  auto num_procs = _comm.size();
 
-  for (processor_id_type proc = 0; proc < _n_procs; proc++)
+  std::vector<std::vector<PetscInt>> send_cols(num_procs), send_num_cols(num_procs);
+  std::vector<std::vector<PetscInt>> recv_cols(num_procs), recv_num_cols(num_procs);
+
+  for (processor_id_type proc = 0; proc < num_procs; proc++)
     for (auto r : _local_comm_list[proc])
     {
       for (PetscInt c = row_ptr[r]; c < row_ptr[r + 1]; ++c)
@@ -234,17 +227,17 @@ System::setupSparsity()
       send_num_cols[proc].push_back(row_ptr[r + 1] - row_ptr[r]);
     }
 
-  for (processor_id_type proc = 0; proc < _n_procs; proc++)
+  for (processor_id_type proc = 0; proc < num_procs; proc++)
   {
-    _comm->scatter(send_cols, recv_cols[proc], proc);
-    _comm->scatter(send_num_cols, recv_num_cols[proc], proc);
+    _comm.scatter(send_cols, recv_cols[proc], proc);
+    _comm.scatter(send_num_cols, recv_num_cols[proc], proc);
   }
 
-  std::vector<PetscInt> col(_n_procs), row(_n_procs);
+  std::vector<PetscInt> col(num_procs), row(num_procs);
 
-  for (auto r : dof_map.get_send_list())
+  for (auto r : _dof_map.get_send_list())
   {
-    auto proc = dof_map.dof_owner(r);
+    auto proc = _dof_map.dof_owner(r);
     auto n_cols = recv_num_cols[proc][row[proc]++];
 
     for (PetscInt c = 0; c < n_cols; ++c)
@@ -305,7 +298,7 @@ System::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 
   if (!dofs.isAlloc())
   {
-    dofs.create(_n_local_dofs + _n_ghost_dofs);
+    dofs.create(_num_local_dofs + _num_ghost_dofs);
     dofs = false;
   }
 
@@ -315,16 +308,18 @@ System::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
   // Let remote processes know about ghost DOFs associated with nodal BCs not to compute
   // residual on them
 
-  std::vector<std::vector<char>> send(_n_procs), recv(_n_procs);
+  auto num_procs = _comm.size();
 
-  for (processor_id_type proc = 0; proc < _n_procs; proc++)
+  std::vector<std::vector<char>> send(num_procs), recv(num_procs);
+
+  for (processor_id_type proc = 0; proc < num_procs; proc++)
     for (auto dof : _local_comm_list[proc])
       send[proc].push_back(dofs[dof]);
 
-  for (processor_id_type proc = 0; proc < _n_procs; proc++)
-    _comm->scatter(send, recv[proc], proc);
+  for (processor_id_type proc = 0; proc < num_procs; proc++)
+    _comm.scatter(send, recv[proc], proc);
 
-  for (processor_id_type proc = 0; proc < _n_procs; proc++)
+  for (processor_id_type proc = 0; proc < num_procs; proc++)
     for (dof_id_type i = 0; i < _ghost_comm_list[proc].size(); ++i)
       dofs[_ghost_comm_list[proc][i]] = recv[proc][i];
 }
@@ -468,7 +463,7 @@ System::setActiveMatrixTags(std::set<TagID> tags)
 }
 
 void
-System::setProjectionFlags(std::set<SubdomainID> subdomains)
+System::setCacheFlags(std::set<SubdomainID> subdomains)
 {
   for (auto tag : _active_variable_tags)
   {
@@ -495,14 +490,14 @@ System::preallocate()
   for (auto tag : _active_variable_tags)
   {
     if (!_qp_solutions[tag].isAlloc())
-      _qp_solutions[tag].create(_mesh.meshSubdomains().size(), _n_vars);
+      _qp_solutions[tag].create(_mesh.meshSubdomains().size(), _num_vars);
 
     if (!_qp_solutions_grad[tag].isAlloc())
-      _qp_solutions_grad[tag].create(_mesh.meshSubdomains().size(), _n_vars);
+      _qp_solutions_grad[tag].create(_mesh.meshSubdomains().size(), _num_vars);
 
     if (!_variable_on_qp[tag].isAlloc())
     {
-      _variable_on_qp[tag].create(_mesh.meshSubdomains().size(), _n_vars);
+      _variable_on_qp[tag].create(_mesh.meshSubdomains().size(), _num_vars);
       _variable_on_qp[tag] = false;
     }
 

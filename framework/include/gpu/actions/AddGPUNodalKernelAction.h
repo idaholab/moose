@@ -11,6 +11,10 @@
 
 #include "MooseObjectAction.h"
 
+/**
+ * Adds a Kokkos nodal kernel for GPU computation
+ * Associated with the [KokkosNodalKernels] syntax
+ */
 class AddKokkosNodalKernelAction : public MooseObjectAction
 {
 public:

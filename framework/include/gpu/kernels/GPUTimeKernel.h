@@ -35,7 +35,7 @@ public:
   // Constructor
   TimeKernel(const InputParameters & parameters)
     : Kernel<Derived>(parameters),
-      _u_dot(kokkosSystems(), _var, Moose::SOLUTION_DOT_TAG),
+      _u_dot(_var, Moose::SOLUTION_DOT_TAG),
       _du_dot_du(_var.sys().duDotDu(_var.number()))
   {
   }
@@ -61,7 +61,7 @@ public:
     kernel->computeResidualAdditional(local_re, datum);
 
     for (unsigned int i = 0; i < datum.n_dofs(); ++i)
-      accumulateTaggedLocalResidual(local_re[i], datum.elem().id, i);
+      accumulateTaggedElementalResidual(local_re[i], datum.elem().id, i);
   }
 
 protected:
