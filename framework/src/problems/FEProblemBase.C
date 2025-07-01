@@ -2533,7 +2533,7 @@ FEProblemBase::addDefaultNonlinearConvergence(const InputParameters & params_to_
 void
 FEProblemBase::addDefaultMultiAppFixedPointConvergence(const InputParameters & params_to_apply)
 {
-  const std::string class_name = "DefaultFixedPointConvergence";
+  const std::string class_name = "DefaultMultiAppFixedPointConvergence";
   InputParameters params = _factory.getValidParams(class_name);
   params.applyParameters(params_to_apply);
   params.applyParameters(parameters());

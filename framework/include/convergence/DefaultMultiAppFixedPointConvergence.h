@@ -16,12 +16,12 @@ class FixedPointSolve;
 /**
  * Default fixed point convergence criteria.
  */
-class DefaultFixedPointConvergence : public DefaultConvergenceBase
+class DefaultMultiAppFixedPointConvergence : public DefaultConvergenceBase
 {
 public:
   static InputParameters validParams();
 
-  DefaultFixedPointConvergence(const InputParameters & parameters);
+  DefaultMultiAppFixedPointConvergence(const InputParameters & parameters);
 
   virtual void initialize() override;
 

@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DefaultFixedPointConvergence.h"
+#include "DefaultMultiAppFixedPointConvergence.h"
 #include "FixedPointSolve.h"
 #include "Console.h"
 
-registerMooseObject("MooseApp", DefaultFixedPointConvergence);
+registerMooseObject("MooseApp", DefaultMultiAppFixedPointConvergence);
 
 InputParameters
-DefaultFixedPointConvergence::validParams()
+DefaultMultiAppFixedPointConvergence::validParams()
 {
   InputParameters params = DefaultConvergenceBase::validParams();
   params += FixedPointSolve::fixedPointDefaultConvergenceParams();
@@ -24,7 +24,8 @@ DefaultFixedPointConvergence::validParams()
   return params;
 }
 
-DefaultFixedPointConvergence::DefaultFixedPointConvergence(const InputParameters & parameters)
+DefaultMultiAppFixedPointConvergence::DefaultMultiAppFixedPointConvergence(
+    const InputParameters & parameters)
   : DefaultConvergenceBase(parameters),
     _accept_max_it(getSharedExecutionerParam<bool>("accept_on_max_fixed_point_iteration")),
     _fixed_point_rel_tol(getSharedExecutionerParam<Real>("fixed_point_rel_tol")),
@@ -41,13 +42,13 @@ DefaultFixedPointConvergence::DefaultFixedPointConvergence(const InputParameters
 }
 
 void
-DefaultFixedPointConvergence::initialize()
+DefaultMultiAppFixedPointConvergence::initialize()
 {
   _pp_history.str("");
 }
 
 Convergence::MooseConvergenceStatus
-DefaultFixedPointConvergence::checkConvergence(unsigned int iter)
+DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
 {
   TIME_SECTION(_perfid_check_convergence);
 
@@ -108,7 +109,7 @@ DefaultFixedPointConvergence::checkConvergence(unsigned int iter)
 }
 
 void
-DefaultFixedPointConvergence::computeCustomConvergencePostprocessor(unsigned int iter)
+DefaultMultiAppFixedPointConvergence::computeCustomConvergencePostprocessor(unsigned int iter)
 {
   if (iter > 0 && !getParam<bool>("direct_pp_value"))
     _pp_old = _pp_new;
