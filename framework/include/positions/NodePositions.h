@@ -16,12 +16,12 @@
 /**
  * Positions from nodes of elements in the mesh
  */
-class ElementNodePositions : public Positions, BlockRestrictable
+class NodePositions : public Positions, BlockRestrictable
 {
 public:
   static InputParameters validParams();
-  ElementNodePositions(const InputParameters & parameters);
-  virtual ~ElementNodePositions() = default;
+  NodePositions(const InputParameters & parameters);
+  virtual ~NodePositions() = default;
 
   virtual void initialize() override;
 

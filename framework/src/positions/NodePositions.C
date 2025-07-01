@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ElementNodePositions.h"
+#include "NodePositions.h"
 
 #include "libmesh/parallel_algebra.h"
 
-registerMooseObject("MooseApp", ElementNodePositions);
+registerMooseObject("MooseApp", NodePositions);
 
 InputParameters
-ElementNodePositions::validParams()
+NodePositions::validParams()
 {
   InputParameters params = Positions::validParams();
   params.addClassDescription("Positions of element nodes.");
@@ -29,7 +29,7 @@ ElementNodePositions::validParams()
   return params;
 }
 
-ElementNodePositions::ElementNodePositions(const InputParameters & parameters)
+NodePositions::NodePositions(const InputParameters & parameters)
   : Positions(parameters), BlockRestrictable(this), _mesh(_fe_problem.mesh())
 {
   // Mesh is ready at construction
@@ -39,7 +39,7 @@ ElementNodePositions::ElementNodePositions(const InputParameters & parameters)
 }
 
 void
-ElementNodePositions::initialize()
+NodePositions::initialize()
 {
   clearPositions();
 
@@ -66,7 +66,7 @@ ElementNodePositions::initialize()
 }
 
 void
-ElementNodePositions::finalize()
+NodePositions::finalize()
 {
   // Gather up the positions vector on all ranks
   mooseAssert(initialized(false), "Positions vector has not been initialized.");

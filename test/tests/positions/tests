@@ -27,8 +27,8 @@
     []
     [mesh_nodes]
       type = 'JSONDiff'
-      input = 'element_node_positions.i'
-      jsondiff = 'element_node_positions_out.json'
+      input = 'node_positions.i'
+      jsondiff = 'node_positions_out.json'
       detail = 'element nodes from a mesh, with or without block restriction,'
     []
     [mesh_quadrature_points]
