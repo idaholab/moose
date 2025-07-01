@@ -31,25 +31,7 @@ public:
   }
 
   KOKKOS_FUNCTION void
-  computeJacobianInternal(const Derived * kernel, ResidualDatum & datum, Real * local_ke) const
-  {
-    if (_lumping)
-    {
-      for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-      {
-        datum.reinit(qp);
-
-        for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-          for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-            local_ke[i] += datum.JxW(qp) * kernel->computeQpJacobian(i, j, qp, datum);
-      }
-
-      for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-        accumulateTaggedElementalMatrix(local_ke[i], datum.elem().id, i, i, datum.jvar());
-    }
-    else
-      Moose::Kokkos::TimeKernel<Derived>::computeJacobianInternal(kernel, datum, local_ke);
-  }
+  computeJacobianInternal(const Derived * kernel, ResidualDatum & datum, Real * local_ke) const;
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -68,6 +50,30 @@ public:
 protected:
   const bool _lumping;
 };
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+KokkosTimeDerivative<Derived>::computeJacobianInternal(const Derived * kernel,
+                                                       ResidualDatum & datum,
+                                                       Real * local_ke) const
+{
+  if (_lumping)
+  {
+    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+    {
+      datum.reinit(qp);
+
+      for (unsigned int i = 0; i < datum.n_idofs(); ++i)
+        for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
+          local_ke[i] += datum.JxW(qp) * kernel->computeQpJacobian(i, j, qp, datum);
+    }
+
+    for (unsigned int i = 0; i < datum.n_idofs(); ++i)
+      accumulateTaggedElementalMatrix(local_ke[i], datum.elem().id, i, i, datum.jvar());
+  }
+  else
+    Moose::Kokkos::TimeKernel<Derived>::computeJacobianInternal(kernel, datum, local_ke);
+}
 
 class KokkosTimeDerivativeKernel final : public KokkosTimeDerivative<KokkosTimeDerivativeKernel>
 {

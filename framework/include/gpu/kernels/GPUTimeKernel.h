@@ -16,6 +16,9 @@ namespace Moose
 namespace Kokkos
 {
 
+/**
+ * The base class for Kokkos time-derivative kernels
+ */
 template <typename Derived>
 class TimeKernel : public Kernel<Derived>
 {
@@ -32,7 +35,9 @@ public:
     return params;
   }
 
-  // Constructor
+  /**
+   * Constructor
+   */
   TimeKernel(const InputParameters & parameters)
     : Kernel<Derived>(parameters),
       _u_dot(_var, Moose::SOLUTION_DOT_TAG),
@@ -40,36 +45,53 @@ public:
   {
   }
 
-  // Empty method to prevent compile errors even when this method was not hidden by the derived
-  // class
+  /**
+   * Hook for additional computation for residual after the standard calls
+   * @param local_re The temporary storage storing the residual contribution of each local DOF
+   * @param datum The ResidualDatum object of the current thread
+   */
   KOKKOS_FUNCTION void computeResidualAdditional(Real * /* local_re */,
                                                  ResidualDatum & /* datum */) const
   {
   }
 
+  /**
+   * The parallel computation body that hides the base class method to allow additional computation
+   * for residual through computeResidualAdditional()
+   */
   KOKKOS_FUNCTION void
-  computeResidualInternal(const Derived * kernel, ResidualDatum & datum, Real * local_re) const
-  {
-    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-    {
-      datum.reinit(qp);
-
-      for (unsigned int i = 0; i < datum.n_dofs(); ++i)
-        local_re[i] += datum.JxW(qp) * kernel->computeQpResidual(i, qp, datum);
-    }
-
-    kernel->computeResidualAdditional(local_re, datum);
-
-    for (unsigned int i = 0; i < datum.n_dofs(); ++i)
-      accumulateTaggedElementalResidual(local_re[i], datum.elem().id, i);
-  }
+  computeResidualInternal(const Derived * kernel, ResidualDatum & datum, Real * local_re) const;
 
 protected:
-  /// Time derivative of u
+  /**
+   * Time derivative of the current solution at quadrature points
+   */
   VariableValue _u_dot;
-  /// Derivative of u_dot with respect to u
+  /**
+   * Derivative of u_dot with respect to u
+   */
   Scalar<const Real> _du_dot_du;
 };
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+TimeKernel<Derived>::computeResidualInternal(const Derived * kernel,
+                                             ResidualDatum & datum,
+                                             Real * local_re) const
+{
+  for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+  {
+    datum.reinit(qp);
+
+    for (unsigned int i = 0; i < datum.n_dofs(); ++i)
+      local_re[i] += datum.JxW(qp) * kernel->computeQpResidual(i, qp, datum);
+  }
+
+  kernel->computeResidualAdditional(local_re, datum);
+
+  for (unsigned int i = 0; i < datum.n_dofs(); ++i)
+    accumulateTaggedElementalResidual(local_re[i], datum.elem().id, i);
+}
 
 } // namespace Kokkos
 } // namespace Moose
