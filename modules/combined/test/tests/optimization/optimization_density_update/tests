@@ -1,32 +1,36 @@
 [Tests]
-    issues = '#25602'
-    design = 'DensityUpdate.md'
-    [top_opt_2d]
-      type = 'Exodiff'
-      input = 'top_opt_2d.i'
-      exodiff = 'top_opt_2d_out.e'
-      requirement = 'The system shall be able to solve a 2D topology optimization problem using the solid isotropic material with penalization method(SIMP) to find the optimal solution and avoid grayscale boundaries/elements.'
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
-    []
-    [top_opt_3d]
-      type = 'Exodiff'
-      input = 'top_opt_3d.i'
-      exodiff = 'top_opt_3d_out.e'
-      requirement = 'The system shall be able to solve a 3D topology optimization problem using the SIMP method to find the optimal solution and avoid grayscale boundaries/elements.'
-      heavy = true
-    []
-    [top_opt_2d_pde_filter]
-      type = 'Exodiff'
-      input = 'top_opt_2d_pde_filter.i'
-      exodiff = 'top_opt_2d_pde_filter_out.e'
-      requirement = 'The system shall be able to solve a 2D topology optimization problem using the SIMP method and PDE sensitivity filtering to find the optimal solution and avoid grayscale boundaries/elements.'
-    []
-    [top_opt_3d_pde_filter]
-      type = 'Exodiff'
-      input = 'top_opt_3d_pde_filter.i'
-      exodiff = 'top_opt_3d_pde_filter_out.e'
-      requirement = 'The system shall be able to solve a 3D topology optimization problem using the SIMP method and PDE sensitivity filtering to find the optimal solution and avoid grayscale boundaries/elements.'
-      heavy = true
-    []
+  issues = '#25602'
+  design = 'DensityUpdate.md'
+  [top_opt_2d]
+    type = 'Exodiff'
+    input = 'top_opt_2d.i'
+    exodiff = 'top_opt_2d_out.e'
+    valgrind = 'none'
+    requirement = 'The system shall be able to solve a 2D topology optimization problem using the solid isotropic material with penalization method(SIMP) to find the optimal solution and avoid grayscale boundaries/elements.'
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
   []
+  [top_opt_3d]
+    type = 'Exodiff'
+    input = 'top_opt_3d.i'
+    exodiff = 'top_opt_3d_out.e'
+    requirement = 'The system shall be able to solve a 3D topology optimization problem using the SIMP method to find the optimal solution and avoid grayscale boundaries/elements.'
+    heavy = true
+    valgrind = 'none'
+  []
+  [top_opt_2d_pde_filter]
+    type = 'Exodiff'
+    input = 'top_opt_2d_pde_filter.i'
+    exodiff = 'top_opt_2d_pde_filter_out.e'
+    valgrind = 'none'
+    requirement = 'The system shall be able to solve a 2D topology optimization problem using the SIMP method and PDE sensitivity filtering to find the optimal solution and avoid grayscale boundaries/elements.'
+  []
+  [top_opt_3d_pde_filter]
+    type = 'Exodiff'
+    input = 'top_opt_3d_pde_filter.i'
+    exodiff = 'top_opt_3d_pde_filter_out.e'
+    requirement = 'The system shall be able to solve a 3D topology optimization problem using the SIMP method and PDE sensitivity filtering to find the optimal solution and avoid grayscale boundaries/elements.'
+    heavy = true
+    valgrind = 'none'
+  []
+[]
