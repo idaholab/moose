@@ -86,6 +86,7 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = concentration
+    coefficient = diffusivity
   []
 []
 
