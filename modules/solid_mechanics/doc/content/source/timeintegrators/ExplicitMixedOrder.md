@@ -33,11 +33,17 @@ then,
 
 When using Dirichlet BCs, one must use the ([ExplicitDirichletBC](source/bcs/ExplicitDirichletBC.md),[ExplicitFunctionDirichletBC](source/bcs/ExplicitFunctionDirichletBC.md)) variations to enforce Dirichlet BC's properly.
 
-Additionally, the time integrator must be used with `MassMatrix`, with a properly tagged mass matrix.
+Additionally, the time integrator must be used with `MassMatrix`, with a properly tagged mass matrix. If both second and first time derivatives of a variable are present, they need to be distinguished by a tagged mass matrix and another different tagged damping matrix.
 
 ## Example Input File Syntax
 
-An example input file is shown below:
+An example input file is shown below. The file solves the equations:
+\begin{equation}
+    \begin{aligned}
+        \ddot{disp_x} + \dot{disp_x} = 0\\
+        \dot{disp_y}
+    \end{aligned} = 0
+\end{equation}
 
 ```
 
@@ -55,6 +61,12 @@ An example input file is shown below:
         matrix_tags = 'system'
         variable = disp_x
     []
+    [dampingmatrix]
+        type = MassMatrix
+        density = 0.8
+        matrix_tags = 'damping'
+        variable = disp_x
+    []
     [massmatrix_y]
         type = MassMatrix
         density = 1
@@ -69,6 +81,9 @@ An example input file is shown below:
     [TimeIntegrator]
         type = CentralDifferenceDirect
         mass_matrix_tag = 'system'
+        damping_matrix_tag = 'damping'
+        second_order_vars = disp_x
+        first_order_vars = disp_y
     []
 []
 

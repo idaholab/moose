@@ -10,7 +10,7 @@
   elem_type = QUAD4
 []
 
-dt_and_v0 = 0.00005
+dt_and_v0 = 0.00001
 
 [Problem]
   extra_tag_matrices = 'mass damping'
@@ -78,10 +78,33 @@ dt_and_v0 = 0.00005
   []
 []
 
+[Postprocessors]
+  [error]
+    type = NodalL2Error
+    variable = u
+    function = u_exact
+  []
+[]
+
+[VectorPostprocessors]
+  [u]
+    type = NodalValueSampler
+    variable = u
+    sort_by = id
+    outputs = csv
+  []
+  [u_exact]
+    type = NodalValueSampler
+    variable = u_exact
+    sort_by = id
+    outputs = csv
+  []
+[]
+
 [Executioner]
   type = Transient
   start_time = 0.0
-  num_steps = 20
+  num_steps = 50
   dt = ${dt_and_v0}
   l_tol = 1e-12
   [TimeIntegrator]
@@ -96,4 +119,9 @@ dt_and_v0 = 0.00005
 
 [Outputs]
   exodus = true
+  [csv]
+    type = CSV
+    file_base = './mms_mixed_order_output/'
+    execute_vector_postprocessors_on = 'INITIAL TIMESTEP_END'
+  []
 []

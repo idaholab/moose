@@ -283,15 +283,6 @@ ExplicitMixedOrder::solve()
   // Update the solution
   *_nonlinear_implicit_system->solution = _nl->solutionOld();
   *_nonlinear_implicit_system->solution += *_solution_update;
-
-  // Clip the solution to be <=1
-  auto & nlSol = *_nonlinear_implicit_system->solution;
-  for (auto i = nlSol.first_local_index(); i < nlSol.last_local_index(); ++i)
-  {
-    if (nlSol(i) > 1.0)
-      nlSol.set(i, 1.0);
-  }
-
   _nonlinear_implicit_system->update();
   _nl->setSolution(*_nonlinear_implicit_system->current_local_solution);
   _nonlinear_implicit_system->nonlinear_solver->converged = converged;
@@ -357,12 +348,12 @@ ExplicitMixedOrder::centralDifference()
     coef->reciprocal();
     a->pointwise_mult(*coef, *r);
   }
-  // _console << "accel: " << *a << std::endl;
 
   // Calculate velocity
   auto delta_v = a->clone();
   delta_v->scale((_dt + _dt_old) / 2);
   vn->add(*delta_v);
+
   // _console << "vel: " << *vn << std::endl;
 
   // close the vectors

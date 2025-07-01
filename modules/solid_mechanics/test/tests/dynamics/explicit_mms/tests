@@ -16,6 +16,12 @@
       exodiff = mms_direct_second_order_with_ic_out.e
       detail = "for systems with initial velocity conditions"
     []
+    [mixed_order_with_damping]
+      type = Exodiff
+      input = mms_mixed_order.i
+      output = mms_mixed_order_out.e
+      detail = "systems with both second and first order time derivatioves for 1 variable (mass and damping)"
+    []
   []
   [failures]
     requirement = "The explicit time integrator will error when not all"
