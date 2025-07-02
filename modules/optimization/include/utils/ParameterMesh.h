@@ -10,13 +10,18 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "KDTree.h"
 
+#include "libmesh/id_types.h"
+#include <unordered_map>
 #include "libmesh/parallel.h"
 #include "libmesh/fe_type.h"
+#include "libmesh/point.h"
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/point_locator_base.h"
 #include "libmesh/exodusII_io.h"
+#include <vector>
 
 namespace libMesh
 {
@@ -39,7 +44,9 @@ class ParameterMesh
 public:
   ParameterMesh(const libMesh::FEType & param_type,
                 const std::string & exodus_mesh,
-                const std::vector<std::string> & var_names = {});
+                const std::vector<std::string> & var_names = {},
+                const bool find_closest = false,
+                const unsigned int kdtree_candidates = 5);
 
   /**
    * @return the number of parameters read from the mesh for a single timestep
@@ -77,10 +84,34 @@ public:
 protected:
   libMesh::Parallel::Communicator _communicator;
   libMesh::ReplicatedMesh _mesh;
+  /// Find closest projection points
+  const bool _find_closest;
   std::unique_ptr<libMesh::EquationSystems> _eq;
   libMesh::System * _sys;
   std::unique_ptr<libMesh::PointLocatorBase> _point_locator;
   std::unique_ptr<libMesh::ExodusII_IO> _exodusII_io;
 
   dof_id_type _param_dofs;
+
+  /// Node-based KDTree optimization
+  std::vector<Point> _mesh_nodes;
+  std::unique_ptr<KDTree> _node_kdtree;
+  std::unordered_map<dof_id_type, std::set<const libMesh::Elem *>> _node_to_elements;
+  unsigned int _kdtree_candidates;
+
+private:
+  /**
+   * Returns the point on the parameter mesh that is projected from the test point
+   * @param p test point
+   * @return Point
+   */
+  Point projectToMesh(const Point & p) const;
+
+  /**
+   * Find closest point on the element to the given point
+   * @param elem
+   * @param p
+   * @return Point
+   */
+  Point closestPoint(const Elem & elem, const Point & p) const;
 };
