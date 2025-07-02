@@ -20,6 +20,7 @@
       Outputs/file_base=part1_out'
     recover = false
     abs_zero = 1e-7
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to create a checkpoint for restarting a single phase compressible flow simulation.'
   []
 

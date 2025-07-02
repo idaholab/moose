@@ -11,6 +11,7 @@
       exodiff = 'transient.e'
       custom_cmp = 'transient.exodiff'
       no_error_deprecated = True
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'in a transient problem, with properties defined by HeatStructureMaterials.'
     []
     [by_materials]

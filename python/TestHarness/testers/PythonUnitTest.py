@@ -26,6 +26,7 @@ class PythonUnitTest(RunApp):
         params['recover'] = False
         # Multiple executions; doesn't support perf graph capture
         params['capture_perf_graph'] = False
+        params['restep'] = False
         return params
 
     def __init__(self, name, params):
