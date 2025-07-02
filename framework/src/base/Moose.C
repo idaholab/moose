@@ -344,13 +344,13 @@ addActionTypes(Syntax & syntax)
                            " add_external_aux_variables)"
                            "(add_mortar_variable)"
                            "(setup_variable_complete)"
-                           "(add_field_split)" // split objects required before field split preconditioner itself
-                           "(add_preconditioning)" // preconditioner may introduce objects such as static condensation which influence the underlying types of tagged matrices
-                           "(create_tagged_matrices)"
                            "(check_integrity_early_physics)"  // checks that systems and variables are consistent
                            "(setup_quadrature)"
                            "(add_convergence)"
                            "(add_default_convergence)"
+                           "(add_field_split)" // split objects required before field split preconditioner itself
+                           "(add_preconditioning)" // preconditioner may introduce objects such as static condensation which influence the underlying types of tagged matrices
+                           "(create_tagged_matrices)"
                            "(add_periodic_bc)"
                            "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_distribution)"
