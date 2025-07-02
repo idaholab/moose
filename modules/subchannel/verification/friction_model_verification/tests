@@ -11,6 +11,18 @@
     abs_zero = 1e-5
     max_threads = 1
     max_parallel = 1
-    requirement = 'The system shall use the default friction model v2'
+    requirement = 'The system shall be able to solve a two channel problem with the default friction model for verification purposes.'
+  []
+  [friction_model_verification2]
+    type = CSVDiff
+    input = two_channel2.i
+    csvdiff = two_channel2_out.csv
+    capabilities = 'method!=dbg'
+    valgrind = NONE
+    recover = false
+    abs_zero = 1e-5
+    max_threads = 1
+    max_parallel = 1
+    requirement = 'The system shall be able to solve a two channel problem with the non-default friction model for verification purposes.'
   []
 []

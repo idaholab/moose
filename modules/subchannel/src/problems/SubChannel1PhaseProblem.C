@@ -687,7 +687,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
 
         // interpolation weight coefficient
         PetscScalar Pe = 0.5;
-        if (_interpolation_scheme == "exponential")
+        if (_interpolation_scheme == 3)
         {
           // Compute the Peclet number
           auto S_in = (*_S_flow_soln)(node_in);

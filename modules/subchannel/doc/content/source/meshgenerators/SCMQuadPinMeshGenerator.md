@@ -12,7 +12,7 @@ The number of cells in the -z direction is given by [!param](/Mesh/SCMQuadPinMes
 
 ## Example Input File Syntax
 
-!listing /validation/psbt/psbt_ss/psbt.i block=QuadSubChannelMesh language=cpp
+!listing /validation/psbt/psbt_ss/psbt.i block=QuadSubChannelMesh language=moose
 
 !syntax parameters /Mesh/SCMQuadPinMeshGenerator
 

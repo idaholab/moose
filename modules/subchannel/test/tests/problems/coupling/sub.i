@@ -17,6 +17,15 @@ heated_length = 1.0
   beta_rotation = 90
 []
 
+[Functions]
+  [volumetric_heat_rate] # Defined such as to be consistent with the IC in SCM
+      type = ParsedFunction
+      expression = '(4.0 * 1000 / (pi * D * D * L)) * (pi/2)*sin(pi*y/L)'
+      symbol_names = 'L D'
+      symbol_values = '${heated_length} ${pin_diameter}'
+  []
+[]
+
 [Variables]
   [temperature]
     order = SECOND
@@ -53,7 +62,7 @@ heated_length = 1.0
   [heat_source]
     type = HeatSource
     variable = temperature
-    value = '${fparse 4.0 * 1000 / (pi * pin_diameter * pin_diameter * heated_length)}'
+    function = volumetric_heat_rate
   []
 []
 
@@ -79,6 +88,18 @@ heated_length = 1.0
   []
 []
 
+[VectorPostprocessors]
+  # These samplers are used for testing purposes.
+  [sample_center_line]
+    type = LineValueSampler
+    variable = 'temperature'
+    sort_by = 'y'
+    num_points = 11
+    start_point = '0 0 0'
+    end_point = '0 1.0 0'
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
@@ -88,4 +109,5 @@ heated_length = 1.0
 
 [Outputs]
   exodus = true
+  csv = true
 []

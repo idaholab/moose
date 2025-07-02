@@ -867,7 +867,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         auto volume = dz * S_interp;
 
         PetscScalar Pe = 0.5;
-        if (_interpolation_scheme == "exponential")
+        if (_interpolation_scheme == 3)
         {
           // Compute the Peclet number
           auto w_perim_in = (*_w_perim_soln)(node_in);

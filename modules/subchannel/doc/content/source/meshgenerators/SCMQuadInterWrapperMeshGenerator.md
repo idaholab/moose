@@ -14,7 +14,7 @@ The size of each subchannel sub-assembly including the duct is defined by: [!par
 
 ## Example Input File Syntax
 
-!listing test/tests/problems/interwrapper/quad_interwrapper.i block=QuadInterWrapperMesh language=cpp
+!listing test/tests/problems/interwrapper/quad_interwrapper.i block=QuadInterWrapperMesh language=moose
 
 !syntax parameters /Mesh/SCMQuadInterWrapperMeshGenerator
 

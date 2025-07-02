@@ -13,7 +13,7 @@ The mass-flow rate for each subchannel is calculated as the product of the mass-
 
 ## Example Input File Syntax
 
-!listing /validation/psbt/psbt_ss/psbt.i block=AuxKernels language=cpp
+!listing /validation/psbt/psbt_ss/psbt.i block=AuxKernels language=moose
 
 !syntax parameters /AuxKernels/SCMMassFlowRateAux
 
