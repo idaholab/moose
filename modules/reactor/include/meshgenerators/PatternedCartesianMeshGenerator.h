@@ -60,6 +60,8 @@ protected:
   const std::vector<subdomain_id_type> _duct_block_ids;
   /// Subdomain Names of the duct layers
   const std::vector<SubdomainName> _duct_block_names;
+  /// Name of the boundary used for stitching
+  const BoundaryName _stitching_boundary_name;
   /// Boundary ID of mesh's external boundary
   const boundary_id_type _external_boundary_id;
   /// Boundary name of mesh's external boundary
