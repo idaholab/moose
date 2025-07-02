@@ -147,9 +147,3 @@ UserObject::setPrimaryThreadCopy(UserObject * primary)
   if (!_primary_thread_copy && primary != this)
     _primary_thread_copy = primary;
 }
-
-unsigned int
-UserObject::systemNumber() const
-{
-  return _sys.number();
-}

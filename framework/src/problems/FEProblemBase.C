@@ -4184,10 +4184,14 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
       parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    if (sys_num == _aux->number())
-      parameters.set<SystemBase *>("_sys") = &_displaced_problem->systemBaseAuxiliary();
-    else
-      parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(sys_num);
+    // Don't override if the parameter has already been set
+    if (parameters.get<SystemBase *>("_sys") == NULL)
+    {
+      if (sys_num == _aux->number())
+        parameters.set<SystemBase *>("_sys") = &_displaced_problem->systemBaseAuxiliary();
+      else
+        parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(sys_num);
+    }
   }
   else
   {
@@ -4200,10 +4204,14 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
 
     parameters.set<SubProblem *>("_subproblem") = this;
 
-    if (sys_num == _aux->number())
-      parameters.set<SystemBase *>("_sys") = _aux.get();
-    else
-      parameters.set<SystemBase *>("_sys") = _solver_systems[sys_num].get();
+    // Don't override if the parameter has already been set
+    if (parameters.get<SystemBase *>("_sys") == NULL)
+    {
+      if (sys_num == _aux->number())
+        parameters.set<SystemBase *>("_sys") = _aux.get();
+      else
+        parameters.set<SystemBase *>("_sys") = _solver_systems[sys_num].get();
+    }
   }
 }
 
@@ -6295,7 +6303,8 @@ FEProblemBase::solverSysNum(const SolverSystemName & solver_sys_name) const
     if (search == _solver_sys_name_to_num.end())
       mooseError("The solver system number was requested for system '" + solver_sys_name,
                  "' but this system does not exist in the Problem. Systems can be added to the "
-                 "problem using the 'nl_sys_names' parameter.\nSystems in the Problem: " +
+                 "problem using the 'nl_sys_names'/'linear_sys_names' parameter.\nSystems in the "
+                 "Problem: " +
                      Moose::stringify(_solver_sys_names));
     solver_sys_num = search->second;
   }
@@ -8823,6 +8832,16 @@ FEProblemBase::getSystemBase(const unsigned int sys_num) const
     return *_solver_systems[sys_num];
 
   return *_aux;
+}
+
+SystemBase &
+FEProblemBase::getSystemBase(const std::string & sys_name)
+{
+  if (std::find(_solver_sys_names.begin(), _solver_sys_names.end(), sys_name) !=
+      _solver_sys_names.end())
+    return getSystemBase(solverSysNum(sys_name));
+  else
+    return *_aux;
 }
 
 SystemBase &
