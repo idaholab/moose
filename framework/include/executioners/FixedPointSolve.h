@@ -91,22 +91,6 @@ public:
   /// Whether or not this has fixed point iterations
   bool hasFixedPointIteration() { return _has_fixed_point_its; }
 
-  /// Whether or not the fixed point residual norm should be checked
-  bool checkFixedPointResidualNorm() const { return _has_fixed_point_norm; }
-
-  /// Get the current iteration's TIMESTEP_BEGIN residual norm
-  Real fixedPointTimestepBeginNorm(unsigned int iter) const
-  {
-    return _fixed_point_timestep_begin_norm[iter];
-  }
-  /// Get the current iteration's TIMESTEP_END residual norm
-  Real fixedPointTimestepEndNorm(unsigned int iter) const
-  {
-    return _fixed_point_timestep_end_norm[iter];
-  }
-  /// Get the initial residual norm
-  Real fixedPointInitialNorm() const { return _fixed_point_initial_norm; }
-
   /// Set relaxation factor for the current solve as a SubApp
   void setMultiAppRelaxationFactor(Real factor) { _secondary_relaxation_factor = factor; }
 
@@ -138,6 +122,12 @@ public:
   /// Mark the current solve as failed due to external conditions
   void failStep() { _fail_step = true; }
 
+  /// Print the convergence history of the coupling, at every fixed point iteration
+  virtual void
+  printFixedPointConvergenceHistory(Real initial_norm,
+                                    const std::vector<Real> & timestep_begin_norms,
+                                    const std::vector<Real> & timestep_end_norms) const = 0;
+
 protected:
   /**
    * Saves the current values of the variables, and update the old(er) vectors.
@@ -168,8 +158,6 @@ protected:
   /**
    * Perform one fixed point iteration or a full solve.
    *
-   * @param begin_norm       Residual norm after timestep_begin execution
-   * @param end_norm         Residual norm after timestep_end execution
    * @param transformed_dofs DoFs targetted by the fixed point algorithm
    *
    * @return True if both nonlinear solve and the execution of multiapps are successful.
@@ -178,8 +166,7 @@ protected:
    * state.
    * FIXME: The proper design will be to let XFEM use Picard iteration to control the execution.
    */
-  virtual bool
-  solveStep(Real & begin_norm, Real & end_norm, const std::set<dof_id_type> & transformed_dofs);
+  virtual bool solveStep(const std::set<dof_id_type> & transformed_dofs);
 
   /// Save both the variable and postprocessor values
   virtual void saveAllValues(const bool primary);
@@ -206,9 +193,6 @@ protected:
   virtual void transformVariables(const std::set<dof_id_type> & transformed_dofs,
                                   const bool primary) = 0;
 
-  /// Print the convergence history of the coupling, at every fixed point iteration
-  virtual void printFixedPointConvergenceHistory() = 0;
-
   /// Examine the various convergence metrics
   bool examineFixedPointConvergence(bool & converged);
 
@@ -221,10 +205,6 @@ protected:
   unsigned int _max_fixed_point_its;
   /// Whether or not we activate fixed point iteration
   const bool _has_fixed_point_its;
-  /// Whether or not to use residual norm to check the fixed point convergence
-  const bool _has_fixed_point_norm;
-  /// Whether or not we force evaluation of residual norms even without multiapps
-  const bool _fixed_point_force_norms;
 
   /// Relaxation factor for fixed point Iteration
   const Real _relax_factor;
@@ -249,12 +229,6 @@ protected:
   unsigned int _fixed_point_it;
   /// fixed point iteration counter for the main app
   unsigned int _main_fixed_point_it;
-  /// Initial residual norm
-  Real _fixed_point_initial_norm;
-  /// Full history of residual norm after evaluation of timestep_begin
-  std::vector<Real> _fixed_point_timestep_begin_norm;
-  /// Full history of residual norm after evaluation of timestep_end
-  std::vector<Real> _fixed_point_timestep_end_norm;
   /// Status of fixed point solve
   MooseFixedPointConvergenceReason _fixed_point_status;
   ///@}

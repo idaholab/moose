@@ -23,6 +23,15 @@ FixedPointSolve::fixedPointDefaultConvergenceParams()
 {
   InputParameters params = emptyInputParameters();
 
+  params.addParam<bool>("disable_fixed_point_residual_norm_check",
+                        false,
+                        "Disable the residual norm evaluation thus the three parameters "
+                        "fixed_point_rel_tol, fixed_point_abs_tol and fixed_point_force_norms.");
+  params.addParam<bool>(
+      "fixed_point_force_norms",
+      false,
+      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
+      "existence of active MultiApps with those execute_on flags, default: false.");
   params.addParam<bool>(
       "accept_on_max_fixed_point_iteration",
       false,
@@ -83,15 +92,6 @@ FixedPointSolve::validParams()
       "fixed_point_min_its", 1, "Specifies the minimum number of fixed point iterations.");
   params.addParam<unsigned int>(
       "fixed_point_max_its", 1, "Specifies the maximum number of fixed point iterations.");
-  params.addParam<bool>("disable_fixed_point_residual_norm_check",
-                        false,
-                        "Disable the residual norm evaluation thus the three parameters "
-                        "fixed_point_rel_tol, fixed_point_abs_tol and fixed_point_force_norms.");
-  params.addParam<bool>(
-      "fixed_point_force_norms",
-      false,
-      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
-      "existence of active MultiApps with those execute_on flags, default: false.");
 
   params.addParam<ConvergenceName>(
       "multiapp_fixed_point_convergence",
@@ -148,8 +148,6 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _min_fixed_point_its(getParam<unsigned int>("fixed_point_min_its")),
     _max_fixed_point_its(getParam<unsigned int>("fixed_point_max_its")),
     _has_fixed_point_its(_max_fixed_point_its > 1),
-    _has_fixed_point_norm(!getParam<bool>("disable_fixed_point_residual_norm_check")),
-    _fixed_point_force_norms(getParam<bool>("fixed_point_force_norms")),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
     _transformed_pps(getParam<std::vector<PostprocessorName>>("transformed_postprocessors")),
@@ -186,19 +184,6 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _secondary_transformed_pps = _app.fixedPointConfig().sub_transformed_pps;
   }
 
-  if (!_has_fixed_point_norm && parameters().isParamSetByUser("fixed_point_rel_tol"))
-    paramWarning(
-        "disable_fixed_point_residual_norm_check",
-        "fixed_point_rel_tol will be ignored because the fixed point residual check is disabled.");
-  if (!_has_fixed_point_norm && parameters().isParamSetByUser("fixed_point_abs_tol"))
-    paramWarning(
-        "disable_fixed_point_residual_norm_check",
-        "fixed_point_abs_tol will be ignored because the fixed point residual check is disabled.");
-  if (!_has_fixed_point_norm && parameters().isParamSetByUser("fixed_point_force_norms"))
-    paramWarning("disable_fixed_point_residual_norm_check",
-                 "fixed_point_force_norms will be ignored because the fixed point residual check "
-                 "is disabled.");
-
   if (isParamValid("multiapp_fixed_point_convergence"))
     _problem.setMultiAppFixedPointConvergenceName(
         getParam<ConvergenceName>("multiapp_fixed_point_convergence"));
@@ -212,11 +197,6 @@ FixedPointSolve::solve()
   TIME_SECTION("PicardSolve", 1);
 
   Real current_dt = _problem.dt();
-
-  _fixed_point_timestep_begin_norm.clear();
-  _fixed_point_timestep_end_norm.clear();
-  _fixed_point_timestep_begin_norm.resize(_max_fixed_point_its);
-  _fixed_point_timestep_end_norm.resize(_max_fixed_point_its);
 
   bool converged = true;
 
@@ -276,21 +256,7 @@ FixedPointSolve::solve()
   {
     if (_has_fixed_point_its)
     {
-      if (_fixed_point_it == 0)
-      {
-        if (_has_fixed_point_norm)
-        {
-          // First fixed point iteration - need to save off the initial nonlinear residual
-          _fixed_point_initial_norm = _problem.computeResidualL2Norm();
-          _console << COLOR_MAGENTA << "Initial fixed point residual norm: " << COLOR_DEFAULT;
-          if (_fixed_point_initial_norm == std::numeric_limits<Real>::max())
-            _console << " MAX ";
-          else
-            _console << std::scientific << _fixed_point_initial_norm;
-          _console << COLOR_DEFAULT << "\n" << std::endl;
-        }
-      }
-      else
+      if (_fixed_point_it != 0)
       {
         // For every iteration other than the first, we need to restore the state of the MultiApps
         _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN);
@@ -303,18 +269,12 @@ FixedPointSolve::solve()
     }
 
     // Solve a single application for one time step
-    bool solve_converged = solveStep(_fixed_point_timestep_begin_norm[_fixed_point_it],
-                                     _fixed_point_timestep_end_norm[_fixed_point_it],
-                                     transformed_dofs);
+    bool solve_converged = solveStep(transformed_dofs);
 
     if (solve_converged)
     {
       if (_has_fixed_point_its)
       {
-        if (_has_fixed_point_norm)
-          // Print the evolution of the main app residual over the fixed point iterations
-          printFixedPointConvergenceHistory();
-
         // Examine convergence metrics & properties and set the convergence reason
         bool break_out = examineFixedPointConvergence(converged);
 
@@ -390,17 +350,9 @@ FixedPointSolve::saveAllValues(const bool primary)
 }
 
 bool
-FixedPointSolve::solveStep(Real & begin_norm,
-                           Real & end_norm,
-                           const std::set<dof_id_type> & transformed_dofs)
+FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 {
   bool auto_advance = autoAdvance();
-
-  // Compute previous norms for coloring the norm output
-  Real begin_norm_old = (_fixed_point_it > 0 ? _fixed_point_timestep_begin_norm[_fixed_point_it - 1]
-                                             : std::numeric_limits<Real>::max());
-  Real end_norm_old = (_fixed_point_it > 0 ? _fixed_point_timestep_end_norm[_fixed_point_it - 1]
-                                           : std::numeric_limits<Real>::max());
 
   _executioner.preSolve();
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
@@ -436,14 +388,11 @@ FixedPointSolve::solveStep(Real & begin_norm,
       _problem.time() == _old_entering_time)
     transformPostprocessors(false);
 
-  if (_has_fixed_point_its && _has_fixed_point_norm)
-    if (_problem.hasMultiApps(EXEC_TIMESTEP_BEGIN) || _fixed_point_force_norms)
-    {
-      begin_norm = _problem.computeResidualL2Norm();
-
-      _console << COLOR_MAGENTA << "Fixed point residual norm after TIMESTEP_BEGIN MultiApps: "
-               << Console::outputNorm(begin_norm_old, begin_norm) << std::endl;
-    }
+  if (_has_fixed_point_its)
+  {
+    auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
+    convergence.preExecute();
+  }
 
   // Perform output for timestep begin
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
@@ -504,15 +453,6 @@ FixedPointSolve::solveStep(Real & begin_norm,
   }
 
   _executioner.postSolve();
-
-  if (_has_fixed_point_its && _has_fixed_point_norm)
-    if (_problem.hasMultiApps(EXEC_TIMESTEP_END) || _fixed_point_force_norms)
-    {
-      end_norm = _problem.computeResidualL2Norm();
-
-      _console << COLOR_MAGENTA << "Fixed point residual norm after TIMESTEP_END MultiApps: "
-               << Console::outputNorm(end_norm_old, end_norm) << std::endl;
-    }
 
   return true;
 }
