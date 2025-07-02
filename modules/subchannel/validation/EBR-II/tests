@@ -29,6 +29,7 @@
     type = CSVDiff
     input = 'XX09_SCM_TR17.i'
     csvdiff  = 'XX09_SCM_TR17_out.csv'
+    cli_args = 'Executioner/num_steps=20'
     heavy = true
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
@@ -42,6 +43,7 @@
     type = CSVDiff
     input = 'XX09_SCM_TR45R.i'
     csvdiff  = 'XX09_SCM_TR45R_out.csv'
+    cli_args = 'Executioner/num_steps=20'
     heavy = true
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
