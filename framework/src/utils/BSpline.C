@@ -8,22 +8,33 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BSpline.h"
-#include "libmesh/point.h"
 #include "libMeshReducedNamespace.h"
 #include "MooseError.h"
+#include "SplineUtils.h"
 
 using namespace libMesh;
 
 namespace Moose
 {
-BSpline::BSpline(const unsigned int degree, const std::vector<libMesh::Point> & control_points)
-  : _degree(degree), _control_points(control_points), _knot_vector(buildKnotVector())
+BSpline::BSpline(const unsigned int degree,
+                 const libMesh::Point & start_point,
+                 const libMesh::Point & end_point,
+                 const libMesh::RealVectorValue & start_direction,
+                 const libMesh::RealVectorValue & end_direction,
+                 const unsigned int cps_per_half,
+                 const libMesh::Real sharpness)
+  : _degree(degree),
+    _start_point(start_point),
+    _end_point(end_point),
+    _start_dir(start_direction),
+    _end_dir(end_direction),
+    _cps_per_half(cps_per_half),
+    _sharpness(sharpness),
+    _control_points(createControlPoints()),
+    _knot_vector(buildKnotVector())
 {
 }
 
-/**
- * Evaluate B-Spline at given t value using the control points.
- */
 libMesh::Point
 BSpline::getPoint(const Real t) const
 {
@@ -35,16 +46,23 @@ BSpline::getPoint(const Real t) const
   return returnPoint;
 }
 
-/**
- * Creates normalized open uniform knot vector.
- */
-std::vector<Real>
+std::vector<libMesh::Point>
+BSpline::createControlPoints() const
+{
+  std::vector<libMesh::Point> cps;
+  /// call SplineUtils function
+  cps = SplineUtils::bSplineControlPoints(
+      _start_point, _end_point, _start_dir, _end_dir, _cps_per_half, _sharpness);
+  return cps;
+}
+
+std::vector<libMesh::Real>
 BSpline::buildKnotVector() const
 {
   const unsigned int num_points_left = _control_points.size() - _degree;
 
-  if (num_points_left <= 0)
-    mooseError("Number of control points must be greater than or equal to degree + 1!");
+  mooseAssert(num_points_left > 0,
+              "Number of control points must be greater than or equal to degree + 1!");
 
   std::vector<libMesh::Real> knot_vector(_degree, 0); // initialize bottom to zeros
 
@@ -92,11 +110,8 @@ BSpline::CdBBasis(const Real & t, const unsigned int i, const unsigned int j) co
            BSpline::secondCoeff(t, i, j) * BSpline::CdBBasis(t, i + 1, j - 1);
 }
 
-/**
- * Submethod to aid in computing the basis function in CdBBasis.
- */
-Real
-BSpline::firstCoeff(const Real & t, const unsigned int i, const unsigned int j) const
+libMesh::Real
+BSpline::firstCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const
 {
   Real ti = _knot_vector[i];
   Real tij = _knot_vector[i + j];
@@ -106,11 +121,8 @@ BSpline::firstCoeff(const Real & t, const unsigned int i, const unsigned int j) 
     return 0;
 }
 
-/**
- * Submethod to aid in computing the basis function in CdBBasis.
- */
-Real
-BSpline::secondCoeff(const Real & t, const unsigned int i, const unsigned int j) const
+libMesh::Real
+BSpline::secondCoeff(const libMesh::Real & t, const unsigned int i, const unsigned int j) const
 {
   Real ti1 = _knot_vector[i + 1];
   Real tij1 = _knot_vector[i + j + 1];
