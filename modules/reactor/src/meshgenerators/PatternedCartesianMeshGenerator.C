@@ -127,6 +127,11 @@ PatternedCartesianMeshGenerator::validParams()
       "allow_unused_inputs",
       false,
       "Whether additional input assemblies can be part of inputs without being used in lattice");
+  params.addParam<bool>(
+      "verbose_stitching",
+      false,
+      "Whether to output the number of nodes stitched when stitching pin and background meshes");
+
   params.addParamNamesToGroup(
       "pattern_boundary background_block_id background_block_name duct_block_ids duct_block_names "
       "external_boundary_id external_boundary_name create_inward_interface_boundaries "
@@ -181,7 +186,8 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
     _use_interface_boundary_id_shift(isParamValid("interface_boundary_id_shift_pattern")),
     _boundary_quad_elem_type(
         getParam<MooseEnum>("boundary_region_element_type").template getEnum<QUAD_ELEM_TYPE>()),
-    _allow_unused_inputs(getParam<bool>("allow_unused_inputs"))
+    _allow_unused_inputs(getParam<bool>("allow_unused_inputs")),
+    _verbose_stitching(getParam<bool>("verbose_stitching"))
 {
   declareMeshProperty("pattern_pitch_meta", 0.0);
   declareMeshProperty("input_pitch_meta", 0.0);
@@ -739,7 +745,7 @@ PatternedCartesianMeshGenerator::generate()
                                     OUTER_SIDESET_ID,
                                     TOLERANCE,
                                     /*clear_stitched_boundary_ids=*/true,
-                                    /*verbose=*/false);
+                                    _verbose_stitching);
           }
 
           continue;
@@ -778,7 +784,7 @@ PatternedCartesianMeshGenerator::generate()
                               OUTER_SIDESET_ID,
                               TOLERANCE,
                               /*clear_stitched_boundary_ids=*/false,
-                              /*verbose=*/false);
+                              _verbose_stitching);
 
       // Translate back now that we've stitched so that anyone else that uses this mesh has it at
       // the origin
@@ -1065,7 +1071,8 @@ PatternedCartesianMeshGenerator::addPeripheralMesh(
 
       // rotate the peripheral mesh to the desired side of the hexagon.
       MeshTools::Modification::rotate(*meshp0, rotation_angle, 0, 0);
-      mesh.stitch_meshes(*meshp0, OUTER_SIDESET_ID, OUTER_SIDESET_ID, TOLERANCE, true, false);
+      mesh.stitch_meshes(
+          *meshp0, OUTER_SIDESET_ID, OUTER_SIDESET_ID, TOLERANCE, true, _verbose_stitching);
       sub_positions_inner.resize(0);
       sub_d_positions_outer.resize(0);
     }
