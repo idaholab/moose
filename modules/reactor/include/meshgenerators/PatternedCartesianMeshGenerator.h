@@ -96,6 +96,8 @@ protected:
   QUAD_ELEM_TYPE _boundary_quad_elem_type;
   /// Whether to allow additional assembly types to be passed to "inputs" parameter without being used in lattice
   const bool _allow_unused_inputs;
+  /// Whether the mesh stitching should be verbose
+  const bool _verbose_stitching;
 
   /**
    * Adds background and duct region mesh to each part outer part of stitched square meshes. Note
