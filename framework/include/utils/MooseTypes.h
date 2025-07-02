@@ -1200,6 +1200,9 @@ DerivativeStringClass(MFEMVectorCoefficientName);
 DerivativeStringClass(MFEMMatrixCoefficientName);
 ///@}
 #endif
+
+#undef DerivativeStringClass
+
 /**
  * additional MOOSE typedefs
  */
