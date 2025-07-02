@@ -387,9 +387,14 @@ PorousFlowSinglePhaseBase::addDictator()
   InputParameters params = _factory.getValidParams(uo_type);
   std::vector<VariableName> pf_vars = _mass_fraction_vars;
   pf_vars.push_back(_pp_var);
-  if (_thermal)
+  // Only couple if in the same nonlinear system
+  params.set<SystemBase *>("_sys") = &_problem->getSystemBase(_problem->getSystem(_pp_var).name());
+  if (_thermal &&
+      (_problem->getSystem(_temperature_var[0]).number() == _problem->getSystem(_pp_var).number()))
     pf_vars.push_back(_temperature_var[0]);
-  if (_mechanical)
+  if (_mechanical && _coupled_displacements.size() &&
+      (_problem->getSystem(_coupled_displacements[0]).number() ==
+       _problem->getSystem(_pp_var).number()))
     pf_vars.insert(pf_vars.end(), _coupled_displacements.begin(), _coupled_displacements.end());
   params.set<std::vector<VariableName>>("porous_flow_vars") = pf_vars;
   params.set<unsigned int>("number_fluid_phases") = 1;
