@@ -80,8 +80,9 @@ GaussianProcess::setupCovarianceMatrix(const torch::Tensor & training_params,
   if (_tuning_data.size())
     tuneHyperParamsAdam(training_params, training_data, opts);
 
-  _K = torch::zeros({training_params.sizes()[0] * training_data.sizes()[1],
-                     training_params.sizes()[0] * training_data.sizes()[1]})
+  _K = torch::resize(_K,
+                     {training_params.sizes()[0] * training_data.sizes()[1],
+                      training_params.sizes()[0] * training_data.sizes()[1]})
            .to(at::kDouble);
   _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
   torch::Tensor training_data_transpose = torch::transpose(training_data, 0, 1);
