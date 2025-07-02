@@ -10,13 +10,28 @@
 #include "BSpline.h"
 #include "libMeshReducedNamespace.h"
 #include "MooseError.h"
+#include "SplineUtils.h"
 
 using namespace libMesh;
 
 namespace Moose
 {
-BSpline::BSpline(const unsigned int degree, const std::vector<libMesh::Point> & control_points)
-  : _degree(degree), _control_points(control_points), _knot_vector(buildKnotVector())
+BSpline::BSpline(const unsigned int degree,
+                 const libMesh::Point & start_point,
+                 const libMesh::Point & end_point,
+                 const libMesh::RealVectorValue & start_direction,
+                 const libMesh::RealVectorValue & end_direction,
+                 const unsigned int cps_per_half,
+                 const libMesh::Real sharpness)
+  : _degree(degree),
+    _start_point(start_point),
+    _end_point(end_point),
+    _start_dir(start_direction),
+    _end_dir(end_direction),
+    _cps_per_half(cps_per_half),
+    _sharpness(sharpness),
+    _control_points(createControlPoints()),
+    _knot_vector(buildKnotVector())
 {
 }
 
@@ -31,6 +46,16 @@ BSpline::getPoint(const libMesh::Real t) const
     returnPoint += BSpline::CdBBasis(t, i, _degree) * _control_points[i];
 
   return returnPoint;
+}
+
+std::vector<libMesh::Point>
+BSpline::createControlPoints() const
+{
+  std::vector<libMesh::Point> cps;
+  /// call SplineUtils function
+  cps = SplineUtils::bSplineControlPoints(
+      _start_point, _end_point, _start_dir, _end_dir, _cps_per_half, _sharpness);
+  return cps;
 }
 
 std::vector<libMesh::Real>

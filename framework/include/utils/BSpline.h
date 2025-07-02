@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "libMeshReducedNamespace.h"
 #include "libmesh/point.h"
 #include <vector>
 
@@ -23,7 +24,13 @@ namespace Moose
 class BSpline
 {
 public:
-  BSpline(const unsigned int degree, const std::vector<libMesh::Point> & control_points);
+  BSpline(const unsigned int degree,
+          const libMesh::Point & start_point,
+          const libMesh::Point & end_point,
+          const libMesh::RealVectorValue & start_direction,
+          const libMesh::RealVectorValue & end_direction,
+          const unsigned int cps_per_half,
+          const libMesh::Real sharpness);
 
   /**
    * Evaluate the BSpline interpolation at given value of t.
@@ -33,16 +40,16 @@ public:
    */
   libMesh::Point getPoint(const libMesh::Real t) const;
 
-  /**
-   * Get the built knot vector associated with the degree and control points.
-   */
-  const std::vector<libMesh::Real> & getKnotVector() const { return _knot_vector; }
-
 private:
   /**
    * Internal method for building the knot vector given the degree and control points.
    */
   std::vector<libMesh::Real> buildKnotVector() const;
+
+  /**
+   * Creates a vector control points from the SplineUtils set of functions.
+   */
+  std::vector<libMesh::Point> createControlPoints() const;
 
   /**
    * Evaluates the the basis function for a B-Spline according to the Cox-de-Boor
@@ -74,6 +81,18 @@ private:
 
   /// The polynomial degree of the B-Spline.
   const unsigned int _degree;
+  /// starting point of spline
+  const libMesh::Point _start_point;
+  /// ending point of spline
+  const libMesh::Point _end_point;
+  /// starting direction of spline
+  const libMesh::RealVectorValue _start_dir;
+  /// ending direction of spline
+  const libMesh::RealVectorValue _end_dir;
+  /// number of control points per half of the spline (vertex is auto-included)
+  const unsigned int _cps_per_half;
+  /// sharpness of the curve
+  const libMesh::Real _sharpness;
   /// The control points.
   const std::vector<libMesh::Point> _control_points;
   /// The knot vector.
