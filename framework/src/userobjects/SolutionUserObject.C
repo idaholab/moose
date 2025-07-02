@@ -52,14 +52,10 @@ SolutionUserObject::validParams()
 SolutionUserObject::SolutionUserObject(const InputParameters & parameters)
   : SolutionUserObjectBase(parameters), FunctionParserUtils<false>(parameters)
 {
-  // setup parsed expression for the time transformation
+  // Create parsed function
   _time_transformation = std::make_shared<SymFunction>();
-  setParserFeatureFlags(_time_transformation);
-
-  // parse function
-  const auto & expression = getParam<std::string>("time_transformation");
-  if (_time_transformation->Parse(expression, "t") >= 0)
-    mooseError("Invalid parsed function\n", expression, "\n", _time_transformation->ErrorMsg());
+  parsedFunctionSetup(
+      _time_transformation, getParam<std::string>("time_transformation"), "t", {}, {}, comm());
 
   // the only parameter is time
   _func_params.resize(1);
