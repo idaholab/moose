@@ -29,6 +29,11 @@ public:
    */
   virtual void allocateStorage(const bool primary) override final;
 
+  virtual void printFixedPointConvergenceHistory(
+      Real initial_norm,
+      const std::vector<Real> & timestep_begin_norms,
+      const std::vector<Real> & timestep_end_norms) const override final;
+
 private:
   /**
    * Saves the current values of the variables, and update the old(er) vectors.
@@ -75,9 +80,6 @@ private:
    */
   virtual void transformVariables(const std::set<dof_id_type> & transformed_dofs,
                                   const bool primary) override final;
-
-  /// Print the convergence history of the coupling, at every coupling iteration
-  virtual void printFixedPointConvergenceHistory() override final;
 
   /// Vector tag id for the most recent solution variable, pre-Secant transform, as a main app
   TagID _fxn_m1_tagid;

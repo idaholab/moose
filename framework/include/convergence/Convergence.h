@@ -47,6 +47,11 @@ public:
   virtual void initialize() {}
 
   /**
+   * Method that gets called in each iteration before the solve
+   */
+  virtual void preExecute() {}
+
+  /**
    * Returns convergence status.
    *
    * @param[in] iter   Iteration index
