@@ -9085,7 +9085,7 @@ FEProblemBase::getLinearConvergenceNames() const
   mooseError("The linear convergence name(s) have not been set.");
 }
 
-ConvergenceName
+const ConvergenceName &
 FEProblemBase::getMultiAppFixedPointConvergenceName() const
 {
   if (_multiapp_fixed_point_convergence_name)
