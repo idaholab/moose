@@ -359,6 +359,11 @@ public:
   virtual const SystemBase & systemBaseLinear(const unsigned int sys_num) const = 0;
   virtual SystemBase & systemBaseLinear(const unsigned int sys_num) = 0;
   /**
+   * Return the solver system object as a base class reference given the system number
+   */
+  virtual const SystemBase & systemBaseSolver(const unsigned int sys_num) const = 0;
+  virtual SystemBase & systemBaseSolver(const unsigned int sys_num) = 0;
+  /**
    * Return the auxiliary system object as a base class reference
    */
   virtual const SystemBase & systemBaseAuxiliary() const = 0;

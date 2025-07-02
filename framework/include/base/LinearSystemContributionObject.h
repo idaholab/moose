@@ -64,6 +64,11 @@ public:
   /// Returns base class reference of the variable that this object operates on.
   virtual const MooseVariableBase & variable() const = 0;
 
+  /// Function which sets up the vectors and matrices this kernel will contribute to.
+  /// These will be determined based on the \p vector_tags and \p matrix_tags .
+  void linkObjectsForContribution(const std::set<TagID> & vector_tags,
+                                  const std::set<TagID> & matrix_tags);
+
 protected:
   /// Reference to this object's FEProblemBase
   FEProblemBase & _fe_problem;
@@ -79,4 +84,10 @@ protected:
 
   /// Reference to the mesh object
   MooseMesh & _mesh;
+
+  /// Pointers to the vectors that need contributions from this kernel.
+  std::vector<NumericVector<Number> *> _vectors;
+
+  /// Pointers to the matrices that need contributions from this kernel.
+  std::vector<SparseMatrix<Number> *> _matrices;
 };
