@@ -198,7 +198,7 @@ class TestResultsReaderReader(unittest.TestCase):
         results = self._testGetTestResults(reader, limit=limit)
         self.assertEqual(len(results), limit)
 
-    @unittest.skipIf(HAS_AUTH, f"Skipping because authentication is not available")
+    @unittest.skipIf(HAS_AUTH, f"Skipping because authentication is available")
     def testMissingClient(self):
         """
         Tests creating the TestHarnessResultsReader without a client/auth
