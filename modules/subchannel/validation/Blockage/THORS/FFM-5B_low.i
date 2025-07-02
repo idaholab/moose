@@ -30,12 +30,10 @@ P_out = 2.0e5 # Pa
     pitch = 7.2644e-3
     dwire = 0.0014224
     hwire = 0.3048
-    spacer_z = '0.0'
-    spacer_k = '0.0'
     z_blockage = '0.49 0.52'
     index_blockage = '29 31 30 32 34 33 35 15 16 8 17 18 9 19'
-    reduction_blockage = '0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2'
-    k_blockage = '1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 '
+    reduction_blockage = '0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1'
+    k_blockage = '5 5 5 5 5 5 5 5 5 5 5 5 5 5 '
   []
 []
 
@@ -89,7 +87,7 @@ P_out = 2.0e5 # Pa
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 2.2
+  CT = 2
   compute_density = true
   compute_viscosity = true
   compute_power = true
