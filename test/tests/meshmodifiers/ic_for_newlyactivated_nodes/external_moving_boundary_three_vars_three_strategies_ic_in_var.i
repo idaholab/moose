@@ -71,11 +71,12 @@
     # --- new for setting IC --- #
 
     old_subdomain_reinitialized = false
-    reinitialize_subdomain_ids = '1'
+    reinitialize_subdomains = '1'
 
-    ic_strategy = "IC_POLYNOMIAL IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN IC_POLYNOMIAL_THRESHOLD"
+    reinitialization_strategy = "POLYNOMIAL_NEIGHBOR POLYNOMIAL_WHOLE POLYNOMIAL_NEARBY"
+    reinitialize_variables = 'diff diff2 diff3'
     nearby_element_threshold = 3
-    nodal_patch_recovery_uo = 'extrapolation_patch extrapolation_patch2 extrapolation_patch3'
+    polynomial_fitters = 'extrapolation_patch extrapolation_patch2 extrapolation_patch3'
   []
 []
 
@@ -85,6 +86,11 @@
   []
   [proc]
     block = '1 2'
+  []
+  [proc_elem]
+    block = '1 2'
+    family = MONOMIAL
+    order = CONSTANT
   []
 []
 
@@ -106,6 +112,12 @@
   [proc]
     type = ProcessorIDAux
     variable = proc
+    execute_on = initial
+    block = '1 2'
+  []
+  [proc_elem]
+    type = ProcessorIDAux
+    variable = proc_elem
     execute_on = initial
     block = '1 2'
   []

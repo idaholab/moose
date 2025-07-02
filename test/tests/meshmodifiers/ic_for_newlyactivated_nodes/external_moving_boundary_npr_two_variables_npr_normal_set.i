@@ -64,11 +64,11 @@
     # --- new for setting IC --- #
 
     old_subdomain_reinitialized = false
-    reinitialize_subdomain_ids = '1'
+    reinitialize_subdomains = '1'
 
-    ic_strategy = "IC_POLYNOMIAL IC_POLYNOMIAL"
-    ic_variables = 'diff diff2'
-    nodal_patch_recovery_uo = 'extrapolation_patch extrapolation_patch2'
+    reinitialization_strategy = "POLYNOMIAL_NEIGHBOR POLYNOMIAL_NEIGHBOR"
+    reinitialize_variables = 'diff diff2'
+    polynomial_fitters = 'extrapolation_patch extrapolation_patch2'
   []
 []
 

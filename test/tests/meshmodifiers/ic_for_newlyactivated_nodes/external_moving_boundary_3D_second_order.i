@@ -12,9 +12,10 @@
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
-    dim = 2
+    dim = 3
     nx = 16
     ny = 16
+    nz = 16
   []
   [left]
     type = SubdomainBoundingBoxGenerator
@@ -33,11 +34,11 @@
 []
 
 [UserObjects]
-  [extrapolation_patch]
+  [extrapolation_patch2]
     type = NodalPatchRecoveryVariable
-    patch_polynomial_order = FIRST
+    patch_polynomial_order = SECOND
     use_specific_elements = true
-    var = 'diff'
+    var = 'diff2'
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []
@@ -49,19 +50,18 @@
     criterion_type = 'BELOW'
     threshold = 0
     subdomain_id = 1
-    moving_boundaries = 'moving_boundary'
-    moving_boundary_subdomain_pairs = '1 2; 1'
     block = '1 2'
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
 
     old_subdomain_reinitialized = false
-    reinitialize_subdomain_ids = '1'
+    reinitialize_subdomains = '1'
 
-    ic_strategy = "IC_POLYNOMIAL"
+    reinitialization_strategy = "POLYNOMIAL_NEIGHBOR"
+    reinitialize_variables = "diff2"
 
-    nodal_patch_recovery_uo = 'extrapolation_patch'
+    polynomial_fitters = "extrapolation_patch2"
   []
 []
 
@@ -98,21 +98,12 @@
 []
 
 [Variables]
-  [diff]
-    order = FIRST
-  []
   [diff2]
     order = FIRST
-    initial_condition = 10
   []
 []
 
 [Kernels]
-  [diffusion]
-    type = MatDiffusion
-    variable = 'diff'
-    diffusivity = 'k'
-  []
   [diffusion2]
     type = MatDiffusion
     variable = 'diff2'
@@ -129,20 +120,6 @@
 []
 
 [BCs]
-  [left]
-    type = DirichletBC
-    variable = 'diff'
-    boundary = left
-    value = 10
-  []
-
-  [bottom]
-    type = DirichletBC
-    variable = 'diff'
-    boundary = bottom
-    value = 0
-  []
-
   [left2]
     type = DirichletBC
     variable = 'diff2'
@@ -161,7 +138,7 @@
 [Executioner]
   type = Transient
   dt = 0.3
-  num_steps = 3
+  num_steps = 1
 []
 
 [Outputs]

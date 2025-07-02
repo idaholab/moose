@@ -16,23 +16,16 @@
 #include "SystemBase.h"
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
-    FEProblemBase & fe_problem)
+    FEProblemBase & fe_problem, const std::optional<std::set<VariableName>> & target_vars)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
-    _target_var_names({})
+    _target_vars(target_vars)
 {
 }
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
     ComputeBoundaryInitialConditionThread & x, Threads::split split)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
-    _target_var_names(x._target_var_names)
-{
-}
-
-ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
-    FEProblemBase & fe_problem, const std::set<std::string> & target_var_names)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
-    _target_var_names(target_var_names)
+    _target_vars(x._target_vars)
 {
 }
 
@@ -55,7 +48,9 @@ ComputeBoundaryInitialConditionThread::onNode(ConstBndNodeRange::const_iterator 
     for (const auto & ic : ics)
     {
 
-      if (!_target_var_names.empty() && !_target_var_names.count(ic->variable().name()))
+      // Skip or include initial conditions based on target variable usage
+      const auto & var_name = ic->variable().name();
+      if (_target_vars && !_target_vars->count(var_name))
         continue;
 
       if (node->processor_id() == _fe_problem.processor_id())

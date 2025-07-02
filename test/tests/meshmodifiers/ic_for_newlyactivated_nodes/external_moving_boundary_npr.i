@@ -55,11 +55,13 @@
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
-    ic_strategy = "IC_POLYNOMIAL"
+    reinitialization_strategy = "POLYNOMIAL_NEIGHBOR"
+
+    reinitialize_variables = 'diff'
 
     old_subdomain_reinitialized = false
-    reinitialize_subdomain_ids = '1'
-    nodal_patch_recovery_uo = 'extrapolation_patch'
+    reinitialize_subdomains = '1'
+    polynomial_fitters = 'extrapolation_patch'
   []
 []
 
@@ -69,6 +71,11 @@
   []
   [proc]
     block = '1 2'
+  []
+  [proc_elem]
+    block = '1 2'
+    order = CONSTANT
+    family = MONOMIAL
   []
 []
 
@@ -90,6 +97,12 @@
   [proc]
     type = ProcessorIDAux
     variable = proc
+    execute_on = initial
+    block = '1 2'
+  []
+  [proc_elem]
+    type = ProcessorIDAux
+    variable = proc_elem
     execute_on = initial
     block = '1 2'
   []

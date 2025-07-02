@@ -13,20 +13,15 @@
 #include "Assembly.h"
 #include "InitialCondition.h"
 
-ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblemBase & fe_problem)
-  : _fe_problem(fe_problem), _target_var_names({})
+ComputeInitialConditionThread::ComputeInitialConditionThread(
+    FEProblemBase & fe_problem, const std::optional<std::set<VariableName>> & target_vars)
+  : _fe_problem(fe_problem), _target_vars(target_vars)
 {
 }
 
 ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialConditionThread & x,
                                                              Threads::split /*split*/)
-  : _fe_problem(x._fe_problem), _target_var_names(x._target_var_names)
-{
-}
-
-ComputeInitialConditionThread::ComputeInitialConditionThread(
-    FEProblemBase & fe_problem, const std::set<std::string> & target_var_names)
-  : _fe_problem(fe_problem), _target_var_names(target_var_names)
+  : _fe_problem(x._fe_problem), _target_vars(x._target_vars)
 {
 }
 
@@ -76,7 +71,9 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
               ic->getState() != current_ic_state)
             continue;
 
-          if (!_target_var_names.empty() && !_target_var_names.count(ic->variable().name()))
+          // Skip initial conditions based on target variable usage
+          const auto & var_name = ic->variable().name();
+          if (_target_vars && !_target_vars->count(var_name))
             continue;
 
           order.push_back(&(ic->variable()));

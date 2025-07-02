@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <optional>
 #include "MooseTypes.h"
 
 // libmesh
@@ -20,12 +21,13 @@ class FEProblemBase;
 class ComputeInitialConditionThread
 {
 public:
-  ComputeInitialConditionThread(FEProblemBase & fe_problem);
+  // Set IC on specific variables
+  ComputeInitialConditionThread(
+      FEProblemBase & fe_problem,
+      const std::optional<std::set<VariableName>> & target_vars = std::nullopt);
+
   // Splitting Constructor
   ComputeInitialConditionThread(ComputeInitialConditionThread & x, Threads::split split);
-  // Set IC on specific variable names
-  ComputeInitialConditionThread(FEProblemBase & fe_problem,
-                                const std::set<std::string> & target_var_names);
 
   void operator()(const libMesh::ConstElemRange & range);
   void join(const ComputeInitialConditionThread & /*y*/);
@@ -38,5 +40,5 @@ protected:
   THREAD_ID _tid;
 
   /// @brief the names of target variables for which the initial conditions are applied
-  const std::set<std::string> _target_var_names;
+  const std::optional<std::set<VariableName>> _target_vars;
 };

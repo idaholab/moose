@@ -29,18 +29,28 @@ public:
    */
   virtual Real nodalPatchRecovery(const Point & p, const std::vector<dof_id_type> & elem_ids) const;
 
+  /**
+   * Get the coefficients of the polynomial for the given element IDs.
+   * If the coefficients are already cached, return them directly.
+   *
+   * @param elem_ids    Ids of the elements in the patch
+   * @return The coefficients of the polynomial
+   */
+  const RealEigenVector getCoefficients(const std::vector<dof_id_type> & elem_ids) const;
+
   virtual void initialize() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject &) override;
   virtual void finalize() override;
 
-  void cacheAdditionalElements(const std::vector<dof_id_type> & additional_elems) const
-  {
-    if (!_use_specific_elements)
-      return;
-
-    _additional_elems = additional_elems;
-  }
+  /**
+   * Cache additional elements for the patch recovery.
+   *
+   * @param additional_elems    Ids of the additional elements to cache
+   * @param do_synchronize      Whether to synchronize the A and b vectors across processors
+   */
+  void cacheAdditionalElements(const std::vector<dof_id_type> & additional_elems,
+                               bool do_synchronize = false) const;
 
   void cleanQueryIDsAndAdditionalElements() const
   {
@@ -60,6 +70,9 @@ public:
 
   /// Returns the variable name
   virtual const VariableName & variableName() const { return _var_name; }
+
+  /// Returns the multi-index table
+  const std::vector<std::vector<unsigned int>> & multiIndex() const { return _multi_index; }
 
 protected:
   /// Compute the quantity to recover using nodal patch recovery
@@ -120,5 +133,6 @@ private:
   /// Print coefficients of the polynomial to console
   const bool _verbose;
 
-  VariableName _var_name; ///< Variable name
+  /// Variable name
+  VariableName _var_name;
 };

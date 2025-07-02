@@ -14,8 +14,8 @@
 
     [IC_for_newlyactivated_nodes_two_variables_different_IC]
       type = 'Exodiff'
-      input = 'external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable.i'
-      exodiff = 'external_moving_boundary_npr_two_variables_only_setIC_for_UO_other_follow_variable_out.e-s004'
+      input = 'setIC_UO_followVar.i'
+      exodiff = 'setIC_UO_followVar_out.e-s004'
       detail = 'using different strategies for each field, one based on nearby regions and the other using a fixed value.'
     []
 
@@ -40,10 +40,10 @@
       detail = 'using all elements in a designated region to estimate initial values by default.'
     []
 
-    [IC_default]
+    [DEFAULT]
       type = 'Exodiff'
-      input = 'external_moving_boundary_no_unsolved_blocks_all_IC_default.i'
-      exodiff = 'external_moving_boundary_no_unsolved_blocks_all_IC_default_out.e-s004'
+      input = 'external_moving_boundary_no_unsolved_blocks_all_default.i'
+      exodiff = 'external_moving_boundary_no_unsolved_blocks_all_default_out.e-s004'
       detail = 'using a default method that does not require advanced configuration.'
     []
 
@@ -102,24 +102,31 @@
       exodiff = 'external_moving_boundary_npr_output_old_older_out.e-s004'
       detail = 'using the current solution to also update values from previous time steps.'
     []
+
+    [IC_threeD_second_order]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_3D_second_order.i'
+      exodiff = 'external_moving_boundary_3D_second_order_out.e-s002'
+      detail = 'using a 3D configuration to initialize from second-order nodal patch recovery.'
+    []
   []
 
   [error_test]
     requirement = 'The system shall throw an error '
 
-    [error_ic_strategy_not_valid]
+    [error_reinitialization_strategy_not_valid]
       type = RunException
       input = 'external_moving_boundary_npr_two_variables_npr_normal_set.i'
-      cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_POLYNOMIAL IC_POLYNOMIAL IC_POLYNOMIAL_WHOLE"'
-      expect_err = 'Invalid option "IC_POLYNOMIAL_WHOLE" in MooseEnum.'
+      cli_args = 'MeshModifiers/moving_circle/reinitialization_strategy="POLYNOMIAL"'
+      expect_err = 'Invalid option "POLYNOMIAL" in MooseEnum.'
       detail = 'if an invalid initial condition strategy name is provided when modifying element subdomains.'
     []
 
-    [error_ic_strategy_more_than_ic_variables]
+    [error_reinitialization_strategy_more_than_ic_variables]
       type = RunException
       input = 'external_moving_boundary_npr_two_variables_npr_normal_set.i'
-      cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_POLYNOMIAL IC_POLYNOMIAL IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN"'
-      expect_err = "The 'ic_strategy' parameter is not used correctly"
+      cli_args = 'MeshModifiers/moving_circle/reinitialization_strategy="POLYNOMIAL_NEIGHBOR POLYNOMIAL_NEIGHBOR POLYNOMIAL_WHOLE"'
+      expect_err = "The 'reinitialization_strategy' parameter must have either a single value or a number of values equal to the number of 'reinitialize_variables'."
       detail = 'if the number of specified strategies does not match the number of associated fields.'
     []
 
@@ -133,26 +140,18 @@
 
     [npr_no_UO_in_esm]
       type = RunException
-      input = 'external_moving_boundary_no_unsolved_blocks_all_IC_default.i'
-      cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_POLYNOMIAL"'
-      expect_err = "The 'ic_strategy' parameter is set to use polynomial extrapolation, but no 'nodal_patch_recovery_uo' is specified."
+      input = 'external_moving_boundary_no_unsolved_blocks_all_default.i'
+      cli_args = 'MeshModifiers/moving_circle/reinitialization_strategy="POLYNOMIAL_NEIGHBOR"'
+      expect_err = "The number of polynomial fitters"
       detail = 'if a strategy that requires extrapolation is used without providing the necessary supporting method.'
     []
 
     [mismatch_IC_poly_npr_UO]
       type = RunException
       input = 'external_moving_boundary_npr.i'
-      cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_DEFAULT" MeshModifiers/moving_circle/unsolved_blocks=""'
-      expect_err = "Mismatch between number of IC strategies using polynomial extrapolation and NPR UO"
+      cli_args = 'MeshModifiers/moving_circle/reinitialization_strategy="IC"'
+      expect_err = "Mismatch between number of reinitialization strategies using polynomial extrapolation and polynomial fitters"
       detail = 'if the number of extrapolation-based strategies does not match the number of corresponding extrapolation sources.'
-    []
-
-    [IC_two_defaults_no_ic_variables]
-      type = RunException
-      input = 'external_moving_boundary_no_unsolved_blocks_all_IC_default.i'
-      expect_err = "The 'ic_strategy' parameter has more than one value, but no 'ic_variables' are specified."
-      cli_args = 'MeshModifiers/moving_circle/ic_strategy="IC_DEFAULT IC_DEFAULT"'
-      detail = 'if multiple strategies are listed but the fields they apply to are not defined.'
     []
   []
 []

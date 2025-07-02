@@ -15,12 +15,27 @@
 #include "NodalPatchRecoveryBase.h"
 #include "KDTree.h"
 
-enum class ICStrategy
+/**
+ * @note Throughout this file, the term "active" refer to elements that are part of the
+ * computational domain where PDEs are being solved. This term shall not be confused with "active"
+ * in the context of adaptive mesh refinement.
+ */
+
+/**
+ * Strategies for (re)initializing the solution:
+ *
+ * - IC: Use the initial condition for the variable
+ * - POLYNOMIAL_NEIGHBOR: Fit a polynomial using the neighbor active elements
+ * - POLYNOMIAL_WHOLE: Fit a polynomial using all active elements
+ * - POLYNOMIAL_NEARBY: Fit a polynomial using nearby active elements whose distance is below a
+ *                      specified threshold.
+ */
+enum class ReinitStrategy
 {
-  IC_DEFAULT = 0,
-  IC_POLYNOMIAL = 1,
-  IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN = 2,
-  IC_POLYNOMIAL_THRESHOLD = 3
+  IC,
+  POLYNOMIAL_NEIGHBOR,
+  POLYNOMIAL_WHOLE,
+  POLYNOMIAL_NEARBY
 };
 
 /**
@@ -119,8 +134,14 @@ private:
   /// Range of reinitialized elements
   ConstElemRange & reinitializedElemRange(bool displaced = false);
 
+  /// Range of reinitialized nodes
+  ConstNodeRange & reinitializedNodeRange();
+
   /// Range of reinitialized boundary nodes
   ConstBndNodeRange & reinitializedBndNodeRange(bool displaced = false);
+
+  /// Return the range of nodes (Node*) extracted from reinitialized boundary nodes (BndNode*)
+  ConstNodeRange & reinitializedNodeRangeFromBndNodes(bool displaced);
 
   /// Reinitialize moved elements whose new subdomain is in this list
   std::vector<SubdomainID> _subdomain_ids_to_reinitialize;
@@ -157,82 +178,86 @@ private:
 
   /// Reinitialized nodes
   std::unordered_set<dof_id_type> _reinitialized_nodes;
+  /// Range of reinitialized nodes
+  std::unique_ptr<ConstNodeRange> _reinitialized_node_range;
   /// Range of reinitialized boundary nodes
   std::unique_ptr<ConstBndNodeRange> _reinitialized_bnd_node_range;
   /// Range of reinitialized boundary nodes on the displaced mesh
   std::unique_ptr<ConstBndNodeRange> _reinitialized_displaced_bnd_node_range;
+  /// Reinitialized boundary nodes in ConstNodeRange format (non-displaced mesh)
+  std::unique_ptr<ConstNodeRange> _reinitialized_node_range_from_bnd_nodes;
+  /// Reinitialized boundary nodes in ConstNodeRange format (displaced mesh)
+  std::unique_ptr<ConstNodeRange> _reinitialized_displaced_node_range_from_bnd_nodes;
+
+  /// Non-reinitialized nodes on reinitialized elements
+  std::unordered_set<dof_id_type> _non_reinit_nodes_on_reinit_elems;
+
+  /// A map from variable name to a pair of:
+  /// (1) a vector of DOF IDs associated with non-reinitialized nodes on reinitialized elements, and
+  /// (2) the corresponding solution values at those DOFs.
+  /// This map is used to preserve solution data for variables that should not be reinitialized
+  /// even though they reside on reinitialized elements.
+  std::map<VariableName, std::pair<std::vector<dof_id_type>, std::vector<Number>>>
+      _var_to_dofs_values_from_nonreinit_nodes;
 
   /// The strategy used to apply IC on newly activated nodes
-  std::vector<ICStrategy> _ic_strategy;
+  std::vector<ReinitStrategy> _reinit_strategy;
 
   /// @brief Names of the NodalPatchRecoveryBase user objects
   const std::vector<UserObjectName> _npr_names;
 
   /// @brief Apply initial conditions using polynomial extrapolation
-  std::vector<const NodalPatchRecoveryBase *> _npr_vec;
+  std::vector<const NodalPatchRecoveryBase *> _npr;
 
   /// @brief List of variable names to be initialized for IC
-  std::vector<VariableName> _ic_vars_names;
+  std::vector<VariableName> _reinit_vars;
 
-  /// @brief List of variable index number to be initialized (used to find corresponding DOFs) for IC
-  std::vector<unsigned int> _ic_vars_number;
+  /// @brief map from variable name to the index of the nodal patch recovery user object in `_npr`
+  std::map<VariableName, unsigned int> _var_name_to_npr_idx;
 
-  /// @brief map from variable number to the index of the nodal patch recovery user object in `_npr_vec`
-  std::unordered_map<unsigned int, unsigned int> _var_number2_npr_idx;
+  /// @brief A map to map reinitialization strategies to their corresponding solved element IDs
+  std::map<ReinitStrategy, std::vector<dof_id_type>> _solved_elem_ids_for_npr;
 
-  /// @brief List of neighbor elements that share nodes with reinitialized elements
-  std::vector<std::vector<dof_id_type>> _solved_elem_ids_for_npr;
-
-  /// Elements that have been reinitialized due to subdomain changes,
-  /// gathered across all processors using MPI
-  std::vector<dof_id_type> _global_reinitialized_elems;
-
-  /// Global collection of all newly activated node IDs, gathered across all processors.
-  /// This set is independent of processor ownership and ensures consistency in parallel runs.
-  std::vector<dof_id_type> _complete_reinitialized_nodes;
-
-  /// IC_POLYNOMIAL_THRESHOLD related parameters
-  /// @brief Threshold for checking the closeness of element numbers in polynomial extrapolation
+  /// POLYNOMIAL_NEARBY related parameters
+  /// @brief Minimum number of nearby elements required in the polynomial extrapolation patch.
   int _nearby_element_threshold = 1;
 
-  /// @brief centroids of the element
+  /// @brief Centroids of all solved elements used for k-d tree construction.
   std::vector<Point> _centroids_of_elements;
 
-  /// @brief Maximum number of elements in a leaf node of the k-d tree
+  /// @brief Maximum number of elements allowed in a leaf node of the k-d tree.
   int _leaf_max_size = 10;
 
-  /// @brief k-d tree for neighbor element search in polynomial extrapolation
+  /// @brief k-d tree used for neighbor solved element search in polynomial extrapolation.
   KDTree * _kd_tree = nullptr;
 
-  /// @brief  Map from k-d tree sequence index to element ID
+  /// @brief Mapping from the k-d tree node index to the corresponding element ID.
   std::vector<dof_id_type> _kd_tree_sequence_elem_id_map;
 
-  /// @brief Minimum diagonal length (criteria) for the k-d tree search
+  /// @brief Minimum diagonal length among the loose bounding boxes of
+  /// all solved elements (i.e., elements within the computational domain,
+  /// excluding those in _reinitialized_elems).
+  /// This value is used to compute the initial search radius for the k-d tree search,
+  /// where the radius is estimated as _nearby_element_threshold multiplied by _min_diag_length.
   double _min_diag_length = std::numeric_limits<double>::max();
 
-  /// @brief Radius search threshold for k-d tree search
-  double _radius_search_threshold = -1;
+  /// @brief Radius threshold for the k-d tree neighbor search.
+  /// By default, it is initialized as _nearby_element_threshold * _min_diag_length,
+  /// but the user can override this value by explicitly setting _nearby_distance_threshold.
+  double _nearby_distance_threshold = -1;
 
-  /// Number of nonlinear variables in the system
-  const int _number_of_nl_variables;
+  /// @brief Set of processor IDs that have reinitialized elements and nodes.
+  std::set<processor_id_type> _global_proc_ids_for_reinit;
 
-  /// Perform a global MPI gather of reinitialized element IDs across all processors.
-  /// Results are stored in `_global_reinitialized_elems`.
-  void synchronizeReinitializedElems();
+  /// @brief Gather neighbor elements for newly activated nodes based on the reinitialization strategy.
+  void gatherNeighborElementsForActivatedNodes(ReinitStrategy & reinit_strategy);
 
-  /// @brief Filters the globally reinitialized nodes and stores only those owned by this processor.
-  void identifyProcessorOwnedReinitializedNodes();
+  /// @brief Project initial conditions using NodalPatchRecoveryBase user objects
+  void projectNprIC(const VariableName & var_name, bool displaced, ReinitStrategy reinit_strategy);
 
-  /// @brief Apply initial conditions using polynomial nodal patch recovery
-  /// @param sys
-  /// @param var_num_in_npr variable number in the NodalPatchRecovery user object
-  /// @param var_num_for_nl_or_aux variable number for the nonlinear or auxiliary system
-  /// @param is_elemental true if the variable is elemental, false if it is nodal
-  void applyIC_Polynomial(SystemBase & sys,
-                          const unsigned int var_num_in_npr,
-                          const unsigned int var_num_for_nl_or_aux,
-                          const bool is_elemental);
+  /// @brief Store values from non-reinitialized nodes on reinitialized elements
+  void storeValuesFromNonReinitNodes(const std::set<VariableName> & vars_names);
 
-  /// @brief Gather neighbor elements for newly activated nodes
-  void gatherNeighborElementsForActivatedNodes(const unsigned int ic_idx);
+  /// @brief Restore values to non-reinitialized nodes on reinitialized elements
+  void restoreValuesToNonReinitNodes(const std::set<VariableName> & vars_names);
 };

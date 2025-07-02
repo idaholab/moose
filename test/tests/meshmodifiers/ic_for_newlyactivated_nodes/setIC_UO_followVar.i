@@ -55,10 +55,15 @@
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
-    ic_strategy = "IC_DEFAULT"
 
     old_subdomain_reinitialized = false
-    reinitialize_subdomain_ids = '1'
+    reinitialize_subdomains = '1'
+
+    reinitialization_strategy = "POLYNOMIAL_NEIGHBOR"
+
+    reinitialize_variables = 'diff'
+
+    polynomial_fitters = 'extrapolation_patch'
   []
 []
 
@@ -98,12 +103,21 @@
   [diff]
     order = FIRST
   []
+  [diff2]
+    order = FIRST
+    initial_condition = 10
+  []
 []
 
 [Kernels]
   [diffusion]
     type = MatDiffusion
-    variable = diff
+    variable = 'diff'
+    diffusivity = 'k'
+  []
+  [diffusion2]
+    type = MatDiffusion
+    variable = 'diff2'
     diffusivity = 'k'
   []
 []
@@ -119,14 +133,28 @@
 [BCs]
   [left]
     type = DirichletBC
-    variable = diff
+    variable = 'diff'
     boundary = left
     value = 10
   []
 
   [bottom]
     type = DirichletBC
-    variable = diff
+    variable = 'diff'
+    boundary = bottom
+    value = 0
+  []
+
+  [left2]
+    type = DirichletBC
+    variable = 'diff2'
+    boundary = left
+    value = 10
+  []
+
+  [bottom2]
+    type = DirichletBC
+    variable = 'diff2'
     boundary = bottom
     value = 0
   []
