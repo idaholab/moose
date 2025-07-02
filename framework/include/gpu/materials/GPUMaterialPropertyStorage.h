@@ -23,17 +23,28 @@ namespace Moose
 namespace Kokkos
 {
 
+/**
+ * The Kokkos class responsible for allocating and storing Kokkos material properties
+ */
 class MaterialPropertyStorage : protected ::MaterialPropertyStorage
 {
   friend void ::dataStore(std::ostream &, MaterialPropertyStorage &, void *);
   friend void ::dataLoad(std::istream &, MaterialPropertyStorage &, void *);
 
 public:
+  /**
+   * Constructor
+   */
   MaterialPropertyStorage(MaterialPropertyRegistry & registry, FEProblemBase & problem)
     : ::MaterialPropertyStorage(registry, problem)
   {
   }
 
+  /**
+   * Cast the reference of a Kokkos material property storage from the base type to the actual type
+   * @param storage The Kokkos material property storage as the reference of the base type
+   * @returns The Kokkos material property storage as the reference of the actual type
+   */
   static MaterialPropertyStorage & cast(::MaterialPropertyStorage & storage)
   {
     return static_cast<MaterialPropertyStorage &>(storage);
@@ -46,38 +57,85 @@ public:
   using ::MaterialPropertyStorage::hasStatefulProperties;
 
 #ifdef MOOSE_KOKKOS_SCOPE
-  // Add a Kokkos material property to the storage
+  /**
+   * Add a material property
+   * @param prop_name The property name
+   * @param type The property data type
+   * @param state The property state
+   * @param declarer The Kokkos material declaring the property, nullptr if simply reserving the
+   * property
+   * @param shell The managed pointer containing the instance of the property
+   * @returns The material property
+   */
   MaterialPropertyBase & addKokkosProperty(const std::string & prop_name,
                                            const std::type_info & type,
                                            const unsigned int state,
-                                           const MaterialBase * declarer,
+                                           const ::MaterialBase * declarer,
                                            std::shared_ptr<MaterialPropertyBase> shell);
+  /**
+   * Add an old/older material property
+   * @param prop_name The property name
+   * @param state The property state
+   * @param shell The managed pointer containing the
+   * @returns The material property
+   */
   MaterialPropertyBase & addKokkosPropertyState(const std::string & prop_name,
                                                 const unsigned int state,
                                                 std::shared_ptr<MaterialPropertyBase> shell);
+  /**
+   * Declare a material property
+   * @param prop_name The property name
+   * @param type The property data type
+   * @param declarer The Kokkos material declaring the property, nullptr if simply reserving the
+   * @param dims The vector containing the size of each dimension
+   * @param bnd Whether the property is a face property
+   * @param shell The managed pointer containing the instance of the property
+   * @returns The material property
+   */
   MaterialPropertyBase & declareKokkosProperty(const std::string & prop_name,
                                                const std::type_info & type,
-                                               const unsigned int state,
-                                               const MaterialBase * declarer,
+                                               const ::MaterialBase * declarer,
                                                const std::vector<unsigned int> & dims,
                                                const bool bnd,
                                                std::shared_ptr<MaterialPropertyBase> shell);
-  // Get a Kokkos material property
+  /**
+   * Get a material property
+   * @param prop_name The property name
+   * @param state The property state
+   * @returns The material property
+   */
   MaterialPropertyBase & getKokkosProperty(std::string prop_name, unsigned int state = 0);
-  // Allocate all the Kokkos material property storages
-  void allocateKokkosProperties();
-  // Check whether a Kokkos material property exists
+  /**
+   * Get whether a material property exists
+   * @param prop_name The property name
+   * @param state The property state
+   * @returns Whether the material property exists
+   */
   bool haveKokkosProperty(std::string prop_name, unsigned int state = 0);
+  /**
+   * Allocate all the material property data storages
+   */
+  void allocateKokkosProperties();
 #endif
 
+  /**
+   * Shift current, old, and older material property data storages
+   */
   void shift();
+  /**
+   * Copy current material properties to old and older
+   */
   void copy();
 
 private:
-  // Kokkos material properties
+  /**
+   * Material properties
+   */
   std::map<std::string, std::shared_ptr<MaterialPropertyBase>>
       _kokkos_props[MaterialData::max_state + 1];
-  // Records of each Kokkos material property
+  /**
+   * Record of each material property
+   */
   std::map<std::string, Moose::Kokkos::PropRecord> _kokkos_prop_records;
 };
 
