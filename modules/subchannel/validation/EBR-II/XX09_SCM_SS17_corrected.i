@@ -160,7 +160,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     type = SCMTriPowerIC
     variable = q_prime
     power = ${Power_initial}
-    filename = "pin_power_profile61_uniform.txt"
+    filename = "pin_power_profile61.txt"
     axial_heat_rate = axial_heat_rate
   []
 

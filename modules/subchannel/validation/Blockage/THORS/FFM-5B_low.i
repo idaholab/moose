@@ -36,7 +36,6 @@ P_out = 2.0e5 # Pa
     index_blockage = '29 31 30 32 34 33 35 15 16 8 17 18 9 19'
     reduction_blockage = '0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2 0.2'
     k_blockage = '1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 1.2 '
-
   []
 []
 
@@ -98,7 +97,7 @@ P_out = 2.0e5 # Pa
   T_tol = 1.0e-4
   implicit = true
   segregated = false
-  interpolation_scheme = 'upwind'
+  verbose_subchannel = true
 []
 
 [ICs]
