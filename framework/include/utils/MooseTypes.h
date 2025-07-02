@@ -1020,7 +1020,7 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
  * MooseTypes.C to also define to_json for each
  */
 #define DerivativeStringClass(TheName, ...)                                                        \
-  class TheName : public std::string __VA_ARGS__                                                   \
+  class TheName : public std::string, __VA_ARGS__                                                  \
   {                                                                                                \
   public:                                                                                          \
     TheName() : std::string() {}                                                                   \
@@ -1043,6 +1043,9 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
 ///@{
 /// Mixin base classes for DerivativeStringClass to specify additional requirements
 // See for example Builder.C for how these mixins are used
+struct None
+{
+};
 struct NoSpace
 {
 };
@@ -1053,144 +1056,144 @@ struct NoSpace
 /// This type is for expected (i.e. input) file names or paths that your simulation needs.
 /// If relative types are assigned to this type, they are replaced with an absolute path
 /// that is relative to the context of the parameter (usually the input file).
-DerivativeStringClass(FileName, , NoSpace);
+DerivativeStringClass(FileName, NoSpace);
 
 /// Similar to FileName but without an extension
-DerivativeStringClass(FileNameNoExtension, , NoSpace);
+DerivativeStringClass(FileNameNoExtension, NoSpace);
 
 /// This type is for expected filenames that should be relative and will not have their
 /// values set to absolute paths like FileName
-DerivativeStringClass(RelativeFileName, , NoSpace);
+DerivativeStringClass(RelativeFileName, NoSpace);
 
 /// This type is for files used in the DataFileInterface, which enables searching of files
 /// within the registered data directory
-DerivativeStringClass(DataFileName, , NoSpace);
+DerivativeStringClass(DataFileName, NoSpace);
 
 /// This type is similar to "FileName", but is used to further filter file dialogs on known file mesh types
-DerivativeStringClass(MeshFileName, , NoSpace);
+DerivativeStringClass(MeshFileName, NoSpace);
 
 /// This type is similar to "FileName", but is used to further filter file dialogs on known matrix file types
-DerivativeStringClass(MatrixFileName, , NoSpace);
+DerivativeStringClass(MatrixFileName, NoSpace);
 
 /// This type is for output file base
-DerivativeStringClass(OutFileBase, , NoSpace);
+DerivativeStringClass(OutFileBase, NoSpace);
 
 /// This type is used for objects that expect nonlinear variable names (i.e. Kernels, BCs)
-DerivativeStringClass(NonlinearVariableName, , NoSpace);
+DerivativeStringClass(NonlinearVariableName, NoSpace);
 
 /// This type is used for objects that expect linear variable names (i.e. LinearFVKernels, LinearFVBCs)
-DerivativeStringClass(LinearVariableName, , NoSpace);
+DerivativeStringClass(LinearVariableName, NoSpace);
 
 /// This type is used for objects that expect linear or nonlinear solver variable names
-DerivativeStringClass(SolverVariableName, , NoSpace);
+DerivativeStringClass(SolverVariableName, NoSpace);
 
 /// This type is used for objects that expect Auxiliary variable names (i.e. AuxKernels, AuxBCs)
-DerivativeStringClass(AuxVariableName, , NoSpace);
+DerivativeStringClass(AuxVariableName, NoSpace);
 
 /// This type is used for objects that expect either Solver or Auxiliary Variables such as postprocessors
-DerivativeStringClass(VariableName, , NoSpace);
+DerivativeStringClass(VariableName, NoSpace);
 
 /// This type is used for objects that expect Boundary Names/Ids read from or generated on the current mesh
-DerivativeStringClass(BoundaryName, , NoSpace);
+DerivativeStringClass(BoundaryName, NoSpace);
 
 /// This type is similar to BoundaryName but is used for "blocks" or subdomains in the current mesh
-DerivativeStringClass(SubdomainName, , NoSpace);
+DerivativeStringClass(SubdomainName, NoSpace);
 
 /// This type is used for objects that expect Postprocessor objects
-DerivativeStringClass(PostprocessorName, , NoSpace);
+DerivativeStringClass(PostprocessorName, NoSpace);
 
 /// This type is used for objects that expect VectorPostprocessor objects
-DerivativeStringClass(VectorPostprocessorName, , NoSpace);
+DerivativeStringClass(VectorPostprocessorName, NoSpace);
 
 /// This type is used for objects that expect MeshDivision objects
-DerivativeStringClass(MeshDivisionName, , NoSpace);
+DerivativeStringClass(MeshDivisionName, NoSpace);
 
 /// This type is used for objects that expect Moose Function objects
-DerivativeStringClass(FunctionName);
+DerivativeStringClass(FunctionName, None);
 
 /// This type is used for objects that expect Moose Distribution objects
-DerivativeStringClass(DistributionName, , NoSpace);
+DerivativeStringClass(DistributionName, NoSpace);
 
 /// This type is used for objects that expect Moose Sampler objects
-DerivativeStringClass(SamplerName, , NoSpace);
+DerivativeStringClass(SamplerName, NoSpace);
 
 /// This type is used for objects that expect "UserObject" names
-DerivativeStringClass(UserObjectName, , NoSpace);
+DerivativeStringClass(UserObjectName, NoSpace);
 
 /// This type is used for objects that expect an Indicator object name
-DerivativeStringClass(IndicatorName, , NoSpace);
+DerivativeStringClass(IndicatorName, NoSpace);
 
 /// This type is used for objects that expect an Marker object name
-DerivativeStringClass(MarkerName, , NoSpace);
+DerivativeStringClass(MarkerName, NoSpace);
 
 /// This type is used for objects that expect an MultiApp object name
-DerivativeStringClass(MultiAppName, , NoSpace);
+DerivativeStringClass(MultiAppName, NoSpace);
 
 /// Used for objects the require Output object names
-DerivativeStringClass(OutputName, , NoSpace);
+DerivativeStringClass(OutputName, NoSpace);
 
 /// Used for objects that expect MaterialProperty names
-DerivativeStringClass(MaterialPropertyName, , NoSpace);
+DerivativeStringClass(MaterialPropertyName, NoSpace);
 
 /// Used for objects that expect Moose::Functor names
-DerivativeStringClass(MooseFunctorName, , NoSpace);
+DerivativeStringClass(MooseFunctorName, NoSpace);
 
 /// User for accessing Material objects
-DerivativeStringClass(MaterialName, , NoSpace);
+DerivativeStringClass(MaterialName, NoSpace);
 
 /// Tag Name
-DerivativeStringClass(TagName, , NoSpace);
+DerivativeStringClass(TagName, NoSpace);
 
 /// Name of MeshGenerators
-DerivativeStringClass(MeshGeneratorName, , NoSpace);
+DerivativeStringClass(MeshGeneratorName, NoSpace);
 
 /// Name of extra element IDs
-DerivativeStringClass(ExtraElementIDName, , NoSpace);
+DerivativeStringClass(ExtraElementIDName, NoSpace);
 
 /// Name of a Reporter Value, second argument to ReporterName (see Reporter.h)
-DerivativeStringClass(ReporterValueName, , NoSpace);
+DerivativeStringClass(ReporterValueName, NoSpace);
 
 /// Name of a Component object
-DerivativeStringClass(ComponentName, , NoSpace);
+DerivativeStringClass(ComponentName, NoSpace);
 
 /// Name of a Physics object
-DerivativeStringClass(PhysicsName, , NoSpace);
+DerivativeStringClass(PhysicsName, NoSpace);
 
 /// Name of a Positions object
-DerivativeStringClass(PositionsName, , NoSpace);
+DerivativeStringClass(PositionsName, NoSpace);
 
 /// Name of a Times object
-DerivativeStringClass(TimesName, , NoSpace);
+DerivativeStringClass(TimesName, NoSpace);
 
 /// Name of an Executor.  Used for inputs to Executors
-DerivativeStringClass(ExecutorName, , NoSpace);
+DerivativeStringClass(ExecutorName, NoSpace);
 
 /// ParsedFunction/ParsedMaterial etc. FParser expression
-DerivativeStringClass(ParsedFunctionExpression);
+DerivativeStringClass(ParsedFunctionExpression, None);
 
 /// System name support of multiple nonlinear systems on the same mesh
-DerivativeStringClass(NonlinearSystemName, , NoSpace);
+DerivativeStringClass(NonlinearSystemName, NoSpace);
 
 /// Name of a Convergence object
-DerivativeStringClass(ConvergenceName, , NoSpace);
+DerivativeStringClass(ConvergenceName, NoSpace);
 
 /// System name support of multiple linear systems on the same mesh
-DerivativeStringClass(LinearSystemName, , NoSpace);
+DerivativeStringClass(LinearSystemName, NoSpace);
 
 /// Name of a system which either be linear or nonlinear
-DerivativeStringClass(SolverSystemName, , NoSpace);
+DerivativeStringClass(SolverSystemName, NoSpace);
 
 /// Command line argument, specialized to handle quotes in vector arguments
-DerivativeStringClass(CLIArgString);
+DerivativeStringClass(CLIArgString, None);
 
 #ifdef MFEM_ENABLED
 /**
  * Coefficients used in input for MFEM residual objects
  */
 ///@{
-DerivativeStringClass(MFEMScalarCoefficientName, , NoSpace);
-DerivativeStringClass(MFEMVectorCoefficientName, , NoSpace);
-DerivativeStringClass(MFEMMatrixCoefficientName, , NoSpace);
+DerivativeStringClass(MFEMScalarCoefficientName, NoSpace);
+DerivativeStringClass(MFEMVectorCoefficientName, NoSpace);
+DerivativeStringClass(MFEMMatrixCoefficientName, NoSpace);
 ///@}
 #endif
 /**
