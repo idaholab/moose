@@ -1404,14 +1404,23 @@ Builder::setScalarParameter(const std::string & full_name,
       throw;
   }
 
-  // Make sure that derivative string types have no spaces
-  if constexpr (std::is_base_of_v<std::string, T> && std::is_base_of_v<NoSpace, T>)
+  if constexpr (std::is_same_v<std::string, Base>)
   {
-    if (param->get().find_first_of("\t\n\f\v\r ") != std::string::npos)
-      _errmsg += hit::errormsg(root()->find(full_name),
-                               "parameter " + full_name + " of type " +
-                                   MooseUtils::prettyCppType<T>() + " may not contain whitespace") +
-                 "\n";
+    // Derivative string classes
+    if constexpr (!std::is_same_v<std::string, T>)
+    {
+      static_assert(std::is_base_of_v<Moose::DerivativeString, T>,
+                    "Derived string types must be moose derivative strings");
+
+      // Derivative string classes that do not allow spaces (default)
+      if constexpr (!std::is_base_of_v<Moose::DerivativeStringAllowSpaces, T>)
+        if (param->get().find_first_of("\t\n\f\v\r ") != std::string::npos)
+          _errmsg +=
+              hit::errormsg(root()->find(full_name),
+                            "parameter " + full_name + " of type " +
+                                MooseUtils::prettyCppType<T>() + " may not contain whitespace") +
+              "\n";
+    }
   }
 
   if (in_global)
