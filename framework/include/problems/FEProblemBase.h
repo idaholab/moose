@@ -725,6 +725,9 @@ public:
   virtual const SystemBase & systemBaseNonlinear(const unsigned int sys_num) const override;
   virtual SystemBase & systemBaseNonlinear(const unsigned int sys_num) override;
 
+  virtual const SystemBase & systemBaseSolver(const unsigned int sys_num) const override;
+  virtual SystemBase & systemBaseSolver(const unsigned int sys_num) override;
+
   virtual const SystemBase & systemBaseAuxiliary() const override;
   virtual SystemBase & systemBaseAuxiliary() override;
 
@@ -1485,10 +1488,10 @@ public:
    * @param compute_gradients A flag to disable the computation of new gradients during the
    * assembly, can be used to lag gradients
    */
-  void computeLinearSystemSys(libMesh::LinearImplicitSystem & sys,
-                              libMesh::SparseMatrix<libMesh::Number> & system_matrix,
-                              NumericVector<libMesh::Number> & rhs,
-                              const bool compute_gradients = true);
+  virtual void computeLinearSystemSys(libMesh::LinearImplicitSystem & sys,
+                                      libMesh::SparseMatrix<libMesh::Number> & system_matrix,
+                                      NumericVector<libMesh::Number> & rhs,
+                                      const bool compute_gradients = true);
 
   /**
    * Assemble the current linear system given a set of vector and matrix tags.
