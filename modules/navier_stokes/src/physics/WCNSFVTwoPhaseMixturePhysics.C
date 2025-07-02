@@ -19,22 +19,32 @@ InputParameters
 WCNSFVTwoPhaseMixturePhysics::validParams()
 {
   InputParameters params = WCNSFVScalarTransportPhysics::validParams();
-  params.addClassDescription("Define the additional terms for a mixture model for the two phase "
-                             "weakly-compressible Navier Stokes equations");
 
-  // It can be useful to define the mixture materials with a fixed phase fraction instead
-  // of solving the equations
-  params.addParam<bool>("add_scalar_equation", true, "");
-  params.renameParam("add_scalar_equation",
-                     "add_phase_transport_equation",
-                     "Whether to add the phase transport equation.");
+  // First rename the parameters from passive scalar to mixture
+  renamePassiveScalarToMixtureParams(params);
+  params.renameParam("passive_scalar_face_interpolation",
+                     "phase_face_interpolation",
+                     "The numerical scheme to interpolate the phase fraction variable to the "
+                     "face (separate from the advected quantity interpolation)");
 
+  // Then add parameters specific to mixtures
   // The flow physics is obtained from the scalar transport base class
   // The fluid heat transfer physics is retrieved even if unspecified
   params.addParam<PhysicsName>(
       "fluid_heat_transfer_physics",
       "NavierStokesFV",
       "WCNSFVFluidHeatTransferPhysics generating the fluid energy equation");
+  params += commonMixtureParams();
+  params.addParamNamesToGroup("fluid_heat_transfer_physics", "Phase change");
+  params.addClassDescription("Define the additional terms for a mixture model for the two phase "
+                             "weakly-compressible Navier Stokes equations");
+  return params;
+}
+
+InputParameters
+WCNSFVTwoPhaseMixturePhysics::commonMixtureParams()
+{
+  InputParameters params = emptyInputParameters();
 
   params.addParam<bool>(
       "use_external_mixture_properties",
@@ -44,13 +54,6 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
   params.addParam<bool>("output_all_properties",
                         false,
                         "Whether to output every functor material property defined to Exodus");
-
-  params.renameParam("initial_scalar_variables",
-                     "initial_phase_fraction",
-                     "Initial value of the main phase fraction variable");
-  params.renameParam("passive_scalar_diffusivity",
-                     "phase_fraction_diffusivity",
-                     "Functor names for the diffusivities used for the main phase fraction.");
 
   // Phase change parameters
   params.addParam<MooseFunctorName>(
@@ -89,9 +92,6 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
                                             "Name of the thermal conductivity functor for phase 1");
 
   // Properties of phase 2 (can be solid, another liquid, or gaseous)
-  params.renameParam("passive_scalar_names",
-                     "phase_2_fraction_name",
-                     "Name of the second phase fraction variable (can be a dispersed phase)");
   params.addRequiredParam<MooseFunctorName>("phase_2_density_name",
                                             "Name of the density functor for phase 2");
   params.addRequiredParam<MooseFunctorName>("phase_2_viscosity_name",
@@ -107,6 +107,44 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
   params.addParam<bool>("use_dispersed_phase_drag_model",
                         false,
                         "Adds a linear friction term with the dispersed phase drag model");
+
+  // Parameter groups
+  params.addParamNamesToGroup("phase_1_density_name phase_1_viscosity_name "
+                              "phase_1_specific_heat_name phase_1_thermal_conductivity_name "
+                              "phase_2_density_name phase_2_viscosity_name "
+                              "phase_2_specific_heat_name phase_2_thermal_conductivity_name "
+                              "use_external_mixture_properties",
+                              "Mixture material properties");
+
+  params.addParamNamesToGroup("slip_linear_friction_name use_dispersed_phase_drag_model",
+                              "Friction model");
+  params.addParamNamesToGroup(NS::alpha_exchange + " add_phase_change_energy_term", "Phase change");
+  params.addParamNamesToGroup("add_drift_flux_momentum_terms density_interp_method",
+                              "Drift flux model");
+  params.addParamNamesToGroup("add_advection_slip_term", "Advection slip model");
+  return params;
+}
+
+void
+WCNSFVTwoPhaseMixturePhysics::renamePassiveScalarToMixtureParams(InputParameters & params)
+{
+  // It can be useful to define the mixture materials with a fixed phase fraction instead
+  // of solving the equations
+  params.addParam<bool>("add_scalar_equation", true, "");
+  params.renameParam("add_scalar_equation",
+                     "add_phase_transport_equation",
+                     "Whether to add the phase transport equation.");
+
+  params.renameParam("initial_scalar_variables",
+                     "initial_phase_fraction",
+                     "Initial value of the main phase fraction variable");
+  params.renameParam("passive_scalar_diffusivity",
+                     "phase_fraction_diffusivity",
+                     "Functor names for the diffusivities used for the main phase fraction.");
+
+  params.renameParam("passive_scalar_names",
+                     "phase_2_fraction_name",
+                     "Name of the second phase fraction variable (can be a dispersed phase)");
 
   // Not applicable currently
   params.suppressParameter<std::vector<MooseFunctorName>>("passive_scalar_source");
@@ -127,10 +165,6 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
                      "phase_advection_interpolation",
                      "The numerical scheme to use for interpolating the phase fraction variable, "
                      "as an advected quantity, to the face.");
-  params.renameParam("passive_scalar_face_interpolation",
-                     "phase_face_interpolation",
-                     "The numerical scheme to interpolate the phase fraction variable to the "
-                     "face (separate from the advected quantity interpolation)");
   params.renameParam(
       "passive_scalar_two_term_bc_expansion",
       "phase_two_term_bc_expansion",
@@ -142,23 +176,7 @@ WCNSFVTwoPhaseMixturePhysics::validParams()
                      "phase_scaling",
                      "The scaling factor for the phase transport equation");
 
-  // Parameter groups
   params.renameParameterGroup("Passive scalar control", "Mixture transport control");
-  params.addParamNamesToGroup("phase_1_density_name phase_1_viscosity_name "
-                              "phase_1_specific_heat_name phase_1_thermal_conductivity_name "
-                              "phase_2_density_name phase_2_viscosity_name "
-                              "phase_2_specific_heat_name phase_2_thermal_conductivity_name "
-                              "use_external_mixture_properties",
-                              "Mixture material properties");
-
-  params.addParamNamesToGroup("fluid_heat_transfer_physics " + NS::alpha_exchange +
-                                  " add_phase_change_energy_term",
-                              "Phase change");
-  params.addParamNamesToGroup("add_drift_flux_momentum_terms density_interp_method",
-                              "Drift flux model");
-  params.addParamNamesToGroup("add_advection_slip_term", "Advection slip model");
-
-  return params;
 }
 
 WCNSFVTwoPhaseMixturePhysics::WCNSFVTwoPhaseMixturePhysics(const InputParameters & parameters)

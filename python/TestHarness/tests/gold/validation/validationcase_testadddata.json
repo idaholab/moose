@@ -1,0 +1,14 @@
+{
+  "data": {
+    "some_dict": {
+      "description": "Useless dictionary",
+      "key": "some_dict",
+      "test": null,
+      "validation": true,
+      "value": {
+        "foo": "bar"
+      }
+    }
+  },
+  "results": []
+}

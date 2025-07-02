@@ -11,6 +11,9 @@
 #include "MooseLinearVariableFV.h"
 #include "NSFVUtils.h"
 #include "NS.h"
+#include "RhieChowMassFlux.h"
+#include "LinearFVBoundaryCondition.h"
+#include "LinearFVAdvectionDiffusionBC.h"
 
 registerMooseObject("NavierStokesApp", LinearWCNSFVMomentumFlux);
 

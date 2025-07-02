@@ -182,10 +182,23 @@ def findDepApps(dep_names, use_current_only=False):
                     dirnames[:] = []
 
     # Now we need to filter out duplicate moose apps
-    moose_dir = os.environ.get('MOOSE_DIR')
     return '\n'.join(dep_dirs)
 
 class TestHarness:
+    # Version history:
+    # 1 - Initial tracking of version
+    # 2 - Added 'unique_test_id' (tests/*/tests/*/unique_test_id) to Job output if set
+    # 3 - Added 'json_metadata' (tests/*/tests/*/tester/json_metadata) to Tester output
+    # 4 - Added 'validation' (tests/*/tests/validation) to Job output if set
+    # 5 - Added validation data types (tests/*/tests/data/type) to Job output if set
+    # 6 - Added 'testharness/validation_version'
+    RESULTS_VERSION = 6
+
+    # Validation version history:
+    # 1 - Initial tracking of version
+    # 2 - Added 'abs_zero' key to ValidationNumericData
+    VALIDATION_VERSION = 2
+
     @staticmethod
     def build(argv: list, app_name: str, moose_dir: str, moose_python: str = None,
               skip_testroot: bool = False) -> None:
@@ -919,13 +932,8 @@ class TestHarness:
         self.options.results_storage = {}
         storage = self.options.results_storage
 
-        # Version history:
-        # 1 - Initial tracking of version
-        # 2 - Added 'unique_test_id' (tests/*/tests/*/unique_test_id) to Job output if set
-        # 3 - Added 'json_metadata' (tests/*/tests/*/tester/json_metadata) to Tester output
-        # 4 - Added 'validation' (tests/*/tests/validation) to Job output if set
-        # 5 - Added validation data types (tests/*/tests/data/type) to Job output if set
-        testharness = {'version': 5,
+        testharness = {'version': self.RESULTS_VERSION,
+                       'validation_version': self.VALIDATION_VERSION,
                        'start_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                        'end_time': None,
                        'args': sys.argv[1:],

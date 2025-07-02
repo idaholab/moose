@@ -112,13 +112,6 @@ P_out = 2.0e5 # Pa
     variable = w_perim
   []
 
-  [q_prime_IC]
-    type = SCMTriPowerIC
-    variable = q_prime
-    power = 52800 #W, low flow case
-    filename = "pin_power_profile_19.txt"
-  []
-
   [T_ic]
     type = ConstantIC
     variable = T
@@ -183,6 +176,13 @@ P_out = 2.0e5 # Pa
     area = S
     mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
+  []
+  [q_prime_Aux]
+    type = SCMTriPowerAux
+    variable = q_prime
+    power = 52800 #W, low flow case
+    filename = "pin_power_profile_19.txt"
+    execute_on = 'initial timestep_begin'
   []
 []
 

@@ -7,4 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from .ValidationCase import *
+from .cases.validationcase import ValidationCase
+
+# The base validation classes that users will derive from
+ValidationCaseClasses = (ValidationCase,)

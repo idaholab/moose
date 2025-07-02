@@ -46,7 +46,7 @@ class TestHarnessTester(TestHarnessTestCase):
         out = self.runTests(*BASE_ARGS, '--re', 'csvdiff', exit_code=128).output
         self.assertRegex(out, r'tests/test_harness.csvdiff.*? FAILED \(Override inputs not the same length\)')
 
-    def testRunException(self):
+    def ValidationTestRunException(self):
         # RunException can access sub directories
         out = self.runTests(*BASE_ARGS, '--re', 'runexception', exit_code=128).output
         self.assertRegex(out, r'tests/test_harness.runexception.*? FAILED \(EXPECTED ERROR MISSING\)')

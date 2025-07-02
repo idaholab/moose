@@ -1,0 +1,28 @@
+{
+  "data": {
+    "number": {
+      "abs_zero": null,
+      "bounds": [
+        101.0,
+        200.0
+      ],
+      "description": "Number",
+      "key": "number",
+      "nominal": null,
+      "rel_err": null,
+      "test": "TestCase.testValidation",
+      "type": "ValidationScalarData",
+      "units": null,
+      "value": 100.0
+    }
+  },
+  "results": [
+    {
+      "data_key": "number",
+      "message": "value 1.000E+02 out of bounds; min = 1.010E+02, max = 2.000E+02",
+      "status": "FAIL",
+      "test": "TestCase.testValidation"
+    }
+  ],
+  "script": "../../../test/tests/test_harness/validation_fail.py"
+}

@@ -128,6 +128,7 @@ LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
   }
   catch (MooseException & e)
   {
+    _console << "Exception detected " << e.what() << std::endl;
     // The buck stops here, we have already handled the exception by
     // calling stopSolve(), it is now up to PETSc to return a
     // "diverged" reason during the next solve.

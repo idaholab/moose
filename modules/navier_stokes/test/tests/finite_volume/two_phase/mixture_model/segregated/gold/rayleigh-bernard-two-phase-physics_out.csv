@@ -1,0 +1,2 @@
+time,average_void,max_drag_coefficient_x,max_drag_coefficient_y,max_x_slip_velocity,max_x_velocity,max_y_slip_velocity,max_y_velocity,min_x_velocity,min_y_velocity
+100000000,0.57599527405404,1.2248395087562,1.2248395087562,0.010079274604252,0.13729942698321,0.010634986225284,0.21381041993432,-0.13729942698319,-0.22048097008922

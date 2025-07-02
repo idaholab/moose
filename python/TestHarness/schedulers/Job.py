@@ -13,8 +13,9 @@ from contextlib import nullcontext, redirect_stdout
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
 from TestHarness.runners.Runner import Runner
-from TestHarness.validation import TestRunException
-from TestHarness import OutputInterface, util, ValidationCase
+from TestHarness.validation.exceptions import ValidationTestRunException
+from TestHarness.validation import ValidationCase
+from TestHarness import OutputInterface, util
 from tempfile import TemporaryDirectory
 from collections import namedtuple
 from dataclasses import asdict, dataclass
@@ -545,7 +546,12 @@ class Job(OutputInterface):
         """
         init_kwargs = {'params': self.__tester.parameters(),
                        'tester_outputs': self.getOutputFiles(self.options)}
-        self.validation_cases = [c(**init_kwargs) for c in self.__tester._validation_classes]
+        cwd = os.getcwd()
+        os.chdir(self.getTestDir())
+        try:
+            self.validation_cases = [c(**init_kwargs) for c in self.__tester._validation_classes]
+        finally:
+            os.chdir(cwd)
 
     def runValidation(self):
         """
@@ -567,7 +573,7 @@ class Job(OutputInterface):
             try:
                 with redirect_stdout(stdout):
                     test_case.run()
-            except TestRunException:
+            except ValidationTestRunException:
                 run_exception = True
             finally:
                 output.appendOutput(stdout.getvalue())

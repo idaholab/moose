@@ -19,6 +19,7 @@
 registerWCNSFVFlowPhysicsBaseTasks("NavierStokesApp", WCNSLinearFVFlowPhysics);
 registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_linear_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_linear_fv_bc");
+registerMooseAction("NavierStokesApp", WCNSLinearFVFlowPhysics, "add_functor_material");
 
 InputParameters
 WCNSLinearFVFlowPhysics::validParams()
@@ -36,6 +37,11 @@ WCNSLinearFVFlowPhysics::validParams()
   params.set<std::vector<SolverSystemName>>("system_names") = {
       "u_system", "v_system", "w_system", "pressure_system"};
 
+  // Implemented in the executioner
+  params.suppressParameter<MooseEnum>("pinned_pressure_type");
+  params.suppressParameter<Point>("pinned_pressure_point");
+  params.suppressParameter<PostprocessorName>("pinned_pressure_value");
+
   // Not supported
   params.suppressParameter<bool>("add_flow_equations");
   params.set<bool>("porous_medium_treatment") = false;
@@ -45,6 +51,7 @@ WCNSLinearFVFlowPhysics::validParams()
   params.suppressParameter<MooseEnum>("mu_interp_method");
   // Not needed
   params.suppressParameter<bool>("add_flow_equations");
+  params.suppressParameter<MooseEnum>("preconditioning");
 
   // No other options so far
   params.set<MooseEnum>("velocity_interpolation") = "rc";
@@ -65,6 +72,10 @@ WCNSLinearFVFlowPhysics::WCNSLinearFVFlowPhysics(const InputParameters & paramet
   if (_hydraulic_separators.size())
     paramError("hydraulic_separator_sidesets",
                "Flow separators are not supported yet for linearFV!");
+  if (getParam<bool>("pin_pressure"))
+    paramError("pin_pressure",
+               "Pressure pinning is implemented in the executioner for the linear finite volume "
+               "segregated solves");
 }
 
 void
@@ -165,6 +176,10 @@ WCNSLinearFVFlowPhysics::addFVKernels()
 
   // Momentum equation: pressure term
   addMomentumPressureKernels();
+
+  // Momentum equation: friction term
+  if (_friction_types.size())
+    addMomentumFrictionKernels();
 
   // Momentum equation: gravity source term
   addMomentumGravityKernels();
@@ -267,6 +282,56 @@ WCNSLinearFVFlowPhysics::addMomentumPressureKernels()
 }
 
 void
+WCNSLinearFVFlowPhysics::addMomentumFrictionKernels()
+{
+  unsigned int num_friction_blocks = _friction_blocks.size();
+  unsigned int num_used_blocks = num_friction_blocks ? num_friction_blocks : 1;
+
+  const std::string kernel_type = "LinearFVMomentumFriction";
+  InputParameters params = getFactory().getValidParams(kernel_type);
+
+  for (const auto block_i : make_range(num_used_blocks))
+  {
+    std::string block_name = "";
+    if (num_friction_blocks)
+    {
+      params.set<std::vector<SubdomainName>>("block") = _friction_blocks[block_i];
+      block_name = Moose::stringify(_friction_blocks[block_i]);
+    }
+    else
+    {
+      assignBlocks(params, _blocks);
+      block_name = std::to_string(block_i);
+    }
+
+    for (const auto d : make_range(dimension()))
+    {
+      params.set<LinearVariableName>("variable") = _velocity_names[d];
+      params.set<MooseEnum>("momentum_component") = NS::directions[d];
+      for (unsigned int type_i = 0; type_i < _friction_types[block_i].size(); ++type_i)
+      {
+        const auto upper_name = MooseUtils::toUpper(_friction_types[block_i][type_i]);
+        if (upper_name == "DARCY")
+        {
+          params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+          params.set<MooseFunctorName>("Darcy_name") = _friction_coeffs[block_i][type_i];
+        }
+        else
+          paramError("momentum_friction_types",
+                     "Friction type '",
+                     _friction_types[block_i][type_i],
+                     "' is not implemented");
+      }
+
+      getProblem().addLinearFVKernel(kernel_type,
+                                     prefix() + "momentum_friction_" + block_name + "_" +
+                                         NS::directions[d],
+                                     params);
+    }
+  }
+}
+
+void
 WCNSLinearFVFlowPhysics::addMomentumGravityKernels()
 {
   if (parameters().isParamValid("gravity") && !_solve_for_dynamic_pressure)
@@ -277,11 +342,12 @@ WCNSLinearFVFlowPhysics::addMomentumGravityKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     const auto gravity_vector = getParam<RealVectorValue>("gravity");
+    const std::vector<std::string> comp_axis({"x", "y", "z"});
 
     for (const auto d : make_range(dimension()))
       if (gravity_vector(d) != 0)
       {
-        params.set<MooseFunctorName>("source_density") = std::to_string(gravity_vector(d));
+        params.set<MooseFunctorName>("source_density") = "rho_g_" + comp_axis[d];
         params.set<LinearVariableName>("variable") = _velocity_names[d];
 
         getProblem().addLinearFVKernel(kernel_type, kernel_name + NS::directions[d], params);
@@ -362,6 +428,20 @@ WCNSLinearFVFlowPhysics::addInletBC()
         getProblem().addLinearFVBC(bc_type, _velocity_names[d] + "_" + inlet_bdy, params);
       }
       ++velocity_pressure_counter;
+
+      // Add the two term BC expansion for pressure if requested
+      if (getParam<bool>("pressure_two_term_bc_expansion"))
+      {
+        const std::string bc_type = "LinearFVExtrapolatedPressureBC";
+        InputParameters params = getFactory().getValidParams(bc_type);
+        params.set<std::vector<BoundaryName>>("boundary") = {inlet_bdy};
+        params.set<LinearVariableName>("variable") = _pressure_name;
+        params.set<bool>("use_two_term_expansion") = true;
+        getProblem().addLinearFVBC(bc_type,
+                                   _pressure_name + "_extrapolation_inlet_" +
+                                       Moose::stringify(inlet_bdy),
+                                   params);
+      }
     }
     else if (momentum_inlet_type == "fixed-pressure")
     {
@@ -529,6 +609,32 @@ WCNSLinearFVFlowPhysics::addRhieChowUserObjects()
   params.set<MooseFunctorName>(NS::density) = _density_name;
 
   getProblem().addUserObject(object_type, rhieChowUOName(), params);
+}
+
+void
+WCNSLinearFVFlowPhysics::addFunctorMaterials()
+{
+  if (parameters().isParamValid("gravity"))
+  {
+    const auto gravity_vector = getParam<RealVectorValue>("gravity");
+    const std::vector<std::string> comp_axis({"x", "y", "z"});
+    for (const auto d : make_range(dimension()))
+      if (gravity_vector(d) != 0)
+      {
+        // Add rho * g functor for each relevant direction
+        // TODO: we could avoid using an AD functor material for non-AD density functor
+        auto params = getFactory().getValidParams("ADParsedFunctorMaterial");
+        assignBlocks(params, _blocks);
+        params.set<std::string>("expression") =
+            _density_gravity_name + " * " + std::to_string(gravity_vector(d));
+        if (!MooseUtils::parsesToReal(_density_gravity_name))
+          params.set<std::vector<std::string>>("functor_names") = {_density_gravity_name};
+        params.set<std::string>("property_name") = "rho_g_" + comp_axis[d];
+        // We don't output this helper material
+        getProblem().addMaterial(
+            "ADParsedFunctorMaterial", prefix() + "gravity_helper_" + comp_axis[d], params);
+      }
+  }
 }
 
 UserObjectName

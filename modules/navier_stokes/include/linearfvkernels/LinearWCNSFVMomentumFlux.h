@@ -10,8 +10,10 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
-#include "RhieChowMassFlux.h"
-#include "LinearFVAdvectionDiffusionBC.h"
+
+class RhieChowMassFlux;
+class LinearFVBoundaryCondition;
+class LinearFVAdvectionDiffusionBC;
 
 /**
  * Kernel that implements the stress tensor and advection terms for the momentum

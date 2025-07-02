@@ -59,7 +59,7 @@ power = 2
     order = CONSTANT
     initial_condition = -1.0
     [AuxKernel]
-      type = SelfAux
+      type = ProjectionAux
       variable = Dc_elem
       v = Dc
       execute_on = 'TIMESTEP_END'

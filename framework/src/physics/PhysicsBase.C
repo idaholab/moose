@@ -96,6 +96,7 @@ PhysicsBase::validParams()
       "Reduce Physics object creation");
 
   params.addParamNamesToGroup("active inactive", "Advanced");
+  params.addParamNamesToGroup("preconditioning", "Numerical scheme");
   return params;
 }
 

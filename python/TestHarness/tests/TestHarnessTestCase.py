@@ -54,7 +54,7 @@ class TestHarnessTestCase(unittest.TestCase):
             stdout = StringIO()
             try:
                 with redirect_stdout(stdout):
-                    result.harness = TestHarness.build(argv, None, os.getenv('MOOSE_DIR'))
+                    result.harness = TestHarness.build(argv, None, MOOSE_DIR)
                     result.harness.findAndRunTests()
             except SystemExit as e:
                 self.assertEqual(e.code, exit_code)
@@ -64,7 +64,10 @@ class TestHarnessTestCase(unittest.TestCase):
                 result.output = stdout.getvalue()
                 stdout.close()
 
+            if result.harness.error_code != exit_code:
+                print(result.output)
             self.assertEqual(result.harness.error_code, exit_code)
+
             if capture_results:
                 with open(result.harness.options.results_file, 'r') as f:
                     result.results = json.loads(f.read())
