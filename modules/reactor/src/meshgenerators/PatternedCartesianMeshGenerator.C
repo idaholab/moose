@@ -746,7 +746,7 @@ PatternedCartesianMeshGenerator::generate()
             const auto stitching_boundary_id_base =
                 MooseMeshUtils::getBoundaryID(_stitching_boundary_name, *out_mesh);
             const auto stitching_boundary_id_periph =
-                MooseMeshUtils::getBoundaryID(_stitching_boundary_name, *out_mesh);
+                MooseMeshUtils::getBoundaryID(_stitching_boundary_name, *tmp_peripheral_mesh);
 
             MeshTools::Modification::translate(
                 *tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
