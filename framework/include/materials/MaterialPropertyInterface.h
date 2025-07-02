@@ -158,62 +158,64 @@ public:
   ///@}
 
 #ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Get a Kokkos material property by property name
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @tparam state The property state
+   * @param prop_name The property name
+   * @returns The Kokkos material property
+   */
   template <typename T, unsigned int dimension, unsigned int state>
   Moose::Kokkos::MaterialProperty<T, dimension>
-  getKokkosGenericMaterialPropertyByName(const std::string & prop_name)
-  {
-    if (!_is_kokkos_object)
-      mooseError("Attempted to retrieve a Kokkos material property from a standard MOOSE object.");
-
-    if constexpr (std::is_same_v<T, Real>)
-    {
-      std::istringstream ss(prop_name);
-      Real value;
-
-      // check if the string parsed cleanly into a Real number
-      if (ss >> value && ss.eof())
-        return Moose::Kokkos::MaterialProperty<T, dimension>(value);
-    }
-
-    checkExecutionStage();
-    checkMaterialProperty(prop_name, state);
-
-    // mark property as requested
-    markMatPropRequested(prop_name);
-
-    // Update the boolean flag.
-    _get_material_property_called = true;
-
-    // Call first so that the ID gets registered
-    auto prop = _material_data.getKokkosProperty<T, dimension, state>(prop_name);
-
-    // Does the material data used here matter?
-    _material_property_dependencies.insert(_material_data.getPropertyId(prop_name));
-
-    if constexpr (state == 0)
-      addConsumedPropertyName(_mi_moose_object_name, prop_name);
-
-    return prop;
-  }
+  getKokkosGenericMaterialPropertyByName(const std::string & prop_name);
+  /**
+   * Get a current Kokkos material property by property name
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param prop_name The property name
+   * @returns The Kokkos material property
+   */
   template <typename T, unsigned int dimension = 0>
   Moose::Kokkos::MaterialProperty<T, dimension>
   getKokkosMaterialPropertyByName(const std::string & prop_name)
   {
     return getKokkosGenericMaterialPropertyByName<T, dimension, 0>(prop_name);
   }
+  /**
+   * Get an old Kokkos material property by property name
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param prop_name The property name
+   * @returns The Kokkos material property
+   */
   template <typename T, unsigned int dimension = 0>
   Moose::Kokkos::MaterialProperty<T, dimension>
   getKokkosMaterialPropertyOldByName(const std::string & prop_name)
   {
     return getKokkosGenericMaterialPropertyByName<T, dimension, 1>(prop_name);
   }
+  /**
+   * Get an older Kokkos material property by property name
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param prop_name The property name
+   * @returns The Kokkos material property
+   */
   template <typename T, unsigned int dimension = 0>
   Moose::Kokkos::MaterialProperty<T, dimension>
   getKokkosMaterialPropertyOlderByName(const std::string & prop_name)
   {
     return getKokkosGenericMaterialPropertyByName<T, dimension, 2>(prop_name);
   }
-
+  /**
+   * Get a Kokkos material property
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @tparam state The property state
+   * @param name The property name or the parameter name containing the property name
+   * @returns The Kokkos material property
+   */
   template <typename T, unsigned int dimension, unsigned int state>
   Moose::Kokkos::MaterialProperty<T, dimension>
   getKokkosGenericMaterialProperty(const std::string & name)
@@ -221,17 +223,38 @@ public:
     return getKokkosGenericMaterialPropertyByName<T, dimension, state>(
         getMaterialPropertyName(name));
   }
+  /**
+   * Get a current Kokkos material property
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param name The property name or the parameter name containing the property name
+   * @returns The Kokkos material property
+   */
   template <typename T, unsigned int dimension = 0>
   Moose::Kokkos::MaterialProperty<T, dimension> getKokkosMaterialProperty(const std::string & name)
   {
     return getKokkosGenericMaterialPropertyByName<T, dimension, 0>(getMaterialPropertyName(name));
   }
+  /**
+   * Get an old Kokkos material property
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param name The property name or the parameter name containing the property name
+   * @returns The Kokkos material property
+   */
   template <typename T, unsigned int dimension = 0>
   Moose::Kokkos::MaterialProperty<T, dimension>
   getKokkosMaterialPropertyOld(const std::string & name)
   {
     return getKokkosGenericMaterialPropertyByName<T, dimension, 1>(getMaterialPropertyName(name));
   }
+  /**
+   * Get an older Kokkos material property
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param name The property name or the parameter name containing the property name
+   * @returns The Kokkos material property
+   */
   template <typename T, unsigned int dimension = 0>
   Moose::Kokkos::MaterialProperty<T, dimension>
   getKokkosMaterialPropertyOlder(const std::string & name)
@@ -787,27 +810,6 @@ MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name_in
   return _material_data.haveProperty<T>(name);
 }
 
-#ifdef MOOSE_KOKKOS_SCOPE
-template <typename T, unsigned int dimension>
-bool
-MaterialPropertyInterface::hasKokkosMaterialProperty(const std::string & name)
-{
-  // Check if the supplied parameter is a valid input parameter key
-  const auto prop_name = getMaterialPropertyName(name);
-  return hasKokkosMaterialPropertyByName<T, dimension>(prop_name);
-}
-
-template <typename T, unsigned int dimension>
-bool
-MaterialPropertyInterface::hasKokkosMaterialPropertyByName(const std::string & name_in)
-{
-  const auto name = _get_suffix.empty()
-                        ? name_in
-                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
-  return _material_data.haveKokkosProperty<T, dimension>(name);
-}
-#endif
-
 template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> &
 MaterialPropertyInterface::getGenericZeroMaterialProperty(const std::string & name)
@@ -954,3 +956,62 @@ MaterialPropertyInterface::getGenericMaterialPropertyByName(const MaterialProper
 
   return prop;
 }
+
+#ifdef MOOSE_KOKKOS_SCOPE
+template <typename T, unsigned int dimension>
+bool
+MaterialPropertyInterface::hasKokkosMaterialProperty(const std::string & name)
+{
+  // Check if the supplied parameter is a valid input parameter key
+  const auto prop_name = getMaterialPropertyName(name);
+  return hasKokkosMaterialPropertyByName<T, dimension>(prop_name);
+}
+
+template <typename T, unsigned int dimension>
+bool
+MaterialPropertyInterface::hasKokkosMaterialPropertyByName(const std::string & name_in)
+{
+  const auto name = _get_suffix.empty()
+                        ? name_in
+                        : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
+  return _material_data.haveKokkosProperty<T, dimension>(name);
+}
+
+template <typename T, unsigned int dimension, unsigned int state>
+Moose::Kokkos::MaterialProperty<T, dimension>
+MaterialPropertyInterface::getKokkosGenericMaterialPropertyByName(const std::string & prop_name)
+{
+  if (!_is_kokkos_object)
+    mooseError("Attempted to retrieve a Kokkos material property from a standard MOOSE object.");
+
+  if constexpr (std::is_same_v<T, Real>)
+  {
+    std::istringstream ss(prop_name);
+    Real value;
+
+    // Check if the string parsed cleanly into a Real number
+    if (ss >> value && ss.eof())
+      return Moose::Kokkos::MaterialProperty<T, dimension>(value);
+  }
+
+  checkExecutionStage();
+  checkMaterialProperty(prop_name, state);
+
+  // Mark property as requested
+  markMatPropRequested(prop_name);
+
+  // Update the boolean flag
+  _get_material_property_called = true;
+
+  // Call first so that the ID gets registered
+  auto prop = _material_data.getKokkosProperty<T, dimension, state>(prop_name);
+
+  // Does the material data used here matter?
+  _material_property_dependencies.insert(_material_data.getPropertyId(prop_name));
+
+  if constexpr (state == 0)
+    addConsumedPropertyName(_mi_moose_object_name, prop_name);
+
+  return prop;
+}
+#endif

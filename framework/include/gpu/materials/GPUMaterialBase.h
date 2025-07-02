@@ -19,6 +19,9 @@ namespace Moose
 namespace Kokkos
 {
 
+/**
+ * The base class for Kokkos materials
+ */
 class MaterialBase : public ::MaterialBase,
                      public MeshHolder,
                      public AssemblyHolder,
@@ -27,12 +30,21 @@ class MaterialBase : public ::MaterialBase,
 public:
   static InputParameters validParams();
 
+  /**
+   * Constructor
+   */
   MaterialBase(const InputParameters & parameters);
+  /**
+   * Copy constructor for parallel dispatch
+   */
   MaterialBase(const MaterialBase & object);
 
+  /**
+   * Setup block and boundary restrictions
+   */
   virtual void initialSetup() override;
 
-  // Unused because all elements are computed in parallel
+  // Unused for Kokkos materials because all elements are computed in parallel
   virtual void subdomainSetup() override final {}
 
   /**
@@ -60,7 +72,14 @@ public:
   ///@}
 
 protected:
-  // Declare Kokkos material property
+  /**
+   * Declare a material property
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param name The property name or the parameter name containing the property name
+   * @param dims The vector containing the size of each dimension
+   * @returns The material property
+   */
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> declareKokkosProperty(const std::string & name,
                                                        const std::vector<unsigned int> dims = {})
@@ -71,88 +90,123 @@ protected:
 
     return declareKokkosPropertyByName<T, dimension>(prop_name, dims);
   }
+  /**
+   * Declare a material property by property name
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param prop_name The property name
+   * @param dims The vector containing the size of each dimension
+   * @returns The material property
+   */
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension>
   declareKokkosPropertyByName(const std::string & prop_name,
-                              const std::vector<unsigned int> dims = {})
-  {
-    return declareKokkosPropertyInternal<T, dimension>(prop_name, dims);
-  }
+                              const std::vector<unsigned int> dims = {});
 
-private:
-  template <typename T, unsigned int dimension>
-  MaterialProperty<T, dimension>
-  declareKokkosPropertyInternal(const std::string & prop_name,
-                                const std::vector<unsigned int> dims = {})
-  {
-    static_assert(dimension <= 4, "Up to four-dimensional Kokkos material properties are allowed.");
+  /**
+   * Get the material data type
+   * @returns The material data type
+   */
+  virtual Moose::MaterialDataType materialDataType() = 0;
 
-    if (dims.size() != dimension)
-      mooseError("The declared Kokkos material property '",
-                 prop_name,
-                 "'\nhas a different dimension (",
-                 dimension,
-                 ") with the provided dimension (",
-                 dims.size(),
-                 ").");
-
-    const auto prop_name_modified =
-        _declare_suffix.empty()
-            ? prop_name
-            : MooseUtils::join(std::vector<std::string>({prop_name, _declare_suffix}), "_");
-
-    auto prop = materialData().declareKokkosProperty<T, dimension>(
-        prop_name_modified, dims, *this, isBoundaryMaterial());
-
-    registerPropName(prop_name_modified, false, 0);
-
-    return prop;
-  }
-
-private:
-  // List of local element IDs this Kokkos material is operating on for element material property
-  // evaluation
-  Array<dof_id_type> _element_ids;
-  // List of local element ID - side index pairs this Kokkos material is operating on for face
-  // material property evaluation
-  Array<Pair<dof_id_type, unsigned int>> _element_side_ids;
-
-protected:
-  // Get the number of local elements this Kokkos material is operating on for element material
-  // property evaluation
-  KOKKOS_FUNCTION auto numElements() const { return _element_ids.size(); }
-  // Get the number of local sides this Kokkos material is operating on for face material property
-  // evaluation
-  KOKKOS_FUNCTION auto numElementSides() const { return _element_side_ids.size(); }
-  /// Get the local element ID this Kokkos thread is operating on
-  KOKKOS_FUNCTION auto elementID(size_t idx) const { return _element_ids[idx]; }
-  // Get the local element ID - side index pair this Kokkos thread is operating on
-  KOKKOS_FUNCTION auto elementSideID(size_t idx) const { return _element_side_ids[idx]; }
-
-protected:
-  // TODO: Move to TransientInterface
-  // Time
-  Scalar<Real> _t;
-  // Old time
-  Scalar<const Real> _t_old;
-  // The number of the time step
-  Scalar<int> _t_step;
-  // Time step size
-  Scalar<Real> _dt;
-  // Size of the old time step
-  Scalar<Real> _dt_old;
-
-protected:
-  // Sets the variables this object depend on
+  /**
+   * Set the variables this object depend on to the Kokkos systems
+   */
   void setVariableDependency();
-  // Sets the quadrature cache status flags for the variables, tags, and subdomains covered by
-  // this object
+  /**
+   * Set the quadrature cache status flags for the variables, tags, and subdomains covered by this
+   * object to the Kokkos systems
+   */
   void setCacheFlags();
 
-protected:
-  // Get the material data type
-  virtual Moose::MaterialDataType materialDataType() = 0;
+  /**
+   * Get the number of elements this material operates on for element material property evaluation
+   * @returns The number of elements
+   */
+  KOKKOS_FUNCTION auto numElements() const { return _element_ids.size(); }
+  /**
+   * Get the number of sides this material is operating on for face material property evaluation
+   * @returns The number of sides
+   */
+  KOKKOS_FUNCTION auto numElementSides() const { return _element_side_ids.size(); }
+  /**
+   * Get the element ID for a thread
+   * @param tid The thread ID
+   * @returns The element ID
+   */
+  KOKKOS_FUNCTION auto elementID(size_t tid) const { return _element_ids[tid]; }
+  /**
+   * Get the element ID - side index pair for a thread
+   * @param tid The thread ID
+   * @returns The element ID - side index pair
+   */
+  KOKKOS_FUNCTION auto elementSideID(size_t tid) const { return _element_side_ids[tid]; }
+
+  /**
+   * TODO: Move to TransientInterface
+   */
+  ///@{
+  /**
+   * Time
+   */
+  Scalar<Real> _t;
+  /**
+   * Old time
+   */
+  Scalar<const Real> _t_old;
+  /**
+   * The number of the time step
+   */
+  Scalar<int> _t_step;
+  /**
+   * Time step size
+   */
+  Scalar<Real> _dt;
+  /**
+   * Size of the old time step
+   */
+  Scalar<Real> _dt_old;
+  ///@}
+
+private:
+  /**
+   * Element IDs this material operates on for element material property evaluation
+   */
+  Array<dof_id_type> _element_ids;
+  /**
+   * Element ID - side index pairs this material operates on for face material property evaluation
+   */
+  Array<Pair<dof_id_type, unsigned int>> _element_side_ids;
 };
+
+template <typename T, unsigned int dimension>
+MaterialProperty<T, dimension>
+MaterialBase::declareKokkosPropertyByName(const std::string & prop_name,
+                                          const std::vector<unsigned int> dims)
+{
+  static_assert(dimension <= 4, "Up to four-dimensional Kokkos material properties are allowed.");
+
+  if (dims.size() != dimension)
+    mooseError("The declared Kokkos material property '",
+               prop_name,
+               "'\nhas a different dimension (",
+               dimension,
+               ") with the provided dimension (",
+               dims.size(),
+               ").");
+
+  const auto prop_name_modified =
+      _declare_suffix.empty()
+          ? prop_name
+          : MooseUtils::join(std::vector<std::string>({prop_name, _declare_suffix}), "_");
+
+  auto prop = materialData().declareKokkosProperty<T, dimension>(
+      prop_name_modified, dims, this, isBoundaryMaterial());
+
+  registerPropName(prop_name_modified, false, 0);
+
+  return prop;
+}
 
 } // namespace Kokkos
 } // namespace Moose
