@@ -100,6 +100,13 @@ Standardizer::getDescaled(RealEigenMatrix & input) const
   input = input.array().rowwise() * stdev.transpose().array();
 }
 
+void
+Standardizer::getScaled(RealEigenMatrix & input) const
+{
+  Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
+  input = input.array().rowwise() / stdev.transpose().array();
+}
+
 /// Helper for dataStore
 void
 Standardizer::storeHelper(std::ostream & stream, void * context) const
