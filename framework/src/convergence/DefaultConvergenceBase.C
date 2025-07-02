@@ -13,9 +13,7 @@ InputParameters
 DefaultConvergenceBase::validParams()
 {
   InputParameters params = Convergence::validParams();
-
   params.addPrivateParam<bool>("added_as_default", false);
-
   return params;
 }
 
@@ -28,7 +26,6 @@ void
 DefaultConvergenceBase::initialSetup()
 {
   Convergence::initialSetup();
-
   checkDuplicateSetSharedExecutionerParams();
 }
 

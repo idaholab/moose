@@ -2306,7 +2306,7 @@ public:
   /**
    * Gets the MultiApp fixed point convergence object name.
    */
-  ConvergenceName getMultiAppFixedPointConvergenceName() const;
+  const ConvergenceName & getMultiAppFixedPointConvergenceName() const;
 
   /**
    * Setter for whether we're computing the scaling jacobian

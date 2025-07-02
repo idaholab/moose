@@ -223,7 +223,7 @@ SteffensenSolve::transformVariables(const std::set<dof_id_type> & transformed_do
 
 void
 SteffensenSolve::printFixedPointConvergenceHistory(
-    Real initial_norm,
+    const Real initial_norm,
     const std::vector<Real> & timestep_begin_norms,
     const std::vector<Real> & timestep_end_norms) const
 {
