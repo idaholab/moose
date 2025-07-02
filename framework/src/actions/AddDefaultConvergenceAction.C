@@ -141,7 +141,7 @@ AddDefaultConvergenceAction::checkUnusedMultiAppFixedPointConvergenceParameters(
   if (!_problem->hasSetMultiAppFixedPointConvergenceName())
     return;
 
-  const auto conv_name = _problem->getMultiAppFixedPointConvergenceName();
+  const auto & conv_name = _problem->getMultiAppFixedPointConvergenceName();
 
   // Abort check if Convergence is inactive
   if (!_problem->hasConvergence(conv_name))
@@ -150,7 +150,7 @@ AddDefaultConvergenceAction::checkUnusedMultiAppFixedPointConvergenceParameters(
   // If the convergence is a DefaultMultiAppFixedPointConvergence they can handle the Executioner
   // parameters pertaining to the fixed point solve
   auto & conv = _problem->getConvergence(conv_name);
-  auto * default_conv = dynamic_cast<DefaultMultiAppFixedPointConvergence *>(&conv);
+  const auto * const default_conv = dynamic_cast<DefaultMultiAppFixedPointConvergence *>(&conv);
 
   // Only Convergence objects deriving from DefaultMultiAppFixedPointConvergence should
   // share parameters with the executioner

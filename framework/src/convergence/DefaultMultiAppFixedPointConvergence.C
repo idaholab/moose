@@ -19,9 +19,7 @@ DefaultMultiAppFixedPointConvergence::validParams()
 {
   InputParameters params = DefaultConvergenceBase::validParams();
   params += FixedPointSolve::fixedPointDefaultConvergenceParams();
-
   params.addClassDescription("Default fixed point convergence criteria.");
-
   return params;
 }
 

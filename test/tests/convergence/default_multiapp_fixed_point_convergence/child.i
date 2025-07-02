@@ -9,8 +9,8 @@ source_coef_B = 1e4
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 5
+  ny = 5
 []
 
 [Variables]
@@ -48,6 +48,5 @@ source_coef_B = 1e4
   nl_max_its = 10
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
-  l_max_its = 10
   l_tol = 1e-3
 []

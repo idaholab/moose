@@ -269,7 +269,7 @@ FixedPointSolve::solve()
     }
 
     // Solve a single application for one time step
-    bool solve_converged = solveStep(transformed_dofs);
+    const bool solve_converged = solveStep(transformed_dofs);
 
     if (solve_converged)
     {

@@ -14,8 +14,8 @@ T_ambient = 300.0
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 5
+  ny = 5
 []
 
 [Variables]
@@ -79,7 +79,6 @@ T_ambient = 300.0
   nl_max_its = 10
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
-  l_max_its = 10
   l_tol = 1e-3
 
   fixed_point_max_its = 15
