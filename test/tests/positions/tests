@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#23587'
+  issues = '#23587 #30899'
   design = 'syntax/Positions/index.md'
 
   [test]
@@ -24,6 +24,12 @@
       detail = 'element centroids from a mesh, with or without block restriction,'
       # PR #26848. Clang 16 Apple Si is not compatible.
       machine = X86_64
+    []
+    [mesh_nodes]
+      type = 'JSONDiff'
+      input = 'node_positions.i'
+      jsondiff = 'node_positions_out.json'
+      detail = 'element nodes from a mesh, with or without block restriction,'
     []
     [mesh_quadrature_points]
       type = 'JSONDiff'
