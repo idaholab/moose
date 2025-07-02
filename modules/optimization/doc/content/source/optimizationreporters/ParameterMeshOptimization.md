@@ -29,6 +29,9 @@ This optimization reporter performs the same type of optimization as [Optimizati
 
 [!ref](ParameterMeshFunction.md#tab:fe_types) shows common interpolation types for the parameters.
 
+!alert warning
+The mesh created +must+ be replicated. Ensure this by having `Mesh/parallel_type=REPLICATED` when creating the mesh.
+
 ## L2 Gradient Regularization
 
 `ParameterMeshOptimization` supports L2 gradient regularization to enforce smoothness in parameter fields. This regularization adds a penalty term to the objective function:
@@ -47,7 +50,7 @@ where:
 The gradient of this regularization term is:
 
 \begin{equation}
-\frac{\partial}{\partial p} \left( \alpha \int_{\Omega} |\nabla p|^2 \, d\Omega \right) = 2\alpha \nabla p
+\frac{\partial}{\partial p} \left( \alpha \int_{\Omega} |\nabla p|^2 \, d\Omega \right) = 2\alpha \left(\int_{\Omega}\nabla p, d\Omega \right)
 \end{equation}
 
 This regularization:
@@ -57,8 +60,6 @@ This regularization:
 
 To enable L2 gradient regularization, set [!param](/OptimizationReporter/ParameterMeshOptimization/gradient_l2_coeff) to a positive value. The strength of regularization increases with larger coefficient values.
 
-!alert warning
-The mesh created +must+ be replicated. Ensure this by having `Mesh/parallel_type=REPLICATED` when creating the mesh.
 
 ## Example Input File Syntax
 
