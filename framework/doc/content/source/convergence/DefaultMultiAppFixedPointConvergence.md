@@ -15,7 +15,7 @@ The parameter [!param](/Executioner/Steady/fixed_point_min_its) specifies the mi
 This Convergence allows checking for convergence on iteration $\ell$ in two ways:
 
 - checking the nonlinear residual norm $\|\mathbf{r}\|_\ell$ (discrete $L_2$ norm) against tolerances, and
-- checking a post-processor value $y_\ell$, specified by [!param](/Executioner/Steady/custom_pp), against tolerances.
+- checking a post-processor value $y_\ell$ or change in value, specified by [!param](/Executioner/Steady/custom_pp), against tolerances.
 
 ## Residual Norm Checks
 
