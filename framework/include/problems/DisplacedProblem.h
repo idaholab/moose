@@ -418,12 +418,18 @@ protected:
       if (y._has_displacement)
         _has_displacement = true;
     }
-    virtual void post() override { _ref_mesh.comm().max(_has_displacement); }
 
     /**
      * Whether the displaced mesh is modified by the latest call to operator()
      */
-    bool hasDisplacement() const { return _has_displacement; }
+    bool hasDisplacement()
+    {
+      mooseAssert(!Threads::in_threads,
+                  "This function requires a MPI all-gathering operation that cannot be in a "
+                  "threaded scope.");
+      _ref_mesh.comm().max(_has_displacement);
+      return _has_displacement;
+    }
 
   protected:
     void init();
