@@ -59,9 +59,12 @@ public:
   void join(const ComputeLinearFVFaceThread & /*y*/);
 
 protected:
+  /// Setup the contribution objects before we start the loop.
+  void setupSystemContributionObjects();
+
   /// Fetch LinearFVFluxKernels for a given block. We only call this when
   /// we transition from one block to another.
-  void fetchSystemContributionObjects();
+  void fetchBlockSystemContributionObjects();
 
   /// Print list of executed object types together with the execution order
   void printGeneralExecutionInformation() const;
@@ -100,41 +103,22 @@ protected:
   THREAD_ID _tid;
 
   /// Kernels which will only contribute to a matrix from the
-  /// element-side of the face. This member is
-  /// unfiltered, used for caching, might have overlaps with the
-  /// container holding the vector tags.
-  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_matrix_elem;
-
-  /// Kernels which will only contribute to a right hand side from the
-  /// element-side of the face. This member is
-  /// unfiltered, used for caching, might have overlaps with the
-  /// container holding the matrix tags.
-  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_rhs_elem;
+  /// element-side of the face.
+  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_elem;
 
   /// Kernels which will only contribute to a matrix from the
-  /// neighbor-side of the face. This member is
-  /// unfiltered, used for caching, might have overlaps with the
-  /// container holding the vector tags.
-  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_matrix_neighbor;
+  /// neighbor-side of the face.
+  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_neighbor;
 
-  /// Kernels which will only contribute to a right hand side from the
-  /// neighbor-side of the face. This member is
-  /// unfiltered, used for caching, might have overlaps with the
-  /// container holding the matrix tags.
-  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_rhs_neighbor;
+  /// Combined LinearFVFluxKernels which will be used to contribute to a system.
+  std::set<LinearFVFluxKernel *> _fv_flux_kernels;
 
-  /// Kernels which will only contribute the right hand side, this is
-  /// the union of `_fv_flux_kernels_matrix_elem` and `_fv_flux_kernels_matrix_neighbor`
-  /// with substracting the common elements with ` _fv_flux_kernels_rhs`.
-  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_matrix;
+  /// Base query for objects with given vector/matrix tags. This will be used
+  /// for reduced filtering based on blocks when we change subdomains.
+  TheWarehouse::Query _base_query;
 
-  /// Kernels which will only contribute the right hand side, this is
-  /// the union of `_fv_flux_kernels_rhs_elem` and `_fv_flux_kernels_rhs_neighbor`
-  /// with substracting the common elements with ` _fv_flux_kernels_matrix`.
-  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_rhs;
-
-  /// Combined kernels which will be used to contribute to the full system, so
-  /// this holds the intersection of `_fv_flux_kernels_matrix` and
-  /// `_fv_flux_kernels_rhs`.
-  std::unordered_set<LinearFVFluxKernel *> _fv_flux_kernels_system;
+private:
+  /// Boolean that is used to check if the kernels are ready to start contributing to
+  /// the system
+  bool _system_contrib_objects_ready;
 };

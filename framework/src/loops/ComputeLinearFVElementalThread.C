@@ -22,7 +22,8 @@ ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(FEProblemBase & f
     _vector_tags(vector_tags),
     _matrix_tags(matrix_tags),
     _subdomain(Moose::INVALID_BLOCK_ID),
-    _old_subdomain(Moose::INVALID_BLOCK_ID)
+    _old_subdomain(Moose::INVALID_BLOCK_ID),
+    _system_contrib_objects_ready(false)
 {
 }
 
@@ -34,7 +35,8 @@ ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(ComputeLinearFVEl
     _vector_tags(x._vector_tags),
     _matrix_tags(x._matrix_tags),
     _subdomain(x._subdomain),
-    _old_subdomain(x._old_subdomain)
+    _old_subdomain(x._old_subdomain),
+    _system_contrib_objects_ready(x._system_contrib_objects_ready)
 {
 }
 
@@ -46,6 +48,7 @@ ComputeLinearFVElementalThread::operator()(const ElemInfoRange & range)
 
   _old_subdomain = Moose::INVALID_BLOCK_ID;
 
+  setupSystemContributionObjects();
   printGeneralExecutionInformation();
 
   // Iterate over all the elements in the range
@@ -54,33 +57,18 @@ ComputeLinearFVElementalThread::operator()(const ElemInfoRange & range)
     _subdomain = elem_info->subdomain_id();
     if (_subdomain != _old_subdomain)
     {
-      fetchSystemContributionObjects();
+      fetchBlockSystemContributionObjects();
       printBlockExecutionInformation();
     }
 
     const Real elem_volume = elem_info->volume() * elem_info->coordFactor();
 
-    // First, we execute the kernels that contribute to both the matrix and
-    // right hand side
-    for (auto kernel : _fv_kernels_system)
+    // Time to add the contributions from the kernels
+    for (auto kernel : _fv_kernels)
     {
       kernel->setCurrentElemInfo(elem_info);
       kernel->setCurrentElemVolume(elem_volume);
       kernel->addMatrixContribution();
-      kernel->addRightHandSideContribution();
-    }
-    // Second, we execute the kernels that contribute to the matrix only
-    for (auto kernel : _fv_kernels_matrix)
-    {
-      kernel->setCurrentElemInfo(elem_info);
-      kernel->setCurrentElemVolume(elem_volume);
-      kernel->addMatrixContribution();
-    }
-    // Lastly, we execute the kernels that contribute to the right hand side only
-    for (auto kernel : _fv_kernels_rhs)
-    {
-      kernel->setCurrentElemInfo(elem_info);
-      kernel->setCurrentElemVolume(elem_volume);
       kernel->addRightHandSideContribution();
     }
   }
@@ -92,21 +80,39 @@ ComputeLinearFVElementalThread::join(const ComputeLinearFVElementalThread & /*y*
 }
 
 void
-ComputeLinearFVElementalThread::fetchSystemContributionObjects()
+ComputeLinearFVElementalThread::setupSystemContributionObjects()
 {
-  auto base_query = _fe_problem.theWarehouse()
-                        .query()
-                        .template condition<AttribSysNum>(_system_number)
-                        .template condition<AttribSubdomains>(_subdomain)
-                        .template condition<AttribSystem>("LinearFVElementalKernel")
-                        .template condition<AttribThread>(_tid);
+  // First of all, we will collect the vectors and matrices for the assigned tags
+  _base_query = _fe_problem.theWarehouse()
+                    .query()
+                    .template condition<AttribSysNum>(_system_number)
+                    .template condition<AttribSystem>("LinearFVElementalKernel")
+                    .template condition<AttribThread>(_tid)
+                    .template condition<AttribMatrixTags>(_matrix_tags)
+                    .template condition<AttribVectorTags>(_vector_tags);
 
-  base_query.condition<AttribMatrixTags>(_matrix_tags).queryInto(_fv_kernels_matrix);
-  base_query.condition<AttribVectorTags>(_vector_tags).queryInto(_fv_kernels_rhs);
+  // We fetch all the available objects and make sure they are linked to the right
+  // vectors and matrices
+  std::vector<LinearFVElementalKernel *> kernels;
+  _base_query.queryInto(kernels);
+
+  // As a last step, we make sure the kernels know which vectors/matrices they need to contribute to
+  for (auto & kernel : kernels)
+    kernel->linkObjectsForContribution(_vector_tags, _matrix_tags);
+
+  _system_contrib_objects_ready = true;
+}
+
+void
+ComputeLinearFVElementalThread::fetchBlockSystemContributionObjects()
+{
+  mooseAssert(_system_contrib_objects_ready,
+              "The system contribution objects need to be set up before we fetch the "
+              "block-restricted objects!");
+
+  // The base query already has the other conditions, here we just filter based on subdomain ID
+  _base_query.template condition<AttribSubdomains>(_subdomain).queryInto(_fv_kernels);
   _old_subdomain = _subdomain;
-
-  // This will remove the common elements and add them to the last argument
-  MooseUtils::removeCommonSet(_fv_kernels_matrix, _fv_kernels_rhs, _fv_kernels_system);
 }
 
 void
@@ -118,6 +124,7 @@ ComputeLinearFVElementalThread::printGeneralExecutionInformation() const
   auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
   console << "[DBG] Beginning linear finite volume elemental objects loop on " << execute_on
           << std::endl;
+
   mooseDoOnce(console << "[DBG] Loop on elements (ElemInfo), objects ordered on each face: "
                       << std::endl;
               console << "[DBG] - linear finite volume kernels" << std::endl;);
@@ -126,8 +133,7 @@ ComputeLinearFVElementalThread::printGeneralExecutionInformation() const
 void
 ComputeLinearFVElementalThread::printBlockExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) ||
-      (_fv_kernels_matrix.empty() && _fv_kernels_rhs.empty() && _fv_kernels_system.empty()))
+  if (!_fe_problem.shouldPrintExecution(_tid) || _fv_kernels.empty())
     return;
 
   auto & console = _fe_problem.console();
@@ -136,11 +142,7 @@ ComputeLinearFVElementalThread::printBlockExecutionInformation() const
 
   // Print the list of objects
   std::vector<MooseObject *> kernels_to_print;
-  for (const auto & kernel : _fv_kernels_matrix)
-    kernels_to_print.push_back(dynamic_cast<MooseObject *>(kernel));
-  for (const auto & kernel : _fv_kernels_rhs)
-    kernels_to_print.push_back(dynamic_cast<MooseObject *>(kernel));
-  for (const auto & kernel : _fv_kernels_system)
+  for (const auto & kernel : _fv_kernels)
     kernels_to_print.push_back(dynamic_cast<MooseObject *>(kernel));
 
   console << ConsoleUtils::formatString(ConsoleUtils::mooseObjectVectorToString(kernels_to_print),

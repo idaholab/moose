@@ -57,9 +57,11 @@ public:
   void join(const ComputeLinearFVElementalThread & /*y*/);
 
 protected:
-  /// Fetch LinearFVElementalKernels for a given block. We only call this when
-  /// we transition from one block to another.
-  void fetchSystemContributionObjects();
+  /// Setup the contribution objects before we start the loop.
+  void setupSystemContributionObjects();
+
+  /// Fetch contribution objects that belong to a specific spatial subdomain
+  void fetchBlockSystemContributionObjects();
 
   /// Print list of object types executed and in which order
   void printGeneralExecutionInformation() const;
@@ -89,17 +91,15 @@ protected:
   SubdomainID _old_subdomain;
 
   /// The set of cached elemental kernels which will be executed on a given element.
-  /// This member variable is changed on a per-block basis. Will contribute to the
-  /// matrix only.
-  std::vector<LinearFVElementalKernel *> _fv_kernels_matrix;
+  /// This member variable is changed on a per-block basis.
+  std::vector<LinearFVElementalKernel *> _fv_kernels;
 
-  /// The set of cached elemental kernels which will be executed on a given element.
-  /// This member variable is changed on a per-block basis. Will contribute to the
-  /// right hand side only.
-  std::vector<LinearFVElementalKernel *> _fv_kernels_rhs;
+  /// Base query for objects with given vector/matrix tags. This will be used
+  /// for reduced filtering based on blocks when we change subdomains.
+  TheWarehouse::Query _base_query;
 
-  /// The set of cached elemental kernels which will be executed on a given element.
-  /// This member variable is changed on a per-block basis. Will contribute to the
-  /// matrix and the right hand side.
-  std::unordered_set<LinearFVElementalKernel *> _fv_kernels_system;
+private:
+  /// Boolean that is used to check if the kernels are ready to start contributing to
+  /// the system
+  bool _system_contrib_objects_ready;
 };

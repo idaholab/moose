@@ -69,6 +69,8 @@ compute_linear_system(libMesh::EquationSystems & es, const std::string & system_
   auto & matrix = *(sys.linearImplicitSystem().matrix);
   auto & rhs = *(sys.linearImplicitSystem().rhs);
   p->computeLinearSystemSys(lin_sys, matrix, rhs);
+  rhs.print();
+  matrix.print();
 }
 }
 
@@ -85,11 +87,14 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
     _linear_implicit_system(fe_problem.es().get_system<LinearImplicitSystem>(name))
 {
   getRightHandSideNonTimeVector();
-  // Don't need to add the matrix - it already exists (for now)
+  // Don't need to add the matrix - it already exists. Well, technically it will exist
+  // after the initialization. Right now it is just a nullpointer. We will just make sure
+  // we associate the tag with the system matrix for now.
   _system_matrix_tag = _fe_problem.addMatrixTag("SYSTEM");
 
   // We create a tag for the right hand side, the vector is already in the libmesh system
   _rhs_tag = _fe_problem.addVectorTag("RHS");
+  associateVectorToTag(*_linear_implicit_system.rhs, _rhs_tag);
 
   _linear_implicit_system.attach_assemble_function(Moose::compute_linear_system);
 }

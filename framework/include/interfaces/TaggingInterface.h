@@ -61,6 +61,7 @@ public:
   {
     friend class AttribVectorTags;
     friend class NonlinearEigenSystem;
+    friend class LinearSystemContributionObject;
     template <typename>
     friend class MooseObjectTagWarehouse;
 
@@ -76,6 +77,7 @@ public:
   {
     friend class AttribMatrixTags;
     friend class NonlinearEigenSystem;
+    friend class LinearSystemContributionObject;
     template <typename>
     friend class MooseObjectTagWarehouse;
 
@@ -379,7 +381,7 @@ private:
                                 const std::set<TagID> & vector_tags,
                                 const std::set<TagID> & absolute_value_vector_tags);
 
-  /// The residual tag ids this Kernel will contribute to
+  /// The vector tag ids this Kernel will contribute to
   std::set<TagID> _vector_tags;
 
   /// The absolute value residual tag ids

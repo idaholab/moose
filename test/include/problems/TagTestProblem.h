@@ -28,9 +28,13 @@ public:
   virtual void computeJacobian(const NumericVector<Number> & soln,
                                SparseMatrix<Number> & jacobian,
                                unsigned int nl_sys_num = 0) override;
+  virtual void computeLinearSystemSys(libMesh::LinearImplicitSystem & sys,
+                                      libMesh::SparseMatrix<libMesh::Number> & system_matrix,
+                                      NumericVector<libMesh::Number> & rhs,
+                                      const bool compute_gradients = true) override;
 
 protected:
-  std::set<std::string> vtags;
+  std::set<std::string> _vtags;
 
-  std::set<std::string> mtags;
+  std::set<std::string> _mtags;
 };

@@ -568,8 +568,13 @@ SystemBase::addMatrix(TagID tag)
                name(),
                "' because the tag does not exist in the problem");
 
+  std::cout << "Adding matrix " << tag << " " << hasMatrix(tag) << std::endl;
   if (hasMatrix(tag))
+  {
+    std::cout << "Returning existing matrix" << std::endl;
+    getMatrix(tag).print();
     return getMatrix(tag);
+  }
 
   const auto matrix_name = _subproblem.matrixTagName(tag);
   SparseMatrix<Number> & mat = system().add_matrix(matrix_name);
