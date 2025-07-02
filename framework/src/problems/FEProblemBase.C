@@ -648,29 +648,32 @@ FEProblemBase::createTagVectors()
 {
   // add vectors and their tags to system
   auto & vectors = getParam<std::vector<std::vector<TagName>>>("extra_tag_vectors");
-  for (const auto nl_sys_num : index_range(vectors))
-    for (auto & vector : vectors[nl_sys_num])
+  for (const auto sys_num : index_range(vectors))
+    for (auto & vector : vectors[sys_num])
     {
       auto tag = addVectorTag(vector);
-      _nl[nl_sys_num]->addVector(tag, false, libMesh::GHOSTED);
+      _solver_systems[sys_num]->addVector(tag, false, libMesh::GHOSTED);
     }
 
   auto & not_zeroed_vectors = getParam<std::vector<std::vector<TagName>>>("not_zeroed_tag_vectors");
-  for (const auto nl_sys_num : index_range(not_zeroed_vectors))
-    for (auto & vector : not_zeroed_vectors[nl_sys_num])
+  for (const auto sys_num : index_range(not_zeroed_vectors))
+    for (auto & vector : not_zeroed_vectors[sys_num])
     {
       auto tag = addVectorTag(vector);
-      _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
+      _solver_systems[sys_num]->addVector(tag, false, GHOSTED);
       addNotZeroedVectorTag(tag);
     }
 
   // add matrices and their tags
   auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
-  for (const auto nl_sys_num : index_range(matrices))
-    for (auto & matrix : matrices[nl_sys_num])
+  std::cout << "Creating vector tags" << std::endl;
+  for (const auto sys_num : index_range(matrices))
+    for (auto & matrix : matrices[sys_num])
     {
+      std::cout << _solver_systems[sys_num]->name() << std::endl;
       auto tag = addMatrixTag(matrix);
-      _nl[nl_sys_num]->addMatrix(tag);
+      std::cout << tag << std::endl;
+      _solver_systems[sys_num]->addMatrix(tag);
     }
 }
 
@@ -7491,6 +7494,7 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   for (const auto tag : matrix_tags)
   {
+    _current_linear_sys->associateMatrixToTag(system_matrix, tag);
     auto & matrix = _current_linear_sys->getMatrix(tag);
     matrix.zero();
   }
@@ -7542,13 +7546,19 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   _current_linear_sys->computeLinearSystemTags(vector_tags, matrix_tags, compute_gradients);
 
-  _safe_access_tagged_vectors = true;
-  _safe_access_tagged_matrices = true;
-
+  // We break the connection of the general RHS/system and the custom vectors,
+  // and reset the tags to the general RHS/MX vectors for the given system.
   _current_linear_sys->disassociateMatrixFromTag(system_matrix,
                                                  _current_linear_sys->systemMatrixTag());
   _current_linear_sys->disassociateVectorFromTag(rhs,
                                                  _current_linear_sys->rightHandSideVectorTag());
+  _current_linear_sys->associateVectorToTag(_current_linear_sys->getRightHandSideVector(),
+                                            _current_linear_sys->rightHandSideVectorTag());
+  _current_linear_sys->associateMatrixToTag(_current_linear_sys->getSystemMatrix(),
+                                            _current_linear_sys->systemMatrixTag());
+
+  _safe_access_tagged_vectors = true;
+  _safe_access_tagged_matrices = true;
 
   // Reset execution flag as after this point we are no longer on LINEAR
   _current_execute_on_flag = EXEC_NONE;
@@ -8870,6 +8880,7 @@ FEProblemBase::systemBaseNonlinear(const unsigned int sys_num) const
 SystemBase &
 FEProblemBase::systemBaseNonlinear(const unsigned int sys_num)
 {
+  mooseAssert(sys_num < _nl.size(), "System number greater than the number of nonlinear systems");
   return *_nl[sys_num];
 }
 
@@ -8887,6 +8898,22 @@ FEProblemBase::systemBaseLinear(const unsigned int sys_num)
   mooseAssert(sys_num < _linear_systems.size(),
               "System number greater than the number of linear systems");
   return *_linear_systems[sys_num];
+}
+
+const SystemBase &
+FEProblemBase::systemBaseSolver(const unsigned int sys_num) const
+{
+  mooseAssert(sys_num < _solver_systems.size(),
+              "System number greater than the number of solver systems");
+  return *_solver_systems[sys_num];
+}
+
+SystemBase &
+FEProblemBase::systemBaseSolver(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _solver_systems.size(),
+              "System number greater than the number of solver systems");
+  return *_solver_systems[sys_num];
 }
 
 const SystemBase &

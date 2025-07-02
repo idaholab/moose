@@ -17,12 +17,14 @@
 #include "InputParameters.h"
 #include "MooseVariableBase.h"
 #include "ConsoleStreamInterface.h"
+#include "SubProblem.h"
 
 // libMesh
 #include "libmesh/exodusII_io.h"
 #include "libmesh/parallel_object.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/sparse_matrix.h"
+#include "libmesh/system.h"
 
 // Forward declarations
 class Factory;
@@ -33,7 +35,7 @@ class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class MooseMesh;
-class SubProblem;
+// class SubProblem;
 class SystemBase;
 class TimeIntegrator;
 class InputParameters;
@@ -42,7 +44,7 @@ class FEProblemBase;
 // libMesh forward declarations
 namespace libMesh
 {
-class System;
+// class System;
 class DofMap;
 class FEType;
 }
@@ -271,6 +273,13 @@ public:
    */
   virtual bool hasVector(TagID tag_id) const
   {
+    std::cout << "In has vector for tag " << tag_id << std::endl;
+    for (const auto & tag : _subproblem.getVectorTags())
+      std::cout << " " << tag._name << " " << tag._id << std::endl;
+    std::cout << " " << tag_id << " " << _tagged_vectors.size() << " " << std::endl;
+    if (tag_id < _tagged_vectors.size())
+      std::cout << " " << _tagged_vectors[tag_id] << " " << std::endl;
+
     return tag_id < _tagged_vectors.size() && _tagged_vectors[tag_id];
   }
 
@@ -350,6 +359,11 @@ public:
    */
   virtual bool hasMatrix(TagID tag) const
   {
+    std::cout << "In has matrix for tag " << tag << std::endl;
+    for (const auto & tag : _subproblem.getMatrixTags())
+      std::cout << " " << tag.first << " " << tag.second << std::endl;
+    std::cout << " " << tag << " " << _tagged_matrices.size() << std::endl;
+    // std::cout << " " << _tagged_matrices[tag] << std::endl;
     return tag < _tagged_matrices.size() && _tagged_matrices[tag];
   }
 
