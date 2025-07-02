@@ -29,5 +29,5 @@ a potentially changing scalar value over time.
 ## Fixed Point Convergence
 
 Fixed point solves by default will use the convergence criteria corresonding to [DefaultMultiAppFixedPointConvergence.md];
-however, this can be overridden by supplying the name of a [Convergence](/Convergence/index.md) object to [!param](/Executioner/Steady/fixed_point_convergence).
+however, this can be overridden by supplying the name of a [Convergence](/Convergence/index.md) object to [!param](/Executioner/Steady/multiapp_fixed_point_convergence).
 
