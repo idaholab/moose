@@ -33,7 +33,7 @@ MFEMBlockRestrictable::MFEMBlockRestrictable(const InputParameters & parameters,
     _subdomain_attributes(_subdomain_names.size())
 {
   _subdomain_attributes = subdomainsToAttributes(_subdomain_names);
-  if (_subdomain_names.size())
+  if (!_subdomain_attributes.IsEmpty())
     mfem::common::AttrToMarker(
         _mfem_mesh.attributes.Max(), _subdomain_attributes, _subdomain_markers);
 }
