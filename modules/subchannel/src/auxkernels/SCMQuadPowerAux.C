@@ -80,8 +80,15 @@ SCMQuadPowerAux::SCMQuadPowerAux(const InputParameters & parameters)
 void
 SCMQuadPowerAux::initialSetup()
 {
+  auto nx = _quadMesh.getNx();
+  auto ny = _quadMesh.getNy();
+  auto n_pins = (nx - 1) * (ny - 1);
+  auto nz = _quadMesh.getNumOfAxialCells();
+  auto z_grid = _quadMesh.getZGrid();
   auto heated_length = _quadMesh.getHeatedLength();
+  auto unheated_length_entry = _quadMesh.getHeatedLengthEntry();
   auto sum = _power_dis.sum();
+
   // full (100%) power of one pin [W]
   auto fpin_power = _power / sum;
   // actual pin power [W]
@@ -89,48 +96,62 @@ SCMQuadPowerAux::initialSetup()
   // Convert the actual pin power to a linear heat rate [W/m]
   _ref_qprime = _ref_power / heated_length;
 
-  auto nx = _quadMesh.getNx();
-  auto ny = _quadMesh.getNy();
-  auto nz = _quadMesh.getNumOfAxialCells();
-  auto z_grid = _quadMesh.getZGrid();
-  auto unheated_length_entry = _quadMesh.getHeatedLengthEntry();
-
-  _estimate_power.resize((ny - 1) * (nx - 1), 1);
+  _estimate_power.resize(n_pins, 1);
   _estimate_power.setZero();
   for (unsigned int iz = 1; iz < nz + 1; iz++)
   {
-    // Compute the height of this element.
-    auto dz = z_grid[iz] - z_grid[iz - 1];
     // Compute axial location of nodes.
     auto z2 = z_grid[iz];
     auto z1 = z_grid[iz - 1];
     Point p1(0, 0, z1 - unheated_length_entry);
     Point p2(0, 0, z2 - unheated_length_entry);
-    // cycle through pins to estimate the total power of each pin
-    if (z2 > unheated_length_entry && z2 <= unheated_length_entry + heated_length)
+    auto heat1 = _axial_heat_rate.value(_t, p1);
+    auto heat2 = _axial_heat_rate.value(_t, p2);
+    if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
+        MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
     {
-      for (unsigned int i_pin = 0; i_pin < (ny - 1) * (nx - 1); i_pin++)
+      // cycle through pins
+      for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
       {
-        // use of trapezoidal rule to add to total power of pin
-        _estimate_power(i_pin) +=
-            _ref_qprime(i_pin) * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2)) *
-            dz / 2.0;
+        // Compute the height of this element.
+        auto dz = z2 - z1;
+
+        // calculation of power for the first heated segment if nodes don't align
+        if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
+            MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry))
+        {
+          heat1 = 0.0;
+        }
+
+        // calculation of power for the last heated segment if nodes don't align
+        if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry + heated_length) &&
+            MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
+        {
+          heat2 = 0.0;
+        }
+
+        _estimate_power(i_pin) += _ref_qprime(i_pin) * (heat1 + heat2) * dz / 2.0;
       }
     }
   }
 
-  // if a Pin has zero power (_ref_qprime(j, i) = 0) then I need to avoid dividing by zero. I
-  // divide by a wrong non-zero number which is not correct but this error doesn't mess things cause
-  // _ref_qprime(i_pin) = 0.0
-  for (unsigned int i_pin = 0; i_pin < (ny - 1) * (nx - 1); i_pin++)
+  // if a Pin has zero power (_ref_qprime(i_pin) = 0) then I need to avoid dividing by zero. I
+  // divide by a wrong non-zero number which is not correct but this error doesn't mess things
+  // cause _ref_qprime(i_pin) = 0.0
+  auto total_power = 0.0;
+  for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
   {
+    total_power += _estimate_power(i_pin);
     if (_estimate_power(i_pin) == 0.0)
       _estimate_power(i_pin) = 1.0;
   }
   // We need to correct the linear power assigned to the nodes of each pin
-  // so that the total power calculated  by the trapezoidal rule agrees with the power assigned by
-  // the user.
+  // so that the total power calculated  by the trapezoidal rule agrees with the power assigned
+  // by the user.
   _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
+  _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
+  _console << "###########################################" << std::endl;
+  _console << "Total power estimation: " << total_power << " [W] " << std::endl;
 }
 
 Real
@@ -143,24 +164,21 @@ SCMQuadPowerAux::computeValue()
   Point P = p - p1;
   auto pin_mesh_exist = _quadMesh.pinMeshExist();
 
-  if (pin_mesh_exist)
+  /// assign power to the nodes located within the heated section
+  if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
+      MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
   {
-    // project axial heat rate on pins
-    auto i_pin = _quadMesh.getPinIndexFromPoint(p);
+    if (pin_mesh_exist)
     {
-      if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
-        return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
-      else
-        return 0.0;
+      // project axial heat rate on pins
+      auto i_pin = _quadMesh.getPinIndexFromPoint(p);
+      return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
     }
-  }
-  else
-  {
-    // project axial heat rate on subchannels
-    auto i_ch = _quadMesh.getSubchannelIndexFromPoint(p);
-    // if we are adjacent to the heated part of the fuel Pin
-    if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
+    else
     {
+      // project axial heat rate on subchannels
+      auto i_ch = _quadMesh.getSubchannelIndexFromPoint(p);
+      // if we are adjacent to the heated part of the fuel Pin
       auto heat_rate = 0.0;
       for (auto i_pin : _quadMesh.getChannelPins(i_ch))
       {
@@ -169,7 +187,7 @@ SCMQuadPowerAux::computeValue()
       }
       return heat_rate;
     }
-    else
-      return 0.0;
   }
+  else
+    return 0.0;
 }

@@ -97,32 +97,48 @@ SCMTriPowerAux::initialSetup()
   _estimate_power.setZero();
   for (unsigned int iz = 1; iz < nz + 1; iz++)
   {
-    // Compute the height of this element.
-    auto dz = z_grid[iz] - z_grid[iz - 1];
     // Compute axial location of nodes.
     auto z2 = z_grid[iz];
     auto z1 = z_grid[iz - 1];
     Point p1(0, 0, z1 - unheated_length_entry);
     Point p2(0, 0, z2 - unheated_length_entry);
-    // cycle through pins
-
-    if (z2 > unheated_length_entry && z2 <= unheated_length_entry + heated_length)
+    auto heat1 = _axial_heat_rate.value(_t, p1);
+    auto heat2 = _axial_heat_rate.value(_t, p2);
+    if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
+        MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
     {
+      // cycle through pins
       for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
       {
-        // use of trapezoidal rule  to calculate local power. The summation gives the total
-        // estimated power of the pin.
-        _estimate_power(i_pin) +=
-            _ref_qprime(i_pin) * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2)) *
-            dz / 2.0;
+        // Compute the height of this element.
+        auto dz = z2 - z1;
+
+        // calculation of power for the first heated segment if nodes don't align
+        if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry) &&
+            MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry))
+        {
+          heat1 = 0.0;
+        }
+
+        // calculation of power for the last heated segment if nodes don't align
+        if (MooseUtils::absoluteFuzzyGreaterThan(z2, unheated_length_entry + heated_length) &&
+            MooseUtils::absoluteFuzzyLessThan(z1, unheated_length_entry + heated_length))
+        {
+          heat2 = 0.0;
+        }
+
+        _estimate_power(i_pin) += _ref_qprime(i_pin) * (heat1 + heat2) * dz / 2.0;
       }
     }
   }
+
   // if a Pin has zero power (_ref_qprime(i_pin) = 0) then I need to avoid dividing by zero. I
   // divide by a wrong non-zero number which is not correct but this error doesn't mess things cause
   // _ref_qprime(i_pin) = 0.0
+  auto total_power = 0.0;
   for (unsigned int i_pin = 0; i_pin < n_pins; i_pin++)
   {
+    total_power += _estimate_power(i_pin);
     if (_estimate_power(i_pin) == 0.0)
       _estimate_power(i_pin) = 1.0;
   }
@@ -130,6 +146,9 @@ SCMTriPowerAux::initialSetup()
   // so that the total power calculated  by the trapezoidal rule agrees with the power assigned by
   // the user.
   _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
+  _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
+  _console << "###########################################" << std::endl;
+  _console << "Total power estimation: " << total_power << " [W] " << std::endl;
 }
 
 Real
@@ -143,45 +162,47 @@ SCMTriPowerAux::computeValue()
   Point P = p - p1;
   auto pin_triMesh_exist = _triMesh.pinMeshExist();
 
-  if (pin_triMesh_exist)
+  /// assign power to the nodes located within the heated section
+  if (MooseUtils::absoluteFuzzyGreaterEqual(p(2), unheated_length_entry) &&
+      MooseUtils::absoluteFuzzyLessEqual(p(2), unheated_length_entry + heated_length))
   {
-    // project axial heat rate on pins
-    auto i_pin = _triMesh.getPinIndexFromPoint(p);
-    if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
-      return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
-    else
-      return 0.0;
-  }
-  else
-  {
-    // Determine which subchannel this point is in.
-    auto i_ch = _triMesh.getSubchannelIndexFromPoint(p);
-    auto subch_type = _triMesh.getSubchannelType(i_ch);
-    // project axial heat rate on subchannels
-    if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
+    if (pin_triMesh_exist)
     {
-      double factor;
-      switch (subch_type)
+      // project axial heat rate on pins
+      auto i_pin = _triMesh.getPinIndexFromPoint(p);
+      return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
+    }
+    else
+    {
+      // Determine which subchannel this point is in.
+      auto i_ch = _triMesh.getSubchannelIndexFromPoint(p);
+      auto subch_type = _triMesh.getSubchannelType(i_ch);
+      // project axial heat rate on subchannels
       {
-        case EChannelType::CENTER:
-          factor = 1.0 / 6.0;
-          break;
-        case EChannelType::EDGE:
-          factor = 1.0 / 4.0;
-          break;
-        case EChannelType::CORNER:
-          factor = 1.0 / 6.0;
-          break;
-        default:
-          return 0.0; // handle invalid subch_type if needed
+        double factor;
+        switch (subch_type)
+        {
+          case EChannelType::CENTER:
+            factor = 1.0 / 6.0;
+            break;
+          case EChannelType::EDGE:
+            factor = 1.0 / 4.0;
+            break;
+          case EChannelType::CORNER:
+            factor = 1.0 / 6.0;
+            break;
+          default:
+            return 0.0; // handle invalid subch_type if needed
+        }
+        for (auto i_pin : _triMesh.getChannelPins(i_ch))
+        {
+          heat_rate += factor * _ref_qprime(i_pin) * _pin_power_correction(i_pin) *
+                       _axial_heat_rate.value(_t, P);
+        }
+        return heat_rate;
       }
-      for (auto i_pin : _triMesh.getChannelPins(i_ch))
-      {
-        heat_rate += factor * _ref_qprime(i_pin) * _pin_power_correction(i_pin) *
-                     _axial_heat_rate.value(_t, P);
-      }
-      return heat_rate;
     }
   }
-  return 0.0;
+  else
+    return 0.0;
 }
