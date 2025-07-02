@@ -305,10 +305,12 @@ ElementSubdomainModifierBase::initialSetup()
 
     // When 'apply_initial_conditions' is fully deprecated, remove this block
     if (isParamSetByUser("apply_initial_conditions"))
+    {
       if (getParam<bool>("apply_initial_conditions"))
         subdomain_names_to_reinitialize = {"ANY_BLOCK_ID"};
       else
         subdomain_names_to_reinitialize = {};
+    }
 
     if (std::find(subdomain_names_to_reinitialize.begin(),
                   subdomain_names_to_reinitialize.end(),
@@ -430,7 +432,7 @@ ElementSubdomainModifierBase::modify(
   _fe_problem.meshChanged(
       /*intermediate_change=*/false, /*contract_mesh=*/false, /*clean_refinement_flags=*/false);
 
-  // important
+  // Clear the serialized solution after the mesh has changed
   _sys.cleanSerializedSolution();
 
   // Initialize solution and stateful material properties
@@ -664,6 +666,10 @@ ElementSubdomainModifierBase::meshChanged()
   _reinitialized_displaced_elem_range.reset();
   _reinitialized_bnd_node_range.reset();
   _reinitialized_displaced_bnd_node_range.reset();
+  _reinitialized_node_range.reset();
+  _reinitialized_displaced_node_range.reset();
+  _reinitialized_node_range_from_bnd_nodes.reset();
+  _reinitialized_displaced_node_range_from_bnd_nodes.reset();
 
   updateAMRMovingBoundary(_mesh);
   if (_displaced_mesh)
@@ -825,33 +831,15 @@ ElementSubdomainModifierBase::applyIC(bool displaced)
              _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
              _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_THRESHOLD)
     {
-      const auto & var = _nl_sys.hasVariable(_ic_vars_names[i])
-                             ? _nl_sys.getVariable(_tid, _ic_vars_names[i])
-                             : _aux_sys.getVariable(_tid, _ic_vars_names[i]);
-      const FEType type = var.feType();
-
-      bool isElemental;
-
-      // Note: Both auxiliary and nonlinear variables can be nodal or elemental variables,
-      // depending on the chosen FEType (e.g., LAGRANGE = nodal, MONOMIAL = elemental).
-      if (type.family == MONOMIAL)
-        isElemental = true;
-      else if (type.family == LAGRANGE)
-        isElemental = false;
-      else
-        mooseError("Unsupported FEType for extrapolated initial condition: family = " +
-                   Utility::enum_to_string(type.family));
-
-      if (_nl_sys.hasVariable(_ic_vars_names[i]))
-        applyIC_Polynomial(_fe_problem.getNonlinearSystemBase(_sys.number()),
-                           _ic_vars_number[i],
-                           _ic_vars_number[i],
-                           isElemental);
-      else
-        applyIC_Polynomial(_fe_problem.getAuxiliarySystem(),
-                           _ic_vars_number[i],
-                           _ic_vars_number[i] - _number_of_nl_variables /*subtract back*/,
-                           isElemental);
+      const auto var_number = _ic_vars_number[i];
+      const auto & coef = _npr_vec[_var_number2_npr_idx[var_number]]->getCoefficients(
+          _solved_elem_ids_for_npr[_var_number2_npr_idx[var_number]]);
+      _fe_problem.projectFunctionOnCustomRangeForSpecificVars(
+          reinitializedElemRange(displaced),
+          reinitializedNodeRangeFromBndNodes(displaced),
+          reinitializedNodeRange(displaced),
+          coef,
+          {_ic_vars_names[i]});
     }
     else
       mooseError("Unknown initial condition strategy");
@@ -948,6 +936,77 @@ ElementSubdomainModifierBase::reinitializedBndNodeRange(bool displaced)
         std::make_unique<ConstBndNodeRange>(bnd_nodes_begin, bnd_nodes_end);
 
   return reinitializedBndNodeRange(displaced);
+}
+
+ConstNodeRange &
+ElementSubdomainModifierBase::reinitializedNodeRange(bool displaced)
+{
+  if (!displaced && _reinitialized_node_range)
+    return *_reinitialized_node_range.get();
+
+  if (displaced && _reinitialized_displaced_node_range)
+    return *_reinitialized_displaced_node_range.get();
+
+  // Create a vector of the newly reinitialized nodes
+  std::vector<const Node *> nodes;
+
+  for (auto node_id : _reinitialized_nodes)
+  {
+    nodes.push_back(displaced ? _displaced_mesh->nodePtr(node_id) : _mesh.nodePtr(node_id));
+  }
+
+  // Make some fake node iterators defining this vector of nodes
+  Node * const * node_itr_begin = const_cast<Node * const *>(nodes.data());
+  Node * const * node_itr_end = node_itr_begin + nodes.size();
+
+  const auto nodes_begin = MeshBase::const_node_iterator(
+      node_itr_begin, node_itr_end, Predicates::NotNull<const Node * const *>());
+  const auto nodes_end = MeshBase::const_node_iterator(
+      node_itr_end, node_itr_end, Predicates::NotNull<const Node * const *>());
+
+  if (!displaced)
+    _reinitialized_node_range = std::make_unique<ConstNodeRange>(nodes_begin, nodes_end);
+  else
+    _reinitialized_displaced_node_range = std::make_unique<ConstNodeRange>(nodes_begin, nodes_end);
+
+  return reinitializedNodeRange(displaced);
+}
+
+ConstNodeRange &
+ElementSubdomainModifierBase::reinitializedNodeRangeFromBndNodes(bool displaced)
+{
+  if (!displaced && _reinitialized_node_range_from_bnd_nodes)
+    return *_reinitialized_node_range_from_bnd_nodes.get();
+
+  if (displaced && _reinitialized_displaced_node_range_from_bnd_nodes)
+    return *_reinitialized_displaced_node_range_from_bnd_nodes.get();
+
+  std::vector<const Node *> nodes;
+
+  auto bnd_nodes =
+      displaced ? _displaced_mesh->getBoundaryNodeRange() : _mesh.getBoundaryNodeRange();
+
+  for (auto bnd_node : *bnd_nodes)
+    if (bnd_node->_node && _reinitialized_nodes.count(bnd_node->_node->id()))
+      nodes.push_back(bnd_node->_node);
+
+  // Fake iterators
+  Node * const * node_itr_begin = const_cast<Node * const *>(nodes.data());
+  Node * const * node_itr_end = node_itr_begin + nodes.size();
+
+  const auto nodes_begin = MeshBase::const_node_iterator(
+      node_itr_begin, node_itr_end, Predicates::NotNull<const Node * const *>());
+  const auto nodes_end = MeshBase::const_node_iterator(
+      node_itr_end, node_itr_end, Predicates::NotNull<const Node * const *>());
+
+  if (!displaced)
+    _reinitialized_node_range_from_bnd_nodes =
+        std::make_unique<ConstNodeRange>(nodes_begin, nodes_end);
+  else
+    _reinitialized_displaced_node_range_from_bnd_nodes =
+        std::make_unique<ConstNodeRange>(nodes_begin, nodes_end);
+
+  return reinitializedNodeRangeFromBndNodes(displaced);
 }
 
 void
@@ -1191,60 +1250,6 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(const unsi
   local2Global(_solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]],
                _solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]],
                true /*sort_and_remove_duplicates*/);
-}
-
-void
-ElementSubdomainModifierBase::applyIC_Polynomial(SystemBase & sys,
-                                                 const unsigned int var_num_in_npr,
-                                                 const unsigned int var_num_for_nl_or_aux,
-                                                 const bool is_elemental)
-{
-  // Pass: setting IC for newly activated nodes
-  NumericVector<Number> & vec = sys.solution();
-  DofMap & dof_map = sys.dofMap();
-
-  if (is_elemental)
-    for (const auto & elem_id : _reinitialized_elems)
-    {
-      const Elem * elem = _mesh.elemPtr(elem_id);
-      if (!elem)
-        continue;
-
-      // Get the DOF indices for this variable at this element
-      std::vector<dof_id_type> dofs_on_reinitialized_elem;
-      dof_map.dof_indices(elem, dofs_on_reinitialized_elem, var_num_for_nl_or_aux);
-
-      // Recover value using polynomial patch recovery
-      const Point & centroid = elem->vertex_average();
-      const Real recovered_val = _npr_vec[_var_number2_npr_idx[var_num_in_npr]]->nodalPatchRecovery(
-          centroid,
-          _solved_elem_ids_for_npr[_var_number2_npr_idx[var_num_in_npr]] /*has already sorted*/);
-
-      // Assign recovered value to the DOF
-      if (!dofs_on_reinitialized_elem.empty())
-        vec.set(dofs_on_reinitialized_elem[0], recovered_val);
-    }
-  else
-    for (const auto & new_id : _reinitialized_nodes)
-    {
-      const Node * node = _mesh.nodePtr(new_id);
-      const Point & x = *node;
-
-      // Get the DOF index for this variable at this node
-      std::vector<dof_id_type> dofs_on_newly_activated_node;
-      dof_map.dof_indices(node, dofs_on_newly_activated_node, var_num_for_nl_or_aux);
-
-      // Recover value using polynomial patch recovery
-      const Real recovered_val = _npr_vec[_var_number2_npr_idx[var_num_in_npr]]->nodalPatchRecovery(
-          x, _solved_elem_ids_for_npr[_var_number2_npr_idx[var_num_in_npr]] /*has already sorted*/);
-
-      // Assign recovered value to the DOF
-      if (!dofs_on_newly_activated_node.empty())
-        vec.set(dofs_on_newly_activated_node[0], recovered_val);
-    }
-
-  vec.close();
-  vec.localize(*sys.system().current_local_solution, sys.dofMap().get_send_list());
 }
 
 void

@@ -29,6 +29,15 @@ public:
    */
   virtual Real nodalPatchRecovery(const Point & p, const std::vector<dof_id_type> & elem_ids) const;
 
+  /**
+   * Get the coefficients of the polynomial for the given element IDs.
+   * If the coefficients are already cached, return them directly.
+   *
+   * @param elem_ids    Ids of the elements in the patch
+   * @return The coefficients of the polynomial
+   */
+  const RealEigenVector getCoefficients(const std::vector<dof_id_type> & elem_ids) const;
+
   virtual void initialize() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject &) override;
@@ -120,5 +129,6 @@ private:
   /// Print coefficients of the polynomial to console
   const bool _verbose;
 
-  VariableName _var_name; ///< Variable name
+  /// Variable name
+  VariableName _var_name;
 };

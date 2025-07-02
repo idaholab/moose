@@ -61,15 +61,23 @@ Real
 NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
                                            const std::vector<dof_id_type> & elem_ids) const
 {
+  const RealEigenVector coef = getCoefficients(elem_ids);
+  // Compute the fitted nodal value
+  RealEigenVector p = evaluateBasisFunctions(x);
+  return p.dot(coef);
+}
+
+const RealEigenVector
+NodalPatchRecoveryBase::getCoefficients(const std::vector<dof_id_type> & elem_ids) const
+{
+  // Check cache
   std::vector<dof_id_type> key = elem_ids;
   std::sort(key.begin(), key.end());
-  RealEigenVector coef(_q);
-
-  // Check cache
   if (key == _cached_elem_ids)
-    coef = _cached_coef;
+    return _cached_coef;
   else
   {
+    RealEigenVector coef = RealEigenVector::Zero(_q);
     // Before we go, check if we have enough sample points for solving the least square fitting
     if (_q_point.size() * elem_ids.size() < _q)
       mooseError("There are not enough sample points to recover the nodal value, try reducing the "
@@ -99,9 +107,6 @@ NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
     // Solve the least squares fitting
     coef = A.completeOrthogonalDecomposition().solve(b);
 
-    _cached_elem_ids = key; // Update the cached element IDs
-    _cached_coef = coef;    // Update the cached coefficients
-
     if (_verbose)
     {
       _console << std::setprecision(15) << std::scientific;
@@ -111,11 +116,12 @@ NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
 
       _console << std::defaultfloat;
     }
-  }
 
-  // Compute the fitted nodal value
-  RealEigenVector p = evaluateBasisFunctions(x);
-  return p.dot(coef);
+    _cached_elem_ids = key; // Update the cached element IDs
+    _cached_coef = coef;    // Update the cached coefficients
+
+    return coef;
+  }
 }
 
 RealEigenVector

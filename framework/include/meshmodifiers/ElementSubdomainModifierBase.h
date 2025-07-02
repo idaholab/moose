@@ -119,8 +119,14 @@ private:
   /// Range of reinitialized elements
   ConstElemRange & reinitializedElemRange(bool displaced = false);
 
+  /// Range of reinitialized nodes
+  ConstNodeRange & reinitializedNodeRange(bool displaced = false);
+
   /// Range of reinitialized boundary nodes
   ConstBndNodeRange & reinitializedBndNodeRange(bool displaced = false);
+
+  /// Return the range of nodes (Node*) extracted from reinitialized boundary nodes (BndNode*)
+  ConstNodeRange & reinitializedNodeRangeFromBndNodes(bool displaced);
 
   /// Reinitialize moved elements whose new subdomain is in this list
   std::vector<SubdomainID> _subdomain_ids_to_reinitialize;
@@ -157,10 +163,18 @@ private:
 
   /// Reinitialized nodes
   std::unordered_set<dof_id_type> _reinitialized_nodes;
+  /// Range of reinitialized nodes
+  std::unique_ptr<ConstNodeRange> _reinitialized_node_range;
+  /// Range of reinitialized nodes on the displaced mesh
+  std::unique_ptr<ConstNodeRange> _reinitialized_displaced_node_range;
   /// Range of reinitialized boundary nodes
   std::unique_ptr<ConstBndNodeRange> _reinitialized_bnd_node_range;
   /// Range of reinitialized boundary nodes on the displaced mesh
   std::unique_ptr<ConstBndNodeRange> _reinitialized_displaced_bnd_node_range;
+  /// Range of reinitialized nodes extracted from boundary nodes (non-displaced mesh)
+  std::unique_ptr<ConstNodeRange> _reinitialized_node_range_from_bnd_nodes;
+  /// Range of reinitialized nodes extracted from boundary nodes (displaced mesh)
+  std::unique_ptr<ConstNodeRange> _reinitialized_displaced_node_range_from_bnd_nodes;
 
   /// The strategy used to apply IC on newly activated nodes
   std::vector<ICStrategy> _ic_strategy;
@@ -222,16 +236,6 @@ private:
 
   /// @brief Filters the globally reinitialized nodes and stores only those owned by this processor.
   void identifyProcessorOwnedReinitializedNodes();
-
-  /// @brief Apply initial conditions using polynomial nodal patch recovery
-  /// @param sys
-  /// @param var_num_in_npr variable number in the NodalPatchRecovery user object
-  /// @param var_num_for_nl_or_aux variable number for the nonlinear or auxiliary system
-  /// @param is_elemental true if the variable is elemental, false if it is nodal
-  void applyIC_Polynomial(SystemBase & sys,
-                          const unsigned int var_num_in_npr,
-                          const unsigned int var_num_for_nl_or_aux,
-                          const bool is_elemental);
 
   /// @brief Gather neighbor elements for newly activated nodes
   void gatherNeighborElementsForActivatedNodes(const unsigned int ic_idx);
