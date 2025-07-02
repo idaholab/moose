@@ -21,7 +21,7 @@ MaterialPropertyBase &
 MaterialPropertyStorage::addKokkosProperty(const std::string & prop_name,
                                            const std::type_info & type,
                                            const unsigned int state,
-                                           const MaterialBase * declarer,
+                                           const ::MaterialBase * declarer,
                                            std::shared_ptr<MaterialPropertyBase> shell)
 {
   auto id = addProperty(prop_name, type, state, declarer);
@@ -68,8 +68,7 @@ MaterialPropertyStorage::addKokkosPropertyState(const std::string & prop_name,
 MaterialPropertyBase &
 MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
                                                const std::type_info & type,
-                                               const unsigned int state,
-                                               const MaterialBase * declarer,
+                                               const ::MaterialBase * declarer,
                                                const std::vector<unsigned int> & dims,
                                                const bool bnd,
                                                std::shared_ptr<MaterialPropertyBase> shell)
@@ -97,7 +96,7 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
     record.bnd = bnd;
   }
 
-  return addKokkosProperty(prop_name, type, state, declarer, shell);
+  return addKokkosProperty(prop_name, type, 0, declarer, shell);
 }
 
 MaterialPropertyBase &
