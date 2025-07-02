@@ -23,27 +23,14 @@
   []
 []
 
-[Functions]
-  [reservoir_far_temperature]
-    type = ParsedFunction
-    expression = 0.5
-  []
-  [heat_transfer_coefficient]
-    type = ParsedFunction
-    expression = 5.0
-  []
-[]
-
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
     variable = temperature
-    coefficient = 1.0
   []
   [dT_dt]
     type = MFEMTimeDerivativeMassKernel
     variable = temperature
-    coefficient = 1.0
   []
 []
 
@@ -59,14 +46,13 @@
     type = MFEMConvectiveHeatFluxBC
     variable = temperature
     boundary = '2'
-    T_infinity = reservoir_far_temperature
-    heat_transfer_coefficient = heat_transfer_coefficient
+    T_infinity = .5
+    heat_transfer_coefficient = 5
   []
   [top_dirichlet]
     type = MFEMScalarDirichletBC
     variable = temperature
     boundary = '2'
-    coefficient = 0.0
   []
 []
 

@@ -147,7 +147,7 @@ CoefficientManager::getVectorCoefficientPtr(const std::string & name)
         name, mfem::Vector(vec_values.data(), vec_values.size()));
     return this->_vector_coeffs.getCoefficientPtr(name);
   }
-  mooseError("Vector oefficient with name '" + name + "' has not been declared.");
+  mooseError("Vector coefficient with name '" + name + "' has not been declared.");
 }
 
 std::shared_ptr<mfem::MatrixCoefficient>

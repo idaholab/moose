@@ -43,17 +43,16 @@
 []
 
 [BCs]
-  [bottom]
+  [top]
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = '1'
     coefficient = 1.0
   []
-  [low_terminal]
+  [bottom]
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = '2'
-    coefficient = 0.0
   []
 []
 
@@ -61,7 +60,6 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = submesh_potential
-    coefficient = 1.0
   []
 []
 

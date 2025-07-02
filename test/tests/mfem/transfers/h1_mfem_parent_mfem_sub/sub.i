@@ -30,11 +30,10 @@
     boundary = 2
     coefficient = 1.0
   []
-  [low_terminal]
+  [top]
     type = MFEMScalarDirichletBC
     variable = u
     boundary = 4
-    coefficient = 0.0
   []
 []
 
@@ -42,7 +41,6 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = u
-    coefficient = 1.0
   []
 []
 

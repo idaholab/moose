@@ -12,23 +12,22 @@
 #pragma once
 #include "MFEMIntegratedBC.h"
 
-class MFEMScalarBoundaryIntegratedBC : public MFEMIntegratedBC
+class MFEMBoundaryNormalIntegratedBC : public MFEMIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MFEMScalarBoundaryIntegratedBC(const InputParameters & parameters);
+  MFEMBoundaryNormalIntegratedBC(const InputParameters & parameters);
 
   // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
   // caller.
-  virtual mfem::LinearFormIntegrator * createLFIntegrator();
+  virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
 
   // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator();
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
 protected:
-  const MFEMScalarCoefficientName & _coef_name;
-  mfem::Coefficient & _coef;
+  mfem::VectorCoefficient & _vec_coef;
 };
 
 #endif
