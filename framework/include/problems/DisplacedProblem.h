@@ -434,9 +434,13 @@ protected:
   protected:
     void init();
 
+    /// Diplaced problem
     DisplacedProblem & _displaced_problem;
+    /// Original mesh
     MooseMesh & _ref_mesh;
+    /// Solution vectors of the nonlinear systems on the displaced problem
     const std::vector<const NumericVector<Number> *> & _nl_soln;
+    /// Solution vector of the auxliary system on the displaced problem
     const NumericVector<Number> & _aux_soln;
 
     // Solution vectors with expanded ghosting, for ReplicatedMesh or
@@ -447,6 +451,7 @@ protected:
         _sys_to_nonghost_and_ghost_soln;
 
   private:
+    /// To locate the system numbers, variable numbers of all displacement variables
     std::map<unsigned int, std::pair<std::vector<unsigned int>, std::vector<unsigned int>>>
         _sys_to_var_num_and_direction;
 
