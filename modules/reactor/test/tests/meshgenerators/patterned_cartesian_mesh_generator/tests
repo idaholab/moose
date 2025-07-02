@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PatternedCartesianMeshGenerator.md'
-  issues = '#22828 #23367 #26921 #28164'
+  issues = '#22828 #23367 #26921 #28164 #30930'
   [square_boundary]
     type = 'Exodiff'
     exodiff_opts = '-pedantic'
@@ -89,6 +89,27 @@
                   Mesh/pattern/deform_non_circular_region=false
                   --mesh-only "patterned_sq_no_deform.e"'
     requirement = 'The system shall stitch square meshes to form a large mesh with square boundary without deforming the input meshes.'
+    recover = false
+  []
+  [square_boundary_different_stitching]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'patterned_2d.i'
+    exodiff = 'patterned_sq.e'
+    prereq = 'square_boundary'
+    cli_args = 'Mesh/pattern/background_block_id=1500
+                  Mesh/pattern/background_block_name="assem_block"
+                  Mesh/pattern/square_size=44
+                  Mesh/pattern/duct_sizes=21
+                  Mesh/pattern/duct_intervals=2
+                  Mesh/pattern/duct_block_ids=2000
+                  Mesh/pattern/duct_block_names="duct_block"
+                  Mesh/pattern/uniform_mesh_on_sides=true
+                  Mesh/pattern/stitching_boundary_name="abcd"
+                  Mesh/square_1/external_boundary_name="abcd"
+                  Mesh/square_2/external_boundary_name="abcd"
+                  --mesh-only "patterned_sq.e"'
+    requirement = 'The system shall stitch square meshes to form a large mesh with square boundary, with a custom boundary used for stitching.'
     recover = false
   []
   [none_boundary]
