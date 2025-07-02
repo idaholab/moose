@@ -182,6 +182,10 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
   std::iota(std::begin(v_sequence), std::end(v_sequence), 0);
   torch::Tensor inputs = torch::empty({_batch_size, training_params.sizes()[1]}, at::kDouble);
   torch::Tensor outputs = torch::empty({_batch_size, training_data.sizes()[1]}, at::kDouble);
+  auto params_accessor = training_params.accessor<Real, 2>();
+  auto data_accessor = training_data.accessor<Real, 2>();
+  auto inputs_accessor = inputs.accessor<Real, 2>();
+  auto outputs_accessor = outputs.accessor<Real, 2>();
   if (opts.show_every_nth_iteration)
     Moose::out << "OPTIMIZING GP HYPER-PARAMETERS USING Adam" << std::endl;
   for (unsigned int ss = 0; ss < opts.num_iter; ++ss)
@@ -191,10 +195,6 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
     generator.seed(0, 1980);
     generator.saveState();
     MooseUtils::shuffle<unsigned int>(v_sequence, generator, 0);
-    auto params_accessor = training_params.accessor<Real, 2>();
-    auto data_accessor = training_data.accessor<Real, 2>();
-    auto inputs_accessor = inputs.accessor<Real, 2>();
-    auto outputs_accessor = outputs.accessor<Real, 2>();
     for (unsigned int ii = 0; ii < _batch_size; ++ii)
     {
       for (unsigned int jj = 0; jj < training_params.sizes()[1]; ++jj)
@@ -249,18 +249,15 @@ Real
 GaussianProcess::getLoss(torch::Tensor & inputs, torch::Tensor & outputs)
 {
   _covariance_function->computeCovarianceMatrix(_K, inputs, inputs, true);
-  outputs = torch::transpose(outputs, 0, 1);
-  torch::Tensor flattened_data =
-      torch::reshape(outputs, {outputs.sizes()[0] * outputs.sizes()[1], -1});
-  outputs = torch::transpose(outputs, 0, 1);
+  torch::Tensor flattened_data = torch::reshape(torch::transpose(outputs, 0, 1),
+                                                {outputs.sizes()[0] * outputs.sizes()[1], -1});
 
   setupStoredMatrices(flattened_data);
 
-  torch::Tensor product = torch::mm(torch::transpose(flattened_data, 0, 1), _K_results_solve);
-  auto product_accessor = product.accessor<Real, 2>();
   Real log_likelihood = 0;
-  log_likelihood += -1 * product_accessor[0][0];
-  log_likelihood += -std::log(torch::det(_K).data_ptr<Real>()[0]);
+  log_likelihood +=
+      -1 * torch::mm(torch::transpose(flattened_data, 0, 1), _K_results_solve).item<Real>();
+  log_likelihood += -std::log(torch::det(_K).item<Real>());
   log_likelihood -= _batch_size * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
   return log_likelihood;
@@ -270,7 +267,6 @@ std::vector<Real>
 GaussianProcess::getGradient(torch::Tensor & inputs) const
 {
   torch::Tensor dKdhp = torch::empty({_batch_size, _batch_size}, at::kDouble);
-  // torch::Tensor dKdhp_matrix(_batch_size, _batch_size);
   torch::Tensor alpha = torch::mm(_K_results_solve, torch::transpose(_K_results_solve, 0, 1));
   std::vector<Real> grad_vec;
   grad_vec.resize(_num_tunable);
@@ -284,8 +280,9 @@ GaussianProcess::getGradient(torch::Tensor & inputs) const
       const auto global_index = first_index + ii;
       _covariance_function->computedKdhyper(dKdhp, inputs, hyper_param_name, ii);
       // This is just temporary. Convert dKhp_matrix to tensor
-      torch::Tensor tmp = torch::mm(alpha, dKdhp) - torch::cholesky_solve(dKdhp, _K_cho_decomp);
-      grad_vec[global_index] = -1 * (torch::trace(tmp).data_ptr<Real>()[0] / 2.0);
+      auto tmp = torch::trace(torch::mm(alpha, dKdhp) - torch::cholesky_solve(dKdhp, _K_cho_decomp))
+                     .item<Real>();
+      grad_vec[global_index] = -1 * (tmp / 2.0);
     }
   }
   return grad_vec;
