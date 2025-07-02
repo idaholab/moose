@@ -20,6 +20,34 @@ namespace Moose
 namespace Kokkos
 {
 
+/**
+ * The base class for a user to derive his own Kokkos materials.
+ *
+ * The polymorphic design of the original MOOSE is reproduced statically by leveraging the Curiously
+ * Recurring Template Pattern (CRTP), a programming idiom that involves a class template inheriting
+ * from a template instantiation of itself. When the user derives his Kokkos object from this class,
+ * the inheritance structure will look like:
+ *
+ * class UserMaterial final : public Moose::Kokkos::Material<UserMaterial>
+ *
+ * It is important to note that the template argument should point to the last derived class.
+ * Therefore, if the user wants to define a derived class that can be further inherited, the derived
+ * class should be a class template as well. Otherwise, it is recommended to mark the derived class
+ * as final to prevent its inheritence by mistake.
+ *
+ * The user is expected to define initQpStatefulProperties() and computeQpProperties() as inlined
+ * public methods in his derived class (not virtual override). The signature of
+ * computeQpProperties() expected to be defined in the derived class is as follows:
+ *
+ * @param qp The local quadrature point index
+ * @param datum The Datum object of the current thread
+ *
+ * KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const;
+ *
+ * The signature of initQpStatefulProperties() can be found in the code below, and its definition in
+ * the derived class is optional. If it is defined in the derived class, it will hide the default
+ * definition in the base class.
+ */
 template <typename Derived>
 class Material : public MaterialBase, public Coupleable, public MaterialPropertyInterface
 {
@@ -32,7 +60,9 @@ public:
     return params;
   }
 
-  // Constructor
+  /**
+   * Constructor
+   */
   Material(const InputParameters & parameters)
     : MaterialBase(parameters),
       Coupleable(this, false),
@@ -48,7 +78,9 @@ public:
       addMooseVariableDependency(coupled_var);
   }
 
-  // Copy constructor
+  /**
+   * Copy constructor for parallel dispatch
+   */
   Material(const Material & object)
     : MaterialBase(object),
       Coupleable(&object, false),
@@ -60,214 +92,136 @@ public:
   {
   }
 
-  virtual bool isBoundaryMaterial() const override { return _bnd; }
+  /**
+   * Dispatch stateful material property initialization
+   */
+  virtual void initStatefulProperties(unsigned int) override;
+  /**
+   * Dispatch material property evaluation
+   */
+  virtual void computeProperties() override;
 
-  virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override
-  {
-    return MaterialPropertyInterface::getMatPropDependencies();
-  }
-
-  // Dispatch material property calculation to GPU
-  virtual void initStatefulProperties(unsigned int /* n_points */) override
-  {
-    if (_default_init)
-      return;
-
-    if (!_bnd && !_neighbor)
-    {
-      setVariableDependency();
-
-      ::Kokkos::parallel_for(
-          ::Kokkos::RangePolicy<ElementInit, ::Kokkos::IndexType<size_t>>(0, numElements()),
-          *static_cast<Derived *>(this));
-
-      setCacheFlags();
-    }
-    else if (_bnd && !_neighbor)
-      ::Kokkos::parallel_for(
-          ::Kokkos::RangePolicy<SideInit, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
-          *static_cast<Derived *>(this));
-    else
-      ::Kokkos::parallel_for(
-          ::Kokkos::RangePolicy<NeighborInit, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
-          *static_cast<Derived *>(this));
-
-    ::Kokkos::fence();
-  }
-  virtual void computeProperties() override
-  {
-    if (!_bnd && !_neighbor)
-    {
-      setVariableDependency();
-
-      ::Kokkos::parallel_for(
-          ::Kokkos::RangePolicy<ElementCompute, ::Kokkos::IndexType<size_t>>(0, numElements()),
-          *static_cast<Derived *>(this));
-
-      setCacheFlags();
-    }
-    else if (_bnd && !_neighbor)
-      ::Kokkos::parallel_for(
-          ::Kokkos::RangePolicy<SideCompute, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
-          *static_cast<Derived *>(this));
-    else
-      ::Kokkos::parallel_for(
-          ::Kokkos::RangePolicy<NeighborCompute, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
-          *static_cast<Derived *>(this));
-
-    ::Kokkos::fence();
-  }
-
-  // Empty methods to prevent compile errors even when these methods were not hidden by the derived
-  // class
+  /**
+   * Default methods to prevent compile errors even when these methods were not defined in the
+   * derived class
+   */
+  ///@{
+  /**
+   * Initialize stateful material properties on a quadrature point
+   * @param qp The local quadrature point index
+   * @param datum The Datum object of the current thread
+   */
   KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int /* qp */,
                                                 Datum & /* datum */) const
   {
   }
+  ///@}
 
-  // Overloaded operators called by Kokkos::parallel_for
-  KOKKOS_FUNCTION void operator()(ElementInit, const size_t tid) const
-  {
-    auto material = static_cast<const Derived *>(this);
-    auto elem = elementID(tid);
-
-    Datum datum(elem, kokkosAssembly(), kokkosSystems());
-
-    for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
-    {
-      datum.reinit(qp);
-
-      material->initQpStatefulProperties(qp, datum);
-    }
-  }
-  KOKKOS_FUNCTION void operator()(SideInit, const size_t tid) const
-  {
-    auto material = static_cast<const Derived *>(this);
-    auto elem = elementSideID(tid);
-
-    Datum datum(elem.first, elem.second, kokkosAssembly(), kokkosSystems());
-
-    for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
-    {
-      datum.reinit(qp);
-
-      material->initQpStatefulProperties(qp, datum);
-    }
-  }
-  KOKKOS_FUNCTION void operator()(NeighborInit, const size_t tid) const
-  {
-    auto material = static_cast<const Derived *>(this);
-    auto elem = elementSideID(tid);
-
-    Datum datum(elem.first, elem.second, kokkosAssembly(), kokkosSystems());
-
-    if (datum.hasNeighbor())
-      for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
-      {
-        datum.reinit(qp);
-
-        material->initQpStatefulProperties(qp, datum);
-      }
-  }
-  KOKKOS_FUNCTION void operator()(ElementCompute, const size_t tid) const
-  {
-    auto material = static_cast<const Derived *>(this);
-    auto elem = elementID(tid);
-
-    Datum datum(elem, kokkosAssembly(), kokkosSystems());
-
-    for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
-    {
-      datum.reinit(qp);
-
-      material->computeQpProperties(qp, datum);
-    }
-  }
-  KOKKOS_FUNCTION void operator()(SideCompute, const size_t tid) const
-  {
-    auto material = static_cast<const Derived *>(this);
-    auto elem = elementSideID(tid);
-
-    Datum datum(elem.first, elem.second, kokkosAssembly(), kokkosSystems());
-
-    for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
-    {
-      datum.reinit(qp);
-
-      material->computeQpProperties(qp, datum);
-    }
-  }
-  KOKKOS_FUNCTION void operator()(NeighborCompute, const size_t tid) const
-  {
-    auto material = static_cast<const Derived *>(this);
-    auto elem = elementSideID(tid);
-
-    Datum datum(elem.first, elem.second, kokkosAssembly(), kokkosSystems());
-
-    if (datum.hasNeighbor())
-      for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
-      {
-        datum.reinit(qp);
-
-        material->computeQpProperties(qp, datum);
-      }
-  }
+  /**
+   * The parallel computation entry functions called by Kokkos
+   */
+  ///@{
+  KOKKOS_FUNCTION void operator()(ElementInit, const size_t tid) const;
+  KOKKOS_FUNCTION void operator()(SideInit, const size_t tid) const;
+  KOKKOS_FUNCTION void operator()(NeighborInit, const size_t tid) const;
+  KOKKOS_FUNCTION void operator()(ElementCompute, const size_t tid) const;
+  KOKKOS_FUNCTION void operator()(SideCompute, const size_t tid) const;
+  KOKKOS_FUNCTION void operator()(NeighborCompute, const size_t tid) const;
+  ///@}
 
 protected:
+  /**
+   * Get a material property by property name
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @tparam state The property state
+   * @param prop_name_in The property name
+   * @returns The material property
+   */
   template <typename T, unsigned int dimension, unsigned int state>
   MaterialProperty<T, dimension>
-  getKokkosGenericMaterialPropertyByName(const std::string & prop_name_in)
-  {
-    MaterialBase::checkExecutionStage();
-
-    const auto prop_name =
-        _get_suffix.empty()
-            ? prop_name_in
-            : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
-
-    if constexpr (state == 0)
-      _requested_props.insert(prop_name);
-
-    auto prop =
-        MaterialPropertyInterface::getKokkosGenericMaterialPropertyByName<T, dimension, state>(
-            prop_name);
-
-    registerPropName(prop_name, true, state);
-
-    return prop;
-  }
+  getKokkosGenericMaterialPropertyByName(const std::string & prop_name_in);
+  /**
+   * Get a current material property by property name
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param prop_name The property name
+   * @returns The material property
+   */
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> getKokkosMaterialPropertyByName(const std::string & prop_name)
   {
     return getKokkosGenericMaterialPropertyByName<T, dimension, 0>(prop_name);
   }
+  /**
+   * Get an old material property by property name
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param prop_name The property name
+   * @returns The material property
+   */
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> getKokkosMaterialPropertyOldByName(const std::string & prop_name)
   {
     return getKokkosGenericMaterialPropertyByName<T, dimension, 1>(prop_name);
   }
+  /**
+   * Get an older material property by property name
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param prop_name The property name
+   * @returns The material property
+   */
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> getKokkosMaterialPropertyOlderByName(const std::string & prop_name)
   {
     return getKokkosGenericMaterialPropertyByName<T, dimension, 2>(prop_name);
   }
-
+  /**
+   * Get a material property
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @tparam state The property state
+   * @param name The property name or the parameter name containing the property name
+   * @returns The material property
+   */
   template <typename T, unsigned int dimension, unsigned int state>
   MaterialProperty<T, dimension> getKokkosGenericMaterialProperty(const std::string & name)
   {
     return getKokkosGenericMaterialPropertyByName<T, dimension, state>(
         getMaterialPropertyName(name));
   }
+  /**
+   * Get a current material property
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param name The property name or the parameter name containing the property name
+   * @returns The material property
+   */
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> getKokkosMaterialProperty(const std::string & name)
   {
     return getKokkosGenericMaterialPropertyByName<T, dimension, 0>(getMaterialPropertyName(name));
   }
+  /**
+   * Get an old material property
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param name The property name or the parameter name containing the property name
+   * @returns The material property
+   */
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> getKokkosMaterialPropertyOld(const std::string & name)
   {
     return getKokkosGenericMaterialPropertyByName<T, dimension, 1>(getMaterialPropertyName(name));
   }
+  /**
+   * Get an older material property
+   * @tparam T The property data type
+   * @tparam dimension The property dimension
+   * @param name The property name or the parameter name containing the property name
+   * @returns The material property
+   */
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> getKokkosMaterialPropertyOlder(const std::string & name)
   {
@@ -281,23 +235,223 @@ protected:
       MaterialPropertyInterface::checkMaterialProperty(name, state);
   }
 
-protected:
-  const bool _bnd;
-  const bool _neighbor;
+  virtual bool isBoundaryMaterial() const override { return _bnd; }
+
+  virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override
+  {
+    return MaterialPropertyInterface::getMatPropDependencies();
+  }
 
   virtual const MaterialData & materialData() const override { return _material_data; }
   virtual MaterialData & materialData() override { return _material_data; }
   virtual Moose::MaterialDataType materialDataType() override { return _material_data_type; }
 
-private:
-  // Whether default initQpStatefulProperties is used
-  const bool _default_init;
+  /**
+   * Flag whether the material is on faces
+   */
+  const bool _bnd;
+  /**
+   * Flag whether the material is on neighbor faces
+   */
+  const bool _neighbor;
 
 private:
-  // Dummy members that should not be accessed by derived classes
+  /**
+   * Flag whether initQpStatefulProperties() was not defined in the derived class
+   */
+  const bool _default_init;
+
+  /**
+   * Dummy members unused for Kokkos materials
+   */
+  ///@{
   const QBase * const & _qrule;
   virtual const QBase & qRule() const override { return *_qrule; }
+  ///@}
 };
+
+template <typename Derived>
+void
+Material<Derived>::initStatefulProperties(unsigned int)
+{
+  if (_default_init)
+    return;
+
+  if (!_bnd && !_neighbor)
+  {
+    setVariableDependency();
+
+    ::Kokkos::parallel_for(
+        ::Kokkos::RangePolicy<ElementInit, ::Kokkos::IndexType<size_t>>(0, numElements()),
+        *static_cast<Derived *>(this));
+
+    setCacheFlags();
+  }
+  else if (_bnd && !_neighbor)
+    ::Kokkos::parallel_for(
+        ::Kokkos::RangePolicy<SideInit, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
+        *static_cast<Derived *>(this));
+  else
+    ::Kokkos::parallel_for(
+        ::Kokkos::RangePolicy<NeighborInit, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
+        *static_cast<Derived *>(this));
+
+  ::Kokkos::fence();
+}
+
+template <typename Derived>
+void
+Material<Derived>::computeProperties()
+{
+  if (!_bnd && !_neighbor)
+  {
+    setVariableDependency();
+
+    ::Kokkos::parallel_for(
+        ::Kokkos::RangePolicy<ElementCompute, ::Kokkos::IndexType<size_t>>(0, numElements()),
+        *static_cast<Derived *>(this));
+
+    setCacheFlags();
+  }
+  else if (_bnd && !_neighbor)
+    ::Kokkos::parallel_for(
+        ::Kokkos::RangePolicy<SideCompute, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
+        *static_cast<Derived *>(this));
+  else
+    ::Kokkos::parallel_for(
+        ::Kokkos::RangePolicy<NeighborCompute, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
+        *static_cast<Derived *>(this));
+
+  ::Kokkos::fence();
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Material<Derived>::operator()(ElementInit, const size_t tid) const
+{
+  auto material = static_cast<const Derived *>(this);
+  auto elem = elementID(tid);
+
+  Datum datum(elem, kokkosAssembly(), kokkosSystems());
+
+  for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+  {
+    datum.reinit(qp);
+
+    material->initQpStatefulProperties(qp, datum);
+  }
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Material<Derived>::operator()(SideInit, const size_t tid) const
+{
+  auto material = static_cast<const Derived *>(this);
+  auto elem = elementSideID(tid);
+
+  Datum datum(elem.first, elem.second, kokkosAssembly(), kokkosSystems());
+
+  for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+  {
+    datum.reinit(qp);
+
+    material->initQpStatefulProperties(qp, datum);
+  }
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Material<Derived>::operator()(NeighborInit, const size_t tid) const
+{
+  auto material = static_cast<const Derived *>(this);
+  auto elem = elementSideID(tid);
+
+  Datum datum(elem.first, elem.second, kokkosAssembly(), kokkosSystems());
+
+  if (datum.hasNeighbor())
+    for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+    {
+      datum.reinit(qp);
+
+      material->initQpStatefulProperties(qp, datum);
+    }
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Material<Derived>::operator()(ElementCompute, const size_t tid) const
+{
+  auto material = static_cast<const Derived *>(this);
+  auto elem = elementID(tid);
+
+  Datum datum(elem, kokkosAssembly(), kokkosSystems());
+
+  for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+  {
+    datum.reinit(qp);
+
+    material->computeQpProperties(qp, datum);
+  }
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Material<Derived>::operator()(SideCompute, const size_t tid) const
+{
+  auto material = static_cast<const Derived *>(this);
+  auto elem = elementSideID(tid);
+
+  Datum datum(elem.first, elem.second, kokkosAssembly(), kokkosSystems());
+
+  for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+  {
+    datum.reinit(qp);
+
+    material->computeQpProperties(qp, datum);
+  }
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION void
+Material<Derived>::operator()(NeighborCompute, const size_t tid) const
+{
+  auto material = static_cast<const Derived *>(this);
+  auto elem = elementSideID(tid);
+
+  Datum datum(elem.first, elem.second, kokkosAssembly(), kokkosSystems());
+
+  if (datum.hasNeighbor())
+    for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+    {
+      datum.reinit(qp);
+
+      material->computeQpProperties(qp, datum);
+    }
+}
+
+template <typename Derived>
+template <typename T, unsigned int dimension, unsigned int state>
+MaterialProperty<T, dimension>
+Material<Derived>::getKokkosGenericMaterialPropertyByName(const std::string & prop_name_in)
+{
+  MaterialBase::checkExecutionStage();
+
+  const auto prop_name =
+      _get_suffix.empty()
+          ? prop_name_in
+          : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
+
+  if constexpr (state == 0)
+    _requested_props.insert(prop_name);
+
+  auto prop =
+      MaterialPropertyInterface::getKokkosGenericMaterialPropertyByName<T, dimension, state>(
+          prop_name);
+
+  registerPropName(prop_name, true, state);
+
+  return prop;
+}
 
 } // namespace Kokkos
 } // namespace Moose
