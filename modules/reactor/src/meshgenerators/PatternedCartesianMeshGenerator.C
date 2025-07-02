@@ -743,14 +743,16 @@ PatternedCartesianMeshGenerator::generate()
             out_mesh->set_subdomain_name_map().insert(increment_subdomain_map.begin(),
                                                       increment_subdomain_map.end());
 
-            const auto stitching_boundary_id =
+            const auto stitching_boundary_id_base =
+                MooseMeshUtils::getBoundaryID(_stitching_boundary_name, *out_mesh);
+            const auto stitching_boundary_id_periph =
                 MooseMeshUtils::getBoundaryID(_stitching_boundary_name, *out_mesh);
 
             MeshTools::Modification::translate(
                 *tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
             out_mesh->stitch_meshes(*tmp_peripheral_mesh,
-                                    stitching_boundary_id,
-                                    stitching_boundary_id,
+                                    stitching_boundary_id_base,
+                                    stitching_boundary_id_periph,
                                     TOLERANCE,
                                     /*clear_stitched_boundary_ids=*/true,
                                     _verbose_stitching);
@@ -787,11 +789,13 @@ PatternedCartesianMeshGenerator::generate()
                             _interface_boundary_id_shift_pattern[i][j],
                             input_interface_boundary_ids[pattern]);
 
-      const auto stitching_boundary_id =
+      const auto stitching_boundary_id_1 =
           MooseMeshUtils::getBoundaryID(_stitching_boundary_name, *out_mesh);
+      const auto stitching_boundary_id_2 =
+          MooseMeshUtils::getBoundaryID(_stitching_boundary_name, pattern_mesh);
       out_mesh->stitch_meshes(pattern_mesh,
-                              stitching_boundary_id,
-                              stitching_boundary_id,
+                              stitching_boundary_id_1,
+                              stitching_boundary_id_2,
                               TOLERANCE,
                               /*clear_stitched_boundary_ids=*/false,
                               _verbose_stitching);
@@ -1089,12 +1093,8 @@ PatternedCartesianMeshGenerator::addPeripheralMesh(
 
       // rotate the peripheral mesh to the desired side of the hexagon.
       MeshTools::Modification::rotate(*meshp0, rotation_angle, 0, 0);
-      mesh.stitch_meshes(*meshp0,
-                         stitching_boundary_id,
-                         stitching_boundary_id,
-                         TOLERANCE,
-                         true,
-                         _verbose_stitching);
+      mesh.stitch_meshes(
+          *meshp0, stitching_boundary_id, OUTER_SIDESET_ID, TOLERANCE, true, _verbose_stitching);
       sub_positions_inner.resize(0);
       sub_d_positions_outer.resize(0);
     }
