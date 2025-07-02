@@ -4,12 +4,12 @@
 # Steady state subchannel calcultion
 # Thermal-hydraulics parameters
 ###################################################
-T_in = 624.70556 #Kelvin
+T_in = 616.4 #Kelvin
 Total_Surface_Area = 0.000854322 #m2
-Mass_In = 2.45 #kg/sec
+Mass_In = 2.427 #kg/sec
 mass_flux_in = '${fparse Mass_In / Total_Surface_Area}' #kg/m2
-P_out = 2.0e5 #Pa
-Power_initial = 486200 #W (Page 26,35 of ANL document)
+P_out = 2.0e5
+Power_initial = 379800 #W (Page 26,35 of ANL document)
 ###################################################
 # Geometric parameters
 ###################################################
@@ -160,7 +160,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     type = SCMTriPowerIC
     variable = q_prime
     power = ${Power_initial}
-    filename = "pin_power_profile61_uniform.txt"
+    filename = "pin_power_profile61.txt"
     axial_heat_rate = axial_heat_rate
   []
 
