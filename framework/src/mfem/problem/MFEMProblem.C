@@ -184,7 +184,6 @@ MFEMProblem::addGridFunction(const std::string & var_type,
                              InputParameters & parameters)
 {
 
-  std::cout << "GOT HERE" << std::endl;
   if (var_type == "MFEMVariable" || var_type == "MFEMComplexVariable")
   {
     // Add MFEM variable directly.

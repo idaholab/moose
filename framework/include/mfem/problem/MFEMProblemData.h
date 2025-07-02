@@ -43,6 +43,9 @@ public:
   Moose::MFEM::TimeDerivativeMap time_derivative_map;
   Moose::MFEM::ComplexGridFunctions complex_gridfunctions;
 
+  enum class NumericType{REAL, COMPLEX};
+
+  NumericType num_type;
   MPI_Comm comm;
   int myid;
   int num_procs;

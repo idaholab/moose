@@ -71,4 +71,5 @@
 [Executioner]
   type = MFEMSteady
   device = cpu
+  numeric_type = complex
 []
