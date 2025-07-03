@@ -129,12 +129,24 @@ ifeq ($(ENABLE_LIBTORCH),true)
     libmesh_LDFLAGS += -L$(LIBTORCH_DIR)/lib -ltorch
 
   else
-    filtered_goals := $(filter $(SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS),$(MAKECMDGOALS))
-    ifeq ($(words $(filtered_goals)), $(words $(MAKECMDGOALS)))
-      $(info Skipping libtorch error check for targets that don't involve compilation!)
+		# No libtorch library found
+
+    ifeq ($(strip $(MAKECMDGOALS)),)
+      # No explicit targets = assume default build
+      libtorch_should_error := true
     else
-      $(error ERROR! MOOSE was configured with libtorch but we cannot locate any dynamic libraries of libtorch. Make sure to install libtorch using the instructions provided here: https://mooseframework.inl.gov/getting_started/installation/install_libtorch.html !)
+      filtered_goals := $(filter $(SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS),$(MAKECMDGOALS))
+      ifneq ($(words $(filtered_goals)), $(words $(MAKECMDGOALS)))
+        libtorch_should_error := true
+      endif
     endif
+
+    ifeq ($(libtorch_should_error),true)
+      $(error ERROR! MOOSE was configured with libtorch but we cannot locate any dynamic libraries of libtorch. Make sure to install libtorch using the instructions provided here: https://mooseframework.inl.gov/getting_started/installation/install_libtorch.html !)
+    else
+      $(info Skipping libtorch error check for targets that don't involve compilation!)
+    endif
+
   endif
 endif
 
