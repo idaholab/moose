@@ -27,6 +27,7 @@ class System;
 class Vector
 {
 public:
+#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Default constructor
    */
@@ -40,7 +41,6 @@ public:
    */
   void destroy();
 
-#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get whether the vector was allocated
    * @returns Whether the vector was allocated
@@ -110,7 +110,9 @@ public:
   KOKKOS_FUNCTION void operator()(PackBuffer, const PetscCount tid) const;
   KOKKOS_FUNCTION void operator()(UnpackBuffer, const PetscCount tid) const;
   ///@}
-
+#else
+  // Instantiation of this class is not allowed outside the Kokkos compilation scope
+  Vector() = delete;
 #endif
 
 private:
