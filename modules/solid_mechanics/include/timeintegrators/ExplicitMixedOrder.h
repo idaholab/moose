@@ -12,6 +12,7 @@
 #include "TimeIntegrator.h"
 #include "MeshChangedInterface.h"
 #include "FEProblemBase.h"
+#define UNUSED(x) (void)(x)
 
 // Forward declarations
 namespace libMesh
@@ -43,6 +44,7 @@ public:
   virtual void postResidual(NumericVector<Number> & residual) override;
   virtual void solve() override;
   virtual void postSolve() override;
+
 
   void computeADTimeDerivatives(ADReal &, const dof_id_type &, ADReal &) const override
   {
@@ -122,6 +124,15 @@ protected:
 
   // local dofs that will have central difference time integration
   std::vector<dof_id_type> & _local_second_order_indices;
+
+  // /// for KKT approach phase-field only ///
+  // std::unordered_set<unsigned int> & _vars_d;
+  // std::vector<dof_id_type> & _local_d_indices;
+
+  /// Helper functions for phase-field
+  virtual void initPF(){}
+  virtual void upperboundCheck(){}
+  virtual void irreversibilityCheck(NumericVector<Number> *acceleration, NumericVector<Number> *velocity){UNUSED(acceleration);UNUSED(velocity);}
 
   /**
    * Helper function that actually does the math for computing the time derivative
