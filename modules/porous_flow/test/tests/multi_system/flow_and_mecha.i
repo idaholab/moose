@@ -9,7 +9,7 @@ PorousFlowDictatorName = 'dictator'
 [Problem]
   kernel_coverage_check = false
   material_coverage_check = false
-  nl_sys_names = 'solid_mech porous_flow'
+  nl_sys_names = 'porous_flow solid_mech'
 []
 
 [Mesh]
@@ -41,24 +41,6 @@ PorousFlowDictatorName = 'dictator'
   []
 []
 
-[AuxVariables]
-  [stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 'BaseMesh'
-  []
-  [stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 'BaseMesh'
-  []
-  [stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 'BaseMesh'
-  []
-[]
-
 [PorousFlowFullySaturated]
   coupling_type = HydroMechanical
   porepressure = porepressure
@@ -68,7 +50,6 @@ PorousFlowDictatorName = 'dictator'
   gravity = '0 0 0'
   add_darcy_aux = false
   dictator_name = ${PorousFlowDictatorName}
-  block = 'BaseMesh'
 []
 
 [Variables]
@@ -82,39 +63,25 @@ PorousFlowDictatorName = 'dictator'
     solver_sys = 'solid_mech'
   []
   [porepressure]
-    order = SECOND
     family = LAGRANGE
-    scaling = 1e-5
-    block = 'BaseMesh'
+    order = SECOND
     solver_sys = 'porous_flow'
   []
 []
 
-[ICs]
-  [porepressure]
-    type = FunctionIC
-    variable = porepressure
-    function = '2'
-    block = 'BaseMesh'
-  []
-[]
-
 [BCs]
-
   [fix_x]
     type = DirichletBC
     variable = disp_x
-    boundary = 'left right'
+    boundary = 'left right front'
     value = 0.0
   []
-
   [fix_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom top'
     value = 0.0
   []
-
   [fix_z]
     type = DirichletBC
     variable = disp_z
@@ -122,71 +89,54 @@ PorousFlowDictatorName = 'dictator'
     value = 0.0
   []
 
-  [porepressure_fix]
+  [porepressure_fix_left]
     type = DirichletBC
     variable = porepressure
-    boundary = 'left right bottom top'
-    value = 2.0
+    boundary = 'left top bottom'
+    value = 2
   []
-
-  [porepressure_Boundary]
-    type = FunctionDirichletBC
+  [porepressure_fix_right]
+    type = DirichletBC
     variable = porepressure
-    boundary = 'left'
-    function = porepressure_at_left
-  []
-[]
-
-[Functions]
-  [porepressure_at_left]
-    type = ParsedFunction
-    expression = '2 + max(0, min(1, t-0.25))'
+    boundary = 'right'
+    value = 1
   []
 []
 
 [FluidProperties]
   [simple_fluid]
     type = SimpleFluidProperties
-    bulk_modulus = 2E3
+    bulk_modulus = 2E5
     density0 = 1000
-    thermal_expansion = 0
-    viscosity = 9.0E-10
+    thermal_expansion = 1e-4
+    viscosity = 9.0E-4
   []
 []
 
 [Materials]
-
   [porosity_bulk]
     type = PorousFlowPorosityConst
-    porosity = 0.15
+    porosity = 0.3
     PorousFlowDictator = ${PorousFlowDictatorName}
   []
-
   [undrained_density_0]
     type = GenericConstantMaterial
     prop_names = density
     prop_values = 2500
   []
-
   [permeability_bulk]
     type = PorousFlowPermeabilityConst
-    block = 'BaseMesh'
     permeability = '1e-5 0 0 0 1e-5 0 0 0 1e-5'
     PorousFlowDictator = ${PorousFlowDictatorName}
   []
 
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    block = 'BaseMesh'
-    youngs_modulus = 2500
+    youngs_modulus = 2e5
     poissons_ratio = 0.15
   []
-
-  [stress]
-    type = ComputeMultipleInelasticStress
-    inelastic_models = ''
-    perform_finite_strain_rotations = false
-    tangent_operator = 'nonlinear'
+  [finite_strain_stress]
+    type = ComputeFiniteStrainElasticStress
   []
 []
 
@@ -205,38 +155,88 @@ PorousFlowDictatorName = 'dictator'
 
 [Executioner]
   type = Transient
-  solve_type = PJFNK
-
-  petsc_options = '-snes_converged_reason'
+  solve_type = NEWTON
 
   # best overall
+  petsc_options = '-snes_converged_reason'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = ' lu       mumps'
 
   line_search = none
 
-  nl_abs_tol = 1e-4
-  nl_rel_tol = 1e-6
+  nl_abs_tol = 5e-8
+  nl_rel_tol = 1e-8
 
   l_max_its = 20
-  nl_max_its = 8
+  nl_max_its = 12
 
   start_time = 0.0
-  end_time = 0.5
+  end_time = 1
   [TimeSteppers]
     [ConstantDT1]
       type = ConstantDT
       dt = 0.25
     []
   []
+[]
 
-  [Quadrature]
-    type = SIMPSON
-    order = SECOND
+[Postprocessors]
+  [p000]
+    type = PointValue
+    variable = porepressure
+    point = '0 0 0'
+    execute_on = 'initial timestep_end'
+  []
+  [p550]
+    type = PointValue
+    variable = porepressure
+    point = '5 5 0'
+    execute_on = 'initial timestep_end'
+  []
+  [p-551]
+    type = PointValue
+    variable = porepressure
+    point = '-5 -5 -1'
+    execute_on = 'initial timestep_end'
+  []
+  [x000]
+    type = PointValue
+    variable = disp_x
+    point = '0 0 0'
+    execute_on = 'initial timestep_end'
+  []
+  [x550]
+    type = PointValue
+    variable = disp_x
+    point = '5 5 0'
+    execute_on = 'initial timestep_end'
+  []
+  [x-551]
+    type = PointValue
+    variable = disp_x
+    point = '-5 -5 -1'
+    execute_on = 'initial timestep_end'
+  []
+  [z000]
+    type = PointValue
+    variable = disp_z
+    point = '0 0 0'
+    execute_on = 'initial timestep_end'
+  []
+  [z550]
+    type = PointValue
+    variable = disp_z
+    point = '5 5 0'
+    execute_on = 'initial timestep_end'
+  []
+  [z-551]
+    type = PointValue
+    variable = disp_z
+    point = '-5 -5 -1'
+    execute_on = 'initial timestep_end'
   []
 []
 
 [Outputs]
-  perf_graph = true
-  exodus = true
+  csv = true
 []
