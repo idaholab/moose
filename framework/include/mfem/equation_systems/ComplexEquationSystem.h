@@ -29,6 +29,7 @@ public:
   virtual void BuildEquationSystem() override;
   virtual void BuildLinearForms() override;
   virtual void BuildBilinearForms() override;
+  virtual void ApplyEssentialBCs() override;
 
 template <class FormType>
 void
