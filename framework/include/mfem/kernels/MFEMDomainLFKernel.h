@@ -24,7 +24,7 @@ public:
 
   MFEMDomainLFKernel(const InputParameters & parameters);
 
-  virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
+  virtual std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *> createLFIntegrator() override;
 
 protected:
   mfem::Coefficient & _coef;

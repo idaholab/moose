@@ -35,10 +35,12 @@ MFEMCurlCurlKernel::MFEMCurlCurlKernel(const InputParameters & parameters)
 {
 }
 
-mfem::BilinearFormIntegrator *
+std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMCurlCurlKernel::createBFIntegrator()
 {
-  return new mfem::CurlCurlIntegrator(_coef);
+  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
+  return std::make_pair(new mfem::CurlCurlIntegrator(_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
+                                                                                                  : new mfem::CurlCurlIntegrator(_coef));
 }
 
 #endif
