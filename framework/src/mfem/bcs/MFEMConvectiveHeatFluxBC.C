@@ -46,17 +46,21 @@ MFEMConvectiveHeatFluxBC::MFEMConvectiveHeatFluxBC(const InputParameters & param
 
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
-mfem::LinearFormIntegrator *
+std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
 MFEMConvectiveHeatFluxBC::createLFIntegrator()
 {
-  return new mfem::BoundaryLFIntegrator(_external_heat_flux_coef);
+  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
+  return std::make_pair(new mfem::BoundaryLFIntegrator(_external_heat_flux_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
+                                                                                                  : new mfem::BoundaryLFIntegrator(_external_heat_flux_coef));
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
-mfem::BilinearFormIntegrator *
+std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMConvectiveHeatFluxBC::createBFIntegrator()
 {
-  return new mfem::BoundaryMassIntegrator(_heat_transfer_coef);
+  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
+  return std::make_pair(new mfem::BoundaryMassIntegrator(_external_heat_flux_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
+                                                                                                  : new mfem::BoundaryMassIntegrator(_external_heat_flux_coef));
 }
 
 #endif

@@ -32,10 +32,12 @@ MFEMVectorFEDomainLFKernel::MFEMVectorFEDomainLFKernel(const InputParameters & p
 {
 }
 
-mfem::LinearFormIntegrator *
+std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
 MFEMVectorFEDomainLFKernel::createLFIntegrator()
 {
-  return new mfem::VectorFEDomainLFIntegrator(_vec_coef);
+  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
+  return std::make_pair(new mfem::VectorFEDomainLFIntegrator(_vec_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
+                                                                                                  : new mfem::VectorFEDomainLFIntegrator(_vec_coef));
 }
 
 #endif

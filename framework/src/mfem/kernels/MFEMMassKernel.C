@@ -32,10 +32,12 @@ MFEMMassKernel::MFEMMassKernel(const InputParameters & parameters)
 {
 }
 
-mfem::BilinearFormIntegrator *
+std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMMassKernel::createBFIntegrator()
 {
-  return new mfem::MassIntegrator(_coef);
+  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
+  return std::make_pair(new mfem::MassIntegrator(_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
+                                                                                                  : new mfem::MassIntegrator(_coef));
 }
 
 #endif

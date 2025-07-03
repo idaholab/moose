@@ -41,10 +41,12 @@ MFEMLinearElasticityKernel::MFEMLinearElasticityKernel(const InputParameters & p
 {
 }
 
-mfem::BilinearFormIntegrator *
+std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMLinearElasticityKernel::createBFIntegrator()
 {
-  return new mfem::ElasticityIntegrator(_lambda, _mu);
+  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
+  return std::make_pair(new mfem::ElasticityIntegrator(_lambda,_mu), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
+                                                                                                  : new mfem::ElasticityIntegrator(_lambda,_mu));
 }
 
 #endif
