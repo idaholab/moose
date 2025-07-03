@@ -15,16 +15,16 @@ InputParameters
 MFEMVectorDirichletBCBase::validParams()
 {
   InputParameters params = MFEMEssentialBC::validParams();
-  params.addRequiredParam<MFEMVectorCoefficientName>(
+  params.addParam<MFEMVectorCoefficientName>(
       "vector_coefficient",
+      "0. 0. 0.",
       "Vector coefficient specifying the values the variable takes on the boundary");
   return params;
 }
 
 MFEMVectorDirichletBCBase::MFEMVectorDirichletBCBase(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
-    _vec_coef_name(getParam<MFEMVectorCoefficientName>("vector_coefficient")),
-    _vec_coef(getVectorCoefficient(_vec_coef_name))
+    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
 {
 }
 

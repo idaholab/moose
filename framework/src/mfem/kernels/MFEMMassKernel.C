@@ -22,15 +22,14 @@ MFEMMassKernel::validParams()
                              "$(k u, v)_\\Omega$ "
                              "arising from the weak form of the mass operator "
                              "$ku$.");
-  params.addParam<MFEMScalarCoefficientName>("coefficient",
-                                             "Name of property for the mass coefficient k.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient", "1.", "Name of property for the mass coefficient k.");
   return params;
 }
 
 MFEMMassKernel::MFEMMassKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
-    _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
-    _coef(getScalarCoefficient(_coef_name))
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
 {
 }
 

@@ -22,17 +22,16 @@ MFEMDiffusionKernel::validParams()
                              "$(k\\vec\\nabla u, \\vec\\nabla v)_\\Omega$ "
                              "arising from the weak form of the Laplacian operator "
                              "$- \\vec\\nabla \\cdot \\left( k \\vec \\nabla u \\right)$.");
-  params.addParam<MFEMScalarCoefficientName>("coefficient",
-                                             "Name of property for diffusion coefficient k.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient", "1.", "Name of property for diffusion coefficient k.");
   return params;
 }
 
 MFEMDiffusionKernel::MFEMDiffusionKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
-    _coef_name(getParam<MFEMScalarCoefficientName>("coefficient")),
     // FIXME: The MFEM bilinear form can also handle vector and matrix
     // coefficients, so ideally we'd handle all three too.
-    _coef(getScalarCoefficient(_coef_name))
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
 {
 }
 

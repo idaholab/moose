@@ -12,9 +12,21 @@ vector parameter.
 Each input mesh, as specified in the
 [!param](/Mesh/XYZDelaunayGenerator/boundary) parameter and optionally
 in the [!param](/Mesh/XYZDelaunayGenerator/holes) parameter,
-can define a closed manifold of boundary triangles either by including
-Tri3 elements for each triangle or by including volume elements whose
-external faces comprise the boundary manifold.
+can define a closed manifold of boundary triangles.
+
+The [!param](/Mesh/XYZDelaunayGenerator/boundary) input mesh can either
+include 2D surface elements or 3D volume elements whose external faces
+comprise the boundary manifold. If the [!param](/Mesh/XYZDelaunayGenerator/boundary)
+input mesh contains volume elements with non-Tri3 surface sides or
+non-Tri3 surface elements, the elements (from the entire boundary input mesh) can be converted automatically by this
+mesh generator to ensure Tri-3 surface elements.
+
+The [!param](/Mesh/XYZDelaunayGenerator/holes) input mesh can contain
+either all 3D volume elements, or all 2D surface elements.
+If one of the [!param](/Mesh/XYZDelaunayGenerator/holes)
+meshes contains non-Tri3 surface elements, or volume elements with non-Tri3
+side elements on its external surface, the elements (from the entire holes) can be converted automatically by this
+mesh generator to ensure Tri-3 surface elements.
 
 If multiple disconnected manifolds exist in a boundary mesh, only the
 manifold enclosing the rest of the mesh is considered to be "the"
@@ -26,7 +38,14 @@ expansions of this class may allow such nodes to be retained as nodes
 in the output tetrahedralization.
 
 Using stitching options, meshes used as "holes" can subsequently be
-stitched into those portions of the output mesh.
+stitched into those portions of the output mesh. If a hole mesh contains
+volume elements with non-Tri3 surface sides, it cannot be stitched
+with the output mesh without modifications. 
+[!param](/Mesh/XYZDelaunayGenerator/convert_holes_for_stitching) needs to
+be set as `true` to allow the stitching of such hole meshes after modifications.
+
+!alert note
+In distributed mesh mode, the [!param](/Mesh/XYZDelaunayGenerator/boundary) input mesh is temporarily serialized when it is set to be stitched with at least one of the [!param](/Mesh/XYZDelaunayGenerator/holes) input meshes. Additionally, the [!param](/Mesh/XYZDelaunayGenerator/holes) input meshes are always temporarily serialized to ensure compatibility with required processing methods.
 
 Interior vertices can be adjusted after mesh generation using the
 [!param](/Mesh/XYZDelaunayGenerator/smooth_triangulation) parameter,

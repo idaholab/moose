@@ -16,7 +16,7 @@ End users should not usually need to interact with the
 `CoefficientManager` directly, instead defining `Functions` or
 `Materials`. Developers wanting to add new coefficients or properties
 to the MFEMProblem should do so using the `CoefficientManager::declareXXXCoefficient`
-method to create a global coefficient object or `CoefficientManager::declarXXXProperty`
+method to create a global coefficient object or `CoefficientManager::declareXXXProperty`
 method to create a material property with values limited to certain blocks of the domain.
 Coefficients (including piecewise material properties) can be retrieved with
 `getScalarCoefficient`, `getVectorCoefficient`, and/or

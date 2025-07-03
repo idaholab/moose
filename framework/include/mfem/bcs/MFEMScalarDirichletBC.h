@@ -22,7 +22,6 @@ public:
   void ApplyBC(mfem::GridFunction & gridfunc) override;
 
 protected:
-  const MFEMScalarCoefficientName & _coef_name;
   mfem::Coefficient & _coef;
 };
 

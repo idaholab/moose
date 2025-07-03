@@ -32,7 +32,6 @@
     type = MFEMVectorDirichletBC
     variable = displacement
     boundary = '1'
-    vector_coefficient = '0.0 0.0 0.0'
   []
   [pull_down]
     type = MFEMVectorBoundaryIntegratedBC
