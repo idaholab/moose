@@ -226,8 +226,6 @@ MooseVariableDataBase<OutputType>::matrixTagValue(TagID tag) const
 
   _need_matrix_tag_u[tag] = true;
 
-  // auto * linsys = dynamic_cast<LinearSystem *>(&_sys);
-  // std::cout << "My mx: " << &linsys->getSystemMatrix() << std::endl;
   if (_sys.hasMatrix(tag))
     return _matrix_tag_u[tag];
   else
@@ -561,12 +559,7 @@ MooseVariableDataBase<OutputType>::fetchDoFValues()
       _dof_values_dotdot_old.resize(n);
       _sys.solutionUDotDotOld()->get(_dof_indices, &_dof_values_dotdot_old[0]);
     }
-  }
-
-  std::cout << "In fetch dof values" << std::endl;
-  const auto tags = _subproblem.getVectorTags();
-  for (const auto & tag : tags)
-    std::cout << tag._name << " " << tag._id << std::endl;
+  };
 
   for (auto tag : _required_vector_tags)
     if (_need_vector_tag_u[tag] || _need_vector_tag_grad[tag] || _need_vector_tag_dof_u[tag])
@@ -574,7 +567,6 @@ MooseVariableDataBase<OutputType>::fetchDoFValues()
            _subproblem.safeAccessTaggedVectors()) ||
           _subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
       {
-        std::cout << "In checking vector tags" << std::endl;
         // tag is defined on problem but may not be used by a system
         // the grain tracker requires being able to read from solution vectors that we are also in
         // the process of writing :-/
@@ -591,10 +583,8 @@ MooseVariableDataBase<OutputType>::fetchDoFValues()
     auto & active_coupleable_matrix_tags =
         _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
 
-    std::cout << "matrix tags " << Moose::stringify(active_coupleable_matrix_tags) << std::endl;
     for (auto tag : active_coupleable_matrix_tags)
     {
-      std::cout << n << std::endl;
       _matrix_tags_dof_u[tag].resize(n);
       if (_need_matrix_tag_dof_u[tag] || _need_matrix_tag_u[tag])
         if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())

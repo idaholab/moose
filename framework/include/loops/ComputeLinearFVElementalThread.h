@@ -94,9 +94,13 @@ protected:
   /// This member variable is changed on a per-block basis.
   std::vector<LinearFVElementalKernel *> _fv_kernels;
 
-  /// Base query for objects with given vector/matrix tags. This will be used
+  /// Base query for objects with given vector tags. This will be used
   /// for reduced filtering based on blocks when we change subdomains.
-  TheWarehouse::Query _base_query;
+  TheWarehouse::Query _base_query_vectors;
+
+  /// Base query for objects with given matrix tags. This will be used
+  /// for reduced filtering based on blocks when we change subdomains.
+  TheWarehouse::Query _base_query_matrices;
 
 private:
   /// Boolean that is used to check if the kernels are ready to start contributing to

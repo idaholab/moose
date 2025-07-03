@@ -85,19 +85,29 @@ ComputeLinearFVFaceThread::join(const ComputeLinearFVFaceThread & /*y*/)
 void
 ComputeLinearFVFaceThread::setupSystemContributionObjects()
 {
-  // First of all, we will collect the vectors and matrices for the assigned tags
-  _base_query = _fe_problem.theWarehouse()
-                    .query()
-                    .template condition<AttribSysNum>(_system_number)
-                    .template condition<AttribSystem>("LinearFVFluxKernel")
-                    .template condition<AttribThread>(_tid)
-                    .template condition<AttribMatrixTags>(_matrix_tags)
-                    .template condition<AttribVectorTags>(_vector_tags);
+  // The reason why we need to grab vectors and matrices separately is that
+  // we want to grab a union instead of an intersection.
+  _base_query_vectors = _fe_problem.theWarehouse()
+                            .query()
+                            .template condition<AttribSysNum>(_system_number)
+                            .template condition<AttribSystem>("LinearFVFluxKernel")
+                            .template condition<AttribThread>(_tid)
+                            .template condition<AttribVectorTags>(_vector_tags);
+  std::vector<LinearFVFluxKernel *> kernels_after_vectors;
+  _base_query_vectors.queryInto(kernels_after_vectors);
 
-  // We fetch all the available objects and make sure they are linked to the right
-  // vectors and matrices
+  _base_query_matrices = _fe_problem.theWarehouse()
+                             .query()
+                             .template condition<AttribSysNum>(_system_number)
+                             .template condition<AttribSystem>("LinearFVFluxKernel")
+                             .template condition<AttribThread>(_tid)
+                             .template condition<AttribMatrixTags>(_matrix_tags);
+  std::vector<LinearFVFluxKernel *> kernels_after_matrices;
+  _base_query_matrices.queryInto(kernels_after_matrices);
+
+  // We fetch the union of the available objects
   std::vector<LinearFVFluxKernel *> kernels;
-  _base_query.queryInto(kernels);
+  MooseUtils::getUnion(kernels_after_vectors, kernels_after_matrices, kernels);
 
   // As a last step, we make sure the kernels know which vectors/matrices they need to contribute to
   for (auto & kernel : kernels)
@@ -117,15 +127,32 @@ ComputeLinearFVFaceThread::fetchBlockSystemContributionObjects()
 
   if (_subdomain != _old_subdomain)
   {
-    _base_query.condition<AttribSubdomains>(_subdomain).queryInto(_fv_flux_kernels_elem);
+    // The base query already has the other conditions, here we just filter based on subdomain ID
+    std::vector<LinearFVFluxKernel *> kernels_after_vector;
+    _base_query_vectors.template condition<AttribSubdomains>(_subdomain)
+        .queryInto(kernels_after_vector);
+    std::vector<LinearFVFluxKernel *> kernels_after_matrix;
+    _base_query_matrices.template condition<AttribSubdomains>(_subdomain)
+        .queryInto(kernels_after_matrix);
+
+    // We populate the list of kernels with the union of the two vectors
+    MooseUtils::getUnion(kernels_after_vector, kernels_after_matrix, _fv_flux_kernels_elem);
     _old_subdomain = _subdomain;
   }
   _fv_flux_kernels.insert(_fv_flux_kernels_elem.begin(), _fv_flux_kernels_elem.end());
 
   if (_neighbor_subdomain != _old_neighbor_subdomain)
   {
-    _base_query.condition<AttribSubdomains>(_neighbor_subdomain)
-        .queryInto(_fv_flux_kernels_neighbor);
+    // The base query already has the other conditions, here we just filter based on subdomain ID
+    std::vector<LinearFVFluxKernel *> kernels_after_vector;
+    _base_query_vectors.template condition<AttribSubdomains>(_neighbor_subdomain)
+        .queryInto(kernels_after_vector);
+    std::vector<LinearFVFluxKernel *> kernels_after_matrix;
+    _base_query_matrices.template condition<AttribSubdomains>(_neighbor_subdomain)
+        .queryInto(kernels_after_matrix);
+
+    // We populate the list of kernels with the union of the two vectors
+    MooseUtils::getUnion(kernels_after_vector, kernels_after_matrix, _fv_flux_kernels_neighbor);
     _old_neighbor_subdomain = _neighbor_subdomain;
   }
   _fv_flux_kernels.insert(_fv_flux_kernels_neighbor.begin(), _fv_flux_kernels_neighbor.end());
