@@ -24,8 +24,9 @@ public:
   /// Defaults to the name of the test variable labelling the weak form.
   virtual const std::string & getTrialVariableName() const { return _test_var_name; }
 
-  /// Apply the essential BC, overwritign the values of gridfunc on the boundary as desired.
+  // Apply the essential BC, overwriting the values of gridfunc on the boundary as desired.
   virtual void ApplyBC(mfem::GridFunction & gridfunc) = 0;
+  virtual void ApplyComplexBC(mfem::ComplexGridFunction & gridfunc) = 0;
 };
 
 #endif
