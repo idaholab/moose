@@ -10,6 +10,7 @@
 #ifdef MFEM_ENABLED
 
 #include "MFEMProblem.h"
+#include "MFEMInitialCondition.h"
 #include "MFEMVariable.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
@@ -506,6 +507,21 @@ MFEMProblem::addTransfer(const std::string & transfer_name,
     FEProblemBase::addUserObject(transfer_name, name, parameters);
   else
     FEProblemBase::addTransfer(transfer_name, name, parameters);
+}
+
+std::shared_ptr<mfem::ParGridFunction>
+MFEMProblem::getGridFunction(const std::string & name)
+{
+  return getUserObject<MFEMVariable>(name).getGridFunction();
+}
+
+void
+MFEMProblem::addInitialCondition(const std::string & ic_name,
+                                 const std::string & name,
+                                 InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(ic_name, name, parameters);
+  getUserObject<MFEMInitialCondition>(name); // error check
 }
 
 std::string
