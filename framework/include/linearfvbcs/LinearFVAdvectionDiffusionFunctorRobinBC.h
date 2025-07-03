@@ -38,8 +38,7 @@ public:
 
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
-  protected:
-
+protected:
   /// The functors for this BC (can be variable, function, etc)
   const Moose::Functor<Real> & _alpha;
   const Moose::Functor<Real> & _beta;

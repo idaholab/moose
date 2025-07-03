@@ -18,12 +18,12 @@ ny = 10
   [gmg]
     type = GeneratedMeshGenerator
     dim  = 2
-    nx   = ${fparse nx}
-    ny   = ${fparse ny}
-    xmin = ${fparse x1}
-    xmax = ${fparse x2}
-    ymin = ${fparse y1}
-    ymax = ${fparse y2}
+    nx   = ${nx}
+    ny   = ${ny}
+    xmin = ${x1}
+    xmax = ${x2}
+    ymin = ${y1}
+    ymax = ${y2}
   []
 []
 
@@ -42,7 +42,7 @@ ny = 10
 [Functions]
   [u_exact]
     type = ParsedFunction
-    expression = '(${fparse amp}*sin(x)*sin(y))'
+    expression = '(${amp}*sin(x)*sin(y))'
   []
   [source_fn]
     type = ParsedFunction
@@ -50,7 +50,7 @@ ny = 10
   []
   [gamma_fn]
     type = ParsedFunction
-    expression = '${fparse -amp*alpha}*cos(x)*sin(y) + ${fparse beta} * u_e'
+    expression = '${fparse -amp*alpha}*cos(x)*sin(y) + ${beta} * u_e'
     symbol_names = 'u_e'
     symbol_values = 'u_exact'
   []
@@ -60,7 +60,7 @@ ny = 10
   [diffusion]
     type = LinearFVDiffusion
     variable = u
-    diffusion_coeff = ${fparse k}
+    diffusion_coeff = ${k}
     use_nonorthogonal_correction = true
   []
   [source]
@@ -93,8 +93,8 @@ ny = 10
     type = LinearFVAdvectionDiffusionFunctorRobinBC
     variable = u
     boundary = "left"
-    alpha = ${fparse alpha}
-    beta  = ${fparse beta}
+    alpha = ${alpha}
+    beta  = ${beta}
     gamma = gamma_fn
   []
 []
@@ -117,16 +117,12 @@ ny = 10
     type = CSV
     execute_on = FINAL
   []
-  [exo]
-    type = Exodus
-    execute_on = FINAL
-  []
 []
 
 [Convergence]
   [linear]
     type = IterationCountConvergence
-    max_iterations = 10
+    max_iterations = 5
     converge_at_max_iterations = true
   []
 []
