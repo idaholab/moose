@@ -66,22 +66,6 @@ TransientBase::validParams()
                                 "The number of timesteps in a transient run");
   params.addParam<int>("n_startup_steps", 0, "The number of timesteps during startup");
 
-  params.addDeprecatedParam<bool>("trans_ss_check",
-                                  false,
-                                  "Whether or not to check for steady state conditions",
-                                  "Use steady_state_detection instead");
-  params.addDeprecatedParam<Real>("ss_check_tol",
-                                  1.0e-08,
-                                  "Whenever the relative residual changes by less "
-                                  "than this the solution will be considered to be "
-                                  "at steady state.",
-                                  "Use steady_state_tolerance instead");
-  params.addDeprecatedParam<Real>(
-      "ss_tmin",
-      0.0,
-      "Minimum amount of time to run before checking for steady state conditions.",
-      "Use steady_state_start_time instead");
-
   params.addParam<bool>(
       "steady_state_detection", false, "Whether or not to check for steady state conditions");
   params.addParam<Real>("steady_state_tolerance",
@@ -130,8 +114,8 @@ TransientBase::validParams()
       "steady_state_detection steady_state_tolerance steady_state_start_time check_aux",
       "Steady State Detection");
 
-  params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol "
-                              "ss_tmin abort_on_solve_fail timestep_tolerance use_multiapp_dt",
+  params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps "
+                              "abort_on_solve_fail timestep_tolerance use_multiapp_dt",
                               "Advanced");
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
@@ -171,19 +155,8 @@ TransientBase::TransientBase(const InputParameters & parameters)
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRecoverableData<Real>("target_time", -std::numeric_limits<Real>::max())),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
-    _solution_change_norm(declareRecoverableData<Real>("solution_change_norm", 0.0)),
     _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt"))
 {
-  // Handle deprecated parameters
-  if (!parameters.isParamSetByAddParam("trans_ss_check"))
-    _steady_state_detection = getParam<bool>("trans_ss_check");
-
-  if (!parameters.isParamSetByAddParam("ss_check_tol"))
-    _steady_state_tolerance = getParam<Real>("ss_check_tol");
-
-  if (!parameters.isParamSetByAddParam("ss_tmin"))
-    _steady_state_start_time = getParam<Real>("ss_tmin");
-
   _t_step = 0;
   _dt = 0;
   _next_interval_output_time = 0.0;
@@ -446,9 +419,6 @@ TransientBase::takeStep(Real input_dt)
 
   _time_stepper->postSolve();
 
-  _solution_change_norm =
-      relativeSolutionDifferenceNorm() / (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
-
   return;
 }
 
@@ -596,12 +566,6 @@ TransientBase::keepGoing()
           // Output last solve if not output previously by forcing it
           keep_going = false;
         }
-        else // keep going
-        {
-          // Print steady-state relative error norm
-          _console << "Steady-State Relative Differential Norm: " << _solution_change_norm
-                   << std::endl;
-        }
       }
 
       // Check for stop condition based upon number of simulation steps and/or solution end time:
@@ -650,9 +614,9 @@ TransientBase::setTargetTime(Real target_time)
 }
 
 Real
-TransientBase::getSolutionChangeNorm()
+TransientBase::computeSolutionChangeNorm() const
 {
-  return _solution_change_norm;
+  return relativeSolutionDifferenceNorm() / (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
 }
 
 void
@@ -762,35 +726,25 @@ TransientBase::convergedToSteadyState() const
 {
   bool converged;
 
+  Real norm = 0.0;
   if (_check_aux)
   {
-    // Get the relative change in the norm of each auxvariable
-    std::vector<Number> aux_soln_change_norms;
-    _aux.variableWiseRelativeSolutionDifferenceNorm(aux_soln_change_norms);
+    std::vector<Number> aux_var_change_norms;
+    _aux.variableWiseRelativeSolutionDifferenceNorm(aux_var_change_norms);
+    for (auto & aux_var_change_norm : aux_var_change_norms)
+      aux_var_change_norm /= (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
 
-    converged = true;
-    for (auto & norm_diff : aux_soln_change_norms)
-    {
-      // Normalize by timestep
-      norm_diff /= (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
-      if (norm_diff >= _steady_state_tolerance)
-      {
-        converged = false;
-        // No point in checking the rest of the auxvariables
-        break;
-      }
-    }
-
-    // This line is useful since _solution_change_norm will be printed
-    _solution_change_norm =
-        *std::max_element(aux_soln_change_norms.begin(), aux_soln_change_norms.end());
+    norm = *std::max_element(aux_var_change_norms.begin(), aux_var_change_norms.end());
   }
-
-  // If not using _check_aux, use relative change in norm from nonlinear system
-  else if (_solution_change_norm < _steady_state_tolerance)
-    converged = true;
   else
-    converged = false;
+    norm = computeSolutionChangeNorm();
+
+  _console << "Steady-State Relative Differential Norm: " << norm << std::endl;
+
+  if (norm < _steady_state_tolerance)
+    return true;
+  else
+    return false;
 
   return converged;
 }
