@@ -32,7 +32,7 @@ public:
   //! Call this with the parameters for the Estimator
   void AddEstimator(std::shared_ptr<MFEMEstimator> estimator) override;
   void SetUpAMR() override;
-  bool HRefine()  override;
+  bool HRefine() override;
   bool PRefine() override;
 
   ~EquationSystemProblemOperator() override = default;
