@@ -69,8 +69,6 @@ compute_linear_system(libMesh::EquationSystems & es, const std::string & system_
   auto & matrix = *(sys.linearImplicitSystem().matrix);
   auto & rhs = *(sys.linearImplicitSystem().rhs);
   p->computeLinearSystemSys(lin_sys, matrix, rhs);
-  rhs.print();
-  matrix.print();
 }
 }
 

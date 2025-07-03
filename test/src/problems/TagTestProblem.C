@@ -124,10 +124,11 @@ TagTestProblem::computeLinearSystemSys(LinearImplicitSystem & sys,
     else
       mooseError("Tag ", vtag, " does not exist");
 
+  for (const auto & tag : vector_tags)
+    linear_sys.associateVectorToTag(rhs, tag._id);
+
   std::set<TagID> selected_vtags;
   selectVectorTagsFromSystem(linear_sys, vector_tags, selected_vtags);
-
-  std::cout << " Selected vector tags: " << Moose::stringify(selected_vtags) << std::endl;
 
   std::map<TagName, TagID> matrix_tags;
   for (auto & mtag : _mtags)
@@ -136,20 +137,12 @@ TagTestProblem::computeLinearSystemSys(LinearImplicitSystem & sys,
     else
       mooseError("Tag ", mtag, " does not exist");
 
+  for (const auto & tag : matrix_tags)
+    linear_sys.associateMatrixToTag(system_matrix, tag.second);
+
   std::set<TagID> selected_mtags;
   selectMatrixTagsFromSystem(linear_sys, matrix_tags, selected_mtags);
 
-  if (selected_vtags.find(linear_sys.rightHandSideVectorTag()) != selected_vtags.end())
-    linear_sys.associateVectorToTag(rhs, linear_sys.rightHandSideVectorTag());
-  if (selected_mtags.size() > 0)
-    linear_sys.associateMatrixToTag(system_matrix, *selected_mtags.begin());
-
-  std::cout << " Selected matrix tags: " << Moose::stringify(selected_mtags) << std::endl;
-
-  computeLinearSystemTags(*(_current_linear_sys->currentSolution()),
-                          system_matrix,
-                          rhs,
-                          selected_vtags,
-                          selected_mtags,
-                          compute_gradients);
+  computeLinearSystemTags(
+      *(_current_linear_sys->currentSolution()), selected_vtags, selected_mtags, compute_gradients);
 }
