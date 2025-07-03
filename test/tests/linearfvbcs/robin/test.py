@@ -8,7 +8,7 @@ def run_spatial(*args, **kwargs):
 
 class TestDiffusion1DRobin(unittest.TestCase):
     def test(self):
-        df1 = run_spatial('diffusion-1d-robin.i', 6, file_base="diffusion-1d-robin_csv")
+        df1 = run_spatial('diffusion-1d-robin.i', 4, file_base="diffusion-1d-robin_csv")
         fig = mms.ConvergencePlot(xlabel='Element Size  ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
                  label='l2error',
@@ -24,7 +24,7 @@ class TestDiffusion1DRobin(unittest.TestCase):
 
 class TestAdvection1DRobin(unittest.TestCase):
     def test(self):
-        df1 = run_spatial('advection-1d-robin.i', 6, file_base="advection-1d-robin_csv")
+        df1 = run_spatial('advection-1d-robin.i', 4, file_base="advection-1d-robin_csv")
         fig = mms.ConvergencePlot(xlabel='Element Size  ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
                  label='l2error',
@@ -40,7 +40,7 @@ class TestAdvection1DRobin(unittest.TestCase):
 
 class TestDiffusion2DRobin(unittest.TestCase):
     def test(self):
-        df1 = run_spatial('diffusion-2d-robin.i', 6, file_base="diffusion-2d-robin_csv")
+        df1 = run_spatial('diffusion-2d-robin.i', 4, file_base="diffusion-2d-robin_csv")
         fig = mms.ConvergencePlot(xlabel='Element Size  ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
                  label='l2error',
@@ -56,7 +56,7 @@ class TestDiffusion2DRobin(unittest.TestCase):
 
 class TestAdvection2DRobin(unittest.TestCase):
     def test(self):
-        df1 = run_spatial('advection-2d-robin.i', 6, file_base="advection-2d-robin_csv")
+        df1 = run_spatial('advection-2d-robin.i', 4, file_base="advection-2d-robin_csv")
         fig = mms.ConvergencePlot(xlabel='Element Size  ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
                  label='l2error',
@@ -64,7 +64,7 @@ class TestAdvection2DRobin(unittest.TestCase):
                  markersize=8,
                  num_fitted_points=3,
                  slope_precision=1)
-        fig.save('2d-linear-fv-advection-robin-non-orthogonal.png')
+        fig.save('2d-linear-fv-advection-robin.png')
 
         for _,value in fig.label_to_slope.items():
             print("The current slope: ", value)
@@ -72,7 +72,7 @@ class TestAdvection2DRobin(unittest.TestCase):
 
 class TestDiffusion2DRobinNonOrthogonal(unittest.TestCase):
     def test(self):
-        df1 = run_spatial('diffusion-2d-robin.i', 6, "Mesh/gmg/elem_type=TRI3", file_base="diffusion-2d-robin_csv")
+        df1 = run_spatial('diffusion-2d-robin.i', 4, "Mesh/gmg/elem_type=TRI3", file_base="diffusion-2d-robin_csv")
         fig = mms.ConvergencePlot(xlabel='Element Size  ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
                  label='l2error',
@@ -88,7 +88,7 @@ class TestDiffusion2DRobinNonOrthogonal(unittest.TestCase):
 
 class TestAdvection2DRobinNonOrthogonal(unittest.TestCase):
     def test(self):
-        df1 = run_spatial('advection-2d-robin.i', 6, "Mesh/gmg/elem_type=TRI3", file_base="advection-2d-robin_csv")
+        df1 = run_spatial('advection-2d-robin.i', 4, "Mesh/gmg/elem_type=TRI3", file_base="advection-2d-robin_csv")
         fig = mms.ConvergencePlot(xlabel='Element Size  ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
                  label='l2error',
