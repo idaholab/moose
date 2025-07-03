@@ -60,7 +60,8 @@ EquationSystemProblemOperator::HRefine()
   }
   else
   {
-    mooseError("Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
+    mooseError(
+        "Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
   }
   return output;
 }
@@ -90,7 +91,8 @@ EquationSystemProblemOperator::PRefine()
 
   else
   {
-    mooseError("Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
+    mooseError(
+        "Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
   }
   return output;
 }
