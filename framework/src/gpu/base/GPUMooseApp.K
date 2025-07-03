@@ -8,8 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GPUHeader.h"
+#include "GPUMemoryPool.h"
 
 #include "MooseApp.h"
+
+std::unique_ptr<Moose::Kokkos::MemoryPool> _pool;
 
 void
 MooseApp::queryGPUs()
@@ -17,4 +20,22 @@ MooseApp::queryGPUs()
   unsigned int num_gpus = Kokkos::num_devices();
 
   _has_gpus = comm().verify(num_gpus > 0);
+}
+
+void
+MooseApp::allocateKokkosMemoryPool(size_t size, unsigned int ways) const
+{
+  _pool = std::make_unique<Moose::Kokkos::MemoryPool>(size, ways);
+}
+
+void
+MooseApp::deallocateKokkosMemoryPool() const
+{
+  _pool.reset();
+}
+
+const Moose::Kokkos::MemoryPool &
+MooseApp::getKokkosMemoryPool() const
+{
+  return *_pool;
 }
