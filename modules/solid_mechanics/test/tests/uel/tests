@@ -64,7 +64,7 @@
     requirement = "The system shall be able to solve a simple mechanics problem with small elastic "
                   "deformation with a triangular mesh using MOOSE capabilities."
     # Only test plugins in dbg and opt.
-    capabilities = 'method=dbg | method=opt'
+    capabilities = 'method=opt'
   []
   [small]
     type = Exodiff
@@ -73,8 +73,7 @@
     abs_zero = 5e-12
     requirement = "The system shall be able to solve a simple mechanics problem with small elastic "
                   "deformation with a triangular mesh using a UEL plugin."
-    # Only test plugins in dbg and opt.
-    capabilities = 'method=dbg | method=opt'
+    capabilities = 'method=opt'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
@@ -125,8 +124,7 @@
     exodiff = small_test_expanded_umat_out.e
     requirement = 'The Abaqus UMAT interface shall be able to yield the same results for a triangular element as a UEL routine that computes internal forces without calling a UMAT routine or an analogous UEL interface that calls a UMAT routine for computing the stress vector and the Jacobian.'
     abs_zero = 1e-12
-    # Only test plugins in dbg and opt.
-    capabilities = 'method=dbg | method=opt'
+    capabilities = 'method=opt'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
@@ -147,8 +145,7 @@
     exodiff = small_test_umat_states_fields_out.e
     requirement = 'The Abaqus UMAT interface shall be able to yield the same results for a triangular element that a UEL routine that computes internal forces, calling a UMAT routine, when the solution depends on system states and two external fields, including temperature.'
     abs_zero = 1e-12
-    # Only test plugins in dbg and opt.
-    capabilities = 'method=dbg | method=opt'
+    capabilities = 'method=opt'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
@@ -158,8 +155,7 @@
     exodiff = small_test_umat_states_fields_gradient_out.e
     requirement = 'The Abaqus UMAT interface shall be able to yield the same results for a triangular element that a UEL routine that computes internal forces, calling a UMAT routine, when the solution depends on system states and two external fields, including temperature, which vary significantly with space.'
     abs_zero = 1e-12
-    # Only test plugins in dbg and opt.
-    capabilities = 'method=dbg | method=opt'
+    capabilities = 'method=opt'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []

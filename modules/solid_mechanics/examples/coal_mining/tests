@@ -18,6 +18,7 @@
     type = 'CSVDiff'
     input = 'cosserat_elastic.i'
     csvdiff = 'cosserat_elastic.csv'
+    heavy = true
   [../]
   [./cosserat_wp_only_csv]
     type = 'CSVDiff'

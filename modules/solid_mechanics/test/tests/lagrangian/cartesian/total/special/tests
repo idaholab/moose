@@ -15,6 +15,7 @@
     requirement = "Stress state correctly rotates from step 10 to the final step"
     issues = '#17472'
     design = 'source/materials/lagrangian/ComputeLagrangianObjectiveStress.md'
+    capabilities = 'method!=dbg'
   []
   [truesdell]
     type = Exodiff

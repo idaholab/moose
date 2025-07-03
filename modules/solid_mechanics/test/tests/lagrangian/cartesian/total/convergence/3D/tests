@@ -7,6 +7,7 @@
     csvdiff = 'dirichlet_out.csv'
     requirement = "Quadratic convergence in 3D for DirichletBCs with the total Lagrangian "
                   "formulation, SMP matches FDP."
+    capabilities = 'method!=dbg'
   []
   [neumann]
     type = CSVDiff
@@ -14,5 +15,6 @@
     csvdiff = 'neumann_out.csv'
     requirement = "Quadratic convergence in 3D for NeumannBCs with the total Lagrangian formulation, "
                   "SMP matches FDP."
+    capabilities = 'method!=dbg'
   []
 []

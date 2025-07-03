@@ -10,6 +10,7 @@
                   'changing temperature'
     design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md'
+    capabilities = 'method!=dbg'
   []
   [thermal_eigenstrain_restart]
     type = 'CSVDiff'
@@ -24,6 +25,7 @@
                   'the simulation is restarted'
     design = '/ComputeMultipleCrystalPlasticityStress.md'
     prereq = 'thermal_eigenstrain'
+    capabilities = 'method!=dbg'
   []
   [multiple_eigenstrains]
     type = 'CSVDiff'
@@ -35,6 +37,7 @@
                   'individual eigenstrains'
     design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md'
+    capabilities = 'method!=dbg'
   []
   [thermal_eigenstrain_011orientation]
     type = 'CSVDiff'
@@ -51,6 +54,7 @@
                   'changing temperature under a 011 loading orientation'
     design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md'
+    capabilities = 'method!=dbg'
   []
   [hcp_thermal_eigenstrain]
     type = 'CSVDiff'
@@ -64,6 +68,7 @@
     design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md '
              '/CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md'
+    capabilities = 'method!=dbg'
   []
   [volumetric_eigenstrain_increase]
     type = 'CSVDiff'
@@ -78,6 +83,7 @@
     design = '/ComputeCrystalPlasticityVolumetricEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md '
              '/CrystalPlasticityKalidindiUpdate.md'
+    capabilities = 'method!=dbg'
   []
   [volumetric_eigenstrain_increase_restart]
     type = 'CSVDiff'
@@ -91,6 +97,7 @@
                   'upon simulation restart.'
     design = '/ComputeCrystalPlasticityVolumetricEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md'
+    capabilities = 'method!=dbg'
   []
   [hcp_volumetric_eigenstrain_decrease]
     type = 'CSVDiff'
@@ -104,6 +111,7 @@
     design = '/ComputeCrystalPlasticityVolumetricEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md '
              '/CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md'
+    capabilities = 'method!=dbg'
   []
   [volumetric_eigenstrain_parabolic]
     type = 'CSVDiff'
@@ -118,6 +126,7 @@
     design = '/ComputeCrystalPlasticityVolumetricEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md '
              '/CrystalPlasticityKalidindiUpdate.md'
+    capabilities = 'method!=dbg'
   []
   [volumetric_eigenstrain_density_check]
     type = 'RunException'
