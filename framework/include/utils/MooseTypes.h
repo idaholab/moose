@@ -1195,9 +1195,9 @@ DerivativeStringClass(CLIArgString, Moose::DerivativeStringAllowSpaces);
  * Coefficients used in input for MFEM residual objects
  */
 ///@{
-DerivativeStringClass(MFEMScalarCoefficientName);
-DerivativeStringClass(MFEMVectorCoefficientName);
-DerivativeStringClass(MFEMMatrixCoefficientName);
+DerivativeStringClass(MFEMScalarCoefficientName, Moose::DerivativeStringAllowSpaces);
+DerivativeStringClass(MFEMVectorCoefficientName, Moose::DerivativeStringAllowSpaces);
+DerivativeStringClass(MFEMMatrixCoefficientName, Moose::DerivativeStringAllowSpaces);
 ///@}
 #endif
 
