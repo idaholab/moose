@@ -61,13 +61,13 @@ Mesh::initMap()
       _maps->_subdomain_elem_ids[subdomain].insert(eid);
 
       for (const auto & node : elem->node_ref_range())
-        if (node.processor_id() == _mesh.processor_id())
-        {
-          if (!_maps->_local_node_id_mapping.count(&node))
-            _maps->_local_node_id_mapping[&node] = _maps->_local_node_id_mapping.size();
+      {
+        if (!_maps->_local_node_id_mapping.count(&node))
+          _maps->_local_node_id_mapping[&node] = _maps->_local_node_id_mapping.size();
 
+        if (node.processor_id() == _mesh.processor_id())
           _maps->_subdomain_node_ids[subdomain].insert(_maps->_local_node_id_mapping[&node]);
-        }
+      }
     }
   }
 }
