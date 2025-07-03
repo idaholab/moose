@@ -83,6 +83,16 @@ namespace hit
 class Node;
 }
 
+#ifdef MOOSE_HAVE_KOKKOS
+namespace Moose
+{
+namespace Kokkos
+{
+class MemoryPool;
+}
+}
+#endif
+
 /**
  * Base class for MOOSE-based applications
  *
@@ -1588,27 +1598,56 @@ private:
   friend class Restartable;
   friend class SubProblem;
 
-  /**
-   * GPU-related variables and methods
-   */
 public:
-  /// Return whether GPUs exist
+  /**
+   * Get whether every process has an associated GPU
+   * @returns Whether every process has an associated GPU
+   */
   bool hasGPUs() const { return _has_gpus; }
 
-  /// Return whether Kokkos objects added by actions exist
+  /**
+   * Get whether there is any Kokkos object added by actions
+   * @returns Whether there is any Kokkos object added by actions
+   */
   bool hasKokkosObjects() const { return _has_kokkos_objects; }
 
+#ifdef MOOSE_HAVE_KOKKOS
+  /**
+   * Allocate Kokkos memory pool
+   * @param size The memory pool size in the number of bytes
+   * @param ways The number of parallel ways
+   */
+  void allocateKokkosMemoryPool(size_t size, unsigned int ways) const;
+
+  /**
+   * Get Kokkos memory pool
+   * @returns The Kokkos memory pool
+   */
+  const Moose::Kokkos::MemoryPool & getKokkosMemoryPool() const;
+#endif
+
 private:
-  /// Whether GPUs exist
+#ifdef MOOSE_HAVE_KOKKOS
+  /**
+   * Query the GPUs in the system and check whether every process has an associated GPU
+   */
+  void queryGPUs();
+
+  /**
+   * Deallocate Kokkos memory pool
+   */
+  void deallocateKokkosMemoryPool() const;
+#endif
+
+  /**
+   * Flag whether every process has an associated GPU
+   */
   bool _has_gpus = false;
 
-  /// Whether we have any Kokkos object added by actions
+  /**
+   * Flag whether there is any Kokkos object added by actions
+   */
   bool _has_kokkos_objects = false;
-
-#ifdef MOOSE_HAVE_KOKKOS
-  /// Query whether GPUs exist
-  void queryGPUs();
-#endif
 };
 
 template <class T>
