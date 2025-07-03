@@ -666,13 +666,10 @@ FEProblemBase::createTagVectors()
 
   // add matrices and their tags
   auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
-  std::cout << "Creating vector tags" << std::endl;
   for (const auto sys_num : index_range(matrices))
     for (auto & matrix : matrices[sys_num])
     {
-      std::cout << _solver_systems[sys_num]->name() << std::endl;
       auto tag = addMatrixTag(matrix);
-      std::cout << tag << std::endl;
       _solver_systems[sys_num]->addMatrix(tag);
     }
 }
@@ -7461,6 +7458,9 @@ FEProblemBase::computeLinearSystemSys(LinearImplicitSystem & sys,
 
   setCurrentLinearSystem(linearSysNum(sys.name()));
 
+  _current_linear_sys->associateVectorToTag(rhs, _current_linear_sys->rightHandSideVectorTag());
+  _current_linear_sys->associateMatrixToTag(system_matrix, _current_linear_sys->systemMatrixTag());
+
   // We are using the residual tag system for right hand sides so we fetch everything
   const auto & vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
@@ -7470,17 +7470,23 @@ FEProblemBase::computeLinearSystemSys(LinearImplicitSystem & sys,
   selectMatrixTagsFromSystem(*_current_linear_sys, getMatrixTags(), _linear_matrix_tags);
 
   computeLinearSystemTags(*(_current_linear_sys->currentSolution()),
-                          system_matrix,
-                          rhs,
                           _linear_vector_tags,
                           _linear_matrix_tags,
                           compute_gradients);
+
+  _current_linear_sys->disassociateMatrixFromTag(system_matrix,
+                                                 _current_linear_sys->systemMatrixTag());
+  _current_linear_sys->disassociateVectorFromTag(rhs,
+                                                 _current_linear_sys->rightHandSideVectorTag());
+  // We reset the tags to the default containers for further operations
+  _current_linear_sys->associateVectorToTag(_current_linear_sys->getRightHandSideVector(),
+                                            _current_linear_sys->rightHandSideVectorTag());
+  _current_linear_sys->associateMatrixToTag(_current_linear_sys->getSystemMatrix(),
+                                            _current_linear_sys->systemMatrixTag());
 }
 
 void
 FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
-                                       SparseMatrix<Number> & system_matrix,
-                                       NumericVector<Number> & rhs,
                                        const std::set<TagID> & vector_tags,
                                        const std::set<TagID> & matrix_tags,
                                        const bool compute_gradients)
@@ -7489,12 +7495,8 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   _current_linear_sys->setSolution(soln);
 
-  _current_linear_sys->associateVectorToTag(rhs, _current_linear_sys->rightHandSideVectorTag());
-  _current_linear_sys->associateMatrixToTag(system_matrix, _current_linear_sys->systemMatrixTag());
-
-  for (const auto tag : matrix_tags)
+  for (auto tag : matrix_tags)
   {
-    _current_linear_sys->associateMatrixToTag(system_matrix, tag);
     auto & matrix = _current_linear_sys->getMatrix(tag);
     matrix.zero();
   }
@@ -7541,27 +7543,14 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   _app.getOutputWarehouse().jacobianSetup();
 
-  _safe_access_tagged_vectors = false;
-  _safe_access_tagged_matrices = false;
-
   _current_linear_sys->computeLinearSystemTags(vector_tags, matrix_tags, compute_gradients);
-
-  // We break the connection of the general RHS/system and the custom vectors,
-  // and reset the tags to the general RHS/MX vectors for the given system.
-  _current_linear_sys->disassociateMatrixFromTag(system_matrix,
-                                                 _current_linear_sys->systemMatrixTag());
-  _current_linear_sys->disassociateVectorFromTag(rhs,
-                                                 _current_linear_sys->rightHandSideVectorTag());
-  _current_linear_sys->associateVectorToTag(_current_linear_sys->getRightHandSideVector(),
-                                            _current_linear_sys->rightHandSideVectorTag());
-  _current_linear_sys->associateMatrixToTag(_current_linear_sys->getSystemMatrix(),
-                                            _current_linear_sys->systemMatrixTag());
-
-  _safe_access_tagged_vectors = true;
-  _safe_access_tagged_matrices = true;
 
   // Reset execution flag as after this point we are no longer on LINEAR
   _current_execute_on_flag = EXEC_NONE;
+
+  // These are the relevant parts of resetState()
+  _safe_access_tagged_vectors = true;
+  _safe_access_tagged_matrices = true;
 }
 
 void

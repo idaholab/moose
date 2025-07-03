@@ -628,30 +628,24 @@ relativeFuzzyLessThan(const T & var1,
 }
 
 /**
- * Function which takes the intersection of \p vector1 and \p vector2 and copies them
- * to \p common while removing the intersection from the original vectors. Depending on
- * the data type this can be very expensive!
+ * Function which takes the union of \p vector1 and \p vector2 and copies them
+ * to \p common Depending on the data type this can be very expensive!
  */
 template <typename T>
 void
-removeCommonSet(std::vector<T> & vector1, std::vector<T> & vector2, std::unordered_set<T> & common)
+getUnion(const std::vector<T> & vector1, const std::vector<T> & vector2, std::vector<T> & common)
 {
-  // Build lookup set from vector1, this should speed up lookups if the vector is long.
-  std::unordered_set<T> set_v1(vector1.begin(), vector1.end());
+  std::unordered_set<T> unique_elements;
+  unique_elements.reserve(vector1.size() + vector2.size());
 
-  // We will collect the common elements into a set (which will speed up the deletion later)
+  for (const T & entry : vector1)
+    unique_elements.insert(entry);
+  for (const T & entry : vector2)
+    unique_elements.insert(entry);
+
+  // Now populate the common vector with the union
   common.clear();
-  for (const auto entry : vector2)
-    if (set_v1.count(entry))
-      common.insert(entry);
-
-  // We remove common elements from the original vectors
-  vector1.erase(
-      std::remove_if(vector1.begin(), vector1.end(), [&](const T & k) { return common.count(k); }),
-      vector1.end());
-  vector2.erase(
-      std::remove_if(vector2.begin(), vector2.end(), [&](const T & k) { return common.count(k); }),
-      vector2.end());
+  common.assign(unique_elements.begin(), unique_elements.end());
 }
 
 /**
