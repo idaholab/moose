@@ -32,6 +32,35 @@ This optimization reporter performs the same type of optimization as [Optimizati
 !alert warning
 The mesh created +must+ be replicated. Ensure this by having `Mesh/parallel_type=REPLICATED` when creating the mesh.
 
+## L2 Gradient Regularization
+
+`ParameterMeshOptimization` supports L2 gradient regularization to enforce smoothness in parameter fields. This regularization adds a penalty term to the objective function:
+
+\begin{equation}
+J_{total} = J_{data} + \alpha \int_{\Omega} |\nabla p|^2 \, d\Omega
+\end{equation}
+
+where:
+
+- $J_{data}$ is the data misfit objective
+- $\alpha$ is the regularization coefficient ([!param](/OptimizationReporter/ParameterMeshOptimization/gradient_l2_coeff))
+- $p$ is the parameter field
+- $\Omega$ is the parameter mesh domain
+
+The gradient of this regularization term is:
+
+\begin{equation}
+\frac{\partial}{\partial p} \left( \alpha \int_{\Omega} |\nabla p|^2 \, d\Omega \right) = 2\alpha \left(\int_{\Omega}\nabla p, d\Omega \right)
+\end{equation}
+
+This regularization:
+
+- Enforces spatial smoothness in parameter distributions
+- Prevents oscillatory parameter solutions
+
+To enable L2 gradient regularization, set [!param](/OptimizationReporter/ParameterMeshOptimization/gradient_l2_coeff) to a positive value. The strength of regularization increases with larger coefficient values.
+
+
 ## Example Input File Syntax
 
 The first step in doing mesh-based inverse optimization is creating the parameter mesh. The easiest way of doing this is defining the mesh in a separate input file and run it with `--mesh-only` on command-line. The input below creates a two-by-two mesh outputted to exodus as `parameter_mesh_in.e`:
