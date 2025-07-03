@@ -19,7 +19,7 @@
     [mixed_order_with_damping]
       type = Exodiff
       input = mms_mixed_order.i
-      output = mms_mixed_order_out.e
+      exodiff = mms_mixed_order_out.e
       detail = "systems with both second and first order time derivatioves for 1 variable (mass and damping)"
     []
   []

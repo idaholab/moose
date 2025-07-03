@@ -86,20 +86,20 @@ dt_and_v0 = 0.00001
   []
 []
 
-[VectorPostprocessors]
-  [u]
-    type = NodalValueSampler
-    variable = u
-    sort_by = id
-    outputs = csv
-  []
-  [u_exact]
-    type = NodalValueSampler
-    variable = u_exact
-    sort_by = id
-    outputs = csv
-  []
-[]
+# [VectorPostprocessors]
+#   [u]
+#     type = NodalValueSampler
+#     variable = u
+#     sort_by = id
+#     outputs = csv
+#   []
+#   [u_exact]
+#     type = NodalValueSampler
+#     variable = u_exact
+#     sort_by = id
+#     outputs = csv
+#   []
+# []
 
 [Executioner]
   type = Transient

@@ -94,10 +94,6 @@ ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
     _vars_second(declareRestartableData<std::unordered_set<unsigned int>>("second_order_vars")),
     _local_second_order_indices(
         declareRestartableData<std::vector<dof_id_type>>("second_local_indices"))
-    // _vars_d(declareRestartableData<std::unordered_set<unsigned int>>(
-    //     "phase_field")), // for KKT approach phase-field only
-    // _local_d_indices(    // for KKT approach phase-field only
-    //     declareRestartableData<std::vector<dof_id_type>>("local_phase_field_indices"))
 {
   _fe_problem.setUDotRequested(true);
   _fe_problem.setUDotOldRequested(true);
@@ -192,29 +188,8 @@ ExplicitMixedOrder::init()
                std::back_inserter(_local_second_order_indices));
   }
 
-  /// for KKT approach phase-field only ///
+  // For phase-field initialization
   initPF();
-  // const auto & var_names_d = getParam<std::vector<VariableName>>("phase_field");
-  // std::unordered_set<unsigned int> var_nums_d(var_num_vec.begin(), var_num_vec.end());
-  // for (const auto & var_name : var_names_d)
-  //   if (lm_sys.has_variable(var_name))
-  //   {
-  //     const auto var_num = lm_sys.variable_number(var_name);
-  //     _vars_d.insert(var_num);
-  //     var_nums_d.erase(var_num);
-  //   }
-  // std::vector<dof_id_type> var_d_indices, d_vec;
-  // for (const auto var_num : _vars_d)
-  // {
-  //   d_vec = _local_d_indices;
-  //   _local_d_indices.clear();
-  //   lm_sys.get_dof_map().local_variable_indices(var_d_indices, lm_sys.get_mesh(), var_num);
-  //   std::merge(d_vec.begin(),
-  //              d_vec.end(),
-  //              var_d_indices.begin(),
-  //              var_d_indices.end(),
-  //              std::back_inserter(_local_d_indices));
-  // }
 }
 
 void
@@ -317,17 +292,8 @@ ExplicitMixedOrder::solve()
   *_nonlinear_implicit_system->solution = _nl->solutionOld();
   *_nonlinear_implicit_system->solution += *_solution_update;
 
-  // Clip the solution to be <=1
+  // For phase-field, clip the solution to be <=1
   upperboundCheck();
-  // auto & nlSol = *_nonlinear_implicit_system->solution;
-  // auto nlSol_d = nlSol.get_subvector(_local_d_indices);
-  // for (auto i = nlSol_d->first_local_index(); i < nlSol_d->last_local_index(); ++i)
-  // {
-  //   if ((*nlSol_d)(i) > 1.0)
-  //     nlSol_d->set(i, 1.0);
-  // }
-  // nlSol.restore_subvector(std::move(nlSol_d), _local_d_indices);
-  // nlSol.close();
 
   _nonlinear_implicit_system->update();
   _nl->setSolution(*_nonlinear_implicit_system->current_local_solution);
@@ -400,24 +366,10 @@ ExplicitMixedOrder::centralDifference()
 
   // close the vectors
   accel->restore_subvector(std::move(a), _local_second_order_indices);
-  // accel->close();
   vel->restore_subvector(std::move(vn), _local_second_order_indices);
-  // vel->close();
 
-  /// for KKT approach phase-field only ///
+  // For phase-field, ensure the irreversibility
   irreversibilityCheck(accel, vel);
-  // auto accel_d = accel->get_subvector(_local_d_indices);
-  // auto vel_d = vel->get_subvector(_local_d_indices);
-  // for (auto i = vel_d->first_local_index(); i < vel_d->last_local_index(); ++i)
-  // {
-  //   if ((*vel_d)(i) < 0.0)
-  //   {
-  //     accel_d->set(i, (*accel_d)(i) - (*vel_d)(i) * 2 / (_dt + _dt_old));
-  //     vel_d->set(i, 0.0);
-  //   }
-  // }
-  // accel->restore_subvector(std::move(accel_d), _local_d_indices);
-  // vel->restore_subvector(std::move(vel_d), _local_d_indices);
 
   accel->close();
   vel->close();

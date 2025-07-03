@@ -59,7 +59,6 @@ private:
    * Initialize the lumped mass matrix.
    * @return lumped mass matrix vector
    */
-  // const NumericVector<Number> & initLumpedMass();
 
   /// Initialize the lumped matrix for ExplicitMixedOrder
   const NumericVector<Number> & initMassLumped();
