@@ -33,6 +33,13 @@
   numeric_type = real
 []
 
+[Kernels]
+  [diff]
+    type = MFEMDiffusionKernel
+    variable = concentration
+    coefficient = 1.0
+  []
+[]
 
 
 
@@ -54,13 +61,6 @@
   []
 []
 
-[Kernels]
-  [diff]
-    type = MFEMDiffusionKernel
-    variable = concentration
-    coefficient = 1.0
-  []
-[]
 
 [Preconditioner]
   [jacobi]
