@@ -244,7 +244,7 @@ gtest_INCLUDE := -I$(gtest_DIR)
 moose_config := $(FRAMEWORK_DIR)/include/base/MooseConfig.h
 moose_default_config := $(FRAMEWORK_DIR)/include/base/MooseDefaultConfig.h
 
-$(moose_config): | prebuild
+$(moose_config):
 	@echo "Copying default MOOSE configuration to: "$@"..."
 	@cp $(moose_default_config) $(moose_config)
 
@@ -475,7 +475,8 @@ wasp_submodule_status:
 # if things like conda packages are out of date. The "-" in "@-" means that
 # it is allowed to not exit 0. "::" means that the rule can be appended by
 # applications that require prebuild steps.
-prebuild::
+prebuild = prebuild
+prebuild:: | $(moose_config)
 	@-python3 $(FRAMEWORK_DIR)/../scripts/premake.py
 
 wasp_submodule_status $(moose_revision_header) $(moose_LIB): | prebuild
