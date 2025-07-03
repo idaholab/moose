@@ -1203,12 +1203,12 @@ public:
   void computeFiniteVolumeCoords() const;
 
   /**
-   * Set whether this mesh is displaced
+   * Set whether this mesh is a displaced mesh
    */
   void isDisplaced(bool is_displaced) { _is_displaced = is_displaced; }
 
   /**
-   * whether this mesh is displaced
+   * whether this mesh is a displaced mesh
    */
   bool isDisplaced() const { return _is_displaced; }
 

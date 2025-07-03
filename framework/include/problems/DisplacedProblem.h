@@ -12,6 +12,7 @@
 #include "SubProblem.h"
 #include "DisplacedSystem.h"
 #include "GeometricSearchData.h"
+#include "ThreadedNodeLoop.h"
 
 // libMesh
 #include "libmesh/equation_systems.h"
@@ -402,6 +403,62 @@ protected:
   std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
 
   GeometricSearchData _geometric_search_data;
+
+  class UpdateDisplacedMeshThread : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>
+  {
+  public:
+    UpdateDisplacedMeshThread(FEProblemBase & fe_problem, DisplacedProblem & displaced_problem);
+
+    UpdateDisplacedMeshThread(UpdateDisplacedMeshThread & x, Threads::split split);
+
+    virtual void onNode(NodeRange::const_iterator & nd) override;
+
+    void join(const UpdateDisplacedMeshThread & y)
+    {
+      if (y._has_displacement)
+        _has_displacement = true;
+    }
+
+    /**
+     * Whether the displaced mesh is modified by the latest call to operator()
+     */
+    bool hasDisplacement()
+    {
+      mooseAssert(!Threads::in_threads,
+                  "This function requires a MPI all-gathering operation that cannot be in a "
+                  "threaded scope.");
+      _ref_mesh.comm().max(_has_displacement);
+      return _has_displacement;
+    }
+
+  protected:
+    void init();
+
+    /// Diplaced problem
+    DisplacedProblem & _displaced_problem;
+    /// Original mesh
+    MooseMesh & _ref_mesh;
+    /// Solution vectors of the nonlinear systems on the displaced problem
+    const std::vector<const NumericVector<Number> *> & _nl_soln;
+    /// Solution vector of the auxliary system on the displaced problem
+    const NumericVector<Number> & _aux_soln;
+
+    // Solution vectors with expanded ghosting, for ReplicatedMesh or
+    // for DistributedMesh cases where the standard algebraic ghosting
+    // doesn't reach as far as the geometric ghosting
+    std::map<unsigned int,
+             std::pair<const NumericVector<Number> *, std::shared_ptr<NumericVector<Number>>>>
+        _sys_to_nonghost_and_ghost_soln;
+
+  private:
+    /// To locate the system numbers, variable numbers of all displacement variables
+    std::map<unsigned int, std::pair<std::vector<unsigned int>, std::vector<unsigned int>>>
+        _sys_to_var_num_and_direction;
+
+    /// A flag to be set by operator() for indicating whether the displaced mesh is
+    /// indeed modified
+    bool _has_displacement;
+  };
 
 private:
   virtual std::pair<bool, unsigned int>

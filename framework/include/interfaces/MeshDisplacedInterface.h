@@ -14,22 +14,22 @@ class FEProblemBase;
 class InputParameters;
 
 /**
- * Interface for notifications that the mesh has changed.
+ * Interface for objects acting when the mesh has been displaced
  */
-class MeshChangedInterface
+class MeshDisplacedInterface
 {
 public:
   static InputParameters validParams();
 
-  MeshChangedInterface(const InputParameters & params);
-  virtual ~MeshChangedInterface() = default;
+  MeshDisplacedInterface(const InputParameters & params);
+  virtual ~MeshDisplacedInterface() = default;
 
   /**
-   * Called on this object when the mesh changes
+   * Called on this object when the displaced mesh gets updated
    */
-  virtual void meshChanged() {}
+  virtual void meshDisplaced() {}
 
 protected:
   /// Reference to FEProblemBase instance
-  FEProblemBase & _mci_feproblem;
+  FEProblemBase & _mdi_feproblem;
 };
