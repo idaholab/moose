@@ -100,33 +100,32 @@ AddVariableAction::init()
   // be populated. So we should apply the parameters directly from the action. There should be no
   // case in which both params objects get set by the user and they have different values
 
-  if (_pars.isParamSetByUser("family") && _moose_object_pars.isParamSetByUser("family") &&
-      !_pars.get<MooseEnum>("family").compareCurrent(_moose_object_pars.get<MooseEnum>("family")))
+  if (isParamSetByUser("family") && _moose_object_pars.isParamSetByUser("family") &&
+      !getParam<MooseEnum>("family").compareCurrent(_moose_object_pars.get<MooseEnum>("family")))
     mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
                "`family` parameter set, and they are different values: ",
                _moose_object_pars.get<MooseEnum>("family"),
                " and ",
-               _pars.get<MooseEnum>("family"),
+               getParam<MooseEnum>("family"),
                " respectively. I don't know how you achieved this, but you need to rectify it.");
 
-  if (_pars.isParamSetByUser("order") && _moose_object_pars.isParamSetByUser("order") &&
-      !_pars.get<MooseEnum>("order").compareCurrent(_moose_object_pars.get<MooseEnum>("order")))
+  if (isParamSetByUser("order") && _moose_object_pars.isParamSetByUser("order") &&
+      !getParam<MooseEnum>("order").compareCurrent(_moose_object_pars.get<MooseEnum>("order")))
     mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
                "`order` parameter set, and they are different values: ",
                _moose_object_pars.get<MooseEnum>("order"),
                " and ",
-               _pars.get<MooseEnum>("order"),
+               getParam<MooseEnum>("order"),
                " respectively. I don't know how you achieved this, but you need to rectify it.");
 
-  if (_pars.isParamSetByUser("scaling") && _moose_object_pars.isParamSetByUser("scaling") &&
-      _pars.get<std::vector<Real>>("scaling") !=
+  if (isParamSetByUser("scaling") && _moose_object_pars.isParamSetByUser("scaling") &&
+      getParam<std::vector<Real>>("scaling") !=
           _moose_object_pars.get<std::vector<Real>>("scaling"))
     mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
                "`scaling` parameter set, and they are different values. I don't know how you "
                "achieved this, but you need to rectify it.");
 
-  if (_pars.isParamSetByUser("initial_condition") &&
-      _pars.isParamSetByUser("initial_from_file_var"))
+  if (isParamSetByUser("initial_condition") && isParamSetByUser("initial_from_file_var"))
     paramError("initial_condition",
                "Two initial conditions have been provided for the variable ",
                name(),
@@ -159,9 +158,9 @@ AddVariableAction::act()
   addVariable(var_name);
 
   // Set the initial condition
-  if (_pars.isParamValid("initial_condition"))
+  if (isParamValid("initial_condition"))
   {
-    const auto value = _pars.get<std::vector<Real>>("initial_condition");
+    const auto value = getParam<std::vector<Real>>("initial_condition");
     createInitialConditionAction(value);
   }
 }
