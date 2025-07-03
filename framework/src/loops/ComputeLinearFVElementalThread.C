@@ -82,19 +82,29 @@ ComputeLinearFVElementalThread::join(const ComputeLinearFVElementalThread & /*y*
 void
 ComputeLinearFVElementalThread::setupSystemContributionObjects()
 {
-  // First of all, we will collect the vectors and matrices for the assigned tags
-  _base_query = _fe_problem.theWarehouse()
-                    .query()
-                    .template condition<AttribSysNum>(_system_number)
-                    .template condition<AttribSystem>("LinearFVElementalKernel")
-                    .template condition<AttribThread>(_tid)
-                    .template condition<AttribMatrixTags>(_matrix_tags)
-                    .template condition<AttribVectorTags>(_vector_tags);
+  // The reason why we need to grab vectors and matrices separately is that
+  // we want to grab a union instead of an intersection.
+  _base_query_vectors = _fe_problem.theWarehouse()
+                            .query()
+                            .template condition<AttribSysNum>(_system_number)
+                            .template condition<AttribSystem>("LinearFVElementalKernel")
+                            .template condition<AttribThread>(_tid)
+                            .template condition<AttribVectorTags>(_vector_tags);
+  std::vector<LinearFVElementalKernel *> kernels_after_vectors;
+  _base_query_vectors.queryInto(kernels_after_vectors);
 
-  // We fetch all the available objects and make sure they are linked to the right
-  // vectors and matrices
+  _base_query_matrices = _fe_problem.theWarehouse()
+                             .query()
+                             .template condition<AttribSysNum>(_system_number)
+                             .template condition<AttribSystem>("LinearFVElementalKernel")
+                             .template condition<AttribThread>(_tid)
+                             .template condition<AttribMatrixTags>(_matrix_tags);
+  std::vector<LinearFVElementalKernel *> kernels_after_matrices;
+  _base_query_matrices.queryInto(kernels_after_matrices);
+
+  // We fetch the union of the available objects
   std::vector<LinearFVElementalKernel *> kernels;
-  _base_query.queryInto(kernels);
+  MooseUtils::getUnion(kernels_after_vectors, kernels_after_matrices, kernels);
 
   // As a last step, we make sure the kernels know which vectors/matrices they need to contribute to
   for (auto & kernel : kernels)
@@ -111,7 +121,16 @@ ComputeLinearFVElementalThread::fetchBlockSystemContributionObjects()
               "block-restricted objects!");
 
   // The base query already has the other conditions, here we just filter based on subdomain ID
-  _base_query.template condition<AttribSubdomains>(_subdomain).queryInto(_fv_kernels);
+  std::vector<LinearFVElementalKernel *> kernels_after_vector;
+  _base_query_vectors.template condition<AttribSubdomains>(_subdomain)
+      .queryInto(kernels_after_vector);
+  std::vector<LinearFVElementalKernel *> kernels_after_matrix;
+  _base_query_matrices.template condition<AttribSubdomains>(_subdomain)
+      .queryInto(kernels_after_matrix);
+
+  // We populate the list of kernels with the union of the two vectors
+  MooseUtils::getUnion(kernels_after_vector, kernels_after_matrix, _fv_kernels);
+
   _old_subdomain = _subdomain;
 }
 

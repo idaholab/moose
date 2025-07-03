@@ -273,13 +273,6 @@ public:
    */
   virtual bool hasVector(TagID tag_id) const
   {
-    std::cout << "In has vector for tag " << tag_id << std::endl;
-    for (const auto & tag : _subproblem.getVectorTags())
-      std::cout << " " << tag._name << " " << tag._id << std::endl;
-    std::cout << " " << tag_id << " " << _tagged_vectors.size() << " " << std::endl;
-    if (tag_id < _tagged_vectors.size())
-      std::cout << " " << _tagged_vectors[tag_id] << " " << std::endl;
-
     return tag_id < _tagged_vectors.size() && _tagged_vectors[tag_id];
   }
 
@@ -359,11 +352,6 @@ public:
    */
   virtual bool hasMatrix(TagID tag) const
   {
-    std::cout << "In has matrix for tag " << tag << std::endl;
-    for (const auto & tag : _subproblem.getMatrixTags())
-      std::cout << " " << tag.first << " " << tag.second << std::endl;
-    std::cout << " " << tag << " " << _tagged_matrices.size() << std::endl;
-    // std::cout << " " << _tagged_matrices[tag] << std::endl;
     return tag < _tagged_matrices.size() && _tagged_matrices[tag];
   }
 
