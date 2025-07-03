@@ -18,6 +18,9 @@ public:
 
   BSplineCurveGenerator(const InputParameters & parameters);
 
+  std::unique_ptr<MeshBase>
+  generate() override; // I copied this from GMG... not sure how to use it...
+
 protected:
   /// starting point of curve
   const libMesh::Point _start_point;
@@ -40,5 +43,5 @@ protected:
    * [0,1]
    * @return the point coordinates
    */
-  libMesh::Point pointCalculator(const Real t_param);
+  libMesh::Point pointCalculator(const Real t);
 };

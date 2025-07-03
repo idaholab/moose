@@ -60,3 +60,11 @@ BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
                : (getParam<MooseEnum>("edge_element_type") == "EDGE3" ? 2 : 3))
 {
 }
+
+std::unique_ptr<MeshBase>
+BSplineCurveGenerator::generate()
+{
+}
+
+libMesh::Point
+BSplineCurveGenerator::pointCalculator(const libMesh::Real t)
