@@ -122,11 +122,11 @@ class TestHarnessResultsReader:
         assert isinstance(test_name, str)
         assert isinstance(pr_num, int)
 
-        find = {"pr_num": {"eq": pr_num}}
+        find = {"pr_num": {"$eq": pr_num}}
         find.update(self._testFilter(folder_name, test_name))
         find.update(filter)
 
-        entry = self.db.tests.find_one(filter, sort=self.mongo_sort_id)
+        entry = self.db.tests.find_one(find, sort=self.mongo_sort_id)
         if entry:
             return dict(entry)
         return None
