@@ -59,8 +59,8 @@ std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMConvectiveHeatFluxBC::createBFIntegrator()
 {
   std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
-  return std::make_pair(new mfem::BoundaryMassIntegrator(_external_heat_flux_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
-                                                                                                  : new mfem::BoundaryMassIntegrator(_external_heat_flux_coef));
+  return std::make_pair(new mfem::BoundaryMassIntegrator(_heat_transfer_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
+                                                                                                  : new mfem::BoundaryMassIntegrator(_heat_transfer_coef));
 }
 
 #endif
