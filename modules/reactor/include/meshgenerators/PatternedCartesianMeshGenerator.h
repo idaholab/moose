@@ -60,6 +60,8 @@ protected:
   const std::vector<subdomain_id_type> _duct_block_ids;
   /// Subdomain Names of the duct layers
   const std::vector<SubdomainName> _duct_block_names;
+  /// Name of the boundary used for stitching
+  const BoundaryName _stitching_boundary_name;
   /// Boundary ID of mesh's external boundary
   const boundary_id_type _external_boundary_id;
   /// Boundary name of mesh's external boundary
@@ -96,6 +98,8 @@ protected:
   QUAD_ELEM_TYPE _boundary_quad_elem_type;
   /// Whether to allow additional assembly types to be passed to "inputs" parameter without being used in lattice
   const bool _allow_unused_inputs;
+  /// Whether the mesh stitching should be verbose
+  const bool _verbose_stitching;
 
   /**
    * Adds background and duct region mesh to each part outer part of stitched square meshes. Note
