@@ -40,6 +40,7 @@ cd problems
 ## Step 10: Micro-scale Results
 
 !media darcy_thermo_mech/step10_micro_result.mp4
+       alt=Phase of the material in the micro-scale simulation above.
 
 !---
 
@@ -75,3 +76,4 @@ cd problems
 ## Step 10: Multi-scale Results
 
 !media darcy_thermo_mech/step10_result.mp4
+       alt=The evolution of the macro-scale temperature and the phase of the material at the micro-scale, produced by the multi-scale simulation above.

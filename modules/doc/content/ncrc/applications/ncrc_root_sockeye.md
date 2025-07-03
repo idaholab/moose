@@ -14,4 +14,5 @@ Sockeye is a heat pipe analysis application geared towards heat pipes of interes
 
 !col small=8 medium=4 large=4
 !media application_logos/sockeye_description.png style=width:100%;
+       alt=Example temperature field in a heat pipe, computed by Sockeye.
 !row-end!

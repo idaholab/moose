@@ -45,4 +45,6 @@ corresponding to this exact solution.
 
 !---
 
-!media darcy_thermo_mech/time_convergence_implicit.png style=width:90%
+!media darcy_thermo_mech/time_convergence_implicit.png
+       style=width:90%
+       alt=L2 error versus time step size for different integration methods, demonstrating their different convergence rates.

@@ -23,6 +23,7 @@
 
 !media tutorial04_meshing/block_vs_reporting_id.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=A mesh labelled by block ID and by reporting ID.
 
 !col-end!
 
@@ -79,6 +80,7 @@
 
 !media tutorial04_meshing/eeid_cart_hex_examples.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Meshes labelled by pin ID and assembly ID.
 
 !col-end!
 
@@ -114,6 +116,7 @@
 
 !media tutorial04_meshing/eeid_assign_type_example.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Different patterns for pin IDs on meshes that are otherwise identical.
 
 !col-end!
 
@@ -140,6 +143,7 @@
 
 !media tutorial04_meshing/eeid_plane_id_examples.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Different distributions of plane IDs.
 
 !col-end!
 
@@ -170,6 +174,7 @@
 
 !media tutorial04_meshing/eeid_depletion_id_example.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Depletion IDs found using different combinations of assembly, pin, and material IDs.
 
 !col-end!
 
@@ -200,6 +205,7 @@
 
 !media tutorial04_meshing/eeid_reporting_id_vpp_example.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Solution variables integrated over zones identified by combinations of reporting IDs.
 
 !col-end!
 

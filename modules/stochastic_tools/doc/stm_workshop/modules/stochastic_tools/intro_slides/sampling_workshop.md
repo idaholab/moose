@@ -146,9 +146,13 @@ Distribution objects are stand-alone classes that can be invoked by other object
 - Mainly meant to be used with PolynomialChaos.
 - Sparse quadrature options allow for efficient integration of monomial spaces.
 
-!media tensor_grid.svg style=width:45%;margin-left:0px;margin-right:10px;
+!media tensor_grid.svg
+       style=width:45%;margin-left:0px;margin-right:10px;
+       alt=The layout of quadrature points in a tensor grid.
 
-!media smolyak_grid.svg style=width:45%;margin-left:10px;margin-right:0px;
+!media smolyak_grid.svg
+       style=width:45%;margin-left:10px;margin-right:0px;
+       alt=The layout of quadrature points in a Smolyak sparse grid.
 !col-end!
 
 !col!

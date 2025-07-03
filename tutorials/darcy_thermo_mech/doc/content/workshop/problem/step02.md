@@ -60,3 +60,4 @@ cd problems
 ## Step 2: Result
 
 !media darcy_thermo_mech/step02_result.png
+       alt=Pressure gradient calculated using the simulation above.

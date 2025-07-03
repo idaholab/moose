@@ -6,6 +6,7 @@
 - The size of the Neighborhood can be controlled in the input file by setting the `patch_size` parameter in the `Mesh` section.
 
 !media media/geomsearch/nearest_node_diagram.jpg
+       alt=Diagram showing the distance being checked between a secondary node and each node on the primary boundary which is in the "neighborhood".
 
 - To use a NearestNodeLocator
 

@@ -134,10 +134,13 @@ By default, [CoreMeshGenerator.md] does not consider the location of nodes at th
 3. One assembly is defined as a heterogeneous mesh (contains one or more pins), and the other assembly is homogenized.
 
 !media reactor/meshgenerators/rgmb_flexible_stitching_case1.png style=width:50%;display:block;margin-left:auto;margin-right:auto;
+       alt=Assemblies with different numbers of pins, stitched together.
 
 !media reactor/meshgenerators/rgmb_flexible_stitching_case2.png style=width:50%;display:block;margin-left:auto;margin-right:auto;
+       alt=Assemblies with the same number of pins but different number of sectors per side, stitched together.
 
 !media reactor/meshgenerators/rgmb_flexible_stitching_case3.png style=width:50%;display:block;margin-left:auto;margin-right:auto;
+       alt=A heterogeneous and homogeneous assembly, stitched together.
 
 The parameter [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) in [ReactorMeshParams.md] can be set to true to enable flexible assembly stitching, where the outermost radial layer is deleted and re-triangulated in order to ensure the same number of nodes on either side of the assembly interface. The optional parameter [!param](/Mesh/ReactorMeshParams/num_sectors_at_flexible_boundary) defines how many sectors should be defined at the assembly interface.
 
