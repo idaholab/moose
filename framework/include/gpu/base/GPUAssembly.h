@@ -75,7 +75,7 @@ public:
    * @param info The element information object
    * @returns The number of quadrature points
    */
-  KOKKOS_FUNCTION auto getNumQps(const ElementInfo & info) const
+  KOKKOS_FUNCTION auto getNumQps(ElementInfo info) const
   {
     return _n_qps[info.subdomain][info.local_id];
   }
@@ -96,7 +96,7 @@ public:
    * @param side The side index
    * @returns The number of quadrature points
    */
-  KOKKOS_FUNCTION auto getNumFaceQps(const ElementInfo & info, unsigned int side) const
+  KOKKOS_FUNCTION auto getNumFaceQps(ElementInfo info, unsigned int side) const
   {
     return _n_qps_face[info.subdomain](side, info.local_id);
   }
@@ -106,7 +106,7 @@ public:
    * @param info The element information object
    * @returns The starting offset
    */
-  KOKKOS_FUNCTION auto getQpOffset(const ElementInfo & info) const
+  KOKKOS_FUNCTION auto getQpOffset(ElementInfo info) const
   {
     return _qp_offset[info.subdomain][info.local_id];
   }
@@ -117,7 +117,7 @@ public:
    * @param side The side index
    * @returns The starting offset
    */
-  KOKKOS_FUNCTION auto getQpFaceOffset(const ElementInfo & info, unsigned int side) const
+  KOKKOS_FUNCTION auto getQpFaceOffset(ElementInfo info, unsigned int side) const
   {
     return _qp_offset_face[info.subdomain](side, info.local_id);
   }
@@ -195,11 +195,8 @@ public:
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
    */
-  KOKKOS_FUNCTION inline void computePhysicalMap(const ElementInfo & info,
-                                                 unsigned int qp,
-                                                 Real33 * jacobian,
-                                                 Real * JxW,
-                                                 Real3 * q_points) const;
+  KOKKOS_FUNCTION inline void computePhysicalMap(
+      ElementInfo info, unsigned int qp, Real33 * jacobian, Real * JxW, Real3 * q_points) const;
   /**
    * Compute physical transformation data for a side
    * @param info The element information object
@@ -209,7 +206,7 @@ public:
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
    */
-  KOKKOS_FUNCTION inline void computePhysicalMap(const ElementInfo & info,
+  KOKKOS_FUNCTION inline void computePhysicalMap(ElementInfo info,
                                                  unsigned int side,
                                                  unsigned int qp,
                                                  Real33 * jacobian,
@@ -335,11 +332,8 @@ Assembly::coordTransformFactor(SubdomainID subdomain, Real3 point) const
 }
 
 KOKKOS_FUNCTION inline void
-Assembly::computePhysicalMap(const ElementInfo & info,
-                             unsigned int qp,
-                             Real33 * jacobian,
-                             Real * JxW,
-                             Real3 * q_points) const
+Assembly::computePhysicalMap(
+    ElementInfo info, unsigned int qp, Real33 * jacobian, Real * JxW, Real3 * q_points) const
 {
   auto sid = info.subdomain;
   auto eid = info.id;
@@ -371,7 +365,7 @@ Assembly::computePhysicalMap(const ElementInfo & info,
 }
 
 KOKKOS_FUNCTION inline void
-Assembly::computePhysicalMap(const ElementInfo & info,
+Assembly::computePhysicalMap(ElementInfo info,
                              unsigned int side,
                              unsigned int qp,
                              Real33 * jacobian,
