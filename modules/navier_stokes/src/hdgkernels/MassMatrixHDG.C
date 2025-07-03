@@ -43,7 +43,9 @@ MassMatrixHDG::computeJacobianOnSide()
   _mass.resize(_face_phi.size(), _face_phi.size());
   for (const auto qp : make_range(_qrule_face->n_points()))
   {
-    const auto qp_quant = _JxW_face[qp] * _coord[qp] * _density;
+    // The division by 2 here is necessary because each face will be visited twice, once from each
+    // neighboring element
+    const auto qp_quant = _JxW_face[qp] * _coord[qp] * _density / 2;
     for (const auto i : index_range(_face_phi))
     {
       const auto qp_i_quant = qp_quant * _face_phi[i][qp];
