@@ -31,6 +31,7 @@ LinearFVAdvectionDiffusionFunctorNeumannBC::LinearFVAdvectionDiffusionFunctorNeu
     _functor(getFunctor<Real>("functor")),
     _diffusion_coeff(getFunctor<Real>("diffusion_coeff"))
 {
+  _var.computeCellGradients();
 }
 
 Real
