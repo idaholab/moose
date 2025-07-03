@@ -61,5 +61,4 @@ MFEMGradAux::update()
   _grad.Finalize();
 }
 
-
 #endif
