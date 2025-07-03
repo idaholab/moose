@@ -1243,6 +1243,10 @@ MooseApp::~MooseApp()
   for (const auto & lib_pair : _lib_handles)
     dlclose(lib_pair.second.library_handle);
 #endif
+
+#ifdef MOOSE_HAVE_KOKKOS
+  deallocateKokkosMemoryPool();
+#endif
 }
 
 std::string
