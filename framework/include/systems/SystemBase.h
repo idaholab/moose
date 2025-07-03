@@ -17,12 +17,14 @@
 #include "InputParameters.h"
 #include "MooseVariableBase.h"
 #include "ConsoleStreamInterface.h"
+#include "SubProblem.h"
 
 // libMesh
 #include "libmesh/exodusII_io.h"
 #include "libmesh/parallel_object.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/sparse_matrix.h"
+#include "libmesh/system.h"
 
 // Forward declarations
 class Factory;
@@ -33,7 +35,7 @@ class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class MooseMesh;
-class SubProblem;
+// class SubProblem;
 class SystemBase;
 class TimeIntegrator;
 class InputParameters;
@@ -42,7 +44,7 @@ class FEProblemBase;
 // libMesh forward declarations
 namespace libMesh
 {
-class System;
+// class System;
 class DofMap;
 class FEType;
 }

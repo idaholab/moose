@@ -237,6 +237,12 @@
     exodiff = tag-fv_out.e
     requirement = 'The system shall be able to index solution vectors and residual vectors using the degree of freedom indices of a finite volume variable.'
   []
+  [linear-fv]
+    type = 'Exodiff'
+    input = tag-linearfv.i
+    exodiff = tag-linearfv_out.e
+    requirement = 'The system shall be able to tag matrix diagonals and right hand sides built using linear systems and finite volume discretization.'
+  []
   [mass]
     requirement = 'The system shall be able to use matrix tagging to compute a mass matrix'
     [fv]
