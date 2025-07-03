@@ -147,11 +147,13 @@ public:
   dof_id_type getNodeID(const Node * node) const;
   /**
    * Get the serialized node ID map
+   * This list contains the nodes of local elements, so some nodes may belong to other processes
    * @returns The node ID map
    */
   const auto & getLocalNodeMap() const { return _maps->_local_node_id_mapping; }
   /**
    * Get the list of serialized node IDs for a subdomain
+   * This list strictly contains the nodes local to the current process
    * @param subdomain The MOOSE subdomain ID
    * @returns The list of node IDs in the subdomain
    */
@@ -247,6 +249,7 @@ private:
     std::map<SubdomainID, std::map<const Elem *, dof_id_type>> _subdomain_local_elem_id_mapping;
     /**
      * Map from the libMesh node to the serialized node ID
+     * This list contains the nodes of local elements, so some nodes may belong to other processes
      */
     std::map<const Node *, dof_id_type> _local_node_id_mapping;
     /**
@@ -255,6 +258,7 @@ private:
     std::map<SubdomainID, std::set<dof_id_type>> _subdomain_elem_ids;
     /**
      * List of the serialized node IDs in each subdomain
+     * This list strictly contains the nodes local to the current process
      */
     std::map<SubdomainID, std::set<dof_id_type>> _subdomain_node_ids;
   };

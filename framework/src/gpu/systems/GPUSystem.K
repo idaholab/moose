@@ -145,12 +145,13 @@ System::setupDofs()
     }
 
     for (auto & [node, id] : kokkosMesh().getLocalNodeMap())
-    {
-      _dof_map.dof_indices(node, dof_indices, var);
+      if (node->processor_id() == _comm.rank())
+      {
+        _dof_map.dof_indices(node, dof_indices, var);
 
-      if (dof_indices.size())
-        _local_node_dof_index[var][id] = solution->map_global_to_local_index(dof_indices[0]);
-    }
+        if (dof_indices.size())
+          _local_node_dof_index[var][id] = solution->map_global_to_local_index(dof_indices[0]);
+      }
   }
 
   _local_elem_dof_index.copyNested();
