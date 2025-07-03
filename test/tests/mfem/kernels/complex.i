@@ -27,6 +27,13 @@
   []
 []
 
+[Executioner]
+  type = MFEMSteady
+  device = cpu
+  numeric_type = real
+[]
+
+
 
 
 
@@ -68,8 +75,3 @@
   l_max_its = 1000
 []
 
-[Executioner]
-  type = MFEMSteady
-  device = cpu
-  numeric_type = complex
-[]

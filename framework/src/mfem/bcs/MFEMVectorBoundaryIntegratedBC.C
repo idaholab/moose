@@ -31,17 +31,19 @@ MFEMVectorBoundaryIntegratedBC::MFEMVectorBoundaryIntegratedBC(const InputParame
 
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
-mfem::LinearFormIntegrator *
+std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
 MFEMVectorBoundaryIntegratedBC::createLFIntegrator()
 {
-  return new mfem::VectorBoundaryLFIntegrator(_vec_coef);
+  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
+  return std::make_pair(new mfem::VectorBoundaryLFIntegrator(_vec_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
+                                                                                                  : new mfem::VectorBoundaryLFIntegrator(_vec_coef));
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
-mfem::BilinearFormIntegrator *
+std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMVectorBoundaryIntegratedBC::createBFIntegrator()
 {
-  return nullptr;
+  return std::make_pair(nullptr, nullptr);
 }
 
 #endif

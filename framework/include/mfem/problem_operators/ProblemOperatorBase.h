@@ -47,6 +47,11 @@ protected:
   /// vector during solve.
   std::vector<std::string> _trial_var_names;
   std::vector<mfem::ParGridFunction *> _trial_variables;
+
+  // Complex counterparts of the above
+  std::vector<mfem::ParComplexGridFunction *> _cpx_test_variables;
+  std::vector<mfem::ParComplexGridFunction *> _cpx_trial_variables;
+
 };
 }
 
