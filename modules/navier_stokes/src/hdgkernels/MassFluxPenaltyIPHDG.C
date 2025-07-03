@@ -25,6 +25,9 @@ MassFluxPenaltyIPHDG::validParams()
   params.addRequiredRangeCheckedParam<unsigned short>(
       "component", "0<=component<=1", "The velocity component this object is being applied to");
   params.addParam<Real>("gamma", 1, "The penalty to multiply the jump");
+  params.addClassDescription("introduces a jump correction on internal faces for grad-div "
+                             "stabilization for discontinuous Galerkin methods. Because this is "
+                             "derived from HDGKernel this class executes twice per face.");
   return params;
 }
 
