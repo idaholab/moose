@@ -35,7 +35,7 @@ MFEMScalarDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 }
 
 void
-MFEMScalarDirichletBC::ApplyComplexBC(mfem::ComplexGridFunction & gridfunc)
+MFEMScalarDirichletBC::ApplyComplexBC(mfem::ParComplexGridFunction & gridfunc)
 {
   std::cout << "FIX ISSUE WITH COMPLEX COEFFICIENTS" << std::endl;
   gridfunc.ProjectBdrCoefficient(_coef, _coef, getBoundaries());

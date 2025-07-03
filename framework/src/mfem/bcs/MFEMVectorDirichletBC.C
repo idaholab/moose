@@ -34,7 +34,7 @@ MFEMVectorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 }
 
 void
-MFEMVectorDirichletBC::ApplyComplexBC(mfem::ComplexGridFunction & /*gridfunc*/)
+MFEMVectorDirichletBC::ApplyComplexBC(mfem::ParComplexGridFunction & /*gridfunc*/)
 {
   mooseError("Full complex Dirichlet BCs not implemented for vector variables. Please use Tangential or Normal complex Dirichlet BCs instead.");
 }
