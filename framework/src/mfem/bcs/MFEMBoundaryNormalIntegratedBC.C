@@ -34,17 +34,29 @@ MFEMBoundaryNormalIntegratedBC::MFEMBoundaryNormalIntegratedBC(const InputParame
 
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
+<<<<<<< HEAD:framework/src/mfem/bcs/MFEMBoundaryNormalIntegratedBC.C
 mfem::LinearFormIntegrator *
 MFEMBoundaryNormalIntegratedBC::createLFIntegrator()
+=======
+std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
+MFEMVectorNormalIntegratedBC::createLFIntegrator()
+>>>>>>> 858d7ab200 (Add complex option to kernels and integrated BCs):framework/src/mfem/bcs/MFEMVectorNormalIntegratedBC.C
 {
-  return new mfem::BoundaryNormalLFIntegrator(_vec_coef);
+  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
+  return std::make_pair(new mfem::BoundaryNormalLFIntegrator(_vec_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
+                                                                                                  : new mfem::BoundaryNormalLFIntegrator(_vec_coef));
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
+<<<<<<< HEAD:framework/src/mfem/bcs/MFEMBoundaryNormalIntegratedBC.C
 mfem::BilinearFormIntegrator *
 MFEMBoundaryNormalIntegratedBC::createBFIntegrator()
+=======
+std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
+MFEMVectorNormalIntegratedBC::createBFIntegrator()
+>>>>>>> 858d7ab200 (Add complex option to kernels and integrated BCs):framework/src/mfem/bcs/MFEMVectorNormalIntegratedBC.C
 {
-  return nullptr;
+  return std::make_pair(nullptr, nullptr);
 }
 
 #endif

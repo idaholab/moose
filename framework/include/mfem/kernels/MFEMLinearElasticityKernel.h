@@ -31,7 +31,7 @@ public:
 
   MFEMLinearElasticityKernel(const InputParameters & parameters);
 
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
+  virtual std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *> createBFIntegrator() override;
 
 protected:
   mfem::Coefficient & _lambda;

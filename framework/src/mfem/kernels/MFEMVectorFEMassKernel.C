@@ -34,10 +34,12 @@ MFEMVectorFEMassKernel::MFEMVectorFEMassKernel(const InputParameters & parameter
 {
 }
 
-mfem::BilinearFormIntegrator *
+std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMVectorFEMassKernel::createBFIntegrator()
 {
-  return new mfem::VectorFEMassIntegrator(_coef);
+  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
+  return std::make_pair(new mfem::VectorFEMassIntegrator(_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
+                                                                                                  : new mfem::VectorFEMassIntegrator(_coef));
 }
 
 #endif

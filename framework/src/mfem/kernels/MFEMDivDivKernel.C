@@ -35,10 +35,12 @@ MFEMDivDivKernel::MFEMDivDivKernel(const InputParameters & parameters)
 {
 }
 
-mfem::BilinearFormIntegrator *
+std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMDivDivKernel::createBFIntegrator()
 {
-  return new mfem::DivDivIntegrator(_coef);
+  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
+  return std::make_pair(new mfem::DivDivIntegrator(_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
+                                                                                                  : new mfem::DivDivIntegrator(_coef));
 }
 
 #endif

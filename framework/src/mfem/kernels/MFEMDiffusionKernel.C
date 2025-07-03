@@ -34,10 +34,12 @@ MFEMDiffusionKernel::MFEMDiffusionKernel(const InputParameters & parameters)
 {
 }
 
-mfem::BilinearFormIntegrator *
+std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMDiffusionKernel::createBFIntegrator()
 {
-  return new mfem::DiffusionIntegrator(_coef);
+  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
+  return std::make_pair(new mfem::DiffusionIntegrator(_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
+                                                                                                  : new mfem::DiffusionIntegrator(_coef));
 }
 
 #endif
