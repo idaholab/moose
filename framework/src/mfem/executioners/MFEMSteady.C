@@ -109,6 +109,7 @@ MFEMSteady::execute()
   {
     _problem_operator->Solve(_problem_data.f);
 
+    // TODO: add in a loop with user-specified conditions
     if ( _use_amr )
     {
       // p-refine
@@ -128,6 +129,9 @@ MFEMSteady::execute()
   _time = _time_step;
   // Execute user objects at timestep end
   _mfem_problem.execute(EXEC_TIMESTEP_END);
+  
+  // Inform objects (e.g aux kernels) that they don't need to update after this point.
+  // H/P-refinement sets this to true
   _mfem_problem.setMeshChanged(false);
 
   _mfem_problem.outputStep(EXEC_TIMESTEP_END);
