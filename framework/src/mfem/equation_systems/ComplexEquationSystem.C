@@ -84,6 +84,41 @@ ComplexEquationSystem::BuildBilinearForms()
   }
 }
 
+void
+ComplexEquationSystem::ApplyEssentialBCs()
+{
+  _ess_tdof_lists.resize(_test_var_names.size());
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    if (!_essential_bc_map.Has(test_var_name))
+      continue;
+
+    // Set default value of gridfunction used in essential BC. Values
+    // overwritten in applyEssentialBCs
+    mfem::ParComplexGridFunction & trial_gf(*(_cxs.at(i)));
+    mfem::ParComplexGridFunction & trial_gf_time_derivatives(*(_cdxdts.at(i)));
+    auto * const pmesh = _test_pfespaces.at(i)->GetParMesh();
+    mooseAssert(pmesh, "parallel mesh is null");
+    trial_gf = 0.0;
+    trial_gf_time_derivatives = 0.0;
+
+    auto bcs = _essential_bc_map.GetRef(test_var_name);
+    mfem::Array<int> global_ess_markers(pmesh->bdr_attributes.Max());
+    global_ess_markers = 0;
+    for (auto & bc : bcs)
+    {
+      bc->ApplyComplexBC(trial_gf);
+
+      mfem::Array<int> ess_bdrs(bc->getBoundaries());
+      for (auto it = 0; it != pmesh->bdr_attributes.Max(); ++it)
+      {
+        global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
+      }
+    }
+    trial_gf.FESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
+  }
+}
 
 }
 
