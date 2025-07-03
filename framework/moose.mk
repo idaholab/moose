@@ -102,10 +102,23 @@ libmesh_LDFLAGS   += $(wasp_LDFLAGS)
 #
 include $(FRAMEWORK_DIR)/contrib/neml2.mk
 
+SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS := clean clobber cleanall clobberall echo_include echo_library install_make_dir libmesh_submodule_status
+
+# $(call check_library_should_error,<libname>)
+define check_library_should_error
+ifeq ($(strip $$(MAKECMDGOALS)),)
+  $$(eval $1_should_error := true)
+else
+  $$(eval $1_filtered_goals := $$(filter $$(SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS),$$(MAKECMDGOALS)))
+  ifneq ($$(words $$($1_filtered_goals)),$$(words $$(MAKECMDGOALS)))
+    $$(eval $1_should_error := true)
+  endif
+endif
+endef
+
 #
 # Conditional parts if the user wants to compile MOOSE with torchlib
 #
-SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS := clean clobber cleanall clobberall echo_include echo_library install_make_dir libmesh_submodule_status
 ifeq ($(ENABLE_LIBTORCH),true)
 	LIBTORCH_LIB := libtorch.$(lib_suffix)
 
@@ -130,16 +143,7 @@ ifeq ($(ENABLE_LIBTORCH),true)
 
   else
 		# No libtorch library found
-
-    ifeq ($(strip $(MAKECMDGOALS)),)
-      # No explicit targets = assume default build
-      libtorch_should_error := true
-    else
-      filtered_goals := $(filter $(SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS),$(MAKECMDGOALS))
-      ifneq ($(words $(filtered_goals)), $(words $(MAKECMDGOALS)))
-        libtorch_should_error := true
-      endif
-    endif
+    $(eval $(call check_library_should_error,libtorch))
 
     ifeq ($(libtorch_should_error),true)
       $(error ERROR! MOOSE was configured with libtorch but we cannot locate any dynamic libraries of libtorch. Make sure to install libtorch using the instructions provided here: https://mooseframework.inl.gov/getting_started/installation/install_libtorch.html !)
@@ -175,11 +179,13 @@ ifeq ($(ENABLE_MFEM),true)
     libmesh_LDFLAGS += -L$(MFEM_DIR)/lib -lmfem -lmfem-common
 
   else
-    filtered_goals := $(filter $(SKIP_EXTERNAL_LIBRARY_CHECK_TARGETS),$(MAKECMDGOALS))
-    ifeq ($(words $(filtered_goals)), $(words $(MAKECMDGOALS)))
-      $(info Skipping libmfem error check for targets that don't involve compilation!)
-    else
+    # No mfem library found
+    $(eval $(call check_library_should_error,mfem))
+
+    ifeq ($(mfem_should_error),true)
       $(error ERROR! Cannot locate libmfem and libmfem-common. Make sure to install mfem before compiling MOOSE!)
+    else
+      $(info Skipping libmfem error check for targets that don't involve compilation!)
     endif
 	endif
 endif
