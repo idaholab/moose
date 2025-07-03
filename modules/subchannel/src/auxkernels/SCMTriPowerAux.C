@@ -146,9 +146,9 @@ SCMTriPowerAux::initialSetup()
   // so that the total power calculated  by the trapezoidal rule agrees with the power assigned by
   // the user.
   _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
-  _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
   _console << "###########################################" << std::endl;
   _console << "Total power estimation: " << total_power << " [W] " << std::endl;
+  _console << "Power correction vector :\n" << _pin_power_correction << " \n";
 }
 
 Real
