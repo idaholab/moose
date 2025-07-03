@@ -26,7 +26,7 @@ public:
   virtual void SetTrialVariablesFromTrueVectors();
   virtual void Init(mfem::BlockVector & X);
 
-  virtual int  GetProblemSize();
+  virtual int GetProblemSize();
 
   mfem::Array<int> _block_true_offsets;
   mfem::Array<int> _global_block_true_offsets;

@@ -29,11 +29,11 @@ public:
   virtual void constructProblemOperator() = 0;
 
   // Executioners should not support estimators by default
-  virtual bool addEstimator( std::shared_ptr<MFEMEstimator> ) { return false; }
+  virtual bool addEstimator(std::shared_ptr<MFEMEstimator>) { return false; }
 
   // Return false if it's time to stop
-  virtual bool PRefine() {return false;};
-  virtual bool HRefine() {return false;};
+  virtual bool PRefine() { return false; };
+  virtual bool HRefine() { return false; };
   virtual void UpdateAfterRefinement() {};
 
   /**

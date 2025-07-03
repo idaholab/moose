@@ -32,7 +32,7 @@ public:
   //! Call this with the parameters for the Estimator
   void AddEstimator(std::shared_ptr<MFEMEstimator> estimator) override;
   void SetUpAMR() override;
-  bool HRefine()  override;
+  bool HRefine() override;
   bool PRefine() override;
 
   ~EquationSystemProblemOperator() override = default;
@@ -49,12 +49,12 @@ public:
 
 private:
   std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};
-  std::shared_ptr<MFEMEstimator>               _estimator;
-  std::unique_ptr<mfem::ThresholdRefiner>      _refiner;
+  std::shared_ptr<MFEMEstimator> _estimator;
+  std::unique_ptr<mfem::ThresholdRefiner> _refiner;
 
   /**
-  * For now, use a bool to determine whether we use amr
-  */
+   * For now, use a bool to determine whether we use amr
+   */
   bool _use_amr;
 };
 

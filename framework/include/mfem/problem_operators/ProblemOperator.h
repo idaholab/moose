@@ -32,10 +32,7 @@ public:
   virtual void AddEstimator(std::shared_ptr<MFEMEstimator> /*estimator*/) {}
   virtual void SetUpAMR() {};
   virtual bool HRefine() { return false; } /* we return true when it's time to stop solving */
-  virtual bool PRefine()
-  {
-    return false;
-  } /* we return true when it's time to stop solving */
+  virtual bool PRefine() { return false; } /* we return true when it's time to stop solving */
 
   virtual void Solve(mfem::Vector & /*X*/) {}
   void Mult(const mfem::Vector &, mfem::Vector &) const override {}

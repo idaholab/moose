@@ -24,7 +24,7 @@ public:
   virtual void init() override;
   virtual void execute() override;
 
-  virtual bool addEstimator( std::shared_ptr<MFEMEstimator> ) override;
+  virtual bool addEstimator(std::shared_ptr<MFEMEstimator>) override;
   virtual bool PRefine() override;
   virtual bool HRefine() override;
   virtual void UpdateAfterRefinement() override;

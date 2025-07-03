@@ -90,13 +90,12 @@ MFEMSteady::execute()
     _problem_operator->Solve(_problem_data.f);
 
     // TODO: add in a loop with user-specified conditions
-    if ( _use_amr )
+    if (_use_amr)
     {
       // p-refine
       PRefine();
       _problem_operator->Solve(_problem_data.f);
     }
-
   }
 
   // Displace mesh, if required
@@ -109,7 +108,7 @@ MFEMSteady::execute()
   _time = _time_step;
   // Execute user objects at timestep end
   _mfem_problem.execute(EXEC_TIMESTEP_END);
-  
+
   // Inform objects (e.g aux kernels) that they don't need to update after this point.
   // H/P-refinement sets this to true
   _mfem_problem.setMeshChanged(false);
@@ -132,7 +131,7 @@ MFEMSteady::execute()
 }
 
 bool
-MFEMSteady::addEstimator( std::shared_ptr<MFEMEstimator> estimator )
+MFEMSteady::addEstimator(std::shared_ptr<MFEMEstimator> estimator)
 {
   if (estimator)
   {
@@ -168,7 +167,7 @@ MFEMSteady::HRefine()
   return output;
 }
 
-void 
+void
 MFEMSteady::UpdateAfterRefinement()
 {
   // Update in the mfem problem
@@ -176,7 +175,5 @@ MFEMSteady::UpdateAfterRefinement()
 
   _problem_operator->SetGridFunctions();
 }
-
-
 
 #endif
