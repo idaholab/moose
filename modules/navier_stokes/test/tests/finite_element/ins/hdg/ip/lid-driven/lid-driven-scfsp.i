@@ -294,6 +294,8 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
 [Executioner]
   type = Transient
   num_steps = ${num_steps}
+  petsc_options_iname = '-ksp_type'
+  petsc_options_value = 'preonly'
 []
 
 [Outputs]
