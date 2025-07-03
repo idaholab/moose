@@ -19,11 +19,12 @@ public:
 
   MFEMVectorBoundaryIntegratedBC(const InputParameters & parameters);
 
-  /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
-  virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
+  // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
+  // caller.
+  virtual std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *> createLFIntegrator() override;
 
-  /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
+  // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
+  virtual std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *> createBFIntegrator() override;
 
 protected:
   mfem::VectorCoefficient & _vec_coef;
