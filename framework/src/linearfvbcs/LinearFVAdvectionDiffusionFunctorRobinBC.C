@@ -43,7 +43,9 @@ Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValue() const
 {
   const auto face = singleSidedFaceArg(_current_face_info);
-  const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? _current_face_info->elemInfo() : _current_face_info->neighborInfo();
+  const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
   const auto elem_arg = makeElemArg(elem_info->elem());
   const auto state = determineState();
 
@@ -59,10 +61,8 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValue() const
   const auto d_cf = computeCellToFaceVector(); // vector from boundary cell centre to boundary face
   const auto projection = d_cf * nhat;
   const auto vc = d_cf - (projection * nhat);
-  return ( (alpha * phi)
-           + ( alpha * grad_phi * vc)
-           + (gamma * projection)
-         ) / ( alpha + (beta * projection) );
+  return ((alpha * phi) + (alpha * grad_phi * vc) + (gamma * projection)) /
+         (alpha + (beta * projection));
 }
 
 Real
@@ -72,7 +72,7 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryNormalGradient() const
   const auto state = determineState();
   const auto alpha = _alpha(face, state);
   mooseAssert(alpha != 0.0, "Alpha should not be 0!");
-  const auto beta  = _beta(face, state);
+  const auto beta = _beta(face, state);
   const auto gamma = _gamma(face, state);
   return (gamma - beta * computeBoundaryValue()) / alpha;
 }
@@ -83,8 +83,8 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValueMatrixContribution
 {
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
-  const auto alpha = _alpha( face,  state);
-  const auto beta  = _beta(face,  state);
+  const auto alpha = _alpha(face, state);
+  const auto beta = _beta(face, state);
   const auto & nhat = _current_face_info->normal();
 
   return alpha / (alpha + (beta * computeCellToFaceVector() * nhat));
@@ -96,7 +96,9 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValueRHSContribution() 
 {
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
-const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? _current_face_info->elemInfo() : _current_face_info->neighborInfo();
+  const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
   const auto alpha = _alpha(face, state);
   const auto beta = _beta(face, state);
   const auto gamma = _gamma(face, state);
@@ -106,10 +108,10 @@ const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM 
 
   const auto d_cf = computeCellToFaceVector(); // vector from boundary cell centre to boundary face
   const auto projection = d_cf * nhat;
-  const auto vc = d_cf - (projection * nhat); //correction vector for non-orthogonal cells
+  const auto vc = d_cf - (projection * nhat); // correction vector for non-orthogonal cells
 
-  return (gamma * projection /( alpha + (beta * projection) ) ) +
-          (alpha * grad_phi * vc /( alpha + (beta * projection) ) );
+  return (gamma * projection / (alpha + (beta * projection))) +
+         (alpha * grad_phi * vc / (alpha + (beta * projection)));
 }
 
 // implicit terms for diffusion kernel
@@ -119,8 +121,8 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryGradientMatrixContribut
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
 
-  const auto alpha = _alpha(face,  state);
-  const auto beta  = _beta(face,  state);
+  const auto alpha = _alpha(face, state);
+  const auto beta = _beta(face, state);
   const auto & nhat = _current_face_info->normal();
 
   return beta / (alpha + (beta * computeCellToFaceVector() * nhat));
@@ -130,7 +132,9 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryGradientMatrixContribut
 Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryGradientRHSContribution() const
 {
-  const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? _current_face_info->elemInfo() : _current_face_info->neighborInfo();
+  const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
   const auto & grad_phi = _var.gradSln(*elem_info);
@@ -143,9 +147,8 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryGradientRHSContribution
 
   const auto d_cf = computeCellToFaceVector(); // vector from boundary cell centre to boundary face
   const auto projection = d_cf * nhat;
-  const auto vc = d_cf - (projection * nhat); //correction vector for non-orthogonal cells
+  const auto vc = d_cf - (projection * nhat); // correction vector for non-orthogonal cells
 
-  return ( gamma/alpha) +
-          ( -beta *gamma * projection / alpha / ( alpha + (beta * projection) ) ) +
-           ( -beta * grad_phi * vc / ( alpha + (beta * projection) ) );
+  return (gamma / alpha) + (-beta * gamma * projection / alpha / (alpha + (beta * projection))) +
+         (-beta * grad_phi * vc / (alpha + (beta * projection)));
 }
