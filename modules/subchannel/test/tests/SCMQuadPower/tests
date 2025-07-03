@@ -1,0 +1,19 @@
+[Tests]
+  design = 'SCMQuadPowerAux.md SCMQuadPowerIC.md'
+  issues = '#28497 #29233'
+  [SCMQuadPowerAux_cells_aligned]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'test_out_line_check_0001.csv'
+    recover = False
+    requirement = 'The system will populate the linear heat rate on subchannels in a quadrilateral lattice using an IC/aux kernel'
+  []
+  [SCMQuadPowerAux_cells_not_aligned]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'not_aligned_line_check_0001.csv'
+    cli_args = 'num_cells=11 Outputs/file_base=not_aligned'
+    recover = False
+    requirement = 'The system will populate the linear heat rate on subchannels in a quadrilateral lattice using an IC/aux kernel in a not aligned mesh'
+  []
+[]
