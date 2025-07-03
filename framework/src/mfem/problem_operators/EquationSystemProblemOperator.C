@@ -47,9 +47,6 @@ EquationSystemProblemOperator::SetUpAMR()
 /*
 The refiner will return true if we have met the stopping condition for refinement.
 If we don't use AMR, we should just return false.
-
-TODO: should probably call an error if _use_amr is set to false
-
 */
 bool
 EquationSystemProblemOperator::HRefine()
@@ -60,6 +57,10 @@ EquationSystemProblemOperator::HRefine()
     _refiner->Apply(*_problem.pmesh);
 
     output = _refiner->Stop();
+  }
+  else
+  {
+    mooseError("Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
   }
   return output;
 }
@@ -85,6 +86,11 @@ EquationSystemProblemOperator::PRefine()
     }
 
     _estimator->getFESpace()->PRefineAndUpdate(prefinements);
+  }
+
+  else
+  {
+    mooseError("Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
   }
   return output;
 }
