@@ -180,7 +180,9 @@ with the input file included using the "-i" option as follows.
 
 !---
 
-!media tutorial03_verification/2d_main.mp4 style=width:100%;margin-left:auto;margin-right:auto;display:block;
+!media tutorial03_verification/2d_main.mp4
+       style=width:100%;margin-left:auto;margin-right:auto;display:block;
+       alt=Result of a forced heat conduction simulation.
 
 !---
 
@@ -296,6 +298,7 @@ second-order shape functions are considered.
 !---
 
 !media tutorial03_verification/2d_mms_spatial.png
+       alt=L2 error for the simulation, as a function of element size.
 
 !---
 
@@ -359,3 +362,4 @@ second-order shape functions are considered.
 !---
 
 !media tutorial03_verification/2d_mms_temporal.png
+       alt=L2 error of the simulation as a function of time-step size.

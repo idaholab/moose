@@ -31,3 +31,4 @@ cd problems
 ## Step 8: Result
 
 !media darcy_thermo_mech/step08_result.mp4
+       alt=Output from simulation above, showing the time evolution of the temperature field; a plot of the average temperature and outlet heat flux as functions of time; and the temperature profile as a function of the y-coordinate about one third of the way along the domain.

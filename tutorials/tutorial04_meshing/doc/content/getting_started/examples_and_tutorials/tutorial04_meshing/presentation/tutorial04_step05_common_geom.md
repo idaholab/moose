@@ -31,6 +31,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 !media tutorial04_meshing/base_ex_pccmg.png
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
+       alt=Mesh for a hexagonal fuel pin.
 
 !col-end!
 
@@ -63,6 +64,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 !media tutorial04_meshing/base_ex_shg.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Possible meshes for hexagons, made up of triangles, quads, or a mix of the two.
 
 !col-end!
 
@@ -85,6 +87,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 - Input will be automatically rotated 90 degrees CCW unless specified with [!param](/Mesh/PatternedHexMeshGenerator/rotate_angle)
 - !media tutorial04_meshing/base_ex_phmg_assm.png
        style=width:40%;display:block;margin-left:auto;margin-right:auto;
+       alt=A mesh for an assembly of heterogeneous pins.
 
 !col-end!
 
@@ -120,6 +123,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 !media tutorial04_meshing/base_ex_hccabmg.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=A hexagonal mesh with external boundaries matched to those of an assembly mesh.
 
 !col-end!
 
@@ -155,6 +159,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 !media tutorial04_meshing/base_ex_phmg_core.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=A mesh for a core, made up of multiple assemblies.
 
 !col-end!
 
@@ -180,6 +185,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 !media tutorial04_meshing/base_ex_prmg.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=A mesh for a reactor core with a circular periphery region, made up of quads.
 
 !col-end!
 
@@ -210,6 +216,7 @@ A second set of mesh generators (Reactor Geometry Mesh Builder mesh generators) 
 
 !media tutorial04_meshing/base_ex_ptmg.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=A mesh for a reactor core with a circular periphery region, made up of quads.
 
 !col-end!
 

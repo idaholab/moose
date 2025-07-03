@@ -297,9 +297,13 @@ x_{5,1} & \dots & x_{5,M}
 
 # MultiApp Mode (cont.)
 
-!media full_solve_memory_mpi.svg style=width:49%;margin-left:auto;margin-right:auto;
+!media full_solve_memory_mpi.svg
+       style=width:49%;margin-left:auto;margin-right:auto;
+       alt=Memory use as a function of the number of samples, for different MultiApp modes.
 
-!media full_solve_memory_mpi_time.svg style=width:49%;margin-left:auto;margin-right:auto;
+!media full_solve_memory_mpi_time.svg
+       style=width:49%;margin-left:auto;margin-right:auto;
+       alt=Run-time as a function of the number of samples, for different MultiApp modes.
 
 !---
 

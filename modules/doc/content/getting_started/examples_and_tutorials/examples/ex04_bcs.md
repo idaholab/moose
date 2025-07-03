@@ -29,12 +29,15 @@ in our coupled system:
 
 !media large_media/examples/ex04_bcs/dirichlet_convected.png
        style=width:50%;display:inline-flex;margin-left:0%;
+       alt=The solution for the convected quantity with coupled Dirichlet boundary conditions.
 
 !media large_media/examples/ex04_bcs/dirichlet_diffused.png
        style=width:50%;display:inline-flex;margin-left:0%;
+       alt=The solution for the diffused quantity with coupled Dirichlet boundary conditions.
 
 !media large_media/examples/ex04_bcs/dirichlet_xsec.svg
        style=width:60%;margin-left:auto;margin-right:auto;
+       alt=Cross-sectional values for the diffused and convected quantities, with coupled Dirichlet boundary conditions.
 
 ## Coupled Neumann
 
@@ -54,12 +57,15 @@ results that look like this:
 
 !media large_media/examples/ex04_bcs/neumann_convected.png
        style=width:50%;display:inline-flex;margin-left:0%;
+       alt=The solution for the convected quantity with coupled Neumann boundary conditions.
 
 !media large_media/examples/ex04_bcs/neumann_diffused.png
        style=width:50%;display:inline-flex;margin-left:0%;
+       alt=The solution for the diffused quantity with coupled Neumann boundary conditions.
 
 !media large_media/examples/ex04_bcs/neumann_xsec.svg
        style=width:60%;margin-left:auto;margin-right:auto;
+       alt=Cross-sectional values for the diffused and convected quantities, with coupled Neumann boundary conditions.
 
 
 ## Periodic
@@ -74,6 +80,7 @@ Here is a result using periodic BCs from running `periodic_bc.i`:
 
 !media large_media/examples/ex04_out_pbc.png
        style=width:50%;
+       alt=Results from a simulation using periodic boundary conditions with parsed functions.
 
 ## Complete source files
 

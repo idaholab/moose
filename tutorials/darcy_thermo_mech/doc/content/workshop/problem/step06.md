@@ -182,6 +182,7 @@ cd problems
 ## Step 6a: Results
 
 !media darcy_thermo_mech/step06a_result.webm
+       alt=Time evolution of temperature and pressure fields, obtained by running the simulation above.
 
 !---
 
@@ -218,6 +219,7 @@ cd problems
 ## Step 6b: Results
 
 !media darcy_thermo_mech/step06b_result.mp4
+       alt=Time evolution of temperature and pressure fields with time-varying input, obtained by running the simulation above.
 
 !---
 

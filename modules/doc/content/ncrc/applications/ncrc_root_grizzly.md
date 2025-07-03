@@ -13,4 +13,5 @@ Grizzly models the degradation due to normal operating conditions of nuclear pow
 
 !col small=8 medium=4 large=4
 !media application_logos/grizzly_description.png style=width:100%;
+       alt=Sample output from Grizzly simulations.
 !row-end!

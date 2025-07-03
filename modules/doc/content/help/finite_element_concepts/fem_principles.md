@@ -1,4 +1,5 @@
-# Polynomial Fitting
+# Finite Element Concepts
+## Polynomial Fitting
 
 - To introduce the idea of finding coefficients to functions, let's consider simple polynomial fitting.
 - In polynomial fitting (or interpolation) you have a set of points and you are looking for the coefficients to a function that has the form:
@@ -15,7 +16,7 @@
 - $f(x)$ is unique and interpolary if $d+1$ is the same as the number of points you need to fit.
 - Need to solve a linear system to find the coefficients.
 
-# Example
+### Example
 
 - Define a set of points:
   \begin{equation}
@@ -72,6 +73,7 @@
 
 !media media/finite_element_concepts/quadratic-polynomial.jpg
        style=width:50%;
+       alt=A quadratic curve fit to the three data points, above.
 
 - The coefficients themselves don't mean anything, by themselves they are just numbers.
 - The solution is *not* the coefficients, but rather the *function* they create when they are multiplied by their respective basis functions and summed.
@@ -81,7 +83,7 @@
   where the $c_i$ correspond to the coefficients in the solution vector, and the $g_i$ are the respective functions.
 - Finally, note that the matrix consists of evaluating the functions at the points.
 
-# Finite Elements Simplified
+## Finite Elements Simplified
 
 - A method for numerically approximating the solution to Partial Differential Equations (PDEs).
 - Works by finding a solution function that is made up of "shape functions" multiplied by coefficients and added together.
@@ -92,7 +94,7 @@
 - FEM is widely applicable for a large range of PDEs and domains.
 - It is supported by a rich mathematical theory with proofs about accuracy, stability, convergence and solution uniqueness.
 
-# Weak Form
+## Weak Form
 
 - Using FE to find the solution to a PDE starts with forming a "weighted residual" or "variational statement" or "weak form".
     - We typically refer to this process as generating a Weak Form.
@@ -106,7 +108,7 @@
 4.  Integrate the whole equation over the domain $\Omega$.
 5.  Integrate by parts (use the divergence theorem) to get the desired derivative order on your functions and simultaneously generate boundary integrals.
 
-# Refresher: The divergence theorem
+### Refresher: The divergence theorem
 
 - Transforms a volume integral into a surface integral:
   \begin{equation}
@@ -136,7 +138,7 @@
   \end{equation}
 - [http://en.wikipedia.org/wiki/Divergence_theorem](http://en.wikipedia.org/wiki/Divergence_theorem)
 
-# Example: Convection Diffusion
+### Example: Convection Diffusion
 
 - Write the strong form of the equation:
   \begin{equation}
