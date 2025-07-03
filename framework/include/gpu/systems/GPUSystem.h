@@ -308,7 +308,7 @@ public:
    * @returns The quadrature value
    */
   KOKKOS_FUNCTION auto &
-  getVectorQpValue(const ElementInfo & info, dof_id_type qp, unsigned int var, TagID tag) const
+  getVectorQpValue(ElementInfo info, dof_id_type qp, unsigned int var, TagID tag) const
   {
     return _qp_solutions[tag](info.subdomain, var)[qp];
   }
@@ -321,7 +321,7 @@ public:
    * @returns The quadrature gradient
    */
   KOKKOS_FUNCTION auto &
-  getVectorQpGrad(const ElementInfo & info, dof_id_type qp, unsigned int var, TagID tag) const
+  getVectorQpGrad(ElementInfo info, dof_id_type qp, unsigned int var, TagID tag) const
   {
     return _qp_solutions_grad[tag](info.subdomain, var)[qp];
   }
@@ -334,11 +334,8 @@ public:
    * @param tag The vector tag
    * @returns The face quadrature value
    */
-  KOKKOS_FUNCTION inline auto getVectorQpValueFace(const ElementInfo & info,
-                                                   unsigned int side,
-                                                   unsigned int qp,
-                                                   unsigned int var,
-                                                   TagID tag) const;
+  KOKKOS_FUNCTION inline auto getVectorQpValueFace(
+      ElementInfo info, unsigned int side, unsigned int qp, unsigned int var, TagID tag) const;
   /**
    * Get the face quadrature gradient of a variable from a tagged vector
    * @param info The element information object
@@ -349,7 +346,7 @@ public:
    * @param tag The vector tag
    * @returns The face quadrature gradient
    */
-  KOKKOS_FUNCTION inline auto getVectorQpGradFace(const ElementInfo & info,
+  KOKKOS_FUNCTION inline auto getVectorQpGradFace(ElementInfo info,
                                                   unsigned int side,
                                                   Real33 jacobian,
                                                   unsigned int qp,
@@ -372,7 +369,7 @@ public:
    * @param info The element information object
    * @returns Whether reinit() should be called
    */
-  KOKKOS_FUNCTION inline bool needReinit(const ElementInfo & info) const;
+  KOKKOS_FUNCTION inline bool needReinit(ElementInfo info) const;
   /**
    * Compute and cache elemental quadrature values and gradients for active variables and tags
    * @param info The element information object
@@ -381,7 +378,7 @@ public:
    * @param qp_local The local quadrature point index
    */
   KOKKOS_FUNCTION inline void
-  reinit(const ElementInfo & info, Real33 jacobian, unsigned int qp, unsigned int qp_local);
+  reinit(ElementInfo info, Real33 jacobian, unsigned int qp, unsigned int qp_local);
 #endif
 
   /**
@@ -540,7 +537,7 @@ private:
 #ifdef MOOSE_KOKKOS_SCOPE
 KOKKOS_FUNCTION inline auto
 System::getVectorQpValueFace(
-    const ElementInfo & info, unsigned int side, unsigned int qp, unsigned int var, TagID tag) const
+    ElementInfo info, unsigned int side, unsigned int qp, unsigned int var, TagID tag) const
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
@@ -554,7 +551,7 @@ System::getVectorQpValueFace(
   return value;
 }
 KOKKOS_FUNCTION inline auto
-System::getVectorQpGradFace(const ElementInfo & info,
+System::getVectorQpGradFace(ElementInfo info,
                             unsigned int side,
                             Real33 jacobian,
                             unsigned int qp,
@@ -575,7 +572,7 @@ System::getVectorQpGradFace(const ElementInfo & info,
 }
 
 KOKKOS_FUNCTION inline bool
-System::needReinit(const ElementInfo & info) const
+System::needReinit(ElementInfo info) const
 {
   auto subdomain = info.subdomain;
 
@@ -592,7 +589,7 @@ System::needReinit(const ElementInfo & info) const
   return false;
 }
 KOKKOS_FUNCTION inline void
-System::reinit(const ElementInfo & info, Real33 jacobian, unsigned int qp, unsigned int qp_local)
+System::reinit(ElementInfo info, Real33 jacobian, unsigned int qp, unsigned int qp_local)
 {
   auto elem = info.id;
   auto elem_type = info.type;
