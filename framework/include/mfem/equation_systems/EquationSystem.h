@@ -114,7 +114,7 @@ protected:
   Moose::MFEM::NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
       _mblfs; // named according to trial variable
-
+  
   /**
    * Template method for applying BilinearFormIntegrators on domains from kernels to a BilinearForm,
    * or MixedBilinearForm
@@ -183,7 +183,7 @@ EquationSystem::ApplyDomainBLFIntegrators(
     auto kernels = kernels_map.GetRef(test_var_name).GetRef(trial_var_name);
     for (auto & kernel : kernels)
     {
-      mfem::BilinearFormIntegrator * integ = kernel->createBFIntegrator();
+      mfem::BilinearFormIntegrator * integ = kernel->createBFIntegrator().first;
       if (integ != nullptr)
       {
         kernel->isSubdomainRestricted()
@@ -206,7 +206,7 @@ EquationSystem::ApplyDomainLFIntegrators(
     auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
     for (auto & kernel : kernels)
     {
-      mfem::LinearFormIntegrator * integ = kernel->createLFIntegrator();
+      mfem::LinearFormIntegrator * integ = kernel->createLFIntegrator().first;
       if (integ != nullptr)
       {
         kernel->isSubdomainRestricted()
@@ -233,7 +233,7 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(trial_var_name);
     for (auto & bc : bcs)
     {
-      mfem::BilinearFormIntegrator * integ = bc->createBFIntegrator();
+      mfem::BilinearFormIntegrator * integ = bc->createBFIntegrator().first;
       if (integ != nullptr)
       {
         bc->isBoundaryRestricted()
@@ -257,7 +257,7 @@ EquationSystem::ApplyBoundaryLFIntegrators(
     auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
     for (auto & bc : bcs)
     {
-      mfem::LinearFormIntegrator * integ = bc->createLFIntegrator();
+      mfem::LinearFormIntegrator * integ = bc->createLFIntegrator().first;
       if (integ != nullptr)
       {
         bc->isBoundaryRestricted()

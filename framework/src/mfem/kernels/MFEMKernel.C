@@ -23,6 +23,16 @@ MFEMKernel::validParams()
   params.registerBase("Kernel");
   params.addParam<VariableName>("variable",
                                 "Variable labelling the weak form this kernel is added to");
+<<<<<<< HEAD
+=======
+  MooseEnum numeric_types("real complex", "real");
+  params.addParam<MooseEnum>("numeric_type", numeric_types, "Number type used for the problem. Can be real or complex.");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              {},
+                                              "The list of blocks (ids) that this "
+                                              "object will be applied to. Leave empty to apply "
+                                              "to all blocks.");
+>>>>>>> 858d7ab200 (Add complex option to kernels and integrated BCs)
   return params;
 }
 
