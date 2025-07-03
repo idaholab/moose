@@ -49,6 +49,21 @@ Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & syste
 }
 
 void
+Matrix::destroy()
+{
+  _matrix = PETSC_NULLPTR;
+  _nr = 0;
+
+  _col_idx.destroy();
+  _row_idx.destroy();
+  _row_ptr.destroy();
+  _val.destroy();
+
+  _is_host = false;
+  _is_alloc = false;
+}
+
+void
 Matrix::close()
 {
   if (_is_host)
