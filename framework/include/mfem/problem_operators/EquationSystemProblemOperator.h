@@ -52,7 +52,6 @@ private:
   std::shared_ptr<MFEMEstimator>               _estimator;
   std::unique_ptr<mfem::ThresholdRefiner>      _refiner;
 
-
   /**
   * For now, use a bool to determine whether we use amr
   */
