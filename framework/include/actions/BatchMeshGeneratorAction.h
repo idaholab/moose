@@ -41,12 +41,21 @@ public:
     USHORT,
     INT,
     UINT,
+    LONG,
+    ULONG,
+    LONGLONG,
+    ULONGLONG,
+    DOFIDTYPE,
+    BDRYIDTYPE,
+    SDIDTYPE,
     STRING,
     SDNAME,
     BDRYNAME,
     MGNAME,
     MFNAME,
-    ENUM
+    ENUM,
+    REALVECTORVALUE,
+    POINT
   };
 
 protected:
@@ -60,13 +69,13 @@ protected:
   /// Types of the scalar input parameters to vary in the batch generation
   const std::vector<ParameterType> _batch_scalar_input_param_types;
   /// Values of the scalar input parameters to vary in the batch generation
-  const std::vector<std::vector<std::string>> _batch_scalar_input_param_values;
+  std::vector<std::vector<std::string>> _batch_scalar_input_param_values;
   /// Names of the vector input parameters to vary in the batch generation
   const std::vector<std::string> _batch_vector_input_param_names;
   /// Types of the vector input parameters to vary in the batch generation
   const std::vector<ParameterType> _batch_vector_input_param_types;
   /// Values of the vector input parameters to vary in the batch generation
-  const std::vector<std::vector<std::vector<std::string>>> _batch_vector_input_param_values;
+  std::vector<std::vector<std::vector<std::string>>> _batch_vector_input_param_values;
   /// Method to use for generating the batch parameters
   const MultiBatchParamsMethod _multi_batch_params_method;
   /// Names of the vector input parameters to keep fixed in the batch generation
@@ -74,13 +83,13 @@ protected:
   /// Types of the vector input parameters to keep fixed in the batch generation
   const std::vector<ParameterType> _fixed_scalar_input_param_types;
   /// Values of the vector input parameters to keep fixed in the batch generation
-  const std::vector<std::string> _fixed_scalar_input_param_values;
+  std::vector<std::string> _fixed_scalar_input_param_values;
   /// Names of the vector input parameters to keep fixed in the batch generation
   const std::vector<std::string> _fixed_vector_input_param_names;
   /// Types of the vector input parameters to keep fixed in the batch generation
   const std::vector<ParameterType> _fixed_vector_input_param_types;
   /// Values of the vector input parameters to keep fixed in the batch generation
-  const std::vector<std::vector<std::string>> _fixed_vector_input_param_values;
+  std::vector<std::vector<std::string>> _fixed_vector_input_param_values;
   /// Flag to indicate if the decomposed index should be used in the mesh name
   const bool _use_decomposed_index;
 
@@ -94,7 +103,7 @@ protected:
   void setScalarParams(InputParameters & params,
                        const std::string & param_name,
                        const ParameterType & param_type,
-                       const std::string & param_value);
+                       const std::string & param_value) const;
 
   /**
    * Set the vector input parameters for a unit mesh generator
@@ -106,7 +115,7 @@ protected:
   void setVectorParams(InputParameters & params,
                        const std::string & param_name,
                        const ParameterType & param_type,
-                       const std::vector<std::string> & param_value);
+                       const std::vector<std::string> & param_value) const;
 
   /**
    * Convert a vector of strings to a numeric vector and set it in the InputParameters object
@@ -117,7 +126,19 @@ protected:
   template <typename T>
   void convertAndSetNumericVector(InputParameters & params,
                                   const std::string & param_name,
-                                  const std::vector<std::string> & param_value);
+                                  const std::vector<std::string> & param_value) const;
+
+  /**
+   * Convert a vector of strings to a compound real scalar type vector and set it in the
+   * InputParameters object
+   * @param params InputParameters object to set the parameter
+   * @param param_name Name of the parameter to set
+   * @param param_value Value of the parameter to set in string format
+   */
+  template <typename T>
+  void convertAndSetCompoundRealScalarVector(InputParameters & params,
+                                             const std::string & param_name,
+                                             const std::vector<std::string> & param_value) const;
 
   /**
    * Convert a vector of strings to a string-derived type vector and set it in the InputParameters
@@ -129,7 +150,7 @@ protected:
   template <typename T>
   void convertAndSetStringLikeVector(InputParameters & params,
                                      const std::string & param_name,
-                                     const std::vector<std::string> & param_value);
+                                     const std::vector<std::string> & param_value) const;
 
   /**
    * Check the types of the input parameters are valid, otherwise throw an error
@@ -143,7 +164,7 @@ protected:
                                  const std::string & action_input_param_name,
                                  const std::vector<std::string> & param_names,
                                  const std::vector<ParameterType> & param_types,
-                                 const bool & is_vector = false);
+                                 const bool & is_vector = false) const;
 
   /**
    * Check the type of the input parameter is valid, otherwise throw an error
@@ -156,5 +177,20 @@ protected:
   void checkInputParameterType(const InputParameters & params,
                                const std::string & action_input_param_name,
                                const std::string & param_name,
-                               const bool & is_vector);
+                               const bool & is_vector) const;
+
+  /**
+   * Convert a string to a compound real scalar type
+   * @param str String to convert
+   * @return Converted compound real scalar type
+   */
+  template <typename T>
+  T convertStringToCompoundRealScalar(const std::string & str) const;
+
+  /**
+   * Check if the parameter type is a compound real scalar type
+   * @param param_type Parameter type to check
+   * @return True if the parameter type is a compound real scalar type, false otherwise
+   */
+  bool isCompoundRealScalarType(const ParameterType & param_type) const;
 };
