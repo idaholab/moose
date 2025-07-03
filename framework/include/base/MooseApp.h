@@ -147,7 +147,7 @@ public:
    * Get the parameters of the object
    * @return The parameters of the object
    */
-  InputParameters & parameters() { return _pars; }
+  const InputParameters & parameters() { return _pars; }
 
   /**
    * The RankMap is a useful object for determining how the processes
@@ -1176,7 +1176,7 @@ protected:
   //@}
 
   /// Parameters of this object
-  InputParameters _pars;
+  const InputParameters & _pars;
 
   /// The string representation of the type of this object as registered (see registerApp(AppName))
   const std::string _type;

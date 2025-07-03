@@ -36,6 +36,26 @@ AppFactory::getValidParams(const std::string & name)
   mooseError(std::string("A '") + name + "' is not a registered object\n\n");
 }
 
+const InputParameters &
+AppFactory::getAppParams(const InputParameters & params) const
+{
+  const auto id = getAppParamsID(params);
+  if (const auto it = _input_parameters.find(id); it != _input_parameters.end())
+    return *it->second;
+  mooseError("AppFactory::getAppParams(): Parameters for application with ID ", id, " not found");
+}
+
+void
+AppFactory::clearAppParams(const InputParameters & params, const ClearAppParamsKey)
+{
+  const auto id = getAppParamsID(params);
+  if (const auto it = _input_parameters.find(id); it != _input_parameters.end())
+    _input_parameters.erase(it);
+  else
+    mooseError(
+        "AppFactory::clearAppParams(): Parameters for application with ID ", id, " not found");
+}
+
 MooseAppPtr
 AppFactory::createAppShared(int argc, char ** argv, std::unique_ptr<Parser> parser)
 {
@@ -118,9 +138,6 @@ AppFactory::createShared(const std::string & app_type,
   // Take the app_type and add it to the parameters so that it can be retrieved in the Application
   parameters.set<std::string>("_type") = app_type;
 
-  // Check to make sure that all required parameters are supplied
-  parameters.finalize("");
-
   auto comm = std::make_shared<Parallel::Communicator>(comm_world_in);
 
   parameters.set<std::shared_ptr<Parallel::Communicator>>("_comm") = comm;
@@ -135,9 +152,16 @@ AppFactory::createShared(const std::string & app_type,
 
   command_line->populateCommandLineParams(parameters);
 
+  // Historically we decided to non-const copy construct all application parameters. In
+  // order to get around that while apps are fixed (by taking a const reference instead),
+  // we store the app params here and the MooseApp constructor will query the InputParameters
+  // owned by ths factory instead of the ones that are passed to it (likely a const ref to a
+  // copy of the derived app's parmeters)
+  const auto & params = storeAppParams(parameters);
+
   build_info->_app_creation_count++;
 
-  return build_info->build(parameters);
+  return build_info->build(params);
 }
 
 std::size_t
@@ -149,4 +173,27 @@ AppFactory::createdAppCount(const std::string & app_type) const
     mooseError("AppFactory::createdAppCount(): '", app_type, "' is not a registered app");
 
   return it->second->_app_creation_count;
+}
+
+const InputParameters &
+AppFactory::storeAppParams(InputParameters & params)
+{
+  const std::size_t next_id =
+      _input_parameters.size() ? (std::prev(_input_parameters.end())->first + 1) : 0;
+  params.addPrivateParam<std::size_t>("_app_params_id", next_id);
+  const auto it_inserted_pair =
+      _input_parameters.emplace(next_id, std::make_unique<InputParameters>(params));
+  mooseAssert(it_inserted_pair.second, "Already exists");
+  auto & stored_params = *it_inserted_pair.first->second;
+  stored_params.finalize("");
+  return stored_params;
+}
+
+std::size_t
+AppFactory::getAppParamsID(const InputParameters & params) const
+{
+  if (!params.have_parameter<std::size_t>("_app_params_id"))
+    mooseError("AppFactory::getAppParamsID(): Invalid application parameters (missing "
+               "'_app_params_id')");
+  return params.get<std::size_t>("_app_params_id");
 }
