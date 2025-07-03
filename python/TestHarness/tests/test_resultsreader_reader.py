@@ -11,6 +11,7 @@ import unittest
 from datetime import datetime
 from mock import patch
 from typing import Tuple
+from dataclasses import dataclass
 import os
 import json
 
@@ -31,7 +32,7 @@ PROD_DATABASE_NAME = 'civet_tests_moose_performance'
 PROD_GET_TEST_RESULTS_ARGS = {'folder_name': 'simple_transient_diffusion',
                               'test_name': 'test'}
 
-# Production database name for testing real results
+# Test database name for testing pull request results
 TEST_DATABASE_NAME = 'civet_tests_moose_test_results'
 # Arguments for using the production database for getting real results
 TEST_GET_TEST_RESULTS_ARGS = {'folder_name': 'tests/test_harness',
@@ -59,31 +60,43 @@ class TestResultsReaderReader(unittest.TestCase):
         Helper for building the gold file for testing getTestResults(),
         using a live production database
         """
+        @dataclass
+        class GoldTest:
+            id: str
+            civet_version: int
+
         # Static set of test IDs (test entires in the database) that we
         # will always test with
-        gold_test_ids = [# civet version 0 tests
-                         '685b0fdf4110325560e2cc2f',
-                         '6857a572bbcb03d9dccfb1a7',
-                         # civet version 1 tests
-                         '685c623b4022db39df9590c3']
+        gold_tests = [GoldTest(id='685b0fdf4110325560e2cc2f', civet_version=None),
+                      GoldTest(id='6857a572bbcb03d9dccfb1a7', civet_version=None),
+                      GoldTest(id='685c623b4022db39df9590c3', civet_version=None),
+                      # bump to civet_version=2
+                      GoldTest(id='6865744be52cb57c4742666d', civet_version=2)]
+
         # This can be set to true once to overwrite the gold file
         rewrite_gold = False
 
         reader = TestHarnessResultsReader(PROD_DATABASE_NAME)
 
         # Get only the specific tests that we've golded on
-        id_filter = {"$or": [{"_id": ObjectId(id)} for id in gold_test_ids]}
+        id_filter = {"$or": [{"_id": ObjectId(test.id)} for test in gold_tests]}
         tests = reader._getTestsEntry(**PROD_GET_TEST_RESULTS_ARGS, filter=id_filter)
-        self.assertEqual(len(tests), len(gold_test_ids))
+        self.assertEqual(len(tests), len(gold_tests))
 
         # Load the results separately
         results = {}
-        for test in tests:
+        for gold_test in gold_tests:
+            test_filter = [v for v in tests if v['_id'] == ObjectId(gold_test.id)]
+            self.assertEqual(len(test_filter), 1)
+            test = test_filter[0]
             result = reader._getResultsEntry(test['result_id'])
             results[str(result['_id'])] = result
 
             # Remove json_metadata as it's lengthy binary
             test['tester']['json_metadata'] = {}
+
+            # Checks
+            self.assertEqual(test.get('civet_version'), gold_test.civet_version)
 
         # Dump the values so that we can load them
         values = {'tests': tests, 'results': results}
@@ -185,7 +198,7 @@ class TestResultsReaderReader(unittest.TestCase):
         results = self._testGetTestResults(reader, limit=limit)
         self.assertEqual(len(results), limit)
 
-    @unittest.skipIf(HAS_AUTH, f"Skipping because authentication is not available")
+    @unittest.skipIf(HAS_AUTH, f"Skipping because authentication is available")
     def testMissingClient(self):
         """
         Tests creating the TestHarnessResultsReader without a client/auth
