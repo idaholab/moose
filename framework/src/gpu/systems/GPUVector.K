@@ -134,6 +134,29 @@ Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & syst
 }
 
 void
+Vector::destroy()
+{
+  if (!_is_alloc)
+    return;
+
+  _global_vector = PETSC_NULLPTR;
+  _local_vector = PETSC_NULLPTR;
+  _array = PETSC_NULLPTR;
+  _system = nullptr;
+  _comm = nullptr;
+
+  _send.destroy();
+  _recv.destroy();
+  _local.destroy();
+  _ghost.destroy();
+
+  _assemble = false;
+  _is_ghosted = false;
+  _is_host = false;
+  _is_alloc = false;
+}
+
+void
 Vector::copy(MemcpyKind dir)
 {
   if (_assemble)
