@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #pragma once
 
@@ -27,9 +28,9 @@ public:
   /// @param x Reference to the first set of points
   /// @param xp Reference to the second set of points
   /// @param is_self_covariance Switch to enable adding the noise variance to the diagonal of the covariance matrix
-  virtual void computeCovarianceMatrix(RealEigenMatrix & K,
-                                       const RealEigenMatrix & x,
-                                       const RealEigenMatrix & xp,
+  virtual void computeCovarianceMatrix(torch::Tensor & K,
+                                       const torch::Tensor & x,
+                                       const torch::Tensor & xp,
                                        const bool is_self_covariance) const = 0;
 
   /// Load some hyperparameters into the local maps contained in this object.
@@ -72,8 +73,8 @@ public:
   /// @param hyper_param_name The name of the hyperparameter
   /// @param ind The index within the hyperparameter. 0 if it is a scalar parameter.
   ///            If it is a vector parameter, it should be the index within the vector.
-  virtual bool computedKdhyper(RealEigenMatrix & dKdhp,
-                               const RealEigenMatrix & x,
+  virtual bool computedKdhyper(torch::Tensor & dKdhp,
+                               const torch::Tensor & x,
                                const std::string & hyper_param_name,
                                unsigned int ind) const;
 
@@ -130,3 +131,5 @@ protected:
   /// Vector of pointers to the dependent covariance functions
   std::vector<CovarianceFunctionBase *> _covariance_functions;
 };
+
+#endif

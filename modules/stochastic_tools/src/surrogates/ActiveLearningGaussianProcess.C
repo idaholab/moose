@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "ActiveLearningGaussianProcess.h"
 
@@ -49,7 +50,7 @@ ActiveLearningGaussianProcess::ActiveLearningGaussianProcess(const InputParamete
     CovarianceInterface(parameters),
     SurrogateModelInterface(this),
     _gp(declareModelData<StochasticTools::GaussianProcess>("_gp")),
-    _training_params(declareModelData<RealEigenMatrix>("_training_params")),
+    _training_params(declareModelData<torch::Tensor>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
     _optimization_opts(StochasticTools::GaussianProcess::GPOptimizerOptions(
@@ -79,15 +80,17 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
   if (inputs.empty())
     mooseError("There is no data for retraining.");
 
-  RealEigenMatrix training_data;
-  _training_params.setZero(outputs.size(), inputs[0].size());
-  training_data.setZero(outputs.size(), 1);
+  _training_params = torch::zeros({long(outputs.size()), long(inputs[0].size())}, at::kDouble);
+  torch::Tensor training_data = torch::zeros({long(outputs.size()), 1}, at::kDouble);
+
+  auto params_accessor = _training_params.accessor<Real, 2>();
+  auto data_accessor = training_data.accessor<Real, 2>();
 
   for (unsigned int i = 0; i < outputs.size(); ++i)
   {
-    training_data(i, 0) = outputs[i];
+    data_accessor[i][0] = outputs[i];
     for (unsigned int j = 0; j < inputs[i].size(); ++j)
-      _training_params(i, j) = inputs[i][j];
+      params_accessor[i][j] = inputs[i][j];
   }
 
   // Standardize (center and scale) training params
@@ -107,3 +110,5 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
   // Setup the covariance
   _gp.setupCovarianceMatrix(_training_params, training_data, _optimization_opts);
 }
+
+#endif
