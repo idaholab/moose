@@ -20,6 +20,7 @@ public:
   MFEMVectorDirichletBC(const InputParameters & parameters);
   ~MFEMVectorDirichletBC() override = default;
   void ApplyBC(mfem::GridFunction & gridfunc) override;
+  void ApplyComplexBC(mfem::ComplexGridFunction & gridfunc) override;
 };
 
 #endif
