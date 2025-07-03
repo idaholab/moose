@@ -77,18 +77,14 @@ MFEMProblem::addIndicator(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
 
   const UserObject * est_uo = &(getUserObjectBase(name));
-  if ( dynamic_cast<const MFEMEstimator *>(est_uo) != nullptr )
+  if (dynamic_cast<const MFEMEstimator *>(est_uo) != nullptr)
   {
-    std::shared_ptr<MooseObject> object_ptr  = getUserObject<MFEMEstimator>(name).getSharedPtr();
+    std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMEstimator>(name).getSharedPtr();
     std::shared_ptr<MFEMEstimator> estimator = std::dynamic_pointer_cast<MFEMEstimator>(object_ptr);
 
     // fetch a pointer to the executioner; use this as our way to access the problem operator
     auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
-    if (
-      mfem_exec_ptr != nullptr
-      and
-      mfem_exec_ptr->addEstimator( estimator )
-    )
+    if (mfem_exec_ptr != nullptr and mfem_exec_ptr->addEstimator(estimator))
     {
       // success
     }
@@ -98,7 +94,7 @@ MFEMProblem::addIndicator(const std::string & user_object_name,
       mooseError("Cannot add estimator :()");
     }
   }
-  
+
   else
   {
     mooseError("Cannot add estimator :()");
@@ -632,7 +628,7 @@ MFEMProblem::updateAfterRefinement()
 
   updateFESpaces();
 
-  if ( _problem_data.pmesh->Nonconforming() )
+  if (_problem_data.pmesh->Nonconforming())
   {
     _problem_data.pmesh->Rebalance();
     // Update FESpaces again to account for rebalancing

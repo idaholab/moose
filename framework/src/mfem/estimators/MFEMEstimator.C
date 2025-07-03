@@ -19,18 +19,19 @@ MFEMEstimator::validParams()
   return params;
 }
 
-
 MFEMEstimator::MFEMEstimator(const InputParameters & params)
-  : MFEMGeneralUserObject(params), _test_var_name( getParam<std::string>("variable") ),
-    _kernel_name( getParam<std::string>("kernel") ), _fe_space_name( getParam<std::string>("fe_space") )
-{}
+  : MFEMGeneralUserObject(params),
+    _test_var_name(getParam<std::string>("variable")),
+    _kernel_name(getParam<std::string>("kernel")),
+    _fe_space_name(getParam<std::string>("fe_space"))
+{
+}
 
 std::shared_ptr<mfem::ParFiniteElementSpace>
 MFEMEstimator::getFESpace()
 {
   MFEMProblemData & problem = getMFEMProblem().getProblemData();
-  return problem.fespaces.GetShared( _fe_space_name );
+  return problem.fespaces.GetShared(_fe_space_name);
 }
-
 
 #endif

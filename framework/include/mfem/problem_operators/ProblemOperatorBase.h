@@ -28,7 +28,7 @@ public:
   virtual void Solve() = 0;
   virtual void UniformRefinement( int num_refinements=1 );
 
-  virtual int  GetProblemSize();
+  virtual int GetProblemSize();
 
   mfem::Array<int> _block_true_offsets;
   mfem::Array<int> _global_block_true_offsets;

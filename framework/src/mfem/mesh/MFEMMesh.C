@@ -29,7 +29,8 @@ MFEMMesh::validParams()
   params.addParam<unsigned int>(
       "parallel_refine", 0, "Number of parallel refinements to perform on the mesh.");
   params.addParam<std::string>("displacement", "Optional variable to use for mesh displacement.");
-  params.addParam<bool>("nc_simplices", true, "For simplicial meshes, enable/disable nonconforming refinement.");
+  params.addParam<bool>(
+      "nc_simplices", true, "For simplicial meshes, enable/disable nonconforming refinement.");
 
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
@@ -60,13 +61,17 @@ MFEMMesh::buildMesh()
                     isParamSetByUser("serial_refine") ? getParam<unsigned int>("serial_refine")
                                                       : getParam<unsigned int>("uniform_refine"));
 
-  if ( isParamSetByUser("reorder_mesh") )
+  if (isParamSetByUser("reorder_mesh"))
   {
     mfem::Array<int> ordering;
     switch (getParam<int>("reorder_mesh"))
     {
-      case 1: mfem_ser_mesh.GetHilbertElementOrdering(ordering); break;
-      case 2: mfem_ser_mesh.GetGeckoElementOrdering(ordering); break;
+      case 1:
+        mfem_ser_mesh.GetHilbertElementOrdering(ordering);
+        break;
+      case 2:
+        mfem_ser_mesh.GetGeckoElementOrdering(ordering);
+        break;
     }
 
     mfem_ser_mesh.ReorderElements(ordering);
