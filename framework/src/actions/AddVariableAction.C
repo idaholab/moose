@@ -160,7 +160,7 @@ AddVariableAction::act()
   // Set the initial condition
   if (isParamValid("initial_condition"))
   {
-    const auto value = getParam<std::vector<Real>>("initial_condition");
+    const auto & value = getParam<std::vector<Real>>("initial_condition");
     createInitialConditionAction(value);
   }
 }
