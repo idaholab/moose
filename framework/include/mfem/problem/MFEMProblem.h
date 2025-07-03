@@ -136,6 +136,10 @@ public:
                    const std::string & name,
                    InputParameters & parameters) override;
 
+  void addInitialCondition(const std::string & ic_name,
+                           const std::string & name,
+                           InputParameters & parameters) override;
+
   /**
    * Override of ExternalProblem::addPostprocessor. In addition to
    * creating the postprocessor object, it will create a coefficient
@@ -199,6 +203,11 @@ public:
   Moose::FEBackend feBackend() const override { return Moose::FEBackend::MFEM; }
 
   std::string solverTypeString(unsigned int solver_sys_num) override;
+
+  /**
+   * @returns a shared pointer to an MFEM parallel grid function
+   */
+  std::shared_ptr<mfem::ParGridFunction> getGridFunction(const std::string & name);
 
 protected:
   MFEMProblemData _problem_data;

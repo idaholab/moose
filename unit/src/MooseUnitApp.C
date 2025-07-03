@@ -13,8 +13,7 @@
 InputParameters
 MooseUnitApp::validParams()
 {
-  InputParameters params = MooseApp::validParams();
-  return params;
+  return MooseApp::validParams();
 }
 
 MooseUnitApp::MooseUnitApp(const InputParameters & parameters) : MooseApp(parameters)
