@@ -33,4 +33,12 @@ MFEMVectorNormalDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
   gridfunc.ProjectBdrCoefficientNormal(_vec_coef, getBoundaryMarkers());
 }
 
+void
+MFEMVectorNormalDirichletBC::ApplyComplexBC(mfem::ComplexGridFunction & gridfunc)
+{
+  std::cout << "FIX ISSUE WITH COMPLEX COEFFICIENTS" << std::endl;
+  gridfunc.ProjectBdrCoefficientNormal(_vec_coef, _vec_coef, getBoundaries());
+}
+
+
 #endif
