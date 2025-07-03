@@ -77,7 +77,7 @@ P_out = 2.0e5 # Pa
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 2.2
+  CT = 2
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -85,7 +85,7 @@ P_out = 2.0e5 # Pa
   T_tol = 1.0e-4
   implicit = true
   segregated = false
-  interpolation_scheme = 'upwind'
+  verbose_subchannel = true
 []
 
 [ICs]
