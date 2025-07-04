@@ -39,7 +39,6 @@ ComplexEquationSystem::BuildEquationSystem()
   BuildLinearForms();
 }
 
-
 void
 ComplexEquationSystem::BuildLinearForms()
 {
@@ -87,7 +86,6 @@ ComplexEquationSystem::BuildBilinearForms()
 void
 ComplexEquationSystem::ApplyEssentialBCs()
 {
-  std::cout << "_test_var_names size = " << _test_var_names.size() << std::endl;
   _ess_tdof_lists.resize(_test_var_names.size());
   for (const auto i : index_range(_test_var_names))
   {
@@ -97,35 +95,22 @@ ComplexEquationSystem::ApplyEssentialBCs()
 
     // Set default value of gridfunction used in essential BC. Values
     // overwritten in applyEssentialBCs
-    std::cout << "GOT HERE" <<std::endl;
-    std::cout << "cxs size = " << _cxs.size() << std::endl;
     mfem::ParComplexGridFunction & trial_gf(*(_cxs.at(i)));
-        std::cout << "GOT HERE2" <<std::endl;
-
     mfem::ParComplexGridFunction & trial_gf_time_derivatives(*(_cdxdts.at(i)));
-        std::cout << "GOT HERE3"<< std::endl;
 
     auto * const pmesh = _test_pfespaces.at(i)->GetParMesh();
-        std::cout << "GOT HERE4" <<std::endl;
 
     mooseAssert(pmesh, "parallel mesh is null");
     trial_gf = 0.0;
     trial_gf_time_derivatives = 0.0;
-        std::cout << "GOT HERE5" <<std::endl;
-
 
     auto bcs = _essential_bc_map.GetRef(test_var_name);
     mfem::Array<int> global_ess_markers(pmesh->bdr_attributes.Max());
     global_ess_markers = 0;
-        std::cout << "GOT HERE6" << std::endl;
 
     for (auto & bc : bcs)
     {
-            std::cout << "GOT HERE7" << std::endl;
-
       bc->ApplyComplexBC(trial_gf);
-          std::cout << "GOT HERE8" << std::endl;
-
 
       mfem::Array<int> ess_bdrs(bc->getBoundaries());
       for (auto it = 0; it != pmesh->bdr_attributes.Max(); ++it)
@@ -164,7 +149,7 @@ ComplexEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
                                         mfem::BlockVector & trueX,
                                         mfem::BlockVector & trueRHS)
 {
-
+  mooseError("ComplexEquationSystem does not support legacy assembly.");
   // Allocate block operator
   DeleteAllBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
@@ -192,6 +177,19 @@ ComplexEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
   // Create monolithic matrix
   op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
 }
+
+void
+ComplexEquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
+                                          Moose::MFEM::ComplexGridFunctions & gridfunctions)
+{
+  for (const auto i : index_range(_trial_var_names))
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    trueX.GetBlock(i).SyncAliasMemory(trueX);
+    gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
+  }
+}
+
 
 }
 
