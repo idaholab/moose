@@ -1,0 +1,54 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifdef MFEM_ENABLED
+
+#pragma once
+#include "EquationSystemProblemOperator.h"
+
+namespace Moose::MFEM
+{
+/// Steady-state problem operator with an equation system.
+class ComplexEquationSystemProblemOperator : public EquationSystemProblemOperator
+{
+ 
+public:
+  ComplexEquationSystemProblemOperator(MFEMProblemData & problem)
+    : EquationSystemProblemOperator(problem)
+  {
+    auto eqn_system = std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(problem.eqn_system);
+    if (!eqn_system)
+      mooseError("ComplexEquationSystemProblemOperator requires a ComplexEquationSystem, but the provided equation system is not of that type.");
+    else
+      _equation_system = eqn_system;
+  }
+
+  void SetGridFunctions() override;
+  void Init(mfem::BlockVector & X) override;
+  virtual void Solve(mfem::Vector & X) override;
+
+  [[nodiscard]] Moose::MFEM::ComplexEquationSystem * GetEquationSystem() const
+  {
+    if (!_equation_system)
+    {
+      MFEM_ABORT("No equation system has been added to ProblemOperator.");
+    }
+
+    return _equation_system.get();
+  }
+
+private:
+  std::shared_ptr<Moose::MFEM::ComplexEquationSystem> _equation_system{nullptr};
+  std::vector<mfem::ParComplexGridFunction *> _cpx_test_variables;
+  std::vector<mfem::ParComplexGridFunction *> _cpx_trial_variables;
+};
+
+} // namespace Moose::MFEM
+
+#endif

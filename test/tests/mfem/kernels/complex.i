@@ -27,6 +27,7 @@
   type = MFEMSteady
   device = cpu
   numeric_type = complex
+  assembly_level = full
 []
 
 [Kernels]
