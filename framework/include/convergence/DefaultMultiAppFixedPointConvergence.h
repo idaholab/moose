@@ -33,6 +33,10 @@ protected:
   /// Computes and prints the user-specified postprocessor assessing convergence
   void computeCustomConvergencePostprocessor(unsigned int iter);
 
+  /// Minimum fixed point iterations
+  const unsigned int _min_fixed_point_its;
+  /// Maximum fixed point iterations
+  const unsigned int _max_fixed_point_its;
   /// Whether or not to use residual norm to check the fixed point convergence
   const bool _has_fixed_point_norm;
   /// Whether or not we force evaluation of residual norms even without multiapps

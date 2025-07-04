@@ -23,15 +23,7 @@ SteffensenSolve::validParams()
   return params;
 }
 
-SteffensenSolve::SteffensenSolve(Executioner & ex) : FixedPointSolve(ex)
-{
-  allocateStorage(true);
-
-  // Steffensen method uses half-steps
-  if (!parameters().isParamSetByAddParam("fixed_point_min_its"))
-    _min_fixed_point_its *= 2;
-  _max_fixed_point_its *= 2;
-}
+SteffensenSolve::SteffensenSolve(Executioner & ex) : FixedPointSolve(ex) { allocateStorage(true); }
 
 void
 SteffensenSolve::allocateStorage(const bool primary)
