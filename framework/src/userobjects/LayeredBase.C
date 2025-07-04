@@ -30,6 +30,10 @@ LayeredBase::validParams()
                                      "The 'bounding' positions of the layers i.e.: '0, "
                                      "1.2, 3.7, 4.2' will mean 3 layers between those "
                                      "positions.");
+  params.addRangeCheckedParam<unsigned int>("bound_uniform_splits",
+                                            "bound_uniform_splits > 0",
+                                            "The number of times the bins specified in 'bounds' "
+                                            "should be split uniformly.");
 
   MooseEnum sample_options("direct interpolate average", "direct");
   params.addParam<MooseEnum>("sample_type",
@@ -69,7 +73,7 @@ LayeredBase::validParams()
   params.addParam<Real>("direction_max",
                         "Maximum coordinate along 'direction' that bounds the layers");
   params.addParamNamesToGroup("direction num_layers bounds direction_min direction_max",
-                              "Layers extent and definition");
+                              "Layers extent and definition bound_uniform_splits");
   params.addParamNamesToGroup("sample_type average_radius cumulative positive_cumulative_direction",
                               "Value sampling / aggregating");
   return params;
@@ -116,6 +120,20 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
 
     // Make sure the bounds are sorted - we're going to depend on this
     std::sort(_layer_bounds.begin(), _layer_bounds.end());
+
+    // If requested, we uniformly split the layers.
+    if (_layered_base_params.isParamValid("bound_uniform_splits"))
+    {
+      std::vector<Real> new_bnds;
+      new_bnds.reserve(2 * (_layer_bounds.size() - 1) + 1);
+      for (unsigned int i = 0; i < _layer_bounds.size() - 1; ++i)
+      {
+        new_bnds.emplace_back(_layer_bounds[i]);
+        new_bnds.emplace_back(0.5 * (_layer_bounds[i] + _layer_bounds[i + 1]));
+        new_bnds.emplace_back(_layer_bounds[i + 1]);
+      }
+      _layer_bounds = new_bnds;
+    }
 
     _num_layers = _layer_bounds.size() - 1; // Layers are only in-between the bounds
     _direction_min = _layer_bounds.front();
