@@ -32,7 +32,6 @@ MFEMHypreAMS::validParams()
 MFEMHypreAMS::MFEMHypreAMS(const InputParameters & parameters)
   : MFEMSolverBase(parameters), _mfem_fespace(getUserObject<MFEMFESpace>("fespace"))
 {
-  mfem::Hypre::Init();
   constructSolver(parameters);
 }
 
