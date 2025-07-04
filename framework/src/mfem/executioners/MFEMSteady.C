@@ -20,6 +20,8 @@ MFEMSteady::validParams()
   InputParameters params = MFEMExecutioner::validParams();
   params.addClassDescription("Executioner for steady state MFEM problems.");
   params.addParam<Real>("time", 0.0, "System time");
+
+  params.addParam<std::string>("fe_space", "none", "FE Space to perform p-refinement in");
   return params;
 }
 
@@ -84,7 +86,17 @@ MFEMSteady::execute()
 
   // Solve equation system.
   if (_mfem_problem.shouldSolve())
+  {
     _problem_operator->Solve(_problem_data.f);
+
+    // TODO: add in a loop with user-specified conditions
+    if (_use_amr)
+    {
+      // p-refine
+      PRefine();
+      _problem_operator->Solve(_problem_data.f);
+    }
+  }
 
   // Displace mesh, if required
   _mfem_problem.displaceMesh();
@@ -96,6 +108,11 @@ MFEMSteady::execute()
   _time = _time_step;
   // Execute user objects at timestep end
   _mfem_problem.execute(EXEC_TIMESTEP_END);
+
+  // Inform objects (e.g aux kernels) that they don't need to update after this point.
+  // H/P-refinement sets this to true
+  _mfem_problem.setMeshChanged(false);
+
   _mfem_problem.outputStep(EXEC_TIMESTEP_END);
   _time = _system_time;
 
@@ -111,6 +128,52 @@ MFEMSteady::execute()
   }
 
   postExecute();
+}
+
+bool
+MFEMSteady::addEstimator(std::shared_ptr<MFEMEstimator> estimator)
+{
+  if (estimator)
+  {
+    _use_amr = true;
+    _problem_operator->AddEstimator(estimator);
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool
+MFEMSteady::PRefine()
+{
+  // Call PRefine in the problem operator
+  bool output = _problem_operator->PRefine();
+
+  UpdateAfterRefinement();
+
+  return output;
+}
+
+bool
+MFEMSteady::HRefine()
+{
+  // Call PRefine in the problem operator
+  bool output = _problem_operator->HRefine();
+
+  UpdateAfterRefinement();
+
+  return output;
+}
+
+void
+MFEMSteady::UpdateAfterRefinement()
+{
+  // Update in the mfem problem
+  _mfem_problem.updateAfterRefinement();
+
+  _problem_operator->SetGridFunctions();
 }
 
 #endif
