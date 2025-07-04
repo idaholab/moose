@@ -18,10 +18,6 @@
 
 [Variables]
   [concentration]
-    type = MFEMVariable
-    fespace = H1FESpace
-  []
-  [complex]
     type = MFEMComplexVariable
     fespace = H1FESpace
   []
@@ -30,21 +26,17 @@
 [Executioner]
   type = MFEMSteady
   device = cpu
-  numeric_type = real
+  numeric_type = complex
 []
 
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
+    numeric_type = complex
     variable = concentration
     coefficient = 1.0
   []
 []
-
-
-
-
-
 
 [BCs]
   [bottom]
@@ -60,7 +52,6 @@
     coefficient = 0.0
   []
 []
-
 
 [Preconditioner]
   [jacobi]
