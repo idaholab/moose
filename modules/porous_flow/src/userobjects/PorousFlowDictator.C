@@ -41,6 +41,9 @@ PorousFlowDictator::validParams()
                                 0,
                                 "The fluid phase number of the aqueous phase in which the "
                                 "equilibrium and kinetic chemical reactions occur");
+
+  params.addParam<SolverSystemName>("solver_sys", "Name of the solver system for the porepressure");
+  params.addParamNamesToGroup("solver_sys", "Advanced");
   return params;
 }
 

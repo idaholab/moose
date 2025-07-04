@@ -388,7 +388,8 @@ PorousFlowSinglePhaseBase::addDictator()
   std::vector<VariableName> pf_vars = _mass_fraction_vars;
   pf_vars.push_back(_pp_var);
   // Only couple if in the same nonlinear system
-  params.set<SystemBase *>("_sys") = &_problem->getSystemBase(_problem->getSystem(_pp_var).name());
+  params.set<SolverSystemName>("solver_sys") =
+      _problem->getSystemBase(_problem->getSystem(_pp_var).name()).name();
   if (_thermal &&
       (_problem->getSystem(_temperature_var[0]).number() == _problem->getSystem(_pp_var).number()))
     pf_vars.push_back(_temperature_var[0]);
