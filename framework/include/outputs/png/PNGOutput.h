@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #pragma once
 
-#include "MooseConfig.h"
 #ifdef MOOSE_HAVE_LIBPNG
 
 // pnglib includes

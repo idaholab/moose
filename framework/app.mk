@@ -300,10 +300,6 @@ ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
 $(all_app_objects) : | $(app_LINKS) $(moose_config_symlink)
 
-else
-
-$(all_app_objects) : $(moose_config)
-
 endif
 
 # Instantiate a new suffix rule for the module loader

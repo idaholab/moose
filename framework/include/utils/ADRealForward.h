@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "MooseConfig.h"
 #include "libmesh/libmesh_common.h"
 #include "metaphysicl/metaphysicl_version.h"
 
