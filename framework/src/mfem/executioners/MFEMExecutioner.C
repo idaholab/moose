@@ -32,6 +32,7 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & parameters)
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
     _problem_data(_mfem_problem.getProblemData())
 {
+  mfem::Hypre::Init();
   setDevice();
 }
 
