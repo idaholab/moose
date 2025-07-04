@@ -31,6 +31,12 @@ public:
   virtual void BuildBilinearForms() override;
   virtual void ApplyEssentialBCs() override;
 
+  virtual void
+  FormSystem(mfem::OperatorHandle & op, mfem::BlockVector & trueX, mfem::BlockVector & trueRHS) override;
+  virtual void FormLegacySystem(mfem::OperatorHandle & op,
+                                mfem::BlockVector & trueX,
+                                mfem::BlockVector & trueRHS) override;
+
 template <class FormType>
 void
 ApplyDomainBLFIntegrators(
