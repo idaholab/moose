@@ -201,7 +201,7 @@ EquationSystem::ApplyDomainLFIntegrators(
     Moose::MFEM::NamedFieldsMap<
         Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
 {
-  if (kernels_map.Has(test_var_name))
+  if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(test_var_name))
   {
     auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
     for (auto & kernel : kernels)
@@ -252,7 +252,8 @@ EquationSystem::ApplyBoundaryLFIntegrators(
         Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
         integrated_bc_map)
 {
-  if (integrated_bc_map.Has(test_var_name))
+  if (integrated_bc_map.Has(test_var_name) &&
+      integrated_bc_map.Get(test_var_name)->Has(test_var_name))
   {
     auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
     for (auto & bc : bcs)
