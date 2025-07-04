@@ -70,6 +70,7 @@ T_ambient = 300.0
 [Convergence]
   [fp_conv]
     type = DefaultMultiAppFixedPointConvergence
+    fixed_point_max_its = 15
   []
 []
 
@@ -81,7 +82,6 @@ T_ambient = 300.0
   nl_rel_tol = 1e-8
   l_tol = 1e-3
 
-  fixed_point_max_its = 15
   multiapp_fixed_point_convergence = fp_conv
 []
 

@@ -69,21 +69,6 @@ FixedPointIterationAdaptiveDT::init()
 
   if (!_fe_problem.hasMultiApps())
     mooseError("This time stepper can only be used if there are MultiApps in the problem.");
-
-  const auto & fp_solve = _executioner.fixedPointSolve();
-  const auto min_its = fp_solve.minFixedPointIts();
-  const auto max_its = fp_solve.maxFixedPointIts();
-  if (_target_max > max_its || _target_min < min_its)
-    mooseError("The specified target iteration window, [",
-               _target_min,
-               ",",
-               _target_max,
-               "], must be within the minimum and maximum number of fixed point iterations "
-               "specified for the Executioner, [",
-               min_its,
-               ",",
-               max_its,
-               "].");
 }
 
 Real

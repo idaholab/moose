@@ -26,6 +26,8 @@ DefaultMultiAppFixedPointConvergence::validParams()
 DefaultMultiAppFixedPointConvergence::DefaultMultiAppFixedPointConvergence(
     const InputParameters & parameters)
   : DefaultConvergenceBase(parameters),
+    _min_fixed_point_its(getSharedExecutionerParam<unsigned int>("fixed_point_min_its")),
+    _max_fixed_point_its(getSharedExecutionerParam<unsigned int>("fixed_point_max_its")),
     _has_fixed_point_norm(
         !getSharedExecutionerParam<bool>("disable_fixed_point_residual_norm_check")),
     _fixed_point_force_norms(getSharedExecutionerParam<bool>("fixed_point_force_norms")),
@@ -42,6 +44,9 @@ DefaultMultiAppFixedPointConvergence::DefaultMultiAppFixedPointConvergence(
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _fp_solve(getMooseApp().getExecutioner()->fixedPointSolve())
 {
+  if (_min_fixed_point_its > _max_fixed_point_its)
+    paramError("fixed_point_min_its",
+               "The minimum number of fixed point iterations may not exceed the maximum.");
   if (!_has_fixed_point_norm && parameters.isParamSetByUser("fixed_point_rel_tol"))
     paramWarning(
         "disable_fixed_point_residual_norm_check",
@@ -63,8 +68,8 @@ DefaultMultiAppFixedPointConvergence::initialize()
 
   _fixed_point_timestep_begin_norm.clear();
   _fixed_point_timestep_end_norm.clear();
-  _fixed_point_timestep_begin_norm.resize(_fp_solve.maxFixedPointIts());
-  _fixed_point_timestep_end_norm.resize(_fp_solve.maxFixedPointIts());
+  _fixed_point_timestep_begin_norm.resize(_max_fixed_point_its);
+  _fixed_point_timestep_end_norm.resize(_max_fixed_point_its);
 
   _pp_history.str("");
 
@@ -130,7 +135,7 @@ DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
                                                 _fixed_point_timestep_begin_norm,
                                                 _fixed_point_timestep_end_norm);
 
-  if (iter + 2 > _fp_solve.minFixedPointIts())
+  if (iter + 2 > _min_fixed_point_its)
   {
     Real max_norm =
         std::max(_fixed_point_timestep_begin_norm[iter], _fixed_point_timestep_end_norm[iter]);
@@ -164,7 +169,7 @@ DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
     }
   }
 
-  if (iter + 1 == _fp_solve.maxFixedPointIts())
+  if (iter + 1 == _max_fixed_point_its)
   {
     if (_accept_max_it)
     {

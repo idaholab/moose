@@ -26,12 +26,5 @@
       expect_err = 'This time stepper can only be used if there are MultiApps in the problem'
       detail = 'if it is used in an application with no sub-applications.'
     []
-    [invalid_iteration_window]
-      type = RunException
-      input = 'main.i'
-      cli_args = "Executioner/fixed_point_max_its=2 Executioner/TimeStepper/target_window=1"
-      expect_err = 'The specified target iteration window, \[5,7\], must be within the minimum and maximum number of fixed point iterations specified for the Executioner, \[1,2\]'
-      detail = 'if the specified target iteration window lies outside the executioner iteration window.'
-    []
   []
 []

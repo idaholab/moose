@@ -23,6 +23,10 @@ FixedPointSolve::fixedPointDefaultConvergenceParams()
 {
   InputParameters params = emptyInputParameters();
 
+  params.addParam<unsigned int>(
+      "fixed_point_min_its", 1, "Specifies the minimum number of fixed point iterations.");
+  params.addParam<unsigned int>(
+      "fixed_point_max_its", 1, "Specifies the maximum number of fixed point iterations.");
   params.addParam<bool>("disable_fixed_point_residual_norm_check",
                         false,
                         "Disable the residual norm evaluation thus the three parameters "
@@ -75,8 +79,9 @@ FixedPointSolve::fixedPointDefaultConvergenceParams()
                                     "the custom_pp residual.");
 
   params.addParamNamesToGroup(
+      "fixed_point_min_its fixed_point_max_its disable_fixed_point_residual_norm_check "
       "accept_on_max_fixed_point_iteration fixed_point_rel_tol fixed_point_abs_tol "
-      "custom_pp direct_pp_value custom_abs_tol custom_rel_tol",
+      "fixed_point_force_norms custom_pp direct_pp_value custom_abs_tol custom_rel_tol",
       "Fixed point iterations");
 
   return params;
@@ -87,11 +92,6 @@ FixedPointSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
   params += FixedPointSolve::fixedPointDefaultConvergenceParams();
-
-  params.addParam<unsigned int>(
-      "fixed_point_min_its", 1, "Specifies the minimum number of fixed point iterations.");
-  params.addParam<unsigned int>(
-      "fixed_point_max_its", 1, "Specifies the maximum number of fixed point iterations.");
 
   params.addParam<ConvergenceName>(
       "multiapp_fixed_point_convergence",
@@ -124,8 +124,7 @@ FixedPointSolve::validParams()
                         "their solve converges, for transient executioners only.");
 
   params.addParamNamesToGroup(
-      "fixed_point_min_its fixed_point_max_its disable_fixed_point_residual_norm_check "
-      "fixed_point_force_norms multiapp_fixed_point_convergence "
+      "multiapp_fixed_point_convergence "
       "relaxation_factor transformed_variables transformed_postprocessors auto_advance",
       "Fixed point iterations");
 
@@ -145,9 +144,8 @@ FixedPointSolve::validParams()
 
 FixedPointSolve::FixedPointSolve(Executioner & ex)
   : SolveObject(ex),
-    _min_fixed_point_its(getParam<unsigned int>("fixed_point_min_its")),
-    _max_fixed_point_its(getParam<unsigned int>("fixed_point_max_its")),
-    _has_fixed_point_its(_max_fixed_point_its > 1),
+    _has_fixed_point_its(getParam<unsigned int>("fixed_point_max_its") > 1 ||
+                         isParamSetByUser("multiapp_fixed_point_convergence")),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
     _transformed_pps(getParam<std::vector<PostprocessorName>>("transformed_postprocessors")),
@@ -167,10 +165,6 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
   // Handle deprecated parameters
   if (!parameters().isParamSetByAddParam("relaxed_variables"))
     _transformed_vars = getParam<std::vector<std::string>>("relaxed_variables");
-
-  if (_min_fixed_point_its > _max_fixed_point_its)
-    paramError("fixed_point_min_its",
-               "The minimum number of fixed point iterations may not exceed the maximum.");
 
   if (_transformed_vars.size() > 0 && _transformed_pps.size() > 0)
     mooseWarning(
@@ -252,7 +246,8 @@ FixedPointSolve::solve()
     convergence.initialize();
   }
 
-  for (_fixed_point_it = 0; _fixed_point_it < _max_fixed_point_its; ++_fixed_point_it)
+  _fixed_point_it = 0;
+  while (true)
   {
     if (_has_fixed_point_its)
     {
@@ -304,6 +299,11 @@ FixedPointSolve::solve()
 
     _problem.dt() =
         current_dt; // _dt might be smaller than this at this point for multistep methods
+
+    _fixed_point_it++;
+
+    if (!_has_fixed_point_its)
+      break;
   }
 
   if (converged)
@@ -460,8 +460,15 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 bool
 FixedPointSolve::examineFixedPointConvergence(bool & converged)
 {
+  // For fixed point algorithms that have intermediate iterations, only check
+  // convergence if not an intermediate iteration
+  const bool is_intermediate_it = (_fixed_point_it + 1) % numIntermediateIterations() != 0;
+  if (is_intermediate_it)
+    return false;
+
+  const unsigned int full_it = (_fixed_point_it + 1) / numIntermediateIterations() - 1;
   auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
-  const auto status = convergence.checkConvergence(_fixed_point_it);
+  const auto status = convergence.checkConvergence(full_it);
   switch (status)
   {
     case Convergence::MooseConvergenceStatus::CONVERGED:

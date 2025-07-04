@@ -47,16 +47,6 @@ public:
   };
 
   /**
-   * Get the minimum number of fixed point iterations
-   */
-  unsigned int minFixedPointIts() const { return _min_fixed_point_its; }
-
-  /**
-   * Get the maximum number of fixed point iterations
-   */
-  unsigned int maxFixedPointIts() const { return _max_fixed_point_its; }
-
-  /**
    * Get the number of fixed point iterations performed
    * Because this returns the number of fixed point iterations, rather than the current
    * iteration count (which starts at 0), increment by 1.
@@ -127,6 +117,9 @@ public:
   printFixedPointConvergenceHistory(Real initial_norm,
                                     const std::vector<Real> & timestep_begin_norms,
                                     const std::vector<Real> & timestep_end_norms) const = 0;
+
+  /// Number of intermediate iterations per full fixed point iteration
+  virtual unsigned int numIntermediateIterations() const = 0;
 
 protected:
   /**
@@ -199,10 +192,6 @@ protected:
   /// Print information about the fixed point convergence
   void printFixedPointConvergenceReason();
 
-  /// Minimum fixed point iterations
-  unsigned int _min_fixed_point_its;
-  /// Maximum fixed point iterations
-  unsigned int _max_fixed_point_its;
   /// Whether or not we activate fixed point iteration
   const bool _has_fixed_point_its;
 
