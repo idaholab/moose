@@ -35,6 +35,7 @@ The result of the optimization, which heavily depends on the many simulation and
 parameters, is shown in what follows:
 
 !media large_media/optimization/tm.png style=width:75%
+       alt=Plot of the pseudo-density, showing the result of the simulation configured above.
 
 
 

@@ -15,4 +15,5 @@ Griffin is a finite element-based reactor multiphysics application. It is suitab
 
 !col small=8 medium=4 large=4
 !media application_logos/griffin_description.png style=width:100%;
+       alt=Sample output of Griffin simulation of a reactor core.
 !row-end!

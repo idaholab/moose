@@ -209,6 +209,7 @@ This will create an image like this:
 
 !media media/application_development/sample-profile.png
     style=width:100%
+    alt=An example PNG image of a profiling graph, showing time spent in each function.
 
 A few notes about data represented in the image:
 
