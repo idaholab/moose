@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MeshChangedInterface.h"
+#include "MeshDisplacedInterface.h"
 
 #include "FEProblem.h"
 
 InputParameters
-MeshChangedInterface::validParams()
+MeshDisplacedInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
   return params;
 }
 
-MeshChangedInterface::MeshChangedInterface(const InputParameters & params)
-  : _mci_feproblem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
+MeshDisplacedInterface::MeshDisplacedInterface(const InputParameters & params)
+  : _mdi_feproblem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
-  _mci_feproblem.notifyWhenMeshChanges(this);
+  _mdi_feproblem.notifyWhenMeshDisplaces(this);
 }
