@@ -1,4 +1,3 @@
 # AddDefaultConvergenceAction
 
-This action adds a default [Convergence](syntax/Convergence/index.md) object if requested
-by the `Problem`.
+This action adds various types of default [Convergence](syntax/Convergence/index.md) objects if they are needed by the solvers but not supplied by the user.

@@ -23,15 +23,7 @@ SteffensenSolve::validParams()
   return params;
 }
 
-SteffensenSolve::SteffensenSolve(Executioner & ex) : FixedPointSolve(ex)
-{
-  allocateStorage(true);
-
-  // Steffensen method uses half-steps
-  if (!parameters().isParamSetByAddParam("fixed_point_min_its"))
-    _min_fixed_point_its *= 2;
-  _max_fixed_point_its *= 2;
-}
+SteffensenSolve::SteffensenSolve(Executioner & ex) : FixedPointSolve(ex) { allocateStorage(true); }
 
 void
 SteffensenSolve::allocateStorage(const bool primary)
@@ -222,17 +214,18 @@ SteffensenSolve::transformVariables(const std::set<dof_id_type> & transformed_do
 }
 
 void
-SteffensenSolve::printFixedPointConvergenceHistory()
+SteffensenSolve::printFixedPointConvergenceHistory(
+    const Real initial_norm,
+    const std::vector<Real> & timestep_begin_norms,
+    const std::vector<Real> & timestep_end_norms) const
 {
   _console << "\n 0 Steffensen initialization |R| = "
-           << Console::outputNorm(std::numeric_limits<Real>::max(), _fixed_point_initial_norm)
-           << '\n';
+           << Console::outputNorm(std::numeric_limits<Real>::max(), initial_norm) << '\n';
 
-  Real max_norm_old = _fixed_point_initial_norm;
+  Real max_norm_old = initial_norm;
   for (unsigned int i = 0; i <= _fixed_point_it; ++i)
   {
-    Real max_norm =
-        std::max(_fixed_point_timestep_begin_norm[i], _fixed_point_timestep_end_norm[i]);
+    Real max_norm = std::max(timestep_begin_norms[i], timestep_end_norms[i]);
     std::stringstream steffensen_prefix;
     if (i == 0)
       steffensen_prefix << " Steffensen initialization |R| = ";

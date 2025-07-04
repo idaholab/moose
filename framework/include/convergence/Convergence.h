@@ -39,7 +39,17 @@ public:
 
   Convergence(const InputParameters & parameters);
 
-  virtual void initialSetup() override{};
+  virtual void initialSetup() override {}
+
+  /**
+   * Method that gets called before each iteration loop
+   */
+  virtual void initialize() {}
+
+  /**
+   * Method that gets called in each iteration before the solve
+   */
+  virtual void preExecute() {}
 
   /**
    * Returns convergence status.
