@@ -4177,21 +4177,25 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
   {
     const auto variable_name = parameters.varName(var_param_name, object_name);
     if (this->hasVariable(variable_name) || this->hasScalarVariable(variable_name))
-      sys_num = getSystem(parameters.varName(var_param_name, object_name)).number();
+      sys_num = getSystem(variable_name).number();
+  }
+  if (parameters.isParamValid("solver_sys"))
+  {
+    const auto var_sys_num = sys_num;
+    sys_num = getSystemBase(parameters.get<SolverSystemName>("solver_sys")).number();
+    if (sys_num != var_sys_num && parameters.isParamValid(var_param_name))
+      mooseError("We dont support setting 'variable' to a variable that is not set to the same "
+                 "system as the 'solver_sys' parameter");
   }
 
   if (_displaced_problem && parameters.have_parameter<bool>("use_displaced_mesh") &&
       parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    // Don't override if the parameter has already been set
-    if (parameters.get<SystemBase *>("_sys") == NULL)
-    {
-      if (sys_num == _aux->number())
-        parameters.set<SystemBase *>("_sys") = &_displaced_problem->systemBaseAuxiliary();
-      else
-        parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(sys_num);
-    }
+    if (sys_num == _aux->number())
+      parameters.set<SystemBase *>("_sys") = &_displaced_problem->systemBaseAuxiliary();
+    else
+      parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(sys_num);
   }
   else
   {
@@ -4204,14 +4208,10 @@ FEProblemBase::addObjectParamsHelper(InputParameters & parameters,
 
     parameters.set<SubProblem *>("_subproblem") = this;
 
-    // Don't override if the parameter has already been set
-    if (parameters.get<SystemBase *>("_sys") == NULL)
-    {
-      if (sys_num == _aux->number())
-        parameters.set<SystemBase *>("_sys") = _aux.get();
-      else
-        parameters.set<SystemBase *>("_sys") = _solver_systems[sys_num].get();
-    }
+    if (sys_num == _aux->number())
+      parameters.set<SystemBase *>("_sys") = _aux.get();
+    else
+      parameters.set<SystemBase *>("_sys") = _solver_systems[sys_num].get();
   }
 }
 
