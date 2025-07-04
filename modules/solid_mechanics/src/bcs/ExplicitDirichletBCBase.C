@@ -24,7 +24,9 @@ ExplicitDirichletBCBase::validParams()
 
 ExplicitDirichletBCBase::ExplicitDirichletBCBase(const InputParameters & parameters)
   : NodalBC(parameters),
-    _mass_diag(initLumpedMass()),
+    // _mass_diag(initLumpedMass()),
+    _mass_lumped(initMassLumped()),
+    _damping_lumped(initDampingLumped()),
     _u_old(_var.nodalValueOld()),
     _u_dot_old(_var.nodalValueDotOld()),
     _explicit_integrator(
@@ -45,13 +47,14 @@ ExplicitDirichletBCBase::computeQpResidual()
   {
     case ExplicitMixedOrder::FIRST:
       resid = (computeQpValue() - _u_old) / _dt;
-      resid /= -_mass_diag(dofnum);
+      resid *= -_mass_lumped(dofnum);
       break;
 
     case ExplicitMixedOrder::SECOND:
       Real avg_dt = (_dt + _dt_old) / 2;
       resid = (computeQpValue() - _u_old) / (avg_dt * _dt) - (_u_dot_old) / avg_dt;
-      resid /= -_mass_diag(dofnum);
+      resid *= -_mass_lumped(dofnum);
+      resid += _damping_lumped(dofnum) * _u_dot_old;
       break;
   }
   return resid;
@@ -65,12 +68,19 @@ ExplicitDirichletBCBase::timestepSetup()
 }
 
 const NumericVector<Number> &
-ExplicitDirichletBCBase::initLumpedMass()
+ExplicitDirichletBCBase::initMassLumped()
 {
   const auto & nl = _fe_problem.getNonlinearSystemBase(_sys.number());
-  if (nl.hasVector("mass_matrix_diag_inverted"))
-    return nl.getVector("mass_matrix_diag_inverted");
+  if (nl.hasVector("mass_matrix_lumped"))
+    return nl.getVector("mass_matrix_lumped");
 
   mooseError("Lumped mass matrix is missing. Make sure ExplicitMixedOrder is being used as the "
              "time integrator.");
+}
+
+const NumericVector<Number> &
+ExplicitDirichletBCBase::initDampingLumped()
+{
+  const auto & nl = _fe_problem.getNonlinearSystemBase(_sys.number());
+  return nl.getVector("damping_matrix_lumped");
 }
