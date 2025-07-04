@@ -7,6 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef MOOSE_HAVE_KOKKOS
+#include "GPUMaterialPropertyStorage.h"
+#endif
+
 #include "FEProblemBase.h"
 #include "AuxiliarySystem.h"
 #include "MaterialPropertyStorage.h"
@@ -424,13 +428,27 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _solver_systems(_num_nl_sys + _num_linear_sys, nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
+#ifdef MOOSE_HAVE_KOKKOS
+    _kokkos_assembly(*this),
+#endif
     _mesh_divisions(/*threaded=*/true),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "material_props", &_mesh, _material_prop_registry)),
+        "material_props", &_mesh, _material_prop_registry, *this)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "bnd_material_props", &_mesh, _material_prop_registry)),
+        "bnd_material_props", &_mesh, _material_prop_registry, *this)),
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "neighbor_material_props", &_mesh, _material_prop_registry)),
+        "neighbor_material_props", &_mesh, _material_prop_registry, *this)),
+#ifdef MOOSE_HAVE_KOKKOS
+    _kokkos_material_props(
+        declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(
+            "kokkos_material_props", &_mesh, _material_prop_registry, *this)),
+    _kokkos_bnd_material_props(
+        declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(
+            "kokkos_bnd_material_props", &_mesh, _material_prop_registry, *this)),
+    _kokkos_neighbor_material_props(
+        declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(
+            "kokkos_neighbor_material_props", &_mesh, _material_prop_registry, *this)),
+#endif
     _reporter_data(_app),
     // TODO: delete the following line after apps have been updated to not call getUserObjects
     _all_user_objects(_app.getExecuteOnEnum()),
@@ -1120,6 +1138,8 @@ FEProblemBase::initialSetup()
         _interface_materials.sort(tid);
       }
     }
+
+    _kokkos_materials.sort(0, true);
 
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
@@ -3027,6 +3047,145 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
 }
 
 void
+FEProblemBase::addKokkosKernel(const std::string & kernel_name,
+                               const std::string & name,
+                               InputParameters & parameters)
+{
+#ifndef MOOSE_HAVE_KOKKOS
+  mooseError("addKokkosKernel() was called but MOOSE was not compiled with Kokkos support.");
+#endif
+
+  parallel_object_only();
+
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError("You are trying to add a Kernel to a linear variable/system, which is not "
+               "supported at the moment!");
+
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
+    _reinit_displaced_elem = true;
+  }
+  else
+  {
+    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow Kernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this Kernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
+  }
+
+  logAdd("KokkosKernel", name, kernel_name, parameters);
+
+#ifdef MOOSE_HAVE_KOKKOS
+  _nl[nl_sys_num]->addKokkosKernel(kernel_name, name, parameters);
+#endif
+
+  _has_kokkos_objects = true;
+}
+
+void
+FEProblemBase::addKokkosNodalKernel(const std::string & kernel_name,
+                                    const std::string & name,
+                                    InputParameters & parameters)
+{
+#ifndef MOOSE_HAVE_KOKKOS
+  mooseError("addKokkosNodalKernel() was called but MOOSE was not compiled with Kokkos support.");
+#endif
+
+  parallel_object_only();
+
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
+    _reinit_displaced_elem = true;
+  }
+  else
+  {
+    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow Kernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this Kernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
+  }
+
+  logAdd("KokkosNodalKernel", name, kernel_name, parameters);
+
+#ifdef MOOSE_HAVE_KOKKOS
+  _nl[nl_sys_num]->addKokkosNodalKernel(kernel_name, name, parameters);
+#endif
+
+  _has_kokkos_objects = true;
+}
+
+void
+FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
+                                          const std::string & name,
+                                          InputParameters & parameters)
+{
+#ifndef MOOSE_HAVE_KOKKOS
+  mooseError(
+      "addKokkosBoundaryCondition() was called but MOOSE was not compiled with Kokkos support.");
+#endif
+
+  parallel_object_only();
+
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError(
+        "You are trying to add a BoundaryCondition to a linear variable/system, which is not "
+        "supported at the moment!");
+
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
+    _reinit_displaced_face = true;
+  }
+  else
+  {
+    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow Materials to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this Material.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
+  }
+
+  logAdd("KokkosBoundaryCondition", name, bc_name, parameters);
+
+#ifdef MOOSE_HAVE_KOKKOS
+  _nl[nl_sys_num]->addKokkosBoundaryCondition(bc_name, name, parameters);
+#endif
+
+  _has_kokkos_objects = true;
+}
+
+void
 FEProblemBase::addConstraint(const std::string & c_name,
                              const std::string & name,
                              InputParameters & parameters)
@@ -3741,21 +3900,93 @@ FEProblemBase::getMaterial(std::string name,
 }
 
 MaterialData &
-FEProblemBase::getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid) const
+FEProblemBase::getMaterialData(Moose::MaterialDataType type,
+                               const THREAD_ID tid,
+                               const MooseObject * object,
+                               bool is_kokkos) const
 {
+  if (is_kokkos)
+#ifdef MOOSE_HAVE_KOKKOS
+    switch (type)
+    {
+      case Moose::BLOCK_MATERIAL_DATA:
+        if (object)
+          _kokkos_material_props.addConsumer(type, object);
+        return _kokkos_material_props.getMaterialData(tid);
+      case Moose::NEIGHBOR_MATERIAL_DATA:
+        if (object)
+          _kokkos_neighbor_material_props.addConsumer(type, object);
+        return _kokkos_neighbor_material_props.getMaterialData(tid);
+      case Moose::BOUNDARY_MATERIAL_DATA:
+      case Moose::FACE_MATERIAL_DATA:
+      case Moose::INTERFACE_MATERIAL_DATA:
+        if (object)
+          _kokkos_bnd_material_props.addConsumer(type, object);
+        return _kokkos_bnd_material_props.getMaterialData(tid);
+    }
+#else
+    mooseError(
+        "FEProblemBase::getMaterialData(): Attempted to get Kokkos material data but MOOSE was "
+        "not compiled with Kokkos support.");
+#endif
+
   switch (type)
   {
     case Moose::BLOCK_MATERIAL_DATA:
+      if (object)
+        _material_props.addConsumer(type, object);
       return _material_props.getMaterialData(tid);
     case Moose::NEIGHBOR_MATERIAL_DATA:
+      if (object)
+        _neighbor_material_props.addConsumer(type, object);
       return _neighbor_material_props.getMaterialData(tid);
     case Moose::BOUNDARY_MATERIAL_DATA:
     case Moose::FACE_MATERIAL_DATA:
     case Moose::INTERFACE_MATERIAL_DATA:
+      if (object)
+        _bnd_material_props.addConsumer(type, object);
       return _bnd_material_props.getMaterialData(tid);
   }
 
   mooseError("FEProblemBase::getMaterialData(): Invalid MaterialDataType ", type);
+}
+
+const std::set<const MooseObject *> &
+FEProblemBase::getMaterialPropertyStorageConsumers(Moose::MaterialDataType type,
+                                                   bool is_kokkos) const
+{
+  if (is_kokkos)
+#ifdef MOOSE_HAVE_KOKKOS
+    switch (type)
+    {
+      case Moose::BLOCK_MATERIAL_DATA:
+        return _kokkos_material_props.getConsumers(type);
+      case Moose::NEIGHBOR_MATERIAL_DATA:
+        return _kokkos_neighbor_material_props.getConsumers(type);
+      case Moose::BOUNDARY_MATERIAL_DATA:
+      case Moose::FACE_MATERIAL_DATA:
+      case Moose::INTERFACE_MATERIAL_DATA:
+        return _kokkos_bnd_material_props.getConsumers(type);
+    }
+#else
+    mooseError("FEProblemBase::getMaterialPropertyStorageConsumers(): Attempted to get Kokkos "
+               "material data but MOOSE was not compiled with Kokkos support.");
+#endif
+
+  switch (type)
+  {
+    case Moose::BLOCK_MATERIAL_DATA:
+      return _material_props.getConsumers(type);
+    case Moose::NEIGHBOR_MATERIAL_DATA:
+      return _neighbor_material_props.getConsumers(type);
+    case Moose::BOUNDARY_MATERIAL_DATA:
+    case Moose::FACE_MATERIAL_DATA:
+    case Moose::INTERFACE_MATERIAL_DATA:
+      return _bnd_material_props.getConsumers(type);
+  }
+
+  mooseError("FEProblemBase::getMaterialPropertyStorageConsumers(): Invalid MaterialDataType ",
+             type);
 }
 
 void
@@ -3820,6 +4051,14 @@ FEProblemBase::addInterfaceMaterial(const std::string & mat_name,
                                     InputParameters & parameters)
 {
   addMaterialHelper({&_interface_materials}, mat_name, name, parameters);
+}
+
+void
+FEProblemBase::addKokkosMaterial(const std::string & mat_name,
+                                 const std::string & name,
+                                 InputParameters & parameters)
+{
+  addMaterialHelper({&_kokkos_materials}, mat_name, name, parameters);
 }
 
 void
@@ -5065,6 +5304,8 @@ FEProblemBase::updateActiveObjects()
   _to_multi_app_transfers.updateActive();
   _from_multi_app_transfers.updateActive();
   _between_multi_app_transfers.updateActive();
+
+  _kokkos_materials.updateActive();
 }
 
 void
@@ -6260,6 +6501,11 @@ FEProblemBase::init()
   if (_displaced_problem)
     _displaced_problem->init();
 
+#ifdef MOOSE_HAVE_KOKKOS
+  if (_has_kokkos_objects)
+    initKokkos();
+#endif
+
   _initialized = true;
 }
 
@@ -6588,6 +6834,17 @@ FEProblemBase::advanceState()
 
   if (_neighbor_material_props.hasStatefulProperties())
     _neighbor_material_props.shift();
+
+#ifdef MOOSE_HAVE_KOKKOS
+  if (_kokkos_material_props.hasStatefulProperties())
+    _kokkos_material_props.shift();
+
+  if (_kokkos_bnd_material_props.hasStatefulProperties())
+    _kokkos_bnd_material_props.shift();
+
+  if (_kokkos_neighbor_material_props.hasStatefulProperties())
+    _kokkos_neighbor_material_props.shift();
+#endif
 }
 
 void
@@ -8200,6 +8457,11 @@ FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const
     Threads::parallel_reduce(elem_range, cmt);
   else
     cmt(elem_range, true);
+
+#ifdef MOOSE_HAVE_KOKKOS
+  if (_has_kokkos_objects)
+    initKokkosStatefulProps();
+#endif
 }
 
 void
@@ -8455,13 +8717,9 @@ FEProblemBase::checkDependMaterialsHelper(
 
     for (const auto & mat1 : it.second)
     {
-      const std::set<std::string> & depend_props = mat1->getRequestedItems();
-      block_depend_props.insert(depend_props.begin(), depend_props.end());
-
       auto & alldeps = mat1->getMatPropDependencies(); // includes requested stateful props
       for (auto & dep : alldeps)
-        if (const auto name = _material_props.queryStatefulPropName(dep))
-          block_depend_props.insert(*name);
+        block_depend_props.insert(_material_prop_registry.getName(dep));
 
       // See if any of the active materials supply this property
       for (const auto & mat2 : it.second)
