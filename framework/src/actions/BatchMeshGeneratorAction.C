@@ -15,6 +15,7 @@
 #include "MeshGenerator.h"
 #include "Factory.h"
 #include "MooseApp.h"
+#include "MooseUtils.h"
 
 #include "hit/hit.h"
 
@@ -37,7 +38,9 @@ BatchMeshGeneratorAction::validParams()
                                             std::vector<std::string>(),
                                             "Names of the scalar input parameters to be altered.");
   MultiMooseEnum default_types(
-      "BOOL REAL SHORT USHORT INT UINT STRING SDNAME BDRYNAME MGNAME MFNAME ENUM", "");
+      "BOOL REAL SHORT USHORT INT UINT LONG ULONG LONGLONG ULONGLONG DOFIDTYPE BDRYIDTYPE SDIDTYPE "
+      "STRING SDNAME BDRYNAME MGNAME MFNAME ENUM REALVECTORVALUE POINT",
+      "");
   params.addParam<MultiMooseEnum>(
       "batch_scalar_input_param_types",
       default_types,
@@ -141,27 +144,137 @@ BatchMeshGeneratorAction::BatchMeshGeneratorAction(const InputParameters & param
   // Sanity check for the fixed input parameters
   checkVectorParamAndMultiMooseEnumLength<std::string>("fixed_scalar_input_param_names",
                                                        "fixed_scalar_input_param_types");
-  checkVectorParamsSameLength<std::string, std::string>("fixed_scalar_input_param_names",
-                                                        "fixed_scalar_input_param_values");
+  const auto fixed_scalar_real_compound_num =
+      std::count_if(_fixed_scalar_input_param_types.begin(),
+                    _fixed_scalar_input_param_types.end(),
+                    [this](const ParameterType & type) { return isCompoundRealScalarType(type); });
+  if (fixed_scalar_real_compound_num > 0)
+  {
+    if (_fixed_scalar_input_param_types.size() + 2 * fixed_scalar_real_compound_num !=
+        _fixed_scalar_input_param_values.size())
+      paramError("fixed_scalar_input_param_values",
+                 "This parameter must have a size that is consistent with "
+                 "fixed_scalar_input_param_names. Note that each REALVECTORVALUE or POINT type "
+                 "parameter must be represented as three separate values instead of one.");
+    // Rearrange _fixed_scalar_input_param_values so that each compound real scalar value is in one
+    // single string
+    auto fixed_scalar_input_param_values_tmp(_fixed_scalar_input_param_values);
+    _fixed_scalar_input_param_values.resize(_fixed_scalar_input_param_types.size());
+    unsigned int raw_value_ct = 0;
+    for (const auto i : index_range(_fixed_scalar_input_param_types))
+    {
+      if (isCompoundRealScalarType(_fixed_scalar_input_param_types[i]))
+      {
+        // In that case, the string element needs to contain three elements separated by spaces
+        _fixed_scalar_input_param_values[i] =
+            fixed_scalar_input_param_values_tmp[raw_value_ct] + ' ' +
+            fixed_scalar_input_param_values_tmp[raw_value_ct + 1] + ' ' +
+            fixed_scalar_input_param_values_tmp[raw_value_ct + 2];
+        raw_value_ct += 3;
+      }
+      else
+      {
+        _fixed_scalar_input_param_values[i] = fixed_scalar_input_param_values_tmp[raw_value_ct];
+        raw_value_ct += 1;
+      }
+    }
+  }
+  else
+    checkVectorParamsSameLength<std::string, std::string>("fixed_scalar_input_param_names",
+                                                          "fixed_scalar_input_param_values");
+
   checkVectorParamAndMultiMooseEnumLength<std::string>("fixed_vector_input_param_names",
                                                        "fixed_vector_input_param_types");
+  // The compound real scalar value type does not alter the length of
+  // 'fixed_vector_input_param_values'
   checkVectorParamsSameLength<std::string, std::vector<std::string>>(
       "fixed_vector_input_param_names", "fixed_vector_input_param_values");
+  // But we still need to process the affected elements
+  for (const auto i : index_range(_fixed_vector_input_param_types))
+  {
+    if (isCompoundRealScalarType(_fixed_vector_input_param_types[i]))
+    {
+      // Ensure that each compound real scalar value is represented as three separate Real values
+      if (_fixed_vector_input_param_values[i].size() % 3 != 0)
+        paramError("fixed_vector_input_param_values",
+                   "This parameter must have a size that is consistent with "
+                   "fixed_vector_input_param_names. Note that each REALVECTORVALUE or POINT type "
+                   "parameter must be represented as three separate values instead of one.");
+      auto unit_fixed_vector_input_param_values_tmp(_fixed_vector_input_param_values[i]);
+      _fixed_vector_input_param_values[i].resize(unit_fixed_vector_input_param_values_tmp.size() /
+                                                 3);
+      for (const auto j : index_range(_fixed_vector_input_param_values[i]))
+        _fixed_vector_input_param_values[i][j] =
+            unit_fixed_vector_input_param_values_tmp[j * 3] + ' ' +
+            unit_fixed_vector_input_param_values_tmp[j * 3 + 1] + ' ' +
+            unit_fixed_vector_input_param_values_tmp[j * 3 + 2];
+    }
+  }
 
   // Sanity check for the batch input parameters
   checkVectorParamAndMultiMooseEnumLength<std::string>("batch_scalar_input_param_names",
                                                        "batch_scalar_input_param_types");
+  // The compound real scalar value type does not alter the length of
+  // 'batch_scalar_input_param_values'
   checkVectorParamsSameLength<std::string, std::vector<std::string>>(
       "batch_scalar_input_param_names", "batch_scalar_input_param_values");
+  // But we still need to process the affected elements
+  for (const auto i : index_range(_batch_scalar_input_param_types))
+  {
+    if (isCompoundRealScalarType(_batch_scalar_input_param_types[i]))
+    {
+      // Ensure that each compound real scalar value is represented as three separate Real values
+      if (_batch_scalar_input_param_values[i].size() % 3 != 0)
+        paramError("batch_scalar_input_param_values",
+                   "This parameter must have a size that is consistent with "
+                   "batch_scalar_input_param_names. Note that each REALVECTORVALUE or POINT type "
+                   "parameter must be represented as three separate values instead of one.");
+      auto unit_batch_scalar_input_param_values_tmp(_batch_scalar_input_param_values[i]);
+      _batch_scalar_input_param_values[i].resize(unit_batch_scalar_input_param_values_tmp.size() /
+                                                 3);
+      for (const auto j : index_range(_batch_scalar_input_param_values[i]))
+        _batch_scalar_input_param_values[i][j] =
+            unit_batch_scalar_input_param_values_tmp[j * 3] + ' ' +
+            unit_batch_scalar_input_param_values_tmp[j * 3 + 1] + ' ' +
+            unit_batch_scalar_input_param_values_tmp[j * 3 + 2];
+    }
+  }
+
   checkVectorParamAndMultiMooseEnumLength<std::string>("batch_vector_input_param_names",
                                                        "batch_vector_input_param_types");
+  /// The compound real scalar value type does not alter the length of 'batch_vector_input_param_values'
   checkVectorParamsSameLength<std::string, std::vector<std::vector<std::string>>>(
       "batch_vector_input_param_names", "batch_vector_input_param_values");
+  // But we still need to process the affected elements
+  for (const auto i : index_range(_batch_vector_input_param_types))
+  {
+    if (isCompoundRealScalarType(_batch_vector_input_param_types[i]))
+    {
+      for (const auto j : index_range(_batch_vector_input_param_values[i]))
+      {
+        // Ensure that each compound real scalar value is represented as three separate Real values
+        if (_batch_vector_input_param_values[i][j].size() % 3 != 0)
+          paramError("batch_vector_input_param_values",
+                     "This parameter must have a size that is consistent with "
+                     "batch_vector_input_param_names. Note that each REALVECTORVALUE or POINT type "
+                     "parameter must be represented as three separate values instead of one.");
+        auto unit_batch_vector_input_param_values_tmp(_batch_vector_input_param_values[i][j]);
+        _batch_vector_input_param_values[i][j].resize(
+            unit_batch_vector_input_param_values_tmp.size() / 3);
+        for (const auto k : index_range(_batch_vector_input_param_values[i][j]))
+          _batch_vector_input_param_values[i][j][k] =
+              unit_batch_vector_input_param_values_tmp[k * 3] + ' ' +
+              unit_batch_vector_input_param_values_tmp[k * 3 + 1] + ' ' +
+              unit_batch_vector_input_param_values_tmp[k * 3 + 2];
+      }
+    }
+  }
 
   // At least we want this action to create one mesh generator
   if (_batch_scalar_input_param_names.empty() && _batch_vector_input_param_names.empty())
-    mooseError("BatchMeshGeneratorAction: batch_scalar_input_param_names and "
-               "batch_vector_input_param_names cannot be empty at the same time.");
+    mooseError("BatchMeshGeneratorAction: " + _name +
+               ", batch_scalar_input_param_names and batch_vector_input_param_names cannot be "
+               "empty at the same time.");
 
   // If the previous check is passed, batch_params_sizes will not be empty
   // But we need to check if any element of the batch_params_values are empty
@@ -184,8 +297,9 @@ BatchMeshGeneratorAction::BatchMeshGeneratorAction(const InputParameters & param
   // Then for the corresponding method, the sizes of the batch_params_values should be the same
   if (_multi_batch_params_method == MultiBatchParamsMethod::corresponding &&
       batch_params_sizes.size() > 1)
-    mooseError("BatchMeshGeneratorAction: elements of batch_scalar_input_param_values and "
-               "batch_vector_input_param_values must have the same size.");
+    mooseError("BatchMeshGeneratorAction: " + _name +
+               ", elements of batch_scalar_input_param_values and batch_vector_input_param_values "
+               "must have the same size in corresponding mode.");
 
   // Decomposed index cannot be used with the corresponding method
   if (_use_decomposed_index && _multi_batch_params_method == MultiBatchParamsMethod::corresponding)
@@ -494,7 +608,7 @@ void
 BatchMeshGeneratorAction::setScalarParams(InputParameters & params,
                                           const std::string & param_name,
                                           const ParameterType & param_type,
-                                          const std::string & param_value)
+                                          const std::string & param_value) const
 {
   switch (param_type)
   {
@@ -512,6 +626,29 @@ BatchMeshGeneratorAction::setScalarParams(InputParameters & params,
       break;
     case (ParameterType::UINT):
       params.set<unsigned int>(param_name) = MooseUtils::convert<unsigned int>(param_value);
+      break;
+    case (ParameterType::LONG):
+      params.set<long>(param_name) = MooseUtils::convert<long>(param_value);
+      break;
+    case (ParameterType::ULONG):
+      params.set<unsigned long>(param_name) = MooseUtils::convert<unsigned long>(param_value);
+      break;
+    case (ParameterType::LONGLONG):
+      params.set<long long>(param_name) = MooseUtils::convert<long long>(param_value);
+      break;
+    case (ParameterType::ULONGLONG):
+      params.set<unsigned long long>(param_name) =
+          MooseUtils::convert<unsigned long long>(param_value);
+      break;
+    case (ParameterType::DOFIDTYPE):
+      params.set<dof_id_type>(param_name) = MooseUtils::convert<dof_id_type>(param_value);
+      break;
+    case (ParameterType::BDRYIDTYPE):
+      params.set<boundary_id_type>(param_name) = MooseUtils::convert<boundary_id_type>(param_value);
+      break;
+    case (ParameterType::SDIDTYPE):
+      params.set<subdomain_id_type>(param_name) =
+          MooseUtils::convert<subdomain_id_type>(param_value);
       break;
     case (ParameterType::ENUM):
       params.set<MooseEnum>(param_name) = param_value;
@@ -534,6 +671,13 @@ BatchMeshGeneratorAction::setScalarParams(InputParameters & params,
     case (ParameterType::BOOL):
       hit::toBool(param_value, &params.set<bool>(param_name));
       break;
+    case (ParameterType::REALVECTORVALUE):
+      params.set<RealVectorValue>(param_name) =
+          convertStringToCompoundRealScalar<RealVectorValue>(param_value);
+      break;
+    case (ParameterType::POINT):
+      params.set<Point>(param_name) = convertStringToCompoundRealScalar<Point>(param_value);
+      break;
     default:
       mooseAssert(false,
                   "impossible situation."); // as we use MultiMooseEnum to ensure the type is valid
@@ -544,7 +688,7 @@ void
 BatchMeshGeneratorAction::setVectorParams(InputParameters & params,
                                           const std::string & param_name,
                                           const ParameterType & param_type,
-                                          const std::vector<std::string> & param_value)
+                                          const std::vector<std::string> & param_value) const
 {
   switch (param_type)
   {
@@ -562,6 +706,27 @@ BatchMeshGeneratorAction::setVectorParams(InputParameters & params,
       break;
     case (ParameterType::UINT):
       convertAndSetNumericVector<unsigned int>(params, param_name, param_value);
+      break;
+    case (ParameterType::LONG):
+      convertAndSetNumericVector<long>(params, param_name, param_value);
+      break;
+    case (ParameterType::ULONG):
+      convertAndSetNumericVector<unsigned long>(params, param_name, param_value);
+      break;
+    case (ParameterType::LONGLONG):
+      convertAndSetNumericVector<long long>(params, param_name, param_value);
+      break;
+    case (ParameterType::ULONGLONG):
+      convertAndSetNumericVector<unsigned long long>(params, param_name, param_value);
+      break;
+    case (ParameterType::DOFIDTYPE):
+      convertAndSetNumericVector<dof_id_type>(params, param_name, param_value);
+      break;
+    case (ParameterType::BDRYIDTYPE):
+      convertAndSetNumericVector<boundary_id_type>(params, param_name, param_value);
+      break;
+    case (ParameterType::SDIDTYPE):
+      convertAndSetNumericVector<subdomain_id_type>(params, param_name, param_value);
       break;
     case (ParameterType::ENUM):
       params.set<MultiMooseEnum>(param_name) = param_value;
@@ -596,6 +761,12 @@ BatchMeshGeneratorAction::setVectorParams(InputParameters & params,
       params.set<std::vector<bool>>(param_name) = values;
       break;
     }
+    case (ParameterType::REALVECTORVALUE):
+      convertAndSetCompoundRealScalarVector<RealVectorValue>(params, param_name, param_value);
+      break;
+    case (ParameterType::POINT):
+      convertAndSetCompoundRealScalarVector<Point>(params, param_name, param_value);
+      break;
     default:
       mooseAssert(false,
                   "impossible situation."); // as we use MultiMooseEnum to ensure the type is valid
@@ -604,9 +775,10 @@ BatchMeshGeneratorAction::setVectorParams(InputParameters & params,
 
 template <typename T>
 void
-BatchMeshGeneratorAction::convertAndSetNumericVector(InputParameters & params,
-                                                     const std::string & param_name,
-                                                     const std::vector<std::string> & param_value)
+BatchMeshGeneratorAction::convertAndSetNumericVector(
+    InputParameters & params,
+    const std::string & param_name,
+    const std::vector<std::string> & param_value) const
 {
   std::vector<T> values(param_value.size());
   std::transform(param_value.begin(),
@@ -618,10 +790,26 @@ BatchMeshGeneratorAction::convertAndSetNumericVector(InputParameters & params,
 
 template <typename T>
 void
+BatchMeshGeneratorAction::convertAndSetCompoundRealScalarVector(
+    InputParameters & params,
+    const std::string & param_name,
+    const std::vector<std::string> & param_value) const
+{
+  std::vector<T> values(param_value.size());
+  std::transform(param_value.begin(),
+                 param_value.end(),
+                 values.begin(),
+                 [this](const std::string & val)
+                 { return convertStringToCompoundRealScalar<T>(val); });
+  params.set<std::vector<T>>(param_name) = values;
+}
+
+template <typename T>
+void
 BatchMeshGeneratorAction::convertAndSetStringLikeVector(
     InputParameters & params,
     const std::string & param_name,
-    const std::vector<std::string> & param_value)
+    const std::vector<std::string> & param_value) const
 {
   std::vector<T> values(param_value.size());
   std::transform(param_value.begin(),
@@ -636,7 +824,7 @@ BatchMeshGeneratorAction::checkInputParametersTypes(const InputParameters & para
                                                     const std::string & action_input_param_name,
                                                     const std::vector<std::string> & param_names,
                                                     const std::vector<ParameterType> & param_types,
-                                                    const bool & is_vector)
+                                                    const bool & is_vector) const
 {
   for (const auto i : index_range(param_names))
   {
@@ -657,6 +845,33 @@ BatchMeshGeneratorAction::checkInputParametersTypes(const InputParameters & para
         break;
       case (ParameterType::UINT):
         checkInputParameterType<unsigned int>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::LONG):
+        checkInputParameterType<long>(params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::ULONG):
+        checkInputParameterType<unsigned long>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::LONGLONG):
+        checkInputParameterType<long long>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::ULONGLONG):
+        checkInputParameterType<unsigned long long>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::DOFIDTYPE):
+        checkInputParameterType<dof_id_type>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::BDRYIDTYPE):
+        checkInputParameterType<boundary_id_type>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::SDIDTYPE):
+        checkInputParameterType<subdomain_id_type>(
             params, action_input_param_name, param_names[i], is_vector);
         break;
       case (ParameterType::ENUM):
@@ -690,6 +905,13 @@ BatchMeshGeneratorAction::checkInputParametersTypes(const InputParameters & para
       case (ParameterType::BOOL):
         checkInputParameterType<bool>(params, action_input_param_name, param_names[i], is_vector);
         break;
+      case (ParameterType::REALVECTORVALUE):
+        checkInputParameterType<RealVectorValue>(
+            params, action_input_param_name, param_names[i], is_vector);
+        break;
+      case (ParameterType::POINT):
+        checkInputParameterType<Point>(params, action_input_param_name, param_names[i], is_vector);
+        break;
       default:
         mooseAssert(
             false,
@@ -703,11 +925,30 @@ void
 BatchMeshGeneratorAction::checkInputParameterType(const InputParameters & params,
                                                   const std::string & action_input_param_name,
                                                   const std::string & param_name,
-                                                  const bool & is_vector)
+                                                  const bool & is_vector) const
 {
   if ((is_vector && !params.isType<std::vector<T>>(param_name)) ||
       (!is_vector && !params.isType<T>(param_name)))
     paramError(action_input_param_name,
                "the input parameter, " + param_name + ", has the wrong type. It should be " +
                    params.type(param_name) + ".");
+}
+
+template <typename T>
+T
+BatchMeshGeneratorAction::convertStringToCompoundRealScalar(const std::string & str) const
+{
+  const auto split_str = MooseUtils::split(str, " ");
+  mooseAssert(split_str.size() == 3,
+              "string used for compound real scalar conversion should contain three elements.");
+  return T(MooseUtils::convert<Real>(split_str[0]),
+           MooseUtils::convert<Real>(split_str[1]),
+           MooseUtils::convert<Real>(split_str[2]));
+}
+
+bool
+BatchMeshGeneratorAction::isCompoundRealScalarType(const ParameterType & param_type) const
+{
+  const auto valid_types = {ParameterType::REALVECTORVALUE, ParameterType::POINT};
+  return std::count(valid_types.begin(), valid_types.end(), param_type);
 }
