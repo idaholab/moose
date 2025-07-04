@@ -11,8 +11,6 @@ Thermochimica_LIB := $(THERMOCHIMICA_DIR)/libThermochimica-$(METHOD).la
 # the C files depend on MooseConfig.h
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 $(Thermochimica_objects): $(moose_config_symlink)
-else
-$(Thermochimica_objects): $(moose_config)
 endif
 
 # remaining object files (Fortran)

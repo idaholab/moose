@@ -256,7 +256,6 @@ libmesh_CPPFLAGS += -imacros $(moose_config)
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
 all_header_dir := $(FRAMEWORK_DIR)/build/header_symlinks
-moose_all_header_dir := $(all_header_dir)
 
 define all_header_dir_rule
 $(1): | prebuild
@@ -289,8 +288,8 @@ endef
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
-moose_config_symlink := $(moose_all_header_dir)/MooseConfig.h
-$(moose_config_symlink): $(moose_config) | $(moose_all_header_dir) prebuild
+moose_config_symlink := $(all_header_dir)/MooseConfig.h
+$(moose_config_symlink): $(moose_config) | $(all_header_dir) prebuild
 	@echo "Symlinking MOOSE configure "$(moose_config_symlink)
 	@ln -sf $(moose_config) $(moose_config_symlink)
 
@@ -440,7 +439,7 @@ ifeq (x$(moose_HEADER_deps),x)
   moose_HEADER_deps := $(realpath $(moose_GIT_DIR)/HEAD $(moose_GIT_DIR)/index)
 endif
 
-$(moose_revision_header): $(moose_HEADER_deps) | $(moose_all_header_dir)
+$(moose_revision_header): $(moose_HEADER_deps) | $(all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
 	$(shell REPO_LOCATION="$(FRAMEWORK_DIR)" \
 	        HEADER_FILE="$(moose_revision_header)" \
@@ -451,8 +450,8 @@ $(moose_revision_header): $(moose_HEADER_deps) | $(moose_all_header_dir)
 	@if [ $(.SHELLSTATUS) -ne 0 ]; then \
 	echo "\nFailed to generate MooseRevision.h\n"; exit $(.SHELLSTATUS); \
 	fi
-	@if [ ! -e "$(moose_all_header_dir)/MooseRevision.h" ]; then \
-		ln -sf $(moose_revision_header) $(moose_all_header_dir); \
+	@if [ ! -e "$(all_header_dir)/MooseRevision.h" ]; then \
+		ln -sf $(moose_revision_header) $(all_header_dir); \
 	fi
 
 # libmesh submodule status
@@ -510,12 +509,7 @@ $(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) 
 
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
-
 $(moose_objects): $(moose_config_symlink) | moose_header_symlinks
-
-else
-
-$(moose_objects): $(moose_config)
 
 endif
 
