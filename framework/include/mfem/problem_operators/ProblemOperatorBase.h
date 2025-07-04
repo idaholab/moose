@@ -30,7 +30,6 @@ public:
   mfem::Array<int> _block_true_offsets;
 
   mfem::BlockVector _true_x, _true_rhs;
-  mfem::OperatorHandle _equation_system_operator;
 
 protected:
   /// Reference to the current problem.
@@ -47,10 +46,6 @@ protected:
   /// vector during solve.
   std::vector<std::string> _trial_var_names;
   std::vector<mfem::ParGridFunction *> _trial_variables;
-
-  // Complex counterparts of the above
-  std::vector<mfem::ParComplexGridFunction *> _cpx_test_variables;
-  std::vector<mfem::ParComplexGridFunction *> _cpx_trial_variables;
 
 };
 }
