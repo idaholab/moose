@@ -30,6 +30,18 @@
     issues = '#2941 #2567'
   []
 
+  [bounds_split]
+    type = 'Exodiff'
+    input = 'layered_average_bounds.i'
+    exodiff = 'layered_average_bounds_split_out.e'
+    cli_args = 'UserObjects/average/bound_uniform_splits=1 Outputs/file_base="layered_average_bounds_split_out"'
+
+    requirement = "The system shall be capable of uniformly splitting the bounds provided for "
+                  "computing the layered average"
+    design = '/LayeredAverage.md'
+    issues = '#30958'
+  []
+
   [errors]
     requirement = "The system shall report an error when computing layered averages of a variable if"
     design = '/LayeredAverage.md'
