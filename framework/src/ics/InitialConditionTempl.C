@@ -175,15 +175,14 @@ InitialConditionTempl<T>::compute()
 
   // If we are not defined on the element,
   // we have no business running on its sides and edges
-  if (!hasBlocks(_current_elem->subdomain_id()))
-    return;
+  const bool out_of_block_restriction = (!hasBlocks(_current_elem->subdomain_id()));
 
   auto & dof_map = _var.dofMap();
   const bool add_p_level =
       dof_map.should_p_refine(dof_map.var_group_from_var_number(_var.number()));
 
   // In 3D, project any edge values next
-  if (_dim > 2 && _cont != DISCONTINUOUS)
+  if (_dim > 2 && _cont != DISCONTINUOUS && !out_of_block_restriction)
     for (unsigned int e = 0; e != _current_elem->n_edges(); ++e)
     {
       FEInterface::dofs_on_edge(_current_elem, _dim, _fe_type, e, _side_dofs, add_p_level);
@@ -208,7 +207,7 @@ InitialConditionTempl<T>::compute()
     }
 
   // Project any side values (edges in 2D, faces in 3D)
-  if (_dim > 1 && _cont != DISCONTINUOUS)
+  if (_dim > 1 && _cont != DISCONTINUOUS && !out_of_block_restriction)
     for (unsigned int s = 0; s != _current_elem->n_sides(); ++s)
     {
       FEInterface::dofs_on_side(_current_elem, _dim, _fe_type, s, _side_dofs, add_p_level);
@@ -242,7 +241,7 @@ InitialConditionTempl<T>::compute()
       _free_dof[_free_dofs++] = i;
 
   // There may be nothing to project
-  if (_free_dofs)
+  if (_free_dofs && !out_of_block_restriction)
   {
     // Initialize FE data
     fe->attach_quadrature_rule(qrule.get());
