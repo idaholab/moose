@@ -30,7 +30,7 @@ MFEMVectorIC::MFEMVectorIC(const InputParameters & params) : MFEMInitialConditio
 void
 MFEMVectorIC::execute()
 {
-  auto & coeff = getVectorCoefficient(getParam<MFEMVectorCoefficientName>("coefficient"));
+  auto & coeff = getVectorCoefficient("coefficient");
   auto grid_function = getMFEMProblem().getGridFunction(getParam<VariableName>("variable"));
   grid_function->ProjectCoefficient(coeff);
 }

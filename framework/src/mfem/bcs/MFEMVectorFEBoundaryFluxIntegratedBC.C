@@ -26,8 +26,7 @@ MFEMVectorFEBoundaryFluxIntegratedBC::validParams()
 
 MFEMVectorFEBoundaryFluxIntegratedBC::MFEMVectorFEBoundaryFluxIntegratedBC(
     const InputParameters & parameters)
-  : MFEMIntegratedBC(parameters),
-    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+  : MFEMIntegratedBC(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 

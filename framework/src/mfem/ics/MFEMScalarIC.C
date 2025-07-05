@@ -30,7 +30,7 @@ MFEMScalarIC::MFEMScalarIC(const InputParameters & params) : MFEMInitialConditio
 void
 MFEMScalarIC::execute()
 {
-  auto & coeff = getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient"));
+  auto & coeff = getScalarCoefficient("coefficient");
   auto grid_function = getMFEMProblem().getGridFunction(getParam<VariableName>("variable"));
   grid_function->ProjectCoefficient(coeff);
 }
