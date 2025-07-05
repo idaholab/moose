@@ -12,6 +12,27 @@
 #include "ElementUserObject.h"
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
+#include "NodalPatchRecoveryBase.h"
+#include "KDTree.h"
+
+/**
+ * Strategies for initializing the solution:
+ *
+ * - DEFAULT: Use the standard initialization method.
+ * - POLYNOMIAL: Apply nodal patch recovery to fit a polynomial using the previously solved elements
+ *   that are directly connected to the elements being reinitialized.
+ * - POLYNOMIAL_WHOLE_SOLVED_DOMAIN: Fit a polynomial using all solved elements in the domain
+ *   to obtain a global approximation.
+ * - POLYNOMIAL_THRESHOLD: Fit a polynomial using nearby solved elements that meet a specified
+ *   threshold criterion, selecting only elements sufficiently close to the reinitialized elements.
+ */
+enum class ICStrategy
+{
+  DEFAULT = 0,
+  POLYNOMIAL = 1,
+  POLYNOMIAL_WHOLE_SOLVED_DOMAIN = 2,
+  POLYNOMIAL_THRESHOLD = 3
+};
 
 /**
  * Base class for mesh modifiers modifying element subdomains
@@ -59,6 +80,12 @@ protected:
   /// Boundary names associated with each moving boundary ID
   std::unordered_map<BoundaryID, BoundaryName> _moving_boundary_names;
 
+  /// Nonlinear system
+  NonlinearSystemBase & _nl_sys;
+
+  /// Auxiliary system
+  AuxiliarySystem & _aux_sys;
+
 private:
   /// Create moving boundaries
   void createMovingBoundaries(MooseMesh & mesh);
@@ -103,8 +130,14 @@ private:
   /// Range of reinitialized elements
   ConstElemRange & reinitializedElemRange(bool displaced = false);
 
+  /// Range of reinitialized nodes
+  ConstNodeRange & reinitializedNodeRange();
+
   /// Range of reinitialized boundary nodes
   ConstBndNodeRange & reinitializedBndNodeRange(bool displaced = false);
+
+  /// Return the range of nodes (Node*) extracted from reinitialized boundary nodes (BndNode*)
+  ConstNodeRange & reinitializedNodeRangeFromBndNodes(bool displaced);
 
   /// Reinitialize moved elements whose new subdomain is in this list
   std::vector<SubdomainID> _subdomain_ids_to_reinitialize;
@@ -141,8 +174,71 @@ private:
 
   /// Reinitialized nodes
   std::unordered_set<dof_id_type> _reinitialized_nodes;
+  /// Range of reinitialized nodes
+  std::unique_ptr<ConstNodeRange> _reinitialized_node_range;
   /// Range of reinitialized boundary nodes
   std::unique_ptr<ConstBndNodeRange> _reinitialized_bnd_node_range;
   /// Range of reinitialized boundary nodes on the displaced mesh
   std::unique_ptr<ConstBndNodeRange> _reinitialized_displaced_bnd_node_range;
+  /// Reinitialized boundary nodes in ConstNodeRange format (non-displaced mesh)
+  std::unique_ptr<ConstNodeRange> _reinitialized_node_range_from_bnd_nodes;
+  /// Reinitialized boundary nodes in ConstNodeRange format (displaced mesh)
+  std::unique_ptr<ConstNodeRange> _reinitialized_displaced_node_range_from_bnd_nodes;
+
+  /// The strategy used to apply IC on newly activated nodes
+  std::vector<ICStrategy> _ic_strategy;
+
+  /// @brief Names of the NodalPatchRecoveryBase user objects
+  const std::vector<UserObjectName> _npr_names;
+
+  /// @brief Apply initial conditions using polynomial extrapolation
+  std::vector<const NodalPatchRecoveryBase *> _npr_vec;
+
+  /// @brief List of variable names to be initialized for IC
+  std::vector<VariableName> _ic_vars_names;
+
+  /// @brief map from variable name to the index of the nodal patch recovery user object in `_npr_vec`
+  std::map<VariableName, unsigned int> _var_name_to_npr_idx;
+
+  /// @brief List of neighbor elements that share nodes with reinitialized elements
+  std::vector<std::vector<dof_id_type>> _solved_elem_ids_for_npr;
+
+  /// Elements that have been reinitialized due to subdomain changes,
+  /// gathered across all processors using MPI
+  std::vector<dof_id_type> _global_reinitialized_elems;
+
+  /// POLYNOMIAL_THRESHOLD related parameters
+  /// @brief Minimum number of nearby elements required in the polynomial extrapolation patch.
+  int _nearby_element_threshold = 1;
+
+  /// @brief Centroids of all solved elements used for k-d tree construction.
+  std::vector<Point> _centroids_of_elements;
+
+  /// @brief Maximum number of elements allowed in a leaf node of the k-d tree.
+  int _leaf_max_size = 10;
+
+  /// @brief k-d tree used for neighbor solved element search in polynomial extrapolation.
+  KDTree * _kd_tree = nullptr;
+
+  /// @brief Mapping from the k-d tree node index to the corresponding element ID.
+  std::vector<dof_id_type> _kd_tree_sequence_elem_id_map;
+
+  /// @brief Minimum diagonal length among the loose bounding boxes of
+  /// all solved elements (i.e., elements within the computational domain,
+  /// excluding those in _reinitialized_elems).
+  /// This value is used to compute the initial search radius for the k-d tree search,
+  /// where the radius is estimated as _nearby_element_threshold multiplied by _min_diag_length.
+  double _min_diag_length = std::numeric_limits<double>::max();
+
+  /// @brief Radius threshold for the k-d tree neighbor search.
+  /// By default, it is initialized as _nearby_element_threshold * _min_diag_length,
+  /// but the user can override this value by explicitly setting _radius_search_threshold.
+  double _radius_search_threshold = -1;
+
+  /// Perform a global MPI gather of reinitialized element IDs across all processors.
+  /// Results are stored in `_global_reinitialized_elems`.
+  void synchronizeReinitializedElems();
+
+  /// @brief Gather neighbor elements for newly activated nodes
+  void gatherNeighborElementsForActivatedNodes(const unsigned int ic_idx);
 };

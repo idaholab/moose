@@ -892,6 +892,39 @@ public:
   void projectInitialConditionOnCustomRange(libMesh::ConstElemRange & elem_range,
                                             ConstBndNodeRange & bnd_node_range);
 
+  /**
+   * Project initial conditions onto a specified set of elements and boundary nodes
+   * for a user-defined subset of variables.
+   */
+  void projectInitialConditionOnCustomRangeForSpecificVars(
+      libMesh::ConstElemRange & elem_range,
+      ConstBndNodeRange & bnd_node_range,
+      const std::set<VariableName> & selected_var_names);
+
+  /**
+   * Project an initial condition given by a polynomial onto selected elements and nodes
+   * for a set of variables.
+   *
+   * Coefficient order depends on the problem dimension:
+   *
+   * - 1D (x):         [c], [c, x], [c, x, x^2]
+   * - 2D (x, y):      [c], [c, y, x], [c, y, x, y^2, xy, x^2]
+   * - 3D (x, y, z):   [c], [c, z, y, x], [c, z, y, x, z^2, zy, zx, y^2, yx, x^2]
+   *
+   * Terms not included are assumed zero.
+   *
+   * \param elem_range       Element range to project on (non-nodal)
+   * \param bnd_nodes        Boundary nodes to include (non-nodal)
+   * \param node_range       Node range for nodal variables
+   * \param coef             Polynomial coefficients
+   * \param target_var_names Set of variable names to project
+   */
+  void projectFunctionOnCustomRangeForSpecificVars(ConstElemRange & elem_range,
+                                                   ConstNodeRange & bnd_nodes,
+                                                   ConstNodeRange & node_range,
+                                                   const RealEigenVector & coef,
+                                                   const std::set<VariableName> & target_var_names);
+
   // Materials /////
   virtual void addMaterial(const std::string & material_name,
                            const std::string & name,

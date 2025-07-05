@@ -31,9 +31,9 @@ If the boundaries provided through `moving_boundaries` already exist, the modifi
 
 !listing test/tests/meshmodifiers/element_subdomain_modifier/moving_boundary.i start=[moving_circle] end=[] include-end=true
 
-!media large_media/mesh_modifiers/element_subdomain_modifier/nodeset.png style=float:center;width:100%; caption=The evolving nodeset (green) between subdomains 1 and 2, as created by the modifier without an existing boundary. 
+!media large_media/mesh_modifiers/element_subdomain_modifier/nodeset.png style=float:center;width:100%; caption=The evolving nodeset (green) between subdomains 1 and 2, as created by the modifier without an existing boundary.
 
-The modifier only creates and modifies boundaries over elements that change subdomain, so the vertical boundary between subdomains 1 and 2 at $x=0.25$ is not added to the created boundary. 
+The modifier only creates and modifies boundaries over elements that change subdomain, so the vertical boundary between subdomains 1 and 2 at $x=0.25$ is not added to the created boundary.
 
 If only one boundary is provided but multiple pairs of subdomains are specified, then all the pairs are applied to the one boundary. Element sides on a subdomain's external boundary can also be added by specifying only one subdomain.
 
@@ -46,7 +46,6 @@ Since the update of the moving boundary only occurs over elements that change su
 !listing test/tests/meshmodifiers/element_subdomain_modifier/partial_moving_boundary.i start=[moving_circle] end=[] include-end=true
 
 !media large_media/mesh_modifiers/element_subdomain_modifier/partial.png style=float:center;width:100%; caption=The evolving sideset (green) around subdomain 1, including the external element sides, from an existing boundary.
- 
 
 Even though the `moving_boundary_subdomain_pairs` defines the moving boundary to be between subdomains 1 and 2 only, the right side of subdomain 2 remains throughout, as no element sides belong to elements that change subdomain.
 
@@ -97,3 +96,35 @@ Reinitialization can be further restricted by setting the parameter `old_subdoma
 !listing test/tests/meshmodifiers/element_subdomain_modifier/reinitialization_from_into.i start=[MeshModifiers] end=[AuxVariables]
 
 !media large_media/mesh_modifiers/element_subdomain_modifier/from_into.png style=float:center;width:100%; caption=Reinitialization of only the elements which change subdomain ID from 3, to subdomain IDs 1 or 2
+
+## Initial condition setting for the newly-activated nodes
+
+The `ElementSubdomainModifier` dynamically activates elements in the domain by changing their subdomain IDs. When a new set of elements becomes active from non-solved state, the nodes shared exclusively by either `newly-activated` or non-solved elements (i.e., elements not yet part of the solution) are called *newly-activated nodes*. These nodes do not carry prior solution history and must be assigned appropriate initial conditions before being incorporated into the simulation.
+
+Simply assigning zero values to these nodes (e.g., zero temperature or displacement) often causes numerical difficulties, especially when using nonlinear material models like those provided by the [`neml2`](https://cardinal.cels.anl.gov/modules/solid_mechanics/NEML2.html) library. Poor convergence or unstable behavior can result.
+
+To mitigate these issues, MOOSE supports strategies for setting the initial condition (IC) on newly-activated nodes using information from the previously solved region.
+
+### Polynomial fitting from nearby values
+
+When newly-activated elements are not directly connected to previously solved ones, a lightweight polynomial fitting strategy is used.
+
+This method leverages the nodal patch recovery technique built into MOOSE. The idea is to:
+
+1. Collect sampled solution values \( u(\mathbf{x}_i) \) from nearby previously solved elements.
+2. Fit a polynomial (e.g., order \( p = 2 \)) using least-squares over monomials like:
+
+\[
+\boldsymbol{P} = [1, x, y, x^2, xy, y^2]
+\]
+
+3. Evaluate the fitted polynomial at the position of the newly-activated node:
+
+\[
+u(\boldsymbol{x}^*) = \boldsymbol{P}(\boldsymbol{x}^*) \boldsymbol{c}
+\]
+
+Where:
+- \( \boldsymbol{x}^* \) is the coordinate of the newly-activated node,
+- \( \boldsymbol{P}(\boldsymbol{x}^*) \) is the polynomial basis evaluated at \( \boldsymbol{x}^* \),
+- \( \boldsymbol{c} \) is the vector of fitted coefficients from the least-squares system.

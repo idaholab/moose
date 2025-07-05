@@ -27,7 +27,15 @@ public:
   ComputeBoundaryInitialConditionThread(ComputeBoundaryInitialConditionThread & x,
                                         Threads::split split);
 
+  // Set IC on specific variable names
+  ComputeBoundaryInitialConditionThread(FEProblemBase & fe_problem,
+                                        const std::set<VariableName> & target_var_names);
+
   void onNode(ConstBndNodeRange::const_iterator & nd);
 
   void join(const ComputeBoundaryInitialConditionThread & /*y*/);
+
+protected:
+  /// @brief the names of target variables for which the initial conditions are applied
+  const std::set<VariableName> _target_var_names;
 };

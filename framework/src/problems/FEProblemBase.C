@@ -3638,10 +3638,10 @@ FEProblemBase::projectSolution()
       DenseVector<Number> vals(var.order());
       ic->compute(vals);
 
-      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      const unsigned int n_scalar_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_scalar_dofs; i++)
       {
-        const dof_id_type global_index = var.dofIndices()[i];
+        const auto global_index = var.dofIndices()[i];
         var.sys().solution().set(global_index, vals(i));
         var.setValue(i, vals(i));
       }
@@ -3691,10 +3691,10 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
       DenseVector<Number> vals(var.order());
       ic->compute(vals);
 
-      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      const unsigned int n_scalar_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_scalar_dofs; i++)
       {
-        const dof_id_type global_index = var.dofIndices()[i];
+        const auto global_index = var.dofIndices()[i];
         var.sys().solution().set(global_index, vals(i));
         var.setValue(i, vals(i));
       }
@@ -3709,6 +3709,228 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
 
   _aux->solution().close();
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
+}
+
+void
+FEProblemBase::projectInitialConditionOnCustomRangeForSpecificVars(
+    ConstElemRange & elem_range,
+    ConstBndNodeRange & bnd_nodes,
+    const std::set<VariableName> & target_var_names)
+{
+  ComputeInitialConditionThread cic(*this, target_var_names);
+  Threads::parallel_reduce(elem_range, cic);
+
+  ComputeBoundaryInitialConditionThread cbic(*this, target_var_names);
+  Threads::parallel_reduce(bnd_nodes, cbic);
+
+  for (auto & nl : _nl)
+    nl->solution().close();
+  _aux->solution().close();
+
+  // Also, load values into the SCALAR dofs
+  // Note: We assume that all SCALAR dofs are on the
+  // processor with highest ID
+  if (processor_id() == (n_processors() - 1) && _scalar_ics.hasActiveObjects())
+  {
+    const auto & ics = _scalar_ics.getActiveObjects();
+    for (const auto & ic : ics)
+    {
+      MooseVariableScalar & var = ic->variable();
+
+      if (!target_var_names.empty() && !target_var_names.count(var.name()))
+        continue;
+
+      var.reinit();
+
+      DenseVector<Number> vals(var.order());
+      ic->compute(vals);
+
+      const unsigned int n_scalar_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_scalar_dofs; i++)
+      {
+        const auto global_index = var.dofIndices()[i];
+        var.sys().solution().set(global_index, vals(i));
+        var.setValue(i, vals(i));
+      }
+    }
+  }
+
+  for (auto & nl : _nl)
+  {
+    nl->solution().close();
+    nl->solution().localize(*nl->system().current_local_solution, nl->dofMap().get_send_list());
+  }
+
+  _aux->solution().close();
+  _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
+}
+
+void
+FEProblemBase::projectFunctionOnCustomRangeForSpecificVars(
+    ConstElemRange & elem_range,
+    ConstNodeRange & bnd_nodes,
+    ConstNodeRange & node_range,
+    const RealEigenVector & coef,
+    const std::set<VariableName> & target_var_names)
+{
+  EquationSystems & es = this->es();
+
+  const unsigned dim = _mesh.dimension();
+
+  es.parameters.set<int>("dimension_for_projection") = dim;
+
+  // Check size validity
+  if ((dim == 1 && coef.size() != 1 && coef.size() != 3) ||
+      (dim == 2 && coef.size() != 1 && coef.size() != 3 && coef.size() != 6) ||
+      (dim == 3 && coef.size() != 1 && coef.size() != 4 && coef.size() != 10))
+    mooseError("Unsupported coef size ", coef.size(), " for dimension ", dim);
+
+  // Set coefficients to parameters with default = 0
+  auto get = [&](int i) -> Real { return (i < coef.size()) ? coef(i) : 0.0; };
+
+  es.parameters.set<Real>("coef_c") = get(0);
+
+  if (dim == 1)
+  {
+    es.parameters.set<Real>("coef_x") = get(1);
+    es.parameters.set<Real>("coef_xx") = get(2);
+  }
+  else if (dim == 2)
+  {
+    es.parameters.set<Real>("coef_y") = get(1);
+    es.parameters.set<Real>("coef_x") = get(2);
+    es.parameters.set<Real>("coef_yy") = get(3);
+    es.parameters.set<Real>("coef_yx") = get(4);
+    es.parameters.set<Real>("coef_xx") = get(5);
+  }
+  else if (dim == 3)
+  {
+    es.parameters.set<Real>("coef_z") = get(1);
+    es.parameters.set<Real>("coef_y") = get(2);
+    es.parameters.set<Real>("coef_x") = get(3);
+    es.parameters.set<Real>("coef_zz") = get(4);
+    es.parameters.set<Real>("coef_zy") = get(5);
+    es.parameters.set<Real>("coef_zx") = get(6);
+    es.parameters.set<Real>("coef_yy") = get(7);
+    es.parameters.set<Real>("coef_yx") = get(8);
+    es.parameters.set<Real>("coef_xx") = get(9);
+  }
+
+  // Define projection function
+  auto poly_func = [](const Point & p,
+                      const Parameters & parameters,
+                      const std::string &,
+                      const std::string &) -> Number
+  {
+    const int dim = parameters.get<int>("dimension_for_projection");
+
+    const Real x = p(0);
+    const Real y = (dim > 1) ? p(1) : 0;
+    const Real z = (dim > 2) ? p(2) : 0;
+
+    Real val = parameters.get<Real>("coef_c");
+
+    if (dim == 1)
+      val += parameters.get<Real>("coef_x") * x + parameters.get<Real>("coef_xx") * x * x;
+    else if (dim == 2)
+      val += parameters.get<Real>("coef_y") * y + parameters.get<Real>("coef_x") * x +
+             parameters.get<Real>("coef_yy") * y * y + parameters.get<Real>("coef_yx") * x * y +
+             parameters.get<Real>("coef_xx") * x * x;
+    else if (dim == 3)
+      val += parameters.get<Real>("coef_z") * z + parameters.get<Real>("coef_y") * y +
+             parameters.get<Real>("coef_x") * x + parameters.get<Real>("coef_zz") * z * z +
+             parameters.get<Real>("coef_zy") * z * y + parameters.get<Real>("coef_zx") * z * x +
+             parameters.get<Real>("coef_yy") * y * y + parameters.get<Real>("coef_yx") * y * x +
+             parameters.get<Real>("coef_xx") * x * x;
+
+    return val;
+  };
+
+  // Define gradient
+  auto poly_func_grad = [](const Point & p,
+                           const Parameters & parameters,
+                           const std::string &,
+                           const std::string &) -> Gradient
+  {
+    const int dim = parameters.get<int>("dimension_for_projection");
+    const Real x = p(0);
+    const Real y = (dim > 1) ? p(1) : 0;
+    const Real z = (dim > 2) ? p(2) : 0;
+
+    Gradient grad;
+
+    if (dim == 1)
+      grad(0) = parameters.get<Real>("coef_x") + 2 * parameters.get<Real>("coef_xx") * x;
+    else if (dim == 2)
+    {
+      grad(0) = parameters.get<Real>("coef_x") + parameters.get<Real>("coef_yx") * y +
+                2 * parameters.get<Real>("coef_xx") * x;
+      grad(1) = parameters.get<Real>("coef_y") + parameters.get<Real>("coef_yx") * x +
+                2 * parameters.get<Real>("coef_yy") * y;
+    }
+    else if (dim == 3)
+    {
+      grad(0) = parameters.get<Real>("coef_x") + parameters.get<Real>("coef_zx") * z +
+                parameters.get<Real>("coef_yx") * y + 2 * parameters.get<Real>("coef_xx") * x;
+      grad(1) = parameters.get<Real>("coef_y") + parameters.get<Real>("coef_zy") * z +
+                parameters.get<Real>("coef_yx") * x + 2 * parameters.get<Real>("coef_yy") * y;
+      grad(2) = parameters.get<Real>("coef_z") + parameters.get<Real>("coef_zy") * y +
+                parameters.get<Real>("coef_zx") * x + 2 * parameters.get<Real>("coef_zz") * z;
+    }
+
+    return grad;
+  };
+
+  for (const std::string & var_name : target_var_names)
+  {
+    const auto & var = getStandardVariable(0, var_name);
+    const auto var_num = var.number();
+
+    SystemBase & sys =
+        _aux->hasVariable(var_name)
+            ? static_cast<SystemBase &>(getAuxiliarySystem())
+            : static_cast<SystemBase &>(getNonlinearSystemBase(systemNumForVariable(var_name)));
+
+    System & libmesh_sys = getSystem(var_name);
+
+    NumericVector<Number> & temp_vec =
+        libmesh_sys.add_vector("temp_projection", /*projected=*/false);
+
+    libmesh_sys.project_vector(poly_func, poly_func_grad, es.parameters, temp_vec);
+    temp_vec.close();
+
+    DofMap & dof_map = sys.dofMap();
+    std::vector<dof_id_type> dof_indices;
+
+    bool not_apply_on_solved_dofs = (var.feType().family == LAGRANGE);
+
+    if (not_apply_on_solved_dofs)
+      for (const auto & node : node_range)
+      {
+        dof_map.dof_indices(node, dof_indices, var_num);
+        for (auto dof : dof_indices)
+          sys.solution().set(dof, temp_vec(dof));
+      }
+    else
+    {
+      for (const auto & elem : elem_range)
+      {
+        dof_map.dof_indices(elem, dof_indices, var_num);
+        for (auto dof : dof_indices)
+          sys.solution().set(dof, temp_vec(dof));
+      }
+      dof_indices.clear();
+      for (const auto & node : bnd_nodes)
+      {
+        dof_map.dof_indices(node, dof_indices, var_num);
+        for (auto dof : dof_indices)
+          sys.solution().set(dof, temp_vec(dof));
+      }
+    }
+
+    sys.solution().close();
+    sys.solution().localize(*libmesh_sys.current_local_solution, sys.dofMap().get_send_list());
+  }
 }
 
 std::shared_ptr<MaterialBase>
