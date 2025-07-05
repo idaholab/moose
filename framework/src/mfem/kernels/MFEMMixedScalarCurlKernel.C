@@ -28,8 +28,7 @@ MFEMMixedScalarCurlKernel::validParams()
 }
 
 MFEMMixedScalarCurlKernel::MFEMMixedScalarCurlKernel(const InputParameters & parameters)
-  : MFEMMixedBilinearFormKernel(parameters),
-    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+  : MFEMMixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 
