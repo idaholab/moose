@@ -130,7 +130,6 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
       {
         new_bnds.emplace_back(_layer_bounds[i]);
         new_bnds.emplace_back(0.5 * (_layer_bounds[i] + _layer_bounds[i + 1]));
-        new_bnds.emplace_back(_layer_bounds[i + 1]);
       }
       _layer_bounds = new_bnds;
     }
