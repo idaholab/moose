@@ -73,7 +73,7 @@
     old_subdomain_reinitialized = false
     reinitialize_subdomain_ids = '1'
 
-    ic_strategy = "IC_POLYNOMIAL IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN IC_POLYNOMIAL_THRESHOLD"
+    ic_strategy = "POLYNOMIAL POLYNOMIAL_WHOLE_SOLVED_DOMAIN POLYNOMIAL_THRESHOLD"
     nearby_element_threshold = 3
     nodal_patch_recovery_uo = 'extrapolation_patch extrapolation_patch2 extrapolation_patch3'
   []

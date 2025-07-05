@@ -25,7 +25,7 @@ ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialCondi
 }
 
 ComputeInitialConditionThread::ComputeInitialConditionThread(
-    FEProblemBase & fe_problem, const std::set<std::string> & target_var_names)
+    FEProblemBase & fe_problem, const std::set<VariableName> & target_var_names)
   : _fe_problem(fe_problem), _target_var_names(target_var_names)
 {
 }

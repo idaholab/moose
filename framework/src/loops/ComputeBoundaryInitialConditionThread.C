@@ -30,7 +30,7 @@ ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
 }
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
-    FEProblemBase & fe_problem, const std::set<std::string> & target_var_names)
+    FEProblemBase & fe_problem, const std::set<VariableName> & target_var_names)
   : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
     _target_var_names(target_var_names)
 {

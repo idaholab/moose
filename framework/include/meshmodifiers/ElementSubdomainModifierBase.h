@@ -15,12 +15,23 @@
 #include "NodalPatchRecoveryBase.h"
 #include "KDTree.h"
 
+/**
+ * Strategies for initializing the solution:
+ *
+ * - DEFAULT: Use the standard initialization method.
+ * - POLYNOMIAL: Apply nodal patch recovery to fit a polynomial using the previously solved elements
+ *   that are directly connected to the elements being reinitialized.
+ * - POLYNOMIAL_WHOLE_SOLVED_DOMAIN: Fit a polynomial using all solved elements in the domain
+ *   to obtain a global approximation.
+ * - POLYNOMIAL_THRESHOLD: Fit a polynomial using nearby solved elements that meet a specified
+ *   threshold criterion, selecting only elements sufficiently close to the reinitialized elements.
+ */
 enum class ICStrategy
 {
-  IC_DEFAULT = 0,
-  IC_POLYNOMIAL = 1,
-  IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN = 2,
-  IC_POLYNOMIAL_THRESHOLD = 3
+  DEFAULT = 0,
+  POLYNOMIAL = 1,
+  POLYNOMIAL_WHOLE_SOLVED_DOMAIN = 2,
+  POLYNOMIAL_THRESHOLD = 3
 };
 
 /**
@@ -120,7 +131,7 @@ private:
   ConstElemRange & reinitializedElemRange(bool displaced = false);
 
   /// Range of reinitialized nodes
-  ConstNodeRange & reinitializedNodeRange(bool displaced = false);
+  ConstNodeRange & reinitializedNodeRange();
 
   /// Range of reinitialized boundary nodes
   ConstBndNodeRange & reinitializedBndNodeRange(bool displaced = false);
@@ -165,15 +176,13 @@ private:
   std::unordered_set<dof_id_type> _reinitialized_nodes;
   /// Range of reinitialized nodes
   std::unique_ptr<ConstNodeRange> _reinitialized_node_range;
-  /// Range of reinitialized nodes on the displaced mesh
-  std::unique_ptr<ConstNodeRange> _reinitialized_displaced_node_range;
   /// Range of reinitialized boundary nodes
   std::unique_ptr<ConstBndNodeRange> _reinitialized_bnd_node_range;
   /// Range of reinitialized boundary nodes on the displaced mesh
   std::unique_ptr<ConstBndNodeRange> _reinitialized_displaced_bnd_node_range;
-  /// Range of reinitialized nodes extracted from boundary nodes (non-displaced mesh)
+  /// Reinitialized boundary nodes in ConstNodeRange format (non-displaced mesh)
   std::unique_ptr<ConstNodeRange> _reinitialized_node_range_from_bnd_nodes;
-  /// Range of reinitialized nodes extracted from boundary nodes (displaced mesh)
+  /// Reinitialized boundary nodes in ConstNodeRange format (displaced mesh)
   std::unique_ptr<ConstNodeRange> _reinitialized_displaced_node_range_from_bnd_nodes;
 
   /// The strategy used to apply IC on newly activated nodes
@@ -188,11 +197,8 @@ private:
   /// @brief List of variable names to be initialized for IC
   std::vector<VariableName> _ic_vars_names;
 
-  /// @brief List of variable index number to be initialized (used to find corresponding DOFs) for IC
-  std::vector<unsigned int> _ic_vars_number;
-
-  /// @brief map from variable number to the index of the nodal patch recovery user object in `_npr_vec`
-  std::unordered_map<unsigned int, unsigned int> _var_number2_npr_idx;
+  /// @brief map from variable name to the index of the nodal patch recovery user object in `_npr_vec`
+  std::map<VariableName, unsigned int> _var_name_to_npr_idx;
 
   /// @brief List of neighbor elements that share nodes with reinitialized elements
   std::vector<std::vector<dof_id_type>> _solved_elem_ids_for_npr;
@@ -201,41 +207,37 @@ private:
   /// gathered across all processors using MPI
   std::vector<dof_id_type> _global_reinitialized_elems;
 
-  /// Global collection of all newly activated node IDs, gathered across all processors.
-  /// This set is independent of processor ownership and ensures consistency in parallel runs.
-  std::vector<dof_id_type> _complete_reinitialized_nodes;
-
-  /// IC_POLYNOMIAL_THRESHOLD related parameters
-  /// @brief Threshold for checking the closeness of element numbers in polynomial extrapolation
+  /// POLYNOMIAL_THRESHOLD related parameters
+  /// @brief Minimum number of nearby elements required in the polynomial extrapolation patch.
   int _nearby_element_threshold = 1;
 
-  /// @brief centroids of the element
+  /// @brief Centroids of all solved elements used for k-d tree construction.
   std::vector<Point> _centroids_of_elements;
 
-  /// @brief Maximum number of elements in a leaf node of the k-d tree
+  /// @brief Maximum number of elements allowed in a leaf node of the k-d tree.
   int _leaf_max_size = 10;
 
-  /// @brief k-d tree for neighbor element search in polynomial extrapolation
+  /// @brief k-d tree used for neighbor solved element search in polynomial extrapolation.
   KDTree * _kd_tree = nullptr;
 
-  /// @brief  Map from k-d tree sequence index to element ID
+  /// @brief Mapping from the k-d tree node index to the corresponding element ID.
   std::vector<dof_id_type> _kd_tree_sequence_elem_id_map;
 
-  /// @brief Minimum diagonal length (criteria) for the k-d tree search
+  /// @brief Minimum diagonal length among the loose bounding boxes of
+  /// all solved elements (i.e., elements within the computational domain,
+  /// excluding those in _reinitialized_elems).
+  /// This value is used to compute the initial search radius for the k-d tree search,
+  /// where the radius is estimated as _nearby_element_threshold multiplied by _min_diag_length.
   double _min_diag_length = std::numeric_limits<double>::max();
 
-  /// @brief Radius search threshold for k-d tree search
+  /// @brief Radius threshold for the k-d tree neighbor search.
+  /// By default, it is initialized as _nearby_element_threshold * _min_diag_length,
+  /// but the user can override this value by explicitly setting _radius_search_threshold.
   double _radius_search_threshold = -1;
-
-  /// Number of nonlinear variables in the system
-  const int _number_of_nl_variables;
 
   /// Perform a global MPI gather of reinitialized element IDs across all processors.
   /// Results are stored in `_global_reinitialized_elems`.
   void synchronizeReinitializedElems();
-
-  /// @brief Filters the globally reinitialized nodes and stores only those owned by this processor.
-  void identifyProcessorOwnedReinitializedNodes();
 
   /// @brief Gather neighbor elements for newly activated nodes
   void gatherNeighborElementsForActivatedNodes(const unsigned int ic_idx);

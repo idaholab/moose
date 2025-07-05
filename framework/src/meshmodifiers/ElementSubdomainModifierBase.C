@@ -86,9 +86,9 @@ ElementSubdomainModifierBase::validParams()
   params.addParam<std::vector<VariableName>>(
       "ic_variables", {}, "Which variables to set IC on the newly activated nodes. ");
 
-  MooseEnum ic_strategy("IC_DEFAULT IC_POLYNOMIAL "
-                        "IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN IC_POLYNOMIAL_THRESHOLD",
-                        "IC_DEFAULT");
+  MooseEnum ic_strategy("DEFAULT POLYNOMIAL "
+                        "POLYNOMIAL_WHOLE_SOLVED_DOMAIN POLYNOMIAL_THRESHOLD",
+                        "DEFAULT");
 
   params.addParam<std::vector<MooseEnum>>(
       "ic_strategy",
@@ -128,8 +128,7 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
     _ic_vars_names(getParam<std::vector<VariableName>>("ic_variables")),
     _nearby_element_threshold(getParam<int>("nearby_element_threshold")),
     _leaf_max_size(getParam<int>("kd_tree_leaf_max_size")),
-    _radius_search_threshold(getParam<double>("radius_search_threshold")),
-    _number_of_nl_variables(_nl_sys.nVariables())
+    _radius_search_threshold(getParam<double>("radius_search_threshold"))
 {
   // Check if the variables to set IC exist in the system
   for (auto var_name : _ic_vars_names)
@@ -154,8 +153,8 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
    *     (b2) If only one strategy is provided -> apply it to all variables from NPR.
    *     (b3) Otherwise -> error.
    * (c) If `ic_strategy` is set, but both `ic_variables` and NPR are empty:
-   *     (c1) If one component in `ic_strategy` == IC_POLYNOMIAL... -> mooseError
-   *     (c2) If one strategy is provided (basically only work for `IC_DEFAULT`) -> apply to all
+   *     (c1) If one component in `ic_strategy` == POLYNOMIAL... -> mooseError
+   *     (c2) If one strategy is provided (basically only work for `DEFAULT`) -> apply to all
    *      nonlinear variables.
    *     (c3) If more than one strategy is provided -> warning + use first for all.
    * (d) If `ic_strategy` has one value and `ic_variables` is provided -> apply to all
@@ -189,9 +188,9 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
     for (const auto & e : ic_strategy_in)
     {
       const auto ic_enum = e.getEnum<ICStrategy>();
-      if (ic_enum == ICStrategy::IC_POLYNOMIAL ||
-          ic_enum == ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
-          ic_enum == ICStrategy::IC_POLYNOMIAL_THRESHOLD)
+      if (ic_enum == ICStrategy::POLYNOMIAL ||
+          ic_enum == ICStrategy::POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
+          ic_enum == ICStrategy::POLYNOMIAL_THRESHOLD)
       {
         ic_has_polynomial = true;
         break;
@@ -209,7 +208,7 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
                    "specified. "
                    "This will apply the same strategy to all variables in the non-linear system "
                    "based on your first value in ic_strategy.");
-    _ic_strategy.resize(_number_of_nl_variables, ic_strategy_in[0].getEnum<ICStrategy>());
+    _ic_strategy.resize(_nl_sys.nVariables(), ic_strategy_in[0].getEnum<ICStrategy>());
     _ic_vars_names = _nl_sys.getVariableNames();
   }
   else if (!_ic_vars_names.empty() && ic_strategy_in.size() == 1)
@@ -226,24 +225,6 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
                "Ensure that either 'ic_variables' or 'nodal_patch_recovery_uo' is specified for "
                "multiple strategies.");
 
-  _ic_vars_number.resize(_ic_vars_names.size());
-  // setup var numbers for the variables that need to be initialized
-  for (const int i : index_range(_ic_vars_names))
-  {
-    const auto & var_name = _ic_vars_names[i];
-    // Get the variable
-    const auto & var = (_nl_sys.hasVariable(var_name)) ? _nl_sys.getVariable(_tid, var_name)
-                                                       : _aux_sys.getVariable(_tid, var_name);
-
-    // Get the variable number
-    const auto var_num = var.number();
-
-    // If the variable is not in the nonlinear system, we need to add the number of nonlinear
-    // variables to the variable number to ensure it is unique across all variables
-    _ic_vars_number[i] =
-        (_nl_sys.hasVariable(var_name)) ? var_num : var_num + _number_of_nl_variables;
-  }
-
   if (!_npr_vec.empty())
   {
     // Count how many variables use NPR strategy
@@ -251,11 +232,11 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
 
     for (auto i : index_range(_ic_vars_names))
     {
-      if (_ic_strategy[i] == ICStrategy::IC_POLYNOMIAL ||
-          _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
-          _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_THRESHOLD)
+      if (_ic_strategy[i] == ICStrategy::POLYNOMIAL ||
+          _ic_strategy[i] == ICStrategy::POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
+          _ic_strategy[i] == ICStrategy::POLYNOMIAL_THRESHOLD)
       {
-        _var_number2_npr_idx[_ic_vars_number[i]] = npr_count;
+        _var_name_to_npr_idx[_ic_vars_names[i]] = npr_count;
         npr_count++;
       }
     }
@@ -413,13 +394,13 @@ ElementSubdomainModifierBase::modify(
     applyMovingBoundaryChanges(*_displaced_mesh);
 
   if (!_npr_vec.empty())
-    for (auto i : index_range(_ic_vars_number))
+    for (auto i : index_range(_ic_vars_names))
     {
-      const auto var_number = _ic_vars_number[i];
-      if (_var_number2_npr_idx.find(var_number) == _var_number2_npr_idx.end())
+      const auto var_name = _ic_vars_names[i];
+      if (_var_name_to_npr_idx.find(var_name) == _var_name_to_npr_idx.end())
         continue;
 
-      const int npr_idx = _var_number2_npr_idx[var_number];
+      const int npr_idx = _var_name_to_npr_idx[var_name];
 
       gatherNeighborElementsForActivatedNodes(i);
       _npr_vec[npr_idx]->cacheAdditionalElements(_solved_elem_ids_for_npr[npr_idx]);
@@ -667,7 +648,6 @@ ElementSubdomainModifierBase::meshChanged()
   _reinitialized_bnd_node_range.reset();
   _reinitialized_displaced_bnd_node_range.reset();
   _reinitialized_node_range.reset();
-  _reinitialized_displaced_node_range.reset();
   _reinitialized_node_range_from_bnd_nodes.reset();
   _reinitialized_displaced_node_range_from_bnd_nodes.reset();
 
@@ -752,17 +732,10 @@ ElementSubdomainModifierBase::findReinitializedElemsAndNodes(
   for (const auto & vec : gathered)
     unique_nodes.insert(vec.begin(), vec.end());
 
-  // Store globally reinitialized node list
-  _complete_reinitialized_nodes.assign(unique_nodes.begin(), unique_nodes.end());
-  identifyProcessorOwnedReinitializedNodes();
-}
-
-void
-ElementSubdomainModifierBase::identifyProcessorOwnedReinitializedNodes()
-{
-  for (auto id : _complete_reinitialized_nodes)
+  // Filters the globally reinitialized nodes and stores only those owned by this processor.
+  for (auto id : unique_nodes)
   {
-    auto node = _mesh.nodePtr(id);
+    const auto node = _mesh.nodePtr(id);
     if (node->processor_id() == _mesh.processor_id())
       _reinitialized_nodes.insert(id);
   }
@@ -798,7 +771,7 @@ void
 ElementSubdomainModifierBase::applyIC(bool displaced)
 {
   // Set of variable names that are not part of the extrapolated initial conditions
-  std::set<std::string> ic_target_vars_names_except_ic_vars;
+  std::set<VariableName> ic_target_vars_names_except_ic_vars;
 
   auto insertNonICVars = [&](SystemBase & sys) -> void
   {
@@ -819,25 +792,25 @@ ElementSubdomainModifierBase::applyIC(bool displaced)
       ic_target_vars_names_except_ic_vars);
 
   // Loop over each variable and initialize
-  for (auto i : index_range(_ic_vars_number))
+  for (auto i : index_range(_ic_vars_names))
   {
-    if (_ic_strategy[i] == ICStrategy::IC_DEFAULT)
+    if (_ic_strategy[i] == ICStrategy::DEFAULT)
       // note: from IC -> current
       _fe_problem.projectInitialConditionOnCustomRangeForSpecificVars(
           reinitializedElemRange(displaced),
           reinitializedBndNodeRange(displaced),
           {_ic_vars_names[i]});
-    else if (_ic_strategy[i] == ICStrategy::IC_POLYNOMIAL ||
-             _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
-             _ic_strategy[i] == ICStrategy::IC_POLYNOMIAL_THRESHOLD)
+    else if (_ic_strategy[i] == ICStrategy::POLYNOMIAL ||
+             _ic_strategy[i] == ICStrategy::POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
+             _ic_strategy[i] == ICStrategy::POLYNOMIAL_THRESHOLD)
     {
-      const auto var_number = _ic_vars_number[i];
-      const auto & coef = _npr_vec[_var_number2_npr_idx[var_number]]->getCoefficients(
-          _solved_elem_ids_for_npr[_var_number2_npr_idx[var_number]]);
+      const auto var_name = _ic_vars_names[i];
+      const auto & coef = _npr_vec[_var_name_to_npr_idx[var_name]]->getCoefficients(
+          _solved_elem_ids_for_npr[_var_name_to_npr_idx[var_name]]);
       _fe_problem.projectFunctionOnCustomRangeForSpecificVars(
           reinitializedElemRange(displaced),
           reinitializedNodeRangeFromBndNodes(displaced),
-          reinitializedNodeRange(displaced),
+          reinitializedNodeRange(),
           coef,
           {_ic_vars_names[i]});
     }
@@ -939,20 +912,17 @@ ElementSubdomainModifierBase::reinitializedBndNodeRange(bool displaced)
 }
 
 ConstNodeRange &
-ElementSubdomainModifierBase::reinitializedNodeRange(bool displaced)
+ElementSubdomainModifierBase::reinitializedNodeRange()
 {
-  if (!displaced && _reinitialized_node_range)
+  if (_reinitialized_node_range)
     return *_reinitialized_node_range.get();
-
-  if (displaced && _reinitialized_displaced_node_range)
-    return *_reinitialized_displaced_node_range.get();
 
   // Create a vector of the newly reinitialized nodes
   std::vector<const Node *> nodes;
 
   for (auto node_id : _reinitialized_nodes)
   {
-    nodes.push_back(displaced ? _displaced_mesh->nodePtr(node_id) : _mesh.nodePtr(node_id));
+    nodes.push_back(_mesh.nodePtr(node_id)); // displaced mesh shares the same node object
   }
 
   // Make some fake node iterators defining this vector of nodes
@@ -964,12 +934,9 @@ ElementSubdomainModifierBase::reinitializedNodeRange(bool displaced)
   const auto nodes_end = MeshBase::const_node_iterator(
       node_itr_end, node_itr_end, Predicates::NotNull<const Node * const *>());
 
-  if (!displaced)
-    _reinitialized_node_range = std::make_unique<ConstNodeRange>(nodes_begin, nodes_end);
-  else
-    _reinitialized_displaced_node_range = std::make_unique<ConstNodeRange>(nodes_begin, nodes_end);
+  _reinitialized_node_range = std::make_unique<ConstNodeRange>(nodes_begin, nodes_end);
 
-  return reinitializedNodeRange(displaced);
+  return *_reinitialized_node_range.get();
 }
 
 ConstNodeRange &
@@ -1110,13 +1077,13 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(const unsi
     }
   };
 
-  if (_ic_strategy[ic_idx] != ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN &&
-      _ic_strategy[ic_idx] != ICStrategy::IC_POLYNOMIAL &&
-      _ic_strategy[ic_idx] != ICStrategy::IC_POLYNOMIAL_THRESHOLD)
+  if (_ic_strategy[ic_idx] != ICStrategy::POLYNOMIAL_WHOLE_SOLVED_DOMAIN &&
+      _ic_strategy[ic_idx] != ICStrategy::POLYNOMIAL &&
+      _ic_strategy[ic_idx] != ICStrategy::POLYNOMIAL_THRESHOLD)
     return;
 
-  const unsigned int ic_var_number = _ic_vars_number[ic_idx];
-  _solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]].clear();
+  const auto ic_var_name = _ic_vars_names[ic_idx];
+  _solved_elem_ids_for_npr[_var_name_to_npr_idx[ic_var_name]].clear();
 
   // 0.  Pre-checks and caching
   if (_global_reinitialized_elems.empty())
@@ -1140,7 +1107,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(const unsi
 
   std::unordered_set<dof_id_type> patch_elem_set; // Prevent duplicates
 
-  if (_ic_strategy[ic_idx] == ICStrategy::IC_POLYNOMIAL_THRESHOLD)
+  if (_ic_strategy[ic_idx] == ICStrategy::POLYNOMIAL_THRESHOLD)
   {
     std::vector<Point> local_centroids;
     std::vector<dof_id_type> local_elem_ids;
@@ -1195,7 +1162,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(const unsi
         if (patch_elem_set.count(neighbor_elem_id))
           continue;
 
-        _solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]].push_back(neighbor_elem_id);
+        _solved_elem_ids_for_npr[_var_name_to_npr_idx[ic_var_name]].push_back(neighbor_elem_id);
         patch_elem_set.insert(neighbor_elem_id);
       }
     }
@@ -1221,7 +1188,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(const unsi
                     elem->subdomain_id()) == _subdomain_ids_to_reinitialize.end())
         continue;
 
-      if (_ic_strategy[ic_idx] == ICStrategy::IC_POLYNOMIAL)
+      if (_ic_strategy[ic_idx] == ICStrategy::POLYNOMIAL)
       {
         // (d) Check if any node is in reinit_node_set
         bool share_with_reinit = false;
@@ -1236,19 +1203,19 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(const unsi
         if (share_with_reinit)
         {
           patch_elem_set.insert(eid);
-          _solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]].push_back(eid);
+          _solved_elem_ids_for_npr[_var_name_to_npr_idx[ic_var_name]].push_back(eid);
         }
       }
-      else if (_ic_strategy[ic_idx] == ICStrategy::IC_POLYNOMIAL_WHOLE_SOLVED_DOMAIN)
+      else if (_ic_strategy[ic_idx] == ICStrategy::POLYNOMIAL_WHOLE_SOLVED_DOMAIN)
       {
         patch_elem_set.insert(eid);
-        _solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]].push_back(eid);
+        _solved_elem_ids_for_npr[_var_name_to_npr_idx[ic_var_name]].push_back(eid);
       }
     }
   }
 
-  local2Global(_solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]],
-               _solved_elem_ids_for_npr[_var_number2_npr_idx[ic_var_number]],
+  local2Global(_solved_elem_ids_for_npr[_var_name_to_npr_idx[ic_var_name]],
+               _solved_elem_ids_for_npr[_var_name_to_npr_idx[ic_var_name]],
                true /*sort_and_remove_duplicates*/);
 }
 

@@ -898,7 +898,7 @@ public:
   void projectInitialConditionOnCustomRangeForSpecificVars(
       libMesh::ConstElemRange & elem_range,
       ConstBndNodeRange & bnd_node_range,
-      const std::set<std::string> & selected_var_names);
+      const std::set<VariableName> & selected_var_names);
 
   /**
    * Project an initial condition given by a polynomial onto selected elements and nodes
@@ -922,7 +922,7 @@ public:
                                                    ConstNodeRange & bnd_nodes,
                                                    ConstNodeRange & node_range,
                                                    const RealEigenVector & coef,
-                                                   const std::set<std::string> & target_var_names);
+                                                   const std::set<VariableName> & target_var_names);
 
   // Materials /////
   virtual void addMaterial(const std::string & material_name,

@@ -3713,7 +3713,7 @@ void
 FEProblemBase::projectInitialConditionOnCustomRangeForSpecificVars(
     ConstElemRange & elem_range,
     ConstBndNodeRange & bnd_nodes,
-    const std::set<std::string> & target_var_names)
+    const std::set<VariableName> & target_var_names)
 {
   ComputeInitialConditionThread cic(*this, target_var_names);
   Threads::parallel_reduce(elem_range, cic);
@@ -3769,7 +3769,7 @@ FEProblemBase::projectFunctionOnCustomRangeForSpecificVars(
     ConstNodeRange & bnd_nodes,
     ConstNodeRange & node_range,
     const RealEigenVector & coef,
-    const std::set<std::string> & target_var_names)
+    const std::set<VariableName> & target_var_names)
 {
   EquationSystems & es = this->es();
 
