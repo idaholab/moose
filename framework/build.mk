@@ -221,7 +221,7 @@ mpif90_command := $(libmesh_F90)
 # Kokkos rules
 #
 
-ifeq ($(KOKKOS),true)
+ifeq ($(ENABLE_KOKKOS),true)
   include $(FRAMEWORK_DIR)/kokkos.mk
 endif
 
