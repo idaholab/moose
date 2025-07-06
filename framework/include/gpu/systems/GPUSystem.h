@@ -541,12 +541,12 @@ System::getVectorQpValueFace(
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & phi = kokkosAssembly().getPhiFace(info.subdomain, info.type, fe);
+  auto & phi = kokkosAssembly().getPhiFace(info.subdomain, info.type, fe)(side);
 
   Real value = 0;
 
   for (unsigned int i = 0; i < n_dofs; ++i)
-    value += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) * phi(i, qp, side);
+    value += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) * phi(i, qp);
 
   return value;
 }
@@ -560,13 +560,13 @@ System::getVectorQpGradFace(ElementInfo info,
 {
   auto fe = _var_fe_types[var];
   auto n_dofs = kokkosAssembly().getNumDofs(info.type, fe);
-  auto & grad_phi = kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe);
+  auto & grad_phi = kokkosAssembly().getGradPhiFace(info.subdomain, info.type, fe)(side);
 
   Real3 grad = 0;
 
   for (unsigned int i = 0; i < n_dofs; ++i)
     grad += getVectorDofValue(getElemLocalDofIndex(info.id, i, var), tag) *
-            (jacobian * grad_phi(i, qp, side));
+            (jacobian * grad_phi(i, qp));
 
   return grad;
 }
