@@ -130,11 +130,6 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
       _systems_to_solve.push_back(_passive_scalar_systems.back());
     }
 
-  // We disable the prefix here for the time being, the segregated solvers use a different approach
-  // for setting the petsc parameters
-  for (auto & system : _systems_to_solve)
-    system->system().prefix_with_name(false);
-
   // and for the active scalar equations
   if (_has_active_scalar_systems)
     for (auto system_i : index_range(_active_scalar_system_names))
@@ -143,6 +138,7 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
           _problem.linearSysNum(_active_scalar_system_names[system_i]));
       _active_scalar_systems.push_back(
           &_problem.getLinearSystem(_active_scalar_system_numbers[system_i]));
+      _systems_to_solve.push_back(_active_scalar_systems.back());
 
       const auto & active_scalar_petsc_options =
           getParam<MultiMooseEnum>("active_scalar_petsc_options");
@@ -167,6 +163,11 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
   if (_active_scalar_equation_relaxation.size() != _active_scalar_system_names.size())
     paramError("active_scalar_equation_relaxation",
                "Should be the same size as the number of systems");
+
+  // We disable the prefix here for the time being, the segregated solvers use a different approach
+  // for setting the petsc parameters
+  for (auto & system : _systems_to_solve)
+    system->system().prefix_with_name(false);
 }
 
 void
@@ -544,7 +545,8 @@ LinearAssemblySegregatedSolve::solve()
 
   // Assign residuals to general residual vector
   const unsigned int no_systems = _momentum_systems.size() + 1 + _has_energy_system +
-                                  _has_solid_energy_system + _turbulence_systems.size();
+                                  _has_solid_energy_system + _active_scalar_systems.size() +
+                                  _turbulence_systems.size();
 
   std::vector<std::pair<unsigned int, Real>> ns_residuals(no_systems, std::make_pair(0, 1.0));
   std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
@@ -626,7 +628,7 @@ LinearAssemblySegregatedSolve::solve()
       // tolerances will be overridden within the solver.
       Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params);
       for (const auto i : index_range(_active_scalar_system_names))
-        ns_residuals[momentum_residual.size() + 1 + _has_energy_system + i] =
+        ns_residuals[momentum_residual.size() + _has_energy_system + _has_solid_energy_system + i] =
             solveAdvectedSystem(_active_scalar_system_numbers[i],
                                 *_active_scalar_systems[i],
                                 _active_scalar_equation_relaxation[i],
@@ -643,7 +645,7 @@ LinearAssemblySegregatedSolve::solve()
       Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
       for (const auto i : index_range(_turbulence_system_names))
       {
-        ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
+        ns_residuals[momentum_residual.size() + _has_energy_system + _has_solid_energy_system +
                      _active_scalar_system_names.size() + i] =
             solveAdvectedSystem(_turbulence_system_numbers[i],
                                 *_turbulence_systems[i],
