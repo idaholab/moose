@@ -40,7 +40,7 @@ public:
 
     return side == libMesh::invalid_uint
                ? datum.assembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
-               : datum.assembly().getPhiFace(elem.subdomain, elem.type, fe)(i, qp, side);
+               : datum.assembly().getPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
   }
 };
 
@@ -63,7 +63,7 @@ public:
     return datum.J(qp) *
            (side == libMesh::invalid_uint
                 ? datum.assembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-                : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(i, qp, side));
+                : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp));
   }
 };
 
@@ -85,7 +85,7 @@ public:
 
     return side == libMesh::invalid_uint
                ? datum.assembly().getPhi(elem.subdomain, elem.type, fe)(i, qp)
-               : datum.assembly().getPhiFace(elem.subdomain, elem.type, fe)(i, qp, side);
+               : datum.assembly().getPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp);
   }
 };
 
@@ -108,7 +108,7 @@ public:
     return datum.J(qp) *
            (side == libMesh::invalid_uint
                 ? datum.assembly().getGradPhi(elem.subdomain, elem.type, fe)(i, qp)
-                : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(i, qp, side));
+                : datum.assembly().getGradPhiFace(elem.subdomain, elem.type, fe)(side)(i, qp));
   }
 };
 ///@}
