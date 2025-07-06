@@ -258,38 +258,6 @@ Assembly::initShape()
   for (auto subdomain : _mesh.meshSubdomains())
   {
     auto sid = kokkosMesh().getSubdomainID(subdomain);
-
-    for (unsigned int t = 0; t < num_elem_types; ++t)
-    {
-      _map_phi(sid, t).create(MAX_DOF, _max_qps_per_elem[sid]);
-      _map_phi_face(sid, t).create(MAX_DOF, _max_qps_per_elem[sid], _mesh.getMaxSidesPerElem());
-      _map_psi_face(sid, t).create(MAX_DOF, _max_qps_per_elem[sid], _mesh.getMaxSidesPerElem());
-      _map_grad_phi(sid, t).create(MAX_DOF, _max_qps_per_elem[sid]);
-      _map_grad_phi_face(sid, t).create(
-          MAX_DOF, _max_qps_per_elem[sid], _mesh.getMaxSidesPerElem());
-      _map_grad_psi_face(sid, t).create(
-          MAX_DOF, _max_qps_per_elem[sid], _mesh.getMaxSidesPerElem());
-
-      for (auto & [fe_type, fe_idx] : _fe_type_map)
-      {
-        _phi(sid, t, fe_idx).create(MAX_DOF, _max_qps_per_elem[sid]);
-        _phi_face(sid, t, fe_idx)
-            .create(MAX_DOF, _max_qps_per_elem[sid], _mesh.getMaxSidesPerElem());
-        _grad_phi(sid, t, fe_idx).create(MAX_DOF, _max_qps_per_elem[sid]);
-        _grad_phi_face(sid, t, fe_idx)
-            .create(MAX_DOF, _max_qps_per_elem[sid], _mesh.getMaxSidesPerElem());
-
-        _phi(sid, t, fe_idx) = 0;
-        _phi_face(sid, t, fe_idx) = 0;
-        _grad_phi(sid, t, fe_idx) = Real3(0);
-        _grad_phi_face(sid, t, fe_idx) = Real3(0);
-      }
-    }
-  }
-
-  for (auto subdomain : _mesh.meshSubdomains())
-  {
-    auto sid = kokkosMesh().getSubdomainID(subdomain);
     auto & map = kokkosMesh().getSubdomainLocalElementMap(subdomain);
 
     auto & assembly = _problem.assembly(0, 0);
@@ -315,12 +283,18 @@ Assembly::initShape()
 
         _n_dofs(elem_type_id, fe_type_id) = phi.size();
 
+        _phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+        _grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+
         for (unsigned int i = 0; i < phi.size(); ++i)
           for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
           {
             _phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
             _grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
           }
+
+        _phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
+        _grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
 
         for (unsigned int side = 0; side < elem->n_sides(); ++side)
         {
@@ -329,11 +303,15 @@ Assembly::initShape()
 
           fe_face->reinit(elem, side);
 
+          _phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(), qrule_face->n_points());
+          _grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
+                                                                     qrule_face->n_points());
+
           for (unsigned int i = 0; i < phi.size(); ++i)
             for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
             {
-              _phi_face(sid, elem_type_id, fe_type_id)(i, qp, side) = phi[i][qp];
-              _grad_phi_face(sid, elem_type_id, fe_type_id)(i, qp, side) = grad_phi[i][qp];
+              _phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
+              _grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
             }
         }
       }
@@ -356,12 +334,20 @@ Assembly::initShape()
 
       fe->reinit(elem);
 
+      _map_phi(sid, elem_type_id).create(phi.size(), qrule->n_points());
+      _map_grad_phi(sid, elem_type_id).create(phi.size(), qrule->n_points());
+
       for (unsigned int i = 0; i < phi.size(); ++i)
         for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
         {
           _map_phi(sid, elem_type_id)(i, qp) = phi[i][qp];
           _map_grad_phi(sid, elem_type_id)(i, qp) = grad_phi[i][qp];
         }
+
+      _map_phi_face(sid, elem_type_id).create(elem->n_sides());
+      _map_grad_phi_face(sid, elem_type_id).create(elem->n_sides());
+      _map_psi_face(sid, elem_type_id).create(elem->n_sides());
+      _map_grad_psi_face(sid, elem_type_id).create(elem->n_sides());
 
       for (unsigned int side = 0; side < elem->n_sides(); ++side)
       {
@@ -370,25 +356,31 @@ Assembly::initShape()
 
         fe_face->reinit(elem, side);
 
+        _map_phi_face(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
+        _map_grad_phi_face(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
+
         for (unsigned int i = 0; i < phi.size(); ++i)
           for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
           {
-            _map_phi_face(sid, elem_type_id)(i, qp, side) = phi[i][qp];
-            _map_grad_phi_face(sid, elem_type_id)(i, qp, side) = grad_phi[i][qp];
+            _map_phi_face(sid, elem_type_id)(side)(i, qp) = phi[i][qp];
+            _map_grad_phi_face(sid, elem_type_id)(side)(i, qp) = grad_phi[i][qp];
           }
 
         auto & psi = fe_face->get_fe_map().get_psi();
         auto & dpsidxi = fe_face->get_fe_map().get_dpsidxi();
         auto & dpsideta = fe_face->get_fe_map().get_dpsideta();
 
+        _map_psi_face(sid, elem_type_id)(side).create(psi.size(), qrule_face->n_points());
+        _map_grad_psi_face(sid, elem_type_id)(side).create(psi.size(), qrule_face->n_points());
+
         for (unsigned int i = 0; i < psi.size(); ++i)
           for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
           {
-            _map_psi_face(sid, elem_type_id)(i, qp, side) = psi[i][qp];
+            _map_psi_face(sid, elem_type_id)(side)(i, qp) = psi[i][qp];
             if (elem->dim() > 1)
-              _map_grad_psi_face(sid, elem_type_id)(i, qp, side)(0) = dpsidxi[i][qp];
+              _map_grad_psi_face(sid, elem_type_id)(side)(i, qp)(0) = dpsidxi[i][qp];
             if (elem->dim() > 2)
-              _map_grad_psi_face(sid, elem_type_id)(i, qp, side)(1) = dpsideta[i][qp];
+              _map_grad_psi_face(sid, elem_type_id)(side)(i, qp)(1) = dpsideta[i][qp];
           }
       }
     }
