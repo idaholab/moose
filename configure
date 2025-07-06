@@ -620,6 +620,8 @@ mfem_library
 mfem_support
 libtorch_library
 libtorch_support
+kokkos_library
+kokkos_support
 target_alias
 host_alias
 build_alias
@@ -666,6 +668,7 @@ with_derivative_size
 with_libtorch
 with_mfem
 with_neml2
+with_kokkos
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1295,6 +1298,8 @@ Optional Packages:
                           or mfem directory]
   --with-neml2[=ARG]      Specify if neml2 support should be enabled [ARG=yes
                           or neml2 directory]
+  --with-kokkos[=ARG]     Specify if Kokkos support should be enabled [ARG=yes
+                          or Kokkos directory]
 
 Report bugs to <https://github.com/idaholab/moose/discussions>.
 moose home page: <https://mooseframework.inl.gov>.
@@ -1925,6 +1930,48 @@ printf "%s\n" "#define NEML2_DIR $neml2_library" >>confdefs.h
 printf "%s\n" "NEML2 library path: $neml2_library" >&6; }
 
 fi
+
+
+# Check whether --with-kokkos was given.
+if test ${with_kokkos+y}
+then :
+  withval=$with_kokkos; kokkos_support=yes kokkos_library="$withval"
+else $as_nop
+  kokkos_support=no
+fi
+
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: configuring with Kokkos support: $kokkos_support" >&5
+printf "%s\n" "configuring with Kokkos support: $kokkos_support" >&6; }
+
+if test "$kokkos_support" = yes
+then :
+
+
+printf "%s\n" "#define HAVE_KOKKOS 1" >>confdefs.h
+
+        kokkos_support=true
+
+        if test "$kokkos_library" = yes
+then :
+
+                    if test "${KOKKOS_DIR+set}" = set
+then :
+  kokkos_library="${KOKKOS_DIR}"
+else $as_nop
+  kokkos_library="$ac_pwd/framework/contrib/kokkos"
+fi
+
+fi
+
+printf "%s\n" "#define KOKKOS_DIR $kokkos_library" >>confdefs.h
+
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Kokkos library path: $kokkos_library" >&5
+printf "%s\n" "Kokkos library path: $kokkos_library" >&6; }
+
+fi
+
 
 if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.

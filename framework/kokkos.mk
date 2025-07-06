@@ -37,32 +37,38 @@ PETSC_HAVE_KOKKOS := $(shell sed -n 's/\#define PETSC_HAVE_KOKKOS //p' $(PETSC_C
 PETSC_HAVE_CUDA := $(shell sed -n 's/\#define PETSC_HAVE_CUDA //p' $(PETSC_CONF))
 
 ifeq ($(PETSC_HAVE_KOKKOS),1)
-  KOKKOS_PATH :=
+  ifeq ($(MAKECMDGOALS),clean)
+    KOKKOS_DIR_WARNING := silent
+  else ifeq ($(MAKECMDGOALS),cleanall)
+    KOKKOS_DIR_WARNING := silent
+  else ifeq ($(MAKECMDGOALS),clobber)
+    KOKKOS_DIR_WARNING := silent
+  else ifeq ($(MAKECMDGOALS),clobberall)
+    KOKKOS_DIR_WARNING := silent
+  endif
+  ifneq ($(KOKKOS_DIR_WARNING),silent)
+    $(warning Kokkos was found in PETSc. Kokkos directory ($(KOKKOS_DIR)) will be ignored.)
+  endif
+  KOKKOS_DIR :=
   ifeq ($(PETSC_HAVE_CUDA),1)
     PETSC_HAVE_CUDA_MIN_ARCH := $(shell sed -n 's/\#define PETSC_HAVE_CUDA_MIN_ARCH //p' $(PETSC_CONF))
     PETSC_PKG_CUDA_MIN_ARCH := $(shell sed -n 's/\#define PETSC_PKG_CUDA_MIN_ARCH //p' $(PETSC_CONF))
     ifneq ($(PETSC_HAVE_CUDA_MIN_ARCH),)
       ifneq ($(CUDA_ARCH),)
-        $(warning Provided CUDA_ARCH ($(CUDA_ARCH)) will be ignored and PETSC_HAVE_CUDA_MIN_ARCH ($(PETSC_HAVE_CUDA_MIN_ARCH)) will be used)
+        $(warning Provided CUDA_ARCH ($(CUDA_ARCH)) will be ignored and PETSC_HAVE_CUDA_MIN_ARCH ($(PETSC_HAVE_CUDA_MIN_ARCH)) will be used.)
       endif
       CUDA_ARCH := $(PETSC_HAVE_CUDA_MIN_ARCH)
     endif
     ifneq ($(PETSC_PKG_CUDA_MIN_ARCH),)
       ifneq ($(CUDA_ARCH),)
-        $(warning Provided CUDA_ARCH ($(CUDA_ARCH)) will be ignored and PETSC_PKG_CUDA_MIN_ARCH ($(PETSC_PKG_CUDA_MIN_ARCH)) will be used)
+        $(warning Provided CUDA_ARCH ($(CUDA_ARCH)) will be ignored and PETSC_PKG_CUDA_MIN_ARCH ($(PETSC_PKG_CUDA_MIN_ARCH)) will be used.)
       endif
       CUDA_ARCH := $(PETSC_PKG_CUDA_MIN_ARCH)
     endif
   endif
 else
-  # We support using Kokkos through submodule as a fallback, but we will error until we can test it
-  $(error PETSc was not configured with Kokkos. Recompile PETSc with Kokkos support)
-  KOKKOS_PATH := $(FRAMEWORK_DIR)/contrib/kokkos
-endif
-
-ifneq ($(KOKKOS_PATH),)
-  ifeq ($(wildcard $(KOKKOS_PATH)/Makefile.kokkos),)
-    $(error Kokkos submodule was not initialized)
+  ifeq ($(wildcard $(KOKKOS_DIR)/Makefile.kokkos),)
+    $(error Kokkos was not found in PETSc nor in $(KOKKOS_DIR). Configure PETSc with Kokkos or double-check the Kokkos directory)
   endif
 endif
 
@@ -87,7 +93,7 @@ ifneq ($(CUDA_EXISTS),)
   ifeq ($(KOKKOS_ARCH_STRING),)
     $(error Unsupported CUDA_ARCH ($(CUDA_ARCH)) for Kokkos)
   endif
-  ifeq ($(KOKKOS_PATH),)
+  ifeq ($(KOKKOS_DIR),)
     KOKKOS_CXXFLAGS += -arch=sm_$(CUDA_ARCH)
   else
     KOKKOS_ARCH := $(KOKKOS_ARCH_STRING)
@@ -105,7 +111,7 @@ else
   $(error No suitable GPU SDK was found for Kokkos)
 endif
 
-ifneq ($(KOKKOS_PATH),)
+ifneq ($(KOKKOS_DIR),)
   CXX := $(KOKKOS_CXX)
 endif
 
@@ -121,8 +127,8 @@ endif
 KOKKOS_CXXFLAGS += $(CXXFLAGS) -fPIC -DMOOSE_KOKKOS_SCOPE
 KOKKOS_LDFLAGS += $(libmesh_LDFLAGS)
 
-ifneq ($(KOKKOS_PATH),)
-  include $(KOKKOS_PATH)/Makefile.kokkos
+ifneq ($(KOKKOS_DIR),)
+  include $(KOKKOS_DIR)/Makefile.kokkos
 endif
 
 KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).o
@@ -131,6 +137,6 @@ KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).o
 	@echo "Compiling Kokkos C++ (in "$(METHOD)" mode, $(KOKKOS_DEVICES), $(KOKKOS_ARCH_STRING)) "$<"..."
 	@$(KOKKOS_CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
-ifneq ($(KOKKOS_PATH),)
+ifneq ($(KOKKOS_DIR),)
   KOKKOS_CLEAN := kokkos-clean
 endif
