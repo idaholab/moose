@@ -289,9 +289,9 @@ private:
    */
   ///@{
   Array3D<Array2D<Real>> _phi;
-  Array3D<Array3D<Real>> _phi_face;
+  Array3D<Array<Array2D<Real>>> _phi_face;
   Array3D<Array2D<Real3>> _grad_phi;
-  Array3D<Array3D<Real3>> _grad_phi_face;
+  Array3D<Array<Array2D<Real3>>> _grad_phi_face;
   Array2D<unsigned int> _n_dofs;
   ///@}
   /**
@@ -299,11 +299,11 @@ private:
    */
   ///@{
   Array2D<Array2D<Real>> _map_phi;
-  Array2D<Array3D<Real>> _map_phi_face;
-  Array2D<Array3D<Real>> _map_psi_face;
+  Array2D<Array<Array2D<Real>>> _map_phi_face;
+  Array2D<Array<Array2D<Real>>> _map_psi_face;
   Array2D<Array2D<Real3>> _map_grad_phi;
-  Array2D<Array3D<Real3>> _map_grad_phi_face;
-  Array2D<Array3D<Real3>> _map_grad_psi_face;
+  Array2D<Array<Array2D<Real3>>> _map_grad_phi_face;
+  Array2D<Array<Array2D<Real3>>> _map_grad_psi_face;
   ///@}
 
   /**
@@ -376,8 +376,8 @@ Assembly::computePhysicalMap(ElementInfo info,
   auto eid = info.id;
   auto elem_type = info.type;
 
-  auto & phi = _map_phi_face(sid, elem_type);
-  auto & grad_phi = _map_grad_phi_face(sid, elem_type);
+  auto & phi = _map_phi_face(sid, elem_type)(side);
+  auto & grad_phi = _map_grad_phi_face(sid, elem_type)(side);
 
   Real33 J;
   Real3 xyz;
@@ -387,10 +387,10 @@ Assembly::computePhysicalMap(ElementInfo info,
     auto points = kokkosMesh().getNodePoint(kokkosMesh().getNodeID(eid, node));
 
     if (jacobian)
-      J += grad_phi(node, qp, side).cartesian_product(points);
+      J += grad_phi(node, qp).cartesian_product(points);
 
     if (JxW || q_points)
-      xyz += phi(node, qp, side) * points;
+      xyz += phi(node, qp) * points;
   }
 
   if (jacobian)
@@ -402,14 +402,14 @@ Assembly::computePhysicalMap(ElementInfo info,
   {
     Real33 J;
 
-    auto & psi = _map_psi_face(sid, elem_type);
-    auto & grad_psi = _map_grad_psi_face(sid, elem_type);
+    auto & psi = _map_psi_face(sid, elem_type)(side);
+    auto & grad_psi = _map_grad_psi_face(sid, elem_type)(side);
 
     for (unsigned int node = 0; node < info.n_nodes_side[side]; ++node)
     {
       auto points = kokkosMesh().getNodePoint(kokkosMesh().getNodeID(eid, side, node));
 
-      J += grad_psi(node, qp, side).cartesian_product(points);
+      J += grad_psi(node, qp).cartesian_product(points);
     }
 
     *JxW = ::Kokkos::sqrt((J * J.transpose()).determinant(_dimension - 1)) *
