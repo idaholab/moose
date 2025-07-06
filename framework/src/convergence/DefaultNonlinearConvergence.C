@@ -82,8 +82,8 @@ DefaultNonlinearConvergence::checkRelativeConvergence(const unsigned int /*it*/,
 {
   if (fnorm <= ref_norm * rel_tol)
   {
-    oss << "Converged due to residual norm " << fnorm << " < relative tolerance (" << rel_tol
-        << ")\n";
+    oss << "Converged due to relative/normalized residual norm " << fnorm / ref_norm
+        << " < relative tolerance (" << rel_tol << ")\n";
     return true;
   }
   else
