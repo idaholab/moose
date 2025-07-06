@@ -13,9 +13,10 @@ endif
 
 # We ignore this in the contrib folder because we will set up the include
 # directories manually later
-IGNORE_CONTRIB_INC ?= libtorch mfem neml2
+IGNORE_CONTRIB_INC ?= libtorch mfem neml2 kokkos
 ENABLE_LIBTORCH ?= false
 ENABLE_MFEM ?= false
+ENABLE_KOKKOS ?= false
 
 # this allows us to modify the linked names/rpaths safely later for install targets
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
@@ -485,7 +486,7 @@ wasp_submodule_status:
 
 # Kokkos for MOOSE
 
-ifeq ($(KOKKOS),true)
+ifeq ($(ENABLE_KOKKOS),true)
 
 MOOSE_KOKKOS_SRC_FILES := $(shell find $(FRAMEWORK_DIR) -name "*.K")
 

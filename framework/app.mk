@@ -367,7 +367,7 @@ app_resource = $(APPLICATION_DIR)/$(APPLICATION_NAME).yaml
 
 # Kokkos for app
 
-ifeq ($(KOKKOS),true)
+ifeq ($(ENABLE_KOKKOS),true)
 
 app_KOKKOS_SRC_FILES := $(shell find $(SRC_DIRS) -name "*.K")
 app_KOKKOS_LIB       := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)_kokkos-$(METHOD).so
