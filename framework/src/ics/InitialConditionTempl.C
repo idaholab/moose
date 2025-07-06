@@ -111,6 +111,9 @@ InitialConditionTempl<T>::compute()
 
   DenseVector<char> mask(n_dofs, true);
 
+  // If we are not defined on the element,
+  const bool out_of_block_restriction = (!hasBlocks(_current_elem->subdomain_id()));
+
   // In general, we need a series of
   // projections to ensure a unique and continuous
   // solution.  We start by interpolating nodes, then
@@ -152,7 +155,10 @@ InitialConditionTempl<T>::compute()
     // not duplicate _dof_indices code badly!
     if (!_current_elem->is_vertex(_n))
     {
-      _current_dof += _nc;
+      if (out_of_block_restriction && _cont == C_ZERO)
+        setCZeroNonVertexExternalNode();
+      else
+        _current_dof += _nc;
       continue;
     }
 
@@ -172,10 +178,6 @@ InitialConditionTempl<T>::compute()
 
   // From here on out we won't be sampling at nodes anymore
   _current_node = nullptr;
-
-  // If we are not defined on the element,
-  // we have no business running on its sides and edges
-  const bool out_of_block_restriction = (!hasBlocks(_current_elem->subdomain_id()));
 
   auto & dof_map = _var.dofMap();
   const bool add_p_level =
@@ -253,7 +255,9 @@ InitialConditionTempl<T>::compute()
 
   // Make sure every DoF got reached!
   for (unsigned int i = 0; i != n_dofs; ++i)
-    libmesh_assert(_dof_is_fixed[i] || !mask(i));
+    mooseAssert(_dof_is_fixed[i] || !mask(i),
+                "Missed a DoF to initialize in generic projector algorithm on element: " +
+                    Moose::stringify(*_current_elem));
 
   // Lock the new_vector since it is shared among threads.
   {
@@ -291,6 +295,13 @@ InitialConditionTempl<RealVectorValue>::setCZeroVertices()
     _dof_is_fixed[_current_dof] = true;
     _current_dof++;
   }
+}
+
+template <typename T>
+void
+InitialConditionTempl<T>::setCZeroNonVertexExternalNode()
+{
+  setCZeroVertices();
 }
 
 template <typename T>
@@ -427,6 +438,7 @@ template <>
 void
 InitialConditionTempl<RealVectorValue>::setOtherCOneVertices()
 {
+  mooseError("Not implemented");
 }
 
 template <typename T>
