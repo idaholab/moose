@@ -52,7 +52,11 @@ ElementGroupCentroidPositions::ElementGroupCentroidPositions(const InputParamete
     _extra_id_names = getParam<std::vector<ExtraElementIDName>>("extra_id_name");
     for (const auto & name : _extra_id_names)
       _extra_id_indices.push_back(_mesh.getMesh().get_elem_integer_index(name));
-    _extra_id_group_indices = getParam<std::vector<std::vector<unsigned int>>>("extra_id");
+
+    if (isParamValid("extra_id"))
+      _extra_id_group_indices = getParam<std::vector<std::vector<unsigned int>>>("extra_id");
+    else
+      _extra_id_group_indices.resize(_extra_id_names.size());
 
     if (_extra_id_group_indices.size() != _extra_id_names.size())
       paramError("extra_id",
@@ -301,8 +305,8 @@ ElementGroupCentroidPositions::initialize()
           _positions_2d[i][j] /= volumes_2d[i][j];
         else
         {
-          _positions_2d[i].erase(_positions.begin() + j);
-          volumes_2d[i].erase(volumes.begin() + j);
+          _positions_2d[i].erase(_positions_2d[i].begin() + j);
+          volumes_2d[i].erase(volumes_2d[i].begin() + j);
           j--;
         }
       }
