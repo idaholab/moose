@@ -80,11 +80,6 @@ ParameterMeshOptimization::validParams()
 ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & parameters)
   : GeneralOptimization(parameters), _gradient_l2_coeff(getParam<Real>("gradient_l2_coeff"))
 {
-  // Check that only one regularization method is used
-  if (_gradient_l2_coeff > 0.0 && _tikhonov_coeff > 0.0)
-    paramError("gradient_l2_coeff",
-               "Cannot use both Tikhonov and L2 Gradient regularization simultaneously. "
-               "Please set either 'tikhonov_coeff' or 'gradient_l2_coeff' to zero.");
 }
 
 std::vector<Real>
