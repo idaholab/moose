@@ -55,10 +55,10 @@ TestCSGRegionTypesMeshGenerator::generateCSG()
   {
     const auto surf_name = "surf_" + surf_names[i];
     const auto plane_coeff = plane_coeffs[i];
-    auto plane_ptr = csg_mesh->createPlaneFromCoefficients(
+    auto & csg_plane = csg_mesh->createPlaneFromCoefficients(
         surf_name, plane_coeff[0], plane_coeff[1], plane_coeff[2], plane_coeff[3]);
-    auto pos_halfspace = +plane_ptr;
-    auto neg_halfspace = -plane_ptr;
+    auto pos_halfspace = +csg_plane;
+    auto neg_halfspace = -csg_plane;
     if (surf_names[i] == "plus_x")
       region_right = neg_halfspace;
     else if (surf_names[i] == "minus_x")

@@ -49,13 +49,13 @@ public:
    * @param p3 point 3
    * @param boundary (optional) CSGSurface::BoundaryType boundary condition for the surface (default
    * TRANSMISSION)
-   * @return shared pointer to CSGSurface object
+   * @return reference to CSGSurface object
    */
-  std::shared_ptr<CSGSurface>
+  CSGSurface &
   createPlaneFromPoints(const std::string name,
-                        const Point p1,
-                        const Point p2,
-                        const Point p3,
+                        const Point & p1,
+                        const Point & p2,
+                        const Point & p3,
                         CSGSurface::BoundaryType boundary = CSGSurface::BoundaryType::TRANSMISSION)
   {
     return _surface_list.addPlaneFromPoints(name, p1, p2, p3, boundary);
@@ -71,9 +71,9 @@ public:
    * @param d coefficient d
    * @param boundary (optional) CSGSurface::BoundaryType boundary condition for the surface (default
    * TRANSMISSION)
-   * @return shared pointer to CSGSurface object
+   * @return reference to CSGSurface object
    */
-  std::shared_ptr<CSGSurface> createPlaneFromCoefficients(
+  CSGSurface & createPlaneFromCoefficients(
       const std::string name,
       const Real a,
       const Real b,
@@ -91,9 +91,9 @@ public:
    * @param r radius
    * @param boundary (optional) CSGSurface::BoundaryType boundary condition for the surface (default
    * TRANSMISSION)
-   * @return shared pointer to CSGSurface object
+   * @return reference to CSGSurface object
    */
-  std::shared_ptr<CSGSurface>
+  CSGSurface &
   createSphere(const std::string name,
                const Real r,
                CSGSurface::BoundaryType boundary = CSGSurface::BoundaryType::TRANSMISSION)
@@ -109,9 +109,9 @@ public:
    * @param r radius
    * @param boundary (optional) CSGSurface::BoundaryType boundary condition for the surface (default
    * TRANSMISSION)
-   * @return shared pointer to CSGSurface object
+   * @return reference to CSGSurface object
    */
-  std::shared_ptr<CSGSurface>
+  CSGSurface &
   createSphere(const std::string name,
                const Point center,
                const Real r,
@@ -133,9 +133,9 @@ public:
    * @param r radius
    * @param boundary (optional) CSGSurface::BoundaryType boundary condition for the surface (default
    * TRANSMISSION)
-   * @return shared pointer to CSGSurface object
+   * @return reference to CSGSurface object
    */
-  std::shared_ptr<CSGSurface>
+  CSGSurface &
   createCylinder(const std::string name,
                  const Real x0,
                  const Real x1,
@@ -149,23 +149,17 @@ public:
   /**
    * @brief Get all surface objects
    *
-   * @return map of names to CSGSurface objects
+   * @return list of pointers to all CSGSurface objects in CSGBase
    */
-  const std::map<std::string, std::shared_ptr<CSGSurface>> & getAllSurfaces() const
-  {
-    return _surface_list.getAllSurfaces();
-  }
+  std::vector<CSGSurface *> getAllSurfaces() const { return _surface_list.getAllSurfaces(); }
 
   /**
    * @brief Get a Surface object by name
    *
    * @param name surface name
-   * @return shared pointer to CSGSurface object
+   * @return reference to CSGSurface object
    */
-  const std::shared_ptr<CSGSurface> & getSurfaceByName(const std::string name)
-  {
-    return _surface_list.getSurface(name);
-  }
+  CSGSurface & getSurfaceByName(const std::string name) { return _surface_list.getSurface(name); }
 
   /**
    * @brief rename the specified surface
@@ -173,7 +167,7 @@ public:
    * @param surface CSGSurface to rename
    * @param name new name
    */
-  void renameSurface(const std::shared_ptr<CSGSurface> surface, const std::string name)
+  void renameSurface(CSGSurface & surface, const std::string name)
   {
     _surface_list.renameSurface(surface, name);
   }
@@ -184,10 +178,9 @@ public:
    * @param surface CSGSurface to update
    * @param boundary CSGSurface::BoundaryType to set
    */
-  void updateSurfaceBoundaryType(const std::shared_ptr<CSGSurface> surface,
-                                 CSGSurface::BoundaryType boundary)
+  void updateSurfaceBoundaryType(CSGSurface & surface, CSGSurface::BoundaryType boundary)
   {
-    surface->setBoundaryType(boundary);
+    surface.setBoundaryType(boundary);
   }
 
   /**

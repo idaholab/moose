@@ -64,11 +64,11 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
   for (unsigned int i = 0; i < points_on_planes.size(); ++i)
   {
     const auto surf_name = "surf_" + surf_names[i];
-    auto plane_ptr = csg_mesh->createPlaneFromPoints(
+    auto & csg_plane = csg_mesh->createPlaneFromPoints(
         surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
-    const auto region_direction = plane_ptr->directionFromPoint(centroid);
+    const auto region_direction = csg_plane.directionFromPoint(centroid);
     auto halfspace =
-        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +plane_ptr : -plane_ptr);
+        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
     // check if first halfspace to be added to the region
     if (region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
       region = halfspace;
@@ -85,7 +85,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
   auto all_surfs = cell_ptr->getRegion().getSurfaces();
   for (auto s : all_surfs)
   {
-    csg_mesh->updateSurfaceBoundaryType(s, CSG::CSGSurface::BoundaryType::REFLECTIVE);
+    csg_mesh->updateSurfaceBoundaryType(*s, CSG::CSGSurface::BoundaryType::REFLECTIVE);
   }
 
   return csg_mesh;

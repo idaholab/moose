@@ -19,11 +19,11 @@ CSGRegion::CSGRegion()
 }
 
 // halfspace constructor
-CSGRegion::CSGRegion(std::shared_ptr<CSGSurface> & surf, const CSGSurface::Direction direction)
+CSGRegion::CSGRegion(CSGSurface & surf, const CSGSurface::Direction direction)
   : _region_type(CSGRegion::RegionType::HALFSPACE)
 {
-  _region_str = ((direction == CSGSurface::Direction::POSITIVE) ? "+" : "-") + surf->getName();
-  _surfaces.push_back(surf);
+  _region_str = ((direction == CSGSurface::Direction::POSITIVE) ? "+" : "-") + surf.getName();
+  _surfaces.push_back(&surf);
 }
 
 // intersection and union constructor
@@ -46,8 +46,8 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
     auto b_string = stripRegionString(region_b.toString(), op);
 
     _region_str = "(" + a_string + op + b_string + ")";
-    auto a_surfs = region_a.getSurfaces();
-    auto b_surfs = region_b.getSurfaces();
+    const auto & a_surfs = region_a.getSurfaces();
+    const auto & b_surfs = region_b.getSurfaces();
     _surfaces.insert(_surfaces.end(), a_surfs.begin(), a_surfs.end());
     _surfaces.insert(_surfaces.end(), b_surfs.begin(), b_surfs.end());
   }
@@ -143,16 +143,16 @@ stripRegionString(std::string region_str, std::string op)
 
 // Operators for region construction
 
-// positve halfspace
+// positive halfspace
 const CSGRegion
-operator+(std::shared_ptr<CSGSurface> surf)
+operator+(CSGSurface & surf)
 {
   return CSGRegion(surf, CSGSurface::Direction::POSITIVE);
 }
 
 // negative halfspace
 const CSGRegion
-operator-(std::shared_ptr<CSGSurface> surf)
+operator-(CSGSurface & surf)
 {
   return CSGRegion(surf, CSGSurface::Direction::NEGATIVE);
 }
