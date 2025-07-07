@@ -63,11 +63,15 @@ StepUserObject::StepUserObject(const InputParameters & parameters)
   const bool is_step_durations = isParamSetByUser("step_durations");
 
   // check for valid user input
-  if (int(is_step_start_times)+int(is_step_end_times)+int(is_interval_and_steps)+int(is_step_durations) > 1)
-    mooseError("In StepUserObject, only one of 'step_start_times', 'step_end_times', 'total_time_interval', and 'step_durations' can be set");
-  if ((isParamSetByUser("total_time_interval") && ! isParamSetByUser("number_steps")) ||
-      (! isParamSetByUser("total_time_interval") && isParamSetByUser("number_steps")))
-    mooseError("In StepUserObject, both 'total_time_interval' and 'number_steps' need both be set.");
+  if (int(is_step_start_times) + int(is_step_end_times) + int(is_interval_and_steps) +
+          int(is_step_durations) >
+      1)
+    mooseError("In StepUserObject, only one of 'step_start_times', 'step_end_times', "
+               "'total_time_interval', and 'step_durations' can be set");
+  if ((isParamSetByUser("total_time_interval") && !isParamSetByUser("number_steps")) ||
+      (!isParamSetByUser("total_time_interval") && isParamSetByUser("number_steps")))
+    mooseError(
+        "In StepUserObject, both 'total_time_interval' and 'number_steps' need both be set.");
 
   // define step times
   if (is_step_start_times)
@@ -85,10 +89,9 @@ StepUserObject::StepUserObject(const InputParameters & parameters)
   {
     _times = getParam<std::vector<Real>>("step_end_times");
     if (!std::is_sorted(_times.begin(), _times.end()))
-      paramError(
-          "step_end_times",
-          "end times for StepUserObject are not provided in ascending order. Please revise "
-          "your input.");
+      paramError("step_end_times",
+                 "end times for StepUserObject are not provided in ascending order. Please revise "
+                 "your input.");
     _times.insert(_times.begin(), 0.0);
 
     mooseInfo("Step start times are used to define simulation steps in ", name(), ".");
