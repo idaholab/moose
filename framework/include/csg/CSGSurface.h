@@ -125,6 +125,12 @@ public:
    */
   std::string getName() const { return _name; }
 
+  /// Operator overload for checking if two CSGSurface objects are equal
+  bool operator==(const CSGSurface & other) const;
+
+  /// Operator overload for checking if two CSGSurface objects are not equal
+  bool operator!=(const CSGSurface & other) const;
+
 protected:
   // set the name of the surface - intentionally not public because
   // name needs to be managed at the CSGSurfaceList level
