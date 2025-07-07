@@ -27,7 +27,11 @@ StepUserObject::validParams()
       "The beginning of step times. The number of steps is inferred from the number of times. One "
       "step is defined by its start time; and its end time is taken from the start time of the "
       "next step (if it exists). This list needs to be in ascending value order.");
-
+  params.addParam<std::vector<Real>>(
+      "step_end_times",
+      "The end of step times. The number of steps is inferred from the number of times. One "
+      "step is defined by the interval between previous start time and the next. The first step "
+      "is assumed to start at time zero. This list needs to be in ascending value order.");
   params.addParam<Real>("total_time_interval",
                         "The total time interval in which the steps take place. This option needs "
                         "to be used together with the 'number_steps'.");
@@ -50,12 +54,21 @@ StepUserObject::StepUserObject(const InputParameters & parameters)
     _total_time_interval(0),
     _number_steps(0)
 {
-  const bool is_step_times = isParamSetByUser("step_start_times");
+  const bool is_step_start_times = isParamSetByUser("step_start_times");
+  const bool is_step_end_times = isParamSetByUser("step_end_times");
   const bool is_interval_and_steps =
       isParamSetByUser("total_time_interval") && isParamSetByUser("number_steps");
   const bool is_step_durations = isParamSetByUser("step_durations");
 
-  if (is_step_times)
+  // check for valid user input
+  if (int(is_step_start_times)+int(is_step_end_times)+int(is_interval_and_steps)+int(is_step_durations) > 1)
+    mooseError("In StepUserObject, only one of 'step_start_times', 'step_end_times', 'total_time_interval', and 'step_durations' can be set");
+  if ((isParamSetByUser("total_time_interval") && ! isParamSetByUser("number_steps")) ||
+      (! isParamSetByUser("total_time_interval") && isParamSetByUser("number_steps")))
+    mooseError("In StepUserObject, both 'total_time_interval' and 'number_steps' need both be set.");
+
+  // define step times
+  if (is_step_start_times)
   {
     _times = getParam<std::vector<Real>>("step_start_times");
     if (!std::is_sorted(_times.begin(), _times.end()))
@@ -63,6 +76,18 @@ StepUserObject::StepUserObject(const InputParameters & parameters)
           "step_start_times",
           "start times for StepUserObject are not provided in ascending order. Please revise "
           "your input.");
+
+    mooseInfo("Step start times are used to define simulation steps in ", name(), ".");
+  }
+  else if (is_step_end_times)
+  {
+    _times = getParam<std::vector<Real>>("step_end_times");
+    if (!std::is_sorted(_times.begin(), _times.end()))
+      paramError(
+          "step_end_times",
+          "end times for StepUserObject are not provided in ascending order. Please revise "
+          "your input.");
+    _times.insert(_times.begin(), 0.0);
 
     mooseInfo("Step start times are used to define simulation steps in ", name(), ".");
   }
