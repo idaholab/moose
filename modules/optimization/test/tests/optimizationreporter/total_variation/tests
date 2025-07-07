@@ -1,0 +1,16 @@
+[Tests]
+  [gradient_l2_regularization]
+    design = 'ParameterMeshOptimization.md'
+    issues = '#30897'
+    type = 'Exodiff'
+    input = 'main.i'
+    rel_err = 1e-3 # we have a low gradient tolerance
+    abs_zero = 1e-5
+    exodiff = 'main_out_forward_and_adjoint0.e'
+    # Optimize executioner does not support multiple threads
+    max_threads = 1
+    requirement = "The system shall support L2 gradient regularization for parameter mesh "
+                  "optimization to enforce smoothness in parameter fields while preserving solution "
+                  "accuracy."
+  []
+[]

@@ -26,6 +26,7 @@
 namespace libMesh
 {
 class System;
+class DofMap;
 }
 
 using libMesh::RealGradient;
@@ -81,6 +82,21 @@ public:
    */
   std::vector<Real> getParameterValues(std::string var_name, unsigned int timestep) const;
 
+  /**
+   * Computes L2 gradient regularization objective value (integral of |grad(p)|^2)
+   * @param parameter_values  vector of parameter values to compute regularization for
+   * @return scalar L2 gradient norm
+   */
+  Real computeGradientL2RegularizationObjective(const std::vector<Real> & parameter_values) const;
+
+  /**
+   * Computes L2 gradient regularization gradient (2*grad(p))
+   * @param parameter_values  vector of parameter values to compute gradient for
+   * @return vector of gradient values (same size as parameter_values)
+   */
+  std::vector<Real>
+  computeGradientL2RegularizationGradient(const std::vector<Real> & parameter_values) const;
+
 protected:
   libMesh::Parallel::Communicator _communicator;
   libMesh::ReplicatedMesh _mesh;
@@ -114,4 +130,8 @@ private:
    * @return Point
    */
   Point closestPoint(const Elem & elem, const Point & p) const;
+  // Cached values for gradient computations
+  const unsigned short int _param_var_id;
+  const libMesh::DofMap * _dof_map;
+  const libMesh::FEType _fe_type;
 };
