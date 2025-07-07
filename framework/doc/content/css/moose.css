@@ -8,6 +8,8 @@
     --darkmode-back: rgba(35, 35, 35, 1.0);
     --darkmode-card: rgba(20, 20, 20, 1.0);
     --darkmode-image-card: rgba(10, 10, 10, 1.0);
+    --darkmode-inl-blue: rgba(0, 143, 245, 1.0);
+    --darkmode-gray: rgba(150, 150, 150, 1.0);
     --darkmode-fore: rgba(200, 200, 200, 1.0);
     --dark-navbar: rgba(39, 63, 99, 1.0);
     --darker-highlight: rgba(100, 100, 100, 1.0);
@@ -212,11 +214,16 @@ code, kbd, pre, samp {
 }
 
 .language-moose .token.punctuation {
-  color: #6A9955;
+  color: #77A761;
 }
 
 .language-moose .token.property {
   color: #90d3f6;
+}
+
+.token.constant, .token.deleted, .token.property, .token.symbol, .token.tag
+{
+    color: #FF71A4;
 }
 
 .diff-highlight .token.coord {
@@ -1005,7 +1012,7 @@ summary::-webkit-details-marker {
   font-family: Material Icons;
   content: 'keyboard_arrow_right';
   vertical-align: middle;
-  color: #bdbdbd;
+  color: #949494;
 }
 
 details[open] > summary .moose-section-icon::before{
@@ -1193,13 +1200,13 @@ div.moose-mega-menu-content{
    border-bottom: 1px solid rgba(0, 0, 0, 0.82);
  }
  .table-of-contents a {
-   color: var(--darker-highlight);
+   color: var(--darkmode-gray);
  }
  .breadcrumb {
-   color: var(--darker-embossed);
+   color: var(--darkmode-gray);
  }
  .breadcrumb:last-child {
-   color: var(--darker-highlight);
+   color: var(--darkmode-gray);
  }
  nav, .btn, .btn-small, .btn-large, footer.page-footer {
    background-color: var(--dark-navbar);
@@ -1231,7 +1238,32 @@ div.moose-mega-menu-content{
  .tabs .tab a {
      background-color: transparent;
      color: white;
-}
+ }
+
+ .sidenav li > a > i, .sidenav li > a > [class^="mdi-"], .sidenav li > a li > a > [class*="mdi-"], .sidenav li > a > i.material-icons {
+   /*margin: -57px 824px 0px 0px;*/
+   color: white;
+ }
+
+ @media only screen
+   and (min-device-width: 320px)
+   and (max-device-width: 1000px)
+   and (orientation: landscape)
+   and (-webkit-min-device-pixel-ratio: 2) {
+   .sidenav li > a > i, .sidenav li > a > [class^="mdi-"], .sidenav li > a li > a > [class*="mdi-"], .sidenav li > a > i.material-icons {
+      /*margin: -57px 824px 0px 0px;*/
+      color: white;
+   }
+ }
+ 
+ .collapsible-header .moose-parameter-header-default,
+ .collapsible-header .moose-parameter-header-description,
+ .collapsible-header .moose-collection-description {
+     color:var(--darkmode-gray);
+ }
+ .moose-parameter-name{
+     color: var(--darkmode-inl-blue);
+ }
 }
 
 div.moose-algorithm-line {
@@ -1286,7 +1318,7 @@ div.moose-algorithm {
       }
       .sidenav li > a > i, .sidenav li > a > [class^="mdi-"], .sidenav li > a li > a > [class*="mdi-"], .sidenav li > a > i.material-icons {
         /*margin: -57px 824px 0px 0px;*/
-        color: white;
+        color: rgb(33, 33, 33);
       }
       .sidenav > li {
         padding-bottom: 25px;
@@ -1387,4 +1419,10 @@ div.moose-algorithm {
     .drag-target {
       width: 100px;
     }
+}
+
+/* Improve the contrast of the "Copy" button in code blocks. */
+div.code-toolbar > .toolbar > .toolbar-item > button {
+    color: #ddd;
+    background: rgb(80,81,76);
 }
