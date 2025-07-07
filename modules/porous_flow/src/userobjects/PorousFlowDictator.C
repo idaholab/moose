@@ -85,7 +85,7 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
       mooseError("PorousFlowDictator: AuxVariables variables must not be coupled into the Dictator "
                  "for this is against specification #1984.  Variable '",
                  coupledName("porous_flow_vars", /*comp=*/i),
-                 "' is an AuxVariable.");
+                 "' is either an AuxVariable or from a different nonlinear system.");
   }
 
   if ((_num_phases > 0) && (_aqueous_phase_number >= _num_phases))
