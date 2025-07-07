@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVFluxKernel.h"
+#include "FVDiffusionInterpolationInterface.h"
 
 /*
  *  FVCoupledValueDiffusionKernel implements a standard diffusion term:
@@ -18,7 +19,7 @@
  *
  *      - weak form: \int_{A} v \nabla u \cdot \vec{n} dA
  */
-class FVCoupledValueDiffusionKernel : public FVFluxKernel
+class FVCoupledValueDiffusionKernel : public FVFluxKernel, public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();
@@ -31,4 +32,8 @@ protected:
   const ADVariableValue & _v_elem;
   /// Coupled variable value (either FE or FV) in neighboring element
   const ADVariableValue & _v_neighbor;
+
+  /// Decides if a geometric arithmetic or harmonic average is used for the
+  /// face interpolation of the diffusion coefficient.
+  const Moose::FV::InterpMethod _coeff_interp_method;
 };
