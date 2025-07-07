@@ -16,10 +16,12 @@ InputParameters
 StepNumber::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  params.addRequiredParam<UserObjectName>("step_user_object", "The StepUserObject that stores step times.");
+  params.addRequiredParam<UserObjectName>("step_user_object",
+                                          "The StepUserObject that stores step times.");
   params.addParam<bool>("use_one_based_indexing", false, "Make step number start at one.");
   params.addClassDescription("Outputs the current analysis step number.");
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};  // only need to execute once per time step
+  params.set<ExecFlagEnum>("execute_on") = {
+      EXEC_INITIAL, EXEC_TIMESTEP_BEGIN}; // only need to execute once per time step
   return params;
 }
 

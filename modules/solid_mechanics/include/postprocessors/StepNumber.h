@@ -22,8 +22,8 @@ public:
 
   StepNumber(const InputParameters & parameters);
 
-  virtual void execute() override{};
-  virtual void initialize() override{};
+  virtual void execute() override {};
+  virtual void initialize() override {};
   virtual PostprocessorValue getValue() const override;
 
 private:
