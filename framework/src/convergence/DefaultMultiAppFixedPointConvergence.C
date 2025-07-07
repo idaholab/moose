@@ -11,6 +11,7 @@
 #include "FEProblemBase.h"
 #include "FixedPointSolve.h"
 #include "Console.h"
+#include "SteffensenSolve.h"
 
 registerMooseObject("MooseApp", DefaultMultiAppFixedPointConvergence);
 
@@ -59,6 +60,14 @@ DefaultMultiAppFixedPointConvergence::DefaultMultiAppFixedPointConvergence(
     paramWarning("disable_fixed_point_residual_norm_check",
                  "fixed_point_force_norms will be ignored because the fixed point residual check "
                  "is disabled.");
+
+  if (dynamic_cast<SteffensenSolve *>(&_fp_solve) && _fe_problem.hasMultiApps())
+  {
+    // Steffensen method uses half-steps
+    if (!parameters.isParamSetByAddParam("fixed_point_min_its"))
+      _min_fixed_point_its *= 2;
+    _max_fixed_point_its *= 2;
+  }
 }
 
 void

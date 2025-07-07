@@ -37,8 +37,6 @@ public:
       const std::vector<Real> & timestep_begin_norms,
       const std::vector<Real> & timestep_end_norms) const override final;
 
-  virtual unsigned int numIntermediateIterations() const override { return 1; }
-
 private:
   /**
    * Saves the current values of the variables, and update the old(er) vectors.

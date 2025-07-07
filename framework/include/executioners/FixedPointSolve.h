@@ -118,9 +118,6 @@ public:
                                     const std::vector<Real> & timestep_begin_norms,
                                     const std::vector<Real> & timestep_end_norms) const = 0;
 
-  /// Number of intermediate iterations per full fixed point iteration
-  virtual unsigned int numIntermediateIterations() const = 0;
-
 protected:
   /**
    * Saves the current values of the variables, and update the old(er) vectors.
