@@ -25,6 +25,9 @@ ExtraIDIntegralVectorPostprocessor::validParams()
   params.addRequiredParam<std::vector<ExtraElementIDName>>(
       "id_name", "List of extra element ID names by which to separate integral(s).");
   params.addParam<bool>("average", false, "Whether or not to compute volume average");
+  params.addParam<std::string>("spatial_value_name",
+                               "To specify which variable or material property is to be used when "
+                               "using as a spatial user object functor");
   params.addClassDescription("Integrates or averages variables based on extra element IDs");
   params.makeParamNotRequired("variable");
   return params;
@@ -32,7 +35,7 @@ ExtraIDIntegralVectorPostprocessor::validParams()
 
 ExtraIDIntegralVectorPostprocessor::ExtraIDIntegralVectorPostprocessor(
     const InputParameters & parameters)
-  : ElementVariableVectorPostprocessor(parameters),
+  : SpatialUserObjectFunctor<ElementVariableVectorPostprocessor>(parameters),
     _average(getParam<bool>("average")),
     _nvar(isParamValid("variable") ? coupledComponents("variable") : 0),
     _nprop(isParamValid("mat_prop") ? getParam<std::vector<MaterialPropertyName>>("mat_prop").size()
@@ -40,7 +43,8 @@ ExtraIDIntegralVectorPostprocessor::ExtraIDIntegralVectorPostprocessor(
     _prop_names(isParamValid("mat_prop") ? getParam<std::vector<MaterialPropertyName>>("mat_prop")
                                          : std::vector<MaterialPropertyName>()),
     _extra_id(getParam<std::vector<ExtraElementIDName>>("id_name")),
-    _n_extra_id(_extra_id.size())
+    _n_extra_id(_extra_id.size()),
+    _spatial_evaluation_index(std::numeric_limits<unsigned int>::max())
 {
   if (!_nvar && !_nprop)
     mooseError("Neither 'variable' nor 'mat_prop' was specified.");
@@ -72,12 +76,15 @@ ExtraIDIntegralVectorPostprocessor::ExtraIDIntegralVectorPostprocessor(
     _extra_ids.push_back(&p);
   }
 
+  std::vector<std::string> vector_names;
+
   // declare vectors containing variable integral values
   for (unsigned int i = 0; i < _nvar; ++i)
   {
     _vars.push_back(getVar("variable", i));
     _var_values.push_back(&coupledValue("variable", i));
-    auto & p = declareVector(_vars[i]->name());
+    vector_names.push_back(_vars[i]->name());
+    auto & p = declareVector(vector_names.back());
     p.resize((*_extra_ids[0]).size());
     _integrals.push_back(&p);
   }
@@ -86,9 +93,25 @@ ExtraIDIntegralVectorPostprocessor::ExtraIDIntegralVectorPostprocessor(
   for (auto & name : _prop_names)
   {
     _props.push_back(&getMaterialPropertyByName<Real>(name));
-    auto & p = declareVector(name);
+    vector_names.push_back(name);
+    auto & p = declareVector(vector_names.back());
     p.resize((*_extra_ids[0]).size());
     _integrals.push_back(&p);
+  }
+
+  if (isParamValid("spatial_value_name"))
+  {
+    const auto & name = getParam<std::string>("spatial_value_name");
+    _spatial_evaluation_index = vector_names.size();
+    for (const auto i : index_range(vector_names))
+      if (name == vector_names[i])
+      {
+        _spatial_evaluation_index = i;
+        break;
+      }
+    if (_spatial_evaluation_index == vector_names.size())
+      paramError("spatial_value_name",
+                 "not a variable name or material property name of this vector postprocessor");
   }
 }
 
@@ -151,4 +174,46 @@ ExtraIDIntegralVectorPostprocessor::threadJoin(const UserObject & s)
   if (_average)
     for (unsigned int i = 0; i < _volumes.size(); ++i)
       _volumes[i] += sibling._volumes[i];
+}
+
+Real
+ExtraIDIntegralVectorPostprocessor::evaluate(const ElemArg & elem,
+                                             const Moose::StateArg & libmesh_dbg_var(state)) const
+{
+  mooseAssert(state.state == 0, "We do not currently support evaluating at old states");
+  return elementValue(elem.elem);
+}
+
+Real
+ExtraIDIntegralVectorPostprocessor::evaluate(const ElemQpArg & elem,
+                                             const Moose::StateArg & libmesh_dbg_var(state)) const
+{
+  mooseAssert(state.state == 0, "We do not currently support evaluating at old states");
+  return elementValue(elem.elem);
+}
+
+Real
+ExtraIDIntegralVectorPostprocessor::elementValue(const Elem * elem) const
+{
+  if (_spatial_evaluation_index == std::numeric_limits<unsigned int>::max())
+    paramError("spatial_value_name",
+               "Must set when ExtraIDIntegralVectorPostprocessor is used as a functor");
+  const auto it = _unique_vpp_ids.find(elem->id());
+  if (it == _unique_vpp_ids.end())
+  {
+    if (!hasBlocks(elem->subdomain_id()))
+      mooseError(
+          "Failed evaluating spatial value of element ",
+          elem->id(),
+          " in subdomain ",
+          elem->subdomain_id(),
+          ". This is likely due to the object using this "
+          "ExtraIDIntegralVectorPostprocessor as a functor operates on a subdomain outside of "
+          "this ExtraIDIntegralVectorPostprocessor");
+    else
+      mooseError("Failed evaluating spatial value of element ",
+                 elem->id(),
+                 ". We should not hit this error. Please contact code developers for help");
+  }
+  return (*_integrals[_spatial_evaluation_index])[it->second];
 }
