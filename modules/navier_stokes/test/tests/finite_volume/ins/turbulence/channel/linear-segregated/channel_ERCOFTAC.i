@@ -35,7 +35,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     ymin = 0
     ymax = ${H}
     nx = 4
-    ny = 3
+    ny = 4
     bias_y = 0.7
   []
   [block_2]
@@ -46,7 +46,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     ymin = ${fparse -H}
     ymax = 0
     nx = 4
-    ny = 3
+    ny = 4
     bias_y = ${fparse 1/0.7}
   []
   [smg]
