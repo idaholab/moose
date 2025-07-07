@@ -1051,11 +1051,12 @@ template <typename C, typename It, typename M1, typename M2>
 auto
 findPair(C & container, It start_iterator, const M1 & first, const M2 & second)
 {
-  return std::find_if(
-      start_iterator,
-      container.end(),
-      [&](auto & item)
-      { return wildcardEqual(first, item.first) && wildcardEqual(second, item.second); });
+  return std::find_if(start_iterator,
+                      container.end(),
+                      [&](auto & item) {
+                        return wildcardEqual(first, item.first) &&
+                               wildcardEqual(second, item.second);
+                      });
 }
 
 /**
