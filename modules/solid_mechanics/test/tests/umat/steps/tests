@@ -79,4 +79,26 @@
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
+
+  [elastic_temperature_steps_uo_step_number_pps]
+    type = 'Exodiff'
+    input = 'elastic_temperature_steps_uo_step_pps.i'
+    exodiff = 'elastic_temperature_steps_uo_step_pps_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to output the current step number as a postprocessor.'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [elastic_temperature_steps_uo_step_number_pps_one_based]
+    type = 'Exodiff'
+    input = 'elastic_temperature_steps_uo_step_pps.i'
+    exodiff = 'elastic_temperature_steps_uo_step_pps_one_based_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to output the current step number as a postprocessor using a one-based index.'
+    cli_args = 'Postprocessors/step_number/use_one_based_indexing=true Outputs/file_base=elastic_temperature_steps_uo_step_pps_one_based_out'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
 []
