@@ -87,23 +87,23 @@ ComputeLinearFVFaceThread::setupSystemContributionObjects()
 {
   // The reason why we need to grab vectors and matrices separately is that
   // we want to grab a union instead of an intersection.
-  _base_query_vectors = _fe_problem.theWarehouse()
-                            .query()
-                            .template condition<AttribSysNum>(_system_number)
-                            .template condition<AttribSystem>("LinearFVFluxKernel")
-                            .template condition<AttribThread>(_tid)
-                            .template condition<AttribVectorTags>(_vector_tags);
   std::vector<LinearFVFluxKernel *> kernels_after_vectors;
-  _base_query_vectors.queryInto(kernels_after_vectors);
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(_system_number)
+      .template condition<AttribSystem>("LinearFVFluxKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_vector_tags)
+      .queryInto(kernels_after_vectors);
 
-  _base_query_matrices = _fe_problem.theWarehouse()
-                             .query()
-                             .template condition<AttribSysNum>(_system_number)
-                             .template condition<AttribSystem>("LinearFVFluxKernel")
-                             .template condition<AttribThread>(_tid)
-                             .template condition<AttribMatrixTags>(_matrix_tags);
   std::vector<LinearFVFluxKernel *> kernels_after_matrices;
-  _base_query_matrices.queryInto(kernels_after_matrices);
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(_system_number)
+      .template condition<AttribSystem>("LinearFVFluxKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribMatrixTags>(_matrix_tags)
+      .queryInto(kernels_after_matrices);
 
   // We fetch the union of the available objects
   std::vector<LinearFVFluxKernel *> kernels;
@@ -127,12 +127,24 @@ ComputeLinearFVFaceThread::fetchBlockSystemContributionObjects()
 
   if (_subdomain != _old_subdomain)
   {
-    // The base query already has the other conditions, here we just filter based on subdomain ID
+    // We just filter based on subdomain ID on top of everything else
     std::vector<LinearFVFluxKernel *> kernels_after_vector;
-    _base_query_vectors.template condition<AttribSubdomains>(_subdomain)
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSysNum>(_system_number)
+        .template condition<AttribSystem>("LinearFVFluxKernel")
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribVectorTags>(_vector_tags)
+        .template condition<AttribSubdomains>(_subdomain)
         .queryInto(kernels_after_vector);
     std::vector<LinearFVFluxKernel *> kernels_after_matrix;
-    _base_query_matrices.template condition<AttribSubdomains>(_subdomain)
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSysNum>(_system_number)
+        .template condition<AttribSystem>("LinearFVFluxKernel")
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribMatrixTags>(_matrix_tags)
+        .template condition<AttribSubdomains>(_subdomain)
         .queryInto(kernels_after_matrix);
 
     // We populate the list of kernels with the union of the two vectors
@@ -143,12 +155,24 @@ ComputeLinearFVFaceThread::fetchBlockSystemContributionObjects()
 
   if (_neighbor_subdomain != _old_neighbor_subdomain)
   {
-    // The base query already has the other conditions, here we just filter based on subdomain ID
+    // Here we just filter based on subdomain ID on top of everything else
     std::vector<LinearFVFluxKernel *> kernels_after_vector;
-    _base_query_vectors.template condition<AttribSubdomains>(_neighbor_subdomain)
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSysNum>(_system_number)
+        .template condition<AttribSystem>("LinearFVFluxKernel")
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribVectorTags>(_vector_tags)
+        .template condition<AttribSubdomains>(_neighbor_subdomain)
         .queryInto(kernels_after_vector);
     std::vector<LinearFVFluxKernel *> kernels_after_matrix;
-    _base_query_matrices.template condition<AttribSubdomains>(_neighbor_subdomain)
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSysNum>(_system_number)
+        .template condition<AttribSystem>("LinearFVFluxKernel")
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribMatrixTags>(_matrix_tags)
+        .template condition<AttribSubdomains>(_neighbor_subdomain)
         .queryInto(kernels_after_matrix);
 
     // We populate the list of kernels with the union of the two vectors

@@ -1,7 +1,9 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-  nx = 2
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 1
+    nx = 3
+  []
 []
 
 [Problem]
