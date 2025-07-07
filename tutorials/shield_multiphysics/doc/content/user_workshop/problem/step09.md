@@ -74,16 +74,20 @@ python step9.py
 !col! width=50%
 
 !media step9_max_temp.png
+       alt=Plot of the evolution of the maximum temperature of the concrete over time.
 
 !media step9_Tx.png
+       alt=Plot of the heat flux of the water over time.
 
 !col-end!
 
 !col! width=50%
 
 !media step9_heat_flux.png
+       alt=Temperatures sampled along a line, at various times. The line is parallel to the x-axis.
 
 !media step9_Ty.png
+       alt=Temperatures sampled along a line, at various times. The line is parallel to the y-axis.
 
 !col-end!
 
