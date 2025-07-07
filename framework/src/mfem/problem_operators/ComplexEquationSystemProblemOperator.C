@@ -18,7 +18,6 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
 {
   _trial_var_names = GetEquationSystem()->TrialVarNames();
 
-  _cpx_test_variables = _problem.complex_gridfunctions.Get(_test_var_names);
   _cpx_trial_variables = _problem.complex_gridfunctions.Get(_trial_var_names);
 
   // Set operator size and block structure
@@ -26,7 +25,7 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
   _block_true_offsets[0] = 0;
   for (unsigned int ind = 0; ind < _cpx_trial_variables.size(); ++ind)
   {
-    _block_true_offsets[ind + 1] = _cpx_trial_variables.at(ind)->ParFESpace()->TrueVSize();
+    _block_true_offsets[ind + 1] = 2*_cpx_trial_variables.at(ind)->ParFESpace()->TrueVSize();
   }
   _block_true_offsets.PartialSum();
 
@@ -34,6 +33,7 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
   _true_rhs.Update(_block_true_offsets);
 
   width = height = _block_true_offsets[_cpx_trial_variables.size()];
+
 }
 
 void
