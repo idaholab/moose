@@ -26,9 +26,21 @@ Additionally, a user can control whether volume-integrated values or volume-aver
 !alert note title=Vector names / CSV output column names
 `ExtraIDIntegralVectorPostprocessor` declares a vector for each variable or material property, named after the variable or material property, holding the values of the integrals computed.
 
-## Example Syntax
-
 !listing test/tests/vectorpostprocessors/extra_id_integral/extra_id_vpp.i block=VectorPostprocessors
+
+## Example use to output a field of the integral values
+
+The `ExtraIDIntegralVectorPostprocessor` object can also be used as a functor for providing spatial values of the integrated or averaged values.
+A [FunctorAux.md] could then be used for example to output them as an auxiliary *elemental* variable.
+The variable has element-wise constant values. Its value on an element is the same as the value in this vector postprocessor with the unique combined id.
+When the `ExtraIDIntegralVectorPostprocessor` object is used as a functor, [!param](/VectorPostprocessors/ExtraIDIntegralVectorPostprocessor/spatial_value_name) must be set to indicate which variable or material property is to be used.
+
+!alert note
+When the `ExtraIDIntegralVectorPostprocessor` object is used as a function in [FunctorAux.md], [!param](/VectorPostprocessors/ExtraIDIntegralVectorPostprocessor/force_preaux) must set to true, otherwise the value of this object would be lagged in the functor evaluation because functors are not put into pre_aux group automatically by MOOSE.
+
+!listing test/tests/functors/eeid_vpp_functor/test.i start=VectorPostprocessors end=Executioner
+
+## Example Syntax
 
 !syntax parameters /VectorPostprocessors/ExtraIDIntegralVectorPostprocessor
 

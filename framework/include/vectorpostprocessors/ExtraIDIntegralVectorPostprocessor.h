@@ -10,12 +10,14 @@
 #pragma once
 
 #include "ElementVariableVectorPostprocessor.h"
+#include "SpatialUserObjectFunctor.h"
 
 /**
  * This ExtraIDIntegralVectorPostprocessor source code is to integrate variables based on parsed
  * extra IDs
  */
-class ExtraIDIntegralVectorPostprocessor : public ElementVariableVectorPostprocessor
+class ExtraIDIntegralVectorPostprocessor
+  : public SpatialUserObjectFunctor<ElementVariableVectorPostprocessor>
 {
 public:
   static InputParameters validParams();
@@ -30,7 +32,16 @@ public:
   /// Return Integral values
   const std::vector<VectorPostprocessorValue *> & getIntegrals() const { return _integrals; };
 
+  using SpatialUserObjectFunctor<ElementVariableVectorPostprocessor>::evaluate;
+
+  /// Get values for an element based on the element extra element id
+  virtual Real evaluate(const ElemArg & elem, const Moose::StateArg & state) const override;
+  /// Get values for an element on qps based on the element extra element id
+  virtual Real evaluate(const ElemQpArg & qp, const Moose::StateArg & state) const override;
+
 protected:
+  /// Get the value for an element based on the element extra element id
+  Real elementValue(const Elem * elem) const;
   /// whether or not to compute volume average
   const bool _average;
   /// Number of variables to be integrated
@@ -57,4 +68,6 @@ protected:
   std::vector<VectorPostprocessorValue *> _integrals;
   /// Vector holding the volume of extra IDs
   std::vector<Real> _volumes;
+  /// The index to the values that is used in 'evaluate' function
+  unsigned int _spatial_evaluation_index;
 };
