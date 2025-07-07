@@ -29,6 +29,34 @@ This optimization reporter performs the same type of optimization as [Optimizati
 
 [!ref](ParameterMeshFunction.md#tab:fe_types) shows common interpolation types for the parameters.
 
+## L2 Gradient Regularization
+
+`ParameterMeshOptimization` supports L2 gradient regularization to enforce smoothness in parameter fields. This regularization adds a penalty term to the objective function:
+
+\begin{equation}
+J_{total} = J_{data} + \alpha \int_{\Omega} |\nabla p|^2 \, d\Omega
+\end{equation}
+
+where:
+
+- $J_{data}$ is the data misfit objective
+- $\alpha$ is the regularization coefficient ([!param](/OptimizationReporter/ParameterMeshOptimization/gradient_l2_coeff))
+- $p$ is the parameter field
+- $\Omega$ is the parameter mesh domain
+
+The gradient of this regularization term is:
+
+\begin{equation}
+\frac{\partial}{\partial p} \left( \alpha \int_{\Omega} |\nabla p|^2 \, d\Omega \right) = 2\alpha \nabla p
+\end{equation}
+
+This regularization:
+
+- Enforces spatial smoothness in parameter distributions
+- Prevents oscillatory parameter solutions
+
+To enable L2 gradient regularization, set [!param](/OptimizationReporter/ParameterMeshOptimization/gradient_l2_coeff) to a positive value. The strength of regularization increases with larger coefficient values.
+
 !alert warning
 The mesh created +must+ be replicated. Ensure this by having `Mesh/parallel_type=REPLICATED` when creating the mesh.
 
