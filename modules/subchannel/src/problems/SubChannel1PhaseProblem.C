@@ -2735,9 +2735,14 @@ SubChannel1PhaseProblem::externalSolve()
     _console << "User defined outlet pressure is : " << _P_out << " Pa" << std::endl;
     _console << " ======================================= " << std::endl;
   }
-}
-void
 
+  if (MooseUtils::absoluteFuzzyLessEqual((power_out - power_in), -1.0))
+    mooseWarning(
+        "Energy conservation equation might not be solved correctly, Power added to coolant:  " +
+        std::to_string(power_out - power_in) + " Watt ");
+}
+
+void
 SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/)
 {
 }
