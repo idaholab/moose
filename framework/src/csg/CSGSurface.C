@@ -55,4 +55,20 @@ CSGSurface::getBoundaryTypeString() const
   }
 }
 
+bool
+CSGSurface::operator==(const CSGSurface & other) const
+{
+  const auto name_eq = this->getName() == other.getName();
+  const auto boundary_type_eq = this->getBoundaryType() == other.getBoundaryType();
+  const auto surface_type_eq = this->getSurfaceType() == other.getSurfaceType();
+  const auto coeffs_eq = this->getCoeffs() == other.getCoeffs();
+  return (name_eq && boundary_type_eq && surface_type_eq && coeffs_eq);
+}
+
+bool
+CSGSurface::operator!=(const CSGSurface & other) const
+{
+  return !(*this == other);
+}
+
 } // namespace CSG

@@ -40,7 +40,7 @@ public:
   /**
    * Constructor for halfspace
    */
-  CSGRegion(std::shared_ptr<CSGSurface> & surf, const CSGSurface::Direction direction);
+  CSGRegion(CSGSurface & surf, const CSGSurface::Direction direction);
 
   /**
    * Constructor for union and intersection
@@ -83,9 +83,9 @@ public:
   /**
    * @brief Get the list of surfaces associated with the region
    *
-   * @return std::vector<std::shared_ptr<CSGSurface>> list of surfaces that define the region
+   * @return std::vector<CSGSurface *> list of pointers to surfaces that define the region
    */
-  std::vector<std::shared_ptr<CSGSurface>> getSurfaces() const { return _surfaces; };
+  std::vector<CSGSurface *> getSurfaces() const { return _surfaces; };
 
   /// Operator overload for &= add an intersection to the current region
   CSGRegion & operator&=(const CSGRegion & other_region);
@@ -101,7 +101,7 @@ protected:
   RegionType _region_type;
 
   /// Surface list associated with the region
-  std::vector<std::shared_ptr<CSGSurface>> _surfaces;
+  std::vector<CSGSurface *> _surfaces;
 };
 
 /**
@@ -116,11 +116,11 @@ std::string stripRegionString(std::string region_str, std::string op);
 
 /// Operation overloads for operation based region construction
 
-// positve halfspace (+)
-const CSGRegion operator+(std::shared_ptr<CSGSurface> surf);
+// positive halfspace (+)
+const CSGRegion operator+(CSGSurface & surf);
 
 // negative halfspace (-)
-const CSGRegion operator-(std::shared_ptr<CSGSurface> surf);
+const CSGRegion operator-(CSGSurface & surf);
 
 // intersection (&)
 const CSGRegion operator&(const CSGRegion & region_a, const CSGRegion & region_b);

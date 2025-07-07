@@ -10,6 +10,7 @@
 #pragma once
 
 #include "CSGSurface.h"
+#include "CSGPlane.h"
 
 namespace CSG
 {
@@ -38,13 +39,13 @@ protected:
    * @param p2 point 2
    * @param p3 point 3
    * @param boundary CSGSurface::BoundaryType boundary type for the surface
-   * @return std::shared_ptr<CSGSurface> pointer to plane surface created
+   * @return CSGSurface & reference to plane surface created
    */
-  std::shared_ptr<CSGSurface> addPlaneFromPoints(const std::string name,
-                                                 const Point p1,
-                                                 const Point p2,
-                                                 const Point p3,
-                                                 CSGSurface::BoundaryType boundary);
+  CSGSurface & addPlaneFromPoints(const std::string name,
+                                  const Point & p1,
+                                  const Point & p2,
+                                  const Point & p3,
+                                  CSGSurface::BoundaryType boundary);
 
   /**
    * @brief Create a new CSGPlane surface from coefficients (a, b, c, d) for the
@@ -56,14 +57,14 @@ protected:
    * @param c coefficient c
    * @param d coefficient d
    * @param boundary CSGSurface::BoundaryType boundary type for the surface
-   * @return std::shared_ptr<CSGSurface> pointer to plane surface created
+   * @return const CSGSurface & reference to plane surface created
    */
-  std::shared_ptr<CSGSurface> addPlaneFromCoefficients(const std::string name,
-                                                       const Real a,
-                                                       const Real b,
-                                                       const Real c,
-                                                       const Real d,
-                                                       CSGSurface::BoundaryType boundary);
+  CSGSurface & addPlaneFromCoefficients(const std::string name,
+                                        const Real a,
+                                        const Real b,
+                                        const Real c,
+                                        const Real d,
+                                        CSGSurface::BoundaryType boundary);
 
   /**
    * @brief create a new CSGSphere surface
@@ -72,12 +73,12 @@ protected:
    * @param center center point of sphere
    * @param r radius of sphere
    * @param boundary CSGSurface::BoundaryType boundary type for the surface
-   * @return std::shared_ptr<CSGSurface> pointer to sphere surface created
+   * @return CSGSurface & reference to sphere surface created
    */
-  std::shared_ptr<CSGSurface> addSphere(const std::string name,
-                                        const Point center,
-                                        const Real r,
-                                        CSGSurface::BoundaryType boundary);
+  CSGSurface & addSphere(const std::string name,
+                         const Point center,
+                         const Real r,
+                         CSGSurface::BoundaryType boundary);
 
   /**
    * @brief create a cylinder aligned with the specified axis
@@ -88,32 +89,36 @@ protected:
    * @param r radius
    * @param axis axis alignment (x, y, or z)
    * @param boundary CSGSurface::BoundaryType boundary type for the surface
-   * @return std::shared_ptr<CSGSurface>
+   * @return reference to CSGSurface object that is created
    */
-  std::shared_ptr<CSGSurface> addCylinder(const std::string name,
-                                          const Real x0,
-                                          const Real x1,
-                                          const Real r,
-                                          const std::string axis,
-                                          CSGSurface::BoundaryType boundary);
+  CSGSurface & addCylinder(const std::string name,
+                           const Real x0,
+                           const Real x1,
+                           const Real r,
+                           const std::string axis,
+                           CSGSurface::BoundaryType boundary);
 
   /**
-   * @brief Get the all aurfaces
+   * @brief Get map of all names to surfaces in surface list
    *
-   * @return const std::map<std::string, std::shared_ptr<CSGSurface>>& map of all names to surfaces
+   * @return std::map<std::string, std::shared_ptr<CSGSurface>>& map of all names to surfaces
    */
-  const std::map<std::string, std::shared_ptr<CSGSurface>> & getAllSurfaces() const
-  {
-    return _surfaces;
-  }
+  std::map<std::string, std::shared_ptr<CSGSurface>> & getSurfaceListMap() { return _surfaces; }
+
+  /**
+   * @brief Get list of pointers to all surfaces in surface list
+   *
+   * @return std::vector<CSGSurface *> list of pointers to surfaces
+   */
+  std::vector<CSGSurface *> getAllSurfaces() const;
 
   /**
    * @brief Get a surface by name
    *
    * @param name name of surface
-   * @return const std::shared_ptr<CSGSurface>& pointer to CSGSurface of the specified name
+   * @return CSGSurface & reference to CSGSurface of the specified name
    */
-  const std::shared_ptr<CSGSurface> & getSurface(const std::string name) const;
+  CSGSurface & getSurface(const std::string name) const;
 
   /**
    * @brief add a surface object to existing SurfaceList
@@ -123,11 +128,11 @@ protected:
   void addSurface(const std::shared_ptr<CSGSurface> surf);
 
   /**
-   * @brief rename the specified cell
+   * @brief rename the specified surface
    *
    * @param name new name of surface
    */
-  void renameSurface(const std::shared_ptr<CSGSurface> surface, const std::string name);
+  void renameSurface(CSGSurface & surface, const std::string name);
 
   /// Checks whether surface name already exists within CSGSurfaceList object
   void checkSurfaceName(const std::string name) const;

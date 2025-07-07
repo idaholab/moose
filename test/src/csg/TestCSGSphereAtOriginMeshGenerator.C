@@ -43,7 +43,7 @@ TestCSGSphereAtOriginMeshGenerator::generateCSG()
   auto csg_mesh = std::make_unique<CSG::CSGBase>();
   auto mg_name = this->name();
 
-  auto sphere_surf = csg_mesh->createSphere(mg_name + "_sphere_surf", _radius);
+  auto & sphere_surf = csg_mesh->createSphere(mg_name + "_sphere_surf", _radius);
   auto sphere_cell = csg_mesh->createCell(mg_name + "_sphere_cell", -sphere_surf);
 
   return csg_mesh;

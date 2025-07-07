@@ -129,8 +129,8 @@ CSGBase::joinSurfaceList(CSGSurfaceList & surf_list)
   // TODO: check if surface is a duplicate (by definition) and skip
   // adding if duplicate; must update references to the surface in cell
   // region definitions.
-  auto all_surfs = surf_list.getAllSurfaces();
-  for (auto s : all_surfs)
+  auto & surf_list_map = surf_list.getSurfaceListMap();
+  for (auto s : surf_list_map)
     _surface_list.addSurface(s.second);
 }
 
@@ -218,10 +218,10 @@ CSGBase::checkRegionSurfaces(const CSGRegion & region)
   {
     auto sname = s->getName();
     // if there is no surface by this name at all, there will be an error from getSurface
-    auto list_surf = _surface_list.getSurface(s->getName());
+    const auto & list_surf = _surface_list.getSurface(s->getName());
     // if there is a surface by the same name, check that it is actually the surface being used
     // (ie same surface points to same location in memory)
-    if (s != list_surf)
+    if (*s != list_surf)
       mooseError("Region is being set with a surface named " + sname +
                  " that is different from the surface of the same name in the base instance.");
   }
@@ -280,13 +280,13 @@ CSGBase::generateOutput() const
   auto all_surfs = getAllSurfaces();
   for (const auto & s : all_surfs)
   {
-    auto surf_obj = s.second;
-    auto coeffs = surf_obj->getCoeffs();
-    csg_json["SURFACES"][s.first] = {{"TYPE", surf_obj->getSurfaceTypeString()},
-                                     {"BOUNDARY", surf_obj->getBoundaryTypeString()},
-                                     {"COEFFICIENTS", {}}};
+    auto surf_name = s->getName();
+    auto coeffs = s->getCoeffs();
+    csg_json["SURFACES"][surf_name] = {{"TYPE", s->getSurfaceTypeString()},
+                                       {"BOUNDARY", s->getBoundaryTypeString()},
+                                       {"COEFFICIENTS", {}}};
     for (const auto & c : coeffs)
-      csg_json["SURFACES"][s.first]["COEFFICIENTS"][c.first] = c.second;
+      csg_json["SURFACES"][surf_name]["COEFFICIENTS"][c.first] = c.second;
   }
 
   // Print out cell information
