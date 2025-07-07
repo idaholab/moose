@@ -20,13 +20,8 @@ class ComplexEquationSystemProblemOperator : public EquationSystemProblemOperato
  
 public:
   ComplexEquationSystemProblemOperator(MFEMProblemData & problem)
-    : EquationSystemProblemOperator(problem)
+    : EquationSystemProblemOperator(problem), _equation_system{std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(problem.eqn_system)}
   {
-    auto eqn_system = std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(problem.eqn_system);
-    if (!eqn_system)
-      mooseError("ComplexEquationSystemProblemOperator requires a ComplexEquationSystem, but the provided equation system is not of that type.");
-    else
-      _equation_system = eqn_system;
   }
 
   void SetGridFunctions() override;
