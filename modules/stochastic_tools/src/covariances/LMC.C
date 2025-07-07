@@ -81,7 +81,6 @@ LMC::computeCovarianceMatrix(torch::Tensor & K,
   {
     _covariance_functions[exp_i]->computeCovarianceMatrix(K_params, x, xp, is_self_covariance);
     computeBMatrix(B, exp_i);
-    // MathUtils::kron(K_working, B, K_params);
     K_working = torch::kron(B, K_params);
     K += K_working;
   }
@@ -125,7 +124,6 @@ LMC::computedKdhyper(torch::Tensor & dKdhp,
       computeLambdaGradient(dBdhp, number, ind);
       _covariance_functions[number]->computeCovarianceMatrix(K_params, x, x, true);
     }
-    // MathUtils::kron(dKdhp, dBdhp, K_params);
     dKdhp = torch::kron(dBdhp, K_params);
     return true;
   }
@@ -164,6 +162,7 @@ LMC::computedKdhyper(torch::Tensor & dKdhp,
 void
 LMC::computeBMatrix(torch::Tensor & Bmat, const unsigned int exp_i) const
 {
+  /*
   auto Bmat_accessor = Bmat.accessor<Real, 2>();
   const auto & a_coeffs = *_a_coeffs[exp_i];
   const auto & lambda_coeffs = *_lambdas[exp_i];
@@ -175,6 +174,17 @@ LMC::computeBMatrix(torch::Tensor & Bmat, const unsigned int exp_i) const
       if (row_i == col_i)
         Bmat_accessor[row_i][col_i] += lambda_coeffs[col_i];
     }
+  */
+  const auto & a_coeffs = *_a_coeffs[exp_i];
+  const auto & lambda_coeffs = *_lambdas[exp_i];
+  std::vector<Real> a_copy = a_coeffs;
+  std::vector<Real> lambda_copy = lambda_coeffs;
+  torch::Tensor a_copy_tensor =
+      torch::from_blob(a_copy.data(), {long(a_copy.size())}, at::kDouble).clone();
+  torch::Tensor lambda_copy_tensor =
+      torch::from_blob(lambda_copy.data(), {long(lambda_copy.size())}, at::kDouble).clone();
+  Bmat = torch::outer(a_copy_tensor, a_copy_tensor);
+  torch::diagonal(Bmat) += lambda_copy_tensor;
 }
 
 void

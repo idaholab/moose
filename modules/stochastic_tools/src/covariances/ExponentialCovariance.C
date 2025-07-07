@@ -63,30 +63,18 @@ ExponentialCovariance::ExponentialFunction(torch::Tensor & K,
                                            const Real gamma,
                                            const bool is_self_covariance)
 {
-  unsigned int num_samples_x = x.sizes()[0];
-  unsigned int num_samples_xp = xp.sizes()[0];
-  unsigned int num_params_x = x.sizes()[1];
-
-  mooseAssert(num_params_x == xp.sizes()[1],
+  mooseAssert(x.sizes()[1] == xp.sizes()[1],
               "Number of parameters do not match in covariance kernel calculation");
 
-  auto K_accessor = K.accessor<Real, 2>();
-  auto x_accessor = x.accessor<Real, 2>();
-  auto xp_accessor = xp.accessor<Real, 2>();
-  for (unsigned int ii = 0; ii < num_samples_x; ++ii)
-  {
-    for (unsigned int jj = 0; jj < num_samples_xp; ++jj)
-    {
-      // Compute distance per parameter, scaled by length factor
-      Real r_scaled = 0;
-      for (unsigned int kk = 0; kk < num_params_x; ++kk)
-        r_scaled += pow((x_accessor[ii][kk] - xp_accessor[jj][kk]) / length_factor[kk], 2);
-      r_scaled = sqrt(r_scaled);
-      K_accessor[ii][jj] = sigma_f_squared * std::exp(-pow(r_scaled, gamma));
-    }
-    if (is_self_covariance)
-      K_accessor[ii][ii] += sigma_n_squared;
-  }
+  std::vector length_factor_cp = length_factor;
+  torch::Tensor l_factor =
+      torch::from_blob(length_factor_cp.data(), {1, long(length_factor_cp.size())}, at::kDouble)
+          .clone();
+  torch::Tensor scaled_distance =
+      torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0);
+  K = sigma_f_squared * torch::exp(-torch::pow(scaled_distance, gamma));
+  if (is_self_covariance)
+    torch::diagonal(K) += sigma_n_squared;
 }
 
 bool

@@ -24,9 +24,7 @@
 #include "libmesh/parameters.h"
 #include "libmesh/numeric_vector.h"
 
-#ifdef LIBTORCH_ENABLED
 #include "LibtorchUtils.h"
-#endif
 
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
 #include <type_traits>

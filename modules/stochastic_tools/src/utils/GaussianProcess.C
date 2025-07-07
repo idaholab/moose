@@ -100,7 +100,8 @@ GaussianProcess::setupStoredMatrices(const torch::Tensor & input)
 {
   // llt does the llt decomposition as part of the Cholesky module
   _K_cho_decomp = torch::linalg_cholesky(_K);
-  _K_results_solve = torch::cholesky_solve(input, _K_cho_decomp);
+  _K_results_solve =
+      torch::linalg_solve(torch::mm(_K_cho_decomp, torch::transpose(_K_cho_decomp, 0, 1)), input);
 }
 
 void
@@ -198,16 +199,10 @@ GaussianProcess::tuneHyperParamsAdam(const torch::Tensor & training_params,
     for (unsigned int ii = 0; ii < _batch_size; ++ii)
     {
       for (unsigned int jj = 0; jj < training_params.sizes()[1]; ++jj)
-      {
-        // inputs(ii, jj) = training_params(v_sequence[ii], jj);
         inputs_accessor[ii][jj] = params_accessor[v_sequence[ii]][jj];
-      }
 
       for (unsigned int jj = 0; jj < training_data.sizes()[1]; ++jj)
-      {
-        // outputs(ii, jj) = training_data(v_sequence[ii], jj);
         outputs_accessor[ii][jj] = data_accessor[v_sequence[ii]][jj];
-      }
     }
 
     store_loss = getLoss(inputs, outputs);
@@ -280,9 +275,12 @@ GaussianProcess::getGradient(torch::Tensor & inputs) const
       const auto global_index = first_index + ii;
       _covariance_function->computedKdhyper(dKdhp, inputs, hyper_param_name, ii);
       // This is just temporary. Convert dKhp_matrix to tensor
-      auto tmp = torch::trace(torch::mm(alpha, dKdhp) - torch::cholesky_solve(dKdhp, _K_cho_decomp))
-                     .item<Real>();
-      grad_vec[global_index] = -1 * (tmp / 2.0);
+      auto tmp =
+          torch::trace(torch::mm(alpha, dKdhp) -
+                       torch::linalg_solve(
+                           torch::mm(_K_cho_decomp, torch::transpose(_K_cho_decomp, 0, 1)), dKdhp))
+              .item<Real>();
+      grad_vec[global_index] = tmp / -2.0;
     }
   }
   return grad_vec;

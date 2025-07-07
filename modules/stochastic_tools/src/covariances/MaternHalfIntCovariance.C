@@ -68,9 +68,9 @@ MaternHalfIntCovariance::maternHalfIntFunction(torch::Tensor & K,
   auto x_accessor = x.accessor<Real, 2>();
   auto xp_accessor = xp.accessor<Real, 2>();
 
-  unsigned int num_samples_x = x.sizes()[0];
-  unsigned int num_samples_xp = xp.sizes()[0];
-  unsigned int num_params_x = x.sizes()[1];
+  const unsigned int num_samples_x = x.sizes()[0];
+  const unsigned int num_samples_xp = xp.sizes()[0];
+  const unsigned int num_params_x = x.sizes()[1];
 
   mooseAssert(num_params_x == xp.sizes()[1],
               "Number of parameters do not match in covariance kernel calculation");

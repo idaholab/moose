@@ -71,6 +71,7 @@ SquaredExponentialCovariance::SquaredExponentialFunction(torch::Tensor & K,
   mooseAssert(num_params_x == xp.sizes()[1],
               "Number of parameters do not match in covariance kernel calculation");
 
+  /*
   for (unsigned int ii = 0; ii < num_samples_x; ++ii)
   {
     for (unsigned int jj = 0; jj < num_samples_xp; ++jj)
@@ -85,6 +86,16 @@ SquaredExponentialCovariance::SquaredExponentialFunction(torch::Tensor & K,
     if (is_self_covariance)
       K_accessor[ii][ii] += sigma_n_squared;
   }
+  */
+  std::vector length_factor_cp = length_factor;
+  torch::Tensor l_factor =
+      torch::from_blob(length_factor_cp.data(), {1, long(length_factor_cp.size())}, at::kDouble)
+          .clone();
+  torch::Tensor scaled_distance =
+      torch::pow(torch::cdist(torch::div(x, l_factor), torch::div(xp, l_factor), 2.0), 2);
+  K = sigma_f_squared * torch::exp(-scaled_distance / 2.0);
+  if (is_self_covariance)
+    torch::diagonal(K) += sigma_n_squared;
 }
 
 bool

@@ -239,6 +239,12 @@ dataStore(std::ostream & stream, torch::Tensor & t, void * context)
       Real r = t_accessor[i][j];
       dataStore(stream, r, context);
     }
+  /*
+  auto sizes = t.sizes();
+  stream.write((char *)&sizes, sizeof(sizes));
+  auto data = t.data_ptr<Real>();
+  stream.write((char *)&data, sizeof(data));
+  */
 }
 #endif
 
@@ -608,6 +614,13 @@ dataLoad(std::istream & stream, torch::Tensor & t, void * context)
       dataLoad(stream, r, context);
       t_accessor[i][j] = r;
     }
+  /*
+  auto sizes = t.sizes();
+  stream.read((char *)&sizes, sizeof(sizes));
+  auto data = t.data_ptr<Real>();
+  stream.read((char *)&sizes, sizeof(sizes));
+  t = torch::Tensor(data);
+  */
 }
 #endif
 
