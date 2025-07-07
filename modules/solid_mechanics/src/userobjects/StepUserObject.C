@@ -44,6 +44,8 @@ StepUserObject::validParams()
       "The durations of the steps. 'n' of step time intervals define 'n+1' steps "
       "starting at time equals zero.");
 
+  params.addParam<bool>("set_sync_times", true, "Sync output with step times.");
+
   return params;
 }
 
@@ -127,6 +129,14 @@ StepUserObject::StepUserObject(const InputParameters & parameters)
     paramError("step_start_times",
                "Plese provide 'step_start_times' or 'step_durations' or 'total_time_interval' and "
                "'number_steps' to define simulation loading steps.");
+
+  // set sync times
+  if (getParam<bool>("set_sync_times"))
+  {
+    std::set<Real> & sync_times = _app.getOutputWarehouse().getSyncTimes();
+    for (const auto t : _times)
+      sync_times.insert(t);
+  }
 }
 
 Real

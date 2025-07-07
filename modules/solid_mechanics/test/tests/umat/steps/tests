@@ -101,4 +101,15 @@
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
   []
+
+  [elastic_temperature_steps_uo_step_number_pps_sync]
+    type = 'Exodiff'
+    input = 'elastic_temperature_steps_uo_step_pps_sync.i'
+    exodiff = 'elastic_temperature_steps_uo_step_pps_sync_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to sync output times.'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
 []
