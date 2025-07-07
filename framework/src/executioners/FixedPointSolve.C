@@ -460,15 +460,8 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 bool
 FixedPointSolve::examineFixedPointConvergence(bool & converged)
 {
-  // For fixed point algorithms that have intermediate iterations, only check
-  // convergence if not an intermediate iteration
-  const bool is_intermediate_it = (_fixed_point_it + 1) % numIntermediateIterations() != 0;
-  if (is_intermediate_it)
-    return false;
-
-  const unsigned int full_it = (_fixed_point_it + 1) / numIntermediateIterations() - 1;
   auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
-  const auto status = convergence.checkConvergence(full_it);
+  const auto status = convergence.checkConvergence(_fixed_point_it);
   switch (status)
   {
     case Convergence::MooseConvergenceStatus::CONVERGED:

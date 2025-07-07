@@ -19,6 +19,8 @@ public:
 
   static InputParameters validParams();
 
+  virtual void initialSetup() override;
+
   /**
    * Allocate storage for the fixed point algorithm.
    * This creates the system vector of old (older, pre/post solve) variable values and the
@@ -33,8 +35,6 @@ public:
       Real initial_norm,
       const std::vector<Real> & timestep_begin_norms,
       const std::vector<Real> & timestep_end_norms) const override final;
-
-  virtual unsigned int numIntermediateIterations() const override { return 2; }
 
 private:
   /**

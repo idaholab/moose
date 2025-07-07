@@ -14,6 +14,7 @@
 #include "NonlinearSystem.h"
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
+#include "DefaultMultiAppFixedPointConvergence.h"
 
 InputParameters
 SteffensenSolve::validParams()
@@ -59,6 +60,18 @@ SteffensenSolve::allocateStorage(const bool primary)
   (*transformed_pps_values).resize((*transformed_pps).size());
   for (size_t i = 0; i < (*transformed_pps).size(); i++)
     (*transformed_pps_values)[i].resize(2);
+}
+
+void
+SteffensenSolve::initialSetup()
+{
+  FixedPointSolve::initialSetup();
+
+  auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
+  if (!dynamic_cast<DefaultMultiAppFixedPointConvergence *>(&convergence))
+    mooseError(
+        "Only DefaultMultiAppFixedPointConvergence objects may be used for "
+        "'multiapp_fixed_point_convergence' when using the Steffensen fixed point algorithm.");
 }
 
 void
