@@ -21,7 +21,18 @@ namespace Moose
  * Create a MooseApp from command-line arguments.
  */
 std::shared_ptr<MooseApp>
-createMooseApp(const std::string & default_app_type, int argc, char * argv[]);
+createMooseApp(const std::string & default_app_name, int argc, char * argv[]);
+
+/**
+ * Create a minimal MooseApp for unit testing.
+ */
+std::shared_ptr<MooseApp> createMinimalMooseApp();
+
+/**
+ * Adds the command line parameters needed from within \p main, which
+ * will also need to be added to MooseApp so that they show up in --help
+ */
+void addMainCommandLineParams(InputParameters & params);
 
 /**
  * Initialize, create and run a MooseApp
