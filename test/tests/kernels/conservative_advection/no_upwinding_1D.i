@@ -22,6 +22,14 @@
   []
 []
 
+[Materials]
+  [v]
+    type = GenericConstantVectorMaterial
+    prop_names = v
+    prop_values = '1 0 0'
+  []
+[]
+
 [Kernels]
   [udot]
     type = TimeDerivative
@@ -30,6 +38,13 @@
   [advection]
     type = ConservativeAdvection
     variable = u
+  []
+[]
+
+[Preconditioning]
+  [smp]
+    type = SMP
+    full = true
   []
 []
 
