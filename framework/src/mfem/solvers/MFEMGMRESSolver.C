@@ -61,6 +61,10 @@ MFEMGMRESSolver::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
   }
   else if (_lor)
   {
+    if (!checkSpectralEquivalence(a))
+      mooseError("Low-Order-Refined solver requires the FESpace closed_basis to be GaussLobatto "
+                 "and the open-basis to be IntegratedGLL for ND and RT elements.");
+
     auto lor_solver = new mfem::LORSolver<mfem::GMRESSolver>(a, tdofs);
     lor_solver->GetSolver().SetRelTol(getParam<mfem::real_t>("l_tol"));
     lor_solver->GetSolver().SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
