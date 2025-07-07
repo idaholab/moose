@@ -1,0 +1,39 @@
+[Tests]
+  [multicomponent_gas_mixture]
+    type = 'CSVDiff'
+    input = 'multicomponent_gas_mixture.i'
+    csvdiff = 'multicomponent_gas_mixture_out.csv'
+    threading = '!pthreads'
+    requirement = 'The system shall be able to model a multiple gas mixture problem in porous media.'
+    design = 'PorousFlowMultiComponentGasMixture.md'
+    issues = '#26795'
+  []
+  [multicomponent_gas_mixture_fv]
+    type = 'CSVDiff'
+    input = 'multicomponent_gas_mixture_fv.i'
+    csvdiff = 'multicomponent_gas_mixture_out.csv'
+    threading = '!pthreads'
+    requirement = 'The system shall be able to model a multiple gas mixture problem in porous media using finite volumes.'
+    design = 'PorousFlowMultiComponentGasMixture.md'
+    issues = '#26795'
+  []
+  [multicomponent_gas_mixture_MPA]
+    type = 'CSVDiff'
+    input = 'multicomponent_gas_mixture_MPA.i'
+    csvdiff = 'multicomponent_gas_mixture_MPA_out.csv'
+    threading = '!pthreads'
+    requirement = 'The system shall be able to model a multiple gas mixture problem in porous media using different pressure units.'
+    design = 'PorousFlowMultiComponentGasMixture.md'
+    issues = '#26795'
+  []
+  [multicomponent_gas_mixture_3comp]
+    type = 'CSVDiff'
+    input = 'multicomponent_gas_mixture_3comp.i'
+    csvdiff = 'multicomponent_gas_mixture_3comp_out.csv'
+    threading = '!pthreads'
+    requirement = 'The system shall be able to model a multiple gas mixture problem in porous media with more than two components.'
+    design = 'PorousFlowMultiComponentGasMixture.md'
+    issues = '#26795'
+  []
+[]
+
