@@ -13,10 +13,17 @@
     block_id = 1
     combinatorial_geometry = 'y > 1'
   []
+  second_order = true
 []
 
 [Variables]
   [c1]
+  []
+[]
+
+[AuxVariables]
+  [c2]
+    order = second
   []
 []
 
@@ -33,6 +40,14 @@
     value = 0.1
     variable = c1
     block = 1
+  []
+  [c2]
+    type = SolutionIC
+    # aux variables are not stored in solutionUO
+    from_variable = 'c1'
+    solution_uo = 2phase
+    variable = c2
+    block = 0
   []
 []
 

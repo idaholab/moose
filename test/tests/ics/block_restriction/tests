@@ -10,7 +10,7 @@
   [block_ic]
     type = RunApp
     input = 'test.i'
-    cli_args = 'ICs/top_c1/value=3 Mesh/second_order=true'
+    cli_args = 'ICs/top_c1/value=3'
     # this test would error if the SolutionIC is called outside of block 0, due to the extent of start.e
     requirement = 'The system shall be able to block restrict nodal initial conditions.'
     prereq = 'generate_restart'

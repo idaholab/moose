@@ -155,13 +155,15 @@ InitialConditionTempl<T>::compute()
     // not duplicate _dof_indices code badly!
     if (!_current_elem->is_vertex(_n))
     {
+      // Use regular nodal-value setting instead of generic projector then
       if (out_of_block_restriction)
       {
-        if (_cont == C_ZERO)
+        // Check _nc in case we are on a second order mesh but setting a first order variable
+        if (_cont == C_ZERO && _nc > 0)
           setCZeroVertices();
-        else if (_cont == C_ONE)
+        else if (_cont == C_ONE && _nc > 0)
           setOtherCOneVertices();
-        else
+        else if (_nc != 0)
           mooseDoOnce(mooseWarning(
               "Block restriction treatment could miss side or edge degrees of freedom"));
       }
@@ -282,7 +284,8 @@ InitialConditionTempl<T>::setCZeroVertices()
 {
   // Assume that C_ZERO elements have a single nodal
   // value shape function
-  libmesh_assert(_nc == 1);
+  mooseAssert(_nc == 1,
+              "Expecting only one component on vertex and yet we have: " + std::to_string(_nc));
   _qp = _n;
   _current_node = _current_elem->node_ptr(_n);
   _Ue(_current_dof) = value(*_current_node);
