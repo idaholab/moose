@@ -89,11 +89,14 @@ AdjointSolve::solve()
   Moose::PetscSupport::petscSetOptions(petsc_options, pars);
 
   _problem.execute(OptimizationAppTypes::EXEC_ADJOINT_TIMESTEP_BEGIN);
+
   if (!_problem.execMultiApps(OptimizationAppTypes::EXEC_ADJOINT_TIMESTEP_BEGIN))
   {
     _console << "MultiApps failed to converge on ADJOINT_TIMESTEP_BEGIN!" << std::endl;
     return false;
   }
+  // Output results between the forward and adjoint solve.
+  _problem.outputStep(OptimizationAppTypes::EXEC_ADJOINT_TIMESTEP_BEGIN);
 
   checkIntegrity();
 
