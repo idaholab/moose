@@ -155,8 +155,16 @@ InitialConditionTempl<T>::compute()
     // not duplicate _dof_indices code badly!
     if (!_current_elem->is_vertex(_n))
     {
-      if (out_of_block_restriction && _cont == C_ZERO)
-        setCZeroNonVertexExternalNode();
+      if (out_of_block_restriction)
+      {
+        if (_cont == C_ZERO)
+          setCZeroVertices();
+        else if (_cont == C_ONE)
+          setOtherCOneVertices();
+        else
+          mooseDoOnce(mooseWarning(
+              "Block restriction treatment could miss side or edge degrees of freedom"));
+      }
       else
         _current_dof += _nc;
       continue;
@@ -298,13 +306,6 @@ InitialConditionTempl<RealVectorValue>::setCZeroVertices()
 }
 
 template <typename T>
-void
-InitialConditionTempl<T>::setCZeroNonVertexExternalNode()
-{
-  setCZeroVertices();
-}
-
-template <typename T>
 T
 InitialConditionTempl<T>::gradientComponent(GradientType grad, unsigned int i)
 {
@@ -411,6 +412,7 @@ template <>
 void
 InitialConditionTempl<RealVectorValue>::setHermiteVertices()
 {
+  mooseError("Not implemented");
 }
 
 template <typename T>

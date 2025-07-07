@@ -84,12 +84,6 @@ public:
   void setOtherCOneVertices();
 
   /**
-   * set the temporary solution vector for an external (e.g. considered from an element that is
-   * outside the block restriction of this initial condition) non-vertex node of a C0 variable
-   */
-  void setCZeroNonVertexExternalNode();
-
-  /**
    * Helps perform multiplication of GradientTypes: a normal dot product for vectors and a
    * contraction for tensors
    */
