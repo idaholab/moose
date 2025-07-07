@@ -96,4 +96,5 @@ moose-opt -i step12.i
 
 !style halign=center
 !media shield_multiphysics/results/step12.png style=width:80%
+       alt=Temperatures of the solid shielding and fluid, the velocity field for the fluid, and the stress in the solids. The (exaggerated) deformation of the shielding is also illustrated.
 

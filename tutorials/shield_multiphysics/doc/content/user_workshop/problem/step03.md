@@ -34,7 +34,9 @@ We modified the meshing script to generate sidesets for our boundary conditions
 
 !col! width=50%
 
-!media shield_multiphysics/results/step03_mesh.png style=width:100%;margin-left:auto;margin-right:auto;display:block
+!media shield_multiphysics/results/step03_mesh.png
+       style=width:100%;margin-left:auto;margin-right:auto;display:block
+       alt=Color-coded diagram of the named boundaries between the different blocks of the mesh.
 
 !col-end!
 
@@ -76,6 +78,7 @@ We use the 'water_boundary_inwards' surface because the solid block is on its pr
 Summary of the boundary conditions:
 
 !media shield_multiphysics/results/step03_bcs.png
+       alt=Diagram of the domain with the type of each boundary labelled.
 
 !---
 
@@ -100,4 +103,4 @@ moose-opt -i step3.i
 We only show the solid temperature. The water temperature is a constant for now.
 
 !media shield_multiphysics/results/step03.png
-
+       alt=Temperature field for the solid components of the mesh, produced using the simulation above.
