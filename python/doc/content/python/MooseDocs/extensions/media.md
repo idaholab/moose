@@ -23,11 +23,11 @@ The "style" setting may be used, as in the example below, to control the placeme
 image.
 
 !alert note
-In order to make your webpage more accessible you should provide "[alt
-text](https://en.wikipedia.org/wiki/Alt_attribute)" for all images and
-videos. You can do this using the "alt" setting. If that is not set
-then the "caption" text will be used instead. If neither "alt" nor
-"caption" are set then a warning will be issued.
+In order to make your webpage more accessible you should provide
+"[alt text](https://en.wikipedia.org/wiki/Alt_attribute)" for all
+images and videos. You can do this using the "alt" setting. If
+that is not set then the "caption" text will be used instead. If
+neither "alt" nor "caption" are set then a warning will be issued.
 
 !devel! example id=example-media caption=Example of the media command with an image.
 !media large_media/framework/inl_blue.png
