@@ -72,8 +72,9 @@ LayeredBase::validParams()
                         "Minimum coordinate along 'direction' that bounds the layers");
   params.addParam<Real>("direction_max",
                         "Maximum coordinate along 'direction' that bounds the layers");
-  params.addParamNamesToGroup("direction num_layers bounds direction_min direction_max",
-                              "Layers extent and definition bound_uniform_splits");
+  params.addParamNamesToGroup(
+      "direction num_layers bounds direction_min direction_max bound_uniform_splits",
+      "Layers extent and definition");
   params.addParamNamesToGroup("sample_type average_radius cumulative positive_cumulative_direction",
                               "Value sampling / aggregating");
   return params;
@@ -124,14 +125,18 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
     // If requested, we uniformly split the layers.
     if (_layered_base_params.isParamValid("bound_uniform_splits"))
     {
-      std::vector<Real> new_bnds;
-      new_bnds.reserve(2 * (_layer_bounds.size() - 1) + 1);
-      for (unsigned int i = 0; i < _layer_bounds.size() - 1; ++i)
+      const auto splits = _layered_base_params.get<unsigned int>("bound_uniform_splits");
+      for (unsigned int s = 0; s < splits; ++s)
       {
-        new_bnds.emplace_back(_layer_bounds[i]);
-        new_bnds.emplace_back(0.5 * (_layer_bounds[i] + _layer_bounds[i + 1]));
+        std::vector<Real> new_bnds;
+        new_bnds.reserve(2 * (_layer_bounds.size() - 1) + 1);
+        for (unsigned int i = 0; i < _layer_bounds.size() - 1; ++i)
+        {
+          new_bnds.emplace_back(_layer_bounds[i]);
+          new_bnds.emplace_back(0.5 * (_layer_bounds[i] + _layer_bounds[i + 1]));
+        }
+        _layer_bounds = new_bnds;
       }
-      _layer_bounds = new_bnds;
     }
 
     _num_layers = _layer_bounds.size() - 1; // Layers are only in-between the bounds
