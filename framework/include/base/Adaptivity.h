@@ -76,7 +76,7 @@ public:
    * Set the error estimator
    *
    * @param error_estimator_name the name of the error estimator (currently: Laplacian, Kelly, and
-   * PatchRecovery. The local smoothness is also stored as an error estimator)
+   * PatchRecovery)
    */
   void setErrorEstimator(const MooseEnum & error_estimator_name);
 
@@ -267,10 +267,6 @@ protected:
   std::unique_ptr<libMesh::ErrorEstimator> _error_estimator;
   /// Error vector for use with the error estimator.
   std::unique_ptr<libMesh::ErrorVector> _error;
-  /// Smoothness estimator to be used by the apps.
-  std::unique_ptr<libMesh::ErrorEstimator> _smoothness_estimator;
-  /// Error vector for use with the smoothness estimator.
-  std::unique_ptr<libMesh::ErrorVector> _smoothness;
 
   std::shared_ptr<DisplacedProblem> _displaced_problem;
 

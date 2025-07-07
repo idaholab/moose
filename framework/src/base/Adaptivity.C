@@ -22,7 +22,6 @@
 #include "libmesh/kelly_error_estimator.h"
 #include "libmesh/patch_recovery_error_estimator.h"
 #include "libmesh/fourth_error_estimators.h"
-#include "libmesh/smoothness_estimator.h"
 #include "libmesh/parallel.h"
 #include "libmesh/error_vector.h"
 #include "libmesh/distributed_mesh.h"
@@ -70,7 +69,6 @@ Adaptivity::init(const unsigned int steps,
 
   _mesh_refinement = std::make_unique<MeshRefinement>(_mesh);
   _error = std::make_unique<ErrorVector>();
-  _smoothness = std::make_unique<ErrorVector>();
 
   EquationSystems & es = _fe_problem.es();
   es.parameters.set<bool>("adaptivity") = true;
@@ -123,10 +121,6 @@ Adaptivity::setErrorEstimator(const MooseEnum & error_estimator_name)
   else
     mooseError(std::string("Unknown error_estimator selection: ") +
                std::string(error_estimator_name));
-
-  // To store smoothness quantity of each element for hp adaptivity
-  if (_hp_refinement_flag)
-    _smoothness_estimator = std::make_unique<SmoothnessEstimator>();
 }
 
 void
@@ -134,8 +128,6 @@ Adaptivity::setErrorNorm(SystemNorm & sys_norm)
 {
   mooseAssert(_error_estimator, "error_estimator not initialized. Did you call init_adaptivity()?");
   _error_estimator->error_norm = sys_norm;
-  if (_hp_refinement_flag)
-    _smoothness_estimator->error_norm = sys_norm;
 }
 
 bool
@@ -221,10 +213,9 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     _mesh_refinement->flag_elements_by_error_fraction(*_error);
 
     // Moving some of h flagged elements to p flagged
-    HPCoarsenTest hpselector;
     if (_hp_refinement_flag){
-      _smoothness_estimator->estimate_error(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(), *_smoothness);
-      hpselector.select_refinement(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(), *_smoothness);
+      HPCoarsenTest hpselector;
+      hpselector.select_refinement(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system());
     }
 
     if (_displaced_problem){
