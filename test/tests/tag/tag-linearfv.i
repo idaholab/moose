@@ -196,7 +196,7 @@
 
 [Executioner]
   type = Steady
-  solve_type = 'NEWTON'
+  solve_type = 'LINEAR'
   system_names = 'u_sys v_sys'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
