@@ -50,10 +50,10 @@ protected:
   /**
    * @brief Get map of all names to universes in universe list
    *
-   * @return std::map<std::string, std::shared_ptr<CSGUniverse>>& map of all names to
+   * @return std::map<std::string, std::unique_ptr<CSGUniverse>>& map of all names to
    * universes
    */
-  std::map<std::string, std::shared_ptr<CSGUniverse>> & getUniverseListMap() { return _universes; }
+  std::map<std::string, std::unique_ptr<CSGUniverse>> & getUniverseListMap() { return _universes; }
 
   /**
    * @brief Get the all universes in CSGBase instance
@@ -78,11 +78,12 @@ protected:
   CSGUniverse & getRoot() { return *_root_universe; };
 
   /**
-   * @brief add an existing universe to list
+   * @brief add an existing universe to list. Ownership of universe will be transferred to universe
+   * list object that calls this function
    *
-   * @param universe shared_ptr to universe to add
+   * @param universe unique_ptr to universe to add
    */
-  void addUniverse(std::shared_ptr<CSGUniverse> & universe);
+  void addUniverse(std::unique_ptr<CSGUniverse> & universe);
 
   /**
    * @brief rename the specified universe
@@ -96,10 +97,10 @@ protected:
   void checkUniverseName(const std::string name) const;
 
   /// Mapping of universe names to pointers of stored universe objects
-  std::map<std::string, std::shared_ptr<CSGUniverse>> _universes;
+  std::map<std::string, std::unique_ptr<CSGUniverse>> _universes;
 
   /// root universe for the CSGBase instance
-  std::shared_ptr<CSGUniverse> _root_universe;
+  CSGUniverse * _root_universe;
 
   // Only CSGBase should be calling the methods in CSGUniverseList
   friend class CSGBase;
