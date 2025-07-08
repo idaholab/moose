@@ -24,14 +24,12 @@ public:
 
   MFEMDomainLFKernel(const InputParameters & parameters);
 
-  virtual std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *> createLFIntegrator() override;
+  virtual std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
+  createLFIntegrator() override;
 
 protected:
   mfem::Coefficient & _coef;
-
-  const std::string & _coef_imag_name;
   mfem::Coefficient & _coef_imag;
-
 };
 
 #endif
