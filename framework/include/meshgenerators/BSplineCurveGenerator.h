@@ -18,10 +18,11 @@ public:
 
   BSplineCurveGenerator(const InputParameters & parameters);
 
-  std::unique_ptr<MeshBase>
-  generate() override; // I copied this from GMG... not sure how to use it...
+  std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// degree of interpolating spline
+  const unsigned int _degree;
   /// starting point of curve
   const libMesh::Point _start_point;
   /// endung point of curve
@@ -45,5 +46,5 @@ protected:
    * [0,1]
    * @return the point coordinates
    */
-  libMesh::Point pointCalculator(const Real t);
+  // libMesh::Point pointCalculator(const Real t);
 };
