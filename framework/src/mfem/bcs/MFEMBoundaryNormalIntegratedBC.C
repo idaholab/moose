@@ -34,10 +34,9 @@ MFEMBoundaryNormalIntegratedBC::validParams()
 MFEMBoundaryNormalIntegratedBC::MFEMBoundaryNormalIntegratedBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
     _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient"))),
-    _vec_coef_imag_name(isParamValid("vector_coefficient_imag")
+    _vec_coef_imag(getVectorCoefficient(isParamValid("vector_coefficient_imag")
                             ? getParam<MFEMVectorCoefficientName>("vector_coefficient_imag")
-                            : getParam<MFEMVectorCoefficientName>("vector_coefficient")),
-    _vec_coef_imag(getVectorCoefficient(_vec_coef_imag_name))
+                            : getParam<MFEMVectorCoefficientName>("vector_coefficient")))
 {
 }
 
