@@ -17,11 +17,11 @@ KOKKOS_CUDA_ARCH_89 := Ada89
 KOKKOS_CUDA_ARCH_90 := Hopper90
 
 CUDA_COMPILER ?= nvcc
-HIP_COMPILER ?= hipcc
+HIP_COMPILER  ?= hipcc
 SYCL_COMPILER ?= dpcpp
 
 CUDA_EXISTS := $(shell which ${CUDA_COMPILER} 2>/dev/null)
-HIP_EXISTS := $(shell which ${HIP_COMPILER} 2>/dev/null)
+HIP_EXISTS  := $(shell which ${HIP_COMPILER} 2>/dev/null)
 SYCL_EXISTS := $(shell which ${SYCL_COMPILER} 2>/dev/null)
 
 PETSC_CONF := $(shell \
@@ -34,109 +34,58 @@ PETSC_CONF := $(shell \
 )
 
 PETSC_HAVE_KOKKOS := $(shell sed -n 's/\#define PETSC_HAVE_KOKKOS //p' $(PETSC_CONF))
-PETSC_HAVE_CUDA := $(shell sed -n 's/\#define PETSC_HAVE_CUDA //p' $(PETSC_CONF))
+PETSC_HAVE_CUDA   := $(shell sed -n 's/\#define PETSC_HAVE_CUDA //p' $(PETSC_CONF))
 
 ifeq ($(PETSC_HAVE_KOKKOS),1)
-  ifeq ($(MAKECMDGOALS),clean)
-    KOKKOS_DIR_WARNING := silent
-  else ifeq ($(MAKECMDGOALS),cleanall)
-    KOKKOS_DIR_WARNING := silent
-  else ifeq ($(MAKECMDGOALS),clobber)
-    KOKKOS_DIR_WARNING := silent
-  else ifeq ($(MAKECMDGOALS),clobberall)
-    KOKKOS_DIR_WARNING := silent
-  endif
-  ifneq ($(KOKKOS_DIR_WARNING),silent)
-    $(warning Kokkos was found in PETSc. Kokkos directory ($(KOKKOS_DIR)) will be ignored.)
-  endif
-  KOKKOS_DIR :=
   ifeq ($(PETSC_HAVE_CUDA),1)
     PETSC_HAVE_CUDA_MIN_ARCH := $(shell sed -n 's/\#define PETSC_HAVE_CUDA_MIN_ARCH //p' $(PETSC_CONF))
     PETSC_PKG_CUDA_MIN_ARCH := $(shell sed -n 's/\#define PETSC_PKG_CUDA_MIN_ARCH //p' $(PETSC_CONF))
     ifneq ($(PETSC_HAVE_CUDA_MIN_ARCH),)
-      ifneq ($(CUDA_ARCH),)
-        $(warning Provided CUDA_ARCH ($(CUDA_ARCH)) will be ignored and PETSC_HAVE_CUDA_MIN_ARCH ($(PETSC_HAVE_CUDA_MIN_ARCH)) will be used.)
-      endif
       CUDA_ARCH := $(PETSC_HAVE_CUDA_MIN_ARCH)
     endif
     ifneq ($(PETSC_PKG_CUDA_MIN_ARCH),)
-      ifneq ($(CUDA_ARCH),)
-        $(warning Provided CUDA_ARCH ($(CUDA_ARCH)) will be ignored and PETSC_PKG_CUDA_MIN_ARCH ($(PETSC_PKG_CUDA_MIN_ARCH)) will be used.)
-      endif
       CUDA_ARCH := $(PETSC_PKG_CUDA_MIN_ARCH)
     endif
   endif
 else
-  ifeq ($(wildcard $(KOKKOS_DIR)/Makefile.kokkos),)
-    $(error Kokkos was not found in PETSc nor in $(KOKKOS_DIR). Configure PETSc with Kokkos or double-check the Kokkos directory)
-  endif
+  $(error PETSc was not configured with Kokkos support)
 endif
 
 CXXFLAGS += -DMOOSE_HAVE_KOKKOS
 
-KOKKOS_CPPFLAGS = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS)
-KOKKOS_LIBS = $(libmesh_LIBS)
-
 ifneq ($(CUDA_EXISTS),)
-  ifeq ($(CUDA_ARCH),)
-    CUDA_ARCH := $(shell nvidia-smi -i 0 --query-gpu=compute_cap --format=csv | tr -cd '0-9')
-    ifeq ($(KOKKOS_CUDA_ARCH_$(CUDA_ARCH)),)
-      $(error CUDA_ARCH cannot be determined automatically and should be set manually)
-    endif
-  endif
-  KOKKOS_CXX := nvcc
-  KOKKOS_DEVICES := Cuda
-  KOKKOS_CXXFLAGS = --forward-unknown-to-host-compiler --disable-warnings -x cu -ccbin $(word 1, $(libmesh_CXX))
+  KOKKOS_DEVICE   := CUDA
+  KOKKOS_CXX      := nvcc
+  KOKKOS_ARCH     := $(KOKKOS_CUDA_ARCH_$(CUDA_ARCH))
+  KOKKOS_CXXFLAGS  = --forward-unknown-to-host-compiler --disable-warnings -x cu -ccbin $(word 1, $(libmesh_CXX))
   KOKKOS_CXXFLAGS += $(filter-out -Werror=return-type -Werror=reorder,$(libmesh_CXXFLAGS)) # Incompatible with NVCC
-  KOKKOS_LDFLAGS = --forward-unknown-to-host-compiler
-  KOKKOS_ARCH_STRING := $(KOKKOS_CUDA_ARCH_$(CUDA_ARCH))
-  ifeq ($(KOKKOS_ARCH_STRING),)
-    $(error Unsupported CUDA_ARCH ($(CUDA_ARCH)) for Kokkos)
-  endif
-  ifeq ($(KOKKOS_DIR),)
-    KOKKOS_CXXFLAGS += -arch=sm_$(CUDA_ARCH)
-  else
-    KOKKOS_ARCH := $(KOKKOS_ARCH_STRING)
-  endif
+  KOKKOS_LDFLAGS   = --forward-unknown-to-host-compiler
+  KOKKOS_CXXFLAGS += -arch=sm_$(CUDA_ARCH)
 else ifneq ($(HIP_EXISTS),) # To be determined for HIP
   ifeq ($(shell hipconfig --platform), nvidia)
     $(error For NVIDIA GPUs, use CUDA instead of HIP for Kokkos)
   endif
-  KOKKOS_CXX := hipcc
-  KOKKOS_DEVICES := HIP
+  KOKKOS_DEVICE   := HIP
+  KOKKOS_CXX      := hipcc
 else ifneq ($(SYCL_EXISTS),) # To be determined for SYCL
-  KOKKOS_CXX := dpcpp
-  KOKKOS_DEVICES := SYCL
+  KOKKOS_DEVICE   := SYCL
+  KOKKOS_CXX      := dpcpp
 else
   $(error No suitable GPU SDK was found for Kokkos)
 endif
 
-ifneq ($(KOKKOS_DIR),)
-  CXX := $(KOKKOS_CXX)
-endif
-
-ifeq ($(METHOD),dbg)
-  KOKKOS_DEBUG := yes
-else ifeq ($(METHOD),devel)
-  KOKKOS_DEBUG := yes
-else ifeq ($(METHOD),opt)
-  KOKKOS_DEBUG := no
+ifeq ($(METHOD),opt)
   KOKKOS_CXXFLAGS += -DNDEBUG
 endif
 
 KOKKOS_CXXFLAGS += $(CXXFLAGS) -fPIC -DMOOSE_KOKKOS_SCOPE
-KOKKOS_LDFLAGS += $(libmesh_LDFLAGS)
-
-ifneq ($(KOKKOS_DIR),)
-  include $(KOKKOS_DIR)/Makefile.kokkos
-endif
+KOKKOS_LDFLAGS  += $(libmesh_LDFLAGS)
+KOKKOS_CPPFLAGS  = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS)
+KOKKOS_INCLUDE   = $(libmesh_INCLUDE)
+KOKKOS_LIBS      = $(libmesh_LIBS)
 
 KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).o
 
 %.$(KOKKOS_OBJ_SUFFIX) : %.K $(KOKKOS_CPP_DEPENDS)
-	@echo "Compiling Kokkos C++ (in "$(METHOD)" mode, $(KOKKOS_DEVICES), $(KOKKOS_ARCH_STRING)) "$<"..."
-	@$(KOKKOS_CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
-
-ifneq ($(KOKKOS_DIR),)
-  KOKKOS_CLEAN := kokkos-clean
-endif
+	@echo "Compiling Kokkos C++ (in "$(METHOD)" mode, $(KOKKOS_DEVICE), $(KOKKOS_ARCH)) "$<"..."
+	@$(KOKKOS_CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) -MMD -MP -MF $@.d -MT $@ -c $< -o $@

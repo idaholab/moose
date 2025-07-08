@@ -620,7 +620,6 @@ mfem_library
 mfem_support
 libtorch_library
 libtorch_support
-kokkos_library
 kokkos_support
 target_alias
 host_alias
@@ -1298,8 +1297,7 @@ Optional Packages:
                           or mfem directory]
   --with-neml2[=ARG]      Specify if neml2 support should be enabled [ARG=yes
                           or neml2 directory]
-  --with-kokkos[=ARG]     Specify if Kokkos support should be enabled [ARG=yes
-                          or Kokkos directory]
+  --with-kokkos[=ARG]     Specify if Kokkos support should be enabled [ARG=yes]
 
 Report bugs to <https://github.com/idaholab/moose/discussions>.
 moose home page: <https://mooseframework.inl.gov>.
@@ -1935,7 +1933,7 @@ fi
 # Check whether --with-kokkos was given.
 if test ${with_kokkos+y}
 then :
-  withval=$with_kokkos; kokkos_support=yes kokkos_library="$withval"
+  withval=$with_kokkos; kokkos_support=yes
 else $as_nop
   kokkos_support=no
 fi
@@ -1951,24 +1949,6 @@ then :
 printf "%s\n" "#define HAVE_KOKKOS 1" >>confdefs.h
 
         kokkos_support=true
-
-        if test "$kokkos_library" = yes
-then :
-
-                    if test "${KOKKOS_DIR+set}" = set
-then :
-  kokkos_library="${KOKKOS_DIR}"
-else $as_nop
-  kokkos_library="$ac_pwd/framework/contrib/kokkos"
-fi
-
-fi
-
-printf "%s\n" "#define KOKKOS_DIR $kokkos_library" >>confdefs.h
-
-
-        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Kokkos library path: $kokkos_library" >&5
-printf "%s\n" "Kokkos library path: $kokkos_library" >&6; }
 
 fi
 
