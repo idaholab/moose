@@ -28,7 +28,7 @@ class MooseTest(MooseSlave):
         self.register_variable(String("BC_info", causality=Fmi2Causality.input, variability=Fmi2Variability.discrete))
         self.register_variable(Real("BC_value", causality=Fmi2Causality.input, variability=Fmi2Variability.continuous))
         # Default experiment configuration
-        self.default_experiment = DefaultExperiment(start_time=0.0, stop_time=3.0, step_size=0.1)
+        self.default_experiment = DefaultExperiment(start_time=0.0, stop_time=3.0, step_size=0.5)
 
     def do_step(self,
                 current_time: float,
