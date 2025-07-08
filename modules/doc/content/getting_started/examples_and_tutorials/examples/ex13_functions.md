@@ -1,6 +1,6 @@
 # Example 13 : Custom Functions
 
-[](---)
+
 
 ## Complete Source Files
 
