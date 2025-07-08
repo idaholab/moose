@@ -81,7 +81,7 @@ TimeKernel<Derived>::computeResidualInternal(const Derived * kernel,
 {
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    datum.reinit(qp);
+    datum.reinit();
 
     for (unsigned int i = 0; i < datum.n_dofs(); ++i)
       local_re[i] += datum.JxW(qp) * kernel->computeQpResidual(i, qp, datum);
