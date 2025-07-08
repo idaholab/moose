@@ -24,21 +24,28 @@ MFEMVectorFEWeakDivergenceKernel::validParams()
       "arising from the weak form of the divergence operator "
       "$\\vec \\nabla \\cdot (k\\vec u)$.");
   params.addParam<MFEMScalarCoefficientName>("coefficient", "1.", "Name of property k to use.");
+  params.addParam<MFEMScalarCoefficientName>("coefficient_imag",
+                                             "Name of the imaginary part of the property k to use.");
   return params;
 }
 
 MFEMVectorFEWeakDivergenceKernel::MFEMVectorFEWeakDivergenceKernel(
     const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+  : MFEMKernel(parameters),
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+    _coef_imag_name(isParamValid("coefficient_imag") ? getParam<MFEMScalarCoefficientName>("coefficient_imag")
+                                                      : getParam<MFEMScalarCoefficientName>("coefficient")),
+    _coef_imag(getScalarCoefficient(_coef_imag_name))
 {
 }
 
 std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMVectorFEWeakDivergenceKernel::createBFIntegrator()
 {
-  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
-  return std::make_pair(new mfem::VectorFEWeakDivergenceIntegrator(_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
-                                                                                                  : new mfem::VectorFEWeakDivergenceIntegrator(_coef));
+  return std::make_pair(
+      new mfem::VectorFEWeakDivergenceIntegrator(_coef),
+      isParamValid("coefficient_imag") ? new mfem::VectorFEWeakDivergenceIntegrator(_coef_imag)
+                                        : nullptr);
 }
 
 #endif
