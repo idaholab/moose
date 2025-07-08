@@ -16,7 +16,13 @@ if __name__ == "__main__":
         "MooseTest.fmu",
         start_time=t0,
         stop_time=t1,
-        start_values = { "flag": "TIMESTEP_END",  'max_retries':      10 },
+        start_values={
+        'flag':             'TIMESTEP_END',
+        'moose_executable': '../../../moose_test-opt',
+        'moose_inputfile':  'fmu_diffusion.i',
+        'server_name':      'web_server',
+        'max_retries':      10
+    },
         input = input_data,
         output      = ['time','moose_time', 'diffused']
     )
@@ -29,5 +35,4 @@ if __name__ == "__main__":
     for ti, di, diff in zip(time, dt, diff_u):
         print(f"fmu_time={ti:.1f} → moose_time={di:.5f} → diffused={diff:.5f} ")
 
-    # for rt in recorded_t:
-    #     print(f"recorded_time={rt:.1f}")
+
