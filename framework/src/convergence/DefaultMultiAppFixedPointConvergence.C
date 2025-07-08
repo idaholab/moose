@@ -100,7 +100,8 @@ DefaultMultiAppFixedPointConvergence::preExecute()
 {
   DefaultConvergenceBase::preExecute();
 
-  // compute TIMESTEP_BEGIN residual norm
+  // compute TIMESTEP_BEGIN residual norm; this should be executed after TIMESTEP_BEGIN
+  // but before the solve
   if (_has_fixed_point_norm &&
       (_fe_problem.hasMultiApps(EXEC_TIMESTEP_BEGIN) || _fixed_point_force_norms))
   {
@@ -122,7 +123,8 @@ DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
   if (_fixed_point_custom_pp)
     computeCustomConvergencePostprocessor(iter);
 
-  // compute TIMESTEP_END residual norm
+  // compute TIMESTEP_END residual norm; this should be executed between TIMESTEP_END
+  // and TIMESTEP_BEGIN
   if (_has_fixed_point_norm)
     if (_fe_problem.hasMultiApps(EXEC_TIMESTEP_END) || _fixed_point_force_norms)
     {
