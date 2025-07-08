@@ -28,9 +28,17 @@ public:
   virtual ~MFEMKernel() = default;
 
   // Create a new MFEM integrator to apply to the weak form. Ownership managed by the caller.
-  // The first element of the pair corresponds to the real part of the integrator. The second element corresponds to the imaginary part.
-  virtual std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *> createLFIntegrator() { return std::make_pair(nullptr, nullptr); }
-  virtual std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *> createBFIntegrator() { return std::make_pair(nullptr, nullptr); }
+  // The first element of the pair corresponds to the real part of the integrator. The second
+  // element corresponds to the imaginary part.
+  virtual std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *> createLFIntegrator()
+  {
+    return std::make_pair(nullptr, nullptr);
+  }
+  virtual std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
+  createBFIntegrator()
+  {
+    return std::make_pair(nullptr, nullptr);
+  }
 
   /// Get name of the test variable labelling the weak form this kernel is added to
   const VariableName & getTestVariableName() const { return _test_var_name; }

@@ -24,8 +24,8 @@ MFEMVectorFEWeakDivergenceKernel::validParams()
       "arising from the weak form of the divergence operator "
       "$\\vec \\nabla \\cdot (k\\vec u)$.");
   params.addParam<MFEMScalarCoefficientName>("coefficient", "1.", "Name of property k to use.");
-  params.addParam<MFEMScalarCoefficientName>("coefficient_imag",
-                                             "Name of the imaginary part of the property k to use.");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient_imag", "Name of the imaginary part of the property k to use.");
   return params;
 }
 
@@ -33,19 +33,21 @@ MFEMVectorFEWeakDivergenceKernel::MFEMVectorFEWeakDivergenceKernel(
     const InputParameters & parameters)
   : MFEMKernel(parameters),
     _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient"))),
-    _coef_imag_name(isParamValid("coefficient_imag") ? getParam<MFEMScalarCoefficientName>("coefficient_imag")
-                                                      : getParam<MFEMScalarCoefficientName>("coefficient")),
-    _coef_imag(getScalarCoefficient(_coef_imag_name))
+    // If the imaginary coefficient is not provided, we pick the real one since the variable needs
+    // to be initialized, but it won't be used
+    _coef_imag(getScalarCoefficient(isParamValid("coefficient_imag")
+                                        ? getParam<MFEMScalarCoefficientName>("coefficient_imag")
+                                        : getParam<MFEMScalarCoefficientName>("coefficient")))
 {
 }
 
 std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMVectorFEWeakDivergenceKernel::createBFIntegrator()
 {
-  return std::make_pair(
-      new mfem::VectorFEWeakDivergenceIntegrator(_coef),
-      isParamValid("coefficient_imag") ? new mfem::VectorFEWeakDivergenceIntegrator(_coef_imag)
-                                        : nullptr);
+  return std::make_pair(new mfem::VectorFEWeakDivergenceIntegrator(_coef),
+                        isParamValid("coefficient_imag")
+                            ? new mfem::VectorFEWeakDivergenceIntegrator(_coef_imag)
+                            : nullptr);
 }
 
 #endif
