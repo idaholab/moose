@@ -25,7 +25,7 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
   _block_true_offsets[0] = 0;
   for (unsigned int ind = 0; ind < _cpx_trial_variables.size(); ++ind)
   {
-    _block_true_offsets[ind + 1] = 2*_cpx_trial_variables.at(ind)->ParFESpace()->TrueVSize();
+    _block_true_offsets[ind + 1] = 2 * _cpx_trial_variables.at(ind)->ParFESpace()->TrueVSize();
   }
   _block_true_offsets.PartialSum();
 
@@ -33,7 +33,6 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
   _true_rhs.Update(_block_true_offsets);
 
   width = height = _block_true_offsets[_cpx_trial_variables.size()];
-
 }
 
 void
@@ -56,11 +55,11 @@ ComplexEquationSystemProblemOperator::Solve(mfem::Vector &)
   _problem.nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem.nonlinear_solver->Mult(_true_rhs, _true_x);
 
-  if (auto cpx_eq_sys = std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(_equation_system))
+  if (auto cpx_eq_sys =
+          std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(_equation_system))
   {
     cpx_eq_sys->RecoverFEMSolution(_true_x, _problem.complex_gridfunctions);
   }
-  
 }
 
 } // namespace Moose::MFEM

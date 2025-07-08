@@ -17,7 +17,6 @@ class ComplexEquationSystem : public Moose::MFEM::EquationSystem
 {
 
 public:
-
   ComplexEquationSystem() = default;
   ~ComplexEquationSystem() = default;
 
@@ -34,45 +33,42 @@ public:
   void RecoverFEMSolution(mfem::BlockVector & trueX,
                           Moose::MFEM::ComplexGridFunctions & gridfunctions);
 
-  virtual void
-  FormSystem(mfem::OperatorHandle & op, mfem::BlockVector & trueX, mfem::BlockVector & trueRHS) override;
+  virtual void FormSystem(mfem::OperatorHandle & op,
+                          mfem::BlockVector & trueX,
+                          mfem::BlockVector & trueRHS) override;
   virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS) override;
 
-template <class FormType>
-void
-ApplyDomainBLFIntegrators(
-    const std::string & trial_var_name,
-    const std::string & test_var_name,
-    std::shared_ptr<FormType> form,
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
+  template <class FormType>
+  void ApplyDomainBLFIntegrators(
+      const std::string & trial_var_name,
+      const std::string & test_var_name,
+      std::shared_ptr<FormType> form,
+      Moose::MFEM::NamedFieldsMap<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
 
-inline void
-ApplyDomainLFIntegrators(
-    const std::string & test_var_name,
-    std::shared_ptr<mfem::ParComplexLinearForm> form,
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
+  inline void ApplyDomainLFIntegrators(
+      const std::string & test_var_name,
+      std::shared_ptr<mfem::ParComplexLinearForm> form,
+      Moose::MFEM::NamedFieldsMap<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
 
-template <class FormType>
-void
-ApplyBoundaryBLFIntegrators(
-    const std::string & trial_var_name,
-    const std::string & test_var_name,
-    std::shared_ptr<FormType> form,
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-        integrated_bc_map);
+  template <class FormType>
+  void ApplyBoundaryBLFIntegrators(
+      const std::string & trial_var_name,
+      const std::string & test_var_name,
+      std::shared_ptr<FormType> form,
+      Moose::MFEM::NamedFieldsMap<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+          integrated_bc_map);
 
-inline void
-ApplyBoundaryLFIntegrators(
-    const std::string & test_var_name,
-    std::shared_ptr<mfem::ParComplexLinearForm> form,
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-        integrated_bc_map);
+  inline void ApplyBoundaryLFIntegrators(
+      const std::string & test_var_name,
+      std::shared_ptr<mfem::ParComplexLinearForm> form,
+      Moose::MFEM::NamedFieldsMap<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+          integrated_bc_map);
 
   // Complex Linear and Bilinear Forms
   Moose::MFEM::NamedFieldsMap<mfem::ParSesquilinearForm> _slfs;
@@ -84,7 +80,6 @@ ApplyBoundaryLFIntegrators(
 
   // Complex gridfunctions for the problem
   Moose::MFEM::ComplexGridFunctions _cpx_trial_variables;
-
 };
 
 template <class FormType>
@@ -101,11 +96,13 @@ ComplexEquationSystem::ApplyDomainBLFIntegrators(
     auto kernels = kernels_map.GetRef(test_var_name).GetRef(trial_var_name);
     for (auto & kernel : kernels)
     {
-      std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *> integ = kernel->createBFIntegrator();
+      std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *> integ =
+          kernel->createBFIntegrator();
       if (integ.first != nullptr && integ.second != nullptr)
       {
         kernel->isSubdomainRestricted()
-            ? form->AddDomainIntegrator(std::move(integ.first), std::move(integ.second), kernel->getSubdomainMarkers())
+            ? form->AddDomainIntegrator(
+                  std::move(integ.first), std::move(integ.second), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ.first), std::move(integ.second));
       }
     }
@@ -124,11 +121,13 @@ ComplexEquationSystem::ApplyDomainLFIntegrators(
     auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
     for (auto & kernel : kernels)
     {
-      std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *> integ = kernel->createLFIntegrator();
+      std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *> integ =
+          kernel->createLFIntegrator();
       if (integ.first != nullptr && integ.second != nullptr)
       {
         kernel->isSubdomainRestricted()
-            ? form->AddDomainIntegrator(std::move(integ.first), std::move(integ.second), kernel->getSubdomainMarkers())
+            ? form->AddDomainIntegrator(
+                  std::move(integ.first), std::move(integ.second), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ.first), std::move(integ.second));
       }
     }
@@ -151,11 +150,13 @@ ComplexEquationSystem::ApplyBoundaryBLFIntegrators(
     auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(trial_var_name);
     for (auto & bc : bcs)
     {
-      std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *> integ = bc->createBFIntegrator();
+      std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *> integ =
+          bc->createBFIntegrator();
       if (integ.first != nullptr && integ.second != nullptr)
       {
         bc->isBoundaryRestricted()
-            ? form->AddBoundaryIntegrator(std::move(integ.first), std::move(integ.second), bc->getBoundaryMarkers())
+            ? form->AddBoundaryIntegrator(
+                  std::move(integ.first), std::move(integ.second), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ.first), std::move(integ.second));
       }
     }
@@ -175,11 +176,13 @@ ComplexEquationSystem::ApplyBoundaryLFIntegrators(
     auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
     for (auto & bc : bcs)
     {
-      std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *> integ = bc->createLFIntegrator();
+      std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *> integ =
+          bc->createLFIntegrator();
       if (integ.first != nullptr && integ.second != nullptr)
       {
         bc->isBoundaryRestricted()
-            ? form->AddBoundaryIntegrator(std::move(integ.first), std::move(integ.second), bc->getBoundaryMarkers())
+            ? form->AddBoundaryIntegrator(
+                  std::move(integ.first), std::move(integ.second), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ.first), std::move(integ.second));
       }
     }
