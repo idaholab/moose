@@ -628,12 +628,12 @@ LinearAssemblySegregatedSolve::solve()
       // tolerances will be overridden within the solver.
       Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params);
       for (const auto i : index_range(_active_scalar_system_names))
-        ns_residuals[momentum_residual.size() + _has_energy_system + _has_solid_energy_system + i] =
-            solveAdvectedSystem(_active_scalar_system_numbers[i],
-                                *_active_scalar_systems[i],
-                                _active_scalar_equation_relaxation[i],
-                                _active_scalar_linear_control,
-                                _active_scalar_l_abs_tol);
+        ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
+                     i] = solveAdvectedSystem(_active_scalar_system_numbers[i],
+                                              *_active_scalar_systems[i],
+                                              _active_scalar_equation_relaxation[i],
+                                              _active_scalar_linear_control,
+                                              _active_scalar_l_abs_tol);
     }
 
     // If we have turbulence equations, solve them here.
@@ -645,7 +645,7 @@ LinearAssemblySegregatedSolve::solve()
       Moose::PetscSupport::petscSetOptions(_turbulence_petsc_options, solver_params);
       for (const auto i : index_range(_turbulence_system_names))
       {
-        ns_residuals[momentum_residual.size() + _has_energy_system + _has_solid_energy_system +
+        ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
                      _active_scalar_system_names.size() + i] =
             solveAdvectedSystem(_turbulence_system_numbers[i],
                                 *_turbulence_systems[i],
