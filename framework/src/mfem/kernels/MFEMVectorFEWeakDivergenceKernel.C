@@ -34,7 +34,7 @@ MFEMVectorFEWeakDivergenceKernel::MFEMVectorFEWeakDivergenceKernel(
   : MFEMKernel(parameters),
     _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
     _coef_imag_name(isParamValid("coefficient_imag") ? getParam<MFEMScalarCoefficientName>("coefficient_imag")
-                                                      : getParam<MFEMScalarCoefficientName>("coefficient")),
+                                                      : _coef_name),
     _coef_imag(getScalarCoefficient(_coef_imag_name))
 {
 }

@@ -22,37 +22,34 @@ MFEMBoundaryIntegratedBC::validParams()
                              "arising from the weak form of the forcing term $f$.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "The coefficient which will be used in the integrated BC");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient_imag",
+      "The imaginary part of the coefficient which will be used in the integrated BC. ");
   return params;
 }
 
 MFEMBoundaryIntegratedBC::MFEMBoundaryIntegratedBC(const InputParameters & parameters)
-  : MFEMIntegratedBC(parameters), _coef(getScalarCoefficient("coefficient"))
+  : MFEMIntegratedBC(parameters),
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+    _coef_imag_name(isParamValid("coefficient_imag")
+                        ? getParam<MFEMScalarCoefficientName>("coefficient_imag")
+                        : _coef_name),
+    _coef_imag(getScalarCoefficient(_coef_imag_name))
 {
 }
 
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
-<<<<<<< HEAD:framework/src/mfem/bcs/MFEMBoundaryIntegratedBC.C
-mfem::LinearFormIntegrator *
-MFEMBoundaryIntegratedBC::createLFIntegrator()
-=======
 std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
 MFEMScalarBoundaryIntegratedBC::createLFIntegrator()
->>>>>>> 858d7ab200 (Add complex option to kernels and integrated BCs):framework/src/mfem/bcs/MFEMScalarBoundaryIntegratedBC.C
 {
-  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
-  return std::make_pair(new mfem::BoundaryLFIntegrator(_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
-                                                                                                  : new mfem::BoundaryLFIntegrator(_coef));
+  return std::make_pair(new mfem::BoundaryLFIntegrator(_coef), isParamValid("coefficient_imag") ? new mfem::BoundaryLFIntegrator(_coef_imag)
+                                                                                                  : nullptr);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
-<<<<<<< HEAD:framework/src/mfem/bcs/MFEMBoundaryIntegratedBC.C
-mfem::BilinearFormIntegrator *
-MFEMBoundaryIntegratedBC::createBFIntegrator()
-=======
 std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMScalarBoundaryIntegratedBC::createBFIntegrator()
->>>>>>> 858d7ab200 (Add complex option to kernels and integrated BCs):framework/src/mfem/bcs/MFEMScalarBoundaryIntegratedBC.C
 {
   return std::make_pair(nullptr, nullptr);
 }
