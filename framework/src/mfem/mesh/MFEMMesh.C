@@ -77,7 +77,7 @@ MFEMMesh::buildMesh()
     mfem_ser_mesh.ReorderElements(ordering);
   }
 
-  // mfem_ser_mesh.EnsureNCMesh(getParam<bool>("nc_simplices"));
+  mfem_ser_mesh.EnsureNCMesh(getParam<bool>("nc_simplices"));
 
   // multi app should take the mpi comm from moose so is split correctly??
   auto comm = this->comm().get();
