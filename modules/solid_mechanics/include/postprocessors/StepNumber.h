@@ -27,7 +27,8 @@ public:
   virtual PostprocessorValue getValue() const override;
 
 private:
-  /// The nearest node number UserObject that does all the work
+  /// The StepUserObject that contains step time information
   const StepUserObject & _step_uo;
+  /// Flag for reporting step times beginning at 1 instead of 0
   const bool _use_one_based_indexing;
 };
