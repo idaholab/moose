@@ -23,20 +23,26 @@ MFEMVectorDomainLFKernel::validParams()
                              "arising from the weak form of the forcing term $\\vec f$.");
   params.addParam<MFEMVectorCoefficientName>(
       "vector_coefficient", "1. 1. 1.", "Name of body force density f.");
+  params.addParam<MFEMVectorCoefficientName>("vector_coefficient_imag",
+                                             "Name of imaginary part of body force density $\\vec f$.");
+
   return params;
 }
 
 MFEMVectorDomainLFKernel::MFEMVectorDomainLFKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _vec_coef(getVectorCoefficient("vector_coefficient"))
+  : MFEMKernel(parameters),
+    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
+    // If the imaginary coefficient is not provided, we pick the real one since the variable needs to be initialized, but it won't be used
+    _vec_coef_imag_name(isParamValid("vector_coefficient_imag") ? getParam<MFEMVectorCoefficientName>("vector_coefficient_imag")
+                                                                 : getParam<MFEMVectorCoefficientName>("vector_coefficient")),
+    _vec_coef_imag(getVectorCoefficient(_vec_coef_imag_name))
 {
 }
 
 std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
 MFEMVectorDomainLFKernel::createLFIntegrator()
 {
-  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
-  return std::make_pair(new mfem::VectorDomainLFIntegrator(_vec_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
-                                                                                                  : new mfem::VectorDomainLFIntegrator(_vec_coef));
+  return std::make_pair(new mfem::VectorDomainLFIntegrator(_vec_coef), isParamValid("vector_coefficient_imag") ? new mfem::VectorDomainLFIntegrator(_vec_coef_imag) : nullptr);
 }
 
 #endif

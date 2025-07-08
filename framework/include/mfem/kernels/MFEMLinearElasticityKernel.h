@@ -36,6 +36,12 @@ public:
 protected:
   mfem::Coefficient & _lambda;
   mfem::Coefficient & _mu;
+
+  const MFEMScalarCoefficientName & _lambda_imag_name;
+  const MFEMScalarCoefficientName & _mu_imag_name;
+  mfem::Coefficient & _lambda_imag;
+  mfem::Coefficient & _mu_imag;
+
 };
 
 #endif

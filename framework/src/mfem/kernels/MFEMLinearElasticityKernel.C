@@ -32,21 +32,38 @@ MFEMLinearElasticityKernel::validParams()
       "lambda", "1.", "Name of MFEM Lame constant lambda to multiply the div(u)*I term by");
   params.addParam<MFEMScalarCoefficientName>(
       "mu", "1.", "Name of MFEM Lame constant mu to multiply the gradients term by");
+  params.addParam<MFEMScalarCoefficientName>(
+      "lambda_imag", "Name of the imaginary part of the MFEM Lame constant lambda to multiply the div(u)*I term by");
+  params.addParam<MFEMScalarCoefficientName>(
+      "mu_imag", "Name of the imaginary part of the MFEM Lame constant mu to multiply the gradients term by");
 
   return params;
 }
 
 MFEMLinearElasticityKernel::MFEMLinearElasticityKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _lambda(getScalarCoefficient("lambda")), _mu(getScalarCoefficient("mu"))
+  : MFEMKernel(parameters),
+    _lambda_name(getParam<MFEMScalarCoefficientName>("lambda")),
+    _mu_name(getParam<MFEMScalarCoefficientName>("mu")),
+    _lambda(getScalarCoefficient(_lambda_name)),
+    _mu(getScalarCoefficient(_mu_name)),
+    // If the imaginary coefficient is not provided, we pick the real one since the variable needs to be initialized, but it won't be used
+    _lambda_imag_name(isParamValid("lambda_imag") ? getParam<MFEMScalarCoefficientName>("lambda_imag") : getParam<MFEMScalarCoefficientName>("lambda")),
+    _mu_imag_name(isParamValid("mu_imag") ? getParam<MFEMScalarCoefficientName>("mu_imag") : getParam<MFEMScalarCoefficientName>("mu")),
+    _lambda_imag(getScalarCoefficient(_lambda_imag_name)),
+    _mu_imag(getScalarCoefficient(_mu_imag_name))
 {
+  // Check that both imaginary coefficients are provided if one is provided
+  if (isParamValid("lambda_imag") != isParamValid("mu_imag"))
+  {
+    mooseError("Please provide the real and imaginary parts of both coefficients for the MFEMLinearElasticityKernel.");
+  }
 }
 
 std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMLinearElasticityKernel::createBFIntegrator()
 {
-  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
-  return std::make_pair(new mfem::ElasticityIntegrator(_lambda,_mu), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
-                                                                                                  : new mfem::ElasticityIntegrator(_lambda,_mu));
+  return std::make_pair(new mfem::ElasticityIntegrator(_lambda,_mu), isParamValid("coefficient_imag") ? new mfem::ElasticityIntegrator(_lambda_imag,_mu_imag)
+                                                                                                  : nullptr);
 }
 
 #endif
