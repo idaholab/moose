@@ -214,28 +214,20 @@ template <typename Derived>
 void
 Kernel<Derived>::computeResidual()
 {
-  setVariableDependency();
-
   ::Kokkos::RangePolicy<ResidualLoop, ::Kokkos::IndexType<size_t>> policy(0, numBlockElements());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
   ::Kokkos::fence();
-
-  setCacheFlags();
 }
 
 template <typename Derived>
 void
 Kernel<Derived>::computeJacobian()
 {
-  if (!defaultJacobian() || !defaultOffDiagJacobian())
+  if (!defaultJacobian())
   {
-    setVariableDependency();
-
     ::Kokkos::RangePolicy<JacobianLoop, ::Kokkos::IndexType<size_t>> policy(0, numBlockElements());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
-
-    setCacheFlags();
   }
 
   if (!defaultOffDiagJacobian())
@@ -318,7 +310,7 @@ Kernel<Derived>::computeResidualInternal(const Derived * kernel,
 {
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    datum.reinit(qp);
+    datum.reinit();
 
     for (unsigned int i = 0; i < datum.n_dofs(); ++i)
       local_re[i] += datum.JxW(qp) * kernel->computeQpResidual(i, qp, datum);
@@ -336,7 +328,7 @@ Kernel<Derived>::computeJacobianInternal(const Derived * kernel,
 {
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    datum.reinit(qp);
+    datum.reinit();
 
     for (unsigned int i = 0; i < datum.n_idofs(); ++i)
       for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
@@ -358,7 +350,7 @@ Kernel<Derived>::computeOffDiagJacobianInternal(const Derived * kernel,
 {
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    datum.reinit(qp);
+    datum.reinit();
 
     for (unsigned int i = 0; i < datum.n_idofs(); ++i)
       for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
