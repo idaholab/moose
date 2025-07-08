@@ -34,7 +34,7 @@ CSGCell &
 CSGCellList::addVoidCell(const std::string name, const CSGRegion & region)
 {
   checkCellName(name);
-  _cells.insert(std::make_pair(name, std::make_shared<CSGCell>(name, region)));
+  _cells.insert(std::make_pair(name, std::make_unique<CSGCell>(name, region)));
   return *_cells[name];
 }
 
@@ -44,7 +44,7 @@ CSGCellList::addMaterialCell(const std::string name,
                              const CSGRegion & region)
 {
   checkCellName(name);
-  _cells.insert(std::make_pair(name, std::make_shared<CSGCell>(name, mat_name, region)));
+  _cells.insert(std::make_pair(name, std::make_unique<CSGCell>(name, mat_name, region)));
   return *_cells[name];
 }
 
@@ -52,7 +52,7 @@ CSGCell &
 CSGCellList::addUniverseCell(const std::string name, CSGUniverse & univ, const CSGRegion & region)
 {
   checkCellName(name);
-  _cells.insert(std::make_pair(name, std::make_shared<CSGCell>(name, &univ, region)));
+  _cells.insert(std::make_pair(name, std::make_unique<CSGCell>(name, &univ, region)));
   return *_cells[name];
 }
 
@@ -66,11 +66,11 @@ CSGCellList::getAllCells() const
 }
 
 void
-CSGCellList::addCell(std::shared_ptr<CSGCell> & cell)
+CSGCellList::addCell(std::unique_ptr<CSGCell> & cell)
 {
   auto name = cell->getName();
   checkCellName(name);
-  _cells.insert(std::make_pair(name, cell));
+  _cells.insert(std::make_pair(name, std::move(cell)));
 }
 
 void
@@ -78,7 +78,7 @@ CSGCellList::renameCell(CSGCell & cell, const std::string name)
 {
   // check that this cell passed in is actually in the same cell that is in the cell list
   auto prev_name = cell.getName();
-  auto existing_cell = _cells.find(prev_name)->second;
+  auto existing_cell = std::move(_cells.find(prev_name)->second);
   if (*existing_cell != cell)
     mooseError("Cell " + prev_name + " cannot be renamed to " + name +
                " as it does not exist in this CSGBase instance.");
@@ -86,7 +86,7 @@ CSGCellList::renameCell(CSGCell & cell, const std::string name)
   checkCellName(name);
   existing_cell->setName(name);
   _cells.erase(prev_name);
-  _cells.insert(std::make_pair(name, existing_cell));
+  _cells.insert(std::make_pair(name, std::move(existing_cell)));
 }
 
 } // namespace CSG
