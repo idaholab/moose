@@ -24,20 +24,26 @@ MFEMMassKernel::validParams()
                              "$ku$.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of property for the mass coefficient k.");
+  params.addParam<MFEMScalarCoefficientName>("coefficient_imag",
+                                             "Name of property for the imaginary part of the mass coefficient k.");
+
   return params;
 }
 
 MFEMMassKernel::MFEMMassKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+  : MFEMKernel(parameters),
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+    // If the imaginary coefficient is not provided, we pick the real one since the variable needs to be initialized, but it won't be used
+    _coef_imag_name(isParamValid("coefficient_imag") ? getParam<MFEMScalarCoefficientName>("coefficient_imag") : getParam<MFEMScalarCoefficientName>("coefficient")),
+    _coef_imag(getScalarCoefficient(_coef_imag_name))
 {
 }
 
 std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMMassKernel::createBFIntegrator()
 {
-  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
-  return std::make_pair(new mfem::MassIntegrator(_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
-                                                                                                  : new mfem::MassIntegrator(_coef));
+  return std::make_pair(new mfem::MassIntegrator(_coef), isParamValid("coefficient_imag") ? new mfem::MassIntegrator(_coef_imag)
+                                                                                                  : nullptr);
 }
 
 #endif
