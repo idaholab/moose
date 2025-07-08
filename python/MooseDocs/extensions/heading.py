@@ -9,6 +9,7 @@
 import logging
 import moosetree
 from ..base import Extension
+from ..common import find_heading
 from . import core
 
 LOG = logging.getLogger("MooseDocs.HeadingExtension")
@@ -16,11 +17,6 @@ LOG = logging.getLogger("MooseDocs.HeadingExtension")
 
 def make_extension(**kwargs):
     return HeadingExtension(**kwargs)
-
-
-def find_heading(page, id_=None):
-    """Helper for returning a copy of the heading tokens."""
-    return page.get("title") if id_ is None else page.get("headings", dict()).get(id_)
 
 
 class HeadingExtension(Extension):
