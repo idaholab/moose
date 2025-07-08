@@ -15,8 +15,6 @@ InputParameters
 MFEMIntegratedBC::validParams()
 {
   InputParameters params = MFEMBoundaryCondition::validParams();
-  MooseEnum numeric_types("real complex", "real");
-  params.addParam<MooseEnum>("numeric_type", numeric_types, "Number type used for the problem. Can be real or complex.");
   return params;
 }
 
