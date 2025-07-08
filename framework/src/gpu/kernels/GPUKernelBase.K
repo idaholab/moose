@@ -51,23 +51,5 @@ KernelBase::KernelBase(const KernelBase & object)
 {
 }
 
-void
-KernelBase::setVariableDependency()
-{
-  auto needed_moose_vars = getMooseVariableDependencies();
-
-  for (auto & system : kokkosSystems())
-    system.setActiveVariables(needed_moose_vars);
-
-  kokkosSystems().copy();
-}
-
-void
-KernelBase::setCacheFlags()
-{
-  for (auto & system : kokkosSystems())
-    system.setCacheFlags(blockIDs());
-}
-
 } // namespace Kokkos
 } // namespace Moose

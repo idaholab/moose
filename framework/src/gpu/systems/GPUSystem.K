@@ -44,7 +44,6 @@ System::System(SystemBase & system)
 
   _qp_solutions.create(MAX_TAG);
   _qp_solutions_grad.create(MAX_TAG);
-  _variable_on_qp.create(MAX_TAG);
 }
 
 void
@@ -464,29 +463,7 @@ System::setActiveMatrixTags(std::set<TagID> tags)
 }
 
 void
-System::setCacheFlags(std::set<SubdomainID> subdomains)
-{
-  for (auto tag : _active_variable_tags)
-  {
-    for (auto subdomain : subdomains)
-    {
-      auto sid = kokkosMesh().getSubdomainID(subdomain);
-
-      for (auto var : _active_variables)
-      {
-        if (!_var_subdomain_active(var, sid))
-          continue;
-
-        _variable_on_qp[tag](sid, var) = true;
-      }
-    }
-
-    _variable_on_qp[tag].copy();
-  }
-}
-
-void
-System::preallocate()
+System::reinit()
 {
   for (auto tag : _active_variable_tags)
   {
@@ -495,12 +472,6 @@ System::preallocate()
 
     if (!_qp_solutions_grad[tag].isAlloc())
       _qp_solutions_grad[tag].create(_mesh.meshSubdomains().size(), _num_vars);
-
-    if (!_variable_on_qp[tag].isAlloc())
-    {
-      _variable_on_qp[tag].create(_mesh.meshSubdomains().size(), _num_vars);
-      _variable_on_qp[tag] = false;
-    }
 
     for (auto subdomain : _mesh.meshSubdomains())
     {
@@ -525,7 +496,57 @@ System::preallocate()
 
   _qp_solutions.copy();
   _qp_solutions_grad.copy();
-  _variable_on_qp.copy();
+
+  _thread.resize({kokkosAssembly().getMaxQpsPerElem(),
+                  kokkosMesh().getLocalElementMap().size(),
+                  _active_variables.size(),
+                  _active_variable_tags.size()});
+
+  ::Kokkos::RangePolicy<::Kokkos::IndexType<size_t>> policy(0, _thread.size());
+  ::Kokkos::parallel_for(policy, *this);
+  ::Kokkos::fence();
+}
+
+KOKKOS_FUNCTION void
+System::operator()(const size_t tid) const
+{
+  auto qp = _thread(tid, 0);
+  auto elem = _thread(tid, 1);
+  auto var = _active_variables(_thread(tid, 2));
+  auto tag = _active_variable_tags(_thread(tid, 3));
+
+  auto info = kokkosMesh().getElementInfo(elem);
+  auto sid = info.subdomain;
+  auto elem_type = info.type;
+
+  if (!_var_subdomain_active(var, sid))
+    return;
+
+  auto fe_type = _var_fe_types[var];
+  auto num_dofs = kokkosAssembly().getNumDofs(elem_type, fe_type);
+  auto num_qps = kokkosAssembly().getNumQps(info);
+  auto qp_offset = kokkosAssembly().getQpOffset(info);
+
+  if (qp >= num_qps)
+    return;
+
+  auto & phi = kokkosAssembly().getPhi(sid, elem_type, fe_type);
+  auto & grad_phi = kokkosAssembly().getGradPhi(sid, elem_type, fe_type);
+  auto jacobian = kokkosAssembly().getJacobian(info, qp);
+
+  Real value = 0;
+  Real3 grad = 0;
+
+  for (unsigned int i = 0; i < num_dofs; ++i)
+  {
+    auto vector = getVectorDofValue(getElemLocalDofIndex(elem, i, var), tag);
+
+    value += vector * phi(i, qp);
+    grad += vector * (jacobian * grad_phi(i, qp));
+  }
+
+  getVectorQpValue(info, qp_offset + qp, var, tag) = value;
+  getVectorQpGrad(info, qp_offset + qp, var, tag) = grad;
 }
 
 } // namespace Kokkos
