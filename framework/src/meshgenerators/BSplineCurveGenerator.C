@@ -32,22 +32,22 @@ BSplineCurveGenerator::validParams()
   params.addRequiredParam<libMesh::Point>("end_point", "Ending (x,y,z) point for curve.");
   params.addRequiredParam<libMesh::RealVectorValue>("start_direction",
                                                     "Direction vector of curve at start point.");
-  params.addRequiredParam<libMesh::RealVectorValue>("end_diretion",
+  params.addRequiredParam<libMesh::RealVectorValue>("end_direction",
                                                     "Direction vector of curve at end point.");
-  params.addRequiredRangeCheckedParam<libMesh::Real>(
-      "sharpness", "sharpness>=0 && sharpness<=1", "Sharpness of curve bend.");
-  params.addRequiredRangeCheckedParam<unsigned int>(
+  params.addRangeCheckedParam<libMesh::Real>(
+      "sharpness", 0, "sharpness>=0 & sharpness<=1", "Sharpness of curve bend.");
+  params.addParam<unsigned int>(
       "num_cps",
-      "num_cps>=3",
-      "Number of control points used to draw the curve. Miniumum of 3 points are required.");
-  params.addRequiredParam<MooseEnum>(
+      5,
+      "Number of control points used to draw the curve. Miniumum of degree+1 points are required.");
+  params.addParam<MooseEnum>(
       "edge_element_type", edge_elem_type, "Type of the EDGE elements to be generated.");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "num_elements", "num_elements>=1", "Numer of elements to be drawn. Must be at least 1.");
 
-  params.addClassDescription("This BSplineMeshGenerator object is designed to generate a mesh of
-                             a curve that consists of EDGE2, EDGE3, or EDGE4 elements drawn using 
-                             an open uniform B-Spline.");
+  params.addClassDescription(
+      "This BSplineMeshGenerator object is designed to generate a mesh of a curve that consists of "
+      "EDGE2, EDGE3, or EDGE4 elements drawn using an open uniform B-Spline.");
 
   return params;
 }
@@ -66,28 +66,30 @@ BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
                : (getParam<MooseEnum>("edge_element_type") == "EDGE3" ? 2 : 3)),
     _num_elements(getParam<unsigned int>("num_elements"))
 {
+  if (_num_cps < _degree + 1)
+    paramError("num_cps", "Number of control points must be at least degree+1.");
 }
 
 std::unique_ptr<MeshBase>
 BSplineCurveGenerator::generate()
 {
-  auto mesh = libMesh::buildReplicatedMesh(2);
+  auto mesh = buildReplicatedMesh(2);
 
   // determine number of control points needed
   unsigned int half_cps;
   if (_num_cps % 2 == 0)
   {
     half_cps = _num_cps / 2;
-    _num_cps += 1;
     // add a mooseWarning
-    mooseWarning("Need an odd number of control points. num_cps has been increased by 1.");
+    mooseWarning("Need an odd number of control points. `num_cps` has been increased by 1.");
   }
   else
-    half_cps = (num_cps - 1) / 2;
+    half_cps = (_num_cps - 1) / 2;
 
   // generate points using BSpline functions/class
   std::vector<Point> control_points = SplineUtils::bSplineControlPoints(
       _start_point, _end_point, _start_dir, _end_dir, half_cps, _sharpness);
+  _console << Moose::stringify(control_points);
 
   // initialize BSpline class
   Moose::BSpline b_spline(
@@ -96,15 +98,15 @@ BSplineCurveGenerator::generate()
   // discretize t and evaluate points, assemble into nodes inside loop
   unsigned int n_ts =
       _num_elements * _order + 1; // need to scale the number of elements by the order
-  std::vector<Node *> nodes(n_ts) // store evaluated nodes
-      libMesh::Real t_current;    // store current t (parameter) value
+  std::vector<Node *> nodes(n_ts); // store evaluated nodes
+  libMesh::Real t_current;         // store current t (parameter) value
   std::vector<Point> eval_points; // store evaluated spline points
   for (const auto i : make_range(n_ts))
   {
     t_current = ((double)i / (double)(n_ts - 1)); // n_ts-1 because max(t_current) must be 1.0
     eval_points.push_back(
         b_spline.getPoint(t_current)); // calls BSpline public method to evaluate point
-    nodes[i] = eval_points.end();      // get the most recent evaluation
+    nodes[i] = mesh->add_point(eval_points.back(), i); // get the most recent evaluation
   }
 
   // create elements from points
@@ -125,9 +127,8 @@ BSplineCurveGenerator::generate()
     new_elem->set_node(0, nodes[i * _order]);
     new_elem->set_node(1, nodes[((i + 1) * _order) % nodes.size()]);
 
-    new_elem->subdomain_id() = 1;
+    new_elem->subdomain_id() = 1; //
     mesh->add_elem(std::move(new_elem));
-
-    return dynamic_pointer_cast<MeshBase>(mesh);
   }
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }

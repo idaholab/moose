@@ -38,7 +38,7 @@ protected:
   /// order of the EDGE elements to be generated
   const unsigned int _order;
   /// number of elements to be drawn
-  const unsigned int _num_elements
+  const unsigned int _num_elements;
 
   /**
    * Calculates the point coordinates {x(t), y(t), z(t)} based on parameter t
