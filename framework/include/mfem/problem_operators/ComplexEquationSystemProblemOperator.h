@@ -17,10 +17,12 @@ namespace Moose::MFEM
 /// Steady-state problem operator with an equation system.
 class ComplexEquationSystemProblemOperator : public EquationSystemProblemOperator
 {
- 
+
 public:
   ComplexEquationSystemProblemOperator(MFEMProblemData & problem)
-    : EquationSystemProblemOperator(problem), _equation_system{std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(problem.eqn_system)}
+    : EquationSystemProblemOperator(problem),
+      _equation_system{
+          std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(problem.eqn_system)}
   {
   }
 

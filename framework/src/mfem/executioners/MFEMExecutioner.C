@@ -24,7 +24,8 @@ MFEMExecutioner::validParams()
       assembly_levels,
       "Matrix assembly level. Options: legacy, full, element, partial, none.");
   MooseEnum numeric_types("real complex", "real");
-  params.addParam<MooseEnum>("numeric_type", numeric_types, "Number type used for the problem. Can be real or complex.");
+  params.addParam<MooseEnum>(
+      "numeric_type", numeric_types, "Number type used for the problem. Can be real or complex.");
 
   return params;
 }

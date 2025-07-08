@@ -24,7 +24,8 @@ public:
 
   MFEMMixedVectorGradientKernel(const InputParameters & parameters);
 
-  virtual std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *> createBFIntegrator() override;
+  virtual std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
+  createBFIntegrator() override;
 
 protected:
   mfem::Coefficient & _coef;
