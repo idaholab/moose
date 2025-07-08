@@ -23,8 +23,6 @@ MFEMKernel::validParams()
   params.registerBase("Kernel");
   params.addParam<VariableName>("variable",
                                 "Variable labelling the weak form this kernel is added to");
-  MooseEnum numeric_types("real complex", "real");
-  params.addParam<MooseEnum>("numeric_type", numeric_types, "Number type used for the problem. Can be real or complex.");
   params.addParam<std::vector<SubdomainName>>("block",
                                               {},
                                               "The list of blocks (ids) that this "
