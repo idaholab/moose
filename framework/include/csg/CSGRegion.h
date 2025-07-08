@@ -93,6 +93,12 @@ public:
   /// Operator overload for |= add a union to the current region
   CSGRegion & operator|=(const CSGRegion & other_region);
 
+  /// Operator overload for checking if two CSGRegion objects are equal
+  bool operator==(const CSGRegion & other) const;
+
+  /// Operator overload for checking if two CSGRegion objects are not equal
+  bool operator!=(const CSGRegion & other) const;
+
 protected:
   /// String representation of region - defaults to empty string
   std::string _region_str;

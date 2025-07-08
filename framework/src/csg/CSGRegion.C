@@ -178,4 +178,19 @@ operator~(const CSGRegion & region)
   return CSGRegion(region, CSGRegion::RegionType::COMPLEMENT);
 }
 
+bool
+CSGRegion::operator==(const CSGRegion & other) const
+{
+  const bool region_type_eq = this->getRegionType() == other.getRegionType();
+  const bool region_str_eq = this->toString() == other.toString();
+  const bool surfaces_eq = this->getSurfaces() == other.getSurfaces();
+  return region_type_eq && region_str_eq && surfaces_eq;
+}
+
+bool
+CSGRegion::operator!=(const CSGRegion & other) const
+{
+  return !(*this == other);
+}
+
 } // namespace CSG

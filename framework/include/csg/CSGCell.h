@@ -57,9 +57,7 @@ public:
    * @param univ universe to be the fill
    * @param region cell region
    */
-  CSGCell(const std::string name,
-          const std::shared_ptr<CSGUniverse> univ,
-          const CSGRegion & region);
+  CSGCell(const std::string name, CSGUniverse * univ, const CSGRegion & region);
 
   /**
    * Destructor
@@ -83,9 +81,9 @@ public:
   /**
    * @brief Get the cell fill if FillType is UNIVERSE
    *
-   * @return CSGUniverse pointer
+   * @return Reference to CSGUniverse fill
    */
-  const std::shared_ptr<CSGUniverse> & getFillUniverse() const;
+  const CSGUniverse & getFillUniverse() const;
 
   /**
    * @brief Get the cell fill material name if FillType is MATERIAL
@@ -123,6 +121,12 @@ public:
    */
   std::string getRegionAsString() const { return _region.toString(); }
 
+  /// Operator overload for checking if two CSGCell objects are equal
+  bool operator==(const CSGCell & other) const;
+
+  /// Operator overload for checking if two CSGCell objects are not equal
+  bool operator!=(const CSGCell & other) const;
+
 protected:
   // set the name of the cell - intentionally not public because
   // name needs to be managed at the CSGCellList level
@@ -145,7 +149,7 @@ protected:
   CSGRegion _region;
 
   /// Fill object if fill is CSGUniverse
-  const std::shared_ptr<CSGUniverse> _fill_universe;
+  CSGUniverse * _fill_universe;
 
   friend class CSGCellList; // needed for setName() access
   friend class CSGBase;     // needed for updateRegion() access

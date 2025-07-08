@@ -21,46 +21,52 @@ CSGCellList::checkCellName(const std::string name) const
     mooseError("Cell with name " + name + " already exists in geoemetry.");
 }
 
-const std::shared_ptr<CSGCell> &
+CSGCell &
 CSGCellList::getCell(const std::string name) const
 {
-  auto cell = _cells.find(name);
-  if (cell == _cells.end())
+  if (_cells.find(name) == _cells.end())
     mooseError("No cell by name " + name + " exists in the geometry.");
   else
-    return cell->second;
+    return *(_cells.find(name)->second);
 }
 
-std::shared_ptr<CSGCell> &
+CSGCell &
 CSGCellList::addVoidCell(const std::string name, const CSGRegion & region)
 {
   checkCellName(name);
   _cells.insert(std::make_pair(name, std::make_shared<CSGCell>(name, region)));
-  return _cells[name];
+  return *_cells[name];
 }
 
-std::shared_ptr<CSGCell> &
+CSGCell &
 CSGCellList::addMaterialCell(const std::string name,
                              const std::string mat_name,
                              const CSGRegion & region)
 {
   checkCellName(name);
   _cells.insert(std::make_pair(name, std::make_shared<CSGCell>(name, mat_name, region)));
-  return _cells[name];
+  return *_cells[name];
 }
 
-std::shared_ptr<CSGCell> &
-CSGCellList::addUniverseCell(const std::string name,
-                             const std::shared_ptr<CSGUniverse> univ,
-                             const CSGRegion & region)
+CSGCell &
+CSGCellList::addUniverseCell(const std::string name, CSGUniverse & univ, const CSGRegion & region)
 {
   checkCellName(name);
-  _cells.insert(std::make_pair(name, std::make_shared<CSGCell>(name, univ, region)));
-  return _cells[name];
+  _cells.insert(std::make_pair(name, std::make_shared<CSGCell>(name, &univ, region)));
+  return *_cells[name];
+}
+
+std::vector<CSGCell *>
+CSGCellList::getAllCells() const
+{
+  std::vector<CSGCell *> cells;
+  for (auto it = _cells.begin(); it != _cells.end(); ++it)
+    cells.push_back(it->second.get());
+  return cells;
 }
 
 void
-CSGCellList::addCell(const std::shared_ptr<CSGCell> & cell)
+CSGCellList::addCell(std::shared_ptr<CSGCell> & cell)
 {
   auto name = cell->getName();
   checkCellName(name);
@@ -68,19 +74,19 @@ CSGCellList::addCell(const std::shared_ptr<CSGCell> & cell)
 }
 
 void
-CSGCellList::renameCell(const std::shared_ptr<CSGCell> & cell, const std::string name)
+CSGCellList::renameCell(CSGCell & cell, const std::string name)
 {
   // check that this cell passed in is actually in the same cell that is in the cell list
-  auto prev_name = cell->getName();
-  auto exisiting_cell = _cells.find(prev_name)->second;
-  if (exisiting_cell != cell)
+  auto prev_name = cell.getName();
+  auto existing_cell = _cells.find(prev_name)->second;
+  if (*existing_cell != cell)
     mooseError("Cell " + prev_name + " cannot be renamed to " + name +
                " as it does not exist in this CSGBase instance.");
 
   checkCellName(name);
-  cell->setName(name);
+  existing_cell->setName(name);
   _cells.erase(prev_name);
-  _cells.insert(std::make_pair(name, cell));
+  _cells.insert(std::make_pair(name, existing_cell));
 }
 
 } // namespace CSG

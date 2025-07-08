@@ -34,59 +34,63 @@ protected:
    * @brief create an empty universe
    *
    * @param name unique name of universe
-   * @return std::shared_ptr<CSGUniverse> pointer to empty universe that is created
+   * @return CSGUniverse & reference to empty universe that is created
    */
-  const std::shared_ptr<CSGUniverse> & addUniverse(const std::string name);
+  CSGUniverse & addUniverse(const std::string name);
 
   /**
    * @brief create a universe from list of cells
    *
    * @param name unique name of universe
    * @param cells list of cell pointers to add to the universe upon creation
-   * @return std::shared_ptr<CSGUniverse> pointer to universe that is created
+   * @return CSGUniverse & pointer to universe that is created
    */
-  const std::shared_ptr<CSGUniverse> & addUniverse(const std::string name,
-                                                   std::vector<std::shared_ptr<CSGCell>> & cells);
+  CSGUniverse & addUniverse(const std::string name, std::vector<CSGCell *> & cells);
 
   /**
-   * @brief Get the all universes
+   * @brief Get map of all names to universes in universe list
    *
-   * @return const std::map<std::string, std::shared_ptr<CSGUniverse>>& map of all names to
+   * @return std::map<std::string, std::shared_ptr<CSGUniverse>>& map of all names to
    * universes
    */
-  const std::map<std::string, std::shared_ptr<CSGUniverse>> & getAllUniverses() const
-  {
-    return _universes;
-  }
+  std::map<std::string, std::shared_ptr<CSGUniverse>> & getUniverseListMap() { return _universes; }
+
+  /**
+   * @brief Get the all universes in CSGBase instance
+   *
+   * @return std::vector<CSGUniverse *> list of pointers to all CSGUniverse objects
+   */
+  std::vector<CSGUniverse *> getAllUniverses() const;
 
   /**
    * @brief Get the Universe by name
    *
    * @param name name of universe
-   * @return const std::shared_ptr<CSGUniverse>& pointer to CSGUniverse of the specified name
+   * @return CSGUniverse & reference to CSGUniverse of the specified name
    */
-  const std::shared_ptr<CSGUniverse> & getUniverse(const std::string name) const;
+  CSGUniverse & getUniverse(const std::string name);
 
   /**
    * @brief Get the root universe
    *
-   * @return const std::shared_ptr<CSGUniverse>& pointer to the root universe
+   * @return CSGUniverse & reference to the root universe
    */
-  const std::shared_ptr<CSGUniverse> & getRoot() const { return _root_universe; };
+  CSGUniverse & getRoot() { return *_root_universe; };
 
   /**
    * @brief add an existing universe to list
    *
-   * @param universe
+   * @param universe shared_ptr to universe to add
    */
-  void addUniverse(const std::shared_ptr<CSGUniverse> & universe);
+  void addUniverse(std::shared_ptr<CSGUniverse> & universe);
 
   /**
    * @brief rename the specified universe
    *
+   * @param universe reference to universe whose name should be renamed
    * @param name new name
    */
-  void renameUniverse(const std::shared_ptr<CSGUniverse> & universe, const std::string name);
+  void renameUniverse(CSGUniverse & universe, const std::string name);
 
   /// Checks whether universe name already exists within CSGUniverseList object
   void checkUniverseName(const std::string name) const;

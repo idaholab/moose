@@ -192,12 +192,12 @@ public:
    * @param region cell region
    * @param add_to_univ (optional) universe to which this cell will be added (default is root
    * universe)
-   * @return std::shared_ptr<CSGCell> pointer to CSGCell that is created
+   * @return CSGCell & reference to CSGCell that is created
    */
-  std::shared_ptr<CSGCell> createCell(const std::string name,
-                                      const std::string mat_name,
-                                      const CSGRegion & region,
-                                      const std::shared_ptr<CSGUniverse> add_to_univ = nullptr);
+  CSGCell & createCell(const std::string name,
+                       const std::string mat_name,
+                       const CSGRegion & region,
+                       CSGUniverse * add_to_univ = nullptr);
 
   /**
    * @brief Create a Void Cell object
@@ -206,11 +206,10 @@ public:
    * @param region cell region
    * @param add_to_univ (optional) universe to which this cell will be added (default is root
    * universe)
-   * @return std::shared_ptr<CSGCell> pointer to CSGCell that is created
+   * @return CSGCell & reference to CSGCell that is created
    */
-  std::shared_ptr<CSGCell> createCell(const std::string name,
-                                      const CSGRegion & region,
-                                      const std::shared_ptr<CSGUniverse> add_to_univ = nullptr);
+  CSGCell &
+  createCell(const std::string name, const CSGRegion & region, CSGUniverse * add_to_univ = nullptr);
 
   /**
    * @brief Create a Universe Cell object
@@ -220,44 +219,35 @@ public:
    * @param region cell region
    * @param add_to_univ (optional) universe to which this cell will be added (default is root
    * universe)
-   * @return std::shared_ptr<CSGCell> pointer to cell that is created
+   * @return CSGCell & reference to cell that is created
    */
-  std::shared_ptr<CSGCell> createCell(const std::string name,
-                                      const std::shared_ptr<CSGUniverse> fill_univ,
-                                      const CSGRegion & region,
-                                      const std::shared_ptr<CSGUniverse> add_to_univ = nullptr);
+  CSGCell & createCell(const std::string name,
+                       CSGUniverse & fill_univ,
+                       const CSGRegion & region,
+                       CSGUniverse * add_to_univ = nullptr);
 
   /**
    * @brief Get all cell objects
    *
-   * @return map of all names to CSGCell objects in this CSGBase instance
+   * @return list of pointers to all CSGCell objects in CSGBase
    */
-  const std::map<std::string, std::shared_ptr<CSGCell>> & getAllCells() const
-  {
-    return _cell_list.getAllCells();
-  }
+  std::vector<CSGCell *> getAllCells() const { return _cell_list.getAllCells(); }
 
   /**
    * @brief Get a Cell object by name
    *
    * @param name cell name
-   * @return shared pointer to CSGCell object
+   * @return reference to CSGCell object
    */
-  const std::shared_ptr<CSGCell> & getCellByName(const std::string name)
-  {
-    return _cell_list.getCell(name);
-  }
+  CSGCell & getCellByName(const std::string name) { return _cell_list.getCell(name); }
 
   /**
    * @brief rename the specified cell
    *
-   * @param cell pointer to CSGCell to rename
+   * @param cell reference to CSGCell to rename
    * @param name new name
    */
-  void renameCell(const std::shared_ptr<CSGCell> cell, const std::string name)
-  {
-    _cell_list.renameCell(cell, name);
-  }
+  void renameCell(CSGCell & cell, const std::string name) { _cell_list.renameCell(cell, name); }
 
   /**
    * @brief change the region of the specified cell
@@ -265,14 +255,14 @@ public:
    * @param cell cell to update the region for
    * @param region new region to assign to cell
    */
-  void updateCellRegion(const std::shared_ptr<CSGCell> cell, const CSGRegion & region);
+  void updateCellRegion(CSGCell & cell, const CSGRegion & region);
 
   /**
    * @brief Get the Root Universe object
    *
-   * @return  shared pointer to CSGUniverse
+   * @return reference to root CSGUniverse
    */
-  std::shared_ptr<CSGUniverse> getRootUniverse() const { return _universe_list.getRoot(); }
+  CSGUniverse & getRootUniverse() { return _universe_list.getRoot(); }
 
   /**
    * @brief rename the root universe for this instance (default is ROOT_UNIVERSE)
@@ -287,10 +277,10 @@ public:
   /**
    * @brief rename the specified universe
    *
-   * @param universe pointer to CSGUniverse to rename
+   * @param universe reference to CSGUniverse to rename
    * @param name new name
    */
-  void renameUniverse(const std::shared_ptr<CSGUniverse> universe, const std::string name)
+  void renameUniverse(CSGUniverse & universe, const std::string name)
   {
     _universe_list.renameUniverse(universe, name);
   }
@@ -299,22 +289,18 @@ public:
    * @brief Create an empty Universe object
    *
    * @param name unique universe name
-   * @return std::shared_ptr<CSGUniverse> pointer CSGUniverse that is created
+   * @return CSGUniverse & reference to CSGUniverse that is created
    */
-  std::shared_ptr<CSGUniverse> createUniverse(const std::string name)
-  {
-    return _universe_list.addUniverse(name);
-  }
+  CSGUniverse & createUniverse(const std::string name) { return _universe_list.addUniverse(name); }
 
   /**
    * @brief Create a Universe object from list of cells
    *
    * @param name unique universe name
    * @param cells list of cells to add to universe
-   * @return std::shared_ptr<CSGUniverse> pointer CSGUniverse that is created
+   * @return CSGUniverse & reference to CSGUniverse that is created
    */
-  std::shared_ptr<CSGUniverse> createUniverse(const std::string name,
-                                              std::vector<std::shared_ptr<CSGCell>> cells);
+  CSGUniverse & createUniverse(const std::string name, std::vector<CSGCell *> cells);
 
   /**
    * @brief Add a cell to an existing universe
@@ -322,17 +308,15 @@ public:
    * @param universe universe to which to add the cell
    * @param cell cell to add
    */
-  void addCellToUniverse(const std::shared_ptr<CSGUniverse> universe,
-                         std::shared_ptr<CSGCell> cell);
+  void addCellToUniverse(CSGUniverse & universe, CSGCell & cell);
 
   /**
    * @brief Add a list of cells to an existing universe
    *
    * @param universe universe to which to add the cells
-   * @param cells list of cells to add
+   * @param cells list of pointers to cells to add
    */
-  void addCellsToUniverse(const std::shared_ptr<CSGUniverse> universe,
-                          std::vector<std::shared_ptr<CSGCell>> cells);
+  void addCellsToUniverse(CSGUniverse & universe, std::vector<CSGCell *> cells);
 
   /**
    * @brief Remove a cell from an existing universe
@@ -340,35 +324,30 @@ public:
    * @param universe universe from which to remove the cell
    * @param cell cell to remove
    */
-  void removeCellFromUniverse(const std::shared_ptr<CSGUniverse> universe,
-                              std::shared_ptr<CSGCell> cell);
+  void removeCellFromUniverse(CSGUniverse & universe, CSGCell & cell);
 
   /**
    * @brief Remove a list of cells from an existing universe
    *
    * @param universe universe from which to remove the cells
-   * @param cells list of cells to remove
+   * @param cells list of pointers to cells to remove
    */
-  void removeCellsFromUniverse(const std::shared_ptr<CSGUniverse> universe,
-                               std::vector<std::shared_ptr<CSGCell>> cells);
+  void removeCellsFromUniverse(CSGUniverse & universe, std::vector<CSGCell *> cells);
 
   /**
    * @brief Get all universe objects
    *
-   * @return map of all names to CSGUniverse objects in this CSGBase instance
+   * @return list of pointers to CSGUniverse objects in this CSGBase instance
    */
-  const std::map<std::string, std::shared_ptr<CSGUniverse>> & getAllUniverses() const
-  {
-    return _universe_list.getAllUniverses();
-  }
+  std::vector<CSGUniverse *> getAllUniverses() { return _universe_list.getAllUniverses(); }
 
   /**
    * @brief Get a universe object by name
    *
    * @param name universe name
-   * @return shared pointer to CSGUniverse object
+   * @return reference to CSGUniverse object
    */
-  const std::shared_ptr<CSGUniverse> & getUniverseByName(const std::string name)
+  CSGUniverse & getUniverseByName(const std::string name)
   {
     return _universe_list.getUniverse(name);
   }
@@ -429,19 +408,19 @@ public:
    * @brief generate the JSON representation output for the CSG object
    *
    */
-  nlohmann::json generateOutput() const;
+  nlohmann::json generateOutput();
 
 private:
   /// Check universes linked to root universe match universes defined in _universe_list
-  void checkUniverseLinking() const;
+  void checkUniverseLinking();
 
   /**
    * @brief Recursive method to retrieve all universes linked to current universe
    *
-   * @param univ Pointer to universe under consideration
+   * @param univ Reference to universe under consideration
    * @param linked_universe_name List of universe names linked to current universe
    */
-  void getLinkedUniverses(const std::shared_ptr<CSGUniverse> & univ,
+  void getLinkedUniverses(const CSGUniverse & univ,
                           std::vector<std::string> & linked_universe_names) const;
 
   /**
@@ -517,7 +496,7 @@ private:
   void checkRegionSurfaces(const CSGRegion & region);
 
   // check that cell being accessed is a part of this CSGBase instance
-  bool checkCellInBase(std::shared_ptr<CSGCell> cell);
+  bool checkCellInBase(CSGCell & cell);
 
   /// List of surfaces associated with CSG object
   CSGSurfaceList _surface_list;
