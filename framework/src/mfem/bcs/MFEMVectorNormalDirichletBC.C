@@ -39,5 +39,4 @@ MFEMVectorNormalDirichletBC::ApplyComplexBC(mfem::ParComplexGridFunction & gridf
   gridfunc.ProjectBdrCoefficientNormal(_vec_coef, _vec_coef_imag, getBoundaryMarkers());
 }
 
-
 #endif

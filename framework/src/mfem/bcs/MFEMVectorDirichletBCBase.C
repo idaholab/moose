@@ -19,9 +19,9 @@ MFEMVectorDirichletBCBase::validParams()
       "vector_coefficient",
       "0. 0. 0.",
       "Vector coefficient specifying the values the variable takes on the boundary");
-  params.addParam<MFEMVectorCoefficientName>(
-      "vector_coefficient_imag",
-      "Vector coefficient specifying the imaginary part of the values the variable takes on the boundary");
+  params.addParam<MFEMVectorCoefficientName>("vector_coefficient_imag",
+                                             "Vector coefficient specifying the imaginary part of "
+                                             "the values the variable takes on the boundary");
 
   return params;
 }
@@ -29,9 +29,10 @@ MFEMVectorDirichletBCBase::validParams()
 MFEMVectorDirichletBCBase::MFEMVectorDirichletBCBase(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
     _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient"))),
-    _vec_coef_imag(isParamValid("vector_coefficient_imag") ?
-                   getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient_imag")) :
-                   getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
+    _vec_coef_imag(
+        isParamValid("vector_coefficient_imag")
+            ? getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient_imag"))
+            : getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
 {
 }
 

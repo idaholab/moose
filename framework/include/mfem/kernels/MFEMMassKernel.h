@@ -24,12 +24,12 @@ public:
 
   MFEMMassKernel(const InputParameters & parameters);
 
-  virtual std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *> createBFIntegrator() override;
+  virtual std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
+  createBFIntegrator() override;
 
 protected:
   mfem::Coefficient & _coef;
   mfem::Coefficient & _coef_imag;
-
 };
 
 #endif
