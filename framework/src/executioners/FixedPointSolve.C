@@ -497,7 +497,7 @@ FixedPointSolve::printFixedPointConvergenceReason()
       _console << "REACH_MAX_ITS";
       break;
     case MooseFixedPointConvergenceReason::CONVERGED_OBJECT:
-      _console << "CONVERGED_OBJECT";
+      _console << "CONVERGED_OBJECT (see Convergence object)";
       break;
     case MooseFixedPointConvergenceReason::DIVERGED_MAX_ITS:
       _console << "DIVERGED_MAX_ITS";
@@ -509,7 +509,7 @@ FixedPointSolve::printFixedPointConvergenceReason()
       _console << "DIVERGED_FAILED_MULTIAPP";
       break;
     case MooseFixedPointConvergenceReason::DIVERGED_OBJECT:
-      _console << "DIVERGED_OBJECT";
+      _console << "DIVERGED_OBJECT (see Convergence object)";
       break;
     default:
       // UNSOLVED and CONVERGED_NONLINEAR should not be hit when coupling
