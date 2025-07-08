@@ -37,12 +37,6 @@ MFEMBoundaryCondition::MFEMBoundaryCondition(const InputParameters & parameters)
                                   ->GetParMesh()),
     _test_var_name(getParam<VariableName>("variable"))
 {
-  for (unsigned int i = 0; i < _boundary_names.size(); ++i)
-  {
-    _bdr_attributes[i] = std::stoi(_boundary_names[i]);
-  }
-
-  mfem::common::AttrToMarker(getMFEMProblem().mesh().getMFEMParMesh().bdr_attributes.Max(), _bdr_attributes, _bdr_markers);
 }
 
 #endif
