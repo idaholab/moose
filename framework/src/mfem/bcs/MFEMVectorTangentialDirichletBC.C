@@ -36,8 +36,7 @@ MFEMVectorTangentialDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 void
 MFEMVectorTangentialDirichletBC::ApplyComplexBC(mfem::ParComplexGridFunction & gridfunc)
 {
-  std::cout << "FIX ISSUE WITH COMPLEX COEFFICIENTS" << std::endl;
-  gridfunc.ProjectBdrCoefficientTangent(_vec_coef, _vec_coef, getBoundaryMarkers());
+  gridfunc.ProjectBdrCoefficientTangent(_vec_coef, _vec_coef_imag, getBoundaryMarkers());
 }
 
 #endif

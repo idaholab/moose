@@ -23,6 +23,7 @@ public:
 protected:
   MFEMVectorDirichletBCBase(const InputParameters & parameters);
   mfem::VectorCoefficient & _vec_coef;
+  mfem::VectorCoefficient & _vec_coef_imag;
 };
 
 #endif

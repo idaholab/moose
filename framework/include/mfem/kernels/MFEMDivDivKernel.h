@@ -28,8 +28,6 @@ public:
 
 protected:
   mfem::Coefficient & _coef;
-
-  const MFEMScalarCoefficientName & _coef_imag_name;
   mfem::Coefficient & _coef_imag;
 
 };

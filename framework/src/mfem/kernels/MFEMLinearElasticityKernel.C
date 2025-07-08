@@ -42,15 +42,13 @@ MFEMLinearElasticityKernel::validParams()
 
 MFEMLinearElasticityKernel::MFEMLinearElasticityKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
-    _lambda_name(getParam<MFEMScalarCoefficientName>("lambda")),
-    _mu_name(getParam<MFEMScalarCoefficientName>("mu")),
-    _lambda(getScalarCoefficient(_lambda_name)),
-    _mu(getScalarCoefficient(_mu_name)),
+    _lambda(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("lambda"))),
+    _mu(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("mu"))),
     // If the imaginary coefficient is not provided, we pick the real one since the variable needs to be initialized, but it won't be used
-    _lambda_imag_name(isParamValid("lambda_imag") ? getParam<MFEMScalarCoefficientName>("lambda_imag") : _lambda_name),
-    _mu_imag_name(isParamValid("mu_imag") ? getParam<MFEMScalarCoefficientName>("mu_imag") : _mu_name),
-    _lambda_imag(getScalarCoefficient(_lambda_imag_name)),
-    _mu_imag(getScalarCoefficient(_mu_imag_name))
+    _lambda_imag(isParamValid("lambda_imag") ? getScalarCoefficient(getParam<MFEMScalarCoefficientName>("lambda_imag")) : 
+                                               getScalarCoefficient(getParam<MFEMScalarCoefficientName>("lambda"))),
+    _mu_imag(isParamValid("mu_imag") ? getScalarCoefficient(getParam<MFEMScalarCoefficientName>("mu_imag")) : 
+                                       getScalarCoefficient(getParam<MFEMScalarCoefficientName>("mu")))
 {
   // Check that both imaginary coefficients are provided if one is provided
   if (isParamValid("lambda_imag") != isParamValid("mu_imag"))

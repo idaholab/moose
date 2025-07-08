@@ -26,8 +26,6 @@ public:
 
 protected:
   mfem::VectorCoefficient & _vec_coef;
-
-  const MFEMVectorCoefficientName & _vec_coef_imag_name;
   mfem::VectorCoefficient & _vec_coef_imag;
 };
 
