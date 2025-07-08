@@ -62,10 +62,22 @@ SteadyAndAdjoint::execute()
   _problem.timestepSetup();
 
   // Solving forward and adjoint problem here (only difference from Steady)
-  _last_solve_converged = _fixed_point_solve->solve() && _adjoint_solve.solve();
+  _last_solve_converged = _fixed_point_solve->solve();
 
   if (!lastSolveConverged())
-    _console << "Aborting as solve did not converge" << std::endl;
+    _console << "Forward solve did not converge." << std::endl;
+
+  _console << "Starting Adjoint solve" << std::endl;
+
+  // this is to check that they are both true
+  bool adjoint_solve_converged = _adjoint_solve.solve();
+  _last_solve_converged &= adjoint_solve_converged;
+
+  if (!lastSolveConverged())
+  {
+    if (!adjoint_solve_converged)
+      _console << "Adjoint solve did not converge." << std::endl;
+  }
   else
   {
     _time = _time_step;
