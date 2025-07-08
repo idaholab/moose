@@ -559,7 +559,7 @@ MooseVariableDataBase<OutputType>::fetchDoFValues()
       _dof_values_dotdot_old.resize(n);
       _sys.solutionUDotDotOld()->get(_dof_indices, &_dof_values_dotdot_old[0]);
     }
-  };
+  }
 
   for (auto tag : _required_vector_tags)
     if (_need_vector_tag_u[tag] || _need_vector_tag_grad[tag] || _need_vector_tag_dof_u[tag])
