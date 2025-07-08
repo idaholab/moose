@@ -137,10 +137,9 @@ public:
   }
 
   /**
-   * Compute and cache the physical transformation data and variable values
-   * @param qp The local quadrature point index
+   * Reset the reinit flag
    */
-  KOKKOS_FUNCTION inline void reinit(const unsigned int qp);
+  KOKKOS_FUNCTION void reinit() { _transform_reinit = false; }
 
 protected:
   /**
@@ -180,7 +179,7 @@ private:
   KOKKOS_FUNCTION inline void reinitTransform(const unsigned int qp);
 
   /**
-   * Flag whether the physical transformation data was reinit
+   * Flag whether the physical transformation data was cached
    */
   bool _transform_reinit = false;
   /**
@@ -194,35 +193,17 @@ private:
 };
 
 KOKKOS_FUNCTION inline void
-Datum::reinit(const unsigned int qp)
-{
-  _transform_reinit = false;
-
-  if (_side != libMesh::invalid_uint)
-    return;
-
-  bool need_reinit = false;
-
-  for (unsigned int s = 0; s < _systems.size(); ++s)
-    need_reinit = need_reinit || _systems[s].needReinit(_elem);
-
-  if (need_reinit)
-  {
-    reinitTransform(qp);
-
-    for (unsigned int s = 0; s < _systems.size(); ++s)
-      _systems[s].reinit(_elem, _J, _qp_offset + qp, qp);
-  }
-}
-
-KOKKOS_FUNCTION inline void
 Datum::reinitTransform(const unsigned int qp)
 {
   if (_transform_reinit)
     return;
 
   if (_side == libMesh::invalid_uint)
-    _assembly.computePhysicalMap(_elem, qp, &_J, &_JxW, &_xyz);
+  {
+    _J = _assembly.getJacobian(_elem, qp);
+    _JxW = _assembly.getJxW(_elem, qp);
+    _xyz = _assembly.getQPoint(_elem, qp);
+  }
   else
     _assembly.computePhysicalMap(_elem, _side, qp, &_J, &_JxW, &_xyz);
 

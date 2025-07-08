@@ -166,7 +166,7 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   for (auto boundary : _fe_problem.mesh().meshBoundaryIds())
     _kokkos_integrated_bcs.updateBoundaryMatPropDependency(boundary, needed_mat_props);
 
-  // Copy data and preallocate quadature point solution vectors
+  // Copy data and cache variable values at element quadature points
 
   for (auto & system : systems)
   {
@@ -176,7 +176,10 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
     {
       TIME_SECTION("KokkosCopy", 1);
       system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
-      system.preallocate();
+    }
+    {
+      TIME_SECTION("KokkosReinit", 1);
+      system.reinit();
     }
   }
 
@@ -225,7 +228,6 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   {
     system.clearActiveVariables();
     system.clearActiveVariableTags();
-    system.clearCacheFlags();
   }
 }
 
@@ -274,7 +276,7 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   for (auto boundary : _fe_problem.mesh().meshBoundaryIds())
     _kokkos_integrated_bcs.updateBoundaryMatPropDependency(boundary, needed_mat_props);
 
-  // Copy data and preallocate quadature point solution vectors
+  // Copy data and cache variable values at element quadature points
 
   for (auto & system : systems)
   {
@@ -284,7 +286,10 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
     {
       TIME_SECTION("KokkosPreallocate", 1);
       system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
-      system.preallocate();
+    }
+    {
+      TIME_SECTION("KokkosReinit", 1);
+      system.reinit();
     }
   }
 
@@ -333,6 +338,5 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   {
     system.clearActiveVariables();
     system.clearActiveVariableTags();
-    system.clearCacheFlags();
   }
 }

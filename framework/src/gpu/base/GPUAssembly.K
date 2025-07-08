@@ -63,6 +63,7 @@ Assembly::init()
 
   initQuadrature();
   initShape();
+  cachePhysicalMap();
 }
 
 void
@@ -399,6 +400,48 @@ Assembly::initShape()
   _map_grad_psi_face.copyNested();
 
   _n_dofs.copy();
+}
+
+void
+Assembly::cachePhysicalMap()
+{
+  auto num_subdomains = _mesh.meshSubdomains().size();
+  auto num_elems = kokkosMesh().getLocalElementMap().size();
+
+  _jacobian.create(num_subdomains);
+  _jxw.create(num_subdomains);
+  _xyz.create(num_subdomains);
+
+  for (auto subdomain : _mesh.meshSubdomains())
+  {
+    auto sid = kokkosMesh().getSubdomainID(subdomain);
+
+    _jacobian[sid].createDevice(_qp_offset[sid].last());
+    _jxw[sid].createDevice(_qp_offset[sid].last());
+    _xyz[sid].createDevice(_qp_offset[sid].last());
+  }
+
+  _jacobian.copyNested();
+  _jxw.copyNested();
+  _xyz.copyNested();
+
+  ::Kokkos::RangePolicy<::Kokkos::IndexType<size_t>> policy(0, num_elems);
+  ::Kokkos::parallel_for(policy, *this);
+  ::Kokkos::fence();
+}
+
+KOKKOS_FUNCTION void
+Assembly::operator()(const size_t tid) const
+{
+  auto info = kokkosMesh().getElementInfo(tid);
+  auto offset = getQpOffset(info);
+
+  auto jacobian = &_jacobian[info.subdomain][offset];
+  auto jxw = &_jxw[info.subdomain][offset];
+  auto xyz = &_xyz[info.subdomain][offset];
+
+  for (unsigned int qp = 0; qp < getNumQps(info); ++qp)
+    computePhysicalMap(info, qp, &jacobian[qp], &jxw[qp], &xyz[qp]);
 }
 
 } // namespace Kokkos
