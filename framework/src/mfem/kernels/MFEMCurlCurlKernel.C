@@ -34,9 +34,9 @@ MFEMCurlCurlKernel::MFEMCurlCurlKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     // FIXME: The MFEM bilinear form can also handle vector and matrix
     // coefficients, so ideally we'd handle all three too.
-    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient"))),
     // If the imaginary coefficient is not provided, we pick the real one since the variable needs to be initialized, but it won't be used
-    _coef_imag_name(isParamValid("coefficient_imag") ? getParam<MFEMScalarCoefficientName>("coefficient_imag") : _coef_name),
+    _coef_imag_name(isParamValid("coefficient_imag") ? getParam<MFEMScalarCoefficientName>("coefficient_imag") : getParam<MFEMScalarCoefficientName>("coefficient")),
     _coef_imag(getScalarCoefficient(_coef_imag_name))
 {
 }
