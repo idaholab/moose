@@ -76,6 +76,19 @@ length = 0.5
   type = Steady
 []
 
+[Postprocessors]
+  [Total_power_IC]
+    type = ElementIntegralVariablePostprocessor
+    variable = q_prime_ic
+    block = fuel_pins
+  []
+  [Total_power_Aux]
+    type = ElementIntegralVariablePostprocessor
+    variable = q_prime_aux
+    block = fuel_pins
+  []
+[]
+
 [VectorPostprocessors]
   [line_check]
     type = LineValueSampler
