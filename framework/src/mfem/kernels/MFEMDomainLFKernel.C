@@ -31,7 +31,7 @@ MFEMDomainLFKernel::MFEMDomainLFKernel(const InputParameters & parameters)
   : MFEMKernel(parameters),
     _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
     // If the imaginary coefficient is not provided, we pick the real one since the variable needs to be initialized, but it won't be used
-    _coef_imag_name(isParamValid("coefficient_imag") ? getParam<std::string>("coefficient_imag") : getParam<std::string>("coefficient")),
+    _coef_imag_name(isParamValid("coefficient_imag") ? getParam<std::string>("coefficient_imag") : _coef_name),
     _coef_imag(getScalarCoefficient(_coef_imag_name))
 {
 }
