@@ -105,7 +105,7 @@ ComplexEquationSystem::ApplyDomainBLFIntegrators(
       if (integ.first != nullptr && integ.second != nullptr)
       {
         kernel->isSubdomainRestricted()
-            ? form->AddDomainIntegrator(std::move(integ.first), std::move(integ.second), kernel->getSubdomains())
+            ? form->AddDomainIntegrator(std::move(integ.first), std::move(integ.second), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ.first), std::move(integ.second));
       }
     }
@@ -128,7 +128,7 @@ ComplexEquationSystem::ApplyDomainLFIntegrators(
       if (integ.first != nullptr && integ.second != nullptr)
       {
         kernel->isSubdomainRestricted()
-            ? form->AddDomainIntegrator(std::move(integ.first), std::move(integ.second), kernel->getSubdomains())
+            ? form->AddDomainIntegrator(std::move(integ.first), std::move(integ.second), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ.first), std::move(integ.second));
       }
     }
@@ -155,7 +155,7 @@ ComplexEquationSystem::ApplyBoundaryBLFIntegrators(
       if (integ.first != nullptr && integ.second != nullptr)
       {
         bc->isBoundaryRestricted()
-            ? form->AddBoundaryIntegrator(std::move(integ.first), std::move(integ.second), bc->getBoundaries())
+            ? form->AddBoundaryIntegrator(std::move(integ.first), std::move(integ.second), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ.first), std::move(integ.second));
       }
     }
@@ -179,7 +179,7 @@ ComplexEquationSystem::ApplyBoundaryLFIntegrators(
       if (integ.first != nullptr && integ.second != nullptr)
       {
         bc->isBoundaryRestricted()
-            ? form->AddBoundaryIntegrator(std::move(integ.first), std::move(integ.second), bc->getBoundaries())
+            ? form->AddBoundaryIntegrator(std::move(integ.first), std::move(integ.second), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ.first), std::move(integ.second));
       }
     }

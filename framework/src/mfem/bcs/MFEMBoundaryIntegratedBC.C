@@ -30,10 +30,10 @@ MFEMBoundaryIntegratedBC::validParams()
 
 MFEMBoundaryIntegratedBC::MFEMBoundaryIntegratedBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient"))),
     _coef_imag_name(isParamValid("coefficient_imag")
                         ? getParam<MFEMScalarCoefficientName>("coefficient_imag")
-                        : _coef_name),
+                        : getParam<MFEMScalarCoefficientName>("coefficient")),
     _coef_imag(getScalarCoefficient(_coef_imag_name))
 {
 }
@@ -41,7 +41,7 @@ MFEMBoundaryIntegratedBC::MFEMBoundaryIntegratedBC(const InputParameters & param
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
 std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
-MFEMScalarBoundaryIntegratedBC::createLFIntegrator()
+MFEMBoundaryIntegratedBC::createLFIntegrator()
 {
   return std::make_pair(new mfem::BoundaryLFIntegrator(_coef), isParamValid("coefficient_imag") ? new mfem::BoundaryLFIntegrator(_coef_imag)
                                                                                                   : nullptr);
@@ -49,7 +49,7 @@ MFEMScalarBoundaryIntegratedBC::createLFIntegrator()
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
 std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
-MFEMScalarBoundaryIntegratedBC::createBFIntegrator()
+MFEMBoundaryIntegratedBC::createBFIntegrator()
 {
   return std::make_pair(nullptr, nullptr);
 }
