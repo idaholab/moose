@@ -179,7 +179,8 @@ StepUserObject::getStep(const Real & time) const
       return i;
 
     which_step = i;
-    if (MooseUtils::absoluteFuzzyGreaterEqual(time, _times[i]) && MooseUtils::absoluteFuzzyLessThan(time, _times[i + 1]))
+    if (MooseUtils::absoluteFuzzyGreaterEqual(time, _times[i]) &&
+        MooseUtils::absoluteFuzzyLessThan(time, _times[i + 1]))
       return which_step;
   }
 
