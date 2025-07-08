@@ -53,9 +53,10 @@ public:
    */
   void sync(std::set<TagID> tags, MemcpyKind dir);
   /**
-   * Preallocate the quadrature point solution vectors for active variable and tags
+   * Allocate the quadrature point solution vectors for active variable and tags and cache
+   * quadrature point values
    */
-  void preallocate();
+  void reinit();
   /**
    * Set the active variables
    * @param vars The active MOOSE variables
@@ -76,11 +77,6 @@ public:
    * @param vars The active matrix tags
    */
   void setActiveMatrixTags(std::set<TagID> tags);
-  /**
-   * Set the quadrature cache flags for active variables and tags
-   * @param subdomains The MOOSE subdomain IDs to set the flags
-   */
-  void setCacheFlags(std::set<SubdomainID> subdomains);
   /**
    * Clear the cached active variables
    */
@@ -104,15 +100,6 @@ public:
   {
     _active_matrix_tags.destroy();
     _matrix_tag_active = false;
-  }
-  /**
-   * Clear the quadrature cache flags
-   */
-  void clearCacheFlags()
-  {
-    for (auto & flags : _variable_on_qp)
-      if (flags.isAlloc())
-        flags = false;
   }
   /**
    * Get the MOOSE system
@@ -365,20 +352,9 @@ public:
   }
 
   /**
-   * Check whether reinit() should be called
-   * @param info The element information object
-   * @returns Whether reinit() should be called
+   * Kokkos function for caching variable values on element quadrature points
    */
-  KOKKOS_FUNCTION inline bool needReinit(ElementInfo info) const;
-  /**
-   * Compute and cache elemental quadrature values and gradients for active variables and tags
-   * @param info The element information object
-   * @param jacobian The inverse of Jacobian matrix
-   * @param qp The global quadrature point index
-   * @param qp_local The local quadrature point index
-   */
-  KOKKOS_FUNCTION inline void
-  reinit(ElementInfo info, Real33 jacobian, unsigned int qp, unsigned int qp_local);
+  KOKKOS_FUNCTION void operator()(const size_t tid) const;
 #endif
 
   /**
@@ -415,6 +391,10 @@ private:
    */
   void getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs);
 
+  /**
+   * Kokkos thread object
+   */
+  Thread _thread;
   /**
    * Reference of the MOOSE system
    */
@@ -458,10 +438,6 @@ private:
   Array<Array2D<Array<Real>>> _qp_solutions;
   Array<Array2D<Array<Real3>>> _qp_solutions_grad;
   ///@}
-  /**
-   * Flag whether each variable was interpolated to quadrature points
-   */
-  Array<Array2D<bool>> _variable_on_qp;
   /**
    * Local DOF index of each variable
    */
@@ -569,61 +545,6 @@ System::getVectorQpGradFace(ElementInfo info,
             (jacobian * grad_phi(i, qp));
 
   return grad;
-}
-
-KOKKOS_FUNCTION inline bool
-System::needReinit(ElementInfo info) const
-{
-  auto subdomain = info.subdomain;
-
-  for (unsigned int t = 0; t < _active_variable_tags.size(); ++t)
-    for (unsigned int v = 0; v < _active_variables.size(); ++v)
-    {
-      auto tag = _active_variable_tags[t];
-      auto var = _active_variables[v];
-
-      if (!_variable_on_qp[tag](subdomain, var))
-        return true;
-    }
-
-  return false;
-}
-KOKKOS_FUNCTION inline void
-System::reinit(ElementInfo info, Real33 jacobian, unsigned int qp, unsigned int qp_local)
-{
-  auto elem = info.id;
-  auto elem_type = info.type;
-  auto subdomain = info.subdomain;
-
-  for (unsigned int t = 0; t < _active_variable_tags.size(); ++t)
-    for (unsigned int v = 0; v < _active_variables.size(); ++v)
-    {
-      auto tag = _active_variable_tags[t];
-      auto var = _active_variables[v];
-
-      if (_variable_on_qp[tag](subdomain, var))
-        continue;
-
-      auto fe = _var_fe_types[var];
-      auto n_dofs = kokkosAssembly().getNumDofs(elem_type, fe);
-
-      auto & phi = kokkosAssembly().getPhi(subdomain, elem_type, fe);
-      auto & grad_phi = kokkosAssembly().getGradPhi(subdomain, elem_type, fe);
-
-      Real value = 0;
-      Real3 grad = 0;
-
-      for (unsigned int i = 0; i < n_dofs; ++i)
-      {
-        auto vector = getVectorDofValue(getElemLocalDofIndex(elem, i, var), tag);
-
-        value += vector * phi(i, qp_local);
-        grad += vector * (jacobian * grad_phi(i, qp_local));
-      }
-
-      getVectorQpValue(info, qp, var, tag) = value;
-      getVectorQpGrad(info, qp, var, tag) = grad;
-    }
 }
 #endif
 

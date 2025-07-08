@@ -141,23 +141,5 @@ MaterialBase::initialSetup()
   }
 }
 
-void
-MaterialBase::setVariableDependency()
-{
-  auto needed_moose_vars = getMooseVariableDependencies();
-
-  for (auto & system : kokkosSystems())
-    system.setActiveVariables(needed_moose_vars);
-
-  kokkosSystems().copy();
-}
-
-void
-MaterialBase::setCacheFlags()
-{
-  for (auto & system : kokkosSystems())
-    system.setCacheFlags(blockIDs());
-}
-
 } // namespace Kokkos
 } // namespace Moose

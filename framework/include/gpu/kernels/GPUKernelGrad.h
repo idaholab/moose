@@ -106,7 +106,7 @@ KernelGrad<Derived>::computeResidualInternal(const Derived * kernel,
 {
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    datum.reinit(qp);
+    datum.reinit();
 
     Real3 value = datum.JxW(qp) * kernel->precomputeQpResidual(qp, datum);
 
@@ -126,7 +126,7 @@ KernelGrad<Derived>::computeJacobianInternal(const Derived * kernel,
 {
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    datum.reinit(qp);
+    datum.reinit();
 
     for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
     {
