@@ -85,7 +85,6 @@ MFEMProblem::addMFEMNonlinearSolver()
   getProblemData().nonlinear_solver->SetRelTol(0.0);
   getProblemData().nonlinear_solver->SetAbsTol(0.0);
   getProblemData().nonlinear_solver->SetMaxIter(1);
-
 }
 
 void
@@ -202,30 +201,31 @@ MFEMProblem::addGridFunction(const std::string & var_type,
   if (var_type == "MFEMComplexVariable")
   {
     MFEMComplexVariable & mfem_variable = getUserObject<MFEMComplexVariable>(var_name);
-    getProblemData().complex_gridfunctions.Register(var_name, mfem_variable.getComplexGridFunction());
+    getProblemData().complex_gridfunctions.Register(var_name,
+                                                    mfem_variable.getComplexGridFunction());
     if (mfem_variable.getFESpace().isScalar())
     {
       getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
-        var_name+"_real", &mfem_variable.getComplexGridFunction()->real());
+          var_name + "_real", &mfem_variable.getComplexGridFunction()->real());
       getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
-        var_name+"_imag", &mfem_variable.getComplexGridFunction()->imag());
+          var_name + "_imag", &mfem_variable.getComplexGridFunction()->imag());
     }
     else
       getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
-        var_name+"_real", &mfem_variable.getComplexGridFunction()->real());
-      getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
-        var_name+"_imag", &mfem_variable.getComplexGridFunction()->imag());
-  } 
+          var_name + "_real", &mfem_variable.getComplexGridFunction()->real());
+    getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
+        var_name + "_imag", &mfem_variable.getComplexGridFunction()->imag());
+  }
   else // must be real, but may have been set up indirectly from a MOOSE variable
   {
     MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
     getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
     if (mfem_variable.getFESpace().isScalar())
       getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
-        var_name, mfem_variable.getGridFunction().get());
+          var_name, mfem_variable.getGridFunction().get());
     else
       getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
-        var_name, mfem_variable.getGridFunction().get());
+          var_name, mfem_variable.getGridFunction().get());
   }
 }
 

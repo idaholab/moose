@@ -158,7 +158,7 @@ protected:
   Moose::MFEM::NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
       _mblfs; // named according to trial variable
-  
+
   /**
    * Template method for applying BilinearFormIntegrators on domains from kernels to a BilinearForm,
    * or MixedBilinearForm

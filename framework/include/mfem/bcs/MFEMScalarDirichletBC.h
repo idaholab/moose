@@ -24,6 +24,7 @@ public:
 
 protected:
   mfem::Coefficient & _coef;
+  mfem::Coefficient & _coef_imag;
 };
 
 #endif

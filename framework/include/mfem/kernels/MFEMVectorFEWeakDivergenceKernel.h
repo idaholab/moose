@@ -24,12 +24,11 @@ public:
 
   MFEMVectorFEWeakDivergenceKernel(const InputParameters & parameters);
 
-  virtual std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *> createBFIntegrator() override;
+  virtual std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
+  createBFIntegrator() override;
 
 protected:
   mfem::Coefficient & _coef;
-
-  const MFEMScalarCoefficientName & _coef_imag_name;
   mfem::Coefficient & _coef_imag;
 };
 

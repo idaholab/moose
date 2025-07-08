@@ -25,7 +25,8 @@ MFEMBoundaryNormalIntegratedBC::validParams()
       "Vector coefficient whose normal component will be used in the integrated BC");
   params.addParam<MFEMVectorCoefficientName>(
       "vector_coefficient_imag",
-      "The imaginary part of the vector coefficient whose normal component will be used in the integrated BC. ");
+      "The imaginary part of the vector coefficient whose normal component will be used in the "
+      "integrated BC. ");
   return params;
 }
 
@@ -45,10 +46,10 @@ MFEMBoundaryNormalIntegratedBC::MFEMBoundaryNormalIntegratedBC(const InputParame
 std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
 MFEMBoundaryNormalIntegratedBC::createLFIntegrator()
 {
-  return std::make_pair(
-      new mfem::BoundaryNormalLFIntegrator(_vec_coef),
-      isParamValid("vector_coefficient_imag") ? new mfem::BoundaryNormalLFIntegrator(_vec_coef_imag)
-                                               : nullptr);
+  return std::make_pair(new mfem::BoundaryNormalLFIntegrator(_vec_coef),
+                        isParamValid("vector_coefficient_imag")
+                            ? new mfem::BoundaryNormalLFIntegrator(_vec_coef_imag)
+                            : nullptr);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.

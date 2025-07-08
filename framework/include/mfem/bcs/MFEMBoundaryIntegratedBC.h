@@ -21,17 +21,18 @@ public:
 
   // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
   // caller.
-  virtual std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *> createLFIntegrator();
+  virtual std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
+  createLFIntegrator();
 
   // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
-  virtual std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *> createBFIntegrator();
+  virtual std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
+  createBFIntegrator();
 
 protected:
   mfem::Coefficient & _coef;
 
   const MFEMScalarCoefficientName & _coef_imag_name;
   mfem::Coefficient & _coef_imag;
-
 };
 
 #endif

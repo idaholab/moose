@@ -16,7 +16,10 @@ public:
   MFEMComplexVariable(const InputParameters & parameters);
 
   /// Returns a shared pointer to the constructed gridfunction.
-  inline std::shared_ptr<mfem::ParComplexGridFunction> getComplexGridFunction() const { return _cmplx_gridfunction; }
+  inline std::shared_ptr<mfem::ParComplexGridFunction> getComplexGridFunction() const
+  {
+    return _cmplx_gridfunction;
+  }
 
   /// Returns a reference to the fespace used by the gridfunction.
   inline const MFEMFESpace & getFESpace() const { return _fespace; }

@@ -43,8 +43,9 @@ MFEMBoundaryIntegratedBC::MFEMBoundaryIntegratedBC(const InputParameters & param
 std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
 MFEMBoundaryIntegratedBC::createLFIntegrator()
 {
-  return std::make_pair(new mfem::BoundaryLFIntegrator(_coef), isParamValid("coefficient_imag") ? new mfem::BoundaryLFIntegrator(_coef_imag)
-                                                                                                  : nullptr);
+  return std::make_pair(
+      new mfem::BoundaryLFIntegrator(_coef),
+      isParamValid("coefficient_imag") ? new mfem::BoundaryLFIntegrator(_coef_imag) : nullptr);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
