@@ -67,9 +67,9 @@ protected:
   /**
    * @brief Get map of all names to cells in cell list
    *
-   * @return std::map<std::string, std::shared_ptr<CSGCell>>& map of all names to cells
+   * @return std::map<std::string, std::unique_ptr<CSGCell>>& map of all names to cells
    */
-  std::map<std::string, std::shared_ptr<CSGCell>> & getCellListMap() { return _cells; }
+  std::map<std::string, std::unique_ptr<CSGCell>> & getCellListMap() { return _cells; }
 
   /**
    * @brief Get the all cells in CSGBase instance
@@ -87,11 +87,12 @@ protected:
   CSGCell & getCell(const std::string name) const;
 
   /**
-   * @brief add a cell to the CellList
+   * @brief add a cell to the CellList. Ownership of cell will be trasnferred to cell list object
+   * that calls this function
    *
    * @param cell cell to add to the CellList.
    */
-  void addCell(std::shared_ptr<CSGCell> & cell);
+  void addCell(std::unique_ptr<CSGCell> & cell);
 
   /**
    * @brief rename the specified cell
@@ -105,7 +106,7 @@ protected:
   void checkCellName(const std::string name) const;
 
   /// Mapping of cell names to pointers of stored cell objects
-  std::map<std::string, std::shared_ptr<CSGCell>> _cells;
+  std::map<std::string, std::unique_ptr<CSGCell>> _cells;
 
   // Only CSGBase should be calling the methods in CSGCellList
   friend class CSGBase;

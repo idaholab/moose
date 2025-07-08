@@ -124,7 +124,7 @@ CSGBase::joinSurfaceList(CSGSurfaceList & surf_list)
   // adding if duplicate; must update references to the surface in cell
   // region definitions.
   auto & surf_list_map = surf_list.getSurfaceListMap();
-  for (auto s : surf_list_map)
+  for (auto & s : surf_list_map)
     _surface_list.addSurface(s.second);
 }
 

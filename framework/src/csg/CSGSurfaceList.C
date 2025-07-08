@@ -44,8 +44,7 @@ CSGSurfaceList::addPlaneFromPoints(const std::string name,
                                    CSGSurface::BoundaryType boundary)
 {
   checkSurfaceName(name);
-  const auto plane_ptr = std::make_shared<CSGPlane>(name, p1, p2, p3, boundary);
-  _surfaces.insert(std::make_pair(name, plane_ptr));
+  _surfaces.insert(std::make_pair(name, std::make_unique<CSGPlane>(name, p1, p2, p3, boundary)));
   return *_surfaces[name];
 }
 
@@ -58,7 +57,7 @@ CSGSurfaceList::addPlaneFromCoefficients(const std::string name,
                                          CSGSurface::BoundaryType boundary)
 {
   checkSurfaceName(name);
-  _surfaces.insert(std::make_pair(name, std::make_shared<CSGPlane>(name, a, b, c, d, boundary)));
+  _surfaces.insert(std::make_pair(name, std::make_unique<CSGPlane>(name, a, b, c, d, boundary)));
   return *_surfaces[name];
 }
 
@@ -69,7 +68,7 @@ CSGSurfaceList::addSphere(const std::string name,
                           CSGSurface::BoundaryType boundary)
 {
   checkSurfaceName(name);
-  _surfaces.insert(std::make_pair(name, std::make_shared<CSGSphere>(name, center, r, boundary)));
+  _surfaces.insert(std::make_pair(name, std::make_unique<CSGSphere>(name, center, r, boundary)));
   return *_surfaces[name];
 }
 
@@ -82,18 +81,18 @@ CSGSurfaceList::addCylinder(const std::string name,
                             CSGSurface::BoundaryType boundary)
 {
   checkSurfaceName(name);
-  std::shared_ptr<CSGSurface> surf;
+  std::unique_ptr<CSGSurface> surf;
 
   if (axis == "x" || axis == "X")
-    surf = std::make_shared<CSGXCylinder>(name, x0, x1, r, boundary);
+    surf = std::make_unique<CSGXCylinder>(name, x0, x1, r, boundary);
   else if (axis == "y" || axis == "Y")
-    surf = std::make_shared<CSGYCylinder>(name, x0, x1, r, boundary);
+    surf = std::make_unique<CSGYCylinder>(name, x0, x1, r, boundary);
   else if (axis == "z" || axis == "Z")
-    surf = std::make_shared<CSGZCylinder>(name, x0, x1, r, boundary);
+    surf = std::make_unique<CSGZCylinder>(name, x0, x1, r, boundary);
   else
     mooseError("Axis " + axis + " not recognized for CSG cylinder. Options are x, y, or z.");
 
-  _surfaces.insert(std::make_pair(name, surf));
+  _surfaces.insert(std::make_pair(name, std::move(surf)));
   return *_surfaces[name];
 }
 
@@ -107,11 +106,11 @@ CSGSurfaceList::getAllSurfaces() const
 }
 
 void
-CSGSurfaceList::addSurface(const std::shared_ptr<CSGSurface> surf)
+CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> & surf)
 {
   auto name = surf->getName();
   checkSurfaceName(name);
-  _surfaces.insert(std::make_pair(name, surf));
+  _surfaces.insert(std::make_pair(name, std::move(surf)));
 }
 
 void
@@ -120,7 +119,7 @@ CSGSurfaceList::renameSurface(CSGSurface & surface, const std::string name)
   // check that this surface passed in is actually in the same surface that is in the surface
   // list
   auto prev_name = surface.getName();
-  auto existing_surface = _surfaces.find(prev_name)->second;
+  auto existing_surface = std::move(_surfaces.find(prev_name)->second);
   if ((*existing_surface) != surface)
     mooseError("Surface " + prev_name + " cannot be renamed to " + name +
                " as it does not exist in this CSGBase instance.");
@@ -128,7 +127,7 @@ CSGSurfaceList::renameSurface(CSGSurface & surface, const std::string name)
   checkSurfaceName(name);
   existing_surface->setName(name);
   _surfaces.erase(prev_name);
-  _surfaces.insert(std::make_pair(name, existing_surface));
+  _surfaces.insert(std::make_pair(name, std::move(existing_surface)));
 }
 
 } // namespace CSG

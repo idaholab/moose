@@ -101,9 +101,9 @@ protected:
   /**
    * @brief Get map of all names to surfaces in surface list
    *
-   * @return std::map<std::string, std::shared_ptr<CSGSurface>>& map of all names to surfaces
+   * @return std::map<std::string, std::unique_ptr<CSGSurface>>& map of all names to surfaces
    */
-  std::map<std::string, std::shared_ptr<CSGSurface>> & getSurfaceListMap() { return _surfaces; }
+  std::map<std::string, std::unique_ptr<CSGSurface>> & getSurfaceListMap() { return _surfaces; }
 
   /**
    * @brief Get list of pointers to all surfaces in surface list
@@ -121,11 +121,12 @@ protected:
   CSGSurface & getSurface(const std::string name) const;
 
   /**
-   * @brief add a surface object to existing SurfaceList
+   * @brief add a surface object to existing SurfaceList. Ownership of surface will be transferred
+   * to surface list object that calls this function
    *
    * @param surf CSGSurface to add
    */
-  void addSurface(const std::shared_ptr<CSGSurface> surf);
+  void addSurface(std::unique_ptr<CSGSurface> & surf);
 
   /**
    * @brief rename the specified surface
@@ -138,7 +139,7 @@ protected:
   void checkSurfaceName(const std::string name) const;
 
   /// Mapping of surface names to pointers of stored surface objects
-  std::map<std::string, std::shared_ptr<CSGSurface>> _surfaces;
+  std::map<std::string, std::unique_ptr<CSGSurface>> _surfaces;
 
   // Only CSGBase should be calling the methods in CSGSurfaceList
   friend class CSGBase;
