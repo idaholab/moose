@@ -110,16 +110,6 @@ protected:
   virtual Moose::MaterialDataType materialDataType() = 0;
 
   /**
-   * Set the variables this object depend on to the Kokkos systems
-   */
-  void setVariableDependency();
-  /**
-   * Set the quadrature cache status flags for the variables, tags, and subdomains covered by this
-   * object to the Kokkos systems
-   */
-  void setCacheFlags();
-
-  /**
    * Get the number of elements this material operates on for element material property evaluation
    * @returns The number of elements
    */
