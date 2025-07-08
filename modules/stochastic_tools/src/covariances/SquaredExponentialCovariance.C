@@ -60,33 +60,11 @@ SquaredExponentialCovariance::SquaredExponentialFunction(torch::Tensor & K,
                                                          const Real sigma_n_squared,
                                                          const bool is_self_covariance)
 {
-  auto K_accessor = K.accessor<Real, 2>();
-  auto x_accessor = x.accessor<Real, 2>();
-  auto xp_accessor = xp.accessor<Real, 2>();
-
-  unsigned int num_samples_x = x.sizes()[0];
-  unsigned int num_samples_xp = xp.sizes()[0];
   unsigned int num_params_x = x.sizes()[1];
 
   mooseAssert(num_params_x == xp.sizes()[1],
               "Number of parameters do not match in covariance kernel calculation");
 
-  /*
-  for (unsigned int ii = 0; ii < num_samples_x; ++ii)
-  {
-    for (unsigned int jj = 0; jj < num_samples_xp; ++jj)
-    {
-      // Compute distance per parameter, scaled by length factor
-      Real r_squared_scaled = 0;
-      for (unsigned int kk = 0; kk < num_params_x; ++kk)
-        r_squared_scaled +=
-            std::pow((x_accessor[ii][kk] - xp_accessor[jj][kk]) / length_factor[kk], 2);
-      K_accessor[ii][jj] = sigma_f_squared * std::exp(-r_squared_scaled / 2.0);
-    }
-    if (is_self_covariance)
-      K_accessor[ii][ii] += sigma_n_squared;
-  }
-  */
   std::vector length_factor_cp = length_factor;
   torch::Tensor l_factor =
       torch::from_blob(length_factor_cp.data(), {1, long(length_factor_cp.size())}, at::kDouble)
