@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "StepUserObject.h"
+#include "MooseUtils.h"
 #include <limits>
 #include <algorithm>
 
@@ -178,7 +179,7 @@ StepUserObject::getStep(const Real & time) const
       return i;
 
     which_step = i;
-    if (time >= _times[i] && time < _times[i + 1])
+    if (MooseUtils::absoluteFuzzyGreaterEqual(time, _times[i]) && MooseUtils::absoluteFuzzyLessThan(time, _times[i + 1]))
       return which_step;
   }
 
