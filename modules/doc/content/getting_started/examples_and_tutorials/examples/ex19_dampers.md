@@ -2,7 +2,7 @@
 
 [ex19.i](https://github.com/idaholab/moose/blob/devel/examples/ex19_dampers/ex19.i)
 
-[](---)
+
 
 ## Example 19 Results
 
