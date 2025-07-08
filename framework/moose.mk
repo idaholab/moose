@@ -705,10 +705,10 @@ app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 #    clean' will only clean debug object and executable files.
 # .) Calling 'make clean' in an app should not remove MOOSE object
 #    files, libraries, etc.
-clean: $(KOKKOS_CLEAN)
+clean:
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
 	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(app_unity_srcfiles)
-	@rm -rf $(app_KOKKOS_LIB) $(KOKKOS_OBJECTS) $(KOKKOS_DEPS) KokkosCore_Config_PostInclude.tmp desul
+	@rm -rf $(app_KOKKOS_LIB) $(KOKKOS_OBJECTS) $(KOKKOS_DEPS)
 	@rm -rf $(APPLICATION_DIR)/build
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
