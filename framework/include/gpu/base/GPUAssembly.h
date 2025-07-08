@@ -179,6 +179,36 @@ public:
   {
     return _grad_phi_face(subdomain, elem_type, fe_type);
   }
+  /**
+   * Get the inverse of Jacobian matrix of an element quadrature point
+   * @param info The element information object
+   * @param qp The local quadrature point index
+   * @returns The inverse of Jacobian matrix
+   */
+  KOKKOS_FUNCTION const auto getJacobian(ElementInfo info, unsigned int qp) const
+  {
+    return _jacobian[info.subdomain][getQpOffset(info) + qp];
+  }
+  /**
+   * Get the transformed Jacobian weight of an element quadrature point
+   * @param info The element information object
+   * @param qp The local quadrature point index
+   * @returns The inverse of Jacobian matrix
+   */
+  KOKKOS_FUNCTION const auto getJxW(ElementInfo info, unsigned int qp) const
+  {
+    return _jxw[info.subdomain][getQpOffset(info) + qp];
+  }
+  /**
+   * Get the coordinate of an element quadrature point
+   * @param info The element information object
+   * @param qp The local quadrature point index
+   * @returns The inverse of Jacobian matrix
+   */
+  KOKKOS_FUNCTION const auto getQPoint(ElementInfo info, unsigned int qp) const
+  {
+    return _xyz[info.subdomain][getQpOffset(info) + qp];
+  }
 
   /**
    * Get the coordinate transform factor for a point in a subdomain
@@ -214,6 +244,11 @@ public:
                                                  Real3 * q_points) const;
 
   /**
+   * Kokkos function for caching physical maps on element quadrature points
+   */
+  KOKKOS_FUNCTION void operator()(const size_t tid) const;
+
+  /**
    * Get the list of boundaries to cache face material properties
    * @returns The list of boundaries
    */
@@ -229,6 +264,10 @@ private:
    * Initialize shape data
    */
   void initShape();
+  /**
+   * Cache physical maps on element quadrature points
+   */
+  void cachePhysicalMap();
 
   /**
    * Reference of the MOOSE problem
@@ -304,6 +343,14 @@ private:
   Array2D<Array2D<Real3>> _map_grad_phi;
   Array2D<Array<Array2D<Real3>>> _map_grad_phi_face;
   Array2D<Array<Array2D<Real3>>> _map_grad_psi_face;
+  ///@}
+  /**
+   * Cached physical maps on element quadrature points
+   */
+  ///@{
+  Array<Array<Real33>> _jacobian;
+  Array<Array<Real>> _jxw;
+  Array<Array<Real3>> _xyz;
   ///@}
 
   /**
