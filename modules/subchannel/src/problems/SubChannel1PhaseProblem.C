@@ -213,7 +213,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   LibmeshPetscCall(
       createPetscMatrix(_cmc_sys_Wij_mat, _block_size * _n_gaps, _block_size * _n_gaps));
   LibmeshPetscCall(createPetscVector(_cmc_sys_Wij_rhs, _block_size * _n_gaps));
-  LibmeshPetscCall(createPetscVector(_cmc_Wij_channel_dummy, _block_size * _n_channels));
 
   // Energy conservation components
   LibmeshPetscCall(createPetscMatrix(
@@ -317,7 +316,6 @@ SubChannel1PhaseProblem::cleanUp()
   LibmeshPetscCall(VecDestroy(&_cmc_pressure_force_rhs));
   LibmeshPetscCall(MatDestroy(&_cmc_sys_Wij_mat));
   LibmeshPetscCall(VecDestroy(&_cmc_sys_Wij_rhs));
-  LibmeshPetscCall(VecDestroy(&_cmc_Wij_channel_dummy));
 
   // Energy conservation components
   LibmeshPetscCall(MatDestroy(&_hc_time_derivative_mat));
