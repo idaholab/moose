@@ -83,8 +83,10 @@ public:
   ///@{
   KOKKOS_FUNCTION void
   computeResidualInternal(const Derived * kernel, ResidualDatum & datum, Real * local_re) const;
-  KOKKOS_FUNCTION void
-  computeJacobianInternal(const Derived * kernel, ResidualDatum & datum, Real * local_ke) const;
+  KOKKOS_FUNCTION void computeJacobianInternal(const Derived * kernel,
+                                               const unsigned int j,
+                                               ResidualDatum & datum,
+                                               Real * local_ke) const;
   ///@}
 
 protected:
@@ -121,6 +123,7 @@ KernelGrad<Derived>::computeResidualInternal(const Derived * kernel,
 template <typename Derived>
 KOKKOS_FUNCTION void
 KernelGrad<Derived>::computeJacobianInternal(const Derived * kernel,
+                                             const unsigned int j,
                                              ResidualDatum & datum,
                                              Real * local_ke) const
 {
@@ -128,19 +131,14 @@ KernelGrad<Derived>::computeJacobianInternal(const Derived * kernel,
   {
     datum.reinit();
 
-    for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-    {
-      Real3 value = datum.JxW(qp) * kernel->precomputeQpJacobian(j, qp, datum);
+    Real3 value = datum.JxW(qp) * kernel->precomputeQpJacobian(j, qp, datum);
 
-      for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-        local_ke[i * datum.n_jdofs() + j] += value * _grad_test(datum, i, qp);
-    }
+    for (unsigned int i = 0; i < datum.n_idofs(); ++i)
+      local_ke[i] += value * _grad_test(datum, i, qp);
   }
 
   for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-    for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-      accumulateTaggedElementalMatrix(
-          local_ke[i * datum.n_jdofs() + j], datum.elem().id, i, j, datum.jvar());
+    accumulateTaggedElementalMatrix(local_ke[i], datum.elem().id, i, j, datum.jvar());
 }
 
 } // namespace Kokkos

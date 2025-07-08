@@ -143,26 +143,32 @@ public:
    * Compute residual
    * @param bc The boundary condition object of the final derived type
    * @param datum The ResidualDatum object of the current thread
-   * @param local_re The temporary storage storing the residual contribution of each local DOF
+   * @param local_re The temporary storage storing the residual contribution of each DOF
    */
   KOKKOS_FUNCTION void
   computeResidualInternal(const Derived * bc, ResidualDatum & datum, Real * local_re) const;
   /**
    * Compute diagonal Jacobian
    * @param bc The boundary condition object of the final derived type
+   * @param j The element-local DOF index for column
    * @param datum The ResidualDatum object of the current thread
-   * @param local_ke The temporary storage storing the Jacobian contribution of each local DOF
+   * @param local_ke The temporary storage storing the Jacobian contribution of each DOF
    */
-  KOKKOS_FUNCTION void
-  computeJacobianInternal(const Derived * bc, ResidualDatum & datum, Real * local_ke) const;
+  KOKKOS_FUNCTION void computeJacobianInternal(const Derived * bc,
+                                               const unsigned int j,
+                                               ResidualDatum & datum,
+                                               Real * local_ke) const;
   /**
    * Compute off-diagonal Jacobian
    * @param bc The boundary condition object of the final derived type
+   * @param j The element-local DOF index for column
    * @param datum The ResidualDatum object of the current thread
-   * @param local_ke The temporary storage storing the Jacobian contribution of each local DOF
+   * @param local_ke The temporary storage storing the Jacobian contribution of each DOF
    */
-  KOKKOS_FUNCTION void
-  computeOffDiagJacobianInternal(const Derived * bc, ResidualDatum & datum, Real * local_ke) const;
+  KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived * bc,
+                                                      const unsigned int j,
+                                                      ResidualDatum & datum,
+                                                      Real * local_ke) const;
   ///@}
 
 protected:
@@ -258,7 +264,7 @@ IntegratedBC<Derived>::operator()(ResidualLoop, const size_t tid) const
   for (unsigned int i = 0; i < datum.n_dofs(); ++i)
     local_re[i] = 0;
 
-  computeResidualInternal(bc, datum, local_re);
+  bc->computeResidualInternal(bc, datum, local_re);
 }
 
 template <typename Derived>
@@ -271,13 +277,15 @@ IntegratedBC<Derived>::operator()(JacobianLoop, const size_t tid) const
   ResidualDatum datum(
       elem.first, elem.second, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
-  Real local_ke[MAX_DOF * MAX_DOF];
+  Real local_ke[MAX_DOF];
 
-  for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-    for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-      local_ke[i * datum.n_jdofs() + j] = 0;
+  for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
+  {
+    for (unsigned int i = 0; i < datum.n_idofs(); ++i)
+      local_ke[i] = 0;
 
-  computeJacobianInternal(bc, datum, local_ke);
+    bc->computeJacobianInternal(bc, j, datum, local_ke);
+  }
 }
 
 template <typename Derived>
@@ -296,13 +304,15 @@ IntegratedBC<Derived>::operator()(OffDiagJacobianLoop, const size_t tid) const
   ResidualDatum datum(
       elem.first, elem.second, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
 
-  Real local_ke[MAX_DOF * MAX_DOF];
+  Real local_ke[MAX_DOF];
 
-  for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-    for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-      local_ke[i * datum.n_jdofs() + j] = 0;
+  for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
+  {
+    for (unsigned int i = 0; i < datum.n_idofs(); ++i)
+      local_ke[i] = 0;
 
-  computeOffDiagJacobianInternal(bc, datum, local_ke);
+    bc->computeOffDiagJacobianInternal(bc, j, datum, local_ke);
+  }
 }
 
 template <typename Derived>
@@ -326,6 +336,7 @@ IntegratedBC<Derived>::computeResidualInternal(const Derived * bc,
 template <typename Derived>
 KOKKOS_FUNCTION void
 IntegratedBC<Derived>::computeJacobianInternal(const Derived * bc,
+                                               const unsigned int j,
                                                ResidualDatum & datum,
                                                Real * local_ke) const
 {
@@ -334,19 +345,17 @@ IntegratedBC<Derived>::computeJacobianInternal(const Derived * bc,
     datum.reinit();
 
     for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-      for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-        local_ke[i * datum.n_jdofs() + j] += datum.JxW(qp) * bc->computeQpJacobian(i, j, qp, datum);
+      local_ke[i] += datum.JxW(qp) * bc->computeQpJacobian(i, j, qp, datum);
   }
 
   for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-    for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-      accumulateTaggedElementalMatrix(
-          local_ke[i * datum.n_jdofs() + j], datum.elem().id, i, j, datum.jvar());
+    accumulateTaggedElementalMatrix(local_ke[i], datum.elem().id, i, j, datum.jvar());
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
 IntegratedBC<Derived>::computeOffDiagJacobianInternal(const Derived * bc,
+                                                      const unsigned int j,
                                                       ResidualDatum & datum,
                                                       Real * local_ke) const
 {
@@ -355,15 +364,11 @@ IntegratedBC<Derived>::computeOffDiagJacobianInternal(const Derived * bc,
     datum.reinit();
 
     for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-      for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-        local_ke[i * datum.n_jdofs() + j] +=
-            datum.JxW(qp) * bc->computeQpOffDiagJacobian(i, j, datum.jvar(), qp, datum);
+      local_ke[i] += datum.JxW(qp) * bc->computeQpOffDiagJacobian(i, j, datum.jvar(), qp, datum);
   }
 
   for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-    for (unsigned int j = 0; j < datum.n_jdofs(); ++j)
-      accumulateTaggedElementalMatrix(
-          local_ke[i * datum.n_jdofs() + j], datum.elem().id, i, j, datum.jvar());
+    accumulateTaggedElementalMatrix(local_ke[i], datum.elem().id, i, j, datum.jvar());
 }
 
 } // namespace Kokkos
