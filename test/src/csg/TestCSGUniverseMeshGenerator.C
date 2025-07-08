@@ -70,9 +70,9 @@ TestCSGUniverseMeshGenerator::generateCSG()
   csg_mesh->joinOtherBase(inp_csg_mesh, new_base_name, new_join_name);
 
   // new universe to collect all others into a main one
-  auto new_univ = csg_mesh->createUniverse(mg_name + "_univ");
+  auto & new_univ = csg_mesh->createUniverse(mg_name + "_univ");
   // collect a list of cells to add to this new universe
-  std::vector<std::shared_ptr<CSG::CSGCell>> cells_to_add;
+  std::vector<CSG::CSGCell *> cells_to_add;
 
   // for all input meshes, create a containment cell, but only join CSGBases
   // for ones that were not joined above (i > 1)
@@ -97,7 +97,7 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
     // create a cell containing the new (root) univ
     // cell is located at the origin of the original cells - just use one cell to get origin
-    auto inp_cells = csg_mesh->getUniverseByName(current_univ_name)->getAllCells();
+    auto inp_cells = csg_mesh->getUniverseByName(current_univ_name).getAllCells();
     auto tmp_cell = inp_cells[0];
     auto tmp_cell_reg = tmp_cell->getRegion();
     auto cell_surfs = tmp_cell_reg.getSurfaces();
@@ -137,16 +137,16 @@ TestCSGUniverseMeshGenerator::generateCSG()
         -x_pos_surf & +x_neg_surf & -y_pos_surf & +y_neg_surf & -z_pos_surf & +z_neg_surf;
 
     // create a cell and add it to the new universe
-    auto univ_ptr = csg_mesh->getUniverseByName(current_univ_name);
+    auto & csg_univ = csg_mesh->getUniverseByName(current_univ_name);
     std::string new_cell_name = img + "_cell";
     if (_add_cell_mode)
     {
       // don't add to the new universe right away, do so later with the addCellsToUniverse method
-      auto img_cell = csg_mesh->createCell(new_cell_name, univ_ptr, new_region);
-      cells_to_add.push_back(img_cell);
+      auto & img_cell = csg_mesh->createCell(new_cell_name, csg_univ, new_region);
+      cells_to_add.push_back(&img_cell);
     }
     else // add to the new universe at time of creation
-      auto img_cell = csg_mesh->createCell(new_cell_name, univ_ptr, new_region, new_univ);
+      csg_mesh->createCell(new_cell_name, csg_univ, new_region, &new_univ);
   }
 
   if (_add_cell_mode)

@@ -23,9 +23,7 @@ CSGCell::CSGCell(const std::string name, const std::string mat_name, const CSGRe
 {
 }
 
-CSGCell::CSGCell(const std::string name,
-                 const std::shared_ptr<CSGUniverse> univ,
-                 const CSGRegion & region)
+CSGCell::CSGCell(const std::string name, CSGUniverse * univ, const CSGRegion & region)
   : _name(name),
     _fill_type(FillType::UNIVERSE),
     _fill_name(univ->getName()),
@@ -34,7 +32,7 @@ CSGCell::CSGCell(const std::string name,
 {
 }
 
-const std::shared_ptr<CSGUniverse> &
+const CSGUniverse &
 CSGCell::getFillUniverse() const
 {
   if (getFillType() != FillType::UNIVERSE)
@@ -42,7 +40,7 @@ CSGCell::getFillUniverse() const
     mooseError("Cell '" + getName() + "' has " + getFillTypeString() + " fill, not UNIVERSE.");
   }
   else
-    return _fill_universe;
+    return *_fill_universe;
 }
 
 const std::string
@@ -69,4 +67,34 @@ CSGCell::getFillTypeString() const
       return "VOID";
   }
 }
+
+bool
+CSGCell::operator==(const CSG::CSGCell & other) const
+{
+  const auto name_eq = this->getName() == other.getName();
+  const auto region_eq = this->getRegion() == other.getRegion();
+  const auto fill_type_eq = (this->getFillTypeString() == other.getFillTypeString()) &&
+                            (this->getFillName() == other.getFillName());
+  if (name_eq && region_eq && fill_type_eq)
+  {
+    switch (this->getFillType())
+    {
+      case FillType::MATERIAL:
+        return this->getFillMaterial() == other.getFillMaterial();
+      case FillType::UNIVERSE:
+        return this->getFillUniverse() == other.getFillUniverse();
+      default:
+        return true;
+    }
+  }
+  else
+    return false;
+}
+
+bool
+CSGCell::operator!=(const CSG::CSGCell & other) const
+{
+  return !(*this == other);
+}
+
 } // namespace CSG

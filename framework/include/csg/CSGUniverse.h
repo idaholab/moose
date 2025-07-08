@@ -37,9 +37,7 @@ public:
    * @param cells list of cells to add to universe
    * @param is_root true to set universe as the root universe (default false)
    */
-  CSGUniverse(const std::string name,
-              std::vector<std::shared_ptr<CSGCell>> & cells,
-              bool is_root = false);
+  CSGUniverse(const std::string name, std::vector<CSGCell *> & cells, bool is_root = false);
 
   /**
    * Destructor
@@ -50,9 +48,9 @@ public:
    * @brief Get the Cell object by name
    *
    * @param name name of cell
-   * @return std::shared_ptr<CSGCell> pointer to the cell of the specified name in this universe
+   * @return CSGCell & reference to the cell of the specified name in this universe
    */
-  const std::shared_ptr<CSGCell> & getCell(const std::string name);
+  CSGCell & getCell(const std::string name);
 
   /**
    * @brief check if cell of provided name is present in universe
@@ -65,9 +63,9 @@ public:
   /**
    * @brief Get list of the all cells in the universe
    *
-   * @return std::vector<std::shared_ptr<CSGCell>> list of pointers to cells in universe
+   * @return std::vector<CSGCell *> list of pointers to cells in universe
    */
-  const std::vector<std::shared_ptr<CSGCell>> & getAllCells() const { return _cells; }
+  const std::vector<CSGCell *> & getAllCells() const { return _cells; }
 
   /**
    * @brief Get the name of the universe
@@ -83,13 +81,19 @@ public:
    */
   bool isRoot() const { return _is_root; }
 
+  /// Operator overload for checking if two CSGUniverse objects are equal
+  bool operator==(const CSGUniverse & other) const;
+
+  /// Operator overload for checking if two CSGUniverse objects are not equal
+  bool operator!=(const CSGUniverse & other) const;
+
 protected:
   /**
    * @brief add cell to universe
    *
-   * @param cell pointer to cell to add
+   * @param reference to cell to add
    */
-  void addCell(const std::shared_ptr<CSGCell> & cell);
+  void addCell(CSGCell & cell);
 
   /**
    * @brief remove a cell of the specified name from the universe
@@ -110,8 +114,8 @@ protected:
   /// Name of universe
   std::string _name;
 
-  /// list of cells in universe
-  std::vector<std::shared_ptr<CSGCell>> _cells;
+  /// list of pointers to cells in universe
+  std::vector<CSGCell *> _cells;
 
   // whether or not this universe is the root universe
   bool _is_root;
