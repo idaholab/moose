@@ -21,11 +21,18 @@ MFEMVectorBoundaryIntegratedBC::validParams()
                              "$(\\vec f, \\vec v)_{\\partial\\Omega}$");
   params.addParam<MFEMVectorCoefficientName>(
       "vector_coefficient", "1. 1. 1.", "Vector coefficient used in the boundary integrator");
+  params.addParam<MFEMVectorCoefficientName>(
+      "vector_coefficient_imag",
+      "The imaginary part of the vector coefficient used in the boundary integrator. ");
   return params;
 }
 
 MFEMVectorBoundaryIntegratedBC::MFEMVectorBoundaryIntegratedBC(const InputParameters & parameters)
-  : MFEMIntegratedBC(parameters), _vec_coef(getVectorCoefficient("vector_coefficient"))
+  : MFEMIntegratedBC(parameters),
+    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient"))),
+    _vec_coef_imag(isParamValid("vector_coefficient_imag")
+                       ? getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient_imag"))
+                       : _vec_coef)
 {
 }
 
@@ -34,9 +41,9 @@ MFEMVectorBoundaryIntegratedBC::MFEMVectorBoundaryIntegratedBC(const InputParame
 std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
 MFEMVectorBoundaryIntegratedBC::createLFIntegrator()
 {
-  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
-  return std::make_pair(new mfem::VectorBoundaryLFIntegrator(_vec_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
-                                                                                                  : new mfem::VectorBoundaryLFIntegrator(_vec_coef));
+  return std::make_pair(new mfem::VectorBoundaryLFIntegrator(_vec_coef),
+                 isParamValid("vector_coefficient_imag") ? new mfem::VectorBoundaryLFIntegrator(_vec_coef_imag)
+                                                          : nullptr);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
