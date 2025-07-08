@@ -1,193 +1,114 @@
-import json
-import datetime
-from collections import OrderedDict, namedtuple
-from pathlib import Path
-from typing import Any, ClassVar, Dict, List, Optional
-
-from xml.etree.ElementTree import Element, SubElement
-
-from _version import __version__ as VERSION
-from pythonfmu.enums import (
-    Fmi2Type,
-    Fmi2Status,
-    Fmi2Causality,
-    Fmi2Initial,
-    Fmi2Variability,
-)
-from pythonfmu.variables import Boolean, Integer, Real, ScalarVariable, String
 from pythonfmu import Fmi2Slave
-
-ModelOptions = namedtuple("ModelOptions", ["name", "value", "cli"])
-
-
-FMI2_MODEL_OPTIONS: List[ModelOptions] = [
-    ModelOptions("needsExecutionTool", True, "no-external-tool"),
-    ModelOptions("canHandleVariableCommunicationStepSize", True, "no-variable-step"),
-    ModelOptions("canInterpolateInputs", False, "interpolate-inputs"),
-    ModelOptions("canBeInstantiatedOnlyOncePerProcess", False, "only-one-per-process"),
-    ModelOptions("canGetAndSetFMUstate", False, "handle-state"),
-    ModelOptions("canSerializeFMUstate", False, "serialize-state"),
-]
+from pythonfmu.enums import Fmi2Causality, Fmi2Variability
+from pythonfmu.variables import Integer, Real, String
+from pythonfmu.default_experiment import DefaultExperiment
+from MooseControl import MooseControl
+from typing import Optional
+import logging
 
 
-class MOOSE2fmu(Fmi2Slave):
-    """Abstract class for the creation of FMU from an OpenMOOSE case
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+    handlers=[
+        logging.FileHandler("moose_simulation.log"),
+        logging.StreamHandler()
+    ]
+)
 
-    Args:
-        Fmi2Slave: Abstract class defining FMU in details see pythomfmu
+class MooseSlave(Fmi2Slave):
     """
+    Base FMU slave for MOOSE simulations. Handles registration of FMU variables,
+    control setup, and stepping logic stub to be implemented by subclasses.
+    """
+    def __init__(
+        self,
+        *args,
+        flag: str = "",
+        moose_mpi: str = "",
+        mpi_num: str = 1,
+        moose_executable: str = "../../../moose_test-opt",
+        moose_inputfile: str = "fmu_diffusion.i",
+        server_name: str = "web_server",
+        max_retries: int = 5,
+        dt_tolerance: Real = 1e-3,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs, logging_add_standard_categories=True)
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.info("MooseSlave initialized successfully.")
 
-        self.host = '"127.0.0.1"'
-        self.port = "12345"
-        self.outputPath = "MOOSECase"
+        # Configuration parameters
+        self.flag: str = flag
+        self.moose_mpi: str = moose_mpi
+        self.mpi_num: str = mpi_num
+        self.moose_executable: str = moose_executable
+        self.moose_inputfile: str = moose_inputfile
+        self.server_name: str = server_name
+        self.max_retries: int = max_retries
+        self.dt_tolerance: Real = dt_tolerance
 
-        self.oscmd = "bash -i"
-        self.arguments = ""
+        # Register tunable parameters
+        self.register_variable(String("flag", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(String("moose_mpi", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(String("mpi_num", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(String("moose_executable", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(String("moose_inputfile", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(String("server_name", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(Integer("max_retries", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(Real("dt_tolerance", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
 
-        self.register_variable(
-            String(
-                "host",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
-        self.register_variable(
-            Integer(
-                "port",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
-        self.register_variable(
-            String(
-                "outputPath",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
-        self.register_variable(
-            String(
-                "oscmd",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
-        self.register_variable(
-            String(
-                "arguments",
-                causality=Fmi2Causality.parameter,
-                variability=Fmi2Variability.tunable,
-            )
-        )
+        # Register outputs
+        self.register_variable(Real("moose_time", causality=Fmi2Causality.output, variability=Fmi2Variability.continuous))
+        self.register_variable(Real("time", causality=Fmi2Causality.output, variability=Fmi2Variability.continuous))
 
-    def to_xml(self, model_options: Dict[str, str] = dict()) -> Element:
-        """Build the XML representation of the model.
-
-        Args:
-            model_options (Dict[str, str]) : FMU model options
-
-        Returns:
-            (xml.etree.TreeElement.Element) XML description of the FMU
-        """
-
-        t = datetime.datetime.now(datetime.timezone.utc)
-        date_str = t.isoformat(timespec="seconds")
-
-        attrib = dict(
-            fmiVersion="2.0",
-            modelName=self.modelName,
-            guid=f"{self.guid!s}",
-            generationTool=f"FMU4MOOSE {VERSION}",
-            generationDateAndTime=date_str,
-            variableNamingConvention="structured",
-        )
-        if self.description is not None:
-            attrib["description"] = self.description
-        if self.author is not None:
-            attrib["author"] = self.author
-        if self.license is not None:
-            attrib["license"] = self.license
-        if self.version is not None:
-            attrib["version"] = self.version
-        if self.copyright is not None:
-            attrib["copyright"] = self.copyright
-
-        root = Element("fmiModelDescription", attrib)
-
-        options = dict()
-        for option in FMI2_MODEL_OPTIONS:
-            value = model_options.get(option.name, option.value)
-            options[option.name] = str(value).lower()
-        options["modelIdentifier"] = self.modelName
-        options["canNotUseMemoryManagementFunctions"] = "true"
-
-        SubElement(root, "CoSimulation", attrib=options)
-
-        if len(self.log_categories) > 0:
-            categories = SubElement(root, "LogCategories")
-            for category, description in self.log_categories.items():
-                categories.append(
-                    Element(
-                        "Category",
-                        attrib={"name": category, "description": description},
-                    )
-                )
-
-        variables = SubElement(root, "ModelVariables")
-        for v in self.vars.values():
-            if ScalarVariable.requires_start(v):
-                self.__apply_start_value(v)
-            variables.append(v.to_xml())
-
-        structure = SubElement(root, "ModelStructure")
-        outputs = list(
-            filter(lambda v: v.causality == Fmi2Causality.output, self.vars.values())
-        )
-
-        if outputs:
-            outputs_node = SubElement(structure, "Outputs")
-            for i, v in enumerate(self.vars.values()):
-                if v.causality == Fmi2Causality.output:
-                    SubElement(outputs_node, "Unknown", attrib=dict(index=str(i + 1)))
-
-        if self.default_experiment is not None:
-            attrib = dict()
-            if self.default_experiment.start_time is not None:
-                attrib["startTime"] = self.default_experiment.start_time
-            if self.default_experiment.stop_time is not None:
-                attrib["stopTime"] = self.default_experiment.stop_time
-            if self.default_experiment.tolerance is not None:
-                attrib["tolerance"] = self.default_experiment.tolerance
-            SubElement(root, "DefaultExperiment", attrib)
-
-        return root
-
-    def __apply_start_value(self, var: ScalarVariable):
-        """apply start values
-
-        Args:
-            var (ScalarVariable): scalarVariable
-        Raises:
-            Exception: unsupported type
-        """
-        vrs = [var.value_reference]
-
-        if isinstance(var, Integer):
-            refs = self.get_integer(vrs)
-        elif isinstance(var, Real):
-            refs = self.get_real(vrs)
-        elif isinstance(var, Boolean):
-            refs = self.get_boolean(vrs)
-        elif isinstance(var, String):
-            refs = self.get_string(vrs)
+        # Setup MooseControl
+        if self.moose_mpi:
+            self.cmd = [self.moose_mpi, "-n", self.mpi_num, self.moose_executable, "-i", self.moose_inputfile]
         else:
-            raise Exception(f"Unsupported type!")
+            self.cmd = [self.moose_executable, "-i", self.moose_inputfile]
+        # self.control = MooseControl(moose_command=cmd, moose_control_name=self.server_name)
+        # self.control.initialize()
 
-        var.start = refs[0]
+    def exit_initialization_mode(self) -> bool:
 
-    def do_step(self, current_time: float, step_size: float) -> bool:
-        "not expected to be implemented"
+        self.control = MooseControl(moose_command=self.cmd, moose_control_name=self.server_name)
+        self.control.initialize()
+
         return True
+
+    def setup_experiment(
+        self,
+        start_time: float,
+        stop_time: Optional[float],
+        tolerance: Optional[float],
+    ) -> bool:
+        self.sim_start_time = start_time
+        self.sim_stop_time = stop_time
+        self.sim_tolerance = tolerance
+        return True
+
+    def do_step(
+        self,
+        current_time: float,
+        step_size: float,
+        no_set_fmu_state_prior: bool = False,
+    ) -> bool:
+        """
+        FMU stepping logic must be implemented by subclasses.
+        """
+        raise NotImplementedError("Subclasses must implement do_step()")
+
+    def _get_flag_with_retries(self, wait_for_flag: str, max_retries: int) -> Optional[str]:
+        """
+        Poll self.control.getWaitingFlag() up to max_retries times.
+        """
+        for attempt in range(1, max_retries + 1):
+            flag = self.control.getWaitingFlag()
+            if flag:
+                return flag
+            print(f"[Attempt {attempt}/{max_retries}] no waiting flag yet, retrying...")
+            self.control.wait(wait_for_flag)
+        return None
+
