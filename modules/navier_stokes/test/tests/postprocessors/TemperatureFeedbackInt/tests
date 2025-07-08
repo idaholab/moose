@@ -1,0 +1,14 @@
+[Tests]
+  [test_1]
+    type = 'Exodiff'
+    input = 'TemperatureFeedback_line.i'
+    exodiff = 'TemperatureFeedback_line_out.e'
+    requirement = 'The system shall be able to calculate the feedback for a changing mesh'
+  []
+  [test_2]
+    type = 'Exodiff'
+    input = 'TemperatureFeedback.i'
+    exodiff = 'TemperatureFeedback_out.e'
+    requirement = 'The system shall be able to calculate the feedback in a complex geometry'
+  []
+[]

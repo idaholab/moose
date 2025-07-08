@@ -1,0 +1,8 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'TempDensity.i'
+    csvdiff = 'TempDensity_outfile.csv'
+    requirement = 'The system shall be able to calculate the density feedback'
+  []
+[]
