@@ -11,6 +11,7 @@ l = 2
     nx = 20
     ny = 5
   []
+  uniform_refine = 0
 []
 
 [Variables]
@@ -25,7 +26,6 @@ l = 2
     type = TimeDerivative
     variable = diffused
   []
-
 
   [diff]
     type = Diffusion
@@ -47,19 +47,28 @@ l = 2
     boundary = 'right'
     value = 0
   []
+
+
+  [bottom]
+    type = DirichletBC
+    variable = diffused
+    value = 1
+    boundary = 'bottom'
+  []
 []
+
+
 
 [Executioner]
   type = Transient
-  num_steps = 10
-  dt = 0.5
+  num_steps = 110
+  dt = 0.1
 []
 
 [Controls]
   [web_server]
     type = WebServerControl
-    execute_on = 'TIMESTEP_BEGIN'
-    port = 40000
+    execute_on = 'TIMESTEP_END'
   []
 []
 
