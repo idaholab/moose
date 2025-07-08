@@ -22,9 +22,11 @@
 #include "libmesh/kelly_error_estimator.h"
 #include "libmesh/patch_recovery_error_estimator.h"
 #include "libmesh/fourth_error_estimators.h"
+#include "libmesh/smoothness_estimator.h"
 #include "libmesh/parallel.h"
 #include "libmesh/error_vector.h"
 #include "libmesh/distributed_mesh.h"
+#include "libmesh/hp_coarsentest.h"
 
 using namespace libMesh;
 
@@ -58,7 +60,8 @@ Adaptivity::~Adaptivity() {}
 void
 Adaptivity::init(const unsigned int steps,
                  const unsigned int initial_steps,
-                 const bool p_refinement)
+                 const bool p_refinement,
+                 const bool hp_refinement)
 {
   // Get the pointer to the DisplacedProblem, this cannot be done at construction because
   // DisplacedProblem
@@ -67,6 +70,7 @@ Adaptivity::init(const unsigned int steps,
 
   _mesh_refinement = std::make_unique<MeshRefinement>(_mesh);
   _error = std::make_unique<ErrorVector>();
+  _smoothness = std::make_unique<ErrorVector>();
 
   EquationSystems & es = _fe_problem.es();
   es.parameters.set<bool>("adaptivity") = true;
@@ -74,9 +78,10 @@ Adaptivity::init(const unsigned int steps,
   _initial_steps = initial_steps;
   _steps = steps;
   _p_refinement_flag = p_refinement;
+  _hp_refinement_flag = hp_refinement;
   _mesh_refinement_on = true;
 
-  if (_p_refinement_flag)
+  if (_p_refinement_flag || _hp_refinement_flag)
     _mesh.doingPRefinement(true);
 
   _mesh_refinement->set_periodic_boundaries_ptr(
@@ -209,9 +214,24 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     // Flag elements to be refined and coarsened
     _mesh_refinement->flag_elements_by_error_fraction(*_error);
 
-    if (_displaced_problem)
+    // Moving some of h flagged elements to p flagged
+    HPCoarsenTest hpselector;
+    if (_hp_refinement_flag){
+      _smoothness_estimator = std::make_unique<SmoothnessEstimator>();
+      _smoothness_estimator->estimate_error(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(), *_smoothness);
+      hpselector.select_refinement(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(), *_smoothness);
+    }
+
+    if (_displaced_problem){
       // Reuse the error vector and refine the displaced mesh
       _displaced_mesh_refinement->flag_elements_by_error_fraction(*_error);
+
+    if (_hp_refinement_flag){
+          _smoothness_estimator = std::make_unique<SmoothnessEstimator>();
+          _smoothness_estimator->estimate_error(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(), *_smoothness);
+          hpselector.select_refinement(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(), *_smoothness);
+        }
+      }
   }
 
   // If the DisplacedProblem is active, undisplace the DisplacedMesh

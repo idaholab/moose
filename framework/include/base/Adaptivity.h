@@ -61,7 +61,7 @@ public:
    * for transient or eigen solves.
    * p_refinement indicates whether the refinement will be p-refinement or h-refinement.
    */
-  void init(const unsigned int steps, const unsigned int initial_steps, const bool p_refinement);
+  void init(const unsigned int steps, const unsigned int initial_steps, const bool p_refinement, const bool hp_refinement);
 
   /**
    * Set adaptivity parameter
@@ -267,6 +267,10 @@ protected:
   std::unique_ptr<libMesh::ErrorEstimator> _error_estimator;
   /// Error vector for use with the error estimator.
   std::unique_ptr<libMesh::ErrorVector> _error;
+  /// Smoothness estimator to be used by the apps.
+  std::unique_ptr<libMesh::ErrorEstimator> _smoothness_estimator;
+  /// Error vector for use with the smoothness estimator.
+  std::unique_ptr<libMesh::ErrorVector> _smoothness;
 
   std::shared_ptr<DisplacedProblem> _displaced_problem;
 
@@ -313,6 +317,7 @@ protected:
   std::map<std::string, std::unique_ptr<libMesh::ErrorVector>> _indicator_field_to_error_vector;
 
   bool _p_refinement_flag = false;
+  bool _hp_refinement_flag = false;
 };
 
 template <typename T>
