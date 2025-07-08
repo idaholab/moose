@@ -550,8 +550,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _solver_params.push_back(makeLinearSolverParams());
   }
 
-  _nonlocal_cm.resize(_nl_sys_names.size());
-  _cm.resize(_nl_sys_names.size());
+  _nonlocal_cm.resize(numSolverSystems());
+  _cm.resize(numSolverSystems());
 
   _time = 0.0;
   _time_old = 0.0;
