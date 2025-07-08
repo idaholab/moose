@@ -111,7 +111,7 @@ ComputeLinearFVFaceThread::setupSystemContributionObjects()
 
   // As a last step, we make sure the kernels know which vectors/matrices they need to contribute to
   for (auto & kernel : kernels)
-    kernel->linkObjectsForContribution(_vector_tags, _matrix_tags);
+    kernel->linkTaggedVectorsAndMatrices(_vector_tags, _matrix_tags);
 
   _system_contrib_objects_ready = true;
 }

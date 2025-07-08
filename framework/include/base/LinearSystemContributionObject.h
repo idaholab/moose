@@ -66,8 +66,8 @@ public:
 
   /// Function which sets up the vectors and matrices this kernel will contribute to.
   /// These will be determined based on the \p vector_tags and \p matrix_tags .
-  void linkObjectsForContribution(const std::set<TagID> & vector_tags,
-                                  const std::set<TagID> & matrix_tags);
+  void linkTaggedVectorsAndMatrices(const std::set<TagID> & vector_tags,
+                                    const std::set<TagID> & matrix_tags);
 
 protected:
   /// Reference to this object's FEProblemBase

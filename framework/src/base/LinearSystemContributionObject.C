@@ -57,8 +57,8 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
 }
 
 void
-LinearSystemContributionObject::linkObjectsForContribution(const std::set<TagID> & vector_tags,
-                                                           const std::set<TagID> & matrix_tags)
+LinearSystemContributionObject::linkTaggedVectorsAndMatrices(const std::set<TagID> & vector_tags,
+                                                             const std::set<TagID> & matrix_tags)
 {
   _vectors.clear();
   _matrices.clear();

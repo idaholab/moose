@@ -242,6 +242,7 @@
     input = tag-linearfv.i
     exodiff = tag-linearfv_out.e
     requirement = 'The system shall be able to tag matrix diagonals and right hand sides built using linear systems and finite volume discretization.'
+    max_threads = 1 # see libmesh issue #3808
   []
   [mass]
     requirement = 'The system shall be able to use matrix tagging to compute a mass matrix'
