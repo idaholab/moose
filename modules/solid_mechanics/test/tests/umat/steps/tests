@@ -81,9 +81,9 @@
   []
 
   [elastic_temperature_steps_uo_step_number_pps]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'elastic_temperature_steps_uo_step_pps.i'
-    exodiff = 'elastic_temperature_steps_uo_step_pps_out.e'
+    csvdiff = 'elastic_temperature_steps_uo_step_pps_out.csv'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to output the current step number as a postprocessor.'
@@ -91,9 +91,9 @@
     installation_type = in_tree
   []
   [elastic_temperature_steps_uo_step_number_pps_one_based]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'elastic_temperature_steps_uo_step_pps.i'
-    exodiff = 'elastic_temperature_steps_uo_step_pps_one_based_out.e'
+    csvdiff = 'elastic_temperature_steps_uo_step_pps_one_based_out.csv'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to output the current step number as a postprocessor using a one-based index.'
@@ -103,13 +103,14 @@
   []
 
   [elastic_temperature_steps_uo_step_number_pps_sync]
-    type = 'Exodiff'
-    input = 'elastic_temperature_steps_uo_step_pps_sync.i'
-    exodiff = 'elastic_temperature_steps_uo_step_pps_sync_out.e'
+    type = 'CSVDiff'
+    input = 'elastic_temperature_steps_uo_step_pps.i'
+    csvdiff = 'elastic_temperature_steps_uo_step_pps_sync_out.csv'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to sync output times.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
+    cli_args = 'UserObjects/step_uo/set_sync_times=true UserObjects/step_uo/step_start_times="0 2.2 4.5" Outputs/file_base=elastic_temperature_steps_uo_step_pps_sync_out'
     installation_type = in_tree
   []
 []
