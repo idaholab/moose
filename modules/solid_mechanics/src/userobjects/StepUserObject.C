@@ -44,7 +44,8 @@ StepUserObject::validParams()
       "The durations of the steps. 'n' of step time intervals define 'n+1' steps "
       "starting at time equals zero.");
 
-  params.addParam<bool>("set_sync_times", false, "Whether to make the output times include the step times.");
+  params.addParam<bool>(
+      "set_sync_times", false, "Whether to make the output times include the step times.");
 
   return params;
 }
