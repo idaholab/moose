@@ -28,6 +28,10 @@ Convergence::validParams()
 
   params.registerBase("Convergence");
 
+  // This parameter is present because of SetupInterface, which is a requirement
+  // of MooseObjectWarehouse, but it should not be used.
+  params.suppressParameter<ExecFlagEnum>("execute_on");
+
   return params;
 }
 
