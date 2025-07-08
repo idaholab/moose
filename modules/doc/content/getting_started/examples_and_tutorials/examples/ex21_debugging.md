@@ -17,7 +17,7 @@ Segmentation fault: 11`
 
 - A segfault is a "good" error to have, because a debugger can easily pinpoint the problem.
 
-[](---)
+
 
 # Debugging Example Problem
 
@@ -38,7 +38,7 @@ Segmentation fault: 11
 
 - We can use a debugger to help us find the problem.
 
-[](---)
+
 
 # Debug Executable
 
@@ -63,7 +63,7 @@ lldb -- ./ex21-dbg -i ex21.i
 - When using either of these tools, the command line arguments to the application appear after the `--` separator.
 - This will start debugger, load your executable, and leave you at the debugger command prompt.
 
-[](---)
+
 
 # Using GDB or LLDB
 
@@ -86,7 +86,7 @@ b MPI_Abort
 .....
 ```
 
-[](---)
+
 
 - This backtrace shows that, in `ExampleDiffusion::computeQpResidual()` we tried to access entry 0 of a `MooseArray` with 0 entries.
 - If we look at the relevant line of code, we'll see:
@@ -98,17 +98,17 @@ return _coupled_coef[_qp]*Diffusion::computeQpResidual();
 - There is only one thing we're indexing into on that line: `_coupled_coef`.
 - Therefore, we can look at how `_coupled_coef` was declared, realize that we forgot an ampersand (`&`), and fix it!
 
-[](---)
+
 
 # Example 21 Source Code
 
 [ex21.i](https://github.com/idaholab/moose/blob/devel/examples/ex21_debugging/ex21.i)
 
-[](---)
+
 
 [ExampleDiffusion.h](https://github.com/idaholab/moose/blob/devel/examples/ex21_debugging/include/kernels/ExampleDiffusion.h)
 
-[](---)
+
 
 [ExampleDiffusion.C](https://github.com/idaholab/moose/blob/devel/examples/ex21_debugging/src/kernels/ExampleDiffusion.C)
 
