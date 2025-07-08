@@ -36,8 +36,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     pitch = ${fuel_pin_pitch}
     dwire = ${wire_diameter}
     hwire = ${wire_z_spacing}
-    spacer_z = '0.0'
-    spacer_k = '0.0'
   []
 
   [fuel_pins]

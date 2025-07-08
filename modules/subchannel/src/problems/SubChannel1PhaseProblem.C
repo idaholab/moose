@@ -55,7 +55,7 @@ formFunction(SNES, Vec x, Vec f, void * ctx)
 InputParameters
 SubChannel1PhaseProblem::validParams()
 {
-  MooseEnum schemes("upwind downwind central_difference exponential", "exponential");
+  MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
   InputParameters params = ExternalProblem::validParams();
   params += PostprocessorInterface::validParams();
   params.addClassDescription("Base class of the subchannel solvers");

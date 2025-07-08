@@ -51,6 +51,19 @@ num_cells = 15
   type = Steady
 []
 
+[Postprocessors]
+  [Total_power_IC]
+    type = ElementIntegralVariablePostprocessor
+    variable = q_prime_ic
+    block = sub_channel
+  []
+  [Total_power_Aux]
+    type = ElementIntegralVariablePostprocessor
+    variable = q_prime_aux
+    block = sub_channel
+  []
+[]
+
 [VectorPostprocessors]
   [line_check]
     type = LineValueSampler
