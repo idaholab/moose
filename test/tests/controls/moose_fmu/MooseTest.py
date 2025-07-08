@@ -4,7 +4,7 @@ from pythonfmu.variables import Boolean, Integer, Real, ScalarVariable, String
 from MooseControl import MooseControl
 from pythonfmu.default_experiment import DefaultExperiment
 from typing import Optional
-from MOOSE2FMU import MooseSlave
+from MooseFMU import MooseSlave
 import time
 import logging
 
@@ -28,7 +28,7 @@ class MooseTest(MooseSlave):
         self.register_variable(String("BC_info", causality=Fmi2Causality.input, variability=Fmi2Variability.discrete))
         self.register_variable(Real("BC_value", causality=Fmi2Causality.input, variability=Fmi2Variability.continuous))
         # Default experiment configuration
-        self.default_experiment = DefaultExperiment(start_time=0.0, stop_time=3.0, step_size=0.1)
+        self.default_experiment = DefaultExperiment(start_time=0.0, stop_time=3.0, step_size=0.5)
 
     def do_step(self,
                 current_time: float,
@@ -72,22 +72,3 @@ class MooseTest(MooseSlave):
 
         return True
 
-
-    def _get_flag_with_retries(self, flag: str, max_retries: int, wait_seconds=0.5) -> str | None:
-        retries = 0
-        while retries < max_retries:
-            try:
-                result = self.control.getWaitingFlag()
-                if result:
-                    self.logger.info(f"Successfully got flag '{result}' after {retries} retries.")
-                    return result
-            except Exception as e:
-                self.logger.warning(f"Attempt {retries+1}/{max_retries} failed: {e}")
-
-            retries += 1
-            self.logger.info(f"Waiting {wait_seconds} seconds before retrying...")
-            time.sleep(wait_seconds)  # Pauses the loop for specified seconds
-
-        self.logger.error(f"Failed to get flag '{result}' after {max_retries} retries.")
-
-        return None
