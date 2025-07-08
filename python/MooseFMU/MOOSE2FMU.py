@@ -5,6 +5,7 @@ from pythonfmu.default_experiment import DefaultExperiment
 from MooseControl import MooseControl
 from typing import Optional
 import logging
+import time
 
 
 logging.basicConfig(
@@ -68,8 +69,7 @@ class MooseSlave(Fmi2Slave):
             self.cmd = [self.moose_mpi, "-n", self.mpi_num, self.moose_executable, "-i", self.moose_inputfile]
         else:
             self.cmd = [self.moose_executable, "-i", self.moose_inputfile]
-        # self.control = MooseControl(moose_command=cmd, moose_control_name=self.server_name)
-        # self.control.initialize()
+
 
     def exit_initialization_mode(self) -> bool:
 
@@ -100,15 +100,42 @@ class MooseSlave(Fmi2Slave):
         """
         raise NotImplementedError("Subclasses must implement do_step()")
 
-    def _get_flag_with_retries(self, wait_for_flag: str, max_retries: int) -> Optional[str]:
-        """
-        Poll self.control.getWaitingFlag() up to max_retries times.
-        """
-        for attempt in range(1, max_retries + 1):
-            flag = self.control.getWaitingFlag()
-            if flag:
-                return flag
-            print(f"[Attempt {attempt}/{max_retries}] no waiting flag yet, retrying...")
-            self.control.wait(wait_for_flag)
-        return None
+    def _get_flag_with_retries(
+        self, flag: str, max_retries: int, wait_seconds: float = 0.5
+    ) -> Optional[str]:
+        """Poll ``getWaitingFlag`` and retry before giving up.
 
+        Parameters
+        ----------
+        flag
+            Flag expected from ``MooseControl``.
+        max_retries
+            Number of times to attempt retrieving the flag.
+        wait_seconds
+            Delay between retries in seconds.
+        """
+        retries = 0
+        result: Optional[str] = None
+        while retries < max_retries:
+            try:
+                result = self.control.getWaitingFlag()
+                if result:
+                    self.logger.info(
+                        f"Successfully got flag '{result}' after {retries} retries."
+                    )
+                    return result
+            except Exception as exc:  # pragma: no cover - defensive logging
+                self.logger.warning(
+                    f"Attempt {retries + 1}/{max_retries} failed: {exc}"
+                )
+
+            retries += 1
+            self.logger.info(
+                f"Waiting {wait_seconds} seconds before retrying..."
+            )
+            time.sleep(wait_seconds)
+
+        self.logger.error(
+            f"Failed to get flag '{flag}' after {max_retries} retries."
+        )
+        return None
