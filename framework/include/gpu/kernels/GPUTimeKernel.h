@@ -47,7 +47,7 @@ public:
 
   /**
    * Hook for additional computation for residual after the standard calls
-   * @param local_re The temporary storage storing the residual contribution of each local DOF
+   * @param local_re The temporary storage storing the residual contribution of each DOF
    * @param datum The ResidualDatum object of the current thread
    */
   KOKKOS_FUNCTION void computeResidualAdditional(Real * /* local_re */,
