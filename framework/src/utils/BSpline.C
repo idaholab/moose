@@ -40,6 +40,8 @@ BSpline::getPoint(const Real t) const
 {
   mooseAssert((t >= 0) && (t <= 1), "t should be in [0, 1]. t=" + std::to_string(t));
   libMesh::Point returnPoint(0, 0, 0);
+  if (t == 1.0)
+    return _control_points.back();
   for (const auto i : index_range(_control_points))
     returnPoint += BSpline::CdBBasis(t, i, _degree) * _control_points[i];
 
@@ -53,6 +55,8 @@ BSpline::createControlPoints() const
   /// call SplineUtils function
   cps = SplineUtils::bSplineControlPoints(
       _start_point, _end_point, _start_dir, _end_dir, _cps_per_half, _sharpness);
+
+  std::cout << Moose::stringify(cps) << std::endl;
   return cps;
 }
 
@@ -90,19 +94,15 @@ BSpline::buildKnotVector() const
   return knot_vector;
 }
 
-/**
- * Method to evaluate the basis function.
- */
-Real
-BSpline::CdBBasis(const Real & t, const unsigned int i, const unsigned int j) const
+libMesh::Real
+BSpline::CdBBasis(const libMesh::Real t, const unsigned int i, const unsigned int j) const
 {
   mooseAssert(i < _knot_vector.size() - 1, "knot index must stay within bounds");
+  mooseAssert(_knot_vector[i] <= _knot_vector[i + 1],
+              "Something is not right with knot vector " + Moose::stringify(_knot_vector));
   if (j == 0)
   {
-    Real basis_return =
-        (t <= _knot_vector[i + 1] && _knot_vector[i] <= t && _knot_vector[i] < _knot_vector[i + 1])
-            ? 1
-            : 0;
+    libMesh::Real basis_return = ((t < _knot_vector[i + 1]) && (_knot_vector[i] <= t)) ? 1 : 0;
     return basis_return;
   }
   else

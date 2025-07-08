@@ -57,7 +57,7 @@ private:
    * of the basis funtion
    * @return scalar quantity for the contribution of the basis function at i in the sum.
    */
-  libMesh::Real CdBBasis(const libMesh::Real & t, const unsigned int i, const unsigned int j) const;
+  libMesh::Real CdBBasis(const libMesh::Real t, const unsigned int i, const unsigned int j) const;
   /**
    * firstCoeff and secondCoeff are submethods for CdBBasis method.
    */
