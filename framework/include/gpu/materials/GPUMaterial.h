@@ -278,15 +278,9 @@ Material<Derived>::initStatefulProperties(unsigned int)
     return;
 
   if (!_bnd && !_neighbor)
-  {
-    setVariableDependency();
-
     ::Kokkos::parallel_for(
         ::Kokkos::RangePolicy<ElementInit, ::Kokkos::IndexType<size_t>>(0, numElements()),
         *static_cast<Derived *>(this));
-
-    setCacheFlags();
-  }
   else if (_bnd && !_neighbor)
     ::Kokkos::parallel_for(
         ::Kokkos::RangePolicy<SideInit, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
@@ -304,15 +298,9 @@ void
 Material<Derived>::computeProperties()
 {
   if (!_bnd && !_neighbor)
-  {
-    setVariableDependency();
-
     ::Kokkos::parallel_for(
         ::Kokkos::RangePolicy<ElementCompute, ::Kokkos::IndexType<size_t>>(0, numElements()),
         *static_cast<Derived *>(this));
-
-    setCacheFlags();
-  }
   else if (_bnd && !_neighbor)
     ::Kokkos::parallel_for(
         ::Kokkos::RangePolicy<SideCompute, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
@@ -336,7 +324,7 @@ Material<Derived>::operator()(ElementInit, const size_t tid) const
 
   for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
   {
-    datum.reinit(qp);
+    datum.reinit();
 
     material->initQpStatefulProperties(qp, datum);
   }
@@ -353,7 +341,7 @@ Material<Derived>::operator()(SideInit, const size_t tid) const
 
   for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
   {
-    datum.reinit(qp);
+    datum.reinit();
 
     material->initQpStatefulProperties(qp, datum);
   }
@@ -371,7 +359,7 @@ Material<Derived>::operator()(NeighborInit, const size_t tid) const
   if (datum.hasNeighbor())
     for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
     {
-      datum.reinit(qp);
+      datum.reinit();
 
       material->initQpStatefulProperties(qp, datum);
     }
@@ -388,7 +376,7 @@ Material<Derived>::operator()(ElementCompute, const size_t tid) const
 
   for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
   {
-    datum.reinit(qp);
+    datum.reinit();
 
     material->computeQpProperties(qp, datum);
   }
@@ -405,7 +393,7 @@ Material<Derived>::operator()(SideCompute, const size_t tid) const
 
   for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
   {
-    datum.reinit(qp);
+    datum.reinit();
 
     material->computeQpProperties(qp, datum);
   }
@@ -423,7 +411,7 @@ Material<Derived>::operator()(NeighborCompute, const size_t tid) const
   if (datum.hasNeighbor())
     for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
     {
-      datum.reinit(qp);
+      datum.reinit();
 
       material->computeQpProperties(qp, datum);
     }
