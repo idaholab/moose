@@ -297,7 +297,6 @@ protected:
   /// Lateral momentum system matrix
   Mat _cmc_sys_Wij_mat;
   Vec _cmc_sys_Wij_rhs;
-  Vec _cmc_Wij_channel_dummy;
 
   /// Enthalpy
   /// Enthalpy conservation - time derivative
@@ -314,8 +313,6 @@ protected:
   /// System matrices
   Mat _hc_sys_h_mat;
   Vec _hc_sys_h_rhs;
-  /// No implicit matrix
-  PetscInt _global_counter = 0;
 
   /// Added resistances for monolithic convergence
   PetscScalar _added_K = 0.0;
