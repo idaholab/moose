@@ -14,27 +14,25 @@ namespace CSG
 
 CSGUniverse::CSGUniverse(const std::string name, bool is_root) : _name(name), _is_root(is_root) {}
 
-CSGUniverse::CSGUniverse(const std::string name,
-                         std::vector<std::shared_ptr<CSGCell>> & cells,
-                         bool is_root)
+CSGUniverse::CSGUniverse(const std::string name, std::vector<CSGCell *> & cells, bool is_root)
   : _name(name), _is_root(is_root)
 {
   for (auto cell : cells)
-    addCell(cell);
+    addCell(*cell);
 }
 
 void
-CSGUniverse::addCell(const std::shared_ptr<CSGCell> & cell)
+CSGUniverse::addCell(CSGCell & cell)
 {
-  auto cell_name = cell->getName();
+  auto cell_name = cell.getName();
   if (!hasCell(cell_name))
-    _cells.push_back(cell);
+    _cells.push_back(&cell);
   else
     mooseWarning("Universe " + getName() + " already contains a cell by name " + cell_name + ". " +
                  "Skipping cell insertion for cell with duplicate name.");
 }
 
-const std::shared_ptr<CSGCell> &
+CSGCell &
 CSGUniverse::getCell(const std::string name)
 {
   if (!hasCell(name))
@@ -42,7 +40,7 @@ CSGUniverse::getCell(const std::string name)
   for (const auto & cell : _cells)
   {
     if (cell->getName() == name)
-      return cell;
+      return *cell;
   }
   mooseError("Cell with name " + name + " was not found in universe " + _name + ".");
 }
@@ -73,4 +71,17 @@ CSGUniverse::removeCell(const std::string name)
     }
   }
 }
+
+bool
+CSGUniverse::operator==(const CSGUniverse & other) const
+{
+  return (this->getAllCells() == other.getAllCells()) && this->getName() == other.getName();
+}
+
+bool
+CSGUniverse::operator!=(const CSGUniverse & other) const
+{
+  return !(*this == other);
+}
+
 } // namespace CSG

@@ -52,7 +52,7 @@ TestCSGRegionSurfaceError::generateCSG()
   // try to apply the region from cell_1 to cell_2
   // This will produce an error that the surfaces of the region are not the
   // same surfaces in memory, despite having the same name
-  auto reg_1 = cell_1->getRegion();
+  auto & reg_1 = cell_1.getRegion();
   csg_2->updateCellRegion(cell_2, reg_1);
 
   return csg_1;

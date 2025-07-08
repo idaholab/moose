@@ -61,7 +61,7 @@ TestCSGRenameError::generateCSG()
   if (_mode == "cell")
   {
     // get cell from base 1 of the same name to try to rename in base 2
-    auto cell_1 = csg_1->getCellByName("square_cell");
+    auto & cell_1 = csg_1->getCellByName("square_cell");
     // should produce error that cell is not the same in memory despite having the same name
     csg_2->renameCell(cell_1, "test_new_cell_name");
   }

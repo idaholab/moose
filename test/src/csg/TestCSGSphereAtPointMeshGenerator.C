@@ -44,8 +44,7 @@ TestCSGSphereAtPointMeshGenerator::generateCSG()
   auto mg_name = this->name();
 
   auto & sphere_surf = csg_mesh->createSphere(mg_name + "_sphere_surf", _center, _radius);
-  const auto & sphere_cell =
-      csg_mesh->createCell(mg_name + "_sphere_cell", "new_mat", -sphere_surf);
+  csg_mesh->createCell(mg_name + "_sphere_cell", "new_mat", -sphere_surf);
 
   return csg_mesh;
 }
