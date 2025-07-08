@@ -34,7 +34,7 @@ MFEMVectorFEDomainLFKernel::MFEMVectorFEDomainLFKernel(const InputParameters & p
     _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
     // If the imaginary coefficient is not provided, we pick the real one since the variable needs to be initialized, but it won't be used
     _vec_coef_imag_name(isParamValid("vector_coefficient_imag") ? getParam<MFEMVectorCoefficientName>("vector_coefficient_imag")
-                                                                 : getParam<MFEMVectorCoefficientName>("vector_coefficient")),
+                                                                 : _vec_coef_name),
     _vec_coef_imag(getVectorCoefficient(_vec_coef_imag_name))
 {
 }
