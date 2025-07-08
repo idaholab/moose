@@ -28,6 +28,8 @@
   using ParsedMaterialHelper<T>::_mat_prop_descriptors;                                            \
   using ParsedMaterialHelper<T>::_tol;                                                             \
   using ParsedMaterialHelper<T>::_postprocessor_values;                                            \
+  using ParsedMaterialHelper<T>::_extra_symbols;                                                   \
+  using ParsedMaterialHelper<T>::_functors;                                                        \
   using ParsedMaterialHelper<T>::_map_mode
 
 /**
