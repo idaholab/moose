@@ -230,37 +230,39 @@ private:
     /**
      * Map from the MOOSE subdomain ID to the serialized subdomain ID
      */
-    std::map<SubdomainID, SubdomainID> _subdomain_id_mapping;
+    std::unordered_map<SubdomainID, SubdomainID> _subdomain_id_mapping;
     /**
      * Map from the MOOSE element type to the serialized element type ID
      */
-    std::map<ElemType, unsigned int> _elem_type_id_mapping;
+    std::unordered_map<ElemType, unsigned int> _elem_type_id_mapping;
     /**
      * Map from the libMesh element to the serialized element ID
      */
-    std::map<const Elem *, dof_id_type> _local_elem_id_mapping;
+    std::unordered_map<const Elem *, dof_id_type> _local_elem_id_mapping;
     /**
      * Map from the libMesh element to the serialized element ID for each subdomain
      */
-    std::map<SubdomainID, std::map<const Elem *, dof_id_type>> _subdomain_elem_id_mapping;
+    std::unordered_map<SubdomainID, std::unordered_map<const Elem *, dof_id_type>>
+        _subdomain_elem_id_mapping;
     /**
      * Map from the libMesh element to the serialized subdomain-local element ID for each subdomain
      */
-    std::map<SubdomainID, std::map<const Elem *, dof_id_type>> _subdomain_local_elem_id_mapping;
+    std::unordered_map<SubdomainID, std::unordered_map<const Elem *, dof_id_type>>
+        _subdomain_local_elem_id_mapping;
     /**
      * Map from the libMesh node to the serialized node ID
      * This list contains the nodes of local elements, so some nodes may belong to other processes
      */
-    std::map<const Node *, dof_id_type> _local_node_id_mapping;
+    std::unordered_map<const Node *, dof_id_type> _local_node_id_mapping;
     /**
      * List of the serialized element IDs in each subdomain
      */
-    std::map<SubdomainID, std::set<dof_id_type>> _subdomain_elem_ids;
+    std::unordered_map<SubdomainID, std::unordered_set<dof_id_type>> _subdomain_elem_ids;
     /**
      * List of the serialized node IDs in each subdomain
      * This list strictly contains the nodes local to the current process
      */
-    std::map<SubdomainID, std::set<dof_id_type>> _subdomain_node_ids;
+    std::unordered_map<SubdomainID, std::unordered_set<dof_id_type>> _subdomain_node_ids;
   };
   /**
    * A shared pointer holding all the host maps to avoid deep copy
