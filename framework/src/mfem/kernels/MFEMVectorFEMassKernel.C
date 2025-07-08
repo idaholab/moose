@@ -24,22 +24,28 @@ MFEMVectorFEMassKernel::validParams()
                              "$k \\vec u$.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of property k to multiply the integrator by");
+  params.addParam<MFEMScalarCoefficientName>("coefficient_imag",
+                                             "Name of the imaginary part of the property k to multiply the Laplacian by");
   return params;
 }
 
 MFEMVectorFEMassKernel::MFEMVectorFEMassKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
-// FIXME: The MFEM bilinear form can also handle vector and matrix
-// coefficients, so ideally we'd handle all three too.
+  : MFEMKernel(parameters),
+    // FIXME: The MFEM bilinear form can also handle vector and matrix
+    // coefficients, so ideally we'd handle all three too.
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+    // If the imaginary coefficient is not provided, we pick the real one since the variable needs to be initialized, but it won't be used
+    _coef_imag_name(isParamValid("coefficient_imag") ? getParam<MFEMScalarCoefficientName>("coefficient_imag")
+                                                     : getParam<MFEMScalarCoefficientName>("coefficient")),
+    _coef_imag(getScalarCoefficient(_coef_imag_name))
 {
 }
 
 std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
 MFEMVectorFEMassKernel::createBFIntegrator()
 {
-  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
-  return std::make_pair(new mfem::VectorFEMassIntegrator(_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
-                                                                                                  : new mfem::VectorFEMassIntegrator(_coef));
+  return std::make_pair(new mfem::VectorFEMassIntegrator(_coef), isParamValid("coefficient_imag") ? new mfem::VectorFEMassIntegrator(_coef_imag)
+                                                                                                                      : nullptr);
 }
 
 #endif

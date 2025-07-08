@@ -23,20 +23,24 @@ MFEMDomainLFKernel::validParams()
                              "arising from the weak form of the forcing term $f$.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of scalar coefficient $f$.");
+  params.addParam<std::string>("coefficient_imag", "Name of the imaginary part of the scalar coefficient $f$.");
   return params;
 }
 
 MFEMDomainLFKernel::MFEMDomainLFKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+  : MFEMKernel(parameters),
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+    // If the imaginary coefficient is not provided, we pick the real one since the variable needs to be initialized, but it won't be used
+    _coef_imag_name(isParamValid("coefficient_imag") ? getParam<std::string>("coefficient_imag") : getParam<std::string>("coefficient")),
+    _coef_imag(getScalarCoefficient(_coef_imag_name))
 {
 }
 
 std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
 MFEMDomainLFKernel::createLFIntegrator()
 {
-  std::cout << "FIX THE COEFFICIENT ISSUE WITH COMPLEX KERNELS" << std::endl;
-  return std::make_pair(new mfem::DomainLFIntegrator(_coef), getParam<MooseEnum>("numeric_type") == "real" ? nullptr
-                                                                                                  : new mfem::DomainLFIntegrator(_coef));
+  return std::make_pair(new mfem::DomainLFIntegrator(_coef), isParamValid("coefficient_imag") ? new mfem::DomainLFIntegrator(_coef_imag)
+                                                                                                  : nullptr);
 }
 
 #endif
