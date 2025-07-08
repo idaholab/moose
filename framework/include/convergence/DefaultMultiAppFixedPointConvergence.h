@@ -30,6 +30,9 @@ public:
   virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
 
 protected:
+  /// Outputs residual norm to console
+  void outputResidualNorm(const std::string & execute_on_str, Real old_norm, Real new_norm) const;
+
   /// Computes and prints the user-specified postprocessor assessing convergence
   void computeCustomConvergencePostprocessor(unsigned int iter);
 

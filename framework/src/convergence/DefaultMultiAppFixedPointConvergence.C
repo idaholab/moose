@@ -110,9 +110,7 @@ DefaultMultiAppFixedPointConvergence::preExecute()
     Real begin_norm_old =
         (iter > 0 ? _fixed_point_timestep_begin_norm[iter - 1] : std::numeric_limits<Real>::max());
 
-    _console << COLOR_MAGENTA << "Fixed point residual norm after TIMESTEP_BEGIN MultiApps: "
-             << Console::outputNorm(begin_norm_old, _fixed_point_timestep_begin_norm[iter])
-             << std::endl;
+    outputResidualNorm("TIMESTEP_BEGIN", begin_norm_old, _fixed_point_timestep_begin_norm[iter]);
   }
 }
 
@@ -133,9 +131,7 @@ DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
       Real end_norm_old =
           (iter > 0 ? _fixed_point_timestep_end_norm[iter - 1] : std::numeric_limits<Real>::max());
 
-      _console << COLOR_MAGENTA << "Fixed point residual norm after TIMESTEP_END MultiApps: "
-               << Console::outputNorm(end_norm_old, _fixed_point_timestep_end_norm[iter])
-               << std::endl;
+      outputResidualNorm("TIMESTEP_END", end_norm_old, _fixed_point_timestep_end_norm[iter]);
     }
 
   // print residual norm history
@@ -195,6 +191,15 @@ DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
   }
 
   return MooseConvergenceStatus::ITERATING;
+}
+
+void
+DefaultMultiAppFixedPointConvergence::outputResidualNorm(const std::string & execute_on_str,
+                                                         Real old_norm,
+                                                         Real new_norm) const
+{
+  _console << COLOR_MAGENTA << "Fixed point residual norm after " << execute_on_str
+           << " MultiApps: " << Console::outputNorm(old_norm, new_norm) << std::endl;
 }
 
 void
