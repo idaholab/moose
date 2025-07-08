@@ -108,8 +108,8 @@ AS_IF([test "$neml2_support" = yes],
       ])
 
 AC_ARG_WITH(kokkos,
-            AS_HELP_STRING([--with-kokkos@<:@=ARG@:>@],[Specify if Kokkos support should be enabled @<:@ARG=yes or Kokkos directory@:>@]),
-            [kokkos_support=yes kokkos_library="$withval"],
+            AS_HELP_STRING([--with-kokkos@<:@=ARG@:>@],[Specify if Kokkos support should be enabled @<:@ARG=yes@:>@]),
+            [kokkos_support=yes],
             [kokkos_support=no])
 
 AC_MSG_RESULT([configuring with kokkos support: $kokkos_support])
@@ -118,15 +118,6 @@ AS_IF([test "$kokkos_support" = yes],
       [
         AC_DEFINE(HAVE_KOKKOS, 1, [Whether to use Kokkos-related code or not])
         AC_SUBST([kokkos_support],[true])
-        AS_IF([test "$kokkos_library" = yes],
-              [
-                    AS_IF([test "${KOKKOS_DIR+set}" = set],
-                          [kokkos_library="${KOKKOS_DIR}"],
-                          [kokkos_library="$ac_pwd/framework/contrib/kokkos"])
-              ])
-        AC_DEFINE_UNQUOTED(KOKKOS_DIR, [$kokkos_library], [The directory where Kokkos is installed])
-        AC_SUBST([kokkos_library])
-        AC_MSG_RESULT([Kokkos library path: $kokkos_library])
       ])
 
 AC_PATH_TOOL(PKG_CONFIG,pkg-config)
