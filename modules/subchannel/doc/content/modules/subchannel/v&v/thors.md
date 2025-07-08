@@ -125,14 +125,14 @@ THORS bundle 5B has the same fuel configuration as bundle 2B, except that 0.0711
 
 ## Results for edge blockage
 
-The case presented here is the high flow case (FFM Series 6, Test 12, Run 101). The thermocouples are located at the middle of the exit region. There is a subchannel index correspondence between the Figure [fig:thors2] and the Pronhorn-SC model shown in Figure[fig:hex_index] as follows: 34(39), 33(38), 18(20), 9(19), 3(4), 0(1), 12(11) and 25(30). Where the number outside the parentheses refers to the SCM model and the number inside the parentheses, refers to the experimental convention. SCM calculation along with the experimental measurements is shown in Figure [fig:FFM-5B]. The code calculations excibits generally good agreement with the experimental measurements. The least agreement occurs at the edge subchannels ($34,33$) which is likely due to the model not accuretally replicating the flow area there. Prongohorn-SC uses an assembly-wide constant wire diameter, while in the experimental assembly the wires at the edge subchannels had half the diameter.
+The case presented here is the high flow case (FFM Series 6, Test 12, Run 101). The thermocouples are located at the middle of the exit region. There is a subchannel index correspondence between the Figure [fig:thors2] and the Pronhorn-SC model shown in Figure[fig:hex_index] as follows: 34(39), 33(38), 18(20), 9(19), 3(4), 0(1), 12(11) and 25(30). Where the number outside the parentheses refers to the SCM model and the number inside the parentheses, refers to the experimental convention. SCM calculation along with the experimental measurements is shown in Figure [fig:FFM-5B]. The code calculations exhibits generally good agreement with the experimental measurements. The least agreement occurs at the edge subchannels ($34,33$) which is likely due to the model not accurately replicating the flow area there. SCM uses an assembly-wide constant wire diameter, while in the experimental assembly the wires at the edge subchannels had half the diameter.
 
 !media subchannel/v&v/thors/FFM-5B_high.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=fig:FFM-5B
     caption= Exit temperature profile for high flow case ($C_T = 10$).
 
-The second case presented here is the low flow case (FFM Series 6, Test 12, Run 109). The thermocouples are located at the middle of the exit region, same as before. SCM calculation along with the experimental measurements is shown in Figure [fig:FFM-5B2]. The code calculations excibits good agreement with the experimental measurements.
+The second case presented here is the low flow case (FFM Series 6, Test 12, Run 109). The thermocouples are located at the middle of the exit region, same as before. SCM calculation along with the experimental measurements is shown in Figure [fig:FFM-5B2]. The code calculations exhibits good agreement with the experimental measurements.
 
 !media subchannel/v&v/thors/FFM-5B_low.png
     style=width:60%;margin-bottom:2%;margin:auto;
