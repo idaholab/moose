@@ -23,8 +23,22 @@ MFEMTransient::validParams()
   params.addParam<mfem::real_t>("start_time", 0.0, "The start time of the simulation");
   params.addParam<mfem::real_t>("end_time", 1.0e30, "The end time of the simulation");
   params.addParam<mfem::real_t>("dt", 1., "The timestep size between solves");
+  params.addParam<mfem::real_t>("dtmin", 1.0e-12, "The minimum timestep size in an adaptive run");
+  params.addParam<mfem::real_t>("dtmax", 1.0e30, "The maximum timestep size in an adaptive run");
+  params.addParam<unsigned int>("num_steps",
+                                std::numeric_limits<unsigned int>::max(),
+                                "The number of timesteps in a transient run");
   params.addParam<unsigned int>(
       "visualisation_steps", 1, "The number of timesteps in a transient run");
+  params.addParam<bool>(
+      "abort_on_solve_fail", false, "abort if solve not converged rather than cut timestep");
+  params.addParam<bool>(
+      "error_on_dtmin",
+      true,
+      "Throw error when timestep is less than dtmin instead of just aborting solve.");
+  params.addParam<Real>("timestep_tolerance",
+                        1.0e-12,
+                        "the tolerance setting for final timestep size and sync times");
   return params;
 }
 
@@ -37,7 +51,13 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
     _end_time(getParam<mfem::real_t>("end_time")),
     _t_step(0),
     _vis_steps(params.get<unsigned int>("visualisation_steps")),
-    _last_step(false)
+    _last_step(false),
+    _timestep_tolerance(getParam<Real>("timestep_tolerance")),
+    _dtmin(getParam<mfem::real_t>("dtmin")),
+    _dtmax(getParam<mfem::real_t>("dtmax")),
+    _num_steps(getParam<unsigned int>("num_steps")),
+    _abort(getParam<bool>("abort_on_solve_fail")),
+    _error_on_dtmin(getParam<bool>("error_on_dtmin"))
 {
   _app.setStartTime(_start_time);
   _time = _start_time;
@@ -54,69 +74,28 @@ MFEMTransient::constructProblemOperator()
   _problem_operator = std::move(problem_operator);
 }
 
-// void
-// MFEMTransient::takeStep(mfem::real_t input_dt)
-// {
-//   _dt_old = _dt;
-
-//   if (input_dt == -1.0)
-//     _dt = computeConstrainedDT();
-//   else
-//     _dt = input_dt;
-
-//   _time_stepper->preSolve();
-
-//   // Increment time
-//   _time = _time_old + _dt;
-
-//   _problem.timestepSetup();
-
-//   _problem.onTimestepBegin();
-
-//   _time_stepper->step();
-//   _xfem_repeat_step = _fixed_point_solve->XFEMRepeatStep();
-
-//   _last_solve_converged = _time_stepper->converged();
-
-//   if (!lastSolveConverged())
-//   {
-//     _console << "Aborting as solve did not converge" << std::endl;
-//     return;
-//   }
-
-//   if (!(_problem.haveXFEM() && _fixed_point_solve->XFEMRepeatStep()))
-//   {
-//     if (lastSolveConverged())
-//       _time_stepper->acceptStep();
-//     else
-//       _time_stepper->rejectStep();
-//   }
-
-//   _time = _time_old;
-
-//   _time_stepper->postSolve();
-
-//   _solution_change_norm =
-//       relativeSolutionDifferenceNorm() / (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
-// }
-
 void
-MFEMTransient::step(double dt, int) const
+MFEMTransient::takeStep(mfem::real_t input_dt)
 {
-  // Check if current time step is final
-  if (_time + dt >= _end_time - dt / 2)
-  {
-    _last_step = true;
-  }
+  _dt = input_dt;
 
-  // Advance time step.
-  _problem_data.ode_solver->Step(_problem_data.f, _time, dt);
+  // Advance time step. Time is also updated here.
+  _problem_data.ode_solver->Step(_problem_data.f, _time, _dt);
 
   // Synchonise time dependent GridFunctions with updated DoF data.
   _problem_operator->SetTestVariablesFromTrueVectors();
 
   // Execute user objects at timestep end
   _mfem_problem.execute(EXEC_TIMESTEP_END);
+}
+
+void
+MFEMTransient::endStep()
+{
+  // Compute the Error Indicators and Markers
+  _mfem_problem.computeIndicators();
+  _mfem_problem.computeMarkers();
+
   // Perform the output of the current time step
   _mfem_problem.outputStep(EXEC_TIMESTEP_END);
 }
@@ -142,16 +121,46 @@ MFEMTransient::init()
   _problem_operator->SetTime(0.0);
 }
 
+bool
+MFEMTransient::keepGoing()
+{
+  bool keep_going = !_mfem_problem.isSolveTerminationRequested();
+
+  // Check for stop condition based upon steady-state check flag:
+  if (lastSolveConverged())
+  {
+    // Check for stop condition based upon number of simulation steps and/or solution end time:
+    if (static_cast<unsigned int>(_t_step) >= _num_steps)
+      keep_going = false;
+
+    if ((_time >= _end_time) || (fabs(_time - _end_time) <= _timestep_tolerance))
+      keep_going = false;
+  }
+  else if (_abort)
+  {
+    _console << "Aborting as solve did not converge and input selected to abort" << std::endl;
+    keep_going = false;
+  }
+  else if (!_error_on_dtmin && _dt <= _dtmin)
+  {
+    _console << "Aborting as timestep already at or below dtmin" << std::endl;
+    keep_going = false;
+  }
+
+  return keep_going;
+}
+
 void
 MFEMTransient::execute()
 {
   _mfem_problem.outputStep(EXEC_INITIAL);
   preExecute();
 
-  while (_last_step != true)
+  while (keepGoing())
   {
     _t_step++;
-    step(_dt, _t_step);
+    takeStep(_dt);
+    endStep();
   }
 
   _mfem_problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN,

@@ -21,7 +21,6 @@ public:
   explicit MFEMTransient(const InputParameters & params);
 
   void constructProblemOperator() override;
-  void step(double dt, int it) const;
   virtual void init() override;
   virtual void execute() override;
 
@@ -34,12 +33,17 @@ public:
   /**
    * Do whatever is necessary to advance one step.
    */
-  // virtual void takeStep(mfem::real_t input_dt = -1.0);
+  virtual void takeStep(mfem::real_t input_dt = -1.0);
 
   /**
    * @return The the computed dt to use for this timestep.
    */
-  // virtual mfem::real_t getDT();
+  virtual mfem::real_t getDT() const { return _dt; };
+
+  /**
+   * Transient loop will continue as long as this keeps returning true.
+   */
+  virtual bool keepGoing();
 
   /**
    * Can be used to set the next "target time" which is a time to nail perfectly.
@@ -52,7 +56,7 @@ public:
    */
   // virtual void incrementStepOrReject();
 
-  // virtual void endStep(mfem::real_t input_time = -1.0);
+  virtual void endStep();
 
   /**
    * Get the current time.
@@ -63,7 +67,7 @@ public:
    * Get the timestep tolerance
    * @return The timestep tolerance
    */
-  // mfem::real_t & timestepTol() { return _timestep_tolerance; }
+  mfem::real_t & timestepTol() { return _timestep_tolerance; }
 
   /**
    * Get a modifiable reference to the end time
@@ -87,7 +91,19 @@ private:
   int _vis_steps;          // Number of cycles between each output update
   mutable bool _last_step; // Flag to check if current step is final
   std::unique_ptr<Moose::MFEM::TimeDomainProblemOperator> _problem_operator{nullptr};
+
+  /**
+   * Variables controlling termination:
+   */
   mfem::real_t _timestep_tolerance;
+  mfem::real_t _dtmin;
+  mfem::real_t _dtmax;
+  unsigned int _num_steps;
+  bool _abort;
+  /// This parameter controls how the system will deal with _dt <= _dtmin
+  /// If true, the time stepper is expected to throw an error
+  /// If false, the executioner will continue through EXEC_FINAL
+  const bool _error_on_dtmin;
 };
 
 #endif
