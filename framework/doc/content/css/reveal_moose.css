@@ -408,3 +408,16 @@
 .diff-highlight .token.coord {
   display: none;
 }
+
+.reveal .slide-number {
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.reveal .controls button {
+    padding: 0.35rem;
+    border-radius: 0.7rem;
+}
+
+.reveal .controls button:focus-visible {
+    background-color: rgba(0, 0, 0, 0.3); 
+}
