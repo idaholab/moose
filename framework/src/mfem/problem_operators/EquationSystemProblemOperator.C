@@ -31,17 +31,33 @@ EquationSystemProblemOperator::Init(mfem::BlockVector & X)
 void
 EquationSystemProblemOperator::AddEstimator(std::shared_ptr<MFEMEstimator> estimator)
 {
+  _use_amr = true;
   _estimator = estimator;
-  SetUpAMR();
+}
+
+void
+EquationSystemProblemOperator::AddRefiner(std::shared_ptr<MFEMRefiner> refiner)
+{
+  _use_amr = true;
+  _refiner = refiner;
 }
 
 void
 EquationSystemProblemOperator::SetUpAMR()
 {
-  _use_amr = true;
+  if ( !_estimator or !_refiner )
+  {
+    // these should have both been added via the input file
+    mooseError("Input file must contain a refiner and an estimator!")
+  }
+  if( _use_amr and _estimator->createEstimator() ) {
+    _refiner->setUp( _estimator );
+  }
 
-  _refiner = std::make_unique<mfem::ThresholdRefiner>(*_estimator->createEstimator());
-  _refiner->SetTotalErrorFraction(0.7);
+  else
+  {
+    mooseError("Failed to setup amr");
+  }
 }
 
 /*
@@ -54,9 +70,7 @@ EquationSystemProblemOperator::HRefine()
   bool output = false;
   if (_use_amr)
   {
-    _refiner->Apply(*_problem.pmesh);
-
-    output = _refiner->Stop();
+    output =  _refiner->Apply(*_problem.pmesh);;
   }
   else
   {
@@ -75,9 +89,7 @@ EquationSystemProblemOperator::PRefine()
     mfem::Array<mfem::pRefinement> prefinements;
     mfem::Array<mfem::Refinement> refinements;
 
-    _refiner->MarkWithoutRefining(*_problem.pmesh, refinements);
-
-    output = (_problem.pmesh->ReduceInt(refinements.Size()) == 0LL);
+    output = _refiner->MarkWithoutRefining(*_problem.pmesh, refinements);
 
     prefinements.SetSize(refinements.Size());
     for (int i = 0; i < refinements.Size(); i++)
