@@ -8,32 +8,32 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "StepUOInterface.h"
-#include "StepUserObject.h"
+#include "AnalysisStepUOInterface.h"
+#include "AnalysisStepUserObject.h"
 
 void
-StepUOInterface::getStepUserObject(const FEProblemBase & fe_problem,
-                                   const StepUserObject *& step_user_object,
+AnalysisStepUOInterface::getAnalysisStepUserObject(const FEProblemBase & fe_problem,
+                                   const AnalysisStepUserObject *& step_user_object,
                                    const std::string & name)
 {
   std::vector<const UserObject *> uos;
   fe_problem.theWarehouse().query().condition<AttribSystem>("UserObject").queryIntoUnsorted(uos);
 
-  std::vector<const StepUserObject *> step_uos;
+  std::vector<const AnalysisStepUserObject *> step_uos;
   for (const auto & uo : uos)
   {
-    const StepUserObject * possible_step_uo = dynamic_cast<const StepUserObject *>(uo);
+    const AnalysisStepUserObject * possible_step_uo = dynamic_cast<const AnalysisStepUserObject *>(uo);
     if (possible_step_uo)
       step_uos.push_back(possible_step_uo);
   }
 
   if (step_uos.size() > 1)
-    mooseError("Your input file has multiple StepUserObjects. MOOSE currently only support one in ",
+    mooseError("Your input file has multiple AnalysisStepUserObjects. MOOSE currently only support one in ",
                name,
                ". \n");
   else if (step_uos.size() == 1)
     mooseInfo(
-        "A StepUserObject, has been identified and will be used to drive stepping behavior in ",
+        "A AnalysisStepUserObject, has been identified and will be used to drive stepping behavior in ",
         name,
         ".");
 

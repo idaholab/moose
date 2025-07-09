@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "StepNumber.h"
+#include "AnalysisStepNumber.h"
 #include "UserObjectInterface.h"
 
-registerMooseObject("SolidMechanicsApp", StepNumber);
+registerMooseObject("SolidMechanicsApp", AnalysisStepNumber);
 
 InputParameters
-StepNumber::validParams()
+AnalysisStepNumber::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  params.addRequiredParam<UserObjectName>("step_user_object",
-                                          "The StepUserObject that stores step times.");
+  params.addRequiredParam<UserObjectName>("analysis_step_user_object",
+                                          "The AnalysisStepUserObject that stores step times.");
   params.addParam<bool>("use_one_based_indexing", false, "Make step number start at one.");
   params.addClassDescription("Outputs the current analysis step number.");
   params.set<ExecFlagEnum>("execute_on") = {
@@ -25,15 +25,15 @@ StepNumber::validParams()
   return params;
 }
 
-StepNumber::StepNumber(const InputParameters & parameters)
+AnalysisStepNumber::AnalysisStepNumber(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _step_uo(getUserObject<StepUserObject>("step_user_object")),
+    _step_uo(getUserObject<AnalysisStepUserObject>("analysis_step_user_object")),
     _use_one_based_indexing(getParam<bool>("use_one_based_indexing"))
 {
 }
 
 Real
-StepNumber::getValue() const
+AnalysisStepNumber::getValue() const
 {
   return _step_uo.getStep(_t_old) + int(_use_one_based_indexing);
 }

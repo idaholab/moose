@@ -9,7 +9,7 @@
 
 #include "AbaqusUExternalDB.h"
 #include "AbaqusUtils.h"
-#include "StepUserObject.h"
+#include "AnalysisStepUserObject.h"
 
 #define QUOTE(macro) stringifyName(macro)
 
@@ -23,7 +23,7 @@ AbaqusUExternalDB::validParams()
   params.addRequiredParam<FileName>(
       "plugin", "The path to the compiled dynamic library for the plugin you want to use");
   params.addParam<UserObjectName>(
-      "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
+      "analysis_step_user_object", "The AnalysisStepUserObject that provides times from simulation loading steps.");
   return params;
 }
 
@@ -48,10 +48,10 @@ AbaqusUExternalDB::initialSetup()
 {
   // Let's automatically detect uos and identify the one we are interested in.
   // If there is more than one, we assume something is off and error out.
-  if (!isParamSetByUser("step_user_object"))
-    getStepUserObject(_fe_problem, _step_user_object, name());
+  if (!isParamSetByUser("analysis_step_user_object"))
+    getAnalysisStepUserObject(_fe_problem, _step_user_object, name());
   else
-    _step_user_object = &getUserObject<StepUserObject>("step_user_object");
+    _step_user_object = &getUserObject<AnalysisStepUserObject>("analysis_step_user_object");
 }
 
 void

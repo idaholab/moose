@@ -25,15 +25,15 @@
 
 [UserObjects]
   [step_uo]
-   type = StepUserObject
+   type = AnalysisStepUserObject
    step_start_times = '0 5'
   []
 []
 
 [Postprocessors]
   [step_number]
-    type = StepNumber
-    step_user_object = step_uo
+    type = AnalysisStepNumber
+    analysis_step_user_object = step_uo
   []
 []
 

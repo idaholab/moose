@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "StepUserObject.h"
+#include "AnalysisStepUserObject.h"
 #include "MooseUtils.h"
 #include <limits>
 #include <algorithm>
 
-registerMooseObject("SolidMechanicsApp", StepUserObject);
+registerMooseObject("SolidMechanicsApp", AnalysisStepUserObject);
 
 InputParameters
-StepUserObject::validParams()
+AnalysisStepUserObject::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
@@ -51,7 +51,7 @@ StepUserObject::validParams()
   return params;
 }
 
-StepUserObject::StepUserObject(const InputParameters & parameters)
+AnalysisStepUserObject::AnalysisStepUserObject(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _times(0),
     _step_durations(0),
@@ -68,12 +68,12 @@ StepUserObject::StepUserObject(const InputParameters & parameters)
   if (int(is_step_start_times) + int(is_step_end_times) + int(is_interval_and_steps) +
           int(is_step_durations) >
       1)
-    mooseError("In StepUserObject, only one of 'step_start_times', 'step_end_times', "
+    mooseError("In AnalysisStepUserObject, only one of 'step_start_times', 'step_end_times', "
                "'total_time_interval', and 'step_durations' can be set");
   if ((isParamSetByUser("total_time_interval") && !isParamSetByUser("number_steps")) ||
       (!isParamSetByUser("total_time_interval") && isParamSetByUser("number_steps")))
     mooseError(
-        "In StepUserObject, both 'total_time_interval' and 'number_steps' need both be set.");
+        "In AnalysisStepUserObject, both 'total_time_interval' and 'number_steps' need both be set.");
 
   // define step times
   if (is_step_start_times)
@@ -82,7 +82,7 @@ StepUserObject::StepUserObject(const InputParameters & parameters)
     if (!std::is_sorted(_times.begin(), _times.end()))
       paramError(
           "step_start_times",
-          "start times for StepUserObject are not provided in ascending order. Please revise "
+          "start times for AnalysisStepUserObject are not provided in ascending order. Please revise "
           "your input.");
 
     mooseInfo("Step start times are used to define simulation steps in ", name(), ".");
@@ -92,7 +92,7 @@ StepUserObject::StepUserObject(const InputParameters & parameters)
     _times = getParam<std::vector<Real>>("step_end_times");
     if (!std::is_sorted(_times.begin(), _times.end()))
       paramError("step_end_times",
-                 "end times for StepUserObject are not provided in ascending order. Please revise "
+                 "end times for AnalysisStepUserObject are not provided in ascending order. Please revise "
                  "your input.");
     _times.insert(_times.begin(), 0.0);
 
@@ -145,16 +145,16 @@ StepUserObject::StepUserObject(const InputParameters & parameters)
 }
 
 Real
-StepUserObject::getStartTime(const unsigned int & step) const
+AnalysisStepUserObject::getStartTime(const unsigned int & step) const
 {
   if (_times.size() <= step)
-    mooseError("StepUserObject was called with a wrong step number");
+    mooseError("AnalysisStepUserObject was called with a wrong step number");
 
   return _times[step];
 }
 
 Real
-StepUserObject::getEndTime(const unsigned int & step) const
+AnalysisStepUserObject::getEndTime(const unsigned int & step) const
 {
   Real end_time(0);
 
@@ -163,13 +163,13 @@ StepUserObject::getEndTime(const unsigned int & step) const
   else if (_times.size() == step + 1)
     end_time = std::numeric_limits<double>::max();
   else
-    mooseError("StepUserObject was called with a wrong step number");
+    mooseError("AnalysisStepUserObject was called with a wrong step number");
 
   return end_time;
 }
 
 unsigned int
-StepUserObject::getStep(const Real & time) const
+AnalysisStepUserObject::getStep(const Real & time) const
 {
   int which_step = 0;
 
@@ -188,14 +188,14 @@ StepUserObject::getStep(const Real & time) const
 }
 
 void
-StepUserObject::initialize()
+AnalysisStepUserObject::initialize()
 {
 }
 void
-StepUserObject::execute()
+AnalysisStepUserObject::execute()
 {
 }
 void
-StepUserObject::finalize()
+AnalysisStepUserObject::finalize()
 {
 }

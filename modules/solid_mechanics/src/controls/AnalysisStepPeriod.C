@@ -8,40 +8,40 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "StepPeriod.h"
-#include "StepUserObject.h"
+#include "AnalysisStepPeriod.h"
+#include "AnalysisStepUserObject.h"
 #include "Function.h"
 #include "Transient.h"
 #include "MooseUtils.h"
 
-registerMooseObject("SolidMechanicsApp", StepPeriod);
+registerMooseObject("SolidMechanicsApp", AnalysisStepPeriod);
 
 InputParameters
-StepPeriod::validParams()
+AnalysisStepPeriod::validParams()
 {
   InputParameters params = TimePeriodBase::validParams();
   params.addClassDescription(
-      "Control the enabled/disabled state of objects with user-provided simulation steps.");
+      "Control the enabled/disabled state of objects with user-provided analysis steps.");
   params.addParam<bool>(
       "set_sync_times", true, "Set the start and end time as execute sync times.");
   params.addParam<UserObjectName>(
-      "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
+      "analysis_step_user_object", "The AnalysisStepUserObject that provides times from analysis steps.");
   params.addRequiredParam<unsigned int>("step_number",
                                         "Step number on which this control object applies.");
   return params;
 }
 
-StepPeriod::StepPeriod(const InputParameters & parameters) : TimePeriodBase(parameters) {}
+AnalysisStepPeriod::AnalysisStepPeriod(const InputParameters & parameters) : TimePeriodBase(parameters) {}
 
 void
-StepPeriod::initialSetup()
+AnalysisStepPeriod::initialSetup()
 {
   // Let's automatically detect uos and identify the one we are interested in.
   // If there is more than one, we assume something is off and error out.
   if (!isParamSetByUser("step_user_object"))
-    getStepUserObject(_fe_problem, _step_user_object, name());
+    getAnalysisStepUserObject(_fe_problem, _step_user_object, name());
   else
-    _step_user_object = &getUserObject<StepUserObject>("step_user_object");
+    _step_user_object = &getUserObject<AnalysisStepUserObject>("analysis_step_user_object");
 
   _start_time.resize(1);
   _end_time.resize(1);
@@ -64,7 +64,7 @@ StepPeriod::initialSetup()
 }
 
 bool
-StepPeriod::conditionMet(const unsigned int & /*i*/)
+AnalysisStepPeriod::conditionMet(const unsigned int & /*i*/)
 {
   return MooseUtils::absoluteFuzzyGreaterEqual(_t, _start_time[0]) &&
          MooseUtils::absoluteFuzzyLessThan(_t, _end_time[0]);

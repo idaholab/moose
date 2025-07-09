@@ -10,25 +10,25 @@
 #pragma once
 
 #include "GeneralPostprocessor.h"
-#include "StepUserObject.h"
+#include "AnalysisStepUserObject.h"
 
 /**
  * Given the current time, outputs the current analysis step number
  */
-class StepNumber : public GeneralPostprocessor
+class AnalysisStepNumber : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  StepNumber(const InputParameters & parameters);
+  AnalysisStepNumber(const InputParameters & parameters);
 
   virtual void execute() override {};
   virtual void initialize() override {};
   virtual PostprocessorValue getValue() const override;
 
 private:
-  /// The StepUserObject that contains step time information
-  const StepUserObject & _step_uo;
+  /// The AnalysisStepUserObject that contains step time information
+  const AnalysisStepUserObject & _step_uo;
   /// Flag for reporting step times beginning at 1 instead of 0
   const bool _use_one_based_indexing;
 };
