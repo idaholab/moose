@@ -58,12 +58,12 @@ CSGCellList::addUniverseCell(const std::string name,
   return *_cells[name];
 }
 
-std::vector<CSGCell *>
+std::vector<std::reference_wrapper<const CSGCell>>
 CSGCellList::getAllCells() const
 {
-  std::vector<CSGCell *> cells;
+  std::vector<std::reference_wrapper<const CSGCell>> cells;
   for (auto it = _cells.begin(); it != _cells.end(); ++it)
-    cells.push_back(it->second.get());
+    cells.push_back(*(it->second));
   return cells;
 }
 

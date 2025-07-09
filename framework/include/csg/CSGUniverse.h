@@ -65,7 +65,7 @@ public:
    *
    * @return std::vector<CSGCell *> list of pointers to cells in universe
    */
-  const std::vector<const CSGCell *> & getAllCells() const { return _cells; }
+  const std::vector<std::reference_wrapper<const CSGCell>> & getAllCells() const { return _cells; }
 
   /**
    * @brief Get the name of the universe
@@ -114,8 +114,8 @@ protected:
   /// Name of universe
   std::string _name;
 
-  /// list of pointers to cells in universe
-  std::vector<const CSGCell *> _cells;
+  /// list of references to cells in universe
+  std::vector<std::reference_wrapper<const CSGCell>> _cells;
 
   // whether or not this universe is the root universe
   bool _is_root;

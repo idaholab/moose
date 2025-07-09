@@ -23,7 +23,7 @@ CSGRegion::CSGRegion(const CSGSurface & surf, const CSGSurface::Direction direct
   : _region_type(CSGRegion::RegionType::HALFSPACE)
 {
   _region_str = ((direction == CSGSurface::Direction::POSITIVE) ? "+" : "-") + surf.getName();
-  _surfaces.push_back(&surf);
+  _surfaces.push_back(surf);
 }
 
 // intersection and union constructor
@@ -183,8 +183,23 @@ CSGRegion::operator==(const CSGRegion & other) const
 {
   const bool region_type_eq = this->getRegionType() == other.getRegionType();
   const bool region_str_eq = this->toString() == other.toString();
-  const bool surfaces_eq = this->getSurfaces() == other.getSurfaces();
-  return region_type_eq && region_str_eq && surfaces_eq;
+  if (region_type_eq && region_str_eq)
+  {
+    const auto & all_surfs = getSurfaces();
+    const auto & other_surfs = other.getSurfaces();
+    const bool num_cells_eq = all_surfs.size() == other_surfs.size();
+    if (num_cells_eq)
+    {
+      for (unsigned int i = 0; i < all_surfs.size(); ++i)
+        if (all_surfs[i].get() != other_surfs[i].get())
+          return false;
+      return true;
+    }
+    else
+      return false;
+  }
+  else
+    return false;
 }
 
 bool

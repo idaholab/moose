@@ -106,11 +106,11 @@ protected:
   std::map<std::string, std::unique_ptr<CSGSurface>> & getSurfaceListMap() { return _surfaces; }
 
   /**
-   * @brief Get list of pointers to all surfaces in surface list
+   * @brief Get list of references to all surfaces in surface list
    *
-   * @return std::vector<CSGSurface *> list of pointers to surfaces
+   * @return std::vector<std::reference_wrapper<const CSGSurface>> list of references to surfaces
    */
-  std::vector<CSGSurface *> getAllSurfaces() const;
+  std::vector<std::reference_wrapper<const CSGSurface>> getAllSurfaces() const;
 
   /**
    * @brief Get a surface by name
