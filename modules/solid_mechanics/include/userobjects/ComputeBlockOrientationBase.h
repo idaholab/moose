@@ -43,7 +43,7 @@ public:
   /**
    * Called _once_ after execute has been called on all "objects".
    */
-  virtual void finalize() override{};
+  virtual void finalize() override {};
 
 protected:
   // This map will hold our averages for each block
