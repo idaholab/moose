@@ -156,7 +156,6 @@ AppFactory::create(const std::string & app_type,
   // copy of the derived app's parmeters)
   const auto & params = storeAppParams(parameters);
 
-  _app_creation_count++;
   build_info->_app_creation_count++;
 
   return build_info->build(params);
