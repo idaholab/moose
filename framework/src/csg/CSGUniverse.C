@@ -22,7 +22,7 @@ CSGUniverse::CSGUniverse(const std::string name, std::vector<CSGCell *> & cells,
 }
 
 void
-CSGUniverse::addCell(CSGCell & cell)
+CSGUniverse::addCell(const CSGCell & cell)
 {
   auto cell_name = cell.getName();
   if (!hasCell(cell_name))
@@ -32,7 +32,7 @@ CSGUniverse::addCell(CSGCell & cell)
                  "Skipping cell insertion for cell with duplicate name.");
 }
 
-CSGCell &
+const CSGCell &
 CSGUniverse::getCell(const std::string name)
 {
   if (!hasCell(name))

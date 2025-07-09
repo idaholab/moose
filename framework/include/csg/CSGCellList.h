@@ -62,7 +62,8 @@ protected:
    * @return CSGCell & reference to CSGCell with universe fill that was created and
    * added to this CSGCellList
    */
-  CSGCell & addUniverseCell(const std::string name, CSGUniverse & univ, const CSGRegion & region);
+  CSGCell &
+  addUniverseCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region);
 
   /**
    * @brief Get map of all names to cells in cell list
@@ -100,7 +101,7 @@ protected:
    * @param cell reference to CSGCell object that should be renamed
    * @param name new name
    */
-  void renameCell(CSGCell & cell, const std::string name);
+  void renameCell(const CSGCell & cell, const std::string name);
 
   /// Checks whether cell name already exists within CSGCellList object
   void checkCellName(const std::string name) const;

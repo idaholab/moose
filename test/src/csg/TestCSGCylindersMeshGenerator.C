@@ -76,7 +76,7 @@ TestCSGCylindersMeshGenerator::generateCSG()
       region = -cyl_surf & -pos_plane & +neg_plane;
     else
     {
-      auto & prev_surf = csg_mesh->getSurfaceByName(prev_surf_name);
+      const auto & prev_surf = csg_mesh->getSurfaceByName(prev_surf_name);
       region = +prev_surf & -cyl_surf & -pos_plane & +neg_plane;
     }
     auto cell = csg_mesh->createCell(cell_name, region);
