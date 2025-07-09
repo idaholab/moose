@@ -222,7 +222,8 @@ class Job(OutputInterface):
         # A list of ValidationCase objects that were ran for this Job,
         # if any. Stored so that the results and data can be captured
         # within the JSON results at the end of the run
-        self.validation_cases: typing.Optional[list[ValidationCase]] = None
+        self.validation_cases: list[ValidationCase] = self.initValidationCases()
+
         # The OutputInterface for the validation run, set only if
         # validation cases were ran
         self.validation_output: typing.Optional[OutputInterface] = None
@@ -447,14 +448,6 @@ class Job(OutputInterface):
             try_catch(run_tester, 'TESTER RUN', 'tester_run')
             return
 
-        # Initialize the validation test, if any
-        # We do this now so that we can capture any invalid python
-        # in the script before we even try to do the actual run
-        if self.specs['validation_test']:
-            init_validation = lambda: self.initValidation()
-            if not try_catch(init_validation, 'VALIDATION INIT', 'validation_init'):
-                return
-
         if self.options.pedantic_checks and self.canParallel():
             # Before the job does anything, get the times files below it were last modified
             with self.timer.time('pedantic_init'):
@@ -540,16 +533,25 @@ class Job(OutputInterface):
         # Run finalize now that we're done
         finalize()
 
-    def initValidation(self):
+    def initValidationCases(self):
         """
         Initilizes (constructs) the validation cases, if any
         """
+        validation_classes = self.__tester._validation_classes
+        if not validation_classes:
+            return []
+
         init_kwargs = {'params': self.__tester.parameters(),
                        'tester_outputs': self.getOutputFiles(self.options)}
         cwd = os.getcwd()
         os.chdir(self.getTestDir())
         try:
-            self.validation_cases = [c(**init_kwargs) for c in self.__tester._validation_classes]
+            return [c(**init_kwargs) for c in validation_classes]
+        except Exception as e:
+            trace = traceback.format_exc()
+            output = util.outputHeader('Python exception encountered in validation case') + trace
+            self.setStatus(self.error, 'VALIDATION INIT EXCEPTION')
+            self.appendOutput(output)
         finally:
             os.chdir(cwd)
 
