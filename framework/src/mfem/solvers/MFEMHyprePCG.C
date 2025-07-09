@@ -32,7 +32,6 @@ MFEMHyprePCG::validParams()
 
 MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters) : MFEMSolverBase(parameters)
 {
-  mfem::Hypre::Init();
   constructSolver(parameters);
 }
 
