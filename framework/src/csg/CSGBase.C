@@ -19,38 +19,50 @@ CSGBase::CSGBase()
 
 CSGBase::~CSGBase() {}
 
-CSGCell &
+void
+CSGBase::updateSurfaceBoundaryType(const CSGSurface & surface, CSGSurface::BoundaryType boundary)
+{
+  auto & surf = getSurface(surface.getName());
+  if (surf != surface)
+    mooseError("A surface named " + surface.getName() + " is being updated that is different " +
+               "from the surface of the same name in the base instance.");
+  surf.setBoundaryType(boundary);
+}
+
+const CSGCell &
 CSGBase::createCell(const std::string name,
                     const std::string mat_name,
                     const CSGRegion & region,
-                    CSGUniverse * add_to_univ)
+                    const CSGUniverse * add_to_univ)
 {
   checkRegionSurfaces(region);
   auto & cell = _cell_list.addMaterialCell(name, mat_name, region);
   if (add_to_univ)
-    add_to_univ->addCell(cell);
+    addCellToUniverse(*add_to_univ, cell);
   else
-    getRootUniverse().addCell(cell);
+    addCellToUniverse(getRootUniverse(), cell);
   return cell;
 }
 
-CSGCell &
-CSGBase::createCell(const std::string name, const CSGRegion & region, CSGUniverse * add_to_univ)
+const CSGCell &
+CSGBase::createCell(const std::string name,
+                    const CSGRegion & region,
+                    const CSGUniverse * add_to_univ)
 {
   checkRegionSurfaces(region);
   auto & cell = _cell_list.addVoidCell(name, region);
   if (add_to_univ)
-    add_to_univ->addCell(cell);
+    addCellToUniverse(*add_to_univ, cell);
   else
-    getRootUniverse().addCell(cell);
+    addCellToUniverse(getRootUniverse(), cell);
   return cell;
 }
 
-CSGCell &
+const CSGCell &
 CSGBase::createCell(const std::string name,
-                    CSGUniverse & fill_univ,
+                    const CSGUniverse & fill_univ,
                     const CSGRegion & region,
-                    CSGUniverse * add_to_univ)
+                    const CSGUniverse * add_to_univ)
 {
   checkRegionSurfaces(region);
   if (add_to_univ && (fill_univ == *add_to_univ))
@@ -59,21 +71,26 @@ CSGBase::createCell(const std::string name,
 
   auto & cell = _cell_list.addUniverseCell(name, fill_univ, region);
   if (add_to_univ)
-    add_to_univ->addCell(cell);
+    addCellToUniverse(*add_to_univ, cell);
   else
-    getRootUniverse().addCell(cell);
+    addCellToUniverse(getRootUniverse(), cell);
   return cell;
 }
 
 void
-CSGBase::updateCellRegion(CSGCell & cell, const CSGRegion & region)
+CSGBase::updateCellRegion(const CSGCell & cell, const CSGRegion & region)
 {
   checkRegionSurfaces(region);
-  cell.updateRegion(region);
+  if (!checkCellInBase(cell))
+    mooseError("The region of cell with name " + cell.getName() +
+               " is being updated that is different " +
+               "from the cell of the same name in the base instance.");
+  auto & list_cell = _cell_list.getCell(cell.getName());
+  list_cell.updateRegion(region);
 }
 
-CSGUniverse &
-CSGBase::createUniverse(const std::string name, std::vector<CSGCell *> cells)
+const CSGUniverse &
+CSGBase::createUniverse(const std::string name, std::vector<const CSGCell *> cells)
 {
   auto & univ = _universe_list.addUniverse(name);
   addCellsToUniverse(univ, cells); // performs a check that cells are a part of this base
@@ -81,37 +98,44 @@ CSGBase::createUniverse(const std::string name, std::vector<CSGCell *> cells)
 }
 
 void
-CSGBase::addCellToUniverse(CSGUniverse & universe, CSGCell & cell)
+CSGBase::addCellToUniverse(const CSGUniverse & universe, const CSGCell & cell)
 {
   // make sure cell is a part of this CSGBase instance
   if (!checkCellInBase(cell))
-    mooseError(" A cell named " + cell.getName() + " is being added to universe " +
+    mooseError("A cell named " + cell.getName() + " is being added to universe " +
                universe.getName() +
                " that is different from the cell of the same name in the base instance.");
-
-  universe.addCell(cell);
+  auto & univ = _universe_list.getUniverse(universe.getName());
+  if (univ != universe)
+    mooseError("Cells are being added to a universe named " + universe.getName() +
+               " that is different " + "from the universe of the same name in the base instance.");
+  univ.addCell(cell);
 }
 
 void
-CSGBase::addCellsToUniverse(CSGUniverse & universe, std::vector<CSGCell *> cells)
+CSGBase::addCellsToUniverse(const CSGUniverse & universe, std::vector<const CSGCell *> cells)
 {
   for (auto & c : cells)
     addCellToUniverse(universe, *c);
 }
 
 void
-CSGBase::removeCellFromUniverse(CSGUniverse & universe, CSGCell & cell)
+CSGBase::removeCellFromUniverse(const CSGUniverse & universe, const CSGCell & cell)
 {
   // make sure cell is a part of this CSGBase instance
   if (!checkCellInBase(cell))
-    mooseError(" A cell named " + cell.getName() + " is being removed from universe " +
+    mooseError("A cell named " + cell.getName() + " is being removed from universe " +
                universe.getName() +
                " that is different from the cell of the same name in the base instance.");
-  universe.removeCell(cell.getName());
+  auto & univ = _universe_list.getUniverse(universe.getName());
+  if (univ != universe)
+    mooseError("Cells are being removed from a universe named " + universe.getName() +
+               " that is different " + "from the universe of the same name in the base instance.");
+  univ.removeCell(cell.getName());
 }
 
 void
-CSGBase::removeCellsFromUniverse(CSGUniverse & universe, std::vector<CSGCell *> cells)
+CSGBase::removeCellsFromUniverse(const CSGUniverse & universe, std::vector<const CSGCell *> cells)
 {
   for (auto c : cells)
     removeCellFromUniverse(universe, *c);
@@ -149,7 +173,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list)
       // add existing cells to current root instead of creating new universe
       auto all_cells = u.second->getAllCells();
       for (auto cell : all_cells)
-        root.addCell(*cell);
+        addCellToUniverse(root, *cell);
     }
     else // unique non-root universe to add to list
       _universe_list.addUniverse(u.second);
@@ -187,7 +211,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list,
   auto & root = getRootUniverse();
   auto root_cells = root.getAllCells();
   createUniverse(new_root_name_base, root_cells);
-  root.removeAllCells();
+  removeCellsFromUniverse(root, root_cells);
 
   // add incoming universes to current Base
   auto & all_univs = univ_list.getUniverseListMap();
@@ -205,7 +229,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list,
 }
 
 void
-CSGBase::checkRegionSurfaces(const CSGRegion & region)
+CSGBase::checkRegionSurfaces(const CSGRegion & region) const
 {
   auto surfs = region.getSurfaces();
   for (auto s : surfs)
@@ -222,7 +246,7 @@ CSGBase::checkRegionSurfaces(const CSGRegion & region)
 }
 
 bool
-CSGBase::checkCellInBase(CSGCell & cell)
+CSGBase::checkCellInBase(const CSGCell & cell) const
 {
   auto name = cell.getName();
   // if no cell by this name exists, an error will be produced by getCell
@@ -232,7 +256,7 @@ CSGBase::checkCellInBase(CSGCell & cell)
 }
 
 void
-CSGBase::checkUniverseLinking()
+CSGBase::checkUniverseLinking() const
 {
   std::vector<std::string> linked_universe_names;
 
@@ -259,7 +283,7 @@ CSGBase::getLinkedUniverses(const CSGUniverse & univ,
 }
 
 nlohmann::json
-CSGBase::generateOutput()
+CSGBase::generateOutput() const
 {
   // Check that orphaned universes do not exist in universe list of CSGBase object
   checkUniverseLinking();
@@ -311,4 +335,5 @@ CSGBase::generateOutput()
 
   return csg_json;
 }
+
 } // namespace CSG

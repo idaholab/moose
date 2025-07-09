@@ -23,7 +23,7 @@ CSGCell::CSGCell(const std::string name, const std::string mat_name, const CSGRe
 {
 }
 
-CSGCell::CSGCell(const std::string name, CSGUniverse * univ, const CSGRegion & region)
+CSGCell::CSGCell(const std::string name, const CSGUniverse * univ, const CSGRegion & region)
   : _name(name),
     _fill_type(FillType::UNIVERSE),
     _fill_name(univ->getName()),

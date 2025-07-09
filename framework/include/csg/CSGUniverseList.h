@@ -75,7 +75,7 @@ protected:
    *
    * @return CSGUniverse & reference to the root universe
    */
-  CSGUniverse & getRoot() { return *_root_universe; };
+  const CSGUniverse & getRoot() const { return *_root_universe; };
 
   /**
    * @brief add an existing universe to list. Ownership of universe will be transferred to universe
@@ -91,7 +91,7 @@ protected:
    * @param universe reference to universe whose name should be renamed
    * @param name new name
    */
-  void renameUniverse(CSGUniverse & universe, const std::string name);
+  void renameUniverse(const CSGUniverse & universe, const std::string name);
 
   /// Checks whether universe name already exists within CSGUniverseList object
   void checkUniverseName(const std::string name) const;
@@ -100,7 +100,7 @@ protected:
   std::map<std::string, std::unique_ptr<CSGUniverse>> _universes;
 
   /// root universe for the CSGBase instance
-  CSGUniverse * _root_universe;
+  const CSGUniverse * _root_universe;
 
   // Only CSGBase should be calling the methods in CSGUniverseList
   friend class CSGBase;

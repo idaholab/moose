@@ -19,7 +19,7 @@ CSGRegion::CSGRegion()
 }
 
 // halfspace constructor
-CSGRegion::CSGRegion(CSGSurface & surf, const CSGSurface::Direction direction)
+CSGRegion::CSGRegion(const CSGSurface & surf, const CSGSurface::Direction direction)
   : _region_type(CSGRegion::RegionType::HALFSPACE)
 {
   _region_str = ((direction == CSGSurface::Direction::POSITIVE) ? "+" : "-") + surf.getName();
@@ -145,14 +145,14 @@ stripRegionString(std::string region_str, std::string op)
 
 // positive halfspace
 const CSGRegion
-operator+(CSGSurface & surf)
+operator+(const CSGSurface & surf)
 {
   return CSGRegion(surf, CSGSurface::Direction::POSITIVE);
 }
 
 // negative halfspace
 const CSGRegion
-operator-(CSGSurface & surf)
+operator-(const CSGSurface & surf)
 {
   return CSGRegion(surf, CSGSurface::Direction::NEGATIVE);
 }

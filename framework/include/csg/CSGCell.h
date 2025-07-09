@@ -57,7 +57,7 @@ public:
    * @param univ universe to be the fill
    * @param region cell region
    */
-  CSGCell(const std::string name, CSGUniverse * univ, const CSGRegion & region);
+  CSGCell(const std::string name, const CSGUniverse * univ, const CSGRegion & region);
 
   /**
    * Destructor
@@ -149,7 +149,7 @@ protected:
   CSGRegion _region;
 
   /// Fill object if fill is CSGUniverse
-  CSGUniverse * _fill_universe;
+  const CSGUniverse * _fill_universe;
 
   friend class CSGCellList; // needed for setName() access
   friend class CSGBase;     // needed for updateRegion() access

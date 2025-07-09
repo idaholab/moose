@@ -72,7 +72,7 @@ CSGUniverseList::addUniverse(std::unique_ptr<CSGUniverse> & universe)
 }
 
 void
-CSGUniverseList::renameUniverse(CSGUniverse & universe, const std::string name)
+CSGUniverseList::renameUniverse(const CSGUniverse & universe, const std::string name)
 {
   // check that this universe passed in is actually in the same universe that is in the universe
   // list

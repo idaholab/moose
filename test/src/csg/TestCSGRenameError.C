@@ -54,7 +54,7 @@ TestCSGRenameError::generateCSG()
   if (_mode == "surface")
   {
     // get surface from base 1 of the same name to try to rename in base 2
-    auto & surf_1 = csg_1->getSurfaceByName("surf_plus_x");
+    const auto & surf_1 = csg_1->getSurfaceByName("surf_plus_x");
     // should produce error that surface is not the same in memory despite having the same name
     csg_2->renameSurface(surf_1, "test_new_surf_name");
   }
