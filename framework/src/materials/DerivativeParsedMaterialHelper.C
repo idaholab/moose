@@ -266,7 +266,8 @@ DerivativeParsedMaterialHelperTempl<is_ad>::assembleDerivatives()
     recurseDerivative(i, 1, root);
 
   // increase the parameter buffer to provide storage for the material property derivatives
-  _func_params.resize(_nargs + _mat_prop_descriptors.size() + _postprocessor_values.size());
+  _func_params.resize(_nargs + _mat_prop_descriptors.size() + _postprocessor_values.size() +
+                      _extra_symbols.size() + _functors.size());
 }
 
 template <bool is_ad>
