@@ -36,7 +36,7 @@ MFEMTransient::validParams()
       "error_on_dtmin",
       true,
       "Throw error when timestep is less than dtmin instead of just aborting solve.");
-  params.addParam<Real>("timestep_tolerance",
+  params.addParam<mfem::real_t>("timestep_tolerance",
                         1.0e-12,
                         "the tolerance setting for final timestep size and sync times");
   return params;
@@ -52,7 +52,7 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
     _t_step(0),
     _vis_steps(params.get<unsigned int>("visualisation_steps")),
     _last_step(false),
-    _timestep_tolerance(getParam<Real>("timestep_tolerance")),
+    _timestep_tolerance(getParam<mfem::real_t>("timestep_tolerance")),
     _dtmin(getParam<mfem::real_t>("dtmin")),
     _dtmax(getParam<mfem::real_t>("dtmax")),
     _num_steps(getParam<unsigned int>("num_steps")),
@@ -158,7 +158,7 @@ MFEMTransient::execute()
 
   while (keepGoing())
   {
-    _t_step++;
+    incrementStepOrReject();
     takeStep(_dt);
     endStep();
   }
@@ -180,4 +180,34 @@ MFEMTransient::execute()
   postExecute();
 }
 
+void
+MFEMTransient::incrementStepOrReject()
+{
+  _t_step++;
+  _mfem_problem.advanceState();
+  if (_t_step == 1)
+    return;
+
+  /*
+    * Call the multi-app executioners endStep and
+    * postStep methods when doing Picard or when not automatically advancing sub-applications for
+    * some other reason. We do not perform these calls for loose-coupling/auto-advancement
+    * problems because TransientBase::endStep and TransientBase::postStep get called from
+    * TransientBaseMultiApp::solveStep in that case.
+    */
+  _mfem_problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+  _mfem_problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN);
+  _mfem_problem.finishMultiAppStep(EXEC_TIMESTEP_END);
+  _mfem_problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_END);
+
+  /*
+    * Ensure that we increment the sub-application time steps so that
+    * when dt selection is made in the master application, we are using
+    * the correct time step information
+    */
+  _mfem_problem.incrementMultiAppTStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+  _mfem_problem.incrementMultiAppTStep(EXEC_TIMESTEP_BEGIN);
+  _mfem_problem.incrementMultiAppTStep(EXEC_TIMESTEP_END);
+  _mfem_problem.incrementMultiAppTStep(EXEC_MULTIAPP_FIXED_POINT_END);
+}
 #endif
