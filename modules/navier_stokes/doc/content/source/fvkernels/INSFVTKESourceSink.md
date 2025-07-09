@@ -109,6 +109,24 @@ For the `logarithmic` layer, the destruction is defined as follows:
 \epsilon = C_{\mu}^{0.75} \frac{\rho k^{\frac{3}{2}}}{\kappa y_p} \,.
 \end{equation}
 
+## Buoyancy correction:
+
+The buoyancy correction is activated by providing a temperature functor
+[!param](/FVKernels/INSFVTKESourceSink/temperature) to the kernel.
+With buoyancy correction, the modified production of turbulent kinetic
+energy reads as follows:
+
+\begin{equation}
+G_k = \mu_t S^2 + \alpha \frac{\mu_t}{Pr_t} (\nabla T \cdot \vec{g})\,,
+\end{equation}
+
+where:
+
+- $\alpha$ is the volumetric thermal expansion coefficient,
+- $Pr_t$ is the turbulent Prandtl number,
+- $T$ is the fluid temperature,
+- $\vec{g}$ is the acceleration of gravity.
+
 !alert note
 When the wall treatment is specified in this kernel, any boundary condition for $k$ will be ignored.
 In other words, there is no need to impose boundary conditions for $k$ when the wall treatment

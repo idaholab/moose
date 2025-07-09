@@ -91,4 +91,16 @@ protected:
 
   /// Whether a nonlinear Newton-like solver is being used (as opposed to a linearized solver)
   const bool _newton_solve;
+
+  /// Temperature field
+  const Moose::Functor<ADReal> * _temperature;
+
+  /// Thermal expansion coefficient
+  const Moose::Functor<ADReal> * _alpha;
+
+  /// Turbulent Prandtl number
+  const Moose::Functor<ADReal> * _Pr_t;
+
+  /// Gravity vector
+  const RealVectorValue * _gravity;
 };
