@@ -25,16 +25,69 @@ public:
   virtual void init() override;
   virtual void execute() override;
 
-  mutable double _t_step; // Time step
+  // virtual void computeDT();
+
+  // Methods called before and after timestepping. Not used in MFEM timesteppers
+  virtual void preStep(){};
+  virtual void postStep(){};
+
+  /**
+   * Do whatever is necessary to advance one step.
+   */
+  // virtual void takeStep(mfem::real_t input_dt = -1.0);
+
+  /**
+   * @return The the computed dt to use for this timestep.
+   */
+  // virtual mfem::real_t getDT();
+
+  /**
+   * Can be used to set the next "target time" which is a time to nail perfectly.
+   * Useful for driving MultiApps.
+   */
+  // virtual void setTargetTime(mfem::real_t target_time);
+
+  /**
+   * This is where the solve step is actually incremented.
+   */
+  // virtual void incrementStepOrReject();
+
+  // virtual void endStep(mfem::real_t input_time = -1.0);
+
+  /**
+   * Get the current time.
+   */
+  virtual mfem::real_t getTime() const { return _time; };
+
+  /**
+   * Get the timestep tolerance
+   * @return The timestep tolerance
+   */
+  // mfem::real_t & timestepTol() { return _timestep_tolerance; }
+
+  /**
+   * Get a modifiable reference to the end time
+   * @return The end time
+   */
+  mfem::real_t & endTime() { return _end_time; }
+
+  /**
+   * Get the Relative L2 norm of the change in the solution.
+   */
+  // mfem::real_t getSolutionChangeNorm();
+
+  mutable mfem::real_t _dt;     // Timestep size
+  mutable mfem::real_t _dt_old; // Previous timestep size
 
 private:
-  double _t_initial;       // Start time
-  double _t_final;         // End time
-  Real & _t;               // Current time
-  mutable int _it;         // Time index
+  mfem::real_t & _time;     // Current time
+  mfem::real_t _start_time; // Start time
+  mfem::real_t _end_time;   // End time
+  mutable int _t_step;      // Current timestep index
   int _vis_steps;          // Number of cycles between each output update
   mutable bool _last_step; // Flag to check if current step is final
   std::unique_ptr<Moose::MFEM::TimeDomainProblemOperator> _problem_operator{nullptr};
+  mfem::real_t _timestep_tolerance;
 };
 
 #endif
