@@ -19,7 +19,7 @@
 // Forwards declaration.
 class MFEMProblem;
 
-/*
+/**
  * This class adds a getMFEMProblem method.
  */
 class MFEMGeneralUserObject : public GeneralUserObject

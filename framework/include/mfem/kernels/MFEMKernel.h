@@ -15,9 +15,9 @@
 #include "MFEMContainers.h"
 #include "MFEMBlockRestrictable.h"
 
-/*
-Class to construct an MFEM integrator to apply to the equation system.
-*/
+/**
+ * Class to construct an MFEM integrator to apply to the equation system.
+ */
 class MFEMKernel : public MFEMGeneralUserObject, public MFEMBlockRestrictable
 {
 public:

@@ -14,9 +14,6 @@
 
 registerMooseObject("MooseApp", MFEMGradAux);
 
-/*
-Class to set an H(curl) auxvariable to be the gradient of a H1 scalar variable.
-*/
 InputParameters
 MFEMGradAux::validParams()
 {

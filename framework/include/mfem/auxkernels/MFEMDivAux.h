@@ -15,9 +15,9 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMAuxKernel.h"
 
-/*
-Class to set an L2 auxvariable to be the divergence of an H(div) vector variable.
-*/
+/**
+ * Class to set an L2 auxvariable to be the divergence of an H(div) vector variable.
+ */
 class MFEMDivAux : public MFEMAuxKernel
 {
 public:
