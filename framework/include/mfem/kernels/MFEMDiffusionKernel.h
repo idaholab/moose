@@ -12,9 +12,9 @@
 #pragma once
 #include "MFEMKernel.h"
 
-/*
+/**
  * \f[
- * (\sigma \nabla q, \nabla q')
+ * (k \vec \nabla u, \vec \nabla v)
  * \f]
  */
 class MFEMDiffusionKernel : public MFEMKernel

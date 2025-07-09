@@ -12,9 +12,9 @@
 #pragma once
 #include "MFEMMassKernel.h"
 
-/*
+/**
  * \f[
- * (\beta du/dt, u')
+ * (k du/dt, v)
  * \f]
  */
 class MFEMTimeDerivativeMassKernel : public MFEMMassKernel

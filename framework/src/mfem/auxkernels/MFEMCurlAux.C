@@ -14,9 +14,6 @@
 
 registerMooseObject("MooseApp", MFEMCurlAux);
 
-/*
-Class to set an H(div) auxvariable to be the curl of a H(curl) vector variable.
-*/
 InputParameters
 MFEMCurlAux::validParams()
 {

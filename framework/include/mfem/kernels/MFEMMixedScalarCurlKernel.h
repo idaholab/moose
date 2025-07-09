@@ -12,9 +12,9 @@
 #pragma once
 #include "MFEMMixedBilinearFormKernel.h"
 
-/*
+/**
  * \f[
- * (\lambda \nabla \times u, v)
+ * (k \vec \nabla \times \vec u, v)
  * \f]
  */
 class MFEMMixedScalarCurlKernel : public MFEMMixedBilinearFormKernel

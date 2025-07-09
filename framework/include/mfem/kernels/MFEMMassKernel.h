@@ -12,9 +12,9 @@
 #pragma once
 #include "MFEMKernel.h"
 
-/*
+/**
  * \f[
- * (\beta u, u')
+ * (k u, v)
  * \f]
  */
 class MFEMMassKernel : public MFEMKernel

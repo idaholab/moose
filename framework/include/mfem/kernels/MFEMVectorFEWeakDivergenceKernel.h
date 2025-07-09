@@ -12,9 +12,9 @@
 #pragma once
 #include "MFEMKernel.h"
 
-/*
+/**
  * \f[
- * (\sigma u, \nabla V')
+ * - (k \vec u, \vec \nabla v)
  * \f]
  */
 class MFEMVectorFEWeakDivergenceKernel : public MFEMKernel

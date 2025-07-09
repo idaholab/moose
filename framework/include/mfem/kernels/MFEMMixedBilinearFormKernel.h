@@ -12,9 +12,9 @@
 #pragma once
 #include "MFEMKernel.h"
 
-/*
-Class to construct an MFEM mixed bilinear form integrator to apply to the equation system.
-*/
+/**
+ * Class to construct an MFEM mixed bilinear form integrator to apply to the equation system.
+ */
 class MFEMMixedBilinearFormKernel : public MFEMKernel
 {
 public:
