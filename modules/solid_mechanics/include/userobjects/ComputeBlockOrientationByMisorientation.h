@@ -39,7 +39,7 @@ public:
    * Called when using threading.  You need to combine the data from "y"
    * into _this_ object.
    */
-  virtual void threadJoin(const UserObject & /*y*/) override{};
+  virtual void threadJoin(const UserObject & /*y*/) override {};
 
   /**
    * Called _once_ after execute has been called on all "objects".
