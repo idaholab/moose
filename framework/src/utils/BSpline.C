@@ -56,7 +56,6 @@ BSpline::createControlPoints() const
   cps = SplineUtils::bSplineControlPoints(
       _start_point, _end_point, _start_dir, _end_dir, _cps_per_half, _sharpness);
 
-  std::cout << Moose::stringify(cps) << std::endl;
   return cps;
 }
 
