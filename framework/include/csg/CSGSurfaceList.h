@@ -133,7 +133,7 @@ protected:
    *
    * @param name new name of surface
    */
-  void renameSurface(CSGSurface & surface, const std::string name);
+  void renameSurface(const CSGSurface & surface, const std::string name);
 
   /// Checks whether surface name already exists within CSGSurfaceList object
   void checkSurfaceName(const std::string name) const;

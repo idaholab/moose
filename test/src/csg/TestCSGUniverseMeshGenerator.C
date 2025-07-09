@@ -72,7 +72,7 @@ TestCSGUniverseMeshGenerator::generateCSG()
   // new universe to collect all others into a main one
   auto & new_univ = csg_mesh->createUniverse(mg_name + "_univ");
   // collect a list of cells to add to this new universe
-  std::vector<CSG::CSGCell *> cells_to_add;
+  std::vector<const CSG::CSGCell *> cells_to_add;
 
   // for all input meshes, create a containment cell, but only join CSGBases
   // for ones that were not joined above (i > 1)

@@ -49,7 +49,9 @@ CSGCellList::addMaterialCell(const std::string name,
 }
 
 CSGCell &
-CSGCellList::addUniverseCell(const std::string name, CSGUniverse & univ, const CSGRegion & region)
+CSGCellList::addUniverseCell(const std::string name,
+                             const CSGUniverse & univ,
+                             const CSGRegion & region)
 {
   checkCellName(name);
   _cells.insert(std::make_pair(name, std::make_unique<CSGCell>(name, &univ, region)));
@@ -74,7 +76,7 @@ CSGCellList::addCell(std::unique_ptr<CSGCell> & cell)
 }
 
 void
-CSGCellList::renameCell(CSGCell & cell, const std::string name)
+CSGCellList::renameCell(const CSGCell & cell, const std::string name)
 {
   // check that this cell passed in is actually in the same cell that is in the cell list
   auto prev_name = cell.getName();

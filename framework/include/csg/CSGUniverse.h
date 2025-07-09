@@ -48,9 +48,9 @@ public:
    * @brief Get the Cell object by name
    *
    * @param name name of cell
-   * @return CSGCell & reference to the cell of the specified name in this universe
+   * @return const CSGCell & reference to the cell of the specified name in this universe
    */
-  CSGCell & getCell(const std::string name);
+  const CSGCell & getCell(const std::string name);
 
   /**
    * @brief check if cell of provided name is present in universe
@@ -65,7 +65,7 @@ public:
    *
    * @return std::vector<CSGCell *> list of pointers to cells in universe
    */
-  const std::vector<CSGCell *> & getAllCells() const { return _cells; }
+  const std::vector<const CSGCell *> & getAllCells() const { return _cells; }
 
   /**
    * @brief Get the name of the universe
@@ -93,7 +93,7 @@ protected:
    *
    * @param reference to cell to add
    */
-  void addCell(CSGCell & cell);
+  void addCell(const CSGCell & cell);
 
   /**
    * @brief remove a cell of the specified name from the universe
@@ -115,7 +115,7 @@ protected:
   std::string _name;
 
   /// list of pointers to cells in universe
-  std::vector<CSGCell *> _cells;
+  std::vector<const CSGCell *> _cells;
 
   // whether or not this universe is the root universe
   bool _is_root;

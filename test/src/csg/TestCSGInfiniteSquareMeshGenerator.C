@@ -84,9 +84,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
   // set all surface boundary conditions to reflective
   auto all_surfs = csg_cell.getRegion().getSurfaces();
   for (auto s : all_surfs)
-  {
     csg_mesh->updateSurfaceBoundaryType(*s, CSG::CSGSurface::BoundaryType::REFLECTIVE);
-  }
 
   return csg_mesh;
 }

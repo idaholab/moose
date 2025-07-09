@@ -114,7 +114,7 @@ CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> & surf)
 }
 
 void
-CSGSurfaceList::renameSurface(CSGSurface & surface, const std::string name)
+CSGSurfaceList::renameSurface(const CSGSurface & surface, const std::string name)
 {
   // check that this surface passed in is actually in the same surface that is in the surface
   // list
