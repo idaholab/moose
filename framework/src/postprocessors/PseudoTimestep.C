@@ -171,7 +171,7 @@ PseudoTimestep::execute()
   // at the end of each timestep call the postprocessor to set values for dt
   if (_current_execute_flag == EXEC_TIMESTEP_END)
   {
-    // This is all incase a timestep fails and needs to be re-done
+    // This is all in case a timestep fails and needs to be re-done
     // Otherwise this is a simply a push_back operation for the vectors
     mooseAssert(_fe_problem.timeStep() >= 1, "Should at least be on the first time step.");
     const std::size_t curr_step = _fe_problem.timeStep();

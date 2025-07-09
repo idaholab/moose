@@ -12,7 +12,7 @@
     input = 'test.i'
     csvdiff = 'UEXTERNALDB_out.csv'
     valgrind = NONE
-    restep = false # Plugin not setup to handle redone timesteps in it's output
+    restep = false # Plugin not setup to handle redone timesteps in its output
     requirement = "The system shall permit data exchange between UMAT and UEXTERNALDB plugins."
   []
 []
