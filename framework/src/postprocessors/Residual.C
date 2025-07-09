@@ -21,7 +21,7 @@ Residual::validParams()
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Report the non-linear residual.");
   MooseEnum residual_types(
-      "FINAL INITIAL_BEFORE_PRESET INITIAL_AFTER_PRESET PRE_SMO INITIAL CURRENT", "FINAL");
+      "FINAL INITIAL_BEFORE_PRESET INITIAL_AFTER_PRESET PRE_SMO INITIAL CURRENT COMPUTE", "FINAL");
   params.addParam<MooseEnum>("residual_type", residual_types, "Type of residual to be reported.");
   return params;
 }
@@ -50,6 +50,8 @@ Residual::getValue() const
 
     residual = norm;
   }
+  else if (_residual_type == "COMPUTE")
+    residual = _fe_problem.computeResidualL2Norm();
   else
   {
     FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
