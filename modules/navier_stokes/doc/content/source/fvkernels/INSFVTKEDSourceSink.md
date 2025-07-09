@@ -91,6 +91,33 @@ where:
 
 - $\kappa = 0.4187$ is the von Kármán constant.
 
+## Buoyancy correction:
+
+The buoyancy correction is activated by providing a temperature functor
+[!param](/FVKernels/INSFVTKEDSourceSink/temperature) to the kernel.
+With buoyancy correction, the modified production of turbulent kinetic
+energy dissipation reads as follows:
+
+\begin{equation}
+G_{\epsilon} = C_{1,\epsilon} \frac{\epsilon}{k} (G_k + C_{3,\epsilon} \alpha \frac{\mu_t}{Pr_t} (\nabla T \cdot \vec{g}))\,,
+\end{equation}
+
+where:
+
+- $\alpha$ is the volumetric thermal expansion coefficient,
+- $Pr_t$ is the turbulent Prandtl number,
+- $T$ is the fluid temperature,
+- $\vec{g}$ is the acceleration of gravity,
+
+Finally, $C_{3,\epsilon}$ is a closure constant that is modeled as follows:
+
+\begin{equation}
+C_{3,\epsilon} = \operatorname{tanh} \left( \frac{|\vec{u}_{par}|}{|\vec{u}_{perp}|} \right)\,.
+\end{equation}
+
+where $\vec{u}_{par}$ is the component of the velocity vector parallel to the gravity vector
+and $\vec{u}_{perp}$ is the velocity perpendicular to the gravity vector.
+
 !alert note
 When using wall functions, since the equilibrium value for $\epsilon$ is set in the cells near the wall, the user is recommended to deactivate advection and diffusion for those near wall cells.
 
