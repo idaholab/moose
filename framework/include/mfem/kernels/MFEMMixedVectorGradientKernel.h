@@ -12,7 +12,7 @@
 #pragma once
 #include "MFEMMixedBilinearFormKernel.h"
 
-/*
+/**
  * \f[
  * (\sigma \nabla V, u')
  * \f]

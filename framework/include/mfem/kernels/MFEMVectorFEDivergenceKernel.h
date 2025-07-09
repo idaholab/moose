@@ -12,9 +12,11 @@
 #pragma once
 #include "MFEMMixedBilinearFormKernel.h"
 
-/*
-(k div u, v)
-*/
+/**
+ * \f[
+ * (k \nabla \cdot u, v)
+ * \f]
+ */
 class MFEMVectorFEDivergenceKernel : public MFEMMixedBilinearFormKernel
 {
 public:

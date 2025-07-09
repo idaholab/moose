@@ -15,9 +15,9 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMAuxKernel.h"
 
-/*
-Class to set an H(div) auxvariable to be the curl of an H(curl) vector variable.
-*/
+/**
+ * Class to set an H(div) auxvariable to be the curl of an H(curl) vector variable.
+ */
 class MFEMCurlAux : public MFEMAuxKernel
 {
 public:

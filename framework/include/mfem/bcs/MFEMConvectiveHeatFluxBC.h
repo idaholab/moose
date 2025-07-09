@@ -12,9 +12,11 @@
 #pragma once
 #include "MFEMIntegratedBC.h"
 
-/*
-(h (T-T_inf), T')
-*/
+/**
+ * \f[
+ * (h (T-T_\inf), T')
+ * \f]
+ */
 class MFEMConvectiveHeatFluxBC : public MFEMIntegratedBC
 {
 public:

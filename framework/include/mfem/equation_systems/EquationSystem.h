@@ -23,10 +23,10 @@
 namespace Moose::MFEM
 {
 
-/*
-Class to store weak form components (bilinear and linear forms, and optionally
-mixed and nonlinear forms) and build methods
-*/
+/**
+ * Class to store weak form components (bilinear and linear forms, and optionally
+ * mixed and nonlinear forms) and build methods
+ */
 class EquationSystem : public mfem::Operator
 {
 
@@ -271,9 +271,9 @@ EquationSystem::ApplyBoundaryLFIntegrators(
   }
 }
 
-/*
-Class to store weak form components for time dependent PDEs
-*/
+/**
+ * Class to store weak form components for time dependent PDEs
+ */
 class TimeDependentEquationSystem : public EquationSystem
 {
 public:

@@ -15,9 +15,9 @@
 #include "libmesh/restore_warnings.h"
 #include "MFEMAuxKernel.h"
 
-/*
-Class to set an H(curl) auxvariable to be the gradient of a H1 scalar variable.
-*/
+/**
+ * Class to set an H(curl) auxvariable to be the gradient of a H1 scalar variable.
+ */
 class MFEMGradAux : public MFEMAuxKernel
 {
 public:

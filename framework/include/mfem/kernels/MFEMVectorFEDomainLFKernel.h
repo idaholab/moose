@@ -12,9 +12,11 @@
 #pragma once
 #include "MFEMKernel.h"
 
-/*
-(\\vec f, \\vec u')
-*/
+/**
+ * \f[
+ * (\vec f, \vec u')
+ * \f]
+ */
 class MFEMVectorFEDomainLFKernel : public MFEMKernel
 {
 public:
