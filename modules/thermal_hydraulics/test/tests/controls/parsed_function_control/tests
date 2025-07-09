@@ -3,6 +3,7 @@
     type = 'CSVDiff'
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall provide a control that evaluates a parsed function'
     design = 'ParsedFunctionControl.md'
     issues = '#93'

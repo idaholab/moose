@@ -83,8 +83,8 @@ private:
   virtual void printFixedPointConvergenceHistory() override final;
 
   /// Vector tag id for the previous solution variable, as a main app
-  TagID _old_tag_id;
+  TagID _old_tag_id = Moose::INVALID_TAG_ID;
 
   /// Vector tag id for the previous solution variable, as a sub app
-  TagID _secondary_old_tag_id;
+  TagID _secondary_old_tag_id = Moose::INVALID_TAG_ID;
 };

@@ -111,7 +111,8 @@
 [Postprocessors]
   [flux]
     type = FunctionValuePostprocessor
-    function = 'if(t <= 9, -10, 10)'
+    function = 'if(t <= 0.5, 0.0, if(t <= 9.5, -10, 10))'
+    execute_on = 'timestep_begin'
   []
   [hys_order]
     type = PointValue

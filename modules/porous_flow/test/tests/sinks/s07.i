@@ -116,45 +116,6 @@
   []
 []
 
-[Functions]
-  [mass1_00]
-    type = ParsedFunction
-    expression = 'frac*vol*por*dens0*exp(pp/bulk)*pow(1+pow(-al*pp,1.0/(1-m)),-m)'
-    symbol_names = 'frac  vol  por dens0 pp bulk al m'
-    symbol_values = 'f1_00 0.25 0.1 1.1  p00 1.3 1.1 0.5'
-  []
-  [expected_mass_change1_00]
-    type = ParsedFunction
-    expression = 'frac*fcn*area*dt'
-    symbol_names = 'frac fcn area dt'
-    symbol_values = 'f1_00 6  0.5  1E-3'
-  []
-  [mass1_00_expect]
-    type = ParsedFunction
-    expression = 'mass_prev-mass_change'
-    symbol_names = 'mass_prev mass_change'
-    symbol_values = 'm1_00_prev  del_m1_00'
-  []
-  [mass1_01]
-    type = ParsedFunction
-    expression = 'frac*vol*por*dens0*exp(pp/bulk)*pow(1+pow(-al*pp,1.0/(1-m)),-m)'
-    symbol_names = 'frac  vol  por dens0 pp bulk al m'
-    symbol_values = 'f1_01 0.25 0.1 1.1  p01 1.3 1.1 0.5'
-  []
-  [expected_mass_change1_01]
-    type = ParsedFunction
-    expression = 'frac*fcn*area*dt'
-    symbol_names = 'frac fcn area dt'
-    symbol_values = 'f1_01 6  0.5  1E-3'
-  []
-  [mass1_01_expect]
-    type = ParsedFunction
-    expression = 'mass_prev-mass_change'
-    symbol_names = 'mass_prev mass_change'
-    symbol_values = 'm1_01_prev  del_m1_01'
-  []
-[]
-
 [Postprocessors]
   [f1_00]
     type = PointValue
@@ -175,26 +136,36 @@
     execute_on = 'initial timestep_end'
   []
   [m1_00]
-    type = FunctionValuePostprocessor
-    function = mass1_00
+    type = ParsedPostprocessor
+    expression = 'f1_00*vol*por*dens0*exp(p00/bulk)*pow(1+pow(-al*p00,1.0/(1-m)),-m)'
+    constant_names = 'vol por dens0 bulk al m'
+    constant_expressions = '0.25 0.1 1.1 1.3 1.1 0.5'
+    pp_names = 'f1_00 p00'
     execute_on = 'initial timestep_end'
   []
+  [dm1_00]
+    type = ChangeOverTimePostprocessor
+    postprocessor = m1_00
+    outputs = none
+  []
   [m1_00_prev]
-    type = FunctionValuePostprocessor
-    function = mass1_00
-    execute_on = 'timestep_begin'
+    type = ParsedPostprocessor
+    expression = 'm1_00 - dm1_00'
+    pp_names = 'm1_00 dm1_00'
     outputs = 'console'
   []
   [del_m1_00]
-    type = FunctionValuePostprocessor
-    function = expected_mass_change1_00
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'f1_00*fcn*area*dt'
+    constant_names = 'fcn area dt'
+    constant_expressions = '6  0.5  1E-3'
+    pp_names = 'f1_00'
     outputs = 'console'
   []
   [m1_00_expect]
-    type = FunctionValuePostprocessor
-    function = mass1_00_expect
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'm1_00_prev-del_m1_00'
+    pp_names = 'm1_00_prev del_m1_00'
   []
   [f1_01]
     type = PointValue
@@ -215,26 +186,36 @@
     execute_on = 'initial timestep_end'
   []
   [m1_01]
-    type = FunctionValuePostprocessor
-    function = mass1_01
+    type = ParsedPostprocessor
+    expression = 'f1_01*vol*por*dens0*exp(p01/bulk)*pow(1+pow(-al*p01,1.0/(1-m)),-m)'
+    constant_names = 'vol por dens0 bulk al m'
+    constant_expressions = '0.25 0.1 1.1 1.3 1.1 0.5'
+    pp_names = 'f1_01 p01'
     execute_on = 'initial timestep_end'
   []
+  [dm1_01]
+    type = ChangeOverTimePostprocessor
+    postprocessor = m1_01
+    outputs = none
+  []
   [m1_01_prev]
-    type = FunctionValuePostprocessor
-    function = mass1_01
-    execute_on = 'timestep_begin'
+    type = ParsedPostprocessor
+    expression = 'm1_01 - dm1_01'
+    pp_names = 'm1_01 dm1_01'
     outputs = 'console'
   []
   [del_m1_01]
-    type = FunctionValuePostprocessor
-    function = expected_mass_change1_01
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'f1_01*fcn*area*dt'
+    constant_names = 'fcn area dt'
+    constant_expressions = '6  0.5  1E-3'
+    pp_names = 'f1_01'
     outputs = 'console'
   []
   [m1_01_expect]
-    type = FunctionValuePostprocessor
-    function = mass1_01_expect
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'm1_01_prev-del_m1_01'
+    pp_names = 'm1_01_prev del_m1_01'
   []
   [f1_11]
     type = PointValue

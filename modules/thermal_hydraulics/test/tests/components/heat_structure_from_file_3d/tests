@@ -5,6 +5,7 @@
     type = Exodiff
     input = 'phy.standalone.i'
     exodiff = 'phy.standalone_out.e'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to use an external mesh file to create a 3D heat structure.'
   []
 

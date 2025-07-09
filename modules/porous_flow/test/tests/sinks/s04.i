@@ -119,45 +119,6 @@
   []
 []
 
-[Functions]
-  [mass10]
-    type = ParsedFunction
-    expression = 'vol*por*dens0*exp(pp/bulk)'
-    symbol_names = 'vol por dens0 pp bulk'
-    symbol_values = '0.25 0.1 1.1 p10 1.3'
-  []
-  [rate10]
-    type = ParsedFunction
-    expression = 'fcn*if(pp>0.8,1,if(pp<0.3,0.5,0.2+pp))'
-    symbol_names = 'fcn pp'
-    symbol_values = '8   p10'
-  []
-  [mass10_expect]
-    type = ParsedFunction
-    expression = 'mass_prev-rate*area*dt'
-    symbol_names = 'mass_prev rate     area dt'
-    symbol_values = 'm10_prev  m10_rate 0.5 1E-3'
-  []
-  [mass11]
-    type = ParsedFunction
-    expression = 'vol*por*dens0*exp(pp/bulk)'
-    symbol_names = 'vol por dens0 pp bulk'
-    symbol_values = '0.25 0.1 1.1 p11 1.3'
-  []
-  [rate11]
-    type = ParsedFunction
-    expression = 'fcn*if(pp>0.8,1,if(pp<0.3,0.5,0.2+pp))'
-    symbol_names = 'fcn pp'
-    symbol_values = '8   p11'
-  []
-  [mass11_expect]
-    type = ParsedFunction
-    expression = 'mass_prev-rate*area*dt'
-    symbol_names = 'mass_prev rate     area dt'
-    symbol_values = 'm11_prev  m11_rate 0.5 1E-3'
-  []
-[]
-
 [Postprocessors]
   [p00]
     type = PointValue
@@ -172,25 +133,37 @@
     execute_on = 'initial timestep_end'
   []
   [m10]
-    type = FunctionValuePostprocessor
-    function = mass10
+    type = ParsedPostprocessor
+    expression = 'vol*por*dens0*exp(p10/bulk)'
+    constant_names = 'vol por dens0 bulk'
+    constant_expressions = '0.25 0.1 1.1 1.3'
+    pp_names = p10
     execute_on = 'initial timestep_end'
   []
+  [dm10]
+    type = ChangeOverTimePostprocessor
+    postprocessor = m10
+    outputs = none
+  []
   [m10_prev]
-    type = FunctionValuePostprocessor
-    function = mass10
-    execute_on = 'timestep_begin'
+    type = ParsedPostprocessor
+    expression = 'm10 - dm10'
+    pp_names = 'm10 dm10'
     outputs = 'console'
   []
   [m10_rate]
-    type = FunctionValuePostprocessor
-    function = rate10
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'fcn*if(p10>0.8,1,if(p10<0.3,0.5,0.2+p10))'
+    constant_names = 'fcn'
+    constant_expressions = '8'
+    pp_names = 'p10'
   []
   [m10_expect]
-    type = FunctionValuePostprocessor
-    function = mass10_expect
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'm10_prev-m10_rate*area*dt'
+    constant_names = 'area dt'
+    constant_expressions = '0.5 1E-3'
+    pp_names = 'm10_prev m10_rate'
   []
   [p01]
     type = PointValue
@@ -205,25 +178,37 @@
     execute_on = 'initial timestep_end'
   []
   [m11]
-    type = FunctionValuePostprocessor
-    function = mass11
+    type = ParsedPostprocessor
+    expression = 'vol*por*dens0*exp(p11/bulk)'
+    constant_names = 'vol por dens0 bulk'
+    constant_expressions = '0.25 0.1 1.1 1.3'
+    pp_names = 'p11'
     execute_on = 'initial timestep_end'
   []
+  [dm11]
+    type = ChangeOverTimePostprocessor
+    postprocessor = m11
+    outputs = none
+  []
   [m11_prev]
-    type = FunctionValuePostprocessor
-    function = mass11
-    execute_on = 'timestep_begin'
+    type = ParsedPostprocessor
+    expression = 'm11 - dm11'
+    pp_names = 'm11 dm11'
     outputs = 'console'
   []
   [m11_rate]
-    type = FunctionValuePostprocessor
-    function = rate11
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'fcn*if(p11>0.8,1,if(p11<0.3,0.5,0.2+p11))'
+    constant_names = 'fcn'
+    constant_expressions = '8'
+    pp_names = 'p11'
   []
   [m11_expect]
-    type = FunctionValuePostprocessor
-    function = mass11_expect
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'm11_prev-m11_rate*area*dt'
+    constant_names = 'area dt'
+    constant_expressions = '0.5 1E-3'
+    pp_names = 'm11_prev m11_rate'
   []
 []
 
