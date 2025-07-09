@@ -23,6 +23,6 @@ class AnalysisStepUOInterface
 {
 protected:
   virtual void getAnalysisStepUserObject(const FEProblemBase & fe_problem,
-                                 const AnalysisStepUserObject *& step_user_object,
-                                 const std::string & name);
+                                         const AnalysisStepUserObject *& step_user_object,
+                                         const std::string & name);
 };

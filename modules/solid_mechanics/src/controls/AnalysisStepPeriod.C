@@ -25,13 +25,17 @@ AnalysisStepPeriod::validParams()
   params.addParam<bool>(
       "set_sync_times", true, "Set the start and end time as execute sync times.");
   params.addParam<UserObjectName>(
-      "analysis_step_user_object", "The AnalysisStepUserObject that provides times from analysis steps.");
+      "analysis_step_user_object",
+      "The AnalysisStepUserObject that provides times from analysis steps.");
   params.addRequiredParam<unsigned int>("step_number",
                                         "Step number on which this control object applies.");
   return params;
 }
 
-AnalysisStepPeriod::AnalysisStepPeriod(const InputParameters & parameters) : TimePeriodBase(parameters) {}
+AnalysisStepPeriod::AnalysisStepPeriod(const InputParameters & parameters)
+  : TimePeriodBase(parameters)
+{
+}
 
 void
 AnalysisStepPeriod::initialSetup()

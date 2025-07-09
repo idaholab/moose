@@ -50,7 +50,8 @@ AbaqusUMATStress::validParams()
       "Whether or not this object should use the "
       "displaced mesh for computing displacements and quantities based on the deformed state.");
   params.addParam<UserObjectName>(
-      "analysis_step_user_object", "The AnalysisStepUserObject that provides times from simulation loading steps.");
+      "analysis_step_user_object",
+      "The AnalysisStepUserObject that provides times from simulation loading steps.");
   params.addParam<RealVectorValue>(
       "orientation",
       "Euler angles that describe the orientation of the local material coordinate system.");

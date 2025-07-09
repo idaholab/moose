@@ -23,7 +23,8 @@ AbaqusUExternalDB::validParams()
   params.addRequiredParam<FileName>(
       "plugin", "The path to the compiled dynamic library for the plugin you want to use");
   params.addParam<UserObjectName>(
-      "analysis_step_user_object", "The AnalysisStepUserObject that provides times from simulation loading steps.");
+      "analysis_step_user_object",
+      "The AnalysisStepUserObject that provides times from simulation loading steps.");
   return params;
 }
 

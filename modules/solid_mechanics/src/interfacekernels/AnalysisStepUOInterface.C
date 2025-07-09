@@ -13,8 +13,8 @@
 
 void
 AnalysisStepUOInterface::getAnalysisStepUserObject(const FEProblemBase & fe_problem,
-                                   const AnalysisStepUserObject *& step_user_object,
-                                   const std::string & name)
+                                                   const AnalysisStepUserObject *& step_user_object,
+                                                   const std::string & name)
 {
   std::vector<const UserObject *> uos;
   fe_problem.theWarehouse().query().condition<AttribSystem>("UserObject").queryIntoUnsorted(uos);
@@ -22,20 +22,22 @@ AnalysisStepUOInterface::getAnalysisStepUserObject(const FEProblemBase & fe_prob
   std::vector<const AnalysisStepUserObject *> step_uos;
   for (const auto & uo : uos)
   {
-    const AnalysisStepUserObject * possible_step_uo = dynamic_cast<const AnalysisStepUserObject *>(uo);
+    const AnalysisStepUserObject * possible_step_uo =
+        dynamic_cast<const AnalysisStepUserObject *>(uo);
     if (possible_step_uo)
       step_uos.push_back(possible_step_uo);
   }
 
   if (step_uos.size() > 1)
-    mooseError("Your input file has multiple AnalysisStepUserObjects. MOOSE currently only support one in ",
+    mooseError("Your input file has multiple AnalysisStepUserObjects. MOOSE currently only support "
+               "one in ",
                name,
                ". \n");
   else if (step_uos.size() == 1)
-    mooseInfo(
-        "A AnalysisStepUserObject, has been identified and will be used to drive stepping behavior in ",
-        name,
-        ".");
+    mooseInfo("A AnalysisStepUserObject, has been identified and will be used to drive stepping "
+              "behavior in ",
+              name,
+              ".");
 
   step_user_object = step_uos.size() == 1 ? step_uos[0] : nullptr;
 }
