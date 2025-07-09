@@ -73,11 +73,12 @@ protected:
   std::map<std::string, std::unique_ptr<CSGCell>> & getCellListMap() { return _cells; }
 
   /**
-   * @brief Get the all cells in CSGBase instance
+   * @brief Get all the cells in CSGBase instance
    *
-   * @return std::vector<CSGCell *> list of pointers to all CSGCell objects
+   * @return std::vector<std::reference_wrapper<const CSGCell>> list of references to all CSGCell
+   * objects
    */
-  std::vector<CSGCell *> getAllCells() const;
+  std::vector<std::reference_wrapper<const CSGCell>> getAllCells() const;
 
   /**
    * @brief Get the CSGCell by name

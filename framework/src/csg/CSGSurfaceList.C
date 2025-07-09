@@ -96,12 +96,12 @@ CSGSurfaceList::addCylinder(const std::string name,
   return *_surfaces[name];
 }
 
-std::vector<CSGSurface *>
+std::vector<std::reference_wrapper<const CSGSurface>>
 CSGSurfaceList::getAllSurfaces() const
 {
-  std::vector<CSGSurface *> surfaces;
+  std::vector<std::reference_wrapper<const CSGSurface>> surfaces;
   for (auto it = _surfaces.begin(); it != _surfaces.end(); ++it)
-    surfaces.push_back(it->second.get());
+    surfaces.push_back(*(it->second));
   return surfaces;
 }
 

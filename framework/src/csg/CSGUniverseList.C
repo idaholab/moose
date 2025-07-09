@@ -38,12 +38,12 @@ CSGUniverseList::getUniverse(const std::string name)
     return *(univ->second);
 }
 
-std::vector<CSGUniverse *>
+std::vector<std::reference_wrapper<const CSGUniverse>>
 CSGUniverseList::getAllUniverses() const
 {
-  std::vector<CSGUniverse *> univs;
+  std::vector<std::reference_wrapper<const CSGUniverse>> univs;
   for (auto it = _universes.begin(); it != _universes.end(); ++it)
-    univs.push_back(it->second.get());
+    univs.push_back(*(it->second.get()));
   return univs;
 }
 

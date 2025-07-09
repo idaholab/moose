@@ -85,7 +85,10 @@ public:
    *
    * @return std::vector<CSGSurface *> list of pointers to surfaces that define the region
    */
-  std::vector<const CSGSurface *> getSurfaces() const { return _surfaces; };
+  const std::vector<std::reference_wrapper<const CSGSurface>> & getSurfaces() const
+  {
+    return _surfaces;
+  }
 
   /// Operator overload for &= add an intersection to the current region
   CSGRegion & operator&=(const CSGRegion & other_region);
@@ -107,11 +110,11 @@ protected:
   RegionType _region_type;
 
   /// Surface list associated with the region
-  std::vector<const CSGSurface *> _surfaces;
+  std::vector<std::reference_wrapper<const CSGSurface>> _surfaces;
 };
 
 /**
- * @brief strip the leading and trailing parentheses fromt the string
+ * @brief strip the leading and trailing parentheses from the string
  * if only the specified operator is present in the string
  *
  * @param region_str region string representation to simplify
