@@ -35,6 +35,8 @@ public:
   virtual void SetUpAMR() {};
   virtual bool HRefine() { return false; } /* we return true when it's time to stop solving */
   virtual bool PRefine() { return false; } /* we return true when it's time to stop solving */
+  virtual bool UseHRefinement() const { return false; }
+  virtual bool UsePRefinement() const { return false; }
 
   virtual void Solve(mfem::Vector & /*X*/) {}
   void Mult(const mfem::Vector &, mfem::Vector &) const override {}
