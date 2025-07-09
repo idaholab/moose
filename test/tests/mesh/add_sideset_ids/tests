@@ -29,7 +29,7 @@
     input = remove_sideset_ids.i
     csvdiff = remove_sideset_ids_out.csv
     design = MooseMesh.md
-    requirement = 'The system shall be able to remove sides from sidesets when tese sides elements are moved to new blocks.'
+    requirement = 'The system shall be able to remove sides from sidesets when these sides elements are moved to new blocks.'
     # Revision of this test would make it possible for restep, the current
     # interplay between timestep_begin and timestep_end make it very fragile
     restep = false

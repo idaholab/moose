@@ -245,15 +245,16 @@ protected:
 private:
   /// Postprocessor value for user-defined fixed point convergence check
   const PostprocessorValue * const _fixed_point_custom_pp;
+  /// Postprocessor value for user-defined fixed point convergence check from previous timestep
   const PostprocessorValue * const _fixed_point_custom_pp_old;
   /// Relative tolerance on postprocessor value
   const Real _custom_rel_tol;
   /// Absolute tolerance on postprocessor value
   const Real _custom_abs_tol;
-  /// Old value of the custom convergence check postprocessor
-  Real _pp_old;
-  /// Current value of the custom convergence check postprocessor
-  Real _pp_new;
+  /// Value of the custom convergence check postprocessor from previous iteration
+  Real _pp_previous;
+  /// Value of the custom convergence check postprocessor from current iteration
+  Real _pp_current;
   /// Scaling of custom convergence check postprocessor (its initial value)
   Real _pp_scaling;
   /// Convergence history of the custom convergence check postprocessor

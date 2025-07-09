@@ -10,7 +10,7 @@
       input = 'explicit_convergence.i'
       cli_args = 'Executioner/TimeIntegrator/type=Heun Executioner/dt=0.00390625 Outputs/file_base=heun_0'
       exodiff = 'heun_0.e'
-      restep = false # See mooseError in ExplicitRK2::solve()
+      restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
       detail = "a full timestep,"
     []
@@ -20,7 +20,7 @@
       input = 'explicit_convergence.i'
       cli_args = 'Executioner/TimeIntegrator/type=Heun Executioner/dt=0.001953125 Outputs/file_base=heun_1'
       exodiff = 'heun_1.e'
-      restep = false # See mooseError in ExplicitRK2::solve()
+      restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
       detail = "a half timestep, and"
     []
@@ -30,7 +30,7 @@
       input = 'explicit_convergence.i'
       cli_args = 'Executioner/TimeIntegrator/type=Heun Executioner/dt=0.0009765625 Outputs/file_base=heun_2'
       exodiff = 'heun_2.e'
-      restep = false # See mooseError in ExplicitRK2::solve()
+      restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
       detail = "a quarter timestep."
     []
@@ -44,7 +44,7 @@
       input = 'explicit_convergence.i'
       cli_args = 'Executioner/TimeIntegrator/type=Ralston Executioner/dt=0.00390625 Outputs/file_base=ralston_0'
       exodiff = 'ralston_0.e'
-      restep = false # See mooseError in ExplicitRK2::solve()
+      restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
       detail = "a full timestep,"
     []
@@ -54,7 +54,7 @@
       input = 'explicit_convergence.i'
       cli_args = 'Executioner/TimeIntegrator/type=Ralston Executioner/dt=0.001953125 Outputs/file_base=ralston_1'
       exodiff = 'ralston_1.e'
-      restep = false # See mooseError in ExplicitRK2::solve()
+      restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
       detail = "a half timestep, and"
     []
@@ -64,7 +64,7 @@
       input = 'explicit_convergence.i'
       cli_args = 'Executioner/TimeIntegrator/type=Ralston Executioner/dt=0.0009765625 Outputs/file_base=ralston_2'
       exodiff = 'ralston_2.e'
-      restep = false # See mooseError in ExplicitRK2::solve()
+      restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
       detail = "a quarter timestep."
     []
@@ -78,7 +78,7 @@
       input = 'explicit_convergence.i'
       cli_args = 'Executioner/TimeIntegrator/type=ExplicitMidpoint Executioner/dt=0.00390625 Outputs/file_base=explicitmidpoint_0'
       exodiff = 'explicitmidpoint_0.e'
-      restep = false # See mooseError in ExplicitRK2::solve()
+      restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
       detail = "a full timestep,"
     []
@@ -88,7 +88,7 @@
       input = 'explicit_convergence.i'
       cli_args = 'Executioner/TimeIntegrator/type=ExplicitMidpoint Executioner/dt=0.001953125 Outputs/file_base=explicitmidpoint_1'
       exodiff = 'explicitmidpoint_1.e'
-      restep = false # See mooseError in ExplicitRK2::solve()
+      restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
       detail = "a half timestep, and"
     []
@@ -98,7 +98,7 @@
       input = 'explicit_convergence.i'
       cli_args = 'Executioner/TimeIntegrator/type=ExplicitMidpoint Executioner/dt=0.0009765625 Outputs/file_base=explicitmidpoint_2'
       exodiff = 'explicitmidpoint_2.e'
-      restep = false # See mooseError in ExplicitRK2::solve()
+      restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
       detail = "a quarter timestep."
     []

@@ -70,6 +70,6 @@ private:
   bool _has_recovered;
   /// the difference with the target from the previous time step, used if a time step fails
   Real _delta_prev_tstep = 0.0;
-  /// the difference with the target from the from the second-to-last iteration of previous time step, used if a time step fails
+  /// the difference with the target from the second-to-last iteration of previous time step, used if a time step fails
   Real _old_delta_prev_tstep = 0.0;
 };

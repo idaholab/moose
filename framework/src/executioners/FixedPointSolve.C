@@ -147,8 +147,8 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
                                                          : nullptr),
     _custom_rel_tol(getParam<Real>("custom_rel_tol")),
     _custom_abs_tol(getParam<Real>("custom_abs_tol")),
-    _pp_old(0.0),
-    _pp_new(std::numeric_limits<Real>::max()),
+    _pp_previous(0.0),
+    _pp_current(std::numeric_limits<Real>::max()),
     _pp_scaling(1),
     _max_xfem_update(getParam<unsigned int>("max_xfem_update")),
     _update_xfem_at_timestep_begin(getParam<bool>("update_xfem_at_timestep_begin")),
@@ -287,7 +287,7 @@ FixedPointSolve::solve()
 
     // Save last postprocessor value as value before solve
     if (_fixed_point_custom_pp && !getParam<bool>("direct_pp_value"))
-      _pp_old = _fixed_point_it > 0 ? *_fixed_point_custom_pp : *_fixed_point_custom_pp_old;
+      _pp_previous = _fixed_point_it > 0 ? *_fixed_point_custom_pp : *_fixed_point_custom_pp_old;
 
     // Solve a single application for one time step
     bool solve_converged = solveStep(_fixed_point_timestep_begin_norm[_fixed_point_it],
@@ -505,11 +505,11 @@ FixedPointSolve::computeCustomConvergencePostprocessor()
   if ((_fixed_point_it == 0 && getParam<bool>("direct_pp_value")) ||
       !getParam<bool>("direct_pp_value"))
     _pp_scaling = *_fixed_point_custom_pp;
-  _pp_new = *_fixed_point_custom_pp;
+  _pp_current = *_fixed_point_custom_pp;
 
   auto ppname = getParam<PostprocessorName>("custom_pp");
   _pp_history << std::setw(2) << _fixed_point_it + 1 << " fixed point " << ppname << " = "
-              << Console::outputNorm(std::numeric_limits<Real>::max(), _pp_new, 8) << std::endl;
+              << Console::outputNorm(std::numeric_limits<Real>::max(), _pp_current, 8) << std::endl;
   _console << _pp_history.str();
 }
 
@@ -533,12 +533,12 @@ FixedPointSolve::examineFixedPointConvergence(bool & converged)
       _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_RELATIVE;
       return true;
     }
-    if (std::abs(_pp_new - _pp_old) < _custom_abs_tol)
+    if (std::abs(_pp_current - _pp_previous) < _custom_abs_tol)
     {
       _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
       return true;
     }
-    if (std::abs((_pp_new - _pp_old) / _pp_scaling) < _custom_rel_tol)
+    if (std::abs((_pp_current - _pp_previous) / _pp_scaling) < _custom_rel_tol)
     {
       _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
       return true;
