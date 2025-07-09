@@ -32,13 +32,10 @@ MFEMMixedScalarCurlKernel::MFEMMixedScalarCurlKernel(const InputParameters & par
 {
 }
 
-std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
+mfem::BilinearFormIntegrator *
 MFEMMixedScalarCurlKernel::createBFIntegrator()
 {
-  if (getParam<MooseEnum>("numeric_type") == "complex")
-    mooseError("Complex-valued mixed kernels are not supported.");
-
-  return std::make_pair(new mfem::MixedScalarCurlIntegrator(_coef), nullptr);
+  return new mfem::MixedScalarCurlIntegrator(_coef);
 }
 
 #endif
