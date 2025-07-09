@@ -77,7 +77,6 @@
       cli_args = 'MultiApps/sub/execute_on=timestep_end
                   Transfers/left_from_sub/execute_on=timestep_begin
                   Transfers/right_to_sub/execute_on=timestep_begin
-                  Postprocessors/to_sub/execute_on="multiapp_fixed_point_begin timestep_end"
                   Outputs/file_base=app_end_transfer_begin'
       detail = 'with the sub-app executed at the end of each time step and postprocessor transfers executed at the beginning of each timestep,'
     []
@@ -115,7 +114,6 @@
       cli_args = "MultiApps/sub/execute_on=timestep_end
                   Transfers/left_from_sub/execute_on=timestep_begin
                   Transfers/right_to_sub/execute_on=timestep_begin
-                  Postprocessors/to_sub/execute_on='multiapp_fixed_point_begin timestep_end'
                   Executioner/transformed_postprocessors=''
                   MultiApps/sub/transformed_postprocessors='from_main'
                   Outputs/file_base=app_end_transfer_begin_secant_sub"
