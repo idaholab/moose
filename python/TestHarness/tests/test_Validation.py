@@ -118,7 +118,6 @@ class TestValidation(TestHarnessTestCase):
 
         # Check timing; validation execution exists
         timing = test['timing']
-        self.assertIn('validation_init', timing)
         self.assertIn('validation_run', timing)
 
     def testCSV(self):
@@ -206,6 +205,25 @@ class TestValidation(TestHarnessTestCase):
         validation_output = output['validation']
         self.assertIn('Exception: foo', validation_output)
         self.assertIn('Encountered exception(s) while running tests', validation_output)
+
+    def testInitException(self):
+        """
+        Tests a validation case initialization failure using the
+        `validation_init_exception` test spec
+        """
+        out = self.runTests('-i', 'validation_init_exception', exit_code=132).results
+        test = out['tests']['tests/test_harness']['tests']['test']
+
+        # Should have failed
+        status = test['status']
+        self.assertEqual(status['status'], 'ERROR')
+        self.assertEqual(status['status_message'], 'VALIDATION INIT EXCEPTION')
+
+        # Check that the exception is in on screen output
+        output = test['output']['job']
+        self.assertIn("Python exception encountered in validation case", output)
+        self.assertIn("validation_init_exception.py", output)
+        self.assertIn("raise Exception('foo')", output)
 
     def testBadPython(self):
         """

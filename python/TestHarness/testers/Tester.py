@@ -237,6 +237,7 @@ class Tester(MooseObject, OutputInterface):
         # Paths to additional JSON metadata that can be collected
         self.json_metadata: dict[str, Tester.JSONMetadata] = {}
 
+        # The validation classes the user specified
         self._validation_classes = self.parameters()['_validation_classes']
 
     def getStatus(self):
