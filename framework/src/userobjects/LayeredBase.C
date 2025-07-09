@@ -119,6 +119,9 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
 
     _layer_bounds = _layered_base_params.get<std::vector<Real>>("bounds");
 
+    if (_layer_bounds.size() < 2)
+      mooseError("At least two boundaries must be provided in 'bounds' to form layers!");
+
     // Make sure the bounds are sorted - we're going to depend on this
     std::sort(_layer_bounds.begin(), _layer_bounds.end());
 
