@@ -22,6 +22,10 @@ public:
 
   MFEMExecutioner(const InputParameters & params);
 
+  /// Returns a reference to the MFEMProblem instance.
+  MFEMProblem & getMFEMProblem() { return _mfem_problem; }
+  const MFEMProblem & getMFEMProblem() const { return _mfem_problem; }
+
   virtual bool lastSolveConverged() const override { return true; };
 
   /// Virtual method to construct the ProblemOperator. Call for default problems.
