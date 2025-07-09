@@ -1536,7 +1536,7 @@ Builder::setDoubleIndexParameter(const std::string & full_name,
   for (const auto j : index_range(outer_string_vectors))
     if (!MooseUtils::tokenizeAndConvert<T>(outer_string_vectors[j], value[j]))
     {
-      _errors.emplace_back("invalid format for parameter '" + full_name + "'", node);
+      _errors.emplace_back("invalid format for parameter " + full_name, node);
       return;
     }
 
@@ -1742,7 +1742,7 @@ Builder::setVectorVectorComponentParameter(
   for (unsigned j = 0; j < vecvec.size(); ++j)
     if (!MooseUtils::tokenizeAndConvert<double>(first_tokenized_vector[j], vecvec[j]))
     {
-      _errors.emplace_back("invalid format for parameter '" + full_name + "'", node);
+      _errors.emplace_back("invalid format for parameter " + full_name, node);
       return;
     }
 
@@ -1863,7 +1863,7 @@ Builder::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
     if (!MooseUtils::tokenizeAndConvert<Real>(first_tokenized_vector[j], values[j]) ||
         (j != 0 && values[j].size() != values[0].size()))
     {
-      _errors.emplace_back("invalid format for parameter '" + full_name + "'", node);
+      _errors.emplace_back("invalid format for parameter " + full_name, node);
       return;
     }
   }

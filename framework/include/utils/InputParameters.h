@@ -1550,9 +1550,8 @@ InputParameters::rangeCheck(const std::string & full_name,
   FunctionParserBase<UP_T> fp;
   std::vector<std::string> vars;
   if (fp.ParseAndDeduceVariables(range_function, vars) != -1) // -1 for success
-    return {
-        {false,
-         "Error parsing expression '" + range_function + "' for parameter '" + short_name + "'"}};
+    return {{false,
+             "Error parsing expression '" + range_function + "' for parameter " + short_name + ""}};
 
   // Fparser parameter buffer
   std::vector<UP_T> parbuf(vars.size());
@@ -1617,7 +1616,7 @@ InputParameters::rangeCheck(const std::string & full_name,
       std::ostringstream oss;
       oss << "Range check failed";
       if (include_param_path)
-        oss << " for parameter '" << full_name << "'";
+        oss << " for parameter " << full_name;
       oss << "; expression = '" << range_function << "'";
       if (need_to_iterate)
         oss << ", component " << i;
@@ -1649,8 +1648,7 @@ InputParameters::rangeCheck(const std::string & full_name,
   FunctionParserBase<UP_T> fp;
   if (fp.Parse(range_function, short_name) != -1) // -1 for success
     return {{false,
-             "Error parsing expression '" + range_function + "'" + " for parameter '" + short_name +
-                 "'"}};
+             "Error parsing expression '" + range_function + "'" + " for parameter " + short_name}};
 
   // ensure range-checked input file parameter comparison functions
   // do absolute floating point comparisons instead of using a default epsilon.
@@ -1663,15 +1661,15 @@ InputParameters::rangeCheck(const std::string & full_name,
 
   if (fp.EvalError())
     return {{true,
-             "Error evaluating expression '" + range_function + "' for parameter '" + short_name +
-                 "'; perhaps you used the wrong variable name?"}};
+             "Error evaluating expression '" + range_function + "' for parameter " + short_name +
+                 "; perhaps you used the wrong variable name?"}};
 
   if (!result)
   {
     std::ostringstream oss;
     oss << "Range check failed";
     if (include_param_path)
-      oss << " for parameter '" << full_name << "'";
+      oss << " for parameter " << full_name;
     oss << "; expression = '" << range_function << "', value = " << value[0];
     return {{true, oss.str()}};
   }

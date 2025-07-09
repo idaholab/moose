@@ -15,7 +15,7 @@
     input = 'distributed_rectilinear_mesh_generator.i'
     cli_args = 'Mesh/gmg/num_side_layers=5'
     requirement = 'The system shall be able to check if or not users ask for too many layers of ghosting elements.'
-    expect_err = "CLI_ARGS: Range check failed for parameter 'Mesh/gmg/num_side_layers'; expression = 'num_side_layers>=1 & num_side_layers<5', value = 5"
+    expect_err = "CLI_ARGS: Range check failed for parameter Mesh/gmg/num_side_layers; expression = 'num_side_layers>=1 & num_side_layers<5', value = 5"
   [../]
 
   [./1D]
