@@ -47,7 +47,7 @@ circularControlPoints(const libMesh::Point & start_point,
   /// initialize parameter
   double t;
 
-  /// loop over the number of control points to generate the contorl points
+  /// loop over the number of control points to generate the control points
   for (const auto i : make_range(num_cps))
   {
     t = (double)i / (double)(num_cps - 1);
@@ -79,8 +79,14 @@ bSplineControlPoints(const libMesh::Point & start_point,
   /// check if directions are parallel
   const bool parallel = ((start_direction.cross(end_direction)).norm() < libMesh::TOLERANCE);
   if (parallel)
-    return SplineUtils::circularControlPoints(
-        start_point, end_point, start_direction, 2 * cps_per_half + 1);
+  {
+    mooseWarning("Directions are parallel! Attempting to use circular control points...");
+    unsigned int num_cps = 2 * cps_per_half + 1;
+    if (num_cps < 25)
+      mooseWarning("Number of control points required for circular control points is much greater "
+                   "than for BSplines. `num_cps` is now 25. Ensure this is acceptable!");
+    return SplineUtils::circularControlPoints(start_point, end_point, start_direction, num_cps);
+  }
 
   /// find closest points --> these will be identical if the extrapolated lines intersect
   std::vector<Point> closest_points_vector =
@@ -88,8 +94,6 @@ bSplineControlPoints(const libMesh::Point & start_point,
   libMesh::Point closest_point_1 = closest_points_vector[0];
   libMesh::Point closest_point_2 = closest_points_vector[1];
 
-  /// create vertex (average of closest points)
-  libMesh::Point vertex = (closest_point_1 + closest_point_2) / 2;
   std::vector<Point> first_half = SplineUtils::controlPointsAlongLine(
       start_point, closest_point_1, start_direction, sharpness, cps_per_half);
   std::vector<Point> second_half = SplineUtils::controlPointsAlongLine(
@@ -100,7 +104,10 @@ bSplineControlPoints(const libMesh::Point & start_point,
   /// put it all together
   for (const auto i : index_range(first_half))
     control_points.push_back(first_half[i]);
-  control_points.push_back(vertex);
+  control_points.push_back(closest_point_1); // add endpoint for line 1
+  if (closest_point_1 != closest_point_2) // check if the lines are intersecting -- doubling up is a
+                                          // bad idea for nice curves
+    control_points.push_back(closest_point_2); // add endpoint for line 2
   for (const auto i : index_range(second_half))
     control_points.push_back(second_half[i]);
 

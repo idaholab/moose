@@ -85,6 +85,55 @@
     requirement = 'The system shall generate a simple meshed curve in 3D.'
     recover = false
   []
+  [3D_curve_arbitrary]
+    type = 'Exodiff'
+    input = 'bspline_curve_3D_arbitrary.i'
+    exodiff = 'bspline_curve_3D_arbitrary_in.e'
+    cli_args = '--mesh-only'
+    requirement = 'The system shall generate a meshed curve of arbitrary points in 3D.'
+    recover = false
+  []
+  [2D_circle]
+    type = 'Exodiff'
+    allow_warnings = true
+    input = 'bspline_curve_2D_circle.i'
+    exodiff = 'bspline_curve_2D_circle_in.e'
+    cli_args = '--mesh-only'
+    requirement = 'The system shall generate a 3D mesh on the x-y plane for two parallel directions using circular control points.'
+    recover = false
+  []
+  [2D_circle_warning]
+    type = 'RunException'
+    input = 'bspline_curve_2D_circle.i'
+    cli_args = 'Mesh/bscg/num_cps=10 --mesh-only error.e'
+    expect_err = 'Number of control points required for circular control points is much greater than for BSplines. `num_cps` is now 25. Ensure this is acceptable!'
+    requirement = 'The system shall generate a 3D mesh on the x-y plane for two parallel directions. Checks for warning when insufficient number of control points are given.'
+  []
+  [3D_circle]
+    type = 'Exodiff'
+    allow_warnings = true
+    input = 'bspline_curve_3D_circle.i'
+    exodiff = 'bspline_curve_3D_circle_in.e'
+    cli_args = '--mesh-only'
+    requirement = 'The system shall generate a 3D mesh for two parallel directions using circular control points.'
+    recover = false
+  []
+  [circle_error1]
+    type = 'RunException'
+    allow_warnings = true
+    input = 'bspline_curve_2D_circle.i'
+    cli_args = 'Mesh/bscg/start_direction=\'0 1 0\' Mesh/bscg/end_direction=\'0 1 0\' --mesh-only error.e'
+    expect_err = 'Parallel lines cannot be interpolated using points along a circle! Direction vectors are incompatible with point locations.'
+    requirement = 'The system shall generate a 3D mesh on the x-y plane for two parallel directions. Checks for error with colinear points.'
+  []
+  [circle_error2]
+    type = 'RunException'
+    allow_warnings = true
+    input = 'bspline_curve_2D_circle.i'
+    cli_args = 'Mesh/bscg/start_point=\'1 1 0\' --mesh-only error.e'
+    expect_err = 'Parallel lines cannot be interpolated using points along a circle! Direction vectors are incompatible with point locations.'
+    requirement = 'The system shall generate a 3D mesh for two parallel directions. Checks for error with incompatible points.'
+  []
 []
 
 # [Tests]
