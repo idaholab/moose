@@ -30,7 +30,10 @@ MFEMProblem::validParams()
   return params;
 }
 
-MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(params) {}
+MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(params) {
+  // Initialise Hypre for all MFEM problems.
+  mfem::Hypre::Init();
+}
 
 void
 MFEMProblem::initialSetup()
@@ -71,6 +74,73 @@ MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
 }
+
+void
+MFEMProblem::addIndicator(const std::string & user_object_name,
+                          const std::string & name,
+                          InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(user_object_name, name, parameters);
+
+  const UserObject * est_uo = &(getUserObjectBase(name));
+  if (dynamic_cast<const MFEMEstimator *>(est_uo) != nullptr)
+  {
+    std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMEstimator>(name).getSharedPtr();
+    std::shared_ptr<MFEMEstimator> estimator = std::dynamic_pointer_cast<MFEMEstimator>(object_ptr);
+
+    // fetch a pointer to the executioner; use this as our way to access the problem operator
+    auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
+    if (mfem_exec_ptr != nullptr and mfem_exec_ptr->addEstimator(estimator))
+    {
+      // success
+    }
+
+    else
+    {
+      mooseError("Cannot add estimator :()");
+    }
+  }
+
+  else
+  {
+    mooseError("Cannot add estimator :()");
+  }
+}
+
+void
+MFEMProblem::addMarker(const std::string & user_object_name,
+                       const std::string & name,
+                       InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(user_object_name, name, parameters);
+
+  const UserObject * est_uo = &(getUserObjectBase(name));
+  if (dynamic_cast<const MFEMRefiner *>(est_uo) != nullptr)
+  {
+    std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMRefiner>(name).getSharedPtr();
+    std::shared_ptr<MFEMRefiner> refiner = std::dynamic_pointer_cast<MFEMRefiner>(object_ptr);
+
+    // fetch a pointer to the executioner
+    auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
+    if (mfem_exec_ptr != nullptr and mfem_exec_ptr->addRefiner(refiner))
+    {
+      // success
+    }
+
+    else
+    {
+      mooseError("Cannot add refiner :()");
+    }
+  }
+
+  else
+  {
+    mooseError("Cannot add refiner :()");
+  }
+}
+
+
+
 
 void
 MFEMProblem::addMFEMSolver(const std::string & user_object_name,
@@ -464,6 +534,35 @@ MFEMProblem::getMeshDisplacementGridFunction()
   {
     return std::nullopt;
   }
+}
+
+void
+MFEMProblem::updateAfterRefinement()
+{
+  setMeshChanged(true);
+
+  updateFESpaces();
+
+  if (_problem_data.pmesh->Nonconforming())
+  {
+    _problem_data.pmesh->Rebalance();
+    // Update FESpaces again to account for rebalancing
+    updateFESpaces();
+  }
+}
+
+void
+MFEMProblem::updateFESpaces()
+{
+  for (const auto & fe_space_pair : _problem_data.fespaces)
+  {
+    fe_space_pair.second->Update();
+  }
+  for (const auto & gridfunction_pair : _problem_data.gridfunctions)
+  {
+    gridfunction_pair.second->Update();
+  }
+  _problem_data.eqn_system->UpdateEquationSystem();
 }
 
 std::vector<VariableName>

@@ -29,6 +29,92 @@ EquationSystemProblemOperator::Init(mfem::BlockVector & X)
 }
 
 void
+EquationSystemProblemOperator::AddEstimator(std::shared_ptr<MFEMEstimator> estimator)
+{
+  _use_amr = true;
+  _estimator = estimator;
+}
+
+void
+EquationSystemProblemOperator::AddRefiner(std::shared_ptr<MFEMRefiner> refiner)
+{
+  _use_amr = true;
+  _refiner = refiner;
+}
+
+void
+EquationSystemProblemOperator::SetUpAMR()
+{
+  if ( !_estimator or !_refiner )
+  {
+    // these should have both been added via the input file
+    mooseError("Input file must contain a refiner and an indicator!");
+  }
+  if( _use_amr and _estimator->createEstimator() ) {
+    _refiner->setUp( _estimator );
+  }
+
+  else
+  {
+    mooseError("Failed to setup amr");
+  }
+}
+
+/*
+The refiner will return true if we have met the stopping condition for refinement.
+If we don't use AMR, we should therefore return true.
+*/
+bool
+EquationSystemProblemOperator::HRefine()
+{
+  bool stop = false;
+  if (_use_amr)
+  {
+    stop = _refiner->Apply(*_problem.pmesh);;
+  }
+  else
+  {
+    mooseError(
+        "Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
+  }
+  return stop;
+}
+
+
+/*
+The refiner will return true if we have met the stopping condition for refinement.
+If we don't use AMR, we should therefore return true.
+*/
+bool
+EquationSystemProblemOperator::PRefine()
+{
+  bool stop = false;
+  if (_use_amr)
+  {
+    mfem::Array<mfem::pRefinement> prefinements;
+    mfem::Array<mfem::Refinement> refinements;
+
+    stop = _refiner->MarkWithoutRefining(*_problem.pmesh, refinements);
+
+    prefinements.SetSize(refinements.Size());
+    for (int i = 0; i < refinements.Size(); i++)
+    {
+      prefinements[i].index = refinements[i].index;
+      prefinements[i].delta = 1; // Increase the element order by 1
+    }
+
+    _estimator->getFESpace()->PRefineAndUpdate(prefinements);
+  }
+
+  else
+  {
+    mooseError(
+        "Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
+  }
+  return stop;
+}
+
+void
 EquationSystemProblemOperator::Solve(mfem::Vector &)
 {
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
