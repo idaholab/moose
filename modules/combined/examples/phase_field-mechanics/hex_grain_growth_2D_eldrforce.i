@@ -221,6 +221,7 @@
     type = ComputePolycrystalElasticityTensor
     block = 0
     grain_tracker = grain_tracker
+    euler_angle_provider = euler_angle_file
   [../]
   [./strain]
     type = ComputeSmallStrain
