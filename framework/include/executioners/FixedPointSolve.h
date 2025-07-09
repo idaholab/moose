@@ -21,6 +21,7 @@ public:
 
   virtual ~FixedPointSolve() = default;
 
+  static InputParameters fixedPointDefaultConvergenceParams();
   static InputParameters validParams();
 
   /**
@@ -32,26 +33,18 @@ public:
   /// Enumeration for fixed point convergence reasons
   enum class MooseFixedPointConvergenceReason
   {
-    UNSOLVED = 0,
-    CONVERGED_NONLINEAR = 1,
-    CONVERGED_ABS = 2,
-    CONVERGED_RELATIVE = 3,
-    CONVERGED_CUSTOM = 4,
-    REACH_MAX_ITS = 5,
-    DIVERGED_MAX_ITS = -1,
-    DIVERGED_NONLINEAR = -2,
-    DIVERGED_FAILED_MULTIAPP = -3
+    UNSOLVED = 0,                  /// Not solved yet
+    CONVERGED_NONLINEAR = 1,       /// Main app nonlinear solve converged, FP unassessed
+    CONVERGED_ABS = 2,             /// FP converged by absolute residual tolerance
+    CONVERGED_RELATIVE = 3,        /// FP converged by relative residual tolerance
+    CONVERGED_PP = 4,              /// FP converged by absolute or relative PP tolerance
+    REACH_MAX_ITS = 5,             /// FP converged by hitting max iterations and accepting
+    CONVERGED_OBJECT = 6,          /// FP converged according to Convergence object
+    DIVERGED_MAX_ITS = -1,         /// FP diverged by hitting max iterations
+    DIVERGED_NONLINEAR = -2,       /// Main app nonlinear solve diverged
+    DIVERGED_FAILED_MULTIAPP = -3, /// Multiapp solve diverged
+    DIVERGED_OBJECT = -4           /// FP diverged according to Convergence object
   };
-
-  /**
-   * Get the minimum number of fixed point iterations
-   */
-  unsigned int minFixedPointIts() const { return _min_fixed_point_its; }
-
-  /**
-   * Get the maximum number of fixed point iterations
-   */
-  unsigned int maxFixedPointIts() const { return _max_fixed_point_its; }
 
   /**
    * Get the number of fixed point iterations performed
@@ -75,6 +68,12 @@ public:
 
   /// This function checks the _xfem_repeat_step flag set by solve.
   bool XFEMRepeatStep() const { return _xfem_repeat_step; }
+
+  /// Set fixed point status
+  void setFixedPointStatus(MooseFixedPointConvergenceReason status)
+  {
+    _fixed_point_status = status;
+  }
 
   /// Clear fixed point status
   void clearFixedPointStatus() { _fixed_point_status = MooseFixedPointConvergenceReason::UNSOLVED; }
@@ -113,6 +112,12 @@ public:
   /// Mark the current solve as failed due to external conditions
   void failStep() { _fail_step = true; }
 
+  /// Print the convergence history of the coupling, at every fixed point iteration
+  virtual void
+  printFixedPointConvergenceHistory(Real initial_norm,
+                                    const std::vector<Real> & timestep_begin_norms,
+                                    const std::vector<Real> & timestep_end_norms) const = 0;
+
 protected:
   /**
    * Saves the current values of the variables, and update the old(er) vectors.
@@ -143,8 +148,6 @@ protected:
   /**
    * Perform one fixed point iteration or a full solve.
    *
-   * @param begin_norm       Residual norm after timestep_begin execution
-   * @param end_norm         Residual norm after timestep_end execution
    * @param transformed_dofs DoFs targetted by the fixed point algorithm
    *
    * @return True if both nonlinear solve and the execution of multiapps are successful.
@@ -153,8 +156,7 @@ protected:
    * state.
    * FIXME: The proper design will be to let XFEM use Picard iteration to control the execution.
    */
-  virtual bool
-  solveStep(Real & begin_norm, Real & end_norm, const std::set<dof_id_type> & transformed_dofs);
+  virtual bool solveStep(const std::set<dof_id_type> & transformed_dofs);
 
   /// Save both the variable and postprocessor values
   virtual void saveAllValues(const bool primary);
@@ -181,34 +183,14 @@ protected:
   virtual void transformVariables(const std::set<dof_id_type> & transformed_dofs,
                                   const bool primary) = 0;
 
-  /// Print the convergence history of the coupling, at every fixed point iteration
-  virtual void printFixedPointConvergenceHistory() = 0;
-
-  /// Computes and prints the user-specified postprocessor assessing convergence
-  void computeCustomConvergencePostprocessor();
-
   /// Examine the various convergence metrics
   bool examineFixedPointConvergence(bool & converged);
 
   /// Print information about the fixed point convergence
   void printFixedPointConvergenceReason();
 
-  /// Minimum fixed point iterations
-  unsigned int _min_fixed_point_its;
-  /// Maximum fixed point iterations
-  unsigned int _max_fixed_point_its;
   /// Whether or not we activate fixed point iteration
   const bool _has_fixed_point_its;
-  /// Whether or not to treat reaching maximum number of fixed point iteration as converged
-  const bool _accept_max_it;
-  /// Whether or not to use residual norm to check the fixed point convergence
-  const bool _has_fixed_point_norm;
-  /// Relative tolerance on residual norm
-  const Real _fixed_point_rel_tol;
-  /// Absolute tolerance on residual norm
-  const Real _fixed_point_abs_tol;
-  /// Whether or not we force evaluation of residual norms even without multiapps
-  const bool _fixed_point_force_norms;
 
   /// Relaxation factor for fixed point Iteration
   const Real _relax_factor;
@@ -233,31 +215,10 @@ protected:
   unsigned int _fixed_point_it;
   /// fixed point iteration counter for the main app
   unsigned int _main_fixed_point_it;
-  /// Initial residual norm
-  Real _fixed_point_initial_norm;
-  /// Full history of residual norm after evaluation of timestep_begin
-  std::vector<Real> _fixed_point_timestep_begin_norm;
-  /// Full history of residual norm after evaluation of timestep_end
-  std::vector<Real> _fixed_point_timestep_end_norm;
   /// Status of fixed point solve
   MooseFixedPointConvergenceReason _fixed_point_status;
   ///@}
 private:
-  /// Postprocessor value for user-defined fixed point convergence check
-  const PostprocessorValue * const _fixed_point_custom_pp;
-  /// Relative tolerance on postprocessor value
-  const Real _custom_rel_tol;
-  /// Absolute tolerance on postprocessor value
-  const Real _custom_abs_tol;
-  /// Old value of the custom convergence check postprocessor
-  Real _pp_old;
-  /// Current value of the custom convergence check postprocessor
-  Real _pp_new;
-  /// Scaling of custom convergence check postprocessor (its initial value)
-  Real _pp_scaling;
-  /// Convergence history of the custom convergence check postprocessor
-  std::ostringstream _pp_history;
-
   /// Maximum number of xfem updates per step
   const unsigned int _max_xfem_update;
   /// Controls whether xfem should update the mesh at the beginning of the time step
