@@ -13,6 +13,7 @@
 #include "ProblemOperator.h"
 #include "EquationSystemInterface.h"
 #include "MFEMEstimator.h"
+#include "MFEMRefiner.h"
 
 namespace Moose::MFEM
 {
@@ -31,6 +32,7 @@ public:
 
   //! Call this with the parameters for the Estimator
   void AddEstimator(std::shared_ptr<MFEMEstimator> estimator) override;
+  void AddRefiner(std::shared_ptr<MFEMRefiner> refiner) override;
   void SetUpAMR() override;
   bool HRefine() override;
   bool PRefine() override;
@@ -50,7 +52,7 @@ public:
 private:
   std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};
   std::shared_ptr<MFEMEstimator> _estimator;
-  std::unique_ptr<mfem::ThresholdRefiner> _refiner;
+  std::shared_ptr<MFEMRefiner> _refiner;
 
   /**
    * For now, use a bool to determine whether we use amr
