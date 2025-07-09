@@ -14,7 +14,7 @@ public:
 
   static InputParameters validParams();
 
-  virtual mfem::ErrorEstimator * createEstimator() override;
+  virtual bool createEstimator() override;
 
 protected:
   std::unique_ptr<mfem::H1_FECollection> _smooth_flux_fec;

@@ -194,6 +194,10 @@ public:
                     const std::string & name,
                     InputParameters & parameters) override;
 
+  void addMarker(const std::string & type,
+                 const std::string & name,
+                 InputParameters & parameters) override;
+
   /**
    * Method called in AddMFEMSolverAction which will create the solver.
    */

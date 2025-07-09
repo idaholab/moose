@@ -102,6 +102,41 @@ MFEMProblem::addIndicator(const std::string & user_object_name,
 }
 
 void
+MFEMProblem::addMarker(const std::string & user_object_name,
+                       const std::string & name,
+                       InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(user_object_name, name, parameters);
+
+  const UserObject * est_uo = &(getUserObjectBase(name));
+  if (dynamic_cast<const MFEMRefiner *>(est_uo) != nullptr)
+  {
+    std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMRefiner>(name).getSharedPtr();
+    std::shared_ptr<MFEMRefiner> refiner = std::dynamic_pointer_cast<MFEMRefiner>(object_ptr);
+
+    // fetch a pointer to the executioner
+    auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
+    if (mfem_exec_ptr != nullptr and mfem_exec_ptr->addRefiner(refiner))
+    {
+      // success
+    }
+
+    else
+    {
+      mooseError("Cannot add refiner :()");
+    }
+  }
+
+  else
+  {
+    mooseError("Cannot add refiner :()");
+  }
+}
+
+
+
+
+void
 MFEMProblem::addMFEMSolver(const std::string & user_object_name,
                            const std::string & name,
                            InputParameters & parameters)

@@ -84,6 +84,10 @@ MFEMSteady::init()
 void
 MFEMSteady::execute()
 {
+  // first, we need to set up AMR
+  if (_use_amr)
+    _problem_operator->SetUpAMR();
+
   if (_app.isRecovering())
   {
     _console << "\nCannot recover steady solves!\nExiting...\n" << std::endl;
@@ -109,11 +113,15 @@ MFEMSteady::execute()
   {
     _problem_operator->Solve(_problem_data.f);
 
-    // TODO: add in a loop with user-specified conditions
-    if (_use_amr)
+    bool stop = false;
+    int counter = 0;
+    while (_use_amr and !stop)
     {
-      // p-refine
-      PRefine();
+      if (counter++ % 2 == 0)
+        stop = PRefine();
+      else
+        stop = HRefine();
+
       _problem_operator->Solve(_problem_data.f);
     }
   }
@@ -155,8 +163,25 @@ MFEMSteady::addEstimator(std::shared_ptr<MFEMEstimator> estimator)
 {
   if (estimator)
   {
+    #pragma message "Redundantly setting _use_amr to true twice; pick one place to do it"
     _use_amr = true;
     _problem_operator->AddEstimator(estimator);
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool
+MFEMSteady::addRefiner(std::shared_ptr<MFEMRefiner> refiner)
+{
+  if (refiner)
+  {
+    #pragma message "Redundantly setting _use_amr to true twice; pick one place to do it"
+    _use_amr = true;
+    _problem_operator->AddRefiner(refiner);
     return true;
   }
   else
