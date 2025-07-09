@@ -10,6 +10,7 @@
       check_files = 'gauss_process_training_GP_avg_trainer.rd/data'
       allow_test_objects = true
       detail = 'training a Gaussian process model and '
+      capabilities = 'libtorch'
     []
     [GP_testing]
       type = CSVDiff
@@ -18,6 +19,7 @@
       csvdiff = 'GP_squared_exponential_testing_out_samp_avg_0002.csv'
       detail = 'evaluating the trained Gaussian process model'
       prereq = store_load/GP_training
+      capabilities = 'libtorch'
     []
   []
 
@@ -29,6 +31,7 @@
       allow_test_objects = true
       csvdiff = 'GP_squared_exponential_out_samp_avg_0002.csv GP_squared_exponential_out_results_0002.csv'
       detail = 'a squared exponential kernel;'
+      capabilities = 'libtorch'
     []
     [GP_exponential]
       type = CSVDiff
@@ -36,6 +39,7 @@
       allow_test_objects = true
       csvdiff = 'GP_exponential_out_samp_avg_0002.csv GP_exponential_out_results_0002.csv'
       detail = 'an exponential kernel;'
+      capabilities = 'libtorch'
     []
     [GP_Matern_half_int]
       type = CSVDiff
@@ -43,6 +47,7 @@
       allow_test_objects = true
       csvdiff = 'GP_Matern_half_int_out_samp_avg_0002.csv GP_Matern_half_int_out_results_0002.csv'
       detail = 'Matern half integer kernel;'
+      capabilities = 'libtorch'
     []
   []
 
@@ -55,6 +60,7 @@
       allow_test_objects = true
       csvdiff = 'GP_squared_exponential_tuned_adam_out_samp_avg_0002.csv GP_squared_exponential_tuned_adam_out_results_0002.csv GP_squared_exponential_tuned_adam_out_hyperparams_0002.csv'
       detail = 'a squared exponential kernel using Adam;'
+      capabilities = 'libtorch'
     []
     [GP_exponential_tuned_adam]
       type = CSVDiff
@@ -62,6 +68,7 @@
       allow_test_objects = true
       csvdiff = 'GP_exponential_tuned_adam_out_samp_avg_0002.csv GP_exponential_tuned_adam_out_results_0002.csv GP_exponential_tuned_adam_out_hyperparams_0002.csv'
       detail = 'an exponential kernel using Adam;'
+      capabilities = 'libtorch'
     []
     [GP_Matern_half_int_tuned_adam]
       type = CSVDiff
@@ -69,6 +76,7 @@
       allow_test_objects = true
       csvdiff = 'GP_Matern_half_int_tuned_adam_samp_avg_0002.csv GP_Matern_half_int_tuned_adam_results_0002.csv GP_Matern_half_int_tuned_adam_hyperparams_0002.csv'
       detail = 'a Matern half integer kernel using Adam;'
+      capabilities = 'libtorch'
     []
     [GP_Matern_half_int_tuned_adam_minibatch]
       type = CSVDiff
@@ -77,6 +85,7 @@
       allow_test_objects = true
       csvdiff = 'GP_Matern_half_int_tuned_adam_minibatch_samp_avg_0002.csv GP_Matern_half_int_tuned_adam_minibatch_results_0002.csv GP_Matern_half_int_tuned_adam_minibatch_hyperparams_0002.csv'
       detail = 'a Matern half integer kernel using Adam with mini-batch sampling;'
+      capabilities = 'libtorch'
     []
   []
   [errors]
@@ -87,6 +96,7 @@
       cli_args = "Trainers/GP_avg_trainer/batch_size='100'"
       detail = 'the batch size is greater than the training data set size for Adam optimization. '
       expect_err = "Batch size cannot be greater than the training data set size."
+      capabilities = 'libtorch'
     []
   []
 []

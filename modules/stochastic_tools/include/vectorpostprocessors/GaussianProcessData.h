@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
 // MOOSE includes
@@ -32,3 +34,5 @@ protected:
   /// Vector of hyperparamater values
   std::vector<VectorPostprocessorValue *> _hp_vector;
 };
+
+#endif
