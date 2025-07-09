@@ -16,7 +16,7 @@ MFEMZienkiewiczZhuEstimator::MFEMZienkiewiczZhuEstimator(const InputParameters &
 {
 }
 
-mfem::ErrorEstimator *
+bool
 MFEMZienkiewiczZhuEstimator::createEstimator()
 {
   MFEMProblemData & problem = getMFEMProblem().getProblemData();
@@ -61,7 +61,7 @@ MFEMZienkiewiczZhuEstimator::createEstimator()
   // finally, initialise the estimator
   _error_estimator = std::make_shared<mfem::L2ZienkiewiczZhuEstimator>(
       *integ, *gridfunction, *_flux_fes, *_smooth_flux_fes);
-  return _error_estimator.get();
+  return _error_estimator.get() != nullptr;
 }
 
 #endif
