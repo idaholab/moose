@@ -129,7 +129,7 @@ FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::FXIntegralBaseUserObje
   : IntegralBaseVariableUserObject(parameters),
     MutableCoefficientsInterface(this, parameters),
     _function_series(
-        FunctionSeries::checkAndConvertFunction(getFunction("function"), getBase(), name())),
+        FunctionSeries::checkAndConvertFunction(getFunction("function"), this->getBase(), name())),
     _keep_history(UserObject::getParam<bool>("keep_history")),
     _print_state(UserObject::getParam<bool>("print_state")),
     _standardized_function_volume(_function_series.getStandardizedFunctionVolume())
