@@ -16,7 +16,7 @@
   [range_check_param]
     type = 'RunException'
     input = 'range_check_param.i'
-    expect_err = "range_check_param.i:6.3: Range check failed for parameter 'Mesh/bias_x'; expression = 'bias_x>=0.5 & bias_x<=2', value = 0.1"
+    expect_err = "range_check_param.i:6.3: Range check failed for parameter Mesh/bias_x; expression = 'bias_x>=0.5 & bias_x<=2', value = 0.1"
 
     requirement = 'The system shall report an error message when a range-checked parameter is out of range.'
     issues = '#2777'
