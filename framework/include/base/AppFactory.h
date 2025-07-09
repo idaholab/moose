@@ -18,12 +18,6 @@
 #include "gtest/gtest.h"
 class GTEST_TEST_CLASS_NAME_(AppFactoryTest, manageAppParams);
 class GTEST_TEST_CLASS_NAME_(AppFactoryTest, appCopyConstructParams);
-#endif
-
-#ifdef MOOSE_UNIT_TEST
-// forward declare unit tests
-#include "gtest/gtest.h"
-class GTEST_TEST_CLASS_NAME_(AppFactoryTest, manageAppParams);
 class GTEST_TEST_CLASS_NAME_(AppFactoryTest, createNotRegistered);
 #endif
 
@@ -212,6 +206,7 @@ private:
 #ifdef MOOSE_UNIT_TEST
   FRIEND_TEST(::AppFactoryTest, manageAppParams);
   FRIEND_TEST(::AppFactoryTest, appCopyConstructParams);
+  FRIEND_TEST(::AppFactoryTest, createNotRegistered);
 #endif
 
   /// Storage of input parameters used in applications (ID (from getAppParamsID()) -> params)
