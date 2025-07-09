@@ -70,7 +70,7 @@ TEST(InputParametersTest, checkRangeCheckedParam)
   };
 
   // Invalid range function
-  test_vector_error({}, "!", false, "Error parsing expression '!' for parameter 'p'");
+  test_vector_error({}, "!", false, "Error parsing expression '!' for parameter p");
   // Check all values, vector has no values
   test_vector_error({}, "p = 1", true, "Range checking empty vector 'p = 1'");
   // Check all values, invalid variable
@@ -98,7 +98,7 @@ TEST(InputParametersTest, checkRangeCheckedParam)
   };
 
   // Invalid range function
-  test_scalar_error("!", false, "Error parsing expression '!' for parameter 'p'");
+  test_scalar_error("!", false, "Error parsing expression '!' for parameter p");
 }
 
 TEST(InputParametersTest, checkControlParamTypeError)
