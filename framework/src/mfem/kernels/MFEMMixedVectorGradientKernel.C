@@ -34,13 +34,10 @@ MFEMMixedVectorGradientKernel::MFEMMixedVectorGradientKernel(const InputParamete
 {
 }
 
-std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
+mfem::BilinearFormIntegrator *
 MFEMMixedVectorGradientKernel::createBFIntegrator()
 {
-  if (getParam<MooseEnum>("numeric_type") == "complex")
-    mooseError("Complex-valued mixed kernels are not supported.");
-
-  return std::make_pair(new mfem::MixedVectorGradientIntegrator(_coef), nullptr);
+  return new mfem::MixedVectorGradientIntegrator(_coef);
 }
 
 #endif

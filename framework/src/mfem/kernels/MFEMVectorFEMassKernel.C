@@ -24,9 +24,6 @@ MFEMVectorFEMassKernel::validParams()
                              "$k \\vec u$.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of property k to multiply the integrator by");
-  params.addParam<MFEMScalarCoefficientName>(
-      "coefficient_imag",
-      "Name of the imaginary part of the property k to multiply the Laplacian by");
   return params;
 }
 
@@ -34,21 +31,14 @@ MFEMVectorFEMassKernel::MFEMVectorFEMassKernel(const InputParameters & parameter
   : MFEMKernel(parameters),
     // FIXME: The MFEM bilinear form can also handle vector and matrix
     // coefficients, so ideally we'd handle all three too.
-    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient"))),
-    // If the imaginary coefficient is not provided, we pick the real one since the variable needs
-    // to be initialized, but it won't be used
-    _coef_imag(getScalarCoefficient(isParamValid("coefficient_imag")
-                                        ? getParam<MFEMScalarCoefficientName>("coefficient_imag")
-                                        : getParam<MFEMScalarCoefficientName>("coefficient")))
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
 {
 }
 
-std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
+mfem::BilinearFormIntegrator *
 MFEMVectorFEMassKernel::createBFIntegrator()
 {
-  return std::make_pair(
-      new mfem::VectorFEMassIntegrator(_coef),
-      isParamValid("coefficient_imag") ? new mfem::VectorFEMassIntegrator(_coef_imag) : nullptr);
+  return new mfem::VectorFEMassIntegrator(_coef);
 }
 
 #endif
