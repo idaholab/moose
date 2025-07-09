@@ -48,7 +48,7 @@ EquationSystemProblemOperator::SetUpAMR()
   if ( !_estimator or !_refiner )
   {
     // these should have both been added via the input file
-    mooseError("Input file must contain a refiner and an estimator!")
+    mooseError("Input file must contain a refiner and an estimator!");
   }
   if( _use_amr and _estimator->createEstimator() ) {
     _refiner->setUp( _estimator );
