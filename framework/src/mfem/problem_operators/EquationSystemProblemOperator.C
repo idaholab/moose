@@ -48,7 +48,7 @@ EquationSystemProblemOperator::SetUpAMR()
   if ( !_estimator or !_refiner )
   {
     // these should have both been added via the input file
-    mooseError("Input file must contain a refiner and an estimator!");
+    mooseError("Input file must contain a refiner and an indicator!");
   }
   if( _use_amr and _estimator->createEstimator() ) {
     _refiner->setUp( _estimator );
@@ -62,34 +62,39 @@ EquationSystemProblemOperator::SetUpAMR()
 
 /*
 The refiner will return true if we have met the stopping condition for refinement.
-If we don't use AMR, we should just return false.
+If we don't use AMR, we should therefore return true.
 */
 bool
 EquationSystemProblemOperator::HRefine()
 {
-  bool output = false;
+  bool stop = false;
   if (_use_amr)
   {
-    output =  _refiner->Apply(*_problem.pmesh);;
+    stop = _refiner->Apply(*_problem.pmesh);;
   }
   else
   {
     mooseError(
         "Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
   }
-  return output;
+  return stop;
 }
 
+
+/*
+The refiner will return true if we have met the stopping condition for refinement.
+If we don't use AMR, we should therefore return true.
+*/
 bool
 EquationSystemProblemOperator::PRefine()
 {
-  bool output = false;
+  bool stop = false;
   if (_use_amr)
   {
     mfem::Array<mfem::pRefinement> prefinements;
     mfem::Array<mfem::Refinement> refinements;
 
-    output = _refiner->MarkWithoutRefining(*_problem.pmesh, refinements);
+    stop = _refiner->MarkWithoutRefining(*_problem.pmesh, refinements);
 
     prefinements.SetSize(refinements.Size());
     for (int i = 0; i < refinements.Size(); i++)
@@ -106,7 +111,7 @@ EquationSystemProblemOperator::PRefine()
     mooseError(
         "Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
   }
-  return output;
+  return stop;
 }
 
 void
