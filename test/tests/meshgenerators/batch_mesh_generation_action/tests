@@ -69,6 +69,30 @@
       recover = false
       requirement = 'The system should batch generate meshes of the same type with variation in one single vector parameter'
   []
+  [single_real_vector_value]
+    type = 'Exodiff'
+      input = 'real_vector_value.i'
+      exodiff = 'real_vector_value_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generated meshes of the same type with variation in one single real vector value parameter'
+  []
+  [fixed_real_vector_value_mixed]
+    type = 'Exodiff'
+      input = 'real_vector_value_mixed.i'
+      exodiff = 'real_vector_value_mixed_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generated meshes of the same type with a fixed real vector value mixed with other scalar parameters'
+  []
+  [single_point_vector_value]
+    type = 'Exodiff'
+      input = 'vector_point.i'
+      exodiff = 'vector_point_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      requirement = 'The system should batch generated meshes of the same type with variation in one single point vector parameter'
+  []
   [double_vector_corr]
     type = 'Exodiff'
       input = 'double_vector_corr.i'
@@ -196,7 +220,7 @@
       input = 'double_vector_corr.i'
       cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_vector_input_param_values='0.8;1.0|2'"
       detail = 'if the batch input parameter values do not have the same size in corresponding mode.'
-      expect_err = 'BatchMeshGeneratorAction: elements of'
+      expect_err = 'must have the same size in corresponding mode'
     []
     [decomp_corr]
       type = RunException
@@ -211,6 +235,27 @@
       cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_vector_input_param_types='UINT UINT'"
       detail = 'if an incorrect input parameter type is provided.'
       expect_err = 'has the wrong type. It should be'
+    []
+    [wrong_compound_scalar_size_fixed_scalar]
+      type = RunException
+      input = 'real_vector_value_mixed.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/fixed_scalar_input_param_values='ROTATE 0 0'"
+      detail = 'if the fixed scalar input parameter value corresponding to a compound scalar parameter is not a multiple of three.'
+      expect_err = 'must be represented as three separate values instead of one'
+    []
+    [wrong_compound_scalar_size_batch_scalar]
+      type = RunException
+      input = 'real_vector_value.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_scalar_input_param_values='0 0 0 2 0 0 0 2 0 2 2'"
+      detail = 'if the batch scalar input parameter values corresponding to a compound scalar parameter is not a multiple of three.'
+      expect_err = 'must be represented as three separate values instead of one'
+    []
+    [wrong_compound_scalar_size_batch_vector]
+      type = RunException
+      input = 'vector_point.i'
+      cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_vector_input_param_values='0 0 0 1 0 0 1 1 0; 2 0 3 0 0 3 1 0;1 2 0 2 2 0 2 3 0'"
+      detail = 'if the element values of a batch vector input parameter corresponding to a compound scalar parameter is not a multiple of three.'
+      expect_err = 'must be represented as three separate values instead of one'
     []
   []
 []
