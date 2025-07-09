@@ -35,10 +35,10 @@ BSplineCurveGenerator::validParams()
   params.addRequiredParam<libMesh::RealVectorValue>("end_direction",
                                                     "Direction vector of curve at end point.");
   params.addRangeCheckedParam<libMesh::Real>(
-      "sharpness", 0, "sharpness>=0 & sharpness<=1", "Sharpness of curve bend.");
+      "sharpness", 0.6, "sharpness>0 & sharpness<=1", "Sharpness of curve bend.");
   params.addParam<unsigned int>(
       "num_cps",
-      5,
+      6,
       "Number of control points used to draw the curve. Miniumum of degree+1 points are required.");
   params.addParam<MooseEnum>(
       "edge_element_type", edge_elem_type, "Type of the EDGE elements to be generated.");
@@ -78,13 +78,13 @@ BSplineCurveGenerator::generate()
   // determine number of control points needed
   unsigned int half_cps;
   if (_num_cps % 2 == 0)
-  {
     half_cps = _num_cps / 2;
-    // add a mooseWarning
-    mooseWarning("Need an odd number of control points. `num_cps` has been increased by 1.");
-  }
   else
+  {
     half_cps = (_num_cps - 1) / 2;
+    // add a mooseWarning
+    mooseWarning("Need an even number of control points. `num_cps` has been increased by 1.");
+  }
 
   // generate points using BSpline functions/class
   std::vector<Point> control_points = SplineUtils::bSplineControlPoints(

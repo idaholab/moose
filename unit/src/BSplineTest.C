@@ -28,7 +28,7 @@ TEST(BSplineTest, CP_MakerDegree2Test)
   const libMesh::RealVectorValue direction1(1, 0, 0);
   const libMesh::RealVectorValue direction2(0, 1, 0);
   const double sharpness = 0.5;
-  const unsigned int cps_per_half = 2;
+  const unsigned int cps_per_half = 3;
 
   const libMesh::Real t0 = 0;
   const libMesh::Real t1 = 0.4;
@@ -47,8 +47,8 @@ TEST(BSplineTest, CP_MakerDegree2Test)
   const libMesh::Point point_3 = b_spline.getPoint(t3);
 
   const libMesh::Point expected_point_0(1, 2, 1);
-  const libMesh::Point expected_point_1(1.84, 1.99, 0.65);
-  const libMesh::Point expected_point_2(2., 1.51, 0.09);
+  const libMesh::Point expected_point_1(1.57, 1.91, 0.82);
+  const libMesh::Point expected_point_2(2., 1.32, 0.);
   const libMesh::Point expected_point_3(2, 1, 0);
 
   EXPECT_NEAR((point_0 - expected_point_0).norm(), 0, libMesh::TOLERANCE);
@@ -66,7 +66,7 @@ TEST(BSplineTest, CP_MakerDegree3Test)
   const libMesh::RealVectorValue direction1(1, 0, 0);
   const libMesh::RealVectorValue direction2(0, 1, 0);
   const double sharpness = 0.5;
-  const unsigned int cps_per_half = 2;
+  const unsigned int cps_per_half = 3;
 
   const libMesh::Real t0 = 0;
   const libMesh::Real t1 = 0.4;
@@ -84,8 +84,8 @@ TEST(BSplineTest, CP_MakerDegree3Test)
   const libMesh::Point point_3 = b_spline.getPoint(t3);
 
   const libMesh::Point expected_point_0(1, 2, 1);
-  const libMesh::Point expected_point_1(1.784, 1.936, 0.648);
-  const libMesh::Point expected_point_2(1.992, 1.488, 0.104);
+  const libMesh::Point expected_point_1(1.61, 1.8575, 0.716);
+  const libMesh::Point expected_point_2(1.982, 1.3465, 0.036);
   const libMesh::Point expected_point_3(2, 1, 0);
 
   EXPECT_NEAR((point_0 - expected_point_0).norm(), 0, libMesh::TOLERANCE);
@@ -103,7 +103,7 @@ TEST(BSplineTest, CP_MakerDegree4Test)
   const libMesh::RealVectorValue direction1(1, 0, 0);
   const libMesh::RealVectorValue direction2(0, 1, 0);
   const double sharpness = 0.5;
-  const unsigned int cps_per_half = 2;
+  const unsigned int cps_per_half = 3;
 
   const libMesh::Real t0 = 0;
   const libMesh::Real t1 = 0.4;
@@ -122,8 +122,8 @@ TEST(BSplineTest, CP_MakerDegree4Test)
   const libMesh::Point point_3 = b_spline.getPoint(t3);
 
   const libMesh::Point expected_point_0(1, 2, 1);
-  const libMesh::Point expected_point_1(1.6976, 1.8976, 0.648);
-  const libMesh::Point expected_point_2(1.9856, 1.3856, 0.104);
+  const libMesh::Point expected_point_1(1.5888, 1.8336, 0.6928);
+  const libMesh::Point expected_point_2(1.9736, 1.3208, 0.0512);
   const libMesh::Point expected_point_3(2, 1, 0);
 
   EXPECT_NEAR((point_0 - expected_point_0).norm(), 0, libMesh::TOLERANCE);
