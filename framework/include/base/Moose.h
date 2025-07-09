@@ -122,6 +122,7 @@ extern const ExecFlagType EXEC_TIMESTEP_END;
 extern const ExecFlagType EXEC_TIMESTEP_BEGIN;
 extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_BEGIN;
 extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_END;
+extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_CONVERGENCE;
 extern const ExecFlagType EXEC_FINAL;
 extern const ExecFlagType EXEC_FORCED;
 extern const ExecFlagType EXEC_FAILED;
