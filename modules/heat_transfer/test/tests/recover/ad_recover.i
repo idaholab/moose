@@ -3,12 +3,9 @@
   family = LAGRANGE
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = recover_in.e
+  coord_type = RZ
 []
 
 [Variables]

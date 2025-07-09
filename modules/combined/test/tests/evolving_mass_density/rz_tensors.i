@@ -10,14 +10,11 @@
 
 [Mesh]
   file = elastic_patch_rz.e
+  coord_type = RZ
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [Functions]
