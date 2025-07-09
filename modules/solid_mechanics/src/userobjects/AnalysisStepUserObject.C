@@ -72,18 +72,18 @@ AnalysisStepUserObject::AnalysisStepUserObject(const InputParameters & parameter
                "'total_time_interval', and 'step_durations' can be set");
   if ((isParamSetByUser("total_time_interval") && !isParamSetByUser("number_steps")) ||
       (!isParamSetByUser("total_time_interval") && isParamSetByUser("number_steps")))
-    mooseError(
-        "In AnalysisStepUserObject, both 'total_time_interval' and 'number_steps' need both be set.");
+    mooseError("In AnalysisStepUserObject, both 'total_time_interval' and 'number_steps' need both "
+               "be set.");
 
   // define step times
   if (is_step_start_times)
   {
     _times = getParam<std::vector<Real>>("step_start_times");
     if (!std::is_sorted(_times.begin(), _times.end()))
-      paramError(
-          "step_start_times",
-          "start times for AnalysisStepUserObject are not provided in ascending order. Please revise "
-          "your input.");
+      paramError("step_start_times",
+                 "start times for AnalysisStepUserObject are not provided in ascending order. "
+                 "Please revise "
+                 "your input.");
 
     mooseInfo("Step start times are used to define simulation steps in ", name(), ".");
   }
@@ -91,9 +91,10 @@ AnalysisStepUserObject::AnalysisStepUserObject(const InputParameters & parameter
   {
     _times = getParam<std::vector<Real>>("step_end_times");
     if (!std::is_sorted(_times.begin(), _times.end()))
-      paramError("step_end_times",
-                 "end times for AnalysisStepUserObject are not provided in ascending order. Please revise "
-                 "your input.");
+      paramError(
+          "step_end_times",
+          "end times for AnalysisStepUserObject are not provided in ascending order. Please revise "
+          "your input.");
     _times.insert(_times.begin(), 0.0);
 
     mooseInfo("Step start times are used to define simulation steps in ", name(), ".");

@@ -16,7 +16,8 @@
 class AnalysisStepUserObject;
 
 /**
- * A basic control for disabling objects for a portion of the simulation based on the analysis step concept.
+ * A basic control for disabling objects for a portion of the simulation based on the analysis step
+ * concept.
  */
 class AnalysisStepPeriod : public TimePeriodBase, public AnalysisStepUOInterface
 {
