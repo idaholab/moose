@@ -1386,7 +1386,7 @@ div.moose-algorithm {
     }
     .sidenav li > a > i, .sidenav li > a > [class^="mdi-"], .sidenav li > a li > a > [class*="mdi-"], .sidenav li > a > i.material-icons {
       /*margin: -57px 824px 0px 0px;*/
-      color: white;
+      color: rgb(33, 33, 33);
     }
     .sidenav > li {
       padding-bottom: 25px;
