@@ -77,7 +77,7 @@
     cli_args = "Executioner/type=Transient Executioner/num_steps=1 Executioner/dtmin=1e-13 Executioner/error_on_dtmin=false Outputs/file_base='solution_invalid_transient' "
     jsondiff = 'solution_invalid_transient.json'
     hpc = false # iteration counts can be MPI dependent
-    restep = false # Test will be repeating it's own time steps
+    restep = false # Test will be repeating its own time steps
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output detailed information about why a solution is invalid to a file in transient simulations'
