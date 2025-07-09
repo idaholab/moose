@@ -110,7 +110,7 @@
 [Functions]
   [sink_strength_fcn]
     type = ParsedFunction
-    expression = '30 * if(t <= 1, 0.0, if(t <= 8, -1, if(t <= 11, 1, if(t <= 13, -1, 1))))'
+    expression = '30 * if(t <= 7, -1, if(t <= 10, 1, if(t <= 12, -1, 1)))'
   []
 []
 
@@ -118,7 +118,6 @@
   [sink_strength]
     type = FunctionValuePostprocessor
     function = sink_strength_fcn
-    execute_on = timestep_begin
     outputs = 'none'
   []
   [saturation]
