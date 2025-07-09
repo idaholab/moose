@@ -30,7 +30,11 @@ MFEMProblem::validParams()
   return params;
 }
 
-MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(params) {}
+MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(params)
+{
+  // Initialise Hypre for all MFEM problems.
+  mfem::Hypre::Init();
+}
 
 void
 MFEMProblem::initialSetup()

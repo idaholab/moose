@@ -31,7 +31,6 @@ MFEMHypreFGMRES::validParams()
 
 MFEMHypreFGMRES::MFEMHypreFGMRES(const InputParameters & parameters) : MFEMSolverBase(parameters)
 {
-  mfem::Hypre::Init();
   constructSolver(parameters);
 }
 
