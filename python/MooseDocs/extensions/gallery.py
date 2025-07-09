@@ -81,9 +81,9 @@ class CardComponent(command.CommandComponent):
         img = CardImage(card)
         src = info["subcommand"]
         if src.endswith((".ogg", ".webm", ".mp4")):
-            media.Video(img, src=src, class_="activator")
+            media.Video(img, src=src, class_="activator", alt=settings["title"])
         else:
-            media.Image(img, src=src, class_="activator")
+            media.Image(img, src=src, class_="activator", alt=settings["title"])
 
         # A title is required
         title = settings["title"]
