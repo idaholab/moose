@@ -55,5 +55,5 @@ protected:
   /// as problem.converged() returns false on the very first initialize() call after recovering
   bool _first_time_recovered;
 
-  std::vector<EulerAngles> _angles_old;
+  std::vector<EulerAngles> & _angles_old;
 };
