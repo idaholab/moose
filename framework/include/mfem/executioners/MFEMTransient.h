@@ -54,7 +54,7 @@ public:
   /**
    * This is where the solve step is actually incremented.
    */
-  // virtual void incrementStepOrReject();
+  virtual void incrementStepOrReject();
 
   virtual void endStep();
 
@@ -74,11 +74,6 @@ public:
    * @return The end time
    */
   mfem::real_t & endTime() { return _end_time; }
-
-  /**
-   * Get the Relative L2 norm of the change in the solution.
-   */
-  // mfem::real_t getSolutionChangeNorm();
 
   mutable mfem::real_t _dt;     // Timestep size
   mutable mfem::real_t _dt_old; // Previous timestep size
