@@ -149,9 +149,12 @@ public:
   /**
    * @brief Get all surface objects
    *
-   * @return list of pointers to all CSGSurface objects in CSGBase
+   * @return list of references to all CSGSurface objects in CSGBase
    */
-  std::vector<CSGSurface *> getAllSurfaces() const { return _surface_list.getAllSurfaces(); }
+  std::vector<std::reference_wrapper<const CSGSurface>> getAllSurfaces() const
+  {
+    return _surface_list.getAllSurfaces();
+  }
 
   /**
    * @brief Get a Surface object by name
@@ -230,9 +233,12 @@ public:
   /**
    * @brief Get all cell objects
    *
-   * @return list of pointers to all CSGCell objects in CSGBase
+   * @return list of references to all CSGCell objects in CSGBase
    */
-  std::vector<CSGCell *> getAllCells() const { return _cell_list.getAllCells(); }
+  std::vector<std::reference_wrapper<const CSGCell>> getAllCells() const
+  {
+    return _cell_list.getAllCells();
+  }
 
   /**
    * @brief Get a Cell object by name
@@ -307,7 +313,8 @@ public:
    * @param cells list of cells to add to universe
    * @return CSGUniverse & reference to CSGUniverse that is created
    */
-  const CSGUniverse & createUniverse(const std::string name, std::vector<const CSGCell *> cells);
+  const CSGUniverse & createUniverse(const std::string name,
+                                     std::vector<std::reference_wrapper<const CSGCell>> & cells);
 
   /**
    * @brief Add a cell to an existing universe
@@ -321,9 +328,10 @@ public:
    * @brief Add a list of cells to an existing universe
    *
    * @param universe universe to which to add the cells
-   * @param cells list of pointers to cells to add
+   * @param cells list of references to cells to add
    */
-  void addCellsToUniverse(const CSGUniverse & universe, std::vector<const CSGCell *> cells);
+  void addCellsToUniverse(const CSGUniverse & universe,
+                          std::vector<std::reference_wrapper<const CSGCell>> & cells);
 
   /**
    * @brief Remove a cell from an existing universe
@@ -337,16 +345,20 @@ public:
    * @brief Remove a list of cells from an existing universe
    *
    * @param universe universe from which to remove the cells
-   * @param cells list of pointers to cells to remove
+   * @param cells list of references to cells to remove
    */
-  void removeCellsFromUniverse(const CSGUniverse & universe, std::vector<const CSGCell *> cells);
+  void removeCellsFromUniverse(const CSGUniverse & universe,
+                               std::vector<std::reference_wrapper<const CSGCell>> & cells);
 
   /**
    * @brief Get all universe objects
    *
-   * @return list of pointers to CSGUniverse objects in this CSGBase instance
+   * @return list of references to CSGUniverse objects in this CSGBase instance
    */
-  std::vector<CSGUniverse *> getAllUniverses() const { return _universe_list.getAllUniverses(); }
+  std::vector<std::reference_wrapper<const CSGUniverse>> getAllUniverses() const
+  {
+    return _universe_list.getAllUniverses();
+  }
 
   /**
    * @brief Get a universe object by name

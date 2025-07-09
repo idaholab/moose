@@ -90,7 +90,8 @@ CSGBase::updateCellRegion(const CSGCell & cell, const CSGRegion & region)
 }
 
 const CSGUniverse &
-CSGBase::createUniverse(const std::string name, std::vector<const CSGCell *> cells)
+CSGBase::createUniverse(const std::string name,
+                        std::vector<std::reference_wrapper<const CSGCell>> & cells)
 {
   auto & univ = _universe_list.addUniverse(name);
   addCellsToUniverse(univ, cells); // performs a check that cells are a part of this base
@@ -113,10 +114,11 @@ CSGBase::addCellToUniverse(const CSGUniverse & universe, const CSGCell & cell)
 }
 
 void
-CSGBase::addCellsToUniverse(const CSGUniverse & universe, std::vector<const CSGCell *> cells)
+CSGBase::addCellsToUniverse(const CSGUniverse & universe,
+                            std::vector<std::reference_wrapper<const CSGCell>> & cells)
 {
   for (auto & c : cells)
-    addCellToUniverse(universe, *c);
+    addCellToUniverse(universe, c);
 }
 
 void
@@ -135,10 +137,11 @@ CSGBase::removeCellFromUniverse(const CSGUniverse & universe, const CSGCell & ce
 }
 
 void
-CSGBase::removeCellsFromUniverse(const CSGUniverse & universe, std::vector<const CSGCell *> cells)
+CSGBase::removeCellsFromUniverse(const CSGUniverse & universe,
+                                 std::vector<std::reference_wrapper<const CSGCell>> & cells)
 {
-  for (auto c : cells)
-    removeCellFromUniverse(universe, *c);
+  for (auto & c : cells)
+    removeCellFromUniverse(universe, c);
 }
 
 void
@@ -172,8 +175,8 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list)
     {
       // add existing cells to current root instead of creating new universe
       auto all_cells = u.second->getAllCells();
-      for (auto cell : all_cells)
-        addCellToUniverse(root, *cell);
+      for (auto & cell : all_cells)
+        addCellToUniverse(root, cell);
     }
     else // unique non-root universe to add to list
       _universe_list.addUniverse(u.second);
@@ -231,15 +234,15 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list,
 void
 CSGBase::checkRegionSurfaces(const CSGRegion & region) const
 {
-  auto surfs = region.getSurfaces();
-  for (auto s : surfs)
+  auto & surfs = region.getSurfaces();
+  for (const CSGSurface & s : surfs)
   {
-    auto sname = s->getName();
+    auto sname = s.getName();
     // if there is no surface by this name at all, there will be an error from getSurface
-    const auto & list_surf = _surface_list.getSurface(s->getName());
+    const auto & list_surf = _surface_list.getSurface(s.getName());
     // if there is a surface by the same name, check that it is actually the surface being used
     // (ie same surface points to same location in memory)
-    if (*s != list_surf)
+    if (s != list_surf)
       mooseError("Region is being set with a surface named " + sname +
                  " that is different from the surface of the same name in the base instance.");
   }
@@ -265,10 +268,10 @@ CSGBase::checkUniverseLinking() const
 
   // Iterate through all universes in universe list and check that they exist in universes linked
   // to root universe list
-  for (const auto univ : getAllUniverses())
-    if (std::find(linked_universe_names.begin(), linked_universe_names.end(), univ->getName()) ==
+  for (const CSGUniverse & univ : getAllUniverses())
+    if (std::find(linked_universe_names.begin(), linked_universe_names.end(), univ.getName()) ==
         linked_universe_names.end())
-      mooseWarning("Universe with name ", univ->getName(), " is not linked to root universe.");
+      mooseWarning("Universe with name ", univ.getName(), " is not linked to root universe.");
 }
 
 void
@@ -276,10 +279,10 @@ CSGBase::getLinkedUniverses(const CSGUniverse & univ,
                             std::vector<std::string> & linked_universe_names) const
 {
   linked_universe_names.push_back(univ.getName());
-  const auto univ_cells = univ.getAllCells();
-  for (const auto & cell : univ_cells)
-    if (cell->getFillType() == CSGCell::FillType::UNIVERSE)
-      getLinkedUniverses(cell->getFillUniverse(), linked_universe_names);
+  const auto & univ_cells = univ.getAllCells();
+  for (const CSGCell & cell : univ_cells)
+    if (cell.getFillType() == CSGCell::FillType::UNIVERSE)
+      getLinkedUniverses(cell.getFillUniverse(), linked_universe_names);
 }
 
 nlohmann::json
@@ -296,12 +299,12 @@ CSGBase::generateOutput() const
 
   // get all surfaces information
   auto all_surfs = getAllSurfaces();
-  for (const auto & s : all_surfs)
+  for (const CSGSurface & s : all_surfs)
   {
-    auto surf_name = s->getName();
-    auto coeffs = s->getCoeffs();
-    csg_json["SURFACES"][surf_name] = {{"TYPE", s->getSurfaceTypeString()},
-                                       {"BOUNDARY", s->getBoundaryTypeString()},
+    auto surf_name = s.getName();
+    auto coeffs = s.getCoeffs();
+    csg_json["SURFACES"][surf_name] = {{"TYPE", s.getSurfaceTypeString()},
+                                       {"BOUNDARY", s.getBoundaryTypeString()},
                                        {"COEFFICIENTS", {}}};
     for (const auto & c : coeffs)
       csg_json["SURFACES"][surf_name]["COEFFICIENTS"][c.first] = c.second;
@@ -309,12 +312,12 @@ CSGBase::generateOutput() const
 
   // Print out cell information
   auto all_cells = getAllCells();
-  for (const auto & c : all_cells)
+  for (const CSGCell & c : all_cells)
   {
-    const auto cell_name = c->getName();
-    const auto cell_region = c->getRegionAsString();
-    const auto cell_filltype = c->getFillTypeString();
-    const auto fill_name = c->getFillName();
+    const auto cell_name = c.getName();
+    const auto cell_region = c.getRegionAsString();
+    const auto cell_filltype = c.getFillTypeString();
+    const auto fill_name = c.getFillName();
     csg_json["CELLS"][cell_name]["FILLTYPE"] = cell_filltype;
     csg_json["CELLS"][cell_name]["REGION"] = cell_region;
     csg_json["CELLS"][cell_name]["FILL"] = fill_name;
@@ -322,15 +325,15 @@ CSGBase::generateOutput() const
 
   // Print out universe information
   auto all_univs = getAllUniverses();
-  for (const auto & u : all_univs)
+  for (const CSGUniverse & u : all_univs)
   {
-    const auto univ_name = u->getName();
-    const auto univ_cells = u->getAllCells();
+    const auto univ_name = u.getName();
+    const auto & univ_cells = u.getAllCells();
     csg_json["UNIVERSES"][univ_name]["CELLS"] = {};
-    for (const auto & c : univ_cells)
-      csg_json["UNIVERSES"][univ_name]["CELLS"].push_back(c->getName());
-    if (u->isRoot())
-      csg_json["UNIVERSES"][univ_name]["ROOT"] = u->isRoot();
+    for (const CSGCell & c : univ_cells)
+      csg_json["UNIVERSES"][univ_name]["CELLS"].push_back(c.getName());
+    if (u.isRoot())
+      csg_json["UNIVERSES"][univ_name]["ROOT"] = u.isRoot();
   }
 
   return csg_json;

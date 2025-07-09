@@ -72,7 +72,7 @@ TestCSGUniverseMeshGenerator::generateCSG()
   // new universe to collect all others into a main one
   auto & new_univ = csg_mesh->createUniverse(mg_name + "_univ");
   // collect a list of cells to add to this new universe
-  std::vector<const CSG::CSGCell *> cells_to_add;
+  std::vector<std::reference_wrapper<const CSG::CSGCell>> cells_to_add;
 
   // for all input meshes, create a containment cell, but only join CSGBases
   // for ones that were not joined above (i > 1)
@@ -97,19 +97,19 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
     // create a cell containing the new (root) univ
     // cell is located at the origin of the original cells - just use one cell to get origin
-    auto inp_cells = csg_mesh->getUniverseByName(current_univ_name).getAllCells();
-    auto tmp_cell = inp_cells[0];
-    auto tmp_cell_reg = tmp_cell->getRegion();
-    auto cell_surfs = tmp_cell_reg.getSurfaces();
+    auto & inp_cells = csg_mesh->getUniverseByName(current_univ_name).getAllCells();
+    const CSG::CSGCell & tmp_cell = inp_cells[0];
+    auto & tmp_cell_reg = tmp_cell.getRegion();
+    auto & cell_surfs = tmp_cell_reg.getSurfaces();
     Real x = 0, y = 0, z = 0;
-    for (auto cs : cell_surfs)
+    for (const CSG::CSGSurface & cs : cell_surfs)
     {
       // find first non-plane surf to get the origin
-      if (cs->getSurfaceType() == CSG::CSGSurface::SurfaceType::PLANE)
+      if (cs.getSurfaceType() == CSG::CSGSurface::SurfaceType::PLANE)
         continue;
       else
       {
-        auto coeffs = cs->getCoeffs();
+        auto coeffs = cs.getCoeffs();
         if (coeffs.find("x0") != coeffs.end())
           x = coeffs.at("x0");
         if (coeffs.find("y0") != coeffs.end())
@@ -142,8 +142,8 @@ TestCSGUniverseMeshGenerator::generateCSG()
     if (_add_cell_mode)
     {
       // don't add to the new universe right away, do so later with the addCellsToUniverse method
-      auto & img_cell = csg_mesh->createCell(new_cell_name, csg_univ, new_region);
-      cells_to_add.push_back(&img_cell);
+      const auto & img_cell = csg_mesh->createCell(new_cell_name, csg_univ, new_region);
+      cells_to_add.push_back(img_cell);
     }
     else // add to the new universe at time of creation
       csg_mesh->createCell(new_cell_name, csg_univ, new_region, &new_univ);
