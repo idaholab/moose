@@ -12,11 +12,6 @@
 #include "NEML2Utils.h"
 #include "NEML2ModelExecutor.h"
 
-#ifdef NEML2_ENABLED
-#include "neml2/base/Factory.h"
-#include "neml2/base/Parser.h"
-#endif
-
 registerMooseAction("MooseApp", NEML2ActionCommon, "parse_neml2");
 
 InputParameters
@@ -28,91 +23,73 @@ NEML2ActionCommon::commonParams()
   MultiMooseEnum moose_types("MATERIAL VARIABLE POSTPROCESSOR");
 
   // Inputs
-  params.addParam<MultiMooseEnum>(
-      "moose_input_types",
-      moose_types,
-      NEML2Utils::docstring("Type of each MOOSE data to be used as NEML2 input variable"));
+  params.addParam<MultiMooseEnum>("moose_input_types",
+                                  moose_types,
+                                  "Type of each MOOSE data to be used as NEML2 input variable");
   params.addParam<std::vector<std::string>>(
-      "moose_inputs",
-      {},
-      NEML2Utils::docstring("List of MOOSE data to be used as inputs of the material model."));
+      "moose_inputs", {}, "List of MOOSE data to be used as inputs of the material model.");
   params.addParam<std::vector<std::string>>(
-      "neml2_inputs",
-      {},
-      NEML2Utils::docstring("List of NEML2 input variables corresponding to each MOOSE data."));
+      "neml2_inputs", {}, "List of NEML2 input variables corresponding to each MOOSE data.");
+  params.addParam<std::vector<std::string>>(
+      "moose_input_kernels", {}, "NEML2 kernels defined in MOOSE that provides input data.");
 
   // Model parameters
-  params.addParam<MultiMooseEnum>(
-      "moose_parameter_types",
-      moose_types,
-      NEML2Utils::docstring("Type of each MOOSE data to be used as NEML2 model parameter"));
+  params.addParam<MultiMooseEnum>("moose_parameter_types",
+                                  moose_types,
+                                  "Type of each MOOSE data to be used as NEML2 model parameter");
   params.addParam<std::vector<std::string>>(
-      "moose_parameters",
-      {},
-      NEML2Utils::docstring("List of MOOSE data to be used as parameters of the material model."));
+      "moose_parameters", {}, "List of MOOSE data to be used as parameters of the material model.");
   params.addParam<std::vector<std::string>>(
-      "neml2_parameters",
-      {},
-      NEML2Utils::docstring("List of NEML2 model parameters corresponding to each MOOSE data."));
+      "neml2_parameters", {}, "List of NEML2 model parameters corresponding to each MOOSE data.");
 
   // Outputs
   params.addParam<MultiMooseEnum>(
-      "moose_output_types",
-      moose_types,
-      NEML2Utils::docstring("MOOSE types used to hold the NEML2 output variables"));
+      "moose_output_types", moose_types, "MOOSE types used to hold the NEML2 output variables");
   params.addParam<std::vector<std::string>>(
-      "moose_outputs",
-      {},
-      NEML2Utils::docstring("List of MOOSE data used to hold the output of the material model."));
+      "moose_outputs", {}, "List of MOOSE data used to hold the output of the material model.");
   params.addParam<std::vector<std::string>>(
-      "neml2_outputs",
-      {},
-      NEML2Utils::docstring("List of NEML2 output variables corresponding to each MOOSE data."));
+      "neml2_outputs", {}, "List of NEML2 output variables corresponding to each MOOSE data.");
 
   // Derivatives
-  params.addParam<MultiMooseEnum>(
-      "moose_derivative_types",
-      moose_types,
-      NEML2Utils::docstring("MOOSE types used to hold the NEML2 variable derivatives"));
+  params.addParam<MultiMooseEnum>("moose_derivative_types",
+                                  moose_types,
+                                  "MOOSE types used to hold the NEML2 variable derivatives");
   params.addParam<std::vector<std::string>>(
       "moose_derivatives",
       {},
-      NEML2Utils::docstring(
-          "List of MOOSE data used to hold the derivative of the material model."));
+      "List of MOOSE data used to hold the derivative of the material model.");
   params.addParam<std::vector<std::vector<std::string>>>(
       "neml2_derivatives",
       {},
-      NEML2Utils::docstring("List of pairs of NEML2 variables to take derivatives (i.e., first in "
-                            "the pair w.r.t. the second in the pair)."));
+      "List of pairs of NEML2 variables to take derivatives (i.e., first in "
+      "the pair w.r.t. the second in the pair).");
 
   // Parameter derivatives
-  params.addParam<MultiMooseEnum>(
-      "moose_parameter_derivative_types",
-      moose_types,
-      NEML2Utils::docstring("MOOSE types used to hold the NEML2 parameter derivatives"));
+  params.addParam<MultiMooseEnum>("moose_parameter_derivative_types",
+                                  moose_types,
+                                  "MOOSE types used to hold the NEML2 parameter derivatives");
   params.addParam<std::vector<std::string>>(
       "moose_parameter_derivatives",
       {},
-      NEML2Utils::docstring("List of MOOSE data used to hold the derivative of the material model "
-                            "w.r.t. model parameters."));
+      "List of MOOSE data used to hold the derivative of the material model "
+      "w.r.t. model parameters.");
   params.addParam<std::vector<std::vector<std::string>>>(
       "neml2_parameter_derivatives",
       {},
-      NEML2Utils::docstring("List of pairs of NEML2 variables to take derivatives (i.e., first in "
-                            "the pair w.r.t. the second in the pair)."));
+      "List of pairs of NEML2 variables to take derivatives (i.e., first in the pair w.r.t. the "
+      "second in the pair).");
 
   // Error checking, logging, etc
   params.addParam<std::vector<std::string>>(
       "skip_variables",
       {},
-      NEML2Utils::docstring(
-          "List of NEML2 variables to skip when setting up the model input. If an input variable "
-          "is skipped, its value will stay zero. If a required input variable is not skipped, an "
-          "error will be raised."));
+      "List of NEML2 variables to skip when setting up the model input. If an input variable is "
+      "skipped, its value will stay zero. If a required input variable is not skipped, an error "
+      "will be raised.");
   params.addParam<bool>("verbose",
                         true,
-                        NEML2Utils::docstring("Whether to print additional information about the "
-                                              "NEML2 model at the beginning of the simulation"));
+                        "Whether to print additional information about the NEML2 model at the "
+                        "beginning of the simulation");
 
   params.addParam<std::vector<MaterialPropertyName>>(
       "initialize_outputs",
@@ -147,7 +124,7 @@ InputParameters
 NEML2ActionCommon::validParams()
 {
   auto params = NEML2ActionCommon::commonParams();
-  params.addClassDescription(NEML2Utils::docstring("Parse a NEML2 input file"));
+  params.addClassDescription("Parse a NEML2 input file");
   return params;
 }
 

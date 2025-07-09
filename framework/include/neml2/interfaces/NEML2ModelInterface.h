@@ -52,6 +52,9 @@ protected:
   /// Get the target compute device
   const neml2::Device & device() const { return _device; }
 
+  /// Get the target output device
+  const neml2::Device & output_device() const { return _output_device; }
+
   using RJType = std::tuple<neml2::ValueMap, neml2::DerivMap>;
   using DispatcherType =
       neml2::WorkDispatcher<neml2::ValueMap, RJType, RJType, neml2::ValueMap, RJType>;
@@ -64,6 +67,8 @@ protected:
 private:
   /// The device on which to evaluate the NEML2 model
   const neml2::Device _device;
+  /// The device on which to store the outputs
+  const neml2::Device _output_device;
   /// The NEML2 factory
   std::unique_ptr<neml2::Factory> _factory;
   /// The NEML2 material model
@@ -86,37 +91,36 @@ InputParameters
 NEML2ModelInterface<T>::validParams()
 {
   InputParameters params = T::validParams();
-  params.addParam<DataFileName>(
-      "input",
-      NEML2Utils::docstring("Path to the NEML2 input file containing the NEML2 model(s)."));
+  params.addParam<DataFileName>("input",
+                                "Path to the NEML2 input file containing the NEML2 model(s).");
   params.addParam<std::vector<std::string>>(
       "cli_args",
       {},
-      NEML2Utils::docstring(
-          "Additional command line arguments to use when parsing the NEML2 input file."));
+      "Additional command line arguments to use when parsing the NEML2 input file.");
   params.addParam<std::string>(
       "model",
       "",
-      NEML2Utils::docstring("Name of the NEML2 model, i.e., the string inside the brackets [] in "
-                            "the NEML2 input file that corresponds to the model you want to use."));
+      "Name of the NEML2 model, i.e., the string inside the brackets [] in the NEML2 input file "
+      "that corresponds to the model you want to use.");
   params.addParam<std::string>(
       "device",
       "cpu",
-      NEML2Utils::docstring(
-          "Device on which to evaluate the NEML2 model. The string supplied must follow the "
-          "following schema: (cpu|cuda)[:<device-index>] where cpu or cuda specifies the device "
-          "type, and :<device-index> optionally specifies a device index. For example, "
-          "device='cpu' sets the target compute device to be CPU, and device='cuda:1' sets the "
-          "target compute device to be CUDA with device ID 1."));
+      "Device on which to evaluate the NEML2 model. The string supplied must follow the following "
+      "schema: (cpu|cuda)[:<device-index>] where cpu or cuda specifies the device type, and "
+      ":<device-index> optionally specifies a device index. For example, device='cpu' sets the "
+      "target compute device to be CPU, and device='cuda:1' sets the target compute device to be "
+      "CUDA with device ID 1.");
+  params.addParam<std::string>("output_device",
+                               "cpu",
+                               "Similar to the 'device' parameter, this parameter specifies the "
+                               "device on which to store the outputs. Default is 'cpu'.");
 
   params.addParam<std::string>(
       "scheduler",
-      NEML2Utils::docstring(
-          "NEML2 scheduler to use to run the model.  If not specified no scheduler is used and "
-          "MOOSE will pass all the constitutive updates to the provided device at once."));
+      "NEML2 scheduler to use to run the model.  If not specified no scheduler is used and MOOSE "
+      "will pass all the constitutive updates to the provided device at once.");
 
-  params.addParam<bool>(
-      "async_dispatch", true, NEML2Utils::docstring("Whether to use asynchronous dispatch."));
+  params.addParam<bool>("async_dispatch", true, "Whether to use asynchronous dispatch.");
 
   return params;
 }
@@ -137,6 +141,7 @@ template <typename... P>
 NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&... args)
   : T(params, args...),
     _device(params.get<std::string>("device")),
+    _output_device(params.get<std::string>("output_device")),
     _scheduler(nullptr),
     _async_dispatch(params.get<bool>("async_dispatch"))
 {

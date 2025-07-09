@@ -1,5 +1,7 @@
 # NEML2ActionCommon
 
+!if! function=hasCapability('neml2')
+
 !syntax description /NEML2/NEML2ActionCommon
 
 !alert note
@@ -15,3 +17,8 @@ This action does not construct any object by itself. All NEML2 object constructi
 
 These input parameters correspond to the common area under the `[NEML2]` block. The usage of the `[NEML2]` block is explained in details in the [NEML2 syntax](syntax/NEML2/index.md) documentation.
 
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md
