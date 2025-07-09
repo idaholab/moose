@@ -11,6 +11,7 @@
 
 #include "AppFactory.h"
 #include "CommandLine.h"
+#include "Parser.h"
 
 TEST(AppFactoryTest, manageAppParams)
 {
@@ -128,8 +129,9 @@ TEST(AppFactoryTest, appCopyConstructParams)
   command_line->parse();
   params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
 
-  params.set<std::shared_ptr<Parser>>("_parser") =
-      std::make_shared<Parser>(std::vector<std::string>());
+  auto parser = std::make_shared<Parser>(std::vector<std::string>());
+  parser->parse();
+  params.set<std::shared_ptr<Parser>>("_parser") = parser;
 
   const auto deprecated_is_error = Moose::_deprecated_is_error;
   Moose::_deprecated_is_error = true;
@@ -138,7 +140,7 @@ TEST(AppFactoryTest, appCopyConstructParams)
       {
         try
         {
-          af.createShared(app_type, "test", params, MPI_COMM_WORLD);
+          af.create(app_type, "test", params, MPI_COMM_WORLD);
         }
         catch (const std::exception & e)
         {
