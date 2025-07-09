@@ -57,5 +57,5 @@ protected:
   /// Used to determine whether a timestep is being repeated
   int & _t_step_old;
 
-  std::vector<EulerAngles> _angles_old;
+  std::vector<EulerAngles> & _angles_old;
 };
