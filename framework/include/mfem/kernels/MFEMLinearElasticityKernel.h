@@ -22,7 +22,7 @@
  * E is Young's modulus,
  * \nu is Poisson's ratio
  * \f]
-*/
+ */
 // clang-format on
 class MFEMLinearElasticityKernel : public MFEMKernel
 {

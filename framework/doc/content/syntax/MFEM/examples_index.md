@@ -1,4 +1,4 @@
-# Examples that use MOOSE's MFEM capabilities
+# Examples that use MFEM capabilities
 
 ## Description
 

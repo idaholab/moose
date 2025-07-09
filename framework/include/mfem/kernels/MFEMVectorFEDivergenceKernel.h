@@ -13,8 +13,8 @@
 #include "MFEMMixedBilinearFormKernel.h"
 
 /*
-(k div u, v)
-*/
+ * (k div u, v)
+ */
 class MFEMVectorFEDivergenceKernel : public MFEMMixedBilinearFormKernel
 {
 public:
