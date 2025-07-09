@@ -38,6 +38,9 @@ public:
   bool HRefine() override;
   bool PRefine() override;
 
+  bool UseHRefinement() const override { return _estimator and _refiner and _refiner->UseHRefinement(); }
+  bool UsePRefinement() const override { return _estimator and _refiner and _refiner->UsePRefinement(); }
+
   ~EquationSystemProblemOperator() override = default;
 
   [[nodiscard]] Moose::MFEM::EquationSystem * GetEquationSystem() const override

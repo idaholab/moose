@@ -21,10 +21,8 @@
       refine = 0.7 # error 
       steps  = 2 # total number of refinement steps
       max_h_level = 2
-      max_p_level = 2
-#      switch_h_to_p_refinement = enum with h/p/h-p refinement # add this one later
-#
-#
+      max_p_level = 4
+      refinement_type = P_REF
     []
   []
 []

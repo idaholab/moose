@@ -10,10 +10,18 @@ MFEMRefiner::validParams()
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("Marker");
 
+  MooseEnum refinement_type("H_REF P_REF H_P_REF", "H_P_REF");
+  params.addRequiredParam<MooseEnum>("refinement_type", refinement_type, "Specifies whether to use h-refinement, p-refinement or both.");
+
   params.addRequiredParam<Real>("refine", "Error fraction for the refiner");
+  params.addRangeCheckedParam<Real>("refine",
+                                    0,
+                                    "refine>=0 & refine<=1",
+                                    "Elements within this percentage of the max error will "
+                                    "be refined.  Must be between 0 and 1!");
   params.addRequiredParam<int>("steps", "Total number of refinement steps");
-  params.addRequiredParam<int>("max_h_level", "Total number of h-refinement steps");
-  params.addRequiredParam<int>("max_p_level", "Total number of p-refinement steps");
+  params.addRangeCheckedParam<int>("max_h_level", -1, "max_h_level>=0 & max_h_level <= 10", "Total number of h-refinement steps");
+  params.addRangeCheckedParam<int>("max_p_level", -1, "max_p_level>=0 & max_p_level <= 10", "Total number of p-refinement steps");
   return params;
 }
 
@@ -22,8 +30,24 @@ MFEMRefiner::MFEMRefiner(const InputParameters & params)
     _error_threshold(getParam<Real>("refine")),
     _steps(getParam<int>("steps")),
     _max_h_level(getParam<int>("max_h_level")),
-    _max_p_level(getParam<int>("max_p_level"))
-{}
+    _max_p_level(getParam<int>("max_p_level")),
+    _refinement_type(getParam<MooseEnum>("refinement_type"))
+{
+  // _use_h_refinement and _use_p_refinement both default to false
+  if ( _refinement_type == "H_P_REF" )
+  {
+    _use_h_refinement = true;
+    _use_p_refinement = true;
+  }
+  else if ( _refinement_type == "H_REF" )
+  {
+    _use_h_refinement = true;
+  }
+  else if ( _refinement_type == "P_REF" )
+  {
+    _use_p_refinement = true;
+  }
+}
 
 
 void

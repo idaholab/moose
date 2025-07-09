@@ -114,15 +114,32 @@ MFEMSteady::execute()
     _problem_operator->Solve(_problem_data.f);
 
     bool stop = false;
-    int counter = 0;
+    bool stop_pref = true;
+    bool stop_href = true;
     while (_use_amr and !stop)
     {
-      if (counter++ % 2 == 0)
-        stop = PRefine();
-      else
-        stop = HRefine();
+      // Check if we have P-Refinement enabled or we've done enough
+      // p-refinement steps
+      if ( _problem_operator->UsePRefinement() )
+      {
+        stop_pref = PRefine();
+        _problem_operator->Solve(_problem_data.f);
+      }
 
-      _problem_operator->Solve(_problem_data.f);
+      // Check if we have H-Refinement enabled or we've done enough
+      // p-refinement steps
+      if ( _problem_operator->UseHRefinement() )
+      {
+        stop_href = HRefine();
+        _problem_operator->Solve(_problem_data.f);
+      }
+
+      // Stop when both H_ref and P-ref think it's time to stop
+      stop = (stop_href and stop_pref);
+
+      // reset the other two bools
+      stop_href = true;
+      stop_pref = true;
     }
   }
 
@@ -194,22 +211,22 @@ bool
 MFEMSteady::PRefine()
 {
   // Call PRefine in the problem operator
-  bool output = _problem_operator->PRefine();
+  bool stop = _problem_operator->PRefine();
 
   UpdateAfterRefinement();
 
-  return output;
+  return stop;
 }
 
 bool
 MFEMSteady::HRefine()
 {
   // Call PRefine in the problem operator
-  bool output = _problem_operator->HRefine();
+  bool stop = _problem_operator->HRefine();
 
   UpdateAfterRefinement();
 
-  return output;
+  return stop;
 }
 
 void
