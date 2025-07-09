@@ -24,7 +24,7 @@ circularControlPoints(const libMesh::Point & start_point,
   libMesh::RealVectorValue orthogonal_direction = start_point - end_point;
 
   /// circular control points will only honor the derivatives if the points are colinear along the orthogonal direction
-  if (!(std::abs(parallel_direction * orthogonal_direction) < 1e-12))
+  if (!(std::abs(parallel_direction * orthogonal_direction) < libMesh::TOLERANCE))
     mooseError("Parallel lines cannot be interpolated using points along a circle! Direction "
                "vectors are incompatible with point locations.");
 
@@ -75,6 +75,8 @@ bSplineControlPoints(const libMesh::Point & start_point,
   /// check that neither direction is the zero vector
   if (start_direction.norm() < libMesh::TOLERANCE || end_direction.norm() == 0)
     mooseError("Direction vectors must have a nonzero magnitude.");
+  if (!(sharpness > 0 && sharpness <= 1))
+    mooseError("Sharpness must be in (0,1].");
 
   /// check if directions are parallel
   const bool parallel = ((start_direction.cross(end_direction)).norm() < libMesh::TOLERANCE);
@@ -82,9 +84,9 @@ bSplineControlPoints(const libMesh::Point & start_point,
   {
     mooseWarning("Directions are parallel! Attempting to use circular control points...");
     unsigned int num_cps = 2 * cps_per_half + 1;
-    if (num_cps < 25)
+    if (num_cps < 30)
       mooseWarning("Number of control points required for circular control points is much greater "
-                   "than for BSplines. `num_cps` is now 25. Ensure this is acceptable!");
+                   "than for BSplines. `num_cps` is now 30. Ensure this is acceptable!");
     return SplineUtils::circularControlPoints(start_point, end_point, start_direction, num_cps);
   }
 
@@ -104,10 +106,6 @@ bSplineControlPoints(const libMesh::Point & start_point,
   /// put it all together
   for (const auto i : index_range(first_half))
     control_points.push_back(first_half[i]);
-  control_points.push_back(closest_point_1); // add endpoint for line 1
-  if (closest_point_1 != closest_point_2) // check if the lines are intersecting -- doubling up is a
-                                          // bad idea for nice curves
-    control_points.push_back(closest_point_2); // add endpoint for line 2
   for (const auto i : index_range(second_half))
     control_points.push_back(second_half[i]);
 

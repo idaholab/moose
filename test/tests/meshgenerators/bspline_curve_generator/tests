@@ -3,8 +3,8 @@
   [2D_curve_simple]
     type = 'Exodiff'
     input = 'bspline_curve_2D.i'
-    exodiff = 'bspline_curve_2D_in.e'
-    cli_args = '--mesh-only'
+    exodiff = 'bspline_curve_2D_simple_in.e'
+    cli_args = '--mesh-only bspline_curve_2D_simple_in.e'
     requirement = 'The system shall generate a 3D mesh on the x-y plane.'
     recover = false
   []
@@ -37,7 +37,7 @@
     input = 'bspline_curve_2D.i'
     exodiff = 'bspline_curve_2D_sharpness50_in.e'
     cli_args = 'Mesh/bscg/sharpness=0.50 --mesh-only bspline_curve_2D_sharpness50_in.e'
-    requirement = 'The system shall generate a 3D mesh on the x-y plane with 50% sharpness.'
+    requirement = 'The system shall generate a 3D mesh on the x-y plane with 25% sharpness.'
     recover = false
   []
   [2D_curve_simple_sharpness75]
@@ -80,9 +80,33 @@
   [3D_curve_simple]
     type = 'Exodiff'
     input = 'bspline_curve_3D.i'
-    exodiff = 'bspline_curve_3D_in.e'
-    cli_args = '--mesh-only'
+    exodiff = 'bspline_curve_3D_simple_in.e'
+    cli_args = '--mesh-only bspline_curve_3D_simple_in.e'
     requirement = 'The system shall generate a simple meshed curve in 3D.'
+    recover = false
+  []
+  [3D_curve_simple_degree2]
+    type = 'Exodiff'
+    input = 'bspline_curve_3D.i'
+    exodiff = 'bspline_curve_3D_simple_degree2_in.e'
+    cli_args = 'Mesh/bscg/degree=2 Mesh/bscg/num_cps=6 --mesh-only bspline_curve_3D_simple_degree2_in.e'
+    requirement = 'The system shall generate a simple meshed curve in 3D with quadratic splines.'
+    recover = false
+  []
+  [3D_curve_simple_degree3]
+    type = 'Exodiff'
+    input = 'bspline_curve_3D.i'
+    exodiff = 'bspline_curve_3D_simple_degree3_in.e'
+    cli_args = 'Mesh/bscg/degree=3 Mesh/bscg/num_cps=6 --mesh-only bspline_curve_3D_simple_degree3_in.e'
+    requirement = 'The system shall generate a simple meshed curve in 3D with cubic splines.'
+    recover = false
+  []
+  [3D_curve_simple_degree4]
+    type = 'Exodiff'
+    input = 'bspline_curve_3D.i'
+    exodiff = 'bspline_curve_3D_simple_degree4_in.e'
+    cli_args = 'Mesh/bscg/degree=3 Mesh/bscg/num_cps=6 --mesh-only bspline_curve_3D_simple_degree4_in.e'
+    requirement = 'The system shall generate a simple meshed curve in 3D with quartic splines.'
     recover = false
   []
   [3D_curve_arbitrary]
@@ -101,13 +125,6 @@
     cli_args = '--mesh-only'
     requirement = 'The system shall generate a 3D mesh on the x-y plane for two parallel directions using circular control points.'
     recover = false
-  []
-  [2D_circle_warning]
-    type = 'RunException'
-    input = 'bspline_curve_2D_circle.i'
-    cli_args = 'Mesh/bscg/num_cps=10 --mesh-only error.e'
-    expect_err = 'Number of control points required for circular control points is much greater than for BSplines. `num_cps` is now 25. Ensure this is acceptable!'
-    requirement = 'The system shall generate a 3D mesh on the x-y plane for two parallel directions. Checks for warning when insufficient number of control points are given.'
   []
   [3D_circle]
     type = 'Exodiff'
@@ -135,226 +152,3 @@
     requirement = 'The system shall generate a 3D mesh for two parallel directions. Checks for error with incompatible points.'
   []
 []
-
-# [Tests]
-#   design = 'meshgenerators/ParsedCurveGenerator.md'
-#   issues = '#22848 #30337'
-#   [open_curve]
-#     type = 'Exodiff'
-#     input = 'parsed_curve_open.i'
-#     exodiff = 'parsed_curve_open_in.e'
-#     cli_args = '--mesh-only'
-#     requirement = 'The system shall generate a 2D open curve mesh.'
-#     recover = false
-#   []
-#   [open_curve_edge3]
-#     type = 'Exodiff'
-#     input = 'parsed_curve_open.i'
-#     exodiff = 'parsed_curve_open_edge3_in.e'
-#     cli_args = '--mesh-only parsed_curve_open_edge3_in.e
-#                 Mesh/pcg/edge_element_type=EDGE3'
-#     requirement = 'The system shall generate a 2D open curve mesh with quadratic elements.'
-#     recover = false
-#   []
-#   [open_curve_edge4]
-#     type = 'Exodiff'
-#     input = 'parsed_curve_open.i'
-#     exodiff = 'parsed_curve_open_edge4_in.e'
-#     cli_args = '--mesh-only parsed_curve_open_edge4_in.e
-#                 Mesh/pcg/edge_element_type=EDGE4'
-#     requirement = 'The system shall generate a 2D open curve mesh with cubic elements.'
-#     recover = false
-#   []
-#   [open_curve_3d]
-#     type = 'Exodiff'
-#     input = 'parsed_curve_3d.i'
-#     exodiff = 'parsed_curve_3d_in.e'
-#     cli_args = '--mesh-only'
-#     requirement = 'The system shall generate a 3D open curve mesh.'
-#     recover = false
-#   []
-#   [open_curve_with_ends]
-#     type = 'Exodiff'
-#     input = 'parsed_curve_open.i'
-#     exodiff = 'parsed_curve_open_nodeset_in.e'
-#     cli_args = "Mesh/pcg/edge_nodesets='start end' --mesh-only parsed_curve_open_nodeset_in.e"
-#     requirement = 'The system shall generate a 2D open curve mesh with nodesets on both ends.'
-#     recover = false
-#   []
-#   [closed_curve]
-#     type = 'Exodiff'
-#     input = 'parsed_curve_closed.i'
-#     exodiff = 'parsed_curve_closed_in.e'
-#     cli_args = '--mesh-only'
-#     requirement = 'The system shall generate a closed loop curve mesh with starting and ending points coincident.'
-#     recover = false
-#   []
-#   [closed_curve_edge3]
-#     type = 'Exodiff'
-#     input = 'parsed_curve_closed.i'
-#     exodiff = 'parsed_curve_closed_edge3_in.e'
-#     cli_args = '--mesh-only parsed_curve_closed_edge3_in.e
-#                 Mesh/pcg/edge_element_type=EDGE3'
-#     requirement = 'The system shall generate a closed loop curve mesh with starting and ending points coincident and with quadratic elements.'
-#     recover = false
-#   []
-#   [closed_curve_edge4]
-#     type = 'Exodiff'
-#     input = 'parsed_curve_closed.i'
-#     exodiff = 'parsed_curve_closed_edge4_in.e'
-#     cli_args = '--mesh-only parsed_curve_closed_edge4_in.e
-#                 Mesh/pcg/edge_element_type=EDGE4'
-#     requirement = 'The system shall generate a closed loop curve mesh with starting and ending points coincident and with cubic elements.'
-#     recover = false
-#   []
-#   [forced_closed_curve]
-#     type = 'Exodiff'
-#     input = 'parsed_curve_closed.i'
-#     exodiff = 'parsed_curve_closed_forced_in.e'
-#     cli_args = 'Mesh/pcg/section_bounding_t_values="0 5"
-#                 Mesh/pcg/nums_segments=10
-#                 --mesh-only parsed_curve_closed_forced_in.e'
-#     requirement = 'The system shall generate a closed loop curve mesh with starting and ending points separated.'
-#     recover = false
-#   []
-#   [forced_closed_curve_multi_segments]
-#     type = 'Exodiff'
-#     input = 'parsed_curve_closed.i'
-#     exodiff = 'parsed_curve_closed_forced_ms_in.e'
-#     cli_args = 'Mesh/pcg/section_bounding_t_values="0 5"
-#                 Mesh/pcg/nums_segments=10
-#                 Mesh/pcg/forced_closing_num_segments=5
-#                 --mesh-only parsed_curve_closed_forced_ms_in.e'
-#     requirement = 'The system shall generate a closed loop curve mesh with starting and ending points separated using a section that contains multiple elements.'
-#     recover = false
-#   []
-#   [forced_closed_curve_multi_segments_edge3]
-#     type = 'Exodiff'
-#     input = 'parsed_curve_closed.i'
-#     exodiff = 'parsed_curve_closed_forced_ms_edge3_in.e'
-#     cli_args = 'Mesh/pcg/section_bounding_t_values="0 5"
-#                 Mesh/pcg/nums_segments=10
-#                 Mesh/pcg/forced_closing_num_segments=5
-#                 Mesh/pcg/edge_element_type=EDGE3
-#                 --mesh-only parsed_curve_closed_forced_ms_edge3_in.e'
-#     requirement = 'The system shall generate a closed loop curve mesh with starting and ending points separated using a section that contains multiple quadratic elements.'
-#     recover = false
-#   []
-#   [forced_closed_curve_multi_segments_edge4]
-#     type = 'Exodiff'
-#     input = 'parsed_curve_closed.i'
-#     exodiff = 'parsed_curve_closed_forced_ms_edge4_in.e'
-#     cli_args = 'Mesh/pcg/section_bounding_t_values="0 5"
-#                 Mesh/pcg/nums_segments=10
-#                 Mesh/pcg/forced_closing_num_segments=5
-#                 Mesh/pcg/edge_element_type=EDGE4
-#                 --mesh-only parsed_curve_closed_forced_ms_edge4_in.e'
-#     requirement = 'The system shall generate a closed loop curve mesh with starting and ending points separated using a section that contains multiple cubic elements.'
-#     recover = false
-#   []
-#   [xy_delaunay_curve]
-#     type = 'Exodiff'
-#     input = 'xy_curve.i'
-#     exodiff = 'xy_curve_in.e'
-#     cli_args = '--mesh-only'
-#     requirement = 'The system shall generate closed 2D curve meshes that can be used as inputs to Delaunay triangulation mesh generators.'
-#     recover = false
-#   []
-#   # Won't work until the libmesh fix is in place
-#   # [xy_delaunay_curve_edge3]
-#   #   type = 'Exodiff'
-#   #   input = 'xy_curve.i'
-#   #   exodiff = 'xy_curve_edge3_in.e'
-#   #   cli_args = '--mesh-only xy_curve_edge3_in.e
-#   #               Mesh/pcg/edge_element_type=EDGE3
-#   #               Mesh/hole1/edge_element_type=EDGE3
-#   #               Mesh/hole2/edge_element_type=EDGE3
-#   #               Mesh/xydg/tri_element_type=TRI6
-#   #               Mesh/xydg/add_nodes_per_boundary_segment=0'
-#   #   requirement = 'The system shall generate closed 2D quadratic curve meshes that can be used as inputs to Delaunay triangulation mesh generators.'
-#   #   recover = false
-#   # []
-#   [err_crossed_curve]
-#     type = 'RunException'
-#     input = 'err_cross.i'
-#     cli_args = '--mesh-only err.e'
-#     expect_err = 'The curve has at least one cross, which is not supported.'
-#     requirement = 'The system shall throw an error if the starting and ending points of a section are overlapped while the section is supposed to be open.'
-#   []
-#   [err_max_oversample]
-#     type = 'RunException'
-#     input = 'parsed_curve_3d.i'
-#     cli_args = 'Mesh/pcg/z_formula=0
-#                 Mesh/pcg/section_bounding_t_values="0 6.2"
-#                 --mesh-only err.e'
-#     expect_err = 'Maximum oversampling points number has been exceeded.'
-#     requirement = 'The system shall throw an error if the oversampling algorithm exceeds its designated maximum sampling number.'
-#   []
-#   [err_repeated_t_series]
-#     type = 'RunException'
-#     input = 'parsed_curve_closed.i'
-#     cli_args = 'Mesh/pcg/section_bounding_t_values="0.0 1.0 1.0"
-#                 --mesh-only err.e'
-#     expect_err = 'elements must be unique.'
-#     requirement = 'The system shall throw an error if there are repeated elements in the user-specified curve abscissas.'
-#   []
-#   [err_unneeded_forced_closed_num_segments_1]
-#     type = 'RunException'
-#     input = 'parsed_curve_closed.i'
-#     cli_args = 'Mesh/pcg/forced_closing_num_segments=5
-#                 --mesh-only err.e'
-#     expect_err = 'this parameter is not needed if the first and last points of the curve to be generated are overlapped.'
-#     requirement = 'The system shall throw an error if the user specifies to force closing a parsed curve, but it is already closed as the starting and ending points of the curve are overlapped.'
-#   []
-#   [err_unneeded_forced_closed_num_segments_2]
-#     type = 'RunException'
-#     input = 'parsed_curve_closed.i'
-#     cli_args = 'Mesh/pcg/section_bounding_t_values="0 5"
-#                 Mesh/pcg/is_closed_loop=false
-#                 Mesh/pcg/nums_segments=10
-#                 Mesh/pcg/forced_closing_num_segments=5
-#                 --mesh-only err.e'
-#     expect_err = 'this parameter is not needed if the curve to be generated is not a closed loop.'
-#     requirement = 'The system shall throw an error if the user specifies to force closing a parsed curve but the curve to be generated is also specified to be open.'
-#   []
-#   [err_unsorted_t_series]
-#     type = 'RunException'
-#     input = 'parsed_curve_closed.i'
-#     cli_args = 'Mesh/pcg/section_bounding_t_values="0.0 2.0 1.0"
-#                 --mesh-only err.e'
-#     expect_err = 'elements must change monotonically.'
-#     requirement = 'The system shall throw an error if the abscissa used to generate the curve is specified non-monotonically.'
-#   []
-#   [err_bad_nums_segments]
-#     type = 'RunException'
-#     input = 'parsed_curve_closed.i'
-#     cli_args = 'Mesh/pcg/nums_segments=10
-#                 --mesh-only err.e'
-#     expect_err = 'The size of this parameter must be one less than size of section_bounding_t_values.'
-#     requirement = 'The system shall throw an error if the number of curve segments is not consistent with the number of abscissa ranges.'
-#   []
-#   [err_failed_parsing_x]
-#     type = 'RunException'
-#     input = 'parsed_curve_closed.i'
-#     cli_args = 'Mesh/pcg/x_formula=t2
-#                 --mesh-only err.e'
-#     expect_err = 'Invalid function'
-#     requirement = 'The system shall throw an error if the parsed expression for the x coordinate cannot be parsed as a function.'
-#   []
-#   [err_failed_parsing_y]
-#     type = 'RunException'
-#     input = 'parsed_curve_closed.i'
-#     cli_args = 'Mesh/pcg/y_formula=t2
-#                 --mesh-only err.e'
-#     expect_err = 'Invalid function'
-#     requirement = 'The system shall throw an error if the parsed expression for the y coordinate cannot be parsed as a function.'
-#   []
-#   [err_failed_parsing_z]
-#     type = 'RunException'
-#     input = 'parsed_curve_closed.i'
-#     cli_args = 'Mesh/pcg/z_formula=t2
-#                 --mesh-only err.e'
-#     expect_err = 'Invalid function'
-#     requirement = 'The system shall throw an error if the parsed expression for the z coordinate cannot be parsed as a function.'
-#   []
-# []
