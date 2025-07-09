@@ -92,6 +92,10 @@
     boundary = right
     diffusivity = 0.1
   [../]
+  [./picard_iterations]
+    type = NumFixedPointIterations
+    execute_on = 'initial timestep_end'
+  [../]
 []
 
 [Executioner]
