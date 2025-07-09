@@ -9,23 +9,24 @@
 
 #pragma once
 
-#include "ElemElemConstraint.h"
+#include "GenericElemElemConstraint.h"
 
 // Forward Declarations
 class XFEM;
 
-class XFEMEqualValueAtInterface : public ElemElemConstraint
+template <bool is_ad>
+class XFEMEqualValueAtInterfaceTempl : public GenericElemElemConstraint<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  XFEMEqualValueAtInterface(const InputParameters & parameters);
-  virtual ~XFEMEqualValueAtInterface();
+  XFEMEqualValueAtInterfaceTempl(const InputParameters & parameters);
+  virtual ~XFEMEqualValueAtInterfaceTempl();
 
 protected:
   virtual void reinitConstraintQuadrature(const ElementPairInfo & element_pair_info) override;
 
-  virtual Real computeQpResidual(Moose::DGResidualType type) override;
+  virtual GenericReal<is_ad> computeQpResidual(Moose::DGResidualType type) override;
 
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
@@ -37,4 +38,10 @@ protected:
 
   /// Pointer to the XFEM controller object
   std::shared_ptr<XFEM> _xfem;
+
+  // Declare usage of base class members
+  usingGenericElemElemConstraint;
 };
+
+typedef XFEMEqualValueAtInterfaceTempl<false> XFEMEqualValueAtInterface;
+typedef XFEMEqualValueAtInterfaceTempl<true> ADXFEMEqualValueAtInterface;

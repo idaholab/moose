@@ -10,27 +10,26 @@
 #pragma once
 
 // MOOSE includes
-#include "ElemElemConstraint.h"
+#include "GenericElemElemConstraint.h"
 #include "MooseMesh.h"
 
 // Forward Declarations
-
 class XFEM;
-
 class Function;
 
-class XFEMSingleVariableConstraint : public ElemElemConstraint
+template <bool is_ad>
+class XFEMSingleVariableConstraintTempl : public GenericElemElemConstraint<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  XFEMSingleVariableConstraint(const InputParameters & parameters);
-  virtual ~XFEMSingleVariableConstraint();
+  XFEMSingleVariableConstraintTempl(const InputParameters & parameters);
+  virtual ~XFEMSingleVariableConstraintTempl();
 
 protected:
   virtual void reinitConstraintQuadrature(const ElementPairInfo & element_pair_info) override;
 
-  virtual Real computeQpResidual(Moose::DGResidualType type) override;
+  virtual GenericReal<is_ad> computeQpResidual(Moose::DGResidualType type) override;
 
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
@@ -52,4 +51,10 @@ protected:
 
   /// Pointer to the XFEM controller object
   std::shared_ptr<XFEM> _xfem;
+
+  // Declare usage of base class members
+  usingGenericElemElemConstraint;
 };
+
+typedef XFEMSingleVariableConstraintTempl<false> XFEMSingleVariableConstraint;
+typedef XFEMSingleVariableConstraintTempl<true> ADXFEMSingleVariableConstraint;

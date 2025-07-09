@@ -110,4 +110,16 @@
     design = 'XFEMEqualValueAtInterface.md'
     issues = '#11750'
   [../]
+  [equal_value_ad]
+    type = Exodiff
+    input = equal_value.i
+    exodiff = 'equal_value_out.e'
+     cli_args = 'Constraints/xfem_constraint/type=ADXFEMEqualValueAtInterface'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    capabilities = 'unique_id'
+    requirement = 'The XFEM module shall provide an ability to apply a two-sided equal value constraint on a stationary interface for one variable using AD.'
+    design = 'XFEMEqualValueAtInterface.md'
+    issues = '#30998'
+  []
 []

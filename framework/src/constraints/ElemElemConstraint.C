@@ -9,76 +9,19 @@
 
 #include "ElemElemConstraint.h"
 
-// MOOSE includes
-#include "Assembly.h"
-#include "ElementPairInfo.h"
-#include "FEProblem.h"
-#include "MooseMesh.h"
-#include "MooseVariableFE.h"
-#include "SystemBase.h"
-
-#include "libmesh/quadrature.h"
-
 InputParameters
 ElemElemConstraint::validParams()
 {
-  InputParameters params = Constraint::validParams();
-  params.addParam<unsigned int>("interface_id", 0, "The id of the interface.");
-  return params;
+  return ElemElemConstraintBase::validParams();
 }
 
 ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters)
-  : Constraint(parameters),
-    NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
-    NeighborMooseVariableInterface<Real>(
-        this, false, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _dim(_mesh.dimension()),
-    _interface_id(getParam<unsigned int>("interface_id")),
-    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
-
-    _current_elem(_assembly.elem()),
-
-    _neighbor_elem(_assembly.neighbor()),
-
+  : ElemElemConstraintBase(parameters),
     _u(_var.sln()),
     _grad_u(_var.gradSln()),
-
-    _phi(_assembly.phi(_var)),
-    _grad_phi(_assembly.gradPhi(_var)),
-
-    _test(_var.phi()),
-    _grad_test(_var.gradPhi()),
-
-    _phi_neighbor(_assembly.phiNeighbor(_var)),
-    _grad_phi_neighbor(_assembly.gradPhiNeighbor(_var)),
-
-    _test_neighbor(_var.phiNeighbor()),
-    _grad_test_neighbor(_var.gradPhiNeighbor()),
-
     _u_neighbor(_var.slnNeighbor()),
     _grad_u_neighbor(_var.gradSlnNeighbor())
 {
-  addMooseVariableDependency(&_var);
-}
-
-void
-ElemElemConstraint::reinit(const ElementPairInfo & element_pair_info)
-{
-  reinitConstraintQuadrature(element_pair_info);
-}
-
-void
-ElemElemConstraint::reinitConstraintQuadrature(const ElementPairInfo & element_pair_info)
-{
-  _constraint_q_point.resize(element_pair_info._elem1_constraint_q_point.size());
-  _constraint_weight.resize(element_pair_info._elem1_constraint_JxW.size());
-  std::copy(element_pair_info._elem1_constraint_q_point.begin(),
-            element_pair_info._elem1_constraint_q_point.end(),
-            _constraint_q_point.begin());
-  std::copy(element_pair_info._elem1_constraint_JxW.begin(),
-            element_pair_info._elem1_constraint_JxW.end(),
-            _constraint_weight.begin());
 }
 
 void
@@ -95,10 +38,16 @@ ElemElemConstraint::computeElemNeighResidual(Moose::DGResidualType type)
     prepareVectorTag(_assembly, _var.number());
   else
     prepareVectorTagNeighbor(_assembly, _var.number());
+
+  std::vector<Real> residuals(test_space.size(), 0.0);
   for (_qp = 0; _qp < _constraint_q_point.size(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)
-      _local_re(_i) += _constraint_weight[_qp] * computeQpResidual(type);
-  accumulateTaggedLocalResidual();
+      residuals[_i] += _constraint_weight[_qp] * computeQpResidual(type);
+
+  if (is_elem)
+    addResiduals(_assembly, residuals, _var.dofIndices(), _var.scalingFactor());
+  else
+    addResiduals(_assembly, residuals, _var.dofIndicesNeighbor(), _var.scalingFactor());
 }
 
 void
