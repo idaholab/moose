@@ -10,8 +10,21 @@
       type     = MFEMZienkiewiczZhuEstimator
       variable = concentration
       kernel   = diff
-      fe_space = H1FESpace
+      fe_space = H1FESpace # not necessary. Get the fespace from the variable
       outputs  = none
+    []
+  []
+  [Markers]
+    [ref]
+      type = MFEMRefiner
+#      indicator=l2zz
+      refine = 0.7 # error 
+      steps  = 2 # total number of refinement steps
+      max_h_level = 2
+      max_p_level = 2
+#      switch_h_to_p_refinement = enum with h/p/h-p refinement # add this one later
+#
+#
     []
   []
 []
