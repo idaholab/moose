@@ -244,6 +244,7 @@ addActionTypes(Syntax & syntax)
   registerTask("check_integrity_early", true);
   registerTask("check_integrity_early_physics", false);
   registerTask("setup_quadrature", true);
+  registerTask("create_tagged_matrices", true);
 
   registerTask("mesh_modifiers", false);
 
@@ -347,6 +348,9 @@ addActionTypes(Syntax & syntax)
                            "(setup_quadrature)"
                            "(add_convergence)"
                            "(add_default_convergence)"
+                           "(add_field_split)" // split objects required before field split preconditioner itself
+                           "(add_preconditioning)" // preconditioner may introduce objects such as static condensation which influence the underlying types of tagged matrices
+                           "(create_tagged_matrices)"
                            "(add_periodic_bc)"
                            "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_distribution)"
@@ -355,8 +359,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_adaptivity)"
                            "(set_adaptivity_options)"
                            "(add_ic, add_fv_ic)"
-                           "(add_constraint, add_field_split)"
-                           "(add_preconditioning)"
+                           "(add_constraint)"
                            "(add_times)"
                            "(add_time_stepper, add_time_steppers)"
                            "(compose_time_stepper)"

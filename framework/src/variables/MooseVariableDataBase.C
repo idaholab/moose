@@ -67,14 +67,6 @@ MooseVariableDataBase<OutputType>::MooseVariableDataBase(const MooseVariableFiel
   _vector_tag_grad.reserve(max_future_num_vector_tags);
   _vector_tag_grad.resize(num_vector_tags);
 
-  auto num_matrix_tags = _subproblem.numMatrixTags();
-
-  _matrix_tags_dof_u.resize(num_matrix_tags);
-  _need_matrix_tag_dof_u.resize(num_matrix_tags, false);
-
-  _need_matrix_tag_u.resize(num_matrix_tags, false);
-  _matrix_tag_u.resize(num_matrix_tags);
-
   // Always fetch the dof values for the solution tag
   const auto soln_tag = _subproblem.getVectorTagID(Moose::SOLUTION_TAG);
   _need_vector_tag_dof_u[soln_tag] = true;
@@ -86,6 +78,19 @@ MooseVariableDataBase<OutputType>::MooseVariableDataBase(const MooseVariableFiel
   _nodal_value_array.resize(1);
   _nodal_value_old_array.resize(1);
   _nodal_value_older_array.resize(1);
+}
+
+template <typename OutputType>
+void
+MooseVariableDataBase<OutputType>::sizeMatrixTagData()
+{
+  auto num_matrix_tags = _subproblem.numMatrixTags();
+
+  _matrix_tags_dof_u.resize(num_matrix_tags);
+  _need_matrix_tag_dof_u.resize(num_matrix_tags, false);
+
+  _need_matrix_tag_u.resize(num_matrix_tags, false);
+  _matrix_tag_u.resize(num_matrix_tags);
 }
 
 template <typename OutputType>
