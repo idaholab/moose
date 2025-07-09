@@ -63,7 +63,7 @@ The following sections explain in detail how to do this as a part of the `genera
 ### Surfaces
 
 Various methods exist to create `CSGSurface` objects (below).
-All surface creation methods will return a shared pointer to that generated surface (`std::shared_ptr<CSGSurface>`).
+All surface creation methods will return a const reference to that generated surface (`const & CSGSurface`).
 
 | Surface Type | Method | Description |
 |---------|--------|------------|
@@ -77,8 +77,8 @@ Options for boundary types are `TRANSMISSION` (default), `VACUUM`, and `REFLECTI
 
 The `CSGSurface` objects can then be accessed or updated with the following methods from `CSGBase`:
 
-- `getAllSurfaces`: retrieve a map of names to shared pointers for of all `CSGSurface` objects
-- `getSurfaceByName`: retrieve the shared pointer to the `CSGSurface` of the specified name
+- `getAllSurfaces`: retrieve a list of const references to all `CSGSurface` objects defined within the `CSGBase` object
+- `getSurfaceByName`: retrieve a const reference to the `CSGSurface` of the specified name
 - `renameSurface`: change the name of the `CSGSurface`
 - `updateSurfaceBoundaryType`: change the boundary type of the `CSGSurface` (`TRANSMISSION`, `VACUUM`, or `REFLECTIVE`)
 
@@ -91,30 +91,30 @@ auto p1 = Point(1, 2, 3);
 auto p2 = Point(1, 1, 0);
 auto p3 = Point(0, 0, 0);
 auto bc_refl = CSG::CSGSurface::BoundaryType::REFLECTIVE;
-auto plane = csg_object->createPlane('new_plane', p1, p2, p3, bc_refl);
+const auto & plane = csg_object->createPlane('new_plane', p1, p2, p3, bc_refl);
 ```
 
 ```cpp
 // create a plane at x=2 (a=1, b=c=0, d=2)
-auto xplane = csg_obj->createPlane('xplane', 1.0, 0.0, 0.0, 2.0);
+const auto & xplane = csg_obj->createPlane('xplane', 1.0, 0.0, 0.0, 2.0);
 ```
 
 ```cpp
 // create a sphere at the origin with radius 5
-auto sphere1 = csg_obj->createSphere('origin_sphere', 5.0);
+const auto & sphere1 = csg_obj->createSphere('origin_sphere', 5.0);
 ```
 
 ```cpp
 // create a sphere at the point (1, 2, 3) of radius 4
 auto center = Point(1, 2, 3);
-auto sphere2 = csg_obj->createSphere('new_sphere', center, 4.0);
+const auto & sphere2 = csg_obj->createSphere('new_sphere', center, 4.0);
 ```
 
 ```cpp
 // create x-, y-, and z- aligned cylinders of radius 5, each centered at (1, 2, 3)
-auto xcyl = csg_obj->createCylinder('xcylinder', 2, 3, 5, 'x');
-auto ycyl = csg_obj->createCylinder('ycylinder', 1, 3, 5, 'y');
-auto zcyl = csg_obj->createCylinder('zcylinder', 1, 2, 5, 'z');
+const auto & xcyl = csg_obj->createCylinder('xcylinder', 2, 3, 5, 'x');
+const auto & ycyl = csg_obj->createCylinder('ycylinder', 1, 3, 5, 'y');
+const auto & zcyl = csg_obj->createCylinder('zcylinder', 1, 2, 5, 'z');
 ```
 
 ### Regions
@@ -160,7 +160,7 @@ The complement of the previous combination then defines the final region `~((-cy
 ### Cells
 
 A cell is an object defined by a region and a fill.
-To create any `CSGCell`, use the method `createCell` from `CSGBase` which will return a shared pointer to the `CSGCell` object that is created (`std::shared_ptr<CSGCell>`).
+To create any `CSGCell`, use the method `createCell` from `CSGBase` which will return a const reference to the `CSGCell` object that is created (`const CSGCell &`).
 At the time of calling `createCell`, a unique cell name, the cell region (`CSGRegion`), and an indicator of the fill must be provided.
 The `CSGRegion` is defined by boolean combinations of `CSGSurfaces` as described below.
 Three types of cell fills are currently supported: void, material, and universe.
@@ -170,24 +170,30 @@ For a cell with a `CSGUniverse` fill, pass it a shared pointer to the `CSGUniver
 
 The `CSGCell` objects can then be accessed or updated with the following methods from `CSGBase`:
 
-- `getAllCells`: retrieve a map of names to shared pointers for of all `CSGCell` objects
-- `getCellByName`: retrieve the shared pointer to the `CSGCell` of the specified name
-- `renameCell`: change the name of the `CSGCell`
+- `getAllCells`: retrieve a list of const references to all `CSGCell` objects defined within the `CSGBase` object
+- `getCellByName`: retrieve a const reference to the `CSGCell` object of the specified name
+- `renameCell`: change the name of the `CSGCell` object
 - `updateCellRegion`: change the region of the cell; if used, all `CSGSurface` objects used to define the new `CSGRegion` must also be a part of the current `CSGBase`
 
 ### Universes
 
-A universe is a collection of cells and is created by calling `createUniverse` from `CSGBase` which will return a shared pointer to the `CSGUniverse` object (`std::shared_ptr<CSGUniverse>`).
+A universe is a collection of cells and is created by calling `createUniverse` from `CSGBase` which will return a const reference to the `CSGUniverse` object (`const CSGUniverse &`).
 A `CSGUniverse` can be initialized as an empty universe, or by passing a vector of shared pointers to `CSGCell` objects.
 Any `CSGUniverse` object can be renamed (including the [root universe](#root-universe)) with `renameUniverse`.
+
+The `CSGUniverse` objects can then be accessed or updated with the following methods from `CSGBase`:
+
+- `getAllUniverses`: retrieve a list of const references to all `CSGUniverse` objects defined within the `CSGBase` object
+- `getUniverseByName`: retrieve a const reference to the `CSGUniverse` of the specified name
+- `renameUniverse`: change the name of the `CSGUniverse`
 
 Example:
 
 ```cpp
 // create an empty universe which will get cells added to it later
-auto empty_universe = csg_obj->createUniverse("empty_universe");
-// create a universe that is initialized with an existing list of shared pointers to CSGCell objects
-auto new_universe = csg_obj->createUniverse("new_universe", list_of_cells);
+const auto & empty_universe = csg_obj->createUniverse("empty_universe");
+// create a universe that is initialized with an existing list of references to CSGCell objects
+const auto & new_universe = csg_obj->createUniverse("new_universe", list_of_cells);
 ```
 
 #### Root Universe
@@ -201,38 +207,38 @@ However, the name of the root universe can be updated, though it won't change th
 
 Methods available for managing the root universe:
 
-- `getRootUniverse`: returns a shared pointer to the root universe of the `CSGBase` instance
+- `getRootUniverse`: returns a const reference to the root universe of the `CSGBase` instance
 - `renameRootUniverse`: change the name of the root universe
 
 #### Adding or Removing Cells
 
 There are multiple ways in which cells can be added to a universe:
 
-1. At the time of universe creation, a list of pointers to `CSGCell` objects can be passed into `createUniverse` (as described [above](#universes)). Example:
+1. At the time of universe creation, a list of references to `CSGCell` objects can be passed into `createUniverse` (as described [above](#universes)). Example:
 
 ```cpp
-auto new_universe = csg_obj->createUniverse("new_universe", list_of_cells);
+const auto & new_universe = csg_obj->createUniverse("new_universe", list_of_cells);
 ```
 
-2. When a `CSGCell` is created with `createCell`, a `CSGUniverse` can be passed as the final argument to indicate that the cell will be created and added directly to that specified universe. In this case, the cell will *not* be added to the root universe. A cell that has a universe fill type cannot be added to the same universe that is being used for the fill. For example:
+2. When a `CSGCell` is created with `createCell`, a pointer to a `CSGUniverse` can be passed as the final argument to indicate that the cell will be created and added directly to that specified universe. In this case, the cell will *not* be added to the root universe. A cell that has a universe fill type cannot be added to the same universe that is being used for the fill. For example:
 
 ```cpp
 // create an empty universe
-auto new_universe = csg_obj->createUniverse("new_univ");
+const auto & new_universe = csg_obj->createUniverse("new_univ");
 // create a new void cell and add it directly to the new empty universe;
 // do not add to the root universe
-auto new_cell_in_univ = csg_obj->createCell("new_cell", region, new_universe);
+const auto & new_cell_in_univ = csg_obj->createCell("new_cell", region, &new_universe);
 ```
 
 3. A cell or list of cells can be added to an existing universe with the `addCellToUniverse` and `addCellsToUniverse` methods. In this case, if a `CSGCell` exists in another `CSGUniverse` (such as the root universe), it will *not* be removed when being added to another (i.e. if the same behavior as option 2 above is desired, the cell will have to be manually removed from the root universe). The following two examples will produce the same outcome:
 
 ```cpp
 // create a list of cells and add to an existing universe after creating all of them
-std::vector<std::shared_ptr<CSG::CSGCell>> list_of_cells;
+std::vector<std::reference_wrapper<const CSG::CSGCell>> list_of_cells;
 for (unsigned int i = 0; i < num_cells_to_add; ++i)
 {
     // creating new_cell here will add it to the root universe
-    auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
+    const auto & new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
     list_of_cells.push_back(new_cell);
 }
 // add to an existing universe; cells will still remain in the root universe
@@ -245,7 +251,7 @@ csg_obj->addCellsToUniverse(existing_universe, list_of_cells);
 for (unsigned int i = 0; i < num_cells_to_add; ++i)
 {
     // creating new_cell here will add it to the root universe
-    auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
+    const auto & new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
     csg_obj->addCellToUniverse(existing_universe, new_cell);
 }
 ```
@@ -255,11 +261,11 @@ An example use would be to take the previous two examples and remove the cells f
 
 ```cpp
 // create a list of cells and add to an existing universe after creating all of them
-std::vector<std::shared_ptr<CSG::CSGCell>> list_of_cells;
+std::vector<std::reference_wrapper<const CSG::CSGCell>> list_of_cells;
 for (unsigned int i = 0; i < num_cells_to_add; ++i)
 {
     // creating new_cell here will add it to the root universe
-    auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
+    const auto & new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
     list_of_cells.push_back(new_cell);
 }
 // add to an existing universe and explicitly remove them from root
@@ -272,7 +278,7 @@ csg_obj->removeCellsFromUniverse(csg_obj->getRootUniverse(), list_of_cells);
 for (unsigned int i = 0; i < num_cells_to_add; ++i)
 {
     // creating new_cell here will add it to the root universe
-    auto new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
+    const auto & new_cell = csg_obj->createCell("new_cell_" + std::to_string(i), regions[i]);
     csg_obj->addCellToUniverse(existing_universe, new_cell);
     csg_obj->removeCellFromUniverse(csg_obj->getRootUniverse(), new_cell);
 }
@@ -393,10 +399,11 @@ For example, if a cell were to be created, the current name and region could be 
 
 ```cpp
 // a cell is created using CSGBase
-auto cell = csg_obj->createCell("cell_name", region);
+const auto & cell = csg_obj->createCell("cell_name", region);
 // the current name and region of that cell can be retrieved directly from the CSGCell object
-auto name = cell->getName();
-auto region = cell->getRegion();
+const auto name = cell.getName();
+const auto & region = cell.getRegion();
+
 // changing the name and region requires using methods in CSGBase
 csg_obj->renameCell(cell, "new_name");
 csg_obj->updateCellRegion(cell, new_region);
@@ -469,14 +476,14 @@ ExamplePrismCSGMeshGenerator::generateCSG()
     // object name includes the mesh generator name for uniqueness
     const auto surf_name = mg_name + "_surf_" + surf_names[i];
     // create the plane for one face of the prism
-    auto plane_ptr = csg_obj->createPlaneFromPoints(
+    const auto & csg_plane = csg_obj->createPlaneFromPoints(
         surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
     // determine where the plane is in relation to the centroid to be able to set the halfspace
-    const auto region_direction = plane_ptr->directionFromPoint(centroid);
+    const auto region_direction = csg_plane.directionFromPoint(centroid);
     // halfspace is either positive (+plane_ptr) or negative (-plane_ptr)
     / /depending on the direction to the centroid
     auto halfspace =
-        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +plane_ptr : -plane_ptr);
+        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
     // check if this is the first halfspace to be added to the region,
     // if not, update the existing region with the intersection of the regions (&=)
     if (region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
@@ -524,9 +531,9 @@ ExampleAxialSurfaceMeshGenerator::generateCSG()
 
   // get the expected existing cell
   const auto cell_name = inp_name + "_square_cell";
-  auto cell_ptr = csg_obj->getCellByName(cell_name);
+  const auto & inp_cell = csg_obj->getCellByName(cell_name);
   // get the existing cell region to update
-  auto cell_region = cell_ptr->getRegion();
+  auto cell_region = inp_cell.getRegion();
 
   // centroid used to determine direction for halfspace
   const auto centroid = Point(0, 0, 0);
@@ -540,19 +547,19 @@ ExampleAxialSurfaceMeshGenerator::generateCSG()
     const auto surf_name = mg_name + "_surf_" + surf_names[i];
     // create the plane
     // z plane equation: 0.0*x + 0.0*y + 1.0*z = (+/-)0.5 * axial_height
-    auto plane_ptr = csg_obj->createPlaneFromCoefficients(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
+    const auto & csg_plane = csg_obj->createPlaneFromCoefficients(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
     // determine the halfspace to add as an updated intersection
-    const auto region_direction = plane_ptr->directionFromPoint(centroid);
+    const auto region_direction = csg_plane.directionFromPoint(centroid);
     auto halfspace =
-        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +plane_ptr : -plane_ptr);
+        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
     // update the existing region with a halfspace
     cell_region &= halfspace;
   }
 
   // set the new region for the existing cell
-  csg_obj->updateCellRegion(cell_ptr, cell_region);
+  csg_obj->updateCellRegion(inp_cell, cell_region);
 
-  // rename the root universe which currently contains just the cell defined by cell_ptr
+  // rename the root universe which currently contains just the cell defined by inp_cell
   csg_obj->renameRootUniverse(mg_name + "_finite_prism_univ");
 
   return csg_obj;
