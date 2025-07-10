@@ -1,4 +1,4 @@
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/mfem-common.hpp"
