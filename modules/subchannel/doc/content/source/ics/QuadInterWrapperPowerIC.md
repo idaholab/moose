@@ -2,7 +2,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This IC creates an initial field for the linear heat rate ([!param](/ICs/QuadInterWrapperFlowAreaIC/variable) = `q_prime`), that gets added or removed to the inter-wrapper flow area, that wraps around sub-assemblies with a square subchannel/pin arrangement.
 
