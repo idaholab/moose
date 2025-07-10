@@ -15,18 +15,16 @@
 
 class MFEMProblem;
 
-class MFEMExecutioner : public Executioner
+class MFEMExecutioner
 {
 public:
   static InputParameters validParams();
 
-  MFEMExecutioner(const InputParameters & params);
+  MFEMExecutioner(const InputParameters & params, MFEMProblem & mfem_problem);
 
   /// Returns a reference to the MFEMProblem instance.
   MFEMProblem & getMFEMProblem() { return _mfem_problem; }
   const MFEMProblem & getMFEMProblem() const { return _mfem_problem; }
-
-  virtual bool lastSolveConverged() const override { return true; };
 
   /// Virtual method to construct the ProblemOperator. Call for default problems.
   virtual void constructProblemOperator() = 0;

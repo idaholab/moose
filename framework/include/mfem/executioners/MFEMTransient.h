@@ -13,7 +13,7 @@
 #include "MFEMExecutioner.h"
 #include "TimeDomainProblemOperator.h"
 
-class MFEMTransient : public MFEMExecutioner
+class MFEMTransient : public Executioner, public MFEMExecutioner
 {
 public:
   static InputParameters validParams();
@@ -23,6 +23,8 @@ public:
   void constructProblemOperator() override;
   virtual void init() override;
   virtual void execute() override;
+
+  virtual bool lastSolveConverged() const override { return true; };
 
   // virtual void computeDT();
 
