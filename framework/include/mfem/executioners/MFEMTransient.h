@@ -23,15 +23,27 @@ public:
 
   void constructProblemOperator() override;
   virtual void init() override;
-  virtual void execute() override;
+
+  /**
+   * Do whatever is necessary to advance one step.
+   */
+  virtual void takeStep(Real input_dt = -1.0) override;
 
   virtual bool lastSolveConverged() const override { return true; };
+
   virtual Real relativeSolutionDifferenceNorm() override { return 0.0; };
 
+  /**
+   * Get the time integrators (time integration scheme) used
+   * Note that because some systems might be steady state simulations, there could be less
+   * time integrators than systems
+   * @return string with the time integration scheme name
+   */
   virtual std::set<TimeIntegrator *> getTimeIntegrators() const override
   {
     return std::set<TimeIntegrator *>{};
   };
+
   /**
    * Get the name of the time integrator (time integration scheme) used
    * @return string with the time integration scheme name
@@ -40,13 +52,6 @@ public:
   {
     return std::vector<std::string>();
   };
-
-  /**
-   * Do whatever is necessary to advance one step.
-   */
-  virtual void takeStep(Real input_dt = -1.0) override;
-
-  virtual void endStep(Real input_time = -1.0) override;
 
 private:
   int _vis_steps;          // Number of cycles between each output update
