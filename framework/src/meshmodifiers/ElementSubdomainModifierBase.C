@@ -17,6 +17,7 @@
 #include "libmesh/remote_elem.h"
 #include "libmesh/parallel_ghost_sync.h"
 #include "libmesh/petsc_vector.h"
+#include "libmesh/parameters.h"
 
 InputParameters
 ElementSubdomainModifierBase::validParams()
@@ -265,41 +266,30 @@ void
 ElementSubdomainModifierBase::initialSetup()
 {
   // Error if both parameters are set
-  if (isParamSetByUser("reinitialize_subdomain_ids") && isParamSetByUser("reinitialize_subdomains"))
-    mooseError("reinitialize_subdomain_ids",
-               "The parameters 'reinitialize_subdomain_ids' and 'reinitialize_subdomains' are "
-               "mutually exclusive. Please use only one of them.");
-
   if (isParamSetByUser("apply_initial_conditions") &&
       isParamSetByUser("reinitialize_subdomain_ids"))
     mooseError("Cannot set both 'apply_initial_conditions' and 'reinitialize_subdomain_ids'. "
                "Please use only one.");
 
-  if (isParamSetByUser("reinitialize_subdomain_ids"))
-    _subdomain_ids_to_reinitialize =
-        getParam<std::vector<SubdomainID>>("reinitialize_subdomain_ids");
-  else
+  // When 'apply_initial_conditions' is fully deprecated, change this to 'const' vector
+  std::vector<SubdomainName> subdomain_names_to_reinitialize =
+      getParam<std::vector<SubdomainName>>("reinitialize_subdomains");
+
+  // When 'apply_initial_conditions' is fully deprecated, remove this block
+  if (isParamSetByUser("apply_initial_conditions"))
   {
-    // When 'apply_initial_conditions' is fully deprecated, change this to 'const' vector
-    std::vector<SubdomainName> subdomain_names_to_reinitialize =
-        getParam<std::vector<SubdomainName>>("reinitialize_subdomains");
-
-    // When 'apply_initial_conditions' is fully deprecated, remove this block
-    if (isParamSetByUser("apply_initial_conditions"))
-    {
-      if (getParam<bool>("apply_initial_conditions"))
-        subdomain_names_to_reinitialize = {"ANY_BLOCK_ID"};
-      else
-        subdomain_names_to_reinitialize = {};
-    }
-
-    if (std::find(subdomain_names_to_reinitialize.begin(),
-                  subdomain_names_to_reinitialize.end(),
-                  "ANY_BLOCK_ID") != subdomain_names_to_reinitialize.end())
-      _subdomain_ids_to_reinitialize.push_back(Moose::ANY_BLOCK_ID);
+    if (getParam<bool>("apply_initial_conditions"))
+      subdomain_names_to_reinitialize = {"ANY_BLOCK_ID"};
     else
-      _subdomain_ids_to_reinitialize = _mesh.getSubdomainIDs(subdomain_names_to_reinitialize);
+      subdomain_names_to_reinitialize = {};
   }
+
+  if (std::find(subdomain_names_to_reinitialize.begin(),
+                subdomain_names_to_reinitialize.end(),
+                "ANY_BLOCK_ID") != subdomain_names_to_reinitialize.end())
+    _subdomain_ids_to_reinitialize.push_back(Moose::ANY_BLOCK_ID);
+  else
+    _subdomain_ids_to_reinitialize = _mesh.getSubdomainIDs(subdomain_names_to_reinitialize);
 
   std::set<SubdomainID> set_subdomain_ids_to_reinitialize(_subdomain_ids_to_reinitialize.begin(),
                                                           _subdomain_ids_to_reinitialize.end());
@@ -804,15 +794,7 @@ ElementSubdomainModifierBase::applyIC(bool displaced)
              _ic_strategy[i] == ICStrategy::POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
              _ic_strategy[i] == ICStrategy::POLYNOMIAL_THRESHOLD)
     {
-      const auto var_name = _ic_vars_names[i];
-      const auto & coef = _npr_vec[_var_name_to_npr_idx[var_name]]->getCoefficients(
-          _solved_elem_ids_for_npr[_var_name_to_npr_idx[var_name]]);
-      _fe_problem.projectFunctionOnCustomRangeForSpecificVars(
-          reinitializedElemRange(displaced),
-          reinitializedNodeRangeFromBndNodes(displaced),
-          reinitializedNodeRange(),
-          coef,
-          {_ic_vars_names[i]});
+      projectNprIC(_ic_vars_names[i], displaced);
     }
     else
       mooseError("Unknown initial condition strategy");
@@ -1229,4 +1211,127 @@ ElementSubdomainModifierBase::synchronizeReinitializedElems()
   _global_reinitialized_elems.clear();
   for (const auto & vec : gathered)
     _global_reinitialized_elems.insert(_global_reinitialized_elems.end(), vec.begin(), vec.end());
+}
+
+void
+ElementSubdomainModifierBase::projectNprIC(const VariableName & var_name, bool displaced)
+{
+  const auto & coef = _npr_vec[_var_name_to_npr_idx[var_name]]->getCoefficients(
+      _solved_elem_ids_for_npr[_var_name_to_npr_idx[var_name]]);
+
+  const unsigned dim = _mesh.dimension();
+
+  libMesh::Parameters function_parameters;
+
+  // Coefficient order depends on the problem dimension:
+  // - 1D (x):       [c], [c, x], [c, x, x^2]
+  // - 2D (x, y):    [c], [c, y, x], [c, y, x, y^2, xy, x^2]
+  // - 3D (x, y, z): [c], [c, z, y, x], [c, z, y, x, z^2, zy, zx, y^2, yx, x^2]
+  // Terms not included are assumed zero.
+
+  // Set coefficients to parameters with default = 0
+  auto get = [&](int i) -> Real { return (i < coef.size()) ? coef(i) : 0.0; };
+
+  function_parameters.set<int>("dimension_for_projection") = dim;
+  function_parameters.set<Real>("coef_c") = get(0);
+
+  if (dim == 1)
+  {
+    function_parameters.set<Real>("coef_x") = get(1);
+    function_parameters.set<Real>("coef_xx") = get(2);
+  }
+  else if (dim == 2)
+  {
+    function_parameters.set<Real>("coef_y") = get(1);
+    function_parameters.set<Real>("coef_x") = get(2);
+    function_parameters.set<Real>("coef_yy") = get(3);
+    function_parameters.set<Real>("coef_yx") = get(4);
+    function_parameters.set<Real>("coef_xx") = get(5);
+  }
+  else if (dim == 3)
+  {
+    function_parameters.set<Real>("coef_z") = get(1);
+    function_parameters.set<Real>("coef_y") = get(2);
+    function_parameters.set<Real>("coef_x") = get(3);
+    function_parameters.set<Real>("coef_zz") = get(4);
+    function_parameters.set<Real>("coef_zy") = get(5);
+    function_parameters.set<Real>("coef_zx") = get(6);
+    function_parameters.set<Real>("coef_yy") = get(7);
+    function_parameters.set<Real>("coef_yx") = get(8);
+    function_parameters.set<Real>("coef_xx") = get(9);
+  }
+
+  // Define projection function
+  auto poly_func = [](const Point & p,
+                      const libMesh::Parameters & parameters,
+                      const std::string &,
+                      const std::string &) -> libMesh::Number
+  {
+    const int dim = parameters.get<int>("dimension_for_projection");
+
+    const Real x = p(0);
+    const Real y = (dim > 1) ? p(1) : 0;
+    const Real z = (dim > 2) ? p(2) : 0;
+
+    Real val = parameters.get<Real>("coef_c");
+
+    if (dim == 1)
+      val += parameters.get<Real>("coef_x") * x + parameters.get<Real>("coef_xx") * x * x;
+    else if (dim == 2)
+      val += parameters.get<Real>("coef_y") * y + parameters.get<Real>("coef_x") * x +
+             parameters.get<Real>("coef_yy") * y * y + parameters.get<Real>("coef_yx") * x * y +
+             parameters.get<Real>("coef_xx") * x * x;
+    else if (dim == 3)
+      val += parameters.get<Real>("coef_z") * z + parameters.get<Real>("coef_y") * y +
+             parameters.get<Real>("coef_x") * x + parameters.get<Real>("coef_zz") * z * z +
+             parameters.get<Real>("coef_zy") * z * y + parameters.get<Real>("coef_zx") * z * x +
+             parameters.get<Real>("coef_yy") * y * y + parameters.get<Real>("coef_yx") * y * x +
+             parameters.get<Real>("coef_xx") * x * x;
+
+    return val;
+  };
+
+  // Define gradient
+  auto poly_func_grad = [](const Point & p,
+                           const libMesh::Parameters & parameters,
+                           const std::string &,
+                           const std::string &) -> libMesh::Gradient
+  {
+    const int dim = parameters.get<int>("dimension_for_projection");
+    const Real x = p(0);
+    const Real y = (dim > 1) ? p(1) : 0;
+    const Real z = (dim > 2) ? p(2) : 0;
+
+    libMesh::Gradient grad;
+
+    if (dim == 1)
+      grad(0) = parameters.get<Real>("coef_x") + 2 * parameters.get<Real>("coef_xx") * x;
+    else if (dim == 2)
+    {
+      grad(0) = parameters.get<Real>("coef_x") + parameters.get<Real>("coef_yx") * y +
+                2 * parameters.get<Real>("coef_xx") * x;
+      grad(1) = parameters.get<Real>("coef_y") + parameters.get<Real>("coef_yx") * x +
+                2 * parameters.get<Real>("coef_yy") * y;
+    }
+    else if (dim == 3)
+    {
+      grad(0) = parameters.get<Real>("coef_x") + parameters.get<Real>("coef_zx") * z +
+                parameters.get<Real>("coef_yx") * y + 2 * parameters.get<Real>("coef_xx") * x;
+      grad(1) = parameters.get<Real>("coef_y") + parameters.get<Real>("coef_zy") * z +
+                parameters.get<Real>("coef_yx") * x + 2 * parameters.get<Real>("coef_yy") * y;
+      grad(2) = parameters.get<Real>("coef_z") + parameters.get<Real>("coef_zy") * y +
+                parameters.get<Real>("coef_zx") * x + 2 * parameters.get<Real>("coef_zz") * z;
+    }
+
+    return grad;
+  };
+
+  _fe_problem.projectFunctionOnCustomRange(reinitializedElemRange(displaced),
+                                           reinitializedNodeRangeFromBndNodes(displaced),
+                                           reinitializedNodeRange(),
+                                           poly_func,
+                                           poly_func_grad,
+                                           function_parameters,
+                                           TargetVarUsageForIC::ONLY_LIST,
+                                           {var_name});
 }

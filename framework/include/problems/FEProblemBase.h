@@ -897,42 +897,50 @@ public:
    * @param elem_range Element range to project on
    * @param bnd_node_range Boundary node range to project on
    * @param target_var_usage How to handle variables that are in the list of variables
-   * (selected_var_names). If TargetVarUsageForIC::SKIP_LIST, these
+   * (target_var_names). If TargetVarUsageForIC::SKIP_LIST, these
    * variables will be skipped to set their ICs. If TargetVarUsageForIC::ONLY_LIST, these variables
    * will be reinitialized to their ICs.
-   * @param selected_var_names Set of variable names to project ICs (depending on \p
+   * @param target_var_names Set of variable names to project ICs (depending on \p
    * target_var_usage). If SKIP_LIST, these variables will be skipped. If ONLY_LIST, these variables
    * will be reinitialized to their ICs.
+   * If the user do not set \p target_var_usage and \p target_var_names, all variables
+   * in the system will be projected.
    */
   void projectInitialConditionOnCustomRange(
       libMesh::ConstElemRange & elem_range,
       ConstBndNodeRange & bnd_node_range,
       const TargetVarUsageForIC target_var_usage = TargetVarUsageForIC::SKIP_LIST,
-      const std::set<VariableName> & selected_var_names = {});
+      const std::set<VariableName> & target_var_names = {});
 
   /**
    * Project an initial condition given by a polynomial onto selected elements and nodes
    * for a set of variables.
    *
-   * Coefficient order depends on the problem dimension:
-   *
-   * - 1D (x):         [c], [c, x], [c, x, x^2]
-   * - 2D (x, y):      [c], [c, y, x], [c, y, x, y^2, xy, x^2]
-   * - 3D (x, y, z):   [c], [c, z, y, x], [c, z, y, x, z^2, zy, zx, y^2, yx, x^2]
-   *
-   * Terms not included are assumed zero.
-   *
    * \param elem_range       Element range to project on (non-nodal)
-   * \param bnd_nodes        Boundary nodes to include (non-nodal)
+   * \param bnd_nodes        Boundary nodes to include
    * \param node_range       Node range for nodal variables
-   * \param coef             Polynomial coefficients
+   * \param poly_func        Polynomial function to project (function pointer)
+   * \param poly_func_grad   Gradient of the polynomial function (function pointer)
+   * \param function_parameters Parameters to pass to the polynomial function
+   * @param target_var_usage How to handle variables that are in the list of variables
+   * (target_var_names). If TargetVarUsageForIC::SKIP_LIST, these
+   * variables will be skipped to set their ICs. If TargetVarUsageForIC::ONLY_LIST, these variables
+   * will be reinitialized to their ICs.
    * \param target_var_names Set of variable names to project
+   * If the user do not set \p target_var_usage and \p target_var_names, all variables
+   * in the system will be projected.
    */
-  void projectFunctionOnCustomRangeForSpecificVars(ConstElemRange & elem_range,
-                                                   ConstNodeRange & bnd_nodes,
-                                                   ConstNodeRange & node_range,
-                                                   const RealEigenVector & coef,
-                                                   const std::set<VariableName> & target_var_names);
+  void projectFunctionOnCustomRange(
+      ConstElemRange & elem_range,
+      ConstNodeRange & bnd_nodes,
+      ConstNodeRange & node_range,
+      Number (*poly_func)(
+          const Point &, const libMesh::Parameters &, const std::string &, const std::string &),
+      Gradient (*poly_func_grad)(
+          const Point &, const libMesh::Parameters &, const std::string &, const std::string &),
+      const libMesh::Parameters & function_parameters,
+      const TargetVarUsageForIC target_var_usage = TargetVarUsageForIC::SKIP_LIST,
+      const std::set<VariableName> & target_var_names = {});
 
   // Materials /////
   virtual void addMaterial(const std::string & material_name,

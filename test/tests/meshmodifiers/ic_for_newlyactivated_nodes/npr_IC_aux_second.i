@@ -65,7 +65,7 @@
     # --- new for setting IC --- #
 
     old_subdomain_reinitialized = false
-    reinitialize_subdomain_ids = '1'
+    reinitialize_subdomains = '1'
 
     ic_strategy = "POLYNOMIAL"
     nodal_patch_recovery_uo = 'u_patch'

@@ -65,7 +65,7 @@
     ic_strategy = "POLYNOMIAL"
 
     old_subdomain_reinitialized = false
-    reinitialize_subdomain_ids = '1'
+    reinitialize_subdomains = '1'
     nodal_patch_recovery_uo = 'extrapolation_patch extrapolation_patch_linear'
   []
 []

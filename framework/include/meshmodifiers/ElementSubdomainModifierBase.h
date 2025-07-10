@@ -241,4 +241,7 @@ private:
 
   /// @brief Gather neighbor elements for newly activated nodes
   void gatherNeighborElementsForActivatedNodes(const unsigned int ic_idx);
+
+  /// @brief Project initial conditions using NodalPatchRecoveryBase user objects
+  void projectNprIC(const VariableName & var_name, bool displaced);
 };

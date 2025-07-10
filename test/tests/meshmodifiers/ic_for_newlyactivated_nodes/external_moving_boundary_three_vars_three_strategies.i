@@ -71,7 +71,7 @@
     # --- new for setting IC --- #
 
     old_subdomain_reinitialized = false
-    reinitialize_subdomain_ids = '1'
+    reinitialize_subdomains = '1'
 
     ic_strategy = "POLYNOMIAL POLYNOMIAL_WHOLE_SOLVED_DOMAIN POLYNOMIAL_THRESHOLD"
     nearby_element_threshold = 3

@@ -3719,122 +3719,40 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
 }
 
 void
-FEProblemBase::projectFunctionOnCustomRangeForSpecificVars(
-    ConstElemRange & elem_range,
-    ConstNodeRange & bnd_nodes,
-    ConstNodeRange & node_range,
-    const RealEigenVector & coef,
-    const std::set<VariableName> & target_var_names)
+FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
+                                            ConstNodeRange & bnd_nodes,
+                                            ConstNodeRange & node_range,
+                                            Number (*poly_func)(const Point &,
+                                                                const libMesh::Parameters &,
+                                                                const std::string &,
+                                                                const std::string &),
+                                            Gradient (*poly_func_grad)(const Point &,
+                                                                       const libMesh::Parameters &,
+                                                                       const std::string &,
+                                                                       const std::string &),
+                                            const libMesh::Parameters & function_parameters,
+                                            const TargetVarUsageForIC target_var_usage,
+                                            const std::set<VariableName> & target_var_names)
 {
-  EquationSystems & es = this->es();
+  std::set<VariableName> var_names_to_project;
 
-  const unsigned dim = _mesh.dimension();
-
-  es.parameters.set<int>("dimension_for_projection") = dim;
-
-  // Check size validity
-  if ((dim == 1 && coef.size() != 1 && coef.size() != 3) ||
-      (dim == 2 && coef.size() != 1 && coef.size() != 3 && coef.size() != 6) ||
-      (dim == 3 && coef.size() != 1 && coef.size() != 4 && coef.size() != 10))
-    mooseError("Unsupported coef size ", coef.size(), " for dimension ", dim);
-
-  // Set coefficients to parameters with default = 0
-  auto get = [&](int i) -> Real { return (i < coef.size()) ? coef(i) : 0.0; };
-
-  es.parameters.set<Real>("coef_c") = get(0);
-
-  if (dim == 1)
+  if (target_var_usage == TargetVarUsageForIC::ONLY_LIST)
+    var_names_to_project = target_var_names;
+  else /* TargetVarUsageForIC::SKIP_LIST */
   {
-    es.parameters.set<Real>("coef_x") = get(1);
-    es.parameters.set<Real>("coef_xx") = get(2);
-  }
-  else if (dim == 2)
-  {
-    es.parameters.set<Real>("coef_y") = get(1);
-    es.parameters.set<Real>("coef_x") = get(2);
-    es.parameters.set<Real>("coef_yy") = get(3);
-    es.parameters.set<Real>("coef_yx") = get(4);
-    es.parameters.set<Real>("coef_xx") = get(5);
-  }
-  else if (dim == 3)
-  {
-    es.parameters.set<Real>("coef_z") = get(1);
-    es.parameters.set<Real>("coef_y") = get(2);
-    es.parameters.set<Real>("coef_x") = get(3);
-    es.parameters.set<Real>("coef_zz") = get(4);
-    es.parameters.set<Real>("coef_zy") = get(5);
-    es.parameters.set<Real>("coef_zx") = get(6);
-    es.parameters.set<Real>("coef_yy") = get(7);
-    es.parameters.set<Real>("coef_yx") = get(8);
-    es.parameters.set<Real>("coef_xx") = get(9);
-  }
-
-  // Define projection function
-  auto poly_func = [](const Point & p,
-                      const Parameters & parameters,
-                      const std::string &,
-                      const std::string &) -> Number
-  {
-    const int dim = parameters.get<int>("dimension_for_projection");
-
-    const Real x = p(0);
-    const Real y = (dim > 1) ? p(1) : 0;
-    const Real z = (dim > 2) ? p(2) : 0;
-
-    Real val = parameters.get<Real>("coef_c");
-
-    if (dim == 1)
-      val += parameters.get<Real>("coef_x") * x + parameters.get<Real>("coef_xx") * x * x;
-    else if (dim == 2)
-      val += parameters.get<Real>("coef_y") * y + parameters.get<Real>("coef_x") * x +
-             parameters.get<Real>("coef_yy") * y * y + parameters.get<Real>("coef_yx") * x * y +
-             parameters.get<Real>("coef_xx") * x * x;
-    else if (dim == 3)
-      val += parameters.get<Real>("coef_z") * z + parameters.get<Real>("coef_y") * y +
-             parameters.get<Real>("coef_x") * x + parameters.get<Real>("coef_zz") * z * z +
-             parameters.get<Real>("coef_zy") * z * y + parameters.get<Real>("coef_zx") * z * x +
-             parameters.get<Real>("coef_yy") * y * y + parameters.get<Real>("coef_yx") * y * x +
-             parameters.get<Real>("coef_xx") * x * x;
-
-    return val;
-  };
-
-  // Define gradient
-  auto poly_func_grad = [](const Point & p,
-                           const Parameters & parameters,
-                           const std::string &,
-                           const std::string &) -> Gradient
-  {
-    const int dim = parameters.get<int>("dimension_for_projection");
-    const Real x = p(0);
-    const Real y = (dim > 1) ? p(1) : 0;
-    const Real z = (dim > 2) ? p(2) : 0;
-
-    Gradient grad;
-
-    if (dim == 1)
-      grad(0) = parameters.get<Real>("coef_x") + 2 * parameters.get<Real>("coef_xx") * x;
-    else if (dim == 2)
+    auto insertICVars = [&](SystemBase & sys) -> void
     {
-      grad(0) = parameters.get<Real>("coef_x") + parameters.get<Real>("coef_yx") * y +
-                2 * parameters.get<Real>("coef_xx") * x;
-      grad(1) = parameters.get<Real>("coef_y") + parameters.get<Real>("coef_yx") * x +
-                2 * parameters.get<Real>("coef_yy") * y;
-    }
-    else if (dim == 3)
-    {
-      grad(0) = parameters.get<Real>("coef_x") + parameters.get<Real>("coef_zx") * z +
-                parameters.get<Real>("coef_yx") * y + 2 * parameters.get<Real>("coef_xx") * x;
-      grad(1) = parameters.get<Real>("coef_y") + parameters.get<Real>("coef_zy") * z +
-                parameters.get<Real>("coef_yx") * x + 2 * parameters.get<Real>("coef_yy") * y;
-      grad(2) = parameters.get<Real>("coef_z") + parameters.get<Real>("coef_zy") * y +
-                parameters.get<Real>("coef_zx") * x + 2 * parameters.get<Real>("coef_zz") * z;
-    }
+      const auto & vars = sys.getVariables(0);
+      for (const auto & ivar : vars)
+        if (!target_var_names.count(ivar->name()))
+          var_names_to_project.insert(ivar->name());
+    };
 
-    return grad;
-  };
-
-  for (const std::string & var_name : target_var_names)
+    for (const auto & nl : _nl)
+      insertICVars(*nl);
+    insertICVars(*_aux);
+  }
+  for (const std::string & var_name : var_names_to_project)
   {
     const auto & var = getStandardVariable(0, var_name);
     const auto var_num = var.number();
@@ -3849,7 +3767,7 @@ FEProblemBase::projectFunctionOnCustomRangeForSpecificVars(
     NumericVector<Number> & temp_vec =
         libmesh_sys.add_vector("temp_projection", /*projected=*/false);
 
-    libmesh_sys.project_vector(poly_func, poly_func_grad, es.parameters, temp_vec);
+    libmesh_sys.project_vector(poly_func, poly_func_grad, function_parameters, temp_vec);
     temp_vec.close();
 
     DofMap & dof_map = sys.dofMap();
