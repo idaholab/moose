@@ -49,15 +49,15 @@ TransientMultiApp::validParams()
 
   params.addParam<bool>("detect_steady_state",
                         false,
-                        "If true then while sub_cycling a steady state check will be "
-                        "done.  In this mode output will only be done once the "
-                        "MultiApp reaches the target time or steady state is reached");
+                        "If true, then if/while sub-cycling ('sub_cycling = true'), a steady-state "
+                        "check will be performed for each child app, allowing them to skip to the "
+                        "end of the parent time step if steady conditions are detected.");
 
   params.addParam<Real>("steady_state_tol",
                         1e-8,
-                        "The relative difference between the new "
-                        "solution and the old solution that will be "
-                        "considered to be at steady state");
+                        "The relative difference tolerance between the new solution and the old "
+                        "solution to be used for steady-state checks if sub-cycling ('sub_cycling "
+                        "= true') and 'detect_steady_state = true'.");
 
   params.addParam<bool>("output_sub_cycles", false, "If true then every sub-cycle will be output.");
   params.addParam<bool>(
@@ -355,7 +355,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
             }
           }
 
-          Real solution_change_norm = ex->getSolutionChangeNorm();
+          Real solution_change_norm = ex->computeSolutionChangeNorm();
 
           if (_detect_steady_state && _fe_problem.verboseMultiApps())
             _console << "Solution change norm: " << solution_change_norm << std::endl;

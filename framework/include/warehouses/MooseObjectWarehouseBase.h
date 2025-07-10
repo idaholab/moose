@@ -119,6 +119,7 @@ public:
   /**
    * Convenience functions for checking/getting specific objects
    */
+  bool hasObject(const std::string & name, THREAD_ID tid = 0) const;
   bool hasActiveObject(const std::string & name, THREAD_ID tid = 0) const;
   std::shared_ptr<T> getObject(const std::string & name, THREAD_ID tid = 0) const;
   std::shared_ptr<T> getActiveObject(const std::string & name, THREAD_ID tid = 0) const;
@@ -568,6 +569,17 @@ MooseObjectWarehouseBase<T>::hasActiveBoundaryObjects(BoundaryID id, THREAD_ID t
   checkThreadID(tid);
   const auto iter = _active_boundary_objects[tid].find(id);
   return iter != _active_boundary_objects[tid].end();
+}
+
+template <typename T>
+bool
+MooseObjectWarehouseBase<T>::hasObject(const std::string & name, THREAD_ID tid /* = 0*/) const
+{
+  checkThreadID(tid);
+  for (const auto & object : _all_objects[tid])
+    if (object->name() == name)
+      return true;
+  return false;
 }
 
 template <typename T>

@@ -411,6 +411,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _dt_old(declareRestartableData<Real>("dt_old")),
     _need_to_add_default_nonlinear_convergence(false),
     _need_to_add_default_multiapp_fixed_point_convergence(false),
+    _need_to_add_default_steady_convergence(false),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
     _linear_systems(_num_linear_sys, nullptr),
@@ -2542,6 +2543,17 @@ FEProblemBase::addDefaultMultiAppFixedPointConvergence(const InputParameters & p
   addConvergence(class_name, getMultiAppFixedPointConvergenceName(), params);
 }
 
+void
+FEProblemBase::addDefaultSteadyConvergence(const InputParameters & params_to_apply)
+{
+  const std::string class_name = "DefaultSteadyConvergence";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.applyParameters(params_to_apply);
+  params.applyParameters(parameters());
+  params.set<bool>("added_as_default") = true;
+  addConvergence(class_name, getSteadyConvergenceName(), params);
+}
+
 bool
 FEProblemBase::hasFunction(const std::string & name, const THREAD_ID tid)
 {
@@ -2602,11 +2614,15 @@ FEProblemBase::hasConvergence(const std::string & name, const THREAD_ID tid) con
 Convergence &
 FEProblemBase::getConvergence(const std::string & name, const THREAD_ID tid) const
 {
-  auto * const ret = dynamic_cast<Convergence *>(_convergences.getActiveObject(name, tid).get());
-  if (!ret)
-    mooseError("The Convergence object '", name, "' does not exist.");
-
-  return *ret;
+  if (_convergences.hasActiveObject(name, tid))
+    return *_convergences.getActiveObject(name, tid);
+  else
+  {
+    if (_convergences.hasObject(name, tid))
+      mooseError("The Convergence object '", name, "' exists but is not active.");
+    else
+      mooseError("The Convergence object '", name, "' does not exist.");
+  }
 }
 
 const std::vector<std::shared_ptr<Convergence>> &
@@ -9053,6 +9069,12 @@ FEProblemBase::setMultiAppFixedPointConvergenceName(const ConvergenceName & conv
   _multiapp_fixed_point_convergence_name = convergence_name;
 }
 
+void
+FEProblemBase::setSteadyConvergenceName(const ConvergenceName & convergence_name)
+{
+  _steady_convergence_name = convergence_name;
+}
+
 const std::vector<ConvergenceName> &
 FEProblemBase::getNonlinearConvergenceNames() const
 {
@@ -9092,6 +9114,15 @@ FEProblemBase::getMultiAppFixedPointConvergenceName() const
     return _multiapp_fixed_point_convergence_name.value();
   else
     mooseError("The fixed point convergence name has not been set.");
+}
+
+const ConvergenceName &
+FEProblemBase::getSteadyConvergenceName() const
+{
+  if (_steady_convergence_name)
+    return _steady_convergence_name.value();
+  else
+    mooseError("The steady convergence name has not been set.");
 }
 
 void
