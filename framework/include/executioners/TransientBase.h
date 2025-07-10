@@ -303,6 +303,8 @@ private:
 
   /// The timestep we fail and repeat if --test-restep is enabled
   std::optional<int> _test_restep_step;
+  /// If the time is greater than this then we fail and repeat if --test-restep is enabled
+  std::optional<Real> _test_restep_time;
   /// Whether or not the last timestep we solved is being repeated with --test-restep
   bool _testing_restep;
 };

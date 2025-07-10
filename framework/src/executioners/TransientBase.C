@@ -219,20 +219,25 @@ TransientBase::TransientBase(const InputParameters & parameters)
   {
     if (_problem.shouldSolve())
     {
-      // Try to infer the number of steps from end_time, start_time, and dt
-      unsigned int num_steps_guess =
-          !parameters.isParamSetByAddParam("dt") && !parameters.isParamSetByAddParam("end_time")
-              ? std::ceil((_end_time - _start_time) / getParam<Real>("dt"))
-              : std::numeric_limits<unsigned int>::max();
-      // Now get the smaller of this one versus the one that might be explicitly set
-      num_steps_guess = std::min(_num_steps, num_steps_guess);
-      // If the number of steps still doesn't make any sense, set it to 1
-      if (num_steps_guess == 0 || num_steps_guess == std::numeric_limits<unsigned int>::max())
-        num_steps_guess = 1;
-      // Set this to the midpoint
-      _test_restep_step = _t_step + (num_steps_guess + 1) / 2;
-      mooseInfo(
-          "Timestep ", *_test_restep_step, " will be forcefully retried due to --test-restep");
+      // If num_steps is defined, we'll use that to determine restep timestep
+      if (!parameters.isParamSetByAddParam("num_steps"))
+        _test_restep_step = _t_step + (_num_steps + 1) / 2;
+      // If end_time is defined, we'll use the half time to determine when to restep
+      if (!parameters.isParamSetByAddParam("end_time"))
+        _test_restep_time = (_start_time + _end_time) / 2;
+      // If neither was set or we are doing pseudo-transient, pick the second timestep
+      if ((!_test_restep_step && !_test_restep_time) || _steady_state_detection)
+        _test_restep_step = 2;
+
+      std::stringstream msg;
+      if (_test_restep_step && _test_restep_time)
+        msg << "Timestep " << *_test_restep_step << " or time " << *_test_restep_time
+            << " (whichever happens first)";
+      else if (_test_restep_step)
+        msg << "Timestep " << *_test_restep_step;
+      else if (_test_restep_time)
+        msg << "Time " << *_test_restep_time;
+      mooseInfo(msg.str(), " will be forcefully retried due to --test-restep.");
     }
     else
       mooseInfo(
@@ -360,11 +365,11 @@ TransientBase::execute()
   // This method can be overridden for user defined activities in the Executioner.
   postExecute();
 
-  if (_test_restep_step)
-    mooseError("Timestep ",
-               *_test_restep_step,
-               " was never retried because the simluation did not get to this timestep.\n\nTo "
-               "support restep testing, increase the number of timesteps.\nOtherwise, set "
+  if (_test_restep_step || _test_restep_time)
+    mooseError((_test_restep_step ? "Timestep " : "Time "),
+               (_test_restep_step ? *_test_restep_step : *_test_restep_time),
+               " was never retried because the simulation did not get to this timestep.\n\nTo "
+               "support restep testing, specify `num_steps` in the input.\nOtherwise, set "
                "`restep = false` in this test specification.");
 }
 
@@ -375,7 +380,7 @@ TransientBase::computeDT()
   // so we use the same dt
   if (_testing_restep)
   {
-    mooseAssert(!_test_restep_step, "Should not be set");
+    mooseAssert(!_test_restep_step && !_test_restep_time, "Should not be set");
     return;
   }
 
@@ -464,7 +469,7 @@ TransientBase::takeStep(Real input_dt)
   // so we use the same dt
   if (_testing_restep)
   {
-    mooseAssert(!_test_restep_step, "Should not be set");
+    mooseAssert(!_test_restep_step && !_test_restep_time, "Should not be set");
     _testing_restep = false;
   }
   else if (input_dt == -1.0)
@@ -488,7 +493,8 @@ TransientBase::takeStep(Real input_dt)
 
   // We're running with --test-restep and we have just solved
   // the timestep we are to repeat for the first time
-  if (_test_restep_step && *_test_restep_step == _t_step)
+  if ((_test_restep_step && *_test_restep_step == _t_step) ||
+      (_test_restep_time && _time >= *_test_restep_time))
   {
     mooseAssert(!_testing_restep, "Should not be set");
 
@@ -496,6 +502,7 @@ TransientBase::takeStep(Real input_dt)
     _last_solve_converged = false;
     _testing_restep = true;
     _test_restep_step.reset();
+    _test_restep_time.reset();
 
     return;
   }
