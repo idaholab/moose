@@ -192,7 +192,7 @@ MFEMSteady::addEstimator(std::shared_ptr<MFEMEstimator> estimator)
 }
 
 bool
-MFEMSteady::addRefiner(std::shared_ptr<MFEMRefiner> refiner)
+MFEMSteady::addRefiner(std::shared_ptr<MFEMThresholdRefiner> refiner)
 {
   if (refiner)
   {
