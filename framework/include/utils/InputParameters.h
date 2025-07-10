@@ -967,10 +967,16 @@ public:
   bool paramSetByUser(const std::string & name) const;
 
   /**
-   * Method returns true if the parameter was by the user
+   * Method returns true if the parameter was set by the user
    * @param name The parameter name
    */
   bool isParamSetByUser(const std::string & name) const;
+
+  /**
+   * Method returns true if the parameter is defined
+   * @param name The parameter name
+   */
+  bool isParamDefined(const std::string & name) const;
 
   ///@{
   /*
