@@ -45,6 +45,32 @@ through, but some of the important ones are:
 - `--recover`: Run all of the tests in "recovery" mode.  This runs the test halfway, stops, then
   attempts to "recover" it and run until the end.  This is very rigorous testing that tests whether
   everything in your application can work with restart/recover.
+
+- `--restep`: Run all of the tests in "restep" mode. This triggers the middle
+  timestep of the simulation to be rejected and redone. This emulates the
+  behavior of a failed solve on timestep, where it tries again with a smaller
+  timestep size; except "restep" does not change the size. The goal is to test
+  if the system retains any state after a timestep is rejected and have
+  different behavior when it is repeated, where this test mode will likely show
+  a failure. The `--restep` flag simply runs the tests with the command-line
+  option `--test-restep`, which can be used to help debug restep failures.
+  Common causes of restep failures include:
+
+  - The system could not find the middle timestep properly. Setting `num_steps`
+    to something close to the actual number of steps will resolve this.
+  - [Controls](Controls/index.md) objects executing on `timestep_end`. Consider
+    changing the test's logic to use `timestep_begin` controls instead.
+  - Unresolved dependencies between objects. Most commonly, this involves
+    function-postprocessor dependencies and cyclic dependencies between user
+    objects.
+  - Stateful class member variables in objects. Typically, this can be resolved
+    by checking if the current timestep is greater than the previous timestep
+    the object was run on. See
+    [Predictor::timestepSetup](framework/src/predictors/Predictor.C) for an
+    example.
+  - Specifying `Executioner/abort_on_solve_fail=true` in the test input or
+    specification `cli_args`.
+
 - `--opt` (The default) Builds an optimized executable suitable for running calculations.
 - `--dbg` An executable meant for use in a debugger (like gdb or lldb). Will be very slow and not meant to be used on large problems
 - `--oprof` Not normally used. Can be used for "code profiling": running your code with a utility like oprof, gprof, vtune, etc.
