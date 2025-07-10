@@ -12,8 +12,9 @@
 #pragma once
 #include "MFEMExecutioner.h"
 #include "TimeDomainProblemOperator.h"
+#include "TransientBase.h"
 
-class MFEMTransient : public Executioner, public MFEMExecutioner
+class MFEMTransient : public TransientBase, public MFEMExecutioner
 {
 public:
   static InputParameters validParams();
@@ -25,82 +26,32 @@ public:
   virtual void execute() override;
 
   virtual bool lastSolveConverged() const override { return true; };
+  virtual Real relativeSolutionDifferenceNorm() override { return 0.0; };
 
-  // virtual void computeDT();
-
-  // Methods called before and after timestepping. Not used in MFEM timesteppers
-  virtual void preStep(){};
-  virtual void postStep(){};
+  virtual std::set<TimeIntegrator *> getTimeIntegrators() const override
+  {
+    return std::set<TimeIntegrator *>{};
+  };
+  /**
+   * Get the name of the time integrator (time integration scheme) used
+   * @return string with the time integration scheme name
+   */
+  virtual std::vector<std::string> getTimeIntegratorNames() const override
+  {
+    return std::vector<std::string>();
+  };
 
   /**
    * Do whatever is necessary to advance one step.
    */
-  virtual void takeStep(mfem::real_t input_dt = -1.0);
+  virtual void takeStep(Real input_dt = -1.0) override;
 
-  /**
-   * @return The the computed dt to use for this timestep.
-   */
-  virtual mfem::real_t getDT() const { return _dt; };
-
-  /**
-   * Transient loop will continue as long as this keeps returning true.
-   */
-  virtual bool keepGoing();
-
-  /**
-   * Can be used to set the next "target time" which is a time to nail perfectly.
-   * Useful for driving MultiApps.
-   */
-  // virtual void setTargetTime(mfem::real_t target_time);
-
-  /**
-   * This is where the solve step is actually incremented.
-   */
-  virtual void incrementStepOrReject();
-
-  virtual void endStep();
-
-  /**
-   * Get the current time.
-   */
-  virtual mfem::real_t getTime() const { return _time; };
-
-  /**
-   * Get the timestep tolerance
-   * @return The timestep tolerance
-   */
-  mfem::real_t & timestepTol() { return _timestep_tolerance; }
-
-  /**
-   * Get a modifiable reference to the end time
-   * @return The end time
-   */
-  mfem::real_t & endTime() { return _end_time; }
-
-  mutable mfem::real_t _dt;     // Timestep size
-  mutable mfem::real_t _dt_old; // Previous timestep size
+  virtual void endStep(Real input_time = -1.0) override;
 
 private:
-  mfem::real_t & _time;     // Current time
-  mfem::real_t _start_time; // Start time
-  mfem::real_t _end_time;   // End time
-  mutable int _t_step;      // Current timestep index
   int _vis_steps;          // Number of cycles between each output update
   mutable bool _last_step; // Flag to check if current step is final
   std::unique_ptr<Moose::MFEM::TimeDomainProblemOperator> _problem_operator{nullptr};
-
-  /**
-   * Variables controlling termination:
-   */
-  mfem::real_t _timestep_tolerance;
-  mfem::real_t _dtmin;
-  mfem::real_t _dtmax;
-  unsigned int _num_steps;
-  bool _abort;
-  /// This parameter controls how the system will deal with _dt <= _dtmin
-  /// If true, the time stepper is expected to throw an error
-  /// If false, the executioner will continue through EXEC_FINAL
-  const bool _error_on_dtmin;
 };
 
 #endif
