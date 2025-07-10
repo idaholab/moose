@@ -13,14 +13,14 @@ reference to the estimator.
 
 Making all the methods dummies for now.
 */
-class MFEMRefiner : public MFEMGeneralUserObject
+class MFEMThresholdRefiner : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  MFEMRefiner(const InputParameters & params);
+  MFEMThresholdRefiner(const InputParameters & params);
 
-  virtual ~MFEMRefiner() = default;
+  virtual ~MFEMThresholdRefiner() = default;
 
   void setUp(std::shared_ptr<MFEMEstimator>);
 
