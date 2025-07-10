@@ -43,8 +43,7 @@ MFEMTransient::constructProblemOperator()
 void
 MFEMTransient::init()
 {
-  _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
-  _mfem_problem.initialSetup();
+  TransientBase::init();
 
   // Set up initial conditions
   _problem_data.eqn_system->Init(
