@@ -135,8 +135,6 @@ TimeSequenceStepperBase::computeInitialDT()
 Real
 TimeSequenceStepperBase::computeDT()
 {
-  const auto standard_dt = _time_sequence[_current_step + 1] - _time_sequence[_current_step];
-
   if (_use_last_dt_after_last_t)
   {
     // last *provided* time value index; actual last index corresponds to end time
@@ -144,10 +142,10 @@ TimeSequenceStepperBase::computeDT()
     if (_current_step + 1 > last_t_index)
       return _time_sequence[last_t_index] - _time_sequence[last_t_index - 1];
     else
-      return standard_dt;
+      return _time_sequence[_current_step + 1] - _time_sequence[_current_step];
   }
   else
-    return standard_dt;
+    return _time_sequence[_current_step + 1] - _time_sequence[_current_step];
 }
 
 Real
