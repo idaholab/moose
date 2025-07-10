@@ -12,6 +12,7 @@
 #include "MFEMProblem.h"
 #include "MFEMInitialCondition.h"
 #include "MFEMVariable.h"
+#include "MFEMComplexVariable.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
 #include "libmesh/string_to_enum.h"
@@ -90,14 +91,12 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
 void
 MFEMProblem::addMFEMNonlinearSolver()
 {
-  auto nl_solver = std::make_shared<mfem::NewtonSolver>(getProblemData().comm);
+  getProblemData().nonlinear_solver = std::make_shared<mfem::NewtonSolver>(getProblemData().comm);
 
   // Defaults to one iteration, without further nonlinear iterations
-  nl_solver->SetRelTol(0.0);
-  nl_solver->SetAbsTol(0.0);
-  nl_solver->SetMaxIter(1);
-
-  getProblemData().nonlinear_solver = nl_solver;
+  getProblemData().nonlinear_solver->SetRelTol(0.0);
+  getProblemData().nonlinear_solver->SetAbsTol(0.0);
+  getProblemData().nonlinear_solver->SetMaxIter(1);
 }
 
 void
@@ -190,7 +189,8 @@ MFEMProblem::addGridFunction(const std::string & var_type,
                              const std::string & var_name,
                              InputParameters & parameters)
 {
-  if (var_type == "MFEMVariable")
+
+  if (var_type == "MFEMVariable" || var_type == "MFEMComplexVariable")
   {
     // Add MFEM variable directly.
     FEProblemBase::addUserObject(var_type, var_name, parameters);
@@ -206,14 +206,35 @@ MFEMProblem::addGridFunction(const std::string & var_type,
   }
 
   // Register gridfunction.
-  MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
-  getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
-  if (mfem_variable.getFESpace().isScalar())
-    getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
-        var_name, mfem_variable.getGridFunction().get());
-  else
+  if (var_type == "MFEMComplexVariable")
+  {
+    MFEMComplexVariable & mfem_variable = getUserObject<MFEMComplexVariable>(var_name);
+    getProblemData().complex_gridfunctions.Register(var_name,
+                                                    mfem_variable.getComplexGridFunction());
+    if (mfem_variable.getFESpace().isScalar())
+    {
+      getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
+          var_name + "_real", &mfem_variable.getComplexGridFunction()->real());
+      getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
+          var_name + "_imag", &mfem_variable.getComplexGridFunction()->imag());
+    }
+    else
+      getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
+          var_name + "_real", &mfem_variable.getComplexGridFunction()->real());
     getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
-        var_name, mfem_variable.getGridFunction().get());
+        var_name + "_imag", &mfem_variable.getComplexGridFunction()->imag());
+  }
+  else // must be real, but may have been set up indirectly from a MOOSE variable
+  {
+    MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
+    getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+    if (mfem_variable.getFESpace().isScalar())
+      getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
+          var_name, mfem_variable.getGridFunction().get());
+    else
+      getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
+          var_name, mfem_variable.getGridFunction().get());
+  }
 }
 
 void

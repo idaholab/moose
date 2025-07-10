@@ -20,12 +20,19 @@ MFEMScalarDirichletBC::validParams()
   params.addClassDescription("Applies a Dirichlet condition to a scalar variable.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "0.", "The coefficient setting the values on the essential boundary");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient_imag",
+      "The imaginary part of the coefficient setting the values on the essential boundary");
+
   return params;
 }
 
 MFEMScalarDirichletBC::MFEMScalarDirichletBC(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
-    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient"))),
+    _coef_imag(isParamValid("coefficient_imag")
+                   ? getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient_imag"))
+                   : getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
 {
 }
 
@@ -33,6 +40,12 @@ void
 MFEMScalarDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
 {
   gridfunc.ProjectBdrCoefficient(_coef, getBoundaryMarkers());
+}
+
+void
+MFEMScalarDirichletBC::ApplyComplexBC(mfem::ParComplexGridFunction & gridfunc)
+{
+  gridfunc.ProjectBdrCoefficient(_coef, _coef_imag, getBoundaryMarkers());
 }
 
 #endif

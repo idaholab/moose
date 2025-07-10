@@ -22,10 +22,12 @@ public:
 
   MFEMVectorFEDomainLFKernel(const InputParameters & parameters);
 
-  virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
+  virtual std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
+  createLFIntegrator() override;
 
 protected:
   mfem::VectorCoefficient & _vec_coef;
+  mfem::VectorCoefficient & _vec_coef_imag;
 };
 
 #endif
