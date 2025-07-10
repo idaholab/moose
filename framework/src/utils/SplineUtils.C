@@ -192,10 +192,13 @@ closestPoints(const libMesh::Point & point_1,
   const auto n2_vec = direction_2.cross(n_vec);
 
   // calculate closest points
-  libMesh::Point point_a =
-      point_1 + (point_2 - point_1) * n2_vec / (direction_1 * (n2_vec)) * direction_1;
-  libMesh::Point point_b =
-      point_2 + (point_1 - point_2) * n1_vec / (direction_2 * (n1_vec)) * direction_2;
+  // take absolute value to ensure specified directions are honored
+  libMesh::Real point_a_dir_scalar =
+      std::abs((point_2 - point_1) * n2_vec / (direction_1 * n2_vec));
+  libMesh::Real point_b_dir_scalar =
+      std::abs((point_1 - point_2) * n1_vec / (direction_2 * n1_vec));
+  libMesh::Point point_a = point_1 + point_a_dir_scalar * direction_1;
+  libMesh::Point point_b = point_2 + point_b_dir_scalar * direction_2;
 
   // points will be returned as a vector containing two points
   const auto closest_points = std::make_pair(point_a, point_b);
