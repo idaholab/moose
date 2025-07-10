@@ -19,11 +19,17 @@ import json
 lines = [line.rstrip() for line in sys.stdin]
 
 commands = []
-for file in lines[3].split() :
-  commands.append({
-    'directory' : lines[0],
-    'command' : "%s %s -c %s" % (lines[1], lines[2], file),
-    'file' : file
-  })
+for i in range(0, len(lines), 4):
+  directory = lines[i]
+  compiler  = lines[i + 1]
+  flags     = lines[i + 2]
+  sources   = lines[i + 3].split()
+
+  for file in sources:
+    commands.append({
+      'directory': directory,
+      'command': f"{compiler} {flags} -c {file}",
+      'file': file
+    })
 
 print(json.dumps(commands, indent=2))
