@@ -1,0 +1,91 @@
+[Tests]
+  issues = '#30126'
+  design = 'TestHarness.md'
+  [restep]
+    requirement = 'The system shall be able to, when requested, repeat the'
+    [num_steps]
+      type = RunApp
+      input = transient.i
+      cli_args = '--test-restep restep_step=3 Executioner/num_steps=5'
+      expect_out = 'Timestep 3 will be forcefully retried due to --test-restep.'
+      restep = false
+      recover = false
+      detail = 'middle timestep,'
+    []
+    [end_time]
+      type = RunApp
+      input = transient.i
+      cli_args = '--test-restep restep_step=3 Executioner/end_time=5'
+      expect_out = 'Time 2.5 will be forcefully retried due to --test-restep.'
+      restep = false
+      recover = false
+      detail = 'timestep at the middle time,'
+    []
+    [end_time_with_start_time]
+      type = RunApp
+      input = transient.i
+      cli_args = '--test-restep restep_step=4 Executioner/start_time=-2 Executioner/end_time=5'
+      expect_out = 'Time 1.5 will be forcefully retried due to --test-restep.'
+      restep = false
+      recover = false
+      detail = 'timestep at the middle time when the start time is non-zero,'
+    []
+    [num_steps_first]
+      type = RunApp
+      input = transient.i
+      cli_args = '--test-restep restep_step=3 Executioner/num_steps=5 Executioner/end_time=10 Executioner/dt=1'
+      expect_out = 'Timestep 3 or time 5 \(whichever happens first\) will be forcefully retried due to --test-restep.'
+      restep = false
+      recover = false
+      detail = 'middle timestep if it is before the middle time,'
+    []
+    [end_time_first]
+      type = RunApp
+      input = transient.i
+      cli_args = '--test-restep restep_step=3 Executioner/num_steps=10 Executioner/end_time=5 Executioner/dt=1'
+      expect_out = 'Timestep 5 or time 2.5 \(whichever happens first\) will be forcefully retried due to --test-restep.'
+      restep = false
+      recover = false
+      detail = 'middle time if it is before the middle timestep,'
+    []
+    [pseudo_transient]
+      type = RunApp
+      input = transient.i
+      cli_args = '--test-restep restep_step=2 Executioner/num_steps=10 Executioner/steady_state_detection=true Executioner/steady_state_tolerance=1e-3'
+      expect_out = 'Timestep 2 will be forcefully retried due to --test-restep.'
+      restep = false
+      recover = false
+      detail = 'and the second timestep if performing a pseudo-transient.'
+    []
+  []
+  [no_restep]
+    requirement = 'The system shall perform a normal simulation even if a timestep repeat is requested if'
+    [steady]
+      type = RunApp
+      input = steady.i
+      cli_args = '--test-restep'
+      expect_out = 'This Executioner does not support --test-restep; solve will behave as normal'
+      restep = false
+      recover = false
+      detail = 'the type of execution does not support the behavior'
+    []
+    [transient_no_solve]
+      type = RunApp
+      input = transient.i
+      cli_args = '--test-restep Problem/solve=false Executioner/num_steps=5'
+      expect_out = 'A timestep is not being retried with --test-restep because Problem/solve=false.'
+      restep = false
+      recover = false
+      detail = 'or there is no solve performed.'
+    []
+  []
+  [error_no_restep]
+    type = RunException
+    input = transient.i
+    cli_args = '--test-restep Executioner/steady_state_detection=true Executioner/steady_state_tolerance=10'
+    expect_err = 'Timestep 2 was never retried because the simulation did not get to this timestep.'
+    restep = false
+    recover = false
+    requirement = 'The system shall throw an error if a repeated timestep was requested and viable, but never occurred.'
+  []
+[]
