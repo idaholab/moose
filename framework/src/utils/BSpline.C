@@ -98,8 +98,7 @@ BSpline::CdBBasis(const libMesh::Real t, const unsigned int i, const unsigned in
 {
   mooseAssert(i < _knot_vector.size() - 1, "knot index must stay within bounds");
   mooseAssert(_knot_vector[i] <= _knot_vector[i + 1],
-              "Knot vector ill-formed. Check that values are ascending. knot_vector=" +
-                  Moose::stringify(_knot_vector));
+              "Something is not right with knot vector " + Moose::stringify(_knot_vector));
   if (j == 0)
   {
     libMesh::Real basis_return = ((t < _knot_vector[i + 1]) && (_knot_vector[i] <= t)) ? 1 : 0;
