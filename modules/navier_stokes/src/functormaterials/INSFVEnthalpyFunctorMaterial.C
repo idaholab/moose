@@ -92,6 +92,7 @@ INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters
     addFunctorProperty<ADReal>("cp_temp",
                                [&h](const auto & r, const auto & t) -> ADReal { return h(r, t); });
   }
+  // We did specify h_in, likely because solving for specific enthalpy
   else if (_h)
   {
     addFunctorProperty<ADReal>(NS::enthalpy_density,
@@ -101,6 +102,7 @@ INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters
     addFunctorProperty<ADReal>(NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),
                                [this](const auto & r, const auto & t) { return _h->dot(r, t); });
   }
+  // We did not specify h, or assume a constant cp, we are solving for temperature but using h(p,T)
   else
   {
     addFunctorProperty<ADReal>(
