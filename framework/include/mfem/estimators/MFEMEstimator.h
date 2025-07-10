@@ -4,6 +4,7 @@
 
 #include "MFEMGeneralUserObject.h"
 #include "MFEMContainers.h"
+#include "MFEMVariable.h"
 
 /*
 Class to construct an MFEM estimator to apply to the equation system.
@@ -19,7 +20,7 @@ public:
   virtual ~MFEMEstimator() = default;
 
   // Get name of the test variable labelling the weak form this kernel is added to
-  const std::string & getTestVariableName() const { return _test_var_name; }
+  const std::string & getTestVariableName() const { return _variable_name; }
 
   // Not necessary anymore to return anything. Make it a bool to indicate if
   // the process succeeded.
@@ -37,9 +38,12 @@ public:
 
 protected:
   // Name of (the test variable associated with) the weak form that the kernel is applied to.
-  std::string _test_var_name;
+  std::string _variable_name;
+
+  // reference to the above variable (for fetching the the FESpace from)
+  const MFEMVariable & _variable;
+
   std::string _kernel_name;
-  std::string _fe_space_name;
   std::shared_ptr<mfem::ErrorEstimator> _error_estimator;
 };
 
