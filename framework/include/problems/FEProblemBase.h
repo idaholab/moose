@@ -779,11 +779,17 @@ public:
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
 
 #ifdef MOOSE_HAVE_KOKKOS
+  /**
+   * Get all Kokkos systems that are associated with MOOSE nonlinear and auxiliary systems
+   * @returns The array of Kokkos systems
+   */
+  ///{@
   Moose::Kokkos::Array<Moose::Kokkos::System> & getKokkosSystems() { return _kokkos_systems; }
   const Moose::Kokkos::Array<Moose::Kokkos::System> & getKokkosSystems() const
   {
     return _kokkos_systems;
   }
+  ///@}
 #endif
 
   /**

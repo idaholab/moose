@@ -26,7 +26,7 @@ MooseInit::initGPUs()
 {
   unsigned int num_gpus = Kokkos::num_devices();
 
-  bool has_gpus = comm().verify(num_gpus > 0);
+  bool has_gpus = comm().verify(num_gpus > 0) && num_gpus > 0;
 
   if (!has_gpus)
     return;
