@@ -1,0 +1,22 @@
+[Tests]
+  design = 'syntax/Executioner/TimeSteppers/index.md AddTimeStepperAction.md '
+  'ComposeTimeStepperAction.md'
+
+ [time_stepper_system]
+  requirement = 'The system shall support the ability to use multiple time steppers on MFEM Problems'
+    [multiple_time_steppers]
+      type = CSVDiff
+      input = 'mfem_multiple_timesteppers.i'
+      csvdiff = 'mfem_multiple_timesteppers.csv'
+      detail = 'using the minimum time step size of input time steppers,'
+    []
+
+    [multiple_time_timesequence]
+      type = CSVDiff
+      recover = false
+      input = 'mfem_multiple_timesequences.i'
+      csvdiff = 'mfem_multiple_timesequences.csv'
+      detail = 'with specific times to hit and still hit all of them,'
+    []
+  []
+[]
