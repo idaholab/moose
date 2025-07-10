@@ -1,0 +1,11 @@
+[Tests]
+  [plastic_heat_simo_hughes]
+    type = 'CSVDiff'
+    input = 'plastic_heat_simo_hughes.i'
+    csvdiff = 'plastic_heat_simo_hughes_out.csv'
+    design = 'ComputeSimoHughesJ2PlasticHeatEnergy.md'
+    issues = '#30640'
+    requirement = 'The system shall correctly compute plastic heat generation using the Simo-Hughes J2 plasticity model.'
+    rel_err = 1e-5
+  []
+[]
