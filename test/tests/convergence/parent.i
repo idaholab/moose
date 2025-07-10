@@ -67,13 +67,6 @@ T_ambient = 300.0
   []
 []
 
-[Convergence]
-  [fp_conv]
-    type = DefaultMultiAppFixedPointConvergence
-    fixed_point_max_its = 15
-  []
-[]
-
 [Executioner]
   type = Steady
   solve_type = NEWTON

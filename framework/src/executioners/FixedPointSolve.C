@@ -460,6 +460,8 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 bool
 FixedPointSolve::examineFixedPointConvergence(bool & converged)
 {
+  _problem.execute(EXEC_MULTIAPP_FIXED_POINT_CONVERGENCE);
+
   auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
   const auto status = convergence.checkConvergence(_fixed_point_it);
   switch (status)
