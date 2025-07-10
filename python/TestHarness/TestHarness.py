@@ -192,7 +192,9 @@ class TestHarness:
     # 4 - Added 'validation' (tests/*/tests/validation) to Job output if set
     # 5 - Added validation data types (tests/*/tests/data/type) to Job output if set
     # 6 - Added 'testharness/validation_version'
-    RESULTS_VERSION = 6
+    # 7 - Moved test output files from test/*/tests/*/tester/output_files to
+    #     job output in test/*/tests/*/output_files
+    RESULTS_VERSION = 7
 
     # Validation version history:
     # 1 - Initial tracking of version

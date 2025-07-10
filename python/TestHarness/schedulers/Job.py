@@ -349,9 +349,16 @@ class Job(OutputInterface):
 
     def getOutputFiles(self, options):
         """ Wrapper method to return getOutputFiles (absolute path) """
+        all_files = self.__tester.getOutputFiles(options)
+        for case in self.validation_cases:
+            all_files += case.getOutputFiles()
+        all_files = list(set(all_files))
+
         files = []
-        for file in self.__tester.getOutputFiles(options):
-            files.append(os.path.join(self.__tester.getTestDir(), file))
+        for file in all_files:
+            if not os.path.isabs(file):
+                file = os.path.join(self.__tester.getTestDir(), file)
+            files.append(file)
         return files
 
     def getMaxTime(self):
@@ -542,7 +549,7 @@ class Job(OutputInterface):
             return []
 
         init_kwargs = {'params': self.__tester.parameters(),
-                       'tester_outputs': self.getOutputFiles(self.options)}
+                       'tester_outputs': self.__tester.getOutputFiles(self.options)}
         cwd = os.getcwd()
         os.chdir(self.getTestDir())
         try:
@@ -552,6 +559,7 @@ class Job(OutputInterface):
             output = util.outputHeader('Python exception encountered in validation case') + trace
             self.setStatus(self.error, 'VALIDATION INIT EXCEPTION')
             self.appendOutput(output)
+            return []
         finally:
             os.chdir(cwd)
 
@@ -894,9 +902,10 @@ class Job(OutputInterface):
         # Base job data
         job_data = {'status': status,
                     'timing': self.timer.totalTimes(),
-                    'tester': self.getTester().getResults(self.options)}
+                    'tester': self.getTester().getResults(self.options),
+                    'output_files': self.getOutputFiles(self.options)}
         if self.hasSeperateOutput():
-            job_data['output_files'] = self.getCombinedSeparateOutputPaths()
+            job_data['output'] = self.getCombinedSeparateOutputPaths()
         else:
             job_data['output'] = self.getAllOutput()
 
