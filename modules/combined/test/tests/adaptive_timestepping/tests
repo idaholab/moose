@@ -5,7 +5,6 @@
     type = 'Exodiff'
     input = 'adapt_tstep_function_change.i'
     exodiff = 'adapt_tstep_function_change_out.e'
-    cli_args = 'Executioner/num_steps=150' # Approximate number of steps for restep to find mid-time.
     rel_err = 9e-06
     requirement = "The system shall allow for an adaptively computed time step to be limited based on a permissible change in the value of a function over a step."
   [../]
@@ -14,7 +13,6 @@
     type = 'Exodiff'
     input = 'adapt_tstep_function_force_step.i'
     exodiff = 'adapt_tstep_function_force_step_out.e'
-    cli_args = 'Executioner/num_steps=10' # Approximate number of steps for restep to find mid-time.
     rel_err = 9e-06
     requirement = "The system shall allow for forcing time steps to be taken at the knots of a time-dependent function."
   [../]

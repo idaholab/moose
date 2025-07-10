@@ -219,7 +219,7 @@
   [../]
 
   start_time = 0.0
-  num_steps = 100
+  num_steps = 1000
   end_time = 8.0
 [] # Executioner
 

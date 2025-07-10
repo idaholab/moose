@@ -117,7 +117,7 @@
 [Executioner]
   type = Transient
   solve_type = Newton
-  num_steps = 25
+  dt = 1E0
   end_time = 1E5
 
   [./TimeStepper]
