@@ -219,7 +219,18 @@ Vector::close()
 
   Kokkos::fence();
 
-#else
+#endif
+
+  // Copy to the host vector if needed
+
+  if (_is_host)
+    _local.copy(MemcpyKind::DEVICE_TO_HOST);
+
+  // Restore the PETSc vector
+
+  restore();
+
+#ifndef DEVICE_ASSEMBLY
 
   _ghost.copy(MemcpyKind::DEVICE_TO_HOST);
 
@@ -231,15 +242,6 @@ Vector::close()
                    ADD_VALUES));
 
 #endif
-
-  // Copy to the host vector if needed
-
-  if (_is_host)
-    _local.copy(MemcpyKind::DEVICE_TO_HOST);
-
-  // Restore the PETSc vector
-
-  restore();
 }
 
 KOKKOS_FUNCTION void
