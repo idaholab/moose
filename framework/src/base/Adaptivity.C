@@ -123,6 +123,10 @@ Adaptivity::setErrorEstimator(const MooseEnum & error_estimator_name)
   else
     mooseError(std::string("Unknown error_estimator selection: ") +
                std::string(error_estimator_name));
+
+  // To store smoothness quantity of each element for hp adaptivity
+  if (_hp_refinement_flag)
+    _smoothness_estimator = std::make_unique<SmoothnessEstimator>();
 }
 
 void
@@ -130,6 +134,8 @@ Adaptivity::setErrorNorm(SystemNorm & sys_norm)
 {
   mooseAssert(_error_estimator, "error_estimator not initialized. Did you call init_adaptivity()?");
   _error_estimator->error_norm = sys_norm;
+  if (_hp_refinement_flag)
+    _smoothness_estimator->error_norm = sys_norm;
 }
 
 bool
@@ -217,7 +223,6 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     // Moving some of h flagged elements to p flagged
     HPCoarsenTest hpselector;
     if (_hp_refinement_flag){
-      _smoothness_estimator = std::make_unique<SmoothnessEstimator>();
       _smoothness_estimator->estimate_error(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(), *_smoothness);
       hpselector.select_refinement(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(), *_smoothness);
     }
@@ -225,13 +230,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     if (_displaced_problem){
       // Reuse the error vector and refine the displaced mesh
       _displaced_mesh_refinement->flag_elements_by_error_fraction(*_error);
-
-    if (_hp_refinement_flag){
-          _smoothness_estimator = std::make_unique<SmoothnessEstimator>();
-          _smoothness_estimator->estimate_error(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(), *_smoothness);
-          hpselector.select_refinement(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(), *_smoothness);
-        }
-      }
+    }
   }
 
   // If the DisplacedProblem is active, undisplace the DisplacedMesh

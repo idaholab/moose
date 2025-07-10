@@ -37,7 +37,7 @@ AdaptivityAction::validParams()
   InputParameters params = Moose::commonAdaptivityParams();
   params.addClassDescription(
       "Add libMesh based adaptation schemes via the Executioner/Adaptivity input syntax.");
-  MooseEnum estimators("KellyErrorEstimator LaplacianErrorEstimator PatchRecoveryErrorEstimator",
+  MooseEnum estimators("KellyErrorEstimator LaplacianErrorEstimator PatchRecoveryErrorEstimator SmoothnessEstimator",
                        "KellyErrorEstimator");
 
   params.addParam<unsigned int>(

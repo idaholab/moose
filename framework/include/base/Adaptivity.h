@@ -76,7 +76,7 @@ public:
    * Set the error estimator
    *
    * @param error_estimator_name the name of the error estimator (currently: Laplacian, Kelly, and
-   * PatchRecovery)
+   * PatchRecovery. The local smoothness is also stored as an error estimator)
    */
   void setErrorEstimator(const MooseEnum & error_estimator_name);
 
