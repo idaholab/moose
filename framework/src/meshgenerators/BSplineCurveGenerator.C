@@ -97,10 +97,10 @@ BSplineCurveGenerator::generate()
 
   // discretize t and evaluate points, assemble into nodes inside loop
   unsigned int n_ts =
-      _num_elements * _order + 1; // need to scale the number of elements by the order
+      _num_elements * _order + 1;  // need to scale the number of elements by the order
   std::vector<Node *> nodes(n_ts); // store evaluated nodes
   libMesh::Real t_current;         // store current t (parameter) value
-  std::vector<Point> eval_points; // store evaluated spline points
+  std::vector<Point> eval_points;  // store evaluated spline points
   for (const auto i : make_range(n_ts))
   {
     t_current = ((double)i / (double)(n_ts - 1)); // n_ts-1 because max(t_current) must be 1.0
