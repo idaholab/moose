@@ -8,5 +8,5 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-rm compile_commands.json
+rm -f compile_commands.json
 MOOSE_HEADER_SYMLINKS=false MOOSE_UNITY=false make compile_commands.json
