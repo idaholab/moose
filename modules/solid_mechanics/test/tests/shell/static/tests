@@ -20,6 +20,7 @@
     input = 'large_strain_m_40_AD.i'
     exodiff = 'large_strain_m_40_AD_out.e'
     requirement = "The mechanics system shall accurately compute the deflection of a cantilever beam when it is modeled using shell elements under large strain and rotations are included."
+    capabilities = 'method!=dbg'
   []
   [beam_bending_jacobian]
     type = 'PetscJacobianTester'
@@ -53,6 +54,7 @@
     input = pinched_cylinder_symm.i
     csvdiff = 'pinched_cylinder_symm_out.csv'
     requirement = "The mechanics system shall converge to the analytic displacement of a cylinder modeled with shell elements, with point loading applied in the x direction."
+    capabilities = 'method!=dbg'
   []
   [pinched_cylinder_y]
     type = 'CSVDiff'
@@ -60,6 +62,7 @@
     cli_args = "DiracKernels/point/variable=disp_y DiracKernels/point/point='0 1 1' Outputs/file_base=pinched_cylinder_symm_y_out"
     csvdiff = 'pinched_cylinder_symm_y_out.csv'
     requirement = "The mechanics system shall converge to the analytic displacement of a cylinder modeled with shell elements, with point loading applied in the y direction."
+    capabilities = 'method!=dbg'
   []
   [inclined_plane]
     type = 'Exodiff'
@@ -110,18 +113,21 @@
     input = pinched_cylinder_symm_unstructured.i
     exodiff = 'pinched_cylinder_symm_unstructured_out.e'
     requirement = "Shell elements should have compatible stresses even for unstructured meshes."
+    capabilities = 'method!=dbg'
   []
   [pinched_cylinder_symm_local_stress]
     type = 'Exodiff'
     input = pinched_cylinder_symm_local_stress.i
     exodiff = 'pinched_cylinder_symm_local_stress_out.e'
     requirement = "Shell elements should have compatible local coordinates."
+    capabilities = 'method!=dbg'
   []
   [plate_concentrated_loads]
     type = 'Exodiff'
     input = plate_concentrated_loads.i
     exodiff = 'plate_concentrated_loads_out.e'
     requirement = "Local force and bending moments should be calculated correctly on the shell element"
+    capabilities = 'method!=dbg'
   []
   [inclined_straintest_local_stress]
     type = 'Exodiff'
@@ -139,12 +145,14 @@
     type = 'Exodiff'
     input = tank_shell.i
     exodiff = 'tank_shell_out.e'
+    capabilities = 'method!=dbg'
     requirement = "The mechanics system shall correctly apply pressure loads to a curved geometry represented by shell elements."
   []
   [tank_shell_rotated]
     type = 'Exodiff'
     input = tank_shell_rotated.i
     exodiff = 'tank_shell_rotated_out.e'
+    capabilities = 'method!=dbg'
     requirement = "The mechanics system shall correctly apply pressure loads to a curved geometry represented by shell elements, in a rotated configuration."
   []
   [scordelis_lo_roof_shell]
@@ -152,6 +160,7 @@
     input = scordelis_lo_roof_shell.i
     exodiff = 'scordelis_lo_roof_shell_out.e'
     requirement = "The mechanics system shall correctly model a benchmark problem consisting of a roof-like geometry with a distributed load, modeled with shell elements."
+    capabilities = 'method!=dbg'
   []
   [clamped_plate_flat]
     type = 'Exodiff'

@@ -23,6 +23,7 @@
     requirement = 'The system shall avoid regression in a simple mechanical problem where a strain field '
                   'modifies the stiffness of the material through CompositeElasticityTensor. This '
                   'test also serves as a reference for UMAT external field verification'
+    capabilities = 'method!=dbg'
   []
   [dpredef]
     type = 'Exodiff'
@@ -61,6 +62,7 @@
                   'two external fields (not temperature) affecting material behavior '
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
+    capabilities = 'method!=dbg'
   []
   [predef_multiple_reference]
     type = 'Exodiff'
@@ -71,6 +73,7 @@
     requirement = 'The system shall avoid regression in a simple mechanical problem where two strain fields '
                   'modifies the stiffness of the material through CompositeElasticityTensor. This '
                   'test also serves as a reference for UMAT external field verification'
+    capabilities = 'method!=dbg'
   []
   [predef_multiple_mat]
     type = 'Exodiff'
@@ -84,6 +87,7 @@
                   'two external material properties affecting material behavior '
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
+    capabilities = 'method!=dbg'
   []
   [predef_multiple_reference_mat]
     type = 'Exodiff'
@@ -94,5 +98,6 @@
     requirement = 'The system shall avoid regression in a simple mechanical problem where two strain fields '
                   'modifies the stiffness of the material through CompositeElasticityTensor. This '
                   'test also serves as a reference for UMAT external material property verification'
+    capabilities = 'method!=dbg'
   []
 []

@@ -8,6 +8,7 @@
                 Materials/stress/type=ADComputeLinearElasticStress'
     design = 'source/materials/ADComputeAxisymmetricRZSmallStrain.md'
     requirement = 'The ADComputeAxisymmetricRZSmallStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small total axisymmetric strain formulation.'
+    capabilities = 'method!=dbg'
   [../]
   [./axisym_incremental_strain]
     type = Exodiff
@@ -19,6 +20,7 @@
     prereq = 'axisym_smallstrain'
     design = 'source/materials/ADComputeAxisymmetricRZIncrementalStrain.md'
     requirement = 'The ADComputeAxisymmetricRZIncrementalStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation.'
+    capabilities = 'method!=dbg'
   [../]
   [./axisym_finitestrain]
     type = Exodiff
@@ -27,6 +29,7 @@
     rel_err = 5E-4
     design = 'source/materials/ADComputeAxisymmetricRZFiniteStrain.md'
     requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation.'
+    capabilities = 'method!=dbg'
   [../]
   [./3D_RZ_finitestrain]
     type = Exodiff
@@ -48,6 +51,7 @@
     abs_zero = 1e-8
     design = 'source/materials/ADComputeAxisymmetricRZFiniteStrain.md'
     requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension.'
+    capabilities = 'method!=dbg'
   [../]
   [./axisym_resid_Bbar]
     type = Exodiff
@@ -59,6 +63,7 @@
     prereq = 'axisym_resid'
     design = 'source/materials/ADComputeAxisymmetricRZFiniteStrain.md VolumetricLocking.md'
     requirement = 'The ADComputeAxisymmetricRZFiniteStrain class shall compute the reaction forces on the top surface of a cylinder which is loaded axially in tension when using the B-bar volumetric locking correction.'
+    capabilities = 'method!=dbg'
   [../]
   [./axisymmetric_vlc_centerline_pp]
     type = CSVDiff

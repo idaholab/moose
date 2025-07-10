@@ -7,6 +7,7 @@
     cli_args = "VectorPostprocessors/section_output/positions='10.0 18.0'"
     csvdiff = 'test_one_step_out_section_output_0001.csv'
     requirement = 'The system shall compute the average of the nodal displacements of a cross section defined by the user via a nodal vector.'
+    capabilities = 'method!=dbg'
   []
   [test_one_step_auto_positions]
     type = 'CSVDiff'
@@ -14,12 +15,14 @@
     cli_args = 'Outputs/file_base=test_one_step_auto_out'
     csvdiff = 'test_one_step_auto_out_section_output_0001.csv'
     requirement = 'The system shall compute the average of the nodal displacements of a cross section defined by the user via a nodal vector at automatically determined positions.'
+    capabilities = 'method!=dbg'
   []
   [test_adapt]
     type = 'CSVDiff'
     input = 'test_adapt.i'
     csvdiff = 'test_adapt_out_section_output_0001.csv test_adapt_out_section_output_0002.csv'
     requirement = 'The system shall compute the average of the nodal displacements of a cross section at automatically located points that are updated with mesh adaptivity.'
+    capabilities = 'method!=dbg'
   []
   [test_adapt_err]
     type = 'RunException'
@@ -28,6 +31,7 @@
     expect_err = "Node counts do not match for all axial positions. If this behavior is desired to "
                  "accommodate nonuniform meshes, set 'require_equal_node_counts=false'"
     requirement = 'The system shall compute the average of the nodal displacements of a cross section at automatically located points that are updated with mesh adaptivity and raise an error if node counts do not match for all axial positions.'
+    capabilities = 'method!=dbg'
   []
   [test_one_step_empty_positions_err]
     type = 'RunException'
@@ -56,12 +60,14 @@
     input = 'test_one_step_two_ducts.i'
     csvdiff = 'test_one_step_two_ducts_out_section_output_0001.csv test_one_step_two_ducts_out_section_output_two_0001.csv'
     requirement = 'The system shall compute the average of the nodal displacements of a cross section defined by the user via two nodal vector and two reference points for two respective ducts.'
+    capabilities = 'method!=dbg'
   []
   [test_therm_exp]
     type = 'CSVDiff'
     input = 'test_therm_exp.i'
     csvdiff = 'test_therm_exp_out_section_output_0001.csv'
     requirement = 'The system shall compute the average of the nodal displacements of a cross section with mechanically and thermally induced deformation.'
+    capabilities = 'method!=dbg'
   []
   [test_therm_exp_symm]
     type = 'CSVDiff'
@@ -70,5 +76,6 @@
     ignore_columns = 'node_count'
     rel_err = 5e-3
     requirement = 'The system shall compute the average of the nodal displacements of a cross section with mechanically and thermally induced deformation with a symmetry plane not aligned with a Cartesian coordinate, and match a reference solution without the symmetry plane.'
+    capabilities = 'method!=dbg'
   []
 []

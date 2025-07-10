@@ -16,5 +16,6 @@
     design = 'PropertyReadFile.md'
     requirement = 'The system shall provide an object to read values from a file and map them onto a mesh based on grain IDs determined by a random Voronoi tessellation'
     allow_warnings = true # CSV has more rows than number of grains
+    capabilities = 'method!=dbg'
   [../]
 []

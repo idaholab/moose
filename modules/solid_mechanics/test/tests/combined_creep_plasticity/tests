@@ -29,10 +29,10 @@
     exodiff = 'combined_stress_prescribed_out.e'
     rel_err = 1e-5
     abs_zero = 1e-09
-    capabilities = 'superlu'
     requirement = "MOOSE tensor mechanics module shall solve a combined creep
                    and plasticity 3D cube problem with a time-varying pressure
                    BC."
+    capabilities = 'superlu & method!=dbg'
   []
   [stress_relaxation]
     type = 'Exodiff'
