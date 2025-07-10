@@ -24,6 +24,8 @@ public:
 
   Transient(const InputParameters & parameters);
 
+  virtual void init() override;
+
   /**
    * The relative L2 norm of the difference between solution and old solution vector.
    */

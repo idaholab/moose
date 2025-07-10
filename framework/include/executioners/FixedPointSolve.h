@@ -24,6 +24,8 @@ public:
   static InputParameters fixedPointDefaultConvergenceParams();
   static InputParameters validParams();
 
+  virtual void initialSetup() override;
+
   /**
    * Iteratively solves the FEProblem.
    * @return True if solver is converged.

@@ -24,6 +24,8 @@ public:
 
   DefaultSteadyConvergence(const InputParameters & parameters);
 
+  virtual void checkIterationType(IterationType it_type) const override;
+
   virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
 
 protected:

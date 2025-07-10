@@ -41,6 +41,15 @@ DefaultSteadyConvergence::DefaultSteadyConvergence(const InputParameters & param
         "DefaultSteadyConvergence can only be used for Executioners derived from TransientBase.");
 }
 
+void
+DefaultSteadyConvergence::checkIterationType(IterationType it_type) const
+{
+  DefaultConvergenceBase::checkIterationType(it_type);
+
+  if (it_type != IterationType::STEADY)
+    mooseError("DefaultSteadyConvergence can only be used with steady-state detection.");
+}
+
 Convergence::MooseConvergenceStatus
 DefaultSteadyConvergence::checkConvergence(unsigned int /*iter*/)
 {

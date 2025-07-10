@@ -33,6 +33,14 @@ Transient::Transient(const InputParameters & parameters)
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 }
 
+void
+Transient::init()
+{
+  TransientBase::init();
+
+  _feproblem_solve.initialSetup();
+}
+
 Real
 Transient::relativeSolutionDifferenceNorm(bool check_aux) const
 {

@@ -211,10 +211,14 @@ TransientBase::init()
 {
   _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _problem.initialSetup();
+  _fixed_point_solve->initialSetup();
 
   mooseAssert(getTimeStepper(), "No time stepper was set");
 
   _time_stepper->init();
+
+  auto & conv = _problem.getConvergence(_problem.getSteadyConvergenceName());
+  conv.checkIterationType(Convergence::IterationType::STEADY);
 
   if (_app.isRecovering()) // Recover case
   {

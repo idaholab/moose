@@ -23,6 +23,8 @@ public:
 
   static const std::set<std::string> & mooseLineSearches();
 
+  virtual void initialSetup() override;
+
   /**
    * Picard solve the FEProblem.
    * @return True if solver is converged.
@@ -65,4 +67,8 @@ protected:
   const bool _using_multi_sys_fp_iterations;
   /// Convergence object to assess the convergence of the multi-system fixed point iteration
   Convergence * _multi_sys_fp_convergence;
+
+private:
+  /// Performs setup related to Convergence objects
+  void convergenceSetup();
 };
