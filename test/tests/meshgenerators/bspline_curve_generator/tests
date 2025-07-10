@@ -8,6 +8,14 @@
     requirement = 'The system shall generate a 3D mesh on the x-y plane.'
     recover = false
   []
+  [2D_curve_s_curve]
+    type = 'Exodiff'
+    input = 'bspline_curve_2D_s_curve.i'
+    exodiff = 'bspline_curve_2D_s_curve_in.e'
+    cli_args = '--mesh-only bspline_curve_2D_s_curve_in.e'
+    requirement = 'The system shall generate a 3D mesh on the x-y plane with an s-like shape. Tests the ability to honor user-specified derivates.'
+    recover = false
+  []
   [2D_curve_simple_edge3]
     type = 'Exodiff'
     input = 'bspline_curve_2D.i'
