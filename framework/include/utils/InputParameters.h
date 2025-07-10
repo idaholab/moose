@@ -973,7 +973,8 @@ public:
   bool isParamSetByUser(const std::string & name) const;
 
   /**
-   * Method returns true if the parameter is defined
+   * Method returns true if the parameter is defined for any type. If the
+   * type is known, use have_parameter<T>() instead.
    * @param name The parameter name
    */
   bool isParamDefined(const std::string & name) const;
@@ -1151,7 +1152,8 @@ public:
 
   /**
    * A wrapper around the \p Parameters base class method. Checks for parameter rename before
-   * calling the base class method
+   * calling the base class method. This method tells whether a parameter with a known type is
+   * defined. If the type is unknown, use isParamDefined().
    * @param name The name to query the parameter values map with
    * @return Whether there is a key in the parameter values map corresponding to the (possibly
    * renamed) name
