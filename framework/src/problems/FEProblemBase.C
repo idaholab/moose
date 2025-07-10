@@ -3658,9 +3658,11 @@ FEProblemBase::projectSolution()
 
 void
 FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
-                                                    ConstBndNodeRange & bnd_nodes)
+                                                    ConstBndNodeRange & bnd_nodes,
+                                                    const TargetVarUsageForIC target_var_usage,
+                                                    const std::set<VariableName> & target_var_names)
 {
-  ComputeInitialConditionThread cic(*this);
+  ComputeInitialConditionThread cic(*this, target_var_names, target_var_usage);
   Threads::parallel_reduce(elem_range, cic);
 
   // Need to close the solution vector here so that boundary ICs take precendence
@@ -3668,57 +3670,7 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
     nl->solution().close();
   _aux->solution().close();
 
-  ComputeBoundaryInitialConditionThread cbic(*this);
-  Threads::parallel_reduce(bnd_nodes, cbic);
-
-  for (auto & nl : _nl)
-    nl->solution().close();
-  _aux->solution().close();
-
-  // Also, load values into the SCALAR dofs
-  // Note: We assume that all SCALAR dofs are on the
-  // processor with highest ID
-  if (processor_id() == (n_processors() - 1) && _scalar_ics.hasActiveObjects())
-  {
-    const auto & ics = _scalar_ics.getActiveObjects();
-    for (const auto & ic : ics)
-    {
-      MooseVariableScalar & var = ic->variable();
-      var.reinit();
-
-      DenseVector<Number> vals(var.order());
-      ic->compute(vals);
-
-      const unsigned int n_scalar_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_scalar_dofs; i++)
-      {
-        const auto global_index = var.dofIndices()[i];
-        var.sys().solution().set(global_index, vals(i));
-        var.setValue(i, vals(i));
-      }
-    }
-  }
-
-  for (auto & nl : _nl)
-  {
-    nl->solution().close();
-    nl->solution().localize(*nl->system().current_local_solution, nl->dofMap().get_send_list());
-  }
-
-  _aux->solution().close();
-  _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
-}
-
-void
-FEProblemBase::projectInitialConditionOnCustomRangeForSpecificVars(
-    ConstElemRange & elem_range,
-    ConstBndNodeRange & bnd_nodes,
-    const std::set<VariableName> & target_var_names)
-{
-  ComputeInitialConditionThread cic(*this, target_var_names);
-  Threads::parallel_reduce(elem_range, cic);
-
-  ComputeBoundaryInitialConditionThread cbic(*this, target_var_names);
+  ComputeBoundaryInitialConditionThread cbic(*this, target_var_names, target_var_usage);
   Threads::parallel_reduce(bnd_nodes, cbic);
 
   for (auto & nl : _nl)
@@ -3735,7 +3687,10 @@ FEProblemBase::projectInitialConditionOnCustomRangeForSpecificVars(
     {
       MooseVariableScalar & var = ic->variable();
 
-      if (!target_var_names.empty() && !target_var_names.count(var.name()))
+      if ((target_var_usage == TargetVarUsageForIC::ONLY_LIST &&
+           !target_var_names.count(var.name())) ||
+          (target_var_usage == TargetVarUsageForIC::SKIP_LIST &&
+           target_var_names.count(var.name())))
         continue;
 
       var.reinit();

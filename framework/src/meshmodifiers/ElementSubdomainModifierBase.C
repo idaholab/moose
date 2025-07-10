@@ -786,20 +786,20 @@ ElementSubdomainModifierBase::applyIC(bool displaced)
   insertNonICVars(_aux_sys);
 
   // note: from IC -> current
-  _fe_problem.projectInitialConditionOnCustomRangeForSpecificVars(
-      reinitializedElemRange(displaced),
-      reinitializedBndNodeRange(displaced),
-      ic_target_vars_names_except_ic_vars);
+  _fe_problem.projectInitialConditionOnCustomRange(reinitializedElemRange(displaced),
+                                                   reinitializedBndNodeRange(displaced),
+                                                   TargetVarUsageForIC::ONLY_LIST,
+                                                   ic_target_vars_names_except_ic_vars);
 
   // Loop over each variable and initialize
   for (auto i : index_range(_ic_vars_names))
   {
     if (_ic_strategy[i] == ICStrategy::DEFAULT)
       // note: from IC -> current
-      _fe_problem.projectInitialConditionOnCustomRangeForSpecificVars(
-          reinitializedElemRange(displaced),
-          reinitializedBndNodeRange(displaced),
-          {_ic_vars_names[i]});
+      _fe_problem.projectInitialConditionOnCustomRange(reinitializedElemRange(displaced),
+                                                       reinitializedBndNodeRange(displaced),
+                                                       TargetVarUsageForIC::ONLY_LIST,
+                                                       {_ic_vars_names[i]});
     else if (_ic_strategy[i] == ICStrategy::POLYNOMIAL ||
              _ic_strategy[i] == ICStrategy::POLYNOMIAL_WHOLE_SOLVED_DOMAIN ||
              _ic_strategy[i] == ICStrategy::POLYNOMIAL_THRESHOLD)

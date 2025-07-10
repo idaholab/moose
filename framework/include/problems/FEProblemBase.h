@@ -124,6 +124,13 @@ enum class MooseLinearConvergenceReason
   DIVERGED_PCSETUP_FAILED = -11
 };
 
+// How to use the target variables in the list for initial conditions
+enum class TargetVarUsageForIC
+{
+  ONLY_LIST, // Set initial conditions for variables in the list
+  SKIP_LIST, // Skip initial condition settings for variables in the list
+};
+
 /**
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
@@ -887,18 +894,21 @@ public:
    * Project initial conditions for custom \p elem_range and \p bnd_node_range
    * This is needed when elements/boundary nodes are added to a specific subdomain
    * at an intermediate step
+   * @param elem_range Element range to project on
+   * @param bnd_node_range Boundary node range to project on
+   * @param target_var_usage How to handle variables that are in the list of variables
+   * (selected_var_names). If TargetVarUsageForIC::SKIP_LIST, these
+   * variables will be skipped to set their ICs. If TargetVarUsageForIC::ONLY_LIST, these variables
+   * will be reinitialized to their ICs.
+   * @param selected_var_names Set of variable names to project ICs (depending on \p
+   * target_var_usage). If SKIP_LIST, these variables will be skipped. If ONLY_LIST, these variables
+   * will be reinitialized to their ICs.
    */
-  void projectInitialConditionOnCustomRange(libMesh::ConstElemRange & elem_range,
-                                            ConstBndNodeRange & bnd_node_range);
-
-  /**
-   * Project initial conditions onto a specified set of elements and boundary nodes
-   * for a user-defined subset of variables.
-   */
-  void projectInitialConditionOnCustomRangeForSpecificVars(
+  void projectInitialConditionOnCustomRange(
       libMesh::ConstElemRange & elem_range,
       ConstBndNodeRange & bnd_node_range,
-      const std::set<VariableName> & selected_var_names);
+      const TargetVarUsageForIC target_var_usage = TargetVarUsageForIC::SKIP_LIST,
+      const std::set<VariableName> & selected_var_names = {});
 
   /**
    * Project an initial condition given by a polynomial onto selected elements and nodes
