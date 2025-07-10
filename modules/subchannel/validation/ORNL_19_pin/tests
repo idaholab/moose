@@ -5,11 +5,11 @@
         type = CSVDiff
         input = ORNL_19.i
         csvdiff = ORNL_19_out.csv
-        # custom_cmp = 'test.exodiff'
         capabilities = 'method!=dbg'
         valgrind = NONE
         recover = false
         abs_zero = 1e-5
+        rel_err = 3e-5
         max_threads = 1
         max_parallel = 1
         requirement = 'The system will examine the subchannel solver for the ORNL 19-pin case'

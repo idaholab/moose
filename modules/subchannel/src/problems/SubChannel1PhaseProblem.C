@@ -68,10 +68,9 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
   params.addParam<PetscInt>("maxit", 1e4, "Maximum number of iterations for ksp solver");
-  params.addParam<MooseEnum>(
-      "interpolation_scheme",
-      schemes,
-      "Interpolation scheme used for the method. Default is central difference");
+  params.addParam<MooseEnum>("interpolation_scheme",
+                             schemes,
+                             "Interpolation scheme used for the method. Default is exponential");
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
   params.addParam<bool>(
@@ -214,7 +213,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   LibmeshPetscCall(
       createPetscMatrix(_cmc_sys_Wij_mat, _block_size * _n_gaps, _block_size * _n_gaps));
   LibmeshPetscCall(createPetscVector(_cmc_sys_Wij_rhs, _block_size * _n_gaps));
-  LibmeshPetscCall(createPetscVector(_cmc_Wij_channel_dummy, _block_size * _n_channels));
 
   // Energy conservation components
   LibmeshPetscCall(createPetscMatrix(
@@ -318,7 +316,6 @@ SubChannel1PhaseProblem::cleanUp()
   LibmeshPetscCall(VecDestroy(&_cmc_pressure_force_rhs));
   LibmeshPetscCall(MatDestroy(&_cmc_sys_Wij_mat));
   LibmeshPetscCall(VecDestroy(&_cmc_sys_Wij_rhs));
-  LibmeshPetscCall(VecDestroy(&_cmc_Wij_channel_dummy));
 
   // Energy conservation components
   LibmeshPetscCall(MatDestroy(&_hc_time_derivative_mat));
@@ -554,8 +551,6 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
     }
     LibmeshPetscCall(MatAssemblyBegin(_mc_axial_convection_mat, MAT_FINAL_ASSEMBLY));
     LibmeshPetscCall(MatAssemblyEnd(_mc_axial_convection_mat, MAT_FINAL_ASSEMBLY));
-    if (_verbose_subchannel)
-      _console << "Block: " << iblock << " - Mass conservation matrix assembled" << std::endl;
 
     if (_segregated_bool)
     {
@@ -1031,9 +1026,6 @@ SubChannel1PhaseProblem::computeDP(int iblock)
 #endif
     LibmeshPetscCall(MatAssemblyBegin(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY));
     LibmeshPetscCall(MatAssemblyEnd(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY));
-    if (_verbose_subchannel)
-      _console << "Block: " << iblock << " - Linear momentum conservation matrix assembled"
-               << std::endl;
     // RHS
     LibmeshPetscCall(VecAXPY(_amc_sys_mdot_rhs, 1.0, _amc_time_derivative_rhs));
     LibmeshPetscCall(VecAXPY(_amc_sys_mdot_rhs, 1.0, _amc_advective_derivative_rhs));
@@ -1688,11 +1680,6 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
 #endif
     LibmeshPetscCall(MatAssemblyBegin(_cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY));
     LibmeshPetscCall(MatAssemblyEnd(_cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY));
-    if (_verbose_subchannel)
-      _console << "Block: " << iblock << " - Cross flow system matrix assembled" << std::endl;
-    if (_verbose_subchannel)
-      _console << "Block: " << iblock << " - Cross flow pressure force matrix assembled"
-               << std::endl;
     // RHS
     LibmeshPetscCall(VecAXPY(_cmc_sys_Wij_rhs, 1.0, _cmc_time_derivative_rhs));
     LibmeshPetscCall(VecAXPY(_cmc_sys_Wij_rhs, 1.0, _cmc_advective_derivative_rhs));
@@ -1705,12 +1692,8 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
       LibmeshPetscCall(createPetscVector(sol_holder_P, _block_size * _n_gaps));
       Vec sol_holder_W;
       LibmeshPetscCall(createPetscVector(sol_holder_W, _block_size * _n_gaps));
-      Vec loc_holder_Wij;
-      LibmeshPetscCall(createPetscVector(loc_holder_Wij, _block_size * _n_gaps));
       LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
           _prodp, *_P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels));
-      LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-          loc_holder_Wij, _Wij, first_node, last_node, _n_gaps));
       LibmeshPetscCall(MatMult(_cmc_sys_Wij_mat, _Wij_vec, sol_holder_W));
       LibmeshPetscCall(VecAXPY(sol_holder_W, -1.0, _cmc_sys_Wij_rhs));
       LibmeshPetscCall(MatMult(_cmc_pressure_force_mat, _prodp, sol_holder_P));
@@ -1728,7 +1711,6 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
       }
       LibmeshPetscCall(VecDestroy(&sol_holder_P));
       LibmeshPetscCall(VecDestroy(&sol_holder_W));
-      LibmeshPetscCall(VecDestroy(&loc_holder_Wij));
     }
   }
 }
@@ -2751,9 +2733,14 @@ SubChannel1PhaseProblem::externalSolve()
     _console << "User defined outlet pressure is : " << _P_out << " Pa" << std::endl;
     _console << " ======================================= " << std::endl;
   }
-}
-void
 
+  if (MooseUtils::absoluteFuzzyLessEqual((power_out - power_in), -1.0))
+    mooseWarning(
+        "Energy conservation equation might not be solved correctly, Power added to coolant:  " +
+        std::to_string(power_out - power_in) + " Watt ");
+}
+
+void
 SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/)
 {
 }

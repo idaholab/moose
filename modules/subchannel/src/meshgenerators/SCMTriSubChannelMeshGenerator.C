@@ -36,10 +36,10 @@ SCMTriSubChannelMeshGenerator::validParams()
                                 "Flat to flat distance for the hexagonal assembly [m]");
   params.addRequiredParam<Real>("dwire", "Wire diameter [m]");
   params.addRequiredParam<Real>("hwire", "Wire lead length [m]");
-  params.addParam<std::vector<Real>>("spacer_z",
-                                     "Axial location of spacers/vanes/mixing_vanes [m]");
-  params.addParam<std::vector<Real>>("spacer_k",
-                                     "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
+  params.addParam<std::vector<Real>>(
+      "spacer_z", {}, "Axial location of spacers/vanes/mixing_vanes [m]");
+  params.addParam<std::vector<Real>>(
+      "spacer_k", {}, "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
   params.addParam<Real>("Kij", 0.5, "Lateral form loss coefficient [-]");
   params.addParam<std::vector<Real>>("z_blockage",
                                      std::vector<Real>({0.0, 0.0}),
@@ -84,7 +84,8 @@ SCMTriSubChannelMeshGenerator::SCMTriSubChannelMeshGenerator(const InputParamete
   if (_spacer_z.size() != _spacer_k.size())
     mooseError(name(), ": Size of vector spacer_z should be equal to size of vector spacer_k");
 
-  if (_spacer_z.back() > _unheated_length_entry + _heated_length + _unheated_length_exit)
+  if (_spacer_z.size() &&
+      _spacer_z.back() > _unheated_length_entry + _heated_length + _unheated_length_exit)
     mooseError(name(), ": Location of spacers should be less than the total bundle length");
 
   if (_z_blockage.size() != 2)

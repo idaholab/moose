@@ -36,13 +36,6 @@ public:
   virtual void initialSetup() override;
 
 protected:
-  /// Standard return structure for reusing in implicit/explicit formulations
-  struct StructPetscMatVec
-  {
-    Mat A;
-    Vec x;
-  };
-
   struct FrictionStruct
   {
     int i_ch;
@@ -115,8 +108,6 @@ protected:
   unsigned int _n_channels;
   unsigned int _block_size;
   Real _outer_channels;
-  /// average relative error in pressure drop of channels
-  Real _dpz_error;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   Real _one;
@@ -297,7 +288,6 @@ protected:
   /// Lateral momentum system matrix
   Mat _cmc_sys_Wij_mat;
   Vec _cmc_sys_Wij_rhs;
-  Vec _cmc_Wij_channel_dummy;
 
   /// Enthalpy
   /// Enthalpy conservation - time derivative
@@ -314,8 +304,6 @@ protected:
   /// System matrices
   Mat _hc_sys_h_mat;
   Vec _hc_sys_h_rhs;
-  /// No implicit matrix
-  PetscInt _global_counter = 0;
 
   /// Added resistances for monolithic convergence
   PetscScalar _added_K = 0.0;

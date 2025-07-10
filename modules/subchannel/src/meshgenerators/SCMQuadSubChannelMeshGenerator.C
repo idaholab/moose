@@ -28,10 +28,10 @@ SCMQuadSubChannelMeshGenerator::validParams()
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
-  params.addParam<std::vector<Real>>("spacer_z",
-                                     "Axial location of spacers/vanes/mixing_vanes [m]");
-  params.addParam<std::vector<Real>>("spacer_k",
-                                     "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
+  params.addParam<std::vector<Real>>(
+      "spacer_z", {}, "Axial location of spacers/vanes/mixing_vanes [m]");
+  params.addParam<std::vector<Real>>(
+      "spacer_k", {}, "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
   params.addParam<std::vector<Real>>("z_blockage",
                                      std::vector<Real>({0.0, 0.0}),
                                      "axial location of blockage (inlet, outlet) [m]");
@@ -83,7 +83,8 @@ SCMQuadSubChannelMeshGenerator::SCMQuadSubChannelMeshGenerator(const InputParame
   if (_spacer_z.size() != _spacer_k.size())
     mooseError(name(), ": Size of vector spacer_z should be equal to size of vector spacer_k");
 
-  if (_spacer_z.back() > _unheated_length_entry + _heated_length + _unheated_length_exit)
+  if (_spacer_z.size() &&
+      _spacer_z.back() > _unheated_length_entry + _heated_length + _unheated_length_exit)
     mooseError(name(), ": Location of spacers should be less than the total bundle length");
 
   if (_z_blockage.size() != 2)

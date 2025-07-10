@@ -65,14 +65,10 @@ P_out = 1.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-4
-  T_tol = 1.0e-4
   implicit = true
   segregated = false
-  staggered_pressure = false
-  monolithic_thermal = false
-  verbose_multiapps = true
-  verbose_subchannel = false
+  verbose_subchannel = true
+  interpolation_scheme = upwind
 []
 
 [ICs]
