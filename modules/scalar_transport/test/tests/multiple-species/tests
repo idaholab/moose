@@ -5,7 +5,6 @@
     type = Exodiff
     input = multiple-species.i
     exodiff = multiple-species_out.e
-    cli_args = 'Executioner/num_steps=100' # Somewhat arbitrary number of steps so restep can happen before steady-state is detected
     requirement = 'The system shall be able to solve for multiple species masss transport with various dissociation and recombination reactions occurring at boundaries'
   []
   [surface_limited]

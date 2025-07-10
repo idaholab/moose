@@ -184,6 +184,7 @@
   type = Transient
   start_time = -0.01
   end_time = 0.1
+  dt = 0.005
   timestep_tolerance = 1e-6
   [TimeIntegrator]
     type = CentralDifference

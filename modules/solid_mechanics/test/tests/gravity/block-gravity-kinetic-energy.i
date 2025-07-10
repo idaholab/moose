@@ -142,7 +142,7 @@ offset = 1.0
 [Executioner]
   type = Transient
   end_time = 0.5
-  dt = 0.05
+  dt = 0.01
   dtmin = .05
   solve_type = 'PJFNK'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_linesearch_monitor'
