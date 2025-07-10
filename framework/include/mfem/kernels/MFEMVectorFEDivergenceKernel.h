@@ -13,16 +13,15 @@
 #include "MFEMMixedBilinearFormKernel.h"
 
 /*
- * \f[
- * (\lambda \nabla \times u, v)
- * \f]
+ * (k div u, v)
  */
-class MFEMMixedScalarCurlKernel : public MFEMMixedBilinearFormKernel
+class MFEMVectorFEDivergenceKernel : public MFEMMixedBilinearFormKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMMixedScalarCurlKernel(const InputParameters & parameters);
+  MFEMVectorFEDivergenceKernel(const InputParameters & parameters);
+  ~MFEMVectorFEDivergenceKernel() override = default;
 
   virtual mfem::BilinearFormIntegrator * createMBFIntegrator() override;
 

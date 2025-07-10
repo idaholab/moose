@@ -13,8 +13,8 @@
 #include "MFEMKernel.h"
 
 /*
-(\\vec f, \\vec u')
-*/
+ * (\\vec f, \\vec u')
+ */
 class MFEMVectorFEDomainLFKernel : public MFEMKernel
 {
 public:

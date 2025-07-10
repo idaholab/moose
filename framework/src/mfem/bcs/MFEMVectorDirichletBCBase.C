@@ -23,8 +23,7 @@ MFEMVectorDirichletBCBase::validParams()
 }
 
 MFEMVectorDirichletBCBase::MFEMVectorDirichletBCBase(const InputParameters & parameters)
-  : MFEMEssentialBC(parameters),
-    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
+  : MFEMEssentialBC(parameters), _vec_coef(getVectorCoefficient("vector_coefficient"))
 {
 }
 

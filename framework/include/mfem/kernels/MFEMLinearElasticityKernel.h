@@ -22,7 +22,7 @@
  * E is Young's modulus,
  * \nu is Poisson's ratio
  * \f]
-*/
+ */
 // clang-format on
 class MFEMLinearElasticityKernel : public MFEMKernel
 {
@@ -34,8 +34,6 @@ public:
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
 protected:
-  const MFEMScalarCoefficientName & _lambda_name;
-  const MFEMScalarCoefficientName & _mu_name;
   mfem::Coefficient & _lambda;
   mfem::Coefficient & _mu;
 };
