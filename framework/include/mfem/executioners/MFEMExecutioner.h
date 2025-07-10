@@ -13,7 +13,7 @@
 #include "Executioner.h"
 #include "MFEMProblemData.h"
 #include "MFEMEstimator.h"
-#include "MFEMRefiner.h"
+#include "MFEMThresholdRefiner.h"
 
 class MFEMProblem;
 
@@ -31,7 +31,7 @@ public:
 
   // Executioners should not support estimators by default
   virtual bool addEstimator(std::shared_ptr<MFEMEstimator>) { return false; }
-  virtual bool addRefiner(std::shared_ptr<MFEMRefiner>) { return false; }
+  virtual bool addRefiner(std::shared_ptr<MFEMThresholdRefiner>) { return false; }
 
   // Return false if it's time to stop
   virtual bool PRefine() { return false; };

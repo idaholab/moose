@@ -13,7 +13,7 @@
 #include "MFEMProblemData.h"
 #include "ProblemOperatorInterface.h"
 #include "MFEMEstimator.h"
-#include "MFEMRefiner.h"
+#include "MFEMThresholdRefiner.h"
 
 namespace Moose::MFEM
 {
@@ -31,7 +31,7 @@ public:
   to add trivial virtual functions up here to make that possible.
   */
   virtual void AddEstimator(std::shared_ptr<MFEMEstimator> /*estimator*/) {}
-  virtual void AddRefiner(std::shared_ptr<MFEMRefiner> /*refiner*/) {}
+  virtual void AddRefiner(std::shared_ptr<MFEMThresholdRefiner> /*refiner*/) {}
   virtual void SetUpAMR() {};
   virtual bool HRefine() { return false; } /* we return true when it's time to stop solving */
   virtual bool PRefine() { return false; } /* we return true when it's time to stop solving */
