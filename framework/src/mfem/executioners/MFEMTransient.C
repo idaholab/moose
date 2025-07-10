@@ -19,6 +19,7 @@ InputParameters
 MFEMTransient::validParams()
 {
   InputParameters params = MFEMExecutioner::validParams();
+  params += Executioner::validParams();
   params.addClassDescription("Executioner for transient MFEM problems.");
   params.addParam<mfem::real_t>("start_time", 0.0, "The start time of the simulation");
   params.addParam<mfem::real_t>("end_time", 1.0e30, "The end time of the simulation");
@@ -43,7 +44,8 @@ MFEMTransient::validParams()
 }
 
 MFEMTransient::MFEMTransient(const InputParameters & params)
-  : MFEMExecutioner(params),
+  : Executioner(params),
+    MFEMExecutioner(params, dynamic_cast<MFEMProblem &>(feProblem())),
     _dt(getParam<mfem::real_t>("dt")),
     _dt_old(getParam<mfem::real_t>("dt")),
     _time(_mfem_problem.time()),
