@@ -18,13 +18,15 @@ InputParameters
 MFEMSteady::validParams()
 {
   InputParameters params = MFEMExecutioner::validParams();
+  params += Executioner::validParams();
   params.addClassDescription("Executioner for steady state MFEM problems.");
   params.addParam<Real>("time", 0.0, "System time");
   return params;
 }
 
 MFEMSteady::MFEMSteady(const InputParameters & params)
-  : MFEMExecutioner(params),
+  : Executioner(params),
+    MFEMExecutioner(params, dynamic_cast<MFEMProblem &>(feProblem())),
     _system_time(getParam<Real>("time")),
     _time_step(_mfem_problem.timeStep()),
     _time(_mfem_problem.time()),
