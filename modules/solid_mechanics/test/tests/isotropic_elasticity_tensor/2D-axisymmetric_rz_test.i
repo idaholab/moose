@@ -98,6 +98,7 @@
 
   start_time = 0.0
   end_time = 1
+  num_steps = 1000
 
   dtmax = 5e6
   dtmin = 1

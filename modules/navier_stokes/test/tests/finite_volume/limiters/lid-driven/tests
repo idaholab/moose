@@ -7,9 +7,7 @@
       type = Exodiff
       input = 'test.i'
       exodiff = upwind.e
-      cli_args = 'GlobalParams/advected_interp_method=upwind
-                  Outputs/file_base=upwind
-                  Executioner/num_steps=2' # Approximation for number of steps so that restep happens before steady-state is detected
+      cli_args = 'GlobalParams/advected_interp_method=upwind Outputs/file_base=upwind'
       detail = 'first-order upwind'
       recover = false # only using final for output in a transient
     []
@@ -17,9 +15,7 @@
       type = Exodiff
       input = 'test.i'
       exodiff = sou.e
-      cli_args = 'GlobalParams/advected_interp_method=sou
-                  Outputs/file_base=sou
-                  Executioner/num_steps=3' # Approximation for number of steps so that restep happens before steady-state is detected
+      cli_args = 'GlobalParams/advected_interp_method=sou Outputs/file_base=sou'
       detail = 'second-order upwind'
       recover = false # only using final for output in a transient
     []
@@ -27,9 +23,7 @@
       type = Exodiff
       input = 'test.i'
       exodiff = vanLeer.e
-      cli_args = 'GlobalParams/advected_interp_method=vanLeer
-                  Outputs/file_base=vanLeer
-                  Executioner/num_steps=5' # Approximation for number of steps so that restep happens before steady-state is detected
+      cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=vanLeer'
       detail = 'van Leer'
       recover = false # only using final for output in a transient
     []
@@ -47,9 +41,7 @@
       type = Exodiff
       input = 'test.i'
       exodiff = quick.e
-      cli_args = 'GlobalParams/advected_interp_method=quick
-                  Outputs/file_base=quick
-                  Executioner/num_steps=5' # Approximation for number of steps so that restep happens before steady-state is detected
+      cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=quick'
       detail = 'QUICK'
       recover = false # only using final for output in a transient
     []
