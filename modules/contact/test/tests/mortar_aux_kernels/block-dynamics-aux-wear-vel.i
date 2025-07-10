@@ -42,7 +42,7 @@ offset = -0.05
     generate_output = 'stress_xx stress_yy'
     strain = FINITE
     block = '1 2'
-    zeta = 1.0
+    stiffness_damping_coefficient = 1.0
     hht_alpha = 0.0
   []
   [inertia_x]

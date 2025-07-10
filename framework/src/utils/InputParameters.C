@@ -1191,6 +1191,13 @@ InputParameters::isParamSetByUser(const std::string & name_in) const
   return !_params.at(name)._set_by_add_param && !_params.at(name)._is_private;
 }
 
+bool
+InputParameters::isParamDefined(const std::string & name_in) const
+{
+  const auto name = checkForRename(name_in);
+  return _params.count(name) > 0;
+}
+
 const std::string &
 InputParameters::getDescription(const std::string & name_in) const
 {
