@@ -12,6 +12,7 @@
 #include "MFEMTransient.h"
 #include "MFEMProblem.h"
 #include "TimeDomainEquationSystemProblemOperator.h"
+#include "TimeStepper.h"
 
 registerMooseObject("MooseApp", MFEMTransient);
 
@@ -27,9 +28,6 @@ MFEMTransient::validParams()
 MFEMTransient::MFEMTransient(const InputParameters & params)
   : TransientBase(params), MFEMExecutioner(params, dynamic_cast<MFEMProblem &>(feProblem()))
 {
-  _app.setStartTime(_start_time);
-  _time = _start_time;
-  _mfem_problem.transient(true);
 }
 
 void
@@ -60,44 +58,23 @@ MFEMTransient::init()
   // Set timestepper
   _problem_data.ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
   _problem_data.ode_solver->Init(*(_problem_operator));
-  _problem_operator->SetTime(0.0);
+  _problem_operator->SetTime(_start_time);
 }
 
 void
-MFEMTransient::execute()
+MFEMTransient::takeStep(Real input_dt)
 {
-  preExecute();
+  _dt_old = _dt;
 
-  while (keepGoing())
-  {
-    incrementStepOrReject();
-    takeStep(_dt);
-    endStep();
-  }
+  if (input_dt == -1.0)
+    _dt = computeConstrainedDT();
+  else
+    _dt = input_dt;
 
-  _mfem_problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN,
-                                   /*recurse_through_multiapp_levels=*/true);
-  _mfem_problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN, /*recurse_through_multiapp_levels=*/true);
-  _mfem_problem.finishMultiAppStep(EXEC_TIMESTEP_END, /*recurse_through_multiapp_levels=*/true);
-  _mfem_problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_END,
-                                   /*recurse_through_multiapp_levels=*/true);
+  _time_stepper->preSolve();
 
-  TIME_SECTION("final", 1, "Executing Final Objects");
-  _mfem_problem.execMultiApps(EXEC_FINAL);
-  _mfem_problem.finalizeMultiApps();
-  _mfem_problem.execute(EXEC_FINAL);
-  _mfem_problem.outputStep(EXEC_FINAL);
-  _mfem_problem.postExecute();
-
-  postExecute();
-}
-
-void
-MFEMTransient::takeStep(mfem::real_t input_dt)
-{
-  _dt = input_dt;
-
-  // Advance time step. Time is also updated here.
+  // Advance time step of the MFEM problem. Time is also updated here.
+  // Takes place instead of TimeStepper::step().
   _problem_data.ode_solver->Step(_problem_data.f, _time, _dt);
 
   // Synchonise time dependent GridFunctions with updated DoF data.
@@ -108,17 +85,28 @@ MFEMTransient::takeStep(mfem::real_t input_dt)
 
   // Execute user objects at timestep end
   _mfem_problem.execute(EXEC_TIMESTEP_END);
-}
 
-void
-MFEMTransient::endStep(Real input_time)
-{
-  // Compute the Error Indicators and Markers
-  _mfem_problem.computeIndicators();
-  _mfem_problem.computeMarkers();
+  // Continue with usual TransientBase::takeStep() finalisation
+  _last_solve_converged = _time_stepper->converged();
 
-  // Perform the output of the current time step
-  _mfem_problem.outputStep(EXEC_TIMESTEP_END);
+  if (!lastSolveConverged())
+  {
+    _console << "Aborting as solve did not converge" << std::endl;
+    return;
+  }
+
+  if (lastSolveConverged())
+    _time_stepper->acceptStep();
+  else
+    _time_stepper->rejectStep();
+
+  // Set time to time old, since final time is updated in TransientBase::endStep()
+  _time = _time_old;
+
+  _time_stepper->postSolve();
+
+  _solution_change_norm =
+      relativeSolutionDifferenceNorm() / (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
 }
 
 #endif
