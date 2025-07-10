@@ -36,7 +36,7 @@ EquationSystemProblemOperator::AddEstimator(std::shared_ptr<MFEMEstimator> estim
 }
 
 void
-EquationSystemProblemOperator::AddRefiner(std::shared_ptr<MFEMRefiner> refiner)
+EquationSystemProblemOperator::AddRefiner(std::shared_ptr<MFEMThresholdRefiner> refiner)
 {
   _use_amr = true;
   _refiner = refiner;
