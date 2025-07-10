@@ -10,7 +10,6 @@
       type     = MFEMZienkiewiczZhuEstimator
       variable = concentration
       kernel   = diff
-      fe_space = H1FESpace # not necessary. Get the fespace from the variable
       outputs  = none
     []
   []
