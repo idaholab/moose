@@ -127,7 +127,7 @@ MFEMSteady::execute()
       }
 
       // Check if we have H-Refinement enabled or we've done enough
-      // p-refinement steps
+      // h-refinement steps
       if ( _problem_operator->UseHRefinement() )
       {
         stop_href = HRefine();
