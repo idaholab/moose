@@ -13,7 +13,7 @@
 #include "MFEMExecutioner.h"
 #include "EquationSystemProblemOperator.h"
 
-class MFEMSteady : public MFEMExecutioner
+class MFEMSteady : public Executioner, public MFEMExecutioner
 {
 public:
   static InputParameters validParams();
@@ -23,6 +23,8 @@ public:
   void constructProblemOperator() override;
   virtual void init() override;
   virtual void execute() override;
+
+  virtual bool lastSolveConverged() const override { return true; };
 
 protected:
   // Time variables used for consistency with MOOSE, needed for outputs.
