@@ -33,9 +33,9 @@ public:
   virtual bool addEstimator(std::shared_ptr<MFEMEstimator>) { return false; }
   virtual bool addRefiner(std::shared_ptr<MFEMThresholdRefiner>) { return false; }
 
-  // Return false if it's time to stop
-  virtual bool PRefine() { return false; };
-  virtual bool HRefine() { return false; };
+  // Return true if it's time to stop
+  virtual bool PRefine() { return true; };
+  virtual bool HRefine() { return true; };
   virtual void UpdateAfterRefinement() {};
 
   /**
