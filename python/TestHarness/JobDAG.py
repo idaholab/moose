@@ -225,23 +225,29 @@ class JobDAG(object):
         # confusing output
         for i in range(1, len(jobs)):
             job = jobs[i]
+            race_jobs = []
             for other_i in reversed(range(i)):
                 other_job = jobs[other_i]
-                tester = job.getTester()
-                other_tester = other_job.getTester()
-                files = set(tester.getOutputFiles(self.options))
-                other_files = set(other_tester.getOutputFiles(self.options))
+                files = set(job.getOutputFiles(self.options))
+                other_files = set(other_job.getOutputFiles(self.options))
                 conflicting_files = list(files.intersection(other_files))
                 if conflicting_files \
                     and not self.__job_dag.is_dependency(other_job, job) \
                     and not self.__job_dag.is_dependency(job, other_job):
-                    print('  This test spec is set to run in parallel, but a race condition was found')
-                    print('  that could lead to multiple tests reading/writing from the same file.\n')
-                    print(f'  Tests: {tester.getTestNameShort()}, {other_tester.getTestNameShort()}')
-                    print(f'  File(s): {", ".join(conflicting_files)}\n')
-                    print('  You can resolve this issue by setting the approprate prerequisites')
-                    print('  between your tests with the "prereq" parameter')
-                    sys.exit(1)
+                    race_jobs.append(other_job)
+
+            if race_jobs:
+                all_jobs = [job] + race_jobs
+                job_names = sorted([j.getTestNameShort() for j in all_jobs])
+                output = 'This test spec is set to run in parallel, but a race condition was found\n'
+                output += 'that could lead to multiple tests reading/writing from the same file.\n\n'
+                output += f'  Tests: {", ".join(job_names)}\n'
+                output += f'  File(s): {", ".join(conflicting_files)}\n\n'
+                output += 'You can resolve this issue by setting the approprate prerequisites\n'
+                output += 'between your tests with the "prereq" parameter.'
+                for j in [job] + race_jobs:
+                    j.appendOutput(output)
+                    j.setStatus(j.error, 'RACE CONDITION')
 
     def _skipPrereqs(self):
         """

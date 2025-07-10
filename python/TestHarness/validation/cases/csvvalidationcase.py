@@ -59,6 +59,9 @@ class CSVValidationCase(ValidationCase):
         # Load the gold file
         self._gold_df: DataFrame = pd.read_csv(self._gold_csv)
 
+    def getOutputFiles(self):
+        return super().getOutputFiles() + [self.getParam('validation_csv')]
+
     def initialize(self):
         if not os.path.exists(self._csv):
             raise FileNotFoundError(f'CSV file {self._csv} not found')

@@ -127,6 +127,7 @@ class TestValidation(TestHarnessTestCase):
         """
         results = self.runTests('-i', 'validation', '--re', 'csv')
         out = results.results
+        harness = results.harness
         self.assertEqual(out['testharness']['validation_version'],
                          results.harness.VALIDATION_VERSION)
 
@@ -136,10 +137,14 @@ class TestValidation(TestHarnessTestCase):
 
         # Validation entry
         validation = test['validation']
-
         # Compare against the golded values
         # If this fails, you can regold by setting rewrite = true in compareGold
         self.compareGold(validation, 'testcsv')
+
+        # Make sure the output path shows up in output files
+        job = harness.finished_jobs[0]
+        csv = os.path.join(job.getTestDir(), job.validation_cases[0].getParam('validation_csv'))
+        self.assertIn(csv, job.getOutputFiles(harness.options))
 
     def testFail(self):
         """

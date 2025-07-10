@@ -290,12 +290,10 @@ class Tester(MooseObject, OutputInterface):
 
     def getResults(self, options) -> dict:
         """Get the results dict for this Tester"""
-        output_files = [os.path.join(self.getTestDir(), file) for file in self.getOutputFiles(options)]
         json_metadata = {k: os.path.join(self.getTestDir(), v.path) if v else None for k, v in self.json_metadata.items()}
         return {'name': self.__class__.__name__,
                 'command': self.getCommand(options),
                 'input_file': self.getInputFile(),
-                'output_files': output_files,
                 'json_metadata': json_metadata}
 
     def getStatusMessage(self):
