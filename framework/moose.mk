@@ -757,17 +757,34 @@ ADRealMonolithic.h: $(MOOSE_DIR)/framework/include/utils/ADReal.h
 	@$(libmesh_CXX) -E $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -imacros cmath -x c++-header $< > $@
 
 compile_commands_all_srcfiles := $(moose_srcfiles) $(srcfiles)
+compile_commands_all_kokkos_srcfiles := $(MOOSE_KOKKOS_SRC_FILES)
 compile_commands.json:
 ifeq (4.0,$(firstword $(sort $(MAKE_VERSION) 4.0)))
+# Standard C++ sources
 	$(file > .compile_commands.json,$(CURDIR))
 	$(file >> .compile_commands.json,$(libmesh_CXX))
 	$(file >> .compile_commands.json,$(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $(ADDITIONAL_INCLUDES))
 	$(file >> .compile_commands.json,$(compile_commands_all_srcfiles))
+ifeq ($(ENABLE_KOKKOS),true)
+# Kokkos sources
+	$(file >> .compile_commands.json,$(CURDIR))
+	$(file >> .compile_commands.json,$(KOKKOS_CXX))
+	$(file >> .compile_commands.json,$(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES))
+	$(file >> .compile_commands.json,$(compile_commands_all_kokkos_srcfiles))
+endif
 else
+# Standard C++ sources
 	@echo $(CURDIR) > .compile_commands.json
 	@echo $(libmesh_CXX) >> .compile_commands.json
 	@echo $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $(ADDITIONAL_INCLUDES) >> .compile_commands.json
 	@echo $(compile_commands_all_srcfiles) >> .compile_commands.json
+ifeq ($(ENABLE_KOKKOS),true)
+# Kokkos sources
+	@echo $(CURDIR) >> .compile_commands.json
+	@echo $(KOKKOS_CXX) >> .compile_commands.json
+	@echo $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) >> .compile_commands.json
+	@echo $(compile_commands_all_kokkos_srcfiles) >> .compile_commands.json
+endif
 endif
 	@$(FRAMEWORK_DIR)/scripts/compile_commands.py < .compile_commands.json > compile_commands.json
 	@rm .compile_commands.json
