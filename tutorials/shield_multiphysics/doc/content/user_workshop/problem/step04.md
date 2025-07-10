@@ -61,3 +61,4 @@ moose-opt -i step4.i
 ## Step 4: Result
 
 !media shield_multiphysics/results/step04.png
+       alt=Temperature field for the reactor shielding, as calculated with the simulation above.

@@ -14,13 +14,17 @@ and numerous systems and complexities are omitted.
 
 Cooling system schematic (from NRIC overview Nov. 21)
 
-!media shield_multiphysics/schematic.png style=width:70%;margin-left:auto;margin-right:auto;display:block;
+!media shield_multiphysics/schematic.png
+       style=width:70%;margin-left:auto;margin-right:auto;display:block;
+       alt=Schamatic of the various systems within the reactor containment building and radiation shielding.
 
 !---
 
 Simplified geometry:
 
-!media shield_multiphysics/shield.png style=width:60%;margin-left:auto;margin-right:auto;display:block;
+!media shield_multiphysics/shield.png
+       style=width:60%;margin-left:auto;margin-right:auto;display:block;
+       alt=Diagram showing the layering of materials in the reactor shielding.
 
 6.5m x 9.7m x 5.25m concrete box with 4m x 7.6m x 3.6m room
 

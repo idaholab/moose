@@ -59,6 +59,7 @@ The "Input File" tab (shown below) allows you to create and edit input files. Yo
 
 !media large_media/peacock/input_file_with_text_no_alpha.png
        style=width:50%;
+       alt=Labelled components of the "Input File" tab.
 
 When Peacock opens, you will be presented with a "Tree View" on the left side of the tab. This tree view represents the input file syntax available to you for the current application. If you launched Peacock with an input file, the tree will already be populated with the blocks and parameters from that input file. You can click the "little arrows" next to an item to expand/contract that part of the tree.
 
@@ -88,6 +89,7 @@ With the Input File tab active, double-clicking to edit an item or right-clickin
 
 !media large_media/peacock/param_editor_with_text_no_alpha.png
        style=width:50%;
+       alt=Labelled components of the "Parameter Editor" window.
 
 ### Selecting a type
 
@@ -141,6 +143,7 @@ The Execute Tab (shown below) allows you to run the current application with the
 
 !media large_media/peacock/execute_with_text_no_alpha.png
        style=width:50%;
+       alt=Labelled components of the "Execute" tab.
 
 ### MPI and Threads
 
@@ -199,6 +202,7 @@ The Postprocess Tab (pictured below) allows you to plot Postprocessor values liv
 
 !media large_media/peacock/postprocess_with_text_no_alpha.png
        style=width:50%;
+       alt=Labelled components of the "Postprocess" tab.
 
 ## Visualize Tab
 
@@ -210,6 +214,7 @@ The Visualize Tab is not intended to be a replacement for Paraview, Ensight, ViS
 
 !media large_media/peacock/visualize_with_text_no_alpha.png
        style=width:50%;
+       alt=Labelled components of the "Visualize" tab.
 
 ### Result View
 

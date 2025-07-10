@@ -1,6 +1,6 @@
 # Example 10 : Auxiliary Variables
 
-[](---)
+
 
 ## Complete Source Files
 
@@ -12,7 +12,7 @@
 
 [ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex10_aux/src/base/ExampleApp.C)
 
-[](---)
+
 
 ## Output
 

@@ -56,6 +56,7 @@ consequence of failure of the software:
 
 !style halign=center
 !media training/waterfall.png
+       alt=The NQA-1 software development process applied to the "waterfall" model.
 
 !---
 
@@ -66,6 +67,7 @@ consequence of failure of the software:
 
 !style halign=center
 !media training/agile2.png style=width:50%;
+       alt=The NQA-1 software development process applied to the "agile" model.
 
 !---
 
