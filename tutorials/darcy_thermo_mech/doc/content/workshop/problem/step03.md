@@ -80,6 +80,7 @@ cd problems
 ## Step 3: Result
 
 !media darcy_thermo_mech/step03_result.png
+       alt=Pressure field obtained by running the simulation above.
 
 !---
 
@@ -98,3 +99,4 @@ Update the input file to vary the sphere size from 1 to 3 along the length of th
 ## Step 3b: Result
 
 !media darcy_thermo_mech/step03b_result.png
+       alt=Pressure and permeability fields for variable-sized spheres, obtained by running the simulation above.

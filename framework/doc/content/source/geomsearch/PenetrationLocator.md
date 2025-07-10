@@ -6,3 +6,4 @@
 - The algorithm in PenetrationLocator utilizes a [`NearestNodeLocator`](/NearestNodeLocator.md) so `patch_size` is still important.
 
 !media media/geomsearch/penetration_diagram.jpg
+       alt=An illustration of the distance between the primary side and secondary node. 

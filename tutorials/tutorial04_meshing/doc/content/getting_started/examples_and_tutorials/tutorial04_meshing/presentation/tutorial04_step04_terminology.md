@@ -14,6 +14,7 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 
 !media tutorial04_meshing/general_FEM_labels.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       alt=Labelled diagram illustrating the use of common terms for parts of a mesh.
 
 !---
 
@@ -24,6 +25,7 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 
 !media tutorial04_meshing/general_FEM_labels.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       alt=Labelled diagram illustrating the use of common terms for parts of a mesh.
 
 !---
 
@@ -39,6 +41,7 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 
 !media tutorial04_meshing/general_FEM_labels.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       alt=Labelled diagram illustrating the use of common terms for parts of a mesh.
 
 !---
 
@@ -49,6 +52,7 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 
 !media tutorial04_meshing/general_FEM_labels.png
        style=width:70%;display:block;margin-left:auto;margin-right:auto;
+       alt=Labelled diagram illustrating the use of common terms for parts of a mesh.
 
 !---
 
@@ -59,3 +63,4 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 
 !media tutorial04_meshing/general_FEM_labels.png
        style=width:70%;display:block;margin-left:auto;margin-right:auto;
+       alt=Labelled diagram illustrating the use of common terms for parts of a mesh.

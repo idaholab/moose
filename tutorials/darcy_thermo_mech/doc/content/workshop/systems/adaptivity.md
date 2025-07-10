@@ -31,6 +31,7 @@ elements of the same type.
 
 !col width=25%
 !media darcy_thermo_mech/adaptivity_pattern.png
+       alt=Illustration of elements being h-refined by splitting into smaller "child" elements.
 !row-end!
 
 !---
