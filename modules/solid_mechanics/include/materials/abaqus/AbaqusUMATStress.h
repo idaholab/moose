@@ -13,14 +13,14 @@
 #include "DynamicLibraryLoader.h"
 #include "ComputeFiniteStrain.h"
 #include "RotationTensor.h"
-#include "StepUOInterface.h"
+#include "AnalysisStepUOInterface.h"
 
-class StepUserObject;
+class AnalysisStepUserObject;
 
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
  */
-class AbaqusUMATStress : public ComputeGeneralStressBase, public StepUOInterface
+class AbaqusUMATStress : public ComputeGeneralStressBase, public AnalysisStepUOInterface
 {
 public:
   static InputParameters validParams();
@@ -259,5 +259,5 @@ private:
   const ComputeFiniteStrain::DecompMethod _decomposition_method;
 
   /// User object that determines step number
-  const StepUserObject * _step_user_object;
+  const AnalysisStepUserObject * _step_user_object;
 };

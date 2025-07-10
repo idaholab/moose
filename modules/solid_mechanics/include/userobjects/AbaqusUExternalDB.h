@@ -11,13 +11,13 @@
 
 #include "ThreadedGeneralUserObject.h"
 #include "DynamicLibraryLoader.h"
-#include "StepUOInterface.h"
-class StepUserObject;
+#include "AnalysisStepUOInterface.h"
+class AnalysisStepUserObject;
 
 /**
  * Coupling user object to use Abaqus UEXTERNALDB subroutines in MOOSE
  */
-class AbaqusUExternalDB : public ThreadedGeneralUserObject, StepUOInterface
+class AbaqusUExternalDB : public ThreadedGeneralUserObject, AnalysisStepUOInterface
 {
 public:
   static InputParameters validParams();
@@ -54,5 +54,5 @@ protected:
   const ExecFlagType & _current_execute_on_flag;
 
   /// User object that determines the step number
-  const StepUserObject * _step_user_object;
+  const AnalysisStepUserObject * _step_user_object;
 };

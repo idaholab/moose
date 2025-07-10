@@ -12,14 +12,14 @@
 #include "GeneralUserObject.h"
 
 /**
- * User object that provides simulation steps given user input
+ * User object that provides analysis steps given user input
  */
-class StepUserObject : public GeneralUserObject
+class AnalysisStepUserObject : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  StepUserObject(const InputParameters & parameters);
+  AnalysisStepUserObject(const InputParameters & parameters);
 
   // Get start time
   Real getStartTime(const unsigned int & step) const;

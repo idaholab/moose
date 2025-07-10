@@ -85,25 +85,25 @@
 
 [Controls]
   [step1]
-    type = StepPeriod
+    type = AnalysisStepPeriod
     enable_objects = 'BCs::y_step1'
     disable_objects = 'BCs::y_pull_function_step2'
-    step_user_object = step_uo
+    analysis_step_user_object = step_uo
     step_number = 0
   []
   [step2]
-    type = StepPeriod
+    type = AnalysisStepPeriod
     enable_objects = 'BCs::y_pull_function_step2'
     disable_objects = 'BCs::y_step1'
-    step_user_object = step_uo
+    analysis_step_user_object = step_uo
     step_number = 1
   []
 []
 
 [UserObjects]
   [step_uo]
-   type = StepUserObject
-   step_start_times = '0 5'
+   type = AnalysisStepUserObject
+   step_end_times = '5 10'
   []
 []
 

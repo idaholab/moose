@@ -12,17 +12,17 @@
 #include <string>
 
 class FEProblemBase;
-class StepUserObject;
+class AnalysisStepUserObject;
 
 /**
  *
  * Interface class for step user object. It meets the requirement of getting *one* step user
  * object among all existing system user objects.
  **/
-class StepUOInterface
+class AnalysisStepUOInterface
 {
 protected:
-  virtual void getStepUserObject(const FEProblemBase & fe_problem,
-                                 const StepUserObject *& step_user_object,
-                                 const std::string & name);
+  virtual void getAnalysisStepUserObject(const FEProblemBase & fe_problem,
+                                         const AnalysisStepUserObject *& step_user_object,
+                                         const std::string & name);
 };

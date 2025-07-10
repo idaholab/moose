@@ -7,14 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "StepUserObject.h"
+#include "AnalysisStepUserObject.h"
+#include "MooseUtils.h"
 #include <limits>
 #include <algorithm>
 
-registerMooseObject("SolidMechanicsApp", StepUserObject);
+registerMooseObject("SolidMechanicsApp", AnalysisStepUserObject);
 
 InputParameters
-StepUserObject::validParams()
+AnalysisStepUserObject::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
@@ -27,7 +28,11 @@ StepUserObject::validParams()
       "The beginning of step times. The number of steps is inferred from the number of times. One "
       "step is defined by its start time; and its end time is taken from the start time of the "
       "next step (if it exists). This list needs to be in ascending value order.");
-
+  params.addParam<std::vector<Real>>(
+      "step_end_times",
+      "The end of step times. The number of steps is inferred from the number of times. One "
+      "step is defined by the interval between previous start time and the next. The first step "
+      "is assumed to start at time zero. This list needs to be in ascending value order.");
   params.addParam<Real>("total_time_interval",
                         "The total time interval in which the steps take place. This option needs "
                         "to be used together with the 'number_steps'.");
@@ -40,29 +45,57 @@ StepUserObject::validParams()
       "The durations of the steps. 'n' of step time intervals define 'n+1' steps "
       "starting at time equals zero.");
 
+  params.addParam<bool>(
+      "set_sync_times", false, "Whether to make the output times include the step times.");
+
   return params;
 }
 
-StepUserObject::StepUserObject(const InputParameters & parameters)
+AnalysisStepUserObject::AnalysisStepUserObject(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _times(0),
     _step_durations(0),
     _total_time_interval(0),
     _number_steps(0)
 {
-  const bool is_step_times = isParamSetByUser("step_start_times");
+  const bool is_step_start_times = isParamSetByUser("step_start_times");
+  const bool is_step_end_times = isParamSetByUser("step_end_times");
   const bool is_interval_and_steps =
       isParamSetByUser("total_time_interval") && isParamSetByUser("number_steps");
   const bool is_step_durations = isParamSetByUser("step_durations");
 
-  if (is_step_times)
+  // check for valid user input
+  if (int(is_step_start_times) + int(is_step_end_times) + int(is_interval_and_steps) +
+          int(is_step_durations) >
+      1)
+    mooseError("In AnalysisStepUserObject, only one of 'step_start_times', 'step_end_times', "
+               "'total_time_interval', and 'step_durations' can be set");
+  if ((isParamSetByUser("total_time_interval") && !isParamSetByUser("number_steps")) ||
+      (!isParamSetByUser("total_time_interval") && isParamSetByUser("number_steps")))
+    mooseError("In AnalysisStepUserObject, both 'total_time_interval' and 'number_steps' need both "
+               "be set.");
+
+  // define step times
+  if (is_step_start_times)
   {
     _times = getParam<std::vector<Real>>("step_start_times");
     if (!std::is_sorted(_times.begin(), _times.end()))
+      paramError("step_start_times",
+                 "start times for AnalysisStepUserObject are not provided in ascending order. "
+                 "Please revise "
+                 "your input.");
+
+    mooseInfo("Step start times are used to define simulation steps in ", name(), ".");
+  }
+  else if (is_step_end_times)
+  {
+    _times = getParam<std::vector<Real>>("step_end_times");
+    if (!std::is_sorted(_times.begin(), _times.end()))
       paramError(
-          "step_start_times",
-          "start times for StepUserObject are not provided in ascending order. Please revise "
+          "step_end_times",
+          "end times for AnalysisStepUserObject are not provided in ascending order. Please revise "
           "your input.");
+    _times.insert(_times.begin(), 0.0);
 
     mooseInfo("Step start times are used to define simulation steps in ", name(), ".");
   }
@@ -102,19 +135,27 @@ StepUserObject::StepUserObject(const InputParameters & parameters)
     paramError("step_start_times",
                "Plese provide 'step_start_times' or 'step_durations' or 'total_time_interval' and "
                "'number_steps' to define simulation loading steps.");
+
+  // set sync times
+  if (getParam<bool>("set_sync_times"))
+  {
+    std::set<Real> & sync_times = _app.getOutputWarehouse().getSyncTimes();
+    for (const auto t : _times)
+      sync_times.insert(t);
+  }
 }
 
 Real
-StepUserObject::getStartTime(const unsigned int & step) const
+AnalysisStepUserObject::getStartTime(const unsigned int & step) const
 {
   if (_times.size() <= step)
-    mooseError("StepUserObject was called with a wrong step number");
+    mooseError("AnalysisStepUserObject was called with a wrong step number");
 
   return _times[step];
 }
 
 Real
-StepUserObject::getEndTime(const unsigned int & step) const
+AnalysisStepUserObject::getEndTime(const unsigned int & step) const
 {
   Real end_time(0);
 
@@ -123,13 +164,13 @@ StepUserObject::getEndTime(const unsigned int & step) const
   else if (_times.size() == step + 1)
     end_time = std::numeric_limits<double>::max();
   else
-    mooseError("StepUserObject was called with a wrong step number");
+    mooseError("AnalysisStepUserObject was called with a wrong step number");
 
   return end_time;
 }
 
 unsigned int
-StepUserObject::getStep(const Real & time) const
+AnalysisStepUserObject::getStep(const Real & time) const
 {
   int which_step = 0;
 
@@ -139,7 +180,8 @@ StepUserObject::getStep(const Real & time) const
       return i;
 
     which_step = i;
-    if (time >= _times[i] && time < _times[i + 1])
+    if (MooseUtils::absoluteFuzzyGreaterEqual(time, _times[i]) &&
+        MooseUtils::absoluteFuzzyLessThan(time, _times[i + 1]))
       return which_step;
   }
 
@@ -147,14 +189,14 @@ StepUserObject::getStep(const Real & time) const
 }
 
 void
-StepUserObject::initialize()
+AnalysisStepUserObject::initialize()
 {
 }
 void
-StepUserObject::execute()
+AnalysisStepUserObject::execute()
 {
 }
 void
-StepUserObject::finalize()
+AnalysisStepUserObject::finalize()
 {
 }
