@@ -32,14 +32,16 @@ public:
    * @param fe_problem Reference to the problem
    * @param linear_system_num The number of the linear system which is assembled by this thread
    * @param mode Computation mode (rhs, matrix or both)
-   * @param tags The vector/matrix tags this thread should contribute to. These are used to query
-   * the warehouse for the objects that should contribute to the linear system matrix and right hand
-   * side. When mode == FullSystem, these tags should be vector tags
+   * @param vector_tags The vector tags this thread should contribute to. These are used to
+   * query the warehouse for the objects that should contribute to the right hand side.
+   * @param matrix_tags The matrix tags this thread should contribute to. These are used to
+   * query the warehouse for the objects that should contribute to the matrix.
    */
   ComputeLinearFVFaceThread(FEProblemBase & fe_problem,
                             const unsigned int linear_system_num,
                             const Moose::FV::LinearFVComputationMode mode,
-                            const std::set<TagID> & tags);
+                            const std::set<TagID> & vector_tags,
+                            const std::set<TagID> & matrix_tags);
 
   /**
    * Splitting constructor.
@@ -57,9 +59,12 @@ public:
   void join(const ComputeLinearFVFaceThread & /*y*/);
 
 protected:
+  /// Setup the contribution objects before we start the loop.
+  void setupSystemContributionObjects();
+
   /// Fetch LinearFVFluxKernels for a given block. We only call this when
   /// we transition from one block to another.
-  void fetchSystemContributionObjects();
+  void fetchBlockSystemContributionObjects();
 
   /// Print list of executed object types together with the execution order
   void printGeneralExecutionInformation() const;
@@ -71,13 +76,16 @@ protected:
   FEProblemBase & _fe_problem;
 
   /// The number of the linear system we are contributing to
-  const unsigned int _linear_system_number;
+  const unsigned int _system_number;
 
   /// The mode in which this thread is operating
   const Moose::FV::LinearFVComputationMode _mode;
 
-  /// The vector/matrix tags this thread contributes to
-  const std::set<TagID> _tags;
+  /// The vector tags this thread contributes to
+  const std::set<TagID> & _vector_tags;
+
+  /// The matrix tags this thread contributes to
+  const std::set<TagID> & _matrix_tags;
 
   /// The subdomain for the current element
   SubdomainID _subdomain;
@@ -94,12 +102,19 @@ protected:
   /// Thread ID
   THREAD_ID _tid;
 
-  /// LinearFVFluxKernels for the element
-  std::vector<LinearFVFluxKernel *> _elem_fv_flux_kernels;
+  /// Kernels which will only contribute to a matrix from the
+  /// element-side of the face.
+  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_elem;
 
-  /// LinearFVFluxKernels for the neighbor
-  std::vector<LinearFVFluxKernel *> _neighbor_fv_flux_kernels;
+  /// Kernels which will only contribute to a matrix from the
+  /// neighbor-side of the face.
+  std::vector<LinearFVFluxKernel *> _fv_flux_kernels_neighbor;
 
-  /// Combined LinearFVFluxKernels which will be used to contribute to a system
+  /// Combined LinearFVFluxKernels which will be used to contribute to a system.
   std::set<LinearFVFluxKernel *> _fv_flux_kernels;
+
+private:
+  /// Boolean that is used to check if the kernels are ready to start contributing to
+  /// the system
+  bool _system_contrib_objects_ready;
 };

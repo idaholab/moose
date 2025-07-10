@@ -628,6 +628,27 @@ relativeFuzzyLessThan(const T & var1,
 }
 
 /**
+ * Function which takes the union of \p vector1 and \p vector2 and copies them
+ * to \p common . Depending on the vector size and data type this can be very expensive!
+ */
+template <typename T>
+void
+getUnion(const std::vector<T> & vector1, const std::vector<T> & vector2, std::vector<T> & common)
+{
+  std::unordered_set<T> unique_elements;
+  unique_elements.reserve(vector1.size() + vector2.size());
+
+  for (const T & entry : vector1)
+    unique_elements.insert(entry);
+  for (const T & entry : vector2)
+    unique_elements.insert(entry);
+
+  // Now populate the common vector with the union
+  common.clear();
+  common.assign(unique_elements.begin(), unique_elements.end());
+}
+
+/**
  * Taken from https://stackoverflow.com/a/257382
  * Evaluating constexpr (Has_size<T>::value) in a templated method over class T will
  * return whether T is a standard container or a singleton
@@ -1030,12 +1051,11 @@ template <typename C, typename It, typename M1, typename M2>
 auto
 findPair(C & container, It start_iterator, const M1 & first, const M2 & second)
 {
-  return std::find_if(start_iterator,
-                      container.end(),
-                      [&](auto & item) {
-                        return wildcardEqual(first, item.first) &&
-                               wildcardEqual(second, item.second);
-                      });
+  return std::find_if(
+      start_iterator,
+      container.end(),
+      [&](auto & item)
+      { return wildcardEqual(first, item.first) && wildcardEqual(second, item.second); });
 }
 
 /**
