@@ -79,8 +79,8 @@ offset = 1.0
 [Physics/SolidMechanics/Dynamic]
   [all]
     hht_alpha = 0.0
-    beta = 0.25
-    gamma = 0.5
+    newmark_beta = 0.25
+    newmark_gamma = 0.5
     mass_damping_coefficient = 0.0
     stiffness_damping_coefficient = 0.0
     displacements = 'disp_x disp_y'
@@ -145,7 +145,7 @@ offset = 1.0
   dt = 0.01
   dtmin = .05
   solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor -snes_linesearch_monitor'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_linesearch_monitor'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err -ksp_gmres_restart'
   petsc_options_value = 'lu       NONZERO               1e-15                   1e-5          100'
   l_max_its = 100
