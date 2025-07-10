@@ -94,17 +94,18 @@ NonlinearSystemBase::addKokkosBoundaryCondition(const std::string & bc_name,
 void
 NonlinearSystemBase::setKokkosInitialSolution()
 {
+  // The preset Dirichlet BCs can have coupled variables from other systems, so we grab all systems
   auto & systems = _fe_problem.getKokkosSystems();
 
-  auto tag = _fe_problem.addVectorTag("_solution", Moose::VECTOR_TAG_SOLUTION);
+  auto tag = _fe_problem.addVectorTag("parallel_solution", Moose::VECTOR_TAG_SOLUTION);
 
   associateVectorToTag(solution(), tag);
 
   std::set<TagID> needed_fe_var_vector_tags = {tag};
 
   for (auto boundary : _fe_problem.mesh().meshBoundaryIds())
-    _kokkos_nodal_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(boundary,
-                                                                         needed_fe_var_vector_tags);
+    _kokkos_preset_nodal_bcs.updateBoundaryFEVariableCoupledVectorTagDependency(
+        boundary, needed_fe_var_vector_tags);
 
   for (auto & system : systems)
     system.sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
