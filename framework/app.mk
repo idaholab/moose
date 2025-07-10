@@ -617,3 +617,4 @@ endif
 sa: $(app_analyzer)
 
 compile_commands_all_srcfiles += $(srcfiles)
+compile_commands_all_kokkos_srcfiles += $(app_KOKKOS_SRC_FILES)
