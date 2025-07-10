@@ -67,7 +67,7 @@ If we don't use AMR, we should therefore return true.
 bool
 EquationSystemProblemOperator::HRefine()
 {
-  bool stop = false;
+  bool stop = true;
   if (_use_amr)
   {
     stop = _refiner->Apply(*_problem.pmesh);;
@@ -88,7 +88,7 @@ If we don't use AMR, we should therefore return true.
 bool
 EquationSystemProblemOperator::PRefine()
 {
-  bool stop = false;
+  bool stop = true;
   if (_use_amr)
   {
     mfem::Array<mfem::pRefinement> prefinements;

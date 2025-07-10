@@ -36,9 +36,9 @@ MFEMZienkiewiczZhuEstimator::createEstimator()
     mooseError("Could not fetch kernel with name ", _kernel_name);
   }
 
-  // fetch the order, dim and sdim
-  auto fec = problem.fecs.GetShared(_fe_space_name);
-  int order = fec->GetOrder();
+  // beforehand we would fetch this from the finite element collections
+  // in the problem data
+  int order = getFESpace()->GetMaxElementOrder();
 
   int dim = problem.pmesh->Dimension();
   int sdim = problem.pmesh->SpaceDimension();
@@ -56,7 +56,7 @@ MFEMZienkiewiczZhuEstimator::createEstimator()
       problem.pmesh.get(), _smooth_flux_fec.get(), dim);
 
   // fetch the grid function we need
-  auto gridfunction = problem.gridfunctions.GetShared(_test_var_name);
+  auto gridfunction = problem.gridfunctions.GetShared(_variable_name);
 
   // finally, initialise the estimator
   _error_estimator = std::make_shared<mfem::L2ZienkiewiczZhuEstimator>(
