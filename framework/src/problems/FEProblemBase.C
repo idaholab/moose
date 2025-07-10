@@ -3650,10 +3650,10 @@ FEProblemBase::projectSolution()
       DenseVector<Number> vals(var.order());
       ic->compute(vals);
 
-      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      const unsigned int n_scalar_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_scalar_dofs; i++)
       {
-        const dof_id_type global_index = var.dofIndices()[i];
+        const auto global_index = var.dofIndices()[i];
         var.sys().solution().set(global_index, vals(i));
         var.setValue(i, vals(i));
       }
@@ -3672,9 +3672,11 @@ FEProblemBase::projectSolution()
 
 void
 FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
-                                                    ConstBndNodeRange & bnd_nodes)
+                                                    ConstBndNodeRange & bnd_nodes,
+                                                    const TargetVarUsageForIC target_var_usage,
+                                                    const std::set<VariableName> & target_var_names)
 {
-  ComputeInitialConditionThread cic(*this);
+  ComputeInitialConditionThread cic(*this, target_var_names, target_var_usage);
   Threads::parallel_reduce(elem_range, cic);
 
   // Need to close the solution vector here so that boundary ICs take precendence
@@ -3682,7 +3684,7 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
     nl->solution().close();
   _aux->solution().close();
 
-  ComputeBoundaryInitialConditionThread cbic(*this);
+  ComputeBoundaryInitialConditionThread cbic(*this, target_var_names, target_var_usage);
   Threads::parallel_reduce(bnd_nodes, cbic);
 
   for (auto & nl : _nl)
@@ -3698,15 +3700,22 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
     for (const auto & ic : ics)
     {
       MooseVariableScalar & var = ic->variable();
+
+      if ((target_var_usage == TargetVarUsageForIC::ONLY_LIST &&
+           !target_var_names.count(var.name())) ||
+          (target_var_usage == TargetVarUsageForIC::SKIP_LIST &&
+           target_var_names.count(var.name())))
+        continue;
+
       var.reinit();
 
       DenseVector<Number> vals(var.order());
       ic->compute(vals);
 
-      const unsigned int n_SCALAR_dofs = var.dofIndices().size();
-      for (unsigned int i = 0; i < n_SCALAR_dofs; i++)
+      const unsigned int n_scalar_dofs = var.dofIndices().size();
+      for (unsigned int i = 0; i < n_scalar_dofs; i++)
       {
-        const dof_id_type global_index = var.dofIndices()[i];
+        const auto global_index = var.dofIndices()[i];
         var.sys().solution().set(global_index, vals(i));
         var.setValue(i, vals(i));
       }
@@ -3721,6 +3730,92 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
 
   _aux->solution().close();
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
+}
+
+void
+FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
+                                            ConstNodeRange & bnd_nodes,
+                                            ConstNodeRange & node_range,
+                                            Number (*poly_func)(const Point &,
+                                                                const libMesh::Parameters &,
+                                                                const std::string &,
+                                                                const std::string &),
+                                            Gradient (*poly_func_grad)(const Point &,
+                                                                       const libMesh::Parameters &,
+                                                                       const std::string &,
+                                                                       const std::string &),
+                                            const libMesh::Parameters & function_parameters,
+                                            const TargetVarUsageForIC target_var_usage,
+                                            const std::set<VariableName> & target_var_names)
+{
+  std::set<VariableName> var_names_to_project;
+
+  if (target_var_usage == TargetVarUsageForIC::ONLY_LIST)
+    var_names_to_project = target_var_names;
+  else /* TargetVarUsageForIC::SKIP_LIST */
+  {
+    auto insertICVars = [&](SystemBase & sys) -> void
+    {
+      const auto & vars = sys.getVariables(0);
+      for (const auto & ivar : vars)
+        if (!target_var_names.count(ivar->name()))
+          var_names_to_project.insert(ivar->name());
+    };
+
+    for (const auto & nl : _nl)
+      insertICVars(*nl);
+    insertICVars(*_aux);
+  }
+  for (const std::string & var_name : var_names_to_project)
+  {
+    const auto & var = getStandardVariable(0, var_name);
+    const auto var_num = var.number();
+
+    SystemBase & sys =
+        _aux->hasVariable(var_name)
+            ? static_cast<SystemBase &>(getAuxiliarySystem())
+            : static_cast<SystemBase &>(getNonlinearSystemBase(systemNumForVariable(var_name)));
+
+    System & libmesh_sys = getSystem(var_name);
+
+    NumericVector<Number> & temp_vec =
+        libmesh_sys.add_vector("temp_projection", /*projected=*/false);
+
+    libmesh_sys.project_vector(poly_func, poly_func_grad, function_parameters, temp_vec);
+    temp_vec.close();
+
+    DofMap & dof_map = sys.dofMap();
+    std::vector<dof_id_type> dof_indices;
+
+    bool not_apply_on_solved_dofs = (var.feType().family == LAGRANGE);
+
+    if (not_apply_on_solved_dofs)
+      for (const auto & node : node_range)
+      {
+        dof_map.dof_indices(node, dof_indices, var_num);
+        for (auto dof : dof_indices)
+          sys.solution().set(dof, temp_vec(dof));
+      }
+    else
+    {
+      for (const auto & elem : elem_range)
+      {
+        dof_map.dof_indices(elem, dof_indices, var_num);
+        for (auto dof : dof_indices)
+          sys.solution().set(dof, temp_vec(dof));
+      }
+      dof_indices.clear();
+      for (const auto & node : bnd_nodes)
+      {
+        dof_map.dof_indices(node, dof_indices, var_num);
+        for (auto dof : dof_indices)
+          sys.solution().set(dof, temp_vec(dof));
+      }
+    }
+
+    sys.solution().close();
+    sys.solution().localize(*libmesh_sys.current_local_solution, sys.dofMap().get_send_list());
+  }
 }
 
 std::shared_ptr<MaterialBase>
