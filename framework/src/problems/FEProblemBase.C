@@ -2614,11 +2614,15 @@ FEProblemBase::hasConvergence(const std::string & name, const THREAD_ID tid) con
 Convergence &
 FEProblemBase::getConvergence(const std::string & name, const THREAD_ID tid) const
 {
-  auto * const ret = dynamic_cast<Convergence *>(_convergences.getActiveObject(name, tid).get());
-  if (!ret)
-    mooseError("The Convergence object '", name, "' does not exist.");
-
-  return *ret;
+  if (_convergences.hasActiveObject(name, tid))
+    return *_convergences.getActiveObject(name, tid);
+  else
+  {
+    if (_convergences.hasObject(name, tid))
+      mooseError("The Convergence object '", name, "' exists but is not active.");
+    else
+      mooseError("The Convergence object '", name, "' does not exist.");
+  }
 }
 
 const std::vector<std::shared_ptr<Convergence>> &
