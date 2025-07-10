@@ -12,7 +12,7 @@
 #include "Action.h"
 
 /**
- * Add a default Convergence object to the simulation.
+ * Adds default Convergence objects to the simulation.
  */
 class AddDefaultConvergenceAction : public Action
 {
@@ -24,9 +24,19 @@ public:
   virtual void act() override;
 
 protected:
+  /// Adds the default nonlinear Convergence object(s)
+  void addDefaultNonlinearConvergence();
+  /// Adds the default fixed point Convergence object
+  void addDefaultMultiAppFixedPointConvergence();
+
   /**
    * Checks that nonlinear convergence parameters were not set in the executioner
    * if using a Convergence object that does not use them.
    */
   void checkUnusedNonlinearConvergenceParameters();
+  /**
+   * Checks that fixed point convergence parameters were not set in the executioner
+   * if using a Convergence object that does not use them.
+   */
+  void checkUnusedMultiAppFixedPointConvergenceParameters();
 };

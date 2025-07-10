@@ -20,7 +20,7 @@ Because MultiApp allows wrapping another levels of MultiApps, the design enables
 App coupling iterations can be relaxed to improve the stability of the convergence.
 When a MultiApp is a subapp of a main application and is also the main application for its own subapps, MOOSE allows relaxation of the MultiApp solution
 within the main coupling iterations and within the coupling iterations, where the MultiApp is the main application, independently.
-More details about the MultiApp coupling algorithms may be found in [FixedPointAlgorithms/index.md])
+More details about the MultiApp coupling algorithms may be found in [FixedPointAlgorithms/index.md].
 
 ## Automatic and Default Preconditioning
 

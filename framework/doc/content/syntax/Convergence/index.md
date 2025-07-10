@@ -4,10 +4,10 @@ The Convergence system allows users to customize the stopping criteria for the
 iteration in various solves:
 
 - Nonlinear system solves
-- Linear system solves (not yet implemented)
+- Linear system solves (for `solve_type = LINEAR` in the executioner, not for inner linear solves within a nonlinear solve)
 - Steady-state detection in [Transient.md] (not yet implemented)
-- Fixed point solves with [MultiApps](syntax/MultiApps/index.md) (not yet implemented)
-- Fixed point solves with multiple systems (not yet implemented)
+- Fixed point solves with [MultiApps](syntax/MultiApps/index.md)
+- Fixed point solves with multiple systems
 
 Instead of supplying convergence-related parameters directly to the executioner,
 the user creates `Convergence` objects whose names are then supplied to the

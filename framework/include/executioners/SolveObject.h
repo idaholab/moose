@@ -27,6 +27,11 @@ public:
   SolveObject(Executioner & ex);
 
   /**
+   * Method that should be executed once, before any solve calls
+   */
+  virtual void initialSetup() {};
+
+  /**
    * Solve routine provided by this object.
    * @return True if solver is converged.
    */

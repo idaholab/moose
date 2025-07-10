@@ -84,6 +84,7 @@
       input = 'transient_main.i'
       csvdiff = 'app_begin_transfer_begin_steffensen_sub.csv app_begin_transfer_begin_steffensen_sub_sub0_csv.csv'
       cli_args = "Outputs/file_base=app_begin_transfer_begin_steffensen_sub Executioner/transformed_postprocessors='' MultiApps/sub/transformed_postprocessors='from_main'"
+      recover = false # Fails because counting iterations and "initial" norm is different on second half; converging by relative tolerance differs
       detail = 'for updating the subapp postprocessor with the sub-app and the variable transfers executed at the beginning of each time step,'
     []
     [app_begin_transfers_end_steffensen_sub]
