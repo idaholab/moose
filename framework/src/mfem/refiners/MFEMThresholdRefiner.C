@@ -1,11 +1,11 @@
 #ifdef MFEM_ENABLED
 
-#include "MFEMRefiner.h"
+#include "MFEMThresholdRefiner.h"
 
-registerMooseObject("MooseApp", MFEMRefiner);
+registerMooseObject("MooseApp", MFEMThresholdRefiner);
 
 InputParameters
-MFEMRefiner::validParams()
+MFEMThresholdRefiner::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("Marker");
@@ -25,7 +25,7 @@ MFEMRefiner::validParams()
   return params;
 }
 
-MFEMRefiner::MFEMRefiner(const InputParameters & params)
+MFEMThresholdRefiner::MFEMThresholdRefiner(const InputParameters & params)
   : MFEMGeneralUserObject(params),
     _error_threshold(getParam<Real>("refine")),
     _steps(getParam<int>("steps")),
@@ -51,13 +51,14 @@ MFEMRefiner::MFEMRefiner(const InputParameters & params)
 
 
 void
-MFEMRefiner::setUp(std::shared_ptr<MFEMEstimator> estimator)
+MFEMThresholdRefiner::setUp(std::shared_ptr<MFEMEstimator> estimator)
 {
   _threshold_refiner = std::make_shared<mfem::ThresholdRefiner>( *(estimator->getEstimator()) );
+  _threshold_refiner->SetTotalErrorFraction(_error_threshold);
 }
 
 bool
-MFEMRefiner::MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinement> & refinements)
+MFEMThresholdRefiner::MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinement> & refinements)
 {
   // We are doing p-refinement. Increase the counter
   // and check if we have exceeded the max number of
@@ -72,7 +73,7 @@ MFEMRefiner::MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinem
 
 // Returns true when it's time to stop
 bool
-MFEMRefiner::Apply(mfem::ParMesh & mesh)
+MFEMThresholdRefiner::Apply(mfem::ParMesh & mesh)
 {
   // We are doing h-refinement. Increase the counter
   // and check if we have exceeded the max number of
