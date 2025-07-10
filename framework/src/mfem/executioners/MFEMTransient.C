@@ -72,7 +72,9 @@ MFEMTransient::takeStep(Real input_dt)
 
   _time_stepper->preSolve();
 
-  // Advance time step of the MFEM problem. Time is also updated here.
+  // Advance time step of the MFEM problem. Time is also updated here, and
+  // _problem_operator->SetTime is called inside the ode_solver->Step method to
+  // update the time used by time dependent (function) coefficients.
   // Takes place instead of TimeStepper::step().
   _problem_data.ode_solver->Step(_problem_data.f, _time, _dt);
 
