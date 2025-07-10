@@ -29,7 +29,8 @@ namespace Kokkos
 class NodalBCBase;
 
 /**
- * The Kokkos system class
+ * The Kokkos system class. Each nonlinear and auxiliary system in MOOSE has a corresponding Kokkos
+ * system.
  */
 class System : public MeshHolder, public AssemblyHolder
 {
