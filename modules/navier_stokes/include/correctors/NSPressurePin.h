@@ -51,8 +51,4 @@ protected:
 
   /// If using average pressure pin, provides the average pressure value
   const PostprocessorValue * const _current_pressure_average;
-
-private:
-  /// The nonlinear system
-  SystemBase & _sys;
 };

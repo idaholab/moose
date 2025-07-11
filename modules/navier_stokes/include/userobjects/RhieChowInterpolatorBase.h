@@ -139,9 +139,6 @@ protected:
   /// The velocity variable numbers
   std::vector<unsigned int> _var_numbers;
 
-  /// The nonlinear system
-  SystemBase & _sys;
-
   /// The interpolation method to use for the velocity
   Moose::FV::InterpMethod _velocity_interp_method;
 
