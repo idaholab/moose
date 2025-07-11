@@ -12,7 +12,6 @@
 #pragma once
 #include "MFEMProblemData.h"
 #include "ProblemOperatorInterface.h"
-#include "MFEMEstimator.h"
 #include "MFEMThresholdRefiner.h"
 
 namespace Moose::MFEM
@@ -30,7 +29,6 @@ public:
   the EquationSystemProblemOperator. Since that one inherits from this class, we need
   to add trivial virtual functions up here to make that possible.
   */
-  virtual void AddEstimator(std::shared_ptr<MFEMEstimator> /*estimator*/) {}
   virtual void AddRefiner(std::shared_ptr<MFEMThresholdRefiner> /*refiner*/) {}
   virtual void SetUpAMR() {};
   virtual bool HRefine() { return true; } /* we return true when it's time to stop solving */
