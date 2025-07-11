@@ -33,11 +33,11 @@ TEST(InputParametersTest, checkControlParamPrivateError)
   }
 }
 
-// This tests for the bug https://github.com/idaholab/moose/issues/8586.
-// It makes sure that range-checked input file parameters comparison functions
-// do absolute floating point comparisons instead of using a default epsilon.
 TEST(InputParametersTest, checkRangeCheckedParam)
 {
+  // This tests for the bug https://github.com/idaholab/moose/issues/8586.
+  // It makes sure that range-checked input file parameters comparison functions
+  // do absolute floating point comparisons instead of using a default epsilon.
   try
   {
     InputParameters params = emptyInputParameters();
@@ -48,9 +48,57 @@ TEST(InputParametersTest, checkRangeCheckedParam)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("Range check failed for param") != std::string::npos)
-        << "range check failed with unexpected error: " << msg;
+    ASSERT_TRUE(msg.find("p: Range check failed; expression = 'p = 1', value = 1") !=
+                std::string::npos)
+        << "Range check failed with unexpected error: " << msg;
   }
+
+  const auto test_vector_error = [](const std::vector<Real> & value,
+                                    const std::string & range_function,
+                                    const bool is_user_error,
+                                    const std::string expect_error)
+  {
+    InputParameters params = emptyInputParameters();
+    const std::string name = "p";
+    params.addRangeCheckedParam<std::vector<Real>>(name, value, range_function, "Some doc");
+    const auto param = dynamic_cast<libMesh::Parameters::Parameter<std::vector<Real>> *>(
+        params.begin()->second.get());
+    const auto result = params.rangeCheck<Real, Real>(name, name, param);
+    EXPECT_TRUE(result.has_value());
+    ASSERT_EQ(is_user_error, result->first);
+    ASSERT_EQ(expect_error, result->second);
+  };
+
+  // Invalid range function
+  test_vector_error({}, "!", false, "Error parsing expression '!' for parameter p");
+  // Check all values, vector has no values
+  test_vector_error({}, "p = 1", true, "Range checking empty vector 'p = 1'");
+  // Check all values, invalid variable
+  test_vector_error({1}, "a = 1", false, "Error parsing expression 'a = 1'");
+  // Index check out of range
+  test_vector_error(
+      {1}, "p_1 = 1", true, "Error parsing expression 'p_1 = 1'; out of range variable 'p_1'");
+  // Index check invalid variable
+  test_vector_error(
+      {1}, "p_a = 1", false, "Error parsing expression 'p_a = 1'; invalid variable 'p_a'");
+
+  const auto test_scalar_error = [](const std::string & range_function,
+                                    const bool is_user_error,
+                                    const std::string expect_error)
+  {
+    InputParameters params = emptyInputParameters();
+    const std::string name = "p";
+    params.addRangeCheckedParam<Real>(name, 1, range_function, "Some doc");
+    const auto param =
+        dynamic_cast<libMesh::Parameters::Parameter<Real> *>(params.begin()->second.get());
+    const auto result = params.rangeCheck<Real, Real>(name, name, param);
+    EXPECT_TRUE(result.has_value());
+    ASSERT_EQ(is_user_error, result->first);
+    ASSERT_EQ(expect_error, result->second);
+  };
+
+  // Invalid range function
+  test_scalar_error("!", false, "Error parsing expression '!' for parameter p");
 }
 
 TEST(InputParametersTest, checkControlParamTypeError)
@@ -382,10 +430,8 @@ TEST(InputParametersTest, getPairLength)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(
-        msg.find(
-            "Vector parameters first:(size: 3) and second:(size: 4) are of different lengths") !=
-        std::string::npos)
+    ASSERT_TRUE(msg.find("first: Vector parameters first(size: 3) and second(size: 4) are of "
+                         "different lengths") != std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 }
@@ -409,8 +455,8 @@ TEST(InputParametersTest, getControllablePairs)
     std::string msg(e.what());
     ASSERT_TRUE(
         msg.find(
-            "first: and/or second: are controllable parameters and cannot be "
-            "retireved using the MooseObject::getParam/InputParameters::get methods for pairs") !=
+            "Parameters first and/or second are controllable parameters and cannot be retireved "
+            "using the MooseObject::getParam/InputParameters::get methods for pairs") !=
         std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
@@ -544,7 +590,7 @@ TEST(InputParametersTest, noDefaultValueError)
   // Throw an error message when no default value is provided
   try
   {
-    params.getParamHelper<Real>("dummy_real", params, static_cast<Real *>(0));
+    params.getParamHelper<Real>("dummy_real", params);
     FAIL() << "failed to get the parameter because the default value is missing";
   }
   catch (const std::exception & e)
@@ -557,8 +603,7 @@ TEST(InputParametersTest, noDefaultValueError)
 
   try
   {
-    params.getParamHelper<std::vector<Real>>(
-        "dummy_vector", params, static_cast<std::vector<Real> *>(0));
+    params.getParamHelper<std::vector<Real>>("dummy_vector", params);
     FAIL() << "failed to get the parameter because the default value is missing";
   }
   catch (const std::exception & e)
@@ -621,19 +666,8 @@ TEST(InputParametersTest, fileNames)
 
     // Parse the inputs
     Parser parser(filenames, input_text);
+    parser.setCommandLineParams(cli_args);
     parser.parse();
-
-    // Merge in the command line arguments, if any
-    std::string cli_hit;
-    for (const auto & value : cli_args)
-      cli_hit += value + "\n";
-    if (cli_hit.size())
-    {
-      auto cli_root = hit::parse("CLI_ARGS", cli_hit);
-      hit::explode(cli_root);
-      hit::merge(cli_root, parser.root());
-      delete cli_root;
-    }
 
     // Define the parameters that we care about
     InputParameters base_params = emptyInputParameters();
@@ -650,7 +684,7 @@ TEST(InputParametersTest, fileNames)
 
     // Fill the object parameters from the input
     ExtractWalker ew(object_params);
-    parser.root()->walk(&ew, hit::NodeType::Section);
+    parser.getRoot().walk(&ew, hit::NodeType::Section);
 
     // Finalize the parameters, which sets the filep aths
     for (auto & name_params_pair : object_params)
