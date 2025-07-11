@@ -38,4 +38,51 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & params, MFEMProblem & m
                        Moose::PassKey<MFEMExecutioner>());
 }
 
+void
+MFEMExecutioner::solve()
+{
+  // FixedPointSolve::solve() called from TimeStepper::step() is libMesh specific, so we need
+  // to include all steps relevant to both FE backends here.
+
+  // need to back up multi-apps even when not doing fixed point iteration for recovering from failed
+  // multiapp solve
+  _mfem_problem.backupMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+  _mfem_problem.backupMultiApps(EXEC_TIMESTEP_BEGIN);
+  _mfem_problem.backupMultiApps(EXEC_TIMESTEP_END);
+  _mfem_problem.backupMultiApps(EXEC_MULTIAPP_FIXED_POINT_END);
+
+  // Fixed point iteration loop ends right above
+  _mfem_problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
+  _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
+  _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
+  _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
+
+  _mfem_problem.execTransfers(EXEC_TIMESTEP_BEGIN);
+
+  _mfem_problem.execute(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+  _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+  _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, true);
+  _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+
+  _mfem_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, true);
+  _mfem_problem.execute(EXEC_TIMESTEP_BEGIN);
+  _mfem_problem.outputStep(EXEC_TIMESTEP_BEGIN);
+
+  // Update warehouse active objects
+  _mfem_problem.updateActiveObjects();
+
+  innerSolve();
+
+  // Execute user objects, transfers, and multiapps at timestep end
+  _mfem_problem.onTimestepEnd();
+  _mfem_problem.execute(EXEC_TIMESTEP_END);
+  _mfem_problem.execTransfers(EXEC_TIMESTEP_END);
+  _mfem_problem.execMultiApps(EXEC_TIMESTEP_END, true);
+
+  // Fixed point iteration loop ends right above
+  _mfem_problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
+  _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
+  _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
+  _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
+}
 #endif

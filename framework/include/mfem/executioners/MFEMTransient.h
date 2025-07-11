@@ -32,7 +32,7 @@ public:
   /**
    * Perform all required solves during a step. Called in takeStep.
    */
-  virtual void solve();
+  virtual void innerSolve();
 
   virtual bool lastSolveConverged() const override { return true; };
 

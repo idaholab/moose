@@ -70,15 +70,6 @@ MFEMTransient::takeStep(Real input_dt)
   else
     _dt = input_dt;
 
-  // from transientbase
-  // _time_stepper->preSolve();
-  // _time = _time_old + _dt;
-  // _problem.timestepSetup();
-  // _problem.onTimestepBegin();
-  // _time_stepper->step();
-  // _xfem_repeat_step = _fixed_point_solve->XFEMRepeatStep();
-  // _last_solve_converged = _time_stepper->converged();
-
   _time_stepper->preSolve();
   _problem.timestepSetup();
   _problem.onTimestepBegin();
@@ -113,42 +104,8 @@ MFEMTransient::takeStep(Real input_dt)
 }
 
 void
-MFEMTransient::solve()
+MFEMTransient::innerSolve()
 {
-  // FixedPointSolve::solve() called from TimeStepper::step() is libMesh specific, so we need
-  // to include all steps relevant to both FE backends here.
-
-  // need to back up multi-apps even when not doing fixed point iteration for recovering from failed
-  // multiapp solve
-  _problem.backupMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
-  _problem.backupMultiApps(EXEC_TIMESTEP_BEGIN);
-  _problem.backupMultiApps(EXEC_TIMESTEP_END);
-  _problem.backupMultiApps(EXEC_MULTIAPP_FIXED_POINT_END);
-
-  if (lastSolveConverged())
-  {
-    // Fixed point iteration loop ends right above
-    _problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
-    _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
-    _problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
-    _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
-  }
-
-  preSolve();
-  _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
-
-  _problem.execute(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
-  _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
-  _problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, true);
-  _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
-
-  _problem.execMultiApps(EXEC_TIMESTEP_BEGIN, true);
-  _problem.execute(EXEC_TIMESTEP_BEGIN);
-  _problem.outputStep(EXEC_TIMESTEP_BEGIN);
-
-  // Update warehouse active objects
-  _problem.updateActiveObjects();
-
   // Advance time step of the MFEM problem. Time is also updated here, and
   // _problem_operator->SetTime is called inside the ode_solver->Step method to
   // update the time used by time dependent (function) coefficients.
@@ -158,23 +115,6 @@ MFEMTransient::solve()
   _problem_operator->SetTestVariablesFromTrueVectors();
   // Sync Host/Device
   _problem_data.f.HostRead();
-
-  // Execute user objects, transfers, and multiapps at timestep end
-  _problem.onTimestepEnd();
-  _problem.execute(EXEC_TIMESTEP_END);
-  _problem.execTransfers(EXEC_TIMESTEP_END);
-  _problem.execMultiApps(EXEC_TIMESTEP_END, true);
-
-  postSolve();
-
-  if (lastSolveConverged())
-  {
-    // Fixed point iteration loop ends right above
-    _problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
-    _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
-    _problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
-    _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
-  }
 }
 
 #endif

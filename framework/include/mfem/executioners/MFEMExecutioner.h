@@ -29,9 +29,22 @@ public:
   /// Virtual method to construct the ProblemOperator. Call for default problems.
   virtual void constructProblemOperator() = 0;
 
+  /**
+   * Perform all required solves during a step. Includes relevant methods from the libmesh-specific
+   * FixedPointSolve::solve()
+   */
+  virtual void solve();
+
+  /**
+   * Perform all required solves during a step. Analagous to FixedPointSolve::innerSolve() for
+   * libMesh problems
+   */
+  virtual void innerSolve() = 0;
+
 protected:
   MFEMProblem & _mfem_problem;
   MFEMProblemData & _problem_data;
+  mfem::Device _device;
 };
 
 #endif
