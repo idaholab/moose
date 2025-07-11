@@ -23,6 +23,7 @@ public:
   void constructProblemOperator() override;
   virtual void init() override;
   virtual void execute() override;
+  virtual void innerSolve() override;
 
   virtual bool lastSolveConverged() const override { return true; };
 
