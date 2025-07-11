@@ -29,13 +29,6 @@ EquationSystemProblemOperator::Init(mfem::BlockVector & X)
 }
 
 void
-EquationSystemProblemOperator::AddEstimator(std::shared_ptr<MFEMEstimator> estimator)
-{
-  _use_amr = true;
-  _estimator = estimator;
-}
-
-void
 EquationSystemProblemOperator::AddRefiner(std::shared_ptr<MFEMThresholdRefiner> refiner)
 {
   _use_amr = true;
@@ -45,13 +38,13 @@ EquationSystemProblemOperator::AddRefiner(std::shared_ptr<MFEMThresholdRefiner> 
 void
 EquationSystemProblemOperator::SetUpAMR()
 {
-  if ( !_estimator or !_refiner )
+  if ( !_refiner )
   {
     // these should have both been added via the input file
     mooseError("Input file must contain a refiner and an indicator!");
   }
-  if( _use_amr and _estimator->createEstimator() ) {
-    _refiner->setUp( _estimator );
+  if( _use_amr ) {
+    _refiner->setUp();
   }
 
   else
@@ -103,7 +96,7 @@ EquationSystemProblemOperator::PRefine()
       prefinements[i].delta = 1; // Increase the element order by 1
     }
 
-    _estimator->getFESpace()->PRefineAndUpdate(prefinements);
+    _refiner->getFESpace()->PRefineAndUpdate(prefinements);
   }
 
   else

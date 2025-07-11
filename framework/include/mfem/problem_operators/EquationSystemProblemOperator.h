@@ -12,7 +12,6 @@
 #pragma once
 #include "ProblemOperator.h"
 #include "EquationSystemInterface.h"
-#include "MFEMEstimator.h"
 #include "MFEMThresholdRefiner.h"
 
 namespace Moose::MFEM
@@ -30,15 +29,13 @@ public:
   void Init(mfem::BlockVector & X) override;
   virtual void Solve(mfem::Vector & X) override;
 
-  //! Call this with the parameters for the Estimator
-  void AddEstimator(std::shared_ptr<MFEMEstimator> estimator) override;
   void AddRefiner(std::shared_ptr<MFEMThresholdRefiner> refiner) override;
   void SetUpAMR() override;
   bool HRefine() override;
   bool PRefine() override;
 
-  bool UseHRefinement() const override { return _estimator and _refiner and _refiner->UseHRefinement(); }
-  bool UsePRefinement() const override { return _estimator and _refiner and _refiner->UsePRefinement(); }
+  bool UseHRefinement() const override { return _refiner and _refiner->UseHRefinement(); }
+  bool UsePRefinement() const override { return _refiner and _refiner->UsePRefinement(); }
 
   ~EquationSystemProblemOperator() override = default;
 
@@ -54,7 +51,6 @@ public:
 
 private:
   std::shared_ptr<Moose::MFEM::EquationSystem> _equation_system{nullptr};
-  std::shared_ptr<MFEMEstimator> _estimator;
   std::shared_ptr<MFEMThresholdRefiner> _refiner;
 
   /**
