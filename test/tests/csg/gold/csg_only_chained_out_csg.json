@@ -1,0 +1,80 @@
+{
+  "CELLS": {
+    "square_cell": {
+      "FILL": "square_material",
+      "FILLTYPE": "MATERIAL",
+      "REGION":
+          "(+surf_plus_x & -surf_minus_x & -surf_plus_y & +surf_minus_y & -surf_plus_z & +surf_minus_z)"
+    }
+  },
+  "SURFACES": {
+    "surf_minus_x": {
+      "BOUNDARY": "reflective",
+      "COEFFICIENTS": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 2.5
+      },
+      "TYPE": "plane"
+    },
+    "surf_minus_y": {
+      "BOUNDARY": "reflective",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -2.5
+      },
+      "TYPE": "plane"
+    },
+    "surf_minus_z": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": -2.5
+      },
+      "TYPE": "plane"
+    },
+    "surf_plus_x": {
+      "BOUNDARY": "reflective",
+      "COEFFICIENTS": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -2.5
+      },
+      "TYPE": "plane"
+    },
+    "surf_plus_y": {
+      "BOUNDARY": "reflective",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 2.5
+      },
+      "TYPE": "plane"
+    },
+    "surf_plus_z": {
+      "BOUNDARY": "transmission",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": 2.5
+      },
+      "TYPE": "plane"
+    }
+  },
+  "UNIVERSES": {
+    "ROOT_UNIVERSE": {
+      "CELLS": [
+        "square_cell"
+      ],
+      "ROOT": true
+    }
+  }
+}
