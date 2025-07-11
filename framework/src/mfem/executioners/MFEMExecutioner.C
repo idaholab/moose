@@ -15,7 +15,7 @@
 InputParameters
 MFEMExecutioner::validParams()
 {
-  InputParameters params = Executioner::validParams();
+  InputParameters params = emptyInputParameters();
   params.addClassDescription("Executioner for MFEM problems.");
   params.addParam<std::string>("device", "cpu", "Run app on the chosen device.");
   MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
@@ -23,27 +23,71 @@ MFEMExecutioner::validParams()
       "assembly_level",
       assembly_levels,
       "Matrix assembly level. Options: legacy, full, element, partial, none.");
-
   return params;
 }
 
-MFEMExecutioner::MFEMExecutioner(const InputParameters & parameters)
-  : Executioner(parameters),
-    _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
-    _problem_data(_mfem_problem.getProblemData())
+MFEMExecutioner::MFEMExecutioner(const InputParameters & params, MFEMProblem & mfem_problem)
+  : _mfem_problem(mfem_problem), _problem_data(_mfem_problem.getProblemData())
 {
-  setDevice();
+  setDevice(params.get<std::string>("device"));
 }
 
 void
-MFEMExecutioner::setDevice()
+MFEMExecutioner::setDevice(const std::string & device_name)
 {
   // TODO: might not be enough should check the device
   // your trying to donfigure is the same one that has been configured
   if (_device.IsConfigured())
     return;
-  _device.Configure(getParam<std::string>("device"));
+  _device.Configure(device_name);
   _device.Print(Moose::out);
 }
 
+void
+MFEMExecutioner::solve()
+{
+  // FixedPointSolve::solve() called from TimeStepper::step() is libMesh specific, so we need
+  // to include all steps relevant to both FE backends here.
+
+  // need to back up multi-apps even when not doing fixed point iteration for recovering from failed
+  // multiapp solve
+  _mfem_problem.backupMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+  _mfem_problem.backupMultiApps(EXEC_TIMESTEP_BEGIN);
+  _mfem_problem.backupMultiApps(EXEC_TIMESTEP_END);
+  _mfem_problem.backupMultiApps(EXEC_MULTIAPP_FIXED_POINT_END);
+
+  // Fixed point iteration loop ends right above
+  _mfem_problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
+  _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
+  _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
+  _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
+
+  _mfem_problem.execTransfers(EXEC_TIMESTEP_BEGIN);
+
+  _mfem_problem.execute(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+  _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+  _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, true);
+  _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+
+  _mfem_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, true);
+  _mfem_problem.execute(EXEC_TIMESTEP_BEGIN);
+  _mfem_problem.outputStep(EXEC_TIMESTEP_BEGIN);
+
+  // Update warehouse active objects
+  _mfem_problem.updateActiveObjects();
+
+  innerSolve();
+
+  // Execute user objects, transfers, and multiapps at timestep end
+  _mfem_problem.onTimestepEnd();
+  _mfem_problem.execute(EXEC_TIMESTEP_END);
+  _mfem_problem.execTransfers(EXEC_TIMESTEP_END);
+  _mfem_problem.execMultiApps(EXEC_TIMESTEP_END, true);
+
+  // Fixed point iteration loop ends right above
+  _mfem_problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
+  _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
+  _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
+  _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
+}
 #endif

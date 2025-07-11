@@ -18,13 +18,15 @@ InputParameters
 MFEMSteady::validParams()
 {
   InputParameters params = MFEMExecutioner::validParams();
+  params += Executioner::validParams();
   params.addClassDescription("Executioner for steady state MFEM problems.");
   params.addParam<Real>("time", 0.0, "System time");
   return params;
 }
 
 MFEMSteady::MFEMSteady(const InputParameters & params)
-  : MFEMExecutioner(params),
+  : Executioner(params),
+    MFEMExecutioner(params, dynamic_cast<MFEMProblem &>(feProblem())),
     _system_time(getParam<Real>("time")),
     _time_step(_mfem_problem.timeStep()),
     _time(_mfem_problem.time()),
@@ -82,20 +84,13 @@ MFEMSteady::execute()
   _time_step = 1;
   _mfem_problem.timestepSetup();
 
-  // Solve equation system.
-  if (_mfem_problem.shouldSolve())
-    _problem_operator->Solve(_problem_data.f);
-
-  // Displace mesh, if required
-  _mfem_problem.displaceMesh();
+  solve();
 
   _mfem_problem.computeIndicators();
   _mfem_problem.computeMarkers();
 
   // need to keep _time in sync with _time_step to get correct output
   _time = _time_step;
-  // Execute user objects at timestep end
-  _mfem_problem.execute(EXEC_TIMESTEP_END);
   _mfem_problem.outputStep(EXEC_TIMESTEP_END);
   _time = _system_time;
 
@@ -111,6 +106,16 @@ MFEMSteady::execute()
   }
 
   postExecute();
+}
+
+void
+MFEMSteady::innerSolve()
+{
+  // Solve equation system.
+  if (_mfem_problem.shouldSolve())
+    _problem_operator->Solve(_problem_data.f);
+  // Displace mesh, if required
+  _mfem_problem.displaceMesh();
 }
 
 #endif

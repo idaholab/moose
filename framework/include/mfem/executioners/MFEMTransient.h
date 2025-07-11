@@ -12,8 +12,9 @@
 #pragma once
 #include "MFEMExecutioner.h"
 #include "TimeDomainProblemOperator.h"
+#include "TransientBase.h"
 
-class MFEMTransient : public MFEMExecutioner
+class MFEMTransient : public TransientBase, public MFEMExecutioner
 {
 public:
   static InputParameters validParams();
@@ -21,17 +22,43 @@ public:
   explicit MFEMTransient(const InputParameters & params);
 
   void constructProblemOperator() override;
-  void step(double dt, int it) const;
   virtual void init() override;
-  virtual void execute() override;
 
-  mutable double _t_step; // Time step
+  /**
+   * Do whatever is necessary to advance one step.
+   */
+  virtual void takeStep(Real input_dt = -1.0) override;
+
+  /**
+   * Perform all required solves during a step. Called in takeStep.
+   */
+  virtual void innerSolve();
+
+  virtual bool lastSolveConverged() const override { return true; };
+
+  virtual Real relativeSolutionDifferenceNorm() override { return 0.0; };
+
+  /**
+   * Get the time integrators (time integration scheme) used
+   * Note that because some systems might be steady state simulations, there could be less
+   * time integrators than systems
+   * @return string with the time integration scheme name
+   */
+  virtual std::set<TimeIntegrator *> getTimeIntegrators() const override
+  {
+    return std::set<TimeIntegrator *>{};
+  };
+
+  /**
+   * Get the name of the time integrator (time integration scheme) used
+   * @return string with the time integration scheme name
+   */
+  virtual std::vector<std::string> getTimeIntegratorNames() const override
+  {
+    return std::vector<std::string>();
+  };
 
 private:
-  double _t_initial;       // Start time
-  double _t_final;         // End time
-  Real & _t;               // Current time
-  mutable int _it;         // Time index
   int _vis_steps;          // Number of cycles between each output update
   mutable bool _last_step; // Flag to check if current step is final
   std::unique_ptr<Moose::MFEM::TimeDomainProblemOperator> _problem_operator{nullptr};
