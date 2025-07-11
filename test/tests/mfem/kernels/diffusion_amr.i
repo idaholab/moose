@@ -16,7 +16,8 @@
   [Markers]
     [ref]
       type = MFEMThresholdRefiner
-      refine = 0.7 # error 
+      refine = 0.7 # error
+      indicator = l2zz
       steps  = 2 # total number of refinement steps
       max_h_level = 2
       max_p_level = 2

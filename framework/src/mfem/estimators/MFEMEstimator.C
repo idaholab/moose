@@ -27,7 +27,7 @@ MFEMEstimator::MFEMEstimator(const InputParameters & params)
 }
 
 std::shared_ptr<mfem::ParFiniteElementSpace>
-MFEMEstimator::getFESpace()
+MFEMEstimator::getFESpace() const
 {
   // MFEMVariable::getFESpace() returns a reference to the MFEMFESpace
   // and we piggyback from this to get the underlying shared ptr

@@ -176,27 +176,10 @@ MFEMSteady::execute()
 }
 
 bool
-MFEMSteady::addEstimator(std::shared_ptr<MFEMEstimator> estimator)
-{
-  if (estimator)
-  {
-    #pragma message "Redundantly setting _use_amr to true twice; pick one place to do it"
-    _use_amr = true;
-    _problem_operator->AddEstimator(estimator);
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-
-bool
 MFEMSteady::addRefiner(std::shared_ptr<MFEMThresholdRefiner> refiner)
 {
   if (refiner)
   {
-    #pragma message "Redundantly setting _use_amr to true twice; pick one place to do it"
     _use_amr = true;
     _problem_operator->AddRefiner(refiner);
     return true;
