@@ -1,0 +1,26 @@
+[Tests]
+  [test]
+    type = 'Exodiff'
+    input = 'Weight_DNP.i'
+    exodiff = 'Weight_DNP_out.e'
+    requirement = 'The system shall be able to weight the DNPs'
+  []
+  [test1]
+    type = 'Exodiff'
+    input = 'scalar_product.i'
+    exodiff = 'scalar_product_out.e'
+    requirement = 'The system shall be able to perform a 2D scalar product'
+  []
+  [test2]
+    type = 'Exodiff'
+    input = 'Integral.i'
+    exodiff = 'Integral_out.e'
+    requirement = 'The system shall be able to integrate and normalize correct'
+  []
+  [test3]
+    type = 'Exodiff'
+    input = 'Mesh_adaptivity.i'
+    exodiff = 'Mesh_adaptivity_out.e'
+    requirement = 'The system shall be able to varry the mesh and still calculate A correct'
+  []
+[]
