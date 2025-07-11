@@ -26,15 +26,12 @@ public:
   // the process succeeded.
   virtual bool createEstimator() { return false; }
 
-  std::shared_ptr<MFEMEstimator>
-  setUp(std::string estimator_type, std::string estimator_name, InputParameters estimator_params);
-
   // Get shared pointer to FE Space using the name we store when setting up this class
-  virtual std::shared_ptr<mfem::ParFiniteElementSpace> getFESpace();
+  virtual std::shared_ptr<mfem::ParFiniteElementSpace> getFESpace() const;
 
   // Method to fetch the error estimator after creation
   std::shared_ptr<mfem::ErrorEstimator>
-  getEstimator() { return _error_estimator; }
+  getEstimator() const { return _error_estimator; }
 
 protected:
   // Name of (the test variable associated with) the weak form that the kernel is applied to.

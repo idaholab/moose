@@ -3,7 +3,6 @@
 
 
 #include "MFEMGeneralUserObject.h"
-#include "MFEMEstimator.h"
 
 /*
 Class to construct threshold refiner.
@@ -22,7 +21,10 @@ public:
 
   virtual ~MFEMThresholdRefiner() = default;
 
-  void setUp(std::shared_ptr<MFEMEstimator>);
+  void setUp();
+
+  std::shared_ptr<mfem::ParFiniteElementSpace>
+  getFESpace();
 
   // Mark the array. Return true if it's time to stop, either because the mesh is sufficiently
   // refined, or because we have done enough steps
@@ -39,6 +41,7 @@ public:
 protected:
   // Shared pointer to underlying mfem object
   std::shared_ptr<mfem::ThresholdRefiner> _threshold_refiner;
+  std::string _estimator_name;
   
   float _error_threshold;
   int _steps; // total number of refinement steps to take
@@ -51,7 +54,6 @@ protected:
 
   bool _use_h_refinement{false};
   bool _use_p_refinement{false};
-  
 };
 
 #endif
