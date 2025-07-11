@@ -7,9 +7,10 @@ MOOSE_HEADER_SYMLINKS ?= true
 
 # We ignore this in the contrib folder because we will set up the include
 # directories manually later
-IGNORE_CONTRIB_INC ?= libtorch mfem neml2
+IGNORE_CONTRIB_INC ?= libtorch mfem neml2 kokkos
 ENABLE_LIBTORCH ?= false
 ENABLE_MFEM ?= false
+ENABLE_KOKKOS ?= false
 
 # this allows us to modify the linked names/rpaths safely later for install targets
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
@@ -481,6 +482,19 @@ endif
 wasp_submodule_status:
 	@if [ x$(wasp_submodule_message) != "x" ]; then printf $(wasp_submodule_message); exit 1; fi
 
+# Kokkos for MOOSE
+
+ifeq ($(ENABLE_KOKKOS),true)
+
+MOOSE_KOKKOS_SRC_FILES := $(shell find $(FRAMEWORK_DIR) -name "*.K")
+
+KOKKOS_OBJECTS := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(MOOSE_KOKKOS_SRC_FILES))
+KOKKOS_DEPS    := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(KOKKOS_OBJECTS))
+
+-include $(KOKKOS_DEPS)
+
+endif
+
 # Pre-make for checking current dependency versions and showing useful warnings
 # if things like conda packages are out of date. The "-" in "@-" means that
 # it is allowed to not exit 0. "::" means that the rule can be appended by
@@ -518,7 +532,6 @@ $(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) 
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
 
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
-
 
 $(moose_objects): $(moose_config_symlink) | moose_header_symlinks
 
@@ -670,6 +683,7 @@ app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 clean:
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
 	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(app_unity_srcfiles)
+	@rm -rf $(app_KOKKOS_LIB) $(KOKKOS_OBJECTS) $(KOKKOS_DEPS)
 	@rm -rf $(APPLICATION_DIR)/build
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
@@ -720,15 +734,31 @@ ADRealMonolithic.h: $(MOOSE_DIR)/framework/include/utils/ADReal.h
 compile_commands_all_srcfiles := $(moose_srcfiles) $(srcfiles)
 compile_commands.json:
 ifeq (4.0,$(firstword $(sort $(MAKE_VERSION) 4.0)))
+# Standard C++ sources
 	$(file > .compile_commands.json,$(CURDIR))
 	$(file >> .compile_commands.json,$(libmesh_CXX))
 	$(file >> .compile_commands.json,$(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $(ADDITIONAL_INCLUDES))
 	$(file >> .compile_commands.json,$(compile_commands_all_srcfiles))
+ifeq ($(ENABLE_KOKKOS),true)
+# Kokkos sources
+	$(file >> .compile_commands.json,$(CURDIR))
+	$(file >> .compile_commands.json,$(KOKKOS_CXX))
+	$(file >> .compile_commands.json,$(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES))
+	$(file >> .compile_commands.json,$(MOOSE_KOKKOS_SRC_FILES))
+endif
 else
+# Standard C++ sources
 	@echo $(CURDIR) > .compile_commands.json
 	@echo $(libmesh_CXX) >> .compile_commands.json
 	@echo $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $(ADDITIONAL_INCLUDES) >> .compile_commands.json
 	@echo $(compile_commands_all_srcfiles) >> .compile_commands.json
+ifeq ($(ENABLE_KOKKOS),true)
+# Kokkos sources
+	@echo $(CURDIR) >> .compile_commands.json
+	@echo $(KOKKOS_CXX) >> .compile_commands.json
+	@echo $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) >> .compile_commands.json
+	@echo $(MOOSE_KOKKOS_SRC_FILES) >> .compile_commands.json
+endif
 endif
 	@$(FRAMEWORK_DIR)/scripts/compile_commands.py < .compile_commands.json > compile_commands.json
 	@rm .compile_commands.json
@@ -751,3 +781,9 @@ echo_app_objects:
 
 echo_app_deps:
 	@echo $(app_deps)
+
+echo_kokkos_objects:
+	@echo $(KOKKOS_OBJECTS)
+
+echo_kokkos_deps:
+	@echo $(KOKKOS_DEPS)

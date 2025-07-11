@@ -31,6 +31,12 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
                         ? _sc_parameters.get<bool>("implicit")
                         : true)
 {
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
+
   SubProblem & problem = *_sc_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
 
   // Coupling

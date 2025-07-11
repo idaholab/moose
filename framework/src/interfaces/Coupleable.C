@@ -59,6 +59,12 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     _obj(moose_object),
     _writable_coupled_variables(libMesh::n_threads())
 {
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
+
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
   _obj->getMooseApp().registerInterfaceObject(*this);
 

@@ -517,7 +517,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("CopyNodalVarsAction", "AuxVariables/*", "copy_nodal_aux_vars");
 
   registerSyntaxTask("AddKernelAction", "Kernels/*", "add_kernel");
+  registerSyntaxTask("AddKokkosKernelAction", "KokkosKernels/*", "add_kernel");
   registerSyntaxTask("AddNodalKernelAction", "NodalKernels/*", "add_nodal_kernel");
+  registerSyntaxTask("AddKokkosNodalKernelAction", "KokkosNodalKernels/*", "add_nodal_kernel");
   registerSyntaxTask("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
 
   registerSyntaxTask("AddHDGKernelAction", "HDGKernels/*", "add_hybridized_kernel");
@@ -528,6 +530,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddScalarKernelAction", "AuxScalarKernels/*", "add_aux_scalar_kernel");
 
   registerSyntaxTask("AddBCAction", "BCs/*", "add_bc");
+  registerSyntaxTask("AddKokkosBCAction", "KokkosBCs/*", "add_bc");
 
   registerSyntax("CreateProblemAction", "Problem");
   registerSyntax("DynamicObjectRegistrationAction", "Problem");
@@ -586,6 +589,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddMaterialAction", "Materials/*");
   syntax.registerSyntaxType("Materials/*", "MaterialName");
+
+  registerSyntax("AddKokkosMaterialAction", "KokkosMaterials/*");
+  syntax.registerSyntaxType("KokkosMaterials/*", "MaterialName");
 
   registerSyntax("AddFunctorMaterialAction", "FunctorMaterials/*");
   syntax.registerSyntaxType("FunctorMaterials/*", "MaterialName");

@@ -17,7 +17,6 @@
 InputParameters
 OutputInterface::validParams()
 {
-
   InputParameters params = emptyInputParameters();
   params.addClassDescription("Interface to handle the restriction of outputs from objects");
   params.addParam<std::vector<OutputName>>("outputs",
@@ -38,12 +37,16 @@ OutputInterface::OutputInterface(const InputParameters & parameters, bool build_
     _oi_outputs(parameters.get<std::vector<OutputName>>("outputs").begin(),
                 parameters.get<std::vector<OutputName>>("outputs").end())
 {
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (parameters.isParamValid("_kokkos_object") && !_oi_moose_app.currentlyExecutingActions())
+    return;
 
   // By default it is assumed that the variable name associated with 'outputs' is the name
   // of the block, this is the case for Markers, Indicators, VectorPostprocessors, and
   // Postprocessors.
-  // However, for Materials this is not the case, so the call to buildOutputHideVariableList must be
-  // disabled, the build_list allows for this behavior. The hide lists are handled by
+  // However, for Materials this is not the case, so the call to buildOutputHideVariableList must
+  // be disabled, the build_list allows for this behavior. The hide lists are handled by
   // MaterialOutputAction in this case.
   //
   // Variables/AuxVariables also call the buildOutputHideVariableList method later, because when

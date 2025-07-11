@@ -9,6 +9,7 @@
 
 #include "MooseVariableDependencyInterface.h"
 #include "MooseVariableFieldBase.h"
+#include "MooseApp.h"
 #include "MooseObject.h"
 #include "SystemBase.h"
 #include "MooseError.h"
@@ -18,7 +19,14 @@
 
 using namespace libMesh;
 
-MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject * const) {}
+MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject * moose_object)
+{
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
+}
 
 template <typename DofObjectType>
 std::set<MooseVariableFieldBase *>

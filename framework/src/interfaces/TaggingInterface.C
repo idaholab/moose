@@ -58,6 +58,12 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
     _moose_object(*moose_object),
     _tag_params(_moose_object.parameters())
 {
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
+
   auto & vector_tag_names = _tag_params.get<MultiMooseEnum>("vector_tags");
 
   if (!vector_tag_names.isValid())
