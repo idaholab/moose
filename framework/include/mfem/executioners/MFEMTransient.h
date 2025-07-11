@@ -29,6 +29,11 @@ public:
    */
   virtual void takeStep(Real input_dt = -1.0) override;
 
+  /**
+   * Perform all required solves during a step. Called in takeStep.
+   */
+  virtual void solve();
+
   virtual bool lastSolveConverged() const override { return true; };
 
   virtual Real relativeSolutionDifferenceNorm() override { return 0.0; };
