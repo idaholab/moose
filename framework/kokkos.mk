@@ -57,10 +57,11 @@ ifneq ($(CUDA_EXISTS),)
   KOKKOS_DEVICE   := CUDA
   KOKKOS_CXX      := nvcc
   KOKKOS_ARCH     := $(KOKKOS_CUDA_ARCH_$(CUDA_ARCH))
-  KOKKOS_CXXFLAGS  = --forward-unknown-to-host-compiler --disable-warnings -x cu -ccbin $(word 1, $(libmesh_CXX))
-  KOKKOS_CXXFLAGS += $(filter-out -Werror=return-type -Werror=reorder,$(libmesh_CXXFLAGS)) # Incompatible with NVCC
+  KOKKOS_CXXFLAGS  = -arch=sm_$(CUDA_ARCH) --extended-lambda
+  KOKKOS_CXXFLAGS += --forward-unknown-to-host-compiler --disable-warnings -x cu -ccbin $(word 1, $(libmesh_CXX))
+  KOKKOS_CXXFLAGS += $(filter-out -Werror=return-type,$(CXXFLAGS) $(libmesh_CXXFLAGS)) # Incompatible with NVCC
+  KOKKOS_CPPFLAGS  = $(subst -Werror,-Werror=all-warnings,$(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS))
   KOKKOS_LDFLAGS   = --forward-unknown-to-host-compiler
-  KOKKOS_CXXFLAGS += -arch=sm_$(CUDA_ARCH)
 else ifneq ($(HIP_EXISTS),) # To be determined for HIP
   ifeq ($(shell hipconfig --platform), nvidia)
     $(error For NVIDIA GPUs, use CUDA instead of HIP for Kokkos)
@@ -78,9 +79,8 @@ ifeq ($(METHOD),opt)
   KOKKOS_CXXFLAGS += -DNDEBUG
 endif
 
-KOKKOS_CXXFLAGS += $(CXXFLAGS) -fPIC -DMOOSE_KOKKOS_SCOPE
+KOKKOS_CXXFLAGS += -fPIC -DMOOSE_KOKKOS_SCOPE
 KOKKOS_LDFLAGS  += $(libmesh_LDFLAGS)
-KOKKOS_CPPFLAGS  = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS)
 KOKKOS_INCLUDE   = $(libmesh_INCLUDE)
 KOKKOS_LIBS      = $(libmesh_LIBS)
 
@@ -88,4 +88,4 @@ KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).o
 
 %.$(KOKKOS_OBJ_SUFFIX) : %.K $(KOKKOS_CPP_DEPENDS)
 	@echo "Compiling Kokkos C++ (in "$(METHOD)" mode, $(KOKKOS_DEVICE), $(KOKKOS_ARCH)) "$<"..."
-	@$(KOKKOS_CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	@$(KOKKOS_CXX) $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
