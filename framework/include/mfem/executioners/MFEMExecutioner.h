@@ -30,6 +30,18 @@ public:
   virtual void constructProblemOperator() = 0;
 
   /**
+   * Perform all required solves during a step. Includes relevant methods from the libmesh-specific
+   * FixedPointSolve::solve()
+   */
+  virtual void solve();
+
+  /**
+   * Perform all required solves during a step. Analagous to FixedPointSolve::innerSolve() for
+   * libMesh problems
+   */
+  virtual void innerSolve() = 0;
+
+  /**
    * Set the device to use to solve the FE problem.
    */
   void setDevice(const std::string & device_name);
