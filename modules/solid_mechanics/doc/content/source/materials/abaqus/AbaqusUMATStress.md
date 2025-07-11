@@ -79,22 +79,24 @@ A subroutine that acts on `PNEWDT` is chosen in the regression test:
 
 !listing modules/solid_mechanics/test/tests/umat/time_step/elastic_timestep.i block=Materials/umat
 
-## UMAT Loading steps
+## UMAT Analysis steps
 
 When setting up an input file, it can be useful to organize it in terms of the loading and boundary
 conditions that the structural component will undergo throughout the numerical simulation. For
-example, a user may want to apply natural boundary conditions as a first step (Step 1), then apply
+example, a user may want to apply natural boundary conditions as a first analysis step (Step 1), then apply
 gradually a permanent or long-term load, e.g. the internal pressure in a vessel (Step 2). Finally,
-other loads, such as those originated by wind, can be added to the existing step to obtain the
+other loads, such as those originated by wind, can be added to the existing analysis step to obtain the
 desired final numerical results (Step 3). For this case,
-MOOSE steps need to be defined throughout the simulation in [StepUserObject](/StepUserObject.md). This user object can be passed to `AbaqusUMATStress` to inform the UMAT routine of the value of step time at the beginning of the current increment (TIME(1) with Fortran indexing).
+MOOSE steps need to be defined throughout the simulation in [AnalysisStepUserObject](/AnalysisStepUserObject.md).
+his user object can be passed to `AbaqusUMATStress` to inform the UMAT routine of the value of step time at the
+beginning of the current increment (TIME(1) with Fortran indexing).
 
 An example of how to pass the user object in an input file is given below:
 
-!listing modules/solid_mechanics/test/tests/umat/steps/elastic_temperature_steps_uo.i block=Materials/umat
+!listing modules/solid_mechanics/test/tests/umat/analysis_steps/elastic_temperature_steps_uo.i block=Materials/umat
 
 Note that the step capability is three-pronged: 1) It allows to pass the step number to the UMAT
-routine via the present object, 2) It allows to pass the step number to the [AbaqusUExternalDB](/AbaqusUExternalDB.md) plugin, and 3) It allows to directly drive controls via step number in [StepPeriod](/StepPeriod.md).
+routine via the present object, 2) It allows to pass the step number to the [AbaqusUExternalDB](/AbaqusUExternalDB.md) plugin, and 3) It allows to directly drive controls via step number in [AnalysisStepPeriod](/AnalysisStepPeriod.md).
 
 ## UMAT Orientation
 

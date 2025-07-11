@@ -11,14 +11,15 @@
 
 // MOOSE includes
 #include "TimePeriodBase.h"
-#include "StepUOInterface.h"
+#include "AnalysisStepUOInterface.h"
 
-class StepUserObject;
+class AnalysisStepUserObject;
 
 /**
- * A basic control for disabling objects for a portion of the simulation based on the step concept.
+ * A basic control for disabling objects for a portion of the simulation based on the analysis step
+ * concept.
  */
-class StepPeriod : public TimePeriodBase, public StepUOInterface
+class AnalysisStepPeriod : public TimePeriodBase, public AnalysisStepUOInterface
 {
 public:
   /**
@@ -27,7 +28,7 @@ public:
    */
   static InputParameters validParams();
 
-  StepPeriod(const InputParameters & parameters);
+  AnalysisStepPeriod(const InputParameters & parameters);
 
 protected:
   /**
@@ -37,5 +38,5 @@ protected:
 
   virtual bool conditionMet(const unsigned int & i) override;
 
-  const StepUserObject * _step_user_object;
+  const AnalysisStepUserObject * _step_user_object;
 };
