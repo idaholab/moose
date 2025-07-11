@@ -13,4 +13,45 @@
                   "optimization to enforce smoothness in parameter fields while preserving solution "
                   "accuracy."
   []
+
+  [regularization_errors]
+    design = 'ParameterMeshOptimization.md'
+    issues = '#30897'
+    requirement = "The system shall throw an error when regularization parameters are incorrectly "
+                  "specified"
+
+    [mismatched_coeffs_types]
+      type = 'RunException'
+      input = 'main.i'
+      cli_args = 'OptimizationReporter/regularization_types="L2_GRADIENT L2_GRADIENT"
+                  OptimizationReporter/regularization_coeffs="0.1"'
+      # Optimize executioner does not support multiple threads
+      max_threads = 1
+      expect_err = 'Number of regularization coefficients \(1\) must match number of regularization types \(2\)'
+      detail = "when the number of regularization coefficients doesn't match the number of "
+               "regularization types;"
+    []
+
+    [invalid_regularization_type]
+      type = 'RunException'
+      input = 'main.i'
+      cli_args = 'OptimizationReporter/regularization_types="INVALID_TYPE"
+                  OptimizationReporter/regularization_coeffs="0.1"'
+      # Optimize executioner does not support multiple threads
+      max_threads = 1
+      expect_err = 'Invalid option "INVALID_TYPE" in MultiMooseEnum'
+      detail = "when an invalid regularization type is specified;"
+    []
+
+    [empty_coeffs_with_types]
+      type = 'RunException'
+      input = 'main.i'
+      cli_args = 'OptimizationReporter/regularization_types="L2_GRADIENT"
+                  OptimizationReporter/regularization_coeffs=""'
+      # Optimize executioner does not support multiple threads
+      max_threads = 1
+      expect_err = 'Number of regularization coefficients \(0\) must match number of regularization types \(1\)'
+      detail = "when regularization types are specified but no coefficients are provided;"
+    []
+  []
 []

@@ -39,8 +39,12 @@ private:
                                     const std::string & mesh_var_name,
                                     unsigned int ntimes) const;
 
-  /// Store parameter meshes for L2 gradient regularization computation
+  /// Store parameter meshes for regularization computation
   std::vector<std::unique_ptr<ParameterMesh>> _parameter_meshes;
-  /// L2 Gradient Regularization Coefficient
-  const Real _gradient_l2_coeff;
+
+  /// Regularization types to apply
+  const MultiMooseEnum & _regularization_types;
+
+  /// Vector of regularization coefficients corresponding to each type
+  const std::vector<Real> _regularization_coeffs;
 };

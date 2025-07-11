@@ -32,9 +32,13 @@ This optimization reporter performs the same type of optimization as [Optimizati
 !alert warning
 The mesh created +must+ be replicated. Ensure this by having `Mesh/parallel_type=REPLICATED` when creating the mesh.
 
-## L2 Gradient Regularization
+## Regularization
 
-`ParameterMeshOptimization` supports L2 gradient regularization to enforce smoothness in parameter fields. This regularization adds a penalty term to the objective function:
+`ParameterMeshOptimization` supports various regularization methods to enforce desired properties in parameter fields. Multiple regularization types can be applied simultaneously by specifying them in [!param](/OptimizationReporter/ParameterMeshOptimization/regularization_types) with corresponding coefficients in [!param](/OptimizationReporter/ParameterMeshOptimization/regularization_coeffs).
+
+### L2 Gradient Regularization
+
+L2 gradient regularization enforces smoothness in parameter fields by adding a penalty term to the objective function:
 
 \begin{equation}
 J_{total} = J_{data} + \alpha \int_{\Omega} |\nabla p|^2 \, d\Omega
@@ -43,7 +47,7 @@ J_{total} = J_{data} + \alpha \int_{\Omega} |\nabla p|^2 \, d\Omega
 where:
 
 - $J_{data}$ is the data misfit objective
-- $\alpha$ is the regularization coefficient ([!param](/OptimizationReporter/ParameterMeshOptimization/gradient_l2_coeff))
+- $\alpha$ is the regularization coefficient
 - $p$ is the parameter field
 - $\Omega$ is the parameter mesh domain
 
@@ -58,7 +62,15 @@ This regularization:
 - Enforces spatial smoothness in parameter distributions
 - Prevents oscillatory parameter solutions
 
-To enable L2 gradient regularization, set [!param](/OptimizationReporter/ParameterMeshOptimization/gradient_l2_coeff) to a positive value. The strength of regularization increases with larger coefficient values.
+To enable L2 gradient regularization, set:
+- [!param](/OptimizationReporter/ParameterMeshOptimization/regularization_types) = 'L2_GRADIENT'
+- [!param](/OptimizationReporter/ParameterMeshOptimization/regularization_coeffs) = '0.001' (or your desired coefficient)
+
+Multiple regularization types can be combined:
+```
+regularization_types = 'L2_GRADIENT L2_GRADIENT'
+regularization_coeffs = '0.001 0.0005'
+```
 
 
 ## Example Input File Syntax

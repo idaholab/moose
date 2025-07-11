@@ -67,19 +67,37 @@ ParameterMeshOptimization::validParams()
       "are used for all parameter groups and all meshes, the capability to define different "
       "timesteps for different meshes is not supported.");
 
-  params.addRangeCheckedParam<Real>("gradient_l2_coeff",
-                                    0.0,
-                                    "gradient_l2_coeff >= 0",
-                                    "Coefficient for L2 Gradient Regularization.");
+  // New parameters for multiple regularization types
+  MultiMooseEnum reg_types("L2_GRADIENT");
+  params.addParam<MultiMooseEnum>(
+      "regularization_types",
+      reg_types,
+      "Types of regularization to apply. Multiple types can be specified.");
 
-  params.addParamNamesToGroup("gradient_l2_coeff tikhonov_coeff", "Regularization");
+  params.addParam<std::vector<Real>>("regularization_coeffs",
+                                     {},
+                                     "Coefficients for each regularization type. Must match the "
+                                     "number of regularization_types specified.");
+
+  params.addParamNamesToGroup("tikhonov_coeff regularization_types regularization_coeffs",
+                              "Regularization");
 
   return params;
 }
 
 ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & parameters)
-  : GeneralOptimization(parameters), _gradient_l2_coeff(getParam<Real>("gradient_l2_coeff"))
+  : GeneralOptimization(parameters),
+    _regularization_types(getParam<MultiMooseEnum>("regularization_types")),
+    _regularization_coeffs(getParam<std::vector<Real>>("regularization_coeffs"))
 {
+  // Validate that regularization coefficients match types
+  if (_regularization_coeffs.size() != _regularization_types.size())
+    paramError("regularization_coeffs",
+               "Number of regularization coefficients (",
+               _regularization_coeffs.size(),
+               ") must match number of regularization types (",
+               _regularization_types.size(),
+               ")");
 }
 
 std::vector<Real>
@@ -256,21 +274,28 @@ ParameterMeshOptimization::computeObjective()
 {
   Real val = GeneralOptimization::computeObjective();
 
-  if (_gradient_l2_coeff > 0.0)
+  // Apply each regularization type with its coefficient
+  for (const auto reg_idx : index_range(_regularization_types))
   {
-    Real total_variation_norm = 0.0;
-
-    for (const auto & param_id : make_range(_nparams))
+    if (_regularization_coeffs[reg_idx] > 0.0)
     {
-      // Get current parameter values for this group
-      const auto & param_values = *_parameters[param_id];
+      Real regularization_value = 0.0;
 
-      // Compute L2 gradient regularization on current parameter state
-      total_variation_norm +=
-          _parameter_meshes[param_id]->computeGradientL2RegularizationObjective(param_values);
+      // Convert MultiMooseEnum to RegularizationType using get() method
+      auto reg_type = static_cast<RegularizationType>(_regularization_types.get(reg_idx));
+
+      for (const auto & param_id : make_range(_nparams))
+      {
+        // Get current parameter values for this group
+        const auto & param_values = *_parameters[param_id];
+
+        // Compute regularization objective for this type
+        regularization_value +=
+            _parameter_meshes[param_id]->computeRegularizationObjective(param_values, reg_type);
+      }
+
+      val += _regularization_coeffs[reg_idx] * regularization_value;
     }
-
-    val += _gradient_l2_coeff * total_variation_norm;
   }
 
   return val;
@@ -279,22 +304,28 @@ ParameterMeshOptimization::computeObjective()
 void
 ParameterMeshOptimization::computeGradient(libMesh::PetscVector<Number> & gradient) const
 {
-  // Add total variation gradient contribution to the reporter gradients before base computation
-  if (_gradient_l2_coeff > 0.0)
+  // Add regularization gradient contributions to the reporter gradients before base computation
+  for (const auto reg_idx : index_range(_regularization_types))
   {
-    for (const auto & param_id : make_range(_nparams))
+    if (_regularization_coeffs[reg_idx] > 0.0)
     {
-      // Get current parameter values for this group
-      const auto & param_values = *_parameters[param_id];
-      auto grad_values = _gradients[param_id];
+      // Convert MultiMooseEnum to RegularizationType using get() method
+      auto reg_type = static_cast<RegularizationType>(_regularization_types.get(reg_idx));
 
-      // Compute L2 gradient regularization gradient on current parameter state
-      std::vector<Real> tv_grad =
-          _parameter_meshes[param_id]->computeGradientL2RegularizationGradient(param_values);
+      for (const auto & param_id : make_range(_nparams))
+      {
+        // Get current parameter values for this group
+        const auto & param_values = *_parameters[param_id];
+        auto grad_values = _gradients[param_id];
 
-      // Add to gradient with coefficient
-      for (unsigned int i = 0; i < param_values.size(); ++i)
-        (*grad_values)[i] += _gradient_l2_coeff * tv_grad[i];
+        // Compute regularization gradient for this type
+        std::vector<Real> reg_grad =
+            _parameter_meshes[param_id]->computeRegularizationGradient(param_values, reg_type);
+
+        // Add to gradient with coefficient
+        for (unsigned int i = 0; i < param_values.size(); ++i)
+          (*grad_values)[i] += _regularization_coeffs[reg_idx] * reg_grad[i];
+      }
     }
   }
 
