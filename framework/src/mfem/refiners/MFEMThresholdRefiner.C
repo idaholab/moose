@@ -22,11 +22,14 @@ MFEMThresholdRefiner::validParams()
   params.addRequiredParam<int>("steps", "Total number of refinement steps");
   params.addRangeCheckedParam<int>("max_h_level", -1, "max_h_level>=0 & max_h_level <= 10", "Total number of h-refinement steps");
   params.addRangeCheckedParam<int>("max_p_level", -1, "max_p_level>=0 & max_p_level <= 10", "Total number of p-refinement steps");
+
+  params.addRequiredParam<std::string>("indicator", "Estimator to use");
   return params;
 }
 
 MFEMThresholdRefiner::MFEMThresholdRefiner(const InputParameters & params)
   : MFEMGeneralUserObject(params),
+    _estimator_name(getParam<std::string>("indicator")),
     _error_threshold(getParam<Real>("refine")),
     _steps(getParam<int>("steps")),
     _max_h_level(getParam<int>("max_h_level")),
@@ -51,9 +54,12 @@ MFEMThresholdRefiner::MFEMThresholdRefiner(const InputParameters & params)
 
 
 void
-MFEMThresholdRefiner::setUp(std::shared_ptr<MFEMEstimator> estimator)
+MFEMThresholdRefiner::setUp()
 {
-  _threshold_refiner = std::make_shared<mfem::ThresholdRefiner>( *(estimator->getEstimator()) );
+  // fetch const ref to the estimator
+  const auto& estimator = getUserObjectByName<MFEMEstimator>(_estimator_name);
+
+  _threshold_refiner = std::make_shared<mfem::ThresholdRefiner>( *(estimator.getEstimator()) );
   _threshold_refiner->SetTotalErrorFraction(_error_threshold);
 }
 
@@ -83,5 +89,14 @@ MFEMThresholdRefiner::Apply(mfem::ParMesh & mesh)
   output |= _threshold_refiner->Apply(mesh);
   return output;
 }
+
+std::shared_ptr<mfem::ParFiniteElementSpace>
+MFEMThresholdRefiner::getFESpace()
+{
+  const auto& estimator = getUserObjectByName<MFEMEstimator>(_estimator_name);
+
+  return estimator.getFESpace();
+}
+
 
 #endif
