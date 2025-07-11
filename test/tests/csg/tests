@@ -1,5 +1,5 @@
 [Tests]
-  design = 'MeshGenerator.md'
+  design = 'CSG.md CSGBase.md'
   issues = '#29095'
   requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file.'
   [geometry]
