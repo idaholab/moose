@@ -9,9 +9,9 @@ Throughout this documentation, `csg_obj` will be used in example code blocks to 
 
 !alert-end!
 
-## setHasGenerateCSG
+## Declaring that a mesh generator supports the generation of CSG
 
-In order to call `generateCSG`, the `setHaseGenerateCSG` method must be called on the mesh generator to tell it that the method has been implemented.
+In order to call `generateCSG`, the `setHasGenerateCSG` method must be called on the mesh generator to declare that the method has been implemented.
 
 ```cpp
 #include "CSGBase.h"
@@ -31,7 +31,7 @@ ExampleMeshGenerator::validParams()
 }
 ```
 
-## generateCSG
+## How to implement the `generateCSG` routine
 
 This section will describe the various components developers should implement into the `generateCSG` method for a given [source/meshgenerators/MeshGenerator.md].
 This method will return a unique pointer to the `CSGBase` object that was created or modified by the mesh generator in the `generateCSG` method.
@@ -62,6 +62,7 @@ The following sections explain in detail how to do this as a part of the `genera
 
 ### Surfaces
 
+Surfaces are used to define the spatial extent of the region of a `CSGCell`.
 Various methods exist to create `CSGSurface` objects (below).
 All surface creation methods will return a const reference to that generated surface (`const & CSGSurface`).
 
@@ -121,7 +122,7 @@ const auto & zcyl = csg_obj->createCylinder('zcylinder', 1, 2, 5, 'z');
 
 A region is a space defined by boolean operations applied to surfaces and other regions.
 Halfspace regions are defined as the positive and negative space separated by a surface.
-These regions can be unioned, intersected, or the complement taken to further define more complex regions.
+These regions can be unionized, intersected, or the complement taken to further define more complex regions.
 Series of operations can be defined using parentheses `(` `)` to indicate which operations to perform first.
 The types of operators available to define a `CSGRegion` using `CSGSurface` objects are:
 
@@ -147,7 +148,7 @@ The complement of the previous combination then defines the final region `~((-cy
 
 !media large_media/csg/region1.png
        id=fig:region1
-       caption=Two separate regions both defined as *intersections* of *halfspaces*.
+       caption=Two separate regions both defined as *intersections* of *half-spaces*.
 
 !media large_media/csg/region2.png
        id=fig:region2

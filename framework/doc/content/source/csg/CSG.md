@@ -1,6 +1,6 @@
 # Constructive Solid Geometry
 
-[!ac](CSG) is a geometry representation in which complex models are created through boolean combinations of surfaces, cells, and universes.
+[!ac](CSG) is a geometry representation in which models are created through boolean combinations of surfaces, cells, and universes.
 [!ac](CSG) models are most commonly used for [!ac](MC) neutronics simulations.
 While each [!ac](MC) code has their own syntax for defining the [!ac](CSG) model, the underlying theory for creating [!ac](CSG) representations is the same throughout.
 The `CSGBase` class provides the framework in MOOSE for creating these generic [!ac](CSG) representations of mesh generators that can then be used by [!ac](MC) codes.
@@ -8,7 +8,6 @@ The `CSGBase` class provides the framework in MOOSE for creating these generic [
 ## Theory
 
 As stated, a [!ac](CSG) representation is defined minimally as a series of surfaces, cells, and universes.
-This section describes in theory what these components are.
 
 [Surfaces](source/csg/CSGBase.md#surfaces) are defined explicitly through surface equations (such as equations of a plane, sphere, etc.).
 Surfaces are usually assigned a boundary type (vacuum, transmission, reflective, etc.) which is relevant for proper physics handling in [!ac](MC) simulations.
@@ -38,11 +37,12 @@ For a more detailed description of how surfaces, cells, and universes are repres
 
 ## How to Invoke
 
-The [!ac](CSG) model generation can be invoked at the command line using the `--csg-only` option with any MOOSE mesh input file.
+The [!ac](CSG) model generation can be invoked on the command line using the `--csg-only` option with any MOOSE mesh input file.
 The [!ac](JSON) file that is generated will be called the name of the input file with `_csg` appended by default.
-An optional output file name can be provided at the command line (`--csg-only <output_file_name.json>`).
+An optional output file name can be provided on the command line (`--csg-only <output_file_name.json>`).
 
-If all mesh generator blocks in the input file have the `generateCSG` method implemented, a [!ac](CSG)-equivalent [!ac](JSON) file will be produced.
+!alert note title=Code requirements
+A [!ac](CSG) [!ac]JSON file will be produced if and only if all mesh generators in the input file have the `generateCSG` method implemented.
 If any mesh generators do not have the `generateCSG` method implemented, an error will be returned explaining as such.
 This process is run as a data-only mode so no finite element mesh is produced.
 
@@ -55,7 +55,7 @@ There are three main sections in the file:
 - [`CELLS`](#cells)
 - [`UNIVERSES`](#universes)
 
-Each item within the blocks is keyed by its unique name identifier, and the value is the corresponding definition for that item.
+Each item within each section is keyed (a JSON is a dictionary) by its unique name identifier, and the value is the corresponding definition for that item.
 Detailed description of each type of item in the section follows.
 
 ### Surfaces
