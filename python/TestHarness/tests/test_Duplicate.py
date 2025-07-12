@@ -14,14 +14,21 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test for duplicate output files in the same directory
         """
-        out = self.runTests('-i', 'duplicate_outputs', exit_code=1).output
-        self.assertIn('Tests: d, c', out)
-        self.assertIn('File(s): good_out.e', out)
+        def run_test(spec, test_names):
+            test_names = sorted(test_names)
+            result = self.runTests('-i', spec, exit_code=132)
+            out = result.output
+            jobs = result.harness.finished_jobs
 
-        # Use a different spec file, which makes use of the AnalyzeJacobian tester
-        out = self.runTests('-i', 'duplicate_outputs_analyzejacobian', exit_code=1).output
-        self.assertIn('Tests: b, a', out)
-        self.assertIn('File(s): good.i', out)
+            for name in test_names:
+                job = [j for j in jobs if j.getTestNameShort() == name][0]
+                out = job.getOutput()
+                files = job.getOutputFiles(job.options)
+                self.assertIn(f'Tests: {", ".join(test_names)}', out)
+                self.assertIn(f'File(s): {", ".join(files)}', out)
+
+        run_test('duplicate_outputs', ['a', 'b', 'c', 'd'])
+        run_test('duplicate_outputs_analyzejacobian', ['a', 'b'])
 
     def testDuplicateOutputsOK(self):
         """

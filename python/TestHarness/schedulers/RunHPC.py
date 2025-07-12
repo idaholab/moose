@@ -475,7 +475,7 @@ class RunHPC(RunParallel):
             # HPC job can add a terminator for them so that we can verify
             # they are complete on the executing host
             additional_output = [result_file]
-            for file in tester.getOutputFiles(options):
+            for file in job.getOutputFiles(options):
                 additional_output.append(os.path.join(tester.getTestDir(), file))
             # This is a bash array, need to wrap each entry in double quotes
             additional_output_wrapped = []
