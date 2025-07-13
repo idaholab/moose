@@ -51,7 +51,7 @@
   preconditioner = boomeramg
   l_tol = 1e-16
   l_max_its = 1000
-  print_level = 0  
+  print_level = 0
 []
 
 [Executioner]
@@ -74,6 +74,6 @@
     app_type = MooseTestApp
     execute_on = timestep_begin
     input_files = full_solve_sub.i
-    keep_full_output_history = true 
+    keep_full_output_history = true
   [../]
 []
