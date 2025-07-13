@@ -1,5 +1,5 @@
 [Tests]
-  design = 'MultiApp.md'
+  design = 'syntax/MultiApps/index.md
   issues = '#31017'
   [MFEMTransientMultiApps]
     requirement = "The system shall support the execution of MFEM TransientMultiApps:"
