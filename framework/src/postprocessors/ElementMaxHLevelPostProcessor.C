@@ -15,7 +15,7 @@ InputParameters
 ElementMaxHLevelPostProcessor::validParams()
 {
   InputParameters params = ElementPostprocessor::validParams();
-  params.addClassDescription("Computes the maximum element h-level.");
+  params.addClassDescription("Computes the maximum element h-level over the whole domain.");
   return params;
 }
 
