@@ -32,7 +32,7 @@ public:
   /**
    * Perform all required solves during a step. Called in takeStep.
    */
-  virtual void innerSolve();
+  virtual void innerSolve() override;
 
   virtual bool lastSolveConverged() const override { return true; };
 
@@ -59,8 +59,6 @@ public:
   };
 
 private:
-  int _vis_steps;          // Number of cycles between each output update
-  mutable bool _last_step; // Flag to check if current step is final
   std::unique_ptr<Moose::MFEM::TimeDomainProblemOperator> _problem_operator{nullptr};
 };
 
