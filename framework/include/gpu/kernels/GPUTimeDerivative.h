@@ -30,10 +30,7 @@ public:
   {
   }
 
-  KOKKOS_FUNCTION void computeJacobianInternal(const Derived * kernel,
-                                               const unsigned int j,
-                                               ResidualDatum & datum,
-                                               Real * local_ke) const;
+  KOKKOS_FUNCTION void computeJacobianInternal(const Derived * kernel, ResidualDatum & datum) const;
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -56,21 +53,45 @@ protected:
 template <typename Derived>
 KOKKOS_FUNCTION void
 KokkosTimeDerivative<Derived>::computeJacobianInternal(const Derived * kernel,
-                                                       const unsigned int j,
-                                                       ResidualDatum & datum,
-                                                       Real * local_ke) const
+                                                       ResidualDatum & datum) const
 {
-  for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+  Real local_ke[MAX_DOF];
+
+  unsigned int num_batches = datum.n_idofs() * datum.n_jdofs() / MAX_DOF;
+
+  if ((datum.n_idofs() * datum.n_jdofs()) % MAX_DOF)
+    ++num_batches;
+
+  for (unsigned int batch = 0; batch < num_batches; ++batch)
   {
-    datum.reinit();
+    unsigned int ijb = batch * MAX_DOF;
+    unsigned int ije = ::Kokkos::min(ijb + MAX_DOF, datum.n_idofs() * datum.n_jdofs());
 
-    for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-      local_ke[i] += datum.JxW(qp) * kernel->computeQpJacobian(i, j, qp, datum);
+    for (unsigned int ij = ijb; ij < ije; ++ij)
+      local_ke[ij - ijb] = 0;
+
+    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+    {
+      datum.reinit();
+
+      for (unsigned int ij = ijb; ij < ije; ++ij)
+      {
+        unsigned int i = ij % datum.n_jdofs();
+        unsigned int j = ij / datum.n_jdofs();
+
+        local_ke[ij - ijb] += datum.JxW(qp) * kernel->computeQpJacobian(i, j, qp, datum);
+      }
+    }
+
+    for (unsigned int ij = ijb; ij < ije; ++ij)
+    {
+      unsigned int i = ij % datum.n_jdofs();
+      unsigned int j = ij / datum.n_jdofs();
+
+      accumulateTaggedElementalMatrix(
+          local_ke[ij - ijb], datum.elem().id, i, _lumping ? i : j, datum.jvar());
+    }
   }
-
-  for (unsigned int i = 0; i < datum.n_idofs(); ++i)
-    accumulateTaggedElementalMatrix(
-        local_ke[i], datum.elem().id, i, _lumping ? i : j, datum.jvar());
 }
 
 class KokkosTimeDerivativeKernel final : public KokkosTimeDerivative<KokkosTimeDerivativeKernel>
