@@ -12,14 +12,14 @@
 #include "ElementPostprocessor.h"
 
 /**
- * This postprocessor computes the maximum element h-level over the whole domain.
+ * This postprocessor computes the maximum element h-level or p-level.
  */
-class ElementMaxHLevelPostProcessor : public ElementPostprocessor
+class ElementMaxLevelPostProcessor : public ElementPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  ElementMaxHLevelPostProcessor(const InputParameters & parameters);
+  ElementMaxLevelPostProcessor(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -29,5 +29,7 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
+  const enum class LevelType { H = 0, P = 1 } _level_type;
+
   unsigned int _max_level;
 };
