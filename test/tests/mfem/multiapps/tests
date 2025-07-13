@@ -1,0 +1,49 @@
+[Tests]
+  design = 'MultiApp.md'
+  issues = '#31017'
+  [MFEMTransientMultiApps]
+    requirement = "The system shall support the execution of MFEM TransientMultiApps:"
+    [MFEM_dt_from_parent]
+      type = XMLDiff
+      input = 'dt_from_parent.i'
+      xmldiff = 'OutputData/dt_from_parent/Run0/Run0.pvd
+                  OutputData/dt_from_parent/Run0/Cycle000001/proc000000.vtu
+                  OutputData/dt_from_parent/Run0/Cycle000010/proc000000.vtu
+                  OutputData/dt_from_parent_sub/Run0/Run0.pvd
+                  OutputData/dt_from_parent_sub/Run0/Cycle000009/proc000000.vtu'
+      detail = "with a time step governed by the MFEM parent application."
+      capabilities = 'mfem'
+      max_parallel = 1
+      recover = false
+    []
+    [MFEM_sub_cycling]
+      type = XMLDiff
+      input = 'sub_cycling_parent.i'
+      xmldiff = 'OutputData/sub_cycling_parent/Run0/Run0.pvd
+                  OutputData/sub_cycling_parent/Run0/Cycle000000/proc000000.vtu
+                  OutputData/sub_cycling_parent/Run0/Cycle000002/proc000000.vtu
+                  OutputData/sub_cycling_sub/Run0/Run0.pvd
+                  OutputData/sub_cycling_sub/Run0/Cycle000002/proc000000.vtu'
+      detail = "with the sub-app running multiple timesteps for each timestep of the parent app."
+      capabilities = 'mfem'
+      max_parallel = 1
+      recover = false
+    []    
+  []
+  [MFEMFullSolveMultiApps]
+    requirement = "The system shall support the execution of MFEM FullSolveMultiApps:"
+    [MFEM_full_solve_transient]
+      type = XMLDiff
+      input = 'full_solve_parent.i'
+      xmldiff = 'OutputData/full_solve_parent/Run0/Run0.pvd
+                  OutputData/full_solve_parent/Run0/Cycle000000/proc000000.vtu
+                  OutputData/full_solve_parent/Run0/Cycle000002/proc000000.vtu
+                  OutputData/full_solve_sub/Run0/Run0.pvd
+                  OutputData/full_solve_sub/Run0/Cycle000005/proc000000.vtu'
+      detail = "with a transient problem running in the parent app."
+      capabilities = 'mfem'
+      max_parallel = 1
+      recover = false
+    []  
+  []
+[]
