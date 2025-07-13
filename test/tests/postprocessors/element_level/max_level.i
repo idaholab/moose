@@ -27,8 +27,9 @@
 []
 
 [Postprocessors]
-  [./max_h_level]
-    type = ElementMaxHLevelPostProcessor
+  [./max_level]
+    type = ElementMaxLevelPostProcessor
+    level = 'h'
   [../]
 []
 
