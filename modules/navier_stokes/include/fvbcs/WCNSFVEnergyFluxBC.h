@@ -33,8 +33,22 @@ protected:
   const PostprocessorValue * const _energy_pp;
 
   /// Fluid specific heat capacity functor
-  const Moose::Functor<ADReal> & _cp;
+  const Moose::Functor<ADReal> * _cp;
 
   /// Fluid temperature functor
   const Moose::Functor<ADReal> & _temperature;
+
+  /// Fluid pressure functor
+  const Moose::Functor<ADReal> * _pressure;
+
+  /// Pointer to the enthalpy functor
+  const Moose::Functor<ADReal> * _h_fluid;
+
+  /// Fluid properties object
+  const SinglePhaseFluidProperties * const _fluid;
+
+private:
+  /// Computes the enthalpy using what the user has specified
+  template <typename T>
+  ADReal enthalpy(const T & loc_arg, const Moose::StateArg & state, const bool inflow) const;
 };
