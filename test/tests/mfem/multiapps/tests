@@ -1,6 +1,6 @@
 [Tests]
-  design = 'syntax/MultiApps/index.md
-  issues = ' #31017'
+  design = 'syntax/MultiApps/index.md'
+  issues = '#31017'
   [MFEMTransientMultiApps]
     requirement = "The system shall support execution of sub-applications in transient problems:"
     [MFEM_dt_from_parent]
