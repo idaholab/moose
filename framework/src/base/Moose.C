@@ -348,11 +348,11 @@ addActionTypes(Syntax & syntax)
                            "(setup_quadrature)"
                            "(add_convergence)"
                            "(add_default_convergence)"
+                           "(add_periodic_bc)"
+                           "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_field_split)" // split objects required before field split preconditioner itself
                            "(add_preconditioning)" // preconditioner may introduce objects such as static condensation which influence the underlying types of tagged matrices
                            "(create_tagged_matrices)"
-                           "(add_periodic_bc)"
-                           "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_distribution)"
                            "(add_sampler)"
                            "(setup_function_complete)"
