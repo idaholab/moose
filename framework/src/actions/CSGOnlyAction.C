@@ -30,7 +30,7 @@ CSGOnlyAction::act()
   if (_current_task == "setup_mesh")
   {
     if (!_mesh)
-      mooseError("Cannot generate CSG mesh without a [Mesh] block in the input file");
+      mooseError("Cannot generate CSG object without a [Mesh] block in the input file");
     _app.getMeshGeneratorSystem().setCSGOnly();
   }
   else if (_current_task == "execute_csg_generators")
@@ -41,31 +41,32 @@ CSGOnlyAction::act()
     for (const auto & generator_set : ordered_mg)
       for (const auto & generator : generator_set)
       {
-        auto csg_mesh = generator->generateInternalCSG();
+        auto csg_obj = generator->generateInternalCSG();
         const auto & name = generator->name();
-        // If we are running generateCSG for final generator, store mesh for use in csg_only task
+        // If we are running generateCSG for final generator, store CSG object for use in csg_only
+        // task
         if (name == final_mg_name)
         {
-          _csg_mesh = std::move(csg_mesh);
+          _csg_obj = std::move(csg_obj);
           return;
         }
         else
         {
-          // Store CSG mesh created by mesh generator for use by downstream MG's
-          _app.getMeshGeneratorSystem().saveOutputCSGBase(name, csg_mesh);
+          // Store CSG object created by mesh generator for use by downstream MG's
+          _app.getMeshGeneratorSystem().saveOutputCSGBase(name, csg_obj);
         }
       }
   }
   else if (_current_task == "csg_only")
   {
     const auto final_mg_name = _app.getMeshGeneratorSystem().getFinalMeshGeneratorName();
-    if (!_csg_mesh)
+    if (!_csg_obj)
       mooseError("Expecting final generator with name " + final_mg_name +
                  " but not found in mesh generator tree");
 
     Moose::out << "Outputting CSGBase object for " + final_mg_name + "\n";
 
-    auto csg_json = _csg_mesh->generateOutput();
+    auto csg_json = _csg_obj->generateOutput();
 
     // write generated json to file. Filename will be based on optional argument to
     // --csg-only. If not provided, the output name will be based on the filename

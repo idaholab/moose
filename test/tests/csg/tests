@@ -83,7 +83,7 @@
       input = 'csg_only_chained_not_moved.i'
       detail = ' a CSG object from an input mesh generator is not moved upon retrieval'
       cli_args = '--csg-only'
-      expect_err = "The CSG mesh from input TestCSGInfiniteSquareMeshGenerator 'csg_inf_square' was not moved."
+      expect_err = "The CSGBase object from input TestCSGInfiniteSquareMeshGenerator 'csg_inf_square' was not moved."
       mesh_mode = REPLICATED
     []
     [region_surfaces_error]

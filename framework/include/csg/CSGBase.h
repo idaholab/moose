@@ -25,7 +25,7 @@ namespace CSG
 
 /**
  * CSGBase creates an internal representation of a Constructive Solid Geometry (CSG)
- * mesh based on an existing MooseMesh instance.
+ * model based on an existing MooseMesh instance.
  */
 class CSGBase
 {
