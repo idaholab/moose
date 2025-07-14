@@ -241,21 +241,21 @@
       input = 'real_vector_value_mixed.i'
       cli_args = "Mesh/BatchMeshGeneratorAction/batch1/fixed_scalar_input_param_values='ROTATE 0 0'"
       detail = 'if the fixed scalar input parameter value corresponding to a compound scalar parameter is not a multiple of three.'
-      expect_err = 'must be represented as three separate values instead of one'
+      expect_err = 'must be represented as 3 separate values instead of 1'
     []
     [wrong_compound_scalar_size_batch_scalar]
       type = RunException
       input = 'real_vector_value.i'
       cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_scalar_input_param_values='0 0 0 2 0 0 0 2 0 2 2'"
       detail = 'if the batch scalar input parameter values corresponding to a compound scalar parameter is not a multiple of three.'
-      expect_err = 'must be represented as three separate values instead of one'
+      expect_err = 'must be represented as 3 separate values instead of 1'
     []
     [wrong_compound_scalar_size_batch_vector]
       type = RunException
       input = 'vector_point.i'
       cli_args = "Mesh/BatchMeshGeneratorAction/batch1/batch_vector_input_param_values='0 0 0 1 0 0 1 1 0; 2 0 3 0 0 3 1 0;1 2 0 2 2 0 2 3 0'"
       detail = 'if the element values of a batch vector input parameter corresponding to a compound scalar parameter is not a multiple of three.'
-      expect_err = 'must be represented as three separate values instead of one'
+      expect_err = 'must be represented as 3 separate values instead of 1'
     []
   []
 []
