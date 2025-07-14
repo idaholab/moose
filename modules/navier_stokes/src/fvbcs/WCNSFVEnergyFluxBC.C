@@ -25,8 +25,15 @@ WCNSFVEnergyFluxBC::validParams()
   // 3) Postprocessors for mass flow rate and energy, functor for specific heat
   params.addParam<PostprocessorName>("energy_pp", "Postprocessor with the inlet energy flow rate");
   params.addParam<PostprocessorName>("temperature_pp", "Postprocessor with the inlet temperature");
-  params.addRequiredParam<MooseFunctorName>(NS::cp, "specific heat capacity functor");
+  params.addParam<MooseFunctorName>(NS::cp, "specific heat capacity functor");
   params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "temperature functor");
+
+  // Parameters to solve with the enthalpy variable
+  params.addParam<MooseFunctorName>(NS::pressure, "pressure functor");
+  params.addParam<MooseFunctorName>(NS::specific_enthalpy,
+                                    "Fluid specific enthalpy functor. This can be specified to "
+                                    "avoid using cp * T as the enthalpy");
+  params.addParam<UserObjectName>(NS::fluid, "Fluid properties object");
   return params;
 }
 
@@ -35,8 +42,14 @@ WCNSFVEnergyFluxBC::WCNSFVEnergyFluxBC(const InputParameters & params)
     _temperature_pp(isParamValid("temperature_pp") ? &getPostprocessorValue("temperature_pp")
                                                    : nullptr),
     _energy_pp(isParamValid("energy_pp") ? &getPostprocessorValue("energy_pp") : nullptr),
-    _cp(getFunctor<ADReal>(NS::cp)),
-    _temperature(getFunctor<ADReal>(NS::T_fluid))
+    _cp(isParamValid(NS::cp) ? &getFunctor<ADReal>(NS::cp) : nullptr),
+    _temperature(getFunctor<ADReal>(NS::T_fluid)),
+    _pressure(isParamValid(NS::pressure) ? &getFunctor<ADReal>(NS::pressure) : nullptr),
+    _h_fluid(isParamValid(NS::specific_enthalpy) ? &getFunctor<ADReal>(NS::specific_enthalpy)
+                                                 : nullptr),
+    _fluid(isParamValid(NS::fluid)
+               ? &UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)
+               : nullptr)
 {
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
     paramError("variable",
@@ -73,14 +86,12 @@ WCNSFVEnergyFluxBC::computeQpResidual()
   if (!isInflow())
   {
     const auto fa = singleSidedFaceArg();
-    return varVelocity(state) * _normal * _rho(fa, state) * _cp(fa, state) *
-           _temperature(fa, state);
+    return varVelocity(state) * _normal * _rho(fa, state) * enthalpy(fa, state, false);
   }
   else if (_energy_pp)
     return -_scaling_factor * *_energy_pp / *_area_pp;
 
-  return -_scaling_factor * inflowMassFlux(state) * _cp(singleSidedFaceArg(), state) *
-         (*_temperature_pp);
+  return -_scaling_factor * inflowMassFlux(state) * enthalpy(singleSidedFaceArg(), state, true);
 }
 
 bool
@@ -98,4 +109,31 @@ WCNSFVEnergyFluxBC::isInflow() const
       "overridden in derived classes if other input parameter combinations are valid. "
       "Neither mdot_pp nor velocity_pp are provided.");
   return true;
+}
+
+template <typename T>
+ADReal
+WCNSFVEnergyFluxBC::enthalpy(const T & loc_arg,
+                             const Moose::StateArg & state,
+                             const bool inflow) const
+{
+  if (!inflow)
+  {
+    if (_h_fluid)
+      return (*_h_fluid)(loc_arg, state);
+    else if (_temperature_pp)
+      return (*_cp)(loc_arg, state) * (*_temperature_pp);
+  }
+  else
+  {
+    if (_temperature_pp)
+    {
+      // Preferrable to use the fluid property if we know it
+      if (_fluid)
+        return _fluid->h_from_p_T((*_pressure)(loc_arg, state), (*_temperature_pp));
+      else if (_cp)
+        return (*_cp)(loc_arg, state) * (*_temperature_pp);
+    }
+  }
+  mooseError("Should not reach here, constructor checks required functor inputs");
 }
