@@ -214,8 +214,8 @@ TransientBase::TransientBase(const InputParameters & parameters)
     if (_num_steps == 0) // Always do one step in the first half
       _num_steps = 1;
   }
-  // Retest the middle timestep
-  if (_app.testReStep())
+  // Retest a timestep (see options below for which timestep)
+  else if (_app.testReStep())
   {
     if (_problem.shouldSolve())
     {
