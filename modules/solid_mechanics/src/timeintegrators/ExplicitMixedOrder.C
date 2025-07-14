@@ -113,7 +113,6 @@ ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
 void
 ExplicitMixedOrder::meshChanged()
 {
-  *_ones = 1.;
 }
 
 void
@@ -122,6 +121,8 @@ ExplicitMixedOrder::init()
   _has_damping = _sys.subproblem().matrixTagExists(_damping_matrix);
 
   meshChanged();
+
+  *_ones = 1.;
 
   if (_nl && _fe_problem.solverParams(_nl->number())._type != Moose::ST_LINEAR)
     mooseError(

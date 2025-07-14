@@ -10,29 +10,51 @@
   elem_type = QUAD4
 []
 
-dt_and_v0 = 0.00001
+dt_and_v0 = 1e-5
 
 [Problem]
   extra_tag_matrices = 'mass damping'
 []
 
 [Functions]
-  [b]
+  [b1]
     type = ParsedFunction
     expression = '5*(x+y^2)*(cos(t)-sin(t))'
+  []
+  [b2]
+    type = ParsedFunction
+    expression = '5*(x^2+y)*cos(t)-10*sin(t)'
   []
   [u_exact]
     type = ParsedFunction
     expression = '5*(x+y^2)*sin(t)'
   []
-  [v_init]
+  [v_exact]
+    type = ParsedFunction
+    expression = '5*(x^2+y)*sin(t)'
+  []
+  [udot_init]
     type = ParsedFunction
     expression = '-5*(x+y^2)*${dt_and_v0}'
   []
+  [v_init]
+    type = ParsedFunction
+    expression = '0'
+  []
+  [v_lr]
+    type = ParsedFunction
+    expression = '5*(1+y)*sin(t)'
+  []
+  # [v_tb]
+  #   type = ParsedFunction
+  #   expression = '5*(x^2+1)*cos(t)'
+  # []
 []
 
 [Variables]
   [u]
+  []
+  [v]
   []
 []
 
@@ -44,58 +66,97 @@ dt_and_v0 = 0.00001
       execute_on = 'INITIAL TIMESTEP_END'
     []
   []
+  [v_exact]
+    [AuxKernel]
+      type = FunctionAux
+      function = v_exact
+      execute_on = 'INITIAL TIMESTEP_END'
+    []
+  []
 []
 
 [ICs]
   [u_old]
-    # type = ConstantIC
     type = FunctionIC
     variable = u
     state = OLD
-    # set's v_0 to 1
-    # value = -${dt_and_v0}
+    function = udot_init
+  []
+  [v_old]
+    type = FunctionIC
+    variable = v
+    state = OLD
     function = v_init
   []
 []
 
+[BCs]
+  [v_lr]
+    type = ExplicitFunctionDirichletBC
+    variable = v
+    boundary = 'left right'
+    function = v_lr
+  []
+[]
+
 [Kernels]
-  [mass]
+  [u_mass]
     type = MassMatrix
     variable = u
     density = 1
     matrix_tags = 'mass'
   []
-  [damping]
+  [u_damping]
     type = MassMatrix
     variable = u
     density = 1
     matrix_tags = 'damping'
   []
-  [ffn]
+  [u_ffn]
     type = BodyForce
     variable = u
-    function = b
+    function = b1
+  []
+  [v_mass]
+    type = MassMatrix
+    variable = v
+    density = 1
+    matrix_tags = 'mass'
+  []
+  [v_diff]
+    type = ADDiffusion
+    variable = v
+  []
+  [v_ffn]
+    type = BodyForce
+    variable = v
+    function = b2
   []
 []
 
 [Postprocessors]
-  [error]
+  [u_error]
     type = NodalL2Error
     variable = u
     function = u_exact
   []
+  [v_error]
+    type = NodalL2Error
+    variable = v
+    function = v_exact
+  []
 []
 
 # [VectorPostprocessors]
-#   [u]
+#   [v]
 #     type = NodalValueSampler
-#     variable = u
+#     variable = v
 #     sort_by = id
 #     outputs = csv
 #   []
-#   [u_exact]
+#   [v_exact]
 #     type = NodalValueSampler
-#     variable = u_exact
+#     variable = v_exact
 #     sort_by = id
 #     outputs = csv
 #   []
@@ -114,6 +175,7 @@ dt_and_v0 = 0.00001
     use_constant_mass = true
     use_constant_damping = true
     second_order_vars = 'u'
+    first_order_vars = 'v'
   []
 []
 

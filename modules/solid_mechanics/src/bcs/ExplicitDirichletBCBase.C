@@ -24,7 +24,6 @@ ExplicitDirichletBCBase::validParams()
 
 ExplicitDirichletBCBase::ExplicitDirichletBCBase(const InputParameters & parameters)
   : NodalBC(parameters),
-    // _mass_diag(initLumpedMass()),
     _mass_lumped(initMassLumped()),
     _damping_lumped(initDampingLumped()),
     _u_old(_var.nodalValueOld()),

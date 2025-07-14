@@ -38,9 +38,6 @@ protected:
    */
   virtual Real computeQpValue() = 0;
 
-  // /// The diagonal of the mass matrix
-  // const NumericVector<Number> & _mass_diag;
-
   /// The lumped mass and damping matrix
   const NumericVector<Number> & _mass_lumped;
   const NumericVector<Number> & _damping_lumped;
