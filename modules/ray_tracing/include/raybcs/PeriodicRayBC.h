@@ -14,7 +14,7 @@
 class PeriodicBoundaries;
 
 /**
- * RayBC that reflects a Ray
+ * RayBC that enforces periodic boundaries.
  */
 class PeriodicRayBC : public GeneralRayBC
 {
@@ -23,7 +23,7 @@ public:
 
   static InputParameters validParams();
 
-  virtual void onBoundary(const unsigned int num_applying) override;
+  virtual void onBoundary(const unsigned int num_applying) override final;
 
   /// Whether or not the RayBC params belong to a PeriodicRayBC
   static bool isPeriodicRayBC(const InputParameters & params);
@@ -37,9 +37,16 @@ private:
   /// Point locator used for searching periodic boundary points
   const std::unique_ptr<libMesh::PointLocatorBase> _point_locator;
 
+  /**
+   * State variables for applying periodic boundary conditions.
+   *
+   * Required in order to enable the application of multiple
+   * periodic boundary conditions (via multiple calls to onBoundary())
+   * for a single Ray at the same point.
+   */
+  ///@{
   unsigned int _periodic_applied;
   Point _periodic_point;
   const Elem * _periodic_neighbor;
-  unsigned int _periodic_side;
-  BoundaryID _periodic_boundary;
+  ///@}
 };
