@@ -150,12 +150,15 @@ BatchMeshGeneratorAction::BatchMeshGeneratorAction(const InputParameters & param
                     [this](const ParameterType & type) { return isCompoundRealScalarType(type); });
   if (fixed_scalar_real_compound_num > 0)
   {
-    if (_fixed_scalar_input_param_types.size() + 2 * fixed_scalar_real_compound_num !=
+    if (_fixed_scalar_input_param_types.size() +
+            (Moose::dim - 1) * fixed_scalar_real_compound_num !=
         _fixed_scalar_input_param_values.size())
       paramError("fixed_scalar_input_param_values",
                  "This parameter must have a size that is consistent with "
                  "fixed_scalar_input_param_names. Note that each REALVECTORVALUE or POINT type "
-                 "parameter must be represented as three separate values instead of one.");
+                 "parameter must be represented as ",
+                 std::to_string(Moose::dim),
+                 " separate values instead of 1.");
     // Rearrange _fixed_scalar_input_param_values so that each compound real scalar value is in one
     // single string
     auto fixed_scalar_input_param_values_tmp(_fixed_scalar_input_param_values);
@@ -166,11 +169,11 @@ BatchMeshGeneratorAction::BatchMeshGeneratorAction(const InputParameters & param
       if (isCompoundRealScalarType(_fixed_scalar_input_param_types[i]))
       {
         // In that case, the string element needs to contain three elements separated by spaces
-        _fixed_scalar_input_param_values[i] =
-            fixed_scalar_input_param_values_tmp[raw_value_ct] + ' ' +
-            fixed_scalar_input_param_values_tmp[raw_value_ct + 1] + ' ' +
-            fixed_scalar_input_param_values_tmp[raw_value_ct + 2];
-        raw_value_ct += 3;
+        _fixed_scalar_input_param_values[i] = MooseUtils::join(
+            fixed_scalar_input_param_values_tmp.begin() + raw_value_ct,
+            fixed_scalar_input_param_values_tmp.begin() + raw_value_ct + Moose::dim,
+            " ");
+        raw_value_ct += Moose::dim;
       }
       else
       {
@@ -194,20 +197,22 @@ BatchMeshGeneratorAction::BatchMeshGeneratorAction(const InputParameters & param
   {
     if (isCompoundRealScalarType(_fixed_vector_input_param_types[i]))
     {
-      // Ensure that each compound real scalar value is represented as three separate Real values
-      if (_fixed_vector_input_param_values[i].size() % 3 != 0)
+      // Ensure that each compound real scalar value is represented as Moose::dim Real values
+      if (_fixed_vector_input_param_values[i].size() % Moose::dim != 0)
         paramError("fixed_vector_input_param_values",
                    "This parameter must have a size that is consistent with "
                    "fixed_vector_input_param_names. Note that each REALVECTORVALUE or POINT type "
-                   "parameter must be represented as three separate values instead of one.");
+                   "parameter must be represented as ",
+                   std::to_string(Moose::dim),
+                   " separate values instead of 1.");
       auto unit_fixed_vector_input_param_values_tmp(_fixed_vector_input_param_values[i]);
       _fixed_vector_input_param_values[i].resize(unit_fixed_vector_input_param_values_tmp.size() /
-                                                 3);
+                                                 Moose::dim);
       for (const auto j : index_range(_fixed_vector_input_param_values[i]))
-        _fixed_vector_input_param_values[i][j] =
-            unit_fixed_vector_input_param_values_tmp[j * 3] + ' ' +
-            unit_fixed_vector_input_param_values_tmp[j * 3 + 1] + ' ' +
-            unit_fixed_vector_input_param_values_tmp[j * 3 + 2];
+        _fixed_vector_input_param_values[i][j] = MooseUtils::join(
+            unit_fixed_vector_input_param_values_tmp.begin() + j * Moose::dim,
+            unit_fixed_vector_input_param_values_tmp.begin() + j * Moose::dim + Moose::dim,
+            " ");
     }
   }
 
@@ -223,20 +228,22 @@ BatchMeshGeneratorAction::BatchMeshGeneratorAction(const InputParameters & param
   {
     if (isCompoundRealScalarType(_batch_scalar_input_param_types[i]))
     {
-      // Ensure that each compound real scalar value is represented as three separate Real values
-      if (_batch_scalar_input_param_values[i].size() % 3 != 0)
+      // Ensure that each compound real scalar value is represented as Moose::dim Real values
+      if (_batch_scalar_input_param_values[i].size() % Moose::dim != 0)
         paramError("batch_scalar_input_param_values",
                    "This parameter must have a size that is consistent with "
                    "batch_scalar_input_param_names. Note that each REALVECTORVALUE or POINT type "
-                   "parameter must be represented as three separate values instead of one.");
+                   "parameter must be represented as ",
+                   std::to_string(Moose::dim),
+                   " separate values instead of 1.");
       auto unit_batch_scalar_input_param_values_tmp(_batch_scalar_input_param_values[i]);
       _batch_scalar_input_param_values[i].resize(unit_batch_scalar_input_param_values_tmp.size() /
                                                  3);
       for (const auto j : index_range(_batch_scalar_input_param_values[i]))
-        _batch_scalar_input_param_values[i][j] =
-            unit_batch_scalar_input_param_values_tmp[j * 3] + ' ' +
-            unit_batch_scalar_input_param_values_tmp[j * 3 + 1] + ' ' +
-            unit_batch_scalar_input_param_values_tmp[j * 3 + 2];
+        _batch_scalar_input_param_values[i][j] = MooseUtils::join(
+            unit_batch_scalar_input_param_values_tmp.begin() + j * Moose::dim,
+            unit_batch_scalar_input_param_values_tmp.begin() + j * Moose::dim + Moose::dim,
+            " ");
     }
   }
 
@@ -252,20 +259,22 @@ BatchMeshGeneratorAction::BatchMeshGeneratorAction(const InputParameters & param
     {
       for (const auto j : index_range(_batch_vector_input_param_values[i]))
       {
-        // Ensure that each compound real scalar value is represented as three separate Real values
-        if (_batch_vector_input_param_values[i][j].size() % 3 != 0)
+        // Ensure that each compound real scalar value is represented as Moose::dim Real values
+        if (_batch_vector_input_param_values[i][j].size() % Moose::dim != 0)
           paramError("batch_vector_input_param_values",
                      "This parameter must have a size that is consistent with "
                      "batch_vector_input_param_names. Note that each REALVECTORVALUE or POINT type "
-                     "parameter must be represented as three separate values instead of one.");
+                     "parameter must be represented as ",
+                     Moose::dim,
+                     " separate values instead of 1.");
         auto unit_batch_vector_input_param_values_tmp(_batch_vector_input_param_values[i][j]);
         _batch_vector_input_param_values[i][j].resize(
             unit_batch_vector_input_param_values_tmp.size() / 3);
         for (const auto k : index_range(_batch_vector_input_param_values[i][j]))
-          _batch_vector_input_param_values[i][j][k] =
-              unit_batch_vector_input_param_values_tmp[k * 3] + ' ' +
-              unit_batch_vector_input_param_values_tmp[k * 3 + 1] + ' ' +
-              unit_batch_vector_input_param_values_tmp[k * 3 + 2];
+          _batch_vector_input_param_values[i][j][k] = MooseUtils::join(
+              unit_batch_vector_input_param_values_tmp.begin() + k * Moose::dim,
+              unit_batch_vector_input_param_values_tmp.begin() + k * Moose::dim + Moose::dim,
+              " ");
       }
     }
   }
@@ -939,11 +948,13 @@ T
 BatchMeshGeneratorAction::convertStringToCompoundRealScalar(const std::string & str) const
 {
   const auto split_str = MooseUtils::split(str, " ");
-  mooseAssert(split_str.size() == 3,
+  mooseAssert(split_str.size() == Moose::dim,
               "string used for compound real scalar conversion should contain three elements.");
-  return T(MooseUtils::convert<Real>(split_str[0]),
-           MooseUtils::convert<Real>(split_str[1]),
-           MooseUtils::convert<Real>(split_str[2]));
+  T ret(MooseUtils::convert<Real>(split_str[0]));
+  for (const auto i :
+       make_range(static_cast<std::remove_cv_t<decltype(Moose::dim)>>(1), Moose::dim))
+    ret(i) = MooseUtils::convert<Real>(split_str[i]);
+  return ret;
 }
 
 bool

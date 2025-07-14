@@ -134,10 +134,6 @@ std::vector<std::string> rsplit(const std::string & str,
                                 const std::string & delimiter,
                                 std::size_t max_count = std::numeric_limits<std::size_t>::max());
 
-#include <sstream>
-#include <string>
-#include <iterator>
-
 /**
  * Python-like join function for strings over an iterator range.
  */
