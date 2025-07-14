@@ -204,18 +204,8 @@ TransientBase::TransientBase(const InputParameters & parameters)
     if (_num_steps == 0) // Always do one step in the first half
       _num_steps = 1;
   }
-
-  if (isParamValid("steady_state_convergence"))
-    _problem.setSteadyStateConvergenceName(getParam<ConvergenceName>("steady_state_convergence"));
-  else
-    // Note that we create a steady-state Convergence object even if steady_state_detection ==
-    // false. This could possibly be changed in the future, but TransientMultiApp would need to be
-    // able to signal for the Convergence object to be created in case it uses steady-state
-    // detection for sub-stepping.
-    _problem.setNeedToAddDefaultSteadyStateConvergence();
-
-  // Retest the middle timestep
-  if (_app.testReStep())
+  // Retest a timestep (see options below for which timestep)
+  else if (_app.testReStep())
   {
     if (_problem.shouldSolve())
     {
@@ -244,6 +234,15 @@ TransientBase::TransientBase(const InputParameters & parameters)
           "A timestep is not being retried with --test-restep because Problem/solve=false.\n\nTo "
           "avoid this test being ran, you could set `restep = false` in the test specification.");
   }
+
+  if (isParamValid("steady_state_convergence"))
+    _problem.setSteadyStateConvergenceName(getParam<ConvergenceName>("steady_state_convergence"));
+  else
+    // Note that we create a steady-state Convergence object even if steady_state_detection ==
+    // false. This could possibly be changed in the future, but TransientMultiApp would need to be
+    // able to signal for the Convergence object to be created in case it uses steady-state
+    // detection for sub-stepping.
+    _problem.setNeedToAddDefaultSteadyStateConvergence();
 }
 
 void

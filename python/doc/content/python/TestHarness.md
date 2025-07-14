@@ -69,7 +69,7 @@ through, but some of the important ones are:
     [Predictor::timestepSetup](framework/src/predictors/Predictor.C) for an
     example.
   - Specifying `Executioner/abort_on_solve_fail=true` in the test input or
-    specification `cli_args`.
+    in the command line arguments (`cli_args`).
 
 - `--opt` (The default) Builds an optimized executable suitable for running calculations.
 - `--dbg` An executable meant for use in a debugger (like gdb or lldb). Will be very slow and not meant to be used on large problems
