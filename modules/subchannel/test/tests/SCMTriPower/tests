@@ -4,18 +4,39 @@
   [SCMTriPower_cells_aligned]
     type = CSVDiff
     input = 'test.i'
-    csvdiff = 'test_out_line_check_0001.csv test_out.csv'
+    csvdiff = 'test_out.csv'
     recover = False
     abs_zero = 1e-7
-    requirement = 'The system will populate the linear heat rate on pins in a triangular lattice using an initial condition and auxiliary kernel'
+    max_parallel = 1
+    requirement = 'The system will populate a uniform linear heat rate on subchannels in a triangular lattice using an initial condition and auxiliary kernel'
+  []
+  [SCMTriPower_cells_aligned_with_pins]
+    type = CSVDiff
+    input = 'test_with_pins.i'
+    csvdiff = 'test_with_pins_out.csv test_with_pins_out_line_check_0001.csv'
+    recover = False
+    abs_zero = 1e-7
+    max_parallel = 1
+    requirement = 'The system will populate a sunisoidal linear heat rate on pins in a triangular lattice using an initial condition and auxiliary kernel'
   []
   [SCMTriPower_cells_not_aligned]
     type = CSVDiff
     input = 'test.i'
-    csvdiff = 'not_aligned_line_check_0001.csv not_aligned.csv'
-    cli_args = 'num_cells=11 Outputs/file_base=not_aligned'
+    csvdiff = 'not_aligned.csv'
+    cli_args = 'num_cells=31 Outputs/file_base=not_aligned'
     recover = False
     abs_zero = 1e-7
-    requirement = 'The system will populate the linear heat rate on pins in a triangular lattice using an initial condition and auxiliary kernel in a mesh that has axial divisions that are not aligned with the heated region entrance and exit heights.'
+    max_parallel = 1
+    requirement = 'The system will populate a uniform linear heat rate on subchannels in a triangular lattice using an initial condition and auxiliary kernel in a mesh that has axial divisions that are not aligned with the heated region entrance and exit heights.'
+  []
+  [SCMTriPower_cells_not_aligned_with_pins]
+    type = CSVDiff
+    input = 'test_with_pins.i'
+    csvdiff = 'not_aligned_with_pins.csv not_aligned_with_pins_line_check_0001.csv'
+    cli_args = 'num_cells=31 Outputs/file_base=not_aligned_with_pins'
+    recover = False
+    abs_zero = 1e-7
+    max_parallel = 1
+    requirement = 'The system will populate a sunisoidal linear heat rate on pins in a triangular lattice using an initial condition and auxiliary kernel in a mesh that has axial divisions that are not aligned with the heated region entrance and exit heights.'
   []
 []

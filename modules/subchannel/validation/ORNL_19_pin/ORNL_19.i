@@ -18,8 +18,6 @@ P_out = 2.0e5 # Pa
     pitch = 7.26e-3
     dwire = 1.42e-3
     hwire = 0.3048
-    spacer_z = '0'
-    spacer_k = '0'
   []
 []
 

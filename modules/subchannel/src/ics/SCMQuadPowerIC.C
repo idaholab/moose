@@ -152,8 +152,9 @@ SCMQuadPowerIC::initialSetup()
   // the user.
   _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
   _console << "###########################################" << std::endl;
-  _console << "Total power estimation before correction: " << total_power << " [W] " << std::endl;
-  _console << "Power correction vector :\n" << _pin_power_correction << " \n";
+  _console << "Total power estimation by IC kernel before correction: " << total_power << " [W] "
+           << std::endl;
+  _console << "IC Power correction vector :\n" << _pin_power_correction << " \n";
 }
 
 Real
