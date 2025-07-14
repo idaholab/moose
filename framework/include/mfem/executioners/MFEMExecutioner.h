@@ -36,6 +36,8 @@ public:
   virtual bool HRefine() { return true; };
   virtual void UpdateAfterRefinement() {};
 
+  bool UseAMR() const;
+
   /**
    * Set the device to use to solve the FE problem.
    */
@@ -45,7 +47,6 @@ protected:
   MFEMProblem & _mfem_problem;
   MFEMProblemData & _problem_data;
   mfem::Device _device;
-  bool _use_amr{false};
 };
 
 #endif

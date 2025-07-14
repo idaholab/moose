@@ -35,4 +35,8 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & parameters)
   _app.setMFEMDevice(getParam<std::string>("device"), Moose::PassKey<MFEMExecutioner>());
 }
 
+bool
+MFEMExecutioner::UseAMR() const
+{ return _mfem_problem.UseAMR(); }
+
 #endif

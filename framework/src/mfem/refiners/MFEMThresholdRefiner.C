@@ -19,7 +19,6 @@ MFEMThresholdRefiner::validParams()
                                     "refine>=0 & refine<=1",
                                     "Elements within this percentage of the max error will "
                                     "be refined.  Must be between 0 and 1!");
-  params.addRequiredParam<int>("steps", "Total number of refinement steps");
   params.addRangeCheckedParam<int>("max_h_level", -1, "max_h_level>=0 & max_h_level <= 10", "Total number of h-refinement steps");
   params.addRangeCheckedParam<int>("max_p_level", -1, "max_p_level>=0 & max_p_level <= 10", "Total number of p-refinement steps");
 
@@ -31,7 +30,6 @@ MFEMThresholdRefiner::MFEMThresholdRefiner(const InputParameters & params)
   : MFEMGeneralUserObject(params),
     _estimator_name(getParam<std::string>("indicator")),
     _error_threshold(getParam<Real>("refine")),
-    _steps(getParam<int>("steps")),
     _max_h_level(getParam<int>("max_h_level")),
     _max_p_level(getParam<int>("max_p_level")),
     _refinement_type(getParam<MooseEnum>("refinement_type"))
