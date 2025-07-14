@@ -272,6 +272,18 @@ public:
   void updateFESpaces();
   void uniformRefinement(int num_refinements);
 
+  void SetUpAMR();
+
+  //! Return true when it's time to stop
+  bool HRefine();
+  //! Return true when it's time to stop
+  bool PRefine();
+
+  bool UseHRefinement() const;
+  bool UsePRefinement() const;
+
+  bool UseAMR() const { return _problem_data._use_amr; }
+
   /**
    * @returns a shared pointer to an MFEM parallel grid function
    */

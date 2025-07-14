@@ -85,8 +85,8 @@ void
 MFEMSteady::execute()
 {
   // first, we need to set up AMR
-  if (_use_amr)
-    _problem_operator->SetUpAMR();
+  if (UseAMR())
+    _mfem_problem.SetUpAMR();
 
   if (_app.isRecovering())
   {
@@ -116,11 +116,11 @@ MFEMSteady::execute()
     bool stop = false;
     bool stop_pref = true;
     bool stop_href = true;
-    while (_use_amr and !stop)
+    while (UseAMR() and !stop)
     {
       // Check if we have P-Refinement enabled or we've done enough
       // p-refinement steps
-      if ( _problem_operator->UsePRefinement() )
+      if ( _mfem_problem.UsePRefinement() )
       {
         stop_pref = PRefine();
         _problem_operator->Solve(_problem_data.f);
@@ -128,7 +128,7 @@ MFEMSteady::execute()
 
       // Check if we have H-Refinement enabled or we've done enough
       // h-refinement steps
-      if ( _problem_operator->UseHRefinement() )
+      if ( _mfem_problem.UseHRefinement() )
       {
         stop_href = HRefine();
         _problem_operator->Solve(_problem_data.f);
@@ -176,25 +176,10 @@ MFEMSteady::execute()
 }
 
 bool
-MFEMSteady::addRefiner(std::shared_ptr<MFEMThresholdRefiner> refiner)
-{
-  if (refiner)
-  {
-    _use_amr = true;
-    _problem_operator->AddRefiner(refiner);
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-
-bool
 MFEMSteady::PRefine()
 {
   // Call PRefine in the problem operator
-  bool stop = _problem_operator->PRefine();
+  bool stop = _mfem_problem.PRefine();
 
   UpdateAfterRefinement();
 
@@ -205,7 +190,7 @@ bool
 MFEMSteady::HRefine()
 {
   // Call PRefine in the problem operator
-  bool stop = _problem_operator->HRefine();
+  bool stop = _mfem_problem.HRefine();
 
   UpdateAfterRefinement();
 
