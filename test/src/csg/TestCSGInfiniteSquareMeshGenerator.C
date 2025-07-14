@@ -41,7 +41,7 @@ TestCSGInfiniteSquareMeshGenerator::generate()
 std::unique_ptr<CSG::CSGBase>
 TestCSGInfiniteSquareMeshGenerator::generateCSG()
 {
-  auto csg_mesh = std::make_unique<CSG::CSGBase>();
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
   const auto centroid = Point(0, 0, 0);
 
   // Add surfaces and halfspaces corresponding to 4 planes of infinite square
@@ -64,7 +64,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
   for (unsigned int i = 0; i < points_on_planes.size(); ++i)
   {
     const auto surf_name = "surf_" + surf_names[i];
-    auto & csg_plane = csg_mesh->createPlaneFromPoints(
+    auto & csg_plane = csg_obj->createPlaneFromPoints(
         surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
     const auto region_direction = csg_plane.directionFromPoint(centroid);
     auto halfspace =
@@ -79,12 +79,12 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
   const auto cell_name = "square_cell";
   const auto material_name = "square_material";
 
-  auto & csg_cell = csg_mesh->createCell(cell_name, material_name, region);
+  auto & csg_cell = csg_obj->createCell(cell_name, material_name, region);
 
   // set all surface boundary conditions to reflective
   auto & all_surfs = csg_cell.getRegion().getSurfaces();
   for (auto & s : all_surfs)
-    csg_mesh->updateSurfaceBoundaryType(s, CSG::CSGSurface::BoundaryType::REFLECTIVE);
+    csg_obj->updateSurfaceBoundaryType(s, CSG::CSGSurface::BoundaryType::REFLECTIVE);
 
-  return csg_mesh;
+  return csg_obj;
 }

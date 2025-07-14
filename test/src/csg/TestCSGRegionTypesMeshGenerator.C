@@ -40,8 +40,8 @@ TestCSGRegionTypesMeshGenerator::generate()
 std::unique_ptr<CSG::CSGBase>
 TestCSGRegionTypesMeshGenerator::generateCSG()
 {
-  auto csg_mesh = std::make_unique<CSG::CSGBase>();
-  auto root_univ = csg_mesh->getRootUniverse();
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  auto root_univ = csg_obj->getRootUniverse();
 
   // initialize all surfaces to be represented
   std::vector<std::vector<Real>> plane_coeffs{{0, 1, 0, _side_length},
@@ -55,7 +55,7 @@ TestCSGRegionTypesMeshGenerator::generateCSG()
   {
     const auto surf_name = "surf_" + surf_names[i];
     const auto plane_coeff = plane_coeffs[i];
-    auto & csg_plane = csg_mesh->createPlaneFromCoefficients(
+    auto & csg_plane = csg_obj->createPlaneFromCoefficients(
         surf_name, plane_coeff[0], plane_coeff[1], plane_coeff[2], plane_coeff[3]);
     auto pos_halfspace = +csg_plane;
     auto neg_halfspace = -csg_plane;
@@ -77,10 +77,10 @@ TestCSGRegionTypesMeshGenerator::generateCSG()
 
   CSG::CSGRegion region = region_left | region_right;
   const auto material_name = "square_material";
-  csg_mesh->createCell("square_cell", material_name, region);
+  csg_obj->createCell("square_cell", material_name, region);
 
   CSG::CSGRegion region_complement = ~region;
-  csg_mesh->createCell("void_cell", region_complement);
+  csg_obj->createCell("void_cell", region_complement);
 
-  return csg_mesh;
+  return csg_obj;
 }

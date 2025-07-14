@@ -42,19 +42,19 @@ TestCSGJoinBasesMeshGenerator::generateCSG()
 {
   const auto csg_bases = getCSGBases("input_meshes");
   // first MG is the base, join all others to this one
-  std::unique_ptr<CSG::CSGBase> csg_mesh = std::move(*csg_bases[0]);
+  std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*csg_bases[0]);
 
   // rename first MG's root to demonstrate that all others are still joined into
   // root despite having different names
   auto mg_name = this->name();
-  csg_mesh->renameRootUniverse(mg_name + "_root");
+  csg_obj->renameRootUniverse(mg_name + "_root");
 
-  auto root_univ = csg_mesh->getRootUniverse();
+  auto root_univ = csg_obj->getRootUniverse();
   for (unsigned int i = 1; i < csg_bases.size(); ++i)
   {
-    std::unique_ptr<CSG::CSGBase> inp_csg_mesh = std::move(*csg_bases[i]);
-    csg_mesh->joinOtherBase(inp_csg_mesh);
+    std::unique_ptr<CSG::CSGBase> inp_csg_obj = std::move(*csg_bases[i]);
+    csg_obj->joinOtherBase(inp_csg_obj);
   }
 
-  return csg_mesh;
+  return csg_obj;
 }
