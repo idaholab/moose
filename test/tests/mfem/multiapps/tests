@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/MultiApps/index.md
-  issues = '#31017'
+  issues = ' #31017'
   [MFEMTransientMultiApps]
     requirement = "The system shall support execution of sub-applications in transient problems:"
     [MFEM_dt_from_parent]
@@ -12,11 +12,10 @@
                   OutputData/dt_from_parent_sub/Run0/Run0.pvd
                   OutputData/dt_from_parent_sub/Run0/Cycle000009/proc000000.vtu'
       detail = "with a time step governed by the MFEM parent application."
-      capabilities = 'mfem'
+      capabilities = 'mfem & platform=linux'
       max_parallel = 1
       recover = false
       max_threads = 1
-      platform = 'linux'
     []
     [MFEM_sub_cycling]
       type = XMLDiff
@@ -30,9 +29,7 @@
       capabilities = 'mfem'
       max_parallel = 1
       recover = false
-      max_threads = 1
-      platform = 'linux'
-    []    
+    []
     [MFEMFullSolveMultiApps]
       requirement = "The system shall support executing a sub-application solving an entire sub-problem:"
       [MFEM_full_solve_transient]
@@ -47,9 +44,7 @@
         capabilities = 'mfem'
         max_parallel = 1
         recover = false
-        max_threads = 1
-        platform = 'linux'
-      []  
+      []
     []
   []
 []
