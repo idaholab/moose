@@ -249,7 +249,7 @@ FixedPointSolve::solve()
 
       // Save variable values before the solve. Solving will provide new values
       if (!_app.isUltimateMaster())
-        saveVariableValues(false);
+        saveVariableValues(/*is parent app of this iteration=*/false);
     }
     else
       _main_fixed_point_it = 0;

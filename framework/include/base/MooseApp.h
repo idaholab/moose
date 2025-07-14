@@ -541,7 +541,8 @@ public:
   bool testCheckpointHalfTransient() const { return _test_checkpoint_half_transient; }
 
   /**
-   * Whether or not this simulation should fail its middle timestep and repeat (for testing)
+   * Whether or not this simulation should fail a timestep and repeat (for testing).
+   * Selection rules for which time step to fail in TransientBase.C constructor.
    */
   bool testReStep() const { return _test_restep; }
 
