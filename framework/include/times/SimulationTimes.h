@@ -10,12 +10,12 @@
 #pragma once
 
 // Moose includes
-#include "Times.h"
+#include "TimesReporter.h"
 
 /**
  * Times simulated, obtained from the problem
  */
-class SimulationTimes : public Times
+class SimulationTimes : public TimesReporter
 {
 public:
   static InputParameters validParams();
