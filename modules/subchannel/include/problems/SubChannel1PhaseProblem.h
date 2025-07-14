@@ -35,6 +35,9 @@ public:
   virtual bool solverSystemConverged(const unsigned int) override;
   virtual void initialSetup() override;
 
+  /// Computes added heat for channel i_ch and cell iz
+  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
+
 protected:
   struct FrictionStruct
   {
@@ -68,8 +71,6 @@ protected:
   void computeMu(int iblock);
   /// Computes Residual Matrix based on the lateral momentum conservation equation for block iblock
   void computeWijResidual(int iblock);
-  /// Computes added heat for channel i_ch and cell iz
-  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
   /// Function that computes the heat flux added by the duct
   Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
   /// Computes Residual Vector based on the lateral momentum conservation equation for block iblock & updates flow variables based on current crossflow solution

@@ -3,6 +3,7 @@ T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = '${fparse 1e+6 * 17.00 / 3600.}'
 P_out = 4.923e6 # Pa
+length = 0.5
 
 [QuadSubChannelMesh]
   [sub_channel]
@@ -17,32 +18,68 @@ P_out = 4.923e6 # Pa
     heated_length = 0.5
     unheated_length_exit = 0.5
   []
+
+  [fuel_pins]
+    type = SCMQuadPinMeshGenerator
+    input = sub_channel
+    nx = 3
+    ny = 3
+    n_cells = ${num_cells}
+    pitch = 0.25
+    unheated_length_entry = 0.5
+    heated_length = 0.5
+    unheated_length_exit = 0.5
+  []
+[]
+
+[Functions]
+  [axial_heat_rate]
+    type = ParsedFunction
+    value = '(pi/2)*sin(pi*z/L)'
+    vars = 'L'
+    vals = '${length}'
+  []
 []
 
 [AuxVariables]
   [q_prime_aux]
+    block = fuel_pins
   []
   [q_prime]
+    block = fuel_pins
   []
   [mdot]
+    block = sub_channel
   []
   [SumWij]
+    block = sub_channel
   []
   [P]
+    block = sub_channel
   []
   [DP]
+    block = sub_channel
   []
   [h]
+    block = sub_channel
   []
   [T]
+    block = sub_channel
+  []
+  [Tpin]
+    block = fuel_pins
   []
   [rho]
+    block = sub_channel
   []
   [mu]
+    block = sub_channel
   []
   [S]
+    block = sub_channel
   []
   [w_perim]
+    block = sub_channel
   []
 []
 
@@ -68,12 +105,13 @@ P_out = 4.923e6 # Pa
 []
 
 [AuxKernels]
-  [q_prime_IC]
+  [q_prime_AUX]
     type = SCMQuadPowerAux
     variable = q_prime_aux
     power = 1e6 # W
     filename = "power_profile.txt" #type in name of file that describes radial power profile
     execute_on = 'initial'
+    axial_heat_rate = axial_heat_rate
   []
   [T_in_bc]
     type = ConstantAux
@@ -98,6 +136,7 @@ P_out = 4.923e6 # Pa
     variable = q_prime
     power = 1e6 # W
     filename = "power_profile.txt" #type in name of file that describes radial power profile
+    axial_heat_rate = axial_heat_rate
   []
 
   [S_IC]
@@ -173,10 +212,12 @@ P_out = 4.923e6 # Pa
   [Total_power_IC_defaultPP]
     type = ElementIntegralVariablePostprocessor
     variable = q_prime
+    block = fuel_pins
   []
   [Total_power_Aux_defaultPP]
     type = ElementIntegralVariablePostprocessor
     variable = q_prime_aux
+    block = fuel_pins
   []
   [Total_power_SCMPowerPostprocessor]
     type = SCMPowerPostprocessor
@@ -189,8 +230,8 @@ P_out = 4.923e6 # Pa
     variable = 'q_prime q_prime_aux'
     execute_on = 'TIMESTEP_END'
     sort_by = 'z'
-    start_point = '0 0 0'
-    end_point = '0 0 1.5'
+    start_point = '0.125 0.125 0'
+    end_point = '0.125 0.125 1.5'
     num_points = ${fparse num_cells + 1}
   []
 []

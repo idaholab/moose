@@ -7,6 +7,7 @@
     csvdiff = 'test_out_line_check_0001.csv test_out.csv'
     recover = False
     abs_zero = 1e-7
+    max_parallel = 1
     requirement = 'The system will populate the linear heat rate on subchannels in a quadrilateral lattice using an initial condition and auxiliary kernel'
   []
   [SCMQuadPower_cells_not_aligned]
@@ -16,6 +17,26 @@
     cli_args = 'num_cells=11 Outputs/file_base=not_aligned'
     recover = False
     abs_zero = 1e-7
+    max_parallel = 1
     requirement = 'The system will populate the linear heat rate on subchannels in a quadrilateral lattice using an initial condition and auxiliary kernel in a mesh that has axial divisions that are not aligned with the heated region entrance and exit heights.'
+  []
+  [SCMQuadPower_cells_aligned_with_pins]
+    type = CSVDiff
+    input = 'test_with_pins.i'
+    csvdiff = 'test_with_pins_out_line_check_0001.csv test_with_pins_out.csv'
+    recover = False
+    abs_zero = 1e-7
+    max_parallel = 1
+    requirement = 'The system will populate the linear heat rate on fuel pins in a quadrilateral lattice using an initial condition and auxiliary kernel'
+  []
+  [SCMQuadPower_cells_not_aligned_with_pins]
+    type = CSVDiff
+    input = 'test_with_pins.i'
+    csvdiff = 'not_aligned_with_pins_line_check_0001.csv not_aligned_with_pins.csv'
+    cli_args = 'num_cells=11 Outputs/file_base=not_aligned_with_pins'
+    recover = False
+    abs_zero = 1e-7
+    max_parallel = 1
+    requirement = 'The system will populate the linear heat rate on fuel pins in a quadrilateral lattice using an initial condition and auxiliary kernel in a mesh that has axial divisions that are not aligned with the heated region entrance and exit heights.'
   []
 []

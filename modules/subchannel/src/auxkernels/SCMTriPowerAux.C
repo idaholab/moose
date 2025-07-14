@@ -73,7 +73,6 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
     i++;
   }
   inFile.close();
-  _console << " Power distribution matrix :\n" << _power_dis << " \n";
 }
 
 void
@@ -126,7 +125,6 @@ SCMTriPowerAux::initialSetup()
         {
           heat2 = 0.0;
         }
-
         _estimate_power(i_pin) += _ref_qprime(i_pin) * (heat1 + heat2) * dz / 2.0;
       }
     }
@@ -147,8 +145,9 @@ SCMTriPowerAux::initialSetup()
   // the user.
   _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
   _console << "###########################################" << std::endl;
-  _console << "Total power estimation before correction: " << total_power << " [W] " << std::endl;
-  _console << "Power correction vector :\n" << _pin_power_correction << " \n";
+  _console << "Total power estimation by Aux kernel before correction: " << total_power << " [W] "
+           << std::endl;
+  _console << "Aux Power correction vector :\n" << _pin_power_correction << " \n";
 }
 
 Real

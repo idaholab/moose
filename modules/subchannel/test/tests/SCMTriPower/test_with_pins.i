@@ -18,34 +18,64 @@ num_cells = 40
     dwire = 1.42e-3
     hwire = 0.3048
   []
+
+  [fuel_pins]
+    type = SCMTriPinMeshGenerator
+    input = subchannel
+    nrings = 3
+    n_cells = ${num_cells}
+    heated_length = 0.5
+    unheated_length_entry = 0.4
+    unheated_length_exit = 0.1
+    pitch = 7.26e-3
+  []
 []
 
 [AuxVariables]
   [mdot]
+    block = subchannel
   []
   [SumWij]
+    block = subchannel
   []
   [P]
+    block = subchannel
   []
   [DP]
+    block = subchannel
   []
   [h]
+    block = subchannel
   []
   [T]
+    block = subchannel
   []
   [rho]
+    block = subchannel
   []
   [S]
+    block = subchannel
   []
   [w_perim]
-  []
-  [q_prime]
-  []
-  [q_prime_aux]
+    block = subchannel
   []
   [mu]
+    block = subchannel
   []
   [displacement]
+    block = subchannel
+  []
+  [q_prime]
+    block = fuel_pins
+  []
+  [q_prime_aux]
+    block = fuel_pins
+  []
+  [Tpin]
+    block = fuel_pins
+  []
+  [Dpin]
+    block = fuel_pins
   []
 []
 
@@ -80,6 +110,12 @@ num_cells = 40
 []
 
 [ICs]
+  [Dpin_ic]
+    type = ConstantIC
+    variable = Dpin
+    value = 5.84e-3
+  []
+
   [S_IC]
     type = SCMTriFlowAreaIC
     variable = S
@@ -95,7 +131,7 @@ num_cells = 40
     variable = q_prime
     power = 20000 # W
     filename = "pin_power_profile.txt"
-    # axial_heat_rate = axial_heat_rate
+    axial_heat_rate = axial_heat_rate
   []
 
   [T_ic]
@@ -168,7 +204,7 @@ num_cells = 40
     variable = q_prime_aux
     power = 20000 # W
     filename = "pin_power_profile.txt" #type in name of file that describes radial power profile
-    # axial_heat_rate = axial_heat_rate
+    axial_heat_rate = axial_heat_rate
     execute_on = 'initial'
   []
 []
@@ -181,13 +217,27 @@ num_cells = 40
   [Total_power_IC_defaultPP]
     type = ElementIntegralVariablePostprocessor
     variable = q_prime
+    block = fuel_pins
   []
   [Total_power_Aux_defaultPP]
     type = ElementIntegralVariablePostprocessor
     variable = q_prime_aux
+    block = fuel_pins
   []
   [Total_power_SCMPowerPostprocessor]
     type = SCMPowerPostprocessor
+  []
+[]
+
+[VectorPostprocessors]
+  [line_check]
+    type = LineValueSampler
+    variable = 'q_prime q_prime_aux'
+    execute_on = 'TIMESTEP_END'
+    sort_by = 'z'
+    start_point = '0 0 0'
+    end_point = '0 0 1.0'
+    num_points = ${fparse num_cells + 1}
   []
 []
 
