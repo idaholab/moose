@@ -21,7 +21,7 @@ InputParameters
 GeneralFunctorFluidPropsTempl<is_ad>::validParams()
 {
   auto params = FunctorMaterial::validParams();
-  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties functor userobject");
+  params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties object");
   params.addClassDescription("Creates functor fluid properties using a (P, T) formulation");
 
   params.addRequiredParam<MooseFunctorName>(NS::pressure, "Pressure");
