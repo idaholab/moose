@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <optional>
 #include "MooseTypes.h"
 
 // libmesh
@@ -20,13 +21,13 @@ class FEProblemBase;
 class ComputeInitialConditionThread
 {
 public:
-  ComputeInitialConditionThread(FEProblemBase & fe_problem);
+  // Set IC on specific variables
+  ComputeInitialConditionThread(
+      FEProblemBase & fe_problem,
+      const std::optional<std::set<VariableName>> & target_vars = std::nullopt);
+
   // Splitting Constructor
   ComputeInitialConditionThread(ComputeInitialConditionThread & x, Threads::split split);
-  // Set IC on specific variable names
-  ComputeInitialConditionThread(FEProblemBase & fe_problem,
-                                const std::set<VariableName> & target_var_names,
-                                const TargetVarUsageForIC target_var_usage);
 
   void operator()(const libMesh::ConstElemRange & range);
   void join(const ComputeInitialConditionThread & /*y*/);
@@ -39,10 +40,5 @@ protected:
   THREAD_ID _tid;
 
   /// @brief the names of target variables for which the initial conditions are applied
-  const std::set<VariableName> _target_var_names;
-
-  // Default behavior is to skip variable names in the list (_target_var_names).
-  // It is because _target_var_names is empty by default. And, we want to apply initial conditions
-  // to all variables by default.
-  TargetVarUsageForIC _target_var_usage = TargetVarUsageForIC::SKIP_LIST;
+  const std::optional<std::set<VariableName>> _target_vars;
 };

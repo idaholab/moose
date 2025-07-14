@@ -13,29 +13,15 @@
 #include "Assembly.h"
 #include "InitialCondition.h"
 
-ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblemBase & fe_problem)
-  : _fe_problem(fe_problem),
-    _target_var_names({}),
-    _target_var_usage(TargetVarUsageForIC::SKIP_LIST)
-
+ComputeInitialConditionThread::ComputeInitialConditionThread(
+    FEProblemBase & fe_problem, const std::optional<std::set<VariableName>> & target_vars)
+  : _fe_problem(fe_problem), _target_vars(target_vars)
 {
 }
 
 ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialConditionThread & x,
                                                              Threads::split /*split*/)
-  : _fe_problem(x._fe_problem),
-    _target_var_names(x._target_var_names),
-    _target_var_usage(x._target_var_usage)
-{
-}
-
-ComputeInitialConditionThread::ComputeInitialConditionThread(
-    FEProblemBase & fe_problem,
-    const std::set<VariableName> & target_var_names,
-    const TargetVarUsageForIC target_var_usage)
-  : _fe_problem(fe_problem),
-    _target_var_names(target_var_names),
-    _target_var_usage(target_var_usage)
+  : _fe_problem(x._fe_problem), _target_vars(x._target_vars)
 {
 }
 
@@ -85,12 +71,9 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
               ic->getState() != current_ic_state)
             continue;
 
-          // Skip or include initial conditions based on target variable usage
+          // Skip initial conditions based on target variable usage
           const auto & var_name = ic->variable().name();
-          if ((_target_var_usage == TargetVarUsageForIC::SKIP_LIST &&
-               _target_var_names.count(var_name)) ||
-              (_target_var_usage == TargetVarUsageForIC::ONLY_LIST &&
-               !_target_var_names.count(var_name)))
+          if (_target_vars && !_target_vars->count(var_name))
             continue;
 
           order.push_back(&(ic->variable()));

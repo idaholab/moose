@@ -124,13 +124,6 @@ enum class MooseLinearConvergenceReason
   DIVERGED_PCSETUP_FAILED = -11
 };
 
-// How to use the target variables in the list for initial conditions
-enum class TargetVarUsageForIC
-{
-  ONLY_LIST, // Set initial conditions for variables in the list
-  SKIP_LIST, // Skip initial condition settings for variables in the list
-};
-
 /**
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
@@ -896,21 +889,12 @@ public:
    * at an intermediate step
    * @param elem_range Element range to project on
    * @param bnd_node_range Boundary node range to project on
-   * @param target_var_usage How to handle variables that are in the list of variables
-   * (target_var_names). If TargetVarUsageForIC::SKIP_LIST, these
-   * variables will be skipped to set their ICs. If TargetVarUsageForIC::ONLY_LIST, these variables
-   * will be reinitialized to their ICs.
-   * @param target_var_names Set of variable names to project ICs (depending on \p
-   * target_var_usage). If SKIP_LIST, these variables will be skipped. If ONLY_LIST, these variables
-   * will be reinitialized to their ICs.
-   * If the user do not set \p target_var_usage and \p target_var_names, all variables
-   * in the system will be projected.
+   * @param target_vars Set of variable names to project ICs
    */
   void projectInitialConditionOnCustomRange(
       libMesh::ConstElemRange & elem_range,
       ConstBndNodeRange & bnd_node_range,
-      const TargetVarUsageForIC target_var_usage = TargetVarUsageForIC::SKIP_LIST,
-      const std::set<VariableName> & target_var_names = {});
+      const std::optional<std::set<VariableName>> & target_vars = std::nullopt);
 
   /**
    * Project an initial condition given by a polynomial onto selected elements and nodes
@@ -922,27 +906,19 @@ public:
    * \param poly_func        Polynomial function to project (function pointer)
    * \param poly_func_grad   Gradient of the polynomial function (function pointer)
    * \param function_parameters Parameters to pass to the polynomial function
-   * @param target_var_usage How to handle variables that are in the list of variables
-   * (target_var_names). If TargetVarUsageForIC::SKIP_LIST, these
-   * variables will be skipped to set their ICs. If TargetVarUsageForIC::ONLY_LIST, these variables
-   * will be reinitialized to their ICs.
-   * \param target_var_names Set of variable names to project
-   * If the user do not set \p target_var_usage and \p target_var_names, all variables
-   * in the system will be projected.
+   * \param target_vars Set of variable names to project
    */
   void projectFunctionOnCustomRange(
       ConstElemRange & elem_range,
       ConstNodeRange & bnd_nodes,
-      ConstNodeRange & node_range,
       Number (*poly_func)(
           const Point &, const libMesh::Parameters &, const std::string &, const std::string &),
       Gradient (*poly_func_grad)(
           const Point &, const libMesh::Parameters &, const std::string &, const std::string &),
       const libMesh::Parameters & function_parameters,
-      const TargetVarUsageForIC target_var_usage = TargetVarUsageForIC::SKIP_LIST,
-      const std::set<VariableName> & target_var_names = {});
+      const std::optional<std::set<VariableName>> & target_vars = std::nullopt);
 
-  // Materials /////
+  // Materials
   virtual void addMaterial(const std::string & material_name,
                            const std::string & name,
                            InputParameters & parameters);

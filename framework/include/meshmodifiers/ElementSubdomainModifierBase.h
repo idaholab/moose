@@ -16,22 +16,26 @@
 #include "KDTree.h"
 
 /**
- * Strategies for initializing the solution:
- *
- * - DEFAULT: Use the standard initialization method.
- * - POLYNOMIAL: Apply nodal patch recovery to fit a polynomial using the previously solved elements
- *   that are directly connected to the elements being reinitialized.
- * - POLYNOMIAL_WHOLE_SOLVED_DOMAIN: Fit a polynomial using all solved elements in the domain
- *   to obtain a global approximation.
- * - POLYNOMIAL_THRESHOLD: Fit a polynomial using nearby solved elements that meet a specified
- *   threshold criterion, selecting only elements sufficiently close to the reinitialized elements.
+ * @note Throughout this file, the term "active" refer to elements that are part of the
+ * computational domain where PDEs are being solved. This term shall not be confused with "active"
+ * in the context of adaptive mesh refinement.
  */
-enum class ICStrategy
+
+/**
+ * Strategies for (re)initializing the solution:
+ *
+ * - IC: Use the initial condition for the variable
+ * - POLYNOMIAL_NEIGHBOR: Fit a polynomial using the neighbor active elements
+ * - POLYNOMIAL_WHOLE: Fit a polynomial using all active elements
+ * - POLYNOMIAL_NEARBY: Fit a polynomial using nearby active elements whose distance is below a
+ *                      specified threshold.
+ */
+enum class ReinitStrategy
 {
-  DEFAULT = 0,
-  POLYNOMIAL = 1,
-  POLYNOMIAL_WHOLE_SOLVED_DOMAIN = 2,
-  POLYNOMIAL_THRESHOLD = 3
+  IC,
+  POLYNOMIAL_NEIGHBOR,
+  POLYNOMIAL_WHOLE,
+  POLYNOMIAL_NEARBY
 };
 
 /**
@@ -186,18 +190,18 @@ private:
   std::unique_ptr<ConstNodeRange> _reinitialized_displaced_node_range_from_bnd_nodes;
 
   /// The strategy used to apply IC on newly activated nodes
-  std::vector<ICStrategy> _ic_strategy;
+  std::vector<ReinitStrategy> _reinit_strategy;
 
   /// @brief Names of the NodalPatchRecoveryBase user objects
   const std::vector<UserObjectName> _npr_names;
 
   /// @brief Apply initial conditions using polynomial extrapolation
-  std::vector<const NodalPatchRecoveryBase *> _npr_vec;
+  std::vector<const NodalPatchRecoveryBase *> _npr;
 
   /// @brief List of variable names to be initialized for IC
-  std::vector<VariableName> _ic_vars_names;
+  std::vector<VariableName> _reinit_vars;
 
-  /// @brief map from variable name to the index of the nodal patch recovery user object in `_npr_vec`
+  /// @brief map from variable name to the index of the nodal patch recovery user object in `_npr`
   std::map<VariableName, unsigned int> _var_name_to_npr_idx;
 
   /// @brief List of neighbor elements that share nodes with reinitialized elements
@@ -207,7 +211,7 @@ private:
   /// gathered across all processors using MPI
   std::vector<dof_id_type> _global_reinitialized_elems;
 
-  /// POLYNOMIAL_THRESHOLD related parameters
+  /// POLYNOMIAL_NEARBY related parameters
   /// @brief Minimum number of nearby elements required in the polynomial extrapolation patch.
   int _nearby_element_threshold = 1;
 
@@ -232,8 +236,8 @@ private:
 
   /// @brief Radius threshold for the k-d tree neighbor search.
   /// By default, it is initialized as _nearby_element_threshold * _min_diag_length,
-  /// but the user can override this value by explicitly setting _radius_search_threshold.
-  double _radius_search_threshold = -1;
+  /// but the user can override this value by explicitly setting _nearby_distance_threshold.
+  double _nearby_distance_threshold = -1;
 
   /// Perform a global MPI gather of reinitialized element IDs across all processors.
   /// Results are stored in `_global_reinitialized_elems`.

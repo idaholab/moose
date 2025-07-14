@@ -127,6 +127,7 @@
 #include "libmesh/petsc_solver_exception.h"
 
 #include "metaphysicl/dualnumber.h"
+#include <vector>
 
 using namespace libMesh;
 
@@ -3657,12 +3658,12 @@ FEProblemBase::projectSolution()
 }
 
 void
-FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
-                                                    ConstBndNodeRange & bnd_nodes,
-                                                    const TargetVarUsageForIC target_var_usage,
-                                                    const std::set<VariableName> & target_var_names)
+FEProblemBase::projectInitialConditionOnCustomRange(
+    ConstElemRange & elem_range,
+    ConstBndNodeRange & bnd_nodes,
+    const std::optional<std::set<VariableName>> & target_vars)
 {
-  ComputeInitialConditionThread cic(*this, target_var_names, target_var_usage);
+  ComputeInitialConditionThread cic(*this, target_vars);
   Threads::parallel_reduce(elem_range, cic);
 
   // Need to close the solution vector here so that boundary ICs take precendence
@@ -3670,7 +3671,7 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
     nl->solution().close();
   _aux->solution().close();
 
-  ComputeBoundaryInitialConditionThread cbic(*this, target_var_names, target_var_usage);
+  ComputeBoundaryInitialConditionThread cbic(*this, target_vars);
   Threads::parallel_reduce(bnd_nodes, cbic);
 
   for (auto & nl : _nl)
@@ -3687,10 +3688,7 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
     {
       MooseVariableScalar & var = ic->variable();
 
-      if ((target_var_usage == TargetVarUsageForIC::ONLY_LIST &&
-           !target_var_names.count(var.name())) ||
-          (target_var_usage == TargetVarUsageForIC::SKIP_LIST &&
-           target_var_names.count(var.name())))
+      if (target_vars && !target_vars->count(var.name()))
         continue;
 
       var.reinit();
@@ -3719,40 +3717,34 @@ FEProblemBase::projectInitialConditionOnCustomRange(ConstElemRange & elem_range,
 }
 
 void
-FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
-                                            ConstNodeRange & bnd_nodes,
-                                            ConstNodeRange & node_range,
-                                            Number (*poly_func)(const Point &,
-                                                                const libMesh::Parameters &,
-                                                                const std::string &,
-                                                                const std::string &),
-                                            Gradient (*poly_func_grad)(const Point &,
-                                                                       const libMesh::Parameters &,
-                                                                       const std::string &,
-                                                                       const std::string &),
-                                            const libMesh::Parameters & function_parameters,
-                                            const TargetVarUsageForIC target_var_usage,
-                                            const std::set<VariableName> & target_var_names)
+FEProblemBase::projectFunctionOnCustomRange(
+    ConstElemRange & elem_range,
+    ConstNodeRange & bnd_nodes,
+    Number (*poly_func)(
+        const Point &, const libMesh::Parameters &, const std::string &, const std::string &),
+    Gradient (*poly_func_grad)(
+        const Point &, const libMesh::Parameters &, const std::string &, const std::string &),
+    const libMesh::Parameters & function_parameters,
+    const std::optional<std::set<VariableName>> & target_vars)
 {
-  std::set<VariableName> var_names_to_project;
+  auto vars_to_project = target_vars.value_or(std::set<VariableName>{});
 
-  if (target_var_usage == TargetVarUsageForIC::ONLY_LIST)
-    var_names_to_project = target_var_names;
-  else /* TargetVarUsageForIC::SKIP_LIST */
+  // If no target_vars are specified, we will project all variables
+  if (!target_vars)
   {
     auto insertICVars = [&](SystemBase & sys) -> void
     {
       const auto & vars = sys.getVariables(0);
       for (const auto & ivar : vars)
-        if (!target_var_names.count(ivar->name()))
-          var_names_to_project.insert(ivar->name());
+        vars_to_project.insert(ivar->name());
     };
 
     for (const auto & nl : _nl)
       insertICVars(*nl);
     insertICVars(*_aux);
   }
-  for (const std::string & var_name : var_names_to_project)
+
+  for (const auto & var_name : vars_to_project)
   {
     const auto & var = getStandardVariable(0, var_name);
     const auto var_num = var.number();
@@ -3762,45 +3754,38 @@ FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
             ? static_cast<SystemBase &>(getAuxiliarySystem())
             : static_cast<SystemBase &>(getNonlinearSystemBase(systemNumForVariable(var_name)));
 
+    // Let libmesh handle the projection
     System & libmesh_sys = getSystem(var_name);
-
-    NumericVector<Number> & temp_vec =
-        libmesh_sys.add_vector("temp_projection", /*projected=*/false);
-
+    std::string temp_vec_name = "__temp_projection_" + var_name + "__";
+    NumericVector<Number> & temp_vec = libmesh_sys.add_vector(temp_vec_name, /*projected=*/false);
     libmesh_sys.project_vector(poly_func, poly_func_grad, function_parameters, temp_vec);
     temp_vec.close();
 
+    // Get the dofs to copy
     DofMap & dof_map = sys.dofMap();
+    std::set<dof_id_type> all_dof_indices;
     std::vector<dof_id_type> dof_indices;
-
-    bool not_apply_on_solved_dofs = (var.feType().family == LAGRANGE);
-
-    if (not_apply_on_solved_dofs)
-      for (const auto & node : node_range)
-      {
-        dof_map.dof_indices(node, dof_indices, var_num);
-        for (auto dof : dof_indices)
-          sys.solution().set(dof, temp_vec(dof));
-      }
-    else
+    for (const auto & elem : elem_range)
     {
-      for (const auto & elem : elem_range)
-      {
-        dof_map.dof_indices(elem, dof_indices, var_num);
-        for (auto dof : dof_indices)
-          sys.solution().set(dof, temp_vec(dof));
-      }
-      dof_indices.clear();
-      for (const auto & node : bnd_nodes)
-      {
-        dof_map.dof_indices(node, dof_indices, var_num);
-        for (auto dof : dof_indices)
-          sys.solution().set(dof, temp_vec(dof));
-      }
+      dof_map.dof_indices(elem, dof_indices, var_num);
+      all_dof_indices.insert(dof_indices.begin(), dof_indices.end());
     }
+    for (const auto & node : bnd_nodes)
+    {
+      dof_map.dof_indices(node, dof_indices, var_num);
+      all_dof_indices.insert(dof_indices.begin(), dof_indices.end());
+    }
+    std::vector<dof_id_type> all_dof_indices_vec(all_dof_indices.begin(), all_dof_indices.end());
 
+    // Copy the projected values into the solution vector
+    std::vector<Real> dof_vals;
+    temp_vec.get(all_dof_indices_vec, dof_vals);
+    sys.solution().insert(dof_vals, all_dof_indices_vec);
     sys.solution().close();
     sys.solution().localize(*libmesh_sys.current_local_solution, sys.dofMap().get_send_list());
+
+    // Remove the temporary vector
+    libmesh_sys.remove_vector(temp_vec_name);
   }
 }
 
