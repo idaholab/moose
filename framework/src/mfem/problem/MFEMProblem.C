@@ -106,17 +106,8 @@ MFEMProblem::addMarker(const std::string & user_object_name,
     std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMThresholdRefiner>(name).getSharedPtr();
     std::shared_ptr<MFEMThresholdRefiner> refiner = std::dynamic_pointer_cast<MFEMThresholdRefiner>(object_ptr);
 
-    // fetch a pointer to the executioner
-    auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
-    if (mfem_exec_ptr != nullptr and mfem_exec_ptr->addRefiner(refiner))
-    {
-      // success
-    }
-
-    else
-    {
-      mooseError("Cannot add refiner :()");
-    }
+    _problem_data._refiner = refiner;
+    _problem_data._use_amr = true;
   }
 
   else
@@ -124,9 +115,6 @@ MFEMProblem::addMarker(const std::string & user_object_name,
     mooseError("Cannot add refiner :()");
   }
 }
-
-
-
 
 void
 MFEMProblem::addMFEMSolver(const std::string & user_object_name,
@@ -740,6 +728,78 @@ MFEMProblem::solverTypeString(const unsigned int libmesh_dbg_var(solver_sys_num)
 {
   mooseAssert(solver_sys_num == 0, "No support for multi-system with MFEM right now");
   return MooseUtils::prettyCppType(getProblemData().jacobian_solver.get());
+}
+
+void
+MFEMProblem::SetUpAMR()
+{
+  if (_problem_data._refiner)
+  {
+    _problem_data._refiner->setUp();
+  }
+  else
+  {
+    mooseError("Failed to setup amr");
+  }
+}
+
+//! Return true when it's time to stop
+bool
+MFEMProblem::HRefine()
+{
+  bool stop = true;
+  if (UseAMR())
+  {
+    stop = _problem_data._refiner->Apply(*_problem_data.pmesh);;
+  }
+  else
+  {
+    mooseError(
+        "Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
+  }
+  return stop;
+}
+
+//! Return true when it's time to stop
+bool
+MFEMProblem::PRefine()
+{
+  bool stop = true;
+  if (UseAMR())
+  {
+    mfem::Array<mfem::pRefinement> prefinements;
+    mfem::Array<mfem::Refinement> refinements;
+
+    stop = _problem_data._refiner->MarkWithoutRefining(*_problem_data.pmesh, refinements);
+
+    prefinements.SetSize(refinements.Size());
+    for (int i = 0; i < refinements.Size(); i++)
+    {
+      prefinements[i].index = refinements[i].index;
+      prefinements[i].delta = 1; // Increase the element order by 1
+    }
+
+    _problem_data._refiner->getFESpace()->PRefineAndUpdate(prefinements);
+  }
+
+  else
+  {
+    mooseError(
+        "Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
+  }
+  return stop;
+}
+
+bool
+MFEMProblem::UseHRefinement() const
+{
+  return _problem_data._refiner->UseHRefinement();
+}
+
+bool
+MFEMProblem::UsePRefinement() const
+{
+  return _problem_data._refiner->UsePRefinement();
 }
 
 #endif

@@ -34,9 +34,8 @@ public:
   // refined, or because we have done enough steps
   bool Apply(mfem::ParMesh & mesh);
 
-  bool UseHRefinement() const { return _use_h_refinement and (_h_ref_counter < _max_h_level) and NotExceededTotalSteps(); }
-  bool UsePRefinement() const { return _use_p_refinement and (_p_ref_counter < _max_p_level) and NotExceededTotalSteps(); }
-  bool NotExceededTotalSteps() const { return (_h_ref_counter + _p_ref_counter) < _steps; }
+  bool UseHRefinement() const { return _use_h_refinement and (_h_ref_counter < _max_h_level); }
+  bool UsePRefinement() const { return _use_p_refinement and (_p_ref_counter < _max_p_level); }
 
 protected:
   // Shared pointer to underlying mfem object
