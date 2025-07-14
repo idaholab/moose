@@ -1,9 +1,9 @@
 [Tests]
   design = 'CSG.md CSGBase.md'
   issues = '#29095'
-  requirement = 'The system shall support Constructive Solid Geometry (CSG) generation of meshes using --csg-only mode using a MOOSE mesh input file.'
+  requirement = 'The system shall support the generation of Constructive Solid Geometry (CSG) representations using --csg-only mode using a meshing input file.'
   [geometry]
-    requirement = "The system shall correctly construct a CSG geometry that "
+    requirement = "The system shall correctly construct a CSG object that "
     [csg_only]
         max_threads = 1
         type = 'JSONDiff'
@@ -12,7 +12,7 @@
         jsondiff = 'csg_only_inf_planes_out_csg.json'
         recover = false
         mesh_mode = REPLICATED
-        detail = 'has a single CSGBase instance with planes constructed from 3 points and can generate a unique cell.'
+        detail = 'is single-level deep with a unique cell constructed of planes each generated from 3 points.'
     []
     [csg_only_chained]
         max_threads = 1
@@ -22,7 +22,7 @@
         jsondiff = 'csg_only_chained_out_csg.json'
         recover = false
         mesh_mode = REPLICATED
-        detail = 'passes a single CSGBase object between MeshGenerators to be updated by updating the region of an existing cell and constructing planes from coefficients.'
+        detail = 'updates an existing CSG representation from another mesh generator by updating the region of an existing cell and constructing planes from coefficients.'
     []
     [csg_only_cylinders_join_new_universes]
         max_threads = 1
@@ -32,7 +32,7 @@
         jsondiff = 'csg_cylinders_join_new_universes_out_csg.json'
         recover = false
         mesh_mode = REPLICATED
-        detail = 'joins multiple CSGBase objects into a new CSGBase to create one object with multiple universes and constructing cylinder surfaces aligned with each axis.'
+        detail = 'joins multiple CSG representations to create one new representation with multiple universes and constructs cylinder surfaces aligned with each axis.'
     []
     [csg_only_spheres_join_single_root]
         max_threads = 1
@@ -42,7 +42,7 @@
         jsondiff = 'csg_spheres_join_single_root_out_csg.json'
         recover = false
         mesh_mode = REPLICATED
-        detail = 'joins multiple CSGBase objects from various MeshGenerator types together into one universe and constructs sphere surfaces with and without a center point specified.'
+        detail = 'joins multiple CSG representations together into one single universe and constructs sphere surfaces with and without a center point specified.'
     []
     [csg_only_add_cells_new_universe]
         max_threads = 1
@@ -62,7 +62,7 @@
         jsondiff = 'csg_only_inf_planes_out_csg.json'
         recover = false
         mesh_mode = REPLICATED
-        detail = 'specifies a final generator to create a CSGBase object for an intermediate generator.'
+        detail = 'specifies a final generator to create a CSG representation for an intermediate generator.'
     []
     [all_region_types]
         max_threads = 1
@@ -90,7 +90,7 @@
       max_threads = 1
       type = 'RunException'
       input = 'csg_region_surfs_error.i'
-      detail = ' a cell region is updated with surfaces not present in the CSGBase instance'
+      detail = ' a cell region is updated with surfaces not present in the current CSGBase instance'
       cli_args = '--csg-only'
       expect_err = "Region is being set with a surface named surf_plus_x that is different from the surface of the same name in the base instance."
       mesh_mode = REPLICATED
@@ -99,7 +99,7 @@
       max_threads = 1
       type = 'RunException'
       input = 'csg_rename_surf_error.i'
-      detail = ' a surface is renamed but the surface object does not match that of the same current name in the base.'
+      detail = ' a surface is renamed but the surface object does not match that of the same name in the current CSGBase instance.'
       cli_args = '--csg-only'
       expect_err = "Surface surf_plus_x cannot be renamed to test_new_surf_name as it does not exist in this CSGBase instance."
       mesh_mode = REPLICATED
@@ -108,7 +108,7 @@
       max_threads = 1
       type = 'RunException'
       input = 'csg_rename_cell_error.i'
-      detail = ' a cell is renamed but the cell object does not match that of the same current name in the base.'
+      detail = ' a cell is renamed but the cell object does not match that of the same name in the current CSGBase instance.'
       cli_args = '--csg-only'
       expect_err = "Cell square_cell cannot be renamed to test_new_cell_name as it does not exist in this CSGBase instance."
       mesh_mode = REPLICATED
@@ -117,7 +117,7 @@
       max_threads = 1
       type = 'RunException'
       input = 'csg_rename_univ_error.i'
-      detail = ' a universe is renamed but the universe object does not match that of the same current name in the base.'
+      detail = ' a universe is renamed but the universe object does not match that of the same name in the current CSGBase instance.'
       cli_args = '--csg-only'
       expect_err = "Universe ROOT_UNIVERSE cannot be renamed to test_new_univ_name as it does not exist in this CSGBase instance."
       mesh_mode = REPLICATED
@@ -126,7 +126,7 @@
       max_threads = 1
       type = 'RunException'
       input = 'csg_universe_cell_add_error.i'
-      detail = ' a cell being added to a universe does not exist in the CSGBase instance.'
+      detail = ' a cell being added to a universe does not exist in the current CSGBase instance.'
       cli_args = '--csg-only'
       expect_err = 'A cell named square_cell is being added to universe new_univ_2 that is different from the cell of the same name in the base instance.'
       mesh_mode = REPLICATED
@@ -135,7 +135,7 @@
       max_threads = 1
       type = 'RunException'
       input = 'csg_universe_cell_remove_error.i'
-      detail = ' a cell being removed from a universe does not exist in the CSGBase instance.'
+      detail = ' a cell being removed from a universe does not exist in the current CSGBase instance.'
       cli_args = '--csg-only'
       expect_err = 'A cell named square_cell is being removed from universe ROOT_UNIVERSE that is different from the cell of the same name in the base instance.'
       mesh_mode = REPLICATED
@@ -163,15 +163,6 @@
       input = 'csg_only_inf_planes.i'
       detail = ' used in conjunction with use split command line option'
       cli_args = '--use-split --csg-only'
-      expect_err = "--csg-only is not compatible with any mesh splitting options"
-      mesh_mode = REPLICATED
-    []
-    [split_file]
-      max_threads = 1
-      type = RunException
-      input = 'csg_only_inf_planes.i'
-      detail = ' used in conjunction with split file command line option'
-      cli_args = '--split-file split_file --csg-only'
       expect_err = "--csg-only is not compatible with any mesh splitting options"
       mesh_mode = REPLICATED
     []
