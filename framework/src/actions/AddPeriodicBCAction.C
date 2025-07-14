@@ -29,8 +29,11 @@ AddPeriodicBCAction::validParams()
   params += Moose::PeriodicBCHelper::validParams();
 
   params.addParam<std::vector<VariableName>>("variable",
-                                             "Variable for the periodic boundary condition");
+                                             "Variable(s) for the periodic boundary condition; if "
+                                             "not provided, apply to all variables.");
+
   params.addClassDescription("Action that adds periodic boundary conditions");
+
   return params;
 }
 
@@ -38,6 +41,7 @@ AddPeriodicBCAction::AddPeriodicBCAction(const InputParameters & params)
   : Action(params),
     Moose::PeriodicBCHelper(static_cast<const Action &>(*this), /* algebraic = */ true)
 {
+  checkPeriodicParams();
 }
 
 void
