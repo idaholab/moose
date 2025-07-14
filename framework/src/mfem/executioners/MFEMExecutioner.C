@@ -46,4 +46,8 @@ MFEMExecutioner::setDevice()
   _device.Print(Moose::out);
 }
 
+bool
+MFEMExecutioner::UseAMR() const
+{ return _mfem_problem.UseAMR(); }
+
 #endif

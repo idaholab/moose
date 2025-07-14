@@ -14,6 +14,7 @@
 #include "MFEMContainers.h"
 #include "CoefficientManager.h"
 #include "MFEMSolverBase.h"
+#include "MFEMThresholdRefiner.h"
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -40,6 +41,9 @@ public:
   Moose::MFEM::FECollections fecs;
   Moose::MFEM::FESpaces fespaces;
   Moose::MFEM::GridFunctions gridfunctions;
+
+  std::shared_ptr<MFEMThresholdRefiner> _refiner;
+  bool _use_amr{false};
 
   MPI_Comm comm;
   int myid;
