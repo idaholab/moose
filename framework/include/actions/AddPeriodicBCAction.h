@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Action.h"
+#include "PeriodicBCHelper.h"
 
 class MooseMesh;
 namespace libMesh
@@ -22,7 +23,7 @@ class PeriodicBoundaryBase;
  * are not MooseObjects so you need not specify a type for these boundaries.  If you
  * do, it will currently be ignored by this Action.
  */
-class AddPeriodicBCAction : public Action
+class AddPeriodicBCAction : public Action, public Moose::PeriodicBCHelper
 {
 public:
   static InputParameters validParams();
@@ -32,15 +33,9 @@ public:
   virtual void act() override;
 
 protected:
-  /**
-   * This function will automatically add the correct translation vectors for
-   * each requested dimension when using GeneratedMesh
-   * @returns a boolean indicating whether or not these boundaries were automatically added
-   */
-  bool autoTranslationBoundaries();
+  using Action::paramError;
 
-  void setPeriodicVars(libMesh::PeriodicBoundaryBase & p,
-                       const std::vector<VariableName> & var_names);
+  virtual void onSetupPeriodicBoundary(libMesh::PeriodicBoundaryBase & p) override;
 
   MooseMesh * _mesh;
 };

@@ -216,6 +216,20 @@ Ray::changeStartDirection(const Point & start,
 }
 
 void
+Ray::changePointElemSide(const Point & point,
+                         const Elem & elem,
+                         const unsigned int side,
+                         const ChangePointElemSideKey)
+{
+  mooseAssert(!_trajectory_changed, "Should not have already changed");
+
+  _current_point = point;
+  _current_elem = &elem;
+  _current_incoming_side = side;
+  _trajectory_changed = true;
+}
+
+void
 Ray::setStart(const Point & starting_point,
               const Elem * starting_elem /* = nullptr */,
               const unsigned short starting_incoming_side /* = RayTracingCommon::invalid_side */)
