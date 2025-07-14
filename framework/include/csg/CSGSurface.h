@@ -77,7 +77,7 @@ public:
   /**
    * @brief Get the string representation of surface type
    *
-   * @return const std::string string representation of surface type
+   * @return string representation of surface type
    */
   const std::string getSurfaceTypeString() const;
 
@@ -110,7 +110,8 @@ public:
   virtual std::map<std::string, Real> getCoeffs() const = 0; // Pure virtual function
 
   /**
-   * @brief get direction from point to surface
+   * @brief get direction from point to surface (e.g. is point 'inside' the half-space, or
+   * 'outside')
    *
    * @param p point
    * @return CSGSurface::Direction

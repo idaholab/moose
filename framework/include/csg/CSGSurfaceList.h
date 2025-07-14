@@ -16,7 +16,7 @@ namespace CSG
 {
 
 /**
- * CSGSurfaceList creates a container for CSGSurface objects to pass to CSGBase object
+ * CSGSurfaceList is a container for storing CSGSurface objects in the CSGBase object
  */
 class CSGSurfaceList
 {
