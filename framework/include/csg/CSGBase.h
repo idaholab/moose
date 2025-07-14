@@ -25,7 +25,7 @@ namespace CSG
 
 /**
  * CSGBase creates an internal representation of a Constructive Solid Geometry (CSG)
- * model based on an existing MooseMesh instance.
+ * model.
  */
 class CSGBase
 {
@@ -531,7 +531,7 @@ private:
   /// List of surfaces associated with CSG object
   CSGSurfaceList _surface_list;
 
-  /// List of surfaces associated with CSG object
+  /// List of cells associated with CSG object
   CSGCellList _cell_list;
 
   /// List of universes associated with CSG object
