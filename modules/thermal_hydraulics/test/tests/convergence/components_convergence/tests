@@ -1,0 +1,10 @@
+[Tests]
+  design = 'ComponentsConvergence.md'
+  issues = '#31038'
+
+  [test]
+    type = RunApp
+    input = 'components_convergence.i'
+    requirement = 'The system shall provide a convergence criteria that checks convergence of all components.'
+  []
+[]
