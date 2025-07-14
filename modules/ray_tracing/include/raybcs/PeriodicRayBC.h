@@ -11,8 +11,6 @@
 
 #include "GeneralRayBC.h"
 
-class PeriodicBoundaries;
-
 /**
  * RayBC that enforces periodic boundaries.
  */
