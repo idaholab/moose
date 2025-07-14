@@ -26,9 +26,15 @@ TimesInterface::TimesInterface(const MooseObject * moose_object)
 }
 
 const Times &
-TimesInterface::getTimes(const std::string & name) const
+TimesInterface::getTimes(const std::string & param) const
 {
-  return getTimesByName(_tmi_params.get<TimesName>(name));
+  return getTimesByName(_tmi_params.get<TimesName>(param));
+}
+
+const Times *
+TimesInterface::getOptionalTimes(const std::string & param) const
+{
+  return _tmi_params.isParamValid(param) ? &getTimes(param) : nullptr;
 }
 
 const Times &
