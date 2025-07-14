@@ -195,19 +195,21 @@ public:
   void setVerbose(const bool verbose) { _verbose = verbose; }
 
   /**
-   * Saves the output CSG mesh to _csg_base_output for a particular mesh generator
+   * Saves the CSGBase object to the global map storage, _csg_base_output, for a particular mesh
+   * generator.
+   * Note that this moves the memory ownership of the CSGBase to the MeshGeneratorSystem.
    *
    * @param generator_name Name of mesh generator
-   * @param csg_base Pointer to CSG base object created by mesh generator
+   * @param csg_base Pointer to CSGBase object created by mesh generator
    */
   void saveOutputCSGBase(const MeshGeneratorName generator_name,
                          std::unique_ptr<CSG::CSGBase> & csg_base);
 
   /**
-   * Returns the output CSG mesh associated with a particular mesh generator name
+   * Returns the output CSGBase object associated with a particular mesh generator name
    *
    * @param name Name of mesh generator
-   * @return Pointer to CSG base object associated with mesh generator name
+   * @return Pointer to CSGBase object associated with mesh generator name
    */
   std::unique_ptr<CSG::CSGBase> & getCSGBaseGeneratorOutput(const MeshGeneratorName & name);
 
@@ -287,6 +289,6 @@ private:
   /// Whether mesh generator system is running in CSG-only mode
   bool _csg_only;
 
-  /// Holds the output CSG base object for each mesh generator
+  /// Holds the output CSGBase object for each mesh generator
   std::map<std::string, std::unique_ptr<CSG::CSGBase>> _csg_base_output;
 };
