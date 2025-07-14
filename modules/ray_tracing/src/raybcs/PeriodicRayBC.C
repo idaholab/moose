@@ -33,7 +33,7 @@ PeriodicRayBC::validParams()
   // This is now set via auto_direction or primary and secondary
   params.suppressParameter<std::vector<BoundaryName>>("boundary");
 
-  params.addClassDescription("A RayBC that enforces a periodic boundary.");
+  params.addClassDescription("A RayBC that enforces periodic boundaries.");
 
   return params;
 }
