@@ -22,6 +22,7 @@
 #include "AdvancedOutputUtils.h"
 #include "PerfGraphInterface.h"
 #include "FunctionInterface.h"
+#include "TimesInterface.h"
 
 class MooseMesh;
 class Times;
@@ -48,7 +49,8 @@ class Output : public MooseObject,
                public PostprocessorInterface,
                public VectorPostprocessorInterface,
                public ReporterInterface,
-               public PerfGraphInterface
+               public PerfGraphInterface,
+               public TimesInterface
 {
 public:
   static InputParameters validParams();
@@ -240,11 +242,11 @@ protected:
   /// Target wall time between outputs in seconds
   Real _wall_time_interval;
 
-  /// Sync times for this outputter
-  std::set<Real> _sync_times;
-
   /// Sync times object for this outputter
   const Times * const _sync_times_object;
+
+  /// Sync times for this outputter
+  std::set<Real> _sync_times;
 
   /// Start outputting time
   Real _start_time;

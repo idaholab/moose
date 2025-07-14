@@ -15,7 +15,7 @@ registerMooseObject("MooseApp", CSVFileTimes);
 InputParameters
 CSVFileTimes::validParams()
 {
-  InputParameters params = Times::validParams();
+  InputParameters params = TimesReporter::validParams();
   params.addClassDescription("Import times from one or more files.");
   params.addRequiredParam<std::vector<FileName>>("files",
                                                  "Text file(s) with the times, one per line");
@@ -29,7 +29,7 @@ CSVFileTimes::validParams()
 }
 
 CSVFileTimes::CSVFileTimes(const InputParameters & parameters)
-  : Times(parameters), _time_column_index(getParam<unsigned int>("time_column_index"))
+  : TimesReporter(parameters), _time_column_index(getParam<unsigned int>("time_column_index"))
 {
   const auto & times_files = getParam<std::vector<FileName>>("files");
 

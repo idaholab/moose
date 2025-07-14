@@ -26,8 +26,8 @@
   num_steps = 2
 
   [TimeStepper]
-    type = TimeSequenceFromTimes
-    times = input
+    type = TimeSequenceStepper
+    time_sequence = input
   []
 []
 

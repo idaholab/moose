@@ -12,6 +12,7 @@
 #include "MooseObject.h"
 #include "Restartable.h"
 #include "ScalarCoupleable.h"
+#include "TimesInterface.h"
 
 class FEProblemBase;
 class TransientBase;
@@ -19,7 +20,10 @@ class TransientBase;
 /**
  * Base class for time stepping
  */
-class TimeStepper : public MooseObject, public Restartable, public ScalarCoupleable
+class TimeStepper : public MooseObject,
+                    public Restartable,
+                    public ScalarCoupleable,
+                    public TimesInterface
 {
 public:
   static InputParameters validParams();

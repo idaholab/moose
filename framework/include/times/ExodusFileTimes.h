@@ -10,12 +10,12 @@
 #pragma once
 
 // Moose includes
-#include "Times.h"
+#include "TimesReporter.h"
 
 /**
  * Times from one or more Exodus files
  */
-class ExodusFileTimes : public Times
+class ExodusFileTimes : public TimesReporter
 {
 public:
   static InputParameters validParams();

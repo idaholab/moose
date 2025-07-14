@@ -23,4 +23,9 @@ public:
   TimeSequenceStepper(const InputParameters & parameters);
 
   virtual void init() override;
+  virtual void step() override;
+
+protected:
+  /// A Times object that will provide the sequence of times to hit
+  const Times & _times;
 };

@@ -10,13 +10,13 @@
 #pragma once
 
 // Moose includes
-#include "Times.h"
+#include "TimesReporter.h"
 #include "FunctorInterface.h"
 
 /**
  * Times created by evaluating a functor
  */
-class FunctorTimes : public Times, public NonADFunctorInterface
+class FunctorTimes : public TimesReporter, public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();

@@ -42,13 +42,6 @@
       detail = 'when reading the sequence from an ExodusII formatted input file.'
     []
 
-    [not_sorted]
-      type = 'RunException'
-      input = 'timesequence.i'
-      expect_err = 'Time points must be in strictly ascending order.'
-      cli_args = 'Executioner/TimeStepper/time_sequence="3 2 1 8 0"'
-      detail = 'that must be sorted in ascending order,'
-    []
     [not_sorted_strictly]
       type = 'RunException'
       input = 'timesequence.i'
