@@ -33,6 +33,9 @@ public:
    */
   const Times & getTimes(const std::string & param) const;
 
+  /// Same as getTimes, except returning a pointer which is null if parameter is not valid
+  const Times * getOptionalTimes(const std::string & params) const;
+
   /**
    * Get a function with a given name
    * @param name The name of the function to retrieve
