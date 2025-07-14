@@ -9,6 +9,7 @@
     exodiff = 'frictionless-mortar-3d_out.e'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint'
+    custom_cmp = 'frictionless-mortar-3d.cmp'
     capabilities = 'ad_size>=150 & method!=dbg'
     valgrind = 'none'
   []
@@ -165,7 +166,7 @@
   [frictional-mortar-3d-penalty]
     type = 'Exodiff'
     input = 'frictional-mortar-3d-penalty.i'
-    capabilities = 'ad_size>=150'
+    capabilities = 'ad_size>=200'
     exodiff = 'frictional-mortar-3d-penalty_out.e'
     requirement = 'The system shall solve a 3D frictional problem with mortar constraint using a '
                   'penalty approach'
