@@ -11,7 +11,7 @@
   [sync_times_object_changing_times]
     type = RunException
     input = 'sync_times_object.i'
-    cli_args = "Outputs/out/sync_times_object=simulation_times"
+    cli_args = "Outputs/out/sync_times=simulation_times"
     expect_err = 'The provided sync times object has changing time values. Only static time values are supported'
     requirement = "The system shall report an error if output is specified to use a times object with changing times."
   []

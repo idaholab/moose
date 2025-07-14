@@ -34,7 +34,7 @@
   end_time = 1e8
 
   [TimeStepper]
-    type = TimeSequenceFromTimes
-    times = time_steps
+    type = TimeSequenceStepper
+    time_sequence = time_steps
   []
 []

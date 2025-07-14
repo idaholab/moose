@@ -204,6 +204,6 @@ initial_vel3 = 0.769
     type = CSV
     show = 'p1 p2 p3'
     sync_only = true
-    sync_times_object = output_times
+    sync_times = output_times
   []
 []

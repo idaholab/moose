@@ -20,6 +20,7 @@
 #include "VectorPostprocessorInterface.h"
 #include "PerfGraphInterface.h"
 #include "ReporterInterface.h"
+#include "TimesInterface.h"
 
 class FEProblemBase;
 class InputParameterWarehouse;
@@ -40,7 +41,8 @@ class Control : public MooseObject,
                 public Restartable,
                 protected PostprocessorInterface,
                 protected VectorPostprocessorInterface,
-                protected ReporterInterface
+                protected ReporterInterface,
+                protected TimesInterface
 {
 public:
   /**

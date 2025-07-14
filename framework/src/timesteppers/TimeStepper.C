@@ -36,6 +36,7 @@ TimeStepper::TimeStepper(const InputParameters & parameters)
   : MooseObject(parameters),
     Restartable(this, "TimeSteppers"),
     ScalarCoupleable(this),
+    TimesInterface(this),
     _fe_problem(parameters.have_parameter<FEProblemBase *>("_fe_problem_base")
                     ? *getParam<FEProblemBase *>("_fe_problem_base")
                     : *getParam<FEProblem *>("_fe_problem")),
