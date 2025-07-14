@@ -2459,14 +2459,6 @@ public:
    */
   const std::vector<SolverSystemName> & getSolverSystemNames() const { return _solver_sys_names; }
 
-  /// @returns true if either the [Problem/block] parameter or the [GlobalParams/block] parameter is set by user
-  bool isBlockSetByUserOrGlobalParams() const;
-
-  /**
-   * @returns the default blocks (for block restriction)
-   */
-  const std::vector<SubdomainName> & getDefaultBlocks() const { return _default_blocks; }
-
   virtual const libMesh::CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const override;
 
   virtual bool checkNonlocalCouplingRequirement() const override;
