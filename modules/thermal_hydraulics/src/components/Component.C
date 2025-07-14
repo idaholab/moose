@@ -318,3 +318,9 @@ Component::getCoordSysTypes() const
 
   return _coord_sys;
 }
+
+Convergence *
+Component::getNonlinearConvergence() const
+{
+  mooseError("getNonlinearConvergence() not implemented.");
+}
