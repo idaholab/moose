@@ -36,19 +36,6 @@ ExampleMeshGenerator::validParams()
 This section will describe the various components developers should implement into the `generateCSG` method for a given [source/meshgenerators/MeshGenerator.md].
 This method will return a unique pointer to the `CSGBase` object that was created or modified by the mesh generator in the `generateCSG` method.
 
-```cpp
-std::unique_ptr<CSG::CSGBase>
-ExampleMeshGenerator::generateCSG()
-{
-  // initialize a new CSGBase object
-  auto csg_obj = std::make_unique<CSG::CSGBase>();
-
-  // add in logic to make surface, cells, and universes as appropriate
-
-  return csg_obj;
-}
-```
-
 ### Initialization
 
 A new `CSGBase` object can be initialized with:
@@ -121,15 +108,15 @@ const auto & zcyl = csg_obj->createCylinder('zcylinder', 1, 2, 5, 'z');
 ### Regions
 
 A region is a space defined by boolean operations applied to surfaces and other regions.
-Halfspace regions are defined as the positive and negative space separated by a surface.
+Half-space regions are defined as the positive and negative space separated by a surface.
 These regions can be unionized, intersected, or the complement taken to further define more complex regions.
 Series of operations can be defined using parentheses `(` `)` to indicate which operations to perform first.
 The types of operators available to define a `CSGRegion` using `CSGSurface` objects are:
 
 | Operator | Description        | Example Use           |
 |----------|--------------------|-----------------------|
-| `+`      | positive halfspace | `+surf`               |
-| `-`      | negative halfspace | `-surf`               |
+| `+`      | positive half-space | `+surf`               |
+| `-`      | negative half-space | `-surf`               |
 | `&`      | intersection       | `-surfA & +surfB`     |
 | `|`      | union              | `-surfA` `|` `+surfB` |
 | `~`      | complement         | `~(-surfA & +surfB)`  |
@@ -137,9 +124,9 @@ The types of operators available to define a `CSGRegion` using `CSGSurface` obje
 | `|``=`   | update existing region with a union | `region1` `|``= +surfB` |
 
 The following is an example of using a combination of all operators to define the space outside a cylinder of a finite height that is topped with a half-sphere.
-Each of the halfspaces associated with each surface are shown in [!ref](fig:region_surfs).
+Each of the half-spaces associated with each surface are shown in [!ref](fig:region_surfs).
 The cylinder and planes are then combined via intersection to form the region inside a finite cylinder, and the space above the top plane is intersected with the sphere to define a half sphere ([!ref](fig:region1)).
-These two regions are unioned as shown in [!ref](fig:region2).
+These two regions are unionized as shown in [!ref](fig:region2).
 The complement of the previous combination then defines the final region `~((-cylinder_surf & -top_plane & +bottom_plane) | (+top_plane & -sphere_surf))`, as shown in blue in [!ref](fig:region3).
 
 !media large_media/csg/region_surfs.png
@@ -468,7 +455,7 @@ ExamplePrismCSGMeshGenerator::generateCSG()
   // initialize cell region to be updated
   CSG::CSGRegion region;
 
-  // set the center of the prism to be used for determining halfspaces
+  // set the center of the prism to be used for determining half-spaces
   const auto centroid = Point(0, 0, 0);
 
   // create each plane and update the region to be used for the cell as each new plane is created
@@ -479,13 +466,13 @@ ExamplePrismCSGMeshGenerator::generateCSG()
     // create the plane for one face of the prism
     const auto & csg_plane = csg_obj->createPlaneFromPoints(
         surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
-    // determine where the plane is in relation to the centroid to be able to set the halfspace
+    // determine where the plane is in relation to the centroid to be able to set the half-space
     const auto region_direction = csg_plane.directionFromPoint(centroid);
-    // halfspace is either positive (+plane_ptr) or negative (-plane_ptr)
+    // half-space is either positive (+plane_ptr) or negative (-plane_ptr)
     / /depending on the direction to the centroid
     auto halfspace =
         ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
-    // check if this is the first halfspace to be added to the region,
+    // check if this is the first half-space to be added to the region,
     // if not, update the existing region with the intersection of the regions (&=)
     if (region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
       region = halfspace;
@@ -536,10 +523,10 @@ ExampleAxialSurfaceMeshGenerator::generateCSG()
   // get the existing cell region to update
   auto cell_region = inp_cell.getRegion();
 
-  // centroid used to determine direction for halfspace
+  // centroid used to determine direction for half-space
   const auto centroid = Point(0, 0, 0);
 
-  // Add surfaces and halfspaces corresponding to top and bottom axial planes
+  // Add surfaces and half-spaces corresponding to top and bottom axial planes
   std::vector<std::string> surf_names{"plus_z", "minus_z"};
   std::vector<Real> coeffs{0.5 * _axial_height, -0.5 * _axial_height};
   for (unsigned int i = 0; i < coeffs.size(); ++i)
@@ -549,11 +536,11 @@ ExampleAxialSurfaceMeshGenerator::generateCSG()
     // create the plane
     // z plane equation: 0.0*x + 0.0*y + 1.0*z = (+/-)0.5 * axial_height
     const auto & csg_plane = csg_obj->createPlaneFromCoefficients(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
-    // determine the halfspace to add as an updated intersection
+    // determine the half-space to add as an updated intersection
     const auto region_direction = csg_plane.directionFromPoint(centroid);
     auto halfspace =
         ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
-    // update the existing region with a halfspace
+    // update the existing region with a half-space
     cell_region &= halfspace;
   }
 
