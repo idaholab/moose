@@ -51,4 +51,5 @@ protected:
   /// solid phase order parameters
   std::vector<NonlinearVariableName> _vals_name;
   std::vector<MaterialProperty<RealTensorValue> *> _dDdeta;
+  std::vector<MaterialProperty<RankThreeTensor> *> _dDdgradeta;
 };

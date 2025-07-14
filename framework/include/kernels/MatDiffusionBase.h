@@ -70,6 +70,7 @@ protected:
 
   /// diffusion coefficient derivatives w.r.t. variables that have explicit dependence on gradients
   const MaterialProperty<typename GradientType<T>::type> & _dDdgradc;
+  std::vector<const MaterialProperty<typename GradientType<T>::type> *> _dDdgradeta;
 
   /// is the kernel used in a coupled form?
   const bool _is_coupled;
@@ -82,6 +83,7 @@ protected:
 
   /// For solid-pore systems, mame of the order parameter identifies the solid-pore surface
   unsigned int _surface_op_var;
+  std::vector<unsigned int> _grain_op_var;
 };
 
 template <typename T>
@@ -122,11 +124,14 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
     _dDdarg(_coupled_moose_vars.size()),
     _dDdgradc(getMaterialPropertyDerivative<typename GradientType<T>::type>(
         isParamValid("D_name") ? "D_name" : "diffusivity", "gradc")),
+    _dDdgradeta(2), // TODO change to op_num
     _is_coupled(isCoupled("v")),
     _v_var(_is_coupled ? coupled("v") : (isCoupled("conc") ? coupled("conc") : _var.number())),
     _grad_v(_is_coupled ? coupledGradient("v")
                         : (isCoupled("conc") ? coupledGradient("conc") : _grad_u)),
-    _surface_op_var(isCoupled("surface_op_var") ? coupled("surface_op_var") : libMesh::invalid_uint)
+    _surface_op_var(isCoupled("surface_op_var") ? coupled("surface_op_var")
+                                                : libMesh::invalid_uint),
+    _grain_op_var(2)
 {
   // deprecated variable parameter conc
   if (isCoupled("conc"))
@@ -136,6 +141,10 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
   for (unsigned int i = 0; i < _dDdarg.size(); ++i)
     _dDdarg[i] = &getMaterialPropertyDerivative<T>(
         isParamValid("D_name") ? "D_name" : "diffusivity", _coupled_moose_vars[i]->name());
+  for (unsigned int i = 0; i < 2; ++i) // TODO change to op_num
+    _dDdgradeta[i] = &getMaterialPropertyDerivative<typename GradientType<T>::type>(
+        isParamValid("D_name") ? "D_name" : "diffusivity",
+        ("gradgr" + Moose::stringify(i))); // TODO fix this check
 }
 
 template <typename T>
@@ -174,6 +183,12 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   Real sum = (*_dDdarg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
   if (jvar == _surface_op_var)
     sum += _dDdgradc[_qp] * _grad_phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+
+  if (cvar == 1)
+    sum += (*_dDdgradeta[0])[_qp] * _grad_phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+
+  if (cvar == 2)
+    sum += (*_dDdgradeta[1])[_qp] * _grad_phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
 
   if (_v_var == jvar)
     sum += computeQpCJacobian();

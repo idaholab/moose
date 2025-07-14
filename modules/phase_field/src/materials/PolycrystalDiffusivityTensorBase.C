@@ -55,7 +55,8 @@ PolycrystalDiffusivityTensorBase::PolycrystalDiffusivityTensorBase(
     _kb(8.617343e-5), // Boltzmann constant in eV/K
     _op_num(coupledComponents("v")),
     _vals_name(_op_num),
-    _dDdeta(_op_num)
+    _dDdeta(_op_num),
+    _dDdgradeta(_op_num)
 {
   if (_op_num == 0)
     mooseError("Model requires op_num > 0");
@@ -69,6 +70,9 @@ PolycrystalDiffusivityTensorBase::PolycrystalDiffusivityTensorBase(
     _vals_name[i] = coupledName("v", i);
     if (!isCoupledConstant(_vals_name[i]))
       _dDdeta[i] = &declarePropertyDerivative<RealTensorValue>(_diffusivity_name, _vals_name[i]);
+    if (!isCoupledConstant(_vals_name[i]))
+      _dDdgradeta[i] =
+          &declarePropertyDerivative<RankThreeTensor>(_diffusivity_name, ("grad" + _vals_name[i]));
   }
 }
 
@@ -85,6 +89,7 @@ PolycrystalDiffusivityTensorBase::computeProperties()
     // Compute grain boundary diffusivity and derivatives wrt order parameters
     RealTensorValue Dgb(0.0);
     std::vector<RealTensorValue> dDgbdeta(_op_num);
+    std::vector<RankThreeTensor> dDgbdgradeta(_op_num);
 
     for (unsigned int i = 0; i < _op_num; ++i)
       for (unsigned int j = i + 1; j < _op_num; ++j)
@@ -103,10 +108,30 @@ PolycrystalDiffusivityTensorBase::computeProperties()
             Tgb(b, a) = I(b, a) - ngb(b) * ngb(a);
           }
 
+        RankThreeTensor dTgbi, dTgbj;
+        if (((*_grad_vals[i])[_qp] - (*_grad_vals[j])[_qp]).norm() > 1.0e-10)
+        {
+          Real detax = (*_grad_vals[i])[_qp](0) - (*_grad_vals[j])[_qp](0);
+          Real detay = (*_grad_vals[i])[_qp](1) - (*_grad_vals[j])[_qp](1);
+          Real norm4 = pow(((*_grad_vals[i])[_qp] - (*_grad_vals[j])[_qp]).norm(), 4.0);
+          // Derivatives wrt dc/dx
+          dTgbi(0, 0, 0) = -2.0 * detax * detay * detay / norm4;
+          dTgbi(1, 0, 0) = dTgbi(0, 1, 0) = (detax * detax * detay - detay * detay * detay) / norm4;
+          dTgbi(1, 1, 0) = 2.0 * detax * detay * detay / norm4;
+          // Derivatives wrt dc/dy
+          dTgbi(0, 0, 1) = 2.0 * detax * detax * detay / norm4;
+          dTgbi(1, 0, 1) = dTgbi(0, 1, 1) = (detax * detay * detay - detax * detax * detax) / norm4;
+          dTgbi(1, 1, 1) = -2.0 * detax * detax * detay / norm4;
+
+          dTgbj = -dTgbi;
+        }
+
         Dgb += (*_vals[i])[_qp] * (*_vals[j])[_qp] * Tgb;
         Dgb += (*_vals[j])[_qp] * (*_vals[i])[_qp] * Tgb;
         dDgbdeta[i] += 2.0 * (*_vals[j])[_qp] * Tgb;
         dDgbdeta[j] += 2.0 * (*_vals[i])[_qp] * Tgb;
+        dDgbdgradeta[i] += 2.0 * (*_vals[i])[_qp] * (*_vals[j])[_qp] * dTgbi;
+        dDgbdgradeta[j] += 2.0 * (*_vals[i])[_qp] * (*_vals[j])[_qp] * dTgbj;
       }
 
     // Compute surface diffusivity matrix
@@ -169,7 +194,11 @@ PolycrystalDiffusivityTensorBase::computeProperties()
     if (_dDdgradc)
       (*_dDdgradc)[_qp] = _Dbulk * _s_index * dDsurfdgradc;
     for (unsigned int i = 0; i < _op_num; ++i)
+    {
       if (_dDdeta[i])
         (*_dDdeta[i])[_qp] = _Dbulk * _gb_index * dDgbdeta[i];
+      if (_dDdgradeta[i])
+        (*_dDdgradeta[i])[_qp] = _Dbulk * _gb_index * dDgbdgradeta[i];
+    }
   }
 }
