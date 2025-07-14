@@ -74,7 +74,7 @@ PeriodicBCHelper::setupPeriodicBoundaries(FEProblemBase & problem)
     setupManualPeriodicBoundaries(problem);
 
   // If we're doing algebraic coupling, the relevant additions to each DofMap
-  // will setup the geometric ghotsing in the mesh. If we're not, we need to add
+  // will setup the geometric ghosting in the mesh. If we're not, we need to add
   // that coupling ourselves
   if (!_algebraic)
   {
