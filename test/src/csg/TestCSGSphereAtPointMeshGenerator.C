@@ -40,11 +40,11 @@ TestCSGSphereAtPointMeshGenerator::generate()
 std::unique_ptr<CSG::CSGBase>
 TestCSGSphereAtPointMeshGenerator::generateCSG()
 {
-  auto csg_mesh = std::make_unique<CSG::CSGBase>();
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
   auto mg_name = this->name();
 
-  auto & sphere_surf = csg_mesh->createSphere(mg_name + "_sphere_surf", _center, _radius);
-  csg_mesh->createCell(mg_name + "_sphere_cell", "new_mat", -sphere_surf);
+  auto & sphere_surf = csg_obj->createSphere(mg_name + "_sphere_surf", _center, _radius);
+  csg_obj->createCell(mg_name + "_sphere_cell", "new_mat", -sphere_surf);
 
-  return csg_mesh;
+  return csg_obj;
 }

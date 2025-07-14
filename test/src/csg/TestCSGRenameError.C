@@ -42,7 +42,7 @@ TestCSGRenameError::generate()
 std::unique_ptr<CSG::CSGBase>
 TestCSGRenameError::generateCSG()
 {
-  // get the two base instances of the input meshes
+  // get the two CSGbase objects of the input meshes
   // both will have:
   //  cell: square_cell
   //  surfaces: surf_[plus/minus]_[x/y]

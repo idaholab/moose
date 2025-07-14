@@ -83,7 +83,7 @@ public:
   virtual std::unique_ptr<MeshBase> generate() = 0;
 
   /**
-   * Internal generation method for CSG mesh generation
+   * Internal generation method for CSG object generation
    */
   [[nodiscard]] std::unique_ptr<CSG::CSGBase> generateInternalCSG();
 
@@ -319,7 +319,7 @@ protected:
 
   /**
    * Takes the name of a MeshGeneratorName parameter and then gets a pointer to the
-   * CSGBase that MeshGenerator has created.
+   * CSGBase object that MeshGenerator has created.
    *
    * NOTE: You MUST catch this by reference!
    *
@@ -503,9 +503,9 @@ private:
   /// The meshes that were requested by this MeshGenerator; used to verify that
   /// any input meshes that are requested are properly released after generation
   std::vector<std::pair<std::string, std::unique_ptr<MeshBase> *>> _requested_meshes;
-  /// The CSG objects that were requested by this MeshGenerator; used to verify that
+  /// The CSGBase objects that were requested by this MeshGenerator; used to verify that
   /// any input meshes that are requested are properly released after generation
-  std::vector<std::pair<std::string, std::unique_ptr<CSG::CSGBase> *>> _requested_csg_meshes;
+  std::vector<std::pair<std::string, std::unique_ptr<CSG::CSGBase> *>> _requested_csg_bases;
 
   /// A nullptr to use for when inputs aren't specified
   std::unique_ptr<MeshBase> _null_mesh = nullptr;

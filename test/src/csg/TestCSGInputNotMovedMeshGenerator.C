@@ -43,8 +43,8 @@ TestCSGInputNotMovedMeshGenerator::generateCSG()
   static_cast<void>(getCSGBase("input"));
 
   // Create temporary CSG object to return
-  auto csg_mesh = std::make_unique<CSG::CSGBase>();
-  csg_mesh->createSphere("sphere_surf", 5.0);
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  csg_obj->createSphere("sphere_surf", 5.0);
 
-  return csg_mesh;
+  return csg_obj;
 }

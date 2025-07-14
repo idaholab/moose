@@ -24,5 +24,5 @@ public:
   virtual void act() override;
 
 protected:
-  std::unique_ptr<CSG::CSGBase> _csg_mesh;
+  std::unique_ptr<CSG::CSGBase> _csg_obj;
 };

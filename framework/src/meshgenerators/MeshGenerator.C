@@ -65,7 +65,7 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
   const auto & system = _app.getMeshGeneratorSystem();
   if (isDataOnly())
   {
-    // Skip the requirement for generateData() if we are generating CSG mesh
+    // Skip the requirement for generateData() if we are generating CSG object
     if (!hasGenerateCSG() && !hasGenerateData())
       system.dataDrivenError(*this, "does not support data-driven generation");
     if (hasSaveMesh())
@@ -231,11 +231,11 @@ MeshGenerator::getCSGBaseByName(const MeshGeneratorName & mesh_generator_name)
 {
   checkGetMesh(mesh_generator_name, "");
 
-  auto & csg_mesh = _app.getMeshGeneratorSystem().getCSGBaseGeneratorOutput(mesh_generator_name);
-  if (!csg_mesh)
-    mooseError("Requested CSG mesh " + mesh_generator_name + " returned a null mesh.");
-  _requested_csg_meshes.emplace_back(mesh_generator_name, &csg_mesh);
-  return csg_mesh;
+  auto & csg_base = _app.getMeshGeneratorSystem().getCSGBaseGeneratorOutput(mesh_generator_name);
+  if (!csg_base)
+    mooseError("Requested CSG object from " + mesh_generator_name + " returned a null object.");
+  _requested_csg_bases.emplace_back(mesh_generator_name, &csg_base);
+  return csg_base;
 }
 
 std::vector<std::unique_ptr<CSG::CSGBase> *>
@@ -382,11 +382,11 @@ std::unique_ptr<CSG::CSGBase>
 MeshGenerator::generateInternalCSG()
 {
   mooseAssert(isDataOnly(), "Trying to use csg-only mode while not in data-driven mode");
-  auto csg_mesh = generateCSG();
-  for (const auto & [requested_name, requested_mesh] : _requested_csg_meshes)
-    if (*requested_mesh)
+  auto csg_obj = generateCSG();
+  for (const auto & [requested_name, requested_csg] : _requested_csg_bases)
+    if (*requested_csg)
       mooseError(
-          "The CSG mesh from input ",
+          "The CSGBase object from input ",
           _app.getMeshGenerator(requested_name).type(),
           " '",
           _app.getMeshGenerator(requested_name).name(),
@@ -394,7 +394,7 @@ MeshGenerator::generateInternalCSG()
           "meshes\nare managed by the requesting MeshGenerator during the generate phase.\n\nThis "
           "is achieved with a std::move() operation within the generateCSG() method.");
 
-  return csg_mesh;
+  return csg_obj;
 }
 
 void
