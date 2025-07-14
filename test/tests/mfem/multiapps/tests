@@ -2,7 +2,7 @@
   design = 'syntax/MultiApps/index.md
   issues = '#31017'
   [MFEMTransientMultiApps]
-    requirement = "The system shall support the execution of MFEM TransientMultiApps:"
+    requirement = "The system shall support execution of sub-applications in transient problems:"
     [MFEM_dt_from_parent]
       type = XMLDiff
       input = 'dt_from_parent.i'
@@ -15,6 +15,8 @@
       capabilities = 'mfem'
       max_parallel = 1
       recover = false
+      max_threads = 1
+      platform = 'linux'
     []
     [MFEM_sub_cycling]
       type = XMLDiff
@@ -28,22 +30,26 @@
       capabilities = 'mfem'
       max_parallel = 1
       recover = false
+      max_threads = 1
+      platform = 'linux'
     []    
-  []
-  [MFEMFullSolveMultiApps]
-    requirement = "The system shall support the execution of MFEM FullSolveMultiApps:"
-    [MFEM_full_solve_transient]
-      type = XMLDiff
-      input = 'full_solve_parent.i'
-      xmldiff = 'OutputData/full_solve_parent/Run0/Run0.pvd
-                  OutputData/full_solve_parent/Run0/Cycle000000/proc000000.vtu
-                  OutputData/full_solve_parent/Run0/Cycle000002/proc000000.vtu
-                  OutputData/full_solve_sub/Run0/Run0.pvd
-                  OutputData/full_solve_sub/Run0/Cycle000005/proc000000.vtu'
-      detail = "with a transient problem running in the parent app."
-      capabilities = 'mfem'
-      max_parallel = 1
-      recover = false
-    []  
+    [MFEMFullSolveMultiApps]
+      requirement = "The system shall support executing a sub-application solving an entire sub-problem:"
+      [MFEM_full_solve_transient]
+        type = XMLDiff
+        input = 'full_solve_parent.i'
+        xmldiff = 'OutputData/full_solve_parent/Run0/Run0.pvd
+                    OutputData/full_solve_parent/Run0/Cycle000000/proc000000.vtu
+                    OutputData/full_solve_parent/Run0/Cycle000002/proc000000.vtu
+                    OutputData/full_solve_sub/Run0/Run0.pvd
+                    OutputData/full_solve_sub/Run0/Cycle000005/proc000000.vtu'
+        detail = "with a transient problem running in the parent app."
+        capabilities = 'mfem'
+        max_parallel = 1
+        recover = false
+        max_threads = 1
+        platform = 'linux'
+      []  
+    []
   []
 []
