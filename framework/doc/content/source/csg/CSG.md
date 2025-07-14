@@ -10,21 +10,21 @@ The `CSGBase` class provides the framework in MOOSE for creating these generic [
 As stated, a [!ac](CSG) representation is defined minimally as a series of surfaces, cells, and universes.
 
 [Surfaces](source/csg/CSGBase.md#surfaces) are defined explicitly through surface equations (such as equations of a plane, sphere, etc.).
-Surfaces are usually assigned a boundary type (vacuum, transmission, reflective, etc.) which is relevant for proper physics handling in [!ac](MC) simulations.
-Each surface inherently separates two halfspace [regions](source/csg/CSGBase.md#regions): positive and negative halfspaces.
-For example, for a plane with the equation $ax + by + cz = d$ the positive halfspace represents the region $ax + by + cz > d$, while the negative halfspace represents the region $ax + by + cz < d$. Similarly, for a spherical surface defined by the equation $x^2 + y^2 + z^2 = r^2$, the negative halfspace represents the region $x^2 + y^2 + z^2 < r^2$ within the sphere while the positive halfspace represents the region $x^2 + y^2 + z^2 > r^2$ outside the sphere.
-Example halfspaces are shown in [!ref](fig:halfspaces).
+Surfaces can be assigned a boundary type (vacuum, transmission, reflective, etc.).
+Each surface inherently separates two half-space [regions](source/csg/CSGBase.md#regions): positive and negative half-spaces.
+For example, for a plane with the equation $ax + by + cz = d$ the positive half-space represents the region $ax + by + cz > d$, while the negative half-space represents the region $ax + by + cz < d$. Similarly, for a spherical surface defined by the equation $x^2 + y^2 + z^2 = r^2$, the negative half-space represents the region $x^2 + y^2 + z^2 < r^2$ within the sphere while the positive half-space represents the region $x^2 + y^2 + z^2 > r^2$ outside the sphere.
+Example half-spaces are shown in [!ref](fig:halfspaces).
 
 !media large_media/csg/halfspaces.png
        id=fig:halfspaces
-       caption=Example depiction of the positive and negative halfspaces defined by a plane (left) and sphere (right).
+       caption=Example depiction of the positive and negative half-spaces defined by a plane (left) and sphere (right).
 
-These halfspace regions defined by the surfaces can be combined further as series of boolean operators for unions, intersections, and complements to further define more complex regions.
-For example, if we wanted to use the surfaces from [!ref](fig:halfspaces) to define just the left hemisphere, we would define the cell region as the intersection of the negative halfspace of the plane and the negative halfspace of the sphere ([!ref](fig:intersection)).
+These half-space regions defined by the surfaces can be combined further as series of boolean operators for unions, intersections, and complements to further define more complex regions.
+For example, if we wanted to use the surfaces from [!ref](fig:halfspaces) to define just the left hemisphere, we would define the cell region as the intersection of the negative half-space of the plane and the negative half-space of the sphere ([!ref](fig:intersection)).
 
 !media large_media/csg/region_intersection.png
        id=fig:intersection
-       caption=Example depiction of a closed region defined by an intersection of two halfspaces.
+       caption=Example depiction of a closed region defined by an intersection of two half-spaces.
 
 [Cells](source/csg/CSGBase.md#cells) are defined by two main characteristics: a region and a fill.
 The region is defined as described above and defines the domain of the cell.
@@ -35,16 +35,16 @@ By default, every model will have a [root universe](source/csg/CSGBase.md#root-u
 
 For a more detailed description of how surfaces, cells, and universes are represented within the MOOSE mesh generator system, please refer to [source/csg/CSGBase.md].
 
-## How to Invoke
+## How to Generate a CSG Model
 
 The [!ac](CSG) model generation can be invoked on the command line using the `--csg-only` option with any MOOSE mesh input file.
 The [!ac](JSON) file that is generated will be called the name of the input file with `_csg` appended by default.
 An optional output file name can be provided on the command line (`--csg-only <output_file_name.json>`).
 
 !alert note title=Code requirements
-A [!ac](CSG) [!ac]JSON file will be produced if and only if all mesh generators in the input file have the `generateCSG` method implemented.
+A [!ac](CSG) [!ac](JSON) file will be produced if and only if all mesh generators in the input file have the `generateCSG` method implemented.
 If any mesh generators do not have the `generateCSG` method implemented, an error will be returned explaining as such.
-This process is run as a data-only mode so no finite element mesh is produced.
+This process is run as a [data-only mode](source/meshgenerators/MeshGenerator.md#using-data-driven-generation) so no finite element mesh is produced.
 
 ## Output
 
@@ -55,7 +55,7 @@ There are three main sections in the file:
 - [`CELLS`](#cells)
 - [`UNIVERSES`](#universes)
 
-Each item within each section is keyed (a JSON is a dictionary) by its unique name identifier, and the value is the corresponding definition for that item.
+Each item within each section is keyed (a [!ac](JSON) is a dictionary) by its unique name identifier, and the value is the corresponding definition for that item.
 Detailed description of each type of item in the section follows.
 
 ### Surfaces
@@ -122,8 +122,8 @@ The cells output contains the following information:
 
 | Boolean Operator   | String Representation |
 |--------------------|-----------------------|
-| positive halfspace | `+`                   |
-| negative halfspace | `-`                   |
+| positive half-space | `+`                   |
+| negative half-space | `-`                   |
 | union              | `|`                   |
 | intersection       | `&`                   |
 | complement         | `~`                   |
