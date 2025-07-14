@@ -19,26 +19,29 @@
 Threads::spin_mutex parsed_function_mutex;
 
 FunctionPeriodicBoundary::FunctionPeriodicBoundary(FEProblemBase & feproblem,
-                                                   std::vector<std::string> fn_names)
-  : _dim(fn_names.size()),
-    _tr_x(&feproblem.getFunction(fn_names[0])),
-    _tr_y(_dim > 1 ? &feproblem.getFunction(fn_names[1]) : NULL),
-    _tr_z(_dim > 2 ? &feproblem.getFunction(fn_names[2]) : NULL)
+                                                   const std::vector<std::string> & fn_names,
+                                                   const std::vector<std::string> & inv_fn_names)
+  : libMesh::PeriodicBoundaryBase(),
+    _dim(fn_names.size()),
+    _tr(getFunctions(feproblem, fn_names)),
+    _inv_tr(getFunctions(feproblem, inv_fn_names))
 {
+  mooseAssert(fn_names.size() == inv_fn_names.size(), "Size mismatch");
 
   // Make certain the the dimensions agree
   if (_dim != feproblem.mesh().dimension())
     mooseError("Transform function has to have the same dimension as the problem being solved.");
-
-  // Initialize the functions (i.e., call thier initialSetup methods)
-  init();
 }
 
-FunctionPeriodicBoundary::FunctionPeriodicBoundary(const FunctionPeriodicBoundary & o)
-  : libMesh::PeriodicBoundaryBase(o), _dim(o._dim), _tr_x(o._tr_x), _tr_y(o._tr_y), _tr_z(o._tr_z)
+FunctionPeriodicBoundary::FunctionPeriodicBoundary(const FunctionPeriodicBoundary & o,
+                                                   TransformationType t /* = FORWARD */)
+  : libMesh::PeriodicBoundaryBase(o),
+    _dim(o._dim),
+    _tr(t == INVERSE ? o._inv_tr : o._tr),
+    _inv_tr(t == INVERSE ? o._tr : o._inv_tr)
 {
-  // Initialize the functions (i.e., call thier initialSetup methods)
-  init();
+  if (t == INVERSE)
+    std::swap(myboundary, pairedboundary);
 }
 
 Point
@@ -47,58 +50,31 @@ FunctionPeriodicBoundary::get_corresponding_pos(const Point & pt) const
   // Force thread-safe evaluation of what could be ParsedFunctions.
   Threads::spin_mutex::scoped_lock lock(parsed_function_mutex);
 
-  Real t = 0.;
   Point p;
-  switch (_dim)
+  for (const auto i : make_range(_dim))
   {
-    case 1:
-      return Point(_tr_x->value(t, pt));
-
-    case 2:
-      mooseAssert(_tr_y, "Must provide a function to map y in 2D.");
-      return Point(_tr_x->value(t, pt), _tr_y->value(t, pt));
-
-    case 3:
-      mooseAssert(_tr_y, "Must provide a function to map y in 2D.");
-      mooseAssert(_tr_z, "Must provide a function to map z in 3D.");
-      return Point(_tr_x->value(t, pt), _tr_y->value(t, pt), _tr_z->value(t, pt));
-
-    default:
-      mooseError("Unsupported dimension");
-      break;
+    mooseAssert(_tr[i], "Function not provided");
+    p(i) = _tr[i]->value(0.0, pt);
   }
-
-  return pt;
+  return p;
 }
 
 std::unique_ptr<libMesh::PeriodicBoundaryBase>
 FunctionPeriodicBoundary::clone(TransformationType t) const
 {
-  if (t == INVERSE)
-    mooseError("No way to automatically clone() an inverse FunctionPeriodicBoundary object");
-
-  return std::make_unique<FunctionPeriodicBoundary>(*this);
+  return std::make_unique<FunctionPeriodicBoundary>(*this, t);
 }
 
-void
-FunctionPeriodicBoundary::init()
+std::array<const Function *, 3>
+FunctionPeriodicBoundary::getFunctions(FEProblemBase & problem,
+                                       const std::vector<std::string> & names)
 {
-  switch (_dim)
-  {
-    case 1:
-      const_cast<Function *>(_tr_x)->initialSetup();
-      break;
-    case 2:
-      const_cast<Function *>(_tr_x)->initialSetup();
-      const_cast<Function *>(_tr_y)->initialSetup();
-      break;
-    case 3:
-      const_cast<Function *>(_tr_x)->initialSetup();
-      const_cast<Function *>(_tr_y)->initialSetup();
-      const_cast<Function *>(_tr_z)->initialSetup();
-      break;
-    default:
-      mooseError("Unsupported dimension");
-      break;
-  }
+  std::array<const Function *, 3> functions;
+  for (const auto i : index_range(functions))
+    if (names.size() > i)
+    {
+      functions[i] = &problem.getFunction(names[i]);
+      const_cast<Function *>(functions[i])->initialSetup();
+    }
+  return functions;
 }

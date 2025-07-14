@@ -184,7 +184,7 @@
     []
     [bad_params]
       type = RunException
-      expect_err = 'Using the automatic periodic boundary detection does not require additional parameters'
+      expect_err = "Should not be specified along with 'auto_direction'"
       input = 'all_periodic_trans.i'
       cli_args = "BCs/Periodic/x/auto_direction=x"
       detail = 'additional parameters are passed when using the automatic periodic boundary detection option,'

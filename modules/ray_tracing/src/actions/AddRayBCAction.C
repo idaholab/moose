@@ -9,8 +9,9 @@
 
 #include "AddRayBCAction.h"
 
-// Local includes
 #include "RayBoundaryConditionBase.h"
+#include "PeriodicRayBC.h"
+#include "SetupPeriodicRayBCAction.h"
 
 registerMooseAction("RayTracingApp", AddRayBCAction, "add_ray_boundary_condition");
 
@@ -29,5 +30,13 @@ AddRayBCAction::AddRayBCAction(const InputParameters & params) : AddRayTracingOb
 void
 AddRayBCAction::addRayTracingObject()
 {
+  // Special case for the PeriodicRayBC, which needs to have geometric
+  // ghosting and periodic boundaries setup before the object is constructed.
+  // A SetupPeriodicRayBCAction will exist for every RayBC, and if this
+  // is a PeriodicRayBC, will setup the periodic boundaries early
+  if (PeriodicRayBC::isPeriodicRayBC(_moose_object_pars))
+    _app.actionWarehouse().getAction<SetupPeriodicRayBCAction>(name()).setupPeriodicRayBC(
+        _moose_object_pars);
+
   _problem->addObject<RayBoundaryConditionBase>(_type, _name, _moose_object_pars);
 }
