@@ -51,11 +51,6 @@ LinearAssemblySegregatedSolve::validParams()
                                     "0.0<=active_scalar_l_tol & active_scalar_l_tol<1.0",
                                     "The relative tolerance on the normalized residual in the "
                                     "linear solver of the active scalar equation(s).");
-  params.addRangeCheckedParam<Real>("active_scalar_l_abs_tol",
-                                    1e-10,
-                                    "0.0<active_scalar_l_abs_tol",
-                                    "The absolute tolerance on the normalized residual in the "
-                                    "linear solver of the active scalar equation(s).");
   params.addParam<unsigned int>(
       "active_scalar_l_max_its",
       10000,
@@ -68,6 +63,22 @@ LinearAssemblySegregatedSolve::validParams()
       "active_scalar_absolute_tolerance "
       "active_scalar_l_tol active_scalar_l_abs_tol active_scalar_l_max_its",
       "Active Scalars Equations");
+
+  params.addRangeCheckedParam<unsigned int>(
+      "num_cht_fpi",
+      1,
+      "num_cht_fpi > 0",
+      "Number of maximum fixed point iterations (FPI). Currently only applied to"
+      " conjugate heat transfer simulations. The default value of 1 essentially keeps"
+      " the FPI feature turned off.");
+
+  params.addRangeCheckedParam<Real>(
+      "cht_fpi_tolerance",
+      1e-8,
+      "cht_fpi_tolerance > 0",
+      "The absolute tolerance to which the fluid and solid temperature and heat fluxes"
+      " must converge during conjugate heat transfer simulations with fixed-point "
+      "iterations (fpi).");
 
   return params;
 }
@@ -92,7 +103,9 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
         getParam<std::vector<Real>>("active_scalar_equation_relaxation")),
     _active_scalar_l_abs_tol(getParam<Real>("active_scalar_l_abs_tol")),
     _active_scalar_absolute_tolerance(
-        getParam<std::vector<Real>>("active_scalar_absolute_tolerance"))
+        getParam<std::vector<Real>>("active_scalar_absolute_tolerance")),
+    _num_cht_fpi(getParam<signed int>("num_cht_fpi")),
+    _cht_fpi_tolerance(getParam<Real>("_cht_fpi_tolerance"))
 {
   // We fetch the systems and their numbers for the momentum equations.
   for (auto system_i : index_range(_momentum_system_names))
@@ -346,6 +359,12 @@ LinearAssemblySegregatedSolve::solvePressureCorrector()
 
   return residuals;
 }
+
+// std::vector<unsigned int>
+// LinearAssemblySegregatedSolve::generateBoundaryMask(const BoundaryID bid, const
+// MooseVariableScalar)
+//{
+// }
 
 std::pair<unsigned int, Real>
 LinearAssemblySegregatedSolve::solveSolidEnergy()
@@ -606,23 +625,51 @@ LinearAssemblySegregatedSolve::solve()
     // outside of the velocity-pressure loop
     if (_has_energy_system)
     {
-      // We set the preconditioner/controllable parameters through petsc options. Linear
-      // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
-      ns_residuals[momentum_residual.size() + _has_energy_system] =
-          solveAdvectedSystem(_energy_sys_number,
-                              *_energy_system,
-                              _energy_equation_relaxation,
-                              _energy_linear_control,
-                              _energy_l_abs_tol);
-    }
-    if (_has_solid_energy_system)
-    {
-      // We set the preconditioner/controllable parameters through petsc options. Linear
-      // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
-      ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
-          solveSolidEnergy();
+      unsigned int fpi_itrs = 0;
+      // Real cht_tol_i = 1.0e10;
+      // Real t_cht_tol_i = 1.0e10;
+      // Real q_cht_tol_i = 1.0e10;
+
+      // unsigned int fpi_flag = 0;
+
+      // *_energy_system->computeGradients();
+      // auto q_cht_res_i = *_energy_system->newGradientContainer() * 0.0;
+      // auto q_cht_res_o = q_cht_res_i;
+
+      // while(fpi_itrs + 1 < num_cht_fpi || cht_tol_i > _cht_fpi_tolerance)
+      while (fpi_itrs + 1 < _num_cht_fpi)
+      {
+        // We set the preconditioner/controllable parameters through petsc options. Linear
+        // tolerances will be overridden within the solver.
+        Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
+        ns_residuals[momentum_residual.size() + _has_energy_system] =
+            solveAdvectedSystem(_energy_sys_number,
+                                *_energy_system,
+                                _energy_equation_relaxation,
+                                _energy_linear_control,
+                                _energy_l_abs_tol);
+
+        if (_has_solid_energy_system)
+        {
+          // We set the preconditioner/controllable parameters through petsc options. Linear
+          // tolerances will be overridden within the solver.
+          Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
+          ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
+              solveSolidEnergy();
+
+          //          const auto t_fluid =  *_energy_system->var();
+          //          const auto t_solid =  *_solid_energy_system->var();
+
+          //          *_energy_system->computeGradients();
+          //          q_cht_res_i = *_energy_system->newGradientContainer() * 0.0;
+          //          q_cht_tol_i = (q_cht_res_i - q_cht_res_o);
+          //          q_cht_tol_i = std::sqrt(q_cht_tol_i * q_cht_tol_i);
+          //
+          //          cht_tol_i = std::max(q_cht_tol_i, t_cht_tol_i);
+        }
+
+        fpi_itrs++;
+      }
     }
 
     // If we have active scalar equations, solve them here in case they depend on temperature
