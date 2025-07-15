@@ -17,6 +17,7 @@
     requirement = 'The system shall have the ability to write out MFEM solutions to '
                   'ParaView, VisIt and Conduit data collections.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     recover = false
   []
 []
