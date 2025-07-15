@@ -28,8 +28,6 @@ LinearFVConjugateHeatTransferBC::LinearFVConjugateHeatTransferBC(
     _solid_conductivity(getFunctor<Real>("solid_conductivity")),
     _fluid_conductivity(getFunctor<Real>("fluid_conductivity"))
 {
-//  LinearFVConvectiveHeatTransferBC(parameters);
-
   // We determine the alpha functor's sign for the Robin BC coupling
   if (_var_is_fluid)
   {
@@ -41,9 +39,36 @@ LinearFVConjugateHeatTransferBC::LinearFVConjugateHeatTransferBC(
     _rhs_temperature  = &_temp_fluid;
     _rhs_conductivity = &_fluid_conductivity;
   }
+
+  _var.computeCellGradients();
 }
 
-// LinearFVConjugateHeatTransferBC::updateCouplingParams()
+Real
+LinearFVConjugateHeatTransferBC::computeBoundaryValueMatrixContribution() const
+{
+  // We approximate the face value with the cell value here.
+  // TODO: we can extend this to a 2-term expansion at some point when the need arises.
+  return 1.0;
+}
+
+Real
+LinearFVConjugateHeatTransferBC::computeBoundaryValueRHSContribution() const
+{
+  // We approximate the face value with the cell value, we
+  // don't need to add anything to the right hand side.
+  return 0.0;
+}
+
+Real
+LinearFVConjugateHeatTransferBC::computeBoundaryGradientMatrixContribution() const
+{
+  const auto face = singleSidedFaceArg(_current_face_info);
+  const auto state = determineState();
+
+  // We just put the heat transfer coefficient on the diagonal (multiplication with the
+  // surface area is taken care of in the kernel).
+  return  _htc(face, state);
+}
 Real
 LinearFVConjugateHeatTransferBC::computeBoundaryGradientRHSContribution() const
 {
@@ -63,8 +88,22 @@ LinearFVConjugateHeatTransferBC::computeBoundaryGradientRHSContribution() const
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
 
-  const auto t_coupled = (*_rhs_temperature)(face, state) +
-              (  (*_rhs_conductivity)(face,state) * computeBoundaryNormalGradient()/ _htc(face, state));
+  const auto neighbor_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                                 ? _current_face_info->neighborInfo()
+                                 : _current_face_info->elemInfo();
 
-  return  -_htc(face, state) * t_coupled;
+  const auto fluid_side_elem_info = _var_is_fluid ? elem_info : neighbor_info;
+
+  const auto multiplier = _current_face_info->normal() *
+	  (_current_face_info->faceCentroid() - fluid_side_elem_info->centroid()) > 0
+                          ?  1
+                          : -1;
+
+  const auto q_prev = multiplier * (*_rhs_conductivity)(face,state) *
+        (*_rhs_temperature).gradient(face,state)*_current_face_info->normal();
+
+  const auto t_prev = (*_rhs_temperature)(face,state);
+
+
+  return _htc(face, state) * t_prev - q_prev;
 }
