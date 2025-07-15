@@ -76,7 +76,7 @@ offset = -0.095
 [Physics/SolidMechanics/Dynamic]
   [all]
     add_variables = true
-    alpha = 0.0
+    hht_alpha = 0.0
     newmark_beta = 0.25
     newmark_gamma = 0.5
     mass_damping_coefficient = 0.0
