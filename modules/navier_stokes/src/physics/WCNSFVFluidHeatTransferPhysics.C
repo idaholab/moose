@@ -432,6 +432,41 @@ WCNSFVFluidHeatTransferPhysics::addEnergyWallBC()
 }
 
 void
+WCNSFVFluidHeatTransferPhysics::addMaterials()
+{
+  if (!_has_energy_equation)
+    return;
+
+  // Note that this material choice would not work for Newton-INSFV + solve_for_enthalpy
+  const auto object_type = "INSFVEnthalpyFunctorMaterial";
+
+  InputParameters params = getFactory().getValidParams(object_type);
+  assignBlocks(params, _blocks);
+
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+
+  if (_solve_for_enthalpy)
+  {
+    params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
+    params.set<MooseFunctorName>(NS::specific_enthalpy + "_in") = _fluid_enthalpy_name;
+    params.set<bool>("assumed_constant_cp") = false;
+    if (isParamValid(NS::fluid))
+      params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
+    else
+      paramError(NS::fluid, "Required when solving for enthalpy");
+  }
+  // the functor material defines the temperature
+  else
+  {
+    params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
+    params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
+  }
+
+  getProblem().addMaterial(object_type, prefix() + "enthalpy_material", params);
+}
+
+void
 WCNSFVFluidHeatTransferPhysics::addEnergySeparatorBC()
 {
   if (_flow_equations_physics->getHydraulicSeparators().size())

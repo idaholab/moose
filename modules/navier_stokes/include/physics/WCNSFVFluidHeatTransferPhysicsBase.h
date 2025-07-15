@@ -62,7 +62,6 @@ protected:
   void addInitialConditions() override;
   void addFVKernels() override;
   void addFVBCs() override;
-  void addMaterials() override;
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
