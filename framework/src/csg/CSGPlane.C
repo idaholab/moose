@@ -48,7 +48,10 @@ CSGPlane::coeffsFromPoints(const Point & p1, const Point & p2, const Point & p3)
   RealVectorValue v2 = p3 - p1;
   RealVectorValue cross = v2.cross(v1);
 
-  // TODO add MooseAssert that points aren't colinear
+  // Check that provided points aren't collinear
+  if (MooseUtils::absoluteFuzzyEqual(cross.norm(), 0))
+    mooseError("Provided points to define a CSGPlane are collinear");
+
   _a = cross(0);
   _b = cross(1);
   _c = cross(2);
