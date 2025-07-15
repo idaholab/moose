@@ -8,5 +8,6 @@
     exodiff = 'out_gpu.e'
     requirement = 'The Kokkos system shall support the creation of BoundaryCondition objects that couple to nonlinear variables.'
     capabilities = 'kokkos'
+    devices = 'cuda'
   [../]
 []
