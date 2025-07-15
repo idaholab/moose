@@ -52,7 +52,10 @@ protected:
    *
    * @return map of all names to CSGUniverse pointers
    */
-  std::map<std::string, std::unique_ptr<CSGUniverse>> & getUniverseListMap() { return _universes; }
+  std::unordered_map<std::string, std::unique_ptr<CSGUniverse>> & getUniverseListMap()
+  {
+    return _universes;
+  }
 
   /**
    * @brief Get the all universes in CSGBase instance
@@ -96,7 +99,7 @@ protected:
   void checkUniverseName(const std::string & name) const;
 
   /// Mapping of universe names to pointers of stored universe objects
-  std::map<std::string, std::unique_ptr<CSGUniverse>> _universes;
+  std::unordered_map<std::string, std::unique_ptr<CSGUniverse>> _universes;
 
   /// root universe for the CSGBase instance
   const CSGUniverse * _root_universe;

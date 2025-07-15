@@ -70,7 +70,7 @@ protected:
    *
    * @return map of all names to CSGCell pointers
    */
-  std::map<std::string, std::unique_ptr<CSGCell>> & getCellListMap() { return _cells; }
+  std::unordered_map<std::string, std::unique_ptr<CSGCell>> & getCellListMap() { return _cells; }
 
   /**
    * @brief Get all the cells in CSGBase instance
@@ -107,7 +107,7 @@ protected:
   void checkCellName(const std::string & name) const;
 
   /// Mapping of cell names to pointers of stored cell objects
-  std::map<std::string, std::unique_ptr<CSGCell>> _cells;
+  std::unordered_map<std::string, std::unique_ptr<CSGCell>> _cells;
 
   // Only CSGBase should be calling the methods in CSGCellList
   friend class CSGBase;
