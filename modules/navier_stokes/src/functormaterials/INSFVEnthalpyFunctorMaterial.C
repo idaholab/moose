@@ -26,13 +26,14 @@ INSFVEnthalpyFunctorMaterial::validParams()
       "incompressible/weakly-compressible finite-volume implementation of the Navier-Stokes "
       "equations.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The value for the density");
-  params.addRequiredParam<MooseFunctorName>("temperature", "the temperature");
+  params.addParam<MooseFunctorName>("temperature", "the temperature");
   params.addParam<MooseFunctorName>(
       NS::cp, NS::cp, "The constant value for the specific heat capacity");
   params.addParam<MooseFunctorName>(
       NS::enthalpy_density, NS::enthalpy_density, "the name of the (extensive) enthalpy");
-  params.addParam<MooseFunctorName>(
-      NS::specific_enthalpy, NS::specific_enthalpy, "the name of the specific enthalpy");
+  params.addParam<MooseFunctorName>(NS::specific_enthalpy,
+                                    NS::specific_enthalpy,
+                                    "the name of the specific enthalpy, for defining it.");
 
   // To handle non constant cp
   params.addParam<bool>("assumed_constant_cp", true, "Whether to assume cp is constant");
@@ -55,8 +56,8 @@ INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters
             ? &UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)
             : nullptr),
     _rho(getFunctor<ADReal>(NS::density)),
-    _temperature(getFunctor<ADReal>("temperature")),
-    _pressure(isParamValid("pressure") ? &getFunctor<ADReal>("pressure") : nullptr),
+    _temperature(isParamValid("temperature") ? &getFunctor<ADReal>("temperature") : nullptr),
+    _pressure(isParamValid(NS::pressure) ? &getFunctor<ADReal>(NS::pressure) : nullptr),
     _cp(getFunctor<ADReal>(NS::cp)),
     _h(isParamValid(NS::specific_enthalpy + "_in")
            ? &getFunctor<ADReal>(NS::specific_enthalpy + "_in")
@@ -70,21 +71,25 @@ INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters
     paramError("fp",
                "Must specify both fluid properties and pressure or an enthalpy functor if not "
                "assuming the specific enthalpy is constant");
+  if (!_temperature && (_assumed_constant_cp || !_h))
+    paramError("temperature",
+               "Temperature must be specified if assuming constant specific heat or if not "
+               "specifying the enthalpy functor");
 
   if (_assumed_constant_cp)
   {
     const auto & rho_h =
         addFunctorProperty<ADReal>(NS::enthalpy_density,
                                    [this](const auto & r, const auto & t)
-                                   { return _rho(r, t) * _cp(r, t) * _temperature(r, t); });
+                                   { return _rho(r, t) * _cp(r, t) * (*_temperature)(r, t); });
 
     const auto & h = addFunctorProperty<ADReal>(NS::specific_enthalpy,
                                                 [this](const auto & r, const auto & t)
-                                                { return _cp(r, t) * _temperature(r, t); });
+                                                { return _cp(r, t) * (*_temperature)(r, t); });
 
     addFunctorProperty<ADReal>(NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),
                                [this](const auto & r, const auto & t)
-                               { return _cp(r, t) * _temperature.dot(r, t); });
+                               { return _cp(r, t) * (*_temperature).dot(r, t); });
 
     addFunctorProperty<ADReal>(
         "rho_cp_temp", [&rho_h](const auto & r, const auto & t) -> ADReal { return rho_h(r, t); });
@@ -101,6 +106,11 @@ INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters
 
     addFunctorProperty<ADReal>(NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),
                                [this](const auto & r, const auto & t) { return _h->dot(r, t); });
+
+    // Note that we don't pick the fluid temperature name
+    addFunctorProperty<ADReal>(NS::T_fluid,
+                               [this](const auto & r, const auto & t) -> ADReal
+                               { return _fp->T_from_p_h((*_pressure)(r, t), (*_h)(r, t)); });
   }
   // We did not specify h, or assume a constant cp, we are solving for temperature but using h(p,T)
   else
@@ -108,19 +118,21 @@ INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters
     addFunctorProperty<ADReal>(
         NS::enthalpy_density,
         [this](const auto & r, const auto & t)
-        { return _rho(r, t) * _fp->h_from_p_T((*_pressure)(r, t), _temperature(r, t)); });
+        { return _rho(r, t) * _fp->h_from_p_T((*_pressure)(r, t), (*_temperature)(r, t)); });
 
     addFunctorProperty<ADReal>(NS::specific_enthalpy,
-                               [this](const auto & r, const auto & t)
-                               { return _fp->h_from_p_T((*_pressure)(r, t), _temperature(r, t)); });
+                               [this](const auto & r, const auto & t) {
+                                 return _fp->h_from_p_T((*_pressure)(r, t), (*_temperature)(r, t));
+                               });
 
     addFunctorProperty<ADReal>(
         NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),
         [this](const auto & r, const auto & t)
         {
           Real h, dh_dp, dh_dT;
-          _fp->h_from_p_T((*_pressure)(r, t).value(), _temperature(r, t).value(), h, dh_dp, dh_dT);
-          return dh_dT * _temperature.dot(r, t) + dh_dp * _pressure->dot(r, t);
+          _fp->h_from_p_T(
+              (*_pressure)(r, t).value(), (*_temperature)(r, t).value(), h, dh_dp, dh_dT);
+          return dh_dT * (*_temperature).dot(r, t) + dh_dp * _pressure->dot(r, t);
         });
   }
 }
