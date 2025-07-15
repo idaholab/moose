@@ -20,7 +20,8 @@ TestCSGCylindersMeshGenerator::validParams()
   params.addRequiredParam<std::vector<Real>>("radii", "list of radii for concentric cylinders");
   params.addRequiredParam<Real>("height", "cylinder height");
   params.addRequiredParam<std::vector<Real>>("center", "center point of cylinder");
-  params.addRequiredParam<std::string>("axis", "axis alignment");
+  MooseEnum axis("x y z", "x");
+  params.addParam<MooseEnum>("axis", axis, "axis alignment");
   // Declare that this generator has a generateData method
   MeshGenerator::setHasGenerateData(params);
   // Declare that this generator has a generateCSG method
@@ -34,7 +35,7 @@ TestCSGCylindersMeshGenerator::TestCSGCylindersMeshGenerator(const InputParamete
     _h(getParam<Real>("height")),
     _x0(getParam<std::vector<Real>>("center")[0]),
     _x1(getParam<std::vector<Real>>("center")[1]),
-    _axis(getParam<std::string>("axis"))
+    _axis(getParam<MooseEnum>("axis"))
 {
 }
 
