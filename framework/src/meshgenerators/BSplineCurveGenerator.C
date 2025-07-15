@@ -15,6 +15,10 @@
 #include "BSpline.h"
 #include "SplineUtils.h"
 
+#include "libmesh/edge_edge2.h"
+#include "libmesh/edge_edge3.h"
+#include "libmesh/edge_edge4.h"
+
 #include "libMeshReducedNamespace.h"
 
 using namespace libMesh;
