@@ -341,38 +341,47 @@ MFEMProblem::addFunction(const std::string & type,
                          const std::string & name,
                          InputParameters & parameters)
 {
-  ExternalProblem::addFunction(type, name, parameters);
-  auto & func = getFunction(name);
-  // FIXME: Do we want to have optimised versions for when functions
-  // are only of space or only of time.
-  if (std::find(SCALAR_FUNCS.begin(), SCALAR_FUNCS.end(), type) != SCALAR_FUNCS.end())
-  {
-    getCoefficients().declareScalar<mfem::FunctionCoefficient>(
-        name,
-        [&func](const mfem::Vector & p, double t) -> mfem::real_t
-        { return func.value(t, pointFromMFEMVector(p)); });
-  }
-  else if (std::find(VECTOR_FUNCS.begin(), VECTOR_FUNCS.end(), type) != VECTOR_FUNCS.end())
-  {
-    int dim = vectorFunctionDim(type, parameters);
-    getCoefficients().declareVector<mfem::VectorFunctionCoefficient>(
-        name,
-        dim,
-        [&func, dim](const mfem::Vector & p, double t, mfem::Vector & u)
-        {
-          libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
-          for (int i = 0; i < dim; i++)
-          {
-            u[i] = vector_value(i);
-          }
-        });
-  }
-  else
-  {
-    mooseWarning("Could not identify whether function ",
-                 type,
-                 " is scalar or vector; no MFEM coefficient object created.");
-  }
+
+    if(type == "MFEMParsedFunction")
+    {
+      FEProblemBase::addUserObject(type, name, parameters);
+      MFEMParsedFunction & mfem_parsed_function(getUserObject<MFEMParsedFunction>(name));
+    }
+    else
+    {
+      ExternalProblem::addFunction(type, name, parameters);
+      auto & func = getFunction(name);
+      // FIXME: Do we want to have optimised versions for when functions
+      // are only of space or only of time.
+      if (std::find(SCALAR_FUNCS.begin(), SCALAR_FUNCS.end(), type) != SCALAR_FUNCS.end())
+      {
+        getCoefficients().declareScalar<mfem::FunctionCoefficient>(
+            name,
+            [&func](const mfem::Vector & p, double t) -> mfem::real_t
+            { return func.value(t, pointFromMFEMVector(p)); });
+      }
+      else if (std::find(VECTOR_FUNCS.begin(), VECTOR_FUNCS.end(), type) != VECTOR_FUNCS.end())
+      {
+        int dim = vectorFunctionDim(type, parameters);
+        getCoefficients().declareVector<mfem::VectorFunctionCoefficient>(
+            name,
+            dim,
+            [&func, dim](const mfem::Vector & p, double t, mfem::Vector & u)
+            {
+              libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
+              for (int i = 0; i < dim; i++)
+              {
+                u[i] = vector_value(i);
+              }
+            });
+      }
+      else
+      {
+        mooseWarning("Could not identify whether function ",
+                    type,
+                    " is scalar or vector; no MFEM coefficient object created.");
+      }
+    }
 }
 
 void
