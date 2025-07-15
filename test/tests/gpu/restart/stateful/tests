@@ -8,6 +8,7 @@
       input = 'gpu_stateful_prop_spatial_test.i'
       requirement = 'The Kokkos system shall be able to write stateful material properties into a checkpoint file.'
       capabilities = 'kokkos'
+      devices = 'cuda'
     []
     [load_checkpoint]
       type = Exodiff
@@ -15,6 +16,7 @@
       exodiff = 'out_spatial_gpu.e'
       requirement = 'The Kokkos system shall be able to restart a transient calculation by loading a checkpoint file that includes stateful material properties.'
       capabilities = 'kokkos'
+      devices = 'cuda'
       prereq = 'restart/write_checkpoint'
     []
   []
@@ -29,6 +31,7 @@
                   KokkosMaterials/stateful/prop_name=other'
       requirement = 'The Kokkos system shall error when a restarted material declares a stateful material property that was not stored.'
       capabilities = 'kokkos'
+      devices = 'cuda'
       prereq = 'restart/write_checkpoint'
     []
     [state_mismatch]
@@ -38,6 +41,7 @@
       cli_args = 'KokkosMaterials/stateful/declare_older=true'
       requirement = 'The Kokkos system shall error when a restarted material declares a stateful material property that has different number of states with the stored property.'
       capabilities = 'kokkos'
+      devices = 'cuda'
       prereq = 'restart/write_checkpoint'
     []
     [ambiguity]
@@ -47,6 +51,7 @@
       cli_args = 'KokkosMaterials/active=another_stateful'
       requirement = 'The Kokkos system shall error when '
       capabilities = 'kokkos'
+      devices = 'cuda'
       prereq = 'restart/write_checkpoint'
     []
     [pass]
@@ -58,6 +63,7 @@
                   KokkosMaterials/active=another_stateful'
       requirement = 'The Kokkos system shall not error when a new material declares a new stateful property in the restarted calculation.'
       capabilities = 'kokkos'
+      devices = 'cuda'
       prereq = 'restart/write_checkpoint'
     []
   []

@@ -12,6 +12,7 @@
       exodiff = 'gpu_tag_vector_out.e'
       detail = 'numeric vector,'
       capabilities = 'kokkos'
+      devices = 'cuda'
     []
     [tag_matrix]
       type = 'Exodiff'
@@ -19,6 +20,7 @@
       exodiff = 'gpu_tag_matrix_out.e'
       detail = 'numeric matrix,'
       capabilities = 'kokkos'
+      devices = 'cuda'
     []
     [tag_multiple_vectors]
       type = 'Exodiff'
@@ -26,6 +28,7 @@
       exodiff = 'gpu_vector_tag_test_out.e'
       detail = 'multiple numeric vectors simultaneously, or'
       capabilities = 'kokkos'
+      devices = 'cuda'
     []
     [tag_multiple_matrices]
       type = 'Exodiff'
@@ -33,6 +36,7 @@
       exodiff = 'gpu_matrix_tag_test_out.e'
       detail = 'multiple numeric matrices simultaneously.'
       capabilities = 'kokkos'
+      devices = 'cuda'
     []
   []
 
@@ -41,6 +45,7 @@
     input = 'gpu_tag_residual_call.i'
     requirement = 'The Kokkos system shall be able to accumulate tagged vectors individually with multiple residual computations.'
     capabilities = 'kokkos'
+    devices = 'cuda'
   []
 
   [systems]
@@ -52,6 +57,7 @@
       exodiff = 'gpu_tag_neumann_out.e'
       detail = 'integrated boundary conditions,'
       capabilities = 'kokkos'
+      devices = 'cuda'
     []
 
     [test_tag_nodal_kernels]
@@ -60,6 +66,7 @@
       exodiff = 'gpu_tag_nodal_kernels_out.e'
       detail = 'the nodal kernel system,'
       capabilities = 'kokkos'
+      devices = 'cuda'
     []
   []
 []
