@@ -17,7 +17,7 @@ C2_eps = 1.92
 C_mu = 0.09
 
 ### Initial and Boundary Conditions ###
-intensity = 0.01
+intensity = ${fparse 0.16*Re^(-1./8.)}
 k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / (2*H)}'
 
@@ -327,10 +327,6 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
   [yplus]
     type = MooseLinearVariableFVReal
   []
-  [mu_eff]
-    type = MooseLinearVariableFVReal
-    initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
-  []
 []
 
 [AuxKernels]
@@ -362,13 +358,6 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     wall_treatment = ${wall_treatment}
     execute_on = 'NONLINEAR'
   []
-  [compute_mu_eff]
-    type = ParsedAux
-    variable = 'mu_eff'
-    coupled_variables = 'mu_t'
-    expression = 'mu_t + ${mu}'
-    execute_on = 'NONLINEAR'
-  []
 []
 
 [Executioner]
@@ -388,7 +377,8 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
 
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
-  turbulence_equation_relaxation = '0.25 0.25'
+  turbulence_equation_relaxation = '0.2 0.2'
+  turbulence_field_relaxation = '0.2 0.2'
   num_iterations = 1000
   pressure_absolute_tolerance = 1e-12
   momentum_absolute_tolerance = 1e-12
