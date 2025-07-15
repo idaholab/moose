@@ -16,8 +16,8 @@ InputParameters
 TestCSGUnlinkedUniverseMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addRequiredParam<std::vector<MeshGeneratorName>>("input_meshes",
-                                                          "list of MGs to add to universe");
+  params.addRequiredParam<std::vector<MeshGeneratorName>>(
+      "inputs", "list of MGs providing CSG to add to first input's CSG");
   // Declare that this generator has a generateData method
   MeshGenerator::setHasGenerateData(params);
   // Declare that this generator has a generateCSG method
@@ -28,8 +28,8 @@ TestCSGUnlinkedUniverseMeshGenerator::validParams()
 TestCSGUnlinkedUniverseMeshGenerator::TestCSGUnlinkedUniverseMeshGenerator(
     const InputParameters & params)
   : MeshGenerator(params),
-    _mesh_ptrs(getMeshes("input_meshes")),
-    _input_mgs(getParam<std::vector<MeshGeneratorName>>("input_meshes"))
+    _mesh_ptrs(getMeshes("inputs")),
+    _input_mgs(getParam<std::vector<MeshGeneratorName>>("inputs"))
 {
 }
 
