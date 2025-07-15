@@ -49,7 +49,7 @@ public:
    *
    * @return map of coefficients to their value
    */
-  virtual std::map<std::string, Real> getCoeffs() const override;
+  virtual std::unordered_map<std::string, Real> getCoeffs() const override;
 
   /**
    * @brief get direction from point to surface

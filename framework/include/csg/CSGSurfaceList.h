@@ -103,7 +103,10 @@ protected:
    *
    * @return map of all names to CSGSurface pointers
    */
-  std::map<std::string, std::unique_ptr<CSGSurface>> & getSurfaceListMap() { return _surfaces; }
+  std::unordered_map<std::string, std::unique_ptr<CSGSurface>> & getSurfaceListMap()
+  {
+    return _surfaces;
+  }
 
   /**
    * @brief Get list of references to all surfaces in surface list
@@ -139,7 +142,7 @@ protected:
   void checkSurfaceName(const std::string & name) const;
 
   /// Mapping of surface names to pointers of stored surface objects
-  std::map<std::string, std::unique_ptr<CSGSurface>> _surfaces;
+  std::unordered_map<std::string, std::unique_ptr<CSGSurface>> _surfaces;
 
   // Only CSGBase should be calling the methods in CSGSurfaceList
   friend class CSGBase;

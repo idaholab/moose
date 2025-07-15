@@ -21,10 +21,10 @@ CSGXCylinder::CSGXCylinder(const std::string & name,
 {
 }
 
-std::map<std::string, Real>
+std::unordered_map<std::string, Real>
 CSGXCylinder::getCoeffs() const
 {
-  std::map<std::string, Real> coeffs = {{"y0", _y0}, {"z0", _z0}, {"r", _r}};
+  std::unordered_map<std::string, Real> coeffs = {{"y0", _y0}, {"z0", _z0}, {"r", _r}};
   return coeffs;
 }
 

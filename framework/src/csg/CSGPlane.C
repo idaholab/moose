@@ -32,10 +32,10 @@ CSGPlane::CSGPlane(const std::string & name,
 {
 }
 
-std::map<std::string, Real>
+std::unordered_map<std::string, Real>
 CSGPlane::getCoeffs() const
 {
-  std::map<std::string, Real> coeffs = {{"a", _a}, {"b", _b}, {"c", _c}, {"d", _d}};
+  std::unordered_map<std::string, Real> coeffs = {{"a", _a}, {"b", _b}, {"c", _c}, {"d", _d}};
   return coeffs;
 }
 

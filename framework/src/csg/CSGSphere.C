@@ -26,10 +26,10 @@ CSGSphere::CSGSphere(const std::string & name,
     mooseError("Radius of sphere must be postive.");
 }
 
-std::map<std::string, Real>
+std::unordered_map<std::string, Real>
 CSGSphere::getCoeffs() const
 {
-  std::map<std::string, Real> coeffs = {{"x0", _x0}, {"y0", _y0}, {"z0", _z0}, {"r", _r}};
+  std::unordered_map<std::string, Real> coeffs = {{"x0", _x0}, {"y0", _y0}, {"z0", _z0}, {"r", _r}};
   return coeffs;
 }
 
