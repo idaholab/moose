@@ -65,7 +65,7 @@ Options for boundary types are `TRANSMISSION` (default), `VACUUM`, and `REFLECTI
 
 The `CSGSurface` objects can then be accessed or updated with the following methods from `CSGBase`:
 
-- `getAllSurfaces`: retrieve a list of const references to all `CSGSurface` objects defined within the `CSGBase` object
+- `getAllSurfaces`: retrieve a list of const references to each `CSGSurface` object in the `CSGBase` instance
 - `getSurfaceByName`: retrieve a const reference to the `CSGSurface` of the specified name
 - `renameSurface`: change the name of the `CSGSurface`
 - `updateSurfaceBoundaryType`: change the boundary type of the `CSGSurface` (`TRANSMISSION`, `VACUUM`, or `REFLECTIVE`)
@@ -158,7 +158,7 @@ For a cell with a `CSGUniverse` fill, pass it a shared pointer to the `CSGUniver
 
 The `CSGCell` objects can then be accessed or updated with the following methods from `CSGBase`:
 
-- `getAllCells`: retrieve a list of const references to all `CSGCell` objects defined within the `CSGBase` object
+- `getAllCells`: retrieve a list of const references to each `CSGCell` object in the `CSGBase` instance
 - `getCellByName`: retrieve a const reference to the `CSGCell` object of the specified name
 - `renameCell`: change the name of the `CSGCell` object
 - `updateCellRegion`: change the region of the cell; if used, all `CSGSurface` objects used to define the new `CSGRegion` must also be a part of the current `CSGBase`
@@ -171,7 +171,7 @@ Any `CSGUniverse` object can be renamed (including the [root universe](#root-uni
 
 The `CSGUniverse` objects can then be accessed or updated with the following methods from `CSGBase`:
 
-- `getAllUniverses`: retrieve a list of const references to all `CSGUniverse` objects defined within the `CSGBase` object
+- `getAllUniverses`:  retrieve a list of const references to each `CSGUniverse` object in the `CSGBase` instance
 - `getUniverseByName`: retrieve a const reference to the `CSGUniverse` of the specified name
 - `renameUniverse`: change the name of the `CSGUniverse`
 
@@ -202,7 +202,7 @@ Methods available for managing the root universe:
 
 There are multiple ways in which cells can be added to a universe:
 
-1. At the time of universe creation, a list of references to `CSGCell` objects can be passed into `createUniverse` (as described [above](#universes)). Example:
+1. At the time of universe creation, a vector of references to `CSGCell` objects can be passed into `createUniverse` (as described [above](#universes)). Example:
 
 ```cpp
 const auto & new_universe = csg_obj->createUniverse("new_universe", list_of_cells);

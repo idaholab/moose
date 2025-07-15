@@ -30,7 +30,7 @@ public:
    * @param x0 x coordinate of center
    * @param z0 z coordinate of center
    * @param r radius
-   * @param boundary CSGSurface::BoundaryType boundary type for the surface
+   * @param boundary boundary type for the surface
    */
   CSGYCylinder(const std::string name,
                const Real x0,
@@ -47,7 +47,7 @@ public:
    * @brief Get the coefficients (x0, z0, and r) that define the cylindrical surface
    * with the equation: (x - x0)^2 + (z - z0)^2 = r^2
    *
-   * @return std::map<std::string, Real> map of coefficients to their value
+   * @return map of coefficients to their value
    */
   virtual std::map<std::string, Real> getCoeffs() const override;
 
