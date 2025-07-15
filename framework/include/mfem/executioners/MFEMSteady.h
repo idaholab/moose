@@ -25,6 +25,7 @@ public:
   virtual void execute() override;
   virtual void innerSolve() override;
 
+  /// Check if last solve converged. Currently defaults to true for all MFEM executioners.
   virtual bool lastSolveConverged() const override { return true; };
 
 protected:

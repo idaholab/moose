@@ -98,9 +98,6 @@ MFEMTransient::takeStep(Real input_dt)
   _time = _time_old;
 
   _time_stepper->postSolve();
-
-  _solution_change_norm =
-      relativeSolutionDifferenceNorm() / (_normalize_solution_diff_norm_by_dt ? _dt : Real(1));
 }
 
 void

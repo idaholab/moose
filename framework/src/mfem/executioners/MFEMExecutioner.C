@@ -41,8 +41,8 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & params, MFEMProblem & m
 void
 MFEMExecutioner::solve()
 {
-  // FixedPointSolve::solve() called from TimeStepper::step() is libMesh specific, so we need
-  // to include all steps relevant to both FE backends here.
+  // FixedPointSolve::solve() is libMesh specific, so we need
+  // to include all steps therein relevant to the MFEM backend here.
 
   // need to back up multi-apps even when not doing fixed point iteration for recovering from failed
   // multiapp solve

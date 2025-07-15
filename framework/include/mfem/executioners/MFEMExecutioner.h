@@ -31,13 +31,13 @@ public:
 
   /**
    * Perform all required solves during a step. Includes relevant methods from the libmesh-specific
-   * FixedPointSolve::solve()
+   * FixedPointSolve::solve() for one iteration.
    */
   virtual void solve();
 
   /**
    * Perform all required solves during a step. Analagous to FixedPointSolve::innerSolve() for
-   * libMesh problems
+   * libMesh problems.
    */
   virtual void innerSolve() = 0;
 
