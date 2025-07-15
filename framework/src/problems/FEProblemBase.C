@@ -3745,26 +3745,77 @@ FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
   libmesh_sys.project_vector(poly_func, poly_func_grad, function_parameters, temp_vec);
   temp_vec.close();
 
+  auto localToGlobal =
+      [&](const auto & local_ids,
+          std::vector<typename std::decay<decltype(local_ids[0])>::type> & global_ids,
+          bool sort_and_remove_duplicates = false) -> void
+  {
+    using IDType = typename std::decay<decltype(local_ids[0])>::type;
+
+    std::vector<std::vector<IDType>> gathered;
+    _mesh.comm().allgather(local_ids, gathered);
+
+    global_ids.clear();
+    for (const auto & vec : gathered)
+      global_ids.insert(global_ids.end(), vec.begin(), vec.end());
+
+    if (sort_and_remove_duplicates)
+    { // remove duplicates cause issue for std::vector<Point>
+      std::sort(global_ids.begin(), global_ids.end());
+      global_ids.erase(std::unique(global_ids.begin(), global_ids.end()), global_ids.end());
+    }
+  };
+
   // Get the dofs to copy
   DofMap & dof_map = sys.dofMap();
-  std::set<dof_id_type> all_dof_indices;
+  std::set<dof_id_type> owned_dof_indices;
+  std::set<dof_id_type> non_owned_dof_indices;
   std::vector<dof_id_type> dof_indices;
+
   for (const auto & elem : elem_range)
   {
     dof_map.dof_indices(elem, dof_indices, var_num);
-    all_dof_indices.insert(dof_indices.begin(), dof_indices.end());
+    for (auto dof : dof_indices)
+    {
+      if (dof_map.dof_owner(dof) == processor_id())
+        owned_dof_indices.insert(dof);
+      else
+        non_owned_dof_indices.insert(dof);
+    }
   }
+
   for (const auto & node : bnd_nodes)
   {
     dof_map.dof_indices(node, dof_indices, var_num);
-    all_dof_indices.insert(dof_indices.begin(), dof_indices.end());
+    for (auto dof : dof_indices)
+    {
+      if (dof_map.dof_owner(dof) == processor_id())
+        owned_dof_indices.insert(dof);
+      else
+        non_owned_dof_indices.insert(dof);
+    }
   }
-  std::vector<dof_id_type> all_dof_indices_vec(all_dof_indices.begin(), all_dof_indices.end());
+
+  std::vector<dof_id_type> non_owned_dof_indices_vec(non_owned_dof_indices.begin(),
+                                                     non_owned_dof_indices.end());
+  localToGlobal(
+      non_owned_dof_indices_vec, non_owned_dof_indices_vec, /*sort_and_remove_duplicates=*/true);
+
+  // Filters the globally all_dof_indices_vec and stores only those owned by this processor.
+  std::vector<dof_id_type> owned_dof_indices_vec(owned_dof_indices.begin(),
+                                                 owned_dof_indices.end());
+  for (const auto & dof : non_owned_dof_indices_vec)
+  {
+    if (dof_map.dof_owner(dof) == processor_id() &&
+        std::find(owned_dof_indices_vec.begin(), owned_dof_indices_vec.end(), dof) ==
+            owned_dof_indices_vec.end())
+      owned_dof_indices_vec.push_back(dof);
+  }
 
   // Copy the projected values into the solution vector
   std::vector<Real> dof_vals;
-  temp_vec.get(all_dof_indices_vec, dof_vals);
-  sys.solution().insert(dof_vals, all_dof_indices_vec);
+  temp_vec.get(owned_dof_indices_vec, dof_vals);
+  sys.solution().insert(dof_vals, owned_dof_indices_vec);
   sys.solution().close();
   sys.solution().localize(*libmesh_sys.current_local_solution, sys.dofMap().get_send_list());
 

@@ -1002,7 +1002,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(
                   reinit_strategy == ReinitStrategy::POLYNOMIAL_NEARBY,
               "reinit strategy must be POLYNOMIAL_WHOLE, POLYNOMIAL, or POLYNOMIAL_NEARBY");
 
-  auto local2Global =
+  auto localToGlobal =
       [&](const auto & local_ids,
           std::vector<typename std::decay<decltype(local_ids[0])>::type> & global_ids,
           bool sort_and_remove_duplicates = false) -> void
@@ -1023,7 +1023,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(
     }
   };
 
-  auto local2GlobalPair =
+  auto localToGlobalPair =
       [&](const auto & local_vals1,
           const auto & local_vals2,
           std::vector<typename std::decay<decltype(local_vals1[0])>::type> & global_vals1,
@@ -1096,7 +1096,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(
       local_elem_ids.push_back(elem->id());
     }
 
-    local2GlobalPair(
+    localToGlobalPair(
         local_centroids, local_elem_ids, _centroids_of_elements, _kd_tree_sequence_elem_id_map);
 
     _kd_tree = new KDTree(_centroids_of_elements, _leaf_max_size);
@@ -1179,9 +1179,9 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(
     }
   }
 
-  local2Global(_solved_elem_ids_for_npr[reinit_strategy],
-               _solved_elem_ids_for_npr[reinit_strategy],
-               true /*sort_and_remove_duplicates*/);
+  localToGlobal(_solved_elem_ids_for_npr[reinit_strategy],
+                _solved_elem_ids_for_npr[reinit_strategy],
+                true /*sort_and_remove_duplicates*/);
 }
 
 void
