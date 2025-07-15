@@ -24,35 +24,30 @@ public:
   void constructProblemOperator() override;
   virtual void init() override;
 
-  /**
-   * Do whatever is necessary to advance one step.
-   */
+  /// Do whatever is necessary to advance one step.
   virtual void takeStep(Real input_dt = -1.0) override;
 
-  /**
-   * Perform all required solves during a step. Called in takeStep.
-   */
+  /// Perform all required solves during a step. Called within takeStep.
   virtual void innerSolve() override;
 
+  /// Check if last solve converged. Currently defaults to true for all MFEM executioners.
   virtual bool lastSolveConverged() const override { return true; };
 
-  virtual Real relativeSolutionDifferenceNorm() override { return 0.0; };
+  /// Not supported for MFEM problems, so error if called.
+  virtual Real relativeSolutionDifferenceNorm() override
+  {
+    mooseError("MFEMTransient executioner does not yet support evaluating the relative solution "
+               "difference norm at each timestep.");
+    return 0.0;
+  };
 
-  /**
-   * Get the time integrators (time integration scheme) used
-   * Note that because some systems might be steady state simulations, there could be less
-   * time integrators than systems
-   * @return string with the time integration scheme name
-   */
+  /// MFEM problems have no libMesh type TimeIntegrators attached, so return empty set.
   virtual std::set<TimeIntegrator *> getTimeIntegrators() const override
   {
     return std::set<TimeIntegrator *>{};
   };
 
-  /**
-   * Get the name of the time integrator (time integration scheme) used
-   * @return string with the time integration scheme name
-   */
+  /// MFEM problems have no libMesh type TimeIntegrators attached, so return empty vector.
   virtual std::vector<std::string> getTimeIntegratorNames() const override
   {
     return std::vector<std::string>();
