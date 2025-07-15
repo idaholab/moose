@@ -12,8 +12,8 @@
 namespace CSG
 {
 
-CSGSphere::CSGSphere(const std::string name,
-                     const Point center,
+CSGSphere::CSGSphere(const std::string & name,
+                     const Point & center,
                      const Real r,
                      CSGSurface::BoundaryType boundary)
   : CSGSurface(name, SurfaceType::SPHERE, boundary),
@@ -34,7 +34,7 @@ CSGSphere::getCoeffs() const
 }
 
 CSGSurface::Direction
-CSGSphere::directionFromPoint(const Point p) const
+CSGSphere::directionFromPoint(const Point & p) const
 {
   // Compute distance from the sphere center to determine if inside (< r^2)
   // or outside (> r^2) the sphere

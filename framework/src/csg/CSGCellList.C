@@ -15,14 +15,14 @@ namespace CSG
 CSGCellList::CSGCellList() {}
 
 void
-CSGCellList::checkCellName(const std::string name) const
+CSGCellList::checkCellName(const std::string & name) const
 {
   if (_cells.find(name) != _cells.end())
     mooseError("Cell with name " + name + " already exists in geoemetry.");
 }
 
 CSGCell &
-CSGCellList::getCell(const std::string name) const
+CSGCellList::getCell(const std::string & name) const
 {
   if (_cells.find(name) == _cells.end())
     mooseError("No cell by name " + name + " exists in the geometry.");
@@ -31,7 +31,7 @@ CSGCellList::getCell(const std::string name) const
 }
 
 CSGCell &
-CSGCellList::addVoidCell(const std::string name, const CSGRegion & region)
+CSGCellList::addVoidCell(const std::string & name, const CSGRegion & region)
 {
   checkCellName(name);
   _cells.insert(std::make_pair(name, std::make_unique<CSGCell>(name, region)));
@@ -39,8 +39,8 @@ CSGCellList::addVoidCell(const std::string name, const CSGRegion & region)
 }
 
 CSGCell &
-CSGCellList::addMaterialCell(const std::string name,
-                             const std::string mat_name,
+CSGCellList::addMaterialCell(const std::string & name,
+                             const std::string & mat_name,
                              const CSGRegion & region)
 {
   checkCellName(name);
@@ -49,7 +49,7 @@ CSGCellList::addMaterialCell(const std::string name,
 }
 
 CSGCell &
-CSGCellList::addUniverseCell(const std::string name,
+CSGCellList::addUniverseCell(const std::string & name,
                              const CSGUniverse & univ,
                              const CSGRegion & region)
 {
@@ -76,7 +76,7 @@ CSGCellList::addCell(std::unique_ptr<CSGCell> & cell)
 }
 
 void
-CSGCellList::renameCell(const CSGCell & cell, const std::string name)
+CSGCellList::renameCell(const CSGCell & cell, const std::string & name)
 {
   // check that this cell passed in is actually in the same cell that is in the cell list
   auto prev_name = cell.getName();

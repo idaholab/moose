@@ -20,14 +20,14 @@ namespace CSG
 CSGSurfaceList::CSGSurfaceList() {}
 
 void
-CSGSurfaceList::checkSurfaceName(const std::string name) const
+CSGSurfaceList::checkSurfaceName(const std::string & name) const
 {
   if (_surfaces.find(name) != _surfaces.end())
     mooseError("Surface with name " + name + " already exists in geoemetry.");
 }
 
 CSGSurface &
-CSGSurfaceList::getSurface(const std::string name) const
+CSGSurfaceList::getSurface(const std::string & name) const
 {
   auto surf = _surfaces.find(name);
   if (surf == _surfaces.end())
@@ -37,7 +37,7 @@ CSGSurfaceList::getSurface(const std::string name) const
 }
 
 CSGSurface &
-CSGSurfaceList::addPlaneFromPoints(const std::string name,
+CSGSurfaceList::addPlaneFromPoints(const std::string & name,
                                    const Point & p1,
                                    const Point & p2,
                                    const Point & p3,
@@ -49,7 +49,7 @@ CSGSurfaceList::addPlaneFromPoints(const std::string name,
 }
 
 CSGSurface &
-CSGSurfaceList::addPlaneFromCoefficients(const std::string name,
+CSGSurfaceList::addPlaneFromCoefficients(const std::string & name,
                                          const Real a,
                                          const Real b,
                                          const Real c,
@@ -62,8 +62,8 @@ CSGSurfaceList::addPlaneFromCoefficients(const std::string name,
 }
 
 CSGSurface &
-CSGSurfaceList::addSphere(const std::string name,
-                          const Point center,
+CSGSurfaceList::addSphere(const std::string & name,
+                          const Point & center,
                           const Real r,
                           CSGSurface::BoundaryType boundary)
 {
@@ -73,11 +73,11 @@ CSGSurfaceList::addSphere(const std::string name,
 }
 
 CSGSurface &
-CSGSurfaceList::addCylinder(const std::string name,
+CSGSurfaceList::addCylinder(const std::string & name,
                             const Real x0,
                             const Real x1,
                             const Real r,
-                            const std::string axis,
+                            const std::string & axis,
                             CSGSurface::BoundaryType boundary)
 {
   checkSurfaceName(name);
@@ -114,7 +114,7 @@ CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> & surf)
 }
 
 void
-CSGSurfaceList::renameSurface(const CSGSurface & surface, const std::string name)
+CSGSurfaceList::renameSurface(const CSGSurface & surface, const std::string & name)
 {
   // check that this surface passed in is actually in the same surface that is in the surface
   // list

@@ -28,7 +28,7 @@ public:
    * @param name unique name of universe
    * @param is_root true to set universe as the root universe (default false)
    */
-  CSGUniverse(const std::string name, bool is_root = false);
+  CSGUniverse(const std::string & name, bool is_root = false);
 
   /**
    * @brief Construct a new CSGUniverse object from list of cells
@@ -37,7 +37,7 @@ public:
    * @param cells list of cells to add to universe
    * @param is_root true to set universe as the root universe (default false)
    */
-  CSGUniverse(const std::string name, std::vector<CSGCell *> & cells, bool is_root = false);
+  CSGUniverse(const std::string & name, std::vector<CSGCell *> & cells, bool is_root = false);
 
   /**
    * Destructor
@@ -50,7 +50,7 @@ public:
    * @param name name of cell
    * @return reference to the cell of the specified name in this universe
    */
-  const CSGCell & getCell(const std::string name);
+  const CSGCell & getCell(const std::string & name);
 
   /**
    * @brief check if cell of provided name is present in universe
@@ -58,7 +58,7 @@ public:
    * @param name name of cell
    * @return true if cell of name is in universe, otherwise false
    */
-  bool hasCell(const std::string name) const;
+  bool hasCell(const std::string & name) const;
 
   /**
    * @brief Get list of the all cells in the universe
@@ -72,7 +72,7 @@ public:
    *
    * @return name of universe
    */
-  const std::string getName() const { return _name; }
+  const std::string & getName() const { return _name; }
 
   /**
    * @brief return true if the universe is the root universe
@@ -100,7 +100,7 @@ protected:
    *
    * @param name name of cell to remove
    */
-  void removeCell(const std::string name);
+  void removeCell(const std::string & name);
 
   /**
    * @brief remove all cells from the universe
@@ -109,7 +109,7 @@ protected:
 
   // set the name of the universe - intentionally not public because
   // name needs to be managed at the CSGUniverseList level
-  void setName(const std::string name) { _name = name; }
+  void setName(const std::string & name) { _name = name; }
 
   /// Name of universe
   std::string _name;

@@ -64,7 +64,7 @@ public:
    *
    * @return string representation of the region
    */
-  std::string toString() const { return _region_str; }
+  const std::string & toString() const { return _region_str; }
 
   /**
    * @brief Get the Region Type as a string
@@ -121,7 +121,7 @@ protected:
  * @param op operator to consider
  * @return region string with () removed if applicable
  */
-std::string stripRegionString(std::string region_str, std::string op);
+const std::string stripRegionString(std::string region_str, std::string op);
 
 /// Operation overloads for operation based region construction
 
