@@ -22,14 +22,14 @@ CSGUniverseList::CSGUniverseList()
 }
 
 void
-CSGUniverseList::checkUniverseName(const std::string name) const
+CSGUniverseList::checkUniverseName(const std::string & name) const
 {
   if (_universes.find(name) != _universes.end())
     mooseError("Universe with name " + name + " already exists in geoemetry.");
 }
 
 CSGUniverse &
-CSGUniverseList::getUniverse(const std::string name)
+CSGUniverseList::getUniverse(const std::string & name)
 {
   auto univ = _universes.find(name);
   if (univ == _universes.end())
@@ -48,7 +48,7 @@ CSGUniverseList::getAllUniverses() const
 }
 
 CSGUniverse &
-CSGUniverseList::addUniverse(const std::string name)
+CSGUniverseList::addUniverse(const std::string & name)
 {
   checkUniverseName(name);
   _universes.insert(std::make_pair(name, std::make_unique<CSGUniverse>(name)));
@@ -56,7 +56,7 @@ CSGUniverseList::addUniverse(const std::string name)
 }
 
 CSGUniverse &
-CSGUniverseList::addUniverse(const std::string name, std::vector<CSGCell *> & cells)
+CSGUniverseList::addUniverse(const std::string & name, std::vector<CSGCell *> & cells)
 {
   checkUniverseName(name);
   _universes.insert(std::make_pair(name, std::make_unique<CSGUniverse>(name, cells)));
@@ -72,7 +72,7 @@ CSGUniverseList::addUniverse(std::unique_ptr<CSGUniverse> & universe)
 }
 
 void
-CSGUniverseList::renameUniverse(const CSGUniverse & universe, const std::string name)
+CSGUniverseList::renameUniverse(const CSGUniverse & universe, const std::string & name)
 {
   // check that this universe passed in is actually in the same universe that is in the universe
   // list

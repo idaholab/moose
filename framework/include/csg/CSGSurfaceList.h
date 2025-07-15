@@ -41,7 +41,7 @@ protected:
    * @param boundary boundary type for the surface
    * @return reference to plane surface created
    */
-  CSGSurface & addPlaneFromPoints(const std::string name,
+  CSGSurface & addPlaneFromPoints(const std::string & name,
                                   const Point & p1,
                                   const Point & p2,
                                   const Point & p3,
@@ -59,7 +59,7 @@ protected:
    * @param boundary boundary type for the surface
    * @return reference to plane surface created
    */
-  CSGSurface & addPlaneFromCoefficients(const std::string name,
+  CSGSurface & addPlaneFromCoefficients(const std::string & name,
                                         const Real a,
                                         const Real b,
                                         const Real c,
@@ -75,8 +75,8 @@ protected:
    * @param boundary boundary type for the surface
    * @return reference to sphere surface created
    */
-  CSGSurface & addSphere(const std::string name,
-                         const Point center,
+  CSGSurface & addSphere(const std::string & name,
+                         const Point & center,
                          const Real r,
                          CSGSurface::BoundaryType boundary);
 
@@ -91,11 +91,11 @@ protected:
    * @param boundary boundary type for the surface
    * @return reference to CSGSurface object that is created
    */
-  CSGSurface & addCylinder(const std::string name,
+  CSGSurface & addCylinder(const std::string & name,
                            const Real x0,
                            const Real x1,
                            const Real r,
-                           const std::string axis,
+                           const std::string & axis,
                            CSGSurface::BoundaryType boundary);
 
   /**
@@ -118,7 +118,7 @@ protected:
    * @param name name of surface
    * @return reference to CSGSurface of the specified name
    */
-  CSGSurface & getSurface(const std::string name) const;
+  CSGSurface & getSurface(const std::string & name) const;
 
   /**
    * @brief add a surface object to existing SurfaceList. Ownership of surface will be transferred
@@ -133,10 +133,10 @@ protected:
    *
    * @param name new name of surface
    */
-  void renameSurface(const CSGSurface & surface, const std::string name);
+  void renameSurface(const CSGSurface & surface, const std::string & name);
 
   /// Checks whether surface name already exists within CSGSurfaceList object
-  void checkSurfaceName(const std::string name) const;
+  void checkSurfaceName(const std::string & name) const;
 
   /// Mapping of surface names to pointers of stored surface objects
   std::map<std::string, std::unique_ptr<CSGSurface>> _surfaces;

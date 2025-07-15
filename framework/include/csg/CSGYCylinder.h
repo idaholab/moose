@@ -32,7 +32,7 @@ public:
    * @param r radius
    * @param boundary boundary type for the surface
    */
-  CSGYCylinder(const std::string name,
+  CSGYCylinder(const std::string & name,
                const Real x0,
                const Real z0,
                const Real r,
@@ -57,7 +57,7 @@ public:
    * @param p point
    * @return sign of direction to surface from point
    */
-  virtual CSGSurface::Direction directionFromPoint(const Point p) const override;
+  virtual CSGSurface::Direction directionFromPoint(const Point & p) const override;
 
 protected:
   /// Value of x0 in equation of an y-axis aligned cylinder

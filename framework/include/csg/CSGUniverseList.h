@@ -36,7 +36,7 @@ protected:
    * @param name unique name of universe
    * @return reference to empty universe that is created
    */
-  CSGUniverse & addUniverse(const std::string name);
+  CSGUniverse & addUniverse(const std::string & name);
 
   /**
    * @brief create a universe from list of cells
@@ -45,7 +45,7 @@ protected:
    * @param cells list of cell pointers to add to the universe upon creation
    * @return pointer to universe that is created
    */
-  CSGUniverse & addUniverse(const std::string name, std::vector<CSGCell *> & cells);
+  CSGUniverse & addUniverse(const std::string & name, std::vector<CSGCell *> & cells);
 
   /**
    * @brief Get map of all names to universes in universe list
@@ -67,7 +67,7 @@ protected:
    * @param name name of universe
    * @return reference to CSGUniverse of the specified name
    */
-  CSGUniverse & getUniverse(const std::string name);
+  CSGUniverse & getUniverse(const std::string & name);
 
   /**
    * @brief Get the root universe
@@ -90,10 +90,10 @@ protected:
    * @param universe reference to universe whose name should be renamed
    * @param name new name
    */
-  void renameUniverse(const CSGUniverse & universe, const std::string name);
+  void renameUniverse(const CSGUniverse & universe, const std::string & name);
 
   /// Checks whether universe name already exists within CSGUniverseList object
-  void checkUniverseName(const std::string name) const;
+  void checkUniverseName(const std::string & name) const;
 
   /// Mapping of universe names to pointers of stored universe objects
   std::map<std::string, std::unique_ptr<CSGUniverse>> _universes;
