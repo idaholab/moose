@@ -29,6 +29,7 @@ WCNSFVFluidHeatTransferPhysics::validParams()
 WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParameters & parameters)
   : WCNSFVFluidHeatTransferPhysicsBase(parameters)
 {
+  checkSecondParamNotSetIfFirstOneSet("solve_for_enthalpy", "fluid_temperature_variable");
 }
 
 void
@@ -317,6 +318,13 @@ WCNSFVFluidHeatTransferPhysics::addEnergyInletBC()
       params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
       params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
 
+      if (_solve_for_enthalpy)
+      {
+        params.set<bool>("assume_constant_cp") = false;
+        params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
+        params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
+        params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
+      }
       for (const auto d : make_range(dimension()))
         params.set<MooseFunctorName>(NS::velocity_vector[d]) = _velocity_names[d];
 
