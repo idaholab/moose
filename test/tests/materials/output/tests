@@ -216,7 +216,7 @@
   [missing_outputs]
     type = RunException
     input = output.i
-    expect_err = "Material properties output specified is not created because 'outputs' is not set in the Material, and neither is Outputs/output_material_properties"
+    expect_err = "Material properties output specified is not created because 'outputs' is not set in the Material, and neither is output_material_properties in any of the outputs in the \[Outputs\] block"
     cli_args = "Materials/active='out'
                 Materials/out/type=OutputTestMaterial
                 Materials/out/variable=u
