@@ -7,6 +7,7 @@
       type = RunApp
       input = parent.i
       capabilities = 'mfem'
+      devices = 'cpu cuda'
       recover = false
       detail = 'running the inputs, and '
     []
