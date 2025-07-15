@@ -9,6 +9,7 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to add an MFEM variable from a user specification of a MOOSE variable, inferring the finite element space.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     max_parallel = 1
     recover = false
   []
