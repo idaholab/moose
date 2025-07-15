@@ -17,6 +17,12 @@
 #include <c10/core/DeviceType.h>
 #endif
 
+#ifdef MOOSE_MFEM_ENABLED
+#include "libmesh/ignore_warnings.h"
+#include <mfem.hpp>
+#include "libmesh/restore_warnings.h"
+#endif
+
 // MOOSE includes
 #include "Moose.h"
 #include "Parser.h"
@@ -38,6 +44,7 @@
 #include "Backup.h"
 #include "MooseBase.h"
 #include "Capabilities.h"
+#include "MoosePassKey.h"
 
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
@@ -62,6 +69,10 @@ class SystemInfo;
 class CommandLine;
 class RelationshipManager;
 class SolutionInvalidity;
+class MultiApp;
+#ifdef MOOSE_MFEM_ENABLED
+class MFEMExecutioner;
+#endif
 
 namespace libMesh
 {
@@ -373,27 +384,6 @@ public:
    **/
   Parser & parser();
 
-private:
-  /**
-   * Internal function used to recursively create the executor objects.
-   *
-   * Called by createExecutors
-   *
-   * @param current_executor_name The name of the executor currently needing to be built
-   * @param possible_roots The names of executors that are currently candidates for being the root
-   */
-  void recursivelyCreateExecutors(const std::string & current_executor_name,
-                                  std::list<std::string> & possible_roots,
-                                  std::list<std::string> & current_branch);
-
-  /**
-   * Register all base MooseApp capabilities to the Moose::Capabilities registry.
-   * Apps and Modules may register additional capabilities in their registerAll
-   * function.
-   */
-  void registerCapabilities();
-
-public:
   /**
    * After adding all of the Executor Params - this function will actually cause all of them to be
    * built
@@ -989,30 +979,6 @@ public:
    */
   const hit::Node * getCurrentActionHitNode() const;
 
-private:
-  /**
-   * Purge this relationship manager from meshes and DofMaps and finally from us. This method is
-   * private because only this object knows when we should remove relationship managers: when we are
-   * adding relationship managers to this object's storage, we perform an operator>= comparison
-   * between our existing RMs and the RM we are trying to add. If any comparison returns true, we do
-   * not add the new RM because the comparison indicates that we would gain no new coverage.
-   * However, if no comparison return true, then we add the new RM and we turn the comparison
-   * around! Consequently if our new RM is >= than any of our preexisting RMs, we remove those
-   * preexisting RMs using this method
-   */
-  void removeRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
-
-#ifdef MOOSE_LIBTORCH_ENABLED
-  /**
-   * Function to determine the device which should be used by libtorch on this
-   * application. We use this function to decide what is available on different
-   * builds.
-   * @param device Enum to describe if a cpu or a gpu should be used.
-   */
-  torch::DeviceType determineLibtorchDeviceType(const MooseEnum & device) const;
-#endif
-
-public:
   /**
    * Attach the relationship managers of the given type
    * Note: Geometric relationship managers that are supposed to be attached late
@@ -1123,6 +1089,24 @@ public:
 
   /// Returns whether the flag for unused parameters is set to throw an error
   bool unusedFlagIsError() const { return _enable_unused_check == ERROR_UNUSED; }
+
+#ifdef MOOSE_MFEM_ENABLED
+  /**
+   * Create/configure the MFEM device with the provided \p device_string. More than one device can
+   * be configured. If supplying multiple devices, they should be comma separated
+   */
+  void setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMExecutioner>);
+
+  /**
+   * Get the MFEM device object
+   */
+  std::shared_ptr<mfem::Device> getMFEMDevice(Moose::PassKey<MultiApp>) { return _mfem_device; }
+
+  /**
+   * Get the configured MFEM devices
+   */
+  const std::set<std::string> & getMFEMDevices(Moose::PassKey<MultiApp>) { return _mfem_devices; }
+#endif
 
 protected:
   /**
@@ -1364,6 +1348,47 @@ protected:
   std::unordered_map<std::string, DynamicLibraryInfo> _lib_handles;
 
 private:
+  /**
+   * Internal function used to recursively create the executor objects.
+   *
+   * Called by createExecutors
+   *
+   * @param current_executor_name The name of the executor currently needing to be built
+   * @param possible_roots The names of executors that are currently candidates for being the root
+   */
+  void recursivelyCreateExecutors(const std::string & current_executor_name,
+                                  std::list<std::string> & possible_roots,
+                                  std::list<std::string> & current_branch);
+
+  /**
+   * Register all base MooseApp capabilities to the Moose::Capabilities registry.
+   * Apps and Modules may register additional capabilities in their registerAll
+   * function.
+   */
+  void registerCapabilities();
+
+  /**
+   * Purge this relationship manager from meshes and DofMaps and finally from us. This method is
+   * private because only this object knows when we should remove relationship managers: when we are
+   * adding relationship managers to this object's storage, we perform an operator>= comparison
+   * between our existing RMs and the RM we are trying to add. If any comparison returns true, we do
+   * not add the new RM because the comparison indicates that we would gain no new coverage.
+   * However, if no comparison return true, then we add the new RM and we turn the comparison
+   * around! Consequently if our new RM is >= than any of our preexisting RMs, we remove those
+   * preexisting RMs using this method
+   */
+  void removeRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
+
+#ifdef MOOSE_LIBTORCH_ENABLED
+  /**
+   * Function to determine the device which should be used by libtorch on this
+   * application. We use this function to decide what is available on different
+   * builds.
+   * @param device Enum to describe if a cpu or a gpu should be used.
+   */
+  torch::DeviceType determineLibtorchDeviceType(const MooseEnum & device) const;
+#endif
+
   ///@{
   /// Structs that are used in the _interface_registry
   struct InterfaceRegistryObjectsBase
@@ -1559,6 +1584,14 @@ private:
 #ifdef MOOSE_LIBTORCH_ENABLED
   /// The libtorch device this app is using.
   const torch::DeviceType _libtorch_device;
+#endif
+
+#ifdef MOOSE_MFEM_ENABLED
+  /// The MFEM Device object
+  std::shared_ptr<mfem::Device> _mfem_device;
+
+  /// MFEM supported devices based on user-provided config
+  std::set<std::string> _mfem_devices;
 #endif
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
