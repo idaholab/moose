@@ -30,8 +30,8 @@ CSGBase::updateSurfaceBoundaryType(const CSGSurface & surface, CSGSurface::Bound
 }
 
 const CSGCell &
-CSGBase::createCell(const std::string name,
-                    const std::string mat_name,
+CSGBase::createCell(const std::string & name,
+                    const std::string & mat_name,
                     const CSGRegion & region,
                     const CSGUniverse * add_to_univ)
 {
@@ -45,7 +45,7 @@ CSGBase::createCell(const std::string name,
 }
 
 const CSGCell &
-CSGBase::createCell(const std::string name,
+CSGBase::createCell(const std::string & name,
                     const CSGRegion & region,
                     const CSGUniverse * add_to_univ)
 {
@@ -59,7 +59,7 @@ CSGBase::createCell(const std::string name,
 }
 
 const CSGCell &
-CSGBase::createCell(const std::string name,
+CSGBase::createCell(const std::string & name,
                     const CSGUniverse & fill_univ,
                     const CSGRegion & region,
                     const CSGUniverse * add_to_univ)
@@ -90,7 +90,7 @@ CSGBase::updateCellRegion(const CSGCell & cell, const CSGRegion & region)
 }
 
 const CSGUniverse &
-CSGBase::createUniverse(const std::string name,
+CSGBase::createUniverse(const std::string & name,
                         std::vector<std::reference_wrapper<const CSGCell>> & cells)
 {
   auto & univ = _universe_list.addUniverse(name);
@@ -186,7 +186,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list)
 }
 
 void
-CSGBase::joinUniverseList(CSGUniverseList & univ_list, std::string new_root_name_incoming)
+CSGBase::joinUniverseList(CSGUniverseList & univ_list, std::string & new_root_name_incoming)
 {
   // case 2: incoming root is turned into new universe and existing root remains root
 
@@ -207,8 +207,8 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list, std::string new_root_name
 
 void
 CSGBase::joinUniverseList(CSGUniverseList & univ_list,
-                          std::string new_root_name_base,
-                          std::string new_root_name_incoming)
+                          std::string & new_root_name_base,
+                          std::string & new_root_name_incoming)
 {
   // case 3: each root universe becomes a new universe and a new root is created
 
@@ -303,8 +303,8 @@ CSGBase::generateOutput() const
   auto all_surfs = getAllSurfaces();
   for (const CSGSurface & s : all_surfs)
   {
-    auto surf_name = s.getName();
-    auto coeffs = s.getCoeffs();
+    const auto & surf_name = s.getName();
+    const auto & coeffs = s.getCoeffs();
     csg_json["SURFACES"][surf_name] = {{"TYPE", s.getSurfaceTypeString()},
                                        {"BOUNDARY", s.getBoundaryTypeString()},
                                        {"COEFFICIENTS", {}}};
@@ -316,10 +316,10 @@ CSGBase::generateOutput() const
   auto all_cells = getAllCells();
   for (const CSGCell & c : all_cells)
   {
-    const auto cell_name = c.getName();
-    const auto cell_region = c.getRegionAsString();
-    const auto cell_filltype = c.getFillTypeString();
-    const auto fill_name = c.getFillName();
+    const auto & cell_name = c.getName();
+    const auto & cell_region = c.getRegionAsString();
+    const auto & cell_filltype = c.getFillTypeString();
+    const auto & fill_name = c.getFillName();
     csg_json["CELLS"][cell_name]["FILLTYPE"] = cell_filltype;
     csg_json["CELLS"][cell_name]["REGION"] = cell_region;
     csg_json["CELLS"][cell_name]["FILL"] = fill_name;
@@ -329,7 +329,7 @@ CSGBase::generateOutput() const
   auto all_univs = getAllUniverses();
   for (const CSGUniverse & u : all_univs)
   {
-    const auto univ_name = u.getName();
+    const auto & univ_name = u.getName();
     const auto & univ_cells = u.getAllCells();
     csg_json["UNIVERSES"][univ_name]["CELLS"] = {};
     for (const CSGCell & c : univ_cells)

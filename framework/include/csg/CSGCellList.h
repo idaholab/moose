@@ -41,7 +41,7 @@ protected:
    * added to this CSGCellList
    */
   CSGCell &
-  addMaterialCell(const std::string name, const std::string mat_name, const CSGRegion & region);
+  addMaterialCell(const std::string & name, const std::string & mat_name, const CSGRegion & region);
 
   /**
    * @brief Add a Void Cell object cell list
@@ -51,7 +51,7 @@ protected:
    * @return reference to CSGCell with void fill that was created and
    * added to this CSGCellList
    */
-  CSGCell & addVoidCell(const std::string name, const CSGRegion & region);
+  CSGCell & addVoidCell(const std::string & name, const CSGRegion & region);
 
   /**
    * @brief Add a Universe Cell object to cell list
@@ -63,14 +63,14 @@ protected:
    * added to this CSGCellList
    */
   CSGCell &
-  addUniverseCell(const std::string name, const CSGUniverse & univ, const CSGRegion & region);
+  addUniverseCell(const std::string & name, const CSGUniverse & univ, const CSGRegion & region);
 
   /**
    * @brief Get map of all names to cells in cell list
    *
    * @return map of all names to CSGCell pointers
    */
-  std::map<std::string, std::unique_ptr<CSGCell>> & getCellListMap() { return _cells; }
+  std::unordered_map<std::string, std::unique_ptr<CSGCell>> & getCellListMap() { return _cells; }
 
   /**
    * @brief Get all the cells in CSGBase instance
@@ -85,7 +85,7 @@ protected:
    * @param name
    * @return reference to CSGCell of the specified name
    */
-  CSGCell & getCell(const std::string name) const;
+  CSGCell & getCell(const std::string & name) const;
 
   /**
    * @brief add a cell to the CellList. Ownership of cell will be trasnferred to cell list object
@@ -101,13 +101,13 @@ protected:
    * @param cell reference to CSGCell object that should be renamed
    * @param name new name
    */
-  void renameCell(const CSGCell & cell, const std::string name);
+  void renameCell(const CSGCell & cell, const std::string & name);
 
   /// Checks whether cell name already exists within CSGCellList object
-  void checkCellName(const std::string name) const;
+  void checkCellName(const std::string & name) const;
 
   /// Mapping of cell names to pointers of stored cell objects
-  std::map<std::string, std::unique_ptr<CSGCell>> _cells;
+  std::unordered_map<std::string, std::unique_ptr<CSGCell>> _cells;
 
   // Only CSGBase should be calling the methods in CSGCellList
   friend class CSGBase;

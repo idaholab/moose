@@ -140,6 +140,15 @@
       expect_err = 'A cell named square_cell is being removed from universe ROOT_UNIVERSE that is different from the cell of the same name in the CSGBase instance.'
       mesh_mode = REPLICATED
     []
+    [collinear_points_on_plane]
+      max_threads = 1
+      type = 'RunException'
+      input = 'csg_only_surface_collinear_points.i'
+      detail = ' trying to generate a CSG plane where all points on the plane are colienar'
+      cli_args = '--csg-only'
+      expect_err = 'Provided points to define a CSGPlane are collinear'
+      mesh_mode = REPLICATED
+    []
     [distributed_mesh]
       max_threads = 1
       type = RunException
