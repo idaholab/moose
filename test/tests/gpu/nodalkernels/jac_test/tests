@@ -13,6 +13,7 @@
       difference_tol = 1E-10
       detail = "subdomain and"
       capabilities = 'kokkos'
+      devices = 'cuda'
     []
 
     [bc_jacobian_test]
@@ -22,6 +23,7 @@
       difference_tol = 1E-10
       detail = "boundary restricted terms."
       capabilities = 'kokkos'
+      devices = 'cuda'
     []
   []
 []

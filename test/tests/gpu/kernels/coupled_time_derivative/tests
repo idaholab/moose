@@ -8,6 +8,7 @@
     exodiff = 'gpu_coupled_time_derivative_test_out.e'
     requirement = 'A coupled time derivative Kokkos kernel shall be provided'
     capabilities = 'kokkos'
+    devices = 'cuda'
   []
   [jac_test]
     type = 'PetscJacobianTester'
@@ -18,5 +19,6 @@
     difference_tol = 1e-6
     requirement = 'The Jacobian from KokkosCoupledTimeDerivative shall be perfect'
     capabilities = 'kokkos'
+    devices = 'cuda'
   []
 []
