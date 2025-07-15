@@ -12,7 +12,7 @@
 namespace CSG
 {
 
-CSGYCylinder::CSGYCylinder(const std::string name,
+CSGYCylinder::CSGYCylinder(const std::string & name,
                            const Real x0,
                            const Real z0,
                            const Real r,
@@ -21,15 +21,15 @@ CSGYCylinder::CSGYCylinder(const std::string name,
 {
 }
 
-std::map<std::string, Real>
+std::unordered_map<std::string, Real>
 CSGYCylinder::getCoeffs() const
 {
-  std::map<std::string, Real> coeffs = {{"x0", _x0}, {"z0", _z0}, {"r", _r}};
+  std::unordered_map<std::string, Real> coeffs = {{"x0", _x0}, {"z0", _z0}, {"r", _r}};
   return coeffs;
 }
 
 CSGSurface::Direction
-CSGYCylinder::directionFromPoint(const Point p) const
+CSGYCylinder::directionFromPoint(const Point & p) const
 {
   // Compute distance from the cylinder center to determine if inside (< r^2)
   // or outside (> r^2) the cylinder

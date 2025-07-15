@@ -38,7 +38,7 @@ public:
    * @param name name of cell
    * @param region cell region
    */
-  CSGCell(const std::string name, const CSGRegion & region);
+  CSGCell(const std::string & name, const CSGRegion & region);
 
   /**
    * Constructor for Material Cell
@@ -48,7 +48,7 @@ public:
    * @param mat_name name of material to use as the cell fill
    * @param region cell region
    */
-  CSGCell(const std::string name, const std::string mat_name, const CSGRegion & region);
+  CSGCell(const std::string & name, const std::string & mat_name, const CSGRegion & region);
 
   /**
    * Constructor for Universe Cell
@@ -57,7 +57,7 @@ public:
    * @param univ universe to be the fill
    * @param region cell region
    */
-  CSGCell(const std::string name, const CSGUniverse * univ, const CSGRegion & region);
+  CSGCell(const std::string & name, const CSGUniverse * univ, const CSGRegion & region);
 
   /**
    * Destructor
@@ -91,21 +91,21 @@ public:
    *
    * @return const std::string
    */
-  const std::string getFillMaterial() const;
+  const std::string & getFillMaterial() const;
 
   /**
    * @brief Get the name of the fill
    *
    * @return std::string fill name
    */
-  std::string getFillName() const { return _fill_name; }
+  const std::string & getFillName() const { return _fill_name; }
 
   /**
    * @brief Get the cell name
    *
    * @return const std::string cell name
    */
-  const std::string getName() const { return _name; }
+  const std::string & getName() const { return _name; }
 
   /**
    * @brief Get the cell region
@@ -119,7 +119,7 @@ public:
    *
    * @return std::string string representation of the cell region
    */
-  std::string getRegionAsString() const { return _region.toString(); }
+  const std::string & getRegionAsString() const { return _region.toString(); }
 
   /// Operator overload for checking if two CSGCell objects are equal
   bool operator==(const CSGCell & other) const;
@@ -130,7 +130,7 @@ public:
 protected:
   // set the name of the cell - intentionally not public because
   // name needs to be managed at the CSGCellList level
-  void setName(const std::string name) { _name = name; }
+  void setName(const std::string & name) { _name = name; }
 
   // update the region of the cell to a new region - not public because
   // it needs to be called from CSGBase so that the surfaces can be checked first.

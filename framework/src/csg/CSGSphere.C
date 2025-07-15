@@ -12,8 +12,8 @@
 namespace CSG
 {
 
-CSGSphere::CSGSphere(const std::string name,
-                     const Point center,
+CSGSphere::CSGSphere(const std::string & name,
+                     const Point & center,
                      const Real r,
                      CSGSurface::BoundaryType boundary)
   : CSGSurface(name, SurfaceType::SPHERE, boundary),
@@ -26,15 +26,15 @@ CSGSphere::CSGSphere(const std::string name,
     mooseError("Radius of sphere must be postive.");
 }
 
-std::map<std::string, Real>
+std::unordered_map<std::string, Real>
 CSGSphere::getCoeffs() const
 {
-  std::map<std::string, Real> coeffs = {{"x0", _x0}, {"y0", _y0}, {"z0", _z0}, {"r", _r}};
+  std::unordered_map<std::string, Real> coeffs = {{"x0", _x0}, {"y0", _y0}, {"z0", _z0}, {"r", _r}};
   return coeffs;
 }
 
 CSGSurface::Direction
-CSGSphere::directionFromPoint(const Point p) const
+CSGSphere::directionFromPoint(const Point & p) const
 {
   // Compute distance from the sphere center to determine if inside (< r^2)
   // or outside (> r^2) the sphere
