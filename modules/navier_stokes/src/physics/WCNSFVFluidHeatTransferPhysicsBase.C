@@ -229,7 +229,7 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
     return;
   }
 
-  InputParameters params = getFactory().getValidParams("FunctionIC");
+  InputParameters params = getFactory().getValidParams("FVFunctionIC");
   assignBlocks(params, _blocks);
 
   if (isParamSetByUser("initial_temperature"))
@@ -243,7 +243,7 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
       params.set<VariableName>("variable") = _fluid_temperature_name;
       params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
 
-      getProblem().addInitialCondition("FunctionIC", _fluid_temperature_name + "_ic", params);
+      getProblem().addFVInitialCondition("FVFunctionIC", _fluid_temperature_name + "_ic", params);
     }
     else if (isParamValid(NS::fluid))
     {
@@ -279,7 +279,7 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
     params.set<VariableName>("variable") = _fluid_enthalpy_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_enthalpy");
 
-    getProblem().addInitialCondition("FunctionIC", _fluid_enthalpy_name + "_ic", params);
+    getProblem().addFVInitialCondition("FVFunctionIC", _fluid_enthalpy_name + "_ic", params);
   }
   else if (isParamValid("initial_enthalpy"))
     reportPotentiallyMissedParameters({"initial_enthalpy"}, "FunctionIC");
