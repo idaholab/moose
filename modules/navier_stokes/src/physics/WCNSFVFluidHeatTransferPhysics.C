@@ -319,8 +319,19 @@ WCNSFVFluidHeatTransferPhysics::addEnergyInletBC()
       const auto & flux_inlet_directions = _flow_equations_physics->getFluxInletDirections();
       const auto & flux_inlet_pps = _flow_equations_physics->getFluxInletPPs();
 
+      if (flux_inlet_pps.size() < flux_bc_counter)
+        _flow_equations_physics->paramError(
+            "flux_inlet_pps",
+            "Should be specified for all 'flux-mass/velocity' boundary conditions");
+
       if (flux_inlet_directions.size())
+      {
+        if (flux_inlet_directions.size() < flux_bc_counter)
+          _flow_equations_physics->paramError("flux_inlet_pps",
+                                              "Should be specified for all or none of the "
+                                              "'flux-mass/velocity' boundary conditions");
         params.set<Point>("direction") = flux_inlet_directions[flux_bc_counter];
+      }
       if (_energy_inlet_types[bc_ind] == "flux-mass")
       {
         params.set<PostprocessorName>("mdot_pp") = flux_inlet_pps[flux_bc_counter];
