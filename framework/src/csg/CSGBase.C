@@ -109,7 +109,8 @@ CSGBase::addCellToUniverse(const CSGUniverse & universe, const CSGCell & cell)
   auto & univ = _universe_list.getUniverse(universe.getName());
   if (univ != universe)
     mooseError("Cells are being added to a universe named " + universe.getName() +
-               " that is different " + "from the universe of the same name in the CSGBase instance.");
+               " that is different " +
+               "from the universe of the same name in the CSGBase instance.");
   univ.addCell(cell);
 }
 
