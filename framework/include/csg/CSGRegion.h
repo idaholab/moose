@@ -16,7 +16,7 @@ namespace CSG
 
 /**
  * CSGRegions creates an internal representation of a CSG region, which can refer to
- * an intersection, union, complement, or halfspace
+ * an intersection, union, complement, or half-space
  * CSGHalfspace objects
  */
 class CSGRegion
@@ -38,7 +38,7 @@ public:
   CSGRegion();
 
   /**
-   * Constructor for halfspace
+   * Constructor for half-space
    */
   CSGRegion(const CSGSurface & surf, const CSGSurface::Direction direction);
 
@@ -62,28 +62,28 @@ public:
   /**
    * @brief gets the string representation of the region
    *
-   * @return std::string string
+   * @return string representation of the region
    */
   std::string toString() const { return _region_str; }
 
   /**
    * @brief Get the Region Type as a string
    *
-   * @return const std::string string representation of the region type
+   * @return string representation of the region type
    */
   const std::string getRegionTypeString() const;
 
   /**
    * @brief Get the RegionType
    *
-   * @return RegionType
+   * @return region type
    */
   RegionType getRegionType() const { return _region_type; }
 
   /**
    * @brief Get the list of surfaces associated with the region
    *
-   * @return std::vector<CSGSurface *> list of pointers to surfaces that define the region
+   * @return list of pointers to surfaces that define the region
    */
   const std::vector<std::reference_wrapper<const CSGSurface>> & getSurfaces() const
   {
@@ -119,16 +119,16 @@ protected:
  *
  * @param region_str region string representation to simplify
  * @param op operator to consider
- * @return std::string region string with () removed if applicable
+ * @return region string with () removed if applicable
  */
 std::string stripRegionString(std::string region_str, std::string op);
 
 /// Operation overloads for operation based region construction
 
-// positive halfspace (+)
+// positive half-space (+)
 const CSGRegion operator+(const CSGSurface & surf);
 
-// negative halfspace (-)
+// negative half-space (-)
 const CSGRegion operator-(const CSGSurface & surf);
 
 // intersection (&)

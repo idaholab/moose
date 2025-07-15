@@ -37,7 +37,7 @@ protected:
    * @param mat_name material name (TODO: this will eventually be a material object and not just a
    * name)
    * @param region cell region
-   * @return CSGCell & reference to CSGCell with material fill that was created and
+   * @return reference to CSGCell with material fill that was created and
    * added to this CSGCellList
    */
   CSGCell &
@@ -48,7 +48,7 @@ protected:
    *
    * @param name unique cell name
    * @param region cell region
-   * @return CSGCell & reference to CSGCell with void fill that was created and
+   * @return reference to CSGCell with void fill that was created and
    * added to this CSGCellList
    */
   CSGCell & addVoidCell(const std::string name, const CSGRegion & region);
@@ -59,7 +59,7 @@ protected:
    * @param name unique cell name
    * @param univ universe
    * @param region cell region
-   * @return CSGCell & reference to CSGCell with universe fill that was created and
+   * @return reference to CSGCell with universe fill that was created and
    * added to this CSGCellList
    */
   CSGCell &
@@ -68,15 +68,14 @@ protected:
   /**
    * @brief Get map of all names to cells in cell list
    *
-   * @return std::map<std::string, std::unique_ptr<CSGCell>>& map of all names to cells
+   * @return map of all names to CSGCell pointers
    */
   std::map<std::string, std::unique_ptr<CSGCell>> & getCellListMap() { return _cells; }
 
   /**
    * @brief Get all the cells in CSGBase instance
    *
-   * @return std::vector<std::reference_wrapper<const CSGCell>> list of references to all CSGCell
-   * objects
+   * @return list of references to all CSGCell objects
    */
   std::vector<std::reference_wrapper<const CSGCell>> getAllCells() const;
 
@@ -84,7 +83,7 @@ protected:
    * @brief Get the CSGCell by name
    *
    * @param name
-   * @return CSGCell & reference to CSGCell of the specified name
+   * @return reference to CSGCell of the specified name
    */
   CSGCell & getCell(const std::string name) const;
 
