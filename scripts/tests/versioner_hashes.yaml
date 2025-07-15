@@ -1257,4 +1257,31 @@ ca3944140e845b4b8586365397d7fe1110ebeb89: #30791; libMesh submodule update, add 
   wasp:
     full_version: 2025.05.13_1
     hash: 3e37a23
-
+8f7ffda5b796dc522173a5b30483974b7279d74d: #31041; support ZSH Conda initializations on Linux
+  libmesh:
+    full_version: 2025.06.25_1
+    hash: 5a38107
+  libmesh-vtk:
+    full_version: 9.4.2_4
+    hash: cfa149b
+  moose-dev:
+    full_version: 2025.07.15
+    hash: '2978173'
+  mpi:
+    full_version: 2025.07.15
+    hash: 325c0ee
+  petsc:
+    full_version: 3.23.0.6.gd9d7fd11dca_3
+    hash: 1b55c48
+  pprof:
+    full_version: 2025.06.13
+    hash: 3d296db
+  seacas:
+    full_version: 2025.05.22_0
+    hash: '1278418'
+  tools:
+    full_version: 2025.06.26
+    hash: d73012a
+  wasp:
+    full_version: 2025.05.13_1
+    hash: 3e37a23
