@@ -66,5 +66,5 @@ LinearFVConjugateHeatTransferBC::computeBoundaryGradientRHSContribution() const
   const auto t_coupled = (*_rhs_temperature)(face, state) +
               (  (*_rhs_conductivity)(face,state) * computeBoundaryNormalGradient()/ _htc(face, state));
 
-  return  -_htc(face, state) * t_coupled;
+  return  _htc(face, state) * t_coupled;
 }

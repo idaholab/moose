@@ -662,6 +662,7 @@ LinearAssemblySegregatedSolve::solve()
           Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
           ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
               solveSolidEnergy();
+          std::cout<<"Solving for solid temp..."<<std::endl;
 
           //          const auto t_fluid =  *_energy_system->var();
           //          const auto t_solid =  *_solid_energy_system->var();
@@ -673,7 +674,7 @@ LinearAssemblySegregatedSolve::solve()
           //
           //          cht_tol_i = std::max(q_cht_tol_i, t_cht_tol_i);
         }
-
+        std::cout<<"Finished iteration:"<<fpi_itrs+1<<std::endl;
         fpi_itrs++;
       }
     }
