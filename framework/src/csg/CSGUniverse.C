@@ -12,9 +12,9 @@
 namespace CSG
 {
 
-CSGUniverse::CSGUniverse(const std::string name, bool is_root) : _name(name), _is_root(is_root) {}
+CSGUniverse::CSGUniverse(const std::string & name, bool is_root) : _name(name), _is_root(is_root) {}
 
-CSGUniverse::CSGUniverse(const std::string name, std::vector<CSGCell *> & cells, bool is_root)
+CSGUniverse::CSGUniverse(const std::string & name, std::vector<CSGCell *> & cells, bool is_root)
   : _name(name), _is_root(is_root)
 {
   for (auto cell : cells)
@@ -33,7 +33,7 @@ CSGUniverse::addCell(const CSGCell & cell)
 }
 
 const CSGCell &
-CSGUniverse::getCell(const std::string name)
+CSGUniverse::getCell(const std::string & name)
 {
   if (!hasCell(name))
     mooseError("Cell with name " + name + " does not exist in universe " + _name + ".");
@@ -44,7 +44,7 @@ CSGUniverse::getCell(const std::string name)
 }
 
 bool
-CSGUniverse::hasCell(const std::string name) const
+CSGUniverse::hasCell(const std::string & name) const
 {
   for (const CSGCell & cell : _cells)
     if (cell.getName() == name)
@@ -53,7 +53,7 @@ CSGUniverse::hasCell(const std::string name) const
 }
 
 void
-CSGUniverse::removeCell(const std::string name)
+CSGUniverse::removeCell(const std::string & name)
 {
   if (!hasCell(name))
     mooseError("Cannot remove cell. Cell with name " + name + " does not exist in universe " +

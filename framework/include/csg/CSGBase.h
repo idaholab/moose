@@ -46,7 +46,7 @@ public:
    * @return reference to CSGSurface object
    */
   const CSGSurface &
-  createPlaneFromPoints(const std::string name,
+  createPlaneFromPoints(const std::string & name,
                         const Point & p1,
                         const Point & p2,
                         const Point & p3,
@@ -67,7 +67,7 @@ public:
    * @return reference to CSGSurface object
    */
   const CSGSurface & createPlaneFromCoefficients(
-      const std::string name,
+      const std::string & name,
       const Real a,
       const Real b,
       const Real c,
@@ -86,7 +86,7 @@ public:
    * @return reference to CSGSurface object
    */
   const CSGSurface &
-  createSphere(const std::string name,
+  createSphere(const std::string & name,
                const Real r,
                CSGSurface::BoundaryType boundary = CSGSurface::BoundaryType::TRANSMISSION)
   {
@@ -103,8 +103,8 @@ public:
    * @return reference to CSGSurface object
    */
   const CSGSurface &
-  createSphere(const std::string name,
-               const Point center,
+  createSphere(const std::string & name,
+               const Point & center,
                const Real r,
                CSGSurface::BoundaryType boundary = CSGSurface::BoundaryType::TRANSMISSION)
   {
@@ -126,11 +126,11 @@ public:
    * @return reference to CSGSurface object
    */
   const CSGSurface &
-  createCylinder(const std::string name,
+  createCylinder(const std::string & name,
                  const Real x0,
                  const Real x1,
                  const Real r,
-                 const std::string axis,
+                 const std::string & axis,
                  CSGSurface::BoundaryType boundary = CSGSurface::BoundaryType::TRANSMISSION)
   {
     return _surface_list.addCylinder(name, x0, x1, r, axis, boundary);
@@ -152,7 +152,7 @@ public:
    * @param name surface name
    * @return reference to CSGSurface object
    */
-  const CSGSurface & getSurfaceByName(const std::string name) const
+  const CSGSurface & getSurfaceByName(const std::string & name) const
   {
     return _surface_list.getSurface(name);
   }
@@ -163,7 +163,7 @@ public:
    * @param surface CSGSurface to rename
    * @param name new name
    */
-  void renameSurface(const CSGSurface & surface, const std::string name)
+  void renameSurface(const CSGSurface & surface, const std::string & name)
   {
     _surface_list.renameSurface(surface, name);
   }
@@ -187,8 +187,8 @@ public:
    * universe)
    * @return reference to CSGCell that is created
    */
-  const CSGCell & createCell(const std::string name,
-                             const std::string mat_name,
+  const CSGCell & createCell(const std::string & name,
+                             const std::string & mat_name,
                              const CSGRegion & region,
                              const CSGUniverse * add_to_univ = nullptr);
 
@@ -201,7 +201,7 @@ public:
    * universe)
    * @return reference to CSGCell that is created
    */
-  const CSGCell & createCell(const std::string name,
+  const CSGCell & createCell(const std::string & name,
                              const CSGRegion & region,
                              const CSGUniverse * add_to_univ = nullptr);
 
@@ -215,7 +215,7 @@ public:
    * universe)
    * @return reference to cell that is created
    */
-  const CSGCell & createCell(const std::string name,
+  const CSGCell & createCell(const std::string & name,
                              const CSGUniverse & fill_univ,
                              const CSGRegion & region,
                              const CSGUniverse * add_to_univ = nullptr);
@@ -236,7 +236,7 @@ public:
    * @param name cell name
    * @return reference to CSGCell object
    */
-  const CSGCell & getCellByName(const std::string name) const { return _cell_list.getCell(name); }
+  const CSGCell & getCellByName(const std::string & name) const { return _cell_list.getCell(name); }
 
   /**
    * @brief rename the specified cell
@@ -244,7 +244,7 @@ public:
    * @param cell reference to CSGCell to rename
    * @param name new name
    */
-  void renameCell(const CSGCell & cell, const std::string name)
+  void renameCell(const CSGCell & cell, const std::string & name)
   {
     _cell_list.renameCell(cell, name);
   }
@@ -269,7 +269,7 @@ public:
    *
    * @param name new name for the root universe
    */
-  void renameRootUniverse(const std::string name)
+  void renameRootUniverse(const std::string & name)
   {
     _universe_list.renameUniverse(_universe_list.getRoot(), name);
   }
@@ -280,7 +280,7 @@ public:
    * @param universe reference to CSGUniverse to rename
    * @param name new name
    */
-  void renameUniverse(const CSGUniverse & universe, const std::string name)
+  void renameUniverse(const CSGUniverse & universe, const std::string & name)
   {
     _universe_list.renameUniverse(universe, name);
   }
@@ -291,7 +291,7 @@ public:
    * @param name unique universe name
    * @return reference to CSGUniverse that is created
    */
-  const CSGUniverse & createUniverse(const std::string name)
+  const CSGUniverse & createUniverse(const std::string & name)
   {
     return _universe_list.addUniverse(name);
   }
@@ -303,7 +303,7 @@ public:
    * @param cells list of cells to add to universe
    * @return reference to CSGUniverse that is created
    */
-  const CSGUniverse & createUniverse(const std::string name,
+  const CSGUniverse & createUniverse(const std::string & name,
                                      std::vector<std::reference_wrapper<const CSGCell>> & cells);
 
   /**
@@ -356,7 +356,7 @@ public:
    * @param name universe name
    * @return reference to CSGUniverse object
    */
-  const CSGUniverse & getUniverseByName(const std::string name)
+  const CSGUniverse & getUniverseByName(const std::string & name)
   {
     return _universe_list.getUniverse(name);
   }
@@ -385,7 +385,7 @@ public:
    * @param base pointer to a different CSGBase object
    * @param new_root_name_join new name for the universe generated from the incoming root universe
    */
-  void joinOtherBase(std::unique_ptr<CSGBase> & base, std::string new_root_name_join)
+  void joinOtherBase(std::unique_ptr<CSGBase> & base, std::string & new_root_name_join)
   {
     joinSurfaceList(base->getSurfaceList());
     joinCellList(base->getCellList());
@@ -405,8 +405,8 @@ public:
    * @param new_root_name_join new name for the universe generated from the incoming root universe
    */
   void joinOtherBase(std::unique_ptr<CSGBase> & base,
-                     std::string new_root_name_base,
-                     std::string new_root_name_join)
+                     std::string & new_root_name_base,
+                     std::string & new_root_name_join)
   {
     joinSurfaceList(base->getSurfaceList());
     joinCellList(base->getCellList());
@@ -429,7 +429,7 @@ private:
    * @param name surface name
    * @return reference to CSGSurface object
    */
-  CSGSurface & getSurface(const std::string name) { return _surface_list.getSurface(name); }
+  CSGSurface & getSurface(const std::string & name) { return _surface_list.getSurface(name); }
 
   /// Check universes linked to root universe match universes defined in _universe_list
   void checkUniverseLinking() const;
@@ -495,7 +495,7 @@ private:
    * @param new_root_name_incoming new name for the universe generated from the incoming root
    * universe
    */
-  void joinUniverseList(CSGUniverseList & univ_list, std::string new_root_name_incoming);
+  void joinUniverseList(CSGUniverseList & univ_list, std::string & new_root_name_incoming);
 
   /**
    * @brief join a separate CSGUniverseList object to this one;
@@ -509,8 +509,8 @@ private:
    * universe
    */
   void joinUniverseList(CSGUniverseList & univ_list,
-                        std::string new_root_name_base,
-                        std::string new_root_name_incoming);
+                        std::string & new_root_name_base,
+                        std::string & new_root_name_incoming);
 
   // check that surfaces used in this region are a part of this CSGBase instance
   void checkRegionSurfaces(const CSGRegion & region) const;

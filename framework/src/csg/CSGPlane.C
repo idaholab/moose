@@ -12,17 +12,17 @@
 namespace CSG
 {
 
-CSGPlane::CSGPlane(const std::string name,
-                   const Point p1,
-                   const Point p2,
-                   const Point p3,
+CSGPlane::CSGPlane(const std::string & name,
+                   const Point & p1,
+                   const Point & p2,
+                   const Point & p3,
                    CSGSurface::BoundaryType boundary)
   : CSGSurface(name, SurfaceType::PLANE, boundary)
 {
   coeffsFromPoints(p1, p2, p3);
 }
 
-CSGPlane::CSGPlane(const std::string name,
+CSGPlane::CSGPlane(const std::string & name,
                    const Real a,
                    const Real b,
                    const Real c,
@@ -40,7 +40,7 @@ CSGPlane::getCoeffs() const
 }
 
 void
-CSGPlane::coeffsFromPoints(const Point p1, const Point p2, const Point p3)
+CSGPlane::coeffsFromPoints(const Point & p1, const Point & p2, const Point & p3)
 {
   // Use three points on plane to solve for the plane equation in form aX + bY +cZ = d,
   // where we are solving for a, b, c, and d.
@@ -56,7 +56,7 @@ CSGPlane::coeffsFromPoints(const Point p1, const Point p2, const Point p3)
 }
 
 CSGSurface::Direction
-CSGPlane::directionFromPoint(const Point p) const
+CSGPlane::directionFromPoint(const Point & p) const
 {
   // Compute dot product of <a, b, c> and p to determine if p lies
   // in the positive or negative halfspace of the plane

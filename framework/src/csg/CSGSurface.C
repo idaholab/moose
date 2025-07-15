@@ -12,7 +12,7 @@
 namespace CSG
 {
 
-CSGSurface::CSGSurface(const std::string name,
+CSGSurface::CSGSurface(const std::string & name,
                        SurfaceType surf_type,
                        CSGSurface::BoundaryType boundary)
   : _name(name), _surface_type(surf_type), _boundary_type(boundary)

@@ -32,10 +32,10 @@ public:
    * @param p3 point 3
    * @param boundary CSGSurface::BoundaryType boundary type for the surface
    */
-  CSGPlane(const std::string name,
-           const Point p1,
-           const Point p2,
-           const Point p3,
+  CSGPlane(const std::string & name,
+           const Point & p1,
+           const Point & p2,
+           const Point & p3,
            CSGSurface::BoundaryType boundary);
 
   /**
@@ -49,7 +49,7 @@ public:
    * @param d coefficient d
    * @param boundary CSGSurface::BoundaryType boundary type for the surface
    */
-  CSGPlane(const std::string name,
+  CSGPlane(const std::string & name,
            const Real a,
            const Real b,
            const Real c,
@@ -74,11 +74,11 @@ public:
    * @param p point
    * @return CSGSurface::Direction
    */
-  virtual CSGSurface::Direction directionFromPoint(const Point p) const override;
+  virtual CSGSurface::Direction directionFromPoint(const Point & p) const override;
 
 protected:
   // calculate the equivalent coeffients (aX + bY + cZ = d) from 3 points on a plane
-  void coeffsFromPoints(const Point p1, const Point p2, const Point p3);
+  void coeffsFromPoints(const Point & p1, const Point & p2, const Point & p3);
 
   /// Value of a in equation of plane
   Real _a;

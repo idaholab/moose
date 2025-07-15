@@ -111,7 +111,7 @@ CSGRegion::operator|=(const CSGRegion & other_region)
   return *this;
 }
 
-std::string
+const std::string
 stripRegionString(std::string region_str, std::string op)
 {
   std::vector<std::string> ops_list = {" | ", " & ", "~"};

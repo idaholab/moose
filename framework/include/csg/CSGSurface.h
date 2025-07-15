@@ -51,7 +51,7 @@ public:
    *
    * @param name unique name of surface
    */
-  CSGSurface(const std::string name);
+  CSGSurface(const std::string & name);
 
   /**
    * @brief Construct a new CSGSurface
@@ -60,7 +60,7 @@ public:
    * @param surf_type surface type
    * @param boundary boundary condition for the surface
    */
-  CSGSurface(const std::string name, SurfaceType surf_type, CSGSurface::BoundaryType boundary);
+  CSGSurface(const std::string & name, SurfaceType surf_type, CSGSurface::BoundaryType boundary);
 
   /**
    * Destructor
@@ -117,14 +117,14 @@ public:
    * @return sign of direction to surface from point
    */
   virtual CSGSurface::Direction
-  directionFromPoint(const Point p) const = 0; // Pure virtual function
+  directionFromPoint(const Point & p) const = 0; // Pure virtual function
 
   /**
    * @brief Get the name of surface
    *
    * @return std::string name of surface
    */
-  std::string getName() const { return _name; }
+  const std::string & getName() const { return _name; }
 
   /// Operator overload for checking if two CSGSurface objects are equal
   bool operator==(const CSGSurface & other) const;
@@ -135,7 +135,7 @@ public:
 protected:
   // set the name of the surface - intentionally not public because
   // name needs to be managed at the CSGSurfaceList level
-  void setName(const std::string name) { _name = name; }
+  void setName(const std::string & name) { _name = name; }
 
   /// Name of surface
   std::string _name;

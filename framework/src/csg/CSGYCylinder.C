@@ -12,7 +12,7 @@
 namespace CSG
 {
 
-CSGYCylinder::CSGYCylinder(const std::string name,
+CSGYCylinder::CSGYCylinder(const std::string & name,
                            const Real x0,
                            const Real z0,
                            const Real r,
@@ -29,7 +29,7 @@ CSGYCylinder::getCoeffs() const
 }
 
 CSGSurface::Direction
-CSGYCylinder::directionFromPoint(const Point p) const
+CSGYCylinder::directionFromPoint(const Point & p) const
 {
   // Compute distance from the cylinder center to determine if inside (< r^2)
   // or outside (> r^2) the cylinder
