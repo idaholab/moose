@@ -38,8 +38,10 @@ CSGSphere::directionFromPoint(const Point p) const
 {
   // Compute distance from the sphere center to determine if inside (< r^2)
   // or outside (> r^2) the sphere
-  const Real dist_sq = pow((p(0) - _x0), 2) + pow((p(1) - _y0), 2) + pow((p(2) - _z0), 2);
+  const Real dist_sq =
+      Utility::pow<2>((p(0) - _x0)) + Utility::pow<2>((p(1) - _y0)) + Utility::pow<2>((p(2) - _z0));
 
-  return (dist_sq > pow(_r, 2)) ? CSGSurface::Direction::POSITIVE : CSGSurface::Direction::NEGATIVE;
+  return (dist_sq > Utility::pow<2>(_r)) ? CSGSurface::Direction::POSITIVE
+                                         : CSGSurface::Direction::NEGATIVE;
 }
 } // namespace CSG
