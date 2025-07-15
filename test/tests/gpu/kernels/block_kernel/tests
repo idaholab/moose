@@ -11,6 +11,7 @@
       exodiff = 'out_gpu.e'
       detail = 'through a subdomain restriction on the kernel, and'
       capabilities = 'kokkos'
+      devices = 'cuda'
     []
 
     [variable]
@@ -19,6 +20,7 @@
       exodiff = 'out_vars_gpu.e'
       detail = 'through a subdomain restriction on the variable.'
       capabilities = 'kokkos'
+      devices = 'cuda'
     []
   []
 []
