@@ -51,18 +51,11 @@ LinearAssemblySegregatedSolve::validParams()
                                     "0.0<=active_scalar_l_tol & active_scalar_l_tol<1.0",
                                     "The relative tolerance on the normalized residual in the "
                                     "linear solver of the active scalar equation(s).");
-  params.addParam<unsigned int>(
-      "active_scalar_l_max_its",
-      10000,
-      "The maximum allowed iterations in the linear solver of the turbulence equation.");
-
-  params.addParamNamesToGroup(
-      "active_scalar_systems active_scalar_equation_relaxation active_scalar_petsc_options "
-      "active_scalar_petsc_options_iname "
-      "active_scalar_petsc_options_value active_scalar_petsc_options_value "
-      "active_scalar_absolute_tolerance "
-      "active_scalar_l_tol active_scalar_l_abs_tol active_scalar_l_max_its",
-      "Active Scalars Equations");
+  params.addRangeCheckedParam<Real>("active_scalar_l_abs_tol",
+                                    1e-10,
+                                    "0.0<active_scalar_l_abs_tol",
+                                    "The absolute tolerance on the normalized residual in the "
+                                    "linear solver of the active scalar equation(s).");
 
   params.addRangeCheckedParam<unsigned int>("num_cht_fpi",
                                     1,
@@ -77,6 +70,19 @@ LinearAssemblySegregatedSolve::validParams()
                                     "The absolute tolerance to which the fluid and solid temperature and heat fluxes"
                                     " must converge during conjugate heat transfer simulations with fixed-point "
                                     "iterations (fpi).");
+
+  params.addParam<unsigned int>(
+      "active_scalar_l_max_its",
+      10000,
+      "The maximum allowed iterations in the linear solver of the turbulence equation.");
+
+  params.addParamNamesToGroup(
+      "active_scalar_systems active_scalar_equation_relaxation active_scalar_petsc_options "
+      "active_scalar_petsc_options_iname "
+      "active_scalar_petsc_options_value active_scalar_petsc_options_value "
+      "active_scalar_absolute_tolerance "
+      "active_scalar_l_tol active_scalar_l_abs_tol active_scalar_l_max_its",
+      "Active Scalars Equations");
 
   return params;
 }
@@ -102,8 +108,8 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     _active_scalar_l_abs_tol(getParam<Real>("active_scalar_l_abs_tol")),
     _active_scalar_absolute_tolerance(
         getParam<std::vector<Real>>("active_scalar_absolute_tolerance")),
-    _num_cht_fpi(getParam<signed int>("num_cht_fpi")),
-    _cht_fpi_tolerance(getParam<Real>("_cht_fpi_tolerance"))
+    _num_cht_fpi(getParam<unsigned int>("num_cht_fpi")),
+    _cht_fpi_tolerance(getParam<Real>("cht_fpi_tolerance"))
 {
   // We fetch the systems and their numbers for the momentum equations.
   for (auto system_i : index_range(_momentum_system_names))
@@ -650,11 +656,13 @@ LinearAssemblySegregatedSolve::solve()
         {
           // We set the preconditioner/controllable parameters through petsc options. Linear
           // tolerances will be overridden within the solver.
+          _energy_system->computeGradients();
           Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
           ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
               solveSolidEnergy();
+          std::cout<<"Solving for solid temp..."<<std::endl;
 
-//          const auto t_fluid =  *_energy_system->var();
+          const auto & t_fluid =  _energy_system->getVariable(0, "T_fluid");
 //          const auto t_solid =  *_solid_energy_system->var();
 
 
@@ -665,8 +673,9 @@ LinearAssemblySegregatedSolve::solve()
 //
 //          cht_tol_i = std::max(q_cht_tol_i, t_cht_tol_i);
 
+          _solid_energy_system->computeGradients();
         }
-
+        std::cout<<"Finished iteration:"<<fpi_itrs+1<<std::endl;
         fpi_itrs++;
       }
     }
