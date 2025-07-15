@@ -78,16 +78,18 @@ PeriodicBCHelper::setupPeriodicBoundaries(FEProblemBase & problem)
   // that coupling ourselves
   if (!_algebraic)
   {
-    const auto add_geometric_coupling = [this](auto & mesh)
+    const auto add_geometric_coupling = [this](auto & problem)
     {
+      auto & mesh = problem.mesh().getMesh();
       auto coupling = std::make_shared<libMesh::DefaultCoupling>();
+      coupling->set_mesh(&mesh);
       coupling->set_periodic_boundaries(&getPeriodicBoundaries());
-      mesh.getMesh().add_ghosting_functor(coupling);
+      mesh.add_ghosting_functor(coupling);
     };
 
-    add_geometric_coupling(problem.mesh());
+    add_geometric_coupling(problem);
     if (const auto displaced_problem = problem.getDisplacedProblem())
-      add_geometric_coupling(displaced_problem->mesh());
+      add_geometric_coupling(*displaced_problem);
   }
 }
 
