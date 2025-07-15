@@ -47,8 +47,7 @@ public:
    * @param p1 point 1
    * @param p2 point 2
    * @param p3 point 3
-   * @param boundary (optional) CSGSurface::BoundaryType boundary condition for the surface (default
-   * TRANSMISSION)
+   * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
    * @return reference to CSGSurface object
    */
   const CSGSurface &
@@ -69,8 +68,7 @@ public:
    * @param b coefficient b
    * @param c coefficient c
    * @param d coefficient d
-   * @param boundary (optional) CSGSurface::BoundaryType boundary condition for the surface (default
-   * TRANSMISSION)
+   * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
    * @return reference to CSGSurface object
    */
   const CSGSurface & createPlaneFromCoefficients(
@@ -89,8 +87,7 @@ public:
    *
    * @param name surface name
    * @param r radius
-   * @param boundary (optional) CSGSurface::BoundaryType boundary condition for the surface (default
-   * TRANSMISSION)
+   * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
    * @return reference to CSGSurface object
    */
   const CSGSurface &
