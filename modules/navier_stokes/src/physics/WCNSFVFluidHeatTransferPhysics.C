@@ -165,10 +165,14 @@ WCNSFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
       const auto block_names = num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
       assignBlocks(params, block_names);
       const auto conductivity_name = vector_conductivity ? NS::kappa : NS::k;
-      params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[block_i];
       params.set<MooseFunctorName>(NS::porosity) =
           _flow_equations_physics->getPorosityFunctorName(true);
       params.set<bool>("effective_conductivity") = getParam<bool>("effective_conductivity");
+      if (!_solve_for_enthalpy)
+        params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[block_i];
+      else
+        params.set<MooseFunctorName>(conductivity_name) =
+            _thermal_conductivity_name[block_i] + "_by_cp";
 
       getProblem().addFVKernel(
           kernel_type, prefix() + "pins_energy_diffusion_" + block_name, params);
@@ -181,7 +185,10 @@ WCNSFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
       std::vector<SubdomainName> block_names =
           num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
       assignBlocks(params, block_names);
-      params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[block_i];
+      if (!_solve_for_enthalpy)
+        params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[block_i];
+      else
+        params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[block_i] + "_by_cp";
 
       getProblem().addFVKernel(
           kernel_type, prefix() + "ins_energy_diffusion_" + block_name, params);
@@ -496,6 +503,9 @@ WCNSFVFluidHeatTransferPhysics::addMaterials()
   }
 
   getProblem().addMaterial(object_type, prefix() + "enthalpy_material", params);
+
+  if (_solve_for_enthalpy)
+    WCNSFVFluidHeatTransferPhysicsBase::defineKOverCpFunctors(/*use ad*/ true);
 }
 
 void
