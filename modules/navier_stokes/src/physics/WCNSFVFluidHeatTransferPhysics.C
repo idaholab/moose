@@ -10,6 +10,7 @@
 #include "WCNSFVFluidHeatTransferPhysics.h"
 #include "WCNSFVFlowPhysics.h"
 #include "NSFVBase.h"
+#include "NS.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFluidHeatTransferPhysics);
 registerWCNSFVFluidHeatTransferPhysicsBaseTasks("NavierStokesApp", WCNSFVFluidHeatTransferPhysics);
@@ -253,6 +254,17 @@ WCNSFVFluidHeatTransferPhysics::addEnergyInletBC()
 
       getProblem().addFVBC(
           bc_type, _fluid_temperature_name + "_" + inlet_boundaries[bc_ind], params);
+
+      // Check the BCs for momentum
+      const auto momentum_inlet_type =
+          _flow_equations_physics->inletBoundaryType(inlet_boundaries[bc_ind]);
+      if (momentum_inlet_type == NS::MomentumInletTypes::FLUX_VELOCITY ||
+          momentum_inlet_type == NS::MomentumInletTypes::FLUX_MASS)
+        paramWarning("energy_inlet_types",
+                     "At inlet '" + inlet_boundaries[bc_ind] +
+                         "', you are using a Dirichlet boundary condition on temperature, and a "
+                         "flux boundary condition on momentum. This is known to create an "
+                         "undesirable inlet source term.");
     }
     else if (_energy_inlet_types[bc_ind] == "heatflux")
     {
