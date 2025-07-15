@@ -9,6 +9,8 @@
 
 #include "ElementGroupCentroidPositions.h"
 
+#include "libmesh/parallel_algebra.h"
+
 registerMooseObject("MooseApp", ElementGroupCentroidPositions);
 
 InputParameters
@@ -42,10 +44,6 @@ ElementGroupCentroidPositions::ElementGroupCentroidPositions(const InputParamete
     _mesh(_fe_problem.mesh()),
     _group_type(getParam<MooseEnum>("grouping_type"))
 {
-  // We would need reductions on volumes, not just positions to make this work for
-  // distributed.
-  _mesh.errorIfDistributedMesh(type());
-
   // We are not excluding using both block restriction and extra element ids
   if (_group_type == "extra_id" || _group_type == "block_and_extra_id")
   {
@@ -114,12 +112,14 @@ ElementGroupCentroidPositions::initialize()
   {
     auto & indices = _extra_id_group_indices[i];
     if (indices.empty())
-      for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
-      {
-        auto local_id = id(*elem, _extra_id_indices[i], _blocks_in_use && i == 0);
-        if (std::find(indices.begin(), indices.end(), local_id) == indices.end())
-          indices.push_back(local_id);
-      }
+    {
+      std::set<unsigned int> ids;
+      for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
+        ids.insert(id(*elem, _extra_id_indices[i], _blocks_in_use && i == 0));
+      _mesh.comm().set_union(ids);
+      for (const auto & id : ids)
+        indices.push_back(id);
+    }
   }
 
   // Allocate some vectors holding the volumes
@@ -229,7 +229,7 @@ ElementGroupCentroidPositions::initialize()
       positions_indexing[i][extra_id] = j++;
   }
 
-  for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
+  for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
   {
     // Pre-compute the centroid, this is expensive but may be used for multiple element ids
     const auto centroid = elem->true_centroid();
@@ -258,27 +258,55 @@ ElementGroupCentroidPositions::initialize()
   // Report the zero volumes
   unsigned int num_zeros = 0;
   if (_extra_id_names.size() == 1)
+  {
+    _mesh.comm().sum(volumes);
+    _mesh.comm().sum(_positions);
     for (const auto & vol : volumes)
       if (MooseUtils::absoluteFuzzyEqual(vol, 0))
         num_zeros++;
+  }
   if (_extra_id_names.size() == 2)
+  {
+    for (const auto i : index_range(volumes_2d))
+    {
+      _mesh.comm().sum(volumes_2d[i]);
+      _mesh.comm().sum(_positions_2d[i]);
+    }
     for (const auto & vol_vec : volumes_2d)
       for (const auto & vol : vol_vec)
         if (MooseUtils::absoluteFuzzyEqual(vol, 0))
           num_zeros++;
+  }
   if (_extra_id_names.size() == 3)
+  {
+    for (const auto i : index_range(volumes_3d))
+      for (const auto j : index_range(volumes_3d[i]))
+      {
+        _mesh.comm().sum(volumes_3d[i][j]);
+        _mesh.comm().sum(_positions_3d[i][j]);
+      }
     for (const auto & vol_vec_vec : volumes_3d)
       for (const auto & vol_vec : vol_vec_vec)
         for (const auto & vol : vol_vec)
           if (MooseUtils::absoluteFuzzyEqual(vol, 0))
             num_zeros++;
+  }
   if (_extra_id_names.size() == 4)
+  {
+    for (const auto i : index_range(volumes_4d))
+      for (const auto j : index_range(volumes_4d[i]))
+        for (const auto k : index_range(volumes_4d[i][j]))
+        {
+          _mesh.comm().sum(volumes_4d[i][j][k]);
+          _mesh.comm().sum(_positions_4d[i][j][k]);
+        }
     for (const auto & vol_vec_vec_vec : volumes_4d)
       for (const auto & vol_vec_vec : vol_vec_vec_vec)
         for (const auto & vol_vec : vol_vec_vec)
           for (const auto & vol : vol_vec)
             if (MooseUtils::absoluteFuzzyEqual(vol, 0))
               num_zeros++;
+  }
   if (num_zeros)
     mooseWarning(std::to_string(num_zeros) +
                  " zero volume bins detected during group centroid position calculation. "
