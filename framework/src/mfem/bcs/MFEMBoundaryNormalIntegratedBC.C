@@ -23,39 +23,29 @@ MFEMBoundaryNormalIntegratedBC::validParams()
       "vector_coefficient",
       "1. 1. 1.",
       "Vector coefficient whose normal component will be used in the integrated BC");
-  params.addParam<MFEMVectorCoefficientName>(
-      "vector_coefficient_imag",
-      "The imaginary part of the vector coefficient whose normal component will be used in the "
-      "integrated BC. ");
   return params;
 }
 
 // TODO: Currently assumes the vector function coefficient is 3D
 MFEMBoundaryNormalIntegratedBC::MFEMBoundaryNormalIntegratedBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient"))),
-    _vec_coef_imag(getVectorCoefficient(isParamValid("vector_coefficient_imag")
-                            ? getParam<MFEMVectorCoefficientName>("vector_coefficient_imag")
-                            : getParam<MFEMVectorCoefficientName>("vector_coefficient")))
+    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
 {
 }
 
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
-std::pair<mfem::LinearFormIntegrator *, mfem::LinearFormIntegrator *>
+mfem::LinearFormIntegrator *
 MFEMBoundaryNormalIntegratedBC::createLFIntegrator()
 {
-  return std::make_pair(new mfem::BoundaryNormalLFIntegrator(_vec_coef),
-                        isParamValid("vector_coefficient_imag")
-                            ? new mfem::BoundaryNormalLFIntegrator(_vec_coef_imag)
-                            : nullptr);
+  return new mfem::BoundaryNormalLFIntegrator(_vec_coef);
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
-std::pair<mfem::BilinearFormIntegrator *, mfem::BilinearFormIntegrator *>
+mfem::BilinearFormIntegrator *
 MFEMBoundaryNormalIntegratedBC::createBFIntegrator()
 {
-  return std::make_pair(nullptr, nullptr);
+  return nullptr;
 }
 
 #endif
