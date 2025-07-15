@@ -23,4 +23,12 @@
       detail = 'checking the sub-application and parent application outputs against each other.'
     []
   []
+  [error]
+    requirement = 'The system shall error if different applications request different devices.'
+    input = parent.i
+    type = RunException
+    expect_err = "Attempted to configure with MFEM devices 'cpu', but we have already configured the MFEM device object with the devices 'cuda'"
+    cli_args = 'Executioner/device=cuda'
+    capabilities = 'mfem & cuda'
+  []
 []
