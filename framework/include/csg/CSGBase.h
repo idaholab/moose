@@ -10,11 +10,6 @@
 #pragma once
 
 #include "CSGSurfaceList.h"
-#include "CSGPlane.h"
-#include "CSGSphere.h"
-#include "CSGXCylinder.h"
-#include "CSGYCylinder.h"
-#include "CSGZCylinder.h"
 #include "CSGRegion.h"
 #include "CSGCellList.h"
 #include "CSGUniverseList.h"
