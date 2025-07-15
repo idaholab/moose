@@ -369,8 +369,8 @@ void
 SubProblem::setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, const THREAD_ID tid)
 {
   _active_fe_var_coupleable_vector_tags[tid] = vtags;
-  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
-    systemBaseNonlinear(nl_sys_num).setActiveVariableCoupleableVectorTags(vtags, tid);
+  for (const auto sys_num : make_range(numSolverSystems()))
+    systemBaseSolver(sys_num).setActiveVariableCoupleableVectorTags(vtags, tid);
   systemBaseAuxiliary().setActiveVariableCoupleableVectorTags(vtags, tid);
 }
 

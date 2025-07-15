@@ -9,6 +9,7 @@
 
 #include "TagTestProblem.h"
 #include "NonlinearSystem.h"
+#include "LinearSystem.h"
 
 registerMooseObject("MooseTestApp", TagTestProblem);
 
@@ -33,15 +34,15 @@ TagTestProblem::TagTestProblem(const InputParameters & params) : FEProblem(param
 {
   auto & vectortags = params.get<MultiMooseEnum>("test_tag_vectors");
 
-  vtags.clear();
+  _vtags.clear();
   for (auto & vtag : vectortags)
-    vtags.insert(vtag);
+    _vtags.insert(vtag);
 
   auto & matrixtags = params.get<MultiMooseEnum>("test_tag_matrices");
 
-  mtags.clear();
+  _mtags.clear();
   for (auto & mtag : matrixtags)
-    mtags.insert(mtag);
+    _mtags.insert(mtag);
 }
 
 void
@@ -52,7 +53,7 @@ TagTestProblem::computeResidual(const NumericVector<Number> & soln,
   setCurrentNonlinearSystem(nl_sys_num);
   _fe_vector_tags.clear();
 
-  for (auto & vtag : vtags)
+  for (auto & vtag : _vtags)
     if (vectorTagExists(vtag))
     {
       auto tag = getVectorTagID(vtag);
@@ -85,7 +86,7 @@ TagTestProblem::computeJacobian(const NumericVector<Number> & soln,
   setCurrentNonlinearSystem(nl_sys_num);
   _fe_matrix_tags.clear();
 
-  for (auto & mtag : mtags)
+  for (auto & mtag : _mtags)
     if (matrixTagExists(mtag))
     {
       auto tag = getMatrixTagID(mtag);
@@ -104,4 +105,44 @@ TagTestProblem::computeJacobian(const NumericVector<Number> & soln,
   if (_fe_matrix_tags.size() > 0)
     getNonlinearSystemBase(nl_sys_num)
         .disassociateMatrixFromTag(jacobian, *_fe_matrix_tags.begin());
+}
+
+void
+TagTestProblem::computeLinearSystemSys(LinearImplicitSystem & sys,
+                                       SparseMatrix<Number> & system_matrix,
+                                       NumericVector<Number> & rhs,
+                                       const bool compute_gradients)
+{
+  const auto linear_sys_num = linearSysNum(sys.name());
+  auto & linear_sys = getLinearSystem(linear_sys_num);
+  setCurrentLinearSystem(linearSysNum(sys.name()));
+
+  std::vector<VectorTag> vector_tags;
+  for (const auto & vtag : _vtags)
+    if (vectorTagExists(vtag))
+      vector_tags.push_back(getVectorTag(getVectorTagID(vtag)));
+    else
+      mooseError("Tag ", vtag, " does not exist");
+
+  for (const auto & tag : vector_tags)
+    linear_sys.associateVectorToTag(rhs, tag._id);
+
+  std::set<TagID> selected_vtags;
+  selectVectorTagsFromSystem(linear_sys, vector_tags, selected_vtags);
+
+  std::map<TagName, TagID> matrix_tags;
+  for (auto & mtag : _mtags)
+    if (matrixTagExists(mtag))
+      matrix_tags.insert(std::make_pair(mtag, getMatrixTagID(mtag)));
+    else
+      mooseError("Tag ", mtag, " does not exist");
+
+  for (const auto & tag : matrix_tags)
+    linear_sys.associateMatrixToTag(system_matrix, tag.second);
+
+  std::set<TagID> selected_mtags;
+  selectMatrixTagsFromSystem(linear_sys, matrix_tags, selected_mtags);
+
+  computeLinearSystemTags(
+      *(_current_linear_sys->currentSolution()), selected_vtags, selected_mtags, compute_gradients);
 }
