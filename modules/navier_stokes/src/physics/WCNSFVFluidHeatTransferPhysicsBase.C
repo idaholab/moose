@@ -285,6 +285,29 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
     reportPotentiallyMissedParameters({"initial_enthalpy"}, "FunctionIC");
 }
 
+void
+WCNSFVFluidHeatTransferPhysicsBase::defineKOverCpFunctors(const bool use_ad)
+{
+  // Define alpha, the diffusion coefficient when solving for enthalpy, on each block
+  for (unsigned int i = 0; i < _thermal_conductivity_name.size(); ++i)
+  {
+    const auto object_type = use_ad ? "ADParsedFunctorMaterial" : "ParsedFunctorMaterial";
+    InputParameters params = getFactory().getValidParams(object_type);
+    assignBlocks(params, _blocks);
+    std::vector<std::string> f_names;
+    if (!MooseUtils::parsesToReal(_thermal_conductivity_name[i]))
+      f_names.push_back(_thermal_conductivity_name[i]);
+    if (!MooseUtils::parsesToReal(getSpecificHeatName()))
+      f_names.push_back(getSpecificHeatName());
+    params.set<std::vector<std::string>>("functor_names") = f_names;
+    params.set<std::string>("expression") =
+        _thermal_conductivity_name[i] + "/" + getSpecificHeatName();
+    params.set<std::string>("property_name") = _thermal_conductivity_name[i] + "_by_cp";
+    getProblem().addMaterial(
+        object_type, prefix() + "rho_alpha_from_" + _thermal_conductivity_name[i], params);
+  }
+}
+
 unsigned short
 WCNSFVFluidHeatTransferPhysicsBase::getNumberAlgebraicGhostingLayersNeeded() const
 {
