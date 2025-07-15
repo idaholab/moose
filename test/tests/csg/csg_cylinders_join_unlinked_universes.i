@@ -15,6 +15,6 @@
   []
   [CylsUniverse]
     type=TestCSGUnlinkedUniverseMeshGenerator
-    input_meshes = 'XCyls YCyls'
+    inputs = 'XCyls YCyls'
   []
 []

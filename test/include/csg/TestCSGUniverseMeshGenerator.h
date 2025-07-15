@@ -29,7 +29,9 @@ protected:
   std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
   /// list of MGs to add to the universe
   const std::vector<MeshGeneratorName> _input_mgs;
-  // side lengths for the bounding box
+  // side lengths for each of the input bounding boxes
+  const std::vector<Real> _side_lengths;
+  // side lengths for the overall bounding box
   const Real _x_side;
   const Real _y_side;
   const Real _z_side;

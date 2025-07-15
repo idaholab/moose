@@ -16,13 +16,13 @@ InputParameters
 TestCSGUniverseMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addRequiredParam<std::vector<MeshGeneratorName>>("input_meshes",
-                                                          "list of MGs to add to universe");
-  params.addRequiredParam<std::vector<Real>>(
-      "input_boxes",
-      "each of the side lengths of bounding boxes to contain each of the input mesh universes");
-  params.addRequiredParam<std::vector<Real>>(
-      "bounding_box", "side lengths (x, y, z) of bounding box for full universe");
+  params.addRequiredParam<std::vector<MeshGeneratorName>>(
+      "inputs", "list of MGs providing cells to add to universe");
+  params.addRequiredParam<std::vector<Real>>("input_box_sides",
+                                             "side lengths of the square bounding boxes to contain "
+                                             "each of the input universes (one per input)");
+  params.addRequiredParam<Point>("bounding_box",
+                                 "side lengths (x, y, z) of bounding box for full universe");
   params.addParam<bool>("add_cell_to_univ_mode",
                         false,
                         "use the add/removeCell method when adding the cells to the universe.");
@@ -35,11 +35,11 @@ TestCSGUniverseMeshGenerator::validParams()
 
 TestCSGUniverseMeshGenerator::TestCSGUniverseMeshGenerator(const InputParameters & params)
   : MeshGenerator(params),
-    _mesh_ptrs(getMeshes("input_meshes")),
-    _input_mgs(getParam<std::vector<MeshGeneratorName>>("input_meshes")),
-    _x_side(getParam<std::vector<Real>>("bounding_box")[0]),
-    _y_side(getParam<std::vector<Real>>("bounding_box")[1]),
-    _z_side(getParam<std::vector<Real>>("bounding_box")[2]),
+    _mesh_ptrs(getMeshes("inputs")),
+    _input_mgs(getParam<std::vector<MeshGeneratorName>>("inputs")),
+    _x_side(getParam<Point>("bounding_box")(0)),
+    _y_side(getParam<Point>("bounding_box")(1)),
+    _z_side(getParam<Point>("bounding_box")(2)),
     _add_cell_mode(getParam<bool>("add_cell_to_univ_mode"))
 {
 }
@@ -55,7 +55,7 @@ std::unique_ptr<CSG::CSGBase>
 TestCSGUniverseMeshGenerator::generateCSG()
 {
   auto mg_name = this->name();
-  auto side_lengths = getParam<std::vector<Real>>("input_boxes");
+  auto _side_lengths = getParam<std::vector<Real>>("input_box_sides");
 
   // start by joining the first two sets of cylinders at the same level and push
   // one level down from root.
@@ -122,17 +122,17 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
     // bounding box for new cell - located at the origin
     auto & x_pos_surf = csg_obj->createPlaneFromCoefficients(
-        img + "_x_pos_surf", 1.0, 0, 0, x + 0.5 * side_lengths[i]);
+        img + "_x_pos_surf", 1.0, 0, 0, x + 0.5 * _side_lengths[i]);
     auto & x_neg_surf = csg_obj->createPlaneFromCoefficients(
-        img + "_x_neg_surf", 1.0, 0, 0, x - 0.5 * side_lengths[i]);
+        img + "_x_neg_surf", 1.0, 0, 0, x - 0.5 * _side_lengths[i]);
     auto & y_pos_surf = csg_obj->createPlaneFromCoefficients(
-        img + "_y_pos_surf", 0, 1.0, 0, y + 0.5 * side_lengths[i]);
+        img + "_y_pos_surf", 0, 1.0, 0, y + 0.5 * _side_lengths[i]);
     auto & y_neg_surf = csg_obj->createPlaneFromCoefficients(
-        img + "_y_neg_surf", 0, 1.0, 0, y - 0.5 * side_lengths[i]);
+        img + "_y_neg_surf", 0, 1.0, 0, y - 0.5 * _side_lengths[i]);
     auto & z_pos_surf = csg_obj->createPlaneFromCoefficients(
-        img + "_z_pos_surf", 0, 0, 1.0, z + 0.5 * side_lengths[i]);
+        img + "_z_pos_surf", 0, 0, 1.0, z + 0.5 * _side_lengths[i]);
     auto & z_neg_surf = csg_obj->createPlaneFromCoefficients(
-        img + "_z_neg_surf", 0, 0, 1.0, z - 0.5 * side_lengths[i]);
+        img + "_z_neg_surf", 0, 0, 1.0, z - 0.5 * _side_lengths[i]);
     auto new_region =
         -x_pos_surf & +x_neg_surf & -y_pos_surf & +y_neg_surf & -z_pos_surf & +z_neg_surf;
 
