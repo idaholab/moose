@@ -73,6 +73,12 @@ public:
   const std::vector<BoundaryName> & getWallBoundaries() const { return _wall_boundaries; }
   /// Get the hydraulic separator boundaries
   const std::vector<BoundaryName> & getHydraulicSeparators() const { return _hydraulic_separators; }
+  /// Get the type of the inlet BC
+  NS::MomentumInletTypes inletBoundaryType(const BoundaryName & boundary_name) const
+  {
+    return NS::MomentumInletTypes(
+        (unsigned int)libmesh_map_find(_momentum_inlet_types, boundary_name));
+  }
   /// Get the inlet direction if using a flux inlet
   const std::vector<Point> & getFluxInletDirections() const { return _flux_inlet_directions; }
   /// Get the inlet flux postprocessor if using a flux inlet

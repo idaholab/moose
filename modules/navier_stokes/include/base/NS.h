@@ -198,7 +198,7 @@ static constexpr Real epsilon_low_limit = 1.0e-8;
 static constexpr Real min_y_plus = 1e-10;
 
 // Boundary condition types
-enum class InletBoundaryTypes
+enum class MomentumInletTypes
 {
   FIXED_VELOCITY = 0,
   FLUX_VELOCITY = 1,
