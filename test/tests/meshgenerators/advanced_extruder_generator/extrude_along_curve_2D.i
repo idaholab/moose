@@ -2,7 +2,7 @@
   [gmg]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 3
+    nx = 60
     xmax = 1
     xmin = -1
   []
@@ -12,7 +12,7 @@
     end_point = '4 2 0'
     start_direction = '0 1 0'
     end_direction = '-1 0 0'
-    num_elements = 10
+    num_elements = 100
   []
   [ext_along_curve]
     type = AdvancedExtruderGenerator
