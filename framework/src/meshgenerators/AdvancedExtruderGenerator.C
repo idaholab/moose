@@ -372,7 +372,7 @@ AdvancedExtruderGenerator::generate()
   mesh->set_mesh_dimension(_input->mesh_dimension() + 1);
 
   // Check if the element integer names are existent in the input mesh.
-  for (unsigned int i = 0; i < _elem_integer_names_to_swap.size(); i++)
+  for (const auto i : make_range(_elem_integer_names_to_swap.size()))
     if (_input->has_elem_integer(_elem_integer_names_to_swap[i]))
       _elem_integer_indices_to_swap.push_back(
           _input->get_elem_integer_index(_elem_integer_names_to_swap[i]));
@@ -426,15 +426,25 @@ AdvancedExtruderGenerator::generate()
                    "' was not found within the mesh");
 
   std::unique_ptr<MeshBase> input = std::move(_input);
+  std::unique_ptr<MeshBase> extrusion_curve = std::move(_extrusion_curve);
 
   // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
   // around
   if (!input->is_serial())
     mesh->delete_remote_elements();
 
-  unsigned int total_num_layers = std::accumulate(_num_layers.begin(), _num_layers.end(), 0);
-
-  auto total_num_elevations = _heights.size();
+  unsigned int total_num_layers;
+  unsigned int total_num_elevations;
+  if (_extrude_along_curve)
+  {
+    total_num_layers = std::accumulate(_num_layers.begin(), _num_layers.end(), 0);
+    total_num_elevations = _heights.size();
+  }
+  else
+  {
+    total_num_layers = extrusion_curve->n_elem(); // may need to check this...
+    total_num_elevations = 1;
+  }
 
   dof_id_type orig_elem = input->n_elem();
   dof_id_type orig_nodes = input->n_nodes();
@@ -496,16 +506,22 @@ AdvancedExtruderGenerator::generate()
     old_distance.zero();
 
     // e is the elevation layer ordering
-    for (unsigned int e = 0; e < total_num_elevations; e++)
+    for (const auto e : make_range(total_num_elevations))
     {
-      auto num_layers = _num_layers[e];
-
-      auto height = _heights[e];
-
-      auto bias = _biases[e];
+      unsigned int num_layers, height, bias;
+      if (_extrude_along_curve)
+      {
+        num_layers = extrusion_curve->n_nodes();
+      }
+      else
+      {
+        num_layers = _num_layers[e];
+        height = _heights[e];
+        bias = _biases[e];
+      }
 
       // k is the element layer ordering within each elevation layer
-      for (unsigned int k = 0; k < order * num_layers + (e == 0 ? 1 : 0); ++k)
+      for (const auto k : make_range(order * num_layers + (e == 0 ? 1 : 0)))
       {
         // For the first layer we don't need to move
         if (e == 0 && k == 0)
@@ -516,11 +532,24 @@ AdvancedExtruderGenerator::generate()
           // direction to get the new position.
           auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
 
-          const auto step_size = MooseUtils::absoluteFuzzyEqual(bias, 1.0)
-                                     ? height / (Real)num_layers / (Real)order
-                                     : height * std::pow(bias, (Real)(layer_index - 1)) *
-                                           (1.0 - bias) /
-                                           (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
+          libMesh::Real step_size;
+          if (_extrude_along_curve)
+          {
+            libMesh::Node * P_next = extrusion_curve->node_ptr(k + 1); // set next point on curve
+            libMesh::Node * P_current = extrusion_curve->node_ptr(k);  // set current point on curve
+
+            _direction = *P_next - *P_current; // set direction
+            _direction /= _direction.norm();   // normalize direction
+            step_size =
+                ((*P_next - *node) * _direction) / (_direction * _direction); // calculate step size
+          }
+          else
+          {
+            step_size = MooseUtils::absoluteFuzzyEqual(bias, 1.0)
+                            ? height / (Real)num_layers / (Real)order
+                            : height * std::pow(bias, (Real)(layer_index - 1)) * (1.0 - bias) /
+                                  (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
+          }
 
           current_distance = old_distance + _direction * step_size;
 
