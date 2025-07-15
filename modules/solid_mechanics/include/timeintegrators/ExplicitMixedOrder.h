@@ -67,8 +67,8 @@ protected:
 
   virtual TagID dampingMatrixTagID() const;
 
-  /// calculate velocity using the forward Euler method
-  virtual void forwardEuler();
+  // /// calculate velocity using the forward Euler method
+  // virtual void forwardEuler();
 
   /// calculate acceleration and velocity using the central difference method
   virtual void centralDifference();

@@ -282,7 +282,7 @@ ExplicitMixedOrder::solve()
   *_explicit_residual *= -1.0;
 
   // Perform the linear solve
-  forwardEuler();
+  // forwardEuler();
   centralDifference();
   const bool converged = solutionUpdate();
 
@@ -301,77 +301,92 @@ ExplicitMixedOrder::solve()
   _nonlinear_implicit_system->nonlinear_solver->converged = converged;
 }
 
-void
-ExplicitMixedOrder::forwardEuler()
-{
-  // Split lumped mass matrix for first-order variables
-  auto Minv = NumericVector<Number>::build(_communicator);
-  _mass_matrix_lumped->create_subvector(*Minv, _local_first_order_indices, false);
-  Minv->reciprocal();
+// void
+// ExplicitMixedOrder::forwardEuler()
+// {
+//   // Split lumped mass matrix for first-order variables
+//   auto Minv = NumericVector<Number>::build(_communicator);
+//   _mass_matrix_lumped->create_subvector(*Minv, _local_first_order_indices, false);
+//   Minv->reciprocal();
 
-  // Split residual vector for first-order variables
-  const auto r = NumericVector<Number>::build(_communicator);
-  _explicit_residual->create_subvector(*r, _local_first_order_indices, false);
+//   // Split residual vector for first-order variables
+//   const auto r = NumericVector<Number>::build(_communicator);
+//   _explicit_residual->create_subvector(*r, _local_first_order_indices, false);
 
-  // Calculate velocity
-  auto vel = _sys.solutionUDot();
-  auto v = vel->get_subvector(_local_first_order_indices);
-  v->pointwise_mult(*Minv, *r);
+//   // Calculate velocity
+//   auto vel = _sys.solutionUDot();
+//   auto v = vel->get_subvector(_local_first_order_indices);
+//   v->pointwise_mult(*Minv, *r);
 
-  // close the vectors
-  vel->restore_subvector(std::move(v), _local_first_order_indices);
-  vel->close();
-}
+//   // close the vectors
+//   vel->restore_subvector(std::move(v), _local_first_order_indices);
+//   vel->close();
+// }
 
 void
 ExplicitMixedOrder::centralDifference()
 {
-  // Split lumped mass matrix for first-order variables
-  auto M = NumericVector<Number>::build(_communicator);
-  _mass_matrix_lumped->create_subvector(*M, _local_second_order_indices, false);
-
-  const auto r = NumericVector<Number>::build(_communicator);
-  _explicit_residual->create_subvector(*r, _local_second_order_indices, false);
-
-  // Split lumped mass matrix for first-order variables
   auto accel = _sys.solutionUDotDot();
-  auto a = accel->get_subvector(_local_second_order_indices);
   auto vel = _sys.solutionUDot();
-  auto vn = vel->get_subvector(_local_second_order_indices);
+
+  // First-order variables
+  // mass matrix
+  auto M1 = NumericVector<Number>::build(_communicator);
+  _mass_matrix_lumped->create_subvector(*M1, _local_first_order_indices, false);
+  M1->reciprocal();
+  // residual vector
+  const auto r1 = NumericVector<Number>::build(_communicator);
+  _explicit_residual->create_subvector(*r1, _local_first_order_indices, false);
+  // velocity
+  auto v1 = vel->get_subvector(_local_first_order_indices);
+  v1->pointwise_mult(*M1, *r1);
+  // restore the vectors
+  vel->restore_subvector(std::move(v1), _local_first_order_indices);
+
+  // Second-order variables
+  // mass matrix
+  auto M2 = NumericVector<Number>::build(_communicator);
+  _mass_matrix_lumped->create_subvector(*M2, _local_second_order_indices, false);
+  // residual vector
+  const auto r2 = NumericVector<Number>::build(_communicator);
+  _explicit_residual->create_subvector(*r2, _local_second_order_indices, false);
+  // acceleration
+  auto a = accel->get_subvector(_local_second_order_indices);
+  auto v2 = vel->get_subvector(_local_second_order_indices);
   if (_has_damping)
   {
+    // damping matrix
     auto C = NumericVector<Number>::build(_communicator);
     _damping_matrix_lumped->create_subvector(*C, _local_second_order_indices, false);
 
     auto rc = C->clone();
-    rc->pointwise_mult(*rc, *vn);
-    r->add(-1.0, *rc);
+    rc->pointwise_mult(*rc, *v2);
+    r2->add(-1.0, *rc);
 
     auto coef = C->clone();
     coef->scale(_dt / 2);
-    coef->add(*M);
+    coef->add(*M2);
     coef->reciprocal();
-    a->pointwise_mult(*coef, *r);
+    a->pointwise_mult(*coef, *r2);
   }
   else
   {
-    auto coef = M->clone();
+    auto coef = M2->clone();
     coef->reciprocal();
-    a->pointwise_mult(*coef, *r);
+    a->pointwise_mult(*coef, *r2);
   }
-
-  // Calculate velocity
+  // velocity
   auto delta_v = a->clone();
   delta_v->scale((_dt + _dt_old) / 2);
-  vn->add(*delta_v);
-
-  // close the vectors
+  v2->add(*delta_v);
+  // restore the vectors
   accel->restore_subvector(std::move(a), _local_second_order_indices);
-  vel->restore_subvector(std::move(vn), _local_second_order_indices);
+  vel->restore_subvector(std::move(v2), _local_second_order_indices);
 
   // For phase-field, ensure the irreversibility
   irreversibilityCheck(accel, vel);
 
+  // close the vectors
   accel->close();
   vel->close();
 }
