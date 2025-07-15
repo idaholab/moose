@@ -204,5 +204,5 @@ When running with `--csg-only` as a command line option, all mesh generators tha
 The logic for defining the `CSGBase` object should be contained within the `generateCSG()` routine for each mesh generator.
 No finite element mesh is created using this execution mode.
 
-For more information about the theory of [!ac](CSG) as a geometry representation, please see [source/csg/CSG.md].
+For more information about the theory of [!ac](CSG) as a geometry representation, please see [syntax/CSG/index.md].
 Additional information about implementing `generateCSG()` methods for each mesh generator can be found in [source/csg/CSGBase.md].

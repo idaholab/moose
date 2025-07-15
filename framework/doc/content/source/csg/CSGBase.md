@@ -1,7 +1,7 @@
 # CSGBase
 
 `CSGBase` is the main class developers should interact with when implementing the `generateCSG` method for any mesh generator.
-This framework class acts as a container and driver for all methods necessary for creating a [constructive solid geometry (CSG)](source/csg/CSG.md) representation such as generating surfaces, cells, and universes of the mesh generator under consideration.
+This framework class acts as a container and driver for all methods necessary for creating a [constructive solid geometry (CSG)](syntax/CSG/index.md) representation such as generating surfaces, cells, and universes of the mesh generator under consideration.
 
 !alert! note
 
