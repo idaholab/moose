@@ -46,7 +46,7 @@ public:
   /// Find the previous time in the times vector for a given time
   /// If current_time is also in the times vector within numerical precision, will return the previous value
   /// If the times are not sorted or unique, this will return the time right before the first time found above the current_time
-  Real getPreviousTime(const Real current_time) const;
+  Real getPreviousTime(const Real current_time, bool error_if_no_previous = true) const;
 
   /// Find the next time in the times vector for a given time
   /// If current_time is also in the times vector within numerical precision, will return the next value

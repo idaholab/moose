@@ -14,6 +14,7 @@
 #include "Restartable.h"
 #include "PerfGraphInterface.h"
 #include "Backup.h"
+#include "TimesInterface.h"
 
 #include "libmesh/communicator.h"
 #include "libmesh/point.h"
@@ -112,7 +113,8 @@ class SubAppBackups : public std::vector<std::unique_ptr<Backup>>
 class MultiApp : public MooseObject,
                  public SetupInterface,
                  public Restartable,
-                 public PerfGraphInterface
+                 public PerfGraphInterface,
+                 public TimesInterface
 {
 public:
   static InputParameters validParams();
@@ -565,13 +567,13 @@ protected:
   const Real _global_time_offset;
 
   /// The times at which to reset apps
-  std::vector<Real> _reset_times;
+  const Times * const _reset_times;
 
   /// The apps to be reset
   std::vector<unsigned int> _reset_apps;
 
   /// Whether or not apps have been reset at each time
-  std::vector<bool> _reset_happened;
+  std::set<Real> _reset_happened;
 
   /// The time at which to move apps
   Real _move_time;

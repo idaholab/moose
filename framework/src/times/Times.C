@@ -30,41 +30,54 @@ Times::getTimeAtIndex(unsigned int index) const
 }
 
 Real
-Times::getPreviousTime(const Real current_time) const
+Times::getPreviousTime(const Real current_time, bool error_if_no_previous) const
 {
-  if (!_times.size())
+  if (_times.empty())
     ::mooseError("Times vector has not been initialized.");
+  mooseAssert(std::is_sorted(_times.begin(), _times.end()), "Times vector must be sorted.");
 
-  Real previous_time = _times[0];
-  for (const auto i : make_range(std::size_t(1), _times.size()))
+  // If all times are greater than current_time
+  if (_times.front() > current_time)
   {
-    const auto & time = _times[i];
-    if (MooseUtils::absoluteFuzzyGreaterThan(time, current_time))
-      return previous_time;
-    previous_time = time;
+    if (error_if_no_previous)
+      ::mooseError("No previous time in Times vector for time ",
+                   current_time,
+                   ". Minimum time in vector is ",
+                   _times.front());
+    return -std::numeric_limits<Real>::max();
   }
+
+  for (const auto i : make_range(std::size_t(1), _times.size()))
+    if (MooseUtils::absoluteFuzzyGreaterThan(_times[i], current_time))
+      return _times[i - 1];
   // entire Times vector is prior to current_time
-  return previous_time;
+  return _times.back();
 }
 
 Real
 Times::getNextTime(const Real current_time, const bool error_if_no_next) const
 {
-  for (const auto i : index_range(_times))
-  {
-    const auto & time = _times[i];
-    if (MooseUtils::absoluteFuzzyGreaterThan(time, current_time))
-      return time;
-  }
-  if (_times.size() && error_if_no_next)
-    ::mooseError("No next time in Times vector for time ",
-                 current_time,
-                 ". Maximum time in vector is ",
-                 *_times.rbegin());
-  else if (!error_if_no_next)
-    return std::numeric_limits<Real>::max();
-  else
+  if (_times.empty())
     ::mooseError("Times vector has not been initialized.");
+  mooseAssert(std::is_sorted(_times.begin(), _times.end()), "Times vector must be sorted.");
+
+  auto it = std::find_if(_times.begin(),
+                         _times.end(),
+                         [&](Real time)
+                         { return MooseUtils::absoluteFuzzyGreaterThan(time, current_time); });
+
+  // entire Times vector is prior to current_time
+  if (it == _times.end())
+  {
+    if (error_if_no_next)
+      ::mooseError("No next time in Times vector for time ",
+                   current_time,
+                   ". Maximum time in vector is ",
+                   *_times.rbegin());
+    return std::numeric_limits<Real>::max();
+  }
+
+  return *it;
 }
 
 const std::vector<Real> &
