@@ -1,7 +1,7 @@
 [Tests]
   design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
   issues = '#29846'
-  [channel]
+  [channel_ERCOFTAC_linear_block]
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization on only part of the domain.'
     type = 'Exodiff'
     input = 'block-ke.i'
