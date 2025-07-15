@@ -3,7 +3,7 @@ import unittest
 from mooseutils import fuzzyEqual
 
 def run_spatial(*args, **kwargs):
-    kwargs['executable'] = "../../"
+    kwargs['executable'] = "../../../"
     return mms.run_spatial(*args, **kwargs)
 
 class TestDiffusion1DRobin(unittest.TestCase):

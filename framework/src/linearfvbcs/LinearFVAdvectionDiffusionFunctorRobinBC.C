@@ -37,6 +37,17 @@ LinearFVAdvectionDiffusionFunctorRobinBC::LinearFVAdvectionDiffusionFunctorRobin
     _gamma(getFunctor<Real>("gamma"))
 {
   _var.computeCellGradients();
+
+  if (_alpha.isConstant())
+  {
+    // We check if we can parse the value to a number and if yes, we throw an error if it is 0
+    std::istringstream ss(getParam<MooseFunctorName>("alpha"));
+    Real real_value;
+    if (ss >> real_value && ss.eof())
+      if (MooseUtils::isZero(real_value))
+        paramError("alpha",
+                   "This value shall not be 0. Use a Dirichlet boundary condition instead!");
+  }
 }
 
 Real
@@ -46,7 +57,6 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValue() const
   const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
-  const auto elem_arg = makeElemArg(elem_info->elem());
   const auto state = determineState();
 
   const auto alpha = _alpha(face, state);
@@ -71,7 +81,7 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryNormalGradient() const
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
   const auto alpha = _alpha(face, state);
-  mooseAssert(alpha != 0.0, "Alpha should not be 0!");
+  mooseAssert(!MooseUtils::isZero(alpha), "Alpha should not be 0!");
   const auto beta = _beta(face, state);
   const auto gamma = _gamma(face, state);
   return (gamma - beta * computeBoundaryValue()) / alpha;

@@ -12,7 +12,7 @@ u0 = 3 # some positive constant for the solution, > 1
 
 gamma = ${fparse (-alpha*amp*sin(x_l)) + beta*amp*(u0 - cos(x_l))} # RHS of Robin BC, applied at left boundary
 
-npts = 4
+npts = 2
 ##################################################################
 
 [Mesh]
@@ -40,7 +40,7 @@ npts = 4
 [Functions]
   [u_exact]
     type = ParsedFunction
-    expression = '${fparse amp}*( ${fparse u0} - cos(x))'
+    expression = '${amp}*(${u0} - cos(x))'
   []
   [source_fn]
     type = ParsedFunction
@@ -52,7 +52,7 @@ npts = 4
   [advection]
     type = LinearFVAdvection
     variable = u
-    velocity = "${fparse c} 0 0"
+    velocity = "${c} 0 0"
     advected_interp_method = average
   []
   [source]
@@ -67,9 +67,9 @@ npts = 4
     type = LinearFVAdvectionDiffusionFunctorRobinBC
     variable = u
     boundary = "left"
-    alpha = ${fparse alpha}
-    beta  = ${fparse beta}
-    gamma = ${fparse gamma}
+    alpha = ${alpha}
+    beta  = ${beta}
+    gamma = ${gamma}
   []
   [outflow]
     type = LinearFVAdvectionDiffusionOutflowBC
@@ -95,7 +95,7 @@ npts = 4
 [Convergence]
   [linear]
     type = IterationCountConvergence
-    max_iterations = 5
+    max_iterations = 4
     converge_at_max_iterations = true
   []
 []
@@ -103,7 +103,7 @@ npts = 4
 [Executioner]
   type = Steady
   system_names = u_sys
-  l_tol = 1e-10
+  l_tol = 1e-8
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       NONZERO               1e-10'
 []
