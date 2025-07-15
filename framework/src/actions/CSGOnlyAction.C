@@ -76,7 +76,7 @@ CSGOnlyAction::act()
 
     std::ofstream csg_file;
     csg_file.open(json_out);
-    csg_file << csg_json.dump(2);
+    csg_file << csg_json.dump(/*indent=*/2);
     csg_file.close();
   }
 }

@@ -36,9 +36,7 @@ const CSGUniverse &
 CSGCell::getFillUniverse() const
 {
   if (getFillType() != FillType::UNIVERSE)
-  {
     mooseError("Cell '" + getName() + "' has " + getFillTypeString() + " fill, not UNIVERSE.");
-  }
   else
     return *_fill_universe;
 }
@@ -47,9 +45,7 @@ const std::string
 CSGCell::getFillMaterial() const
 {
   if (getFillType() != FillType::MATERIAL)
-  {
     mooseError("Cell '" + getName() + "' has " + getFillTypeString() + " fill, not MATERIAL.");
-  }
   else
     return _fill_name;
 }
