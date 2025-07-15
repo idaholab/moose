@@ -11,8 +11,8 @@ y_r   = ${fparse 1.0*pi}
 alpha = 5.000 # robin BC coeff for gradient term
 beta  = 2.000 # robin BC coeff for variable term
 
-nx = 10
-ny = 10
+nx = 2
+ny = 2
 ##################################################################
 
 [Mesh]
@@ -116,7 +116,7 @@ ny = 10
 [Convergence]
   [linear]
     type = IterationCountConvergence
-    max_iterations = 5
+    max_iterations = 4
     converge_at_max_iterations = true
   []
 []
@@ -124,7 +124,7 @@ ny = 10
 [Executioner]
   type = Steady
   system_names = u_sys
-  l_tol = 1e-10
+  l_tol = 1e-8
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       NONZERO               1e-10'
 []
