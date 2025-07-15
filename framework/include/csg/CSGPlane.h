@@ -64,9 +64,10 @@ public:
   /**
    * @brief get coefficients (a, b, c, d) of the Plane aX + bY + cZ = d
    *
-   * @return std::map<std::string, Real> map of coefficients (a, b, c, and d) and their values
+   * @return std::unordered_map<std::string, Real> map of coefficients (a, b, c, and d) and their
+   * values
    */
-  virtual std::map<std::string, Real> getCoeffs() const override;
+  virtual std::unordered_map<std::string, Real> getCoeffs() const override;
 
   /**
    * @brief get direction from point p to plane

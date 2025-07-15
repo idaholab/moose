@@ -47,7 +47,7 @@ public:
    *
    * @return map of coefficients (x0, y0, z0, and r) and their values
    */
-  virtual std::map<std::string, Real> getCoeffs() const override;
+  virtual std::unordered_map<std::string, Real> getCoeffs() const override;
 
   /**
    * @brief get direction from point to sphere surface

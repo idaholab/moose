@@ -107,7 +107,7 @@ public:
    *
    * @return map of coefficients and their values
    */
-  virtual std::map<std::string, Real> getCoeffs() const = 0; // Pure virtual function
+  virtual std::unordered_map<std::string, Real> getCoeffs() const = 0; // Pure virtual function
 
   /**
    * @brief get direction from point to surface (e.g. is point 'inside' the half-space, or
