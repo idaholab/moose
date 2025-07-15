@@ -260,7 +260,7 @@
   [definition_valenum_test]
     type = 'RunApp'
     input = ''
-    expect_out = '\'execute_on\'{[^{]*{[^}]*ValEnums=\[ "NONE" "INI[^]]*?GIN" "FINAL" "CUSTOM"[^]]*\][^}]*}[^}]*}'
+    expect_out = '\'execute_on\'{[^{]*{[^}]*ValEnums=\[ "NONE" "INI[^]]*?GENCE" "FINAL" "CUSTOM"[^]]*\][^}]*}[^}]*}'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'
