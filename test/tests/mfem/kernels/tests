@@ -28,6 +28,7 @@
                'Outputs/ParaViewDataCollection/file_base=OutputData/CurlCurlLOR'
     requirement = 'The system shall have the ability to solve a LOR definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     valgrind = heavy
     max_parallel = 1
     recover = false
@@ -43,6 +44,7 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     max_parallel = 1
     recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*3.*Spatial Dimension.*3.*Elems.*2476.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
@@ -57,6 +59,7 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     max_parallel = 1
     recover = false
   []
@@ -72,6 +75,7 @@
                'Outputs/ParaViewDataCollection/file_base=OutputData/DiffusionLOR'
     requirement = 'The system shall have the ability to solve a diffusion problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     max_parallel = 1
     recover = false
     abs_zero = 1e-6
@@ -84,6 +88,7 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a grad-div problem with Raviart-Thomas elements using MFEM.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     max_parallel = 1
     recover = false
     errors = 'foobarbaz' # allow cuda errors I guess?
@@ -101,6 +106,7 @@
                'Outputs/ParaViewDataCollection/file_base=OutputData/GradDivLOR'
     requirement = 'The system shall have the ability to solve a LOR grad-div problem with Raviart-Thomas elements using MFEM.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     valgrind = heavy
     max_parallel = 1
     recover = false
@@ -118,6 +124,7 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     max_parallel = 1
     recover = false
   []
@@ -135,6 +142,7 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     valgrind = none
     max_parallel = 1
     recover = false
@@ -154,6 +162,7 @@
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConductionLOR'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     max_parallel = 1
     recover = false
   []
@@ -165,6 +174,7 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     max_parallel = 1
     recover = false
   []
@@ -176,6 +186,7 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a linear elasticity problem using MFEM.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     max_parallel = 1
     recover = false
   []
@@ -199,6 +210,7 @@
     requirement = 'The system shall have the ability to solve for an irrotational vortex in two dimensions using MFEM.'
     abs_zero = 1e-6
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     recover = false
   []
   [MFEMDarcy]
