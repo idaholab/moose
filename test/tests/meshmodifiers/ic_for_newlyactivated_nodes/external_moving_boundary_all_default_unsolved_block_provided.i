@@ -55,7 +55,7 @@
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
-    ic_strategy = "DEFAULT"
+    reinitialization_strategy = "IC"
 
     old_subdomain_reinitialized = false
     reinitialize_subdomains = '1'

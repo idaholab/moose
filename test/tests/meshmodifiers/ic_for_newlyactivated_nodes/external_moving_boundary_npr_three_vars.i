@@ -45,7 +45,7 @@
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
-    ic_strategy = "DEFAULT"
+    reinitialization_strategy = "IC"
   []
 []
 

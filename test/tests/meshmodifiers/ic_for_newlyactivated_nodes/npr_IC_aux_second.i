@@ -67,8 +67,8 @@
     old_subdomain_reinitialized = false
     reinitialize_subdomains = '1'
 
-    ic_strategy = "POLYNOMIAL"
-    nodal_patch_recovery_uo = 'u_patch'
+    reinitialization_strategy = "POLYNOMIAL_NEIGHBOR"
+    polynomial_fitters = 'u_patch'
   []
 []
 

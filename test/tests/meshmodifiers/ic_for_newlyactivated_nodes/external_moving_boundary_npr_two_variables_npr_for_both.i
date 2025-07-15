@@ -66,9 +66,11 @@
     old_subdomain_reinitialized = false
     reinitialize_subdomains = '1'
 
-    ic_strategy = "POLYNOMIAL"
+    reinitialization_strategy = "POLYNOMIAL_NEIGHBOR"
 
-    nodal_patch_recovery_uo = 'extrapolation_patch extrapolation_patch2'
+    reinitialize_variables = 'diff diff2'
+
+    polynomial_fitters = 'extrapolation_patch extrapolation_patch2'
   []
 []
 

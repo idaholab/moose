@@ -898,7 +898,7 @@ public:
 
   /**
    * Project an initial condition given by a polynomial onto selected elements and nodes
-   * for a set of variables.
+   * for a variable.
    *
    * \param elem_range       Element range to project on (non-nodal)
    * \param bnd_nodes        Boundary nodes to include
@@ -906,17 +906,20 @@ public:
    * \param poly_func        Polynomial function to project (function pointer)
    * \param poly_func_grad   Gradient of the polynomial function (function pointer)
    * \param function_parameters Parameters to pass to the polynomial function
-   * \param target_vars Set of variable names to project
+   * \param target_var variable name to project
    */
-  void projectFunctionOnCustomRange(
-      ConstElemRange & elem_range,
-      ConstNodeRange & bnd_nodes,
-      Number (*poly_func)(
-          const Point &, const libMesh::Parameters &, const std::string &, const std::string &),
-      Gradient (*poly_func_grad)(
-          const Point &, const libMesh::Parameters &, const std::string &, const std::string &),
-      const libMesh::Parameters & function_parameters,
-      const std::optional<std::set<VariableName>> & target_vars = std::nullopt);
+  void projectFunctionOnCustomRange(ConstElemRange & elem_range,
+                                    ConstNodeRange & bnd_nodes,
+                                    Number (*poly_func)(const Point &,
+                                                        const libMesh::Parameters &,
+                                                        const std::string &,
+                                                        const std::string &),
+                                    Gradient (*poly_func_grad)(const Point &,
+                                                               const libMesh::Parameters &,
+                                                               const std::string &,
+                                                               const std::string &),
+                                    const libMesh::Parameters & function_parameters,
+                                    const VariableName & target_var);
 
   // Materials
   virtual void addMaterial(const std::string & material_name,

@@ -55,8 +55,8 @@
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
-    ic_strategy = "DEFAULT"
-    ic_variables = 'diff'
+    reinitialization_strategy = "IC"
+    reinitialize_variables = 'diff'
   []
 []
 

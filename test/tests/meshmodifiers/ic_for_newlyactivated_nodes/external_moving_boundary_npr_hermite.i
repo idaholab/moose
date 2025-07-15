@@ -62,11 +62,12 @@
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
-    ic_strategy = "POLYNOMIAL"
+    reinitialization_strategy = "POLYNOMIAL_NEIGHBOR"
+    reinitialize_variables = 'diff diff_linear'
 
     old_subdomain_reinitialized = false
     reinitialize_subdomains = '1'
-    nodal_patch_recovery_uo = 'extrapolation_patch extrapolation_patch_linear'
+    polynomial_fitters = 'extrapolation_patch extrapolation_patch_linear'
   []
 []
 

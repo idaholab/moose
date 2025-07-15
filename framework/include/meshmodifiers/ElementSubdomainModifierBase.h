@@ -189,6 +189,17 @@ private:
   /// Reinitialized boundary nodes in ConstNodeRange format (displaced mesh)
   std::unique_ptr<ConstNodeRange> _reinitialized_displaced_node_range_from_bnd_nodes;
 
+  /// Non-reinitialized nodes on reinitialized elements
+  std::unordered_set<dof_id_type> _non_reinit_nodes_on_reinit_elems;
+
+  /// A map from variable name to a pair of:
+  /// (1) a vector of DOF IDs associated with non-reinitialized nodes on reinitialized elements, and
+  /// (2) the corresponding solution values at those DOFs.
+  /// This map is used to preserve solution data for variables that should not be reinitialized
+  /// even though they reside on reinitialized elements.
+  std::map<VariableName, std::pair<std::vector<dof_id_type>, std::vector<Number>>>
+      _var_to_dofs_values_from_nonreinit_nodes;
+
   /// The strategy used to apply IC on newly activated nodes
   std::vector<ReinitStrategy> _reinit_strategy;
 
@@ -204,8 +215,8 @@ private:
   /// @brief map from variable name to the index of the nodal patch recovery user object in `_npr`
   std::map<VariableName, unsigned int> _var_name_to_npr_idx;
 
-  /// @brief List of neighbor elements that share nodes with reinitialized elements
-  std::vector<std::vector<dof_id_type>> _solved_elem_ids_for_npr;
+  /// @brief A map to map reinitialization strategies to their corresponding solved element IDs
+  std::map<ReinitStrategy, std::vector<dof_id_type>> _solved_elem_ids_for_npr;
 
   /// Elements that have been reinitialized due to subdomain changes,
   /// gathered across all processors using MPI
@@ -243,9 +254,15 @@ private:
   /// Results are stored in `_global_reinitialized_elems`.
   void synchronizeReinitializedElems();
 
-  /// @brief Gather neighbor elements for newly activated nodes
-  void gatherNeighborElementsForActivatedNodes(const unsigned int ic_idx);
+  /// @brief Gather neighbor elements for newly activated nodes based on the reinitialization strategy.
+  void gatherNeighborElementsForActivatedNodes(ReinitStrategy & reinit_strategy);
 
   /// @brief Project initial conditions using NodalPatchRecoveryBase user objects
-  void projectNprIC(const VariableName & var_name, bool displaced);
+  void projectNprIC(const VariableName & var_name, bool displaced, ReinitStrategy reinit_strategy);
+
+  /// @brief Store values from non-reinitialized nodes on reinitialized elements
+  void storeValuesFromNonReinitNodes(const std::set<VariableName> & vars_names);
+
+  /// @brief Restore values to non-reinitialized nodes on reinitialized elements
+  void restoreValuesToNonReinitNodes(const std::set<VariableName> & vars_names);
 };

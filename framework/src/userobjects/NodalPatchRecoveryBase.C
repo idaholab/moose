@@ -272,3 +272,20 @@ NodalPatchRecoveryBase::synchronizeAebe() const
   libMesh::Parallel::pull_parallel_vector_data<AbPair>(
       _communicator, _query_ids, gather_data, act_on_data, 0);
 }
+
+void
+NodalPatchRecoveryBase::cacheAdditionalElements(const std::vector<dof_id_type> & additional_elems,
+                                                bool do_synchronize) const
+{
+  if (!_use_specific_elements)
+    return;
+
+  _additional_elems = additional_elems;
+
+  if (do_synchronize)
+  {
+    identifyAdditionalElementsFromOtherProcs();
+    synchronizeAebe();
+  }
+  cleanQueryIDsAndAdditionalElements();
+}

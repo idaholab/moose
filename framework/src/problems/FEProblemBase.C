@@ -3717,76 +3717,59 @@ FEProblemBase::projectInitialConditionOnCustomRange(
 }
 
 void
-FEProblemBase::projectFunctionOnCustomRange(
-    ConstElemRange & elem_range,
-    ConstNodeRange & bnd_nodes,
-    Number (*poly_func)(
-        const Point &, const libMesh::Parameters &, const std::string &, const std::string &),
-    Gradient (*poly_func_grad)(
-        const Point &, const libMesh::Parameters &, const std::string &, const std::string &),
-    const libMesh::Parameters & function_parameters,
-    const std::optional<std::set<VariableName>> & target_vars)
+FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
+                                            ConstNodeRange & bnd_nodes,
+                                            Number (*poly_func)(const Point &,
+                                                                const libMesh::Parameters &,
+                                                                const std::string &,
+                                                                const std::string &),
+                                            Gradient (*poly_func_grad)(const Point &,
+                                                                       const libMesh::Parameters &,
+                                                                       const std::string &,
+                                                                       const std::string &),
+                                            const libMesh::Parameters & function_parameters,
+                                            const VariableName & target_var)
 {
-  auto vars_to_project = target_vars.value_or(std::set<VariableName>{});
+  const auto & var = getStandardVariable(0, target_var);
+  const auto var_num = var.number();
 
-  // If no target_vars are specified, we will project all variables
-  if (!target_vars)
+  SystemBase & sys =
+      _aux->hasVariable(target_var)
+          ? static_cast<SystemBase &>(getAuxiliarySystem())
+          : static_cast<SystemBase &>(getNonlinearSystemBase(systemNumForVariable(target_var)));
+
+  // Let libmesh handle the projection
+  System & libmesh_sys = getSystem(target_var);
+  std::string temp_vec_name = "__temp_projection_" + target_var + "__";
+  NumericVector<Number> & temp_vec = libmesh_sys.add_vector(temp_vec_name, /*projected=*/false);
+  libmesh_sys.project_vector(poly_func, poly_func_grad, function_parameters, temp_vec);
+  temp_vec.close();
+
+  // Get the dofs to copy
+  DofMap & dof_map = sys.dofMap();
+  std::set<dof_id_type> all_dof_indices;
+  std::vector<dof_id_type> dof_indices;
+  for (const auto & elem : elem_range)
   {
-    auto insertICVars = [&](SystemBase & sys) -> void
-    {
-      const auto & vars = sys.getVariables(0);
-      for (const auto & ivar : vars)
-        vars_to_project.insert(ivar->name());
-    };
-
-    for (const auto & nl : _nl)
-      insertICVars(*nl);
-    insertICVars(*_aux);
+    dof_map.dof_indices(elem, dof_indices, var_num);
+    all_dof_indices.insert(dof_indices.begin(), dof_indices.end());
   }
-
-  for (const auto & var_name : vars_to_project)
+  for (const auto & node : bnd_nodes)
   {
-    const auto & var = getStandardVariable(0, var_name);
-    const auto var_num = var.number();
-
-    SystemBase & sys =
-        _aux->hasVariable(var_name)
-            ? static_cast<SystemBase &>(getAuxiliarySystem())
-            : static_cast<SystemBase &>(getNonlinearSystemBase(systemNumForVariable(var_name)));
-
-    // Let libmesh handle the projection
-    System & libmesh_sys = getSystem(var_name);
-    std::string temp_vec_name = "__temp_projection_" + var_name + "__";
-    NumericVector<Number> & temp_vec = libmesh_sys.add_vector(temp_vec_name, /*projected=*/false);
-    libmesh_sys.project_vector(poly_func, poly_func_grad, function_parameters, temp_vec);
-    temp_vec.close();
-
-    // Get the dofs to copy
-    DofMap & dof_map = sys.dofMap();
-    std::set<dof_id_type> all_dof_indices;
-    std::vector<dof_id_type> dof_indices;
-    for (const auto & elem : elem_range)
-    {
-      dof_map.dof_indices(elem, dof_indices, var_num);
-      all_dof_indices.insert(dof_indices.begin(), dof_indices.end());
-    }
-    for (const auto & node : bnd_nodes)
-    {
-      dof_map.dof_indices(node, dof_indices, var_num);
-      all_dof_indices.insert(dof_indices.begin(), dof_indices.end());
-    }
-    std::vector<dof_id_type> all_dof_indices_vec(all_dof_indices.begin(), all_dof_indices.end());
-
-    // Copy the projected values into the solution vector
-    std::vector<Real> dof_vals;
-    temp_vec.get(all_dof_indices_vec, dof_vals);
-    sys.solution().insert(dof_vals, all_dof_indices_vec);
-    sys.solution().close();
-    sys.solution().localize(*libmesh_sys.current_local_solution, sys.dofMap().get_send_list());
-
-    // Remove the temporary vector
-    libmesh_sys.remove_vector(temp_vec_name);
+    dof_map.dof_indices(node, dof_indices, var_num);
+    all_dof_indices.insert(dof_indices.begin(), dof_indices.end());
   }
+  std::vector<dof_id_type> all_dof_indices_vec(all_dof_indices.begin(), all_dof_indices.end());
+
+  // Copy the projected values into the solution vector
+  std::vector<Real> dof_vals;
+  temp_vec.get(all_dof_indices_vec, dof_vals);
+  sys.solution().insert(dof_vals, all_dof_indices_vec);
+  sys.solution().close();
+  sys.solution().localize(*libmesh_sys.current_local_solution, sys.dofMap().get_send_list());
+
+  // Remove the temporary vector
+  libmesh_sys.remove_vector(temp_vec_name);
 }
 
 std::shared_ptr<MaterialBase>
