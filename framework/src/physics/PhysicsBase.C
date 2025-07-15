@@ -645,8 +645,18 @@ PhysicsBase::shouldCreateIC(const VariableName & var_name,
   std::set<SubdomainID> blocks_ids_covered;
   bool has_all_blocks;
   if (isVariableFV(var_name))
+  {
     has_all_blocks = _problem->getFVInitialConditionWarehouse().hasObjectsForVariableAndBlocks(
         var_name, blocks_ids_set, blocks_ids_covered, /*tid =*/0);
+    // FV variables can be defined by non-FV BCs
+    std::set<SubdomainID> blocks_ids_covered_fe;
+    const bool has_all_blocks_from_feics =
+        _problem->getInitialConditionWarehouse().hasObjectsForVariableAndBlocks(
+            var_name, blocks_ids_set, blocks_ids_covered_fe, /*tid =*/0);
+    // Note we are missing the case with complete but split coverage
+    has_all_blocks = has_all_blocks || has_all_blocks_from_feics;
+    blocks_ids_covered.insert(blocks_ids_covered_fe.begin(), blocks_ids_covered_fe.end());
+  }
   else
     has_all_blocks = _problem->getInitialConditionWarehouse().hasObjectsForVariableAndBlocks(
         var_name, blocks_ids_set, blocks_ids_covered, /*tid =*/0);
