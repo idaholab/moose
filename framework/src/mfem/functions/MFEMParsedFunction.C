@@ -1,4 +1,5 @@
 #include "MFEMParsedFunction.h"
+#include "MFEMScalarParsedCoeff.h"
 #include "InputParameters.h"
 #include "MFEMProblem.h"
 #include <vector>
@@ -79,6 +80,15 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
         if (_communicator.rank() == 0)
           _communicator.barrier();
       }
+}
+
+void
+MFEMParsedFunction::initialSetup()
+{
+
+  getMFEMProblem().getCoefficients().declareScalar<MFEMScalarParsedCoeff>(name(), 
+  getMFEMProblem().getProblemData().gridfunctions, _var_names, _use_xyzt, _func_F);
+
 }
 
 MFEMParsedFunction::~MFEMParsedFunction() {}

@@ -15,6 +15,11 @@ public:
   MFEMParsedFunction(const InputParameters & parameters);
   virtual ~MFEMParsedFunction();
 
+  /**
+   * Creates the parsed function.
+   */
+  virtual void initialSetup() override;
+
 protected:
   const std::string & _prop_name;
   /// function expression
