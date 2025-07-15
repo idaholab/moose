@@ -145,7 +145,7 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     _elem_integer_names_to_swap(getParam<std::vector<std::string>>("elem_integer_names_to_swap")),
     _elem_integers_swaps(
         getParam<std::vector<std::vector<std::vector<dof_id_type>>>>("elem_integers_swaps")),
-    _direction(getParam<Point>("direction")),
+    _direction(isParamValid("direction") ? getParam<Point>("direction") : Point(0, 0, 0)),
     _extrusion_curve(isParamValid("extrusion_curve") ? getMesh("extrusion_curve")
                                                      : getMesh("extrusion_curve")),
     _extrude_along_curve(isParamValid("extrusion_curve")),
@@ -178,13 +178,13 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
 {
   if (_extrude_along_curve)
   {
-    if (isParamValid("heights"))
+    if (isParamSetByUser("heights"))
       paramError("heights", "heights cannot be set if extruding along curve!");
-    if (isParamValid("biases"))
+    if (isParamSetByUser("biases"))
       paramError("biases", "biases cannot be set if extruding along curve!");
-    if (isParamValid("num_layers"))
+    if (isParamSetByUser("num_layers"))
       paramError("num_layers", "num_layers cannot be set if extruding along curve!");
-    if (isParamValid("direction"))
+    if (isParamSetByUser("direction"))
       paramError("direction", "direction cannot be set if extruding along curve!");
   }
   else
@@ -304,26 +304,16 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
       paramError("biases", "Size of this parameter, if provided, must be the same as heights.");
   }
 
-  if (_upward_boundary_source_blocks.size() != _upward_boundary_ids.size() ||
-      _upward_boundary_ids.size() != num_elevations)
+  if ((_upward_boundary_source_blocks.size() || _upward_boundary_ids.size()) &&
+      (_upward_boundary_source_blocks.size() != _upward_boundary_ids.size() ||
+       _upward_boundary_ids.size() != num_elevations))
   {
-    if (_extrude_along_curve)
-      paramError(
-          "upward_boundary_ids",
-          "This parameter must have the same length (" +
-              std::to_string(_upward_boundary_ids.size()) + ") as upward_boundary_source_blocks (" +
-              std::to_string(_upward_boundary_source_blocks.size()) + ") and (" +
-              std::to_string(num_elevations) +
-              "). Note that the number of heights is set to 1 when extrudingn along a curve.");
-    else
-    {
-      paramError("upward_boundary_ids",
-                 "This parameter must have the same length (" +
-                     std::to_string(_upward_boundary_ids.size()) +
-                     ") as upward_boundary_source_blocks (" +
-                     std::to_string(_upward_boundary_source_blocks.size()) + ") and heights (" +
-                     std::to_string(num_elevations) + ")");
-    }
+    paramError("upward_boundary_ids",
+               "This parameter must have the same length (" +
+                   std::to_string(_upward_boundary_ids.size()) +
+                   ") as upward_boundary_source_blocks (" +
+                   std::to_string(_upward_boundary_source_blocks.size()) + ") and heights (" +
+                   std::to_string(num_elevations) + ")");
   }
 
   for (unsigned int i = 0; i < _upward_boundary_source_blocks.size(); i++)
@@ -332,8 +322,9 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
                  "Every element of this parameter must have the same length as the corresponding "
                  "element of upward_boundary_source_blocks.");
 
-  if (_downward_boundary_source_blocks.size() != _downward_boundary_ids.size() ||
-      _downward_boundary_ids.size() != num_elevations)
+  if ((_downward_boundary_source_blocks.size() || _downward_boundary_ids.size()) &&
+      (_downward_boundary_source_blocks.size() != _downward_boundary_ids.size() ||
+       _downward_boundary_ids.size() != num_elevations))
   {
     if (_extrude_along_curve)
       paramError(
@@ -426,7 +417,12 @@ AdvancedExtruderGenerator::generate()
                    "' was not found within the mesh");
 
   std::unique_ptr<MeshBase> input = std::move(_input);
-  std::unique_ptr<MeshBase> extrusion_curve = std::move(_extrusion_curve);
+
+  std::unique_ptr<MeshBase> extrusion_curve;
+  if (_extrude_along_curve)
+    extrusion_curve = std::move(_extrusion_curve);
+  else
+    extrusion_curve = nullptr;
 
   // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
   // around
@@ -435,7 +431,7 @@ AdvancedExtruderGenerator::generate()
 
   unsigned int total_num_layers;
   unsigned int total_num_elevations;
-  if (_extrude_along_curve)
+  if (!_extrude_along_curve)
   {
     total_num_layers = std::accumulate(_num_layers.begin(), _num_layers.end(), 0);
     total_num_elevations = _heights.size();
@@ -511,7 +507,7 @@ AdvancedExtruderGenerator::generate()
       unsigned int num_layers, height, bias;
       if (_extrude_along_curve)
       {
-        num_layers = extrusion_curve->n_nodes();
+        num_layers = extrusion_curve->n_elem();
       }
       else
       {
@@ -532,11 +528,13 @@ AdvancedExtruderGenerator::generate()
           // direction to get the new position.
           auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
 
+          //
           libMesh::Real step_size;
           if (_extrude_along_curve)
           {
-            libMesh::Node * P_next = extrusion_curve->node_ptr(k + 1); // set next point on curve
-            libMesh::Node * P_current = extrusion_curve->node_ptr(k);  // set current point on curve
+            libMesh::Node * P_next = extrusion_curve->node_ptr(k); // set next point on curve
+            libMesh::Node * P_current =
+                extrusion_curve->node_ptr(k - 1); // set current point on curve
 
             _direction = *P_next - *P_current; // set direction
             _direction /= _direction.norm();   // normalize direction
@@ -630,7 +628,11 @@ AdvancedExtruderGenerator::generate()
 
     for (unsigned int e = 0; e != total_num_elevations; e++)
     {
-      auto num_layers = _num_layers[e];
+      unsigned int num_layers;
+      if (_extrude_along_curve)
+        num_layers = extrusion_curve->n_elem();
+      else
+        num_layers = _num_layers[e];
 
       for (unsigned int k = 0; k != num_layers; ++k)
       {
@@ -1130,20 +1132,26 @@ AdvancedExtruderGenerator::generate()
               new_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
           // Assign sideset id to the side if the element belongs to a specified
           // upward_boundary_source_blocks
-          for (unsigned int i = 0; i < _upward_boundary_source_blocks[e].size(); i++)
-            if (new_elem->subdomain_id() == _upward_boundary_source_blocks[e][i])
-              boundary_info.add_side(
-                  new_elem.get(), is_flipped ? 0 : top_id, _upward_boundary_ids[e][i]);
+          if (_downward_boundary_source_blocks.size() || _downward_boundary_ids.size())
+          {
+            for (unsigned int i = 0; i < _upward_boundary_source_blocks[e].size(); i++)
+              if (new_elem->subdomain_id() == _upward_boundary_source_blocks[e][i])
+                boundary_info.add_side(
+                    new_elem.get(), is_flipped ? 0 : top_id, _upward_boundary_ids[e][i]);
+          }
         }
         // define downward boundaries
         if (k == 0)
         {
           const unsigned short top_id =
               new_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
-          for (unsigned int i = 0; i < _downward_boundary_source_blocks[e].size(); i++)
-            if (new_elem->subdomain_id() == _downward_boundary_source_blocks[e][i])
-              boundary_info.add_side(
-                  new_elem.get(), is_flipped ? top_id : 0, _downward_boundary_ids[e][i]);
+          if (_downward_boundary_source_blocks.size() || _downward_boundary_ids.size())
+          {
+            for (unsigned int i = 0; i < _downward_boundary_source_blocks[e].size(); i++)
+              if (new_elem->subdomain_id() == _downward_boundary_source_blocks[e][i])
+                boundary_info.add_side(
+                    new_elem.get(), is_flipped ? top_id : 0, _downward_boundary_ids[e][i]);
+          }
         }
 
         // perform subdomain swaps

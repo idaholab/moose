@@ -14,14 +14,14 @@
     end_direction = '-1 0 0'
     num_elements = 10
   []
-  # [ext_along_curve]
-  #   type = AdvancedExtruderGenerator
-  #   input = gmg
-  #   extrusion_curve = bscg
-  # []
-  [stitcher]
-    type = StitchedMeshGenerator
-    inputs = 'gmg bscg'
-    stitch_boundaries_pairs = '1 1'
+  [ext_along_curve]
+    type = AdvancedExtruderGenerator
+    input = gmg
+    extrusion_curve = bscg
   []
+  # [stitcher]
+  #   type = StitchedMeshGenerator
+  #   inputs = 'gmg bscg'
+  #   stitch_boundaries_pairs = '1 1'
+  # []
 []
