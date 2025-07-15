@@ -73,24 +73,19 @@ PeriodicBCHelper::setupPeriodicBoundaries(FEProblemBase & problem)
   else
     setupManualPeriodicBoundaries(problem);
 
-  // If we're doing algebraic coupling, the relevant additions to each DofMap
-  // will setup the geometric ghosting in the mesh. If we're not, we need to add
-  // that coupling ourselves
-  if (!_algebraic)
+  const auto add_geometric_coupling = [this](auto & problem)
   {
-    const auto add_geometric_coupling = [this](auto & problem)
-    {
-      auto & mesh = problem.mesh().getMesh();
-      auto coupling = std::make_shared<libMesh::DefaultCoupling>();
-      coupling->set_mesh(&mesh);
-      coupling->set_periodic_boundaries(&getPeriodicBoundaries());
-      mesh.add_ghosting_functor(coupling);
-    };
+    auto & mesh = problem.mesh().getMesh();
+    auto functor = std::make_shared<libMesh::DefaultCoupling>();
+    functor->set_mesh(&mesh);
+    functor->set_n_levels(1);
+    functor->set_periodic_boundaries(&getPeriodicBoundaries());
+    mesh.add_ghosting_functor(functor);
+  };
 
-    add_geometric_coupling(problem);
-    if (const auto displaced_problem = problem.getDisplacedProblem())
-      add_geometric_coupling(*displaced_problem);
-  }
+  add_geometric_coupling(problem);
+  if (const auto displaced_problem = problem.getDisplacedProblem())
+    add_geometric_coupling(*displaced_problem);
 }
 
 void
