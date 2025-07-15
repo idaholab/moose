@@ -38,8 +38,8 @@ protected:
    * @param p1 point 1
    * @param p2 point 2
    * @param p3 point 3
-   * @param boundary CSGSurface::BoundaryType boundary type for the surface
-   * @return CSGSurface & reference to plane surface created
+   * @param boundary boundary type for the surface
+   * @return reference to plane surface created
    */
   CSGSurface & addPlaneFromPoints(const std::string name,
                                   const Point & p1,
@@ -56,8 +56,8 @@ protected:
    * @param b coefficient b
    * @param c coefficient c
    * @param d coefficient d
-   * @param boundary CSGSurface::BoundaryType boundary type for the surface
-   * @return const CSGSurface & reference to plane surface created
+   * @param boundary boundary type for the surface
+   * @return reference to plane surface created
    */
   CSGSurface & addPlaneFromCoefficients(const std::string name,
                                         const Real a,
@@ -72,8 +72,8 @@ protected:
    * @param name unique name for the sphere surface
    * @param center center point of sphere
    * @param r radius of sphere
-   * @param boundary CSGSurface::BoundaryType boundary type for the surface
-   * @return CSGSurface & reference to sphere surface created
+   * @param boundary boundary type for the surface
+   * @return reference to sphere surface created
    */
   CSGSurface & addSphere(const std::string name,
                          const Point center,
@@ -88,7 +88,7 @@ protected:
    * @param x1 second coordinate of origin
    * @param r radius
    * @param axis axis alignment (x, y, or z)
-   * @param boundary CSGSurface::BoundaryType boundary type for the surface
+   * @param boundary boundary type for the surface
    * @return reference to CSGSurface object that is created
    */
   CSGSurface & addCylinder(const std::string name,
@@ -101,14 +101,14 @@ protected:
   /**
    * @brief Get map of all names to surfaces in surface list
    *
-   * @return std::map<std::string, std::unique_ptr<CSGSurface>>& map of all names to surfaces
+   * @return map of all names to CSGSurface pointers
    */
   std::map<std::string, std::unique_ptr<CSGSurface>> & getSurfaceListMap() { return _surfaces; }
 
   /**
    * @brief Get list of references to all surfaces in surface list
    *
-   * @return std::vector<std::reference_wrapper<const CSGSurface>> list of references to surfaces
+   * @return list of references to surfaces
    */
   std::vector<std::reference_wrapper<const CSGSurface>> getAllSurfaces() const;
 
@@ -116,7 +116,7 @@ protected:
    * @brief Get a surface by name
    *
    * @param name name of surface
-   * @return CSGSurface & reference to CSGSurface of the specified name
+   * @return reference to CSGSurface of the specified name
    */
   CSGSurface & getSurface(const std::string name) const;
 

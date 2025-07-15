@@ -29,7 +29,7 @@ public:
    * @param name unique name for the sphere surface
    * @param center center point of sphere
    * @param r radius of sphere
-   * @param boundary CSGSurface::BoundaryType boundary type for the surface
+   * @param boundary boundary type for the surface
    */
   CSGSphere(const std::string name,
             const Point center,
@@ -45,7 +45,7 @@ public:
    * @brief Get the coefficients (x0, y0, z0, r) for the equation of a sphere
    * (x - x0)^2 + (y - y0)^2 + (z - z0)^2 = r^2
    *
-   * @return std::map<std::string, Real> map of coefficients (x0, y0, z0, and r) and their values
+   * @return map of coefficients (x0, y0, z0, and r) and their values
    */
   virtual std::map<std::string, Real> getCoeffs() const override;
 
@@ -53,7 +53,7 @@ public:
    * @brief get direction from point to sphere surface
    *
    * @param p point
-   * @return CSGSurface::Direction direction from point
+   * @return sign of direction to surface from point
    */
   virtual CSGSurface::Direction directionFromPoint(const Point p) const override;
 

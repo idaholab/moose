@@ -107,8 +107,7 @@ public:
    * @param name surface name
    * @param center a point defining the center
    * @param r radius
-   * @param boundary (optional) CSGSurface::BoundaryType boundary condition for the surface (default
-   * TRANSMISSION)
+   * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
    * @return reference to CSGSurface object
    */
   const CSGSurface &
@@ -131,8 +130,7 @@ public:
    * @param x0 first coordinate for center
    * @param x1 second coordinate for center
    * @param r radius
-   * @param boundary (optional) CSGSurface::BoundaryType boundary condition for the surface (default
-   * TRANSMISSION)
+   * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
    * @return reference to CSGSurface object
    */
   const CSGSurface &
@@ -182,7 +180,7 @@ public:
    * @brief change the boundary type of a surface
    *
    * @param surface CSGSurface to update
-   * @param boundary CSGSurface::BoundaryType to set
+   * @param boundary boundary type to set
    */
   void updateSurfaceBoundaryType(const CSGSurface & surface, CSGSurface::BoundaryType boundary);
 
@@ -195,7 +193,7 @@ public:
    * @param region cell region
    * @param add_to_univ (optional) universe to which this cell will be added (default is root
    * universe)
-   * @return const CSGCell & reference to CSGCell that is created
+   * @return reference to CSGCell that is created
    */
   const CSGCell & createCell(const std::string name,
                              const std::string mat_name,
@@ -209,7 +207,7 @@ public:
    * @param region cell region
    * @param add_to_univ (optional) universe to which this cell will be added (default is root
    * universe)
-   * @return const CSGCell & reference to CSGCell that is created
+   * @return reference to CSGCell that is created
    */
   const CSGCell & createCell(const std::string name,
                              const CSGRegion & region,
@@ -223,7 +221,7 @@ public:
    * @param region cell region
    * @param add_to_univ (optional) universe to which this cell will be added (default is root
    * universe)
-   * @return const CSGCell & reference to cell that is created
+   * @return reference to cell that is created
    */
   const CSGCell & createCell(const std::string name,
                              const CSGUniverse & fill_univ,
@@ -299,7 +297,7 @@ public:
    * @brief Create an empty Universe object
    *
    * @param name unique universe name
-   * @return CSGUniverse & reference to CSGUniverse that is created
+   * @return reference to CSGUniverse that is created
    */
   const CSGUniverse & createUniverse(const std::string name)
   {
@@ -311,7 +309,7 @@ public:
    *
    * @param name unique universe name
    * @param cells list of cells to add to universe
-   * @return CSGUniverse & reference to CSGUniverse that is created
+   * @return reference to CSGUniverse that is created
    */
   const CSGUniverse & createUniverse(const std::string name,
                                      std::vector<std::reference_wrapper<const CSGCell>> & cells);

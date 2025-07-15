@@ -39,7 +39,7 @@ public:
     REFLECTIVE
   };
 
-  /// Enum for the direction of the halfspace being represented by a point and surface
+  /// Enum for the direction of the half-space being represented by a point and surface
   enum class Direction
   {
     POSITIVE,
@@ -58,7 +58,7 @@ public:
    *
    * @param name unique name of surface
    * @param surf_type surface type
-   * @param boundary CSGSurface::BoundaryType boundary condition for the surface
+   * @param boundary boundary condition for the surface
    */
   CSGSurface(const std::string name, SurfaceType surf_type, CSGSurface::BoundaryType boundary);
 
@@ -70,7 +70,7 @@ public:
   /**
    * @brief Get the Surface Type (i.e. PLANE, SPHERE, XCYLINDER, YCYLINDER, ZCYLINDER)
    *
-   * @return SurfaceType type of surface
+   * @return type of surface
    */
   SurfaceType getSurfaceType() const { return _surface_type; }
 
@@ -82,30 +82,30 @@ public:
   const std::string getSurfaceTypeString() const;
 
   /**
-   * @brief Set the Boundary Type (i.e. transmission or vacuum)
+   * @brief Set the Boundary Type (i.e. TRANSMISSION or VACUUM)
    *
    * @param boundary_type type of boundary
    */
   void setBoundaryType(const BoundaryType boundary_type) { _boundary_type = boundary_type; }
 
   /**
-   * @brief Get the Boundary Type (i.e. transmission or vacuum)
+   * @brief Get the Boundary Type (i.e. TRANSMISSION or VACUUM)
    *
-   * @return BoundaryType type of boundary
+   * @return type of boundary
    */
   BoundaryType getBoundaryType() const { return _boundary_type; }
 
   /**
    * @brief Get the string representation of Boundary Type
    *
-   * @return const std::string string representation of the boundary type
+   * @return string representation of the boundary type
    */
   const std::string getBoundaryTypeString() const;
 
   /**
    * @brief Get the coefficients that define the surface
    *
-   * @return std::map<std::string, Real> map of coefficients and their values
+   * @return map of coefficients and their values
    */
   virtual std::map<std::string, Real> getCoeffs() const = 0; // Pure virtual function
 
@@ -114,7 +114,7 @@ public:
    * 'outside')
    *
    * @param p point
-   * @return CSGSurface::Direction
+   * @return sign of direction to surface from point
    */
   virtual CSGSurface::Direction
   directionFromPoint(const Point p) const = 0; // Pure virtual function

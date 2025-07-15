@@ -45,10 +45,10 @@ public:
   virtual ~CSGUniverse() = default;
 
   /**
-   * @brief Get the Cell object by name
+   * @brief Get the CSGCell object by name
    *
    * @param name name of cell
-   * @return const CSGCell & reference to the cell of the specified name in this universe
+   * @return reference to the cell of the specified name in this universe
    */
   const CSGCell & getCell(const std::string name);
 
@@ -63,14 +63,14 @@ public:
   /**
    * @brief Get list of the all cells in the universe
    *
-   * @return std::vector<CSGCell *> list of pointers to cells in universe
+   * @return list of pointers to cells in universe
    */
   const std::vector<std::reference_wrapper<const CSGCell>> & getAllCells() const { return _cells; }
 
   /**
    * @brief Get the name of the universe
    *
-   * @return const std::string name of universe
+   * @return name of universe
    */
   const std::string getName() const { return _name; }
 
@@ -122,6 +122,7 @@ protected:
 
   // CSGUniverseList needs to be friend to access setName()
   friend class CSGUniverseList;
+
   // CSGUniverseList needs to be friend to access addCell()
   friend class CSGBase;
 };
