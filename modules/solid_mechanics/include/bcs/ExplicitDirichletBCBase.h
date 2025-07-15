@@ -32,6 +32,7 @@ public:
 
 protected:
   virtual Real computeQpResidual() override;
+  // virtual void initialSetup() override;
   virtual void timestepSetup() override;
   /**
    * Compute the value of the DirichletBC at the current quadrature point
@@ -39,8 +40,8 @@ protected:
   virtual Real computeQpValue() = 0;
 
   /// The lumped mass and damping matrix
-  const NumericVector<Number> & _mass_lumped;
-  const NumericVector<Number> & _damping_lumped;
+  NumericVector<Number> * _mass_lumped = nullptr;
+  NumericVector<Number> * _damping_lumped = nullptr;
 
   const Real & _u_old;
   const Real & _u_dot_old;
@@ -58,6 +59,6 @@ private:
    */
 
   /// Initialize the lumped matrix for ExplicitMixedOrder
-  const NumericVector<Number> & initMassLumped();
-  const NumericVector<Number> & initDampingLumped();
+  NumericVector<Number> & initMassLumped();
+  NumericVector<Number> & initDampingLumped();
 };

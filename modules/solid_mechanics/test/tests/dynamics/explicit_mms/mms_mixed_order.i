@@ -25,6 +25,10 @@ dt_and_v0 = 1e-5
     type = ParsedFunction
     expression = '5*(x^2+y)*cos(t)-10*sin(t)'
   []
+  [b3]
+    type = ParsedFunction
+    expression = '-15*(x^2+y^2)*sin(2*t)'
+  []
   [u_exact]
     type = ParsedFunction
     expression = '5*(x+y^2)*sin(t)'
@@ -33,28 +37,34 @@ dt_and_v0 = 1e-5
     type = ParsedFunction
     expression = '5*(x^2+y)*sin(t)'
   []
+  [w_exact]
+    type = ParsedFunction
+    expression = '5*(x^2+y^2)*sin(2*t)'
+  []
   [udot_init]
     type = ParsedFunction
     expression = '-5*(x+y^2)*${dt_and_v0}'
   []
   [v_init]
     type = ParsedFunction
-    expression = '0'
+    expression = '-5*(x^2+y)*${dt_and_v0}'
   []
   [v_lr]
     type = ParsedFunction
     expression = '5*(1+y)*sin(t)'
   []
-  # [v_tb]
-  #   type = ParsedFunction
-  #   expression = '5*(x^2+1)*cos(t)'
-  # []
+  [wdot_init]
+    type = ParsedFunction
+    expression = '-10*(x^2+y^2)*${dt_and_v0}'
+  []
 []
 
 [Variables]
   [u]
   []
   [v]
+  []
+  [w]
   []
 []
 
@@ -73,6 +83,13 @@ dt_and_v0 = 1e-5
       execute_on = 'INITIAL TIMESTEP_END'
     []
   []
+  [w_exact]
+    [AuxKernel]
+      type = FunctionAux
+      function = w_exact
+      execute_on = 'INITIAL TIMESTEP_END'
+    []
+  []
 []
 
 [ICs]
@@ -87,6 +104,12 @@ dt_and_v0 = 1e-5
     variable = v
     state = OLD
     function = v_init
+  []
+  [w_old]
+    type = FunctionIC
+    variable = w
+    state = OLD
+    function = wdot_init
   []
 []
 
@@ -132,6 +155,22 @@ dt_and_v0 = 1e-5
     variable = v
     function = b2
   []
+  [w_mass]
+    type = MassMatrix
+    variable = w
+    density = 1
+    matrix_tags = 'mass'
+  []
+  [w_reaction]
+    type = ADReaction
+    variable = w
+    rate = 1
+  []
+  [w_ffn]
+    type = BodyForce
+    variable = w
+    function = b3
+  []
 []
 
 [Postprocessors]
@@ -145,22 +184,12 @@ dt_and_v0 = 1e-5
     variable = v
     function = v_exact
   []
+  [w_error]
+    type = NodalL2Error
+    variable = w
+    function = w_exact
+  []
 []
-
-# [VectorPostprocessors]
-#   [v]
-#     type = NodalValueSampler
-#     variable = v
-#     sort_by = id
-#     outputs = csv
-#   []
-#   [v_exact]
-#     type = NodalValueSampler
-#     variable = v_exact
-#     sort_by = id
-#     outputs = csv
-#   []
-# []
 
 [Executioner]
   type = Transient
@@ -174,16 +203,11 @@ dt_and_v0 = 1e-5
     damping_matrix_tag = 'damping'
     use_constant_mass = true
     use_constant_damping = true
-    second_order_vars = 'u'
-    first_order_vars = 'v'
+    second_order_vars = 'u w'
+    first_order_vars = 'u v'
   []
 []
 
 [Outputs]
   exodus = true
-  [csv]
-    type = CSV
-    file_base = './mms_mixed_order_output/'
-    execute_vector_postprocessors_on = 'INITIAL TIMESTEP_END'
-  []
 []

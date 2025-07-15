@@ -53,7 +53,8 @@ public:
   enum TimeOrder
   {
     FIRST,
-    SECOND
+    SECOND,
+    FIRST_AND_SECOND
   };
 
   /**
@@ -67,11 +68,8 @@ protected:
 
   virtual TagID dampingMatrixTagID() const;
 
-  // /// calculate velocity using the forward Euler method
-  // virtual void forwardEuler();
-
   /// calculate acceleration and velocity using the central difference method
-  virtual void centralDifference();
+  virtual void discretize();
 
   /// Update the solution vector. @return true if the solution converged, false otherwise.
   virtual bool solutionUpdate();

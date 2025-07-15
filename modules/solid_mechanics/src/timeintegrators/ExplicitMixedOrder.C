@@ -148,7 +148,6 @@ ExplicitMixedOrder::init()
       _vars_first.insert(var_num);
       var_nums.erase(var_num);
     }
-
   for (const auto & var_name : var_names_second)
     if (lm_sys.has_variable(var_name))
     {
@@ -156,6 +155,10 @@ ExplicitMixedOrder::init()
       _vars_second.insert(var_num);
       var_nums.erase(var_num);
     }
+  // if a variable is in both first and second order, its highest order will be used
+  for (auto var_num : _vars_second)
+    if (_vars_first.find(var_num) != _vars_first.end())
+      _vars_first.erase(var_num);
 
   // If var_nums is empty then that means the user has specified all the variables in this system
   if (!var_nums.empty())
@@ -282,8 +285,7 @@ ExplicitMixedOrder::solve()
   *_explicit_residual *= -1.0;
 
   // Perform the linear solve
-  // forwardEuler();
-  centralDifference();
+  discretize();
   const bool converged = solutionUpdate();
 
   // Apply constraints
@@ -301,30 +303,8 @@ ExplicitMixedOrder::solve()
   _nonlinear_implicit_system->nonlinear_solver->converged = converged;
 }
 
-// void
-// ExplicitMixedOrder::forwardEuler()
-// {
-//   // Split lumped mass matrix for first-order variables
-//   auto Minv = NumericVector<Number>::build(_communicator);
-//   _mass_matrix_lumped->create_subvector(*Minv, _local_first_order_indices, false);
-//   Minv->reciprocal();
-
-//   // Split residual vector for first-order variables
-//   const auto r = NumericVector<Number>::build(_communicator);
-//   _explicit_residual->create_subvector(*r, _local_first_order_indices, false);
-
-//   // Calculate velocity
-//   auto vel = _sys.solutionUDot();
-//   auto v = vel->get_subvector(_local_first_order_indices);
-//   v->pointwise_mult(*Minv, *r);
-
-//   // close the vectors
-//   vel->restore_subvector(std::move(v), _local_first_order_indices);
-//   vel->close();
-// }
-
 void
-ExplicitMixedOrder::centralDifference()
+ExplicitMixedOrder::discretize()
 {
   auto accel = _sys.solutionUDotDot();
   auto vel = _sys.solutionUDot();
@@ -434,7 +414,9 @@ ExplicitMixedOrder::findVariableTimeOrder(unsigned int var_num) const
 {
   if (_vars_first.empty() && _vars_second.empty())
     mooseError("Time order sets are both empty.");
-  if (_vars_first.count(var_num))
+  if (_vars_first.count(var_num) && _vars_second.count(var_num))
+    return FIRST_AND_SECOND;
+  else if (_vars_first.count(var_num))
     return FIRST;
   else if (_vars_second.count(var_num))
     return SECOND;
