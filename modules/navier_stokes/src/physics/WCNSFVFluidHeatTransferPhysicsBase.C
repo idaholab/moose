@@ -34,6 +34,9 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
   params.addParam<NonlinearVariableName>(
       "fluid_temperature_variable", NS::T_fluid, "Name of the fluid temperature variable");
 
+  params.addParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
+  params.addParamNamesToGroup(NS::fluid, "Material properties");
+
   // Initial conditions
   params.addParam<FunctionName>(
       "initial_enthalpy",
@@ -226,7 +229,8 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
   InputParameters params = getFactory().getValidParams("FunctionIC");
   assignBlocks(params, _blocks);
 
-  if (shouldCreateIC(_fluid_temperature_name,
+  if (isParamSetByUser("initial_temperature") &&
+      shouldCreateIC(_fluid_temperature_name,
                      _blocks,
                      /*whether IC is a default*/ !isParamSetByUser("initial_temperature"),
                      /*error if already an IC*/ isParamSetByUser("initial_temperature")))
@@ -247,49 +251,6 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
 
     getProblem().addInitialCondition("FunctionIC", _fluid_enthalpy_name + "_ic", params);
   }
-}
-
-void
-WCNSFVFluidHeatTransferPhysicsBase::addMaterials()
-{
-  // For compatibility with Modules/NavierStokesFV syntax
-  if (!_has_energy_equation)
-    return;
-
-  // Note that this material choice would not work for Newton-INSFV + solve_for_enthalpy
-  const auto object_type =
-      _solve_for_enthalpy ? "LinearFVEnthalpyFunctorMaterial" : "INSFVEnthalpyFunctorMaterial";
-
-  InputParameters params = getFactory().getValidParams(object_type);
-  assignBlocks(params, _blocks);
-
-  if (_solve_for_enthalpy)
-  {
-    params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
-    params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
-    params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
-    if (isParamValid(NS::fluid))
-      params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
-    else
-    {
-      if (!getProblem().hasFunctor("h_from_p_T_functor", 0) ||
-          !getProblem().hasFunctor("T_from_p_h_functor", 0))
-        paramError(NS::fluid,
-                   "Either 'fp' must be specified or the 'h_from_p_T_functor' and "
-                   "'T_from_p_h_functor' must be defined outside the Physics");
-      // Note: we could define those in the Physics if cp is constant
-      params.set<MooseFunctorName>("h_from_p_T_functor") = "h_from_p_T_functor";
-      params.set<MooseFunctorName>("T_from_p_h_functor") = "T_from_p_h_functor";
-    }
-  }
-  else
-  {
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-    params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
-  }
-
-  getProblem().addMaterial(object_type, prefix() + "enthalpy_material", params);
 }
 
 unsigned short

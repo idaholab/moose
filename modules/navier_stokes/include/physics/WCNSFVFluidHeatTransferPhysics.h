@@ -25,6 +25,7 @@ public:
 protected:
 private:
   virtual void addSolverVariables() override;
+  virtual void addMaterials() override;
 
   /**
    * Functions adding kernels for the incompressible / weakly compressible energy equation

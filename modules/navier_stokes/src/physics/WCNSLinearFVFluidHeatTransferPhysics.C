@@ -30,9 +30,6 @@ WCNSLinearFVFluidHeatTransferPhysics::validParams()
       "orthogonal meshes.");
   params.set<std::vector<SolverSystemName>>("system_names") = {"energy_system"};
 
-  params.addParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
-  params.addParamNamesToGroup(NS::fluid, "Material properties");
-
   // We could split between discretization and solver here.
   params.addParamNamesToGroup("use_nonorthogonal_correction system_names", "Numerical scheme");
 
@@ -409,7 +406,43 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyOutletBC()
 void
 WCNSLinearFVFluidHeatTransferPhysics::addMaterials()
 {
-  WCNSFVFluidHeatTransferPhysicsBase::addMaterials();
+  // For compatibility with Modules/NavierStokesFV syntax
+  if (!_has_energy_equation)
+    return;
+
+  // Note that this material choice would not work for Newton-INSFV + solve_for_enthalpy
+  const auto object_type = "LinearFVEnthalpyFunctorMaterial";
+
+  InputParameters params = getFactory().getValidParams(object_type);
+  assignBlocks(params, _blocks);
+
+  if (_solve_for_enthalpy)
+  {
+    params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
+    params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
+    params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
+    if (isParamValid(NS::fluid))
+      params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
+    else
+    {
+      if (!getProblem().hasFunctor("h_from_p_T_functor", 0) ||
+          !getProblem().hasFunctor("T_from_p_h_functor", 0))
+        paramError(NS::fluid,
+                   "Either 'fp' must be specified or the 'h_from_p_T_functor' and "
+                   "'T_from_p_h_functor' must be defined outside the Physics");
+      // Note: we could define those in the Physics if cp is constant
+      params.set<MooseFunctorName>("h_from_p_T_functor") = "h_from_p_T_functor";
+      params.set<MooseFunctorName>("T_from_p_h_functor") = "T_from_p_h_functor";
+    }
+  }
+  else
+  {
+    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+    params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
+  }
+
+  getProblem().addMaterial(object_type, prefix() + "enthalpy_material", params);
 
   if (_solve_for_enthalpy)
   {
