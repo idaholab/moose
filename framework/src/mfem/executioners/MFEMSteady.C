@@ -123,7 +123,6 @@ MFEMSteady::execute()
       if ( _mfem_problem.UsePRefinement() )
       {
         stop_pref = PRefine();
-        _problem_operator->Solve(_problem_data.f);
       }
 
       // Check if we have H-Refinement enabled or we've done enough
@@ -131,8 +130,10 @@ MFEMSteady::execute()
       if ( _mfem_problem.UseHRefinement() )
       {
         stop_href = HRefine();
-        _problem_operator->Solve(_problem_data.f);
       }
+
+      // Solve again
+      _problem_operator->Solve(_problem_data.f);
 
       // Stop when both H_ref and P-ref think it's time to stop
       stop = (stop_href and stop_pref);
