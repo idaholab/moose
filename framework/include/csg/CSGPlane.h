@@ -86,10 +86,10 @@ protected:
   /// Value of b in equation of plane
   Real _b;
 
-  /// Value of b in equation of plane
+  /// Value of c in equation of plane
   Real _c;
 
-  /// Value of b in equation of plane
+  /// Value of d in equation of plane
   Real _d;
 };
 } // namespace CSG

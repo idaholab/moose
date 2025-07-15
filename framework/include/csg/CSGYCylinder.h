@@ -55,7 +55,7 @@ public:
    * @brief get direction from point to surface
    *
    * @param p point
-   * @return CSGSurface::Direction
+   * @return sign of direction to surface from point
    */
   virtual CSGSurface::Direction directionFromPoint(const Point p) const override;
 

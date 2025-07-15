@@ -34,7 +34,7 @@ protected:
    * @brief create an empty universe
    *
    * @param name unique name of universe
-   * @return CSGUniverse & reference to empty universe that is created
+   * @return reference to empty universe that is created
    */
   CSGUniverse & addUniverse(const std::string name);
 
@@ -43,23 +43,21 @@ protected:
    *
    * @param name unique name of universe
    * @param cells list of cell pointers to add to the universe upon creation
-   * @return CSGUniverse & pointer to universe that is created
+   * @return pointer to universe that is created
    */
   CSGUniverse & addUniverse(const std::string name, std::vector<CSGCell *> & cells);
 
   /**
    * @brief Get map of all names to universes in universe list
    *
-   * @return std::map<std::string, std::unique_ptr<CSGUniverse>>& map of all names to
-   * universes
+   * @return map of all names to CSGUniverse pointers
    */
   std::map<std::string, std::unique_ptr<CSGUniverse>> & getUniverseListMap() { return _universes; }
 
   /**
    * @brief Get the all universes in CSGBase instance
    *
-   * @return std::vector<std::reference_wrapper<const CSGUniverse> list of references to all
-   * CSGUniverse objects
+   * @return list of references to all CSGUniverse objects
    */
   std::vector<std::reference_wrapper<const CSGUniverse>> getAllUniverses() const;
 
@@ -67,14 +65,14 @@ protected:
    * @brief Get the Universe by name
    *
    * @param name name of universe
-   * @return CSGUniverse & reference to CSGUniverse of the specified name
+   * @return reference to CSGUniverse of the specified name
    */
   CSGUniverse & getUniverse(const std::string name);
 
   /**
    * @brief Get the root universe
    *
-   * @return CSGUniverse & reference to the root universe
+   * @return reference to the root universe
    */
   const CSGUniverse & getRoot() const { return *_root_universe; };
 
@@ -82,7 +80,7 @@ protected:
    * @brief add an existing universe to list. Ownership of universe will be transferred to universe
    * list object that calls this function
    *
-   * @param universe unique_ptr to universe to add
+   * @param universe pointer to universe to add
    */
   void addUniverse(std::unique_ptr<CSGUniverse> & universe);
 
