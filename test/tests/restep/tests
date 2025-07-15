@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30126'
-  design = 'TestHarness.md'
+  design = 'Transient.md'
   [restep]
     requirement = 'The system shall be able to, when requested, repeat the'
     [num_steps]
