@@ -15,7 +15,7 @@ where:
 - $l$ is the size of the system in the direction of the temperature difference
 - $g$ is the magnitude of the gravity
 - $\mu$ is the dynamic viscosity of the fluid
-- $k$ is the thermal diffusivity of the fluid
+- $k$ is the thermal conductivity of the fluid
 
 
 The density difference may be provided either directly or using the fluid expansion coefficient
