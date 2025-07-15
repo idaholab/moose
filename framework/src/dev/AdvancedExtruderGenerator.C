@@ -528,18 +528,21 @@ AdvancedExtruderGenerator::generate()
           // direction to get the new position.
           auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
 
-          //
+          // Calculate initial node step
           libMesh::Real step_size;
           if (_extrude_along_curve)
           {
-            libMesh::Node * P_next = extrusion_curve->node_ptr(k); // set next point on curve
-            libMesh::Node * P_current =
-                extrusion_curve->node_ptr(k - 1); // set current point on curve
+            libMesh::Node * P_current = extrusion_curve->node_ptr(k);  // set next point on curve
+            libMesh::Node * P_prev = extrusion_curve->node_ptr(k - 1); // set current point on curve
 
-            _direction = *P_next - *P_current; // set direction
+            _direction = *P_current - *P_prev; // set direction
             _direction /= _direction.norm();   // normalize direction
-            step_size =
-                ((*P_next - *node) * _direction) / (_direction * _direction); // calculate step size
+            mooseAssert(std::abs(_direction.norm() - 1.0) < libMesh::TOLERANCE,
+                        "Norm of direction vector is not 1!");
+
+            // Calculate step size.
+            // Note: old_distance+*node is the vector description of the previously-created node
+            step_size = ((*P_current - (old_distance + *node)) * _direction);
           }
           else
           {
@@ -549,7 +552,9 @@ AdvancedExtruderGenerator::generate()
                                   (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
           }
 
-          current_distance = old_distance + _direction * step_size;
+          current_distance =
+              old_distance +
+              _direction * step_size; // update distance from starting node to new node
 
           // Handle helicoidal extrusion
           if (!MooseUtils::absoluteFuzzyEqual(_twist_pitch, 0.))
