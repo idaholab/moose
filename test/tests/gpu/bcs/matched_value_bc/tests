@@ -8,5 +8,6 @@
     exodiff = 'out_gpu.e'
     requirement = 'The Kokkos system shall support matching variable values on a boundary.'
     capabilities = 'kokkos'
+    devices = 'cuda'
   [../]
 []
