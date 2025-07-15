@@ -25,7 +25,7 @@ CSGBase::updateSurfaceBoundaryType(const CSGSurface & surface, CSGSurface::Bound
   auto & surf = getSurface(surface.getName());
   if (surf != surface)
     mooseError("A surface named " + surface.getName() + " is being updated that is different " +
-               "from the surface of the same name in the base instance.");
+               "from the surface of the same name in the CSGBase instance.");
   surf.setBoundaryType(boundary);
 }
 
@@ -84,7 +84,7 @@ CSGBase::updateCellRegion(const CSGCell & cell, const CSGRegion & region)
   if (!checkCellInBase(cell))
     mooseError("The region of cell with name " + cell.getName() +
                " is being updated that is different " +
-               "from the cell of the same name in the base instance.");
+               "from the cell of the same name in the CSGBase instance.");
   auto & list_cell = _cell_list.getCell(cell.getName());
   list_cell.updateRegion(region);
 }
@@ -105,11 +105,11 @@ CSGBase::addCellToUniverse(const CSGUniverse & universe, const CSGCell & cell)
   if (!checkCellInBase(cell))
     mooseError("A cell named " + cell.getName() + " is being added to universe " +
                universe.getName() +
-               " that is different from the cell of the same name in the base instance.");
+               " that is different from the cell of the same name in the CSGBase instance.");
   auto & univ = _universe_list.getUniverse(universe.getName());
   if (univ != universe)
     mooseError("Cells are being added to a universe named " + universe.getName() +
-               " that is different " + "from the universe of the same name in the base instance.");
+               " that is different " + "from the universe of the same name in the CSGBase instance.");
   univ.addCell(cell);
 }
 
@@ -128,11 +128,12 @@ CSGBase::removeCellFromUniverse(const CSGUniverse & universe, const CSGCell & ce
   if (!checkCellInBase(cell))
     mooseError("A cell named " + cell.getName() + " is being removed from universe " +
                universe.getName() +
-               " that is different from the cell of the same name in the base instance.");
+               " that is different from the cell of the same name in the CSGBase instance.");
   auto & univ = _universe_list.getUniverse(universe.getName());
   if (univ != universe)
     mooseError("Cells are being removed from a universe named " + universe.getName() +
-               " that is different " + "from the universe of the same name in the base instance.");
+               " that is different " +
+               "from the universe of the same name in the CSGBase instance.");
   univ.removeCell(cell.getName());
 }
 
@@ -244,7 +245,7 @@ CSGBase::checkRegionSurfaces(const CSGRegion & region) const
     // (ie same surface points to same location in memory)
     if (s != list_surf)
       mooseError("Region is being set with a surface named " + sname +
-                 " that is different from the surface of the same name in the base instance.");
+                 " that is different from the surface of the same name in the CSGBase instance.");
   }
 }
 
