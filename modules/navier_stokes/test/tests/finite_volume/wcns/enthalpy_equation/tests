@@ -1,6 +1,6 @@
 [Tests]
-  design = 'LinearFVEnthalpyFunctorMaterial.md'
-  issues = '#29531'
+  design = 'LinearFVEnthalpyFunctorMaterial.md INSFVEnthalpyFunctorMaterial.md'
+  issues = '#29531 #31043'
   [1d]
     requirement = 'The system shall be able to solve a one-dimensional enthalpy conservation equation using'
     [analytical_outlet_temperature_userdefined]
@@ -39,5 +39,27 @@
     rel_err = 1e-5
     requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy and the shorthand physics syntax.'
     max_threads = 1 # see libmesh issue #3808
+  []
+  [2d-fp-physics-flux-vel-inlet]
+    type = 'CSVDiff'
+    input = 'enthalpy_equation-physics-nonlinearFV.i'
+    cli_args = "Physics/NavierStokes/Flow/flow/momentum_inlet_types='flux-velocity'
+                Physics/NavierStokes/Flow/flow/flux_inlet_pps='${bulk_u}'"
+    csvdiff = 'enthalpy_equation-physics-nonlinearFV_out.csv'
+    requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy and the shorthand physics syntax, using the nonlinear finite volume discretization.'
+  []
+  [2d-fp-physics-dirichlet-vel-and-T-inlet]
+    type = 'CSVDiff'
+    input = 'enthalpy_equation-physics-nonlinearFV.i'
+    cli_args = "Physics/NavierStokes/Flow/flow/momentum_inlet_types='fixed-velocity'
+                Physics/NavierStokes/Flow/flow/momentum_inlet_functors='${bulk_u} 0'
+                Physics/NavierStokes/FluidHeatTransfer/energy/energy_inlet_types='fixed-temperature'"
+    csvdiff = 'enthalpy_equation-physics-nonlinearFV_out.csv'
+    ignore_columns = 'area_pp_left pdrop'
+    # pdrop is at 1e-2 difference
+    # we expect some difference due to
+    rel_err = 2e-3
+    prereq = '2d-fp-physics-flux-vel-inlet'
+    requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy and the shorthand physics syntax, using the nonlinear finite volume discretization.'
   []
 []
