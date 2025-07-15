@@ -123,9 +123,6 @@ ifeq ($(ENABLE_LIBTORCH),true)
 	LIBTORCH_LIB := libtorch.$(lib_suffix)
 
   ifneq ($(wildcard $(LIBTORCH_DIR)/lib/$(LIBTORCH_LIB)),)
-    # Enabling parts that have pytorch dependencies
-    libmesh_CXXFLAGS += -DLIBTORCH_ENABLED
-
     # Adding the include directories, we use -isystem to silence the warning coming from
     # libtorch (which would cause errors in the testing phase)
     libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include/torch/csrc/api/include
@@ -162,9 +159,6 @@ ifeq ($(ENABLE_MFEM),true)
 	MFEM_COMMON_LIB := libmfem-common.$(lib_suffix)
 
   ifneq ($(and $(wildcard $(MFEM_DIR)/lib/$(MFEM_LIB)), $(wildcard $(MFEM_DIR)/lib/$(MFEM_COMMON_LIB))),)
-    # Enabling parts that have MFEM dependencies
-    libmesh_CXXFLAGS += -DMFEM_ENABLED
-
     # Adding the include directories
 	  include $(MFEM_DIR)/share/mfem/config.mk
 	  libmesh_CXXFLAGS += $(MFEM_INCFLAGS)
@@ -256,9 +250,11 @@ gtest_INCLUDE := -I$(gtest_DIR)
 moose_config := $(FRAMEWORK_DIR)/include/base/MooseConfig.h
 moose_default_config := $(FRAMEWORK_DIR)/include/base/MooseDefaultConfig.h
 
-$(moose_config): | prebuild
+$(moose_config):
 	@echo "Copying default MOOSE configuration to: "$@"..."
 	@cp $(moose_default_config) $(moose_config)
+
+libmesh_CPPFLAGS += -imacros $(moose_config)
 
 #
 # header symlinks
@@ -266,7 +262,6 @@ $(moose_config): | prebuild
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
 all_header_dir := $(FRAMEWORK_DIR)/build/header_symlinks
-moose_all_header_dir := $(all_header_dir)
 
 define all_header_dir_rule
 $(1): | prebuild
@@ -299,8 +294,8 @@ endef
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
-moose_config_symlink := $(moose_all_header_dir)/MooseConfig.h
-$(moose_config_symlink): $(moose_config) | $(moose_all_header_dir) prebuild
+moose_config_symlink := $(all_header_dir)/MooseConfig.h
+$(moose_config_symlink): $(moose_config) | $(all_header_dir) prebuild
 	@echo "Symlinking MOOSE configure "$(moose_config_symlink)
 	@ln -sf $(moose_config) $(moose_config_symlink)
 
@@ -450,7 +445,7 @@ ifeq (x$(moose_HEADER_deps),x)
   moose_HEADER_deps := $(realpath $(moose_GIT_DIR)/HEAD $(moose_GIT_DIR)/index)
 endif
 
-$(moose_revision_header): $(moose_HEADER_deps) | $(moose_all_header_dir)
+$(moose_revision_header): $(moose_HEADER_deps) | $(all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
 	$(shell REPO_LOCATION="$(FRAMEWORK_DIR)" \
 	        HEADER_FILE="$(moose_revision_header)" \
@@ -461,8 +456,8 @@ $(moose_revision_header): $(moose_HEADER_deps) | $(moose_all_header_dir)
 	@if [ $(.SHELLSTATUS) -ne 0 ]; then \
 	echo "\nFailed to generate MooseRevision.h\n"; exit $(.SHELLSTATUS); \
 	fi
-	@if [ ! -e "$(moose_all_header_dir)/MooseRevision.h" ]; then \
-		ln -sf $(moose_revision_header) $(moose_all_header_dir); \
+	@if [ ! -e "$(all_header_dir)/MooseRevision.h" ]; then \
+		ln -sf $(moose_revision_header) $(all_header_dir); \
 	fi
 
 # libmesh submodule status
@@ -482,10 +477,19 @@ wasp_submodule_status:
 	@if [ x$(wasp_submodule_message) != "x" ]; then printf $(wasp_submodule_message); exit 1; fi
 
 # Pre-make for checking current dependency versions and showing useful warnings
-# if things like conda packages are out of date. The "-" in "@-" means that
-# it is allowed to not exit 0. "::" means that the rule can be appended by
-# applications that require prebuild steps.
-prebuild::
+# if things like conda packages are out of date. The variable is such that
+# rules can use $(prebuild), instead of prebuild, as a prerequisite. In those
+# cases, if this file, moose.mk, is not included, the variable expands to the
+# empty string, establishing no dependency, and keeping the rule valid. The
+# order-only prerequisite $(moose_config), guarantees _some_ configuration file
+# exists prior to execution of any recipe whose rule depends on prebuild. The
+# responsibility to trigger a rebuild on an update of the configuration file,
+# e.g. via the configure command, lies with normal prerequisites for the rules
+# of targets that actually depend on the contents of the configuration file.
+# The "-" in "@-" means that it is allowed to not exit 0. "::" means that
+# the rule can be appended by applications that require prebuild steps.
+prebuild = prebuild
+prebuild:: | $(moose_config)
 	@-python3 $(FRAMEWORK_DIR)/../scripts/premake.py
 
 wasp_submodule_status $(moose_revision_header) $(moose_LIB): | prebuild
@@ -518,7 +522,6 @@ $(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) 
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
 
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
-
 
 $(moose_objects): $(moose_config_symlink) | moose_header_symlinks
 

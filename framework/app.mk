@@ -295,10 +295,10 @@ LIBRARY_SUFFIX :=
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
 # If we are compiling with header symlinks, we don't want to start compiling any
-# object files until all symlinking is completed. The first dependency in the
+# object files until all symlinking is completed. The second dependency in the
 # list below ensures this.
 
-$(all_app_objects) : | $(app_LINKS) $(moose_config_symlink)
+$(all_app_objects) : $(moose_config_symlink) | $(app_LINKS)
 
 else
 
