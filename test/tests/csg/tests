@@ -92,7 +92,7 @@
       input = 'csg_region_surfs_error.i'
       detail = ' a cell region is updated with surfaces not present in the current CSGBase instance'
       cli_args = '--csg-only'
-      expect_err = "Region is being set with a surface named surf_plus_x that is different from the surface of the same name in the base instance."
+      expect_err = "Region is being set with a surface named surf_plus_x that is different from the surface of the same name in the CSGBase instance."
       mesh_mode = REPLICATED
     []
     [rename_surface_error]
@@ -128,7 +128,7 @@
       input = 'csg_universe_cell_add_error.i'
       detail = ' a cell being added to a universe does not exist in the current CSGBase instance.'
       cli_args = '--csg-only'
-      expect_err = 'A cell named square_cell is being added to universe new_univ_2 that is different from the cell of the same name in the base instance.'
+      expect_err = 'A cell named square_cell is being added to universe new_univ_2 that is different from the cell of the same name in the CSGBase instance.'
       mesh_mode = REPLICATED
     []
     [remove_cell_universe_error]
@@ -137,7 +137,7 @@
       input = 'csg_universe_cell_remove_error.i'
       detail = ' a cell being removed from a universe does not exist in the current CSGBase instance.'
       cli_args = '--csg-only'
-      expect_err = 'A cell named square_cell is being removed from universe ROOT_UNIVERSE that is different from the cell of the same name in the base instance.'
+      expect_err = 'A cell named square_cell is being removed from universe ROOT_UNIVERSE that is different from the cell of the same name in the CSGBase instance.'
       mesh_mode = REPLICATED
     []
     [distributed_mesh]
