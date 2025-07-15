@@ -311,7 +311,7 @@ advected_interp_method = 'upwind'
     type = LinearFVAdvectionDiffusionFunctorNeumannBC
     variable = T_fluid
     functor = 0
-    boundary = 'ent_top ent_bottom fluid_top fluid_right'
+    boundary = 'ent_top ent_bottom fluid_top'
   []
   [insulated_solid]
     type = LinearFVAdvectionDiffusionFunctorNeumannBC
@@ -362,12 +362,6 @@ advected_interp_method = 'upwind'
     fluid_conductivity = ${k}
   []
 
-  [insulated_walls_T]
-    type = LinearFVAdvectionDiffusionFunctorNeumannBC
-    variable = T_fluid
-    functor = 0.0
-    boundary = 'fluid_top ent_top ent_bottom solid_left solid_right'
-  []
   [outlet_T]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = T_fluid
@@ -433,13 +427,13 @@ advected_interp_method = 'upwind'
     sort_by = y
     execute_on = 'final'
   []
-  [t_f_interface]
-    type = SideValueSampler
-    variable = T_solid
-    sort_by = x
-    execute_on = final
-    boundary = interface
-  []
+#  [t_f_interface]
+#    type = SideValueSampler
+#    variable = T_solid
+#    sort_by = x
+#    execute_on = final
+#    boundary = interface
+#  []
 []
 
 [Executioner]
