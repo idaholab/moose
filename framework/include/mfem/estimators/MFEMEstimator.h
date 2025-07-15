@@ -22,8 +22,9 @@ public:
   // Get name of the test variable labelling the weak form this kernel is added to
   const std::string & getTestVariableName() const { return _variable_name; }
 
-  // Not necessary anymore to return anything. Make it a bool to indicate if
-  // the process succeeded.
+  // Create the estimator internally and return a bool to indicate if it
+  // succeeded. This base class should not be used directly, so we return
+  // false here.
   virtual bool createEstimator() { return false; }
 
   // Get shared pointer to FE Space using the name we store when setting up this class
