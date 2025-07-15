@@ -722,7 +722,7 @@ public:
    * Get non-constant reference to a system in this problem
    * @param sys_name The name of the system
    */
-  virtual SystemBase & getSystemBase(const std::string & sys_name);
+  SystemBase & getSystemBase(const std::string & sys_name);
 
   /**
    * Get non-constant reference to a linear system

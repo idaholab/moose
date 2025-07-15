@@ -8840,8 +8840,10 @@ FEProblemBase::getSystemBase(const std::string & sys_name)
   if (std::find(_solver_sys_names.begin(), _solver_sys_names.end(), sys_name) !=
       _solver_sys_names.end())
     return getSystemBase(solverSysNum(sys_name));
-  else
+  else if (sys_name == "aux0")
     return *_aux;
+  else
+    mooseError("System '" + sys_name + "' was requested from problem but does not exist.");
 }
 
 SystemBase &
