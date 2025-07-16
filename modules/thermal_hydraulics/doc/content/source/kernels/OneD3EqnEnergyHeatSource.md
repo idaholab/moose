@@ -13,9 +13,11 @@ where $q$ is a volumetric heat source, a [Function](syntax/Functions/index.md) o
 If the heat source function spatial shape is not integrated exactly by the quadrature, this will lead
 to non-conservation of energy.
 
+
 !alert note
-In THM, most kernels are added automatically by components. This kernel is created to add volumetric heat sources
-by the [HeatSourceVolumetric1Phase.md].
+In THM, most kernels are added automatically by components. This kernel is no-longer in use, having
+been replaced by its [AD](automatic_differentiation/index.md) counterpart [ADOneD3EqnEnergyHeatSource.md],
+designed to provide numerically exact contributions to the Jacobian.
 
 !syntax parameters /Kernels/OneD3EqnEnergyHeatSource
 
