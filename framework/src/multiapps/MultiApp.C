@@ -419,9 +419,9 @@ MultiApp::createApps()
 }
 
 void
-MultiApp::createLocalApp(const unsigned int i)
+MultiApp::createLocalApp(const unsigned int i, bool for_reset)
 {
-  createApp(i, _global_time_offset);
+  createApp(i, _global_time_offset, for_reset);
 }
 
 void
@@ -1099,7 +1099,7 @@ MultiApp::resetApp(unsigned int global_app, Real time)
     // Extract the file numbers from the output, so that the numbering is maintained after reset
     std::map<std::string, unsigned int> m = _apps[local_app]->getOutputWarehouse().getFileNumbers();
 
-    createApp(local_app, time);
+    createApp(local_app, time, true);
 
     // Reset the file numbers of the newly reset apps
     _apps[local_app]->getOutputWarehouse().setFileNumbers(m);
@@ -1134,7 +1134,7 @@ MultiApp::parentOutputPositionChanged()
 }
 
 void
-MultiApp::createApp(unsigned int i, Real start_time)
+MultiApp::createApp(unsigned int i, Real start_time, bool for_reset)
 {
   // Delete the old app if we're resetting
   if (_apps[i])
@@ -1224,8 +1224,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   app->setGlobalTimeOffset(start_time);
   app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
-  app->setRestart(_app.isRestarting());
-  app->setRecover(_app.isRecovering());
+  // If we are resetting, we want to restart from initial versus where the checkpoint last was
+  app->setRestart(!for_reset && _app.isRestarting());
+  app->setRecover(!for_reset && _app.isRecovering());
 
   if (_use_positions && getParam<bool>("output_in_position"))
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
