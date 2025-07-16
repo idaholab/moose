@@ -35,7 +35,18 @@ public:
 protected:
   using Action::paramError;
 
+  /**
+   * Overriden method from PeriodicBCHelper that is called on every periodic
+   * boundary, in which we will setup the algebraic ghosting via the DofMap
+   * and the MooseMesh context if possible.
+   */
   virtual void onSetupPeriodicBoundary(libMesh::PeriodicBoundaryBase & p) override;
+
+  /**
+   * Helper for getting the variables to which periodic boundary
+   * conditions will be applied
+   */
+  std::vector<const MooseVariableFieldBase *> getVariables() const;
 
   /// The variables to apply periodic boundary conditions to
   std::vector<const MooseVariableFieldBase *> _vars;
