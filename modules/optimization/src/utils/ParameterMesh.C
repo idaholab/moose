@@ -16,6 +16,7 @@
 #include "libmesh/edge_edge2.h"
 #include "libmesh/enum_elem_type.h"
 #include "libmesh/enum_point_locator_type.h"
+#include "libmesh/int_range.h"
 #include "libmesh/dof_map.h"
 
 #include "libmesh/elem.h"
@@ -31,6 +32,8 @@
 #include "libmesh/plane.h"
 #include "libmesh/enum_to_string.h"
 #include <memory>
+#include "libmesh/quadrature_gauss.h"
+#include "libmesh/fe_base.h"
 
 using namespace libMesh;
 
@@ -42,7 +45,10 @@ ParameterMesh::ParameterMesh(const FEType & param_type,
   : _communicator(MPI_COMM_SELF),
     _mesh(_communicator),
     _find_closest(find_closest),
-    _kdtree_candidates(kdtree_candidates)
+    _kdtree_candidates(kdtree_candidates),
+    _param_var_id(0),
+    _dof_map(nullptr),
+    _fe_type(param_type)
 {
   _mesh.allow_renumbering(false);
   _mesh.prepare_for_use();
@@ -142,6 +148,10 @@ ParameterMesh::ParameterMesh(const FEType & param_type,
   // Create KDTree from node coordinates
   if (!_mesh_nodes.empty())
     _node_kdtree = std::make_unique<KDTree>(_mesh_nodes, 10);
+  // Update cached values for gradient computations
+  const_cast<unsigned short int &>(_param_var_id) = var_id;
+  const_cast<const DofMap *&>(_dof_map) = &_sys->get_dof_map();
+  const_cast<FEType &>(_fe_type) = _dof_map->variable_type(_param_var_id);
 }
 
 void
@@ -155,19 +165,16 @@ ParameterMesh::getIndexAndWeight(const Point & pt,
   if (!elem)
     mooseError("No element was found to contain point ", test_point);
 
-  // Get the  in the dof_indices for our element
-  // variable name is hard coded to _parameter_mesh_var
+  // Get the dof_indices for our element
+  // variable id is hard coded to _param_var_id
   // this is probably the only variable in the ParameterMesh system used by ParameterMeshFunction
-  const unsigned short int var = _sys->variable_number("_parameter_mesh_var");
-  const DofMap & dof_map = _sys->get_dof_map();
-  dof_map.dof_indices(elem, dof_indices, var);
+  _dof_map->dof_indices(elem, dof_indices, _param_var_id);
 
   // Map the physical co-ordinates to the reference co-ordinates
   Point coor = FEMap::inverse_map(elem->dim(), elem, test_point);
   // get the shape function value via the FEInterface
-  FEType fe_type = dof_map.variable_type(var);
   FEComputeData fe_data(*_eq, coor);
-  FEInterface::compute_data(elem->dim(), fe_type, elem, fe_data);
+  FEInterface::compute_data(elem->dim(), _fe_type, elem, fe_data);
   // Set weights to the value of the shape functions
   weights = fe_data.shape;
 
@@ -186,20 +193,17 @@ ParameterMesh::getIndexAndWeight(const Point & pt,
   // Locate the element the point is in
   const Elem * elem = (*_point_locator)(test_point);
 
-  // Get the  in the dof_indices for our element
-  // variable name is hard coded to _parameter_mesh_var
+  // Get the dof_indices for our element
+  // variable id is hard coded to _param_var_id
   // this is probably the only variable in the ParameterMesh system used by ParameterMeshFunction
-  const unsigned short int var = _sys->variable_number("_parameter_mesh_var");
-  const DofMap & dof_map = _sys->get_dof_map();
-  dof_map.dof_indices(elem, dof_indices, var);
+  _dof_map->dof_indices(elem, dof_indices, _param_var_id);
 
   // Map the physical co-ordinates to the reference co-ordinates
   Point coor = FEMap::inverse_map(elem->dim(), elem, test_point);
   // get the shape function value via the FEInterface
-  FEType fe_type = dof_map.variable_type(var);
   FEComputeData fe_data(*_eq, coor);
   fe_data.enable_derivative();
-  FEInterface::compute_data(elem->dim(), fe_type, elem, fe_data);
+  FEInterface::compute_data(elem->dim(), _fe_type, elem, fe_data);
   // Set weights to the value of the shape functions
   weights = fe_data.dshape;
 
@@ -394,5 +398,183 @@ ParameterMesh::closestPoint(const Elem & elem, const Point & p) const
                    " for projection of parameter mesh.");
       }
     }
+  }
+}
+
+template <typename T>
+T
+ParameterMesh::computeRegularizationLoop(
+    const std::vector<Real> & parameter_values,
+    RegularizationType /*reg_type*/,
+    const std::function<void(const std::vector<std::vector<Real>> &,
+                             const std::vector<std::vector<RealGradient>> &,
+                             const unsigned int,
+                             const std::vector<dof_id_type> &,
+                             const std::vector<Real> &,
+                             T &)> & compute_func) const
+{
+  if (parameter_values.size() != _param_dofs)
+    mooseError("Parameter values size (",
+               parameter_values.size(),
+               ") does not match mesh DOFs (",
+               _param_dofs,
+               ")");
+
+  T result;
+  if constexpr (std::is_same_v<T, Real>)
+    result = 0.0;
+  else if constexpr (std::is_same_v<T, std::vector<Real>>)
+    result.resize(_param_dofs, 0.0);
+
+  // Iterate over all elements in the mesh
+  for (const auto & elem : _mesh.element_ptr_range())
+  {
+    // Get DOF indices for this element
+    std::vector<dof_id_type> dof_indices;
+    _dof_map->dof_indices(elem, dof_indices, _param_var_id);
+
+    // Get quadrature rule for this element
+    const unsigned int dim = elem->dim();
+    QGauss qrule(dim, _fe_type.default_quadrature_order());
+
+    // Create finite element objects
+    std::unique_ptr<FEBase> fe(FEBase::build(dim, _fe_type));
+    fe->attach_quadrature_rule(&qrule);
+
+    // Request shape functions and derivatives before reinit
+    const std::vector<Real> & JxW = fe->get_JxW();
+    const std::vector<std::vector<Real>> & phi = fe->get_phi();
+    const std::vector<std::vector<RealGradient>> & dphi = fe->get_dphi();
+
+    // Reinitialize for current element
+    fe->reinit(elem);
+
+    // Loop over quadrature points
+    for (const auto qp : make_range(qrule.n_points()))
+      compute_func(phi, dphi, qp, dof_indices, JxW, result);
+  }
+
+  return result;
+}
+
+Real
+ParameterMesh::computeRegularizationObjective(const std::vector<Real> & parameter_values,
+                                              RegularizationType reg_type) const
+{
+  return computeRegularizationLoop<Real>(
+      parameter_values,
+      reg_type,
+      [this, &parameter_values, reg_type](const std::vector<std::vector<Real>> & phi,
+                                          const std::vector<std::vector<RealGradient>> & dphi,
+                                          const unsigned int qp,
+                                          const std::vector<dof_id_type> & dof_indices,
+                                          const std::vector<Real> & JxW,
+                                          Real & result)
+      {
+        result +=
+            computeRegularizationQp(parameter_values, phi, dphi, qp, dof_indices, JxW, reg_type);
+      });
+}
+
+std::vector<Real>
+ParameterMesh::computeRegularizationGradient(const std::vector<Real> & parameter_values,
+                                             RegularizationType reg_type) const
+{
+  return computeRegularizationLoop<std::vector<Real>>(
+      parameter_values,
+      reg_type,
+      [this, &parameter_values, reg_type](const std::vector<std::vector<Real>> & phi,
+                                          const std::vector<std::vector<RealGradient>> & dphi,
+                                          const unsigned int qp,
+                                          const std::vector<dof_id_type> & dof_indices,
+                                          const std::vector<Real> & JxW,
+                                          std::vector<Real> & result)
+      {
+        computeRegularizationGradientQp(
+            parameter_values, phi, dphi, qp, dof_indices, JxW, reg_type, result);
+      });
+}
+
+// Explicit template instantiations
+template Real ParameterMesh::computeRegularizationLoop<Real>(
+    const std::vector<Real> &,
+    RegularizationType,
+    const std::function<void(const std::vector<std::vector<Real>> &,
+                             const std::vector<std::vector<RealGradient>> &,
+                             const unsigned int,
+                             const std::vector<dof_id_type> &,
+                             const std::vector<Real> &,
+                             Real &)> &) const;
+
+template std::vector<Real> ParameterMesh::computeRegularizationLoop<std::vector<Real>>(
+    const std::vector<Real> &,
+    RegularizationType,
+    const std::function<void(const std::vector<std::vector<Real>> &,
+                             const std::vector<std::vector<RealGradient>> &,
+                             const unsigned int,
+                             const std::vector<dof_id_type> &,
+                             const std::vector<Real> &,
+                             std::vector<Real> &)> &) const;
+
+Real
+ParameterMesh::computeRegularizationQp(const std::vector<Real> & parameter_values,
+                                       const std::vector<std::vector<Real>> & /*phi*/,
+                                       const std::vector<std::vector<RealGradient>> & dphi,
+                                       const unsigned int qp,
+                                       const std::vector<dof_id_type> & dof_indices,
+                                       const std::vector<Real> & JxW,
+                                       RegularizationType reg_type) const
+{
+  Real objective_contribution = 0.0;
+
+  // Switch on regularization type
+  switch (reg_type)
+  {
+    case RegularizationType::L2_GRADIENT:
+    {
+      // Compute parameter gradient at this quadrature point
+      RealGradient param_grad;
+      for (const auto i : index_range(dof_indices))
+        param_grad += parameter_values[dof_indices[i]] * dphi[i][qp];
+
+      // Add L2 norm squared of gradient for regularization
+      objective_contribution = param_grad.norm_sq() * JxW[qp];
+      break;
+    }
+    default:
+      mooseError("Unknown Regularization Type");
+  }
+
+  return objective_contribution;
+}
+
+void
+ParameterMesh::computeRegularizationGradientQp(const std::vector<Real> & parameter_values,
+                                               const std::vector<std::vector<Real>> & /*phi*/,
+                                               const std::vector<std::vector<RealGradient>> & dphi,
+                                               const unsigned int qp,
+                                               const std::vector<dof_id_type> & dof_indices,
+                                               const std::vector<Real> & JxW,
+                                               RegularizationType reg_type,
+                                               std::vector<Real> & gradient) const
+{
+  // Switch on regularization type
+  switch (reg_type)
+  {
+    case RegularizationType::L2_GRADIENT:
+    {
+      // Compute parameter gradient at this quadrature point
+      RealGradient param_grad;
+      for (const auto i : index_range(dof_indices))
+        param_grad += parameter_values[dof_indices[i]] * dphi[i][qp];
+
+      // Compute gradient contribution: 2 * grad(p) * dphi_j
+      for (const auto j : index_range(dof_indices))
+        gradient[dof_indices[j]] += 2.0 * param_grad * dphi[j][qp] * JxW[qp];
+      break;
+    }
+
+    default:
+      mooseError("Unknown Regularization Type");
   }
 }
