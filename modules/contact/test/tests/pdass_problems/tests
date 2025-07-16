@@ -137,6 +137,7 @@
     input = 'cylinder_friction_penalty_frictional_al_action_amg_bussetta_simple.i'
     rel_err = 1.0e-4
     abs_zero = 1.0e-2
+    restep = false # Issue #31054
     requirement = "The contact module shall be able to approximate frictional contact in a "
                   "two-dimensional cylinder via an augmented Lagrange approach to constraint "
                   "enforcement using the contact action and use the hypre algebraic multigrid "
