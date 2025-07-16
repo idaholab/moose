@@ -35,4 +35,10 @@ protected:
   std::vector<Real> _values;
 
   unsigned int _qp;
+
+  /// Whether to sample over quadrature points or FaceInfos
+  bool _qp_sampling;
+
+private:
+  std::vector<const MooseVariableField<Real> *> _fv_vars;
 };
