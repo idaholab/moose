@@ -57,8 +57,8 @@ ComplexEquationSystem::BuildLinearForms()
   {
     // Apply kernels
     auto clf = _clfs.GetShared(test_var_name);
-    ApplyDomainLFIntegrators(test_var_name, clf, _kernels_map);
-    ApplyBoundaryLFIntegrators(test_var_name, clf, _integrated_bc_map);
+    ApplyDomainLFIntegrators(test_var_name, clf, _cpx_kernels_map);
+    ApplyBoundaryLFIntegrators(test_var_name, clf, _cpx_integrated_bc_map);
     clf->Assemble();
   }
 }
@@ -77,9 +77,9 @@ ComplexEquationSystem::BuildBilinearForms()
     auto slf = _slfs.GetShared(test_var_name);
     slf->SetAssemblyLevel(_assembly_level);
     ApplyBoundaryBLFIntegrators<mfem::ParSesquilinearForm>(
-        test_var_name, test_var_name, slf, _integrated_bc_map);
+        test_var_name, test_var_name, slf, _cpx_integrated_bc_map);
     ApplyDomainBLFIntegrators<mfem::ParSesquilinearForm>(
-        test_var_name, test_var_name, slf, _kernels_map);
+        test_var_name, test_var_name, slf, _cpx_kernels_map);
     // Assemble
     slf->Assemble();
   }
@@ -122,6 +122,52 @@ ComplexEquationSystem::ApplyEssentialBCs()
     }
     trial_gf.FESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
   }
+}
+
+void
+ComplexEquationSystem::AddKernel(std::shared_ptr<MFEMComplexKernel> kernel)
+{
+  AddTestVariableNameIfMissing(kernel->getTestVariableName());
+  AddTrialVariableNameIfMissing(kernel->getTrialVariableName());
+  auto trial_var_name = kernel->getTrialVariableName();
+  auto test_var_name = kernel->getTestVariableName();
+  if (!_cpx_kernels_map.Has(test_var_name))
+  {
+    auto kernel_field_map =
+        std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>();
+    _cpx_kernels_map.Register(test_var_name, std::move(kernel_field_map));
+  }
+  // Register new kernels map if not present for the test/trial variable
+  // pair
+  if (!_cpx_kernels_map.Get(test_var_name)->Has(trial_var_name))
+  {
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMComplexKernel>>>();
+    _cpx_kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
+  }
+  _cpx_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
+}
+
+void
+ComplexEquationSystem::AddIntegratedBC(std::shared_ptr<MFEMComplexIntegratedBC> bc)
+{
+  AddTestVariableNameIfMissing(bc->getTestVariableName());
+  AddTrialVariableNameIfMissing(bc->getTrialVariableName());
+  auto trial_var_name = bc->getTrialVariableName();
+  auto test_var_name = bc->getTestVariableName();
+  if (!_cpx_integrated_bc_map.Has(test_var_name))
+  {
+    auto integrated_bc_field_map = std::make_shared<
+        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>();
+    _cpx_integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
+  }
+  // Register new integrated bc map if not present for the test/trial variable
+  // pair
+  if (!_cpx_integrated_bc_map.Get(test_var_name)->Has(trial_var_name))
+  {
+    auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>();
+    _cpx_integrated_bc_map.Get(test_var_name)->Register(trial_var_name, std::move(bcs));
+  }
+  _cpx_integrated_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc));
 }
 
 void

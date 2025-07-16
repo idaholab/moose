@@ -183,7 +183,7 @@ EquationSystem::ApplyDomainBLFIntegrators(
     auto kernels = kernels_map.GetRef(test_var_name).GetRef(trial_var_name);
     for (auto & kernel : kernels)
     {
-      mfem::BilinearFormIntegrator * integ = kernel->createBFIntegrator().first;
+      mfem::BilinearFormIntegrator * integ = kernel->createBFIntegrator();
       if (integ != nullptr)
       {
         kernel->isSubdomainRestricted()
@@ -206,7 +206,7 @@ EquationSystem::ApplyDomainLFIntegrators(
     auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
     for (auto & kernel : kernels)
     {
-      mfem::LinearFormIntegrator * integ = kernel->createLFIntegrator().first;
+      mfem::LinearFormIntegrator * integ = kernel->createLFIntegrator();
       if (integ != nullptr)
       {
         kernel->isSubdomainRestricted()
@@ -233,7 +233,7 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(trial_var_name);
     for (auto & bc : bcs)
     {
-      mfem::BilinearFormIntegrator * integ = bc->createBFIntegrator().first;
+      mfem::BilinearFormIntegrator * integ = bc->createBFIntegrator();
       if (integ != nullptr)
       {
         bc->isBoundaryRestricted()
@@ -257,7 +257,7 @@ EquationSystem::ApplyBoundaryLFIntegrators(
     auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
     for (auto & bc : bcs)
     {
-      mfem::LinearFormIntegrator * integ = bc->createLFIntegrator().first;
+      mfem::LinearFormIntegrator * integ = bc->createLFIntegrator();
       if (integ != nullptr)
       {
         bc->isBoundaryRestricted()
