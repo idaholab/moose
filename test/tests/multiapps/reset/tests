@@ -35,6 +35,7 @@
   [dynamic_reset]
     type = RunApp
     input = parent_dynamic.i
+    mesh_mode = replicated # FunctorTimes requires replicated mesh, currently
     requirement = 'The system shall support the ability to reset a sub-application at dynamic times during the simulation.'
   []
 []

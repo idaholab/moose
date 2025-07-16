@@ -573,7 +573,7 @@ protected:
   std::vector<unsigned int> _reset_apps;
 
   /// Whether or not apps have been reset at each time
-  std::set<Real> _reset_happened;
+  std::set<Real> & _reset_happened;
 
   /// The time at which to move apps
   Real _move_time;
