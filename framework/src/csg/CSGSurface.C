@@ -13,30 +13,12 @@ namespace CSG
 {
 
 CSGSurface::CSGSurface(const std::string & name,
-                       SurfaceType surf_type,
+                       const std::string surf_type,
                        CSGSurface::BoundaryType boundary)
-  : _name(name), _surface_type(surf_type), _boundary_type(boundary)
+  : _name(name),
+    _surface_type("PLANE SPHERE XCYLINDER YCYLINDER ZCYLINDER", surf_type),
+    _boundary_type(boundary)
 {
-}
-
-const std::string
-CSGSurface::getSurfaceTypeString() const
-{
-  switch (_surface_type)
-  {
-    case SurfaceType::PLANE:
-      return "plane";
-    case SurfaceType::SPHERE:
-      return "sphere";
-    case SurfaceType::XCYLINDER:
-      return "xcylinder";
-    case SurfaceType::YCYLINDER:
-      return "ycylinder";
-    case SurfaceType::ZCYLINDER:
-      return "zcylinder";
-    default:
-      mooseError("Detected invalid surface type");
-  }
 }
 
 const std::string
