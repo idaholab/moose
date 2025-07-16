@@ -841,6 +841,13 @@ public:
                            const BoundaryID secondary);
 
   /**
+   * Query the translated periodic dimension flags for the given variable on the given system.
+   * @param sys_num - The number of the system the variable is on
+   * @param var_num - The variable number
+   */
+  const std::array<bool, 3> * queryPeriodicDimensions(const unsigned int sys_num,
+                                                      const unsigned int var_num) const;
+  /**
    * Returns whether this generated mesh is periodic in the given dimension for the given variable
    * on the given system.
    * @param sys_num - The number of the system the variable is on
