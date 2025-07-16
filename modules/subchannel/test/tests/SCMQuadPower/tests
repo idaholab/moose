@@ -8,7 +8,7 @@
     recover = False
     abs_zero = 1e-7
     max_parallel = 1
-    requirement = 'The system will populate the linear heat rate on subchannels in a quadrilateral lattice using an initial condition and auxiliary kernel'
+    requirement = 'The system will populate a uniform linear heat rate on subchannels in a quadrilateral lattice using an initial condition and auxiliary kernel'
   []
   [SCMQuadPower_cells_not_aligned]
     type = CSVDiff
@@ -18,7 +18,7 @@
     recover = False
     abs_zero = 1e-7
     max_parallel = 1
-    requirement = 'The system will populate the linear heat rate on subchannels in a quadrilateral lattice using an initial condition and auxiliary kernel in a mesh that has axial divisions that are not aligned with the heated region entrance and exit heights.'
+    requirement = 'The system will populate a uniform linear heat rate on subchannels in a quadrilateral lattice using an initial condition and auxiliary kernel in a mesh that has axial divisions that are not aligned with the heated region entrance and exit heights.'
   []
   [SCMQuadPower_cells_aligned_with_pins]
     type = CSVDiff
@@ -27,7 +27,7 @@
     recover = False
     abs_zero = 1e-7
     max_parallel = 1
-    requirement = 'The system will populate the linear heat rate on fuel pins in a quadrilateral lattice using an initial condition and auxiliary kernel'
+    requirement = 'The system will populate a sinusoidal linear heat rate on fuel pins in a quadrilateral lattice using an initial condition and auxiliary kernel'
   []
   [SCMQuadPower_cells_not_aligned_with_pins]
     type = CSVDiff
@@ -37,6 +37,6 @@
     recover = False
     abs_zero = 1e-7
     max_parallel = 1
-    requirement = 'The system will populate the linear heat rate on fuel pins in a quadrilateral lattice using an initial condition and auxiliary kernel in a mesh that has axial divisions that are not aligned with the heated region entrance and exit heights.'
+    requirement = 'The system will populate a sinusoidal linear heat rate on fuel pins in a quadrilateral lattice using an initial condition and auxiliary kernel in a mesh that has axial divisions that are not aligned with the heated region entrance and exit heights.'
   []
 []
