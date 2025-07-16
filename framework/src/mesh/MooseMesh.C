@@ -2218,7 +2218,7 @@ MooseMesh::addPeriodicVariable(const unsigned int sys_num,
     return;
 
   const auto key = std::make_pair(sys_num, var_num);
-  auto & entry = _periodic_dim[key]; // default construction ok
+  auto & entry = _periodic_dim[key]; // default construction ok (bool default = false)
 
   _half_range = Point(dimensionWidth(0) / 2.0, dimensionWidth(1) / 2.0, dimensionWidth(2) / 2.0);
 
@@ -2253,8 +2253,8 @@ MooseMesh::isTranslatedPeriodic(const unsigned int sys_num,
 {
   mooseAssert(component < dimension(), "Requested dimension out of bounds");
 
-  if (const auto it = _periodic_dim.find(std::make_pair(sys_num, var_num));
-      it != _periodic_dim.end())
+  const auto key = std::make_pair(sys_num, var_num);
+  if (const auto it = _periodic_dim.find(key); it != _periodic_dim.end())
     return it->second[component];
   return false;
 }
