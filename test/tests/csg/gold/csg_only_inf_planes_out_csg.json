@@ -8,44 +8,44 @@
   },
   "SURFACES": {
     "surf_minus_x": {
-      "BOUNDARY": "reflective",
+      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
         "d": 2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "surf_minus_y": {
-      "BOUNDARY": "reflective",
+      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": -2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "surf_plus_x": {
-      "BOUNDARY": "reflective",
+      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
         "d": -2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "surf_plus_y": {
-      "BOUNDARY": "reflective",
+      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": 2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     }
   },
   "UNIVERSES": {

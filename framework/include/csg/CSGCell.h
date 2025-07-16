@@ -23,15 +23,6 @@ class CSGUniverse;
 class CSGCell
 {
 public:
-  /// An enum for type of fill for cell region
-  // TODO: add support for lattice fill
-  enum class FillType
-  {
-    VOID,
-    MATERIAL,
-    UNIVERSE,
-  };
-
   /**
    * Constructor for void cell
    *
@@ -67,26 +58,19 @@ public:
   /**
    * @brief Get the type of fill for the cell
    *
-   * @return FillType
+   * @return fill type
    */
-  FillType getFillType() const { return _fill_type; }
+  const std::string getFillType() const { return _fill_type; }
 
   /**
-   * @brief Get the string representation of the fill type
-   *
-   * @return const std::string fill type
-   */
-  const std::string getFillTypeString() const;
-
-  /**
-   * @brief Get the cell fill if FillType is UNIVERSE
+   * @brief Get the cell fill if fill type is UNIVERSE
    *
    * @return Reference to CSGUniverse fill
    */
   const CSGUniverse & getFillUniverse() const;
 
   /**
-   * @brief Get the cell fill material name if FillType is MATERIAL
+   * @brief Get the cell fill material name if fill fype is MATERIAL
    * TODO: update to return material object when materials are implemented
    *
    * @return const std::string
@@ -139,8 +123,9 @@ protected:
   /// Name of surface
   std::string _name;
 
-  /// Fill type of cell
-  FillType _fill_type;
+  /// An enum for type of fill for cell region
+  // TODO: add support for lattice fill
+  MooseEnum _fill_type{"VOID MATERIAL UNIVERSE"};
 
   /// name of the fill object
   std::string _fill_name;

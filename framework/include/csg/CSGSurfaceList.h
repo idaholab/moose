@@ -45,7 +45,7 @@ protected:
                                   const Point & p1,
                                   const Point & p2,
                                   const Point & p3,
-                                  CSGSurface::BoundaryType boundary);
+                                  std::string boundary);
 
   /**
    * @brief Create a new CSGPlane surface from coefficients (a, b, c, d) for the
@@ -64,7 +64,7 @@ protected:
                                         const Real b,
                                         const Real c,
                                         const Real d,
-                                        CSGSurface::BoundaryType boundary);
+                                        std::string boundary);
 
   /**
    * @brief create a new CSGSphere surface
@@ -75,10 +75,8 @@ protected:
    * @param boundary boundary type for the surface
    * @return reference to sphere surface created
    */
-  CSGSurface & addSphere(const std::string & name,
-                         const Point & center,
-                         const Real r,
-                         CSGSurface::BoundaryType boundary);
+  CSGSurface &
+  addSphere(const std::string & name, const Point & center, const Real r, std::string boundary);
 
   /**
    * @brief create a cylinder aligned with the specified axis
@@ -96,7 +94,7 @@ protected:
                            const Real x1,
                            const Real r,
                            const std::string & axis,
-                           CSGSurface::BoundaryType boundary);
+                           std::string boundary);
 
   /**
    * @brief Get map of all names to surfaces in surface list

@@ -45,12 +45,11 @@ public:
    * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
    * @return reference to CSGSurface object
    */
-  const CSGSurface &
-  createPlaneFromPoints(const std::string & name,
-                        const Point & p1,
-                        const Point & p2,
-                        const Point & p3,
-                        CSGSurface::BoundaryType boundary = CSGSurface::BoundaryType::TRANSMISSION)
+  const CSGSurface & createPlaneFromPoints(const std::string & name,
+                                           const Point & p1,
+                                           const Point & p2,
+                                           const Point & p3,
+                                           std::string boundary = "TRANSMISSION")
   {
     return _surface_list.addPlaneFromPoints(name, p1, p2, p3, boundary);
   }
@@ -66,13 +65,12 @@ public:
    * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
    * @return reference to CSGSurface object
    */
-  const CSGSurface & createPlaneFromCoefficients(
-      const std::string & name,
-      const Real a,
-      const Real b,
-      const Real c,
-      const Real d,
-      CSGSurface::BoundaryType boundary = CSGSurface::BoundaryType::TRANSMISSION)
+  const CSGSurface & createPlaneFromCoefficients(const std::string & name,
+                                                 const Real a,
+                                                 const Real b,
+                                                 const Real c,
+                                                 const Real d,
+                                                 std::string boundary = "TRANSMISSION")
   {
     return _surface_list.addPlaneFromCoefficients(name, a, b, c, d, boundary);
   }
@@ -86,9 +84,7 @@ public:
    * @return reference to CSGSurface object
    */
   const CSGSurface &
-  createSphere(const std::string & name,
-               const Real r,
-               CSGSurface::BoundaryType boundary = CSGSurface::BoundaryType::TRANSMISSION)
+  createSphere(const std::string & name, const Real r, std::string boundary = "TRANSMISSION")
   {
     return _surface_list.addSphere(name, Point(0.0, 0.0, 0.0), r, boundary);
   }
@@ -102,11 +98,10 @@ public:
    * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
    * @return reference to CSGSurface object
    */
-  const CSGSurface &
-  createSphere(const std::string & name,
-               const Point & center,
-               const Real r,
-               CSGSurface::BoundaryType boundary = CSGSurface::BoundaryType::TRANSMISSION)
+  const CSGSurface & createSphere(const std::string & name,
+                                  const Point & center,
+                                  const Real r,
+                                  std::string boundary = "TRANSMISSION")
   {
     return _surface_list.addSphere(name, center, r, boundary);
   }
@@ -125,13 +120,12 @@ public:
    * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
    * @return reference to CSGSurface object
    */
-  const CSGSurface &
-  createCylinder(const std::string & name,
-                 const Real x0,
-                 const Real x1,
-                 const Real r,
-                 const std::string & axis,
-                 CSGSurface::BoundaryType boundary = CSGSurface::BoundaryType::TRANSMISSION)
+  const CSGSurface & createCylinder(const std::string & name,
+                                    const Real x0,
+                                    const Real x1,
+                                    const Real r,
+                                    const std::string & axis,
+                                    std::string boundary = "TRANSMISSION")
   {
     return _surface_list.addCylinder(name, x0, x1, r, axis, boundary);
   }
@@ -174,7 +168,7 @@ public:
    * @param surface CSGSurface to update
    * @param boundary boundary type to set
    */
-  void updateSurfaceBoundaryType(const CSGSurface & surface, CSGSurface::BoundaryType boundary);
+  void updateSurfaceBoundaryType(const CSGSurface & surface, std::string boundary);
 
   /**
    * @brief Create a Material Cell object

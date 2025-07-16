@@ -12,29 +12,11 @@
 namespace CSG
 {
 
-CSGSurface::CSGSurface(const std::string & name,
-                       const std::string surf_type,
-                       CSGSurface::BoundaryType boundary)
+CSGSurface::CSGSurface(const std::string & name, const std::string surf_type, std::string boundary)
   : _name(name),
     _surface_type("PLANE SPHERE XCYLINDER YCYLINDER ZCYLINDER", surf_type),
-    _boundary_type(boundary)
+    _boundary_type("TRANSMISSION VACUUM REFLECTIVE", boundary)
 {
-}
-
-const std::string
-CSGSurface::getBoundaryTypeString() const
-{
-  switch (_boundary_type)
-  {
-    case BoundaryType::TRANSMISSION:
-      return "transmission";
-    case BoundaryType::VACUUM:
-      return "vacuum";
-    case BoundaryType::REFLECTIVE:
-      return "reflective";
-    default:
-      mooseError("Detected invalid surface boundary type");
-  }
 }
 
 bool
