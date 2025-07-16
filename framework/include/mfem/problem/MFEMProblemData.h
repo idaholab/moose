@@ -11,6 +11,7 @@
 
 #pragma once
 #include "EquationSystem.h"
+#include "ComplexEquationSystem.h"
 #include "MFEMContainers.h"
 #include "CoefficientManager.h"
 #include "MFEMSolverBase.h"
