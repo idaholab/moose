@@ -294,7 +294,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _global_time_offset(getParam<Real>("global_time_offset")),
     _reset_times(getOptionalTimes("reset_time")),
     _reset_apps(getParam<std::vector<unsigned int>>("reset_apps")),
-    _reset_happened(),
+    _reset_happened(declareRestartableData<std::set<Real>>("multiapp_reset_happened")),
     _move_time(getParam<Real>("move_time")),
     _move_apps(getParam<std::vector<unsigned int>>("move_apps")),
     _move_positions(getParam<std::vector<Point>>("move_positions")),
