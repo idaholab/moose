@@ -105,7 +105,7 @@ TestCSGUniverseMeshGenerator::generateCSG()
     for (const CSG::CSGSurface & cs : cell_surfs)
     {
       // find first non-plane surf to get the origin
-      if (cs.getSurfaceType() == CSG::CSGSurface::SurfaceType::PLANE)
+      if (cs.getSurfaceType() == "PLANE")
         continue;
       else
       {

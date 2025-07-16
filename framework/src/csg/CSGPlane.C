@@ -17,7 +17,7 @@ CSGPlane::CSGPlane(const std::string & name,
                    const Point & p2,
                    const Point & p3,
                    CSGSurface::BoundaryType boundary)
-  : CSGSurface(name, SurfaceType::PLANE, boundary)
+  : CSGSurface(name, "PLANE", boundary)
 {
   coeffsFromPoints(p1, p2, p3);
 }
@@ -28,7 +28,7 @@ CSGPlane::CSGPlane(const std::string & name,
                    const Real c,
                    const Real d,
                    CSGSurface::BoundaryType boundary)
-  : CSGSurface(name, SurfaceType::PLANE, boundary), _a(a), _b(b), _c(c), _d(d)
+  : CSGSurface(name, "PLANE", boundary), _a(a), _b(b), _c(c), _d(d)
 {
 }
 

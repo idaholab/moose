@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseApp.h"
+#include "MooseEnum.h"
 
 namespace CSG
 {
@@ -21,16 +22,6 @@ namespace CSG
 class CSGSurface
 {
 public:
-  /// An enum for type of surface that is being represented
-  enum class SurfaceType
-  {
-    PLANE,
-    SPHERE,
-    XCYLINDER,
-    YCYLINDER,
-    ZCYLINDER
-  };
-
   /// An enum for boundary type of surface
   enum class BoundaryType
   {
@@ -60,7 +51,9 @@ public:
    * @param surf_type surface type
    * @param boundary boundary condition for the surface
    */
-  CSGSurface(const std::string & name, SurfaceType surf_type, CSGSurface::BoundaryType boundary);
+  CSGSurface(const std::string & name,
+             const std::string surf_type,
+             CSGSurface::BoundaryType boundary);
 
   /**
    * Destructor
@@ -72,14 +65,7 @@ public:
    *
    * @return type of surface
    */
-  SurfaceType getSurfaceType() const { return _surface_type; }
-
-  /**
-   * @brief Get the string representation of surface type
-   *
-   * @return string representation of surface type
-   */
-  const std::string getSurfaceTypeString() const;
+  const std::string getSurfaceType() const { return _surface_type; }
 
   /**
    * @brief Set the Boundary Type (i.e. TRANSMISSION or VACUUM)
@@ -140,8 +126,8 @@ protected:
   /// Name of surface
   std::string _name;
 
-  /// Type of surface that is being represented
-  SurfaceType _surface_type;
+  /// An enum for type of surface that is being represented
+  const MooseEnum _surface_type;
 
   /// Boundary type of surface
   BoundaryType _boundary_type;

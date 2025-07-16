@@ -305,7 +305,7 @@ CSGBase::generateOutput() const
   {
     const auto & surf_name = s.getName();
     const auto & coeffs = s.getCoeffs();
-    csg_json["SURFACES"][surf_name] = {{"TYPE", s.getSurfaceTypeString()},
+    csg_json["SURFACES"][surf_name] = {{"TYPE", s.getSurfaceType()},
                                        {"BOUNDARY", s.getBoundaryTypeString()},
                                        {"COEFFICIENTS", {}}};
     for (const auto & c : coeffs)
