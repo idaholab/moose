@@ -9,6 +9,7 @@
 
 #include "TimesEnableControl.h"
 #include "Times.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseApp", TimesEnableControl);
 
