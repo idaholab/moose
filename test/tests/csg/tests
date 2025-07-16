@@ -1,5 +1,5 @@
 [Tests]
-  design = 'CSG.md CSGBase.md'
+  design = 'CSGBase.md'
   issues = '#29095'
   requirement = 'The system shall support the generation of Constructive Solid Geometry (CSG) representations using --csg-only mode using a meshing input file.'
   [geometry]
