@@ -159,7 +159,7 @@ AddPeriodicBCAction::getVariables() const
     // multiple systems so we can't use vars across all systems
     if (_problem->numSolverSystems() > 1)
       mooseError("Parameter 'variable' must be specified when multiple solver systems exist");
-    // Use all field variables from system 0, excluding scalar varaibles
+    // Use all field variables from system 0, excluding scalar variables
     const auto & nl = _problem->getNonlinearSystemBase(0);
     var_names = nl.getVariableNames();
     var_names.erase(std::remove_if(var_names.begin(),
