@@ -83,7 +83,6 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('libpng',        ['ALL'], "A test that runs only if libpng is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch',      ['ALL'], "A test that runs only if libtorch is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch_version', ['ALL'], "A list of libtorch versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-        params.addParam('mfem',          ['ALL'], "A test that runs only if MFEM is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('installation_type',['ALL'], "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')")
 
         params.addParam('capabilities',      "", "A test that only runs if all listed capabilities are supported by the executable")
@@ -714,7 +713,7 @@ class Tester(MooseObject, OutputInterface):
                         'unique_ids', 'vtk', 'tecplot', 'petsc_debug', 'curl', 'superlu', 'mumps',
                         'strumpack', 'unique_id', 'slepc',
                         'boost', 'fparser_jit', 'parmetis', 'chaco', 'party', 'ptscotch',
-                        'threading', 'libpng', 'libtorch', 'mfem']
+                        'threading', 'libpng', 'libtorch']
 
         for check in local_checks:
             test_platforms = set()

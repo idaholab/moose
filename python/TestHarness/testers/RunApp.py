@@ -120,15 +120,14 @@ class RunApp(Tester):
                 self.setStatus(self.skip)
                 return False
 
-        if self.specs['libtorch'] or self.specs['mfem']:
-            if self.specs.isValid('libtorch_devices'):
-                devices_lower = [x.lower() for x in self.specs['libtorch_devices']]
-            else:
-                devices_lower = [x.lower() for x in self.specs['devices']]
-            if options.device not in devices_lower:
-                self.addCaveats(f'{options.device} not in devices')
-                self.setStatus(self.skip)
-                return False
+        if self.specs.isValid('libtorch_devices'):
+            devices_lower = [x.lower() for x in self.specs['libtorch_devices']]
+        else:
+            devices_lower = [x.lower() for x in self.specs['devices']]
+        if options.device not in devices_lower:
+            self.addCaveats(f'{options.device} not in devices')
+            self.setStatus(self.skip)
+            return False
 
         if options.hpc and self.specs.isValid('command_proxy') and os.environ.get('APPTAINER_CONTAINER') is not None:
             self.addCaveats('hpc unsupported')
