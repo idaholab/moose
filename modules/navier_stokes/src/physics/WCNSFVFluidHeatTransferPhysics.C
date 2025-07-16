@@ -21,6 +21,11 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   InputParameters params = WCNSFVFluidHeatTransferPhysicsBase::validParams();
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
   params.transferParam<Real>(NSFVBase::validParams(), "energy_scaling");
+  params.addParam<bool>("check_bc_compatibility",
+                        true,
+                        "Whether to check for known incompatiblity between boundary conditions for "
+                        "the heat transport equation physics and other physics");
+  params.addParamNamesToGroup("check_bc_compatibility", "Advanced");
 
   params.addParamNamesToGroup("energy_face_interpolation energy_scaling", "Numerical scheme");
   return params;
@@ -292,13 +297,14 @@ WCNSFVFluidHeatTransferPhysics::addEnergyInletBC()
       // Check the BCs for momentum
       const auto momentum_inlet_type =
           _flow_equations_physics->inletBoundaryType(inlet_boundaries[bc_ind]);
-      if (momentum_inlet_type == NS::MomentumInletTypes::FLUX_VELOCITY ||
-          momentum_inlet_type == NS::MomentumInletTypes::FLUX_MASS)
-        paramWarning("energy_inlet_types",
-                     "At inlet '" + inlet_boundaries[bc_ind] +
-                         "', you are using a Dirichlet boundary condition on temperature, and a "
-                         "flux boundary condition on momentum. This is known to create an "
-                         "undesirable inlet source term.");
+      if (getParam<bool>("check_bc_compatibility") &&
+          (momentum_inlet_type == NS::MomentumInletTypes::FLUX_VELOCITY ||
+           momentum_inlet_type == NS::MomentumInletTypes::FLUX_MASS))
+        paramError("energy_inlet_types",
+                   "At inlet '" + inlet_boundaries[bc_ind] +
+                       "', you are using a Dirichlet boundary condition on temperature, and a "
+                       "flux boundary condition on momentum. This is known to create an "
+                       "undesirable inlet source term.");
     }
     else if (_energy_inlet_types[bc_ind] == "heatflux")
     {
