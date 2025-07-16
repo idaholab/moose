@@ -114,6 +114,7 @@
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
       capabilities = 'ad_size>=73'
+      restep = false # Issue #31054
     []
     [equal_order_edge_dropping]
       type = 'Exodiff'
