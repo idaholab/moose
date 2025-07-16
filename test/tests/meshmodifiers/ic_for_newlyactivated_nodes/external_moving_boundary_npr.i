@@ -72,6 +72,11 @@
   [proc]
     block = '1 2'
   []
+  [proc_elem]
+    block = '1 2'
+    order = CONSTANT
+    family = MONOMIAL
+  []
 []
 
 [Functions]
@@ -92,6 +97,12 @@
   [proc]
     type = ProcessorIDAux
     variable = proc
+    execute_on = initial
+    block = '1 2'
+  []
+  [proc_elem]
+    type = ProcessorIDAux
+    variable = proc_elem
     execute_on = initial
     block = '1 2'
   []

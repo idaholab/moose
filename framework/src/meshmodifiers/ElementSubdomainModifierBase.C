@@ -260,7 +260,6 @@ ElementSubdomainModifierBase::modify(
 
   // This has to be done *before* subdomain changes are applied
   findReinitializedElemsAndNodes(moved_elems);
-  synchronizeReinitializedElems();
 
   // Apply cached subdomain changes
   applySubdomainChanges(moved_elems, _mesh);
@@ -577,9 +576,13 @@ ElementSubdomainModifierBase::findReinitializedElemsAndNodes(
 
   std::unordered_set<dof_id_type> local_reinitialized_nodes, non_reinit_nodes_on_reinit_elems;
 
+  std::set<processor_id_type> processors_with_reinit_elems_nodes;
+
   for (const auto & [elem_id, subdomain] : moved_elems)
   {
-    mooseAssert(_mesh.elemPtr(elem_id)->active(), "Moved elements should be active");
+    const auto elem = _mesh.elemPtr(elem_id);
+
+    mooseAssert(elem->active(), "Moved elements should be active");
     // Default: any element that changes subdomain is reinitialized
     if (std::find(_subdomain_ids_to_reinitialize.begin(),
                   _subdomain_ids_to_reinitialize.end(),
@@ -589,16 +592,21 @@ ElementSubdomainModifierBase::findReinitializedElemsAndNodes(
     {
       const auto & [from, to] = subdomain;
       if (subdomainIsReinitialized(to) && _old_subdomain_reinitialized)
+      {
         _reinitialized_elems.insert(elem_id);
+        processors_with_reinit_elems_nodes.insert(elem->processor_id());
+      }
       // Only reinitialize if original subdomain is not in list of subdomains
       else if (subdomainIsReinitialized(to) && !_old_subdomain_reinitialized &&
                !subdomainIsReinitialized(from))
+      {
         _reinitialized_elems.insert(elem_id);
+        processors_with_reinit_elems_nodes.insert(elem->processor_id());
+      }
       else // New subdomain is not in list of subdomains
         continue;
     }
 
-    const auto elem = _mesh.elemPtr(elem_id);
     for (unsigned int i = 0; i < elem->n_nodes(); ++i)
     {
       if (nodeIsNewlyReinitialized(elem->node_id(i)))
@@ -608,42 +616,50 @@ ElementSubdomainModifierBase::findReinitializedElemsAndNodes(
     }
   }
 
-  // Convert to vector and allgather across processors
-  std::vector<dof_id_type> local(local_reinitialized_nodes.begin(),
-                                 local_reinitialized_nodes.end());
-  std::vector<dof_id_type> non_reinit_nodes(non_reinit_nodes_on_reinit_elems.begin(),
-                                            non_reinit_nodes_on_reinit_elems.end());
+  auto push_nodes_to_owners = [this](const std::unordered_set<dof_id_type> & local_nodes,
+                                     std::unordered_set<dof_id_type> & target_set)
+  {
+    std::unordered_map<processor_id_type, std::vector<dof_id_type>> push_data;
 
-  std::vector<std::vector<dof_id_type>> gathered;
-  _mesh.comm().allgather(local, gathered);
-  std::vector<std::vector<dof_id_type>> non_reinit_nodes_gathered;
-  _mesh.comm().allgather(non_reinit_nodes, non_reinit_nodes_gathered);
+    for (const auto & id : local_nodes)
+    {
+      const auto * node = _mesh.nodePtr(id);
+      push_data[node->processor_id()].push_back(id);
+    }
 
-  // Collect globally unique activated nodes
-  std::unordered_set<dof_id_type> unique_nodes;
+    auto push_receiver =
+        [this, &target_set](const processor_id_type, const std::vector<dof_id_type> & received_data)
+    {
+      for (const auto & id : received_data)
+      {
+        const auto * node = _mesh.nodePtr(id);
+        if (node && node->processor_id() == _mesh.processor_id()) // grap only local nodes
+          target_set.insert(id);
+      }
+    };
+
+    Parallel::push_parallel_vector_data(_mesh.comm(), push_data, push_receiver);
+  };
+
+  push_nodes_to_owners(local_reinitialized_nodes, _reinitialized_nodes);
+  push_nodes_to_owners(non_reinit_nodes_on_reinit_elems, _non_reinit_nodes_on_reinit_elems);
+
+  for (const auto & node_id : _reinitialized_nodes)
+  {
+    const auto * node = _mesh.nodePtr(node_id);
+    if (node)
+      processors_with_reinit_elems_nodes.insert(node->processor_id());
+  }
+
+  std::vector<processor_id_type> local_proc_ids_vec(processors_with_reinit_elems_nodes.begin(),
+                                                    processors_with_reinit_elems_nodes.end());
+
+  std::vector<std::vector<processor_id_type>> gathered;
+  _mesh.comm().allgather(local_proc_ids_vec, gathered);
+
+  std::set<processor_id_type> global_proc_ids;
   for (const auto & vec : gathered)
-    unique_nodes.insert(vec.begin(), vec.end());
-
-  // Collect globally unique non-reinitialized nodes
-  std::unordered_set<dof_id_type> unique_non_reinit_nodes;
-  for (const auto & vec : non_reinit_nodes_gathered)
-    unique_non_reinit_nodes.insert(vec.begin(), vec.end());
-
-  // Filters the globally reinitialized nodes and stores only those owned by this processor.
-  for (auto id : unique_nodes)
-  {
-    const auto node = _mesh.nodePtr(id);
-    if (node->processor_id() == _mesh.processor_id())
-      _reinitialized_nodes.insert(id);
-  }
-
-  // Filters the globally non-reinitialized nodes and stores only those owned by this processor.
-  for (auto id : unique_non_reinit_nodes)
-  {
-    const auto node = _mesh.nodePtr(id);
-    if (node->processor_id() == _mesh.processor_id())
-      _non_reinit_nodes_on_reinit_elems.insert(id);
-  }
+    _global_proc_ids_for_reinit.insert(vec.begin(), vec.end());
 }
 
 bool
@@ -1002,84 +1018,36 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(
                   reinit_strategy == ReinitStrategy::POLYNOMIAL_NEARBY,
               "reinit strategy must be POLYNOMIAL_WHOLE, POLYNOMIAL, or POLYNOMIAL_NEARBY");
 
-  auto localToGlobal =
-      [&](const auto & local_ids,
-          std::vector<typename std::decay<decltype(local_ids[0])>::type> & global_ids,
-          bool sort_and_remove_duplicates = false) -> void
+  // For O(1) lookup; use a set for nodes
+  std::unordered_set<dof_id_type> reinit_node_set; // including all nodes of reinitialized elements,
+                                                   // not the same as _reinitialized_nodes
+  for (const auto & elem_id : _reinitialized_elems)
   {
-    using IDType = typename std::decay<decltype(local_ids[0])>::type;
-
-    std::vector<std::vector<IDType>> gathered;
-    _mesh.comm().allgather(local_ids, gathered);
-
-    global_ids.clear();
-    for (const auto & vec : gathered)
-      global_ids.insert(global_ids.end(), vec.begin(), vec.end());
-
-    if (sort_and_remove_duplicates)
-    { // remove duplicates cause issue for std::vector<Point>
-      std::sort(global_ids.begin(), global_ids.end());
-      global_ids.erase(std::unique(global_ids.begin(), global_ids.end()), global_ids.end());
-    }
-  };
-
-  auto localToGlobalPair =
-      [&](const auto & local_vals1,
-          const auto & local_vals2,
-          std::vector<typename std::decay<decltype(local_vals1[0])>::type> & global_vals1,
-          std::vector<typename std::decay<decltype(local_vals2[0])>::type> & global_vals2) -> void
-  {
-    mooseAssert(local_vals1.size() == local_vals2.size(),
-                "local_vals1 and local_vals2 must have the same size!");
-
-    using Type1 = typename std::decay<decltype(local_vals1[0])>::type;
-    using Type2 = typename std::decay<decltype(local_vals2[0])>::type;
-
-    std::vector<std::vector<Type1>> gathered1;
-    std::vector<std::vector<Type2>> gathered2;
-
-    _mesh.comm().allgather(local_vals1, gathered1);
-    _mesh.comm().allgather(local_vals2, gathered2);
-
-    global_vals1.clear();
-    global_vals2.clear();
-    for (std::size_t i = 0; i < gathered1.size(); ++i)
-    {
-      global_vals1.insert(global_vals1.end(), gathered1[i].begin(), gathered1[i].end());
-      global_vals2.insert(global_vals2.end(), gathered2[i].begin(), gathered2[i].end());
-    }
-  };
-
-  // 0.  Pre-checks and caching
-  if (_global_reinitialized_elems.empty())
-    return;
-
-  // (a) For O(1) lookup; use a set for elements and a set for nodes
-  std::unordered_set<dof_id_type> reinit_elem_set(_global_reinitialized_elems.begin(),
-                                                  _global_reinitialized_elems.end());
-  std::unordered_set<dof_id_type> reinit_node_set;
-
-  // (b) Collect all nodes owned by reinitialized elements
-  for (const auto & eid : _global_reinitialized_elems)
-  {
-    const Elem * e = _mesh.elemPtr(eid);
-    if (!e)
-      continue; // Not necessarily local; skip if nullptr
-
-    for (unsigned n = 0; n < e->n_nodes(); ++n)
-      reinit_node_set.insert(e->node_id(n)); // already prevented duplicates
+    const Elem * elem = _mesh.elemPtr(elem_id);
+    if (!elem)
+      continue;
+    for (unsigned int n = 0; n < elem->n_nodes(); ++n)
+      reinit_node_set.insert(elem->node_id(n));
   }
 
   std::unordered_set<dof_id_type> patch_elem_set; // Prevent duplicates
 
+  std::vector<dof_id_type> solved_elem_ids_local;
+
   if (reinit_strategy == ReinitStrategy::POLYNOMIAL_NEARBY)
   {
-    std::vector<Point> local_centroids;
-    std::vector<dof_id_type> local_elem_ids;
-    for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
+    using PointIDPair = std::pair<Point, dof_id_type>;
+    std::vector<PointIDPair> local_pairs;
+
+    const unsigned int num_procs = _mesh.comm().size();
+
+    _centroids_of_elements.clear();
+    _kd_tree_sequence_elem_id_map.clear();
+
+    for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
     {
       // Skip if this is a reinitialized element
-      if (reinit_elem_set.count(elem->id()))
+      if (_reinitialized_elems.count(elem->id()))
         continue;
 
       // Skip if element is unsolved (inactive in computational domain)
@@ -1092,12 +1060,34 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(
       const Point box_vec = bbox.second - bbox.first;
       _min_diag_length = std::min(_min_diag_length, box_vec.norm());
 
-      local_centroids.push_back(elem->vertex_average());
-      local_elem_ids.push_back(elem->id());
+      if (num_procs > 1)
+        local_pairs.emplace_back(elem->vertex_average(), elem->id());
+
+      _centroids_of_elements.push_back(elem->vertex_average());
+      _kd_tree_sequence_elem_id_map.push_back(elem->id());
     }
 
-    localToGlobalPair(
-        local_centroids, local_elem_ids, _centroids_of_elements, _kd_tree_sequence_elem_id_map);
+    if (num_procs > 1)
+    {
+      std::unordered_map<processor_id_type, std::vector<PointIDPair>> send_map;
+      for (unsigned int i = 0; i < num_procs; ++i)
+        if (i != processor_id())
+          send_map[i] = local_pairs;
+
+      auto act_on_data = [&](processor_id_type, std::vector<PointIDPair> && received_pairs)
+      {
+        for (const auto & pair : received_pairs)
+        {
+          const auto & point = pair.first;
+          const auto & id = pair.second;
+
+          _centroids_of_elements.push_back(point);
+          _kd_tree_sequence_elem_id_map.push_back(id);
+        }
+      };
+
+      Parallel::push_parallel_vector_data(_mesh.comm(), send_map, act_on_data);
+    }
 
     _kd_tree = new KDTree(_centroids_of_elements, _leaf_max_size);
 
@@ -1106,7 +1096,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(
     if (_nearby_distance_threshold < 0.0)
       _nearby_distance_threshold = _nearby_element_threshold * _min_diag_length;
 
-    for (const auto & elem_id : _global_reinitialized_elems)
+    for (const auto & elem_id : _reinitialized_elems)
     {
       const Elem * elem = _mesh.elemPtr(elem_id);
       if (!elem)
@@ -1127,7 +1117,7 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(
         if (patch_elem_set.count(neighbor_elem_id))
           continue;
 
-        _solved_elem_ids_for_npr[reinit_strategy].push_back(neighbor_elem_id);
+        solved_elem_ids_local.push_back(neighbor_elem_id);
         patch_elem_set.insert(neighbor_elem_id);
       }
     }
@@ -1135,12 +1125,12 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(
   else
   {
     // Pass : Traverse local active elements to find neighbors sharing nodes with reinit elements
-    for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
+    for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
     {
       const dof_id_type eid = elem->id();
 
       // (a) Skip if this is a reinitialized element
-      if (reinit_elem_set.count(eid))
+      if (_reinitialized_elems.count(eid))
         continue;
 
       // (b) Skip if already added to patch
@@ -1168,32 +1158,37 @@ ElementSubdomainModifierBase::gatherNeighborElementsForActivatedNodes(
         if (share_with_reinit)
         {
           patch_elem_set.insert(eid);
-          _solved_elem_ids_for_npr[reinit_strategy].push_back(eid);
+          solved_elem_ids_local.push_back(eid);
         }
       }
       else if (reinit_strategy == ReinitStrategy::POLYNOMIAL_WHOLE)
       {
         patch_elem_set.insert(eid);
-        _solved_elem_ids_for_npr[reinit_strategy].push_back(eid);
+        solved_elem_ids_local.push_back(eid);
       }
     }
   }
 
-  localToGlobal(_solved_elem_ids_for_npr[reinit_strategy],
-                _solved_elem_ids_for_npr[reinit_strategy],
-                true /*sort_and_remove_duplicates*/);
-}
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> send_map;
+  for (auto pid : _global_proc_ids_for_reinit)
+    send_map[pid] = solved_elem_ids_local;
 
-void
-ElementSubdomainModifierBase::synchronizeReinitializedElems()
-{
-  std::vector<dof_id_type> local(_reinitialized_elems.begin(), _reinitialized_elems.end());
-  std::vector<std::vector<dof_id_type>> gathered;
-  _mesh.comm().allgather(local, gathered);
+  auto act_on_data = [&](processor_id_type, std::vector<dof_id_type> && received_ids)
+  {
+    _solved_elem_ids_for_npr[reinit_strategy].insert(
+        _solved_elem_ids_for_npr[reinit_strategy].end(), received_ids.begin(), received_ids.end());
 
-  _global_reinitialized_elems.clear();
-  for (const auto & vec : gathered)
-    _global_reinitialized_elems.insert(_global_reinitialized_elems.end(), vec.begin(), vec.end());
+    std::sort(_solved_elem_ids_for_npr[reinit_strategy].begin(),
+              _solved_elem_ids_for_npr[reinit_strategy].end());
+
+    _solved_elem_ids_for_npr[reinit_strategy].erase(
+        std::unique(_solved_elem_ids_for_npr[reinit_strategy].begin(),
+                    _solved_elem_ids_for_npr[reinit_strategy].end()),
+        _solved_elem_ids_for_npr[reinit_strategy].end());
+  };
+
+  // Only send solved_elem_ids_local to the processors that have reinitialized elements and nodes
+  Parallel::push_parallel_vector_data(_mesh.comm(), send_map, act_on_data);
 }
 
 void

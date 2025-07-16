@@ -218,10 +218,6 @@ private:
   /// @brief A map to map reinitialization strategies to their corresponding solved element IDs
   std::map<ReinitStrategy, std::vector<dof_id_type>> _solved_elem_ids_for_npr;
 
-  /// Elements that have been reinitialized due to subdomain changes,
-  /// gathered across all processors using MPI
-  std::vector<dof_id_type> _global_reinitialized_elems;
-
   /// POLYNOMIAL_NEARBY related parameters
   /// @brief Minimum number of nearby elements required in the polynomial extrapolation patch.
   int _nearby_element_threshold = 1;
@@ -250,9 +246,8 @@ private:
   /// but the user can override this value by explicitly setting _nearby_distance_threshold.
   double _nearby_distance_threshold = -1;
 
-  /// Perform a global MPI gather of reinitialized element IDs across all processors.
-  /// Results are stored in `_global_reinitialized_elems`.
-  void synchronizeReinitializedElems();
+  /// @brief Set of processor IDs that have reinitialized elements and nodes.
+  std::set<processor_id_type> _global_proc_ids_for_reinit;
 
   /// @brief Gather neighbor elements for newly activated nodes based on the reinitialization strategy.
   void gatherNeighborElementsForActivatedNodes(ReinitStrategy & reinit_strategy);
