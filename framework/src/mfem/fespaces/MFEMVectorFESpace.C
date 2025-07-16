@@ -64,7 +64,8 @@ MFEMVectorFESpace::getFECName() const
 
   // This is to get around an MFEM bug where if you pass the full name of the default element type,
   // it crashes
-  const std::string basis = (closed_basis + open_basis == "Gg" ? "" : "@" + closed_basis + open_basis);
+  const std::string basis =
+      (closed_basis + open_basis == "Gg" ? "" : "@" + closed_basis + open_basis);
 
   return actual_type + basis + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
 }
