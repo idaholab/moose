@@ -566,6 +566,7 @@ MooseVariableDataBase<OutputType>::fetchDoFValues()
       if ((_subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
            _subproblem.safeAccessTaggedVectors()) ||
           _subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
+      {
         // tag is defined on problem but may not be used by a system
         // the grain tracker requires being able to read from solution vectors that we are also in
         // the process of writing :-/
@@ -575,11 +576,13 @@ MooseVariableDataBase<OutputType>::fetchDoFValues()
           _vector_tags_dof_u[tag].resize(n);
           vec.get(_dof_indices, &_vector_tags_dof_u[tag][0]);
         }
+      }
 
   if (_subproblem.safeAccessTaggedMatrices())
   {
     auto & active_coupleable_matrix_tags =
         _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
+
     for (auto tag : active_coupleable_matrix_tags)
     {
       _matrix_tags_dof_u[tag].resize(n);

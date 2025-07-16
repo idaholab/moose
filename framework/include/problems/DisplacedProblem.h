@@ -64,6 +64,9 @@ public:
   virtual const SystemBase & systemBaseLinear(const unsigned int sys_num) const override;
   virtual SystemBase & systemBaseLinear(const unsigned int sys_num) override;
 
+  virtual const SystemBase & systemBaseSolver(const unsigned int sys_num) const override;
+  virtual SystemBase & systemBaseSolver(const unsigned int sys_num) override;
+
   virtual const SystemBase & systemBaseAuxiliary() const override { return *_displaced_aux; }
   virtual SystemBase & systemBaseAuxiliary() override { return *_displaced_aux; }
 
@@ -503,4 +506,20 @@ inline SystemBase &
 DisplacedProblem::systemBaseLinear(const unsigned int /*sys_num*/)
 {
   mooseError("Linear systems are not supported for displaced problems yet.");
+}
+
+inline const SystemBase &
+DisplacedProblem::systemBaseSolver(const unsigned int sys_num) const
+{
+  mooseAssert(sys_num < _displaced_solver_systems.size(),
+              "System number greater than the number of solver systems");
+  return *_displaced_solver_systems[sys_num];
+}
+
+inline SystemBase &
+DisplacedProblem::systemBaseSolver(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _displaced_solver_systems.size(),
+              "System number greater than the number of solver systems");
+  return *_displaced_solver_systems[sys_num];
 }

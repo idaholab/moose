@@ -14,10 +14,16 @@
 #include "FEProblemBase.h"
 
 ComputeLinearFVFaceThread::ComputeLinearFVFaceThread(FEProblemBase & fe_problem,
-                                                     const unsigned int linear_system_num,
+                                                     const unsigned int system_num,
                                                      const Moose::FV::LinearFVComputationMode mode,
-                                                     const std::set<TagID> & tags)
-  : _fe_problem(fe_problem), _linear_system_number(linear_system_num), _mode(mode), _tags(tags)
+                                                     const std::set<TagID> & vector_tags,
+                                                     const std::set<TagID> & matrix_tags)
+  : _fe_problem(fe_problem),
+    _system_number(system_num),
+    _mode(mode),
+    _vector_tags(vector_tags),
+    _matrix_tags(matrix_tags),
+    _system_contrib_objects_ready(false)
 {
 }
 
@@ -25,9 +31,11 @@ ComputeLinearFVFaceThread::ComputeLinearFVFaceThread(FEProblemBase & fe_problem,
 ComputeLinearFVFaceThread::ComputeLinearFVFaceThread(ComputeLinearFVFaceThread & x,
                                                      Threads::split /*split*/)
   : _fe_problem(x._fe_problem),
-    _linear_system_number(x._linear_system_number),
+    _system_number(x._system_number),
     _mode(x._mode),
-    _tags(x._tags)
+    _vector_tags(x._vector_tags),
+    _matrix_tags(x._matrix_tags),
+    _system_contrib_objects_ready(x._system_contrib_objects_ready)
 {
 }
 
@@ -40,6 +48,7 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
   _old_subdomain = Moose::INVALID_BLOCK_ID;
   _old_neighbor_subdomain = Moose::INVALID_BLOCK_ID;
 
+  setupSystemContributionObjects();
   printGeneralExecutionInformation();
 
   // Iterate over all the elements in the range
@@ -50,22 +59,20 @@ ComputeLinearFVFaceThread::operator()(const FaceInfoRange & range)
         face_info->neighborPtr() ? face_info->neighbor().subdomain_id() : _subdomain;
     if (_subdomain != _old_subdomain || _neighbor_subdomain != _old_neighbor_subdomain)
     {
-      fetchSystemContributionObjects();
+      fetchBlockSystemContributionObjects();
       printBlockExecutionInformation();
     }
 
-    Real face_area = face_info->faceArea() * face_info->faceCoord();
+    const Real face_area = face_info->faceArea() * face_info->faceCoord();
 
-    for (auto kernel : _fv_flux_kernels)
+    // Time to execute the kernels that contribute to the matrix and
+    // right hand side
+    for (auto & kernel : _fv_flux_kernels)
     {
       kernel->setupFaceData(face_info);
       kernel->setCurrentFaceArea(face_area);
-      if (_mode == Moose::FV::LinearFVComputationMode::Matrix ||
-          _mode == Moose::FV::LinearFVComputationMode::FullSystem)
-        kernel->addMatrixContribution();
-      if (_mode == Moose::FV::LinearFVComputationMode::RHS ||
-          _mode == Moose::FV::LinearFVComputationMode::FullSystem)
-        kernel->addRightHandSideContribution();
+      kernel->addMatrixContribution();
+      kernel->addRightHandSideContribution();
     }
   }
 }
@@ -76,48 +83,103 @@ ComputeLinearFVFaceThread::join(const ComputeLinearFVFaceThread & /*y*/)
 }
 
 void
-ComputeLinearFVFaceThread::fetchSystemContributionObjects()
+ComputeLinearFVFaceThread::setupSystemContributionObjects()
 {
-  const auto system_number = _fe_problem.getLinearSystem(_linear_system_number).number();
+  // The reason why we need to grab vectors and matrices separately is that
+  // we want to grab a union instead of an intersection.
+  std::vector<LinearFVFluxKernel *> kernels_after_vectors;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(_system_number)
+      .template condition<AttribSystem>("LinearFVFluxKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_vector_tags)
+      .queryInto(kernels_after_vectors);
+
+  std::vector<LinearFVFluxKernel *> kernels_after_matrices;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(_system_number)
+      .template condition<AttribSystem>("LinearFVFluxKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribMatrixTags>(_matrix_tags)
+      .queryInto(kernels_after_matrices);
+
+  // We fetch the union of the available objects
+  std::vector<LinearFVFluxKernel *> kernels;
+  MooseUtils::getUnion(kernels_after_vectors, kernels_after_matrices, kernels);
+
+  // As a last step, we make sure the kernels know which vectors/matrices they need to contribute to
+  for (auto & kernel : kernels)
+    kernel->linkTaggedVectorsAndMatrices(_vector_tags, _matrix_tags);
+
+  _system_contrib_objects_ready = true;
+}
+
+void
+ComputeLinearFVFaceThread::fetchBlockSystemContributionObjects()
+{
+  mooseAssert(_system_contrib_objects_ready,
+              "The system contribution objects need to be set up before we fetch the "
+              "block-restricted objects!");
+
   _fv_flux_kernels.clear();
 
   if (_subdomain != _old_subdomain)
   {
-    _elem_fv_flux_kernels.clear();
+    // We just filter based on subdomain ID on top of everything else
+    std::vector<LinearFVFluxKernel *> kernels_after_vector;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSysNum>(_system_number)
+        .template condition<AttribSystem>("LinearFVFluxKernel")
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribVectorTags>(_vector_tags)
+        .template condition<AttribSubdomains>(_subdomain)
+        .queryInto(kernels_after_vector);
+    std::vector<LinearFVFluxKernel *> kernels_after_matrix;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSysNum>(_system_number)
+        .template condition<AttribSystem>("LinearFVFluxKernel")
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribMatrixTags>(_matrix_tags)
+        .template condition<AttribSubdomains>(_subdomain)
+        .queryInto(kernels_after_matrix);
 
-    auto base_query = _fe_problem.theWarehouse()
-                          .query()
-                          .template condition<AttribSysNum>(system_number)
-                          .template condition<AttribSubdomains>(_subdomain)
-                          .template condition<AttribSystem>("LinearFVFluxKernel")
-                          .template condition<AttribThread>(_tid);
-
-    if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
-      base_query.condition<AttribMatrixTags>(_tags).queryInto(_elem_fv_flux_kernels);
-    else
-      base_query.condition<AttribVectorTags>(_tags).queryInto(_elem_fv_flux_kernels);
+    // We populate the list of kernels with the union of the two vectors
+    MooseUtils::getUnion(kernels_after_vector, kernels_after_matrix, _fv_flux_kernels_elem);
     _old_subdomain = _subdomain;
   }
-  _fv_flux_kernels.insert(_elem_fv_flux_kernels.begin(), _elem_fv_flux_kernels.end());
+  _fv_flux_kernels.insert(_fv_flux_kernels_elem.begin(), _fv_flux_kernels_elem.end());
 
   if (_neighbor_subdomain != _old_neighbor_subdomain)
   {
-    _neighbor_fv_flux_kernels.clear();
+    // Here we just filter based on subdomain ID on top of everything else
+    std::vector<LinearFVFluxKernel *> kernels_after_vector;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSysNum>(_system_number)
+        .template condition<AttribSystem>("LinearFVFluxKernel")
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribVectorTags>(_vector_tags)
+        .template condition<AttribSubdomains>(_neighbor_subdomain)
+        .queryInto(kernels_after_vector);
+    std::vector<LinearFVFluxKernel *> kernels_after_matrix;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSysNum>(_system_number)
+        .template condition<AttribSystem>("LinearFVFluxKernel")
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribMatrixTags>(_matrix_tags)
+        .template condition<AttribSubdomains>(_neighbor_subdomain)
+        .queryInto(kernels_after_matrix);
 
-    auto base_query = _fe_problem.theWarehouse()
-                          .query()
-                          .template condition<AttribSysNum>(system_number)
-                          .template condition<AttribSubdomains>(_neighbor_subdomain)
-                          .template condition<AttribSystem>("LinearFVFluxKernel")
-                          .template condition<AttribThread>(_tid);
-
-    if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
-      base_query.condition<AttribMatrixTags>(_tags).queryInto(_neighbor_fv_flux_kernels);
-    else
-      base_query.condition<AttribVectorTags>(_tags).queryInto(_neighbor_fv_flux_kernels);
+    // We populate the list of kernels with the union of the two vectors
+    MooseUtils::getUnion(kernels_after_vector, kernels_after_matrix, _fv_flux_kernels_neighbor);
     _old_neighbor_subdomain = _neighbor_subdomain;
   }
-  _fv_flux_kernels.insert(_neighbor_fv_flux_kernels.begin(), _neighbor_fv_flux_kernels.end());
+  _fv_flux_kernels.insert(_fv_flux_kernels_neighbor.begin(), _fv_flux_kernels_neighbor.end());
 }
 
 void
@@ -137,7 +199,7 @@ ComputeLinearFVFaceThread::printGeneralExecutionInformation() const
 void
 ComputeLinearFVFaceThread::printBlockExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_fv_flux_kernels.size())
+  if (!_fe_problem.shouldPrintExecution(_tid) || _fv_flux_kernels.empty())
     return;
 
   // Print the location of the execution
