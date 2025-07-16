@@ -13,6 +13,7 @@
       detail =  'compute the slip system strength and resolved applied shear '
                 'stress for the prismatic<a> and pyramidal<c+a> slip systems when '
                 'loaded along the c-axis;'
+      capabilities = 'method!=dbg'
     []
     [update_method_hcp_aprismatic_active]
       type = 'CSVDiff'
@@ -21,6 +22,7 @@
       allow_warnings = true
       detail = 'evolve the forest dislocation and substructure densities on '
                'prismatic<a> slip planes when loaded in an appropriate orientation;'
+      capabilities = 'method!=dbg'
     []
     [update_method_hcp_capyramidal_active]
       type = 'CSVDiff'
@@ -30,6 +32,7 @@
       detail = 'evolve the forest dislocation densities on pyramidal <c+a> slip '
                'planes and the substructure density when the crystal is loaded in '
                'an appropriate orientation.'
+      capabilities = 'method!=dbg'
     []
     [update_method_hcp_basal_active]
       type = 'CSVDiff'
@@ -39,6 +42,7 @@
       allow_warnings = true
       detail = 'evolve the forest dislocation densities on basal <a> slip '
                'planes when the crystal is loaded in an appropriate orientation.'
+      capabilities = 'method!=dbg'
     []
     [update_method_hcp_no_substructure]
       type = 'CSVDiff'
@@ -46,6 +50,7 @@
       csvdiff = 'update_method_hcp_no_substructure_out.csv'
       allow_warnings = true
       detail = 'prevent the calculation of a negative substructure density increment.'
+      capabilities = 'method!=dbg'
     []
     [update_method_hcp_no_negative_aprismatic]
       type = 'CSVDiff'
@@ -53,6 +58,7 @@
       csvdiff = 'update_method_hcp_no_negative_aprismatic_out.csv'
       allow_warnings = true
       detail = 'prevent the calculation of a negative total forest density.'
+      capabilities = 'method!=dbg'
     []
     [update_method_hcp_size_slip_modes]
       type = 'RunException'
@@ -160,6 +166,7 @@
                  'Executioner/dt=0.125'
       detail = 'continue to evolve the forest dislocation densities on basal <a> slip planes.'
       prereq = 'constitutive_model/update_method_hcp_basal_active'
+      capabilities = 'method!=dbg'
     []
     [update_method_hcp_aprismatic_capyramidal_restart]
       type = 'CSVDiff'

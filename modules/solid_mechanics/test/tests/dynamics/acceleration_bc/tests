@@ -9,6 +9,7 @@
                   " acceleration at the given boundary."
     design = "Dynamics.md PresetAcceleration.md"
     issues = "#7642"
+    capabilities = 'method!=dbg'
   [../]
   [./acceleration_bc_ti]
     type = 'Exodiff'
@@ -22,5 +23,6 @@
     design = "Dynamics.md PresetAcceleration.md"
     issues = "#12185"
     prereq = "acceleration_bc"
+    capabilities = 'method!=dbg'
   [../]
 []

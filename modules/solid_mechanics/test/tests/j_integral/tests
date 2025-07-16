@@ -6,6 +6,7 @@
     input = 'j_integral_2d.i'
     csvdiff = 'j_integral_2d_out.csv'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 2D.'
+    capabilities = 'method!=dbg'
   []
   [j_2d_block_restrict]
     type = 'CSVDiff'
@@ -13,6 +14,7 @@
     input = 'j_integral_2d_block_restrict.i'
     csvdiff = 'j_integral_2d_block_restrict_out.csv'
     requirement = 'The domain integral action shall compute the fracture domain integrals including the J integral for problems in which the fracture domains of interest represent a subset of all the domains in the system.'
+    capabilities = 'method!=dbg'
   []
   [j_2d_block_restrict_error]
     type = 'RunException'
@@ -31,6 +33,7 @@
     check_not_exists = 'j_integral_2d_output_vpp_out_*VPP*.csv'
     cli_args = "DomainIntegral/output_vpp=false Outputs/file_base=j_integral_2d_output_vpp_out"
     requirement = 'The domain integral action shall suppress the vector postprocessor output and stop generating a csv file for each integration ring at each time step.'
+    capabilities = 'method!=dbg'
   []
   [j_2d_output_pp]
     type = 'CSVDiff'
@@ -39,30 +42,35 @@
     csvdiff = 'j_integral_2d_output_pp_out.csv'
     cli_args = "DomainIntegral/output_vpp=false Outputs/file_base=j_integral_2d_output_pp_out"
     requirement = 'The domain integral action shall suppress the vector postprocessor output while the postprocessor outputs are not affected.'
+    capabilities = 'method!=dbg'
   []
   [j_2d_small_strain]
     type = 'CSVDiff'
     input = 'j_integral_2d_small_strain.i'
     csvdiff = 'j_integral_2d_small_strain_out.csv'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 2D using small strain.'
+    capabilities = 'method!=dbg'
   []
   [j_2d_points]
     type = 'CSVDiff'
     input = 'j_integral_2d_points.i'
     csvdiff = 'j_integral_2d_points_out.csv'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 2D at specified points.'
+    capabilities = 'method!=dbg'
   []
   [j_2d_mouth_dir]
     type = 'CSVDiff'
     input = 'j_integral_2d_mouth_dir.i'
     csvdiff = 'j_integral_2d_mouth_dir_out.csv'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 2D given a mouth direction.'
+    capabilities = 'method!=dbg'
   []
   [j_2d_topo_q]
     type = 'CSVDiff'
     input = 'j_integral_2d_topo_q_func.i'
     csvdiff = 'j_integral_2d_topo_q_func_out.csv'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 2D using the topology type q function.'
+    capabilities = 'method!=dbg'
   []
   [j_3d_as_2d]
     type = 'CSVDiff'
@@ -81,6 +89,7 @@
     input = 'j_integral_3d.i'
     csvdiff = 'j_integral_3d_out.csv'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 3D.'
+    capabilities = 'method!=dbg'
   []
   [j_3d_noq]
     type = 'CSVDiff'
@@ -88,30 +97,35 @@
     csvdiff = 'j_integral_3d_out.csv'
     prereq = j_3d
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 3D with the q function turned off.'
+    capabilities = 'method!=dbg'
   []
   [j_3d_points]
     type = 'CSVDiff'
     input = 'j_integral_3d_points.i'
     csvdiff = 'j_integral_3d_points_out.csv'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 3D with specified points.'
+    capabilities = 'method!=dbg'
   []
   [j_3d_mouth_dir]
     type = 'CSVDiff'
     input = 'j_integral_3d_mouth_dir.i'
     csvdiff = 'j_integral_3d_mouth_dir_out.csv'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 3D given a crack mouth direction.'
+    capabilities = 'method!=dbg'
   []
   [j_3d_mouth_dir_end_dir_vec]
     type = 'CSVDiff'
     input = 'j_integral_3d_mouth_dir_end_dir_vec.i'
     csvdiff = 'j_integral_3d_mouth_dir_end_dir_vec_out.csv'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 3D given a crack mouth direction and end direction vector.'
+    capabilities = 'method!=dbg'
   []
   [j_3d_topo_q]
     type = 'CSVDiff'
     input = 'j_integral_3d_topo_q_func.i'
     csvdiff = 'j_integral_3d_topo_q_func_out.csv'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 3D with a topology type q function.'
+    capabilities = 'method!=dbg'
   []
   [j_2d_noq]
     type = 'CSVDiff'
@@ -119,6 +133,7 @@
     csvdiff = 'j_integral_2d_out.csv'
     prereq = 'j_2d'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 2D while supressing the output of the q function values.'
+    capabilities = 'method!=dbg'
   []
   [j_2d_chk_q]
     type = 'Exodiff'
@@ -128,6 +143,7 @@
     prereq = 'j_2d_noq'
     rel_err = 1e-5
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 2D while outputting the q function values.'
+    capabilities = 'method!=dbg'
   []
   [j_2d_topo_chk_q]
     type = 'Exodiff'
@@ -137,6 +153,7 @@
     prereq = 'j_2d_topo_q'
     rel_err = 1e-5
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 2D with the topology type q function and outputting the values.'
+    capabilities = 'method!=dbg'
   []
   [j_3d_chk_q]
     type = 'Exodiff'
@@ -145,6 +162,7 @@
     exodiff = 'j_integral_3d_out.e'
     prereq = 'j_3d_noq'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 3D while supressing the output of the q values.'
+    capabilities = 'method!=dbg'
   []
   [j_3d_topo_chk_q]
     type = 'Exodiff'
@@ -153,5 +171,6 @@
     exodiff = 'j_integral_3d_topo_q_func_out.e'
     prereq = 'j_3d_topo_q'
     requirement = 'The domain integral action shall compute all of the fracture domain integrals including the J integral for problems in 3D with the topology type q function and outputting the values.'
+    capabilities = 'method!=dbg'
   []
 []

@@ -27,6 +27,7 @@
       input = finite_elastic.i
       exodiff = finite_elastic_out.e
       detail = 'with full tensors'
+      capabilities = 'method!=dbg'
     []
     [symmetric_tensor]
       type = Exodiff

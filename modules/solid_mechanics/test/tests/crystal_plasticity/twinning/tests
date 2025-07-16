@@ -14,6 +14,7 @@
                'applied shear stress and resistance to twin propagation, the '
                'corresponding twin volume fraction per twin system, and the total '
                'value of the twin volume fraction across all twin systems.'
+      capabilities = 'method!=dbg'
     []
     [check_direction_twin_propagation]
       type = 'CSVDiff'
@@ -22,6 +23,7 @@
       allow_warnings = true
       detail = 'compute a non-zero twin volume fraction, and associate plastic '
                'shear increment, for only postive applied shear stress values.'
+      capabilities = 'method!=dbg'
     []
     [coplanar_twin_hardening]
       type = 'CSVDiff'
@@ -29,6 +31,7 @@
       csvdiff = 'coplanar_twin_hardening_out.csv'
       detail = 'calculate the coplanar twin propogation resistance contribution '
                'as a function of the twin volume fractions on coplanar systems alone.'
+      capabilities = 'method!=dbg'
     []
     [non_coplanar_twin_hardening]
       type = 'CSVDiff'
@@ -37,6 +40,7 @@
       detail = 'calculate the contribution to twin propagation resistance from '
                'non-coplanar systems as a function of only the twin volume fraction '
                'on non-coplanar twin systems.'
+      capabilities = 'method!=dbg'
     []
     [upper_twin_fraction_limit]
       type = CSVDiff
@@ -45,6 +49,7 @@
       allow_warnings = true
       detail = 'set the plastic shear increments due to twinning to zero once '
                'the total twin volume fraction limit is reached.'
+      capabilities = 'method!=dbg'
     []
     [upper_twin_fraction_limit_error]
       type = RunException
@@ -78,6 +83,7 @@
       cli_args = 'Outputs/out/type=Checkpoint Outputs/out/execute_on=Final'
       detail = 'compute plastic shear due to both slip and twin propagation when '
                'loaded under tension in a 111 orientation.'
+      capabilities = 'method!=dbg'
     []
     [combined_twinning_slip_111compression]
       type = CSVDiff
@@ -86,6 +92,7 @@
       cli_args = 'BCs/tdisp/function=-0.02*t Outputs/file_base=combined_twinning_slip_111compression_out '
       detail = 'compute a near-zero twin volume fraction when loaded under '
                'compression in a 111 orientation.'
+      capabilities = 'method!=dbg'
     []
     [combined_twinning_slip_100tension]
       type = CSVDiff
@@ -94,6 +101,7 @@
       cli_args = 'BCs/tdisp/function=0.025*t Outputs/file_base=combined_twinning_slip_100tension_out'
       detail = 'compute a near-zero volume fraction of twins for all twin system '
                'when a 100 oriented crystal is loaded under tension.'
+      capabilities = 'method!=dbg'
     []
     [combined_twinning_slip_100compression]
       type = CSVDiff
@@ -101,6 +109,7 @@
       csvdiff = 'combined_twinning_slip_100compression_out.csv'
       detail = 'compute both dislocation glide and twin propagation in a 100 '
                'oriented crystal loaded under compression.'
+      capabilities = 'method!=dbg'
     []
   []
   [restart_capabilities]
