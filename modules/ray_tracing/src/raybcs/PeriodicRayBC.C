@@ -42,7 +42,9 @@ PeriodicRayBC::PeriodicRayBC(const InputParameters & params)
   : GeneralRayBC(params),
     _periodic_boundaries(
         *getCheckedPointerParam<const libMesh::PeriodicBoundaries *>(periodic_boundaries_param)),
-    _point_locator(_mesh.getPointLocator())
+    _point_locator(_mesh.getPointLocator()),
+    _periodic_applied(0),
+    _periodic_neighbor(nullptr)
 {
 }
 
