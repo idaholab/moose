@@ -45,7 +45,7 @@ protected:
   virtual void constructSolver(const InputParameters & parameters) = 0;
 
   /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence
-  virtual bool checkSpectralEquivalence(mfem::ParBilinearForm & blf);
+  virtual bool checkSpectralEquivalence(mfem::ParBilinearForm & blf) const;
 
   // Variable defining whether to use LOR solver
   bool _lor;
