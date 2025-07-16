@@ -37,8 +37,8 @@ protected:
 
   virtual void onSetupPeriodicBoundary(libMesh::PeriodicBoundaryBase & p) override;
 
-  /// The variable names to apply periodic boundary conditions to
-  std::vector<VariableName> _var_names;
+  /// The variables to apply periodic boundary conditions to
+  std::vector<const MooseVariableFieldBase *> _vars;
 
   MooseMesh * _mesh;
 };
