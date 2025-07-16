@@ -79,6 +79,8 @@ using ResultItem = std::pair<T, U>;
 }
 #endif
 
+const std::array<bool, 3> MooseMesh::periodic_dim_default{false, false, false};
+
 InputParameters
 MooseMesh::validParams()
 {
@@ -2218,7 +2220,7 @@ MooseMesh::addPeriodicVariable(const unsigned int sys_num,
     return;
 
   const auto key = std::make_pair(sys_num, var_num);
-  auto & entry = _periodic_dim[key]; // default construction ok (bool default = false)
+  auto & entry = _periodic_dim.try_emplace(key, periodic_dim_default).first->second;
 
   _half_range = Point(dimensionWidth(0) / 2.0, dimensionWidth(1) / 2.0, dimensionWidth(2) / 2.0);
 
@@ -2246,13 +2248,19 @@ MooseMesh::addPeriodicVariable(const unsigned int sys_num,
                  "variable will not be stored.");
 }
 
-const std::array<bool, 3> *
+const std::array<bool, 3> &
 MooseMesh::queryPeriodicDimensions(const unsigned int sys_num, const unsigned int var_num) const
 {
   const auto key = std::make_pair(sys_num, var_num);
   if (const auto it = _periodic_dim.find(key); it != _periodic_dim.end())
-    return &it->second;
-  return nullptr;
+    return it->second;
+  return periodic_dim_default;
+}
+
+const std::array<bool, 3> &
+MooseMesh::queryPeriodicDimensions(const MooseVariableBase & var) const
+{
+  return queryPeriodicDimensions(var.sys().number(), var.number());
 }
 
 bool
@@ -2261,15 +2269,13 @@ MooseMesh::isTranslatedPeriodic(const unsigned int sys_num,
                                 const unsigned int component) const
 {
   mooseAssert(component < dimension(), "Requested dimension out of bounds");
-  if (const auto dims = queryPeriodicDimensions(sys_num, var_num))
-    return (*dims)[component];
-  return false;
+  return queryPeriodicDimensions(sys_num, var_num)[component];
 }
 
 bool
 MooseMesh::isTranslatedPeriodic(const MooseVariableBase & var, const unsigned int component) const
 {
-  return isTranslatedPeriodic(var.number(), var.sys().number(), component);
+  return isTranslatedPeriodic(var.sys().number(), var.number(), component);
 }
 
 RealVectorValue
@@ -2278,24 +2284,23 @@ MooseMesh::minPeriodicVector(const unsigned int sys_num,
                              Point p,
                              Point q) const
 {
-  if (const auto periodic_dims = queryPeriodicDimensions(sys_num, var_num))
+  const auto & periodic_dims = queryPeriodicDimensions(sys_num, var_num);
+
+  for (const auto i : make_range(dimension()))
   {
-    for (const auto i : make_range(dimension()))
+    // check to see if we're closer in real or periodic space in x, y, and z
+    if (periodic_dims[i])
     {
-      // check to see if we're closer in real or periodic space in x, y, and z
-      if ((*periodic_dims)[i])
+      // Need to test order before differencing
+      if (p(i) > q(i))
       {
-        // Need to test order before differencing
-        if (p(i) > q(i))
-        {
-          if (p(i) - q(i) > _half_range(i))
-            p(i) -= _half_range(i) * 2;
-        }
-        else
-        {
-          if (q(i) - p(i) > _half_range(i))
-            p(i) += _half_range(i) * 2;
-        }
+        if (p(i) - q(i) > _half_range(i))
+          p(i) -= _half_range(i) * 2;
+      }
+      else
+      {
+        if (q(i) - p(i) > _half_range(i))
+          p(i) += _half_range(i) * 2;
       }
     }
   }
@@ -2306,7 +2311,7 @@ MooseMesh::minPeriodicVector(const unsigned int sys_num,
 RealVectorValue
 MooseMesh::minPeriodicVector(const MooseVariableBase & var, const Point & p, const Point & q) const
 {
-  return minPeriodicVector(var.number(), var.sys().number(), p, q);
+  return minPeriodicVector(var.sys().number(), var.number(), p, q);
 }
 
 Real
@@ -2323,7 +2328,7 @@ MooseMesh::minPeriodicDistance(const MooseVariableBase & var,
                                const Point & p,
                                const Point & q) const
 {
-  return minPeriodicDistance(var.number(), var.sys().number(), p, q);
+  return minPeriodicDistance(var.sys().number(), var.number(), p, q);
 }
 
 const std::pair<BoundaryID, BoundaryID> *

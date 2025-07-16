@@ -32,11 +32,11 @@ PeriodicNodeMapTester::PeriodicNodeMapTester(const InputParameters & parameters)
 void
 PeriodicNodeMapTester::initialSetup()
 {
-  const auto var = getFieldVar("v", 0);
+  const auto & periodic_dims = _mesh.queryPeriodicDimensions(*getFieldVar("v", 0));
   // collect mesh periodicity data
   for (unsigned int i = 0; i < _dim; ++i)
   {
-    if (!_mesh.isRegularOrthogonal() || !_mesh.isTranslatedPeriodic(*var, i))
+    if (!_mesh.isRegularOrthogonal() || !periodic_dims[i])
       paramError("v", "Variable must be periodic in all directions");
 
     _periodic_min[i] = _mesh.getMinInDimension(i);
