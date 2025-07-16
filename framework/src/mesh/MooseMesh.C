@@ -2006,20 +2006,22 @@ MooseMesh::detectPairedSidesets()
   // single pair for that direction.  In that case, we'll just return
   // as was done in the original algorithm.
 
-  // Points used for direction comparison
-  const Point minus_x(-1, 0, 0), plus_x(1, 0, 0), minus_y(0, -1, 0), plus_y(0, 1, 0),
-      minus_z(0, 0, -1), plus_z(0, 0, 1);
-
   // we need to test all element dimensions from dim down to 1
-  const unsigned int dim = getMesh().mesh_dimension();
+  const unsigned int mesh_dim = getMesh().mesh_dimension();
 
-  // boundary id sets for elements of different dimensions
-  std::vector<std::set<BoundaryID>> minus_x_ids(dim), plus_x_ids(dim), minus_y_ids(dim),
-      plus_y_ids(dim), minus_z_ids(dim), plus_z_ids(dim);
+  // Helper for iterating through unit dimensions (0=x, 1=y, 2=z)
+  static constexpr std::array<std::size_t, 3> unit_dims{0, 1, 2};
 
-  std::vector<std::unique_ptr<FEBase>> fe_faces(dim);
-  std::vector<std::unique_ptr<libMesh::QGauss>> qfaces(dim);
-  for (unsigned side_dim = 0; side_dim < dim; ++side_dim)
+  // Boundary id sets for elements of different dimensions
+  // First index: false for minus, true for plus
+  // Second index: unit dimension; 0=x, 1=y, 2=z
+  // Third index: side dimension; 0=1D, 1=2D, 2=3D
+  std::array<std::array<std::array<std::set<BoundaryID>, 3>, 3>, 2> ids{};
+
+  // Build quadrature needed to evaluate side normals
+  std::array<std::unique_ptr<FEBase>, 3> fe_faces{};
+  std::array<std::unique_ptr<libMesh::QGauss>, 3> qfaces{};
+  for (const auto side_dim : make_range(mesh_dim))
   {
     // Face is assumed to be flat, therefore normal is assumed to be
     // constant over the face, therefore only compute it at 1 qp.
@@ -2028,27 +2030,32 @@ MooseMesh::detectPairedSidesets()
     // A first-order Lagrange FE for the face.
     fe_faces[side_dim] = FEBase::build(side_dim + 1, FEType(FIRST, libMesh::LAGRANGE));
     fe_faces[side_dim]->attach_quadrature_rule(qfaces[side_dim].get());
+    fe_faces[side_dim]->get_normals();
   }
 
-  // We need this to get boundary ids for each boundary face we encounter.
-  BoundaryInfo & boundary_info = getMesh().get_boundary_info();
+  // Get boundary IDs for each dimension that are in the unit normal
+  const auto & boundary_info = getMesh().get_boundary_info();
+  // Temporary for evaluating boundary_ids
   std::vector<boundary_id_type> face_ids;
-
+  // The side dimensions we've come across, so that we only report
+  // warnings for side dimensions that we have
+  std::set<unsigned int> side_dims;
   for (auto & elem : as_range(getMesh().level_elements_begin(0), getMesh().level_elements_end(0)))
   {
-    // dimension of the current element and its normals
-    unsigned int side_dim = elem->dim() - 1;
-    const std::vector<Point> & normals = fe_faces[side_dim]->get_normals();
+    // If not on the boundary, nothing to do
+    if (!elem->on_boundary())
+      continue;
 
-    // loop over element sides
-    for (unsigned int s = 0; s < elem->n_sides(); s++)
-    {
-      // If side is on the boundary
-      if (elem->neighbor_ptr(s) == nullptr)
+    const auto side_dim = elem->dim() - 1;
+    side_dims.insert(side_dim);
+
+    // Check for unit normals on each boundary side
+    for (const auto s : elem->side_index_range())
+      if (!elem->neighbor_ptr(s))
       {
-        std::unique_ptr<Elem> side = elem->build_side_ptr(s);
-
+        // Reinit to get the normal
         fe_faces[side_dim]->reinit(elem, s);
+        const auto & normal = fe_faces[side_dim]->get_normals()[0];
 
         // Get the boundary ID(s) for this side.  If there is more
         // than 1 boundary id, then we already can't determine a
@@ -2056,25 +2063,23 @@ MooseMesh::detectPairedSidesets()
         // keep going to keep the logic simple.
         boundary_info.boundary_ids(elem, s, face_ids);
 
-        // x-direction faces
-        if (normals[0].absolute_fuzzy_equals(minus_x))
-          minus_x_ids[side_dim].insert(face_ids.begin(), face_ids.end());
-        else if (normals[0].absolute_fuzzy_equals(plus_x))
-          plus_x_ids[side_dim].insert(face_ids.begin(), face_ids.end());
-
-        // y-direction faces
-        else if (normals[0].absolute_fuzzy_equals(minus_y))
-          minus_y_ids[side_dim].insert(face_ids.begin(), face_ids.end());
-        else if (normals[0].absolute_fuzzy_equals(plus_y))
-          plus_y_ids[side_dim].insert(face_ids.begin(), face_ids.end());
-
-        // z-direction faces
-        else if (normals[0].absolute_fuzzy_equals(minus_z))
-          minus_z_ids[side_dim].insert(face_ids.begin(), face_ids.end());
-        else if (normals[0].absolute_fuzzy_equals(plus_z))
-          plus_z_ids[side_dim].insert(face_ids.begin(), face_ids.end());
+        // Helper that allows us to return early if we find something
+        // Normals are normalized so finding -1 or 1 anywhere means break
+        const auto find = [&]()
+        {
+          for (const auto unit_dim : unit_dims)
+            for (const auto plus : {false, true})
+            {
+              const Real val = plus ? 1.0 : -1.0;
+              if (libMesh::absolute_fuzzy_equals(normal(unit_dim), val))
+              {
+                ids[plus][unit_dim][side_dim].insert(face_ids.begin(), face_ids.end());
+                return;
+              }
+            }
+        };
+        find();
       }
-    }
   }
 
   // For a distributed mesh, boundaries may be distributed as well. We therefore collect information
@@ -2088,101 +2093,52 @@ MooseMesh::detectPairedSidesets()
   if (_use_distributed_mesh && !_mesh->is_serial())
   {
     // Pack all data together so that we send them via one communication
-    // pair: boundary side --> boundary ids.
-    std::vector<std::pair<boundary_id_type, boundary_id_type>> vecdata;
-    //  We check boundaries on all dimensions
-    for (unsigned side_dim = 0; side_dim < dim; ++side_dim)
-    {
-      // "6" means: we have at most 6 boundaries. It is true for generated simple mesh
-      // "detectPairedSidesets" is designed for only simple meshes
-      for (auto bd = minus_x_ids[side_dim].begin(); bd != minus_x_ids[side_dim].end(); bd++)
-        vecdata.emplace_back(side_dim * 6 + 0, *bd);
+    // [plus, unit_dim, side_dim, boundary id]
+    std::vector<std::tuple<unsigned char, unsigned int, unsigned int, boundary_id_type>> data;
 
-      for (auto bd = plus_x_ids[side_dim].begin(); bd != plus_x_ids[side_dim].end(); bd++)
-        vecdata.emplace_back(side_dim * 6 + 1, *bd);
-
-      for (auto bd = minus_y_ids[side_dim].begin(); bd != minus_y_ids[side_dim].end(); bd++)
-        vecdata.emplace_back(side_dim * 6 + 2, *bd);
-
-      for (auto bd = plus_y_ids[side_dim].begin(); bd != plus_y_ids[side_dim].end(); bd++)
-        vecdata.emplace_back(side_dim * 6 + 3, *bd);
-
-      for (auto bd = minus_z_ids[side_dim].begin(); bd != minus_z_ids[side_dim].end(); bd++)
-        vecdata.emplace_back(side_dim * 6 + 4, *bd);
-
-      for (auto bd = plus_z_ids[side_dim].begin(); bd != plus_z_ids[side_dim].end(); bd++)
-        vecdata.emplace_back(side_dim * 6 + 5, *bd);
-    }
-
-    _communicator.allgather(vecdata, false);
+    // Collect and communicate all boundary data that we've obtained
+    for (const auto plus : {false, true})
+      for (const auto unit_dim : unit_dims)
+        for (const auto side_dim : side_dims)
+          for (const auto bd : ids[plus][unit_dim][side_dim])
+            data.emplace_back(plus, unit_dim, side_dim, bd);
+    _communicator.allgather(data, false);
 
     // Unpack data, and add them into minus/plus_x/y_ids
-    for (auto pair = vecdata.begin(); pair != vecdata.end(); pair++)
+    for (const auto & [plus_char, unit_dim, side_dim, bd] : data)
     {
-      // Convert data from the long vector, and add data to separated sets
-      auto side_dim = pair->first / 6;
-      auto side = pair->first % 6;
-
-      switch (side)
-      {
-        case 0:
-          minus_x_ids[side_dim].insert(pair->second);
-          break;
-        case 1:
-          plus_x_ids[side_dim].insert(pair->second);
-          break;
-        case 2:
-          minus_y_ids[side_dim].insert(pair->second);
-          break;
-        case 3:
-          plus_y_ids[side_dim].insert(pair->second);
-          break;
-        case 4:
-          minus_z_ids[side_dim].insert(pair->second);
-          break;
-        case 5:
-          plus_z_ids[side_dim].insert(pair->second);
-          break;
-        default:
-          mooseError("Unknown boundary side ", side);
-      }
+      const bool plus = plus_char;
+      ids[plus][unit_dim][side_dim].insert(bd);
     }
-
   } // end if (_use_distributed_mesh && !_need_ghost_ghosted_boundaries)
 
-  for (unsigned side_dim = 0; side_dim < dim; ++side_dim)
+  // Find pairings that have exactly one boundary on each side
+  std::vector<std::pair<unsigned int, unsigned int>> missing; // unit dim and side dim
+  for (const auto unit_dim : unit_dims)
+    for (const auto side_dim : side_dims)
+    {
+      const auto & minus = ids[false][unit_dim][side_dim];
+      const auto & plus = ids[true][unit_dim][side_dim];
+      if (minus.size() == 1 && plus.size() == 1)
+        _paired_boundary.emplace_back(std::make_pair(*minus.begin(), *plus.begin()));
+      else
+        missing.emplace_back(unit_dim, side_dim);
+    }
+
+  // Report parings that were missing
+  if (missing.size())
   {
-    // If unique pairings were found, fill up the _paired_boundary data
-    // structure with that information.
-    if (minus_x_ids[side_dim].size() == 1 && plus_x_ids[side_dim].size() == 1)
-      _paired_boundary.emplace_back(
-          std::make_pair(*(minus_x_ids[side_dim].begin()), *(plus_x_ids[side_dim].begin())));
-    else
-      mooseInfoRepeated(
-          "For side dimension " + std::to_string(side_dim) +
-          " we did not find paired boundaries (sidesets) in X due to the presence of " +
-          std::to_string(minus_x_ids[side_dim].size()) + " -X normal and " +
-          std::to_string(plus_x_ids[side_dim].size()) + " +X normal boundaries.");
-
-    if (minus_y_ids[side_dim].size() == 1 && plus_y_ids[side_dim].size() == 1)
-      _paired_boundary.emplace_back(
-          std::make_pair(*(minus_y_ids[side_dim].begin()), *(plus_y_ids[side_dim].begin())));
-    else
-      mooseInfoRepeated(
-          "For side dimension " + std::to_string(side_dim) +
-          " we did not find paired boundaries (sidesets) in Y due to the presence of " +
-          std::to_string(minus_y_ids[side_dim].size()) + " -Y normal and " +
-          std::to_string(plus_y_ids[side_dim].size()) + " +Y normal boundaries.");
-
-    if (minus_z_ids[side_dim].size() == 1 && plus_z_ids[side_dim].size() == 1)
-      _paired_boundary.emplace_back(
-          std::make_pair(*(minus_z_ids[side_dim].begin()), *(plus_z_ids[side_dim].begin())));
-    else
-      mooseInfoRepeated(
-          "For side dimension " + std::to_string(side_dim) +
-          " we did not find paired boundaries (sidesets) in Z due to the presence of " +
-          std::to_string(minus_z_ids[side_dim].size()) + " -Z normal and " +
-          std::to_string(plus_z_ids[side_dim].size()) + " +Z normal boundaries.");
+    std::ostringstream oss;
+    oss << "Failed to find paried boundaries (sidesets) for the following dimensions:";
+    for (const auto & [unit_dim, side_dim] : missing)
+    {
+      const auto unit_name = unit_dim == 0 ? "x" : (unit_dim == 1 ? "y" : "z");
+      const auto num_minus = ids[false][unit_dim][side_dim].size();
+      const auto num_plus = ids[true][unit_dim][side_dim].size();
+      oss << "  " << side_dim + 1 << "D: found " << num_minus << " -" << unit_name
+          << " boundaries and " << num_plus << " +" << unit_name << " boundaries";
+    }
+    mooseInfoRepeated(oss.str());
   }
 }
 
