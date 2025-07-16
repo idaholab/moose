@@ -41,7 +41,7 @@ CSGSurfaceList::addPlaneFromPoints(const std::string & name,
                                    const Point & p1,
                                    const Point & p2,
                                    const Point & p3,
-                                   CSGSurface::BoundaryType boundary)
+                                   std::string boundary)
 {
   checkSurfaceName(name);
   _surfaces.insert(std::make_pair(name, std::make_unique<CSGPlane>(name, p1, p2, p3, boundary)));
@@ -54,7 +54,7 @@ CSGSurfaceList::addPlaneFromCoefficients(const std::string & name,
                                          const Real b,
                                          const Real c,
                                          const Real d,
-                                         CSGSurface::BoundaryType boundary)
+                                         std::string boundary)
 {
   checkSurfaceName(name);
   _surfaces.insert(std::make_pair(name, std::make_unique<CSGPlane>(name, a, b, c, d, boundary)));
@@ -65,7 +65,7 @@ CSGSurface &
 CSGSurfaceList::addSphere(const std::string & name,
                           const Point & center,
                           const Real r,
-                          CSGSurface::BoundaryType boundary)
+                          std::string boundary)
 {
   checkSurfaceName(name);
   _surfaces.insert(std::make_pair(name, std::make_unique<CSGSphere>(name, center, r, boundary)));
@@ -78,7 +78,7 @@ CSGSurfaceList::addCylinder(const std::string & name,
                             const Real x1,
                             const Real r,
                             const std::string & axis,
-                            CSGSurface::BoundaryType boundary)
+                            std::string boundary)
 {
   checkSurfaceName(name);
   std::unique_ptr<CSGSurface> surf;

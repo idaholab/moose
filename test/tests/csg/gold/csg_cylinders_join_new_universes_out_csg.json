@@ -62,367 +62,367 @@
   },
   "SURFACES": {
     "CylsUniverse_bb_x_neg_surf": {
-      "BOUNDARY": "vacuum",
+      "BOUNDARY": "VACUUM",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
         "c": 0.0,
         "d": -15.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "CylsUniverse_bb_x_pos_surf": {
-      "BOUNDARY": "vacuum",
+      "BOUNDARY": "VACUUM",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
         "c": 0.0,
         "d": 15.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "CylsUniverse_bb_y_neg_surf": {
-      "BOUNDARY": "vacuum",
+      "BOUNDARY": "VACUUM",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": -20.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "CylsUniverse_bb_y_pos_surf": {
-      "BOUNDARY": "vacuum",
+      "BOUNDARY": "VACUUM",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": 20.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "CylsUniverse_bb_z_neg_surf": {
-      "BOUNDARY": "vacuum",
+      "BOUNDARY": "VACUUM",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": -25.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "CylsUniverse_bb_z_pos_surf": {
-      "BOUNDARY": "vacuum",
+      "BOUNDARY": "VACUUM",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": 25.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "XCyls_neg_plane": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
         "c": 0.0,
         "d": -2.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "XCyls_pos_plane": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
         "c": 0.0,
         "d": 2.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "XCyls_surf_cyl_x_0": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 1.0,
         "y0": 0.0,
         "z0": 0.0
       },
-      "TYPE": "xcylinder"
+      "TYPE": "XCYLINDER"
     },
     "XCyls_surf_cyl_x_1": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 2.0,
         "y0": 0.0,
         "z0": 0.0
       },
-      "TYPE": "xcylinder"
+      "TYPE": "XCYLINDER"
     },
     "XCyls_surf_cyl_x_2": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 3.0,
         "y0": 0.0,
         "z0": 0.0
       },
-      "TYPE": "xcylinder"
+      "TYPE": "XCYLINDER"
     },
     "XCyls_x_neg_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
         "c": 0.0,
         "d": -5.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "XCyls_x_pos_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
         "c": 0.0,
         "d": 5.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "XCyls_y_neg_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": -5.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "XCyls_y_pos_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": 5.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "XCyls_z_neg_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": -5.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "XCyls_z_pos_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": 5.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "YCyls_neg_plane": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": -1.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "YCyls_pos_plane": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": 1.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "YCyls_surf_cyl_y_0": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 2.0,
         "x0": -10.0,
         "z0": -10.0
       },
-      "TYPE": "ycylinder"
+      "TYPE": "YCYLINDER"
     },
     "YCyls_surf_cyl_y_1": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 4.0,
         "x0": -10.0,
         "z0": -10.0
       },
-      "TYPE": "ycylinder"
+      "TYPE": "YCYLINDER"
     },
     "YCyls_x_neg_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
         "c": 0.0,
         "d": -14.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "YCyls_x_pos_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
         "c": 0.0,
         "d": -6.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "YCyls_y_neg_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": -4.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "YCyls_y_pos_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": 4.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "YCyls_z_neg_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": -14.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "YCyls_z_pos_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": -6.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "ZCyls_neg_plane": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": -1.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "ZCyls_pos_plane": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": 1.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "ZCyls_surf_cyl_z_0": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 1.0,
         "x0": 10.0,
         "y0": 10.0
       },
-      "TYPE": "zcylinder"
+      "TYPE": "ZCYLINDER"
     },
     "ZCyls_surf_cyl_z_1": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 2.0,
         "x0": 10.0,
         "y0": 10.0
       },
-      "TYPE": "zcylinder"
+      "TYPE": "ZCYLINDER"
     },
     "ZCyls_x_neg_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
         "c": 0.0,
         "d": 2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "ZCyls_x_pos_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
         "c": 0.0,
         "d": 17.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "ZCyls_y_neg_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": 2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "ZCyls_y_pos_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": 17.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "ZCyls_z_neg_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": -7.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "ZCyls_z_pos_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": 7.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     }
   },
   "UNIVERSES": {

@@ -32,11 +32,8 @@ public:
    * @param r radius
    * @param boundary boundary type for the surface
    */
-  CSGZCylinder(const std::string & name,
-               const Real x0,
-               const Real y0,
-               const Real r,
-               CSGSurface::BoundaryType boundary);
+  CSGZCylinder(
+      const std::string & name, const Real x0, const Real y0, const Real r, std::string boundary);
 
   /**
    * Destructor

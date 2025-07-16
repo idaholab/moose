@@ -15,13 +15,13 @@ namespace CSG
 CSGRegion::CSGRegion()
 {
   _region_str = "";
-  _region_type = CSGRegion::RegionType::EMPTY;
+  _region_type = "EMPTY";
 }
 
 // halfspace constructor
 CSGRegion::CSGRegion(const CSGSurface & surf, const CSGSurface::Direction direction)
-  : _region_type(CSGRegion::RegionType::HALFSPACE)
 {
+  _region_type = "HALFSPACE";
   _region_str = ((direction == CSGSurface::Direction::POSITIVE) ? "+" : "-") + surf.getName();
   _surfaces.push_back(surf);
 }
@@ -29,19 +29,16 @@ CSGRegion::CSGRegion(const CSGSurface & surf, const CSGSurface::Direction direct
 // intersection and union constructor
 CSGRegion::CSGRegion(const CSGRegion & region_a,
                      const CSGRegion & region_b,
-                     const CSGRegion::RegionType region_type)
-  : _region_type(region_type)
+                     std::string region_type)
 {
-  if (_region_type != CSGRegion::RegionType::INTERSECTION &&
-      _region_type != CSGRegion::RegionType::UNION)
-    mooseError("Region type " + getRegionTypeString() + " is not supported for two regions.");
-  else if (region_a.getRegionType() == CSGRegion::RegionType::EMPTY ||
-           region_b.getRegionType() == CSGRegion::RegionType::EMPTY)
-    mooseError("Region operation " + getRegionTypeString() +
-               " cannot be performed on an empty region.");
+  _region_type = region_type;
+  if (_region_type != "INTERSECTION" && _region_type != "UNION")
+    mooseError("Region type " + getRegionType() + " is not supported for two regions.");
+  else if (region_a.getRegionType() == "EMPTY" || region_b.getRegionType() == "EMPTY")
+    mooseError("Region operation " + getRegionType() + " cannot be performed on an empty region.");
   else
   {
-    std::string op = (_region_type == CSGRegion::RegionType::UNION) ? " | " : " & ";
+    std::string op = (_region_type == "UNION") ? " | " : " & ";
     auto a_string = stripRegionString(region_a.toString(), op);
     auto b_string = stripRegionString(region_b.toString(), op);
 
@@ -54,20 +51,19 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
 }
 
 // complement or explicitly empty constructor
-CSGRegion::CSGRegion(const CSGRegion & region, const CSGRegion::RegionType region_type)
-  : _region_type(region_type)
+CSGRegion::CSGRegion(const CSGRegion & region, std::string region_type)
 {
-  if (_region_type != CSGRegion::RegionType::COMPLEMENT &&
-      _region_type != CSGRegion::RegionType::EMPTY)
-    mooseError("Region type " + getRegionTypeString() + " is not supported for a single region");
+  _region_type = region_type;
+  if (_region_type != "COMPLEMENT" && _region_type != "EMPTY")
+    mooseError("Region type " + getRegionType() + " is not supported for a single region");
 
-  if (_region_type == CSGRegion::RegionType::COMPLEMENT)
+  if (_region_type == "COMPLEMENT")
   {
     // no change to surfaces, but update string
     _region_str = "~" + region.toString();
     _surfaces = region.getSurfaces();
   }
-  else if (_region_type == CSGRegion::RegionType::EMPTY)
+  else if (_region_type == "EMPTY")
   {
     // reset the region and make it empty
     _region_str = "";
@@ -75,31 +71,11 @@ CSGRegion::CSGRegion(const CSGRegion & region, const CSGRegion::RegionType regio
   }
 }
 
-const std::string
-CSGRegion::getRegionTypeString() const
-{
-  switch (_region_type)
-  {
-    case RegionType::EMPTY:
-      return "EMPTY";
-    case RegionType::HALFSPACE:
-      return "HALFSPACE";
-    case RegionType::COMPLEMENT:
-      return "COMPLEMENT";
-    case RegionType::INTERSECTION:
-      return "INTERSECTION";
-    case RegionType::UNION:
-      return "UNION";
-    default:
-      mooseError("Detected invalid region type");
-  }
-}
-
 CSGRegion &
 CSGRegion::operator&=(const CSGRegion & other_region)
 {
   if (this != &other_region)
-    *this = CSGRegion(*this, other_region, CSGRegion::RegionType::INTERSECTION);
+    *this = CSGRegion(*this, other_region, "INTERSECTION");
   return *this;
 }
 
@@ -107,7 +83,7 @@ CSGRegion &
 CSGRegion::operator|=(const CSGRegion & other_region)
 {
   if (this != &other_region)
-    *this = CSGRegion(*this, other_region, CSGRegion::RegionType::UNION);
+    *this = CSGRegion(*this, other_region, "UNION");
   return *this;
 }
 
@@ -161,21 +137,21 @@ operator-(const CSGSurface & surf)
 const CSGRegion
 operator&(const CSGRegion & region_a, const CSGRegion & region_b)
 {
-  return CSGRegion(region_a, region_b, CSGRegion::RegionType::INTERSECTION);
+  return CSGRegion(region_a, region_b, "INTERSECTION");
 }
 
 // union
 const CSGRegion
 operator|(const CSGRegion & region_a, const CSGRegion & region_b)
 {
-  return CSGRegion(region_a, region_b, CSGRegion::RegionType::UNION);
+  return CSGRegion(region_a, region_b, "UNION");
 }
 
 // complement
 const CSGRegion
 operator~(const CSGRegion & region)
 {
-  return CSGRegion(region, CSGRegion::RegionType::COMPLEMENT);
+  return CSGRegion(region, "COMPLEMENT");
 }
 
 bool

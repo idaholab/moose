@@ -20,7 +20,7 @@ CSGBase::CSGBase()
 CSGBase::~CSGBase() {}
 
 void
-CSGBase::updateSurfaceBoundaryType(const CSGSurface & surface, CSGSurface::BoundaryType boundary)
+CSGBase::updateSurfaceBoundaryType(const CSGSurface & surface, std::string boundary)
 {
   auto & surf = getSurface(surface.getName());
   if (surf != surface)
@@ -283,7 +283,7 @@ CSGBase::getLinkedUniverses(const CSGUniverse & univ,
   linked_universe_names.push_back(univ.getName());
   const auto & univ_cells = univ.getAllCells();
   for (const CSGCell & cell : univ_cells)
-    if (cell.getFillType() == CSGCell::FillType::UNIVERSE)
+    if (cell.getFillType() == "UNIVERSE")
       getLinkedUniverses(cell.getFillUniverse(), linked_universe_names);
 }
 
@@ -305,9 +305,8 @@ CSGBase::generateOutput() const
   {
     const auto & surf_name = s.getName();
     const auto & coeffs = s.getCoeffs();
-    csg_json["SURFACES"][surf_name] = {{"TYPE", s.getSurfaceType()},
-                                       {"BOUNDARY", s.getBoundaryTypeString()},
-                                       {"COEFFICIENTS", {}}};
+    csg_json["SURFACES"][surf_name] = {
+        {"TYPE", s.getSurfaceType()}, {"BOUNDARY", s.getBoundaryType()}, {"COEFFICIENTS", {}}};
     for (const auto & c : coeffs)
       csg_json["SURFACES"][surf_name]["COEFFICIENTS"][c.first] = c.second;
   }
@@ -318,7 +317,7 @@ CSGBase::generateOutput() const
   {
     const auto & cell_name = c.getName();
     const auto & cell_region = c.getRegionAsString();
-    const auto & cell_filltype = c.getFillTypeString();
+    const auto & cell_filltype = c.getFillType();
     const auto & fill_name = c.getFillName();
     csg_json["CELLS"][cell_name]["FILLTYPE"] = cell_filltype;
     csg_json["CELLS"][cell_name]["REGION"] = cell_region;

@@ -22,14 +22,6 @@ namespace CSG
 class CSGSurface
 {
 public:
-  /// An enum for boundary type of surface
-  enum class BoundaryType
-  {
-    TRANSMISSION,
-    VACUUM,
-    REFLECTIVE
-  };
-
   /// Enum for the direction of the half-space being represented by a point and surface
   enum class Direction
   {
@@ -51,9 +43,7 @@ public:
    * @param surf_type surface type
    * @param boundary boundary condition for the surface
    */
-  CSGSurface(const std::string & name,
-             const std::string surf_type,
-             CSGSurface::BoundaryType boundary);
+  CSGSurface(const std::string & name, const std::string surf_type, std::string boundary);
 
   /**
    * Destructor
@@ -67,26 +57,19 @@ public:
    */
   const std::string getSurfaceType() const { return _surface_type; }
 
-  /**
+  /**s
    * @brief Set the Boundary Type (i.e. TRANSMISSION or VACUUM)
    *
    * @param boundary_type type of boundary
    */
-  void setBoundaryType(const BoundaryType boundary_type) { _boundary_type = boundary_type; }
+  void setBoundaryType(std::string boundary_type) { _boundary_type = boundary_type; }
 
   /**
    * @brief Get the Boundary Type (i.e. TRANSMISSION or VACUUM)
    *
    * @return type of boundary
    */
-  BoundaryType getBoundaryType() const { return _boundary_type; }
-
-  /**
-   * @brief Get the string representation of Boundary Type
-   *
-   * @return string representation of the boundary type
-   */
-  const std::string getBoundaryTypeString() const;
+  std::string getBoundaryType() const { return _boundary_type; }
 
   /**
    * @brief Get the coefficients that define the surface
@@ -129,8 +112,8 @@ protected:
   /// An enum for type of surface that is being represented
   const MooseEnum _surface_type;
 
-  /// Boundary type of surface
-  BoundaryType _boundary_type;
+  /// An enum for boundary type of surface
+  MooseEnum _boundary_type;
 
   // CSGSurfaceList needs to be friend to access setName()
   friend class CSGSurfaceList;

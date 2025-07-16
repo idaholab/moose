@@ -158,7 +158,7 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
   // make cell with surfaces from bounding_box input and fill cell with new universe containing the
   // other cells
-  auto bc_vac = CSG::CSGSurface::BoundaryType::VACUUM; // vacuum bc for bounding box
+  auto bc_vac = "VACUUM"; // vacuum bc for bounding box
   auto & x_pos_surf = csg_obj->createPlaneFromCoefficients(
       mg_name + "_bb_x_pos_surf", 1.0, 0, 0, 0.5 * _x_side, bc_vac);
   auto & x_neg_surf = csg_obj->createPlaneFromCoefficients(

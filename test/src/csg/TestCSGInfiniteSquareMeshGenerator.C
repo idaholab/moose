@@ -70,7 +70,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
     auto halfspace =
         ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
     // check if first halfspace to be added to the region
-    if (region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
+    if (region.getRegionType() == "EMPTY")
       region = halfspace;
     else
       region &= halfspace;
@@ -84,7 +84,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
   // set all surface boundary conditions to reflective
   auto & all_surfs = csg_cell.getRegion().getSurfaces();
   for (auto & s : all_surfs)
-    csg_obj->updateSurfaceBoundaryType(s, CSG::CSGSurface::BoundaryType::REFLECTIVE);
+    csg_obj->updateSurfaceBoundaryType(s, "REFLECTIVE");
 
   return csg_obj;
 }

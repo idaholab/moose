@@ -31,10 +31,7 @@ public:
    * @param r radius of sphere
    * @param boundary boundary type for the surface
    */
-  CSGSphere(const std::string & name,
-            const Point & center,
-            const Real r,
-            CSGSurface::BoundaryType boundary);
+  CSGSphere(const std::string & name, const Point & center, const Real r, std::string boundary);
 
   /**
    * Destructor
