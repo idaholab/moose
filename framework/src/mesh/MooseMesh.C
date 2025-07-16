@@ -2246,16 +2246,23 @@ MooseMesh::addPeriodicVariable(const unsigned int sys_num,
                  "variable will not be stored.");
 }
 
+const std::array<bool, 3> *
+MooseMesh::queryPeriodicDimensions(const unsigned int sys_num, const unsigned int var_num) const
+{
+  const auto key = std::make_pair(sys_num, var_num);
+  if (const auto it = _periodic_dim.find(key); it != _periodic_dim.end())
+    return &it->second;
+  return nullptr;
+}
+
 bool
 MooseMesh::isTranslatedPeriodic(const unsigned int sys_num,
                                 const unsigned int var_num,
                                 const unsigned int component) const
 {
   mooseAssert(component < dimension(), "Requested dimension out of bounds");
-
-  const auto key = std::make_pair(sys_num, var_num);
-  if (const auto it = _periodic_dim.find(key); it != _periodic_dim.end())
-    return it->second[component];
+  if (const auto dims = queryPeriodicDimensions(sys_num, var_num))
+    return (*dims)[component];
   return false;
 }
 
@@ -2271,21 +2278,24 @@ MooseMesh::minPeriodicVector(const unsigned int sys_num,
                              Point p,
                              Point q) const
 {
-  for (unsigned int i = 0; i < dimension(); ++i)
+  if (const auto periodic_dims = queryPeriodicDimensions(sys_num, var_num))
   {
-    // check to see if we're closer in real or periodic space in x, y, and z
-    if (isTranslatedPeriodic(sys_num, var_num, i))
+    for (const auto i : make_range(dimension()))
     {
-      // Need to test order before differencing
-      if (p(i) > q(i))
+      // check to see if we're closer in real or periodic space in x, y, and z
+      if ((*periodic_dims)[i])
       {
-        if (p(i) - q(i) > _half_range(i))
-          p(i) -= _half_range(i) * 2;
-      }
-      else
-      {
-        if (q(i) - p(i) > _half_range(i))
-          p(i) += _half_range(i) * 2;
+        // Need to test order before differencing
+        if (p(i) > q(i))
+        {
+          if (p(i) - q(i) > _half_range(i))
+            p(i) -= _half_range(i) * 2;
+        }
+        else
+        {
+          if (q(i) - p(i) > _half_range(i))
+            p(i) += _half_range(i) * 2;
+        }
       }
     }
   }
