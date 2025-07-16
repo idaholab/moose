@@ -65,6 +65,8 @@ protected:
 
   /// Mesh to extrude along
   std::unique_ptr<MeshBase> & _extrusion_curve;
+  const libMesh::Point _start_extrusion_direction;
+  const libMesh::Point _end_extrusion_direction;
   bool _extrude_along_curve;
 
   const bool _has_top_boundary;
