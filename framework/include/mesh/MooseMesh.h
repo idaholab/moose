@@ -93,6 +93,11 @@ public:
    */
   static InputParameters validParams();
 
+  /**
+   * Default value for periodic boundary dimensions.
+   */
+  static const std::array<bool, 3> periodic_dim_default;
+
   MooseMesh(const InputParameters & parameters);
   MooseMesh(const MooseMesh & other_mesh);
   MooseMesh() = delete;
@@ -842,11 +847,25 @@ public:
 
   /**
    * Query the translated periodic dimension flags for the given variable on the given system.
+   *
+   * Query here means that it will not error if a variable isn't found to be periodic, instead
+   * the default value is returned (false for each dimension)
+   *
    * @param sys_num - The number of the system the variable is on
    * @param var_num - The variable number
    */
-  const std::array<bool, 3> * queryPeriodicDimensions(const unsigned int sys_num,
+  const std::array<bool, 3> & queryPeriodicDimensions(const unsigned int sys_num,
                                                       const unsigned int var_num) const;
+  /**
+   * Query the translated periodic dimension flags for the given variable.\
+   *
+   * Query here means that it will not error if a variable isn't found to be periodic, instead
+   * the default value is returned (false for each dimension)
+   *
+   * @param var - The variable
+   */
+  const std::array<bool, 3> & queryPeriodicDimensions(const MooseVariableBase & var) const;
+
   /**
    * Returns whether this generated mesh is periodic in the given dimension for the given variable
    * on the given system.
