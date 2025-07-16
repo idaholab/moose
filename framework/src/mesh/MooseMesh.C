@@ -2209,28 +2209,32 @@ MooseMesh::getMaxInDimension(unsigned int component) const
 }
 
 void
-MooseMesh::addPeriodicVariable(unsigned int var_num, BoundaryID primary, BoundaryID secondary)
+MooseMesh::addPeriodicVariable(const unsigned int sys_num,
+                               const unsigned int var_num,
+                               const BoundaryID primary,
+                               const BoundaryID secondary)
 {
   if (!_regular_orthogonal_mesh)
     return;
 
-  _periodic_dim[var_num].resize(dimension());
+  const auto key = std::make_pair(sys_num, var_num);
+  auto & entry = _periodic_dim[key]; // default construction ok
 
   _half_range = Point(dimensionWidth(0) / 2.0, dimensionWidth(1) / 2.0, dimensionWidth(2) / 2.0);
 
   bool component_found = false;
-  for (unsigned int component = 0; component < dimension(); ++component)
+  for (const auto component : make_range(dimension()))
   {
     const std::pair<BoundaryID, BoundaryID> * boundary_ids = getPairedBoundaryMapping(component);
 
-    if (boundary_ids != nullptr &&
-        ((boundary_ids->first == primary && boundary_ids->second == secondary) ||
-         (boundary_ids->first == secondary && boundary_ids->second == primary)))
+    if (boundary_ids && ((boundary_ids->first == primary && boundary_ids->second == secondary) ||
+                         (boundary_ids->first == secondary && boundary_ids->second == primary)))
     {
-      _periodic_dim[var_num][component] = true;
+      entry[component] = true;
       component_found = true;
     }
   }
+
   if (!component_found)
     mooseWarning("Could not find a match between boundary '",
                  getBoundaryName(primary),
@@ -2243,23 +2247,34 @@ MooseMesh::addPeriodicVariable(unsigned int var_num, BoundaryID primary, Boundar
 }
 
 bool
-MooseMesh::isTranslatedPeriodic(unsigned int nonlinear_var_num, unsigned int component) const
+MooseMesh::isTranslatedPeriodic(const unsigned int sys_num,
+                                const unsigned int var_num,
+                                const unsigned int component) const
 {
   mooseAssert(component < dimension(), "Requested dimension out of bounds");
 
-  if (_periodic_dim.find(nonlinear_var_num) != _periodic_dim.end())
-    return _periodic_dim.at(nonlinear_var_num)[component];
-  else
-    return false;
+  if (const auto it = _periodic_dim.find(std::make_pair(sys_num, var_num));
+      it != _periodic_dim.end())
+    return it->second[component];
+  return false;
+}
+
+bool
+MooseMesh::isTranslatedPeriodic(const MooseVariableBase & var, const unsigned int component) const
+{
+  return isTranslatedPeriodic(var.number(), var.sys().number(), component);
 }
 
 RealVectorValue
-MooseMesh::minPeriodicVector(unsigned int nonlinear_var_num, Point p, Point q) const
+MooseMesh::minPeriodicVector(const unsigned int sys_num,
+                             const unsigned int var_num,
+                             Point p,
+                             Point q) const
 {
   for (unsigned int i = 0; i < dimension(); ++i)
   {
     // check to see if we're closer in real or periodic space in x, y, and z
-    if (isTranslatedPeriodic(nonlinear_var_num, i))
+    if (isTranslatedPeriodic(sys_num, var_num, i))
     {
       // Need to test order before differencing
       if (p(i) > q(i))
@@ -2278,10 +2293,27 @@ MooseMesh::minPeriodicVector(unsigned int nonlinear_var_num, Point p, Point q) c
   return q - p;
 }
 
-Real
-MooseMesh::minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q) const
+RealVectorValue
+MooseMesh::minPeriodicVector(const MooseVariableBase & var, const Point & p, const Point & q) const
 {
-  return minPeriodicVector(nonlinear_var_num, p, q).norm();
+  return minPeriodicVector(var.number(), var.sys().number(), p, q);
+}
+
+Real
+MooseMesh::minPeriodicDistance(const unsigned int sys_num,
+                               const unsigned int var_num,
+                               const Point & p,
+                               const Point & q) const
+{
+  return minPeriodicVector(sys_num, var_num, p, q).norm();
+}
+
+Real
+MooseMesh::minPeriodicDistance(const MooseVariableBase & var,
+                               const Point & p,
+                               const Point & q) const
+{
+  return minPeriodicDistance(var.number(), var.sys().number(), p, q);
 }
 
 const std::pair<BoundaryID, BoundaryID> *

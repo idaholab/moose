@@ -117,7 +117,7 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
 
       for (unsigned int gr = 0; gr < _grain_num; ++gr)
       {
-        diff[gr].d = _mesh.minPeriodicDistance(_var.number(), rand_point, _centerpoints[gr]);
+        diff[gr].d = _mesh.minPeriodicDistance(_var, rand_point, _centerpoints[gr]);
         diff[gr].gr = gr;
       }
 
@@ -128,12 +128,11 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
 
       // Find Slope of Line in the plane orthogonal to the diff_centerpoint
       // vector
-      Point pa = rand_point + _mesh.minPeriodicVector(_var.number(), rand_point, closest_point);
-      Point pb =
-          rand_point + _mesh.minPeriodicVector(_var.number(), rand_point, next_closest_point);
+      Point pa = rand_point + _mesh.minPeriodicVector(_var, rand_point, closest_point);
+      Point pb = rand_point + _mesh.minPeriodicVector(_var, rand_point, next_closest_point);
       Point diff_centerpoints = pb - pa;
 
-      Point diff_rand_center = _mesh.minPeriodicVector(_var.number(), closest_point, rand_point);
+      Point diff_rand_center = _mesh.minPeriodicVector(_var, closest_point, rand_point);
       Point normal_vector = diff_centerpoints.cross(diff_rand_center);
       Point slope = normal_vector.cross(diff_centerpoints);
 
@@ -142,7 +141,7 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
 
       // Solve for the scalar multiplier solution on the line
       Real lambda = 0;
-      Point mid_rand_vector = _mesh.minPeriodicVector(_var.number(), midpoint, rand_point);
+      Point mid_rand_vector = _mesh.minPeriodicVector(_var, midpoint, rand_point);
 
       Real slope_dot = slope * slope;
       mooseAssert(slope_dot > 0, "The dot product of slope with itself is zero");
@@ -159,7 +158,7 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
 
       for (unsigned int i = 0; i < vp; ++i)
       {
-        Real dist = _mesh.minPeriodicDistance(_var.number(), _centers[vp], _centers[i]);
+        Real dist = _mesh.minPeriodicDistance(_var, _centers[vp], _centers[i]);
 
         if (dist < _bubspac)
           try_again = true;
@@ -182,7 +181,7 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
 
         for (unsigned int gr = 0; gr < _grain_num; ++gr)
         {
-          rij = _mesh.minPeriodicDistance(_var.number(), _centers[vp], _centerpoints[gr]);
+          rij = _mesh.minPeriodicDistance(_var, _centers[vp], _centerpoints[gr]);
 
           if (rij < min_rij_1)
           {

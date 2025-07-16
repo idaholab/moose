@@ -45,10 +45,10 @@ GlobalStrainUserObject::GlobalStrainUserObject(const InputParameters & parameter
 
   for (unsigned int dir = 0; dir < _dim; ++dir)
   {
-    _periodic_dir(dir) = _mesh.isTranslatedPeriodic(_disp_var[0], dir);
+    _periodic_dir(dir) = _mesh.isTranslatedPeriodic(*getFieldVar("displacements", 0), dir);
 
     for (unsigned int i = 1; i < _ndisp; ++i)
-      if (_mesh.isTranslatedPeriodic(_disp_var[i], dir) != _periodic_dir(dir))
+      if (_mesh.isTranslatedPeriodic(*getFieldVar("displacements", i), dir) != _periodic_dir(dir))
         mooseError("All the displacement components in a particular direction should have same "
                    "periodicity.");
   }

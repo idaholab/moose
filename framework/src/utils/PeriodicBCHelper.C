@@ -43,10 +43,7 @@ PeriodicBCHelper::validParams()
   return params;
 }
 
-PeriodicBCHelper::PeriodicBCHelper(const Action & action, const bool algebraic)
-  : _action(action), _algebraic(algebraic), _params(getParams())
-{
-}
+PeriodicBCHelper::PeriodicBCHelper(const Action & action) : _action(action), _params(getParams()) {}
 
 void
 PeriodicBCHelper::checkPeriodicParams() const
@@ -73,7 +70,7 @@ PeriodicBCHelper::setupPeriodicBoundaries(FEProblemBase & problem)
   else
     setupManualPeriodicBoundaries(problem);
 
-  const auto add_geometric_coupling = [this](auto & problem)
+  const auto add_ghosting = [this](auto & problem)
   {
     auto & mesh = problem.mesh().getMesh();
     auto functor = std::make_shared<libMesh::DefaultCoupling>();
@@ -83,41 +80,18 @@ PeriodicBCHelper::setupPeriodicBoundaries(FEProblemBase & problem)
     mesh.add_ghosting_functor(functor);
   };
 
-  add_geometric_coupling(problem);
+  add_ghosting(problem);
   if (const auto displaced_problem = problem.getDisplacedProblem())
-    add_geometric_coupling(*displaced_problem);
+    add_ghosting(*displaced_problem);
 }
 
 void
-PeriodicBCHelper::onSetupPeriodicBoundary(libMesh::PeriodicBoundaryBase & /* p */)
-{
-}
-
-void
-PeriodicBCHelper::addPeriodicBoundary(FEProblemBase & problem,
-                                      std::unique_ptr<libMesh::PeriodicBoundaryBase> p)
+PeriodicBCHelper::addPeriodicBoundary(std::unique_ptr<libMesh::PeriodicBoundaryBase> p)
 {
   onSetupPeriodicBoundary(*p);
 
-  // If we're doing algebraic coupling, we need to add these boundaries to
-  // the relevant dof maps
-  if (_algebraic)
-  {
-    const auto add_periodic_boundary = [&p](auto & problem)
-    {
-      auto & eq = problem.es();
-      for (const auto i : make_range(eq.n_systems()))
-        eq.get_system(i).get_dof_map().add_periodic_boundary(*p);
-    };
-
-    add_periodic_boundary(problem);
-    if (auto displaced_problem = problem.getDisplacedProblem())
-      add_periodic_boundary(*displaced_problem);
-  }
-
-  auto p_inv = p->clone(libMesh::PeriodicBoundaryBase::INVERSE);
-  _periodic_boundaries.emplace(p->myboundary, std::move(p));
-  _periodic_boundaries.emplace(p_inv->myboundary, std::move(p_inv));
+  _periodic_boundaries.emplace(p->myboundary, p->clone());
+  _periodic_boundaries.emplace(p->pairedboundary, p->clone(libMesh::PeriodicBoundaryBase::INVERSE));
 }
 
 void
@@ -152,7 +126,7 @@ PeriodicBCHelper::setupAutoPeriodicBoundaries(FEProblemBase & problem)
     p->myboundary = boundary_ids->first;
     p->pairedboundary = boundary_ids->second;
 
-    addPeriodicBoundary(problem, std::move(p));
+    addPeriodicBoundary(std::move(p));
   }
 }
 
@@ -197,7 +171,7 @@ PeriodicBCHelper::setupManualPeriodicBoundaries(FEProblemBase & problem)
   p->myboundary = get_boundary("primary");
   p->pairedboundary = get_boundary("secondary");
 
-  addPeriodicBoundary(problem, std::move(p));
+  addPeriodicBoundary(std::move(p));
 }
 
 void
