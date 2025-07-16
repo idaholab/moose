@@ -111,6 +111,9 @@ InitialConditionTempl<T>::compute()
 
   DenseVector<char> mask(n_dofs, true);
 
+  // If we are not defined on the element,
+  const bool out_of_block_restriction = (!hasBlocks(_current_elem->subdomain_id()));
+
   // In general, we need a series of
   // projections to ensure a unique and continuous
   // solution.  We start by interpolating nodes, then
@@ -152,7 +155,20 @@ InitialConditionTempl<T>::compute()
     // not duplicate _dof_indices code badly!
     if (!_current_elem->is_vertex(_n))
     {
-      _current_dof += _nc;
+      // Use regular nodal-value setting instead of generic projector then
+      if (out_of_block_restriction)
+      {
+        // Check _nc in case we are on a second order mesh but setting a first order variable
+        if (_cont == C_ZERO && _nc > 0)
+          setCZeroVertices();
+        else if (_cont == C_ONE && _nc > 0)
+          setOtherCOneVertices();
+        else if (_nc != 0)
+          mooseDoOnce(mooseWarning(
+              "Block restriction treatment could miss side or edge degrees of freedom"));
+      }
+      else
+        _current_dof += _nc;
       continue;
     }
 
@@ -178,7 +194,7 @@ InitialConditionTempl<T>::compute()
       dof_map.should_p_refine(dof_map.var_group_from_var_number(_var.number()));
 
   // In 3D, project any edge values next
-  if (_dim > 2 && _cont != DISCONTINUOUS)
+  if (_dim > 2 && _cont != DISCONTINUOUS && !out_of_block_restriction)
     for (unsigned int e = 0; e != _current_elem->n_edges(); ++e)
     {
       FEInterface::dofs_on_edge(_current_elem, _dim, _fe_type, e, _side_dofs, add_p_level);
@@ -203,7 +219,7 @@ InitialConditionTempl<T>::compute()
     }
 
   // Project any side values (edges in 2D, faces in 3D)
-  if (_dim > 1 && _cont != DISCONTINUOUS)
+  if (_dim > 1 && _cont != DISCONTINUOUS && !out_of_block_restriction)
     for (unsigned int s = 0; s != _current_elem->n_sides(); ++s)
     {
       FEInterface::dofs_on_side(_current_elem, _dim, _fe_type, s, _side_dofs, add_p_level);
@@ -237,7 +253,7 @@ InitialConditionTempl<T>::compute()
       _free_dof[_free_dofs++] = i;
 
   // There may be nothing to project
-  if (_free_dofs)
+  if (_free_dofs && !out_of_block_restriction)
   {
     // Initialize FE data
     fe->attach_quadrature_rule(qrule.get());
@@ -249,7 +265,9 @@ InitialConditionTempl<T>::compute()
 
   // Make sure every DoF got reached!
   for (unsigned int i = 0; i != n_dofs; ++i)
-    libmesh_assert(_dof_is_fixed[i]);
+    mooseAssert(_dof_is_fixed[i] || !mask(i),
+                "Missed a DoF to initialize in generic projector algorithm on element: " +
+                    Moose::stringify(*_current_elem));
 
   // Lock the new_vector since it is shared among threads.
   {
@@ -266,7 +284,8 @@ InitialConditionTempl<T>::setCZeroVertices()
 {
   // Assume that C_ZERO elements have a single nodal
   // value shape function
-  libmesh_assert(_nc == 1);
+  mooseAssert(_nc == 1,
+              "Expecting only one component on vertex and yet we have: " + std::to_string(_nc));
   _qp = _n;
   _current_node = _current_elem->node_ptr(_n);
   _Ue(_current_dof) = value(*_current_node);
@@ -396,6 +415,7 @@ template <>
 void
 InitialConditionTempl<RealVectorValue>::setHermiteVertices()
 {
+  mooseError("Not implemented");
 }
 
 template <typename T>
@@ -423,6 +443,7 @@ template <>
 void
 InitialConditionTempl<RealVectorValue>::setOtherCOneVertices()
 {
+  mooseError("Not implemented");
 }
 
 template <typename T>
