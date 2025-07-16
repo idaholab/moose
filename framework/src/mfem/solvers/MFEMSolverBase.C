@@ -58,7 +58,7 @@ template void MFEMSolverBase::setPreconditioner(mfem::HypreGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HyprePCG &);
 
 bool
-MFEMSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf)
+MFEMSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf) const
 {
   bool equiv = true;
 
