@@ -163,24 +163,23 @@
   []
 
   [no_add_scalar]
-    type = 'Exodiff'
+    type = 'RunException'
     input = 'no_add_scalar.i'
-    exodiff = 'no_add_scalar_out.e'
 
     requirement = "When using periodic boundary detection, the system shall not attempt to add periodic boundary conditions to scalar variables."
     design = 'source/actions/AddPeriodicBCAction.md'
     issues = '#11417'
+    expect_err = "Variable 'scalar' is a scalar variable and does not support a periodic boundary condition"
   []
 
   [exceptions]
     requirement = 'The system shall throw an error if'
     issues = '#22496'
-    [multi_sys]
+    [multi_sys_same_block]
       type = RunException
-      expect_err = 'Multiple solver systems currently not supported'
-      input = 'all_periodic_trans.i'
-      cli_args = "Problem/nl_sys_names='nl0 nl1'"
-      detail = 'multiple solver systems are being used as it is currently unsupported,'
+      expect_err = 'Variables were specified across multiple systems; this is not supported'
+      input = 'periodic_multisystem_same_block.i'
+      detail = 'multiple solver systems are being used within the same block as it is currently unsupported,'
     []
     [bad_params]
       type = RunException

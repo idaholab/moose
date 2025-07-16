@@ -202,7 +202,7 @@ MultiSmoothSuperellipsoidIC::computeSuperellipsoidCenters()
       _centers[i] = _bottom_left + ran * _range;
 
       for (unsigned int j = 0; j < i; ++j)
-        if (_mesh.minPeriodicDistance(_var.number(), _centers[i], _centers[j]) < _bubspac[_gk] ||
+        if (_mesh.minPeriodicDistance(_var, _centers[i], _centers[j]) < _bubspac[_gk] ||
             ellipsoidsOverlap(i, j))
           goto fail;
 
@@ -236,7 +236,7 @@ bool
 MultiSmoothSuperellipsoidIC::ellipsoidsOverlap(unsigned int i, unsigned int j)
 {
   // Check for overlap between centers
-  const Point dist_vec = _mesh.minPeriodicVector(_var.number(), _centers[i], _centers[j]);
+  const Point dist_vec = _mesh.minPeriodicVector(_var, _centers[i], _centers[j]);
   const Real dist = dist_vec.norm();
 
   // Handle this case independently because we cannot calculate polar angles at this point
@@ -295,7 +295,7 @@ MultiSmoothSuperellipsoidIC::checkExtremes(unsigned int i, unsigned int j)
     else
       tmp_p(2) += _cs[j];
 
-    const Point dist_vec = _mesh.minPeriodicVector(_var.number(), _centers[i], tmp_p);
+    const Point dist_vec = _mesh.minPeriodicVector(_var, _centers[i], tmp_p);
     const Real dist = dist_vec.norm();
 
     // Handle this case independently because we cannot calculate polar angles at this point
