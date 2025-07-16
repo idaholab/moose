@@ -99,6 +99,16 @@ AdvancedExtruderGenerator::validParams()
                          "A vector that points in the direction to extrude (note, this will be "
                          "normalized internally - so don't worry about it here)");
   params.addParam<MeshGeneratorName>("extrusion_curve", "Name of curve to be extruded along.");
+  params.addParam<Point>(
+      "start_extrusion_direction",
+      "A vector that points in the starting direction for extruding along a curve. This vector "
+      "should be the tangent vector at the FIRST node of the extrusion curve. Vector will be "
+      "normalized in code, so don't worry about it here.");
+  params.addParam<Point>(
+      "end_extrusion_direction",
+      "A vector that points in the ending direction for extruding along a curve. This vector "
+      "should be the tangent vector at the LAST node of the extrusion curve. Vector will be "
+      "normalized in code, so don't worry about it here.");
 
   params.addParam<BoundaryName>(
       "top_boundary",
@@ -148,6 +158,12 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     _direction(isParamValid("direction") ? getParam<Point>("direction") : Point(0, 0, 0)),
     _extrusion_curve(isParamValid("extrusion_curve") ? getMesh("extrusion_curve")
                                                      : getMesh("extrusion_curve")),
+    _start_extrusion_direction(isParamValid("start_extrusion_direction")
+                                   ? getParam<Point>("start_extrusion_direction")
+                                   : Point(0, 0, 0)),
+    _end_extrusion_direction(isParamValid("end_extrusion_direction")
+                                 ? getParam<Point>("end_extrusion_direction")
+                                 : Point(0, 0, 0)),
     _extrude_along_curve(isParamValid("extrusion_curve")),
     _has_top_boundary(isParamValid("top_boundary")),
     _top_boundary(isParamValid("top_boundary") ? getParam<BoundaryName>("top_boundary") : "0"),
@@ -186,6 +202,12 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
       paramError("num_layers", "num_layers cannot be set if extruding along curve!");
     if (isParamSetByUser("direction"))
       paramError("direction", "direction cannot be set if extruding along curve!");
+    if (!isParamSetByUser("start_extrusion_direction"))
+      paramError("start_extrusion_direction",
+                 "If extruding along curve, start_extrusion_direction must be set!");
+    if (!isParamSetByUser("end_extrusion_direction"))
+      paramError("end_extrusion_direction",
+                 "If extruding along curve, end_extrusion_direction must be set!");
   }
   else
   {
@@ -532,10 +554,27 @@ AdvancedExtruderGenerator::generate()
           libMesh::Real step_size;
           if (_extrude_along_curve)
           {
-            libMesh::Node * P_current = extrusion_curve->node_ptr(k);  // set next point on curve
-            libMesh::Node * P_prev = extrusion_curve->node_ptr(k - 1); // set current point on curve
+            libMesh::Node * P_next;
+            libMesh::Node * P_current = extrusion_curve->node_ptr(k);
+            libMesh::Node * P_prev = extrusion_curve->node_ptr(k - 1);
+            libMesh::RealVectorValue plane_normal_vec;
 
-            _direction = *P_current - *P_prev; // set direction
+            if (k > 0 && k < order * num_layers - 1)
+            {
+              P_next = extrusion_curve->node_ptr(k + 1);
+              plane_normal_vec = *P_next - *P_prev;
+            }
+            else if (k == 1)
+            {
+              P_next = extrusion_curve->node_ptr(k + 1);
+              plane_normal_vec = _start_extrusion_direction + (*P_next - *P_current);
+            }
+            else
+            {
+              plane_normal_vec = _end_extrusion_direction;
+            }
+            plane_normal_vec /= plane_normal_vec.norm();
+            _direction = *P_current - *P_prev;
             _direction /= _direction.norm();   // normalize direction
             mooseAssert(std::abs(_direction.norm() - 1.0) < libMesh::TOLERANCE,
                         "Norm of direction vector is not 1!");
