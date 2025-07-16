@@ -22,16 +22,6 @@ namespace CSG
 class CSGRegion
 {
 public:
-  /// An enum for type of type of operation that defines region
-  enum class RegionType
-  {
-    EMPTY,
-    HALFSPACE,
-    COMPLEMENT,
-    INTERSECTION,
-    UNION
-  };
-
   /**
    * Default Constructor
    */
@@ -45,14 +35,12 @@ public:
   /**
    * Constructor for union and intersection
    */
-  CSGRegion(const CSGRegion & region_a,
-            const CSGRegion & region_b,
-            const CSGRegion::RegionType region_type);
+  CSGRegion(const CSGRegion & region_a, const CSGRegion & region_b, std::string region_type);
 
   /**
    * Constructor for complement
    */
-  CSGRegion(const CSGRegion & region, const CSGRegion::RegionType region_type);
+  CSGRegion(const CSGRegion & region, std::string region_type);
 
   /**
    * Destructor
@@ -67,18 +55,11 @@ public:
   const std::string & toString() const { return _region_str; }
 
   /**
-   * @brief Get the Region Type as a string
-   *
-   * @return string representation of the region type
-   */
-  const std::string getRegionTypeString() const;
-
-  /**
-   * @brief Get the RegionType
+   * @brief Get the region type
    *
    * @return region type
    */
-  RegionType getRegionType() const { return _region_type; }
+  const std::string getRegionType() const { return _region_type; }
 
   /**
    * @brief Get the list of surfaces associated with the region
@@ -106,8 +87,8 @@ protected:
   /// String representation of region - defaults to empty string
   std::string _region_str;
 
-  /// type of region - defaults to EMPTY
-  RegionType _region_type;
+  /// An enum for type of type of operation that defines region
+  MooseEnum _region_type{"EMPTY HALFSPACE COMPLEMENT INTERSECTION UNION"};
 
   /// Surface list associated with the region
   std::vector<std::reference_wrapper<const CSGSurface>> _surfaces;

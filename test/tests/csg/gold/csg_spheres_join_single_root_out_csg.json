@@ -19,84 +19,84 @@
   },
   "SURFACES": {
     "OriginSphere_sphere_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 3.0,
         "x0": 0.0,
         "y0": 0.0,
         "z0": 0.0
       },
-      "TYPE": "sphere"
+      "TYPE": "SPHERE"
     },
     "PointSphere_sphere_surf": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 5.0,
         "x0": -3.0,
         "y0": -2.0,
         "z0": -1.0
       },
-      "TYPE": "sphere"
+      "TYPE": "SPHERE"
     },
     "surf_minus_x": {
-      "BOUNDARY": "reflective",
+      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
         "d": 2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "surf_minus_y": {
-      "BOUNDARY": "reflective",
+      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": -2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "surf_minus_z": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": -2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "surf_plus_x": {
-      "BOUNDARY": "reflective",
+      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
         "d": -2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "surf_plus_y": {
-      "BOUNDARY": "reflective",
+      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": 2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "surf_plus_z": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": 2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     }
   },
   "UNIVERSES": {
