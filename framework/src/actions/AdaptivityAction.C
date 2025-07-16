@@ -140,11 +140,12 @@ AdaptivityAction::act()
     // splitting process. Adaptivity::init must be called for any adaptivity to work, however, so we
     // can't just skip it for the useSplit case.
     if (_mesh->isSplit())
-      adapt.init(0, 0, getParam<bool>("switch_h_to_p_refinement"));
+      adapt.init(0, 0, getParam<bool>("switch_h_to_p_refinement"), getParam<bool>("hp_refinement"));
     else
       adapt.init(getParam<unsigned int>("steps"),
                  getParam<unsigned int>("initial_adaptivity"),
-                 getParam<bool>("switch_h_to_p_refinement"));
+                 getParam<bool>("switch_h_to_p_refinement"),
+                 getParam<bool>("hp_refinement"));
 
     adapt.setErrorEstimator(getParam<MooseEnum>("error_estimator"));
 
