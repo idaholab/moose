@@ -142,8 +142,9 @@ public:
   /**
    * Create the i-th local app
    * @param[in] i local app index
+   * @param for_reset Whether we are resetting an app versus creating it for the first time
    */
-  virtual void createLocalApp(const unsigned int i);
+  virtual void createLocalApp(const unsigned int i, bool for_reset = false);
 
   /**
    * Method to be called in main-app initial setup for create sub-apps if using positions is false.
@@ -406,8 +407,9 @@ protected:
    *
    * @param i The local app number to create.
    * @param start_time The initial time for the App
+   * @param for_reset Whether we are resetting an app versus creating it for the first time
    */
-  void createApp(unsigned int i, Real start_time);
+  void createApp(unsigned int i, Real start_time, bool for_reset = false);
 
   /**
    * Create an MPI communicator suitable for each app.
