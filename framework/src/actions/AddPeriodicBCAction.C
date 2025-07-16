@@ -173,6 +173,7 @@ AddPeriodicBCAction::getVariables() const
 
   // Verify and collect variables
   std::vector<const MooseVariableFieldBase *> vars;
+  vars.reserve(var_names.size());
   std::optional<unsigned int> used_sys_num;
   for (const auto & var_name : var_names)
   {
