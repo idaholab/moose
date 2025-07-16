@@ -17,7 +17,7 @@ CSGYCylinder::CSGYCylinder(const std::string & name,
                            const Real z0,
                            const Real r,
                            CSGSurface::BoundaryType boundary)
-  : CSGSurface(name, SurfaceType::YCYLINDER, boundary), _x0(x0), _z0(z0), _r(r)
+  : CSGSurface(name, "YCYLINDER", boundary), _x0(x0), _z0(z0), _r(r)
 {
 }
 
