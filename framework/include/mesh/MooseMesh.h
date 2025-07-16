@@ -835,32 +835,71 @@ public:
    * For "regular orthogonal" meshes, determine if variable var_num is periodic with respect to the
    * primary and secondary BoundaryIDs, record this fact in the _periodic_dim data structure.
    */
-  void addPeriodicVariable(unsigned int var_num, BoundaryID primary, BoundaryID secondary);
+  void addPeriodicVariable(const unsigned int sys_num,
+                           const unsigned int var_num,
+                           const BoundaryID primary,
+                           const BoundaryID secondary);
+
+  /**
+   * Returns whether this generated mesh is periodic in the given dimension for the given variable
+   * on the given system.
+   * @param sys_num - The number of the system the variable is on
+   * @param var_num - The variable number
+   * @param component - An integer representing the desired component (dimension)
+   */
+  bool isTranslatedPeriodic(const unsigned int sys_num,
+                            const unsigned int var_num,
+                            const unsigned int component) const;
 
   /**
    * Returns whether this generated mesh is periodic in the given dimension for the given variable.
-   * @param nonlinear_var_num - The nonlinear variable number
+   * @param var - The variable
    * @param component - An integer representing the desired component (dimension)
    */
-  bool isTranslatedPeriodic(unsigned int nonlinear_var_num, unsigned int component) const;
+  bool isTranslatedPeriodic(const MooseVariableBase & var, const unsigned int component) const;
 
   /**
-   * This function returns the minimum vector between two points on the mesh taking into account
-   * periodicity for the given variable number.
-   * @param nonlinear_var_num - The nonlinear variable number
+   * Returns the minimum vector between two points on the mesh taking into account
+   * periodicity for the given variable on the given system.
+   * @param sys_num - The number of the system the variable is on
+   * @param var_num - The variable number
    * @param p, q - The points between which to compute a minimum vector
    * @return RealVectorValue - The vector pointing from p to q
    */
-  RealVectorValue minPeriodicVector(unsigned int nonlinear_var_num, Point p, Point q) const;
+  RealVectorValue
+  minPeriodicVector(const unsigned int sys_num, const unsigned int var_num, Point p, Point q) const;
 
   /**
-   * This function returns the distance between two points on the mesh taking into account
-   * periodicity for the given variable number.
-   * @param nonlinear_var_num - The nonlinear variable number
+   * Returns the minimum vector between two points on the mesh taking into account
+   * periodicity for the given variable.
+   * @param var - The variable
+   * @param p, q - The points between which to compute a minimum vector
+   * @return RealVectorValue - The vector pointing from p to q
+   */
+  RealVectorValue
+  minPeriodicVector(const MooseVariableBase & var, const Point & p, const Point & q) const;
+
+  /**
+   * Returns the distance between two points on the mesh taking into account
+   * periodicity for the given variable on the given system.
+   * @param sys_num - The number of the system the variable is on
+   * @param var_num - The variable number
    * @param p, q - The points for which to compute a minimum distance
    * @return Real - The L2 distance between p and q
    */
-  Real minPeriodicDistance(unsigned int nonlinear_var_num, Point p, Point q) const;
+  Real minPeriodicDistance(const unsigned int sys_num,
+                           const unsigned int var_num,
+                           const Point & p,
+                           const Point & q) const;
+
+  /**
+   * Returns the distance between two points on the mesh taking into account
+   * periodicity for the given variable.
+   * @param var - The variable
+   * @param p, q - The points for which to compute a minimum distance
+   * @return Real - The L2 distance between p and q
+   */
+  Real minPeriodicDistance(const MooseVariableBase & var, const Point & p, const Point & q) const;
 
   /**
    * This function attempts to return the paired boundary ids for the given component.  For example,
@@ -1620,10 +1659,12 @@ private:
   mutable bool _linear_finite_volume_dofs_cached = false;
 
   /**
-   * A map of vectors indicating which dimensions are periodic in a regular orthogonal mesh for
-   * the specified variable numbers.  This data structure is populated by addPeriodicVariable.
+   * A map from (system number, vector number) to which dimensions are periodic in a regular
+   * orthogonal mesh.
+   *
+   * This data structure is populated by addPeriodicVariable.
    */
-  std::map<unsigned int, std::vector<bool>> _periodic_dim;
+  std::map<std::pair<unsigned int, unsigned int>, std::array<bool, 3>> _periodic_dim;
 
   /**
    * A convenience vector used to hold values in each dimension representing half of the range.

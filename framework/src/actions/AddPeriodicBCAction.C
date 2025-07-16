@@ -13,10 +13,12 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "RelationshipManager.h"
 
 #include "libmesh/periodic_boundary.h"
+
+#include <optional>
 
 registerMooseAction("MooseApp", AddPeriodicBCAction, "add_periodic_bc");
 registerMooseAction("MooseApp", AddPeriodicBCAction, "add_geometric_rm");
@@ -29,8 +31,8 @@ AddPeriodicBCAction::validParams()
   params += Moose::PeriodicBCHelper::validParams();
 
   params.addParam<std::vector<VariableName>>("variable",
-                                             "Variable(s) for the periodic boundary condition; if "
-                                             "not provided, apply to all variables.");
+                                             "Variable(s) to apply periodic boundary conditions "
+                                             "to; if unset, apply to all field variables.");
 
   params.addClassDescription("Action that adds periodic boundary conditions");
 
@@ -38,8 +40,7 @@ AddPeriodicBCAction::validParams()
 }
 
 AddPeriodicBCAction::AddPeriodicBCAction(const InputParameters & params)
-  : Action(params),
-    Moose::PeriodicBCHelper(static_cast<const Action &>(*this), /* algebraic = */ true)
+  : Action(params), Moose::PeriodicBCHelper(static_cast<const Action &>(*this))
 {
   checkPeriodicParams();
 }
@@ -47,44 +48,53 @@ AddPeriodicBCAction::AddPeriodicBCAction(const InputParameters & params)
 void
 AddPeriodicBCAction::onSetupPeriodicBoundary(libMesh::PeriodicBoundaryBase & p)
 {
-  // TODO: multi-system
-  if (_problem->numSolverSystems() > 1)
-    mooseError("Multiple solver systems currently not supported");
+  const auto is_regular_orthogonal = _mesh->isRegularOrthogonal();
+  std::optional<unsigned int> used_sys_num;
 
-  NonlinearSystemBase & nl = _problem->getNonlinearSystemBase(/*nl_sys_num=*/0);
-
-  // If var_names is empty - then apply this periodic condition to all variables in the system
-  const auto variable_ptr = queryParam<std::vector<VariableName>>("variable");
-  const auto & var_names = variable_ptr ? *variable_ptr : nl.getVariableNames();
-
-  // Helper function to apply periodic BC for a given variable number
-  auto apply_periodic_bc = [&](unsigned int var_num, const std::string & var_name)
+  for (const auto & var_name : _var_names)
   {
-    p.set_variable(var_num);
-    if (_mesh->isRegularOrthogonal())
-      _mesh->addPeriodicVariable(var_num, p.myboundary, p.pairedboundary);
-    else
-      mooseInfoRepeated("Periodicity information for variable '" + var_name +
-                        "' will only be stored in the system's DoF map, not on the MooseMesh");
-  };
+    if (_problem->hasScalarVariable(var_name))
+      paramError("variable",
+                 "Variable '" + var_name +
+                     "' is a scalar variable and does not support a periodic boundary condition");
+    if (!_problem->hasVariable(var_name))
+      paramError("variable", "Nonlinear variable '" + var_name + "' not found");
 
-  // If is an array variable, loop over all of components
-  for (const auto & var_name : var_names)
-  {
-    // Exclude scalar variables for which periodic boundary conditions dont make sense
-    if (!nl.hasScalarVariable(var_name))
+    const auto & var = _problem->getVariable(0, var_name);
+    const auto sys_num = var.sys().number();
+
+    // Until we have a way to have separate PeriodicBoundaries objects for each systems,
+    // we can't do these in the same block
+    if (used_sys_num && *used_sys_num != sys_num)
+      paramError("variable",
+                 "Variables were specified across multiple systems; this is not supported. Use a "
+                 "separate [Periodic/BCs] block for each system.");
+    used_sys_num = sys_num;
+
+    for (const auto component : make_range(var.count()))
     {
-      const auto & var = nl.getVariable(0, var_name);
-      const auto var_num = var.number();
+      const auto var_num = var.number() + component;
+      p.set_variable(var_num);
+      if (is_regular_orthogonal)
+        _mesh->addPeriodicVariable(sys_num, var_num, p.myboundary, p.pairedboundary);
 
-      if (var.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
-      {
-        for (const auto component : make_range(var.count()))
-          apply_periodic_bc(var_num + component, var_name + "_" + std::to_string(component));
-      }
-      else
-        apply_periodic_bc(var_num, var_name);
+      const auto add_to_dof_map = [&p, &sys_num](auto & problem)
+      { problem.es().get_system(sys_num).get_dof_map().add_periodic_boundary(p); };
+
+      add_to_dof_map(*_problem);
+      if (auto displaced_problem = _problem->getDisplacedProblem())
+        add_to_dof_map(*displaced_problem);
     }
+  }
+
+  if (!is_regular_orthogonal)
+  {
+    std::ostringstream out;
+    out << "Periodicity information for the following variables:\n";
+    for (const auto & var_name : _var_names)
+      out << "  " << var_name << "\n";
+    out << "will only be stored in the system's DoF map, not on the MooseMesh";
+    mooseInfoRepeated(out.str());
   }
 }
 
@@ -125,6 +135,27 @@ AddPeriodicBCAction::act()
 
   if (_current_task == "add_periodic_bc")
   {
+    // Determine variable names
+    std::vector<VariableName> var_names;
+    // Variable is set, use it
+    if (isParamValid("variable"))
+      var_names = getParam<std::vector<VariableName>>("variable");
+    // Variable is not set
+    else
+    {
+      // We can't currently distinguish PeriodicBoundaries objects across
+      // multiple systems
+      if (_problem->numSolverSystems() > 1)
+        mooseError("Parameter 'variable' must be specified when multiple solver systems exist");
+      // Use all field variables from system 0, excluding scalar varaibles
+      const auto & nl = _problem->getNonlinearSystemBase(0);
+      var_names = nl.getVariableNames();
+      var_names.erase(std::remove_if(var_names.begin(),
+                                     var_names.end(),
+                                     [&nl](const auto & var_name)
+                                     { return nl.hasScalarVariable(var_name); }));
+    }
+
     _mesh = &_problem->mesh();
     setupPeriodicBoundaries(*_problem);
   }

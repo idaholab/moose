@@ -25,7 +25,7 @@ SetupPeriodicRayBCAction::validParams()
 
 SetupPeriodicRayBCAction::SetupPeriodicRayBCAction(const InputParameters & params)
   : Action(params),
-    Moose::PeriodicBCHelper(getAddRayBCAction(), /* algebraic = */ false),
+    Moose::PeriodicBCHelper(getAddRayBCAction()),
     _is_periodic_ray_bc(PeriodicRayBC::isPeriodicRayBC(getAddRayBCAction().getObjectParams()))
 {
   if (_is_periodic_ray_bc)

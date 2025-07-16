@@ -113,7 +113,7 @@ PolycrystalVoronoi::getGrainsBasedOnPoint(const Point & point,
     // Find the closest centerpoint to the current point
     for (MooseIndex(_centerpoints) grain = 0; grain < n_grains; ++grain)
     {
-      distance = _mesh.minPeriodicDistance(_vars[0]->number(), _centerpoints[grain], point);
+      distance = _mesh.minPeriodicDistance(*_vars[0], _centerpoints[grain], point);
       if (distance < d_min)
       {
         d_min = distance;
@@ -279,7 +279,7 @@ PolycrystalVoronoi::buildSearchTree()
     // Add new coords when there exists periodic boundary conditions
     // We extend half domain
     for (unsigned int i = 0; i < _mesh.dimension(); i++)
-      if (_mesh.isTranslatedPeriodic(_vars[0]->number(), i))
+      if (_mesh.isTranslatedPeriodic(*_vars[0], i))
         xyzs[i].push_back(point(i) <= midplane(i) ? point(i) + _range(i) : point(i) - _range(i));
 
     // Construct all combinations
@@ -327,8 +327,8 @@ PolycrystalVoronoi::computeDiffuseInterface(const Point & point,
 Point
 PolycrystalVoronoi::findNormalVector(const Point & point, const Point & p1, const Point & p2) const
 {
-  Point pa = point + _mesh.minPeriodicVector(_vars[0]->number(), point, p1);
-  Point pb = point + _mesh.minPeriodicVector(_vars[0]->number(), point, p2);
+  Point pa = point + _mesh.minPeriodicVector(*_vars[0], point, p1);
+  Point pb = point + _mesh.minPeriodicVector(*_vars[0], point, p2);
   Point N = pb - pa;
   return N / N.norm();
 }
@@ -336,8 +336,8 @@ PolycrystalVoronoi::findNormalVector(const Point & point, const Point & p1, cons
 Point
 PolycrystalVoronoi::findCenterPoint(const Point & point, const Point & p1, const Point & p2) const
 {
-  Point pa = point + _mesh.minPeriodicVector(_vars[0]->number(), point, p1);
-  Point pb = point + _mesh.minPeriodicVector(_vars[0]->number(), point, p2);
+  Point pa = point + _mesh.minPeriodicVector(*_vars[0], point, p1);
+  Point pb = point + _mesh.minPeriodicVector(*_vars[0], point, p2);
   return 0.5 * (pa + pb);
 }
 

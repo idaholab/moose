@@ -21,13 +21,16 @@ namespace Moose
 {
 /**
  * Helper class for setting up periodic boundary conditions via an Action.
+ *
+ * Determines the PeriodicBoundaries given the parameters and sets up
+ * geometric ghosting. Does not handle algebraic ghosting.
  */
 class PeriodicBCHelper
 {
 public:
   static InputParameters validParams();
 
-  PeriodicBCHelper(const Action & action, const bool algebraic);
+  PeriodicBCHelper(const Action & action);
 
 protected:
   /**
@@ -49,7 +52,7 @@ protected:
   /**
    * Entry-point for derived actions to extend the addition of a periodic boundary.
    */
-  virtual void onSetupPeriodicBoundary(libMesh::PeriodicBoundaryBase & p);
+  virtual void onSetupPeriodicBoundary(libMesh::PeriodicBoundaryBase & /* p */) {};
 
   /**
    * Get the PeriodicBoundaries map produced in setupPeriodicBoundaries().
@@ -60,8 +63,7 @@ private:
   /**
    * Internal helper for adding a periodic boundary.
    */
-  void addPeriodicBoundary(FEProblemBase & problem,
-                           std::unique_ptr<libMesh::PeriodicBoundaryBase> p);
+  void addPeriodicBoundary(std::unique_ptr<libMesh::PeriodicBoundaryBase> /* p */);
 
   /**
    * Internal method for setting up periodic boundaries via the "auto_direction" param.
@@ -93,8 +95,6 @@ private:
 
   /// The owning Action
   const Action & _action;
-  /// Whether or not to add geometric+algebraic ghosting (if false, just geometric)
-  const bool _algebraic;
   /// The parameters used to create the periodic boundary
   const InputParameters & _params;
   /// The PeriodicBoundaries map, filled in setupPeriodicBoundaries()

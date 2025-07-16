@@ -69,15 +69,14 @@ PolycrystalICTools::assignPointsToVariables(const std::vector<Point> & centerpoi
       // case)
       for (unsigned int i = 0; i < op_num; ++i)
       {
-        min_op_dist[i] =
-            mesh.minPeriodicDistance(var.number(), centerpoints[grain], centerpoints[i]);
+        min_op_dist[i] = mesh.minPeriodicDistance(var, centerpoints[grain], centerpoints[i]);
         min_op_ind[assigned_op[i]] = i;
       }
 
       // Now check if any of the extra grains are even closer
       for (unsigned int i = op_num; i < grain; ++i)
       {
-        Real dist = mesh.minPeriodicDistance(var.number(), centerpoints[grain], centerpoints[i]);
+        Real dist = mesh.minPeriodicDistance(var, centerpoints[grain], centerpoints[i]);
         if (min_op_dist[assigned_op[i]] > dist)
         {
           min_op_dist[assigned_op[i]] = dist;
@@ -117,7 +116,7 @@ PolycrystalICTools::assignPointToGrain(const Point & p,
   // Loops through all of the grain centers and finds the center that is closest to the point p
   for (unsigned int grain = 0; grain < grain_num; grain++)
   {
-    Real distance = mesh.minPeriodicDistance(var.number(), centerpoints[grain], p);
+    Real distance = mesh.minPeriodicDistance(var, centerpoints[grain], p);
 
     if (min_distance > distance)
     {

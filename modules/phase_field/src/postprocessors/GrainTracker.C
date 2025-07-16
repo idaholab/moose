@@ -1721,7 +1721,8 @@ GrainTracker::centroidRegionDistance(std::vector<BoundingBox> & bboxes1,
       const auto centroid_point2 = (bbox2.max() + bbox2.min()) / 2.0;
 
       // Here we'll calculate a distance between the centroids
-      auto curr_distance = _mesh.minPeriodicDistance(_var_number, centroid_point1, centroid_point2);
+      auto curr_distance =
+          _mesh.minPeriodicDistance(*_fe_vars[0], centroid_point1, centroid_point2);
 
       if (curr_distance < min_distance)
         min_distance = curr_distance;

@@ -20,6 +20,7 @@
 [BCs]
   [./Periodic]
     [./all]
+      variable = c
     [../]
   [../]
 []
