@@ -27,6 +27,9 @@ public:
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & y) override;
 
+  const Real & getVolume() const { return _volume; }
+  const Real & getIntegralValue() const { return _integral_value; }
+
 protected:
   Real _volume;
 };
