@@ -52,6 +52,10 @@ MFEMHypreAMS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
   {
+    if (!checkSpectralEquivalence(a))
+      mooseError("Low-Order-Refined solver requires the FESpace closed_basis to be GaussLobatto "
+                 "and the open-basis to be IntegratedGLL for ND and RT elements.");
+
     if (_mfem_fespace.getFESpace()->GetMesh()->GetElement(0)->GetGeometryType() !=
         mfem::Geometry::Type::CUBE)
       mooseError("LOR HypreAMS Solver only supports hex meshes.");

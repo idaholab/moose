@@ -57,4 +57,25 @@ template void MFEMSolverBase::setPreconditioner(mfem::HypreFGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HyprePCG &);
 
+bool
+MFEMSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf) const
+{
+  bool equiv = true;
+
+  if (auto fec = dynamic_cast<const mfem::ND_FECollection *>(blf.FESpace()->FEColl()))
+  {
+    if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
+        fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
+      equiv = false;
+  }
+  else if (auto fec = dynamic_cast<const mfem::RT_FECollection *>(blf.FESpace()->FEColl()))
+  {
+    if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
+        fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
+      equiv = false;
+  }
+
+  return equiv;
+}
+
 #endif
