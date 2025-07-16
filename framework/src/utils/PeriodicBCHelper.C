@@ -70,6 +70,8 @@ PeriodicBCHelper::setupPeriodicBoundaries(FEProblemBase & problem)
   else
     setupManualPeriodicBoundaries(problem);
 
+  mooseAssert(getPeriodicBoundaries().size(), "Shouldn't run without boundaries");
+
   const auto add_ghosting = [this](auto & problem)
   {
     auto & mesh = problem.mesh().getMesh();
