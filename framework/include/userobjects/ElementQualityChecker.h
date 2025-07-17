@@ -51,6 +51,9 @@ protected:
   // set to save bypassed element type
   std::set<std::string> _bypassed_elem_type;
 
+  /// Whether to print element applicability warning for bypassed elements
+  const bool _suppress_bypass_warning;
+
 private:
   enum class FailureType
   {
