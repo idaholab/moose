@@ -34,8 +34,12 @@ public:
   // refined, or because we have done enough steps
   bool Apply(mfem::ParMesh & mesh);
 
-  bool UseHRefinement() const { return _use_h_refinement and (_h_ref_counter < _max_h_level); }
-  bool UsePRefinement() const { return _use_p_refinement and (_p_ref_counter < _max_p_level); }
+  //! Return whether these functions are enabled
+  bool UseHRefinement() const { return _use_h_refinement; }
+  bool UsePRefinement() const { return _use_p_refinement; }
+
+  int MaxHLevel() const { return _max_h_level; }
+  int MaxPLevel() const { return _max_p_level; }
 
 protected:
   // Shared pointer to underlying mfem object
@@ -47,9 +51,6 @@ protected:
   int _max_h_level;
   int _max_p_level;
   std::string _refinement_type;
-
-  int _h_ref_counter{0};
-  int _p_ref_counter{0};
 
   bool _use_h_refinement{false};
   bool _use_p_refinement{false};

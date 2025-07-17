@@ -47,6 +47,8 @@ public:
 
   std::shared_ptr<MFEMThresholdRefiner> _refiner;
   bool _use_amr{false};
+  int _h_ref_counter{0};
+  int _p_ref_counter{0};
 
   MPI_Comm comm;
   int myid;
