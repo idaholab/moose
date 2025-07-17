@@ -7,7 +7,7 @@
 [Adaptivity]
   [Indicators]
     [l2zz]
-      type     = MFEMZienkiewiczZhuEstimator
+      type     = MFEMZienkiewiczZhuIndicator
       variable = concentration
       kernel   = diff
       outputs  = none
@@ -15,7 +15,7 @@
   []
   [Markers]
     [ref]
-      type = MFEMThresholdRefiner
+      type = MFEMThresholdMarker
       refine = 0.7 # error
       indicator = l2zz
       max_h_level = 2
