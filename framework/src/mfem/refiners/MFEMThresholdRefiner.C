@@ -67,24 +67,19 @@ MFEMThresholdRefiner::MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem
   // We are doing p-refinement. Increase the counter
   // and check if we have exceeded the max number of
   // p-refinement steps
-  bool output = (++_p_ref_counter >= _max_p_level);
   _threshold_refiner->MarkWithoutRefining(mesh, refinements);
 
-  output |= (mesh.ReduceInt(refinements.Size()) == 0LL);
+  bool output = (mesh.ReduceInt(refinements.Size()) == 0LL);
 
   return output;
 }
 
-// Returns true when it's time to stop
+// Returns true when it's time to stop - the refiner itself
+// will tell us if we've finished refinement
 bool
 MFEMThresholdRefiner::Apply(mfem::ParMesh & mesh)
 {
-  // We are doing h-refinement. Increase the counter
-  // and check if we have exceeded the max number of
-  // h-refinement steps
-  bool output = (++_h_ref_counter >= _max_h_level);
-
-  output |= _threshold_refiner->Apply(mesh);
+  bool output = _threshold_refiner->Apply(mesh);
   return output;
 }
 
