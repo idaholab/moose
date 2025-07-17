@@ -145,7 +145,8 @@ MaterialPropertyStorage::copy()
 {
   for (unsigned int state : statefulIndexRange())
     for (auto & [name, prop] : _kokkos_props[state])
-      prop->copy(*_kokkos_props[0][name]);
+      if (!isRestoredProperty(name))
+        prop->copy(*_kokkos_props[0][name]);
 }
 
 } // namespace Kokkos
