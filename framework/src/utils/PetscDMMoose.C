@@ -53,6 +53,8 @@ checkSize(const std::string & split_name, const I1 split_size, const I2 size_exp
 struct DM_Moose
 {
   NonlinearSystemBase * _nl; // nonlinear system context
+  const DofMapBase * _dof_map;
+  const System * _system;
   DM_Moose * _parent = nullptr;
   std::set<std::string> * _vars; // variables
   std::map<std::string, unsigned int> * _var_ids;
@@ -230,6 +232,34 @@ DMMooseSetNonlinearSystem(DM dm, NonlinearSystemBase & nl)
             "Cannot reset the NonlinearSystem after DM has been set up.");
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   dmm->_nl = &nl;
+  PetscFunctionReturn(PETSC_SUCCESS);
+}
+
+PetscErrorCode
+DMMooseSetDofMap(DM dm, const DofMapBase & dof_map)
+{
+  PetscFunctionBegin;
+  LibmeshPetscCallQ(DMMooseValidityCheck(dm));
+  if (dm->setupcalled)
+    SETERRQ(((PetscObject)dm)->comm,
+            PETSC_ERR_ARG_WRONGSTATE,
+            "Cannot reset the degree of freedom map after DM has been set up.");
+  DM_Moose * dmm = (DM_Moose *)(dm->data);
+  dmm->_dof_map = &dof_map;
+  PetscFunctionReturn(PETSC_SUCCESS);
+}
+
+PetscErrorCode
+DMMooseSetSystem(DM dm, const System & system)
+{
+  PetscFunctionBegin;
+  LibmeshPetscCallQ(DMMooseValidityCheck(dm));
+  if (dm->setupcalled)
+    SETERRQ(((PetscObject)dm)->comm,
+            PETSC_ERR_ARG_WRONGSTATE,
+            "Cannot reset the degree of freedom map after DM has been set up.");
+  DM_Moose * dmm = (DM_Moose *)(dm->data);
+  dmm->_system = &system;
   PetscFunctionReturn(PETSC_SUCCESS);
 }
 
@@ -514,7 +544,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
     if (!dmm->_all_vars || !dmm->_all_blocks || !dmm->_nosides || !dmm->_nounsides ||
         !dmm->_nounside_by_var || !dmm->_nocontacts || !dmm->_nouncontacts)
     {
-      DofMap & dofmap = dmm->_nl->system().get_dof_map();
+      auto & dofmap = *dmm->_dof_map;
       // Put this outside the lambda scope to avoid constant memory reallocation
       std::vector<dof_id_type> node_indices;
       auto process_nodal_dof_indices =
@@ -551,7 +581,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
       std::set<dof_id_type> unindices;
       std::set<dof_id_type> cached_indices;
       std::set<dof_id_type> cached_unindices;
-      auto & lm_mesh = dmm->_nl->system().get_mesh();
+      auto & lm_mesh = dmm->_system->get_mesh();
       const auto & node_to_elem_map = dmm->_nl->feProblem().mesh().nodeToElemMap();
       for (const auto & vit : *(dmm->_var_ids))
       {
@@ -570,12 +600,12 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               process_elem_dof_indices(evindices, indices);
             }
 
-            // Sometime, we own nodes but do not own the elements the nodes connected to
+            // Sometime, we own nodes but do not own the elements the nodes are connected to
             {
               bool is_on_current_block = false;
               for (auto & node : lm_mesh.local_node_ptr_range())
               {
-                const unsigned int n_comp = node->n_comp(dmm->_nl->system().number(), v);
+                const unsigned int n_comp = node->n_comp(dmm->_system->number(), v);
 
                 // skip it if no dof
                 if (!n_comp)
@@ -587,7 +617,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 {
                   // if one of incident elements belongs to a block, we consider
                   // the node lives in the block
-                  Elem & neighbor_elem = lm_mesh.elem_ref(elem_num);
+                  const Elem & neighbor_elem = lm_mesh.elem_ref(elem_num);
                   if (neighbor_elem.subdomain_id() == b)
                   {
                     is_on_current_block = true;
@@ -727,7 +757,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               PenetrationInfo * pinfo = lit->second;
               if (pinfo && pinfo->isCaptured())
               {
-                Node & secondary_node = lm_mesh.node_ref(secondary_node_num);
+                const Node & secondary_node = lm_mesh.node_ref(secondary_node_num);
                 process_nodal_dof_indices(
                     secondary_node, v, indices_to_insert_to, &nonlocal_indices_to_insert_to);
 
@@ -738,8 +768,8 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 process_elem_dof_indices(
                     evindices, indices_to_insert_to, &nonlocal_indices_to_insert_to);
               } // if pinfo
-            }   // for penetration
-          }     // for contact name
+            } // for penetration
+          } // for contact name
         };
 
         // Include all nodes on the contact surfaces
@@ -842,7 +872,8 @@ DMCreateFieldDecomposition_Moose(
     DM_Moose::SplitInfo & dinfo = (*dmm->_splits)[dname];
     if (!dinfo._dm)
     {
-      LibmeshPetscCallQ(DMCreateMoose(((PetscObject)dm)->comm, *dmm->_nl, dname, &dinfo._dm));
+      LibmeshPetscCallQ(DMCreateMoose(
+          ((PetscObject)dm)->comm, *dmm->_nl, *dmm->_dof_map, *dmm->_system, dname, &dinfo._dm));
       LibmeshPetscCallQ(
           PetscObjectSetOptionsPrefix((PetscObject)dinfo._dm, ((PetscObject)dm)->prefix));
       std::string suffix = std::string("fieldsplit_") + dname + "_";
@@ -920,9 +951,7 @@ DMCreateFieldDecomposition_Moose(
   if (dmm->_parent)
     dmm->_parent->checkChildSize(dm, split_size_sum, *dmm->_name);
   else
-    checkSize(*dmm->_name,
-              split_size_sum,
-              dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m());
+    checkSize(*dmm->_name, split_size_sum, dmm->_dof_map->n_local_dofs());
 
   PetscFunctionReturn(PETSC_SUCCESS);
 }
@@ -1142,7 +1171,7 @@ DMCreateGlobalVector_Moose(DM dm, Vec * x)
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
-  NumericVector<Number> * nv = (dmm->_nl->system().solution).get();
+  NumericVector<Number> * nv = (dmm->_system->solution).get();
   PetscVector<Number> * pv = dynamic_cast<PetscVector<Number> *>(nv);
   Vec v = pv->vec();
   /* Unfortunately, currently this does not produce a ghosted vector, so nonlinear subproblem solves
@@ -1188,28 +1217,17 @@ DMCreateMatrix_Moose(DM dm, Mat * A)
    Even fancier: compute the sparsity of the coupling of a contact secondary to the contact primary.
    In any event, here we are in control of the matrix type and structure.
    */
-  DofMap & dof_map = dmm->_nl->system().get_dof_map();
+  const auto & dof_map = *dmm->_dof_map;
   PetscInt M, N, m, n;
   MPI_Comm comm;
   M = dof_map.n_dofs();
   N = M;
-  m = static_cast<PetscInt>(dof_map.n_dofs_on_processor(dmm->_nl->system().processor_id()));
+  m = static_cast<PetscInt>(dof_map.n_local_dofs());
   n = m;
   LibmeshPetscCallQ(PetscObjectGetComm((PetscObject)dm, &comm));
   LibmeshPetscCallQ(MatCreate(comm, A));
   LibmeshPetscCallQ(MatSetSizes(*A, m, n, M, N));
   LibmeshPetscCallQ(MatSetType(*A, type));
-  /* Set preallocation for the basic sparse matrix types (applies only if *A has the right type. */
-  /* For now we ignore blocksize issues, since BAIJ doesn't play well with field decomposition by
-   * variable. */
-  const std::vector<numeric_index_type> & n_nz = dof_map.get_n_nz();
-  const std::vector<numeric_index_type> & n_oz = dof_map.get_n_oz();
-  LibmeshPetscCallQ(MatSeqAIJSetPreallocation(*A, 0, (PetscInt *)(n_nz.empty() ? NULL : &n_nz[0])));
-  LibmeshPetscCallQ(MatMPIAIJSetPreallocation(*A,
-                                              0,
-                                              (PetscInt *)(n_nz.empty() ? NULL : &n_nz[0]),
-                                              0,
-                                              (PetscInt *)(n_oz.empty() ? NULL : &n_oz[0])));
   /* TODO: set the prefix for *A and MatSetFromOptions(*A)? Might override the type and other
    * settings made here. */
   LibmeshPetscCallQ(MatSetUp(*A));
@@ -1324,7 +1342,7 @@ DMMooseGetMeshBlocks_Private(DM dm, std::set<subdomain_id_type> & blocks)
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
-  const MeshBase & mesh = dmm->_nl->system().get_mesh();
+  const MeshBase & mesh = dmm->_system->get_mesh();
   /* The following effectively is a verbatim copy of MeshBase::n_subdomains(). */
   // This requires an inspection on every processor
   libmesh_parallel_only(mesh.comm());
@@ -1346,9 +1364,9 @@ DMSetUp_Moose_Pre(DM dm)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
 
   /* Set up variables, blocks and sides. */
-  DofMap & dofmap = dmm->_nl->system().get_dof_map();
+  const auto & dofmap = *dmm->_dof_map;
   /* libMesh mesh */
-  const MeshBase & mesh = dmm->_nl->system().get_mesh();
+  const MeshBase & mesh = dmm->_system->get_mesh();
 
   // Do sides
   dmm->_nosides = PETSC_TRUE;
@@ -1552,7 +1570,7 @@ DMSetUp_Moose_Pre(DM dm)
     dmm->_blocks = LIBMESH_PETSC_NULLPTR;
   }
 
-  std::string name = dmm->_nl->system().name();
+  std::string name = dmm->_system->name();
   name += "_vars";
   for (const auto & vit : *(dmm->_var_names))
     name += "_" + vit.second;
@@ -1691,7 +1709,7 @@ DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
       ((PetscObject)dm)->comm, ((PetscObject)dm)->prefix, "DMMoose options", "DM"));
 #endif
   std::string opt, help;
-  PetscInt maxvars = dmm->_nl->system().get_dof_map().n_variables();
+  PetscInt maxvars = dmm->_dof_map->n_variables();
   char ** vars;
   std::set<std::string> varset;
   PetscInt nvars = maxvars;
@@ -1728,8 +1746,7 @@ DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
   LibmeshPetscCallQ(PetscFree(blocks));
   if (blockset.size())
     LibmeshPetscCallQ(DMMooseSetBlocks(dm, blockset));
-  PetscInt maxsides =
-      dmm->_nl->system().get_mesh().get_boundary_info().get_global_boundary_ids().size();
+  PetscInt maxsides = dmm->_system->get_mesh().get_boundary_info().get_global_boundary_ids().size();
   char ** sides;
   LibmeshPetscCallQ(PetscMalloc(maxsides * maxvars * sizeof(char *), &sides));
   PetscInt nsides = maxsides;
@@ -2041,12 +2058,19 @@ DMDestroy_Moose(DM dm)
 }
 
 PetscErrorCode
-DMCreateMoose(MPI_Comm comm, NonlinearSystemBase & nl, const std::string & dm_name, DM * dm)
+DMCreateMoose(MPI_Comm comm,
+              NonlinearSystemBase & nl,
+              const DofMapBase & dof_map,
+              const System & system,
+              const std::string & dm_name,
+              DM * dm)
 {
   PetscFunctionBegin;
   LibmeshPetscCallQ(DMCreate(comm, dm));
   LibmeshPetscCallQ(DMSetType(*dm, DMMOOSE));
   LibmeshPetscCallQ(DMMooseSetNonlinearSystem(*dm, nl));
+  LibmeshPetscCallQ(DMMooseSetDofMap(*dm, dof_map));
+  LibmeshPetscCallQ(DMMooseSetSystem(*dm, system));
   LibmeshPetscCallQ(DMMooseSetName(*dm, dm_name));
   PetscFunctionReturn(PETSC_SUCCESS);
 }
