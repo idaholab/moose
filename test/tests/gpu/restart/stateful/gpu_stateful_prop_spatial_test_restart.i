@@ -78,7 +78,7 @@
 []
 
 [Outputs]
-  file_base = out_spatial_gpu
+  file_base = out_spatial_restart_gpu
   [./out]
     type = Exodus
     elemental_as_nodal = true
