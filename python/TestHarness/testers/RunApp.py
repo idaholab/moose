@@ -53,7 +53,8 @@ class RunApp(Tester):
         # Valgrind
         params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
-        params.addParam('libtorch_devices', ['CPU'], "The devices to use for this libtorch test ('CPU', 'CUDA', 'MPS'); default ('CPU')")
+        params.addParam('libtorch_devices', "The devices to use for this libtorch test ('CPU', 'CUDA', 'MPS')")
+        params.addParam('devices', ['CPU'], "The devices to use for this libtorch or MFEM test ('CPU', 'CUDA', 'HIP', 'MPS'); default ('CPU')")
         return params
 
     def __init__(self, name, params):
@@ -75,9 +76,14 @@ class RunApp(Tester):
             if params['no_additional_cli_args']:
                 raise Exception('The parameters "command_proxy" and "no_additional_cli_args" cannot be supplied together')
 
-        for value in params['libtorch_devices']:
-            if value.lower() not in ['cpu', 'cuda', 'mps']:
-                raise Exception(f'Unknown libtorch_device "{value}')
+        if params.isValid('libtorch_devices'):
+            for value in params['libtorch_devices']:
+                if value.lower() not in ['cpu', 'cuda', 'mps']:
+                    raise Exception(f'Unknown libtorch_device "{value}')
+
+        for value in params['devices']:
+            if value.lower() not in ['cpu', 'cuda', 'hip', 'mps']:
+                raise Exception(f'Unknown device "{value}')
 
     def getInputFile(self):
         if self.specs.isValid('input'):
@@ -114,12 +120,14 @@ class RunApp(Tester):
                 self.setStatus(self.skip)
                 return False
 
-        if self.specs['libtorch']:
+        if self.specs.isValid('libtorch_devices'):
             devices_lower = [x.lower() for x in self.specs['libtorch_devices']]
-            if options.libtorch_device not in devices_lower:
-                self.addCaveats(f'{options.libtorch_device} not in libtorch_devices')
-                self.setStatus(self.skip)
-                return False
+        else:
+            devices_lower = [x.lower() for x in self.specs['devices']]
+        if options.device not in devices_lower:
+            self.addCaveats(f'{options.device} not in devices')
+            self.setStatus(self.skip)
+            return False
 
         if options.hpc and self.specs.isValid('command_proxy') and os.environ.get('APPTAINER_CONTAINER') is not None:
             self.addCaveats('hpc unsupported')
@@ -274,8 +282,11 @@ class RunApp(Tester):
         if options.scaling and specs['scale_refine'] > 0:
             cli_args.insert(0, ' -r ' + str(specs['scale_refine']))
 
-        if specs['libtorch']:
-            cli_args.append(f'--libtorch-device {options.libtorch_device}')
+        if specs.isValid('capabilities'):
+            if 'libtorch' in specs['capabilities']:
+                cli_args.append(f'--libtorch-device {options.device}')
+            if 'mfem' in specs['capabilities']:
+                cli_args.append(f'Executioner/device={options.device}')
 
         # Get the number of processors and threads the Tester requires
         ncpus = self.getProcs(options)
