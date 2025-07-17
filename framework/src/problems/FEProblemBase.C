@@ -973,8 +973,16 @@ FEProblemBase::initialSetup()
 
     // This forces stateful material property loading to be an exact one-to-one match
     if (_app.isRecovering())
+    {
       for (auto props : {&_material_props, &_bnd_material_props, &_neighbor_material_props})
         props->setRecovering();
+
+#ifdef MOOSE_HAVE_KOKKOS
+      for (auto props :
+           {&_kokkos_material_props, &_kokkos_bnd_material_props, &_kokkos_neighbor_material_props})
+        props->setRecovering();
+#endif
+    }
 
     TIME_SECTION("restore", 3, "Restoring from backup");
 
@@ -1160,6 +1168,13 @@ FEProblemBase::initialSetup()
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
           _neighbor_material_props.hasStatefulProperties())
         _has_initialized_stateful = true;
+
+#ifdef MOOSE_HAVE_KOKKOS
+      if (_kokkos_material_props.hasStatefulProperties() ||
+          _kokkos_bnd_material_props.hasStatefulProperties() ||
+          _kokkos_neighbor_material_props.hasStatefulProperties())
+        _has_initialized_stateful = true;
+#endif
     }
   }
 
