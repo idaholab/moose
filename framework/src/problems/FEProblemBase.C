@@ -456,24 +456,15 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
     _kernel_coverage_check(
-        isParamSetByUser("kernel_coverage_check") || !isParamSetByUser("block")
-            ? getParam<MooseEnum>("kernel_coverage_check").getEnum<CoverageCheckMode>()
-            : CoverageCheckMode::ONLY_LIST),
-    _kernel_coverage_blocks(isParamSetByUser("kernel_coverage_check") || !isParamSetByUser("block")
-                                ? getParam<std::vector<SubdomainName>>("kernel_coverage_block_list")
-                                : getParam<std::vector<SubdomainName>>("block")),
+        getParam<MooseEnum>("kernel_coverage_check").getEnum<CoverageCheckMode>()),
+    _kernel_coverage_blocks(getParam<std::vector<SubdomainName>>("kernel_coverage_block_list")),
     _boundary_restricted_node_integrity_check(
         getParam<bool>("boundary_restricted_node_integrity_check")),
     _boundary_restricted_elem_integrity_check(
         getParam<bool>("boundary_restricted_elem_integrity_check")),
     _material_coverage_check(
-        isParamSetByUser("material_coverage_check") || !isParamSetByUser("block")
-            ? getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()
-            : CoverageCheckMode::ONLY_LIST),
-    _material_coverage_blocks(
-        isParamSetByUser("material_coverage_check") || !isParamSetByUser("block")
-            ? getParam<std::vector<SubdomainName>>("material_coverage_block_list")
-            : getParam<std::vector<SubdomainName>>("block")),
+        getParam<MooseEnum>("material_coverage_check").getEnum<CoverageCheckMode>()),
+    _material_coverage_blocks(getParam<std::vector<SubdomainName>>("material_coverage_block_list")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
     _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
@@ -521,21 +512,25 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _regard_general_exceptions_as_errors(getParam<bool>("regard_general_exceptions_as_errors")),
     _requires_nonlocal_coupling(false)
 {
-
-  auto checkConflict =
-      [this](const CoverageCheckMode & coverage_check_mode, const std::string & coverage_check)
+  auto checkCoverageCheckConflict =
+      [this](const std::string & coverage_check,
+             const CoverageCheckMode & coverage_check_mode,
+             const std::vector<SubdomainName> & coverage_blocks) -> void
   {
-    if ((isParamSetByUser(coverage_check) &&
-         (coverage_check_mode == CoverageCheckMode::ONLY_LIST ||
-          coverage_check_mode == CoverageCheckMode::SKIP_LIST)) &&
-        isParamSetByUser("block"))
-      paramError("block",
-                 "Cannot set both '" + coverage_check +
-                     "' as 'ONLY_LIST' or 'SKIP_LIST' and 'block'. Please set only one.");
+    if (coverage_check_mode != CoverageCheckMode::FALSE &&
+        coverage_check_mode != CoverageCheckMode::OFF)
+      for (const auto & blk_name : coverage_blocks)
+        if (blk_name == "ANY_BLOCK_ID")
+          paramError(coverage_check,
+                     "The list of blocks used for ",
+                     coverage_check,
+                     " cannot contain 'ANY_BLOCK_ID'. ");
   };
 
-  checkConflict(_kernel_coverage_check, "kernel_coverage_check");
-  checkConflict(_material_coverage_check, "material_coverage_check");
+  checkCoverageCheckConflict(
+      "kernel_coverage_check", _kernel_coverage_check, _kernel_coverage_blocks);
+  checkCoverageCheckConflict(
+      "material_coverage_check", _material_coverage_check, _material_coverage_blocks);
 
   //  Initialize static do_derivatives member. We initialize this to true so that all the
   //  default AD things that we setup early in the simulation actually get their derivative
@@ -8228,8 +8223,10 @@ FEProblemBase::checkProblemIntegrity()
 {
   TIME_SECTION("checkProblemIntegrity", 5);
 
-  // Check for unsatisfied actions
-  const std::set<SubdomainID> & mesh_subdomains = _mesh.meshSubdomains();
+  // Subdomains specified by the "Problem/block" parameter
+  const auto & subdomain_names = getParam<std::vector<SubdomainName>>("block");
+  auto mesh_subdomains_vec = MooseMeshUtils::getSubdomainIDs(_mesh, subdomain_names);
+  std::set<SubdomainID> mesh_subdomains(mesh_subdomains_vec.begin(), mesh_subdomains_vec.end());
 
   // Check kernel coverage of subdomains (blocks) in the mesh
   if (!_skip_nl_system_check && _solve && _kernel_coverage_check != CoverageCheckMode::FALSE &&
@@ -8247,7 +8244,14 @@ FEProblemBase::checkProblemIntegrity()
         const auto id = _mesh.getSubdomainID(subdomain_name);
         if (id == Moose::INVALID_BLOCK_ID)
           paramError("kernel_coverage_block_list",
-                     "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+                     "Subdomain \"",
+                     subdomain_name,
+                     "\" not found in mesh.");
+        if (mesh_subdomains.find(id) == mesh_subdomains.end())
+          paramError("kernel_coverage_block_list",
+                     "Subdomain \"",
+                     subdomain_name,
+                     "\" is not being skipped.");
         blocks.erase(id);
       }
     }
@@ -8257,7 +8261,14 @@ FEProblemBase::checkProblemIntegrity()
         const auto id = _mesh.getSubdomainID(subdomain_name);
         if (id == Moose::INVALID_BLOCK_ID)
           paramError("kernel_coverage_block_list",
-                     "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+                     "Subdomain \"",
+                     subdomain_name,
+                     "\" not found in mesh.");
+        if (mesh_subdomains.find(id) == mesh_subdomains.end())
+          paramError("kernel_coverage_block_list",
+                     "Subdomain \"",
+                     subdomain_name,
+                     "\" is not part of the simulation domain specified by Problem/block.");
         blocks.insert(id);
       }
     if (!blocks.empty())
@@ -8303,6 +8314,11 @@ FEProblemBase::checkProblemIntegrity()
           if (id == Moose::INVALID_BLOCK_ID)
             paramError("material_coverage_block_list",
                        "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+          if (mesh_subdomains.find(id) == mesh_subdomains.end())
+            paramError("material_coverage_block_list",
+                       "Subdomain \"",
+                       subdomain_name,
+                       "\" is not being skipped.");
           local_mesh_subs.erase(id);
         }
       }
@@ -8315,6 +8331,11 @@ FEProblemBase::checkProblemIntegrity()
           if (id == Moose::INVALID_BLOCK_ID)
             paramError("material_coverage_block_list",
                        "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+          if (mesh_subdomains.find(id) == mesh_subdomains.end())
+            paramError("material_coverage_block_list",
+                       "Subdomain \"",
+                       subdomain_name,
+                       "\" is not part of the simulation domain specified by Problem/block.");
           blocks.erase(id);
         }
         for (const auto id : blocks)

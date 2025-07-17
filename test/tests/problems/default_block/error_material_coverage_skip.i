@@ -1,18 +1,18 @@
-[Problem]
-  kernel_coverage_check = ONLY_LIST
-  kernel_coverage_block_list = '0 1'
-[]
-
 [GlobalParams]
   block = '0 1 3'
+[]
+
+[Problem]
+  material_coverage_check = SKIP_LIST
+  material_coverage_block_list = '2'
 []
 
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 48
-    ny = 32
+    nx = 3
+    ny = 2
     xmin = 0
     xmax = 3
     ymin = 0
@@ -24,14 +24,14 @@
     block_id = 0
     block_name = material_left
     bottom_left = '0 0 0'
-    top_right = '1.25 2.0 0'
+    top_right = '1.0 2.0 0'
   []
   [block_right]
     type = SubdomainBoundingBoxGenerator
     input = block_left
     block_id = 1
     block_name = material_right
-    bottom_left = '1.75 0 0'
+    bottom_left = '2.0 0 0'
     top_right = '3.0 2.0 0'
   []
   [block_middle]
@@ -39,16 +39,16 @@
     input = block_right
     block_id = 2
     block_name = material_null
-    bottom_left = '1.25 0 0'
-    top_right = '1.75 2.0 0'
+    bottom_left = '1.0 0 0'
+    top_right = '2.0 1.0 0'
   []
   [block_middle_new]
     type = SubdomainBoundingBoxGenerator
     input = block_middle
     block_id = 3
     block_name = material_middle
-    bottom_left = '1.25 1.0 0'
-    top_right = '1.75 2.0 0'
+    bottom_left = '1.0 1.0 0'
+    top_right = '2.0 2.0 0'
   []
   use_displaced_mesh = false
 []
