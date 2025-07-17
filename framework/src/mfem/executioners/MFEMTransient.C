@@ -64,10 +64,12 @@ MFEMTransient::step(double dt, int) const
 
   // Advance time step.
   _problem_data.ode_solver->Step(_problem_data.f, _t, dt);
-  _problem_data.f.HostRead();
 
   // Synchonise time dependent GridFunctions with updated DoF data.
   _problem_operator->SetTestVariablesFromTrueVectors();
+
+  // Sync Host/Device
+  _problem_data.f.HostRead();
 
   // Execute user objects at timestep end
   _mfem_problem.execute(EXEC_TIMESTEP_END);
