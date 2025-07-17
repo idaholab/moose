@@ -28,8 +28,6 @@ LinearFVConjugateHeatTransferBC::LinearFVConjugateHeatTransferBC(
     _solid_conductivity(getFunctor<Real>("solid_conductivity")),
     _fluid_conductivity(getFunctor<Real>("fluid_conductivity"))
 {
-//  LinearFVConvectiveHeatTransferBC(parameters);
-
   // We determine the alpha functor's sign for the Robin BC coupling
   if (_var_is_fluid)
   {
@@ -41,9 +39,10 @@ LinearFVConjugateHeatTransferBC::LinearFVConjugateHeatTransferBC(
     _rhs_temperature  = &_temp_fluid;
     _rhs_conductivity = &_fluid_conductivity;
   }
+
+  _var.computeCellGradients();
 }
 
-// LinearFVConjugateHeatTransferBC::updateCouplingParams()
 Real
 LinearFVConjugateHeatTransferBC::computeBoundaryGradientRHSContribution() const
 {
@@ -63,8 +62,15 @@ LinearFVConjugateHeatTransferBC::computeBoundaryGradientRHSContribution() const
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
 
-  const auto t_coupled = (*_rhs_temperature)(face, state) +
-              (  (*_rhs_conductivity)(face,state) * computeBoundaryNormalGradient()/ _htc(face, state));
+  // const auto multiplier = _current_face_info->normal() * (_current_face_info->faceCentroid() -
+  //                                                         fluid_side_elem_info->centroid()) >
+  //                                 0
+  //                             ? 1
+  //                             : -1;
+  const auto t_coupled = (*_rhs_temperature)(face, state) -
+              (  (*_rhs_conductivity)(face,state) *
+                  (*_rhs_temperature).gradient(face,state)*_current_face_info->normal()
+              / _htc(face, state));
 
   return  _htc(face, state) * t_coupled;
 }

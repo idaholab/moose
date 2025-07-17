@@ -659,22 +659,15 @@ LinearAssemblySegregatedSolve::solve()
         {
           // We set the preconditioner/controllable parameters through petsc options. Linear
           // tolerances will be overridden within the solver.
+          _energy_system->computeGradients();
           Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
           ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
               solveSolidEnergy();
-          std::cout<<"Solving for solid temp..."<<std::endl;
+          std::cout << "Solving for solid temp..." << std::endl;
 
-          //          const auto t_fluid =  *_energy_system->var();
-          //          const auto t_solid =  *_solid_energy_system->var();
-
-          //          *_energy_system->computeGradients();
-          //          q_cht_res_i = *_energy_system->newGradientContainer() * 0.0;
-          //          q_cht_tol_i = (q_cht_res_i - q_cht_res_o);
-          //          q_cht_tol_i = std::sqrt(q_cht_tol_i * q_cht_tol_i);
-          //
-          //          cht_tol_i = std::max(q_cht_tol_i, t_cht_tol_i);
+          _solid_energy_system->computeGradients();
         }
-        std::cout<<"Finished iteration:"<<fpi_itrs+1<<std::endl;
+        std::cout << "Finished iteration:" << fpi_itrs + 1 << std::endl;
         fpi_itrs++;
       }
     }
