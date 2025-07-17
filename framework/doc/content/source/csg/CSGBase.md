@@ -60,15 +60,15 @@ All surface creation methods will return a const reference to that generated sur
 | Sphere | `createSphere` | creates a sphere of radius `r` at an optionally specified center point (default is `(0, 0, 0)`) |
 | Axis-Aligned Cylinder | `createCylinder` | creates a cylinder aligned with the specified axis (`x`, `y`, or `z`) at the specified center location (`x0`, `x1`), where (`x0`, `x1`) is (`y`, `z`) for X-Cylinder, (`x`, `z`) for Y-Cylinder, and (`x`, `y`) for Z-Cylinder |
 
-At the time of surface creation, the type of boundary (`CSGSurface::BoundaryType`) can be optionally set.
-Options for boundary types are `TRANSMISSION` (default), `VACUUM`, and `REFLECTIVE`.
+At the time of surface creation, the type of boundary can be optionally set.
+Options for boundary types are `"TRANSMISSION"` (default), `"VACUUM"`, and `"REFLECTIVE"`.
 
 The `CSGSurface` objects can then be accessed or updated with the following methods from `CSGBase`:
 
 - `getAllSurfaces`: retrieve a list of const references to each `CSGSurface` object in the `CSGBase` instance
 - `getSurfaceByName`: retrieve a const reference to the `CSGSurface` of the specified name
 - `renameSurface`: change the name of the `CSGSurface`
-- `updateSurfaceBoundaryType`: change the boundary type of the `CSGSurface` (`TRANSMISSION`, `VACUUM`, or `REFLECTIVE`)
+- `updateSurfaceBoundaryType`: change the boundary type of the `CSGSurface` (`"TRANSMISSION"`, `"VACUUM"`, or `"REFLECTIVE"`)
 
 Examples:
 
@@ -474,7 +474,7 @@ ExamplePrismCSGMeshGenerator::generateCSG()
         ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
     // check if this is the first half-space to be added to the region,
     // if not, update the existing region with the intersection of the regions (&=)
-    if (region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
+    if (region.getRegionType() == "EMPTY")
       region = halfspace;
     else
       region &= halfspace;
@@ -586,64 +586,64 @@ Example Output:
   },
   "SURFACES": {
     "Prism_surf_minus_x": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
         "d": 2.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "Prism_surf_minus_y": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": -2.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "Cube_surf_minus_z": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": -2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "Prism_surf_plus_x": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
         "d": -2.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "Prism_surf_plus_y": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
         "d": 2.0
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     },
     "Cube_surf_plus_z": {
-      "BOUNDARY": "transmission",
+      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
         "c": 1.0,
         "d": 2.5
       },
-      "TYPE": "plane"
+      "TYPE": "PLANE"
     }
   },
   "UNIVERSES": {
