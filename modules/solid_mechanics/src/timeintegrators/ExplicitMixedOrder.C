@@ -281,7 +281,7 @@ ExplicitMixedOrder::solve()
   _explicit_residual->zero();
   _fe_problem.computeResidual(sol, *_explicit_residual, _nl->number());
 
-  // Move the residual to the RHS
+  // Move the residual to RHS
   *_explicit_residual *= -1.0;
 
   // Perform the linear solve
