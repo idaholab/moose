@@ -1,13 +1,13 @@
 #ifdef MFEM_ENABLED
 
-#include "MFEMEstimator.h"
+#include "MFEMIndicator.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMEstimator);
+registerMooseObject("MooseApp", MFEMIndicator);
 
 // static method
 InputParameters
-MFEMEstimator::validParams()
+MFEMIndicator::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("Indicator");
@@ -18,7 +18,7 @@ MFEMEstimator::validParams()
   return params;
 }
 
-MFEMEstimator::MFEMEstimator(const InputParameters & params)
+MFEMIndicator::MFEMIndicator(const InputParameters & params)
   : MFEMGeneralUserObject(params),
     _variable_name(getParam<std::string>("variable")),
     _variable(getUserObject<MFEMVariable>("variable")),
@@ -27,7 +27,7 @@ MFEMEstimator::MFEMEstimator(const InputParameters & params)
 }
 
 std::shared_ptr<mfem::ParFiniteElementSpace>
-MFEMEstimator::getFESpace() const
+MFEMIndicator::getFESpace() const
 {
   // MFEMVariable::getFESpace() returns a reference to the MFEMFESpace
   // and we piggyback from this to get the underlying shared ptr
