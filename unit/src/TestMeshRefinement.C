@@ -6,7 +6,7 @@
 #include "MFEMHypreBoomerAMG.h"
 #include "equation_system_problem_operator.h"
 #include "MFEMParaViewDataCollection.h"
-#include "MFEMEstimator.h"
+#include "MFEMIndicator.h"
 
 static double
 SolveEquationAndCheckResidual(std::unique_ptr<platypus::EquationSystemProblemOperator> &,

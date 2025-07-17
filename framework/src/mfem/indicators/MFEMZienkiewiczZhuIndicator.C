@@ -1,23 +1,23 @@
 #ifdef MFEM_ENABLED
 
-#include "MFEMZienkiewiczZhuEstimator.h"
+#include "MFEMZienkiewiczZhuIndicator.h"
 
-registerMooseObject("MooseApp", MFEMZienkiewiczZhuEstimator);
+registerMooseObject("MooseApp", MFEMZienkiewiczZhuIndicator);
 
 InputParameters
-MFEMZienkiewiczZhuEstimator::validParams()
+MFEMZienkiewiczZhuIndicator::validParams()
 {
-  return MFEMEstimator::validParams();
+  return MFEMIndicator::validParams();
 }
 
 // Make sure we don't do this until all the grid functions etc are set up!
-MFEMZienkiewiczZhuEstimator::MFEMZienkiewiczZhuEstimator(const InputParameters & params)
-  : MFEMEstimator(params)
+MFEMZienkiewiczZhuIndicator::MFEMZienkiewiczZhuIndicator(const InputParameters & params)
+  : MFEMIndicator(params)
 {
 }
 
 bool
-MFEMZienkiewiczZhuEstimator::createEstimator()
+MFEMZienkiewiczZhuIndicator::createEstimator()
 {
   MFEMProblemData & problem = getMFEMProblem().getProblemData();
   mfem::BilinearFormIntegrator * integ;

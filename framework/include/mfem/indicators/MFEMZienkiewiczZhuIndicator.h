@@ -11,13 +11,13 @@
 
 #pragma once
 
-#include "MFEMEstimator.h"
+#include "MFEMIndicator.h"
 
-class MFEMZienkiewiczZhuEstimator : public MFEMEstimator
+class MFEMZienkiewiczZhuIndicator : public MFEMIndicator
 {
 public:
-  MFEMZienkiewiczZhuEstimator(const InputParameters & parameters);
-  virtual ~MFEMZienkiewiczZhuEstimator() = default;
+  MFEMZienkiewiczZhuIndicator(const InputParameters & parameters);
+  virtual ~MFEMZienkiewiczZhuIndicator() = default;
 
   static InputParameters validParams();
 
