@@ -111,6 +111,9 @@ private:
 
   void applyMovingBoundaryChanges(MooseMesh & mesh);
 
+  void prepareVariableForReinitialization(const VariableName & var_name,
+                                          ReinitStrategy reinit_strategy);
+
   /// Update boundaries for adaptive mesh from the parent to children elements
   void updateAMRMovingBoundary(MooseMesh & mesh);
 
@@ -189,75 +192,54 @@ private:
   /// Reinitialized boundary nodes in ConstNodeRange format (displaced mesh)
   std::unique_ptr<ConstNodeRange> _reinitialized_displaced_node_range_from_bnd_nodes;
 
-  /// Non-reinitialized nodes on reinitialized elements
-  std::unordered_set<dof_id_type> _non_reinit_nodes_on_reinit_elems;
-
-  /// A map from variable name to a pair of:
-  /// (1) a vector of DOF IDs associated with non-reinitialized nodes on reinitialized elements, and
-  /// (2) the corresponding solution values at those DOFs.
-  /// This map is used to preserve solution data for variables that should not be reinitialized
-  /// even though they reside on reinitialized elements.
-  std::map<VariableName, std::pair<std::vector<dof_id_type>, std::vector<Number>>>
-      _var_to_dofs_values_from_nonreinit_nodes;
-
   /// The strategy used to apply IC on newly activated nodes
   std::vector<ReinitStrategy> _reinit_strategy;
 
   /// @brief Names of the NodalPatchRecoveryBase user objects
-  const std::vector<UserObjectName> _npr_names;
+  const std::vector<UserObjectName> _pr_names;
 
   /// @brief Apply initial conditions using polynomial extrapolation
-  std::vector<const NodalPatchRecoveryBase *> _npr;
+  std::vector<const NodalPatchRecoveryBase *> _pr;
 
   /// @brief List of variable names to be initialized for IC
   std::vector<VariableName> _reinit_vars;
 
-  /// @brief map from variable name to the index of the nodal patch recovery user object in `_npr`
-  std::map<VariableName, unsigned int> _var_name_to_npr_idx;
+  /// @brief map from variable name to the index of the nodal patch recovery user object in `_pr`
+  std::map<VariableName, unsigned int> _var_name_to_pr_idx;
 
-  /// @brief A map to map reinitialization strategies to their corresponding solved element IDs
-  std::map<ReinitStrategy, std::vector<dof_id_type>> _solved_elem_ids_for_npr;
-
-  /// POLYNOMIAL_NEARBY related parameters
-  /// @brief Minimum number of nearby elements required in the polynomial extrapolation patch.
-  int _nearby_element_threshold = 1;
-
-  /// @brief Centroids of all solved elements used for k-d tree construction.
-  std::vector<Point> _centroids_of_elements;
+  /// @brief A map to map reinitialization strategies to their corresponding patch element IDs
+  std::map<VariableName, std::vector<dof_id_type>> _patch_elem_ids;
 
   /// @brief Maximum number of elements allowed in a leaf node of the k-d tree.
   int _leaf_max_size = 10;
 
   /// @brief k-d tree used for neighbor solved element search in polynomial extrapolation.
-  KDTree * _kd_tree = nullptr;
+  std::unique_ptr<KDTree> _kd_tree = nullptr;
 
-  /// @brief Mapping from the k-d tree node index to the corresponding element ID.
-  std::vector<dof_id_type> _kd_tree_sequence_elem_id_map;
-
-  /// @brief Minimum diagonal length among the loose bounding boxes of
-  /// all solved elements (i.e., elements within the computational domain,
-  /// excluding those in _reinitialized_elems).
-  /// This value is used to compute the initial search radius for the k-d tree search,
-  /// where the radius is estimated as _nearby_element_threshold multiplied by _min_diag_length.
-  double _min_diag_length = std::numeric_limits<double>::max();
+  /// @brief Centroids of all solved elements used for k-d tree construction.
+  std::vector<Point> _kd_tree_points;
 
   /// @brief Radius threshold for the k-d tree neighbor search.
-  /// By default, it is initialized as _nearby_element_threshold * _min_diag_length,
+  /// By default, it is initialized as _nearby_element_threshold,
   /// but the user can override this value by explicitly setting _nearby_distance_threshold.
   double _nearby_distance_threshold = -1;
 
   /// @brief Set of processor IDs that have reinitialized elements and nodes.
   std::set<processor_id_type> _global_proc_ids_for_reinit;
 
-  /// @brief Gather neighbor elements for newly activated nodes based on the reinitialization strategy.
-  void gatherNeighborElementsForActivatedNodes(ReinitStrategy & reinit_strategy);
+  /// @brief Gather patch elements for reinitialized elements based onthe reinitialization strategy.
+  void gatherPatchElements(const VariableName & var_name, ReinitStrategy reinit_strategy);
 
-  /// @brief Project initial conditions using NodalPatchRecoveryBase user objects
-  void projectNprIC(const VariableName & var_name, bool displaced, ReinitStrategy reinit_strategy);
+  /// @brief Extrapolate polynomial for the given variable onto the reinitialized elements.
+  void extrapolatePolynomial(const VariableName & var_name, bool displaced);
 
   /// @brief Store values from non-reinitialized nodes on reinitialized elements
-  void storeValuesFromNonReinitNodes(const std::set<VariableName> & vars_names);
+  void storeOverriddenDofValues(const std::set<VariableName> & vars_names);
 
   /// @brief Restore values to non-reinitialized nodes on reinitialized elements
-  void restoreValuesToNonReinitNodes(const std::set<VariableName> & vars_names);
+  void restoreOverriddenDofValues(const std::set<VariableName> & vars_names);
+
+private:
+  /// Construct a KD-tree from the given elements
+  std::unique_ptr<KDTree> constructKDTreeFromElements(const std::vector<dof_id_type> & elems);
 };
