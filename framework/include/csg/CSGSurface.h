@@ -43,7 +43,7 @@ public:
    * @param surf_type surface type
    * @param boundary boundary condition for the surface
    */
-  CSGSurface(const std::string & name, const std::string surf_type, std::string boundary);
+  CSGSurface(const std::string & name, const std::string & surf_type, std::string & boundary);
 
   /**
    * Destructor
@@ -51,7 +51,7 @@ public:
   virtual ~CSGSurface() = default;
 
   /**
-   * @brief Get the Surface Type (i.e. PLANE, SPHERE, XCYLINDER, YCYLINDER, ZCYLINDER)
+   * @brief Get the Surface Type
    *
    * @return type of surface
    */
