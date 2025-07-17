@@ -254,7 +254,7 @@ INSFVTKEDSourceSink::computeQpResidual()
       const auto g_direction = (*_gravity) / (*_gravity).norm();
       const auto vel_parallel = velocity * g_direction;
       const auto vel_perpendicular = (velocity - vel_parallel * g_direction).norm();
-      const auto C_eps_3 = std::tanh(vel_parallel / (vel_perpendicular + 1e-10));
+      const auto C_eps_3 = std::tanh(std::abs(vel_parallel) / (vel_perpendicular + 1e-10));
 
       base_strain += C_eps_3 * (*_alpha)(elem_arg, state) / (*_Pr_t)(elem_arg, state) *
                      (_temperature->gradient(elem_arg, state) * (*_gravity));
