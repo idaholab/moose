@@ -631,6 +631,9 @@ MFEMProblem::HRefine()
   bool stop = true;
   if (UseAMR())
   {
+    // increment the counter
+    _problem_data._h_ref_counter++;
+
     stop = _problem_data._refiner->Apply(*_problem_data.pmesh);;
   }
   else
@@ -648,6 +651,9 @@ MFEMProblem::PRefine()
   bool stop = true;
   if (UseAMR())
   {
+    // increment the counter
+    _problem_data._p_ref_counter++;
+
     mfem::Array<mfem::pRefinement> prefinements;
     mfem::Array<mfem::Refinement> refinements;
 
@@ -674,13 +680,18 @@ MFEMProblem::PRefine()
 bool
 MFEMProblem::UseHRefinement() const
 {
-  return _problem_data._refiner->UseHRefinement();
+  return
+    (_problem_data._refiner->UseHRefinement())
+    and
+    (_problem_data._h_ref_counter < _problem_data._refiner->MaxHLevel());
 }
 
 bool
 MFEMProblem::UsePRefinement() const
 {
-  return _problem_data._refiner->UsePRefinement();
-}
+  return
+    (_problem_data._refiner->UsePRefinement())
+    and
+    (_problem_data._p_ref_counter < _problem_data._refiner->MaxPLevel());}
 
 #endif
