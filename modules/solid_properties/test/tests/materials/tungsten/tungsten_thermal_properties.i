@@ -1,5 +1,5 @@
-# Analytic formulas are taken from Milner, J. L., Karkos, P., & Bowers, J. J. (2024). 
-# Space Nuclear Propulsion (SNP) Material Property Handbook (No. SNP-HDBK-0008). 
+# Analytic formulas are taken from Milner, J. L., Karkos, P., & Bowers, J. J. (2024).
+# Space Nuclear Propulsion (SNP) Material Property Handbook (No. SNP-HDBK-0008).
 # National Aeronautics and Space Administration (NASA). https://ntrs.nasa.gov/citations/20240004217
 
 

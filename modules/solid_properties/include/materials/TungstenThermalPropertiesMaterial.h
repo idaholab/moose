@@ -13,8 +13,8 @@
 
 /**
  * This material computes Tungsten thermal properties as a function of temperature.
- * Constants are taken from Milner, J. L., Karkos, P., & Bowers, J. J. (2024). 
- * Space Nuclear Propulsion (SNP) Material Property Handbook (No. SNP-HDBK-0008). 
+ * Constants are taken from Milner, J. L., Karkos, P., & Bowers, J. J. (2024).
+ * Space Nuclear Propulsion (SNP) Material Property Handbook (No. SNP-HDBK-0008).
  * National Aeronautics and Space Administration (NASA). https://ntrs.nasa.gov/citations/20240004217
  */
 
@@ -68,5 +68,5 @@ class TungstenThermalPropertiesMaterial : public Material
             MaterialProperty<Real> & _c_p;
             /// density of the tungsten material
             MaterialProperty<Real> & _rho;
-            
+
 };
