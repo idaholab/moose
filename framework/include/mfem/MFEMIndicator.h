@@ -9,15 +9,15 @@
 /*
 Class to construct an MFEM estimator to apply to the equation system.
 */
-class MFEMEstimator : public MFEMGeneralUserObject
+class MFEMIndicator : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
 
   // also need reference to mfem problem here
-  MFEMEstimator(const InputParameters & params);
+  MFEMIndicator(const InputParameters & params);
 
-  virtual ~MFEMEstimator() = default;
+  virtual ~MFEMIndicator() = default;
 
   // Get name of the test variable labelling the weak form this kernel is added to
   const std::string & getTestVariableName() const { return _variable_name; }

@@ -1,11 +1,11 @@
-# MFEMZienkiewiczZhuEstimator
+# MFEMZienkiewiczZhuIndicator
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-Child class of [MFEMEstimator](source/mfem/estimators/MFEMEstimator.md) that supplies
-the `mfem::L2ZienkiewiczZhuEstimator` to the [Refiner](source/mfem/refiners/MFEMThresholdRefiner.md)
+Child class of [MFEMIndicator](source/mfem/estimators/MFEMIndicator.md) that supplies
+the `mfem::L2ZienkiewiczZhuEstimator` to the [Refiner](source/mfem/refiners/MFEMThresholdMarker.md)
 
 ## Overview
 
