@@ -1,5 +1,5 @@
 ##################################################################
-c     = 0.01 # advection veclocity (+x direction)
+c     = 0.01 # advection velocity (+x direction)
 amp   = 1.0 # sinusoid amplitude, for u_exact
 u0    = 1.2 # any positive constant > 1.0
 
@@ -124,9 +124,10 @@ ny = 2
 [Executioner]
   type = Steady
   system_names = u_sys
-  l_tol = 1e-8
+  l_tol = 1e-7
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       NONZERO               1e-10'
+  linear_convergence = linear
 []
 
 [Outputs]

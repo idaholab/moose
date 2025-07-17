@@ -15,11 +15,12 @@ InputParameters
 LinearFVAdvectionDiffusionFunctorRobinBC::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
-  params.addClassDescription("Adds a Robin BC of the form alpha* grad_phi*n + beta*phi = gamma, "
-                             "which can be used for the assembly of linear "
-                             "finite volume system and whose face values are determined using "
-                             "three functors. This kernel is "
-                             "only designed to work with advection-diffusion problems.");
+  params.addClassDescription(
+      "Adds a Robin BC of the form \\alpha * \\nabla \\phi*n + \\beta * \\phi = \\gamma, "
+      "which can be used for the assembly of linear "
+      "finite volume system and whose face values are determined using "
+      "three functors. This kernel is "
+      "only designed to work with advection-diffusion problems.");
   params.addRequiredParam<MooseFunctorName>(
       "alpha", "The functor which is the coefficient of the normal gradient term.");
   params.addRequiredParam<MooseFunctorName>(
@@ -54,6 +55,8 @@ Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValue() const
 {
   const auto face = singleSidedFaceArg(_current_face_info);
+  mooseAssert(_current_face_type != FaceInfo::VarFaceNeighbors::BOTH,
+              "This should not be assigned on an internal face!");
   const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
@@ -106,6 +109,8 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValueRHSContribution() 
 {
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
+  mooseAssert(_current_face_type != FaceInfo::VarFaceNeighbors::BOTH,
+              "This should not be assigned on an internal face!");
   const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
@@ -142,6 +147,8 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryGradientMatrixContribut
 Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryGradientRHSContribution() const
 {
+  mooseAssert(_current_face_type != FaceInfo::VarFaceNeighbors::BOTH,
+              "This should not be assigned on an internal face!");
   const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();

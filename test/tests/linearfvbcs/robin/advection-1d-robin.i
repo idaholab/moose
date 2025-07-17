@@ -1,5 +1,5 @@
 ##################################################################
-c     = 0.1 # advection veclocity (+x direction)
+c     = 0.1 # advection velocity (+x direction)
 amp   = 7.0 # sinusoid amplitude, for u_exact
 
 x_l   = ${fparse 0.0*pi} # domain bound (left)
@@ -103,9 +103,10 @@ npts = 2
 [Executioner]
   type = Steady
   system_names = u_sys
-  l_tol = 1e-8
+  l_tol = 1e-7
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       NONZERO               1e-10'
+  linear_convergence = linear
 []
 
 [Outputs]

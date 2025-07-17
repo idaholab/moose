@@ -39,8 +39,10 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
 protected:
-  /// The functors for this BC (can be variable, function, etc)
+  /// Functor giving the alpha coefficient (multiplying normal gradient)
   const Moose::Functor<Real> & _alpha;
+  /// Functor giving the beta coefficient (multiplying value)
   const Moose::Functor<Real> & _beta;
+  /// Functor giving the gamma coefficient (on right hand side, treated explicitly)
   const Moose::Functor<Real> & _gamma;
 };
