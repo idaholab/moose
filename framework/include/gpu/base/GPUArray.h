@@ -314,6 +314,7 @@ public:
     bool operator==(const iterator & other) const { return it == other.it; }
     bool operator!=(const iterator & other) const { return it != other.it; }
     T & operator*() const { return *it; }
+    T * operator&() const { return it; }
     iterator & operator++()
     {
       ++it;

@@ -42,8 +42,11 @@ Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & syste
   else
     _val.create(_col_idx.size());
 
+  std::vector<PetscInt> col_idx(&_col_idx.begin(), &_col_idx.end());
+  std::vector<PetscInt> row_idx(&_row_idx.begin(), &_row_idx.end());
+
   LibmeshPetscCallQ(
-      MatSetPreallocationCOO(_matrix, _col_idx.size(), _row_idx.data(), _col_idx.data()));
+      MatSetPreallocationCOO(_matrix, col_idx.size(), row_idx.data(), col_idx.data()));
 
   _is_alloc = true;
 }
