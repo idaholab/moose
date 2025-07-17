@@ -17,7 +17,6 @@ namespace CSG
 /**
  * CSGRegions creates an internal representation of a CSG region, which can refer to
  * an intersection, union, complement, or half-space
- * CSGHalfspace objects
  */
 class CSGRegion
 {
@@ -28,17 +27,27 @@ public:
   CSGRegion();
 
   /**
-   * Constructor for half-space
+   * @brief Constructor for half-space of a surface
+   *
+   * @param surf referance to surface used to define the half-space
+   * @param direction half-space direction to apply to surface (POSITIVE or NEGATIVE)
    */
   CSGRegion(const CSGSurface & surf, const CSGSurface::Direction direction);
 
   /**
-   * Constructor for union and intersection
+   * @brief Constructor for union and intersection
+   *
+   * @param region_a reference to first region to union or intersect
+   * @param region_b reference to second region to union or intersect
+   * @param region_type type of region operation (UNION or INTERSECTION)
    */
   CSGRegion(const CSGRegion & region_a, const CSGRegion & region_b, std::string region_type);
 
   /**
-   * Constructor for complement
+   * @brief Constructor for complement or empty region (clear the region)
+   *
+   * @param region reference to region to apply complement
+   * @param region_type type of region to apply (COMPLEMENT or EMPTY)
    */
   CSGRegion(const CSGRegion & region, std::string region_type);
 
