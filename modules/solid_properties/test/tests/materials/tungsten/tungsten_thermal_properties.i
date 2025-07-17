@@ -172,11 +172,25 @@
   []
 []
 
+[VectorPostprocessors]
+  [props_and_diffs]
+    type = LineValueSampler
+    variable = 'thermal_conductivity specific_heat density k_diff c_p_diff rho_diff'
+    start_point = '11 0 0'
+    end_point = '3600 0 0'
+    num_points = 100
+    sort_by = x
+  []
+[]
+
 [Executioner]
   type = Steady
 []
 
 [Outputs]
-  csv = true
   exodus = true
+  [csv]
+    type = CSV
+    execute_on = final
+  []
 []
