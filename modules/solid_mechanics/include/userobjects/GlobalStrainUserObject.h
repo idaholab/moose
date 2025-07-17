@@ -33,7 +33,7 @@ public:
   /**
    * Calculate additional applied stresses
    */
-  virtual void computeAdditionalStress(){};
+  virtual void computeAdditionalStress() {};
 
 protected:
   /// Base name of the material system
@@ -50,10 +50,9 @@ protected:
 
   const unsigned int _dim;
 
-  /// Number of displacement variables
-  const unsigned int _ndisp;
+  /// Displacement variables
+  const std::vector<const MooseVariableFieldBase *> _disp_var;
 
   /// Variable numbers of the displacement variables
-  std::vector<unsigned int> _disp_var;
   VectorValue<bool> _periodic_dir;
 };

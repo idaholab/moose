@@ -1,0 +1,30 @@
+[Tests]
+  design = 'ReflectRayBC.md RayBCs/index.md'
+  issues = '#31025'
+
+  [test]
+    requirement = 'The system shall support tracing rays with periodic boundary conditions for'
+
+    [1d]
+      type = 'CSVDiff'
+      input = 'periodic_ray_bc_1d.i'
+      csvdiff = 'periodic_ray_bc_1d_out.csv'
+      allow_test_objects = true
+      detail = 'one-dimensional meshes,'
+    []
+    [2d]
+      type = 'CSVDiff'
+      input = 'periodic_ray_bc_2d.i'
+      csvdiff = 'periodic_ray_bc_2d_out.csv'
+      allow_test_objects = true
+      detail = 'two-dimensional meshes,'
+    []
+    [3d]
+      type = 'CSVDiff'
+      input = 'periodic_ray_bc_3d.i'
+      csvdiff = 'periodic_ray_bc_3d_out.csv'
+      allow_test_objects = true
+      detail = 'and three-dimensional meshes.'
+    []
+  []
+[]

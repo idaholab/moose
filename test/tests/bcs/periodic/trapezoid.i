@@ -56,6 +56,7 @@
 [BCs]
   [./Periodic]
     [./x]
+      variable = u
       primary = 1
       secondary = 4
       transform_func = 'tr_x tr_y'

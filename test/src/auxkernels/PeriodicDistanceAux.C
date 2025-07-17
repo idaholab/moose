@@ -39,5 +39,5 @@ PeriodicDistanceAux::computeValue()
 {
   // Compute the periodic distance from a given feature
   // Note: For this test kernel we are just going to use the first nonlinear variable (index: 0)
-  return _mesh.minPeriodicDistance(0, *_current_node, _point);
+  return _mesh.minPeriodicDistance(0, 0, *_current_node, _point);
 }

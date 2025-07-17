@@ -49,6 +49,7 @@ RayTracingApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 
   // Adds [RayBCs] block
   registerSyntaxTask("AddRayBCAction", "RayBCs/*", "add_ray_boundary_condition");
+  registerSyntax("SetupPeriodicRayBCAction", "RayBCs/*");
   registerMooseObjectTask("add_ray_boundary_condition", RayBoundaryCondition, false);
   addTaskDependency("add_ray_boundary_condition", "add_kernel");
 }

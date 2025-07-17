@@ -4,53 +4,22 @@
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 20
+  nx = 1
 []
 
-[Variables]
-  [./c]
-    [./InitialCondition]
-      type = FunctionIC
-      function = x
-    [../]
-  [../]
-  [./scalar]
-    family = SCALAR
-  [../]
+[Variables/scalar]
+  family = SCALAR
 []
 
-[BCs]
-  [./Periodic]
-    [./all]
-      auto_direction = x
-    [../]
-  [../]
-[]
-
-[Kernels]
-  [./dt]
-    type = TimeDerivative
-    variable = c
-  [../]
-  [./diff]
-    type = Diffusion
-    variable = c
-  [../]
-[]
-
-[ScalarKernels]
-  [./scalar]
-    type = ODETimeDerivative
-    variable = scalar
-  [../]
+[BCs/Periodic/scalar]
+  variable = scalar
+  auto_direction = x
 []
 
 [Executioner]
-  type = Transient
-  dt = 0.1
-  num_steps = 3
+  type = Steady
 []
 
-[Outputs]
-  exodus = true
+[Problem]
+  solve = false
 []
