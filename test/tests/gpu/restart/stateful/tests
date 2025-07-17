@@ -13,7 +13,7 @@
     [load_checkpoint]
       type = Exodiff
       input = 'gpu_stateful_prop_spatial_test_restart.i'
-      exodiff = 'out_spatial_gpu.e'
+      exodiff = 'out_spatial_restart_gpu.e'
       requirement = 'The Kokkos system shall be able to restart a transient calculation by loading a checkpoint file that includes stateful material properties.'
       capabilities = 'kokkos'
       devices = 'cuda'
@@ -65,6 +65,7 @@
       capabilities = 'kokkos'
       devices = 'cuda'
       prereq = 'restart/write_checkpoint'
+      recover = false
     []
   []
 []
