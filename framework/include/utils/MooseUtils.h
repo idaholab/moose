@@ -135,16 +135,25 @@ std::vector<std::string> rsplit(const std::string & str,
                                 std::size_t max_count = std::numeric_limits<std::size_t>::max());
 
 /**
- * Python like join function for strings.
+ * Python-like join function for strings over an iterator range.
+ */
+template <typename Iterator>
+std::string
+join(Iterator begin, Iterator end, const std::string & delimiter)
+{
+  std::ostringstream oss;
+  std::copy(begin, end, infix_ostream_iterator<std::string>(oss, delimiter.c_str()));
+  return oss.str();
+}
+
+/**
+ * Python-like join function for strings over a container.
  */
 template <typename T>
 std::string
 join(const T & strings, const std::string & delimiter)
 {
-  std::ostringstream oss;
-  std::copy(
-      strings.begin(), strings.end(), infix_ostream_iterator<std::string>(oss, delimiter.c_str()));
-  return oss.str();
+  return join(strings.begin(), strings.end(), delimiter);
 }
 
 /**

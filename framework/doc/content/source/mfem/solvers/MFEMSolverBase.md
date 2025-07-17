@@ -17,6 +17,8 @@ preconditioners - can be passed to the `mfem::Solver` at construction time.
 
 Most solvers have the option of being used as Low-Order-Refined (LOR) preconditioner, by setting their respective `low_order_refined` parameter to `true`. LOR solvers work by taking a problem and casting it onto a spectrally equivalent one with lower polynomial order and more refined mesh. Due to the scaling properties of the computing time with respect to polynomial order and mesh size, this change will often result in a significant performance improvement, which tends to be more pronounced at higher polynomial orders. More details can be found [here](https://mfem.org/pdf/workshop21/15_WillPazner_High_Order_Solvers.pdf).
 
+!alert note Solving a problem with vector variables with the LOR method requires a specific choice of quadrature basis for the low-order and the high-order systems to be spectrally equivalent. Therefore, if you are solving an H(Curl) or H(Div) problem with an LOR solver, you must set `closed_basis = GaussLobatto` and `open_basis = IntegratedGLL` in the corresponding `FESpaces` block.
+
 
 !if-end!
 
