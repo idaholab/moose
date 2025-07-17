@@ -40,8 +40,12 @@ ElementQualityChecker::validParams()
   params.addRequiredParam<MooseEnum>("metric_type",
                                      ElementQualityChecker::QualityMetricType(),
                                      "Type of quality metric to be checked");
-  params.addParam<Real>("upper_bound", "the upper bound for provided metric type");
+  params.addParam<Real>("upper_bound", "The upper bound for provided metric type");
   params.addParam<Real>("lower_bound", "The lower bound for provided metric type");
+  params.addParam<bool>("suppress_invalid_metric_warning",
+                        false,
+                        "Whether to print the warning related to the quality metric type not being "
+                        "applicable to a given element type.");
   params.addParam<MooseEnum>("failure_type",
                              ElementQualityChecker::FailureMessageType(),
                              "The way how the failure of quality metric check should respond");
@@ -60,6 +64,7 @@ ElementQualityChecker::ElementQualityChecker(const InputParameters & parameters)
     _m_min(0),
     _m_max(0),
     _m_sum(0),
+    _suppress_invalid_metric_warning(getParam<bool>("suppress_invalid_metric_warning")),
     _failure_type(getParam<MooseEnum>("failure_type").getEnum<FailureType>())
 {
 }
@@ -163,8 +168,9 @@ ElementQualityChecker::finalize()
   _communicator.set_union(_bypassed_elem_type);
 
   if (_bypassed)
-    mooseWarning("Provided quality metric doesn't apply to following element type: " +
-                 Moose::stringify(_bypassed_elem_type));
+    if (!_suppress_invalid_metric_warning)
+      mooseWarning("Provided quality metric doesn't apply to following element type: " +
+                   Moose::stringify(_bypassed_elem_type));
 
   _console << libMesh::Quality::name(_m_type) << " Metric values:"
            << "\n";
