@@ -39,7 +39,10 @@ ProblemOperatorInterface::Init(mfem::BlockVector & X)
   for (size_t i = 0; i < _test_variables.size(); ++i)
   {
     X.GetBlock(i) = _test_variables.at(i)->GetTrueVector();
+    // After initial assignment of X from the preexisting grid function true vector, we replace the
+    // latter with X
     _test_variables.at(i)->MakeTRef(_test_variables.at(i)->ParFESpace(), X, _block_true_offsets[i]);
+    _test_true_vector = &X;
   }
 }
 
@@ -48,7 +51,13 @@ ProblemOperatorInterface::SetTestVariablesFromTrueVectors()
 {
   for (unsigned int ind = 0; ind < _test_variables.size(); ++ind)
   {
-    _test_variables.at(ind)->SetFromTrueVector();
+    auto * const test_var = _test_variables.at(ind);
+
+    // We must sync the memory flags from the true true vector to the grid function copy of the true
+    // vector
+    mooseAssert(_test_true_vector, "The true vector should already have been set");
+    test_var->GetTrueVector().SyncMemory(*_test_true_vector);
+    test_var->SetFromTrueVector();
   }
 }
 
