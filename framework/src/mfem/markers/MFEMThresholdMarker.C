@@ -1,11 +1,11 @@
 #ifdef MFEM_ENABLED
 
-#include "MFEMThresholdRefiner.h"
+#include "MFEMThresholdMarker.h"
 
-registerMooseObject("MooseApp", MFEMThresholdRefiner);
+registerMooseObject("MooseApp", MFEMThresholdMarker);
 
 InputParameters
-MFEMThresholdRefiner::validParams()
+MFEMThresholdMarker::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("Marker");
@@ -26,7 +26,7 @@ MFEMThresholdRefiner::validParams()
   return params;
 }
 
-MFEMThresholdRefiner::MFEMThresholdRefiner(const InputParameters & params)
+MFEMThresholdMarker::MFEMThresholdMarker(const InputParameters & params)
   : MFEMGeneralUserObject(params),
     _estimator_name(getParam<std::string>("indicator")),
     _error_threshold(getParam<Real>("refine")),
@@ -52,17 +52,17 @@ MFEMThresholdRefiner::MFEMThresholdRefiner(const InputParameters & params)
 
 
 void
-MFEMThresholdRefiner::setUp()
+MFEMThresholdMarker::setUp()
 {
   // fetch const ref to the estimator
-  const auto& estimator = getUserObjectByName<MFEMEstimator>(_estimator_name);
+  const auto& estimator = getUserObjectByName<MFEMIndicator>(_estimator_name);
 
   _threshold_refiner = std::make_shared<mfem::ThresholdRefiner>( *(estimator.getEstimator()) );
   _threshold_refiner->SetTotalErrorFraction(_error_threshold);
 }
 
 bool
-MFEMThresholdRefiner::MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinement> & refinements)
+MFEMThresholdMarker::MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinement> & refinements)
 {
   // We are doing p-refinement. Increase the counter
   // and check if we have exceeded the max number of
@@ -77,16 +77,16 @@ MFEMThresholdRefiner::MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem
 // Returns true when it's time to stop - the refiner itself
 // will tell us if we've finished refinement
 bool
-MFEMThresholdRefiner::Apply(mfem::ParMesh & mesh)
+MFEMThresholdMarker::Apply(mfem::ParMesh & mesh)
 {
   bool output = _threshold_refiner->Apply(mesh);
   return output;
 }
 
 std::shared_ptr<mfem::ParFiniteElementSpace>
-MFEMThresholdRefiner::getFESpace()
+MFEMThresholdMarker::getFESpace()
 {
-  const auto& estimator = getUserObjectByName<MFEMEstimator>(_estimator_name);
+  const auto& estimator = getUserObjectByName<MFEMIndicator>(_estimator_name);
 
   return estimator.getFESpace();
 }
