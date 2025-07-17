@@ -26,7 +26,6 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
-#include "libmesh/default_coupling.h"
 
 // TIMPI includes
 #include "timpi/parallel_sync.h"
@@ -102,10 +101,6 @@ MultiAppProjectionTransfer::initialSetup()
                          .feType();
 
     LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + name());
-
-    proj_sys.get_dof_map().add_coupling_functor(
-        proj_sys.get_dof_map().default_coupling(),
-        false); // The false keeps it from getting added to the mesh
 
     _proj_var_num = proj_sys.add_variable("var", fe_type);
     proj_sys.attach_assemble_function(assemble_l2);
