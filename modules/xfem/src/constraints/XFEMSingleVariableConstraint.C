@@ -20,11 +20,13 @@
 #include "libmesh/quadrature.h"
 
 registerMooseObject("XFEMApp", XFEMSingleVariableConstraint);
+registerMooseObject("XFEMApp", ADXFEMSingleVariableConstraint);
 
+template <bool is_ad>
 InputParameters
-XFEMSingleVariableConstraint::validParams()
+XFEMSingleVariableConstraintTempl<is_ad>::validParams()
 {
-  InputParameters params = ElemElemConstraint::validParams();
+  InputParameters params = GenericElemElemConstraint<is_ad>::validParams();
   params.addParam<Real>("alpha",
                         100,
                         "Stabilization parameter in Nitsche's formulation and penalty factor "
@@ -46,19 +48,21 @@ XFEMSingleVariableConstraint::validParams()
   return params;
 }
 
-XFEMSingleVariableConstraint::XFEMSingleVariableConstraint(const InputParameters & parameters)
-  : ElemElemConstraint(parameters),
-    _alpha(getParam<Real>("alpha")),
-    _jump(getFunction("jump")),
-    _jump_flux(getFunction("jump_flux")),
-    _use_penalty(getParam<bool>("use_penalty"))
+template <bool is_ad>
+XFEMSingleVariableConstraintTempl<is_ad>::XFEMSingleVariableConstraintTempl(
+    const InputParameters & parameters)
+  : GenericElemElemConstraint<is_ad>(parameters),
+    _alpha(this->template getParam<Real>("alpha")),
+    _jump(this->getFunction("jump")),
+    _jump_flux(this->getFunction("jump_flux")),
+    _use_penalty(this->template getParam<bool>("use_penalty"))
 {
   _xfem = std::dynamic_pointer_cast<XFEM>(_fe_problem.getXFEM());
   if (_xfem == nullptr)
     mooseError("Problem casting to XFEM in XFEMSingleVariableConstraint");
 
-  const UserObject * uo =
-      &(_fe_problem.getUserObjectBase(getParam<UserObjectName>("geometric_cut_userobject")));
+  const UserObject * uo = &(_fe_problem.getUserObjectBase(
+      this->template getParam<UserObjectName>("geometric_cut_userobject")));
 
   if (dynamic_cast<const GeometricCutUserObject *>(uo) == nullptr)
     mooseError("UserObject casting to GeometricCutUserObject in XFEMSingleVariableConstraint");
@@ -66,19 +70,25 @@ XFEMSingleVariableConstraint::XFEMSingleVariableConstraint(const InputParameters
   _interface_id = _xfem->getGeometricCutID(dynamic_cast<const GeometricCutUserObject *>(uo));
 }
 
-XFEMSingleVariableConstraint::~XFEMSingleVariableConstraint() {}
-
-void
-XFEMSingleVariableConstraint::reinitConstraintQuadrature(const ElementPairInfo & element_pair_info)
+template <bool is_ad>
+XFEMSingleVariableConstraintTempl<is_ad>::~XFEMSingleVariableConstraintTempl()
 {
-  _interface_normal = element_pair_info._elem1_normal;
-  ElemElemConstraint::reinitConstraintQuadrature(element_pair_info);
 }
 
-Real
-XFEMSingleVariableConstraint::computeQpResidual(Moose::DGResidualType type)
+template <bool is_ad>
+void
+XFEMSingleVariableConstraintTempl<is_ad>::reinitConstraintQuadrature(
+    const ElementPairInfo & element_pair_info)
 {
-  Real r = 0;
+  _interface_normal = element_pair_info._elem1_normal;
+  GenericElemElemConstraint<is_ad>::reinitConstraintQuadrature(element_pair_info);
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+XFEMSingleVariableConstraintTempl<is_ad>::computeQpResidual(Moose::DGResidualType type)
+{
+  GenericReal<is_ad> r = 0;
 
   switch (type)
   {
@@ -89,10 +99,13 @@ XFEMSingleVariableConstraint::computeQpResidual(Moose::DGResidualType type)
               0.5 * _grad_u_neighbor[_qp] * _interface_normal) *
              _test[_i][_qp];
         r -= (_u[_qp] - _u_neighbor[_qp]) * 0.5 * _grad_test[_i][_qp] * _interface_normal;
-        r += 0.5 * _grad_test[_i][_qp] * _interface_normal * _jump.value(_t, _u[_qp]);
+        r += 0.5 * _grad_test[_i][_qp] * _interface_normal *
+             _jump.value(_t, MetaPhysicL::raw_value(_u[_qp]));
       }
-      r += 0.5 * _test[_i][_qp] * _jump_flux.value(_t, _u[_qp]);
-      r += _alpha * (_u[_qp] - _u_neighbor[_qp] - _jump.value(_t, _u[_qp])) * _test[_i][_qp];
+      r += 0.5 * _test[_i][_qp] * _jump_flux.value(_t, MetaPhysicL::raw_value(_u[_qp]));
+      r += _alpha *
+           (_u[_qp] - _u_neighbor[_qp] - _jump.value(_t, MetaPhysicL::raw_value(_u[_qp]))) *
+           _test[_i][_qp];
       break;
 
     case Moose::Neighbor:
@@ -103,19 +116,26 @@ XFEMSingleVariableConstraint::computeQpResidual(Moose::DGResidualType type)
              _test_neighbor[_i][_qp];
         r -= (_u[_qp] - _u_neighbor[_qp]) * 0.5 * _grad_test_neighbor[_i][_qp] * _interface_normal;
         r += 0.5 * _grad_test_neighbor[_i][_qp] * _interface_normal *
-             _jump.value(_t, _u_neighbor[_qp]);
+             _jump.value(_t, MetaPhysicL::raw_value(_u_neighbor[_qp]));
       }
-      r += 0.5 * _test_neighbor[_i][_qp] * _jump_flux.value(_t, _u_neighbor[_qp]);
-      r -= _alpha * (_u[_qp] - _u_neighbor[_qp] - _jump.value(_t, _u_neighbor[_qp])) *
-           _test_neighbor[_i][_qp];
+      r += 0.5 * _test_neighbor[_i][_qp] *
+           _jump_flux.value(_t, MetaPhysicL::raw_value(_u_neighbor[_qp]));
+      r -=
+          _alpha *
+          (_u[_qp] - _u_neighbor[_qp] - _jump.value(_t, MetaPhysicL::raw_value(_u_neighbor[_qp]))) *
+          _test_neighbor[_i][_qp];
       break;
   }
   return r;
 }
 
+template <bool is_ad>
 Real
-XFEMSingleVariableConstraint::computeQpJacobian(Moose::DGJacobianType type)
+XFEMSingleVariableConstraintTempl<is_ad>::computeQpJacobian(Moose::DGJacobianType type)
 {
+  if (is_ad)
+    return 0;
+
   Real r = 0;
 
   switch (type)
@@ -151,3 +171,6 @@ XFEMSingleVariableConstraint::computeQpJacobian(Moose::DGJacobianType type)
 
   return r;
 }
+
+template class XFEMSingleVariableConstraintTempl<false>;
+template class XFEMSingleVariableConstraintTempl<true>;

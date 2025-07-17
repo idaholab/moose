@@ -10,7 +10,7 @@
 #include "ConstraintWarehouse.h"
 
 // MOOSE includes
-#include "ElemElemConstraint.h"
+#include "ElemElemConstraintBase.h"
 #include "MortarConstraintBase.h"
 #include "MooseVariable.h"
 #include "NodalConstraint.h"
@@ -33,7 +33,8 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   std::shared_ptr<MortarConstraintBase> mc =
       std::dynamic_pointer_cast<MortarConstraintBase>(object);
   std::shared_ptr<NodalConstraint> nc = std::dynamic_pointer_cast<NodalConstraint>(object);
-  std::shared_ptr<ElemElemConstraint> ec = std::dynamic_pointer_cast<ElemElemConstraint>(object);
+  std::shared_ptr<ElemElemConstraintBase> ec =
+      std::dynamic_pointer_cast<ElemElemConstraintBase>(object);
   std::shared_ptr<NodeElemConstraintBase> nec =
       std::dynamic_pointer_cast<NodeElemConstraintBase>(object);
 
@@ -168,11 +169,11 @@ ConstraintWarehouse::getActiveMortarConstraints(
   return it->second.getActiveObjects();
 }
 
-const std::vector<std::shared_ptr<ElemElemConstraint>> &
+const std::vector<std::shared_ptr<ElemElemConstraintBase>> &
 ConstraintWarehouse::getActiveElemElemConstraints(const InterfaceID interface_id,
                                                   bool displaced) const
 {
-  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>>::const_iterator it, end_it;
+  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraintBase>>::const_iterator it, end_it;
 
   if (displaced)
   {
@@ -230,7 +231,7 @@ bool
 ConstraintWarehouse::hasActiveElemElemConstraints(const InterfaceID interface_id,
                                                   bool displaced) const
 {
-  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>>::const_iterator it, end_it;
+  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraintBase>>::const_iterator it, end_it;
 
   if (displaced)
   {

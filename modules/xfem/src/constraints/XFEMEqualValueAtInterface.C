@@ -13,11 +13,13 @@
 #include "XFEM.h"
 
 registerMooseObject("XFEMApp", XFEMEqualValueAtInterface);
+registerMooseObject("XFEMApp", ADXFEMEqualValueAtInterface);
 
+template <bool is_ad>
 InputParameters
-XFEMEqualValueAtInterface::validParams()
+XFEMEqualValueAtInterfaceTempl<is_ad>::validParams()
 {
-  InputParameters params = ElemElemConstraint::validParams();
+  InputParameters params = GenericElemElemConstraint<is_ad>::validParams();
   params.addRequiredParam<Real>("alpha", "Penalty parameter in penalty formulation.");
   params.addRequiredParam<Real>("value", "Prescribed value at the interface.");
   params.addParam<UserObjectName>(
@@ -28,15 +30,19 @@ XFEMEqualValueAtInterface::validParams()
   return params;
 }
 
-XFEMEqualValueAtInterface::XFEMEqualValueAtInterface(const InputParameters & parameters)
-  : ElemElemConstraint(parameters), _alpha(getParam<Real>("alpha")), _value(getParam<Real>("value"))
+template <bool is_ad>
+XFEMEqualValueAtInterfaceTempl<is_ad>::XFEMEqualValueAtInterfaceTempl(
+    const InputParameters & parameters)
+  : GenericElemElemConstraint<is_ad>(parameters),
+    _alpha(this->template getParam<Real>("alpha")),
+    _value(this->template getParam<Real>("value"))
 {
   _xfem = std::dynamic_pointer_cast<XFEM>(_fe_problem.getXFEM());
   if (_xfem == nullptr)
     mooseError("Problem casting to XFEM in XFEMEqualValueAtInterface");
 
-  const UserObject * uo =
-      &(_fe_problem.getUserObjectBase(getParam<UserObjectName>("geometric_cut_userobject")));
+  const UserObject * uo = &(_fe_problem.getUserObjectBase(
+      this->template getParam<UserObjectName>("geometric_cut_userobject")));
 
   if (dynamic_cast<const GeometricCutUserObject *>(uo) == nullptr)
     mooseError("UserObject casting to GeometricCutUserObject in XFEMEqualValueAtInterface");
@@ -44,18 +50,24 @@ XFEMEqualValueAtInterface::XFEMEqualValueAtInterface(const InputParameters & par
   _interface_id = _xfem->getGeometricCutID(dynamic_cast<const GeometricCutUserObject *>(uo));
 }
 
-XFEMEqualValueAtInterface::~XFEMEqualValueAtInterface() {}
-
-void
-XFEMEqualValueAtInterface::reinitConstraintQuadrature(const ElementPairInfo & element_pair_info)
+template <bool is_ad>
+XFEMEqualValueAtInterfaceTempl<is_ad>::~XFEMEqualValueAtInterfaceTempl()
 {
-  ElemElemConstraint::reinitConstraintQuadrature(element_pair_info);
 }
 
-Real
-XFEMEqualValueAtInterface::computeQpResidual(Moose::DGResidualType type)
+template <bool is_ad>
+void
+XFEMEqualValueAtInterfaceTempl<is_ad>::reinitConstraintQuadrature(
+    const ElementPairInfo & element_pair_info)
 {
-  Real r = 0;
+  GenericElemElemConstraint<is_ad>::reinitConstraintQuadrature(element_pair_info);
+}
+
+template <bool is_ad>
+GenericReal<is_ad>
+XFEMEqualValueAtInterfaceTempl<is_ad>::computeQpResidual(Moose::DGResidualType type)
+{
+  GenericReal<is_ad> r = 0;
 
   switch (type)
   {
@@ -70,9 +82,13 @@ XFEMEqualValueAtInterface::computeQpResidual(Moose::DGResidualType type)
   return r;
 }
 
+template <bool is_ad>
 Real
-XFEMEqualValueAtInterface::computeQpJacobian(Moose::DGJacobianType type)
+XFEMEqualValueAtInterfaceTempl<is_ad>::computeQpJacobian(Moose::DGJacobianType type)
 {
+  if (is_ad)
+    return 0;
+
   Real r = 0;
 
   switch (type)
@@ -91,3 +107,6 @@ XFEMEqualValueAtInterface::computeQpJacobian(Moose::DGJacobianType type)
 
   return r;
 }
+
+template class XFEMEqualValueAtInterfaceTempl<false>;
+template class XFEMEqualValueAtInterfaceTempl<true>;

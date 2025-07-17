@@ -12,12 +12,17 @@
 // MOOSE includes
 #include "ElemElemConstraintBase.h"
 
-class ElemElemConstraint : public ElemElemConstraintBase
+/**
+ * An ADElemElemConstraint is the AD (Automatic Differentiation) version of ElemElemConstraint
+ * used for creating constraints between elements across an interface using automatic
+ * differentiation to compute the Jacobian contributions.
+ */
+class ADElemElemConstraint : public ElemElemConstraintBase
 {
 public:
   static InputParameters validParams();
 
-  ElemElemConstraint(const InputParameters & parameters);
+  ADElemElemConstraint(const InputParameters & parameters);
 
   /**
    * Computes the residual for this element or the neighbor
@@ -44,20 +49,19 @@ protected:
    *  Compute the residual for one of the constraint quadrature points.  Must be overwritten by
    * derived class.
    */
-  virtual Real computeQpResidual(Moose::DGResidualType type) = 0;
+  virtual ADReal computeQpResidual(Moose::DGResidualType type) = 0;
 
   /**
-   *  Compute the Jacobian for one of the constraint quadrature points.  Must be overwritten by
-   * derived class.
+   *  Compute the Jacobian for one of the constraint quadrature points.
    */
-  virtual Real computeQpJacobian(Moose::DGJacobianType type) = 0;
+  virtual Real computeQpJacobian(Moose::DGJacobianType type);
 
-  /// Holds the variable value on the element side
-  const VariableValue & _u;
-  /// Holds the variable gradient on the element side
-  const VariableGradient & _grad_u;
-  /// Holds the variable value on the neighbor element side
-  const VariableValue & _u_neighbor;
-  /// Holds the variable gradient on the neighbor element side
-  const VariableGradient & _grad_u_neighbor;
+  /// Holds the AD variable value on the element side
+  const ADVariableValue & _u;
+  /// Holds the AD variable gradient on the element side
+  const ADVariableGradient & _grad_u;
+  /// Holds the AD variable value on the neighbor element side
+  const ADVariableValue & _u_neighbor;
+  /// Holds the AD variable gradient on the neighbor element side
+  const ADVariableGradient & _grad_u_neighbor;
 };
