@@ -10,11 +10,10 @@ the boundary condition based on the following expression
 !equation
 \alpha \nabla \phi_b \cdot \hat{n}_b + \beta \phi_b = \gamma
 
-where $\nabla \phi_b$, $\phi_b$m, and $\hat{n} _b$ are the field gradient, value, and the normal at the boundary $b.
+where $\nabla \phi_b$, $\phi_b$, and $\hat{n} _b$ are the field gradient, value, and the normal at the boundary $b$.
 
 !alert note
-This boundary condition should only be used for problems which involve advection and/or diffusion
-problems.
+This boundary condition should only be used for problems which involve advection and/or diffusion.
 
 !alert note
 If the coefficient $\alpha \: \rightarrow 0$, certain terms in this boundary condition tend to
