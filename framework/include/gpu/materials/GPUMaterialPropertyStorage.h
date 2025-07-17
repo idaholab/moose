@@ -55,6 +55,7 @@ public:
   using ::MaterialPropertyStorage::getMaterialData;
   using ::MaterialPropertyStorage::getMaterialPropertyRegistry;
   using ::MaterialPropertyStorage::hasStatefulProperties;
+  using ::MaterialPropertyStorage::setRecovering;
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
