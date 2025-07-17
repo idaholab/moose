@@ -20,7 +20,8 @@
     type = 'CSVDiff'
     input = 'side_value_sampler_fv.i'
     csvdiff = 'side_value_sampler_fv_vpp_csv_side_sample_0001.csv side_value_sampler_fv_vpp_csv_internal_sample_0001.csv'
-    requirement = 'The system shall be capable of sampling one or more finite volume field variables along internal and external sides at each face segment along the side.'
+    requirement = 'The system shall be capable of sampling one or more finite volume field variables along internal and external boundaries at each element face along the specified boundary.'
     allow_warnings = true # parsed sideset generation isn't fully supported on distributed meshes
+    max_threads = 1 # see libmesh issue #3808
   []
 []

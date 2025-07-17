@@ -50,7 +50,8 @@ SideValueSampler::SideValueSampler(const InputParameters & parameters)
       paramError(
           "variable",
           "This object cannot accept mixed FE and FV variables, please make "
-          "sure all the provided variables are either FE or FV by separating this postporocessor "
+          "sure all the provided variables are either FE or FV by separating this vector "
+          "postprocessor "
           "into two blocks, one for finite element and another for finite volume variables!");
 
     for (const auto var : _coupled_standard_fv_moose_vars)
@@ -92,19 +93,18 @@ SideValueSampler::execute()
     {
       for (unsigned int i = 0; i < _fv_vars.size(); i++)
       {
-        mooseAssert(_coupled_moose_vars[i]->hasFaceSide(*fi, true) ||
-                        _coupled_moose_vars[i]->hasFaceSide(*fi, false),
-                    "Variable " + _coupled_moose_vars[i]->name() +
+        mooseAssert(_fv_vars[i]->hasFaceSide(*fi, true) || _fv_vars[i]->hasFaceSide(*fi, false),
+                    "Variable " + _fv_vars[i]->name() +
                         " should be defined on one side of the face!");
 
-        auto * elem = _fv_vars[i]->hasFaceSide(*fi, true) ? fi->elemPtr() : fi->neighborPtr();
+        const auto * elem = _fv_vars[i]->hasFaceSide(*fi, true) ? fi->elemPtr() : fi->neighborPtr();
 
         const auto face_arg = Moose::FaceArg(
             {fi, Moose::FV::LimiterType::CentralDifference, true, false, elem, nullptr});
         _values[i] = MetaPhysicL::raw_value((*_fv_vars[i])(face_arg, state));
       }
 
-      SamplerBase::addSample(fi->faceCentroid(), fi->id(), _values);
+      SamplerBase::addSample(fi->faceCentroid(), _current_elem->id(), _values);
     }
   }
 }
