@@ -68,6 +68,9 @@ protected:
   /// diffusion coefficient derivatives w.r.t. coupled variables
   std::vector<const MaterialProperty<T> *> _dDdarg;
 
+  /// Number of grain order parameters for cases where there is dependence on grain OP gradients
+  const unsigned int _op_num;
+
   /// diffusion coefficient derivatives w.r.t. variables that have explicit dependence on gradients
   const MaterialProperty<typename GradientType<T>::type> & _dDdgradc;
   std::vector<const MaterialProperty<typename GradientType<T>::type> *> _dDdgradeta;
@@ -83,7 +86,9 @@ protected:
 
   /// For solid-pore systems, mame of the order parameter identifies the solid-pore surface
   unsigned int _surface_op_var;
-  std::vector<unsigned int> _grain_op_var;
+
+  /// Variable to allow user to control whether grain OP gradient contributions are added to Jacobian
+  const bool _add_grain_op_gradients;
 };
 
 template <typename T>
@@ -111,6 +116,14 @@ MatDiffusionBase<T>::validParams()
       "surface_op_var",
       "Name of the order parameter for solid-pore surface. For use when diffusivity "
       "depends on these OP gradients, leave this parameter un-set otherwise. ");
+  params.addCoupledVarWithAutoBuild(
+      "grain_op_vars", "var_name_base", "op_num", "Array of grain order parameter variables");
+  params.addParam<bool>(
+      "add_grain_op_gradients",
+      false,
+      "Whether grain order parameter gradient contributions are added to Jacobian. Set to false "
+      "unless diffusivity explicitly depends on grain OP gradients.");
+
   return params;
 }
 
@@ -122,16 +135,17 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
     _dDdc(getMaterialPropertyDerivative<T>(isParamValid("D_name") ? "D_name" : "diffusivity",
                                            _var.name())),
     _dDdarg(_coupled_moose_vars.size()),
+    _op_num(coupledComponents("grain_op_vars")),
     _dDdgradc(getMaterialPropertyDerivative<typename GradientType<T>::type>(
         isParamValid("D_name") ? "D_name" : "diffusivity", "gradc")),
-    _dDdgradeta(2), // TODO change to op_num
+    _dDdgradeta(_op_num),
     _is_coupled(isCoupled("v")),
     _v_var(_is_coupled ? coupled("v") : (isCoupled("conc") ? coupled("conc") : _var.number())),
     _grad_v(_is_coupled ? coupledGradient("v")
                         : (isCoupled("conc") ? coupledGradient("conc") : _grad_u)),
     _surface_op_var(isCoupled("surface_op_var") ? coupled("surface_op_var")
                                                 : libMesh::invalid_uint),
-    _grain_op_var(2)
+    _add_grain_op_gradients(getParam<bool>("add_grain_op_gradients"))
 {
   // deprecated variable parameter conc
   if (isCoupled("conc"))
@@ -141,10 +155,10 @@ MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
   for (unsigned int i = 0; i < _dDdarg.size(); ++i)
     _dDdarg[i] = &getMaterialPropertyDerivative<T>(
         isParamValid("D_name") ? "D_name" : "diffusivity", _coupled_moose_vars[i]->name());
-  for (unsigned int i = 0; i < 2; ++i) // TODO change to op_num
-    _dDdgradeta[i] = &getMaterialPropertyDerivative<typename GradientType<T>::type>(
-        isParamValid("D_name") ? "D_name" : "diffusivity",
-        ("gradgr" + Moose::stringify(i))); // TODO fix this check
+  if (_add_grain_op_gradients)
+    for (unsigned int j = 0; j < _op_num; ++j)
+      _dDdgradeta[j] = &getMaterialPropertyDerivative<typename GradientType<T>::type>(
+          isParamValid("D_name") ? "D_name" : "diffusivity", ("gradgr" + Moose::stringify(j)));
 }
 
 template <typename T>
@@ -184,11 +198,12 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar == _surface_op_var)
     sum += _dDdgradc[_qp] * _grad_phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
 
-  if (cvar == 1)
-    sum += (*_dDdgradeta[0])[_qp] * _grad_phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
-
-  if (cvar == 2)
-    sum += (*_dDdgradeta[1])[_qp] * _grad_phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+  if (_add_grain_op_gradients)
+  {
+    for (unsigned int k = 0; k < _op_num; ++k)
+      if (jvar == coupled("grain_op_vars", k))
+        sum += (*_dDdgradeta[k])[_qp] * _grad_phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
+  }
 
   if (_v_var == jvar)
     sum += computeQpCJacobian();
