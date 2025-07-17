@@ -77,11 +77,11 @@ MFEMProblem::addIndicator(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
 
   const UserObject * est_uo = &(getUserObjectBase(name));
-  if (dynamic_cast<const MFEMEstimator *>(est_uo) != nullptr)
+  if (dynamic_cast<const MFEMIndicator *>(est_uo) != nullptr)
   {
     // success
-    std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMEstimator>(name).getSharedPtr();
-    std::shared_ptr<MFEMEstimator> estimator = std::dynamic_pointer_cast<MFEMEstimator>(object_ptr);
+    std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMIndicator>(name).getSharedPtr();
+    std::shared_ptr<MFEMIndicator> estimator = std::dynamic_pointer_cast<MFEMIndicator>(object_ptr);
 
     // construct the estimator itself
     estimator->createEstimator();
@@ -101,10 +101,10 @@ MFEMProblem::addMarker(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
 
   const UserObject * est_uo = &(getUserObjectBase(name));
-  if (dynamic_cast<const MFEMThresholdRefiner *>(est_uo) != nullptr)
+  if (dynamic_cast<const MFEMThresholdMarker *>(est_uo) != nullptr)
   {
-    std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMThresholdRefiner>(name).getSharedPtr();
-    std::shared_ptr<MFEMThresholdRefiner> refiner = std::dynamic_pointer_cast<MFEMThresholdRefiner>(object_ptr);
+    std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMThresholdMarker>(name).getSharedPtr();
+    std::shared_ptr<MFEMThresholdMarker> refiner = std::dynamic_pointer_cast<MFEMThresholdMarker>(object_ptr);
 
     _problem_data._refiner = refiner;
     _problem_data._use_amr = true;
