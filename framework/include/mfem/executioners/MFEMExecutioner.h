@@ -12,29 +12,28 @@
 #pragma once
 #include "Executioner.h"
 #include "MFEMProblemData.h"
+#include "ProblemOperatorInterface.h"
 
 class MFEMProblem;
 
-class MFEMExecutioner : public Executioner
+class MFEMExecutioner
 {
 public:
   static InputParameters validParams();
 
-  MFEMExecutioner(const InputParameters & params);
-
-  virtual bool lastSolveConverged() const override { return true; };
-
-  /// Virtual method to construct the ProblemOperator. Call for default problems.
-  virtual void constructProblemOperator() = 0;
+  MFEMExecutioner(const InputParameters & params, MFEMProblem & mfem_problem);
 
   /**
-   * Set the device to use to solve the FE problem.
+   * Perform all required solves during a step. Includes relevant methods from the libmesh-specific
+   * FixedPointSolve::solve() for one iteration.
    */
-  void setDevice();
+  virtual void solve(Moose::MFEM::ProblemOperatorInterface & problem_operator);
+
+  /// Set the device to use to solve the FE problem.
+  void setDevice(const std::string & device_name);
 
 protected:
   MFEMProblem & _mfem_problem;
-  MFEMProblemData & _problem_data;
   mfem::Device _device;
 };
 

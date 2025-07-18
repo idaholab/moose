@@ -12,28 +12,52 @@
 #pragma once
 #include "MFEMExecutioner.h"
 #include "TimeDomainProblemOperator.h"
+#include "TransientBase.h"
 
-class MFEMTransient : public MFEMExecutioner
+class MFEMTransient : public TransientBase
 {
 public:
   static InputParameters validParams();
 
   explicit MFEMTransient(const InputParameters & params);
 
-  void constructProblemOperator() override;
-  void step(double dt, int it) const;
+  void constructProblemOperator();
+  virtual Moose::MFEM::TimeDomainProblemOperator & getProblemOperator()
+  {
+    return *_problem_operator;
+  };
   virtual void init() override;
-  virtual void execute() override;
 
-  mutable double _t_step; // Time step
+  /// Do whatever is necessary to advance one step.
+  virtual void takeStep(Real input_dt = -1.0) override;
+
+  /// Check if last solve converged. Currently defaults to true for all MFEM executioners.
+  virtual bool lastSolveConverged() const override { return true; };
+
+  /// Not supported for MFEM problems, so error if called.
+  virtual Real relativeSolutionDifferenceNorm() override
+  {
+    mooseError("MFEMTransient executioner does not yet support evaluating the relative solution "
+               "difference norm at each timestep.");
+    return 0.0;
+  };
+
+  /// MFEM problems have no libMesh type TimeIntegrators attached, so return empty set.
+  virtual std::set<TimeIntegrator *> getTimeIntegrators() const override
+  {
+    return std::set<TimeIntegrator *>{};
+  };
+
+  /// MFEM problems have no libMesh type TimeIntegrators attached, so return empty vector.
+  virtual std::vector<std::string> getTimeIntegratorNames() const override
+  {
+    return std::vector<std::string>();
+  };
 
 private:
-  double _t_initial;       // Start time
-  double _t_final;         // End time
-  Real & _t;               // Current time
-  mutable int _it;         // Time index
-  int _vis_steps;          // Number of cycles between each output update
-  mutable bool _last_step; // Flag to check if current step is final
+  MFEMProblem & _mfem_problem;
+  MFEMProblemData & _mfem_problem_data;
+  MFEMExecutioner _mfem_problem_solver;
   std::unique_ptr<Moose::MFEM::TimeDomainProblemOperator> _problem_operator{nullptr};
 };
 
