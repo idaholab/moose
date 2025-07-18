@@ -8251,7 +8251,8 @@ FEProblemBase::checkProblemIntegrity()
           paramError("kernel_coverage_block_list",
                      "Subdomain \"",
                      subdomain_name,
-                     "\" is not being skipped.");
+                     "\" is not being skipped. This could happen if the subdomain doesn't exist or "
+                     "is empty.");
         blocks.erase(id);
       }
     }
@@ -8268,7 +8269,8 @@ FEProblemBase::checkProblemIntegrity()
           paramError("kernel_coverage_block_list",
                      "Subdomain \"",
                      subdomain_name,
-                     "\" is not part of the simulation domain specified by Problem/block.");
+                     "\" is not part of the simulation domain specified by Problem/block. This "
+                     "could happen if the subdomain doesn't exist or is empty.");
         blocks.insert(id);
       }
     if (!blocks.empty())
@@ -8318,7 +8320,8 @@ FEProblemBase::checkProblemIntegrity()
             paramError("material_coverage_block_list",
                        "Subdomain \"",
                        subdomain_name,
-                       "\" is not being skipped.");
+                       "\" is not being skipped. This could happen if the subdomain doesn't exist "
+                       "or is empty.");
           local_mesh_subs.erase(id);
         }
       }
@@ -8335,7 +8338,8 @@ FEProblemBase::checkProblemIntegrity()
             paramError("material_coverage_block_list",
                        "Subdomain \"",
                        subdomain_name,
-                       "\" is not part of the simulation domain specified by Problem/block.");
+                       "\" is not part of the simulation domain specified by Problem/block. This "
+                       "could happen if the subdomain doesn't exist or is empty.");
           blocks.erase(id);
         }
         for (const auto id : blocks)

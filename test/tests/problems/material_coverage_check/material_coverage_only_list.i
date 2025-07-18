@@ -15,7 +15,14 @@
     nx = 10
     ny = 10
   []
-  add_subdomain_names = 'empty_subdomain'
+  [add_subdomain]
+    type = SubdomainBoundingBoxGenerator
+    input = 'generate'
+    bottom_left = '0 0 0'
+    top_right = '0.5 1 0'
+    block_id = '100'
+    block_name = 'another_subdomain'
+  []
 []
 
 [Variables]
@@ -38,12 +45,6 @@
     variable = u
     boundary = left
     value = 0
-  []
-  [right]
-    type = DirichletBC
-    variable = u
-    boundary = right
-    value = 1
   []
 []
 

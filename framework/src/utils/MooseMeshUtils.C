@@ -195,8 +195,7 @@ getSubdomainIDs(const MeshBase & mesh, const std::vector<SubdomainName> & subdom
     if (subdomain_names.size() > 1)
       mooseError(
           "You passed \"ANY_BLOCK_ID\" in addition to other subdomain names to getSubdomainIDs().");
-    for (const auto & [id, name] : mesh.get_subdomain_name_map())
-      ids.push_back(id);
+    ids.assign(mesh.get_mesh_subdomains().begin(), mesh.get_mesh_subdomains().end());
   }
   else
   {
@@ -215,8 +214,7 @@ getSubdomainIDs(const MeshBase & mesh, const std::set<SubdomainName> & subdomain
   for (const auto & name : subdomain_names)
   {
     if (name == "ANY_BLOCK_ID")
-      for (const auto & [id, name] : mesh.get_subdomain_name_map())
-        ids.insert(id);
+      ids.insert(mesh.get_mesh_subdomains().begin(), mesh.get_mesh_subdomains().end());
     else
       ids.insert(MooseMeshUtils::getSubdomainID(name, mesh));
   }
