@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 The user needs to specify the [!param](/Postprocessors/SubChannelPointValue/variable) whose value they want to see, the [!param](/Postprocessors/SubChannelPointValue/index) of the subchannel and the
 [!param](/Postprocessors/SubChannelPointValue/height). The postprocessor will interpolate and print the value of that subchannel variable at that location.
