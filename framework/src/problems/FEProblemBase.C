@@ -3718,7 +3718,6 @@ FEProblemBase::projectInitialConditionOnCustomRange(
 
 void
 FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
-                                            ConstNodeRange & bnd_nodes,
                                             Number (*poly_func)(const Point &,
                                                                 const libMesh::Parameters &,
                                                                 const std::string &,
@@ -3760,16 +3759,27 @@ FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
     }
   }
 
-  // Boundary node would have the dofs belong to other processors
-  for (const auto & node : bnd_nodes)
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> push_data;
+
+  for (const auto & elem : elem_range)
   {
-    dof_map.dof_indices(node, dof_indices, var_num);
+    dof_map.dof_indices(elem, dof_indices, var_num);
     for (auto dof : dof_indices)
     {
       if (dof_map.dof_owner(dof) == processor_id())
         owned_dof_indices.insert(dof);
+      else // push the dof to the processor that owns it
+        push_data[dof_map.dof_owner(dof)].push_back(dof);
     }
   }
+
+  auto push_receiver = [&](const processor_id_type, const std::vector<dof_id_type> & received_data)
+  {
+    for (const auto & id : received_data)
+      owned_dof_indices.insert(id);
+  };
+
+  Parallel::push_parallel_vector_data(_mesh.comm(), push_data, push_receiver);
 
   std::vector<dof_id_type> owned_dof_indices_vec(owned_dof_indices.begin(),
                                                  owned_dof_indices.end());
