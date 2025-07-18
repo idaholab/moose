@@ -744,9 +744,6 @@ private:
   /// The RayTracingStudy that owns this Ray (not sent in parallel)
   RayTracingStudy & _study;
 
-  /// Extra padding to avoid false sharing
-  long padding[8];
-
   // TraceRay is the only object that should be executing Rays and therefore needs access
   friend class TraceRay;
   // Packing needs access to changing the internal counters during the trace
