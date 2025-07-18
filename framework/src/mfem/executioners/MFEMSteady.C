@@ -95,6 +95,7 @@ MFEMSteady::execute()
 
     while (UseAMR() and ApplyRefinements())
     {
+      UpdateAfterRefinement();
       // Solve again
       _problem_operator->Solve(_problem_data.f);
     }
@@ -142,14 +143,12 @@ MFEMSteady::ApplyRefinements()
   {
     output = true;
     _mfem_problem.PRefine();
-    UpdateAfterRefinement();
   }
 
   if ( _mfem_problem.UseHRefinement() )
   {
     output = true;
     _mfem_problem.HRefine();
-    UpdateAfterRefinement();
   }
 
   return output;
