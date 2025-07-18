@@ -29,21 +29,19 @@ public:
   /// Check if last solve converged. Currently defaults to true for all MFEM executioners.
   virtual bool lastSolveConverged() const override { return true; };
 
-protected:
-  // Time variables used for consistency with MOOSE, needed for outputs.
-  // Important for future synchronisation of solves in MultiApps
-  Real _system_time;
-  int & _time_step;
-  Real & _time;
-
-  /// Iteration number obtained from the main application
-  unsigned int _output_iteration_number;
-
 private:
   MFEMProblem & _mfem_problem;
   MFEMProblemData & _mfem_problem_data;
   MFEMExecutioner _mfem_problem_solver;
   std::unique_ptr<Moose::MFEM::ProblemOperator> _problem_operator{nullptr};
+
+  // Time variables used for consistency with MOOSE, needed for outputs.
+  // Important for future synchronisation of solves in MultiApps
+  Real _system_time;
+  int _time_step;
+  Real & _time;
+  /// Iteration number obtained from the main application
+  unsigned int _output_iteration_number;
 };
 
 #endif
