@@ -26,16 +26,20 @@ MFEMTransient::validParams()
 }
 
 MFEMTransient::MFEMTransient(const InputParameters & params)
-  : TransientBase(params), MFEMExecutioner(params, dynamic_cast<MFEMProblem &>(feProblem()))
+  : TransientBase(params),
+    _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
+    _mfem_problem_data(_mfem_problem.getProblemData()),
+    _mfem_problem_solver(params, _mfem_problem)
 {
+  constructProblemOperator();
 }
 
 void
 MFEMTransient::constructProblemOperator()
 {
-  _problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>();
+  _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>();
   auto problem_operator =
-      std::make_unique<Moose::MFEM::TimeDomainEquationSystemProblemOperator>(_problem_data);
+      std::make_unique<Moose::MFEM::TimeDomainEquationSystemProblemOperator>(_mfem_problem);
   _problem_operator.reset();
   _problem_operator = std::move(problem_operator);
 }
@@ -46,18 +50,13 @@ MFEMTransient::init()
   TransientBase::init();
 
   // Set up initial conditions
-  _problem_data.eqn_system->Init(
-      _problem_data.gridfunctions,
-      _problem_data.fespaces,
+  _mfem_problem_data.eqn_system->Init(
+      _mfem_problem_data.gridfunctions,
+      _mfem_problem_data.fespaces,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
   _problem_operator->SetGridFunctions();
-  _problem_operator->Init(_problem_data.f);
-
-  // Set timestepper
-  _problem_data.ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
-  _problem_data.ode_solver->Init(*(_problem_operator));
-  _problem_operator->SetTime(_start_time);
+  _problem_operator->Init(_mfem_problem_data.f);
 }
 
 void
@@ -78,7 +77,7 @@ MFEMTransient::takeStep(Real input_dt)
   // _problem_operator->SetTime is called inside the ode_solver->Step method to
   // update the time used by time dependent (function) coefficients.
   // Takes place instead of TimeStepper::step().
-  solve();
+  _mfem_problem_solver.solve(*_problem_operator);
 
   // Continue with usual TransientBase::takeStep() finalisation
   _last_solve_converged = _time_stepper->converged();
@@ -98,20 +97,6 @@ MFEMTransient::takeStep(Real input_dt)
   _time = _time_old;
 
   _time_stepper->postSolve();
-}
-
-void
-MFEMTransient::innerSolve()
-{
-  // Advance time step of the MFEM problem. Time is also updated here, and
-  // _problem_operator->SetTime is called inside the ode_solver->Step method to
-  // update the time used by time dependent (function) coefficients.
-  // Takes place instead of TimeStepper::step().
-  _problem_data.ode_solver->Step(_problem_data.f, _time, _dt);
-  // Synchonise time dependent GridFunctions with updated DoF data.
-  _problem_operator->SetTestVariablesFromTrueVectors();
-  // Sync Host/Device
-  _problem_data.f.HostRead();
 }
 
 #endif

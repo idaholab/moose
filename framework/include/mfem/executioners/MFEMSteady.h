@@ -13,17 +13,18 @@
 #include "MFEMExecutioner.h"
 #include "EquationSystemProblemOperator.h"
 
-class MFEMSteady : public Executioner, public MFEMExecutioner
+class MFEMSteady : public Executioner
 {
 public:
   static InputParameters validParams();
 
   explicit MFEMSteady(const InputParameters & params);
 
-  void constructProblemOperator() override;
+  void constructProblemOperator();
+  virtual Moose::MFEM::ProblemOperator & getProblemOperator() { return *_problem_operator; };
+
   virtual void init() override;
   virtual void execute() override;
-  virtual void innerSolve() override;
 
   /// Check if last solve converged. Currently defaults to true for all MFEM executioners.
   virtual bool lastSolveConverged() const override { return true; };
@@ -39,6 +40,9 @@ protected:
   unsigned int _output_iteration_number;
 
 private:
+  MFEMProblem & _mfem_problem;
+  MFEMProblemData & _mfem_problem_data;
+  MFEMExecutioner _mfem_problem_solver;
   std::unique_ptr<Moose::MFEM::ProblemOperator> _problem_operator{nullptr};
 };
 
