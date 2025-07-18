@@ -81,18 +81,19 @@ MFEMThresholdMarker::MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem:
   _stop_p_ref |= (mesh.ReduceInt(refinements.Size()) == 0LL);
 }
 
-// Returns true when it's time to stop - the refiner itself
-// will tell us if we've finished refinement
+// We poll the refiner to ask if we need to stop h-refinement
 void
 MFEMThresholdMarker::HRefine(mfem::ParMesh & mesh)
 {
   // Increase the counter and check if we have exceeded
   // the max number of refinement steps
   _stop_h_ref = ( ++_h_ref_counter >= _max_h_level );
+
+  // Perform h-refinement
+  _threshold_refiner->Apply(mesh);
   
-  // Do |= so that we stop if either one of the conditions
-  // is met
-  _stop_h_ref |= _threshold_refiner->Apply(mesh);
+  // Ask the refiner if we need to stop H-refinement
+  _stop_h_ref |= _threshold_refiner->Stop();
 }
 
 std::shared_ptr<mfem::ParFiniteElementSpace>
