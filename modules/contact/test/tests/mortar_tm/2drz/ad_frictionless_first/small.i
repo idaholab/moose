@@ -4,10 +4,6 @@ elem = QUAD4
 order = FIRST
 name = 'small'
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   patch_size = 80
   patch_update_strategy = auto
@@ -58,6 +54,7 @@ name = 'small'
     old_block = '1 2'
     new_block = 'plank block'
   []
+  coord_type = RZ
 []
 
 [GlobalParams]

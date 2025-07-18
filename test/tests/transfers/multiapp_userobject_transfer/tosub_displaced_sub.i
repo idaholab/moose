@@ -6,6 +6,7 @@
   xmax = 0.1
   ymax = 0.5
   displacements = 'disp_x disp_y'
+  coord_type = rz
 []
 
 [Variables]
@@ -77,6 +78,5 @@
 []
 
 [Problem]
-  coord_type = rz
   type = FEProblem
 []

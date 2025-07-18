@@ -11,13 +11,10 @@
 # Stress xx, yy, zz = E/(1+nu)/(1-2nu)*strain*((1-nu) + nu + nu) = -6000
 #
 
-[Problem]
-  coord_type = RSPHERICAL
-[]
-
 [Mesh]
   file = simple_contact_rspherical.e
   construct_side_list_from_node_list = true
+  coord_type = RSPHERICAL
 []
 
 [GlobalParams]

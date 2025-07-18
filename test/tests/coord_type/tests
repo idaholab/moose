@@ -1,37 +1,41 @@
 [Tests]
   issues = '#4531 #6629'
   design = 'syntax/Problem/index.md'
-  [./rz-y-rotation]
+  [rz-y-rotation]
     # Simple diffusion with rotation around the y-axis
     type = Exodiff
     input = coord_type_rz.i
     exodiff = coord_type_rz_out.e
-    requirement = "The system shall support cylindrical coordinates with the radial direction in the 'x' direction."
-  [../]
-  [./rz-x-rotation]
+    requirement = "The system shall support cylindrical coordinates with the radial direction in the "
+                  "'x' direction."
+  []
+  [rz-x-rotation]
     # Simple diffusion with rotation around the x-axis
     type = Exodiff
     input = coord_type_rz.i
     exodiff = coord_type_rz_x_rotation.e
-    cli_args = 'Problem/rz_coord_axis=X Outputs/file_base=coord_type_rz_x_rotation'
-    requirement = "The system shall support cylindrical coordinates with the radial direction in the 'y' direction."
-  [../]
-  [./rz-integrated-y-rotation]
+    cli_args = 'Mesh/rz_coord_axis=X Outputs/file_base=coord_type_rz_x_rotation'
+    requirement = "The system shall support cylindrical coordinates with the radial direction in the "
+                  "'y' direction."
+  []
+  [rz-integrated-y-rotation]
     # DGDiffusion with multiple integrated BCs; rotation around y-axis
     type = Exodiff
     input = coord_type_rz_integrated.i
     exodiff = coord_type_rz_integrated_out.e
-    requirement = "The system shall support cylindrical coordinates with the radial direction in the 'x' direction with discontinous Galkerin and integrated boundary conditions."
-  [../]
-  [./rz-integrated-x-rotation]
+    requirement = "The system shall support cylindrical coordinates with the radial direction in the "
+                  "'x' direction with discontinous Galkerin and integrated boundary conditions."
+  []
+  [rz-integrated-x-rotation]
     # DGDiffusion with multiple integrated BCs; rotation around x-axis
     type = Exodiff
     input = coord_type_rz_integrated.i
     exodiff = coord_type_rz_integrated_x_rotation_out.e
     rel_err = 1e-4
-    cli_args = 'Problem/rz_coord_axis=X Outputs/file_base=coord_type_rz_integrated_x_rotation_out'
-    requirement = "The system shall support cylindrical coordinates with the radial direction in the 'y' direction with discontinous Galkerin and integrated boundary conditions."
-  [../]
+    cli_args = 'Mesh/rz_coord_axis=X Outputs/file_base=coord_type_rz_integrated_x_rotation_out'
+    requirement = "The system shall support cylindrical coordinates with the radial direction in the "
+                  "'y' direction with discontinous Galkerin and integrated boundary conditions."
+  []
   [rz_general]
     type = Exodiff
     input = coord_type_rz_general.i
