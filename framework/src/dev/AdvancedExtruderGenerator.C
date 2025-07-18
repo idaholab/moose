@@ -39,6 +39,7 @@
 #include "libmesh/point.h"
 
 #include <numeric>
+#include <cmath>
 
 registerMooseObject("MooseApp", AdvancedExtruderGenerator);
 registerMooseObjectRenamed("MooseApp",
@@ -51,6 +52,8 @@ AdvancedExtruderGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
+  MooseEnum radial_growth_methods("LINEAR CUBIC", "LINEAR");
+
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh to extrude");
 
   params.addClassDescription(
@@ -60,13 +63,15 @@ AdvancedExtruderGenerator::validParams()
       "extra integers within each elevation as well as interface boundaries between neighboring "
       "elevation layers.");
 
-  params.addRequiredParam<std::vector<Real>>("heights", "The height of each elevation");
+  params.addParam<std::vector<Real>>("heights", {}, "The height of each elevation");
 
   params.addRangeCheckedParam<std::vector<Real>>(
       "biases", "biases>0.0", "The axial growth factor used for mesh biasing for each elevation.");
 
-  params.addRequiredParam<std::vector<unsigned int>>(
-      "num_layers", "The number of layers for each elevation - must be num_elevations in length!");
+  params.addParam<std::vector<unsigned int>>(
+      "num_layers",
+      {},
+      "The number of layers for each elevation - must be num_elevations in length!");
 
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "subdomain_swaps",
@@ -93,10 +98,20 @@ AdvancedExtruderGenerator::validParams()
       "swapped, the enties are stacked based on the order provided in "
       "'elem_integer_names_to_swap' to form the third dimension.");
 
-  params.addRequiredParam<Point>(
-      "direction",
-      "A vector that points in the direction to extrude (note, this will be "
-      "normalized internally - so don't worry about it here)");
+  params.addParam<Point>("direction",
+                         "A vector that points in the direction to extrude (note, this will be "
+                         "normalized internally - so don't worry about it here)");
+  params.addParam<MeshGeneratorName>("extrusion_curve", "Name of curve to be extruded along.");
+  params.addParam<Point>(
+      "start_extrusion_direction",
+      "A vector that points in the starting direction for extruding along a curve. This vector "
+      "should be the tangent vector at the FIRST node of the extrusion curve. Vector will be "
+      "normalized in code, so don't worry about it here.");
+  params.addParam<Point>(
+      "end_extrusion_direction",
+      "A vector that points in the ending direction for extruding along a curve. This vector "
+      "should be the tangent vector at the LAST node of the extrusion curve. Vector will be "
+      "normalized in code, so don't worry about it here.");
 
   params.addParam<BoundaryName>(
       "top_boundary",
@@ -128,6 +143,11 @@ AdvancedExtruderGenerator::validParams()
                         0,
                         "Pitch for helicoidal extrusion around an axis going through the origin "
                         "following the direction vector");
+  params.addParam<libMesh::Real>(
+      "r_final", "Final radius to extrude to. Defaults to constant radius if not specified.");
+  params.addParam<MooseEnum>("radial_growth_method",
+                             radial_growth_methods,
+                             "Functional form to change radius while extruding along curve.");
   return params;
 }
 
@@ -143,7 +163,16 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     _elem_integer_names_to_swap(getParam<std::vector<std::string>>("elem_integer_names_to_swap")),
     _elem_integers_swaps(
         getParam<std::vector<std::vector<std::vector<dof_id_type>>>>("elem_integers_swaps")),
-    _direction(getParam<Point>("direction")),
+    _direction(isParamValid("direction") ? getParam<Point>("direction") : Point(0, 0, 0)),
+    _extrusion_curve(isParamValid("extrusion_curve") ? getMesh("extrusion_curve")
+                                                     : getMesh("extrusion_curve")),
+    _start_extrusion_direction(isParamValid("start_extrusion_direction")
+                                   ? getParam<Point>("start_extrusion_direction")
+                                   : Point(0, 0, 0)),
+    _end_extrusion_direction(isParamValid("end_extrusion_direction")
+                                 ? getParam<Point>("end_extrusion_direction")
+                                 : Point(0, 0, 0)),
+    _extrude_along_curve(isParamValid("extrusion_curve")),
     _has_top_boundary(isParamValid("top_boundary")),
     _top_boundary(isParamValid("top_boundary") ? getParam<BoundaryName>("top_boundary") : "0"),
     _has_bottom_boundary(isParamValid("bottom_boundary")),
@@ -171,23 +200,58 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
                                                          std::vector<boundary_id_type>())),
     _twist_pitch(getParam<Real>("twist_pitch"))
 {
-  if (!_direction.norm())
-    paramError("direction", "Must have some length!");
+  if (_extrude_along_curve)
+  {
+    if (isParamSetByUser("heights"))
+      paramError("heights", "heights cannot be set if extruding along curve!");
+    if (isParamSetByUser("biases"))
+      paramError("biases", "biases cannot be set if extruding along curve!");
+    if (isParamSetByUser("num_layers"))
+      paramError("num_layers", "num_layers cannot be set if extruding along curve!");
+    if (isParamSetByUser("direction"))
+      paramError("direction", "direction cannot be set if extruding along curve!");
+    if (!isParamSetByUser("start_extrusion_direction"))
+      paramError("start_extrusion_direction",
+                 "If extruding along curve, start_extrusion_direction must be set!");
+    if (!isParamSetByUser("end_extrusion_direction"))
+      paramError("end_extrusion_direction",
+                 "If extruding along curve, end_extrusion_direction must be set!");
+  }
+  else
+  {
+    if (!_direction.norm())
+      paramError("direction", "Must have some length!");
 
-  // Normalize it
-  _direction /= _direction.norm();
+    // Normalize it
+    _direction /= _direction.norm();
+  }
 
-  const auto num_elevations = _heights.size();
-
-  if (_num_layers.size() != num_elevations)
-    paramError("heights", "The length of 'heights' and 'num_layers' must be the same in ", name());
+  unsigned int num_elevations;
+  if (_extrude_along_curve)
+    num_elevations = 1;
+  else
+  {
+    num_elevations = _heights.size();
+    if (_num_layers.size() != num_elevations)
+      paramError(
+          "heights", "The length of 'heights' and 'num_layers' must be the same in ", name());
+  }
 
   if (_subdomain_swaps.size() && (_subdomain_swaps.size() != num_elevations))
-    paramError("subdomain_swaps",
-               "If specified, 'subdomain_swaps' (" + std::to_string(_subdomain_swaps.size()) +
-                   ") must be the same length as 'heights' (" + std::to_string(num_elevations) +
-                   ") in ",
-               name());
+  {
+    if (_extrude_along_curve)
+      paramError("subdomain_swaps",
+                 "If specified, 'subdomain_swaps' (" + std::to_string(_subdomain_swaps.size()) +
+                     ") must be equal to 1 when extruding along a curve.");
+    else
+    {
+      paramError("subdomain_swaps",
+                 "If specified, 'subdomain_swaps' (" + std::to_string(_subdomain_swaps.size()) +
+                     ") must be the same length as 'heights' (" + std::to_string(num_elevations) +
+                     ") in ",
+                 name());
+    }
+  }
 
   try
   {
@@ -200,11 +264,22 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
   }
 
   if (_boundary_swaps.size() && (_boundary_swaps.size() != num_elevations))
-    paramError("boundary_swaps",
-               "If specified, 'boundary_swaps' (" + std::to_string(_boundary_swaps.size()) +
-                   ") must be the same length as 'heights' (" + std::to_string(num_elevations) +
-                   ") in ",
-               name());
+  {
+    if (_extrude_along_curve)
+    {
+      paramError("boundary_swaps",
+                 "If specified, 'boundary_swaps' (" + std::to_string(_boundary_swaps.size()) +
+                     ") must be the same length as 'heights' (" + std::to_string(num_elevations) +
+                     ") in ",
+                 name());
+    }
+    else
+    {
+      paramError("boundary_swaps",
+                 "If specified, 'boundary_swaps' (" + std::to_string(_boundary_swaps.size()) +
+                     ") must be equal to 1 when extruding along a curve.");
+    }
+  }
 
   try
   {
@@ -241,43 +316,65 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     paramError("elem_integers_swaps", e.what());
   }
 
-  bool has_negative_entry = false;
-  bool has_positive_entry = false;
-  for (const auto & h : _heights)
+  if (!_extrude_along_curve)
   {
-    if (h > 0.0)
-      has_positive_entry = true;
-    else
-      has_negative_entry = true;
+    bool has_negative_entry = false;
+    bool has_positive_entry = false;
+    for (const auto & h : _heights)
+    {
+      if (h > 0.0)
+        has_positive_entry = true;
+      else
+        has_negative_entry = true;
+    }
+
+    if (has_negative_entry && has_positive_entry)
+      paramError("heights", "Cannot have both positive and negative heights!");
+    if (_biases.size() != _heights.size())
+      paramError("biases", "Size of this parameter, if provided, must be the same as heights.");
   }
 
-  if (has_negative_entry && has_positive_entry)
-    paramError("heights", "Cannot have both positive and negative heights!");
-  if (_biases.size() != _heights.size())
-    paramError("biases", "Size of this parameter, if provided, must be the same as heights.");
-
-  if (_upward_boundary_source_blocks.size() != _upward_boundary_ids.size() ||
-      _upward_boundary_ids.size() != num_elevations)
+  if ((_upward_boundary_source_blocks.size() || _upward_boundary_ids.size()) &&
+      (_upward_boundary_source_blocks.size() != _upward_boundary_ids.size() ||
+       _upward_boundary_ids.size() != num_elevations))
+  {
     paramError("upward_boundary_ids",
                "This parameter must have the same length (" +
                    std::to_string(_upward_boundary_ids.size()) +
                    ") as upward_boundary_source_blocks (" +
                    std::to_string(_upward_boundary_source_blocks.size()) + ") and heights (" +
                    std::to_string(num_elevations) + ")");
+  }
+
   for (unsigned int i = 0; i < _upward_boundary_source_blocks.size(); i++)
     if (_upward_boundary_source_blocks[i].size() != _upward_boundary_ids[i].size())
       paramError("upward_boundary_ids",
                  "Every element of this parameter must have the same length as the corresponding "
                  "element of upward_boundary_source_blocks.");
 
-  if (_downward_boundary_source_blocks.size() != _downward_boundary_ids.size() ||
-      _downward_boundary_ids.size() != num_elevations)
-    paramError("downward_boundary_ids",
-               "This parameter must have the same length (" +
-                   std::to_string(_downward_boundary_ids.size()) +
-                   ") as downward_boundary_source_blocks (" +
-                   std::to_string(_downward_boundary_source_blocks.size()) + ") and heights (" +
-                   std::to_string(num_elevations) + ")");
+  if ((_downward_boundary_source_blocks.size() || _downward_boundary_ids.size()) &&
+      (_downward_boundary_source_blocks.size() != _downward_boundary_ids.size() ||
+       _downward_boundary_ids.size() != num_elevations))
+  {
+    if (_extrude_along_curve)
+      paramError(
+          "downward_boundary_ids",
+          "This parameter must have the same length (" +
+              std::to_string(_downward_boundary_ids.size()) +
+              ") as downward_boundary_source_blocks (" +
+              std::to_string(_downward_boundary_source_blocks.size()) + ") and (" +
+              std::to_string(num_elevations) +
+              "). Note that the number of heights is set to 1 when extrudingn along a curve.");
+    else
+    {
+      paramError("downward_boundary_ids",
+                 "This parameter must have the same length (" +
+                     std::to_string(_downward_boundary_ids.size()) +
+                     ") as downward_boundary_source_blocks (" +
+                     std::to_string(_downward_boundary_source_blocks.size()) + ") and heights (" +
+                     std::to_string(num_elevations) + ")");
+    }
+  }
   for (unsigned int i = 0; i < _downward_boundary_source_blocks.size(); i++)
     if (_downward_boundary_source_blocks[i].size() != _downward_boundary_ids[i].size())
       paramError("downward_boundary_ids",
@@ -296,7 +393,7 @@ AdvancedExtruderGenerator::generate()
   mesh->set_mesh_dimension(_input->mesh_dimension() + 1);
 
   // Check if the element integer names are existent in the input mesh.
-  for (unsigned int i = 0; i < _elem_integer_names_to_swap.size(); i++)
+  for (const auto i : make_range(_elem_integer_names_to_swap.size()))
     if (_input->has_elem_integer(_elem_integer_names_to_swap[i]))
       _elem_integer_indices_to_swap.push_back(
           _input->get_elem_integer_index(_elem_integer_names_to_swap[i]));
@@ -351,14 +448,29 @@ AdvancedExtruderGenerator::generate()
 
   std::unique_ptr<MeshBase> input = std::move(_input);
 
+  std::unique_ptr<MeshBase> extrusion_curve;
+  if (_extrude_along_curve)
+    extrusion_curve = std::move(_extrusion_curve);
+  else
+    extrusion_curve = nullptr;
+
   // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
   // around
   if (!input->is_serial())
     mesh->delete_remote_elements();
 
-  unsigned int total_num_layers = std::accumulate(_num_layers.begin(), _num_layers.end(), 0);
-
-  auto total_num_elevations = _heights.size();
+  unsigned int total_num_layers;
+  unsigned int total_num_elevations;
+  if (!_extrude_along_curve)
+  {
+    total_num_layers = std::accumulate(_num_layers.begin(), _num_layers.end(), 0);
+    total_num_elevations = _heights.size();
+  }
+  else
+  {
+    total_num_layers = extrusion_curve->n_elem(); // may need to check this...
+    total_num_elevations = 1;
+  }
 
   dof_id_type orig_elem = input->n_elem();
   dof_id_type orig_nodes = input->n_nodes();
@@ -412,6 +524,28 @@ AdvancedExtruderGenerator::generate()
   Point old_distance;
   Point current_distance;
 
+  // the following code looks to systematically find the starting radius by finding the largest
+  // distance from the starting point on the curve (this is assumed to be at the center).
+  libMesh::Node * reference_point = extrusion_curve->node_ptr(0);
+  libMesh::Real start_radius = 0;
+  if (isParamValid("r_final"))
+  {
+
+    libMesh::Real test_radius;
+    unsigned int counter = 0;
+    for (const auto & node : input->node_ptr_range())
+    {
+      test_radius = (*node - *reference_point).norm(); // this might throw a type error
+      if (counter == 0)
+        start_radius = test_radius;
+      else
+      {
+        if (test_radius > start_radius)
+          start_radius = test_radius;
+      }
+    }
+  }
+
   // Create translated layers of nodes in the direction of extrusion
   for (const auto & node : input->node_ptr_range())
   {
@@ -419,17 +553,30 @@ AdvancedExtruderGenerator::generate()
 
     old_distance.zero();
 
+    libMesh::Real start_node_radius =
+        (*node - *reference_point).norm(); // find distance from node to spline
+
     // e is the elevation layer ordering
-    for (unsigned int e = 0; e < total_num_elevations; e++)
+    for (const auto e : make_range(total_num_elevations))
     {
-      auto num_layers = _num_layers[e];
+      unsigned int num_layers, height, bias;
+      if (_extrude_along_curve)
+      {
+        num_layers = extrusion_curve->n_elem();
+      }
+      else
+      {
+        num_layers = _num_layers[e];
+        height = _heights[e];
+        bias = _biases[e];
+      }
 
-      auto height = _heights[e];
-
-      auto bias = _biases[e];
-
+      libMesh::Real t; // parameter for radial expansion
+      unsigned int total_extrap_heights =
+          order * num_layers +
+          (e == 0 ? 1 : 0); // total number of extrapolations steps to take per node
       // k is the element layer ordering within each elevation layer
-      for (unsigned int k = 0; k < order * num_layers + (e == 0 ? 1 : 0); ++k)
+      for (const auto k : make_range(total_extrap_heights))
       {
         // For the first layer we don't need to move
         if (e == 0 && k == 0)
@@ -440,13 +587,110 @@ AdvancedExtruderGenerator::generate()
           // direction to get the new position.
           auto layer_index = (k - (e == 0 ? 1 : 0)) / order + 1;
 
-          const auto step_size = MooseUtils::absoluteFuzzyEqual(bias, 1.0)
-                                     ? height / (Real)num_layers / (Real)order
-                                     : height * std::pow(bias, (Real)(layer_index - 1)) *
-                                           (1.0 - bias) /
-                                           (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
+          // Calculate initial node step
+          libMesh::Real step_size;
+          if (_extrude_along_curve)
+          {
+            libMesh::Node * P_next; // next point along curve (conditionally set)
+            libMesh::Node * P_current =
+                extrusion_curve->node_ptr(k); // current point in extrusion curve
+            libMesh::Node * P_prev =
+                extrusion_curve->node_ptr(k - 1); // previous point in extrusion curve
+            libMesh::RealVectorValue P_start =
+                old_distance + *node; // previous node to extrude from
 
-          current_distance = old_distance + _direction * step_size;
+            // define a couple of vectors for convenience
+            libMesh::RealVectorValue a_vec = *P_current - *P_prev;
+            libMesh::RealVectorValue b_vec = P_start - *P_prev;
+
+            libMesh::Real prev_node_distance_to_spline = b_vec.norm();
+
+            libMesh::RealVectorValue
+                intersecting_plane_normal_vec; // normal vector describing plane to extrude to
+
+            // handle definition of intersecting plane.
+            if (k > 0 && k < order * num_layers - 1)
+            {
+              P_next = extrusion_curve->node_ptr(k + 1);
+              intersecting_plane_normal_vec =
+                  *P_next - *P_prev; // this approximates the derivative at the spline point
+            }
+            else if (k == 1)
+            {
+              P_next = extrusion_curve->node_ptr(k + 1);
+              intersecting_plane_normal_vec = _start_extrusion_direction + (*P_next - *P_current);
+            }
+            else
+            {
+              intersecting_plane_normal_vec = _end_extrusion_direction;
+            }
+            intersecting_plane_normal_vec /= intersecting_plane_normal_vec.norm(); // normalize
+
+            if (prev_node_distance_to_spline > libMesh::TOLERANCE) // check to see if on the spline
+            {
+              t = (double)k /
+                  (double)(total_extrap_heights - 1); // parameter for expansion function
+
+              libMesh::RealVectorValue current_plane_normal_vec =
+                  a_vec.cross(b_vec); // normal vector that defines the first plane
+              current_plane_normal_vec /= current_plane_normal_vec.norm(); // normalize
+
+              libMesh::RealVectorValue dir_along_line = current_plane_normal_vec.cross(
+                  intersecting_plane_normal_vec);      // calculate the line of intersection's slope
+              dir_along_line /= dir_along_line.norm(); // normalize
+
+              libMesh::Real node_radius; // allocate some memory
+
+              // Handle if we are expanding the radius as we extrude.
+              if (isParamValid("r_final"))
+              {
+                libMesh::Real radius_scaling =
+                    start_node_radius /
+                    start_radius; // fraction of the total starting radius the node lives in
+                libMesh::Real radial_weight = AdvancedExtruderGenerator::radialWeighting(
+                    getParam<MooseEnum>("radial_growth_method"),
+                    t); // calculate weighting for expansion
+                mooseAssert(radial_weight >= 0 && radial_weight <= 1.0,
+                            "radial weighting must be in [0,1]!");
+                node_radius = (start_radius * (1 - radial_weight) +
+                               getParam<libMesh::Real>("r_final") * radial_weight) *
+                              radius_scaling; // calculate new radius
+              }
+              else
+              {
+                node_radius = prev_node_distance_to_spline; // standard node radius if no expansion
+              }
+
+              libMesh::Point new_node_point =
+                  *P_current + node_radius * dir_along_line; // calculate new node location
+              current_distance = new_node_point -
+                                 *node; // this backtracks a bit, but it fits in with what's here...
+            }
+            else
+            {
+              _direction = *P_current - *P_prev;
+              _direction /= _direction.norm(); // normalize direction
+              mooseAssert(std::abs(_direction.norm() - 1.0) < libMesh::TOLERANCE,
+                          "Norm of direction vector is not 1!");
+
+              // Calculate step size.
+              // Note: old_distance+*node is the vector description of the previously-created node
+              step_size = ((*P_current - (old_distance + *node)) * _direction);
+              current_distance =
+                  old_distance +
+                  _direction * step_size; // update distance from starting node to new node
+            }
+          }
+          else
+          {
+            step_size = MooseUtils::absoluteFuzzyEqual(bias, 1.0)
+                            ? height / (Real)num_layers / (Real)order
+                            : height * std::pow(bias, (Real)(layer_index - 1)) * (1.0 - bias) /
+                                  (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
+            current_distance =
+                old_distance +
+                _direction * step_size; // update distance from starting node to new node
+          }
 
           // Handle helicoidal extrusion
           if (!MooseUtils::absoluteFuzzyEqual(_twist_pitch, 0.))
@@ -525,7 +769,11 @@ AdvancedExtruderGenerator::generate()
 
     for (unsigned int e = 0; e != total_num_elevations; e++)
     {
-      auto num_layers = _num_layers[e];
+      unsigned int num_layers;
+      if (_extrude_along_curve)
+        num_layers = extrusion_curve->n_elem();
+      else
+        num_layers = _num_layers[e];
 
       for (unsigned int k = 0; k != num_layers; ++k)
       {
@@ -1025,20 +1273,26 @@ AdvancedExtruderGenerator::generate()
               new_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
           // Assign sideset id to the side if the element belongs to a specified
           // upward_boundary_source_blocks
-          for (unsigned int i = 0; i < _upward_boundary_source_blocks[e].size(); i++)
-            if (new_elem->subdomain_id() == _upward_boundary_source_blocks[e][i])
-              boundary_info.add_side(
-                  new_elem.get(), is_flipped ? 0 : top_id, _upward_boundary_ids[e][i]);
+          if (_downward_boundary_source_blocks.size() || _downward_boundary_ids.size())
+          {
+            for (unsigned int i = 0; i < _upward_boundary_source_blocks[e].size(); i++)
+              if (new_elem->subdomain_id() == _upward_boundary_source_blocks[e][i])
+                boundary_info.add_side(
+                    new_elem.get(), is_flipped ? 0 : top_id, _upward_boundary_ids[e][i]);
+          }
         }
         // define downward boundaries
         if (k == 0)
         {
           const unsigned short top_id =
               new_elem->dim() == 3 ? cast_int<unsigned short>(elem->n_sides() + 1) : 2;
-          for (unsigned int i = 0; i < _downward_boundary_source_blocks[e].size(); i++)
-            if (new_elem->subdomain_id() == _downward_boundary_source_blocks[e][i])
-              boundary_info.add_side(
-                  new_elem.get(), is_flipped ? top_id : 0, _downward_boundary_ids[e][i]);
+          if (_downward_boundary_source_blocks.size() || _downward_boundary_ids.size())
+          {
+            for (unsigned int i = 0; i < _downward_boundary_source_blocks[e].size(); i++)
+              if (new_elem->subdomain_id() == _downward_boundary_source_blocks[e][i])
+                boundary_info.add_side(
+                    new_elem.get(), is_flipped ? top_id : 0, _downward_boundary_ids[e][i]);
+          }
         }
 
         // perform subdomain swaps
@@ -1184,4 +1438,34 @@ AdvancedExtruderGenerator::generate()
     mesh->prepare_for_use();
 
   return mesh;
+}
+
+libMesh::Real
+AdvancedExtruderGenerator::radialWeighting(const MooseEnum function_type, const libMesh::Real t)
+{
+  // NOTE: All functions added to this method must obey the following: f(0)=0, f(1)=1, 0<=f(t)<=1
+  // for all t in [0,1].
+
+  // hold the case definitions in this method to keep generate() cleaner
+  int switch_val = -1; // set default
+  if (function_type == "LINEAR")
+    switch_val = 1;
+  else if (function_type == "CUBIC")
+    switch_val = 2;
+
+  libMesh::Real result;
+  switch (switch_val)
+  {
+    case 1:
+      result = t;
+      break;
+    case 2:
+      // derivatives set s.t. the expansion will be smooth and match the extrusion curve's
+      // derivative
+      result = -2 * std::pow(t, 3) + 3 * std::pow(t, 2);
+      break;
+    default:
+      mooseError("radial_growth_method specfied not valid for radial expansion!");
+  }
+  return result;
 }
