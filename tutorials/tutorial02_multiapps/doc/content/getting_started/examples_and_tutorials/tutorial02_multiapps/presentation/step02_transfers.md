@@ -44,6 +44,7 @@ Can be made to "conserve" a Postprocessor quantity.
 !col width=20%
 !media images/transfers_01_meshfunction.png
        style=width:100%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+       alt=Diagram showing a Transfer using ShapeEvaluation.
 
 !row-end!
 
@@ -98,6 +99,7 @@ To explore the NearestNodeTransfer we will create a situation where a 2D, 1x1 sq
 !col width=30%
 !media images/transfers_02_geometry.png
        style=width:100%;margin-left:auto;margin-right:auto;display:block;
+       alt=Diagram showing 3D columns embedded in a 2D mesh, used in an example of NearestNode Transfers.
 
 !row-end!
 
@@ -148,6 +150,7 @@ The final class of Transfers, those moving scalar values, play a role here.  "Sa
 !col width=20%
 !media images/transfers_04_multiscale.png
        style=width:100%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+       alt=Diagram showing a multiscale Transfer, for when the sub-app is effectively an infinitesimal point in the parent app's domain.
 
 !row-end!
 

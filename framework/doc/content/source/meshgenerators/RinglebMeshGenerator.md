@@ -47,6 +47,7 @@ The corresponding mesh looks like this:
 
 !media large_media/ringleb_mesh/ringleb_mesh.png
        style=width:50%;
+       alt=The mesh produced with the configurations above, suitable for use with a Ringleb problem.
 
 !syntax parameters /Mesh/RinglebMeshGenerator
 

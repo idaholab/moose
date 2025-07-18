@@ -8,6 +8,7 @@ This example illustrates the use of RGMB mesh generators to define a pin-resolve
 
 !media tutorial04_meshing/rgmb_abtr_hethom_stepbystep.png
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
+       alt=Process for producing an extruded homogeneous core for a sodium-cooled fast reactor.
 
 +Hands-on package MOOSE input file (Heterogeneous ABTR mesh)+: `tutorials/tutorial04_meshing/doc/listings/reactor_examples/rgmb_abtr/rgmb_abtr_het_mesh.i`
 
@@ -85,6 +86,7 @@ In order to define homogeneous assembly structures to stitch into the core, we u
 
 !media tutorial04_meshing/rgmb_abtr_het_core_eeid.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration.
 
 !col-end!
 
@@ -112,6 +114,7 @@ In this case, `EquivalentCoreMeshGenerator` will determine uniqueness based on b
 
 !media tutorial04_meshing/rgmb_abtr_het_hom_conversion.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration.
 
 !col-end!
 

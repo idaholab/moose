@@ -31,6 +31,7 @@ The final distribution of materials for the bridge structure (note that
 symmetry is being used) looks as follows:
 
 !media large_media/optimization/multimaterial.png style=width:75%
+       alt=The distribution of materials, indicated by their pseudo-density.
 
 
 
