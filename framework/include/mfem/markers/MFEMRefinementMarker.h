@@ -12,14 +12,14 @@ reference to the estimator.
 
 Making all the methods dummies for now.
 */
-class MFEMThresholdMarker : public MFEMGeneralUserObject
+class MFEMRefinementMarker : public MFEMGeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  MFEMThresholdMarker(const InputParameters & params);
+  MFEMRefinementMarker(const InputParameters & params);
 
-  virtual ~MFEMThresholdMarker() = default;
+  virtual ~MFEMRefinementMarker() = default;
 
   void setUp();
 

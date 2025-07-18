@@ -101,10 +101,10 @@ MFEMProblem::addMarker(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
 
   const UserObject * est_uo = &(getUserObjectBase(name));
-  if (dynamic_cast<const MFEMThresholdMarker *>(est_uo) != nullptr)
+  if (dynamic_cast<const MFEMRefinementMarker *>(est_uo) != nullptr)
   {
-    std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMThresholdMarker>(name).getSharedPtr();
-    std::shared_ptr<MFEMThresholdMarker> refiner = std::dynamic_pointer_cast<MFEMThresholdMarker>(object_ptr);
+    std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMRefinementMarker>(name).getSharedPtr();
+    std::shared_ptr<MFEMRefinementMarker> refiner = std::dynamic_pointer_cast<MFEMRefinementMarker>(object_ptr);
 
     _problem_data._refiner = refiner;
     _problem_data._use_amr = true;

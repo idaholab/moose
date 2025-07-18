@@ -1,4 +1,4 @@
-# MFEMThresholdMarker
+# MFEMRefinementMarker
 
 !if! function=hasCapability('mfem')
 

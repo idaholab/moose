@@ -5,7 +5,7 @@
 ## Summary
 
 Child class of [MFEMIndicator](source/mfem/estimators/MFEMIndicator.md) that supplies
-the `mfem::L2ZienkiewiczZhuEstimator` to the [Refiner](source/mfem/refiners/MFEMThresholdMarker.md)
+the `mfem::L2ZienkiewiczZhuEstimator` to the [Refiner](source/mfem/refiners/MFEMRefinementMarker.md)
 
 ## Overview
 
