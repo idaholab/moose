@@ -53,12 +53,6 @@ TransientMultiApp::validParams()
                         "check will be performed for each child app, allowing them to skip to the "
                         "end of the parent time step if steady conditions are detected.");
 
-  params.addParam<Real>("steady_state_tol",
-                        1e-8,
-                        "The relative difference tolerance between the new solution and the old "
-                        "solution to be used for steady-state checks if sub-cycling ('sub_cycling "
-                        "= true') and 'detect_steady_state = true'.");
-
   params.addParam<bool>("output_sub_cycles", false, "If true then every sub-cycle will be output.");
   params.addParam<bool>(
       "print_sub_cycles", true, "Toggle the display of sub-cycles on the screen.");
@@ -67,7 +61,7 @@ TransientMultiApp::validParams()
       "max_failures", 0, "Maximum number of solve failures tolerated while sub_cycling.");
 
   params.addParamNamesToGroup("sub_cycling interpolate_transfers detect_steady_state "
-                              "steady_state_tol output_sub_cycles print_sub_cycles max_failures",
+                              "output_sub_cycles print_sub_cycles max_failures",
                               "Sub cycling");
 
   params.addParam<bool>("tolerate_failure",
@@ -98,7 +92,6 @@ TransientMultiApp::TransientMultiApp(const InputParameters & parameters)
     _sub_cycling(getParam<bool>("sub_cycling")),
     _interpolate_transfers(getParam<bool>("interpolate_transfers")),
     _detect_steady_state(getParam<bool>("detect_steady_state")),
-    _steady_state_tol(getParam<Real>("steady_state_tol")),
     _output_sub_cycles(getParam<bool>("output_sub_cycles")),
     _max_failures(getParam<unsigned int>("max_failures")),
     _tolerate_failure(getParam<bool>("tolerate_failure")),
