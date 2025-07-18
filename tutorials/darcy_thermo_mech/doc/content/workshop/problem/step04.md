@@ -60,6 +60,7 @@ cd problems
 ## Step 4: Result
 
 !media darcy_thermo_mech/step04_result.png
+       alt=The pressure and velocity fields obtained by running the simulation above.
 
 !---
 
@@ -73,3 +74,4 @@ cd problems
 ```
 
 !media darcy_thermo_mech/step04_result_tight.png
+       alt=The pressure and velocity fields obtained by running the simulation with smaller tolerances.

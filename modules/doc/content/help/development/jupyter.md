@@ -37,6 +37,7 @@ From the _New_ dropdown in the top right select _Python 2_ under _Notebooks_. A 
 with an empty notebook should open.
 
 !media media/jupyter_new.png
+       alt=Screenshot of a new, empty Python 2 notebook in Jupyter.
 
 Start by importing [sympy](http://www.sympy.org/en/index.html) in `In [1]:` and enabling LaTeX rendering for equations.
 
@@ -70,6 +71,7 @@ derivatives of the expression `f` with respect to `c` and `eta`
 This should yield
 
 !media media/jupyter_example.png
+       alt=Image of the Jupyter notebook after executing the commands described above.
 
 ## Enabling and disabling the environment
 

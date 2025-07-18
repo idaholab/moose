@@ -162,3 +162,4 @@ cd problems
 ## Step 5c: Results
 
 !media darcy_thermo_mech/step05c_result.webm
+       alt=Time evolution of the temperature, obtained by running the simulation above.

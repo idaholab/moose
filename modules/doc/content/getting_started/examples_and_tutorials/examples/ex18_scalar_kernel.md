@@ -1,7 +1,5 @@
 # Example 18 : ODE Coupling
 
-[](---)
-
 ## Complete Source Files
 
 [ex18.i](https://github.com/idaholab/moose/blob/devel/examples/ex18_scalar_kernel/ex18.i)
@@ -20,15 +18,15 @@
 
 [ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex18_scalar_kernel/src/base/ExampleApp.C)
 
-[](---)
-
 ## Outputs
 
 !media large_media/examples/ex18-diffused.png
        style=width:50%;
+       alt=Simulated value of diffused quantity.
 
 !media large_media/examples/ex18-ode-plot.png
        style=width:50%;
+       alt=Solution to ODEs.
 
 !content pagination use_title=True
                     previous=examples/ex17_dirac.md
