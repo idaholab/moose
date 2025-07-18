@@ -1,0 +1,59 @@
+{
+  "CELLS": {
+    "square_cell": {
+      "FILL": "square_material",
+      "FILLTYPE": "MATERIAL",
+      "REGION": "(+surf_plus_x & -surf_minus_x & -surf_plus_y & +surf_minus_y)"
+    }
+  },
+  "SURFACES": {
+    "surf_minus_x": {
+      "BOUNDARY": "REFLECTIVE",
+      "COEFFICIENTS": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 2.5
+      },
+      "TYPE": "PLANE"
+    },
+    "surf_minus_y": {
+      "BOUNDARY": "REFLECTIVE",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -2.5
+      },
+      "TYPE": "PLANE"
+    },
+    "surf_plus_x": {
+      "BOUNDARY": "REFLECTIVE",
+      "COEFFICIENTS": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -2.5
+      },
+      "TYPE": "PLANE"
+    },
+    "surf_plus_y": {
+      "BOUNDARY": "REFLECTIVE",
+      "COEFFICIENTS": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 2.5
+      },
+      "TYPE": "PLANE"
+    }
+  },
+  "UNIVERSES": {
+    "ROOT_UNIVERSE": {
+      "CELLS": [
+        "square_cell"
+      ],
+      "ROOT": true
+    }
+  }
+}
