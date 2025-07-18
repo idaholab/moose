@@ -15,13 +15,15 @@
 #include "TransientBase.h"
 #include "DefaultNonlinearConvergence.h"
 #include "DefaultMultiAppFixedPointConvergence.h"
-#include "DefaultSteadyConvergence.h"
+#include "DefaultSteadyStateConvergence.h"
 
 registerMooseAction("MooseApp", AddDefaultConvergenceAction, "add_default_nonlinear_convergence");
 registerMooseAction("MooseApp",
                     AddDefaultConvergenceAction,
                     "add_default_multiapp_fixed_point_convergence");
-registerMooseAction("MooseApp", AddDefaultConvergenceAction, "add_default_steady_convergence");
+registerMooseAction("MooseApp",
+                    AddDefaultConvergenceAction,
+                    "add_default_steady_state_convergence");
 
 InputParameters
 AddDefaultConvergenceAction::validParams()
@@ -43,8 +45,8 @@ AddDefaultConvergenceAction::act()
     addDefaultNonlinearConvergence();
   else if (_current_task == "add_default_multiapp_fixed_point_convergence")
     addDefaultMultiAppFixedPointConvergence();
-  else if (_current_task == "add_default_steady_convergence")
-    addDefaultSteadyConvergence();
+  else if (_current_task == "add_default_steady_state_convergence")
+    addDefaultSteadyStateConvergence();
 }
 
 void
@@ -78,16 +80,16 @@ AddDefaultConvergenceAction::addDefaultMultiAppFixedPointConvergence()
 }
 
 void
-AddDefaultConvergenceAction::addDefaultSteadyConvergence()
+AddDefaultConvergenceAction::addDefaultSteadyStateConvergence()
 {
-  if (_problem->needToAddDefaultSteadyConvergence())
+  if (_problem->needToAddDefaultSteadyStateConvergence())
   {
-    const std::string conv_name = "default_steady_convergence";
-    _problem->setSteadyConvergenceName(conv_name);
-    _problem->addDefaultSteadyConvergence(getMooseApp().getExecutioner()->parameters());
+    const std::string conv_name = "default_steady_state_convergence";
+    _problem->setSteadyStateConvergenceName(conv_name);
+    _problem->addDefaultSteadyStateConvergence(getMooseApp().getExecutioner()->parameters());
   }
 
-  checkUnusedSteadyConvergenceParameters();
+  checkUnusedSteadyStateConvergenceParameters();
 }
 
 void
@@ -193,29 +195,29 @@ AddDefaultConvergenceAction::checkUnusedMultiAppFixedPointConvergenceParameters(
 }
 
 void
-AddDefaultConvergenceAction::checkUnusedSteadyConvergenceParameters()
+AddDefaultConvergenceAction::checkUnusedSteadyStateConvergenceParameters()
 {
   // Abort check if executioner does not allow Convergence objects
   auto & executioner_params = getMooseApp().getExecutioner()->parameters();
-  if (!executioner_params.have_parameter<ConvergenceName>("steady_convergence"))
+  if (!executioner_params.have_parameter<ConvergenceName>("steady_state_convergence"))
     return;
 
-  const auto conv_name = _problem->getSteadyConvergenceName();
+  const auto conv_name = _problem->getSteadyStateConvergenceName();
 
   // Abort check if Convergence is inactive
   if (!_problem->hasConvergence(conv_name))
     return;
 
-  // If the convergence is a DefaultSteadyConvergence they can handle the Executioner
+  // If the convergence is a DefaultSteadyStateConvergence they can handle the Executioner
   // parameters pertaining to the steady solve
   auto & conv = _problem->getConvergence(conv_name);
-  auto * default_conv = dynamic_cast<DefaultSteadyConvergence *>(&conv);
+  auto * default_conv = dynamic_cast<DefaultSteadyStateConvergence *>(&conv);
 
-  // Only Convergence objects deriving from DefaultSteadyConvergence should
+  // Only Convergence objects deriving from DefaultSteadyStateConvergence should
   // share parameters with the executioner
   if (!default_conv)
   {
-    auto params = TransientBase::steadyDefaultConvergenceParams();
+    auto params = TransientBase::defaultSteadyStateConvergenceParams();
     std::vector<std::string> unused_params;
     for (const auto & param : params.getParametersList())
       if (executioner_params.isParamSetByUser(param))

@@ -15,14 +15,14 @@ class TransientBase;
 class AuxiliarySystem;
 
 /**
- * Default steady convergence criteria.
+ * Default steady-state convergence criteria.
  */
-class DefaultSteadyConvergence : public DefaultConvergenceBase
+class DefaultSteadyStateConvergence : public DefaultConvergenceBase
 {
 public:
   static InputParameters validParams();
 
-  DefaultSteadyConvergence(const InputParameters & parameters);
+  DefaultSteadyStateConvergence(const InputParameters & parameters);
 
   virtual void checkIterationType(IterationType it_type) const override;
 

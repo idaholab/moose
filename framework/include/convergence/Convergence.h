@@ -46,7 +46,7 @@ public:
     LINEAR = 1, // solve_type = LINEAR, not linear solves within nonlinear solve
     MULTISYSTEM_FIXED_POINT = 2,
     MULTIAPP_FIXED_POINT = 3,
-    STEADY = 4
+    STEADY_STATE = 4
   };
 
   Convergence(const InputParameters & parameters);
