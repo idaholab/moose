@@ -1,11 +1,11 @@
 #ifdef MFEM_ENABLED
 
-#include "MFEMThresholdMarker.h"
+#include "MFEMRefinementMarker.h"
 
-registerMooseObject("MooseApp", MFEMThresholdMarker);
+registerMooseObject("MooseApp", MFEMRefinementMarker);
 
 InputParameters
-MFEMThresholdMarker::validParams()
+MFEMRefinementMarker::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("Marker");
@@ -26,7 +26,7 @@ MFEMThresholdMarker::validParams()
   return params;
 }
 
-MFEMThresholdMarker::MFEMThresholdMarker(const InputParameters & params)
+MFEMRefinementMarker::MFEMRefinementMarker(const InputParameters & params)
   : MFEMGeneralUserObject(params),
     _estimator_name(getParam<std::string>("indicator")),
     _error_threshold(getParam<Real>("refine")),
@@ -52,7 +52,7 @@ MFEMThresholdMarker::MFEMThresholdMarker(const InputParameters & params)
 
 
 void
-MFEMThresholdMarker::setUp()
+MFEMRefinementMarker::setUp()
 {
   // fetch const ref to the estimator
   const auto& estimator = getUserObjectByName<MFEMIndicator>(_estimator_name);
@@ -62,7 +62,7 @@ MFEMThresholdMarker::setUp()
 }
 
 void
-MFEMThresholdMarker::MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinement> & refinements)
+MFEMRefinementMarker::MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinement> & refinements)
 {
   // We are doing p-refinement. Increase the counter
   // and check if we have exceeded the max number of
@@ -83,7 +83,7 @@ MFEMThresholdMarker::MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem:
 
 // We poll the refiner to ask if we need to stop h-refinement
 void
-MFEMThresholdMarker::HRefine(mfem::ParMesh & mesh)
+MFEMRefinementMarker::HRefine(mfem::ParMesh & mesh)
 {
   // Increase the counter and check if we have exceeded
   // the max number of refinement steps
@@ -97,7 +97,7 @@ MFEMThresholdMarker::HRefine(mfem::ParMesh & mesh)
 }
 
 std::shared_ptr<mfem::ParFiniteElementSpace>
-MFEMThresholdMarker::getFESpace()
+MFEMRefinementMarker::getFESpace()
 {
   const auto& estimator = getUserObjectByName<MFEMIndicator>(_estimator_name);
 
