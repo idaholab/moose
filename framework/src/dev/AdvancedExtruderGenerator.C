@@ -39,6 +39,7 @@
 #include "libmesh/point.h"
 
 #include <numeric>
+#include <cmath>
 
 registerMooseObject("MooseApp", AdvancedExtruderGenerator);
 registerMooseObjectRenamed("MooseApp",
@@ -554,34 +555,66 @@ AdvancedExtruderGenerator::generate()
           libMesh::Real step_size;
           if (_extrude_along_curve)
           {
-            libMesh::Node * P_next;
-            libMesh::Node * P_current = extrusion_curve->node_ptr(k);
-            libMesh::Node * P_prev = extrusion_curve->node_ptr(k - 1);
-            libMesh::RealVectorValue plane_normal_vec;
+            libMesh::Node * P_next; // next point along curve (conditionally set)
+            libMesh::Node * P_current =
+                extrusion_curve->node_ptr(k); // current point in extrusion curve
+            libMesh::Node * P_prev =
+                extrusion_curve->node_ptr(k - 1); // previous point in extrusion curve
+            libMesh::RealVectorValue P_start =
+                old_distance + *node; // previous node to extrude from
 
+            // define a couple of vectors for convenience
+            libMesh::RealVectorValue a_vec = *P_current - *P_prev;
+            libMesh::RealVectorValue b_vec = P_start - *P_prev;
+
+            libMesh::RealVectorValue
+                intersecting_plane_normal_vec; // normal vector describing plane to extrude to
+
+            // handle definition of intersecting plane.
             if (k > 0 && k < order * num_layers - 1)
             {
               P_next = extrusion_curve->node_ptr(k + 1);
-              plane_normal_vec = *P_next - *P_prev;
+              intersecting_plane_normal_vec =
+                  *P_next - *P_prev; // this approximates the derivative at the spline point
             }
             else if (k == 1)
             {
               P_next = extrusion_curve->node_ptr(k + 1);
-              plane_normal_vec = _start_extrusion_direction + (*P_next - *P_current);
+              intersecting_plane_normal_vec = _start_extrusion_direction + (*P_next - *P_current);
             }
             else
             {
-              plane_normal_vec = _end_extrusion_direction;
+              intersecting_plane_normal_vec = _end_extrusion_direction;
             }
-            plane_normal_vec /= plane_normal_vec.norm();
-            _direction = *P_current - *P_prev;
-            _direction /= _direction.norm();   // normalize direction
-            mooseAssert(std::abs(_direction.norm() - 1.0) < libMesh::TOLERANCE,
-                        "Norm of direction vector is not 1!");
+            intersecting_plane_normal_vec /= intersecting_plane_normal_vec.norm(); // normalize
 
-            // Calculate step size.
-            // Note: old_distance+*node is the vector description of the previously-created node
-            step_size = ((*P_current - (old_distance + *node)) * _direction);
+            if (b_vec.norm() > libMesh::TOLERANCE)
+            {
+              libMesh::RealVectorValue current_plane_normal_vec = a_vec.cross(b_vec);
+              current_plane_normal_vec /= current_plane_normal_vec.norm(); // normalize
+              libMesh::RealVectorValue dir_along_line = current_plane_normal_vec.cross(
+                  intersecting_plane_normal_vec);      // calculate the line of intersection's slope
+              dir_along_line /= dir_along_line.norm(); // normalize
+
+              libMesh::Point new_node_point = *P_current + b_vec.norm() * dir_along_line;
+              current_distance =
+                  new_node_point -
+                  *node; // this is not great coding, but it fits in with what's here...
+            }
+            else
+            {
+              _direction = *P_current - *P_prev;
+              _direction /= _direction.norm(); // normalize direction
+              mooseAssert(std::abs(_direction.norm() - 1.0) < libMesh::TOLERANCE,
+                          "Norm of direction vector is not 1!");
+
+              // Calculate step size.
+              // Note: old_distance+*node is the vector description of the previously-created node
+              step_size = ((*P_current - (old_distance + *node)) * _direction);
+              current_distance =
+                  old_distance +
+                  _direction * step_size; // update distance from starting node to new node
+            }
           }
           else
           {
@@ -589,11 +622,10 @@ AdvancedExtruderGenerator::generate()
                             ? height / (Real)num_layers / (Real)order
                             : height * std::pow(bias, (Real)(layer_index - 1)) * (1.0 - bias) /
                                   (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
+            current_distance =
+                old_distance +
+                _direction * step_size; // update distance from starting node to new node
           }
-
-          current_distance =
-              old_distance +
-              _direction * step_size; // update distance from starting node to new node
 
           // Handle helicoidal extrusion
           if (!MooseUtils::absoluteFuzzyEqual(_twist_pitch, 0.))
