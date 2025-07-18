@@ -14,6 +14,7 @@
 #include "MFEMContainers.h"
 #include "CoefficientManager.h"
 #include "MFEMSolverBase.h"
+#include "MFEMRefinementMarker.h"
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -41,9 +42,14 @@ public:
   Moose::MFEM::FESpaces fespaces;
   Moose::MFEM::GridFunctions gridfunctions;
 
+  std::shared_ptr<MFEMRefinementMarker> _refiner;
+  bool _use_amr{false};
+
   MPI_Comm comm;
   int myid;
   int num_procs;
+
+  bool _mesh_changed{false};
 };
 
 #endif

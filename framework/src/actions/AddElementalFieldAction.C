@@ -45,7 +45,8 @@ AddElementalFieldAction::init()
 
   // Need static_cast to resolve overloads
   _problem_add_var_method = static_cast<void (FEProblemBase::*)(
-      const std::string &, const std::string &, InputParameters &)>(&FEProblemBase::addAuxVariable);
+      const std::string &, const std::string &, InputParameters &)>(
+      &FEProblemBase::addElementalFieldVariable);
 }
 
 void

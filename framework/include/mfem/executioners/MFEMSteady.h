@@ -24,6 +24,9 @@ public:
   virtual void init() override;
   virtual void execute() override;
 
+  virtual void UpdateAfterRefinement() override;
+  virtual bool ApplyRefinements() override;
+
 protected:
   // Time variables used for consistency with MOOSE, needed for outputs.
   // Important for future synchronisation of solves in MultiApps

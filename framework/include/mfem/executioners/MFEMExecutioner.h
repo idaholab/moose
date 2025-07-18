@@ -12,6 +12,7 @@
 #pragma once
 #include "Executioner.h"
 #include "MFEMProblemData.h"
+#include "MFEMRefinementMarker.h"
 
 class MFEMProblem;
 
@@ -26,6 +27,17 @@ public:
 
   /// Virtual method to construct the ProblemOperator. Call for default problems.
   virtual void constructProblemOperator() = 0;
+
+  // Executioners should not support estimators by default
+  virtual bool addRefiner(std::shared_ptr<MFEMRefinementMarker>) { return false; }
+
+  virtual void UpdateAfterRefinement() {}
+
+  //! Virtual method to apply any refinements which are enabled and returns a bool
+  //! to indicate whether we should solve the problem again.
+  virtual bool ApplyRefinements() {return false;}
+
+  bool UseAMR() const;
 
   /**
    * Set the device to use to solve the FE problem.
