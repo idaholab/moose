@@ -185,6 +185,18 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _problem.setNeedToAddDefaultMultiAppFixedPointConvergence();
 }
 
+void
+FixedPointSolve::initialSetup()
+{
+  SolveObject::initialSetup();
+
+  if (_has_fixed_point_its)
+  {
+    auto & conv = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
+    conv.checkIterationType(Convergence::IterationType::MULTIAPP_FIXED_POINT);
+  }
+}
+
 bool
 FixedPointSolve::solve()
 {

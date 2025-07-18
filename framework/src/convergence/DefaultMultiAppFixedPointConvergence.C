@@ -71,6 +71,16 @@ DefaultMultiAppFixedPointConvergence::DefaultMultiAppFixedPointConvergence(
 }
 
 void
+DefaultMultiAppFixedPointConvergence::checkIterationType(IterationType it_type) const
+{
+  DefaultConvergenceBase::checkIterationType(it_type);
+
+  if (it_type != IterationType::MULTIAPP_FIXED_POINT)
+    mooseError(
+        "DefaultMultiAppFixedPointConvergence can only be used with MultiApp fixed point solves.");
+}
+
+void
 DefaultMultiAppFixedPointConvergence::initialize()
 {
   DefaultConvergenceBase::initialize();

@@ -63,6 +63,15 @@ DefaultNonlinearConvergence::DefaultNonlinearConvergence(const InputParameters &
       getSharedExecutionerParam<Real>("nl_rel_step_tol");
 }
 
+void
+DefaultNonlinearConvergence::checkIterationType(IterationType it_type) const
+{
+  DefaultConvergenceBase::checkIterationType(it_type);
+
+  if (it_type != IterationType::NONLINEAR)
+    mooseError("DefaultNonlinearConvergence can only be used with nonlinear solves.");
+}
+
 bool
 DefaultNonlinearConvergence::checkRelativeConvergence(const unsigned int /*it*/,
                                                       const Real fnorm,

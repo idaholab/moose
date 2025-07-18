@@ -59,7 +59,6 @@ private:
   bool _sub_cycling;
   bool _interpolate_transfers;
   bool _detect_steady_state;
-  Real _steady_state_tol;
   bool _output_sub_cycles;
 
   unsigned int _max_failures;
