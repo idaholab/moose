@@ -13,14 +13,15 @@
 #include "Assembly.h"
 #include "InitialCondition.h"
 
-ComputeInitialConditionThread::ComputeInitialConditionThread(FEProblemBase & fe_problem)
-  : _fe_problem(fe_problem)
+ComputeInitialConditionThread::ComputeInitialConditionThread(
+    FEProblemBase & fe_problem, const std::optional<std::set<VariableName>> & target_vars)
+  : _fe_problem(fe_problem), _target_vars(target_vars)
 {
 }
 
 ComputeInitialConditionThread::ComputeInitialConditionThread(ComputeInitialConditionThread & x,
                                                              Threads::split /*split*/)
-  : _fe_problem(x._fe_problem)
+  : _fe_problem(x._fe_problem), _target_vars(x._target_vars)
 {
 }
 
@@ -69,6 +70,12 @@ ComputeInitialConditionThread::operator()(const ConstElemRange & range)
           if ((id != elem->subdomain_id() && !ic->variable().isNodal()) ||
               ic->getState() != current_ic_state)
             continue;
+
+          // Skip initial conditions based on target variable usage
+          const auto & var_name = ic->variable().name();
+          if (_target_vars && !_target_vars->count(var_name))
+            continue;
+
           order.push_back(&(ic->variable()));
           groups[&(ic->variable())].push_back(ic);
         }
