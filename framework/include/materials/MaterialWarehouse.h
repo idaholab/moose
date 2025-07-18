@@ -42,7 +42,7 @@ public:
   virtual void jacobianSetup(THREAD_ID tid = 0) const;
   virtual void residualSetup(THREAD_ID tid = 0) const;
   virtual void updateActive(THREAD_ID tid = 0);
-  void sort(THREAD_ID tid = 0);
+  void sort(THREAD_ID tid = 0, bool sort_all_objects = false);
   ///@}
 
   /**

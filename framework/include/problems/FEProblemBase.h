@@ -9,6 +9,11 @@
 
 #pragma once
 
+#ifdef MOOSE_HAVE_KOKKOS
+#include "GPUAssembly.h"
+#include "GPUSystem.h"
+#endif
+
 // MOOSE includes
 #include "SubProblem.h"
 #include "GeometricSearchData.h"
@@ -92,6 +97,14 @@ class Convergence;
 class MooseAppCoordTransform;
 class MortarUserObject;
 class SolutionInvalidity;
+
+namespace Moose
+{
+namespace Kokkos
+{
+class MaterialPropertyStorage;
+} // namespace Kokkos
+} // namespace Moose
 
 // libMesh forward declarations
 namespace libMesh
@@ -314,6 +327,11 @@ public:
   virtual Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) override;
   virtual const Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) const override;
 
+#ifdef MOOSE_HAVE_KOKKOS
+  Moose::Kokkos::Assembly & kokkosAssembly() { return _kokkos_assembly; }
+  const Moose::Kokkos::Assembly & kokkosAssembly() const { return _kokkos_assembly; }
+#endif
+
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
    */
@@ -389,6 +407,10 @@ public:
 
   virtual void init() override;
   virtual void solve(const unsigned int nl_sys_num);
+
+#ifdef MOOSE_HAVE_KOKKOS
+  void initKokkos();
+#endif
 
   /**
    * Build and solve a linear system
@@ -733,6 +755,20 @@ public:
 
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
 
+#ifdef MOOSE_HAVE_KOKKOS
+  /**
+   * Get all Kokkos systems that are associated with MOOSE nonlinear and auxiliary systems
+   * @returns The array of Kokkos systems
+   */
+  ///{@
+  Moose::Kokkos::Array<Moose::Kokkos::System> & getKokkosSystems() { return _kokkos_systems; }
+  const Moose::Kokkos::Array<Moose::Kokkos::System> & getKokkosSystems() const
+  {
+    return _kokkos_systems;
+  }
+  ///@}
+#endif
+
   /**
    * Get constant reference to a system in this problem
    * @param sys_num The number of the system
@@ -816,6 +852,17 @@ public:
   virtual void addBoundaryCondition(const std::string & bc_name,
                                     const std::string & name,
                                     InputParameters & parameters);
+
+  virtual void addKokkosKernel(const std::string & kernel_name,
+                               const std::string & name,
+                               InputParameters & parameters);
+  virtual void addKokkosNodalKernel(const std::string & kernel_name,
+                                    const std::string & name,
+                                    InputParameters & parameters);
+  virtual void addKokkosBoundaryCondition(const std::string & bc_name,
+                                          const std::string & name,
+                                          InputParameters & parameters);
+
   virtual void
   addConstraint(const std::string & c_name, const std::string & name, InputParameters & parameters);
 
@@ -933,6 +980,10 @@ public:
                                   const std::string & name,
                                   InputParameters & parameters);
 
+  virtual void addKokkosMaterial(const std::string & material_name,
+                                 const std::string & name,
+                                 InputParameters & parameters);
+
   /**
    * Add the MooseVariables and the material properties that the current materials depend on to the
    * dependency list.
@@ -997,6 +1048,11 @@ public:
 
   void
   reinitMaterialsInterface(BoundaryID boundary_id, const THREAD_ID tid, bool swap_stateful = true);
+
+#ifdef MOOSE_HAVE_KOKKOS
+  void prepareKokkosMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props);
+  void reinitKokkosMaterials();
+#endif
 
   /*
    * Swap back underlying data storing stateful material properties
@@ -1673,6 +1729,21 @@ public:
   {
     return _neighbor_material_props;
   }
+
+#ifdef MOOSE_HAVE_KOKKOS
+  Moose::Kokkos::MaterialPropertyStorage & getKokkosMaterialPropertyStorage()
+  {
+    return _kokkos_material_props;
+  }
+  Moose::Kokkos::MaterialPropertyStorage & getKokkosBndMaterialPropertyStorage()
+  {
+    return _kokkos_bnd_material_props;
+  }
+  Moose::Kokkos::MaterialPropertyStorage & getKokkosNeighborMaterialPropertyStorage()
+  {
+    return _kokkos_neighbor_material_props;
+  }
+#endif
   ///@}
 
   /**
@@ -1780,6 +1851,10 @@ public:
    * at an intermediate step
    */
   void initElementStatefulProps(const libMesh::ConstElemRange & elem_range, const bool threaded);
+
+#ifdef MOOSE_HAVE_KOKKOS
+  void initKokkosStatefulProps();
+#endif
 
   /**
    * Method called to perform a series of sanity checks before a simulation is run. This method
@@ -1894,6 +1969,11 @@ public:
   const MaterialWarehouse & getDiscreteMaterialWarehouse() const { return _discrete_materials; }
   const MaterialWarehouse & getInterfaceMaterialsWarehouse() const { return _interface_materials; }
 
+  /*
+   * Return a reference to the material warehouse of Kokkos Material objects to be computed.
+   */
+  const MaterialWarehouse & getKokkosMaterialsWarehouse() const { return _kokkos_materials; }
+
   /**
    * Return a pointer to a MaterialBase object.  If no_warn is true, suppress
    * warning about retrieving a material reference potentially during the
@@ -1906,10 +1986,19 @@ public:
                                             const THREAD_ID tid = 0,
                                             bool no_warn = false);
 
-  /*
+  /**
    * @return The MaterialData for the type \p type for thread \p tid
    */
-  MaterialData & getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid = 0) const;
+  MaterialData & getMaterialData(Moose::MaterialDataType type,
+                                 const THREAD_ID tid = 0,
+                                 const MooseObject * object = nullptr,
+                                 bool is_kokkos = false) const;
+
+  /**
+   * @return The consumers of the MaterialPropertyStorage for the type \p type
+   */
+  const std::set<const MooseObject *> &
+  getMaterialPropertyStorageConsumers(Moose::MaterialDataType type, bool is_kokkos = false) const;
 
   /**
    * @returns Whether the original matrix nonzero pattern is restored before each Jacobian assembly
@@ -2464,6 +2553,8 @@ public:
 
   virtual Moose::FEBackend feBackend() const { return Moose::FEBackend::LibMesh; }
 
+  bool hasKokkosObjects() { return _has_kokkos_objects; }
+
 protected:
   /**
    * Deprecated. Users should switch to overriding the meshChanged which takes arguments
@@ -2604,12 +2695,20 @@ protected:
   Moose::CouplingType _coupling;                             ///< Type of variable coupling
   std::vector<std::unique_ptr<libMesh::CouplingMatrix>> _cm; ///< Coupling matrix for variables.
 
+#ifdef MOOSE_HAVE_KOKKOS
+  Moose::Kokkos::Array<Moose::Kokkos::System> _kokkos_systems;
+#endif
+
   /// Dimension of the subspace spanned by the vectors with a given prefix
   std::map<std::string, unsigned int> _subspace_dim;
 
   /// The Assembly objects. The first index corresponds to the thread ID and the second index
   /// corresponds to the nonlinear system number
   std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
+
+#ifdef MOOSE_HAVE_KOKKOS
+  Moose::Kokkos::Assembly _kokkos_assembly;
+#endif
 
   /// Warehouse to store mesh divisions
   /// NOTE: this could probably be moved to the MooseMesh instead of the Problem
@@ -2641,12 +2740,19 @@ protected:
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;
 
+#ifdef MOOSE_HAVE_KOKKOS
+  Moose::Kokkos::MaterialPropertyStorage & _kokkos_material_props;
+  Moose::Kokkos::MaterialPropertyStorage & _kokkos_bnd_material_props;
+  Moose::Kokkos::MaterialPropertyStorage & _kokkos_neighbor_material_props;
+#endif
   ///@{
   // Material Warehouses
   MaterialWarehouse _materials;           // regular materials
   MaterialWarehouse _interface_materials; // interface materials
   MaterialWarehouse _discrete_materials;  // Materials that the user must compute
   MaterialWarehouse _all_materials; // All materials for error checking and MaterialData storage
+
+  MaterialWarehouse _kokkos_materials; // Kokkos materials
   ///@}
 
   ///@{
@@ -3047,6 +3153,9 @@ private:
 
   /// nonlocal coupling requirement flag
   bool _requires_nonlocal_coupling;
+
+  /// Whether we have any Kokkos objects
+  bool _has_kokkos_objects = false;
 
   friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,
                                                         const std::string & value,

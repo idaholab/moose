@@ -60,8 +60,10 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_feproblem(*_mi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _mi_subproblem(*_mi_params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
+    _is_kokkos_object(_mi_params.isParamValid("_kokkos_object")),
     _material_data_type(getMaterialDataType(boundary_ids)),
-    _material_data(_mi_feproblem.getMaterialData(_material_data_type, _mi_tid)),
+    _material_data(_mi_feproblem.getMaterialData(
+        _material_data_type, _mi_tid, moose_object, _is_kokkos_object)),
     _stateful_allowed(true),
     _get_material_property_called(false),
     _get_suffix(_mi_params.get<MaterialPropertyName>("prop_getter_suffix")),
@@ -70,6 +72,12 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_block_ids(block_ids),
     _mi_boundary_ids(boundary_ids)
 {
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
+
   moose_object->getMooseApp().registerInterfaceObject(*this);
 }
 

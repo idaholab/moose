@@ -9,6 +9,10 @@
 
 #pragma once
 
+#ifdef MOOSE_HAVE_KOKKOS
+#include "GPUTypes.h"
+#endif
+
 // MOOSE includes
 #include "InputParameters.h"
 #include "MaterialData.h"
@@ -54,6 +58,15 @@ public:
   BoundaryRestrictable(const MooseObject * moose_object,
                        const std::set<SubdomainID> & block_ids,
                        bool nodal);
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Class copy constructor
+   * Used for dispatching Kokkos functor.
+   * Only defined for Kokkos objects.
+   */
+  BoundaryRestrictable(const BoundaryRestrictable & object);
+#endif
 
   /**
    * Helper for determining if the object is boundary restricted. This is needed for the
@@ -220,12 +233,39 @@ private:
    */
   void initializeBoundaryRestrictable();
 
+#ifdef MOOSE_HAVE_KOKKOS
+  void initializeKokkosBoundaryRestrictable(MooseMesh * mesh);
+#endif
+
 protected:
   /**
    * A helper method to avoid circular #include problems.
    * @see hasBoundaryMaterialProperty
    */
   bool hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const;
+
+#ifdef MOOSE_HAVE_KOKKOS
+  /**
+   * Kokkos-related variables and methods
+   */
+private:
+  /// List of local node IDs this Kokkos object is operating on
+  Moose::Kokkos::Array<dof_id_type> _node_ids;
+  /// List of local element ID - side index pairs this Kokkos object is operating on
+  Moose::Kokkos::Array<Moose::Kokkos::Pair<dof_id_type, unsigned int>> _element_side_ids;
+#endif
+
+#ifdef MOOSE_KOKKOS_SCOPE
+protected:
+  /// Get the number of local nodes this Kokkos object is operating on
+  KOKKOS_FUNCTION auto numBoundaryNodes() const { return _node_ids.size(); }
+  /// Get the number of local sides this Kokkos object is operating on
+  KOKKOS_FUNCTION auto numBoundarySides() const { return _element_side_ids.size(); }
+  /// Get the local node ID this Kokkos thread is operating on
+  KOKKOS_FUNCTION auto boundaryNodeID(size_t idx) const { return _node_ids[idx]; }
+  /// Get the local element ID - side index pair this Kokkos thread is operating on
+  KOKKOS_FUNCTION auto boundaryElementSideID(size_t idx) const { return _element_side_ids[idx]; }
+#endif
 };
 
 template <typename T, bool is_ad>

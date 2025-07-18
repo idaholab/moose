@@ -39,6 +39,11 @@ RandomInterface::RandomInterface(const InputParameters & parameters,
     _curr_node(problem.assembly(tid, 0).node()),
     _curr_element(problem.assembly(tid, 0).elem())
 {
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (parameters.isParamValid("_kokkos_object") &&
+      !problem.getMooseApp().currentlyExecutingActions())
+    return;
 }
 
 RandomInterface::~RandomInterface() {}
