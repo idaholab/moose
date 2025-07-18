@@ -24,8 +24,6 @@ LinearFVCHTOrdTwoBC::LinearFVCHTOrdTwoBC(
     const InputParameters & parameters)
   :  LinearFVConjugateHeatTransferBC(parameters)
 {
-  LinearFVConjugateHeatTransferBC::LinearFVConjugateHeatTransferBC(params);
-  LinearFVAdvectionDiffusionFunctorRobinBC::LinearFVAdvectionDiffusionFunctorRobinBC(params);
 }
 
 void
