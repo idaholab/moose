@@ -24,9 +24,8 @@ public:
   virtual void init() override;
   virtual void execute() override;
 
-  virtual bool PRefine() override;
-  virtual bool HRefine() override;
   virtual void UpdateAfterRefinement() override;
+  virtual bool ApplyRefinements() override;
 
 protected:
   // Time variables used for consistency with MOOSE, needed for outputs.

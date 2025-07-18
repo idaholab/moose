@@ -31,10 +31,11 @@ public:
   // Executioners should not support estimators by default
   virtual bool addRefiner(std::shared_ptr<MFEMThresholdMarker>) { return false; }
 
-  // Return true if it's time to stop
-  virtual bool PRefine() { return true; };
-  virtual bool HRefine() { return true; };
-  virtual void UpdateAfterRefinement() {};
+  virtual void UpdateAfterRefinement() {}
+
+  //! Virtual method to apply any refinements which are enabled and returns a bool
+  //! to indicate whether we should solve the problem again.
+  virtual bool ApplyRefinements() {return false;}
 
   bool UseAMR() const;
 

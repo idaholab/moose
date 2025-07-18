@@ -26,17 +26,14 @@ public:
   std::shared_ptr<mfem::ParFiniteElementSpace>
   getFESpace();
 
-  // Mark the array. Return true if it's time to stop, either because the mesh is sufficiently
-  // refined, or because we have done enough steps
-  bool MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinement> & refinements);
-
-  // Return true if it's time to stop, either because the mesh is sufficiently
-  // refined, or because we have done enough steps
-  bool Apply(mfem::ParMesh & mesh);
+  void MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinement> & refinements);
+  void HRefine(mfem::ParMesh & mesh);
 
   //! Return whether these functions are enabled
-  bool UseHRefinement() const { return _use_h_refinement; }
-  bool UsePRefinement() const { return _use_p_refinement; }
+  //! Checking the the counter here is indeed redundant since the
+  //! H-refinement and P-refinement functions modify this one as well
+  bool UseHRefinement() const { return _use_h_refinement and !_stop_h_ref and (_h_ref_counter < _max_h_level); }
+  bool UsePRefinement() const { return _use_p_refinement and !_stop_p_ref and (_p_ref_counter < _max_p_level); }
 
   int MaxHLevel() const { return _max_h_level; }
   int MaxPLevel() const { return _max_p_level; }
@@ -47,9 +44,19 @@ protected:
   std::string _estimator_name;
   
   float _error_threshold;
-  int _steps; // total number of refinement steps to take
   int _max_h_level;
   int _max_p_level;
+  int _h_ref_counter{0};
+  int _p_ref_counter{0};
+
+  //! Bool to indicate we have reached stopping condition
+  //! for h-refinement.
+  bool _stop_h_ref{false};
+
+  //! Bool to indicate we have reached stopping condition
+  //! for p-refinement.
+  bool _stop_p_ref{false};
+
   std::string _refinement_type;
 
   bool _use_h_refinement{false};
