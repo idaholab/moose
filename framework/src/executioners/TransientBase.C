@@ -767,10 +767,8 @@ TransientBase::convergedToSteadyState() const
   const auto status = convergence.checkConvergence(_t_step);
 
   if (status == Convergence::MooseConvergenceStatus::DIVERGED)
-  {
-    _console << "Steady-state Convergence object reported divergence" << std::endl;
-    return false;
-  }
+    mooseError(
+        "The steady-state Convergence object (", convergence.name(), ") reported divergence.");
   else if (status == Convergence::MooseConvergenceStatus::CONVERGED)
     return true;
   else // status == Convergence::MooseConvergenceStatus::ITERATING
