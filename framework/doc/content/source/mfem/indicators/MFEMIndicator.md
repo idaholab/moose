@@ -8,7 +8,7 @@ Virtual base class for element based error estimators.
 
 ## Overview
 
-MFEM Estimators are resonsible for providing Error Estimators to [Refiners](source/mfem/refiners/MFEMThresholdMarker.md). 
+MFEM Estimators are resonsible for providing Error Estimators to [Refiners](source/mfem/refiners/MFEMRefinementMarker.md). 
 The `mfem::ErrorEstimator` object is constructed using a variable and a kernel which applies to that variable.
 
 
