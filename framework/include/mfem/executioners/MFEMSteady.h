@@ -40,8 +40,6 @@ private:
   Real _system_time;
   int & _time_step;
   Real & _time;
-  /// Iteration number obtained from the main application
-  unsigned int _output_iteration_number;
 };
 
 #endif
