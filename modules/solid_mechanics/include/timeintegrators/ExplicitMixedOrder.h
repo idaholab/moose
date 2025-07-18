@@ -9,7 +9,10 @@
 
 #pragma once
 
-#include "ExplicitTimeIntegrator.h"
+#include "TimeIntegrator.h"
+#include "MeshChangedInterface.h"
+#include "FEProblemBase.h"
+#define UNUSED(x) (void)(x)
 
 // Forward declarations
 namespace libMesh
@@ -22,39 +25,36 @@ class SparseMatrix;
  * Implements a form of the central difference time integrator that calculates acceleration directly
  * from the residual forces.
  */
-class ExplicitMixedOrder : public ExplicitTimeIntegrator
+class ExplicitMixedOrder : public TimeIntegrator, public MeshChangedInterface
 {
 public:
   static InputParameters validParams();
 
   ExplicitMixedOrder(const InputParameters & parameters);
 
+  virtual void init() override;
+  virtual void meshChanged() override;
+  virtual bool isExplicit() const override { return true; }
   virtual int order() override { return 1; }
   virtual void computeTimeDerivatives() override;
-
-  virtual void solve() override;
-  virtual void postResidual(NumericVector<Number> & residual) override;
   virtual bool overridesSolve() const override { return true; }
-
-  virtual void postSolve() override
-  { // Once we have the new solution, we want to adanceState to make sure the
-    // coupling between the solution and the computed material properties is kept correctly.
-    _fe_problem.advanceState();
-  }
   virtual bool advancesProblemState() const override { return true; }
 
-  virtual bool performExplicitSolve(SparseMatrix<Number> & mass_matrix) override;
+  virtual void preSolve() override {}
+  virtual void postResidual(NumericVector<Number> & residual) override;
+  virtual void solve() override;
+  virtual void postSolve() override;
 
   void computeADTimeDerivatives(ADReal &, const dof_id_type &, ADReal &) const override
   {
     mooseError("NOT SUPPORTED");
   }
-  virtual void init() override;
 
   enum TimeOrder
   {
     FIRST,
-    SECOND
+    SECOND,
+    FIRST_AND_SECOND
   };
 
   /**
@@ -64,16 +64,51 @@ public:
   TimeOrder findVariableTimeOrder(unsigned int var_num) const;
 
 protected:
-  virtual TagID massMatrixTagID() const override;
+  virtual TagID massMatrixTagID() const;
+
+  virtual TagID dampingMatrixTagID() const;
+
+  /// calculate acceleration and velocity using the central difference method
+  virtual void discretize();
+
+  /// Update the solution vector. @return true if the solution converged, false otherwise.
+  virtual bool solutionUpdate();
+
+  /// Whether damping is present
+  bool _has_damping;
 
   /// Whether we are reusing the mass matrix
   const bool & _constant_mass;
 
+  /// Whether we aare reusing the damping matrix
+  const bool & _constant_damping;
+
   /// Mass matrix name
   const TagName & _mass_matrix;
 
+  /// Damping matrix name
+  const TagName & _damping_matrix;
+
   /// The older solution
   const NumericVector<Number> & _solution_older;
+
+  /// Residual used for the RHS
+  NumericVector<Real> * _explicit_residual;
+
+  /// Solution vector for the linear solve
+  NumericVector<Real> * _solution_update;
+
+  /// Diagonal of the lumped mass matrix (and its inversion)
+  NumericVector<Real> * _mass_matrix_lumped;
+
+  /// Diagonal of the lumped mass matrix (and its inversion)
+  NumericVector<Real> * _damping_matrix_lumped;
+
+  /// Vector of 1's to help with creating the lumped mass matrix
+  NumericVector<Real> * _ones;
+
+  /// Save off current time to reset it back and forth
+  Real _current_time;
 
   // Variables that forward Euler time integration will be used for
   std::unordered_set<unsigned int> & _vars_first;
@@ -86,6 +121,16 @@ protected:
 
   // local dofs that will have central difference time integration
   std::vector<dof_id_type> & _local_second_order_indices;
+
+  /// Helper functions for phase-field
+  virtual void initPF() {}
+  virtual void upperboundCheck() {}
+  virtual void irreversibilityCheck(NumericVector<Number> * acceleration,
+                                    NumericVector<Number> * velocity)
+  {
+    UNUSED(acceleration);
+    UNUSED(velocity);
+  }
 
   /**
    * Helper function that actually does the math for computing the time derivative

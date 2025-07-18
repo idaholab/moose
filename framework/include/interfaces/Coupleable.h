@@ -791,6 +791,13 @@ protected:
                                                       unsigned int comp = 0) const;
 
   /**
+   * Returns the time derivatives of the gradient for all of a coupled variable's components
+   * @param var_name Name of coupled variable
+   * @return Vector of VariableValue pointers for each component of \p var_name
+   */
+  std::vector<const VariableGradient *> coupledGradientDots(const std::string & var_name) const;
+
+  /**
    * Second time derivative of the gradient of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -1009,6 +1016,13 @@ protected:
    */
   virtual const VariableValue & coupledDotDot(const std::string & var_name,
                                               unsigned int comp = 0) const;
+
+  /**
+   * Returns the second time derivatives for all of a coupled variable's components
+   * @param var_name Name of coupled variable
+   * @return Vector of VariableValue pointers for each component of \p var_name
+   */
+  std::vector<const VariableValue *> coupledDotDots(const std::string & var_name) const;
 
   /**
    * Old time derivative of a coupled variable
