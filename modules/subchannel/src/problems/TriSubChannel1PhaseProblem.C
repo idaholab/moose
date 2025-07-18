@@ -691,101 +691,67 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         auto h_out = 0.0;
         Real sumWijh = 0.0;
         Real sumWijPrimeDhij = 0.0;
+        Real sweep_enthalpy = 0.0;
         Real e_cond = 0.0;
-
         Real added_enthalpy = computeAddedHeatPin(i_ch, iz);
         added_enthalpy += computeAddedHeatDuct(i_ch, iz);
 
-        // compute the sweep flow enthalpy change
-        auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-        Real sweep_enthalpy = 0.0;
-
-        if ((subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER) &&
-            (wire_diameter != 0.0) && (wire_lead_length != 0.0))
-        {
-          const Real & pitch = _subchannel_mesh.getPitch();
-          const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
-          const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
-          const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
-          auto gap = _tri_sch_mesh.getDuctToPinGap();
-          auto w = pin_diameter + gap;
-          auto theta =
-              std::acos(wire_lead_length /
-                        std::sqrt(std::pow(wire_lead_length, 2) +
-                                  std::pow(libMesh::pi * (pin_diameter + wire_diameter), 2)));
-          auto Sij = dz * gap;
-          auto Si = (*_S_flow_soln)(node_in);
-          // in/out channels for i_ch
-          auto sweep_in = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
-          auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
-
-          // Calculation of flow regime
-          auto ReL = 320.0 * std::pow(10.0, pitch / pin_diameter - 1);
-          auto ReT = 10000.0 * std::pow(10.0, 0.7 * (pitch / pin_diameter - 1));
-          auto massflux = (*_mdot_soln)(node_in) / Si;
-          auto w_perim = (*_w_perim_soln)(node_in);
-          auto mu = (*_mu_soln)(node_in);
-          // hydraulic diameter
-          auto hD = 4.0 * Si / w_perim;
-          auto Re = massflux * hD / mu;
-          // Calculation of geometric parameters
-          auto Ar2 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 4.0;
-          auto A2prime =
-              pitch * (w - pin_diameter / 2.0) - libMesh::pi * std::pow(pin_diameter, 2) / 8.0;
-          auto A2 = A2prime - libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
-          auto Cs = 0.0;
-          if (Re < ReL)
-          {
-            Cs = 0.033 * std::pow(wire_lead_length / pin_diameter, 0.3);
-          }
-          else if (Re > ReT)
-          {
-            Cs = 0.75 * std::pow(wire_lead_length / pin_diameter, 0.3);
-          }
-          else
-          {
-            auto psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
-            auto gamma = 2.0 / 3.0;
-            Cs = 0.75 * std::pow(wire_lead_length / pin_diameter, 0.3) +
-                 (0.75 * std::pow(wire_lead_length / pin_diameter, 0.3) -
-                  0.033 * std::pow(wire_lead_length / pin_diameter, 0.3)) *
-                     std::pow(psi, gamma);
-          }
-          // Calculation of turbulent mixing parameter
-          auto beta = Cs * std::pow(Ar2 / A2, 0.5) * std::tan(theta);
-
-          auto wsweep_in = gedge_ave * beta * Sij;
-          auto wsweep_out = gedge_ave * beta * Sij;
-          auto sweep_hin = (*_h_soln)(node_sin);
-          auto sweep_hout = (*_h_soln)(node_in);
-          sweep_enthalpy = (wsweep_in * sweep_hin - wsweep_out * sweep_hout);
-        }
-
-        // Calculate sum of crossflow into channel i from channels j around i
+        /// Calculate net sum of enthalpy into/out-of channel i from channels j around i
+        /// (Turbulent difussion, Diversion Crossflow, Sweep flow Enthalpy, Radial heat conduction)
         unsigned int counter = 0;
         for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
         {
           auto chans = _subchannel_mesh.getGapChannels(i_gap);
-          unsigned int ii_ch = chans.first;
-          // i is always the smallest and first index in the mapping
-          unsigned int jj_ch = chans.second;
+          auto gap = _subchannel_mesh.getGapWidth(iz, i_gap);
+          auto Sij = dz * gap;
+          unsigned int ii_ch = chans.first;  // the first subchannel next to gap i_gap
+          unsigned int jj_ch = chans.second; // the second subchannel next to gap i_gap
           auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
           auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
+          auto subch_type_i = _subchannel_mesh.getSubchannelType(ii_ch);
+          auto subch_type_j = _subchannel_mesh.getSubchannelType(jj_ch);
           // Define donor enthalpy
           auto h_star = 0.0;
           if (_Wij(i_gap, iz) > 0.0)
             h_star = (*_h_soln)(node_in_i);
           else if (_Wij(i_gap, iz) < 0.0)
             h_star = (*_h_soln)(node_in_j);
-          // take care of the sign by applying the map, use donor cell
+          /// Diversion crossflow
+          /// take care of the sign by applying the map, use donor cell
           sumWijh += _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * h_star;
-          sumWijPrimeDhij += _WijPrime(i_gap, iz) * (2 * (*_h_soln)(node_in) -
-                                                     (*_h_soln)(node_in_j) - (*_h_soln)(node_in_i));
           counter++;
+          /// SWEEP FLOW is calculated if i_gap is located in the periphery
+          /// and we have a wire-wrap (if i_gap is in the periphery then i_chan is in the periphery)
+          if ((subch_type_i == EChannelType::CORNER || subch_type_i == EChannelType::EDGE) &&
+              (subch_type_j == EChannelType::CORNER || subch_type_j == EChannelType::EDGE) &&
+              (wire_lead_length != 0) && (wire_diameter != 0))
+          {
+            // donor subchannel and node of sweep flow
+            auto sweep_in = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
+            auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
+            /// if one of the neighbor subchannels is the donor subchannel (the other would be the i_ch)
+            /// sweep enthalpy flows into i_ch
+            if ((ii_ch == sweep_in) || (jj_ch == sweep_in))
+            {
+              sweep_enthalpy +=
+                  computeBeta(i_gap, iz, true) * gedge_ave * Sij * (*_h_soln)(node_sin);
+            }
+            /// else sweep enthalpy flows out
+            else
+            {
+              sweep_enthalpy -=
+                  computeBeta(i_gap, iz, true) * gedge_ave * Sij * (*_h_soln)(node_in);
+            }
+          }
+          /// Inner gap
+          /// Turbulent Diffusion
+          else
+          {
+            sumWijPrimeDhij +=
+                _WijPrime(i_gap, iz) * (2 * h_in - (*_h_soln)(node_in_j) - (*_h_soln)(node_in_i));
+          }
 
           // compute the radial heat conduction through the gaps
-          auto subch_type_i = _subchannel_mesh.getSubchannelType(ii_ch);
-          auto subch_type_j = _subchannel_mesh.getSubchannelType(jj_ch);
           Real dist_ij = pitch;
 
           if (subch_type_i == EChannelType::EDGE && subch_type_j == EChannelType::EDGE)
@@ -802,7 +768,6 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             dist_ij = pitch / std::sqrt(3);
           }
 
-          auto Sij = dz * _subchannel_mesh.getGapWidth(iz, i_gap);
           auto thcon_i = _fp->k_from_p_T((*_P_soln)(node_in_i) + _P_out, (*_T_soln)(node_in_i));
           auto thcon_j = _fp->k_from_p_T((*_P_soln)(node_in_j) + _P_out, (*_T_soln)(node_in_j));
           auto shape_factor =
