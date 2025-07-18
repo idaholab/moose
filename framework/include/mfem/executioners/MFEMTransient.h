@@ -14,21 +14,22 @@
 #include "TimeDomainProblemOperator.h"
 #include "TransientBase.h"
 
-class MFEMTransient : public TransientBase, public MFEMExecutioner
+class MFEMTransient : public TransientBase
 {
 public:
   static InputParameters validParams();
 
   explicit MFEMTransient(const InputParameters & params);
 
-  void constructProblemOperator() override;
+  void constructProblemOperator();
+  virtual Moose::MFEM::TimeDomainProblemOperator & getProblemOperator()
+  {
+    return *_problem_operator;
+  };
   virtual void init() override;
 
   /// Do whatever is necessary to advance one step.
   virtual void takeStep(Real input_dt = -1.0) override;
-
-  /// Perform all required solves during a step. Called within takeStep.
-  virtual void innerSolve() override;
 
   /// Check if last solve converged. Currently defaults to true for all MFEM executioners.
   virtual bool lastSolveConverged() const override { return true; };
@@ -54,6 +55,9 @@ public:
   };
 
 private:
+  MFEMProblem & _mfem_problem;
+  MFEMProblemData & _mfem_problem_data;
+  MFEMExecutioner _mfem_problem_solver;
   std::unique_ptr<Moose::MFEM::TimeDomainProblemOperator> _problem_operator{nullptr};
 };
 

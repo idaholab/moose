@@ -10,7 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
-#include "MFEMProblemData.h"
+#include "MFEMProblem.h"
 
 namespace Moose::MFEM
 {
@@ -18,13 +18,14 @@ namespace Moose::MFEM
 class ProblemOperatorInterface
 {
 public:
-  ProblemOperatorInterface(MFEMProblemData & problem) : _problem(problem) {}
+  ProblemOperatorInterface(MFEMProblem & problem);
   virtual ~ProblemOperatorInterface() = default;
 
   virtual void SetGridFunctions();
   virtual void SetTestVariablesFromTrueVectors();
   virtual void SetTrialVariablesFromTrueVectors();
   virtual void Init(mfem::BlockVector & X);
+  virtual void Solve() = 0;
 
   mfem::Array<int> _block_true_offsets;
 
@@ -33,7 +34,8 @@ public:
 
 protected:
   /// Reference to the current problem.
-  MFEMProblemData & _problem;
+  MFEMProblem & _problem;
+  MFEMProblemData & _problem_data;
 
   /// Vector of names of state gridfunctions used in formulation, ordered by appearance in block
   /// vector during solve.
