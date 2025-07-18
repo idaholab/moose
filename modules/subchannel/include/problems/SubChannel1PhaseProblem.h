@@ -35,14 +35,10 @@ public:
   virtual bool solverSystemConverged(const unsigned int) override;
   virtual void initialSetup() override;
 
-protected:
-  /// Standard return structure for reusing in implicit/explicit formulations
-  struct StructPetscMatVec
-  {
-    Mat A;
-    Vec x;
-  };
+  /// Computes added heat for channel i_ch and cell iz
+  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
 
+protected:
   struct FrictionStruct
   {
     int i_ch;
@@ -75,8 +71,6 @@ protected:
   void computeMu(int iblock);
   /// Computes Residual Matrix based on the lateral momentum conservation equation for block iblock
   void computeWijResidual(int iblock);
-  /// Computes added heat for channel i_ch and cell iz
-  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
   /// Function that computes the heat flux added by the duct
   Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
   /// Computes Residual Vector based on the lateral momentum conservation equation for block iblock & updates flow variables based on current crossflow solution
@@ -115,8 +109,6 @@ protected:
   unsigned int _n_channels;
   unsigned int _block_size;
   Real _outer_channels;
-  /// average relative error in pressure drop of channels
-  Real _dpz_error;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   Real _one;
@@ -297,7 +289,6 @@ protected:
   /// Lateral momentum system matrix
   Mat _cmc_sys_Wij_mat;
   Vec _cmc_sys_Wij_rhs;
-  Vec _cmc_Wij_channel_dummy;
 
   /// Enthalpy
   /// Enthalpy conservation - time derivative
@@ -314,8 +305,6 @@ protected:
   /// System matrices
   Mat _hc_sys_h_mat;
   Vec _hc_sys_h_rhs;
-  /// No implicit matrix
-  PetscInt _global_counter = 0;
 
   /// Added resistances for monolithic convergence
   PetscScalar _added_K = 0.0;

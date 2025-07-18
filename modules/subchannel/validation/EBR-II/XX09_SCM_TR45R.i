@@ -116,8 +116,8 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-6
-  T_tol = 1.0e-5
+  P_tol = 1.0e-4
+  T_tol = 1.0e-4
   implicit = true
   segregated = false
   interpolation_scheme = 'upwind'
@@ -261,7 +261,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 []
 
 [Outputs]
-  exodus = true
   csv = true
 []
 
@@ -310,7 +309,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     growth_factor = 2.0
   []
   dtmax = 20
-  num_steps = 15
+  # num_steps = 15
 []
 
 ################################################################################

@@ -18,8 +18,6 @@ P_out = 2.0e5 # Pa
     pitch = 7.26e-3
     dwire = 1.42e-3
     hwire = 0.3048
-    spacer_z = '0'
-    spacer_k = '0'
   []
 []
 
@@ -62,19 +60,16 @@ P_out = 2.0e5 # Pa
   n_blocks = 1
   P_out = 2.0e5
   CT = 2.6
-  # enforce_uniform_pressure = false
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-4
-  T_tol = 1.0e-4
-  implicit = false
-  segregated = true
+  implicit = true
+  segregated = false
   staggered_pressure = false
-  monolithic_thermal = false
+  monolithic_thermal = true
   verbose_multiapps = true
-  verbose_subchannel = false
-  interpolation_scheme = 'upwind'
+  verbose_subchannel = true
+  interpolation_scheme = upwind
 []
 
 [ICs]
@@ -91,7 +86,7 @@ P_out = 2.0e5 # Pa
   [q_prime_IC]
     type = SCMTriPowerIC
     variable = q_prime
-    power = 16975 #${fparse 16975/(0.5334+0.4046+0.0762)} # W/m
+    power = 16975 # W/m
     filename = "pin_power_profile19.txt"
   []
 
