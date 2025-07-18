@@ -37,7 +37,7 @@ class TestHarnessTester(TestHarnessTestCase):
             # Test should be in the results
             test_results = test_spec_results['tests'][test]
             # Get the output files from the test spec
-            result_output_files = test_results['output_files']
+            result_output = test_results['output']
             # Unique test id if specified
             if unique_test_id:
                 self.assertEqual(test_results['unique_test_id'], unique_test_id)
@@ -45,9 +45,9 @@ class TestHarnessTester(TestHarnessTestCase):
             for name in output_object_names:
                 output_path = f'{output_base_path}/{test}.{name}_out.txt'
                 self.assertTrue(os.path.exists(output_path))
-                self.assertEqual(result_output_files[name], output_path)
+                self.assertEqual(result_output[name], output_path)
             # And make sure that we don't have output from any other objects
-            for name, output_path in result_output_files.items():
+            for name, output_path in result_output.items():
                 if name not in output_object_names:
                     self.assertEqual(output_path, None)
 
