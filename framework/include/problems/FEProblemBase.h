@@ -951,7 +951,6 @@ public:
    * for a variable.
    *
    * \param elem_range       Element range to project on (non-nodal)
-   * \param bnd_nodes        Boundary nodes to include
    * \param node_range       Node range for nodal variables
    * \param poly_func        Polynomial function to project (function pointer)
    * \param poly_func_grad   Gradient of the polynomial function (function pointer)
@@ -959,7 +958,6 @@ public:
    * \param target_var variable name to project
    */
   void projectFunctionOnCustomRange(ConstElemRange & elem_range,
-                                    ConstNodeRange & bnd_nodes,
                                     Number (*poly_func)(const Point &,
                                                         const libMesh::Parameters &,
                                                         const std::string &,
