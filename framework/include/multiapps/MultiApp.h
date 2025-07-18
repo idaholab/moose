@@ -14,6 +14,7 @@
 #include "Restartable.h"
 #include "PerfGraphInterface.h"
 #include "Backup.h"
+#include "TimesInterface.h"
 
 #include "libmesh/communicator.h"
 #include "libmesh/point.h"
@@ -112,7 +113,8 @@ class SubAppBackups : public std::vector<std::unique_ptr<Backup>>
 class MultiApp : public MooseObject,
                  public SetupInterface,
                  public Restartable,
-                 public PerfGraphInterface
+                 public PerfGraphInterface,
+                 public TimesInterface
 {
 public:
   static InputParameters validParams();
@@ -140,8 +142,9 @@ public:
   /**
    * Create the i-th local app
    * @param[in] i local app index
+   * @param for_reset Whether we are resetting an app versus creating it for the first time
    */
-  virtual void createLocalApp(const unsigned int i);
+  virtual void createLocalApp(const unsigned int i, bool for_reset = false);
 
   /**
    * Method to be called in main-app initial setup for create sub-apps if using positions is false.
@@ -404,8 +407,9 @@ protected:
    *
    * @param i The local app number to create.
    * @param start_time The initial time for the App
+   * @param for_reset Whether we are resetting an app versus creating it for the first time
    */
-  void createApp(unsigned int i, Real start_time);
+  void createApp(unsigned int i, Real start_time, bool for_reset = false);
 
   /**
    * Create an MPI communicator suitable for each app.
@@ -565,13 +569,13 @@ protected:
   const Real _global_time_offset;
 
   /// The times at which to reset apps
-  std::vector<Real> _reset_times;
+  const Times * const _reset_times;
 
   /// The apps to be reset
   std::vector<unsigned int> _reset_apps;
 
   /// Whether or not apps have been reset at each time
-  std::vector<bool> _reset_happened;
+  std::set<Real> & _reset_happened;
 
   /// The time at which to move apps
   Real _move_time;

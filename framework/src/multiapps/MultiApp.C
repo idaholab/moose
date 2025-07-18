@@ -156,9 +156,8 @@ MultiApp::validParams()
                         "global time will be ahead by the offset specified here.");
 
   // Resetting subapps
-  params.addParam<std::vector<Real>>(
+  params.addParam<TimesName>(
       "reset_time",
-      {},
       "The time(s) at which to reset Apps given by the 'reset_apps' parameter.  "
       "Resetting an App means that it is destroyed and recreated, possibly "
       "modeling the insertion of 'new' material for that app.");
@@ -275,6 +274,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     SetupInterface(this),
     Restartable(this, "MultiApps"),
     PerfGraphInterface(this, std::string("MultiApp::") + _name),
+    TimesInterface(this),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type"))
                                        : _fe_problem.getMooseApp().type()),
@@ -294,9 +294,9 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _min_procs_per_app(getParam<processor_id_type>("min_procs_per_app")),
     _output_in_position(getParam<bool>("output_in_position")),
     _global_time_offset(getParam<Real>("global_time_offset")),
-    _reset_times(getParam<std::vector<Real>>("reset_time")),
+    _reset_times(getOptionalTimes("reset_time")),
     _reset_apps(getParam<std::vector<unsigned int>>("reset_apps")),
-    _reset_happened(false),
+    _reset_happened(declareRestartableData<std::set<Real>>("multiapp_reset_happened")),
     _move_time(getParam<Real>("move_time")),
     _move_apps(getParam<std::vector<unsigned int>>("move_apps")),
     _move_positions(getParam<std::vector<Point>>("move_positions")),
@@ -325,15 +325,8 @@ MultiApp::MultiApp(const InputParameters & parameters)
                "This MultiApps has been set to not use positions, "
                "but a 'positions' parameter has been set.");
 
-  if ((_reset_apps.size() > 0 && _reset_times.size() == 0) ||
-      (_reset_apps.size() == 0 && _reset_times.size() > 0))
+  if ((_reset_apps.size() > 0 && !_reset_times) || (_reset_apps.size() == 0 && _reset_times))
     mooseError("reset_time and reset_apps may only be specified together");
-
-  // Check that the reset times are sorted by the user
-  auto sorted_times = _reset_times;
-  std::sort(sorted_times.begin(), sorted_times.end());
-  if (_reset_times.size() && _reset_times != sorted_times)
-    paramError("reset_time", "List of reset times must be sorted in increasing order");
 }
 
 void
@@ -355,7 +348,6 @@ MultiApp::init(unsigned int num_apps, const LocalRankConfig & config)
   _sub_app_backups.resize(_my_num_apps);
 
   _has_bounding_box.resize(_my_num_apps, false);
-  _reset_happened.resize(_reset_times.size(), false);
   _bounding_box.resize(_my_num_apps);
 
   if ((_cli_args.size() > 1) && (_total_num_apps != _cli_args.size()))
@@ -429,9 +421,9 @@ MultiApp::createApps()
 }
 
 void
-MultiApp::createLocalApp(const unsigned int i)
+MultiApp::createLocalApp(const unsigned int i, bool for_reset)
 {
-  createApp(i, _global_time_offset);
+  createApp(i, _global_time_offset, for_reset);
 }
 
 void
@@ -662,41 +654,58 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
     timestep_tol =
         dynamic_cast<TransientBase *>(_fe_problem.getMooseApp().getExecutioner())->timestepTol();
 
+  // Determination on whether we need to backup the app due to changes below
+  bool backup_apps = false;
+
   // First, see if any Apps need to be reset
-  for (unsigned int i = 0; i < _reset_times.size(); i++)
+  if (_reset_times)
   {
-    if (!_reset_happened[i] && (target_time + timestep_tol >= _reset_times[i]))
+    // Last time in the set
+    const Real prev_reset_time = _reset_times->getPreviousTime(target_time + timestep_tol, false);
+
+    // Not time to reset yet
+    if (prev_reset_time > _app.getStartTime())
     {
-      _reset_happened[i] = true;
-      if (_reset_apps.size() > 0)
+      // Check if we already reset this time
+      bool already_reset = false;
+      for (const auto & rh : _reset_happened)
+        if (MooseUtils::relativeFuzzyEqual(rh, prev_reset_time))
+        {
+          already_reset = true;
+          break;
+        }
+
+      // Reset if not reset before
+      if (!already_reset)
+      {
         for (auto & app : _reset_apps)
           resetApp(app);
 
-      // If we reset an application, then we delete the old objects, including the coordinate
-      // transformation classes. Consequently we need to reset the coordinate transformation classes
-      // in the associated transfer classes
-      for (auto * const transfer : _associated_transfers)
-        transfer->getAppInfo();
+        // If we reset an application, then we delete the old objects, including the coordinate
+        // transformation classes. Consequently we need to reset the coordinate transformation
+        // classes in the associated transfer classes
+        for (auto * const transfer : _associated_transfers)
+          transfer->getAppInfo();
 
-      // Similarly we need to transform the mesh again
-      if (_run_in_position)
-        for (const auto i : make_range(_my_num_apps))
-        {
-          auto app_ptr = _apps[i];
-          if (usingPositions())
-            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
-                app_ptr->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
-          else
-            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
-                app_ptr->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
-        }
+        // Similarly we need to transform the mesh again
+        if (_run_in_position)
+          for (const auto i : make_range(_my_num_apps))
+          {
+            auto app_ptr = _apps[i];
+            if (usingPositions())
+              app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
+                  app_ptr->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+            else
+              app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
+                  app_ptr->getExecutioner()->feProblem().mesh(), Point());
+          }
 
-      // If the time step covers multiple reset times, set them all as having 'happened'
-      for (unsigned int j = i; j < _reset_times.size(); j++)
-        if (target_time + timestep_tol >= _reset_times[j])
-          _reset_happened[j] = true;
+        // Make sure we don't reset this time again
+        _reset_happened.insert(prev_reset_time);
 
-      break;
+        // Backup in case the next solve fails
+        backup_apps = true;
+      }
     }
   }
 
@@ -706,7 +715,13 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
     _move_happened = true;
     for (unsigned int i = 0; i < _move_apps.size(); i++)
       moveApp(_move_apps[i], _move_positions[i]);
+
+    // Backup in case the next solve fails
+    backup_apps = true;
   }
+
+  if (backup_apps)
+    backup();
 }
 
 Executioner *
@@ -845,6 +860,16 @@ MultiApp::restore(bool force)
 
       _end_aux_solutions.clear();
     }
+
+    // Make sure the displaced mesh on the multiapp is up-to-date with displacement variables
+    for (const auto & app_ptr : _apps)
+      if (app_ptr->feProblem().getDisplacedProblem())
+        app_ptr->feProblem().getDisplacedProblem()->updateMesh();
+
+    // If we are restoring due to a failed solve, make sure reset the solved state in the sub-apps
+    if (!getMooseApp().getExecutioner()->lastSolveConverged())
+      for (auto & app_ptr : _apps)
+        app_ptr->getExecutioner()->fixedPointSolve().clearFixedPointStatus();
   }
   else
   {
@@ -1066,7 +1091,7 @@ MultiApp::resetApp(unsigned int global_app, Real time)
     // Extract the file numbers from the output, so that the numbering is maintained after reset
     std::map<std::string, unsigned int> m = _apps[local_app]->getOutputWarehouse().getFileNumbers();
 
-    createApp(local_app, time);
+    createApp(local_app, time, true);
 
     // Reset the file numbers of the newly reset apps
     _apps[local_app]->getOutputWarehouse().setFileNumbers(m);
@@ -1101,7 +1126,7 @@ MultiApp::parentOutputPositionChanged()
 }
 
 void
-MultiApp::createApp(unsigned int i, Real start_time)
+MultiApp::createApp(unsigned int i, Real start_time, bool for_reset)
 {
   // Define the app name
   const std::string multiapp_name = getMultiAppName(name(), _first_local_app + i, _total_num_apps);
@@ -1183,8 +1208,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   app->setGlobalTimeOffset(start_time);
   app->setOutputFileNumbers(_app.getOutputWarehouse().getFileNumbers());
-  app->setRestart(_app.isRestarting());
-  app->setRecover(_app.isRecovering());
+  // If we are resetting, we want to restart from initial versus where the checkpoint last was
+  app->setRestart(!for_reset && _app.isRestarting());
+  app->setRecover(!for_reset && _app.isRecovering());
 
   if (_use_positions && getParam<bool>("output_in_position"))
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
