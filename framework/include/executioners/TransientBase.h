@@ -26,7 +26,7 @@ class FEProblemBase;
 class TransientBase : public Executioner
 {
 public:
-  static InputParameters steadyDefaultConvergenceParams();
+  static InputParameters defaultSteadyStateConvergenceParams();
   static InputParameters validParams();
 
   TransientBase(const InputParameters & parameters);

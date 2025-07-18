@@ -38,7 +38,7 @@
 #include <iomanip>
 
 InputParameters
-TransientBase::steadyDefaultConvergenceParams()
+TransientBase::defaultSteadyStateConvergenceParams()
 {
   InputParameters params = emptyInputParameters();
 
@@ -68,7 +68,7 @@ InputParameters
 TransientBase::validParams()
 {
   InputParameters params = Executioner::validParams();
-  params += TransientBase::steadyDefaultConvergenceParams();
+  params += TransientBase::defaultSteadyStateConvergenceParams();
 
   params.addClassDescription("Executioner for time varying simulations.");
 
@@ -201,9 +201,9 @@ TransientBase::TransientBase(const InputParameters & parameters)
   }
 
   if (isParamValid("steady_state_convergence"))
-    _problem.setSteadyConvergenceName(getParam<ConvergenceName>("steady_state_convergence"));
+    _problem.setSteadyStateConvergenceName(getParam<ConvergenceName>("steady_state_convergence"));
   else
-    _problem.setNeedToAddDefaultSteadyConvergence();
+    _problem.setNeedToAddDefaultSteadyStateConvergence();
 }
 
 void
@@ -217,8 +217,8 @@ TransientBase::init()
 
   _time_stepper->init();
 
-  auto & conv = _problem.getConvergence(_problem.getSteadyConvergenceName());
-  conv.checkIterationType(Convergence::IterationType::STEADY);
+  auto & conv = _problem.getConvergence(_problem.getSteadyStateConvergenceName());
+  conv.checkIterationType(Convergence::IterationType::STEADY_STATE);
 
   if (_app.isRecovering()) // Recover case
   {
@@ -763,7 +763,7 @@ TransientBase::setTimeStepper(TimeStepper & ts)
 bool
 TransientBase::convergedToSteadyState() const
 {
-  auto & convergence = _problem.getConvergence(_problem.getSteadyConvergenceName());
+  auto & convergence = _problem.getConvergence(_problem.getSteadyStateConvergenceName());
   const auto status = convergence.checkConvergence(_t_step);
 
   if (status == Convergence::MooseConvergenceStatus::DIVERGED)

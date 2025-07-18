@@ -2,7 +2,7 @@
 
 [Convergence]
   [steady_conv]
-    type = DefaultSteadyConvergence
+    type = DefaultSteadyStateConvergence
     steady_state_tolerance = ${ss_tol}
   []
 []

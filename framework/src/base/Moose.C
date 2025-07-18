@@ -281,7 +281,7 @@ addActionTypes(Syntax & syntax)
 
   registerTask("add_default_nonlinear_convergence", true);
   registerTask("add_default_multiapp_fixed_point_convergence", true);
-  registerTask("add_default_steady_convergence", true);
+  registerTask("add_default_steady_state_convergence", true);
 
   registerTask("chain_control_setup", true);
 
@@ -352,7 +352,7 @@ addActionTypes(Syntax & syntax)
                            "(add_convergence)"
                            "(add_default_nonlinear_convergence,"
                            " add_default_multiapp_fixed_point_convergence,"
-                           " add_default_steady_convergence)"
+                           " add_default_steady_state_convergence)"
                            "(add_periodic_bc)"
                            "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_distribution)"

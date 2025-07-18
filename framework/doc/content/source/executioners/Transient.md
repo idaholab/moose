@@ -46,7 +46,7 @@ This idea works perfectly in MOOSE with `Transient`: just simply only apply [`Ti
 
 ## Solving To Steady State
 
-Another use-case is to use `Transient` to solve to a steady state. By default, steady-state detection is disabled; it must be enabled by setting [!param](/Executioner/Transient/steady_state_detection) to `true`. The parameter [!param](/Executioner/Transient/steady_state_convergence) is used to specify the name of a [Convergence](Convergence/index.md) object to detect convergence; if not provided, a [DefaultSteadyConvergence.md] is created using the shared steady-state convergence parameters (see "Steady State Detection Parameters" section below).
+Another use-case is to use `Transient` to solve to a steady state. By default, steady-state detection is disabled; it must be enabled by setting [!param](/Executioner/Transient/steady_state_detection) to `true`. The parameter [!param](/Executioner/Transient/steady_state_convergence) is used to specify the name of a [Convergence](Convergence/index.md) object to detect convergence; if not provided, a [DefaultSteadyStateConvergence.md] is created using the shared steady-state convergence parameters (see "Steady State Detection Parameters" section below).
 
 !syntax parameters /Executioner/Transient
 

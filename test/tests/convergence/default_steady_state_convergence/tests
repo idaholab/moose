@@ -1,5 +1,5 @@
 [Tests]
-  design = 'DefaultSteadyConvergence.md'
+  design = 'DefaultSteadyStateConvergence.md'
   issues = '#30858'
 
   [default]
@@ -25,7 +25,7 @@
     [invalid_iteration_type]
       type = RunException
       input = 'invalid_iteration_type.i'
-      expect_err = "DefaultSteadyConvergence can only be used with steady-state detection"
+      expect_err = "DefaultSteadyStateConvergence can only be used with steady-state detection"
       detail = 'if used with an invalid iteration type.'
     []
   []

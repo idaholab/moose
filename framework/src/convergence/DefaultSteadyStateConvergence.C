@@ -7,25 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DefaultSteadyConvergence.h"
+#include "DefaultSteadyStateConvergence.h"
 #include "FEProblemBase.h"
 #include "TransientBase.h"
 #include "AuxiliarySystem.h"
 
-registerMooseObject("MooseApp", DefaultSteadyConvergence);
+registerMooseObject("MooseApp", DefaultSteadyStateConvergence);
 
 InputParameters
-DefaultSteadyConvergence::validParams()
+DefaultSteadyStateConvergence::validParams()
 {
   InputParameters params = DefaultConvergenceBase::validParams();
-  params += TransientBase::steadyDefaultConvergenceParams();
+  params += TransientBase::defaultSteadyStateConvergenceParams();
 
   params.addClassDescription("Default steady-state convergence criteria.");
 
   return params;
 }
 
-DefaultSteadyConvergence::DefaultSteadyConvergence(const InputParameters & parameters)
+DefaultSteadyStateConvergence::DefaultSteadyStateConvergence(const InputParameters & parameters)
   : DefaultConvergenceBase(parameters),
 
     _steady_state_tolerance(getSharedExecutionerParam<Real>("steady_state_tolerance")),
@@ -37,21 +37,21 @@ DefaultSteadyConvergence::DefaultSteadyConvergence(const InputParameters & param
     _aux_system(_fe_problem.getAuxiliarySystem())
 {
   if (!_transient_executioner)
-    mooseError(
-        "DefaultSteadyConvergence can only be used for Executioners derived from TransientBase.");
+    mooseError("DefaultSteadyStateConvergence can only be used for Executioners derived from "
+               "TransientBase.");
 }
 
 void
-DefaultSteadyConvergence::checkIterationType(IterationType it_type) const
+DefaultSteadyStateConvergence::checkIterationType(IterationType it_type) const
 {
   DefaultConvergenceBase::checkIterationType(it_type);
 
-  if (it_type != IterationType::STEADY)
-    mooseError("DefaultSteadyConvergence can only be used with steady-state detection.");
+  if (it_type != IterationType::STEADY_STATE)
+    mooseError("DefaultSteadyStateConvergence can only be used with steady-state detection.");
 }
 
 Convergence::MooseConvergenceStatus
-DefaultSteadyConvergence::checkConvergence(unsigned int /*iter*/)
+DefaultSteadyStateConvergence::checkConvergence(unsigned int /*iter*/)
 {
   TIME_SECTION(_perfid_check_convergence);
 
