@@ -25,7 +25,7 @@ public:
   MFEMAuxKernel(const InputParameters & parameters);
   virtual ~MFEMAuxKernel() = default;
 
-  // Method called to update any owned objects upon a mesh update.
+  /// Method called to update any owned objects upon a mesh update.
   virtual void update(){};
 
 protected:
