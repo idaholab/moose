@@ -349,10 +349,10 @@ class Job(OutputInterface):
 
     def getOutputFiles(self, options):
         """ Wrapper method to return getOutputFiles (absolute path) """
-        all_files = self.__tester.getOutputFiles(options)
+        all_files = set(self.__tester.getOutputFiles(options))
         for case in self.validation_cases:
-            all_files += case.getOutputFiles()
-        all_files = list(set(all_files))
+            all_files.update(case.getOutputFiles())
+        all_files = list(all_files)
 
         files = []
         for file in all_files:
