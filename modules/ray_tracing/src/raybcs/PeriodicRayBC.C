@@ -98,14 +98,10 @@ PeriodicRayBC::onBoundary(const unsigned int num_applying)
   unsigned int periodic_side;
   _periodic_neighbor = _periodic_boundaries.neighbor(
       _current_bnd_id, *_point_locator, _periodic_neighbor, current_side, &periodic_side);
-  if (!_periodic_neighbor)
-    mooseError("Failed to find topological neighbor\n\n", currentRay()->getInfo());
-
-  mooseAssert(
-      _study.sideIsIncoming(_periodic_neighbor, periodic_side, currentRay()->direction(), _tid),
-      "Is not incoming");
-  mooseAssert(_periodic_neighbor->build_side_ptr(periodic_side)->contains_point(_periodic_point),
-              "Does not contain point");
+  mooseAssert(_periodic_neighbor, "Should be set");
+  if (_periodic_neighbor == libMesh::remote_elem)
+    mooseError(
+        "Topological neighbor at ", _periodic_point, " is remote\n\n", currentRay()->getInfo());
 
   // We've done all translations, so actually move the Ray
   if (++_periodic_applied == num_applying)
