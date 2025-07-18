@@ -51,7 +51,6 @@
   start_time = 0.0
   num_steps = 1
   dt = 100.0
-  enable = false
   [./Adaptivity]
     refine_fraction = .5
   [../]
