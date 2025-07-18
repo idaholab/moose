@@ -12,7 +12,7 @@
 #pragma once
 #include "Executioner.h"
 #include "MFEMProblemData.h"
-#include "MFEMThresholdMarker.h"
+#include "MFEMRefinementMarker.h"
 
 class MFEMProblem;
 
@@ -29,7 +29,7 @@ public:
   virtual void constructProblemOperator() = 0;
 
   // Executioners should not support estimators by default
-  virtual bool addRefiner(std::shared_ptr<MFEMThresholdMarker>) { return false; }
+  virtual bool addRefiner(std::shared_ptr<MFEMRefinementMarker>) { return false; }
 
   virtual void UpdateAfterRefinement() {}
 
