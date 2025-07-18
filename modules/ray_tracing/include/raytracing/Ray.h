@@ -710,9 +710,13 @@ private:
    */
   unsigned short _current_incoming_side;
 
+  /// Whether or not this Ray had its trajectory changed (not sent in parallel)
+  bool _trajectory_changed;
   /// Whether or not the user has set an end point for this Ray (via limiting its
   /// distance with setStartingEndPoint())
   bool _end_set;
+  /// Wether or not the Ray should continue to be traced (not sent in parallel)
+  bool _should_continue;
 
   /// Number of times this Ray has been communicated
   unsigned int _processor_crossings;
@@ -722,16 +726,11 @@ private:
 
   /// Number of times this Ray has had its trajectory changed
   unsigned int _trajectory_changes;
-  /// Whether or not this Ray had its trajectory changed (not sent in parallel)
-  bool _trajectory_changed;
 
   /// Total distance this Ray has traveled
   Real _distance;
   /// Maximum distance the Ray is allowed to travel
   Real _max_distance;
-
-  /// Wether or not the Ray should continue to be traced (not sent in parallel)
-  bool _should_continue;
 
   /// The data that is carried with the Ray
   /// This is mutable so that we can resize it if needed within const accessors
