@@ -239,12 +239,16 @@ class JobDAG(object):
             if race_jobs:
                 all_jobs = [job] + race_jobs
                 job_names = sorted([j.getTestNameShort() for j in all_jobs])
-                output = 'This test spec is set to run in parallel, but a race condition was found\n'
-                output += 'that could lead to multiple tests reading/writing from the same file.\n\n'
-                output += f'  Tests: {", ".join(job_names)}\n'
-                output += f'  File(s): {", ".join(conflicting_files)}\n\n'
-                output += 'You can resolve this issue by setting the approprate prerequisites\n'
-                output += 'between your tests with the "prereq" parameter.'
+
+                output = f'''This test spec is set to run in parallel, but a race condition was found
+that could lead to multiple tests reading/writing from the same file.
+
+  Tests: {", ".join(job_names)}
+  File(s): {", ".join(conflicting_files)}
+
+You can resolve this issue by setting the approprate prerequisites
+between your tests with the "prereq" parameter.'''
+
                 for j in [job] + race_jobs:
                     j.appendOutput(output)
                     j.setStatus(j.error, 'RACE CONDITION')
