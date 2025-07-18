@@ -26,13 +26,13 @@ MFEMSteady::validParams()
 
 MFEMSteady::MFEMSteady(const InputParameters & params)
   : Executioner(params),
+    _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
+    _mfem_problem_data(_mfem_problem.getProblemData()),
+    _mfem_problem_solver(params, _mfem_problem),
     _system_time(getParam<Real>("time")),
     _time_step(_mfem_problem.timeStep()),
     _time(_mfem_problem.time()),
-    _output_iteration_number(0),
-    _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
-    _mfem_problem_data(_mfem_problem.getProblemData()),
-    _mfem_problem_solver(params, _mfem_problem)
+    _output_iteration_number(0)
 {
   _time = _system_time;
   constructProblemOperator();
