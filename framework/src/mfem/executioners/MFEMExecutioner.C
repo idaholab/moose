@@ -27,7 +27,7 @@ MFEMExecutioner::validParams()
 }
 
 MFEMExecutioner::MFEMExecutioner(const InputParameters & params, MFEMProblem & mfem_problem)
-  : _mfem_problem(mfem_problem), _problem_data(_mfem_problem.getProblemData())
+  : _mfem_problem(mfem_problem)
 {
   if (const auto compute_device = _app.getComputeDevice())
     _app.setMFEMDevice(*compute_device, Moose::PassKey<MFEMExecutioner>());
@@ -39,7 +39,7 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & params, MFEMProblem & m
 }
 
 void
-MFEMExecutioner::solve()
+MFEMExecutioner::solve(Moose::MFEM::ProblemOperatorInterface & problem_operator)
 {
   // FixedPointSolve::solve() is libMesh specific, so we need
   // to include all steps therein relevant to the MFEM backend here.
@@ -71,7 +71,9 @@ MFEMExecutioner::solve()
   // Update warehouse active objects
   _mfem_problem.updateActiveObjects();
 
-  innerSolve();
+  if (_mfem_problem.shouldSolve())
+    problem_operator.Solve();
+  _mfem_problem.displaceMesh();
 
   // Execute user objects, transfers, and multiapps at timestep end
   _mfem_problem.onTimestepEnd();

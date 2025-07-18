@@ -57,15 +57,15 @@ void
 MFEMProblem::initProblemOperator()
 {
   setMesh();
-  auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
-  if (mfem_exec_ptr != nullptr)
-  {
-    mfem_exec_ptr->constructProblemOperator();
-  }
-  else
-  {
-    mooseError("Executioner used that is not currently supported by MFEMProblem");
-  }
+  // auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
+  // if (mfem_exec_ptr != nullptr)
+  // {
+  //   // mfem_exec_ptr->constructProblemOperator();
+  // }
+  // else
+  // {
+  //   mooseError("Executioner used that is not currently supported by MFEMProblem");
+  // }
 }
 
 void

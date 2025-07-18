@@ -19,11 +19,11 @@ namespace Moose::MFEM
 class ProblemOperator : public mfem::Operator, public ProblemOperatorInterface
 {
 public:
-  ProblemOperator(MFEMProblemData & problem) : ProblemOperatorInterface(problem) {}
+  ProblemOperator(MFEMProblem & problem) : ProblemOperatorInterface(problem) {}
 
   void SetGridFunctions() override;
 
-  virtual void Solve(mfem::Vector & /*X*/) {}
+  virtual void Solve() override {}
   void Mult(const mfem::Vector &, mfem::Vector &) const override {}
 };
 
