@@ -178,6 +178,36 @@ protected:
   /// it needs to be scaled with a representative flux.
   const Real _passive_scalar_l_abs_tol;
 
+  // ************************ Turbulence Variables ************************ //
+
+  /// The names of the turbulence systems
+  const std::vector<SolverSystemName> & _turbulence_system_names;
+
+  /// Boolean for easy check if a turbulence scalar systems shall be solved or not
+  const bool _has_turbulence_systems;
+
+  // The number(s) of the system(s) corresponding to the turbulence equation(s)
+  std::vector<unsigned int> _turbulence_system_numbers;
+
+  /// The user-defined relaxation parameter(s) for the turbulence equation(s)
+  const std::vector<Real> _turbulence_equation_relaxation;
+
+  /// The user-defined relaxation parameter(s) for the turbulence field(s)
+  std::vector<Real> _turbulence_field_relaxation;
+
+  /// The user-defined lower limit for turbulent quantities e.g. k, eps/omega, etc..
+  std::vector<Real> _turbulence_field_min_limit;
+
+  /// Options which hold the petsc settings for the turbulence equation(s)
+  Moose::PetscSupport::PetscOptions _turbulence_petsc_options;
+
+  /// Options for the linear solver of the turbulence equation(s)
+  SIMPLESolverConfiguration _turbulence_linear_control;
+
+  /// Absolute linear tolerance for the turbulence equation(s). We need to store this, because
+  /// it needs to be scaled with a representative flux.
+  const Real _turbulence_l_abs_tol;
+
   // ************************ Iteration control **************************** //
 
   /// The user-defined absolute tolerance for determining the convergence in momentum
@@ -194,6 +224,9 @@ protected:
 
   /// The user-defined absolute tolerance for determining the convergence in passive scalars
   const std::vector<Real> _passive_scalar_absolute_tolerance;
+
+  /// The user-defined absolute tolerance for determining the convergence turbulence variables
+  const std::vector<Real> _turbulence_absolute_tolerance;
 
   /// The maximum number of momentum-pressure iterations
   const unsigned int _num_iterations;
