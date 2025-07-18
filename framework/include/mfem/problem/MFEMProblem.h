@@ -275,9 +275,9 @@ public:
   void SetUpAMR();
 
   //! Return true when it's time to stop
-  bool HRefine();
+  void HRefine();
   //! Return true when it's time to stop
-  bool PRefine();
+  void PRefine();
 
   bool UseHRefinement() const;
   bool UsePRefinement() const;

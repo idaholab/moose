@@ -743,40 +743,29 @@ MFEMProblem::SetUpAMR()
   }
 }
 
-//! Return true when it's time to stop
-bool
+void
 MFEMProblem::HRefine()
 {
-  bool stop = true;
   if (UseAMR())
   {
-    // increment the counter
-    _problem_data._h_ref_counter++;
-
-    stop = _problem_data._refiner->Apply(*_problem_data.pmesh);;
+    _problem_data._refiner->HRefine(*_problem_data.pmesh);;
   }
   else
   {
     mooseError(
         "Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
   }
-  return stop;
 }
 
-//! Return true when it's time to stop
-bool
+void
 MFEMProblem::PRefine()
 {
-  bool stop = true;
   if (UseAMR())
   {
-    // increment the counter
-    _problem_data._p_ref_counter++;
-
     mfem::Array<mfem::pRefinement> prefinements;
     mfem::Array<mfem::Refinement> refinements;
 
-    stop = _problem_data._refiner->MarkWithoutRefining(*_problem_data.pmesh, refinements);
+    _problem_data._refiner->MarkWithoutRefining(*_problem_data.pmesh, refinements);
 
     prefinements.SetSize(refinements.Size());
     for (int i = 0; i < refinements.Size(); i++)
@@ -793,24 +782,18 @@ MFEMProblem::PRefine()
     mooseError(
         "Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
   }
-  return stop;
 }
 
 bool
 MFEMProblem::UseHRefinement() const
 {
-  return
-    (_problem_data._refiner->UseHRefinement())
-    and
-    (_problem_data._h_ref_counter < _problem_data._refiner->MaxHLevel());
+  return (_problem_data._refiner->UseHRefinement());
 }
 
 bool
 MFEMProblem::UsePRefinement() const
 {
-  return
-    (_problem_data._refiner->UsePRefinement())
-    and
-    (_problem_data._p_ref_counter < _problem_data._refiner->MaxPLevel());}
+  return (_problem_data._refiner->UsePRefinement());
+}
 
 #endif
