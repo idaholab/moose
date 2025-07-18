@@ -42,6 +42,9 @@ Executioner::validParams()
       "File base name used for restart",
       "Please use \"Problem/restart_file_base\" instead");
 
+  // An executioner should never be disabled
+  params.suppressParameter<bool>("enable");
+
   params.registerBase("Executioner");
 
   params.addParamNamesToGroup("fixed_point_algorithm", "Fixed point iterations");
