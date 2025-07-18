@@ -107,14 +107,17 @@ public:
 
   /**
    * Compute the relative L2 norm of the change in the solution.
+   *
+   * @param[in] check_aux   Whether to use the aux variables instead of solution variables
+   * @param[in] normalize_by_dt  Whether to divide by time step size
    */
-  Real computeSolutionChangeNorm() const;
   Real computeSolutionChangeNorm(bool check_aux, bool normalize_by_dt) const;
 
   /**
    * The relative L2 norm of the difference between solution and old solution vector.
+   *
+   * @param[in] check_aux   Whether to use the aux variables instead of solution variables
    */
-  Real relativeSolutionDifferenceNorm() const;
   virtual Real relativeSolutionDifferenceNorm(bool check_aux) const = 0;
 
   /**
@@ -227,6 +230,9 @@ public:
   /// Return the solve object wrapped by time stepper
   virtual SolveObject * timeStepSolveObject() { return _fixed_point_solve.get(); }
 
+  /// Determines whether the problem has converged to steady state
+  bool convergedToSteadyState() const;
+
 protected:
   /// Here for backward compatibility
   FEProblemBase & _problem;
@@ -288,20 +294,9 @@ protected:
 
   void setupTimeIntegrator();
 
-  /// Determines whether the problem has converged to steady state
-  bool convergedToSteadyState() const;
-
 private:
   /// Constrain the timestep dt_cur by looking at the timesteps for the MultiApps on execute_on
   void constrainDTFromMultiApp(Real & dt_cur,
                                std::ostringstream & diag,
                                const ExecFlagType & execute_on) const;
-
-  /// Whether to use the auxiliary system solution to determine steady-states
-  const bool _check_aux;
-
-  /// Whether to divide the solution difference norm by dt. If taking 'small' time steps this member
-  /// should probably be true. If taking very 'large' timesteps in an attempt to reach a
-  /// steady-state, this member should probably be be false.
-  const bool _normalize_solution_diff_norm_by_dt;
 };

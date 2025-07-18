@@ -355,17 +355,12 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
             }
           }
 
-          Real solution_change_norm = ex->computeSolutionChangeNorm();
+          at_steady = ex->convergedToSteadyState();
 
-          if (_detect_steady_state && _fe_problem.verboseMultiApps())
-            _console << "Solution change norm: " << solution_change_norm << std::endl;
-
-          if (converged && _detect_steady_state && solution_change_norm < _steady_state_tol)
+          if (converged && _detect_steady_state && at_steady)
           {
             if (_fe_problem.verboseMultiApps())
               _console << "Detected Steady State! Fast-forwarding to " << target_time << std::endl;
-
-            at_steady = true;
 
             // Indicate that the next output call (occurs in ex->endStep()) should output,
             // regardless of intervals etc...

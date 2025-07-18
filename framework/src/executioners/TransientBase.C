@@ -171,9 +171,7 @@ TransientBase::TransientBase(const InputParameters & parameters)
     _start_time(getParam<Real>("start_time")),
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRecoverableData<Real>("target_time", -std::numeric_limits<Real>::max())),
-    _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
-    _check_aux(getParam<bool>("check_aux")),
-    _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt"))
+    _use_multiapp_dt(getParam<bool>("use_multiapp_dt"))
 {
   _t_step = 0;
   _dt = 0;
@@ -641,21 +639,9 @@ TransientBase::setTargetTime(Real target_time)
 }
 
 Real
-TransientBase::computeSolutionChangeNorm() const
-{
-  return computeSolutionChangeNorm(_check_aux, _normalize_solution_diff_norm_by_dt);
-}
-
-Real
 TransientBase::computeSolutionChangeNorm(bool check_aux, bool normalize_by_dt) const
 {
   return relativeSolutionDifferenceNorm(check_aux) / (normalize_by_dt ? _dt : Real(1));
-}
-
-Real
-TransientBase::relativeSolutionDifferenceNorm() const
-{
-  return relativeSolutionDifferenceNorm(_check_aux);
 }
 
 void
