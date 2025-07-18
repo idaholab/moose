@@ -89,4 +89,7 @@ protected:
 
   /// Axial pitch for a full rotation
   const Real _twist_pitch;
+
+  /// Calculate radius for expansion
+  libMesh::Real radialWeighting(const MooseEnum function_type, const libMesh::Real t);
 };
