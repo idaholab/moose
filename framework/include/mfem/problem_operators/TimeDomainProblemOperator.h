@@ -23,10 +23,10 @@ class TimeDomainProblemOperator : public mfem::TimeDependentOperator,
                                   public ProblemOperatorInterface
 {
 public:
-  TimeDomainProblemOperator(MFEMProblemData & problem) : ProblemOperatorInterface(problem) {}
+  TimeDomainProblemOperator(MFEMProblem & problem) : ProblemOperatorInterface(problem) {}
 
   void SetGridFunctions() override;
-
+  void Solve() override{};
   void ImplicitSolve(const double, const mfem::Vector &, mfem::Vector &) override {}
 };
 
