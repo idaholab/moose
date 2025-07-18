@@ -122,8 +122,7 @@ class CSVValidationCase(ValidationCase):
 
         # Key that we're storing the data as isn't the
         # same as the column name in the CSV
-        if not store_key:
-            store_key = key
+        store_key = store_key or key
 
         # Load both values from CSV
         value = self._getScalarCSV(key, index, False)
