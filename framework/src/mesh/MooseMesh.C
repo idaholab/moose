@@ -2152,15 +2152,15 @@ MooseMesh::detectPairedSidesets()
   const auto missing = oss_missing.str();
   if (found.size())
     oss << "The following paired boundaries were automatically detected for periodicity:\n"
-        << found;
+        << found << "\n";
   if (missing.size())
   {
     if (found.size())
-      oss << "\n\n";
+      oss << "\n";
     oss << "Paired boundaries were not automatically detected for the following:\n"
         << missing
         << "\n\nAutomatic detection requires that exactly one boundary is found in each unit "
-           "direction.";
+           "direction.\n";
   }
 
   mooseInfoRepeated(oss.str());
