@@ -113,34 +113,10 @@ MFEMSteady::execute()
   {
     _problem_operator->Solve(_problem_data.f);
 
-    bool stop = false;
-    bool stop_pref = true;
-    bool stop_href = true;
-    while (UseAMR() and !stop)
+    while (UseAMR() and ApplyRefinements())
     {
-      // Check if we have P-Refinement enabled or we've done enough
-      // p-refinement steps
-      if ( _mfem_problem.UsePRefinement() )
-      {
-        stop_pref = PRefine();
-      }
-
-      // Check if we have H-Refinement enabled or we've done enough
-      // h-refinement steps
-      if ( _mfem_problem.UseHRefinement() )
-      {
-        stop_href = HRefine();
-      }
-
       // Solve again
       _problem_operator->Solve(_problem_data.f);
-
-      // Stop when both H_ref and P-ref think it's time to stop
-      stop = (stop_href and stop_pref);
-
-      // reset the other two bools
-      stop_href = true;
-      stop_pref = true;
     }
   }
 
@@ -176,26 +152,27 @@ MFEMSteady::execute()
   postExecute();
 }
 
+//! Returns true if we need to solve again
 bool
-MFEMSteady::PRefine()
+MFEMSteady::ApplyRefinements()
 {
-  // Call PRefine in the problem operator
-  bool stop = _mfem_problem.PRefine();
+  bool output = false;
 
-  UpdateAfterRefinement();
+  if ( _mfem_problem.UsePRefinement() )
+  {
+    output = true;
+    _mfem_problem.PRefine();
+    UpdateAfterRefinement();
+  }
 
-  return stop;
-}
+  if ( _mfem_problem.UseHRefinement() )
+  {
+    output = true;
+    _mfem_problem.HRefine();
+    UpdateAfterRefinement();
+  }
 
-bool
-MFEMSteady::HRefine()
-{
-  // Call PRefine in the problem operator
-  bool stop = _mfem_problem.HRefine();
-
-  UpdateAfterRefinement();
-
-  return stop;
+  return output;
 }
 
 void
