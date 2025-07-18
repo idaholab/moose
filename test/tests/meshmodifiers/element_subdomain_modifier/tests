@@ -168,6 +168,8 @@
     input = 'amr_bc.i'
     exodiff = 'amr_bc_out.e amr_bc_out.e-s002 amr_bc_out.e-s003 amr_bc_out.e-s004 amr_bc_out.e-s005'
     mesh_mode = 'REPLICATED'
+    # MeshModifiers cannot reverse their state when re-doing a timestep, currently. See #30878.
+    restep = false
     requirement = 'The framework shall support applying nodal BCs on the moving boundary with AMR in the element subdomain modifier'
   []
 
@@ -178,6 +180,8 @@
     exodiff = 'amr_integral_bc_out.e amr_integral_bc_out.e-s002
     amr_integral_bc_out.e-s003 amr_integral_bc_out.e-s004 amr_integral_bc_out.e-s005'
     mesh_mode = 'REPLICATED'
+    # MeshModifiers cannot reverse their state when re-doing a timestep, currently. See #30878.
+    restep = false
     requirement = 'The framework shall support applying integral BCs on the moving boundary with AMR in the element subdomain modifier'
   []
 

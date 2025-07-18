@@ -22,6 +22,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 8 # https://github.com/idaholab/moose/issues/24537
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to simulate a gate valve in between two components for a few time steps.'
   []
 
@@ -39,6 +40,7 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 8 # https://github.com/idaholab/moose/issues/24537
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to simulate a gate valve in between two components with the component oriented in either direction.'
   []
 

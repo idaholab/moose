@@ -8,6 +8,7 @@
     allow_test_objects = true
     recover = false
     max_parallel = 1
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to compute the convergence order of its 1D single phase compressible flow discretization.'
   []
 []

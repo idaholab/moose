@@ -23,6 +23,9 @@
       max_threads = 1
       min_parallel = 2
       max_parallel = 2
+      # Tests are meant to count how many times a setup interface call is triggered.
+      # With restep, this triggers those calls one more time than what is golded, which is intended
+      restep = false
 
       detail = 'once for general user objects,'
     []
@@ -32,6 +35,9 @@
       csvdiff = element_out.csv
       max_threads = 1
       max_parallel = 1
+      # Tests are meant to count how many times a setup interface call is triggered.
+      # With restep, this triggers those calls one more time than what is golded, which is intended
+      restep = false
 
       detail = 'for each element,'
     []
@@ -41,6 +47,9 @@
       csvdiff = side_out.csv
       max_threads = 1
       max_parallel = 1
+      # Tests are meant to count how many times a setup interface call is triggered.
+      # With restep, this triggers those calls one more time than what is golded, which is intended
+      restep = false
 
       detail = 'for each side,'
     []
@@ -50,6 +59,9 @@
       csvdiff = internal_side_out.csv
       max_threads = 1
       max_parallel = 1
+      # Tests are meant to count how many times a setup interface call is triggered.
+      # With restep, this triggers those calls one more time than what is golded, which is intended
+      restep = false
 
       detail = 'for each internal side, and'
     []
@@ -59,6 +71,9 @@
       csvdiff = nodal_out.csv
       max_threads = 1
       max_parallel = 1
+      # Tests are meant to count how many times a setup interface call is triggered.
+      # With restep, this triggers those calls one more time than what is golded, which is intended
+      restep = false
 
       detail = 'for each node.'
     []

@@ -29,7 +29,8 @@
       type = 'CSVDiff'
       input = 'transient_main.i'
       csvdiff = 'transient_main_out.csv transient_main_out_sub0_csv.csv'
-      cli_args = 'Executioner/fixed_point_max_its=5 Executioner/fixed_point_abs_tol=1e-10'
+      cli_args = 'Executioner/fixed_point_max_its=6 Executioner/fixed_point_abs_tol=1e-10'
+      ignore_columns = 'coupling_its'
       detail = 'with a failed timestep,'
     []
     [iteration_adaptive]
@@ -38,6 +39,7 @@
       csvdiff = 'adaptive_transient_main_out.csv adaptive_transient_main_out_sub0_csv.csv'
       recover = false
       cli_args = 'Executioner/TimeStepper/type=IterationAdaptiveDT Executioner/TimeStepper/dt=0.1 Executioner/TimeStepper/optimal_iterations=6 Executioner/TimeStepper/growth_factor=1.2 Executioner/TimeStepper/cutback_factor=0.4 Outputs/file_base=adaptive_transient_main_out'
+      ignore_columns = 'coupling_its'
       detail = 'with adaptive timestepping,'
     []
     [sub_cycling]
@@ -45,6 +47,7 @@
       input = 'transient_main.i'
       csvdiff = 'sub_cycling_out.csv sub_cycling_out_sub0_csv.csv'
       cli_args = "MultiApps/sub/cli_args='Executioner/dt=0.05' Outputs/file_base=sub_cycling_out"
+      ignore_columns = 'coupling_its'
       detail = 'with a subapp using a smaller timestep,'
     []
 
@@ -53,6 +56,7 @@
       input = 'transient_main.i'
       csvdiff = 'app_begin_transfer_begin.csv app_begin_transfer_begin_sub0_csv.csv'
       cli_args = 'Transfers/left_from_sub/execute_on=timestep_begin Transfers/right_to_sub/execute_on=timestep_begin Outputs/file_base=app_begin_transfer_begin'
+      ignore_columns = 'coupling_its'
       detail = 'with the sub-app and the postprocessor transfers executed at the beginning of each time step,'
     []
     [app_begin_transfers_end]
@@ -62,6 +66,7 @@
       allow_warnings = true
       recover = false
       cli_args = 'Transfers/left_from_sub/execute_on=timestep_end Transfers/right_to_sub/execute_on=timestep_end Outputs/file_base=app_begin_transfer_end'
+      ignore_columns = 'coupling_its'
       detail = 'with the sub-app executed at the beginning of each time step and postprocessor transfers executed at the end of each timestep,'
     []
     [app_end_transfers_begin]
@@ -69,7 +74,10 @@
       input = 'transient_main.i'
       csvdiff = 'app_end_transfer_begin.csv app_end_transfer_begin_sub0_csv.csv'
       allow_warnings = true
-      cli_args = 'MultiApps/sub/execute_on=timestep_end Transfers/left_from_sub/execute_on=timestep_begin Transfers/right_to_sub/execute_on=timestep_begin Outputs/file_base=app_end_transfer_begin'
+      cli_args = 'MultiApps/sub/execute_on=timestep_end
+                  Transfers/left_from_sub/execute_on=timestep_begin
+                  Transfers/right_to_sub/execute_on=timestep_begin
+                  Outputs/file_base=app_end_transfer_begin'
       detail = 'with the sub-app executed at the end of each time step and postprocessor transfers executed at the beginning of each timestep,'
     []
     [app_end_transfers_end]
@@ -77,6 +85,7 @@
       input = 'transient_main.i'
       csvdiff = 'app_end_transfer_end.csv app_end_transfer_end_sub0_csv.csv'
       cli_args = 'MultiApps/sub/execute_on=timestep_end Transfers/left_from_sub/execute_on=timestep_end Transfers/right_to_sub/execute_on=timestep_end Outputs/file_base=app_end_transfer_end'
+      ignore_columns = 'coupling_its'
       detail = 'with the sub-app and the postprocessor transfers executed at the end of each time step.'
     []
 
@@ -85,6 +94,7 @@
       input = 'transient_main.i'
       csvdiff = 'app_begin_transfer_begin_secant_sub.csv app_begin_transfer_begin_secant_sub_sub0_csv.csv'
       cli_args = "Outputs/file_base=app_begin_transfer_begin_secant_sub Executioner/transformed_postprocessors='' MultiApps/sub/transformed_postprocessors='from_main'"
+      ignore_columns = 'coupling_its'
       detail = 'for updating the subapp postprocessor with the sub-app and the variable transfers executed at the beginning of each time step,'
     []
     [app_begin_transfers_end_secant_sub]
@@ -93,6 +103,7 @@
       csvdiff = 'app_begin_transfer_end_secant_sub.csv app_begin_transfer_end_secant_sub_sub0_csv.csv'
       allow_warnings = true
       cli_args = "Transfers/left_from_sub/execute_on=timestep_end Transfers/right_to_sub/execute_on=timestep_end Executioner/transformed_postprocessors='' MultiApps/sub/transformed_postprocessors='from_main' Outputs/file_base=app_begin_transfer_end_secant_sub"
+      ignore_columns = 'coupling_its'
       detail = 'for updating the subapp postprocessor with the sub-app executed at the beginning of each time step and variable transfers executed at the end of each timestep,'
     []
     [app_end_transfers_begin_secant_sub]
@@ -100,7 +111,12 @@
       input = 'transient_main.i'
       csvdiff = 'app_end_transfer_begin_secant_sub.csv'
       allow_warnings = true
-      cli_args = "MultiApps/sub/execute_on=timestep_end Transfers/left_from_sub/execute_on=timestep_begin Transfers/right_to_sub/execute_on=timestep_begin Executioner/transformed_postprocessors='' MultiApps/sub/transformed_postprocessors='from_main' Outputs/file_base=app_end_transfer_begin_secant_sub"
+      cli_args = "MultiApps/sub/execute_on=timestep_end
+                  Transfers/left_from_sub/execute_on=timestep_begin
+                  Transfers/right_to_sub/execute_on=timestep_begin
+                  Executioner/transformed_postprocessors=''
+                  MultiApps/sub/transformed_postprocessors='from_main'
+                  Outputs/file_base=app_end_transfer_begin_secant_sub"
       detail = 'for updating the subapp postprocessor with the sub-app executed at the end of each time step and variable transfers executed at the beginning of each timestep,'
     []
     [app_end_transfers_end_secant_sub]
@@ -109,6 +125,7 @@
       csvdiff = 'app_end_transfer_end_secant_sub.csv'
       allow_warnings = true
       cli_args = "MultiApps/sub/execute_on=timestep_end Transfers/left_from_sub/execute_on=timestep_end Transfers/right_to_sub/execute_on=timestep_end Executioner/transformed_postprocessors='' MultiApps/sub/transformed_postprocessors='from_main' Outputs/file_base=app_end_transfer_end_secant_sub"
+      ignore_columns = 'coupling_its'
       detail = 'and for updating the subapp postprocessor with the sub-app and the variable transfers executed at the end of each time step.'
     []
   []

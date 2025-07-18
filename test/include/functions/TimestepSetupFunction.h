@@ -24,5 +24,5 @@ public:
   virtual void timestepSetup();
 
 private:
-  unsigned int & _local_timestep;
+  int _local_timestep;
 };

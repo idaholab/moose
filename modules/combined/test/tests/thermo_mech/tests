@@ -66,6 +66,7 @@
     exodiff = 'thermo_mech_smp_out.e'
     custom_cmp = 'thermo_mech.cmp'
     max_parallel = 1
+    restep = False # Cannot compare restep output when outputting on nonlinear
     issues = "#8642"
     requirement = "The system shall be able to run coupled thermo-mechanics simulations using the "
                   "SMP preconditioner and match the deprecated solid mechanics methods"
