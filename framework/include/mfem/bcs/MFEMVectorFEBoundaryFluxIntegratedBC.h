@@ -19,10 +19,10 @@ public:
 
   MFEMVectorFEBoundaryFluxIntegratedBC(const InputParameters & parameters);
 
-  // Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
+  /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
   virtual mfem::LinearFormIntegrator * createLFIntegrator();
 
-  // Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
+  /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::BilinearFormIntegrator * createBFIntegrator();
 
 protected:

@@ -115,7 +115,7 @@ public:
   // NOLINTNEXTLINE(readability-identifier-naming)
   [[nodiscard]] inline const_iterator end() const { return _field_map.end(); }
 
-  // Returns the number of elements in the map
+  /// Returns the number of elements in the map
   int size() { return _field_map.size(); }
 
 protected:
