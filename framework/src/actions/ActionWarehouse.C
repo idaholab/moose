@@ -145,9 +145,9 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
     {
       const InputParameters & mparams = moa->getObjectParams();
 
-      if (mparams.have_parameter<std::string>("_moose_base"))
+      if (mparams.hasBase())
       {
-        const std::string & base = mparams.get<std::string>("_moose_base");
+        const std::string & base = mparams.getBase();
         if (!_syntax.verifyMooseObjectTask(base, task))
           mooseError("Task ", task, " is not registered to build ", base, " derived objects");
       }

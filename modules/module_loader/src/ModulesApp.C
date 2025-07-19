@@ -222,7 +222,7 @@ ModulesApp::registerApps()
 void
 ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  mooseDeprecated(
+  ::mooseDeprecated(
       "\"registerAll\" in Modules is deprecated. Please update your *App.C file(s) to call the new "
       "templated \"registerAllObjects\" method (e.g. ModulesApp::registerAllObjects<MyApp>(...))");
 
