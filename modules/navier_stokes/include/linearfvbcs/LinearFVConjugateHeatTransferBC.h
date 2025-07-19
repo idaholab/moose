@@ -29,6 +29,12 @@ public:
    */
   LinearFVConjugateHeatTransferBC(const InputParameters & parameters);
 
+  virtual Real computeBoundaryValueMatrixContribution() const override;
+
+  virtual Real computeBoundaryValueRHSContribution() const override;
+
+  virtual Real computeBoundaryGradientMatrixContribution() const override;
+
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
 protected:
