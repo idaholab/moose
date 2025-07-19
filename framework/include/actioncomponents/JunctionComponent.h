@@ -26,9 +26,10 @@ class JunctionComponent : public virtual ActionComponent,
 {
 public:
   static InputParameters validParams();
-  JunctionComponent(const InputParameters & params)
+  JunctionComponent(const InputParameters & params);
 
-      protected : virtual void addMeshGenerators() override;
+protected:
+  virtual void addMeshGenerators() override;
   virtual void setupComponent() override;
   virtual void checkIntegrity() override;
 
