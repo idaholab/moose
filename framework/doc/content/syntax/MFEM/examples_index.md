@@ -38,4 +38,6 @@ that may serve as a useful starting point for users to adapt:
   problem, discretized using Raviart-Thomas finite elements (velocity $\vec u$) and
   piecewise discontinuous polynomials (pressure $p$). This example demonstrates the use of
   transposition in the input file for mixed problems with different trial and test variables.
+  Transposition flips the matrix associated a mixed bilinear form over its diagonal, swapping
+  the roles of the test and trial variables and avoiding the need to define a second kernel.
   This example is based on [MFEM Example 5](https://mfem.org/examples/#ex5).
