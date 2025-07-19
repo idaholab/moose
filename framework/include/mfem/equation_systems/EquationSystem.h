@@ -77,7 +77,6 @@ public:
   mfem::Operator & GetGradient(const mfem::Vector & u) const override;
 
   // Update variable from solution vector after solve
-  using mfem::Operator::RecoverFEMSolution;
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
                                   Moose::MFEM::GridFunctions & gridfunctions);
 
@@ -85,6 +84,9 @@ public:
 
   const std::vector<std::string> & TrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & TestVarNames() const { return _test_var_names; }
+
+private:
+  using mfem::Operator::RecoverFEMSolution;
 
 protected:
   // Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
