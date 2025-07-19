@@ -3,7 +3,7 @@
 ## Summary
 
 Solves a 3D linear elasticity problem for
-the deformation of a mult-material cantiliver beam. This example
+the deformation of a multi-material cantilever beam. This example
 is based on [MFEM Example 2](https://mfem.org/examples/).
 
 

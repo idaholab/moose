@@ -15,7 +15,7 @@
 
 /**
  * This class allows us to have a section of the input file like the following
- * specifying the solver to use and the solve options.
+ * specifying the preconditioner to use and its options.
  *
  * [Preconditioner]
  * []
