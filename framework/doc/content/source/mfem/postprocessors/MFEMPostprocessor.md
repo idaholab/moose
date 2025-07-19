@@ -11,8 +11,8 @@ Base class for MFEM postprocessors used to evaluate a single scalar.
 MFEM postprocessors calculate scalar quantities from the
 (aux)variables, typically after each timestep.
 
-An `MFEMPostprocessor` is derived from `MFEMPostprocessor` and thus
-`MFEMGeneralUserObject`. Therefore, the order of their execution can
+An `MFEMPostprocessor` is derived from `MFEMGeneralUserObject`.
+Therefore, the order of their execution can
 be controlled similar to other MOOSE UserObjects using the
 `execution_order_group` input parameter.
 
