@@ -82,7 +82,7 @@ the following order:
 
 9. `execute` is called for objects derived from `ThreadedGeneralUserObject` in a threaded way.
 
-10. `threadJoin` and `finalize` ar called for `ThreadedGeneralUserObject`s.
+10. `threadJoin` and `finalize` are called for `ThreadedGeneralUserObject`s.
 
 12. `initialize`, `execute`, and `finalize` are called in that order for each `GeneralUserObject` (which in turn are ordered through dependency resolution within the set of applicable `GeneralUserObject`s).
 
