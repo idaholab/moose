@@ -201,4 +201,13 @@
     capabilities = 'mfem'
     recover = false
   []
+  [MFEMDarcy]
+    type = CSVDiff
+    input = darcy.i
+    csvdiff = 'OutputData/Darcy.csv'
+    requirement = 'The system shall have the ability to solve a mixed Darcy problem in two dimensions using MFEM.'
+    abs_zero = 1e-6
+    capabilities = 'mfem'
+    recover = false
+  []
 []

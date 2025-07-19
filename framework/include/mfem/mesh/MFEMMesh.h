@@ -25,8 +25,6 @@
 #include "libmesh/restore_warnings.h"
 
 /**
- * MFEMMesh
- *
  * MFEMMesh inherits a MOOSE mesh class which allows us to work with
  * other MOOSE objects. It contains a pointer to the parallel MFEM mesh.
  */

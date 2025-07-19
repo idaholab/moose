@@ -47,11 +47,13 @@ protected:
   /// Checks for the correct configuration of quadrature bases for LOR spectral equivalence
   virtual bool checkSpectralEquivalence(mfem::ParBilinearForm & blf) const;
 
-  // Variable defining whether to use LOR solver
+  /// Variable defining whether to use LOR solver
   bool _lor;
 
-  // Solver and preconditioner to be used for the problem
+  /// Solver to be used for the problem
   std::unique_ptr<mfem::Solver> _solver;
+
+  /// Preconditioner to be used for the problem
   MFEMSolverBase * _preconditioner;
 };
 

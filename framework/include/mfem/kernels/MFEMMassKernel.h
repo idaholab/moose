@@ -12,7 +12,7 @@
 #pragma once
 #include "MFEMKernel.h"
 
-/*
+/**
  * \f[
  * (\beta u, u')
  * \f]

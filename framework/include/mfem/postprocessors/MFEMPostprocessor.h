@@ -16,7 +16,7 @@
 #include "mfem.hpp"
 #include "libmesh/restore_warnings.h"
 
-/*
+/**
  * Postprocessor for MFEM results. Must inherit from Postprocessor in
  * order for MOOSE to call it.
  */

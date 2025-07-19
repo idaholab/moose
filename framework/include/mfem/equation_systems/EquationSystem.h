@@ -23,10 +23,10 @@
 namespace Moose::MFEM
 {
 
-/*
-Class to store weak form components (bilinear and linear forms, and optionally
-mixed and nonlinear forms) and build methods
-*/
+/**
+ * Class to store weak form components (bilinear and linear forms, and optionally
+ * mixed and nonlinear forms) and build methods
+ */
 class EquationSystem : public mfem::Operator
 {
 
@@ -37,17 +37,18 @@ public:
   EquationSystem() = default;
   ~EquationSystem() override;
 
-  // add test variable to EquationSystem;
+  /// Add test variable to EquationSystem.
   virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
+  /// Add trial variable to EquationSystem.
   virtual void AddTrialVariableNameIfMissing(const std::string & trial_var_name);
 
-  // Add kernels.
+  /// Add kernels.
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
   virtual void ApplyEssentialBCs();
 
-  // Build forms
+  /// Build forms
   virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
                     const Moose::MFEM::FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level);
@@ -56,7 +57,7 @@ public:
   virtual void BuildMixedBilinearForms();
   virtual void BuildEquationSystem();
 
-  // Form linear system, with essential boundary conditions accounted for
+  /// Form linear system, with essential boundary conditions accounted for
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
@@ -67,7 +68,7 @@ public:
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
 
-  // Build linear system, with essential boundary conditions accounted for
+  /// Build linear system, with essential boundary conditions accounted for
   virtual void BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
 
   /// Compute residual y = Mu
@@ -76,8 +77,7 @@ public:
   /// Compute J = M + grad_H(u)
   mfem::Operator & GetGradient(const mfem::Vector & u) const override;
 
-  // Update variable from solution vector after solve
-  using mfem::Operator::RecoverFEMSolution;
+  /// Update variable from solution vector after solve
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
                                   Moose::MFEM::GridFunctions & gridfunctions);
 
@@ -86,10 +86,14 @@ public:
   const std::vector<std::string> & TrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & TestVarNames() const { return _test_var_names; }
 
+private:
+  /// Disallowed inherited method
+  using mfem::Operator::RecoverFEMSolution;
+
 protected:
-  // Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
-  // and then proceeds to delete all dynamically allocated memory for _h_blocks
-  // itself, resetting all dimensions to zero.
+  /// Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
+  /// and then proceeds to delete all dynamically allocated memory for _h_blocks
+  /// itself, resetting all dimensions to zero.
   void DeleteAllBlocks();
 
   bool VectorContainsName(const std::vector<std::string> & the_vector,
@@ -98,14 +102,14 @@ protected:
   // Test variables are associated with LinearForms,
   // whereas trial variables are associated with gridfunctions.
 
-  // Names of all variables corresponding to gridfunctions. This may differ
-  // from test_var_names when time derivatives are present.
+  /// Names of all variables corresponding to gridfunctions. This may differ
+  /// from test_var_names when time derivatives are present.
   std::vector<std::string> _trial_var_names;
-  // Pointers to trial variables.
+  /// Pointers to trial variables.
   Moose::MFEM::GridFunctions _trial_variables;
-  // Names of all test variables corresponding to linear forms in this equation
-  // system
+  /// Names of all test variables corresponding to linear forms in this equation system
   std::vector<std::string> _test_var_names;
+  /// Pointers to finite element spaces associated with test variables.
   std::vector<mfem::ParFiniteElementSpace *> _test_pfespaces;
 
   // Components of weak form. // Named according to test variable
@@ -149,19 +153,23 @@ protected:
           Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
           integrated_bc_map);
 
-  // gridfunctions for setting Dirichlet BCs
+  /// Gridfunctions for setting Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _xs;
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _dxdts;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
 
-  // Arrays to store kernels to act on each component of weak form. Named
-  // according to test variable
+  /// Arrays to store kernels to act on each component of weak form.
+  /// Named according to test and trial variables.
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
       _kernels_map;
+  /// Arrays to store integrated BCs to act on each component of weak form.
+  /// Named according to test and trial variables.
   Moose::MFEM::NamedFieldsMap<
       Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>
       _integrated_bc_map;
+  /// Arrays to store essential BCs to act on each component of weak form.
+  /// Named according to test variable.
   Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
 
   mutable mfem::OperatorHandle _jacobian;
@@ -201,7 +209,7 @@ EquationSystem::ApplyDomainLFIntegrators(
     Moose::MFEM::NamedFieldsMap<
         Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
 {
-  if (kernels_map.Has(test_var_name))
+  if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(test_var_name))
   {
     auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
     for (auto & kernel : kernels)
@@ -252,7 +260,8 @@ EquationSystem::ApplyBoundaryLFIntegrators(
         Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
         integrated_bc_map)
 {
-  if (integrated_bc_map.Has(test_var_name))
+  if (integrated_bc_map.Has(test_var_name) &&
+      integrated_bc_map.Get(test_var_name)->Has(test_var_name))
   {
     auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
     for (auto & bc : bcs)
@@ -268,9 +277,9 @@ EquationSystem::ApplyBoundaryLFIntegrators(
   }
 }
 
-/*
-Class to store weak form components for time dependent PDEs
-*/
+/**
+ * Class to store weak form components for time dependent PDEs
+ */
 class TimeDependentEquationSystem : public EquationSystem
 {
 public:
@@ -293,12 +302,13 @@ public:
   const std::vector<std::string> & TrialVarTimeDerivativeNames() const;
 
 protected:
-  mfem::ConstantCoefficient _dt_coef; // Coefficient for timestep scaling
+  /// Coefficient for timestep scaling
+  mfem::ConstantCoefficient _dt_coef;
   std::vector<std::string> _trial_var_time_derivative_names;
 
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
       _td_kernels_map;
-  // Container to store contributions to weak form of the form (F du/dt, v)
+  /// Container to store contributions to weak form of the form (F du/dt, v)
   Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
 };
 

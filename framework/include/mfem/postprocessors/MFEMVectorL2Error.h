@@ -13,7 +13,7 @@
 #include "MFEMPostprocessor.h"
 #include "MFEMGeneralUserObject.h"
 
-/*
+/**
  * Compute the L2 error for a vector variable.
  */
 class MFEMVectorL2Error : public MFEMPostprocessor
@@ -32,8 +32,6 @@ public:
   virtual PostprocessorValue getValue() const override final;
 
 private:
-  const VariableName & _var_name;
-  const MFEMVectorCoefficientName & _coeff_name;
   mfem::VectorCoefficient & _vec_coeff;
   mfem::GridFunction & _var;
 };

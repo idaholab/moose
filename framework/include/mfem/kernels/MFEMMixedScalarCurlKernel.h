@@ -12,7 +12,7 @@
 #pragma once
 #include "MFEMMixedBilinearFormKernel.h"
 
-/*
+/**
  * \f[
  * (\lambda \nabla \times u, v)
  * \f]
@@ -24,7 +24,7 @@ public:
 
   MFEMMixedScalarCurlKernel(const InputParameters & parameters);
 
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
+  virtual mfem::BilinearFormIntegrator * createMBFIntegrator() override;
 
 protected:
   mfem::Coefficient & _coef;

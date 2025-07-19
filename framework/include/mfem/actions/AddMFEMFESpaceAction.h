@@ -15,7 +15,7 @@
 #include "MFEMProblem.h"
 /**
  * This class allows us to have a section of the input file like the
- * following to add MFEM coefficients to the problem.
+ * following to add MFEM finite element spaces to the problem.
  *
  * [FESpaces]
  * []
