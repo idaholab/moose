@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/mug.e
+  file = ../mesh/square.msh
   dim = 3
 []
 
@@ -18,8 +18,8 @@
       type = MFEMRefinementMarker
       refine = 0.7 # error
       indicator = l2zz
-      max_h_level = 2
-      max_p_level = 2
+      max_h_level = 1
+      max_p_level = 1
       refinement_type = H_P_REF
     []
   []
