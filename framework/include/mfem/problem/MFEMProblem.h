@@ -69,11 +69,6 @@ public:
    */
   void setMesh();
 
-  /**
-   * Initialise the required ProblemOperator used in the Executioner to solve the problem.
-   */
-  void initProblemOperator();
-
   void addSubMesh(const std::string & user_object_name,
                   const std::string & name,
                   InputParameters & parameters);
