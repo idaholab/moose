@@ -30,9 +30,6 @@ AddMFEMProblemOperatorAction::AddMFEMProblemOperatorAction(const InputParameters
 void
 AddMFEMProblemOperatorAction::act()
 {
-  MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
-  if (mfem_problem)
-    mfem_problem->initProblemOperator();
 }
 
 #endif
