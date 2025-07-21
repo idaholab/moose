@@ -14,6 +14,9 @@ where
 - $n$ is the time step index.
 - $\tau$ is the tolerance, specified by [!param](/Convergence/DefaultSteadyStateConvergence/steady_state_tolerance).
 
+!alert note title=Auxiliary variables treated variable-wise
+Note that when the auxiliary system is used, the L2 norms are computed for each variable separately, and then the maximum over all variables is used. This difference of behavior is to achieve backwards compatibility.
+
 If [!param](/Convergence/DefaultSteadyStateConvergence/normalize_solution_diff_norm_by_dt) is set to `true`, then the norm is normalized by the time step size:
 
 !equation

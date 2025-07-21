@@ -17,6 +17,7 @@
 #include "Console.h"
 #include "EigenExecutionerBase.h"
 #include "Convergence.h"
+#include "ConvergenceIterationTypes.h"
 
 InputParameters
 FixedPointSolve::fixedPointDefaultConvergenceParams()
