@@ -11,6 +11,7 @@
 #include "FEProblemBase.h"
 #include "TransientBase.h"
 #include "AuxiliarySystem.h"
+#include "ConvergenceIterationTypes.h"
 
 registerMooseObject("MooseApp", DefaultSteadyStateConvergence);
 
@@ -46,7 +47,7 @@ DefaultSteadyStateConvergence::checkIterationType(IterationType it_type) const
 {
   DefaultConvergenceBase::checkIterationType(it_type);
 
-  if (it_type != IterationType::STEADY_STATE)
+  if (it_type != ConvergenceIterationTypes::STEADY_STATE)
     mooseError("DefaultSteadyStateConvergence can only be used with steady-state detection.");
 }
 

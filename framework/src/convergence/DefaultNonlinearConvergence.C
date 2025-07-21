@@ -12,6 +12,7 @@
 #include "FEProblemBase.h"
 #include "PetscSupport.h"
 #include "NonlinearSystemBase.h"
+#include "ConvergenceIterationTypes.h"
 
 #include "libmesh/equation_systems.h"
 
@@ -68,7 +69,7 @@ DefaultNonlinearConvergence::checkIterationType(IterationType it_type) const
 {
   DefaultConvergenceBase::checkIterationType(it_type);
 
-  if (it_type != IterationType::NONLINEAR)
+  if (it_type != ConvergenceIterationTypes::NONLINEAR)
     mooseError("DefaultNonlinearConvergence can only be used with nonlinear solves.");
 }
 
