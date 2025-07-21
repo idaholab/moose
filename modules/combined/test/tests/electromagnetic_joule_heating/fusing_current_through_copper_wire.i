@@ -42,21 +42,28 @@
   []
 []
 
+[Problem]
+  nl_sys_names = 'EM_system HT_system'
+[]
+
 [Variables]
   # The real and complex components of the magnetic vector
   # potential in the frequency domain
   [A_real]
     family = NEDELEC_ONE
     order = FIRST
+    solver_sys = 'EM_system'
   []
   [A_imag]
     family = NEDELEC_ONE
     order = FIRST
+    solver_sys = 'EM_system'
   []
 
   # The temperature of the air in the copper wire
   [T]
     initial_condition = 293.0 #in K
+    solver_sys = 'HT_system'
   []
 []
 
@@ -340,6 +347,15 @@
   []
 []
 
+[Convergence]
+  [multisys]
+    type = IterationCountConvergence
+    min_iterations = 0
+    max_iterations = 10
+    converge_at_max_iterations = true
+  []
+[]
+
 [Executioner]
   type = Transient
   scheme = bdf2
@@ -352,6 +368,10 @@
   # end_time = 10
   end_time = 5
   automatic_scaling = true
+
+  multi_system_fixed_point = true
+  multi_system_fixed_point_convergence = 'multisys'
+  nl_abs_tol = 1e-12
 []
 
 [Outputs]
