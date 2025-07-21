@@ -593,7 +593,7 @@ Example Output:
         "c": 0.0,
         "d": 2.0
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGSPlane"
     },
     "Prism_surf_minus_y": {
       "BOUNDARY": "TRANSMISSION",
@@ -603,7 +603,7 @@ Example Output:
         "c": 0.0,
         "d": -2.0
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "Cube_surf_minus_z": {
       "BOUNDARY": "TRANSMISSION",
@@ -613,7 +613,7 @@ Example Output:
         "c": 1.0,
         "d": -2.5
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "Prism_surf_plus_x": {
       "BOUNDARY": "TRANSMISSION",
@@ -623,7 +623,7 @@ Example Output:
         "c": 0.0,
         "d": -2.0
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "Prism_surf_plus_y": {
       "BOUNDARY": "TRANSMISSION",
@@ -633,7 +633,7 @@ Example Output:
         "c": 0.0,
         "d": 2.0
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "Cube_surf_plus_z": {
       "BOUNDARY": "TRANSMISSION",
@@ -643,7 +643,7 @@ Example Output:
         "c": 1.0,
         "d": 2.5
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     }
   },
   "UNIVERSES": {

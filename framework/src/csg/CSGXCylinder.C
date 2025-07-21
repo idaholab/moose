@@ -14,7 +14,7 @@ namespace CSG
 
 CSGXCylinder::CSGXCylinder(
     const std::string & name, const Real y0, const Real z0, const Real r, std::string boundary)
-  : CSGSurface(name, "XCYLINDER", boundary), _y0(y0), _z0(z0), _r(r)
+  : CSGSurface(name, MooseUtils::prettyCppType<CSGXCylinder>(), boundary), _y0(y0), _z0(z0), _r(r)
 {
 }
 
