@@ -9,6 +9,7 @@
 
 #include "TestCSGUniverseMeshGenerator.h"
 #include "MeshGenerator.h"
+#include "CSGPlane.h"
 
 registerMooseObject("MooseTestApp", TestCSGUniverseMeshGenerator);
 
@@ -121,18 +122,27 @@ TestCSGUniverseMeshGenerator::generateCSG()
     }
 
     // bounding box for new cell - located at the origin
-    auto & x_pos_surf = csg_obj->createPlaneFromCoefficients(
-        img + "_x_pos_surf", 1.0, 0, 0, x + 0.5 * _side_lengths[i]);
-    auto & x_neg_surf = csg_obj->createPlaneFromCoefficients(
-        img + "_x_neg_surf", 1.0, 0, 0, x - 0.5 * _side_lengths[i]);
-    auto & y_pos_surf = csg_obj->createPlaneFromCoefficients(
-        img + "_y_pos_surf", 0, 1.0, 0, y + 0.5 * _side_lengths[i]);
-    auto & y_neg_surf = csg_obj->createPlaneFromCoefficients(
-        img + "_y_neg_surf", 0, 1.0, 0, y - 0.5 * _side_lengths[i]);
-    auto & z_pos_surf = csg_obj->createPlaneFromCoefficients(
-        img + "_z_pos_surf", 0, 0, 1.0, z + 0.5 * _side_lengths[i]);
-    auto & z_neg_surf = csg_obj->createPlaneFromCoefficients(
-        img + "_z_neg_surf", 0, 0, 1.0, z - 0.5 * _side_lengths[i]);
+    std::unique_ptr<CSG::CSGSurface> x_pos_ptr =
+        std::make_unique<CSG::CSGPlane>(img + "_x_pos_surf", 1.0, 0, 0, x + 0.5 * _side_lengths[i]);
+    auto & x_pos_surf = csg_obj->addSurface(x_pos_ptr);
+    std::unique_ptr<CSG::CSGSurface> x_neg_ptr =
+        std::make_unique<CSG::CSGPlane>(img + "_x_neg_surf", 1.0, 0, 0, x - 0.5 * _side_lengths[i]);
+    auto & x_neg_surf = csg_obj->addSurface(x_neg_ptr);
+
+    std::unique_ptr<CSG::CSGSurface> y_pos_ptr =
+        std::make_unique<CSG::CSGPlane>(img + "_y_pos_surf", 0, 1.0, 0, y + 0.5 * _side_lengths[i]);
+    auto & y_pos_surf = csg_obj->addSurface(y_pos_ptr);
+    std::unique_ptr<CSG::CSGSurface> y_neg_ptr =
+        std::make_unique<CSG::CSGPlane>(img + "_y_neg_surf", 0, 1.0, 0, y - 0.5 * _side_lengths[i]);
+    auto & y_neg_surf = csg_obj->addSurface(y_neg_ptr);
+
+    std::unique_ptr<CSG::CSGSurface> z_pos_ptr =
+        std::make_unique<CSG::CSGPlane>(img + "_z_pos_surf", 0, 0, 1.0, z + 0.5 * _side_lengths[i]);
+    auto & z_pos_surf = csg_obj->addSurface(z_pos_ptr);
+    std::unique_ptr<CSG::CSGSurface> z_neg_ptr =
+        std::make_unique<CSG::CSGPlane>(img + "_z_neg_surf", 0, 0, 1.0, z - 0.5 * _side_lengths[i]);
+    auto & z_neg_surf = csg_obj->addSurface(z_neg_ptr);
+
     auto new_region =
         -x_pos_surf & +x_neg_surf & -y_pos_surf & +y_neg_surf & -z_pos_surf & +z_neg_surf;
 
@@ -159,18 +169,28 @@ TestCSGUniverseMeshGenerator::generateCSG()
   // make cell with surfaces from bounding_box input and fill cell with new universe containing the
   // other cells
   auto bc_vac = "VACUUM"; // vacuum bc for bounding box
-  auto & x_pos_surf = csg_obj->createPlaneFromCoefficients(
-      mg_name + "_bb_x_pos_surf", 1.0, 0, 0, 0.5 * _x_side, bc_vac);
-  auto & x_neg_surf = csg_obj->createPlaneFromCoefficients(
+
+  std::unique_ptr<CSG::CSGSurface> x_pos_ptr =
+      std::make_unique<CSG::CSGPlane>(mg_name + "_bb_x_pos_surf", 1.0, 0, 0, 0.5 * _x_side, bc_vac);
+  auto & x_pos_surf = csg_obj->addSurface(x_pos_ptr);
+  std::unique_ptr<CSG::CSGSurface> x_neg_ptr = std::make_unique<CSG::CSGPlane>(
       mg_name + "_bb_x_neg_surf", 1.0, 0, 0, -0.5 * _x_side, bc_vac);
-  auto & y_pos_surf = csg_obj->createPlaneFromCoefficients(
-      mg_name + "_bb_y_pos_surf", 0, 1.0, 0, 0.5 * _y_side, bc_vac);
-  auto & y_neg_surf = csg_obj->createPlaneFromCoefficients(
+  auto & x_neg_surf = csg_obj->addSurface(x_neg_ptr);
+
+  std::unique_ptr<CSG::CSGSurface> y_pos_ptr =
+      std::make_unique<CSG::CSGPlane>(mg_name + "_bb_y_pos_surf", 0, 1.0, 0, 0.5 * _y_side, bc_vac);
+  auto & y_pos_surf = csg_obj->addSurface(y_pos_ptr);
+  std::unique_ptr<CSG::CSGSurface> y_neg_ptr = std::make_unique<CSG::CSGPlane>(
       mg_name + "_bb_y_neg_surf", 0, 1.0, 0, -0.5 * _y_side, bc_vac);
-  auto & z_pos_surf = csg_obj->createPlaneFromCoefficients(
-      mg_name + "_bb_z_pos_surf", 0, 0, 1.0, 0.5 * _z_side, bc_vac);
-  auto & z_neg_surf = csg_obj->createPlaneFromCoefficients(
+  auto & y_neg_surf = csg_obj->addSurface(y_neg_ptr);
+
+  std::unique_ptr<CSG::CSGSurface> z_pos_ptr =
+      std::make_unique<CSG::CSGPlane>(mg_name + "_bb_z_pos_surf", 0, 0, 1.0, 0.5 * _z_side, bc_vac);
+  auto & z_pos_surf = csg_obj->addSurface(z_pos_ptr);
+  std::unique_ptr<CSG::CSGSurface> z_neg_ptr = std::make_unique<CSG::CSGPlane>(
       mg_name + "_bb_z_neg_surf", 0, 0, 1.0, -0.5 * _z_side, bc_vac);
+  auto & z_neg_surf = csg_obj->addSurface(z_neg_ptr);
+
   auto bb_region =
       -x_pos_surf & +x_neg_surf & -y_pos_surf & +y_neg_surf & -z_pos_surf & +z_neg_surf;
 

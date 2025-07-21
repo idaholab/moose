@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TestCSGSphereAtOriginMeshGenerator.h"
+#include "CSGSphere.h"
 
 registerMooseObject("MooseTestApp", TestCSGSphereAtOriginMeshGenerator);
 
@@ -43,8 +44,10 @@ TestCSGSphereAtOriginMeshGenerator::generateCSG()
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   auto mg_name = this->name();
 
-  auto & sphere_surf = csg_obj->createSphere(mg_name + "_sphere_surf", _radius);
-  auto sphere_cell = csg_obj->createCell(mg_name + "_sphere_cell", -sphere_surf);
+  std::unique_ptr<CSG::CSGSurface> sp_ptr =
+      std::make_unique<CSG::CSGSphere>(mg_name + "_sphere_surf", _radius);
+  auto & sphere_surf = csg_obj->addSurface(sp_ptr);
+  csg_obj->createCell(mg_name + "_sphere_cell", -sphere_surf);
 
   return csg_obj;
 }

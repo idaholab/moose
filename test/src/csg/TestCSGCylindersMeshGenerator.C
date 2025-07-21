@@ -9,6 +9,10 @@
 
 #include "TestCSGCylindersMeshGenerator.h"
 #include "CSGBase.h"
+#include "CSGPlane.h"
+#include "CSGXCylinder.h"
+#include "CSGYCylinder.h"
+#include "CSGZCylinder.h"
 
 registerMooseObject("MooseTestApp", TestCSGCylindersMeshGenerator);
 
@@ -62,15 +66,27 @@ TestCSGCylindersMeshGenerator::generateCSG()
     b = 1;
   else if (_axis == "z")
     c = 1;
-  auto & pos_plane = csg_obj->createPlaneFromCoefficients(mg_name + "_pos_plane", a, b, c, _h / 2);
-  auto & neg_plane =
-      csg_obj->createPlaneFromCoefficients(mg_name + "_neg_plane", a, b, c, -1 * _h / 2);
+  std::unique_ptr<CSG::CSGSurface> pos_plane_ptr =
+      std::make_unique<CSG::CSGPlane>(mg_name + "_pos_plane", a, b, c, _h / 2);
+  auto & pos_plane = csg_obj->addSurface(pos_plane_ptr);
+  std::unique_ptr<CSG::CSGSurface> neg_plane_ptr =
+      std::make_unique<CSG::CSGPlane>(mg_name + "_neg_plane", a, b, c, -1 * _h / 2);
+  auto & neg_plane = csg_obj->addSurface(neg_plane_ptr);
 
   std::string prev_surf_name;
   for (unsigned int i = 0; i < _radii.size(); ++i)
   {
     std::string surf_name = mg_name + "_surf_cyl_" + _axis + "_" + std::to_string(i);
-    auto & cyl_surf = csg_obj->createCylinder(surf_name, _x0, _x1, _radii[i], _axis);
+    std::unique_ptr<CSG::CSGSurface> cyl_ptr;
+    if (_axis == "x")
+      cyl_ptr = std::make_unique<CSG::CSGXCylinder>(surf_name, _x0, _x1, _radii[i]);
+    else if (_axis == "y")
+      cyl_ptr = std::make_unique<CSG::CSGYCylinder>(surf_name, _x0, _x1, _radii[i]);
+    else if (_axis == "z")
+      cyl_ptr = std::make_unique<CSG::CSGZCylinder>(surf_name, _x0, _x1, _radii[i]);
+
+    auto & cyl_surf = csg_obj->addSurface(cyl_ptr);
+
     CSG::CSGRegion region;
     std::string cell_name = mg_name + "_cell_cyl_" + _axis + "_" + std::to_string(i);
     if (i == 0)
