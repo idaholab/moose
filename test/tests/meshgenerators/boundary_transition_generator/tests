@@ -1,0 +1,108 @@
+[Tests]
+  design = 'BoundaryTransitionGenerator.md'
+  issues = '#31293'
+  [simple_hex8]
+    type = Exodiff
+    input = simple_conversion.i
+    exodiff = 'simple_hex8.e'
+    cli_args = '--mesh-only simple_hex8.e'
+    recover = false
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall be able to convert HEX8 elements so that the single given boundary only contains TRI3 sides.'
+  []
+  [complex_hex8]
+    type = Exodiff
+    input = simple_conversion.i
+    exodiff = 'complex_hex8.e'
+    cli_args = '--mesh-only complex_hex8.e
+                Mesh/trans/boundary_names="left top"'
+    recover = false
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall be able to convert HEX8 elements so that the given set of boundaries only contains TRI3 sides.'
+  []
+  [simple_prism6]
+    type = Exodiff
+    input = simple_conversion.i
+    exodiff = 'simple_prism6.e'
+    cli_args = '--mesh-only simple_prism6.e
+                Mesh/gmg/elem_type=PRISM6'
+    recover = false
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall be able to convert PRISM6 elements so that the single given boundary only contains TRI3 sides.'
+  []
+  [complex_prism6]
+    type = Exodiff
+    input = simple_conversion.i
+    exodiff = 'complex_prism6.e'
+    cli_args = '--mesh-only complex_prism6.e
+                Mesh/gmg/elem_type=PRISM6
+                Mesh/trans/boundary_names="left top"'
+    recover = false
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall be able to convert PRISM6 elements so that the given set of boundaries only contains TRI3 sides.'
+  []
+  [simple_pyramid5]
+    type = Exodiff
+    input = simple_conversion.i
+    exodiff = 'simple_pyramid5.e'
+    cli_args = '--mesh-only simple_pyramid5.e
+                Mesh/gmg/elem_type=PYRAMID5'
+    recover = false
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall be able to convert PYRAMID5 elements so that the single given boundary only contains TRI3 sides.'
+  []
+  [complex_pyramid5]
+    type = Exodiff
+    input = simple_conversion.i
+    exodiff = 'complex_pyramid5.e'
+    cli_args = '--mesh-only complex_pyramid5.e
+                Mesh/gmg/elem_type=PYRAMID5
+                Mesh/trans/boundary_names="left top"'
+    recover = false
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall be able to convert PYRAMID5 elements so that the given set of boundaries only contains TRI3 sides.'
+  []
+  [err_distributed]
+    type = 'RunException'
+    input = 'simple_conversion.i'
+    cli_args = '--mesh-only simple_conversion_err.e'
+    expect_err = 'Input is not a replicated mesh'
+    mesh_mode = 'DISTRIBUTED'
+    requirement = 'The system shall throw an error if the input mesh to be converted is not a replicated mesh.'
+  []
+  [err_layer_number]
+    type = 'RunException'
+    input = 'simple_conversion.i'
+    cli_args = '--mesh-only simple_conversion_err.e
+                Mesh/trans/conversion_element_layer_number="10"'
+    expect_err = 'There is fewer layers'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall throw an error if the input mesh does not contain enough layers of elements to be specified to convert.'
+  []
+  [err_no_boundary]
+    type = 'RunException'
+    input = 'simple_conversion.i'
+    cli_args = '--mesh-only simple_conversion_err.e
+                Mesh/trans/boundary_names="noexist"'
+    expect_err = 'was not found within the mesh'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall throw an error if the input mesh does not contain the specified boundaries.'
+  []
+  [err_unsupported_side_type]
+    type = 'RunException'
+    input = 'simple_conversion.i'
+    cli_args = '--mesh-only simple_conversion_err.e
+                Mesh/gmg/elem_type="HEX20"'
+    expect_err = 'non-linear side elements'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall throw an error if the input mesh contains non-linear side elements.'
+  []
+  [err_internal_boundary]
+    type = 'RunException'
+    input = 'err_internal_bdry.i'
+    cli_args = '--mesh-only'
+    expect_err = 'The provided boundary contains non-external sides'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall throw an error if the provided boundary is not external when it is asked to check the external boundaries.'
+  []
+[]
