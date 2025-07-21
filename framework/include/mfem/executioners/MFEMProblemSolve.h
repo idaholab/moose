@@ -16,12 +16,12 @@
 
 class MFEMProblem;
 
-class MFEMExecutioner
+class MFEMProblemSolve
 {
 public:
   static InputParameters validParams();
 
-  MFEMExecutioner(const InputParameters & params, MFEMProblem & mfem_problem);
+  MFEMProblemSolve(const InputParameters & params, MFEMProblem & mfem_problem);
 
   /**
    * Perform all required solves during a step. Includes relevant methods from the libmesh-specific

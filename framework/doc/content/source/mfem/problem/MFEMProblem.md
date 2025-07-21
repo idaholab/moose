@@ -11,7 +11,7 @@
 `MFEMProblem` is derived from MOOSE's `ExternalProblem` Problem type, customised to set up the
  finite element problem using the MFEM FE library instead of MOOSE's default libMesh. Use of MFEM
  allows problem assembly and solution on GPU architectures as well as on CPU; desired device can be
- controlled by the [`MFEMExecutioner`](MFEMExecutioner.md) used to solve the problem.
+ controlled by the [`MFEMProblemSolve`](MFEMProblemSolve.md) object used to solve the problem.
 
 `MFEMProblem` methods are called by `Actions` during parsing of the user's input file, which add
  and/or initialize members of the owned [MFEMProblemData](source/mfem/problem/MFEMProblemData.md) struct.

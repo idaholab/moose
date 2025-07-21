@@ -19,7 +19,7 @@ registerMooseObject("MooseApp", MFEMTransient);
 InputParameters
 MFEMTransient::validParams()
 {
-  InputParameters params = MFEMExecutioner::validParams();
+  InputParameters params = MFEMProblemSolve::validParams();
   params += TransientBase::validParams();
   params.addClassDescription("Executioner for transient MFEM problems.");
   return params;
@@ -29,7 +29,7 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
   : TransientBase(params),
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
     _mfem_problem_data(_mfem_problem.getProblemData()),
-    _mfem_problem_solver(params, _mfem_problem)
+    _mfem_problem_solve(params, _mfem_problem)
 {
   constructProblemOperator();
 }
@@ -77,7 +77,7 @@ MFEMTransient::takeStep(Real input_dt)
   // _problem_operator->SetTime is called inside the ode_solver->Step method to
   // update the time used by time dependent (function) coefficients.
   // Takes place instead of TimeStepper::step().
-  _mfem_problem_solver.solve(*_problem_operator);
+  _mfem_problem_solve.solve(*_problem_operator);
 
   // Continue with usual TransientBase::takeStep() finalisation
   _last_solve_converged = _time_stepper->converged();
