@@ -594,7 +594,7 @@ SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(
     // Separate out positive and negative eigen values
     std::array<T, N> epos;
     std::array<T, N> d;
-    for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int i = 0; i < Ndim; ++i)
     {
       epos[i] = (std::abs(eigval[i]) + eigval[i]) / 2.0;
       d[i] = 0 < eigval[i] ? 1.0 : 0.0;
