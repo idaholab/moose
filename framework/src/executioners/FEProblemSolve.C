@@ -14,6 +14,7 @@
 #include "LinearSystem.h"
 #include "Convergence.h"
 #include "Executioner.h"
+#include "ConvergenceIterationTypes.h"
 
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
 
@@ -424,7 +425,7 @@ FEProblemSolve::convergenceSetup()
   for (const auto & conv_name : conv_names)
   {
     auto & conv = _problem.getConvergence(conv_name);
-    conv.checkIterationType(Convergence::IterationType::NONLINEAR);
+    conv.checkIterationType(ConvergenceIterationTypes::NONLINEAR);
   }
 
   // linear
@@ -434,7 +435,7 @@ FEProblemSolve::convergenceSetup()
     for (const auto & conv_name : conv_names)
     {
       auto & conv = _problem.getConvergence(conv_name);
-      conv.checkIterationType(Convergence::IterationType::LINEAR);
+      conv.checkIterationType(ConvergenceIterationTypes::LINEAR);
     }
   }
 
@@ -444,7 +445,7 @@ FEProblemSolve::convergenceSetup()
     _multi_sys_fp_convergence =
         &_problem.getConvergence(getParam<ConvergenceName>("multi_system_fixed_point_convergence"));
     _multi_sys_fp_convergence->checkIterationType(
-        Convergence::IterationType::MULTISYSTEM_FIXED_POINT);
+        ConvergenceIterationTypes::MULTISYSTEM_FIXED_POINT);
   }
 }
 

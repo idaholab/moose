@@ -37,17 +37,8 @@ public:
     DIVERGED = -1
   };
 
-  /**
-   * Iteration type
-   */
-  enum class IterationType
-  {
-    NONLINEAR = 0,
-    LINEAR = 1, // solve_type = LINEAR, not linear solves within nonlinear solve
-    MULTISYSTEM_FIXED_POINT = 2,
-    MULTIAPP_FIXED_POINT = 3,
-    STEADY_STATE = 4
-  };
+  /// Iteration type
+  using IterationType = MooseEnumItem;
 
   Convergence(const InputParameters & parameters);
 

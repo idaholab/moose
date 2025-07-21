@@ -216,7 +216,7 @@ TransientBase::init()
   _time_stepper->init();
 
   auto & conv = _problem.getConvergence(_problem.getSteadyStateConvergenceName());
-  conv.checkIterationType(Convergence::IterationType::STEADY_STATE);
+  conv.checkIterationType(ConvergenceIterationTypes::STEADY_STATE);
 
   if (_app.isRecovering()) // Recover case
   {
