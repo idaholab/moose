@@ -361,13 +361,12 @@ Material<Derived>::operator()(NeighborInit, const size_t tid) const
 
   Datum datum(elem.first, elem.second, kokkosAssembly(), kokkosSystems());
 
-  if (datum.hasNeighbor())
-    for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
-    {
-      datum.reinit();
+  for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+  {
+    datum.reinit();
 
-      material->initQpStatefulProperties(qp, datum);
-    }
+    material->initQpStatefulProperties(qp, datum);
+  }
 }
 
 template <typename Derived>
@@ -413,13 +412,12 @@ Material<Derived>::operator()(NeighborCompute, const size_t tid) const
 
   Datum datum(elem.first, elem.second, kokkosAssembly(), kokkosSystems());
 
-  if (datum.hasNeighbor())
-    for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
-    {
-      datum.reinit();
+  for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+  {
+    datum.reinit();
 
-      material->computeQpProperties(qp, datum);
-    }
+    material->computeQpProperties(qp, datum);
+  }
 }
 
 template <typename Derived>
