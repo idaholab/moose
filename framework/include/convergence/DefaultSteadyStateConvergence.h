@@ -15,7 +15,7 @@ class TransientBase;
 class AuxiliarySystem;
 
 /**
- * Default steady-state convergence criteria.
+ * Default convergence criteria for steady-state detection in a transient simulation.
  */
 class DefaultSteadyStateConvergence : public DefaultConvergenceBase
 {

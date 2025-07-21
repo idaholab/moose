@@ -21,7 +21,8 @@ DefaultSteadyStateConvergence::validParams()
   InputParameters params = DefaultConvergenceBase::validParams();
   params += TransientBase::defaultSteadyStateConvergenceParams();
 
-  params.addClassDescription("Default steady-state convergence criteria.");
+  params.addClassDescription(
+      "Default convergence criteria for steady-state detection in a transient simulation.");
 
   return params;
 }
