@@ -117,7 +117,10 @@ public:
    *
    * If this is null, it means we haven't parsed yet
    */
+  ///@{
+  const hit::Node * queryRoot() const { return _root.get(); }
   hit::Node * queryRoot() { return _root.get(); }
+  ///@}
 
   /**
    * @return The root HIT node with error checking on if it exists

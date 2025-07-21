@@ -346,7 +346,10 @@ public:
   /**
    * @return The Parser
    **/
+  ///@{
+  const Parser & parser() const;
   Parser & parser();
+  ///@}
 
   /**
    * After adding all of the Executor Params - this function will actually cause all of them to be
