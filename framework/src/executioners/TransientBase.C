@@ -50,7 +50,7 @@ TransientBase::defaultSteadyStateConvergenceParams()
   params.addParam<bool>("check_aux",
                         false,
                         "Whether to check the auxiliary system for convergence to steady-state. If "
-                        "false, then the nonlinear system is used.");
+                        "false, then the solution vector from the solver system is used.");
   params.addParam<bool>(
       "normalize_solution_diff_norm_by_dt",
       true,

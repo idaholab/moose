@@ -66,7 +66,7 @@ DefaultSteadyStateConvergence::checkConvergence(unsigned int /*iter*/)
     norm = *std::max_element(aux_var_diff_norms.begin(), aux_var_diff_norms.end());
   }
   else
-    norm = _transient_executioner->computeSolutionChangeNorm(_check_aux, _normalize_norm_by_dt);
+    norm = _transient_executioner->computeSolutionChangeNorm(false, _normalize_norm_by_dt);
 
   _console << "Steady-State Relative Differential Norm: " << norm << std::endl;
 
