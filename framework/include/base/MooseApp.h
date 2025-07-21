@@ -335,7 +335,10 @@ public:
   /**
    * @return The Parser
    **/
+  ///@{
+  const Parser & parser() const;
   Parser & parser();
+  ///@}
 
 private:
   /**

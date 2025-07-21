@@ -368,42 +368,47 @@ private:
   /**
    * @return The check state for the current document path, if any
    */
+  ///@{
+  const CheckState * queryCheckState() const;
   CheckState * queryCheckState();
+  ///@}
   /**
    * @return The check app for the current document path, if any
    */
+  ///@{
+  const MooseApp * queryCheckApp() const;
   MooseApp * queryCheckApp();
+  ///@}
   /**
    * @return The check parser for the current document path, if any
    */
+  ///@{
+  const Parser * queryCheckParser() const;
   Parser * queryCheckParser();
+  ///@}
   /**
    * @return The root node from the check parser for the current document path, if any
    */
-  hit::Node * queryRoot();
+  const hit::Node * queryRoot() const;
   /**
    * @return up to date text string associated with current document path, if any
    */
-  const std::string * queryDocumentText();
+  const std::string * queryDocumentText() const;
 
   /**
    * @return The check app for the current document path, with error checking on if it exists
    */
   MooseApp & getCheckApp();
   /**
-   * @return The check parser for the current document path, with error checking on if it exists
-   */
-  Parser & getCheckParser();
-  /**
    * @return The root node from the check parser for the current document path, with error checking
    * on if it exists
    */
-  hit::Node & getRoot();
+  const hit::Node & getRoot() const;
 
   /**
    * @return up to date text string associated with current document path
    */
-  const std::string & getDocumentText();
+  const std::string & getDocumentText() const;
 
   /**
    * @brief _moose_app - reference to parent application that owns this server
