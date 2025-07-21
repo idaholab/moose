@@ -1,4 +1,4 @@
-# MFEMExecutioner
+# MFEMProblemSolve
 
 !if! function=hasCapability('mfem')
 
@@ -8,9 +8,11 @@ Virtual base class for executioners used to solve MFEM FE problems.
 
 ## Overview
 
-`MFEMExecutioner` is a purely virtual base class used to control the execution of MFEM FE problems.
-Importantly, use of an `MFEMExecutioner` derived `Executioner` allows for selection of the desired
-device and assembly strategy to use for the FE problem.
+`MFEMProblemSolve` is a purely virtual base class for solve objects used to control the execution of
+MFEM FE problems. Importantly, `MFEMProblemSolve` is used in `Executioner` classes intended for the
+solution of problems using the MFEM FE backend, such as `MFEMTransient` and `MFEMSteady`, by
+executing their corresponding `ProblemOperators`. `MFEMProblemSolve` also allows for selection of
+the desired device and assembly strategy to use for the FE problem.
 
 Provided MFEM and its dependencies have been built with support for GPU backends (e.g. `cuda` or
 `hip`), they may be selected here to enable use of GPUs for solvers and during assembly.
