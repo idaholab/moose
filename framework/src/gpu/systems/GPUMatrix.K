@@ -25,6 +25,11 @@ Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & syste
   PetscBool is_host;
   LibmeshPetscCallQ(MatBoundToCPU(petsc_matrix->mat(), &is_host));
 
+#ifndef MOOSE_KOKKOS_ENABLE_GPU
+  if (!is_host)
+    mooseError("PETSc matrices must be on host when Kokkos device capabilities are disabled.");
+#endif
+
   if (_is_alloc)
     return;
 

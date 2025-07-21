@@ -287,7 +287,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
   determineUseDistributedMesh();
 
 #ifdef MOOSE_HAVE_KOKKOS
-  if (_app.hasGPUs())
+  if (_app.isKokkosAvailable())
     _kokkos_mesh = std::make_unique<Moose::Kokkos::Mesh>(*this);
 #endif
 }
@@ -370,7 +370,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
   updateCoordTransform();
 
 #ifdef MOOSE_HAVE_KOKKOS
-  if (_app.hasGPUs())
+  if (_app.isKokkosAvailable())
     _kokkos_mesh = std::make_unique<Moose::Kokkos::Mesh>(*this);
 #endif
 }
