@@ -29,9 +29,22 @@ public:
    * @param name unique name for the sphere surface
    * @param center center point of sphere
    * @param r radius of sphere
-   * @param boundary boundary type for the surface
+   * @param boundary (optional) boundary type for the surface, default "TRANSMISSION"
    */
-  CSGSphere(const std::string & name, const Point & center, const Real r, std::string boundary);
+  CSGSphere(const std::string & name,
+            const Point & center,
+            const Real r,
+            std::string boundary = "TRANSMISSION");
+
+  /**
+   * @brief Construct a new CSGSphere surface
+   *
+   * @param name unique name for the sphere surface
+   * @param center center point of sphere
+   * @param r radius of sphere
+   * @param boundary (optional) boundary type for the surface, default "TRANSMISSION"
+   */
+  CSGSphere(const std::string & name, const Real r, std::string boundary = "TRANSMISSION");
 
   /**
    * Destructor
@@ -55,6 +68,13 @@ public:
   virtual CSGSurface::Direction directionFromPoint(const Point & p) const override;
 
 protected:
+  // check that radius is positive
+  void checkRadius(const Real r)
+  {
+    if (r <= 0.0)
+      mooseError("Radius of sphere must be positive.");
+  }
+
   /// Value of x0 in equation of sphere
   Real _x0;
 

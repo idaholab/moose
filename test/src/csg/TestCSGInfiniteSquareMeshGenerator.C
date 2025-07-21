@@ -9,6 +9,7 @@
 
 #include "TestCSGInfiniteSquareMeshGenerator.h"
 #include "CSGBase.h"
+#include "CSGPlane.h"
 
 registerMooseObject("MooseTestApp", TestCSGInfiniteSquareMeshGenerator);
 
@@ -64,8 +65,9 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
   for (unsigned int i = 0; i < points_on_planes.size(); ++i)
   {
     const auto surf_name = "surf_" + surf_names[i];
-    auto & csg_plane = csg_obj->createPlaneFromPoints(
+    std::unique_ptr<CSG::CSGSurface> plane_ptr = std::make_unique<CSG::CSGPlane>(
         surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
+    auto & csg_plane = csg_obj->addSurface(plane_ptr);
     const auto region_direction = csg_plane.directionFromPoint(centroid);
     auto halfspace =
         ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);

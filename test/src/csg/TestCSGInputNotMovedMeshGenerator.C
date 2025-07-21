@@ -44,7 +44,7 @@ TestCSGInputNotMovedMeshGenerator::generateCSG()
 
   // Create temporary CSG object to return
   auto csg_obj = std::make_unique<CSG::CSGBase>();
-  csg_obj->createSphere("sphere_surf", 5.0);
+  csg_obj->getRootUniverse();
 
   return csg_obj;
 }
