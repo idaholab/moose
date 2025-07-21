@@ -53,6 +53,34 @@
     max_parallel = 1
     recover = false
   []
+  [MFEMDiffusionLOR]
+    type = XMLDiff
+    input = diffusion.i
+    xmldiff = 'OutputData/DiffusionLOR/Run0/Run0.pvd '
+              'OutputData/DiffusionLOR/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
+    cli_args = 'FESpaces/H1FESpace/fec_order=SECOND '
+               'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
+               'Preconditioner/jacobi/low_order_refined=true '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/DiffusionLOR'
+    requirement = 'The system shall have the ability to solve a diffusion problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+    abs_zero = 1e-6
+  []
+  [MFEMDiffusionAMR]
+    type = XMLDiff
+    input = diffusion_amr.i
+    xmldiff = 'OutputData/Diffusion_amr/Run0/Run0.pvd
+                OutputData/Diffusion_amr/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
+    requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
+    capabilities = 'mfem'
+    max_parallel = 1
+    recover = false
+  []
   [MFEMGradDiv]
     type = XMLDiff
     input = graddiv.i
