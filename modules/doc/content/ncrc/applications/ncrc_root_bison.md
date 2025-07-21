@@ -1,6 +1,6 @@
 ## BISON
 
-- [Documentation](https://bison-docs.hpc.inl.gov/)
+- [Documentation](https://bison-docs.hpcondemand.inl.gov)
 - [Support Forum (Discourse)](https://bison-discourse.hpcondemand.inl.gov)
 - [Build Status](https://civet.inl.gov/repo/875/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_bison.md)
