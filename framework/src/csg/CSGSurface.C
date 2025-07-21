@@ -16,7 +16,7 @@ CSGSurface::CSGSurface(const std::string & name,
                        const std::string & surf_type,
                        std::string & boundary)
   : _name(name),
-    _surface_type("PLANE SPHERE XCYLINDER YCYLINDER ZCYLINDER", surf_type),
+    _surface_type(surf_type),
     _boundary_type("TRANSMISSION VACUUM REFLECTIVE", boundary)
 {
 }

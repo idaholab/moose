@@ -17,7 +17,7 @@ CSGPlane::CSGPlane(const std::string & name,
                    const Point & p2,
                    const Point & p3,
                    std::string boundary)
-  : CSGSurface(name, "PLANE", boundary)
+  : CSGSurface(name, MooseUtils::prettyCppType<CSGPlane>(), boundary)
 {
   coeffsFromPoints(p1, p2, p3);
 }
@@ -28,7 +28,7 @@ CSGPlane::CSGPlane(const std::string & name,
                    const Real c,
                    const Real d,
                    std::string boundary)
-  : CSGSurface(name, "PLANE", boundary), _a(a), _b(b), _c(c), _d(d)
+  : CSGSurface(name, MooseUtils::prettyCppType<CSGPlane>(), boundary), _a(a), _b(b), _c(c), _d(d)
 {
 }
 

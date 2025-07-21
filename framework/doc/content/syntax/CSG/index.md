@@ -62,19 +62,19 @@ Detailed description of each type of item in the section follows.
 
 Surfaces contain the following information:
 
-- `TYPE`: the type of surface
+- `TYPE`: the type of surface as defined by the class name that was used to create the surface
 - `COEFFICIENTS`: the values for each coefficient in the equation defining the surface type (shown in the table below)
 - `BOUNDARY`: type of boundary condition applied to the surface (`"TRANSMISSION"`, `"REFLECTIVE"`, or `"VACUUM"`)
 
 | `TYPE`      | Equation                                        | COEFFICIENTS          |
 |-------------|-------------------------------------------------|-----------------------|
-| `PLANE`     | $ax + by + cz = d$                              | `a`, `b`, `c`, `d`    |
-| `SPHERE`    | $(x - x_0)^2 + (y - y_0)^2 + (z - z_0)^2 = r^2$ | `x0`, `y0`, `z0`, `r` |
-| `XCYLINDER` | $(y - y_0)^2 + (z - z_0)^2 = r^2$               | `y0`, `z0`, `r`       |
-| `YCYLINDER` | $(x - x_0)^2 + (z - z_0)^2 = r^2$               | `x0`, `z0`, `r`       |
-| `ZCYLINDER` | $(x - x_0)^2 + (y - y_0)^2 = r^2$               | `x0`, `y0`, `r`       |
+| `CSG::CSGPlane`     | $ax + by + cz = d$                              | `a`, `b`, `c`, `d`    |
+| `CSG::CSGSphere`    | $(x - x_0)^2 + (y - y_0)^2 + (z - z_0)^2 = r^2$ | `x0`, `y0`, `z0`, `r` |
+| `CSG::CSGXCylinder` | $(y - y_0)^2 + (z - z_0)^2 = r^2$               | `y0`, `z0`, `r`       |
+| `CSG::CSGYCylinder` | $(x - x_0)^2 + (z - z_0)^2 = r^2$               | `x0`, `z0`, `r`       |
+| `CSG::CSGZCylinder` | $(x - x_0)^2 + (y - y_0)^2 = r^2$               | `x0`, `y0`, `r`       |
 
-Below is example [!ac](JSON) surface output for a `PLANE` at x=5, `ZCYLINDER` of radius 2 centered at $(1, 3)$, and a `SPHERE` centered at $(-2, -3, 7)$ with radius 5.
+Below is example [!ac](JSON) surface output for a `CSG::CSGPlane` at x=5, `CSG::CSGZCylinder` of radius 2 centered at $(1, 3)$, and a `CSG::CSGSphere` centered at $(-2, -3, 7)$ with radius 5.
 
 ```json
 {
@@ -87,7 +87,7 @@ Below is example [!ac](JSON) surface output for a `PLANE` at x=5, `ZCYLINDER` of
         "c": 0.0,
         "d": 5.0
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "my_z_cylinder": {
       "BOUNDARY": "TRANSMISSION",
@@ -96,7 +96,7 @@ Below is example [!ac](JSON) surface output for a `PLANE` at x=5, `ZCYLINDER` of
         "x0": 1.0,
         "y0": 3.0
       },
-      "TYPE": "ZCYLINDER"
+      "TYPE": "CSG::CSGZCylinder"
     },
     "my_sphere": {
       "BOUNDARY": "TRANSMISSION",
@@ -106,7 +106,7 @@ Below is example [!ac](JSON) surface output for a `PLANE` at x=5, `ZCYLINDER` of
         "y0": -3.0,
         "z0": 7.0
       },
-      "TYPE": "SPHERE"
+      "TYPE": "CSG::CSGSphere"
     }
   }
 }

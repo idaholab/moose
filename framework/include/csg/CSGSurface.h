@@ -109,8 +109,9 @@ protected:
   /// Name of surface
   std::string _name;
 
-  /// An enum for type of surface that is being represented
-  const MooseEnum _surface_type;
+  /// Type of surface that is being represented
+  /// string is taken directly from the surface class name
+  const std::string _surface_type;
 
   /// An enum for boundary type of surface
   MooseEnum _boundary_type;
