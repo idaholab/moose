@@ -425,7 +425,7 @@ Assembly::cachePhysicalMap()
   _jxw.copyNested();
   _xyz.copyNested();
 
-  ::Kokkos::RangePolicy<::Kokkos::IndexType<size_t>> policy(0, num_elems);
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<size_t>> policy(0, num_elems);
   ::Kokkos::parallel_for(policy, *this);
   ::Kokkos::fence();
 }

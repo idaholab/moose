@@ -11,7 +11,7 @@
       exodiff = 'gpu_kernel_restartable_out.e'
       detail = 'perform residual calculations that accumulate state and'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
 
     [test2]
@@ -21,7 +21,7 @@
       prereq = kernel/test
       detail = 'restart the calculation using the accumulated state.'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
   []
 []

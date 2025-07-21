@@ -30,7 +30,7 @@ AddKokkosBCAction::act()
   mooseError("Attempted to add a Kokkos boundary condition but MOOSE was not compiled with Kokkos "
              "support.");
 #else
-  if (!_app.hasGPUs())
+  if (!_app.isKokkosAvailable())
     mooseError(
         "Attempted to add a Kokkos boundary condition but no GPU was detected in the system.");
   else

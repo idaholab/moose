@@ -82,8 +82,8 @@
   type = Transient
 
   solve_type = 'PJFNK'
-  petsc_options_iname = '-vec_type -nl0_mat_type -pc_type -pc_hypre_type'
-  petsc_options_value = 'kokkos hypre hypre boomeramg'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 
   start_time = 0.0
   num_steps = 5

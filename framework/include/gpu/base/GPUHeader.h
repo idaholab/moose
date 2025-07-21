@@ -28,16 +28,37 @@
 // MOOSE includes
 #include "MooseError.h"
 #include "MooseUtils.h"
+#include "MooseConfig.h"
 
 // Architecture-dependent execution spaces
+#ifdef MOOSE_KOKKOS_ENABLE_GPU
 #ifdef KOKKOS_ENABLE_CUDA
 #define MemSpace ::Kokkos::CudaSpace
+#define ExecSpace ::Kokkos::Cuda
 #endif
 #ifdef KOKKOS_ENABLE_HIP
 #define MemSpace ::Kokkos::HIPSpace
+#define ExecSpace ::Kokkos::HIP
 #endif
 #ifdef KOKKOS_ENABLE_SYCL
-#define MemSpace ::Kokkos::Experimental::SYCL
+#define MemSpace ::Kokkos::SYCLDeviceUSMSpace
+#define ExecSpace ::Kokkos::SYCL
+#endif
+#else
+#define MemSpace ::Kokkos::HostSpace
+#define ExecSpace ::Kokkos::OpenMP
+#define KOKKOS_FUNCTION
+#define KOKKOS_INLINE_FUNCTION inline
+#define KOKKOS_IF_ON_HOST(code)                                                                    \
+  if (!omp_get_level())                                                                            \
+  {                                                                                                \
+    code                                                                                           \
+  }
+#define KOKKOS_IF_ON_DEVICE(code)                                                                  \
+  if (omp_get_level())                                                                             \
+  {                                                                                                \
+    code                                                                                           \
+  }
 #endif
 
 // Predefined maximum values

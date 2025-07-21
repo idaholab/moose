@@ -9,6 +9,6 @@
     abs_zero = 1e-6
     requirement = 'The Kokkos system shall support a kernel for coupling the sum of several products of material properties with variables and constant coefficients'
     capabilities = 'kokkos'
-    devices = 'cuda'
+    devices = 'cpu cuda'
   [../]
 []
