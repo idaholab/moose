@@ -42,7 +42,7 @@ public:
    *
    * @return reference to CSGSurface that was added
    */
-  CSGSurface & addSurface(std::unique_ptr<CSGSurface> & surf)
+  const CSGSurface & addSurface(std::unique_ptr<CSGSurface> & surf)
   {
     return _surface_list.addSurface(surf);
   }

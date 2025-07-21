@@ -51,6 +51,7 @@ protected:
    * @brief Get a surface by name
    *
    * @param name name of surface
+   *
    * @return reference to CSGSurface of the specified name
    */
   CSGSurface & getSurface(const std::string & name) const;
@@ -60,6 +61,8 @@ protected:
    * to surface list object that calls this function
    *
    * @param surf CSGSurface to add
+   *
+   * @return reference to CSGSurface
    */
   CSGSurface & addSurface(std::unique_ptr<CSGSurface> & surf);
 

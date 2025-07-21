@@ -107,7 +107,7 @@ const auto & sphere1 = csg_obj->addSurface(sphere_ptr);
 auto center = Point(1, 2, 3);
 std::unique_ptr<CSG::CSGSurface> sphere_ptr =
     std::make_unique<CSG::CSGSphere>('new_sphere', center, 4.0);
-const auto & sphere1 = csg_obj->addSurface(sphere_ptr);
+const auto & sphere2 = csg_obj->addSurface(sphere_ptr);
 ```
 
 ```cpp
