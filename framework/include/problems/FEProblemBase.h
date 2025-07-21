@@ -643,7 +643,7 @@ public:
   {
     return _need_to_add_default_multiapp_fixed_point_convergence;
   }
-  /// Returns true if the problem needs to add the default steady convergence
+  /// Returns true if the problem needs to add the default steady-state detection convergence
   bool needToAddDefaultSteadyStateConvergence() const
   {
     return _need_to_add_default_steady_state_convergence;
@@ -668,7 +668,7 @@ public:
   {
     return _multiapp_fixed_point_convergence_name.has_value();
   }
-  /// Returns true if the problem has set the steady convergence name
+  /// Returns true if the problem has set the steady-state detection convergence name
   bool hasSetSteadyStateConvergenceName() const
   {
     return _steady_state_convergence_name.has_value();
@@ -698,7 +698,7 @@ public:
    */
   void addDefaultMultiAppFixedPointConvergence(const InputParameters & params);
   /**
-   * Adds the default steady Convergence
+   * Adds the default steady-state detection Convergence
    *
    * This is called if the user does not supply 'steady_state_convergence'.
    *
@@ -2318,7 +2318,7 @@ public:
    */
   void setMultiAppFixedPointConvergenceName(const ConvergenceName & convergence_name);
   /**
-   * Sets the steady convergence object name if there is one
+   * Sets the steady-state detection convergence object name if there is one
    */
   void setSteadyStateConvergenceName(const ConvergenceName & convergence_name);
 
@@ -2335,7 +2335,7 @@ public:
    */
   const ConvergenceName & getMultiAppFixedPointConvergenceName() const;
   /**
-   * Gets the steady convergence object name.
+   * Gets the steady-state detection convergence object name.
    */
   const ConvergenceName & getSteadyStateConvergenceName() const;
 
@@ -2556,7 +2556,7 @@ protected:
   std::optional<std::vector<ConvergenceName>> _linear_convergence_names;
   /// MultiApp fixed point convergence name
   std::optional<ConvergenceName> _multiapp_fixed_point_convergence_name;
-  /// Steady convergence name
+  /// Steady-state detection convergence name
   std::optional<ConvergenceName> _steady_state_convergence_name;
 
   std::set<TagID> _fe_vector_tags;
