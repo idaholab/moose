@@ -8,15 +8,28 @@ The `CutMeshByPlaneGenerator` is basically the 3D version of [`XYMeshLineCutter`
 
 ## Methods
 
-`CutMeshByPlaneGenerator` first converts all elements of the input mesh into `TET4` elements. Next, the `TET4` elements sliced by the cutting plane are further split into `TET4` elements. 
+As cutting a `TET4` element along a plane is most straightforward, the elements that are crossed by the cutting plane need to be converted into TET4 elements before the cutting operation. The `CutMeshByPlaneGenerator` supports two methods for this conversion:
 
-### Splitting of Non-TET4 Elements
+!media framework/meshgenerators/plane_cut_transition.png
+       style=display: block;margin-left:auto;margin-right:auto;width:85%;
+       id=plane_cut_transition
+       caption=Example of cutting a cube mesh consisting of `HEX8` elements along a plane. From left to right: (1) original mesh; (2) mesh after the cutting without the transition layer; (3) mesh after the cutting with the transition layer; (4) detailed breakdown of the mesh cut with the transition layer.
 
-The splitting of non-TET4 elements was performed using the same algorithm as described in [`ElementsToTetrahedronsConverter`](/ElementsToTetrahedronsConverter.md). Note that only those elements that will be fully or partially retained after the cutting are split.
+### Method 1: Full Conversion to TET4 Elements
+
+This method converts all elements of the input mesh into `TET4` elements. The conversion is performed using the [`ElementsToTetrahedronsConverter`](/ElementsToTetrahedronsConverter.md) algorithm, which splits non-`TET4` elements into `TET4` elements. Note that only those elements that will be fully or partially retained after the cutting are split.
+
+As all the non-`TET4` elements are converted into `TET4` elements, the output mesh only contains `TET4` elements. Thus, all the subdomain ids and names of the input mesh are preserved in the output mesh. See the second subfigure in [plane_cut_transition] for an example.
+
+### Method 2: Transition Layer Approach
+
+The transition layer approach utilizes an algorithm that is similar to what is described in [`BoundaryTransitionGenerator`](/BoundaryTransitionGenerator.md).In this method, only the elements that are crossed by the cutting plane are converted into `TET4` elements (using the [`ElementsToTetrahedronsConverter`](/ElementsToTetrahedronsConverter.md) algorithm). The elements that are adjacent to these converted `TET4` elements are also converted into a combination of `TET4` and `PYRAMID5` elements, which are then used to create a transition layer between the `TET4` elements and the original elements. In this case, the majority of elements in the input mesh can be retained as they are. This option can be enabled by setting [!param](/Mesh/CutMeshByPlaneGenerator/generate_transition_layer) to `true`. See the third and fourth subfigures in [plane_cut_transition] for an example.
+
+As new types of elements are introduced in the transition layer, only the subdomain ids and names of the input mesh that are associated with the retained elements are preserved in the output mesh. The new `TET4` and `PYRAMID5` elements in the transition layer are assigned new subdomain names that are based on the original subdomain names with a suffix defined by [!param](/Mesh/CutMeshByPlaneGenerator/converted_pyramid_element_subdomain_name_suffix) and [!param](/Mesh/CutMeshByPlaneGenerator/converted_tet_element_subdomain_name_suffix), respectively. The new subdomain ids are assigned by automatically shifting the original ids.
 
 ### Cutting of TET4 Elements along Plane
 
-Once all the elements of the input mesh have been converted into TET elements, the cutting method only needs to be applied to TET elements. First, all the elements that are cut by the given cutting plane are identified. For the TET elements involved, their relationship with the cutting plane can be categorized into one of the six cases shown in [tet_cut]. For each of these six cases, new nodes are created at the intersection points between the cutting plane and the edges of the TET element. Then the red part of the original TET element is removed and new TET element(s) are created as shown in [tet_cut]. The cross-sections created by this cutting procedure are assigned a new boundary ID as defined by [!param](/Mesh/CutMeshByPlaneGenerator/cut_face_id)
+Once all the elements of the input mesh that are involved in cutting have been converted into `TET4` elements, the cutting method only needs to be applied to `TET4` elements. First, all the elements that are cut by the given cutting plane are identified. For the `TET4` elements involved, their relationship with the cutting plane can be categorized into one of the six cases shown in [tet_cut]. For each of these six cases, new nodes are created at the intersection points between the cutting plane and the edges of the `TET4` element. Then the red part of the original `TET4` element is removed and new `TET4` element(s) are created as shown in [tet_cut]. The cross-sections created by this cutting procedure are assigned a new boundary ID as defined by [!param](/Mesh/CutMeshByPlaneGenerator/cut_face_id)
 
 !media framework/meshgenerators/tet_cut.png
       style=display: block;margin-left:auto;margin-right:auto;width:75%;
