@@ -24,6 +24,7 @@
 #include "Console.h"
 #include "AuxiliarySystem.h"
 #include "Convergence.h"
+#include "ConvergenceIterationTypes.h"
 
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -201,6 +202,10 @@ TransientBase::TransientBase(const InputParameters & parameters)
   if (isParamValid("steady_state_convergence"))
     _problem.setSteadyStateConvergenceName(getParam<ConvergenceName>("steady_state_convergence"));
   else
+    // Note that we create a steady-state Convergence object even if steady_state_detection ==
+    // false. This could possibly be changed in the future, but TransientMultiApp would need to be
+    // able to signal for the Convergence object to be created in case it uses steady-state
+    // detection for sub-stepping.
     _problem.setNeedToAddDefaultSteadyStateConvergence();
 }
 
