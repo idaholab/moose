@@ -69,9 +69,9 @@ public:
 
 protected:
   // check that radius is positive
-  void checkRadius(const Real r)
+  void checkRadius()
   {
-    if (r <= 0.0)
+    if (_r <= 0.0)
       mooseError("Radius of sphere must be positive.");
   }
 

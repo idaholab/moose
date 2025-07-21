@@ -22,7 +22,7 @@ CSGSphere::CSGSphere(const std::string & name,
     _z0(center(2)),
     _r(r)
 {
-  checkRadius(r);
+  checkRadius();
 }
 
 CSGSphere::CSGSphere(const std::string & name, const Real r, std::string boundary)
@@ -32,7 +32,7 @@ CSGSphere::CSGSphere(const std::string & name, const Real r, std::string boundar
     _z0(0.0),
     _r(r)
 {
-  checkRadius(r);
+  checkRadius();
 }
 
 std::unordered_map<std::string, Real>
