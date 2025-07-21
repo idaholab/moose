@@ -16,7 +16,7 @@
         "c": 0.0,
         "d": 2.5
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "surf_minus_y": {
       "BOUNDARY": "REFLECTIVE",
@@ -26,7 +26,7 @@
         "c": 0.0,
         "d": -2.5
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "surf_minus_z": {
       "BOUNDARY": "TRANSMISSION",
@@ -36,7 +36,7 @@
         "c": 1.0,
         "d": -2.5
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "surf_plus_x": {
       "BOUNDARY": "REFLECTIVE",
@@ -46,7 +46,7 @@
         "c": 0.0,
         "d": -2.5
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "surf_plus_y": {
       "BOUNDARY": "REFLECTIVE",
@@ -56,7 +56,7 @@
         "c": 0.0,
         "d": 2.5
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "surf_plus_z": {
       "BOUNDARY": "TRANSMISSION",
@@ -66,7 +66,7 @@
         "c": 1.0,
         "d": 2.5
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     }
   },
   "UNIVERSES": {

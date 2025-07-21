@@ -22,7 +22,7 @@
         "c": 0.0,
         "d": 5.0
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "surf_minus_y": {
       "BOUNDARY": "TRANSMISSION",
@@ -32,7 +32,7 @@
         "c": 0.0,
         "d": 5.0
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "surf_plus_x": {
       "BOUNDARY": "TRANSMISSION",
@@ -42,7 +42,7 @@
         "c": 0.0,
         "d": 5.0
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "surf_plus_y": {
       "BOUNDARY": "TRANSMISSION",
@@ -52,7 +52,7 @@
         "c": 0.0,
         "d": 5.0
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     },
     "surf_zero_y": {
       "BOUNDARY": "TRANSMISSION",
@@ -62,7 +62,7 @@
         "c": 0.0,
         "d": 0.0
       },
-      "TYPE": "PLANE"
+      "TYPE": "CSG::CSGPlane"
     }
   },
   "UNIVERSES": {
