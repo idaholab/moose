@@ -148,6 +148,9 @@ AdvancedExtruderGenerator::validParams()
   params.addParam<MooseEnum>("radial_growth_method",
                              radial_growth_methods,
                              "Functional form to change radius while extruding along curve.");
+  params.addParam<Real>("start_radial_growth_rate", 0, "Starting rate of radial expansion.");
+  params.addParam<Real>("end_radial_growth_rate", 0, "Ending rate of radial expansion.");
+
   return params;
 }
 
@@ -650,8 +653,6 @@ AdvancedExtruderGenerator::generate()
                 libMesh::Real radial_weight = AdvancedExtruderGenerator::radialWeighting(
                     getParam<MooseEnum>("radial_growth_method"),
                     t); // calculate weighting for expansion
-                mooseAssert(radial_weight >= 0 && radial_weight <= 1.0,
-                            "radial weighting must be in [0,1]!");
                 node_radius = (start_radius * (1 - radial_weight) +
                                getParam<libMesh::Real>("r_final") * radial_weight) *
                               radius_scaling; // calculate new radius
@@ -1453,6 +1454,9 @@ AdvancedExtruderGenerator::radialWeighting(const MooseEnum function_type, const 
   else if (function_type == "CUBIC")
     switch_val = 2;
 
+  libMesh::Real start_growth_rate = getParam<libMesh::Real>("start_radial_growth_rate");
+  libMesh::Real end_growth_rate = getParam<libMesh::Real>("end_radial_growth_rate");
+
   libMesh::Real result;
   switch (switch_val)
   {
@@ -1460,9 +1464,9 @@ AdvancedExtruderGenerator::radialWeighting(const MooseEnum function_type, const 
       result = t;
       break;
     case 2:
-      // derivatives set s.t. the expansion will be smooth and match the extrusion curve's
-      // derivative
-      result = -2 * std::pow(t, 3) + 3 * std::pow(t, 2);
+      result = (-2 + start_growth_rate + end_growth_rate) * std::pow(t, 3) +
+               (3 - (2 * start_growth_rate + end_growth_rate)) * std::pow(t, 2) +
+               start_growth_rate * t;
       break;
     default:
       mooseError("radial_growth_method specfied not valid for radial expansion!");
