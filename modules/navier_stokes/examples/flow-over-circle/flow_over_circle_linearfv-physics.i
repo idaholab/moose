@@ -69,3 +69,5 @@
   exodus = true
   csv = true
 []
+
+!include postprocessors.i

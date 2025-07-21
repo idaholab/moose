@@ -28,4 +28,5 @@
   []
 []
 
-!include executioner_postprocessor.i
+!include executioner.i
+!include postprocessors.i
