@@ -1619,49 +1619,64 @@ MooseServer::getRequiredParamsText(const std::string & subblock_path,
   return required_param_text;
 }
 
-// TODO RUN PARSER PARSE FIRST !!
-
-hit::Node *
-MooseServer::queryRoot()
+const hit::Node *
+MooseServer::queryRoot() const
 {
-  if (auto parser_ptr = queryCheckParser())
+  if (const auto parser_ptr = queryCheckParser())
   {
 #ifndef NDEBUG
     if (const auto app_ptr = queryCheckApp())
       mooseAssert(&app_ptr->parser() == parser_ptr, "App should have this parser");
 #endif
-    if (auto root_ptr = parser_ptr->queryRoot())
+    if (const auto root_ptr = parser_ptr->queryRoot())
       if (!root_ptr->getNodeView().is_null())
         return root_ptr;
   }
   return nullptr;
 }
 
-MooseServer::CheckState *
-MooseServer::queryCheckState()
+const MooseServer::CheckState *
+MooseServer::queryCheckState() const
 {
   const auto it = _check_state.find(document_path);
   return it == _check_state.end() ? nullptr : &it->second;
 }
 
-MooseApp *
-MooseServer::queryCheckApp()
+MooseServer::CheckState *
+MooseServer::queryCheckState()
+{
+  return const_cast<MooseServer::CheckState *>(std::as_const(*this).queryCheckState());
+}
+
+const Parser *
+MooseServer::queryCheckParser() const
+{
+  const auto state = queryCheckState();
+  return state ? state->parser.get() : nullptr;
+}
+
+Parser *
+MooseServer::queryCheckParser()
+{
+  return const_cast<Parser *>(std::as_const(*this).queryCheckParser());
+}
+
+const MooseApp *
+MooseServer::queryCheckApp() const
 {
   if (auto state = queryCheckState())
     return state->app.get();
   return nullptr;
 }
 
-Parser *
-MooseServer::queryCheckParser()
+MooseApp *
+MooseServer::queryCheckApp()
 {
-  if (auto state = queryCheckState())
-    return state->parser.get();
-  return nullptr;
+  return const_cast<MooseApp *>(std::as_const(*this).queryCheckApp());
 }
 
 const std::string *
-MooseServer::queryDocumentText()
+MooseServer::queryDocumentText() const
 {
   if (const auto parser = queryCheckParser())
   {
@@ -1685,23 +1700,8 @@ MooseServer::getCheckApp()
   mooseError("MooseServer::getCheckApp(): App not available");
 }
 
-Parser &
-MooseServer::getCheckParser()
-{
-  if (auto parser_ptr = queryCheckParser())
-  {
-    auto & parser = *parser_ptr;
-#ifndef NDEBUG
-    if (const auto app_ptr = queryCheckApp())
-      mooseAssert(&app_ptr->parser() == parser_ptr, "App should have this parser");
-#endif
-    return parser;
-  }
-  mooseError("MooseServer::getCheckParser(): Parser not available");
-}
-
-hit::Node &
-MooseServer::getRoot()
+const hit::Node &
+MooseServer::getRoot() const
 {
   if (auto root_ptr = queryRoot())
     return *root_ptr;
@@ -1709,7 +1709,7 @@ MooseServer::getRoot()
 }
 
 const std::string &
-MooseServer::getDocumentText()
+MooseServer::getDocumentText() const
 {
   if (auto text_ptr = queryDocumentText())
     return *text_ptr;

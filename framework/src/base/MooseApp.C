@@ -1973,11 +1973,17 @@ MooseApp::addExecutorParams(const std::string & type,
   _executor_params[name] = std::make_pair(type, std::make_unique<InputParameters>(params));
 }
 
-Parser &
-MooseApp::parser()
+const Parser &
+MooseApp::parser() const
 {
   mooseAssert(_parser, "Not set");
   return *_parser;
+}
+
+Parser &
+MooseApp::parser()
+{
+  return const_cast<Parser &>(std::as_const(*this).parser());
 }
 
 void
