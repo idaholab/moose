@@ -22,8 +22,17 @@ CSGSphere::CSGSphere(const std::string & name,
     _z0(center(2)),
     _r(r)
 {
-  if (r < 0.0 || r == 0.0)
-    mooseError("Radius of sphere must be postive.");
+  checkRadius(r);
+}
+
+CSGSphere::CSGSphere(const std::string & name, const Real r, std::string boundary)
+  : CSGSurface(name, MooseUtils::prettyCppType<CSGSphere>(), boundary),
+    _x0(0.0),
+    _y0(0.0),
+    _z0(0.0),
+    _r(r)
+{
+  checkRadius(r);
 }
 
 std::unordered_map<std::string, Real>

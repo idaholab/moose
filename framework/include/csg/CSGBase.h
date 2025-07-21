@@ -36,98 +36,15 @@ public:
   ~CSGBase();
 
   /**
-   * @brief Create a plane from three points
+   * @brief add a unique surface pointer to this base instance
    *
-   * @param name surface name
-   * @param p1 point 1
-   * @param p2 point 2
-   * @param p3 point 3
-   * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
-   * @return reference to CSGSurface object
-   */
-  const CSGSurface & createPlaneFromPoints(const std::string & name,
-                                           const Point & p1,
-                                           const Point & p2,
-                                           const Point & p3,
-                                           std::string boundary = "TRANSMISSION")
-  {
-    return _surface_list.addPlaneFromPoints(name, p1, p2, p3, boundary);
-  }
-
-  /**
-   * @brief Create a plane from coefficients for the equation: ax + by + cz = d
+   * @param surf pointer to surface to add
    *
-   * @param name surface name
-   * @param a coefficient a
-   * @param b coefficient b
-   * @param c coefficient c
-   * @param d coefficient d
-   * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
-   * @return reference to CSGSurface object
+   * @return reference to CSGSurface that was added
    */
-  const CSGSurface & createPlaneFromCoefficients(const std::string & name,
-                                                 const Real a,
-                                                 const Real b,
-                                                 const Real c,
-                                                 const Real d,
-                                                 std::string boundary = "TRANSMISSION")
+  CSGSurface & addSurface(std::unique_ptr<CSGSurface> & surf)
   {
-    return _surface_list.addPlaneFromCoefficients(name, a, b, c, d, boundary);
-  }
-
-  /**
-   * @brief Create a Sphere At Origin
-   *
-   * @param name surface name
-   * @param r radius
-   * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
-   * @return reference to CSGSurface object
-   */
-  const CSGSurface &
-  createSphere(const std::string & name, const Real r, std::string boundary = "TRANSMISSION")
-  {
-    return _surface_list.addSphere(name, Point(0.0, 0.0, 0.0), r, boundary);
-  }
-
-  /**
-   * @brief Create a Sphere centered at a point
-   *
-   * @param name surface name
-   * @param center a point defining the center
-   * @param r radius
-   * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
-   * @return reference to CSGSurface object
-   */
-  const CSGSurface & createSphere(const std::string & name,
-                                  const Point & center,
-                                  const Real r,
-                                  std::string boundary = "TRANSMISSION")
-  {
-    return _surface_list.addSphere(name, center, r, boundary);
-  }
-
-  /**
-   * @brief Create a Cylinder aligned with an axis (x, y or z) at the point
-   * (x0, x1), where x0 and x1 correspond to:
-   * x aligned: (y, z)
-   * y aligned: (x, z)
-   * z aligned: (x, y)
-   *
-   * @param name surface name
-   * @param x0 first coordinate for center
-   * @param x1 second coordinate for center
-   * @param r radius
-   * @param boundary (optional) boundary condition for the surface (default TRANSMISSION)
-   * @return reference to CSGSurface object
-   */
-  const CSGSurface & createCylinder(const std::string & name,
-                                    const Real x0,
-                                    const Real x1,
-                                    const Real r,
-                                    const std::string & axis,
-                                    std::string boundary = "TRANSMISSION")
-  {
-    return _surface_list.addCylinder(name, x0, x1, r, axis, boundary);
+    return _surface_list.addSurface(surf);
   }
 
   /**

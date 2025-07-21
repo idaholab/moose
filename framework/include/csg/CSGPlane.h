@@ -30,13 +30,13 @@ public:
    * @param p1 point 1
    * @param p2 point 2
    * @param p3 point 3
-   * @param boundary boundary type for the surface
+   * @param boundary (optional) boundary type for the surface, default "TRANSMISSION"
    */
   CSGPlane(const std::string & name,
            const Point & p1,
            const Point & p2,
            const Point & p3,
-           std::string boundary);
+           std::string boundary = "TRANSMISSION");
 
   /**
    * @brief Construct a new CSGPlane surface from coefficients (a, b, c, d) for the
@@ -47,14 +47,14 @@ public:
    * @param b coefficient b
    * @param c coefficient c
    * @param d coefficient d
-   * @param boundary boundary type for the surface
+   * @param boundary (optional) boundary type for the surface, default "TRANSMISSION"
    */
   CSGPlane(const std::string & name,
            const Real a,
            const Real b,
            const Real c,
            const Real d,
-           std::string boundary);
+           std::string boundary = "TRANSMISSION");
 
   /**
    * Destructor

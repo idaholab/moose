@@ -9,6 +9,7 @@
 
 #include "TestCSGSurfaceColinearPointsMeshGenerator.h"
 #include "CSGBase.h"
+#include "CSGPlane.h"
 
 registerMooseObject("MooseTestApp", TestCSGSurfaceColinearPointsMeshGenerator);
 
@@ -42,12 +43,13 @@ TestCSGSurfaceColinearPointsMeshGenerator::generateCSG()
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
 
-  // Create a plane from collinear points
+  // Create a plane from collinear points - should produce error
   const auto & p1 = Point(0, 0, 0);
   const auto & p2 = Point(1, 0, 0);
   const auto & p3 = Point(2, 0, 0);
   const auto & surf_name = "surf";
-  csg_obj->createPlaneFromPoints(surf_name, p1, p2, p3);
+  std::unique_ptr<CSG::CSGSurface> plane_ptr =
+      std::make_unique<CSG::CSGPlane>(surf_name, p1, p2, p3);
 
   return csg_obj;
 }

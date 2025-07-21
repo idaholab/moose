@@ -50,25 +50,29 @@ The following sections explain in detail how to do this as a part of the `genera
 ### Surfaces
 
 Surfaces are used to define the spatial extent of the region of a `CSGCell`.
-Various methods exist to create `CSGSurface` objects (below).
-All surface creation methods will return a const reference to that generated surface (`const & CSGSurface`).
+To create a `CSGSurface` object, the surface constructor must be called directly to create a unique pointer.
+This pointer then has to be added to the current `CSGBase` instance with `addSurface` which will return a const reference to that generated surface (`const & CSGSurface`).
+The syntax to do this is as follows:
 
-| Surface Type | Method | Description |
+```cpp
+// the unique surface pointer is made first
+std::unique_ptr<CSG::CSGSurface> surf_ptr = std::make_unique<SurfaceType>(arguments);
+// and then it is explcitly added to this CSGBase instance
+const auto & surface = csg_obj->addSurface(surf_ptr);
+```
+
+The `CSG` framework in MOOSE provides various classes for creating basic surfaces:
+
+| Surface Type | Class | Description |
 |---------|--------|------------|
-| Plane | `createPlaneFromPoints` | create a plane defined by 3 points |
-| Plane | `createPlaneFromCoefficients` | creates a plane based on the coefficients `a`, `b`, `c`, and `d` for the equation `ax + by + cz = d` |
-| Sphere | `createSphere` | creates a sphere of radius `r` at an optionally specified center point (default is `(0, 0, 0)`) |
-| Axis-Aligned Cylinder | `createCylinder` | creates a cylinder aligned with the specified axis (`x`, `y`, or `z`) at the specified center location (`x0`, `x1`), where (`x0`, `x1`) is (`y`, `z`) for X-Cylinder, (`x`, `z`) for Y-Cylinder, and (`x`, `y`) for Z-Cylinder |
+| Plane | `CSGPlane` | create a plane defined by 3 points or from coefficients `a`, `b`, `c`, and `d` for the equation `ax + by + cz = d` |
+| Sphere | `CSGSphere` | creates a sphere of radius `r` at an optionally specified center point (default is `(0, 0, 0)`) |
+| Cylinder | `CSGXCylinder` | creates a cylinder aligned with the x-axis at the specified center location (`y`, `z`) |
+| Cylinder | `CSGYCylinder` | creates a cylinder aligned with the y-axis at the specified center location (`x`, `z`) |
+| Cylinder | `CSGZCylinder` | creates a cylinder aligned with the z-axis at the specified center location (`x`, `y`) |
 
 At the time of surface creation, the type of boundary can be optionally set.
 Options for boundary types are `"TRANSMISSION"` (default), `"VACUUM"`, and `"REFLECTIVE"`.
-
-The `CSGSurface` objects can then be accessed or updated with the following methods from `CSGBase`:
-
-- `getAllSurfaces`: retrieve a list of const references to each `CSGSurface` object in the `CSGBase` instance
-- `getSurfaceByName`: retrieve a const reference to the `CSGSurface` of the specified name
-- `renameSurface`: change the name of the `CSGSurface`
-- `updateSurfaceBoundaryType`: change the boundary type of the `CSGSurface` (`"TRANSMISSION"`, `"VACUUM"`, or `"REFLECTIVE"`)
 
 Examples:
 
@@ -78,32 +82,60 @@ Examples:
 auto p1 = Point(1, 2, 3);
 auto p2 = Point(1, 1, 0);
 auto p3 = Point(0, 0, 0);
-auto bc_refl = CSG::CSGSurface::BoundaryType::REFLECTIVE;
-const auto & plane = csg_object->createPlane('new_plane', p1, p2, p3, bc_refl);
+auto bc_refl = "REFLECTIVE";
+std::unique_ptr<CSG::CSGSurface> plane_ptr =
+    std::make_unique<CSG::CSGPlane>('new_plane', p1, p2, p3, bc_refl);
+const auto & plane = csg_obj->addSurface(plane_ptr);
 ```
 
 ```cpp
 // create a plane at x=2 (a=1, b=c=0, d=2)
-const auto & xplane = csg_obj->createPlane('xplane', 1.0, 0.0, 0.0, 2.0);
+std::unique_ptr<CSG::CSGSurface> plane_ptr =
+    std::make_unique<CSG::CSGPlane>('xplane', 1.0, 0.0, 0.0, 2.0);
+const auto & plane = csg_obj->addSurface(plane_ptr);
 ```
 
 ```cpp
 // create a sphere at the origin with radius 5
-const auto & sphere1 = csg_obj->createSphere('origin_sphere', 5.0);
+std::unique_ptr<CSG::CSGSurface> sphere_ptr =
+    std::make_unique<CSG::CSGSphere>('origin_sphere', 5.0);
+const auto & sphere1 = csg_obj->addSurface(sphere_ptr);
 ```
 
 ```cpp
 // create a sphere at the point (1, 2, 3) of radius 4
 auto center = Point(1, 2, 3);
-const auto & sphere2 = csg_obj->createSphere('new_sphere', center, 4.0);
+std::unique_ptr<CSG::CSGSurface> sphere_ptr =
+    std::make_unique<CSG::CSGSphere>('new_sphere', center, 4.0);
+const auto & sphere1 = csg_obj->addSurface(sphere_ptr);
 ```
 
 ```cpp
 // create x-, y-, and z- aligned cylinders of radius 5, each centered at (1, 2, 3)
-const auto & xcyl = csg_obj->createCylinder('xcylinder', 2, 3, 5, 'x');
-const auto & ycyl = csg_obj->createCylinder('ycylinder', 1, 3, 5, 'y');
-const auto & zcyl = csg_obj->createCylinder('zcylinder', 1, 2, 5, 'z');
+std::unique_ptr<CSG::CSGSurface> x_ptr =
+    std::make_unique<CSG::CSGXCylinder>('xcylinder', 2, 3, 5);
+const auto & xcyl = csg_obj->addSurface(x_ptr);
+std::unique_ptr<CSG::CSGSurface> y_ptr =
+    std::make_unique<CSG::CSGYCylinder>('ycylinder', 1, 3, 5);
+const auto & ycyl = csg_obj->addSurface(y_ptr);
+std::unique_ptr<CSG::CSGSurface> z_ptr =
+    std::make_unique<CSG::CSGZCylinder>('zcylinder', 1, 2, 5);
+const auto & zcyl = csg_obj->addSurface(z_ptr);
 ```
+
+!alert! note title=Including Surface Types
+
+In order to define a surface, the header file for that surface type must be included in the `MeshGenerator.C` file (i.e., `#include "CSGPlane.h"` to create planes).
+
+!alert-end!
+
+The `CSGSurface` objects can then be accessed or updated with the following methods from `CSGBase`:
+
+- `addSurface`: add a unique pointer to a `CSGSurface` object to this `CSGBase` instance
+- `getAllSurfaces`: retrieve a list of const references to each `CSGSurface` object in the `CSGBase` instance
+- `getSurfaceByName`: retrieve a const reference to the `CSGSurface` of the specified name
+- `renameSurface`: change the name of the `CSGSurface`
+- `updateSurfaceBoundaryType`: change the boundary type of the `CSGSurface` (`"TRANSMISSION"`, `"VACUUM"`, or `"REFLECTIVE"`)
 
 ### Regions
 
@@ -464,8 +496,9 @@ ExamplePrismCSGMeshGenerator::generateCSG()
     // object name includes the mesh generator name for uniqueness
     const auto surf_name = mg_name + "_surf_" + surf_names[i];
     // create the plane for one face of the prism
-    const auto & csg_plane = csg_obj->createPlaneFromPoints(
+    std::unique_ptr<CSG::CSGSurface> plane_ptr = std::make_unique<CSG::CSGPlane>(
         surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
+    const auto & csg_plane = csg_obj->addSurface(plane_ptr);
     // determine where the plane is in relation to the centroid to be able to set the half-space
     const auto region_direction = csg_plane.directionFromPoint(centroid);
     // half-space is either positive (+plane_ptr) or negative (-plane_ptr)
@@ -535,7 +568,9 @@ ExampleAxialSurfaceMeshGenerator::generateCSG()
     const auto surf_name = mg_name + "_surf_" + surf_names[i];
     // create the plane
     // z plane equation: 0.0*x + 0.0*y + 1.0*z = (+/-)0.5 * axial_height
-    const auto & csg_plane = csg_obj->createPlaneFromCoefficients(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
+    std::unique_ptr<CSG::CSGSurface> plane_ptr =
+        std::make_unique<CSG::CSGPlane>(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
+    const auto & csg_plane = csg_obj->addSurface(plane_ptr);
     // determine the half-space to add as an updated intersection
     const auto region_direction = csg_plane.directionFromPoint(centroid);
     auto halfspace =
