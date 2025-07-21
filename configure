@@ -621,6 +621,7 @@ mfem_support
 libtorch_library
 libtorch_support
 kokkos_support
+kokkos_gpu
 target_alias
 host_alias
 build_alias
@@ -1297,7 +1298,8 @@ Optional Packages:
                           or mfem directory]
   --with-neml2[=ARG]      Specify if neml2 support should be enabled [ARG=yes
                           or neml2 directory]
-  --with-kokkos[=ARG]     Specify if Kokkos support should be enabled [ARG=yes]
+  --with-kokkos[=ARG]     Specify if Kokkos support should be enabled [ARG=yes
+                          or cpu to disable GPU capabilities]
 
 Report bugs to <https://github.com/idaholab/moose/discussions>.
 moose home page: <https://mooseframework.inl.gov>.
@@ -1938,20 +1940,28 @@ else $as_nop
   kokkos_support=no
 fi
 
-
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: configuring with Kokkos support: $kokkos_support" >&5
 printf "%s\n" "configuring with Kokkos support: $kokkos_support" >&6; }
 
 if test "$kokkos_support" = yes
 then :
-
-
-printf "%s\n" "#define HAVE_KOKKOS 1" >>confdefs.h
-
-        kokkos_support=true
-
+  printf "%s\n" "#define HAVE_KOKKOS 1" >>confdefs.h
+  kokkos_support=true
 fi
 
+if test ${with_kokkos+y}
+then :
+  if test "$with_kokkos" = cpu
+  then :
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Kokkos GPU capabilities disabled" >&5
+    printf "%s\n" "Kokkos GPU capabilities disabled" >&6; }
+    kokkos_gpu=false
+  else
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Kokkos GPU capabilities enabled" >&5
+    printf "%s\n" "Kokkos GPU capabilities enabled" >&6; }
+    kokkos_gpu=true
+  fi
+fi
 
 if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.

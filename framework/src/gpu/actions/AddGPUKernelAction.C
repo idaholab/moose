@@ -32,7 +32,7 @@ AddKokkosKernelAction::act()
 #ifndef MOOSE_HAVE_KOKKOS
   mooseError("Attempted to add a Kokkos kernel but MOOSE was not compiled with Kokkos support.");
 #else
-  if (!_app.hasGPUs())
+  if (!_app.isKokkosAvailable())
     mooseError("Attempted to add a Kokkos kernel but no GPU was detected in the system.");
   else
     _problem->addKokkosKernel(_type, _name, _moose_object_pars);

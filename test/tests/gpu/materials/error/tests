@@ -12,7 +12,7 @@
                   KokkosMaterials/left/block=10'
       detail = 'multiple materials properties with the same name are declared on the same block.'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
     [not_supplied]
       type = RunException
@@ -22,7 +22,7 @@
                   KokkosMaterials/mat1/use_old_prop=false'
       detail = 'a material property was requested by a material but not supplied by another material.'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
     [stateful_not_supplied]
       type = RunException
@@ -31,7 +31,7 @@
       cli_args = 'KokkosMaterials/mat1/coupled_mat_prop=\'prop-c\''
       detail = 'a stateful material property was requested by a material but not supplied by another material.'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
     [cyclic]
       type = RunException
@@ -40,7 +40,7 @@
       cli_args = 'KokkosMaterials/mat1/use_old_prop=false'
       detail = 'two materials depend on each other.'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
     [different_type]
       type = RunException
@@ -49,7 +49,7 @@
       cli_args = 'KokkosMaterials/active=\'left_real_1D right_int_1D\''
       detail = 'the same material property was declared by different non-overlapping materials with different types'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
     [different_dim]
       type = RunException
@@ -58,7 +58,7 @@
       cli_args = 'KokkosMaterials/active=\'left_real_1D right_real_2D\''
       detail = 'the same material property was declared by different non-overlapping materials with different dimensions'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
     [different_dim_size]
       type = RunException
@@ -67,7 +67,7 @@
       cli_args = 'KokkosMaterials/active=\'left_real_1D right_real_1D\''
       detail = 'the same material property was declared by different non-overlapping materials with different size of dimensions'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
   []
 
@@ -76,7 +76,7 @@
     input = 'gpu_dependency.i'
     requirement = 'The Kokkos material system shall not create a dependency when old versions of material properties are retrieved and used in calculations.'
     capabilities = 'kokkos'
-    devices = 'cuda'
+    devices = 'cpu cuda'
   []
   [same_type_and_dim]
     type = RunApp
@@ -84,6 +84,6 @@
     cli_args = 'KokkosMaterials/active=\'left_real_1D right_real_1D_correct\''
     requirement = 'The Kokkos material system shall not error when the same material property was declared by different non-overlapping materials with consistent type and dimension.'
     capabilities = 'kokkos'
-    devices = 'cuda'
+    devices = 'cpu cuda'
   []
 []

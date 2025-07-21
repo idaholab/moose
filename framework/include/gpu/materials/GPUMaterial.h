@@ -279,15 +279,17 @@ Material<Derived>::initStatefulProperties(unsigned int)
 
   if (!_bnd && !_neighbor)
     ::Kokkos::parallel_for(
-        ::Kokkos::RangePolicy<ElementInit, ::Kokkos::IndexType<size_t>>(0, numElements()),
+        ::Kokkos::RangePolicy<ElementInit, ExecSpace, ::Kokkos::IndexType<size_t>>(0,
+                                                                                   numElements()),
         *static_cast<Derived *>(this));
   else if (_bnd && !_neighbor)
-    ::Kokkos::parallel_for(
-        ::Kokkos::RangePolicy<SideInit, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
-        *static_cast<Derived *>(this));
+    ::Kokkos::parallel_for(::Kokkos::RangePolicy<SideInit, ExecSpace, ::Kokkos::IndexType<size_t>>(
+                               0, numElementSides()),
+                           *static_cast<Derived *>(this));
   else
     ::Kokkos::parallel_for(
-        ::Kokkos::RangePolicy<NeighborInit, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
+        ::Kokkos::RangePolicy<NeighborInit, ExecSpace, ::Kokkos::IndexType<size_t>>(
+            0, numElementSides()),
         *static_cast<Derived *>(this));
 
   ::Kokkos::fence();
@@ -299,15 +301,18 @@ Material<Derived>::computeProperties()
 {
   if (!_bnd && !_neighbor)
     ::Kokkos::parallel_for(
-        ::Kokkos::RangePolicy<ElementCompute, ::Kokkos::IndexType<size_t>>(0, numElements()),
+        ::Kokkos::RangePolicy<ElementCompute, ExecSpace, ::Kokkos::IndexType<size_t>>(
+            0, numElements()),
         *static_cast<Derived *>(this));
   else if (_bnd && !_neighbor)
     ::Kokkos::parallel_for(
-        ::Kokkos::RangePolicy<SideCompute, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
+        ::Kokkos::RangePolicy<SideCompute, ExecSpace, ::Kokkos::IndexType<size_t>>(
+            0, numElementSides()),
         *static_cast<Derived *>(this));
   else
     ::Kokkos::parallel_for(
-        ::Kokkos::RangePolicy<NeighborCompute, ::Kokkos::IndexType<size_t>>(0, numElementSides()),
+        ::Kokkos::RangePolicy<NeighborCompute, ExecSpace, ::Kokkos::IndexType<size_t>>(
+            0, numElementSides()),
         *static_cast<Derived *>(this));
 
   ::Kokkos::fence();

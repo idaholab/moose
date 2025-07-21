@@ -16,7 +16,7 @@ namespace Kokkos
 
 MemoryPool::MemoryPool(dof_id_type size, unsigned int ways)
 {
-  ::Kokkos::DefaultExecutionSpace::memory_space space;
+  MemSpace::memory_space space;
 
   _pools.create(ways);
 

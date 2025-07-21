@@ -98,7 +98,7 @@ DirichletBCBase<Derived>::presetSolution(TagID tag)
   _solution_tag = tag;
 
   ::Kokkos::parallel_for(
-      ::Kokkos::RangePolicy<::Kokkos::IndexType<size_t>>(0, this->numBoundaryNodes()),
+      ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<size_t>>(0, this->numBoundaryNodes()),
       *static_cast<Derived *>(this));
 }
 

@@ -462,10 +462,8 @@ ArrayBase<T, dimension>::destroy()
       }
     }
 
-#ifdef MOOSE_HAVE_KOKKOS
     if (_is_device_alloc && !_is_device_alias)
       Moose::Kokkos::free(_device_data);
-#endif
 
     delete _counter;
     _counter = nullptr;
@@ -524,7 +522,8 @@ ArrayBase<T, dimension>::allocDevice()
   if (_is_device_alloc)
     return;
 
-  _device_data = static_cast<T *>(::Kokkos::kokkos_malloc(_size * sizeof(T)));
+  _device_data =
+      static_cast<T *>(::Kokkos::kokkos_malloc<ExecSpace::memory_space>(_size * sizeof(T)));
 
   _is_device_alloc = true;
 }
@@ -839,7 +838,7 @@ ArrayBase<T, dimension>::operator=(const T & scalar)
   {
     ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> data(_device_data,
                                                                                     _size);
-    ::Kokkos::Experimental::fill_n(::Kokkos::DefaultExecutionSpace(), data, _size, scalar);
+    ::Kokkos::Experimental::fill_n(ExecSpace(), data, _size, scalar);
   }
 
   return *this;

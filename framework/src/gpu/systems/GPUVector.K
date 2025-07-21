@@ -64,6 +64,11 @@ Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & syst
   bool realloc =
       !_is_alloc || _assemble != assemble || _is_host != is_host || _is_ghosted != is_ghosted;
 
+#ifndef MOOSE_KOKKOS_ENABLE_GPU
+  if (!is_host)
+    mooseError("PETSc vectors must be on host when Kokkos device capabilities are disabled.");
+#endif
+
   _global_vector = petsc_vector->vec();
   _array = array;
   _system = &system;

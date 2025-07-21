@@ -12,7 +12,7 @@
                   Outputs/file_base=out_current_gpu'
       detail = 'use current state in other calculations.'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
     [old]
       type = Exodiff
@@ -22,7 +22,7 @@
                   Outputs/file_base=out_old_gpu'
       detail = 'use old state in other calculations.'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
     [older]
       type = Exodiff
@@ -32,7 +32,7 @@
                   Outputs/file_base=out_older_gpu'
       detail = 'use older state in other calculations.'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
   []
 
@@ -44,7 +44,7 @@
       exodiff = 'out_spatial_gpu.e'
       detail = 'on blocks and boundaries.'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
     [spatial_bnd_only]
       type = Exodiff
@@ -52,7 +52,7 @@
       exodiff = 'out_bnd_only_gpu.e'
       detail = 'only on boundaries.'
       capabilities = 'kokkos'
-      devices = 'cuda'
+      devices = 'cpu cuda'
     []
   []
 []

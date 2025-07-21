@@ -8,6 +8,6 @@
     exodiff = 'out_gpu.e'
     requirement = 'The Kokkos system shall provide optimized kernels for residuals with the test function or its gradient factored out.'
     capabilities = 'kokkos'
-    devices = 'cuda'
+    devices = 'cpu cuda'
   [../]
 []
