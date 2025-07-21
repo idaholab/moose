@@ -16,7 +16,7 @@ namespace Kokkos
 void
 free(void * ptr)
 {
-  ::Kokkos::kokkos_free(ptr);
+  ::Kokkos::kokkos_free<ExecSpace::memory_space>(ptr);
 }
 } // namespace Kokkos
 } // namespace Moose

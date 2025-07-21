@@ -502,7 +502,7 @@ System::reinit()
                   _active_variables.size(),
                   _active_variable_tags.size()});
 
-  ::Kokkos::RangePolicy<::Kokkos::IndexType<size_t>> policy(0, _thread.size());
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<size_t>> policy(0, _thread.size());
   ::Kokkos::parallel_for(policy, *this);
   ::Kokkos::fence();
 }
