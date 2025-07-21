@@ -7,6 +7,6 @@
     requirement = 'The Kokkos system shall not duplicate computation of kernels on a node that is shared between two subdomains.'
     design = 'NodalKernels/index.md'
     capabilities = 'kokkos'
-    devices = 'cuda'
+    devices = 'cpu cuda'
   []
 []

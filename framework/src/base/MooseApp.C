@@ -769,7 +769,9 @@ MooseApp::MooseApp(const InputParameters & parameters)
   Moose::out << std::flush;
 
 #ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLE_GPU
   queryGPUs();
+#endif
 #endif
 }
 

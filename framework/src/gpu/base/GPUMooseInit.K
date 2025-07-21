@@ -14,7 +14,7 @@
 #include "libmesh/petsc_solver_exception.h"
 
 PetscErrorCode
-finalizeGPUs()
+finalizeKokkos()
 {
   Kokkos::finalize();
 
@@ -22,29 +22,33 @@ finalizeGPUs()
 }
 
 void
-MooseInit::initGPUs()
+MooseInit::initKokkos()
 {
+  Kokkos::InitializationSettings settings;
+
+#ifdef MOOSE_KOKKOS_ENABLE_GPU
+
   unsigned int num_gpus = Kokkos::num_devices();
 
   bool has_gpus = comm().verify(num_gpus > 0) && num_gpus > 0;
 
-  if (!has_gpus)
-    return;
+  if (has_gpus)
+  {
+    // Create a local communicator defined at each shared memory node
+    Parallel::Communicator local_comm;
+    comm().split_by_type(MPI_COMM_TYPE_SHARED, comm().rank(), MPI_INFO_NULL, local_comm);
 
-  Kokkos::InitializationSettings settings;
+    // The number of processes in each node is usually larger than the number of
+    // GPU devices in the node, so multiple processes share the same GPU
+    unsigned int my_gpu_id = local_comm.rank() % num_gpus;
 
-  // Create a local communicator defined at each shared memory node
-  Parallel::Communicator local_comm;
-  comm().split_by_type(MPI_COMM_TYPE_SHARED, comm().rank(), MPI_INFO_NULL, local_comm);
+    // Override the default GPU ID
+    settings.set_device_id(my_gpu_id);
+  }
 
-  // The number of processes in each node is usually larger than the number of
-  // GPU devices in the node, so multiple processes share the same GPU
-  unsigned int my_gpu_id = local_comm.rank() % num_gpus;
-
-  // Override the default GPU ID
-  settings.set_device_id(my_gpu_id);
+#endif
 
   Kokkos::initialize(settings);
 
-  LibmeshPetscCall(PetscRegisterFinalize(finalizeGPUs));
+  LibmeshPetscCall(PetscRegisterFinalize(finalizeKokkos));
 }

@@ -222,7 +222,7 @@ mpif90_command := $(libmesh_F90)
 #
 
 ifeq ($(ENABLE_KOKKOS),true)
-  include $(FRAMEWORK_DIR)/kokkos.mk
+  include $(MOOSE_DIR)/framework/kokkos.mk
 endif
 
 # If $(libmesh_f90) is an mpiXXX compiler script, use -show

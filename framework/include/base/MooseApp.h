@@ -1600,10 +1600,24 @@ private:
 
 public:
   /**
-   * Get whether every process has an associated GPU
-   * @returns Whether every process has an associated GPU
+   * Get whether Kokkos is available
+   * @returns
+   * 1) True if MOOSE is configured with Kokkos and every process has an associated GPU,
+   * 2) True if MOOSE is configured with Kokkos and GPU capablities are disabled,
+   * 3) False otherwise.
    */
-  bool hasGPUs() const { return _has_gpus; }
+  bool isKokkosAvailable() const
+  {
+#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLE_GPU
+    return _has_gpus;
+#else
+    return true;
+#endif
+#else
+    return false;
+#endif
+  }
 
   /**
    * Get whether there is any Kokkos object added by actions
