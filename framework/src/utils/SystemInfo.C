@@ -20,7 +20,7 @@
 #include <locale>
 #endif
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 #include <torch/version.h>
 #endif
 
@@ -43,7 +43,7 @@ SystemInfo::getInfo() const
       << LIBMESH_DETECTED_SLEPC_VERSION_MINOR << '.' << LIBMESH_DETECTED_SLEPC_VERSION_SUBMINOR
       << '\n';
 #endif
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
   oss << std::setw(25) << "Libtorch Version: " << TORCH_VERSION << '\n';
 #endif
 

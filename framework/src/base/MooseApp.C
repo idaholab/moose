@@ -72,7 +72,7 @@
 #include <sys/utsname.h> // utsname
 #endif
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 #include <torch/version.h>
 #endif
 
@@ -501,7 +501,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _output_buffer_cache(nullptr),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
     ,
     _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("libtorch_device")))
 #endif
@@ -793,7 +793,7 @@ MooseApp::registerCapabilities()
 
   {
     const auto doc = "LibTorch machine learning and parallel tensor algebra library";
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
     addCapability("libtorch", TORCH_VERSION, doc);
 #else
     missingCapability("libtorch",
@@ -807,7 +807,7 @@ MooseApp::registerCapabilities()
 
   {
     const auto doc = "MFEM finite element library";
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
     haveCapability("mfem", doc);
 #else
     missingCapability("mfem",
@@ -3466,7 +3466,7 @@ MooseApp::constructingMeshGenerators() const
          _mesh_generator_system.appendingMeshGenerators();
 }
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 torch::DeviceType
 MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum) const
 {

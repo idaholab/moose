@@ -11,7 +11,6 @@
 
 #include "MooseError.h"
 #include "MooseTypes.h"
-#include "MooseConfig.h"
 
 class SubProblem;
 class SystemBase;

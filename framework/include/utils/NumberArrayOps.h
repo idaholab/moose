@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "MooseConfig.h"
 #include "MooseError.h"
 #include "metaphysicl/dualnumberarray.h"
 
