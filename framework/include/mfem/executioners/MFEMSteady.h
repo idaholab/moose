@@ -10,7 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
-#include "MFEMExecutioner.h"
+#include "MFEMProblemSolve.h"
 #include "EquationSystemProblemOperator.h"
 
 class MFEMSteady : public Executioner
@@ -32,7 +32,7 @@ public:
 private:
   MFEMProblem & _mfem_problem;
   MFEMProblemData & _mfem_problem_data;
-  MFEMExecutioner _mfem_problem_solver;
+  MFEMProblemSolve _mfem_problem_solve;
   std::unique_ptr<Moose::MFEM::ProblemOperator> _problem_operator{nullptr};
 
   // Time variables used for consistency with MOOSE, needed for outputs.

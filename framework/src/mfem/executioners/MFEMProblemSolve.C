@@ -9,15 +9,20 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMExecutioner.h"
+#include "MFEMProblemSolve.h"
 #include "MFEMProblem.h"
 
 InputParameters
-MFEMExecutioner::validParams()
+MFEMProblemSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
+<<<<<<< HEAD:framework/src/mfem/executioners/MFEMExecutioner.C
   params.addClassDescription("Executioner for MFEM problems.");
   params.addParam<std::string>("device", "Run app on the chosen device.");
+=======
+  params.addClassDescription("Solve object for MFEM problems.");
+  params.addParam<std::string>("device", "cpu", "Run app on the chosen device.");
+>>>>>>> 813f71bd83 (Rename MFEMExecutioner to MFEMProblemSolve to better reflect new class. Refs #31017):framework/src/mfem/executioners/MFEMProblemSolve.C
   MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
   params.addParam<MooseEnum>(
       "assembly_level",
@@ -26,7 +31,7 @@ MFEMExecutioner::validParams()
   return params;
 }
 
-MFEMExecutioner::MFEMExecutioner(const InputParameters & params, MFEMProblem & mfem_problem)
+MFEMProblemSolve::MFEMProblemSolve(const InputParameters & params, MFEMProblem & mfem_problem)
   : _mfem_problem(mfem_problem)
 {
   if (const auto compute_device = _app.getComputeDevice())
@@ -39,7 +44,7 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & params, MFEMProblem & m
 }
 
 void
-MFEMExecutioner::solve(Moose::MFEM::ProblemOperatorInterface & problem_operator)
+MFEMProblemSolve::solve(Moose::MFEM::ProblemOperatorInterface & problem_operator)
 {
   // FixedPointSolve::solve() is libMesh specific, so we need
   // to include all steps therein relevant to the MFEM backend here.

@@ -10,7 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
-#include "MFEMExecutioner.h"
+#include "MFEMProblemSolve.h"
 #include "TimeDomainProblemOperator.h"
 #include "TransientBase.h"
 
@@ -57,7 +57,7 @@ public:
 private:
   MFEMProblem & _mfem_problem;
   MFEMProblemData & _mfem_problem_data;
-  MFEMExecutioner _mfem_problem_solver;
+  MFEMProblemSolve _mfem_problem_solve;
   std::unique_ptr<Moose::MFEM::TimeDomainProblemOperator> _problem_operator{nullptr};
 };
 

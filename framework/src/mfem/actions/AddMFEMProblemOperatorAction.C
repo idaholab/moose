@@ -18,7 +18,7 @@ AddMFEMProblemOperatorAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription(
-      "Set the ProblemOperator used in the MFEMExecutioner to solve the FE problem.");
+      "Set the ProblemOperator used in the MFEMProblemSolve to solve the FE problem.");
   return params;
 }
 

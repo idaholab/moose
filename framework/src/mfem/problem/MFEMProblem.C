@@ -57,7 +57,7 @@ void
 MFEMProblem::initProblemOperator()
 {
   setMesh();
-  // auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
+  // auto mfem_exec_ptr = dynamic_cast<MFEMProblemSolve *>(_app.getExecutioner());
   // if (mfem_exec_ptr != nullptr)
   // {
   //   // mfem_exec_ptr->constructProblemOperator();
