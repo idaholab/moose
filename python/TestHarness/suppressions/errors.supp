@@ -106,6 +106,21 @@
    fun:mca_base_framework_components_register
 }
 {
+   openmpi_pmix_progress_engine_leak
+   Memcheck:Leak
+   ...
+   fun:progress_engine
+   ...
+}
+{
+   openmpi_pmix_progress_engine_param
+   Memcheck:Param
+   writev(vector[1])
+   ...
+   fun:progress_engine
+   ...
+}
+{
    Super_LU
    Memcheck:Cond
    ...
