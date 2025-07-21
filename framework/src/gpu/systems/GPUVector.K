@@ -175,7 +175,7 @@ void
 Vector::restore()
 {
   LibmeshPetscCallQ(
-      VecRestoreArrayAndMemType(_local_vector ? _local_vector : _global_vector, PETSC_NULLPTR));
+      VecRestoreArrayAndMemType(_local_vector ? _local_vector : _global_vector, &_array));
   LibmeshPetscCallQ(VecGhostRestoreLocalForm(_global_vector, &_local_vector));
 }
 

@@ -90,6 +90,22 @@ public:
   ArrayBase() = default;
 
   /**
+   * Copy constructor
+   */
+  ArrayBase(const ArrayBase<T, dimension> & array)
+  {
+#ifndef MOOSE_KOKKOS_SCOPE
+    static_assert(!ArrayDeepCopy<T>::value,
+                  "Kokkos array cannot be deep copied outside the Kokkos compilation scope");
+#endif
+
+    if constexpr (ArrayDeepCopy<T>::value)
+      deepCopy(array);
+    else
+      shallowCopy(array);
+  }
+
+  /**
    * Destructor
    */
   ~ArrayBase() { destroy(); }
@@ -99,18 +115,19 @@ public:
    */
   void destroy();
 
-#ifdef MOOSE_KOKKOS_SCOPE
   /**
-   * Copy constructor
+   * Shallow copy another Kokkos array
+   * @param array The Kokkos array to be shallow copied
    */
-  ArrayBase(const ArrayBase<T, dimension> & array)
-  {
-    if constexpr (ArrayDeepCopy<T>::value)
-      deepCopy(array);
-    else
-      shallowCopy(array);
-  }
+  void shallowCopy(const ArrayBase<T, dimension> & array);
 
+  /**
+   * Get the reference count
+   * @returns The reference count
+   */
+  unsigned int use_count() const { return _counter ? *_counter : 0; }
+
+#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get whether the array was allocated either on host or device
    * @returns Whether the array was allocated either on host or device
@@ -192,11 +209,6 @@ public:
   }
 
   /**
-   * Get the reference count
-   * @returns The reference count
-   */
-  unsigned int use_count() const { return _counter ? *_counter : 0; }
-  /**
    * Get the host data pointer
    * @returns The pointer to the underlying host data
    */
@@ -269,11 +281,6 @@ public:
    * Copy all the nested Kokkos arrays including self from host to device
    */
   void copyNested();
-  /**
-   * Shallow copy another Kokkos array
-   * @param array The Kokkos array to be shallow copied
-   */
-  void shallowCopy(const ArrayBase<T, dimension> & array);
   /**
    * Deep copy another Kokkos array
    * If ArrayDeepCopy<T>::value is true, it will copy-construct each entry
@@ -428,15 +435,6 @@ ArrayBase<T, dimension>::destroy()
   if (!_counter)
     return;
 
-  _size = 0;
-
-  for (unsigned int i = 0; i < dimension; ++i)
-  {
-    _n[i] = 0;
-    _s[i] = 0;
-    _d[i] = 0;
-  }
-
   if (*_counter > 1)
   {
     _host_data = nullptr;
@@ -469,10 +467,48 @@ ArrayBase<T, dimension>::destroy()
     _counter = nullptr;
   }
 
+  _size = 0;
+
+  for (unsigned int i = 0; i < dimension; ++i)
+  {
+    _n[i] = 0;
+    _s[i] = 0;
+    _d[i] = 0;
+  }
+
   _is_host_alloc = false;
   _is_device_alloc = false;
   _is_host_alias = false;
   _is_device_alias = false;
+}
+
+template <typename T, unsigned int dimension>
+void
+ArrayBase<T, dimension>::shallowCopy(const ArrayBase<T, dimension> & array)
+{
+  destroy();
+
+  _counter = array._counter;
+
+  if (_counter)
+    (*_counter)++;
+
+  _size = array._size;
+
+  for (unsigned int i = 0; i < dimension; ++i)
+  {
+    _n[i] = array._n[i];
+    _s[i] = array._s[i];
+    _d[i] = array._d[i];
+  }
+
+  _is_host_alloc = array._is_host_alloc;
+  _is_device_alloc = array._is_device_alloc;
+  _is_host_alias = array._is_host_alias;
+  _is_device_alias = array._is_device_alias;
+
+  _host_data = array._host_data;
+  _device_data = array._device_data;
 }
 
 #ifdef MOOSE_KOKKOS_SCOPE
@@ -750,35 +786,6 @@ ArrayBase<T, dimension>::copyNested()
     copyInner(_host_data[i]);
 
   copy();
-}
-
-template <typename T, unsigned int dimension>
-void
-ArrayBase<T, dimension>::shallowCopy(const ArrayBase<T, dimension> & array)
-{
-  destroy();
-
-  _counter = array._counter;
-
-  if (_counter)
-    (*_counter)++;
-
-  _size = array._size;
-
-  for (unsigned int i = 0; i < dimension; ++i)
-  {
-    _n[i] = array._n[i];
-    _s[i] = array._s[i];
-    _d[i] = array._d[i];
-  }
-
-  _is_host_alloc = array._is_host_alloc;
-  _is_device_alloc = array._is_device_alloc;
-  _is_host_alias = array._is_host_alias;
-  _is_device_alias = array._is_device_alias;
-
-  _host_data = array._host_data;
-  _device_data = array._device_data;
 }
 
 template <typename T, unsigned int dimension>

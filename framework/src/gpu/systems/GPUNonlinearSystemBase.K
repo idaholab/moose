@@ -117,7 +117,8 @@ NonlinearSystemBase::setKokkosInitialSolution()
 
   Kokkos::fence();
 
-  systems[number()].sync({tag}, Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
+  for (auto & system : systems)
+    system.sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
 
   disassociateVectorFromTag(solution(), tag);
 }
@@ -214,11 +215,13 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
       nbc->computeResidual();
   }
 
-  // Copy back residual
+  // Close and restore vectors
 
   {
     TIME_SECTION("KokkosCopy", 1);
-    systems[number()].sync(Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
+
+    for (auto & system : systems)
+      system.sync(Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
   }
 
   // Clear
@@ -324,11 +327,13 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
       nbc->computeJacobian();
   }
 
-  // Copy back matrix
+  // Close and restore vectors and matrices
 
   {
     TIME_SECTION("KokkosCopy", 1);
-    systems[number()].sync(Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
+
+    for (auto & system : systems)
+      system.sync(Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
   }
 
   // Clear

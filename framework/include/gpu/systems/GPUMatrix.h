@@ -26,7 +26,6 @@ class System;
 class Matrix
 {
 public:
-#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Default constructor
    */
@@ -40,6 +39,7 @@ public:
    */
   void destroy();
 
+#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get whether the matrix was allocated
    * @returns Whether the matrix was allocated
@@ -89,9 +89,6 @@ public:
 
     return *this;
   }
-#else
-  // Instantiation of this class is not allowed outside the Kokkos compilation scope
-  Matrix() = delete;
 #endif
 
 private:

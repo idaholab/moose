@@ -71,6 +71,7 @@ FEProblemBase::initKokkosStatefulProps()
   {
     system.setActiveVariables(needed_moose_vars);
     system.setActiveVariableTags(needed_fe_var_vector_tags);
+
     system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
     system.reinit();
   }
@@ -105,6 +106,8 @@ FEProblemBase::initKokkosStatefulProps()
 
   for (auto & system : _kokkos_systems)
   {
+    system.sync(Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
+
     system.clearActiveVariables();
     system.clearActiveVariableTags();
   }
