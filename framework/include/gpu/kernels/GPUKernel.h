@@ -208,7 +208,8 @@ template <typename Derived>
 void
 Kernel<Derived>::computeResidual()
 {
-  ::Kokkos::RangePolicy<ResidualLoop, ::Kokkos::IndexType<size_t>> policy(0, numBlockElements());
+  ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<size_t>> policy(
+      0, numBlockElements());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
   ::Kokkos::fence();
 }
@@ -219,7 +220,8 @@ Kernel<Derived>::computeJacobian()
 {
   if (!defaultJacobian())
   {
-    ::Kokkos::RangePolicy<JacobianLoop, ::Kokkos::IndexType<size_t>> policy(0, numBlockElements());
+    ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<size_t>> policy(
+        0, numBlockElements());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
   }
@@ -230,8 +232,8 @@ Kernel<Derived>::computeJacobian()
 
     _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numBlockElements()});
 
-    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ::Kokkos::IndexType<size_t>> policy(0,
-                                                                                   _thread.size());
+    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<size_t>> policy(
+        0, _thread.size());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
   }

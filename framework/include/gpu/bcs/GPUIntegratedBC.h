@@ -209,7 +209,8 @@ template <typename Derived>
 void
 IntegratedBC<Derived>::computeResidual()
 {
-  ::Kokkos::RangePolicy<ResidualLoop, ::Kokkos::IndexType<size_t>> policy(0, numBoundarySides());
+  ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<size_t>> policy(
+      0, numBoundarySides());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
   ::Kokkos::fence();
 }
@@ -220,7 +221,8 @@ IntegratedBC<Derived>::computeJacobian()
 {
   if (!defaultJacobian())
   {
-    ::Kokkos::RangePolicy<JacobianLoop, ::Kokkos::IndexType<size_t>> policy(0, numBoundarySides());
+    ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<size_t>> policy(
+        0, numBoundarySides());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
   }
@@ -231,8 +233,8 @@ IntegratedBC<Derived>::computeJacobian()
 
     _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numBoundarySides()});
 
-    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ::Kokkos::IndexType<size_t>> policy(0,
-                                                                                   _thread.size());
+    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<size_t>> policy(
+        0, _thread.size());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
   }
