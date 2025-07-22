@@ -57,7 +57,7 @@ public:
    * @param p point
    * @return sign of direction to surface from point
    */
-  virtual CSGSurface::Direction directionFromPoint(const Point & p) const override;
+  virtual CSGSurface::Direction getHalfspaceFromPoint(const Point & p) const override;
 
 protected:
   /// Value of y0 in equation of an x-axis aligned cylinder

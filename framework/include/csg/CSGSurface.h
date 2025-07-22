@@ -79,14 +79,14 @@ public:
   virtual std::unordered_map<std::string, Real> getCoeffs() const = 0; // Pure virtual function
 
   /**
-   * @brief get direction from point to surface (e.g. is point 'inside' the half-space, or
-   * 'outside')
+   * @brief given a point, determine if it is in the positive or negative
+   * half-space for the surface
    *
    * @param p point
-   * @return sign of direction to surface from point
+   * @return sign of the half-space
    */
   virtual CSGSurface::Direction
-  directionFromPoint(const Point & p) const = 0; // Pure virtual function
+  getHalfspaceFromPoint(const Point & p) const = 0; // Pure virtual function
 
   /**
    * @brief Get the name of surface
