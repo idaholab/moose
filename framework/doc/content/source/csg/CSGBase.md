@@ -504,7 +504,7 @@ ExamplePrismCSGMeshGenerator::generateCSG()
     // half-space is either positive (+plane_ptr) or negative (-plane_ptr)
     / /depending on the direction to the centroid
     auto halfspace =
-        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
+        ((region_direction == CSG::CSGSurface::Halfspace::POSITIVE) ? +csg_plane : -csg_plane);
     // check if this is the first half-space to be added to the region,
     // if not, update the existing region with the intersection of the regions (&=)
     if (region.getRegionType() == "EMPTY")
@@ -574,7 +574,7 @@ ExampleAxialSurfaceMeshGenerator::generateCSG()
     // determine the half-space to add as an updated intersection
     const auto region_direction = csg_plane.getHalfspaceFromPoint(centroid);
     auto halfspace =
-        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
+        ((region_direction == CSG::CSGSurface::Halfspace::POSITIVE) ? +csg_plane : -csg_plane);
     // update the existing region with a half-space
     cell_region &= halfspace;
   }

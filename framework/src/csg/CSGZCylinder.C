@@ -25,14 +25,14 @@ CSGZCylinder::getCoeffs() const
   return coeffs;
 }
 
-CSGSurface::Direction
+CSGSurface::Halfspace
 CSGZCylinder::getHalfspaceFromPoint(const Point & p) const
 {
   // Compute distance from the cylinder center to determine if inside (< r^2)
   // or outside (> r^2) the cylinder
   const Real dist_sq = Utility::pow<2>((p(0) - _x0)) + Utility::pow<2>((p(1) - _y0));
 
-  return (dist_sq > Utility::pow<2>(_r)) ? CSGSurface::Direction::POSITIVE
-                                         : CSGSurface::Direction::NEGATIVE;
+  return (dist_sq > Utility::pow<2>(_r)) ? CSGSurface::Halfspace::POSITIVE
+                                         : CSGSurface::Halfspace::NEGATIVE;
 }
 } // namespace CSG
