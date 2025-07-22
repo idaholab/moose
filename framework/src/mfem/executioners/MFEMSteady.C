@@ -146,13 +146,13 @@ MFEMSteady::ApplyRefinements()
 {
   bool output = false;
 
-  if ( _mfem_problem.UsePRefinement() )
+  if (_mfem_problem.UsePRefinement())
   {
     output = true;
     _mfem_problem.PRefine();
   }
 
-  if ( _mfem_problem.UseHRefinement() )
+  if (_mfem_problem.UseHRefinement())
   {
     output = true;
     _mfem_problem.HRefine();
