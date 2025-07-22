@@ -37,6 +37,8 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & parameters)
 
 bool
 MFEMExecutioner::UseAMR() const
-{ return _mfem_problem.UseAMR(); }
+{
+  return _mfem_problem.UseAMR();
+}
 
 #endif
