@@ -8,36 +8,26 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-
-#include "PorousFlowFluidPropertiesBase.h"
-#include "BrineFluidProperties.h"
+#include "PorousFlowMultiComponentFluidBase.h"
 
 /**
  * Fluid properties of Brine.
  * Provides density, viscosity, derivatives wrt pressure and temperature at the quadpoints or nodes
  */
-class PorousFlowBrine : public PorousFlowFluidPropertiesBase
+
+class BrineFluidProperties;
+class SinglePhaseFluidProperties;
+template <bool is_ad>
+class PorousFlowBrineTempl : public PorousFlowMultiComponentFluidBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowBrine(const InputParameters & parameters);
+  PorousFlowBrineTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
-
-  /// Derivative of fluid density wrt salt mass fraction at the qps or nodes
-  MaterialProperty<Real> * const _ddensity_dX;
-
-  /// Derivative of fluid phase viscosity wrt salt mass fraction at the nodes or qps
-  MaterialProperty<Real> * const _dviscosity_dX;
-
-  /// Derivative of fluid internal_energy wrt salt mass fraction at the qps or nodes
-  MaterialProperty<Real> * const _dinternal_energy_dX;
-
-  /// Derivative of fluid enthalpy wrt salt mass fraction at the qps or nodes
-  MaterialProperty<Real> * const _denthalpy_dX;
 
   /// Brine fluid properties UserObject
   const BrineFluidProperties * _brine_fp;
@@ -49,8 +39,18 @@ protected:
   const bool _is_xnacl_nodal;
 
   /// NaCl mass fraction at the qps or nodes
-  const VariableValue & _xnacl;
+  const GenericVariableValue<is_ad> & _xnacl;
 
   /// Flag to denote whether NaCl mass fraction is a nonlinear variable
   const bool _is_xnacl_pfvar;
+
+  usingPorousFlowFluidPropertiesMembers;
+  using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_ddensity_dX;
+  using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_dviscosity_dX;
+  using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_dinternal_energy_dX;
+  using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_denthalpy_dX;
+  using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_console;
 };
+
+typedef PorousFlowBrineTempl<false> PorousFlowBrine;
+typedef PorousFlowBrineTempl<true> ADPorousFlowBrine;
