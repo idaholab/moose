@@ -19,11 +19,11 @@ namespace Moose::MFEM
  * - EquationSystemProblemOperator
  * - TimeDomainEquationSystemProblemOperator
  */
-class EquationSystemInterface
+class MFEMEquationSystemInterface
 {
 public:
-  EquationSystemInterface() = default;
-  virtual ~EquationSystemInterface() = default;
+  MFEMEquationSystemInterface() = default;
+  virtual ~MFEMEquationSystemInterface() = default;
 
   /// Returns a pointer to the operator's equation system.
   [[nodiscard]] virtual Moose::MFEM::EquationSystem * GetEquationSystem() const = 0;

@@ -11,15 +11,15 @@
 
 #pragma once
 #include "MFEMProblemData.h"
-#include "ProblemOperatorInterface.h"
+#include "ProblemOperatorBase.h"
 
 namespace Moose::MFEM
 {
 /// Steady-state problem operator with no equation system.
-class ProblemOperator : public mfem::Operator, public ProblemOperatorInterface
+class ProblemOperator : public mfem::Operator, public ProblemOperatorBase
 {
 public:
-  ProblemOperator(MFEMProblem & problem) : ProblemOperatorInterface(problem) {}
+  ProblemOperator(MFEMProblem & problem) : ProblemOperatorBase(problem) {}
 
   void SetGridFunctions() override;
 

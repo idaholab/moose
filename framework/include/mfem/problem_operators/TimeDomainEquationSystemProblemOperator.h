@@ -11,14 +11,14 @@
 
 #pragma once
 #include "TimeDomainProblemOperator.h"
-#include "EquationSystemInterface.h"
+#include "MFEMEquationSystemInterface.h"
 
 namespace Moose::MFEM
 {
 
 /// Problem operator for time-dependent problems with an equation system.
 class TimeDomainEquationSystemProblemOperator : public TimeDomainProblemOperator,
-                                                public EquationSystemInterface
+                                                public MFEMEquationSystemInterface
 {
 public:
   TimeDomainEquationSystemProblemOperator(MFEMProblem & problem)

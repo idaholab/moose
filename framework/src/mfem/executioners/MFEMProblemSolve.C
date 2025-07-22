@@ -44,7 +44,7 @@ MFEMProblemSolve::MFEMProblemSolve(const InputParameters & params, MFEMProblem &
 }
 
 void
-MFEMProblemSolve::solve(Moose::MFEM::ProblemOperatorInterface & problem_operator)
+MFEMProblemSolve::solve(Moose::MFEM::ProblemOperatorBase & problem_operator)
 {
   // FixedPointSolve::solve() is libMesh specific, so we need
   // to include all steps therein relevant to the MFEM backend here.
