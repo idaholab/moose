@@ -30,9 +30,9 @@ public:
    * @brief Constructor for half-space of a surface
    *
    * @param surf referance to surface used to define the half-space
-   * @param direction half-space direction to apply to surface (POSITIVE or NEGATIVE)
+   * @param halfspace half-space to apply to surface (POSITIVE or NEGATIVE)
    */
-  CSGRegion(const CSGSurface & surf, const CSGSurface::Direction direction);
+  CSGRegion(const CSGSurface & surf, const CSGSurface::Halfspace halfspace);
 
   /**
    * @brief Constructor for union and intersection

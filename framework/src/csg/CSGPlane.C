@@ -58,7 +58,7 @@ CSGPlane::coeffsFromPoints(const Point & p1, const Point & p2, const Point & p3)
   _d = cross * (RealVectorValue)p1;
 }
 
-CSGSurface::Direction
+CSGSurface::Halfspace
 CSGPlane::getHalfspaceFromPoint(const Point & p) const
 {
   // Compute dot product of <a, b, c> and p to determine if p lies
@@ -66,6 +66,6 @@ CSGPlane::getHalfspaceFromPoint(const Point & p) const
   const Real dot_prod = _a * p(0) + _b * p(1) + _c * p(2);
 
   // TODO add MooseAssert that point doesn't lie on plane
-  return (dot_prod > _d) ? CSGSurface::Direction::POSITIVE : CSGSurface::Direction::NEGATIVE;
+  return (dot_prod > _d) ? CSGSurface::Halfspace::POSITIVE : CSGSurface::Halfspace::NEGATIVE;
 }
 } // namespace CSG

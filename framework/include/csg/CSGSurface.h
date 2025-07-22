@@ -22,8 +22,8 @@ namespace CSG
 class CSGSurface
 {
 public:
-  /// Enum for the direction of the half-space being represented by a point and surface
-  enum class Direction
+  /// Enum for the sign of the half-space being represented by a point and surface
+  enum class Halfspace
   {
     POSITIVE,
     NEGATIVE
@@ -85,7 +85,7 @@ public:
    * @param p point
    * @return sign of the half-space
    */
-  virtual CSGSurface::Direction
+  virtual CSGSurface::Halfspace
   getHalfspaceFromPoint(const Point & p) const = 0; // Pure virtual function
 
   /**

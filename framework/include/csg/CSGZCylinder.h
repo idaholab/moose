@@ -58,7 +58,7 @@ public:
    * @param p point
    * @return sign of the half-space
    */
-  virtual CSGSurface::Direction getHalfspaceFromPoint(const Point & p) const override;
+  virtual CSGSurface::Halfspace getHalfspaceFromPoint(const Point & p) const override;
 
 protected:
   /// Value of x0 in equation of an z-axis aligned cylinder

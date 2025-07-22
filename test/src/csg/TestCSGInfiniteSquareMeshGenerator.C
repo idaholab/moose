@@ -70,7 +70,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
     auto & csg_plane = csg_obj->addSurface(plane_ptr);
     const auto region_direction = csg_plane.getHalfspaceFromPoint(centroid);
     auto halfspace =
-        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
+        ((region_direction == CSG::CSGSurface::Halfspace::POSITIVE) ? +csg_plane : -csg_plane);
     // check if first halfspace to be added to the region
     if (region.getRegionType() == "EMPTY")
       region = halfspace;
