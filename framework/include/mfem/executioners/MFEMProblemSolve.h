@@ -12,7 +12,7 @@
 #pragma once
 #include "Executioner.h"
 #include "MFEMProblemData.h"
-#include "ProblemOperatorInterface.h"
+#include "ProblemOperatorBase.h"
 
 class MFEMProblem;
 
@@ -27,7 +27,7 @@ public:
    * Perform all required solves during a step. Includes relevant methods from the libmesh-specific
    * FixedPointSolve::solve() for one iteration.
    */
-  virtual void solve(Moose::MFEM::ProblemOperatorInterface & problem_operator);
+  virtual void solve(Moose::MFEM::ProblemOperatorBase & problem_operator);
 
 protected:
   MFEMProblem & _mfem_problem;

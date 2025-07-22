@@ -27,7 +27,7 @@ GetTimeDerivativeNames(std::vector<std::string> gridfunction_names)
 void
 TimeDomainProblemOperator::SetGridFunctions()
 {
-  ProblemOperatorInterface::SetGridFunctions();
+  ProblemOperatorBase::SetGridFunctions();
   width = height = _block_true_offsets[_trial_variables.size()];
 }
 
