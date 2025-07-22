@@ -66,7 +66,7 @@ public:
    * @param p point
    * @return sign of the half-space
    */
-  virtual CSGSurface::Direction getHalfspaceFromPoint(const Point & p) const override;
+  virtual CSGSurface::Halfspace getHalfspaceFromPoint(const Point & p) const override;
 
 protected:
   // check that radius is positive

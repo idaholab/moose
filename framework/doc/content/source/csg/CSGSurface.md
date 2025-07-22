@@ -20,7 +20,7 @@ For example, a plane is defined by the equation $ax + by + cz = d$ and so this m
 ### Half-space Determination
 
 In [!ac](CSG) representation, knowing which half-space of the surface is positive or negative is necessary for correct construction of a [cell](source/csg/CSGBase.md#cells) [region](source/csg/CSGBase.md#regions).
-To help determine the sign of these half-spaces, each surface type should have a `getHalfspaceFromPoint` method implemented that can be used to determine if a point lies within the positive (`CSGSurface::Direction::POSITIVE`) or negative (`CSGSurface::Direction::NEGATIVE`) half-space for the surface.
+To help determine the sign of these half-spaces, each surface type should have a `getHalfspaceFromPoint` method implemented that can be used to determine if a point lies within the positive (`CSGSurface::Halfspace::POSITIVE`) or negative (`CSGSurface::Halfspace::NEGATIVE`) half-space for the surface.
 
 ### Setting the Surface Type
 

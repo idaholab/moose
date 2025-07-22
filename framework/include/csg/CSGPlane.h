@@ -76,7 +76,7 @@ public:
    * @param p point
    * @return sign of the half-space
    */
-  virtual CSGSurface::Direction getHalfspaceFromPoint(const Point & p) const override;
+  virtual CSGSurface::Halfspace getHalfspaceFromPoint(const Point & p) const override;
 
 protected:
   // calculate the equivalent coeffients (aX + bY + cZ = d) from 3 points on a plane

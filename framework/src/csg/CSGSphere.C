@@ -42,7 +42,7 @@ CSGSphere::getCoeffs() const
   return coeffs;
 }
 
-CSGSurface::Direction
+CSGSurface::Halfspace
 CSGSphere::getHalfspaceFromPoint(const Point & p) const
 {
   // Compute distance from the sphere center to determine if inside (< r^2)
@@ -50,7 +50,7 @@ CSGSphere::getHalfspaceFromPoint(const Point & p) const
   const Real dist_sq =
       Utility::pow<2>((p(0) - _x0)) + Utility::pow<2>((p(1) - _y0)) + Utility::pow<2>((p(2) - _z0));
 
-  return (dist_sq > Utility::pow<2>(_r)) ? CSGSurface::Direction::POSITIVE
-                                         : CSGSurface::Direction::NEGATIVE;
+  return (dist_sq > Utility::pow<2>(_r)) ? CSGSurface::Halfspace::POSITIVE
+                                         : CSGSurface::Halfspace::NEGATIVE;
 }
 } // namespace CSG
