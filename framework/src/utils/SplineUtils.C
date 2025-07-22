@@ -20,44 +20,15 @@ circularControlPoints(const libMesh::Point & start_point,
                       const libMesh::RealVectorValue & parallel_direction,
                       const unsigned int num_cps)
 {
-<<<<<<< HEAD
-  /// establish the direction vector between the two points
-  libMesh::RealVectorValue orthogonal_direction = start_point - end_point;
-
-  /// circular control points will only honor the derivatives if the points are colinear along the orthogonal direction
-=======
   // establish the direction vector between the two points
   libMesh::RealVectorValue orthogonal_direction = start_point - end_point;
 
   // circular control points will only honor the derivatives if the points are colinear along the
   // orthogonal direction
->>>>>>> BSplineGen-cleanup
   if (!(std::abs(parallel_direction * orthogonal_direction) < libMesh::TOLERANCE))
     mooseError("Parallel lines cannot be interpolated using points along a circle! Direction "
                "vectors are incompatible with point locations.");
 
-<<<<<<< HEAD
-  /// define the distance between the two points
-  libMesh::Real distance_between = orthogonal_direction.norm();
-
-  /// connecting circle is assumed to be between each point along the orthogonal_direction vector
-  libMesh::Real radius = distance_between / 2.0;
-
-  /// normalize vectors
-  libMesh::RealVectorValue unit_normal = orthogonal_direction / distance_between;
-  libMesh::RealVectorValue unit_parallel = parallel_direction / parallel_direction.norm();
-
-  /// calculate circle center
-  libMesh::Point center_point = end_point + radius * unit_normal;
-
-  /// initialize vector of control points
-  std::vector<Point> control_points;
-
-  /// initialize parameter
-  double t;
-
-  /// loop over the number of control points to generate the control points
-=======
   // define the distance between the two points
   libMesh::Real distance_between = orthogonal_direction.norm();
 
@@ -78,7 +49,6 @@ circularControlPoints(const libMesh::Point & start_point,
   double t;
 
   // loop over the number of control points to generate the control points
->>>>>>> BSplineGen-cleanup
   for (const auto i : make_range(num_cps))
   {
     t = (double)i / (double)(num_cps - 1);
@@ -97,15 +67,6 @@ bSplineControlPoints(const libMesh::Point & start_point,
                      const unsigned int cps_per_half,
                      const libMesh::Real sharpness)
 {
-<<<<<<< HEAD
-  ///
-  /// start with a couple of checks to be sure the input is good
-  ///
-  /// check that start_point is different from end_point
-  if ((start_point - end_point).norm() < libMesh::TOLERANCE)
-    mooseError("Start and end points must be unique.");
-  /// check that neither direction is the zero vector
-=======
   //
   // start with a couple of checks to be sure the input is good
   //
@@ -113,17 +74,12 @@ bSplineControlPoints(const libMesh::Point & start_point,
   if ((start_point - end_point).norm() < libMesh::TOLERANCE)
     mooseError("Start and end points must be unique.");
   // check that neither direction is the zero vector
->>>>>>> BSplineGen-cleanup
   if (start_direction.norm() < libMesh::TOLERANCE || end_direction.norm() == 0)
     mooseError("Direction vectors must have a nonzero magnitude.");
   if (!(sharpness > 0 && sharpness <= 1))
     mooseError("Sharpness must be in (0,1].");
 
-<<<<<<< HEAD
-  /// check if directions are parallel
-=======
   // check if directions are parallel
->>>>>>> BSplineGen-cleanup
   const bool parallel = ((start_direction.cross(end_direction)).norm() < libMesh::TOLERANCE);
   if (parallel)
   {
@@ -135,11 +91,7 @@ bSplineControlPoints(const libMesh::Point & start_point,
     return SplineUtils::circularControlPoints(start_point, end_point, start_direction, num_cps);
   }
 
-<<<<<<< HEAD
-  /// find closest points --> these will be identical if the extrapolated lines intersect
-=======
   // find closest points --> these will be identical if the extrapolated lines intersect
->>>>>>> BSplineGen-cleanup
   std::vector<Point> closest_points_vector =
       SplineUtils::closestPoints(start_point, end_point, start_direction, end_direction);
   libMesh::Point closest_point_1 = closest_points_vector[0];
@@ -152,11 +104,7 @@ bSplineControlPoints(const libMesh::Point & start_point,
 
   std::vector<Point> control_points;
 
-<<<<<<< HEAD
-  /// put it all together
-=======
   // put it all together
->>>>>>> BSplineGen-cleanup
   for (const auto i : index_range(first_half))
     control_points.push_back(first_half[i]);
   for (const auto i : index_range(second_half))

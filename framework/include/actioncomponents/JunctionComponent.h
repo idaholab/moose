@@ -33,9 +33,5 @@ protected:
   virtual void setupComponent() override;
   virtual void checkIntegrity() override;
 
-  /// starting point/edge/face
-  /// start direction
-  const libMesh::RealVectorValue start_vec;
-  /// end direction
-  const libMesh::RealVectorValue end_vec;
-}
+  MooseEnum _junction_method;
+};
