@@ -42,6 +42,7 @@ SidesetAroundSubdomainUpdater::validParams()
   params.renameParam(
       "update_sideset_id", "update_boundary_id", "The boundary id which is updated.");
   params.registerBase("MeshModifier");
+  params.addParam<bool>("verbose", false, "Whether to output some information during execution");
   return params;
 }
 
@@ -165,6 +166,15 @@ SidesetAroundSubdomainUpdater::finalize()
   const auto & mesh = _mesh.getMesh();
   const auto * displaced_mesh =
       _displaced_problem ? &_displaced_problem->mesh().getMesh() : nullptr;
+  if (getParam<bool>("verbose"))
+  {
+    if (_remove.size())
+      _console << "Removing " << _remove.size() << " sides from sideset " << _boundary_id
+               << " on processor " << _pid << std::endl;
+    if (_add.size())
+      _console << "Adding " << _add.size() << " sides to sideset " << _boundary_id
+               << " on processor " << _pid << std::endl;
+  }
 
   auto add_functor = [this, &mesh, &displaced_mesh](const processor_id_type, const auto & sent_data)
   {
