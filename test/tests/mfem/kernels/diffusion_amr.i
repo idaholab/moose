@@ -95,7 +95,7 @@
 []
 
 [Solver]
-  type = MFEMHyprePCG
+  type = MFEMHypreGMRES
   preconditioner = boomeramg
   l_tol = 1e-16
   l_abs_tol = 1e-16

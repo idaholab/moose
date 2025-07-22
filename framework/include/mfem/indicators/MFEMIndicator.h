@@ -31,8 +31,7 @@ public:
   virtual std::shared_ptr<mfem::ParFiniteElementSpace> getFESpace() const;
 
   // Method to fetch the error estimator after creation
-  std::shared_ptr<mfem::ErrorEstimator>
-  getEstimator() const { return _error_estimator; }
+  std::shared_ptr<mfem::ErrorEstimator> getEstimator() const { return _error_estimator; }
 
 protected:
   // Name of (the test variable associated with) the weak form that the kernel is applied to.
