@@ -29,10 +29,6 @@ protected:
   const SubdomainID _new_subdomain_id;
   /// degree of interpolating spline
   const unsigned int _degree;
-  /// starting point of curve
-  const libMesh::Point _start_point;
-  /// ending point of curve
-  const libMesh::Point _end_point;
   /// direction of curve at start point
   const libMesh::RealVectorValue _start_dir;
   /// direction of curve at end point
