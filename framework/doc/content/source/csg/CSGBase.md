@@ -61,7 +61,7 @@ std::unique_ptr<CSG::CSGSurface> surf_ptr = std::make_unique<SurfaceType>(argume
 const auto & surface = csg_obj->addSurface(surf_ptr);
 ```
 
-The `CSG` framework in MOOSE provides various classes for creating basic surfaces:
+The `CSG` framework in MOOSE provides various classes for creating basic surfaces (below) and information about how to define new types of surfaces can be found in [source/csg/CSGSurface.md].
 
 | Surface Type | Class | Description |
 |---------|--------|------------|
