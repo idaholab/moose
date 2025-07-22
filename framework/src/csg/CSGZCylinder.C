@@ -26,7 +26,7 @@ CSGZCylinder::getCoeffs() const
 }
 
 CSGSurface::Direction
-CSGZCylinder::directionFromPoint(const Point & p) const
+CSGZCylinder::getHalfspaceFromPoint(const Point & p) const
 {
   // Compute distance from the cylinder center to determine if inside (< r^2)
   // or outside (> r^2) the cylinder

@@ -500,7 +500,7 @@ ExamplePrismCSGMeshGenerator::generateCSG()
         surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
     const auto & csg_plane = csg_obj->addSurface(plane_ptr);
     // determine where the plane is in relation to the centroid to be able to set the half-space
-    const auto region_direction = csg_plane.directionFromPoint(centroid);
+    const auto region_direction = csg_plane.getHalfspaceFromPoint(centroid);
     // half-space is either positive (+plane_ptr) or negative (-plane_ptr)
     / /depending on the direction to the centroid
     auto halfspace =
@@ -572,7 +572,7 @@ ExampleAxialSurfaceMeshGenerator::generateCSG()
         std::make_unique<CSG::CSGPlane>(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
     const auto & csg_plane = csg_obj->addSurface(plane_ptr);
     // determine the half-space to add as an updated intersection
-    const auto region_direction = csg_plane.directionFromPoint(centroid);
+    const auto region_direction = csg_plane.getHalfspaceFromPoint(centroid);
     auto halfspace =
         ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
     // update the existing region with a half-space
