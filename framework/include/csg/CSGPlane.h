@@ -70,12 +70,13 @@ public:
   virtual std::unordered_map<std::string, Real> getCoeffs() const override;
 
   /**
-   * @brief get direction from point p to plane
+   * @brief given a point, determine if it is in the positive or negative
+   * half-space of the plane as compared to the surface normal
    *
    * @param p point
-   * @return CSGSurface::Direction
+   * @return sign of the half-space
    */
-  virtual CSGSurface::Direction directionFromPoint(const Point & p) const override;
+  virtual CSGSurface::Direction getHalfspaceFromPoint(const Point & p) const override;
 
 protected:
   // calculate the equivalent coeffients (aX + bY + cZ = d) from 3 points on a plane

@@ -59,7 +59,7 @@ CSGPlane::coeffsFromPoints(const Point & p1, const Point & p2, const Point & p3)
 }
 
 CSGSurface::Direction
-CSGPlane::directionFromPoint(const Point & p) const
+CSGPlane::getHalfspaceFromPoint(const Point & p) const
 {
   // Compute dot product of <a, b, c> and p to determine if p lies
   // in the positive or negative halfspace of the plane
