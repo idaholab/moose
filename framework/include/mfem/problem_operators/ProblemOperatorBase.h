@@ -15,11 +15,11 @@
 namespace Moose::MFEM
 {
 /// Interface inherited by ProblemOperator and TimeDomainProblemOperator. Removes duplicated code in both classes.
-class ProblemOperatorInterface
+class ProblemOperatorBase
 {
 public:
-  ProblemOperatorInterface(MFEMProblem & problem);
-  virtual ~ProblemOperatorInterface() = default;
+  ProblemOperatorBase(MFEMProblem & problem);
+  virtual ~ProblemOperatorBase() = default;
 
   virtual void SetGridFunctions();
   virtual void SetTestVariablesFromTrueVectors();

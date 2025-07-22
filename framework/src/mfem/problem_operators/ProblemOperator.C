@@ -17,7 +17,7 @@ namespace Moose::MFEM
 void
 ProblemOperator::SetGridFunctions()
 {
-  ProblemOperatorInterface::SetGridFunctions();
+  ProblemOperatorBase::SetGridFunctions();
   width = height = _block_true_offsets[_trial_variables.size()];
 }
 
