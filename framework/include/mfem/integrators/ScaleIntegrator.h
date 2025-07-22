@@ -89,6 +89,12 @@ public:
 
   virtual void AddMultPA(const mfem::Vector & x, mfem::Vector & y) const;
 
+  virtual void AssembleMF(const mfem::FiniteElementSpace & fes);
+
+  virtual void AddMultMF(const mfem::Vector & x, mfem::Vector & y) const;
+
+  virtual void AssembleDiagonalMF(mfem::Vector & diag);
+
   virtual void
   AssembleEA(const mfem::FiniteElementSpace & fes, mfem::Vector & emat, const bool add);
 
