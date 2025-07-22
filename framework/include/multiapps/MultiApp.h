@@ -604,7 +604,7 @@ protected:
   const bool _no_restore;
 
   /// The solution from the end of the previous solve, this is cloned from the Nonlinear solution during restore
-  std::vector<std::unique_ptr<libMesh::NumericVector<Real>>> _end_solutions;
+  std::vector<std::vector<std::unique_ptr<libMesh::NumericVector<Real>>>> _end_solutions;
 
   /// The auxiliary solution from the end of the previous solve, this is cloned from the auxiliary solution during restore
   std::vector<std::unique_ptr<NumericVector<Real>>> _end_aux_solutions;

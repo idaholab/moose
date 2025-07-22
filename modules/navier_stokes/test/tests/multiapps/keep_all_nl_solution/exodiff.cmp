@@ -1,0 +1,26 @@
+	#TKE           # min:    1.157338e-07 @ t2,b3,e910       max:   1.5038232e-06 @ t2,b3,e595
+	#TKED          # min:   3.0186918e-11 @ t1,b3,e1 max:   5.9568605e-06 @ t2,b3,e500
+	#T_fluid       # min:       490.39551 @ t2,b3,e91        max:             800 @ t1,b3,e1
+	#pressure      # min:               0 @ t1,b3,e1 max:    0.0025340406 @ t2,b3,e991
+	#vel_x         # min:               0 @ t1,b3,e1 max:    0.0057539692 @ t2,b3,e896
+	#vel_y         # min:               0 @ t1,b3,e1 max:     0.033867681 @ t2,b3,e406
+	#vel_z         # min:               0 @ t1,b3,e1 max:    0.0057541189 @ t2,b3,e599
+
+
+
+STEP OFFSET 1
+
+EXCLUDE TIMES 2
+
+TIME STEPS relative 1.0 floor 0.0
+
+ELEMENT VARIABLES relative 1.e-10 floor 0.0
+	TKE           # min:    1.157338e-07 @ t2,b3,e1 max:   1.5038232e-06 @ t2,b3,e596
+	TKED          # min:   3.0186918e-11 @ t1,b3,e1 max:   5.9568605e-06 @ t2,b3,e500
+	T_fluid       # min:       490.39551 @ t2,b3,e100       max:             800 @ t1,b3,e1
+	k_t           # min:   1.6725608e-07 @ t2,b3,e1 max:               1 @ t1,b3,e1
+	mu_t          # min:   1.2490905e-07 @ t2,b3,e1 max:        3.354102 @ t1,b3,e1
+	pressure      # min:               0 @ t1,b3,e1 max:    0.0025340406 @ t2,b3,e1000
+	vel_x         # min:               0 @ t1,b3,e1 max:    0.0057539692 @ t2,b3,e196
+	vel_y         # min:               0 @ t1,b3,e1 max:     0.033867681 @ t2,b3,e405
+	yplus         # min:               0 @ t1,b3,e1 max:   0.00021165622 @ t2,b3,e95
