@@ -12,9 +12,9 @@
 #pragma once
 #include "MFEMKernel.h"
 
-/*
+/**
  * \f[
- * (f, u')
+ * (f, v)
  * \f]
  */
 class MFEMDomainLFKernel : public MFEMKernel

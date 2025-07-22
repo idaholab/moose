@@ -34,9 +34,8 @@ MFEMConvectiveHeatFluxBC::validParams()
 
 MFEMConvectiveHeatFluxBC::MFEMConvectiveHeatFluxBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters),
-    _heat_transfer_coef(
-        getScalarCoefficient(getParam<MFEMScalarCoefficientName>("heat_transfer_coefficient"))),
-    _T_inf_coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("T_infinity"))),
+    _heat_transfer_coef(getScalarCoefficient("heat_transfer_coefficient")),
+    _T_inf_coef(getScalarCoefficient("T_infinity")),
     _external_heat_flux_coef(
         getMFEMProblem().getCoefficients().declareScalar<mfem::ProductCoefficient>(
             "__ConvectiveHeatFluxBC_" + parameters.get<std::string>("_unique_name"),

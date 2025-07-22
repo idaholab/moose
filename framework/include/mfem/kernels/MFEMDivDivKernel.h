@@ -12,9 +12,9 @@
 #pragma once
 #include "MFEMKernel.h"
 
-/*
+/**
  * \f[
- * (\alpha \nabla \cdot u, \nabla \cdot u')
+ * (k \vec \nabla \cdot \vec u, \vec \nabla \cdot \vec v)
  * \f]
  */
 class MFEMDivDivKernel : public MFEMKernel
