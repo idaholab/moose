@@ -32,8 +32,12 @@ BSplineCurveGenerator::validParams()
   MooseEnum edge_elem_type("EDGE2 EDGE3 EDGE4", "EDGE2");
 
   params.addParam<unsigned int>("degree", 3, "Degree of interpolating polynomial.");
-  params.addRequiredParam<libMesh::Point>("start_point", "Starting (x,y,z) point for curve.");
-  params.addRequiredParam<libMesh::Point>("end_point", "Ending (x,y,z) point for curve.");
+  params.addParam<libMesh::Point>("start_point", "Starting (x,y,z) point for curve.");
+  params.addParam<libMesh::Point>("end_point", "Ending (x,y,z) point for curve.");
+  params.addParam<std::string>("start_mesh", "Mesh to start spline from.");
+  params.addParam<BoundaryName>("start_boundary", "Starting boundary of spline.");
+  params.addParam<std::string>("end_mesh", "Mesh to end splne.");
+  params.addParam<BoundaryName>("end_boundary", "Ending boundary of curve.");
   params.addRequiredParam<libMesh::RealVectorValue>("start_direction",
                                                     "Direction vector of curve at start point.");
   params.addRequiredParam<libMesh::RealVectorValue>("end_direction",
@@ -59,8 +63,6 @@ BSplineCurveGenerator::validParams()
 BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _degree(getParam<unsigned int>("degree")),
-    _start_point(getParam<libMesh::Point>("start_point")),
-    _end_point(getParam<libMesh::Point>("end_point")),
     _start_dir(getParam<libMesh::RealVectorValue>("start_direction")),
     _end_dir(getParam<libMesh::RealVectorValue>("end_direction")),
     _sharpness(getParam<libMesh::Real>("sharpness")),
@@ -72,11 +74,69 @@ BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
 {
   if (_num_cps < _degree + 1)
     paramError("num_cps", "Number of control points must be at least degree+1.");
+
+  // add tests for parameters
+  if (!isParamValid("start_point"))
+  {
+    if (!isParamValid("start_boundary"))
+      paramError("start_boundary", "start_boundary must be specified if start_point is not");
+    else if (!isParamValid("start_mesh"))
+      paramError("start_mesh", "start_mesh must be specified if start_point is not.");
+    // std::unique_ptr<MeshBase> & _start_mesh = getMesh("start_mesh");
+  }
+  if (!isParamValid("end_point"))
+  {
+    if (!isParamValid("end_boundary"))
+      paramError("end_boundary", "end_boundary must be specified if start_point is not");
+    else if (!isParamValid("end_mesh"))
+      paramError("end_mesh", "end_mesh must be specified if start_point is not.");
+  }
+  // if (isParamValid("start_boundary") || isParamValid("start_mesh"))
+  //   paramError("start_point and start_boundary or start_mesh cannot be simultaneously
+  //   specified!");
 }
 
 std::unique_ptr<MeshBase>
 BSplineCurveGenerator::generate()
 {
+  Point _start_point;
+
+  if (isParamValid("start_point"))
+    _start_point = getParam<libMesh::Point>("start_point");
+  else
+  {
+    std::unique_ptr<MeshBase> & _start_mesh = getMesh("start_mesh");
+    BoundaryInfo & start_mesh_boundary_info = _start_mesh->get_boundary_info();
+    boundary_id_type start_boundary_id = start_mesh_boundary_info.get_id_by_name(
+        std::string_view(getParam<BoundaryName>("start_boundary")));
+
+    // initialize sums
+    double volume_sum = 0;
+    Point volume_weighted_centroid_sum(0, 0, 0);
+
+    // loop over all elements in mesh
+    for (const auto & elem : _start_mesh->element_ptr_range())
+    {
+      // loop over all sides in element
+      for (const auto side_num : make_range(elem->n_sides()))
+      {
+        // check if on boundary
+        bool on_boundary =
+            start_mesh_boundary_info.has_boundary_id(elem, side_num, start_boundary_id);
+        if (on_boundary)
+        {
+          // update running sums
+          volume_sum += elem->side_ptr(side_num)->volume();
+          volume_weighted_centroid_sum +=
+              elem->side_ptr(side_num)->volume() * elem->side_ptr(side_num)->true_centroid();
+        }
+      }
+    }
+    _start_point = volume_weighted_centroid_sum / volume_sum;
+    std::cout << "_start_point = " << _start_point << std::endl;
+  }
+  Point _end_point = getParam<Point>("end_point");
+
   auto mesh = buildReplicatedMesh(2);
 
   // determine number of control points needed
