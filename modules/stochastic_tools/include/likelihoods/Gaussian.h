@@ -27,13 +27,15 @@ public:
   /**
    * Return the probability density function
    * @param exp The experimental measurement
+   * @param exp_group The experimental measurement group indicator
    * @param model The model prediction
    * @param noise The standard deviation
    * @param log_likelihood Bool to return the log likelihood value
    */
   static Real function(const std::vector<Real> & exp,
+                       const std::vector<Real> & exp_group,
                        const std::vector<Real> & model,
-                       const Real & noise,
+                       const std::vector<Real> & noise,
                        const bool & log_likelihood);
 
 protected:
@@ -41,8 +43,11 @@ protected:
   const bool _log_likelihood;
 
   /// Noise value
-  const Real & _noise;
+  const std::vector<Real> & _noise;
 
   /// Experimental data values
   std::vector<Real> _exp_values;
+
+  /// Experimental configuration group indicators
+  std::vector<Real> _exp_groups;
 };
