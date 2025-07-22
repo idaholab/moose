@@ -1105,7 +1105,7 @@ public:
   /**
    * Get the configured MFEM devices
    */
-  const std::set<std::string> & getMFEMDevices(Moose::PassKey<MultiApp>) { return _mfem_devices; }
+  const std::set<std::string> & getMFEMDevices(Moose::PassKey<MultiApp>) const;
 #endif
 
 protected:
@@ -1673,3 +1673,11 @@ MooseApp::getInterfaceObjects() const
   const static std::vector<T *> empty;
   return empty;
 }
+
+#ifdef MOOSE_MFEM_ENABLED
+inline const std::set<std::string> &
+MooseApp::getMFEMDevices(Moose::PassKey<MultiApp>) const
+{
+  return _mfem_devices;
+}
+#endif
