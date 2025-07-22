@@ -56,37 +56,45 @@ template <bool is_ad>
 void
 TungstenThermalPropertiesMaterialTempl<is_ad>::computeQpProperties()
 {
-  if (_temperature[_qp] < 11 || _temperature[_qp] > 3600)
-    flagInvalidSolution("Thermal properties out of bounds for the Tungsten temperature "
-                        "computation. Temperature has to be between 11K and 3600K.");
+  if (_temperature[_qp] < 5 || _temperature[_qp] > 3600)
+    flagInvalidSolution("The temperature is out of bounds to calculate tungsten density."
+                        "Temperature has to be between 5 K and 3600 K.");
 
-  _k[_qp] = (_temperature[_qp] < 55) ? _kA0 * std::pow(_temperature[_qp] / 1000, 8.740e-01) /
-                                           (1 + _kA1 * _temperature[_qp] / 1000 +
-                                            _kA2 * Utility::pow<2>(_temperature[_qp] / 1000) +
-                                            _kA3 * Utility::pow<3>(_temperature[_qp] / 1000))
-                                     : (_kB0 + _kB1 * _temperature[_qp] / 1000 +
-                                        _kB2 * Utility::pow<2>(_temperature[_qp] / 1000) +
-                                        _kB3 * Utility::pow<3>(_temperature[_qp] / 1000)) /
-                                           (_kC0 + _kC1 * _temperature[_qp] / 1000 +
-                                            Utility::pow<2>(_temperature[_qp] / 1000));
+  if (_temperature[_qp] < 1 || _temperature[_qp] > 3653)
+    flagInvalidSolution("The temperature is out of bounds to calculate tungsten thermal"
+                        "conductivity. Temperature has to be between 1 K and 3653 K.");
 
-  _c_p[_qp] = (_temperature[_qp] <= 293) ? _cA0 * std::pow(_temperature[_qp] / 1000, 3.030) /
-                                               (1 + _cA1 * _temperature[_qp] / 1000 +
-                                                _cA2 * Utility::pow<2>(_temperature[_qp] / 1000) +
-                                                _cA3 * Utility::pow<3>(_temperature[_qp] / 1000))
-                                         : _cB0 + _cB1 * _temperature[_qp] / 1000 +
-                                               _cB2 * Utility::pow<2>(_temperature[_qp] / 1000) +
-                                               _cB3 * Utility::pow<3>(_temperature[_qp] / 1000) +
-                                               _cB_2 / Utility::pow<2>(_temperature[_qp] / 1000);
+  if (_temperature[_qp] < 11 || _temperature[_qp] > 3700)
+    flagInvalidSolution("The temperature is out of bounds to calculate tungsten specific"
+                        "heat. Temperature has to be between 11 K and 3700 K.");
+
+  Real temperature_scaled = _temperature[_qp] / 1000;
+
+  _k[_qp] = (_temperature[_qp] < 55)
+                ? _kA0 * std::pow(temperature_scaled, 8.740e-01) /
+                      (1 + _kA1 * temperature_scaled + _kA2 * Utility::pow<2>(temperature_scaled) +
+                       _kA3 * Utility::pow<3>(temperature_scaled))
+                : (_kB0 + _kB1 * temperature_scaled + _kB2 * Utility::pow<2>(temperature_scaled) +
+                   _kB3 * Utility::pow<3>(temperature_scaled)) /
+                      (_kC0 + _kC1 * temperature_scaled + Utility::pow<2>(temperature_scaled));
+
+  _c_p[_qp] =
+      (_temperature[_qp] <= 293)
+          ? _cA0 * std::pow(temperature_scaled, 3.030) /
+                (1 + _cA1 * temperature_scaled + _cA2 * Utility::pow<2>(temperature_scaled) +
+                 _cA3 * Utility::pow<3>(temperature_scaled))
+          : _cB0 + _cB1 * temperature_scaled + _cB2 * Utility::pow<2>(temperature_scaled) +
+                _cB3 * Utility::pow<3>(temperature_scaled) +
+                _cB_2 / Utility::pow<2>(temperature_scaled);
 
   _rho[_qp] = (_temperature[_qp] <= 294)
-                  ? _rA0 / Utility::pow<3>(1 + (_rA1 + _rA2 * _temperature[_qp] / 1000 +
-                                                _rA3 * Utility::pow<2>(_temperature[_qp] / 1000) +
-                                                _rA4 * Utility::pow<3>(_temperature[_qp] / 1000)) /
+                  ? _rA0 / Utility::pow<3>(1 + (_rA1 + _rA2 * temperature_scaled +
+                                                _rA3 * Utility::pow<2>(temperature_scaled) +
+                                                _rA4 * Utility::pow<3>(temperature_scaled)) /
                                                    100)
-                  : _rA0 / Utility::pow<3>(1 + (_rB0 + _rB1 * _temperature[_qp] / 1000 +
-                                                _rB2 * Utility::pow<2>(_temperature[_qp] / 1000) +
-                                                _rB3 * Utility::pow<3>(_temperature[_qp] / 1000)) /
+                  : _rA0 / Utility::pow<3>(1 + (_rB0 + _rB1 * temperature_scaled +
+                                                _rB2 * Utility::pow<2>(temperature_scaled) +
+                                                _rB3 * Utility::pow<3>(temperature_scaled)) /
                                                    100);
 }
 
