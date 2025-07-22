@@ -45,10 +45,10 @@ BSplineCurveGenerator::validParams()
   params.addRequiredParam<libMesh::RealVectorValue>("end_direction",
                                                     "Direction vector of curve at end point.");
   // Alternative to start / end point
-  params.addParam<std::string>("start_mesh", "Meshgenerator producing the mesh to start spline from.");
+  params.addParam<MeshGeneratorName>("start_mesh", "Mesh to start spline from.");
   params.addParam<BoundaryName>("start_boundary", "Starting boundary of spline.");
-  params.addParam<std::string>("end_mesh", "Meshgenerator producing the mesh  to end splne.");
-  params.addParam<BoundaryName>("end_boundary", "Ending boundary of curve.");
+  params.addParam<MeshGeneratorName>("end_mesh", "Mesh to end splne on.");
+  params.addParam<BoundaryName>("end_boundary", "Ending boundary of spline.");
 
   // Spline shape parameters
   params.addParam<unsigned int>("degree", 3, "Degree of interpolating polynomial.");
@@ -83,7 +83,9 @@ BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
     _sharpness(getParam<libMesh::Real>("sharpness")),
     _num_cps(getParam<unsigned int>("num_cps")),
     _order((unsigned int)(getParam<MooseEnum>("edge_element_type")) + 1),
-    _num_elements(getParam<unsigned int>("num_elements"))
+    _num_elements(getParam<unsigned int>("num_elements")),
+    _start_mesh(getMesh("start_mesh", true)),
+    _end_mesh(getMesh("end_mesh", true))
 {
   if (_num_cps < _degree + 1)
     paramError("num_cps", "Number of control points must be at least degree+1.");
@@ -96,6 +98,13 @@ BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
     else if (!isParamValid("start_mesh"))
       paramError("start_mesh", "start_mesh must be specified if start_point is not.");
   }
+  else
+  {
+    if (isParamValid("start_boundary") || isParamValid("start_mesh"))
+      paramError(
+          "start_point and start_boundary or start_mesh cannot be simultaneously specified!");
+  }
+
   if (!isParamValid("end_point"))
   {
     if (!isParamValid("end_boundary"))
@@ -103,48 +112,18 @@ BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
     else if (!isParamValid("end_mesh"))
       paramError("end_mesh", "end_mesh must be specified if start_point is not.");
   }
+  else
+  {
+    if (isParamValid("end_boundary") || isParamValid("end_mesh"))
+      paramError("end_point and end_boundary or end_mesh cannot be simultaneously specified!");
+  }
 }
 
 std::unique_ptr<MeshBase>
 BSplineCurveGenerator::generate()
 {
-  Point _start_point;
-
-  if (isParamValid("start_point"))
-    _start_point = getParam<libMesh::Point>("start_point");
-  else
-  {
-    std::unique_ptr<MeshBase> & _start_mesh = getMesh("start_mesh");
-    BoundaryInfo & start_mesh_boundary_info = _start_mesh->get_boundary_info();
-    boundary_id_type start_boundary_id = start_mesh_boundary_info.get_id_by_name(
-        std::string_view(getParam<BoundaryName>("start_boundary")));
-
-    // initialize sums
-    double volume_sum = 0;
-    Point volume_weighted_centroid_sum(0, 0, 0);
-
-    // loop over all elements in mesh
-    for (const auto & elem : _start_mesh->element_ptr_range())
-    {
-      // loop over all sides in element
-      for (const auto side_num : make_range(elem->n_sides()))
-      {
-        // check if on boundary
-        bool on_boundary =
-            start_mesh_boundary_info.has_boundary_id(elem, side_num, start_boundary_id);
-        if (on_boundary)
-        {
-          // update running sums
-          volume_sum += elem->side_ptr(side_num)->volume();
-          volume_weighted_centroid_sum +=
-              elem->side_ptr(side_num)->volume() * elem->side_ptr(side_num)->true_centroid();
-        }
-      }
-    }
-    _start_point = volume_weighted_centroid_sum / volume_sum;
-    std::cout << "_start_point = " << _start_point << std::endl;
-  }
-  Point _end_point = getParam<Point>("end_point");
+  const auto _start_point = BSplineCurveGenerator::returnStartPoint();
+  const auto _end_point = BSplineCurveGenerator::returnEndPoint();
 
   auto mesh = buildReplicatedMesh(2);
 
@@ -212,4 +191,66 @@ BSplineCurveGenerator::generate()
     mesh->subdomain_name(_new_subdomain_id) = getParam<SubdomainName>("new_subdomain_name");
 
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+libMesh::Point
+BSplineCurveGenerator::returnStartPoint()
+{
+  if (isParamValid("start_point"))
+    return getParam<Point>("start_point");
+  else
+  {
+    std::unique_ptr<MeshBase> start_mesh = std::move(_start_mesh);
+    return BSplineCurveGenerator::findCenterPoint(getParam<BoundaryName>("start_boundary"),
+                                                  start_mesh);
+  }
+}
+
+libMesh::Point
+BSplineCurveGenerator::returnEndPoint()
+{
+  if (isParamValid("end_point"))
+    return getParam<Point>("end_point");
+  else
+  {
+    std::unique_ptr<MeshBase> end_mesh = std::move(_end_mesh);
+    return BSplineCurveGenerator::findCenterPoint(getParam<BoundaryName>("end_boundary"), end_mesh);
+  }
+}
+
+libMesh::Point
+BSplineCurveGenerator::findCenterPoint(const BoundaryName & boundary,
+                                       const std::unique_ptr<MeshBase> & mesh)
+{
+  if (!mesh->is_serial())
+    mooseError("findCenterPoint not yet implemented for distributed meshes!");
+
+  libMesh::Point center_point(0, 0, 0);
+
+  BoundaryInfo & mesh_boundary_info = mesh->get_boundary_info();
+  boundary_id_type boundary_id = mesh_boundary_info.get_id_by_name(std::string_view(boundary));
+
+  // initialize sums
+  double volume_sum = 0;
+  Point volume_weighted_centroid_sum(0, 0, 0);
+
+  // loop over all elements in mesh
+  for (const auto & elem : mesh->element_ptr_range())
+  {
+    // loop over all sides in element
+    for (const auto side_num : make_range(elem->n_sides()))
+    {
+      // check if on boundary
+      bool on_boundary = mesh_boundary_info.has_boundary_id(elem, side_num, boundary_id);
+      if (on_boundary)
+      {
+        // update running sums
+        volume_sum += elem->side_ptr(side_num)->volume();
+        volume_weighted_centroid_sum +=
+            elem->side_ptr(side_num)->volume() * elem->side_ptr(side_num)->true_centroid();
+      }
+    }
+  }
+  center_point = volume_weighted_centroid_sum / volume_sum;
+  return center_point;
 }

@@ -10,7 +10,6 @@
 #pragma once
 
 #include "MeshGenerator.h"
-#include "LinearInterpolation.h"
 
 /**
  * Mesh generator to create a 1D B-spline curve mesh in 3D space
@@ -29,6 +28,10 @@ protected:
   const SubdomainID _new_subdomain_id;
   /// degree of interpolating spline
   const unsigned int _degree;
+  /// start point of spline
+  // const libMesh::Point _start_point;
+  // /// end point of spline
+  // const libMesh::Point _end_point;
   /// direction of curve at start point
   const libMesh::RealVectorValue _start_dir;
   /// direction of curve at end point
@@ -41,4 +44,19 @@ protected:
   const unsigned int _order;
   /// number of edge elements on the curve
   const unsigned int _num_elements;
+
+  std::unique_ptr<MeshBase> & _start_mesh;
+  std::unique_ptr<MeshBase> & _end_mesh;
+
+  libMesh::Point returnStartPoint();
+
+  libMesh::Point returnEndPoint();
+
+  /**
+   * Calculcates the center-of-mass point of a boundary on a mesh.
+   * @param boundary boundary name
+   * @param mesh_name mesh name (getMesh routine is called within the method)
+   */
+  libMesh::Point findCenterPoint(const BoundaryName & boundary,
+                                 const std::unique_ptr<MeshBase> & mesh);
 };
