@@ -28,38 +28,38 @@ protected:
   virtual void computeQpProperties();
 
   // Constants for the thermal conductivity formulas
-  static constexpr Real _kA0 = 7.348e+05;
-  static constexpr Real _kA1 = 2.544e+01;
-  static constexpr Real _kA2 = -8.304e+03;
-  static constexpr Real _kA3 = 1.180e+06;
-  static constexpr Real _kB0 = -3.679;
-  static constexpr Real _kB1 = 1.181e+02;
-  static constexpr Real _kB2 = 5.879e+01;
-  static constexpr Real _kB3 = 2.867;
-  static constexpr Real _kC0 = -2.052e-02;
-  static constexpr Real _kC1 = 4.741e-01;
+  static constexpr Real _kA0 = 7.348e+05;  // [W/m.K]
+  static constexpr Real _kA1 = 2.544e+01;  // [1]
+  static constexpr Real _kA2 = -8.304e+03; // [1]
+  static constexpr Real _kA3 = 1.180e+06;  // [1]
+  static constexpr Real _kB0 = -3.679;     // [W/m.K]
+  static constexpr Real _kB1 = 1.181e+02;  // [W/m.K]
+  static constexpr Real _kB2 = 5.879e+01;  // [W/m.K]
+  static constexpr Real _kB3 = 2.867;      // [W/m.K]
+  static constexpr Real _kC0 = -2.052e-02; // [1]
+  static constexpr Real _kC1 = 4.741e-01;  // [1]
 
   // Constants for the specific heat formulas
-  static constexpr Real _cN = 3.030;
-  static constexpr Real _cA0 = 3.103e+02;
-  static constexpr Real _cA1 = -8.815;
-  static constexpr Real _cA2 = 1.295e+02;
-  static constexpr Real _cA3 = 1.874e+03;
-  static constexpr Real _cB0 = 1.301e-01;
-  static constexpr Real _cB1 = 2.225e-02;
-  static constexpr Real _cB2 = -7.224e-03;
-  static constexpr Real _cB3 = 3.539e-03;
-  static constexpr Real _cB_2 = -3.061e-04;
+  static constexpr Real _cN = 3.030;        // [1]
+  static constexpr Real _cA0 = 3.103e+02;   // [J/g.K]
+  static constexpr Real _cA1 = -8.815;      // [1]
+  static constexpr Real _cA2 = 1.295e+02;   // [1]
+  static constexpr Real _cA3 = 1.874e+03;   // [1]
+  static constexpr Real _cB0 = 1.301e-01;   // [J/g.K]
+  static constexpr Real _cB1 = 2.225e-02;   // [J/g.K]
+  static constexpr Real _cB2 = -7.224e-03;  // [J/g.K]
+  static constexpr Real _cB3 = 3.539e-03;   // [J/g.K]
+  static constexpr Real _cB_2 = -3.061e-04; // [J/g.K]
   // Constatns for the density formulas
-  static constexpr Real _rA0 = 19250;
-  static constexpr Real _rA1 = -8.529e-02;
-  static constexpr Real _rA2 = -9.915e-02;
-  static constexpr Real _rA3 = 2.257;
-  static constexpr Real _rA4 = -3.157;
-  static constexpr Real _rB0 = -1.4e-01;
-  static constexpr Real _rB1 = 4.869e-01;
-  static constexpr Real _rB2 = -3.056e-02;
-  static constexpr Real _rB3 = 2.234e-02;
+  static constexpr Real _rA0 = 19250;      // [Kg/m^3]
+  static constexpr Real _rA1 = -8.529e-02; // [1]
+  static constexpr Real _rA2 = -9.915e-02; // [1]
+  static constexpr Real _rA3 = 2.257;      // [1]
+  static constexpr Real _rA4 = -3.157;     // [1]
+  static constexpr Real _rB0 = -1.4e-01;   // [1]
+  static constexpr Real _rB1 = 4.869e-01;  // [1]
+  static constexpr Real _rB2 = -3.056e-02; // [1]
+  static constexpr Real _rB3 = 2.234e-02;  // [1]
 
 private:
   const VariableValue & _temperature;
