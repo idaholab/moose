@@ -1,0 +1,25 @@
+{
+  "data": {
+    "data": {
+      "abs_zero": 0.1,
+      "bounds": null,
+      "description": "description",
+      "key": "data",
+      "nominal": 0.0,
+      "rel_err": 1e-06,
+      "test": "TestCase.test",
+      "units": null,
+      "validation": true,
+      "value": 0.09
+    }
+  },
+  "results": [
+    {
+      "data_key": "data",
+      "message": "value 9.000E-02 relative error skipped due to absolute zero",
+      "status": "OK",
+      "test": "TestCase.test",
+      "validation": true
+    }
+  ]
+}
