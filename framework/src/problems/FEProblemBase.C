@@ -4317,10 +4317,10 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     {
       if (euo || nuo || duo)
         _reinit_displaced_elem = true;
-      else if (suo || duo)
+      if (suo || duo)
         // shouldn't we add isuo
         _reinit_displaced_face = true;
-      else if (iuob || duo)
+      if (iuob || duo)
         _reinit_displaced_neighbor = true;
     }
 
