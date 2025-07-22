@@ -159,4 +159,28 @@
     expect_err = 'Parallel lines cannot be interpolated using points along a circle! Direction vectors are incompatible with point locations.'
     requirement = 'The system shall generate a 3D mesh for two parallel directions. Checks for error with incompatible points.'
   []
+  [find_center_2D_end]
+    type = 'Exodiff'
+    allow_warnings = true
+    input = 'bspline_curve_find_center_on_2D_end.i'
+    exodiff = 'bspline_curve_find_center_on_2D_end_in.e'
+    cli_args = '--mesh-only'
+    requirement = 'The system shall generate a 1D mesh connecting two other meshes by computing center points on the given end boundary.'
+  []
+  [find_center_2D_start]
+    type = 'Exodiff'
+    allow_warnings = true
+    input = 'bspline_curve_find_center_on_2D_start.i'
+    exodiff = 'bspline_curve_find_center_on_2D_start_in.e'
+    cli_args = '--mesh-only'
+    requirement = 'The system shall generate a 1D mesh connecting two other meshes by computing center points on the given start boundary.'
+  []
+  [find_center_2D_both_sides]
+    type = 'Exodiff'
+    allow_warnings = true
+    input = 'bspline_curve_find_center_on_2D_both.i'
+    exodiff = 'bspline_curve_find_center_on_2D_both_in.e'
+    cli_args = '--mesh-only'
+    requirement = 'The system shall generate a 1D mesh connecting two other meshes by computing center points on the given boundaries.'
+  []
 []
