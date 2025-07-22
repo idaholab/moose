@@ -103,8 +103,10 @@ MFEMProblem::addMarker(const std::string & user_object_name,
   const UserObject * est_uo = &(getUserObjectBase(name));
   if (dynamic_cast<const MFEMRefinementMarker *>(est_uo) != nullptr)
   {
-    std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMRefinementMarker>(name).getSharedPtr();
-    std::shared_ptr<MFEMRefinementMarker> refiner = std::dynamic_pointer_cast<MFEMRefinementMarker>(object_ptr);
+    std::shared_ptr<MooseObject> object_ptr =
+        getUserObject<MFEMRefinementMarker>(name).getSharedPtr();
+    std::shared_ptr<MFEMRefinementMarker> refiner =
+        std::dynamic_pointer_cast<MFEMRefinementMarker>(object_ptr);
 
     _problem_data._refiner = refiner;
     _problem_data._use_amr = true;
@@ -748,7 +750,8 @@ MFEMProblem::HRefine()
 {
   if (UseAMR())
   {
-    _problem_data._refiner->HRefine(*_problem_data.pmesh);;
+    _problem_data._refiner->HRefine(*_problem_data.pmesh);
+    ;
   }
   else
   {

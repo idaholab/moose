@@ -91,7 +91,8 @@ TEST_F(MFEMMeshRefinementTest, DiffusionRefinement)
   eqn_system->Init(problem_data.gridfunctions, problem_data.fespaces, mfem::AssemblyLevel::LEGACY);
 
   // problem operator
-  auto problem_operator = std::make_unique<Moose::MFEM::EquationSystemProblemOperator>(problem_data);
+  auto problem_operator =
+      std::make_unique<Moose::MFEM::EquationSystemProblemOperator>(problem_data);
   problem_operator->SetGridFunctions();
   problem_operator->Init(X);
 

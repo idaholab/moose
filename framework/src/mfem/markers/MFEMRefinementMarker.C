@@ -11,7 +11,10 @@ MFEMRefinementMarker::validParams()
   params.registerBase("Marker");
 
   MooseEnum refinement_type("H_REF P_REF H_P_REF", "H_P_REF");
-  params.addRequiredParam<MooseEnum>("refinement_type", refinement_type, "Specifies whether to use h-refinement, p-refinement or both.");
+  params.addRequiredParam<MooseEnum>(
+      "refinement_type",
+      refinement_type,
+      "Specifies whether to use h-refinement, p-refinement or both.");
 
   params.addRequiredParam<Real>("refine", "Error fraction for the refiner");
   params.addRangeCheckedParam<Real>("refine",
@@ -19,8 +22,10 @@ MFEMRefinementMarker::validParams()
                                     "refine>=0 & refine<=1",
                                     "Elements within this percentage of the max error will "
                                     "be refined.  Must be between 0 and 1!");
-  params.addRangeCheckedParam<int>("max_h_level", 0, "max_h_level>=0 & max_h_level <= 10", "Total number of h-refinement steps");
-  params.addRangeCheckedParam<int>("max_p_level", 0, "max_p_level>=0 & max_p_level <= 10", "Total number of p-refinement steps");
+  params.addRangeCheckedParam<int>(
+      "max_h_level", 0, "max_h_level>=0 & max_h_level <= 10", "Total number of h-refinement steps");
+  params.addRangeCheckedParam<int>(
+      "max_p_level", 0, "max_p_level>=0 & max_p_level <= 10", "Total number of p-refinement steps");
 
   params.addRequiredParam<std::string>("indicator", "Estimator to use");
   return params;
@@ -35,39 +40,39 @@ MFEMRefinementMarker::MFEMRefinementMarker(const InputParameters & params)
     _refinement_type(getParam<MooseEnum>("refinement_type"))
 {
   // _use_h_refinement and _use_p_refinement both default to false
-  if ( _refinement_type == "H_P_REF" )
+  if (_refinement_type == "H_P_REF")
   {
     _use_h_refinement = true;
     _use_p_refinement = true;
   }
-  else if ( _refinement_type == "H_REF" )
+  else if (_refinement_type == "H_REF")
   {
     _use_h_refinement = true;
   }
-  else if ( _refinement_type == "P_REF" )
+  else if (_refinement_type == "P_REF")
   {
     _use_p_refinement = true;
   }
 }
-
 
 void
 MFEMRefinementMarker::setUp()
 {
   // fetch const ref to the estimator
-  const auto& estimator = getUserObjectByName<MFEMIndicator>(_estimator_name);
+  const auto & estimator = getUserObjectByName<MFEMIndicator>(_estimator_name);
 
-  _threshold_refiner = std::make_shared<mfem::ThresholdRefiner>( *(estimator.getEstimator()) );
+  _threshold_refiner = std::make_shared<mfem::ThresholdRefiner>(*(estimator.getEstimator()));
   _threshold_refiner->SetTotalErrorFraction(_error_threshold);
 }
 
 void
-MFEMRefinementMarker::MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinement> & refinements)
+MFEMRefinementMarker::MarkWithoutRefining(mfem::ParMesh & mesh,
+                                          mfem::Array<mfem::Refinement> & refinements)
 {
   // We are doing p-refinement. Increase the counter
   // and check if we have exceeded the max number of
   // p-refinement steps
-  _stop_p_ref = ( ++_p_ref_counter >= _max_p_level );
+  _stop_p_ref = (++_p_ref_counter >= _max_p_level);
 
   // Hand over to the underlying mfem object to find all the
   // places we should increase the polynomial order
@@ -87,11 +92,11 @@ MFEMRefinementMarker::HRefine(mfem::ParMesh & mesh)
 {
   // Increase the counter and check if we have exceeded
   // the max number of refinement steps
-  _stop_h_ref = ( ++_h_ref_counter >= _max_h_level );
+  _stop_h_ref = (++_h_ref_counter >= _max_h_level);
 
   // Perform h-refinement
   _threshold_refiner->Apply(mesh);
-  
+
   // Ask the refiner if we need to stop H-refinement
   _stop_h_ref |= _threshold_refiner->Stop();
 }
@@ -99,10 +104,9 @@ MFEMRefinementMarker::HRefine(mfem::ParMesh & mesh)
 std::shared_ptr<mfem::ParFiniteElementSpace>
 MFEMRefinementMarker::getFESpace()
 {
-  const auto& estimator = getUserObjectByName<MFEMIndicator>(_estimator_name);
+  const auto & estimator = getUserObjectByName<MFEMIndicator>(_estimator_name);
 
   return estimator.getFESpace();
 }
-
 
 #endif
