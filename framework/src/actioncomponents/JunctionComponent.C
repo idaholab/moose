@@ -82,64 +82,65 @@ JunctionComponent::JunctionComponent(const InputParameters & params)
   //   "block"});
 }
 
-// void
-// JunctionComponent::addMeshGenerators()
-// {
-//   const auto & first_component = ActionComponent(getParam<ComponentName>("first_component"));
-//   const auto & second_component = ActionComponent(getParam<ComponentName>("second_component"));
-//   const auto first_boundary = getParam<BoundaryName>("first_boundary");
-//   const auto second_boundary = getParam<BoundaryName>("second_boundary");
+void
+JunctionComponent::addMeshGenerators()
+{
+  const auto & first_component =
+      _awh.getAction<ActionComponent>(getParam<ComponentName>("first_component"));
+  const auto & second_component = ActionComponent(getParam<ComponentName>("second_component"));
+  const auto first_boundary = getParam<BoundaryName>("first_boundary");
+  const auto second_boundary = getParam<BoundaryName>("second_boundary");
 
-//   // Get the dimension of the components
-//   const auto dimension_first = first_component.dimension();
-//   const auto dimension_second = second_component.dimension();
+  // Get the dimension of the components
+  const auto dimension_first = first_component.dimension();
+  const auto dimension_second = second_component.dimension();
 
-//   if (dimension_first == 0 || dimension_second == 0)
-//     mooseError("Connecting 0 dimension meshes not implemented!");
+  if (dimension_first == 0 || dimension_second == 0)
+    mooseError("Connecting 0 dimension meshes not implemented!");
 
-//   // Perform junction
-//   if (_junction_method == "stitch_meshes")
-//   {
-//     // Fairly easy to stitch this
-//     if (dimension_first == dimension_second)
-//     {
-//       // Stitch the two meshes
-//       InputParameters params = _factory.getValidParams("StitchedMeshGenerator");
-//       params.set<std::vector<MeshGeneratorName>>("inputs") =
-//           _mg_names; // protected member of ActionComponent
-//       params.set<std::vector<std::string>>("stitch_boundaries_pairs") = {first_boundary,
-//                                                                          second_boundary};
-//     }
-//     else
-//       mooseError("Stiching meshes of different dimensions is not implemented");
-//   }
-//   else if (_junction_method == "fill_gap")
-//   {
-//     // This method is set to use a B-Spline to draw a 1D curve between
+  // Perform junction
+  if (_junction_method == "stitch_meshes")
+  {
+    // Fairly easy to stitch this
+    if (dimension_first == dimension_second)
+    {
+      // Stitch the two meshes
+      InputParameters params = _factory.getValidParams("StitchedMeshGenerator");
+      params.set<std::vector<MeshGeneratorName>>("inputs") =
+          _mg_names; // protected member of ActionComponent
+      params.set<std::vector<std::string>>("stitch_boundaries_pairs") = {first_boundary,
+                                                                         second_boundary};
+    }
+    else
+      mooseError("Stiching meshes of different dimensions is not implemented");
+  }
+  else if (_junction_method == "fill_gap")
+  {
+    // This method is set to use a B-Spline to draw a 1D curve between
 
-//     // get mesh from boundaries
+    // get mesh from boundaries
 
-//     // determine start and end points
+    // determine start and end points
 
-//     // find start and end directions (may need to take the negative of the negative direction)
+    // find start and end directions (may need to take the negative of the negative direction)
 
-//     // if (std::min(dimension_first, dimension_second) <= 1)
-//     // {
-//     //   // Create a 1D line of the length between the two meshes
-//     // }
-//     // else if (std::min(dimension_first, dimension_second) <= 2)
-//     // {
-//     //   // Use a 2D mesh
-//     // }
-//     // else
-//     // {
-//     //   // Build 3D sides around the junction
-//     //   // Tetrahedralize inside
-//     // }
-//   }
-//   else
-//     mooseError("junction_method specified is invalid!");
-// }
+    // if (std::min(dimension_first, dimension_second) <= 1)
+    // {
+    //   // Create a 1D line of the length between the two meshes
+    // }
+    // else if (std::min(dimension_first, dimension_second) <= 2)
+    // {
+    //   // Use a 2D mesh
+    // }
+    // else
+    // {
+    //   // Build 3D sides around the junction
+    //   // Tetrahedralize inside
+    // }
+  }
+  else
+    mooseError("junction_method specified is invalid!");
+}
 
 void
 JunctionComponent::checkIntegrity()
