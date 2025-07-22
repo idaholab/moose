@@ -779,13 +779,15 @@ MultiApp::restore(bool force)
       for (unsigned int i = 0; i < _my_num_apps; i++)
       {
         _end_solutions[i].resize(_apps[i]->getExecutioner()->feProblem().numNonlinearSystems());
-        for(unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numNonlinearSystems(); j++) {
-           _end_solutions[i][j] = _apps[i]
-                                   ->getExecutioner()
-                                   ->feProblem()
-                                   .getNonlinearSystemBase(/*nl_sys=*/j)
-                                   .solution()
-                                   .clone();
+        for (unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numNonlinearSystems();
+             j++)
+        {
+          _end_solutions[i][j] = _apps[i]
+                                     ->getExecutioner()
+                                     ->feProblem()
+                                     .getNonlinearSystemBase(/*nl_sys=*/j)
+                                     .solution()
+                                     .clone();
         }
         auto & sub_multiapps =
             _apps[i]->getExecutioner()->feProblem().getMultiAppWarehouse().getObjects();
@@ -825,13 +827,15 @@ MultiApp::restore(bool force)
     {
       for (unsigned int i = 0; i < _my_num_apps; i++)
       {
-         for(unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numNonlinearSystems(); j++) {
-           _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase(/*nl_sys=*/j).solution() =
-               *_end_solutions[i][j];
+        for (unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numNonlinearSystems();
+             j++)
+        {
+          _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase(/*nl_sys=*/j).solution() =
+              *_end_solutions[i][j];
 
-           // We need to synchronize solution so that local_solution has the right values
-           _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase(/*nl_sys=*/j).update();
-         }
+          // We need to synchronize solution so that local_solution has the right values
+          _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase(/*nl_sys=*/j).update();
+        }
       }
 
       _end_solutions.clear();
