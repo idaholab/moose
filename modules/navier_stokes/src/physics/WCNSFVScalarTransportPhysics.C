@@ -197,10 +197,10 @@ WCNSFVScalarTransportPhysics::addScalarInletBC()
     {
       if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "fixed-value")
       {
-        const std::string bc_type = "FVFunctionDirichletBC";
+        const std::string bc_type = "FVADFunctorDirichletBC";
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
-        params.set<FunctionName>("function") = _passive_scalar_inlet_functors[name_i][bc_ind];
+        params.set<MooseFunctorName>("functor") = _passive_scalar_inlet_functors[name_i][bc_ind];
         params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
 
         getProblem().addFVBC(
