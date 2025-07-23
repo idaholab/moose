@@ -30,7 +30,7 @@ public:
 
     InputParameters problem_params = _factory.getValidParams("MFEMProblem");
     problem_params.set<MooseMesh *>("mesh") = _mfem_mesh_ptr.get();
-    problem_params.set<std::string>("_object_name") = "name2";
+    problem_params.set<std::string>(MooseBase::name_param) = "name2";
     _mfem_problem = _factory.create<MFEMProblem>("MFEMProblem", "problem", problem_params);
 
     _app->actionWarehouse().problemBase() = _mfem_problem;

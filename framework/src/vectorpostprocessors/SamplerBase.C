@@ -16,7 +16,6 @@
 #include "MooseError.h"
 #include "VectorPostprocessor.h"
 #include "MooseVariableFieldBase.h"
-#include "MooseBaseParameterInterface.h"
 
 #include "libmesh/point.h"
 

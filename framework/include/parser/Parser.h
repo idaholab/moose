@@ -9,10 +9,7 @@
 
 #pragma once
 
-// MOOSE includes
-#include "ConsoleStreamInterface.h"
 #include "MooseTypes.h"
-#include "Syntax.h"
 
 #include "hit/hit.h"
 
@@ -21,15 +18,6 @@
 #include <iomanip>
 #include <optional>
 #include <filesystem>
-
-// Forward declarations
-class ActionWarehouse;
-class SyntaxTree;
-class MooseApp;
-class Factory;
-class ActionFactory;
-class GlobalParamsAction;
-class JsonSyntaxTree;
 
 class FuncParseEvaler : public hit::Evaler
 {
@@ -51,10 +39,9 @@ public:
   virtual void
   walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override;
 
-  std::vector<std::string> errors;
+  std::vector<hit::ErrorMessage> errors;
 
 private:
-  std::set<std::string> _duplicates;
   std::map<std::string, hit::Node *> _have;
 };
 
@@ -64,14 +51,14 @@ public:
   virtual void walk(const std::string & /*fullpath*/,
                     const std::string & /*nodepath*/,
                     hit::Node * section) override;
-  std::vector<std::string> errors;
+  std::vector<hit::ErrorMessage> errors;
 };
 
 class CompileParamWalker : public hit::Walker
 {
 public:
   typedef std::map<std::string, hit::Node *> ParamMap;
-  CompileParamWalker(ParamMap & map) : _map(map){};
+  CompileParamWalker(ParamMap & map) : _map(map) {};
 
   virtual void
   walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override;
@@ -114,29 +101,63 @@ public:
    */
   Parser(const std::string & input_filename, const std::optional<std::string> & input_text = {});
 
+  struct Error : public hit::Error
+  {
+    Error() = delete;
+    Error(const std::vector<hit::ErrorMessage> & error_messages);
+  };
+
   /**
    * Parses the inputs
    */
   void parse();
 
   /**
-   * This function attempts to extract values from the input file based on the contents of
-   * the passed parameters objects.  It handles a number of various types with dynamic casting
-   * including vector types
+   * @return The root HIT node if it exists
+   *
+   * If this is null, it means we haven't parsed yet
    */
-  void extractParams(const std::string & prefix, InputParameters & p);
+  ///@{
+  const hit::Node * queryRoot() const { return _root.get(); }
+  hit::Node * queryRoot() { return _root.get(); }
+  ///@}
 
   /**
-   * @return The root HIT node, if any
+   * @return The root HIT node with error checking on if it exists
    *
-   * If this is null, it means that we haven't parsed yet
+   * If it doesn't exist, it means we haven't parsed yet
    */
-  hit::Node * root() { return _root.get(); }
+  hit::Node & getRoot();
+
+  /**
+   * @return The root command line HIT node if it exists
+   *
+   * If this is null, it means we haven't parsed yet
+   */
+  ///@{
+  const hit::Node * queryCommandLineRoot() const { return _cli_root.get(); }
+  hit::Node * queryCommandLineRoot() { return _cli_root.get(); }
+  ///@}
+
+  /**
+   * @return The root command line HIT node, with error checking on if it exists
+   *
+   * If it doesn't exist, it means we haven't parsed yet
+   */
+  ///@{
+  const hit::Node & getCommandLineRoot() const;
+  hit::Node & getCommandLineRoot();
+  ///@}
 
   /**
    * @return The names of the inputs
    */
   const std::vector<std::string> & getInputFileNames() const { return _input_filenames; }
+
+  /**
+   * @return The input file contents
+   */
+  const std::vector<std::string> & getInputText() const { return _input_text; }
 
   /*
    * Get extracted application type from parser
@@ -149,6 +170,11 @@ public:
   void setAppType(const std::string & app_type) { _app_type = app_type; }
 
   /**
+   * Sets the HIT parameters from the command line
+   */
+  void setCommandLineParams(const std::vector<std::string> & params);
+
+  /**
    * @return The file name of the last input
    */
   const std::string & getLastInputFileName() const;
@@ -158,6 +184,48 @@ public:
    */
   std::filesystem::path getLastInputFilePath() const { return getLastInputFileName(); }
 
+  /**
+   * Set whether or not to throw Parse::Error on errors
+   *
+   * This is used by the MooseServer to capture errors while retaining the root if possible
+   */
+  void setThrowOnError(const bool throw_on_error) { _throw_on_error = throw_on_error; }
+
+  /**
+   * @return Whether or not to throw Parse::Error on errors
+   *
+   * This is used by the MooseServer to capture errors while retaining the root if possible
+   */
+  bool getThrowOnError() const { return _throw_on_error; }
+
+  /**
+   * @returns The variables that have been extracted so far.
+   *
+   * These are the variables that have been used during brace expansion.
+   */
+  const std::set<std::string> & getExtractedVars() const { return _extracted_vars; }
+  /**
+   * Helper for accumulating errors from a walker into an accumulation of errors
+   */
+  ///@{
+  static void appendErrorMessages(std::vector<hit::ErrorMessage> & to,
+                                  const std::vector<hit::ErrorMessage> & from);
+  static void appendErrorMessages(std::vector<hit::ErrorMessage> & to, const hit::Error & error);
+  ///@}
+
+  /**
+   * Helper for combining error messages into a single, newline separated message
+   */
+  static std::string joinErrorMessages(const std::vector<hit::ErrorMessage> & error_messages);
+
+  /**
+   * Helper for throwing an error with the given messages.
+   *
+   * If throwOnError(), throw a Parser::Error (for the MooseServer).
+   * Otherwise, use mooseError() (for standard runs).
+   */
+  void parseError(std::vector<hit::ErrorMessage> messages) const;
+
 private:
   /// The root node, which owns the whole tree
   std::unique_ptr<hit::Node> _root;
@@ -165,9 +233,21 @@ private:
   /// The input file names
   const std::vector<std::string> _input_filenames;
 
-  /// The optional input text contents (to support not reading by file)
-  const std::optional<std::vector<std::string>> _input_text;
+  /// The input text (may be filled during parse())
+  std::vector<std::string> _input_text;
+
+  /// The root node for command line hit arguments
+  std::unique_ptr<hit::Node> _cli_root;
 
   /// The application types extracted from [Application] block
   std::string _app_type;
+
+  /// Whether or not to throw on error
+  bool _throw_on_error;
+
+  /// The command line HIT parameters (if any)
+  std::optional<std::vector<std::string>> _command_line_params;
+
+  /// Variables that have been extracted during brace expansion
+  std::set<std::string> _extracted_vars;
 };
