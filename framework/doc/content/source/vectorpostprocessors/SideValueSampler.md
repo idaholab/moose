@@ -5,11 +5,13 @@
 The data output to CSV is output with the columns listed below. The declared vectors use the same
 names.
 
-- the id of the element that the quadrature point, on the side, belongs to
+- the id of the element that the quadrature point, on the side, belongs to.
 
-- the values of the requested variables, with a column named after each variable
+- the values of the requested variables, with a column named after each variable.
+  On internal sidesets, finite volume variables use an inverse distance weighted average to determine the face value.
 
-- the X, Y, Z coordinates of the quadrature points on the side
+- the X, Y, Z coordinates of the quadrature points on the side. In case of finite
+  volume variables this is the cell centroid of the face.
 
 !alert note title=General sampling
 The `SideValueSampler` samples variables on the specified boundary on element side quadrature points. For more flexible sampling,
