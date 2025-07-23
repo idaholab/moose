@@ -418,4 +418,4 @@ protected:                                                                      
   using Moose::Kokkos::IntegratedBC<T>::_grad_u;                                                   \
                                                                                                    \
 public:                                                                                            \
-  using Moose::Kokkos::IntegratedBC<T>::operator();
+  using Moose::Kokkos::IntegratedBC<T>::operator()

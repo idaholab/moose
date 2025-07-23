@@ -580,7 +580,8 @@ public:
   KOKKOS_FUNCTION const Array<System> & kokkosSystems() const
   {
     KOKKOS_IF_ON_HOST(return _systems_host;)
-    KOKKOS_IF_ON_DEVICE(return _systems_device;)
+
+    return _systems_device;
   }
   /**
    * Get the writeable host reference of the Kokkos systems
@@ -596,7 +597,8 @@ public:
   KOKKOS_FUNCTION const System & kokkosSystem(unsigned int sys) const
   {
     KOKKOS_IF_ON_HOST(return _systems_host[sys];)
-    KOKKOS_IF_ON_DEVICE(return _systems_device[sys];)
+
+    return _systems_device[sys];
   }
   /**
    * Get the writeable reference of a Kokkos system

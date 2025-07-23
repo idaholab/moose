@@ -47,13 +47,17 @@
 #else
 #define MemSpace ::Kokkos::HostSpace
 #define ExecSpace ::Kokkos::OpenMP
+#undef KOKKOS_FUNCTION
 #define KOKKOS_FUNCTION
+#undef KOKKOS_INLINE_FUNCTION
 #define KOKKOS_INLINE_FUNCTION inline
+#undef KOKKOS_IF_ON_HOST
 #define KOKKOS_IF_ON_HOST(code)                                                                    \
   if (!omp_get_level())                                                                            \
   {                                                                                                \
     code                                                                                           \
   }
+#undef KOKKOS_IF_ON_DEVICE
 #define KOKKOS_IF_ON_DEVICE(code)                                                                  \
   if (omp_get_level())                                                                             \
   {                                                                                                \

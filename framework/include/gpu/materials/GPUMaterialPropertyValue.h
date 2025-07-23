@@ -15,7 +15,7 @@
 #define usingKokkosMaterialPropertyValueBaseMembers(T, dimension)                                  \
   using MaterialPropertyValueBase<T, dimension>::_qp;                                              \
   using MaterialPropertyValueBase<T, dimension>::_data;                                            \
-  using MaterialPropertyValueBase<T, dimension>::_value;
+  using MaterialPropertyValueBase<T, dimension>::_value
 
 namespace Moose
 {

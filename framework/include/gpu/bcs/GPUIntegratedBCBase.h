@@ -43,4 +43,4 @@ public:
 } // namespace Kokkos
 } // namespace Moose
 
-#define usingKokkosIntegratedBCBaseMembers usingKokkosBoundaryConditionMembers;
+#define usingKokkosIntegratedBCBaseMembers usingKokkosBoundaryConditionMembers

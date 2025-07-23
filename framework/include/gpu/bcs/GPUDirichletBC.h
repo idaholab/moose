@@ -49,4 +49,4 @@ public:
   usingKokkosDirichletBCBaseMembers(T);                                                            \
                                                                                                    \
 protected:                                                                                         \
-  using KokkosDirichletBC<T>::_value;
+  using KokkosDirichletBC<T>::_value

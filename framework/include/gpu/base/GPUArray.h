@@ -29,7 +29,7 @@ public:                                                                         
   using ArrayBase<T, dimension>::createHost;                                                       \
   using ArrayBase<T, dimension>::createDevice;                                                     \
   using ArrayBase<T, dimension>::offset;                                                           \
-  using ArrayBase<T, dimension>::operator=;
+  using ArrayBase<T, dimension>::operator=
 
 namespace Moose
 {
@@ -171,8 +171,9 @@ public:
    */
   KOKKOS_FUNCTION T * data() const
   {
-    KOKKOS_IF_ON_DEVICE(return _device_data;)
     KOKKOS_IF_ON_HOST(return _host_data;)
+
+    return _device_data;
   }
   /**
    * Get the first element
@@ -181,8 +182,9 @@ public:
    */
   KOKKOS_FUNCTION T & first() const
   {
-    KOKKOS_IF_ON_DEVICE(return _device_data[0];)
     KOKKOS_IF_ON_HOST(return _host_data[0];)
+
+    return _device_data[0];
   }
   /**
    * Get the last element
@@ -191,8 +193,9 @@ public:
    */
   KOKKOS_FUNCTION T & last() const
   {
-    KOKKOS_IF_ON_DEVICE(return _device_data[_size - 1];)
     KOKKOS_IF_ON_HOST(return _host_data[_size - 1];)
+
+    return _device_data[_size - 1];
   }
   /**
    * Get an array entry
@@ -204,8 +207,9 @@ public:
   {
     KOKKOS_ASSERT(i < _size);
 
-    KOKKOS_IF_ON_DEVICE(return _device_data[i];)
     KOKKOS_IF_ON_HOST(return _host_data[i];)
+
+    return _device_data[i];
   }
 
   /**
@@ -299,16 +303,6 @@ public:
    * @param scalar The scalar value to be assigned
    */
   auto & operator=(const T & scalar);
-  /**
-   * Shallow copy another Kokkos array
-   * @param array The Kokkos array to be shallow copied
-   */
-  auto & operator=(const ArrayBase<T, dimension> & array)
-  {
-    shallowCopy(array);
-
-    return *this;
-  }
 #endif
 
   /**
@@ -585,7 +579,7 @@ ArrayBase<T, dimension>::createInternal(const std::vector<uint64_t> n)
   _size = 1;
   _s[0] = 1;
 
-  for (unsigned int i = 0; i < n.size(); ++i)
+  for (unsigned int i = 0; i < dimension; ++i)
   {
     _n[i] = n[i];
     _size *= n[i];
@@ -767,7 +761,7 @@ ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyKind dir, uint64_t n, uint64_t o
 
 template <typename T>
 void
-copyInner(T & data)
+copyInner(T & /* data */)
 {
 }
 
@@ -989,6 +983,20 @@ public:
    * Default constructor
    */
   Array() = default;
+  /**
+   * Copy constructor
+   */
+  Array(const Array<T, 1> & array) : ArrayBase<T, 1>(array) {}
+  /**
+   * Shallow copy another Kokkos array
+   * @param array The Kokkos array to be shallow copied
+   */
+  auto & operator=(const Array<T, 1> & array)
+  {
+    this->shallowCopy(array);
+
+    return *this;
+  }
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -1097,7 +1105,7 @@ public:
    */
   KOKKOS_FUNCTION T & operator()(int64_t i0) const
   {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && i0 - _d[0] < _n[0]);
+    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<uint64_t>(i0 - _d[0]) < _n[0]);
 
     return this->operator[](i0 - _d[0]);
   }
@@ -1116,6 +1124,20 @@ public:
    * Default constructor
    */
   Array() = default;
+  /**
+   * Copy constructor
+   */
+  Array(const Array<T, 2> & array) : ArrayBase<T, 2>(array) {}
+  /**
+   * Shallow copy another Kokkos array
+   * @param array The Kokkos array to be shallow copied
+   */
+  auto & operator=(const Array<T, 2> & array)
+  {
+    this->shallowCopy(array);
+
+    return *this;
+  }
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -1173,8 +1195,8 @@ public:
    */
   KOKKOS_FUNCTION T & operator()(int64_t i0, int64_t i1) const
   {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && i0 - _d[0] < _n[0]);
-    KOKKOS_ASSERT(i1 - _d[1] >= 0 && i1 - _d[1] < _n[1]);
+    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<uint64_t>(i0 - _d[0]) < _n[0]);
+    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<uint64_t>(i1 - _d[1]) < _n[1]);
 
     return this->operator[](i0 - _d[0] + (i1 - _d[1]) * _s[1]);
   }
@@ -1193,6 +1215,20 @@ public:
    * Default constructor
    */
   Array() = default;
+  /**
+   * Copy constructor
+   */
+  Array(const Array<T, 3> & array) : ArrayBase<T, 3>(array) {}
+  /**
+   * Shallow copy another Kokkos array
+   * @param array The Kokkos array to be shallow copied
+   */
+  auto & operator=(const Array<T, 3> & array)
+  {
+    this->shallowCopy(array);
+
+    return *this;
+  }
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -1263,9 +1299,9 @@ public:
    */
   KOKKOS_FUNCTION T & operator()(int64_t i0, int64_t i1, int64_t i2) const
   {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && i0 - _d[0] < _n[0]);
-    KOKKOS_ASSERT(i1 - _d[1] >= 0 && i1 - _d[1] < _n[1]);
-    KOKKOS_ASSERT(i2 - _d[2] >= 0 && i2 - _d[2] < _n[2]);
+    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<uint64_t>(i0 - _d[0]) < _n[0]);
+    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<uint64_t>(i1 - _d[1]) < _n[1]);
+    KOKKOS_ASSERT(i2 - _d[2] >= 0 && static_cast<uint64_t>(i2 - _d[2]) < _n[2]);
 
     return this->operator[](i0 - _d[0] + (i1 - _d[1]) * _s[1] + (i2 - _d[2]) * _s[2]);
   }
@@ -1284,6 +1320,20 @@ public:
    * Default constructor
    */
   Array() = default;
+  /**
+   * Copy constructor
+   */
+  Array(const Array<T, 4> & array) : ArrayBase<T, 4>(array) {}
+  /**
+   * Shallow copy another Kokkos array
+   * @param array The Kokkos array to be shallow copied
+   */
+  auto & operator=(const Array<T, 4> & array)
+  {
+    this->shallowCopy(array);
+
+    return *this;
+  }
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -1364,10 +1414,10 @@ public:
    */
   KOKKOS_FUNCTION T & operator()(int64_t i0, int64_t i1, int64_t i2, int64_t i3) const
   {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && i0 - _d[0] < _n[0]);
-    KOKKOS_ASSERT(i1 - _d[1] >= 0 && i1 - _d[1] < _n[1]);
-    KOKKOS_ASSERT(i2 - _d[2] >= 0 && i2 - _d[2] < _n[2]);
-    KOKKOS_ASSERT(i3 - _d[3] >= 0 && i3 - _d[3] < _n[3]);
+    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<uint64_t>(i0 - _d[0]) < _n[0]);
+    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<uint64_t>(i1 - _d[1]) < _n[1]);
+    KOKKOS_ASSERT(i2 - _d[2] >= 0 && static_cast<uint64_t>(i2 - _d[2]) < _n[2]);
+    KOKKOS_ASSERT(i3 - _d[3] >= 0 && static_cast<uint64_t>(i3 - _d[3]) < _n[3]);
 
     return this->operator[](i0 - _d[0] + (i1 - _d[1]) * _s[1] + (i2 - _d[2]) * _s[2] +
                             (i3 - _d[3]) * _s[3]);
@@ -1387,6 +1437,20 @@ public:
    * Default constructor
    */
   Array() = default;
+  /**
+   * Copy constructor
+   */
+  Array(const Array<T, 5> & array) : ArrayBase<T, 5>(array) {}
+  /**
+   * Shallow copy another Kokkos array
+   * @param array The Kokkos array to be shallow copied
+   */
+  auto & operator=(const Array<T, 5> & array)
+  {
+    this->shallowCopy(array);
+
+    return *this;
+  }
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -1477,11 +1541,11 @@ public:
    */
   KOKKOS_FUNCTION T & operator()(int64_t i0, int64_t i1, int64_t i2, int64_t i3, int64_t i4) const
   {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && i0 - _d[0] < _n[0]);
-    KOKKOS_ASSERT(i1 - _d[1] >= 0 && i1 - _d[1] < _n[1]);
-    KOKKOS_ASSERT(i2 - _d[2] >= 0 && i2 - _d[2] < _n[2]);
-    KOKKOS_ASSERT(i3 - _d[3] >= 0 && i3 - _d[3] < _n[3]);
-    KOKKOS_ASSERT(i4 - _d[4] >= 0 && i4 - _d[4] < _n[4]);
+    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<uint64_t>(i0 - _d[0]) < _n[0]);
+    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<uint64_t>(i1 - _d[1]) < _n[1]);
+    KOKKOS_ASSERT(i2 - _d[2] >= 0 && static_cast<uint64_t>(i2 - _d[2]) < _n[2]);
+    KOKKOS_ASSERT(i3 - _d[3] >= 0 && static_cast<uint64_t>(i3 - _d[3]) < _n[3]);
+    KOKKOS_ASSERT(i4 - _d[4] >= 0 && static_cast<uint64_t>(i4 - _d[4]) < _n[4]);
 
     return this->operator[](i0 - _d[0] + (i1 - _d[1]) * _s[1] + (i2 - _d[2]) * _s[2] +
                             (i3 - _d[3]) * _s[3] + (i4 - _d[4]) * _s[4]);

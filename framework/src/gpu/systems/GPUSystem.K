@@ -200,7 +200,7 @@ System::setupSparsity()
   std::vector<PetscInt> row_idx;
   std::vector<PetscInt> row_ptr = {0};
 
-  for (PetscInt r = _dof_map.first_dof(); r < _dof_map.end_dof(); ++r)
+  for (dof_id_type r = _dof_map.first_dof(); r < _dof_map.end_dof(); ++r)
   {
     auto & cols = pattern->get_sparsity_pattern().at(r - _dof_map.first_dof());
 

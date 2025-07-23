@@ -46,4 +46,4 @@ public:
                                                                                                    \
 protected:                                                                                         \
   using Moose::Kokkos::BoundaryCondition::boundaryElementSideID;                                   \
-  using Moose::Kokkos::BoundaryCondition::boundaryNodeID;
+  using Moose::Kokkos::BoundaryCondition::boundaryNodeID
