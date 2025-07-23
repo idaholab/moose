@@ -122,4 +122,4 @@ DirichletBCBase<Derived>::operator()(const size_t tid) const
   usingKokkosNodalBCMembers(T);                                                                    \
                                                                                                    \
 public:                                                                                            \
-  using Moose::Kokkos::DirichletBCBase<T>::operator();
+  using Moose::Kokkos::DirichletBCBase<T>::operator()

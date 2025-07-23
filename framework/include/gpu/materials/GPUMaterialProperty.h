@@ -75,6 +75,10 @@ public:
    * Default constructor
    */
   MaterialPropertyBase() = default;
+  /**
+   * Desturctor
+   */
+  virtual ~MaterialPropertyBase() {}
 
   /**
    * Get the property ID
@@ -233,14 +237,27 @@ public:
   {
     if (!property._reference)
     {
-      *this = property;
-      this->_reference = &property;
+      shallowCopy(property);
+
+      _reference = &property;
     }
     else
     {
-      *this = *property._reference;
-      this->_reference = property._reference;
+      shallowCopy(*property._reference);
+
+      _reference = property._reference;
     }
+  }
+
+  /**
+   * Shallow copy another property
+   * @param property The property to be shallow copied
+   */
+  MaterialProperty<T, dimension> & operator=(const MaterialProperty<T, dimension> & property)
+  {
+    shallowCopy(property);
+
+    return *this;
   }
 
   /**
@@ -276,6 +293,21 @@ protected:
   }
 
 private:
+  /**
+   * Shallow copy another property
+   * @param property The property to be shallow copied
+   */
+  void shallowCopy(const MaterialProperty<T, dimension> & property)
+  {
+    _record = property._record;
+    _id = property._id;
+    _default = property._default;
+
+    _reference = property._reference;
+    _data = property._data;
+    _value = property._value;
+  }
+
 #ifdef MOOSE_KOKKOS_SCOPE
   virtual void allocate(const MooseMesh & mesh,
                         const Assembly & assembly,

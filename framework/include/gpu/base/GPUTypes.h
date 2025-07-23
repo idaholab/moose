@@ -31,11 +31,19 @@ struct Real33
 #ifdef MOOSE_KOKKOS_SCOPE
   KOKKOS_INLINE_FUNCTION Real33() { *this = 0; }
   KOKKOS_INLINE_FUNCTION Real33(const Real & scalar) { *this = scalar; }
-
+  KOKKOS_INLINE_FUNCTION Real33(const Real33 & tensor) { *this = tensor; }
   KOKKOS_INLINE_FUNCTION Real & operator()(unsigned int i, unsigned int j) { return a[i][j]; }
   KOKKOS_INLINE_FUNCTION const Real & operator()(unsigned int i, unsigned int j) const
   {
     return a[i][j];
+  }
+  KOKKOS_INLINE_FUNCTION Real33 & operator=(const Real33 & tensor)
+  {
+    for (unsigned int i = 0; i < 3; ++i)
+      for (unsigned int j = 0; j < 3; ++j)
+        a[i][j] = tensor.a[i][j];
+
+    return *this;
   }
   KOKKOS_INLINE_FUNCTION Real33 & operator=(Real scalar)
   {
@@ -53,16 +61,20 @@ struct Real33
   }
   KOKKOS_INLINE_FUNCTION Real determinant(unsigned int dim = 3)
   {
+    Real det = 0;
+
     if (dim == 0)
-      return 1;
+      det = 1;
     else if (dim == 1)
-      return a[0][0];
+      det = a[0][0];
     else if (dim == 2)
-      return a[0][0] * a[1][1] - a[0][1] * a[1][0];
+      det = a[0][0] * a[1][1] - a[0][1] * a[1][0];
     else if (dim == 3)
-      return a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1]) -
-             a[0][1] * (a[1][0] * a[2][2] - a[1][2] * a[2][0]) +
-             a[0][2] * (a[1][0] * a[2][1] - a[1][1] * a[2][0]);
+      det = a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1]) -
+            a[0][1] * (a[1][0] * a[2][2] - a[1][2] * a[2][0]) +
+            a[0][2] * (a[1][0] * a[2][1] - a[1][1] * a[2][0]);
+
+    return det;
   }
   KOKKOS_INLINE_FUNCTION Real33 inverse(unsigned int dim = 3)
   {
@@ -146,6 +158,14 @@ struct Real3
 
   KOKKOS_INLINE_FUNCTION Real & operator()(unsigned int i) { return v[i]; }
 
+  KOKKOS_INLINE_FUNCTION Real3 & operator=(const Real3 & vector)
+  {
+    v[0] = vector.v[0];
+    v[1] = vector.v[1];
+    v[2] = vector.v[2];
+
+    return *this;
+  }
   KOKKOS_INLINE_FUNCTION Real3 & operator=(Real scalar)
   {
     v[0] = scalar;

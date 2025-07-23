@@ -67,7 +67,8 @@ public:
   KOKKOS_FUNCTION auto size() const
   {
     KOKKOS_IF_ON_HOST(return _map->size();)
-    KOKKOS_IF_ON_DEVICE(return _keys.size();)
+
+    return _keys.size();
   }
   /**
    * Find the index of a key

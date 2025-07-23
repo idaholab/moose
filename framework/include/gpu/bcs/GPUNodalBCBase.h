@@ -47,11 +47,11 @@ public:
    */
   ///@{
   virtual bool preset() const { return false; }
-  virtual void presetSolution(TagID tag) {}
+  virtual void presetSolution(TagID /* tag */) {}
   ///@}
 };
 
 } // namespace Kokkos
 } // namespace Moose
 
-#define usingKokkosNodalBCBaseMembers usingKokkosBoundaryConditionMembers;
+#define usingKokkosNodalBCBaseMembers usingKokkosBoundaryConditionMembers

@@ -35,7 +35,9 @@ public:
         "name", this->template getParam<std::vector<unsigned int>>("dims"));
   }
 
-  KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const {}
+  KOKKOS_FUNCTION void computeQpProperties(const unsigned int /* qp */, Datum & /* datum */) const
+  {
+  }
 
 protected:
   Moose::Kokkos::MaterialProperty<T, dimension> _property;

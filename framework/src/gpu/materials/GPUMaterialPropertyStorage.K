@@ -213,7 +213,7 @@ dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage
   unsigned int num_stateful_properties;
   dataLoad(stream, num_stateful_properties, nullptr);
 
-  for (auto prop = 0; prop < num_stateful_properties; ++prop)
+  for (unsigned int prop = 0; prop < num_stateful_properties; ++prop)
   {
     std::string name;
     dataLoad(stream, name, nullptr);

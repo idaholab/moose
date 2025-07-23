@@ -122,7 +122,7 @@ Assembly::initQuadrature()
 
       // Cache volume quadrature of each reference element
 
-      qrule->init(elem->type(), /* p-level */ 0);
+      qrule->init(*elem, /* p-level */ 0);
       n_qps[elem_type] = qrule->n_points();
 
       _q_points(sid, elem_type_id).create(qrule->n_points());
@@ -138,7 +138,7 @@ Assembly::initQuadrature()
 
       for (unsigned int side = 0; side < elem->n_sides(); ++side)
       {
-        qrule_face->init(elem->side_ptr(side)->type(), /* p-level */ 0);
+        qrule_face->init(*elem->side_ptr(side), /* p-level */ 0);
         n_qps_face[elem_type].push_back(qrule_face->n_points());
 
         _q_points_face(sid, elem_type_id)[side].create(qrule_face->n_points());
@@ -259,7 +259,6 @@ Assembly::initShape()
   for (auto subdomain : _mesh.meshSubdomains())
   {
     auto sid = kokkosMesh().getSubdomainID(subdomain);
-    auto & map = kokkosMesh().getSubdomainLocalElementMap(subdomain);
 
     auto & assembly = _problem.assembly(0, 0);
     auto qrule = assembly.writeableQRule(_dimension, subdomain);

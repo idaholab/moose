@@ -211,4 +211,4 @@ protected:                                                                      
   using Moose::Kokkos::NodalBC<T>::_u;                                                             \
                                                                                                    \
 public:                                                                                            \
-  using Moose::Kokkos::NodalBC<T>::operator();
+  using Moose::Kokkos::NodalBC<T>::operator()
