@@ -109,23 +109,21 @@ and the thermal expansion `dL/L_0(T) [%]` is given by:
 
 For temperature range: 5 ≤ T < 294
 
-| Constant | Value      | Unit |
-|----------|------------|------|
-| A0       | -8.529E-02 | [1]  |
-| A1       | -9.915E-02 | [1]  |
-| A2       | 2.257E+00  | [1]  |
-| A3       | -3.157E+00 | [1]  |
+| Constant | Value      | Unit           |
+|----------|------------|----------------|
+| A0       | -8.529E-02 | `${units 1}`   |
+| A1       | -9.915E-02 | `${units 1}`   |
+| A2       | 2.257E+00  | `${units 1}`   |
+| A3       | -3.157E+00 | `${units 1}`   |
 
 For temperature range: 294 ≤ T ≤ 3600
 
-| Constant | Value      | Unit |
-|----------|------------|------|
-| A0       | -1.400E-01 | [1]  |
-| A1       | 4.869E-01  | [1]  |
-| A2       | -3.056E-02 | [1]  |
-| A3       | 2.234E-02  | [1]  |
-
-!listing modules/solid_properties/test/tests/tungsten/tungsten_thermal_properties.i block=Materials
+| Constant | Value      | Unit           |
+|----------|------------|----------------|
+| A0       | -1.400E-01 | `${units 1}`   |
+| A1       | 4.869E-01  | `${units 1}`   |
+| A2       | -3.056E-02 | `${units 1}`   |
+| A3       | 2.234E-02  | `${units 1}`   |
 
 !syntax parameters /Materials/TungstenThermalPropertiesMaterial
 
