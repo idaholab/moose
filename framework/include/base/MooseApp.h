@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 // Libtorch includes
 #include <torch/types.h>
 #include <torch/mps.h>
@@ -88,7 +88,7 @@ class MooseApp : public ConsoleStreamInterface,
                  public MooseBase
 {
 public:
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
   /// Get the device torch is supposed to be running on.
   torch::DeviceType getLibtorchDevice() const { return _libtorch_device; }
 #endif
@@ -1002,7 +1002,7 @@ private:
    */
   void removeRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
   /**
    * Function to determine the device which should be used by libtorch on this
    * application. We use this function to decide what is available on different
@@ -1556,7 +1556,7 @@ private:
   /// the backup will not be filled yet.
   std::unique_ptr<Backup> * const _initial_backup;
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
   /// The libtorch device this app is using.
   const torch::DeviceType _libtorch_device;
 #endif

@@ -121,23 +121,23 @@ unity_files:
 #
 # C++ rules
 #
-pcre%.$(obj-suffix) : pcre%.cc | prebuild
+pcre%.$(obj-suffix) : pcre%.cc | $(prebuild)
 	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(ADDITIONAL_CPPFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
-gtest%.$(no-method-obj-suffix) : gtest%.cc | prebuild
+gtest%.$(no-method-obj-suffix) : gtest%.cc | $(prebuild)
 	@echo "Compiling C++ "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(ADDITIONAL_CPPFLAGS) $(gtest_INCLUDE) $(CXXFLAGS) -w -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
-%.$(obj-suffix) : %.cc
+%.$(obj-suffix) : %.cc | $(prebuild)
 	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(ADDITIONAL_CPPFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 define CXX_RULE_TEMPLATE
-%$(1).$(obj-suffix) : %.C $(ADDITIONAL_SRC_DEPS)
+%$(1).$(obj-suffix) : %.C $(ADDITIONAL_SRC_DEPS) | $(prebuild)
 ifeq ($(1),)
 	@echo "Compiling C++ (in "$$(METHOD)" mode) "$$<"..."
 else
@@ -149,7 +149,7 @@ endef
 # Instantiate Rules
 $(eval $(call CXX_RULE_TEMPLATE,))
 
-%.$(obj-suffix) : %.cpp
+%.$(obj-suffix) : %.cpp | $(prebuild)
 	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(ADDITIONAL_CPPFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
@@ -170,12 +170,12 @@ $(eval $(call CXX_RULE_TEMPLATE,))
 # C rules
 #
 
-pcre%.$(obj-suffix) : pcre%.c | prebuild
+pcre%.$(obj-suffix) : pcre%.c | $(prebuild)
 	@echo "Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
-%.$(obj-suffix) : %.c
+%.$(obj-suffix) : %.c | $(prebuild)
 	@echo "Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
@@ -315,10 +315,9 @@ endif
 #
 PLUGIN_FLAGS := -shared -fPIC -Wl,-undefined,dynamic_lookup
 
-# we add include/base so that MooseConfig.h can be found, which is absent from the symlink dirs
-%-$(METHOD).plugin : %.C
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -I $(FRAMEWORK_DIR)/include/base $< -o $@
-%-$(METHOD).plugin : %.c
+%-$(METHOD).plugin : %.C | $(prebuild)
+	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
+%-$(METHOD).plugin : %.c | $(prebuild)
 	@echo "Compiling C Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(PLUGIN_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f
