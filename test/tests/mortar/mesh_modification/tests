@@ -1,0 +1,11 @@
+[Tests]
+  design = 'syntax/MeshModifiers/index.md syntax/Constraints/index.md'
+  issues = '#31067'
+  [mortar_moving_subdomains]
+    type = CSVDiff
+    input = 'displaced_and_modifying_meshes.i'
+    csvdiff = 'displaced_and_modifying_meshes_out.csv'
+    abs_zero = 1e-8
+    requirement = 'The system shall be able to use mortar constraints while modifying element subdomains in the mesh and the displaced mesh.'
+  []
+[]
