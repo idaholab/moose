@@ -827,14 +827,14 @@ MultiApp::restore(bool force)
     {
       for (unsigned int i = 0; i < _my_num_apps; i++)
       {
-        for (unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numNonlinearSystems();
+        for (unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numSolverSystems();
              j++)
         {
-          _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase(/*nl_sys=*/j).solution() =
+          _apps[i]->getExecutioner()->feProblem().getSolverSystem(/*solver_sys=*/j).solution() =
               *_end_solutions[i][j];
 
           // We need to synchronize solution so that local_solution has the right values
-          _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase(/*nl_sys=*/j).update();
+          _apps[i]->getExecutioner()->feProblem().getSolverSystem(/*solver_sys=*/j).update();
         }
       }
 
