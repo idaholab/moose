@@ -67,8 +67,8 @@ public:
    * @returns The component of the Jacobian contribution that will be multiplied by the test
    * function
    */
-  KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int j,
-                                            const unsigned int qp,
+  KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int /* j */,
+                                            const unsigned int /* qp */,
                                             ResidualDatum & /* datum */) const
   {
     return 0;
@@ -134,7 +134,7 @@ KOKKOS_FUNCTION void
 KernelValue<Derived>::computeJacobianInternal(const Derived * kernel, ResidualDatum & datum) const
 {
   Real local_ke[MAX_DOF];
-  Real value;
+  Real value = 0;
 
   unsigned int num_batches = datum.n_idofs() * datum.n_jdofs() / MAX_DOF;
 

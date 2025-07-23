@@ -118,4 +118,4 @@ TimeKernel<Derived>::computeResidualInternal(const Derived * kernel, ResidualDat
                                                                                                    \
 protected:                                                                                         \
   using Moose::Kokkos::TimeKernel<T>::_u_dot;                                                      \
-  using Moose::Kokkos::TimeKernel<T>::_du_dot_du;
+  using Moose::Kokkos::TimeKernel<T>::_du_dot_du

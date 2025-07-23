@@ -64,4 +64,4 @@ protected:
                                                                                                    \
 protected:                                                                                         \
   using Moose::Kokkos::TimeNodalKernel<T>::_u_dot;                                                 \
-  using Moose::Kokkos::TimeNodalKernel<T>::_du_dot_du;
+  using Moose::Kokkos::TimeNodalKernel<T>::_du_dot_du

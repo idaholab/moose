@@ -413,4 +413,4 @@ protected:                                                                      
   using Moose::Kokkos::Kernel<T>::_grad_u;                                                         \
                                                                                                    \
 public:                                                                                            \
-  using Moose::Kokkos::Kernel<T>::operator();
+  using Moose::Kokkos::Kernel<T>::operator()
