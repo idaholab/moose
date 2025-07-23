@@ -52,12 +52,12 @@ public:
   virtual std::unordered_map<std::string, Real> getCoeffs() const override;
 
   /**
-   * @brief get direction from point to surface
+   * @brief given a point, determine its evaluation based on the equation of the cylinder
    *
    * @param p point
-   * @return sign of direction to surface from point
+   * @return evaluation of point based on surface equation
    */
-  virtual CSGSurface::Direction directionFromPoint(const Point & p) const override;
+  virtual Real evaluateSurfaceEquationAtPoint(const Point & p) const override;
 
 protected:
   /// Value of x0 in equation of an y-axis aligned cylinder

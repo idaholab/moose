@@ -25,14 +25,13 @@ CSGXCylinder::getCoeffs() const
   return coeffs;
 }
 
-CSGSurface::Direction
-CSGXCylinder::directionFromPoint(const Point & p) const
+Real
+CSGXCylinder::evaluateSurfaceEquationAtPoint(const Point & p) const
 {
   // Compute distance from the cylinder center to determine if inside (< r^2)
   // or outside (> r^2) the cylinder
   const Real dist_sq = Utility::pow<2>((p(1) - _y0)) + Utility::pow<2>((p(2) - _z0));
 
-  return (dist_sq > Utility::pow<2>(_r)) ? CSGSurface::Direction::POSITIVE
-                                         : CSGSurface::Direction::NEGATIVE;
+  return dist_sq - Utility::pow<2>(_r);
 }
 } // namespace CSG

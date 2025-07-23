@@ -22,8 +22,8 @@ namespace CSG
 class CSGSurface
 {
 public:
-  /// Enum for the direction of the half-space being represented by a point and surface
-  enum class Direction
+  /// Enum for the sign of the half-space being represented by a point and surface
+  enum class Halfspace
   {
     POSITIVE,
     NEGATIVE
@@ -79,14 +79,24 @@ public:
   virtual std::unordered_map<std::string, Real> getCoeffs() const = 0; // Pure virtual function
 
   /**
-   * @brief get direction from point to surface (e.g. is point 'inside' the half-space, or
-   * 'outside')
+   * @brief given a point, determine its evaluation based on the surface equation. A positive value
+   * indicates a point that lies in the positive value of the surface, a negative value
+   * indicates a point that lies in the negative value of the surface, and a value of 0 indicates
+   * that the point lies on the surface.
    *
    * @param p point
-   * @return sign of direction to surface from point
+   * @return evaluation of point based on surface equation
    */
-  virtual CSGSurface::Direction
-  directionFromPoint(const Point & p) const = 0; // Pure virtual function
+  virtual Real evaluateSurfaceEquationAtPoint(const Point & p) const = 0; // Pure virtual function
+
+  /**
+   * @brief given a point, determine if it is in the positive or negative
+   * half-space for the surface
+   *
+   * @param p point
+   * @return sign of the half-space
+   */
+  CSGSurface::Halfspace getHalfspaceFromPoint(const Point & p) const;
 
   /**
    * @brief Get the name of surface

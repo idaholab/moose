@@ -61,7 +61,14 @@ std::unique_ptr<CSG::CSGSurface> surf_ptr = std::make_unique<SurfaceType>(argume
 const auto & surface = csg_obj->addSurface(surf_ptr);
 ```
 
-The `CSG` framework in MOOSE provides various classes for creating basic surfaces:
+!alert! note title=Adding surfaces to the CSGBase instance
+
+Surfaces need to be added to the CSGBase instance with `addSurace` as described above. If this is not done and these surfaces are referenced in regions used to define cells within the CSGBase instance, an error will occur.
+
+!alert-end!
+
+The `CSG` framework in MOOSE provides various classes for creating basic surfaces (see table below).
+Information about how to define new types of surfaces can be found in [source/csg/CSGSurface.md].
 
 | Surface Type | Class | Description |
 |---------|--------|------------|
@@ -500,11 +507,11 @@ ExamplePrismCSGMeshGenerator::generateCSG()
         surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
     const auto & csg_plane = csg_obj->addSurface(plane_ptr);
     // determine where the plane is in relation to the centroid to be able to set the half-space
-    const auto region_direction = csg_plane.directionFromPoint(centroid);
+    const auto region_direction = csg_plane.getHalfspaceFromPoint(centroid);
     // half-space is either positive (+plane_ptr) or negative (-plane_ptr)
     / /depending on the direction to the centroid
     auto halfspace =
-        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
+        ((region_direction == CSG::CSGSurface::Halfspace::POSITIVE) ? +csg_plane : -csg_plane);
     // check if this is the first half-space to be added to the region,
     // if not, update the existing region with the intersection of the regions (&=)
     if (region.getRegionType() == "EMPTY")
@@ -572,9 +579,9 @@ ExampleAxialSurfaceMeshGenerator::generateCSG()
         std::make_unique<CSG::CSGPlane>(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
     const auto & csg_plane = csg_obj->addSurface(plane_ptr);
     // determine the half-space to add as an updated intersection
-    const auto region_direction = csg_plane.directionFromPoint(centroid);
+    const auto region_direction = csg_plane.getHalfspaceFromPoint(centroid);
     auto halfspace =
-        ((region_direction == CSG::CSGSurface::Direction::POSITIVE) ? +csg_plane : -csg_plane);
+        ((region_direction == CSG::CSGSurface::Halfspace::POSITIVE) ? +csg_plane : -csg_plane);
     // update the existing region with a half-space
     cell_region &= halfspace;
   }
