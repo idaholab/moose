@@ -1,0 +1,10 @@
+[Tests]
+  design = 'syntax/MeshModifiers/index.md MortarConstraint.md'
+  issues = '#31067'
+  [mortar_moving_subdomains]
+    type = Exodiff
+    input = 'displaced_and_modifying_meshes.i'
+    exodiff = 'displaced_and_modifying_meshes_out.e displaced_and_modifying_meshes_out.e-s003'
+    requirement = 'The system shall be able to use mortar constraints while modifying element subdomains in the mesh and the displaced mesh.'
+  []
+[]

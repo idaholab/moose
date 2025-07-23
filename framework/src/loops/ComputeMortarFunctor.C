@@ -51,6 +51,18 @@ ComputeMortarFunctor::ComputeMortarFunctor(
 }
 
 void
+ComputeMortarFunctor::setupMortarMaterials()
+{
+  Moose::Mortar::setupMortarMaterials(_mortar_constraints,
+                                      _fe_problem,
+                                      _amg,
+                                      /*thread id*/ 0,
+                                      _secondary_ip_sub_to_mats,
+                                      _primary_ip_sub_to_mats,
+                                      _secondary_boundary_mats);
+}
+
+void
 ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type,
                                  const std::set<TagID> & vector_tag_ids,
                                  const std::set<TagID> & /*matrix_tag_ids*/)
