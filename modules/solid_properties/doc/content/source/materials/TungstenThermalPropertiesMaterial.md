@@ -2,7 +2,7 @@
 
 !syntax description /Materials/TungstenThermalPropertiesMaterial
 
-`TungstenThermalPropertiesMaterial` provides tungsten's thermal conductivity, specific heat, and density as material properties based on temperature
+This class provides tungsten's thermal conductivity, specific heat, and density as material properties based on temperature.
 
 Properties of tungsten are obtained from [!cite](milner2024space).
 
