@@ -54,7 +54,7 @@ public:
   /**
    * Returns convergence status.
    *
-   * @param[in] iter   Iteration index
+   * @param[in] iter   Iteration index (first index in loop should be 0)
    */
   virtual MooseConvergenceStatus checkConvergence(unsigned int iter) = 0;
 
