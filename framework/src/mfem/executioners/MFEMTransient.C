@@ -29,7 +29,7 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
   : TransientBase(params),
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
     _mfem_problem_data(_mfem_problem.getProblemData()),
-    _mfem_problem_solve(params, _mfem_problem)
+    _mfem_problem_solve(*this, getProblemOperators())
 {
 }
 
@@ -68,8 +68,7 @@ MFEMTransient::takeStep(Real input_dt)
   // Advance time step of the MFEM problem. Time is also updated here, and
   // _problem_operator->SetTime is called inside the ode_solver->Step method to
   // update the time used by time dependent (function) coefficients.
-  // Takes place instead of TimeStepper::step().
-  _mfem_problem_solve.solve(getProblemOperators());
+  _time_stepper->step();
 
   // Continue with usual TransientBase::takeStep() finalisation
   _last_solve_converged = _time_stepper->converged();
