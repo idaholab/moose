@@ -21,8 +21,5 @@
     end_extrusion_direction = '1 0 0'
     start_extrusion_direction = '0 1 0'
     r_final = 3
-    radial_growth_method = CUBIC
-    start_radial_growth_rate=0
-    end_radial_growth_rate=2
   []
 []
