@@ -39,15 +39,6 @@ protected:
   CSGUniverse & addUniverse(const std::string & name);
 
   /**
-   * @brief create a universe from list of cells
-   *
-   * @param name unique name of universe
-   * @param cells list of cell pointers to add to the universe upon creation
-   * @return pointer to universe that is created
-   */
-  CSGUniverse & addUniverse(const std::string & name, std::vector<CSGCell *> & cells);
-
-  /**
    * @brief Get map of all names to universes in universe list
    *
    * @return map of all names to CSGUniverse pointers

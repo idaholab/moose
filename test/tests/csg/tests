@@ -158,6 +158,24 @@
       expect_err = 'ambiguously defined halfspace'
       mesh_mode = REPLICATED
     []
+    [halfspace_defined_by_two_regions]
+      max_threads = 1
+      type = 'RunException'
+      input = 'csg_only_invalid_region_types.i'
+      detail = ' trying to define a halfspace by passing in two regions to the CSGRegion constructor'
+      cli_args = '--csg-only'
+      expect_err = 'Region type HALFSPACE is not supported for two regions.'
+      mesh_mode = REPLICATED
+    []
+    [union_defined_by_empty_region]
+      max_threads = 1
+      type = 'RunException'
+      input = 'csg_only_invalid_region_types.i'
+      detail = ' trying to define a unionized region by passing in an empty region to the CSGRegion constructor'
+      cli_args = 'Mesh/csg_inf_square/region_type=1 --csg-only'
+      expect_err = 'Region operation UNION cannot be performed on an empty region.'
+      mesh_mode = REPLICATED
+    []
     [distributed_mesh]
       max_threads = 1
       type = RunException

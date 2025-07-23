@@ -51,17 +51,22 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
   auto & csg_cell = root_univ.getCell(cell_name);
   auto cell_region = csg_cell.getRegion();
   const auto centroid = Point(0, 0, 0);
+  const auto default_surf_name = "default_surf";
 
   // Add surfaces and halfspaces corresponding to top and bottom axial planes
   std::vector<std::string> surf_names{"plus_z", "minus_z"};
   std::vector<Real> coeffs{0.5 * _axial_height, -0.5 * _axial_height};
   for (unsigned int i = 0; i < coeffs.size(); ++i)
   {
-    const auto surf_name = "surf_" + surf_names[i];
     // z plane equation: 0.0*x + 0.0*y + 1.0*z = (+/-)0.5 * axial_height
     std::unique_ptr<CSG::CSGSurface> surface_ptr =
-        std::make_unique<CSG::CSGPlane>(surf_name, 0.0, 0.0, 1.0, coeffs[i]);
+        std::make_unique<CSG::CSGPlane>(default_surf_name, 0.0, 0.0, 1.0, coeffs[i]);
     auto & csg_plane = csg_obj->addSurface(surface_ptr);
+
+    // Rename surface so that it has a unique name
+    const auto surf_name = "surf_" + surf_names[i];
+    csg_obj->renameSurface(csg_plane, surf_name);
+
     const auto region_direction = csg_plane.getHalfspaceFromPoint(centroid);
     auto halfspace =
         ((region_direction == CSG::CSGSurface::Halfspace::POSITIVE) ? +csg_plane : -csg_plane);
@@ -69,6 +74,9 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
   }
 
   csg_obj->updateCellRegion(csg_cell, cell_region);
+
+  // Rename cell as it now defines a box region instead of an infinite square region
+  csg_obj->renameCell(csg_cell, "box_cell");
 
   return csg_obj;
 }
