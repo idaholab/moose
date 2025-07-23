@@ -52,7 +52,7 @@ public:
   }
 #endif
 
-private:
+protected:
   /**
    * Total thread pool size
    */

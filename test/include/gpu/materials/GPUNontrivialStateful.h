@@ -14,7 +14,20 @@ class NotTriviallyCopyable
 public:
   NotTriviallyCopyable() = default;
   NotTriviallyCopyable(const NotTriviallyCopyable &) {}
+  NotTriviallyCopyable & operator=(const NotTriviallyCopyable &) { return *this; }
 };
+
+namespace Moose
+{
+namespace Kokkos
+{
+template <>
+struct ArrayDeepCopy<NotTriviallyCopyable>
+{
+  static const bool value = true;
+};
+} // namespace Kokkos
+} // namespace Moose
 
 class KokkosNontrivialStateful final : public Moose::Kokkos::Material<KokkosNontrivialStateful>
 {

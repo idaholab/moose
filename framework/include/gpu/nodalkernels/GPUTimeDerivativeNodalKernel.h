@@ -22,5 +22,5 @@ public:
   KokkosTimeDerivativeNodalKernel(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const { return _u_dot(node); }
-  KOKKOS_FUNCTION Real computeQpJacobian(const dof_id_type node) const { return _du_dot_du; }
+  KOKKOS_FUNCTION Real computeQpJacobian(const dof_id_type /* node */) const { return _du_dot_du; }
 };

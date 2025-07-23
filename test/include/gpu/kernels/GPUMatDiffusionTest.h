@@ -23,7 +23,6 @@ public:
                                          const unsigned int qp,
                                          ResidualDatum & datum) const
   {
-    Real diff = _diff(datum, qp);
     return _diff(datum, qp) * _grad_test(datum, i, qp) * _grad_u(datum, qp);
   }
 

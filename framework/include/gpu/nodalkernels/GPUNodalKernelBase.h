@@ -50,4 +50,4 @@ public:
                                                                                                    \
 protected:                                                                                         \
   using Moose::Kokkos::NodalKernelBase::blockNodeID;                                               \
-  using Moose::Kokkos::NodalKernelBase::boundaryNodeID;
+  using Moose::Kokkos::NodalKernelBase::boundaryNodeID

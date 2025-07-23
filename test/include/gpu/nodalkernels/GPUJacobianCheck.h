@@ -22,5 +22,5 @@ public:
   KokkosJacobianCheck(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const { return -5.0 * _u(node); }
-  KOKKOS_FUNCTION Real computeQpJacobian(const dof_id_type node) const { return -5.0; }
+  KOKKOS_FUNCTION Real computeQpJacobian(const dof_id_type /* node */) const { return -5.0; }
 };

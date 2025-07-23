@@ -24,7 +24,7 @@ public:
     return params;
   }
 
-  KokkosTimeDerivative::KokkosTimeDerivative(const InputParameters & parameters)
+  KokkosTimeDerivative(const InputParameters & parameters)
     : Moose::Kokkos::TimeKernel<Derived>(parameters),
       _lumping(this->template getParam<bool>("lumping"))
   {

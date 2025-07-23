@@ -68,8 +68,8 @@ public:
    * @returns The vector component of the Jacobian contribution that will be multiplied by the
    * gradient of the test function
    */
-  KOKKOS_FUNCTION Real3 precomputeQpJacobian(const unsigned int j,
-                                             const unsigned int qp,
+  KOKKOS_FUNCTION Real3 precomputeQpJacobian(const unsigned int /* j */,
+                                             const unsigned int /* qp */,
                                              ResidualDatum & /* datum */) const
   {
     return Real3(0);
