@@ -25,6 +25,8 @@ public:
   virtual mfem::DataCollection & getDataCollection() override { return _conduit_dc; }
 
 protected:
+  bool gridFunctionsNeedHostRead() const override { return true; }
+
   mfem::ConduitDataCollection _conduit_dc;
   const MooseEnum _protocol;
 };
