@@ -1068,13 +1068,14 @@ SubProblem::removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf)
 {
   EquationSystems & eq = es();
   const auto n_sys = eq.n_systems();
+  DofMap & nl_dof_map = eq.get_system(0).get_dof_map();
 
-#ifndef NDEBUG
-  const DofMap & nl_dof_map = eq.get_system(0).get_dof_map();
   const bool found_in_root_sys =
       std::find(nl_dof_map.algebraic_ghosting_functors_begin(),
                 nl_dof_map.algebraic_ghosting_functors_end(),
                 &algebraic_gf) != nl_dof_map.algebraic_ghosting_functors_end();
+
+#ifndef NDEBUG
   const bool found_in_our_map =
       _root_alg_gf_to_sys_clones.find(&algebraic_gf) != _root_alg_gf_to_sys_clones.end();
   mooseAssert(found_in_root_sys == found_in_our_map,
@@ -1082,7 +1083,9 @@ SubProblem::removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf)
               "it in our gf to clones map");
 #endif
 
-  eq.get_system(0).get_dof_map().remove_algebraic_ghosting_functor(algebraic_gf);
+  if (found_in_root_sys) // libMesh yells if we try to remove
+                         // something that's not there
+    nl_dof_map.remove_algebraic_ghosting_functor(algebraic_gf);
 
   auto it = _root_alg_gf_to_sys_clones.find(&algebraic_gf);
   if (it == _root_alg_gf_to_sys_clones.end())
@@ -1111,11 +1114,12 @@ SubProblem::removeCouplingGhostingFunctor(GhostingFunctor & coupling_gf)
   if (!num_nl_sys)
     return;
 
-#ifndef NDEBUG
-  const DofMap & nl_dof_map = eq.get_system(0).get_dof_map();
+  DofMap & nl_dof_map = eq.get_system(0).get_dof_map();
   const bool found_in_root_sys = std::find(nl_dof_map.coupling_functors_begin(),
                                            nl_dof_map.coupling_functors_end(),
                                            &coupling_gf) != nl_dof_map.coupling_functors_end();
+
+#ifndef NDEBUG
   const bool found_in_our_map =
       _root_coupling_gf_to_sys_clones.find(&coupling_gf) != _root_coupling_gf_to_sys_clones.end();
   mooseAssert(found_in_root_sys == found_in_our_map,
@@ -1123,7 +1127,9 @@ SubProblem::removeCouplingGhostingFunctor(GhostingFunctor & coupling_gf)
               "it in our gf to clones map");
 #endif
 
-  eq.get_system(0).get_dof_map().remove_coupling_functor(coupling_gf);
+  if (found_in_root_sys) // libMesh yells if we try to remove
+                         // something that's not there
+    nl_dof_map.remove_coupling_functor(coupling_gf);
 
   auto it = _root_coupling_gf_to_sys_clones.find(&coupling_gf);
   if (it == _root_coupling_gf_to_sys_clones.end())
