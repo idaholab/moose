@@ -12,26 +12,30 @@
 #pragma once
 #include "Executioner.h"
 #include "MFEMProblemData.h"
+#include "MFEMProblemOperatorInterface.h"
 #include "ProblemOperatorBase.h"
+#include "SolveObject.h"
 
 class MFEMProblem;
 
-class MFEMProblemSolve
+class MFEMProblemSolve : public SolveObject
 {
 public:
   static InputParameters validParams();
 
-  MFEMProblemSolve(const InputParameters & params, MFEMProblem & mfem_problem);
+  MFEMProblemSolve(
+      Executioner & ex,
+      std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & problem_operators);
 
   /**
-   * Perform all required solves during a step. Includes relevant methods from the libmesh-specific
-   * FixedPointSolve::solve() for one iteration.
+   * Solve routine provided by this object.
+   * @return True if solver is converged.
    */
-  virtual void
-  solve(std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & problem_operators);
+  virtual bool solve() override;
 
 protected:
   MFEMProblem & _mfem_problem;
+  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & _problem_operators;
   mfem::Device _device;
 };
 

@@ -28,7 +28,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
   : Executioner(params),
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
     _mfem_problem_data(_mfem_problem.getProblemData()),
-    _mfem_problem_solve(params, _mfem_problem),
+    _mfem_problem_solve(*this, getProblemOperators()),
     _system_time(getParam<Real>("time")),
     _time_step(_mfem_problem.timeStep()),
     _time(_mfem_problem.time())
@@ -77,7 +77,7 @@ MFEMSteady::execute()
   _time_step = 1;
   _mfem_problem.timestepSetup();
 
-  _mfem_problem_solve.solve(getProblemOperators());
+  _mfem_problem_solve.solve();
 
   _mfem_problem.computeIndicators();
   _mfem_problem.computeMarkers();

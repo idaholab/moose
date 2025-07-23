@@ -31,8 +31,12 @@ MFEMProblemSolve::validParams()
   return params;
 }
 
-MFEMProblemSolve::MFEMProblemSolve(const InputParameters & params, MFEMProblem & mfem_problem)
-  : _mfem_problem(mfem_problem)
+MFEMProblemSolve::MFEMProblemSolve(
+    Executioner & ex,
+    std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & problem_operators)
+  : SolveObject(ex),
+    _mfem_problem(dynamic_cast<MFEMProblem &>(_problem)),
+    _problem_operators(problem_operators)
 {
   if (const auto compute_device = _app.getComputeDevice())
     _app.setMFEMDevice(*compute_device, Moose::PassKey<MFEMExecutioner>());
@@ -43,9 +47,8 @@ MFEMProblemSolve::MFEMProblemSolve(const InputParameters & params, MFEMProblem &
                        Moose::PassKey<MFEMExecutioner>());
 }
 
-void
-MFEMProblemSolve::solve(
-    std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & problem_operators)
+bool
+MFEMProblemSolve::solve()
 {
   // FixedPointSolve::solve() is libMesh specific, so we need
   // to include all steps therein relevant to the MFEM backend here.
@@ -79,7 +82,7 @@ MFEMProblemSolve::solve(
 
   if (_mfem_problem.shouldSolve())
   {
-    for (const auto & problem_operator : problem_operators)
+    for (const auto & problem_operator : _problem_operators)
     {
       problem_operator->Solve();
     }
@@ -97,5 +100,6 @@ MFEMProblemSolve::solve(
   _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
   _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
   _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
+  return true;
 }
 #endif

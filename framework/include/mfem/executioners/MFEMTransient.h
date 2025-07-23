@@ -24,6 +24,9 @@ public:
 
   virtual void init() override;
 
+  /// Return the solve object wrapped by time stepper
+  virtual SolveObject * timeStepSolveObject() override { return &_mfem_problem_solve; }
+
   /// Do whatever is necessary to advance one step.
   virtual void takeStep(Real input_dt = -1.0) override;
 
