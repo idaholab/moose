@@ -10,6 +10,8 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "AddMFEMProblemOperatorAction.h"
+#include "MFEMProblem.h"
+#include "MFEMProblemOperatorInterface.h"
 
 registerMooseAction("MooseApp", AddMFEMProblemOperatorAction, "add_mfem_problem_operator");
 
@@ -30,6 +32,9 @@ AddMFEMProblemOperatorAction::AddMFEMProblemOperatorAction(const InputParameters
 void
 AddMFEMProblemOperatorAction::act()
 {
+  MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
+  if (mfem_problem)
+    mfem_problem->addProblemOperator();
 }
 
 #endif

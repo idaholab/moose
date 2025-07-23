@@ -10,22 +10,18 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+#include "MFEMProblemOperatorInterface.h"
 #include "MFEMProblemSolve.h"
 #include "TimeDomainProblemOperator.h"
 #include "TransientBase.h"
 
-class MFEMTransient : public TransientBase
+class MFEMTransient : public TransientBase, public Moose::MFEM::MFEMProblemOperatorInterface
 {
 public:
   static InputParameters validParams();
 
   explicit MFEMTransient(const InputParameters & params);
 
-  void constructProblemOperator();
-  virtual Moose::MFEM::TimeDomainProblemOperator & getProblemOperator()
-  {
-    return *_problem_operator;
-  };
   virtual void init() override;
 
   /// Do whatever is necessary to advance one step.
@@ -58,7 +54,6 @@ private:
   MFEMProblem & _mfem_problem;
   MFEMProblemData & _mfem_problem_data;
   MFEMProblemSolve _mfem_problem_solve;
-  std::unique_ptr<Moose::MFEM::TimeDomainProblemOperator> _problem_operator{nullptr};
 };
 
 #endif
