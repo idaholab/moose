@@ -5301,7 +5301,7 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION dire
 
   const MooseObjectWarehouse<Transfer> & wh = to_multiapp     ? _to_multi_app_transfers[type]
                                               : from_multiapp ? _from_multi_app_transfers[type]
-                                                              : _between_multi_app_transfers;
+                                                              : _between_multi_app_transfers[type];
 
   if (wh.hasActiveObjects())
   {
