@@ -7,4 +7,16 @@
     csvdiff = 'tungsten_thermal_properties_csv_props_and_diffs_0002.csv'
     requirement = 'The system shall be able to compute tungsten thermal properties and compare exactly to analytical expressions.'
   []
+  [invalid]
+    type = 'RunException'
+    input = 'invalid_temperature.i'
+    expect_err = 'The solution is not converged due to the solution being invalid.'
+    requirement = 'The system shall not accept a converged solution if the solution has been tagged as invalid.'
+  []
+  [allow_invalid]
+    type = 'RunApp'
+    input = 'invalid_temperature.i'
+    cli_args = 'Problem/allow_invalid_solution=true'
+    requirement = 'The system shall allow overriding the solution validity checks.'
+  []
 []
