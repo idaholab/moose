@@ -44,9 +44,11 @@ MFEMTransient::init()
       _mfem_problem_data.fespaces,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
-  auto problem_operator = getProblemOperators().at(0);
-  problem_operator->SetGridFunctions();
-  problem_operator->Init(_mfem_problem_data.f);
+  for (const auto & problem_operator : getProblemOperators())
+  {
+    problem_operator->SetGridFunctions();
+    problem_operator->Init(_mfem_problem_data.f);
+  }
 }
 
 void
@@ -67,7 +69,7 @@ MFEMTransient::takeStep(Real input_dt)
   // _problem_operator->SetTime is called inside the ode_solver->Step method to
   // update the time used by time dependent (function) coefficients.
   // Takes place instead of TimeStepper::step().
-  _mfem_problem_solve.solve(*getProblemOperators().at(0));
+  _mfem_problem_solve.solve(getProblemOperators());
 
   // Continue with usual TransientBase::takeStep() finalisation
   _last_solve_converged = _time_stepper->converged();

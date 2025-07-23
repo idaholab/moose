@@ -48,9 +48,11 @@ MFEMSteady::init()
       _mfem_problem_data.fespaces,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
-  auto problem_operator = getProblemOperators().at(0);
-  problem_operator->SetGridFunctions();
-  problem_operator->Init(_mfem_problem_data.f);
+  for (const auto & problem_operator : getProblemOperators())
+  {
+    problem_operator->SetGridFunctions();
+    problem_operator->Init(_mfem_problem_data.f);
+  }
 }
 
 void
@@ -75,7 +77,7 @@ MFEMSteady::execute()
   _time_step = 1;
   _mfem_problem.timestepSetup();
 
-  _mfem_problem_solve.solve(*getProblemOperators().at(0));
+  _mfem_problem_solve.solve(getProblemOperators());
 
   _mfem_problem.computeIndicators();
   _mfem_problem.computeMarkers();

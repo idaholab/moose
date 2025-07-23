@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMProblem.h"
+#include "MFEMProblemOperatorInterface.h"
 #include "MFEMInitialCondition.h"
 #include "MFEMVariable.h"
 #include "MFEMSubMesh.h"
