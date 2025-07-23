@@ -68,6 +68,14 @@
     []
   []
 
+  [all_columns]
+    type = CSVDiff
+    input = 'all_columns_parent.i'
+    csvdiff = 'all_columns_parent_out.csv'
+    requirement = "The system shall allow multiple lines to be output in a CSV file, with the same physical time, if the lines are themselves not otherwise identical."
+    issues = '#31110'
+  []
+
   [align]
     # Test the alignment, delimiter, and precision settings
     type = CSVDiff
