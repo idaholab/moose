@@ -37,6 +37,12 @@ MultiAppVectorPostprocessorTransfer::validParams()
                              "N sub-apps or"
                              " collects Postprocessor values from N sub-apps "
                              "into a VectorPostprocessor");
+  params.addParam<bool>(
+      "warn_source_object_execution_schedule",
+      true,
+      "Emit a warning when the transfer execution schedule is detected to lag "
+      "information from the vector postprocessor. Note that the check cannot detect all "
+      "potential wrong combinations of vector postprocessor/transfer execution schedules");
   return params;
 }
 
@@ -59,6 +65,7 @@ MultiAppVectorPostprocessorTransfer::executeToMultiapp()
                                                                        _vector_name);
 
   // Execute VPP if it was specified to execute on transfers
+  checkParentAppUserObjectExecuteOn(_master_vpp_name);
   _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::PRE_AUX, _master_vpp_name);
   _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, _master_vpp_name);
 
