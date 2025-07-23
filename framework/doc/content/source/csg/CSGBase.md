@@ -61,6 +61,12 @@ std::unique_ptr<CSG::CSGSurface> surf_ptr = std::make_unique<SurfaceType>(argume
 const auto & surface = csg_obj->addSurface(surf_ptr);
 ```
 
+!alert! note title=Adding surfaces to the CSGBase instance
+
+Surfaces need to be added to the CSGBase instance with `addSurace` as described above. If this is not done and these surfaces are referenced in regions used to define cells within the CSGBase instance, an error will occur.
+
+!alert-end!
+
 The `CSG` framework in MOOSE provides various classes for creating basic surfaces (see table below).
 Information about how to define new types of surfaces can be found in [source/csg/CSGSurface.md].
 
