@@ -321,7 +321,8 @@ public:
   KOKKOS_FUNCTION const Mesh & kokkosMesh() const
   {
     KOKKOS_IF_ON_HOST(return _mesh_host;)
-    KOKKOS_IF_ON_DEVICE(return _mesh_device;)
+
+    return _mesh_device;
   }
 #endif
 

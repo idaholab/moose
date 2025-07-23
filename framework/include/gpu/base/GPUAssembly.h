@@ -185,7 +185,7 @@ public:
    * @param qp The local quadrature point index
    * @returns The inverse of Jacobian matrix
    */
-  KOKKOS_FUNCTION const auto getJacobian(ElementInfo info, unsigned int qp) const
+  KOKKOS_FUNCTION auto getJacobian(ElementInfo info, unsigned int qp) const
   {
     return _jacobian[info.subdomain][getQpOffset(info) + qp];
   }
@@ -195,7 +195,7 @@ public:
    * @param qp The local quadrature point index
    * @returns The inverse of Jacobian matrix
    */
-  KOKKOS_FUNCTION const auto getJxW(ElementInfo info, unsigned int qp) const
+  KOKKOS_FUNCTION auto getJxW(ElementInfo info, unsigned int qp) const
   {
     return _jxw[info.subdomain][getQpOffset(info) + qp];
   }
@@ -205,7 +205,7 @@ public:
    * @param qp The local quadrature point index
    * @returns The inverse of Jacobian matrix
    */
-  KOKKOS_FUNCTION const auto getQPoint(ElementInfo info, unsigned int qp) const
+  KOKKOS_FUNCTION auto getQPoint(ElementInfo info, unsigned int qp) const
   {
     return _xyz[info.subdomain][getQpOffset(info) + qp];
   }
@@ -375,6 +375,8 @@ Assembly::coordTransformFactor(SubdomainID subdomain, Real3 point) const
         return 2 * M_PI * point(_rz_radial_coord);
     case Moose::COORD_RSPHERICAL:
       return 4 * M_PI * point(0) * point(0);
+    default:
+      return 0;
   }
 }
 
@@ -449,7 +451,6 @@ Assembly::computePhysicalMap(ElementInfo info,
   {
     Real33 J;
 
-    auto & psi = _map_psi_face(sid, elem_type)(side);
     auto & grad_psi = _map_grad_psi_face(sid, elem_type)(side);
 
     for (unsigned int node = 0; node < info.n_nodes_side[side]; ++node)
@@ -498,7 +499,8 @@ public:
   KOKKOS_FUNCTION const Assembly & kokkosAssembly() const
   {
     KOKKOS_IF_ON_HOST(return _assembly_host;)
-    KOKKOS_IF_ON_DEVICE(return _assembly_device;)
+
+    return _assembly_device;
   }
 #endif
 

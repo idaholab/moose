@@ -232,4 +232,4 @@ protected:                                                                      
   using Moose::Kokkos::NodalKernel<T>::_u;                                                         \
                                                                                                    \
 public:                                                                                            \
-  using Moose::Kokkos::NodalKernel<T>::operator();
+  using Moose::Kokkos::NodalKernel<T>::operator()
