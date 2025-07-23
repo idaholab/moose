@@ -68,6 +68,14 @@
     []
   []
 
+  [all_columns]
+    type = CSVDiff
+    input = 'all_columns_parent.i'
+    csvdiff = 'all_columns_parent_out.csv'
+    requirement = "The system shall allow new CSV rows even if times are the same, as long as some column is different."
+    issues = '#31110'
+  []
+
   [align]
     # Test the alignment, delimiter, and precision settings
     type = CSVDiff

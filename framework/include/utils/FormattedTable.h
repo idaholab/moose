@@ -167,13 +167,13 @@ public:
   /**
    * Retrieve the last time (or independent variable) value.
    */
-  Real getLastTime();
+  Real getLastTime() const;
 
   /**
    * Retrieve Data for last value of given name
    */
   template <typename T = Real>
-  T & getLastData(const std::string & name);
+  T & getLastData(const std::string & name) const;
 
   void clear();
 
@@ -399,7 +399,7 @@ FormattedTable::addData(const std::string & name, const std::vector<T> & vector)
 
 template <typename T>
 T &
-FormattedTable::getLastData(const std::string & name)
+FormattedTable::getLastData(const std::string & name) const
 {
   mooseAssert(!empty(), "No Data stored in the FormattedTable");
 
