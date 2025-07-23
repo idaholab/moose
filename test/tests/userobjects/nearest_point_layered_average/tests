@@ -23,7 +23,7 @@
   [error_missing_point_spec]
     type = RunException
     input = 'nearest_point_layered_average.i'
-    expect_err = "npla: You need to supply either 'points' or 'points_file' parameter\."
+    expect_err = "npla: You need to supply either 'points', 'points_file' or 'positions_object' parameter\."
     prereq = test
     requirement = 'The system shall report an error when points are not specified in an input file nor an external file when computing nearest point layered averages'
     design = 'NearestPointLayeredAverage.md'
@@ -34,7 +34,7 @@
     type = RunException
     input = 'nearest_point_layered_average.i'
     cli_args = "UserObjects/npla/points='0.25 0 0.25' UserObjects/npla/points_file='points.txt'"
-    expect_err = "npla: Both 'points' and 'points_file' cannot be specified simultaneously\."
+    expect_err = "\(UserObjects/npla/points_file\) Cannot be specified together with 'points'"
     prereq = test
     requirement = 'The system shall report an error when points are specified both in an input file and an external file when computing nearest point layered averages'
     design = 'NearestPointLayeredAverage.md'
