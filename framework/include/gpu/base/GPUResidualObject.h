@@ -313,4 +313,4 @@ protected:                                                                      
 public:                                                                                            \
   using Moose::Kokkos::ResidualObject::ResidualLoop;                                               \
   using Moose::Kokkos::ResidualObject::JacobianLoop;                                               \
-  using Moose::Kokkos::ResidualObject::OffDiagJacobianLoop;
+  using Moose::Kokkos::ResidualObject::OffDiagJacobianLoop

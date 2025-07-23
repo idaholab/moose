@@ -58,7 +58,8 @@ public:
   KOKKOS_FUNCTION operator const T &() const
   {
     KOKKOS_IF_ON_HOST(return _reference;)
-    KOKKOS_IF_ON_DEVICE(return _copy;)
+
+    return _copy;
   }
   /**
    * Get the const reference of the stored variable
@@ -68,7 +69,8 @@ public:
   KOKKOS_FUNCTION const T & operator*() const
   {
     KOKKOS_IF_ON_HOST(return _reference;)
-    KOKKOS_IF_ON_DEVICE(return _copy;)
+
+    return _copy;
   }
   /**
    * Get the const pointer to the stored variable
@@ -78,7 +80,8 @@ public:
   KOKKOS_FUNCTION const T * operator->() const
   {
     KOKKOS_IF_ON_HOST(return &_reference;)
-    KOKKOS_IF_ON_DEVICE(return &_copy;)
+
+    return &_copy;
   }
   /**
    * Forward arguments to the stored variable's const operator() depending on the architecture this
@@ -89,7 +92,8 @@ public:
   KOKKOS_FUNCTION auto operator()(Args &&... args) const -> decltype(auto)
   {
     KOKKOS_IF_ON_HOST(return _reference(std::forward<Args>(args)...);)
-    KOKKOS_IF_ON_DEVICE(return _copy(std::forward<Args>(args)...);)
+
+    return _copy(std::forward<Args>(args)...);
   }
 #else
   /**
@@ -180,7 +184,8 @@ public:
   KOKKOS_FUNCTION operator const T &() const
   {
     KOKKOS_IF_ON_HOST(return _reference;)
-    KOKKOS_IF_ON_DEVICE(return _copy;)
+
+    return _copy;
   }
   /**
    * Get the const reference of the stored variable
@@ -190,7 +195,8 @@ public:
   KOKKOS_FUNCTION const T & operator*() const
   {
     KOKKOS_IF_ON_HOST(return _reference;)
-    KOKKOS_IF_ON_DEVICE(return _copy;)
+
+    return _copy;
   }
   /**
    * Get the const pointer to the stored variable
@@ -200,7 +206,8 @@ public:
   KOKKOS_FUNCTION const T * operator->() const
   {
     KOKKOS_IF_ON_HOST(return &_reference;)
-    KOKKOS_IF_ON_DEVICE(return &_copy;)
+
+    return &_copy;
   }
   /**
    * Forward arguments to the stored variable's const operator() depending on the architecture this
@@ -211,7 +218,8 @@ public:
   KOKKOS_FUNCTION auto operator()(Args &&... args) const -> decltype(auto)
   {
     KOKKOS_IF_ON_HOST(return _reference(std::forward<Args>(args)...);)
-    KOKKOS_IF_ON_DEVICE(return _copy(std::forward<Args>(args)...);)
+
+    return _copy(std::forward<Args>(args)...);
   }
 #else
   /**
