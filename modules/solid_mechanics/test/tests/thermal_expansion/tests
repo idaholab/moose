@@ -31,6 +31,7 @@
     requirement = 'The solid mechanics module shall have the capability to combine multiple eigenstrains to correctly calculate an eigenstrain tensor resulting from isotropic thermal expansion when automatic differentiation is requested.'
     design = 'ComputeThermalExpansionEigenstrain.md RankTwoAux.md'
     issues = '#7457'
+    capabilities = 'method!=dbg'
   []
 
   [ad_constant_expansion_coeff]

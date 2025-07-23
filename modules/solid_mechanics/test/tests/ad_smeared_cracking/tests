@@ -22,6 +22,7 @@
     exodiff = cracking_function_out.e
     custom_cmp = cracking_function.cmp
     requirement = 'The MOOSE SolidMechanics module shall simulate cracking while the cracking strength is prescribed by an elemental AuxVariable using AD and match non-AD methods.'
+    capabilities = 'method!=dbg'
   []
   [exponential]
     type = Exodiff
@@ -30,6 +31,7 @@
     custom_cmp = cracking_exponential.cmp
     use_old_floor = true
     requirement = 'The MOOSE SolidMechanics module shall simulate exponential stress release using AD and match non-AD methods.'
+    capabilities = 'method!=dbg'
   []
   [rz_exponential]
     type = Exodiff
@@ -46,6 +48,7 @@
     input = cracking_power.i
     exodiff = cracking_power_out.e
     requirement = 'The MOOSE SolidMechanics module shall demonstrate softening using the power law for smeared cracking using AD and match non-AD methods.'
+    capabilities = 'method!=dbg'
   []
   [multiple_softening]
     type = Exodiff
@@ -54,6 +57,7 @@
     requirement = 'The MOOSE SolidMechanics module shall demonstrate the prescribed softening laws in three directions, power law (x), exponential (y), and abrupt (z) using AD and match non-AD methods.'
     # PR #26848. Clang 16 Apple Si is not compatible.
     machine = X86_64
+    capabilities = 'method!=dbg'
   []
   [xyz]
     type = Exodiff
@@ -62,6 +66,7 @@
     use_old_floor = true
     custom_cmp = cracking_xyz.cmp
     requirement = 'The MOOSE SolidMechanics module shall simulate smeared cracking in the x y and z directions using AD and match non-AD methods.'
+    capabilities = 'method!=dbg'
   []
   [plane_stress]
     type = Exodiff
@@ -79,6 +84,7 @@
     custom_cmp = cracking_rotation.cmp
     max_parallel = 1
     requirement = 'The MOOSE SolidMechanics module shall demonstrate that the smeared cracking model correctly handles finite rotation of cracked elements using AD and match non-AD methods.'
+    capabilities = 'method!=dbg'
   []
   [cracking_rotation_pres_dir_x]
     type = Exodiff

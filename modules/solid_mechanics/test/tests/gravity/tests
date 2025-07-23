@@ -48,5 +48,6 @@
                   'use of auxiliary kernels and postprocessors. This test verifies that a body falls '
                   'at the right acceleration under the action of gravity and that the computed '
                   'kinetic energy matches the analytical expression.'
+    capabilities = 'method!=dbg'
   []
 []
