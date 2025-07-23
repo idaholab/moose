@@ -1445,8 +1445,8 @@ AdvancedExtruderGenerator::generate()
 libMesh::Real
 AdvancedExtruderGenerator::radialWeighting(const MooseEnum function_type, const libMesh::Real t)
 {
-  // NOTE: All functions added to this method must obey the following: f(0)=0, f(1)=1, 0<=f(t)<=1
-  // for all t in [0,1].
+  // NOTE: All functions added to this method must obey the following: f(0)=0, f(1)=1 for all t in
+  // [0,1].
 
   // hold the case definitions in this method to keep generate() cleaner
   int switch_val = -1; // set default
