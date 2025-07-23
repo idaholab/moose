@@ -55,6 +55,22 @@ protected:
   virtual void outputPostprocessors() override;
 
   /**
+   * Checks to see if a new postprocessor row should be added
+   *
+   * @param[in] table  Table to add row to
+   */
+  bool shouldOutputPostprocessorsRow(const FormattedTable & table);
+
+  /**
+   * Outputs a new postprocessor row.
+   *
+   * This should be called only if shouldOutputPostprocessorRow() returns true.
+   *
+   * @param[out] table  Table to add row to
+   */
+  void outputPostprocessorsRow(FormattedTable & table);
+
+  /**
    * Populates the tables with Reporter values
    */
   virtual void outputReporters() override;
@@ -86,6 +102,9 @@ protected:
 
   /// Table containing postprocessor values, scalar aux variables, and Real Reporters
   FormattedTable & _all_data_table;
+
+  /// If true, new postprocessor rows can be added if any column has a new value
+  const bool _check_all_columns_for_new_row;
 
   /// Tolerance used when deciding whether or not to add a new row to the table
   const Real _new_row_tol;
