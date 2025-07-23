@@ -78,25 +78,37 @@ TestCSGCylindersMeshGenerator::generateCSG()
   {
     std::string surf_name = mg_name + "_surf_cyl_" + _axis + "_" + std::to_string(i);
     std::unique_ptr<CSG::CSGSurface> cyl_ptr;
+    Point cyl_origin;
     if (_axis == "x")
+    {
       cyl_ptr = std::make_unique<CSG::CSGXCylinder>(surf_name, _x0, _x1, _radii[i]);
+      cyl_origin = Point(0, _x0, _x1);
+    }
     else if (_axis == "y")
+    {
       cyl_ptr = std::make_unique<CSG::CSGYCylinder>(surf_name, _x0, _x1, _radii[i]);
+      cyl_origin = Point(_x0, 0, _x1);
+    }
     else if (_axis == "z")
+    {
       cyl_ptr = std::make_unique<CSG::CSGZCylinder>(surf_name, _x0, _x1, _radii[i]);
+      cyl_origin = Point(_x0, _x1, 0);
+    }
 
     auto & cyl_surf = csg_obj->addSurface(cyl_ptr);
+    auto cyl_halfspace = cyl_surf.getHalfspaceFromPoint(cyl_origin);
+    auto cyl_region = CSG::CSGRegion(cyl_surf, cyl_halfspace);
 
-    CSG::CSGRegion region;
+    CSG::CSGRegion full_region;
     std::string cell_name = mg_name + "_cell_cyl_" + _axis + "_" + std::to_string(i);
     if (i == 0)
-      region = -cyl_surf & -pos_plane & +neg_plane;
+      full_region = cyl_region & -pos_plane & +neg_plane;
     else
     {
       const auto & prev_surf = csg_obj->getSurfaceByName(prev_surf_name);
-      region = +prev_surf & -cyl_surf & -pos_plane & +neg_plane;
+      full_region = +prev_surf & cyl_region & -pos_plane & +neg_plane;
     }
-    auto cell = csg_obj->createCell(cell_name, region);
+    auto cell = csg_obj->createCell(cell_name, full_region);
     prev_surf_name = surf_name;
   }
 

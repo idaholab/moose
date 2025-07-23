@@ -46,7 +46,9 @@ TestCSGSphereAtPointMeshGenerator::generateCSG()
   std::unique_ptr<CSG::CSGSurface> sp_ptr =
       std::make_unique<CSG::CSGSphere>(mg_name + "_sphere_surf", _center, _radius);
   auto & sphere_surf = csg_obj->addSurface(sp_ptr);
-  csg_obj->createCell(mg_name + "_sphere_cell", "new_mat", -sphere_surf);
+  auto halfspace = sphere_surf.getHalfspaceFromPoint(_center);
+  auto region = CSG::CSGRegion(sphere_surf, halfspace);
+  csg_obj->createCell(mg_name + "_sphere_cell", "new_mat", region);
 
   return csg_obj;
 }

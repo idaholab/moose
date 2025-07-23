@@ -1,6 +1,6 @@
 {
   "CELLS": {
-    "square_cell": {
+    "box_cell": {
       "FILL": "square_material",
       "FILLTYPE": "MATERIAL",
       "REGION":
@@ -72,7 +72,7 @@
   "UNIVERSES": {
     "ROOT_UNIVERSE": {
       "CELLS": [
-        "square_cell"
+        "box_cell"
       ],
       "ROOT": true
     }

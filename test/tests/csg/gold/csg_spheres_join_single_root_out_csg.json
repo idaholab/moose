@@ -10,7 +10,7 @@
       "FILLTYPE": "MATERIAL",
       "REGION": "-PointSphere_sphere_surf"
     },
-    "square_cell": {
+    "box_cell": {
       "FILL": "square_material",
       "FILLTYPE": "MATERIAL",
       "REGION":
@@ -104,7 +104,7 @@
       "CELLS": [
         "PointSphere_sphere_cell",
         "OriginSphere_sphere_cell",
-        "square_cell"
+        "box_cell"
       ],
       "ROOT": true
     }
