@@ -19,8 +19,7 @@ std::vector<std::string> GetTimeDerivativeNames(std::vector<std::string> gridfun
 
 /// Problem operator for time-dependent problems with no equation system. The user will need to subclass this since the solve is not
 /// implemented.
-class TimeDomainProblemOperator : public mfem::TimeDependentOperator,
-                                  public ProblemOperatorBase
+class TimeDomainProblemOperator : public mfem::TimeDependentOperator, public ProblemOperatorBase
 {
 public:
   TimeDomainProblemOperator(MFEMProblem & problem) : ProblemOperatorBase(problem) {}

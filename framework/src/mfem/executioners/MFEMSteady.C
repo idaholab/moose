@@ -34,18 +34,6 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _time(_mfem_problem.time())
 {
   _time = _system_time;
-  constructProblemOperator();
-}
-
-void
-MFEMSteady::constructProblemOperator()
-{
-  _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-  auto problem_operator =
-      std::make_unique<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
-
-  _problem_operator.reset();
-  _problem_operator = std::move(problem_operator);
 }
 
 void
@@ -60,8 +48,9 @@ MFEMSteady::init()
       _mfem_problem_data.fespaces,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
-  _problem_operator->SetGridFunctions();
-  _problem_operator->Init(_mfem_problem_data.f);
+  auto problem_operator = getProblemOperators().at(0);
+  problem_operator->SetGridFunctions();
+  problem_operator->Init(_mfem_problem_data.f);
 }
 
 void
@@ -86,7 +75,7 @@ MFEMSteady::execute()
   _time_step = 1;
   _mfem_problem.timestepSetup();
 
-  _mfem_problem_solve.solve(*_problem_operator);
+  _mfem_problem_solve.solve(*getProblemOperators().at(0));
 
   _mfem_problem.computeIndicators();
   _mfem_problem.computeMarkers();

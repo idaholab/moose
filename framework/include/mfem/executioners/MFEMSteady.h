@@ -10,18 +10,16 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+#include "MFEMProblemOperatorInterface.h"
 #include "MFEMProblemSolve.h"
 #include "EquationSystemProblemOperator.h"
 
-class MFEMSteady : public Executioner
+class MFEMSteady : public Executioner, public Moose::MFEM::MFEMProblemOperatorInterface
 {
 public:
   static InputParameters validParams();
 
   explicit MFEMSteady(const InputParameters & params);
-
-  void constructProblemOperator();
-  virtual Moose::MFEM::ProblemOperator & getProblemOperator() { return *_problem_operator; };
 
   virtual void init() override;
   virtual void execute() override;
@@ -33,7 +31,6 @@ private:
   MFEMProblem & _mfem_problem;
   MFEMProblemData & _mfem_problem_data;
   MFEMProblemSolve _mfem_problem_solve;
-  std::unique_ptr<Moose::MFEM::ProblemOperator> _problem_operator{nullptr};
 
   // Time variables used for consistency with MOOSE, needed for outputs.
   // Important for future synchronisation of solves in MultiApps

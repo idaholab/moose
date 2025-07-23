@@ -55,6 +55,34 @@ MFEMProblem::setMesh()
 }
 
 void
+MFEMProblem::addProblemOperator()
+{
+  // Add default problem operators to the Executioner.
+  auto mfem_exec_ptr =
+      dynamic_cast<Moose::MFEM::MFEMProblemOperatorInterface *>(_app.getExecutioner());
+  if (mfem_exec_ptr != nullptr)
+  {
+    if (isTransient())
+    {
+      getProblemData().eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>();
+      auto problem_operator =
+          std::make_shared<Moose::MFEM::TimeDomainEquationSystemProblemOperator>(*this);
+      mfem_exec_ptr->addProblemOperator(std::move(problem_operator));
+    }
+    else
+    {
+      getProblemData().eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
+      auto problem_operator = std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(*this);
+      mfem_exec_ptr->addProblemOperator(std::move(problem_operator));
+    }
+  }
+  else
+  {
+    mooseError("Executioner used that is not currently supported by MFEMProblem");
+  }
+}
+
+void
 MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
                                    const std::string & name,
                                    InputParameters & parameters)
