@@ -177,4 +177,44 @@
     cli_args = '--mesh-only'
     recover = false
   []
+  [extrude_along_2D_curve]
+    type = Exodiff
+    input = 'extrude_along_curve_2D.i'
+    exodiff = 'extrude_along_curve_2D_in.e'
+    cli_args = '--mesh-only extrude_along_curve_2D_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve.'
+    design = 'AdvancedExtruderGenerator.md'
+  []
+  [extrude_along_2D_curve_cubic_growth]
+    type = Exodiff
+    input = 'extrude_with_expansion_2D.i'
+    exodiff = 'extrude_with_expansion_2D_curve_cubic_growth_in.e'
+    cli_args = 'Mesh/ext_along_curve/radial_growth_method=CUBIC --mesh-only extrude_with_expansion_2D_curve_cubic_growth_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve with cubic radial expansion.'
+    design = 'AdvancedExtruderGenerator.md'
+  []
+  [extrude_along_2D_curve_cubic_growth_var_drdt]
+    type = Exodiff
+    input = 'extrude_with_expansion_2D.i'
+    exodiff = 'extrude_with_expansion_2D_curve_cubic_growth_var_drd_in.e'
+    cli_args = 'Mesh/ext_along_curve/radial_growth_method=CUBIC Mesh/ext_along_curve/start_radial_growth_rate=1 Mesh/ext_along_curve/end_radial_growth_rate=2 --mesh-only extrude_with_expansion_2D_curve_cubic_growth_var_drd_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve with cubic radial expansion and prescribed radial growth rates at each endpoint.'
+    design = 'AdvancedExtruderGenerator.md'
+  []
+  [extrude_along_2D_curve_linear_growth]
+    type = Exodiff
+    input = 'extrude_with_expansion_2D.i'
+    exodiff = 'extrude_with_expansion_2D_curve_linear_growth_in.e'
+    cli_args = 'Mesh/ext_along_curve/radial_growth_method=LINEAR --mesh-only extrude_with_expansion_2D_curve_linear_growth_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve with linear radial growth rate.'
+    design = 'AdvancedExtruderGenerator.md'
+  []
 []

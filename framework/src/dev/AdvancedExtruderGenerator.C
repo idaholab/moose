@@ -167,8 +167,7 @@ AdvancedExtruderGenerator::AdvancedExtruderGenerator(const InputParameters & par
     _elem_integers_swaps(
         getParam<std::vector<std::vector<std::vector<dof_id_type>>>>("elem_integers_swaps")),
     _direction(isParamValid("direction") ? getParam<Point>("direction") : Point(0, 0, 0)),
-    _extrusion_curve(isParamValid("extrusion_curve") ? getMesh("extrusion_curve")
-                                                     : getMesh("extrusion_curve")),
+    _extrusion_curve(getMesh("extrusion_curve", true)),
     _start_extrusion_direction(isParamValid("start_extrusion_direction")
                                    ? getParam<Point>("start_extrusion_direction")
                                    : Point(0, 0, 0)),
@@ -454,8 +453,6 @@ AdvancedExtruderGenerator::generate()
   std::unique_ptr<MeshBase> extrusion_curve;
   if (_extrude_along_curve)
     extrusion_curve = std::move(_extrusion_curve);
-  else
-    extrusion_curve = nullptr;
 
   // If we're using a distributed mesh... then make sure we don't have any remote elements hanging
   // around
@@ -471,7 +468,7 @@ AdvancedExtruderGenerator::generate()
   }
   else
   {
-    total_num_layers = extrusion_curve->n_elem(); // may need to check this...
+    total_num_layers = extrusion_curve->n_elem();
     total_num_elevations = 1;
   }
 
@@ -529,7 +526,9 @@ AdvancedExtruderGenerator::generate()
 
   // the following code looks to systematically find the starting radius by finding the largest
   // distance from the starting point on the curve (this is assumed to be at the center).
-  libMesh::Node * reference_point = extrusion_curve->node_ptr(0);
+  libMesh::Node * reference_point;
+  if (_extrude_along_curve)
+    reference_point = extrusion_curve->node_ptr(0);
   libMesh::Real start_radius = 0;
   if (isParamValid("r_final"))
   {
@@ -556,13 +555,15 @@ AdvancedExtruderGenerator::generate()
 
     old_distance.zero();
 
-    libMesh::Real start_node_radius =
-        (*node - *reference_point).norm(); // find distance from node to spline
+    libMesh::Real start_node_radius;
+    if (_extrude_along_curve)
+      start_node_radius = (*node - *reference_point).norm(); // find distance from node to spline
 
     // e is the elevation layer ordering
     for (const auto e : make_range(total_num_elevations))
     {
-      unsigned int num_layers, height, bias;
+      unsigned int num_layers;
+      Real height, bias;
       if (_extrude_along_curve)
       {
         num_layers = extrusion_curve->n_elem();
