@@ -83,6 +83,7 @@ Output::validParams()
   // Update the 'execute_on' input parameter for output
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum = Output::getDefaultExecFlagEnum();
+  exec_enum.addAvailableFlags(EXEC_MULTIAPP_FIXED_POINT_ITERATION_END);
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.setDocString("execute_on", exec_enum.getDocString());
 

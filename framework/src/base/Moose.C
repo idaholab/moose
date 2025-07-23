@@ -33,6 +33,8 @@ const ExecFlagType EXEC_NONLINEAR_CONVERGENCE = registerDefaultExecFlag("NONLINE
 const ExecFlagType EXEC_POSTCHECK = registerDefaultExecFlag("POSTCHECK");
 const ExecFlagType EXEC_TIMESTEP_END = registerDefaultExecFlag("TIMESTEP_END");
 const ExecFlagType EXEC_TIMESTEP_BEGIN = registerDefaultExecFlag("TIMESTEP_BEGIN");
+const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_ITERATION_END =
+    registerExecFlag("MULTIAPP_FIXED_POINT_ITERATION_END");
 const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_END =
     registerDefaultExecFlag("MULTIAPP_FIXED_POINT_END");
 const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_BEGIN =
