@@ -17,7 +17,7 @@ Comment = tokens.newToken('Comment', content='')
 
 class CommentExtension(Extension):
     """
-    Extracts the heading from AST after tokenization.
+    Provides the means to make comments within markdown pages that are not rendered.
     """
     @staticmethod
     def defaultConfig():
