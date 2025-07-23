@@ -128,6 +128,7 @@ function configure_petsc()
       --download-superlu_dist=1 \
       --download-kokkos=1 \
       --download-kokkos-kernels=1 \
+      --download-libceed=1 \
       "${EXTRA_CONFIGURE_OPTIONS[@]}" \
       "$@"
 
