@@ -26,4 +26,8 @@ public:
   virtual void initialize() override{};
 
   virtual Real getValue() const override;
+
+protected:
+  /// Amount by which to shift the count
+  const int _count_shift;
 };
