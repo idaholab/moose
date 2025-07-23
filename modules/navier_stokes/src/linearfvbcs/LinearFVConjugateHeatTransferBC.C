@@ -67,7 +67,7 @@ LinearFVConjugateHeatTransferBC::computeBoundaryGradientMatrixContribution() con
 
   // We just put the heat transfer coefficient on the diagonal (multiplication with the
   // surface area is taken care of in the kernel).
-  return _htc(face, state);
+  return  _htc(face, state);
 }
 Real
 LinearFVConjugateHeatTransferBC::computeBoundaryGradientRHSContribution() const
