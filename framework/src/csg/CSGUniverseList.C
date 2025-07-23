@@ -55,14 +55,6 @@ CSGUniverseList::addUniverse(const std::string & name)
   return *_universes[name];
 }
 
-CSGUniverse &
-CSGUniverseList::addUniverse(const std::string & name, std::vector<CSGCell *> & cells)
-{
-  checkUniverseName(name);
-  _universes.insert(std::make_pair(name, std::make_unique<CSGUniverse>(name, cells)));
-  return *_universes[name];
-}
-
 void
 CSGUniverseList::addUniverse(std::unique_ptr<CSGUniverse> & universe)
 {
