@@ -27,7 +27,8 @@ public:
    * Perform all required solves during a step. Includes relevant methods from the libmesh-specific
    * FixedPointSolve::solve() for one iteration.
    */
-  virtual void solve(Moose::MFEM::ProblemOperatorBase & problem_operator);
+  virtual void
+  solve(std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & problem_operators);
 
 protected:
   MFEMProblem & _mfem_problem;

@@ -44,7 +44,8 @@ MFEMProblemSolve::MFEMProblemSolve(const InputParameters & params, MFEMProblem &
 }
 
 void
-MFEMProblemSolve::solve(Moose::MFEM::ProblemOperatorBase & problem_operator)
+MFEMProblemSolve::solve(
+    std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & problem_operators)
 {
   // FixedPointSolve::solve() is libMesh specific, so we need
   // to include all steps therein relevant to the MFEM backend here.
@@ -77,7 +78,12 @@ MFEMProblemSolve::solve(Moose::MFEM::ProblemOperatorBase & problem_operator)
   _mfem_problem.updateActiveObjects();
 
   if (_mfem_problem.shouldSolve())
-    problem_operator.Solve();
+  {
+    for (const auto & problem_operator : problem_operators)
+    {
+      problem_operator->Solve();
+    }
+  }
   _mfem_problem.displaceMesh();
 
   // Execute user objects, transfers, and multiapps at timestep end
