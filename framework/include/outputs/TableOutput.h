@@ -29,6 +29,9 @@ class TableOutput : public AdvancedOutput
 {
 public:
   static InputParameters validParams();
+  /// Adds the exec flag MULTIAPP_FIXED_POINT_ITERATION_END to a parameter
+  static void addMultiAppFixedPointIterationEndExecFlag(InputParameters & params,
+                                                        const std::string & param);
 
   /**
    * Class constructor.

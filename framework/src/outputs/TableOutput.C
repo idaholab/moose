@@ -54,6 +54,15 @@ TableOutput::validParams()
   return params;
 }
 
+void
+TableOutput::addMultiAppFixedPointIterationEndExecFlag(InputParameters & params,
+                                                       const std::string & param)
+{
+  ExecFlagEnum & execute_on = params.set<ExecFlagEnum>(param, true);
+  execute_on.addAvailableFlags(EXEC_MULTIAPP_FIXED_POINT_ITERATION_END);
+  params.setDocString(param, execute_on.getDocString());
+}
+
 TableOutput::TableOutput(const InputParameters & parameters)
   : AdvancedOutput(parameters),
     _tables_restartable(getParam<bool>("append_restart")),

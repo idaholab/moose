@@ -283,6 +283,8 @@ FixedPointSolve::solve()
     {
       if (_has_fixed_point_its)
       {
+        _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_ITERATION_END);
+
         // Examine convergence metrics & properties and set the convergence reason
         bool break_out = examineFixedPointConvergence(converged);
 
