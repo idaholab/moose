@@ -52,13 +52,12 @@ public:
   virtual std::unordered_map<std::string, Real> getCoeffs() const override;
 
   /**
-   * @brief given a point, determine if it is in the positive (outside) or negative
-   * (inside) half-space for the cylinder
+   * @brief given a point, determine its evaluation based on the equation of the cylinder
    *
    * @param p point
-   * @return sign of the half-space
+   * @return evaluation of point based on surface equation
    */
-  virtual CSGSurface::Halfspace getHalfspaceFromPoint(const Point & p) const override;
+  virtual Real evaluateSurfaceEquationAtPoint(const Point & p) const override;
 
 protected:
   /// Value of x0 in equation of an z-axis aligned cylinder
