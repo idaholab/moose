@@ -21,6 +21,22 @@ CSGSurface::CSGSurface(const std::string & name,
 {
 }
 
+CSGSurface::Halfspace
+CSGSurface::getHalfspaceFromPoint(const Point & p) const
+{
+  auto eval = evaluateSurfaceEquationAtPoint(p);
+  if (MooseUtils::absoluteFuzzyGreaterThan(eval, 0))
+    return Halfspace::POSITIVE;
+  else if (MooseUtils::absoluteFuzzyLessThan(eval, 0))
+    return Halfspace::NEGATIVE;
+  else
+    mooseError("Point ",
+               p,
+               " used to determine halfspace evaluation lies on the surface ",
+               _name,
+               ", leading to an ambiguously defined halfspace.");
+}
+
 bool
 CSGSurface::operator==(const CSGSurface & other) const
 {
