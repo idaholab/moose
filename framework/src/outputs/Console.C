@@ -40,6 +40,10 @@ Console::validParams()
 
   params += TableOutput::enableOutputTypes("system_information scalar postprocessor input");
 
+  addMultiAppFixedPointIterationEndExecFlag(params, "execute_on");
+  addMultiAppFixedPointIterationEndExecFlag(params, "execute_postprocessors_on");
+  addMultiAppFixedPointIterationEndExecFlag(params, "execute_scalars_on");
+
   // Screen and file output toggles
   params.addParam<bool>("output_screen", true, "Output to the screen");
   params.addParam<bool>("output_file",
