@@ -8138,6 +8138,11 @@ FEProblemBase::meshChanged(const bool intermediate_change,
   // mortar mesh discretization will depend necessarily on the displaced mesh being re-displaced
   updateMortarMesh();
 
+  // Nonlinear systems hold the mortar mesh functors. The domains of definition of the mortar
+  // functors might have changed when the mesh changed.
+  for (auto & nl_sys : _nl)
+    nl_sys->reinitMortarFunctors();
+
   reinitBecauseOfGhostingOrNewGeomObjects(/*mortar_changed=*/true);
 
   // We need to create new storage for newly active elements, and copy
