@@ -24,7 +24,7 @@ public:
   virtual void init() override;
   virtual void execute() override;
 
-  /// Check if last solve converged. 
+  /// Check if last solve converged.
   virtual bool lastSolveConverged() const override { return _last_solve_converged; };
 
 private:
