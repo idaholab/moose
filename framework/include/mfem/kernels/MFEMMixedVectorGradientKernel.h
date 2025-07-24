@@ -12,9 +12,9 @@
 #pragma once
 #include "MFEMMixedBilinearFormKernel.h"
 
-/*
+/**
  * \f[
- * (\sigma \nabla V, u')
+ * (k \vec \nabla u, \vec v)
  * \f]
  */
 class MFEMMixedVectorGradientKernel : public MFEMMixedBilinearFormKernel
@@ -24,7 +24,7 @@ public:
 
   MFEMMixedVectorGradientKernel(const InputParameters & parameters);
 
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
+  virtual mfem::BilinearFormIntegrator * createMBFIntegrator() override;
 
 protected:
   mfem::Coefficient & _coef;

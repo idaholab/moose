@@ -1,5 +1,5 @@
 # Test for the shear stress and strain output for 2D planar shell with uniform mesh.
-# A  cantiliver beam of length 10 m  and cross-section 1.5 m x 0.1 m having
+# A  cantilever beam of length 10 m  and cross-section 1.5 m x 0.1 m having
 # Young's Modulus of 5 N/mm^2 and poissons ratio of 0 is subjected to shear
 # displacement of 0.05 m at the free end.
 

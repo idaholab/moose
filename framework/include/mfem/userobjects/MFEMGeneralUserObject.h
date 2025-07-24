@@ -19,7 +19,7 @@
 // Forwards declaration.
 class MFEMProblem;
 
-/*
+/**
  * This class adds a getMFEMProblem method.
  */
 class MFEMGeneralUserObject : public GeneralUserObject
@@ -34,6 +34,9 @@ public:
   const MFEMProblem & getMFEMProblem() const { return _mfem_problem; }
 
   /// Returns references to coefficients stored in the MFEMProblem PropertiesManager.
+  mfem::Coefficient & getScalarCoefficientByName(const MFEMScalarCoefficientName & name);
+  mfem::VectorCoefficient & getVectorCoefficientByName(const MFEMVectorCoefficientName & name);
+  mfem::MatrixCoefficient & getMatrixCoefficientByName(const MFEMMatrixCoefficientName & name);
   mfem::Coefficient & getScalarCoefficient(const std::string & name);
   mfem::VectorCoefficient & getVectorCoefficient(const std::string & name);
   mfem::MatrixCoefficient & getMatrixCoefficient(const std::string & name);

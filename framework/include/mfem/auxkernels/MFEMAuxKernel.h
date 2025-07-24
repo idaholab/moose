@@ -14,9 +14,9 @@
 #include "MFEMGeneralUserObject.h"
 #include "MFEMContainers.h"
 
-/*
-Class to construct an auxiliary solver used to update an auxvariable.
-*/
+/**
+ * Class to construct an auxiliary solver used to update an auxvariable.
+ */
 class MFEMAuxKernel : public MFEMGeneralUserObject
 {
 public:
@@ -25,7 +25,7 @@ public:
   MFEMAuxKernel(const InputParameters & parameters);
   virtual ~MFEMAuxKernel() = default;
 
-  // Method called to update any owned objects upon a mesh update.
+  /// Method called to update any owned objects upon a mesh update.
   virtual void update(){};
 
 protected:
