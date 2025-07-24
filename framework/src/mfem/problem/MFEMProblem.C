@@ -10,7 +10,8 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMProblem.h"
-#include "MFEMProblemOperatorInterface.h"
+#include "MFEMTransient.h"
+#include "MFEMSteady.h"
 #include "MFEMInitialCondition.h"
 #include "MFEMVariable.h"
 #include "MFEMSubMesh.h"
@@ -55,34 +56,6 @@ MFEMProblem::setMesh()
   getProblemData().comm = pmesh->GetComm();
   MPI_Comm_size(pmesh->GetComm(), &(getProblemData().num_procs));
   MPI_Comm_rank(pmesh->GetComm(), &(getProblemData().myid));
-}
-
-void
-MFEMProblem::addProblemOperator()
-{
-  // Add default problem operators to the Executioner.
-  auto mfem_exec_ptr =
-      dynamic_cast<Moose::MFEM::MFEMProblemOperatorInterface *>(_app.getExecutioner());
-  if (mfem_exec_ptr != nullptr)
-  {
-    if (isTransient())
-    {
-      getProblemData().eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>();
-      auto problem_operator =
-          std::make_shared<Moose::MFEM::TimeDomainEquationSystemProblemOperator>(*this);
-      mfem_exec_ptr->addProblemOperator(std::move(problem_operator));
-    }
-    else
-    {
-      getProblemData().eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-      auto problem_operator = std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(*this);
-      mfem_exec_ptr->addProblemOperator(std::move(problem_operator));
-    }
-  }
-  else
-  {
-    mooseError("Executioner used that is not currently supported by MFEMProblem");
-  }
 }
 
 void

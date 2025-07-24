@@ -11,6 +11,7 @@
 
 #include "MFEMSteady.h"
 #include "MFEMProblem.h"
+#include "EquationSystemProblemOperator.h"
 
 registerMooseObject("MooseApp", MFEMSteady);
 
@@ -35,6 +36,13 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _last_solve_converged(false)
 {
   _time = _system_time;
+  // If no ProblemOperators have been added by the user, add a default  
+  if(getProblemOperators().empty())
+  {
+    _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
+    auto problem_operator = std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
+    addProblemOperator(std::move(problem_operator));
+  } 
 }
 
 void
