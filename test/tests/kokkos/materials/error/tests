@@ -1,0 +1,89 @@
+[Tests]
+  issues = '#30655'
+  design = 'syntax/Materials/index.md'
+
+  [error]
+    requirement = 'The Kokkos material system shall issue an error when '
+    [block_overlap]
+      type = RunException
+      input = 'kokkos_overlap.i'
+      expect_err = 'The following material properties are declared on block 10 by multiple materials:'
+      cli_args = 'KokkosMaterials/all/block=ANY_BLOCK_ID
+                  KokkosMaterials/left/block=10'
+      detail = 'multiple materials properties with the same name are declared on the same block.'
+      capabilities = 'kokkos'
+      devices = 'cpu cuda'
+    []
+    [not_supplied]
+      type = RunException
+      input = 'kokkos_dependency.i'
+      expect_err = 'Material property \'prop-c\', requested by \'mat1\' is not defined on block 0'
+      cli_args = 'KokkosMaterials/mat1/coupled_mat_prop=\'prop-c\'
+                  KokkosMaterials/mat1/use_old_prop=false'
+      detail = 'a material property was requested by a material but not supplied by another material.'
+      capabilities = 'kokkos'
+      devices = 'cpu cuda'
+    []
+    [stateful_not_supplied]
+      type = RunException
+      input = 'kokkos_dependency.i'
+      expect_err = 'One or more Material Properties were not supplied on block 0:'
+      cli_args = 'KokkosMaterials/mat1/coupled_mat_prop=\'prop-c\''
+      detail = 'a stateful material property was requested by a material but not supplied by another material.'
+      capabilities = 'kokkos'
+      devices = 'cpu cuda'
+    []
+    [cyclic]
+      type = RunException
+      input = 'kokkos_dependency.i'
+      expect_err = 'Cyclic dependency detected in object ordering:'
+      cli_args = 'KokkosMaterials/mat1/use_old_prop=false'
+      detail = 'two materials depend on each other.'
+      capabilities = 'kokkos'
+      devices = 'cpu cuda'
+    []
+    [different_type]
+      type = RunException
+      input = 'kokkos_multid.i'
+      expect_err = 'The declared 1D Kokkos material property \'prop_a\' of type \'int\' was already declared or requested as a 1D property of type \'double\'.'
+      cli_args = 'KokkosMaterials/active=\'left_real_1D right_int_1D\''
+      detail = 'the same material property was declared by different non-overlapping materials with different types'
+      capabilities = 'kokkos'
+      devices = 'cpu cuda'
+    []
+    [different_dim]
+      type = RunException
+      input = 'kokkos_multid.i'
+      expect_err = 'The declared 2D Kokkos material property \'prop_a\' with dimensions \(1, 1\) was already declared as a 1D property with dimensions \(1\).'
+      cli_args = 'KokkosMaterials/active=\'left_real_1D right_real_2D\''
+      detail = 'the same material property was declared by different non-overlapping materials with different dimensions'
+      capabilities = 'kokkos'
+      devices = 'cpu cuda'
+    []
+    [different_dim_size]
+      type = RunException
+      input = 'kokkos_multid.i'
+      expect_err = 'The declared 1D Kokkos material property \'prop_a\' with dimensions \(2\) was already declared as a 1D property with dimensions \(1\).'
+      cli_args = 'KokkosMaterials/active=\'left_real_1D right_real_1D\''
+      detail = 'the same material property was declared by different non-overlapping materials with different size of dimensions'
+      capabilities = 'kokkos'
+      devices = 'cpu cuda'
+    []
+  []
+
+  [stateful_cyclic]
+    type = RunApp
+    input = 'kokkos_dependency.i'
+    requirement = 'The Kokkos material system shall not create a dependency when old versions of material properties are retrieved and used in calculations.'
+    capabilities = 'kokkos'
+    devices = 'cpu cuda'
+  []
+  [same_type_and_dim]
+    type = RunApp
+    input = 'kokkos_multid.i'
+    cli_args = 'KokkosMaterials/active=\'left_real_1D right_real_1D_correct\''
+    requirement = 'The Kokkos material system shall not error when the same material property was declared by different non-overlapping materials with consistent type and dimension.'
+    capabilities = 'kokkos'
+    devices = 'cpu cuda'
+  []
+[]
