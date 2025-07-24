@@ -55,6 +55,9 @@ public:
   /// Return the dimension of the component
   unsigned int dimension() const { return _dimension; }
 
+  /// Return mesh generator names of the component
+  std::vector<MeshGeneratorName> mg_names() const { return _mg_names; }
+
 protected:
   // The default implementation of these routines will do nothing as we do not expect all Components
   // to be defining an object of every type
