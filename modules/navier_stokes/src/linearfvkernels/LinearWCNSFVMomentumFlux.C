@@ -55,6 +55,7 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
     _advected_interp_coeffs(std::make_pair<Real, Real>(0, 0)),
     _face_mass_flux(0.0),
+    _boundary_normal_factor(1.0),
     _stress_matrix_contribution(0.0),
     _stress_rhs_contribution(0.0),
     _index(getParam<MooseEnum>("momentum_component")),
@@ -132,6 +133,7 @@ Real
 LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
   const auto * const adv_diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
+
   mooseAssert(adv_diff_bc, "This should be a valid BC!");
   return (computeStressBoundaryRHSContribution(adv_diff_bc) +
           computeAdvectionBoundaryRHSContribution(adv_diff_bc)) *
@@ -296,17 +298,20 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
   // this in the boundary condition too. For now, however, we keep it like this.
   if (_use_nonorthogonal_correction)
   {
-    const auto correction_vector =
-        _current_face_info->normal() -
-        1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
-
-    // We might be on a face which is an internal boundary so we want to make sure we
-    // get the gradient from the right side.
+    // We support internal boundaries as well. In that case we have to decide on which side
+    // of the boundary we are on.
     const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
 
-    grad_contrib += _mu(face_arg, determineState()) * _var.gradSln(*elem_info) * correction_vector;
+    // Unit vector to the boundary. Unfortunately, we have to recompute it because the value
+    // stored in the face info is only correct for external boundaries
+    const auto e_Cf = _current_face_info->faceCentroid() - elem_info->centroid();
+    const auto correction_vector =
+        _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;
+
+    grad_contrib += _mu(face_arg, determineState()) * _var.gradSln(*elem_info) *
+                    _boundary_normal_factor * correction_vector;
   }
 
   if (_use_deviatoric_terms)
@@ -342,7 +347,10 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
     }
 
     frace_grad_approx(_index) -= 2 / 3 * trace_elem;
-    grad_contrib += _mu(face_arg, state_arg) * frace_grad_approx * _current_face_info->normal();
+
+    // We support internal boundaries too so we have to make sure the normal points always outward
+    grad_contrib += _mu(face_arg, state_arg) * frace_grad_approx * _boundary_normal_factor *
+                    _current_face_info->normal();
   }
 
   return grad_contrib;
@@ -353,22 +361,15 @@ LinearWCNSFVMomentumFlux::computeAdvectionBoundaryMatrixContribution(
     const LinearFVAdvectionDiffusionBC * bc)
 {
   const auto boundary_value_matrix_contrib = bc->computeBoundaryValueMatrixContribution();
-
-  // We support internal boundaries too so we have to make sure the normal points always outward
-  const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
-
-  return boundary_value_matrix_contrib * factor * _face_mass_flux;
+  return boundary_value_matrix_contrib * _face_mass_flux;
 }
 
 Real
 LinearWCNSFVMomentumFlux::computeAdvectionBoundaryRHSContribution(
     const LinearFVAdvectionDiffusionBC * bc)
 {
-  // We support internal boundaries too so we have to make sure the normal points always outward
-  const auto factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ? 1.0 : -1.0);
-
   const auto boundary_value_rhs_contrib = bc->computeBoundaryValueRHSContribution();
-  return -boundary_value_rhs_contrib * factor * _face_mass_flux;
+  return -boundary_value_rhs_contrib * _face_mass_flux;
 }
 
 void
@@ -376,8 +377,12 @@ LinearWCNSFVMomentumFlux::setupFaceData(const FaceInfo * face_info)
 {
   LinearFVFluxKernel::setupFaceData(face_info);
 
-  // Caching the mass flux on the face which will be reused in the advection term's matrix and right
-  // hand side contributions
+  // Multiplier that ensures the normal of the boundary always points outwards, even in cases
+  // when the boundary is within the mesh.
+  _boundary_normal_factor = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
+
+  // Caching the mass flux on the face which will be reused in the advection term's matrix and
+  // right hand side contributions
   _face_mass_flux = _mass_flux_provider.getMassFlux(*face_info);
 
   // Caching the interpolation coefficients so they will be reused for the matrix and right hand
