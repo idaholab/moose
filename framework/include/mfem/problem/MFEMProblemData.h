@@ -14,10 +14,12 @@
 #include "MFEMContainers.h"
 #include "CoefficientManager.h"
 #include "MFEMSolverBase.h"
-#include "MFEMRefinementMarker.h"
 #include <fstream>
 #include <iostream>
 #include <memory>
+
+// forward declare
+class MFEMRefinementMarker;
 
 /// Base problem data struct.
 struct MFEMProblemData
