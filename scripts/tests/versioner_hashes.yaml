@@ -1257,4 +1257,31 @@ ca3944140e845b4b8586365397d7fe1110ebeb89: #30791; libMesh submodule update, add 
   wasp:
     full_version: 2025.05.13_1
     hash: 3e37a23
-
+f14118d63adbfcc3d45765c2ba3cac1dfa0ffa7a: #31104; add kokkos to all builds, update apptainer mpi, add libceed, fix conda zsh linux
+  libmesh:
+    full_version: 2025.06.25_1
+    hash: 471ff5e
+  libmesh-vtk:
+    full_version: 9.4.2_4
+    hash: d35235e
+  moose-dev:
+    full_version: 2025.07.22
+    hash: 46da177
+  mpi:
+    full_version: 2025.07.23
+    hash: 0a5dd50
+  petsc:
+    full_version: 3.23.0.6.gd9d7fd11dca_3
+    hash: '4564759'
+  pprof:
+    full_version: 2025.06.13
+    hash: 3d296db
+  seacas:
+    full_version: 2025.05.22_0
+    hash: '1278418'
+  tools:
+    full_version: 2025.06.26
+    hash: d73012a
+  wasp:
+    full_version: 2025.05.13_1
+    hash: 3e37a23
