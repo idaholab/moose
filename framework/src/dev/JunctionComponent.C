@@ -52,8 +52,8 @@ JunctionComponent::validParams()
       "Final radius to extrude to. Defaults to constant radius if not specified.");
 
   // Parameters for the region between meshes
-  params.addParam<unsigned int>(
-      "n_elem_normal", 0, "Number of elements in the normal direction of the junction");
+  params.addRequiredParam<unsigned int>(
+      "n_elem_normal", "Number of elements in the normal direction of the junction");
   params.addParam<SubdomainName>("block", "Block name for the junction, if a block is created.");
 
   // add curve controls
@@ -129,7 +129,7 @@ JunctionComponent::addMeshGenerators()
       params.set<std::vector<MeshGeneratorName>>("inputs") =
           _mg_names; // protected member of ActionComponent
       params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
-          first_boundary, second_boundary};
+          {first_boundary, second_boundary}};
     }
     else
       mooseError("Stiching meshes of different dimensions is not implemented");
@@ -153,7 +153,7 @@ JunctionComponent::addMeshGenerators()
 
     InputParameters bspline_params = _factory.getValidParams("BSplineCurveGenerator");
     bspline_params.set<RealVectorValue>("start_direction") = start_direction;
-    bspline_params.set<RealVectorValue>("end_direction") = end_direction;
+    bspline_params.set<RealVectorValue>("end_direction") = -end_direction;
     bspline_params.set<unsigned int>("num_elements") = getParam<unsigned int>("n_elem_normal");
     if (isParamValid("sharpness"))
       bspline_params.set<Real>("sharpness") = getParam<Real>("sharpness");
@@ -170,9 +170,28 @@ JunctionComponent::addMeshGenerators()
         "BSplineCurveGenerator", name() + "_curve", bspline_params);
     _mg_names.push_back(name() + "_curve");
 
+    // create lower dimension mesh on the boundary
+    InputParameters ld_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
+    ld_params.set<MeshGeneratorName>("input") = first_component.mg_names().back();
+    ld_params.set<std::vector<BoundaryName>>("sidesets") =
+        std::vector{getParam<BoundaryName>("first_boundary")};
+    ld_params.set<SubdomainName>("new_block_name") = (SubdomainName)(name() + "_LowerDBlock");
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "LowerDBlockFromSidesetGenerator", name() + "_lowerDGeneration", ld_params);
+    _mg_names.push_back(name() + "_lowerDGeneration");
+
+    InputParameters bmc_params = _factory.getValidParams("BlockToMeshConverterGenerator");
+    bmc_params.set<MeshGeneratorName>("input") = name() + "_lowerDGeneration";
+    bmc_params.set<std::vector<SubdomainName>>("target_blocks") = {
+        (SubdomainName)(name() + "_LowerDBlock")};
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "BlockToMeshConverterGenerator", name() + "_blockToMesh", bmc_params);
+    _mg_names.push_back(name() + "_blockToMesh");
+
     // set up AdvancedExtruderGenerator
     InputParameters aeg_params = _factory.getValidParams("AdvancedExtruderGenerator");
     aeg_params.set<MeshGeneratorName>("extrusion_curve") = (MeshGeneratorName)(name() + "_curve");
+    aeg_params.set<MeshGeneratorName>("input") = (MeshGeneratorName)(name() + "_blockToMesh");
 
     aeg_params.set<Point>("start_extrusion_direction") = start_direction;
     aeg_params.set<Point>("end_extrusion_direction") = end_direction;
@@ -193,7 +212,7 @@ JunctionComponent::addMeshGenerators()
     InputParameters stitcher_params = _factory.getValidParams("StitchedMeshGenerator");
     stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = _mg_names;
     stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
-        first_boundary, second_boundary};
+        {first_boundary, second_boundary}};
   }
   else
     mooseError("junction_method specified is invalid!");
