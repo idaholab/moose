@@ -100,7 +100,7 @@ MFEMProblemSolve::solve()
   _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
   _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
   _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
-  
+
   return true;
 }
 #endif
