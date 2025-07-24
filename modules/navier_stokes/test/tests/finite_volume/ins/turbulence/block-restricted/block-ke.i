@@ -17,21 +17,21 @@ C2_eps = 1.92
 C_mu = 0.09
 
 ### Initial and Boundary Conditions ###
-intensity = ${fparse 0.16*Re^(-1./8.)}
+intensity = '${fparse 0.16*Re^(-1./8.)}'
 k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / (2*H)}'
 
 ### Modeling parameters ###
 bulk_wall_treatment = false
 walls = 'walls'
-wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearized, neq
+wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
   [block_left]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = ${fparse -2*H}
-    xmax = ${fparse -H}
+    xmin = '${fparse -2*H}'
+    xmax = '${fparse -H}'
     ymin = 0
     ymax = ${L}
     nx = 3
@@ -40,13 +40,13 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
   [block_1]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = ${fparse -H}
+    xmin = '${fparse -H}'
     xmax = 0
     ymin = 0
     ymax = ${L}
-    nx = 3
+    nx = 4
     ny = 4
-    bias_x = ${fparse 1/0.7}
+    bias_x = '${fparse 1/0.7}'
   []
   [block_2]
     type = GeneratedMeshGenerator
@@ -55,7 +55,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     xmax = ${H}
     ymin = 0
     ymax = ${L}
-    nx = 3
+    nx = 4
     ny = 4
     bias_x = 0.7
   []
@@ -63,7 +63,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     type = GeneratedMeshGenerator
     dim = 2
     xmin = ${H}
-    xmax = ${fparse 2*H}
+    xmax = '${fparse 2*H}'
     ymin = 0
     ymax = ${L}
     nx = 3
