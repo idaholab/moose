@@ -10,7 +10,7 @@
     requirement = 'The system shall have the ability to set initial conditions on a scalar variable.'
     capabilities = 'mfem'
     devices = 'cpu cuda'
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMVectorIC]
@@ -22,7 +22,7 @@
     requirement = 'The system shall have the ability to set initial conditions on a vector MFEM variable.'
     capabilities = 'mfem'
     devices = 'cpu cuda'
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMTransientScalarIC]
@@ -35,7 +35,7 @@
     requirement = 'The system shall have the ability to set initial conditions on a scalar variable in transient simulations.'
     capabilities = 'mfem'
     devices = 'cpu cuda'
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-  []  
+  []
 []
