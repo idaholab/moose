@@ -256,7 +256,7 @@ $(moose_config):
 	@echo "Copying default MOOSE configuration to: "$@"..."
 	@cp $(moose_default_config) $(moose_config)
 
-libmesh_CPPFLAGS += -imacros $(moose_config)
+libmesh_CPPFLAGS += -include $(moose_config)
 
 #
 # header symlinks
