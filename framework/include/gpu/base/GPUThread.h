@@ -32,7 +32,7 @@ public:
    * Set the thread pool size and dimension
    * @param dims The vector containing the size of each dimension
    */
-  void resize(std::vector<size_t> dims);
+  void resize(std::vector<dof_id_type> dims);
   /**
    * Get the total thread pool size
    * @returns The total thread pool size
@@ -44,7 +44,7 @@ public:
    * @param dim for which the multi-dimensional thread index is to be returned
    * @returns The multi-dimensional thread index of the dimension
    */
-  KOKKOS_FUNCTION auto operator()(size_t tid, unsigned int dim) const
+  KOKKOS_FUNCTION auto operator()(dof_id_type tid, unsigned int dim) const
   {
     KOKKOS_ASSERT(dim < _dim);
 
@@ -56,7 +56,7 @@ protected:
   /**
    * Total thread pool size
    */
-  size_t _size = 0;
+  dof_id_type _size = 0;
   /**
    * Thread pool dimension
    */
@@ -64,11 +64,11 @@ protected:
   /**
    * Thread pool size of each dimension
    */
-  size_t _dims[10];
+  dof_id_type _dims[10];
   /**
    * Thread pool stride of each dimension
    */
-  size_t _strides[10];
+  dof_id_type _strides[10];
 };
 
 } // namespace Kokkos

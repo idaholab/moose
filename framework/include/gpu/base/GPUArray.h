@@ -16,8 +16,6 @@
 #include "Conversion.h"
 #include "DataIO.h"
 
-#include <cstdint>
-
 #define usingKokkosArrayBaseMembers(T, dimension)                                                  \
 private:                                                                                           \
   using ArrayBase<T, dimension>::_n;                                                               \
@@ -157,13 +155,13 @@ public:
    * Get the total array size
    * @returns The total array size
    */
-  KOKKOS_FUNCTION uint64_t size() const { return _size; }
+  KOKKOS_FUNCTION dof_id_type size() const { return _size; }
   /**
    * Get the size of a dimension
    * @param dim The dimension index
    * @returns The array size of the dimension
    */
-  KOKKOS_FUNCTION uint64_t n(unsigned int dim) const { return _n[dim]; }
+  KOKKOS_FUNCTION dof_id_type n(unsigned int dim) const { return _n[dim]; }
   /**
    * Get the data pointer
    * @returns The pointer to the underlying data depending on the architecture this function is
@@ -203,7 +201,7 @@ public:
    * @returns The reference of the entry depending on the architecture this function is being called
    * on
    */
-  KOKKOS_FUNCTION T & operator[](size_t i) const
+  KOKKOS_FUNCTION T & operator[](dof_id_type i) const
   {
     KOKKOS_ASSERT(i < _size);
 
@@ -226,17 +224,17 @@ public:
    * Allocate array on host and device
    * @param n The vector containing the size of each dimension
    */
-  void create(const std::vector<uint64_t> n) { createInternal<true, true>(n); }
+  void create(const std::vector<dof_id_type> n) { createInternal<true, true>(n); }
   /**
    * Allocate array on host only
    * @param n The vector containing the size of each dimension
    */
-  void createHost(const std::vector<uint64_t> n) { createInternal<true, false>(n); }
+  void createHost(const std::vector<dof_id_type> n) { createInternal<true, false>(n); }
   /**
    * Allocate array on device only
    * @param n The vector containing the size of each dimension
    */
-  void createDevice(const std::vector<uint64_t> n) { createInternal<false, true>(n); }
+  void createDevice(const std::vector<dof_id_type> n) { createInternal<false, true>(n); }
   /**
    * Point the host data to an external data instead of allocating it
    * @param ptr The pointer to the external host data
@@ -259,7 +257,7 @@ public:
    * Apply starting index offsets to each dimension
    * @param d The vector containing the offset of each dimension
    */
-  void offset(const std::vector<int64_t> d);
+  void offset(const std::vector<dof_id_signed_type> d);
   /**
    * Copy data between host and device
    * @param dir The copy direction
@@ -272,7 +270,7 @@ public:
    * @param n The number of entries to copy
    * @param offset The starting offset of this array
    */
-  void copyIn(const T * ptr, MemcpyKind dir, uint64_t n, uint64_t offset = 0);
+  void copyIn(const T * ptr, MemcpyKind dir, dof_id_type n, dof_id_type offset = 0);
   /**
    * Copy data to an external data from this array
    * @param ptr The pointer to the external data
@@ -280,7 +278,7 @@ public:
    * @param n The number of entries to copy
    * @param offset The starting offset of this array
    */
-  void copyOut(T * ptr, MemcpyKind dir, uint64_t n, uint64_t offset = 0);
+  void copyOut(T * ptr, MemcpyKind dir, dof_id_type n, dof_id_type offset = 0);
   /**
    * Copy all the nested Kokkos arrays including self from host to device
    */
@@ -349,15 +347,15 @@ protected:
   /**
    * Size of each dimension
    */
-  uint64_t _n[dimension] = {0};
+  dof_id_type _n[dimension] = {0};
   /**
    * Stride of each dimension
    */
-  uint64_t _s[dimension] = {0};
+  dof_id_type _s[dimension] = {0};
   /**
    * Offset of each dimension
    */
-  int64_t _d[dimension] = {0};
+  dof_id_signed_type _d[dimension] = {0};
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -367,14 +365,14 @@ protected:
    * @param n The vector containing the size of each dimension
    */
   template <bool host, bool device>
-  void createInternal(const std::vector<uint64_t> n);
+  void createInternal(const std::vector<dof_id_type> n);
   /**
    * The internal method to initialize and allocate this array
    * @param n The vector containing the size of each dimension
    * @param host The flag whether host data will be allocated
    * @param device The flag whether device data will be allocated
    */
-  void createInternal(const std::vector<uint64_t> n, bool host, bool device);
+  void createInternal(const std::vector<dof_id_type> n, bool host, bool device);
   /**
    * The internal method to perform a memory copy
    * @tparam TargetSpace The Kokkos memory space of target data
@@ -384,7 +382,7 @@ protected:
    * @param n The number of entries to copy
    */
   template <typename TargetSpace, typename SourceSpace>
-  void copyInternal(T * target, const T * source, uint64_t n);
+  void copyInternal(T * target, const T * source, dof_id_type n);
 #endif
 
 private:
@@ -419,7 +417,7 @@ private:
   /**
    * Total size
    */
-  uint64_t _size = 0;
+  dof_id_type _size = 0;
 };
 
 template <typename T, unsigned int dimension>
@@ -447,7 +445,7 @@ ArrayBase<T, dimension>::destroy()
       else
       {
         // Allocated by malloc
-        for (uint64_t i = 0; i < _size; ++i)
+        for (dof_id_type i = 0; i < _size; ++i)
           _host_data[i].~T();
 
         std::free(_host_data);
@@ -561,7 +559,7 @@ ArrayBase<T, dimension>::allocDevice()
 template <typename T, unsigned int dimension>
 template <bool host, bool device>
 void
-ArrayBase<T, dimension>::createInternal(const std::vector<uint64_t> n)
+ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> n)
 {
   if (n.size() != dimension)
     mooseError("Kokkos array error: the number of dimensions provided (",
@@ -597,7 +595,7 @@ ArrayBase<T, dimension>::createInternal(const std::vector<uint64_t> n)
 
 template <typename T, unsigned int dimension>
 void
-ArrayBase<T, dimension>::createInternal(const std::vector<uint64_t> n, bool host, bool device)
+ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> n, bool host, bool device)
 {
   if (host && device)
     createInternal<true, true>(n);
@@ -612,7 +610,7 @@ ArrayBase<T, dimension>::createInternal(const std::vector<uint64_t> n, bool host
 template <typename T, unsigned int dimension>
 template <typename TargetSpace, typename SourceSpace>
 void
-ArrayBase<T, dimension>::copyInternal(T * target, const T * source, uint64_t n)
+ArrayBase<T, dimension>::copyInternal(T * target, const T * source, dof_id_type n)
 {
   ::Kokkos::Impl::DeepCopy<TargetSpace, SourceSpace>(target, source, n * sizeof(T));
   ::Kokkos::fence();
@@ -620,7 +618,7 @@ ArrayBase<T, dimension>::copyInternal(T * target, const T * source, uint64_t n)
 
 template <typename T, unsigned int dimension>
 void
-ArrayBase<T, dimension>::offset(const std::vector<int64_t> d)
+ArrayBase<T, dimension>::offset(const std::vector<dof_id_signed_type> d)
 {
   if (d.size() > dimension)
     mooseError("Kokkos array error: the number of offsets provided (",
@@ -683,7 +681,7 @@ ArrayBase<T, dimension>::copy(MemcpyKind dir)
 
 template <typename T, unsigned int dimension>
 void
-ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, uint64_t n, uint64_t offset)
+ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, dof_id_type n, dof_id_type offset)
 {
   if (n > _size)
     mooseError("Kokkos array error: cannot copyin data larger than the array size.");
@@ -722,7 +720,7 @@ ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, uint64_t n, uint6
 
 template <typename T, unsigned int dimension>
 void
-ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyKind dir, uint64_t n, uint64_t offset)
+ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyKind dir, dof_id_type n, dof_id_type offset)
 {
   if (n > _size)
     mooseError("Kokkos array error: cannot copyout data larger than the array size.");
@@ -790,13 +788,13 @@ ArrayBase<T, dimension>::deepCopy(const ArrayBase<T, dimension> & array)
     mooseError(
         "Kokkos array error: cannot deep copy using constructor from array without host data.");
 
-  std::vector<uint64_t> n(std::begin(array._n), std::end(array._n));
+  std::vector<dof_id_type> n(std::begin(array._n), std::end(array._n));
 
   createInternal(n, array._is_host_alloc, array._is_device_alloc);
 
   if constexpr (ArrayDeepCopy<T>::value)
   {
-    for (uint64_t i = 0; i < _size; ++i)
+    for (dof_id_type i = 0; i < _size; ++i)
       new (_host_data + i) T(array._host_data[i]);
 
     copy();
@@ -879,7 +877,7 @@ dataStore(std::ostream & stream, Array<T, dimension> & array, void * context)
 
     array.copyOut(data, MemcpyKind::DEVICE_TO_HOST, array.size());
 
-    for (uint64_t i = 0; i < array.size(); ++i)
+    for (dof_id_type i = 0; i < array.size(); ++i)
       dataStore(stream, data[i], context);
 
     std::free(data);
@@ -923,8 +921,8 @@ dataLoad(std::istream & stream, Array<T, dimension> & array, void * context)
                dimension,
                "D.");
 
-  std::vector<uint64_t> from_n(dimension);
-  std::vector<uint64_t> n(dimension);
+  std::vector<dof_id_type> from_n(dimension);
+  std::vector<dof_id_type> n(dimension);
 
   for (unsigned int dim = 0; dim < dimension; ++dim)
   {
@@ -1005,7 +1003,7 @@ public:
    * This allocates both host and device data
    * @param n0 The first dimension size
    */
-  Array(uint64_t n0) { create(n0); }
+  Array(dof_id_type n0) { create(n0); }
   /**
    * Constructor
    * Initialize and allocate array by copying a standard vector variable
@@ -1018,27 +1016,27 @@ public:
    * Initialize array with given dimensions but do not allocate
    * @param n0 The first dimension size
    */
-  void init(uint64_t n0) { this->template createInternal<false, false>({n0}); }
+  void init(dof_id_type n0) { this->template createInternal<false, false>({n0}); }
   /**
    * Initialize and allocate array with given dimensions on host and device
    * @param n0 The first dimension size
    */
-  void create(uint64_t n0) { this->template createInternal<true, true>({n0}); }
+  void create(dof_id_type n0) { this->template createInternal<true, true>({n0}); }
   /**
    * Initialize and allocate array with given dimensions on host only
    * @param n0 The first dimension size
    */
-  void createHost(uint64_t n0) { this->template createInternal<true, false>({n0}); }
+  void createHost(dof_id_type n0) { this->template createInternal<true, false>({n0}); }
   /**
    * Initialize and allocate array with given dimensions on device only
    * @param n0 The first dimension size
    */
-  void createDevice(uint64_t n0) { this->template createInternal<false, true>({n0}); }
+  void createDevice(dof_id_type n0) { this->template createInternal<false, true>({n0}); }
   /**
    * Set starting index offsets
    * @param d0 The first dimension offset
    */
-  void offset(int64_t d0) { ArrayBase<T, 1>::offset({d0}); }
+  void offset(dof_id_signed_type d0) { ArrayBase<T, 1>::offset({d0}); }
 
   /**
    * Copy a standard vector variable
@@ -1050,7 +1048,7 @@ public:
   template <bool host = true, bool device = true>
   void copyVector(const std::vector<T> & vector)
   {
-    this->template createInternal<host, device>({vector.size()});
+    this->template createInternal<host, device>({static_cast<dof_id_type>(vector.size())});
 
     if (host)
       std::memcpy(this->host_data(), vector.data(), this->size() * sizeof(T));
@@ -1103,9 +1101,9 @@ public:
    * @returns The reference of the entry depending on the architecture this function is being
    * called on
    */
-  KOKKOS_FUNCTION T & operator()(int64_t i0) const
+  KOKKOS_FUNCTION T & operator()(dof_id_signed_type i0) const
   {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<uint64_t>(i0 - _d[0]) < _n[0]);
+    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<dof_id_type>(i0 - _d[0]) < _n[0]);
 
     return this->operator[](i0 - _d[0]);
   }
@@ -1147,26 +1145,32 @@ public:
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    */
-  Array(uint64_t n0, uint64_t n1) { create(n0, n1); }
+  Array(dof_id_type n0, dof_id_type n1) { create(n0, n1); }
 
   /**
    * Initialize array with given dimensions but do not allocate
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    */
-  void init(uint64_t n0, uint64_t n1) { this->template createInternal<false, false>({n0, n1}); }
+  void init(dof_id_type n0, dof_id_type n1)
+  {
+    this->template createInternal<false, false>({n0, n1});
+  }
   /**
    * Initialize and allocate array with given dimensions on host and device
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    */
-  void create(uint64_t n0, uint64_t n1) { this->template createInternal<true, true>({n0, n1}); }
+  void create(dof_id_type n0, dof_id_type n1)
+  {
+    this->template createInternal<true, true>({n0, n1});
+  }
   /**
    * Initialize and allocate array with given dimensions on host only
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    */
-  void createHost(uint64_t n0, uint64_t n1)
+  void createHost(dof_id_type n0, dof_id_type n1)
   {
     this->template createInternal<true, false>({n0, n1});
   }
@@ -1175,7 +1179,7 @@ public:
    * @param n0 The first dimension size
    * @param n1 The second dimension size
    */
-  void createDevice(uint64_t n0, uint64_t n1)
+  void createDevice(dof_id_type n0, dof_id_type n1)
   {
     this->template createInternal<false, true>({n0, n1});
   }
@@ -1184,7 +1188,7 @@ public:
    * @param d0 The first dimension offset
    * @param d1 The second dimension offset
    */
-  void offset(int64_t d0, int64_t d1) { ArrayBase<T, 2>::offset({d0, d1}); }
+  void offset(dof_id_signed_type d0, dof_id_signed_type d1) { ArrayBase<T, 2>::offset({d0, d1}); }
 
   /**
    * Get an array entry
@@ -1193,10 +1197,10 @@ public:
    * @returns The reference of the entry depending on the architecture this function is being called
    * on
    */
-  KOKKOS_FUNCTION T & operator()(int64_t i0, int64_t i1) const
+  KOKKOS_FUNCTION T & operator()(dof_id_signed_type i0, dof_id_signed_type i1) const
   {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<uint64_t>(i0 - _d[0]) < _n[0]);
-    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<uint64_t>(i1 - _d[1]) < _n[1]);
+    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<dof_id_type>(i0 - _d[0]) < _n[0]);
+    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<dof_id_type>(i1 - _d[1]) < _n[1]);
 
     return this->operator[](i0 - _d[0] + (i1 - _d[1]) * _s[1]);
   }
@@ -1239,7 +1243,7 @@ public:
    * @param n1 The second dimension size
    * @param n2 The third dimension size
    */
-  Array(uint64_t n0, uint64_t n1, uint64_t n2) { create(n0, n1, n2); }
+  Array(dof_id_type n0, dof_id_type n1, dof_id_type n2) { create(n0, n1, n2); }
 
   /**
    * Initialize array with given dimensions but do not allocate
@@ -1247,7 +1251,7 @@ public:
    * @param n1 The second dimension size
    * @param n2 The third dimension size
    */
-  void init(uint64_t n0, uint64_t n1, uint64_t n2)
+  void init(dof_id_type n0, dof_id_type n1, dof_id_type n2)
   {
     this->template createInternal<false, false>({n0, n1, n2});
   }
@@ -1257,7 +1261,7 @@ public:
    * @param n1 The second dimension size
    * @param n2 The third dimension size
    */
-  void create(uint64_t n0, uint64_t n1, uint64_t n2)
+  void create(dof_id_type n0, dof_id_type n1, dof_id_type n2)
   {
     this->template createInternal<true, true>({n0, n1, n2});
   }
@@ -1267,7 +1271,7 @@ public:
    * @param n1 The second dimension size
    * @param n2 The third dimension size
    */
-  void createHost(uint64_t n0, uint64_t n1, uint64_t n2)
+  void createHost(dof_id_type n0, dof_id_type n1, dof_id_type n2)
   {
     this->template createInternal<true, false>({n0, n1, n2});
   }
@@ -1277,7 +1281,7 @@ public:
    * @param n1 The second dimension size
    * @param n2 The third dimension size
    */
-  void createDevice(uint64_t n0, uint64_t n1, uint64_t n2)
+  void createDevice(dof_id_type n0, dof_id_type n1, dof_id_type n2)
   {
     this->template createInternal<false, true>({n0, n1, n2});
   }
@@ -1287,7 +1291,10 @@ public:
    * @param d1 The second dimension offset
    * @param d2 The third dimension offset
    */
-  void offset(int64_t d0, int64_t d1, int64_t d2) { ArrayBase<T, 3>::offset({d0, d1, d2}); }
+  void offset(dof_id_signed_type d0, dof_id_signed_type d1, dof_id_signed_type d2)
+  {
+    ArrayBase<T, 3>::offset({d0, d1, d2});
+  }
 
   /**
    * Get an array entry
@@ -1297,11 +1304,12 @@ public:
    * @returns The reference of the entry depending on the architecture this function is being
    * called on
    */
-  KOKKOS_FUNCTION T & operator()(int64_t i0, int64_t i1, int64_t i2) const
+  KOKKOS_FUNCTION T &
+  operator()(dof_id_signed_type i0, dof_id_signed_type i1, dof_id_signed_type i2) const
   {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<uint64_t>(i0 - _d[0]) < _n[0]);
-    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<uint64_t>(i1 - _d[1]) < _n[1]);
-    KOKKOS_ASSERT(i2 - _d[2] >= 0 && static_cast<uint64_t>(i2 - _d[2]) < _n[2]);
+    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<dof_id_type>(i0 - _d[0]) < _n[0]);
+    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<dof_id_type>(i1 - _d[1]) < _n[1]);
+    KOKKOS_ASSERT(i2 - _d[2] >= 0 && static_cast<dof_id_type>(i2 - _d[2]) < _n[2]);
 
     return this->operator[](i0 - _d[0] + (i1 - _d[1]) * _s[1] + (i2 - _d[2]) * _s[2]);
   }
@@ -1345,7 +1353,7 @@ public:
    * @param n2 The third dimension size
    * @param n3 The fourth dimension size
    */
-  Array(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3) { create(n0, n1, n2, n3); }
+  Array(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3) { create(n0, n1, n2, n3); }
 
   /**
    * Initialize array with given dimensions but do not allocate
@@ -1354,7 +1362,7 @@ public:
    * @param n2 The third dimension size
    * @param n3 The fourth dimension size
    */
-  void init(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3)
+  void init(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3)
   {
     this->template createInternal<false, false>({n0, n1, n2, n3});
   }
@@ -1365,7 +1373,7 @@ public:
    * @param n2 The third dimension size
    * @param n3 The fourth dimension size
    */
-  void create(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3)
+  void create(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3)
   {
     this->template createInternal<true, true>({n0, n1, n2, n3});
   }
@@ -1376,7 +1384,7 @@ public:
    * @param n2 The third dimension size
    * @param n3 The fourth dimension size
    */
-  void createHost(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3)
+  void createHost(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3)
   {
     this->template createInternal<true, false>({n0, n1, n2, n3});
   }
@@ -1387,7 +1395,7 @@ public:
    * @param n2 The third dimension size
    * @param n3 The fourth dimension size
    */
-  void createDevice(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3)
+  void createDevice(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3)
   {
     this->template createInternal<false, true>({n0, n1, n2, n3});
   }
@@ -1398,7 +1406,8 @@ public:
    * @param d2 The third dimension offset
    * @param d3 The fourth dimension offset
    */
-  void offset(int64_t d0, int64_t d1, int64_t d2, int64_t d3)
+  void
+  offset(dof_id_signed_type d0, dof_id_signed_type d1, dof_id_signed_type d2, dof_id_signed_type d3)
   {
     ArrayBase<T, 4>::offset({d0, d1, d2, d3});
   }
@@ -1412,12 +1421,15 @@ public:
    * @returns The reference of the entry depending on the architecture this function is being called
    * on
    */
-  KOKKOS_FUNCTION T & operator()(int64_t i0, int64_t i1, int64_t i2, int64_t i3) const
+  KOKKOS_FUNCTION T & operator()(dof_id_signed_type i0,
+                                 dof_id_signed_type i1,
+                                 dof_id_signed_type i2,
+                                 dof_id_signed_type i3) const
   {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<uint64_t>(i0 - _d[0]) < _n[0]);
-    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<uint64_t>(i1 - _d[1]) < _n[1]);
-    KOKKOS_ASSERT(i2 - _d[2] >= 0 && static_cast<uint64_t>(i2 - _d[2]) < _n[2]);
-    KOKKOS_ASSERT(i3 - _d[3] >= 0 && static_cast<uint64_t>(i3 - _d[3]) < _n[3]);
+    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<dof_id_type>(i0 - _d[0]) < _n[0]);
+    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<dof_id_type>(i1 - _d[1]) < _n[1]);
+    KOKKOS_ASSERT(i2 - _d[2] >= 0 && static_cast<dof_id_type>(i2 - _d[2]) < _n[2]);
+    KOKKOS_ASSERT(i3 - _d[3] >= 0 && static_cast<dof_id_type>(i3 - _d[3]) < _n[3]);
 
     return this->operator[](i0 - _d[0] + (i1 - _d[1]) * _s[1] + (i2 - _d[2]) * _s[2] +
                             (i3 - _d[3]) * _s[3]);
@@ -1463,7 +1475,7 @@ public:
    * @param n3 The fourth dimension size
    * @param n4 The fifth dimension size
    */
-  Array(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3, uint64_t n4)
+  Array(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3, dof_id_type n4)
   {
     create(n0, n1, n2, n3, n4);
   }
@@ -1476,7 +1488,7 @@ public:
    * @param n3 The fourth dimension size
    * @param n4 The fifth dimension size
    */
-  void init(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3, uint64_t n4)
+  void init(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3, dof_id_type n4)
   {
     this->template createInternal<false, false>({n0, n1, n2, n3, n4});
   }
@@ -1488,7 +1500,7 @@ public:
    * @param n3 The fourth dimension size
    * @param n4 The fifth dimension size
    */
-  void create(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3, uint64_t n4)
+  void create(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3, dof_id_type n4)
   {
     this->template createInternal<true, true>({n0, n1, n2, n3, n4});
   }
@@ -1500,7 +1512,7 @@ public:
    * @param n3 The fourth dimension size
    * @param n4 The fifth dimension size
    */
-  void createHost(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3, uint64_t n4)
+  void createHost(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3, dof_id_type n4)
   {
     this->template createInternal<true, false>({n0, n1, n2, n3, n4});
   }
@@ -1512,7 +1524,7 @@ public:
    * @param n3 The fourth dimension size
    * @param n4 The fifth dimension size
    */
-  void createDevice(uint64_t n0, uint64_t n1, uint64_t n2, uint64_t n3, uint64_t n4)
+  void createDevice(dof_id_type n0, dof_id_type n1, dof_id_type n2, dof_id_type n3, dof_id_type n4)
   {
     this->template createInternal<false, true>({n0, n1, n2, n3, n4});
   }
@@ -1524,7 +1536,11 @@ public:
    * @param d3 The fourth dimension offset
    * @param d4 The fifth dimension offset
    */
-  void offset(int64_t d0, int64_t d1, int64_t d2, int64_t d3, int64_t d4)
+  void offset(dof_id_signed_type d0,
+              dof_id_signed_type d1,
+              dof_id_signed_type d2,
+              dof_id_signed_type d3,
+              dof_id_signed_type d4)
   {
     ArrayBase<T, 5>::offset({d0, d1, d2, d3, d4});
   }
@@ -1539,13 +1555,17 @@ public:
    * @returns The reference of the entry depending on the architecture this function is being called
    * on
    */
-  KOKKOS_FUNCTION T & operator()(int64_t i0, int64_t i1, int64_t i2, int64_t i3, int64_t i4) const
+  KOKKOS_FUNCTION T & operator()(dof_id_signed_type i0,
+                                 dof_id_signed_type i1,
+                                 dof_id_signed_type i2,
+                                 dof_id_signed_type i3,
+                                 dof_id_signed_type i4) const
   {
-    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<uint64_t>(i0 - _d[0]) < _n[0]);
-    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<uint64_t>(i1 - _d[1]) < _n[1]);
-    KOKKOS_ASSERT(i2 - _d[2] >= 0 && static_cast<uint64_t>(i2 - _d[2]) < _n[2]);
-    KOKKOS_ASSERT(i3 - _d[3] >= 0 && static_cast<uint64_t>(i3 - _d[3]) < _n[3]);
-    KOKKOS_ASSERT(i4 - _d[4] >= 0 && static_cast<uint64_t>(i4 - _d[4]) < _n[4]);
+    KOKKOS_ASSERT(i0 - _d[0] >= 0 && static_cast<dof_id_type>(i0 - _d[0]) < _n[0]);
+    KOKKOS_ASSERT(i1 - _d[1] >= 0 && static_cast<dof_id_type>(i1 - _d[1]) < _n[1]);
+    KOKKOS_ASSERT(i2 - _d[2] >= 0 && static_cast<dof_id_type>(i2 - _d[2]) < _n[2]);
+    KOKKOS_ASSERT(i3 - _d[3] >= 0 && static_cast<dof_id_type>(i3 - _d[3]) < _n[3]);
+    KOKKOS_ASSERT(i4 - _d[4] >= 0 && static_cast<dof_id_type>(i4 - _d[4]) < _n[4]);
 
     return this->operator[](i0 - _d[0] + (i1 - _d[1]) * _s[1] + (i2 - _d[2]) * _s[2] +
                             (i3 - _d[3]) * _s[3] + (i4 - _d[4]) * _s[4]);

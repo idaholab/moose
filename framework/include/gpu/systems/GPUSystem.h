@@ -355,7 +355,7 @@ public:
   /**
    * Kokkos function for caching variable values on element quadrature points
    */
-  KOKKOS_FUNCTION void operator()(const size_t tid) const;
+  KOKKOS_FUNCTION void operator()(const dof_id_type tid) const;
 #endif
 
   /**
@@ -453,7 +453,7 @@ private:
   /**
    * Maximum number of DOFs per element for each variable
    */
-  Array<dof_id_type> _max_dofs_per_elem;
+  Array<unsigned int> _max_dofs_per_elem;
   /**
    * FE type ID of each variable
    */

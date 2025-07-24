@@ -50,7 +50,7 @@ public:
    * @param dim The dimension index
    * @returns The size of the dimension
    */
-  KOKKOS_FUNCTION uint64_t n(unsigned int dim) const { return _data->n(dim); }
+  KOKKOS_FUNCTION dof_id_type n(unsigned int dim) const { return _data->n(dim); }
 
 protected:
   /**

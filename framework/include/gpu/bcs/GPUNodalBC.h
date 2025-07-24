@@ -111,9 +111,9 @@ public:
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
-  KOKKOS_FUNCTION void operator()(ResidualLoop, const size_t tid) const;
-  KOKKOS_FUNCTION void operator()(JacobianLoop, const size_t tid) const;
-  KOKKOS_FUNCTION void operator()(OffDiagJacobianLoop, const size_t tid) const;
+  KOKKOS_FUNCTION void operator()(ResidualLoop, const dof_id_type tid) const;
+  KOKKOS_FUNCTION void operator()(JacobianLoop, const dof_id_type tid) const;
+  KOKKOS_FUNCTION void operator()(OffDiagJacobianLoop, const dof_id_type tid) const;
   ///@}
 
 protected:
@@ -133,7 +133,7 @@ template <typename Derived>
 void
 NodalBC<Derived>::computeResidual()
 {
-  ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<size_t>> policy(
+  ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
       0, numBoundaryNodes());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
   ::Kokkos::fence();
@@ -143,7 +143,7 @@ template <typename Derived>
 void
 NodalBC<Derived>::computeJacobian()
 {
-  ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<size_t>> policy(
+  ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
       0, numBoundaryNodes());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
   ::Kokkos::fence();
@@ -154,7 +154,7 @@ NodalBC<Derived>::computeJacobian()
 
     _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numBoundaryNodes()});
 
-    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<size_t>> policy(
+    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
         0, _thread.size());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
@@ -163,7 +163,7 @@ NodalBC<Derived>::computeJacobian()
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-NodalBC<Derived>::operator()(ResidualLoop, const size_t tid) const
+NodalBC<Derived>::operator()(ResidualLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
   auto node = boundaryNodeID(tid);
@@ -175,7 +175,7 @@ NodalBC<Derived>::operator()(ResidualLoop, const size_t tid) const
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-NodalBC<Derived>::operator()(JacobianLoop, const size_t tid) const
+NodalBC<Derived>::operator()(JacobianLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
   auto node = boundaryNodeID(tid);
@@ -188,7 +188,7 @@ NodalBC<Derived>::operator()(JacobianLoop, const size_t tid) const
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-NodalBC<Derived>::operator()(OffDiagJacobianLoop, const size_t tid) const
+NodalBC<Derived>::operator()(OffDiagJacobianLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
   auto node = boundaryNodeID(_thread(tid, 1));
