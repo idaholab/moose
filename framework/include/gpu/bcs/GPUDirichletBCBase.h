@@ -66,7 +66,7 @@ public:
   /**
    * The preset function called by Kokkos
    */
-  KOKKOS_FUNCTION void operator()(const size_t tid) const;
+  KOKKOS_FUNCTION void operator()(const dof_id_type tid) const;
 
   /**
    * Compute residual contribution on a node
@@ -97,14 +97,14 @@ DirichletBCBase<Derived>::presetSolution(TagID tag)
 {
   _solution_tag = tag;
 
-  ::Kokkos::parallel_for(
-      ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<size_t>>(0, this->numBoundaryNodes()),
-      *static_cast<Derived *>(this));
+  ::Kokkos::parallel_for(::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>>(
+                             0, this->numBoundaryNodes()),
+                         *static_cast<Derived *>(this));
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-DirichletBCBase<Derived>::operator()(const size_t tid) const
+DirichletBCBase<Derived>::operator()(const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
   auto node = boundaryNodeID(tid);
