@@ -69,6 +69,9 @@ protected:
   const libMesh::Point _end_extrusion_direction;
   bool _extrude_along_curve;
 
+  /// Mesh to extrude to
+  std::unique_ptr<MeshBase> & _target_mesh;
+
   const bool _has_top_boundary;
   const BoundaryName _top_boundary;
 
@@ -89,6 +92,21 @@ protected:
 
   /// Axial pitch for a full rotation
   const Real _twist_pitch;
+
+  /// @brief Calculates starting radius for extrusion along curve
+  /// @param extrusion_curve 1D extrusion curve
+  /// @param input_mesh mesh to be extruded
+  libMesh::Real calculateStartRadius(const std::unique_ptr<MeshBase> & extrusion_curve,
+                                     const std::unique_ptr<MeshBase> & input_mesh);
+
+  /// @brief Calculates ending radius for extrusion along curve.
+  /// @param extrusion_curve 1D extrusion curve
+  /// @param target_mesh mesh to be extruded to
+  /// @param start_radius radius at the start of the extrusion (calculated with above method)
+  /// @return
+  libMesh::Real calculateEndRadius(const std::unique_ptr<MeshBase> & extrusion_curve,
+                                   const std::unique_ptr<MeshBase> & target_mesh,
+                                   const libMesh::Real & start_radius);
 
   /// Calculate radius for expansion
   libMesh::Real radialWeighting(const MooseEnum function_type, const libMesh::Real t);
