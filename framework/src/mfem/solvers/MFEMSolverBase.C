@@ -51,6 +51,13 @@ MFEMSolverBase::setPreconditioner(T & solver)
   }
 }
 
+void
+MFEMSolverBase::resetSolver()
+{
+  InputParameters solver_params = MFEMGeneralUserObject::validParams();
+  constructSolver(solver_params);
+}
+
 template void MFEMSolverBase::setPreconditioner(mfem::CGSolver &);
 template void MFEMSolverBase::setPreconditioner(mfem::GMRESSolver &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreFGMRES &);

@@ -648,9 +648,13 @@ MFEMProblem::updateAfterRefinement()
   if (_problem_data.pmesh->Nonconforming())
   {
     _problem_data.pmesh->Rebalance();
+
     // Update FESpaces again to account for rebalancing
     updateFESpaces();
   }
+
+  // finally, reset the solver. Ultimately this reconstructs it.
+  _problem_data.jacobian_solver->resetSolver();
 }
 
 void
