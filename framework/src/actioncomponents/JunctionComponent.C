@@ -128,8 +128,8 @@ JunctionComponent::addMeshGenerators()
       InputParameters params = _factory.getValidParams("StitchedMeshGenerator");
       params.set<std::vector<MeshGeneratorName>>("inputs") =
           _mg_names; // protected member of ActionComponent
-      params.set<std::vector<std::string>>("stitch_boundaries_pairs") = {first_boundary,
-                                                                         second_boundary};
+      params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
+          first_boundary, second_boundary};
     }
     else
       mooseError("Stiching meshes of different dimensions is not implemented");
@@ -192,8 +192,8 @@ JunctionComponent::addMeshGenerators()
     // stitcher for results
     InputParameters stitcher_params = _factory.getValidParams("StitchedMeshGenerator");
     stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = _mg_names;
-    stitcher_params.set<std::vector<std::string>>("stitch_boundaries_pairs") = {first_boundary,
-                                                                                second_boundary};
+    stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
+        first_boundary, second_boundary};
   }
   else
     mooseError("junction_method specified is invalid!");
