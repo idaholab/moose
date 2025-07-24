@@ -9,6 +9,7 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
+    devices = 'cpu' # schemadiff with cuda
     max_parallel = 1
     recover = false
     max_threads = 1
@@ -198,6 +199,7 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads using MFEM.'
     capabilities = 'mfem'
+    devices = 'cpu' # schemadiff with cuda
     max_parallel = 1
     recover = false
     max_threads = 1
