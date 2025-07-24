@@ -94,7 +94,7 @@ LinearFVConjugateHeatTransferBC::computeBoundaryGradientRHSContribution() const
 
   const auto fluid_side_elem_info = _var_is_fluid ? elem_info : neighbor_info;
 
-  const auto multiplier = _current_face_info->normal() * 
+  const auto multiplier = _current_face_info->normal() *
 	  (_current_face_info->faceCentroid() - fluid_side_elem_info->centroid()) > 0
                           ?  1
                           : -1;
