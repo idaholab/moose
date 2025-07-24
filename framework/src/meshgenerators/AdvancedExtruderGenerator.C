@@ -538,7 +538,6 @@ AdvancedExtruderGenerator::generate()
   if (_extrude_along_curve)
     reference_point = extrusion_curve->node_ptr(0);
 
-  std::cout << "input->n_nodes() = " << input->n_nodes() << std::endl;
   libMesh::Real start_radius =
       AdvancedExtruderGenerator::calculateStartRadius(extrusion_curve, input);
 

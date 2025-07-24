@@ -258,4 +258,14 @@
     requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve with linear radial growth rate.'
     design = 'AdvancedExtruderGenerator.md'
   []
+  [extrude_along_2D_curve_expand_to_target_mesh]
+    type = Exodiff
+    input = 'extrude_with_expansion_to_target_2D.i'
+    exodiff = 'extrude_with_expansion_to_target_2D_in.e'
+    cli_args = '--mesh-only extrude_with_expansion_to_target_2D_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve towards a target mesh and expand as needed.'
+    design = 'AdvancedExtruderGenerator.md'
+  []
 []
