@@ -10,7 +10,7 @@
     requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
     devices = 'cpu' # schemadiff with cuda
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     max_threads = 1
     platform = 'linux'
@@ -31,7 +31,7 @@
     capabilities = 'mfem'
     devices = 'cpu cuda'
     valgrind = heavy
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     max_threads = 1
     platform = 'linux'
@@ -46,7 +46,7 @@
     requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
     capabilities = 'mfem'
     devices = 'cpu cuda'
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*3.*Spatial Dimension.*3.*Elems.*2476.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
   []
@@ -61,7 +61,7 @@
     requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
     capabilities = 'mfem'
     devices = 'cpu cuda'
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMDiffusionLOR]
@@ -77,7 +77,7 @@
     requirement = 'The system shall have the ability to solve a diffusion problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
     capabilities = 'mfem'
     devices = 'cpu cuda'
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     abs_zero = 1e-6
   []
@@ -90,7 +90,7 @@
     requirement = 'The system shall have the ability to solve a grad-div problem with Raviart-Thomas elements using MFEM.'
     capabilities = 'mfem'
     devices = 'cpu cuda'
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     errors = 'foobarbaz' # allow cuda errors I guess?
   []
@@ -109,7 +109,7 @@
     capabilities = 'mfem'
     devices = 'cpu cuda'
     valgrind = heavy
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     abs_zero = 1e-6
   []
@@ -126,7 +126,7 @@
     requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
     capabilities = 'mfem'
     devices = 'cpu cuda'
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMHeatConductionElement]
@@ -145,7 +145,7 @@
     capabilities = 'mfem'
     devices = 'cpu cuda'
     valgrind = none
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMHeatConductionLOR]
@@ -164,7 +164,7 @@
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
     capabilities = 'mfem'
     devices = 'cpu cuda'
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMHeatTransfer]
@@ -176,7 +176,7 @@
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
     capabilities = 'mfem'
     devices = 'cpu cuda'
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMLinearElasticity]
@@ -188,7 +188,7 @@
     requirement = 'The system shall have the ability to solve a linear elasticity problem using MFEM.'
     capabilities = 'mfem'
     devices = 'cpu cuda'
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMGravity]
@@ -200,7 +200,7 @@
     requirement = 'The system shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads using MFEM.'
     capabilities = 'mfem'
     devices = 'cpu' # schemadiff with cuda
-    max_parallel = 1
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     max_threads = 1
     platform = 'linux'
@@ -214,7 +214,6 @@
     capabilities = 'mfem'
     devices = 'cpu cuda'
     recover = false
-    max_parallel = 1 # mfem-hypre doesn't appear to work with multiple ranks with cuda
   []
   [MFEMDarcy]
     type = CSVDiff
