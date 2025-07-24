@@ -7,7 +7,7 @@
       type = RunApp
       input = parent.i
       capabilities = 'mfem'
-      devices = 'cpu cuda'
+      devices = 'cpu' # Executioner/device=cuda only passed to main app which leads to inconsistency error
       recover = false
       detail = 'running the inputs, and '
     []
