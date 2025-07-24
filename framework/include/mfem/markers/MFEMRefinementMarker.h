@@ -24,16 +24,20 @@ public:
 
   std::shared_ptr<mfem::ParFiniteElementSpace> getFESpace();
 
+  /// Modifies the input array with all the locations in the mesh where we should increase
+  /// the polynomial order
   void MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinement> & refinements);
+
+  /// Refines the mesh wherever the refiner sees fit.
   void HRefine(mfem::ParMesh & mesh);
 
-  //! Return whether these functions are enabled
-  //! Checking the the counter here is indeed redundant since the
-  //! H-refinement and P-refinement functions modify this one as well
+  /// Checks if H refinement is enabled, and if we should continue.
   bool UseHRefinement() const
   {
     return _use_h_refinement and !_stop_h_ref and (_h_ref_counter < _max_h_level);
   }
+
+  /// Checks if P refinement is enabled, and if we should continue.
   bool UsePRefinement() const
   {
     return _use_p_refinement and !_stop_p_ref and (_p_ref_counter < _max_p_level);
@@ -53,12 +57,12 @@ protected:
   int _h_ref_counter{0};
   int _p_ref_counter{0};
 
-  //! Bool to indicate we have reached stopping condition
-  //! for h-refinement.
+  /// Bool to indicate we have reached stopping condition
+  /// for h-refinement.
   bool _stop_h_ref{false};
 
-  //! Bool to indicate we have reached stopping condition
-  //! for p-refinement.
+  /// Bool to indicate we have reached stopping condition
+  /// for p-refinement.
   bool _stop_p_ref{false};
 
   std::string _refinement_type;
