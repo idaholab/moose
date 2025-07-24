@@ -32,12 +32,6 @@ protected:
   virtual void check() const override;
 
   /**
-   * Gets the heat structure boundary name for this connection
-   *
-   * @return The boundary name of the heat structure side
-   */
-  const BoundaryName & getHeatStructureSideName() const;
-  /**
    * Gets the flow channel nodeset name for this connection
    *
    * @return The nodeset name for the channel side
