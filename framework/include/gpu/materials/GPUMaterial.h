@@ -121,12 +121,12 @@ public:
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
-  KOKKOS_FUNCTION void operator()(ElementInit, const size_t tid) const;
-  KOKKOS_FUNCTION void operator()(SideInit, const size_t tid) const;
-  KOKKOS_FUNCTION void operator()(NeighborInit, const size_t tid) const;
-  KOKKOS_FUNCTION void operator()(ElementCompute, const size_t tid) const;
-  KOKKOS_FUNCTION void operator()(SideCompute, const size_t tid) const;
-  KOKKOS_FUNCTION void operator()(NeighborCompute, const size_t tid) const;
+  KOKKOS_FUNCTION void operator()(ElementInit, const dof_id_type tid) const;
+  KOKKOS_FUNCTION void operator()(SideInit, const dof_id_type tid) const;
+  KOKKOS_FUNCTION void operator()(NeighborInit, const dof_id_type tid) const;
+  KOKKOS_FUNCTION void operator()(ElementCompute, const dof_id_type tid) const;
+  KOKKOS_FUNCTION void operator()(SideCompute, const dof_id_type tid) const;
+  KOKKOS_FUNCTION void operator()(NeighborCompute, const dof_id_type tid) const;
   ///@}
 
 protected:
@@ -279,16 +279,17 @@ Material<Derived>::initStatefulProperties(unsigned int)
 
   if (!_bnd && !_neighbor)
     ::Kokkos::parallel_for(
-        ::Kokkos::RangePolicy<ElementInit, ExecSpace, ::Kokkos::IndexType<size_t>>(0,
-                                                                                   numElements()),
+        ::Kokkos::RangePolicy<ElementInit, ExecSpace, ::Kokkos::IndexType<dof_id_type>>(
+            0, numElements()),
         *static_cast<Derived *>(this));
   else if (_bnd && !_neighbor)
-    ::Kokkos::parallel_for(::Kokkos::RangePolicy<SideInit, ExecSpace, ::Kokkos::IndexType<size_t>>(
-                               0, numElementSides()),
-                           *static_cast<Derived *>(this));
+    ::Kokkos::parallel_for(
+        ::Kokkos::RangePolicy<SideInit, ExecSpace, ::Kokkos::IndexType<dof_id_type>>(
+            0, numElementSides()),
+        *static_cast<Derived *>(this));
   else
     ::Kokkos::parallel_for(
-        ::Kokkos::RangePolicy<NeighborInit, ExecSpace, ::Kokkos::IndexType<size_t>>(
+        ::Kokkos::RangePolicy<NeighborInit, ExecSpace, ::Kokkos::IndexType<dof_id_type>>(
             0, numElementSides()),
         *static_cast<Derived *>(this));
 
@@ -301,17 +302,17 @@ Material<Derived>::computeProperties()
 {
   if (!_bnd && !_neighbor)
     ::Kokkos::parallel_for(
-        ::Kokkos::RangePolicy<ElementCompute, ExecSpace, ::Kokkos::IndexType<size_t>>(
+        ::Kokkos::RangePolicy<ElementCompute, ExecSpace, ::Kokkos::IndexType<dof_id_type>>(
             0, numElements()),
         *static_cast<Derived *>(this));
   else if (_bnd && !_neighbor)
     ::Kokkos::parallel_for(
-        ::Kokkos::RangePolicy<SideCompute, ExecSpace, ::Kokkos::IndexType<size_t>>(
+        ::Kokkos::RangePolicy<SideCompute, ExecSpace, ::Kokkos::IndexType<dof_id_type>>(
             0, numElementSides()),
         *static_cast<Derived *>(this));
   else
     ::Kokkos::parallel_for(
-        ::Kokkos::RangePolicy<NeighborCompute, ExecSpace, ::Kokkos::IndexType<size_t>>(
+        ::Kokkos::RangePolicy<NeighborCompute, ExecSpace, ::Kokkos::IndexType<dof_id_type>>(
             0, numElementSides()),
         *static_cast<Derived *>(this));
 
@@ -320,7 +321,7 @@ Material<Derived>::computeProperties()
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Material<Derived>::operator()(ElementInit, const size_t tid) const
+Material<Derived>::operator()(ElementInit, const dof_id_type tid) const
 {
   auto material = static_cast<const Derived *>(this);
   auto elem = elementID(tid);
@@ -337,7 +338,7 @@ Material<Derived>::operator()(ElementInit, const size_t tid) const
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Material<Derived>::operator()(SideInit, const size_t tid) const
+Material<Derived>::operator()(SideInit, const dof_id_type tid) const
 {
   auto material = static_cast<const Derived *>(this);
   auto elem = elementSideID(tid);
@@ -354,7 +355,7 @@ Material<Derived>::operator()(SideInit, const size_t tid) const
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Material<Derived>::operator()(NeighborInit, const size_t tid) const
+Material<Derived>::operator()(NeighborInit, const dof_id_type tid) const
 {
   auto material = static_cast<const Derived *>(this);
   auto elem = elementSideID(tid);
@@ -371,7 +372,7 @@ Material<Derived>::operator()(NeighborInit, const size_t tid) const
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Material<Derived>::operator()(ElementCompute, const size_t tid) const
+Material<Derived>::operator()(ElementCompute, const dof_id_type tid) const
 {
   auto material = static_cast<const Derived *>(this);
   auto elem = elementID(tid);
@@ -388,7 +389,7 @@ Material<Derived>::operator()(ElementCompute, const size_t tid) const
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Material<Derived>::operator()(SideCompute, const size_t tid) const
+Material<Derived>::operator()(SideCompute, const dof_id_type tid) const
 {
   auto material = static_cast<const Derived *>(this);
   auto elem = elementSideID(tid);
@@ -405,7 +406,7 @@ Material<Derived>::operator()(SideCompute, const size_t tid) const
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Material<Derived>::operator()(NeighborCompute, const size_t tid) const
+Material<Derived>::operator()(NeighborCompute, const dof_id_type tid) const
 {
   auto material = static_cast<const Derived *>(this);
   auto elem = elementSideID(tid);

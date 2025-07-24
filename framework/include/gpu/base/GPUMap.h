@@ -64,7 +64,7 @@ public:
    * Get the size of map
    * @returns The size of map
    */
-  KOKKOS_FUNCTION auto size() const
+  KOKKOS_FUNCTION dof_id_type size() const
   {
     KOKKOS_IF_ON_HOST(return _map->size();)
 
@@ -75,13 +75,13 @@ public:
    * @param key The key
    * @returns The index into the map, size of the map if key is not found
    */
-  KOKKOS_FUNCTION uint64_t find(const T1 & key) const;
+  KOKKOS_FUNCTION dof_id_type find(const T1 & key) const;
   /**
    * Get the value corresponding to an index
    * @param index The index into the map returned by find()
    * @returns The reference of the value
    */
-  KOKKOS_FUNCTION const T2 & operator[](const uint64_t index) const
+  KOKKOS_FUNCTION const T2 & operator[](const dof_id_type index) const
   {
     KOKKOS_ASSERT(index < size());
 
@@ -127,7 +127,7 @@ Map<T1, T2>::copy()
 }
 
 template <typename T1, typename T2>
-KOKKOS_FUNCTION uint64_t
+KOKKOS_FUNCTION dof_id_type
 Map<T1, T2>::find(const T1 & key) const
 {
   auto left = &_keys.first();
