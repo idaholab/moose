@@ -30,7 +30,10 @@ public:
   virtual std::shared_ptr<mfem::ParFiniteElementSpace> getFESpace() const;
 
   /// Method to fetch the error estimator after creation
-  std::shared_ptr<mfem::ErrorEstimator> getEstimator() const; { return _error_estimator; }
+  std::shared_ptr<mfem::ErrorEstimator> getEstimator() const;
+  {
+    return _error_estimator;
+  }
 
 protected:
   /// Name of (the test variable associated with) the weak form that the kernel is applied to.
@@ -47,7 +50,8 @@ protected:
 inline std::shared_ptr<mfem::ErrorEstimator>
 MFEMIndicator::getEstimator() const
 {
-  mooseAssert(_error_estimator, "Attempting to retrieve error estimator before it's been constructed");
+  mooseAssert(_error_estimator,
+              "Attempting to retrieve error estimator before it's been constructed");
   return _error_estimator;
 }
 
