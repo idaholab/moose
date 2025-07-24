@@ -115,6 +115,7 @@ function configure_petsc()
       --download-slepc=1 \
       --download-strumpack=1 \
       --download-superlu_dist=1 \
+      --download-libceed=1 \
       $HDF5_STR \
       $MUMPS_ARM_STR \
       $MAKE_NP_STR \

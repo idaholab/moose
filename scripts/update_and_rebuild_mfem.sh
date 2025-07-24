@@ -111,6 +111,8 @@ if [ -z "$go_fast" ]; then
       -DParMETIS_DIR="$PETSC_DIR/$PETSC_ARCH" \
       -DMFEM_USE_SUPERLU=YES \
       -DSuperLUDist_DIR="$PETSC_DIR/$PETSC_ARCH" \
+      -DMFEM_USE_CEED=YES \
+      -DCEED_DIR="$PETSC_DIR/$PETSC_ARCH" \
       -DBUILD_SHARED_LIBS=ON \
       -DHDF5_DIR="$HDF5_DIR" \
       -DBLAS_DIR="$PETSC_DIR/$PETSC_ARCH" \
