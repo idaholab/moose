@@ -1136,6 +1136,13 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
   app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
+#ifdef MOOSE_MFEM_ENABLED
+  app_params.set<std::shared_ptr<mfem::Device>>("_mfem_device") =
+      _app.getMFEMDevice(Moose::PassKey<MultiApp>());
+  const auto & mfem_device_set = _app.getMFEMDevices(Moose::PassKey<MultiApp>());
+  app_params.set<std::vector<std::string>>("_mfem_devices") =
+      std::vector<std::string>(mfem_device_set.begin(), mfem_device_set.end());
+#endif
   if (getParam<bool>("clone_master_mesh") || getParam<bool>("clone_parent_mesh"))
   {
     if (_fe_problem.verboseMultiApps())
