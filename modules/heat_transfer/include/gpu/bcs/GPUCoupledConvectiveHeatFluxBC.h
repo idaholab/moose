@@ -30,7 +30,7 @@ public:
   {
     Real q = 0;
     Real u = _u(datum, qp);
-    for (std::size_t c = 0; c < _n_components; c++)
+    for (unsigned int c = 0; c < _n_components; c++)
       q += _alpha(datum, qp, c) * _htc(datum, qp, c) * (u - _T_infinity(datum, qp, c));
     return _test(datum, i, qp) * q * _scale_factor(datum, qp);
   }
@@ -41,7 +41,7 @@ public:
   {
     Real dq = 0;
     Real phi = _phi(datum, j, qp);
-    for (std::size_t c = 0; c < _n_components; c++)
+    for (unsigned int c = 0; c < _n_components; c++)
       dq += _alpha(datum, qp, c) * _htc(datum, qp, c) * phi;
     return _test(datum, i, qp) * dq * _scale_factor(datum, qp);
   }

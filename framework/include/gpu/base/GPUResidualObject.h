@@ -188,7 +188,7 @@ ResidualObject::accumulateTaggedElementalResidual(Real local_re,
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto dof = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
 
-  for (size_t t = 0; t < _vector_tags.size(); ++t)
+  for (dof_id_type t = 0; t < _vector_tags.size(); ++t)
   {
     auto tag = _vector_tags[t];
 
@@ -214,7 +214,7 @@ ResidualObject::accumulateTaggedNodalResidual(bool add,
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto dof = sys.getNodeLocalDofIndex(node, _kokkos_var.var(comp));
 
-  for (size_t t = 0; t < _vector_tags.size(); ++t)
+  for (dof_id_type t = 0; t < _vector_tags.size(); ++t)
   {
     auto tag = _vector_tags[t];
 
@@ -242,7 +242,7 @@ ResidualObject::accumulateTaggedElementalMatrix(Real local_ke,
   auto row = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
   auto col = sys.getElemGlobalDofIndex(elem, j, jvar);
 
-  for (size_t t = 0; t < _matrix_tags.size(); ++t)
+  for (dof_id_type t = 0; t < _matrix_tags.size(); ++t)
   {
     auto tag = _matrix_tags[t];
 
@@ -267,7 +267,7 @@ ResidualObject::accumulateTaggedNodalMatrix(
   auto row = sys.getNodeLocalDofIndex(node, _kokkos_var.var(comp));
   auto col = sys.getNodeGlobalDofIndex(node, jvar);
 
-  for (size_t t = 0; t < _matrix_tags.size(); ++t)
+  for (dof_id_type t = 0; t < _matrix_tags.size(); ++t)
   {
     auto tag = _matrix_tags[t];
 

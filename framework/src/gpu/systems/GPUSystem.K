@@ -123,7 +123,8 @@ System::setupDofs()
     {
       _dof_map.dof_indices(elem, dof_indices, var);
 
-      _max_dofs_per_elem[var] = std::max(_max_dofs_per_elem[var], dof_indices.size());
+      _max_dofs_per_elem[var] =
+          std::max(_max_dofs_per_elem[var], static_cast<unsigned int>(dof_indices.size()));
     }
 
     _local_elem_dof_index[var].create(num_elems, _max_dofs_per_elem[var]);
@@ -497,18 +498,20 @@ System::reinit()
   _qp_solutions.copy();
   _qp_solutions_grad.copy();
 
+  dof_id_type num_elems = kokkosMesh().getLocalElementMap().size();
+
   _thread.resize({kokkosAssembly().getMaxQpsPerElem(),
-                  kokkosMesh().getLocalElementMap().size(),
+                  num_elems,
                   _active_variables.size(),
                   _active_variable_tags.size()});
 
-  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<size_t>> policy(0, _thread.size());
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(0, _thread.size());
   ::Kokkos::parallel_for(policy, *this);
   ::Kokkos::fence();
 }
 
 KOKKOS_FUNCTION void
-System::operator()(const size_t tid) const
+System::operator()(const dof_id_type tid) const
 {
   auto qp = _thread(tid, 0);
   auto elem = _thread(tid, 1);

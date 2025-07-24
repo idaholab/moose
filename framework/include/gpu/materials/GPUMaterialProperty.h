@@ -338,7 +338,7 @@ MaterialProperty<T, dimension>::copy(const MaterialPropertyBase & prop)
 {
   auto & prop_cast = static_cast<const MaterialProperty<T, dimension> &>(prop);
 
-  for (uint64_t i = 0; i < prop_cast._data.size(); ++i)
+  for (dof_id_type i = 0; i < prop_cast._data.size(); ++i)
     if (prop_cast._data[i].isAlloc())
       _data[i].deepCopy(prop_cast._data[i]);
 
@@ -368,7 +368,7 @@ MaterialProperty<T, dimension>::allocate(const MooseMesh & mesh,
   {
     auto sid = mesh.getKokkosMesh()->getSubdomainID(subdomain);
 
-    std::vector<uint64_t> n;
+    std::vector<dof_id_type> n;
 
     for (unsigned int i = 0; i < dimension; ++i)
       n.push_back(_record->dims[i]);
