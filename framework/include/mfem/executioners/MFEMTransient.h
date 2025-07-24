@@ -30,9 +30,6 @@ public:
   /// Do whatever is necessary to advance one step.
   virtual void takeStep(Real input_dt = -1.0) override;
 
-  /// Check if last solve converged. Currently defaults to true for all MFEM executioners.
-  virtual bool lastSolveConverged() const override { return true; };
-
   /// Not supported for MFEM problems, so error if called.
   virtual Real relativeSolutionDifferenceNorm() override
   {

@@ -29,7 +29,8 @@ public:
 
   /**
    * Solve routine provided by this object.
-   * @return True if solver is converged.
+   * @return True if solver is converged. Currently, this always will return true for 
+   * MFEMProblemSolve.
    */
   virtual bool solve() override;
 

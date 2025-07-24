@@ -24,8 +24,8 @@ public:
   virtual void init() override;
   virtual void execute() override;
 
-  /// Check if last solve converged. Currently defaults to true for all MFEM executioners.
-  virtual bool lastSolveConverged() const override { return true; };
+  /// Check if last solve converged. 
+  virtual bool lastSolveConverged() const override { return _last_solve_converged; };
 
 private:
   MFEMProblem & _mfem_problem;
@@ -37,6 +37,9 @@ private:
   Real _system_time;
   int & _time_step;
   Real & _time;
+
+  /// Flag showing if the last solve converged
+  bool _last_solve_converged;
 };
 
 #endif

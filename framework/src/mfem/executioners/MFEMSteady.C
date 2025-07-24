@@ -31,7 +31,8 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _mfem_problem_solve(*this, getProblemOperators()),
     _system_time(getParam<Real>("time")),
     _time_step(_mfem_problem.timeStep()),
-    _time(_mfem_problem.time())
+    _time(_mfem_problem.time()),
+    _last_solve_converged(false)
 {
   _time = _system_time;
 }
@@ -77,7 +78,7 @@ MFEMSteady::execute()
   _time_step = 1;
   _mfem_problem.timestepSetup();
 
-  _mfem_problem_solve.solve();
+  _last_solve_converged = _mfem_problem_solve.solve();
 
   _mfem_problem.computeIndicators();
   _mfem_problem.computeMarkers();
