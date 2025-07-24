@@ -21,7 +21,6 @@ public:
   virtual void initialSetup() override;
 
 protected:
-  const std::string & _prop_name;
   /// function expression
   std::string _function;
   const std::vector<std::string> & _var_names;
