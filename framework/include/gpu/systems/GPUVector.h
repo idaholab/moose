@@ -71,7 +71,7 @@ public:
    * @param i The entry index local to this process
    * @returns The reference of the entry
    */
-  KOKKOS_FUNCTION PetscScalar & operator()(uint64_t i) const
+  KOKKOS_FUNCTION PetscScalar & operator()(dof_id_type i) const
   {
     return i < _local.size() ? _local[i] : _ghost(i);
   }
@@ -80,7 +80,7 @@ public:
    * @param i The entry index local to this process
    * @returns The reference of the entry
    */
-  KOKKOS_FUNCTION PetscScalar & operator[](uint64_t i) const
+  KOKKOS_FUNCTION PetscScalar & operator[](dof_id_type i) const
   {
     return i < _local.size() ? _local[i] : _ghost(i);
   }

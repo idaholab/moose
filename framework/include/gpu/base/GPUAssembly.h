@@ -246,7 +246,7 @@ public:
   /**
    * Kokkos function for caching physical maps on element quadrature points
    */
-  KOKKOS_FUNCTION void operator()(const size_t tid) const;
+  KOKKOS_FUNCTION void operator()(const dof_id_type tid) const;
 
   /**
    * Get the list of boundaries to cache face material properties
