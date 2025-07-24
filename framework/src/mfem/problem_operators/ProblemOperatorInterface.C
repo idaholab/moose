@@ -39,7 +39,7 @@ ProblemOperatorInterface::Init(mfem::BlockVector & X)
   for (size_t i = 0; i < _test_variables.size(); ++i)
   {
     auto * const test_var = _test_variables.at(i);
-    X.GetBlock(i) = (*test_var);
+    X.GetBlock(i) = test_var->GetTrueVector();
     // Sync the flags from sub-block vectors to global vector
     X.SyncFromBlocks();
 
