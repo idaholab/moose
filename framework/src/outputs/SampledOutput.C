@@ -222,9 +222,26 @@ SampledOutput::initSample()
         num_actual_vars++;
 
         // We do what we can to preserve the block restriction
-        const auto * const subdomains = (_using_external_sampling_file && !_mesh_subdomains_match)
-                                            ? nullptr
-                                            : &source_sys.variable(var_num).active_subdomains();
+        const std::set<SubdomainID> * subdomains;
+        std::set<SubdomainID> restricted_subdomains;
+        if (_using_external_sampling_file && !_mesh_subdomains_match)
+          subdomains = nullptr;
+        else
+        {
+          subdomains = &source_sys.variable(var_num).active_subdomains();
+          // Reduce the block restriction if the output is block restricted
+          if (isParamValid("sampling_blocks"))
+          {
+            const auto & sampling_blocks = _sampling_mesh_ptr->getSubdomainIDs(
+                getParam<std::vector<SubdomainName>>("sampling_blocks"));
+            set_intersection(subdomains->begin(),
+                             subdomains->end(),
+                             sampling_blocks.begin(),
+                             sampling_blocks.end(),
+                             std::inserter(restricted_subdomains, restricted_subdomains.begin()));
+            subdomains = &restricted_subdomains;
+          }
+        }
 
         // Add the variable. We essentially support nodal variables and constant monomials
         const FEType & fe_type = source_sys.variable_type(var_num);
