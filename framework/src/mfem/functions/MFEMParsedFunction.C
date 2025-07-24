@@ -15,8 +15,6 @@ MFEMParsedFunction::validParams()
   params.registerBase("Function");
   params.addClassDescription("Declares constant material properties based on names and values "
                              "prescribed by input parameters.");
-  params.addRequiredParam<std::string>(
-                              "prop_name", "The names of the properties this material will have");
   params.addRequiredCustomTypeParam<std::string>(
                               "function", "FunctionExpression", "Parsed function expression to compute");
   params.deprecateParam("function", "expression", "02/07/2024");
@@ -32,7 +30,6 @@ MFEMParsedFunction::validParams()
 MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     FunctionParserUtils(parameters),
-    _prop_name(getParam<std::string>("prop_name")),
     _function(getParam<std::string>("expression")),    
     _var_names(getParam<std::vector<std::string>>("var_names")),
     _use_xyzt(getParam<bool>("use_xyzt")),
@@ -80,14 +77,14 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
         if (_communicator.rank() == 0)
           _communicator.barrier();
       }
+
+  getMFEMProblem().getCoefficients().declareScalar<MFEMScalarParsedCoeff>(name(), 
+  getMFEMProblem().getProblemData().gridfunctions, _var_names, _use_xyzt, _func_F);
 }
 
 void
 MFEMParsedFunction::initialSetup()
 {
-
-  getMFEMProblem().getCoefficients().declareScalar<MFEMScalarParsedCoeff>(name(), 
-  getMFEMProblem().getProblemData().gridfunctions, _var_names, _use_xyzt, _func_F);
 
 }
 
