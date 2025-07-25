@@ -19,7 +19,7 @@ HeatSourceVolumetric1Phase::validParams()
   InputParameters params = Component::validParams();
   params.addRequiredParam<std::string>("flow_channel",
                                        "Flow channel name in which to apply heat source");
-  params.addRequiredParam<FunctionName>("q", "Volumetric heat source [W/m^3]");
+  params.addRequiredParam<MooseFunctorName>("q", "Volumetric heat source functor [W/m^3]");
   params.addClassDescription("Volumetric heat source applied on a flow channel");
   return params;
 }
@@ -43,11 +43,11 @@ HeatSourceVolumetric1Phase::addMooseObjects()
   const FlowChannelBase & fch = getComponent<FlowChannel1Phase>("flow_channel");
 
   {
-    std::string class_name = "OneD3EqnEnergyHeatSource";
+    std::string class_name = "ADOneD3EqnEnergyHeatSource";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
     pars.set<std::vector<SubdomainName>>("block") = fch.getSubdomainNames();
-    pars.set<FunctionName>("q") = getParam<FunctionName>("q");
+    pars.set<MooseFunctorName>("q") = getParam<MooseFunctorName>("q");
     pars.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
     getTHMProblem().addKernel(class_name, genName(name(), "rhoE_heat_source"), pars);
   }

@@ -9,25 +9,21 @@
 
 #pragma once
 
-#include "Kernel.h"
-
-class Function;
+#include "ADKernel.h"
 
 /**
  * Volumetric heat source for 1-phase flow channel
  */
-class OneD3EqnEnergyHeatSource : public Kernel
+class ADOneD3EqnEnergyHeatSource : public ADKernel
 {
 public:
-  OneD3EqnEnergyHeatSource(const InputParameters & parameters);
+  ADOneD3EqnEnergyHeatSource(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual ADReal computeQpResidual();
 
   /// Heat source function
-  const Function & _q;
+  const Moose::Functor<ADReal> & _q;
   /// Cross sectional area
   const VariableValue & _A;
 
