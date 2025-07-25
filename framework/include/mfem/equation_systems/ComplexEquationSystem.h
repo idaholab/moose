@@ -45,18 +45,18 @@ public:
                                 mfem::BlockVector & trueRHS) override;
 
   template <class FormType>
-  void ApplyDomainBLFIntegrators(
-      const std::string & trial_var_name,
-      const std::string & test_var_name,
-      std::shared_ptr<FormType> form,
-      Moose::MFEM::NamedFieldsMap<
-          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> & kernels_map);
+  void
+  ApplyDomainBLFIntegrators(const std::string & trial_var_name,
+                            const std::string & test_var_name,
+                            std::shared_ptr<FormType> form,
+                            Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<
+                                std::vector<std::shared_ptr<MFEMComplexKernel>>>> & kernels_map);
 
-  inline void ApplyDomainLFIntegrators(
-      const std::string & test_var_name,
-      std::shared_ptr<mfem::ParComplexLinearForm> form,
-      Moose::MFEM::NamedFieldsMap<
-          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> & kernels_map);
+  inline void
+  ApplyDomainLFIntegrators(const std::string & test_var_name,
+                           std::shared_ptr<mfem::ParComplexLinearForm> form,
+                           Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<
+                               std::vector<std::shared_ptr<MFEMComplexKernel>>>> & kernels_map);
 
   template <class FormType>
   void ApplyBoundaryBLFIntegrators(
@@ -87,12 +87,12 @@ public:
 
   // Complex kernels and integrated BCs
 
-  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>
+  Moose::MFEM::NamedFieldsMap<
+      Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>
       _cpx_kernels_map;
   Moose::MFEM::NamedFieldsMap<
       Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>
       _cpx_integrated_bc_map;
-
 };
 
 template <class FormType>
@@ -109,10 +109,8 @@ ComplexEquationSystem::ApplyDomainBLFIntegrators(
     auto kernels = kernels_map.GetRef(test_var_name).GetRef(trial_var_name);
     for (auto & kernel : kernels)
     {
-      mfem::BilinearFormIntegrator * integ_real =
-          kernel->getRealBFIntegrator();
-      mfem::BilinearFormIntegrator * integ_imag =
-          kernel->getImagBFIntegrator();
+      mfem::BilinearFormIntegrator * integ_real = kernel->getRealBFIntegrator();
+      mfem::BilinearFormIntegrator * integ_imag = kernel->getImagBFIntegrator();
 
       if (integ_real != nullptr && integ_imag != nullptr)
       {
@@ -137,10 +135,8 @@ ComplexEquationSystem::ApplyDomainLFIntegrators(
     auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
     for (auto & kernel : kernels)
     {
-      mfem::LinearFormIntegrator * integ_real =
-          kernel->getRealLFIntegrator();
-      mfem::LinearFormIntegrator * integ_imag =
-          kernel->getImagLFIntegrator();
+      mfem::LinearFormIntegrator * integ_real = kernel->getRealLFIntegrator();
+      mfem::LinearFormIntegrator * integ_imag = kernel->getImagLFIntegrator();
 
       if (integ_real != nullptr && integ_imag != nullptr)
       {
@@ -169,10 +165,8 @@ ComplexEquationSystem::ApplyBoundaryBLFIntegrators(
     auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(trial_var_name);
     for (auto & bc : bcs)
     {
-      mfem::BilinearFormIntegrator * integ_real =
-          bc->getRealBFIntegrator();
-      mfem::BilinearFormIntegrator * integ_imag =
-          bc->getImagBFIntegrator();
+      mfem::BilinearFormIntegrator * integ_real = bc->getRealBFIntegrator();
+      mfem::BilinearFormIntegrator * integ_imag = bc->getImagBFIntegrator();
 
       if (integ_real != nullptr && integ_imag != nullptr)
       {
@@ -198,10 +192,8 @@ ComplexEquationSystem::ApplyBoundaryLFIntegrators(
     auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
     for (auto & bc : bcs)
     {
-      mfem::LinearFormIntegrator * integ_real =
-          bc->getRealLFIntegrator();
-      mfem::LinearFormIntegrator * integ_imag =
-          bc->getImagLFIntegrator();
+      mfem::LinearFormIntegrator * integ_real = bc->getRealLFIntegrator();
+      mfem::LinearFormIntegrator * integ_imag = bc->getImagLFIntegrator();
 
       if (integ_real != nullptr && integ_imag != nullptr)
       {

@@ -464,12 +464,12 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_kernel", "add_mfem_fespaces");
 
   // add complex kernels
-  registerMooseObjectTask("add_mfem_complex_kernels", Kernel, false);
-  registerMooseObjectTask("add_mfem_complex_component_kernels", Kernel, false);
-  registerMooseObjectTask("add_mfem_complex_bc_component_kernels", BoundaryCondition, false);
-  addTaskDependency("add_mfem_complex_component_kernels", "add_mfem_fespaces");
-  addTaskDependency("add_mfem_complex_kernels", "add_mfem_complex_component_kernels");
-  addTaskDependency("add_bc", "add_mfem_complex_bc_component_kernels");
+  registerMooseObjectTask("add_mfem_complex_kernel_components", Kernel, false);
+  registerMooseObjectTask("add_mfem_complex_bc_components", BoundaryCondition, false);
+  addTaskDependency("add_mfem_complex_kernel_components", "add_mfem_fespaces");
+  addTaskDependency("add_mfem_complex_bc_components", "add_mfem_fespaces");
+  addTaskDependency("add_kernel", "add_mfem_complex_kernel_components");
+  addTaskDependency("add_bc", "add_mfem_complex_bc_components");
 
   // set mesh FE space
   registerTask("set_mesh_fe_space", true);
@@ -764,9 +764,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 #ifdef MOOSE_MFEM_ENABLED
   registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
   registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
-  registerSyntaxTask("AddMFEMComplexKernelAction", "ComplexKernels/*", "add_mfem_complex_kernels");
-  registerSyntaxTask("AddMFEMComplexKernelComponentAction", "ComplexKernels/*/*", "add_mfem_complex_component_kernels");
-  registerSyntaxTask("AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_component_kernels");
+  registerSyntaxTask(
+      "AddMFEMComplexKernelComponentAction", "Kernels/*/*", "add_mfem_complex_kernel_components");
+  registerSyntaxTask(
+      "AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_components");
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
   registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
 #endif

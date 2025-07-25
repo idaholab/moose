@@ -28,10 +28,22 @@ public:
 
   virtual ~MFEMComplexKernel() = default;
 
-  virtual mfem::LinearFormIntegrator * getRealLFIntegrator() { return _real_kernel->createLFIntegrator(); }
-  virtual mfem::LinearFormIntegrator * getImagLFIntegrator() { return _imag_kernel->createLFIntegrator(); }
-  virtual mfem::BilinearFormIntegrator * getRealBFIntegrator() { return _real_kernel->createBFIntegrator();}
-  virtual mfem::BilinearFormIntegrator * getImagBFIntegrator() { return _imag_kernel->createBFIntegrator(); }
+  virtual mfem::LinearFormIntegrator * getRealLFIntegrator()
+  {
+    return _real_kernel->createLFIntegrator();
+  }
+  virtual mfem::LinearFormIntegrator * getImagLFIntegrator()
+  {
+    return _imag_kernel->createLFIntegrator();
+  }
+  virtual mfem::BilinearFormIntegrator * getRealBFIntegrator()
+  {
+    return _real_kernel->createBFIntegrator();
+  }
+  virtual mfem::BilinearFormIntegrator * getImagBFIntegrator()
+  {
+    return _imag_kernel->createBFIntegrator();
+  }
 
   virtual void setRealKernel(std::shared_ptr<MFEMKernel> kernel) { _real_kernel = kernel; }
   virtual void setImagKernel(std::shared_ptr<MFEMKernel> kernel) { _imag_kernel = kernel; }
@@ -47,8 +59,7 @@ protected:
   // Name of (the test variable associated with) the weak form that the kernel is applied to.
   const VariableName & _test_var_name;
   std::shared_ptr<MFEMKernel> _real_kernel{nullptr};
-  std::shared_ptr<MFEMKernel> _imag_kernel{nullptr};  
-
+  std::shared_ptr<MFEMKernel> _imag_kernel{nullptr};
 };
 
 #endif

@@ -11,27 +11,14 @@
 
 #include "AddMFEMComplexBCComponentAction.h"
 
-registerMooseAction("MooseApp", AddMFEMComplexBCComponentAction, "add_mfem_complex_bc_component_kernels");
-
-int nthFromLast(std::string str, char ch, int N)
-{
-  int occur = 0;
-  for (int i=str.length()-1; i >= 0 ; --i) 
-  {
-      if (str[i] == ch) {
-          occur += 1;
-      }
-      if (occur == N)
-          return i;
-  }
-  return -1;
-}
+registerMooseAction("MooseApp", AddMFEMComplexBCComponentAction, "add_mfem_complex_bc_components");
 
 InputParameters
 AddMFEMComplexBCComponentAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add an MFEM AuxKernel to serve as the real or imaginary component of an MFEMComplexIntegratedBC.");
+  params.addClassDescription("Add an MFEM AuxKernel to serve as the real or imaginary component of "
+                             "an MFEMComplexIntegratedBC.");
   return params;
 }
 
@@ -43,19 +30,29 @@ AddMFEMComplexBCComponentAction::AddMFEMComplexBCComponentAction(const InputPara
 void
 AddMFEMComplexBCComponentAction::act()
 {
-
-  // First, we need to make sure that the parent object is an MFEMComplexIntegratedBC
-  std::string action_name = _app.actionWarehouse().getCurrentActionName();
-  int second_last_slash = nthFromLast(action_name, '/', 2);
-
   if (_name == "real_part" || _name == "imag_part")
   {
+    // Finding the string "parent/real_part" or "parent/imag_part" to associate with the object
+    std::string action_name = _app.actionWarehouse().getCurrentActionName();
+    int second_last_slash = 0;
+    int occur = 0;
+    for (int i = action_name.length() - 1; i >= 0; --i)
+    {
+      if (action_name[i] == '/')
+        occur += 1;
+
+      if (occur == 2)
+      {
+        second_last_slash = i;
+        break;
+      }
+    }
+
     std::string comp_name = action_name.substr(second_last_slash + 1, action_name.length());
     MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
     if (mfem_problem)
       mfem_problem->addAuxBoundaryCondition(_type, comp_name, _moose_object_pars);
   }
-
 }
 
 #endif
