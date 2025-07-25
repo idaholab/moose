@@ -10,21 +10,22 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
-#include "MFEMProblemData.h"
+#include "MFEMProblem.h"
 
 namespace Moose::MFEM
 {
 /// Interface inherited by ProblemOperator and TimeDomainProblemOperator. Removes duplicated code in both classes.
-class ProblemOperatorInterface
+class ProblemOperatorBase
 {
 public:
-  ProblemOperatorInterface(MFEMProblemData & problem) : _problem(problem) {}
-  virtual ~ProblemOperatorInterface() = default;
+  ProblemOperatorBase(MFEMProblem & problem);
+  virtual ~ProblemOperatorBase() = default;
 
   virtual void SetGridFunctions();
   virtual void SetTestVariablesFromTrueVectors();
   virtual void SetTrialVariablesFromTrueVectors();
   virtual void Init(mfem::BlockVector & X);
+  virtual void Solve() = 0;
 
   mfem::Array<int> _block_true_offsets;
 
@@ -33,7 +34,8 @@ public:
 
 protected:
   /// Reference to the current problem.
-  MFEMProblemData & _problem;
+  MFEMProblem & _problem;
+  MFEMProblemData & _problem_data;
 
   /// Vector of names of state gridfunctions used in formulation, ordered by appearance in block
   /// vector during solve.

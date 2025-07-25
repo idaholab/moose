@@ -9,15 +9,23 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "ProblemOperatorInterface.h"
+#include "ProblemOperatorBase.h"
+
+class MFEMProblem;
 
 namespace Moose::MFEM
 {
-void
-ProblemOperatorInterface::SetGridFunctions()
+
+ProblemOperatorBase::ProblemOperatorBase(MFEMProblem & problem)
+  : _problem(problem), _problem_data(problem.getProblemData())
 {
-  _test_variables = _problem.gridfunctions.Get(_test_var_names);
-  _trial_variables = _problem.gridfunctions.Get(_trial_var_names);
+}
+
+void
+ProblemOperatorBase::SetGridFunctions()
+{
+  _test_variables = _problem_data.gridfunctions.Get(_test_var_names);
+  _trial_variables = _problem_data.gridfunctions.Get(_trial_var_names);
 
   // Set operator size and block structure
   _block_true_offsets.SetSize(_trial_variables.size() + 1);
@@ -33,7 +41,7 @@ ProblemOperatorInterface::SetGridFunctions()
 }
 
 void
-ProblemOperatorInterface::Init(mfem::BlockVector & X)
+ProblemOperatorBase::Init(mfem::BlockVector & X)
 {
   X.Update(_block_true_offsets);
   for (size_t i = 0; i < _test_variables.size(); ++i)
@@ -44,7 +52,7 @@ ProblemOperatorInterface::Init(mfem::BlockVector & X)
 }
 
 void
-ProblemOperatorInterface::SetTestVariablesFromTrueVectors()
+ProblemOperatorBase::SetTestVariablesFromTrueVectors()
 {
   for (unsigned int ind = 0; ind < _test_variables.size(); ++ind)
   {
@@ -53,7 +61,7 @@ ProblemOperatorInterface::SetTestVariablesFromTrueVectors()
 }
 
 void
-ProblemOperatorInterface::SetTrialVariablesFromTrueVectors()
+ProblemOperatorBase::SetTrialVariablesFromTrueVectors()
 {
   for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
   {

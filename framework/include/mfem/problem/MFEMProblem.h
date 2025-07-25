@@ -13,7 +13,6 @@
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
-#include "MFEMExecutioner.h"
 
 class MFEMProblem : public ExternalProblem
 {
@@ -25,7 +24,6 @@ public:
 
   virtual void initialSetup() override;
   virtual void externalSolve() override {}
-  virtual bool nlConverged(const unsigned int) override { return true; }
   virtual void syncSolutions(Direction) override {}
 
   /**
@@ -71,9 +69,9 @@ public:
   void setMesh();
 
   /**
-   * Initialise the required ProblemOperator used in the Executioner to solve the problem.
+   * Add a ProblemOperator to the executioner used to solve the problem.
    */
-  void initProblemOperator();
+  void addProblemOperator() {};
 
   void addSubMesh(const std::string & user_object_name,
                   const std::string & name,

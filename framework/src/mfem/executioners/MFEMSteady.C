@@ -11,37 +11,39 @@
 
 #include "MFEMSteady.h"
 #include "MFEMProblem.h"
+#include "EquationSystemProblemOperator.h"
 
 registerMooseObject("MooseApp", MFEMSteady);
 
 InputParameters
 MFEMSteady::validParams()
 {
-  InputParameters params = MFEMExecutioner::validParams();
+  InputParameters params = MFEMProblemSolve::validParams();
+  params += Executioner::validParams();
   params.addClassDescription("Executioner for steady state MFEM problems.");
   params.addParam<Real>("time", 0.0, "System time");
   return params;
 }
 
 MFEMSteady::MFEMSteady(const InputParameters & params)
-  : MFEMExecutioner(params),
+  : Executioner(params),
+    _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
+    _mfem_problem_data(_mfem_problem.getProblemData()),
+    _mfem_problem_solve(*this, getProblemOperators()),
     _system_time(getParam<Real>("time")),
     _time_step(_mfem_problem.timeStep()),
     _time(_mfem_problem.time()),
-    _output_iteration_number(0)
+    _last_solve_converged(false)
 {
   _time = _system_time;
-}
-
-void
-MFEMSteady::constructProblemOperator()
-{
-  _problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-  auto problem_operator =
-      std::make_unique<Moose::MFEM::EquationSystemProblemOperator>(_problem_data);
-
-  _problem_operator.reset();
-  _problem_operator = std::move(problem_operator);
+  // If no ProblemOperators have been added by the user, add a default
+  if (getProblemOperators().empty())
+  {
+    _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
+    auto problem_operator =
+        std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
+    addProblemOperator(std::move(problem_operator));
+  }
 }
 
 void
@@ -51,13 +53,16 @@ MFEMSteady::init()
   _mfem_problem.initialSetup();
 
   // Set up initial conditions
-  _problem_data.eqn_system->Init(
-      _problem_data.gridfunctions,
-      _problem_data.fespaces,
+  _mfem_problem_data.eqn_system->Init(
+      _mfem_problem_data.gridfunctions,
+      _mfem_problem_data.fespaces,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
-  _problem_operator->SetGridFunctions();
-  _problem_operator->Init(_problem_data.f);
+  for (const auto & problem_operator : getProblemOperators())
+  {
+    problem_operator->SetGridFunctions();
+    problem_operator->Init(_mfem_problem_data.f);
+  }
 }
 
 void
@@ -82,20 +87,13 @@ MFEMSteady::execute()
   _time_step = 1;
   _mfem_problem.timestepSetup();
 
-  // Solve equation system.
-  if (_mfem_problem.shouldSolve())
-    _problem_operator->Solve(_problem_data.f);
-
-  // Displace mesh, if required
-  _mfem_problem.displaceMesh();
+  _last_solve_converged = _mfem_problem_solve.solve();
 
   _mfem_problem.computeIndicators();
   _mfem_problem.computeMarkers();
 
   // need to keep _time in sync with _time_step to get correct output
   _time = _time_step;
-  // Execute user objects at timestep end
-  _mfem_problem.execute(EXEC_TIMESTEP_END);
   _mfem_problem.outputStep(EXEC_TIMESTEP_END);
   _time = _system_time;
 

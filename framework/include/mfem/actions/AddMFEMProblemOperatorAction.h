@@ -12,10 +12,9 @@
 #pragma once
 
 #include "Action.h"
-#include "MFEMProblem.h"
+
 /**
- * This class implements the action controlling the construction of the
- * required MFEM ProblemOperator.
+ * This class implements the action controlling the construction of an MFEM ProblemOperator.
  */
 class AddMFEMProblemOperatorAction : public Action
 {

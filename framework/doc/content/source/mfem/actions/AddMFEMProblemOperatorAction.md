@@ -4,7 +4,7 @@
 
 ## Summary
 
-Set the ProblemOperator used in the MFEMExecutioner to solve the FE problem.
+Set the ProblemOperator used in the MFEMProblemSolve to solve the FE problem.
 
 ## Overview
 

@@ -11,27 +11,27 @@
 
 #pragma once
 #include "TimeDomainProblemOperator.h"
-#include "EquationSystemInterface.h"
+#include "MFEMEquationSystemInterface.h"
 
 namespace Moose::MFEM
 {
 
 /// Problem operator for time-dependent problems with an equation system.
 class TimeDomainEquationSystemProblemOperator : public TimeDomainProblemOperator,
-                                                public EquationSystemInterface
+                                                public MFEMEquationSystemInterface
 {
 public:
-  TimeDomainEquationSystemProblemOperator(MFEMProblemData & problem)
+  TimeDomainEquationSystemProblemOperator(MFEMProblem & problem)
     : TimeDomainProblemOperator(problem),
-      _equation_system(
-          std::dynamic_pointer_cast<Moose::MFEM::TimeDependentEquationSystem>(problem.eqn_system))
+      _equation_system(std::dynamic_pointer_cast<Moose::MFEM::TimeDependentEquationSystem>(
+          _problem_data.eqn_system))
   {
   }
 
   void SetGridFunctions() override;
   void Init(mfem::BlockVector & X) override;
-
   void ImplicitSolve(const double dt, const mfem::Vector & X, mfem::Vector & dX_dt) override;
+  void Solve() override;
 
   [[nodiscard]] Moose::MFEM::TimeDependentEquationSystem * GetEquationSystem() const override
   {
