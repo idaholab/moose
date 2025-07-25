@@ -60,6 +60,20 @@
     max_parallel = 1
     recover = false
   []
+  [MFEMDiffusionMatFree]
+    type = XMLDiff
+    input = diffusion.i
+    xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd '
+              'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
+    cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
+               'Executioner/device=ceed-cpu '
+               'Executioner/assembly_level=none'
+    ignored_items = "root['VTKFile']['@version']"
+    requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
+    capabilities = 'mfem'
+    max_parallel = 1
+    recover = false
+  []
   [MFEMDiffusionLOR]
     type = XMLDiff
     input = diffusion.i
@@ -132,6 +146,25 @@
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
                'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Executioner/assembly_level=element'
+    ignored_items = "root['VTKFile']['@version']"
+    requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
+    capabilities = 'mfem'
+    valgrind = none
+    max_parallel = 1
+    recover = false
+  []
+  [MFEMHeatConductionMatFree]
+    type = XMLDiff
+    input = heattransfer.i
+    xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd '
+              'OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu '
+              'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
+    cli_args = 'BCs/active="bottom top_dirichlet" '
+               'Executioner/dt=0.25 Executioner/end_time=1.0 '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
+               'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
+               'Executioner/assembly_level=none '
+               'Executioner/device=ceed-cpu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
     capabilities = 'mfem'
