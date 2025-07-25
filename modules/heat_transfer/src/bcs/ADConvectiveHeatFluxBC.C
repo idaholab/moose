@@ -105,10 +105,13 @@ ADConvectiveHeatFluxBC::initialSetup()
 
     // Determine if neighbor can be used, just in case
     const auto neighbor = elem->neighbor_ptr(side);
-    T_inf_can_use_neighbor = T_inf_can_use_neighbor && neighbor &&
-                             _T_infinity_functor->hasBlocks(neighbor->subdomain_id());
-    htc_can_use_neighbor =
-        htc_can_use_neighbor && neighbor && _htc_functor->hasBlocks(neighbor->subdomain_id());
+    if (neighbor && !neighbor->is_remote())
+    {
+      T_inf_can_use_neighbor =
+          T_inf_can_use_neighbor && _T_infinity_functor->hasBlocks(neighbor->subdomain_id());
+      htc_can_use_neighbor =
+          htc_can_use_neighbor && _htc_functor->hasBlocks(neighbor->subdomain_id());
+    }
   }
 
   const std::string error_msg =
