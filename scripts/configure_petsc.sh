@@ -25,48 +25,22 @@ function configure_petsc()
     exit 1
   fi
 
+  # Whether or not we're building on apple silicon
+  local IS_APPLE_SILICON=
+  if [[ $(uname -p) == 'arm' ]] && [[ $(uname) == 'Darwin' ]] && [[ $PETSC_ARCH == 'arch-moose' ]]; then
+    IS_APPLE_SILICON=1
+  fi
+
+  # Extra configure options to pass to petsc
+  EXTRA_CONFIGURE_OPTIONS=()
+
   # Use --with-make-np if MOOSE_JOBS is given
-  MAKE_NP_STR=''
-  if [ ! -z "$MOOSE_JOBS" ]; then
-    MAKE_NP_STR="--with-make-np=$MOOSE_JOBS"
+  if [ -n "$MOOSE_JOBS" ]; then
+    EXTRA_CONFIGURE_OPTIONS+=("--with-make-np=$MOOSE_JOBS")
   fi
 
-  # Check to see if HDF5 exists using environment variables and expected locations.
-  # If it does, use it.
-  echo 'INFO: Checking for HDF5...'
-
-  # Prioritize user-set environment variables HDF5_DIR, HDF5DIR, and HDF5_ROOT,
-  # with the first taking the greatest priority
-  if [ -n "$HDF5_DIR" ]; then
-    echo "INFO: HDF5 installation location was set using HDF5_DIR=$HDF5_DIR"
-    HDF5_STR="--with-hdf5-dir=$HDF5_DIR"
-  elif [ -n "$HDF5DIR" ]; then
-    echo "INFO: HDF5 installation location was set using HDF5DIR=$HDF5DIR"
-    HDF5_STR="--with-hdf5-dir=$HDF5DIR"
-  elif [ -n "$HDF5_ROOT" ]; then
-    echo "INFO: HDF5 installation location was set using HDF5_ROOT=$HDF5_ROOT"
-    HDF5_STR="--with-hdf5-dir=$HDF5_ROOT"
-  fi
-
-  # If not found using a variable, look at a few common library locations
-  HDF5_PATHS=/usr/lib/hdf5:/usr/local/hdf5:/usr/share/hdf5:/usr/local/hdf5/share:/opt/hdf5:$HOME/.local
-  if [ -z "$HDF5_STR" ]; then
-    # Set path delimiter
-    IFS=:
-    for p in $HDF5_PATHS; do
-      # When first instance of hdf5 header is found, report finding, set HDF5_STR, and break
-      loc=$(find "$p" -name 'hdf5.h' -print -quit 2>/dev/null)
-      if [ ! -z "$loc" ]; then
-        echo "INFO: HDF5 header location was found at: $loc"
-        echo 'INFO: Using this HDF5 installation to configure and build PETSc.'
-        echo 'INFO: If another HDF5 is desired, please set HDF5_DIR and re-run this script.'
-        HDF5_STR="--with-hdf5-dir=$loc/../../"
-        break
-      fi
-    done
-    unset IFS
-  fi
-
+  # Find the location for patches if needed
+  local PATCH_DIR=
   if [ -n "$BASH_VERSION" ]; then
       PATCH_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
   elif [ -n "$ZSH_VERSION" ]; then
@@ -76,25 +50,62 @@ function configure_petsc()
       exit 1
   fi
 
-  # If HDF5 is not found locally, download it via PETSc and patch if on Apple Silicon
-  if [ -z "$HDF5_STR" ]; then
-    HDF5_STR='--download-hdf5=1 --with-hdf5-fortran-bindings=0 --download-hdf5-configure-arguments="--with-zlib"'
+  # Check to see if HDF5 exists using environment variables and expected locations.
+  # If it does, use it.
+  echo 'INFO: Checking for HDF5...'
+
+  # Prioritize user-set environment variables HDF5_DIR, HDF5DIR, and HDF5_ROOT,
+  # with the first taking the greatest priority
+  local FOUND_HDF5_DIR=""
+  if [ -n "$HDF5_DIR" ]; then
+    echo "INFO: HDF5 installation location was set using HDF5_DIR=$HDF5_DIR"
+    FOUND_HDF5_DIR="$HDF5_DIR"
+  elif [ -n "$HDF5DIR" ]; then
+    echo "INFO: HDF5 installation location was set using HDF5DIR=$HDF5DIR"
+    FOUND_HDF5_DIR="$HDF5DIR"
+  elif [ -n "$HDF5_ROOT" ]; then
+    echo "INFO: HDF5 installation location was set using HDF5_ROOT=$HDF5_ROOT"
+    FOUND_HDF5_DIR="$HDF5_ROOT"
+  fi
+  # If not found using a variable, look at a few common library locations
+  if [ -z "$FOUND_HDF5_DIR" ]; then
+    local HDF5_PATHS=/usr/lib/hdf5:/usr/local/hdf5:/usr/share/hdf5:/usr/local/hdf5/share:/opt/hdf5:$HOME/.local
+    # Set path delimiter
+    IFS=:
+    for p in $HDF5_PATHS; do
+      # When first instance of hdf5 header is found, report finding, set HDF5_STR, and break
+      loc=$(find "$p" -name 'hdf5.h' -print -quit 2>/dev/null)
+      if [ -n "$loc" ]; then
+        echo "INFO: HDF5 header location was found at: $loc"
+        echo 'INFO: Using this HDF5 installation to configure and build PETSc.'
+        echo 'INFO: If another HDF5 is desired, please set HDF5_DIR and re-run this script.'
+        FOUND_HDF5_DIR="$loc/../../"
+        break
+      fi
+    done
+    unset IFS
+  fi
+  # Pass whatever we decided from HDF5_STR as an option
+  if [ -n "$FOUND_HDF5_DIR" ]; then
+    EXTRA_CONFIGURE_OPTIONS+=("--with-hdf5-dir=${FOUND_HDF5_DIR}")
+  # Otherwise, download it via PETSc and patch if on apple silicon
+  else
+    EXTRA_CONFIGURE_OPTIONS+=("--download-hdf5=1" "--with-hdf5-fortran-bindings=0" "--download-hdf5-configure-arguments='--with-zlib'")
     echo 'INFO: HDF5 library not detected, opting to download via PETSc...'
-    if [[ `uname -p` == 'arm' ]] && [[ $(uname) == 'Darwin' ]] && [[ $PETSC_ARCH == 'arch-moose' ]]; then
+    if [ -n "$IS_APPLE_SILICON" ]; then
       echo 'INFO: Patching PETSc to support HDF5 download and installation on Apple Silicon...'
-      PATCH=$PATCH_DIR/apple-silicon-hdf5-autogen.patch
-      git apply $PATCH 2>/dev/null || (git apply $PATCH -R --check && echo 'INFO: Apple Silicon HDF5 patch already applied.')
+      local HDF5_PATCH=$PATCH_DIR/apple-silicon-hdf5-autogen.patch
+      git apply "$HDF5_PATCH" 2>/dev/null || (git apply "$HDF5_PATCH" -R --check && echo 'INFO: Apple Silicon HDF5 patch already applied.')
     fi
   fi
 
   # When manually building PETSc on Apple Silicon, set FFLAGS to the proper arch, otherwise MUMPS
   # will fail to find MPI libraries
-  MUMPS_ARM_STR=''
-  if [[ `uname -p` == 'arm' ]] && [[ $(uname) == 'Darwin' ]] && [[ $PETSC_ARCH == 'arch-moose' ]]; then
-    MUMPS_ARM_STR='FFLAGS=-march=armv8.3-a'
+  if [ -n "$IS_APPLE_SILICON" ]; then
+    EXTRA_CONFIGURE_OPTIONS+=("FFLAGS=-march=armv8.3-a")
   fi
 
-  cd $PETSC_DIR
+  cd "$PETSC_DIR" || exit 1
   python3 ./configure --with-64-bit-indices \
       --with-cxx-dialect=C++17 \
       --with-debugging=no \
@@ -115,12 +126,13 @@ function configure_petsc()
       --download-slepc=1 \
       --download-strumpack=1 \
       --download-superlu_dist=1 \
-      $HDF5_STR \
-      $MUMPS_ARM_STR \
-      $MAKE_NP_STR \
+      --download-kokkos=1 \
+      --download-kokkos-kernels=1 \
+      --download-libceed=1 \
+      "${EXTRA_CONFIGURE_OPTIONS[@]}" \
       "$@"
 
-  RETURN_CODE=$?
+  local RETURN_CODE=$?
   if [ $RETURN_CODE != 0 ] && [ -f configure.log ]; then
     echo "Configure failed; displaying contents of configure.log:"
     cat configure.log
