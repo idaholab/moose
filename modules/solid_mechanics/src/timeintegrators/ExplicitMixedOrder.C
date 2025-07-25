@@ -302,7 +302,7 @@ ExplicitMixedOrder::solve()
   {
     _M1_old = _M1->clone();
     _M2_old = _M2->clone();
-    if (_constant_mass && _dt ==_dt_old)
+    if (_constant_mass && _dt == _dt_old)
     {
       _M1 = _M1_old->clone();
       if (_has_damping && !_constant_damping)
