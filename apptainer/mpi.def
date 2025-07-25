@@ -31,18 +31,14 @@
 
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/mpi' -%}
-{#- Whether or not to enable openmpi                                                          -#}
-{%- set ENABLE_OPENMPI = ALTERNATE_FROM is not defined or ALTERNATE_FROM == "cuda" -%}
-{#- Whether or not to enable mpich                                                            -#}
-{%- set ENABLE_MPICH = ALTERNATE_FROM is not defined or ALTERNATE_FROM != "cuda" -%}
 
 Bootstrap: oras
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-From: mooseharbor.hpc.inl.gov/base/rocky-x86_64:8.10-3
+From: mooseharbor.hpc.inl.gov/base/rocky-x86_64:8.10-5
 {%- elif ALTERNATE_FROM == "cuda" %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-cuda-x86_64:8.10-cuda12.4-1
+From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-cuda-x86_64:8.10-cuda12.4-3
 {%- else %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-2
+From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-3
 {%- endif %}
 # Logan Harbour
 Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
@@ -90,14 +86,12 @@ EOF
 
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
 
-{%- if ENABLE_MPICH %}
     # Install prefix for mpich
     export MOOSE_MPICH_DIR=/opt/mpich
-{%- endif %}
-{%- if ENABLE_OPENMPI %}
     # Install prefix for openmpi
-    export MOOSE_OPENMPI_DIR=/opt/openmpi
-{%- endif %}
+    if [ -d "/opt/openmpi" ]; then
+        export MOOSE_OPENMPI_DIR=/opt/openmpi
+    fi
 
 {%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
     # Version of GCC needed to complement Clang
@@ -174,12 +168,13 @@ EOF
 
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
     # Build and install MPICH
+    MPICH_VERSION=4.3.1
     mkdir ${ROOT_BUILD_DIR}/mpich
     cd ${ROOT_BUILD_DIR}/mpich
-    curl -L -O http://www.mpich.org/static/downloads/4.1.2/mpich-4.1.2.tar.gz
-    tar -xf mpich-4.1.2.tar.gz
-    mkdir mpich-4.1.2/build
-    cd mpich-4.1.2/build
+    curl -L -O http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz
+    tar -xf mpich-${MPICH_VERSION}.tar.gz
+    mkdir mpich-${MPICH_VERSION}/build
+    cd mpich-${MPICH_VERSION}/build
     ../configure --prefix=${MOOSE_MPICH_DIR} \
 {%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
       --enable-shared \
@@ -209,23 +204,23 @@ export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
 export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
 export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77'
 
-{%- if ENABLE_MPICH %}
     # Add script for loading mpich environment
-    cat << EOF > /opt/mpi/use-mpich
+    if [ -n "$MOOSE_MPICH_DIR" ]; then
+        cat << EOF > /opt/mpi/use-mpich
 #!/bin/bash
 export MOOSE_MPI_DIR=${MOOSE_MPICH_DIR}
 ${USE_MPI_SCRIPT}
 EOF
-{%- endif %}
+    fi
 
-{%- if ENABLE_OPENMPI %}
-    # Add script for loading openmpi environment
-    cat << EOF > /opt/mpi/use-openmpi
+    # Add script for loading openmpi environment if available
+    if [ -n "$MOOSE_OPENMPI_DIR" ]; then
+        cat << EOF > /opt/mpi/use-openmpi
 #!/bin/bash
 export MOOSE_MPI_DIR=${MOOSE_OPENMPI_DIR}
 ${USE_MPI_SCRIPT}
 EOF
-{%- endif %}
+    fi
 
     # Clean Up
     rm -rf ${ROOT_BUILD_DIR}
