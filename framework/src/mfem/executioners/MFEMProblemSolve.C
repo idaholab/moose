@@ -33,7 +33,7 @@ MFEMProblemSolve::MFEMProblemSolve(
     _mfem_problem(dynamic_cast<MFEMProblem &>(_problem)),
     _problem_operators(problem_operators)
 {
-  _app.setMFEMDevice(getParam<std::string>("device"), Moose::PassKey<MFEMExecutioner>());
+  _app.setMFEMDevice(getParam<std::string>("device"), Moose::PassKey<MFEMProblemSolve>());
 }
 
 bool
