@@ -23,22 +23,6 @@
   []
 []
 
-[Executioner]
-  type = MFEMSteady
-  device = cpu
-  numeric_type = complex
-  assembly_level = full
-[]
-
-[Kernels]
-  [diff]
-    type = MFEMDiffusionKernel
-    numeric_type = complex
-    variable = concentration
-    coefficient = 1.0
-  []
-[]
-
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
@@ -46,13 +30,48 @@
     boundary = '1'
     coefficient = 1.0
   []
-  [low_terminal]
-    type = MFEMScalarDirichletBC
+  [top]
+    type = MFEMComplexIntegratedBC
     variable = concentration
-    boundary = '2'
-    coefficient = 0.0
+    boundary = '1'
+    [real_part]
+      type = MFEMBoundaryIntegratedBC
+      variable = concentration
+      coefficient = 1.0
+    []
+    [imag_part]
+      type = MFEMBoundaryIntegratedBC
+      variable = concentration
+      coefficient = 1.0
+    []
   []
 []
+
+[Kernels]
+  [diff]
+    type = MFEMDiffusionKernel
+    variable = concentration
+    coefficient = 1.0
+  []
+[]
+
+[ComplexKernels]
+  [c_diff]
+    type = MFEMComplexKernel
+    variable = concentration
+    [real_part]
+      variable = concentration
+      type = MFEMDiffusionKernel
+      coefficient = 1.0
+    []
+    [imag_part]
+      variable = concentration
+      type = MFEMDiffusionKernel
+      coefficient = 1.0
+    []
+  []
+[]
+
 
 [Preconditioner]
   [jacobi]
@@ -65,5 +84,12 @@
   preconditioner = jacobi
   l_tol = 1e-16
   l_max_its = 1000
+[]
+
+[Executioner]
+  type = MFEMSteady
+  device = cpu
+  numeric_type = complex
+  assembly_level = full
 []
 
