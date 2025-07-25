@@ -53,9 +53,6 @@
     variable = concentration
     coefficient = 1.0
   []
-[]
-
-[ComplexKernels]
   [c_diff]
     type = MFEMComplexKernel
     variable = concentration
@@ -71,7 +68,6 @@
     []
   []
 []
-
 
 [Preconditioner]
   [jacobi]

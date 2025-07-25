@@ -20,10 +20,22 @@ public:
   MFEMComplexIntegratedBC(const InputParameters & parameters);
   virtual ~MFEMComplexIntegratedBC() = default;
 
-  virtual mfem::LinearFormIntegrator * getRealLFIntegrator() { return _real_bc->createLFIntegrator(); }
-  virtual mfem::LinearFormIntegrator * getImagLFIntegrator() { return _imag_bc->createLFIntegrator(); }
-  virtual mfem::BilinearFormIntegrator * getRealBFIntegrator() { return _real_bc->createBFIntegrator();}
-  virtual mfem::BilinearFormIntegrator * getImagBFIntegrator() { return _imag_bc->createBFIntegrator(); }
+  virtual mfem::LinearFormIntegrator * getRealLFIntegrator()
+  {
+    return _real_bc->createLFIntegrator();
+  }
+  virtual mfem::LinearFormIntegrator * getImagLFIntegrator()
+  {
+    return _imag_bc->createLFIntegrator();
+  }
+  virtual mfem::BilinearFormIntegrator * getRealBFIntegrator()
+  {
+    return _real_bc->createBFIntegrator();
+  }
+  virtual mfem::BilinearFormIntegrator * getImagBFIntegrator()
+  {
+    return _imag_bc->createBFIntegrator();
+  }
 
   virtual void setRealBC(std::shared_ptr<MFEMIntegratedBC> bc) { _real_bc = bc; }
   virtual void setImagBC(std::shared_ptr<MFEMIntegratedBC> bc) { _imag_bc = bc; }
@@ -33,10 +45,8 @@ public:
   virtual const std::string & getTrialVariableName() const { return _test_var_name; }
 
 protected:
-
   std::shared_ptr<MFEMIntegratedBC> _real_bc{nullptr};
-  std::shared_ptr<MFEMIntegratedBC> _imag_bc{nullptr};  
-
+  std::shared_ptr<MFEMIntegratedBC> _imag_bc{nullptr};
 };
 
 #endif
