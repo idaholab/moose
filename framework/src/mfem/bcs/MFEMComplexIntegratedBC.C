@@ -26,12 +26,6 @@ MFEMComplexIntegratedBC::validParams()
 MFEMComplexIntegratedBC::MFEMComplexIntegratedBC(const InputParameters & parameters)
   : MFEMBoundaryCondition(parameters)
 {
-  //FEProblemBase::addUserObject(kernel_name, name, parameters);
-  //const UserObject * kernel_uo = &(getUserObjectBase(name));
-
-  _real_bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(getUserObject<MFEMIntegratedBC>("real_kernel").getSharedPtr());
-  _imag_bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(getUserObject<MFEMIntegratedBC>("imag_kernel").getSharedPtr());
-
 }
 
 #endif
