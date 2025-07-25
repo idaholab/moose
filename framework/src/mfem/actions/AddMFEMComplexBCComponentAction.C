@@ -9,9 +9,9 @@
 
 #ifdef MFEM_ENABLED
 
-#include "AddMFEMComplexBCComponentKernelAction.h"
+#include "AddMFEMComplexBCComponentAction.h"
 
-registerMooseAction("MooseApp", AddMFEMComplexBCComponentKernelAction, "add_mfem_complex_bc_component_kernels");
+registerMooseAction("MooseApp", AddMFEMComplexBCComponentAction, "add_mfem_complex_bc_component_kernels");
 
 int nthFromLast(std::string str, char ch, int N)
 {
@@ -28,20 +28,20 @@ int nthFromLast(std::string str, char ch, int N)
 }
 
 InputParameters
-AddMFEMComplexBCComponentKernelAction::validParams()
+AddMFEMComplexBCComponentAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription("Add an MFEM AuxKernel to serve as the real or imaginary component of an MFEMComplexIntegratedBC.");
   return params;
 }
 
-AddMFEMComplexBCComponentKernelAction::AddMFEMComplexBCComponentKernelAction(const InputParameters & parameters)
+AddMFEMComplexBCComponentAction::AddMFEMComplexBCComponentAction(const InputParameters & parameters)
   : MooseObjectAction(parameters)
 {
 }
 
 void
-AddMFEMComplexBCComponentKernelAction::act()
+AddMFEMComplexBCComponentAction::act()
 {
 
   // First, we need to make sure that the parent object is an MFEMComplexIntegratedBC
