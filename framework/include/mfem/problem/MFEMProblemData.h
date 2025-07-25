@@ -19,7 +19,7 @@
 #include <fstream>
 #include <iostream>
 
-// forward declare
+// forward declaration
 class MFEMRefinementMarker;
 
 /// Base problem data struct.
