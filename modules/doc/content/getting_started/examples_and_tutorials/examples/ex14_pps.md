@@ -28,7 +28,7 @@ Postprocessor Values:
 
 !media large_media/examples/ex14-conv-rate.png
        style=width:50%;
-       alt=A plot showing the L2 error (calculated using a postprocessor) against number of degrees of freedom.
+       alt=A plot showing the L2 error (calculated using a postprocessor) against the number of degrees of freedom.
 
 
 ## Comparison to a Fine Grid Solution

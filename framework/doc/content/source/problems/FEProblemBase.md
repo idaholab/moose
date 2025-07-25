@@ -123,7 +123,7 @@ $\psi_4$
 
 !media media/problems/quad9-center.jpg
        style=width:50%;
-       alt=One of the 2D quadratic Lagrange shape functions, associated with the centre node.
+       alt=One of the 2D quadratic Lagrange shape functions, associated with the center node.
 
 $\psi_8$
 

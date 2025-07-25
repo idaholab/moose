@@ -16,7 +16,7 @@ The `TensorMechanics` system provides a cohesive zone modeling capability that c
 The [BreakMeshByBlockGenerator](BreakMeshByBlockGenerator.md) is utilized to create the cohesive zone interface  by splitting a monolithic mesh into blocks by adding the required nodes and boundaries between each block pair. The split mesh allows to compute a displacement jump $\llbracket u \rrbracket$ at each quadrature point on the interface. The schematic below is an example of using `BreakMeshByBlockGenerator` on a 3-blocks, 2-dimensional mesh. The generated interfaces are highlighted in yellow.
 
 !media media/solid_mechanics/BreakMeshByBlock.png style=width:100%;
-       alt=A monolitich mesh is split to allow a displacement jump between elements. Cohesive interfaces are added between blocks.
+       alt=A monolithic mesh is split to allow a displacement jump between elements. Cohesive interfaces are added between blocks.
 
 The `ComputeDisplacementJump` object computes the displacement jump across the cohesive zone according to the selected formulation. The `ComputeLocalTraction` provides the cohesive zone response in the natural interface coordinate system.
 The `ComputeGlobalTraction` object computes the traction in global coordinates and its derivative w.r.t. the displacement jump in global coordinates, $\llbracket u \rrbracket$.
