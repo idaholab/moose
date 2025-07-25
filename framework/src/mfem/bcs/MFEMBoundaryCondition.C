@@ -29,12 +29,7 @@ MFEMBoundaryCondition::validParams()
 
 MFEMBoundaryCondition::MFEMBoundaryCondition(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
-    MFEMBoundaryRestrictable(parameters,
-                             *getMFEMProblem()
-                                  .getProblemData()
-                                  .gridfunctions.GetRef(getParam<VariableName>("variable"))
-                                  .ParFESpace()
-                                  ->GetParMesh()),
+    MFEMBoundaryRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
     _test_var_name(getParam<VariableName>("variable"))
 {
 }
