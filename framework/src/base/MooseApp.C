@@ -3603,7 +3603,7 @@ MooseApp::addCapability(const std::string & capability, const char * value, cons
 
 #ifdef MOOSE_MFEM_ENABLED
 void
-MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMExecutioner>)
+MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMProblemSolve>)
 {
   const auto string_vec = MooseUtils::split(device_string, ",");
   auto string_set = std::set<std::string>(string_vec.begin(), string_vec.end());
