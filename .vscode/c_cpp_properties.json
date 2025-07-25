@@ -11,9 +11,7 @@
                 "/opt/rh/gcc-toolset-12/root/usr/include/**",
                 "/usr/include/**"
             ],
-            "defines": [
-                "MFEM_ENABLED=1"
-            ],
+            "defines": [],
             "compilerPath": "/opt/rh/gcc-toolset-12/root/usr/bin/gcc",
             "cStandard": "c17",
             "cppStandard": "gnu++17",
@@ -21,4 +19,5 @@
         }
     ],
     "version": 4
-}
+  }
+

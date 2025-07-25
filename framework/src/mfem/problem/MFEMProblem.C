@@ -108,13 +108,14 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
 
   if (dynamic_cast<const MFEMComplexIntegratedBC *>(mfem_bc_uo) != nullptr)
   {
-    std::string r_name = name + "/real_part"; 
+    std::string r_name = name + "/real_part";
     std::string i_name = name + "/imag_part";
 
     auto object_ptr = getUserObject<MFEMComplexIntegratedBC>(name).getSharedPtr();
     auto bc = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(object_ptr);
-    auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
-    
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
+
     if (eqsys)
     {
       auto r_ptr = getUserObject<MFEMIntegratedBC>(r_name).getSharedPtr();
@@ -136,7 +137,8 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   {
     auto object_ptr = getUserObject<MFEMIntegratedBC>(name).getSharedPtr();
     auto bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(object_ptr);
-    auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
 
     if (eqsys)
     {
@@ -301,12 +303,13 @@ MFEMProblem::addKernel(const std::string & kernel_name,
 
   if (dynamic_cast<const MFEMComplexKernel *>(kernel_uo) != nullptr)
   {
-    std::string r_name = name + "/real_part"; 
+    std::string r_name = name + "/real_part";
     std::string i_name = name + "/imag_part";
 
     auto object_ptr = getUserObject<MFEMComplexKernel>(name).getSharedPtr();
     auto kernel = std::dynamic_pointer_cast<MFEMComplexKernel>(object_ptr);
-    auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
 
     if (eqsys)
     {
@@ -328,7 +331,8 @@ MFEMProblem::addKernel(const std::string & kernel_name,
   {
     auto object_ptr = getUserObject<MFEMKernel>(name).getSharedPtr();
     auto kernel = std::dynamic_pointer_cast<MFEMKernel>(object_ptr);
-    auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
 
     if (eqsys)
     {

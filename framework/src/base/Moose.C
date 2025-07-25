@@ -710,8 +710,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 #ifdef MOOSE_MFEM_ENABLED
   registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
   registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
-  registerSyntaxTask("AddMFEMComplexKernelComponentAction", "Kernels/*/*", "add_mfem_complex_kernel_components");
-  registerSyntaxTask("AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_components");
+  registerSyntaxTask(
+      "AddMFEMComplexKernelComponentAction", "Kernels/*/*", "add_mfem_complex_kernel_components");
+  registerSyntaxTask(
+      "AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_components");
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
   registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
 #endif
