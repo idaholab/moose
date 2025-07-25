@@ -10,14 +10,10 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMProblem.h"
-#include "MFEMTransient.h"
-#include "MFEMSteady.h"
 #include "MFEMInitialCondition.h"
 #include "MFEMVariable.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
-#include "EquationSystemProblemOperator.h"
-#include "TimeDomainEquationSystemProblemOperator.h"
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
