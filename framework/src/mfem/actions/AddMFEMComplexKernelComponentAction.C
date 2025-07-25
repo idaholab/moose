@@ -9,9 +9,9 @@
 
 #ifdef MFEM_ENABLED
 
-#include "AddMFEMComplexComponentKernelAction.h"
+#include "AddMFEMComplexKernelComponentAction.h"
 
-registerMooseAction("MooseApp", AddMFEMComplexComponentKernelAction, "add_mfem_complex_component_kernels");
+registerMooseAction("MooseApp", AddMFEMComplexKernelComponentAction, "add_mfem_complex_component_kernels");
 
 //int nthFromLast(std::string str, char ch, int N)
 //{
@@ -28,20 +28,20 @@ registerMooseAction("MooseApp", AddMFEMComplexComponentKernelAction, "add_mfem_c
 //}
 
 InputParameters
-AddMFEMComplexComponentKernelAction::validParams()
+AddMFEMComplexKernelComponentAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription("Add an MFEM AuxKernel to serve as the real or imaginary component of an MFEMComplexKernel.");
   return params;
 }
 
-AddMFEMComplexComponentKernelAction::AddMFEMComplexComponentKernelAction(const InputParameters & parameters)
+AddMFEMComplexKernelComponentAction::AddMFEMComplexKernelComponentAction(const InputParameters & parameters)
   : MooseObjectAction(parameters)
 {
 }
 
 void
-AddMFEMComplexComponentKernelAction::act()
+AddMFEMComplexKernelComponentAction::act()
 {
   std::string action_name = _app.actionWarehouse().getCurrentActionName();
   if (!(_name == "real_part" || _name == "imag_part"))

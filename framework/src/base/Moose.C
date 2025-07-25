@@ -765,8 +765,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
   registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
   registerSyntaxTask("AddMFEMComplexKernelAction", "ComplexKernels/*", "add_mfem_complex_kernels");
-  registerSyntaxTask("AddMFEMComplexComponentKernelAction", "ComplexKernels/*/*", "add_mfem_complex_component_kernels");
-  registerSyntaxTask("AddMFEMComplexBCComponentKernelAction", "BCs/*/*", "add_mfem_complex_bc_component_kernels");
+  registerSyntaxTask("AddMFEMComplexKernelComponentAction", "ComplexKernels/*/*", "add_mfem_complex_component_kernels");
+  registerSyntaxTask("AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_component_kernels");
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
   registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
 #endif

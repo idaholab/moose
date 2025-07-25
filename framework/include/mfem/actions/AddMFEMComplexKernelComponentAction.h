@@ -20,12 +20,12 @@
  * [ComplexKernels]
  * []
  */
-class AddMFEMComplexBCComponentKernelAction : public MooseObjectAction
+class AddMFEMComplexKernelComponentAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  AddMFEMComplexBCComponentKernelAction(const InputParameters & parameters);
+  AddMFEMComplexKernelComponentAction(const InputParameters & parameters);
 
   virtual void act() override;
 };
