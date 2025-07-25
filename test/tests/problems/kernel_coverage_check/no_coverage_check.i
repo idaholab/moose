@@ -1,40 +1,52 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
-  coord_block = '0'
-  coord_type = 'XYZ'
+  file = rectangle.e
 []
 
 [Problem]
-  block = '0 1'
-  coord_type = 'RZ'
+  kernel_coverage_check = false
 []
 
 [Variables]
+  active = 'u'
+
   [u]
+    order = FIRST
+    family = LAGRANGE
+    block = 1
   []
 []
 
 [Kernels]
+  active = 'diff body_force'
+
   [diff]
     type = Diffusion
     variable = u
+    block = 1
+  []
+
+  [body_force]
+    type = BodyForce
+    variable = u
+    block = 1
+    value = 10
   []
 []
 
 [BCs]
+  active = 'left'
+
   [left]
     type = DirichletBC
     variable = u
-    boundary = left
-    value = 0
+    boundary = 1
+    value = 1
   []
+
   [right]
     type = DirichletBC
     variable = u
-    boundary = right
+    boundary = 2
     value = 1
   []
 []
@@ -42,8 +54,6 @@
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]

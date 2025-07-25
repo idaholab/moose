@@ -8,9 +8,6 @@
   dim = 1
   nx = 3
   elem_type = EDGE3
-[]
-
-[Problem]
   coord_type = RSPHERICAL
 []
 

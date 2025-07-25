@@ -15,8 +15,6 @@ The PorousFlow input file and associated scripts that generate the analytic solu
 
 !listing modules/porous_flow/examples/thm_example/2D.i block=Mesh
 
-!listing modules/porous_flow/examples/thm_example/2D.i block=Problem
-
 
 
 ## Equations and assumptions
@@ -398,47 +396,47 @@ The `Variables` used in the PorousFlow input file are:
 ## Parameter values and initial conditions
 
 !table id=table_params caption=Parameters and their numerical values used in the benchmark against LaForce et al.
-| Symbol | Value | Physical description |
-| --- | --- | --- |
-| $\alpha_{B}$  |  1.0  |  Biot coefficient for reservoir and seals |
-| $\alpha_{T}$  |  $5\times 10^{-6}\,$K  |  Drained linear thermal expansion coefficient of the reservoir and seals |
-| $C_{\mathrm{reservoir}}$  |  1100$\,$J.kg$^{-1}$.K$^{-1}$  |  Specific heat capacity of reservoir rock grains |
-| $C_{\mathrm{seal}}$  |  828.9$\,$J.kg$^{-1}$.K$^{-1}$  |  Specific heat capacity of seal rock grains |
-| $C_{\mathrm{co2}}$  |  2920.5$\,$J.kg$^{-1}$.K$^{-1}$  |  Specific heat capacity of water |
-| $C_{\mathrm{water}}$  |  4149$\,$J.kg$^{-1}$.K$^{-1}$  |  Specific heat capacity of water |
-| $\phi_{\mathrm{reservoir}}$  |  0.2  |  Porosity of reservoir  |
-| $\phi_{\mathrm{seal}}$  |  0.02  |  Porosity of seals  |
-| $G$  |  6$\,$GPa  |  Shear modulus of the reservoir and seals |
-| $h_{\mathrm{reservoir}}$  |  11$\,$m  |  Vertical height of the reservoir  |
-| $I$  |  $5\times 10^{5}\,$Tonne.year$^{-1}$  |  Injection rate of CO$_{2}$.  |
-| $K_{\mathrm{drained}}$  |  8$\,$GPa  |  Drained bulk modulus of the reservoir and seals |
-| $K_{\mathrm{water}}$  |  $2.27\times 10^{5}\,$GPa  |  Bulk density of water |
-| $K_{\mathrm{co2}}$  |  $2.27\times 10^{5}\,$GPa  |  Bulk density of CO$_{2}$ |
-| $k_{\mathrm{reservoir}}$  |  $2\times 10^{-12}\,$m$^{2}$  |  horizontal permeability components of the reservoir (there is zero vertical permeability)  |
-| $k_{\mathrm{seal}}$  |  0  |  permeability of seal  |
-| $\lambda_{\mathrm{reservoir}}^{0}$  | 1.32$\,$J.s$^{-1}$.m$^{-1}$.K$^{-1}$  |  Vertical thermal conductivity of reservoir at zero water saturation  |
-| $\lambda_{\mathrm{reservoir}}^{1}$  | 3.083$\,$J.s$^{-1}$.m$^{-1}$.K$^{-1}$  |  Vertical thermal conductivity of reservoir at full water saturation  |
-| $\lambda_{\mathrm{seal}}^{0}$  | 1.6$\,$J.s$^{-1}$.m$^{-1}$.K$^{-1}$  |  Vertical thermal conductivity of seal at zero water saturation  |
-| $\lambda_{\mathrm{seal}}^{1}$  | 4.31$\,$J.s$^{-1}$.m$^{-1}$.K$^{-1}$  |  Vertical thermal conductivity of seal at full water saturation  |
-| $\mu_{\mathrm{water}}$  |  $3.394\times 10^{-4}\,$Pa.s  |  Viscosity of water  |
-| $\mu_{\mathrm{co2}}$  |  $3.93\times 10^{-5}\,$Pa.s  |  Viscosity of CO$_{2}$  |
-| $\nu_{\mathrm{drained}}$  |  0.2  |  Drained Poisson's ratio of the reservoir and seals  |
-| $P_{0}$  |  18.3$\,$MPa  |  Initial porepressure  |
-| $r_{\mathrm{bh}}$  |  0.1$\,$m  |  Borehole radius  |
-| $r_{\mathrm{max}}$  |  5$\,$km  |  Radial size of the model  |
-| $\rho_{\mathrm{R\,reservoir}}$  |  2350$\,$kg.m$^{-3}$  |  Density of reservoir rock grains  |
-| $\rho_{\mathrm{R\,seal}}$  |  2773.4$\,$kg.m$^{-3}$  |  Density of seal rock grains  |
-| $\rho_{\mathrm{water}}$  |  970$\,$kg.m$^{-3}$  |  Density of water  |
-| $\rho_{\mathrm{co2}}$  |  516.48$\,$kg.m$^{-3}$  |  Density of CO$_{2}$  |
-| $S_{\mathrm{water\,0}}$  |  1.0  |  Initial water saturation  |
-| $S_{\mathrm{co2}}^{\mathrm{res}}$  |  0.205  |  Residual saturation of CO$_{2}$  |
-| $S_{\mathrm{water}}^{\mathrm{res}}$  |  0.2  |  Residual saturation of water  |
-| $\sigma_{\mathrm{hor}}^{\mathrm{eff\,0}}$  |  -12.8$\,$MPa  |  Initial horizontal effective stress in reservoir and seals  |
-| $\sigma_{\mathrm{ver}}^{\mathrm{eff\,0}}$  |  -51.3$\,$MPa  |  Initial vertical effective stress in reservoir and seals  |
-| $T_{0}$  |  358$\,$K  |  Initial reservoir and seal temperature  |
-| $T_{\mathrm{injection}}$  |  294$\,$K  |  Injection temperature of CO$_{2}$  |
-| $T_{\mathrm{ref}}$  |  358$\,$K  |  Reference temperature for thermal strains and Lauwerier term |
-| $t_{\mathrm{end}}$  |  5$\,$years  |  End-time for the simulation  |
+| Symbol                                    | Value                                 | Physical description                                                                      |
+| ----------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------- |
+| $\alpha_{B}$                              | 1.0                                   | Biot coefficient for reservoir and seals                                                  |
+| $\alpha_{T}$                              | $5\times 10^{-6}\,$K                  | Drained linear thermal expansion coefficient of the reservoir and seals                   |
+| $C_{\mathrm{reservoir}}$                  | 1100$\,$J.kg$^{-1}$.K$^{-1}$          | Specific heat capacity of reservoir rock grains                                           |
+| $C_{\mathrm{seal}}$                       | 828.9$\,$J.kg$^{-1}$.K$^{-1}$         | Specific heat capacity of seal rock grains                                                |
+| $C_{\mathrm{co2}}$                        | 2920.5$\,$J.kg$^{-1}$.K$^{-1}$        | Specific heat capacity of water                                                           |
+| $C_{\mathrm{water}}$                      | 4149$\,$J.kg$^{-1}$.K$^{-1}$          | Specific heat capacity of water                                                           |
+| $\phi_{\mathrm{reservoir}}$               | 0.2                                   | Porosity of reservoir                                                                     |
+| $\phi_{\mathrm{seal}}$                    | 0.02                                  | Porosity of seals                                                                         |
+| $G$                                       | 6$\,$GPa                              | Shear modulus of the reservoir and seals                                                  |
+| $h_{\mathrm{reservoir}}$                  | 11$\,$m                               | Vertical height of the reservoir                                                          |
+| $I$                                       | $5\times 10^{5}\,$Tonne.year$^{-1}$   | Injection rate of CO$_{2}$.                                                               |
+| $K_{\mathrm{drained}}$                    | 8$\,$GPa                              | Drained bulk modulus of the reservoir and seals                                           |
+| $K_{\mathrm{water}}$                      | $2.27\times 10^{5}\,$GPa              | Bulk density of water                                                                     |
+| $K_{\mathrm{co2}}$                        | $2.27\times 10^{5}\,$GPa              | Bulk density of CO$_{2}$                                                                  |
+| $k_{\mathrm{reservoir}}$                  | $2\times 10^{-12}\,$m$^{2}$           | horizontal permeability components of the reservoir (there is zero vertical permeability) |
+| $k_{\mathrm{seal}}$                       | 0                                     | permeability of seal                                                                      |
+| $\lambda_{\mathrm{reservoir}}^{0}$        | 1.32$\,$J.s$^{-1}$.m$^{-1}$.K$^{-1}$  | Vertical thermal conductivity of reservoir at zero water saturation                       |
+| $\lambda_{\mathrm{reservoir}}^{1}$        | 3.083$\,$J.s$^{-1}$.m$^{-1}$.K$^{-1}$ | Vertical thermal conductivity of reservoir at full water saturation                       |
+| $\lambda_{\mathrm{seal}}^{0}$             | 1.6$\,$J.s$^{-1}$.m$^{-1}$.K$^{-1}$   | Vertical thermal conductivity of seal at zero water saturation                            |
+| $\lambda_{\mathrm{seal}}^{1}$             | 4.31$\,$J.s$^{-1}$.m$^{-1}$.K$^{-1}$  | Vertical thermal conductivity of seal at full water saturation                            |
+| $\mu_{\mathrm{water}}$                    | $3.394\times 10^{-4}\,$Pa.s           | Viscosity of water                                                                        |
+| $\mu_{\mathrm{co2}}$                      | $3.93\times 10^{-5}\,$Pa.s            | Viscosity of CO$_{2}$                                                                     |
+| $\nu_{\mathrm{drained}}$                  | 0.2                                   | Drained Poisson's ratio of the reservoir and seals                                        |
+| $P_{0}$                                   | 18.3$\,$MPa                           | Initial porepressure                                                                      |
+| $r_{\mathrm{bh}}$                         | 0.1$\,$m                              | Borehole radius                                                                           |
+| $r_{\mathrm{max}}$                        | 5$\,$km                               | Radial size of the model                                                                  |
+| $\rho_{\mathrm{R\,reservoir}}$            | 2350$\,$kg.m$^{-3}$                   | Density of reservoir rock grains                                                          |
+| $\rho_{\mathrm{R\,seal}}$                 | 2773.4$\,$kg.m$^{-3}$                 | Density of seal rock grains                                                               |
+| $\rho_{\mathrm{water}}$                   | 970$\,$kg.m$^{-3}$                    | Density of water                                                                          |
+| $\rho_{\mathrm{co2}}$                     | 516.48$\,$kg.m$^{-3}$                 | Density of CO$_{2}$                                                                       |
+| $S_{\mathrm{water\,0}}$                   | 1.0                                   | Initial water saturation                                                                  |
+| $S_{\mathrm{co2}}^{\mathrm{res}}$         | 0.205                                 | Residual saturation of CO$_{2}$                                                           |
+| $S_{\mathrm{water}}^{\mathrm{res}}$       | 0.2                                   | Residual saturation of water                                                              |
+| $\sigma_{\mathrm{hor}}^{\mathrm{eff\,0}}$ | -12.8$\,$MPa                          | Initial horizontal effective stress in reservoir and seals                                |
+| $\sigma_{\mathrm{ver}}^{\mathrm{eff\,0}}$ | -51.3$\,$MPa                          | Initial vertical effective stress in reservoir and seals                                  |
+| $T_{0}$                                   | 358$\,$K                              | Initial reservoir and seal temperature                                                    |
+| $T_{\mathrm{injection}}$                  | 294$\,$K                              | Injection temperature of CO$_{2}$                                                         |
+| $T_{\mathrm{ref}}$                        | 358$\,$K                              | Reference temperature for thermal strains and Lauwerier term                              |
+| $t_{\mathrm{end}}$                        | 5$\,$years                            | End-time for the simulation                                                               |
 
 These parameter values may be found through the PorousFlow input file.  For instance:
 
