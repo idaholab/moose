@@ -97,7 +97,7 @@ protected:
   /// First order coefficient matrix
   std::unique_ptr<NumericVector<Number>> _M1;
   std::unique_ptr<NumericVector<Number>> _M1_old;
-  
+
   /// Second order coefficient matrix
   std::unique_ptr<NumericVector<Number>> _M2;
   std::unique_ptr<NumericVector<Number>> _M2_old;

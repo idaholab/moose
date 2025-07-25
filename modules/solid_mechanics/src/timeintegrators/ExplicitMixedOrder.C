@@ -302,7 +302,7 @@ ExplicitMixedOrder::solve()
   {
     _M1_old = _M1->clone();
     _M2_old = _M2->clone();
-    if (_constant_mass && _dt==_dt_old)
+    if (_constant_mass && _dt ==_dt_old)
     {
       _M1 = _M1_old->clone();
       if (_has_damping && !_constant_damping)
@@ -347,13 +347,13 @@ ExplicitMixedOrder::computeInvMatrix_first()
 std::unique_ptr<NumericVector<Number>>
 ExplicitMixedOrder::computeInvMatrix_second()
 {
-  std::unique_ptr<NumericVector<Number>> M2 = NumericVector<Number>::build(_communicator);;
+  std::unique_ptr<NumericVector<Number>> M2 = NumericVector<Number>::build(_communicator);
   _mass_matrix_lumped->create_subvector(*M2, _local_second_order_indices, false);
   if (_has_damping)
   {
     auto C = NumericVector<Number>::build(_communicator);
     _damping_matrix_lumped->create_subvector(*C, _local_second_order_indices, false);
-    C->scale(_dt/2);
+    C->scale(_dt / 2);
     M2->add(*C);
   }
   M2->reciprocal();
@@ -376,6 +376,7 @@ ExplicitMixedOrder::discretize()
   _explicit_residual->create_subvector(*r1, _local_first_order_indices, false);
   // velocity
   auto v1 = vel->get_subvector(_local_first_order_indices);
+  // v1->pointwise_mult(*M1, *r1);
   v1->pointwise_mult(*_M1, *r1);
   // restore the vectors
   vel->restore_subvector(std::move(v1), _local_first_order_indices);
