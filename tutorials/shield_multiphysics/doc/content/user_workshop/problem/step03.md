@@ -78,7 +78,7 @@ We use the 'water_boundary_inwards' surface because the solid block is on its pr
 Summary of the boundary conditions:
 
 !media shield_multiphysics/results/step03_bcs.png
-       alt=Diagram of the domain with the type of each boundary labelled.
+       alt=Diagram of the domain with the type of each boundary labeled.
 
 !---
 

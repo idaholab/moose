@@ -56,4 +56,4 @@ cd problems
 ## Step 9: Results
 
 !media darcy_thermo_mech/step09_result.mp4
-       alt=Time evolution of temperature and VonMises stress from the above simulation.
+       alt=Time evolution of temperature and Von Mises stress from the above simulation.

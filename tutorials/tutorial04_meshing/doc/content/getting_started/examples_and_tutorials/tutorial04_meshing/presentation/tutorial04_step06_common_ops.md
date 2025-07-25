@@ -22,7 +22,7 @@
 
 !media tutorial04_meshing/base_ex_hmt.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
-       alt=Illustration of linse along which a mesh can be trimmed.
+       alt=Illustration of lines along which a mesh can be trimmed.
 
 !col-end!
 
@@ -45,7 +45,7 @@
 
 !media tutorial04_meshing/base_ex_center_trim.png
        style=width:75%;display:block;margin-left:auto;margin-right:auto;
-       alt=A mesh which as undergone through-the-centre trimming.
+       alt=A mesh which has undergone through-the-center trimming.
 
 !col-end!
 

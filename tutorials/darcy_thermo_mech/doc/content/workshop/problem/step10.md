@@ -76,4 +76,4 @@ cd problems
 ## Step 10: Multi-scale Results
 
 !media darcy_thermo_mech/step10_result.mp4
-       alt=The evolution of the macro-scale temperature and the phase of the material at the micro-scale, produced by the multi-scale simulation above.
+       alt=The evolution of the macro-scale temperature and the phase of the material at the micro-scale, produced by the multiscale simulation above.
