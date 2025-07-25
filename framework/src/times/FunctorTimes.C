@@ -14,7 +14,7 @@ registerMooseObject("MooseApp", FunctorTimes);
 InputParameters
 FunctorTimes::validParams()
 {
-  InputParameters params = Times::validParams();
+  InputParameters params = TimesReporter::validParams();
   params += NonADFunctorInterface::validParams();
   params.addClassDescription(
       "Times created by evaluating a functor at the (0,0,0) point and the current time");
@@ -31,7 +31,7 @@ FunctorTimes::validParams()
 }
 
 FunctorTimes::FunctorTimes(const InputParameters & parameters)
-  : Times(parameters),
+  : TimesReporter(parameters),
     NonADFunctorInterface(this),
     _functor(getFunctor<Real>("functor")),
     _factor(getFunctor<Real>("factor"))
