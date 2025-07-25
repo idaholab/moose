@@ -16,13 +16,8 @@ InputParameters
 MFEMProblemSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-<<<<<<< HEAD:framework/src/mfem/executioners/MFEMExecutioner.C
-  params.addClassDescription("Executioner for MFEM problems.");
-  params.addParam<std::string>("device", "Run app on the chosen device.");
-=======
   params.addClassDescription("Solve object for MFEM problems.");
-  params.addParam<std::string>("device", "cpu", "Run app on the chosen device.");
->>>>>>> 813f71bd83 (Rename MFEMExecutioner to MFEMProblemSolve to better reflect new class. Refs #31017):framework/src/mfem/executioners/MFEMProblemSolve.C
+  params.addParam<std::string>("device", "Run app on the chosen device.");
   MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
   params.addParam<MooseEnum>(
       "assembly_level",
@@ -41,7 +36,7 @@ MFEMProblemSolve::MFEMProblemSolve(
   _app.setMFEMDevice(isParamValid("device")    ? getParam<std::string>("device")
                      : _app.isUltimateMaster() ? "cpu"
                                                : "",
-                     Moose::PassKey<MFEMExecutioner>());
+                     Moose::PassKey<MFEMProblemSolve>());
 }
 
 bool
