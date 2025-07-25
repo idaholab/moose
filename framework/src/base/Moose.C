@@ -463,6 +463,13 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_elemental_field_variable", "add_mfem_fespaces");
   addTaskDependency("add_kernel", "add_mfem_fespaces");
 
+  // add complex kernels
+  
+  registerMooseObjectTask("add_mfem_complex_kernels", Kernel, false);
+  registerMooseObjectTask("add_mfem_complex_component_kernels", Kernel, false);
+  addTaskDependency("add_mfem_complex_component_kernels", "add_mfem_fespaces");
+  addTaskDependency("add_mfem_complex_kernels", "add_mfem_complex_component_kernels");
+
   // set mesh FE space
   registerTask("set_mesh_fe_space", true);
   addTaskDependency("set_mesh_fe_space", "add_variable");
@@ -756,6 +763,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 #ifdef MOOSE_MFEM_ENABLED
   registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
   registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
+  registerSyntaxTask("AddMFEMComplexKernelAction", "ComplexKernels/*", "add_mfem_complex_kernels");
+  registerSyntaxTask("AddMFEMComplexComponentKernelAction", "ComplexKernels/*/*", "add_mfem_complex_component_kernels");
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
   registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
 #endif

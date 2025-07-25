@@ -115,6 +115,14 @@ public:
                  InputParameters & parameters) override;
 
   /**
+   * Creates an MFEMGeneralUserObject representing the complex kernel in MOOSE. The underlying 
+   * real and imaginary kernels are created as auxkernel objects.
+   */
+  void addComplexKernel(const std::string & kernel_name,
+                 const std::string & name,
+                 InputParameters & parameters);
+
+  /**
    * Override of ExternalProblem::addAuxKernel. Uses ExternalProblem::addAuxKernel to create a
    * MFEMGeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
    * to be used in the MFEM solve.
