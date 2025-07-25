@@ -42,6 +42,8 @@ MFEMProblemSolve::solve()
   // FixedPointSolve::solve() is libMesh specific, so we need
   // to include all steps therein relevant to the MFEM backend here.
 
+  bool converged = true;
+
   // need to back up multi-apps even when not doing fixed point iteration for recovering from failed
   // multiapp solve
   _mfem_problem.backupMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
@@ -49,12 +51,8 @@ MFEMProblemSolve::solve()
   _mfem_problem.backupMultiApps(EXEC_TIMESTEP_END);
   _mfem_problem.backupMultiApps(EXEC_MULTIAPP_FIXED_POINT_END);
 
-  // Fixed point iteration loop ends right above
-  _mfem_problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
-  _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
-  _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
-  _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
-
+  // Solve step begins
+  _executioner.preSolve();
   _mfem_problem.execTransfers(EXEC_TIMESTEP_BEGIN);
 
   _mfem_problem.execute(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
@@ -83,13 +81,18 @@ MFEMProblemSolve::solve()
   _mfem_problem.execute(EXEC_TIMESTEP_END);
   _mfem_problem.execTransfers(EXEC_TIMESTEP_END);
   _mfem_problem.execMultiApps(EXEC_TIMESTEP_END, true);
+  _executioner.postSolve();
+  // Solve step ends
 
-  // Fixed point iteration loop ends right above
-  _mfem_problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
-  _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
-  _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
-  _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
+  if (converged)
+  {
+    // Fixed point iteration loop ends right above
+    _mfem_problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
+    _mfem_problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
+    _mfem_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
+    _mfem_problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
+  }
 
-  return true;
+  return converged;
 }
 #endif
