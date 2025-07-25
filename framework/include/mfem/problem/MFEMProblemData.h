@@ -18,6 +18,9 @@
 #include <iostream>
 #include <memory>
 
+// forward declaration
+class MFEMRefinementMarker;
+
 /// Base problem data struct.
 struct MFEMProblemData
 {
@@ -41,9 +44,14 @@ public:
   Moose::MFEM::FESpaces fespaces;
   Moose::MFEM::GridFunctions gridfunctions;
 
+  std::shared_ptr<MFEMRefinementMarker> _refiner;
+  bool _use_amr{false};
+
   MPI_Comm comm;
   int myid;
   int num_procs;
+
+  bool _mesh_changed{false};
 };
 
 #endif
