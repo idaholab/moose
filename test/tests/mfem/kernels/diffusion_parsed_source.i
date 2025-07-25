@@ -63,8 +63,6 @@
     type = MFEMParsedFunction
     expression = 'aux_var*sin(10*z)'
     use_xyzt = true
-   # symbol_names = 'c'
-   # symbol_values = 'concentration'
     var_names = 'aux_var'
   []
 []

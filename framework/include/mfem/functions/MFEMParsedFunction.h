@@ -3,9 +3,7 @@
 #include "MFEMProblemData.h"
 #include "MFEMGeneralUserObject.h"
 /**
- * Declares material properties based on names and values prescribed by input parameters.
- *
- * This is identical in function to the GenericConstantMaterial in Moose.
+ * Declares parsed functions based on names and values prescribed by input parameters.
  */
 class MFEMParsedFunction : public MFEMGeneralUserObject, public FunctionParserUtils<false>
 {
@@ -15,14 +13,10 @@ public:
   MFEMParsedFunction(const InputParameters & parameters);
   virtual ~MFEMParsedFunction();
 
-  /**
-   * Creates the parsed function.
-   */
-  virtual void initialSetup() override;
-
 protected:
   /// function expression
   std::string _function;
+  /// function variables
   const std::vector<std::string> & _var_names;
   unsigned int _num_props;
   /// import coordinates and time
@@ -32,5 +26,4 @@ protected:
   MFEMProblemData & _problem_data;
   /// function parser object for the resudual and on-diagonal Jacobian
   SymFunctionPtr _func_F;
-
 };

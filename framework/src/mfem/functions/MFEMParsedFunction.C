@@ -13,7 +13,7 @@ MFEMParsedFunction::validParams()
   InputParameters params = MFEMGeneralUserObject::validParams();
   params += FunctionParserUtils<false>::validParams();
   params.registerBase("Function");
-  params.addClassDescription("Declares constant material properties based on names and values "
+  params.addClassDescription("Parses function expression based on names and values "
                              "prescribed by input parameters.");
   params.addRequiredCustomTypeParam<std::string>(
                               "function", "FunctionExpression", "Parsed function expression to compute");
@@ -78,14 +78,9 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
           _communicator.barrier();
       }
 
-  getMFEMProblem().getCoefficients().declareScalar<MFEMScalarParsedCoeff>(name(), 
-  getMFEMProblem().getProblemData().gridfunctions, _var_names, _use_xyzt, _func_F);
-}
-
-void
-MFEMParsedFunction::initialSetup()
-{
-
+    // declares MFEMScalarParsedCoeff
+    getMFEMProblem().getCoefficients().declareScalar<MFEMScalarParsedCoeff>(name(), 
+    getMFEMProblem().getProblemData().gridfunctions, _var_names, _use_xyzt, _func_F);
 }
 
 MFEMParsedFunction::~MFEMParsedFunction() {}
