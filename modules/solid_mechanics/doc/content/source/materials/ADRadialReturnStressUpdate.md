@@ -110,6 +110,4 @@ We provide the substepping capability in `ADRadialReturnStressUpdate` for nonlin
 
 !listing modules/solid_mechanics/test/tests/substepping/power_law_creep.i block=Materials/power_law_creep
 
-<!-- !syntax children /Materials/RadialReturnStressUpdate -->
-
 !bibtex bibliography

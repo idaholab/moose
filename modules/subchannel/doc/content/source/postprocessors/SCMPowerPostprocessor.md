@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! this comment introduces vertical space
 
 The user needs to specify a subchannel problem. Either a QuadSubChannel1PhaseProblem or a TriSubChannel1PhaseProblem. The postprocessor will calculate the total power of the assembly based on the distribution of the aux variable q_prime, on the fuel pins or the subchannels. It will integrate this variable over the heated section using the trapezoidal rule.
 

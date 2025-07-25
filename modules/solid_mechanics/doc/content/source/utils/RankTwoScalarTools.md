@@ -74,10 +74,12 @@ where $P^c$ is the current sampling position point, and $\hat{n}^r$ is the direc
 
 ## Hoop Stress in Spherical System
 
-<!-- // Given normal vector N=(n1,n2,n3) and current point C(c1,c2,c3), the tangential plane is then
+!!!
+// Given normal vector N=(n1,n2,n3) and current point C(c1,c2,c3), the tangential plane is then
 // defined as n1(x-c1 + n2(y-c2) + n3(z-c3)=0. Let us assume n1!=0, the arbitrary point P on this
 // plane can be taken as P(x,c2+r,c3+r) where r is the radius. The x can be solved as x =
-// -r(n2+n3)/n1 + c1. The tangential vector PC is given as P-C. -->
+// -r(n2+n3)/n1 + c1. The tangential vector PC is given as P-C.
+!!!
 
 `HoopStress` calculates the value of a Rank -2 tensor along the
 tangential direction of a sphere, shown in [eq:hoop_stress_scalar_type_spherical].  The spherical system is defined by the center point $C(c_1,c_2,c_3)$. The radial direction $R(r_1,r_2,r_3)$ at current point $P(p_1,p_2,p_3)$ is calculated as $(P-C)$. The tangential plane at the Point $P$ is given as $r_1(x-p_1) + r_2(y-p_2) + r_3(z-p_3)=0$. Any vector that passes through $P$ on this plane is tangential to the spherical surface. To find a point $Q(q_1,q_2,q_3)$ on the tangential plane, we can freely set the values of two coordinates and the solve for last one using the equation of the plane. For example, we set $q_1=p_1+r$ and $q_2=p_2+r$ where $r$ is the norm of the radial direction vector. Then the $q_3$ is calculated as $q_3 = -(r_1+r_2)r/r_3+p_3$. The tangential vector $\hat{t}$ is defined as $Q-P$.
