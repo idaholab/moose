@@ -53,11 +53,8 @@ MFEMDataCollection::output()
   dc.SetCycle(getFileNumber());
   dc.SetTime(time());
   if (gridFunctionsNeedHostRead())
-    for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions)
-    {
-      libmesh_ignore(gf_name);
+    for (auto & [_, gf_ptr] : _problem_data.gridfunctions)
       gf_ptr->HostRead();
-    }
   dc.Save();
   _file_num++;
 }
