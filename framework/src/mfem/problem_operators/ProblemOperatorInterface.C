@@ -36,23 +36,21 @@ void
 ProblemOperatorInterface::Init(mfem::BlockVector & X)
 {
   X.Update(_block_true_offsets);
-  for (size_t i = 0; i < _test_variables.size(); ++i)
-  {
-    auto * const test_var = _test_variables.at(i);
-    X.GetBlock(i) = test_var->GetTrueVector();
-    // Sync the flags from sub-block vectors to global vector
-    X.SyncFromBlocks();
+  for (const auto i : index_range(_test_variables))
+    X.GetBlock(i) = _test_variables[i]->GetTrueVector();
+  // Sync the flags from sub-block vectors to global vector
+  X.SyncFromBlocks();
 
-    // After initial assignment of X from the grid function, which may contain initial conditions,
-    // we alias the grid function to X
-    test_var->MakeTRef(_test_variables.at(i)->ParFESpace(), X, _block_true_offsets[i]);
-    _test_true_vector = &X;
-    // This might seem silly but after making the tref the memory flags of the grid function and its
-    // true vector are in an empty state other than the aliasing. This operation syncs the flags and
-    // should be a no-op in terms of actual data transfer
-    test_var->GetTrueVector().SyncMemory(*_test_true_vector);
-    test_var->SetFromTrueVector();
-  }
+  // After initial assignment of X from the grid function, which may contain initial conditions,
+  // we alias the grid function to X
+  for (const auto i : index_range(_test_variables))
+    _test_variables[i]->MakeTRef(_test_variables[i]->ParFESpace(), X, _block_true_offsets[i]);
+  _test_true_vector = &X;
+
+  // This might seem silly but after making the tref the memory flags of the grid function and its
+  // true vector are in an empty state other than the aliasing. This operation syncs the flags and
+  // should be a no-op in terms of actual data transfer
+  SetTestVariablesFromTrueVectors();
 }
 
 void
@@ -78,7 +76,6 @@ ProblemOperatorInterface::SetTrialVariablesFromTrueVectors()
     _trial_variables.at(ind)->SetFromTrueVector();
   }
 }
-
 }
 
 #endif
