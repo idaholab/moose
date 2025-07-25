@@ -2,7 +2,7 @@
   "CELLS": {
     "box_cell": {
       "FILL": "square_material",
-      "FILLTYPE": "MATERIAL",
+      "FILLTYPE": "CSG_MATERIAL",
       "REGION":
           "(+surf_plus_x & -surf_minus_x & -surf_plus_y & +surf_minus_y & -surf_plus_z & +surf_minus_z)"
     }

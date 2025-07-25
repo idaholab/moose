@@ -125,7 +125,7 @@ protected:
 
   /// An enum for type of fill for cell region
   // TODO: add support for lattice fill
-  MooseEnum _fill_type{"VOID MATERIAL UNIVERSE"};
+  MooseEnum _fill_type{"VOID CSG_MATERIAL UNIVERSE"};
 
   /// name of the fill object
   std::string _fill_name;

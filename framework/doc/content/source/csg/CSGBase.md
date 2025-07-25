@@ -195,6 +195,13 @@ If creating a void cell, no fill has to be passed to the creation method.
 To create a cell with a material fill, simply provide it with a name of a material as a string.
 For a cell with a `CSGUniverse` fill, pass it a shared pointer to the `CSGUniverse`.
 
+!alert! note title=Materials as Placeholders
+
+A cell with a material fill is *not* connected to a MOOSE material definition at this time.
+The "material" is currently just a string to represent the name of a CSG material or other type of fill that is otherwise undefined.
+
+!alert-end!
+
 The `CSGCell` objects can then be accessed or updated with the following methods from `CSGBase`:
 
 - `getAllCells`: retrieve a list of const references to each `CSGCell` object in the `CSGBase` instance

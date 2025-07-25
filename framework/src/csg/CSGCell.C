@@ -21,7 +21,7 @@ CSGCell::CSGCell(const std::string & name, const CSGRegion & region) : _name(nam
 CSGCell::CSGCell(const std::string & name, const std::string & mat_name, const CSGRegion & region)
   : _name(name), _fill_name(mat_name), _region(region)
 {
-  _fill_type = "MATERIAL";
+  _fill_type = "CSG_MATERIAL";
 }
 
 CSGCell::CSGCell(const std::string & name, const CSGUniverse * univ, const CSGRegion & region)
@@ -42,8 +42,8 @@ CSGCell::getFillUniverse() const
 const std::string &
 CSGCell::getFillMaterial() const
 {
-  if (getFillType() != "MATERIAL")
-    mooseError("Cell '" + getName() + "' has " + getFillType() + " fill, not MATERIAL.");
+  if (getFillType() != "CSG_MATERIAL")
+    mooseError("Cell '" + getName() + "' has " + getFillType() + " fill, not CSG_MATERIAL.");
   else
     return _fill_name;
 }
@@ -57,7 +57,7 @@ CSGCell::operator==(const CSG::CSGCell & other) const
       (this->getFillType() == other.getFillType()) && (this->getFillName() == other.getFillName());
   if (name_eq && region_eq && fill_type_eq)
   {
-    if (this->getFillType() == "MATERIAL")
+    if (this->getFillType() == "CSG_MATERIAL")
       return this->getFillMaterial() == other.getFillMaterial();
     else if (this->getFillType() == "UNIVERSE")
       return this->getFillUniverse() == other.getFillUniverse();
