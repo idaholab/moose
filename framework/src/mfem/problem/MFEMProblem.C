@@ -94,14 +94,28 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
 {
   FEProblemBase::addUserObject(bc_name, name, parameters);
   const UserObject * mfem_bc_uo = &(getUserObjectBase(name));
+
+  std::string action_name = _app.actionWarehouse().getCurrentActionName();
+  std::cout << "Action name = " << action_name << std::endl;
+
   if (dynamic_cast<const MFEMComplexIntegratedBC *>(mfem_bc_uo) != nullptr)
   {
+    std::string r_name = name + "/real_part"; 
+    std::string i_name = name + "/imag_part";
+
     auto object_ptr = getUserObject<MFEMComplexIntegratedBC>(name).getSharedPtr();
     auto bc = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(object_ptr);
     auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
     
     if (eqsys)
     {
+      auto r_ptr = getUserObject<MFEMIntegratedBC>(r_name).getSharedPtr();
+      auto real_bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(r_ptr);
+      auto i_ptr = getUserObject<MFEMIntegratedBC>(i_name).getSharedPtr();
+      auto imag_bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(i_ptr);
+      bc->setRealBC(real_bc);
+      bc->setImagBC(imag_bc);
+      
       eqsys->AddIntegratedBC(std::move(bc));
     }
     else
@@ -144,6 +158,14 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   {
     mooseError("Unsupported bc of type '", bc_name, "' and name '", name, "' detected.");
   }
+}
+
+void
+MFEMProblem::addAuxBoundaryCondition(const std::string & bc_name,
+                                     const std::string & name,
+                                     InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(bc_name, name, parameters);
 }
 
 void
@@ -305,9 +327,6 @@ MFEMProblem::addComplexKernel(const std::string & kernel_name,
 
   std::string r_name = name + "/real_part"; 
   std::string i_name = name + "/imag_part";
-
-  std::cout << "Real part name = " << r_name << std::endl;
-  std::cout << "Imag part name = " << i_name << std::endl;
 
   if (dynamic_cast<const MFEMComplexKernel *>(kernel_uo) != nullptr)
   {

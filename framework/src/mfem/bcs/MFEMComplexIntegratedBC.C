@@ -11,6 +11,8 @@
 
 #include "MFEMComplexIntegratedBC.h"
 
+registerMooseObject("MooseApp", MFEMComplexIntegratedBC);
+
 InputParameters
 MFEMComplexIntegratedBC::validParams()
 {

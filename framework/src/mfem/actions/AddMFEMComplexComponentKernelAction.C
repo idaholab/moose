@@ -13,19 +13,19 @@
 
 registerMooseAction("MooseApp", AddMFEMComplexComponentKernelAction, "add_mfem_complex_component_kernels");
 
-int nthFromLast(std::string str, char ch, int N)
-{
-  int occur = 0;
-  for (int i=str.length()-1; i >= 0 ; --i) 
-  {
-      if (str[i] == ch) {
-          occur += 1;
-      }
-      if (occur == N)
-          return i;
-  }
-  return -1;
-}
+//int nthFromLast(std::string str, char ch, int N)
+//{
+//  int occur = 0;
+//  for (int i=str.length()-1; i >= 0 ; --i) 
+//  {
+//      if (str[i] == ch) {
+//          occur += 1;
+//      }
+//      if (occur == N)
+//          return i;
+//  }
+//  return -1;
+//}
 
 InputParameters
 AddMFEMComplexComponentKernelAction::validParams()
@@ -55,8 +55,6 @@ AddMFEMComplexComponentKernelAction::act()
       "MFEMComplexKernels within it has a real_part and an imag_part sub-block.");
   
   std::string comp_name = action_name.substr(second_last_slash + 1, action_name.length());
-  std::cout << "Component name = " << comp_name << std::endl;
-
 
   MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
   if (mfem_problem)

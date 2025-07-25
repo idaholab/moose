@@ -29,7 +29,6 @@ AddMFEMComplexKernelAction::AddMFEMComplexKernelAction(const InputParameters & p
 void
 AddMFEMComplexKernelAction::act()
 {
-  std::cout << "Complex kernel name = " << _name << std::endl;
   MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
   if (mfem_problem)
     mfem_problem->addComplexKernel(_type, _name, _moose_object_pars);
