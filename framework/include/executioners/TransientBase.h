@@ -26,6 +26,7 @@ class FEProblemBase;
 class TransientBase : public Executioner
 {
 public:
+  static InputParameters defaultSteadyStateConvergenceParams();
   static InputParameters validParams();
 
   TransientBase(const InputParameters & parameters);
@@ -105,9 +106,19 @@ public:
   virtual void setTimeOld(Real t) { _time_old = t; };
 
   /**
-   * Get the Relative L2 norm of the change in the solution.
+   * Compute the relative L2 norm of the change in the solution.
+   *
+   * @param[in] check_aux   Whether to use the aux variables instead of solution variables
+   * @param[in] normalize_by_dt  Whether to divide by time step size
    */
-  Real getSolutionChangeNorm();
+  Real computeSolutionChangeNorm(bool check_aux, bool normalize_by_dt) const;
+
+  /**
+   * The relative L2 norm of the difference between solution and old solution vector.
+   *
+   * @param[in] check_aux   Whether to use the aux variables instead of solution variables
+   */
+  virtual Real relativeSolutionDifferenceNorm(bool check_aux) const = 0;
 
   /**
    * Pointer to the TimeStepper
@@ -211,11 +222,6 @@ public:
   void parentOutputPositionChanged() override;
 
   /**
-   * The relative L2 norm of the difference between solution and old solution vector.
-   */
-  virtual Real relativeSolutionDifferenceNorm() = 0;
-
-  /**
    * Set the number of time steps
    * @param num_steps number of time steps
    */
@@ -224,15 +230,15 @@ public:
   /// Return the solve object wrapped by time stepper
   virtual SolveObject * timeStepSolveObject() { return _fixed_point_solve.get(); }
 
+  /// Determines whether the problem has converged to steady state
+  bool convergedToSteadyState() const;
+
 protected:
   /// Here for backward compatibility
   FEProblemBase & _problem;
 
   /// Reference to auxiliary system base for faster access
   AuxiliarySystem & _aux;
-
-  /// Whether to use the auxiliary system solution to determine steady-states
-  const bool _check_aux;
 
   Moose::TimeIntegratorType _time_scheme;
   TimeStepper * _time_stepper;
@@ -265,9 +271,8 @@ protected:
   /**
    * Steady state detection variables:
    */
-  bool _steady_state_detection;
-  Real _steady_state_tolerance;
-  Real _steady_state_start_time;
+  const bool _steady_state_detection;
+  const Real _steady_state_start_time;
 
   std::set<Real> & _sync_times;
 
@@ -287,17 +292,7 @@ protected:
   Real & _target_time;
   bool _use_multiapp_dt;
 
-  Real & _solution_change_norm;
-
   void setupTimeIntegrator();
-
-  /// Whether to divide the solution difference norm by dt. If taking 'small' time steps this member
-  /// should probably be true. If taking very 'large' timesteps in an attempt to reach a
-  /// steady-state, this member should probably be be false.
-  const bool _normalize_solution_diff_norm_by_dt;
-
-  /// Determines whether the problem has converged to steady state
-  bool convergedToSteadyState() const;
 
 private:
   /// Constrain the timestep dt_cur by looking at the timesteps for the MultiApps on execute_on

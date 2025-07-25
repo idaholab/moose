@@ -123,3 +123,31 @@ The returned type `MooseConvergenceStatus` is one of the following values:
 - `ITERATING`: The system has neither converged nor diverged and thus will
   continue to iterate.
 
+### Convergence Iteration Type
+
+`Convergence` objects may override the method
+
+```
+void checkIterationType(IterationType)
+```
+
+This method is called a single time by the relevant context of the iteration for which convergence is being checked. Its purpose is to perform any checks related to the compatibility of the `Convergence` object and the iteration type. For example, [DefaultNonlinearConvergence.md] may only be used for nonlinear solves, so it overrides the `checkIterationType` method to check it is not being used with other iteration types:
+
+!listing framework/src/convergence/DefaultNonlinearConvergence.C re=void\s+DefaultNonlinearConvergence::checkIterationType.*?^}
+
+The following iteration types are available for all MOOSE-based applications:
+
+- `ConvergenceIterationTypes::NONLINEAR`: Nonlinear solves
+- `ConvergenceIterationTypes::LINEAR`: Linear solves (`solve_type = LINEAR`, not inner linear solves of nonlinear solves)
+- `ConvergenceIterationTypes::MULTIAPP_FIXED_POINT`: MultiApp fixed point solves
+- `ConvergenceIterationTypes::MULTISYSTEM_FIXED_POINT`: Multi-system fixed point solves
+- `ConvergenceIterationTypes::STEADY_STATE`: Steady-state detection in transient simulations
+
+Apps may register additional iteration types by making the following registration call, somewhere within the global namespace, typically within `MyApp.h`, where `MY_TYPE` is the desired new iteration type:
+
+```
+namespace ConvergenceIterationTypes
+{
+  const auto MY_TYPE = registerType("MY_TYPE");
+}
+```

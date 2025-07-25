@@ -17,6 +17,7 @@
 #include "Console.h"
 #include "EigenExecutionerBase.h"
 #include "Convergence.h"
+#include "ConvergenceIterationTypes.h"
 
 InputParameters
 FixedPointSolve::fixedPointDefaultConvergenceParams()
@@ -183,6 +184,18 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
         getParam<ConvergenceName>("multiapp_fixed_point_convergence"));
   else
     _problem.setNeedToAddDefaultMultiAppFixedPointConvergence();
+}
+
+void
+FixedPointSolve::initialSetup()
+{
+  SolveObject::initialSetup();
+
+  if (_has_fixed_point_its)
+  {
+    auto & conv = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
+    conv.checkIterationType(ConvergenceIterationTypes::MULTIAPP_FIXED_POINT);
+  }
 }
 
 bool

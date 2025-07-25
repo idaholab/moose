@@ -61,4 +61,12 @@
     requirement = "The system shall report an error if the user specifies nonlinear convergence parameters that are not used."
     issues = '#24128'
   []
+
+  [diverged_steady_state]
+    type = RunException
+    input = 'diverged_steady_state.i'
+    expect_err = "The steady-state Convergence object \(iteration_conv\) reported divergence"
+    requirement = "The system shall report an error if the steady-state convergence check reports divergence."
+    issues = '#30858'
+  []
 []

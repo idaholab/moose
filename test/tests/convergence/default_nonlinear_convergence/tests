@@ -26,5 +26,11 @@
       expect_err = "The following parameters were set in both this Convergence object and the executioner:\s+nl_abs_tol"
       detail = 'if convergence criteria are additionally specified in the executioner.'
     []
+    [invalid_iteration_type]
+      type = RunException
+      input = 'invalid_iteration_type.i'
+      expect_err = "DefaultNonlinearConvergence can only be used with nonlinear solves"
+      detail = 'if used with an invalid iteration type.'
+    []
   []
 []

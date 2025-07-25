@@ -44,4 +44,7 @@ public:
 protected:
   /// Transient executioner
   TransientBase * _trex;
+
+  /// Whether to use the aux system variables for the norm instead of the solution variables
+  const bool _use_aux;
 };

@@ -12,6 +12,7 @@
 #include "FixedPointSolve.h"
 #include "Console.h"
 #include "SteffensenSolve.h"
+#include "ConvergenceIterationTypes.h"
 
 registerMooseObject("MooseApp", DefaultMultiAppFixedPointConvergence);
 
@@ -68,6 +69,16 @@ DefaultMultiAppFixedPointConvergence::DefaultMultiAppFixedPointConvergence(
       _min_fixed_point_its *= 2;
     _max_fixed_point_its *= 2;
   }
+}
+
+void
+DefaultMultiAppFixedPointConvergence::checkIterationType(IterationType it_type) const
+{
+  DefaultConvergenceBase::checkIterationType(it_type);
+
+  if (it_type != ConvergenceIterationTypes::MULTIAPP_FIXED_POINT)
+    mooseError(
+        "DefaultMultiAppFixedPointConvergence can only be used with MultiApp fixed point solves.");
 }
 
 void
