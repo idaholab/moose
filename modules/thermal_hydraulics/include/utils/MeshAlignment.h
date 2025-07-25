@@ -28,8 +28,10 @@ public:
    * Constructor
    *
    * @param mesh[in] mesh   Mesh
+   * @param[in] require_same_translation. If true, mesh alignment requires the same translation.
+   *   Else it just requires that all primary elements have exactly one pairing.
    */
-  MeshAlignment(const MooseMesh & mesh);
+  MeshAlignment(const MooseMesh & mesh, bool require_same_translation = false);
 
   /**
    * Extracts mesh information and builds the mapping
@@ -134,6 +136,10 @@ protected:
   /// Map of element ID to vector of coupled quadrature points
   std::map<dof_id_type, std::vector<unsigned int>> _coupled_elem_qp_indices;
 
+  /// Flag that alignment requires that pairings have same translation vector
+  const bool _require_same_translation;
   /// Flag that meshes are coincident
   bool _meshes_are_coincident;
+  /// Flag that each pairing has the same translation vector
+  bool _meshes_have_same_translation;
 };
