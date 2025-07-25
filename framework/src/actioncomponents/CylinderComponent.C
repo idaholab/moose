@@ -93,13 +93,44 @@ CylinderComponent::addMeshGenerators()
         "GeneratedMeshGenerator", name() + "_base", params);
     _mg_names.push_back(name() + "_base");
   }
-  else
+  else if (_dimension == 3)
   {
-    paramError("dimension", "3D cylinder is not implemented");
     if (!isParamValid("n_radial"))
       paramError("n_radial", "Should be provided for a 3D cylinder");
     if (!isParamValid("n_azimuthal"))
       paramError("n_azimuthal", "Should be provided in 3D");
+
+    // create circular face
+    InputParameters circle_params = _factory.getValidParams("AnnularMeshGenerator");
+    circle_params.set<unsigned int>("nt") = getParam<unsigned int>("n_azimuthal");
+    circle_params.set<unsigned int>("nr") = getParam<unsigned int>("n_radial");
+    circle_params.set<Real>("r_max") = getParam<Real>("radius");
+    circle_params.set<Real>("r_min") = 0; // for now, just do solid cylinders
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "AnnularMeshGenerator", name() + "_circle_base", circle_params);
+    _mg_names.push_back(name() + "+circle_base");
+
+    // extrude surface
+
+    // create equidistant layers
+    const unsigned int n_azim = getParam<unsigned int>("n_azimuthal");
+    std::vector<Real> heights;
+    std::vector<unsigned int> layers;
+    Real distance_per_height = _height / (Real)n_azim;
+    for (const auto i : make_range(n_azim))
+    {
+      heights.push_back(distance_per_height);
+      layers.push_back(1);
+    }
+
+    InputParameters ext_params = _factory.getValidParams("AdvancedExtruderGenerator");
+    ext_params.set<std::vector<unsigned int>>("num_layers") = layers;
+    ext_params.set<MeshGeneratorName>("input") = (MeshGeneratorName)(name() + "+circle_base");
+    ext_params.set<std::vector<Real>>("heights") = heights;
+    ext_params.set<Point>("direction") = direction();
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "AdvancedExtruderGenerator", name() + "_base", ext_params);
+    _mg_names.push_back(name() + "_base");
   }
 
   ComponentMeshTransformHelper::addMeshGenerators();
