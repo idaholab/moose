@@ -131,6 +131,7 @@
 
     capabilities = 'method!=dbg'
     valgrind = 'NONE'
+    restep = false # Restep isn't compatible with recover tests
 
     requirement = "The GrainTracker object shall properly checkpoint unique grain information in "
                   "serial."
@@ -164,6 +165,7 @@
 
     capabilities = 'method!=dbg'
     valgrind = 'NONE'
+    restep = false # Restep isn't compatible with recover tests
 
     requirement = "The GrainTracker object shall properly checkpoint unique grain information in "
                   "parallel."
@@ -305,6 +307,7 @@
     rel_err = 1e-4
     capabilities = 'method!=dbg' # slow test
     valgrind = 'HEAVY'
+    restep = false # Issue #31054
 
     requirement = "The AverageFeatureVolume Postprocessor shall calculate the average volume of each "
                   "active grain in a simulation."

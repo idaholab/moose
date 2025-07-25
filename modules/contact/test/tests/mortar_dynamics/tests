@@ -112,6 +112,7 @@
               'frictional-mortar-3d-dynamics_out_tangent_y_0001.csv'
     requirement = 'The system shall solve a dynamic 3D frictional bouncing block problem with mortar '
                   'constraint using nodal-attached geometry'
+    restep = false # Issue #31054
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
     capabilities = 'ad_size>=150 & method=opt'
@@ -159,6 +160,7 @@
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
     capabilities = 'ad_size>=64'
+    restep = false # Issue #31054
     requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem '
                   'with mortar constraints using nodal geometry and a friction coefficient '
                   'that depends on the normal contact pressure and the relative tangential velocity'

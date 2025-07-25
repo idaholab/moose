@@ -47,6 +47,9 @@ Executioner::validParams()
   params.addParamNamesToGroup("fixed_point_algorithm", "Fixed point iterations");
   params.addParamNamesToGroup("restart_file_base", "Restart");
 
+  // Whether or not this executioner supports --test-restep capability
+  params.addPrivateParam<bool>("_supports_test_restep", false);
+
   return params;
 }
 
@@ -69,6 +72,9 @@ Executioner::Executioner(const InputParameters & parameters)
 
   if (!_restart_file_base.empty())
     _fe_problem.setRestartFile(_restart_file_base);
+
+  if (!getParam<bool>("_supports_test_restep") && _app.testReStep())
+    mooseInfo("This Executioner does not support --test-restep; solve will behave as normal");
 
   // Instantiate the SolveObject for the MultiApp fixed point iteration algorithm
   if (_iteration_method == "picard")
@@ -99,6 +105,9 @@ Executioner::Executioner(const InputParameters & parameters, bool)
 {
   if (!_restart_file_base.empty())
     _fe_problem.setRestartFile(_restart_file_base);
+
+  if (!getParam<bool>("_supports_test_restep") && _app.testReStep())
+    mooseInfo("This Executioner does not support --test-restep; solve will behave as normal");
 }
 
 Problem &

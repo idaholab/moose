@@ -64,6 +64,7 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('library_mode',  ['ALL'], "A test that only runs when libraries are built under certain configurations ('ALL', 'STATIC', 'DYNAMIC')")
         params.addParam('unique_ids',    ['ALL'], "Deprecated. Use unique_id instead.")
         params.addParam('recover',       True,    "A test that runs with '--recover' mode enabled")
+        params.addParam('restep',        True,    "A test that can run with --test-restep")
         params.addParam('vtk',           ['ALL'], "A test that runs only if VTK is detected ('ALL', 'TRUE', 'FALSE')")
         params.addParam('tecplot',       ['ALL'], "A test that runs only if Tecplot is detected ('ALL', 'TRUE', 'FALSE')")
         params.addParam('dof_id_bytes',  ['ALL'], "A test that runs only if libmesh is configured --with-dof-id-bytes = a specific number, e.g. '4', '8'")
@@ -651,6 +652,8 @@ class Tester(MooseObject, OutputInterface):
         # If we're running in recover mode skip tests that have recover = false
         elif options.enable_recover and self.specs['recover'] == False:
             reasons['recover'] = 'NO RECOVER'
+        elif options.enable_restep and self.specs['restep'] == False:
+            reasons['restep'] = 'NO RESTEP'
 
         # AD size check
         min_ad_size = self.specs['min_ad_size']
