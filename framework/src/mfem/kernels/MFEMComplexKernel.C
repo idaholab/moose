@@ -22,11 +22,13 @@ MFEMComplexKernel::validParams()
   params.registerBase("Kernel");
   params.addParam<VariableName>("variable",
                                 "Variable labelling the weak form this kernel is added to");
-  params.addClassDescription("Holds MFEMKernel objects for the real and imaginary parts of a complex kernel.");
-  //params.addParam<UserObjectName>(
-  //    "real_kernel", "Name of the kernel to use for the real of the composite complex kernel.");
-  //params.addParam<UserObjectName>(
-  //    "imag_kernel", "Name of the kernel to use for the imaginary of the composite complex kernel.");
+  params.addClassDescription(
+      "Holds MFEMKernel objects for the real and imaginary parts of a complex kernel.");
+  // params.addParam<UserObjectName>(
+  //     "real_kernel", "Name of the kernel to use for the real of the composite complex kernel.");
+  // params.addParam<UserObjectName>(
+  //     "imag_kernel", "Name of the kernel to use for the imaginary of the composite complex
+  //     kernel.");
 
   return params;
 }
@@ -34,7 +36,7 @@ MFEMComplexKernel::validParams()
 MFEMComplexKernel::MFEMComplexKernel(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
-   _test_var_name(getParam<VariableName>("variable"))
+    _test_var_name(getParam<VariableName>("variable"))
 {
 }
 
