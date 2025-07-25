@@ -40,7 +40,7 @@ JunctionComponent::validParams()
   params.addParam<MooseEnum>("junction_method", junction_type, "How to join the two components");
 
   // Parameters for changing radius -- final radius will be calculated under the hood
-  MooseEnum radial_growth_methods("LINEAR CUBIC", "LINEAR");
+  MooseEnum radial_growth_methods("LINEAR CUBIC", "CUBIC");
   params.addParam<MooseEnum>("radial_growth_method",
                              radial_growth_methods,
                              "Functional form to change radius while extruding along curve.");
@@ -67,8 +67,6 @@ JunctionComponent::validParams()
   MooseEnum edge_elem_type("EDGE2 EDGE3 EDGE4", "EDGE2");
   params.addParam<MooseEnum>(
       "edge_element_type", edge_elem_type, "Type of the EDGE elements to be generated.");
-  // params.addRequiredRangeCheckedParam<unsigned int>(
-  //     "num_elements", "num_elements>=1", "Numer of elements to be drawn. Must be at least 1.");
 
   // add parameters to an Advanced group for additional controls
   params.addParamNamesToGroup("sharpness num_cps edge_element_type r_final radial_growth_method "
@@ -105,15 +103,9 @@ JunctionComponent::addMeshGenerators()
   const auto first_boundary = getParam<BoundaryName>("first_boundary");
   const auto second_boundary = getParam<BoundaryName>("second_boundary");
 
-  std::cout << "First Component boundary  = " << first_boundary << std::endl;
-  std::cout << "Second Component boundary = " << second_boundary << std::endl;
-
   // Get the dimension of the components
   const auto dimension_first = first_component.dimension();
   const auto dimension_second = second_component.dimension();
-
-  std::cout << "First Component dimension = " << dimension_first << std::endl;
-  std::cout << "Second Component dimension = " << dimension_second << std::endl;
 
   if (dimension_first == 0 || dimension_second == 0)
     mooseError("Connecting 0 dimension meshes not implemented!");
@@ -126,10 +118,14 @@ JunctionComponent::addMeshGenerators()
     {
       // Stitch the two meshes
       InputParameters params = _factory.getValidParams("StitchedMeshGenerator");
-      params.set<std::vector<MeshGeneratorName>>("inputs") =
-          _mg_names; // protected member of ActionComponent
+      params.set<std::vector<MeshGeneratorName>>("inputs") = {first_component.mg_names().back(),
+                                                              second_component.mg_names().back()};
       params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
           {first_boundary, second_boundary}};
+      params.set<bool>("verbose_stitching") = true;
+      _app.getMeshGeneratorSystem().addMeshGenerator(
+          "StitchedMeshGenerator", name() + "_base", params);
+      _mg_names.push_back(name() + "_base");
     }
     else
       mooseError("Stiching meshes of different dimensions is not implemented");
@@ -171,48 +167,76 @@ JunctionComponent::addMeshGenerators()
     _mg_names.push_back(name() + "_curve");
 
     // create lower dimension mesh on the boundary
-    InputParameters ld_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
-    ld_params.set<MeshGeneratorName>("input") = first_component.mg_names().back();
-    ld_params.set<std::vector<BoundaryName>>("sidesets") =
+    InputParameters ld_source_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
+    ld_source_params.set<MeshGeneratorName>("input") = first_component.mg_names().back();
+    ld_source_params.set<std::vector<BoundaryName>>("sidesets") =
         std::vector{getParam<BoundaryName>("first_boundary")};
-    ld_params.set<SubdomainName>("new_block_name") = (SubdomainName)(name() + "_LowerDBlock");
+    ld_source_params.set<SubdomainName>("new_block_name") =
+        (SubdomainName)(name() + "_LowerDBlockSource");
     _app.getMeshGeneratorSystem().addMeshGenerator(
-        "LowerDBlockFromSidesetGenerator", name() + "_lowerDGeneration", ld_params);
-    _mg_names.push_back(name() + "_lowerDGeneration");
+        "LowerDBlockFromSidesetGenerator", name() + "_lowerDGenerationSource", ld_source_params);
+    _mg_names.push_back(name() + "_lowerDGenerationSource");
 
-    InputParameters bmc_params = _factory.getValidParams("BlockToMeshConverterGenerator");
-    bmc_params.set<MeshGeneratorName>("input") = name() + "_lowerDGeneration";
-    bmc_params.set<std::vector<SubdomainName>>("target_blocks") = {
-        (SubdomainName)(name() + "_LowerDBlock")};
+    InputParameters _bmc_source_params = _factory.getValidParams("BlockToMeshConverterGenerator");
+    _bmc_source_params.set<MeshGeneratorName>("input") = name() + "_lowerDGenerationSource";
+    _bmc_source_params.set<std::vector<SubdomainName>>("target_blocks") = {
+        (SubdomainName)(name() + "_LowerDBlockSource")};
     _app.getMeshGeneratorSystem().addMeshGenerator(
-        "BlockToMeshConverterGenerator", name() + "_blockToMesh", bmc_params);
-    _mg_names.push_back(name() + "_blockToMesh");
+        "BlockToMeshConverterGenerator", name() + "_blockToMeshSource", _bmc_source_params);
+    _mg_names.push_back(name() + "_blockToMeshSource");
+
+    // do the same for target boundary
+    InputParameters ld_target_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
+    ld_target_params.set<MeshGeneratorName>("input") = second_component.mg_names().back();
+    ld_target_params.set<std::vector<BoundaryName>>("sidesets") =
+        std::vector{getParam<BoundaryName>("second_boundary")};
+    ld_target_params.set<SubdomainName>("new_block_name") =
+        (SubdomainName)(name() + "_LowerDBlockTarget");
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "LowerDBlockFromSidesetGenerator", name() + "_lowerDGenerationTarget", ld_target_params);
+    _mg_names.push_back(name() + "_lowerDGenerationTarget");
+
+    InputParameters _bmc_target_params = _factory.getValidParams("BlockToMeshConverterGenerator");
+    _bmc_target_params.set<MeshGeneratorName>("input") = name() + "_lowerDGenerationTarget";
+    _bmc_target_params.set<std::vector<SubdomainName>>("target_blocks") = {
+        (SubdomainName)(name() + "_LowerDBlockTarget")};
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "BlockToMeshConverterGenerator", name() + "_blockToMeshTarget", _bmc_target_params);
+    _mg_names.push_back(name() + "_blockToMeshTarget");
 
     // set up AdvancedExtruderGenerator
     InputParameters aeg_params = _factory.getValidParams("AdvancedExtruderGenerator");
     aeg_params.set<MeshGeneratorName>("extrusion_curve") = (MeshGeneratorName)(name() + "_curve");
-    aeg_params.set<MeshGeneratorName>("input") = (MeshGeneratorName)(name() + "_blockToMesh");
+    aeg_params.set<MeshGeneratorName>("input") = (MeshGeneratorName)(name() + "_blockToMeshSource");
+    aeg_params.set<MeshGeneratorName>("target_mesh") =
+        (MeshGeneratorName)(name() + "_blockToMeshTarget");
 
     aeg_params.set<Point>("start_extrusion_direction") = start_direction;
     aeg_params.set<Point>("end_extrusion_direction") = end_direction;
-    if (isParamValid("r_final"))
-    {
-      // this will be conditionally set... hopefully r_final can be automated in the future
-      aeg_params.set<Real>("r_final") = getParam<Real>("r_final");
-      aeg_params.set<Real>("start_radial_growth_rate") = getParam<Real>("start_radial_growth_rate");
-      aeg_params.set<Real>("end_radial_growth_rate") = getParam<Real>("end_radial_growth_rate");
-      aeg_params.set<MooseEnum>("radial_growth_method") =
-          getParam<MooseEnum>("radial_growth_method");
-    }
+
+    aeg_params.set<Real>("start_radial_growth_rate") = getParam<Real>("start_radial_growth_rate");
+    aeg_params.set<Real>("end_radial_growth_rate") = getParam<Real>("end_radial_growth_rate");
+    aeg_params.set<MooseEnum>("radial_growth_method") = getParam<MooseEnum>("radial_growth_method");
+
+    aeg_params.set<BoundaryName>("bottom_boundary") = name() + "_aeg_bottom_boundary";
+    aeg_params.set<BoundaryName>("top_boundary") = name() + "_aeg_top_boundary";
+
     _app.getMeshGeneratorSystem().addMeshGenerator(
-        "AdvancedExtruderGenerator", name() + "_base", aeg_params);
-    _mg_names.push_back(name() + "_base");
+        "AdvancedExtruderGenerator", name() + "_aeg", aeg_params);
+    _mg_names.push_back(name() + "_aeg");
 
     // stitcher for results
     InputParameters stitcher_params = _factory.getValidParams("StitchedMeshGenerator");
-    stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = _mg_names;
+    stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") = std::vector<MeshGeneratorName>{
+        first_component.mg_names().back(), name() + "_aeg", second_component.mg_names().back()};
     stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
-        {first_boundary, second_boundary}};
+        {first_boundary, name() + "_aeg_bottom_boundary"},
+        {name() + "_aeg_top_boundary", second_boundary}};
+    stitcher_params.set<bool>("verbose_stitching") = true;
+    stitcher_params.set<bool>("output") = true;
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "StitchedMeshGenerator", name() + "_stitcher", stitcher_params);
+    _mg_names.push_back(name() + "_stitcher");
   }
   else
     mooseError("junction_method specified is invalid!");
