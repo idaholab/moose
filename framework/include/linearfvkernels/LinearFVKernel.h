@@ -36,6 +36,9 @@ public:
   virtual const MooseLinearVariableFV<Real> & variable() const override { return _var; }
 
 protected:
+  /// Utility routine to request cell gradient computation on a variable
+  void requestVariableCellGradient(const std::string & variable_name);
+
   /// Reference to the linear finite volume variable
   MooseLinearVariableFV<Real> & _var;
 
