@@ -168,6 +168,7 @@ section near the top of the simulation that shows the settings being used for ea
 | "timestep_begin" | executes the output method at the beginning of the timestep |
 | "final"          | calls the output method on the final timestep |
 | "failed"         | executes the output method when the solution fails |
+| "multiapp_fixed_point_iteration_end" | executes the output method at the end of each successful MultiApp fixed point iteration (only if fixed point iterations are enabled) |
 
 As detailed in the [#custom-output] section, there are two types of outputs
 classes: `BasicOutput` and `AdvancedOutput`. Advanced outputs have additional control beyond

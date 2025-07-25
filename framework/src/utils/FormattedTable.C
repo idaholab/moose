@@ -189,7 +189,7 @@ FormattedTable::addRow(Real time)
 }
 
 Real
-FormattedTable::getLastTime()
+FormattedTable::getLastTime() const
 {
   mooseAssert(!empty(), "No Data stored in the FormattedTable");
   return _data.rbegin()->first;
