@@ -23,6 +23,7 @@
 #include "libmesh/sparse_matrix.h"
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <utility>
 
 registerMooseObject("SolidMechanicsApp", ExplicitMixedOrder);
@@ -104,6 +105,10 @@ ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
   if (_nl)
     _fe_problem.solverParams(_nl->number())._type = Moose::ST_LINEAR;
 
+  // _M1 = NumericVector<Number>::build(_communicator);
+  // _M2 = NumericVector<Number>::build(_communicator);
+  // _M1_old = NumericVector<Number>::build(_communicator);
+  // _M2_old = NumericVector<Number>::build(_communicator);
   _ones = addVector("ones", true, PARALLEL);
 
   // don't set any of the common SNES-related petsc options to prevent unused option warnings
@@ -285,6 +290,33 @@ ExplicitMixedOrder::solve()
   *_explicit_residual *= -1.0;
 
   // Perform the linear solve
+  // calculate the coefficient matrices
+  if (_t_step == 1)
+  {
+    _M1_old = computeInvMatrix_first();
+    _M1 = _M1_old->clone();
+    _M2_old = computeInvMatrix_second();
+    _M2 = _M2_old->clone();
+  }
+  else
+  {
+    _M1_old = _M1->clone();
+    _M2_old = _M2->clone();
+    if (_constant_mass && _dt==_dt_old)
+    {
+      _M1 = _M1_old->clone();
+      if (_has_damping && !_constant_damping)
+        _M2 = computeInvMatrix_second();
+      else
+        _M2 = _M2_old->clone();
+    }
+    else
+    {
+      _M1 = computeInvMatrix_first();
+      _M2 = computeInvMatrix_second();
+    }
+  }
+  // perform the time discretization scheme
   discretize();
   const bool converged = solutionUpdate();
 
@@ -303,6 +335,31 @@ ExplicitMixedOrder::solve()
   _nonlinear_implicit_system->nonlinear_solver->converged = converged;
 }
 
+std::unique_ptr<NumericVector<Number>>
+ExplicitMixedOrder::computeInvMatrix_first()
+{
+  std::unique_ptr<NumericVector<Number>> M1 = NumericVector<Number>::build(_communicator);
+  _mass_matrix_lumped->create_subvector(*M1, _local_first_order_indices, false);
+  M1->reciprocal();
+  return M1;
+}
+
+std::unique_ptr<NumericVector<Number>>
+ExplicitMixedOrder::computeInvMatrix_second()
+{
+  std::unique_ptr<NumericVector<Number>> M2 = NumericVector<Number>::build(_communicator);;
+  _mass_matrix_lumped->create_subvector(*M2, _local_second_order_indices, false);
+  if (_has_damping)
+  {
+    auto C = NumericVector<Number>::build(_communicator);
+    _damping_matrix_lumped->create_subvector(*C, _local_second_order_indices, false);
+    C->scale(_dt/2);
+    M2->add(*C);
+  }
+  M2->reciprocal();
+  return M2;
+}
+
 void
 ExplicitMixedOrder::discretize()
 {
@@ -310,23 +367,23 @@ ExplicitMixedOrder::discretize()
   auto vel = _sys.solutionUDot();
 
   // First-order variables
-  // mass matrix
-  auto M1 = NumericVector<Number>::build(_communicator);
-  _mass_matrix_lumped->create_subvector(*M1, _local_first_order_indices, false);
-  M1->reciprocal();
+  // // mass matrix
+  // auto M1 = NumericVector<Number>::build(_communicator);
+  // _mass_matrix_lumped->create_subvector(*M1, _local_first_order_indices, false);
+  // M1->reciprocal();
   // residual vector
   const auto r1 = NumericVector<Number>::build(_communicator);
   _explicit_residual->create_subvector(*r1, _local_first_order_indices, false);
   // velocity
   auto v1 = vel->get_subvector(_local_first_order_indices);
-  v1->pointwise_mult(*M1, *r1);
+  v1->pointwise_mult(*_M1, *r1);
   // restore the vectors
   vel->restore_subvector(std::move(v1), _local_first_order_indices);
 
   // Second-order variables
-  // mass matrix
-  auto M2 = NumericVector<Number>::build(_communicator);
-  _mass_matrix_lumped->create_subvector(*M2, _local_second_order_indices, false);
+  // // mass matrix
+  // auto M2 = NumericVector<Number>::build(_communicator);
+  // _mass_matrix_lumped->create_subvector(*M2, _local_second_order_indices, false);
   // residual vector
   const auto r2 = NumericVector<Number>::build(_communicator);
   _explicit_residual->create_subvector(*r2, _local_second_order_indices, false);
@@ -343,18 +400,19 @@ ExplicitMixedOrder::discretize()
     rc->pointwise_mult(*rc, *v2);
     r2->add(-1.0, *rc);
 
-    auto coef = C->clone();
-    coef->scale(_dt / 2);
-    coef->add(*M2);
-    coef->reciprocal();
-    a->pointwise_mult(*coef, *r2);
+    // auto coef = C->clone();
+    // coef->scale(_dt / 2);
+    // coef->add(*M2);
+    // coef->reciprocal();
+    // a->pointwise_mult(*coef, *r2);
   }
-  else
-  {
-    auto coef = M2->clone();
-    coef->reciprocal();
-    a->pointwise_mult(*coef, *r2);
-  }
+  // else
+  // {
+  //   auto coef = M2->clone();
+  //   coef->reciprocal();
+  //   a->pointwise_mult(*coef, *r2);
+  // }
+  a->pointwise_mult(*_M2, *r2);
   // velocity
   auto delta_v = a->clone();
   delta_v->scale((_dt + _dt_old) / 2);

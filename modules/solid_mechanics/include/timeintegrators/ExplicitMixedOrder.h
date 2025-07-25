@@ -12,6 +12,7 @@
 #include "TimeIntegrator.h"
 #include "MeshChangedInterface.h"
 #include "FEProblemBase.h"
+#include <memory>
 #define UNUSED(x) (void)(x)
 
 // Forward declarations
@@ -68,6 +69,10 @@ protected:
 
   virtual TagID dampingMatrixTagID() const;
 
+  /// calculate the inversed highest order coefficient matrices
+  std::unique_ptr<NumericVector<Number>> computeInvMatrix_first();
+  std::unique_ptr<NumericVector<Number>> computeInvMatrix_second();
+
   /// calculate acceleration and velocity using the central difference method
   virtual void discretize();
 
@@ -88,6 +93,14 @@ protected:
 
   /// Damping matrix name
   const TagName & _damping_matrix;
+
+  /// First order coefficient matrix
+  std::unique_ptr<NumericVector<Number>> _M1;
+  std::unique_ptr<NumericVector<Number>> _M1_old;
+  
+  /// Second order coefficient matrix
+  std::unique_ptr<NumericVector<Number>> _M2;
+  std::unique_ptr<NumericVector<Number>> _M2_old;
 
   /// The older solution
   const NumericVector<Number> & _solution_older;
