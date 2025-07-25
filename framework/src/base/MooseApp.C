@@ -400,6 +400,10 @@ MooseApp::validParams()
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
   params.addPrivateParam<std::unique_ptr<Backup> *>("_initial_backup", nullptr);
   params.addPrivateParam<std::shared_ptr<Parser>>("_parser");
+#ifdef MOOSE_MFEM_ENABLED
+  params.addPrivateParam<std::shared_ptr<mfem::Device>>("_mfem_device");
+  params.addPrivateParam<std::vector<std::string>>("_mfem_devices");
+#endif
 
   params.addParam<bool>(
       "use_legacy_material_output",
@@ -504,6 +508,17 @@ MooseApp::MooseApp(const InputParameters & parameters)
 #ifdef MOOSE_LIBTORCH_ENABLED
     ,
     _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("libtorch_device")))
+#endif
+#ifdef MOOSE_MFEM_ENABLED
+    ,
+    _mfem_device(isParamValid("_mfem_device")
+                     ? getParam<std::shared_ptr<mfem::Device>>("_mfem_device")
+                     : nullptr),
+    _mfem_devices(
+        isParamValid("_mfem_devices")
+            ? std::set<std::string>(getParam<std::vector<std::string>>("_mfem_devices").begin(),
+                                    getParam<std::vector<std::string>>("_mfem_devices").end())
+            : std::set<std::string>{})
 #endif
 {
   if (&parameters != &_pars)
@@ -726,11 +741,22 @@ MooseApp::MooseApp(const InputParameters & parameters)
     std::this_thread::sleep_for(std::chrono::seconds(getParam<unsigned int>("stop_for_debugger")));
   }
 
-  if (_master_mesh && _multiapp_level == 0)
+  if (_master_mesh && isUltimateMaster())
     mooseError("Mesh can be passed in only for sub-apps");
 
   if (_master_displaced_mesh && !_master_mesh)
     mooseError("_master_mesh should have been set when _master_displaced_mesh is set");
+
+#ifdef MOOSE_MFEM_ENABLED
+  if (_mfem_device)
+  {
+    mooseAssert(!isUltimateMaster(),
+                "The MFEM device should only be auto-set for sub-applications");
+    mooseAssert(!_mfem_devices.empty(),
+                "If we are a sub-application and we have an MFEM device object, then we must know "
+                "its configuration string");
+  }
+#endif
 
   // Data specifically associated with the mesh (meta-data) that will read from the restart
   // file early during the simulation setup so that they are available to Actions and other objects
@@ -3539,3 +3565,24 @@ MooseApp::addCapability(const std::string & capability, const char * value, cons
 {
   Moose::Capabilities::getCapabilityRegistry().add(capability, std::string(value), doc);
 }
+
+#ifdef MOOSE_MFEM_ENABLED
+void
+MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMExecutioner>)
+{
+  const auto string_vec = MooseUtils::split(device_string, ",");
+  auto string_set = std::set<std::string>(string_vec.begin(), string_vec.end());
+  if (!_mfem_device)
+  {
+    _mfem_device = std::make_shared<mfem::Device>(device_string);
+    _mfem_devices = std::move(string_set);
+    _mfem_device->Print(Moose::out);
+  }
+  else if (string_set != _mfem_devices)
+    mooseError("Attempted to configure with MFEM devices '",
+               MooseUtils::join(string_set, " "),
+               "', but we have already configured the MFEM device object with the devices '",
+               MooseUtils::join(_mfem_devices, " "),
+               "'");
+}
+#endif

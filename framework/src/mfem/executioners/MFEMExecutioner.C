@@ -32,18 +32,7 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & parameters)
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
     _problem_data(_mfem_problem.getProblemData())
 {
-  setDevice();
-}
-
-void
-MFEMExecutioner::setDevice()
-{
-  // TODO: might not be enough should check the device
-  // your trying to configure is the same one that has been configured
-  if (_device.IsConfigured())
-    return;
-  _device.Configure(getParam<std::string>("device"));
-  _device.Print(Moose::out);
+  _app.setMFEMDevice(getParam<std::string>("device"), Moose::PassKey<MFEMExecutioner>());
 }
 
 #endif
