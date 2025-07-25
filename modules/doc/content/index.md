@@ -2,7 +2,9 @@
 
 # HOME style=visibility:hidden;
 
-!media media/moose_logo.png style=display:block;margin-left:auto;margin-right:auto;width:60%;
+!media media/moose_logo.png
+       style=display:block;margin-left:auto;margin-right:auto;width:60%;
+       alt=MOOSE logo
 
 !style halign=center fontsize=120% color=0.5 0.5 0.5
 Multiphysics Object-Oriented Simulation Environment
@@ -49,7 +51,11 @@ Multiphysics Object-Oriented Simulation Environment
 !row! style=display:inline-flex;
 !col! small=12 medium=4 large=2
 
-!media large_media/organization_logos/INL-Logo_Left-Black.png dark_src=large_media/organization_logos/INL-Logo_Left-White.png link=https://inl.gov style=width:100%;display:block;
+!media large_media/organization_logos/INL-Logo_Left-Black.png
+       dark_src=large_media/organization_logos/INL-Logo_Left-White.png
+       link=https://inl.gov
+       alt=Idaho National Laboratory
+       style=width:100%;display:block;
 
 !col-end!
 
@@ -57,7 +63,11 @@ Multiphysics Object-Oriented Simulation Environment
 
 !style halign=center
 
-!media large_media/organization_logos/Argonne_cmyk_black.png dark_src=large_media/organization_logos/Argonne_cmyk_white.png link=https://www.anl.gov/ style=width:100%;display:block;
+!media large_media/organization_logos/Argonne_cmyk_black.png
+       dark_src=large_media/organization_logos/Argonne_cmyk_white.png
+       link=https://www.anl.gov/
+       alt=Argonne National Laboratory
+       style=width:100%;display:block;
 
 !col-end!
 
@@ -65,7 +75,11 @@ Multiphysics Object-Oriented Simulation Environment
 
 !style halign=center
 
-!media large_media/organization_logos/LosAlamosLab_light.png dark_src=large_media/organization_logos/LosAlamosLab_dark.png link=https://lanl.gov/ style=width:100%;display:block;
+!media large_media/organization_logos/LosAlamosLab_light.png
+       dark_src=large_media/organization_logos/LosAlamosLab_dark.png
+       link=https://lanl.gov/
+       alt=Los Alamos National Laboratory
+       style=width:100%;display:block;
 
 !col-end!
 
@@ -73,7 +87,11 @@ Multiphysics Object-Oriented Simulation Environment
 
 !style halign=center
 
-!media large_media/organization_logos/OLCF_official_black_10_26_15.png dark_src=large_media/organization_logos/OLCF_official_white_10_26_15.png link=https://www.olcf.ornl.gov/ style=width:100%;display:block;
+!media large_media/organization_logos/OLCF_official_black_10_26_15.png
+       dark_src=large_media/organization_logos/OLCF_official_white_10_26_15.png
+       link=https://www.olcf.ornl.gov/
+       alt=Oak Ridge National Laboratory, Leadership Computing Facility
+       style=width:100%;display:block;
 
 !col-end!
 !row-end!

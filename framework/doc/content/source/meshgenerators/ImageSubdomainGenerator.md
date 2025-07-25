@@ -13,11 +13,15 @@ In this example, the parameter `threshold` is used. This sets a color value abov
 
 ### Input Image (kitten.png)
 
-!media media/framework/mesh_modifiers/kitten.png style=width:250px;float:center;margin-left:40px
+!media media/framework/mesh_modifiers/kitten.png 
+       style=width:250px;float:center;margin-left:40px
+       alt=A picture of a pink kitten to be sampled by ImageSubdomainGenerator
 
 ### Mesh Subdomain ID Output
 
-!media media/framework/mesh_modifiers/kitten_out.png style=width:550px;float:center;margin-left:40px
+!media media/framework/mesh_modifiers/kitten_out.png
+       style=width:550px;float:center;margin-left:40px
+       alt=The results of assigning subdomain IDs sampling from the previous image
 
 !syntax parameters /Mesh/ImageSubdomainGenerator
 

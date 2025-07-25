@@ -44,6 +44,7 @@ There are several ways to instigate uniform refinement:
 Each refinement increases the number of elements by a factor of $2^{\texttt{dim}}$
 
 !media results/step8_uniform.png
+       alt=Comparison of the mesh with no refinement and when 2 uniform refinements have been applied.
 
 !---
 
@@ -68,3 +69,4 @@ moose-opt -i step8_adapt.i
 !---
 
 !media results/step8_adapt.mp4
+       alt=Simulation of the evolving temperature field for the reactor shielding, with the mesh undergoing active refinement.

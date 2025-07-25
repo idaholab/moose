@@ -60,3 +60,4 @@ moose-opt -i step5.i
 ## Step 5: Result
 
 !media shield_multiphysics/results/step05.png
+       alt=Temperature field and heat-flux vectors for the reactor shielding, produced by the simulation above.
