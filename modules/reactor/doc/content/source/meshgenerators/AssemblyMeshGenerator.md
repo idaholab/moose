@@ -75,11 +75,15 @@ For applications where an output mesh does not need to be created and meshing ro
 
 This is the resulting mesh block layout, where by default a single block is assigned to the triangular elements and another block is assigned to the quadrilateral elements:
 
-!media reactor/meshgenerators/assembly_mesh_generator.png style=width:40%;
+!media reactor/meshgenerators/assembly_mesh_generator.png
+       style=width:40%;
+       alt=The mesh blocks created by the configuration above.
 
 This is the resulting "region_id" extra element integer layout, which was chosen by setting the region IDs for each of the constituent pins:
 
-!media reactor/meshgenerators/assembly_mesh_generator_rid.png style=width:40%;
+!media reactor/meshgenerators/assembly_mesh_generator_rid.png
+       style=width:40%;
+       alt=The region_id for the mesh created from the configuration above.
 
 !syntax parameters /Mesh/AssemblyMeshGenerator
 

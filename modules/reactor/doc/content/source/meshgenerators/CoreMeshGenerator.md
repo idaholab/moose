@@ -46,10 +46,13 @@ By default, `CoreMeshGenerator` will stitch assemblies created by [`AssemblyMesh
 `CoreMeshGenerator` will throw a warning if it detects that assembly stitching may lead to hanging nodes. If this happens, the user can regenerate the core mesh by setting [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) to `true` to enable flexible assembly stitching. This flexible assembly stitching algorithm deletes the outermost mesh interval and replaces it with a triangulated region using [`FlexiblePatternGenerator`](FlexiblePatternGenerator.md). For a homogeneous assembly, the entire assembly region is triangulated. By doing so, the number of nodes at the outer boundary of each input assembly will be identical and positioned at the same locations, thus enabling stitching of dissimilar assemblies. In order to control the number of sectors at the outer assembly boundary after the triangulation step, the user can set this parameter using [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/num_sectors_at_flexible_boundary). If the core lattice consists of any structures created with [ControlDrumMeshGenerator](ControlDrumMeshGenerator.md), then [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) must be set to `true`. The following three images describe how flexible assembly patterning can be used to address the issue of hanging nodes for the three cases listed above:
 
 !media reactor/meshgenerators/rgmb_flexible_stitching_case1.png style=width:70%;
+      alt=Assemblies with different numbers of pins, stitched together.
 
 !media reactor/meshgenerators/rgmb_flexible_stitching_case2.png style=width:70%;
+       alt=Assemblies with the same number of pins but different number of sectors per side, stitched together.
 
 !media reactor/meshgenerators/rgmb_flexible_stitching_case3.png style=width:70%;
+       alt=A heterogeneous and homogeneous assembly, stitched together.
 
 ## Metadata Information
 
@@ -76,10 +79,14 @@ For applications where an output mesh does not need to be created and meshing ro
 This is the resulting mesh block layout, where by default a single block is assigned to all of the quadrilateral elements in the mesh:
 
 !media reactor/meshgenerators/core_mesh_generator.png style=width:40%;
+       alt=Mesh layout generated above, with all of the quad elements making up a single block.
 
 This is the resulting "region_id" extra element integer layout, which was chosen by setting the region IDs for each of the constituent pins and assemblies:
 
-!media reactor/meshgenerators/core_mesh_generator_rid.png style=width:40%;
+!media reactor/meshgenerators/core_mesh_generator_rid.png
+       style=width:40%;
+       alt=The region IDs for the above mesh, with the region ID set for each constituent pin and assembly.
+ 
 
 ## Periphery Mesh Generation
 
@@ -91,7 +98,9 @@ The `CoreMeshGenerator` includes support for meshing a circular reactor peripher
 
 This is the resulting mesh block layout:
 
-!media reactor/meshgenerators/core_mesh_generator_ptmg.png style=width:40%;
+!media reactor/meshgenerators/core_mesh_generator_ptmg.png
+       style=width:40%;
+       alt=Reactor core mesh with hexagonal assemblies and a circular periphery.
 
 !syntax parameters /Mesh/CoreMeshGenerator
 

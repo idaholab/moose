@@ -218,6 +218,7 @@ python ../../python/visualize_statistics.py main_out.json --bar-plot \
 ```
 
 !media stochastic_tools/parameter_study/stats_bar.png
+       alt=Mean and standard deviation statistics for average temperature and flux.
 
 ## Time Dependent and Vector Quantities
 
@@ -279,6 +280,7 @@ python ../../python/visualize_statistics.py main_time_out.json --line-plot \
 ```
 
 !media stochastic_tools/parameter_study/stats_time_timeline.png
+       alt=The evolution over time of the means and standard deviations for average temperature and heat flux.
 
 ```language=sh
 python ../../python/visualize_statistics.py main_time_out.json --line-plot \
@@ -288,6 +290,7 @@ python ../../python/visualize_statistics.py main_time_out.json --line-plot \
 ```
 
 !media stochastic_tools/parameter_study/stats_time_line.png
+       alt=The mean and standard deviation of the average temperature profile, as a function of the x coordinate, at different times.
 
 ## Time Dependent Quantities with AccumulateReporter
 
@@ -328,6 +331,7 @@ python ../../python/visualize_statistics.py main_vector_out.json --line-plot \
 ```
 
 !media stochastic_tools/parameter_study/mean_vector_line.png
+       alt=The mean flux plotted against the mean average temperature.
 
 ```language=sh
 python ../../python/visualize_statistics.py main_vector_out.json --line-plot \
@@ -337,3 +341,4 @@ python ../../python/visualize_statistics.py main_vector_out.json --line-plot \
 ```
 
 !media stochastic_tools/parameter_study/stddev_vector_line.png
+       alt=The standard deviation of the flux plotted against the standard deviation of the average temperature.

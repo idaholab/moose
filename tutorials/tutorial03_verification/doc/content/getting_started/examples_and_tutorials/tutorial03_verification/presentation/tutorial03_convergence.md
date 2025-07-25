@@ -67,7 +67,9 @@ $L_2$-norm computed at the nodes is adequate.
 
 ## Practice: Spatial Convergence
 
-!media mms_spatial.png style=width:70%;float:right;margin-left:2em;
+!media mms_spatial.png
+       style=width:70%;float:right;margin-left:2em;
+       alt=Plot of L2 error as a function of element size, for first and second order elements.
 
 Error decreases with decreasing element size, first-order elements converge with a slope of two and
 second-order three, when plotted on a log-log scale.
@@ -76,7 +78,9 @@ second-order three, when plotted on a log-log scale.
 
 ## Practice: Temporal Convergence
 
-!media mms_spatial.png style=width:70%;float:right;margin-left:2em;
+!media mms_spatial.png
+       style=width:70%;float:right;margin-left:2em;
+       alt=Plot of the L2 error as a function of time-step size, for first and second order integration methods.
 
 Error decreases with decreasing time step size, with the slope equal to the order of the method when
 plotted on a log-log scale.

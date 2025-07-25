@@ -33,6 +33,7 @@ No problem!
 !col width=50%
 !media images/coupling.png
        style=width:80%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+       alt=Diagram showing the different levels of coupling possible between apps.
 
 !row-end!
 
@@ -73,6 +74,7 @@ One caveat: in order for this to work, both apps need to have Backup/Restore cap
 
 !media images/coupling_02_picard.png
        style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
+       alt=Diagram illustrating the sequence of solves and transfers used for coupling with Picard iteration.
 
 
 !---
@@ -102,6 +104,7 @@ The graphic on the next slide should help...
 
 !media images/coupling_03_subcycling_picard.png
        style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
+       alt=Diagram illustrating the sequence of solves and transfers used for coupling with Picard iteration, when the child-app has a shorter time-step.
 
 !---
 

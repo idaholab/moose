@@ -24,7 +24,9 @@ can partially define Block 2, but the region outside Block 1 also needs to be ex
 
 The final mesh output is:
 
-!media large_media/parsed_subdomain_mesh/parsed_subdomain_mesh.png style=width:75%;float:center
+!media large_media/parsed_subdomain_mesh/parsed_subdomain_mesh.png
+       style=width:75%;display:block;margin:auto
+       alt=A mesh with 3 subdomains, produced from the configurations given above.
 
 !syntax parameters /Mesh/ParsedSubdomainMeshGenerator
 
