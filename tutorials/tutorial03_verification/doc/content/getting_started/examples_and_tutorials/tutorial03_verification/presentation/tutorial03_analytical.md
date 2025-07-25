@@ -146,7 +146,7 @@ along with the average element size.
 
 !media tutorial03_verification/1d_analytical.mp4
        style=width:75%;margin-left:auto;margin-right:auto;display:block;
-       alt=Comparison of the a MOOSE simulation to the analytic solution to the heat equation.
+       alt=Comparison of a MOOSE simulation to the analytic solution to the heat equation.
 
 !---
 

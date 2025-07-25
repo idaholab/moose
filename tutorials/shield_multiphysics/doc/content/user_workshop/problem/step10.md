@@ -53,7 +53,7 @@ on finding issues is too long. We switch to 2D:
 !col! width=50%
 
 !media step10_mesh.png style=width:60%;
-       alt=A 2D version of the mesh, with the blocks/materials labelled.
+       alt=A 2D version of the mesh, with the blocks/materials labeled.
 
 !col-end!
 

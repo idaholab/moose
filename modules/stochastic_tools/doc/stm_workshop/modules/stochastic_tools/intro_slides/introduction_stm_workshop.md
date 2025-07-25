@@ -16,7 +16,7 @@
 
 !col width=50%
 !media batch_viz.png
-       alt=Representation running simulations as a batch.
+       alt=Representation of running simulations as a batch.
 !row-end!
 
 !---
@@ -48,7 +48,7 @@ Train meta-models to build fast-evaluating +surrogates+ of the high-fidelity mul
        alt=Visualization for the development of surrogate models.
 
 !media gp_variants.png style=width:40%
-       alt=Different type of Gaussian process models.
+       alt=Different types of Gaussian process models.
 
 !media active_learning.png
        style=width:75%;display:block;margin-left:auto;margin-right:auto;

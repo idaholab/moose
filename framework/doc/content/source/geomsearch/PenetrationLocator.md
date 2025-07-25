@@ -8,4 +8,5 @@
 - Most user interaction with a PenetrationLocator is likely to be through objects which inherit from `GeometricSearchInterface`.  Users can change the algorithm of PenetrationLocator by setting `search_method=all_proximate_sides` on such objects.
 
 !media media/geomsearch/penetration_diagram.jpg
+       style=display:block;margin:auto;
        alt=An illustration of the distance between the primary side and secondary node. 

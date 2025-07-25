@@ -46,7 +46,7 @@ This tutorial covers the generation of mostly standard geometries, but many reac
 
 !media tutorial04_meshing/adv_ex_2DKRUSTY.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
-       alt=2D mesh for teh core of a KRUSTY heat-pipe cooled microreactor.
+       alt=2D mesh for the core of a KRUSTY heat-pipe cooled microreactor.
 
 !col-end!
 

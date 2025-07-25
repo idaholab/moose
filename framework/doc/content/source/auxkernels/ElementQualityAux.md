@@ -10,7 +10,7 @@ the value of the shape metric.
 
 !media media/framework/auxkernels/element_quality.png
        style=width:60%
-       alt=Example of a range element qualities (evaluated using the SHAPE metric) in a mesh.
+       alt=Example of a range of element qualities (evaluated using the SHAPE metric) in a mesh.
 
 
 The `SHAPE` metric is a good one to use for quads and tris.  You can see the list of all possible metrics below in the documentation for the `metric` parameter.

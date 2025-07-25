@@ -17,7 +17,7 @@ The [BreakMeshByBlockGenerator](BreakMeshByBlockGenerator.md) is utilized to cre
 
 !media media/solid_mechanics/BreakMeshByBlock.png
        style=width:100%;
-       alt=A monolitich mesh is split to allow a displacement jump between elements. Cohesive interfaces are added between blocks.
+       alt=A monolithic mesh is split to allow a displacement jump between elements. Cohesive interfaces are added between blocks.
 
 The `ComputeDisplacementJump` object computes the displacement jump across the cohesive zone according to the selected formulation. The `ComputeLocalTraction` provides the cohesive zone response in the natural interface coordinate system.
 The `ComputeGlobalTraction` object computes the traction in global coordinates and its derivative w.r.t. the displacement jump in global coordinates, $\llbracket u \rrbracket$.

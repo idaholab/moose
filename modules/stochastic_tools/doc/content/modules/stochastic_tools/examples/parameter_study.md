@@ -331,7 +331,7 @@ python ../../python/visualize_statistics.py main_vector_out.json --line-plot \
 ```
 
 !media stochastic_tools/parameter_study/mean_vector_line.png
-       alt=The mean flux plotted against the mean average temperature
+       alt=The mean flux plotted against the mean average temperature.
 
 ```language=sh
 python ../../python/visualize_statistics.py main_vector_out.json --line-plot \

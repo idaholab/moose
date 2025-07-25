@@ -132,7 +132,7 @@
 !col! width=50%
 
 !media subchannel/tutorial/ControlVolume2.png
-       alt=Illustration of control volumes for the lateral an axial momentum equations.
+       alt=Illustration of control volumes for the lateral and axial momentum equations.
 
 !col-end!
 

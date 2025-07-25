@@ -23,7 +23,7 @@
 
 !media tutorial04_meshing/block_vs_reporting_id.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
-       alt=A mesh labelled by block ID and by reporting ID.
+       alt=A mesh labeled by block ID and by reporting ID.
 
 !col-end!
 
@@ -80,7 +80,7 @@
 
 !media tutorial04_meshing/eeid_cart_hex_examples.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
-       alt=Meshes labelled by pin ID and assembly ID.
+       alt=Meshes labeled by pin ID and assembly ID.
 
 !col-end!
 
