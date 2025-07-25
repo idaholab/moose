@@ -14,18 +14,16 @@
 #include "MooseObjectAction.h"
 #include "MFEMProblem.h"
 /**
- * This class allows us to introduce as auxkernels the kernels that will be 
- * the real and imaginary components of MFEMComplexKernels
+ * This class allows us to introduce as auxBCs the integrated BCs that will be 
+ * the real and imaginary components of MFEMComplexIntegratedBCs
  *
- * [ComplexKernels]
- * []
  */
-class AddMFEMComplexComponentKernelAction : public MooseObjectAction
+class AddMFEMComplexBCComponentAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  AddMFEMComplexComponentKernelAction(const InputParameters & parameters);
+  AddMFEMComplexBCComponentAction(const InputParameters & parameters);
 
   virtual void act() override;
 };
