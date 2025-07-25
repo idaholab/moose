@@ -11,31 +11,35 @@
 
 #include "AddMFEMComplexKernelComponentAction.h"
 
-registerMooseAction("MooseApp", AddMFEMComplexKernelComponentAction, "add_mfem_complex_component_kernels");
+registerMooseAction("MooseApp",
+                    AddMFEMComplexKernelComponentAction,
+                    "add_mfem_complex_kernel_components");
 
-//int nthFromLast(std::string str, char ch, int N)
+// int nthFromLast(std::string str, char ch, int N)
 //{
-//  int occur = 0;
-//  for (int i=str.length()-1; i >= 0 ; --i) 
-//  {
-//      if (str[i] == ch) {
-//          occur += 1;
-//      }
-//      if (occur == N)
-//          return i;
-//  }
-//  return -1;
-//}
+//   int occur = 0;
+//   for (int i=str.length()-1; i >= 0 ; --i)
+//   {
+//       if (str[i] == ch) {
+//           occur += 1;
+//       }
+//       if (occur == N)
+//           return i;
+//   }
+//   return -1;
+// }
 
 InputParameters
 AddMFEMComplexKernelComponentAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add an MFEM AuxKernel to serve as the real or imaginary component of an MFEMComplexKernel.");
+  params.addClassDescription(
+      "Add an MFEM AuxKernel to serve as the real or imaginary component of an MFEMComplexKernel.");
   return params;
 }
 
-AddMFEMComplexKernelComponentAction::AddMFEMComplexKernelComponentAction(const InputParameters & parameters)
+AddMFEMComplexKernelComponentAction::AddMFEMComplexKernelComponentAction(
+    const InputParameters & parameters)
   : MooseObjectAction(parameters)
 {
 }
@@ -43,22 +47,30 @@ AddMFEMComplexKernelComponentAction::AddMFEMComplexKernelComponentAction(const I
 void
 AddMFEMComplexKernelComponentAction::act()
 {
-  std::string action_name = _app.actionWarehouse().getCurrentActionName();
-  if (!(_name == "real_part" || _name == "imag_part"))
-    mooseError("The name of the complex component kernel must be either 'real_part' or 'imag_part'. "
-               "Current name is: " + _name + ". ");
-  
-  int second_last_slash = nthFromLast(action_name, '/', 2);
-  if (second_last_slash == -1)
-    mooseError("Could not find the parent MFEMComplexKernel name in the action name: " + action_name + ". "
-      "Please ensure that your script contains a block named ComplexKernels and that each of your "
-      "MFEMComplexKernels within it has a real_part and an imag_part sub-block.");
-  
-  std::string comp_name = action_name.substr(second_last_slash + 1, action_name.length());
+  if (_name == "real_part" || _name == "imag_part")
+  {
+    // Finding the string "parent/real_part" or "parent/imag_part" to associate with the object
+    std::string action_name = _app.actionWarehouse().getCurrentActionName();
+    int second_last_slash = 0;
+    int occur = 0;
+    for (int i = action_name.length() - 1; i >= 0; --i)
+    {
+      if (action_name[i] == '/')
+        occur += 1;
 
-  MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
-  if (mfem_problem)
-    mfem_problem->addAuxKernel(_type, comp_name, _moose_object_pars);
+      if (occur == 2)
+      {
+        second_last_slash = i;
+        break;
+      }
+    }
+
+    std::string comp_name = action_name.substr(second_last_slash + 1, action_name.length());
+    std::cout << "Adding object with name: " << comp_name << std::endl;
+    MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
+    if (mfem_problem)
+      mfem_problem->addAuxKernel(_type, comp_name, _moose_object_pars);
+  }
 }
 
 #endif

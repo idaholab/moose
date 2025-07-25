@@ -133,8 +133,8 @@ ComplexEquationSystem::AddKernel(std::shared_ptr<MFEMComplexKernel> kernel)
   auto test_var_name = kernel->getTestVariableName();
   if (!_cpx_kernels_map.Has(test_var_name))
   {
-    auto kernel_field_map =
-        std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>();
+    auto kernel_field_map = std::make_shared<
+        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>();
     _cpx_kernels_map.Register(test_var_name, std::move(kernel_field_map));
   }
   // Register new kernels map if not present for the test/trial variable
