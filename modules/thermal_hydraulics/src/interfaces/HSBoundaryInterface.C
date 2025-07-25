@@ -17,19 +17,43 @@ HSBoundaryInterface::validParams()
   InputParameters params = emptyInputParameters();
 
   params.addRequiredParam<std::string>("hs", "Heat structure name");
-  params.addRequiredParam<MooseEnum>(
+  params.addParam<MooseEnum>(
       "hs_side", Component2D::getExternalBoundaryTypeMooseEnum(), "Heat structure side");
+  params.addParam<BoundaryName>("hs_boundary", "Name of the coupled heat structure boundary.");
 
   return params;
 }
 
 HSBoundaryInterface::HSBoundaryInterface(Component * component)
-  : _hs_name(component->getParam<std::string>("hs")),
-    _hs_side_enum(component->getParam<MooseEnum>("hs_side")),
-    _hs_side(component->getEnumParam<Component2D::ExternalBoundaryType>("hs_side")),
-    _hs_side_valid(static_cast<int>(_hs_side) >= 0)
+  : _hs_name(component->getParam<std::string>("hs")), _hs_side_valid(false)
 {
   component->addDependency(_hs_name);
+
+  component->checkMutuallyExclusiveParameters({"hs_side", "hs_boundary"});
+}
+
+void
+HSBoundaryInterface::setupMesh(const Component * const component)
+{
+  if (!component->hasComponentByName<HeatStructureBase>(_hs_name))
+    return;
+
+  const HeatStructureBase & hs = component->getComponentByName<HeatStructureBase>(_hs_name);
+
+  if (component->isParamValid("hs_side"))
+  {
+    _hs_side = component->getEnumParam<Component2D::ExternalBoundaryType>("hs_side");
+    _hs_side_valid = static_cast<int>(_hs_side) >= 0;
+    if (_hs_side_valid)
+      _hs_boundary = hs.getExternalBoundaryName(_hs_side);
+  }
+
+  if (component->isParamValid("hs_boundary"))
+  {
+    _hs_boundary = component->getParam<BoundaryName>("hs_boundary");
+    _hs_side = hs.getExternalBoundaryType(_hs_boundary);
+    _hs_side_valid = static_cast<int>(_hs_side) >= 0;
+  }
 }
 
 void
@@ -41,28 +65,36 @@ HSBoundaryInterface::check(const Component * const component) const
   {
     const HeatStructureBase & hs = component->getComponentByName<HeatStructureBase>(_hs_name);
 
-    if (_hs_side_valid)
-    {
-      const Real & P_hs = hs.getUnitPerimeter(_hs_side);
-      if (MooseUtils::absoluteFuzzyEqual(P_hs, 0.))
-        component->logError("'hs_side' parameter is set to '",
-                            _hs_side_enum,
-                            "', but this side of the heat structure '",
-                            _hs_name,
-                            "' has radius of zero.");
+    if (!hs.hasBoundary(_hs_boundary))
+      component->logError("The heat structure boundary '", _hs_boundary, "' does not exist.");
 
-      if (std::isnan(P_hs))
-        component->logError("Invalid side '",
-                            _hs_side_enum,
-                            "'. This side does not have unit perimeter. You probably want to use "
-                            "'INNER' or 'OUTER' side instead.");
-    }
+    if (!_hs_side_valid)
+      return;
+
+    const Real & P_hs = hs.getUnitPerimeter(_hs_side);
+    if (MooseUtils::absoluteFuzzyEqual(P_hs, 0.))
+      component->logError("The specified boundary '",
+                          _hs_boundary,
+                          "' of the heat structure '",
+                          _hs_name,
+                          "' has a radius of zero.");
+    if (std::isnan(P_hs))
+      component->logError("The specified boundary '",
+                          _hs_boundary,
+                          "' of the heat structure '",
+                          _hs_name,
+                          "' is either START and END boundary, which may not be used.");
   }
 }
 
-const BoundaryName &
-HSBoundaryInterface::getHSBoundaryName(const Component * const component) const
+BoundaryName
+HSBoundaryInterface::getHSBoundaryName(const Component * const /*component*/) const
 {
-  const HeatStructureBase & hs = component->getComponentByName<HeatStructureBase>(_hs_name);
-  return hs.getExternalBoundaryName(_hs_side);
+  return _hs_boundary;
+}
+
+Component2D::ExternalBoundaryType
+HSBoundaryInterface::getHSExternalBoundaryType() const
+{
+  return _hs_side;
 }
