@@ -134,8 +134,8 @@
     issues = '#25486'
   []
 
-  [errors]
-    requirement = 'The system shall error'
+  [general_errors]
+    requirement = 'The system shall error.'
     issues = '#22117'
     design = 'AdvancedExtruderGenerator.md'
     [bad_subdomain_swap]
@@ -167,6 +167,47 @@
       expect_err = 'The block \'1234\' was not found within the mesh'
     []
   []
+  [parameter_errors]
+    requirement = 'The system shall error.'
+    issues = '#31112'
+    design = 'AdvancedExtruderGenerator.md'
+    [param_heights]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/heights='1 2 3' --mesh-only"
+      expect_err = 'heights cannot be set if extruding along curve!'
+    []
+    [param_biases]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/biases='1 2 3' --mesh-only"
+      expect_err = 'biases cannot be set if extruding along curve!'
+    []
+    [param_num_layers]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/num_layers='1 2 3' --mesh-only"
+      expect_err = 'num_layers cannot be set if extruding along curve!'
+    []
+    [param_direction]
+      type = RunException
+      input = extrude_along_curve_2D.i
+      cli_args = "Mesh/ext_along_curve/direction='1 2 3' --mesh-only"
+      expect_err = 'direction cannot be set if extruding along curve!'
+    []
+    [param_start_extrusion_direction]
+      type = RunException
+      input = extrude_along_curve_2D_bare.i
+      cli_args = "Mesh/ext_along_curve/end_extrusion_direction='1 2 3' --mesh-only"
+      expect_err = 'If extruding along curve, start_extrusion_direction must be set!'
+    []
+    [param_end_extrusion_direction]
+      type = RunException
+      input = extrude_along_curve_2D_bare.i
+      cli_args = "Mesh/ext_along_curve/start_extrusion_direction='1 2 3' --mesh-only"
+      expect_err = 'If extruding along curve, end_extrusion_direction must be set!'
+    []
+  []
   [named_boundaries]
     type = Exodiff
     input = named_boundaries.i
@@ -176,5 +217,55 @@
     requirement = 'The system shall be able to assign names to the top and bottom boundaries of an extrusion.'
     cli_args = '--mesh-only'
     recover = false
+  []
+  [extrude_along_2D_curve]
+    type = Exodiff
+    input = 'extrude_along_curve_2D.i'
+    exodiff = 'extrude_along_curve_2D_in.e'
+    cli_args = '--mesh-only extrude_along_curve_2D_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve.'
+    design = 'AdvancedExtruderGenerator.md'
+  []
+  [extrude_along_2D_curve_cubic_growth]
+    type = Exodiff
+    input = 'extrude_with_expansion_2D.i'
+    exodiff = 'extrude_with_expansion_2D_curve_cubic_growth_in.e'
+    cli_args = 'Mesh/ext_along_curve/radial_growth_method=CUBIC --mesh-only extrude_with_expansion_2D_curve_cubic_growth_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve with cubic radial expansion.'
+    design = 'AdvancedExtruderGenerator.md'
+  []
+  [extrude_along_2D_curve_cubic_growth_var_drdt]
+    type = Exodiff
+    input = 'extrude_with_expansion_2D.i'
+    exodiff = 'extrude_with_expansion_2D_curve_cubic_growth_var_drd_in.e'
+    cli_args = 'Mesh/ext_along_curve/radial_growth_method=CUBIC Mesh/ext_along_curve/start_radial_growth_rate=1 Mesh/ext_along_curve/end_radial_growth_rate=2 --mesh-only extrude_with_expansion_2D_curve_cubic_growth_var_drd_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve with cubic radial expansion and prescribed radial growth rates at each endpoint.'
+    design = 'AdvancedExtruderGenerator.md'
+  []
+  [extrude_along_2D_curve_linear_growth]
+    type = Exodiff
+    input = 'extrude_with_expansion_2D.i'
+    exodiff = 'extrude_with_expansion_2D_curve_linear_growth_in.e'
+    cli_args = 'Mesh/ext_along_curve/radial_growth_method=LINEAR --mesh-only extrude_with_expansion_2D_curve_linear_growth_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve with linear radial growth rate.'
+    design = 'AdvancedExtruderGenerator.md'
+  []
+  [extrude_along_2D_curve_expand_to_target_mesh]
+    type = Exodiff
+    input = 'extrude_with_expansion_to_target_2D.i'
+    exodiff = 'extrude_with_expansion_to_target_2D_in.e'
+    cli_args = '--mesh-only extrude_with_expansion_to_target_2D_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a 1D mesh into 2D along a curve towards a target mesh and expand as needed.'
+    design = 'AdvancedExtruderGenerator.md'
   []
 []
