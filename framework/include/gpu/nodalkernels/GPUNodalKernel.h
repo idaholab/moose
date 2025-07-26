@@ -145,9 +145,6 @@ template <typename Derived>
 void
 NodalKernel<Derived>::computeResidual()
 {
-  if (!_var.isNodalDefined())
-    return;
-
   ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
       0, _boundary_restricted ? numBoundaryNodes() : numBlockNodes());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
@@ -158,9 +155,6 @@ template <typename Derived>
 void
 NodalKernel<Derived>::computeJacobian()
 {
-  if (!_var.isNodalDefined())
-    return;
-
   if (!_default_diag)
   {
     ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
@@ -189,6 +183,10 @@ NodalKernel<Derived>::operator()(ResidualLoop, const dof_id_type tid) const
 {
   auto kernel = static_cast<const Derived *>(this);
   auto node = _boundary_restricted ? boundaryNodeID(tid) : blockNodeID(tid);
+  auto & sys = kokkosSystem(_kokkos_var.sys());
+
+  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+    return;
 
   Real local_re = kernel->computeQpResidual(node);
 
@@ -201,6 +199,10 @@ NodalKernel<Derived>::operator()(JacobianLoop, const dof_id_type tid) const
 {
   auto kernel = static_cast<const Derived *>(this);
   auto node = _boundary_restricted ? boundaryNodeID(tid) : blockNodeID(tid);
+  auto & sys = kokkosSystem(_kokkos_var.sys());
+
+  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+    return;
 
   Real local_ke = kernel->computeQpJacobian(node);
 
@@ -213,9 +215,11 @@ NodalKernel<Derived>::operator()(OffDiagJacobianLoop, const dof_id_type tid) con
 {
   auto kernel = static_cast<const Derived *>(this);
   auto node = _boundary_restricted ? boundaryNodeID(_thread(tid, 1)) : blockNodeID(_thread(tid, 1));
-
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];
+
+  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+    return;
 
   Real local_ke = kernel->computeQpOffDiagJacobian(jvar, node);
 
