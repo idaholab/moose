@@ -108,9 +108,11 @@ DirichletBCBase<Derived>::operator()(const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
   auto node = boundaryNodeID(tid);
-
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto dof = sys.getNodeLocalDofIndex(node, _kokkos_var.var());
+
+  if (dof == libMesh::DofObject::invalid_id)
+    return;
 
   sys.getVectorDofValue(dof, _solution_tag) = bc->computeValue(node);
 }
