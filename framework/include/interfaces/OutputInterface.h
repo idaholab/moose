@@ -37,8 +37,7 @@ public:
    * Handles 'outputs' parameter for objects that desire control of variable outputs
    * @param parameters The parameters object holding data for the class to use.
    * @param build_list If false the buildOutputHideVariableList must be called explicitly, this
-   * behavior
-   *                   is required for automatic output of material properties
+   * behavior is required for automatic output of material properties
    */
   OutputInterface(const InputParameters & parameters, bool build_list = true);
 

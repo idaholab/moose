@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#30655'
+  design = 'bcs/NeumannBC.md'
+
+  [./test]
+    type = 'Exodiff'
+    input = 'kokkos_1d_neumann.i'
+    exodiff = 'kokkos_1d_neumann_out.e'
+    requirement = 'The Kokkos system shall support Neumann type boundary conditions for a 1D problem.'
+    capabilities = 'kokkos'
+    devices = 'cpu cuda'
+  [../]
+[]

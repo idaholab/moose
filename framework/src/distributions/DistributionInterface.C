@@ -25,6 +25,11 @@ DistributionInterface::DistributionInterface(const MooseObject * moose_object)
     _dni_feproblem(*_dni_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _dni_moose_object_ptr(moose_object)
 {
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
 }
 
 const Distribution &

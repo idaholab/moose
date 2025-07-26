@@ -1,0 +1,58 @@
+[Tests]
+  issues = '#30655'
+  design = 'syntax/Materials/index.md'
+
+  [stateful]
+    requirement = 'The Kokkos material system shall be able to generate current, old, and older states of material properties and '
+    [current]
+      type = Exodiff
+      input = 'kokkos_stateful_prop_test.i'
+      exodiff = 'kokkos_stateful_prop_test_current_out.e'
+      cli_args = 'KokkosKernels/heat/prop_state=\'current\'
+                  Outputs/file_base=kokkos_stateful_prop_test_current_out'
+      detail = 'use current state in other calculations.'
+      capabilities = 'kokkos'
+      devices = 'cpu cuda'
+    []
+    [old]
+      type = Exodiff
+      input = 'kokkos_stateful_prop_test.i'
+      exodiff = 'kokkos_stateful_prop_test_old_out.e'
+      cli_args = 'KokkosKernels/heat/prop_state=\'old\'
+                  Outputs/file_base=kokkos_stateful_prop_test_old_out'
+      detail = 'use old state in other calculations.'
+      capabilities = 'kokkos'
+      devices = 'cpu cuda'
+    []
+    [older]
+      type = Exodiff
+      input = 'kokkos_stateful_prop_test.i'
+      exodiff = 'kokkos_stateful_prop_test_older_out.e'
+      cli_args = 'KokkosKernels/heat/prop_state=\'older\'
+                  Outputs/file_base=kokkos_stateful_prop_test_older_out'
+      detail = 'use older state in other calculations.'
+      capabilities = 'kokkos'
+      devices = 'cpu cuda'
+    []
+  []
+
+  [storage]
+    requirement = 'The Kokkos system shall store stateful properties that vary at every quadrature point '
+    [spatial_test]
+      type = Exodiff
+      input = 'kokkos_stateful_prop_spatial_test.i'
+      exodiff = 'kokkos_stateful_prop_spatial_test_out.e'
+      detail = 'on blocks and boundaries.'
+      capabilities = 'kokkos'
+      devices = 'cpu cuda'
+    []
+    [spatial_bnd_only]
+      type = Exodiff
+      input = 'kokkos_stateful_prop_on_bnd_only.i'
+      exodiff = 'kokkos_stateful_prop_on_bnd_only_out.e'
+      detail = 'only on boundaries.'
+      capabilities = 'kokkos'
+      devices = 'cpu cuda'
+    []
+  []
+[]

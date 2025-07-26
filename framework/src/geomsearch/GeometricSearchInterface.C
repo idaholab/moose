@@ -29,6 +29,11 @@ GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_obj
                                ->geomSearchData()),
     _requires_geometric_search(false)
 {
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isParamValid("_kokkos_object") &&
+      !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
 }
 
 PenetrationLocator &
