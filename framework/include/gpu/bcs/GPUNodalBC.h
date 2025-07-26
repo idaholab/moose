@@ -167,6 +167,10 @@ NodalBC<Derived>::operator()(ResidualLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
   auto node = boundaryNodeID(tid);
+  auto & sys = kokkosSystem(_kokkos_var.sys());
+
+  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+    return;
 
   Real local_re = bc->computeQpResidual(node);
 
@@ -179,6 +183,10 @@ NodalBC<Derived>::operator()(JacobianLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
   auto node = boundaryNodeID(tid);
+  auto & sys = kokkosSystem(_kokkos_var.sys());
+
+  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+    return;
 
   Real local_ke = bc->computeQpJacobian(node);
 
@@ -192,9 +200,11 @@ NodalBC<Derived>::operator()(OffDiagJacobianLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
   auto node = boundaryNodeID(_thread(tid, 1));
-
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];
+
+  if (!sys.isNodalDefined(node, _kokkos_var.var()))
+    return;
 
   Real local_ke = bc->computeQpOffDiagJacobian(jvar, node);
 
