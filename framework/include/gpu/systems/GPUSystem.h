@@ -266,6 +266,16 @@ public:
     return _local_to_global_dof_index[dof];
   }
   /**
+   * Get whether a variable is defined on a node
+   * @param node The node ID
+   * @param var The variable number
+   * @returns Whether the variable is defined on the node
+   */
+  KOKKOS_FUNCTION bool isNodalDefined(dof_id_type node, unsigned int var) const
+  {
+    return _local_node_dof_index[var][node] != libMesh::DofObject::invalid_id;
+  }
+  /**
    * Get a tagged Kokkos vector
    * @param tag The vector tag
    * @returns The Kokkos vector
