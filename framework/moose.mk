@@ -498,6 +498,12 @@ KOKKOS_DEPS    := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $
 
 -include $(KOKKOS_DEPS)
 
+ifeq ($(MOOSE_HEADER_SYMLINKS),true)
+  $(KOKKOS_OBJECTS): $(moose_config_symlink) | moose_header_symlinks
+else
+  $(KOKKOS_OBJECTS): $(moose_config)
+endif
+
 endif
 
 # Pre-make for checking current dependency versions and showing useful warnings

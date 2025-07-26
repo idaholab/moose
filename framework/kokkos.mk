@@ -117,6 +117,6 @@ endif
 
 KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).o
 
-%.$(KOKKOS_OBJ_SUFFIX) : %.K $(KOKKOS_CPP_DEPENDS)
+%.$(KOKKOS_OBJ_SUFFIX) : %.K
 	@echo "Compiling Kokkos C++ (in "$(METHOD)" mode, $(KOKKOS_DEVICE), $(KOKKOS_ARCH)) "$<"..."
 	@$(KOKKOS_CXX) $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) -MMD -MP -MF $@.d -MT $@ -c $< -o $@

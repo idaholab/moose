@@ -372,16 +372,17 @@ ifeq ($(ENABLE_KOKKOS),true)
 app_KOKKOS_SRC_FILES := $(shell find $(SRC_DIRS) -name "*.K")
 app_KOKKOS_LIB       := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)_kokkos-$(METHOD).so
 app_KOKKOS_LDFLAGS   := -L$(APPLICATION_DIR)/lib -l$(APPLICATION_NAME)_kokkos-$(METHOD)
+app_KOKKOS_OBJECTS   := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(app_KOKKOS_SRC_FILES))
 
-KOKKOS_OBJECTS += $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(app_KOKKOS_SRC_FILES))
+KOKKOS_OBJECTS += $(app_KOKKOS_OBJECTS)
 KOKKOS_DEPS    := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(KOKKOS_OBJECTS))
 
 -include $(KOKKOS_DEPS)
 
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
-  $(KOKKOS_OBJECTS): $(app_LINKS) $(moose_config_symlink)
+  $(app_KOKKOS_OBJECTS): $(moose_config_symlink) | $(app_LINKS)
 else
-  $(KOKKOS_OBJECTS): $(moose_config)
+  $(app_KOKKOS_OBJECTS): $(moose_config)
 endif
 
 $(app_KOKKOS_LIB): $(KOKKOS_LINK_DEPENDS) $(KOKKOS_OBJECTS) $(app_LIBS)
