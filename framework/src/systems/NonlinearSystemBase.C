@@ -966,16 +966,20 @@ NonlinearSystemBase::setInitialSolution()
 
       if (node->processor_id() == processor_id())
       {
-        // reinit variables in nodes
-        _fe_problem.reinitNodeFace(node, boundary_id, 0);
+        bool has_preset_nodal_bcs = _preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id);
+        bool has_ad_preset_nodal_bcs = _ad_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id);
 
-        if (_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+        // reinit variables in nodes
+        if (has_preset_nodal_bcs || has_ad_preset_nodal_bcs)
+          _fe_problem.reinitNodeFace(node, boundary_id, 0);
+
+        if (has_preset_nodal_bcs)
         {
           const auto & preset_bcs = _preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
           for (const auto & preset_bc : preset_bcs)
             preset_bc->computeValue(initial_solution);
         }
-        if (_ad_preset_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+        if (has_ad_preset_nodal_bcs)
         {
           const auto & preset_bcs_res = _ad_preset_nodal_bcs.getActiveBoundaryObjects(boundary_id);
           for (const auto & preset_bc : preset_bcs_res)
