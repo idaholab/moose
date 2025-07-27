@@ -455,7 +455,8 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
                                                    const Real relaxation_factor,
                                                    SolverConfiguration & solver_config,
                                                    const Real absolute_tol,
-                                                   const Real field_relaxation)
+                                                   const Real field_relaxation,
+                                                   const Real min_value_limiter)
 {
   _problem.setCurrentLinearSystem(system_num);
 
@@ -510,11 +511,18 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
     _console << " Norm factor " << norm_factor << std::endl;
   }
 
+  // Limiting scalar solution
+  if (min_value_limiter != std::numeric_limits<Real>::min())
+    NS::FV::limitSolutionUpdate(current_local_solution, min_value_limiter);
+
   // Relax the field update for the next momentum predictor
   if (field_relaxation != 1.0)
   {
-    const auto & old_local_solution = *(system.solutionPreviousNewton());
+    auto & old_local_solution = *(system.solutionPreviousNewton());
     NS::FV::relaxSolutionUpdate(current_local_solution, old_local_solution, field_relaxation);
+
+    // Update old solution, only needed if relaxing the field
+    old_local_solution = current_local_solution;
   }
 
   system.setSolution(current_local_solution);
@@ -652,16 +660,8 @@ LinearAssemblySegregatedSolve::solve()
                                 _turbulence_equation_relaxation[i],
                                 _turbulence_linear_control,
                                 _turbulence_l_abs_tol,
-                                _turbulence_field_relaxation[i]);
-
-        // Limiting turbulence solution
-        LinearImplicitSystem & li_system =
-            libMesh::cast_ref<LinearImplicitSystem &>(_turbulence_systems[i]->system());
-        NumericVector<Number> & current_solution = *(li_system.solution);
-        NS::FV::limitSolutionUpdate(current_solution, _turbulence_field_min_limit[i]);
-
-        // Overwrite old solution
-        _turbulence_systems[i]->setSolution(current_solution);
+                                _turbulence_field_relaxation[i],
+                                _turbulence_field_min_limit[i]);
       }
     }
 
