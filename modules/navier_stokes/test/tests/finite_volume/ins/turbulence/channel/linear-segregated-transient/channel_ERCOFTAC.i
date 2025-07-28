@@ -56,6 +56,8 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     stitch_boundaries_pairs = 'bottom top'
     merge_boundaries_with_same_name = true
   []
+  # Prevent test diffing on distributed parallel element numbering
+  allow_renumbering = false
 []
 
 [Problem]

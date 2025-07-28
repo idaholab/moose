@@ -62,6 +62,8 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
     input = corner_walls
     block ='2'
   []
+  # Prevent test diffing on distributed parallel element numbering
+  allow_renumbering = false
 []
 
 [Problem]
