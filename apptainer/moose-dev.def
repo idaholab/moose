@@ -315,7 +315,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     IFS=' ' read -r -a MFEM_OPTIONS <<< "{{ MFEM_OPTIONS }}"
     # Additional options with cuda
     if [ -n "$CUDA_DIR" ]; then
-        MFEM_OPTIONS+=("-DMFEM_USE_CUDA=ON" "-DSuperLUDist_VERSION_OK=YES")
+        MFEM_OPTIONS+=("-DMFEM_USE_CUDA=ON" "-DSuperLUDist_VERSION_OK=YES" "-DCUDA_ARCH=sm_86")
     fi
 
     # Install conduit
