@@ -83,7 +83,7 @@ public:
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
-  const std::vector<std::string> & TrialVarNames() const { return _trial_var_names; }
+  const std::vector<std::string> & TrialVarNames() const { return _coupled_var_names; }
   const std::vector<std::string> & TestVarNames() const { return _test_var_names; }
 
 private:
@@ -102,11 +102,15 @@ protected:
   // Test variables are associated with LinearForms,
   // whereas trial variables are associated with gridfunctions.
 
-  /// Names of all variables corresponding to gridfunctions. This may differ
-  /// from test_var_names when time derivatives are present.
-  std::vector<std::string> _trial_var_names;
-  /// Pointers to trial variables.
-  Moose::MFEM::GridFunctions _trial_variables;
+  /// Names of all trial variables of kernels and boundary conditions
+  /// added to this EquationSystem.
+  std::vector<std::string> _coupled_var_names;
+  /// Subset of _coupled_var_names of all variables corresponding to gridfunctions with degrees of
+  /// freedom that comprise the state vector of this EquationSystem. This will differ from
+  /// _coupled_var_names when time derivatives or other trivially eliminated variables are present.
+  std::vector<std::string> _trial_var_names;  
+  /// Pointers to coupled variables not part of the reduced EquationSystem.
+  Moose::MFEM::GridFunctions _eliminated_variables;
   /// Names of all test variables corresponding to linear forms in this equation system
   std::vector<std::string> _test_var_names;
   /// Pointers to finite element spaces associated with test variables.
