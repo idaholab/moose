@@ -20,6 +20,7 @@
 class THMProblem;
 class THMMesh;
 class ThermalHydraulicsApp;
+class Convergence;
 
 /**
  * Base class for THM components
@@ -274,6 +275,11 @@ public:
    * @return vector of coordinate system types for this component
    */
   virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() const;
+
+  /**
+   * Gets the Component's nonlinear Convergence object if it has one
+   */
+  virtual Convergence * getNonlinearConvergence() const { return nullptr; };
 
 protected:
   /**
