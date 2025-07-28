@@ -28,7 +28,7 @@ public:
     mfem::common::H1_FESpace fe(pm, 1);
     mfem::GridFunction gf(&fe);
     auto pgf = std::make_shared<mfem::ParGridFunction>(pm, &gf);
-    _mfem_problem->getProblemData().gridfunctions.Register("test_variable_name", pgf);
+    _mfem_problem->getProblemData().gridfunctions.real_gfs.Register("test_variable_name", pgf);
   }
 };
 
