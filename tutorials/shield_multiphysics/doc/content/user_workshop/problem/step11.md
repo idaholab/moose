@@ -11,13 +11,16 @@ We want to
 
 !col! width=50%
 
-!media shield_sensor_spread.png style=width:55%;margin-left:auto;margin-right:auto;display:block
+!media shield_sensor_spread.png
+       style=width:55%;margin-left:auto;margin-right:auto;display:block
+       alt=Diagram of the mesh, with sensors embedded in the ordinary concrete and aluminum layers.
 
 !col-end!
 
 !col! width=50%
 
 !media sensor_xs.png
+       alt=The mesh for spherical sensors, with boron and HDPE layers.
 
 !col-end!
 
@@ -35,7 +38,9 @@ Three inputs representing each region/physics:
 2. Thermal fluids: `step11_2d_fluid.i`
 3. Sensor response: `step11_local.i`
 
-!media shield_multiphysics/results/step11_flow.png style=width:55%;margin-left:auto;margin-right:auto;display:block
+!media shield_multiphysics/results/step11_flow.png
+       style=width:55%;margin-left:auto;margin-right:auto;display:block
+       alt=Illustration of the exchange of temperature information between the three components of the simulation.
 
 !---
 
@@ -133,6 +138,7 @@ moose-opt -i step11_2d_heat_conduction.i MultiApps/active='' Transfers/active=''
 
 !media results/step11_local.png
        style=width:40%;margin-left:auto;margin-right:auto;display:block
+       alt=Temperature field of the sensor, when run with decoupled physics
 
 !style halign=center
 Sensor temperature field with dummy fixed boundary conditions
@@ -151,4 +157,6 @@ The individual sensor results can be plotted 'in-position' in the global geometr
 
 Postprocessed quantities can be transferred from the local child app meshes to the global mesh.
 
-!media results/step11_global.png style=width:70%;margin-left:auto;margin-right:auto;display:block
+!media results/step11_global.png
+       style=width:70%;margin-left:auto;margin-right:auto;display:block
+       alt=Temperature of the fluid, solid walls, and sensors. Also plotted are the temperatures of the upper and lower boron liners.

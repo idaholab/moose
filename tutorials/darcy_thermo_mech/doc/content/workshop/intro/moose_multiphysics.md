@@ -107,7 +107,9 @@ VectorPostprocessors\\
 
 ## Finite-Element Reactor Fuel Simulation
 
-!media darcy_thermo_mech/simulator.mp4 style=width:70%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/simulator.mp4
+       style=width:70%;margin-left:auto;margin-right:auto;display:block;
+       alt=Animation illustrating which parts of the MOOSE tech stack implement the various features and how they all come together under the Mammoth reactor simulator.
 
 !---
 
@@ -156,6 +158,8 @@ Reactor\\
 
 ## The MOOSE ecosystem
 
-!media darcy_thermo_mech/moose_herd_2022.png style=margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_herd_2022.png
+       style=margin-left:auto;margin-right:auto;display:block;
+       alt=Graph illustrating the dependencies between the various parts of the MOOSE ecosystem.
 
 Many are open-source on GitHub. Some are accessible through the [NCRC](https://inl.gov/ncrc/)

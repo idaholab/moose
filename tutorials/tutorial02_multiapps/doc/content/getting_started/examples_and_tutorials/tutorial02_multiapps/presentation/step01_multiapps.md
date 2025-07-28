@@ -88,6 +88,7 @@ Each application will march forward in time together, solve, and output
 !col width=50%
 !media multiapps_01_hierarchy.png
        style=width:70%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+       alt=Diagram for a simple multiapp with two apps and no transfers.
 
 !row-end!
 
@@ -132,6 +133,8 @@ Let's modify the sub-app to have a smaller timestep and see what happens
 
 !media multiapps_02_timesteps.png
        style=width:50%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+       alt=Timesteps for a parent app and its child app.
+
 
 
 !---
@@ -189,6 +192,7 @@ There are two options for specifying input files for the positions:
 
 !media multiapps_04_hierarchy.png
        style=width:50%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+       alt=Representation of a more complex case where the child app is a MultiApp with three sub-apps.
 
 !---
 
@@ -220,6 +224,7 @@ To achieve this, the available processors are evenly split among the sub-apps wi
 !col width=50%
 !media multiapps_05_parallelism.png
        style=width:80%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+       alt=Diagram showing the division of processors among parent apps, MultiApps, and sub-apps.
 
 !row-end!
 
@@ -259,6 +264,7 @@ To show how this works, we'll execute `06_parent_twoapps.i` which will run a hie
 
 !media multiapps_06_hierarchy.png
        style=width:60%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+       alt=Diagram showing a case with a solve using two MultiApps, each with their own sub-apps.
 
 !---
 

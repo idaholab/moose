@@ -124,6 +124,7 @@ python ../../python/visualize_sobol.py main_out.json --bar-plot --log-scale --st
 ```
 
 !media stochastic_tools/sobol/sobol_bar.png
+       alt=Bar graph showing the sensitivity of the heat flux and the average temperature to different variables.
 
 ```
 python ../../python/visualize_sobol.py main_out.json --heatmap --log-scale --stat second_order \
@@ -132,3 +133,4 @@ python ../../python/visualize_sobol.py main_out.json --heatmap --log-scale --sta
 ```
 
 !media stochastic_tools/sobol/sobol_heatmap.png
+       alt=Heat map showing the sensitivity of the heat flux and the average temperature to different variables.

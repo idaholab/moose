@@ -25,6 +25,7 @@
 
 !media tutorial04_meshing/hpmr_workflow.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The steps to create a mesh for a heat pipe-cooled micro reactor.
 
 !col-end!
 
@@ -59,6 +60,7 @@
 
 !media tutorial04_meshing/hpmr_pin_cell.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -88,6 +90,7 @@
 
 !media tutorial04_meshing/hpmr_hex_assembly.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -115,6 +118,7 @@
 
 !media tutorial04_meshing/hpmr_fuel_core.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -155,6 +159,7 @@ Setup
 
 !media tutorial04_meshing/hpmr_control_drum_1.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -173,6 +178,7 @@ Setup
 
 !media tutorial04_meshing/hpmr_control_drum_2.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -206,6 +212,7 @@ Setup
 
 !media tutorial04_meshing/hpmr_additional_assemblies.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -239,6 +246,7 @@ Setup
 
 !media tutorial04_meshing/hpmr_core.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -264,6 +272,7 @@ Setup
 
 !media tutorial04_meshing/hpmr_del_dummy.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -296,6 +305,7 @@ Setup
 
 !media tutorial04_meshing/hpmr_periphery.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -329,6 +339,7 @@ Setup
 
 !media tutorial04_meshing/hpmr_slice.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -377,6 +388,7 @@ Setup
 
 !media tutorial04_meshing/hpmr_extrude.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -411,6 +423,7 @@ All blocks in the mesh must be assigned to a material in Griffin.
 
 !media tutorial04_meshing/hpmr_blocks.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -422,6 +435,7 @@ All blocks in the mesh must be assigned to a material in Griffin.
 
 !media tutorial04_meshing/hpmr_sidesets.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Sidesets of the mesh
 
 !---
 
@@ -438,6 +452,7 @@ We briefly touch on mesh generation for the Coarse Mesh Finite Difference accele
 
 !media tutorial04_meshing/hpmr_coarse_mesh_cartesian_stencil_2.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=A coarse mesh covering the same geometry but with coarser refinement.
 
 !col-end!
 
@@ -445,6 +460,7 @@ We briefly touch on mesh generation for the Coarse Mesh Finite Difference accele
 
 !media tutorial04_meshing/hpmr_coarse_mesh_cartesian_stencil_1.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=A regular square grid covering the entire mesh domain.
 
 !col-end!
 

@@ -10,10 +10,13 @@
 
 !row!
 !col width=50%
-!media normal_viz.png style=width:75%;margin-left:auto;margin-right:auto;display:block
+!media normal_viz.png
+       style=width:75%;margin-left:auto;margin-right:auto;display:block
+       alt=Representation of gathering data from a number of separate simulations.
 
 !col width=50%
 !media batch_viz.png
+       alt=Representation of running simulations as a batch.
 !row-end!
 
 !---
@@ -21,11 +24,17 @@
 !style halign=center fontsize=120%
 Perform UQ and sensitivity analysis with +distributed data+ and leveraging +advanced variance reduction+ methods.
 
-!media sobol_total.png style=width:50%;margin-left:auto;margin-right:auto;display:block
+!media sobol_total.png
+       style=width:50%;margin-left:auto;margin-right:auto;display:block
+       alt=Example plot showing sensitivity of a simulation to varying parameters.
 
-!media case1_inference_results.png style=width:50%
+!media case1_inference_results.png
+       style=width:50%
+       alt=Example of statistical inference plots.
 
-!media Parallel_Subset_Simulation_Sampler.svg style=width:35%
+!media Parallel_Subset_Simulation_Sampler.svg
+       style=width:35%
+       alt=Illustration of sampling simulations.
 
 !---
 
@@ -36,10 +45,14 @@ Train meta-models to build fast-evaluating +surrogates+ of the high-fidelity mul
 - Use +active learning+ models for building surrogates.
 
 !media surrogate_viz.png style=width:60%
+       alt=Visualization for the development of surrogate models.
 
 !media gp_variants.png style=width:40%
+       alt=Different types of Gaussian process models.
 
-!media active_learning.png style=width:75%;display:block;margin-left:auto;margin-right:auto;
+!media active_learning.png
+       style=width:75%;display:block;margin-left:auto;margin-right:auto;
+       alt=Process for training machine learning models using MOOSE.
 
 !---
 
@@ -71,6 +84,7 @@ Part 3^*^: Active learning
 # Workflow
 
 !media stm_flow.png
+       alt=Diagram showing the general pattern of execution for stochastic simulations using the MOOSE-STM.
 
 !---
 
