@@ -42,6 +42,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     fi
 
 %post
+    # So that piping things to tee fails
+    set -o pipefail
+
     # Load jinja vars
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     LIBMESH_DIR={{ LIBMESH_DIR }}
