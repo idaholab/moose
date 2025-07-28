@@ -17,7 +17,7 @@ Comment = tokens.newToken('Comment', content='')
 
 class CommentExtension(Extension):
     """
-    Extracts the heading from AST after tokenization.
+    Provides the means to make comments within markdown pages that are not rendered.
     """
     @staticmethod
     def defaultConfig():
@@ -25,20 +25,9 @@ class CommentExtension(Extension):
         return config
 
     def extend(self, reader, renderer):
-        reader.addInline(HTMLCommentBlock(), location='_begin')
         reader.addInline(CommentInline(), location='_begin')
         reader.addBlock(CommentBlock(), location='_begin')
-
-class HTMLCommentBlock(components.ReaderComponent):
-    """
-    HTML style comments (deprecated)
-    """
-    # TODO: Remove this in favor of !!! version
-    RE = re.compile(r'<!--(?P<content>.*?)-->', flags=re.UNICODE|re.MULTILINE|re.DOTALL)
-
-    def createToken(self, parent, info, page, settings):
-        Comment(parent, content=info['content'])
-        return parent
+        reader.addInline(HTMLCommentBlock(), location='_begin')
 
 class CommentInline(components.ReaderComponent):
     """
@@ -62,3 +51,13 @@ class CommentBlock(components.ReaderComponent):
     def createToken(self, parent, info, page, settings):
         Comment(parent, content=info['content'])
         return parent
+
+class HTMLCommentBlock(components.ReaderComponent):
+    """
+    Error check for HTML style comments (removed in July 2025 with idaholab/moose#29581).
+    This should be removed eventually, as developers become used to the change.
+    """
+    RE = re.compile(r'<!--(?P<content>.*?)-->', flags=re.UNICODE|re.MULTILINE|re.DOTALL)
+
+    def createToken(self, parent, info, page, settings):
+        raise RuntimeError("Use of HTML-style comments are not allowed. Please use '!!' for inline and '!!! .... !!!' for block syntax!")

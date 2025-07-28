@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This is a custom, hard-coded IC, that is used only in one specific geometry. This kernel calculates and initializes, the deformation of the duct (`displacement` [AuxVariable](https://mooseframework.inl.gov/syntax/AuxVariables/index.html)) for the [AREVA FCTF](https://www.osti.gov/servlets/purl/1346027/).
 SCM models the effect of the duct deformation, by adapting the geometric parameters of the perimetric subchannels according to a representative per subchannel deformation variable,
