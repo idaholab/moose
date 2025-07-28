@@ -7,25 +7,25 @@
   [lid_driven_turb_std_wall_nonlinear]
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with standard wall functions, '
     [result]
-      type = 'Exodiff'
+      type = 'CSVDiff'
       input = 'lid-driven-turb-std-wall-nonlinear.i'
-      exodiff = 'lid-driven-turb-std-wall-nonlinear_out.e'
+      csvdiff = 'lid-driven-turb-std-wall-nonlinear_out_horizontal_center_0161.csv lid-driven-turb-std-wall-nonlinear_out_side_left_0161.csv  lid-driven-turb-std-wall-nonlinear_out_side_top_0161.csv
+                 lid-driven-turb-std-wall-nonlinear_out_side_bottom_0161.csv       lid-driven-turb-std-wall-nonlinear_out_side_right_0161.csv lid-driven-turb-std-wall-nonlinear_out_vertical_center_0161.csv'
       detail = 'and reach converged results with monolithic nonlinear solvers.'
       abs_zero = 1e-6
       heavy = true
       cli_args = 'Outputs/execute_on=final'
       min_parallel = 4
-      custom_cmp = 'ignore_lambda.cmp'
     []
     [run]
-      type = 'Exodiff'
+      type = 'CSVDiff'
       input = 'lid-driven-turb-std-wall-nonlinear.i'
-      exodiff = 'lid-driven-turb-std-wall-nonlinear_short.e'
+      csvdiff = 'lid-driven-turb-std-wall-nonlinear_short_horizontal_center_0003.csv lid-driven-turb-std-wall-nonlinear_short_side_left_0003.csv  lid-driven-turb-std-wall-nonlinear_short_side_top_0003.csv
+                 lid-driven-turb-std-wall-nonlinear_short_side_bottom_0003.csv       lid-driven-turb-std-wall-nonlinear_short_side_right_0003.csv lid-driven-turb-std-wall-nonlinear_short_vertical_center_0003.csv'
       detail = 'and pass debugging checks with monolithic nonlinear solvers.'
       abs_zero = 1e-6
       cli_args = 'Executioner/num_steps=3 Outputs/file_base=lid-driven-turb-std-wall-nonlinear_short'
       min_parallel = 4
-      custom_cmp = 'ignore_lambda.cmp'
     []
   []
 []
