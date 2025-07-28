@@ -81,7 +81,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     if [ -n "$CUDA_DIR" ]; then
         # Additional options with cuda
-        PETSC_OPTIONS+=("--with-cuda" "--with-cuda-dir=${CUDA_DIR}" "--with-cuda-arch=70" "--download-slate")
+        PETSC_OPTIONS+=("--with-cuda" "--with-cuda-dir=${CUDA_DIR}" "--with-cuda-arch=80" "--download-slate" "--download-hypre-configure-arguments='--enable-gpu-aware-mpi'")
         # Expose the compat libraries that can be linked to during configure for building without a GPU present
         export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}
     fi
