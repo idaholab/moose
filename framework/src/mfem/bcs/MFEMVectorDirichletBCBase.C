@@ -28,11 +28,10 @@ MFEMVectorDirichletBCBase::validParams()
 
 MFEMVectorDirichletBCBase::MFEMVectorDirichletBCBase(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
-    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient"))),
-    _vec_coef_imag(
-        isParamValid("vector_coefficient_imag")
-            ? getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient_imag"))
-            : getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
+    _vec_coef(getVectorCoefficient("vector_coefficient")),
+    _vec_coef_imag(isParamValid("vector_coefficient_imag")
+                       ? getVectorCoefficient("vector_coefficient_imag")
+                       : getVectorCoefficient("vector_coefficient"))
 {
 }
 

@@ -69,7 +69,7 @@ MFEMSteady::init()
           std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(_problem_data.eqn_system))
   {
     // Set up initial conditions for real equation system
-    eqsys->Init(_problem_data.complex_gridfunctions,
+    eqsys->Init(_problem_data.gridfunctions,
                 _problem_data.fespaces,
                 getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
   }

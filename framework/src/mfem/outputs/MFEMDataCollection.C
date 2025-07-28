@@ -34,7 +34,7 @@ void
 MFEMDataCollection::registerFields()
 {
   mfem::DataCollection & dc(getDataCollection());
-  for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions)
+  for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions.real_gfs)
   {
     if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
       dc.RegisterField(gf_name, gf_ptr.get());
