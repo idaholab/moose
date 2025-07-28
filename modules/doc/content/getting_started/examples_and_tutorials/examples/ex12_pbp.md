@@ -1,6 +1,6 @@
 # Example 12 : Physics Based Preconditioning
 
-[](---)
+
 
 ## Complete source Files
 

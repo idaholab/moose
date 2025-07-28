@@ -1,6 +1,6 @@
 # Scope, Memory and Overloading
 
-[](---)
+
 
 ## Scope
 
@@ -13,7 +13,7 @@
 - When a variable goes out of scope, its destructor is called
 - Dynamically-allocated (via new) memory *is not* automatically freed at the end of the scope
 
-[](---)
+
 
 ## "Named" Scopes
 
@@ -37,7 +37,7 @@
   }
   ```
 
-[](---)
+
 
 ## Scope Resolution Operator
 
@@ -66,7 +66,7 @@
   - An assignable location on the left hand side (memory location)
   - An expression on the right hand side
 
-[](---)
+
 
 ## Pointers
 
@@ -80,7 +80,7 @@
 
   - Ex : one object "owns" the memory associated with some data, and allows other objects access through a pointer
 
-[](---)
+
 
 ## Pointer Syntax
 
@@ -116,7 +116,7 @@
   std::cout <<  p << "\n";  // prints an address (0x7fff5fbfe95c)
   ```
 
-[](---)
+
 
 ## Pointers are Powerful but Unsafe
 
@@ -137,7 +137,7 @@
   *p;    // Access memory at &a + 1000
   ```
 
-[](---)
+
 
 ## References to the Rescue
 
@@ -152,7 +152,7 @@ std::cout <<  r << "\n";  // prints 7
 std::cout << &r << "\n";  // prints address of a
 ```
 
-[](---)
+
 
 ## References are Safe
 
@@ -172,7 +172,7 @@ std::cout << &r << "\n";  // prints address of a
 - If so, initialization must occur in the constructor!
 - We will see an example later on...
 
-[](---)
+
 
 ## Summary : Pointers and References
 
@@ -193,7 +193,7 @@ std::cout << &r << "\n";  // prints address of a
   int a = b + iRef;
   ```
 
-[](---)
+
 
 ## Calling Conventions
 
@@ -207,7 +207,7 @@ result = someFunction(a, b,my_shape);
 - Is this call expensive ? (Are arguments copied around ?)
 - C++ by default is "Pass by Value" (copy) but you can pass arguments by reference (alias) with additional syntax
 
-[](---)
+
 
 ## Swap Example (Pass by Value)
 
@@ -226,7 +226,7 @@ std::cout << i << " " << j;   // prints 1 2
 
 ```
 
-[](---)
+
 
 ## Swap Example (Pass by Reference)
 
@@ -245,7 +245,7 @@ std::cout << i << " " << j;   // prints 2 1
 
 ```
 
-[](---)
+
 
 ## Dynamic Memory Allocation
 
@@ -256,7 +256,7 @@ Why do we need dynamic memory allocation?
 - Efficient use of space
 - Flexibility
 
-[](---)
+
 
 ## Dynamic Memory in C++
 
@@ -271,7 +271,7 @@ Why do we need dynamic memory allocation?
 
 - During normal usage, dynamic memory allocation is unnecessary
 
-[](---)
+
 
 ## Example: Dynamic Memory
 
@@ -286,7 +286,7 @@ std::cout << c;  // prints 9
 delete b;
 ```
 
-[](---)
+
 
 ## Example: Dynamic Memory Using References
 
@@ -301,7 +301,7 @@ std::cout << c;  // prints 9
 delete b;
 ```
 
-[](---)
+
 
 ## Const
 
@@ -322,7 +322,7 @@ void print(const std::string & name)
 }
 ```
 
-[](---)
+
 
 ## Function Overloading
 

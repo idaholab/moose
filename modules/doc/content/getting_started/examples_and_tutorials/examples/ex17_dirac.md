@@ -1,6 +1,6 @@
 # Example 17 : Adding a DiracKernel
 
-[](---)
+
 
 ## Complete Source Files
 
@@ -12,7 +12,7 @@
 
 [ExampleApp.C](https://github.com/idaholab/moose/blob/devel/examples/ex17_dirac/src/base/ExampleApp.C)
 
-[](---)
+
 
 ## Outputs
 

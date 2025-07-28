@@ -117,3 +117,4 @@ cd ~/projects/moose/examples/ex14_pps
 !---
 
 !media darcy_thermo_mech/ex14_mms.png
+       alt=L2 error of a simulation, as a function of element size.

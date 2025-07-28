@@ -8,6 +8,7 @@ This example illustrates the use of RGMB mesh generators to define a heterogeneo
 
 !media tutorial04_meshing/rgmb_empire_stepbystep.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       alt=Process for constructing a microreactor core.
 
 +Hands-on package MOOSE input file (Heterogeneous EMPIRE mesh)+: `tutorials/tutorial04_meshing/doc/listings/reactor_examples/rgmb_empire/rgmb_empire.i`
 
@@ -109,6 +110,7 @@ In order to define control drum structures to stitch into the core, we use [Cont
 
 !media tutorial04_meshing/rgmb_empire_mesh.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration.
 
 !col-end!
 

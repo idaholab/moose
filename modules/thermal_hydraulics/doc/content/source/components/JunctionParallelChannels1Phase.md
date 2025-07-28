@@ -48,6 +48,7 @@ area, the geometry of the junction is shown below.
 
 !media thermal_hydraulics/misc/parallel_junction_geometry.png
        style=width:40%;display:block;margin-left:auto;margin-right:auto
+       alt=Diagram for the problem of a junction between a narrow inlet pipe and a wider outlet pipe.
 
 It is assumed that the wall pressure is:
 
