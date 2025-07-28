@@ -26,7 +26,7 @@ public:
 
   virtual void init() override;
 
-  virtual Real relativeSolutionDifferenceNorm() override;
+  virtual Real relativeSolutionDifferenceNorm(bool check_aux) const override;
 
 protected:
   virtual std::set<TimeIntegrator *> getTimeIntegrators() const override;

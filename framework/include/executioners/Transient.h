@@ -24,10 +24,12 @@ public:
 
   Transient(const InputParameters & parameters);
 
+  virtual void init() override;
+
   /**
    * The relative L2 norm of the difference between solution and old solution vector.
    */
-  virtual Real relativeSolutionDifferenceNorm() override;
+  virtual Real relativeSolutionDifferenceNorm(bool check_aux) const override;
 
 protected:
   virtual std::set<TimeIntegrator *> getTimeIntegrators() const override;
