@@ -31,10 +31,7 @@ MFEMDivDivKernel::validParams()
 }
 
 MFEMDivDivKernel::MFEMDivDivKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters),
-    // FIXME: The MFEM bilinear form can also handle vector and matrix
-    // coefficients, so ideally we'd handle all three too.
-    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 

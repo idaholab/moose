@@ -31,7 +31,8 @@ MFEMVectorL2Error::validParams()
 MFEMVectorL2Error::MFEMVectorL2Error(const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
     _vec_coeff(getVectorCoefficient("function")),
-    _var(getMFEMProblem().getProblemData().gridfunctions.GetRef(getParam<VariableName>("variable")))
+    _var(getMFEMProblem().getProblemData().gridfunctions.real_gfs.GetRef(
+        getParam<VariableName>("variable")))
 {
 }
 

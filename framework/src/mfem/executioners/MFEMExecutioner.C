@@ -42,6 +42,7 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & parameters)
                        : _app.isUltimateMaster() ? "cpu"
                                                  : "",
                        Moose::PassKey<MFEMExecutioner>());
+  setNumericType();
 }
 
 void
