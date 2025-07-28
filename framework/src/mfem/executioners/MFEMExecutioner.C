@@ -32,10 +32,14 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & parameters)
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
     _problem_data(_mfem_problem.getProblemData())
 {
-  _app.setMFEMDevice(isParamValid("device")    ? getParam<std::string>("device")
-                     : _app.isUltimateMaster() ? "cpu"
-                                               : "",
-                     Moose::PassKey<MFEMExecutioner>());
+  if (const auto device = queryParam<std::string>("device"))
+    _app.setMFEMDevice(isParamValid("device")    ? getParam<std::string>("device")
+                       : _app.isUltimateMaster() ? "cpu"
+                                                 : "",
+                       Moose::PassKey<MFEMExecutioner>());
+  else
+    _app.setMFEMDevice(_app.getParam<MooseEnum>("libtorch_device"),
+                       Moose::PassKey<MFEMExecutioner>());
 }
 
 #endif
