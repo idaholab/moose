@@ -2,28 +2,14 @@
   design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
   issues = '#29846'
   [channel_ERCOFTAC_linear_transient]
-    requirement = 'The system shall be able to solve transient fluid flow problems with k-epsilon turbulence model for a channel, '
-    [result]
-      type = 'Exodiff'
-      input = 'channel_ERCOFTAC.i'
-      exodiff = 'channel_ERCOFTAC_out.e'
-      detail = 'and reach converged results with segregated solvers,'
-      abs_zero = 5e-6
-      rel_err = 5e-6
-      heavy = true
-      recover = false # we don't support recovery for PIMPLE yet
-      max_threads = 1 # see libmesh issue #3808
-    []
-    [run]
-      type = 'Exodiff'
-      input = 'channel_ERCOFTAC.i'
-      exodiff = 'channel_ERCOFTAC_short.e'
-      detail = 'and pass debugging checks.'
-      abs_zero = 5e-6
-      rel_err = 5e-6
-      cli_args = 'Executioner/dt=1.0 Executioner/num_steps=1 Outputs/file_base=channel_ERCOFTAC_short'
-      recover = false # we don't support recovery for PIMPLE yet
-      max_threads = 1 # see libmesh issue #3808
-    []
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC.i'
+    csvdiff = 'channel_ERCOFTAC_out_line_center_channel_0001.csv channel_ERCOFTAC_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_out_side_bottom_0001.csv channel_ERCOFTAC_out_side_top_0001.csv'
+    abs_zero = 5e-6
+    rel_err = 5e-6
+    capabilities = 'method!=dbg'
+    recover = false # we don't support recovery for PIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    requirement = 'The system shall be able to solve transient fluid flow problems with the linear finite volume discretization and with k-epsilon turbulence model for a channel, and reach converged results with segregated solvers.'
   []
 []
