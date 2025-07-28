@@ -196,7 +196,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     LIBTORCH_DIR={{ LIBTORCH_DIR }}
     if [ -n "$BUILD_PYTORCH" ]; then
         # Clone pytorch for build
-        PYTORCH_VER=2.6.0
+        PYTORCH_VER=2.7.1
         cd ${ROOT_BUILD_DIR}
         git clone --branch v${PYTORCH_VER} --single-branch --recursive https://github.com/pytorch/pytorch
         cd pytorch
