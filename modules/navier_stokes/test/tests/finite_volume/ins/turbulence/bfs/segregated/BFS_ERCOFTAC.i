@@ -21,7 +21,7 @@ advected_interp_method = 'upwind'
 pressure_tag = "pressure_grad"
 
 ### k-epsilon Closure Parameters ###
-sigma_k =1.0
+sigma_k = 1.0
 sigma_eps = 1.3
 C1_eps = 1.44
 C2_eps = 1.92
@@ -107,11 +107,13 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
     type = INSFVEnergyVariable
     solver_sys = TKE_system
     initial_condition = ${k_init}
+    two_term_boundary_expansion = false
   []
   [TKED]
     type = INSFVEnergyVariable
     solver_sys = TKED_system
     initial_condition = ${eps_init}
+    two_term_boundary_expansion = false
   []
 []
 
@@ -370,9 +372,44 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
 []
 
 [Outputs]
-  exodus = true
+  csv = true
   [console]
     type = Console
     outlier_variable_norms = false
+  []
+[]
+
+[VectorPostprocessors]
+  [side_bottom]
+    type = SideValueSampler
+    boundary = 'bottom'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [side_top]
+    type = SideValueSampler
+    boundary = 'top'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [line_entry_channel_wall]
+    type = LineValueSampler
+    start_point = '${fparse 0.5 * H} ${fparse 1.00001 * H} 0'
+    end_point = '${fparse 29.5 * H} ${fparse 1.00001 * H} 0'
+    num_points = 24
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [line_quarter_entry_channel]
+    type = LineValueSampler
+    start_point = '${fparse 0.5 * H} ${fparse 2.25001 * H} 0'
+    end_point = '${fparse 29.5 * H} ${fparse 2.25001 * H} 0'
+    num_points = 24
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
   []
 []
