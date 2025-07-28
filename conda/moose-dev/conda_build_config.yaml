@@ -3,11 +3,11 @@ mpi:
   - openmpi
 
 moose_libmesh:
-  - moose-libmesh 2025.06.25 mpich_1
-  - moose-libmesh 2025.06.25 openmpi_1
+  - moose-libmesh 2025.08.06 mpich_0
+  - moose-libmesh 2025.08.06 openmpi_0
 
 moose_wasp:
-  - moose-wasp 2025.05.13
+  - moose-wasp 2025.07.07
 
 moose_tools:
   - moose-tools 2025.06.26
