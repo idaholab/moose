@@ -60,11 +60,14 @@ ComponentMeshTransformHelper::addMeshGenerators()
     else
     {
       const auto rotation_matrix =
-          RotationMatrix::rotVec1ToVec2<false>(RealVectorValue(1, 0, 0), *_direction);
+          RotationMatrix::rotVec1ToVec2<false>(RealVectorValue(1, 0, 0), -*_direction);
       RealVectorValue angles;
-      angles(0) = std::atan2(rotation_matrix(1, 0), rotation_matrix(0, 0));
-      angles(1) = std::asin(-rotation_matrix(2, 0));
-      angles(2) = std::atan2(rotation_matrix(2, 1), rotation_matrix(2, 2));
+      // angles(0) = std::atan2(rotation_matrix(1, 0), rotation_matrix(0, 0));
+      // angles(1) = std::asin(-rotation_matrix(2, 0));
+      // angles(2) = std::atan2(rotation_matrix(2, 1), rotation_matrix(2, 2));
+      angles(1) = std::asin(-rotation_matrix(0, 2));
+      angles(0) = std::asin(rotation_matrix(0, 1) / std::cos(angles(1)));
+      angles(2) = std::acos(rotation_matrix(2, 2) / std::cos(angles(1)));
       params.set<RealVectorValue>("vector_value") = angles / M_PI_2 * 90;
     }
     _app.getMeshGeneratorSystem().addMeshGenerator(
