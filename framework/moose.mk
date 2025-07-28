@@ -487,20 +487,29 @@ wasp_submodule_status:
 
 # Kokkos for MOOSE
 
+app_KOKKOS_LIBS :=
+
 ifeq ($(ENABLE_KOKKOS),true)
 
 MOOSE_KOKKOS_SRC_FILES := $(shell find $(FRAMEWORK_DIR) -name "*.K")
+MOOSE_KOKKOS_OBJECTS   := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(MOOSE_KOKKOS_SRC_FILES))
+MOOSE_KOKKOS_DEPS      := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(MOOSE_KOKKOS_OBJECTS))
+MOOSE_KOKKOS_LIB       := $(FRAMEWORK_DIR)/libmoose_kokkos-$(METHOD).so
 
-KOKKOS_OBJECTS := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(MOOSE_KOKKOS_SRC_FILES))
-KOKKOS_DEPS    := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(KOKKOS_OBJECTS))
+KOKKOS_OBJECTS := $(MOOSE_KOKKOS_OBJECTS)
+KOKKOS_DEPS    := $(MOOSE_KOKKOS_DEPS)
 
--include $(KOKKOS_DEPS)
+-include $(MOOSE_KOKKOS_DEPS)
 
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
   $(KOKKOS_OBJECTS): $(moose_config_symlink) | moose_header_symlinks
 else
   $(KOKKOS_OBJECTS): $(moose_config)
 endif
+
+$(MOOSE_KOKKOS_LIB): $(MOOSE_KOKKOS_OBJECTS)
+	@echo "Linking Kokkos Library "$@"..."
+	@$(KOKKOS_CXX) --shared -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
 
 endif
 
@@ -701,6 +710,9 @@ app_EXEC := $(exodiff_APP)
 app_LIB  := $(moose_LIBS) $(gtest_LIB) $(pyhit_LIB)
 app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects) $(hit_objects)
 app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
+app_KOKKOS_OBJECTS := $(MOOSE_KOKKOS_OBJECTS)
+app_KOKKOS_DEPS := $(MOOSE_KOKKOS_DEPS)
+app_KOKKOS_LIB := $(MOOSE_KOKKOS_LIB)
 
 # The clean target removes everything we can remove "easily",
 # i.e. stuff which we have Makefile variables for.  Notes:
@@ -713,7 +725,7 @@ app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 clean:
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
 	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(app_unity_srcfiles)
-	@rm -rf $(app_KOKKOS_LIB) $(KOKKOS_OBJECTS) $(KOKKOS_DEPS)
+	@rm -rf $(app_KOKKOS_LIB) $(app_KOKKOS_OBJECTS) $(app_KOKKOS_DEPS)
 	@rm -rf $(APPLICATION_DIR)/build
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
