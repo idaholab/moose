@@ -66,8 +66,16 @@ rotVec1ToVec2(GenericRealVectorValue<is_ad> vec1, GenericRealVectorValue<is_ad> 
 // provides a rotation matrix that will rotate the vector vec1 to the vector vec2
 {
   GenericRealTensorValue<is_ad> rot1_to_z = rotVecToZ<is_ad>(vec1);
+  mooseAssert((rot1_to_z * vec1 - Point(0, 0, 1)).norm() < libMesh::TOLERANCE,
+              "rot1_to_z does not rotate vec1 to z-axis!");
   GenericRealTensorValue<is_ad> rot2_to_z = rotVecToZ<is_ad>(vec2);
-  return rot2_to_z.transpose() * rot1_to_z;
+  mooseAssert((rot2_to_z * vec2 - Point(0, 0, 1)).norm() < libMesh::TOLERANCE,
+              "rot2_to_z does not rotate vec2 to z-axis!");
+
+  GenericRealTensorValue<is_ad> result = rot2_to_z.transpose() * rot1_to_z;
+  mooseAssert((result * vec1 - vec2).norm() < libMesh::TOLERANCE,
+              "Rotation matrix from vec1 to vec2 incorrect!");
+  return result;
 }
 
 /// provides a rotation matrix that will rotate the vector vec1 to the [1,0,0], assuming vec1[2]==0
