@@ -117,8 +117,6 @@ ADConvectiveHeatFluxBC::initialSetup()
 
   _communicator.max(_T_infinity_use_neighbor);
   _communicator.max(_htc_use_neighbor);
-  _communicator.min(T_inf_can_use_neighbor);
-  _communicator.min(htc_can_use_neighbor);
 
   const std::string error_msg =
       "Functor must either be defined on all of the primary side of the boundary or on all "
