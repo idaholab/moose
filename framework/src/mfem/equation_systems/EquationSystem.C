@@ -360,7 +360,34 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
   {
     auto & trial_var_name = _trial_var_names.at(i);
     trueX.GetBlock(i).SyncAliasMemory(trueX);
-    gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
+    gridfunctions.real_gfs.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
+  }
+}
+
+void
+EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
+                     const Moose::MFEM::FESpaces & /*fespaces*/,
+                     mfem::AssemblyLevel assembly_level)
+{
+  _assembly_level = assembly_level;
+
+  for (auto & test_var_name : _test_var_names)
+  {
+    if (!gridfunctions.real_gfs.Has(test_var_name))
+    {
+      MFEM_ABORT("Test variable " << test_var_name
+                                  << " requested by equation system during initialisation was "
+                                     "not found in gridfunctions");
+    }
+    // Store pointers to variable FESpaces
+    _test_pfespaces.push_back(gridfunctions.real_gfs.Get(test_var_name)->ParFESpace());
+    // Create auxiliary gridfunctions for applying Dirichlet conditions
+    _xs.emplace_back(std::make_unique<mfem::ParGridFunction>(
+        gridfunctions.real_gfs.Get(test_var_name)->ParFESpace()));
+    _dxdts.emplace_back(std::make_unique<mfem::ParGridFunction>(
+        gridfunctions.real_gfs.Get(test_var_name)->ParFESpace()));
+    _trial_variables.real_gfs.Register(test_var_name,
+                                       gridfunctions.real_gfs.GetShared(test_var_name));
   }
 }
 

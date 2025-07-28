@@ -1,4 +1,4 @@
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "libmesh/ignore_warnings.h"
@@ -22,20 +22,19 @@ public:
   ~ComplexEquationSystem() = default;
 
   // Build forms
-  virtual void Init(Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions,
+  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
                     const Moose::MFEM::FESpaces & fespaces,
-                    mfem::AssemblyLevel assembly_level);
+                    mfem::AssemblyLevel assembly_level) override;
 
   virtual void BuildEquationSystem() override;
   virtual void BuildLinearForms() override;
   virtual void BuildBilinearForms() override;
   virtual void ApplyEssentialBCs() override;
 
-  void AddKernel(std::shared_ptr<MFEMComplexKernel> kernel);
+  virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   void AddIntegratedBC(std::shared_ptr<MFEMComplexIntegratedBC> bc);
 
-  void RecoverFEMSolution(mfem::BlockVector & trueX,
-                          Moose::MFEM::ComplexGridFunctions & gridfunctions);
+  void RecoverFEMSolution(mfem::BlockVector & trueX, Moose::MFEM::GridFunctions & gridfunctions);
 
   virtual void FormSystem(mfem::OperatorHandle & op,
                           mfem::BlockVector & trueX,
@@ -81,9 +80,6 @@ public:
   // Complex gridfunctions for setting Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cxs;
   std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cdxdts;
-
-  // Complex gridfunctions for the problem
-  Moose::MFEM::ComplexGridFunctions _cpx_trial_variables;
 
   // Complex kernels and integrated BCs
 

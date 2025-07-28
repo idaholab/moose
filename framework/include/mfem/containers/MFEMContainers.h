@@ -254,9 +254,15 @@ private:
 
 using FECollections = Moose::MFEM::NamedFieldsMap<mfem::FiniteElementCollection>;
 using FESpaces = Moose::MFEM::NamedFieldsMap<mfem::ParFiniteElementSpace>;
-using GridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParGridFunction>;
-using ComplexGridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParComplexGridFunction>;
 using SubMeshes = Moose::MFEM::NamedFieldsMap<mfem::ParSubMesh>;
+
+// ParComplexGridFunction does not inherit from ParGridFunction, so we need to
+// use a separate NamedFieldsMap for it, but we bundle them together.
+struct GridFunctions
+{
+  Moose::MFEM::NamedFieldsMap<mfem::ParGridFunction> real_gfs;
+  Moose::MFEM::NamedFieldsMap<mfem::ParComplexGridFunction> cpx_gfs;
+};
 
 } // namespace Moose::MFEM
 

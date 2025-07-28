@@ -34,9 +34,9 @@ MFEMSubMeshTransfer::validParams()
 MFEMSubMeshTransfer::MFEMSubMeshTransfer(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     _source_var_name(getParam<VariableName>("from_variable")),
-    _source_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_source_var_name)),
+    _source_var(*getMFEMProblem().getProblemData().gridfunctions.real_gfs.Get(_source_var_name)),
     _result_var_name(getParam<VariableName>("to_variable")),
-    _result_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_result_var_name))
+    _result_var(*getMFEMProblem().getProblemData().gridfunctions.real_gfs.Get(_result_var_name))
 {
 }
 

@@ -1,4 +1,4 @@
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "ComplexEquationSystem.h"
 #include "libmesh/int_range.h"
@@ -7,7 +7,7 @@ namespace Moose::MFEM
 {
 
 void
-ComplexEquationSystem::Init(Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions,
+ComplexEquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
                             const Moose::MFEM::FESpaces & /*fespaces*/,
                             mfem::AssemblyLevel assembly_level)
 {
@@ -15,20 +15,21 @@ ComplexEquationSystem::Init(Moose::MFEM::ComplexGridFunctions & cpx_gridfunction
 
   for (auto & test_var_name : _test_var_names)
   {
-    if (!cpx_gridfunctions.Has(test_var_name))
+    if (!gridfunctions.cpx_gfs.Has(test_var_name))
     {
       MFEM_ABORT("Test variable " << test_var_name
                                   << " requested by equation system during initialisation was "
                                      "not found in gridfunctions");
     }
     // Store pointers to variable FESpaces
-    _test_pfespaces.push_back(cpx_gridfunctions.Get(test_var_name)->ParFESpace());
+    _test_pfespaces.push_back(gridfunctions.cpx_gfs.Get(test_var_name)->ParFESpace());
     // Create auxiliary gridfunctions for applying Dirichlet conditions
     _cxs.emplace_back(std::make_unique<mfem::ParComplexGridFunction>(
-        cpx_gridfunctions.Get(test_var_name)->ParFESpace()));
+        gridfunctions.cpx_gfs.Get(test_var_name)->ParFESpace()));
     _cdxdts.emplace_back(std::make_unique<mfem::ParComplexGridFunction>(
-        cpx_gridfunctions.Get(test_var_name)->ParFESpace()));
-    _cpx_trial_variables.Register(test_var_name, cpx_gridfunctions.GetShared(test_var_name));
+        gridfunctions.cpx_gfs.Get(test_var_name)->ParFESpace()));
+    _trial_variables.cpx_gfs.Register(test_var_name,
+                                      gridfunctions.cpx_gfs.GetShared(test_var_name));
   }
 }
 
@@ -125,26 +126,51 @@ ComplexEquationSystem::ApplyEssentialBCs()
 }
 
 void
-ComplexEquationSystem::AddKernel(std::shared_ptr<MFEMComplexKernel> kernel)
+ComplexEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
   AddTestVariableNameIfMissing(kernel->getTestVariableName());
   AddTrialVariableNameIfMissing(kernel->getTrialVariableName());
   auto trial_var_name = kernel->getTrialVariableName();
   auto test_var_name = kernel->getTestVariableName();
-  if (!_cpx_kernels_map.Has(test_var_name))
+
+  if (auto kernel_ptr = std::dynamic_pointer_cast<MFEMComplexKernel>(kernel))
   {
-    auto kernel_field_map = std::make_shared<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>();
-    _cpx_kernels_map.Register(test_var_name, std::move(kernel_field_map));
+    if (!_cpx_kernels_map.Has(test_var_name))
+    {
+      auto kernel_field_map = std::make_shared<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>();
+      _cpx_kernels_map.Register(test_var_name, std::move(kernel_field_map));
+    }
+    // Register new kernels map if not present for the test/trial variable
+    // pair
+    if (!_cpx_kernels_map.Get(test_var_name)->Has(trial_var_name))
+    {
+      auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMComplexKernel>>>();
+      _cpx_kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
+    }
+    _cpx_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel_ptr));
   }
-  // Register new kernels map if not present for the test/trial variable
-  // pair
-  if (!_cpx_kernels_map.Get(test_var_name)->Has(trial_var_name))
+  else if (auto kernel_ptr = std::dynamic_pointer_cast<MFEMKernel>(kernel))
   {
-    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMComplexKernel>>>();
-    _cpx_kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
+    if (!_kernels_map.Has(test_var_name))
+    {
+      auto kernel_field_map =
+          std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
+      _kernels_map.Register(test_var_name, std::move(kernel_field_map));
+    }
+    // Register new kernels map if not present for the test/trial variable
+    // pair
+    if (!_kernels_map.Get(test_var_name)->Has(trial_var_name))
+    {
+      auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
+      _kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
+    }
+    _kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel_ptr));
   }
-  _cpx_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
+  else
+  {
+    mooseError("Unknown kernel type. Please use MFEMKernel or MFEMComplexKernel.");
+  }
 }
 
 void
@@ -228,13 +254,13 @@ ComplexEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
 
 void
 ComplexEquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
-                                          Moose::MFEM::ComplexGridFunctions & gridfunctions)
+                                          Moose::MFEM::GridFunctions & gridfunctions)
 {
   for (const auto i : index_range(_trial_var_names))
   {
     auto & trial_var_name = _trial_var_names.at(i);
     trueX.GetBlock(i).SyncAliasMemory(trueX);
-    gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
+    gridfunctions.cpx_gfs.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
 }
 

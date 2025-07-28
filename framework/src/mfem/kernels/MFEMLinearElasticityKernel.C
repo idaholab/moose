@@ -37,11 +37,7 @@ MFEMLinearElasticityKernel::validParams()
 }
 
 MFEMLinearElasticityKernel::MFEMLinearElasticityKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters),
-    _lambda_name(getParam<MFEMScalarCoefficientName>("lambda")),
-    _mu_name(getParam<MFEMScalarCoefficientName>("mu")),
-    _lambda(getScalarCoefficient(_lambda_name)),
-    _mu(getScalarCoefficient(_mu_name))
+  : MFEMKernel(parameters), _lambda(getScalarCoefficient("lambda")), _mu(getScalarCoefficient("mu"))
 {
 }
 
