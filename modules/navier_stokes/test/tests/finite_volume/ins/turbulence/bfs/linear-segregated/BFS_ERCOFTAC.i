@@ -3,7 +3,7 @@ Re = 5100
 rho = 1.0
 bulk_u = 1.0
 H = 1.0
-mu = '${fparse rho * bulk_u * H/ Re}'
+mu = '${fparse rho * bulk_u * H / Re}'
 
 advected_interp_method = 'upwind'
 
@@ -400,9 +400,45 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
 []
 
 [Outputs]
-  exodus = true
+  csv = true
   [console]
     type = Console
     outlier_variable_norms = false
+  []
+[]
+
+
+[VectorPostprocessors]
+  [side_bottom]
+    type = SideValueSampler
+    boundary = 'bottom'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [side_top]
+    type = SideValueSampler
+    boundary = 'top'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [line_entry_channel_wall]
+    type = LineValueSampler
+    start_point = '${fparse 0.5 * H} ${fparse 1.00001 * H} 0'
+    end_point = '${fparse 29.5 * H} ${fparse 1.00001 * H} 0'
+    num_points = 24
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [line_quarter_entry_channel]
+    type = LineValueSampler
+    start_point = '${fparse 0.5 * H} ${fparse 2.25001 * H} 0'
+    end_point = '${fparse 29.5 * H} ${fparse 2.25001 * H} 0'
+    num_points = 24
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
   []
 []
