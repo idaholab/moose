@@ -77,6 +77,7 @@ CylinderComponent::addMeshGenerators()
     if (_dimension == 2)
     {
       params.set<Real>("ymax") = {getParam<Real>("radius")};
+      params.set<Real>("ymin") = {-getParam<Real>("radius")};
       if (!isParamValid("n_radial"))
         paramError("n_radial", "Should be provided for a 2D cylinder");
       params.set<unsigned int>("ny") = {getParam<unsigned int>("n_radial")};
@@ -104,33 +105,82 @@ CylinderComponent::addMeshGenerators()
     InputParameters circle_params = _factory.getValidParams("AnnularMeshGenerator");
     circle_params.set<unsigned int>("nt") = getParam<unsigned int>("n_azimuthal");
     circle_params.set<unsigned int>("nr") = getParam<unsigned int>("n_radial");
-    circle_params.set<Real>("r_max") = getParam<Real>("radius");
-    circle_params.set<Real>("r_min") = 0; // for now, just do solid cylinders
+    circle_params.set<Real>("rmax") = getParam<Real>("radius");
+    circle_params.set<Real>("rmin") = 0; // for now, just do solid cylinders
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "AnnularMeshGenerator", name() + "_circle_base", circle_params);
-    _mg_names.push_back(name() + "+circle_base");
+    _mg_names.push_back(name() + "_circle_base");
 
     // extrude surface
 
     // create equidistant layers
-    const unsigned int n_azim = getParam<unsigned int>("n_azimuthal");
-    std::vector<Real> heights;
-    std::vector<unsigned int> layers;
-    Real distance_per_height = _height / (Real)n_azim;
-    for (const auto i : make_range(n_azim))
-    {
-      heights.push_back(distance_per_height);
-      layers.push_back(1);
-    }
+    // const unsigned int n_azim = getParam<unsigned int>("n_azimuthal");
+    // std::vector<Real> heights;
+    // std::vector<unsigned int> layers;
+    // Real distance_per_height = _height / (Real)n_azim;
+    // for (const auto i : make_range(n_azim))
+    // {
+    //   heights.push_back(distance_per_height);
+    //   layers.push_back(1);
+    // }
 
     InputParameters ext_params = _factory.getValidParams("AdvancedExtruderGenerator");
-    ext_params.set<std::vector<unsigned int>>("num_layers") = layers;
-    ext_params.set<MeshGeneratorName>("input") = (MeshGeneratorName)(name() + "+circle_base");
-    ext_params.set<std::vector<Real>>("heights") = heights;
-    ext_params.set<Point>("direction") = direction();
+    ext_params.set<std::vector<unsigned int>>("num_layers") = {getParam<unsigned int>("n_axial")};
+    ext_params.set<MeshGeneratorName>("input") = (MeshGeneratorName)(name() + "_circle_base");
+    ext_params.set<std::vector<Real>>("heights") = {_height};
+
+    const Point default_direction(0, 0, 1);
+    ext_params.set<Point>("direction") = default_direction;
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "AdvancedExtruderGenerator", name() + "_base", ext_params);
     _mg_names.push_back(name() + "_base");
+
+    // rotate to have extrusion axis be along x-axis
+    InputParameters rotate1_params = _factory.getValidParams("TransformGenerator");
+    rotate1_params.set<MeshGeneratorName>("input") = _mg_names.back();
+    rotate1_params.set<MooseEnum>("transform") = "ROTATE";
+    const auto rotation_matrix1 =
+        RotationMatrix::rotVec1ToVec2<false>(RealVectorValue(1, 0, 0), RealVectorValue(0, 0, 1));
+    RealVectorValue angles1;
+    angles1(0) = std::atan2(rotation_matrix1(1, 0), rotation_matrix1(0, 0));
+    angles1(1) = std::asin(-rotation_matrix1(2, 0));
+    angles1(2) = std::atan2(rotation_matrix1(2, 1), rotation_matrix1(2, 2));
+    rotate1_params.set<RealVectorValue>("vector_value") = angles1 / M_PI_2 * 90;
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "TransformGenerator", name() + "_3D_init_rotate1", rotate1_params);
+    _mg_names.push_back(name() + "_3D_init_rotate1");
+
+    InputParameters rotate_params2 = _factory.getValidParams("TransformGenerator");
+    rotate_params2.set<MeshGeneratorName>("input") = _mg_names.back();
+    rotate_params2.set<MooseEnum>("transform") = "ROTATE";
+    const auto rotation_matrix2 =
+        RotationMatrix::rotVec1ToVec2<false>(RealVectorValue(0, 0, 1), RealVectorValue(0, 1, 0));
+    RealVectorValue angles2;
+    angles2(0) = std::atan2(rotation_matrix2(1, 0), rotation_matrix2(0, 0));
+    angles2(1) = std::asin(-rotation_matrix2(2, 0));
+    angles2(2) = std::atan2(rotation_matrix2(2, 1), rotation_matrix2(2, 2));
+    rotate_params2.set<RealVectorValue>("vector_value") = angles2 / M_PI_2 * 90;
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "TransformGenerator", name() + "_3D_init_rotate2", rotate_params2);
+    _mg_names.push_back(name() + "_3D_init_rotate2");
+
+    // if (isParamValid("direction"))
+    // {
+    //   InputParameters rotate3_params = _factory.getValidParams("TransformGenerator");
+    //   rotate3_params.set<MeshGeneratorName>("input") = _mg_names.back();
+    //   rotate3_params.set<MooseEnum>("transform") = "ROTATE";
+    //   const auto rotation_matrix3 =
+    //       RotationMatrix::rotVec1ToVec2<false>(RealVectorValue(0, 0, 1), RealVectorValue(1, 0,
+    //       0));
+    //   RealVectorValue angles3;
+    //   angles3(0) = std::atan2(rotation_matrix3(1, 0), rotation_matrix3(0, 0));
+    //   angles3(1) = std::asin(-rotation_matrix3(2, 0));
+    //   angles3(2) = std::atan2(rotation_matrix3(2, 1), rotation_matrix3(2, 2));
+    //   rotate3_params.set<RealVectorValue>("vector_value") = angles3 / M_PI_2 * 90;
+    //   _app.getMeshGeneratorSystem().addMeshGenerator(
+    //       "TransformGenerator", name() + "_3D_init_rotate3", rotate3_params);
+    //   _mg_names.push_back(name() + "_3D_init_rotate3");
+    // }
   }
 
   ComponentMeshTransformHelper::addMeshGenerators();
