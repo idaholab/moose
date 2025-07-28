@@ -170,7 +170,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # Explicitly silence all warnings because the build is loud (>5MB of output...)
     BUILD_PYTORCH_CCXXFLAGS="-w"
     BUILD_PYTORCH_FLAGS=()
-    BUILD_PYTORCH_PATCHES=()
     if [ "$COMPILER" == "g++" ]; then
         BUILD_PYTORCH_CCXXFLAGS+=" -Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict"
         if [[ $(gcc --version) =~ [0-9]+.[0-9]+(.[0-9]+?) ]]; then
@@ -186,8 +185,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     elif [ "$COMPILER" == "clang++" ]; then
         # FBGEMM requires AVX512, which we don't get with clang
         BUILD_PYTORCH_FLAGS+=("-DUSE_FBGEMM:BOOL=OFF")
-        # See github.com/pytorch/pytorch/issues/151316
-        BUILD_PYTORCH_PATCHES+=("${ROOT_BUILD_DIR}/pytorch_clang.patch")
     else
         echo "Unknown compiler $COMPILER"
         exit 1
@@ -199,13 +196,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         PYTORCH_VER=2.7.1
         cd ${ROOT_BUILD_DIR}
         git clone --branch v${PYTORCH_VER} --single-branch --recursive https://github.com/pytorch/pytorch
-        cd pytorch
-        PYTORCH_DIR=$(pwd)
-        # Apply patches
-        for patch in "${BUILD_PYTORCH_PATCHES[@]}"; do
-            git apply "$patch"
-        done
-        cd "$ROOT_BUILD_DIR"
+        PYTORCH_DIR=${ROOT_BUILD_DIR}/pytorch
 
         # Create a temporary python environment for building pytorch
         PYTORCH_CONDA_ENV=pytorch_build
@@ -399,7 +390,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {% if WITHOUT_PYTORCH is not defined %}
     # libtorch
     {{ MOOSE_DIR }}/scripts/setup_libtorch.sh {{ ROOT_BUILD_DIR }}/setup_libtorch.sh
-    {{ FILES_DIR }}/pytorch_clang.patch {{ ROOT_BUILD_DIR }}/pytorch_clang.patch
     # neml2
     {{ MOOSE_DIR }}/scripts/configure_neml2.sh {{ ROOT_BUILD_DIR }}/configure_neml2.sh
     {{ MOOSE_DIR }}/scripts/{{ NEML2_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ NEML2_BUILD_SCRIPT }}
