@@ -66,7 +66,6 @@ AddMFEMComplexKernelComponentAction::act()
     }
 
     std::string comp_name = action_name.substr(second_last_slash + 1, action_name.length());
-    std::cout << "Adding object with name: " << comp_name << std::endl;
     MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
     if (mfem_problem)
       mfem_problem->addAuxKernel(_type, comp_name, _moose_object_pars);

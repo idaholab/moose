@@ -96,7 +96,6 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   const UserObject * mfem_bc_uo = &(getUserObjectBase(name));
 
   std::string action_name = _app.actionWarehouse().getCurrentActionName();
-  std::cout << "Action name = " << action_name << std::endl;
 
   if (dynamic_cast<const MFEMComplexIntegratedBC *>(mfem_bc_uo) != nullptr)
   {
@@ -167,7 +166,6 @@ MFEMProblem::addAuxBoundaryCondition(const std::string & bc_name,
                                      const std::string & name,
                                      InputParameters & parameters)
 {
-  std::cout << "Adding object with name: " << name << std::endl;
   FEProblemBase::addUserObject(bc_name, name, parameters);
 }
 
