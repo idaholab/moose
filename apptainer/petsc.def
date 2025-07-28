@@ -66,7 +66,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     IFS=' ' read -r -a PETSC_OPTIONS <<< "{{ PETSC_OPTIONS }}"
     # Additional options with cuda
     if [ -n "$CUDA_DIR" ]; then
-        PETSC_OPTIONS+=("--with-cuda" "--with-cuda-arch=70" "--download-slate")
+        PETSC_OPTIONS+=("--with-cuda" "--with-cuda-arch=86" "--download-slate" "--download-hypre-configure-arguments='--enable-gpu-aware-mpi'")
     fi
 {%- if PROFILING is defined %}
     # Flags needed for profiling
