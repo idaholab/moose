@@ -1,4 +1,4 @@
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "ComplexEquationSystem.h"
 #include "libmesh/int_range.h"
