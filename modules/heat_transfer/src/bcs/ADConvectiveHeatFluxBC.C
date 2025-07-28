@@ -95,7 +95,7 @@ ADConvectiveHeatFluxBC::initialSetup()
   {
     const auto & [elem, side, bid] = *bnd_elem;
     // Skip if this boundary is not part of the restriction
-    if (!hasBoundary(bid))
+    if (!hasBoundary(bid) || (elem->processor_id() != this->processor_id()))
       continue;
 
     // Use neighbors if the functor is not defined on all primary blocks
@@ -105,13 +105,14 @@ ADConvectiveHeatFluxBC::initialSetup()
 
     // Determine if neighbor can be used, just in case
     const auto neighbor = elem->neighbor_ptr(side);
-    if (neighbor && !neighbor->is_remote())
-    {
-      T_inf_can_use_neighbor =
-          T_inf_can_use_neighbor && _T_infinity_functor->hasBlocks(neighbor->subdomain_id());
-      htc_can_use_neighbor =
-          htc_can_use_neighbor && _htc_functor->hasBlocks(neighbor->subdomain_id());
-    }
+    if (neighbor)
+      mooseAssert(
+          !neighbor->is_remote(),
+          "The neighbor best not be remote because we request at least one layer of ghosting");
+    T_inf_can_use_neighbor = T_inf_can_use_neighbor && neighbor &&
+                             _T_infinity_functor->hasBlocks(neighbor->subdomain_id());
+    htc_can_use_neighbor =
+        htc_can_use_neighbor && neighbor && _htc_functor->hasBlocks(neighbor->subdomain_id());
   }
 
   const std::string error_msg =
