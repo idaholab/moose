@@ -370,14 +370,19 @@ app_resource = $(APPLICATION_DIR)/$(APPLICATION_NAME).yaml
 ifeq ($(ENABLE_KOKKOS),true)
 
 app_KOKKOS_SRC_FILES := $(shell find $(SRC_DIRS) -name "*.K")
-app_KOKKOS_LIB       := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)_kokkos-$(METHOD).so
-app_KOKKOS_LDFLAGS   := -L$(APPLICATION_DIR)/lib -l$(APPLICATION_NAME)_kokkos-$(METHOD)
 app_KOKKOS_OBJECTS   := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(app_KOKKOS_SRC_FILES))
+app_KOKKOS_DEPS      := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(app_KOKKOS_OBJECTS))
+app_KOKKOS_LIB       :=
+
+ifneq ($(app_KOKKOS_OBJECTS),)
+  app_KOKKOS_LIB     := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)_kokkos-$(METHOD).so
+  app_KOKKOS_LIBS    += $(app_KOKKOS_LIB)
+endif
 
 KOKKOS_OBJECTS += $(app_KOKKOS_OBJECTS)
-KOKKOS_DEPS    := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(KOKKOS_OBJECTS))
+KOKKOS_DEPS    += $(app_KOKKOS_DEPS)
 
--include $(KOKKOS_DEPS)
+-include $(app_KOKKOS_DEPS)
 
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
   $(app_KOKKOS_OBJECTS): $(moose_config_symlink) | $(app_LINKS)
@@ -385,17 +390,23 @@ else
   $(app_KOKKOS_OBJECTS): $(moose_config)
 endif
 
-$(app_KOKKOS_LIB): $(KOKKOS_LINK_DEPENDS) $(KOKKOS_OBJECTS) $(app_LIBS)
+ifneq ($(app_KOKKOS_LIB),)
+
+$(app_KOKKOS_LIB): curr_dir  := $(APPLICATION_DIR)
+$(app_KOKKOS_LIB): curr_objs := $(app_KOKKOS_OBJECTS)
+$(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
 	@mkdir -p $(curr_dir)/lib
 	@echo "Linking Kokkos Library "$@"..."
-	@$(KOKKOS_CXX) --shared -o $@ $(KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
+	@$(KOKKOS_CXX) --shared -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
+
+endif
 
 endif
 
 # Target-specific Variable Values (See GNU-make manual)
 $(app_LIB): curr_objs := $(app_objects)
 $(app_LIB): curr_dir  := $(APPLICATION_DIR)
-$(app_LIB): curr_deps := $(depend_libs)
+$(app_LIB): curr_deps := $(depend_libs) $(app_KOKKOS_LIB)
 $(app_LIB): curr_libs := $(depend_libs_flags)
 $(app_LIB): curr_additional_depend_libs := $(ADDITIONAL_DEPEND_LIBS)
 $(app_LIB): curr_additional_libs := $(ADDITIONAL_LIBS)
@@ -414,7 +425,7 @@ else
 # Target-specific Variable Values (See GNU-make manual)
 $(app_test_LIB): curr_objs := $(app_test_objects)
 $(app_test_LIB): curr_dir  := $(APPLICATION_DIR)/test
-$(app_test_LIB): curr_deps := $(depend_libs)
+$(app_test_LIB): curr_deps := $(depend_libs) $(app_KOKKOS_LIB)
 $(app_test_LIB): curr_libs := $(depend_libs_flags)
 $(app_test_LIB): curr_additional_depend_libs := $(ADDITIONAL_DEPEND_LIBS)
 $(app_test_LIB): curr_additional_libs := $(ADDITIONAL_LIBS)
@@ -488,10 +499,10 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
   endif
 endif
 
-$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_resource) $(app_KOKKOS_LIB)
+$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_resource) $(MOOSE_KOKKOS_LIB) $(app_KOKKOS_LIBS)
 	@echo "Linking Executable "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) $(app_KOKKOS_LDFLAGS) ${SILENCE_SOME_WARNINGS}'
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) $(MOOSE_KOKKOS_LIB) $(app_KOKKOS_LIBS) ${SILENCE_SOME_WARNINGS}'
 	@$(codesign)
 
 ###### install stuff #############
