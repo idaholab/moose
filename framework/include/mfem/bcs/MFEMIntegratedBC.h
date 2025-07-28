@@ -20,11 +20,10 @@ public:
   MFEMIntegratedBC(const InputParameters & parameters);
   virtual ~MFEMIntegratedBC() = default;
 
-  // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
-  // caller.
+  /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
   virtual mfem::LinearFormIntegrator * createLFIntegrator() = 0;
 
-  // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
+  /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() = 0;
 
   /// Get name of the trial variable (gridfunction) the kernel acts on.

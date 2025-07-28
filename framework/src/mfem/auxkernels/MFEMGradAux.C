@@ -30,7 +30,7 @@ MFEMGradAux::validParams()
 MFEMGradAux::MFEMGradAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
-    _source_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_source_var_name)),
+    _source_var(*getMFEMProblem().getProblemData().gridfunctions.real_gfs.Get(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
     _grad(_source_var.ParFESpace(), _result_var.ParFESpace())
 {

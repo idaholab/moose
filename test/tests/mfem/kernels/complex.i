@@ -33,7 +33,7 @@
   [top]
     type = MFEMComplexIntegratedBC
     variable = concentration
-    boundary = '1'
+    boundary = '2'
     [real_part]
       type = MFEMBoundaryIntegratedBC
       variable = concentration
@@ -48,11 +48,6 @@
 []
 
 [Kernels]
-  [diff]
-    type = MFEMDiffusionKernel
-    variable = concentration
-    coefficient = 1.0
-  []
   [c_diff]
     type = MFEMComplexKernel
     variable = concentration
