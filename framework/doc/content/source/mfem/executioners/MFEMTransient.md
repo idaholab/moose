@@ -12,7 +12,7 @@
 problems, calling the [`MFEMProblemSolve`](MFEMProblemSolve.md) solve object to execute one or more
 MFEM `TimeDomainProblemOperators`.
 
-As in all `Executioner` classes using the [`MFEMProblemSolve`](MFEMProblemSolve.md) solve object,
+As in all `Executioner` classes using the [MFEMProblemSolve.md] solve object,
 the desired device and assembly level to use during problem set-up and solution can be selected.
 
 Currently, only simulations with constant timestep `dt` and an implicit backwards Euler timestepper
