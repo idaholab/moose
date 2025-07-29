@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This class is used to transfer the subchannel associated variables to the visualization mesh.
 

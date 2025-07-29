@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This class is used to transfer the pin associated variables: pin surface temperature `Tpin`, axial heat rate qprime `q_prime` and pin diameter `Dpin`
 to the visualization mesh.

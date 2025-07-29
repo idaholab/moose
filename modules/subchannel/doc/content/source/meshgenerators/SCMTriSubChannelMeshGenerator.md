@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This mesh generator creates the mesh were the `SCM` solution variables associated with the subchannels live.
 The user needs to provide the [!param](/Mesh/SCMTriSubChannelMeshGenerator/nrings) parameter which defines the number of fuel pin rings. For triangular sub-assemblies, one nring means that there is one central pin in the (0 0 0) position and six neighboring ones on the the vertices of a normal hexagon. The number of cells in the -z direction is given by [!param](/Mesh/SCMTriSubChannelMeshGenerator/n_cells). The distance of the pins from eachother is given by the [!param](/Mesh/SCMTriSubChannelMeshGenerator/pitch) parameter and the total length of the sub-assembly in the -z direction is defined by the parameters:

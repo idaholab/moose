@@ -14,6 +14,7 @@
 #include "LinearSystem.h"
 #include "Convergence.h"
 #include "Executioner.h"
+#include "ConvergenceIterationTypes.h"
 
 std::set<std::string> const FEProblemSolve::_moose_line_searches = {"contact", "project"};
 
@@ -409,15 +410,48 @@ FEProblemSolve::getParamFromNonlinearSystemVectorParam(const std::string & param
     return param_vec[index];
 }
 
+void
+FEProblemSolve::initialSetup()
+{
+  MultiSystemSolveObject::initialSetup();
+  convergenceSetup();
+}
+
+void
+FEProblemSolve::convergenceSetup()
+{
+  // nonlinear
+  const auto conv_names = _problem.getNonlinearConvergenceNames();
+  for (const auto & conv_name : conv_names)
+  {
+    auto & conv = _problem.getConvergence(conv_name);
+    conv.checkIterationType(ConvergenceIterationTypes::NONLINEAR);
+  }
+
+  // linear
+  if (isParamValid("linear_convergence"))
+  {
+    const auto conv_names = getParam<std::vector<ConvergenceName>>("linear_convergence");
+    for (const auto & conv_name : conv_names)
+    {
+      auto & conv = _problem.getConvergence(conv_name);
+      conv.checkIterationType(ConvergenceIterationTypes::LINEAR);
+    }
+  }
+
+  // multisystem fixed point
+  if (isParamValid("multi_system_fixed_point_convergence"))
+  {
+    _multi_sys_fp_convergence =
+        &_problem.getConvergence(getParam<ConvergenceName>("multi_system_fixed_point_convergence"));
+    _multi_sys_fp_convergence->checkIterationType(
+        ConvergenceIterationTypes::MULTISYSTEM_FIXED_POINT);
+  }
+}
+
 bool
 FEProblemSolve::solve()
 {
-  // This should be late enough to retrieve the convergence object.
-  // TODO: Move this to a setup phase, which does not exist for SolveObjects
-  if (isParamValid("multi_system_fixed_point_convergence"))
-    _multi_sys_fp_convergence =
-        &_problem.getConvergence(getParam<ConvergenceName>("multi_system_fixed_point_convergence"));
-
   // Outer loop for multi-grid convergence
   bool converged = false;
   unsigned int num_fp_multisys_iters = 0;

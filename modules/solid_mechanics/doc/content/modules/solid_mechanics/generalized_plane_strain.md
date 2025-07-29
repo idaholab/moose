@@ -92,44 +92,18 @@ The formulation above for the generalized plane strain problem shares many simil
 The out-of-plane strain is a scalar variable, and it can be added to the standard system of equations for a mechanics problem, where $\boldsymbol{u}_x$ and $\boldsymbol{u}_y$ represent
 the displacement vectors in the $x$ and $y$ directions, $\boldsymbol{f}_x$ and $\boldsymbol{f}_y$ represent the corresponding reaction forces. The discussion here is for the case where the two-dimensional model lies in the $x$-$y$ plane,  The partitioned linearized system of equations, in which the block entries in the stiffness matrix are represented by subscripted $\boldsymbol{K}$ terms, can be written including the scalar strain variable as follows:
 
-<!--This is the intended equation, but \hline was not working when the equation was created-->
-<!-- \begin{equation} -->
-<!-- \left[ -->
-<!-- \begin{array}{cc|c} -->
-<!-- \boldsymbol{K}_{xx} & \boldsymbol{K}_{xy} & \boldsymbol{K}_{xz} \\ -->
-<!-- \boldsymbol{K}_{yx} & \boldsymbol{K}_{yy} & \boldsymbol{K}_{yz} \\ \hline -->
-<!-- \boldsymbol{K}_{zx} & \boldsymbol{K}_{zy} & K_{zz} -->
-<!-- \end{array} -->
-<!-- \right] -->
-<!-- \left\{ -->
-<!-- \begin{array}{c} -->
-<!-- \boldsymbol{u}_x \\ -->
-<!-- \boldsymbol{u}_y \\ \hline -->
-<!-- \epsilon_{zz} -->
-<!-- \end{array} -->
-<!-- \right\} -->
-<!-- = -->
-<!-- \left\{ -->
-<!-- \begin{array}{c} -->
-<!-- \boldsymbol{f}_x \\ -->
-<!-- \boldsymbol{f}_y \\ \hline -->
-<!-- N_{z} -->
-<!-- \end{array} -->
-<!-- \right\} -->
-<!-- \end{equation} -->
-
 \begin{equation}
 \left[
-\begin{array}{ccc}
+\begin{array}{cc|c}
 \boldsymbol{K}_{xx} & \boldsymbol{K}_{xy} & \boldsymbol{K}_{xz} \\
-\boldsymbol{K}_{yx} & \boldsymbol{K}_{yy} & \boldsymbol{K}_{yz} \\
+\boldsymbol{K}_{yx} & \boldsymbol{K}_{yy} & \boldsymbol{K}_{yz} \\ \hline
 \boldsymbol{K}_{zx} & \boldsymbol{K}_{zy} & K_{zz}
 \end{array}
 \right]
 \left\{
 \begin{array}{c}
 \boldsymbol{u}_x \\
-\boldsymbol{u}_y \\
+\boldsymbol{u}_y \\ \hline
 \epsilon_{zz}
 \end{array}
 \right\}
@@ -137,7 +111,7 @@ the displacement vectors in the $x$ and $y$ directions, $\boldsymbol{f}_x$ and $
 \left\{
 \begin{array}{c}
 \boldsymbol{f}_x \\
-\boldsymbol{f}_y \\
+\boldsymbol{f}_y \\ \hline
 N_{z}
 \end{array}
 \right\}

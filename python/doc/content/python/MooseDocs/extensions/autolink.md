@@ -45,8 +45,6 @@ The `optional` and `exact` settings are similarly applied when handling alternat
 !alert warning title=Try not to abuse alternative links.
 The `alternative` setting should not be used as a means to circumvent potentially broken content configurations, but rather consciously under special circumstances. For example, its main purpose is to provide a fallback when developing sites designed with [multiple configurations](MooseDocs/config.md#multiconfigs) and cross-links between them, but expeditiously building only one of those configurations such that certain content is only conditionally unavailable.
 
-<!--TODO: The above alert should include a link to the appropriate multiconfigs documentation when it becomes available. See #18137-->
-
 ## Automatic Link Shortcuts
 
 Markdown includes syntax for creating shortcuts (see [core.md#shortcut-link]). In MooseDown,
