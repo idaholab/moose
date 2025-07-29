@@ -31,7 +31,6 @@ ExodusTimeSequenceStepper::validParams()
 ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & parameters)
   : TimeSequenceStepperBase(parameters), _mesh_file(getParam<MeshFileName>("mesh"))
 {
-
 }
 
 void
@@ -59,5 +58,4 @@ ExodusTimeSequenceStepper::init()
   _communicator.broadcast(times);
 
   setupSequence(times);
-
 }

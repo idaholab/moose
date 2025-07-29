@@ -24,7 +24,8 @@ public:
 
   void setupSequence(const std::vector<Real> & times);
 
-  // Clear the time sequence array, usually use when time sequence need to be updated during the simulation
+  // Clear the time sequence array, usually use when time sequence need to be updated during the
+  // simulation
   void resetSequence();
 
   // Increase the current step count by one

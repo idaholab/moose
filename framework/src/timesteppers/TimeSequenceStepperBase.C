@@ -151,7 +151,6 @@ TimeSequenceStepperBase::resetSequence()
   _time_sequence.clear();
 }
 
-
 void
 TimeSequenceStepperBase::step()
 {
@@ -180,7 +179,6 @@ TimeSequenceStepperBase::computeDT()
   }
   else
     return _time_sequence[_current_step + 1] - _time_sequence[_current_step];
-
 }
 
 Real
@@ -197,4 +195,3 @@ TimeSequenceStepperBase::computeFailedDT()
                         _time_sequence[_current_step] + dt);
   return computeDT();
 }
-
