@@ -88,6 +88,8 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     new_boundary = walls
     input = middle
   []
+  # Prevent test diffing on distributed parallel element numbering
+  allow_renumbering = false
 []
 
 [Problem]
@@ -449,4 +451,35 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 [Outputs]
   exodus = true
   execute_on = timestep_end
+  csv = true
+[]
+
+[VectorPostprocessors]
+  [line_wall]
+    type = LineValueSampler
+    start_point = '${fparse 0.99 * H} ${fparse 0.125 * L} 0'
+    end_point = '${fparse 0.99 * H} ${fparse 0.875 * L} 0'
+    num_points = ${Mesh/block_1/nx}
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [line_center_channel]
+    type = LineValueSampler
+    start_point = ' ${fparse 0.0001 * H} ${fparse 0.125 * L} 0'
+    end_point = '${fparse 0.0001 * H} ${fparse 0.875 * L} 0'
+    num_points = ${Mesh/block_1/nx}
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [line_quarter_radius_channel]
+    type = LineValueSampler
+    start_point = '${fparse 0.51 * H} ${fparse 0.125 * L} 0'
+    end_point = '${fparse 0.51 * H} ${fparse 0.875 * L} 0'
+    num_points =  ${Mesh/block_1/nx}
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
 []
