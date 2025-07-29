@@ -503,7 +503,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _chain_control_system(*this),
     _rd_reader(*this, _restartable_data, forceRestart()),
     _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
-    _currently_executing_actions(false),
     _output_buffer_cache(nullptr),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
@@ -768,8 +767,8 @@ MooseApp::MooseApp(const InputParameters & parameters)
 
   Moose::out << std::flush;
 
-#ifdef MOOSE_HAVE_KOKKOS
-#ifdef MOOSE_KOKKOS_ENABLE_GPU
+#ifdef MOOSE_KOKKOS_ENABLED
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
   queryGPUs();
 #endif
 #endif
@@ -899,7 +898,7 @@ MooseApp::registerCapabilities()
 
   {
     const auto doc = "Kokkos performance portability programming ecosystem";
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
     haveCapability("kokkos", doc);
 #else
     missingCapability("kokkos",
@@ -1241,7 +1240,7 @@ MooseApp::~MooseApp()
     dlclose(lib_pair.second.library_handle);
 #endif
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   deallocateKokkosMemoryPool();
 #endif
 }
@@ -1681,7 +1680,7 @@ MooseApp::setupOptions()
     _exit_code = 1;
   }
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   for (auto & action : _action_warehouse.allActionBlocks())
     if (action->isParamValid("_kokkos_action"))
       _has_kokkos_objects = true;
@@ -1738,11 +1737,7 @@ MooseApp::runInputFile()
   if (_ready_to_exit)
     return;
 
-  _currently_executing_actions = true;
-
   _action_warehouse.executeAllActions();
-
-  _currently_executing_actions = false;
 
   if (isParamSetByUser("mesh_only"))
   {

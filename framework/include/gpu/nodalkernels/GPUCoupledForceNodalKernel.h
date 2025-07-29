@@ -19,22 +19,32 @@ public:
 
   KokkosCoupledForceNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const { return -_coef * _v(node); }
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
-                                                const dof_id_type /* node */) const
-  {
-    if (jvar == _v_var)
-      return -_coef;
-    return 0;
-  }
+  KOKKOS_FUNCTION inline Real computeQpResidual(const dof_id_type node) const;
+  KOKKOS_FUNCTION inline Real computeQpOffDiagJacobian(const unsigned int jvar,
+                                                       const dof_id_type node) const;
 
 private:
   /// The number of the coupled variable
   const unsigned int _v_var;
 
   /// The value of the coupled variable
-  Moose::Kokkos::VariableNodalValue _v;
+  const Moose::Kokkos::VariableNodalValue _v;
 
   /// A multiplicative factor for computing the coupled force
   const Real _coef;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosCoupledForceNodalKernel::computeQpResidual(const dof_id_type node) const
+{
+  return -_coef * _v(node);
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosCoupledForceNodalKernel::computeQpOffDiagJacobian(const unsigned int jvar,
+                                                        const dof_id_type /* node */) const
+{
+  if (jvar == _v_var)
+    return -_coef;
+  return 0;
+}

@@ -17,37 +17,49 @@ class KokkosBodyForce : public Moose::Kokkos::Kernel<Derived>
   usingKokkosKernelMembers(Derived);
 
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = Moose::Kokkos::Kernel<Derived>::validParams();
-    params.addParam<Real>("value", 1.0, "Coefficient to multiply by the body force term");
-    params.addParam<PostprocessorName>(
-        "postprocessor", 1, "A postprocessor whose value is multiplied by the body force");
-    params.declareControllable("value");
-    return params;
-  }
+  static InputParameters validParams();
 
-  KokkosBodyForce(const InputParameters & parameters)
-    : Moose::Kokkos::Kernel<Derived>(parameters),
-      _scale(this->template getParam<Real>("value")),
-      _postprocessor(getPostprocessorValue("postprocessor"))
-  {
-  }
+  KokkosBodyForce(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return -_test(datum, i, qp) * _scale * _postprocessor;
-  }
+  KOKKOS_FUNCTION inline Real
+  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
 
 protected:
   /// Scale factor
-  Moose::Kokkos::Scalar<const Real> _scale;
+  const Moose::Kokkos::Scalar<const Real> _scale;
 
   /// Optional Postprocessor value
-  Moose::Kokkos::PostprocessorValue _postprocessor;
+  const Moose::Kokkos::PostprocessorValue _postprocessor;
 };
+
+template <typename Derived>
+InputParameters
+KokkosBodyForce<Derived>::validParams()
+{
+  InputParameters params = Moose::Kokkos::Kernel<Derived>::validParams();
+  params.addParam<Real>("value", 1.0, "Coefficient to multiply by the body force term");
+  params.addParam<PostprocessorName>(
+      "postprocessor", 1, "A postprocessor whose value is multiplied by the body force");
+  params.declareControllable("value");
+  return params;
+}
+
+template <typename Derived>
+KokkosBodyForce<Derived>::KokkosBodyForce(const InputParameters & parameters)
+  : Moose::Kokkos::Kernel<Derived>(parameters),
+    _scale(this->template getParam<Real>("value")),
+    _postprocessor(getPostprocessorValue("postprocessor"))
+{
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION inline Real
+KokkosBodyForce<Derived>::computeQpResidual(const unsigned int i,
+                                            const unsigned int qp,
+                                            ResidualDatum & datum) const
+{
+  return -_test(datum, i, qp) * _scale * _postprocessor;
+}
 
 class KokkosBodyForceKernel final : public KokkosBodyForce<KokkosBodyForceKernel>
 {

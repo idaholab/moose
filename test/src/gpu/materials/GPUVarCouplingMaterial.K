@@ -34,8 +34,8 @@ KokkosVarCouplingMaterial::validParams()
 
 KokkosVarCouplingMaterial::KokkosVarCouplingMaterial(const InputParameters & parameters)
   : Material(parameters),
-    _var(getParam<bool>("use_tag") ? KokkosCoupledVectorTagValue("var", "tag")
-                                   : KokkosCoupledValue("var")),
+    _var(getParam<bool>("use_tag") ? kokkosCoupledVectorTagValue("var", "tag")
+                                   : kokkosCoupledValue("var")),
     _base(getParam<Real>("base")),
     _coef(getParam<Real>("coef")),
     _coupled_prop(declareKokkosProperty<Real>("coupled_prop_name"))

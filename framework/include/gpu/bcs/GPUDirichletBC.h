@@ -17,25 +17,32 @@ class KokkosDirichletBC : public Moose::Kokkos::DirichletBCBase<DirichletBC>
   usingKokkosDirichletBCBaseMembers(DirichletBC);
 
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = Moose::Kokkos::DirichletBCBase<DirichletBC>::validParams();
-    params.addRequiredParam<Real>("value", "Value of the BC");
-    params.declareControllable("value");
-    return params;
-  }
+  static InputParameters validParams();
 
-  KokkosDirichletBC(const InputParameters & parameters)
-    : Moose::Kokkos::DirichletBCBase<DirichletBC>(parameters),
-      _value(this->template getParam<Real>("value"))
-  {
-  }
+  KokkosDirichletBC(const InputParameters & parameters);
 
   KOKKOS_FUNCTION Real computeValue(const dof_id_type /* node */) const { return _value; }
 
 protected:
-  Moose::Kokkos::Scalar<const Real> _value;
+  const Moose::Kokkos::Scalar<const Real> _value;
 };
+
+template <typename DirichletBC>
+InputParameters
+KokkosDirichletBC<DirichletBC>::validParams()
+{
+  InputParameters params = Moose::Kokkos::DirichletBCBase<DirichletBC>::validParams();
+  params.addRequiredParam<Real>("value", "Value of the BC");
+  params.declareControllable("value");
+  return params;
+}
+
+template <typename DirichletBC>
+KokkosDirichletBC<DirichletBC>::KokkosDirichletBC(const InputParameters & parameters)
+  : Moose::Kokkos::DirichletBCBase<DirichletBC>(parameters),
+    _value(this->template getParam<Real>("value"))
+{
+}
 
 class KokkosDirichletBCKernel final : public KokkosDirichletBC<KokkosDirichletBCKernel>
 {

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
 #include "GPUMaterialProperty.h"
 #endif
 
@@ -262,7 +262,7 @@ private:
                                                         const unsigned int state,
                                                         const MooseObject & requestor);
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Helper function for adding a Kokkos material property
    * @param prop_name The property name

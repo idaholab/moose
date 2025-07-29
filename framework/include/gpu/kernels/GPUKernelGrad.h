@@ -44,16 +44,12 @@ class KernelGrad : public Kernel<Derived>
   usingKokkosKernelMembers(Derived);
 
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = Kernel<Derived>::validParams();
-    return params;
-  }
+  static InputParameters validParams();
 
   /**
    * Constructor
    */
-  KernelGrad(const InputParameters & parameters) : Kernel<Derived>(parameters) {}
+  KernelGrad(const InputParameters & parameters);
 
   /**
    * Default methods to prevent compile errors even when these methods were not defined in the
@@ -95,6 +91,19 @@ protected:
     return &Derived::precomputeQpJacobian == &KernelGrad::precomputeQpJacobian;
   }
 };
+
+template <typename Derived>
+InputParameters
+KernelGrad<Derived>::validParams()
+{
+  InputParameters params = Kernel<Derived>::validParams();
+  return params;
+}
+
+template <typename Derived>
+KernelGrad<Derived>::KernelGrad(const InputParameters & parameters) : Kernel<Derived>(parameters)
+{
+}
 
 template <typename Derived>
 KOKKOS_FUNCTION void

@@ -15,25 +15,9 @@ template <unsigned int dimension, typename T>
 class KokkosMultiDProperty : public Moose::Kokkos::Material<KokkosMultiDProperty<dimension, T>>
 {
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params =
-        Moose::Kokkos::Material<KokkosMultiDProperty<dimension, T>>::validParams();
-    params.addParam<MaterialPropertyName>("name", "The name of the property");
-    params.addParam<std::vector<unsigned int>>("dims", "The dimensions of the property");
-    return params;
-  }
+  static InputParameters validParams();
 
-  KokkosMultiDProperty(const InputParameters & parameters)
-    : Moose::Kokkos::Material<KokkosMultiDProperty<dimension, T>>(parameters),
-      _dims(this->template getParam<std::vector<unsigned int>>("dims"))
-  {
-    if (_dims.size() != dimension)
-      this->paramError("dims", "Should be ", dimension, "-dimension");
-
-    _property = this->template declareKokkosProperty<T, dimension>(
-        "name", this->template getParam<std::vector<unsigned int>>("dims"));
-  }
+  KokkosMultiDProperty(const InputParameters & parameters);
 
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int /* qp */, Datum & /* datum */) const
   {
@@ -41,8 +25,31 @@ public:
 
 protected:
   Moose::Kokkos::MaterialProperty<T, dimension> _property;
-  Moose::Kokkos::Array<unsigned int> _dims;
+  const Moose::Kokkos::Array<unsigned int> _dims;
 };
+
+template <unsigned int dimension, typename T>
+InputParameters
+KokkosMultiDProperty<dimension, T>::validParams()
+{
+  InputParameters params =
+      Moose::Kokkos::Material<KokkosMultiDProperty<dimension, T>>::validParams();
+  params.addParam<MaterialPropertyName>("name", "The name of the property");
+  params.addParam<std::vector<unsigned int>>("dims", "The dimensions of the property");
+  return params;
+}
+
+template <unsigned int dimension, typename T>
+KokkosMultiDProperty<dimension, T>::KokkosMultiDProperty(const InputParameters & parameters)
+  : Moose::Kokkos::Material<KokkosMultiDProperty<dimension, T>>(parameters),
+    _dims(this->template getParam<std::vector<unsigned int>>("dims"))
+{
+  if (_dims.size() != dimension)
+    this->paramError("dims", "Should be ", dimension, "-dimension");
+
+  _property = this->template declareKokkosProperty<T, dimension>(
+      "name", this->template getParam<std::vector<unsigned int>>("dims"));
+}
 
 class Kokkos1DRealProperty final : public KokkosMultiDProperty<1, Real>
 {

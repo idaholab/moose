@@ -18,8 +18,14 @@ public:
 
   KokkosConstantRate(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type /* node */) const { return -_rate; }
+  KOKKOS_FUNCTION inline Real computeQpResidual(const dof_id_type node) const;
 
 protected:
-  Moose::Kokkos::Scalar<const Real> _rate;
+  const Moose::Kokkos::Scalar<const Real> _rate;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosConstantRate::computeQpResidual(const dof_id_type /* node */) const
+{
+  return -_rate;
+}

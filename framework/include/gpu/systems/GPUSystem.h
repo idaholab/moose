@@ -46,13 +46,13 @@ public:
    * Synchronize the active tagged vectors and matrices between host and device
    * @param dir Copy direction
    */
-  void sync(MemcpyKind dir);
+  void sync(const MemcpyKind dir);
   /**
    * Synchronize the specified tagged vectors between host and device
    * @param tags The vector tags
    * @param dir Copy direction
    */
-  void sync(std::set<TagID> tags, MemcpyKind dir);
+  void sync(const std::set<TagID> & tags, const MemcpyKind dir);
   /**
    * Allocate the quadrature point solution vectors for active variable and tags and cache
    * quadrature point values
@@ -62,22 +62,22 @@ public:
    * Set the active variables
    * @param vars The active MOOSE variables
    */
-  void setActiveVariables(std::set<MooseVariableFieldBase *> vars);
+  void setActiveVariables(const std::set<MooseVariableFieldBase *> & vars);
   /**
    * Set the active solution tags
    * @param tags The active solution tags
    */
-  void setActiveVariableTags(std::set<TagID> tags);
+  void setActiveVariableTags(const std::set<TagID> & tags);
   /**
    * Set the active residual tags
    * @param tags The active residual tags
    */
-  void setActiveResidualTags(std::set<TagID> tags);
+  void setActiveResidualTags(const std::set<TagID> & tags);
   /**
    * Set the active matrix tags
    * @param vars The active matrix tags
    */
-  void setActiveMatrixTags(std::set<TagID> tags);
+  void setActiveMatrixTags(const std::set<TagID> & tags);
   /**
    * Clear the cached active variables
    */
@@ -144,7 +144,7 @@ public:
    * @param subdomain The subdomain ID
    * @returns Whether the variable is active
    */
-  KOKKOS_FUNCTION auto isVariableActive(unsigned int var, SubdomainID subdomain) const
+  KOKKOS_FUNCTION bool isVariableActive(unsigned int var, SubdomainID subdomain) const
   {
     return _var_subdomain_active(var, subdomain);
   }
@@ -153,19 +153,19 @@ public:
    * @param tag The residual tag
    * @returns Whether the residual tag is active
    */
-  KOKKOS_FUNCTION auto isResidualTagActive(TagID tag) const { return _residual_tag_active[tag]; }
+  KOKKOS_FUNCTION bool isResidualTagActive(TagID tag) const { return _residual_tag_active[tag]; }
   /**
    * Check whether a matrix tag is active
    * @param tag The matrix tag
    * @returns Whether the matrix tag is active
    */
-  KOKKOS_FUNCTION auto isMatrixTagActive(TagID tag) const { return _matrix_tag_active[tag]; }
+  KOKKOS_FUNCTION bool isMatrixTagActive(TagID tag) const { return _matrix_tag_active[tag]; }
   /**
    * Check whether a local DOF index is covered by a nodal BC
    * @param dof The local DOF index
    * @returns Whether the local DOF index is covered by a nodal BC
    */
-  KOKKOS_FUNCTION auto hasNodalBC(dof_id_type dof) const
+  KOKKOS_FUNCTION bool hasNodalBC(dof_id_type dof) const
   {
     return _nbc_dof.isAlloc() && _nbc_dof[dof];
   }
@@ -175,7 +175,7 @@ public:
    * @param tag The extra residual tag
    * @returns Whether the local DOF index is covered by a nodal BC
    */
-  KOKKOS_FUNCTION auto hasNodalBCResidualTag(dof_id_type dof, TagID tag) const
+  KOKKOS_FUNCTION bool hasNodalBCResidualTag(dof_id_type dof, TagID tag) const
   {
     return _nbc_residual_tag_dof[tag].isAlloc() && _nbc_residual_tag_dof[tag][dof];
   }
@@ -185,7 +185,7 @@ public:
    * @param tag The extra matrix tag
    * @returns Whether the local DOF index is covered by a nodal BC
    */
-  KOKKOS_FUNCTION auto hasNodalBCMatrixTag(dof_id_type dof, TagID tag) const
+  KOKKOS_FUNCTION bool hasNodalBCMatrixTag(dof_id_type dof, TagID tag) const
   {
     return _nbc_matrix_tag_dof[tag].isAlloc() && _nbc_matrix_tag_dof[tag][dof];
   }
@@ -194,24 +194,27 @@ public:
    * @param var The variable number
    * @returns The FE type ID
    */
-  KOKKOS_FUNCTION auto getFETypeID(unsigned int var) const { return _var_fe_types[var]; }
+  KOKKOS_FUNCTION unsigned int getFETypeID(unsigned int var) const { return _var_fe_types[var]; }
   /**
    * Get the number of local DOFs
    * @returns The number of local DOFs
    */
-  KOKKOS_FUNCTION auto getNumLocalDofs() const { return _num_local_dofs; }
+  KOKKOS_FUNCTION dof_id_type getNumLocalDofs() const { return _num_local_dofs; }
   /**
    * Get the number of ghost DOFs
    * @returns The number of ghost DOFs
    */
-  KOKKOS_FUNCTION auto getNumGhostDofs() const { return _num_ghost_dofs; }
+  KOKKOS_FUNCTION dof_id_type getNumGhostDofs() const { return _num_ghost_dofs; }
   /**
    * Get the maximum number of DOFs per element of a variable
    * This number is local to each process
    * @param var The variable number
    * @returns The maximum number of DOFs per element
    */
-  KOKKOS_FUNCTION auto getMaxDofsPerElem(unsigned int var) const { return _max_dofs_per_elem[var]; }
+  KOKKOS_FUNCTION unsigned int getMaxDofsPerElem(unsigned int var) const
+  {
+    return _max_dofs_per_elem[var];
+  }
   /**
    * Get the local DOF index of a variable for an element
    * @param elem The element ID
@@ -219,8 +222,9 @@ public:
    * @param var The variable number
    * @returns The local DOF index
    */
-  KOKKOS_FUNCTION auto
-  getElemLocalDofIndex(dof_id_type elem, unsigned int i, unsigned int var) const
+  KOKKOS_FUNCTION dof_id_type getElemLocalDofIndex(dof_id_type elem,
+                                                   unsigned int i,
+                                                   unsigned int var) const
   {
     return _local_elem_dof_index[var](elem, i);
   }
@@ -230,7 +234,7 @@ public:
    * @param var The variable number
    * @returns The local DOF index
    */
-  KOKKOS_FUNCTION auto getNodeLocalDofIndex(dof_id_type node, unsigned int var) const
+  KOKKOS_FUNCTION dof_id_type getNodeLocalDofIndex(dof_id_type node, unsigned int var) const
   {
     return _local_node_dof_index[var][node];
   }
@@ -241,8 +245,9 @@ public:
    * @param var The variable number
    * @returns The global DOF index
    */
-  KOKKOS_FUNCTION auto
-  getElemGlobalDofIndex(dof_id_type elem, unsigned int i, unsigned int var) const
+  KOKKOS_FUNCTION dof_id_type getElemGlobalDofIndex(dof_id_type elem,
+                                                    unsigned int i,
+                                                    unsigned int var) const
   {
     return _local_to_global_dof_index[_local_elem_dof_index[var](elem, i)];
   }
@@ -252,7 +257,7 @@ public:
    * @param var The variable number
    * @returns The global DOF index
    */
-  KOKKOS_FUNCTION auto getNodeGlobalDofIndex(dof_id_type node, unsigned int var) const
+  KOKKOS_FUNCTION dof_id_type getNodeGlobalDofIndex(dof_id_type node, unsigned int var) const
   {
     return _local_to_global_dof_index[_local_node_dof_index[var][node]];
   }
@@ -261,7 +266,7 @@ public:
    * @param dof The local DOF index
    * @returns The global DOF index
    */
-  KOKKOS_FUNCTION auto localToGlobalDofIndex(dof_id_type dof) const
+  KOKKOS_FUNCTION dof_id_type localToGlobalDofIndex(dof_id_type dof) const
   {
     return _local_to_global_dof_index[dof];
   }
@@ -293,7 +298,7 @@ public:
    * @param tag The vector tag
    * @returns The DOF value
    */
-  KOKKOS_FUNCTION auto & getVectorDofValue(dof_id_type dof, TagID tag) const
+  KOKKOS_FUNCTION Real & getVectorDofValue(dof_id_type dof, TagID tag) const
   {
     return _vectors[tag][dof];
   }
@@ -305,7 +310,7 @@ public:
    * @param tag The vector tag
    * @returns The quadrature value
    */
-  KOKKOS_FUNCTION auto &
+  KOKKOS_FUNCTION Real &
   getVectorQpValue(ElementInfo info, dof_id_type qp, unsigned int var, TagID tag) const
   {
     return _qp_solutions[tag](info.subdomain, var)[qp];
@@ -318,7 +323,7 @@ public:
    * @param tag The vector tag
    * @returns The quadrature gradient
    */
-  KOKKOS_FUNCTION auto &
+  KOKKOS_FUNCTION Real3 &
   getVectorQpGrad(ElementInfo info, dof_id_type qp, unsigned int var, TagID tag) const
   {
     return _qp_solutions_grad[tag](info.subdomain, var)[qp];
@@ -332,8 +337,11 @@ public:
    * @param tag The vector tag
    * @returns The face quadrature value
    */
-  KOKKOS_FUNCTION inline auto getVectorQpValueFace(
-      ElementInfo info, unsigned int side, unsigned int qp, unsigned int var, TagID tag) const;
+  KOKKOS_FUNCTION inline Real getVectorQpValueFace(const ElementInfo info,
+                                                   const unsigned int side,
+                                                   const unsigned int qp,
+                                                   const unsigned int var,
+                                                   const TagID tag) const;
   /**
    * Get the face quadrature gradient of a variable from a tagged vector
    * @param info The element information object
@@ -344,12 +352,12 @@ public:
    * @param tag The vector tag
    * @returns The face quadrature gradient
    */
-  KOKKOS_FUNCTION inline auto getVectorQpGradFace(ElementInfo info,
-                                                  unsigned int side,
-                                                  Real33 jacobian,
-                                                  unsigned int qp,
-                                                  unsigned int var,
-                                                  TagID tag) const;
+  KOKKOS_FUNCTION inline Real3 getVectorQpGradFace(const ElementInfo info,
+                                                   const unsigned int side,
+                                                   const Real33 jacobian,
+                                                   const unsigned int qp,
+                                                   const unsigned int var,
+                                                   const TagID tag) const;
   /**
    * Get an entry from a tagged matrix
    * @param row The local row index
@@ -357,7 +365,7 @@ public:
    * @param tag The matrix tag
    * @returns The entry from the tagged matrix
    */
-  KOKKOS_FUNCTION auto & getMatrixValue(dof_id_type row, dof_id_type col, TagID tag) const
+  KOKKOS_FUNCTION Real & getMatrixValue(dof_id_type row, dof_id_type col, TagID tag) const
   {
     return _matrices[tag](row, col);
   }
@@ -522,7 +530,7 @@ private:
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
-KOKKOS_FUNCTION inline auto
+KOKKOS_FUNCTION inline Real
 System::getVectorQpValueFace(
     ElementInfo info, unsigned int side, unsigned int qp, unsigned int var, TagID tag) const
 {
@@ -537,7 +545,7 @@ System::getVectorQpValueFace(
 
   return value;
 }
-KOKKOS_FUNCTION inline auto
+KOKKOS_FUNCTION inline Real3
 System::getVectorQpGradFace(ElementInfo info,
                             unsigned int side,
                             Real33 jacobian,

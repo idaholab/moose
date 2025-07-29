@@ -26,7 +26,7 @@ MooseInit::initKokkos()
 {
   Kokkos::InitializationSettings settings;
 
-#ifdef MOOSE_KOKKOS_ENABLE_GPU
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
 
   unsigned int num_gpus = Kokkos::num_devices();
 
