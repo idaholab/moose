@@ -158,6 +158,23 @@ EquationSystem::ApplyEssentialBCs()
 }
 
 void
+EquationSystem::EliminateCoupledVariables()
+{
+  for (const auto & test_var_name : _test_var_names)
+  {
+    auto lf = _lfs.Get(test_var_name);
+    for (const auto & eliminated_var_name : _eliminated_var_names)
+    {
+      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(eliminated_var_name))
+      {
+        auto mblf = _mblfs.Get(test_var_name)->Get(eliminated_var_name);
+        mblf->AddMult(*_eliminated_variables.Get(eliminated_var_name), *lf, -1.0);
+      }
+    }
+  }
+}
+
+void
 EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
                                  mfem::BlockVector & trueX,
                                  mfem::BlockVector & trueRHS)
@@ -311,7 +328,7 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
                                      "not found in gridfunctions");
     }
     // Store pointers to variable FESpaces
-    _test_pfespaces.push_back(gridfunctions.Get(test_var_name)->ParFESpace());
+    _test_pfespaces.push_back(gridfunctions.Get(test_var_name)->ParFESpace());    
     // Create auxiliary gridfunctions for applying Dirichlet conditions
     _xs.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
@@ -319,7 +336,18 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
     _eliminated_variables.Register(test_var_name, gridfunctions.GetShared(test_var_name));
   }
+
+  for (auto & coupled_var_name : _coupled_var_names)
+  {
+    _coupled_pfespaces.push_back(gridfunctions.Get(coupled_var_name)->ParFESpace());  
+  }
+
   SetTrialVariableNames();
+
+  for (auto & eliminated_var_name : _eliminated_var_names)
+  {
+    _eliminated_variables.Register(eliminated_var_name, gridfunctions.GetShared(eliminated_var_name));
+  }
 }
 
 void
@@ -332,6 +360,7 @@ EquationSystem::BuildLinearForms()
     _lfs.Register(test_var_name, std::make_shared<mfem::ParLinearForm>(_test_pfespaces.at(i)));
     _lfs.GetRef(test_var_name) = 0.0;
   }
+
   // Apply boundary conditions
   ApplyEssentialBCs();
 
@@ -343,6 +372,9 @@ EquationSystem::BuildLinearForms()
     ApplyBoundaryLFIntegrators(test_var_name, lf, _integrated_bc_map);
     lf->Assemble();
   }
+
+  // Eliminate trivially eliminated variables by subtracting contributions from linear forms
+  EliminateCoupledVariables();
 }
 
 void
@@ -366,36 +398,37 @@ EquationSystem::BuildBilinearForms()
   }
 }
 
+// TODO: build all kernels associated with a test/coupled pair rather than test/trial 
 void
 EquationSystem::BuildMixedBilinearForms()
 {
   // Register mixed bilinear forms. Note that not all combinations may
   // have a kernel
 
-  // Create mblf for each test/trial pair
+  // Create mblf for each test/coupled variable pair with an added kernel
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
     auto test_mblfs = std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
-    for (const auto j : index_range(_test_var_names))
+    for (const auto j : index_range(_coupled_var_names))
     {
-      auto trial_var_name = _coupled_var_names.at(j);
-      auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
+      auto coupled_var_name = _coupled_var_names.at(j);
+      auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_coupled_pfespaces.at(j),
                                                                _test_pfespaces.at(i));
       // Register MixedBilinearForm if kernels exist for it, and assemble
       // kernels
-      if (_kernels_map.Has(test_var_name) && _kernels_map.Get(test_var_name)->Has(trial_var_name) &&
-          test_var_name != trial_var_name)
+      if (_kernels_map.Has(test_var_name) && _kernels_map.Get(test_var_name)->Has(coupled_var_name) &&
+          test_var_name != coupled_var_name)
       {
         mblf->SetAssemblyLevel(_assembly_level);
         // Apply all mixed kernels with this test/trial pair
         ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
-            trial_var_name, test_var_name, mblf, _kernels_map);
+            coupled_var_name, test_var_name, mblf, _kernels_map);
         // Assemble mixed bilinear forms
         mblf->Assemble();
         // Register mixed bilinear forms associated with a single trial variable
         // for the current test variable
-        test_mblfs->Register(trial_var_name, mblf);
+        test_mblfs->Register(coupled_var_name, mblf);
       }
     }
     // Register all mixed bilinear form sets associated with a single test
