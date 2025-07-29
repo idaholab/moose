@@ -19,22 +19,30 @@ public:
 
   KokkosMatDiffusionTest(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return _diff(datum, qp) * _grad_test(datum, i, qp) * _grad_u(datum, qp);
-  }
-
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return _diff(datum, qp) * _grad_test(datum, i, qp) * _grad_phi(datum, j, qp);
-  }
+  KOKKOS_FUNCTION inline Real
+  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION inline Real computeQpJacobian(const unsigned int i,
+                                                const unsigned int j,
+                                                const unsigned int qp,
+                                                ResidualDatum & datum) const;
 
 private:
-  std::string _prop_name;
   Moose::Kokkos::MaterialProperty<Real> _diff;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosMatDiffusionTest::computeQpResidual(const unsigned int i,
+                                          const unsigned int qp,
+                                          ResidualDatum & datum) const
+{
+  return _diff(datum, qp) * _grad_test(datum, i, qp) * _grad_u(datum, qp);
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosMatDiffusionTest::computeQpJacobian(const unsigned int i,
+                                          const unsigned int j,
+                                          const unsigned int qp,
+                                          ResidualDatum & datum) const
+{
+  return _diff(datum, qp) * _grad_test(datum, i, qp) * _grad_phi(datum, j, qp);
+}

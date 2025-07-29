@@ -13,10 +13,12 @@ namespace Moose
 {
 namespace Kokkos
 {
+
 void
-free(void * ptr)
+kokkosFree(void * ptr)
 {
   ::Kokkos::kokkos_free<ExecSpace::memory_space>(ptr);
 }
+
 } // namespace Kokkos
 } // namespace Moose

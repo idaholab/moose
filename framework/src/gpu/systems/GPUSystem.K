@@ -326,7 +326,7 @@ System::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
 }
 
 void
-System::sync(MemcpyKind dir)
+System::sync(const MemcpyKind dir)
 {
   if (dir == MemcpyKind::HOST_TO_DEVICE)
   {
@@ -371,7 +371,7 @@ System::sync(MemcpyKind dir)
 }
 
 void
-System::sync(std::set<TagID> tags, MemcpyKind dir)
+System::sync(const std::set<TagID> & tags, const MemcpyKind dir)
 {
   if (dir == MemcpyKind::HOST_TO_DEVICE)
   {
@@ -402,7 +402,7 @@ System::sync(std::set<TagID> tags, MemcpyKind dir)
 }
 
 void
-System::setActiveVariables(std::set<MooseVariableFieldBase *> vars)
+System::setActiveVariables(const std::set<MooseVariableFieldBase *> & vars)
 {
   std::set<unsigned int> active_variables;
 
@@ -415,7 +415,7 @@ System::setActiveVariables(std::set<MooseVariableFieldBase *> vars)
 }
 
 void
-System::setActiveVariableTags(std::set<TagID> tags)
+System::setActiveVariableTags(const std::set<TagID> & tags)
 {
   if (!_active_variables.size())
     return;
@@ -430,7 +430,7 @@ System::setActiveVariableTags(std::set<TagID> tags)
 }
 
 void
-System::setActiveResidualTags(std::set<TagID> tags)
+System::setActiveResidualTags(const std::set<TagID> & tags)
 {
   std::set<TagID> active_residual_tags;
 
@@ -447,7 +447,7 @@ System::setActiveResidualTags(std::set<TagID> tags)
 }
 
 void
-System::setActiveMatrixTags(std::set<TagID> tags)
+System::setActiveMatrixTags(const std::set<TagID> & tags)
 {
   std::set<TagID> active_matrix_tags;
 

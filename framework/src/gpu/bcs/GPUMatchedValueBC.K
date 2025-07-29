@@ -25,7 +25,7 @@ KokkosMatchedValueBC::validParams()
 
 KokkosMatchedValueBC::KokkosMatchedValueBC(const InputParameters & parameters)
   : NodalBC(parameters),
-    _v(KokkosCoupledNodalValue("v")),
+    _v(kokkosCoupledNodalValue("v")),
     _v_num(coupled("v")),
     _u_coeff(getParam<Real>("u_coeff")),
     _v_coeff(getParam<Real>("v_coeff"))

@@ -35,7 +35,7 @@ KokkosMatCoupledForce::KokkosMatCoupledForce(const InputParameters & parameters)
     _n_coupled(coupledComponents("v")),
     _coupled_props(isParamValid("material_properties")),
     _v_var(coupledIndices("v")),
-    _v(KokkosCoupledValues("v")),
+    _v(kokkosCoupledValues("v")),
     _coef(isParamValid("coef") ? getParam<std::vector<Real>>("coef")
                                : std::vector<Real>(_n_coupled, 1))
 {

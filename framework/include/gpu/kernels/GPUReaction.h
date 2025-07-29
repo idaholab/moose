@@ -21,21 +21,31 @@ public:
 
   KokkosReaction(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return _test(datum, i, qp) * _rate * _u(datum, qp);
-  }
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return _test(datum, i, qp) * _rate * _phi(datum, j, qp);
-  }
+  KOKKOS_FUNCTION inline Real
+  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION inline Real computeQpJacobian(const unsigned int i,
+                                                const unsigned int j,
+                                                const unsigned int qp,
+                                                ResidualDatum & datum) const;
 
 protected:
   /// Scalar coefficient representing the relative amount consumed per unit time
-  Moose::Kokkos::Scalar<const Real> _rate;
+  const Moose::Kokkos::Scalar<const Real> _rate;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosReaction::computeQpResidual(const unsigned int i,
+                                  const unsigned int qp,
+                                  ResidualDatum & datum) const
+{
+  return _test(datum, i, qp) * _rate * _u(datum, qp);
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosReaction::computeQpJacobian(const unsigned int i,
+                                  const unsigned int j,
+                                  const unsigned int qp,
+                                  ResidualDatum & datum) const
+{
+  return _test(datum, i, qp) * _rate * _phi(datum, j, qp);
+}

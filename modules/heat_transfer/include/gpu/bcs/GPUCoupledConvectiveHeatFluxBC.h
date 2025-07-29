@@ -24,37 +24,47 @@ public:
 
   KokkosCoupledConvectiveHeatFluxBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    Real q = 0;
-    Real u = _u(datum, qp);
-    for (unsigned int c = 0; c < _n_components; c++)
-      q += _alpha(datum, qp, c) * _htc(datum, qp, c) * (u - _T_infinity(datum, qp, c));
-    return _test(datum, i, qp) * q * _scale_factor(datum, qp);
-  }
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    Real dq = 0;
-    Real phi = _phi(datum, j, qp);
-    for (unsigned int c = 0; c < _n_components; c++)
-      dq += _alpha(datum, qp, c) * _htc(datum, qp, c) * phi;
-    return _test(datum, i, qp) * dq * _scale_factor(datum, qp);
-  }
+  KOKKOS_FUNCTION inline Real
+  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION inline Real computeQpJacobian(const unsigned int i,
+                                                const unsigned int j,
+                                                const unsigned int qp,
+                                                ResidualDatum & datum) const;
 
 private:
   /// The number of components
   const unsigned int _n_components;
   /// Far-field temperature fields for each component
-  Moose::Kokkos::VariableValue _T_infinity;
+  const Moose::Kokkos::VariableValue _T_infinity;
   /// Convective heat transfer coefficient
-  Moose::Kokkos::VariableValue _htc;
+  const Moose::Kokkos::VariableValue _htc;
   /// Volume fraction of individual phase
-  Moose::Kokkos::VariableValue _alpha;
+  const Moose::Kokkos::VariableValue _alpha;
   /// Scale factor
-  Moose::Kokkos::VariableValue _scale_factor;
+  const Moose::Kokkos::VariableValue _scale_factor;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosCoupledConvectiveHeatFluxBC::computeQpResidual(const unsigned int i,
+                                                     const unsigned int qp,
+                                                     ResidualDatum & datum) const
+{
+  Real q = 0;
+  Real u = _u(datum, qp);
+  for (unsigned int c = 0; c < _n_components; c++)
+    q += _alpha(datum, qp, c) * _htc(datum, qp, c) * (u - _T_infinity(datum, qp, c));
+  return _test(datum, i, qp) * q * _scale_factor(datum, qp);
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosCoupledConvectiveHeatFluxBC::computeQpJacobian(const unsigned int i,
+                                                     const unsigned int j,
+                                                     const unsigned int qp,
+                                                     ResidualDatum & datum) const
+{
+  Real dq = 0;
+  Real phi = _phi(datum, j, qp);
+  for (unsigned int c = 0; c < _n_components; c++)
+    dq += _alpha(datum, qp, c) * _htc(datum, qp, c) * phi;
+  return _test(datum, i, qp) * dq * _scale_factor(datum, qp);
+}

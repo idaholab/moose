@@ -22,18 +22,22 @@ public:
 
   KokkosCoupledForce(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return -_coef * _v(datum, qp) * _test(datum, i, qp);
-  }
+  KOKKOS_FUNCTION inline Real
+  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
 
 private:
   /// Coupled variable number
-  unsigned int _v_var;
+  const unsigned int _v_var;
   /// Coupled variable
-  Moose::Kokkos::VariableValue _v;
+  const Moose::Kokkos::VariableValue _v;
   /// Multiplier for the coupled force term
   const Real _coef;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosCoupledForce::computeQpResidual(const unsigned int i,
+                                      const unsigned int qp,
+                                      ResidualDatum & datum) const
+{
+  return -_coef * _v(datum, qp) * _test(datum, i, qp);
+}

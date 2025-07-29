@@ -11,27 +11,35 @@
 
 #include "GPUKernelValue.h"
 
+using Real3 = Moose::Kokkos::Real3;
+
 class KokkosConvectionPrecompute final
   : public Moose::Kokkos::KernelValue<KokkosConvectionPrecompute>
 {
-  using Real3 = Moose::Kokkos::Real3;
-
 public:
   static InputParameters validParams();
 
   KokkosConvectionPrecompute(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, ResidualDatum & datum) const
-  {
-    return _velocity * _grad_u(datum, qp);
-  }
-  KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int j,
-                                            const unsigned int qp,
-                                            ResidualDatum & datum) const
-  {
-    return _velocity * _grad_phi(datum, j, qp);
-  }
+  KOKKOS_FUNCTION inline Real precomputeQpResidual(const unsigned int qp,
+                                                   ResidualDatum & datum) const;
+  KOKKOS_FUNCTION inline Real
+  precomputeQpJacobian(const unsigned int j, const unsigned int qp, ResidualDatum & datum) const;
 
 private:
-  Real3 _velocity;
+  const Real3 _velocity;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosConvectionPrecompute::precomputeQpResidual(const unsigned int qp, ResidualDatum & datum) const
+{
+  return _velocity * _grad_u(datum, qp);
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosConvectionPrecompute::precomputeQpJacobian(const unsigned int j,
+                                                 const unsigned int qp,
+                                                 ResidualDatum & datum) const
+{
+  return _velocity * _grad_phi(datum, j, qp);
+}

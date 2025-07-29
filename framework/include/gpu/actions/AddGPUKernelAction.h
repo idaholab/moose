@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "MooseObjectAction.h"
+#include "KokkosObjectAction.h"
 
 /**
  * Adds a Kokkos kernel for GPU computation
  * Associated with the [KokkosKernels] syntax
  */
-class AddKokkosKernelAction : public MooseObjectAction
+class AddKokkosKernelAction : public KokkosObjectAction
 {
 public:
   static InputParameters validParams();

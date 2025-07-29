@@ -36,7 +36,7 @@ public:
   }
 
 protected:
-  Moose::Kokkos::VariableValue _var;
+  const Moose::Kokkos::VariableValue _var;
   Real _base;
   Real _coef;
   Moose::Kokkos::MaterialProperty<Real> _coupled_prop;

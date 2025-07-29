@@ -52,29 +52,12 @@ template <typename Derived>
 class Kernel : public KernelBase
 {
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = KernelBase::validParams();
-    params.registerBase("Kernel");
-    return params;
-  }
+  static InputParameters validParams();
 
   /**
    * Constructor
    */
-  Kernel(const InputParameters & parameters)
-    : KernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD), _u(_var), _grad_u(_var)
-  {
-    addMooseVariableDependency(&_var);
-  }
-
-  /**
-   * Copy constructor for parallel dispatch
-   */
-  Kernel(const Kernel<Derived> & object)
-    : KernelBase(object), _u(object._u), _grad_u(object._grad_u)
-  {
-  }
+  Kernel(const InputParameters & parameters);
 
   /**
    * Dispatch residual calculation
@@ -164,27 +147,27 @@ protected:
   /**
    * Current test function
    */
-  VariableTestValue _test;
+  const VariableTestValue _test;
   /**
    * Gradient of the current test function
    */
-  VariableTestGradient _grad_test;
+  const VariableTestGradient _grad_test;
   /**
    * Current shape function
    */
-  VariablePhiValue _phi;
+  const VariablePhiValue _phi;
   /**
    * Gradient of the current shape function
    */
-  VariablePhiGradient _grad_phi;
+  const VariablePhiGradient _grad_phi;
   /**
    * Current solution at quadrature points
    */
-  VariableValue _u;
+  const VariableValue _u;
   /**
    * Gradient of the current solution at quadrature points
    */
-  VariableGradient _grad_u;
+  const VariableGradient _grad_u;
 
   /**
    * Get whether computeQpJacobian() was not defined in the derived class
@@ -203,6 +186,28 @@ protected:
     return &Derived::computeQpOffDiagJacobian == &Kernel::computeQpOffDiagJacobian;
   }
 };
+
+template <typename Derived>
+InputParameters
+Kernel<Derived>::validParams()
+{
+  InputParameters params = KernelBase::validParams();
+  params.registerBase("Kernel");
+  return params;
+}
+
+template <typename Derived>
+Kernel<Derived>::Kernel(const InputParameters & parameters)
+  : KernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _test(),
+    _grad_test(),
+    _phi(),
+    _grad_phi(),
+    _u(_var),
+    _grad_u(_var)
+{
+  addMooseVariableDependency(&_var);
+}
 
 template <typename Derived>
 void

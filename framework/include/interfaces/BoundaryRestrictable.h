@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
 #include "GPUTypes.h"
 #endif
 
@@ -233,7 +233,7 @@ private:
    */
   void initializeBoundaryRestrictable();
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   void initializeKokkosBoundaryRestrictable(MooseMesh * mesh);
 #endif
 
@@ -244,27 +244,47 @@ protected:
    */
   bool hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const;
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_SCOPE
   /**
-   * Kokkos-related variables and methods
+   * Get the number of nodes this Kokkos object is operating on
+   * @returns The number of nodes local to this process
    */
-private:
-  /// List of local node IDs this Kokkos object is operating on
-  Moose::Kokkos::Array<dof_id_type> _node_ids;
-  /// List of local element ID - side index pairs this Kokkos object is operating on
-  Moose::Kokkos::Array<Moose::Kokkos::Pair<dof_id_type, unsigned int>> _element_side_ids;
+  KOKKOS_FUNCTION dof_id_type numBoundaryNodes() const { return _kokkos_node_ids.size(); }
+  /**
+   * Get the number of sides this Kokkos object is operating on
+   * @returns The number of sides local to this process
+   */
+  KOKKOS_FUNCTION dof_id_type numBoundarySides() const { return _kokkos_element_side_ids.size(); }
+  /**
+   * Get the node ID this Kokkos thread is operating on
+   * @param tid The thread ID
+   * @returns The node ID
+   */
+  KOKKOS_FUNCTION dof_id_type boundaryNodeID(dof_id_type tid) const
+  {
+    return _kokkos_node_ids[tid];
+  }
+  /**
+   * Get the element ID - side index pair this Kokkos thread is operating on
+   * @param tid The thread ID
+   * @returns The element ID - side index pair
+   */
+  KOKKOS_FUNCTION auto boundaryElementSideID(dof_id_type tid) const
+  {
+    return _kokkos_element_side_ids[tid];
+  }
 #endif
 
-#ifdef MOOSE_KOKKOS_SCOPE
-protected:
-  /// Get the number of local nodes this Kokkos object is operating on
-  KOKKOS_FUNCTION auto numBoundaryNodes() const { return _node_ids.size(); }
-  /// Get the number of local sides this Kokkos object is operating on
-  KOKKOS_FUNCTION auto numBoundarySides() const { return _element_side_ids.size(); }
-  /// Get the local node ID this Kokkos thread is operating on
-  KOKKOS_FUNCTION auto boundaryNodeID(size_t idx) const { return _node_ids[idx]; }
-  /// Get the local element ID - side index pair this Kokkos thread is operating on
-  KOKKOS_FUNCTION auto boundaryElementSideID(size_t idx) const { return _element_side_ids[idx]; }
+#ifdef MOOSE_KOKKOS_ENABLED
+private:
+  /**
+   * List of node IDs this Kokkos object is operating on
+   */
+  Moose::Kokkos::Array<dof_id_type> _kokkos_node_ids;
+  /**
+   * List of element ID - side index pairs this Kokkos object is operating on
+   */
+  Moose::Kokkos::Array<Moose::Kokkos::Pair<dof_id_type, unsigned int>> _kokkos_element_side_ids;
 #endif
 };
 

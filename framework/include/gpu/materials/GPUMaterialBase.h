@@ -124,18 +124,18 @@ protected:
    * Get the number of elements this material operates on for element material property evaluation
    * @returns The number of elements
    */
-  KOKKOS_FUNCTION auto numElements() const { return _element_ids.size(); }
+  KOKKOS_FUNCTION dof_id_type numElements() const { return _element_ids.size(); }
   /**
    * Get the number of sides this material is operating on for face material property evaluation
    * @returns The number of sides
    */
-  KOKKOS_FUNCTION auto numElementSides() const { return _element_side_ids.size(); }
+  KOKKOS_FUNCTION dof_id_type numElementSides() const { return _element_side_ids.size(); }
   /**
    * Get the element ID for a thread
    * @param tid The thread ID
    * @returns The element ID
    */
-  KOKKOS_FUNCTION auto elementID(dof_id_type tid) const { return _element_ids[tid]; }
+  KOKKOS_FUNCTION dof_id_type elementID(dof_id_type tid) const { return _element_ids[tid]; }
   /**
    * Get the element ID - side index pair for a thread
    * @param tid The thread ID

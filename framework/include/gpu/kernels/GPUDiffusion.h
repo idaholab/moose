@@ -21,30 +21,50 @@ class KokkosDiffusion : public Moose::Kokkos::Kernel<Derived>
   usingKokkosKernelMembers(Derived);
 
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = Moose::Kokkos::Kernel<Derived>::validParams();
-    return params;
-  }
+  static InputParameters validParams();
 
-  KokkosDiffusion(const InputParameters & parameters) : Moose::Kokkos::Kernel<Derived>(parameters)
-  {
-  }
+  KokkosDiffusion(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return _grad_u(datum, qp) * _grad_test(datum, i, qp);
-  }
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return _grad_phi(datum, j, qp) * _grad_test(datum, i, qp);
-  }
+  KOKKOS_FUNCTION inline Real
+  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION inline Real computeQpJacobian(const unsigned int i,
+                                                const unsigned int j,
+                                                const unsigned int qp,
+                                                ResidualDatum & datum) const;
 };
+
+template <typename Derived>
+InputParameters
+KokkosDiffusion<Derived>::validParams()
+{
+  InputParameters params = Moose::Kokkos::Kernel<Derived>::validParams();
+  return params;
+}
+
+template <typename Derived>
+KokkosDiffusion<Derived>::KokkosDiffusion(const InputParameters & parameters)
+  : Moose::Kokkos::Kernel<Derived>(parameters)
+{
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION inline Real
+KokkosDiffusion<Derived>::computeQpResidual(const unsigned int i,
+                                            const unsigned int qp,
+                                            ResidualDatum & datum) const
+{
+  return _grad_u(datum, qp) * _grad_test(datum, i, qp);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION inline Real
+KokkosDiffusion<Derived>::computeQpJacobian(const unsigned int i,
+                                            const unsigned int j,
+                                            const unsigned int qp,
+                                            ResidualDatum & datum) const
+{
+  return _grad_phi(datum, j, qp) * _grad_test(datum, i, qp);
+}
 
 class KokkosDiffusionKernel final : public KokkosDiffusion<KokkosDiffusionKernel>
 {

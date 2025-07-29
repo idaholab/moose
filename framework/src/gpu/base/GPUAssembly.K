@@ -110,8 +110,8 @@ Assembly::initQuadrature()
     std::map<ElemType, std::vector<unsigned int>> n_qps_face;
 
     auto & assembly = _problem.assembly(0, 0);
-    auto qrule = assembly.writeableQRule(_dimension, subdomain);
-    auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain);
+    auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
+    auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain, {});
 
     for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
     {
@@ -261,8 +261,8 @@ Assembly::initShape()
     auto sid = kokkosMesh().getSubdomainID(subdomain);
 
     auto & assembly = _problem.assembly(0, 0);
-    auto qrule = assembly.writeableQRule(_dimension, subdomain);
-    auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain);
+    auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
+    auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain, {});
 
     for (auto & [fe_type, fe_type_id] : _fe_type_map)
     {

@@ -1945,7 +1945,7 @@ printf "%s\n" "configuring with Kokkos support: $kokkos_support" >&6; }
 
 if test "$kokkos_support" = yes
 then :
-  printf "%s\n" "#define HAVE_KOKKOS 1" >>confdefs.h
+  printf "%s\n" "#define KOKKOS_ENABLED 1" >>confdefs.h
   kokkos_support=true
 fi
 

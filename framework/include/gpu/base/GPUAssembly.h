@@ -46,18 +46,18 @@ public:
    * @param type The libMesh FEType object
    * @returns The FE type ID
    */
-  auto getFETypeID(FEType type) const { return libmesh_map_find(_fe_type_map, type); }
+  unsigned int getFETypeID(FEType type) const { return libmesh_map_find(_fe_type_map, type); }
   /**
    * Get the maximum number of quadrature points per element across the entire mesh
    * @returns The maximum number of quadrature points per element
    */
-  KOKKOS_FUNCTION auto getMaxQpsPerElem() const { return _max_qps_per_elem.last(); }
+  KOKKOS_FUNCTION unsigned int getMaxQpsPerElem() const { return _max_qps_per_elem.last(); }
   /**
    * Get the maximum number of quadrature points per element for a subdomain
    * @param subdomain The subdomain ID
    * @returns The maximum number of quadrature points per element
    */
-  KOKKOS_FUNCTION auto getMaxQpsPerElem(SubdomainID subdomain) const
+  KOKKOS_FUNCTION unsigned int getMaxQpsPerElem(SubdomainID subdomain) const
   {
     return _max_qps_per_elem[subdomain];
   }
@@ -66,7 +66,7 @@ public:
    * @param subdomain The subdomain ID
    * @returns The number of quadrature points
    */
-  KOKKOS_FUNCTION auto getNumQps(SubdomainID subdomain) const
+  KOKKOS_FUNCTION dof_id_type getNumQps(SubdomainID subdomain) const
   {
     return _qp_offset[subdomain].last();
   }
@@ -75,7 +75,7 @@ public:
    * @param info The element information object
    * @returns The number of quadrature points
    */
-  KOKKOS_FUNCTION auto getNumQps(ElementInfo info) const
+  KOKKOS_FUNCTION unsigned int getNumQps(ElementInfo info) const
   {
     return _n_qps[info.subdomain][info.local_id];
   }
@@ -86,7 +86,7 @@ public:
    * @param subdomain The subdomain ID
    * @returns The number of quadrature points
    */
-  KOKKOS_FUNCTION auto getNumFaceQps(SubdomainID subdomain) const
+  KOKKOS_FUNCTION dof_id_type getNumFaceQps(SubdomainID subdomain) const
   {
     return _qp_offset_face[subdomain].last();
   }
@@ -96,7 +96,7 @@ public:
    * @param side The side index
    * @returns The number of quadrature points
    */
-  KOKKOS_FUNCTION auto getNumFaceQps(ElementInfo info, unsigned int side) const
+  KOKKOS_FUNCTION unsigned int getNumFaceQps(ElementInfo info, unsigned int side) const
   {
     return _n_qps_face[info.subdomain](side, info.local_id);
   }
@@ -106,7 +106,7 @@ public:
    * @param info The element information object
    * @returns The starting offset
    */
-  KOKKOS_FUNCTION auto getQpOffset(ElementInfo info) const
+  KOKKOS_FUNCTION dof_id_type getQpOffset(ElementInfo info) const
   {
     return _qp_offset[info.subdomain][info.local_id];
   }
@@ -117,7 +117,7 @@ public:
    * @param side The side index
    * @returns The starting offset
    */
-  KOKKOS_FUNCTION auto getQpFaceOffset(ElementInfo info, unsigned int side) const
+  KOKKOS_FUNCTION dof_id_type getQpFaceOffset(ElementInfo info, unsigned int side) const
   {
     return _qp_offset_face[info.subdomain](side, info.local_id);
   }
@@ -127,7 +127,7 @@ public:
    * @param fe_type The FE type ID
    * @returns The number of DOFs
    */
-  KOKKOS_FUNCTION auto getNumDofs(unsigned int elem_type, unsigned int fe_type) const
+  KOKKOS_FUNCTION unsigned int getNumDofs(unsigned int elem_type, unsigned int fe_type) const
   {
     return _n_dofs(elem_type, fe_type);
   }
@@ -185,7 +185,7 @@ public:
    * @param qp The local quadrature point index
    * @returns The inverse of Jacobian matrix
    */
-  KOKKOS_FUNCTION auto getJacobian(ElementInfo info, unsigned int qp) const
+  KOKKOS_FUNCTION Real33 getJacobian(ElementInfo info, unsigned int qp) const
   {
     return _jacobian[info.subdomain][getQpOffset(info) + qp];
   }
@@ -195,7 +195,7 @@ public:
    * @param qp The local quadrature point index
    * @returns The inverse of Jacobian matrix
    */
-  KOKKOS_FUNCTION auto getJxW(ElementInfo info, unsigned int qp) const
+  KOKKOS_FUNCTION Real getJxW(ElementInfo info, unsigned int qp) const
   {
     return _jxw[info.subdomain][getQpOffset(info) + qp];
   }
@@ -205,7 +205,7 @@ public:
    * @param qp The local quadrature point index
    * @returns The inverse of Jacobian matrix
    */
-  KOKKOS_FUNCTION auto getQPoint(ElementInfo info, unsigned int qp) const
+  KOKKOS_FUNCTION Real3 getQPoint(ElementInfo info, unsigned int qp) const
   {
     return _xyz[info.subdomain][getQpOffset(info) + qp];
   }
@@ -216,7 +216,8 @@ public:
    * @param point The point coordinate
    * @returns The coordinate transform factor
    */
-  KOKKOS_FUNCTION inline Real coordTransformFactor(SubdomainID subdomain, Real3 point) const;
+  KOKKOS_FUNCTION inline Real coordTransformFactor(const SubdomainID subdomain,
+                                                   const Real3 point) const;
   /**
    * Compute physical transformation data for an element
    * @param info The element information object
@@ -225,8 +226,11 @@ public:
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
    */
-  KOKKOS_FUNCTION inline void computePhysicalMap(
-      ElementInfo info, unsigned int qp, Real33 * jacobian, Real * JxW, Real3 * q_points) const;
+  KOKKOS_FUNCTION inline void computePhysicalMap(const ElementInfo info,
+                                                 const unsigned int qp,
+                                                 Real33 * const jacobian,
+                                                 Real * const JxW,
+                                                 Real3 * const q_points) const;
   /**
    * Compute physical transformation data for a side
    * @param info The element information object
@@ -236,12 +240,12 @@ public:
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
    */
-  KOKKOS_FUNCTION inline void computePhysicalMap(ElementInfo info,
-                                                 unsigned int side,
-                                                 unsigned int qp,
-                                                 Real33 * jacobian,
-                                                 Real * JxW,
-                                                 Real3 * q_points) const;
+  KOKKOS_FUNCTION inline void computePhysicalMap(const ElementInfo info,
+                                                 const unsigned int side,
+                                                 const unsigned int qp,
+                                                 Real33 * const jacobian,
+                                                 Real * const JxW,
+                                                 Real3 * const q_points) const;
 
   /**
    * Kokkos function for caching physical maps on element quadrature points
@@ -361,7 +365,7 @@ private:
 
 #ifdef MOOSE_KOKKOS_SCOPE
 KOKKOS_FUNCTION inline Real
-Assembly::coordTransformFactor(SubdomainID subdomain, Real3 point) const
+Assembly::coordTransformFactor(const SubdomainID subdomain, const Real3 point) const
 {
   switch (_coord_type[subdomain])
   {
@@ -381,8 +385,11 @@ Assembly::coordTransformFactor(SubdomainID subdomain, Real3 point) const
 }
 
 KOKKOS_FUNCTION inline void
-Assembly::computePhysicalMap(
-    ElementInfo info, unsigned int qp, Real33 * jacobian, Real * JxW, Real3 * q_points) const
+Assembly::computePhysicalMap(const ElementInfo info,
+                             const unsigned int qp,
+                             Real33 * const jacobian,
+                             Real * const JxW,
+                             Real3 * const q_points) const
 {
   auto sid = info.subdomain;
   auto eid = info.id;
@@ -414,12 +421,12 @@ Assembly::computePhysicalMap(
 }
 
 KOKKOS_FUNCTION inline void
-Assembly::computePhysicalMap(ElementInfo info,
-                             unsigned int side,
-                             unsigned int qp,
-                             Real33 * jacobian,
-                             Real * JxW,
-                             Real3 * q_points) const
+Assembly::computePhysicalMap(const ElementInfo info,
+                             const unsigned int side,
+                             const unsigned int qp,
+                             Real33 * const jacobian,
+                             Real * const JxW,
+                             Real3 * const q_points) const
 {
   auto sid = info.subdomain;
   auto eid = info.id;

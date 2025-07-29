@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
 #include "GPUMesh.h"
 #endif
 
@@ -670,7 +670,7 @@ public:
   /**
    * Accessor for Kokkos mesh object.
    */
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   const Moose::Kokkos::Mesh * getKokkosMesh() const { return _kokkos_mesh.get(); }
 #endif
 
@@ -1459,7 +1459,7 @@ protected:
   std::unique_ptr<libMesh::MeshBase> _mesh;
 
   /// Pointer to Kokkos mesh object
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   std::unique_ptr<Moose::Kokkos::Mesh> _kokkos_mesh;
 #endif
 

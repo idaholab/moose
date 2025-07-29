@@ -25,7 +25,7 @@ Matrix::create(libMesh::SparseMatrix<PetscScalar> & matrix, const System & syste
   PetscBool is_host;
   LibmeshPetscCallQ(MatBoundToCPU(petsc_matrix->mat(), &is_host));
 
-#ifndef MOOSE_KOKKOS_ENABLE_GPU
+#ifndef MOOSE_ENABLE_KOKKOS_GPU
   if (!is_host)
     mooseError("PETSc matrices must be on host when Kokkos device capabilities are disabled.");
 #endif
@@ -78,7 +78,7 @@ Matrix::close()
     _val.copy(MemcpyKind::DEVICE_TO_HOST);
 
   LibmeshPetscCallQ(
-      MatSetValuesCOO(_matrix, _is_host ? _val.host_data() : _val.device_data(), ADD_VALUES));
+      MatSetValuesCOO(_matrix, _is_host ? _val.hostData() : _val.deviceData(), ADD_VALUES));
 }
 
 } // namespace Kokkos

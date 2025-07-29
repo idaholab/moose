@@ -27,14 +27,18 @@ public:
 
   KokkosPostprocessorNeumannBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return -_test(datum, i, qp) * _value;
-  }
+  KOKKOS_FUNCTION inline Real
+  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
 
 protected:
   /// Value of grad(u) on the boundary.
   Moose::Kokkos::PostprocessorValue _value;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosPostprocessorNeumannBC::computeQpResidual(const unsigned int i,
+                                                const unsigned int qp,
+                                                ResidualDatum & datum) const
+{
+  return -_test(datum, i, qp) * _value;
+}

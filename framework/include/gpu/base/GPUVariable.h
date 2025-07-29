@@ -67,35 +67,35 @@ public:
    * Get whether the variable is coupled
    * @returns Whether the variable is coupled
    */
-  KOKKOS_FUNCTION auto coupled() const { return _coupled; }
+  KOKKOS_FUNCTION bool coupled() const { return _coupled; }
   /**
    * Get the number of components
    * @returns The number of components
    */
-  KOKKOS_FUNCTION auto components() { return _components; }
+  KOKKOS_FUNCTION unsigned int components() { return _components; }
   /**
    * Get the vector tag ID
    * @returns The vector tag ID
    */
-  KOKKOS_FUNCTION auto tag() const { return _tag; }
+  KOKKOS_FUNCTION TagID tag() const { return _tag; }
   /**
    * Get the variable number of a component
    * @param comp The variable component
    * @returns The variable number
    */
-  KOKKOS_FUNCTION auto var(unsigned int comp = 0) const { return _var[comp]; }
+  KOKKOS_FUNCTION unsigned int var(unsigned int comp = 0) const { return _var[comp]; }
   /**
    * Get the system number of a component
    * @param comp The variable component
    * @returns The system number
    */
-  KOKKOS_FUNCTION auto sys(unsigned int comp = 0) const { return _sys[comp]; }
+  KOKKOS_FUNCTION unsigned int sys(unsigned int comp = 0) const { return _sys[comp]; }
   /**
    * Get the default value of a component
    * @param comp The variable component
    * @returns The default value
    */
-  KOKKOS_FUNCTION auto value(unsigned int comp = 0) const
+  KOKKOS_FUNCTION Real value(unsigned int comp = 0) const
   {
     KOKKOS_ASSERT(!_coupled);
 

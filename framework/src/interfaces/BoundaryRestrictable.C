@@ -187,7 +187,7 @@ BoundaryRestrictable::initializeBoundaryRestrictable()
     }
   }
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   if (_moose_object.isParamValid("_kokkos_object"))
     initializeKokkosBoundaryRestrictable(_bnd_mesh);
 #endif

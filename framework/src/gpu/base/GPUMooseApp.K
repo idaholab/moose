@@ -23,13 +23,13 @@ MooseApp::queryGPUs()
 }
 
 void
-MooseApp::allocateKokkosMemoryPool(size_t size, unsigned int ways) const
+MooseApp::allocateKokkosMemoryPool(std::size_t size, unsigned int ways) const
 {
   _pool = std::make_unique<Moose::Kokkos::MemoryPool>(size, ways);
 }
 
 void
-MooseApp::deallocateKokkosMemoryPool() const
+MooseApp::deallocateKokkosMemoryPool()
 {
   _pool.reset();
 }

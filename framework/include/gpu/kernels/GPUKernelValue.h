@@ -43,16 +43,12 @@ class KernelValue : public Kernel<Derived>
   usingKokkosKernelMembers(Derived);
 
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = Kernel<Derived>::validParams();
-    return params;
-  }
+  static InputParameters validParams();
 
   /**
    * Constructor
    */
-  KernelValue(const InputParameters & parameters) : Kernel<Derived>(parameters) {}
+  KernelValue(const InputParameters & parameters);
 
   /**
    * Default methods to prevent compile errors even when these methods were not defined in the
@@ -94,6 +90,19 @@ protected:
     return &Derived::precomputeQpJacobian == &KernelValue::precomputeQpJacobian;
   }
 };
+
+template <typename Derived>
+InputParameters
+KernelValue<Derived>::validParams()
+{
+  InputParameters params = Kernel<Derived>::validParams();
+  return params;
+}
+
+template <typename Derived>
+KernelValue<Derived>::KernelValue(const InputParameters & parameters) : Kernel<Derived>(parameters)
+{
+}
 
 template <typename Derived>
 KOKKOS_FUNCTION void

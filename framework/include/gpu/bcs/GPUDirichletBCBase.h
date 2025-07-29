@@ -25,31 +25,12 @@ class DirichletBCBase : public NodalBC<Derived>
   usingKokkosNodalBCMembers(Derived);
 
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = NodalBC<Derived>::validParams();
-    params.addParam<bool>(
-        "preset",
-        true,
-        "Whether or not to preset the BC (apply the value before the solve begins).");
-    return params;
-  }
+  static InputParameters validParams();
 
   /**
    * Constructor
    */
-  DirichletBCBase(const InputParameters & parameters)
-    : NodalBC<Derived>(parameters), _preset(this->template getParam<bool>("preset"))
-  {
-  }
-
-  /**
-   * Copy constructor for parallel dispatch
-   */
-  DirichletBCBase(const DirichletBCBase<Derived> & object)
-    : NodalBC<Derived>(object), _preset(object._preset), _solution_tag(object._solution_tag)
-  {
-  }
+  DirichletBCBase(const InputParameters & parameters);
 
   /**
    * Get whether the value is to be preset
@@ -73,12 +54,7 @@ public:
    * @param node The node ID
    * @returns The residual contribution
    */
-  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const
-  {
-    auto bc = static_cast<const Derived *>(this);
-
-    return _u(node) - bc->computeValue(node);
-  }
+  KOKKOS_FUNCTION inline Real computeQpResidual(const dof_id_type node) const;
 
 private:
   /**
@@ -90,6 +66,22 @@ private:
    */
   TagID _solution_tag;
 };
+
+template <typename Derived>
+InputParameters
+DirichletBCBase<Derived>::validParams()
+{
+  InputParameters params = NodalBC<Derived>::validParams();
+  params.addParam<bool>(
+      "preset", true, "Whether or not to preset the BC (apply the value before the solve begins).");
+  return params;
+}
+
+template <typename Derived>
+DirichletBCBase<Derived>::DirichletBCBase(const InputParameters & parameters)
+  : NodalBC<Derived>(parameters), _preset(this->template getParam<bool>("preset"))
+{
+}
 
 template <typename Derived>
 void
@@ -115,6 +107,15 @@ DirichletBCBase<Derived>::operator()(const dof_id_type tid) const
     return;
 
   sys.getVectorDofValue(dof, _solution_tag) = bc->computeValue(node);
+}
+
+template <typename Derived>
+KOKKOS_FUNCTION inline Real
+DirichletBCBase<Derived>::computeQpResidual(const dof_id_type node) const
+{
+  auto bc = static_cast<const Derived *>(this);
+
+  return _u(node) - bc->computeValue(node);
 }
 
 } // namespace Kokkos

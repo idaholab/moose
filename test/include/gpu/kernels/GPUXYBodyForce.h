@@ -18,11 +18,15 @@ public:
 
   KokkosXYBodyForce(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return (datum.q_point(qp)(0) + datum.q_point(qp)(1)) *
-           KokkosBodyForce::computeQpResidual(i, qp, datum);
-  }
+  KOKKOS_FUNCTION inline Real
+  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosXYBodyForce::computeQpResidual(const unsigned int i,
+                                     const unsigned int qp,
+                                     ResidualDatum & datum) const
+{
+  return (datum.q_point(qp)(0) + datum.q_point(qp)(1)) *
+         KokkosBodyForce::computeQpResidual(i, qp, datum);
+}

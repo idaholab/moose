@@ -8,4 +8,4 @@ MFEM_DIR          := @mfem_library@
 ENABLE_NEML2      := @neml2_support@
 NEML2_DIR         := @neml2_library@
 ENABLE_KOKKOS     := @kokkos_support@
-KOKKOS_ENABLE_GPU := @kokkos_gpu@
+ENABLE_KOKKOS_GPU := @kokkos_gpu@

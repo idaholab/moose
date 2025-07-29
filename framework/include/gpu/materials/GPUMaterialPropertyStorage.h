@@ -132,12 +132,12 @@ private:
   /**
    * Material properties
    */
-  std::map<std::string, std::shared_ptr<MaterialPropertyBase>>
+  std::unordered_map<std::string, std::shared_ptr<MaterialPropertyBase>>
       _kokkos_props[MaterialData::max_state + 1];
   /**
    * Record of each material property
    */
-  std::map<std::string, Moose::Kokkos::PropRecord> _kokkos_prop_records;
+  std::unordered_map<std::string, Moose::Kokkos::PropRecord> _kokkos_prop_records;
 };
 
 } // namespace Kokkos
