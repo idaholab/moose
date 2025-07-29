@@ -46,7 +46,12 @@ public:
   /**
    * Return the proposed variance samples to facilitate decision making in reporters
    */
-  const std::vector<Real> & getVarSamples() const;
+  const std::vector<std::vector<Real>> & getVarSamples() const;
+
+  /**
+   * Return the number of experimental groups
+   */
+  const unsigned int & getNumExpGroups() const;
 
   /**
    * Return the priors to facilitate decision making in reporters
@@ -123,11 +128,15 @@ protected:
   /// Initial values of the input params to get the MCMC scheme started
   const std::vector<Real> & _initial_values;
 
+  /// Number of variances to calibrate
+  const unsigned int & _num_variances;
+
   /// Vectors of new proposed samples
   std::vector<std::vector<Real>> _new_samples;
 
   /// Vector of new proposed variance samples
-  std::vector<Real> _new_var_samples;
+  std::vector<std::vector<Real>> _new_var_samples;
+
 
   /// Vector of random numbers for decision making
   std::vector<Real> _rnd_vec;
