@@ -99,6 +99,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     git checkout ${LIBMESH_GIT_SHA}
     git submodule update --init --recursive
 
+    # Expose the compat cuda libraries that can be linked to for building without a GPU present
+    if [ -n "$CUDA_DIR" ]; then
+        export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}
+    fi
+
     # Build libMesh
     umask 022
     cd ${ROOT_BUILD_DIR}
