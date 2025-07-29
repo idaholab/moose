@@ -37,12 +37,10 @@ EquationSystem::VectorContainsName(const std::vector<std::string> & the_vector,
 }
 
 void
-EquationSystem::AddTrialVariableNameIfMissing(const std::string & trial_var_name)
+EquationSystem::AddCoupledVariableNameIfMissing(const std::string & coupled_var_name)
 {
-  if (!VectorContainsName(_coupled_var_names, trial_var_name))
-    _coupled_var_names.push_back(trial_var_name);
-  if (!VectorContainsName(_trial_var_names, trial_var_name))
-    _trial_var_names.push_back(trial_var_name);    
+  if (!VectorContainsName(_coupled_var_names, coupled_var_name))
+    _coupled_var_names.push_back(coupled_var_name); 
 }
 
 void
@@ -53,10 +51,25 @@ EquationSystem::AddTestVariableNameIfMissing(const std::string & test_var_name)
 }
 
 void
+EquationSystem::SetTrialVariableNames()
+{
+  // If a coupled variable has an equation associated with it,
+  // add it to the set of trial variables.
+  for (const auto& coupled_var_name : _coupled_var_names)
+  {
+    if (VectorContainsName(_test_var_names, coupled_var_name))
+      _trial_var_names.push_back(coupled_var_name);
+    else
+      _eliminated_var_names.push_back(coupled_var_name);
+  }
+  PrintTrialVarNames();
+}
+
+void
 EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
   AddTestVariableNameIfMissing(kernel->getTestVariableName());
-  AddTrialVariableNameIfMissing(kernel->getTrialVariableName());
+  AddCoupledVariableNameIfMissing(kernel->getTrialVariableName());
   auto trial_var_name = kernel->getTrialVariableName();
   auto test_var_name = kernel->getTestVariableName();
   if (!_kernels_map.Has(test_var_name))
@@ -79,7 +92,7 @@ void
 EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
 {
   AddTestVariableNameIfMissing(bc->getTestVariableName());
-  AddTrialVariableNameIfMissing(bc->getTrialVariableName());
+  AddCoupledVariableNameIfMissing(bc->getTrialVariableName());
   auto trial_var_name = bc->getTrialVariableName();
   auto test_var_name = bc->getTestVariableName();
   if (!_integrated_bc_map.Has(test_var_name))
@@ -159,7 +172,7 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
       mooseAssert(_test_var_names.size() == 1,
                   "Non-legacy assembly is only supported for single-variable systems");
       mooseAssert(
-          _test_var_names.size() == _coupled_var_names.size(),
+          _test_var_names.size() == _trial_var_names.size(),
           "Non-legacy assembly is only supported for single test and trial variable systems");
       FormSystem(op, trueX, trueRHS);
   }
@@ -214,9 +227,9 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
-    for (const auto j : index_range(_test_var_names))
+    for (const auto j : index_range(_trial_var_names))
     {
-      auto trial_var_name = _coupled_var_names.at(j);
+      auto trial_var_name = _trial_var_names.at(j);
 
       mfem::Vector aux_x, aux_rhs;
       mfem::ParLinearForm aux_lf(_test_pfespaces.at(i));
@@ -274,9 +287,9 @@ void
 EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
                                    Moose::MFEM::GridFunctions & gridfunctions)
 {
-  for (const auto i : index_range(_coupled_var_names))
+  for (const auto i : index_range(_trial_var_names))
   {
-    auto & trial_var_name = _coupled_var_names.at(i);
+    auto & trial_var_name = _trial_var_names.at(i);
     trueX.GetBlock(i).SyncAliasMemory(trueX);
     gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
@@ -306,6 +319,7 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
     _eliminated_variables.Register(test_var_name, gridfunctions.GetShared(test_var_name));
   }
+  SetTrialVariableNames();
 }
 
 void
@@ -401,12 +415,12 @@ EquationSystem::BuildEquationSystem()
 TimeDependentEquationSystem::TimeDependentEquationSystem() : _dt_coef(1.0) {}
 
 void
-TimeDependentEquationSystem::AddTrialVariableNameIfMissing(const std::string & var_name)
+TimeDependentEquationSystem::AddCoupledVariableNameIfMissing(const std::string & coupled_var_name)
 {
   // The TimeDependentEquationSystem operator expects to act on a vector of variable time
   // derivatives
-  std::string var_time_derivative_name = GetTimeDerivativeName(var_name);
-  EquationSystem::AddTrialVariableNameIfMissing(var_time_derivative_name);
+  std::string var_time_derivative_name = GetTimeDerivativeName(coupled_var_name);
+  EquationSystem::AddCoupledVariableNameIfMissing(var_time_derivative_name);
   if (!VectorContainsName(_trial_var_time_derivative_names, var_time_derivative_name))
     _trial_var_time_derivative_names.push_back(var_time_derivative_name);
 }
@@ -427,6 +441,32 @@ TimeDependentEquationSystem::SetTimeStep(double dt)
 }
 
 void
+TimeDependentEquationSystem::SetTrialVariableNames()
+{
+  // If a coupled variable has an equation associated with it,
+  // add it to the set of trial variables.
+  // Need thought for time derivatives...
+  for (const auto& coupled_var_name : _coupled_var_names)
+  {
+    for (const auto& test_var_name : _test_var_names)
+    {
+      const auto time_derivative_test_var_name = GetTimeDerivativeName(test_var_name); 
+      if (time_derivative_test_var_name==coupled_var_name)
+      {
+        if (!VectorContainsName(_trial_var_names, coupled_var_name))
+          _trial_var_names.push_back(coupled_var_name);
+      }
+      else
+      {
+        if (!VectorContainsName(_eliminated_var_names, coupled_var_name))
+          _eliminated_var_names.push_back(coupled_var_name);
+      }
+    }
+  }
+  PrintTrialVarNames();
+}
+
+void
 TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
   if (kernel->getTrialVariableName() == GetTimeDerivativeName(kernel->getTestVariableName()))
@@ -434,7 +474,7 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
     auto trial_var_name = kernel->getTrialVariableName();
     auto test_var_name = kernel->getTestVariableName();
     AddTestVariableNameIfMissing(test_var_name);
-    AddTrialVariableNameIfMissing(test_var_name);
+    AddCoupledVariableNameIfMissing(test_var_name);
     if (!_td_kernels_map.Has(test_var_name))
     {
       auto kernel_field_map =
@@ -586,9 +626,7 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 void
 TimeDependentEquationSystem::UpdateEquationSystem()
 {
-  BuildBilinearForms();
-  BuildMixedBilinearForms();
-  BuildLinearForms();
+  EquationSystem::BuildEquationSystem();
 }
 
 } // namespace Moose::MFEM
