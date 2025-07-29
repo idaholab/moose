@@ -20,6 +20,8 @@ InputTimes::validParams()
 
   // Times are known for all processes already
   params.set<bool>("auto_broadcast") = false;
+  // Input set the time sequence during initialization stage
+  params.set<bool>("dynamic_time_sequence") = false;
 
   return params;
 }

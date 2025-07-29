@@ -182,6 +182,7 @@ CompositionDT::getSequenceSteppersNextTime()
   for (auto & tss : time_sequence_steppers)
   {
     Real ts_time_to_hit = tss->getNextTimeInSequence();
+
     if (ts_time_to_hit - _time <= _dt_min)
     {
       tss->increaseCurrentStep();
