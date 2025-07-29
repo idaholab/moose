@@ -298,7 +298,7 @@ class RunApp(Tester):
         # Get the number of processors and threads the Tester requires
         ncpus = self.getProcs(options)
         nthreads = self.getThreads(options)
-        cli_args.append(f'--libtorch-device {options.device}')
+        cli_args.append(f'--compute-device {options.device}')
 
         if specs['redirect_output'] and ncpus > 1:
             cli_args.append('--keep-cout --redirect-output ' + self.name())

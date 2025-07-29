@@ -99,6 +99,9 @@ class MooseApp : public ConsoleStreamInterface,
                  public MooseBase
 {
 public:
+  /// Get the device accelerated computations are supposed to be running on.
+  std::optional<MooseEnum> getComputeDevice();
+
 #ifdef MOOSE_LIBTORCH_ENABLED
   /// Get the device torch is supposed to be running on.
   torch::DeviceType getLibtorchDevice() const { return _libtorch_device; }
@@ -1590,7 +1593,7 @@ private:
   std::unique_ptr<Backup> * const _initial_backup;
 
 #ifdef MOOSE_LIBTORCH_ENABLED
-  /// The libtorch device this app is using.
+  /// The libtorch device this app is using (converted from compute_device)
   const torch::DeviceType _libtorch_device;
 #endif
 

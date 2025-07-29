@@ -26,7 +26,7 @@ Options:
   --json                              Dumps all input file syntax in JSON format
   --json-search                       Dumps input file syntax matching a search in JSON format
   --language-server                   Starts a process to communicate with development tools using the language server protocol
-  --libtorch-device                   The device type we want to run libtorch on.
+  --compute-device                    The device type we want to run accelerated (libtorch, MFEM) computations on.
   --list-constructed-objects          List all moose object type names constructed by the master app factory
   --mesh-only <optional path>         Build and output the mesh only (Default: "<input_file_name>_in.e")
   --minimal                           Ignore input file and build a minimal application with Transient executioner
