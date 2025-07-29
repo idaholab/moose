@@ -31,6 +31,12 @@ ExodusTimeSequenceStepper::validParams()
 ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & parameters)
   : TimeSequenceStepperBase(parameters), _mesh_file(getParam<MeshFileName>("mesh"))
 {
+
+}
+
+void
+ExodusTimeSequenceStepper::init()
+{
   // Read the Exodus file on processor 0
   std::vector<Real> times;
   if (processor_id() == 0)
@@ -53,4 +59,5 @@ ExodusTimeSequenceStepper::ExodusTimeSequenceStepper(const InputParameters & par
   _communicator.broadcast(times);
 
   setupSequence(times);
+
 }
