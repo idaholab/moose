@@ -58,7 +58,7 @@ class TestInlineCivet(CivetTestCase):
         self.assertURL(ast(0, 0))
 
 
-@unittest.skipIf(requests.get('https://civet.inl.gov/job_results/3074159').status_code != 200, "CIVET job results not available")
+@unittest.skipIf(requests.get('https://civet.inl.gov/job_results/3074159').status_code != requests.codes.ok, "CIVET job results not available")
 class TestInlineCivetWithConfig(CivetTestCase):
     EXTENSIONS = [core, command, civet]
     RESULTS = "[!civet!results](Results)"
