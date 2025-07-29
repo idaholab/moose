@@ -22,6 +22,8 @@ ExodusFileTimes::validParams()
   params.addRequiredParam<std::vector<FileName>>("files", "Exodus file(s) with the times");
   // File is loaded only on zeroth process
   params.set<bool>("auto_broadcast") = true;
+  // Exodus file set the time sequence during initialization stage
+  params.set<bool>("dynamic_time_sequence") = false;
 
   return params;
 }
