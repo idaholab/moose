@@ -9,8 +9,8 @@ InputParameters
 MFEMVectorProjectAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
-  params.addClassDescription("Projects a VectorCoefficient into a AuxVariable.");
-  params.addRequiredParam<std::string>("coefficient", "Name of the VectorCoefficient to project.");
+  params.addClassDescription("Projects a Vector Coefficient into a vector MFEMVariable.");
+  params.addRequiredParam<std::string>("coefficient", "Name of the Vector Coefficient to project.");
   return params;
 }
 

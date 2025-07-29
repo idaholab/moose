@@ -9,8 +9,8 @@ InputParameters
 MFEMScalarProjectAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
-  params.addClassDescription("Projects a scalar Coefficient into a scalar AuxVariable.");
-  params.addRequiredParam<std::string>("coefficient", "Name of the scalar Coefficient to project.");
+  params.addClassDescription("Projects a Scalar Coefficient into a scalea MFEMVariable");
+  params.addRequiredParam<std::string>("coefficient", "Name of the Scalar Coefficient to project.");
   return params;
 }
 
