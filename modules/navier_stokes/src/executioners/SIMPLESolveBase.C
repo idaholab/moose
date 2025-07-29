@@ -303,7 +303,7 @@ SIMPLESolveBase::validParams()
       "turbulence_field_min_limit",
       std::vector<Real>(),
       "The lower limit imposed on turbulent quantities. The recommended value for robustness "
-      "is 1e-8.");
+      "is 1e-8. This is the imposed default if not set.");
 
   params.addParam<MultiMooseEnum>("turbulence_petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
