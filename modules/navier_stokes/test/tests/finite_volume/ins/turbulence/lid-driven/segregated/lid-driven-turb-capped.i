@@ -62,6 +62,8 @@ pressure_tag = "pressure_grad"
     x_function = 'if(x<side_length*1.001 / 2 & x > side_length * 0.999 / 2, x * 1.05, x)'
     y_function = 'if(y<side_length*1.001 / 2 & y > side_length * 0.999 / 2, y * 1.05, y)'
   []
+  # Prevent test diffing on distributed parallel element numbering
+  allow_renumbering = false
 []
 
 [Problem]
@@ -99,11 +101,13 @@ pressure_tag = "pressure_grad"
     type = INSFVEnergyVariable
     solver_sys = TKE_system
     initial_condition = ${k_init}
+    two_term_boundary_expansion = false
   []
   [TKED]
     type = INSFVEnergyVariable
     solver_sys = TKED_system
     initial_condition = ${eps_init}
+    two_term_boundary_expansion = false
   []
 []
 
@@ -352,9 +356,57 @@ pressure_tag = "pressure_grad"
 []
 
 [Outputs]
-  exodus = true
-  csv = false
+  csv = true
   perf_graph = false
   print_nonlinear_residuals = false
   print_linear_residuals = true
+[]
+
+[VectorPostprocessors]
+  [side_bottom]
+    type = SideValueSampler
+    boundary = 'bottom'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [side_top]
+    type = SideValueSampler
+    boundary = 'top'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [side_left]
+    type = SideValueSampler
+    boundary = 'left'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'y'
+    execute_on = 'timestep_end'
+  []
+  [side_right]
+    type = SideValueSampler
+    boundary = 'right'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'y'
+    execute_on = 'timestep_end'
+  []
+  [horizontal_center]
+    type = LineValueSampler
+    start_point = '${fparse 0.01 * side_length} ${fparse 0.499 * side_length} 0'
+    end_point = '${fparse 0.99 * side_length} ${fparse 0.499 * side_length} 0'
+    num_points = ${Mesh/gen/nx}
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [vertical_center]
+    type = LineValueSampler
+    start_point = '${fparse 0.499 * side_length} ${fparse 0.01 * side_length} 0'
+    end_point = '${fparse 0.499 * side_length} ${fparse 0.99 * side_length} 0'
+    num_points =  ${Mesh/gen/ny}
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'y'
+    execute_on = 'timestep_end'
+  []
 []
