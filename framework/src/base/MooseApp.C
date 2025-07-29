@@ -3578,7 +3578,7 @@ MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMEx
     _mfem_devices = std::move(string_set);
     _mfem_device->Print(Moose::out);
   }
-  else if (string_set != _mfem_devices)
+  else if (!device_string.empty() && string_set != _mfem_devices)
     mooseError("Attempted to configure with MFEM devices '",
                MooseUtils::join(string_set, " "),
                "', but we have already configured the MFEM device object with the devices '",
