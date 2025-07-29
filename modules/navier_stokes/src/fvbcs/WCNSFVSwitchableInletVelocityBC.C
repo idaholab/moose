@@ -48,10 +48,14 @@ WCNSFVSwitchableInletVelocityBC::boundaryValue(const FaceInfo & fi,
     // The two-term expansion = false piece is critical as it prevents infinite recursion that would
     // occur with a Green-Gauss gradient calculation which would call back to this "Dirichlet"
     // object
-    return _var.getExtrapolatedBoundaryFaceValue(fi,
-                                                 /*two_term_expansion=*/false,
-                                                 /*correct_skewness=*/false,
-                                                 fi.elemPtr(),
-                                                 state) *
+    return _var.getExtrapolatedBoundaryFaceValue(
+               fi,
+               /*two_term_expansion=*/false,
+               /*correct_skewness=*/false,
+               (fi.faceType(std::make_pair(_var.number(), _var.sys().number())) ==
+                FaceInfo::VarFaceNeighbors::ELEM)
+                   ? fi.elemPtr()
+                   : fi.neighborPtr(),
+               state) *
            _face_limiter;
 }
