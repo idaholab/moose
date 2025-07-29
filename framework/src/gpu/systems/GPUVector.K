@@ -17,6 +17,8 @@ namespace Moose
 namespace Kokkos
 {
 
+#ifdef DEVICE_ASSEMBLY
+
 void
 Vector::DeviceAssembly::create(const Array<Array<libMesh::dof_id_type>> & list)
 {
@@ -45,6 +47,20 @@ Vector::DeviceAssembly::destroy()
   offset.destroy();
   buffer.destroy();
 }
+
+KOKKOS_FUNCTION void
+Vector::operator()(PackBuffer, const PetscCount tid) const
+{
+  _send.buffer[_send.offset[_current_proc] + tid] = _ghost(_send.list[_current_proc][tid]);
+}
+
+KOKKOS_FUNCTION void
+Vector::operator()(UnpackBuffer, const PetscCount tid) const
+{
+  _local[_recv.list[_current_proc][tid]] += _recv.buffer[_recv.offset[_current_proc] + tid];
+}
+
+#endif
 
 void
 Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & system, bool assemble)
@@ -79,8 +95,12 @@ Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & syst
   if (realloc)
   {
     _comm = nullptr;
+
+#ifdef DEVICE_ASSEMBLY
     _send.destroy();
     _recv.destroy();
+#endif
+
     _local.destroy();
     _ghost.destroy();
   }
@@ -150,8 +170,11 @@ Vector::destroy()
   _system = nullptr;
   _comm = nullptr;
 
+#ifdef DEVICE_ASSEMBLY
   _send.destroy();
   _recv.destroy();
+#endif
+
   _local.destroy();
   _ghost.destroy();
 
@@ -247,18 +270,6 @@ Vector::close()
                    ADD_VALUES));
 
 #endif
-}
-
-KOKKOS_FUNCTION void
-Vector::operator()(PackBuffer, const PetscCount tid) const
-{
-  _send.buffer[_send.offset[_current_proc] + tid] = _ghost(_send.list[_current_proc][tid]);
-}
-
-KOKKOS_FUNCTION void
-Vector::operator()(UnpackBuffer, const PetscCount tid) const
-{
-  _local[_recv.list[_current_proc][tid]] += _recv.buffer[_recv.offset[_current_proc] + tid];
 }
 
 } // namespace Kokkos
