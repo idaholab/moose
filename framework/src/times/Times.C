@@ -32,6 +32,8 @@ Times::validParams()
   params.suppressParameter<MaterialPropertyName>("prop_getter_suffix");
   params.suppressParameter<bool>("use_interpolated_state");
 
+  params.addParam<bool>("dynamic_time_sequence", true, "Whether the time sequence is dynamic");
+
   params.registerBase("Times");
   return params;
 }
@@ -44,7 +46,8 @@ Times::Times(const InputParameters & parameters)
     _need_broadcast(getParam<bool>("auto_broadcast")),
     _need_sort(getParam<bool>("auto_sort")),
     _need_unique(getParam<bool>("unique_times")),
-    _unique_tol(getParam<Real>("unique_tolerance"))
+    _unique_tol(getParam<Real>("unique_tolerance")),
+    _dynamic_time_sequence(getParam<bool>("dynamic_time_sequence"))
 {
 }
 
