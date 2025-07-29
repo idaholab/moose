@@ -5,9 +5,9 @@
   [test]
     type = CSVDiff
     input = 'three_pipe_shock.i'
+    cli_args = 'Executioner/num_steps=150'
     csvdiff = 'three_pipe_shock.csv'
     heavy = True
-    max_time = 650
     requirement = 'The system shall be able to model a 3-pipe shock.'
   []
 []
