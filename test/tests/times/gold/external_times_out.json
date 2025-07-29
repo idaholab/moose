@@ -1,0 +1,89 @@
+{
+    "reporters": {
+        "external_input": {
+            "type": "DynamicInputTimes",
+            "values": {
+                "times": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "external_input": {
+                "times": [
+                    0.0,
+                    0.01
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.0,
+                    0.01,
+                    0.52
+                ]
+            },
+            "time": 0.01,
+            "time_step": 1
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.0,
+                    0.01,
+                    0.52,
+                    0.92
+                ]
+            },
+            "time": 0.21000000000000002,
+            "time_step": 2
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.0,
+                    0.01,
+                    0.52,
+                    0.92,
+                    1.32
+                ]
+            },
+            "time": 0.41000000000000003,
+            "time_step": 3
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.0,
+                    0.01,
+                    0.52,
+                    0.92,
+                    1.32,
+                    1.54
+                ]
+            },
+            "time": 0.52,
+            "time_step": 4
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.0,
+                    0.01,
+                    0.52,
+                    0.92,
+                    1.32,
+                    1.54,
+                    1.94
+                ]
+            },
+            "time": 0.72,
+            "time_step": 5
+        }
+    ]
+}
