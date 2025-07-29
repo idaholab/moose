@@ -113,15 +113,36 @@ PolycrystalDiffusivityTensorBase::computeProperties()
         {
           Real detax = (*_grad_vals[i])[_qp](0) - (*_grad_vals[j])[_qp](0);
           Real detay = (*_grad_vals[i])[_qp](1) - (*_grad_vals[j])[_qp](1);
+          Real detaz = (*_grad_vals[i])[_qp](2) - (*_grad_vals[j])[_qp](2);
           Real norm4 = pow(((*_grad_vals[i])[_qp] - (*_grad_vals[j])[_qp]).norm(), 4.0);
-          // Derivatives wrt dc/dx
-          dTgbi(0, 0, 0) = -2.0 * detax * detay * detay / norm4;
-          dTgbi(1, 0, 0) = dTgbi(0, 1, 0) = (detax * detax * detay - detay * detay * detay) / norm4;
+          // Derivatives wrt detai/dx
+          dTgbi(0, 0, 0) = -2.0 * detax * (detay * detay + detaz * detaz) / norm4;
+          dTgbi(1, 0, 0) = dTgbi(0, 1, 0) =
+              (detax * detax * detay - detay * detay * detay - detay * detaz * detaz) / norm4;
           dTgbi(1, 1, 0) = 2.0 * detax * detay * detay / norm4;
-          // Derivatives wrt dc/dy
+          dTgbi(2, 0, 0) = dTgbi(0, 2, 0) =
+              (detax * detax * detaz - detay * detay * detaz - detaz * detaz * detaz) / norm4;
+          dTgbi(2, 1, 0) = dTgbi(1, 2, 0) = 2.0 * detax * detay * detaz / norm4;
+          dTgbi(2, 2, 0) = 2.0 * detax * detaz * detaz / norm4;
+          // Derivatives wrt detai/dy
           dTgbi(0, 0, 1) = 2.0 * detax * detax * detay / norm4;
-          dTgbi(1, 0, 1) = dTgbi(0, 1, 1) = (detax * detay * detay - detax * detax * detax) / norm4;
-          dTgbi(1, 1, 1) = -2.0 * detax * detax * detay / norm4;
+          dTgbi(1, 0, 1) = dTgbi(0, 1, 1) =
+              (-detax * detax * detax + detax * detay * detay - detax * detaz * detaz) / norm4;
+          dTgbi(1, 1, 1) = -2.0 * detay * (detax * detax + detaz * detaz) / norm4;
+          dTgbi(2, 0, 1) = dTgbi(0, 2, 1) = 2.0 * detax * detay * detaz / norm4;
+          dTgbi(2, 1, 1) = dTgbi(1, 2, 1) =
+              (detay * detay * detaz - detax * detax * detaz - detaz * detaz * detaz) / norm4;
+          dTgbi(2, 2, 1) = 2.0 * detay * detaz * detaz / norm4;
+
+          // Derivatives wrt detai/dz
+          dTgbi(0, 0, 2) = 2.0 * detax * detax * detaz / norm4;
+          dTgbi(1, 0, 2) = dTgbi(0, 1, 2) = 2.0 * detax * detay * detaz / norm4;
+          dTgbi(1, 1, 2) = 2.0 * detay * detay * detaz / norm4;
+          dTgbi(2, 0, 2) = dTgbi(0, 2, 2) =
+              (detax * detaz * detaz - detax * detax * detax - detay * detay * detax) / norm4;
+          dTgbi(2, 1, 2) = dTgbi(1, 2, 2) =
+              (detay * detaz * detaz - detax * detax * detay - detay * detay * detay) / norm4;
+          dTgbi(2, 2, 2) = -2.0 * detaz * (detax * detax + detay * detay) / norm4;
 
           dTgbj = -dTgbi;
         }
