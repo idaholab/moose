@@ -26,7 +26,7 @@ KokkosCoupledForceNodalKernel::validParams()
 KokkosCoupledForceNodalKernel::KokkosCoupledForceNodalKernel(const InputParameters & parameters)
   : NodalKernel(parameters),
     _v_var(coupled("v")),
-    _v(KokkosCoupledNodalValue("v")),
+    _v(kokkosCoupledNodalValue("v")),
     _coef(getParam<Real>("coef"))
 {
   if (_var.number() == _v_var)

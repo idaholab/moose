@@ -161,7 +161,7 @@ public:
                             const std::string & name,
                             InputParameters & parameters);
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Adds a Kokkos kernel
    * @param kernel_name The type of the kernel
@@ -304,7 +304,7 @@ public:
 
   void setInitialSolution();
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   void setKokkosInitialSolution();
 #endif
 
@@ -772,7 +772,7 @@ protected:
   /**
    * Compute residual with Kokkos objects
    */
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   void computeKokkosResidual(const std::set<TagID> & tags);
 #endif
 
@@ -805,7 +805,7 @@ protected:
   /**
    * Compute Jacobian with Kokkos objects
    */
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   void computeKokkosJacobian(const std::set<TagID> & tags);
 #endif
 

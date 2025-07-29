@@ -32,7 +32,7 @@ public:
 
 private:
   const bool _has_temp;
-  Moose::Kokkos::VariableValue _temperature;
+  const Moose::Kokkos::VariableValue _temperature;
 
   const Real _my_thermal_conductivity;
   const Real _my_specific_heat;

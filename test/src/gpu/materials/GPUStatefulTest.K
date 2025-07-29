@@ -25,7 +25,7 @@ KokkosStatefulTest::validParams()
 
 KokkosStatefulTest::KokkosStatefulTest(const InputParameters & parameters)
   : Material(parameters),
-    _coupled_val(isParamValid("coupled") ? KokkosCoupledValue("coupled") : KokkosZeroValue()),
+    _coupled_val(isParamValid("coupled") ? kokkosCoupledValue("coupled") : kokkosZeroValue()),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
     _prop_values(getParam<std::vector<Real>>("prop_values"))
 {

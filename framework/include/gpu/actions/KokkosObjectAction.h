@@ -9,18 +9,15 @@
 
 #pragma once
 
-#include "KokkosObjectAction.h"
+#include "MooseObjectAction.h"
 
 /**
- * Adds a Kokkos boundary condition for GPU computation
- * Associated with the [KokkosBCs] syntax
+ * Base class for actions adding Kokkos objects
  */
-class AddKokkosBCAction : public KokkosObjectAction
+class KokkosObjectAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  AddKokkosBCAction(const InputParameters & params);
-
-  virtual void act() override;
+  KokkosObjectAction(const InputParameters & params, const std::string object_type);
 };
