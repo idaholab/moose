@@ -30,7 +30,7 @@ MFEMParsedFunction::validParams()
 MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     FunctionParserUtils(parameters),
-    _function(getParam<std::string>("expression")),    
+    _function(getParam<std::string>("expression")),
     _var_names(getParam<std::vector<std::string>>("var_names")),
     _use_xyzt(getParam<bool>("use_xyzt")),
     _xyzt({"x", "y", "z", "t"}),
@@ -78,9 +78,9 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
           _communicator.barrier();
       }
 
-    // declares MFEMScalarParsedCoeff
-    getMFEMProblem().getCoefficients().declareScalar<MFEMScalarParsedCoeff>(name(), 
-    getMFEMProblem().getProblemData().gridfunctions, _var_names, _use_xyzt, _func_F);
+      // declares MFEMScalarParsedCoeff
+      getMFEMProblem().getCoefficients().declareScalar<MFEMScalarParsedCoeff>(
+          name(), getMFEMProblem().getProblemData().gridfunctions, _var_names, _use_xyzt, _func_F);
 }
 
 MFEMParsedFunction::~MFEMParsedFunction() {}
