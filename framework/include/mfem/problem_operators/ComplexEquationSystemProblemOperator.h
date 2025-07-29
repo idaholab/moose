@@ -30,7 +30,7 @@ public:
   void Init(mfem::BlockVector & X) override;
   virtual void Solve(mfem::Vector & X) override;
 
-  [[nodiscard]] Moose::MFEM::ComplexEquationSystem * GetEquationSystem() const
+  [[nodiscard]] Moose::MFEM::ComplexEquationSystem * GetEquationSystem() const override
   {
     if (!_equation_system)
     {
@@ -43,7 +43,7 @@ public:
 private:
   std::shared_ptr<Moose::MFEM::ComplexEquationSystem> _equation_system{nullptr};
   std::vector<mfem::ParComplexGridFunction *> _cpx_test_variables;
-  std::vector<mfem::ParComplexGridFunction *> _cpx_trial_variables;
+  std::vector<mfem::ParComplexGridFunction *> _trial_variables;
 };
 
 } // namespace Moose::MFEM

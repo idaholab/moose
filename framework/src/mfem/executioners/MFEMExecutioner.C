@@ -36,6 +36,7 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & parameters)
     _problem_data(_mfem_problem.getProblemData())
 {
   _app.setMFEMDevice(getParam<std::string>("device"), Moose::PassKey<MFEMExecutioner>());
+  setNumericType();
 }
 
 void

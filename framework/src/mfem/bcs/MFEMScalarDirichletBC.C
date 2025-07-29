@@ -29,10 +29,9 @@ MFEMScalarDirichletBC::validParams()
 
 MFEMScalarDirichletBC::MFEMScalarDirichletBC(const InputParameters & parameters)
   : MFEMEssentialBC(parameters),
-    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient"))),
-    _coef_imag(isParamValid("coefficient_imag")
-                   ? getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient_imag"))
-                   : getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+    _coef(getScalarCoefficient("coefficient")),
+    _coef_imag(isParamValid("coefficient_imag") ? getScalarCoefficient("coefficient_imag")
+                                                : getScalarCoefficient("coefficient"))
 {
 }
 
