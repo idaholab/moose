@@ -36,24 +36,24 @@ TimeSequenceFromTimes::init()
   setupSequence(_time_points);
 }
 
-void TimeSequenceFromTimes::updateTimeSequence()
+void
+TimeSequenceFromTimes::updateTimeSequence()
 {
   resetSequence();
   setupSequence(_time_points);
 }
 
-
 Real
 TimeSequenceFromTimes::computeDT()
 {
   if (_times.isDynamicTimeSequence())
-  updateTimeSequence();
+    updateTimeSequence();
 
   return TimeSequenceStepperBase::computeDT();
 }
 
-
-Real TimeSequenceFromTimes::getNextTimeInSequence()
+Real
+TimeSequenceFromTimes::getNextTimeInSequence()
 {
   if (_times.isDynamicTimeSequence())
     updateTimeSequence();
