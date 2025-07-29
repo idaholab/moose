@@ -368,11 +368,16 @@ MooseApp::validParams()
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default");
 
-  MooseEnum libtorch_device_type("cpu cuda mps", "cpu");
+  MooseEnum compute_device_type("cpu cuda mps hip ceed-cpu ceed-cuda ceed-hip", "cpu");
   params.addCommandLineParam<MooseEnum>("libtorch_device",
                                         "--libtorch-device",
-                                        libtorch_device_type,
-                                        "The device type we want to run libtorch on.");
+                                        compute_device_type,
+                                        "Deprecated. Use --compute-device.");
+  params.addCommandLineParam<MooseEnum>(
+      "compute_device",
+      "--compute-device",
+      compute_device_type,
+      "The device type we want to run accelerated (libtorch, MFEM) computations on.");
 
 #ifdef HAVE_GPERFTOOLS
   params.addCommandLineParam<std::string>(
@@ -512,7 +517,9 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
 #ifdef MOOSE_LIBTORCH_ENABLED
     ,
-    _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("libtorch_device")))
+    _libtorch_device(determineLibtorchDeviceType(isParamSetByUser("libtorch_device")
+                                                     ? getParam<MooseEnum>("libtorch_device")
+                                                     : getParam<MooseEnum>("compute_device")))
 #endif
 #ifdef MOOSE_MFEM_ENABLED
     ,
@@ -526,6 +533,13 @@ MooseApp::MooseApp(const InputParameters & parameters)
             : std::set<std::string>{})
 #endif
 {
+  if (isParamSetByUser("libtorch_device"))
+  {
+    mooseDeprecated("--libtorch-device has been renamed --compute-device.");
+    if (isParamSetByUser("compute_device"))
+      mooseError("Remove the redundant --libtorch-device option.");
+  }
+
   if (&parameters != &_pars)
   {
     const auto show_trace = Moose::show_trace;
@@ -782,6 +796,16 @@ MooseApp::MooseApp(const InputParameters & parameters)
   registerCapabilities();
 
   Moose::out << std::flush;
+}
+
+std::optional<MooseEnum>
+MooseApp::getComputeDevice()
+{
+  if (isParamSetByUser("libtorch_device"))
+    return getParam<MooseEnum>("libtorch_device");
+  if (isParamSetByUser("compute_device"))
+    return getParam<MooseEnum>("compute_device");
+  return {};
 }
 
 void
@@ -3510,24 +3534,29 @@ MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum) const
   {
 #ifdef __linux__
     if (!torch::cuda::is_available())
-      mooseError("--libtorch-device=cuda: CUDA is not available");
+      mooseError(
+          "--compute-device=cuda: CUDA support is not available in the linked libtorch library");
     return torch::kCUDA;
 #else
-    mooseError("--libtorch-device=cuda: CUDA is not supported on your platform");
+    mooseError("--compute-device=cuda: CUDA is not supported on your platform");
 #endif
   }
   else if (device_enum == "mps")
   {
 #ifdef __APPLE__
     if (!torch::mps::is_available())
-      mooseError("--libtorch-device=mps: MPS is not available");
+      mooseError(
+          "--compute-device=mps: MPS support is not available in the linked libtorch library");
     return torch::kMPS;
 #else
-    mooseError("--libtorch-device=mps: MPS is not supported on your platform");
+    mooseError("--compute-device=mps: MPS is not supported on your platform");
 #endif
   }
 
-  mooseAssert(device_enum == "cpu", "Should be cpu");
+  else if (device_enum != "cpu")
+    mooseError("The device '",
+               device_enum,
+               "' is not currently supported by the MOOSE libtorch integration.");
   return torch::kCPU;
 }
 #endif
