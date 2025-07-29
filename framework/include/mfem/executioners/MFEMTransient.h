@@ -31,7 +31,7 @@ public:
   virtual void takeStep(Real input_dt = -1.0) override;
 
   /// Not supported for MFEM problems, so error if called.
-  virtual Real relativeSolutionDifferenceNorm() override
+  virtual Real relativeSolutionDifferenceNorm(bool /*check_aux*/) const override
   {
     mooseError("MFEMTransient executioner does not yet support evaluating the relative solution "
                "difference norm at each timestep.");
