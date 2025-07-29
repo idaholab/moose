@@ -68,6 +68,7 @@
     cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Executioner/device=ceed-cpu '
                'Executioner/assembly_level=none'
+    devices = 'ceed-cpu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
     capabilities = 'mfem'
@@ -165,6 +166,7 @@
                'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Executioner/assembly_level=none '
                'Executioner/device=ceed-cpu'
+    devices = 'ceed-cpu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
     capabilities = 'mfem'
