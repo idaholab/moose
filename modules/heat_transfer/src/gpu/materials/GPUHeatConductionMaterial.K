@@ -33,7 +33,7 @@ KokkosHeatConductionMaterial::validParams()
 KokkosHeatConductionMaterial::KokkosHeatConductionMaterial(const InputParameters & parameters)
   : Material(parameters),
     _has_temp(isCoupled("temp")),
-    _temperature(_has_temp ? KokkosCoupledValue("temp") : KokkosZeroValue()),
+    _temperature(_has_temp ? kokkosCoupledValue("temp") : kokkosZeroValue()),
     _my_thermal_conductivity(getParam<Real>("thermal_conductivity")),
     _my_specific_heat(getParam<Real>("specific_heat")),
     _thermal_conductivity(declareKokkosProperty<Real>("thermal_conductivity")),

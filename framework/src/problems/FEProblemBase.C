@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
 #include "GPUMaterialPropertyStorage.h"
 #endif
 
@@ -421,7 +421,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _solver_systems(_num_nl_sys + _num_linear_sys, nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_assembly(*this),
 #endif
     _mesh_divisions(/*threaded=*/true),
@@ -431,7 +431,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
         "bnd_material_props", &_mesh, _material_prop_registry, *this)),
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
         "neighbor_material_props", &_mesh, _material_prop_registry, *this)),
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_material_props(
         declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(
             "kokkos_material_props", &_mesh, _material_prop_registry, *this)),
@@ -970,7 +970,7 @@ FEProblemBase::initialSetup()
       for (auto props : {&_material_props, &_bnd_material_props, &_neighbor_material_props})
         props->setRecovering();
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
       for (auto props :
            {&_kokkos_material_props, &_kokkos_bnd_material_props, &_kokkos_neighbor_material_props})
         props->setRecovering();
@@ -1162,7 +1162,7 @@ FEProblemBase::initialSetup()
           _neighbor_material_props.hasStatefulProperties())
         _has_initialized_stateful = true;
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
       if (_kokkos_material_props.hasStatefulProperties() ||
           _kokkos_bnd_material_props.hasStatefulProperties() ||
           _kokkos_neighbor_material_props.hasStatefulProperties())
@@ -3090,7 +3090,7 @@ FEProblemBase::addKokkosKernel(const std::string & kernel_name,
                                const std::string & name,
                                InputParameters & parameters)
 {
-#ifndef MOOSE_HAVE_KOKKOS
+#ifndef MOOSE_KOKKOS_ENABLED
   mooseError("addKokkosKernel() was called but MOOSE was not compiled with Kokkos support.");
 #endif
 
@@ -3125,7 +3125,7 @@ FEProblemBase::addKokkosKernel(const std::string & kernel_name,
 
   logAdd("KokkosKernel", name, kernel_name, parameters);
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   _nl[nl_sys_num]->addKokkosKernel(kernel_name, name, parameters);
 #endif
 
@@ -3137,7 +3137,7 @@ FEProblemBase::addKokkosNodalKernel(const std::string & kernel_name,
                                     const std::string & name,
                                     InputParameters & parameters)
 {
-#ifndef MOOSE_HAVE_KOKKOS
+#ifndef MOOSE_KOKKOS_ENABLED
   mooseError("addKokkosNodalKernel() was called but MOOSE was not compiled with Kokkos support.");
 #endif
 
@@ -3168,7 +3168,7 @@ FEProblemBase::addKokkosNodalKernel(const std::string & kernel_name,
 
   logAdd("KokkosNodalKernel", name, kernel_name, parameters);
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   _nl[nl_sys_num]->addKokkosNodalKernel(kernel_name, name, parameters);
 #endif
 
@@ -3180,7 +3180,7 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
                                           const std::string & name,
                                           InputParameters & parameters)
 {
-#ifndef MOOSE_HAVE_KOKKOS
+#ifndef MOOSE_KOKKOS_ENABLED
   mooseError(
       "addKokkosBoundaryCondition() was called but MOOSE was not compiled with Kokkos support.");
 #endif
@@ -3217,7 +3217,7 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
 
   logAdd("KokkosBoundaryCondition", name, bc_name, parameters);
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   _nl[nl_sys_num]->addKokkosBoundaryCondition(bc_name, name, parameters);
 #endif
 
@@ -3945,7 +3945,7 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type,
                                bool is_kokkos) const
 {
   if (is_kokkos)
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
     switch (type)
     {
       case Moose::BLOCK_MATERIAL_DATA:
@@ -3995,7 +3995,7 @@ FEProblemBase::getMaterialPropertyStorageConsumers(Moose::MaterialDataType type,
                                                    bool is_kokkos) const
 {
   if (is_kokkos)
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
     switch (type)
     {
       case Moose::BLOCK_MATERIAL_DATA:
@@ -6550,7 +6550,7 @@ FEProblemBase::init()
   if (_displaced_problem)
     _displaced_problem->init();
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   if (_has_kokkos_objects)
     initKokkos();
 #endif
@@ -6884,7 +6884,7 @@ FEProblemBase::advanceState()
   if (_neighbor_material_props.hasStatefulProperties())
     _neighbor_material_props.shift();
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   if (_kokkos_material_props.hasStatefulProperties())
     _kokkos_material_props.shift();
 
@@ -8515,7 +8515,7 @@ FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const
   else
     cmt(elem_range, true);
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   if (_has_kokkos_objects)
     initKokkosStatefulProps();
 #endif

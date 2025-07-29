@@ -44,7 +44,7 @@ public:
    * Get whether the matrix was allocated
    * @returns Whether the matrix was allocated
    */
-  bool isAlloc() { return _is_alloc; }
+  bool isAlloc() const { return _is_alloc; }
   /**
    * Create the matrix from a libMesh PetscMatrix
    * @param matrix The libMesh PetscMatrix

@@ -48,31 +48,12 @@ template <typename Derived>
 class NodalBC : public NodalBCBase
 {
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = NodalBCBase::validParams();
-
-    return params;
-  }
+  static InputParameters validParams();
 
   /**
    * Constructor
    */
-  NodalBC(const InputParameters & parameters)
-    : NodalBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-      _u(kokkosSystems(), _var),
-      _default_offdiag(&Derived::computeQpOffDiagJacobian == &NodalBC::computeQpOffDiagJacobian)
-  {
-    addMooseVariableDependency(&_var);
-  }
-
-  /**
-   * Copy constructor for parallel dispatch
-   */
-  NodalBC(const NodalBC<Derived> & object)
-    : NodalBCBase(object), _u(object._u), _default_offdiag(object._default_offdiag)
-  {
-  }
+  NodalBC(const InputParameters & parameters);
 
   /**
    * Dispatch residual calculation
@@ -120,7 +101,7 @@ protected:
   /**
    * Current solution at nodes
    */
-  VariableNodalValue _u;
+  const VariableNodalValue _u;
 
 private:
   /**
@@ -128,6 +109,23 @@ private:
    */
   const bool _default_offdiag;
 };
+
+template <typename Derived>
+InputParameters
+NodalBC<Derived>::validParams()
+{
+  InputParameters params = NodalBCBase::validParams();
+  return params;
+}
+
+template <typename Derived>
+NodalBC<Derived>::NodalBC(const InputParameters & parameters)
+  : NodalBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _u(kokkosSystems(), _var),
+    _default_offdiag(&Derived::computeQpOffDiagJacobian == &NodalBC::computeQpOffDiagJacobian)
+{
+  addMooseVariableDependency(&_var);
+}
 
 template <typename Derived>
 void

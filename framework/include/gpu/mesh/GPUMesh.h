@@ -175,7 +175,7 @@ public:
    * @param side The side index
    * @returns The neighbor element ID
    */
-  KOKKOS_FUNCTION auto getNeighbor(dof_id_type elem, unsigned int side) const
+  KOKKOS_FUNCTION dof_id_type getNeighbor(dof_id_type elem, unsigned int side) const
   {
     return _elem_neighbor(side, elem);
   }
@@ -185,7 +185,7 @@ public:
    * @param node The node index
    * @returns The node ID
    */
-  KOKKOS_FUNCTION auto getNodeID(dof_id_type elem, unsigned int node) const
+  KOKKOS_FUNCTION dof_id_type getNodeID(dof_id_type elem, unsigned int node) const
   {
     return _nodes(node, elem);
   }
@@ -196,7 +196,9 @@ public:
    * @param node The node index
    * @returns The node ID
    */
-  KOKKOS_FUNCTION auto getNodeID(dof_id_type elem, unsigned int side, unsigned int node) const
+  KOKKOS_FUNCTION dof_id_type getNodeID(dof_id_type elem,
+                                        unsigned int side,
+                                        unsigned int node) const
   {
     return _nodes_face(node, side, elem);
   }
@@ -205,7 +207,7 @@ public:
    * @param node The node ID
    * @returns The node coordinate
    */
-  KOKKOS_FUNCTION auto getNodePoint(dof_id_type node) const { return _points[node]; }
+  KOKKOS_FUNCTION Real3 getNodePoint(dof_id_type node) const { return _points[node]; }
 #endif
 
 private:

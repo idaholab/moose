@@ -23,8 +23,8 @@ KokkosCoupledTimeDerivative::validParams()
 
 KokkosCoupledTimeDerivative::KokkosCoupledTimeDerivative(const InputParameters & parameters)
   : Kernel(parameters),
-    _v_dot(KokkosCoupledDot("v")),
-    _dv_dot(KokkosCoupledDotDu("v")),
+    _v_dot(kokkosCoupledDot("v")),
+    _dv_dot(kokkosCoupledDotDu("v")),
     _v_var(coupled("v"))
 {
 }

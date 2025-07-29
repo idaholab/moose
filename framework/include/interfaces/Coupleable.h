@@ -1814,95 +1814,95 @@ private:
   std::vector<std::set<MooseWritableVariable *>> _writable_coupled_variables;
 
   /**
-   * Kokkos-related variables and methods
+   * kokkos-related variables and methods
    */
 private:
   const Real _kokkos_default_value_zero = 0;
 
 #ifdef MOOSE_KOKKOS_SCOPE
-  Moose::Kokkos::Variable KokkosCoupledVectorTagVariable(const std::string & var_name,
+  Moose::Kokkos::Variable kokkosCoupledVectorTagVariable(const std::string & var_name,
                                                          const std::string & tag_name,
                                                          unsigned int comp);
-  Moose::Kokkos::Variable KokkosCoupledVectorTagVariables(const std::string & var_name,
+  Moose::Kokkos::Variable kokkosCoupledVectorTagVariables(const std::string & var_name,
                                                           const std::string & tag_name);
-  Moose::Kokkos::Variable KokkosZeroVariable();
+  Moose::Kokkos::Variable kokkosZeroVariable();
 
 public:
-  Moose::Kokkos::VariableValue KokkosCoupledVectorTagValueByName(const std::string & var_name,
+  Moose::Kokkos::VariableValue kokkosCoupledVectorTagValueByName(const std::string & var_name,
                                                                  const std::string & tag_name,
                                                                  unsigned int comp = 0);
-  Moose::Kokkos::VariableValue KokkosCoupledVectorTagValuesByName(const std::string & var_name,
+  Moose::Kokkos::VariableValue kokkosCoupledVectorTagValuesByName(const std::string & var_name,
                                                                   const std::string & tag_name);
-  Moose::Kokkos::VariableGradient KokkosCoupledVectorTagGradientByName(const std::string & var_name,
+  Moose::Kokkos::VariableGradient kokkosCoupledVectorTagGradientByName(const std::string & var_name,
                                                                        const std::string & tag_name,
                                                                        unsigned int comp = 0);
   Moose::Kokkos::VariableGradient
-  KokkosCoupledVectorTagGradientsByName(const std::string & var_name, const std::string & tag_name);
-  Moose::Kokkos::VariableNodalValue KokkosCoupledVectorTagNodalValueByName(
+  kokkosCoupledVectorTagGradientsByName(const std::string & var_name, const std::string & tag_name);
+  Moose::Kokkos::VariableNodalValue kokkosCoupledVectorTagNodalValueByName(
       const std::string & var_name, const std::string & tag_name, unsigned int comp = 0);
   Moose::Kokkos::VariableNodalValue
-  KokkosCoupledVectorTagNodalValuesByName(const std::string & var_name,
+  kokkosCoupledVectorTagNodalValuesByName(const std::string & var_name,
                                           const std::string & tag_name);
 
-  Moose::Kokkos::VariableValue KokkosCoupledVectorTagValue(const std::string & var_name,
+  Moose::Kokkos::VariableValue kokkosCoupledVectorTagValue(const std::string & var_name,
                                                            const std::string & tag_param_name,
                                                            unsigned int comp = 0);
-  Moose::Kokkos::VariableValue KokkosCoupledVectorTagValues(const std::string & var_name,
+  Moose::Kokkos::VariableValue kokkosCoupledVectorTagValues(const std::string & var_name,
                                                             const std::string & tag_param_name);
-  Moose::Kokkos::VariableGradient KokkosCoupledVectorTagGradient(const std::string & var_name,
+  Moose::Kokkos::VariableGradient kokkosCoupledVectorTagGradient(const std::string & var_name,
                                                                  const std::string & tag_param_name,
                                                                  unsigned int comp = 0);
   Moose::Kokkos::VariableGradient
-  KokkosCoupledVectorTagGradients(const std::string & var_name, const std::string & tag_param_name);
-  Moose::Kokkos::VariableNodalValue KokkosCoupledVectorTagNodalValue(
+  kokkosCoupledVectorTagGradients(const std::string & var_name, const std::string & tag_param_name);
+  Moose::Kokkos::VariableNodalValue kokkosCoupledVectorTagNodalValue(
       const std::string & var_name, const std::string & tag_param_name, unsigned int comp = 0);
   Moose::Kokkos::VariableNodalValue
-  KokkosCoupledVectorTagNodalValues(const std::string & var_name,
+  kokkosCoupledVectorTagNodalValues(const std::string & var_name,
                                     const std::string & tag_param_name);
 
-  Moose::Kokkos::VariableValue KokkosCoupledValue(const std::string & var_name,
+  Moose::Kokkos::VariableValue kokkosCoupledValue(const std::string & var_name,
                                                   unsigned int comp = 0);
-  Moose::Kokkos::VariableValue KokkosCoupledValues(const std::string & var_name);
-  Moose::Kokkos::VariableGradient KokkosCoupledGradient(const std::string & var_name,
+  Moose::Kokkos::VariableValue kokkosCoupledValues(const std::string & var_name);
+  Moose::Kokkos::VariableGradient kokkosCoupledGradient(const std::string & var_name,
                                                         unsigned int comp = 0);
-  Moose::Kokkos::VariableGradient KokkosCoupledGradients(const std::string & var_name);
-  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalValue(const std::string & var_name,
+  Moose::Kokkos::VariableGradient kokkosCoupledGradients(const std::string & var_name);
+  Moose::Kokkos::VariableNodalValue kokkosCoupledNodalValue(const std::string & var_name,
                                                             unsigned int comp = 0);
-  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalValues(const std::string & var_name);
+  Moose::Kokkos::VariableNodalValue kokkosCoupledNodalValues(const std::string & var_name);
 
-  Moose::Kokkos::VariableValue KokkosCoupledValueOld(const std::string & var_name,
+  Moose::Kokkos::VariableValue kokkosCoupledValueOld(const std::string & var_name,
                                                      unsigned int comp = 0);
-  Moose::Kokkos::VariableValue KokkosCoupledValuesOld(const std::string & var_name);
-  Moose::Kokkos::VariableGradient KokkosCoupledGradientOld(const std::string & var_name,
+  Moose::Kokkos::VariableValue kokkosCoupledValuesOld(const std::string & var_name);
+  Moose::Kokkos::VariableGradient kokkosCoupledGradientOld(const std::string & var_name,
                                                            unsigned int comp = 0);
-  Moose::Kokkos::VariableGradient KokkosCoupledGradientsOld(const std::string & var_name);
-  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalValueOld(const std::string & var_name,
+  Moose::Kokkos::VariableGradient kokkosCoupledGradientsOld(const std::string & var_name);
+  Moose::Kokkos::VariableNodalValue kokkosCoupledNodalValueOld(const std::string & var_name,
                                                                unsigned int comp = 0);
-  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalValuesOld(const std::string & var_name);
+  Moose::Kokkos::VariableNodalValue kokkosCoupledNodalValuesOld(const std::string & var_name);
 
-  Moose::Kokkos::VariableValue KokkosCoupledValueOlder(const std::string & var_name,
+  Moose::Kokkos::VariableValue kokkosCoupledValueOlder(const std::string & var_name,
                                                        unsigned int comp = 0);
-  Moose::Kokkos::VariableValue KokkosCoupledValuesOlder(const std::string & var_name);
-  Moose::Kokkos::VariableGradient KokkosCoupledGradientOlder(const std::string & var_name,
+  Moose::Kokkos::VariableValue kokkosCoupledValuesOlder(const std::string & var_name);
+  Moose::Kokkos::VariableGradient kokkosCoupledGradientOlder(const std::string & var_name,
                                                              unsigned int comp = 0);
-  Moose::Kokkos::VariableGradient KokkosCoupledGradientsOlder(const std::string & var_name);
-  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalValueOlder(const std::string & var_name,
+  Moose::Kokkos::VariableGradient kokkosCoupledGradientsOlder(const std::string & var_name);
+  Moose::Kokkos::VariableNodalValue kokkosCoupledNodalValueOlder(const std::string & var_name,
                                                                  unsigned int comp = 0);
-  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalValuesOlder(const std::string & var_name);
+  Moose::Kokkos::VariableNodalValue kokkosCoupledNodalValuesOlder(const std::string & var_name);
 
-  Moose::Kokkos::VariableValue KokkosCoupledDot(const std::string & var_name,
+  Moose::Kokkos::VariableValue kokkosCoupledDot(const std::string & var_name,
                                                 unsigned int comp = 0);
-  Moose::Kokkos::VariableValue KokkosCoupledDots(const std::string & var_name);
-  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalDot(const std::string & var_name,
+  Moose::Kokkos::VariableValue kokkosCoupledDots(const std::string & var_name);
+  Moose::Kokkos::VariableNodalValue kokkosCoupledNodalDot(const std::string & var_name,
                                                           unsigned int comp = 0);
-  Moose::Kokkos::VariableNodalValue KokkosCoupledNodalDots(const std::string & var_name);
+  Moose::Kokkos::VariableNodalValue kokkosCoupledNodalDots(const std::string & var_name);
 
-  Moose::Kokkos::Scalar<const Real> KokkosCoupledDotDu(const std::string & var_name,
+  Moose::Kokkos::Scalar<const Real> kokkosCoupledDotDu(const std::string & var_name,
                                                        unsigned int comp = 0);
 
-  Moose::Kokkos::VariableValue KokkosZeroValue();
-  Moose::Kokkos::VariableGradient KokkosZeroGradient();
-  Moose::Kokkos::VariableNodalValue KokkosZeroNodalValue();
+  Moose::Kokkos::VariableValue kokkosZeroValue();
+  Moose::Kokkos::VariableGradient kokkosZeroGradient();
+  Moose::Kokkos::VariableNodalValue kokkosZeroNodalValue();
 #endif
 };
 
