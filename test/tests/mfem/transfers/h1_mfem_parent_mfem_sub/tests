@@ -7,7 +7,7 @@
       type = RunApp
       input = parent.i
       capabilities = 'mfem'
-      devices = 'cpu' # Executioner/device=cuda only passed to main app which leads to inconsistency error
+      devices = 'cpu cuda'
       recover = false
       detail = 'running the inputs, and '
     []
@@ -30,7 +30,7 @@
       type = RunApp
       input = sub.i
       capabilities = 'mfem'
-      devices = 'cpu' # Executioner/device=cuda only passed to main app which leads to inconsistency error
+      devices = 'cpu cuda'
       recover = false
       cli_args = 'MultiApps/active=subapp Transfers/active=to_sub '
                  'subapp:MultiApps/active="" subapp:Transfers/active=""'

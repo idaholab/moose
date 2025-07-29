@@ -17,7 +17,7 @@ MFEMExecutioner::validParams()
 {
   InputParameters params = Executioner::validParams();
   params.addClassDescription("Executioner for MFEM problems.");
-  params.addParam<std::string>("device", "cpu", "Run app on the chosen device.");
+  params.addParam<std::string>("device", "Run app on the chosen device.");
   MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
   params.addParam<MooseEnum>(
       "assembly_level",
@@ -32,7 +32,10 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & parameters)
     _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
     _problem_data(_mfem_problem.getProblemData())
 {
-  _app.setMFEMDevice(getParam<std::string>("device"), Moose::PassKey<MFEMExecutioner>());
+  _app.setMFEMDevice(isParamValid("device")    ? getParam<std::string>("device")
+                     : _app.isUltimateMaster() ? "cpu"
+                                               : "",
+                     Moose::PassKey<MFEMExecutioner>());
 }
 
 #endif
