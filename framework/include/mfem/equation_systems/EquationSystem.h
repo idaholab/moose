@@ -47,6 +47,7 @@ public:
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
   virtual void ApplyEssentialBCs();
+  virtual void EliminateCoupledVariables();
 
   /// Build forms
   virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
@@ -112,7 +113,7 @@ public:
 private:
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
-  
+
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames();  
 
@@ -143,6 +144,8 @@ protected:
   std::vector<std::string> _test_var_names;
   /// Pointers to finite element spaces associated with test variables.
   std::vector<mfem::ParFiniteElementSpace *> _test_pfespaces;
+  /// Pointers to finite element spaces associated with coupled variables.
+  std::vector<mfem::ParFiniteElementSpace *> _coupled_pfespaces;
 
   // Components of weak form. // Named according to test variable
   Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _blfs;
