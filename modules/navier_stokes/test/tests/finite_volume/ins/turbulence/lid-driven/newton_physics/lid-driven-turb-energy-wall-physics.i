@@ -54,6 +54,8 @@ wall_treatment_tem = 'eq_linearized' # Options: eq_newton, eq_incremental, eq_li
     nx = 12
     ny = 12
   []
+  # Prevent test diffing on distributed parallel element numbering
+  allow_renumbering = false
 []
 
 [Physics]
@@ -141,15 +143,41 @@ wall_treatment_tem = 'eq_linearized' # Options: eq_newton, eq_incremental, eq_li
         # this case requires it for convergence
         linearize_sink_sources = true
         neglect_advection_derivatives = true
+
+        # needed for non-negative face values
+        tke_two_term_bc_expansion = false
+        tked_two_term_bc_expansion = false
       []
     []
   []
 []
 
+[AuxVariables]
+  [dummy]
+    type = MooseVariableConstMonomial
+  []
+[]
+[Bounds]
+  [min_tke]
+    type = ConstantBounds
+    variable = dummy
+    bound_value = 1e-8
+    bounded_variable = TKE
+    bound_type = lower
+  []
+  [min_eps]
+    type = ConstantBounds
+    variable = dummy
+    bound_value = 1e-8
+    bounded_variable = TKED
+    bound_type = lower
+  []
+[]
+
 [Executioner]
   type = Steady
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu NONZERO'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_type'
+  petsc_options_value = 'lu NONZERO vinewtonrsls'
   nl_rel_tol = 1e-10
   nl_abs_tol = 5e-8
   nl_max_its = 100
@@ -160,7 +188,58 @@ wall_treatment_tem = 'eq_linearized' # Options: eq_newton, eq_incremental, eq_li
 []
 
 [Outputs]
+  csv = true
   exodus = true
-  csv = false
   perf_graph = false
+  print_nonlinear_residuals = true
+  print_linear_residuals = false
+[]
+
+[VectorPostprocessors]
+  [side_bottom]
+    type = SideValueSampler
+    boundary = 'bottom'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [side_top]
+    type = SideValueSampler
+    boundary = 'top'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [side_left]
+    type = SideValueSampler
+    boundary = 'left'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'y'
+    execute_on = 'timestep_end'
+  []
+  [side_right]
+    type = SideValueSampler
+    boundary = 'right'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'y'
+    execute_on = 'timestep_end'
+  []
+  [horizontal_center]
+    type = LineValueSampler
+    start_point = '${fparse 0.01 * side_length} ${fparse 0.499 * side_length} 0'
+    end_point = '${fparse 0.99 * side_length} ${fparse 0.499 * side_length} 0'
+    num_points = ${Mesh/gen/nx}
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [vertical_center]
+    type = LineValueSampler
+    start_point = '${fparse 0.499 * side_length} ${fparse 0.01 * side_length} 0'
+    end_point = '${fparse 0.499 * side_length} ${fparse 0.99 * side_length} 0'
+    num_points =  ${Mesh/gen/ny}
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'y'
+    execute_on = 'timestep_end'
+  []
 []
