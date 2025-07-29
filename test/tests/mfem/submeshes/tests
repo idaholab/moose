@@ -37,4 +37,15 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
+  [MFEMCoupledVariableSource]
+    type = XMLDiff
+    input = magnetostatic.i
+    xmldiff = 'OutputData/Magnetostatic/Run0/Run0.pvd
+                OutputData/Magnetostatic/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
+    requirement = 'MOOSE shall have the ability to support source terms arising from the elimination of coupled MFEM variables external to the equation system.'
+    capabilities = 'mfem'
+    max_parallel = 1
+    recover = false
+  []  
 []
