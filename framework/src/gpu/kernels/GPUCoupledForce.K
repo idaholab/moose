@@ -28,7 +28,7 @@ KokkosCoupledForce::validParams()
 KokkosCoupledForce::KokkosCoupledForce(const InputParameters & parameters)
   : Kernel(parameters),
     _v_var(coupled("v")),
-    _v(KokkosCoupledValue("v")),
+    _v(kokkosCoupledValue("v")),
     _coef(getParam<Real>("coef"))
 {
   if (_var.number() == _v_var)

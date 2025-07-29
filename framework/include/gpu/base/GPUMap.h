@@ -34,28 +34,53 @@ public:
   /**
    * Default constructor
    */
-  Map() { _map = std::make_shared<std::map<T1, T2>>(); }
+  Map() : _map(std::make_shared<std::map<T1, T2>>()) {}
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
-   * Get the beginning iterator of the host map
+   * Get the beginning writeable iterator of the host map
    * @returns The beginning iterator
    */
-  auto begin() { return _map->begin(); }
+  auto begin() { return get().begin(); }
   /**
-   * Get the end iterator of the host map
+   * Get the beginning const iterator of the host map
+   * @returns The beginning iterator
+   */
+  auto begin() const { return get().cbegin(); }
+  /**
+   * Get the end writeable iterator of the host map
    * @returns The end iterator
    */
-  auto end() { return _map->end(); }
+  auto end() { return get().end(); }
   /**
-   * Get the underlying host map
-   * @returns The host map
+   * Get the end const iterator of the host map
+   * @returns The end iterator
    */
-  auto & get() { return *_map; }
+  auto end() const { return get().cend(); }
+  /**
+   * Get the underlying writeable host map
+   * @returns The writeable host map
+   */
+  auto & get()
+  {
+    mooseAssert(_map, "Kokkos map error: host map was not initialized.");
+
+    return *_map;
+  }
+  /**
+   * Get the underlying const host map
+   * @returns The const host map
+   */
+  const auto & get() const
+  {
+    mooseAssert(_map, "Kokkos map error: host map was not initialized.");
+
+    return *_map;
+  }
   /**
    * Call the host map's operator[]
    */
-  T2 & operator[](const T1 & key) { return (*_map)[key]; }
+  T2 & operator[](const T1 & key) { return get()[key]; }
   /**
    * Copy the host map to device
    */
@@ -66,7 +91,7 @@ public:
    */
   KOKKOS_FUNCTION dof_id_type size() const
   {
-    KOKKOS_IF_ON_HOST(return _map->size();)
+    KOKKOS_IF_ON_HOST(return get().size();)
 
     return _keys.size();
   }
@@ -94,7 +119,7 @@ private:
    * Standard map on host
    * Stored as a shared pointer to avoid deep copy
    */
-  std::shared_ptr<std::map<T1, T2>> _map;
+  const std::shared_ptr<std::map<T1, T2>> _map;
   /**
    * Key array on device
    */

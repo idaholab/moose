@@ -52,29 +52,12 @@ template <typename Derived>
 class IntegratedBC : public IntegratedBCBase
 {
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = IntegratedBCBase::validParams();
-
-    return params;
-  }
+  static InputParameters validParams();
 
   /**
    * Constructor
    */
-  IntegratedBC(const InputParameters & parameters)
-    : IntegratedBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD), _u(_var), _grad_u(_var)
-  {
-    addMooseVariableDependency(&_var);
-  }
-
-  /**
-   * Copy constructor for parallel dispatch
-   */
-  IntegratedBC(const IntegratedBC<Derived> & object)
-    : IntegratedBCBase(object), _u(object._u), _grad_u(object._grad_u)
-  {
-  }
+  IntegratedBC(const InputParameters & parameters);
 
   /**
    * Dispatch residual calculation
@@ -164,27 +147,27 @@ protected:
   /**
    * Current test function
    */
-  VariableTestValue _test;
+  const VariableTestValue _test;
   /**
    * Gradient of the current test function
    */
-  VariableTestGradient _grad_test;
+  const VariableTestGradient _grad_test;
   /**
    * Current shape function
    */
-  VariablePhiValue _phi;
+  const VariablePhiValue _phi;
   /**
    * Gradient of the current shape function
    */
-  VariablePhiGradient _grad_phi;
+  const VariablePhiGradient _grad_phi;
   /**
    * Current solution at quadrature points
    */
-  VariableValue _u;
+  const VariableValue _u;
   /**
    * Gradient of the current solution at quadrature points
    */
-  VariableGradient _grad_u;
+  const VariableGradient _grad_u;
 
 protected:
   /**
@@ -204,6 +187,27 @@ protected:
     return &Derived::computeQpOffDiagJacobian == &IntegratedBC::computeQpOffDiagJacobian;
   }
 };
+
+template <typename Derived>
+InputParameters
+IntegratedBC<Derived>::validParams()
+{
+  InputParameters params = IntegratedBCBase::validParams();
+  return params;
+}
+
+template <typename Derived>
+IntegratedBC<Derived>::IntegratedBC(const InputParameters & parameters)
+  : IntegratedBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _test(),
+    _grad_test(),
+    _phi(),
+    _grad_phi(),
+    _u(_var),
+    _grad_u(_var)
+{
+  addMooseVariableDependency(&_var);
+}
 
 template <typename Derived>
 void

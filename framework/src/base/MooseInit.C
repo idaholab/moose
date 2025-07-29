@@ -56,7 +56,7 @@ MooseInit::MooseInit(int argc, char * argv[], MPI_Comm COMM_WORLD_IN)
 
   RegisterSigHandler();
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   initKokkos();
 #endif
 }

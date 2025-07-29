@@ -19,18 +19,21 @@ public:
 
   KokkosMTBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return -_test(datum, i, qp) * _value * _mat(datum, qp);
-  }
+  KOKKOS_FUNCTION inline Real
+  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
 
 private:
   /**
    * Value of grad(u) on the boundary.
    */
-  Real _value;
-  std::string _prop_name;
+  const Real _value;
   const Moose::Kokkos::MaterialProperty<Real> _mat;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosMTBC::computeQpResidual(const unsigned int i,
+                              const unsigned int qp,
+                              ResidualDatum & datum) const
+{
+  return -_test(datum, i, qp) * _value * _mat(datum, qp);
+}

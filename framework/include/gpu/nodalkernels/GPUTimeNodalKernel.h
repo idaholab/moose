@@ -25,36 +25,43 @@ class TimeNodalKernel : public NodalKernel<Derived>
   usingKokkosNodalKernelMembers(Derived);
 
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = NodalKernel<Derived>::validParams();
-
-    params.set<MultiMooseEnum>("vector_tags") = "time";
-    params.set<MultiMooseEnum>("matrix_tags") = "system time";
-
-    return params;
-  }
+  static InputParameters validParams();
 
   /**
    * Constructor
    */
-  TimeNodalKernel(const InputParameters & parameters)
-    : NodalKernel<Derived>(parameters),
-      _u_dot(kokkosSystems(), _var, Moose::SOLUTION_DOT_TAG),
-      _du_dot_du(_var.sys().duDotDu(_var.number()))
-  {
-  }
+  TimeNodalKernel(const InputParameters & parameters);
 
 protected:
   /**
    * Time derivative of the current solution at nodes
    */
-  VariableNodalValue _u_dot;
+  const VariableNodalValue _u_dot;
   /**
    * Derivative of u_dot with respect to u
    */
-  Scalar<const Real> _du_dot_du;
+  const Scalar<const Real> _du_dot_du;
 };
+
+template <typename Derived>
+InputParameters
+TimeNodalKernel<Derived>::validParams()
+{
+  InputParameters params = NodalKernel<Derived>::validParams();
+
+  params.set<MultiMooseEnum>("vector_tags") = "time";
+  params.set<MultiMooseEnum>("matrix_tags") = "system time";
+
+  return params;
+}
+
+template <typename Derived>
+TimeNodalKernel<Derived>::TimeNodalKernel(const InputParameters & parameters)
+  : NodalKernel<Derived>(parameters),
+    _u_dot(kokkosSystems(), _var, Moose::SOLUTION_DOT_TAG),
+    _du_dot_du(_var.sys().duDotDu(_var.number()))
+{
+}
 
 } // namespace Kokkos
 } // namespace Moose

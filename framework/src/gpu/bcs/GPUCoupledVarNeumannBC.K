@@ -26,9 +26,9 @@ KokkosCoupledVarNeumannBC::validParams()
 }
 KokkosCoupledVarNeumannBC::KokkosCoupledVarNeumannBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
-    _coupled_var(KokkosCoupledValue("v")),
+    _coupled_var(kokkosCoupledValue("v")),
     _coupled_num(coupled("v")),
     _coef(getParam<Real>("coef")),
-    _scale_factor(KokkosCoupledValue("scale_factor"))
+    _scale_factor(kokkosCoupledValue("scale_factor"))
 {
 }
