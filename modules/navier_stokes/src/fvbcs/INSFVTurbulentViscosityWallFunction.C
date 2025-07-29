@@ -55,8 +55,9 @@ ADReal
 INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
                                                    const Moose::StateArg & /* state */) const
 {
-  const bool use_elem = (fi.faceType(std::make_pair(_var.number(), _var.sys().number())) ==
-                         FaceInfo::VarFaceNeighbors::ELEM);
+  // if on an internal face (internal to the mesh, but an external boundary of the flow area),
+  // we have to select the element on which the flow variables / viscosity is defined
+  const bool use_elem = (fi.faceType(_var_sys_numbers_pair) == FaceInfo::VarFaceNeighbors::ELEM);
   const Real wall_dist = std::abs(
       ((use_elem ? fi.elemCentroid() : fi.neighborCentroid()) - fi.faceCentroid()) * fi.normal());
   const Elem * const elem_ptr = use_elem ? fi.elemPtr() : fi.neighborPtr();

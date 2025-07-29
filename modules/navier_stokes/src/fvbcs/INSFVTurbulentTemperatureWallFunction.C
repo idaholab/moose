@@ -65,6 +65,8 @@ INSFVTurbulentTemperatureWallFunction::computeQpResidual()
 {
   // Useful parameters
   const FaceInfo & fi = *_face_info;
+  // if on an internal face (internal to the mesh, but an external boundary of the flow area),
+  // we have to select the element on which the flow variables / temperature are defined
   const bool use_elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM);
   const Real wall_dist = std::abs(
       ((use_elem ? fi.elemCentroid() : fi.neighborCentroid()) - fi.faceCentroid()) * fi.normal());
