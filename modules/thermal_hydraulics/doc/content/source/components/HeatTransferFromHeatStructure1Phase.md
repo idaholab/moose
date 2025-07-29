@@ -13,9 +13,14 @@ It specifies a convective heat exchange between a
 !template load file=heat_transfer_1phase_usage.md.template name=HeatTransferFromHeatStructure1Phase
 
 The parameter [!param](/Components/HeatTransferFromHeatStructure1Phase/hs) specifies
-the name of the connected heat structure, and
-[!param](/Components/HeatTransferFromHeatStructure1Phase/hs_side) specifies the
-side of the connected heat structure that is coupled to the flow channel.
+the name of the connected heat structure, and there are two options for how to specify
+the coupled heat structure boundary, which are mutually exclusive:
+
+- [!param](/Components/HeatTransferFromHeatStructure1Phase/hs_side) specifies an
+  entire boundary using an enumeration value (`INNER` or `OUTER`).
+- [!param](/Components/HeatTransferFromHeatStructure1Phase/hs_boundary) specifies a
+  boundary by name, so that for example, axial sub-sections of the inner or outer
+  boundary can be coupled instead of the entire length.
 
 !alert note title=Flow channel alignment
 The flow channel axis must be parallel to the heat structure axis and have
