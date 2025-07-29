@@ -24,11 +24,14 @@ public:
 
   void setupSequence(const std::vector<Real> & times);
 
+  // Clear the time sequence array, usually use when time sequence need to be updated during the simulation
+  void resetSequence();
+
   // Increase the current step count by one
   void increaseCurrentStep() { _current_step++; };
 
   // Get the time of the current step from input time sequence
-  Real getNextTimeInSequence() { return _time_sequence[_current_step]; };
+  virtual Real getNextTimeInSequence() { return _time_sequence[_current_step]; };
 
   virtual void init() override {}
   virtual void acceptStep() override;
