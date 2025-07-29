@@ -45,7 +45,7 @@ public:
    * Get whether the vector was allocated
    * @returns Whether the vector was allocated
    */
-  bool isAlloc() { return _is_alloc; }
+  bool isAlloc() const { return _is_alloc; }
   /**
    * Create the vector from a libMesh PetscVector
    * @param vector The libMesh PetscVector
@@ -56,7 +56,7 @@ public:
   /**
    * Copy from/to the libMesh PetscVector
    */
-  void copy(MemcpyKind dir = MemcpyKind::HOST_TO_DEVICE);
+  void copy(const MemcpyKind dir = MemcpyKind::HOST_TO_DEVICE);
   /**
    * Restore the underlying PETSc vector
    */

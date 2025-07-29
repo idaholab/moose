@@ -33,10 +33,7 @@ struct Real33
   KOKKOS_INLINE_FUNCTION Real33(const Real & scalar) { *this = scalar; }
   KOKKOS_INLINE_FUNCTION Real33(const Real33 & tensor) { *this = tensor; }
   KOKKOS_INLINE_FUNCTION Real & operator()(unsigned int i, unsigned int j) { return a[i][j]; }
-  KOKKOS_INLINE_FUNCTION const Real & operator()(unsigned int i, unsigned int j) const
-  {
-    return a[i][j];
-  }
+  KOKKOS_INLINE_FUNCTION Real operator()(unsigned int i, unsigned int j) const { return a[i][j]; }
   KOKKOS_INLINE_FUNCTION Real33 & operator=(const Real33 & tensor)
   {
     for (unsigned int i = 0; i < 3; ++i)
@@ -45,7 +42,7 @@ struct Real33
 
     return *this;
   }
-  KOKKOS_INLINE_FUNCTION Real33 & operator=(Real scalar)
+  KOKKOS_INLINE_FUNCTION Real33 & operator=(const Real scalar)
   {
     for (unsigned int i = 0; i < 3; ++i)
       for (unsigned int j = 0; j < 3; ++j)
@@ -53,13 +50,13 @@ struct Real33
 
     return *this;
   }
-  KOKKOS_INLINE_FUNCTION void operator+=(Real33 tensor)
+  KOKKOS_INLINE_FUNCTION void operator+=(const Real33 tensor)
   {
     for (unsigned int i = 0; i < 3; ++i)
       for (unsigned int j = 0; j < 3; ++j)
         a[i][j] += tensor.a[i][j];
   }
-  KOKKOS_INLINE_FUNCTION Real determinant(unsigned int dim = 3)
+  KOKKOS_INLINE_FUNCTION Real determinant(const unsigned int dim = 3)
   {
     Real det = 0;
 
@@ -76,7 +73,7 @@ struct Real33
 
     return det;
   }
-  KOKKOS_INLINE_FUNCTION Real33 inverse(unsigned int dim = 3)
+  KOKKOS_INLINE_FUNCTION Real33 inverse(const unsigned int dim = 3)
   {
     Real inv_det = 1.0 / determinant(dim);
     Real33 inv_mat;
@@ -157,6 +154,7 @@ struct Real3
   }
 
   KOKKOS_INLINE_FUNCTION Real & operator()(unsigned int i) { return v[i]; }
+  KOKKOS_INLINE_FUNCTION Real operator()(unsigned int i) const { return v[i]; }
 
   KOKKOS_INLINE_FUNCTION Real3 & operator=(const Real3 & vector)
   {
@@ -166,7 +164,7 @@ struct Real3
 
     return *this;
   }
-  KOKKOS_INLINE_FUNCTION Real3 & operator=(Real scalar)
+  KOKKOS_INLINE_FUNCTION Real3 & operator=(const Real scalar)
   {
     v[0] = scalar;
     v[1] = scalar;
@@ -182,42 +180,42 @@ struct Real3
 
     return *this;
   }
-  KOKKOS_INLINE_FUNCTION void operator+=(Real scalar)
+  KOKKOS_INLINE_FUNCTION void operator+=(const Real scalar)
   {
     v[0] += scalar;
     v[1] += scalar;
     v[2] += scalar;
   }
-  KOKKOS_INLINE_FUNCTION void operator+=(Real3 vector)
+  KOKKOS_INLINE_FUNCTION void operator+=(const Real3 vector)
   {
     v[0] += vector.v[0];
     v[1] += vector.v[1];
     v[2] += vector.v[2];
   }
-  KOKKOS_INLINE_FUNCTION void operator-=(Real scalar)
+  KOKKOS_INLINE_FUNCTION void operator-=(const Real scalar)
   {
     v[0] -= scalar;
     v[1] -= scalar;
     v[2] -= scalar;
   }
-  KOKKOS_INLINE_FUNCTION void operator-=(Real3 vector)
+  KOKKOS_INLINE_FUNCTION void operator-=(const Real3 vector)
   {
     v[0] -= vector.v[0];
     v[1] -= vector.v[1];
     v[2] -= vector.v[2];
   }
-  KOKKOS_INLINE_FUNCTION void operator*=(Real scalar)
+  KOKKOS_INLINE_FUNCTION void operator*=(const Real scalar)
   {
     v[0] *= scalar;
     v[1] *= scalar;
     v[2] *= scalar;
   }
   KOKKOS_INLINE_FUNCTION Real norm() { return std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]); }
-  KOKKOS_INLINE_FUNCTION Real dot_product(Real3 vector)
+  KOKKOS_INLINE_FUNCTION Real dot_product(const Real3 vector)
   {
     return v[0] * vector.v[0] + v[1] * vector.v[1] + v[2] * vector.v[2];
   }
-  KOKKOS_INLINE_FUNCTION Real3 cross_product(Real3 vector)
+  KOKKOS_INLINE_FUNCTION Real3 cross_product(const Real3 vector)
   {
     Real3 cross;
 
@@ -227,7 +225,7 @@ struct Real3
 
     return cross;
   }
-  KOKKOS_INLINE_FUNCTION Real33 cartesian_product(Real3 vector)
+  KOKKOS_INLINE_FUNCTION Real33 cartesian_product(const Real3 vector)
   {
     Real33 tensor;
 
@@ -242,29 +240,29 @@ struct Real3
 
 #ifdef MOOSE_KOKKOS_SCOPE
 KOKKOS_INLINE_FUNCTION Real3
-operator*(Real left, Real3 right)
+operator*(const Real left, const Real3 right)
 {
   return {left * right.v[0], left * right.v[1], left * right.v[2]};
 }
 KOKKOS_INLINE_FUNCTION Real3
-operator*(Real3 left, Real right)
+operator*(const Real3 left, const Real right)
 {
   return {left.v[0] * right, left.v[1] * right, left.v[2] * right};
 }
 KOKKOS_INLINE_FUNCTION Real
-operator*(Real3 left, Real3 right)
+operator*(const Real3 left, const Real3 right)
 {
   return left.v[0] * right.v[0] + left.v[1] * right.v[1] + left.v[2] * right.v[2];
 }
 KOKKOS_INLINE_FUNCTION Real3
-operator*(Real33 left, Real3 right)
+operator*(const Real33 left, const Real3 right)
 {
   return {left(0, 0) * right.v[0] + left(0, 1) * right.v[1] + left(0, 2) * right.v[2],
           left(1, 0) * right.v[0] + left(1, 1) * right.v[1] + left(1, 2) * right.v[2],
           left(2, 0) * right.v[0] + left(2, 1) * right.v[1] + left(2, 2) * right.v[2]};
 }
 KOKKOS_INLINE_FUNCTION Real33
-operator*(Real33 left, Real33 right)
+operator*(const Real33 left, const Real33 right)
 {
   Real33 mul;
 
@@ -276,32 +274,32 @@ operator*(Real33 left, Real33 right)
   return mul;
 }
 KOKKOS_INLINE_FUNCTION Real3
-operator+(Real left, Real3 right)
+operator+(const Real left, const Real3 right)
 {
   return {left + right.v[0], left + right.v[1], left + right.v[2]};
 }
 KOKKOS_INLINE_FUNCTION Real3
-operator+(Real3 left, Real right)
+operator+(const Real3 left, const Real right)
 {
   return {left.v[0] + right, left.v[1] + right, left.v[2] + right};
 }
 KOKKOS_INLINE_FUNCTION Real3
-operator+(Real3 left, Real3 right)
+operator+(const Real3 left, const Real3 right)
 {
   return {left.v[0] + right.v[0], left.v[1] + right.v[1], left.v[2] + right.v[2]};
 }
 KOKKOS_INLINE_FUNCTION Real3
-operator-(Real left, Real3 right)
+operator-(const Real left, const Real3 right)
 {
   return {left - right.v[0], left - right.v[1], left - right.v[2]};
 }
 KOKKOS_INLINE_FUNCTION Real3
-operator-(Real3 left, Real right)
+operator-(const Real3 left, const Real right)
 {
   return {left.v[0] - right, left.v[1] - right, left.v[2] - right};
 }
 KOKKOS_INLINE_FUNCTION Real3
-operator-(Real3 left, Real3 right)
+operator-(const Real3 left, const Real3 right)
 {
   return {left.v[0] - right.v[0], left.v[1] - right.v[1], left.v[2] - right.v[2]};
 }

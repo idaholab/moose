@@ -21,27 +21,33 @@ public:
 
   KokkosMatchedValueBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const
-  {
-    return _u_coeff * _u(node) - _v_coeff * _v(node);
-  }
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
-                                                const dof_id_type /* node */) const
-  {
-    if (jvar == _v_num)
-      return -_v_coeff;
-    else
-      return 0;
-  }
+  KOKKOS_FUNCTION inline Real computeQpResidual(const dof_id_type node) const;
+  KOKKOS_FUNCTION inline Real computeQpOffDiagJacobian(const unsigned int jvar,
+                                                       const dof_id_type node) const;
 
 protected:
-  Moose::Kokkos::VariableNodalValue _v;
+  const Moose::Kokkos::VariableNodalValue _v;
 
   /// The id of the coupled variable
-  unsigned int _v_num;
-
+  const unsigned int _v_num;
   /// Coefficient for primary variable
   const Real _u_coeff;
   /// Coefficient for coupled variable
   const Real _v_coeff;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosMatchedValueBC::computeQpResidual(const dof_id_type node) const
+{
+  return _u_coeff * _u(node) - _v_coeff * _v(node);
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosMatchedValueBC::computeQpOffDiagJacobian(const unsigned int jvar,
+                                               const dof_id_type /* node */) const
+{
+  if (jvar == _v_num)
+    return -_v_coeff;
+  else
+    return 0;
+}

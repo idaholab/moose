@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
 #include "GPUMaterialPropertyStorage.h"
 #endif
 

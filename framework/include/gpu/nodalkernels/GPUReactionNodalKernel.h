@@ -18,9 +18,21 @@ public:
 
   KokkosReactionNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const { return _coeff * _u(node); }
-  KOKKOS_FUNCTION Real computeQpJacobian(const dof_id_type /* node */) const { return _coeff; }
+  KOKKOS_FUNCTION inline Real computeQpResidual(const dof_id_type node) const;
+  KOKKOS_FUNCTION inline Real computeQpJacobian(const dof_id_type node) const;
 
 protected:
   const Real _coeff;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosReactionNodalKernel::computeQpResidual(const dof_id_type node) const
+{
+  return _coeff * _u(node);
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosReactionNodalKernel::computeQpJacobian(const dof_id_type /* node */) const
+{
+  return _coeff;
+}

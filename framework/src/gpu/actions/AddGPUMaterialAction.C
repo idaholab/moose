@@ -15,28 +15,21 @@ registerMooseAction("MooseApp", AddKokkosMaterialAction, "add_material");
 InputParameters
 AddKokkosMaterialAction::validParams()
 {
-  InputParameters params = MooseObjectAction::validParams();
+  InputParameters params = KokkosObjectAction::validParams();
   params.addClassDescription("Add a Kokkos Material object to the simulation.");
-  params.addPrivateParam<bool>("_kokkos_action", true);
   return params;
 }
 
 AddKokkosMaterialAction::AddKokkosMaterialAction(const InputParameters & params)
-  : MooseObjectAction(params)
+  : KokkosObjectAction(params, "Material")
 {
 }
 
 void
 AddKokkosMaterialAction::act()
 {
-#ifndef MOOSE_HAVE_KOKKOS
-  mooseError("Attempted to add a Kokkos material but MOOSE was not compiled with Kokkos support.");
-#else
-  if (!_app.isKokkosAvailable())
-    mooseError("Attempted to add a Kokkos material but no GPU was detected in the system.");
-  else if (!_moose_object_pars.get<bool>("_interface"))
+  if (!_moose_object_pars.get<bool>("_interface"))
     _problem->addKokkosMaterial(_type, _name, _moose_object_pars);
-    // else
-    //  _problem->addKokkosInterfaceMaterial(_type, _name, _moose_object_pars);
-#endif
+  // else
+  //  _problem->addKokkosInterfaceMaterial(_type, _name, _moose_object_pars);
 }

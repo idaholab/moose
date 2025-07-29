@@ -17,7 +17,7 @@ IGNORE_CONTRIB_INC ?= libtorch mfem neml2 kokkos
 ENABLE_LIBTORCH ?= false
 ENABLE_MFEM ?= false
 ENABLE_KOKKOS ?= false
-KOKKOS_ENABLE_GPU ?= true
+ENABLE_KOKKOS_GPU ?= true
 
 # this allows us to modify the linked names/rpaths safely later for install targets
 ifneq (,$(findstring darwin,$(libmesh_HOST)))

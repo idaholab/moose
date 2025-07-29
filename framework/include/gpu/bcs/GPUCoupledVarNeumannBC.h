@@ -23,27 +23,17 @@ public:
 
   KokkosCoupledVarNeumannBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return -_scale_factor(datum, qp) * _coef * _test(datum, i, qp) * _coupled_var(datum, qp);
-  }
-  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
-                                                const unsigned int j,
-                                                const unsigned int jvar,
-                                                const unsigned int qp,
-                                                ResidualDatum & datum) const
-  {
-    if (jvar == _coupled_num)
-      return -_scale_factor(datum, qp) * _coef * _test(datum, i, qp) * _phi(datum, j, qp);
-    else
-      return 0;
-  }
+  KOKKOS_FUNCTION inline Real
+  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION inline Real computeQpOffDiagJacobian(const unsigned int i,
+                                                       const unsigned int j,
+                                                       const unsigned int jvar,
+                                                       const unsigned int qp,
+                                                       ResidualDatum & datum) const;
 
 protected:
   /// Variable providing the value of grad(u) on the boundary.
-  Moose::Kokkos::VariableValue _coupled_var;
+  const Moose::Kokkos::VariableValue _coupled_var;
 
   /// The identifying number of the coupled variable
   const unsigned int _coupled_num;
@@ -52,5 +42,26 @@ protected:
   const Real _coef;
 
   /// Scale factor
-  Moose::Kokkos::VariableValue _scale_factor;
+  const Moose::Kokkos::VariableValue _scale_factor;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosCoupledVarNeumannBC::computeQpResidual(const unsigned int i,
+                                             const unsigned int qp,
+                                             ResidualDatum & datum) const
+{
+  return -_scale_factor(datum, qp) * _coef * _test(datum, i, qp) * _coupled_var(datum, qp);
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosCoupledVarNeumannBC::computeQpOffDiagJacobian(const unsigned int i,
+                                                    const unsigned int j,
+                                                    const unsigned int jvar,
+                                                    const unsigned int qp,
+                                                    ResidualDatum & datum) const
+{
+  if (jvar == _coupled_num)
+    return -_scale_factor(datum, qp) * _coef * _test(datum, i, qp) * _phi(datum, j, qp);
+  else
+    return 0;
+}

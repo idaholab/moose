@@ -20,6 +20,6 @@ KokkosCoupledDirichletBC::validParams()
 }
 
 KokkosCoupledDirichletBC::KokkosCoupledDirichletBC(const InputParameters & parameters)
-  : KokkosDirichletBC(parameters), _v(KokkosCoupledNodalValue("v")), _v_num(coupled("v")), _c(1.0)
+  : KokkosDirichletBC(parameters), _v(kokkosCoupledNodalValue("v")), _v_num(coupled("v")), _c(1.0)
 {
 }
