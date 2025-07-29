@@ -42,7 +42,7 @@ From: mooseharbor.hpc.inl.gov/base/rocky-x86_64:8.10-5
 {%- elif ALTERNATE_FROM == "cuda" %}
 From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-cuda-x86_64:8.10-cuda12.9-0
 {%- else %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-3
+From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-4
 {%- endif %}
 # Logan Harbour
 Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
