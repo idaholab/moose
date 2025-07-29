@@ -31,6 +31,10 @@
 
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/mpi' -%}
+{#- The install location for mpich                                                            -#}
+{%- set MPICH_DIR = '/opt/mpich' -%}
+{#- The install location for openmpi                                                          -#}
+{%- set OPENMPI_DIR = '/opt/openmpi' -%}
 
 Bootstrap: oras
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
@@ -87,10 +91,10 @@ EOF
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
 
     # Install prefix for mpich
-    export MOOSE_MPICH_DIR=/opt/mpich
+    export MOOSE_MPICH_DIR={{ MPICH_DIR }}
     # Install prefix for openmpi
-    if [ -d "/opt/openmpi" ]; then
-        export MOOSE_OPENMPI_DIR=/opt/openmpi
+    if [ -d "{{ OPENMPI_DIR }}" ]; then
+        export MOOSE_OPENMPI_DIR={{ OPENMPI_DIR }}
     fi
 
 {%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
@@ -225,6 +229,15 @@ EOF
     # Clean Up
     rm -rf ${ROOT_BUILD_DIR}
     dnf clean all
+
+%test
+    if [ -d {{ MPICH_DIR }} ]; then
+        {{ MPICH_DIR }}/bin/mpiexec --version
+    fi
+    if [ -d {{ OPENMPI_DIR }} ]; then
+        {{ OPENMPI_DIR }}/bin/mpiexec --version
+        {{ OPENMPI_DIR }}/bin/ompi_info
+    fi
 
 %files
     {{ MOOSE_DIR }}/apptainer/set_prompt.bash {{ SET_PROMPT_SCRIPT }}
