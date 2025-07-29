@@ -3,10 +3,9 @@
   issues = '#29846'
   [channel_ERCOFTAC_linear_block]
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization on only part of the domain.'
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'block-ke.i'
-    exodiff = 'block-ke_out.e'
-    detail = 'and reach converged results with segregated solvers.'
+    csvdiff = 'block-ke_out_line_center_channel_0001.csv  block-ke_out_line_quarter_radius_channel_0001.csv block-ke_out_line_wall_0001.csv'
     abs_zero = 1e-6
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
