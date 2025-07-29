@@ -3108,29 +3108,8 @@ FEProblemBase::addKokkosKernel(const std::string & kernel_name,
     mooseError("You are trying to add a Kernel to a linear variable/system, which is not "
                "supported at the moment!");
 
-  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
-  {
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
-    _reinit_displaced_elem = true;
-  }
-  else
-  {
-    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
-    {
-      // We allow Kernels to request that they use_displaced_mesh,
-      // but then be overridden when no displacements variables are
-      // provided in the Mesh block.  If that happened, update the value
-      // of use_displaced_mesh appropriately for this Kernel.
-      if (parameters.have_parameter<bool>("use_displaced_mesh"))
-        parameters.set<bool>("use_displaced_mesh") = false;
-    }
-
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
-  }
-
-  logAdd("KokkosKernel", name, kernel_name, parameters);
+  setResidualObjectParamsAndLog(
+      kernel_name, name, parameters, nl_sys_num, "KokkosKernel", _reinit_displaced_elem);
 
 #ifdef MOOSE_KOKKOS_ENABLED
   _nl[nl_sys_num]->addKokkosKernel(kernel_name, name, parameters);
@@ -3151,29 +3130,9 @@ FEProblemBase::addKokkosNodalKernel(const std::string & kernel_name,
   parallel_object_only();
 
   const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
-  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
-  {
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
-    _reinit_displaced_elem = true;
-  }
-  else
-  {
-    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
-    {
-      // We allow Kernels to request that they use_displaced_mesh,
-      // but then be overridden when no displacements variables are
-      // provided in the Mesh block.  If that happened, update the value
-      // of use_displaced_mesh appropriately for this Kernel.
-      if (parameters.have_parameter<bool>("use_displaced_mesh"))
-        parameters.set<bool>("use_displaced_mesh") = false;
-    }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
-  }
-
-  logAdd("KokkosNodalKernel", name, kernel_name, parameters);
+  setResidualObjectParamsAndLog(
+      kernel_name, name, parameters, nl_sys_num, "KokkosNodalKernel", _reinit_displaced_elem);
 
 #ifdef MOOSE_KOKKOS_ENABLED
   _nl[nl_sys_num]->addKokkosNodalKernel(kernel_name, name, parameters);
@@ -3200,29 +3159,8 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
         "You are trying to add a BoundaryCondition to a linear variable/system, which is not "
         "supported at the moment!");
 
-  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
-  {
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->solverSys(nl_sys_num);
-    _reinit_displaced_face = true;
-  }
-  else
-  {
-    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
-    {
-      // We allow Materials to request that they use_displaced_mesh,
-      // but then be overridden when no displacements variables are
-      // provided in the Mesh block.  If that happened, update the value
-      // of use_displaced_mesh appropriately for this Material.
-      if (parameters.have_parameter<bool>("use_displaced_mesh"))
-        parameters.set<bool>("use_displaced_mesh") = false;
-    }
-
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl[nl_sys_num].get();
-  }
-
-  logAdd("KokkosBoundaryCondition", name, bc_name, parameters);
+  setResidualObjectParamsAndLog(
+      bc_name, name, parameters, nl_sys_num, "KokkosBoundaryCondition", _reinit_displaced_face);
 
 #ifdef MOOSE_KOKKOS_ENABLED
   _nl[nl_sys_num]->addKokkosBoundaryCondition(bc_name, name, parameters);
