@@ -64,7 +64,7 @@ Vector::create(libMesh::NumericVector<PetscScalar> & vector, const System & syst
   bool realloc =
       !_is_alloc || _assemble != assemble || _is_host != is_host || _is_ghosted != is_ghosted;
 
-#ifndef MOOSE_KOKKOS_ENABLE_GPU
+#ifndef MOOSE_ENABLE_KOKKOS_GPU
   if (!is_host)
     mooseError("PETSc vectors must be on host when Kokkos device capabilities are disabled.");
 #endif
@@ -162,7 +162,7 @@ Vector::destroy()
 }
 
 void
-Vector::copy(MemcpyKind dir)
+Vector::copy(const MemcpyKind dir)
 {
   if (_assemble)
     mooseError("Kokkos vector error: copy() should not be called for an assembled vector.");
@@ -203,11 +203,11 @@ Vector::close()
 
   // Perform MPI communications
 
-  MPI_Alltoallv(_send.buffer.device_data(),
+  MPI_Alltoallv(_send.buffer.deviceData(),
                 _send.count.data(),
                 _send.offset.data(),
                 MPIU_SCALAR,
-                _recv.buffer.device_data(),
+                _recv.buffer.deviceData(),
                 _recv.count.data(),
                 _recv.offset.data(),
                 MPIU_SCALAR,

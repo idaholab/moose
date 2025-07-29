@@ -989,7 +989,7 @@ NonlinearSystemBase::setInitialSolution()
     }
   }
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   if (_kokkos_preset_nodal_bcs.hasObjects())
     setKokkosInitialSolution();
 #endif
@@ -1750,7 +1750,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
   residualSetup();
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   if (_fe_problem.hasKokkosObjects())
     computeKokkosResidual(tags);
 #endif
@@ -2851,7 +2851,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   jacobianSetup();
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   if (_fe_problem.hasKokkosObjects())
     computeKokkosJacobian(tags);
 #endif

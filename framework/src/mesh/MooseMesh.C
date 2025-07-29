@@ -286,7 +286,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
 
   determineUseDistributedMesh();
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   if (_app.isKokkosAvailable())
     _kokkos_mesh = std::make_unique<Moose::Kokkos::Mesh>(*this);
 #endif
@@ -369,7 +369,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
 
   updateCoordTransform();
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   if (_app.isKokkosAvailable())
     _kokkos_mesh = std::make_unique<Moose::Kokkos::Mesh>(*this);
 #endif
@@ -661,7 +661,7 @@ MooseMesh::update()
   // the flag might have been set by calling doingPRefinement(true)
   _doing_p_refinement = _doing_p_refinement || (_max_p_level > 0);
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   if (_app.hasKokkosObjects() || (_app.getExecutioner() && _app.feProblem().hasKokkosObjects()))
     _kokkos_mesh->update();
 #endif

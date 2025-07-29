@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
 #include "GPUAssembly.h"
 #include "GPUSystem.h"
 #endif
@@ -327,7 +327,7 @@ public:
   virtual Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) override;
   virtual const Assembly & assembly(const THREAD_ID tid, const unsigned int sys_num) const override;
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   Moose::Kokkos::Assembly & kokkosAssembly() { return _kokkos_assembly; }
   const Moose::Kokkos::Assembly & kokkosAssembly() const { return _kokkos_assembly; }
 #endif
@@ -408,7 +408,7 @@ public:
   virtual void init() override;
   virtual void solve(const unsigned int nl_sys_num);
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   void initKokkos();
 #endif
 
@@ -778,7 +778,7 @@ public:
 
   virtual NonlinearSystem & getNonlinearSystem(const unsigned int sys_num);
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Get all Kokkos systems that are associated with MOOSE nonlinear and auxiliary systems
    * @returns The array of Kokkos systems
@@ -1109,7 +1109,7 @@ public:
   void
   reinitMaterialsInterface(BoundaryID boundary_id, const THREAD_ID tid, bool swap_stateful = true);
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   void prepareKokkosMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props);
   void reinitKokkosMaterials();
 #endif
@@ -1790,7 +1790,7 @@ public:
     return _neighbor_material_props;
   }
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   Moose::Kokkos::MaterialPropertyStorage & getKokkosMaterialPropertyStorage()
   {
     return _kokkos_material_props;
@@ -1912,7 +1912,7 @@ public:
    */
   void initElementStatefulProps(const libMesh::ConstElemRange & elem_range, const bool threaded);
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   void initKokkosStatefulProps();
 #endif
 
@@ -2778,7 +2778,7 @@ protected:
   Moose::CouplingType _coupling;                             ///< Type of variable coupling
   std::vector<std::unique_ptr<libMesh::CouplingMatrix>> _cm; ///< Coupling matrix for variables.
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   Moose::Kokkos::Array<Moose::Kokkos::System> _kokkos_systems;
 #endif
 
@@ -2789,7 +2789,7 @@ protected:
   /// corresponds to the nonlinear system number
   std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   Moose::Kokkos::Assembly _kokkos_assembly;
 #endif
 
@@ -2823,7 +2823,7 @@ protected:
   MaterialPropertyStorage & _bnd_material_props;
   MaterialPropertyStorage & _neighbor_material_props;
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   Moose::Kokkos::MaterialPropertyStorage & _kokkos_material_props;
   Moose::Kokkos::MaterialPropertyStorage & _kokkos_bnd_material_props;
   Moose::Kokkos::MaterialPropertyStorage & _kokkos_neighbor_material_props;

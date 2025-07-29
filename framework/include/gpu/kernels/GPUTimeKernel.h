@@ -25,25 +25,12 @@ class TimeKernel : public Kernel<Derived>
   usingKokkosKernelMembers(Derived);
 
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = Kernel<Derived>::validParams();
-
-    params.set<MultiMooseEnum>("vector_tags") = "time";
-    params.set<MultiMooseEnum>("matrix_tags") = "system time";
-
-    return params;
-  }
+  static InputParameters validParams();
 
   /**
    * Constructor
    */
-  TimeKernel(const InputParameters & parameters)
-    : Kernel<Derived>(parameters),
-      _u_dot(_var, Moose::SOLUTION_DOT_TAG),
-      _du_dot_du(_var.sys().duDotDu(_var.number()))
-  {
-  }
+  TimeKernel(const InputParameters & parameters);
 
   /**
    * Hook for additional computation for residual after the standard calls
@@ -69,12 +56,32 @@ protected:
   /**
    * Time derivative of the current solution at quadrature points
    */
-  VariableValue _u_dot;
+  const VariableValue _u_dot;
   /**
    * Derivative of u_dot with respect to u
    */
-  Scalar<const Real> _du_dot_du;
+  const Scalar<const Real> _du_dot_du;
 };
+
+template <typename Derived>
+InputParameters
+TimeKernel<Derived>::validParams()
+{
+  InputParameters params = Kernel<Derived>::validParams();
+
+  params.set<MultiMooseEnum>("vector_tags") = "time";
+  params.set<MultiMooseEnum>("matrix_tags") = "system time";
+
+  return params;
+}
+
+template <typename Derived>
+TimeKernel<Derived>::TimeKernel(const InputParameters & parameters)
+  : Kernel<Derived>(parameters),
+    _u_dot(_var, Moose::SOLUTION_DOT_TAG),
+    _du_dot_du(_var.sys().duDotDu(_var.number()))
+{
+}
 
 template <typename Derived>
 KOKKOS_FUNCTION void

@@ -83,7 +83,7 @@ namespace hit
 class Node;
 }
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
 namespace Moose
 {
 namespace Kokkos
@@ -359,7 +359,7 @@ public:
   /**
    * Returns whether the simulation is currently executing actions
    */
-  bool currentlyExecutingActions() const { return _currently_executing_actions; }
+  bool currentlyExecutingActions() const { return _action_warehouse.getCurrentAction() != nullptr; }
 
   /**
    * @return The Parser
@@ -1550,9 +1550,6 @@ private:
    */
   const ExecFlagEnum _execute_flags;
 
-  /// Indicates if simulation is currently executing actions
-  bool _currently_executing_actions;
-
   /// Cache output buffer so the language server can turn it off then back on
   std::streambuf * _output_buffer_cache;
 
@@ -1608,8 +1605,8 @@ public:
    */
   bool isKokkosAvailable() const
   {
-#ifdef MOOSE_HAVE_KOKKOS
-#ifdef MOOSE_KOKKOS_ENABLE_GPU
+#ifdef MOOSE_KOKKOS_ENABLED
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
     return _has_gpus;
 #else
     return true;
@@ -1625,13 +1622,13 @@ public:
    */
   bool hasKokkosObjects() const { return _has_kokkos_objects; }
 
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Allocate Kokkos memory pool
    * @param size The memory pool size in the number of bytes
    * @param ways The number of parallel ways
    */
-  void allocateKokkosMemoryPool(size_t size, unsigned int ways) const;
+  void allocateKokkosMemoryPool(std::size_t size, unsigned int ways) const;
 
   /**
    * Get Kokkos memory pool
@@ -1641,7 +1638,7 @@ public:
 #endif
 
 private:
-#ifdef MOOSE_HAVE_KOKKOS
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Query the GPUs in the system and check whether every process has an associated GPU
    */
@@ -1650,7 +1647,7 @@ private:
   /**
    * Deallocate Kokkos memory pool
    */
-  void deallocateKokkosMemoryPool() const;
+  void deallocateKokkosMemoryPool();
 #endif
 
   /**

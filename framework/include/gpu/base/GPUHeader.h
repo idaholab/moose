@@ -31,7 +31,7 @@
 #include "MooseConfig.h"
 
 // Architecture-dependent execution spaces
-#ifdef MOOSE_KOKKOS_ENABLE_GPU
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
 #ifdef KOKKOS_ENABLE_CUDA
 #define MemSpace ::Kokkos::CudaSpace
 #define ExecSpace ::Kokkos::Cuda
@@ -65,6 +65,12 @@
   }
 #endif
 
+namespace Moose
+{
+namespace Kokkos
+{
 // Predefined maximum values
 constexpr unsigned int MAX_TAG = 30;
 constexpr unsigned int MAX_DOF = 30;
+} // namespace Kokkos
+} // namespace Moose

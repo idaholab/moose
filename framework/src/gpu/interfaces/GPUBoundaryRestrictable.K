@@ -16,8 +16,8 @@
 BoundaryRestrictable::BoundaryRestrictable(const BoundaryRestrictable & object)
   : BoundaryRestrictable(&object._moose_object, object._bnd_nodal)
 {
-  _node_ids = object._node_ids;
-  _element_side_ids = object._element_side_ids;
+  _kokkos_node_ids = object._kokkos_node_ids;
+  _kokkos_element_side_ids = object._kokkos_element_side_ids;
 }
 
 void
@@ -40,7 +40,7 @@ BoundaryRestrictable::initializeKokkosBoundaryRestrictable(MooseMesh * mesh)
         if (node->processor_id() == _moose_object.processor_id())
           node_ids.insert(kokkos_mesh->getNodeID(node));
 
-    _node_ids = node_ids;
+    _kokkos_node_ids = node_ids;
   }
   else
   {
@@ -56,6 +56,6 @@ BoundaryRestrictable::initializeKokkosBoundaryRestrictable(MooseMesh * mesh)
               {kokkos_mesh->getElementID(elem), mesh->sideWithBoundaryID(elem, boundary)});
       }
 
-    _element_side_ids = element_side_ids;
+    _kokkos_element_side_ids = element_side_ids;
   }
 }

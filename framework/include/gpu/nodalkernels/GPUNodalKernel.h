@@ -48,35 +48,12 @@ template <typename Derived>
 class NodalKernel : public NodalKernelBase
 {
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = NodalKernelBase::validParams();
-    return params;
-  }
+  static InputParameters validParams();
 
   /**
    * Constructor
    */
-  NodalKernel(const InputParameters & parameters)
-    : NodalKernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-      _u(kokkosSystems(), _var),
-      _boundary_restricted(boundaryRestricted()),
-      _default_diag(&Derived::computeQpJacobian == &NodalKernel::computeQpJacobian),
-      _default_offdiag(&Derived::computeQpOffDiagJacobian == &NodalKernel::computeQpOffDiagJacobian)
-  {
-  }
-
-  /**
-   * Copy constructor for parallel dispatch
-   */
-  NodalKernel(const NodalKernel<Derived> & object)
-    : NodalKernelBase(object),
-      _u(object._u),
-      _boundary_restricted(object._boundary_restricted),
-      _default_diag(object._default_diag),
-      _default_offdiag(object._default_offdiag)
-  {
-  }
+  NodalKernel(const InputParameters & parameters);
 
   /**
    * Dispatch residual calculation
@@ -124,7 +101,7 @@ protected:
   /**
    * Current solution at nodes
    */
-  VariableNodalValue _u;
+  const VariableNodalValue _u;
 
 private:
   /**
@@ -140,6 +117,24 @@ private:
    */
   const bool _default_offdiag;
 };
+
+template <typename Derived>
+InputParameters
+NodalKernel<Derived>::validParams()
+{
+  InputParameters params = NodalKernelBase::validParams();
+  return params;
+}
+
+template <typename Derived>
+NodalKernel<Derived>::NodalKernel(const InputParameters & parameters)
+  : NodalKernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _u(kokkosSystems(), _var),
+    _boundary_restricted(boundaryRestricted()),
+    _default_diag(&Derived::computeQpJacobian == &NodalKernel::computeQpJacobian),
+    _default_offdiag(&Derived::computeQpOffDiagJacobian == &NodalKernel::computeQpOffDiagJacobian)
+{
+}
 
 template <typename Derived>
 void

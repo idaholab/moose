@@ -15,27 +15,18 @@ registerMooseAction("MooseApp", AddKokkosNodalKernelAction, "add_nodal_kernel");
 InputParameters
 AddKokkosNodalKernelAction::validParams()
 {
-  InputParameters params = MooseObjectAction::validParams();
+  InputParameters params = KokkosObjectAction::validParams();
   params.addClassDescription("Add a Kokkos NodalKernel object to the simulation.");
-  params.addPrivateParam<bool>("_kokkos_action", true);
   return params;
 }
 
 AddKokkosNodalKernelAction::AddKokkosNodalKernelAction(const InputParameters & params)
-  : MooseObjectAction(params)
+  : KokkosObjectAction(params, "NodalKernel")
 {
 }
 
 void
 AddKokkosNodalKernelAction::act()
 {
-#ifndef MOOSE_HAVE_KOKKOS
-  mooseError(
-      "Attempted to add a Kokkos nodal kernel but MOOSE was not compiled with Kokkos support.");
-#else
-  if (!_app.isKokkosAvailable())
-    mooseError("Attempted to add a Kokkos nodal kernel but no GPU was detected in the system.");
-  else
-    _problem->addKokkosNodalKernel(_type, _name, _moose_object_pars);
-#endif
+  _problem->addKokkosNodalKernel(_type, _name, _moose_object_pars);
 }

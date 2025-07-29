@@ -52,45 +52,17 @@ template <typename Derived>
 class Material : public MaterialBase, public Coupleable, public MaterialPropertyInterface
 {
 public:
-  static InputParameters validParams()
-  {
-    InputParameters params = MaterialBase::validParams();
-    params += MaterialPropertyInterface::validParams();
-    params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
-    return params;
-  }
+  static InputParameters validParams();
 
   /**
    * Constructor
    */
-  Material(const InputParameters & parameters)
-    : MaterialBase(parameters),
-      Coupleable(this, false),
-      MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
-      _bnd(_material_data_type != Moose::BLOCK_MATERIAL_DATA),
-      _neighbor(_material_data_type == Moose::NEIGHBOR_MATERIAL_DATA),
-      _default_init(&Derived::initQpStatefulProperties == &Material::initQpStatefulProperties),
-      _qrule(_bnd ? (_neighbor ? _subproblem.assembly(_tid, 0).qRuleNeighbor()
-                               : _subproblem.assembly(_tid, 0).qRuleFace())
-                  : _subproblem.assembly(_tid, 0).qRule())
-  {
-    for (auto coupled_var : getCoupledMooseVars())
-      addMooseVariableDependency(coupled_var);
-  }
+  Material(const InputParameters & parameters);
 
   /**
    * Copy constructor for parallel dispatch
    */
-  Material(const Material & object)
-    : MaterialBase(object),
-      Coupleable(&object, false),
-      MaterialPropertyInterface(&object, object.blockIDs(), object.boundaryIDs()),
-      _bnd(object._bnd),
-      _neighbor(object._neighbor),
-      _default_init(object._default_init),
-      _qrule(object._qrule)
-  {
-  }
+  Material(const Material & object);
 
   /**
    * Dispatch stateful material property initialization
@@ -269,6 +241,44 @@ private:
   virtual const QBase & qRule() const override { return *_qrule; }
   ///@}
 };
+
+template <typename Derived>
+InputParameters
+Material<Derived>::validParams()
+{
+  InputParameters params = MaterialBase::validParams();
+  params += MaterialPropertyInterface::validParams();
+  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+  return params;
+}
+
+template <typename Derived>
+Material<Derived>::Material(const InputParameters & parameters)
+  : MaterialBase(parameters),
+    Coupleable(this, false),
+    MaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
+    _bnd(_material_data_type != Moose::BLOCK_MATERIAL_DATA),
+    _neighbor(_material_data_type == Moose::NEIGHBOR_MATERIAL_DATA),
+    _default_init(&Derived::initQpStatefulProperties == &Material::initQpStatefulProperties),
+    _qrule(_bnd ? (_neighbor ? _subproblem.assembly(_tid, 0).qRuleNeighbor()
+                             : _subproblem.assembly(_tid, 0).qRuleFace())
+                : _subproblem.assembly(_tid, 0).qRule())
+{
+  for (auto coupled_var : getCoupledMooseVars())
+    addMooseVariableDependency(coupled_var);
+}
+
+template <typename Derived>
+Material<Derived>::Material(const Material & object)
+  : MaterialBase(object),
+    Coupleable(&object, false),
+    MaterialPropertyInterface(&object, object.blockIDs(), object.boundaryIDs()),
+    _bnd(object._bnd),
+    _neighbor(object._neighbor),
+    _default_init(object._default_init),
+    _qrule(object._qrule)
+{
+}
 
 template <typename Derived>
 void

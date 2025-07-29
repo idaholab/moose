@@ -116,7 +116,7 @@ AC_MSG_RESULT([configuring with kokkos support: $kokkos_support])
 
 AS_IF([test "$kokkos_support" = yes],
       [
-        AC_DEFINE(HAVE_KOKKOS, 1, [Whether to use Kokkos-related code or not])
+        AC_DEFINE(KOKKOS_ENABLED, 1, [Whether to use Kokkos-related code or not])
         AC_SUBST([kokkos_support],[true])
 
         AS_IF([test "$with_kokkos" = cpu],

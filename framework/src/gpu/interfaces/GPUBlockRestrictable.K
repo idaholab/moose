@@ -13,9 +13,9 @@
 BlockRestrictable::BlockRestrictable(const BlockRestrictable & object)
   : BlockRestrictable(object._moose_object, false)
 {
-  _element_ids = object._element_ids;
-  _element_side_ids = object._element_side_ids;
-  _node_ids = object._node_ids;
+  _kokkos_element_ids = object._kokkos_element_ids;
+  _kokkos_node_ids = object._kokkos_node_ids;
+  _kokkos_element_side_ids = object._kokkos_element_side_ids;
 }
 
 void
@@ -37,8 +37,8 @@ BlockRestrictable::initializeKokkosBlockRestrictable(const Moose::Kokkos::Mesh *
                     mesh->getSubdomainNodeIDs(block).end());
   }
 
-  _element_ids = element_ids;
-  _node_ids = node_ids;
+  _kokkos_element_ids = element_ids;
+  _kokkos_node_ids = node_ids;
 
   if (_moose_object->isParamValid("_material_data_type") &&
       _moose_object->getParam<Moose::MaterialDataType>("_material_data_type") !=
@@ -53,6 +53,6 @@ BlockRestrictable::initializeKokkosBlockRestrictable(const Moose::Kokkos::Mesh *
         for (unsigned int side = 0; side < elem->n_sides(); ++side)
           element_side_ids.insert({id, side});
 
-    _element_side_ids = element_side_ids;
+    _kokkos_element_side_ids = element_side_ids;
   }
 }

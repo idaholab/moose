@@ -37,14 +37,14 @@ public:
    * Get the total thread pool size
    * @returns The total thread pool size
    */
-  auto size() const { return _size; }
+  dof_id_type size() const { return _size; }
   /**
    * Get the multi-dimensional thread index of a dimension given a one-dimensional thread index
    * @param tid The one-dimensional thread index
    * @param dim for which the multi-dimensional thread index is to be returned
    * @returns The multi-dimensional thread index of the dimension
    */
-  KOKKOS_FUNCTION auto operator()(dof_id_type tid, unsigned int dim) const
+  KOKKOS_FUNCTION dof_id_type operator()(dof_id_type tid, unsigned int dim) const
   {
     KOKKOS_ASSERT(dim < _dim);
 

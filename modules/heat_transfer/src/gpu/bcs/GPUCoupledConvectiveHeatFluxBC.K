@@ -30,10 +30,10 @@ KokkosCoupledConvectiveHeatFluxBC::KokkosCoupledConvectiveHeatFluxBC(
     const InputParameters & parameters)
   : IntegratedBC(parameters),
     _n_components(coupledComponents("T_infinity")),
-    _T_infinity(KokkosCoupledValues("T_infinity")),
-    _htc(KokkosCoupledValues("htc")),
-    _alpha(KokkosCoupledValues("alpha")),
-    _scale_factor(KokkosCoupledValue("scale_factor"))
+    _T_infinity(kokkosCoupledValues("T_infinity")),
+    _htc(kokkosCoupledValues("htc")),
+    _alpha(kokkosCoupledValues("alpha")),
+    _scale_factor(kokkosCoupledValue("scale_factor"))
 {
   if (coupledComponents("alpha") != _n_components)
     paramError(

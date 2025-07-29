@@ -37,7 +37,7 @@ public:
 
 private:
   // optional coupled variable
-  Moose::Kokkos::VariableValue _coupled_val;
+  const Moose::Kokkos::VariableValue _coupled_val;
 
   std::vector<std::string> _prop_names;
   Moose::Kokkos::Array<Real> _prop_values;

@@ -18,21 +18,30 @@ public:
 
   KokkosCoefDiffusion(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return _coef * _grad_test(datum, i, qp) * _grad_u(datum, qp);
-  }
-
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
-                                         const unsigned int j,
-                                         const unsigned int qp,
-                                         ResidualDatum & datum) const
-  {
-    return _coef * _grad_test(datum, i, qp) * _grad_phi(datum, j, qp);
-  }
+  KOKKOS_FUNCTION inline Real
+  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION inline Real computeQpJacobian(const unsigned int i,
+                                                const unsigned int j,
+                                                const unsigned int qp,
+                                                ResidualDatum & datum) const;
 
 protected:
-  Moose::Kokkos::Scalar<const Real> _coef;
+  const Moose::Kokkos::Scalar<const Real> _coef;
 };
+
+KOKKOS_FUNCTION inline Real
+KokkosCoefDiffusion::computeQpResidual(const unsigned int i,
+                                       const unsigned int qp,
+                                       ResidualDatum & datum) const
+{
+  return _coef * _grad_test(datum, i, qp) * _grad_u(datum, qp);
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosCoefDiffusion::computeQpJacobian(const unsigned int i,
+                                       const unsigned int j,
+                                       const unsigned int qp,
+                                       ResidualDatum & datum) const
+{
+  return _coef * _grad_test(datum, i, qp) * _grad_phi(datum, j, qp);
+}

@@ -34,13 +34,16 @@ namespace Moose
 namespace Kokkos
 {
 
-void free(void * ptr);
+// This function simply calls ::Kokkos::kokkos_free, but it is separately defined in KokkosArray.K
+// because the Kokkos function cannot be directly seen by the host compiler
+void kokkosFree(void * ptr);
 
 /**
  * The enumerator that dictates the memory copy direction
  */
 enum class MemcpyKind
 {
+  HOST_TO_HOST,
   HOST_TO_DEVICE,
   DEVICE_TO_HOST,
   DEVICE_TO_DEVICE
@@ -50,9 +53,7 @@ enum class MemcpyKind
  * The Kokkos array class
  */
 template <typename T, unsigned int dimension = 1>
-class Array
-{
-};
+class Array;
 
 /**
  * The type trait that determines the default behavior of copy constructor and deepCopy()
@@ -123,7 +124,7 @@ public:
    * Get the reference count
    * @returns The reference count
    */
-  unsigned int use_count() const { return _counter ? *_counter : 0; }
+  unsigned int useCount() const { return _counter.use_count(); }
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -214,27 +215,27 @@ public:
    * Get the host data pointer
    * @returns The pointer to the underlying host data
    */
-  T * host_data() const { return _host_data; }
+  T * hostData() const { return _host_data; }
   /**
    * Get the device data pointer
    * @returns The pointer to the underlying device data
    */
-  T * device_data() const { return _device_data; }
+  T * deviceData() const { return _device_data; }
   /**
    * Allocate array on host and device
    * @param n The vector containing the size of each dimension
    */
-  void create(const std::vector<dof_id_type> n) { createInternal<true, true>(n); }
+  void create(const std::vector<dof_id_type> & n) { createInternal<true, true>(n); }
   /**
    * Allocate array on host only
    * @param n The vector containing the size of each dimension
    */
-  void createHost(const std::vector<dof_id_type> n) { createInternal<true, false>(n); }
+  void createHost(const std::vector<dof_id_type> & n) { createInternal<true, false>(n); }
   /**
    * Allocate array on device only
    * @param n The vector containing the size of each dimension
    */
-  void createDevice(const std::vector<dof_id_type> n) { createInternal<false, true>(n); }
+  void createDevice(const std::vector<dof_id_type> & n) { createInternal<false, true>(n); }
   /**
    * Point the host data to an external data instead of allocating it
    * @param ptr The pointer to the external host data
@@ -246,18 +247,10 @@ public:
    */
   void aliasDevice(T * ptr);
   /**
-   * Allocate host data for an initialized array that has not allocated host data
-   */
-  void allocHost();
-  /**
-   * Allocate device data for an initialized array that has not allocated device data
-   */
-  void allocDevice();
-  /**
    * Apply starting index offsets to each dimension
    * @param d The vector containing the offset of each dimension
    */
-  void offset(const std::vector<dof_id_signed_type> d);
+  void offset(const std::vector<dof_id_signed_type> & d);
   /**
    * Copy data between host and device
    * @param dir The copy direction
@@ -365,14 +358,14 @@ protected:
    * @param n The vector containing the size of each dimension
    */
   template <bool host, bool device>
-  void createInternal(const std::vector<dof_id_type> n);
+  void createInternal(const std::vector<dof_id_type> & n);
   /**
    * The internal method to initialize and allocate this array
    * @param n The vector containing the size of each dimension
    * @param host The flag whether host data will be allocated
    * @param device The flag whether device data will be allocated
    */
-  void createInternal(const std::vector<dof_id_type> n, bool host, bool device);
+  void createInternal(const std::vector<dof_id_type> & n, bool host, bool device);
   /**
    * The internal method to perform a memory copy
    * @tparam TargetSpace The Kokkos memory space of target data
@@ -386,10 +379,21 @@ protected:
 #endif
 
 private:
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Allocate host data for an initialized array that has not allocated host data
+   */
+  void allocHost();
+  /**
+   * Allocate device data for an initialized array that has not allocated device data
+   */
+  void allocDevice();
+#endif
+
   /**
    * Reference counter
    */
-  unsigned int * _counter = nullptr;
+  std::shared_ptr<unsigned int> _counter;
   /**
    * Flag whether host data was allocated
    */
@@ -427,15 +431,12 @@ ArrayBase<T, dimension>::destroy()
   if (!_counter)
     return;
 
-  if (*_counter > 1)
+  if (_counter.use_count() > 1)
   {
     _host_data = nullptr;
     _device_data = nullptr;
-
-    (*_counter)--;
-    _counter = nullptr;
   }
-  else if (*_counter == 1)
+  else if (_counter.use_count() == 1)
   {
     if (_is_host_alloc && !_is_host_alias)
     {
@@ -453,10 +454,7 @@ ArrayBase<T, dimension>::destroy()
     }
 
     if (_is_device_alloc && !_is_device_alias)
-      Moose::Kokkos::free(_device_data);
-
-    delete _counter;
-    _counter = nullptr;
+      kokkosFree(_device_data);
   }
 
   _size = 0;
@@ -472,6 +470,8 @@ ArrayBase<T, dimension>::destroy()
   _is_device_alloc = false;
   _is_host_alias = false;
   _is_device_alias = false;
+
+  _counter.reset();
 }
 
 template <typename T, unsigned int dimension>
@@ -481,9 +481,6 @@ ArrayBase<T, dimension>::shallowCopy(const ArrayBase<T, dimension> & array)
   destroy();
 
   _counter = array._counter;
-
-  if (_counter)
-    (*_counter)++;
 
   _size = array._size;
 
@@ -559,7 +556,7 @@ ArrayBase<T, dimension>::allocDevice()
 template <typename T, unsigned int dimension>
 template <bool host, bool device>
 void
-ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> n)
+ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> & n)
 {
   if (n.size() != dimension)
     mooseError("Kokkos array error: the number of dimensions provided (",
@@ -571,13 +568,12 @@ ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> n)
   if (_counter)
     destroy();
 
-  _counter = new unsigned int;
-  *_counter = 1;
+  _counter = std::make_shared<unsigned int>();
 
   _size = 1;
   _s[0] = 1;
 
-  for (unsigned int i = 0; i < dimension; ++i)
+  for (const auto i : make_range(dimension))
   {
     _n[i] = n[i];
     _size *= n[i];
@@ -595,7 +591,7 @@ ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> n)
 
 template <typename T, unsigned int dimension>
 void
-ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> n, bool host, bool device)
+ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> & n, bool host, bool device)
 {
   if (host && device)
     createInternal<true, true>(n);
@@ -618,7 +614,7 @@ ArrayBase<T, dimension>::copyInternal(T * target, const T * source, dof_id_type 
 
 template <typename T, unsigned int dimension>
 void
-ArrayBase<T, dimension>::offset(const std::vector<dof_id_signed_type> d)
+ArrayBase<T, dimension>::offset(const std::vector<dof_id_signed_type> & d)
 {
   if (d.size() > dimension)
     mooseError("Kokkos array error: the number of offsets provided (",
@@ -627,7 +623,7 @@ ArrayBase<T, dimension>::offset(const std::vector<dof_id_signed_type> d)
                dimension,
                ").");
 
-  for (unsigned int i = 0; i < d.size(); ++i)
+  for (const auto i : index_range(d))
     _d[i] = d[i];
 }
 
@@ -644,7 +640,7 @@ ArrayBase<T, dimension>::copy(MemcpyKind dir)
     // If device side memory is not allocated,
     if (!_is_device_alloc)
     {
-      if (*_counter == 1)
+      if (_counter.use_count() == 1)
         // allocate memory if this array is not shared with other arrays
         allocDevice();
       else
@@ -665,7 +661,7 @@ ArrayBase<T, dimension>::copy(MemcpyKind dir)
     // If host side memory is not allocated,
     if (!_is_host_alloc)
     {
-      if (*_counter == 1)
+      if (_counter.use_count() == 1)
         // allocate memory if this array is not shared with other arrays
         allocHost();
       else
@@ -689,7 +685,16 @@ ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, dof_id_type n, do
   if (offset > _size)
     mooseError("Kokkos array error: offset cannot be larger than the array size.");
 
-  if (dir == MemcpyKind::HOST_TO_DEVICE)
+  if (dir == MemcpyKind::HOST_TO_HOST)
+  {
+    // If host side memory is not allocated, do nothing
+    if (!_is_host_alloc)
+      return;
+
+    // Copy from host to host
+    copyInternal<::Kokkos::HostSpace, ::Kokkos::HostSpace>(_host_data + offset, ptr, n);
+  }
+  else if (dir == MemcpyKind::HOST_TO_DEVICE)
   {
     // If device side memory is not allocated, do nothing
     if (!_is_device_alloc)
@@ -697,15 +702,6 @@ ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, dof_id_type n, do
 
     // Copy from host to device
     copyInternal<MemSpace, ::Kokkos::HostSpace>(_device_data + offset, ptr, n);
-  }
-  else if (dir == MemcpyKind::DEVICE_TO_DEVICE)
-  {
-    // If device side memory is not allocated, do nothing
-    if (!_is_device_alloc)
-      return;
-
-    // Copy from device to device
-    copyInternal<MemSpace, MemSpace>(_device_data + offset, ptr, n);
   }
   else if (dir == MemcpyKind::DEVICE_TO_HOST)
   {
@@ -715,6 +711,15 @@ ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, dof_id_type n, do
 
     // Copy from device to host
     copyInternal<::Kokkos::HostSpace, MemSpace>(_host_data + offset, ptr, n);
+  }
+  else if (dir == MemcpyKind::DEVICE_TO_DEVICE)
+  {
+    // If device side memory is not allocated, do nothing
+    if (!_is_device_alloc)
+      return;
+
+    // Copy from device to device
+    copyInternal<MemSpace, MemSpace>(_device_data + offset, ptr, n);
   }
 }
 
@@ -728,7 +733,25 @@ ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyKind dir, dof_id_type n, dof_id_
   if (offset > _size)
     mooseError("Kokkos array error: offset cannot be larger than the array size.");
 
-  if (dir == MemcpyKind::DEVICE_TO_HOST)
+  if (dir == MemcpyKind::HOST_TO_HOST)
+  {
+    // If host side memory is not allocated, do nothing
+    if (!_is_host_alloc)
+      return;
+
+    // Copy from host to host
+    copyInternal<::Kokkos::HostSpace, ::Kokkos::HostSpace>(ptr, _host_data + offset, n);
+  }
+  else if (dir == MemcpyKind::HOST_TO_DEVICE)
+  {
+    // If host side memory is not allocated, do nothing
+    if (!_is_host_alloc)
+      return;
+
+    // Copy from host to device
+    copyInternal<MemSpace, ::Kokkos::HostSpace>(ptr, _host_data + offset, n);
+  }
+  else if (dir == MemcpyKind::DEVICE_TO_HOST)
   {
     // If device side memory is not allocated, do nothing
     if (!_is_device_alloc)
@@ -745,15 +768,6 @@ ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyKind dir, dof_id_type n, dof_id_
 
     // Copy from device to device
     copyInternal<MemSpace, MemSpace>(ptr, _device_data + offset, n);
-  }
-  else if (dir == MemcpyKind::HOST_TO_DEVICE)
-  {
-    // If host side memory is not allocated, do nothing
-    if (!_is_host_alloc)
-      return;
-
-    // Copy from host to device
-    copyInternal<MemSpace, ::Kokkos::HostSpace>(ptr, _host_data + offset, n);
   }
 }
 
@@ -883,10 +897,8 @@ dataStore(std::ostream & stream, Array<T, dimension> & array, void * context)
     std::free(data);
   }
   else
-  {
     for (auto & value : array)
       dataStore(stream, value, context);
-  }
 }
 
 using ::dataLoad;
@@ -1045,17 +1057,17 @@ public:
    * @tparam device Whether to allocate and copy to the device data
    * @param vector The standard vector variable to copy
    */
-  template <bool host = true, bool device = true>
+  template <bool host, bool device>
   void copyVector(const std::vector<T> & vector)
   {
     this->template createInternal<host, device>({static_cast<dof_id_type>(vector.size())});
 
     if (host)
-      std::memcpy(this->host_data(), vector.data(), this->size() * sizeof(T));
+      std::memcpy(this->hostData(), vector.data(), this->size() * sizeof(T));
 
     if (device)
       this->template copyInternal<MemSpace, ::Kokkos::HostSpace>(
-          this->device_data(), vector.data(), this->size());
+          this->deviceData(), vector.data(), this->size());
   }
   /**
    * Copy a standard set variable
@@ -1064,7 +1076,7 @@ public:
    * @tparam device Whether to allocate and copy to the device data
    * @param set The standard set variable to copy
    */
-  template <bool host = true, bool device = true>
+  template <bool host, bool device>
   void copySet(const std::set<T> & set)
   {
     std::vector<T> vector(set.begin(), set.end());
@@ -1079,7 +1091,7 @@ public:
    */
   auto & operator=(const std::vector<T> & vector)
   {
-    copyVector(vector);
+    copyVector<true, true>(vector);
 
     return *this;
   }
@@ -1090,7 +1102,7 @@ public:
    */
   auto & operator=(const std::set<T> & set)
   {
-    copySet(set);
+    copySet<true, true>(set);
 
     return *this;
   }
