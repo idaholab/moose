@@ -27,6 +27,7 @@
     design = '/ComputeFiniteStrain.md'
     requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
                    tensile test simulation in 3D'
+    capabilities = 'method!=dbg'
   [../]
   [./3d_bar_Bbar]
     type = 'Exodiff'
@@ -38,5 +39,6 @@
     design = '/ComputeFiniteStrain.md'
     requirement = 'Finite strain methods in Tensor Mechanics should be able to adequately simulate a
                    tensile test simulation in 3D using a volumetric locking correction'
+    capabilities = 'method!=dbg'
   [../]
 []

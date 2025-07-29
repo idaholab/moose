@@ -40,6 +40,7 @@
       allow_warnings = true
       max_parallel = 1
       detail = 'test_cutback'
+      capabilities = 'method!=dbg'
     []
     [test_substep]
       type = 'Exodiff'

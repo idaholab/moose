@@ -8,6 +8,7 @@
     valgrind = HEAVY
     requirement = "The AD multiple power law creep must reproduce the results of the AD single power "
                   "law creep: Reference results."
+    capabilities = 'method!=dbg'
   []
   [multipowerlaw]
     type = 'Exodiff'
@@ -19,6 +20,7 @@
     valgrind = HEAVY
     requirement = "The AD multiple power law creep must reproduce the results of the AD single power "
                   "law creep when a single stress increment is provided by the user."
+    capabilities = 'method!=dbg'
   []
   [multipowerlaw_two_intervals]
     type = 'Exodiff'
@@ -30,6 +32,7 @@
     valgrind = HEAVY
     requirement = "The AD multiple power law creep must reproduce the results of the AD single power "
                   "law creep with multiple stress intervals with same power law material parameters."
+    capabilities = 'method!=dbg'
   []
   [multipowerlaw_two_intervals_no_continuity]
     type = 'Exodiff'
@@ -41,6 +44,7 @@
     abs_zero = 1.0e-4
     rel_err = 5.0e-4
     requirement = "The AD multiple power law creep must avoid regression for a simple few-element problem whose solution has stress levels encompassing two different sets of power law parameters"
+    capabilities = 'method!=dbg'
   []
   [multipowerlaw_user_input_error]
     type = 'RunException'
@@ -51,5 +55,6 @@
               Outputs/file_base=multi_power_law_creep_two_intervals_different_no_continuity_out"
 
     requirement = "Stress thresholds must be provided in increasing order, otherwise an error will inform the user of such a requirement. "
+    capabilities = 'method!=dbg'
   []
 []

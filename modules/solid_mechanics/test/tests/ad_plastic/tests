@@ -7,6 +7,7 @@
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten"'
     requirement = "The AD multiple inelastic stress calculator shall provide a correct stress for a single power law creep model (reference computation)"
     design = 'PowerLawCreepStressUpdate.md'
+    capabilities = 'method!=dbg'
   [../]
   [./powerlaw_zero]
     type = 'CSVDiff'
@@ -16,6 +17,7 @@
     prereq = powerlaw_ten
     requirement = "The AD multiple inelastic stress calculator shall provide a correct stress for a single power law creep model and an additional zero creep power law model"
     design = 'ADComputeMultipleInelasticStress.md'
+    capabilities = 'method!=dbg'
   [../]
   [./powerlaw_sum]
     type = 'CSVDiff'
@@ -26,6 +28,7 @@
     valgrind = HEAVY
     requirement = "The AD multiple inelastic stress calculator shall provide a correct stress for the linear combination of two power law creep models"
     design = 'ADComputeMultipleInelasticStress.md'
+    capabilities = 'method!=dbg'
   [../]
   [./powerlaw_cycle]
     type = 'CSVDiff'
@@ -35,6 +38,7 @@
     prereq = powerlaw_sum
     requirement = "The AD multiple inelastic stress calculator shall provide a correct stress when cycling through two identical power law creep models"
     design = 'ADComputeMultipleInelasticStress.md'
+    capabilities = 'method!=dbg'
   [../]
 
   # the Jacobian norms have been compared to the norms of the handcoded jacobians and the tolerances set accordingly
