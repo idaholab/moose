@@ -47,5 +47,6 @@
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
+    max_threads = 1
   []  
 []
