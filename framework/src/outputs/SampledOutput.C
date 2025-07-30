@@ -218,8 +218,6 @@ SampledOutput::initSample()
         const auto & var_name = source_sys.variable_name(var_num);
         if (!nodal_data.count(var_name) && !elemental_data.count(var_name))
           continue;
-        _variable_numbers_in_system[sys_num].push_back(var_num);
-        num_actual_vars++;
 
         // We do what we can to preserve the block restriction
         const std::set<SubdomainID> * subdomains;
@@ -230,7 +228,7 @@ SampledOutput::initSample()
         {
           subdomains = &source_sys.variable(var_num).active_subdomains();
           // Reduce the block restriction if the output is block restricted
-          if (isParamValid("sampling_blocks"))
+          if (isParamValid("sampling_blocks") && !subdomains->empty())
           {
             const auto & sampling_blocks = _sampling_mesh_ptr->getSubdomainIDs(
                 getParam<std::vector<SubdomainName>>("sampling_blocks"));
@@ -240,8 +238,19 @@ SampledOutput::initSample()
                              sampling_blocks.end(),
                              std::inserter(restricted_subdomains, restricted_subdomains.begin()));
             subdomains = &restricted_subdomains;
+
+            // None of the subdomains are included in the sampling, might as well skip
+            if (subdomains->empty())
+            {
+              hideAdditionalVariable(nodal_data.count(var_name) ? "nodal" : "elemental", var_name);
+              continue;
+            }
           }
         }
+
+        // We are going to add the variable, let's count it
+        _variable_numbers_in_system[sys_num].push_back(var_num);
+        num_actual_vars++;
 
         // Add the variable. We essentially support nodal variables and constant monomials
         const FEType & fe_type = source_sys.variable_type(var_num);
@@ -314,7 +323,8 @@ SampledOutput::updateSample()
       {
         _serialized_solution->clear();
         _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
-        // Pull down a full copy of this vector on every processor so we can get values in parallel
+        // Pull down a full copy of this vector on every processor so we can get values in
+        // parallel
         source_sys.solution->localize(*_serialized_solution);
       }
 
@@ -323,8 +333,8 @@ SampledOutput::updateSample()
       {
         const auto original_var_num = _variable_numbers_in_system[sys_num][var_num];
 
-        // If the mesh has changed, the MeshFunctions need to be re-built, otherwise simply clear it
-        // for re-initialization
+        // If the mesh has changed, the MeshFunctions need to be re-built, otherwise simply clear
+        // it for re-initialization
         // TODO: inherit from MeshChangedInterface and rebuild mesh functions on meshChanged()
         if (!_mesh_functions[sys_num][var_num] || _sampling_mesh_changed)
           _mesh_functions[sys_num][var_num] = std::make_unique<MeshFunction>(
@@ -338,8 +348,9 @@ SampledOutput::updateSample()
         // Initialize the MeshFunctions for application to the sampled solution
         _mesh_functions[sys_num][var_num]->init();
 
-        // Mesh functions are still defined on the original mesh, which might not fully overlap with
-        // the sampling mesh. We don't want to error with a libMesh assert on the out of mesh mode
+        // Mesh functions are still defined on the original mesh, which might not fully overlap
+        // with the sampling mesh. We don't want to error with a libMesh assert on the out of mesh
+        // mode
         _mesh_functions[sys_num][var_num]->enable_out_of_mesh_mode(-1e6);
       }
 
