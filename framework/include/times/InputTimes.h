@@ -23,5 +23,9 @@ public:
   virtual ~InputTimes() = default;
 
 protected:
-  virtual void initialize() override {}
+  virtual void initialize() override;
+
+private:
+  /// The next external time sequences to hit
+  const std::vector<Real> & _input_times;
 };

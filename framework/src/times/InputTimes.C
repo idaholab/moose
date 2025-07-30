@@ -17,16 +17,27 @@ InputTimes::validParams()
   InputParameters params = Times::validParams();
   params.addClassDescription("Times set directly from a user parameter in the input file");
   params.addRequiredParam<std::vector<Real>>("times", "Times to store in the times vector");
-
+  params.declareControllable("times");
   // Times are known for all processes already
   params.set<bool>("auto_broadcast") = false;
-  // Input set the time sequence during initialization stage
-  params.set<bool>("dynamic_time_sequence") = false;
 
   return params;
 }
 
-InputTimes::InputTimes(const InputParameters & parameters) : Times(parameters)
+InputTimes::InputTimes(const InputParameters & parameters)
+  : Times(parameters), _input_times(getParam<std::vector<Real>>("times"))
 {
-  _times = getParam<std::vector<Real>>("times");
+  _times = _input_times;
+}
+
+void
+InputTimes::initialize()
+{
+  if (_times == _input_times)
+    return;
+  for (auto const & t : _input_times)
+  {
+    if (std::find(_times.begin(), _times.end(), t) == _times.end())
+      _times.push_back(t);
+  }
 }
