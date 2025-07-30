@@ -11,6 +11,10 @@
 
 #include "GPUArray.h"
 
+#ifdef MOOSE_KOKKOS_SCOPE
+#include "KokkosUtils.h"
+#endif
+
 #include <memory>
 #include <map>
 
@@ -155,22 +159,14 @@ template <typename T1, typename T2>
 KOKKOS_FUNCTION dof_id_type
 Map<T1, T2>::find(const T1 & key) const
 {
-  auto left = &_keys.first();
-  auto right = &_keys.last();
+  auto begin = &_keys.begin();
+  auto end = &_keys.end();
+  auto target = Utils::find(key, begin, end);
 
-  while (left <= right)
-  {
-    auto mid = left + (right - left) / 2;
-
-    if (*mid == key)
-      return mid - left;
-    else if (*mid < key)
-      left = mid + 1;
-    else
-      right = mid - 1;
-  }
-
-  return _keys.size();
+  if (target == end)
+    return _keys.size();
+  else
+    return target - begin;
 }
 #endif
 

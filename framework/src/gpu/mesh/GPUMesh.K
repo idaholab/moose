@@ -30,6 +30,7 @@ Mesh::initMap()
     _maps = std::make_shared<MeshMap>();
 
   _maps->_subdomain_id_mapping.clear();
+  _maps->_boundary_id_mapping.clear();
   _maps->_elem_type_id_mapping.clear();
   _maps->_local_elem_id_mapping.clear();
   _maps->_local_node_id_mapping.clear();
@@ -70,6 +71,9 @@ Mesh::initMap()
       }
     }
   }
+
+  for (auto boundary : _mesh.meshBoundaryIds())
+    _maps->_boundary_id_mapping[boundary] = _maps->_boundary_id_mapping.size();
 }
 
 void
@@ -114,6 +118,7 @@ Mesh::initElement()
   _points.create(num_nodes);
   _nodes.create(_mesh.getMaxNodesPerElem(), num_elems);
   _nodes_face.create(_mesh.getMaxNodesPerSide(), _mesh.getMaxSidesPerElem(), num_elems);
+  _boundary_nodes.create(_mesh.meshBoundaryIds().size());
 
   for (auto & [node, nid] : getLocalNodeMap())
     _points[nid] = *node;
@@ -128,9 +133,22 @@ Mesh::initElement()
         _nodes_face(node, side, eid) = getNodeID(elem->side_ptr(side)->node_ptr(node));
   }
 
+  for (auto boundary : _mesh.meshBoundaryIds())
+  {
+    std::set<dof_id_type> nodes;
+
+    for (const auto node : as_range(_mesh.getMesh().bid_nodes_begin(boundary),
+                                    _mesh.getMesh().bid_nodes_end(boundary)))
+      if (node->processor_id() == _mesh.processor_id())
+        nodes.insert(getNodeID(node));
+
+    _boundary_nodes[getBoundaryID(boundary)] = nodes;
+  }
+
   _points.copy();
   _nodes.copy();
   _nodes_face.copy();
+  _boundary_nodes.copy();
 }
 
 SubdomainID
@@ -140,6 +158,15 @@ Mesh::getSubdomainID(const SubdomainID subdomain) const
     mooseError("Subdomain ", subdomain, " does not have Kokkos subdomain ID");
 
   return _maps->_subdomain_id_mapping.at(subdomain);
+}
+
+BoundaryID
+Mesh::getBoundaryID(const BoundaryID boundary) const
+{
+  if (!_maps->_boundary_id_mapping.count(boundary))
+    mooseError("Boundary ", boundary, " does not have Kokkos boundary ID");
+
+  return _maps->_boundary_id_mapping.at(boundary);
 }
 
 unsigned int
