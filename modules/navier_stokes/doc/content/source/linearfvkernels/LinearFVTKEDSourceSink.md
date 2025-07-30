@@ -1,6 +1,7 @@
 # LinearFVTKEDSourceSink
 
-This kernel implements a version of [`INSFVTKEDSourceSink`](INSFVTKEDSourceSink.md) for a linear kernel.
+This kernel implements a version of [`INSFVTKEDSourceSink`](INSFVTKEDSourceSink.md) for
+the linear finite volume discretization of the $k-\epsilon$ turbulence equations.
 The documentation is repeated down here for completeness.
 
 The object computes the turbulent source and sink term for the turbulent kinetic energy dissipation rate equation.
@@ -43,9 +44,9 @@ A separate formulation is used for the `sub-laminar` and `logarithmic` boundary 
 The determination of whether the near-wall cell lies in the laminar or logarithmic region
 is performed via the non-dimensional wall distance $y^+$.
 The non-dimensional wall distance can be defined differently according to the
-[!param](/LinearFVKernels/LinearFVTKEDSourceSink/wall_treatment) parameter. 
+[!param](/LinearFVKernels/LinearFVTKEDSourceSink/wall_treatment) parameter.
 
-The four formulations are described in more detail in [INSFVTurbulentViscosityWallFunction.md]. 
+The four formulations are described in more detail in [INSFVTurbulentViscosityWallFunction.md].
 
 If an equilibrium [!param](/LinearFVKernels/LinearFVTKEDSourceSink/wall_treatment) is defined, i.e. `eq_newton`,`eq_incremental` or `eq_linearized`, the standard wall function formulations are used in which $y^+$ is found:
 

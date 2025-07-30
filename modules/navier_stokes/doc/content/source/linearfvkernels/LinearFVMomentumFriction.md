@@ -1,7 +1,7 @@
 # LinearFVMomentumFriction
 
 This kernel adds the Darcy friction term to the Navier Stokes momentum
-equations. This kernel must be used with the canonical LinearFV variable set,
+equations. This kernel must be used with the canonical linear finite volume discretization (`LinearFV`) variable set,
 e.g. pressure and superficial velocity, and supports the Darcy friction model.
 
 Darcy drag model
