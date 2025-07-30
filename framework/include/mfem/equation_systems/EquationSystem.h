@@ -314,8 +314,6 @@ public:
                           mfem::BlockVector & truedXdt,
                           mfem::BlockVector & trueRHS) override;
 
-  const std::vector<std::string> & TrialVarTimeDerivativeNames() const;
-
 protected:
   /// Coefficient for timestep scaling
   mfem::ConstantCoefficient _dt_coef;
