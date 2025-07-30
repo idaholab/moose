@@ -46,40 +46,21 @@ public:
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
-  virtual void ApplyEssentialBCs();
-  virtual void EliminateCoupledVariables();
 
-  /// Build forms
+  /// Initialise
   virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
                     const Moose::MFEM::FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level);
+
+  /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms();
+  virtual void ApplyEssentialBCs();
+  virtual void EliminateCoupledVariables();
+
+  /// Build bilinear forms
   virtual void BuildBilinearForms();
   virtual void BuildMixedBilinearForms();
   virtual void BuildEquationSystem();
-
-  void PrintTrialVarNames()
-  {
-    std::cout << "_test_var_names: ";
-    for (auto test_var_name : _test_var_names)
-        std::cout << test_var_name << " ";
-    std::cout << std::endl;
-
-    std::cout << "_trial_var_names: ";
-    for (auto trial_var_name : _trial_var_names)
-        std::cout << trial_var_name << " ";
-    std::cout << std::endl;
-
-    std::cout << "_eliminated_var_names: ";
-    for (auto elim_var_name : _eliminated_var_names)
-        std::cout << elim_var_name << " ";
-    std::cout << std::endl;
-
-    std::cout << "_coupled_var_names: ";
-    for (auto coupled_var_name : _coupled_var_names)
-        std::cout << coupled_var_name << " ";
-    std::cout << std::endl;
-  };
 
   /// Form linear system, with essential boundary conditions accounted for
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
@@ -190,7 +171,6 @@ protected:
 
   /// Gridfunctions for setting Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _xs;
-  std::vector<std::unique_ptr<mfem::ParGridFunction>> _dxdts;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
 
@@ -338,24 +318,18 @@ public:
 
   protected:
   /// Coefficient for timestep scaling
-  mfem::ConstantCoefficient _dt_coef;
-  std::vector<std::string> _trial_var_time_derivative_names;
+    mfem::ConstantCoefficient _dt_coef;
 
-  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
-      _td_kernels_map;
-  /// Container to store contributions to weak form of the form (F du/dt, v)
-  Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
+    Moose::MFEM::NamedFieldsMap<
+        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
+        _td_kernels_map;
+    /// Container to store contributions to weak form of the form (F du/dt, v)
+    Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
 
   private:
     /// Set trial variable names from subset of coupled variables that have an associated test variable.
     virtual void SetTrialVariableNames() override;
 };
-
-inline const std::vector<std::string> &
-TimeDependentEquationSystem::TrialVarTimeDerivativeNames() const
-{
-  return _trial_var_time_derivative_names;
-}
 
 } // namespace Moose::MFEM
 
