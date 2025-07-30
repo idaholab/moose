@@ -10,19 +10,20 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+#include "MFEMComplexEssentialBC.h"
 
-#include "MFEMEssentialBC.h"
-
-class MFEMVectorDirichletBCBase : public MFEMEssentialBC
+class MFEMComplexScalarDirichletBC : public MFEMComplexEssentialBC
 {
 public:
   static InputParameters validParams();
 
-  ~MFEMVectorDirichletBCBase() override = default;
+  MFEMComplexScalarDirichletBC(const InputParameters & parameters);
+
+  void ApplyBC(mfem::ParComplexGridFunction & gridfunc) override;
 
 protected:
-  MFEMVectorDirichletBCBase(const InputParameters & parameters);
-  mfem::VectorCoefficient & _vec_coef;
+  mfem::Coefficient & _coef_real;
+  mfem::Coefficient & _coef_imag;
 };
 
 #endif

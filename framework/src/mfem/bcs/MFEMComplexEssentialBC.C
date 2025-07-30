@@ -9,20 +9,18 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#pragma once
+#include "MFEMComplexEssentialBC.h"
 
-#include "MFEMEssentialBC.h"
-
-class MFEMVectorDirichletBCBase : public MFEMEssentialBC
+InputParameters
+MFEMComplexEssentialBC::validParams()
 {
-public:
-  static InputParameters validParams();
+  InputParameters params = MFEMBoundaryCondition::validParams();
+  return params;
+}
 
-  ~MFEMVectorDirichletBCBase() override = default;
-
-protected:
-  MFEMVectorDirichletBCBase(const InputParameters & parameters);
-  mfem::VectorCoefficient & _vec_coef;
-};
+MFEMComplexEssentialBC::MFEMComplexEssentialBC(const InputParameters & parameters)
+  : MFEMBoundaryCondition(parameters)
+{
+}
 
 #endif

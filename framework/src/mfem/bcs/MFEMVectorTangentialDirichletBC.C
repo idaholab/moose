@@ -33,10 +33,4 @@ MFEMVectorTangentialDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
   gridfunc.ProjectBdrCoefficientTangent(_vec_coef, getBoundaryMarkers());
 }
 
-void
-MFEMVectorTangentialDirichletBC::ApplyComplexBC(mfem::ParComplexGridFunction & gridfunc)
-{
-  gridfunc.ProjectBdrCoefficientTangent(_vec_coef, _vec_coef_imag, getBoundaryMarkers());
-}
-
 #endif
