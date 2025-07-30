@@ -112,28 +112,26 @@ CylinderComponent::addMeshGenerators()
     _mg_names.push_back(name() + "_circle_base");
 
     // rotate to have extrusion axis be along x-axis
-
-    InputParameters ext_params = _factory.getValidParams("AdvancedExtruderGenerator");
-    ext_params.set<std::vector<unsigned int>>("num_layers") = {getParam<unsigned int>("n_axial")};
-    ext_params.set<MeshGeneratorName>("input") = (MeshGeneratorName)(name() + "_circle_base");
-    ext_params.set<std::vector<Real>>("heights") = {_height};
-
-    const Point default_direction(0, 0, 1);
-    ext_params.set<Point>("direction") = default_direction;
-    _app.getMeshGeneratorSystem().addMeshGenerator(
-        "AdvancedExtruderGenerator", name() + "_base", ext_params);
-    _mg_names.push_back(name() + "_base");
-
     InputParameters rotate_params = _factory.getValidParams("TransformGenerator");
     rotate_params.set<MeshGeneratorName>("input") = _mg_names.back();
-    rotate_params.set<MooseEnum>("transform") = "ROTATE";
-    const auto rotation_matrix =
-        RotationMatrix::rotVec1ToVec2<false>(RealVectorValue(0, 0, 1), RealVectorValue(1, 0, 0));
-    RealVectorValue angles(-90, -90, -90);
+    rotate_params.set<MooseEnum>("transform") = "ROTATE_EXT";
+    RealVectorValue angles(-90, -90, 90);
     rotate_params.set<RealVectorValue>("vector_value") = angles;
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "TransformGenerator", name() + "_3D_init_rotate", rotate_params);
     _mg_names.push_back(name() + "_3D_init_rotate");
+
+    // extrude surface
+    InputParameters ext_params = _factory.getValidParams("AdvancedExtruderGenerator");
+    ext_params.set<std::vector<unsigned int>>("num_layers") = {getParam<unsigned int>("n_axial")};
+    ext_params.set<MeshGeneratorName>("input") = _mg_names.back();
+    ext_params.set<std::vector<Real>>("heights") = {_height};
+
+    const Point default_direction(1, 0, 0);
+    ext_params.set<Point>("direction") = default_direction;
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "AdvancedExtruderGenerator", name() + "_base", ext_params);
+    _mg_names.push_back(name() + "_base");
   }
 
   ComponentMeshTransformHelper::addMeshGenerators();
