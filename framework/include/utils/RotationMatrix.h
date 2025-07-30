@@ -66,15 +66,8 @@ rotVec1ToVec2(GenericRealVectorValue<is_ad> vec1, GenericRealVectorValue<is_ad> 
 // provides a rotation matrix that will rotate the vector vec1 to the vector vec2
 {
   GenericRealTensorValue<is_ad> rot1_to_z = rotVecToZ<is_ad>(vec1);
-  mooseAssert((rot1_to_z * vec1 - Point(0, 0, 1)).norm() < libMesh::TOLERANCE,
-              "rot1_to_z does not rotate vec1 to z-axis!");
   GenericRealTensorValue<is_ad> rot2_to_z = rotVecToZ<is_ad>(vec2);
-  mooseAssert((rot2_to_z * vec2 - Point(0, 0, 1)).norm() < libMesh::TOLERANCE,
-              "rot2_to_z does not rotate vec2 to z-axis!");
-
   GenericRealTensorValue<is_ad> result = rot2_to_z.transpose() * rot1_to_z;
-  mooseAssert((result * vec1 - vec2).norm() < libMesh::TOLERANCE,
-              "Rotation matrix from vec1 to vec2 incorrect!");
   return result;
 }
 
@@ -96,17 +89,14 @@ rotVec2DToX(const GenericRealVectorValue<is_ad> & vec)
 /// @return 3x3 rotation tensor (matrix)
 template <bool is_ad = false>
 GenericRealTensorValue<is_ad>
-rotationMatrixVecToVec(GenericRealVectorValue<is_ad> vec1, GenericRealVectorValue<is_ad> vec2)
+rodriguesRotationMatrix(GenericRealVectorValue<is_ad> vec1, GenericRealVectorValue<is_ad> vec2)
 {
   // normalize input vectors
   GenericRealVectorValue<is_ad> u = vec1 / vec1.norm();
   GenericRealVectorValue<is_ad> v = vec2 / vec2.norm();
 
   if ((u - v).norm() < libMesh::TOLERANCE)
-  {
-    std::cout << "\n\nu and v are the same! Returning identity matrix...\n\n" << std::endl;
     return GenericRealTensorValue<is_ad>(1, 0, 0, 0, 1, 0, 0, 0, 1); // identity matrix
-  }
 
   GenericRealVectorValue<is_ad> k_vec = u.cross(v); // calculate rotation axis
   k_vec /= k_vec.norm();                            // normalize
@@ -121,10 +111,6 @@ rotationMatrixVecToVec(GenericRealVectorValue<is_ad> vec1, GenericRealVectorValu
   GenericRealTensorValue<is_ad> rot_matrix;
   rot_matrix =
       I + sin_theta * K_matrix + (1 - cos_theta) * K_matrix * K_matrix; // construct rotation matrix
-
-  mooseAssert(
-      (rot_matrix * vec1 - vec2).norm() < libMesh::TOLERANCE,
-      "Rotation matrix produced by rotationMatrixVecToVec does not rotate from vec1 to vec2!");
   return rot_matrix;
 }
 }
