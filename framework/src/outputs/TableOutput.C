@@ -44,14 +44,36 @@ TableOutput::validParams()
       true,
       "Whether or not the 'time' column should be written for Postprocessor CSV files");
 
+  MooseEnum new_row_detection_columns("time all", "time");
+  new_row_detection_columns.addDocumentation(
+      "time",
+      "If the time for a new row would match the previous row's time within 'new_row_tolerance', "
+      "do not add the row.");
+  new_row_detection_columns.addDocumentation(
+      "all",
+      "If all columns for a new row would match the previous row's columns within "
+      "'new_row_tolerance', do not add the row.");
+  params.addParam<MooseEnum>("new_row_detection_columns",
+                             new_row_detection_columns,
+                             "Columns to check for duplicate rows; duplicate rows are not output.");
   params.addParam<Real>("new_row_tolerance",
                         libMesh::TOLERANCE * libMesh::TOLERANCE,
                         "The independent variable tolerance for determining when a new row should "
                         "be added to the table (Note: This value must be set independently for "
                         "Postprocessor output to type=Console and type=CSV file separately.");
-  params.addParamNamesToGroup("new_row_tolerance time_data time_column", "Table formatting");
+  params.addParamNamesToGroup("new_row_detection_columns new_row_tolerance time_data time_column",
+                              "Table formatting");
 
   return params;
+}
+
+void
+TableOutput::addMultiAppFixedPointIterationEndExecFlag(InputParameters & params,
+                                                       const std::string & param)
+{
+  ExecFlagEnum & execute_on = params.set<ExecFlagEnum>(param, true);
+  execute_on.addAvailableFlags(EXEC_MULTIAPP_FIXED_POINT_ITERATION_END);
+  params.setDocString(param, execute_on.getDocString());
 }
 
 TableOutput::TableOutput(const InputParameters & parameters)
@@ -71,6 +93,7 @@ TableOutput::TableOutput(const InputParameters & parameters)
                                         : declareRecoverableData<FormattedTable>("reporter_table")),
     _all_data_table(_tables_restartable ? declareRestartableData<FormattedTable>("all_data_table")
                                         : declareRecoverableData<FormattedTable>("all_data_table")),
+    _check_all_columns_for_new_row(getParam<MooseEnum>("new_row_detection_columns") == "all"),
     _new_row_tol(getParam<Real>("new_row_tolerance")),
     _time_data(getParam<bool>("time_data")),
     _time_column(getParam<bool>("time_column"))
@@ -85,26 +108,52 @@ TableOutput::TableOutput(const InputParameters & parameters)
 void
 TableOutput::outputPostprocessors()
 {
-  // Add new row to the tables
-  if (_postprocessor_table.empty() ||
-      !MooseUtils::absoluteFuzzyEqual(
-          _postprocessor_table.getLastTime(), getOutputTime(), _new_row_tol))
-    _postprocessor_table.addRow(getOutputTime());
+  if (shouldOutputPostprocessorsRow(_postprocessor_table))
+    outputPostprocessorsRow(_postprocessor_table);
 
-  if (_all_data_table.empty() ||
-      !MooseUtils::absoluteFuzzyEqual(_all_data_table.getLastTime(), getOutputTime(), _new_row_tol))
-    _all_data_table.addRow(getOutputTime());
+  if (shouldOutputPostprocessorsRow(_all_data_table))
+    outputPostprocessorsRow(_all_data_table);
+}
 
-  // List of names of the postprocessors to output
-  const std::set<std::string> & out = getPostprocessorOutput();
+bool
+TableOutput::shouldOutputPostprocessorsRow(const FormattedTable & table)
+{
+  if (table.empty())
+    return true;
 
-  // Loop through the postprocessor names and extract the values from the PostprocessorData storage
-  for (const auto & out_name : out)
+  // Check time column; all options will output row if time is new
+  const Real old_time = table.getLastTime();
+  const Real new_time = getOutputTime();
+  if (!MooseUtils::absoluteFuzzyEqual(old_time, new_time, _new_row_tol))
+    return true;
+
+  // Check PP columns if that option enabled
+  if (_check_all_columns_for_new_row)
   {
-    const PostprocessorValue & value = _problem_ptr->getPostprocessorValueByName(out_name);
-    _postprocessor_table.addData(out_name, value);
-    _all_data_table.addData(out_name, value);
+    bool all_columns_are_identical = true;
+    for (const auto & pp_name : getPostprocessorOutput())
+    {
+      const Real old_pp_value = table.getLastData(pp_name);
+      const Real new_pp_value = _problem_ptr->getPostprocessorValueByName(pp_name);
+      if (!MooseUtils::absoluteFuzzyEqual(old_pp_value, new_pp_value, _new_row_tol))
+      {
+        all_columns_are_identical = false;
+        break;
+      }
+    }
+    return !all_columns_are_identical;
   }
+  else
+    return false;
+}
+
+void
+TableOutput::outputPostprocessorsRow(FormattedTable & table)
+{
+  table.addRow(getOutputTime());
+
+  for (const auto & pp_name : getPostprocessorOutput())
+    table.addData(pp_name, _problem_ptr->getPostprocessorValueByName(pp_name));
 }
 
 void
