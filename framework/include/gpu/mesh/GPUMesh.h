@@ -79,10 +79,16 @@ public:
 
   /**
    * Get the serialized subdomain ID of a subdomain
-   * @param The MOOSE subdomain ID
+   * @param subdomain The MOOSE subdomain ID
    * @returns The subdomain ID
    */
   SubdomainID getSubdomainID(const SubdomainID subdomain) const;
+  /**
+   * Get the serialized boundary ID of a boundary
+   * @param boundary The MOOSE boundary ID
+   * @returns The boundary ID
+   */
+  BoundaryID getBoundaryID(const BoundaryID boundary) const;
   /**
    * Get the serialized element type ID of an element
    * @param elem The libMesh element
@@ -208,6 +214,13 @@ public:
    * @returns The node coordinate
    */
   KOKKOS_FUNCTION Real3 getNodePoint(dof_id_type node) const { return _points[node]; }
+  /**
+   * Get whether a node is on a boundary
+   * @param node The node ID
+   * @param boundary The boundary ID
+   * @returns Whether the node is on the boundary
+   */
+  KOKKOS_FUNCTION inline bool isBoundaryNode(dof_id_type node, BoundaryID boundary) const;
 #endif
 
 private:
@@ -233,6 +246,10 @@ private:
      * Map from the MOOSE subdomain ID to the serialized subdomain ID
      */
     std::unordered_map<SubdomainID, SubdomainID> _subdomain_id_mapping;
+    /**
+     * Map from the MOOSE boundary ID to the serialized boundary ID
+     */
+    std::unordered_map<BoundaryID, BoundaryID> _boundary_id_mapping;
     /**
      * Map from the MOOSE element type to the serialized element type ID
      */
@@ -290,7 +307,26 @@ private:
   Array2D<dof_id_type> _nodes;
   Array3D<dof_id_type> _nodes_face;
   ///@}
+  /**
+   * Node IDs on each boundary
+   */
+  Array<Array<dof_id_type>> _boundary_nodes;
 };
+
+#ifdef MOOSE_KOKKOS_SCOPE
+KOKKOS_FUNCTION inline bool
+Mesh::isBoundaryNode(dof_id_type node, BoundaryID boundary) const
+{
+  if (!_boundary_nodes[boundary].size())
+    return false;
+
+  auto begin = &_boundary_nodes[boundary].begin();
+  auto end = &_boundary_nodes[boundary].end();
+  auto target = Utils::find(node, begin, end);
+
+  return target != end;
+}
+#endif
 
 /**
  * The Kokkos interface that holds the host reference of the Kokkos mesh and copies it to device
