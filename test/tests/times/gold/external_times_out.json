@@ -1,7 +1,7 @@
 {
     "reporters": {
         "external_input": {
-            "type": "DynamicInputTimes",
+            "type": "InputTimes",
             "values": {
                 "times": {
                     "type": "std::vector<double>"
@@ -13,7 +13,6 @@
         {
             "external_input": {
                 "times": [
-                    0.0,
                     0.01
                 ]
             },
@@ -23,7 +22,6 @@
         {
             "external_input": {
                 "times": [
-                    0.0,
                     0.01,
                     0.52
                 ]
@@ -34,7 +32,6 @@
         {
             "external_input": {
                 "times": [
-                    0.0,
                     0.01,
                     0.52,
                     0.92
@@ -46,7 +43,6 @@
         {
             "external_input": {
                 "times": [
-                    0.0,
                     0.01,
                     0.52,
                     0.92,
@@ -59,7 +55,6 @@
         {
             "external_input": {
                 "times": [
-                    0.0,
                     0.01,
                     0.52,
                     0.92,
@@ -73,7 +68,6 @@
         {
             "external_input": {
                 "times": [
-                    0.0,
                     0.01,
                     0.52,
                     0.92,

@@ -12,7 +12,9 @@
     "time_steps": [
         {
             "functor": {
-                "times": []
+                "times": [
+                    0.0
+                ]
             },
             "time": 0.0,
             "time_step": 0
@@ -20,6 +22,7 @@
         {
             "functor": {
                 "times": [
+                    0.0,
                     2.0
                 ]
             },
@@ -29,6 +32,7 @@
         {
             "functor": {
                 "times": [
+                    0.0,
                     2.0
                 ]
             },
