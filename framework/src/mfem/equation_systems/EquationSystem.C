@@ -62,7 +62,6 @@ EquationSystem::SetTrialVariableNames()
     else
       _eliminated_var_names.push_back(coupled_var_name);
   }
-  PrintTrialVarNames();
 }
 
 void
@@ -122,6 +121,42 @@ EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
     _essential_bc_map.Register(test_var_name, std::move(bcs));
   }
   _essential_bc_map.GetRef(test_var_name).push_back(std::move(bc));
+}
+
+void
+EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
+                     const Moose::MFEM::FESpaces & /*fespaces*/,
+                     mfem::AssemblyLevel assembly_level)
+{
+  _assembly_level = assembly_level;
+
+  for (auto & test_var_name : _test_var_names)
+  {
+    if (!gridfunctions.Has(test_var_name))
+    {
+      MFEM_ABORT("Test variable " << test_var_name
+                                  << " requested by equation system during initialisation was "
+                                     "not found in gridfunctions");
+    }
+    // Store pointers to test FESpaces
+    _test_pfespaces.push_back(gridfunctions.Get(test_var_name)->ParFESpace());
+    // Create auxiliary gridfunctions for applying Dirichlet conditions
+    _xs.emplace_back(
+        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
+  }
+
+  // Store pointers to FESpaces of all coupled (trial) variables
+  for (auto & coupled_var_name : _coupled_var_names)
+    _coupled_pfespaces.push_back(gridfunctions.Get(coupled_var_name)->ParFESpace());
+
+  // Extract which coupled variables are to be trivially eliminated and which are trial variables
+  SetTrialVariableNames();
+
+  // Store pointers to coupled variable GridFunctions that are to be eliminated prior to forming the
+  // jacobian
+  for (auto & eliminated_var_name : _eliminated_var_names)
+    _eliminated_variables.Register(eliminated_var_name,
+                                   gridfunctions.GetShared(eliminated_var_name));
 }
 
 void
@@ -313,44 +348,6 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
 }
 
 void
-EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
-                     const Moose::MFEM::FESpaces & /*fespaces*/,
-                     mfem::AssemblyLevel assembly_level)
-{
-  _assembly_level = assembly_level;
-
-  for (auto & test_var_name : _test_var_names)
-  {
-    if (!gridfunctions.Has(test_var_name))
-    {
-      MFEM_ABORT("Test variable " << test_var_name
-                                  << " requested by equation system during initialisation was "
-                                     "not found in gridfunctions");
-    }
-    // Store pointers to variable FESpaces
-    _test_pfespaces.push_back(gridfunctions.Get(test_var_name)->ParFESpace());    
-    // Create auxiliary gridfunctions for applying Dirichlet conditions
-    _xs.emplace_back(
-        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
-    _dxdts.emplace_back(
-        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
-    _eliminated_variables.Register(test_var_name, gridfunctions.GetShared(test_var_name));
-  }
-
-  for (auto & coupled_var_name : _coupled_var_names)
-  {
-    _coupled_pfespaces.push_back(gridfunctions.Get(coupled_var_name)->ParFESpace());  
-  }
-
-  SetTrialVariableNames();
-
-  for (auto & eliminated_var_name : _eliminated_var_names)
-  {
-    _eliminated_variables.Register(eliminated_var_name, gridfunctions.GetShared(eliminated_var_name));
-  }
-}
-
-void
 EquationSystem::BuildLinearForms()
 {
   // Register linear forms
@@ -398,7 +395,6 @@ EquationSystem::BuildBilinearForms()
   }
 }
 
-// TODO: build all kernels associated with a test/coupled pair rather than test/trial 
 void
 EquationSystem::BuildMixedBilinearForms()
 {
@@ -450,12 +446,12 @@ TimeDependentEquationSystem::TimeDependentEquationSystem() : _dt_coef(1.0) {}
 void
 TimeDependentEquationSystem::AddCoupledVariableNameIfMissing(const std::string & coupled_var_name)
 {
-  // The TimeDependentEquationSystem operator expects to act on a vector of variable time
-  // derivatives
-  std::string var_time_derivative_name = GetTimeDerivativeName(coupled_var_name);
-  EquationSystem::AddCoupledVariableNameIfMissing(var_time_derivative_name);
-  if (!VectorContainsName(_trial_var_time_derivative_names, var_time_derivative_name))
-    _trial_var_time_derivative_names.push_back(var_time_derivative_name);
+  /// The TimeDependentEquationSystem operator expects to act on a vector of variable time
+  /// derivatives, so the coupled variable must be the time derivative of the 'base' variable
+  EquationSystem::AddCoupledVariableNameIfMissing(GetTimeDerivativeName(coupled_var_name));
+  /// When implicit, also register test_var_name in _eliminated_variables
+  /// for the elimination of 'old' variable values from the previous timestep
+  EquationSystem::AddCoupledVariableNameIfMissing(coupled_var_name);
 }
 
 void
@@ -478,7 +474,6 @@ TimeDependentEquationSystem::SetTrialVariableNames()
 {
   // If a coupled variable has an equation associated with it,
   // add it to the set of trial variables.
-  // Need thought for time derivatives...
   for (const auto& coupled_var_name : _coupled_var_names)
   {
     for (const auto& test_var_name : _test_var_names)
@@ -496,7 +491,6 @@ TimeDependentEquationSystem::SetTrialVariableNames()
       }
     }
   }
-  PrintTrialVarNames();
 }
 
 void
@@ -508,6 +502,7 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
     auto test_var_name = kernel->getTestVariableName();
     AddTestVariableNameIfMissing(test_var_name);
     AddCoupledVariableNameIfMissing(test_var_name);
+
     if (!_td_kernels_map.Has(test_var_name))
     {
       auto kernel_field_map =
