@@ -223,8 +223,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
         # Require CUDA if we have cuda available
         if [ -n "$CUDA_DIR" ]; then
-            # INL cuda arches; 7.0 V100 (sawtooth), 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
-            BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}" "-DCUDA_ARCH_LIST=7.0;8.0;8.6;8.9")
+            # 6.1 (schwen), 7.0 V100 (sawtooth), 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
+            CUDA_ARCHES="61;70;80;86;89"
+            BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}" "-DCMAKE_CUDA_ARCHITECTURES=${CUDA_ARCHES}")
         else
             BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=OFF")
         fi
@@ -237,7 +238,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
             -DBUILD_SHARED_LIBS:BOOL=ON \
             -DCMAKE_BUILD_TYPE:STRING=Release \
             -DCMAKE_INSTALL_PREFIX:PATH=${LIBTORCH_DIR} \
-            -DBUILD_PYTHON:BOOL=ON \
+            -DBUILD_PYTHON:BOOL=OFF \
             -DUSE_BLAS:BOOL=ON \
             -DBLAS:STRING=OpenBLAS \
             -DUSE_LAPACK:BOOL=ON \
