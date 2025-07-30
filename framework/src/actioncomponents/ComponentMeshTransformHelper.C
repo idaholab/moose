@@ -66,7 +66,7 @@ ComponentMeshTransformHelper::addMeshGenerators()
 
       RealVectorValue angles;
       const auto rotation_matrix =
-          RotationMatrix::rotationMatrixVecToVec<false>(RealVectorValue(1, 0, 0), *_direction);
+          RotationMatrix::rodriguesRotationMatrix<false>(RealVectorValue(1, 0, 0), *_direction);
       params.set<RealTensorValue>("rotation_matrix") = rotation_matrix;
     }
     _app.getMeshGeneratorSystem().addMeshGenerator(
