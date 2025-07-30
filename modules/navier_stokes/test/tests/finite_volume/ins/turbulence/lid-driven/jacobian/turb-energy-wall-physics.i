@@ -140,6 +140,8 @@ wall_treatment_tem = 'eq_linearized' # Options: eq_newton, eq_incremental, eq_li
         turbulent_viscosity_two_term_bc_expansion = false
         mu_t_as_aux_variable = true
         k_t_as_aux_variable = false
+        tke_two_term_bc_expansion = false
+        tked_two_term_bc_expansion = false
       []
     []
   []
