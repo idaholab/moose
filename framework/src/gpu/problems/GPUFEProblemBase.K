@@ -15,6 +15,72 @@
 #include "MaterialBase.h"
 
 void
+FEProblemBase::addKokkosKernel(const std::string & kernel_name,
+                               const std::string & name,
+                               InputParameters & parameters)
+{
+  parallel_object_only();
+
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError("You are trying to add a Kernel to a linear variable/system, which is not "
+               "supported at the moment!");
+
+  setResidualObjectParamsAndLog(
+      kernel_name, name, parameters, nl_sys_num, "KokkosKernel", _reinit_displaced_elem);
+
+  _nl[nl_sys_num]->addKokkosKernel(kernel_name, name, parameters);
+
+  _has_kokkos_objects = true;
+}
+
+void
+FEProblemBase::addKokkosNodalKernel(const std::string & kernel_name,
+                                    const std::string & name,
+                                    InputParameters & parameters)
+{
+  parallel_object_only();
+
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+
+  setResidualObjectParamsAndLog(
+      kernel_name, name, parameters, nl_sys_num, "KokkosNodalKernel", _reinit_displaced_elem);
+
+  _nl[nl_sys_num]->addKokkosNodalKernel(kernel_name, name, parameters);
+
+  _has_kokkos_objects = true;
+}
+
+void
+FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
+                                          const std::string & name,
+                                          InputParameters & parameters)
+{
+  parallel_object_only();
+
+  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
+  if (!isSolverSystemNonlinear(nl_sys_num))
+    mooseError(
+        "You are trying to add a BoundaryCondition to a linear variable/system, which is not "
+        "supported at the moment!");
+
+  setResidualObjectParamsAndLog(
+      bc_name, name, parameters, nl_sys_num, "KokkosBoundaryCondition", _reinit_displaced_face);
+
+  _nl[nl_sys_num]->addKokkosBoundaryCondition(bc_name, name, parameters);
+
+  _has_kokkos_objects = true;
+}
+
+void
+FEProblemBase::addKokkosMaterial(const std::string & mat_name,
+                                 const std::string & name,
+                                 InputParameters & parameters)
+{
+  addMaterialHelper({&_kokkos_materials}, mat_name, name, parameters);
+}
+
+void
 FEProblemBase::initKokkos()
 {
   // Initialize Kokkos assembly

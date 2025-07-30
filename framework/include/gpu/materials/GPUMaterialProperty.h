@@ -68,8 +68,6 @@ using PropertyLoad = std::function<void(std::istream &, void *)>;
  */
 class MaterialPropertyBase
 {
-  friend class MaterialPropertyStorage;
-
 public:
   /**
    * Default constructor
@@ -84,28 +82,28 @@ public:
    * Get the property ID
    * @returns The property ID assigned by the MOOSE registry
    */
-  auto id() const { return _id; }
+  unsigned int id() const { return _id; }
   /**
    * Get the property name
    * @returns The property name
    */
-  auto name() const { return _record->name; }
+  std::string name() const { return _record->name; }
   /**
    * Get the data type
    * @returns The demangled data type name
    */
-  auto type() const { return _record->type; }
+  std::string type() const { return _record->type; }
   /**
    * Get the dimension
    * @returns The dimension
    */
-  auto dim() const { return _record->dims.size(); }
+  unsigned int dim() const { return _record->dims.size(); }
   /**
    * Get the size of a dimension
    * @param i The dimension index
    * @returns The size of the dimension
    */
-  auto dim(unsigned int i) const
+  unsigned int dim(unsigned int i) const
   {
     if (i >= dim())
       mooseError("Cannot query the size of ",
@@ -198,6 +196,8 @@ private:
    * @param prop The property to swap
    */
   virtual void swap(MaterialPropertyBase & prop) = 0;
+
+  friend class MaterialPropertyStorage;
 };
 
 template <typename T, unsigned int dimension>

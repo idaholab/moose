@@ -214,7 +214,7 @@ void
 Kernel<Derived>::computeResidual()
 {
   ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
-      0, numBlockElements());
+      0, numKokkosBlockElements());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
   ::Kokkos::fence();
 }
@@ -226,7 +226,7 @@ Kernel<Derived>::computeJacobian()
   if (!defaultJacobian())
   {
     ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
-        0, numBlockElements());
+        0, numKokkosBlockElements());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
   }
@@ -235,7 +235,7 @@ Kernel<Derived>::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numBlockElements()});
+    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numKokkosBlockElements()});
 
     ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
         0, _thread.size());
@@ -249,7 +249,7 @@ KOKKOS_FUNCTION void
 Kernel<Derived>::operator()(ResidualLoop, const dof_id_type tid) const
 {
   auto kernel = static_cast<const Derived *>(this);
-  auto elem = blockElementID(tid);
+  auto elem = kokkosBlockElementID(tid);
 
   ResidualDatum datum(elem, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
@@ -261,7 +261,7 @@ KOKKOS_FUNCTION void
 Kernel<Derived>::operator()(JacobianLoop, const dof_id_type tid) const
 {
   auto kernel = static_cast<const Derived *>(this);
-  auto elem = blockElementID(tid);
+  auto elem = kokkosBlockElementID(tid);
 
   ResidualDatum datum(elem, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
@@ -273,7 +273,7 @@ KOKKOS_FUNCTION void
 Kernel<Derived>::operator()(OffDiagJacobianLoop, const dof_id_type tid) const
 {
   auto kernel = static_cast<const Derived *>(this);
-  auto elem = blockElementID(_thread(tid, 1));
+  auto elem = kokkosBlockElementID(_thread(tid, 1));
 
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];

@@ -60,7 +60,7 @@ protected:
   /**
    * Pointer to the property data storage
    */
-  const Array<T, dimension + 1> * _data;
+  Array<T, dimension + 1> const * _data;
   /**
    * Default value
    */
@@ -68,9 +68,7 @@ protected:
 };
 
 template <typename T, unsigned int dimension>
-class MaterialPropertyValue
-{
-};
+class MaterialPropertyValue;
 
 template <typename T>
 class MaterialPropertyValue<T, 0> : public MaterialPropertyValueBase<T, 0>

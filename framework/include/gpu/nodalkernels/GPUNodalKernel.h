@@ -141,7 +141,7 @@ void
 NodalKernel<Derived>::computeResidual()
 {
   ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
-      0, _boundary_restricted ? numBoundaryNodes() : numBlockNodes());
+      0, _boundary_restricted ? numKokkosBoundaryNodes() : numKokkosBlockNodes());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
   ::Kokkos::fence();
 }
@@ -153,7 +153,7 @@ NodalKernel<Derived>::computeJacobian()
   if (!_default_diag)
   {
     ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
-        0, _boundary_restricted ? numBoundaryNodes() : numBlockNodes());
+        0, _boundary_restricted ? numKokkosBoundaryNodes() : numKokkosBlockNodes());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
   }
@@ -163,7 +163,7 @@ NodalKernel<Derived>::computeJacobian()
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
     _thread.resize({sys.getCoupling(_kokkos_var.var()).size(),
-                    _boundary_restricted ? numBoundaryNodes() : numBlockNodes()});
+                    _boundary_restricted ? numKokkosBoundaryNodes() : numKokkosBlockNodes()});
 
     ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
         0, _thread.size());
@@ -177,7 +177,7 @@ KOKKOS_FUNCTION void
 NodalKernel<Derived>::operator()(ResidualLoop, const dof_id_type tid) const
 {
   auto kernel = static_cast<const Derived *>(this);
-  auto node = _boundary_restricted ? boundaryNodeID(tid) : blockNodeID(tid);
+  auto node = _boundary_restricted ? kokkosBoundaryNodeID(tid) : kokkosBlockNodeID(tid);
   auto & sys = kokkosSystem(_kokkos_var.sys());
 
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
@@ -193,7 +193,7 @@ KOKKOS_FUNCTION void
 NodalKernel<Derived>::operator()(JacobianLoop, const dof_id_type tid) const
 {
   auto kernel = static_cast<const Derived *>(this);
-  auto node = _boundary_restricted ? boundaryNodeID(tid) : blockNodeID(tid);
+  auto node = _boundary_restricted ? kokkosBoundaryNodeID(tid) : kokkosBlockNodeID(tid);
   auto & sys = kokkosSystem(_kokkos_var.sys());
 
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
@@ -209,7 +209,8 @@ KOKKOS_FUNCTION void
 NodalKernel<Derived>::operator()(OffDiagJacobianLoop, const dof_id_type tid) const
 {
   auto kernel = static_cast<const Derived *>(this);
-  auto node = _boundary_restricted ? boundaryNodeID(_thread(tid, 1)) : blockNodeID(_thread(tid, 1));
+  auto node = _boundary_restricted ? kokkosBoundaryNodeID(_thread(tid, 1))
+                                   : kokkosBlockNodeID(_thread(tid, 1));
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];
 
