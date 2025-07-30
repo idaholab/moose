@@ -44,7 +44,7 @@ public:
 
   /// Add kernels.
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
-  virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
+  virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc);
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
   virtual void ApplyEssentialBCs();
 
