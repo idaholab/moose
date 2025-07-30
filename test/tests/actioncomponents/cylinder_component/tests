@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#31158'
+  [3D_mesh]
+    requirement = 'The system shall be able to create a 3D cylinder mesh.'
+    [x-axis]
+      type = Exodiff
+      input = '3D_cylinder.i'
+      exodiff = '3D_cylinder_x_in.e'
+      cli_args = '--mesh-only 3D_cylinder_x_in.e'
+      requirement = 'The system shall be able to create simple 3D cylindrical mesh using default parameters.'
+    []
+    [y-axis]
+      type = Exodiff
+      input = '3D_cylinder.i'
+      exodiff = '3D_cylinder_y_in.e'
+      cli_args = 'ActionComponents/cyl/direction=\'0 1 0\' --mesh-only 3D_cylinder_y_in.e'
+      requirement = 'The system shall be able to create simple 3D cylindrical mesh along along the y-axis.'
+    []
+    [z-axis]
+      type = Exodiff
+      input = '3D_cylinder.i'
+      exodiff = '3D_cylinder_z_in.e'
+      cli_args = 'ActionComponents/cyl/direction=\'0 0 1\' --mesh-only 3D_cylinder_z_in.e'
+      requirement = 'The system shall be able to create simple 3D cylindrical mesh along the z-axis.'
+    []
+    [move_center]
+      type = Exodiff
+      input = '3D_cylinder.i'
+      exodiff = '3D_cylinder_move_center_in.e'
+      cli_args = 'ActionComponents/cyl/direction=\'0 0 1\' ActionComponents/cyl/position=\'1 1 1\' --mesh-only 3D_cylinder_move_center_in.e'
+      requirement = 'The system shall be able to create simple 3D cylindrical mesh along the z-axis centered at the point (1,1,1).'
+    []
+  []
+[]
