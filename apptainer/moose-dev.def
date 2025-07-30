@@ -313,20 +313,28 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     cd ${MFEM_SRC_DIR}
     git checkout $MFEM_GIT_SHA
 
-    # Load mfem options, split by word so that globbing works correctly
-    IFS=' ' read -r -a MFEM_OPTIONS <<< "{{ MFEM_OPTIONS }}"
-    # Additional options with cuda
-    if [ -n "$CUDA_DIR" ]; then
-        MFEM_OPTIONS+=("-DMFEM_USE_CUDA=ON" "-DSuperLUDist_VERSION_OK=YES")
-    fi
-
     # Install conduit
     mkdir -p ${CONDUIT_DIR}/logs
     CONDUIT_DIR=${CONDUIT_DIR} CONDUIT_SRC_DIR=${CONDUIT_SRC_DIR} ${CONDUIT_BUILD_SCRIPT} {{ CONDUIT_OPTIONS }} 2>&1 | tee ${CONDUIT_DIR}/logs/build.log
 
+    # Load mfem options, split by word so that globbing works correctly
+    IFS=' ' read -r -a MFEM_OPTIONS <<< "{{ MFEM_OPTIONS }}"
+    if [ -n "$CUDA_DIR" ]; then
+        # Additional options with cuda
+        MFEM_OPTIONS+=("-DMFEM_USE_CUDA=ON" "-DSuperLUDist_VERSION_OK=YES")
+        # Expose the compat libraries that can be linked to during configure for building without a GPU present
+        CUDA_COMPAT=${CUDA_DIR}/compat
+        export LD_LIBRARY_PATH=${CUDA_COMPAT}:${LD_LIBRARY_PATH}
+    fi
+
     # Install MFEM
     mkdir -p ${MFEM_DIR}/logs
     MFEM_DIR=${MFEM_DIR} MFEM_SRC_DIR=${MFEM_SRC_DIR} CONDUIT_DIR=${CONDUIT_DIR} ${MFEM_BUILD_SCRIPT} "${MFEM_OPTIONS[@]}" 2>&1 | tee ${MFEM_DIR}/logs/build.log
+
+    # Hide cuda compat libs
+    if [ -n "$CUDA_DIR" ]; then
+        export LD_LIBRARY_PATH="${LD_LIBRARY_PATH/${CUDA_COMPAT}:/}"
+    fi
 {%- endif %}
 
     # Add moose channels
