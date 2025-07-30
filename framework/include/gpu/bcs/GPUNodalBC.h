@@ -132,7 +132,7 @@ void
 NodalBC<Derived>::computeResidual()
 {
   ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
-      0, numBoundaryNodes());
+      0, numKokkosBoundaryNodes());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
   ::Kokkos::fence();
 }
@@ -142,7 +142,7 @@ void
 NodalBC<Derived>::computeJacobian()
 {
   ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
-      0, numBoundaryNodes());
+      0, numKokkosBoundaryNodes());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
   ::Kokkos::fence();
 
@@ -150,7 +150,7 @@ NodalBC<Derived>::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numBoundaryNodes()});
+    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundaryNodes()});
 
     ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
         0, _thread.size());
@@ -164,7 +164,7 @@ KOKKOS_FUNCTION void
 NodalBC<Derived>::operator()(ResidualLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
-  auto node = boundaryNodeID(tid);
+  auto node = kokkosBoundaryNodeID(tid);
   auto & sys = kokkosSystem(_kokkos_var.sys());
 
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
@@ -180,7 +180,7 @@ KOKKOS_FUNCTION void
 NodalBC<Derived>::operator()(JacobianLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
-  auto node = boundaryNodeID(tid);
+  auto node = kokkosBoundaryNodeID(tid);
   auto & sys = kokkosSystem(_kokkos_var.sys());
 
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
@@ -197,7 +197,7 @@ KOKKOS_FUNCTION void
 NodalBC<Derived>::operator()(OffDiagJacobianLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
-  auto node = boundaryNodeID(_thread(tid, 1));
+  auto node = kokkosBoundaryNodeID(_thread(tid, 1));
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];
 
