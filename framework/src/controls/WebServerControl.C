@@ -33,6 +33,9 @@ registerMooseObject("MooseApp", WebServerControl);
   registerWebServerControlVector(T, miniJson::JsonType::kNumber)
 #define registerWebServerControlVectorString(T)                                                    \
   registerWebServerControlVector(T, miniJson::JsonType::kString)
+#define registerWebServerControlRealEigenMatrix()                                                  \
+  static char registerWebServerControlCombine(wsc_matrix, __COUNTER__) =                           \
+      WebServerControl::registerRealEigenMatrix()
 
 // Registration of the types that we can accept in the web server for controlling parameters
 registerWebServerControlScalarBool(bool);
@@ -42,6 +45,7 @@ registerWebServerControlScalarString(std::string);
 registerWebServerControlVectorNumber(Real);
 registerWebServerControlVectorNumber(int);
 registerWebServerControlVectorString(std::string);
+registerWebServerControlRealEigenMatrix();
 
 InputParameters
 WebServerControl::validParams()
@@ -363,4 +367,51 @@ WebServerControl::stringifyJSONType(const miniJson::JsonType & json_type)
   if (json_type == miniJson::JsonType::kObject)
     return "object";
   ::mooseError("WebServerControl::stringifyJSONType(): Unused JSON value type");
+}
+
+WebServerControl::RealEigenMatrixValue::RealEigenMatrixValue(const std::string & name,
+                                                             const std::string & type)
+  : TypedValueBase<RealEigenMatrix>(name, type)
+{
+}
+
+WebServerControl::RealEigenMatrixValue::RealEigenMatrixValue(const std::string & name,
+                                                             const std::string & type,
+                                                             const miniJson::Json & json_value)
+  : TypedValueBase<RealEigenMatrix>(name, type, getMatrixJSONValue(json_value))
+{
+}
+
+RealEigenMatrix
+WebServerControl::RealEigenMatrixValue::getMatrixJSONValue(const miniJson::Json & json_value)
+{
+  const auto from_json_type = json_value.getType();
+  if (from_json_type != miniJson::JsonType::kArray)
+    throw ValueBase::Exception("The value '" + json_value.serialize() + "' of type " +
+                               stringifyJSONType(from_json_type) + " is not an array");
+
+  const auto & array_of_array_value = json_value.toArray();
+  const auto nrows = array_of_array_value.size();
+  if (nrows == 0)
+    return RealEigenMatrix::Zero(0, 0);
+
+  RealEigenMatrix matrix;
+  for (const auto i : make_range(nrows))
+  {
+    if (array_of_array_value[i].getType() != miniJson::JsonType::kArray)
+      throw ValueBase::Exception(
+          "The value '" + array_of_array_value[i].serialize() + "' of type " +
+          stringifyJSONType(array_of_array_value[i].getType()) + " is not an array");
+
+    const auto & array_value = array_of_array_value[i].toArray();
+    if (i == 0)
+      matrix.resize(nrows, array_value.size());
+    else if (array_value.size() != (std::size_t)matrix.cols())
+      throw ValueBase::Exception("The matrix '" + json_value.serialize() + "' is jagged.");
+
+    for (const auto j : index_range(array_value))
+      matrix(i, j) = array_value[j].toDouble();
+  }
+
+  return matrix;
 }

@@ -13,6 +13,8 @@
 
 #include "WebServerControlTypeRegistry.h"
 
+#include "libmesh/parallel_eigen.h"
+
 #include "tinyhttp/http.h"
 
 #include <atomic>
@@ -128,6 +130,19 @@ public:
   };
 
   /**
+   * Class that stores a RealEigenMatrix controllable value to be set
+   */
+  class RealEigenMatrixValue : public TypedValueBase<RealEigenMatrix>
+  {
+  public:
+    RealEigenMatrixValue(const std::string & name, const std::string & type);
+    RealEigenMatrixValue(const std::string & name,
+                         const std::string & type,
+                         const miniJson::Json & json_value);
+    static RealEigenMatrix getMatrixJSONValue(const miniJson::Json & json_value);
+  };
+
+  /**
    * Registers a scalar parameter type to be controlled
    */
   template <typename T, miniJson::JsonType json_type>
@@ -143,6 +158,14 @@ public:
   {
     return Moose::WebServerControlTypeRegistry().add<VectorValue<T, json_type>>("std::vector<" +
                                                                                 type_name + ">");
+  }
+
+  /**
+   * Registers a vector parameter type to be controlled
+   */
+  static char registerRealEigenMatrix()
+  {
+    return Moose::WebServerControlTypeRegistry().add<RealEigenMatrixValue>("RealEigenMatrix");
   }
 
 private:
