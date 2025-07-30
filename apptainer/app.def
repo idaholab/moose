@@ -125,10 +125,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     WITH_LIBTORCH=$(if_true "{{ WITH_LIBTORCH }}")
     WITH_MFEM=$(if_true "{{ WITH_MFEM }}")
     WITH_NEML2=$(if_true "{{ WITH_NEML2 }}")
-    if [ -n "$WITH_NEML2" ]; then
-        WITH_LIBTORCH=1
-    fi
     unset -f if_true
+    if [ -n "$WITH_NEML2" ] && [ -z "$WITH_LIBTORCH" ]; then
+        echo "Must set WITH_LIBTORCH if using WITH_NEML2"
+        exit 1
+    fi
 
     # Delete the things that we don't need, and capture the configure args
     # if we do need them
