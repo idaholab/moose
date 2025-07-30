@@ -446,6 +446,7 @@ TriSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, boo
   const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
   const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
   auto chans = _subchannel_mesh.getGapChannels(i_gap);
+  auto Nr = _tri_sch_mesh._n_rings;
   unsigned int i_ch = chans.first;
   unsigned int j_ch = chans.second;
   auto subch_type_i = _subchannel_mesh.getSubchannelType(i_ch);
@@ -482,31 +483,51 @@ TriSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, boo
       (wire_lead_length != 0) && (wire_diameter != 0))
   {
     // Calculation of geometric parameters
+    // wire angle
     auto theta = std::acos(wire_lead_length /
                            std::sqrt(std::pow(wire_lead_length, 2) +
                                      std::pow(libMesh::pi * (pin_diameter + wire_diameter), 2)));
+    // projected area of wire on subchannel
     auto Ar1 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 6.0;
+    // bare subchannel flow area
     auto A1prime =
         (std::sqrt(3.0) / 4.0) * std::pow(pitch, 2) - libMesh::pi * std::pow(pin_diameter, 2) / 8.0;
+    // wire-wrapped subchannel flow area
     auto A1 = A1prime - libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
+    // empirical constant for mixing parameter
     auto Cm = 0.0;
+    auto CmL_constant = 0.0;
+    auto CmT_constant = 0.0;
+
+    if (Nr == 1)
+    {
+      CmT_constant = 0.1;
+      CmL_constant = 0.055;
+    }
+    else
+    {
+      CmT_constant = 0.14;
+      CmL_constant = 0.077;
+    }
+
+    auto CmT = CmT_constant * std::pow((pitch - pin_diameter) / pin_diameter, -0.5);
+    auto CmL = CmL_constant * std::pow((pitch - pin_diameter) / pin_diameter, -0.5);
+
     if (Re < ReL)
     {
-      Cm = 0.077 * std::pow((pitch - pin_diameter) / pin_diameter, -0.5);
+      Cm = CmL;
     }
     else if (Re > ReT)
     {
-      Cm = 0.14 * std::pow((pitch - pin_diameter) / pin_diameter, -0.5);
+      Cm = CmT;
     }
     else
     {
       auto psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
       auto gamma = 2.0 / 3.0;
-      Cm = 0.14 * std::pow((pitch - pin_diameter) / pin_diameter, -0.5) +
-           (0.14 * std::pow((pitch - pin_diameter) / pin_diameter, -0.5) -
-            0.077 * std::pow((pitch - pin_diameter) / pin_diameter, -0.5)) *
-               std::pow(psi, gamma);
+      Cm = CmL + (CmT - CmL) * std::pow(psi, gamma);
     }
+    // mixing parameter
     beta = Cm * std::pow(Ar1 / A1, 0.5) * std::tan(theta);
   }
   // EDGE OR CORNER SUBCHANNELS/ SWEEP FLOW
@@ -518,28 +539,43 @@ TriSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, boo
                            std::sqrt(std::pow(wire_lead_length, 2) +
                                      std::pow(libMesh::pi * (pin_diameter + wire_diameter), 2)));
     // Calculation of geometric parameters
+    // distance from pin surface to duct
     auto dpgap = _tri_sch_mesh.getDuctToPinGap();
+    // Edge pitch parameter defined as pin diameter plus distance to duct wall
     auto w = pin_diameter + dpgap;
     auto Ar2 = libMesh::pi * (pin_diameter + wire_diameter) * wire_diameter / 4.0;
     auto A2prime = pitch * (w - pin_diameter / 2.0) - libMesh::pi * std::pow(pin_diameter, 2) / 8.0;
     auto A2 = A2prime - libMesh::pi * std::pow(wire_diameter, 2) / 8.0 / std::cos(theta);
+    // empirical constant for mixing parameter
     auto Cs = 0.0;
+    auto CsL_constant = 0.0;
+    auto CsT_constant = 0.0;
+    if (Nr == 1)
+    {
+      CsT_constant = 0.6;
+      CsL_constant = 0.33;
+    }
+    else
+    {
+      CsT_constant = 0.75;
+      CsL_constant = 0.413;
+    }
+    auto CsL = CsL_constant * std::pow(wire_lead_length / pin_diameter, 0.3);
+    auto CsT = CsT_constant * std::pow(wire_lead_length / pin_diameter, 0.3);
+
     if (Re < ReL)
     {
-      Cs = 0.033 * std::pow(wire_lead_length / pin_diameter, 0.3);
+      Cs = CsL;
     }
     else if (Re > ReT)
     {
-      Cs = 0.75 * std::pow(wire_lead_length / pin_diameter, 0.3);
+      Cs = CsT;
     }
     else
     {
       auto psi = (std::log(Re) - std::log(ReL)) / (std::log(ReT) - std::log(ReL));
       auto gamma = 2.0 / 3.0;
-      Cs = 0.75 * std::pow(wire_lead_length / pin_diameter, 0.3) +
-           (0.75 * std::pow(wire_lead_length / pin_diameter, 0.3) -
-            0.033 * std::pow(wire_lead_length / pin_diameter, 0.3)) *
-               std::pow(psi, gamma);
+      Cs = CsL + (CsT - CsL) * std::pow(psi, gamma);
     }
     // Calculation of turbulent mixing parameter used for sweep flow only
     if (enthalpy)
@@ -1319,11 +1355,12 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             }
           }
           // Abort execution if required values are unset
-          if (std::isnan(beta_in))
-            mooseError(name(), " : beta_in not set for i_ch = ", i_ch, ", iz = ", iz);
-
-          if (std::isnan(beta_out))
-            mooseError(name(), " : beta_out not set for i_ch = ", i_ch, ", iz = ", iz);
+          mooseAssert(!std::isnan(beta_in),
+                      "beta_in was not set. Check gap logic for i_ch = " + std::to_string(i_ch) +
+                          ", iz = " + std::to_string(iz));
+          mooseAssert(!std::isnan(beta_out),
+                      "beta_out was not set. Check gap logic for i_ch = " + std::to_string(i_ch) +
+                          ", iz = " + std::to_string(iz));
 
           auto gap = _tri_sch_mesh.getDuctToPinGap();
           auto Sij = dz * gap;
