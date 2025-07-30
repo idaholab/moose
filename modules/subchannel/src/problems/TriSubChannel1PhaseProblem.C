@@ -440,7 +440,7 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
 Real
 TriSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, bool enthalpy)
 {
-  auto beta = 0.0;
+  auto beta = std::numeric_limits<double>::quiet_NaN();
   const Real & pitch = _subchannel_mesh.getPitch();
   const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
   const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
@@ -580,6 +580,8 @@ TriSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, boo
     // Calculation of turbulent mixing parameter used for sweep flow only
     if (enthalpy)
       beta = Cs * std::pow(Ar2 / A2, 0.5) * std::tan(theta);
+    else
+      beta = 0.0;
   }
   // Calculation of Turbulent Crossflow for bare assemblies, from Kim and Chung (2001).
   else if ((wire_lead_length == 0) && (wire_diameter == 0))
