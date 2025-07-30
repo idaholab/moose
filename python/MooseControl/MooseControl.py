@@ -16,6 +16,7 @@ import time
 import logging
 import tempfile
 from threading import Thread
+import numpy as np
 
 # Common logger for the MooseControl
 logger = logging.getLogger('MooseControl')
@@ -527,6 +528,26 @@ class MooseControl:
         for i in range(len(value)):
             value[i] = str(value[i])
         self._setControllable(path, 'std::vector<std::string>', value)
+
+    def setControllableMatrix(self, path: str, value: np.typing.ArrayLike):
+        """Sets a controllable RealEigenMatrix.
+
+        The provided value must be something convertible to a numpy array. If it
+        is a 1-D array, it is converted to a 2-D array with 1 row; otherwise,
+        the array must be 2-D.
+
+        Parameters:
+            path (str): The path of the controllable value
+            value (ArrayLike): The value to set
+        """
+        try:
+            array = np.array(value, dtype=np.float64)
+            if len(array.shape) == 1:
+                array = array.reshape((1, -1))
+            assert len(array.shape) == 2
+        except Exception as e:
+            raise self.ControlException('value is not convertible to a 1- or 2-D array.') from e
+        self._setControllable(path, 'RealEigenMatrix', array.tolist())
 
     def getPostprocessor(self, name: str) -> float:
         """Gets a postprocessor value
