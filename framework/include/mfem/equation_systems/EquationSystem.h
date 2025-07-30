@@ -96,7 +96,7 @@ private:
   using mfem::Operator::RecoverFEMSolution;
 
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
-  virtual void SetTrialVariableNames();  
+  virtual void SetTrialVariableNames();
 
 protected:
   /// Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
@@ -116,9 +116,9 @@ protected:
   /// Subset of _coupled_var_names of all variables corresponding to gridfunctions with degrees of
   /// freedom that comprise the state vector of this EquationSystem. This will differ from
   /// _coupled_var_names when time derivatives or other eliminated variables are present.
-  std::vector<std::string> _trial_var_names;  
+  std::vector<std::string> _trial_var_names;
   /// Names of all coupled variables without a corresponding test variable.
-  std::vector<std::string> _eliminated_var_names;  
+  std::vector<std::string> _eliminated_var_names;
   /// Pointers to coupled variables not part of the reduced EquationSystem.
   Moose::MFEM::GridFunctions _eliminated_variables;
   /// Names of all test variables corresponding to linear forms in this equation system
@@ -316,19 +316,18 @@ public:
 
   const std::vector<std::string> & TrialVarTimeDerivativeNames() const;
 
-  protected:
+protected:
   /// Coefficient for timestep scaling
-    mfem::ConstantCoefficient _dt_coef;
+  mfem::ConstantCoefficient _dt_coef;
 
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
-        _td_kernels_map;
-    /// Container to store contributions to weak form of the form (F du/dt, v)
-    Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
+  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
+      _td_kernels_map;
+  /// Container to store contributions to weak form of the form (F du/dt, v)
+  Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
 
-  private:
-    /// Set trial variable names from subset of coupled variables that have an associated test variable.
-    virtual void SetTrialVariableNames() override;
+private:
+  /// Set trial variable names from subset of coupled variables that have an associated test variable.
+  virtual void SetTrialVariableNames() override;
 };
 
 } // namespace Moose::MFEM
