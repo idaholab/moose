@@ -40,7 +40,7 @@ void
 EquationSystem::AddCoupledVariableNameIfMissing(const std::string & coupled_var_name)
 {
   if (!VectorContainsName(_coupled_var_names, coupled_var_name))
-    _coupled_var_names.push_back(coupled_var_name); 
+    _coupled_var_names.push_back(coupled_var_name);
 }
 
 void
@@ -55,7 +55,7 @@ EquationSystem::SetTrialVariableNames()
 {
   // If a coupled variable has an equation associated with it,
   // add it to the set of trial variables.
-  for (const auto& coupled_var_name : _coupled_var_names)
+  for (const auto & coupled_var_name : _coupled_var_names)
   {
     if (VectorContainsName(_test_var_names, coupled_var_name))
       _trial_var_names.push_back(coupled_var_name);
@@ -413,7 +413,8 @@ EquationSystem::BuildMixedBilinearForms()
                                                                _test_pfespaces.at(i));
       // Register MixedBilinearForm if kernels exist for it, and assemble
       // kernels
-      if (_kernels_map.Has(test_var_name) && _kernels_map.Get(test_var_name)->Has(coupled_var_name) &&
+      if (_kernels_map.Has(test_var_name) &&
+          _kernels_map.Get(test_var_name)->Has(coupled_var_name) &&
           test_var_name != coupled_var_name)
       {
         mblf->SetAssemblyLevel(_assembly_level);
@@ -474,12 +475,12 @@ TimeDependentEquationSystem::SetTrialVariableNames()
 {
   // If a coupled variable has an equation associated with it,
   // add it to the set of trial variables.
-  for (const auto& coupled_var_name : _coupled_var_names)
+  for (const auto & coupled_var_name : _coupled_var_names)
   {
-    for (const auto& test_var_name : _test_var_names)
+    for (const auto & test_var_name : _test_var_names)
     {
-      const auto time_derivative_test_var_name = GetTimeDerivativeName(test_var_name); 
-      if (time_derivative_test_var_name==coupled_var_name)
+      const auto time_derivative_test_var_name = GetTimeDerivativeName(test_var_name);
+      if (time_derivative_test_var_name == coupled_var_name)
       {
         if (!VectorContainsName(_trial_var_names, coupled_var_name))
           _trial_var_names.push_back(coupled_var_name);
