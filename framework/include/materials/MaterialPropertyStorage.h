@@ -334,9 +334,12 @@ public:
   /**
    * @return The consumers of storage of type \p type
    */
-  const std::set<const MooseObject *> & getConsumers(Moose::MaterialDataType type)
+  std::set<const MooseObject *> getConsumers(Moose::MaterialDataType type) const
   {
-    return _consumers[type];
+    if (_consumers.count(type))
+      return _consumers.at(type);
+    else
+      return {};
   }
 
   /**

@@ -622,7 +622,6 @@ public:
    */
   MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
   const MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() const { return _kernels; }
-  MooseObjectTagWarehouse<ResidualObject> & getKokkosKernelWarehouse() { return _kokkos_kernels; }
   MooseObjectTagWarehouse<DGKernelBase> & getDGKernelWarehouse() { return _dg_kernels; }
   MooseObjectTagWarehouse<InterfaceKernelBase> & getInterfaceKernelWarehouse()
   {
@@ -637,10 +636,6 @@ public:
   const MooseObjectTagWarehouse<NodalKernelBase> & getNodalKernelWarehouse() const
   {
     return _nodal_kernels;
-  }
-  MooseObjectTagWarehouse<ResidualObject> & getKokkosNodalKernelWarehouse()
-  {
-    return _kokkos_nodal_kernels;
   }
   MooseObjectTagWarehouse<HDGKernel> & getHDGKernelWarehouse() { return _hybridized_kernels; }
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() const
@@ -657,10 +652,6 @@ public:
    * Return the NodalBCBase warehouse
    */
   const MooseObjectTagWarehouse<NodalBCBase> & getNodalBCWarehouse() const { return _nodal_bcs; }
-  MooseObjectTagWarehouse<ResidualObject> & getKokkosNodalBCWarehouse()
-  {
-    return _kokkos_nodal_bcs;
-  }
 
   /**
    * Return the IntegratedBCBase warehouse
@@ -669,10 +660,25 @@ public:
   {
     return _integrated_bcs;
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  ///@{
+  /// Return the Kokkos residual object warehouses
+  MooseObjectTagWarehouse<ResidualObject> & getKokkosKernelWarehouse() { return _kokkos_kernels; }
+  MooseObjectTagWarehouse<ResidualObject> & getKokkosNodalKernelWarehouse()
+  {
+    return _kokkos_nodal_kernels;
+  }
+  MooseObjectTagWarehouse<ResidualObject> & getKokkosNodalBCWarehouse()
+  {
+    return _kokkos_nodal_bcs;
+  }
   MooseObjectTagWarehouse<ResidualObject> & getKokkosIntegratedBCWarehouse()
   {
     return _kokkos_integrated_bcs;
   }
+  ///@}
+#endif
 
   //@}
 
@@ -912,8 +918,6 @@ protected:
   MooseObjectTagWarehouse<ScalarKernelBase> _scalar_kernels;
   MooseObjectTagWarehouse<DGKernelBase> _dg_kernels;
   MooseObjectTagWarehouse<InterfaceKernelBase> _interface_kernels;
-
-  MooseObjectTagWarehouse<ResidualObject> _kokkos_kernels;
   ///@}
 
   ///@{
@@ -922,11 +926,18 @@ protected:
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<DirichletBCBase> _preset_nodal_bcs;
   MooseObjectWarehouse<ADDirichletBCBase> _ad_preset_nodal_bcs;
+  ///@}
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  ///@{
+  /// Kokkos residual object warhouses
+  MooseObjectTagWarehouse<ResidualObject> _kokkos_kernels;
   MooseObjectTagWarehouse<ResidualObject> _kokkos_integrated_bcs;
   MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_bcs;
   MooseObjectWarehouse<ResidualObject> _kokkos_preset_nodal_bcs;
+  MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_kernels;
   ///@}
+#endif
 
   /// Dirac Kernel storage for each thread
   MooseObjectTagWarehouse<DiracKernelBase> _dirac_kernels;
@@ -942,7 +953,6 @@ protected:
 
   /// NodalKernels for each thread
   MooseObjectTagWarehouse<NodalKernelBase> _nodal_kernels;
-  MooseObjectTagWarehouse<ResidualObject> _kokkos_nodal_kernels;
 
   /// Decomposition splits
   MooseObjectWarehouseBase<Split> _splits; // use base b/c there are no setup methods

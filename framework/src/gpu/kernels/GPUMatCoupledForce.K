@@ -45,8 +45,8 @@ KokkosMatCoupledForce::KokkosMatCoupledForce(const InputParameters & parameters)
 
     if (_var.number() == _v_var[j])
       paramError("v",
-                 "Coupled variable 'v' needs to be different from 'variable' with MatCoupledForce, "
-                 "consider using Reaction or somethig similar");
+                 "Coupled variable 'v' needs to be different from 'variable', consider using "
+                 "KokkosReaction or something similar");
   }
 
   _v_var_to_index.copy();
