@@ -124,14 +124,16 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _Re_non_time_tag(-1),
     _Re_non_time(NULL),
     _scalar_kernels(/*threaded=*/false),
-    _kokkos_kernels(/*threaded=*/false),
     _nodal_bcs(/*threaded=*/false),
     _preset_nodal_bcs(/*threaded=*/false),
     _ad_preset_nodal_bcs(/*threaded=*/false),
+#ifdef MOOSE_KOKKOS_ENABLED
+    _kokkos_kernels(/*threaded=*/false),
     _kokkos_integrated_bcs(/*threaded=*/false),
     _kokkos_nodal_bcs(/*threaded=*/false),
     _kokkos_preset_nodal_bcs(/*threaded=*/false),
     _kokkos_nodal_kernels(/*threaded=*/false),
+#endif
     _splits(/*threaded=*/false),
     _increment_vec(NULL),
     _use_finite_differenced_preconditioner(false),
@@ -194,8 +196,10 @@ NonlinearSystemBase::preInit()
   if (_residual_copy.get())
     _residual_copy->init(_sys.n_dofs(), false, SERIAL);
 
+#ifdef MOOSE_KOKKOS_ENABLED
   if (_fe_problem.hasKokkosObjects())
     _sys.get_dof_map().full_sparsity_pattern_needed();
+#endif
 }
 
 void
@@ -268,10 +272,12 @@ NonlinearSystemBase::initialSetup()
     _general_dampers.initialSetup();
     _nodal_bcs.initialSetup();
 
+#ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_kernels.initialSetup();
     _kokkos_nodal_kernels.initialSetup();
     _kokkos_integrated_bcs.initialSetup();
     _kokkos_nodal_bcs.initialSetup();
+#endif
   }
 
   {
@@ -378,10 +384,12 @@ NonlinearSystemBase::timestepSetup()
   _general_dampers.timestepSetup();
   _nodal_bcs.timestepSetup();
 
+#ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.timestepSetup();
   _kokkos_nodal_kernels.timestepSetup();
   _kokkos_integrated_bcs.timestepSetup();
   _kokkos_nodal_bcs.timestepSetup();
+#endif
 }
 
 void
@@ -437,10 +445,12 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
   _general_dampers.customSetup(exec_type);
   _nodal_bcs.customSetup(exec_type);
 
+#ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.customSetup(exec_type);
   _kokkos_nodal_kernels.customSetup(exec_type);
   _kokkos_integrated_bcs.customSetup(exec_type);
   _kokkos_nodal_bcs.customSetup(exec_type);
+#endif
 }
 
 void
@@ -1730,10 +1740,12 @@ NonlinearSystemBase::residualSetup()
   _general_dampers.residualSetup();
   _nodal_bcs.residualSetup();
 
+#ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.residualSetup();
   _kokkos_nodal_kernels.residualSetup();
   _kokkos_integrated_bcs.residualSetup();
   _kokkos_nodal_bcs.residualSetup();
+#endif
 
   // Avoid recursion
   if (this == &_fe_problem.currentNonlinearSystem())
@@ -2806,10 +2818,12 @@ NonlinearSystemBase::jacobianSetup()
   _general_dampers.jacobianSetup();
   _nodal_bcs.jacobianSetup();
 
+#ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.jacobianSetup();
   _kokkos_nodal_kernels.jacobianSetup();
   _kokkos_integrated_bcs.jacobianSetup();
   _kokkos_nodal_bcs.jacobianSetup();
+#endif
 
   // Avoid recursion
   if (this == &_fe_problem.currentNonlinearSystem())
@@ -3350,11 +3364,13 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
     _constraints.updateActive();
     _scalar_kernels.updateActive();
 
+#ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_kernels.updateActive();
     _kokkos_nodal_kernels.updateActive();
     _kokkos_integrated_bcs.updateActive();
     _kokkos_nodal_bcs.updateActive();
     _kokkos_preset_nodal_bcs.updateActive();
+#endif
   }
 }
 
@@ -3649,8 +3665,10 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
   _scalar_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _constraints.subdomainsCovered(input_subdomains, kernel_variables);
 
+#ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _kokkos_nodal_kernels.subdomainsCovered(input_subdomains, kernel_variables);
+#endif
 
   if (_fe_problem.haveFV())
   {

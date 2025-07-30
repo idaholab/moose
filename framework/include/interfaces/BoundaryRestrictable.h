@@ -249,18 +249,21 @@ protected:
    * Get the number of nodes this Kokkos object is operating on
    * @returns The number of nodes local to this process
    */
-  KOKKOS_FUNCTION dof_id_type numBoundaryNodes() const { return _kokkos_node_ids.size(); }
+  KOKKOS_FUNCTION dof_id_type numKokkosBoundaryNodes() const { return _kokkos_node_ids.size(); }
   /**
    * Get the number of sides this Kokkos object is operating on
    * @returns The number of sides local to this process
    */
-  KOKKOS_FUNCTION dof_id_type numBoundarySides() const { return _kokkos_element_side_ids.size(); }
+  KOKKOS_FUNCTION dof_id_type numKokkosBoundarySides() const
+  {
+    return _kokkos_element_side_ids.size();
+  }
   /**
    * Get the node ID this Kokkos thread is operating on
    * @param tid The thread ID
    * @returns The node ID
    */
-  KOKKOS_FUNCTION dof_id_type boundaryNodeID(dof_id_type tid) const
+  KOKKOS_FUNCTION dof_id_type kokkosBoundaryNodeID(dof_id_type tid) const
   {
     return _kokkos_node_ids[tid];
   }
@@ -269,7 +272,7 @@ protected:
    * @param tid The thread ID
    * @returns The element ID - side index pair
    */
-  KOKKOS_FUNCTION auto boundaryElementSideID(dof_id_type tid) const
+  KOKKOS_FUNCTION auto kokkosBoundaryElementSideID(dof_id_type tid) const
   {
     return _kokkos_element_side_ids[tid];
   }
