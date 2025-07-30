@@ -1,6 +1,7 @@
 # LinearFVTKESourceSink
 
-This kernel implements a version of [`INSFVTKESourceSink`](INSFVTKESourceSink.md) for a linear kernel.
+This kernel implements a version of [`INSFVTKESourceSink`](INSFVTKESourceSink.md) for
+the linear finite volume discretization of the $k-\epsilon$ turbulence equations.
 The documentation is repeated down here for completeness.
 
 The object computes the turbulent source and sink term for the turbulent kinetic energy equation.
@@ -84,7 +85,7 @@ where:
 - $||\nabla \vec{u}||$ is the near wall velocity gradient norm, which is defined as $||\nabla \vec{u}|| = (\nabla \vec{u} \cdot \hat{n}) \cdot \hat{n}$,
 - $\kappa = 0.41$ is the von Kármán constant.
 
-The formulation assumes that the near wall value is already imposed in the $\mu_t$ functor. 
+The formulation assumes that the near wall value is already imposed in the $\mu_t$ functor.
 
 When solving a linear problem, instead of the nonlinear formulation, the production term is formulated as:
 

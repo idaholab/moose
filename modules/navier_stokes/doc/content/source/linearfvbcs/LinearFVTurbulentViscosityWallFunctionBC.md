@@ -1,7 +1,7 @@
 # LinearFVTurbulentViscosityWallFunctionBC
 
 Implements wall function boundary condition for the turbulent
-dynamic viscosity $\mu_t$.
+dynamic viscosity $\mu_t$ for the linear finite volume discretization.
 
 The boundary conditions are different depending on where the centroid
 of the cell near the identified boundary lies in the wall function profile.
@@ -13,8 +13,8 @@ boundary layer are identified as follows:
 - Logarithmic region: $y^+ \ge 30$
 
 The wall function goal is to set the total viscosity at the wall $\mu_w$, decomposed as
-$\mu_w = \mu + \mu_t$, such that the wall shear stress $\tau_w$ is accurately captured 
-without the need of fully resolving the gradients at the near wall region. 
+$\mu_w = \mu + \mu_t$, such that the wall shear stress $\tau_w$ is accurately captured
+without the need of fully resolving the gradients at the near wall region.
 
 \begin{equation}
     \tau_w = \frac{ \mu_w u_p}{y_p} \,,
@@ -29,11 +29,11 @@ where:
 - $u_p$ is the wall-parallel velocity at the centroid
 - $y_p$ is the wall normal distance to the centroid
 
-To impose a correct boundary condition for $\mu_t$, as seen in the Equation above, we need to compute $\tau_w$ using analytical 
+To impose a correct boundary condition for $\mu_t$, as seen in the Equation above, we need to compute $\tau_w$ using analytical
 relationships between the wall shear stress and the dimensionless wall distance $y^+$. For this purpose, four different
 formulations are supported as defined by the [!param](/LinearFVBCs/LinearFVTurbulentViscosityWallFunctionBC/wall_treatment) parameter.
 
-To set the grid spacing for the first cell near the wall in your mesh, we recommend using the [RANSYPlusAux.md] auxiliary kernel. 
+To set the grid spacing for the first cell near the wall in your mesh, we recommend using the [RANSYPlusAux.md] auxiliary kernel.
 to estimate the dimensionless wall distance $y^+$.
 
 ## Equilibrium wall functions using a Newton solve
