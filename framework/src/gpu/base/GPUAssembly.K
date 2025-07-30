@@ -86,7 +86,7 @@ Assembly::initQuadrature()
 
   // Find boundaries where material properties should be computed
 
-  auto & boundary_objects =
+  auto boundary_objects =
       _problem.getMaterialPropertyStorageConsumers(Moose::BOUNDARY_MATERIAL_DATA, true);
 
   for (auto object : boundary_objects)

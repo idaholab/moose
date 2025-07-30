@@ -214,7 +214,7 @@ void
 IntegratedBC<Derived>::computeResidual()
 {
   ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
-      0, numBoundarySides());
+      0, numKokkosBoundarySides());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
   ::Kokkos::fence();
 }
@@ -226,7 +226,7 @@ IntegratedBC<Derived>::computeJacobian()
   if (!defaultJacobian())
   {
     ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
-        0, numBoundarySides());
+        0, numKokkosBoundarySides());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
   }
@@ -235,7 +235,7 @@ IntegratedBC<Derived>::computeJacobian()
   {
     auto & sys = kokkosSystem(_kokkos_var.sys());
 
-    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numBoundarySides()});
+    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundarySides()});
 
     ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
         0, _thread.size());
@@ -249,7 +249,7 @@ KOKKOS_FUNCTION void
 IntegratedBC<Derived>::operator()(ResidualLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
-  auto elem = boundaryElementSideID(tid);
+  auto elem = kokkosBoundaryElementSideID(tid);
 
   ResidualDatum datum(
       elem.first, elem.second, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
@@ -262,7 +262,7 @@ KOKKOS_FUNCTION void
 IntegratedBC<Derived>::operator()(JacobianLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
-  auto elem = boundaryElementSideID(tid);
+  auto elem = kokkosBoundaryElementSideID(tid);
 
   ResidualDatum datum(
       elem.first, elem.second, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
@@ -275,7 +275,7 @@ KOKKOS_FUNCTION void
 IntegratedBC<Derived>::operator()(OffDiagJacobianLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
-  auto elem = boundaryElementSideID(_thread(tid, 1));
+  auto elem = kokkosBoundaryElementSideID(_thread(tid, 1));
 
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];

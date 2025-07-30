@@ -13,6 +13,7 @@
 #include "MooseArray.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
+#include "MoosePassKey.h"
 #include "ArbitraryQuadrature.h"
 
 #include "libmesh/dense_vector.h"
@@ -224,13 +225,7 @@ public:
    * classes may create keys using simple curly braces \p {} or may be more explicit and use \p
    * Assembly::InternalDataKey{}
    */
-  class InternalDataKey
-  {
-    // Blessed classes
-    friend class Moose::Kokkos::Assembly;
-    InternalDataKey() {}
-    InternalDataKey(const InternalDataKey &) {}
-  };
+  using InternalDataKey = Moose::PassKey<Moose::Kokkos::Assembly>;
 
   /**
    * Returns the reference to the current quadrature being used

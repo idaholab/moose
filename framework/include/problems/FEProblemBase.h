@@ -409,6 +409,9 @@ public:
   virtual void solve(const unsigned int nl_sys_num);
 
 #ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Construct Kokkos assembly and systems and allocate Kokkos material property storages
+   */
   void initKokkos();
 #endif
 
@@ -882,6 +885,7 @@ public:
                                     const std::string & name,
                                     InputParameters & parameters);
 
+#ifdef MOOSE_KOKKOS_ENABLED
   virtual void addKokkosKernel(const std::string & kernel_name,
                                const std::string & name,
                                InputParameters & parameters);
@@ -891,6 +895,7 @@ public:
   virtual void addKokkosBoundaryCondition(const std::string & bc_name,
                                           const std::string & name,
                                           InputParameters & parameters);
+#endif
 
   virtual void
   addConstraint(const std::string & c_name, const std::string & name, InputParameters & parameters);
@@ -1040,9 +1045,11 @@ public:
                                   const std::string & name,
                                   InputParameters & parameters);
 
+#ifdef MOOSE_KOKKOS_ENABLED
   virtual void addKokkosMaterial(const std::string & material_name,
                                  const std::string & name,
                                  InputParameters & parameters);
+#endif
 
   /**
    * Add the MooseVariables and the material properties that the current materials depend on to the
@@ -2029,10 +2036,12 @@ public:
   const MaterialWarehouse & getDiscreteMaterialWarehouse() const { return _discrete_materials; }
   const MaterialWarehouse & getInterfaceMaterialsWarehouse() const { return _interface_materials; }
 
+#ifdef MOOSE_KOKKOS_ENABLED
   /*
    * Return a reference to the material warehouse of Kokkos Material objects to be computed.
    */
   const MaterialWarehouse & getKokkosMaterialsWarehouse() const { return _kokkos_materials; }
+#endif
 
   /**
    * Return a pointer to a MaterialBase object.  If no_warn is true, suppress
@@ -2057,8 +2066,8 @@ public:
   /**
    * @return The consumers of the MaterialPropertyStorage for the type \p type
    */
-  const std::set<const MooseObject *> &
-  getMaterialPropertyStorageConsumers(Moose::MaterialDataType type, bool is_kokkos = false) const;
+  std::set<const MooseObject *> getMaterialPropertyStorageConsumers(Moose::MaterialDataType type,
+                                                                    bool is_kokkos = false) const;
 
   /**
    * @returns Whether the original matrix nonzero pattern is restored before each Jacobian assembly
@@ -2632,7 +2641,10 @@ public:
 
   void createTagMatrices(CreateTaggedMatrixKey);
 
-  bool hasKokkosObjects() { return _has_kokkos_objects; }
+  /**
+   * @returns whether any Kokkos object was added in the problem
+   */
+  bool hasKokkosObjects() const { return _has_kokkos_objects; }
 
 protected:
   /**
@@ -2835,7 +2847,9 @@ protected:
   MaterialWarehouse _discrete_materials;  // Materials that the user must compute
   MaterialWarehouse _all_materials; // All materials for error checking and MaterialData storage
 
+#ifdef MOOSE_KOKKOS_ENABLED
   MaterialWarehouse _kokkos_materials; // Kokkos materials
+#endif
   ///@}
 
   ///@{
