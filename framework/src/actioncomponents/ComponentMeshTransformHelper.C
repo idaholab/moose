@@ -54,32 +54,20 @@ ComponentMeshTransformHelper::addMeshGenerators()
   {
     InputParameters params = _factory.getValidParams("TransformGenerator");
     params.set<MeshGeneratorName>("input") = _mg_names.back();
-    params.set<MooseEnum>("transform") = "ROTATE";
+
     if (_rotation)
+    {
+      params.set<MooseEnum>("transform") = "ROTATE";
       params.set<RealVectorValue>("vector_value") = *_rotation;
+    }
     else
     {
-      const auto rotation_matrix =
-          RotationMatrix::rotVec1ToVec2<false>(RealVectorValue(1, 0, 0), *_direction);
+      params.set<MooseEnum>("transform") = "ROTATE_WITH_MATRIX";
+
       RealVectorValue angles;
-      // angles(0) = std::atan2(rotation_matrix(1, 0), rotation_matrix(0, 0));
-      // angles(1) = std::asin(-rotation_matrix(2, 0));
-      // angles(2) = std::atan2(rotation_matrix(2, 1), rotation_matrix(2, 2));
-      angles(1) = std::asin(-rotation_matrix(0, 2));
-      angles(0) = std::asin(rotation_matrix(0, 1) / std::cos(angles(1)));
-      angles(2) = std::asin(rotation_matrix(1, 2) / std::cos(angles(1)));
-      // angles(0) = std::atan2(rotation_matrix(2, 1), rotation_matrix(2, 2));
-      // angles(1) = std::atan2(
-      //     -rotation_matrix(2, 0),
-      //     std::sqrt(std::pow(rotation_matrix(2, 1), 1) + std::pow(rotation_matrix(2, 2), 2)));
-      // angles(2) = std::atan2(rotation_matrix(1, 0), rotation_matrix(0, 0));
-
-      std::cout << "\nrotation_matrix = \n" << rotation_matrix << std::endl;
-      std::cout << "phi   = " << angles(0) / M_PI_2 * 90 << std::endl;
-      std::cout << "theta = " << angles(1) / M_PI_2 * 90 << std::endl;
-      std::cout << "psi   = " << angles(2) / M_PI_2 * 90 << "\n" << std::endl;
-
-      params.set<RealVectorValue>("vector_value") = angles / M_PI_2 * 90;
+      const auto rotation_matrix =
+          RotationMatrix::rotationMatrixVecToVec<false>(RealVectorValue(1, 0, 0), *_direction);
+      params.set<RealTensorValue>("rotation_matrix") = rotation_matrix;
     }
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "TransformGenerator", name() + "_rotated", params);
