@@ -119,6 +119,12 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
 }
 
 void
+TimeSequenceStepperBase::resetSequence()
+{
+  _time_sequence.clear();
+}
+
+void
 TimeSequenceStepperBase::step()
 {
   TimeStepper::step();
