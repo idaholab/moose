@@ -581,8 +581,7 @@ processSingletonMooseWrappedOptions(FEProblemBase & fe_problem, const InputParam
               "Leading prefix character must be a '-'. Current prefix is '" << prefix << "'");     \
   mooseAssert((prefix.size() == 1) || (prefix.back() == '_'),                                      \
               "Terminating prefix character must be a '_'. Current prefix is '" << prefix << "'"); \
-  mooseAssert(MooseUtils::isAllLowercase(prefix),                                                  \
-              "PETSc prefixes should be all lower-case. What are you, a crazy person?")
+  mooseAssert(MooseUtils::isAllLowercase(prefix), "PETSc prefixes should be all lower-case")
 
 void
 storePetscOptions(FEProblemBase & fe_problem,
