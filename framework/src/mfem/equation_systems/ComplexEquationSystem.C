@@ -174,26 +174,52 @@ ComplexEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 }
 
 void
-ComplexEquationSystem::AddIntegratedBC(std::shared_ptr<MFEMComplexIntegratedBC> bc)
+ComplexEquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
 {
   AddTestVariableNameIfMissing(bc->getTestVariableName());
   AddTrialVariableNameIfMissing(bc->getTrialVariableName());
   auto trial_var_name = bc->getTrialVariableName();
   auto test_var_name = bc->getTestVariableName();
-  if (!_cpx_integrated_bc_map.Has(test_var_name))
+
+  if (auto bc_ptr = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(bc))
   {
-    auto integrated_bc_field_map = std::make_shared<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>();
-    _cpx_integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
+    if (!_cpx_integrated_bc_map.Has(test_var_name))
+    {
+      auto integrated_bc_field_map = std::make_shared<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>();
+      _cpx_integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
+    }
+    // Register new integrated bc map if not present for the test/trial variable
+    // pair
+    if (!_cpx_integrated_bc_map.Get(test_var_name)->Has(trial_var_name))
+    {
+      auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>();
+      _cpx_integrated_bc_map.Get(test_var_name)->Register(trial_var_name, std::move(bcs));
+    }
+    _cpx_integrated_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc_ptr));
   }
-  // Register new integrated bc map if not present for the test/trial variable
-  // pair
-  if (!_cpx_integrated_bc_map.Get(test_var_name)->Has(trial_var_name))
+  else if (auto bc_ptr = std::dynamic_pointer_cast<MFEMIntegratedBC>(bc))
   {
-    auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>();
-    _cpx_integrated_bc_map.Get(test_var_name)->Register(trial_var_name, std::move(bcs));
+    if (!_integrated_bc_map.Has(test_var_name))
+    {
+      auto integrated_bc_field_map = std::make_shared<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>();
+      _integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
+    }
+    // Register new integrated bc map if not present for the test/trial variable
+    // pair
+    if (!_integrated_bc_map.Get(test_var_name)->Has(trial_var_name))
+    {
+      auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMIntegratedBC>>>();
+      _integrated_bc_map.Get(test_var_name)->Register(trial_var_name, std::move(bcs));
+    }
+    _integrated_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc_ptr));
   }
-  _cpx_integrated_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc));
+  else
+  {
+    mooseError(
+        "Unknown integrated BC type. Please use MFEMIntegratedBC or MFEMComplexIntegratedBC.");
+  }
 }
 
 void

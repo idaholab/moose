@@ -12,7 +12,7 @@
 #pragma once
 #include "MFEMIntegratedBC.h"
 
-class MFEMComplexIntegratedBC : public MFEMBoundaryCondition
+class MFEMComplexIntegratedBC : public MFEMIntegratedBC
 {
 public:
   static InputParameters validParams();
@@ -40,9 +40,20 @@ public:
   virtual void setRealBC(std::shared_ptr<MFEMIntegratedBC> bc) { _real_bc = bc; }
   virtual void setImagBC(std::shared_ptr<MFEMIntegratedBC> bc) { _imag_bc = bc; }
 
+  virtual mfem::LinearFormIntegrator * createLFIntegrator() override
+  {
+    mooseError("MFEMComplexIntegratedBC does not support createLFIntegrator(). Please use "
+               "getRealLFIntegrator() and getImagLFIntegrator()");
+  }
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override
+  {
+    mooseError("MFEMComplexIntegratedBC does not support createBFIntegrator(). Please use "
+               "getRealBFIntegrator() and getImagBFIntegrator()");
+  }
+
   // Get name of the trial variable (gridfunction) the kernel acts on.
   // Defaults to the name of the test variable labelling the weak form.
-  virtual const std::string & getTrialVariableName() const { return _test_var_name; }
+  // virtual const std::string & getTrialVariableName() const { return _test_var_name; }
 
 protected:
   std::shared_ptr<MFEMIntegratedBC> _real_bc{nullptr};

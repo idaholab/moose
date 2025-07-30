@@ -26,7 +26,7 @@ MFEMComplexIntegratedBC::validParams()
 }
 
 MFEMComplexIntegratedBC::MFEMComplexIntegratedBC(const InputParameters & parameters)
-  : MFEMBoundaryCondition(parameters)
+  : MFEMIntegratedBC(parameters)
 {
 }
 
