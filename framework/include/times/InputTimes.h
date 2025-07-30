@@ -25,7 +25,7 @@ public:
 protected:
   virtual void initialize() override;
 
-  private:
+private:
   /// The next external time sequences to hit
   const std::vector<Real> & _input_times;
 };

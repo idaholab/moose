@@ -24,7 +24,8 @@ InputTimes::validParams()
   return params;
 }
 
-InputTimes::InputTimes(const InputParameters & parameters) : Times(parameters),_input_times(getParam<std::vector<Real>>("times"))
+InputTimes::InputTimes(const InputParameters & parameters)
+  : Times(parameters), _input_times(getParam<std::vector<Real>>("times"))
 {
   _times = _input_times;
 }
@@ -32,10 +33,11 @@ InputTimes::InputTimes(const InputParameters & parameters) : Times(parameters),_
 void
 InputTimes::initialize()
 {
-    if (_times == _input_times)
-        return;
-    for (auto const & t : _input_times) {
-        if (std::find(_times.begin(), _times.end(), t) == _times.end())
-            _times.push_back(t);
-    }
+  if (_times == _input_times)
+    return;
+  for (auto const & t : _input_times)
+  {
+    if (std::find(_times.begin(), _times.end(), t) == _times.end())
+      _times.push_back(t);
+  }
 }
