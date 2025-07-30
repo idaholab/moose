@@ -15,7 +15,7 @@
     type = MFEMScalarFESpace
     fec_type = H1
     fec_order = FIRST
-  []  
+  []
   [HCurlFESpace]
     type = MFEMVectorFESpace
     fec_type = ND
