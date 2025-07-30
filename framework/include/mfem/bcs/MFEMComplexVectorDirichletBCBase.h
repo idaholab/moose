@@ -11,18 +11,19 @@
 
 #pragma once
 
-#include "MFEMEssentialBC.h"
+#include "MFEMComplexEssentialBC.h"
 
-class MFEMVectorDirichletBCBase : public MFEMEssentialBC
+class MFEMComplexVectorDirichletBCBase : public MFEMComplexEssentialBC
 {
 public:
   static InputParameters validParams();
 
-  ~MFEMVectorDirichletBCBase() override = default;
+  ~MFEMComplexVectorDirichletBCBase() override = default;
 
 protected:
-  MFEMVectorDirichletBCBase(const InputParameters & parameters);
-  mfem::VectorCoefficient & _vec_coef;
+  MFEMComplexVectorDirichletBCBase(const InputParameters & parameters);
+  mfem::VectorCoefficient & _vec_coef_real;
+  mfem::VectorCoefficient & _vec_coef_imag;
 };
 
 #endif

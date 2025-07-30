@@ -107,13 +107,13 @@ ComplexEquationSystem::ApplyEssentialBCs()
     trial_gf = 0.0;
     trial_gf_time_derivatives = 0.0;
 
-    auto bcs = _essential_bc_map.GetRef(test_var_name);
+    auto bcs = _cpx_essential_bc_map.GetRef(test_var_name);
     mfem::Array<int> global_ess_markers(pmesh->bdr_attributes.Max());
     global_ess_markers = 0;
 
     for (auto & bc : bcs)
     {
-      bc->ApplyComplexBC(trial_gf);
+      bc->ApplyBC(trial_gf);
 
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
       for (auto it = 0; it != pmesh->bdr_attributes.Max(); ++it)
