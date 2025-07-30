@@ -223,7 +223,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
         # Require CUDA if we have cuda available
         if [ -n "$CUDA_DIR" ]; then
-            BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}")
+            # INL cuda arches; 7.0 V100 (sawtooth), 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
+            BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}" "-DCUDA_ARCH_LIST=7.0;8.0;8.6;8.9")
         else
             BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=OFF")
         fi
