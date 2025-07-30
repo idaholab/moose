@@ -167,14 +167,17 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     conda update -yq --all
 
 {% if WITHOUT_PYTORCH is not defined %}
+    # Make ninja available for neml2 and libtorch builds
+    dnf install -y ninja-build
+
     # Figure out compiler and version to see if we build torch or use prebuilt torch
     COMPILER=$(mpicxx -show | awk '{ print $1 }')
     BUILD_PYTORCH=1
     # Explicitly silence all warnings because the build is loud (>5MB of output...)
-    BUILD_PYTORCH_CCXXFLAGS="-w"
+    BUILD_PYTORCH_CCXXFLAGS=("-w")
     BUILD_PYTORCH_FLAGS=()
     if [ "$COMPILER" == "g++" ]; then
-        BUILD_PYTORCH_CCXXFLAGS+=" -Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict"
+        BUILD_PYTORCH_CCXXFLAGS+=("-Wno-error=maybe-uninitialized" "-Wno-error=uninitialized" "-Wno-error=restrict")
         if [[ $(gcc --version) =~ [0-9]+.[0-9]+(.[0-9]+?) ]]; then
             GCC_VERSION="${BASH_REMATCH[0]}"
         else
@@ -203,18 +206,16 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
         # Create a temporary python environment for building pytorch
         PYTORCH_CONDA_ENV=pytorch_build
-        conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.11
+        conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.12
         source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
         pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
-        # Need older cmake (we get cmake 4 from requirements.txt)
-        conda install cmake=3.31.6
 
         # Need BLAS and LAPACK libs for torch in neml2
         dnf install -y openblas-devel
 
         # Require CUDA if we have cuda available
         if [ -n "$CUDA_DIR" ]; then
-            BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON")
+            BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}")
         else
             BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=OFF")
         fi
@@ -222,15 +223,17 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         mkdir -p $LIBTORCH_DIR/logs
         PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
         mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
-        CC= CXX= F77= F90= FC= CFLAGS="$BUILD_PYTORCH_CCXXFLAGS" CXXFLAGS="$BUILD_PYTORCH_CCXXFLAGS" cmake \
+        CC= CXX= F77= F90= FC= CFLAGS="${BUILD_PYTORCH_CCXXFLAGS[*]}" CXXFLAGS="${BUILD_PYTORCH_CCXXFLAGS[*]}" cmake \
+            -GNinja \
             -DBUILD_SHARED_LIBS:BOOL=ON \
             -DCMAKE_BUILD_TYPE:STRING=Release \
-            -DCMAKE_INSTALL_PREFIX:PATH={{ LIBTORCH_DIR }} \
+            -DCMAKE_INSTALL_PREFIX:PATH=${LIBTORCH_DIR} \
             -DBUILD_PYTHON:BOOL=ON \
             -DUSE_BLAS:BOOL=ON \
             -DBLAS:STRING=OpenBLAS \
             -DUSE_LAPACK:BOOL=ON \
             -DUSE_MPI:BOOL=OFF \
+            -DUSE_SYSTEM_NCCL:BOOL=ON \
             "${BUILD_PYTORCH_FLAGS[@]}" \
             ${PYTORCH_DIR} 2>&1 | tee ${LIBTORCH_DIR}/logs/cmake.log
         cmake --build . --target install -- -j ${MOOSE_JOBS} 2>&1 | tee ${LIBTORCH_DIR}/logs/build.log
@@ -258,9 +261,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     NEML2_GIT_REMOTE={{ NEML2_GIT_REMOTE }}
     NEML2_DIR={{ NEML2_DIR }}
     NEML2_BUILD_SCRIPT=${ROOT_BUILD_DIR}/{{ NEML2_BUILD_SCRIPT }}
-
-    # Make ninja available for neml2 builds
-    dnf install -y ninja-build
 
     # Build and install neml2
     cd ${ROOT_BUILD_DIR}
