@@ -33,11 +33,4 @@ MFEMVectorDirichletBC::ApplyBC(mfem::GridFunction & gridfunc)
   gridfunc.ProjectBdrCoefficient(_vec_coef, getBoundaryMarkers());
 }
 
-void
-MFEMVectorDirichletBC::ApplyComplexBC(mfem::ParComplexGridFunction & /*gridfunc*/)
-{
-  mooseError("Full complex Dirichlet BCs not implemented for vector variables. Please use "
-             "Tangential or Normal complex Dirichlet BCs instead.");
-}
-
 #endif
