@@ -347,7 +347,7 @@
       },
       "test_name": "test",
       "tester": {
-        "command": "mpiexec -n 28 /opt/moose/share/moose/python/TestHarness/../../../../bin/combined-opt -i simple_transient_diffusion.i --error --error-override --timing Outputs/perf_graph=true Outputs/perf_graph_json_file=/scratch/romebuild9-service/build/copied_tests/moose/performance/simple_transient_diffusion/metadata_perf_graph_test.json --compute-device cpu",
+        "command": "mpiexec -n 28 /opt/moose/share/moose/python/TestHarness/../../../../bin/combined-opt -i simple_transient_diffusion.i --error --error-override --timing Outputs/perf_graph=true Outputs/perf_graph_json_file=/scratch/romebuild9-service/build/copied_tests/moose/performance/simple_transient_diffusion/metadata_perf_graph_test.json --libtorch-device cpu",
         "input_file": "/scratch/romebuild9-service/build/copied_tests/moose/performance/simple_transient_diffusion/simple_transient_diffusion.i",
         "json_metadata": {},
         "name": "CSVDiff",
