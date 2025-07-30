@@ -294,25 +294,24 @@ public:
    * @param scalar The scalar value to be assigned
    */
   auto & operator=(const T & scalar);
-#endif
 
   /**
-   * Array iterator for host data
+   * Array iterator
    */
   class iterator
   {
   public:
-    iterator(T * it) : it(it) {}
-    bool operator==(const iterator & other) const { return it == other.it; }
-    bool operator!=(const iterator & other) const { return it != other.it; }
-    T & operator*() const { return *it; }
-    T * operator&() const { return it; }
-    iterator & operator++()
+    KOKKOS_FUNCTION iterator(T * it) : it(it) {}
+    KOKKOS_FUNCTION bool operator==(const iterator & other) const { return it == other.it; }
+    KOKKOS_FUNCTION bool operator!=(const iterator & other) const { return it != other.it; }
+    KOKKOS_FUNCTION T & operator*() const { return *it; }
+    KOKKOS_FUNCTION T * operator&() const { return it; }
+    KOKKOS_FUNCTION iterator & operator++()
     {
       ++it;
       return *this;
     }
-    iterator operator++(int)
+    KOKKOS_FUNCTION iterator operator++(int)
     {
       iterator pre = *this;
       ++it;
@@ -323,17 +322,26 @@ public:
     T * it;
   };
 
-#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get the beginning iterator
    * @returns The beginning iterator
    */
-  iterator begin() const { return iterator(_host_data); }
+  KOKKOS_FUNCTION iterator begin() const
+  {
+    KOKKOS_IF_ON_HOST(return iterator(_host_data);)
+
+    return iterator(_device_data);
+  }
   /**
    * Get the end iterator
    * @returns The end iterator
    */
-  iterator end() const { return iterator(_host_data + _size); }
+  KOKKOS_FUNCTION iterator end() const
+  {
+    KOKKOS_IF_ON_HOST(return iterator(_host_data + _size);)
+
+    return iterator(_device_data + _size);
+  }
 #endif
 
 protected:

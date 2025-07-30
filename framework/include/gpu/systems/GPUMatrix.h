@@ -11,6 +11,10 @@
 
 #include "GPUArray.h"
 
+#ifdef MOOSE_KOKKOS_SCOPE
+#include "KokkosUtils.h"
+#endif
+
 #include "libmesh/petsc_matrix.h"
 
 namespace Moose
@@ -135,22 +139,14 @@ Matrix::find(PetscInt i, PetscInt j) const
 {
   KOKKOS_ASSERT(i < _nr);
 
-  auto left = _col_idx.data() + _row_ptr[i];
-  auto right = _col_idx.data() + _row_ptr[i + 1] - 1;
+  auto begin = _col_idx.data() + _row_ptr[i];
+  auto end = _col_idx.data() + _row_ptr[i + 1];
+  auto target = Utils::find(j, begin, end);
 
-  while (left <= right)
-  {
-    auto mid = left + (right - left) / 2;
-
-    if (*mid == j)
-      return mid - _col_idx.data();
-    else if (*mid < j)
-      left = mid + 1;
-    else
-      right = mid - 1;
-  }
-
-  return -1;
+  if (target == end)
+    return -1;
+  else
+    return target - _col_idx.data();
 }
 #endif
 
