@@ -49,5 +49,5 @@ public:
   usingKokkosResidualObjectMembers;                                                                \
                                                                                                    \
 protected:                                                                                         \
-  using Moose::Kokkos::NodalKernelBase::blockNodeID;                                               \
-  using Moose::Kokkos::NodalKernelBase::boundaryNodeID
+  using Moose::Kokkos::NodalKernelBase::kokkosBlockNodeID;                                         \
+  using Moose::Kokkos::NodalKernelBase::kokkosBoundaryNodeID

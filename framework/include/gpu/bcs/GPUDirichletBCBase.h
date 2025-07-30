@@ -90,7 +90,7 @@ DirichletBCBase<Derived>::presetSolution(TagID tag)
   _solution_tag = tag;
 
   ::Kokkos::parallel_for(::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>>(
-                             0, this->numBoundaryNodes()),
+                             0, this->numKokkosBoundaryNodes()),
                          *static_cast<Derived *>(this));
 }
 
@@ -99,7 +99,7 @@ KOKKOS_FUNCTION void
 DirichletBCBase<Derived>::operator()(const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
-  auto node = boundaryNodeID(tid);
+  auto node = kokkosBoundaryNodeID(tid);
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto dof = sys.getNodeLocalDofIndex(node, _kokkos_var.var());
 
