@@ -1366,9 +1366,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           auto Sij = dz * gap;
 
           // Calculation of turbulent mixing parameter
-          auto beta = 0.5 * (beta_in + beta_out);
-          auto wsweep_in = gedge_ave * beta * Sij;
-          auto wsweep_out = gedge_ave * beta * Sij;
+          auto wsweep_in = gedge_ave * beta_in * Sij;
+          auto wsweep_out = gedge_ave * beta_out * Sij;
           auto sweep_hin = (*_h_soln)(node_sin);
           auto sweep_hout = (*_h_soln)(node_in);
           sweep_enthalpy = (wsweep_in * sweep_hin - wsweep_out * sweep_hout);
