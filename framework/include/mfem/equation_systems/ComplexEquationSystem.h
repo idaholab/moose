@@ -7,6 +7,7 @@
 #include "MFEMContainers.h"
 #include "MFEMComplexKernel.h"
 #include "MFEMComplexIntegratedBC.h"
+#include "MFEMComplexEssentialBC.h"
 
 namespace Moose::MFEM
 {
@@ -83,13 +84,16 @@ public:
   std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cdxdts;
 
   // Complex kernels and integrated BCs
-
   Moose::MFEM::NamedFieldsMap<
       Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>
       _cpx_kernels_map;
   Moose::MFEM::NamedFieldsMap<
       Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>
       _cpx_integrated_bc_map;
+
+  // Complex essential BCs
+  Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>>
+      _cpx_essential_bc_map;
 };
 
 template <class FormType>
