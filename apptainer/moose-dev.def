@@ -82,13 +82,21 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export PATH=${WASP_DIR}/bin:$PATH
 
 {%- if WITH_MFEM %}
-    export CONDUIT_DIR={{ CONDUIT_DIR }}
-    export MFEM_DIR={{ MFEM_DIR }}
+    if [ -d "{{ CONDUIT_DIR }}" ]; then
+        export CONDUIT_DIR={{ CONDUIT_DIR }}
+    fi
+    if [ -d "{{ MFEM_DIR }}" ]; then
+        export MFEM_DIR={{ MFEM_DIR }}
+    fi
 {%- endif %}
 
 {% if WITHOUT_PYTORCH is not defined %}
-    export LIBTORCH_DIR={{ LIBTORCH_DIR }}
-    export NEML2_DIR={{ NEML2_DIR }}
+    if [ -d "{{ LIBTORCH_DIR }}" ]; then
+        export LIBTORCH_DIR={{ LIBTORCH_DIR }}
+    fi
+    if [ -d "{{ NEML2_DIR }} " ]; then
+        export NEML2_DIR={{ NEML2_DIR }}
+    fi
     # Adding this to not get GPU initialization errors from MPICH
     export MPIR_CVAR_ENABLE_GPU=0
 {%- endif %}
