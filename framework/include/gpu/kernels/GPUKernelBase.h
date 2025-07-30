@@ -49,4 +49,4 @@ public:
   usingKokkosResidualObjectMembers;                                                                \
                                                                                                    \
 protected:                                                                                         \
-  using Moose::Kokkos::KernelBase::blockElementID
+  using Moose::Kokkos::KernelBase::kokkosBlockElementID

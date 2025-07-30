@@ -903,8 +903,8 @@ MooseApp::registerCapabilities()
 #else
     missingCapability("kokkos",
                       doc,
-                      "Rebuild PETSc with Kokkos support and libMesh, or checkout the Kokkos "
-                      "submodule. Then, rebuild MOOSE with KOKKOS=true.");
+                      "Rebuild PETSc with Kokkos support and libMesh. Then, reconfigure MOOSE with "
+                      "--with-kokkos.");
 #endif
   }
 

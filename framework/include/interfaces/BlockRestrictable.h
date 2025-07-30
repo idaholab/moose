@@ -261,23 +261,26 @@ protected:
    * Get the number of elements this Kokkos object is operating on
    * @returns The number of elements local to this process
    */
-  KOKKOS_FUNCTION dof_id_type numBlockElements() const { return _kokkos_element_ids.size(); }
+  KOKKOS_FUNCTION dof_id_type numKokkosBlockElements() const { return _kokkos_element_ids.size(); }
   /**
    * Get the number of nodes this Kokkos object is operating on
    * @returns The number of nodes local to this process
    */
-  KOKKOS_FUNCTION dof_id_type numBlockNodes() const { return _kokkos_node_ids.size(); }
+  KOKKOS_FUNCTION dof_id_type numKokkosBlockNodes() const { return _kokkos_node_ids.size(); }
   /**
    * Get the number of sides this Kokkos object is operating on
    * @returns The number of sides local to this process
    */
-  KOKKOS_FUNCTION dof_id_type numBlockSides() const { return _kokkos_element_side_ids.size(); }
+  KOKKOS_FUNCTION dof_id_type numKokkosBlockSides() const
+  {
+    return _kokkos_element_side_ids.size();
+  }
   /**
    * Get the element ID this Kokkos thread is operating on
    * @param tid The thread ID
    * @returns The element ID
    */
-  KOKKOS_FUNCTION dof_id_type blockElementID(dof_id_type tid) const
+  KOKKOS_FUNCTION dof_id_type kokkosBlockElementID(dof_id_type tid) const
   {
     return _kokkos_element_ids[tid];
   }
@@ -286,13 +289,16 @@ protected:
    * @param tid The thread ID
    * @returns the node ID
    */
-  KOKKOS_FUNCTION dof_id_type blockNodeID(dof_id_type tid) const { return _kokkos_node_ids[tid]; }
+  KOKKOS_FUNCTION dof_id_type kokkosBlockNodeID(dof_id_type tid) const
+  {
+    return _kokkos_node_ids[tid];
+  }
   /**
    * Get the element ID - side index pair this Kokkos thread is operating on
    * @param tid The thread ID
    * @returns The element ID - side index pair
    */
-  KOKKOS_FUNCTION auto blockElementSideID(dof_id_type tid) const
+  KOKKOS_FUNCTION auto kokkosBlockElementSideID(dof_id_type tid) const
   {
     return _kokkos_element_side_ids[tid];
   }

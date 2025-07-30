@@ -1158,7 +1158,9 @@ FEProblemBase::initialSetup()
       }
     }
 
+#ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_materials.sort(0, true);
+#endif
 
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
@@ -3093,83 +3095,6 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
 }
 
 void
-FEProblemBase::addKokkosKernel(const std::string & kernel_name,
-                               const std::string & name,
-                               InputParameters & parameters)
-{
-#ifndef MOOSE_KOKKOS_ENABLED
-  mooseError("addKokkosKernel() was called but MOOSE was not compiled with Kokkos support.");
-#endif
-
-  parallel_object_only();
-
-  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
-  if (!isSolverSystemNonlinear(nl_sys_num))
-    mooseError("You are trying to add a Kernel to a linear variable/system, which is not "
-               "supported at the moment!");
-
-  setResidualObjectParamsAndLog(
-      kernel_name, name, parameters, nl_sys_num, "KokkosKernel", _reinit_displaced_elem);
-
-#ifdef MOOSE_KOKKOS_ENABLED
-  _nl[nl_sys_num]->addKokkosKernel(kernel_name, name, parameters);
-#endif
-
-  _has_kokkos_objects = true;
-}
-
-void
-FEProblemBase::addKokkosNodalKernel(const std::string & kernel_name,
-                                    const std::string & name,
-                                    InputParameters & parameters)
-{
-#ifndef MOOSE_KOKKOS_ENABLED
-  mooseError("addKokkosNodalKernel() was called but MOOSE was not compiled with Kokkos support.");
-#endif
-
-  parallel_object_only();
-
-  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
-
-  setResidualObjectParamsAndLog(
-      kernel_name, name, parameters, nl_sys_num, "KokkosNodalKernel", _reinit_displaced_elem);
-
-#ifdef MOOSE_KOKKOS_ENABLED
-  _nl[nl_sys_num]->addKokkosNodalKernel(kernel_name, name, parameters);
-#endif
-
-  _has_kokkos_objects = true;
-}
-
-void
-FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
-                                          const std::string & name,
-                                          InputParameters & parameters)
-{
-#ifndef MOOSE_KOKKOS_ENABLED
-  mooseError(
-      "addKokkosBoundaryCondition() was called but MOOSE was not compiled with Kokkos support.");
-#endif
-
-  parallel_object_only();
-
-  const auto nl_sys_num = determineSolverSystem(parameters.varName("variable", name), true).second;
-  if (!isSolverSystemNonlinear(nl_sys_num))
-    mooseError(
-        "You are trying to add a BoundaryCondition to a linear variable/system, which is not "
-        "supported at the moment!");
-
-  setResidualObjectParamsAndLog(
-      bc_name, name, parameters, nl_sys_num, "KokkosBoundaryCondition", _reinit_displaced_face);
-
-#ifdef MOOSE_KOKKOS_ENABLED
-  _nl[nl_sys_num]->addKokkosBoundaryCondition(bc_name, name, parameters);
-#endif
-
-  _has_kokkos_objects = true;
-}
-
-void
 FEProblemBase::addConstraint(const std::string & c_name,
                              const std::string & name,
                              InputParameters & parameters)
@@ -4007,7 +3932,7 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type,
   mooseError("FEProblemBase::getMaterialData(): Invalid MaterialDataType ", type);
 }
 
-const std::set<const MooseObject *> &
+std::set<const MooseObject *>
 FEProblemBase::getMaterialPropertyStorageConsumers(Moose::MaterialDataType type,
                                                    bool is_kokkos) const
 {
@@ -4107,14 +4032,6 @@ FEProblemBase::addInterfaceMaterial(const std::string & mat_name,
                                     InputParameters & parameters)
 {
   addMaterialHelper({&_interface_materials}, mat_name, name, parameters);
-}
-
-void
-FEProblemBase::addKokkosMaterial(const std::string & mat_name,
-                                 const std::string & name,
-                                 InputParameters & parameters)
-{
-  addMaterialHelper({&_kokkos_materials}, mat_name, name, parameters);
 }
 
 void
@@ -5377,7 +5294,9 @@ FEProblemBase::updateActiveObjects()
   _from_multi_app_transfers.updateActive();
   _between_multi_app_transfers.updateActive();
 
+#ifdef MOOSE_KOKKOS_ENABLED
   _kokkos_materials.updateActive();
+#endif
 }
 
 void
