@@ -5,7 +5,7 @@
 []
 
 [Problem]
-  type = MFEMProblem 
+  type = MFEMProblem
 []
 
 [FESpaces]
@@ -62,7 +62,7 @@
 
    [current_output]
     type = MFEMScalarProjectAux
-    coefficient = Jvalue 
+    coefficient = Jvalue
     variable = J
   []
 
@@ -102,7 +102,7 @@
 [Kernels]
     [diffusion]
         type = MFEMDiffusionKernel
-        variable = Az 
+        variable = Az
         coefficient = diffusivity
     []
 

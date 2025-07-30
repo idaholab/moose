@@ -2,7 +2,6 @@
   type = MFEMMesh
   file = ../mesh/2Dwire.e
   dim = 2
-  # uniform_refine = 1
 []
 
 [Problem]
@@ -37,7 +36,7 @@
     [Az]
         type = MFEMVariable
         fespace = H1FESpace
-  
+
     []
 
 
@@ -65,7 +64,7 @@
 
    [current_output]
     type = MFEMVectorProjectAux
-    coefficient = Jvalue 
+    coefficient = Jvalue
     variable = J
   []
 
@@ -106,7 +105,7 @@
 [Kernels]
     [diffusion]
         type = MFEMDiffusionKernel
-        variable = Az 
+        variable = Az
         coefficient = diffusivity
     []
 

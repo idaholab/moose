@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/AuxKernels/index.md'
-  issues = '#29632'
+  issues = '#31153'
 
   [MFEMScalarProjectAux]
     type = XMLDiff
