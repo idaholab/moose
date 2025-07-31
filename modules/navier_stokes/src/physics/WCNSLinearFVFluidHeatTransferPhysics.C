@@ -415,12 +415,12 @@ WCNSLinearFVFluidHeatTransferPhysics::addMaterials()
 
   InputParameters params = getFactory().getValidParams(object_type);
   assignBlocks(params, _blocks);
+  params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
+  params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
+  params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
 
   if (_solve_for_enthalpy)
   {
-    params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
-    params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
-    params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
     if (isParamValid(NS::fluid))
       params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
     else
@@ -435,14 +435,10 @@ WCNSLinearFVFluidHeatTransferPhysics::addMaterials()
       params.set<MooseFunctorName>("T_from_p_h_functor") = "T_from_p_h_functor";
     }
   }
-  else
-  {
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-    params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
-  }
 
-  getProblem().addMaterial(object_type, prefix() + "enthalpy_material", params);
+  // We don't need it so far otherwise
+  if (_solve_for_enthalpy)
+    getProblem().addMaterial(object_type, prefix() + "enthalpy_material", params);
 
   if (_solve_for_enthalpy)
     WCNSFVFluidHeatTransferPhysicsBase::defineKOverCpFunctors(/*use ad*/ false);
