@@ -327,15 +327,12 @@
     []
   []
   [lid_driven_turb_buoyant]
-    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with buoyant production, '
-    [run]
-      type = 'Exodiff'
-      input = 'lid-driven-turb-energy-wall-bouyancy-production.i'
-      exodiff = 'lid-driven-turb-bouyant_short.e'
-      detail = 'and pass debugging checks,'
-      abs_zero = 1e-6
-      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-bouyant_short'
-    []
+    requirement = 'The system shall be able to simulation incompressible fluid flow with the k-epsilon turbulence model in enclosures with buoyant production of turbulent kinetic energy.'
+    type = 'Exodiff'
+    input = 'lid-driven-turb-energy-wall-bouyancy-production.i'
+    exodiff = 'lid-driven-turb-bouyant_short.e'
+    abs_zero = 1e-6
+    cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-bouyant_short'
   []
   [lid_driven_turb_std_wall_nonlinear]
 
