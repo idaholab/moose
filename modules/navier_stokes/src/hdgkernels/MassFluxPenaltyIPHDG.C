@@ -48,6 +48,8 @@ MassFluxPenaltyIPHDG::MassFluxPenaltyIPHDG(const InputParameters & parameters)
     _comp(getParam<unsigned short>("component")),
     _gamma(getParam<Real>("gamma"))
 {
+  if (_mesh.dimension() > 2)
+    mooseError("Only two-dimensional velocity is currently implemented");
 }
 
 template <typename T>

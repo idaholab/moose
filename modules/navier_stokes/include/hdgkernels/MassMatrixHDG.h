@@ -11,6 +11,11 @@
 
 #include "HDGKernel.h"
 
+/**
+ * This class computes a mass for facet unkowns on interior faces just like \p MassMatrixDGKernel.
+ * However, in order to be compatible with static condensation it is slightly less efficient in that
+ * faces are visited twice
+ */
 class MassMatrixHDG : public HDGKernel
 {
 public:
@@ -25,7 +30,7 @@ public:
   virtual void computeJacobianOnSide() override;
 
 protected:
-  const MooseArray<std::vector<Real>> & _face_phi;
+  const VariablePhiValue & _face_phi;
   const Real _density;
   DenseMatrix<Number> _mass;
 };

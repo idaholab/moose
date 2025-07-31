@@ -11,6 +11,12 @@
 
 #include "HDGKernel.h"
 
+/*
+ * Imposes a singular perturbation on the component momentum equations penalizing discontinuities in
+ * mass flux. Similar to \p MassFluxPenalty except it does not couple interior degrees of freedom on
+ * neighboring elements, which makes this class useful in tandem with hybridized discretizations
+ * because it supports static condensation
+ */
 class MassFluxPenaltyIPHDG : public HDGKernel
 {
 public:
@@ -46,6 +52,11 @@ protected:
   std::vector<ADReal> _ad_residuals;
 
 private:
+  /**
+   * Helper method to reduce code duplication, this will multiply quadrature point residuals
+   * corresponding to the jump in mass flux by the passed-in \p test functions (corresponding to
+   * either interior or face test functions) and \p sign (+1 or -1 respectively)
+   */
   template <typename T>
   void computeOnSideHelper(std::vector<T> & residuals,
                            const MooseArray<std::vector<Real>> & test,
