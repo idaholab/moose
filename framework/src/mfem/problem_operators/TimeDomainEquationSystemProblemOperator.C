@@ -42,8 +42,6 @@ TimeDomainEquationSystemProblemOperator::Solve()
   _problem_data.ode_solver->Step(_problem_data.f, _problem.time(), _problem.dt());
   // Synchonise time dependent GridFunctions with updated DoF data.
   SetTestVariablesFromTrueVectors();
-  // Sync Host/Device
-  _problem_data.f.HostRead();
 }
 
 void
