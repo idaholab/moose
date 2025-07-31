@@ -788,7 +788,7 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
   _n_residual_evaluations++;
 
   // not suppose to do anythin on matrix
-  deactiveAllMatrixTags();
+  deactivateAllMatrixTags();
 
   FloatingPointExceptionGuard fpe_guard(_app);
 
@@ -848,7 +848,7 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
   }
 
   // not supposed to do anything on matrix
-  activeAllMatrixTags();
+  activateAllMatrixTags();
 
   _fe_problem.setCurrentlyComputingResidual(false);
 }
@@ -904,7 +904,7 @@ NonlinearSystemBase::onTimestepBegin()
 void
 NonlinearSystemBase::setInitialSolution()
 {
-  deactiveAllMatrixTags();
+  deactivateAllMatrixTags();
 
   NumericVector<Number> & initial_solution(solution());
   if (_predictor.get())
@@ -1920,7 +1920,7 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
   TIME_SECTION("computeResidualAndJacobianInternal", 3);
 
   // Make matrix ready to use
-  activeAllMatrixTags();
+  activateAllMatrixTags();
 
   for (auto tag : matrix_tags)
   {
@@ -2767,7 +2767,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   _fe_problem.setCurrentNonlinearSystem(number());
 
   // Make matrix ready to use
-  activeAllMatrixTags();
+  activateAllMatrixTags();
 
   for (auto tag : tags)
   {

@@ -198,7 +198,7 @@ public:
   /**
    * Size data structures related to matrix tagging
    */
-  virtual void sizeMatrixTagData() { mooseError("Derived class must implement this meethod"); }
+  virtual void sizeMatrixTagData() { mooseError("Derived class must implement this method"); }
 
 protected:
   /**

@@ -366,12 +366,7 @@ public:
   /**
    *  Make all existing matrices active
    */
-  virtual void activeAllMatrixTags();
-
-  /**
-   *  Active a matrix for tag
-   */
-  virtual void activeMatrixTag(TagID tag);
+  virtual void activateAllMatrixTags();
 
   /**
    *  If or not a matrix tag is active
@@ -379,14 +374,9 @@ public:
   virtual bool matrixTagActive(TagID tag) const;
 
   /**
-   *  deactive a matrix for tag
-   */
-  virtual void deactiveMatrixTag(TagID tag);
-
-  /**
    * Make matrices inactive
    */
-  virtual void deactiveAllMatrixTags();
+  virtual void deactivateAllMatrixTags();
 
   /**
    * Close all matrices associated the tags
@@ -969,7 +959,7 @@ public:
   std::string prefix() const;
 
   /**
-   * size the matrix data for each variable
+   * size the matrix data for each variable for the number of matrix tags we have
    */
   void sizeVariableMatrixData();
 
@@ -1022,7 +1012,7 @@ protected:
   std::vector<NumericVector<Number> *> _tagged_vectors;
   /// Tagged matrices (pointer)
   std::vector<libMesh::SparseMatrix<Number> *> _tagged_matrices;
-  /// Active tagged matrices. A matrix is active if its tag-matrix pair is present in the map. We use a map instead of a vector so that users can easily add and remove to this container with calls to (de)activeMatrixTag
+  /// Active tagged matrices. A matrix is active if its tag-matrix pair is present in the map. We use a map instead of a vector so that users can easily add and remove to this container with calls to (de)activateMatrixTag
   std::unordered_map<TagID, libMesh::SparseMatrix<Number> *> _active_tagged_matrices;
   /// Active flags for tagged matrices
   std::vector<bool> _matrix_tag_active_flags;

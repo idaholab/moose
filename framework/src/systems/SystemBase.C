@@ -1107,35 +1107,7 @@ SystemBase::disassociateDefaultMatrixTags()
 }
 
 void
-SystemBase::activeMatrixTag(TagID tag)
-{
-  mooseAssert(_subproblem.matrixTagExists(tag),
-              "Cannot active Matrix with matrix_tag : " << tag << "that does not exist");
-
-  if (_matrix_tag_active_flags.size() < tag + 1)
-    _matrix_tag_active_flags.resize(tag + 1);
-
-  mooseAssert(hasMatrix(tag),
-              "Requested to activate a matrix tag, but there is no associated matrix");
-  _matrix_tag_active_flags[tag] = true;
-  _active_tagged_matrices.emplace(tag, &getMatrix(tag));
-}
-
-void
-SystemBase::deactiveMatrixTag(TagID tag)
-{
-  mooseAssert(_subproblem.matrixTagExists(tag),
-              "Cannot deactivate Matrix with matrix_tag : " << tag << "that does not exist");
-
-  if (_matrix_tag_active_flags.size() < tag + 1)
-    _matrix_tag_active_flags.resize(tag + 1);
-
-  _matrix_tag_active_flags[tag] = false;
-  _active_tagged_matrices.erase(tag);
-}
-
-void
-SystemBase::deactiveAllMatrixTags()
+SystemBase::deactivateAllMatrixTags()
 {
   auto num_matrix_tags = _subproblem.numMatrixTags();
 
@@ -1147,7 +1119,7 @@ SystemBase::deactiveAllMatrixTags()
 }
 
 void
-SystemBase::activeAllMatrixTags()
+SystemBase::activateAllMatrixTags()
 {
   auto num_matrix_tags = _subproblem.numMatrixTags();
 
