@@ -44,13 +44,20 @@ INSFVSwitchableOutletPressureBC::boundaryValue(const FaceInfo & fi,
   if (_switch_bc)
     return INSFVOutletPressureBCTempl<INSFVFlowBC>::boundaryValue(fi, state) * _face_limiter;
   else
+  {
+    // if on an internal face (internal to the mesh, but an external boundary of the flow area),
+    // we have to make sure to select the element on which the pressure is defined
+    const auto elem_ptr = (fi.faceType(_var_sys_numbers_pair) == FaceInfo::VarFaceNeighbors::ELEM)
+                              ? fi.elemPtr()
+                              : fi.neighborPtr();
     // The two-term expansion = false piece is critical as it prevents infinite recursion that would
     // occur with a Green-Gauss gradient calculation which would call back to this "Dirichlet"
     // object
     return _var.getExtrapolatedBoundaryFaceValue(fi,
                                                  /*two_term_expansion=*/false,
                                                  /*correct_skewness=*/false,
-                                                 fi.elemPtr(),
+                                                 elem_ptr,
                                                  state) *
            _face_limiter;
+  }
 }
