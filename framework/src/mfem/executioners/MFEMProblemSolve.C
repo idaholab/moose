@@ -9,6 +9,7 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
+#include "Executioner.h"
 #include "MFEMProblemSolve.h"
 #include "MFEMProblem.h"
 
