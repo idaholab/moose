@@ -93,7 +93,7 @@ protected:
    */
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> declareKokkosProperty(const std::string & name,
-                                                       const std::vector<unsigned int> dims = {})
+                                                       const std::vector<unsigned int> & dims = {})
   {
     std::string prop_name = name;
     if (_pars.have_parameter<MaterialPropertyName>(name))
@@ -112,7 +112,7 @@ protected:
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension>
   declareKokkosPropertyByName(const std::string & prop_name,
-                              const std::vector<unsigned int> dims = {});
+                              const std::vector<unsigned int> & dims = {});
 
   /**
    * Get the material data type
@@ -183,7 +183,7 @@ private:
 template <typename T, unsigned int dimension>
 MaterialProperty<T, dimension>
 MaterialBase::declareKokkosPropertyByName(const std::string & prop_name,
-                                          const std::vector<unsigned int> dims)
+                                          const std::vector<unsigned int> & dims)
 {
   static_assert(dimension <= 4, "Up to four-dimensional Kokkos material properties are allowed.");
 

@@ -17,7 +17,7 @@ namespace Kokkos
 {
 
 /**
- * The base class for a user to derive his own Kokkos kernels where the residual is of the form
+ * The base class for a user to derive their own Kokkos kernels where the residual is of the form
  *
  * $(\dots, \nabla\psi_i)$
  *

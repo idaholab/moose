@@ -12,6 +12,8 @@
 
 #include "MooseApp.h"
 
+#include "libmesh/parallel_implementation.h"
+
 std::unique_ptr<Moose::Kokkos::MemoryPool> _pool;
 
 void
@@ -19,7 +21,9 @@ MooseApp::queryGPUs()
 {
   unsigned int num_gpus = Kokkos::num_devices();
 
-  _has_gpus = comm().verify(num_gpus > 0);
+  comm().min(num_gpus);
+
+  _has_gpus = num_gpus > 0;
 }
 
 void

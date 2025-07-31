@@ -35,8 +35,7 @@ KokkosLowerBoundNodalKernel::KokkosLowerBoundNodalKernel(const InputParameters &
     _lower_bound(getParam<Real>("lower_bound"))
 {
   if (_var.number() == _v_var)
-    mooseError("Coupled variable 'v' needs to be different from 'variable' with "
-               "LowerBoundNodalKernel");
+    paramError("v", "Coupled variable needs to be different from 'variable'");
 
   std::set<BoundaryID> bnd_ids;
 

@@ -275,7 +275,7 @@ private:
   addKokkosPropertyHelper(const std::string & prop_name,
                           const std::type_info & type,
                           const unsigned int state,
-                          std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell) const;
+                          std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell);
 
   /**
    * Helper function for declaring a Kokkos material property
@@ -293,7 +293,7 @@ private:
                               const MaterialBase * declarer,
                               const std::vector<unsigned int> & dims,
                               const bool bnd,
-                              std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell) const;
+                              std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell);
 
   /**
    * Helper function for getting a Kokkos material property

@@ -3841,7 +3841,7 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type,
   mooseError("FEProblemBase::getMaterialData(): Invalid MaterialDataType ", type);
 }
 
-std::set<const MooseObject *>
+const std::set<const MooseObject *> &
 FEProblemBase::getMaterialPropertyStorageConsumers(Moose::MaterialDataType type,
                                                    bool is_kokkos) const
 {
