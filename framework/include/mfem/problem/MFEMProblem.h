@@ -69,10 +69,8 @@ public:
   void setMesh();
 
   /**
-   * Add a ProblemOperator to the executioner used to solve the problem.
+   * Add an MFEM SubMeshes to the problem.
    */
-  void addProblemOperator() {}
-
   void addSubMesh(const std::string & user_object_name,
                   const std::string & name,
                   InputParameters & parameters);
