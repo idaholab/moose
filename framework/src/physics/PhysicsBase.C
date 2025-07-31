@@ -62,7 +62,7 @@ PhysicsBase::validParams()
   // Options to turn off tasks
   params.addParam<bool>(
       "dont_create_solver_variables", false, "Whether to skip the 'add_variable' task");
-  params.addParam<bool>("dont_create_ics", false, "Whether to skip the 'add_ic' task");
+  params.addParam<bool>("dont_create_ics", false, "Whether to skip the 'add_ic'/'add_fv_ic' task");
   params.addParam<bool>(
       "dont_create_kernels", false, "Whether to skip the 'add_kernel' task for each kernel type");
   params.addParam<bool>("dont_create_bcs",
@@ -130,7 +130,8 @@ PhysicsBase::act()
     initializePhysics();
   else if (_current_task == "add_variable" && !getParam<bool>("dont_create_solver_variables"))
     addSolverVariables();
-  else if (_current_task == "add_ic" && !getParam<bool>("dont_create_ics"))
+  else if ((_current_task == "add_ic" || _current_task == "add_fv_ic") &&
+           !getParam<bool>("dont_create_ics"))
     addInitialConditions();
 
   // Kernels
@@ -648,7 +649,7 @@ PhysicsBase::shouldCreateIC(const VariableName & var_name,
   {
     has_all_blocks = _problem->getFVInitialConditionWarehouse().hasObjectsForVariableAndBlocks(
         var_name, blocks_ids_set, blocks_ids_covered, /*tid =*/0);
-    // FV variables can be defined by non-FV BCs
+    // FV variables can be initialized by non-FV ICs
     std::set<SubdomainID> blocks_ids_covered_fe;
     const bool has_all_blocks_from_feics =
         _problem->getInitialConditionWarehouse().hasObjectsForVariableAndBlocks(

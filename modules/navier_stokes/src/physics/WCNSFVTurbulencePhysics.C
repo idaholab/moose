@@ -21,7 +21,7 @@ registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "get_turbulence_
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_variable");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_fv_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_fv_bc");
-registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_ic");
+registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_fv_ic");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_aux_variable");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_aux_kernel");
 registerMooseAction("NavierStokesApp", WCNSFVTurbulencePhysics, "add_material");

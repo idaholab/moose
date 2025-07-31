@@ -16,7 +16,7 @@
 #define registerWCNSFVFluidHeatTransferPhysicsBaseTasks(app_name, derived_name)                    \
   registerMooseAction(app_name, derived_name, "get_turbulence_physics");                           \
   registerMooseAction(app_name, derived_name, "add_variable");                                     \
-  registerMooseAction(app_name, derived_name, "add_ic");                                           \
+  registerMooseAction(app_name, derived_name, "add_fv_ic");                                        \
   registerMooseAction(app_name, derived_name, "add_fv_kernel");                                    \
   registerMooseAction(app_name, derived_name, "add_fv_bc");                                        \
   registerMooseAction(app_name, derived_name, "add_material")
