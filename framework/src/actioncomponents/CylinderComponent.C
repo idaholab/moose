@@ -102,6 +102,8 @@ CylinderComponent::addMeshGenerators()
       paramError("n_azimuthal", "Should be provided in 3D");
 
     // create circular face
+    InputParameters circle_params = _factore.getValidParams("ConcentricCircleMeshGenerator");
+
     InputParameters circle_params = _factory.getValidParams("AnnularMeshGenerator");
     circle_params.set<unsigned int>("nt") = getParam<unsigned int>("n_azimuthal");
     circle_params.set<unsigned int>("nr") = getParam<unsigned int>("n_radial");
