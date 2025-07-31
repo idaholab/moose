@@ -62,7 +62,7 @@ protected:
   static constexpr Real _rB3 = 2.234e-02;  // [1]
 
 private:
-  const VariableValue & _temperature;
+  const GenericVariableValue<is_ad> & _temperature;
   /// Thermal conductivity of the tungsten material
   GenericMaterialProperty<Real, is_ad> & _k;
   /// specific heat of the tungsten material
