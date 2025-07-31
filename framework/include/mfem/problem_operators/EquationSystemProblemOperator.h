@@ -11,12 +11,12 @@
 
 #pragma once
 #include "ProblemOperator.h"
-#include "MFEMEquationSystemInterface.h"
+#include "EquationSystemInterface.h"
 
 namespace Moose::MFEM
 {
 /// Steady-state problem operator with an equation system.
-class EquationSystemProblemOperator : public ProblemOperator, public MFEMEquationSystemInterface
+class EquationSystemProblemOperator : public ProblemOperator, public EquationSystemInterface
 {
 public:
   EquationSystemProblemOperator(MFEMProblem & problem)

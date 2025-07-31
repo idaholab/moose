@@ -10,11 +10,11 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
-#include "MFEMProblemOperatorInterface.h"
+#include "ProblemOperatorInterface.h"
 #include "MFEMProblemSolve.h"
 #include "EquationSystemProblemOperator.h"
 
-class MFEMSteady : public Executioner, public Moose::MFEM::MFEMProblemOperatorInterface
+class MFEMSteady : public Executioner, public Moose::MFEM::ProblemOperatorInterface
 {
 public:
   static InputParameters validParams();
