@@ -116,6 +116,14 @@
     issues = '#25275'
   []
 
+  [hs_boundary]
+    type = CSVDiff
+    input = 'hs_boundary.i'
+    csvdiff = 'hs_boundary_out.csv'
+    requirement = 'The system shall be able to perform heat transfer between a flow channel and a subsection of a heat structure boundary.'
+    issues = '#31120'
+  []
+
   # Error checking
   [err:not_a_pipe]
     type = 'RunException'
@@ -147,43 +155,13 @@
     issues = '#19754'
   []
 
-  [err:elems_mismatch]
-    type = 'RunException'
-    input = 'err.1phase.i'
-    cli_args = "Components/pipe/n_elems=1 Components/hx/Hw=300"
-    expect_err = "hx: The number of elements in component 'pipe' is 1, but the number of axial elements in component 'hs' is 2. They must be the same."
-
-    requirement = "The system shall throw an error if the heat structure and flow channel components don't have the same number of axial elements."
-    issues = '#19754'
-  []
-
-  [err:length_mismatch]
+  [err:mesh_misaligned]
     type = 'RunException'
     input = 'err.1phase.i'
     cli_args = "Components/pipe/length=3 Components/hx/Hw=300"
-    expect_err = "hx: The length of component 'pipe' is 3, but the length of component 'hs' is 4. They must be the same."
+    expect_err = "hx: The centers of the elements of flow channel 'pipe' do not align with the centers of the specified heat structure side"
 
     requirement = "The system shall throw an error if the heat structure and flow channel components don't have the same length."
-    issues = '#19754'
-  []
-
-  [err:wrong_position]
-    type = 'RunException'
-    input = 'err.1phase.i'
-    cli_args = "Components/pipe/position='0 0.2 0.5' Components/hx/Hw=300 Components/pipe/n_elems=10 Components/hs/n_elems=10"
-    expect_err = "hx: The centers of the elements of flow channel 'pipe' do not align with the centers of the specified heat structure side."
-
-    requirement = "The system shall throw an error if the center of the elements of the flow channel component don't align with the centers of the specified heat structure side."
-    issues = '#19754'
-  []
-
-  [err:wrong_orientation]
-    type = 'RunException'
-    input = 'err.1phase.i'
-    cli_args = "Components/pipe/orientation='0 1 0' Components/hx/Hw=300"
-    expect_err = "hx: The centers of the elements of flow channel 'pipe' do not align with the centers of the specified heat structure side."
-
-    requirement = "The system shall throw an error if the coupled flow channel and heat structure components don't have the same orientation."
     issues = '#19754'
   []
 

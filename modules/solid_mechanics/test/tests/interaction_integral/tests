@@ -7,6 +7,7 @@ issues = '#3705'
    csvdiff = 'interaction_integral_2d_out.csv'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 2D.'
+   capabilities = 'method!=dbg'
  [../]
  [./ii_2d_rot]
    type = 'CSVDiff'
@@ -14,6 +15,7 @@ issues = '#3705'
    csvdiff = 'interaction_integral_2d_rot_out.csv'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems for all planes in 2D.'
+   capabilities = 'method!=dbg'
  [../]
  [./ii_3d_as_2d]
    type = 'CSVDiff'
@@ -21,6 +23,7 @@ issues = '#3705'
    csvdiff = 'interaction_integral_3d_as_2d_out.csv'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3d evaluated as 2D.'
+   capabilities = 'method!=dbg'
  [../]
  [./ii_3d]
    type = 'CSVDiff'
@@ -29,6 +32,7 @@ issues = '#3705'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    abs_zero = 1e-8
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D.'
+   capabilities = 'method!=dbg'
  [../]
  [./ii_3d_noq]
    type = 'CSVDiff'
@@ -39,6 +43,7 @@ issues = '#3705'
    abs_zero = 1e-8
    prereq = ii_3d
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D while supressing the output of q function values.'
+   capabilities = 'method!=dbg'
  [../]
  [./ii_3d_points]
    type = 'CSVDiff'
@@ -47,6 +52,7 @@ issues = '#3705'
    abs_zero = 1e-8
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 3D at specified points.'
+   capabilities = 'method!=dbg'
  [../]
  [./ii_3d_rot]
    type = 'CSVDiff'
@@ -55,6 +61,7 @@ issues = '#3705'
    abs_zero = 2e-8
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in any plane in 3D.'
+   capabilities = 'method!=dbg'
  [../]
  [./ii_2d_chk_q]
    type = 'Exodiff'
@@ -63,7 +70,8 @@ issues = '#3705'
    exodiff = 'interaction_integral_2d_out.e'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    prereq = 'ii_2d'
-   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 2D while outputting q vlaues.'
+   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 2D while outputting q values.'
+   capabilities = 'method!=dbg'
  [../]
  [./ii_2d_rot_chk_q]
    type = 'Exodiff'

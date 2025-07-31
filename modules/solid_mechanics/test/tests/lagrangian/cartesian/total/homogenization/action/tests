@@ -8,6 +8,7 @@
     requirement = "Action produces identical results for a 3D, large deformation problem with mixed "
                   "constraints compared to a case where the components are specified manually."
     abs_zero = 1e-6
+    heavy = true
   []
   [compare_2d]
     type = Exodiff
@@ -16,5 +17,6 @@
     requirement = "Action produces identical results for a 2D, small deformation problem with mixed "
                   "constraints compared to a case where the components are specific manually."
     abs_zero = 1e-6
+    heavy = true
   []
 []

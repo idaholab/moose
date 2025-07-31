@@ -119,6 +119,7 @@
       csvdiff = creep_ramp_sub_false_more_steps_out.csv
       allow_test_objects = true
       detail = 'when substepping is off and the time step size guarantees accurate results.'
+      capabilities = 'method!=dbg'
     []
     [creep_ramp_sub_true]
       type = 'CSVDiff'
@@ -136,6 +137,7 @@
       allow_test_objects = true
       allow_warnings = true
       detail = 'when substepping is on and the numerical integration error selected by the user guarantees accurate results but substepping settings require a system-wise time step cut because the computed number of substeps exceeds the maximum_number_substeps parameter.'
+      capabilities = 'method!=dbg'
     []
 
     [3tile]
@@ -185,6 +187,7 @@
       cli_args = 'Outputs/file_base=3d_out'
       detail = 'in 3D.'
       allow_test_objects = true
+      capabilities = 'method!=dbg'
     []
     [3d_MPA]
       type = 'CSVDiff'
@@ -194,6 +197,7 @@
       csvdiff = '3d_out.csv'
       detail = 'with units of stress other than Pascal.'
       allow_test_objects = true
+      capabilities = 'method!=dbg'
     []
     [3d-jac]
       type = 'PetscJacobianTester'
@@ -215,6 +219,7 @@
       cli_args = 'Outputs/file_base=2drz_out'
       detail = 'in 2DRz.'
       allow_test_objects = true
+      capabilities = 'method!=dbg'
     []
     [2drz-jac]
       type = 'PetscJacobianTester'

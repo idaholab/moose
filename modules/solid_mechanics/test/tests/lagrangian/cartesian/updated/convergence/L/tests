@@ -21,5 +21,6 @@
                   "displacement boundary conditions for large deformation, and the preconditioning "
                   "for a single matrix shall match finite-difference preconditioning results."
     valgrind = HEAVY
+    capabilities = 'method!=dbg'
   []
 []

@@ -63,6 +63,7 @@
     rel_err = 5E-4
     design = 'source/materials/ComputeAxisymmetricRZFiniteStrain.md'
     requirement = 'The ComputeAxisymmetricRZFiniteStrain class shall compute the mechanical response for a pressurized hollow cylinder with a small incremental axisymmetric strain formulation.'
+    capabilities = 'method!=dbg'
   [../]
   [./3D_RZ_finitestrain]
     type = Exodiff

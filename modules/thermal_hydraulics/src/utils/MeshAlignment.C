@@ -13,8 +13,11 @@
 
 #include "libmesh/elem.h"
 
-MeshAlignment::MeshAlignment(const MooseMesh & mesh)
-  : MeshAlignmentBase(mesh), _meshes_are_coincident(false)
+MeshAlignment::MeshAlignment(const MooseMesh & mesh, bool require_same_translation)
+  : MeshAlignmentBase(mesh),
+    _require_same_translation(require_same_translation),
+    _meshes_are_coincident(false),
+    _meshes_have_same_translation(false)
 {
 }
 
@@ -92,13 +95,9 @@ MeshAlignment::buildMapping()
     }
   }
 
-  // Check if meshes are aligned: all primary boundary elements have exactly one pairing
-  _meshes_are_aligned = true;
-  for (std::size_t i_primary = 0; i_primary < _primary_elem_ids.size(); i_primary++)
-    if (primary_elem_pairing_count[i_primary] != 1)
-      _meshes_are_aligned = false;
-
   // Build the node mapping
+  Point reference_translation_vector;
+  _meshes_have_same_translation = true;
   if (_primary_node_points.size() > 0 && _secondary_node_points.size() > 0)
   {
     // find the primary nodes that are nearest to the secondary nodes
@@ -110,16 +109,41 @@ MeshAlignment::buildMapping()
       kd_tree.neighborSearch(_secondary_node_points[i_secondary], patch_size, return_index);
       const std::size_t i_primary = return_index[0];
 
-      // Flip flag if any pair of points are not coincident
-      if (!_secondary_node_points[i_secondary].absolute_fuzzy_equals(
-              _primary_node_points[i_primary]))
-        _meshes_are_coincident = false;
+      const Point translation_vector =
+          _primary_node_points[i_primary] - _secondary_node_points[i_secondary];
+
+      if (i_secondary == 0)
+        reference_translation_vector = translation_vector;
+      else
+      {
+        if (!MooseUtils::absoluteFuzzyEqual(
+                (reference_translation_vector - translation_vector).norm(), 0))
+          _meshes_have_same_translation = false;
+      }
 
       const auto primary_node_id = _primary_node_ids[i_primary];
       const auto secondary_node_id = _secondary_node_ids[i_secondary];
 
       _coupled_node_ids.insert({primary_node_id, secondary_node_id});
       _coupled_node_ids.insert({secondary_node_id, primary_node_id});
+    }
+
+    if (_meshes_have_same_translation &&
+        MooseUtils::absoluteFuzzyEqual(reference_translation_vector.norm(), 0))
+      _meshes_are_coincident = true;
+    else
+      _meshes_are_coincident = false;
+
+    // Check if meshes are aligned
+    if (_require_same_translation)
+      _meshes_are_aligned = _meshes_have_same_translation;
+    else
+    {
+      // Else require that all primary boundary elements have exactly one pairing
+      _meshes_are_aligned = true;
+      for (std::size_t i_primary = 0; i_primary < _primary_elem_ids.size(); i_primary++)
+        if (primary_elem_pairing_count[i_primary] != 1)
+          _meshes_are_aligned = false;
     }
   }
 }

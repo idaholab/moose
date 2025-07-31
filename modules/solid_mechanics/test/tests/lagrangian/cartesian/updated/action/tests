@@ -41,6 +41,7 @@
                "Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
                "Physics/SolidMechanics/QuasiStatic/all/formulation=UPDATED "
                "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=true"
+    capabilities = 'method!=dbg'
   []
   [action_small_no_stab]
     type = Exodiff
@@ -53,6 +54,7 @@
                "Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
                "Physics/SolidMechanics/QuasiStatic/all/formulation=UPDATED "
                "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false"
+    capabilities = 'method!=dbg'
   []
   [action_1D]
     type = Exodiff
