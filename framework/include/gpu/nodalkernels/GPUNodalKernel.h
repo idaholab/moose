@@ -17,12 +17,12 @@ namespace Kokkos
 {
 
 /**
- * The base class for a user to derive his own Kokkos nodal kernels.
+ * The base class for a user to derive their own Kokkos nodal kernels.
  *
  * The polymorphic design of the original MOOSE is reproduced statically by leveraging the Curiously
  * Recurring Template Pattern (CRTP), a programming idiom that involves a class template inheriting
- * from a template instantiation of itself. When the user derives his Kokkos object from this class,
- * the inheritance structure will look like:
+ * from a template instantiation of itself. When the user derives their Kokkos object from this
+ * class, the inheritance structure will look like:
  *
  * class UserNodalKernel final : public Moose::Kokkos::NodalKernel<UserNodalKernel>
  *
@@ -32,8 +32,9 @@ namespace Kokkos
  * as final to prevent its inheritence by mistake.
  *
  * The user is expected to define computeQpResidual(), computeQpJacobian(), and
- * computeQpOffDiagJacobian() as inlined public methods in his derived class (not virtual override).
- * The signature of computeQpResidual() expected to be defined in the derived class is as follows:
+ * computeQpOffDiagJacobian() as inlined public methods in their derived class (not virtual
+ * override). The signature of computeQpResidual() expected to be defined in the derived class is as
+ * follows:
  *
  * @param node The node ID
  * @returns The residual contribution

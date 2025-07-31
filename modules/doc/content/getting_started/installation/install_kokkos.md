@@ -12,7 +12,7 @@ export MOOSE_JOBS=10
 Then, build PETSc by running the PETSc installer script:
 
 ```bash
-./scripts/update_and_rebuild_petsc.sh --with-cuda --with-cuda-arch=[arch] --download-kokkos --download-kokkos-kernels --download-slate [options]
+./scripts/update_and_rebuild_petsc.sh --with-cuda --with-cuda-arch=[arch] --download-slate [options]
 ```
 
 The current Kokkos capability of MOOSE only supports CUDA for NVIDIA GPUs to be the backend for Kokkos, and the support for HIP and SYCL for AMD and Intel GPUs will be added in the future. Kokkos can only be built with a single GPU architecture at a time, so your GPU architecture should be specified in the place of `[arch]`. To maximize performance and avoid errors, you should also make sure that your underlying MPI library is GPU-aware. You may substitute `[options]` with any other desired PETSc configure flags, which are discussed in the [PETSc install page](https://petsc.org/release/install/install).

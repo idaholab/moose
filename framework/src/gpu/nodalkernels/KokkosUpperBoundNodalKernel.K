@@ -35,8 +35,7 @@ KokkosUpperBoundNodalKernel::KokkosUpperBoundNodalKernel(const InputParameters &
     _upper_bound(getParam<Real>("upper_bound"))
 {
   if (_var.number() == _v_var)
-    mooseError("Coupled variable 'v' needs to be different from 'variable' with "
-               "UpperBoundNodalKernel");
+    paramError("v", "Coupled variable needs to be different from 'variable'");
 
   std::set<BoundaryID> bnd_ids;
 
