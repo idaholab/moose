@@ -6,6 +6,7 @@
     input = 'phy.form_loss_1phase.i'
     csvdiff = 'phy.form_loss_1phase_out.csv'
     rel_err = 1e-3
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to compute a form loss using coefficients computed from a function, including constants defined in the input file.'
   []
 []

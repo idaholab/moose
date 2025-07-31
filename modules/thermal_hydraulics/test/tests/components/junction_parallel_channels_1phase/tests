@@ -7,6 +7,7 @@
     # The gold file was actually produced with equal_area_no_junction.i and
     # then renamed to equal_area_with_junction_out.csv.
     csvdiff = 'equal_area_with_junction_out.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to connect an arbitrary number of parallel channels to another flow component."
   []
 
@@ -17,6 +18,7 @@
     abs_zero = 5e-5
     rel_err = 0
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to connect an arbitrary number of single phase parallel channels with different flow areas to another flow component."
   []
 
@@ -45,6 +47,7 @@
     csvdiff = 'junction_with_calorifically_imperfect_gas_out.csv'
     abs_zero = 4e-5
     rel_err = 1e-5
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to connect an arbitrary number of parallel channels to another flow component, with a calorifically imperfect gas fluid."
   []
 
@@ -53,6 +56,7 @@
     type = 'CSVDiff'
     input = 'conservation.i'
     csvdiff = 'conservation_out.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to show conservation of mass and energy when connecting parallel channels.'
   []
   [conservation_1phase_K_crtl]
@@ -61,6 +65,7 @@
     cli_args = "ControlLogic/active=K_crtl Outputs/file_base=conservation_K "
                "Outputs/out/show='dp_junction'"
     csvdiff = 'conservation_K.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to show conservation of mass and energy when connecting parallel channels and leveraging the control system to dynamically control the simulation.'
   []
 

@@ -20,6 +20,7 @@
     cli_args = 'Problem/restart_file_base=thermal_eigenstrain_test_out_cp/LATEST '
                'Outputs/file_base=thermal_eigenstrain_test_restart_out
                Executioner/end_time=15'
+    restep = false # Restep happens in thermal_eigenstrain
     issues = '#26458'
     requirement = 'The system shall produce correct thermal deformation gradient values when '
                   'the simulation is restarted'
@@ -92,6 +93,7 @@
     cli_args = 'Problem/restart_file_base=volumetric_eigenstrain_increase_out_cp/LATEST '
                'Outputs/file_base=volumetric_eigenstrain_increase_restart_out '
                'Executioner/end_time=7.5'
+    restep = false # Restep happens in volumetric_eigenstrain_increase
     issues = '#26458'
     requirement = 'The system shall continue the isotropic eigenstrain response calculation '
                   'upon simulation restart.'

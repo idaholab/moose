@@ -18,6 +18,7 @@
       input = random_pps.i
       cli_args = 'Outputs/checkpoint=true --test-checkpoint-half-transient'
       recover = false
+      restep = false # half transient testing not compatible with restep
       prereq = 'random_pps/full_sim'
       group = random_pps
 
@@ -29,6 +30,7 @@
       csvdiff = random_pps_out.csv
       cli_args = '--recover'
       recover = false
+      restep = false # recovery not compatible with re-step testing
       prereq = 'random_pps/half_transient'
       delete_output_before_running = false
       group = random_pps

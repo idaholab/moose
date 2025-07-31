@@ -3,6 +3,7 @@
     type = Exodiff
     input = two_blocks.i
     exodiff = two_blocks_out.e
+    restep = false # Issue #31054
     issues = '#14626'
     requirement = 'The system shall provide Jacobian entries coupling the primary-side temperature and displacement with the secondary side temperatures for thermal contact such that problems with significant gap heat transfer may have a non-linear solve that converges'
     design = 'GapHeatTransfer.md'

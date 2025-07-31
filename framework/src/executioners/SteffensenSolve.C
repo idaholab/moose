@@ -93,6 +93,12 @@ SteffensenSolve::saveVariableValues(const bool primary)
     xn_m1_tagid = _secondary_xn_m1_tagid;
   }
 
+  // Check to make sure allocateStorage has been called
+  mooseAssert(fxn_m1_tagid != Moose::INVALID_TAG_ID,
+              "allocateStorage has not been called with primary = " + Moose::stringify(primary));
+  mooseAssert(xn_m1_tagid != Moose::INVALID_TAG_ID,
+              "allocateStorage has not been called with primary = " + Moose::stringify(primary));
+
   // Save previous variable values
   NumericVector<Number> & solution = _solver_sys.solution();
   NumericVector<Number> & fxn_m1 = _solver_sys.getVector(fxn_m1_tagid);

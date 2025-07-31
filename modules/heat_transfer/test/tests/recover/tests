@@ -24,6 +24,7 @@
     delete_output_before_running = false
     cli_args = '--recover recover_out_cp/0005'
     capabilities = 'superlu'
+    restep = false # Restep happens at the recover_2 step
     requirement = 'The system shall be able to recover from a short simulation and reproduce a the full time scale simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
   []
 
@@ -50,6 +51,7 @@
     delete_output_before_running = false
     cli_args = '--recover ad_recover_out_cp/0005'
     capabilities = 'superlu'
+    restep = false # Restep happens at the ad_recover_2 step
     requirement = 'The system shall be able to recover from a short simulation and reproduce a the full time scale simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
   []
 

@@ -146,6 +146,7 @@
     type = 'Exodiff'
     input = 'euler2rgb_non_uniform_orientation.i'
     exodiff = 'euler2rgb_non_uniform_orientation_out.e'
+    restep = false # Not actually doing any timesteps
 
     issues = "#13869"
     design = "EBSDReader.md"

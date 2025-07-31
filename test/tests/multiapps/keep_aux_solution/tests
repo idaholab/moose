@@ -5,6 +5,8 @@
     type = Exodiff
     input = 'picard_parent.i'
     exodiff = 'picard_parent_out.e picard_parent_out_sub0.e'
+    # This test intends to be stateful to show solution doesn't change after restore
+    restep = false
     requirement = 'The system shall be able to keep the auxiliary solution during fixed point iterations.'
   []
 []

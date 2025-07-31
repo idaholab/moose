@@ -7,6 +7,7 @@
     input = 'test.i'
     csvdiff = 'test_out.csv'
     rel_err = 1e-4
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to use a proportional-integral-derivative law to adjust controllable flow parameters to be able to match a desired target quantity.'
   []
 []

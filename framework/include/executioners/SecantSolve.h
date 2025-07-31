@@ -82,26 +82,26 @@ private:
                                   const bool primary) override final;
 
   /// Vector tag id for the most recent solution variable, pre-Secant transform, as a main app
-  TagID _fxn_m1_tagid;
+  TagID _fxn_m1_tagid = Moose::INVALID_TAG_ID;
 
   /// Vector tag id for the solution variable before the latest solve, as a main app
-  TagID _xn_m1_tagid;
+  TagID _xn_m1_tagid = Moose::INVALID_TAG_ID;
 
   /// Vector tag id for the result of the last but one solve, as a main app
-  TagID _fxn_m2_tagid;
+  TagID _fxn_m2_tagid = Moose::INVALID_TAG_ID;
 
   /// Vector tag id for the solution variable two solves ago, as a main app
-  TagID _xn_m2_tagid;
+  TagID _xn_m2_tagid = Moose::INVALID_TAG_ID;
 
   /// Vector tag id for the most recent solution variable, pre-Secant transform, as a sub app
-  TagID _secondary_fxn_m1_tagid;
+  TagID _secondary_fxn_m1_tagid = Moose::INVALID_TAG_ID;
 
   /// Vector tag id for the solution variable before the latest solve, as a sub app
-  TagID _secondary_xn_m1_tagid;
+  TagID _secondary_xn_m1_tagid = Moose::INVALID_TAG_ID;
 
   /// Vector tag id for the result of the last but one secondary solve, as a sub app
-  TagID _secondary_fxn_m2_tagid;
+  TagID _secondary_fxn_m2_tagid = Moose::INVALID_TAG_ID;
 
   /// Vector tag id for the solution variable two primary solves ago, as a sub app
-  TagID _secondary_xn_m2_tagid;
+  TagID _secondary_xn_m2_tagid = Moose::INVALID_TAG_ID;
 };

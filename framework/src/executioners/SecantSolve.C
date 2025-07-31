@@ -96,6 +96,16 @@ SecantSolve::saveVariableValues(const bool primary)
     xn_m2_tagid = _secondary_xn_m2_tagid;
   }
 
+  // Check to make sure allocateStorage has been called
+  mooseAssert(fxn_m1_tagid != Moose::INVALID_TAG_ID,
+              "allocateStorage has not been called with primary = " + Moose::stringify(primary));
+  mooseAssert(xn_m1_tagid != Moose::INVALID_TAG_ID,
+              "allocateStorage has not been called with primary = " + Moose::stringify(primary));
+  mooseAssert(fxn_m2_tagid != Moose::INVALID_TAG_ID,
+              "allocateStorage has not been called with primary = " + Moose::stringify(primary));
+  mooseAssert(xn_m2_tagid != Moose::INVALID_TAG_ID,
+              "allocateStorage has not been called with primary = " + Moose::stringify(primary));
+
   // Save previous variable values
   NumericVector<Number> & solution = _solver_sys.solution();
   NumericVector<Number> & fxn_m1 = _solver_sys.getVector(fxn_m1_tagid);
@@ -105,10 +115,17 @@ SecantSolve::saveVariableValues(const bool primary)
 
   // Advance one step
   xn_m2 = xn_m1;
-  fxn_m2 = fxn_m1;
 
   // Before a solve, solution is a sequence term, after a solve, solution is the evaluated term
   xn_m1 = solution;
+
+  // Since we did not update on the 0th iteration, the solution is also the previous evaluated term
+  const unsigned int it = primary ? _fixed_point_it : _main_fixed_point_it;
+  if (it == 1)
+    fxn_m2 = solution;
+  // Otherwise we just advance
+  else
+    fxn_m2 = fxn_m1;
 }
 
 void
@@ -126,13 +143,13 @@ SecantSolve::savePostprocessorValues(const bool primary)
     transformed_pps = &_secondary_transformed_pps;
     transformed_pps_values = &_secondary_transformed_pps_values;
   }
+  const unsigned int it = primary ? _fixed_point_it : _main_fixed_point_it;
 
   // Save previous postprocessor values
   for (size_t i = 0; i < (*transformed_pps).size(); i++)
   {
     // Advance one step
     (*transformed_pps_values)[i][3] = (*transformed_pps_values)[i][1];
-    (*transformed_pps_values)[i][2] = (*transformed_pps_values)[i][0];
 
     // Save current value
     // Primary: this is done before the timestep's solves and before timestep_begin transfers,
@@ -141,6 +158,13 @@ SecantSolve::savePostprocessorValues(const bool primary)
     // are computed, or timestep_end transfers are received.
     // This value is the same as before the solve (xn_m1)
     (*transformed_pps_values)[i][1] = getPostprocessorValueByName((*transformed_pps)[i]);
+
+    // Since we did not update on the 1st iteration, the pp is also the previous evaluated term
+    if (it == 2)
+      (*transformed_pps_values)[i][2] = (*transformed_pps_values)[i][1];
+    // Otherwise we just advance
+    else
+      (*transformed_pps_values)[i][2] = (*transformed_pps_values)[i][0];
   }
 }
 
@@ -149,14 +173,17 @@ SecantSolve::useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary)
 {
   // Need at least two evaluations to compute the Secant slope
   if (primary)
-    return _fixed_point_it > 1;
+    return _fixed_point_it > 0;
   else
-    return _main_fixed_point_it > 1;
+    return _main_fixed_point_it > 0;
 }
 
 void
 SecantSolve::transformPostprocessors(const bool primary)
 {
+  if ((primary ? _fixed_point_it : _main_fixed_point_it) < 2)
+    return;
+
   Real relaxation_factor;
   const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
@@ -261,7 +288,7 @@ SecantSolve::printFixedPointConvergenceHistory(Real initial_norm,
   {
     Real max_norm = std::max(timestep_begin_norms[i], timestep_end_norms[i]);
     std::stringstream secant_prefix;
-    if (i < 2)
+    if (i < 1)
       secant_prefix << " Secant initialization |R| = ";
     else
       secant_prefix << " Secant step           |R| = ";

@@ -10,12 +10,14 @@
       input = 'concentric_cylinders.i'
       csvdiff = 'concentric_cylinders.csv'
       abs_zero = 1e-7
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'and for a concentric cylinder problem produce an identical solution to the solution obtained using concentric cylinder assumptions.'
     []
     [adjacent_cylinders]
       type = Exodiff
       input = 'adjacent_cylinders.i'
       exodiff = 'adjacent_cylinders.e'
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'and be able to include the environment.'
     []
     [energy_conservation]
@@ -23,6 +25,7 @@
       input = 'energy_conservation.i'
       csvdiff = 'energy_conservation.csv'
       abs_zero = 1e-6
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'and conserve energy.'
     []
 

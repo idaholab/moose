@@ -11,6 +11,7 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe solid_wall'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve the Woodward Colebella blast wave problem with 1D single phase compressible flow.'
   []
 []

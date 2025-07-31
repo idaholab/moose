@@ -45,8 +45,9 @@ ViewfactorVectorPostprocessor::initialize()
   }
 
   // setup of view factors
+  j = _vf.size();
   _vf.resize(ns);
-  for (unsigned int j = 0; j < ns; ++j)
+  for (; j < ns; ++j)
   {
     std::stringstream ss;
     ss << "vf_to_" << _surface_ids[j];
