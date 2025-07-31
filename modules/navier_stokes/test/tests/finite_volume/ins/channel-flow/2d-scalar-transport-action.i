@@ -47,6 +47,8 @@ cp = 1
     add_energy_equation = true
     add_scalar_equation = true
     passive_scalar_names = 'scalar'
+    # needed until Physics IC-creation executes consistently after ICs
+    dont_create_ics = true
 
     density = ${rho}
     dynamic_viscosity = ${mu}
