@@ -38,9 +38,18 @@ CylinderComponent::validParams()
   params.addRequiredRangeCheckedParam<Real>("radius", "radius>0", "Radius of the cylinder");
   params.addRequiredRangeCheckedParam<Real>("length", "length>0", "Length/Height of the cylinder");
 
+  params.addParam<unsigned int>(
+      "n_radial_rings",
+      1,
+      "Number of radial rings within the mesh (does not affect boundary layers).");
+
   params.addRequiredParam<unsigned int>("n_axial", "Number of axial elements of the cylinder");
-  params.addParam<unsigned int>("n_radial", "Number of radial elements of the cylinder");
-  params.addParam<unsigned int>("n_azimuthal", "Number of azimuthal elements of the cylinder");
+  params.addRangeCheckedParam<Real>("boundary_layer_width",
+                                    "boundary_layer_width>=0",
+                                    "The width of the boundary layer (if assigned).");
+  params.addParam<unsigned int>("n_boundary_layers", 1, "The number of boundary layers.");
+  params.addRequiredParam<unsigned int>(
+      "n_sectors", "Number of azimuthal sectors in each quadrant of cylinder face.");
 
   params.addParam<SubdomainName>("block", "Block name for the cylinder");
 
@@ -96,21 +105,32 @@ CylinderComponent::addMeshGenerators()
   }
   else if (_dimension == 3)
   {
-    if (!isParamValid("n_radial"))
-      paramError("n_radial", "Should be provided for a 3D cylinder");
-    if (!isParamValid("n_azimuthal"))
-      paramError("n_azimuthal", "Should be provided in 3D");
+    if (!isParamValid("n_axial"))
+      paramError("n_axial", "Should be provided for a 3D cylinder");
+    if (!isParamValid("n_sectors"))
+      paramError("n_sectors", "Should be provided in 3D");
 
     // create circular face
-    InputParameters circle_params = _factore.getValidParams("ConcentricCircleMeshGenerator");
+    InputParameters circle_params = _factory.getValidParams("ConcentricCircleMeshGenerator");
+    circle_params.set<bool>("preserve_volumes") = true;
+    circle_params.set<bool>("has_outer_square") = false;
+    if (isParamValid("boundary_layer_width"))
+    {
+      Real inner_radius = getParam<Real>("radius") - getParam<Real>("boundary_layer_width");
+      circle_params.set<std::vector<Real>>("radii") = {inner_radius, getParam<Real>("radius")};
+      circle_params.set<std::vector<unsigned int>>("rings") = {
+          getParam<unsigned int>("n_radial_rings"), getParam<unsigned int>("n_boundary_layers")};
+    }
+    else
+    {
+      circle_params.set<std::vector<Real>>("radii") = {getParam<Real>("radius")};
+      circle_params.set<std::vector<unsigned int>>("rings") = {
+          getParam<unsigned int>("n_radial_rings")};
+    }
 
-    InputParameters circle_params = _factory.getValidParams("AnnularMeshGenerator");
-    circle_params.set<unsigned int>("nt") = getParam<unsigned int>("n_azimuthal");
-    circle_params.set<unsigned int>("nr") = getParam<unsigned int>("n_radial");
-    circle_params.set<Real>("rmax") = getParam<Real>("radius");
-    circle_params.set<Real>("rmin") = 0; // for now, just do solid cylinders
+    circle_params.set<unsigned int>("num_sectors") = getParam<unsigned int>("n_sectors");
     _app.getMeshGeneratorSystem().addMeshGenerator(
-        "AnnularMeshGenerator", name() + "_circle_base", circle_params);
+        "ConcentricCircleMeshGenerator", name() + "_circle_base", circle_params);
     _mg_names.push_back(name() + "_circle_base");
 
     // rotate to have extrusion axis be along x-axis
