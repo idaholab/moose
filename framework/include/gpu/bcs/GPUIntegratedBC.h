@@ -17,12 +17,12 @@ namespace Kokkos
 {
 
 /**
- * The base class for a user to derive his own Kokkos integrated boundary conditions.
+ * The base class for a user to derive their own Kokkos integrated boundary conditions.
  *
  * The polymorphic design of the original MOOSE is reproduced statically by leveraging the Curiously
  * Recurring Template Pattern (CRTP), a programming idiom that involves a class template inheriting
- * from a template instantiation of itself. When the user derives his Kokkos object from this class,
- * the inheritance structure will look like:
+ * from a template instantiation of itself. When the user derives their Kokkos object from this
+ * class, the inheritance structure will look like:
  *
  * class UserIntegratedBC final : public Moose::Kokkos::IntegratedBC<UserIntegratedBC>
  *
@@ -32,8 +32,9 @@ namespace Kokkos
  * as final to prevent its inheritence by mistake.
  *
  * The user is expected to define computeQpResidual(), computeQpJacobian(), and
- * computeQpOffDiagJacobian() as inlined public methods in his derived class (not virtual override).
- * The signature of computeQpResidual() expected to be defined in the derived class is as follows:
+ * computeQpOffDiagJacobian() as inlined public methods in their derived class (not virtual
+ * override). The signature of computeQpResidual() expected to be defined in the derived class is as
+ * follows:
  *
  * @param i The element-local DOF index
  * @param qp The local quadrature point index
@@ -249,10 +250,10 @@ KOKKOS_FUNCTION void
 IntegratedBC<Derived>::operator()(ResidualLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
-  auto elem = kokkosBoundaryElementSideID(tid);
+  auto [elem, side] = kokkosBoundaryElementSideID(tid);
 
   ResidualDatum datum(
-      elem.first, elem.second, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
   bc->computeResidualInternal(bc, datum);
 }
@@ -262,10 +263,10 @@ KOKKOS_FUNCTION void
 IntegratedBC<Derived>::operator()(JacobianLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
-  auto elem = kokkosBoundaryElementSideID(tid);
+  auto [elem, side] = kokkosBoundaryElementSideID(tid);
 
   ResidualDatum datum(
-      elem.first, elem.second, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+      elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
   bc->computeJacobianInternal(bc, datum);
 }
@@ -275,16 +276,15 @@ KOKKOS_FUNCTION void
 IntegratedBC<Derived>::operator()(OffDiagJacobianLoop, const dof_id_type tid) const
 {
   auto bc = static_cast<const Derived *>(this);
-  auto elem = kokkosBoundaryElementSideID(_thread(tid, 1));
+  auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
 
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto jvar = sys.getCoupling(_kokkos_var.var())[_thread(tid, 0)];
 
-  if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem.first).subdomain))
+  if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
-  ResidualDatum datum(
-      elem.first, elem.second, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+  ResidualDatum datum(elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
 
   bc->computeOffDiagJacobianInternal(bc, datum);
 }
