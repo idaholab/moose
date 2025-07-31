@@ -50,9 +50,9 @@ StaticCondensationFieldSplitPreconditioner::system() const
 }
 
 std::string
-StaticCondensationFieldSplitPreconditioner::petscPrefix() const
+StaticCondensationFieldSplitPreconditioner::prefix() const
 {
-  return MooseStaticCondensationPreconditioner::petscPrefix();
+  return MooseStaticCondensationPreconditioner::prefix();
 }
 
 void

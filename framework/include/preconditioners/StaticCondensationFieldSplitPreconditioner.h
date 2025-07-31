@@ -19,9 +19,6 @@ class StaticCondensationFieldSplitPreconditioner
   : public FieldSplitPreconditionerTempl<MooseStaticCondensationPreconditioner>
 {
 public:
-  /**
-   *  Constructor. Initializes SplitBasedPreconditioner data structures
-   */
   static InputParameters validParams();
 
   StaticCondensationFieldSplitPreconditioner(const InputParameters & parameters);
@@ -32,5 +29,5 @@ public:
 protected:
   virtual const libMesh::DofMapBase & dofMap() const override;
   virtual const libMesh::System & system() const override;
-  virtual std::string petscPrefix() const override;
+  virtual std::string prefix() const override;
 };

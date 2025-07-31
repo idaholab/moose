@@ -140,8 +140,13 @@ void storePetscOptions(FEProblemBase & fe_problem,
 /**
  * Set flags that will instruct the user on the reason their simulation diverged from PETSc's
  * perspective
+ * @param fe_problem The problem from which to retrieve the PETSc options
+ * @param prefix The prefix to add to the convergence flags. This should not contain a
+ * leading dash per PETSc prefix convention. Note that this function will immediately \emph add said
+ * dash at the start of \p prefix so that calls to \p PetscOptionsSetValue work. This is the
+ * reason we pass \p prefix by value
  */
-void setConvergedReasonFlags(FEProblemBase & fe_problem, const std::string & prefix);
+void setConvergedReasonFlags(FEProblemBase & fe_problem, std::string prefix);
 
 /**
  * Sets the FE problem's solve type from the input params.
@@ -166,12 +171,15 @@ void storePetscOptionsFromParams(FEProblemBase & fe_problem, const InputParamete
 /**
  * Populate flags in a given PetscOptions object using a vector of input arguments
  * @param petsc_flags Container holding the flags of the petsc options
- * @param prefix The prefix to add to the user provided \p petsc_flags
+ * @param prefix The prefix to add to the user provided \p petsc_flags. This should not contain a
+ * leading dash per PETSc prefix convention. Note that this function will immediately \emph add said
+ * dash at the start of \p prefix so that later calls to \p PetscOptionsSetValue work. This is the
+ * reason we pass \p prefix by value
  * @param param_object The \p ParallelParamObject adding the PETSc options
  * @param petsc_options Data structure which handles petsc options within moose
  */
 void addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags,
-                                 const std::string & prefix,
+                                 std::string prefix,
                                  const ParallelParamObject & param_object,
                                  PetscOptions & petsc_options);
 
@@ -179,14 +187,17 @@ void addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags,
  * Populate name and value pairs in a given PetscOptions object using vectors of input arguments
  * @param petsc_pair_options Option-value pairs of petsc settings
  * @param mesh_dimension The mesh dimension, needed for multigrid settings
- * @param prefix The prefix to add to the user provided \p petsc_flags
+ * @param prefix The prefix to add to the user provided \p petsc_pair_options. This should not
+ * contain a leading dash per PETSc prefix convention. Note that this function will immediately
+ * \emph add said dash at the start of \p prefix so that later calls to \p PetscOptionsSetValue
+ * work. This is the reason we pass \p prefix by value
  * @param param_object The \p ParallelParamObject adding the PETSc options
  * @param petsc_options Data structure which handles petsc options within moose
  */
 void addPetscPairsToPetscOptions(
     const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
     const unsigned int mesh_dimension,
-    const std::string & prefix,
+    std::string prefix,
     const ParallelParamObject & param_object,
     PetscOptions & petsc_options);
 

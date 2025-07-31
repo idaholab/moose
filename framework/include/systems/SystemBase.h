@@ -962,15 +962,11 @@ public:
   const std::vector<std::shared_ptr<TimeIntegrator>> & getTimeIntegrators();
 
   /**
-   * @returns A prefix for solvers. This does have a leading dash
+   * @returns The prefix used for this system for solver settings for PETSc. This prefix is used to
+   * prevent collision of solver settings for different systems. Note that this prefix does not have
+   * a leading dash so it's appropriate for passage straight to PETSc APIs
    */
   std::string prefix() const;
-
-  /**
-   * @returns A prefix for solvers ready to immediately pass to PETSc. This does not have a leading
-   * dash
-   */
-  std::string petscPrefix() const;
 
   /**
    * size the matrix data for each variable

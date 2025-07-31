@@ -37,7 +37,6 @@ protected:
   const libMesh::StaticCondensation & scSysMat() const;
 
   std::string prefix() const;
-  std::string petscPrefix() const;
 
 private:
   /// Pointer to the libMesh static condensation dof map object

@@ -69,7 +69,7 @@ protected:
   /**
    * @returns The prefix to pass to PETSc for the DM
    */
-  virtual std::string petscPrefix() const = 0;
+  virtual std::string prefix() const = 0;
 
   /**
    * creates the MOOSE data management object
@@ -98,5 +98,5 @@ public:
 protected:
   virtual const libMesh::DofMapBase & dofMap() const override;
   virtual const libMesh::System & system() const override;
-  virtual std::string petscPrefix() const override;
+  virtual std::string prefix() const override;
 };
