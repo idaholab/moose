@@ -33,7 +33,6 @@ cp = 1
   []
   [T_fluid]
     type = 'INSFVEnergyVariable'
-    initial_condition = 0
   []
   [scalar]
     type = MooseVariableFVReal
