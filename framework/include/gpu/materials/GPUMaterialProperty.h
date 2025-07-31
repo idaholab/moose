@@ -211,11 +211,6 @@ void propertyLoad(std::istream & stream, void * prop);
 template <typename T, unsigned int dimension = 0>
 class MaterialProperty : public MaterialPropertyBase
 {
-  friend class MaterialPropertyValueBase<T, dimension>;
-
-  friend void propertyStore<T, dimension>(std::ostream &, void *);
-  friend void propertyLoad<T, dimension>(std::istream &, void *);
-
 public:
   /**
    * Default constructor
@@ -232,21 +227,23 @@ public:
   }
   /**
    * Copy constructor
+   * The reference material properties are held by the material property storage, and the user deals
+   * with the clones of them. The reference material properties also hold the arrays for storing the
+   * property values (_data), and the user accesses the arrays through their shallow copies in the
+   * clones. As a result, if the reference material properties reallocate their arrays, the shallow
+   * copies of arrays in the clones will lose synchronization. Thus, the clones also hold the
+   * pointers to their reference material properties and shallow copy them in the copy constructor,
+   * so that the arrays are always synchronized with those in the reference material properties
+   * during parallel dispatch.
    */
   MaterialProperty(const MaterialProperty<T, dimension> & property)
   {
-    if (!property._reference)
-    {
-      shallowCopy(property);
+    // If property._reference is nullptr, property itself is the reference material property
+    const auto & prop = property._reference ? *property._reference : property;
 
-      _reference = &property;
-    }
-    else
-    {
-      shallowCopy(*property._reference);
+    shallowCopy(prop);
 
-      _reference = property._reference;
-    }
+    _reference = &prop;
   }
 
   /**
@@ -297,16 +294,7 @@ private:
    * Shallow copy another property
    * @param property The property to be shallow copied
    */
-  void shallowCopy(const MaterialProperty<T, dimension> & property)
-  {
-    _record = property._record;
-    _id = property._id;
-    _default = property._default;
-
-    _reference = property._reference;
-    _data = property._data;
-    _value = property._value;
-  }
+  void shallowCopy(const MaterialProperty<T, dimension> & property);
 
 #ifdef MOOSE_KOKKOS_SCOPE
   virtual void allocate(const MooseMesh & mesh,
@@ -329,6 +317,11 @@ private:
    * Default value
    */
   T _value;
+
+  friend class MaterialPropertyValueBase<T, dimension>;
+
+  friend void propertyStore<T, dimension>(std::ostream &, void *);
+  friend void propertyLoad<T, dimension>(std::istream &, void *);
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
@@ -336,11 +329,13 @@ template <typename T, unsigned int dimension>
 void
 MaterialProperty<T, dimension>::copy(const MaterialPropertyBase & prop)
 {
-  auto & prop_cast = static_cast<const MaterialProperty<T, dimension> &>(prop);
+  auto prop_cast = dynamic_cast<const MaterialProperty<T, dimension> *>(&prop);
 
-  for (dof_id_type i = 0; i < prop_cast._data.size(); ++i)
-    if (prop_cast._data[i].isAlloc())
-      _data[i].deepCopy(prop_cast._data[i]);
+  mooseAssert(prop_cast, "The property to copy should be of the same type and dimension.");
+
+  for (const auto i : index_range(prop_cast->_data))
+    if (prop_cast->_data[i].isAlloc())
+      _data[i].deepCopy(prop_cast->_data[i]);
 
   _data.copy();
 }
@@ -349,9 +344,24 @@ template <typename T, unsigned int dimension>
 void
 MaterialProperty<T, dimension>::swap(MaterialPropertyBase & prop)
 {
-  auto & prop_cast = static_cast<MaterialProperty<T, dimension> &>(prop);
+  auto prop_cast = dynamic_cast<MaterialProperty<T, dimension> *>(&prop);
 
-  _data.swap(prop_cast._data);
+  mooseAssert(prop_cast, "The property to swap should be of the same type and dimension.");
+
+  _data.swap(prop_cast->_data);
+}
+
+template <typename T, unsigned int dimension>
+void
+MaterialProperty<T, dimension>::shallowCopy(const MaterialProperty<T, dimension> & property)
+{
+  _record = property._record;
+  _id = property._id;
+  _default = property._default;
+
+  _reference = property._reference;
+  _data = property._data;
+  _value = property._value;
 }
 
 template <typename T, unsigned int dimension>
@@ -364,7 +374,7 @@ MaterialProperty<T, dimension>::allocate(const MooseMesh & mesh,
   if (!_data.isAlloc())
     _data.create(mesh.meshSubdomains().size());
 
-  for (auto subdomain : subdomains)
+  for (const auto subdomain : subdomains)
   {
     auto sid = mesh.getKokkosMesh()->getSubdomainID(subdomain);
 
