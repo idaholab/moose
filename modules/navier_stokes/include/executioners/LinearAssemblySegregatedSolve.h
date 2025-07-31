@@ -12,6 +12,9 @@
 // Moose includes
 #include "RhieChowMassFlux.h"
 #include "SIMPLESolveBase.h"
+#include "FaceCenteredMapFunctor.h"
+
+class LinearFVAdvectionDiffusionBC;
 
 /**
  * Common base class for segregated solvers for the Navier-Stokes
@@ -28,6 +31,8 @@ public:
 
   virtual void linkRhieChowUserObject() override;
 
+  virtual void initialSetup() override;
+
   /**
    * Performs the momentum pressure coupling.
    * @return True if solver is converged.
@@ -37,8 +42,11 @@ public:
   /// Return pointers to the systems which are solved for within this object
   const std::vector<LinearSystem *> systemsToSolve() const { return _systems_to_solve; }
 
+  void setupConjugateHeatTransferContainers();
+
 protected:
-//  std::vector<unsigned int> generateBoundaryMask(const BoundaryID bid, const MooseVariableScalar);
+  //  std::vector<unsigned int> generateBoundaryMask(const BoundaryID bid, const
+  //  MooseVariableScalar);
 
   virtual std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor() override;
   virtual std::pair<unsigned int, Real> solvePressureCorrector() override;
@@ -140,10 +148,34 @@ protected:
   /// The user-defined absolute tolerance for determining the convergence in active scalars
   const std::vector<Real> _active_scalar_absolute_tolerance;
 
+  /// ********************** Conjugate heat transfer variables ************** //
+
   /// number of CHT fixed point iterations.
   const unsigned int _num_cht_fpi;
 
   /// Tolerance to which temperature and heat flux at the CHT interface must converge during fixed-
   /// point iterations (TODO: separate tols for q and T)
   const Real _cht_fpi_tolerance;
+
+  const std::vector<BoundaryName> _cht_boundary_names;
+  const std::vector<BoundaryID> _cht_boundary_ids;
+
+  /// The subset of the FaceInfo objects that belong to the given boundaries.
+  std::map<BoundaryID, std::vector<const FaceInfo *>> _cht_face_info;
+
+  /// The can't be const considering we need to update hte face infos
+  std::map<BoundaryID, std::pair<LinearFVAdvectionDiffusionBC *, LinearFVAdvectionDiffusionBC *>>
+      _boundary_conditions;
+
+  /// Two functors per sideset, one for the solid and another for the fluid
+  std::map<BoundaryID,
+           std::pair<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>,
+                     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
+      _boundary_heat_flux;
+
+  /// Two functors per sideset, one for the solid and another for the fluid
+  std::map<BoundaryID,
+           std::pair<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>,
+                     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
+      _boundary_temperatures;
 };

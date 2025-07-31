@@ -11,6 +11,7 @@
 #include "FEProblem.h"
 #include "SegregatedSolverUtils.h"
 #include "LinearSystem.h"
+#include "LinearFVAdvectionDiffusionBC.h"
 
 using namespace libMesh;
 
@@ -72,6 +73,11 @@ LinearAssemblySegregatedSolve::validParams()
       "The absolute tolerance to which the fluid and solid temperature and heat fluxes"
       " must converge during conjugate heat transfer simulations with fixed-point "
       "iterations (fpi).");
+<<<<<<< HEAD
+=======
+
+  params.addParam<std::vector<BoundaryName>>("cht_boundaries", {}, "Something nice");
+>>>>>>> 8db40cc045 (Add first attempt on the coupling field functors.)
 
   params.addParam<unsigned int>(
       "active_scalar_l_max_its",
@@ -111,7 +117,9 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     _active_scalar_absolute_tolerance(
         getParam<std::vector<Real>>("active_scalar_absolute_tolerance")),
     _num_cht_fpi(getParam<unsigned int>("num_cht_fpi")),
-    _cht_fpi_tolerance(getParam<Real>("cht_fpi_tolerance"))
+    _cht_fpi_tolerance(getParam<Real>("cht_fpi_tolerance")),
+    _cht_boundary_names(getParam<std::vector<BoundaryName>>("cht_boundaries")),
+    _cht_boundary_ids(_problem.mesh().getBoundaryIDs(_cht_boundary_names))
 {
   // We fetch the systems and their numbers for the momentum equations.
   for (auto system_i : index_range(_momentum_system_names))
@@ -300,6 +308,12 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   momentum_solver.reuse_preconditioner(false);
 
   return its_normalized_residuals;
+}
+
+void
+LinearAssemblySegregatedSolve::initialSetup()
+{
+  setupConjugateHeatTransferContainers();
 }
 
 std::pair<unsigned int, Real>
@@ -561,6 +575,92 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   return residuals;
 }
 
+void
+LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
+{
+  if (!_cht_boundary_names.empty())
+  {
+    if (_energy_system->nVariables() != 1)
+      mooseError("We should have only one variable in the fluid energy system: ",
+                 _energy_system->name(),
+                 "! Right now we have: ",
+                 Moose::stringify(_energy_system->getVariableNames()));
+    if (_energy_system->nVariables() != 1)
+      mooseError("We should have only one variable in the fluid energy system: ",
+                 _energy_system->name(),
+                 "! Right now we have: ",
+                 Moose::stringify(_energy_system->getVariableNames()));
+  }
+
+  // First we create the functors
+  for (const auto i : index_range(_cht_boundary_ids))
+  {
+    const auto bd_id = _cht_boundary_ids[i];
+    const auto bd_name = _cht_boundary_names[i];
+
+    // We populate the face infos for every interface
+    auto & bd_fi_container = _cht_face_info[bd_id];
+    for (auto & fi : _problem.mesh().faceInfo())
+      if (fi->boundaryIDs().count(bd_id))
+        bd_fi_container.push_back(fi);
+
+    // Fetching the variables for both domains
+    const auto * fluid_variable =
+        dynamic_cast<const MooseLinearVariableFVReal *>(&_energy_system->getVariable(0, 0));
+    mooseAssert(fluid_variable, "Fluid temperature variable must be of type MooseVariableFVReal!");
+    const auto * solid_variable =
+        dynamic_cast<const MooseLinearVariableFVReal *>(&_solid_energy_system->getVariable(0, 0));
+
+    // These can't be consts because we need to update the boundary conditions with the face infos
+    auto * fluid_bc =
+        dynamic_cast<LinearFVAdvectionDiffusionBC *>(fluid_variable->getBoundaryCondition(bd_id));
+    mooseAssert(fluid_bc,
+                "We must have a boundary condition defined on the boundary from the fluid side and "
+                "it has to be a LinearFVAdvectionDiffusionBC!");
+    auto * solid_bc =
+        dynamic_cast<LinearFVAdvectionDiffusionBC *>(solid_variable->getBoundaryCondition(bd_id));
+    mooseAssert(solid_bc,
+                "We must have a boundary condition defined on the boundary from the fluid side and "
+                "it has to be a LinearFVAdvectionDiffusionBC!");
+
+    _boundary_conditions.emplace(bd_id, std::make_pair(solid_bc, fluid_bc));
+
+    FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> solid_bd_flux(
+        _problem.mesh(), solid_variable->blockIDs(), "heat_flux_solid_" + bd_name);
+    FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> fluid_bd_flux(
+        _problem.mesh(), fluid_variable->blockIDs(), "heat_flux_fluid_" + bd_name);
+
+    // We do this uglyness to save an extra line, considering emplace already gives a reference to
+    // the freshly emplaced object
+    auto & flux_container =
+        _boundary_heat_flux
+            .emplace(bd_id, std::make_pair(std::move(solid_bd_flux), std::move(fluid_bd_flux)))
+            .first->second;
+
+    FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> solid_bd_temperature(
+        _problem.mesh(), solid_variable->blockIDs(), "bd_temperature_solid_" + bd_name);
+    FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> fluid_bd_temperature(
+        _problem.mesh(), fluid_variable->blockIDs(), "bd_temperature_fluid_" + bd_name);
+
+    // We do this uglyness to save an extra line, considering emplace already gives a reference to
+    // the freshly emplaced object
+    auto & temperature_container = _boundary_temperatures
+                                       .emplace(bd_id,
+                                                std::make_pair(std::move(solid_bd_temperature),
+                                                               std::move(fluid_bd_temperature)))
+                                       .first->second;
+
+    // Initialize the containers
+    for (auto & fi : bd_fi_container)
+    {
+      flux_container.first[fi->id()] = 0.0;
+      flux_container.second[fi->id()] = 0.0;
+      temperature_container.first[fi->id()] = 0.0;
+      temperature_container.second[fi->id()] = 0.0;
+    }
+  }
+}
+
 bool
 LinearAssemblySegregatedSolve::solve()
 {
@@ -664,7 +764,6 @@ LinearAssemblySegregatedSolve::solve()
           ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
               solveSolidEnergy();
           std::cout << "Solving for solid temp..." << std::endl;
-
           _solid_energy_system->computeGradients();
         }
         std::cout << "Finished iteration:" << fpi_itrs + 1 << std::endl;
