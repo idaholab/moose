@@ -23,6 +23,7 @@ public:
   TimeSequenceStepperBase(const InputParameters & parameters);
 
   void setupSequence(const std::vector<Real> & times);
+  void updateSequence(const std::vector<Real> & times);
 
   // Clear the time sequence array, usually use when time sequence need to be updated during the
   // simulation
