@@ -9,7 +9,8 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to set initial conditions on a scalar variable.'
     capabilities = 'mfem'
-    max_parallel = 1
+    devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMVectorIC]
@@ -20,7 +21,8 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to set initial conditions on a vector MFEM variable.'
     capabilities = 'mfem'
-    max_parallel = 1
+    devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMTransientScalarIC]
@@ -32,7 +34,8 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to set initial conditions on a scalar variable in transient simulations.'
     capabilities = 'mfem'
-    max_parallel = 1
+    devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-  []  
+  []
 []
