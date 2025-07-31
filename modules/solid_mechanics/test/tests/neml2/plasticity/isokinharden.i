@@ -53,6 +53,7 @@ N = 2
   [time]
     type = TimePostprocessor
     execute_on = 'INITIAL TIMESTEP_BEGIN'
+    outputs = 'none'
   []
 []
 
