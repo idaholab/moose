@@ -11,6 +11,7 @@
 
 #include "MooseInit.h"
 
+#include "libmesh/parallel_implementation.h"
 #include "libmesh/petsc_solver_exception.h"
 
 PetscErrorCode
@@ -30,9 +31,9 @@ MooseInit::initKokkos()
 
   unsigned int num_gpus = Kokkos::num_devices();
 
-  bool has_gpus = comm().verify(num_gpus > 0) && num_gpus > 0;
+  comm().min(num_gpus);
 
-  if (has_gpus)
+  if (num_gpus)
   {
     // Create a local communicator defined at each shared memory node
     Parallel::Communicator local_comm;

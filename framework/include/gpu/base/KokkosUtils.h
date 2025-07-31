@@ -29,6 +29,9 @@ template <typename T>
 KOKKOS_INLINE_FUNCTION const T *
 find(const T & target, const T * const begin, const T * const end)
 {
+  if (begin == end)
+    return end;
+
   auto left = begin;
   auto right = end - 1;
 
