@@ -11,12 +11,6 @@
 
 #include "WCNSFVScalarTransportPhysicsBase.h"
 
-#define registerWCNSFVScalarTransportBaseTasks(app_name, derived_name)                             \
-  registerMooseAction(app_name, derived_name, "add_variable");                                     \
-  registerMooseAction(app_name, derived_name, "add_ic");                                           \
-  registerMooseAction(app_name, derived_name, "add_fv_kernel");                                    \
-  registerMooseAction(app_name, derived_name, "add_fv_bc")
-
 /**
  * Creates all the objects needed to solve the Navier Stokes scalar transport equations
  * using the nonlinear finite volume weakly-compressible discretization (WCNSFV)
