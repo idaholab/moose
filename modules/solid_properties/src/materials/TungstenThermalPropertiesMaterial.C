@@ -15,6 +15,7 @@
  */
 
 #include "TungstenThermalPropertiesMaterial.h"
+#include "SolidPropertiesNames.h"
 #include "libmesh/utility.h"
 #include <cmath>
 
