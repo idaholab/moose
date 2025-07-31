@@ -142,7 +142,7 @@ WCNSLinearFVScalarTransportPhysics::addScalarSourceKernels()
     {
       // Added for backward compatibility with former Modules/NavierStokesFV syntax
       params.set<MooseFunctorName>("source_density") = _passive_scalar_sources[scalar_i];
-      getProblem().addFVKernel(
+      getProblem().addLinearFVKernel(
           kernel_type, prefix() + "ins_" + _passive_scalar_names[scalar_i] + "_source", params);
     }
 
