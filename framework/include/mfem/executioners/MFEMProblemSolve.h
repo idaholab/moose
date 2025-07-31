@@ -10,13 +10,11 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
-#include "Executioner.h"
-#include "MFEMProblemData.h"
-#include "ProblemOperatorInterface.h"
 #include "ProblemOperatorBase.h"
 #include "SolveObject.h"
 
 class MFEMProblem;
+class Executioner;
 
 class MFEMProblemSolve : public SolveObject
 {
@@ -37,7 +35,6 @@ public:
 protected:
   MFEMProblem & _mfem_problem;
   std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & _problem_operators;
-  mfem::Device _device;
 };
 
 #endif
