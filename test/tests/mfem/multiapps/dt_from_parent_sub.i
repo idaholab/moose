@@ -8,34 +8,34 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = MFEMDiffusionKernel
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = MFEMTimeDerivativeMassKernel
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = MFEMScalarDirichletBC
     variable = u
     boundary = left
     coefficient = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = MFEMScalarDirichletBC
     variable = u
     boundary = right
     coefficient = 1
-  [../]
+  []
 []
 
 [Preconditioner]
@@ -47,8 +47,8 @@
 [Solver]
   type = MFEMHypreGMRES
   preconditioner = boomeramg
-  l_tol = 1e-16
-  l_max_its = 1000
+  l_tol = 1e-8
+  l_max_its = 100
 []
 
 [Executioner]

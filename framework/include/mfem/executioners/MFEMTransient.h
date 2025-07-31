@@ -39,16 +39,10 @@ public:
   }
 
   /// MFEM problems have no libMesh based TimeIntegrators attached, so return empty set.
-  virtual std::set<TimeIntegrator *> getTimeIntegrators() const override
-  {
-    return {};
-  }
+  virtual std::set<TimeIntegrator *> getTimeIntegrators() const override { return {}; }
 
   /// MFEM problems have no libMesh based TimeIntegrators attached, so return empty vector.
-  virtual std::vector<std::string> getTimeIntegratorNames() const override
-  {
-    return {};
-  }
+  virtual std::vector<std::string> getTimeIntegratorNames() const override { return {}; }
 
 private:
   MFEMProblem & _mfem_problem;
