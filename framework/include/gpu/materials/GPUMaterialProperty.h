@@ -118,15 +118,10 @@ public:
   }
 
   /**
-   * Store the data to a stream
-   * @param stream The stream to store
+   * Get the key to call load/store functions
+   * @returns The key for the load/store function pointer map
    */
-  void store(std::ostream & stream) { _store[key()](stream, this); }
-  /**
-   * Load the data from a stream
-   * @param stream The stream to load
-   */
-  void load(std::istream & stream) { _load[key()](stream, this); }
+  virtual PropertyKey loadStoreKey() = 0;
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -137,20 +132,6 @@ public:
 #endif
 
 protected:
-  /**
-   * Function pointer maps for load/store
-   */
-  ///{@
-  static std::unordered_map<PropertyKey, PropertyStore> _store;
-  static std::unordered_map<PropertyKey, PropertyLoad> _load;
-  ///@}
-
-  /**
-   * Get the key to call load/store functions
-   * @returns The key for the load/store function pointer map
-   */
-  virtual PropertyKey key() = 0;
-
   /**
    * Pointer to the record of this property
    */
@@ -263,15 +244,6 @@ public:
    */
   MaterialProperty<T, dimension> clone() { return MaterialProperty<T, dimension>(*this); }
 
-  /**
-   * Register the load/store functions for this property type
-   */
-  void registerLoadStore()
-  {
-    _store[key()] = propertyStore<T, dimension>;
-    _load[key()] = propertyLoad<T, dimension>;
-  }
-
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get the property values of a quadrature point
@@ -283,8 +255,7 @@ public:
                                                                  unsigned int qp) const;
 #endif
 
-protected:
-  virtual PropertyKey key() override
+  virtual PropertyKey loadStoreKey() override
   {
     return std::make_pair(std::type_index(typeid(T)), dimension);
   }

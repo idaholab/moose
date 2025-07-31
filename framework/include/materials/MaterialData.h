@@ -313,6 +313,16 @@ private:
    * @return Whether the Kokkos material property exists
    */
   bool haveKokkosPropertyHelper(const std::string & prop_name) const;
+  /**
+   * Helper function to register load/store functions of a Kokkos material property to the Kokkos
+   * material property storage
+   * @param key The key to call load/store functions
+   * @param store The function pointer to the store function
+   * @param load The function pointer to the load function
+   */
+  void kokkosRegisterLoadStoreHelper(Moose::Kokkos::PropertyKey key,
+                                     Moose::Kokkos::PropertyStore store,
+                                     Moose::Kokkos::PropertyLoad load);
 #endif
 
   static void mooseErrorHelper(const MooseObject & object, const std::string_view & error);
@@ -456,7 +466,9 @@ MaterialData::getKokkosProperty(const std::string & prop_name)
     // to provide custom dataLoad and dataStore for non-trivially-copyable types that are never
     // used as stateful properties
     if constexpr (state > 0)
-      shell->registerLoadStore();
+      kokkosRegisterLoadStoreHelper(shell->loadStoreKey(),
+                                    Moose::Kokkos::propertyStore<T, dimension>,
+                                    Moose::Kokkos::propertyLoad<T, dimension>);
   }
 
   auto & prop_base = getKokkosPropertyHelper(prop_name, state, nullptr);
