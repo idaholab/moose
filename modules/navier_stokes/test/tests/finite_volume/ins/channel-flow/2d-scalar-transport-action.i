@@ -47,6 +47,8 @@ cp = 1
     add_scalar_equation = true
     passive_scalar_names = 'scalar'
 
+    initial_temperature = 0
+
     density = ${rho}
     dynamic_viscosity = ${mu}
     thermal_conductivity = ${k}
