@@ -11,7 +11,7 @@
                   OutputData/dt_from_parent/Run0/Cycle000010/proc000000.vtu
                   OutputData/dt_from_parent_sub/Run0/Run0.pvd
                   OutputData/dt_from_parent_sub/Run0/Cycle000009/proc000000.vtu'
-      detail = "with a time step governed by the MFEM parent application."
+      detail = "with a time step governed by the MFEM parent application,"
       capabilities = 'mfem & platform=linux'
       max_parallel = 1
       recover = false
@@ -25,7 +25,7 @@
                   OutputData/sub_cycling_parent/Run0/Cycle000002/proc000000.vtu
                   OutputData/sub_cycling_sub/Run0/Run0.pvd
                   OutputData/sub_cycling_sub/Run0/Cycle000002/proc000000.vtu'
-      detail = "with the sub-app running multiple timesteps for each timestep of the parent app."
+      detail = "and with the sub-app running multiple timesteps for each timestep of the parent app."
       capabilities = 'mfem'
       max_parallel = 1
       recover = false
