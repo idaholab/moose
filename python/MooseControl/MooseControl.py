@@ -572,6 +572,29 @@ class MooseControl:
 
         return value
 
+    def getReporterValue(self, name: str) -> float:
+        """Gets a postprocessor value
+
+        Parameters:
+            name (str): The name of the reporter value
+        Returns:
+            float: The value of the postprocessor
+        """
+        logger.debug(f'Getting reporter value for "{name}"')
+        self._requireWaiting()
+
+        data = {'name': name}
+        status, r = self._post('get/reporter', data)
+
+        if status != 200:
+            raise self.ControlException(f'Unexpected status {status} from getting postprocessor value')
+        self._checkResponse(['value'], r)
+
+        value = r['value']
+        logger.debug(f'Successfully retrieved reporter value {name}={value}')
+
+        return value
+
     @staticmethod
     def spawnMoose(cmd: list[str], inherit_environment: bool = True) -> subprocess.Popen:
         """Helper for spawning a MOOSE process that will be cleanly killed"""

@@ -132,6 +132,17 @@
     valgrind = 'none' # http library is not completely valgrind clean
   []
 
+  [get_reporter]
+    type = JSONDiff
+    input = get_reporter.i
+    jsondiff = get_reporter_out.json
+    command_proxy = get_reporter.py
+    required_python_packages = requests
+    recover = false
+    requirement = 'The system shall support retrieving reporter values via a REST API'
+    valgrind = 'none' # http library is not completely valgrind clean
+  []
+
   [connect_port]
     type = RunApp
     input = wait_initial.i

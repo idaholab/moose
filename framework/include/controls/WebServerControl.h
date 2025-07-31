@@ -47,6 +47,9 @@ public:
   template <typename T, miniJson::JsonType json_type>
   static T getScalarJSONValue(const miniJson::Json & json_value);
 
+  template <typename T>
+  static miniJson::Json toMiniJson(const T & value);
+
   using ValueBase = Moose::WebServerControlTypeRegistry::ValueBase;
 
   /**
@@ -61,6 +64,9 @@ public:
       : ValueBase(name, type), _value(value)
     {
     }
+
+    /// The underlying type of the value
+    using value_type = T;
 
     /**
      * @return The underlying value
@@ -212,3 +218,7 @@ WebServerControl::getScalarJSONValue(const miniJson::Json & json_value)
   ::mooseError("WebServerControl::getScalarJSONValue(): Not configured for parsing type ",
                stringifyJSONType(from_json_type));
 }
+
+// Explicit specialization
+template <>
+miniJson::Json WebServerControl::toMiniJson(const nlohmann::json & value);

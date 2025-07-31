@@ -35,6 +35,8 @@ public:
   ReporterName(const char * combined_name);
   ReporterName(){}; // empty constructor for InputParameters
 
+  static bool isValidName(const std::string & object_and_value_name);
+
   /**
    * Return the object name that produces the Reporter value
    */

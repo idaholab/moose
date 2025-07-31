@@ -195,6 +195,44 @@ WebServerControl::startServer()
             return HttpResponse{200, res_json};
           });
 
+  // POST /get/reporter, with data:
+  //   'name' (string): The name of the Reporter value (object_name/value_name)
+  // Returns code 200 on success and JSON:
+  //   'value' (double): The postprocessor value
+  _server->when("/get/reporter")
+      ->posted(
+          [this, &error, &get_name, &require_waiting, &require_parameters](const HttpRequest & req)
+          {
+            const auto & msg = req.json().toObject();
+
+            // Should only have name and type
+            if (const auto response = require_parameters(msg, {"name"}))
+              return *response;
+            // Should be waiting for data
+            if (const auto response = require_waiting(*this))
+              return *response;
+
+            // Get the reporter name
+            const auto name_result = get_name(msg, "reporter value to retrieve");
+            if (const auto response = std::get_if<HttpResponse>(&name_result))
+              return *response;
+            const auto & name = std::get<std::string>(name_result);
+            if (!ReporterName::isValidName(name))
+              return error(name + " is not a valid reporter name.");
+            const auto rname = ReporterName(name);
+
+            // Reporter should exist
+            if (!this->hasReporterValueByName(rname))
+              return error("The reporter value '" + name + "' was not found");
+
+            // Grab the reporter value in nlohmann::json format, then convert to miniJson
+            nlohmann::json njson;
+            getReporterContextBaseByName(rname).store(njson);
+            miniJson::Json::_object res_json = {{"value", toMiniJson(njson)}};
+
+            return HttpResponse{200, res_json};
+          });
+
   // POST /set/controllable, with data:
   //   'name' (string): The path to the controllable data
   //   'value': The data to set
@@ -367,6 +405,18 @@ WebServerControl::stringifyJSONType(const miniJson::JsonType & json_type)
   if (json_type == miniJson::JsonType::kObject)
     return "object";
   ::mooseError("WebServerControl::stringifyJSONType(): Unused JSON value type");
+}
+
+template <>
+miniJson::Json
+WebServerControl::toMiniJson(const nlohmann::json & value)
+{
+  const auto value_str = value.dump();
+  std::string errMsg;
+  const auto json_value = miniJson::Json::parse(value_str, errMsg);
+  if (!errMsg.empty())
+    ::mooseError("Failed parse value into miniJson:\n", errMsg);
+  return json_value;
 }
 
 WebServerControl::RealEigenMatrixValue::RealEigenMatrixValue(const std::string & name,
