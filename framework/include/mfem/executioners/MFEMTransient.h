@@ -36,19 +36,19 @@ public:
     mooseError("MFEMTransient executioner does not yet support evaluating the relative solution "
                "difference norm at each timestep.");
     return 0.0;
-  };
+  }
 
-  /// MFEM problems have no libMesh type TimeIntegrators attached, so return empty set.
+  /// MFEM problems have no libMesh based TimeIntegrators attached, so return empty set.
   virtual std::set<TimeIntegrator *> getTimeIntegrators() const override
   {
-    return std::set<TimeIntegrator *>{};
-  };
+    return {};
+  }
 
-  /// MFEM problems have no libMesh type TimeIntegrators attached, so return empty vector.
+  /// MFEM problems have no libMesh based TimeIntegrators attached, so return empty vector.
   virtual std::vector<std::string> getTimeIntegratorNames() const override
   {
-    return std::vector<std::string>();
-  };
+    return {};
+  }
 
 private:
   MFEMProblem & _mfem_problem;

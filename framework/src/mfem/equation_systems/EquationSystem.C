@@ -495,15 +495,11 @@ TimeDependentEquationSystem::BuildBilinearForms()
       ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, true);
 
       for (int i = 0; i < integs->Size(); ++i)
-      {
         sum->AddIntegrator(*integs[i]);
-      }
 
       for (int i = 0; i < b_integs->Size(); ++i)
-      {
         td_blf->AddBoundaryIntegrator(new ScaleIntegrator(*b_integs[i], _dt_coef.constant, false),
                                       *(*markers[i]));
-      }
 
       // scaled_sum is owned by td_blf
       td_blf->AddDomainIntegrator(scaled_sum);

@@ -7,7 +7,7 @@
       type = CSVDiff
       input = 'mfem_multiple_timesteppers.i'
       csvdiff = 'mfem_multiple_timesteppers.csv'
-      detail = 'using the minimum time step size of input time steppers.'
+      detail = 'using the minimum time step size of input time steppers,'
       capabilities = 'mfem'
       max_parallel = 1
       recover = false
@@ -17,7 +17,7 @@
       type = CSVDiff
       input = 'mfem_multiple_timesequences.i'
       csvdiff = 'mfem_multiple_timesequences.csv'
-      detail = 'with specific times to hit and still hit all of them.'
+      detail = 'or with specific times to hit.'
       capabilities = 'mfem'
       max_parallel = 1
       recover = false

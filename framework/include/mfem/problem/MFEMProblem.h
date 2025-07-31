@@ -71,7 +71,7 @@ public:
   /**
    * Add a ProblemOperator to the executioner used to solve the problem.
    */
-  void addProblemOperator() {};
+  void addProblemOperator() {}
 
   void addSubMesh(const std::string & user_object_name,
                   const std::string & name,

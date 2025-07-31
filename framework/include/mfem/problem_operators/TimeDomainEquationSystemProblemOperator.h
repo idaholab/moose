@@ -23,7 +23,7 @@ class TimeDomainEquationSystemProblemOperator : public TimeDomainProblemOperator
 public:
   TimeDomainEquationSystemProblemOperator(MFEMProblem & problem)
     : TimeDomainProblemOperator(problem),
-      _equation_system(std::dynamic_pointer_cast<Moose::MFEM::TimeDependentEquationSystem>(
+      _equation_system(std::dynamic_pointer_cast<TimeDependentEquationSystem>(
           _problem_data.eqn_system))
   {
   }

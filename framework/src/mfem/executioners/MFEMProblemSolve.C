@@ -74,12 +74,8 @@ MFEMProblemSolve::solve()
   _mfem_problem.updateActiveObjects();
 
   if (_mfem_problem.shouldSolve())
-  {
     for (const auto & problem_operator : _problem_operators)
-    {
       problem_operator->Solve();
-    }
-  }
   _mfem_problem.displaceMesh();
 
   // Execute user objects, transfers, and multiapps at timestep end
