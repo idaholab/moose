@@ -108,6 +108,13 @@ public:
    */
   bool haveKokkosProperty(std::string prop_name, unsigned int state = 0);
   /**
+   * Register the load/store functions
+   * @param key The key to call load/store functions
+   * @param store The function pointer to the store function
+   * @param load The function pointer to the load function
+   */
+  void registerLoadStore(PropertyKey key, PropertyStore store, PropertyLoad load);
+  /**
    * Allocate all the material property data storages
    */
   void allocateKokkosProperties();
@@ -132,6 +139,13 @@ private:
    * Record of each material property
    */
   std::unordered_map<std::string, Moose::Kokkos::PropRecord> _kokkos_prop_records;
+  /**
+   * Function pointer maps for load/store
+   */
+  ///{@
+  std::unordered_map<PropertyKey, PropertyStore> _store;
+  std::unordered_map<PropertyKey, PropertyLoad> _load;
+  ///@}
 };
 
 } // namespace Kokkos
