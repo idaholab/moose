@@ -55,7 +55,7 @@ class RunApp(Tester):
 
         params.addParam('libtorch_devices', "The devices to use for this libtorch test ('CPU', 'CUDA', 'MPS')")
         device_list_str = "', '".join(d.upper() for d in TestHarness.validDevices())
-        device_param_doc = f"The devices to use for this libtorch or MFEM test ('{device_list_str}'); default ('CPU')"
+        device_param_doc = f"The devices to use for this libtorch or MFEM test ('{device_list_str}'); device availability depends on library support and compilation settings; default ('CPU')"
         params.addParam('devices', ['CPU'], device_param_doc)
 
         return params
@@ -86,7 +86,7 @@ class RunApp(Tester):
 
         for value in params['devices']:
             if value.lower() not in TestHarness.validDevices():
-                raise Exception(f'Unknown device "{value}')
+                raise Exception(f'Unknown device "{value}"')
 
     def getInputFile(self):
         if self.specs.isValid('input'):
