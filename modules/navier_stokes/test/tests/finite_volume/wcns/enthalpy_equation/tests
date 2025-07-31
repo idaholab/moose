@@ -57,7 +57,7 @@
     csvdiff = 'enthalpy_equation-physics-nonlinearFV_out.csv'
     ignore_columns = 'area_pp_left pdrop'
     # pdrop is at 1e-2 difference
-    # we expect some difference due to
+    # we expect some difference between dirichlet and flux BCs for a non-constant cp non-constant rho fluid
     rel_err = 2e-3
     prereq = '2d-fp-physics-flux-vel-inlet'
     requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy and the shorthand physics syntax, using the nonlinear finite volume discretization.'
