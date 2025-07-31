@@ -8,7 +8,7 @@ Properties of tungsten are obtained from [!cite](milner2024space).
 
 # Thermal conductivity
 
-For temperature range: 1 ≤ T < 55
+For temperature range: 1 ≤ T < 55 K
 
 \begin{equation}
 k(T) =
@@ -29,7 +29,7 @@ where:
 | A2       | -8.304E+03 | `[1]`               |
 | A3       | 1.180E+06  | `[1]`               |
 
-For temperature range 55 ≤ T ≤ 3653
+For temperature range 55 ≤ T ≤ 3653 K
 
 \begin{equation}
 k(T) = \frac{B0 + B1 \cdot \left( \frac{T}{1000} \right) + B2 \cdot \left( \frac{T}{1000} \right)^2 + B3 \cdot \left( \frac{T}{1000} \right)^3}{C0 + C1 \cdot \left( \frac{T}{1000} \right) + \left( \frac{T}{1000} \right)^2}

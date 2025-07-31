@@ -43,7 +43,7 @@ template <bool is_ad>
 TungstenThermalPropertiesMaterialTempl<is_ad>::TungstenThermalPropertiesMaterialTempl(
     const InputParameters & parameters)
   : Material(parameters),
-    _temperature(coupledValue("temperature")),
+    _temperature(genericCoupledValue<is_ad>("temperature")),
     _k(declareGenericProperty<Real, is_ad>(
         getParam<std::string>(SolidPropertiesNames::thermal_conductivity))),
     _c_p(declareGenericProperty<Real, is_ad>(
@@ -57,18 +57,18 @@ void
 TungstenThermalPropertiesMaterialTempl<is_ad>::computeQpProperties()
 {
   if (_temperature[_qp] < 5 || _temperature[_qp] > 3600)
-    flagInvalidSolution("The temperature is out of bounds to calculate tungsten density."
+    flagInvalidSolution("The temperature is out of bounds to calculate tungsten density. "
                         "Temperature has to be between 5 K and 3600 K.");
 
   if (_temperature[_qp] < 1 || _temperature[_qp] > 3653)
-    flagInvalidSolution("The temperature is out of bounds to calculate tungsten thermal"
+    flagInvalidSolution("The temperature is out of bounds to calculate tungsten thermal "
                         "conductivity. Temperature has to be between 1 K and 3653 K.");
 
   if (_temperature[_qp] < 11 || _temperature[_qp] > 3700)
-    flagInvalidSolution("The temperature is out of bounds to calculate tungsten specific"
+    flagInvalidSolution("The temperature is out of bounds to calculate tungsten specific "
                         "heat. Temperature has to be between 11 K and 3700 K.");
 
-  Real temperature_scaled = _temperature[_qp] / 1000;
+  const auto temperature_scaled = _temperature[_qp] / 1000;
 
   _k[_qp] = (_temperature[_qp] < 55)
                 ? _kA0 * std::pow(temperature_scaled, 8.740e-01) /
