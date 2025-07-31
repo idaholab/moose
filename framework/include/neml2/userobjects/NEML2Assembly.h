@@ -16,7 +16,7 @@
 
 #include "neml2/tensors/Tensor.h"
 
-/// This user object caches assebmly information from MOOSE.
+/// This user object caches assembly information from MOOSE.
 class NEML2Assembly : public ElementUserObject
 {
 public:
