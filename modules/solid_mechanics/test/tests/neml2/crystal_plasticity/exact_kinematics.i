@@ -29,26 +29,26 @@ N = 2
 []
 
 [NEML2]
-  input = 'approx_kinematics_neml2.i'
+  input = 'exact_kinematics_neml2.i'
   [all]
     model = 'model'
     verbose = true
     device = 'cpu'
 
-    moose_input_types = 'MATERIAL                           POSTPROCESSOR POSTPROCESSOR MATERIAL                  MATERIAL                  MATERIAL'
-    moose_inputs = '     spatial_velocity_increment         time          time          elastic_strain            orientation               slip_hardening'
-    neml2_inputs = '     forces/spatial_velocity_increment  forces/t      old_forces/t  old_state/elastic_strain  old_state/orientation     old_state/internal/slip_hardening'
+    moose_input_types = 'MATERIAL             MATERIAL             POSTPROCESSOR POSTPROCESSOR MATERIAL          MATERIAL'
+    moose_inputs = '     deformation_gradient initial_orientation  time          time          plastic_defgrad   crss'
+    neml2_inputs = '     forces/F             forces/r             forces/t      old_forces/t  old_state/Fp      old_state/tauc'
 
-    moose_output_types = 'MATERIAL                            MATERIAL                  MATERIAL                  MATERIAL'
-    moose_outputs = '     neml2_cauchy_stress                 elastic_strain            orientation               slip_hardening'
-    neml2_outputs = '     state/internal/full_cauchy_stress   state/elastic_strain      state/orientation         state/internal/slip_hardening'
+    moose_output_types = 'MATERIAL          MATERIAL        MATERIAL'
+    moose_outputs = '     neml2_pk2_stress  plastic_defgrad crss'
+    neml2_outputs = '     state/full_S      state/Fp        state/tauc'
 
     moose_derivative_types = 'MATERIAL'
-    moose_derivatives = '     neml2_cauchy_jacobian'
-    neml2_derivatives = '     state/internal/full_cauchy_stress forces/spatial_velocity_increment'
+    moose_derivatives = '     neml2_pk2_jacobian'
+    neml2_derivatives = '     state/full_S forces/F'
 
-    initialize_outputs = '      orientation'
-    initialize_output_values = 'initial_orientation'
+    initialize_outputs = '      plastic_defgrad'
+    initialize_output_values = 'initial_plastic_defgrad'
   []
 []
 
@@ -62,15 +62,20 @@ N = 2
 
 [Materials]
   [copy]
-    type = ComputeLagrangianCauchyCustomStress
-    custom_cauchy_stress = 'neml2_cauchy_stress'
-    custom_cauchy_jacobian = 'neml2_cauchy_jacobian'
+    type = ComputeLagrangianStressCustomPK2
+    custom_pk2_stress = 'neml2_pk2_stress'
+    custom_pk2_jacobian = 'neml2_pk2_jacobian'
     large_kinematics = true
   []
   [initial_orientation]
     type = GenericConstantRealVectorValue
     vector_name = 'initial_orientation'
     vector_values = '-0.54412095 -0.34931944 0.12600655'
+  []
+  [initial_plastic_defgrad]
+    type = GenericConstantRankTwoTensor
+    tensor_name = 'initial_plastic_defgrad'
+    tensor_values = '1 1 1'
   []
 []
 

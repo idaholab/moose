@@ -23,9 +23,9 @@
 [Data]
   [crystal_geometry]
     type = CubicCrystal
-    lattice_parameter = "a"
-    slip_directions = "sdirs"
-    slip_planes = "splanes"
+    lattice_parameter = 'a'
+    slip_directions = 'sdirs'
+    slip_planes = 'splanes'
   []
 []
 
@@ -55,8 +55,8 @@
     type = LinearIsotropicElasticity
     coefficient_types = 'YOUNGS_MODULUS POISSONS_RATIO'
     coefficients = '1e5 0.25'
-    strain = "state/elastic_strain"
-    stress = "state/internal/cauchy_stress"
+    strain = 'state/elastic_strain'
+    stress = 'state/internal/cauchy_stress'
   []
   [resolved_shear]
     type = ResolvedShear
