@@ -161,7 +161,6 @@ void
 ExplicitMixedOrder::evaluateRHSResidual()
 {
   // Compute the residual
-  _explicit_residual->zero();
   _fe_problem.computeResidual(
       *_nonlinear_implicit_system->current_local_solution, *_explicit_residual, _nl->number());
 
