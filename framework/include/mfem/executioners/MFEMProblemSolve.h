@@ -12,7 +12,7 @@
 #pragma once
 #include "Executioner.h"
 #include "MFEMProblemData.h"
-#include "MFEMProblemOperatorInterface.h"
+#include "ProblemOperatorInterface.h"
 #include "ProblemOperatorBase.h"
 #include "SolveObject.h"
 

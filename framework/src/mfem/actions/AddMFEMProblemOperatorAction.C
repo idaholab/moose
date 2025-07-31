@@ -11,7 +11,7 @@
 
 #include "AddMFEMProblemOperatorAction.h"
 #include "MFEMProblem.h"
-#include "MFEMProblemOperatorInterface.h"
+#include "ProblemOperatorInterface.h"
 
 registerMooseAction("MooseApp", AddMFEMProblemOperatorAction, "add_mfem_problem_operator");
 

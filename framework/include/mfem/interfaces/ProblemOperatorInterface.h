@@ -19,27 +19,26 @@ namespace Moose::MFEM
  * - MFEMTransient
  * - MFEMSteady
  */
-class MFEMProblemOperatorInterface
+class ProblemOperatorInterface
 {
 public:
-  MFEMProblemOperatorInterface() = default;
-  virtual ~MFEMProblemOperatorInterface() = default;
+  ProblemOperatorInterface() = default;
+  virtual ~ProblemOperatorInterface() = default;
 
   /// Returns a pointer to the operator's equation system.
-  virtual std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & getProblemOperators()
+  virtual std::vector<std::shared_ptr<ProblemOperatorBase>> & getProblemOperators()
   {
     return _problem_operators;
   }
 
   /// Add an MFEM problem operator. Takes ownership.
-  virtual void
-  addProblemOperator(std::shared_ptr<Moose::MFEM::ProblemOperatorBase> problem_operator)
+  virtual void addProblemOperator(std::shared_ptr<ProblemOperatorBase> problem_operator)
   {
     _problem_operators.push_back(std::move(problem_operator));
   }
 
 private:
-  std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> _problem_operators;
+  std::vector<std::shared_ptr<ProblemOperatorBase>> _problem_operators;
 };
 }
 
