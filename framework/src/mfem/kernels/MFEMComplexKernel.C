@@ -25,9 +25,11 @@ MFEMComplexKernel::validParams()
                                 "Variable labelling the weak form this kernel is added to");
   params.addClassDescription(
       "Holds MFEMKernel objects for the real and imaginary parts of a complex kernel.");
-  params.addParam<mfem::real_t>(
-      "phase", 0., "Phase shift angle to apply to the bilinear form kernels, measured in radians. Both the real and imaginary parts get multiplied by a factor of exp(i*phase). Does not affect linear form kernels");
-
+  params.addParam<mfem::real_t>("phase",
+                                0.,
+                                "Phase shift angle to apply to the bilinear form kernels, measured "
+                                "in radians. Both the real and imaginary parts get multiplied by a "
+                                "factor of exp(i*phase). Does not affect linear form kernels");
 
   return params;
 }
@@ -37,7 +39,8 @@ MFEMComplexKernel::MFEMComplexKernel(const InputParameters & parameters)
 {
 }
 
-mfem::BilinearFormIntegrator * MFEMComplexKernel::getRealBFIntegrator()
+mfem::BilinearFormIntegrator *
+MFEMComplexKernel::getRealBFIntegrator()
 {
   mfem::real_t phase = getParam<mfem::real_t>("phase");
   Moose::MFEM::ScaleIntegrator scaled_real(_real_kernel->createBFIntegrator(), cos(phase));
@@ -50,7 +53,8 @@ mfem::BilinearFormIntegrator * MFEMComplexKernel::getRealBFIntegrator()
   return shifted_integ;
 }
 
-mfem::BilinearFormIntegrator * MFEMComplexKernel::getImagBFIntegrator()
+mfem::BilinearFormIntegrator *
+MFEMComplexKernel::getImagBFIntegrator()
 {
   mfem::real_t phase = getParam<mfem::real_t>("phase");
   Moose::MFEM::ScaleIntegrator scaled_real(_real_kernel->createBFIntegrator(), sin(phase));
@@ -62,7 +66,5 @@ mfem::BilinearFormIntegrator * MFEMComplexKernel::getImagBFIntegrator()
 
   return shifted_integ;
 }
-
-
 
 #endif

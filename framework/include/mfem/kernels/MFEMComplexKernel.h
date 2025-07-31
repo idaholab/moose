@@ -22,7 +22,6 @@ Class to construct an MFEM integrator to apply to the equation system.
 class MFEMComplexKernel : public MFEMKernel
 {
 public:
-
   static InputParameters validParams();
 
   MFEMComplexKernel(const InputParameters & parameters);
@@ -55,7 +54,6 @@ public:
   }
 
 protected:
-
   /// Name of (the test variable associated with) the weak form that the kernel is applied to.
   const VariableName & _test_var_name;
 
