@@ -23,6 +23,7 @@ C_mu = 0.09
 intensity = 0.01
 k_init = '${fparse 1.5*(intensity * inlet_velocity)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
+mu_t_init = '${fparse rho * C_mu * k_init * k_init / eps_init}'
 
 ### Modeling parameters ###
 bulk_wall_treatment = false

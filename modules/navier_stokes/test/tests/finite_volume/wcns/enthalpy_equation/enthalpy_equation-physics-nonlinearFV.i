@@ -74,7 +74,7 @@ advected_interp_method = 'upwind'
         energy_wall_functors = '950 950'
 
         energy_advection_interpolation = ${advected_interp_method}
-        energy_two_term_bc_expansion = false
+        energy_two_term_bc_expansion = true
       []
     []
   []

@@ -370,7 +370,7 @@ inlet_velocity = 0.1
     vel_y = vel_y
     advected_quantity = rho
     boundary = left
-    #advected_interp_method = ${advected_interp_method}
+    advected_interp_method = ${advected_interp_method}
   []
 
   [right_mdot]
@@ -379,13 +379,7 @@ inlet_velocity = 0.1
     vel_y = vel_y
     advected_quantity = rho
     boundary = right
-    advected_interp_method = upwind #${advected_interp_method}
-  []
-[]
-
-[FluidProperties]
-  [fp]
-    type = FlibeFluidProperties
+    advected_interp_method = ${advected_interp_method}
   []
 []
 
@@ -395,12 +389,6 @@ inlet_velocity = 0.1
     prop_names = 'cp k rho'
     prop_values = '${cp} ${k} 1980'
   []
-  #[rho]
-  #  type = RhoFromPTFunctorMaterial
-  #  fp = fp
-  #  temperature = T_fluid
-  #  pressure = pressure
-  #[]
   [ins_fv]
     type = INSFVEnthalpyFunctorMaterial
     temperature = 'T_fluid'
