@@ -63,4 +63,21 @@
     design = 'Pressure.md'
     requirement = "The Pressure boundary condition shall compute the correct Jacobian for a problem in RZ coordinates with quad8 elements."
   []
+  [predeclared_boundaries]
+    type = Exodiff
+    input = 'pressure_predeclared_boundaries.i'
+    exodiff = 'pressure_predeclared_boundaries_out.e'
+    issues = '#30611'
+    design = 'syntax/BCs/Pressure/index.md'
+    allow_warnings = true
+    requirement = 'The Pressure boundary condition action shall allow a predeclared boundary to work, bypassing what is considered to be a block_ids.size() = 0'
+  []
+  [predeclared_boundary_warning]
+    type = RunApp
+    input = 'pressure_predeclared_boundaries.i'
+    issues = '#30611'
+    design = 'syntax/BCs/Pressure/index.md'
+    expect_out = "No connected blocks were found, the coordinate system type is obtained from the mesh."
+    requirement = 'The Pressure boundary condition action shall inform the user when retrieving the coordinate system type from the mesh.'
+  []
 []
