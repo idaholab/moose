@@ -40,14 +40,6 @@
   [../]
 []
 
-[BCs]
-  [./Periodic]
-    [./All]
-      auto_direction = 'x y'
-    [../]
-  [../]
-[]
-
 [Materials]
   [./multibarrier]
     type = MultiBarrierFunctionMaterial

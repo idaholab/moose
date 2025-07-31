@@ -16,11 +16,11 @@
     exodiff = 'pbc_adaptivity_out.e'
     cli_args = 'Outputs/hide="pid" Outputs/console/type=Console '
                'Outputs/console/system_info="framework mesh aux nonlinear execution relationship"'
-    expect_out = '  Default:                 libMesh::DefaultCoupling x 2
+    expect_out = '  Default:                 libMesh::DefaultCoupling x 4
   Default:                 '
                  'libMesh::GhostPointNeighbors
   Default:                 libMesh::DefaultCoupling x '
-                 '2 for DisplacedMesh
+                 '4 for DisplacedMesh
   Default:                 libMesh::GhostPointNeighbors for '
                  'DisplacedMesh'
     abs_zero = 1e-7
