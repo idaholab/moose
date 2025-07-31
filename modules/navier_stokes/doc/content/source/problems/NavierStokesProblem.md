@@ -1,7 +1,9 @@
 # NavierStokesProblem
 
+## Least Squares Commutator (LSC) preconditioning
+
 The `NavierStokesProblem` solves the saddle point incompressible Navier-Stokes
-equations using Schur complement field split preconditioning. It focuses on the
+equations using Schur complement field split preconditioning. It includes support for the
 Least Squares Commutator (LSC) preconditioner, also known as the BFBt
 preconditioner, developed by Elman in [!citep](elman1999preconditioning) and
 [!citep](elman2006block). The PETSc manual page on the LSC preconditioner can be
@@ -79,6 +81,8 @@ been requested, then [!param](/Problem/NavierStokesProblem/L_matrix) *must* be
 provided since it cannot be formed from system matrix data. Similarly,
 [!param](/Problem/NavierStokesProblem/mass_matrix) must also be provided.
 
+## Preconditioning using the pressure mass matrix
+
 A final option available to users is the [!param](/Problem/NavierStokesProblem/use_pressure_mass_matrix) parameter. For Stokes flow (no advective term in the momentum equation) it is known that the pressure mass matrix is spectrally equivalent to the Schur complement, in which case the pressure mass matrix is an ideal choice for forming a preconditioner. If the user sets this option to `true`, then
 
 \begin{equation}
@@ -87,6 +91,15 @@ A final option available to users is the [!param](/Problem/NavierStokesProblem/u
 
 in which case a "standard" preconditioner can be used (e.g. `-pc_type lu`,
 `-pc_type hypre -pc_hypre_type boomeramg`, etc.) as opposed to LSC.
+
+For advection-dominated Navier-Stokes simulations, one can introduce
+[grad-div](INSADMomentumGradDiv.md) stabilization in order to once again make the Schur complement
+spectrally similar to the pressure mass matrix. This has its own drawbacks in that it makes the
+velocity field split, already tough to solve due to the assymetry from advection, even more
+difficult because of the singular perturbation. This tradeoff is a "property" known jokingly in the
+linear algebra community as conservation of difficulty. Preconditioning the perturbed velocity block
+with something other than a direct solver is still an open research question, discussed more on the
+[grad-div](INSADMomentumGradDiv.md) page.
 
 ## Which preconditioner to choose
 
