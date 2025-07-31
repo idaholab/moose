@@ -232,8 +232,9 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
   InputParameters params = getFactory().getValidParams("FVFunctionIC");
   assignBlocks(params, _blocks);
 
-  if (isParamSetByUser("initial_temperature"))
+  // initial_temperature has a default so we should almost always set it (see shouldCreateIC logic)
   {
+    bool temperature_ic_used = false;
     if (variableExists(_fluid_temperature_name, false) &&
         shouldCreateIC(_fluid_temperature_name,
                        _blocks,
@@ -244,8 +245,15 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
       params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
 
       getProblem().addFVInitialCondition("FVFunctionIC", _fluid_temperature_name + "_ic", params);
+      temperature_ic_used = true;
     }
-    else if (isParamValid(NS::fluid))
+    // Needed to solve for enthalpy: an initial condition on enthalpy based on the initial
+    // temperature
+    if (isParamValid(NS::fluid) && _solve_for_enthalpy && !isParamValid("initial_enthalpy") &&
+        shouldCreateIC(_fluid_enthalpy_name,
+                       _blocks,
+                       /*whether IC is a default*/ !isParamSetByUser("initial_temperature"),
+                       /*error if already an IC*/ isParamSetByUser("initial_temperature")))
     {
       // from the FluidProperties module
       InputParameters params =
@@ -266,11 +274,13 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
         paramError("initial_temperature", "Only Real values supported when solving for enthalpy");
       getProblem().addInitialCondition(
           "SpecificEnthalpyFromPressureTemperatureIC", _fluid_enthalpy_name + "_ic", params);
+      temperature_ic_used = true;
     }
-    else
+
+    if (!temperature_ic_used && isParamSetByUser("initial_temperature"))
       reportPotentiallyMissedParameters({"initial_temperature"}, "FunctionIC");
   }
-  if (parameters().isParamValid("initial_enthalpy") &&
+  if (isParamValid("initial_enthalpy") && _solve_for_enthalpy &&
       shouldCreateIC(_fluid_enthalpy_name,
                      _blocks,
                      /*whether IC is a default*/ false,
