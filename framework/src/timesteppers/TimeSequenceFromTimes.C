@@ -40,7 +40,7 @@ void
 TimeSequenceFromTimes::updateTimeSequence()
 {
   resetSequence();
-  setupSequence(_time_points);
+  updateSequence(_time_points);
 }
 
 Real
