@@ -38,6 +38,8 @@ CylinderComponent::validParams()
   params.addRequiredRangeCheckedParam<Real>("radius", "radius>0", "Radius of the cylinder");
   params.addRequiredRangeCheckedParam<Real>("length", "length>0", "Length/Height of the cylinder");
 
+  params.addParam<unsigned int>("n_radial",
+                                "Number of radial elements. Only assign if mesh is 2D!");
   params.addParam<unsigned int>(
       "n_radial_rings",
       1,
@@ -48,8 +50,8 @@ CylinderComponent::validParams()
                                     "boundary_layer_width>=0",
                                     "The width of the boundary layer (if assigned).");
   params.addParam<unsigned int>("n_boundary_layers", 1, "The number of boundary layers.");
-  params.addRequiredParam<unsigned int>(
-      "n_sectors", "Number of azimuthal sectors in each quadrant of cylinder face.");
+  params.addParam<unsigned int>("n_sectors",
+                                "Number of azimuthal sectors in each quadrant of cylinder face.");
 
   params.addParam<SubdomainName>("block", "Block name for the cylinder");
 
@@ -148,6 +150,8 @@ CylinderComponent::addMeshGenerators()
     ext_params.set<std::vector<unsigned int>>("num_layers") = {getParam<unsigned int>("n_axial")};
     ext_params.set<MeshGeneratorName>("input") = _mg_names.back();
     ext_params.set<std::vector<Real>>("heights") = {_height};
+    ext_params.set<BoundaryName>("bottom_boundary") = name() + "_bottom_boundary";
+    ext_params.set<BoundaryName>("top_boundary") = name() + "_top_boundary";
 
     const Point default_direction(1, 0, 0);
     ext_params.set<Point>("direction") = default_direction;
