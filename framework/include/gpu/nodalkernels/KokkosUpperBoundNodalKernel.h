@@ -28,6 +28,8 @@ public:
                                                        const dof_id_type node) const;
 
 private:
+  KOKKOS_FUNCTION inline bool skipOnBoundary(const dof_id_type node) const;
+
   /// The number of the coupled variable
   const unsigned int _v_var;
 
@@ -41,12 +43,21 @@ private:
   const Real _upper_bound;
 };
 
-KOKKOS_FUNCTION inline Real
-KokkosUpperBoundNodalKernel::computeQpResidual(const dof_id_type node) const
+KOKKOS_FUNCTION inline bool
+KokkosUpperBoundNodalKernel::skipOnBoundary(const dof_id_type node) const
 {
   for (dof_id_type b = 0; b < _bnd_ids.size(); ++b)
     if (kokkosMesh().isBoundaryNode(node, _bnd_ids[b]))
-      return _u(node);
+      return true;
+
+  return false;
+}
+
+KOKKOS_FUNCTION inline Real
+KokkosUpperBoundNodalKernel::computeQpResidual(const dof_id_type node) const
+{
+  if (skipOnBoundary(node))
+    return _u(node);
 
   return ::Kokkos::min(_u(node), _upper_bound - _v(node));
 }
@@ -54,9 +65,8 @@ KokkosUpperBoundNodalKernel::computeQpResidual(const dof_id_type node) const
 KOKKOS_FUNCTION inline Real
 KokkosUpperBoundNodalKernel::computeQpJacobian(const dof_id_type node) const
 {
-  for (dof_id_type b = 0; b < _bnd_ids.size(); ++b)
-    if (kokkosMesh().isBoundaryNode(node, _bnd_ids[b]))
-      return 1;
+  if (skipOnBoundary(node))
+    return 1;
 
   if (_u(node) <= _upper_bound - _v(node))
     return 1;
@@ -67,9 +77,8 @@ KOKKOS_FUNCTION inline Real
 KokkosUpperBoundNodalKernel::computeQpOffDiagJacobian(const unsigned int jvar,
                                                       const dof_id_type node) const
 {
-  for (dof_id_type b = 0; b < _bnd_ids.size(); ++b)
-    if (kokkosMesh().isBoundaryNode(node, _bnd_ids[b]))
-      return 0;
+  if (skipOnBoundary(node))
+    return 0;
 
   if (jvar == _v_var)
     if (_upper_bound - _v(node) < _u(node))

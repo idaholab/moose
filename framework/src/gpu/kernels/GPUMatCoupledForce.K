@@ -39,7 +39,7 @@ KokkosMatCoupledForce::KokkosMatCoupledForce(const InputParameters & parameters)
     _coef(isParamValid("coef") ? getParam<std::vector<Real>>("coef")
                                : std::vector<Real>(_n_coupled, 1))
 {
-  for (MooseIndex(_n_coupled) j = 0; j < _n_coupled; ++j)
+  for (const auto j : make_range(_n_coupled))
   {
     _v_var_to_index[_v_var[j]] = j;
 
@@ -57,11 +57,10 @@ KokkosMatCoupledForce::KokkosMatCoupledForce(const InputParameters & parameters)
   if (_coupled_props)
   {
     _mat_props.create(_n_coupled);
-    std::vector<MaterialPropertyName> names =
-        getParam<std::vector<MaterialPropertyName>>("material_properties");
+    const auto & names = getParam<std::vector<MaterialPropertyName>>("material_properties");
     if (names.size() != _n_coupled)
       paramError("material_properties", "Size must be equal to number of coupled variables");
-    for (unsigned int j = 0; j < _n_coupled; ++j)
+    for (const auto j : make_range(_n_coupled))
       _mat_props[j] = getKokkosMaterialPropertyByName<Real>(names[j]);
   }
 }

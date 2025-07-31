@@ -104,6 +104,19 @@ MaterialPropertyStorage::isRestoredProperty(const std::string & name) const
   return record.restored;
 }
 
+const std::set<const MooseObject *> &
+MaterialPropertyStorage::getConsumers(Moose::MaterialDataType type) const
+{
+  static const std::set<const MooseObject *> empty;
+
+  const auto it = _consumers.find(type);
+
+  if (it != _consumers.end())
+    return it->second;
+
+  return empty;
+}
+
 void
 MaterialPropertyStorage::updateStatefulPropsForPRefinement(
     const processor_id_type libmesh_dbg_var(pid),

@@ -17,6 +17,18 @@ namespace Moose
 namespace Kokkos
 {
 
+MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry,
+                                                 FEProblemBase & problem)
+  : ::MaterialPropertyStorage(registry, problem)
+{
+}
+
+MaterialPropertyStorage &
+MaterialPropertyStorage::cast(::MaterialPropertyStorage & storage)
+{
+  return static_cast<MaterialPropertyStorage &>(storage);
+}
+
 MaterialPropertyBase &
 MaterialPropertyStorage::addKokkosProperty(const std::string & prop_name,
                                            const std::type_info & type,

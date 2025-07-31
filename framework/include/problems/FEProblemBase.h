@@ -2066,8 +2066,8 @@ public:
   /**
    * @return The consumers of the MaterialPropertyStorage for the type \p type
    */
-  std::set<const MooseObject *> getMaterialPropertyStorageConsumers(Moose::MaterialDataType type,
-                                                                    bool is_kokkos = false) const;
+  const std::set<const MooseObject *> &
+  getMaterialPropertyStorageConsumers(Moose::MaterialDataType type, bool is_kokkos = false) const;
 
   /**
    * @returns Whether the original matrix nonzero pattern is restored before each Jacobian assembly

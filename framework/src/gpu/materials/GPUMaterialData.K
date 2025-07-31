@@ -12,11 +12,10 @@
 #include "MaterialData.h"
 
 Moose::Kokkos::MaterialPropertyBase &
-MaterialData::addKokkosPropertyHelper(
-    const std::string & prop_name,
-    const std::type_info & type,
-    const unsigned int state,
-    std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell) const
+MaterialData::addKokkosPropertyHelper(const std::string & prop_name,
+                                      const std::type_info & type,
+                                      const unsigned int state,
+                                      std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell)
 {
   auto & storage = Moose::Kokkos::MaterialPropertyStorage::cast(_storage);
 
@@ -30,7 +29,7 @@ MaterialData::declareKokkosPropertyHelper(
     const MaterialBase * declarer,
     const std::vector<unsigned int> & dims,
     const bool bnd,
-    std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell) const
+    std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell)
 {
   auto & storage = Moose::Kokkos::MaterialPropertyStorage::cast(_storage);
 
