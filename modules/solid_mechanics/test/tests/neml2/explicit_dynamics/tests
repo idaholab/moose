@@ -7,6 +7,16 @@
     input = 'neml2.i'
     exodiff = 'neml2_exodus.e'
     capabilities = 'neml2'
+    devices = 'cpu cuda'
+    valgrind = heavy
+  []
+
+  [explicit_dynamics_validation]
+    type = Exodiff
+    requirement = 'The system NEML2 based explicit dynamics simulation reults shall match those of an equivalent MOOSE simulation.'
+    input = 'moose.i'
+    exodiff = 'moose_exodus.e'
+    capabilities = 'neml2'
     valgrind = heavy
   []
 []
