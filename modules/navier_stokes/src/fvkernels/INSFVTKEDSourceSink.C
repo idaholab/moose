@@ -88,11 +88,11 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
 
   if (_temperature && !_alpha)
     paramError("alpha",
-               "The thermal expansion coefficient should be >0.0 for themal buoyancy production "
+               "The thermal expansion coefficient should be >0.0 for thermal buoyancy production "
                "correction.");
 
   if (_temperature && !_gravity)
-    paramError("gravity", "Gravity should be provided when buoyancy corrections are active.");
+    paramError("gravity", "Gravity should be provided when buoyancy correction is active.");
 }
 
 void
@@ -239,7 +239,7 @@ INSFVTKEDSourceSink::computeQpResidual()
 
     auto base_strain = symmetric_strain_tensor_sq_norm;
 
-    // Bouyancy strain
+    // Buoyancy strain
     if (_temperature)
     {
       ADRealVectorValue velocity(_u_var(elem_arg, state));
