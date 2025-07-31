@@ -145,6 +145,13 @@ MaterialPropertyStorage::haveKokkosProperty(std::string prop_name, unsigned int 
 }
 
 void
+MaterialPropertyStorage::registerLoadStore(PropertyKey key, PropertyStore store, PropertyLoad load)
+{
+  _store[key] = store;
+  _load[key] = load;
+}
+
+void
 MaterialPropertyStorage::shift()
 {
   for (unsigned int state = maxState(); state != 0; --state)
@@ -203,7 +210,7 @@ dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storag
       std::stringstream ss;
 
       for (unsigned int state = 0; state < num_states; ++state)
-        props[state][name]->store(ss);
+        storage._store[props[state][name]->loadStoreKey()](ss, props[state][name].get());
 
       // Write the temporary stream to the output stream
       dataStore(stream, ss, nullptr);
@@ -238,6 +245,6 @@ dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage
 
     if (records.count(name) && storage.getPropRecord(records[name].id).stateful())
       for (unsigned int state = 0; state < num_states; ++state)
-        props[state][name]->load(ss);
+        storage._load[props[state][name]->loadStoreKey()](ss, props[state][name].get());
   }
 }
