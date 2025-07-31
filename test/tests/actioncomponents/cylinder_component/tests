@@ -30,5 +30,26 @@
       cli_args = 'ActionComponents/cyl/direction=\'0 0 1\' ActionComponents/cyl/position=\'1 1 1\' --mesh-only 3D_cylinder_move_center_in.e'
       requirement = 'The system shall be able to create simple 3D cylindrical mesh along the z-axis centered at the point (1,1,1).'
     []
+    [single_boundary_layer]
+      type = Exodiff
+      input = '3D_cylinder.i'
+      exodiff = '3D_cylinder_single_BL_in.e'
+      cli_args = 'ActionComponents/cyl/direction=\'0 0 1\' ActionComponents/cyl/boundary_layer_width=1 --mesh-only 3D_cylinder_single_BL_in.e'
+      requirement = 'The system shall be able to create 3D cylindrical mesh with a single boundary layer.'
+    []
+    [multiple_boundary_layer]
+      type = Exodiff
+      input = '3D_cylinder.i'
+      exodiff = '3D_cylinder_multiple_BL_in.e'
+      cli_args = 'ActionComponents/cyl/direction=\'0 0 1\' ActionComponents/cyl/boundary_layer_width=1 ActionComponents/cyl/n_boundary_layers=4 --mesh-only 3D_cylinder_multiple_BL_in.e'
+      requirement = 'The system shall be able to create 3D cylindrical mesh with multiple boundary layers.'
+    []
+    [radial_rings]
+      type = Exodiff
+      input = '3D_cylinder.i'
+      exodiff = '3D_cylinder_radial_rings_in.e'
+      cli_args = 'ActionComponents/cyl/direction=\'0 0 1\' ActionComponents/cyl/n_radial_rings=4 --mesh-only 3D_cylinder_radial_rings_in.e'
+      requirement = 'The system shall be able to create 3D cylindrical mesh with multiple boundary layers.'
+    []
   []
 []
