@@ -704,7 +704,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
     {
       auto z_grid = _subchannel_mesh.getZGrid();
       auto dz = z_grid[iz] - z_grid[iz - 1];
-      Real gedge_ave = 0.0;
+      // Calculation of average mass flux of all periphery subchannels
+      Real edge_flux_ave = 0.0;
       Real mdot_sum = 0.0;
       Real si_sum = 0.0;
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
@@ -719,7 +720,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           si_sum = si_sum + Si;
         }
       }
-      gedge_ave = mdot_sum / si_sum;
+      edge_flux_ave = mdot_sum / si_sum;
 
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
       {
@@ -734,6 +735,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         Real sumWijPrimeDhij = 0.0;
         Real sweep_enthalpy = 0.0;
         Real e_cond = 0.0;
+
+        // Calculate added enthalpy from heatflux (Pin, Duct)
         Real added_enthalpy = computeAddedHeatPin(i_ch, iz);
         added_enthalpy += computeAddedHeatDuct(i_ch, iz);
 
@@ -762,26 +765,28 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           sumWijh += _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * h_star;
           counter++;
           // SWEEP FLOW is calculated if i_gap is located in the periphery
-          // and we have a wire-wrap (if i_gap is in the periphery then i_chan is in the periphery)
+          // and we have a wire-wrap (if i_gap is in the periphery then i_ch is in the periphery)
+          // There are two gaps per periphery subchannel that this is true.
           if ((subch_type_i == EChannelType::CORNER || subch_type_i == EChannelType::EDGE) &&
               (subch_type_j == EChannelType::CORNER || subch_type_j == EChannelType::EDGE) &&
               (wire_lead_length != 0) && (wire_diameter != 0))
           {
-            // donor subchannel and node of sweep flow
-            auto sweep_in = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
-            auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
-            // if one of the neighbor subchannels is the donor subchannel (the other would be the
-            // i_ch) sweep enthalpy flows into i_ch
-            if ((ii_ch == sweep_in) || (jj_ch == sweep_in))
+            // donor subchannel and node of sweep flow. The donor subchannel is the subchannel next
+            // to i_ch that sweep flow, flows from and into i_ch
+            auto sweep_donor = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
+            auto * node_sweep_donor = _subchannel_mesh.getChannelNode(sweep_donor, iz - 1);
+            // if one of the neighbor subchannels of the periphery gap is the donor subchannel
+            //(the other would be the i_ch) sweep enthalpy flows into i_ch
+            if ((ii_ch == sweep_donor) || (jj_ch == sweep_donor))
             {
               sweep_enthalpy +=
-                  computeBeta(i_gap, iz, true) * gedge_ave * Sij * (*_h_soln)(node_sin);
+                  computeBeta(i_gap, iz, true) * edge_flux_ave * Sij * (*_h_soln)(node_sweep_donor);
             }
-            // else sweep enthalpy flows out
+            // else sweep enthalpy flows out of i_ch
             else
             {
               sweep_enthalpy -=
-                  computeBeta(i_gap, iz, true) * gedge_ave * Sij * (*_h_soln)(node_in);
+                  computeBeta(i_gap, iz, true) * edge_flux_ave * Sij * (*_h_soln)(node_in);
             }
           }
           // Inner gap
@@ -1309,8 +1314,9 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
           counter++;
         }
 
-        // compute the sweep flow enthalpy change
-        Real gedge_ave = 0.0;
+        // Compute the sweep flow enthalpy change
+        // Calculation of average mass flux of all periphery subchannels
+        Real edge_flux_ave = 0.0;
         Real mdot_sum = 0.0;
         Real si_sum = 0.0;
         for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
@@ -1325,7 +1331,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             si_sum = si_sum + Si;
           }
         }
-        gedge_ave = mdot_sum / si_sum;
+        edge_flux_ave = mdot_sum / si_sum;
         auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
         PetscScalar sweep_enthalpy = 0.0;
         if ((subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER) &&
@@ -1333,9 +1339,10 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
         {
           auto beta_in = std::numeric_limits<double>::quiet_NaN();
           auto beta_out = std::numeric_limits<double>::quiet_NaN();
-          // in/out sweep channels for i_ch
-          auto sweep_i_ch = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
-          auto * node_sin = _subchannel_mesh.getChannelNode(sweep_i_ch, iz - 1);
+          // donor sweep channel for i_ch
+          auto sweep_donor = _tri_sch_mesh.getSweepFlowChans(i_ch).first;
+          auto * node_sweep_donor = _subchannel_mesh.getChannelNode(sweep_donor, iz - 1);
+          // Calculation of turbulent mixing parameter
           for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
           {
             auto chans = _subchannel_mesh.getGapChannels(i_gap);
@@ -1346,7 +1353,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             if ((subch_type_i == EChannelType::CORNER || subch_type_i == EChannelType::EDGE) &&
                 (subch_type_j == EChannelType::CORNER || subch_type_j == EChannelType::EDGE))
             {
-              if ((ii_ch == sweep_i_ch) || (jj_ch == sweep_i_ch))
+              if ((ii_ch == sweep_donor) || (jj_ch == sweep_donor))
               {
                 beta_in = computeBeta(i_gap, iz, true);
               }
@@ -1366,11 +1373,9 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
 
           auto gap = _tri_sch_mesh.getDuctToPinGap();
           auto Sij = dz * gap;
-
-          // Calculation of turbulent mixing parameter
-          auto wsweep_in = gedge_ave * beta_in * Sij;
-          auto wsweep_out = gedge_ave * beta_out * Sij;
-          auto sweep_hin = (*_h_soln)(node_sin);
+          auto wsweep_in = edge_flux_ave * beta_in * Sij;
+          auto wsweep_out = edge_flux_ave * beta_out * Sij;
+          auto sweep_hin = (*_h_soln)(node_sweep_donor);
           auto sweep_hout = (*_h_soln)(node_in);
           sweep_enthalpy = (wsweep_in * sweep_hin - wsweep_out * sweep_hout);
 
@@ -1388,7 +1393,7 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
             PetscInt col_sh = i_ch + _n_channels * (iz_ind - 1);
             LibmeshPetscCall(MatSetValues(
                 _hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &wsweep_out, ADD_VALUES));
-            PetscInt col_sh_l = sweep_i_ch + _n_channels * (iz_ind - 1);
+            PetscInt col_sh_l = sweep_donor + _n_channels * (iz_ind - 1);
             PetscScalar neg_sweep_in = -1.0 * wsweep_in;
             // coefficient of sweep_hout
             LibmeshPetscCall(MatSetValues(
