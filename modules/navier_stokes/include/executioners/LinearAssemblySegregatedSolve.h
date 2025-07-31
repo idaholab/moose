@@ -14,7 +14,7 @@
 #include "SIMPLESolveBase.h"
 #include "FaceCenteredMapFunctor.h"
 
-class LinearFVAdvectionDiffusionBC;
+class LinearFVConjugateHeatTranferBCBase;
 
 /**
  * Common base class for segregated solvers for the Navier-Stokes
@@ -43,6 +43,10 @@ public:
   const std::vector<LinearSystem *> systemsToSolve() const { return _systems_to_solve; }
 
   void setupConjugateHeatTransferContainers();
+
+  void updateCHTBoundaryCouplingSolid();
+
+  void updateCHTBoundaryCouplingFluid();
 
 protected:
   //  std::vector<unsigned int> generateBoundaryMask(const BoundaryID bid, const
@@ -159,12 +163,17 @@ protected:
 
   const std::vector<BoundaryName> _cht_boundary_names;
   const std::vector<BoundaryID> _cht_boundary_ids;
+  const std::vector<Real> _cht_solid_flux_relaxation_factor;
+  const std::vector<Real> _cht_fluid_flux_relaxation_factor;
+  const std::vector<Real> _cht_solid_temperature_relaxation_factor;
+  const std::vector<Real> _cht_fluid_temperature_relaxation_factor;
 
   /// The subset of the FaceInfo objects that belong to the given boundaries.
   std::map<BoundaryID, std::vector<const FaceInfo *>> _cht_face_info;
 
   /// The can't be const considering we need to update hte face infos
-  std::map<BoundaryID, std::pair<LinearFVAdvectionDiffusionBC *, LinearFVAdvectionDiffusionBC *>>
+  std::map<BoundaryID,
+           std::pair<LinearFVConjugateHeatTranferBCBase *, LinearFVConjugateHeatTranferBCBase *>>
       _boundary_conditions;
 
   /// Two functors per sideset, one for the solid and another for the fluid
