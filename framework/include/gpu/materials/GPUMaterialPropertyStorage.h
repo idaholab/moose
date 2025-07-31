@@ -35,20 +35,14 @@ public:
   /**
    * Constructor
    */
-  MaterialPropertyStorage(MaterialPropertyRegistry & registry, FEProblemBase & problem)
-    : ::MaterialPropertyStorage(registry, problem)
-  {
-  }
+  MaterialPropertyStorage(MaterialPropertyRegistry & registry, FEProblemBase & problem);
 
   /**
    * Cast the reference of a Kokkos material property storage from the base type to the actual type
    * @param storage The Kokkos material property storage as the reference of the base type
    * @returns The Kokkos material property storage as the reference of the actual type
    */
-  static MaterialPropertyStorage & cast(::MaterialPropertyStorage & storage)
-  {
-    return static_cast<MaterialPropertyStorage &>(storage);
-  }
+  static MaterialPropertyStorage & cast(::MaterialPropertyStorage & storage);
 
   using ::MaterialPropertyStorage::addConsumer;
   using ::MaterialPropertyStorage::getConsumers;
