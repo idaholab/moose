@@ -113,7 +113,7 @@ FieldSplitPreconditionerTempl<Base>::createMooseDM(DM * dm)
       _nl.comm().get(),
       DMCreateMoose(_nl.comm().get(), _nl, dofMap(), system(), _decomposition_split, dm));
   LibmeshPetscCallA(_nl.comm().get(),
-                    PetscObjectSetOptionsPrefix((PetscObject)*dm, petscPrefix().c_str()));
+                    PetscObjectSetOptionsPrefix((PetscObject)*dm, prefix().c_str()));
   LibmeshPetscCall(DMSetFromOptions(*dm));
   LibmeshPetscCall(DMSetUp(*dm));
 }
@@ -145,7 +145,7 @@ FieldSplitPreconditioner::setupDM()
   // Create and set up the DM that will consume the split options and deal with block matrices.
   auto * const petsc_solver =
       libMesh::cast_ptr<PetscNonlinearSolver<Number> *>(_nl.nonlinearSolver());
-  SNES snes = petsc_solver->snes(petscPrefix().c_str());
+  SNES snes = petsc_solver->snes(prefix().c_str());
   // if there exists a DMMoose object, not to recreate a new one
   LibmeshPetscCall(SNESGetDM(snes, &dm));
   if (dm)
@@ -172,9 +172,9 @@ FieldSplitPreconditioner::system() const
 }
 
 std::string
-FieldSplitPreconditioner::petscPrefix() const
+FieldSplitPreconditioner::prefix() const
 {
-  return _nl.petscPrefix();
+  return _nl.prefix();
 }
 
 KSP

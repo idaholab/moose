@@ -40,14 +40,6 @@ MooseStaticCondensationPreconditioner::prefix() const
 {
   // We always prefix the condensed system with the nonlinear system name regardless of the number
   // of systems in the problem. Maybe we'll change this later for more consistency?
-  return "-" + petscPrefix();
-}
-
-std::string
-MooseStaticCondensationPreconditioner::petscPrefix() const
-{
-  // We always prefix the condensed system with the nonlinear system name regardless of the number
-  // of systems in the problem. Maybe we'll change this later for more consistency?
   return _nl.name() + "_condensed_";
 }
 

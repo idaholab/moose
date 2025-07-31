@@ -144,21 +144,22 @@ stringify(const MffdType & t)
 void
 setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont_add_these_options)
 {
+  const auto prefix_with_dash = '-' + solver_params._prefix;
   // set PETSc options implied by a solve type
   switch (solver_params._type)
   {
     case Moose::ST_PJFNK:
       setSinglePetscOptionIfAppropriate(dont_add_these_options,
-                                        solver_params._prefix + "snes_mf_operator");
+                                        prefix_with_dash + "snes_mf_operator");
       setSinglePetscOptionIfAppropriate(dont_add_these_options,
-                                        solver_params._prefix + "mat_mffd_type",
+                                        prefix_with_dash + "mat_mffd_type",
                                         stringify(solver_params._mffd_type));
       break;
 
     case Moose::ST_JFNK:
-      setSinglePetscOptionIfAppropriate(dont_add_these_options, solver_params._prefix + "snes_mf");
+      setSinglePetscOptionIfAppropriate(dont_add_these_options, prefix_with_dash + "snes_mf");
       setSinglePetscOptionIfAppropriate(dont_add_these_options,
-                                        solver_params._prefix + "mat_mffd_type",
+                                        prefix_with_dash + "mat_mffd_type",
                                         stringify(solver_params._mffd_type));
       break;
 
@@ -166,14 +167,14 @@ setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont
       break;
 
     case Moose::ST_FD:
-      setSinglePetscOptionIfAppropriate(dont_add_these_options, solver_params._prefix + "snes_fd");
+      setSinglePetscOptionIfAppropriate(dont_add_these_options, prefix_with_dash + "snes_fd");
       break;
 
     case Moose::ST_LINEAR:
       setSinglePetscOptionIfAppropriate(
-          dont_add_these_options, solver_params._prefix + "snes_type", "ksponly");
+          dont_add_these_options, prefix_with_dash + "snes_type", "ksponly");
       setSinglePetscOptionIfAppropriate(dont_add_these_options,
-                                        solver_params._prefix + "snes_monitor_cancel");
+                                        prefix_with_dash + "snes_monitor_cancel");
       break;
   }
 
@@ -183,7 +184,7 @@ setSolverOptions(const SolverParams & solver_params, const MultiMooseEnum & dont
 
   if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CONTACT && ls_type != Moose::LS_PROJECT)
     setSinglePetscOptionIfAppropriate(
-        dont_add_these_options, solver_params._prefix + "snes_linesearch_type", stringify(ls_type));
+        dont_add_these_options, prefix_with_dash + "snes_linesearch_type", stringify(ls_type));
 }
 
 void
@@ -632,10 +633,11 @@ checkUserProvidedPetscOption(const T & option, const ParallelParamObject & param
 
 void
 addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags,
-                            const std::string & prefix,
+                            std::string prefix,
                             const ParallelParamObject & param_object,
                             PetscOptions & po)
 {
+  prefix.insert(prefix.begin(), '-');
   checkPrefix(prefix);
 
   // Update the PETSc single flags
@@ -667,8 +669,9 @@ addPetscFlagsToPetscOptions(const MultiMooseEnum & petsc_flags,
 }
 
 void
-setConvergedReasonFlags(FEProblemBase & fe_problem, const std::string & prefix)
+setConvergedReasonFlags(FEProblemBase & fe_problem, std::string prefix)
 {
+  prefix.insert(prefix.begin(), '-');
   checkPrefix(prefix);
   libmesh_ignore(fe_problem); // avoid unused warnings for old PETSc
 
@@ -693,10 +696,11 @@ void
 addPetscPairsToPetscOptions(
     const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options,
     const unsigned int mesh_dimension,
-    const std::string & prefix,
+    std::string prefix,
     const ParallelParamObject & param_object,
     PetscOptions & po)
 {
+  prefix.insert(prefix.begin(), '-');
   checkPrefix(prefix);
 
   // Setup the name value pairs
