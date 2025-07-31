@@ -613,7 +613,7 @@ AdvancedExtruderGenerator::generate()
                 intersecting_plane_normal_vec; // normal vector describing plane to extrude to
 
             // handle definition of intersecting plane.
-            if (k > 0 && k < order * num_layers - 1)
+            if (k > 0 && k < order * num_layers)
             {
               P_next = extrusion_curve->node_ptr(k + 1);
               intersecting_plane_normal_vec =
