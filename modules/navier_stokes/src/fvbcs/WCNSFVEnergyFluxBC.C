@@ -83,14 +83,16 @@ WCNSFVEnergyFluxBC::computeQpResidual()
 {
   const auto state = determineState();
 
+  // Currently an outlet
   if (!isInflow())
   {
     const auto fa = singleSidedFaceArg();
     return varVelocity(state) * _normal * _rho(fa, state) * enthalpy(fa, state, false);
   }
+  // Currently an inlet with a set enthalpy
   else if (_energy_pp)
     return -_scaling_factor * *_energy_pp / *_area_pp;
-
+  // Currently an inlet, compute the enthalpy
   return -_scaling_factor * inflowMassFlux(state) * enthalpy(singleSidedFaceArg(), state, true);
 }
 
@@ -117,12 +119,15 @@ WCNSFVEnergyFluxBC::enthalpy(const T & loc_arg,
                              const Moose::StateArg & state,
                              const bool inflow) const
 {
+  // Outlet, use interior values
   if (!inflow)
   {
     if (_h_fluid)
       return (*_h_fluid)(loc_arg, state);
+    else if (_fluid)
+      return _fluid->h_from_p_T((*_pressure)(loc_arg, state), _temperature(loc_arg, state));
     else if (_temperature_pp)
-      return (*_cp)(loc_arg, state) * (*_temperature_pp);
+      return (*_cp)(loc_arg, state) * _temperature(loc_arg, state);
   }
   else
   {
@@ -135,5 +140,5 @@ WCNSFVEnergyFluxBC::enthalpy(const T & loc_arg,
         return (*_cp)(loc_arg, state) * (*_temperature_pp);
     }
   }
-  mooseError("Should not reach here, constructor checks required functor inputs");
+  mooseError("Should not reach here, constructor checks required functor inputs to flux BC");
 }
