@@ -537,7 +537,6 @@ AdvancedExtruderGenerator::generate()
   libMesh::Node * reference_point;
   if (_extrude_along_curve)
     reference_point = extrusion_curve->node_ptr(0);
-
   libMesh::Real start_radius =
       AdvancedExtruderGenerator::calculateStartRadius(extrusion_curve, input);
 
@@ -547,6 +546,8 @@ AdvancedExtruderGenerator::generate()
   else
     end_radius =
         AdvancedExtruderGenerator::calculateEndRadius(extrusion_curve, target_mesh, start_radius);
+  if (std::abs(start_radius - end_radius) > libMesh::TOLERANCE)
+    _console << "Expanding radially with ratio: " << end_radius / start_radius << std::endl;
 
   // Create translated layers of nodes in the direction of extrusion
   for (const auto & node : input->node_ptr_range())
@@ -575,7 +576,6 @@ AdvancedExtruderGenerator::generate()
         bias = _biases[e];
       }
 
-      libMesh::Real t; // parameter for radial expansion
       unsigned int total_extrap_heights =
           order * num_layers +
           (e == 0 ? 1 : 0); // total number of extrapolations steps to take per node
@@ -595,7 +595,6 @@ AdvancedExtruderGenerator::generate()
           libMesh::Real step_size;
           if (_extrude_along_curve)
           {
-            libMesh::Node * P_next; // next point along curve (conditionally set)
             libMesh::Node * P_current =
                 extrusion_curve->node_ptr(k); // current point in extrusion curve
             libMesh::Node * P_prev =
@@ -615,25 +614,19 @@ AdvancedExtruderGenerator::generate()
             // handle definition of intersecting plane.
             if (k > 0 && k < order * num_layers)
             {
-              P_next = extrusion_curve->node_ptr(k + 1);
+              libMesh::Node * P_next = extrusion_curve->node_ptr(k + 1);
               intersecting_plane_normal_vec =
                   *P_next - *P_prev; // this approximates the derivative at the spline point
             }
-            else if (k == 1)
-            {
-              P_next = extrusion_curve->node_ptr(k + 1);
-              intersecting_plane_normal_vec = _start_extrusion_direction + (*P_next - *P_current);
-            }
             else
-            {
               intersecting_plane_normal_vec = _end_extrusion_direction;
-            }
+
             intersecting_plane_normal_vec /= intersecting_plane_normal_vec.norm(); // normalize
 
             if (prev_node_distance_to_spline > libMesh::TOLERANCE) // check to see if on the spline
             {
-              t = (double)k /
-                  (double)(total_extrap_heights - 1); // parameter for expansion function
+              const Real t = (double)k /
+                             (double)(total_extrap_heights - 1); // parameter for expansion function
 
               libMesh::RealVectorValue current_plane_normal_vec =
                   a_vec.cross(b_vec); // normal vector that defines the first plane
@@ -648,6 +641,7 @@ AdvancedExtruderGenerator::generate()
               // Handle if we are expanding the radius as we extrude.
               if (!MooseUtils::absoluteFuzzyEqual(end_radius, start_radius))
               {
+                std::cout << "DEBUG: Expanding radius!" << std::endl;
                 libMesh::Real radius_scaling =
                     start_node_radius /
                     start_radius; // fraction of the total starting radius the node lives in

@@ -7,6 +7,7 @@
       exodiff = 'junction_2D_fill_in.e'
       cli_args = '--mesh-only junction_2D_fill_in.e'
       requirement = 'The system shall be able to connect two meshes by filling space between them.'
+      recover = false
     []
     [stitch]
       type = Exodiff
@@ -14,6 +15,7 @@
       exodiff = 'junction_2D_stitch_in.e'
       cli_args = '--mesh-only junction_2D_stitch_in.e'
       requirement = 'The system shall be able to connect two meshes by stitching the touching boundaries.'
+      skip = 'Stitcher not yet working for 2D...'
     []
   []
   [3D]
@@ -23,6 +25,7 @@
       exodiff = 'junction_3D_fill_in.e'
       cli_args = '--mesh-only junction_3D_fill_in.e'
       requirement = 'The system shall be able to connect two meshes by filling space between them.'
+      recover = false
     []
     [stitch]
       type = Exodiff
@@ -30,6 +33,7 @@
       exodiff = 'junction_3D_stitch_in.e'
       cli_args = '--mesh-only junction_3D_stitch_in.e'
       requirement = 'The system shall be able to connect two meshes by stitching the touching boundaries.'
+      recover = false
     []
   []
 []

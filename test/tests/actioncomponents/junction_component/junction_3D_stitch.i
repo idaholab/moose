@@ -28,10 +28,8 @@
     type = JunctionComponent
     first_component = cyl1
     second_component = cyl2
-    first_boundary = 'cyl1_left'
-    second_boundary = 'cyl2_right'
+    first_boundary = 'cyl1_top_boundary'
+    second_boundary = 'cyl2_bottom_boundary'
     junction_method = stitch_meshes
-
-    # optional parameters
   []
 []
