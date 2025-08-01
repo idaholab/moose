@@ -44,12 +44,12 @@ public:
 
   /// Add kernels.
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
-  virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
+  virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc);
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
   virtual void ApplyEssentialBCs();
 
   /// Build forms
-  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
+  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions, Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions,
                     const Moose::MFEM::FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level);
   virtual void BuildLinearForms();
@@ -79,7 +79,7 @@ public:
 
   /// Update variable from solution vector after solve
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
-                                  Moose::MFEM::GridFunctions & gridfunctions);
+                                  Moose::MFEM::GridFunctions & gridfunctions, Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions);
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 

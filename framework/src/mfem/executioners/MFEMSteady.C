@@ -36,12 +36,21 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
 void
 MFEMSteady::constructProblemOperator()
 {
-  _problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
-  auto problem_operator =
-      std::make_unique<Moose::MFEM::EquationSystemProblemOperator>(_problem_data);
-
   _problem_operator.reset();
-  _problem_operator = std::move(problem_operator);
+  if (_problem_data.num_type == MFEMProblemData::NumericType::REAL)
+  {
+    _problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
+    _problem_operator = std::make_unique<Moose::MFEM::EquationSystemProblemOperator>(_problem_data);
+  }
+  else if (_problem_data.num_type == MFEMProblemData::NumericType::COMPLEX)
+  {
+    _problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
+    _problem_operator =
+        std::make_unique<Moose::MFEM::ComplexEquationSystemProblemOperator>(_problem_data);
+  }
+  else
+    mooseError("Unknown numeric type. "
+               "Please set the numeric type to either 'REAL' or 'COMPLEX'.");
 }
 
 void
@@ -51,10 +60,7 @@ MFEMSteady::init()
   _mfem_problem.initialSetup();
 
   // Set up initial conditions
-  _problem_data.eqn_system->Init(
-      _problem_data.gridfunctions,
-      _problem_data.fespaces,
-      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
+  _problem_data.eqn_system->Init(_problem_data.gridfunctions, _problem_data.cpx_gridfunctions, _problem_data.fespaces, getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
   _problem_operator->SetGridFunctions();
   _problem_operator->Init(_problem_data.f);

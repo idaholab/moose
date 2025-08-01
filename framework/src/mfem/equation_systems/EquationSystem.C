@@ -274,7 +274,7 @@ EquationSystem::GetGradient(const mfem::Vector &) const
 
 void
 EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
-                                   Moose::MFEM::GridFunctions & gridfunctions)
+                                   Moose::MFEM::GridFunctions & gridfunctions, Moose::MFEM::ComplexGridFunctions & /*cpx_gridfunctions*/)
 {
   for (const auto i : index_range(_trial_var_names))
   {
@@ -285,11 +285,14 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
 }
 
 void
-EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
+EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions, Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions,
                      const Moose::MFEM::FESpaces & /*fespaces*/,
                      mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
+
+  if (cpx_gridfunctions.size())
+    mooseError("Complex variables have been created but the executioner numeric type has not been set to complex. Please set Executioner/numeric_type = complex.");
 
   for (auto & test_var_name : _test_var_names)
   {
@@ -302,11 +305,12 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
     // Store pointers to variable FESpaces
     _test_pfespaces.push_back(gridfunctions.Get(test_var_name)->ParFESpace());
     // Create auxiliary gridfunctions for applying Dirichlet conditions
-    _xs.emplace_back(
-        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
-    _dxdts.emplace_back(
-        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
-    _trial_variables.Register(test_var_name, gridfunctions.GetShared(test_var_name));
+    _xs.emplace_back(std::make_unique<mfem::ParGridFunction>(
+        gridfunctions.Get(test_var_name)->ParFESpace()));
+    _dxdts.emplace_back(std::make_unique<mfem::ParGridFunction>(
+        gridfunctions.Get(test_var_name)->ParFESpace()));
+    _trial_variables.Register(test_var_name,
+                                       gridfunctions.GetShared(test_var_name));
   }
 }
 

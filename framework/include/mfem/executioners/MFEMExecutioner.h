@@ -27,6 +27,11 @@ public:
   /// Virtual method to construct the ProblemOperator. Call for default problems.
   virtual void constructProblemOperator() = 0;
 
+  /**
+   * Set the numeric type used in the problem.
+   */
+  void setNumericType();
+
 protected:
   MFEMProblem & _mfem_problem;
   MFEMProblemData & _problem_data;
