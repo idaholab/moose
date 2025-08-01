@@ -40,7 +40,7 @@ NEML2Assembly::validParams()
 NEML2Assembly::NEML2Assembly(const InputParameters & parameters) : ElementUserObject(parameters) {}
 
 void
-NEML2Assembly::invalidate() const
+NEML2Assembly::invalidate()
 {
   _up_to_date = false;
 }
