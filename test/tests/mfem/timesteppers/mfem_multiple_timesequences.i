@@ -54,6 +54,7 @@
 
 [Executioner]
   type = MFEMTransient
+  device = cpu
   end_time = 0.8
 
   # Use as many different time sequence steppers as we could to test the compositionDT

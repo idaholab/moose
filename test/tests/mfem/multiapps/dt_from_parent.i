@@ -53,6 +53,7 @@
 
 [Executioner]
   type = MFEMTransient
+  device = cpu
   num_steps = 10
   dt = 0.2
 []
