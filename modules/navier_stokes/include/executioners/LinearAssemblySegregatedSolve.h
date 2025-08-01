@@ -14,7 +14,7 @@
 #include "SIMPLESolveBase.h"
 #include "FaceCenteredMapFunctor.h"
 
-class LinearFVConjugateHeatTranferBCBase;
+class LinearFVConjugateHeatTransferBCBase;
 
 /**
  * Common base class for segregated solvers for the Navier-Stokes
@@ -173,7 +173,7 @@ protected:
 
   /// The can't be const considering we need to update hte face infos
   std::map<BoundaryID,
-           std::pair<LinearFVConjugateHeatTranferBCBase *, LinearFVConjugateHeatTranferBCBase *>>
+           std::pair<LinearFVConjugateHeatTransferBCBase *, LinearFVConjugateHeatTransferBCBase *>>
       _boundary_conditions;
 
   /// Two functors per sideset, one for the solid and another for the fluid

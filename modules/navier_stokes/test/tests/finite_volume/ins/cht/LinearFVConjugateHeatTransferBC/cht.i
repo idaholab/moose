@@ -320,46 +320,25 @@ advected_interp_method = 'upwind'
     boundary = 'solid_left solid_right'
   []
 
-# interface bcs
-
-# pg bc
-#  [fluid_solid]
-#    type = LinearFVConvectiveHeatTransferBC
-#    variable = T_fluid
-#    T_solid = T_solid
-#    T_fluid = T_fluid
-#    boundary = interface
-#    h = ${h_test}
-#  []
-#  [solid_fluid]
-#    type = LinearFVConvectiveHeatTransferBC
-#    variable = T_solid
-#    T_solid = T_solid
-#    T_fluid = T_fluid
-#    boundary = interface
-#    h = ${h_test}
-#  []
-
-# pg bc v2
   [fluid_solid]
-    type = LinearFVConjugateHeatTransferBC
+    type = LinearFVRobinConjugateHeatTransferBC
     variable = T_fluid
     T_solid = T_solid
     T_fluid = T_fluid
     boundary = interface
+    incoming_flux = heat_flux_solid_interface
     h = ${h_f}
-    solid_conductivity = ${k_s}
-    fluid_conductivity = ${k}
+    thermal_conductivity = ${k}
   []
   [solid_fluid]
-    type = LinearFVConjugateHeatTransferBC
+    type = LinearFVRobinConjugateHeatTransferBC
     variable = T_solid
     T_solid = T_solid
     T_fluid = T_fluid
     boundary = interface
     h = ${h_s}
-    solid_conductivity = ${k_s}
-    fluid_conductivity = ${k}
+    thermal_conductivity = ${k_s}
+    incoming_flux = heat_flux_fluid_interface
   []
 
   [outlet_T]
@@ -438,6 +417,11 @@ advected_interp_method = 'upwind'
 
 [Executioner]
   type = SIMPLE
+  cht_boundaries = 'interface'
+  cht_solid_flux_relaxation_factor = 1.0
+  cht_fluid_flux_relaxation_factor = 1.0
+  cht_solid_temperature_relaxation_factor = 1.0
+  cht_fluid_temperature_relaxation_factor = 1.0
   momentum_l_abs_tol = 1e-13
   pressure_l_abs_tol = 1e-13
   energy_l_abs_tol = 1e-13
@@ -454,7 +438,7 @@ advected_interp_method = 'upwind'
   momentum_equation_relaxation = 0.8
   energy_equation_relaxation = 1.0
   pressure_variable_relaxation = 0.3
-  num_iterations = 1000
+  num_iterations = 2
   pressure_absolute_tolerance = 1e-10
   momentum_absolute_tolerance = 1e-10
   energy_absolute_tolerance = 1e-10
@@ -469,7 +453,7 @@ advected_interp_method = 'upwind'
   solid_energy_petsc_options_value = 'hypre boomeramg'
   print_fields = false
   continue_on_max_its = true
-  num_cht_fpi = 1
+  num_cht_fpi = 3
   cht_fpi_tolerance = 1e-6
 []
 

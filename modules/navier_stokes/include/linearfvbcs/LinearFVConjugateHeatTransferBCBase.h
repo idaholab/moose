@@ -11,14 +11,14 @@
 
 #include "LinearFVAdvectionDiffusionBC.h"
 
-class LinearFVConjugateHeatTranferBCBase : public LinearFVAdvectionDiffusionBC
+class LinearFVConjugateHeatTransferBCBase : public LinearFVAdvectionDiffusionBC
 {
 public:
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
    */
-  LinearFVConjugateHeatTranferBCBase(const InputParameters & parameters);
+  LinearFVConjugateHeatTransferBCBase(const InputParameters & parameters);
 
   static InputParameters validParams();
 

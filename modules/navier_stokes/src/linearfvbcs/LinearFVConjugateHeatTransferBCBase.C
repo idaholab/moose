@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearFVConjugateHeatTranferBCBase.h"
+#include "LinearFVConjugateHeatTransferBCBase.h"
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", LinearFVConjugateHeatTransferBC);
 
 InputParameters
-LinearFVConjugateHeatTranferBCBase::validParams()
+LinearFVConjugateHeatTransferBCBase::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
   params.addRequiredParam<MooseFunctorName>("thermal_conductivity",
@@ -22,7 +22,7 @@ LinearFVConjugateHeatTranferBCBase::validParams()
   return params;
 }
 
-LinearFVConjugateHeatTranferBCBase::LinearFVConjugateHeatTranferBCBase(
+LinearFVConjugateHeatTransferBCBase::LinearFVConjugateHeatTransferBCBase(
     const InputParameters & parameters)
   : LinearFVAdvectionDiffusionBC(parameters),
     _thermal_conductivity(getFunctor<Real>("thermal_conductivity"))
@@ -31,7 +31,7 @@ LinearFVConjugateHeatTranferBCBase::LinearFVConjugateHeatTranferBCBase(
 }
 
 Real
-LinearFVConjugateHeatTranferBCBase::computeBoundaryConductionFlux() const
+LinearFVConjugateHeatTransferBCBase::computeBoundaryConductionFlux() const
 {
   const auto * elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
                                ? _current_face_info->elemInfo()

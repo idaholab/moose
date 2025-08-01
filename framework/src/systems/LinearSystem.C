@@ -35,6 +35,8 @@
 #include "SolutionInvalidity.h"
 #include "MooseLinearVariableFV.h"
 #include "LinearFVTimeDerivative.h"
+#include "LinearFVFluxKernel.h"
+#include "LinearFVElementalKernel.h"
 
 // libMesh
 #include "libmesh/linear_solver.h"

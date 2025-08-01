@@ -11,7 +11,7 @@
 #include "FEProblem.h"
 #include "SegregatedSolverUtils.h"
 #include "LinearSystem.h"
-#include "LinearFVConjugateHeatTranferBCBase.h"
+#include "LinearFVConjugateHeatTransferBCBase.h"
 
 using namespace libMesh;
 
@@ -320,6 +320,7 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
 void
 LinearAssemblySegregatedSolve::initialSetup()
 {
+  std::cout << "Initial setup in seggo" << std::endl;
   setupConjugateHeatTransferContainers();
 }
 
@@ -619,12 +620,12 @@ LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
         dynamic_cast<const MooseLinearVariableFVReal *>(&_solid_energy_system->getVariable(0, 0));
 
     // These can't be consts because we need to update the boundary conditions with the face infos
-    auto * fluid_bc = dynamic_cast<LinearFVConjugateHeatTranferBCBase *>(
+    auto * fluid_bc = dynamic_cast<LinearFVConjugateHeatTransferBCBase *>(
         fluid_variable->getBoundaryCondition(bd_id));
     mooseAssert(fluid_bc,
                 "We must have a boundary condition defined on the boundary from the fluid side and "
                 "it has to be a LinearFVAdvectionDiffusionBC!");
-    auto * solid_bc = dynamic_cast<LinearFVConjugateHeatTranferBCBase *>(
+    auto * solid_bc = dynamic_cast<LinearFVConjugateHeatTransferBCBase *>(
         solid_variable->getBoundaryCondition(bd_id));
     mooseAssert(solid_bc,
                 "We must have a boundary condition defined on the boundary from the fluid side and "
@@ -818,6 +819,7 @@ LinearAssemblySegregatedSolve::solve()
       {
         // We set the preconditioner/controllable parameters through petsc options. Linear
         // tolerances will be overridden within the solver.
+        updateCHTBoundaryCouplingFluid();
         Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
         ns_residuals[momentum_residual.size() + _has_energy_system] =
             solveAdvectedSystem(_energy_sys_number,
@@ -831,6 +833,7 @@ LinearAssemblySegregatedSolve::solve()
           // We set the preconditioner/controllable parameters through petsc options. Linear
           // tolerances will be overridden within the solver.
           _energy_system->computeGradients();
+          updateCHTBoundaryCouplingSolid();
           Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
           ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
               solveSolidEnergy();
