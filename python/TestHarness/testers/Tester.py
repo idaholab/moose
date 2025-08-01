@@ -578,7 +578,7 @@ class Tester(MooseObject, OutputInterface):
             capabilities = options._capabilities.copy()
             def augment(key, val_doc):
                 if key in capabilities:
-                    raise Exception(f"Capability {key} is defined by the app, but it is a reserved dynamic test harness capability. This is an application bug.")
+                    raise ValueError(f"Capability {key} is defined by the app, but it is a reserved dynamic test harness capability. This is an application bug.")
                 capabilities[key] = val_doc
 
             augment('scale_refine', [options.scaling, 'The number of refinements to do when scaling'])
