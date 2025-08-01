@@ -44,7 +44,7 @@ template <bool is_ad>
 TungstenThermalPropertiesMaterialTempl<is_ad>::TungstenThermalPropertiesMaterialTempl(
     const InputParameters & parameters)
   : Material(parameters),
-    _temperature(genericCoupledValue<is_ad>("temperature")),
+    _temperature(coupledGenericValue<is_ad>("temperature")),
     _k(declareGenericProperty<Real, is_ad>(
         getParam<std::string>(SolidPropertiesNames::thermal_conductivity))),
     _c_p(declareGenericProperty<Real, is_ad>(
