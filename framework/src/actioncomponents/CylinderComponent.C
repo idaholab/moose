@@ -38,9 +38,20 @@ CylinderComponent::validParams()
   params.addRequiredRangeCheckedParam<Real>("radius", "radius>0", "Radius of the cylinder");
   params.addRequiredRangeCheckedParam<Real>("length", "length>0", "Length/Height of the cylinder");
 
+  params.addParam<unsigned int>("n_radial",
+                                "Number of radial elements. Only assign if mesh is 2D!");
+  params.addParam<unsigned int>(
+      "n_radial_rings",
+      1,
+      "Number of radial rings within the mesh (does not affect boundary layers).");
+
   params.addRequiredParam<unsigned int>("n_axial", "Number of axial elements of the cylinder");
-  params.addParam<unsigned int>("n_radial", "Number of radial elements of the cylinder");
-  params.addParam<unsigned int>("n_azimuthal", "Number of azimuthal elements of the cylinder");
+  params.addRangeCheckedParam<Real>("boundary_layer_width",
+                                    "boundary_layer_width>=0",
+                                    "The width of the boundary layer (if assigned).");
+  params.addParam<unsigned int>("n_boundary_layers", 1, "The number of boundary layers.");
+  params.addParam<unsigned int>("n_sectors",
+                                "Number of azimuthal sectors in each quadrant of cylinder face.");
 
   params.addParam<SubdomainName>("block", "Block name for the cylinder");
 
@@ -77,6 +88,7 @@ CylinderComponent::addMeshGenerators()
     if (_dimension == 2)
     {
       params.set<Real>("ymax") = {getParam<Real>("radius")};
+      params.set<Real>("ymin") = {-getParam<Real>("radius")};
       if (!isParamValid("n_radial"))
         paramError("n_radial", "Should be provided for a 2D cylinder");
       params.set<unsigned int>("ny") = {getParam<unsigned int>("n_radial")};
@@ -93,13 +105,59 @@ CylinderComponent::addMeshGenerators()
         "GeneratedMeshGenerator", name() + "_base", params);
     _mg_names.push_back(name() + "_base");
   }
-  else
+  else if (_dimension == 3)
   {
-    paramError("dimension", "3D cylinder is not implemented");
-    if (!isParamValid("n_radial"))
-      paramError("n_radial", "Should be provided for a 3D cylinder");
-    if (!isParamValid("n_azimuthal"))
-      paramError("n_azimuthal", "Should be provided in 3D");
+    if (!isParamValid("n_axial"))
+      paramError("n_axial", "Should be provided for a 3D cylinder");
+    if (!isParamValid("n_sectors"))
+      paramError("n_sectors", "Should be provided in 3D");
+
+    // create circular face
+    InputParameters circle_params = _factory.getValidParams("ConcentricCircleMeshGenerator");
+    circle_params.set<bool>("preserve_volumes") = true;
+    circle_params.set<bool>("has_outer_square") = false;
+    if (isParamValid("boundary_layer_width"))
+    {
+      Real inner_radius = getParam<Real>("radius") - getParam<Real>("boundary_layer_width");
+      circle_params.set<std::vector<Real>>("radii") = {inner_radius, getParam<Real>("radius")};
+      circle_params.set<std::vector<unsigned int>>("rings") = {
+          getParam<unsigned int>("n_radial_rings"), getParam<unsigned int>("n_boundary_layers")};
+    }
+    else
+    {
+      circle_params.set<std::vector<Real>>("radii") = {getParam<Real>("radius")};
+      circle_params.set<std::vector<unsigned int>>("rings") = {
+          getParam<unsigned int>("n_radial_rings")};
+    }
+
+    circle_params.set<unsigned int>("num_sectors") = getParam<unsigned int>("n_sectors");
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "ConcentricCircleMeshGenerator", name() + "_circle_base", circle_params);
+    _mg_names.push_back(name() + "_circle_base");
+
+    // rotate to have extrusion axis be along x-axis
+    InputParameters rotate_params = _factory.getValidParams("TransformGenerator");
+    rotate_params.set<MeshGeneratorName>("input") = _mg_names.back();
+    rotate_params.set<MooseEnum>("transform") = "ROTATE_EXT";
+    RealVectorValue angles(-90, -90, 90);
+    rotate_params.set<RealVectorValue>("vector_value") = angles;
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "TransformGenerator", name() + "_3D_init_rotate", rotate_params);
+    _mg_names.push_back(name() + "_3D_init_rotate");
+
+    // extrude surface
+    InputParameters ext_params = _factory.getValidParams("AdvancedExtruderGenerator");
+    ext_params.set<std::vector<unsigned int>>("num_layers") = {getParam<unsigned int>("n_axial")};
+    ext_params.set<MeshGeneratorName>("input") = _mg_names.back();
+    ext_params.set<std::vector<Real>>("heights") = {_height};
+    ext_params.set<BoundaryName>("bottom_boundary") = name() + "_bottom_boundary";
+    ext_params.set<BoundaryName>("top_boundary") = name() + "_top_boundary";
+
+    const Point default_direction(1, 0, 0);
+    ext_params.set<Point>("direction") = default_direction;
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "AdvancedExtruderGenerator", name() + "_base", ext_params);
+    _mg_names.push_back(name() + "_base");
   }
 
   ComponentMeshTransformHelper::addMeshGenerators();
