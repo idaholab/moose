@@ -662,7 +662,7 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
     // Last time in the set
     const Real prev_reset_time = _reset_times->getPreviousTime(target_time + timestep_tol, false);
 
-    // Not time to reset yet
+    // Gathered reset time is before simulation start time, no need to reset
     if (prev_reset_time > _app.getStartTime())
     {
       // Check if we already reset this time
