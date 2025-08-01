@@ -7,8 +7,18 @@
   file = ../mesh/square.e
 []
 
+[FESpaces]
+  [H1FESpace]
+    type = MFEMScalarFESpace
+    fec_type = H1
+    fec_order = FIRST
+  []
+[]
+
 [Variables]
   [u]
+    type = MFEMVariable
+    fespace = H1FESpace
   []
 []
 
