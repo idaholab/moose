@@ -43,7 +43,7 @@ public:
   bool upToDate() const { return _up_to_date; }
 
   /// Invalidate the cached assembly information
-  void invalidate() const;
+  void invalidate();
 
   void meshChanged() override { invalidate(); }
 
@@ -54,7 +54,7 @@ public:
 
 protected:
   /// Whether the current assembly cache is up to date
-  mutable bool _up_to_date = false;
+  bool _up_to_date = false;
 
   /// number of elements on this rank
   int64_t _nelem;

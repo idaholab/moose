@@ -163,9 +163,6 @@ NEML2FEInterpolation::invalidateFEMContext() const
 {
   _fem_context_up_to_date = false;
   invalidateInterpolations();
-
-  // Also invalidate the assembly object
-  _neml2_assembly.invalidate();
 }
 
 void
