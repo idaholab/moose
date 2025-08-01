@@ -58,16 +58,16 @@ INSFVMixingLengthTurbulentViscosityAux::computeValue()
   const Elem & elem = *_current_elem;
   const auto state = determineState();
 
-  const auto & grad_u = _u_var->adGradSln(&elem, state);
-  ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
+  const auto & grad_u = MetaPhysicL::raw_value(_u_var->adGradSln(&elem, state));
+  Real symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
   if (_dim >= 2)
   {
-    const auto & grad_v = _v_var->adGradSln(&elem, state);
+    const auto & grad_v = MetaPhysicL::raw_value(_v_var->adGradSln(&elem, state));
     symmetric_strain_tensor_norm +=
         2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
     if (_dim >= 3)
     {
-      const auto & grad_w = _w_var->adGradSln(&elem, state);
+      const auto & grad_w = MetaPhysicL::raw_value(_w_var->adGradSln(&elem, state));
       symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
                                       Utility::pow<2>(grad_u(2) + grad_w(0)) +
                                       Utility::pow<2>(grad_v(2) + grad_w(1));
@@ -77,8 +77,8 @@ INSFVMixingLengthTurbulentViscosityAux::computeValue()
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
   // Compute the eddy diffusivitiy
-  ADReal eddy_diff = symmetric_strain_tensor_norm * _mixing_len[_qp] * _mixing_len[_qp];
+  Real eddy_diff = symmetric_strain_tensor_norm * _mixing_len[_qp] * _mixing_len[_qp];
 
   // Return the turbulent stress contribution to the momentum equation
-  return eddy_diff.value();
+  return eddy_diff;
 }

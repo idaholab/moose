@@ -24,7 +24,7 @@ HasPorosityJumpFace::validParams()
 }
 
 HasPorosityJumpFace::HasPorosityJumpFace(const InputParameters & parameters)
-  : AuxKernel(parameters), _eps(getFunctor<ADReal>(NS::porosity))
+  : AuxKernel(parameters), _eps(getFunctor<Real>(NS::porosity))
 {
   if (isNodal())
     mooseError("This AuxKernel only supports Elemental fields");
@@ -41,7 +41,7 @@ HasPorosityJumpFace::computeValue()
               ? _mesh.faceInfo(_current_elem, s)
               : _mesh.faceInfo(neighbor, neighbor->which_neighbor_am_i(_current_elem));
       mooseAssert(fi, "This should be non-null");
-      if (std::get<0>(NS::isPorosityJumpFace(_eps, *fi, determineState())))
+      if (std::get<0>(NS::isPorosityJumpFace<false>(_eps, *fi, determineState())))
         return 1;
     }
 

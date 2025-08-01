@@ -38,8 +38,8 @@ WallFunctionYPlusAux::WallFunctionYPlusAux(const InputParameters & params)
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-    _rho(getFunctor<ADReal>("rho")),
-    _mu(getFunctor<ADReal>("mu")),
+    _rho(getFunctor<Real>("rho")),
+    _mu(getFunctor<Real>("mu")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
   if (!_u_var)
@@ -98,24 +98,23 @@ WallFunctionYPlusAux::computeValue()
   const auto state = determineState();
 
   // Get the velocity vector
-  ADRealVectorValue velocity(_u_var->getElemValue(&elem, state));
+  RealVectorValue velocity(_u_var->getElemValue(&elem, state).value());
   if (_v_var)
-    velocity(1) = _v_var->getElemValue(&elem, state);
+    velocity(1) = _v_var->getElemValue(&elem, state).value();
   if (_w_var)
-    velocity(2) = _w_var->getElemValue(&elem, state);
+    velocity(2) = _w_var->getElemValue(&elem, state).value();
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
   Real dist = std::abs(wall_vec * normal);
-  ADReal perpendicular_speed = velocity * normal;
-  ADRealVectorValue parallel_velocity = velocity - perpendicular_speed * normal;
-  ADReal parallel_speed = parallel_velocity.norm();
-  ADRealVectorValue parallel_dir = parallel_velocity / parallel_speed;
+  Real perpendicular_speed = velocity * normal;
+  RealVectorValue parallel_velocity = velocity - perpendicular_speed * normal;
+  Real parallel_speed = parallel_velocity.norm();
 
-  if (parallel_speed.value() < 1e-6)
+  if (parallel_speed < 1e-6)
     return 0;
 
-  if (!std::isfinite(parallel_speed.value()))
-    return parallel_speed.value();
+  if (!std::isfinite(parallel_speed))
+    return parallel_speed;
 
   // Compute the friction velocity and the wall shear stress
   const auto elem_arg = makeElemArg(_current_elem);
@@ -124,5 +123,5 @@ WallFunctionYPlusAux::computeValue()
   ADReal u_star = NS::findUStar<ADReal>(mu.value(), rho.value(), parallel_speed, dist);
   ADReal tau = u_star * u_star * rho;
 
-  return (dist * u_star * rho / mu).value();
+  return (dist * u_star * rho / mu);
 }
