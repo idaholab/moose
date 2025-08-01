@@ -170,6 +170,18 @@
     valgrind = 'none' # http library is not completely valgrind clean
   []
 
+  [terminate]
+    type = CSVDiff
+    input = get_postprocessor.i
+    csvdiff = get_postprocessor_out.csv
+    command_proxy = 'terminate.py 3'
+    cli_args = 'Executioner/num_steps=100' # Greater than the what is in gold file
+    required_python_packages = requests
+    recover = false
+    requirement = 'The system shall support terminating the simulation at a requested timestep before the simulation is complete.'
+    valgrind = 'none' # http library is not completely valgrind clean
+  []
+
   # We cannot run these tests with valgrind because they come from the python script, which will terminate
   # the MOOSE process early and therefore we won't receive and of the valgrind summary output
   [errors]

@@ -311,6 +311,22 @@ WebServerControl::startServer()
             return error("The control is not currently waiting");
           });
 
+  // GET /terminate, Returns code 200 and tell FEProblemBase to terminate solve
+  _server->when("/terminate")
+      ->requested(
+          [this, &error](const HttpRequest &)
+          {
+            if (this->_currently_waiting.load())
+            {
+              this->_fe_problem.terminateSolve();
+              this->_currently_waiting.store(false);
+              return HttpResponse{200};
+            }
+
+            // Not currently waiting
+            return error("The control is not currently waiting");
+          });
+
   _server_thread = std::make_unique<std::thread>(
       [this]
       {

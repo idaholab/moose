@@ -416,6 +416,17 @@ class MooseControl:
             raise self.ControlException(f'Unexpected data {r_json} from continue')
         logger.debug(f'Successfully told the webserver to continue')
 
+    def setTerminate(self):
+        """Tells the WebServerControl to terminate the simulation gracefully."""
+        logger.info(f'Telling the webserver to terminate')
+        self._requireWaiting()
+        status, r_json = self._get('terminate')
+        if status != 200:
+            raise self.ControlException(f'Unexpected status {status} from terminate')
+        if r_json is not None:
+            raise self.ControlException(f'Unexpected data {r_json} from terminate')
+        logger.debug(f'Successfully told the webserver to terminate')
+
     def _setControllable(self, path: str, type: str, value):
         """Internal helper for setting a controllable value"""
         logger.info(f'Setting controllable value {path}')
