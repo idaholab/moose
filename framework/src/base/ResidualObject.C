@@ -53,11 +53,12 @@ ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal
     _assembly(_subproblem.assembly(_tid, _sys.number())),
     _mesh(_subproblem.mesh())
 {
+#ifdef MOOSE_KOKKOS_ENABLED
   // Calling this constructor while not executing actions means this object is being
   // copy-constructed
-  if (parameters.isParamValid("_kokkos_object") &&
-      !_fe_problem.getMooseApp().currentlyExecutingActions())
+  if (isKokkosObject() && !_fe_problem.getMooseApp().currentlyExecutingActions())
     return;
+#endif
 }
 
 void

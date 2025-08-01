@@ -115,12 +115,6 @@ protected:
                               const std::vector<unsigned int> & dims = {});
 
   /**
-   * Get the material data type
-   * @returns The material data type
-   */
-  virtual Moose::MaterialDataType materialDataType() = 0;
-
-  /**
    * Get the number of elements this material operates on for element material property evaluation
    * @returns The number of elements
    */
