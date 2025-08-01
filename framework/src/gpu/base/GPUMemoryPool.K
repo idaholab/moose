@@ -27,7 +27,7 @@ MemoryPool::MemoryPool(size_t size, unsigned int ways)
 
   // clang-format on
 
-  _pools.copy();
+  _pools.copyToDevice();
 }
 
 } // namespace Kokkos

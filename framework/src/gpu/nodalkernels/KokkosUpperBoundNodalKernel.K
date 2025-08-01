@@ -14,34 +14,13 @@ registerMooseObject("MooseApp", KokkosUpperBoundNodalKernel);
 InputParameters
 KokkosUpperBoundNodalKernel::validParams()
 {
-  InputParameters params = NodalKernel::validParams();
+  InputParameters params = KokkosBoundNodalKernel::validParams();
   params.addClassDescription("Used to prevent a coupled variable from going above a upper bound");
-  params.addRequiredCoupledVar(
-      "v", "The coupled variable we require to be greater than the upper bound");
   params.addParam<Real>("upper_bound", 0, "The upper bound on the coupled variable");
-  params.addParam<std::vector<BoundaryName>>(
-      "exclude_boundaries",
-      {},
-      "Boundaries on which not to execute the NodalKernel. This can be useful for avoiding "
-      "singuarility in the matrix in case a constraint is active in the same place that a "
-      "DirichletBC is set");
   return params;
 }
 
 KokkosUpperBoundNodalKernel::KokkosUpperBoundNodalKernel(const InputParameters & parameters)
-  : NodalKernel(parameters),
-    _v_var(coupled("v")),
-    _v(kokkosCoupledNodalValue("v")),
-    _upper_bound(getParam<Real>("upper_bound"))
+  : KokkosBoundNodalKernel(parameters), _upper_bound(getParam<Real>("upper_bound"))
 {
-  if (_var.number() == _v_var)
-    paramError("v", "Coupled variable needs to be different from 'variable'");
-
-  std::set<BoundaryID> bnd_ids;
-
-  const auto & bnd_names = getParam<std::vector<BoundaryName>>("exclude_boundaries");
-  for (const auto & bnd_id : _mesh.getBoundaryIDs(bnd_names))
-    bnd_ids.insert(kokkosMesh().getBoundaryID(bnd_id));
-
-  _bnd_ids = bnd_ids;
 }

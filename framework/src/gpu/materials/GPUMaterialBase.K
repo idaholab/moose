@@ -63,7 +63,7 @@ MaterialBase::validParams()
   params.suppressParameter<std::vector<OutputName>>("outputs");
   params.suppressParameter<std::vector<std::string>>("output_properties");
 
-  params.addPrivateParam<bool>("_kokkos_object", true);
+  params.addPrivateParam<bool>(KOKKOS_OBJECT_PARAM, true);
   params.addPrivateParam<bool>("_kokkos_material", true);
 
   return params;

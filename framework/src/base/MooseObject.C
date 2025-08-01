@@ -45,10 +45,12 @@ MooseObject::validParams()
 MooseObject::MooseObject(const InputParameters & parameters)
   : ParallelParamObject(parameters), _enabled(getParam<bool>("enable"))
 {
+#ifdef MOOSE_KOKKOS_ENABLED
   // Calling this constructor while not executing actions means this object is being
   // copy-constructed
-  if (parameters.isParamValid("_kokkos_object") && !_app.currentlyExecutingActions())
+  if (isKokkosObject() && !_app.currentlyExecutingActions())
     return;
+#endif
 
   if (Registry::isRegisteredObj(type()) && _app.getFactory().currentlyConstructing() != &parameters)
     mooseError(
