@@ -159,29 +159,16 @@ public:
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
-   * Get a Kokkos material property by property name
+   * Get a Kokkos material property by property name for any state
    * @tparam T The property data type
    * @tparam dimension The property dimension
    * @tparam state The property state
    * @param prop_name The property name
    * @returns The Kokkos material property
    */
-  template <typename T, unsigned int dimension, unsigned int state>
+  template <typename T, unsigned int dimension = 0, unsigned int state = 0>
   Moose::Kokkos::MaterialProperty<T, dimension>
-  getKokkosGenericMaterialPropertyByName(const std::string & prop_name);
-  /**
-   * Get a current Kokkos material property by property name
-   * @tparam T The property data type
-   * @tparam dimension The property dimension
-   * @param prop_name The property name
-   * @returns The Kokkos material property
-   */
-  template <typename T, unsigned int dimension = 0>
-  Moose::Kokkos::MaterialProperty<T, dimension>
-  getKokkosMaterialPropertyByName(const std::string & prop_name)
-  {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, 0>(prop_name);
-  }
+  getKokkosMaterialPropertyByName(const std::string & prop_name);
   /**
    * Get an old Kokkos material property by property name
    * @tparam T The property data type
@@ -193,7 +180,7 @@ public:
   Moose::Kokkos::MaterialProperty<T, dimension>
   getKokkosMaterialPropertyOldByName(const std::string & prop_name)
   {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, 1>(prop_name);
+    return getKokkosMaterialPropertyByName<T, dimension, 1>(prop_name);
   }
   /**
    * Get an older Kokkos material property by property name
@@ -206,34 +193,20 @@ public:
   Moose::Kokkos::MaterialProperty<T, dimension>
   getKokkosMaterialPropertyOlderByName(const std::string & prop_name)
   {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, 2>(prop_name);
+    return getKokkosMaterialPropertyByName<T, dimension, 2>(prop_name);
   }
   /**
-   * Get a Kokkos material property
+   * Get a Kokkos material property for any state
    * @tparam T The property data type
    * @tparam dimension The property dimension
    * @tparam state The property state
    * @param name The property name or the parameter name containing the property name
    * @returns The Kokkos material property
    */
-  template <typename T, unsigned int dimension, unsigned int state>
-  Moose::Kokkos::MaterialProperty<T, dimension>
-  getKokkosGenericMaterialProperty(const std::string & name)
-  {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, state>(
-        getMaterialPropertyName(name));
-  }
-  /**
-   * Get a current Kokkos material property
-   * @tparam T The property data type
-   * @tparam dimension The property dimension
-   * @param name The property name or the parameter name containing the property name
-   * @returns The Kokkos material property
-   */
-  template <typename T, unsigned int dimension = 0>
+  template <typename T, unsigned int dimension = 0, unsigned int state = 0>
   Moose::Kokkos::MaterialProperty<T, dimension> getKokkosMaterialProperty(const std::string & name)
   {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, 0>(getMaterialPropertyName(name));
+    return getKokkosMaterialPropertyByName<T, dimension, state>(getMaterialPropertyName(name));
   }
   /**
    * Get an old Kokkos material property
@@ -246,7 +219,7 @@ public:
   Moose::Kokkos::MaterialProperty<T, dimension>
   getKokkosMaterialPropertyOld(const std::string & name)
   {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, 1>(getMaterialPropertyName(name));
+    return getKokkosMaterialPropertyByName<T, dimension, 1>(getMaterialPropertyName(name));
   }
   /**
    * Get an older Kokkos material property
@@ -259,7 +232,7 @@ public:
   Moose::Kokkos::MaterialProperty<T, dimension>
   getKokkosMaterialPropertyOlder(const std::string & name)
   {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, 2>(getMaterialPropertyName(name));
+    return getKokkosMaterialPropertyByName<T, dimension, 2>(getMaterialPropertyName(name));
   }
 #endif
 
@@ -979,7 +952,7 @@ MaterialPropertyInterface::hasKokkosMaterialPropertyByName(const std::string & n
 
 template <typename T, unsigned int dimension, unsigned int state>
 Moose::Kokkos::MaterialProperty<T, dimension>
-MaterialPropertyInterface::getKokkosGenericMaterialPropertyByName(const std::string & prop_name)
+MaterialPropertyInterface::getKokkosMaterialPropertyByName(const std::string & prop_name)
 {
   if (!_is_kokkos_object)
     mooseError("Attempted to retrieve a Kokkos material property from a standard MOOSE object.");

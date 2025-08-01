@@ -9,6 +9,17 @@
 
 #pragma once
 
+// initQpStatefulProperties() and computeQpProperties() are intentionally hidden
+// but some compilers generate ugly warnings
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#elif defined(__GNUC__) || defined(__GNUG__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#endif
+
 #include "GPUMaterialBase.h"
 #include "GPUDatum.h"
 
@@ -103,28 +114,15 @@ public:
 
 protected:
   /**
-   * Get a material property by property name
+   * Get a material property by property name for any state
    * @tparam T The property data type
    * @tparam dimension The property dimension
    * @tparam state The property state
    * @param prop_name_in The property name
    * @returns The material property
    */
-  template <typename T, unsigned int dimension, unsigned int state>
-  MaterialProperty<T, dimension>
-  getKokkosGenericMaterialPropertyByName(const std::string & prop_name_in);
-  /**
-   * Get a current material property by property name
-   * @tparam T The property data type
-   * @tparam dimension The property dimension
-   * @param prop_name The property name
-   * @returns The material property
-   */
-  template <typename T, unsigned int dimension = 0>
-  MaterialProperty<T, dimension> getKokkosMaterialPropertyByName(const std::string & prop_name)
-  {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, 0>(prop_name);
-  }
+  template <typename T, unsigned int dimension = 0, unsigned int state = 0>
+  MaterialProperty<T, dimension> getKokkosMaterialPropertyByName(const std::string & prop_name_in);
   /**
    * Get an old material property by property name
    * @tparam T The property data type
@@ -135,7 +133,7 @@ protected:
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> getKokkosMaterialPropertyOldByName(const std::string & prop_name)
   {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, 1>(prop_name);
+    return getKokkosMaterialPropertyByName<T, dimension, 1>(prop_name);
   }
   /**
    * Get an older material property by property name
@@ -147,33 +145,20 @@ protected:
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> getKokkosMaterialPropertyOlderByName(const std::string & prop_name)
   {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, 2>(prop_name);
+    return getKokkosMaterialPropertyByName<T, dimension, 2>(prop_name);
   }
   /**
-   * Get a material property
+   * Get a material property for any state
    * @tparam T The property data type
    * @tparam dimension The property dimension
    * @tparam state The property state
    * @param name The property name or the parameter name containing the property name
    * @returns The material property
    */
-  template <typename T, unsigned int dimension, unsigned int state>
-  MaterialProperty<T, dimension> getKokkosGenericMaterialProperty(const std::string & name)
-  {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, state>(
-        getMaterialPropertyName(name));
-  }
-  /**
-   * Get a current material property
-   * @tparam T The property data type
-   * @tparam dimension The property dimension
-   * @param name The property name or the parameter name containing the property name
-   * @returns The material property
-   */
-  template <typename T, unsigned int dimension = 0>
+  template <typename T, unsigned int dimension = 0, unsigned int state = 0>
   MaterialProperty<T, dimension> getKokkosMaterialProperty(const std::string & name)
   {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, 0>(getMaterialPropertyName(name));
+    return getKokkosMaterialPropertyByName<T, dimension, state>(getMaterialPropertyName(name));
   }
   /**
    * Get an old material property
@@ -185,7 +170,7 @@ protected:
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> getKokkosMaterialPropertyOld(const std::string & name)
   {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, 1>(getMaterialPropertyName(name));
+    return getKokkosMaterialPropertyByName<T, dimension, 1>(getMaterialPropertyName(name));
   }
   /**
    * Get an older material property
@@ -197,7 +182,7 @@ protected:
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> getKokkosMaterialPropertyOlder(const std::string & name)
   {
-    return getKokkosGenericMaterialPropertyByName<T, dimension, 2>(getMaterialPropertyName(name));
+    return getKokkosMaterialPropertyByName<T, dimension, 2>(getMaterialPropertyName(name));
   }
 
   virtual void checkMaterialProperty(const std::string & name, const unsigned int state) override
@@ -428,7 +413,7 @@ Material<Derived>::operator()(NeighborCompute, const dof_id_type tid) const
 template <typename Derived>
 template <typename T, unsigned int dimension, unsigned int state>
 MaterialProperty<T, dimension>
-Material<Derived>::getKokkosGenericMaterialPropertyByName(const std::string & prop_name_in)
+Material<Derived>::getKokkosMaterialPropertyByName(const std::string & prop_name_in)
 {
   MaterialBase::checkExecutionStage();
 
@@ -441,8 +426,7 @@ Material<Derived>::getKokkosGenericMaterialPropertyByName(const std::string & pr
     _requested_props.insert(prop_name);
 
   auto prop =
-      MaterialPropertyInterface::getKokkosGenericMaterialPropertyByName<T, dimension, state>(
-          prop_name);
+      MaterialPropertyInterface::getKokkosMaterialPropertyByName<T, dimension, state>(prop_name);
 
   registerPropName(prop_name, true, state);
 
