@@ -93,7 +93,7 @@ ComplexEquationSystem::ApplyEssentialBCs()
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
-    if (!_essential_bc_map.Has(test_var_name))
+    if (!_cpx_essential_bc_map.Has(test_var_name))
       continue;
 
     // Set default value of gridfunction used in essential BC. Values
@@ -221,6 +221,20 @@ ComplexEquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
         "Unknown integrated BC type. Please use MFEMIntegratedBC or MFEMComplexIntegratedBC.");
   }
 }
+
+void
+ComplexEquationSystem::AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc)
+{
+  AddTestVariableNameIfMissing(bc->getTestVariableName());
+  auto test_var_name = bc->getTestVariableName();
+  if (!_cpx_essential_bc_map.Has(test_var_name))
+  {
+    auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>>();
+    _cpx_essential_bc_map.Register(test_var_name, std::move(bcs));
+  }
+  _cpx_essential_bc_map.GetRef(test_var_name).push_back(std::move(bc));
+}
+
 
 void
 ComplexEquationSystem::FormSystem(mfem::OperatorHandle & op,
