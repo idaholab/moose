@@ -113,9 +113,9 @@ plt.figure()
 plt.plot(TTC_EXP[:, 1] + 273.15, "r", marker='o', markerfacecolor="r", linestyle='none', label="EXP")
 plt.plot(TTC_DASSH[:, 1] + 273.15, "b-.", marker='o',
          markerfacecolor="b", label="DASSH")
-plt.plot(TTC17[1:], "k-.", marker='o',
+plt.plot(TTC17[10:], "k-.", marker='o',
          markerfacecolor="k", label="SCM")
-plt.plot(TTC17_corrected[1:], "g-.", marker='o',
+plt.plot(TTC17_corrected[10:], "g-.", marker='o',
          markerfacecolor="g", label="SCM power profile corrected")
 plt.title(r"Temperature profile 0.322m downstream of heated section" "\n" "XX09 TTC SHRT-17, Initial steady state", fontsize=13)
 plt.xticks([i for i in range(len(TTC_EXP[:, 0]))],
@@ -132,9 +132,9 @@ plt.show()
 plt.figure()
 plt.plot(TTC_EXP45[:, 1], "r", marker='o',
          markerfacecolor="r", linestyle='none', label="EXP")
-plt.plot(TTC45R[1:], "k-.", marker='o',
+plt.plot(TTC45R[10:], "k-.", marker='o',
          markerfacecolor="k", label="SCM")
-plt.plot(TTC45R_corrected[1:], "g-.", marker='o',
+plt.plot(TTC45R_corrected[10:], "g-.", marker='o',
          markerfacecolor="g", label="SCM power profile corrected")
 plt.title(r"Temperature profile 0.322m downstream of heated section" "\n" "XX09 TTC SHRT-45R, Initial steady state", fontsize=13)
 plt.xticks([i for i in range(len(TTC_EXP45[:, 0]))],
