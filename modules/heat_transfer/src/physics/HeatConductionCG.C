@@ -97,7 +97,10 @@ HeatConductionCG::addFEKernels()
     InputParameters params = getFactory().getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
-    params.applyParameter(parameters(), "density_name");
+    if (_use_ad)
+      params.set<MaterialPropertyName>("density_name") = getParam<MaterialPropertyName>("density");
+    else
+      params.applyParameter(parameters(), "density");
     params.applyParameter(parameters(), "specific_heat");
     getProblem().addKernel(kernel_type, prefix() + _temperature_name + "_time", params);
   }

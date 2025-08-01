@@ -227,16 +227,18 @@ RhieChowMassFlux::initFaceMassFlux()
     // On the boundary, we just take the boundary values
     else
     {
-      const Elem * const boundary_elem =
-          hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
+      const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
+      const Elem * const boundary_elem = elem_is_fluid ? fi->elemPtr() : fi->neighborPtr();
 
+      // We need this multiplier in case the face is an internal face and
+      const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
       const Moose::FaceArg boundary_face{
           fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem, nullptr};
 
       const Real face_rho = _rho(boundary_face, time_arg);
       for (const auto dim_i : index_range(_vel))
-        density_times_velocity(dim_i) =
-            face_rho * raw_value((*_vel[dim_i])(boundary_face, time_arg));
+        density_times_velocity(dim_i) = boundary_normal_multiplier * face_rho *
+                                        raw_value((*_vel[dim_i])(boundary_face, time_arg));
     }
 
     _face_mass_flux[fi->id()] = density_times_velocity * fi->normal();
@@ -444,8 +446,12 @@ RhieChowMassFlux::populateCouplingFunctors(
     }
     else
     {
-      const ElemInfo & elem_info =
-          hasBlocks(fi->elemPtr()->subdomain_id()) ? *fi->elemInfo() : *fi->neighborInfo();
+      const bool elem_is_fluid = hasBlocks(fi->elemPtr()->subdomain_id());
+
+      // We need this multiplier in case the face is an internal face and
+      const Real boundary_normal_multiplier = elem_is_fluid ? 1.0 : -1.0;
+
+      const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
       const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
       // If it is a Dirichlet BC, we use the dirichlet value the make sure the face flux
@@ -458,7 +464,8 @@ RhieChowMassFlux::populateCouplingFunctors(
 
         for (const auto dim_i : make_range(_dim))
           face_hbya(dim_i) =
-              -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
+              -boundary_normal_multiplier *
+              MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
       }
       // Otherwise we just do a one-term expansion (so we just use the element value)
       else
@@ -467,7 +474,7 @@ RhieChowMassFlux::populateCouplingFunctors(
 
         face_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
         for (const auto dim_i : make_range(_dim))
-          face_hbya(dim_i) = hbya_reader[dim_i](elem_dof);
+          face_hbya(dim_i) = boundary_normal_multiplier * hbya_reader[dim_i](elem_dof);
       }
 
       // We just do a one-term expansion for 1/A no matter what

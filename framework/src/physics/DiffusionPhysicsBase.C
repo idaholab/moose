@@ -49,7 +49,7 @@ DiffusionPhysicsBase::validParams()
       "compute_diffusive_fluxes_on", {}, "Surfaces to compute the diffusive flux on");
 
   // Preconditioning is implemented so let's use it by default
-  MooseEnum pc_options("default none", "default");
+  MooseEnum pc_options("default defer", "default");
   params.addParam<MooseEnum>(
       "preconditioning", pc_options, "Which preconditioning to use for this Physics");
 

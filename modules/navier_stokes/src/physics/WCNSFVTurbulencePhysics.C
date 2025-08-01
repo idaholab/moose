@@ -111,7 +111,7 @@ WCNSFVTurbulencePhysics::validParams()
       "Whether to remove the off-diagonal velocity term in the TKE and TKED advection term");
   params.addParam<bool>(
       "tke_two_term_bc_expansion",
-      true,
+      false,
       "If a two-term Taylor expansion is needed for the determination of the boundary values"
       "of the turbulent kinetic energy.");
   params.addRangeCheckedParam<Real>(
@@ -129,7 +129,7 @@ WCNSFVTurbulencePhysics::validParams()
                              "face when in the advection kernel.");
   params.addParam<bool>(
       "tked_two_term_bc_expansion",
-      true,
+      false,
       "If a two-term Taylor expansion is needed for the determination of the boundary values"
       "of the turbulent kinetic energy dissipation.");
   params.addParam<bool>(

@@ -1,0 +1,66 @@
+[Tests]
+  issues = '#27280'
+  design = 'INSFVMomentumDiffusion.md SIMPLENonlinearAssembly.md SIMPLE.md'
+  [newton]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestVortexNewton
+    min_parallel = 4
+    requirement = 'The system shall be able to converge to analytic solutions using a Newton solver with space-dependent viscosity without the inclusion of the deviatoric stress tensor.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+    capabilities = 'method!=dbg'
+  []
+  [newton-deviatoric]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestVortexNewtonDeviatoric
+    min_parallel = 4
+    requirement = 'The system shall be able to converge to analytic solutions using a Newton solver with space-dependent viscosity with the inclusion of the deviatoric stress tensor.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+    capabilities = 'method!=dbg'
+  []
+  [snl]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestVortexSNL
+    min_parallel = 4
+    requirement = 'The system shall be able to converge to analytic solutions using a SIMPLE solver, with the nonlinear finite volume discretization, with space-dependent viscosity without the inclusion of the deviatoric stress tensor.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+    capabilities = 'method!=dbg'
+  []
+  [snl-deviatoric]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestVortexSNLDeviatoric
+    min_parallel = 4
+    requirement = 'The system shall be able to converge to analytic solutions using a SIMPLE solver, with the nonlinear finite volume discretization, with space-dependent viscosity with the inclusion of the deviatoric stress tensor.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+    capabilities = 'method!=dbg'
+  []
+  [sl]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestVortexSL
+    min_parallel = 4
+    requirement = 'The system shall be able to converge to analytic solutions using a SIMPLE solver with space-dependent viscosity without the inclusion of the deviatoric stress tensor.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+    max_threads = 1 # see libmesh issue #3808
+    capabilities = 'method!=dbg'
+  []
+  [sl-deviatoric]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestVortexSLDeviatoric
+    min_parallel = 4
+    requirement = 'The system shall be able to converge to analytic solutions using a SIMPLE solver with space-dependent viscosity with the inclusion of the deviatoric stress tensor.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+    max_threads = 1 # see libmesh issue #3808
+    capabilities = 'method!=dbg'
+  []
+[]

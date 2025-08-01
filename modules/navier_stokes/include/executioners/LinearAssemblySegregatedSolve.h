@@ -57,12 +57,17 @@ protected:
   /// @param relaxation_factor The relaxation factor for matrix relaxation
   /// @param solver_config The solver configuration object for the linear solve
   /// @param abs_tol The scaled absolute tolerance for the linear solve
+  /// @param field_relaxation (optional) The relaxation factor for fields if relax_fields is true. Default value is 1.0.
+  /// @param min_value_limiter (optional) The minimum value for the solution field
   /// @return The normalized residual norm of the equation.
-  std::pair<unsigned int, Real> solveAdvectedSystem(const unsigned int system_num,
-                                                    LinearSystem & system,
-                                                    const Real relaxation_factor,
-                                                    libMesh::SolverConfiguration & solver_config,
-                                                    const Real abs_tol);
+  std::pair<unsigned int, Real>
+  solveAdvectedSystem(const unsigned int system_num,
+                      LinearSystem & system,
+                      const Real relaxation_factor,
+                      libMesh::SolverConfiguration & solver_config,
+                      const Real abs_tol,
+                      const Real field_relaxation = 1.0,
+                      const Real min_value_limiter = std::numeric_limits<Real>::min());
 
   /// Solve an equation which contains the solid energy conservation.
   std::pair<unsigned int, Real> solveSolidEnergy();
@@ -96,6 +101,9 @@ protected:
 
   /// Pointer(s) to the system(s) corresponding to the active scalar equation(s)
   std::vector<LinearSystem *> _active_scalar_systems;
+
+  /// Pointer(s) to the system(s) corresponding to the turbulence equation(s)
+  std::vector<LinearSystem *> _turbulence_systems;
 
   /// Pointer to the segregated RhieChow interpolation object
   RhieChowMassFlux * _rc_uo;
