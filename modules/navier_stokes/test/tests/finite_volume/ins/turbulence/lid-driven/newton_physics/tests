@@ -1,0 +1,54 @@
+[Tests]
+    design = 'WCNSFVTurbulencePhysics.md'
+    issues = '#9007'
+
+    # These tests mirror tests in lid_driven/segregated, showing a reasonable agreement between
+    # SIMPLE and Newton
+    [lid_driven_turb_energy_wall]
+      requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with temperature wall functions, '
+      [result_physics]
+        type = 'CSVDiff'
+        input = 'lid-driven-turb-energy-wall-physics.i'
+        csvdiff = 'lid-driven-turb-energy-wall_out_horizontal_center_0001.csv lid-driven-turb-energy-wall_out_side_left_0001.csv  lid-driven-turb-energy-wall_out_side_top_0001.csv
+                   lid-driven-turb-energy-wall_out_side_bottom_0001.csv       lid-driven-turb-energy-wall_out_side_right_0001.csv lid-driven-turb-energy-wall_out_vertical_center_0001.csv'
+
+        detail = 'using the Navier Stokes Physics shorthand syntax.'
+        abs_zero = 1e-4
+        rel_err = 2.4e-1
+        ignore_columns = 'TKE TKED pressure'
+        cli_args = 'Outputs/file_base=lid-driven-turb-energy-wall_out'
+        # >300s in debug mode
+        method = 'opt'
+      []
+    []
+    [lid_driven_turb_capped]
+      requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with capped production, '
+      [result_physics]
+        type = 'CSVDiff'
+        input = 'lid-driven-turb-capped-physics.i'
+        csvdiff = 'lid-driven-turb-capped_out_horizontal_center_0001.csv lid-driven-turb-capped_out_side_left_0001.csv  lid-driven-turb-capped_out_side_top_0001.csv
+                   lid-driven-turb-capped_out_side_bottom_0001.csv       lid-driven-turb-capped_out_side_right_0001.csv lid-driven-turb-capped_out_vertical_center_0001.csv'
+        detail = 'using the Navier Stokes Physics shorthand syntax.'
+        rel_err = 1.6e-1
+        abs_zero = 4e-4
+        ignore_columns = 'vel_x pressure'
+        cli_args = 'Outputs/file_base=lid-driven-turb-capped_out'
+      []
+    []
+
+    # This test mirrors one of the test in lid_driven/newton
+    [lid_driven_turb_std_wall_nonlinear]
+      requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with standard wall functions, '
+      [result_physics]
+        type = 'CSVDiff'
+        input = 'lid-driven-turb-std-wall-nonlinear-physics.i'
+        csvdiff = 'lid-driven-turb-std-wall-nonlinear_out_horizontal_center_0161.csv lid-driven-turb-std-wall-nonlinear_out_side_left_0161.csv  lid-driven-turb-std-wall-nonlinear_out_side_top_0161.csv
+                   lid-driven-turb-std-wall-nonlinear_out_side_bottom_0161.csv       lid-driven-turb-std-wall-nonlinear_out_side_right_0161.csv lid-driven-turb-std-wall-nonlinear_out_vertical_center_0161.csv'
+        detail = 'using the Navier Stokes Physics shorthand syntax.'
+        abs_zero = 1e-6
+        cli_args = 'Outputs/execute_on=final Outputs/file_base=lid-driven-turb-std-wall-nonlinear_out'
+        min_parallel = 4
+        heavy = true
+      []
+    []
+  []

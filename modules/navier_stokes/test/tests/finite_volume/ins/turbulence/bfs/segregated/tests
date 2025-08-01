@@ -1,0 +1,27 @@
+[Tests]
+  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
+  issues = '#9007'
+  [BFS_ERCOFTAC]
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a backward facing step, '
+    [result]
+      type = 'CSVDiff'
+      input = 'BFS_ERCOFTAC.i'
+      csvdiff = 'BFS_ERCOFTAC_out_line_entry_channel_wall_0001.csv BFS_ERCOFTAC_out_side_bottom_0001.csv BFS_ERCOFTAC_out_line_quarter_entry_channel_0001.csv BFS_ERCOFTAC_out_side_top_0001.csv'
+      detail = 'and reach converged results with segregated solvers,'
+      abs_zero = 1e-6
+      ignore_columns = 'id'
+      heavy = true
+      recover = false # steady solve
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'BFS_ERCOFTAC.i'
+      csvdiff = 'BFS_ERCOFTAC_short_line_entry_channel_wall_0001.csv  BFS_ERCOFTAC_short_side_bottom_0001.csv BFS_ERCOFTAC_short_line_quarter_entry_channel_0001.csv BFS_ERCOFTAC_short_side_top_0001.csv'
+      detail = 'and pass debugging checks.'
+      abs_zero = 1e-6
+      ignore_columns = 'id'
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=BFS_ERCOFTAC_short'
+      recover = false # steady solve
+    []
+  []
+[]
