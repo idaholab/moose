@@ -162,6 +162,21 @@ protected:
                                                           const unsigned int jvar,
                                                           const unsigned int comp = 0) const;
 
+  /**
+   * The common loop structure template for computing elemental residual
+   * @param datum The ResidualDatum object of the current thread
+   * @param body The quadrature-point loop body
+   */
+  template <typename function>
+  KOKKOS_FUNCTION void computeResidualInternal(ResidualDatum & datum, function body) const;
+  /**
+   * The common loop structure template for computing elemental Jacobian
+   * @param datum The ResidualDatum object of the current thread
+   * @param body The quadrature-point loop body
+   */
+  template <typename function>
+  KOKKOS_FUNCTION void computeJacobianInternal(ResidualDatum & datum, function body) const;
+
 private:
   /**
    * Tags this object operates on
@@ -205,6 +220,7 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
     }
   }
 }
+
 KOKKOS_FUNCTION inline void
 ResidualObject::accumulateTaggedNodalResidual(const bool add,
                                               const Real local_re,
@@ -230,6 +246,7 @@ ResidualObject::accumulateTaggedNodalResidual(const bool add,
     }
   }
 }
+
 KOKKOS_FUNCTION inline void
 ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
                                                 const dof_id_type elem,
@@ -259,6 +276,7 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
     }
   }
 }
+
 KOKKOS_FUNCTION inline void
 ResidualObject::accumulateTaggedNodalMatrix(const bool add,
                                             const Real local_ke,
@@ -288,6 +306,63 @@ ResidualObject::accumulateTaggedNodalMatrix(const bool add,
         matrix.zero(row);
         matrix(row, col) = local_ke;
       }
+    }
+  }
+}
+
+template <typename function>
+KOKKOS_FUNCTION void
+ResidualObject::computeResidualInternal(ResidualDatum & datum, function body) const
+{
+  Real local_re[MAX_CACHED_DOF];
+
+  unsigned int num_batches = datum.n_dofs() / MAX_CACHED_DOF;
+
+  if (datum.n_dofs() % MAX_CACHED_DOF)
+    ++num_batches;
+
+  for (unsigned int batch = 0; batch < num_batches; ++batch)
+  {
+    unsigned int ib = batch * MAX_CACHED_DOF;
+    unsigned int ie = ::Kokkos::min(ib + MAX_CACHED_DOF, datum.n_dofs());
+
+    for (unsigned int i = ib; i < ie; ++i)
+      local_re[i - ib] = 0;
+
+    body(local_re - ib, ib, ie);
+
+    for (unsigned int i = ib; i < ie; ++i)
+      accumulateTaggedElementalResidual(local_re[i - ib], datum.elem().id, i);
+  }
+}
+
+template <typename function>
+KOKKOS_FUNCTION void
+ResidualObject::computeJacobianInternal(ResidualDatum & datum, function body) const
+{
+  Real local_ke[MAX_CACHED_DOF];
+
+  unsigned int num_batches = datum.n_idofs() * datum.n_jdofs() / MAX_CACHED_DOF;
+
+  if ((datum.n_idofs() * datum.n_jdofs()) % MAX_CACHED_DOF)
+    ++num_batches;
+
+  for (unsigned int batch = 0; batch < num_batches; ++batch)
+  {
+    unsigned int ijb = batch * MAX_CACHED_DOF;
+    unsigned int ije = ::Kokkos::min(ijb + MAX_CACHED_DOF, datum.n_idofs() * datum.n_jdofs());
+
+    for (unsigned int ij = ijb; ij < ije; ++ij)
+      local_ke[ij - ijb] = 0;
+
+    body(local_ke - ijb, ijb, ije);
+
+    for (unsigned int ij = ijb; ij < ije; ++ij)
+    {
+      unsigned int i = ij % datum.n_jdofs();
+      unsigned int j = ij / datum.n_jdofs();
+
+      accumulateTaggedElementalMatrix(local_ke[ij - ijb], datum.elem().id, i, j, datum.jvar());
     }
   }
 }
