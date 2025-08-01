@@ -38,11 +38,11 @@
 
 Bootstrap: oras
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-From: mooseharbor.hpc.inl.gov/base/rocky-x86_64:8.10-5
+From: harbor.hpc.inl.gov/moose-base/rocky-x86_64:8.10-5
 {%- elif ALTERNATE_FROM == "cuda" %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-cuda-x86_64:8.10-cuda12.9-0
+From: harbor.hpc.inl.gov/moose-hpcbase/rocky-cuda-x86_64:8.10-cuda12.9-0
 {%- else %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-4
+From: harbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-4
 {%- endif %}
 # Logan Harbour
 Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
