@@ -235,7 +235,6 @@ ComplexEquationSystem::AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssenti
   _cpx_essential_bc_map.GetRef(test_var_name).push_back(std::move(bc));
 }
 
-
 void
 ComplexEquationSystem::FormSystem(mfem::OperatorHandle & op,
                                   mfem::BlockVector & trueX,

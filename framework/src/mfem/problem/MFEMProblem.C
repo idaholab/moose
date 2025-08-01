@@ -140,7 +140,8 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   {
     auto object_ptr = getUserObject<MFEMIntegratedBC>(name).getSharedPtr();
     auto bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(object_ptr);
-    auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
     if (eqsys)
       eqsys->AddIntegratedBC(std::move(bc));
     else
@@ -151,7 +152,8 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   {
     auto object_ptr = getUserObject<MFEMComplexEssentialBC>(name).getSharedPtr();
     auto mfem_bc = std::dynamic_pointer_cast<MFEMComplexEssentialBC>(object_ptr);
-    auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
     if (eqsys)
       eqsys->AddComplexEssentialBCs(std::move(mfem_bc));
     else
@@ -162,7 +164,8 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   {
     auto object_ptr = getUserObject<MFEMEssentialBC>(name).getSharedPtr();
     auto mfem_bc = std::dynamic_pointer_cast<MFEMEssentialBC>(object_ptr);
-    auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
     if (eqsys)
       eqsys->AddEssentialBC(std::move(mfem_bc));
     else
