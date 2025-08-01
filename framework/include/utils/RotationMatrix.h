@@ -95,9 +95,6 @@ rodriguesRotationMatrix(GenericRealVectorValue<is_ad> vec1, GenericRealVectorVal
   GenericRealVectorValue<is_ad> u = vec1 / vec1.norm();
   GenericRealVectorValue<is_ad> v = vec2 / vec2.norm();
 
-  std::cout << "u_vec (normalize) = " << u << std::endl;
-  std::cout << "v_vec (normalize) = " << v << std::endl;
-
   if ((u - v).norm() < libMesh::TOLERANCE)
     return GenericRealTensorValue<is_ad>(1, 0, 0, 0, 1, 0, 0, 0, 1); // identity matrix
 
