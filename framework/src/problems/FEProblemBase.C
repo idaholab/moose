@@ -3436,6 +3436,7 @@ FEProblemBase::addLinearFVBC(const std::string & bc_name,
                              const std::string & name,
                              InputParameters & parameters)
 {
+  std::cout << "Adding linearfv bc" << bc_name << " " << name << std::endl;
   addObject<LinearFVBoundaryCondition>(bc_name, name, parameters);
 }
 

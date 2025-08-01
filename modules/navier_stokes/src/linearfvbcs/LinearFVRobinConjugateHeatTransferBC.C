@@ -26,16 +26,18 @@ LinearFVRobinConjugateHeatTransferBC::validParams()
 
 LinearFVRobinConjugateHeatTransferBC::LinearFVRobinConjugateHeatTransferBC(
     const InputParameters & parameters)
-  : LinearFVConjugateHeatTransferBCBase(parameters),
-    _incoming_flux(getFunctor<Real>("incoming_flux")),
-    _htc(getFunctor<Real>("h"))
+  : LinearFVConjugateHeatTransferBCBase(parameters), _htc(getFunctor<Real>("h"))
 {
   _var.computeCellGradients();
+  _incoming_flux = &getFunctor<Real>("incoming_flux");
+  _temp_fluid = &getFunctor<Real>(NS::T_fluid);
+  _temp_solid = &getFunctor<Real>(NS::T_solid);
 }
 
 void
 LinearFVRobinConjugateHeatTransferBC::initialSetup()
 {
+  _incoming_flux = &getFunctor<Real>("incoming_flux");
   _temp_fluid = &getFunctor<Real>(NS::T_fluid);
   _temp_solid = &getFunctor<Real>(NS::T_solid);
   _var_is_fluid = "wraps_" + _var.name() == _temp_fluid->functorName() ||
@@ -53,6 +55,8 @@ LinearFVRobinConjugateHeatTransferBC::computeBoundaryValue() const
   const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
+  // std::cout << "Computing boundary value" << _var.getElemValue(*elem_info, determineState())
+  //           << std::endl;
 
   return _var.getElemValue(*elem_info, determineState());
 }
@@ -102,6 +106,12 @@ LinearFVRobinConjugateHeatTransferBC::computeBoundaryGradientRHSContribution() c
   else
     face.face_side = _current_face_info->neighborPtr();
 
+  // std::cout << (*_incoming_flux)(face, state) << std::endl;
   // TODO: check if includesMaterialPropertyMultiplier() affects this... it shouldn't
-  return _htc(face, state) * (*_rhs_temperature)(face, state) - _incoming_flux(face, state);
+
+  // std::cout << _incoming_flux->functorName() << std::endl;
+  // std::cout << "Flux coming in within " << name() << " " << _current_face_info->faceCentroid()
+  //           << " " << -(*_incoming_flux)(face, state) << std::endl;
+
+  return _htc(face, state) * (*_rhs_temperature)(face, state) - (*_incoming_flux)(face, state);
 }

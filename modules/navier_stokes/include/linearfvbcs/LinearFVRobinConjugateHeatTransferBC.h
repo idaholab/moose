@@ -38,7 +38,7 @@ protected:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
 protected:
-  const Moose::Functor<Real> & _incoming_flux;
+  const Moose::Functor<Real> * _incoming_flux;
 
   /// The fluid temperature, we use the functor form to enable situations when
   /// the user wants to supply a solution-independent form for this.

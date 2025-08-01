@@ -586,6 +586,7 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
 void
 LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
 {
+  std::cout << "Creating BCHT maps" << std::endl;
   if (!_cht_boundary_names.empty())
   {
     if (_energy_system->nVariables() != 1)
@@ -619,14 +620,34 @@ LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
     const auto * solid_variable =
         dynamic_cast<const MooseLinearVariableFVReal *>(&_solid_energy_system->getVariable(0, 0));
 
+    std::vector<LinearFVBoundaryCondition *> bcs;
+    _problem.getMooseApp()
+        .theWarehouse()
+        .query()
+        .template condition<AttribSystem>("LinearFVBoundaryCondition")
+        .template condition<AttribVar>(0)
+        .template condition<AttribSysNum>(_energy_sys_number)
+        .template condition<AttribBoundaries>(std::set<BoundaryID>({bd_id}))
+        .queryInto(bcs);
+    mooseAssert(bcs.size() <= 1, "cannot have multiple BCs on the same boundary");
     // These can't be consts because we need to update the boundary conditions with the face infos
-    auto * fluid_bc = dynamic_cast<LinearFVConjugateHeatTransferBCBase *>(
-        fluid_variable->getBoundaryCondition(bd_id));
+    auto * fluid_bc = dynamic_cast<LinearFVConjugateHeatTransferBCBase *>(bcs[0]);
+
     mooseAssert(fluid_bc,
                 "We must have a boundary condition defined on the boundary from the fluid side and "
                 "it has to be a LinearFVAdvectionDiffusionBC!");
-    auto * solid_bc = dynamic_cast<LinearFVConjugateHeatTransferBCBase *>(
-        solid_variable->getBoundaryCondition(bd_id));
+
+    _problem.getMooseApp()
+        .theWarehouse()
+        .query()
+        .template condition<AttribSystem>("LinearFVBoundaryCondition")
+        .template condition<AttribVar>(0)
+        .template condition<AttribSysNum>(_solid_energy_sys_number)
+        .template condition<AttribBoundaries>(std::set<BoundaryID>({bd_id}))
+        .queryInto(bcs);
+
+    mooseAssert(bcs.size() <= 1, "cannot have multiple BCs on the same boundary");
+    auto * solid_bc = dynamic_cast<LinearFVConjugateHeatTransferBCBase *>(bcs[0]);
     mooseAssert(solid_bc,
                 "We must have a boundary condition defined on the boundary from the fluid side and "
                 "it has to be a LinearFVAdvectionDiffusionBC!");
@@ -645,6 +666,12 @@ LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
             .emplace(bd_id, std::make_pair(std::move(solid_bd_flux), std::move(fluid_bd_flux)))
             .first->second;
 
+    for (const auto tid : make_range(libMesh::n_threads()))
+    {
+      _problem.addFunctor("heat_flux_solid_" + bd_name, flux_container.first, tid);
+      _problem.addFunctor("heat_flux_fluid_" + bd_name, flux_container.second, tid);
+    }
+
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> solid_bd_temperature(
         _problem.mesh(), solid_variable->blockIDs(), "bd_temperature_solid_" + bd_name);
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> fluid_bd_temperature(
@@ -658,15 +685,21 @@ LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
                                                                std::move(fluid_bd_temperature)))
                                        .first->second;
 
+    for (const auto tid : make_range(libMesh::n_threads()))
+    {
+      _problem.addFunctor("bd_temperature_solid_" + bd_name, temperature_container.first, tid);
+      _problem.addFunctor("bd_temperature_fluid_" + bd_name, temperature_container.second, tid);
+    }
+
     // Initialize the containers
     for (auto & fi : bd_fi_container)
     {
       flux_container.first[fi->id()] = 0.0;
       flux_container.second[fi->id()] = 0.0;
-      solid_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _energy_sys_number)));
-      fluid_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _solid_energy_sys_number)));
-      temperature_container.first[fi->id()] = solid_bc->computeBoundaryValue();
-      temperature_container.second[fi->id()] = fluid_bc->computeBoundaryValue();
+      // solid_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _solid_energy_sys_number)));
+      // fluid_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _energy_sys_number)));
+      temperature_container.first[fi->id()] = 0.0;  // solid_bc->computeBoundaryValue();
+      temperature_container.second[fi->id()] = 0.0; // fluid_bc->computeBoundaryValue();
     }
   }
 }
@@ -674,62 +707,91 @@ LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
 void
 LinearAssemblySegregatedSolve::updateCHTBoundaryCouplingSolid()
 {
-  for (const auto i : _cht_boundary_ids)
+  for (const auto i : index_range(_cht_boundary_ids))
   {
     const auto bd_id = _cht_boundary_ids[i];
-
-    auto & flux_container_solid = _boundary_heat_flux.at(bd_id).first;
-    auto & temperature_container_solid = _boundary_temperatures.at(bd_id).first;
 
     auto & fluid_bc = _boundary_conditions[bd_id].second;
 
     const auto solid_temperature_relaxation = _cht_solid_flux_relaxation_factor[i];
     const auto solid_flux_relaxation = _cht_solid_temperature_relaxation_factor[i];
 
-    const auto & bd_fi_container = _cht_face_info[bd_id];
-    // We enter the face loop to update the coupling fields
-    for (const auto & fi : bd_fi_container)
-    {
-      fluid_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _energy_sys_number)));
-      temperature_container_solid[fi->id()] =
-          solid_temperature_relaxation * fluid_bc->computeBoundaryValue() +
-          (1 - solid_temperature_relaxation) * temperature_container_solid[fi->id()];
+    auto it_flux = _boundary_heat_flux.find(bd_id);
+    auto it_temp = _boundary_temperatures.find(bd_id);
 
-      flux_container_solid[fi->id()] =
-          solid_flux_relaxation * fluid_bc->computeBoundaryConductionFlux() +
-          (1 - solid_flux_relaxation) * flux_container_solid[fi->id()];
+    if (it_flux != _boundary_heat_flux.end() && it_temp != _boundary_temperatures.end())
+    {
+      auto & flux_container_solid = it_flux->second.first;
+      auto & temperature_container_solid = it_temp->second.first;
+
+      const auto & bd_fi_container = _cht_face_info[bd_id];
+      // We enter the face loop to update the coupling fields
+
+      // std::cout << flux_container_solid.functorName() << std::endl;
+      for (const auto & fi : bd_fi_container)
+      {
+        fluid_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _energy_sys_number)));
+
+        // std::cout << "Updating solid temp: (" << fluid_bc->name() << ") " << fi->faceCentroid()
+        //           << " old " << temperature_container_solid[fi->id()] << " new "
+        //           << fluid_bc->computeBoundaryValue() << std::endl;
+        // temperature_container_solid[fi->id()] =
+        //     solid_temperature_relaxation * fluid_bc->computeBoundaryValue() +
+        //     (1 - solid_temperature_relaxation) * temperature_container_solid[fi->id()];
+
+        // std::cout << "Updating solid flux: " << fi->faceCentroid() << " old "
+        //           << flux_container_solid[fi->id()] << " new "
+        //           << fluid_bc->computeBoundaryConductionFlux() << std::endl;
+        flux_container_solid[fi->id()] =
+            solid_flux_relaxation * fluid_bc->computeBoundaryConductionFlux() +
+            (1 - solid_flux_relaxation) * flux_container_solid[fi->id()];
+      }
     }
+    else
+      mooseError("We could not find the given CHT BC in the flux or the temperature map!");
   }
 }
 
 void
 LinearAssemblySegregatedSolve::updateCHTBoundaryCouplingFluid()
 {
-  for (const auto i : _cht_boundary_ids)
+  for (const auto i : index_range(_cht_boundary_ids))
   {
     const auto bd_id = _cht_boundary_ids[i];
 
-    auto & flux_container_fluid = _boundary_heat_flux.at(bd_id).second;
-    auto & temperature_container_fluid = _boundary_temperatures.at(bd_id).second;
-
     auto & solid_bc = _boundary_conditions[bd_id].first;
 
-    const auto fluid_temperature_relaxation = _cht_fluid_flux_relaxation_factor[i];
-    const auto fluid_flux_relaxation = _cht_fluid_temperature_relaxation_factor[i];
+    auto it_flux = _boundary_heat_flux.find(bd_id);
+    auto it_temp = _boundary_temperatures.find(bd_id);
 
-    const auto & bd_fi_container = _cht_face_info[bd_id];
-    // We enter the face loop to update the coupling fields
-    for (const auto & fi : bd_fi_container)
+    if (it_flux != _boundary_heat_flux.end() && it_temp != _boundary_temperatures.end())
     {
-      solid_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _solid_energy_sys_number)));
-      temperature_container_fluid[fi->id()] =
-          fluid_temperature_relaxation * solid_bc->computeBoundaryValue() +
-          (1 - fluid_temperature_relaxation) * temperature_container_fluid[fi->id()];
+      auto & flux_container_fluid = it_flux->second.second;
+      auto & temperature_container_fluid = it_temp->second.second;
 
-      flux_container_fluid[fi->id()] =
-          fluid_flux_relaxation * solid_bc->computeBoundaryConductionFlux() +
-          (1 - fluid_flux_relaxation) * flux_container_fluid[fi->id()];
+      const auto fluid_temperature_relaxation = _cht_fluid_flux_relaxation_factor[i];
+      const auto fluid_flux_relaxation = _cht_fluid_temperature_relaxation_factor[i];
+
+      const auto & bd_fi_container = _cht_face_info[bd_id];
+      // We enter the face loop to update the coupling fields
+      for (const auto & fi : bd_fi_container)
+      {
+        solid_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _solid_energy_sys_number)));
+        temperature_container_fluid[fi->id()] =
+            fluid_temperature_relaxation * solid_bc->computeBoundaryValue() +
+            (1 - fluid_temperature_relaxation) * temperature_container_fluid[fi->id()];
+
+        // std::cout << "Updating fluid flux: " << fi->faceCentroid() << " old "
+        //           << flux_container_fluid[fi->id()] << " new "
+        //           << solid_bc->computeBoundaryConductionFlux() << std::endl;
+
+        flux_container_fluid[fi->id()] =
+            fluid_flux_relaxation * solid_bc->computeBoundaryConductionFlux() +
+            (1 - fluid_flux_relaxation) * flux_container_fluid[fi->id()];
+      }
     }
+    else
+      mooseError("We could not find the given CHT BC in the flux or the temperature map!");
   }
 }
 
@@ -817,6 +879,7 @@ LinearAssemblySegregatedSolve::solve()
       // while(fpi_itrs + 1 < num_cht_fpi || cht_tol_i > _cht_fpi_tolerance)
       while (fpi_itrs + 1 < _num_cht_fpi)
       {
+        std::cout << " CHT Iteration:" << fpi_itrs + 1 << std::endl;
         // We set the preconditioner/controllable parameters through petsc options. Linear
         // tolerances will be overridden within the solver.
         updateCHTBoundaryCouplingFluid();
@@ -837,10 +900,10 @@ LinearAssemblySegregatedSolve::solve()
           Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
           ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
               solveSolidEnergy();
-          std::cout << "Solving for solid temp..." << std::endl;
+
           _solid_energy_system->computeGradients();
         }
-        std::cout << "Finished iteration:" << fpi_itrs + 1 << std::endl;
+
         fpi_itrs++;
       }
     }
