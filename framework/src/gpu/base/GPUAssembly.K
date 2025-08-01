@@ -44,7 +44,7 @@ Assembly::init()
   for (auto subdomain : _mesh.meshSubdomains())
     _coord_type[kokkosMesh().getSubdomainID(subdomain)] = _mesh.getCoordSystem(subdomain);
 
-  _coord_type.copy();
+  _coord_type.copyToDevice();
 
   if (_mesh.usingGeneralAxisymmetricCoordAxes())
   {
@@ -54,7 +54,7 @@ Assembly::init()
       _rz_axis[kokkosMesh().getSubdomainID(subdomain)] =
           _mesh.getGeneralAxisymmetricCoordAxis(subdomain);
 
-    _rz_axis.copy();
+    _rz_axis.copyToDevice();
   }
   else
     _rz_radial_coord = _mesh.getAxisymmetricRadialCoord();
@@ -87,7 +87,7 @@ Assembly::initQuadrature()
   // Find boundaries where material properties should be computed
 
   auto & boundary_objects =
-      _problem.getMaterialPropertyStorageConsumers(Moose::BOUNDARY_MATERIAL_DATA, true);
+      _problem.getKokkosMaterialPropertyStorageConsumers(Moose::BOUNDARY_MATERIAL_DATA);
 
   for (auto object : boundary_objects)
   {
@@ -201,16 +201,16 @@ Assembly::initQuadrature()
         _qp_offset_face[sid].begin(), _qp_offset_face[sid].end(), _qp_offset_face[sid].begin(), 0);
   }
 
-  _q_points.copyNested();
-  _q_points_face.copyNested();
-  _weights.copyNested();
-  _weights_face.copyNested();
+  _q_points.copyToDeviceNested();
+  _q_points_face.copyToDeviceNested();
+  _weights.copyToDeviceNested();
+  _weights_face.copyToDeviceNested();
 
-  _n_qps.copyNested();
-  _n_qps_face.copyNested();
-  _qp_offset.copyNested();
-  _qp_offset_face.copyNested();
-  _max_qps_per_elem.copy();
+  _n_qps.copyToDeviceNested();
+  _n_qps_face.copyToDeviceNested();
+  _qp_offset.copyToDeviceNested();
+  _qp_offset_face.copyToDeviceNested();
+  _max_qps_per_elem.copyToDevice();
 }
 
 void
@@ -386,19 +386,19 @@ Assembly::initShape()
     }
   }
 
-  _phi.copyNested();
-  _phi_face.copyNested();
-  _grad_phi.copyNested();
-  _grad_phi_face.copyNested();
+  _phi.copyToDeviceNested();
+  _phi_face.copyToDeviceNested();
+  _grad_phi.copyToDeviceNested();
+  _grad_phi_face.copyToDeviceNested();
 
-  _map_phi.copyNested();
-  _map_phi_face.copyNested();
-  _map_psi_face.copyNested();
-  _map_grad_phi.copyNested();
-  _map_grad_phi_face.copyNested();
-  _map_grad_psi_face.copyNested();
+  _map_phi.copyToDeviceNested();
+  _map_phi_face.copyToDeviceNested();
+  _map_psi_face.copyToDeviceNested();
+  _map_grad_phi.copyToDeviceNested();
+  _map_grad_phi_face.copyToDeviceNested();
+  _map_grad_psi_face.copyToDeviceNested();
 
-  _n_dofs.copy();
+  _n_dofs.copyToDevice();
 }
 
 void
@@ -420,9 +420,9 @@ Assembly::cachePhysicalMap()
     _xyz[sid].createDevice(_qp_offset[sid].last());
   }
 
-  _jacobian.copyNested();
-  _jxw.copyNested();
-  _xyz.copyNested();
+  _jacobian.copyToDeviceNested();
+  _jxw.copyToDeviceNested();
+  _xyz.copyToDeviceNested();
 
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(0, num_elems);
   ::Kokkos::parallel_for(policy, *this);

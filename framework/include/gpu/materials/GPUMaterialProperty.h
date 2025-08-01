@@ -201,7 +201,7 @@ public:
    * Constructor for default property
    * @param value The default value
    */
-  MaterialProperty(const T value)
+  MaterialProperty(const T & value)
   {
     _default = true;
     _value = value;
@@ -308,7 +308,7 @@ MaterialProperty<T, dimension>::copy(const MaterialPropertyBase & prop)
     if (prop_cast->_data[i].isAlloc())
       _data[i].deepCopy(prop_cast->_data[i]);
 
-  _data.copy();
+  _data.copyToDevice();
 }
 
 template <typename T, unsigned int dimension>
@@ -360,7 +360,7 @@ MaterialProperty<T, dimension>::allocate(const MooseMesh & mesh,
       _data[sid].createDevice(n);
   }
 
-  _data.copy();
+  _data.copyToDevice();
 }
 #endif
 
