@@ -54,8 +54,9 @@ interpolationParameters()
 
 namespace NS
 {
-std::tuple<bool, ADReal, ADReal>
-isPorosityJumpFace(const Moose::Functor<ADReal> & porosity,
+template <class T>
+std::tuple<bool, T, T>
+isPorosityJumpFace(const Moose::Functor<T> & porosity,
                    const FaceInfo & fi,
                    const Moose::StateArg & time)
 {
@@ -74,4 +75,9 @@ isPorosityJumpFace(const Moose::Functor<ADReal> & porosity,
   const auto eps_elem = porosity(face_elem, time), eps_neighbor = porosity(face_neighbor, time);
   return {!MooseUtils::relativeFuzzyEqual(eps_elem, eps_neighbor), eps_elem, eps_neighbor};
 }
+
+template std::tuple<bool, Real, Real> isPorosityJumpFace<Real>(
+    const Moose::Functor<Real> & porosity, const FaceInfo & fi, const Moose::StateArg & time);
+template std::tuple<bool, ADReal, ADReal> isPorosityJumpFace<ADReal>(
+    const Moose::Functor<ADReal> & porosity, const FaceInfo & fi, const Moose::StateArg & time);
 }

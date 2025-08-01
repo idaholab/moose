@@ -126,7 +126,7 @@ WCNSFV2PMomentumAdvectionSlip::computeResidualsAndAData(const FaceInfo & fi)
                                            nullptr,
                                            nullptr};
     if (const auto [is_jump, eps_elem_face, eps_neighbor_face] =
-            NS::isPorosityJumpFace(epsilon(), fi, state);
+            NS::isPorosityJumpFace<ADReal>(epsilon(), fi, state);
         is_jump)
     {
       // For a weakly compressible formulation, the density should not depend on pressure and

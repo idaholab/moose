@@ -120,8 +120,7 @@ WallFunctionYPlusAux::computeValue()
   const auto elem_arg = makeElemArg(_current_elem);
   const auto rho = _rho(elem_arg, state);
   const auto mu = _mu(elem_arg, state);
-  ADReal u_star = NS::findUStar<ADReal>(mu.value(), rho.value(), parallel_speed, dist);
-  ADReal tau = u_star * u_star * rho;
+  Real u_star = NS::findUStar<Real>(mu, rho, parallel_speed, dist);
 
   return (dist * u_star * rho / mu);
 }
