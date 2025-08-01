@@ -9,7 +9,8 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'MOOSE shall have the ability to solve a diffusion problem defined on an MFEM domain restricted submesh.'
     capabilities = 'mfem'
-    max_parallel = 1
+    devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMBoundarySubMeshTransfer]
@@ -20,7 +21,8 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'MOOSE shall have the ability to solve an FE problem defined on an MFEM boundary restricted submesh.'
     capabilities = 'mfem'
-    max_parallel = 1
+    devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
   [MFEMDomainSubMeshTransfer]
@@ -31,7 +33,8 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'MOOSE shall have the ability to transfer a domain restricted submesh variable data to a corresponding variable defined on the parent mesh.'
     capabilities = 'mfem'
-    max_parallel = 1
+    devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
 []

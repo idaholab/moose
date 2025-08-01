@@ -26,6 +26,11 @@ public:
 protected:
   void registerFields();
   void output() override;
+  /**
+   * Whether the grid functions need to be explicitly read on the host before output. This seems to
+   * be required for Conduit data output whereas other formats handle the host read themselves
+   */
+  virtual bool gridFunctionsNeedHostRead() const { return false; }
 
   /// Reference to the MFEMProblemData struct storing the output variables.
   MFEMProblemData & _problem_data;
