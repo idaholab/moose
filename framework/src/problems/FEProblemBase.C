@@ -3883,34 +3883,8 @@ FEProblemBase::getMaterial(std::string name,
 MaterialData &
 FEProblemBase::getMaterialData(Moose::MaterialDataType type,
                                const THREAD_ID tid,
-                               const MooseObject * object,
-                               bool is_kokkos) const
+                               const MooseObject * object) const
 {
-  if (is_kokkos)
-#ifdef MOOSE_KOKKOS_ENABLED
-    switch (type)
-    {
-      case Moose::BLOCK_MATERIAL_DATA:
-        if (object)
-          _kokkos_material_props.addConsumer(type, object);
-        return _kokkos_material_props.getMaterialData(tid);
-      case Moose::NEIGHBOR_MATERIAL_DATA:
-        if (object)
-          _kokkos_neighbor_material_props.addConsumer(type, object);
-        return _kokkos_neighbor_material_props.getMaterialData(tid);
-      case Moose::BOUNDARY_MATERIAL_DATA:
-      case Moose::FACE_MATERIAL_DATA:
-      case Moose::INTERFACE_MATERIAL_DATA:
-        if (object)
-          _kokkos_bnd_material_props.addConsumer(type, object);
-        return _kokkos_bnd_material_props.getMaterialData(tid);
-    }
-#else
-    mooseError(
-        "FEProblemBase::getMaterialData(): Attempted to get Kokkos material data but MOOSE was "
-        "not compiled with Kokkos support.");
-#endif
-
   switch (type)
   {
     case Moose::BLOCK_MATERIAL_DATA:
@@ -3933,27 +3907,8 @@ FEProblemBase::getMaterialData(Moose::MaterialDataType type,
 }
 
 const std::set<const MooseObject *> &
-FEProblemBase::getMaterialPropertyStorageConsumers(Moose::MaterialDataType type,
-                                                   bool is_kokkos) const
+FEProblemBase::getMaterialPropertyStorageConsumers(Moose::MaterialDataType type) const
 {
-  if (is_kokkos)
-#ifdef MOOSE_KOKKOS_ENABLED
-    switch (type)
-    {
-      case Moose::BLOCK_MATERIAL_DATA:
-        return _kokkos_material_props.getConsumers(type);
-      case Moose::NEIGHBOR_MATERIAL_DATA:
-        return _kokkos_neighbor_material_props.getConsumers(type);
-      case Moose::BOUNDARY_MATERIAL_DATA:
-      case Moose::FACE_MATERIAL_DATA:
-      case Moose::INTERFACE_MATERIAL_DATA:
-        return _kokkos_bnd_material_props.getConsumers(type);
-    }
-#else
-    mooseError("FEProblemBase::getMaterialPropertyStorageConsumers(): Attempted to get Kokkos "
-               "material data but MOOSE was not compiled with Kokkos support.");
-#endif
-
   switch (type)
   {
     case Moose::BLOCK_MATERIAL_DATA:

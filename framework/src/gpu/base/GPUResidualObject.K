@@ -32,7 +32,7 @@ ResidualObject::validParams()
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");
 
-  params.addPrivateParam<bool>("_kokkos_object", true);
+  params.addPrivateParam<bool>(KOKKOS_OBJECT_PARAM, true);
 
   return params;
 }
@@ -85,8 +85,8 @@ ResidualObject::ResidualObject(const InputParameters & parameters,
       _is_extra_matrix_tag[t] = extra_matrix_tags.count(_matrix_tags[t]);
   }
 
-  _is_extra_vector_tag.copy();
-  _is_extra_matrix_tag.copy();
+  _is_extra_vector_tag.copyToDevice();
+  _is_extra_matrix_tag.copyToDevice();
 
   _kokkos_var.init(_var);
 }
