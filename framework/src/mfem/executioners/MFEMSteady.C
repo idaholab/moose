@@ -65,26 +65,12 @@ MFEMSteady::init()
   _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _mfem_problem.initialSetup();
 
-  if (auto eqsys =
-          std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(_problem_data.eqn_system))
-  {
-    // Set up initial conditions for real equation system
-    eqsys->Init(_problem_data.gridfunctions,
-                _problem_data.fespaces,
-                getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
-  }
-  else if (auto eqsys =
-               std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(_problem_data.eqn_system))
-  {
-    // Set up initial conditions for complex equation system
-    eqsys->Init(_problem_data.gridfunctions,
-                _problem_data.fespaces,
-                getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
-  }
-  else
-  {
-    mooseError("Unknown equation system type.");
-  }
+  // Set up initial conditions
+  _problem_data.eqn_system->Init(
+      _problem_data.gridfunctions,
+      _problem_data.cpx_gridfunctions,
+      _problem_data.fespaces,
+      getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
   for (const auto & problem_operator : getProblemOperators())
   {

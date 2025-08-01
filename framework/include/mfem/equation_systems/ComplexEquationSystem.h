@@ -24,6 +24,7 @@ public:
 
   // Build forms
   virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
+                    Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions,
                     const Moose::MFEM::FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level) override;
 
@@ -37,7 +38,8 @@ public:
   void AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc);
 
   void RecoverFEMSolution(mfem::BlockVector & trueX,
-                          Moose::MFEM::GridFunctions & gridfunctions) override;
+                          Moose::MFEM::GridFunctions & gridfunctions,
+                          Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions) override;
 
   virtual void FormSystem(mfem::OperatorHandle & op,
                           mfem::BlockVector & trueX,
@@ -95,6 +97,9 @@ public:
   // Complex essential BCs
   Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>>
       _cpx_essential_bc_map;
+
+  // Complex trial variables
+  Moose::MFEM::ComplexGridFunctions _cpx_trial_variables;
 };
 
 template <class FormType>

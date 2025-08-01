@@ -50,7 +50,10 @@ public:
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
 
   /// Initialise
-  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions, mfem::AssemblyLevel assembly_level);
+  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
+                    Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions,
+                    const Moose::MFEM::FESpaces & fespaces,
+                    mfem::AssemblyLevel assembly_level);
 
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms();
@@ -108,7 +111,8 @@ public:
 
   /// Update variable from solution vector after solve
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
-                                  Moose::MFEM::GridFunctions & gridfunctions);
+                                  Moose::MFEM::GridFunctions & gridfunctions,
+                                  Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions);
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 

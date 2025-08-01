@@ -42,7 +42,7 @@ public:
   Moose::MFEM::FESpaces fespaces;
   Moose::MFEM::GridFunctions gridfunctions;
   Moose::MFEM::TimeDerivativeMap time_derivative_map;
-  Moose::MFEM::ComplexGridFunctions complex_gridfunctions;
+  Moose::MFEM::ComplexGridFunctions cpx_gridfunctions;
 
   enum class NumericType
   {

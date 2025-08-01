@@ -128,7 +128,8 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   {
     auto object_ptr = getUserObject<MFEMIntegratedBC>(name).getSharedPtr();
     auto bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(object_ptr);
-    auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
     if (eqsys)
       eqsys->AddIntegratedBC(std::move(bc));
     else
@@ -139,7 +140,8 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   {
     auto object_ptr = getUserObject<MFEMComplexEssentialBC>(name).getSharedPtr();
     auto mfem_bc = std::dynamic_pointer_cast<MFEMComplexEssentialBC>(object_ptr);
-    auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
     if (eqsys)
       eqsys->AddComplexEssentialBCs(std::move(mfem_bc));
     else
@@ -150,7 +152,8 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   {
     auto object_ptr = getUserObject<MFEMEssentialBC>(name).getSharedPtr();
     auto mfem_bc = std::dynamic_pointer_cast<MFEMEssentialBC>(object_ptr);
-    auto eqsys = std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
     if (eqsys)
       eqsys->AddEssentialBC(std::move(mfem_bc));
     else
@@ -244,8 +247,7 @@ MFEMProblem::addGridFunction(const std::string & var_type,
   if (var_type == "MFEMComplexVariable")
   {
     MFEMComplexVariable & mfem_variable = getUserObject<MFEMComplexVariable>(var_name);
-    getProblemData().gridfunctions.cpx_gfs.Register(var_name,
-                                                    mfem_variable.getComplexGridFunction());
+    getProblemData().cpx_gridfunctions.Register(var_name, mfem_variable.getComplexGridFunction());
     if (mfem_variable.getFESpace().isScalar())
     {
       getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
@@ -262,7 +264,7 @@ MFEMProblem::addGridFunction(const std::string & var_type,
   else // must be real, but may have been set up indirectly from a MOOSE variable
   {
     MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
-    getProblemData().gridfunctions.real_gfs.Register(var_name, mfem_variable.getGridFunction());
+    getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
     if (mfem_variable.getFESpace().isScalar())
       getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
           var_name, mfem_variable.getGridFunction().get());
@@ -547,7 +549,7 @@ MFEMProblem::getMeshDisplacementGridFunction()
   auto const displacement_variable = mesh().getMeshDisplacementVariable();
   if (displacement_variable)
   {
-    return *_problem_data.gridfunctions.real_gfs.Get(displacement_variable.value());
+    return *_problem_data.gridfunctions.Get(displacement_variable.value());
   }
   else
   {
