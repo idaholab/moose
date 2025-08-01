@@ -14,7 +14,7 @@ registerMooseObject("MooseApp", SimulationTimes);
 InputParameters
 SimulationTimes::validParams()
 {
-  InputParameters params = Times::validParams();
+  InputParameters params = TimesReporter::validParams();
   params.addClassDescription("Times simulated");
 
   // Times are known for all processes already
@@ -27,7 +27,7 @@ SimulationTimes::validParams()
   return params;
 }
 
-SimulationTimes::SimulationTimes(const InputParameters & parameters) : Times(parameters) {}
+SimulationTimes::SimulationTimes(const InputParameters & parameters) : TimesReporter(parameters) {}
 
 void
 SimulationTimes::initialize()

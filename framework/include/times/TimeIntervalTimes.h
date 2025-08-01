@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "Times.h"
+#include "TimesReporter.h"
 
 /**
  * Times between a start time and end time with a fixed time interval.
  */
-class TimeIntervalTimes : public Times
+class TimeIntervalTimes : public TimesReporter
 {
 public:
   static InputParameters validParams();

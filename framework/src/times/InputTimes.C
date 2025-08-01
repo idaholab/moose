@@ -14,7 +14,7 @@ registerMooseObject("MooseApp", InputTimes);
 InputParameters
 InputTimes::validParams()
 {
-  InputParameters params = Times::validParams();
+  InputParameters params = TimesReporter::validParams();
   params.addClassDescription("Times set directly from a user parameter in the input file");
   params.addRequiredParam<std::vector<Real>>("times", "Times to store in the times vector");
 
@@ -24,7 +24,7 @@ InputTimes::validParams()
   return params;
 }
 
-InputTimes::InputTimes(const InputParameters & parameters) : Times(parameters)
+InputTimes::InputTimes(const InputParameters & parameters) : TimesReporter(parameters)
 {
   _times = getParam<std::vector<Real>>("times");
 }
