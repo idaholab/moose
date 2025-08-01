@@ -14,7 +14,7 @@
       detail = "with a time step governed by the MFEM parent application,"
       capabilities = 'mfem & platform=linux'
       devices = 'cpu cuda'
-      max_parallel = 1
+      max_parallel = 1 # schemadiff with multiple ranks
       recover = false
       max_threads = 1
     []
@@ -29,7 +29,7 @@
       detail = "and with the sub-app running multiple timesteps for each timestep of the parent app."
       capabilities = 'mfem'
       devices = 'cpu cuda'
-      max_parallel = 1
+      max_parallel = 1 # schemadiff with multiple ranks
       recover = false
     []
   []
@@ -46,7 +46,7 @@
       detail = "with a transient problem running in the parent app."
       capabilities = 'mfem'
       devices = 'cpu cuda'
-      max_parallel = 1
+      max_parallel = 1 # schemadiff with multiple ranks
       recover = false
     []
   []
