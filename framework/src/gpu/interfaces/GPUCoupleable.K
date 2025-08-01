@@ -20,15 +20,9 @@ Coupleable::kokkosCoupledVectorTagVariable(const std::string & var_name,
 {
   Moose::Kokkos::Variable variable;
 
-  const auto coupled = isCoupled(var_name);
-
-  variable._coupled = coupled;
-  variable._components = 1;
-
-  if (coupled)
+  if (isCoupled(var_name))
   {
-    variable._var.create(1);
-    variable._sys.create(1);
+    const auto tag = _c_fe_problem.getVectorTagID(tag_name);
 
     auto var = const_cast<MooseVariableField<Real> *>(
         getVarHelper<MooseVariableField<Real>>(var_name, comp));
@@ -38,22 +32,12 @@ Coupleable::kokkosCoupledVectorTagVariable(const std::string & var_name,
     else if (tag_name == Moose::OLDER_SOLUTION_TAG)
       var->sys().needSolutionState(2);
 
-    variable._var[0] = var->number();
-    variable._sys[0] = var->sys().number();
+    variable.init({var}, tag, {});
 
-    variable._var.copyToDevice();
-    variable._sys.copyToDevice();
-
-    variable._tag = _c_fe_problem.getVectorTagID(tag_name);
-
-    addFEVariableCoupleableVectorTag(variable._tag);
+    addFEVariableCoupleableVectorTag(tag);
   }
   else
-  {
-    variable._default_value.create(1);
-    variable._default_value[0] = _c_parameters.defaultCoupledValue(var_name, comp);
-    variable._default_value.copyToDevice();
-  }
+    variable.init({_c_parameters.defaultCoupledValue(var_name, comp)}, {});
 
   return variable;
 }
@@ -64,16 +48,13 @@ Coupleable::kokkosCoupledVectorTagVariables(const std::string & var_name,
 {
   Moose::Kokkos::Variable variable;
 
-  const auto coupled = isCoupled(var_name);
   const auto components = coupledComponents(var_name);
 
-  variable._coupled = coupled;
-  variable._components = components;
-
-  if (coupled)
+  if (isCoupled(var_name))
   {
-    variable._var.create(components);
-    variable._sys.create(components);
+    const auto tag = _c_fe_problem.getVectorTagID(tag_name);
+
+    std::vector<const MooseVariableBase *> vars;
 
     for (unsigned int comp = 0; comp < components; ++comp)
     {
@@ -85,25 +66,21 @@ Coupleable::kokkosCoupledVectorTagVariables(const std::string & var_name,
       else if (tag_name == Moose::OLDER_SOLUTION_TAG)
         var->sys().needSolutionState(2);
 
-      variable._var[comp] = var->number();
-      variable._sys[comp] = var->sys().number();
+      vars.push_back(var);
     }
 
-    variable._var.copyToDevice();
-    variable._sys.copyToDevice();
+    variable.init({vars}, tag, {});
 
-    variable._tag = _c_fe_problem.getVectorTagID(tag_name);
-
-    addFEVariableCoupleableVectorTag(variable._tag);
+    addFEVariableCoupleableVectorTag(tag);
   }
   else
   {
-    variable._default_value.create(components);
+    std::vector<Real> default_values(components);
 
     for (unsigned int comp = 0; comp < components; ++comp)
-      variable._default_value[comp] = _c_parameters.defaultCoupledValue(var_name, comp);
+      default_values[comp] = _c_parameters.defaultCoupledValue(var_name, comp);
 
-    variable._default_value.copyToDevice();
+    variable.init(default_values, {});
   }
 
   return variable;
@@ -114,9 +91,7 @@ Coupleable::kokkosZeroVariable()
 {
   Moose::Kokkos::Variable variable;
 
-  variable._default_value.create(1);
-  variable._default_value[0] = 0;
-  variable._default_value.copyToDevice();
+  variable.init({0}, {});
 
   return variable;
 }
