@@ -12,17 +12,6 @@
 #include "GPUTypes.h"
 #include "GPUMaterialPropertyValue.h"
 
-// initQpStatefulProperties() and computeQpProperties() are intentionally hidden
-// but some compilers generate ugly warnings
-
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Woverloaded-virtual"
-#elif defined(__GNUC__) || defined(__GNUG__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
-#endif
-
 #include "MaterialBase.h"
 
 namespace Moose

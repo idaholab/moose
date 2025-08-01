@@ -33,14 +33,45 @@ Variable::init(const MooseVariableBase & variable, const TagID tag)
   _var.create(_components);
   _sys.create(_components);
 
-  for (unsigned int i = 0; i < variable.count(); ++i)
+  for (unsigned int comp = 0; comp < _components; ++comp)
   {
-    _var[i] = variable.number() + i;
-    _sys[i] = variable.sys().number();
+    _var[comp] = variable.number() + comp;
+    _sys[comp] = variable.sys().number();
   }
 
   _var.copyToDevice();
   _sys.copyToDevice();
+}
+
+void
+Variable::init(const std::vector<const MooseVariableBase *> & variables,
+               const TagID tag,
+               CoupleableKey)
+{
+  _coupled = true;
+  _components = variables.size();
+  _tag = tag;
+
+  _var.create(_components);
+  _sys.create(_components);
+
+  for (unsigned int comp = 0; comp < _components; ++comp)
+  {
+    _var[comp] = variables[comp]->number();
+    _sys[comp] = variables[comp]->sys().number();
+  }
+
+  _var.copyToDevice();
+  _sys.copyToDevice();
+}
+
+void
+Variable::init(const std::vector<Real> & values, CoupleableKey)
+{
+  _coupled = false;
+  _components = values.size();
+
+  _default_value = values;
 }
 
 } // namespace Kokkos
