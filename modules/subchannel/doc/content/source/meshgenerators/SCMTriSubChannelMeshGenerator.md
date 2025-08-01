@@ -11,7 +11,7 @@ The user needs to provide the [!param](/Mesh/SCMTriSubChannelMeshGenerator/nring
 [!param](/Mesh/SCMTriSubChannelMeshGenerator/heated_length),[!param](/Mesh/SCMTriSubChannelMeshGenerator/unheated_length_entry),[!param](/Mesh/SCMTriSubChannelMeshGenerator/unheated_length_entry).
 The fuel pin diameter is given by [!param](/Mesh/SCMTriSubChannelMeshGenerator/pin_diameter). The user also has the ability to define the effect of spacers or mixing vanes on the sub-assembly
 by defining their axial location [!param](/Mesh/SCMTriSubChannelMeshGenerator/spacer_z) and a local presure from loss [!param](/Mesh/SCMTriSubChannelMeshGenerator/spacer_k). [!param](/Mesh/SCMTriSubChannelMeshGenerator/flat_to_flat) is the size of the hexagonal duct that encloses the sub-assembly. If the pins are wire wrapped then the parameters: [!param](/Mesh/SCMTriSubChannelMeshGenerator/dwire) [!param](/Mesh/SCMTriSubChannelMeshGenerator/hwire) have non zero values that describe the geometry of the wire-wrap.
-The center of the mesh is the origin.
+The center of the mesh is the origin. The indexing/location of the subchannels/fuel_pins can be seen [here](general/user_notes.md)
 
 ## Example Input File Syntax
 
