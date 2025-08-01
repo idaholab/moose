@@ -38,6 +38,8 @@ public:
   const std::vector<LinearSystem *> systemsToSolve() const { return _systems_to_solve; }
 
 protected:
+//  std::vector<unsigned int> generateBoundaryMask(const BoundaryID bid, const MooseVariableScalar);
+
   virtual std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor() override;
   virtual std::pair<unsigned int, Real> solvePressureCorrector() override;
 
@@ -137,4 +139,11 @@ protected:
 
   /// The user-defined absolute tolerance for determining the convergence in active scalars
   const std::vector<Real> _active_scalar_absolute_tolerance;
+
+  /// number of CHT fixed point iterations.
+  const unsigned int _num_cht_fpi;
+
+  /// Tolerance to which temperature and heat flux at the CHT interface must converge during fixed-
+  /// point iterations (TODO: separate tols for q and T)
+  const Real _cht_fpi_tolerance;
 };
