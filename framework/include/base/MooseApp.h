@@ -100,7 +100,7 @@ class MooseApp : public ConsoleStreamInterface,
 {
 public:
   /// Get the device accelerated computations are supposed to be running on.
-  std::optional<MooseEnum> getComputeDevice();
+  std::optional<MooseEnum> getComputeDevice() const;
 
 #ifdef MOOSE_LIBTORCH_ENABLED
   /// Get the device torch is supposed to be running on.

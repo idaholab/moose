@@ -799,7 +799,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
 }
 
 std::optional<MooseEnum>
-MooseApp::getComputeDevice()
+MooseApp::getComputeDevice() const
 {
   if (isParamSetByUser("libtorch_device"))
     return getParam<MooseEnum>("libtorch_device");
