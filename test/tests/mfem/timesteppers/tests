@@ -12,7 +12,6 @@
       devices = 'cpu cuda'
       max_parallel = 1 # MOOSE-MFEM-HypreGMRES doesn't appear to work with multiple ranks with cuda. Will be fixed by #31140
       recover = false
-      max_threads = 1
     []
     [multiple_time_sequences]
       type = CSVDiff
@@ -23,7 +22,6 @@
       devices = 'cpu cuda'
       max_parallel = 1 # MOOSE-MFEM-HypreGMRES doesn't appear to work with multiple ranks with cuda. Will be fixed by #31140
       recover = false
-      max_threads = 1
     []
   []
 []
