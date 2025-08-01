@@ -18,6 +18,7 @@ import plotly
 from plotly import subplots
 import plotly.graph_objects as go
 import mooseutils
+from dataclasses import dataclass, field
 
 def command_line_options():
     """
@@ -35,7 +36,7 @@ def command_line_options():
     parser.add_argument('-obj', '--object', default=None, type=str, help="StatisticsReporter object to consider, by default the first object found is used.")
     parser.add_argument('-val', '--values', default=[], nargs='+', type=str, help="List of values to consider, by default all values are considered.")
     parser.add_argument('-s', '--stat', default='TOTAL', type=str, help="Type of sobol index to output. Options: 'TOTAL' (default), 'FIRST_ORDER', 'SECOND_ORDER'.")
-    parser.add_argument('-ci', '--confidence-interval', dest='confidence_interval', default=None, nargs=2, type=str, help="Pair of confidence interval levels to use, by default the largest and smallest are used.")
+    parser.add_argument('-ci', '--confidence-interval', dest='confidence_interval', default=None, nargs=2, type=float, help="Pair of confidence interval levels to use, by default the largest and smallest are used.")
     parser.add_argument('-t', '--time', default=None, type=float, help="Time to consider, by default the last time is used.")
     parser.add_argument('-n', '--names', default='{}', type=str, help="Map between the value name and display name in json format. Example: '{\"value1_name\" : \"Value One\", \"value2_name\" : \"Value Two\"}'")
     parser.add_argument('-p', '--param-names', nargs='+', default=[], type=str, help="List of names to display for the parameters.")
@@ -46,6 +47,27 @@ def command_line_options():
 
     parser.set_defaults(ignore_ci=False, format=0, log_scale=False)
     return parser.parse_args()
+
+@dataclass
+class VisualizeSobolOptions:
+    filename: str
+    format: int = 0
+    object: str = None
+    values: list[str] = field(default_factory=list)
+    stat: str = 'TOTAL'
+    confidence_interval: list[float] = None
+    time: float = None
+    names: dict | str = field(default_factory=dict)
+    param_names: list[str] = field(default_factory=list)
+    number_format: str = ".4g"
+    output: str = None
+    ignore_ci: bool = False
+    log_scale: bool = False
+
+    def __post_init__(self):
+        if isinstance(self.names, str):
+            self.names = json.loads(self.names)
+        self.stat = self.stat.upper()
 
 def totalTable(data, num_form):
     tab = dict()
@@ -174,15 +196,7 @@ def heatmap(data, stat, log_scale):
 
     return fig
 
-def main():
-
-    # Command-line options
-    opt = command_line_options()
-
-    # Make sure stat is uppercase
-    opt.stat = opt.stat.upper()
-    # Define value_name-display_name map
-    opt.names = json.loads(opt.names)
+def visualize_sobol(opt: VisualizeSobolOptions):
 
     # Read reporter data
     data = mooseutils.ReporterReader(opt.filename)
@@ -252,4 +266,9 @@ def main():
     return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    # Command-line options
+    cli_args = command_line_options()
+    opt = VisualizeSobolOptions(**vars(cli_args))
+
+    # Run
+    visualize_sobol(opt)

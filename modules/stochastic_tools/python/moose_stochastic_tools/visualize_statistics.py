@@ -17,6 +17,7 @@ import numpy as np
 import plotly
 import plotly.graph_objects as go
 import mooseutils
+from dataclasses import dataclass, field
 
 def command_line_options():
     """
@@ -46,6 +47,36 @@ def command_line_options():
     parser.add_argument('--xlabel', default=None, type=str, help="The x-axis label in the line plot. Default is whatever '--xvalue' is. This is only relevant with '--line-plot'.")
     parser.set_defaults(ignore_ci=False, format=0)
     return parser.parse_args()
+
+@dataclass
+class VisualizeStatisticsOptions:
+    filenames: list[str]
+    format: int = 0
+    objects: list[str] = field(default_factory=list)
+    values: list[str] = field(default_factory=list)
+    stats: list[str] = field(default_factory=list)
+    confidence_interval: list[float] = None
+    times: list[float] = field(default_factory=list)
+    names: str | dict = field(default_factory=dict)
+    stat_names: str | dict = field(default_factory=dict)
+    number_format: str = ".4g"
+    output: str = None
+    ignore_ci: bool = False
+    xvalue: str = "Time"
+    xlabel: str = None
+
+    def __post_init__(self):
+        self.stats = [s.upper() for s in self.stats]
+
+        if isinstance(self.names, str):
+            self.names = json.loads(self.names)
+
+        if isinstance(self.stat_names, str):
+            self.stat_names = json.loads(self.stat_names)
+        self.stat_names = {key.upper(): value for key, value in self.stat_names.items()}
+
+        if self.xlabel is None:
+            self.xlabel = self.names.get(self.xvalue) or self.xvalue
 
 def statTable(data, num_form):
 
@@ -246,17 +277,7 @@ def linePlot(data, xname, file):
     else:
         plotly.io.write_image(fig, os.path.abspath(file))
 
-def main():
-
-    # Command-line options
-    opt = command_line_options()
-
-    # Convert stats to uppercase
-    opt.stats = [stat.upper() for stat in opt.stats]
-
-    # Define value_name-display_name map
-    opt.names = json.loads(opt.names)
-    opt.stat_names = dict((key.upper(), value) for (key, value) in json.loads(opt.stat_names).items())
+def visualize_statistics(opt: VisualizeStatisticsOptions):
 
     # Grab ALL the data
     frame = dict(time=[], object_name=[], vector_name=[], statistic=[], ci_levels=[], value=[], confidence_interval=[])
@@ -306,10 +327,7 @@ def main():
                 frame['confidence_interval'].append(ci_val)
 
 
-    xname = opt.names[opt.xvalue] if opt.xvalue in opt.names else opt.xvalue
-    if opt.xlabel is None:
-        opt.xlabel = xname
-
+    xname = opt.names.get(opt.xvalue) or opt.xvalue
     if opt.xvalue != 'Time' and xname not in frame['vector_name']:
         for file in opt.filenames:
             data = mooseutils.ReporterReader(file)
@@ -348,4 +366,9 @@ def main():
         linePlot(frame, opt.xlabel, opt.output)
 
 if __name__ == '__main__':
-    sys.exit(main())
+    # Command-line options
+    cli_args = command_line_options()
+    opt = VisualizeStatisticsOptions(**vars(cli_args))
+
+    # Run
+    visualize_statistics(opt)

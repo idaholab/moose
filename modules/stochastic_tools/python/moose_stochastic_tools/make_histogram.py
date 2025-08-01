@@ -15,6 +15,7 @@ import glob
 import plotly
 import plotly.graph_objects as go
 import mooseutils
+from dataclasses import dataclass, field
 
 def command_line_options():
     """
@@ -33,10 +34,20 @@ def command_line_options():
     parser.add_argument('--output', default=None, type=str, help="File name to save figure")
     return parser.parse_args()
 
-if __name__ == '__main__':
+@dataclass
+class MakeHistogramOptions:
+    filenames: list[str]
+    vectors: list[str] = field(default_factory=list)
+    names: list[str] = field(default_factory=list)
+    probability: bool = True
+    bins: int = None
+    alpha: float = 0.75
+    xlabel: str = 'Value'
+    ylabel: str = 'Probability'
+    title: str = None
+    output: str = None
 
-    # Command-line options
-    opt = command_line_options()
+def make_histogram(opt: MakeHistogramOptions):
 
     # Read data
     data = dict()
@@ -114,3 +125,12 @@ if __name__ == '__main__':
         fig.show()
     else:
         plotly.io.write_image(fig, os.path.abspath(opt.output))
+
+if __name__ == '__main__':
+
+    # Command-line options
+    cli_opt = command_line_options()
+    opt = MakeHistogramOptions(**vars(cli_opt))
+
+    # Run
+    make_histogram(opt)
