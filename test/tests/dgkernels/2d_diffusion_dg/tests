@@ -11,7 +11,7 @@
   [p_refinement_test]
     type = 'Exodiff'
     input = '2d_diffusion_dg_test.i'
-    cli_args = 'Outputs/file_base=p_refinement Executioner/Adaptivity/switch_h_to_p_refinement=true'
+    cli_args = 'Outputs/file_base=p_refinement Executioner/Adaptivity/adaptivity_type=p'
     exodiff = 'p_refinement.e-s003'
     requirement = "The system shall support solving 2D diffusion using the discontinuous Galerkin "
                   "method with p-refinement."

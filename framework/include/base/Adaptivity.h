@@ -63,8 +63,7 @@ public:
    */
   void init(const unsigned int steps,
             const unsigned int initial_steps,
-            const bool p_refinement,
-            const bool hp_refinement = false);
+            const MooseEnum & adaptivity_type);
 
   /**
    * Set adaptivity parameter
@@ -303,6 +302,9 @@ protected:
   /// Name of the marker variable if using the new adaptivity system
   std::string _marker_variable_name;
 
+  /// Type of mesh adaptivity
+  std::string _adaptivity_type;
+
   /// Name of the initial marker variable if using the new adaptivity system
   std::string _initial_marker_variable_name;
 
@@ -314,10 +316,6 @@ protected:
 
   /// Stores pointers to ErrorVectors associated with indicator field names
   std::map<std::string, std::unique_ptr<libMesh::ErrorVector>> _indicator_field_to_error_vector;
-
-  bool _p_refinement_flag = false;
-
-  bool _hp_refinement_flag = false;
 };
 
 template <typename T>
