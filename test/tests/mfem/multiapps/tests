@@ -16,7 +16,6 @@
       devices = 'cpu cuda'
       max_parallel = 1 # schemadiff with multiple ranks
       recover = false
-      max_threads = 1
     []
     [MFEM_sub_cycling]
       type = XMLDiff
