@@ -36,11 +36,11 @@ public:
   {
     return _imag_kernel->createLFIntegrator();
   }
-  virtual mfem::BilinearFormIntegrator * getRealBFIntegrator();
+  virtual mfem::BilinearFormIntegrator * getRealBFIntegrator()
   {
     return _real_kernel->createBFIntegrator();
   }
-  virtual mfem::BilinearFormIntegrator * getImagBFIntegrator();
+  virtual mfem::BilinearFormIntegrator * getImagBFIntegrator()
   {
     return _imag_kernel->createBFIntegrator();
   }
