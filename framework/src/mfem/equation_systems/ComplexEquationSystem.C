@@ -7,7 +7,7 @@ namespace Moose::MFEM
 {
 
 void
-ComplexEquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
+ComplexEquationSystem::Init(Moose::MFEM::GridFunctions & /*gridfunctions*/, Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions,
                             const Moose::MFEM::FESpaces & /*fespaces*/,
                             mfem::AssemblyLevel assembly_level)
 {
@@ -15,21 +15,21 @@ ComplexEquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
 
   for (auto & test_var_name : _test_var_names)
   {
-    if (!gridfunctions.cpx_gfs.Has(test_var_name))
+    if (!cpx_gridfunctions.Has(test_var_name))
     {
       MFEM_ABORT("Test variable " << test_var_name
                                   << " requested by equation system during initialisation was "
                                      "not found in gridfunctions");
     }
     // Store pointers to variable FESpaces
-    _test_pfespaces.push_back(gridfunctions.cpx_gfs.Get(test_var_name)->ParFESpace());
+    _test_pfespaces.push_back(cpx_gridfunctions.Get(test_var_name)->ParFESpace());
     // Create auxiliary gridfunctions for applying Dirichlet conditions
     _cxs.emplace_back(std::make_unique<mfem::ParComplexGridFunction>(
-        gridfunctions.cpx_gfs.Get(test_var_name)->ParFESpace()));
+        cpx_gridfunctions.Get(test_var_name)->ParFESpace()));
     _cdxdts.emplace_back(std::make_unique<mfem::ParComplexGridFunction>(
-        gridfunctions.cpx_gfs.Get(test_var_name)->ParFESpace()));
-    _trial_variables.cpx_gfs.Register(test_var_name,
-                                      gridfunctions.cpx_gfs.GetShared(test_var_name));
+        cpx_gridfunctions.Get(test_var_name)->ParFESpace()));
+    _cpx_trial_variables.Register(test_var_name,
+                                      cpx_gridfunctions.GetShared(test_var_name));
   }
 }
 
@@ -294,13 +294,13 @@ ComplexEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
 
 void
 ComplexEquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
-                                          Moose::MFEM::GridFunctions & gridfunctions)
+                                          Moose::MFEM::GridFunctions & /*gridfunctions*/, Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions)
 {
   for (const auto i : index_range(_trial_var_names))
   {
     auto & trial_var_name = _trial_var_names.at(i);
     trueX.GetBlock(i).SyncAliasMemory(trueX);
-    gridfunctions.cpx_gfs.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
+    cpx_gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
 }
 

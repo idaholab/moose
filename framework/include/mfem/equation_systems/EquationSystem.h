@@ -49,7 +49,7 @@ public:
   virtual void ApplyEssentialBCs();
 
   /// Build forms
-  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
+  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions, Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions,
                     const Moose::MFEM::FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level);
   virtual void BuildLinearForms();
@@ -79,7 +79,7 @@ public:
 
   /// Update variable from solution vector after solve
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
-                                  Moose::MFEM::GridFunctions & gridfunctions);
+                                  Moose::MFEM::GridFunctions & gridfunctions, Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions);
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 

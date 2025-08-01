@@ -31,7 +31,7 @@ MFEML2Error::validParams()
 MFEML2Error::MFEML2Error(const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
     _coeff(getScalarCoefficient("function")),
-    _var(getMFEMProblem().getProblemData().gridfunctions.real_gfs.GetRef(
+    _var(getMFEMProblem().getProblemData().gridfunctions.GetRef(
         getParam<VariableName>("variable")))
 {
 }

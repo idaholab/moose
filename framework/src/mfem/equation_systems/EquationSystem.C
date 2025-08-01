@@ -274,40 +274,43 @@ EquationSystem::GetGradient(const mfem::Vector &) const
 
 void
 EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
-                                   Moose::MFEM::GridFunctions & gridfunctions)
+                                   Moose::MFEM::GridFunctions & gridfunctions, Moose::MFEM::ComplexGridFunctions & /*cpx_gridfunctions*/)
 {
   for (const auto i : index_range(_trial_var_names))
   {
     auto & trial_var_name = _trial_var_names.at(i);
     trueX.GetBlock(i).SyncAliasMemory(trueX);
-    gridfunctions.real_gfs.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
+    gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
 }
 
 void
-EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
+EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions, Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions,
                      const Moose::MFEM::FESpaces & /*fespaces*/,
                      mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
 
+  if (cpx_gridfunctions.size())
+    mooseError("Complex variables have been created but the executioner numeric type has not been set to complex. Please set Executioner/numeric_type = complex.");
+
   for (auto & test_var_name : _test_var_names)
   {
-    if (!gridfunctions.real_gfs.Has(test_var_name))
+    if (!gridfunctions.Has(test_var_name))
     {
       MFEM_ABORT("Test variable " << test_var_name
                                   << " requested by equation system during initialisation was "
                                      "not found in gridfunctions");
     }
     // Store pointers to variable FESpaces
-    _test_pfespaces.push_back(gridfunctions.real_gfs.Get(test_var_name)->ParFESpace());
+    _test_pfespaces.push_back(gridfunctions.Get(test_var_name)->ParFESpace());
     // Create auxiliary gridfunctions for applying Dirichlet conditions
     _xs.emplace_back(std::make_unique<mfem::ParGridFunction>(
-        gridfunctions.real_gfs.Get(test_var_name)->ParFESpace()));
+        gridfunctions.Get(test_var_name)->ParFESpace()));
     _dxdts.emplace_back(std::make_unique<mfem::ParGridFunction>(
-        gridfunctions.real_gfs.Get(test_var_name)->ParFESpace()));
-    _trial_variables.real_gfs.Register(test_var_name,
-                                       gridfunctions.real_gfs.GetShared(test_var_name));
+        gridfunctions.Get(test_var_name)->ParFESpace()));
+    _trial_variables.Register(test_var_name,
+                                       gridfunctions.GetShared(test_var_name));
   }
 }
 
@@ -529,12 +532,12 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     auto lf = _lfs.Get(test_var_name);
     // if implicit, add contribution to linear form from terms involving state
     // variable at previous timestep: {
-    blf->AddMult(*_trial_variables.real_gfs.Get(test_var_name), *lf, -1.0);
+    blf->AddMult(*_trial_variables.Get(test_var_name), *lf, -1.0);
     // }
     mfem::Vector aux_x, aux_rhs;
     // Update solution values on Dirichlet values to be in terms of du/dt instead of u
     mfem::Vector bc_x = *(_xs.at(i).get());
-    bc_x -= *_trial_variables.real_gfs.Get(test_var_name);
+    bc_x -= *_trial_variables.Get(test_var_name);
     bc_x /= _dt_coef.constant;
 
     // Form linear system for operator acting on vector of du/dt
@@ -566,13 +569,13 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 
   // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
   mfem::Vector lf_prev(lf->Size());
-  blf->Mult(*_trial_variables.real_gfs.Get(test_var_name), lf_prev);
+  blf->Mult(*_trial_variables.Get(test_var_name), lf_prev);
   *lf -= lf_prev;
   // }
   mfem::Vector aux_x, aux_rhs;
   // Update solution values on Dirichlet values to be in terms of du/dt instead of u
   mfem::Vector bc_x = *(_xs.at(0).get());
-  bc_x -= *_trial_variables.real_gfs.Get(test_var_name);
+  bc_x -= *_trial_variables.Get(test_var_name);
   bc_x /= _dt_coef.constant;
 
   // Form linear system for operator acting on vector of du/dt

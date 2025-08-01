@@ -16,8 +16,8 @@ namespace Moose::MFEM
 void
 ProblemOperatorInterface::SetGridFunctions()
 {
-  _test_variables = _problem.gridfunctions.real_gfs.Get(_test_var_names);
-  _trial_variables = _problem.gridfunctions.real_gfs.Get(_trial_var_names);
+  _test_variables = _problem.gridfunctions.Get(_test_var_names);
+  _trial_variables = _problem.gridfunctions.Get(_trial_var_names);
 
   // Set operator size and block structure
   _block_true_offsets.SetSize(_trial_variables.size() + 1);

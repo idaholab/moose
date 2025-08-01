@@ -20,7 +20,7 @@ TimeDomainEquationSystemProblemOperator::SetGridFunctions()
   _test_var_names = GetEquationSystem()->TestVarNames();
   _trial_var_names = GetEquationSystem()->TrialVarNames();
   _trial_variable_time_derivatives =
-      _problem.gridfunctions.real_gfs.Get(GetEquationSystem()->TrialVarTimeDerivativeNames());
+      _problem.gridfunctions.Get(GetEquationSystem()->TrialVarTimeDerivativeNames());
 
   TimeDomainProblemOperator::SetGridFunctions();
 }

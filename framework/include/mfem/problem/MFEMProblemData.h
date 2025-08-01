@@ -41,6 +41,7 @@ public:
   Moose::MFEM::FECollections fecs;
   Moose::MFEM::FESpaces fespaces;
   Moose::MFEM::GridFunctions gridfunctions;
+  Moose::MFEM::ComplexGridFunctions cpx_gridfunctions;
 
   enum class NumericType
   {
