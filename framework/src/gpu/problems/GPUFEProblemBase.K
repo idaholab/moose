@@ -80,6 +80,50 @@ FEProblemBase::addKokkosMaterial(const std::string & mat_name,
   addMaterialHelper({&_kokkos_materials}, mat_name, name, parameters);
 }
 
+MaterialData &
+FEProblemBase::getKokkosMaterialData(Moose::MaterialDataType type, const MooseObject * object) const
+{
+  switch (type)
+  {
+    case Moose::BLOCK_MATERIAL_DATA:
+      if (object)
+        _kokkos_material_props.addConsumer(type, object);
+      return _kokkos_material_props.getMaterialData(0);
+    case Moose::NEIGHBOR_MATERIAL_DATA:
+      if (object)
+        _kokkos_neighbor_material_props.addConsumer(type, object);
+      return _kokkos_neighbor_material_props.getMaterialData(0);
+    case Moose::BOUNDARY_MATERIAL_DATA:
+    case Moose::FACE_MATERIAL_DATA:
+    case Moose::INTERFACE_MATERIAL_DATA:
+      if (object)
+        _kokkos_bnd_material_props.addConsumer(type, object);
+      return _kokkos_bnd_material_props.getMaterialData(0);
+  }
+
+  mooseError("FEProblemBase::getKokkosMaterialData(): Invalid MaterialDataType ", type);
+}
+
+const std::set<const MooseObject *> &
+FEProblemBase::getKokkosMaterialPropertyStorageConsumers(Moose::MaterialDataType type) const
+{
+  switch (type)
+  {
+    case Moose::BLOCK_MATERIAL_DATA:
+      return _kokkos_material_props.getConsumers(type);
+    case Moose::NEIGHBOR_MATERIAL_DATA:
+      return _kokkos_neighbor_material_props.getConsumers(type);
+    case Moose::BOUNDARY_MATERIAL_DATA:
+    case Moose::FACE_MATERIAL_DATA:
+    case Moose::INTERFACE_MATERIAL_DATA:
+      return _kokkos_bnd_material_props.getConsumers(type);
+  }
+
+  mooseError(
+      "FEProblemBase::getKokkosMaterialPropertyStorageConsumers(): Invalid MaterialDataType ",
+      type);
+}
+
 void
 FEProblemBase::initKokkos()
 {
@@ -142,7 +186,7 @@ FEProblemBase::initKokkosStatefulProps()
     system.reinit();
   }
 
-  _kokkos_systems.copy();
+  _kokkos_systems.copyToDevice();
 
   // Initialize stateful properties
 

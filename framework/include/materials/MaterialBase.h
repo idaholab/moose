@@ -311,6 +311,7 @@ protected:
 
   virtual const MaterialData & materialData() const = 0;
   virtual MaterialData & materialData() = 0;
+  virtual Moose::MaterialDataType materialDataType() = 0;
 
   virtual const FEProblemBase & miProblem() const { return _fe_problem; }
   virtual FEProblemBase & miProblem() { return _fe_problem; }

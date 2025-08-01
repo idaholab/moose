@@ -54,9 +54,13 @@ public:
    */
   void create(libMesh::NumericVector<PetscScalar> & vector, const System & system, bool assemble);
   /**
-   * Copy from/to the libMesh PetscVector
+   * Copy from the host libMesh PetscVector
    */
-  void copy(const MemcpyKind dir = MemcpyKind::HOST_TO_DEVICE);
+  void copyToDevice();
+  /**
+   * Copy to the host libMesh PetscVector
+   */
+  void copyToHost();
   /**
    * Restore the underlying PETSc vector
    */

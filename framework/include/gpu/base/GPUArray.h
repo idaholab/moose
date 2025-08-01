@@ -252,10 +252,13 @@ public:
    */
   void offset(const std::vector<dof_id_signed_type> & d);
   /**
-   * Copy data between host and device
-   * @param dir The copy direction
+   * Copy data from host to device
    */
-  void copy(MemcpyKind dir = MemcpyKind::HOST_TO_DEVICE);
+  void copyToDevice();
+  /**
+   * Copy data from device to host
+   */
+  void copyToHost();
   /**
    * Copy data from an external data to this array
    * @param ptr The pointer to the external data
@@ -275,7 +278,7 @@ public:
   /**
    * Copy all the nested Kokkos arrays including self from host to device
    */
-  void copyNested();
+  void copyToDeviceNested();
   /**
    * Deep copy another Kokkos array
    * If ArrayDeepCopy<T>::value is true, it will copy-construct each entry
@@ -637,50 +640,50 @@ ArrayBase<T, dimension>::offset(const std::vector<dof_id_signed_type> & d)
 
 template <typename T, unsigned int dimension>
 void
-ArrayBase<T, dimension>::copy(MemcpyKind dir)
+ArrayBase<T, dimension>::copyToDevice()
 {
-  if (dir == MemcpyKind::HOST_TO_DEVICE)
+  // If host side memory is not allocated, do nothing
+  if (!_is_host_alloc)
+    return;
+
+  // If device side memory is not allocated,
+  if (!_is_device_alloc)
   {
-    // If host side memory is not allocated, do nothing
-    if (!_is_host_alloc)
-      return;
-
-    // If device side memory is not allocated,
-    if (!_is_device_alloc)
-    {
-      if (_counter.use_count() == 1)
-        // allocate memory if this array is not shared with other arrays
-        allocDevice();
-      else
-        // print error if this array is shared with other arrays
-        mooseError("Kokkos array error: cannot copy from host to device because device side memory "
-                   "was not allocated and array is being shared with other arrays.");
-    }
-
-    // Copy from host to device
-    copyInternal<MemSpace, ::Kokkos::HostSpace>(_device_data, _host_data, _size);
+    if (_counter.use_count() == 1)
+      // allocate memory if this array is not shared with other arrays
+      allocDevice();
+    else
+      // print error if this array is shared with other arrays
+      mooseError("Kokkos array error: cannot copy from host to device because device side memory "
+                 "was not allocated and array is being shared with other arrays.");
   }
-  else if (dir == MemcpyKind::DEVICE_TO_HOST)
+
+  // Copy from host to device
+  copyInternal<MemSpace, ::Kokkos::HostSpace>(_device_data, _host_data, _size);
+}
+
+template <typename T, unsigned int dimension>
+void
+ArrayBase<T, dimension>::copyToHost()
+{
+  // If device side memory is not allocated, do nothing
+  if (!_is_device_alloc)
+    return;
+
+  // If host side memory is not allocated,
+  if (!_is_host_alloc)
   {
-    // If device side memory is not allocated, do nothing
-    if (!_is_device_alloc)
-      return;
-
-    // If host side memory is not allocated,
-    if (!_is_host_alloc)
-    {
-      if (_counter.use_count() == 1)
-        // allocate memory if this array is not shared with other arrays
-        allocHost();
-      else
-        // print error if this array is shared with other arrays
-        mooseError("Kokkos array error: cannot copy from device to host because host side memory "
-                   "was not allocated and array is being shared with other arrays.");
-    }
-
-    // Copy from device to host
-    copyInternal<::Kokkos::HostSpace, MemSpace>(_host_data, _device_data, _size);
+    if (_counter.use_count() == 1)
+      // allocate memory if this array is not shared with other arrays
+      allocHost();
+    else
+      // print error if this array is shared with other arrays
+      mooseError("Kokkos array error: cannot copy from device to host because host side memory "
+                 "was not allocated and array is being shared with other arrays.");
   }
+
+  // Copy from device to host
+  copyInternal<::Kokkos::HostSpace, MemSpace>(_host_data, _device_data, _size);
 }
 
 template <typename T, unsigned int dimension>
@@ -781,25 +784,25 @@ ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyKind dir, dof_id_type n, dof_id_
 
 template <typename T>
 void
-copyInner(T & /* data */)
+copyToDeviceInner(T & /* data */)
 {
 }
 
 template <typename T, unsigned int dimension>
 void
-copyInner(Array<T, dimension> & data)
+copyToDeviceInner(Array<T, dimension> & data)
 {
-  data.copyNested();
+  data.copyToDeviceNested();
 }
 
 template <typename T, unsigned int dimension>
 void
-ArrayBase<T, dimension>::copyNested()
+ArrayBase<T, dimension>::copyToDeviceNested()
 {
   for (unsigned int i = 0; i < _size; ++i)
-    copyInner(_host_data[i]);
+    copyToDeviceInner(_host_data[i]);
 
-  copy();
+  copyToDevice();
 }
 
 template <typename T, unsigned int dimension>
@@ -819,7 +822,7 @@ ArrayBase<T, dimension>::deepCopy(const ArrayBase<T, dimension> & array)
     for (dof_id_type i = 0; i < _size; ++i)
       new (_host_data + i) T(array._host_data[i]);
 
-    copy();
+    copyToDevice();
   }
   else
   {
@@ -963,7 +966,7 @@ dataLoad(std::istream & stream, Array<T, dimension> & array, void * context)
       dataLoad(stream, value, context);
 
     if (array.isDeviceAlloc())
-      array.copy();
+      array.copyToDevice();
   }
   else
   {
@@ -980,13 +983,12 @@ dataLoad(std::istream & stream, Array<T, dimension> & array, void * context)
 /**
  * The specialization of the Kokkos array class for each dimension.
  * All array data that needs to be accessed on device in Kokkos objects should use this class.
- * If the array is populated on host and is to be accessed on device, make sure to call copy() after
- * populating data.
- * For a nested Kokkos array, either copyNested() should be called for the outermost array or copy()
- * should be called for each instance of Kokkos array from the innermost to the outermost.
- * Do not store this object as reference in your Kokkos object if it used on device, because the
- * reference refers to a host object and therefore is not accessible on device.
- * If storing it as a reference is required, see ReferenceWrapper.
+ * If the array is populated on host and is to be accessed on device, make sure to call
+ * copyToDevice() after populating data. For a nested Kokkos array, either copyToDeviceNested()
+ * should be called for the outermost array or copyToDevice() should be called for each instance of
+ * Kokkos array from the innermost to the outermost. Do not store this object as reference in your
+ * Kokkos object if it used on device, because the reference refers to a host object and therefore
+ * is not accessible on device. If storing it as a reference is required, see ReferenceWrapper.
  */
 ///@{
 template <typename T>

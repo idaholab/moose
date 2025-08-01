@@ -22,11 +22,12 @@ FunctorInterface::FunctorInterface(const MooseObject * const moose_object)
     _fi_subproblem(_fi_params.get<SubProblem *>("_subproblem")),
     _fi_tid(_fi_params.get<THREAD_ID>("_tid"))
 {
+#ifdef MOOSE_KOKKOS_ENABLED
   // Calling this constructor while not executing actions means this object is being
   // copy-constructed
-  if (moose_object->isParamValid("_kokkos_object") &&
-      !moose_object->getMooseApp().currentlyExecutingActions())
+  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
     return;
+#endif
 }
 
 std::string

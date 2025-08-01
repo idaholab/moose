@@ -45,6 +45,13 @@ public:
   std::shared_ptr<MooseObject> getSharedPtr();
   std::shared_ptr<const MooseObject> getSharedPtr() const;
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  bool isKokkosObject() const
+  {
+    return parameters().isParamValid(Moose::Kokkos::KOKKOS_OBJECT_PARAM);
+  }
+#endif
+
 protected:
   /// Reference to the "enable" InputParameters, used by Controls for toggling on/off MooseObjects
   const bool & _enabled;

@@ -41,8 +41,8 @@ Coupleable::kokkosCoupledVectorTagVariable(const std::string & var_name,
     variable._var[0] = var->number();
     variable._sys[0] = var->sys().number();
 
-    variable._var.copy();
-    variable._sys.copy();
+    variable._var.copyToDevice();
+    variable._sys.copyToDevice();
 
     variable._tag = _c_fe_problem.getVectorTagID(tag_name);
 
@@ -52,7 +52,7 @@ Coupleable::kokkosCoupledVectorTagVariable(const std::string & var_name,
   {
     variable._default_value.create(1);
     variable._default_value[0] = _c_parameters.defaultCoupledValue(var_name, comp);
-    variable._default_value.copy();
+    variable._default_value.copyToDevice();
   }
 
   return variable;
@@ -89,8 +89,8 @@ Coupleable::kokkosCoupledVectorTagVariables(const std::string & var_name,
       variable._sys[comp] = var->sys().number();
     }
 
-    variable._var.copy();
-    variable._sys.copy();
+    variable._var.copyToDevice();
+    variable._sys.copyToDevice();
 
     variable._tag = _c_fe_problem.getVectorTagID(tag_name);
 
@@ -103,7 +103,7 @@ Coupleable::kokkosCoupledVectorTagVariables(const std::string & var_name,
     for (unsigned int comp = 0; comp < components; ++comp)
       variable._default_value[comp] = _c_parameters.defaultCoupledValue(var_name, comp);
 
-    variable._default_value.copy();
+    variable._default_value.copyToDevice();
   }
 
   return variable;
@@ -116,7 +116,7 @@ Coupleable::kokkosZeroVariable()
 
   variable._default_value.create(1);
   variable._default_value[0] = 0;
-  variable._default_value.copy();
+  variable._default_value.copyToDevice();
 
   return variable;
 }

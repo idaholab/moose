@@ -50,6 +50,13 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object, bool init
     _blk_dim(libMesh::invalid_uint),
     _moose_object(moose_object)
 {
+#ifdef MOOSE_KOKKOS_ENABLED
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
+#endif
+
   if (initialize)
     initializeBlockRestrictable(_moose_object);
 }
@@ -86,11 +93,14 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
 
   // Populate the MaterialData pointer
   if (_blk_feproblem != NULL)
-    _blk_material_data =
-        &_blk_feproblem->getMaterialData(Moose::BLOCK_MATERIAL_DATA,
-                                         _blk_tid,
-                                         nullptr,
-                                         moose_object->isParamValid("_kokkos_object"));
+  {
+#ifdef MOOSE_KOKKOS_ENABLED
+    if (_moose_object->isKokkosObject())
+      _blk_material_data = &_blk_feproblem->getKokkosMaterialData(Moose::BLOCK_MATERIAL_DATA);
+    else
+#endif
+      _blk_material_data = &_blk_feproblem->getMaterialData(Moose::BLOCK_MATERIAL_DATA, _blk_tid);
+  }
 
   // The 'block' input is defined
   if (moose_object->isParamValid("block"))
@@ -184,7 +194,7 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
     _blk_dim = _blk_mesh->dimension();
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (moose_object->isParamValid("_kokkos_object"))
+  if (moose_object->isKokkosObject())
     initializeKokkosBlockRestrictable(_blk_mesh->getKokkosMesh());
 #endif
 }

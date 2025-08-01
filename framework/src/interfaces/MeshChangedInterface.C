@@ -21,11 +21,13 @@ MeshChangedInterface::validParams()
 MeshChangedInterface::MeshChangedInterface(const InputParameters & params)
   : _mci_feproblem(*params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
+#ifdef MOOSE_KOKKOS_ENABLED
   // Calling this constructor while not executing actions means this object is being
   // copy-constructed
-  if (params.isParamValid("_kokkos_object") &&
+  if (params.isParamValid(Moose::Kokkos::KOKKOS_OBJECT_PARAM) &&
       !_mci_feproblem.getMooseApp().currentlyExecutingActions())
     return;
+#endif
 
   _mci_feproblem.notifyWhenMeshChanges(this);
 }

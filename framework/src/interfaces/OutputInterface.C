@@ -37,10 +37,13 @@ OutputInterface::OutputInterface(const InputParameters & parameters, bool build_
     _oi_outputs(parameters.get<std::vector<OutputName>>("outputs").begin(),
                 parameters.get<std::vector<OutputName>>("outputs").end())
 {
+#ifdef MOOSE_KOKKOS_ENABLED
   // Calling this constructor while not executing actions means this object is being
   // copy-constructed
-  if (parameters.isParamValid("_kokkos_object") && !_oi_moose_app.currentlyExecutingActions())
+  if (parameters.isParamValid(Moose::Kokkos::KOKKOS_OBJECT_PARAM) &&
+      !_oi_moose_app.currentlyExecutingActions())
     return;
+#endif
 
   // By default it is assumed that the variable name associated with 'outputs' is the name
   // of the block, this is the case for Markers, Indicators, VectorPostprocessors, and

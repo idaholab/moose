@@ -2060,14 +2060,29 @@ public:
    */
   MaterialData & getMaterialData(Moose::MaterialDataType type,
                                  const THREAD_ID tid = 0,
-                                 const MooseObject * object = nullptr,
-                                 bool is_kokkos = false) const;
+                                 const MooseObject * object = nullptr) const;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * @return The Kokkos MaterialData for the type \p type for thread \p tid
+   */
+  MaterialData & getKokkosMaterialData(Moose::MaterialDataType type,
+                                       const MooseObject * object = nullptr) const;
+#endif
 
   /**
    * @return The consumers of the MaterialPropertyStorage for the type \p type
    */
   const std::set<const MooseObject *> &
-  getMaterialPropertyStorageConsumers(Moose::MaterialDataType type, bool is_kokkos = false) const;
+  getMaterialPropertyStorageConsumers(Moose::MaterialDataType type) const;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * @return The consumers of the Kokkos MaterialPropertyStorage for the type \p type
+   */
+  const std::set<const MooseObject *> &
+  getKokkosMaterialPropertyStorageConsumers(Moose::MaterialDataType type) const;
+#endif
 
   /**
    * @returns Whether the original matrix nonzero pattern is restored before each Jacobian assembly

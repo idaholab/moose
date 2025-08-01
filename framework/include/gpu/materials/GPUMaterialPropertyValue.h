@@ -103,8 +103,8 @@ public:
     return *this;
   }
   /**
-   * Copy a value from another
-   * @param value The
+   * Copy a value from another property
+   * @param value The property to copy
    */
   KOKKOS_FUNCTION auto & operator=(const MaterialPropertyValue<T, 0> & value)
   {

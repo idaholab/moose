@@ -19,13 +19,15 @@
 
 using namespace libMesh;
 
-MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject * moose_object)
+MooseVariableDependencyInterface::MooseVariableDependencyInterface(
+    [[maybe_unused]] const MooseObject * moose_object)
 {
+#ifdef MOOSE_KOKKOS_ENABLED
   // Calling this constructor while not executing actions means this object is being
   // copy-constructed
-  if (moose_object->isParamValid("_kokkos_object") &&
-      !moose_object->getMooseApp().currentlyExecutingActions())
+  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
     return;
+#endif
 }
 
 template <typename DofObjectType>

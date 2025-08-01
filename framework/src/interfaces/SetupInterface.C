@@ -31,11 +31,12 @@ SetupInterface::SetupInterface(const MooseObject * moose_object)
         (moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
             ->getCurrentExecuteOnFlag())
 {
+#ifdef MOOSE_KOKKOS_ENABLED
   // Calling this constructor while not executing actions means this object is being
   // copy-constructed
-  if (moose_object->isParamValid("_kokkos_object") &&
-      !moose_object->getMooseApp().currentlyExecutingActions())
+  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
     return;
+#endif
 
   _empty_execute_enum
       .clearSetValues(); // remove any flags for the case when "execute_on" is not used
