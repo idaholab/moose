@@ -13,6 +13,7 @@
 
 #include "MooseTypes.h"
 #include "MooseVariableBase.h"
+#include "MoosePassKey.h"
 
 class Coupleable;
 
@@ -26,9 +27,9 @@ namespace Kokkos
  */
 class Variable
 {
-  friend class ::Coupleable;
-
 public:
+  using CoupleableKey = ::Moose::PassKey<::Coupleable>;
+
   /**
    * Default constructor
    */
@@ -62,6 +63,18 @@ public:
    * @param tag_name The vector tag name
    */
   void init(const MooseVariableBase & variable, const TagName & tag_name = Moose::SOLUTION_TAG);
+  /**
+   * Initialize the variable with coupled MOOSE variables
+   * @param variables The coupled MOOSE variables
+   * @param tag The vector tag ID
+   */
+  void
+  init(const std::vector<const MooseVariableBase *> & variables, const TagID tag, CoupleableKey);
+  /**
+   * Initialize the variable with coupled default values
+   * @param values The default coupled values
+   */
+  void init(const std::vector<Real> & values, CoupleableKey);
 
   /**
    * Get whether the variable is coupled
