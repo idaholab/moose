@@ -182,7 +182,6 @@ ExplicitMixedOrder::postResidual(NumericVector<Number> & residual)
 bool
 ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
 {
-
   bool converged = false;
 
   // Grab all the vectors that we will need
