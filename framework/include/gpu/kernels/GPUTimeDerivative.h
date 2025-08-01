@@ -55,19 +55,19 @@ KOKKOS_FUNCTION void
 KokkosTimeDerivative<Derived>::computeJacobianInternal(const Derived * kernel,
                                                        ResidualDatum & datum) const
 {
-  using Moose::Kokkos::MAX_DOF;
+  using Moose::Kokkos::MAX_CACHED_DOF;
 
-  Real local_ke[MAX_DOF];
+  Real local_ke[MAX_CACHED_DOF];
 
-  unsigned int num_batches = datum.n_idofs() * datum.n_jdofs() / MAX_DOF;
+  unsigned int num_batches = datum.n_idofs() * datum.n_jdofs() / MAX_CACHED_DOF;
 
-  if ((datum.n_idofs() * datum.n_jdofs()) % MAX_DOF)
+  if ((datum.n_idofs() * datum.n_jdofs()) % MAX_CACHED_DOF)
     ++num_batches;
 
   for (unsigned int batch = 0; batch < num_batches; ++batch)
   {
-    unsigned int ijb = batch * MAX_DOF;
-    unsigned int ije = ::Kokkos::min(ijb + MAX_DOF, datum.n_idofs() * datum.n_jdofs());
+    unsigned int ijb = batch * MAX_CACHED_DOF;
+    unsigned int ije = ::Kokkos::min(ijb + MAX_CACHED_DOF, datum.n_idofs() * datum.n_jdofs());
 
     for (unsigned int ij = ijb; ij < ije; ++ij)
       local_ke[ij - ijb] = 0;

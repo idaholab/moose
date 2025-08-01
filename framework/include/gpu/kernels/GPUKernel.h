@@ -291,117 +291,65 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 Kernel<Derived>::computeResidualInternal(const Derived * kernel, ResidualDatum & datum) const
 {
-  Real local_re[MAX_DOF];
+  ResidualObject::computeResidualInternal(
+      datum,
+      [&](Real * local_re, const unsigned int ib, const unsigned int ie)
+      {
+        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+        {
+          datum.reinit();
 
-  unsigned int num_batches = datum.n_dofs() / MAX_DOF;
-
-  if (datum.n_dofs() % MAX_DOF)
-    ++num_batches;
-
-  for (unsigned int batch = 0; batch < num_batches; ++batch)
-  {
-    unsigned int ib = batch * MAX_DOF;
-    unsigned int ie = ::Kokkos::min(ib + MAX_DOF, datum.n_dofs());
-
-    for (unsigned int i = ib; i < ie; ++i)
-      local_re[i - ib] = 0;
-
-    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-    {
-      datum.reinit();
-
-      for (unsigned int i = ib; i < ie; ++i)
-        local_re[i - ib] += datum.JxW(qp) * kernel->computeQpResidual(i, qp, datum);
-    }
-
-    for (unsigned int i = ib; i < ie; ++i)
-      accumulateTaggedElementalResidual(local_re[i - ib], datum.elem().id, i);
-  }
+          for (unsigned int i = ib; i < ie; ++i)
+            local_re[i] += datum.JxW(qp) * kernel->computeQpResidual(i, qp, datum);
+        }
+      });
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
 Kernel<Derived>::computeJacobianInternal(const Derived * kernel, ResidualDatum & datum) const
 {
-  Real local_ke[MAX_DOF];
-
-  unsigned int num_batches = datum.n_idofs() * datum.n_jdofs() / MAX_DOF;
-
-  if ((datum.n_idofs() * datum.n_jdofs()) % MAX_DOF)
-    ++num_batches;
-
-  for (unsigned int batch = 0; batch < num_batches; ++batch)
-  {
-    unsigned int ijb = batch * MAX_DOF;
-    unsigned int ije = ::Kokkos::min(ijb + MAX_DOF, datum.n_idofs() * datum.n_jdofs());
-
-    for (unsigned int ij = ijb; ij < ije; ++ij)
-      local_ke[ij - ijb] = 0;
-
-    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-    {
-      datum.reinit();
-
-      for (unsigned int ij = ijb; ij < ije; ++ij)
+  ResidualObject::computeJacobianInternal(
+      datum,
+      [&](Real * local_ke, const unsigned int ijb, const unsigned int ije)
       {
-        unsigned int i = ij % datum.n_jdofs();
-        unsigned int j = ij / datum.n_jdofs();
+        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+        {
+          datum.reinit();
 
-        local_ke[ij - ijb] += datum.JxW(qp) * kernel->computeQpJacobian(i, j, qp, datum);
-      }
-    }
+          for (unsigned int ij = ijb; ij < ije; ++ij)
+          {
+            unsigned int i = ij % datum.n_jdofs();
+            unsigned int j = ij / datum.n_jdofs();
 
-    for (unsigned int ij = ijb; ij < ije; ++ij)
-    {
-      unsigned int i = ij % datum.n_jdofs();
-      unsigned int j = ij / datum.n_jdofs();
-
-      accumulateTaggedElementalMatrix(local_ke[ij - ijb], datum.elem().id, i, j, datum.jvar());
-    }
-  }
+            local_ke[ij] += datum.JxW(qp) * kernel->computeQpJacobian(i, j, qp, datum);
+          }
+        }
+      });
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
 Kernel<Derived>::computeOffDiagJacobianInternal(const Derived * kernel, ResidualDatum & datum) const
 {
-  Real local_ke[MAX_DOF];
-
-  unsigned int num_batches = datum.n_idofs() * datum.n_jdofs() / MAX_DOF;
-
-  if ((datum.n_idofs() * datum.n_jdofs()) % MAX_DOF)
-    ++num_batches;
-
-  for (unsigned int batch = 0; batch < num_batches; ++batch)
-  {
-    unsigned int ijb = batch * MAX_DOF;
-    unsigned int ije = ::Kokkos::min(ijb + MAX_DOF, datum.n_idofs() * datum.n_jdofs());
-
-    for (unsigned int ij = ijb; ij < ije; ++ij)
-      local_ke[ij - ijb] = 0;
-
-    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-    {
-      datum.reinit();
-
-      for (unsigned int ij = ijb; ij < ije; ++ij)
+  ResidualObject::computeJacobianInternal(
+      datum,
+      [&](Real * local_ke, const unsigned int ijb, const unsigned int ije)
       {
-        unsigned int i = ij % datum.n_jdofs();
-        unsigned int j = ij / datum.n_jdofs();
+        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+        {
+          datum.reinit();
 
-        local_ke[ij - ijb] +=
-            datum.JxW(qp) * kernel->computeQpOffDiagJacobian(i, j, datum.jvar(), qp, datum);
-      }
-    }
+          for (unsigned int ij = ijb; ij < ije; ++ij)
+          {
+            unsigned int i = ij % datum.n_jdofs();
+            unsigned int j = ij / datum.n_jdofs();
 
-    for (unsigned int ij = ijb; ij < ije; ++ij)
-    {
-      unsigned int i = ij % datum.n_jdofs();
-      unsigned int j = ij / datum.n_jdofs();
-
-      accumulateTaggedElementalMatrix(local_ke[ij - ijb], datum.elem().id, i, j, datum.jvar());
-    }
-  }
+            local_ke[ij] +=
+                datum.JxW(qp) * kernel->computeQpOffDiagJacobian(i, j, datum.jvar(), qp, datum);
+          }
+        }
+      });
 }
 
 } // namespace Kokkos

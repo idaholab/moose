@@ -87,34 +87,20 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 TimeKernel<Derived>::computeResidualInternal(const Derived * kernel, ResidualDatum & datum) const
 {
-  Real local_re[MAX_DOF];
+  ResidualObject::computeResidualInternal(
+      datum,
+      [&](Real * local_re, const unsigned int ib, const unsigned int ie)
+      {
+        for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
+        {
+          datum.reinit();
 
-  unsigned int num_batches = datum.n_dofs() / MAX_DOF;
+          for (unsigned int i = ib; i < ie; ++i)
+            local_re[i] += datum.JxW(qp) * kernel->computeQpResidual(i, qp, datum);
+        }
 
-  if (datum.n_dofs() % MAX_DOF)
-    ++num_batches;
-
-  for (unsigned int batch = 0; batch < num_batches; ++batch)
-  {
-    unsigned int ib = batch * MAX_DOF;
-    unsigned int ie = ::Kokkos::min(ib + MAX_DOF, datum.n_dofs());
-
-    for (unsigned int i = ib; i < ie; ++i)
-      local_re[i - ib] = 0;
-
-    for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
-    {
-      datum.reinit();
-
-      for (unsigned int i = ib; i < ie; ++i)
-        local_re[i - ib] += datum.JxW(qp) * kernel->computeQpResidual(i, qp, datum);
-    }
-
-    kernel->computeResidualAdditional(ib, ie, datum, local_re);
-
-    for (unsigned int i = ib; i < ie; ++i)
-      accumulateTaggedElementalResidual(local_re[i - ib], datum.elem().id, i);
-  }
+        kernel->computeResidualAdditional(ib, ie, datum, local_re);
+      });
 }
 
 } // namespace Kokkos
