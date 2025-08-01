@@ -659,52 +659,51 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
   // First, see if any Apps need to be reset
   if (_reset_times)
   {
-    // Last time in the set
-    const Real prev_reset_time = _reset_times->getPreviousTime(target_time + timestep_tol, false);
+    // Get the reset time that is <= (within tolerance) to the current time
+    // Will only reset if it is after the simulation start time and
+    // if the candidate hasn't been reset yet
+    const Real candidate_reset_time =
+        _reset_times->getPreviousTime(target_time + timestep_tol, false);
 
-    // Gathered reset time is before simulation start time, no need to reset
-    if (prev_reset_time > _app.getStartTime())
+    // Check if the candidate reset time should be accepted to perform reset
+    bool candidate_reset_time_accepted = candidate_reset_time > _app.getStartTime();
+    for (const auto & rh : _reset_happened)
+      if (MooseUtils::relativeFuzzyEqual(rh, candidate_reset_time))
+      {
+        candidate_reset_time_accepted = false;
+        break;
+      }
+
+    // Candidate time is accepted, so perform reset
+    if (candidate_reset_time_accepted)
     {
-      // Check if we already reset this time
-      bool already_reset = false;
-      for (const auto & rh : _reset_happened)
-        if (MooseUtils::relativeFuzzyEqual(rh, prev_reset_time))
+      for (auto & app : _reset_apps)
+        resetApp(app);
+
+      // If we reset an application, then we delete the old objects, including the coordinate
+      // transformation classes. Consequently we need to reset the coordinate transformation
+      // classes in the associated transfer classes
+      for (auto * const transfer : _associated_transfers)
+        transfer->getAppInfo();
+
+      // Similarly we need to transform the mesh again
+      if (_run_in_position)
+        for (const auto i : make_range(_my_num_apps))
         {
-          already_reset = true;
-          break;
+          auto app_ptr = _apps[i];
+          if (usingPositions())
+            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
+                app_ptr->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+          else
+            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
+                app_ptr->getExecutioner()->feProblem().mesh(), Point());
         }
 
-      // Reset if not reset before
-      if (!already_reset)
-      {
-        for (auto & app : _reset_apps)
-          resetApp(app);
+      // Make sure we don't reset this time again
+      _reset_happened.insert(candidate_reset_time);
 
-        // If we reset an application, then we delete the old objects, including the coordinate
-        // transformation classes. Consequently we need to reset the coordinate transformation
-        // classes in the associated transfer classes
-        for (auto * const transfer : _associated_transfers)
-          transfer->getAppInfo();
-
-        // Similarly we need to transform the mesh again
-        if (_run_in_position)
-          for (const auto i : make_range(_my_num_apps))
-          {
-            auto app_ptr = _apps[i];
-            if (usingPositions())
-              app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
-                  app_ptr->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
-            else
-              app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
-                  app_ptr->getExecutioner()->feProblem().mesh(), Point());
-          }
-
-        // Make sure we don't reset this time again
-        _reset_happened.insert(prev_reset_time);
-
-        // Backup in case the next solve fails
-        backup_apps = true;
-      }
+      // Backup in case the next solve fails
+      backup_apps = true;
     }
   }
 
