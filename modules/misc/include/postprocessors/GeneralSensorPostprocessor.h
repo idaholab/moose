@@ -71,6 +71,8 @@ protected:
   std::vector<Real> & _integrand;
   /// vector to store R function values
   std::vector<Real> & _R_function_values;
+  /// The last time step this object was executed on
+  int & _t_step_old;
   /// To get fixed seed random numbers
   const unsigned int _seed;
   MooseRandom _rng;

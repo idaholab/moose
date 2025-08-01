@@ -140,6 +140,9 @@ TransientBase::validParams()
 
   params.addParamNamesToGroup("time_periods time_period_starts time_period_ends", "Time Periods");
 
+  // This Executioner supports --test-restep
+  params.set<bool>("_supports_test_restep") = true;
+
   return params;
 }
 
@@ -172,7 +175,8 @@ TransientBase::TransientBase(const InputParameters & parameters)
     _start_time(getParam<Real>("start_time")),
     _timestep_tolerance(getParam<Real>("timestep_tolerance")),
     _target_time(declareRecoverableData<Real>("target_time", -std::numeric_limits<Real>::max())),
-    _use_multiapp_dt(getParam<bool>("use_multiapp_dt"))
+    _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
+    _testing_restep(false)
 {
   _t_step = 0;
   _dt = 0;
@@ -190,13 +194,45 @@ TransientBase::TransientBase(const InputParameters & parameters)
 
   setupTimeIntegrator();
 
-  if (_app.testCheckpointHalfTransient()) // Cut timesteps and end_time in half...
+  // Cut timesteps and end_time in half
+  if (_app.testCheckpointHalfTransient())
   {
+    mooseAssert(!_app.testReStep(), "Cannot use with restep");
     _end_time = (_start_time + _end_time) / 2.0;
     _num_steps /= 2.0;
 
     if (_num_steps == 0) // Always do one step in the first half
       _num_steps = 1;
+  }
+  // Retest a timestep (see options below for which timestep)
+  else if (_app.testReStep())
+  {
+    if (_problem.shouldSolve())
+    {
+      // If num_steps is defined, we'll use that to determine restep timestep
+      if (!parameters.isParamSetByAddParam("num_steps"))
+        _test_restep_step = _t_step + (_num_steps + 1) / 2;
+      // If end_time is defined, we'll use the half time to determine when to restep
+      if (!parameters.isParamSetByAddParam("end_time"))
+        _test_restep_time = (_start_time + _end_time) / 2;
+      // If neither was set or we are doing pseudo-transient, pick the second timestep
+      if ((!_test_restep_step && !_test_restep_time) || _steady_state_detection)
+        _test_restep_step = 2;
+
+      std::stringstream msg;
+      if (_test_restep_step && _test_restep_time)
+        msg << "Timestep " << *_test_restep_step << " or time " << *_test_restep_time
+            << " (whichever happens first)";
+      else if (_test_restep_step)
+        msg << "Timestep " << *_test_restep_step;
+      else if (_test_restep_time)
+        msg << "Time " << *_test_restep_time;
+      mooseInfo(msg.str(), " will be forcefully retried due to --test-restep.");
+    }
+    else
+      mooseInfo(
+          "A timestep is not being retried with --test-restep because Problem/solve=false.\n\nTo "
+          "avoid this test being ran, you could set `restep = false` in the test specification.");
   }
 
   if (isParamValid("steady_state_convergence"))
@@ -327,11 +363,26 @@ TransientBase::execute()
 
   // This method can be overridden for user defined activities in the Executioner.
   postExecute();
+
+  if (_test_restep_step || _test_restep_time)
+    mooseError((_test_restep_step ? "Timestep " : "Time "),
+               (_test_restep_step ? *_test_restep_step : *_test_restep_time),
+               " was never retried because the simulation did not get to this timestep.\n\nTo "
+               "support restep testing, specify `num_steps` in the input.\nOtherwise, set "
+               "`restep = false` in this test specification.");
 }
 
 void
 TransientBase::computeDT()
 {
+  // We're repeating the solve of the previous timestep,
+  // so we use the same dt
+  if (_testing_restep)
+  {
+    mooseAssert(!_test_restep_step && !_test_restep_time, "Should not be set");
+    return;
+  }
+
   _time_stepper->computeStep(); // This is actually when DT gets computed
 }
 
@@ -410,9 +461,17 @@ TransientBase::incrementStepOrReject()
 void
 TransientBase::takeStep(Real input_dt)
 {
-  _dt_old = _dt;
+  if (lastSolveConverged())
+    _dt_old = _dt;
 
-  if (input_dt == -1.0)
+  // We're repeating the solve of the previous timestep,
+  // so we use the same dt
+  if (_testing_restep)
+  {
+    mooseAssert(!_test_restep_step && !_test_restep_time, "Should not be set");
+    _testing_restep = false;
+  }
+  else if (input_dt == -1.0)
     _dt = computeConstrainedDT();
   else
     _dt = input_dt;
@@ -430,6 +489,22 @@ TransientBase::takeStep(Real input_dt)
   _xfem_repeat_step = _fixed_point_solve->XFEMRepeatStep();
 
   _last_solve_converged = _time_stepper->converged();
+
+  // We're running with --test-restep and we have just solved
+  // the timestep we are to repeat for the first time
+  if ((_test_restep_step && *_test_restep_step == _t_step) ||
+      (_test_restep_time && _time >= *_test_restep_time))
+  {
+    mooseAssert(!_testing_restep, "Should not be set");
+
+    mooseInfo("Aborting and retrying solve for timestep ", _t_step, " due to --test-restep");
+    _last_solve_converged = false;
+    _testing_restep = true;
+    _test_restep_step.reset();
+    _test_restep_time.reset();
+
+    return;
+  }
 
   if (!lastSolveConverged())
   {

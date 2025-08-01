@@ -241,13 +241,15 @@ FixedPointSolve::solve()
     }
 
     // To detect a new time step
-    if (_old_entering_time == _problem.time())
+    if (_old_entering_time == _problem.time() &&
+        _fixed_point_status != MooseFixedPointConvergenceReason::UNSOLVED)
     {
       // Keep track of the iteration number of the main app
       _main_fixed_point_it++;
 
       // Save variable values before the solve. Solving will provide new values
-      saveVariableValues(false);
+      if (!_app.isUltimateMaster())
+        saveVariableValues(/*is parent app of this iteration=*/false);
     }
     else
       _main_fixed_point_it = 0;

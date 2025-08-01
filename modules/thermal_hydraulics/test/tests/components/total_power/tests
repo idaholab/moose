@@ -5,6 +5,7 @@
     type = 'CSVDiff'
     input = 'phy.constant_power.i'
     csvdiff = 'phy.constant_power_out.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to apply a heat source in a heat structure component.'
   []
 
@@ -12,6 +13,7 @@
     type = 'CSVDiff'
     input = 'clg.power.i'
     csvdiff = 'clg.power_out.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to dynamically control the heat source in a heat structure component.'
   []
 []

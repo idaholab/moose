@@ -23,7 +23,9 @@ DiscreteNucleationInserterBase::DiscreteNucleationInserterBase(const InputParame
     _changes_made(0, 0),
     _update_required(_app.isRecovering() || _app.isRestarting())
 {
-  setRandomResetFrequency(EXEC_TIMESTEP_END);
+  // Even though this object executes on timestep_end, registering on timestep_begin will allow
+  // generators to be restored if a timestep is repeated.
+  setRandomResetFrequency(EXEC_TIMESTEP_BEGIN);
 }
 
 template <>

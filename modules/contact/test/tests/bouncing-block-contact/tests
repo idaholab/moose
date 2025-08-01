@@ -23,6 +23,7 @@
       detail = 'without bounds projection and be'
       cli_args = 'Outputs/file_base=ranfs-dont-project-svd Executioner/line_search=none -pc_type svd '
                  '-pc_svd_monitor'
+      restep = false # Restep will output more timesteps with output on nonlinear
     []
     [ranfs-project-amg]
       type = 'Exodiff'
@@ -113,6 +114,7 @@
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
       capabilities = 'ad_size>=73'
+      restep = false # Issue #31054
     []
     [equal_order_edge_dropping]
       type = 'Exodiff'
@@ -129,6 +131,7 @@
       type = 'Exodiff'
       input = frictionless-penalty-weighted-gap.i
       exodiff = 'frictionless-penalty-weighted-gap_out.e'
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'using a first order basis for displacements and penalty multiplication times the '
                'negative gap distance to form the contact force.'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
@@ -141,6 +144,7 @@
       detail = 'using a first order basis for displacements and penalty multiplication times the '
                'negative gap distance to form the contact force via the contact action.'
       map = true
+      restep = false # Test is prescribed to abort on failed timestep
       cli_args = "Mesh/mesh_file/file=long-bottom-block-1elem-blocks-coarse.e "
                  "Executioner/end_time=50 Postprocessors/active='' Outputs/hide='nodal_area "
                  "contact_pressure penetration'"
@@ -157,6 +161,7 @@
                "Postprocessors/active='' "
                "Outputs/file_base=parallel-frictionless-penalty-weighted-gap_out"
     min_parallel = 13
+    restep = false # Test is prescribed to abort on failed timestep
   []
   [very_parallel_frictional_penalty]
     requirement = 'The system shall be able to communicate semilocal weighted gaps and velocities '
@@ -172,6 +177,7 @@
                "Postprocessors/active='' "
                "Outputs/file_base=parallel-frictional-penalty-weighted-vel_out"
     min_parallel = 13
+    restep = false # Test is prescribed to abort on failed timestep
   []
   [weighted_vel_pdass]
     requirement = 'The system shall support a variationally consistent mortar frictional constraints '

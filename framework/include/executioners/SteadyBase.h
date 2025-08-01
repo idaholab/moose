@@ -72,5 +72,5 @@ protected:
 
 private:
   /// Flag showing if the last solve converged
-  bool _last_solve_converged;
+  bool _last_solve_converged = true;
 };

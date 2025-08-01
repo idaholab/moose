@@ -6619,6 +6619,10 @@ FEProblemBase::restoreSolutions()
 {
   TIME_SECTION("restoreSolutions", 5, "Restoring Solutions");
 
+  if (!_not_zeroed_tagged_vectors.empty())
+    paramError("not_zeroed_tag_vectors",
+               "There is currently no way to restore not-zeroed vectors.");
+
   for (auto & sys : _solver_systems)
   {
     if (_verbose_restore)

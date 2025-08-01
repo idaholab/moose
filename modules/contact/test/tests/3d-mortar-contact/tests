@@ -160,6 +160,7 @@
     abs_zero = 1.0e-5
     allow_warnings = true
     max_parallel = 1
+    restep = false # Issue #31054
     # not running any time step, just examining nodal geometry
     recover = false
   []
@@ -168,6 +169,7 @@
     input = 'frictional-mortar-3d-penalty.i'
     capabilities = 'ad_size>=200'
     exodiff = 'frictional-mortar-3d-penalty_out.e'
+    restep = false # Issue #31054
     requirement = 'The system shall solve a 3D frictional problem with mortar constraint using a '
                   'penalty approach'
     rel_err = 1.0e-5

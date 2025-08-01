@@ -6,6 +6,7 @@
     input = 'heat_rate_convection_1phase.i'
     csvdiff = 'heat_rate_convection_1phase_out.csv'
     recover = false
+    restep = false # Test is not performing any timesteps
     requirement = 'The system shall be able to compute the convective heat flux rate on a boundary in a single phase simulation.'
   []
 []

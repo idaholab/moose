@@ -103,9 +103,16 @@ class RunApp(Tester):
         return input_file
 
     def checkRunnable(self, options):
-        if options.enable_recover:
-            if self.specs.isValid('expect_out') or self.specs.isValid('absent_out') or self.specs['should_crash'] == True:
-                self.addCaveats('expect_out RECOVER')
+        if options.enable_recover or options.enable_restep:
+            reason = 'RECOVER' if options.enable_recover else 'RESTEP'
+            caveats = []
+            for param in ['expect_out', 'absent_out']:
+                if self.specs.isValid(param):
+                    caveats.append(param)
+            if self.specs['should_crash'] == True:
+                caveats.append('should_crash')
+            if caveats:
+                self.addCaveats(f'{",".join(caveats)} {reason}')
                 self.setStatus(self.skip)
                 return False
 
@@ -245,6 +252,9 @@ class RunApp(Tester):
             # The user has passed the parallel-mesh option to the test harness
             # and it is NOT supplied already in the cli-args option
             cli_args.append('--distributed-mesh')
+
+        if specs['restep'] != False and options.enable_restep:
+            cli_args.append('--test-restep')
 
         if '--error' not in cli_args and (not specs["allow_warnings"] or options.error) and not options.allow_warnings:
             cli_args.append('--error')

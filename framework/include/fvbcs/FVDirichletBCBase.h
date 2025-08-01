@@ -24,4 +24,8 @@ public:
   static InputParameters validParams();
 
   virtual ADReal boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const = 0;
+
+protected:
+  /// A pair keeping track of the variable and system numbers
+  const std::pair<unsigned int, unsigned int> _var_sys_numbers_pair;
 };

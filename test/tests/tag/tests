@@ -7,6 +7,8 @@
     requirement = 'The system shall support the ability for a the user to create a tagged vector which is not automatically zeroed.'
     input = 'not_zeroed_tag_vector.i'
     exodiff = 'not_zeroed_tag_vector_out.e'
+    # There is no way to reset a not zeroed vector if a timestep fails and is repeated
+    restep = false
   []
 
   [general]

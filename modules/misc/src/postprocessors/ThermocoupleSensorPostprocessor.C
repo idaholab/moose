@@ -57,6 +57,16 @@ ThermocoupleSensorPostprocessor::initialize()
   // if the problem is transient
   else
   {
+    // Remove last element if we are repeating the timestep
+    mooseAssert(_t_step_old <= _t_step,
+                "The old time step needs to be behind or the same as the current time step.");
+    if (_t_step_old == _t_step)
+    {
+      _time_values.pop_back();
+      _input_signal_values.pop_back();
+      _integrand.pop_back();
+    }
+
     _delay_value = _delay_function.value(_t);
     _time_values.push_back(_t);
     _input_signal_values.push_back(_input_signal);
@@ -81,6 +91,9 @@ ThermocoupleSensorPostprocessor::initialize()
                     efficiency_value * (_proportional_weight * proportional_value +
                                         _integral_weight * _integration_value) +
                     uncertainty_value;
+
+    // Update old time step
+    _t_step_old = _t_step;
   }
 }
 

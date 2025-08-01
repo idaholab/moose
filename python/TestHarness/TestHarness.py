@@ -1123,6 +1123,7 @@ class TestHarness:
         parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
         parser.add_argument('--recover', action='store_true', dest='enable_recover', help='Run a test in recover mode')
         parser.add_argument('--recoversuffix', action='store', type=str, default='cpr', dest='recoversuffix', help='Set the file suffix for recover mode')
+        parser.add_argument('--restep', action='store_true', dest='enable_restep', help='Run a test in restep mode')
         parser.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         parser.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
         parser.add_argument('--valgrind-max-fails', nargs=1, type=int, dest='valgrind_max_fails', default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
@@ -1237,8 +1238,14 @@ class TestHarness:
         if opts.check_input and opts.no_check_input:
             print('ERROR: --check-input and --no-check-input cannot be used simultaneously')
             sys.exit(1)
-        if opts.check_input and opts.enable_recover:
-            print('ERROR: --check-input and --recover cannot be used simultaneously')
+        has_flags = []
+        for var, flag in [('check_input', '--check-input'),
+                          ('enable_recover', '--recover'),
+                          ('enable_restep', '--restep')]:
+            if getattr(opts, var):
+                has_flags.append(flag)
+        if len(has_flags) > 1:
+            print('ERROR:', ' and '.join(has_flags), 'cannot be used together')
             sys.exit(1)
         if opts.spec_file:
             if not os.path.exists(opts.spec_file):
