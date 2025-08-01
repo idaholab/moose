@@ -366,6 +366,9 @@ SampledOutput::updateSample()
         const FEType & fe_type = source_sys.variable_type(original_var_num);
         // we use the original variable block restriction for sampling
         const auto * var_blocks = &source_sys.variable(original_var_num).active_subdomains();
+        // NOTE: if we have overlapping domains between the sampling mesh and the source mesh
+        // we would get a value from the source mesh domain. We could further restrict this
+        // block restriction with the sampling mesh block restriction to prevent this.
 
         // Loop over the mesh, nodes for nodal data, elements for element data
         if (isSampledAtNodes(fe_type))
@@ -378,9 +381,12 @@ SampledOutput::updateSample()
                 (_serialize || processor_id() == node->processor_id()))
             {
               // the node has to be within the domain of the mesh function
-              DenseVector<Real> value;
-              (*_mesh_functions[sys_num][var_num])(
-                  *node - _position, /*time*/ 0., value, var_blocks);
+              DenseVector<Real> value(1);
+              if (var_blocks->size())
+                (*_mesh_functions[sys_num][var_num])(
+                    *node - _position, /*time*/ 0., value, var_blocks);
+              else
+                value[0] = (*_mesh_functions[sys_num][var_num])(*node - _position);
 
               if (value[0] != -1e6)
                 dest_sys.solution->set(node->dof_number(sys_num, var_num, /*comp=*/0), value[0]);
@@ -404,9 +410,12 @@ SampledOutput::updateSample()
             if (elem->n_dofs(sys_num, var_num) &&
                 (_serialize || processor_id() == elem->processor_id()))
             {
-              DenseVector<Real> value;
-              (*_mesh_functions[sys_num][var_num])(
-                  elem->true_centroid() - _position, /*time*/ 0., value, var_blocks);
+              DenseVector<Real> value(1);
+              if (var_blocks->size())
+                (*_mesh_functions[sys_num][var_num])(
+                    elem->true_centroid() - _position, /*time*/ 0., value, var_blocks);
+              else
+                value[0] = (*_mesh_functions[sys_num][var_num])(elem->true_centroid() - _position);
 
               if (value[0] != -1e6)
                 dest_sys.solution->set(elem->dof_number(sys_num, var_num, /*comp=*/0), value[0]);
