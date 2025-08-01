@@ -15,6 +15,7 @@
 // System includes
 #include <string>
 #include <fstream>
+#include <optional>
 
 class TimeStepper;
 class FEProblemBase;
@@ -65,7 +66,7 @@ public:
 
   virtual void postExecute() override;
 
-  virtual void computeDT();
+  void computeDT();
 
   virtual void preStep();
 
@@ -299,4 +300,11 @@ private:
   void constrainDTFromMultiApp(Real & dt_cur,
                                std::ostringstream & diag,
                                const ExecFlagType & execute_on) const;
+
+  /// The timestep we fail and repeat if --test-restep is enabled
+  std::optional<int> _test_restep_step;
+  /// If the time is greater than this then we fail and repeat if --test-restep is enabled
+  std::optional<Real> _test_restep_time;
+  /// Whether or not the last timestep we solved is being repeated with --test-restep
+  bool _testing_restep;
 };

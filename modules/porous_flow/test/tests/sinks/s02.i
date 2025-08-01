@@ -116,45 +116,6 @@
   []
 []
 
-[Functions]
-  [mass00]
-    type = ParsedFunction
-    expression = 'vol*por*dens0*exp(pp/bulk)'
-    symbol_names = 'vol por dens0 pp bulk'
-    symbol_values = '0.25 0.1 1.1 p00 1.3'
-  []
-  [mass01]
-    type = ParsedFunction
-    expression = 'vol*por*dens0*exp(pp/bulk)'
-    symbol_names = 'vol por dens0 pp bulk'
-    symbol_values = '0.25 0.1 1.1 p01 1.3'
-  []
-  [expected_mass_change00]
-    type = ParsedFunction
-    expression = 'fcn*perm*dens0*exp(pp/bulk)/visc*area*dt'
-    symbol_names = 'fcn perm dens0 pp bulk visc area dt'
-    symbol_values = '6   0.2  1.1  p00 1.3  1.1  0.5  1E-3'
-  []
-  [expected_mass_change01]
-    type = ParsedFunction
-    expression = 'fcn*perm*dens0*exp(pp/bulk)/visc*area*dt'
-    symbol_names = 'fcn perm dens0 pp bulk visc area dt'
-    symbol_values = '6   0.2  1.1  p01 1.3  1.1  0.5  1E-3'
-  []
-  [mass00_expect]
-    type = ParsedFunction
-    expression = 'mass_prev-mass_change'
-    symbol_names = 'mass_prev mass_change'
-    symbol_values = 'm00_prev  del_m00'
-  []
-  [mass01_expect]
-    type = ParsedFunction
-    expression = 'mass_prev-mass_change'
-    symbol_names = 'mass_prev mass_change'
-    symbol_values = 'm01_prev  del_m01'
-  []
-[]
-
 [Postprocessors]
   [p00]
     type = PointValue
@@ -163,26 +124,36 @@
     execute_on = 'initial timestep_end'
   []
   [m00]
-    type = FunctionValuePostprocessor
-    function = mass00
+    type = ParsedPostprocessor
+    expression = 'vol*por*dens0*exp(p00/bulk)'
+    constant_names = 'vol por dens0 bulk'
+    constant_expressions = '0.25 0.1 1.1 1.3'
+    pp_names = 'p00'
     execute_on = 'initial timestep_end'
   []
+  [dm00]
+    type = ChangeOverTimePostprocessor
+    postprocessor = m00
+    outputs = none
+  []
   [m00_prev]
-    type = FunctionValuePostprocessor
-    function = mass00
-    execute_on = 'timestep_begin'
+    type = ParsedPostprocessor
+    expression = 'm00 - dm00'
+    pp_names = 'm00 dm00'
     outputs = 'console'
   []
   [del_m00]
-    type = FunctionValuePostprocessor
-    function = expected_mass_change00
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'fcn*perm*dens0*exp(p00/bulk)/visc*area*dt'
+    constant_names = 'fcn perm dens0 bulk visc area dt'
+    constant_expressions = '6   0.2  1.1 1.3  1.1  0.5  1E-3'
+    pp_names = 'p00'
     outputs = 'console'
   []
   [m00_expect]
-    type = FunctionValuePostprocessor
-    function = mass00_expect
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'm00_prev - del_m00'
+    pp_names = 'm00_prev del_m00'
   []
   [p10]
     type = PointValue
@@ -197,26 +168,36 @@
     execute_on = 'initial timestep_end'
   []
   [m01]
-    type = FunctionValuePostprocessor
-    function = mass01
+    type = ParsedPostprocessor
+    expression = 'vol*por*dens0*exp(p01/bulk)'
+    constant_names = 'vol por dens0 bulk'
+    constant_expressions = '0.25 0.1 1.1 1.3'
+    pp_names = 'p01'
     execute_on = 'initial timestep_end'
   []
+  [dm01]
+    type = ChangeOverTimePostprocessor
+    postprocessor = m01
+    outputs = none
+  []
   [m01_prev]
-    type = FunctionValuePostprocessor
-    function = mass01
-    execute_on = 'timestep_begin'
+    type = ParsedPostprocessor
+    expression = 'm01 - dm01'
+    pp_names = 'm01 dm01'
     outputs = 'console'
   []
   [del_m01]
-    type = FunctionValuePostprocessor
-    function = expected_mass_change01
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'fcn*perm*dens0*exp(p01/bulk)/visc*area*dt'
+    constant_names = 'fcn perm dens0 bulk visc area dt'
+    constant_expressions = '6   0.2  1.1 1.3  1.1  0.5  1E-3'
+    pp_names = 'p01'
     outputs = 'console'
   []
   [m01_expect]
-    type = FunctionValuePostprocessor
-    function = mass01_expect
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'm01_prev - del_m01'
+    pp_names = 'm01_prev del_m01'
   []
   [p11]
     type = PointValue

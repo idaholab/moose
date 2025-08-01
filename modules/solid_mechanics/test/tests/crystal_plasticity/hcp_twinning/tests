@@ -34,6 +34,7 @@
     requirement = 'The crystal plasticity system shall compute the plastic velocity gradient  '
                   'from both slip and twinning in anHCP crystal upon simulation restart.'
     issues = '#26458'
+    restep = false # Restep happens in demonstration_combined_hcp_slip_twins
     design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md /CrystalPlasticityTwinningKalidindiUpdate.md'
     prereq = 'coupling_demonstration/demonstration_combined_hcp_slip_twins'
     capabilities = 'method!=dbg'

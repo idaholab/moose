@@ -55,23 +55,29 @@ ADReal
 INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
                                                    const Moose::StateArg & /* state */) const
 {
-  const Real wall_dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * fi.normal());
-  const Elem & _current_elem = fi.elem();
-  const auto current_argument = makeElemArg(&_current_elem);
+  // if on an internal face (internal to the mesh, but an external boundary of the flow area),
+  // we have to select the element on which the flow variables / viscosity is defined
+  const bool use_elem = (fi.faceType(_var_sys_numbers_pair) == FaceInfo::VarFaceNeighbors::ELEM);
+  const Real wall_dist = std::abs(
+      ((use_elem ? fi.elemCentroid() : fi.neighborCentroid()) - fi.faceCentroid()) * fi.normal());
+  const Elem * const elem_ptr = use_elem ? fi.elemPtr() : fi.neighborPtr();
+  const auto elem_arg = makeElemArg(elem_ptr);
+
   // Get the previous non linear iteration values
   const auto old_state = Moose::StateArg(1, Moose::SolutionIterationType::Nonlinear);
-  const auto mu = _mu(current_argument, old_state);
-  const auto rho = _rho(current_argument, old_state);
+  const auto mu = _mu(elem_arg, old_state);
+  const auto rho = _rho(elem_arg, old_state);
 
   // Get the velocity vector
-  ADRealVectorValue velocity(_u_var(current_argument, old_state));
+  ADRealVectorValue velocity(_u_var(elem_arg, old_state));
   if (_v_var)
-    velocity(1) = (*_v_var)(current_argument, old_state);
+    velocity(1) = (*_v_var)(elem_arg, old_state);
   if (_w_var)
-    velocity(2) = (*_w_var)(current_argument, old_state);
+    velocity(2) = (*_w_var)(elem_arg, old_state);
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
-  const auto parallel_speed = NS::computeSpeed(velocity - velocity * (fi.normal()) * (fi.normal()));
+  const auto parallel_speed =
+      NS::computeSpeed<ADReal>(velocity - velocity * (fi.normal()) * (fi.normal()));
 
   // Switch for determining the near wall quantities
   // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
@@ -82,7 +88,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
   if (_wall_treatment == NS::WallTreatmentEnum::EQ_NEWTON)
   {
     // Full Newton-Raphson solve to find the wall quantities from the law of the wall
-    const auto u_tau = NS::findUStar(mu, rho, parallel_speed, wall_dist);
+    const auto u_tau = NS::findUStar<ADReal>(mu, rho, parallel_speed, wall_dist);
     y_plus = wall_dist * u_tau * rho / mu;
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
     mut_log = mu_wall - mu;
@@ -90,7 +96,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
   else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)
   {
     // Incremental solve on y_plus to get the near-wall quantities
-    y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
+    y_plus = NS::findyPlus<ADReal>(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
     mu_wall = mu * (NS::von_karman_constant * y_plus /
                     std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
     mut_log = mu_wall - mu;
@@ -111,8 +117,7 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
   else if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
   {
     // Assign non-equilibrium wall function value
-    y_plus =
-        std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(current_argument, old_state)) * rho / mu;
+    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(elem_arg, old_state)) * rho / mu;
     mu_wall = mu * (NS::von_karman_constant * y_plus /
                     std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)));
     mut_log = mu_wall - mu;

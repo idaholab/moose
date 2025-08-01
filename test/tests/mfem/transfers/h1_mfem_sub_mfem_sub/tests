@@ -7,6 +7,7 @@
       type = RunApp
       input = parent.i
       capabilities = 'mfem'
+      devices = 'cpu cuda'
       recover = false
       detail = 'running the inputs, and '
     []
@@ -28,7 +29,8 @@
     input = parent.i
     type = RunException
     expect_err = "Attempted to configure with MFEM devices 'cpu', but we have already configured the MFEM device object with the devices 'cuda'"
-    cli_args = 'Executioner/device=cuda'
-    capabilities = 'mfem & cuda'
+    cli_args = recv_app:Executioner/device=cpu
+    capabilities = mfem
+    devices = cuda
   []
 []

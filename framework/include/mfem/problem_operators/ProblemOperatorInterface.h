@@ -39,6 +39,7 @@ protected:
   /// vector during solve.
   std::vector<std::string> _test_var_names;
   std::vector<mfem::ParGridFunction *> _test_variables;
+  const mfem::Vector * _test_true_vector = nullptr;
 
   /// Vector of names of state gridfunctions used in formulation, ordered by appearance in block
   /// vector during solve.

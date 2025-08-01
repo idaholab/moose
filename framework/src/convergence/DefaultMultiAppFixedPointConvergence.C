@@ -40,8 +40,10 @@ DefaultMultiAppFixedPointConvergence::DefaultMultiAppFixedPointConvergence(
     _custom_pp_abs_tol(getSharedExecutionerParam<Real>("custom_abs_tol")),
     _fixed_point_custom_pp(isParamValid("custom_pp") ? &getPostprocessorValue("custom_pp")
                                                      : nullptr),
-    _pp_old(0.0),
-    _pp_new(std::numeric_limits<Real>::max()),
+    _fixed_point_custom_pp_old(isParamValid("custom_pp") ? &getPostprocessorValueOld("custom_pp")
+                                                         : nullptr),
+    _pp_previous(0.0),
+    _pp_current(std::numeric_limits<Real>::max()),
     _pp_scaling(1.0),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _fp_solve(getMooseApp().getExecutioner()->fixedPointSolve())
@@ -173,13 +175,13 @@ DefaultMultiAppFixedPointConvergence::checkConvergence(unsigned int iter)
       return MooseConvergenceStatus::CONVERGED;
     }
 
-    if (std::abs(_pp_new - _pp_old) < _custom_pp_abs_tol)
+    if (std::abs(_pp_current - _pp_previous) < _custom_pp_abs_tol)
     {
       _fp_solve.setFixedPointStatus(
           FixedPointSolve::MooseFixedPointConvergenceReason::CONVERGED_PP);
       return MooseConvergenceStatus::CONVERGED;
     }
-    if (std::abs((_pp_new - _pp_old) / _pp_scaling) < _custom_pp_rel_tol)
+    if (std::abs((_pp_current - _pp_previous) / _pp_scaling) < _custom_pp_rel_tol)
     {
       _fp_solve.setFixedPointStatus(
           FixedPointSolve::MooseFixedPointConvergenceReason::CONVERGED_PP);
@@ -218,15 +220,15 @@ DefaultMultiAppFixedPointConvergence::outputResidualNorm(const std::string & exe
 void
 DefaultMultiAppFixedPointConvergence::computeCustomConvergencePostprocessor(unsigned int iter)
 {
-  if (iter > 0 && !getParam<bool>("direct_pp_value"))
-    _pp_old = _pp_new;
+  if (!getParam<bool>("direct_pp_value"))
+    _pp_previous = iter > 0 ? _pp_current : *_fixed_point_custom_pp_old;
 
   if ((iter == 0 && getParam<bool>("direct_pp_value")) || !getParam<bool>("direct_pp_value"))
     _pp_scaling = *_fixed_point_custom_pp;
-  _pp_new = *_fixed_point_custom_pp;
+  _pp_current = *_fixed_point_custom_pp;
 
   const auto pp_name = getParam<PostprocessorName>("custom_pp");
   _pp_history << std::setw(2) << iter + 1 << " fixed point " << pp_name << " = "
-              << Console::outputNorm(std::numeric_limits<Real>::max(), _pp_new, 8) << std::endl;
+              << Console::outputNorm(std::numeric_limits<Real>::max(), _pp_current, 8) << std::endl;
   _console << _pp_history.str() << std::flush;
 }

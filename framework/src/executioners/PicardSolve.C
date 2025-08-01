@@ -76,6 +76,10 @@ PicardSolve::saveVariableValues(const bool primary)
     old_tag_id = _secondary_old_tag_id;
   }
 
+  // Check to make sure allocateStorage has been called
+  mooseAssert(old_tag_id != Moose::INVALID_TAG_ID,
+              "allocateStorage has not been called with primary = " + Moose::stringify(primary));
+
   if (relaxation_factor != 1.)
   {
     // Save variable previous values

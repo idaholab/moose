@@ -68,5 +68,4 @@
 
 [Executioner]
   type = MFEMSteady
-  device = cpu
 []

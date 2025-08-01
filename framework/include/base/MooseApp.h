@@ -535,10 +535,16 @@ public:
   }
 
   /**
-   *  Whether or not this simulation should only run half its transient (useful for testing
+   * Whether or not this simulation should only run half its transient (useful for testing
    * recovery)
    */
   bool testCheckpointHalfTransient() const { return _test_checkpoint_half_transient; }
+
+  /**
+   * Whether or not this simulation should fail a timestep and repeat (for testing).
+   * Selection rules for which time step to fail in TransientBase.C constructor.
+   */
+  bool testReStep() const { return _test_restep; }
 
   /**
    * Store a map of outputter names and file numbers
@@ -1315,7 +1321,9 @@ protected:
   std::string _restart_recover_base;
 
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
-  bool _test_checkpoint_half_transient;
+  const bool _test_checkpoint_half_transient;
+  /// Whether or not this simulation should fail its middle timestep and repeat (for testing)
+  const bool _test_restep;
 
   /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
   std::map<std::string, unsigned int> _output_file_numbers;

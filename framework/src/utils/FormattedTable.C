@@ -423,7 +423,7 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
       printRow(_data[_output_row_index], align);
   }
 
-  _output_file.flush();
+  close();
 }
 
 void
