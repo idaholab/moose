@@ -42,7 +42,8 @@
     []
   []
   marker = uniform
-  interval = 13
+  max_h_level = 2
+  # interval = 13
 []
 
 [Executioner]
@@ -52,6 +53,7 @@
     type = ExplicitMixedOrder
     mass_matrix_tag = 'mass'
     use_constant_mass = true
+    recompute_mass_matrix_after_mesh_change = true
     second_order_vars = 'disp_x disp_y disp_z'
   []
 

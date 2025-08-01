@@ -49,6 +49,14 @@ ExplicitMixedOrder::validParams()
                         false,
                         "If set to true, will only compute the mass matrix in the first time step, "
                         "and keep using it throughout the simulation.");
+
+  params.addParam<bool>(
+      "recompute_mass_matrix_after_mesh_change",
+      false,
+      "If set to true, the mass matrix will be recomputed when the mesh changes (e.g. through "
+      "adaptivity). If use_constant_mass is set to true, adadaptivity is used, and this parameter "
+      "is not set to true, the simulation will error out when the mesh changes.");
+
   params.addParam<TagName>("mass_matrix_tag", "mass", "The tag for the mass matrix");
 
   params.addParam<std::vector<VariableName>>(
@@ -75,6 +83,9 @@ ExplicitMixedOrder::validParams()
 ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
   : ExplicitTimeIntegrator(parameters),
     _constant_mass(getParam<bool>("use_constant_mass")),
+    _recompute_mass_matrix_on_mesh_change(
+        getParam<bool>("recompute_mass_matrix_after_mesh_change")),
+    _mesh_changed(true),
     _mass_matrix(getParam<TagName>("mass_matrix_tag")),
     _solution_older(_sys.solutionState(2)),
     _vars_first(declareRestartableData<std::unordered_set<unsigned int>>("first_order_vars")),
@@ -101,6 +112,23 @@ ExplicitMixedOrder::computeTimeDerivatives()
   return;
 }
 
+void
+ExplicitMixedOrder::meshChanged()
+{
+  if (_constant_mass && !_recompute_mass_matrix_on_mesh_change)
+    paramError("recompute_mass_matrix_after_mesh_change",
+               "Must be set to true explicitly by the user to support adaptivity with "
+               "`use_constant_mass`.");
+
+  // after mesh changes we need to recompute the mass matrix, it is not interpolable as it contains
+  // a volume integrated quantity!
+  _mesh_changed = true;
+
+  mooseInfoRepeated("ExplicitMixedOrder::meshChanged()");
+
+  ExplicitTimeIntegrator::meshChanged();
+}
+
 TagID
 ExplicitMixedOrder::massMatrixTagID() const
 {
@@ -121,9 +149,14 @@ ExplicitMixedOrder::solve()
 
   auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
 
+  if (_mesh_changed)
+    updateDOFIndices();
+
   // Compute the mass matrix
-  if (!_constant_mass || _t_step == 1)
+  if (_mesh_changed || !_constant_mass)
   {
+    mooseInfoRepeated("Computing Mass Matrix.");
+
     // We only want to compute "inverted" lumped mass matrix once.
     _fe_problem.computeJacobianTag(
         *_nonlinear_implicit_system->current_local_solution, mass_matrix, mass_tag);
@@ -135,6 +168,8 @@ ExplicitMixedOrder::solve()
     _mass_matrix_diag_inverted->reciprocal();
     _mass_matrix_diag_inverted->close();
   }
+
+  _mesh_changed = false;
 
   // Set time to the time at which to evaluate the residual
   _fe_problem.time() = _fe_problem.timeOld();
@@ -227,6 +262,8 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
   auto accel_scaled = accel_second->clone();
   accel_scaled->scale((_dt + _dt_old) / 2);
 
+  mooseInfoRepeated("vel ", vel_second->size(), " accel ", accel_scaled->size());
+
   // Velocity update for central difference
   *vel_second += *accel_scaled;
 
@@ -288,6 +325,12 @@ ExplicitMixedOrder::init()
   // If var_nums is empty then that means the user has specified all the variables in this system
   if (!var_nums.empty())
     mooseError("Not all nonlinear variables have their order specified.");
+}
+
+void
+ExplicitMixedOrder::updateDOFIndices()
+{
+  auto & lm_sys = _sys.system();
 
   std::vector<dof_id_type> var_dof_indices, work_vec;
   for (const auto var_num : _vars_first)

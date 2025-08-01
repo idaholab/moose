@@ -88,7 +88,7 @@ N = 2
   [disp_x]
     type = ElementAverageValue
     variable = disp_x
-    execute_on = 'INITIAL FINAL'
+    execute_on = 'TIMESTEP_END'
   []
 []
 
@@ -101,5 +101,6 @@ N = 2
     type = Console
     execute_postprocessors_on = 'INITIAL FINAL'
   []
+
   perf_graph = true
 []
