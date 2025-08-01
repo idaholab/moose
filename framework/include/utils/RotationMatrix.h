@@ -102,7 +102,7 @@ rodriguesRotationMatrix(GenericRealVectorValue<is_ad> vec1, GenericRealVectorVal
 
   GenericRealVectorValue<is_ad> k_vec = u.cross(v); // calculate rotation axis
   k_vec /= k_vec.norm();                            // normalize
-  Real cos_theta = k_vec * u;
+  Real cos_theta = u * v;
   Real theta = std::acos(cos_theta);
   Real sin_theta = std::sin(theta);
 
