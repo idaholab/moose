@@ -34,6 +34,7 @@ public:
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc) override;
+  void AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc);
 
   void RecoverFEMSolution(mfem::BlockVector & trueX,
                           Moose::MFEM::GridFunctions & gridfunctions) override;
