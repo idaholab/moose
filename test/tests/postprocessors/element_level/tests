@@ -14,7 +14,7 @@
     [p_max]
       type = CSVDiff
       input = 'max_level.i'
-      cli_args = 'Postprocessors/max_level/level=p Adaptivity/switch_h_to_p_refinement=true Outputs/file_base="max_p_level_out"'
+      cli_args = 'Postprocessors/max_level/level=p Adaptivity/adaptivity_type=p Outputs/file_base="max_p_level_out"'
       csvdiff = 'max_p_level_out.csv'
       detail = 'maximum element p-adaptivity level'
     []
