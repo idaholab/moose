@@ -31,7 +31,6 @@ namespace Kokkos
  * that the device copy is always up-to-date with the host reference when it is used on device
  * Therefore, the variable must be copy constructible.
  */
-///@{
 template <typename T>
 class ReferenceWrapper
 {
@@ -156,109 +155,6 @@ protected:
    */
   const T _copy;
 };
-
-// The const specialization
-template <typename T>
-class ReferenceWrapper<const T>
-{
-public:
-  /**
-   * Constructor
-   * @param reference The const reference of the variable to store
-   */
-  ReferenceWrapper(const T & reference) : _reference(reference), _copy(reference) {}
-  /**
-   * Copy constructor
-   */
-  ReferenceWrapper(const ReferenceWrapper<const T> & object)
-    : _reference(object._reference), _copy(object._reference)
-  {
-  }
-
-#ifdef MOOSE_KOKKOS_SCOPE
-  /**
-   * Get the const reference of the stored variable
-   * @returns The const reference of the stored variable depending on the architecture this function
-   * is being called on
-   */
-  KOKKOS_FUNCTION operator const T &() const
-  {
-    KOKKOS_IF_ON_HOST(return _reference;)
-
-    return _copy;
-  }
-  /**
-   * Get the const reference of the stored variable
-   * @returns The const reference of the stored variable depending on the architecture this function
-   * is being called on
-   */
-  KOKKOS_FUNCTION const T & operator*() const
-  {
-    KOKKOS_IF_ON_HOST(return _reference;)
-
-    return _copy;
-  }
-  /**
-   * Get the const pointer to the stored variable
-   * @returns The const pointer to the stored variable depending on the architecture this function
-   * is being called on
-   */
-  KOKKOS_FUNCTION const T * operator->() const
-  {
-    KOKKOS_IF_ON_HOST(return &_reference;)
-
-    return &_copy;
-  }
-  /**
-   * Forward arguments to the stored variable's const operator() depending on the architecture this
-   * function is being called on
-   * @param args The variadic arguments to be forwarded
-   */
-  template <typename... Args>
-  KOKKOS_FUNCTION auto operator()(Args &&... args) const -> decltype(auto)
-  {
-    KOKKOS_IF_ON_HOST(return _reference(std::forward<Args>(args)...);)
-
-    return _copy(std::forward<Args>(args)...);
-  }
-#else
-  /**
-   * Get the const reference of the stored host reference
-   * @returns The const reference of the stored host reference
-   */
-  operator const T &() const { return _reference; }
-  /**
-   * Get the const reference of the stored host reference
-   * @returns The const reference of the stored host reference
-   */
-  const T & operator*() const { return _reference; }
-  /**
-   * Get the const pointer of the stored host reference
-   * @returns The const pointer of the stored host reference
-   */
-  const T * operator->() const { return &_reference; }
-  /**
-   * Forward arguments to the stored host reference's const operator()
-   * @param args The variadic arguments to be forwarded
-   */
-  template <typename... Args>
-  auto operator()(Args &&... args) const -> decltype(auto)
-  {
-    return _reference(std::forward<Args>(args)...);
-  }
-#endif
-
-protected:
-  /**
-   * Const host reference of the variable
-   */
-  const T & _reference;
-  /**
-   * Device copy of the variable
-   */
-  const T _copy;
-};
-///@}
 
 } // namespace Kokkos
 } // namespace Moose

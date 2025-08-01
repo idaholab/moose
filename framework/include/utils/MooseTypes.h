@@ -1208,6 +1208,13 @@ enum class FEBackend
   MFEM
 #endif
 };
+
+#ifdef MOOSE_KOKKOS_ENABLED
+namespace Kokkos
+{
+extern const std::string KOKKOS_OBJECT_PARAM;
+}
+#endif
 }
 
 /// macros for adding Tensor index enums locally

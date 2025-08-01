@@ -30,11 +30,12 @@ ElementIDInterface::ElementIDInterface(const MooseObject * moose_object)
     _id_mesh(moose_object->getMooseApp().actionWarehouse().mesh()),
     _ei_name(moose_object->name())
 {
+#ifdef MOOSE_KOKKOS_ENABLED
   // Calling this constructor while not executing actions means this object is being
   // copy-constructed
-  if (moose_object->isParamValid("_kokkos_object") &&
-      !moose_object->getMooseApp().currentlyExecutingActions())
+  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
     return;
+#endif
 }
 
 unsigned int

@@ -17,9 +17,9 @@
 PetscErrorCode
 finalizeKokkos()
 {
+  PetscFunctionBegin;
   Kokkos::finalize();
-
-  return PETSC_SUCCESS;
+  PetscFunctionReturn(PETSC_SUCCESS);
 }
 
 void

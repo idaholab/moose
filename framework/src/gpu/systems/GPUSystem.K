@@ -63,8 +63,8 @@ System::setupVariables()
           sys.variable(var).active_on_subdomain(subdomain);
   }
 
-  _var_fe_types.copy();
-  _var_subdomain_active.copy();
+  _var_fe_types.copyToDevice();
+  _var_subdomain_active.copyToDevice();
 
   // Set coupling
 
@@ -85,7 +85,7 @@ System::setupVariables()
     for (unsigned int var = 0; var < _num_vars; ++var)
       _coupling[var] = coupling[var];
 
-    _coupling.copy();
+    _coupling.copyToDevice();
   }
 }
 
@@ -154,11 +154,11 @@ System::setupDofs()
       }
   }
 
-  _local_elem_dof_index.copyNested();
-  _local_node_dof_index.copyNested();
-  _local_to_global_dof_index.copy();
+  _local_elem_dof_index.copyToDeviceNested();
+  _local_node_dof_index.copyToDeviceNested();
+  _local_to_global_dof_index.copyToDevice();
 
-  _max_dofs_per_elem.copy();
+  _max_dofs_per_elem.copyToDevice();
 
   // Setup DOF communication maps
 
@@ -188,8 +188,8 @@ System::setupDofs()
       _ghost_comm_list[proc][i] = solution->map_global_to_local_index(recv_list[proc][i]);
   }
 
-  _local_comm_list.copyNested();
-  _ghost_comm_list.copyNested();
+  _local_comm_list.copyToDeviceNested();
+  _ghost_comm_list.copyToDeviceNested();
 }
 
 void
@@ -287,9 +287,9 @@ System::checkNodalBCs()
       getNodalBCDofs(nbc, _nbc_matrix_tag_dof[tag]);
   }
 
-  _nbc_dof.copy();
-  _nbc_residual_tag_dof.copyNested();
-  _nbc_matrix_tag_dof.copyNested();
+  _nbc_dof.copyToDevice();
+  _nbc_residual_tag_dof.copyToDeviceNested();
+  _nbc_matrix_tag_dof.copyToDeviceNested();
 }
 
 void
@@ -335,7 +335,7 @@ System::sync(const MemcpyKind dir)
       auto & vector = _system.getVector(tag);
 
       _vectors[tag].create(vector, *this, false);
-      _vectors[tag].copy(dir);
+      _vectors[tag].copyToDevice();
     }
 
     for (auto tag : _active_residual_tags)
@@ -354,8 +354,8 @@ System::sync(const MemcpyKind dir)
       _matrices[tag] = 0;
     }
 
-    _vectors.copy();
-    _matrices.copy();
+    _vectors.copyToDevice();
+    _matrices.copyToDevice();
   }
   else if (dir == MemcpyKind::DEVICE_TO_HOST)
   {
@@ -383,10 +383,10 @@ System::sync(const std::set<TagID> & tags, const MemcpyKind dir)
       auto & vector = _system.getVector(tag);
 
       _vectors[tag].create(vector, *this, false);
-      _vectors[tag].copy(dir);
+      _vectors[tag].copyToDevice();
     }
 
-    _vectors.copy();
+    _vectors.copyToDevice();
   }
   else if (dir == MemcpyKind::DEVICE_TO_HOST)
   {
@@ -395,7 +395,7 @@ System::sync(const std::set<TagID> & tags, const MemcpyKind dir)
       if (!_system.hasVector(tag))
         continue;
 
-      _vectors[tag].copy(dir);
+      _vectors[tag].copyToHost();
       _vectors[tag].restore();
     }
   }
@@ -443,7 +443,7 @@ System::setActiveResidualTags(const std::set<TagID> & tags)
 
   _active_residual_tags = active_residual_tags;
 
-  _residual_tag_active.copy();
+  _residual_tag_active.copyToDevice();
 }
 
 void
@@ -460,7 +460,7 @@ System::setActiveMatrixTags(const std::set<TagID> & tags)
 
   _active_matrix_tags = active_matrix_tags;
 
-  _matrix_tag_active.copy();
+  _matrix_tag_active.copyToDevice();
 }
 
 void
@@ -491,12 +491,12 @@ System::reinit()
       }
     }
 
-    _qp_solutions[tag].copy();
-    _qp_solutions_grad[tag].copy();
+    _qp_solutions[tag].copyToDevice();
+    _qp_solutions_grad[tag].copyToDevice();
   }
 
-  _qp_solutions.copy();
-  _qp_solutions_grad.copy();
+  _qp_solutions.copyToDevice();
+  _qp_solutions_grad.copyToDevice();
 
   dof_id_type num_elems = kokkosMesh().getLocalElementMap().size();
 
