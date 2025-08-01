@@ -6,7 +6,8 @@
     input = 'BFS_ERCOFTAC.i'
     csvdiff = 'BFS_ERCOFTAC_out_line_entry_channel_wall_0010.csv BFS_ERCOFTAC_out_side_bottom_0010.csv BFS_ERCOFTAC_out_line_quarter_entry_channel_0010.csv BFS_ERCOFTAC_out_side_top_0010.csv'
     abs_zero = 5e-6
-    rel_err = 5e-6
+    # see #31193
+    restep = false
     ignore_columns = 'id'
     recover = false # we don't support recovery for PIMPLE yet
     max_threads = 1 # see libmesh issue #3808
