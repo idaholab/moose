@@ -1,0 +1,11 @@
+[Tests]
+	issues = '#31097'
+	design = 'syntax/MultiApps/index.md'
+	[nl_sol]
+		type = Exodiff
+		input = parent.i
+		exodiff = parent_out_sub0.e
+		custom_cmp = exodiff.cmp
+		exodiff_opts = '-show_all_diffs'
+	[]
+[]
