@@ -56,12 +56,11 @@
 
     # --- new for setting IC --- #
     reinitialization_strategy = "POLYNOMIAL_NEIGHBOR"
-
     reinitialize_variables = 'diff'
-
     old_subdomain_reinitialized = false
     reinitialize_subdomains = '1'
     polynomial_fitters = 'extrapolation_patch'
+    restore_overridden_dofs = "true"
   []
 []
 

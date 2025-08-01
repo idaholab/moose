@@ -109,6 +109,13 @@
       exodiff = 'external_moving_boundary_3D_second_order_out.e-s002'
       detail = 'using a 3D configuration to initialize from second-order nodal patch recovery.'
     []
+
+    [restore_not_restore_test]
+      type = 'Exodiff'
+      input = 'restore_not_restore_test.i'
+      exodiff = 'restore_not_restore_test_out.e-s004'
+      detail = 'using a configuration that tests both restoring and not restoring DOF values after reinitialization.'
+    []
   []
 
   [error_test]
@@ -128,6 +135,14 @@
       cli_args = 'MeshModifiers/moving_circle/reinitialization_strategy="POLYNOMIAL_NEIGHBOR POLYNOMIAL_NEIGHBOR POLYNOMIAL_WHOLE"'
       expect_err = "The 'reinitialization_strategy' parameter must have either a single value or a number of values equal to the number of 'reinitialize_variables'."
       detail = 'if the number of specified strategies does not match the number of associated fields.'
+    []
+
+    [mismatch_ic_variables_and_restore_overridden_dofs]
+      type = RunException
+      input = 'restore_not_restore_test.i'
+      cli_args = 'MeshModifiers/moving_circle/restore_overridden_dofs="true false"'
+      expect_err = "The 'restore_overridden_dofs' parameter must have either a single value or a number"
+      detail = 'if the number of initialized variables and restore_overridden_dofs do not match.'
     []
 
     [npr_no_UO_in_esm]

@@ -45,7 +45,11 @@
     execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
+    old_subdomain_reinitialized = false
+    reinitialize_subdomains = '1'
     reinitialization_strategy = "IC"
+    reinitialize_variables = "diff diff2 diff3"
+    restore_overridden_dofs = "true"
   []
 []
 

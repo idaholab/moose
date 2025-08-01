@@ -69,6 +69,7 @@
     reinitialization_strategy = "POLYNOMIAL_NEIGHBOR POLYNOMIAL_NEIGHBOR"
     reinitialize_variables = 'diff diff2'
     polynomial_fitters = 'extrapolation_patch extrapolation_patch2'
+    restore_overridden_dofs = "true"
   []
 []
 

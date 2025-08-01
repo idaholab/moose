@@ -69,6 +69,7 @@
     reinitialization_strategy = "POLYNOMIAL_NEIGHBOR"
     reinitialize_variables = 'u_recovered'
     polynomial_fitters = 'u_patch'
+    restore_overridden_dofs = "true"
   []
 []
 

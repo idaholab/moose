@@ -88,6 +88,13 @@ ElementSubdomainModifierBase::validParams()
       -1.0,
       "Threshold for considering elements as 'nearby' in the K-D tree search. Only elements within "
       "this distance will be considered for polynomial fitting.");
+  params.addParam<std::vector<bool>>(
+      "restore_overridden_dofs",
+      {},
+      "A list of boolean flags, one for each variable in 'reinitialize_variables', specifying "
+      "whether overridden DOF values should be restored after reinitialization for each variable. "
+      "This is useful when the solved values on these DOFs should be preserved. If the list is "
+      "empty, overridden DOF values will NOT be restored for any variable by default.");
 
   params.registerBase("MeshModifier");
 
@@ -184,8 +191,9 @@ ElementSubdomainModifierBase::initialSetup()
 
   // Determine the reinitialization strategy for each variable.
   //   (1) If they are of the same size, we perform a 1-to-1 mapping.
-  //   (2) If only one strategy is provided, it applies to all variables.
+  //   (2) If only one strategy or restore flag is provided, it applies to all variables.
   const auto reinit_strategy_in = getParam<std::vector<MooseEnum>>("reinitialization_strategy");
+  const auto restore_overridden_dofs_in = getParam<std::vector<bool>>("restore_overridden_dofs");
 
   if (std::any_of(reinit_strategy_in.begin(),
                   reinit_strategy_in.end(),
@@ -203,7 +211,38 @@ ElementSubdomainModifierBase::initialSetup()
     paramError(
         "reinitialization_strategy",
         "The 'reinitialization_strategy' parameter must have either a single value or a number "
-        "of values equal to the number of 'reinitialize_variables'.");
+        "of values equal to the number of 'reinitialize_variables'. "
+        "Got ",
+        reinit_strategy_in.size(),
+        " strategies for ",
+        _reinit_vars.size(),
+        " variables.");
+
+  if (restore_overridden_dofs_in.size() == 1)
+  {
+    if (restore_overridden_dofs_in[0])
+      _vars_to_restore_overridden_dofs =
+          _reinit_vars; // Restore overridden DOFs for all reinitialized variables
+  }
+  else if (restore_overridden_dofs_in.size() == _reinit_vars.size())
+  {
+    for (auto i : index_range(_reinit_vars))
+      if (restore_overridden_dofs_in[i])
+        _vars_to_restore_overridden_dofs.push_back(_reinit_vars[i]);
+  }
+  else
+  {
+    if (!restore_overridden_dofs_in.empty())
+      paramError(
+          "restore_overridden_dofs",
+          "The 'restore_overridden_dofs' parameter must have either a single value or a number "
+          "of values equal to the number of 'reinitialize_variables'. "
+          "Got ",
+          restore_overridden_dofs_in.size(),
+          " restore_overridden_dofs for ",
+          _reinit_vars.size(),
+          " variables.");
+  }
 
   // For all the other variables, we set the reinitialization strategy to IC
   for (const auto & var_name : _fe_problem.getVariableNames())
@@ -634,11 +673,11 @@ ElementSubdomainModifierBase::nodeIsNewlyReinitialized(dof_id_type node_id) cons
 void
 ElementSubdomainModifierBase::applyIC()
 {
-  // When we reinitialize the variables, we may be overriding some of the existing dofs.
-  // To work around this, we first store the dof values that will be overridden
-  // and then restore them after the reinitialization is done.
-  const auto & all_vars_names = _fe_problem.getVariableNames();
-  storeOverriddenDofValues(all_vars_names);
+  // Before reinitializing variables, some DOFs may be overwritten.
+  // By default, these overwritten DOF values are NOT restored.
+  // If the user sets `restore_overridden_dofs` with some true values, we first save the current
+  // values of these DOFs, then restore them after reinitialization.
+  storeOverriddenDofValues(_vars_to_restore_overridden_dofs);
 
   // ReinitStrategy::IC
   std::set<VariableName> ic_vars;
@@ -654,7 +693,7 @@ ElementSubdomainModifierBase::applyIC()
     extrapolatePolynomial(var);
 
   // See the comment above, now we restore the values of the dofs that were overridden
-  restoreOverriddenDofValues(all_vars_names);
+  restoreOverriddenDofValues(_vars_to_restore_overridden_dofs);
 
   mooseAssert(_fe_problem.numSolverSystems() <= 1,
               "This code was written for a single nonlinear system");
@@ -923,6 +962,9 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
   auto vn = sys.variable_number(static_cast<std::string>(var_name));
   for (const auto elem : *_mesh.getActiveLocalElementRange())
   {
+    if (_reinitialized_elems.count(elem->id()))
+      continue; // Skip elements that were reinitialized
+
     dof_map.dof_indices(elem, elem_dofs, vn);
     if (!elem_dofs.empty() &&
         std::all_of(elem_dofs.begin(),

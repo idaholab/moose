@@ -38,7 +38,14 @@
     patch_polynomial_order = FIRST
     use_specific_elements = true
     var = 'diff'
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [extrapolation_patch_not_restore]
+    type = NodalPatchRecoveryVariable
+    patch_polynomial_order = FIRST
+    use_specific_elements = true
+    var = 'diff_not_restore'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 
@@ -52,16 +59,15 @@
     moving_boundaries = 'moving_boundary'
     moving_boundary_subdomain_pairs = '1 2; 1'
     block = '1 2'
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
+    execute_on = 'INITIAL TIMESTEP_END'
 
     # --- new for setting IC --- #
-
+    reinitialization_strategy = "POLYNOMIAL_NEIGHBOR POLYNOMIAL_NEIGHBOR IC IC"
+    reinitialize_variables = 'diff diff_not_restore diff_ic_const diff_ic_const_not_restore'
     old_subdomain_reinitialized = false
     reinitialize_subdomains = '1'
-    reinitialization_strategy = "POLYNOMIAL_NEIGHBOR"
-    reinitialize_variables = 'diff'
-    polynomial_fitters = 'extrapolation_patch'
-    restore_overridden_dofs = "true"
+    polynomial_fitters = 'extrapolation_patch extrapolation_patch_not_restore'
+    restore_overridden_dofs = "true false true false"
   []
 []
 
@@ -71,6 +77,11 @@
   []
   [proc]
     block = '1 2'
+  []
+  [proc_elem]
+    block = '1 2'
+    order = CONSTANT
+    family = MONOMIAL
   []
 []
 
@@ -95,11 +106,28 @@
     execute_on = initial
     block = '1 2'
   []
+  [proc_elem]
+    type = ProcessorIDAux
+    variable = proc_elem
+    execute_on = initial
+    block = '1 2'
+  []
 []
 
 [Variables]
   [diff]
     order = FIRST
+  []
+  [diff_not_restore]
+    order = FIRST
+  []
+  [diff_ic_const]
+    order = FIRST
+    initial_condition = 10
+  []
+  [diff_ic_const_not_restore]
+    order = FIRST
+    initial_condition = 10
   []
 []
 
@@ -109,29 +137,20 @@
     variable = diff
     diffusivity = 'k'
   []
-[]
-
-[AuxVariables]
-  [diff_old]
+  [diffusion_not_restore]
+    type = MatDiffusion
+    variable = diff_not_restore
+    diffusivity = 'k'
   []
-  [diff_older]
+  [diff_ic_const]
+    type = MatDiffusion
+    variable = diff_ic_const
+    diffusivity = 'k'
   []
-[]
-
-[AuxKernels]
-  [diff_old]
-    type = CopyValueAux
-    variable = diff_old
-    source = diff
-    state = OLD
-    execute_on = 'initial timestep_end'
-  []
-  [diff_older]
-    type = CopyValueAux
-    variable = diff_older
-    source = diff
-    state = OLDER
-    execute_on = 'initial timestep_end'
+  [diff_ic_const_not_restore]
+    type = MatDiffusion
+    variable = diff_ic_const_not_restore
+    diffusivity = 'k'
   []
 []
 
@@ -154,6 +173,48 @@
   [bottom]
     type = DirichletBC
     variable = diff
+    boundary = bottom
+    value = 0
+  []
+
+  [left_not_restore]
+    type = DirichletBC
+    variable = diff_not_restore
+    boundary = left
+    value = 10
+  []
+
+  [bottom_not_restore]
+    type = DirichletBC
+    variable = diff_not_restore
+    boundary = bottom
+    value = 0
+  []
+
+  [left_ic_con]
+    type = DirichletBC
+    variable = diff_ic_const
+    boundary = left
+    value = 10
+  []
+
+  [bottom_ic_con]
+    type = DirichletBC
+    variable = diff_ic_const
+    boundary = bottom
+    value = 0
+  []
+
+  [left_ic_con_not_restore]
+    type = DirichletBC
+    variable = diff_ic_const_not_restore
+    boundary = left
+    value = 10
+  []
+
+  [bottom_ic_con_not_restore]
+    type = DirichletBC
+    variable = diff_ic_const_not_restore
     boundary = bottom
     value = 0
   []

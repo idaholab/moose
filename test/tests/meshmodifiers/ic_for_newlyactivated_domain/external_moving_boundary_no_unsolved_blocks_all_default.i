@@ -56,6 +56,7 @@
 
     # --- new for setting IC --- #
     reinitialization_strategy = "IC"
+    restore_overridden_dofs = "true"
   []
 []
 
