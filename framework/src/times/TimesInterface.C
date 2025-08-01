@@ -28,13 +28,19 @@ TimesInterface::TimesInterface(const MooseObject * moose_object)
 const Times &
 TimesInterface::getTimes(const std::string & param) const
 {
-  return getTimesByName(_tmi_params.get<TimesName>(param));
+  _curr_param = param;
+  const auto & times = getTimesByName(_tmi_params.get<TimesName>(param));
+  _curr_param.clear();
+  return times;
 }
 
 const Times *
 TimesInterface::getOptionalTimes(const std::string & param) const
 {
-  return _tmi_params.isParamValid(param) ? &getTimes(param) : nullptr;
+  _curr_param = param;
+  const auto * times = _tmi_params.isParamValid(param) ? &getTimes(param) : nullptr;
+  _curr_param.clear();
+  return times;
 }
 
 const Times &
@@ -53,7 +59,7 @@ TimesInterface::getTimesByName(const TimesName & name) const
         uoi ? &uoi->getUserObjectBaseByName(name)
             : &_tmi_feproblem.getUserObjectBase(name, _tmi_tid));
     if (!tr)
-      _tmi_moose_object.mooseError(name, " is not a Times object.");
+      timesError(name, " is not a Times object.");
 
     times_obj = tr;
   }
@@ -64,7 +70,7 @@ TimesInterface::getTimesByName(const TimesName & name) const
 
   // Cannot do anything from here.
   else
-    _tmi_moose_object.mooseError("Could not find times object ", name, ".");
+    timesError("Could not find times object ", name, ".");
 
   // TODO: Add ability to retrieve the object later in case this operation
   // happens before the Times objects are constructed
@@ -78,6 +84,8 @@ TimesInterface::getDefaultTimesObject(const std::string & input) const
   std::vector<Real> times;
   if (MooseUtils::tokenizeAndConvert(input, times))
   {
+    if (!std::is_sorted(times.begin(), times.end()))
+      timesError("Times are not sorted:\n    ", Moose::stringify(times, ", ", "", true));
     _default_times_objs.emplace_back(times, _tmi_feproblem);
     return true;
   }
@@ -89,5 +97,4 @@ TimesInterface::DefaultTimes::DefaultTimes(const std::vector<Real> & times,
                                            const FEProblemBase & fe_problem)
   : Times(_default_times, fe_problem.time()), _default_times(times)
 {
-  std::sort(_default_times.begin(), _default_times.end());
 }

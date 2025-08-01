@@ -11,6 +11,7 @@
 
 #include "InputParameters.h"
 #include "Times.h"
+#include "MooseObject.h"
 
 // Forward declarations
 class Times;
@@ -44,6 +45,15 @@ public:
   const Times & getTimesByName(const TimesName & name) const;
 
 private:
+  template <typename... Args>
+  [[noreturn]] void timesError(Args &&... args) const
+  {
+    if (!this->_curr_param.empty())
+      _tmi_moose_object.paramError(_curr_param, std::forward<Args>(args)...);
+    else
+      _tmi_moose_object.mooseError(std::forward<Args>(args)...);
+  }
+
   class DefaultTimes : public Times
   {
   public:
@@ -75,4 +85,7 @@ private:
 
   /// Default times objects constructed by this object
   mutable std::deque<DefaultTimes> _default_times_objs;
+
+  /// Passed in parameter name to provide useful errors
+  mutable std::string _curr_param = "";
 };
