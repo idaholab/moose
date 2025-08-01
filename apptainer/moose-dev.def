@@ -94,7 +94,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     if [ -d "{{ LIBTORCH_DIR }}" ]; then
         export LIBTORCH_DIR={{ LIBTORCH_DIR }}
     fi
-    if [ -d "{{ NEML2_DIR }} " ]; then
+    if [ -d "{{ NEML2_DIR }}" ]; then
         export NEML2_DIR={{ NEML2_DIR }}
     fi
     # Adding this to not get GPU initialization errors from MPICH
