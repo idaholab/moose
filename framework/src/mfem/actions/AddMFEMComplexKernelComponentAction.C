@@ -15,20 +15,6 @@ registerMooseAction("MooseApp",
                     AddMFEMComplexKernelComponentAction,
                     "add_mfem_complex_kernel_components");
 
-// int nthFromLast(std::string str, char ch, int N)
-//{
-//   int occur = 0;
-//   for (int i=str.length()-1; i >= 0 ; --i)
-//   {
-//       if (str[i] == ch) {
-//           occur += 1;
-//       }
-//       if (occur == N)
-//           return i;
-//   }
-//   return -1;
-// }
-
 InputParameters
 AddMFEMComplexKernelComponentAction::validParams()
 {

@@ -61,7 +61,7 @@ public:
     // Register a dummy (Par)GridFunction for the variable the BCs apply to
     auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
     auto pgf = std::make_shared<mfem::ParGridFunction>(pm, &_scalar_gridfunc);
-    _mfem_problem->getProblemData().gridfunctions.real_gfs.Register("test_variable_name", pgf);
+    _mfem_problem->getProblemData().gridfunctions.Register("test_variable_name", pgf);
   }
 
   void check_boundary(int /*bound*/,

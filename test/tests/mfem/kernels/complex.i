@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/mug.e
+  file = ../mesh/inline-quad.mesh
   dim = 3
 []
 
@@ -17,56 +17,116 @@
 []
 
 [Variables]
-  [concentration]
+  [u]
     type = MFEMComplexVariable
     fespace = H1FESpace
   []
 []
 
-[BCs]
-  [bottom]
-    type = MFEMScalarDirichletBC
-    variable = concentration
-    boundary = '1'
-    coefficient = 1.0
+[Functions]
+  [mu]
+    type = ParsedFunction
+    expression = 1.0
   []
-  [top]
-    type = MFEMComplexIntegratedBC
-    variable = concentration
-    boundary = '2'
-    [real_part]
-      type = MFEMBoundaryIntegratedBC
-      variable = concentration
-      coefficient = 1.0
-    []
-    [imag_part]
-      type = MFEMBoundaryIntegratedBC
-      variable = concentration
-      coefficient = 1.0
-    []
+  [epsilon]
+    type = ParsedFunction
+    expression = 1.0
+  []
+  [sigma]
+    type = ParsedFunction
+    expression = 20.0
+  []
+  [omega]
+    type = ParsedFunction
+    expression = 10.0
+  []
+  [kappa_r]
+    type = ParsedFunction
+    expression = 12.72019649514069
+  []
+  [kappa_i]
+    type = ParsedFunction
+    expression = -7.861513777574233
+  []
+  [u0_r]
+    type = ParsedFunction
+    expression = exp(y*kappa_i)*cos(z*kappa_r)
+    symbol_names = 'kappa_r kappa_i'
+    symbol_values = 'kappa_r kappa_i'
+  []
+  [u0_i]
+    type = ParsedFunction
+    expression = -exp(y*kappa_i)*sin(z*kappa_r)
+    symbol_names = 'kappa_r kappa_i'
+    symbol_values = 'kappa_r kappa_i'
+  []
+  [stiffnessCoef]
+    type = ParsedFunction
+    expression = 0.0
+    #expression = 1.0/mu
+    symbol_names = 'mu'
+    symbol_values = 'mu'
+  []
+  [massCoef]
+    type = ParsedFunction
+    expression = -omega*omega*epsilon
+    symbol_names = 'epsilon omega'
+    symbol_values = 'epsilon omega'
+  []
+  [lossCoef]
+    type = ParsedFunction
+    expression = omega*sigma
+    symbol_names = 'sigma omega'
+    symbol_values = 'sigma omega'
+  []
+[]
+
+[BCs]
+  [dbc]
+    type = MFEMComplexScalarDirichletBC
+    variable = u
+    boundary = '1 2 3 4'
+    coefficient_real = u0_r
+    coefficient_imag = u0_i
   []
 []
 
 [Kernels]
-  [c_diff]
+  #[diffusion_complex]
+  #  type = MFEMComplexKernel
+  #  variable = u
+  #  [real_part]
+  #    variable = u
+  #    type = MFEMDiffusionKernel
+  #    coefficient = stiffnessCoef
+  #  []
+  #  [imag_part]
+  #    variable = u
+  #    type = MFEMDiffusionKernel
+  #    coefficient = 1.0
+  #  []
+  #[]
+  [mass_complex]
     type = MFEMComplexKernel
-    variable = concentration
+    variable = u
     [real_part]
-      variable = concentration
-      type = MFEMDiffusionKernel
-      coefficient = 1.0
+      variable = u
+      type = MFEMMassKernel
+      coefficient = massCoef
     []
     [imag_part]
-      variable = concentration
-      type = MFEMDiffusionKernel
-      coefficient = 1.0
+      variable = u
+      type = MFEMMassKernel
+      coefficient = lossCoef
     []
   []
 []
 
 [Preconditioner]
   [jacobi]
-    type = MFEMOperatorJacobiSmoother
+    type = MFEMCGSolver
+    l_tol = 1e-16
+    l_max_its = 1000
   []
 []
 
@@ -81,6 +141,13 @@
   type = MFEMSteady
   device = cpu
   numeric_type = complex
-  assembly_level = full
+  assembly_level = partial
 []
 
+[Outputs]
+  [ParaViewDataCollection]
+    type = MFEMParaViewDataCollection
+    file_base = OutputData/ComplexDiffusion
+    vtk_format = ASCII
+  []
+[]
