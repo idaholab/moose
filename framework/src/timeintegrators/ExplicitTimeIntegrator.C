@@ -69,7 +69,7 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
 void
 ExplicitTimeIntegrator::initialSetup()
 {
-  meshChanged();
+  setupSolver();
 
   if (_nl)
   {
@@ -167,6 +167,12 @@ ExplicitTimeIntegrator::preSolve()
 
 void
 ExplicitTimeIntegrator::meshChanged()
+{
+  setupSolver();
+}
+
+void
+ExplicitTimeIntegrator::setupSolver()
 {
   // Can only be done after the system is initialized
   if (_ones)
