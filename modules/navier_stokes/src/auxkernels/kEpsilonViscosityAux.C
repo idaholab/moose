@@ -53,13 +53,13 @@ kEpsilonViscosityAux::validParams()
 kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
   : AuxKernel(params),
     _dim(_subproblem.mesh().dimension()),
-    _u_var(getFunctor<ADReal>("u")),
-    _v_var(params.isParamValid("v") ? &(getFunctor<ADReal>("v")) : nullptr),
-    _w_var(params.isParamValid("w") ? &(getFunctor<ADReal>("w")) : nullptr),
-    _k(getFunctor<ADReal>(NS::TKE)),
-    _epsilon(getFunctor<ADReal>(NS::TKED)),
-    _rho(getFunctor<ADReal>(NS::density)),
-    _mu(getFunctor<ADReal>(NS::mu)),
+    _u_var(getFunctor<Real>("u")),
+    _v_var(params.isParamValid("v") ? &(getFunctor<Real>("v")) : nullptr),
+    _w_var(params.isParamValid("w") ? &(getFunctor<Real>("w")) : nullptr),
+    _k(getFunctor<Real>(NS::TKE)),
+    _epsilon(getFunctor<Real>(NS::TKED)),
+    _rho(getFunctor<Real>(NS::density)),
+    _mu(getFunctor<Real>(NS::mu)),
     _C_mu(getParam<Real>("C_mu")),
     _mu_t_ratio_max(getParam<Real>("mu_t_ratio_max")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
@@ -88,7 +88,7 @@ kEpsilonViscosityAux::computeValue()
 {
   // Convenient Arguments
   const Elem & elem = *_current_elem;
-  const auto current_argument = makeElemArg(_current_elem);
+  const auto elem_arg = makeElemArg(_current_elem);
   const Moose::StateArg state = determineState();
   const auto rho = _rho(makeElemArg(_current_elem), state);
   const auto mu = _mu(makeElemArg(_current_elem), state);
@@ -112,26 +112,26 @@ kEpsilonViscosityAux::computeValue()
     const auto loc_normal = _face_infos[&elem][minIndex]->normal();
 
     // Getting y_plus
-    ADRealVectorValue velocity(_u_var(current_argument, state));
+    RealVectorValue velocity(_u_var(elem_arg, state));
     if (_v_var)
-      velocity(1) = (*_v_var)(current_argument, state);
+      velocity(1) = (*_v_var)(elem_arg, state);
     if (_w_var)
-      velocity(2) = (*_w_var)(current_argument, state);
+      velocity(2) = (*_w_var)(elem_arg, state);
 
     // Compute the velocity and direction of the velocity component that is parallel to the wall
     const auto parallel_speed =
-        NS::computeSpeed<ADReal>(velocity - velocity * loc_normal * loc_normal);
+        NS::computeSpeed<Real>(velocity - velocity * loc_normal * loc_normal);
 
     // Switch for determining the near wall quantities
     // wall_treatment can be: "eq_newton eq_incremental eq_linearized neq"
-    ADReal y_plus;
-    ADReal mut_log; // turbulent log-layer viscosity
-    ADReal mu_wall; // total wall viscosity to obtain the shear stress at the wall
+    Real y_plus = 0;
+    Real mut_log; // turbulent log-layer viscosity
+    Real mu_wall; // total wall viscosity to obtain the shear stress at the wall
 
     if (_wall_treatment == NS::WallTreatmentEnum::EQ_NEWTON)
     {
       // Full Newton-Raphson solve to find the wall quantities from the law of the wall
-      const auto u_tau = NS::findUStar<ADReal>(mu, rho, parallel_speed, min_wall_dist);
+      const auto u_tau = NS::findUStar<Real>(mu, rho, parallel_speed, min_wall_dist);
       y_plus = min_wall_dist * u_tau * rho / mu;
       mu_wall = rho * Utility::pow<2>(u_tau) * min_wall_dist / parallel_speed;
       mut_log = mu_wall - mu;
@@ -139,7 +139,7 @@ kEpsilonViscosityAux::computeValue()
     else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)
     {
       // Incremental solve on y_plus to get the near-wall quantities
-      y_plus = NS::findyPlus<ADReal>(mu, rho, std::max(parallel_speed, 1e-10), min_wall_dist);
+      y_plus = NS::findyPlus<Real>(mu, rho, std::max(parallel_speed, 1e-10), min_wall_dist);
       mu_wall = mu * (NS::von_karman_constant * y_plus /
                       std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
       mut_log = mu_wall - mu;
@@ -147,10 +147,10 @@ kEpsilonViscosityAux::computeValue()
     else if (_wall_treatment == NS::WallTreatmentEnum::EQ_LINEARIZED)
     {
       // Linearized approximation to the wall function to find the near-wall quantities faster
-      const ADReal a_c = 1 / NS::von_karman_constant;
-      const ADReal b_c = 1 / NS::von_karman_constant *
-                         (std::log(NS::E_turb_constant * std::max(min_wall_dist, 1.0) / mu) + 1.0);
-      const ADReal c_c = parallel_speed;
+      const Real a_c = 1 / NS::von_karman_constant;
+      const Real b_c = 1 / NS::von_karman_constant *
+                       (std::log(NS::E_turb_constant * std::max(min_wall_dist, 1.0) / mu) + 1.0);
+      const Real c_c = parallel_speed;
 
       const auto u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
       y_plus = min_wall_dist * u_tau * rho / mu;
@@ -160,7 +160,7 @@ kEpsilonViscosityAux::computeValue()
     else if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
     {
       // Assign non-equilibrium wall function value
-      y_plus = min_wall_dist * std::sqrt(std::sqrt(_C_mu) * _k(current_argument, state)) * rho / mu;
+      y_plus = min_wall_dist * std::sqrt(std::sqrt(_C_mu) * _k(elem_arg, state)) * rho / mu;
       mu_wall = mu * (NS::von_karman_constant * y_plus /
                       std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
       mut_log = mu_wall - mu;
@@ -173,7 +173,7 @@ kEpsilonViscosityAux::computeValue()
       mu_t = 0.0;
     else if (y_plus >= 30.0)
       // log-layer
-      mu_t = std::max(mut_log.value(), NS::mu_t_low_limit);
+      mu_t = std::max(mut_log, NS::mu_t_low_limit);
     else
     {
       // buffer layer
@@ -182,32 +182,30 @@ kEpsilonViscosityAux::computeValue()
       const auto mut_log = mu * (NS::von_karman_constant * 30.0 /
                                      std::log(std::max(NS::E_turb_constant * 30.0, 1 + 1e-4)) -
                                  1.0);
-      mu_t = std::max(raw_value(blending_function * mut_log), NS::mu_t_low_limit);
+      mu_t = std::max(blending_function * mut_log, NS::mu_t_low_limit);
     }
   }
   else
   {
-    ADReal time_scale;
+    Real time_scale;
     if (_scale_limiter == "standard")
     {
-      time_scale = std::max(_k(current_argument, state) / _epsilon(current_argument, state),
-                            std::sqrt(nu / _epsilon(current_argument, state)));
+      time_scale = std::max(_k(elem_arg, state) / _epsilon(elem_arg, state),
+                            std::sqrt(nu / _epsilon(elem_arg, state)));
     }
     else
     {
-      time_scale = _k(current_argument, state) / _epsilon(current_argument, state);
+      time_scale = _k(elem_arg, state) / _epsilon(elem_arg, state);
     }
     // For newton solvers, epsilon might not be bounded
     if (_newton_solve)
-      time_scale = _k(current_argument, state) /
-                   std::max(NS::epsilon_low_limit, _epsilon(current_argument, state));
+      time_scale = _k(elem_arg, state) / std::max(NS::epsilon_low_limit, _epsilon(elem_arg, state));
 
-    const ADReal mu_t_nl =
-        _rho(current_argument, state) * _C_mu * _k(current_argument, state) * time_scale;
-    mu_t = mu_t_nl.value();
+    const Real mu_t_nl = _rho(elem_arg, state) * _C_mu * _k(elem_arg, state) * time_scale;
+    mu_t = mu_t_nl;
     if (_newton_solve)
       mu_t = std::max(mu_t, NS::mu_t_low_limit);
   }
   // Turbulent viscosity limiter
-  return std::min(mu_t, _mu_t_ratio_max * raw_value(mu));
+  return std::min(mu_t, _mu_t_ratio_max * mu);
 }
