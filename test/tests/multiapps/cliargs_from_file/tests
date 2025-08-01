@@ -10,21 +10,12 @@
     requirement = "The system shall support reading command-line arguments from a file with multiple lines"
   [../]
 
-  [./one_line_file]
-    type = 'Exodiff'
-    input = 'cliargs_parent.i'
-    exodiff = 'cliargs_parent_out.e		cliargs_parent_out_sub_app0.e	cliargs_parent_out_sub_app1.e	cliargs_parent_out_sub_app2.e	cliargs_parent_out_sub_app3.e'
-    cli_args = 'MultiApps/sub_app/cli_args_files=cliargs_oneline.txt'
-    prereq = multiline_file
-    requirement = "The system shall support reading command-line arguments from a file with a single line"
-  [../]
-
   [./two_files]
     type = 'Exodiff'
     input = 'cliargs_parent.i'
     exodiff = 'cliargs_parent_out.e		cliargs_parent_out_sub_app0.e	cliargs_parent_out_sub_app1.e	cliargs_parent_out_sub_app2.e	cliargs_parent_out_sub_app3.e'
     cli_args = 'MultiApps/sub_app/positions_file="positions_1.txt positions_2.txt" MultiApps/sub_app/input_files="cliargs_sub_1.i cliargs_sub_2.i" MultiApps/sub_app/cli_args_files="cliargs_1.txt cliargs_2.txt"'
-    prereq = one_line_file
+    prereq = multiline_file
     requirement = "The system shall support reading command-line arguments from multiple files"
   [../]
 

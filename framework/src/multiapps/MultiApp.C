@@ -481,9 +481,10 @@ MultiApp::readCommandLineArguments()
         MooseUtils::checkFileReadable(cli_args_file);
 
         std::ifstream is(cli_args_file.c_str());
-        std::copy(std::istream_iterator<std::string>(is),
-                  std::istream_iterator<std::string>(),
-                  std::back_inserter(cli_args));
+        // Read by line rather than space separated like the cli_args parameter
+        std::string line;
+        while (std::getline(is, line))
+          cli_args.push_back(line);
 
         // We do not allow empty files
         if (!cli_args.size())
