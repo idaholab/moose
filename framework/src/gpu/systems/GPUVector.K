@@ -34,7 +34,7 @@ Vector::DeviceAssembly::create(const Array<Array<libMesh::dof_id_type>> & list)
     offset[i + 1] = offset[i] + count[i];
   }
 
-  offset.copy();
+  offset.copyToDevice();
 
   buffer.createDevice(offset.last());
 }
@@ -185,13 +185,23 @@ Vector::destroy()
 }
 
 void
-Vector::copy(const MemcpyKind dir)
+Vector::copyToDevice()
 {
   if (_assemble)
-    mooseError("Kokkos vector error: copy() should not be called for an assembled vector.");
+    mooseError("Kokkos vector error: copyToDevice() should not be called for an assembled vector.");
 
   if (_is_alloc && _is_host)
-    _local.copy(dir);
+    _local.copyToDevice();
+}
+
+void
+Vector::copyToHost()
+{
+  if (_assemble)
+    mooseError("Kokkos vector error: copyToHost() should not be called for an assembled vector.");
+
+  if (_is_alloc && _is_host)
+    _local.copyToHost();
 }
 
 void
@@ -252,7 +262,7 @@ Vector::close()
   // Copy to the host vector if needed
 
   if (_is_host)
-    _local.copy(MemcpyKind::DEVICE_TO_HOST);
+    _local.copyToHost();
 
   // Restore the PETSc vector
 
@@ -260,7 +270,7 @@ Vector::close()
 
 #ifndef DEVICE_ASSEMBLY
 
-  _ghost.copy(MemcpyKind::DEVICE_TO_HOST);
+  _ghost.copyToHost();
 
   LibmeshPetscCallQ(
       VecSetValues(_global_vector,

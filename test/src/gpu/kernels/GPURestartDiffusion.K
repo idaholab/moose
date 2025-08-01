@@ -31,5 +31,5 @@ KokkosRestartDiffusion::timestepSetup()
 {
   _step = _step + 1;
   _coef(_step) = _coef(_step - 1) + 1;
-  _coef->copy();
+  _coef->copyToDevice();
 }

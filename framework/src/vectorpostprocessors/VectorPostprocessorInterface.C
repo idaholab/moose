@@ -30,11 +30,12 @@ VectorPostprocessorInterface::VectorPostprocessorInterface(const MooseObject * m
                  ? _vpi_moose_object.parameters().get<THREAD_ID>("_tid")
                  : 0)
 {
+#ifdef MOOSE_KOKKOS_ENABLED
   // Calling this constructor while not executing actions means this object is being
   // copy-constructed
-  if (moose_object->isParamValid("_kokkos_object") &&
-      !moose_object->getMooseApp().currentlyExecutingActions())
+  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
     return;
+#endif
 }
 
 const VectorPostprocessorValue &

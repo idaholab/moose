@@ -75,7 +75,7 @@ void
 Matrix::close()
 {
   if (_is_host)
-    _val.copy(MemcpyKind::DEVICE_TO_HOST);
+    _val.copyToHost();
 
   LibmeshPetscCallQ(
       MatSetValuesCOO(_matrix, _is_host ? _val.hostData() : _val.deviceData(), ADD_VALUES));

@@ -108,8 +108,8 @@ Mesh::initElement()
     }
   }
 
-  _elem_info.copy();
-  _elem_neighbor.copy();
+  _elem_info.copyToDevice();
+  _elem_neighbor.copyToDevice();
 
   // Cache node data
 
@@ -145,10 +145,10 @@ Mesh::initElement()
     _boundary_nodes[getBoundaryID(boundary)] = nodes;
   }
 
-  _points.copy();
-  _nodes.copy();
-  _nodes_face.copy();
-  _boundary_nodes.copy();
+  _points.copyToDevice();
+  _nodes.copyToDevice();
+  _nodes_face.copyToDevice();
+  _boundary_nodes.copyToDevice();
 }
 
 SubdomainID

@@ -210,7 +210,12 @@ dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storag
       std::stringstream ss;
 
       for (unsigned int state = 0; state < num_states; ++state)
-        storage._store[props[state][name]->loadStoreKey()](ss, props[state][name].get());
+      {
+        auto it = storage._store.find(props[state][name]->loadStoreKey());
+        mooseAssert(it != storage._store.end(), "Store function was not properly registered.");
+
+        it->second(ss, props[state][name].get());
+      }
 
       // Write the temporary stream to the output stream
       dataStore(stream, ss, nullptr);
@@ -245,6 +250,11 @@ dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage
 
     if (records.count(name) && storage.getPropRecord(records[name].id).stateful())
       for (unsigned int state = 0; state < num_states; ++state)
-        storage._load[props[state][name]->loadStoreKey()](ss, props[state][name].get());
+      {
+        auto it = storage._load.find(props[state][name]->loadStoreKey());
+        mooseAssert(it != storage._load.end(), "Load function was not properly registered.");
+
+        it->second(ss, props[state][name].get());
+      }
   }
 }

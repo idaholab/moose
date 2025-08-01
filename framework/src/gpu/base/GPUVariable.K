@@ -39,8 +39,8 @@ Variable::init(const MooseVariableBase & variable, const TagID tag)
     _sys[i] = variable.sys().number();
   }
 
-  _var.copy();
-  _sys.copy();
+  _var.copyToDevice();
+  _sys.copyToDevice();
 }
 
 } // namespace Kokkos

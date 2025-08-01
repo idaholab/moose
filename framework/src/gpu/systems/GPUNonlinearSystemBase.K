@@ -110,7 +110,7 @@ NonlinearSystemBase::setKokkosInitialSolution()
   for (auto & system : systems)
     system.sync(needed_fe_var_vector_tags, Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
 
-  systems.copy();
+  systems.copyToDevice();
 
   for (auto nbc : _kokkos_preset_nodal_bcs.getActiveObjects())
     std::static_pointer_cast<Moose::Kokkos::NodalBCBase>(nbc)->presetSolution(tag);
@@ -185,7 +185,7 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
     }
   }
 
-  systems.copy();
+  systems.copyToDevice();
 
   {
     TIME_SECTION("KokkosMaterial", 1);
@@ -297,7 +297,7 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
     }
   }
 
-  systems.copy();
+  systems.copyToDevice();
 
   {
     TIME_SECTION("KokkosMaterial", 1);
