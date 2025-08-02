@@ -9,7 +9,7 @@
 
 import re, os, shutil
 from Tester import Tester
-from TestHarness import util
+from TestHarness import util, TestHarness
 from shlex import quote
 
 class RunApp(Tester):
@@ -54,7 +54,10 @@ class RunApp(Tester):
         params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
         params.addParam('libtorch_devices', "The devices to use for this libtorch test ('CPU', 'CUDA', 'MPS')")
-        params.addParam('devices', ['CPU'], "The devices to use for this libtorch or MFEM test ('CPU', 'CUDA', 'HIP', 'MPS'); default ('CPU')")
+        device_list_str = "', '".join(d.upper() for d in TestHarness.validDevices())
+        device_param_doc = f"The devices to use for this libtorch or MFEM test ('{device_list_str}'); device availability depends on library support and compilation settings; default ('CPU')"
+        params.addParam('devices', ['CPU'], device_param_doc)
+
         return params
 
     def __init__(self, name, params):
@@ -79,11 +82,11 @@ class RunApp(Tester):
         if params.isValid('libtorch_devices'):
             for value in params['libtorch_devices']:
                 if value.lower() not in ['cpu', 'cuda', 'mps']:
-                    raise Exception(f'Unknown libtorch_device "{value}')
+                    raise Exception(f'Unknown libtorch_device "{value}"')
 
         for value in params['devices']:
-            if value.lower() not in ['cpu', 'cuda', 'hip', 'mps']:
-                raise Exception(f'Unknown device "{value}')
+            if value.lower() not in TestHarness.validDevices():
+                raise Exception(f'Unknown device "{value}"')
 
     def getInputFile(self):
         if self.specs.isValid('input'):
