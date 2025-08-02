@@ -200,6 +200,13 @@ protected:
    */
   virtual void init();
 
+  /// Add an additional variable to the hide list
+  void hideAdditionalVariable(const std::string & category, const std::string & var_name)
+  {
+    _execute_data[category].hide.insert(var_name);
+    _execute_data[category].output.erase(var_name);
+  }
+
   /**
    * Handles logic for determining if a step should be output
    * @return True if a call if output should be performed
