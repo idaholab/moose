@@ -26,6 +26,7 @@ TestSubgenerators::validParams()
   params.set<std::vector<MeshGeneratorName>>("inputs") = {};
 
   params.addRequiredParam<std::vector<std::string>>("input_files", "The input mesh filenames");
+  params.addPrivateParam<bool>("_check_inputs", false);
 
   return params;
 }
