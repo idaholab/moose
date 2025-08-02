@@ -295,15 +295,10 @@ class RunApp(Tester):
         if options.scaling and specs['scale_refine'] > 0:
             cli_args.insert(0, ' -r ' + str(specs['scale_refine']))
 
-        if specs.isValid('capabilities'):
-            if 'libtorch' in specs['capabilities']:
-                cli_args.append(f'--libtorch-device {options.device}')
-            if 'mfem' in specs['capabilities']:
-                cli_args.append(f'Executioner/device={options.device}')
-
         # Get the number of processors and threads the Tester requires
         ncpus = self.getProcs(options)
         nthreads = self.getThreads(options)
+        cli_args.append(f'--compute-device={options.device}')
 
         if specs['redirect_output'] and ncpus > 1:
             cli_args.append('--keep-cout --redirect-output ' + self.name())
