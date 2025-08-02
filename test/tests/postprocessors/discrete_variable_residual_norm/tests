@@ -1,0 +1,11 @@
+[Tests]
+  design = 'DiscreteVariableResidualNorm.md'
+  issues = '#31177'
+
+  [test]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    requirement = 'The system shall compute the l-1, l-2, and l-infinity discrete residual norms for a variable on a subdomain.'
+  [../]
+[]
