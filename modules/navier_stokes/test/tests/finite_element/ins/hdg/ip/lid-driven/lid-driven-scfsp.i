@@ -304,6 +304,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     type = Exodus
     hide = 'pressure_average'
     output_material_properties = true
+    execute_on = 'timestep_end'
   []
 []
 
