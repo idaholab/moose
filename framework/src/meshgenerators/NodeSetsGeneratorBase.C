@@ -41,6 +41,10 @@ NodeSetsGeneratorBase::validParams()
       "included_subdomains",
       "A set of subdomain names or ids whose nodes will be included in the new nodesets. A node "
       "is only added if the subdomain id of the corresponding element is in this set.");
+  params.addParam<std::vector<SubdomainName>>(
+      "excluded_subdomains",
+      "A set of subdomain names or ids whose nodes will be excluded in the new nodesets. A node "
+      "is only added if the subdomain id of the corresponding element is not in this set.");
 
   params.addParam<bool>(
       "include_only_external_nodes",
@@ -63,9 +67,11 @@ NodeSetsGeneratorBase::NodeSetsGeneratorBase(const InputParameters & parameters)
     _check_included_nodesets(isParamValid("included_nodesets")),
     _check_excluded_nodesets(isParamValid("excluded_nodesets")),
     _check_included_subdomains(isParamValid("included_subdomains")),
+    _check_excluded_subdomains(isParamValid("excluded_subdomains")),
     _included_nodeset_ids(std::vector<boundary_id_type>()),
     _excluded_nodeset_ids(std::vector<boundary_id_type>()),
     _included_subdomain_ids(std::vector<subdomain_id_type>()),
+    _excluded_subdomain_ids(std::vector<subdomain_id_type>()),
     _include_only_external_nodes(getParam<bool>("include_only_external_nodes"))
 {
   if (isParamValid("new_nodeset"))
@@ -143,6 +149,28 @@ NodeSetsGeneratorBase::setup(MeshBase & mesh)
     _included_subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
   }
 
+  if (_check_excluded_subdomains)
+  {
+    // check that the subdomains exist in the mesh
+    const auto subdomains = getParam<std::vector<SubdomainName>>("excluded_subdomains");
+    for (const auto & name : subdomains)
+      if (!MooseMeshUtils::hasSubdomainName(mesh, name))
+        paramError("excluded_subdomains", "The block '", name, "' was not found in the mesh");
+
+    _excluded_subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
+
+    if (_check_included_subdomains)
+    {
+      // Check that included and excluded nodeset lists do not overlap
+      for (const auto & subdomain_id : _included_subdomain_ids)
+        if (std::find(_excluded_subdomain_ids.begin(),
+                      _excluded_subdomain_ids.end(),
+                      subdomain_id) != _excluded_subdomain_ids.end())
+          paramError("excluded_subdomains",
+                     "'included_subdomains' and 'excluded_subdomains' lists should not overlap");
+    }
+  }
+
   // Build the node to element map, which is usually provided by a MooseMesh but in the mesh
   // generation process we are working with a MeshBase
   for (const auto & elem : mesh.active_element_ptr_range())
@@ -189,6 +217,21 @@ NodeSetsGeneratorBase::nodeElementsInIncludedSubdomains(const std::vector<dof_id
 }
 
 bool
+NodeSetsGeneratorBase::nodeElementsInExcludedSubdomains(const std::vector<dof_id_type> node_elems,
+                                                        const MeshBase & mesh) const
+{
+  for (const auto elem_id : node_elems)
+  {
+    subdomain_id_type curr_subdomain = mesh.elem_ptr(elem_id)->subdomain_id();
+    if (std ::find(_excluded_subdomain_ids.begin(),
+                   _excluded_subdomain_ids.end(),
+                   curr_subdomain) != _excluded_subdomain_ids.end())
+      return true;
+  }
+  return false;
+}
+
+bool
 NodeSetsGeneratorBase::nodeInIncludedNodesets(const std::vector<BoundaryID> & node_nodesets) const
 {
   for (const auto bid : node_nodesets)
@@ -220,6 +263,13 @@ NodeSetsGeneratorBase::nodeSatisfiesRequirements(const Node * node,
 
   // Skip if none of the elements owning the node are in the list of accepted subdomains
   if (_check_included_subdomains && !nodeElementsInIncludedSubdomains(node_elems, mesh))
+    return false;
+
+  // Skip if a element owning the node is in the list of excluded subdomains
+  // Note: if a node is on the interface of included subdomains and excluded subdomains,
+  //       it will pass the above check but return false here, i.e. subdomain excluding will
+  //       win if both subdomain including and excluding are true.
+  if (_check_excluded_subdomains && nodeElementsInExcludedSubdomains(node_elems, mesh))
     return false;
 
   // Skip if side is not part of included nodesets
