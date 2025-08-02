@@ -20,7 +20,7 @@ registerMooseObject("MooseTestApp", TestSubgenerators);
 InputParameters
 TestSubgenerators::validParams()
 {
-  InputParameters params = StitchedMeshGenerator::validParams();
+  InputParameters params = StitchMeshGenerator::validParams();
 
   params.makeParamNotRequired<std::vector<MeshGeneratorName>>("inputs");
   params.set<std::vector<MeshGeneratorName>>("inputs") = {};
@@ -31,7 +31,7 @@ TestSubgenerators::validParams()
 }
 
 TestSubgenerators::TestSubgenerators(const InputParameters & parameters)
-  : StitchedMeshGenerator(parameters),
+  : StitchMeshGenerator(parameters),
     _input_filenames(getParam<std::vector<std::string>>("input_files"))
 {
   const std::string sg_name_base = name() + "_sub_";

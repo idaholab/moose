@@ -15,7 +15,7 @@
   []
 
   [./smg]
-    type = StitchedMeshGenerator
+    type = StitchMeshGenerator
     inputs = 'fmg_left fmg_center fmg_right'
     clear_stitched_boundary_ids = true
     stitch_boundaries_pairs = 'right left;

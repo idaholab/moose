@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "StitchedMeshGenerator.h"
+#include "StitchMeshGenerator.h"
 
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
@@ -15,10 +15,10 @@
 
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("MooseApp", StitchedMeshGenerator);
+registerMooseObject("MooseApp", StitchMeshGenerator);
 
 InputParameters
-StitchedMeshGenerator::validParams()
+StitchMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -59,7 +59,7 @@ StitchedMeshGenerator::validParams()
   return params;
 }
 
-StitchedMeshGenerator::StitchedMeshGenerator(const InputParameters & parameters)
+StitchMeshGenerator::StitchMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _mesh_ptrs(getMeshes("inputs")),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
@@ -73,12 +73,12 @@ StitchedMeshGenerator::StitchedMeshGenerator(const InputParameters & parameters)
 }
 
 std::unique_ptr<MeshBase>
-StitchedMeshGenerator::generate()
+StitchMeshGenerator::generate()
 {
   // We put the first mesh in a local pointer
   std::unique_ptr<UnstructuredMesh> mesh = dynamic_pointer_cast<UnstructuredMesh>(*_mesh_ptrs[0]);
   if (!mesh) // This should never happen until libMesh implements on-the-fly-Elem mesh types
-    mooseError("StitchedMeshGenerator is only implemented for unstructured meshes");
+    mooseError("StitchMeshGenerator is only implemented for unstructured meshes");
 
   // Reserve spaces for the other meshes (no need to store the first one another time)
   std::vector<std::unique_ptr<UnstructuredMesh>> meshes(_mesh_ptrs.size() - 1);
