@@ -95,18 +95,24 @@ rodriguesRotationMatrix(GenericRealVectorValue<is_ad> vec1, GenericRealVectorVal
   GenericRealVectorValue<is_ad> u = vec1 / vec1.norm();
   GenericRealVectorValue<is_ad> v = vec2 / vec2.norm();
 
+  GenericRealTensorValue<is_ad> I(1, 0, 0, 0, 1, 0, 0, 0, 1); // identity matrix
+
   if ((u - v).norm() < libMesh::TOLERANCE)
-    return GenericRealTensorValue<is_ad>(1, 0, 0, 0, 1, 0, 0, 0, 1); // identity matrix
+    return I;
 
   GenericRealVectorValue<is_ad> k_vec = u.cross(v); // calculate rotation axis
-  k_vec /= k_vec.norm();                            // normalize
+
+  // test for exactly opposite vectors to avoid divide by zero
+  if (k_vec.norm() < libMesh::TOLERANCE)
+    return -I;
+
+  k_vec /= k_vec.norm(); // normalize
   Real cos_theta = u * v;
   Real theta = std::acos(cos_theta);
   Real sin_theta = std::sin(theta);
 
   GenericRealTensorValue<is_ad> K_matrix(
       0, -k_vec(2), k_vec(1), k_vec(2), 0, -k_vec(0), -k_vec(1), k_vec(0), 0);
-  GenericRealTensorValue<is_ad> I(1, 0, 0, 0, 1, 0, 0, 0, 1); // identity matrix
 
   GenericRealTensorValue<is_ad> rot_matrix;
   rot_matrix =

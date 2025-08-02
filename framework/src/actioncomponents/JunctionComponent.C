@@ -36,6 +36,10 @@ JunctionComponent::validParams()
   params.addRequiredParam<ComponentName>("second_component", "Second component to join");
   params.addRequiredParam<BoundaryName>("second_boundary", "Second boundary to connect to.");
 
+  // optional user parameters. Will be obeyed always.
+  params.addParam<RealVectorValue>("first_direction", "Direction from the first boundary.");
+  params.addParam<RealVectorValue>("second_direction", "Direction from the second boundary.");
+
   MooseEnum junction_type("stitch_meshes fill_gap", "fill_gap");
   params.addParam<MooseEnum>("junction_method", junction_type, "How to join the two components");
 
@@ -110,6 +114,11 @@ JunctionComponent::addMeshGenerators()
   if (dimension_first == 0 || dimension_second == 0)
     mooseError("Connecting 0 dimension meshes not implemented!");
 
+  if (dimension_first != dimension_second)
+    mooseError("Input components do not have the same mesh dimensions!");
+
+  _dimension = dimension_first; // set the dimension of the action component
+
   // Perform junction
   if (_junction_method == "stitch_meshes")
   {
@@ -129,7 +138,11 @@ JunctionComponent::addMeshGenerators()
       _mg_names.push_back(name() + "_base");
     }
     else
+    {
+      std::cout << "dim_first = " << dimension_first << std::endl;
+      std::cout << "dim_second = " << dimension_second << std::endl;
       mooseError("Stiching meshes of different dimensions is not implemented");
+    }
   }
   else if (_junction_method == "fill_gap")
   {
@@ -144,9 +157,17 @@ JunctionComponent::addMeshGenerators()
     const auto & second_component_cmth =
         _awh.getAction<ComponentMeshTransformHelper>(getParam<ComponentName>("second_component"));
 
-    // find start and end directions (may need to take the negative of the end direction)
-    RealVectorValue start_direction = first_component_cmth.direction();
-    RealVectorValue end_direction = second_component_cmth.direction();
+    // find start and end directions (may need to take the negative of the end direction).
+    // obey user parameters if set
+    RealVectorValue start_direction, end_direction;
+    if (isParamValid("first_direction"))
+      start_direction = getParam<RealVectorValue>("first_direction");
+    else
+      start_direction = first_component_cmth.direction();
+    if (isParamValid("second_direction"))
+      end_direction = getParam<RealVectorValue>("second_direction");
+    else
+      end_direction = second_component_cmth.direction();
 
     InputParameters bspline_params = _factory.getValidParams("BSplineCurveGenerator");
     bspline_params.set<RealVectorValue>("start_direction") = start_direction;

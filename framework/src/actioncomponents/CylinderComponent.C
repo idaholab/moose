@@ -119,7 +119,8 @@ CylinderComponent::addMeshGenerators()
     // create base
     InputParameters edge_params = _factory.getValidParams("GeneratedMeshGenerator");
     edge_params.set<MooseEnum>("dim") = 1;
-    edge_params.set<Real>("xmax") = getParam<Real>("start_radius") * 2.0;
+    edge_params.set<Real>("xmax") = getParam<Real>("start_radius");
+    edge_params.set<Real>("xmin") = -getParam<Real>("start_radius");
     edge_params.set<unsigned int>("nx") = getParam<unsigned int>("n_radial") * 2;
     _app.getMeshGeneratorSystem().addMeshGenerator(
         "GeneratedMeshGenerator", name() + "_edge", edge_params);
