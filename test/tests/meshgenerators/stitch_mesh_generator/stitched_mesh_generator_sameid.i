@@ -20,7 +20,7 @@
     type = StitchMeshGenerator
     inputs = 'fmg_left rename_center'
     clear_stitched_boundary_ids = true
-    stitch_boundaries_pairs = 'right left;'
+    stitch_boundaries_pairs = 'right left'
     parallel_type = 'replicated'
     prevent_boundary_ids_overlap = false
   []

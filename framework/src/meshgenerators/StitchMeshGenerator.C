@@ -19,6 +19,7 @@ registerMooseObjectRenamed("MooseApp",
                            StitchedMeshGenerator,
                            "06/30/2026 24:00",
                            StitchMeshGenerator);
+registerMooseObject("MooseApp", StitchMeshGenerator);
 
 InputParameters
 StitchMeshGenerator::validParams()
@@ -41,6 +42,8 @@ StitchMeshGenerator::validParams()
   params.addClassDescription(
       "Allows multiple mesh files to be stitched together to form a single mesh.");
 
+  // This is used for compatibility with TestSubGenerators
+  params.addPrivateParam<bool>("_check_inputs", true);
   return params;
 }
 
@@ -52,7 +55,7 @@ StitchMeshGenerator::StitchMeshGenerator(const InputParameters & parameters)
     _merge_boundaries_with_same_name(getParam<bool>("merge_boundaries_with_same_name"))
 {
   // Check inputs
-  if (_input_names.size() - 1 != _stitch_boundaries_pairs.size())
+  if (_input_names.size() - 1 != _stitch_boundaries_pairs.size() && getParam<bool>("_check_inputs"))
     paramError("stitch_boundaries_pairs",
                "Can only stitch one pair of boundary per pair of mesh. We have '" +
                    std::to_string(_input_names.size()) +
@@ -89,7 +92,7 @@ StitchMeshGenerator::generate()
     // Check the input boundaries
     const auto first = getBoundaryIdToStitch(
         *mesh,
-        _input_names[0] +
+        (_input_names.size() ? _input_names[0] : "(unknown)") +
             ((i == 0) ? "" : (" (stitched with " + std::to_string(i) + " previous meshes)")),
         boundary_pair[0]);
     auto second = getBoundaryIdToStitch(*meshes[i], name(), boundary_pair[1]);
