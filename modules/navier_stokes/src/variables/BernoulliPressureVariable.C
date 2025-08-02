@@ -115,7 +115,7 @@ BernoulliPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
   if (isSeparatorBoundary(fi))
     return true;
 
-  if (std::get<0>(NS::isPorosityJumpFace(*_eps, fi, time)))
+  if (std::get<0>(NS::isPorosityJumpFace<ADReal>(*_eps, fi, time)))
     // We choose to extrapolate for the element that is downwind
     return !std::get<0>(elemIsUpwind(*elem, fi, time));
 
@@ -135,7 +135,7 @@ BernoulliPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi,
     if (isSeparatorBoundary(fi))
       return false;
 
-    if (std::get<0>(NS::isPorosityJumpFace(*_eps, fi, time)))
+    if (std::get<0>(NS::isPorosityJumpFace<ADReal>(*_eps, fi, time)))
       // We choose to apply the Dirichlet condition for the upwind element
       return std::get<0>(elemIsUpwind(*elem, fi, time));
   }
@@ -153,7 +153,8 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   if (INSFVPressureVariable::isDirichletBoundaryFace(fi, elem, time))
     return INSFVPressureVariable::getDirichletBoundaryFaceValue(fi, elem, time);
 
-  const auto [is_jump_face, eps_elem, eps_neighbor] = NS::isPorosityJumpFace(*_eps, fi, time);
+  const auto [is_jump_face, eps_elem, eps_neighbor] =
+      NS::isPorosityJumpFace<ADReal>(*_eps, fi, time);
 #ifndef NDEBUG
   mooseAssert(is_jump_face,
               "If we are not a traditional Dirichlet face, then we must be a jump face");

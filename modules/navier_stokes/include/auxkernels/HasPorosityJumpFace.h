@@ -25,5 +25,5 @@ protected:
   Real computeValue() override;
 
   /// The porosity
-  const Moose::Functor<ADReal> & _eps;
+  const Moose::Functor<Real> & _eps;
 };

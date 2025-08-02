@@ -26,9 +26,9 @@ TurbulentConductivityAux::validParams()
 
 TurbulentConductivityAux::TurbulentConductivityAux(const InputParameters & params)
   : AuxKernel(params),
-    _cp(getFunctor<ADReal>(NS::cp)),
-    _Pr_t(getFunctor<ADReal>("Pr_t")),
-    _mu_t(getFunctor<ADReal>(NS::mu_t))
+    _cp(getFunctor<Real>(NS::cp)),
+    _Pr_t(getFunctor<Real>("Pr_t")),
+    _mu_t(getFunctor<Real>(NS::mu_t))
 {
 }
 
@@ -38,6 +38,6 @@ TurbulentConductivityAux::computeValue()
   const auto current_argument = makeElemArg(_current_elem);
   const auto state = determineState();
 
-  return raw_value(_cp(current_argument, state) * _mu_t(current_argument, state) /
-                   _Pr_t(current_argument, state));
+  return _cp(current_argument, state) * _mu_t(current_argument, state) /
+         _Pr_t(current_argument, state);
 }
