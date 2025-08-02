@@ -34,21 +34,21 @@ protected:
   const unsigned int _dim;
 
   /// x-velocity
-  const Moose::Functor<ADReal> & _u_var;
+  const Moose::Functor<Real> & _u_var;
   /// y-velocity
-  const Moose::Functor<ADReal> * _v_var;
+  const Moose::Functor<Real> * _v_var;
   /// z-velocity
-  const Moose::Functor<ADReal> * _w_var;
+  const Moose::Functor<Real> * _w_var;
 
   /// Turbulent kinetic energy
-  const Moose::Functor<ADReal> & _k;
+  const Moose::Functor<Real> & _k;
   /// Turbulent kinetic energy dissipation rate
-  const Moose::Functor<ADReal> & _epsilon;
+  const Moose::Functor<Real> & _epsilon;
 
   /// Density
-  const Moose::Functor<ADReal> & _rho;
+  const Moose::Functor<Real> & _rho;
   /// Dynamic viscosity
-  const Moose::Functor<ADReal> & _mu;
+  const Moose::Functor<Real> & _mu;
 
   /// C-mu closure coefficient
   const Real _C_mu;
