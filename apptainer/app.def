@@ -15,6 +15,9 @@
 {#- METHOD: The method to build; defaults to "opt"                                            -#}
 {#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
 {#- TEST_DIRS: Directories to test in the %test section; defaults to just "tests"             -#}
+{#- WITH_LIBTORCH: Set to enable libtorch                                                     -#}
+{#- WITH_MFEM : Set to enable mfem                                                            -#}
+{#- WITH_NEML2: Set to enable neml2 (sets WITH_LIBTORCH=1)                                    -#}
 
 {#- Civet Specific jinja arguments                                                            -#}
 {#- CIVET_STEP_ALLOWED_TO_FAIL: BOOL, specific to Civet. Available in %post, %test section    -#}
@@ -112,6 +115,50 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     APPLICATION_DIR=${TEMP_LOC}/${APPLICATION_NAME}
     export MOOSE_DIR=${TEMP_LOC}/moose
 
+    # Load WITH_XXX variables
+    if_true() {
+        local val="${1,,}"  # Convert to lowercase
+        if [[ "$val" == "1" || "$val" == "true" || "$val" == "on" ]]; then
+            echo "1"
+        fi
+    }
+    WITH_LIBTORCH=$(if_true "{{ WITH_LIBTORCH }}")
+    WITH_MFEM=$(if_true "{{ WITH_MFEM }}")
+    WITH_NEML2=$(if_true "{{ WITH_NEML2 }}")
+    unset -f if_true
+    if [ -n "$WITH_NEML2" ] && [ -z "$WITH_LIBTORCH" ]; then
+        echo "Must set WITH_LIBTORCH if using WITH_NEML2"
+        exit 1
+    fi
+
+    # Delete the things that we don't need, and capture the configure args
+    # if we do need them
+    EXTRA_MOOSE_OPTIONS=()
+    for DEP in libtorch mfem neml2; do
+        DEP_ENABLED_VAR="WITH_${dep^^}"
+        DEP_ENABLED="${!DEP_ENABLED_VAR}"
+        DEP_DIR_VAR="${DEP^^}_DIR"
+        DEP_DIR="${!DEP_DIR_VAR}"
+        if [ -n "$DEP_ENABLED" ]; then
+            if ! [ -d "$DEP_DIR" ]; then
+                echo "Cannot configure with $DEP support; directory ${DEP_DIR_VAR}=${DEP_DIR} does not exist"
+                exit 1
+            fi
+            echo "Configuring with $DEP support"
+            EXTRA_MOOSE_OPTIONS+=("--with-${DEP}=${DEP_DIR}")
+        else
+            echo "Not configuring with $DEP support"
+            unset "$DEP_DIR_VAR"
+            if [ -d "$DEP_DIR" ]; then
+                rm -rf "${DEP_DIR}"
+            fi
+            if [ "$DEP" == "mfem" ] && [ -d "$CONDUIT_DIR" ]; then
+                rm -rf "${CONDUIT_DIR}"
+                unset CONDUIT_DIR
+            fi
+        fi
+    done
+
     # If MOOSE_DIR is a symlink, we're using MOOSE within
     # the app, so use that instead
     if test -h $MOOSE_DIR; then
@@ -148,16 +195,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # Install the application
     MOOSE_PREFIX=/opt/${BINARY_NAME}
     cd ${MOOSE_DIR}
-    if [ -n "$LIBTORCH_DIR" ]; then
-        MOOSE_OPTIONS+=" --with-libtorch=${LIBTORCH_DIR}"
-        if [ -n "$NEML2_DIR" ]; then
-            MOOSE_OPTIONS+=" --with-neml2=${NEML2_DIR}"
-        fi
-    fi
-    if [ -n "$MFEM_DIR" ]; then
-        MOOSE_OPTIONS+=" --with-mfem=${MFEM_DIR}"
-    fi
-    ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS}
+    ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS} "${EXTRA_MOOSE_OPTIONS[@]}"
+
     # Build and install
 {%- if BINARY_NAME == 'moose' %}
     cd ${APPLICATION_DIR}/modules

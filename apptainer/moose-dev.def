@@ -82,13 +82,21 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export PATH=${WASP_DIR}/bin:$PATH
 
 {%- if WITH_MFEM %}
-    export CONDUIT_DIR={{ CONDUIT_DIR }}
-    export MFEM_DIR={{ MFEM_DIR }}
+    if [ -d "{{ CONDUIT_DIR }}" ]; then
+        export CONDUIT_DIR={{ CONDUIT_DIR }}
+    fi
+    if [ -d "{{ MFEM_DIR }}" ]; then
+        export MFEM_DIR={{ MFEM_DIR }}
+    fi
 {%- endif %}
 
 {% if WITHOUT_PYTORCH is not defined %}
-    export LIBTORCH_DIR={{ LIBTORCH_DIR }}
-    export NEML2_DIR={{ NEML2_DIR }}
+    if [ -d "{{ LIBTORCH_DIR }}" ]; then
+        export LIBTORCH_DIR={{ LIBTORCH_DIR }}
+    fi
+    if [ -d "{{ NEML2_DIR }}" ]; then
+        export NEML2_DIR={{ NEML2_DIR }}
+    fi
     # Adding this to not get GPU initialization errors from MPICH
     export MPIR_CVAR_ENABLE_GPU=0
 {%- endif %}
@@ -103,6 +111,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 %post
     umask 022
 
+    # So that piping things to tee fails
+    set -o pipefail
+
     # Load jinja vars
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     MINIFORGE_DIR={{ MINIFORGE_DIR }}
@@ -116,9 +127,14 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export MOOSE_JOBS={{ MOOSE_JOBS }}
 
     # Pinned versions
-    MINIFORGE_VERSION=23.3.1-1
+    CODE_SERVER_VERSION=4.102.2
+{% if PROFILING is defined %}
+    GPERFTOOLS_VERSION=2.15
+    GO_VERSION=1.23.1
+{%- endif %}
+    MINIFORGE_VERSION=25.3.1-0
     PYTHON_VERSION=3.13
-    CODE_SERVER_VERSION=4.96.4
+    PYTORCH_VERSION=2.7.1
 
     # Install code-server
     CODE_SERVER_FILE=code-server-${CODE_SERVER_VERSION}-amd64.rpm
@@ -164,15 +180,17 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     conda update -yq --all
 
 {% if WITHOUT_PYTORCH is not defined %}
+    # Make ninja available for neml2 and libtorch builds
+    dnf install -y ninja-build
+
     # Figure out compiler and version to see if we build torch or use prebuilt torch
     COMPILER=$(mpicxx -show | awk '{ print $1 }')
     BUILD_PYTORCH=1
     # Explicitly silence all warnings because the build is loud (>5MB of output...)
-    BUILD_PYTORCH_CCXXFLAGS="-w"
+    BUILD_PYTORCH_CCXXFLAGS=("-w")
     BUILD_PYTORCH_FLAGS=()
-    BUILD_PYTORCH_PATCHES=()
     if [ "$COMPILER" == "g++" ]; then
-        BUILD_PYTORCH_CCXXFLAGS+=" -Wno-error=maybe-uninitialized -Wno-error=uninitialized -Wno-error=restrict"
+        BUILD_PYTORCH_CCXXFLAGS+=("-Wno-error=maybe-uninitialized" "-Wno-error=uninitialized" "-Wno-error=restrict")
         if [[ $(gcc --version) =~ [0-9]+.[0-9]+(.[0-9]+?) ]]; then
             GCC_VERSION="${BASH_REMATCH[0]}"
         else
@@ -186,8 +204,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     elif [ "$COMPILER" == "clang++" ]; then
         # FBGEMM requires AVX512, which we don't get with clang
         BUILD_PYTORCH_FLAGS+=("-DUSE_FBGEMM:BOOL=OFF")
-        # See github.com/pytorch/pytorch/issues/151316
-        BUILD_PYTORCH_PATCHES+=("${ROOT_BUILD_DIR}/pytorch_clang.patch")
     else
         echo "Unknown compiler $COMPILER"
         exit 1
@@ -196,31 +212,24 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     LIBTORCH_DIR={{ LIBTORCH_DIR }}
     if [ -n "$BUILD_PYTORCH" ]; then
         # Clone pytorch for build
-        PYTORCH_VER=2.6.0
         cd ${ROOT_BUILD_DIR}
-        git clone --branch v${PYTORCH_VER} --single-branch --recursive https://github.com/pytorch/pytorch
-        cd pytorch
-        PYTORCH_DIR=$(pwd)
-        # Apply patches
-        for patch in "${BUILD_PYTORCH_PATCHES[@]}"; do
-            git apply "$patch"
-        done
-        cd "$ROOT_BUILD_DIR"
+        git clone --branch v${PYTORCH_VERSION} --single-branch --recursive https://github.com/pytorch/pytorch
+        PYTORCH_DIR=${ROOT_BUILD_DIR}/pytorch
 
         # Create a temporary python environment for building pytorch
         PYTORCH_CONDA_ENV=pytorch_build
-        conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.11
+        conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.12
         source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
         pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
-        # Need older cmake (we get cmake 4 from requirements.txt)
-        conda install cmake=3.31.6
 
         # Need BLAS and LAPACK libs for torch in neml2
         dnf install -y openblas-devel
 
         # Require CUDA if we have cuda available
         if [ -n "$CUDA_DIR" ]; then
-            BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON")
+            # 6.1 (schwen), 7.0 V100 (sawtooth), 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
+            CUDA_ARCHES="61;70;80;86;89"
+            BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}" "-DCMAKE_CUDA_ARCHITECTURES=${CUDA_ARCHES}")
         else
             BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=OFF")
         fi
@@ -228,15 +237,17 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         mkdir -p $LIBTORCH_DIR/logs
         PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
         mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
-        CC= CXX= F77= F90= FC= CFLAGS="$BUILD_PYTORCH_CCXXFLAGS" CXXFLAGS="$BUILD_PYTORCH_CCXXFLAGS" cmake \
+        CC= CXX= F77= F90= FC= CFLAGS="${BUILD_PYTORCH_CCXXFLAGS[*]}" CXXFLAGS="${BUILD_PYTORCH_CCXXFLAGS[*]}" cmake \
+            -GNinja \
             -DBUILD_SHARED_LIBS:BOOL=ON \
             -DCMAKE_BUILD_TYPE:STRING=Release \
-            -DCMAKE_INSTALL_PREFIX:PATH={{ LIBTORCH_DIR }} \
-            -DBUILD_PYTHON:BOOL=ON \
+            -DCMAKE_INSTALL_PREFIX:PATH=${LIBTORCH_DIR} \
+            -DBUILD_PYTHON:BOOL=OFF \
             -DUSE_BLAS:BOOL=ON \
             -DBLAS:STRING=OpenBLAS \
             -DUSE_LAPACK:BOOL=ON \
             -DUSE_MPI:BOOL=OFF \
+            -DUSE_SYSTEM_NCCL:BOOL=ON \
             "${BUILD_PYTORCH_FLAGS[@]}" \
             ${PYTORCH_DIR} 2>&1 | tee ${LIBTORCH_DIR}/logs/cmake.log
         cmake --build . --target install -- -j ${MOOSE_JOBS} 2>&1 | tee ${LIBTORCH_DIR}/logs/build.log
@@ -264,9 +275,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     NEML2_GIT_REMOTE={{ NEML2_GIT_REMOTE }}
     NEML2_DIR={{ NEML2_DIR }}
     NEML2_BUILD_SCRIPT=${ROOT_BUILD_DIR}/{{ NEML2_BUILD_SCRIPT }}
-
-    # Make ninja available for neml2 builds
-    dnf install -y ninja-build
 
     # Build and install neml2
     cd ${ROOT_BUILD_DIR}
@@ -311,20 +319,28 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     cd ${MFEM_SRC_DIR}
     git checkout $MFEM_GIT_SHA
 
-    # Load mfem options, split by word so that globbing works correctly
-    IFS=' ' read -r -a MFEM_OPTIONS <<< "{{ MFEM_OPTIONS }}"
-    # Additional options with cuda
-    if [ -n "$CUDA_DIR" ]; then
-        MFEM_OPTIONS+=("-DMFEM_USE_CUDA=ON" "-DSuperLUDist_VERSION_OK=YES")
-    fi
-
     # Install conduit
     mkdir -p ${CONDUIT_DIR}/logs
     CONDUIT_DIR=${CONDUIT_DIR} CONDUIT_SRC_DIR=${CONDUIT_SRC_DIR} ${CONDUIT_BUILD_SCRIPT} {{ CONDUIT_OPTIONS }} 2>&1 | tee ${CONDUIT_DIR}/logs/build.log
 
+    # Load mfem options, split by word so that globbing works correctly
+    IFS=' ' read -r -a MFEM_OPTIONS <<< "{{ MFEM_OPTIONS }}"
+    if [ -n "$CUDA_DIR" ]; then
+        # Additional options with cuda
+        MFEM_OPTIONS+=("-DMFEM_USE_CUDA=ON" "-DSuperLUDist_VERSION_OK=YES")
+        # Expose the compat libraries that can be linked to during configure for building without a GPU present
+        CUDA_COMPAT=${CUDA_DIR}/compat
+        export LD_LIBRARY_PATH=${CUDA_COMPAT}:${LD_LIBRARY_PATH}
+    fi
+
     # Install MFEM
     mkdir -p ${MFEM_DIR}/logs
     MFEM_DIR=${MFEM_DIR} MFEM_SRC_DIR=${MFEM_SRC_DIR} CONDUIT_DIR=${CONDUIT_DIR} ${MFEM_BUILD_SCRIPT} "${MFEM_OPTIONS[@]}" 2>&1 | tee ${MFEM_DIR}/logs/build.log
+
+    # Hide cuda compat libs
+    if [ -n "$CUDA_DIR" ]; then
+        export LD_LIBRARY_PATH="${LD_LIBRARY_PATH/${CUDA_COMPAT}:/}"
+    fi
 {%- endif %}
 
     # Add moose channels
@@ -347,10 +363,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {% if PROFILING is defined %}
     # Install gperftools
     GPERF_DIR={{ GPERF_DIR }}
-    GPERFTOOLS_VERSION=gperftools-2.15
     cd ${ROOT_BUILD_DIR}
     mkdir -p ${GPERF_DIR}/logs
-    git clone -b ${GPERFTOOLS_VERSION} --single-branch https://github.com/gperftools/gperftools.git
+    git clone -b gperftools-${GPERFTOOLS_VERSION} --single-branch https://github.com/gperftools/gperftools.git
     GPERFTOOLS_SRC=${ROOT_BUILD_DIR}/gperftools
     cd ${GPERFTOOLS_SRC}
     ./autogen.sh 2>&1 | tee ${GPERF_DIR}/logs/autogen.log
@@ -361,7 +376,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     rm -rf ${GPERFTOOLS_SRC}
 
     # Install go for building pprof; to be removed
-    GO_VERSION=1.23.1
     GO_TAR=${ROOT_BUILD_DIR}/go.tar.gz
     curl -L https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -o ${GO_TAR}
     tar -C ${ROOT_BUILD_DIR} -xf ${GO_TAR}
@@ -399,7 +413,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {% if WITHOUT_PYTORCH is not defined %}
     # libtorch
     {{ MOOSE_DIR }}/scripts/setup_libtorch.sh {{ ROOT_BUILD_DIR }}/setup_libtorch.sh
-    {{ FILES_DIR }}/pytorch_clang.patch {{ ROOT_BUILD_DIR }}/pytorch_clang.patch
     # neml2
     {{ MOOSE_DIR }}/scripts/configure_neml2.sh {{ ROOT_BUILD_DIR }}/configure_neml2.sh
     {{ MOOSE_DIR }}/scripts/{{ NEML2_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ NEML2_BUILD_SCRIPT }}
