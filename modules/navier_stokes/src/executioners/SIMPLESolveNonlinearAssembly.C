@@ -124,10 +124,10 @@ SIMPLESolveNonlinearAssembly::SIMPLESolveNonlinearAssembly(Executioner & ex)
     const auto & turbulence_petsc_pair_options = getParam<MooseEnumItem, std::string>(
         "turbulence_petsc_options_iname", "turbulence_petsc_options_value");
     Moose::PetscSupport::addPetscFlagsToPetscOptions(
-        turbulence_petsc_options, "-", *this, _turbulence_petsc_options);
+        turbulence_petsc_options, "", *this, _turbulence_petsc_options);
     Moose::PetscSupport::addPetscPairsToPetscOptions(turbulence_petsc_pair_options,
                                                      _problem.mesh().dimension(),
-                                                     "-",
+                                                     "",
                                                      *this,
                                                      _turbulence_petsc_options);
 

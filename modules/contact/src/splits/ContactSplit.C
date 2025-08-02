@@ -76,7 +76,7 @@ ContactSplit::setup(NonlinearSystemBase & nl, const std::string & prefix)
   // A reference to the PetscOptions
   Moose::PetscSupport::PetscOptions & po = _fe_problem.getPetscOptions();
   // prefix
-  const std::string dmprefix = prefix + "dm_moose_";
+  const std::string dmprefix = '-' + prefix + "dm_moose_";
 
   // contacts options
   if (!_contact_pairs.empty())
