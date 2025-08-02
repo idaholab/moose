@@ -26,6 +26,22 @@ TimeDomainEquationSystemProblemOperator::Init(mfem::BlockVector & X)
 {
   TimeDomainProblemOperator::Init(X);
   GetEquationSystem()->BuildEquationSystem();
+  // Set timestepper
+  auto & ode_solver = _problem_data.ode_solver;
+  ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
+  ode_solver->Init(*(this));
+  SetTime(_problem.time());
+}
+
+void
+TimeDomainEquationSystemProblemOperator::Solve()
+{
+  // Advance time step of the MFEM problem. Time is also updated here, and
+  // _problem_operator->SetTime is called inside the ode_solver->Step method to
+  // update the time used by time dependent (function) coefficients.
+  _problem_data.ode_solver->Step(_problem_data.f, _problem.time(), _problem.dt());
+  // Synchonise time dependent GridFunctions with updated DoF data.
+  SetTestVariablesFromTrueVectors();
 }
 
 void
@@ -40,19 +56,19 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
     _trial_variables.at(ind)->MakeTRef(
         _trial_variables.at(ind)->ParFESpace(), dX_dt, _block_true_offsets[ind]);
   }
-  _problem.coefficients.setTime(GetTime());
+  _problem_data.coefficients.setTime(GetTime());
   BuildEquationSystemOperator(dt);
 
-  if (_problem.jacobian_solver->isLOR() && _equation_system->_test_var_names.size() > 1)
+  if (_problem_data.jacobian_solver->isLOR() && _equation_system->_test_var_names.size() > 1)
     mooseError("LOR solve is only supported for single-variable systems");
 
-  _problem.jacobian_solver->updateSolver(
+  _problem_data.jacobian_solver->updateSolver(
       *_equation_system->_blfs.Get(_equation_system->_test_var_names.at(0)),
       _equation_system->_ess_tdof_lists.at(0));
 
-  _problem.nonlinear_solver->SetSolver(_problem.jacobian_solver->getSolver());
-  _problem.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem.nonlinear_solver->Mult(_true_rhs, dX_dt);
+  _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
+  _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
+  _problem_data.nonlinear_solver->Mult(_true_rhs, dX_dt);
   SetTrialVariablesFromTrueVectors();
 }
 
