@@ -1,5 +1,7 @@
 # NEML2ModelExecutor
 
+!if! function=hasCapability('neml2')
+
 !syntax description /UserObjects/NEML2ModelExecutor
 
 !alert note
@@ -35,3 +37,9 @@ Note that the model is only re-allocated when the gathered batch size and the mo
 - After a mesh-change event which results in a change in the number of quadrature points in the operating subdomain.
 
 !syntax parameters /UserObjects/NEML2ModelExecutor
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md

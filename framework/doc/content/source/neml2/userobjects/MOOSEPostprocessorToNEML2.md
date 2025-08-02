@@ -1,5 +1,7 @@
 # MOOSEPostprocessorToNEML2
 
+!if! function=hasCapability('neml2')
+
 !syntax description /UserObjects/MOOSEPostprocessorToNEML2
 
 !alert note
@@ -18,3 +20,9 @@ MOOSE[Old]PostprocessorToNEML2
 For example, `MOOSEPostprocessorToNEML2` gathers the postprocessor value from the +current+ time step, and `MOOSEOldPostprocessorToNEML2` gathers the postprocessor value from the +previous+ time step.
 
 !syntax parameters /UserObjects/MOOSEPostprocessorToNEML2
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md

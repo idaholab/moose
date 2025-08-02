@@ -23,11 +23,11 @@ InputParameters
 MOOSEMaterialPropertyToNEML2<T, state>::validParams()
 {
   auto params = MOOSEToNEML2Batched<T>::validParams();
-  params.addClassDescription(NEML2Utils::docstring(
+  params.addClassDescription(
       "Gather a MOOSE material property of type " + demangle(typeid(T).name()) +
-      " for insertion into the specified input or model parameter of a NEML2 model."));
-  params.template addRequiredParam<MaterialPropertyName>(
-      "from_moose", NEML2Utils::docstring("MOOSE material property to read from"));
+      " for insertion into the specified input or model parameter of a NEML2 model.");
+  params.template addRequiredParam<MaterialPropertyName>("from_moose",
+                                                         "MOOSE material property to read from");
   return params;
 }
 
