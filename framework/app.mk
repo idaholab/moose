@@ -375,7 +375,7 @@ $(app_LIB): curr_additional_libs := $(ADDITIONAL_LIBS)
 $(app_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_objects) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(LDFLAGS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 
 ifeq ($(BUILD_TEST_OBJECTS_LIB),no)
@@ -394,7 +394,7 @@ $(app_test_LIB): curr_additional_libs := $(ADDITIONAL_LIBS)
 $(app_test_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_test_objects) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Test Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(LDFLAGS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 endif
 
@@ -464,7 +464,7 @@ endif
 $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_resource)
 	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
 	@$(codesign)
 
 ###### install stuff #############
