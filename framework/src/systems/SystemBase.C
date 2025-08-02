@@ -713,7 +713,7 @@ SystemBase::addVariable(const std::string & var_type,
 {
   _numbered_vars.resize(libMesh::n_threads());
 
-  auto components = parameters.get<unsigned int>("components");
+  const auto components = parameters.get<unsigned int>("components");
 
   // Convert the std::vector parameter provided by the user into a std::set for use by libMesh's
   // System::add_variable method
@@ -744,13 +744,12 @@ SystemBase::addVariable(const std::string & var_type,
       array_var_component_names =
           parameters.get<std::vector<std::string>>("array_var_component_names");
       if (array_var_component_names.size() != components)
-        mooseError("For variable ",
-                   name,
-                   ", parameter 'array_var_component_names' has ",
-                   array_var_component_names.size(),
-                   " name(s), but there are ",
-                   components,
-                   " array variable component(s).");
+        parameters.paramError("array_var_component_names",
+                              "Must be the same size as 'components' (size ",
+                              components,
+                              ") for array variable '",
+                              name,
+                              "'");
     }
 
     // Build up the variable names
@@ -772,17 +771,19 @@ SystemBase::addVariable(const std::string & var_type,
 
     // Set as array variable
     if (parameters.isParamSetByUser("array") && !parameters.get<bool>("array"))
-      mooseError("Variable '",
-                 name,
-                 "' is an array variable ('components' > 1) but 'array' is set to false.");
+      parameters.paramError("array",
+                            "Must be set to true for variable '",
+                            name,
+                            "' because 'components' > 1 (is an array variable)");
     parameters.set<bool>("array") = true;
   }
   else
   {
     if (parameters.isParamSetByUser("array_var_component_names"))
-      mooseError("Variable '",
-                 name,
-                 "' is a regular variable. 'array_var_component_names' should not be set.");
+      parameters.paramError("array_var_component_names",
+                            "Should not be set because this variable (",
+                            name,
+                            ") is a non-array variable");
     var_num = system().add_variable(name, fe_type, &blocks);
   }
 

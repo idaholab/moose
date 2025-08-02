@@ -108,7 +108,7 @@ public:
       {
         if (!current_node->is_array())
           mooseError("Cannot retrieve a vector from JSON node",
-                     *current_node,
+                     nlohmann::to_string(*current_node),
                      "obtained with last key",
                      vector_keys[key_index]);
         vector_to_fill.clear();
@@ -120,7 +120,7 @@ public:
         mooseError("Cannot obtain nested JSON item with key",
                    vector_keys[key_index + 1],
                    "because the current item is an array:",
-                   *current_node);
+                   nlohmann::to_string(*current_node));
       current_node = &(*current_node)[vector_keys[key_index + 1]];
     }
   }

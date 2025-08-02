@@ -356,14 +356,54 @@ private:
   bool rootIsValid() const;
 
   /**
-   * @return The current root node
+   * Helper for storing the state for a single document
    */
-  hit::Node & getRoot();
+  struct CheckState
+  {
+    CheckState(std::shared_ptr<Parser> & parser) : parser(parser) {}
+    std::shared_ptr<Parser> parser;
+    std::unique_ptr<MooseApp> app;
+  };
 
   /**
-   * @return Input check application for document path from current operation
+   * @return The check state for the current document path, if any
    */
-  std::shared_ptr<MooseApp> getCheckApp() const;
+  ///@{
+  const CheckState * queryCheckState() const;
+  CheckState * queryCheckState();
+  ///@}
+  /**
+   * @return The check app for the current document path, if any
+   */
+  ///@{
+  const MooseApp * queryCheckApp() const;
+  MooseApp * queryCheckApp();
+  ///@}
+  /**
+   * @return The check parser for the current document path, if any
+   */
+  ///@{
+  const Parser * queryCheckParser() const;
+  Parser * queryCheckParser();
+  ///@}
+  /**
+   * @return The root node from the check parser for the current document path, if any
+   */
+  const hit::Node * queryRoot() const;
+  /**
+   * @return up to date text string associated with current document path, if any
+   */
+  const std::string * queryDocumentText() const;
+
+  /**
+   * @return The check app for the current document path, with error checking on if it exists
+   */
+  MooseApp & getCheckApp();
+  /**
+   * @return The root node from the check parser for the current document path, with error checking
+   * on if it exists
+   */
+  const hit::Node & getRoot() const;
 
   /**
    * @return up to date text string associated with current document path
@@ -376,14 +416,9 @@ private:
   MooseApp & _moose_app;
 
   /**
-   * @brief _check_apps - map from document paths to input check applications
+   * @brief _check_state - map from document paths to state (parser, app, text)
    */
-  std::map<std::string, std::shared_ptr<MooseApp>> _check_apps;
-
-  /**
-   * @brief _path_to_text - map of document paths to current text strings
-   */
-  std::map<std::string, std::string> _path_to_text;
+  std::map<std::string, CheckState> _check_state;
 
   /**
    * @brief _connection - shared pointer to this server's read / write iostream

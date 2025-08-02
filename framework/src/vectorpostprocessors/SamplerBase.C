@@ -8,15 +8,12 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SamplerBase.h"
-
-// MOOSE includes
 #include "IndirectSort.h"
 #include "InputParameters.h"
 #include "MooseEnum.h"
 #include "MooseError.h"
 #include "VectorPostprocessor.h"
 #include "MooseVariableFieldBase.h"
-#include "MooseBaseParameterInterface.h"
 #include "FEProblemBase.h"
 #include "MooseApp.h"
 #include "TransientBase.h"

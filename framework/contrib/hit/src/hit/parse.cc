@@ -78,15 +78,95 @@ toBool(const std::string & val, bool * dst)
   return false;
 }
 
-Error::Error(const std::string & msg) : msg(msg) {}
+ErrorMessage::ErrorMessage(const std::string & message)
+  : message(message), prefixed_message(message)
+{
+}
+
+ErrorMessage::ErrorMessage(const std::string & message, const std::string & filename)
+  : filename(filename), message(message), prefixed_message(buildPrefixedMessage())
+{
+}
+
+ErrorMessage::ErrorMessage(const std::string & message, const Node * node) : ErrorMessage(message)
+{
+  if (node && !node->isRoot())
+  {
+    this->node = node;
+    this->filename = node->filename();
+    this->lineinfo = LineInfo{node->line(), node->column(), node->line(), node->column()};
+    this->prefixed_message = buildPrefixedMessage();
+  }
+}
+
+ErrorMessage::ErrorMessage(const std::string & message,
+                           const std::string & filename,
+                           const int line,
+                           const int column)
+  : filename(filename),
+    lineinfo({line, column, line, column}),
+    message(message),
+    prefixed_message(buildPrefixedMessage())
+{
+}
+
+ErrorMessage::ErrorMessage(const std::string & message,
+                           const std::string & filename,
+                           const int start_line,
+                           const int start_column,
+                           const int end_line,
+                           const int end_column)
+  : filename(filename),
+    lineinfo({start_line, start_column, end_line, end_column}),
+    message(message),
+    prefixed_message(buildPrefixedMessage())
+{
+}
+
+std::string
+ErrorMessage::buildPrefixedMessage() const
+{
+  std::ostringstream ss;
+  if (this->filename)
+  {
+    ss << *this->filename;
+    if (this->lineinfo)
+    {
+      const auto & info = *this->lineinfo;
+      ss << ":" << info.start_line << "." << info.start_column;
+      if (info.end_line > info.start_line || info.end_column > info.start_column)
+        ss << "-" << info.end_line << "." << info.end_column;
+    }
+    ss << ": ";
+  }
+  return ss.str() + this->message;
+}
+
+std::ostream &
+operator<<(std::ostream & stream, const ErrorMessage & error)
+{
+  stream << error.prefixed_message;
+  return stream;
+}
+
+Error::Error(const std::vector<ErrorMessage> & error_messages) : error_messages(error_messages)
+{
+  for (const auto & em : error_messages)
+    this->message += em.prefixed_message + "\n";
+  if (error_messages.size())
+    this->message = this->message.substr(0, this->message.size() - 1);
+}
+
+Error::Error(const std::string & message, const Node * node /* = nullptr */)
+  : Error(std::vector<ErrorMessage>{{message, node}})
+{
+}
 
 const char *
 Error::what() const throw()
 {
-  return msg.c_str();
+  return this->message.c_str();
 }
-
-ParseError::ParseError(const std::string & msg) : Error(msg) {}
 
 std::string
 strRepeat(const std::string & s, int n)
@@ -211,12 +291,6 @@ Node::remove()
   delete this;
 }
 
-wasp::HITNodeView
-Node::getNodeView()
-{
-  return _hnv;
-}
-
 const std::string &
 Node::filename() const
 {
@@ -245,20 +319,21 @@ Node::column() const
   return _hnv.column();
 }
 
-#define valthrow() throw Error("non-field node '" + fullpath() + "' has no value to retrieve")
+#define valthrow()                                                                                 \
+  throw Error("non-field node '" + fullpath() + "' has no value to retrieve", this);
 
 bool
-Node::boolVal()
+Node::boolVal() const
 {
   valthrow();
 }
 int64_t
-Node::intVal()
+Node::intVal() const
 {
   valthrow();
 }
 double
-Node::floatVal()
+Node::floatVal() const
 {
   valthrow();
 }
@@ -268,22 +343,22 @@ Node::strVal() const
   valthrow();
 }
 std::vector<double>
-Node::vecFloatVal()
+Node::vecFloatVal() const
 {
   valthrow();
 }
 std::vector<bool>
-Node::vecBoolVal()
+Node::vecBoolVal() const
 {
   valthrow();
 }
 std::vector<int>
-Node::vecIntVal()
+Node::vecIntVal() const
 {
   valthrow();
 }
 std::vector<std::string>
-Node::vecStrVal()
+Node::vecStrVal() const
 {
   valthrow();
 }
@@ -317,11 +392,23 @@ Node::insertChild(std::size_t index, Node * child)
   _children.insert(_children.begin() + index, child);
 }
 
+std::vector<const Node *>
+Node::children(NodeType t) const
+{
+  if (t == NodeType::All)
+    return {_children.begin(), _children.end()};
+  std::vector<const Node *> nodes;
+  for (const auto child : _children)
+    if (child->type() == t)
+      nodes.push_back(child);
+  return nodes;
+}
+
 std::vector<Node *>
 Node::children(NodeType t)
 {
   if (t == NodeType::All)
-    return _children;
+    return {_children.begin(), _children.end()};
   std::vector<Node *> nodes;
   for (auto child : _children)
     if (child->type() == t)
@@ -329,12 +416,18 @@ Node::children(NodeType t)
   return nodes;
 }
 
-Node *
-Node::root()
+const Node *
+Node::root() const
 {
   if (isRoot())
     return this;
   return _parent->root();
+}
+
+Node *
+Node::root()
+{
+  return const_cast<Node *>(const_cast<const Node *>(this)->root());
 }
 
 std::string
@@ -379,20 +472,20 @@ Node::walk(Walker * w, NodeType t, TraversalOrder o)
       child->walk(w, t, o);
 }
 
-Node *
-Node::find(const std::string & path)
+const Node *
+Node::find(const std::string & path, const bool check /* = false */) const
 {
   std::stringstream search(path);
-  std::vector<Node *> parent_nodes{this};
+  std::vector<const Node *> parent_nodes{this};
 
   for (std::string name; std::getline(search, name, '/');)
   {
     if (name.empty())
       continue;
 
-    std::vector<Node *> child_nodes;
-    for (auto parent_node : parent_nodes)
-      for (auto child : parent_node->children())
+    std::vector<const Node *> child_nodes;
+    for (const auto parent_node : parent_nodes)
+      for (const auto child : parent_node->children())
         if (child->path() == name)
           child_nodes.push_back(child);
 
@@ -405,7 +498,17 @@ Node::find(const std::string & path)
 
   if (!parent_nodes.empty())
     return parent_nodes.front();
+
+  if (check)
+    throw Error("no node named '" + path + "'", this);
+
   return nullptr;
+}
+
+Node *
+Node::find(const std::string & path, const bool check /* = false */)
+{
+  return const_cast<Node *>(const_cast<const Node *>(this)->find(path, check));
 }
 
 Comment::Comment(const std::string & text, bool is_inline = false)
@@ -419,7 +522,7 @@ Comment::Comment(std::shared_ptr<wasp::DefaultHITInterpreter> dhi, wasp::HITNode
 }
 
 std::string
-Comment::render(int indent, const std::string & indent_text, int /*maxlen*/)
+Comment::render(int indent, const std::string & indent_text, int /*maxlen*/) const
 {
   const auto & comment_text = _hnv.data();
 
@@ -476,7 +579,7 @@ Section::path() const
 }
 
 std::string
-Section::render(int indent, const std::string & indent_text, int maxlen)
+Section::render(int indent, const std::string & indent_text, int maxlen) const
 {
   std::string s;
 
@@ -493,7 +596,7 @@ Section::render(int indent, const std::string & indent_text, int maxlen)
     s = "\n" + strRepeat(indent_text, indent) + decl_data;
   }
 
-  for (auto child : children())
+  for (const auto child : children())
     s += child->render(indent + (at_root_level ? 0 : 1), indent_text, maxlen);
 
   if (!at_root_level)
@@ -539,7 +642,7 @@ Field::path() const
 }
 
 std::string
-Field::render(int indent, const std::string & indent_text, int maxlen)
+Field::render(int indent, const std::string & indent_text, int maxlen) const
 {
   std::string s = "\n" + strRepeat(indent_text, indent) + path() + " = ";
 
@@ -549,7 +652,7 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
 
   s += formatValue(render_val, val_column, prefix_len, maxlen);
 
-  for (auto child : children())
+  for (const auto child : children())
     s += child->render(indent + 1, indent_text, maxlen);
 
   return s;
@@ -796,21 +899,21 @@ extractValue(const std::string & field_data)
 }
 
 std::vector<bool>
-Field::vecBoolVal()
+Field::vecBoolVal() const
 {
   std::vector<bool> vec;
   for (const auto & s : vecStrVal())
   {
     bool converted_val = false;
     if (!toBool(s, &converted_val))
-      throw Error("cannot convert field '" + fullpath() + "' value '" + s + "' to bool");
+      throw Error("cannot convert field '" + fullpath() + "' value '" + s + "' to bool", this);
     vec.push_back(converted_val);
   }
   return vec;
 }
 
 std::vector<int>
-Field::vecIntVal()
+Field::vecIntVal() const
 {
   std::vector<int> vec;
   for (const auto & s : vecStrVal())
@@ -818,14 +921,14 @@ Field::vecIntVal()
     std::istringstream iss(s);
     int conversion;
     if ((iss >> conversion).fail() || !iss.eof())
-      throw Error("cannot convert field '" + fullpath() + "' value '" + s + "' to integer");
+      throw Error("cannot convert field '" + fullpath() + "' value '" + s + "' to integer", this);
     vec.push_back(conversion);
   }
   return vec;
 }
 
 std::vector<double>
-Field::vecFloatVal()
+Field::vecFloatVal() const
 {
   std::vector<double> vec;
   for (const auto & s : vecStrVal())
@@ -833,14 +936,14 @@ Field::vecFloatVal()
     std::istringstream iss(s);
     double conversion;
     if ((iss >> conversion).fail() || !iss.eof())
-      throw Error("cannot convert field '" + fullpath() + "' value '" + s + "' to float");
+      throw Error("cannot convert field '" + fullpath() + "' value '" + s + "' to float", this);
     vec.push_back(conversion);
   }
   return vec;
 }
 
 std::vector<std::string>
-Field::vecStrVal()
+Field::vecStrVal() const
 {
   std::string unquoted = val();
   if (!quoteChar(unquoted).empty())
@@ -849,7 +952,7 @@ Field::vecStrVal()
 }
 
 bool
-Field::boolVal()
+Field::boolVal() const
 {
   bool bool_value = false;
   try
@@ -862,30 +965,33 @@ Field::boolVal()
     std::string str_value = val();
     if (!toBool(str_value, &bool_value))
       throw Error("field node '" + fullpath() + "' does not hold a bool-typed value (val='" +
-                  str_value + "')");
+                      str_value + "')",
+                  this);
   }
   return bool_value;
 }
 
 int64_t
-Field::intVal()
+Field::intVal() const
 {
   std::string str_value = val();
   std::istringstream iss(str_value);
   int64_t converted_val;
   if ((iss >> converted_val).fail() || !iss.eof())
-    throw Error("cannot convert field '" + fullpath() + "' value '" + str_value + "' to integer");
+    throw Error("cannot convert field '" + fullpath() + "' value '" + str_value + "' to integer",
+                this);
   return converted_val;
 }
 
 double
-Field::floatVal()
+Field::floatVal() const
 {
   std::string str_value = val();
   std::istringstream iss(str_value);
   double converted_val;
   if ((iss >> converted_val).fail() || !iss.eof())
-    throw Error("cannot convert field '" + fullpath() + "' value '" + str_value + "' to float");
+    throw Error("cannot convert field '" + fullpath() + "' value '" + str_value + "' to float",
+                this);
   return converted_val;
 }
 
@@ -916,21 +1022,31 @@ Field::strVal() const
 // starting LexFunc.  Parsing is implemented as recursive-descent with the functions in this file
 // named "parse[Bla]".
 Node *
-parse(const std::string & fname, const std::string & input, std::ostream * errors)
+parse(const std::string & fname,
+      const std::string & input,
+      std::vector<ErrorMessage> * syntax_errors /* = nullptr */)
 {
   std::stringstream input_errors;
   std::shared_ptr<wasp::DefaultHITInterpreter> interpreter =
       std::make_shared<wasp::DefaultHITInterpreter>(input_errors);
 
+  std::vector<ErrorMessage> errors;
+
   std::stringstream input_stream(input);
   if (!interpreter->parseStream(input_stream, fname))
   {
-    // add syntax errors to stream if provided and continue to build hit tree
-    // and return root otherwise throw exception if error stream not provided
-    if (errors)
-      *errors << input_errors.str();
+    for (const auto & d : interpreter->error_diagnostics())
+      errors.emplace_back(d.message(),
+                          d.filename(),
+                          d.start_line(),
+                          d.start_column(),
+                          d.end_line(),
+                          d.end_column());
+
+    if (syntax_errors)
+      *syntax_errors = errors;
     else
-      throw ParseError(input_errors.str());
+      throw Error(errors);
   }
 
   std::unique_ptr<Node> root(new Section(interpreter, interpreter->root()));
@@ -1003,16 +1119,6 @@ merge(Node * from, Node * into)
   MergeSectionWalker sw(into);
   from->walk(&fw);
   from->walk(&sw);
-}
-
-Node *
-explode(Node * n)
-{
-  /// all of the explode logic that expands shorthand path notation
-  /// into sections is handled by a combination of the wasp interpreter and
-  /// the buildHITTree so this method is a no-op and is temporarily here
-  /// for interface purposes
-  return n->root();
 }
 
 /// when a node tree is walked with this, all legacy markers in section
@@ -1269,8 +1375,9 @@ buildHITTree(std::shared_ptr<wasp::DefaultHITInterpreter> interpreter,
         }
         else if (override_for_old_node && override_for_new_node)
           // both fields have override and this is not allowed so throw error
-          throw ParseError(found_field->fileLocation() + ": '" + found_field->fullpath() +
-                           "' specified more than once with override syntax");
+          throw Error("'" + found_field->fullpath() +
+                          "' specified more than once with override syntax",
+                      found_field);
       }
       else
       {
