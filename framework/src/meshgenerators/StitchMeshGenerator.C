@@ -19,6 +19,7 @@ registerMooseObjectRenamed("MooseApp",
                            StitchedMeshGenerator,
                            "06/30/2026 24:00",
                            StitchMeshGenerator);
+registerMooseObject("MooseApp", StitchMeshGenerator);
 
 InputParameters
 StitchMeshGenerator::validParams()
