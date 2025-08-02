@@ -213,11 +213,16 @@ protected:
                "another multiapp");
   }
 
+  /// Checks the execute_on flags for user object transfers with user objects on the source app
+  /// which is also the parent app. This is to prevent a common mistake lagging the data from the
+  /// user object
+  void checkParentAppUserObjectExecuteOn(const std::string & object_name) const;
+
   /**
-   * Error if executing this MooseObject on EXEC_TRANSFER in a source multiapp (from_multiapp, e.g.
-   * child/sibling app). Note that, conversely, when the parent app is the source application, it is
-   * usually \emph desired to use EXEC_TRANSFER for a MooseObject that provides the values to
-   * transfer.
+   * Error if executing this MooseObject on EXEC_TRANSFER in a source multiapp (from_multiapp,
+   * e.g. child/sibling app). Note that, conversely, when the parent app is the source
+   * application, it is usually \emph desired to use EXEC_TRANSFER for a MooseObject that
+   * provides the values to transfer.
    * @param object_name name of the object to check the execute_on flags for
    */
   void errorIfObjectExecutesOnTransferInSourceApp(const std::string & object_name) const;

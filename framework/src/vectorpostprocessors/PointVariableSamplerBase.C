@@ -64,8 +64,12 @@ PointVariableSamplerBase::initialize()
 
   // Check for elemental variables, which are ill-defined on faces for this object
   for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
-    if (!_assembly.getFE(_coupled_moose_vars[i]->feType(), _mesh.dimension())->get_continuity())
+  {
+    const auto continuity =
+        _assembly.getFE(_coupled_moose_vars[i]->feType(), _mesh.dimension())->get_continuity();
+    if (continuity != libMesh::C_ZERO && continuity != libMesh::C_ONE)
       _discontinuous_at_faces = true;
+  }
 }
 
 void

@@ -15,6 +15,7 @@
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
+#include "UserObject.h"
 
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/mesh_tools.h"
@@ -655,6 +656,39 @@ MultiAppTransfer::getLocalSourceAppIndex(unsigned int i_from) const
   return _current_direction == TO_MULTIAPP
              ? 0
              : _from_local2global_map[i_from] - _from_local2global_map[0];
+}
+
+void
+MultiAppTransfer::checkParentAppUserObjectExecuteOn(const std::string & object_name) const
+{
+  // Source app is not the parent, most execution schedules are fine since the transfer occurs after
+  // the app has run NOTE: not true for siblings transfer
+  if (hasFromMultiApp())
+    return;
+  // Get user object from parent. We don't know the type
+  const auto & uo = _fe_problem.getUserObject<UserObject>(object_name);
+  // If we are executing on transfers, every additional schedule is not a problem
+  if (uo.getExecuteOnEnum().contains(EXEC_TRANSFER))
+    return;
+  // If we are transferring on the same schedule as we are executing, we are lagging. Is it on
+  // purpose? We don't know, so we will give a warning unless silenced.
+  // The derived-classes offer the parameter to silence this warning
+  // Note: UOs execute before transfers on INITIAL so it's not a problem at this time
+  if (uo.getExecuteOnEnum().contains(_fe_problem.getCurrentExecuteOnFlag()) &&
+      _fe_problem.getCurrentExecuteOnFlag() != EXEC_INITIAL)
+    if (!isParamValid("warn_source_object_execution_schedule") ||
+        getParam<bool>("warn_source_object_execution_schedule"))
+      uo.paramWarning("execute_on",
+                      "This UserObject-derived class is being executed on '" +
+                          Moose::stringify(_fe_problem.getCurrentExecuteOnFlag()) +
+                          "' and also providing values for the '" + name() +
+                          "' transfer, on that same execution schedule. Because user objects are "
+                          "executed after transfers are, this means the values provided by this "
+                          "user object are lagged. If you are ok with this, then set the "
+                          "'warn_source_object_execution_schedule' parameter to false in this "
+                          "Transfer. If not, then execute '" +
+                          uo.name() +
+                          "' on TRANSFER by adding it to the 'execute_on' vector parameter.");
 }
 
 void
