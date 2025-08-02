@@ -51,6 +51,19 @@ StitchMeshGenerator::StitchMeshGenerator(const InputParameters & parameters)
     _prevent_boundary_ids_overlap(getParam<bool>("prevent_boundary_ids_overlap")),
     _merge_boundaries_with_same_name(getParam<bool>("merge_boundaries_with_same_name"))
 {
+  // Check inputs
+  if (_input_names.size() - 1 != _stitch_boundaries_pairs.size())
+    paramError("stitch_boundaries_pairs",
+               "Can only stitch one pair of boundary per pair of mesh. We have '" +
+                   std::to_string(_input_names.size()) +
+                   "' meshes specified (=" + std::to_string(_input_names.size() - 1) +
+                   " pairs) and " + std::to_string(_stitch_boundaries_pairs.size()) +
+                   " pairs of boundaries specified");
+  for (const auto & pair : _stitch_boundaries_pairs)
+    if (pair.size() != 2)
+      paramError("stitch_boundaries_pairs",
+                 "Stitched boundary pair '" + Moose::stringify(pair) +
+                     "' is not of length 2, but of length: " + std::to_string(pair.size()));
 }
 
 std::unique_ptr<MeshBase>
