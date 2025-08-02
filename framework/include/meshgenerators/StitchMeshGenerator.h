@@ -16,12 +16,12 @@
 /**
  * Allows multiple mesh files to be "stitched" together to form a single mesh.
  */
-class StitchedMeshGenerator : public MeshGenerator
+class StitchMeshGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  StitchedMeshGenerator(const InputParameters & parameters);
+  StitchMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
