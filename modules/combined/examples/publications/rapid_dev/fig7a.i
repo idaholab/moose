@@ -14,9 +14,6 @@
   xmin = 0
   xmax = 100
   second_order = true
-[]
-
-[Problem]
   coord_type = RSPHERICAL
 []
 

@@ -29,9 +29,6 @@
     new_sideset_name = left
     input = remove_1
   []
-[]
-
-[Problem]
   coord_type = RZ
 []
 
