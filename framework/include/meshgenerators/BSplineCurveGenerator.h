@@ -45,20 +45,4 @@ protected:
   libMesh::Point returnStartPoint();
 
   libMesh::Point returnEndPoint();
-
-  /**
-   * Calculcates the center-of-mass point of a boundary on a mesh.
-   * @param boundary boundary name
-   * @param mesh_name mesh name (getMesh routine is called within the method)
-   */
-  libMesh::Point findCenterPoint(const BoundaryName & boundary,
-                                 const std::unique_ptr<MeshBase> & mesh);
-
-  /**
-   * Calculates the point coordinates {x(t), y(t), z(t)} based on parameter t
-   * @param t_param parameter t that is used to determine the coordinates of the point, exists in
-   * [0,1]
-   * @return the point coordinates
-   */
-  // libMesh::Point pointCalculator(const Real t);
 };

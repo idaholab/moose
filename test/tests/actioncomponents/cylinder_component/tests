@@ -52,4 +52,14 @@
       requirement = 'The system shall be able to create 3D cylindrical mesh with multiple boundary layers.'
     []
   []
+  [2D_mesh]
+    requirement = 'The system shall be able to create a 2D cylinder mesh.'
+    [expansion]
+      type = Exodiff
+      input = '2D_nozzle.i'
+      exodiff = '2D_nozzle_in.e'
+      cli_args = '--mesh-only'
+      requirement = 'The system shall be able to expand from one radius to another given an input mesh and final radius.'
+    []
+  []
 []

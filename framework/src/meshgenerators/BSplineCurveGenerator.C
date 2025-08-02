@@ -21,6 +21,8 @@
 
 #include "libMeshReducedNamespace.h"
 
+#include "MeshSurfaceUtils.h"
+
 using namespace libMesh;
 
 registerMooseObject("MooseApp", BSplineCurveGenerator);
@@ -180,8 +182,7 @@ BSplineCurveGenerator::returnStartPoint()
   else
   {
     std::unique_ptr<MeshBase> start_mesh = std::move(_start_mesh);
-    return BSplineCurveGenerator::findCenterPoint(getParam<BoundaryName>("start_boundary"),
-                                                  start_mesh);
+    return MeshSurfaceUtils::meshSurfaceCOM(getParam<BoundaryName>("start_boundary"), start_mesh);
   }
 }
 
@@ -193,43 +194,6 @@ BSplineCurveGenerator::returnEndPoint()
   else
   {
     std::unique_ptr<MeshBase> end_mesh = std::move(_end_mesh);
-    return BSplineCurveGenerator::findCenterPoint(getParam<BoundaryName>("end_boundary"), end_mesh);
+    return MeshSurfaceUtils::meshSurfaceCOM(getParam<BoundaryName>("end_boundary"), end_mesh);
   }
-}
-
-libMesh::Point
-BSplineCurveGenerator::findCenterPoint(const BoundaryName & boundary,
-                                       const std::unique_ptr<MeshBase> & mesh)
-{
-  if (!mesh->is_serial())
-    mooseError("findCenterPoint not yet implemented for distributed meshes!");
-
-  libMesh::Point center_point(0, 0, 0);
-
-  BoundaryInfo & mesh_boundary_info = mesh->get_boundary_info();
-  boundary_id_type boundary_id = mesh_boundary_info.get_id_by_name(std::string_view(boundary));
-
-  // initialize sums
-  double volume_sum = 0;
-  Point volume_weighted_centroid_sum(0, 0, 0);
-
-  // loop over all elements in mesh
-  for (const auto & elem : mesh->element_ptr_range())
-  {
-    // loop over all sides in element
-    for (const auto side_num : make_range(elem->n_sides()))
-    {
-      // check if on boundary
-      bool on_boundary = mesh_boundary_info.has_boundary_id(elem, side_num, boundary_id);
-      if (on_boundary)
-      {
-        // update running sums
-        volume_sum += elem->side_ptr(side_num)->volume();
-        volume_weighted_centroid_sum +=
-            elem->side_ptr(side_num)->volume() * elem->side_ptr(side_num)->true_centroid();
-      }
-    }
-  }
-  center_point = volume_weighted_centroid_sum / volume_sum;
-  return center_point;
 }
