@@ -41,11 +41,20 @@ protected:
 
   /**
    * Determines whether any neighbor element of the node has a subdomain id in the given
-   * subdomain_id_list.
+   * included_subdomains parameter.
    * @param node_elems vector of the ids of all the elements sharing this node
    * @param mesh mesh which contains the node (and the elements)
    */
   bool nodeElementsInIncludedSubdomains(const std::vector<dof_id_type> node_elems,
+                                        const MeshBase & mesh) const;
+
+  /**
+   * Determines whether any neighbor element of the node has a subdomain id in the given
+   * excluded_subdomains parameter.
+   * @param node_elems vector of the ids of all the elements sharing this node
+   * @param mesh mesh which contains the node (and the elements)
+   */
+  bool nodeElementsInExcludedSubdomains(const std::vector<dof_id_type> node_elems,
                                         const MeshBase & mesh) const;
 
   /**
@@ -92,6 +101,9 @@ protected:
   /// whether to check subdomain ids of the element that included this node
   const bool _check_included_subdomains;
 
+  /// whether to check subdomain ids of the element that excluded this node
+  const bool _check_excluded_subdomains;
+
   /// A list of nodeset ids that the node has to be part of, extracted from the included_nodesets parameter
   std::vector<boundary_id_type> _included_nodeset_ids;
 
@@ -100,6 +112,9 @@ protected:
 
   /// A list of included subdomain ids that the node has to be part of, extracted from the included_subdomains parameter
   std::vector<subdomain_id_type> _included_subdomain_ids;
+
+  /// A list of included subdomain ids that the node must not be part of, extracted from the excluded_subdomains parameter
+  std::vector<subdomain_id_type> _excluded_subdomain_ids;
 
   /// Whether to only include external node when considering nodes to add to the nodeset
   const bool _include_only_external_nodes;
