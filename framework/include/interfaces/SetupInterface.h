@@ -24,6 +24,7 @@ class SetupInterface
 {
 public:
   SetupInterface(const MooseObject * moose_object);
+
   virtual ~SetupInterface();
 
   static InputParameters validParams();

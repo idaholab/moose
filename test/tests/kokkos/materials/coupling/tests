@@ -1,0 +1,69 @@
+[Tests]
+  issues = '#30655'
+  design = 'syntax/Materials/index.md'
+
+  [./var_coupling]
+    type = 'Exodiff'
+    input = 'kokkos_var_coupling.i'
+    exodiff = 'kokkos_var_coupling_out.e'
+    requirement = 'The Kokkos material system shall be able to couple in variables to compute material properties.'
+    capabilities = 'kokkos'
+    devices = 'cpu cuda'
+  [../]
+
+  [./var_stateful_coupling]
+    type = 'Exodiff'
+    input = 'kokkos_var_coupling.i'
+    exodiff = 'kokkos_var_stateful_coupling_out.e'
+    cli_args = 'KokkosMaterials/coupling_u/declare_old=true
+                Outputs/file_base=kokkos_var_stateful_coupling_out'
+    requirement = 'The Kokkos material system shall be able to couple in variables to initialize stateful material properties.'
+    capabilities = 'kokkos'
+    devices = 'cpu cuda'
+  [../]
+
+  [./aux_coupling]
+    type = 'Exodiff'
+    input = 'kokkos_var_coupling.i'
+    exodiff = 'kokkos_var_stateful_coupling_out.e'
+    cli_args = 'KokkosMaterials/coupling_u/var=v
+                Outputs/file_base=kokkos_var_stateful_coupling_out'
+    requirement = 'The Kokkos material system shall be able to couple in aux variables to compute material properties.'
+    capabilities = 'kokkos'
+    devices = 'cpu cuda'
+    prereq = var_stateful_coupling
+  [../]
+
+  [./aux_stateful_coupling]
+    type = 'Exodiff'
+    input = 'kokkos_var_coupling.i'
+    exodiff = 'kokkos_var_stateful_coupling_out.e'
+    cli_args = 'KokkosMaterials/coupling_u/var=v
+                KokkosMaterials/coupling_u/declare_old=true
+                Outputs/file_base=kokkos_var_stateful_coupling_out'
+    requirement = 'The Kokkos material system shall be able to couple in aux variables to initialize stateful material properties.'
+    capabilities = 'kokkos'
+    devices = 'cpu cuda'
+    prereq = aux_coupling
+  [../]
+
+  [./prop_coupling]
+    type = 'Exodiff'
+    input = 'kokkos_prop_stateful_coupling.i'
+    exodiff = 'kokkos_prop_coupling_out.e'
+    cli_args = 'KokkosMaterials/coupled_mat/use_old_prop=false
+                Outputs/file_base=kokkos_prop_coupling_out'
+    requirement = 'The Kokkos material system shall be able to couple in other material properties to compute material properties.'
+    capabilities = 'kokkos'
+    devices = 'cpu cuda'
+  [../]
+
+  [./prop_stateful_coupling]
+    type = 'Exodiff'
+    input = 'kokkos_prop_stateful_coupling.i'
+    exodiff = 'kokkos_prop_stateful_coupling_out.e'
+    requirement = 'The Kokkos material system shall be able to couple in other stateful material properties to compute material properties.'
+    capabilities = 'kokkos'
+    devices = 'cpu cuda'
+  [../]
+[]

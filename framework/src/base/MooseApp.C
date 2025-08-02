@@ -782,6 +782,12 @@ MooseApp::MooseApp(const InputParameters & parameters)
   registerCapabilities();
 
   Moose::out << std::flush;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
+  queryGPUs();
+#endif
+#endif
 }
 
 void
@@ -895,6 +901,28 @@ MooseApp::registerCapabilities()
     haveCapability("cuda", doc);
 #else
     missingCapability("cuda", doc, "Add the CUDA bin directory to your path and rebuild PETSc.");
+#endif
+  }
+
+  {
+    const auto doc = "Kokkos performance portability programming ecosystem";
+#ifdef MOOSE_KOKKOS_ENABLED
+    haveCapability("kokkos", doc);
+#else
+    missingCapability("kokkos",
+                      doc,
+                      "Rebuild PETSc with Kokkos support and libMesh. Then, reconfigure MOOSE with "
+                      "--with-kokkos.");
+#endif
+  }
+
+  {
+    const auto doc = "Kokkos support for PETSc";
+#ifdef PETSC_HAVE_KOKKOS
+    haveCapability("petsc_kokkos", doc);
+#else
+    missingCapability(
+        "kokkos", doc, "Rebuild PETSc with Kokkos support, then rebuild libMesh and MOOSE.");
 #endif
   }
 
@@ -1206,6 +1234,10 @@ MooseApp::~MooseApp()
   // Close any open dynamic libraries
   for (const auto & lib_pair : _lib_handles)
     dlclose(lib_pair.second.library_handle);
+#endif
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  deallocateKokkosMemoryPool();
 #endif
 }
 
@@ -1648,6 +1680,12 @@ MooseApp::setupOptions()
     _ready_to_exit = true;
     _exit_code = 1;
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  for (auto & action : _action_warehouse.allActionBlocks())
+    if (action->isParamValid("_kokkos_action"))
+      _has_kokkos_objects = true;
+#endif
 
   Moose::out << std::flush;
 }

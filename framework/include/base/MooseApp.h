@@ -83,6 +83,16 @@ namespace hit
 class Node;
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+namespace Moose
+{
+namespace Kokkos
+{
+class MemoryPool;
+}
+}
+#endif
+
 /**
  * Base class for MOOSE-based applications
  *
@@ -378,6 +388,11 @@ public:
   void addExecutorParams(const std::string & type,
                          const std::string & name,
                          const InputParameters & params);
+
+  /**
+   * Returns whether the simulation is currently executing actions
+   */
+  bool currentlyExecutingActions() const { return _action_warehouse.getCurrentAction() != nullptr; }
 
   /**
    * @return The Parser
@@ -1606,6 +1621,71 @@ private:
   friend class FEProblemBase;
   friend class Restartable;
   friend class SubProblem;
+
+public:
+  /**
+   * Get whether Kokkos is available
+   * @returns
+   * 1) True if MOOSE is configured with Kokkos and every process has an associated GPU,
+   * 2) True if MOOSE is configured with Kokkos and GPU capablities are disabled,
+   * 3) False otherwise.
+   */
+  bool isKokkosAvailable() const
+  {
+#ifdef MOOSE_KOKKOS_ENABLED
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
+    return _has_gpus;
+#else
+    return true;
+#endif
+#else
+    return false;
+#endif
+  }
+
+  /**
+   * Get whether there is any Kokkos object added by actions
+   * @returns Whether there is any Kokkos object added by actions
+   */
+  bool hasKokkosObjects() const { return _has_kokkos_objects; }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Allocate Kokkos memory pool
+   * @param size The memory pool size in the number of bytes
+   * @param ways The number of parallel ways
+   */
+  void allocateKokkosMemoryPool(std::size_t size, unsigned int ways) const;
+
+  /**
+   * Get Kokkos memory pool
+   * @returns The Kokkos memory pool
+   */
+  const Moose::Kokkos::MemoryPool & getKokkosMemoryPool() const;
+#endif
+
+private:
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Query the GPUs in the system and check whether every process has an associated GPU
+   */
+  void queryGPUs();
+
+  /**
+   * Deallocate Kokkos memory pool
+   */
+  void deallocateKokkosMemoryPool();
+#endif
+
+  /**
+   * Flag whether every process has an associated GPU
+   */
+  bool _has_gpus = false;
+
+  /**
+   * Flag whether there is any Kokkos object added by actions
+   */
+  bool _has_kokkos_objects = false;
 };
 
 template <typename T>

@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#30655'
+  design = '/kernels/Kernel.md'
+
+  [./test]
+    type = 'Exodiff'
+    input = 'kokkos_kernel_precompute_test.i'
+    exodiff = 'kokkos_kernel_precompute_test_out.e'
+    requirement = 'The Kokkos system shall provide optimized kernels for residuals with the test function or its gradient factored out.'
+    capabilities = 'kokkos'
+    devices = 'cpu cuda'
+  [../]
+[]

@@ -8,7 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BoundaryRestrictableRequired.h"
-
+#include "MooseApp.h"
+#include "MooseObject.h"
 #include "InputParameters.h"
 
 InputParameters

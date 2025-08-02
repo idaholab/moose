@@ -24,6 +24,9 @@
 /* Whether to use neml2-related code or not */
 #undef NEML2_ENABLED
 
+/* Whether to use Kokkos-related code or not */
+#undef KOKKOS_ENABLED
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 

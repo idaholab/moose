@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#30655'
+  design = '/CoupledTimeDerivative.md'
+
+  [test]
+    type = 'Exodiff'
+    input = 'kokkos_coupled_time_derivative_test.i'
+    exodiff = 'kokkos_coupled_time_derivative_test_out.e'
+    requirement = 'A coupled time derivative Kokkos kernel shall be provided'
+    capabilities = 'kokkos'
+    devices = 'cpu cuda'
+  []
+  [jac_test]
+    type = 'PetscJacobianTester'
+    input = 'kokkos_coupled_time_derivative_test.i'
+    cli_args = 'Outputs/exodus=false'
+    run_sim = True
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    requirement = 'The Jacobian from KokkosCoupledTimeDerivative shall be perfect'
+    capabilities = 'kokkos'
+    devices = 'cpu cuda'
+  []
+[]

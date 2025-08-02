@@ -37,6 +37,12 @@ TransientInterface::TransientInterface(const MooseObject * moose_object)
     _is_transient(_ti_feproblem.isTransient()),
     _ti_name(MooseUtils::shortName(_ti_params.get<std::string>("_object_name")))
 {
+#ifdef MOOSE_KOKKOS_ENABLED
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
+#endif
 }
 
 TransientInterface::~TransientInterface() {}

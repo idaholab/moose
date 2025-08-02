@@ -14,11 +14,17 @@
 #include "FEProblemBase.h"
 #include "SolutionInvalidityRegistry.h"
 
-SolutionInvalidInterface::SolutionInvalidInterface(MooseObject * const moose_object)
+SolutionInvalidInterface::SolutionInvalidInterface(const MooseObject * const moose_object)
   : _si_moose_object(*moose_object),
     _si_problem(
         *_si_moose_object.parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
+#ifdef MOOSE_KOKKOS_ENABLED
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
+    return;
+#endif
 }
 
 /// Set solution invalid mark for the given solution ID

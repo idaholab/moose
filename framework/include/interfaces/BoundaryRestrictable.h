@@ -9,6 +9,10 @@
 
 #pragma once
 
+#ifdef MOOSE_KOKKOS_ENABLED
+#include "GPUTypes.h"
+#endif
+
 // MOOSE includes
 #include "InputParameters.h"
 #include "MaterialData.h"
@@ -54,6 +58,15 @@ public:
   BoundaryRestrictable(const MooseObject * moose_object,
                        const std::set<SubdomainID> & block_ids,
                        bool nodal);
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Class copy constructor
+   * Used for dispatching Kokkos functor.
+   * Only defined for Kokkos objects.
+   */
+  BoundaryRestrictable(const BoundaryRestrictable & object);
+#endif
 
   /**
    * Helper for determining if the object is boundary restricted. This is needed for the
@@ -220,12 +233,62 @@ private:
    */
   void initializeBoundaryRestrictable();
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  void initializeKokkosBoundaryRestrictable(MooseMesh * mesh);
+#endif
+
 protected:
   /**
    * A helper method to avoid circular #include problems.
    * @see hasBoundaryMaterialProperty
    */
   bool hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const;
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Get the number of nodes this Kokkos object is operating on
+   * @returns The number of nodes local to this process
+   */
+  KOKKOS_FUNCTION dof_id_type numKokkosBoundaryNodes() const { return _kokkos_node_ids.size(); }
+  /**
+   * Get the number of sides this Kokkos object is operating on
+   * @returns The number of sides local to this process
+   */
+  KOKKOS_FUNCTION dof_id_type numKokkosBoundarySides() const
+  {
+    return _kokkos_element_side_ids.size();
+  }
+  /**
+   * Get the node ID this Kokkos thread is operating on
+   * @param tid The thread ID
+   * @returns The node ID
+   */
+  KOKKOS_FUNCTION dof_id_type kokkosBoundaryNodeID(dof_id_type tid) const
+  {
+    return _kokkos_node_ids[tid];
+  }
+  /**
+   * Get the element ID - side index pair this Kokkos thread is operating on
+   * @param tid The thread ID
+   * @returns The element ID - side index pair
+   */
+  KOKKOS_FUNCTION auto kokkosBoundaryElementSideID(dof_id_type tid) const
+  {
+    return _kokkos_element_side_ids[tid];
+  }
+#endif
+
+#ifdef MOOSE_KOKKOS_ENABLED
+private:
+  /**
+   * List of node IDs this Kokkos object is operating on
+   */
+  Moose::Kokkos::Array<dof_id_type> _kokkos_node_ids;
+  /**
+   * List of element ID - side index pairs this Kokkos object is operating on
+   */
+  Moose::Kokkos::Array<Moose::Kokkos::Pair<dof_id_type, unsigned int>> _kokkos_element_side_ids;
+#endif
 };
 
 template <typename T, bool is_ad>

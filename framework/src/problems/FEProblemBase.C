@@ -7,6 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef MOOSE_KOKKOS_ENABLED
+#include "GPUMaterialPropertyStorage.h"
+#endif
+
 #include "FEProblemBase.h"
 #include "AuxiliarySystem.h"
 #include "MaterialPropertyStorage.h"
@@ -426,13 +430,27 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _solver_systems(_num_nl_sys + _num_linear_sys, nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
+#ifdef MOOSE_KOKKOS_ENABLED
+    _kokkos_assembly(*this),
+#endif
     _mesh_divisions(/*threaded=*/true),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "material_props", &_mesh, _material_prop_registry)),
+        "material_props", &_mesh, _material_prop_registry, *this)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "bnd_material_props", &_mesh, _material_prop_registry)),
+        "bnd_material_props", &_mesh, _material_prop_registry, *this)),
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "neighbor_material_props", &_mesh, _material_prop_registry)),
+        "neighbor_material_props", &_mesh, _material_prop_registry, *this)),
+#ifdef MOOSE_KOKKOS_ENABLED
+    _kokkos_material_props(
+        declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(
+            "kokkos_material_props", &_mesh, _material_prop_registry, *this)),
+    _kokkos_bnd_material_props(
+        declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(
+            "kokkos_bnd_material_props", &_mesh, _material_prop_registry, *this)),
+    _kokkos_neighbor_material_props(
+        declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(
+            "kokkos_neighbor_material_props", &_mesh, _material_prop_registry, *this)),
+#endif
     _reporter_data(_app),
     // TODO: delete the following line after apps have been updated to not call getUserObjects
     _all_user_objects(_app.getExecuteOnEnum()),
@@ -946,8 +964,16 @@ FEProblemBase::initialSetup()
 
     // This forces stateful material property loading to be an exact one-to-one match
     if (_app.isRecovering())
+    {
       for (auto props : {&_material_props, &_bnd_material_props, &_neighbor_material_props})
         props->setRecovering();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+      for (auto props :
+           {&_kokkos_material_props, &_kokkos_bnd_material_props, &_kokkos_neighbor_material_props})
+        props->setRecovering();
+#endif
+    }
 
     TIME_SECTION("restore", 3, "Restoring from backup");
 
@@ -1123,6 +1149,10 @@ FEProblemBase::initialSetup()
       }
     }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+    _kokkos_materials.sort(0, true);
+#endif
+
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
 
@@ -1131,6 +1161,13 @@ FEProblemBase::initialSetup()
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
           _neighbor_material_props.hasStatefulProperties())
         _has_initialized_stateful = true;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+      if (_kokkos_material_props.hasStatefulProperties() ||
+          _kokkos_bnd_material_props.hasStatefulProperties() ||
+          _kokkos_neighbor_material_props.hasStatefulProperties())
+        _has_initialized_stateful = true;
+#endif
     }
   }
 
@@ -3765,21 +3802,48 @@ FEProblemBase::getMaterial(std::string name,
 }
 
 MaterialData &
-FEProblemBase::getMaterialData(Moose::MaterialDataType type, const THREAD_ID tid) const
+FEProblemBase::getMaterialData(Moose::MaterialDataType type,
+                               const THREAD_ID tid,
+                               const MooseObject * object) const
 {
   switch (type)
   {
     case Moose::BLOCK_MATERIAL_DATA:
+      if (object)
+        _material_props.addConsumer(type, object);
       return _material_props.getMaterialData(tid);
     case Moose::NEIGHBOR_MATERIAL_DATA:
+      if (object)
+        _neighbor_material_props.addConsumer(type, object);
       return _neighbor_material_props.getMaterialData(tid);
     case Moose::BOUNDARY_MATERIAL_DATA:
     case Moose::FACE_MATERIAL_DATA:
     case Moose::INTERFACE_MATERIAL_DATA:
+      if (object)
+        _bnd_material_props.addConsumer(type, object);
       return _bnd_material_props.getMaterialData(tid);
   }
 
   mooseError("FEProblemBase::getMaterialData(): Invalid MaterialDataType ", type);
+}
+
+const std::set<const MooseObject *> &
+FEProblemBase::getMaterialPropertyStorageConsumers(Moose::MaterialDataType type) const
+{
+  switch (type)
+  {
+    case Moose::BLOCK_MATERIAL_DATA:
+      return _material_props.getConsumers(type);
+    case Moose::NEIGHBOR_MATERIAL_DATA:
+      return _neighbor_material_props.getConsumers(type);
+    case Moose::BOUNDARY_MATERIAL_DATA:
+    case Moose::FACE_MATERIAL_DATA:
+    case Moose::INTERFACE_MATERIAL_DATA:
+      return _bnd_material_props.getConsumers(type);
+  }
+
+  mooseError("FEProblemBase::getMaterialPropertyStorageConsumers(): Invalid MaterialDataType ",
+             type);
 }
 
 void
@@ -5089,6 +5153,10 @@ FEProblemBase::updateActiveObjects()
   _to_multi_app_transfers.updateActive();
   _from_multi_app_transfers.updateActive();
   _between_multi_app_transfers.updateActive();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  _kokkos_materials.updateActive();
+#endif
 }
 
 void
@@ -6284,6 +6352,11 @@ FEProblemBase::init()
   if (_displaced_problem)
     _displaced_problem->init();
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_has_kokkos_objects)
+    initKokkos();
+#endif
+
   _initialized = true;
 }
 
@@ -6612,6 +6685,17 @@ FEProblemBase::advanceState()
 
   if (_neighbor_material_props.hasStatefulProperties())
     _neighbor_material_props.shift();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_kokkos_material_props.hasStatefulProperties())
+    _kokkos_material_props.shift();
+
+  if (_kokkos_bnd_material_props.hasStatefulProperties())
+    _kokkos_bnd_material_props.shift();
+
+  if (_kokkos_neighbor_material_props.hasStatefulProperties())
+    _kokkos_neighbor_material_props.shift();
+#endif
 }
 
 void
@@ -8227,6 +8311,11 @@ FEProblemBase::initElementStatefulProps(const ConstElemRange & elem_range, const
     Threads::parallel_reduce(elem_range, cmt);
   else
     cmt(elem_range, true);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_has_kokkos_objects)
+    initKokkosStatefulProps();
+#endif
 }
 
 void
@@ -8482,13 +8571,9 @@ FEProblemBase::checkDependMaterialsHelper(
 
     for (const auto & mat1 : it.second)
     {
-      const std::set<std::string> & depend_props = mat1->getRequestedItems();
-      block_depend_props.insert(depend_props.begin(), depend_props.end());
-
       auto & alldeps = mat1->getMatPropDependencies(); // includes requested stateful props
       for (auto & dep : alldeps)
-        if (const auto name = _material_props.queryStatefulPropName(dep))
-          block_depend_props.insert(*name);
+        block_depend_props.insert(_material_prop_registry.getName(dep));
 
       // See if any of the active materials supply this property
       for (const auto & mat2 : it.second)

@@ -20,8 +20,10 @@
 
 #include <optional>
 
-MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry)
-  : _max_state(0),
+MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry,
+                                                 FEProblemBase & problem)
+  : _problem(problem),
+    _max_state(0),
     _spin_mtx(libMesh::Threads::spin_mtx),
     _registry(registry),
     _restart_in_place(false),
@@ -100,6 +102,19 @@ MaterialPropertyStorage::isRestoredProperty(const std::string & name) const
   if (!record.stateful())
     mooseAssert(!record.restored, "Stateful properties should not be restored");
   return record.restored;
+}
+
+const std::set<const MooseObject *> &
+MaterialPropertyStorage::getConsumers(Moose::MaterialDataType type) const
+{
+  static const std::set<const MooseObject *> empty;
+
+  const auto it = _consumers.find(type);
+
+  if (it != _consumers.end())
+    return it->second;
+
+  return empty;
 }
 
 void
