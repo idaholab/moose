@@ -30,6 +30,8 @@ StitchBoundaryMeshGenerator::validParams()
 StitchBoundaryMeshGenerator::StitchBoundaryMeshGenerator(const InputParameters & parameters)
   : StitchMeshGeneratorBase(parameters), _input(getMesh("input"))
 {
+  if (_stitch_boundaries_pairs.size() != 1 && _stitch_boundaries_pairs[0].size() != 2)
+    paramError("stitch_boundaries_pair", "Can only stitch two boundaries together.");
 }
 
 std::unique_ptr<MeshBase>
