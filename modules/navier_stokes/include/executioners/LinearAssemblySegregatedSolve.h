@@ -48,6 +48,8 @@ public:
 
   void updateCHTBoundaryCouplingFluid();
 
+  void initializeCHTCouplingFields();
+
 protected:
   //  std::vector<unsigned int> generateBoundaryMask(const BoundaryID bid, const
   //  MooseVariableScalar);
@@ -181,6 +183,8 @@ protected:
            std::pair<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>,
                      FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
       _boundary_heat_flux;
+
+  std::map<BoundaryID, std::pair<Real, Real>> _integrated_boundary_heat_flux;
 
   /// Two functors per sideset, one for the solid and another for the fluid
   std::map<BoundaryID,
