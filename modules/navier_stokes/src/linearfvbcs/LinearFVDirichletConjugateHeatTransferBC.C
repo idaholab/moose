@@ -55,6 +55,9 @@ LinearFVDirichletConjugateHeatTransferBC::computeBoundaryConductionFlux() const
 Real
 LinearFVDirichletConjugateHeatTransferBC::computeBoundaryValue() const
 {
+  // std::cout << "Computing boundary value on CHTDirichlet for " << _var.name() << " "
+  //           << _incoming_temperature(singleSidedFaceArg(_current_face_info), determineState())
+  //           << std::endl;
   return _incoming_temperature(singleSidedFaceArg(_current_face_info), determineState());
 }
 

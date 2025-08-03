@@ -39,6 +39,12 @@ LinearFVConjugateHeatTransferBCBase::computeBoundaryConductionFlux() const
   const auto boundary_normal_multiplier =
       (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR) ? 1.0 : -1.0;
 
+  // std::cout << "Computing boundary flux on CHTBase for " << _var.name() << " "
+  //           << boundary_normal_multiplier *
+  //                  _thermal_conductivity(singleSidedFaceArg(_current_face_info),
+  //                  determineState()) * _var.gradSln(*elem_info) * _current_face_info->normal()
+  //           << std::endl;
+
   return boundary_normal_multiplier *
          _thermal_conductivity(singleSidedFaceArg(_current_face_info), determineState()) *
          _var.gradSln(*elem_info) * _current_face_info->normal();
