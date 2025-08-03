@@ -16,47 +16,59 @@ InputParameters
 LinearFVRobinConjugateHeatTransferBC::validParams()
 {
   InputParameters params = LinearFVConjugateHeatTransferBCBase::validParams();
-  params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "The fluid temperature variable");
-  params.addRequiredParam<MooseFunctorName>(NS::T_solid, "The solid/wall temperature variable");
   params.addRequiredParam<MooseFunctorName>("h", "The convective heat transfer coefficient");
   params.addRequiredParam<MooseFunctorName>("incoming_flux", "Blabla");
+  params.addRequiredParam<MooseFunctorName>("incoming_temperature", "Blabla");
+
   params.addClassDescription("Class describing a conjugate heat transfer between two domains.");
   return params;
 }
 
 LinearFVRobinConjugateHeatTransferBC::LinearFVRobinConjugateHeatTransferBC(
     const InputParameters & parameters)
-  : LinearFVConjugateHeatTransferBCBase(parameters), _htc(getFunctor<Real>("h"))
+  : LinearFVConjugateHeatTransferBCBase(parameters),
+    _htc(getFunctor<Real>("h")),
+    _incoming_flux(&getFunctor<Real>("incoming_flux")),
+    _incoming_temperature(&getFunctor<Real>("incoming_temperature"))
 {
   _var.computeCellGradients();
-  _incoming_flux = &getFunctor<Real>("incoming_flux");
-  _temp_fluid = &getFunctor<Real>(NS::T_fluid);
-  _temp_solid = &getFunctor<Real>(NS::T_solid);
 }
 
-void
-LinearFVRobinConjugateHeatTransferBC::initialSetup()
+Real
+LinearFVRobinConjugateHeatTransferBC::computeBoundaryConductionFlux() const
 {
-  _incoming_flux = &getFunctor<Real>("incoming_flux");
-  _temp_fluid = &getFunctor<Real>(NS::T_fluid);
-  _temp_solid = &getFunctor<Real>(NS::T_solid);
-  _var_is_fluid = "wraps_" + _var.name() == _temp_fluid->functorName() ||
-                  "wraps_" + _var.name() + "_raw_value" == _temp_fluid->functorName();
-  // We determine which one is the source variable
-  if (_var_is_fluid)
-    _rhs_temperature = _temp_solid;
-  else
-    _rhs_temperature = _temp_fluid;
+  const auto * elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
+
+  const auto state = determineState();
+  auto face = singleSidedFaceArg(_current_face_info);
+  face.face_side = elem_info->elem();
+
+  // std::cout << "Computing flux for coupling on  " << _var.name() << " " << _htc(face, state) << "
+  // "
+  //           << _var.getElemValue(*elem_info, state) << " " << (*_incoming_temperature)(face,
+  //           state)
+  //           << " " << -(*_incoming_flux)(face, state) << " "
+  //           << _htc(face, state) * (_var.getElemValue(*elem_info, state) -
+  //                                   (*_incoming_temperature)(face, state)) -
+  //                  (*_incoming_flux)(face, state)
+  //           << std::endl;
+
+  return _htc(face, state) *
+             (_var.getElemValue(*elem_info, state) - (*_incoming_temperature)(face, state)) -
+         (*_incoming_flux)(face, state);
 }
 
 Real
 LinearFVRobinConjugateHeatTransferBC::computeBoundaryValue() const
 {
+
   const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
-  // std::cout << "Computing boundary value" << _var.getElemValue(*elem_info, determineState())
-  //           << std::endl;
+  // std::cout << "Computing boundary value " << _var.name() << " "
+  //           << _var.getElemValue(*elem_info, determineState()) << std::endl;
 
   return _var.getElemValue(*elem_info, determineState());
 }
@@ -98,20 +110,21 @@ LinearFVRobinConjugateHeatTransferBC::computeBoundaryGradientRHSContribution() c
 {
   // We check where the functor contributing to the right hand side lives. We do this
   // because this functor lives on the domain where the variable of this kernel doesn't.
+
+  const auto * elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
+
   const auto state = determineState();
   auto face = singleSidedFaceArg(_current_face_info);
+  face.face_side = elem_info->elem();
 
-  if (_rhs_temperature->hasFaceSide(*_current_face_info, true))
-    face.face_side = _current_face_info->elemPtr();
-  else
-    face.face_side = _current_face_info->neighborPtr();
+  // std::cout << "Applying face flux " << _var.name() << " "
+  //           << _htc(face, state) * (*_incoming_temperature)(face, state) << " "
+  //           << (*_incoming_flux)(face, state) << " "
+  //           << _htc(face, state) * (*_incoming_temperature)(face, state) +
+  //                  (*_incoming_flux)(face, state)
+  //           << std::endl;
 
-  // std::cout << (*_incoming_flux)(face, state) << std::endl;
-  // TODO: check if includesMaterialPropertyMultiplier() affects this... it shouldn't
-
-  // std::cout << _incoming_flux->functorName() << std::endl;
-  // std::cout << "Flux coming in within " << name() << " " << _current_face_info->faceCentroid()
-  //           << " " << -(*_incoming_flux)(face, state) << std::endl;
-
-  return _htc(face, state) * (*_rhs_temperature)(face, state) - (*_incoming_flux)(face, state);
+  return _htc(face, state) * (*_incoming_temperature)(face, state) + (*_incoming_flux)(face, state);
 }

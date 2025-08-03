@@ -22,7 +22,9 @@ public:
 
   static InputParameters validParams();
 
-  virtual void initialSetup() override;
+  // virtual void initialSetup() override;
+
+  virtual Real computeBoundaryConductionFlux() const override;
 
 protected:
   virtual Real computeBoundaryValue() const override;
@@ -37,26 +39,13 @@ protected:
 
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
+  virtual bool includesMaterialPropertyMultiplier() const override { return true; }
+
 protected:
-  const Moose::Functor<Real> * _incoming_flux;
-
-  /// The fluid temperature, we use the functor form to enable situations when
-  /// the user wants to supply a solution-independent form for this.
-  const Moose::Functor<Real> * _temp_fluid;
-
-  /// The solid/wall temperature, we use the functor form to enable situations when
-  /// the user wants to supply a solution-independent form for this.
-  const Moose::Functor<Real> * _temp_solid;
-
   /// The convective heat transfer coefficient
   const Moose::Functor<Real> & _htc;
 
-  /// Helper boolean to see if the variable we have is the fluid variable
-  bool _var_is_fluid;
+  const Moose::Functor<Real> * _incoming_flux;
 
-  /// The temperature which will contribute to the right hand side.
-  /// When this is the fluid domain, the solid temperature will go to the
-  /// right hand side. When it is the solid domain, the fluid temperature
-  /// will contribute to the right hand side.
-  const Moose::Functor<Real> * _rhs_temperature;
+  const Moose::Functor<Real> * _incoming_temperature;
 };
