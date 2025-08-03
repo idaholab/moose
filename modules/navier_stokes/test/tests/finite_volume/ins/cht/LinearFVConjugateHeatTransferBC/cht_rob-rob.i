@@ -5,10 +5,10 @@
 b = 0.01 # plate thickness
 l = 0.2 # plate length
 
-nxi = 100 # nx in the inlet/entrance region
-nyf = 80 # ny in fluid
-nxf = 100 # nx in the main fluid region
-nys = 30 # ny in the fluid domain
+nxi = 100 # 10 # 100 # nx in the inlet/entrance region
+nyf = 80 # 10 # 80 # ny in fluid
+nxf = 100 # 10 # 100 # nx in the main fluid region
+nys = 30 # 5 # 30 # ny in the fluid domain
 
 fx1_bias = 1.00 # 1.15 # bdry layer bias - fluid
 fx2_bias = '${fparse 1.0/1.00}' # 0.85 # bdry layer bias - solid
@@ -29,8 +29,8 @@ T_s_bottom = 600.0
 P_out = 1.03e5
 
 #h_test = ${fparse k_s/l} # test value
-h_s = 0
-# h_f = 0
+h_s = 0.1
+h_f = 10
 
 advected_interp_method = 'upwind'
 
@@ -319,21 +319,22 @@ advected_interp_method = 'upwind'
   []
 
   [fluid_solid]
-    type = LinearFVDirichletConjugateHeatTransferBC
+    type = LinearFVRobinConjugateHeatTransferBC
     variable = T_fluid
     boundary = interface
-    incoming_temperature = bd_temperature_fluid_interface
+    h = ${h_f}
     thermal_conductivity = ${k}
+    incoming_flux = heat_flux_fluid_interface
+    incoming_temperature = bd_temperature_fluid_interface
   []
   [solid_fluid]
     type = LinearFVRobinConjugateHeatTransferBC
     variable = T_solid
-    T_solid = T_solid
-    T_fluid = T_fluid
     boundary = interface
     h = ${h_s}
     thermal_conductivity = ${k_s}
     incoming_flux = heat_flux_solid_interface
+    incoming_temperature = bd_temperature_solid_interface
   []
 []
 
@@ -410,10 +411,10 @@ advected_interp_method = 'upwind'
 [Executioner]
   type = SIMPLE
   cht_boundaries = 'interface'
-  cht_solid_flux_relaxation = 0.3
-  cht_fluid_flux_relaxation = 0.3
-  cht_solid_temperature_relaxation = 0.3
-  cht_fluid_temperature_relaxation = 0.3
+  cht_solid_flux_relaxation = 1.0
+  cht_fluid_flux_relaxation = 1.0
+  cht_solid_temperature_relaxation = 1.0
+  cht_fluid_temperature_relaxation = 1.0
   momentum_l_abs_tol = 1e-13
   pressure_l_abs_tol = 1e-13
   energy_l_abs_tol = 1e-13
@@ -430,7 +431,7 @@ advected_interp_method = 'upwind'
   momentum_equation_relaxation = 0.7
   energy_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
-  num_iterations = 500
+  num_iterations = 1000
   momentum_absolute_tolerance = 1e-10
   energy_absolute_tolerance = 1e-10
   solid_energy_absolute_tolerance = 1e-10
@@ -444,7 +445,7 @@ advected_interp_method = 'upwind'
   solid_energy_petsc_options_value = 'hypre boomeramg'
   print_fields = false
   continue_on_max_its = true
-  num_cht_fpi = 20
+  num_cht_fpi = 3
   cht_fpi_tolerance = 1e-6
 []
 
