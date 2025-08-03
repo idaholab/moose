@@ -17,6 +17,8 @@
     requirement = 'The system shall have the ability to write out MFEM solutions to '
                   'ParaView, VisIt and Conduit data collections.'
     capabilities = 'mfem'
+    devices = 'cpu cuda'
     recover = false
+    max_parallel = 1 # MOOSE-MFEM-HypreGMRES doesn't appear to work with multiple ranks with cuda
   []
 []

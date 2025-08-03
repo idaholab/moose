@@ -16,6 +16,7 @@ namespace Moose::MFEM
 void
 EquationSystemProblemOperator::SetGridFunctions()
 {
+  _test_var_names = GetEquationSystem()->TestVarNames();
   _trial_var_names = GetEquationSystem()->TrialVarNames();
   ProblemOperator::SetGridFunctions();
 }

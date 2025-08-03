@@ -26,7 +26,6 @@
 
 [Executioner]
   type = MFEMSteady
-  device = cpu
 []
 
 [MultiApps]

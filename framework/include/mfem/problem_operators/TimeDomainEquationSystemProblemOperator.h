@@ -47,7 +47,6 @@ protected:
   void BuildEquationSystemOperator(double dt);
 
 private:
-  std::vector<mfem::ParGridFunction *> _trial_variable_time_derivatives;
   std::shared_ptr<Moose::MFEM::TimeDependentEquationSystem> _equation_system{nullptr};
 };
 
