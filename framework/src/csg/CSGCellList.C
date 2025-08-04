@@ -18,7 +18,7 @@ void
 CSGCellList::checkCellName(const std::string & name) const
 {
   if (_cells.find(name) != _cells.end())
-    mooseError("Cell with name " + name + " already exists in geoemetry.");
+    mooseError("Cell with name " + name + " already exists in geometry.");
 }
 
 CSGCell &

@@ -117,7 +117,7 @@ protected:
   /// list of references to cells in universe
   std::vector<std::reference_wrapper<const CSGCell>> _cells;
 
-  // whether or not this universe is the root universe
+  /// whether or not this universe is the root universe
   bool _is_root;
 
   // CSGUniverseList needs to be friend to access setName()

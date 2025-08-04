@@ -23,7 +23,7 @@ void
 CSGSurfaceList::checkSurfaceName(const std::string & name) const
 {
   if (_surfaces.find(name) != _surfaces.end())
-    mooseError("Surface with name " + name + " already exists in geoemetry.");
+    mooseError("Surface with name " + name + " already exists in geometry.");
 }
 
 CSGSurface &

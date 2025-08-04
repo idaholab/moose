@@ -40,7 +40,7 @@ CSGUniverse::getCell(const std::string & name)
   for (const CSGCell & cell : _cells)
     if (cell.getName() == name)
       return cell;
-  mooseError("Cell with name " + name + " was not found in universe " + _name + ".");
+  mooseError("Should not reach here.");
 }
 
 bool
