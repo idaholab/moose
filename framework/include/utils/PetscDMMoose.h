@@ -34,6 +34,7 @@ extern PetscErrorCode DMMooseRegisterAll();
  * Create a MOOSE DM
  * @param comm The communicator that the DM should use
  * @param nl The nonlinear system context that the DM is associated with
+ * @param dof_map A reference to the DoFMap, which you can get from the system
  * @param dm_name A name to associate with the DM
  * @param dm A pointer to the PETSc DM
  */
