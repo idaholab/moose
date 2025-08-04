@@ -3530,26 +3530,25 @@ MooseApp::constructingMeshGenerators() const
 torch::DeviceType
 MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum) const
 {
+  const auto pname = isParamSetByUser("libtorch_device") ? "--libtorch-device" : "--compute-device";
   if (device_enum == "cuda")
   {
 #ifdef __linux__
     if (!torch::cuda::is_available())
-      mooseError(
-          "--compute-device=cuda: CUDA support is not available in the linked libtorch library");
+      mooseError(pname, "=cuda: CUDA support is not available in the linked libtorch library");
     return torch::kCUDA;
 #else
-    mooseError("--compute-device=cuda: CUDA is not supported on your platform");
+    mooseError(pname, "=cuda: CUDA is not supported on your platform");
 #endif
   }
   else if (device_enum == "mps")
   {
 #ifdef __APPLE__
     if (!torch::mps::is_available())
-      mooseError(
-          "--compute-device=mps: MPS support is not available in the linked libtorch library");
+      mooseError(pname, "=mps: MPS support is not available in the linked libtorch library");
     return torch::kMPS;
 #else
-    mooseError("--compute-device=mps: MPS is not supported on your platform");
+    mooseError(pname, "=mps: MPS is not supported on your platform");
 #endif
   }
 
