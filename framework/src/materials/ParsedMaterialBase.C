@@ -75,12 +75,10 @@ ParsedMaterialBase::validParams()
 }
 
 ParsedMaterialBase::ParsedMaterialBase(const InputParameters & parameters, const MooseObject * obj)
-  : _derived_object(obj)
+  : _derived_object(obj),
+    _function_param(parameters.isParamValid("function") ? "function" : "expression"),
+    _function(parameters.get<std::string>(_function_param))
 {
-  // get function expression
-  _function = parameters.isParamValid("function") ? parameters.get<std::string>("function")
-                                                  : parameters.get<std::string>("expression");
-
   // get constant vectors
   _constant_names = parameters.get<std::vector<std::string>>("constant_names");
   _constant_expressions = parameters.get<std::vector<std::string>>("constant_expressions");
