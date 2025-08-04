@@ -1285,3 +1285,31 @@ f14118d63adbfcc3d45765c2ba3cac1dfa0ffa7a: #31104; add kokkos to all builds, upda
   wasp:
     full_version: 2025.05.13_1
     hash: 3e37a23
+b820c33833234373aef2c4aede7cc3858b32134e: #31140
+  libmesh:
+    full_version: 2025.06.25_2
+    hash: e0b82cc
+  libmesh-vtk:
+    full_version: 9.4.2_4
+    hash: d35235e
+  moose-dev:
+    full_version: 2025.07.28
+    hash: e27f701
+  mpi:
+    full_version: 2025.07.23
+    hash: 0a5dd50
+  petsc:
+    full_version: 3.23.0.6.gd9d7fd11dca_4
+    hash: 194ff71
+  pprof:
+    full_version: 2025.06.13
+    hash: 3d296db
+  seacas:
+    full_version: 2025.05.22_0
+    hash: '1278418'
+  tools:
+    full_version: 2025.06.26
+    hash: d73012a
+  wasp:
+    full_version: 2025.05.13_1
+    hash: 3e37a23
