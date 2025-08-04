@@ -31,54 +31,53 @@ FunctionMaterialBase<is_ad>::FunctionMaterialBase(const InputParameters & parame
 {
   // fetch names and numbers of all coupled variables
   _mapping_is_unique = true;
-  for (std::set<std::string>::const_iterator it = _pars.coupledVarsBegin();
-       it != _pars.coupledVarsEnd();
-       ++it)
+  for (const auto & var_param : _pars.getCoupledVariableParamNames())
   {
     // find the variable in the list of coupled variables
-    auto vars = _coupled_vars.find(*it);
+    const auto it = _coupled_vars.find(var_param);
 
     // no MOOSE variable was provided for this coupling, add to a list of variables set to constant
     // default values
-    if (vars == _coupled_vars.end())
+    if (it == _coupled_vars.end())
     {
-      if (_pars.hasDefaultCoupledValue(*it))
-        _arg_constant_defaults.push_back(*it);
+      if (_pars.hasDefaultCoupledValue(var_param))
+        _arg_constant_defaults.push_back(var_param);
       continue;
     }
+    const auto & vars = it->second;
 
     // check if we have a 1:1 mapping between parameters and variables
-    if (vars->second.size() != 1)
+    if (vars.size() != 1)
       _mapping_is_unique = false;
 
     // iterate over all components
-    for (unsigned int j = 0; j < vars->second.size(); ++j)
+    for (const auto comp : index_range(vars))
     {
+      mooseAssert(vars[comp], "Null variable");
+      const auto & var_name = vars[comp]->name();
       // make sure each nonlinear variable is coupled in only once
-      if (std::find(_arg_names.begin(), _arg_names.end(), vars->second[j]->name()) !=
-          _arg_names.end())
+      if (std::find(_arg_names.begin(), _arg_names.end(), var_name) != _arg_names.end())
         mooseError("A nonlinear variable can only be coupled in once.");
 
       // insert the map values
-      // unsigned int number = vars->second[j]->number();
-      unsigned int number = coupled(*it, j);
-      _arg_names.push_back(vars->second[j]->name());
+      const auto number = coupled(var_param, comp);
+      _arg_names.push_back(var_name);
       _arg_numbers.push_back(number);
-      _arg_param_names.push_back(*it);
+      _arg_param_names.push_back(var_param);
       if (_mapping_is_unique)
         _arg_param_numbers.push_back(-1);
       else
-        _arg_param_numbers.push_back(j);
+        _arg_param_numbers.push_back(comp);
 
       // populate number -> arg index lookup table
-      unsigned int idx = libMeshVarNumberRemap(number);
+      const auto idx = libMeshVarNumberRemap(number);
       if (idx >= _arg_index.size())
         _arg_index.resize(idx + 1, -1);
 
       _arg_index[idx] = _args.size();
 
       // get variable value
-      _args.push_back(&coupledGenericValue(*it, j));
+      _args.push_back(&coupledGenericValue(var_param, comp));
     }
   }
 
