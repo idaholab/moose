@@ -47,6 +47,9 @@ function configure_libmesh()
     EXTRA_ARGS+=("--with-xdr-include=${CONDA_PREFIX}/include/tirpc")
   fi
 
+  # Allow unbound variable for when EXTRA_ARGS is empty
+  set +u
+
   cd "${SRC_DIR}/build" || exit 1
   # shellcheck disable=SC2086  # we want wordsplitting
   # shellcheck disable=SC2048  # we want to not handle whitspaces
@@ -67,6 +70,10 @@ function configure_libmesh()
                INSTALL="${INSTALL_BINARY}" \
                "${EXTRA_ARGS[@]}" \
                $*
+  local RETURN_CODE=$?
 
-  return $?
+  # Restore unbound variable checks
+  set -u
+
+  return $RETURN_CODE
 }
