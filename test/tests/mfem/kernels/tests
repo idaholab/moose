@@ -168,7 +168,7 @@
                'Executioner/device=ceed-cpu'
     devices = 'ceed-cpu'
     ignored_items = "root['VTKFile']['@version']"
-    requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
+    requirement = 'The system shall have the ability to solve a transient heat conduction problem with matrix-free assembly using MFEM.'
     capabilities = 'mfem'
     valgrind = none
     max_parallel = 1
