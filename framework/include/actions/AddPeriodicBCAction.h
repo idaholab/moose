@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Action.h"
+#include "PeriodicBCHelper.h"
 
 class MooseMesh;
 namespace libMesh
@@ -22,7 +23,7 @@ class PeriodicBoundaryBase;
  * are not MooseObjects so you need not specify a type for these boundaries.  If you
  * do, it will currently be ignored by this Action.
  */
-class AddPeriodicBCAction : public Action
+class AddPeriodicBCAction : public Action, public Moose::PeriodicBCHelper
 {
 public:
   static InputParameters validParams();
@@ -32,15 +33,23 @@ public:
   virtual void act() override;
 
 protected:
-  /**
-   * This function will automatically add the correct translation vectors for
-   * each requested dimension when using GeneratedMesh
-   * @returns a boolean indicating whether or not these boundaries were automatically added
-   */
-  bool autoTranslationBoundaries();
+  using Action::paramError;
 
-  void setPeriodicVars(libMesh::PeriodicBoundaryBase & p,
-                       const std::vector<VariableName> & var_names);
+  /**
+   * Overriden method from PeriodicBCHelper that is called on every periodic
+   * boundary, in which we will setup the algebraic ghosting via the DofMap
+   * and the MooseMesh context if possible.
+   */
+  virtual void onSetupPeriodicBoundary(libMesh::PeriodicBoundaryBase & p) override;
+
+  /**
+   * Helper for getting the variables to which periodic boundary
+   * conditions will be applied
+   */
+  std::vector<const MooseVariableFieldBase *> getVariables() const;
+
+  /// The variables to apply periodic boundary conditions to
+  std::vector<const MooseVariableFieldBase *> _vars;
 
   MooseMesh * _mesh;
 };
