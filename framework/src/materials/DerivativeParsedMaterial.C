@@ -16,7 +16,6 @@ template <bool is_ad>
 InputParameters
 DerivativeParsedMaterialTempl<is_ad>::validParams()
 {
-
   InputParameters params = DerivativeParsedMaterialHelperTempl<is_ad>::validParams();
   params += ParsedMaterialBase::validParams();
   params.addClassDescription("Parsed Function Material with automatic derivatives.");
@@ -26,9 +25,9 @@ DerivativeParsedMaterialTempl<is_ad>::validParams()
 template <bool is_ad>
 DerivativeParsedMaterialTempl<is_ad>::DerivativeParsedMaterialTempl(
     const InputParameters & parameters)
-  : DerivativeParsedMaterialHelperTempl<is_ad>(parameters,
-                                               VariableNameMappingMode::USE_MOOSE_NAMES),
-    ParsedMaterialBase(parameters, this)
+  : ParsedMaterialBase(parameters, this),
+    DerivativeParsedMaterialHelperTempl<is_ad>(
+        parameters, VariableNameMappingMode::USE_MOOSE_NAMES, _function_param)
 {
   // Build function, take derivatives, optimize
   functionParse(_function,
