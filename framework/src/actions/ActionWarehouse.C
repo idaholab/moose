@@ -215,13 +215,18 @@ ActionWarehouse::buildBuildableActions(const std::string & task)
     auto it_pair = _action_factory.getActionsByTask(task);
     for (const auto & action_pair : as_range(it_pair))
     {
-      InputParameters params = _action_factory.getValidParams(action_pair.second);
+      const auto & type = action_pair.second;
+      InputParameters params = _action_factory.getValidParams(type);
       params.set<ActionWarehouse *>("awh") = this;
+
+      std::string name = "auto_" + type;
+      std::transform(
+          name.begin(), name.end(), name.begin(), [](const auto v) { return std::tolower(v); });
 
       if (params.areAllRequiredParamsValid())
       {
         params.set<std::string>("registered_identifier") = "(AutoBuilt)";
-        addActionBlock(_action_factory.create(action_pair.second, "", params));
+        addActionBlock(_action_factory.create(type, name, params));
         ret_value = true;
       }
     }
