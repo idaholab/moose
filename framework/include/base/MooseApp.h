@@ -985,30 +985,6 @@ public:
    */
   const hit::Node * getCurrentActionHitNode() const;
 
-private:
-  /**
-   * Purge this relationship manager from meshes and DofMaps and finally from us. This method is
-   * private because only this object knows when we should remove relationship managers: when we are
-   * adding relationship managers to this object's storage, we perform an operator>= comparison
-   * between our existing RMs and the RM we are trying to add. If any comparison returns true, we do
-   * not add the new RM because the comparison indicates that we would gain no new coverage.
-   * However, if no comparison return true, then we add the new RM and we turn the comparison
-   * around! Consequently if our new RM is >= than any of our preexisting RMs, we remove those
-   * preexisting RMs using this method
-   */
-  void removeRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
-
-#ifdef MOOSE_LIBTORCH_ENABLED
-  /**
-   * Function to determine the device which should be used by libtorch on this
-   * application. We use this function to decide what is available on different
-   * builds.
-   * @param device Enum to describe if a cpu or a gpu should be used.
-   */
-  torch::DeviceType determineLibtorchDeviceType(const MooseEnum & device) const;
-#endif
-
-public:
   /**
    * Attach the relationship managers of the given type
    * Note: Geometric relationship managers that are supposed to be attached late
