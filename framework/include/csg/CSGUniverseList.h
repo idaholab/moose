@@ -49,14 +49,14 @@ protected:
   }
 
   /**
-   * @brief Get the all universes in CSGBase instance
+   * @brief Get all the universes in CSGBase instance
    *
    * @return list of references to all CSGUniverse objects
    */
   std::vector<std::reference_wrapper<const CSGUniverse>> getAllUniverses() const;
 
   /**
-   * @brief Get the Universe by name
+   * @brief Get a Universe from the list by its name
    *
    * @param name name of universe
    * @return reference to CSGUniverse of the specified name

@@ -25,7 +25,7 @@ void
 CSGUniverseList::checkUniverseName(const std::string & name) const
 {
   if (_universes.find(name) != _universes.end())
-    mooseError("Universe with name " + name + " already exists in geoemetry.");
+    mooseError("Universe with name " + name + " already exists in geometry.");
 }
 
 CSGUniverse &
