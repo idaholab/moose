@@ -79,7 +79,7 @@
 [Executioner]
   type = Steady
   #type = Transient
-  #steady_state_detection = true 
+  #steady_state_detection = true
   system_names = 'v_sys u_sys'
   l_abs_tol = 1e-12
   l_tol = 1e-10
