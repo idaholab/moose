@@ -20,10 +20,7 @@ MFEMProblemSolve::validParams()
   params.addClassDescription("Solve object for MFEM problems.");
   params.addParam<std::string>("device", "Run app on the chosen device.");
   MooseEnum assembly_levels("legacy full element partial none", "legacy", true);
-  params.addParam<MooseEnum>(
-      "assembly_level",
-      assembly_levels,
-      "Matrix assembly level.");
+  params.addParam<MooseEnum>("assembly_level", assembly_levels, "Matrix assembly level.");
   return params;
 }
 
