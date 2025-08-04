@@ -15,12 +15,41 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = ${l}
+    xmax = '${fparse 2 * l}'
     ymin = 0
     ymax = ${l}
-    nx = ${n}
+    nx = '${fparse 2 * n}'
     ny = ${n}
     elem_type = TRI6
+  []
+  [remove]
+    type = ParsedSubdomainMeshGenerator
+    input = 'gen'
+    expression = 'x > ${l}'
+    block_id = 2
+  []
+  [redo_bottom]
+    type = ParsedGenerateSideset
+    input = 'remove'
+    combinatorial_geometry = 'x > -1e8'
+    included_subdomains = '0'
+    included_boundaries = 'bottom'
+    new_sideset_name = 'bottom_v2'
+  []
+  [redo_top]
+    type = ParsedGenerateSideset
+    input = 'redo_bottom'
+    combinatorial_geometry = 'x > -1e8'
+    included_subdomains = '0'
+    included_boundaries = 'top'
+    new_sideset_name = 'top_v2'
+  []
+  [redo_right]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = 'redo_top'
+    primary_block = '0'
+    paired_block = '2'
+    new_boundary = 'right_v2'
   []
 []
 
@@ -29,12 +58,14 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
   extra_tag_matrices = 'mass'
   mass_matrix = 'mass'
   use_pressure_mass_matrix = true
+  kernel_coverage_check = false
 []
 
 [AuxVariables]
   [vel_mag]
     family = L2_HIERARCHIC
     order = SECOND
+    block = 0
   []
 []
 
@@ -51,26 +82,32 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
   [vel_x]
     family = L2_HIERARCHIC
     order = SECOND
+    block = 0
   []
   [vel_y]
     family = L2_HIERARCHIC
     order = SECOND
+    block = 0
   []
   [pressure]
     family = L2_HIERARCHIC
     order = FIRST
+    block = 0
   []
   [vel_bar_x]
     family = SIDE_HIERARCHIC
     order = SECOND
+    block = 0
   []
   [vel_bar_y]
     family = SIDE_HIERARCHIC
     order = SECOND
+    block = 0
   []
   [pressure_bar]
     family = SIDE_HIERARCHIC
     order = SECOND
+    block = 0
   []
 []
 
@@ -149,7 +186,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
 [BCs]
   [momentum_x_diffusion_walls]
     type = NavierStokesStressIPHDGDirichletBC
-    boundary = 'left bottom right'
+    boundary = 'left bottom_v2 right_v2'
     variable = vel_x
     face_variable = vel_bar_x
     pressure_variable = pressure
@@ -161,7 +198,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
   []
   [momentum_x_diffusion_top]
     type = NavierStokesStressIPHDGDirichletBC
-    boundary = 'top'
+    boundary = 'top_v2'
     variable = vel_x
     face_variable = vel_bar_x
     pressure_variable = pressure
@@ -173,7 +210,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
   []
   [momentum_y_diffusion_all]
     type = NavierStokesStressIPHDGDirichletBC
-    boundary = 'left bottom right top'
+    boundary = 'left bottom_v2 right_v2 top_v2'
     variable = vel_y
     face_variable = vel_bar_y
     pressure_variable = pressure
@@ -191,7 +228,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     velocity = 'velocity'
     coeff = '${fparse -rho}'
     self_advection = false
-    boundary = 'left bottom top right'
+    boundary = 'left bottom_v2 top_v2 right_v2'
     prescribed_normal_flux = 0
   []
 
@@ -199,7 +236,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     type = MassMatrixIntegratedBC
     variable = pressure_bar
     matrix_tags = 'mass'
-    boundary = 'left right bottom top'
+    boundary = 'left right_v2 bottom_v2 top_v2'
     density = '${fparse -1/gamma}'
   []
 
@@ -209,7 +246,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     u = vel_x
     v = vel_y
     component = 0
-    boundary = 'left right bottom'
+    boundary = 'left right_v2 bottom_v2'
     gamma = ${gamma}
     dirichlet_value = walls
   []
@@ -219,7 +256,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     u = vel_x
     v = vel_y
     component = 1
-    boundary = 'left right bottom'
+    boundary = 'left right_v2 bottom_v2'
     gamma = ${gamma}
     dirichlet_value = walls
   []
@@ -229,7 +266,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     u = vel_x
     v = vel_y
     component = 0
-    boundary = 'top'
+    boundary = 'top_v2'
     gamma = ${gamma}
     dirichlet_value = top_vel
   []
@@ -239,7 +276,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     u = vel_x
     v = vel_y
     component = 1
-    boundary = 'top'
+    boundary = 'top_v2'
     gamma = ${gamma}
     dirichlet_value = top_vel
   []
@@ -270,6 +307,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     vector_prop_name = 'velocity'
     u = vel_x
     v = vel_y
+    block = 0
   []
   [mu]
     type = ADParsedMaterial
@@ -277,7 +315,6 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     functor_symbols = 'reynolds'
     property_name = 'mu'
     expression = '${U} * ${l} / reynolds'
-    output_properties = 'mu'
   []
 []
 
@@ -316,12 +353,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
 
 [Outputs]
   print_linear_residuals = 'false'
-  [out]
-    type = Exodus
-    hide = 'pressure_average'
-    output_material_properties = true
-    execute_on = 'timestep_end'
-  []
+  csv = true
 []
 
 [Postprocessors]
@@ -332,10 +364,12 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
   [pressure_average]
     type = ElementAverageValue
     variable = pressure
+    block = 0
   []
   [vel_average]
     type = ElementAverageValue
     variable = vel_mag
+    block = 0
   []
 []
 
