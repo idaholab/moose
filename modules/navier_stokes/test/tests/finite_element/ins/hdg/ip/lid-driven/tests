@@ -108,7 +108,30 @@
     requirement = 'The system shall be able to apply a field split preconditioner on a statically condensed interior penalty hybridized discontinuous Galerkin discretization. The facet pressure mass matrix shall be an effective preconditioner for the Schur complement, even for a Reynolds number of 200, due to an augmented Lagrange-like stabilization.'
     expect_out = 'Linear nl0_condensed_fieldsplit_p_ solve converged due to CONVERGED_RTOL iterations [1-2]'
     absent_out = 'Linear nl0_condensed_fieldsplit_p_ solve converged due to CONVERGED_RTOL iterations [3-9]'
-    cli_args = "final_re=200 starting_re=200 num_steps=1 Outputs/out/output_material_properties=false -ksp_type preonly Materials/mu/output_properties=''"
+    cli_args = "final_re=200 starting_re=200 num_steps=1 Outputs/out/output_material_properties=false  Materials/mu/output_properties='' Outputs/out/hide='vel_average vel_mag pressure_average'"
     max_threads = 1 # static condensation doesn't currently support threading
+  []
+  [block_restriction]
+    requirement = 'The system shall produce equivalent output when using field split preconditoning and static condensation'
+    [csv]
+      type = CSVDiff
+      input = lid-driven-scfsp.i
+      csvdiff = lid-driven-scfsp_out.csv
+      cli_args = "final_re=200 starting_re=200 num_steps=1 Outputs/out/output_material_properties=false   Materials/mu/output_properties='' Outputs/csv=true"
+      max_threads = 1 # static condensation doesn't currently support threading
+      detail = 'without block restriction and'
+      prereq = 'lid_driven_sc_fsp'
+    []
+    [block_restricted_sc_fsp]
+      type = CSVDiff
+      input = block-restricted-scfsp.i
+      csvdiff = block-restricted-scfsp_out.csv
+      cli_args = "final_re=200 starting_re=200 num_steps=1"
+      max_threads = 1 # static condensation doesn't currently support threading
+      detail = 'with block restriction.'
+      expect_out = 'Linear nl0_condensed_fieldsplit_p_ solve converged due to CONVERGED_RTOL iterations [1-2]'
+      absent_out = 'Linear nl0_condensed_fieldsplit_p_ solve converged due to CONVERGED_RTOL iterations [3-9]'
+      mesh_mode = REPLICATED
+    []
   []
 []
