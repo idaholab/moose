@@ -45,10 +45,10 @@ LinearFVDirichletConjugateHeatTransferBC::computeBoundaryConductionFlux() const
            (_current_face_info->faceCentroid() - elem_info->centroid())) *
           (_current_face_info->faceCentroid() - elem_info->centroid());
 
-  return _thermal_conductivity(singleSidedFaceArg(_current_face_info), determineState()) *
+  return -_thermal_conductivity(singleSidedFaceArg(_current_face_info), determineState()) *
              (_incoming_temperature(singleSidedFaceArg(_current_face_info), determineState()) -
               _var.getElemValue(*elem_info, determineState())) /
-             computeCellToFaceDistance() +
+             computeCellToFaceDistance() -
          _var.gradSln(*elem_info) * correction_vector;
 }
 
