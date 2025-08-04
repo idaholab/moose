@@ -28,7 +28,7 @@ For example, if we wanted to use the surfaces from [!ref](fig:halfspaces) to def
 
 [Cells](source/csg/CSGBase.md#cells) are defined by two main characteristics: a region and a fill.
 The region is defined as described above and defines the domain of the cell.
-The fill can typically be set as void (i.e., nothing), a material (typically specified by provided the name of the material), a [universe](source/csg/CSGBase.md#universes), or a lattice (note, lattices are not yet supported for MOOSE implementation).
+The fill can typically be set as void (i.e., nothing), a material (placeholder type for now, this will be expanded in future works), a [universe](source/csg/CSGBase.md#universes), or a lattice (note, lattices are not yet supported for MOOSE implementation).
 
 [Universes](source/csg/CSGBase.md#universes) can then be optionally defined as a collection of cells, which can then be used to either fill other cells, or used repeatedly throughout a geometry (such as in a repeated lattice).
 By default, every model will have a [root universe](source/csg/CSGBase.md#root-universe), which is the singular overarching universe that all other universes can be traced back to through the tree defined by universes containing cells and cells filled with universes.

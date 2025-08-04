@@ -51,19 +51,19 @@ The following sections explain in detail how to do this as a part of the `genera
 
 Surfaces are used to define the spatial extent of the region of a `CSGCell`.
 To create a `CSGSurface` object, the surface constructor must be called directly to create a unique pointer.
-This pointer then has to be added to the current `CSGBase` instance with `addSurface` which will return a const reference to that generated surface (`const & CSGSurface`).
+This pointer then has to be passed to the current `CSGBase` instance with `addSurface` which will then return a const reference to that generated surface (`const & CSGSurface`).
 The syntax to do this is as follows:
 
 ```cpp
-// the unique surface pointer is made first
+// the unique surface pointer is made first, creating the surface object
 std::unique_ptr<CSG::CSGSurface> surf_ptr = std::make_unique<SurfaceType>(arguments);
-// and then it is explcitly added to this CSGBase instance
+// and then it is explicitly passed to this CSGBase instance, which holds the memory ownership for the object
 const auto & surface = csg_obj->addSurface(surf_ptr);
 ```
 
 !alert! note title=Adding surfaces to the CSGBase instance
 
-Surfaces need to be added to the CSGBase instance with `addSurace` as described above. If this is not done and these surfaces are referenced in regions used to define cells within the CSGBase instance, an error will occur.
+Surfaces need to be added to the CSGBase instance with `addSurface` as described above. If this is not done and these surfaces are referenced in regions used to define cells within the CSGBase instance, an error will occur.
 
 !alert-end!
 
@@ -347,7 +347,7 @@ For example:
 // other_mg_name is a MeshGeneratorName object
 auto csg_base = getCSGBaseByName(other_mg_name);
 std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*csg_base);
-// csg_obj is now the object that will continue to get updated throughout the generateCSG method.
+// csg_obj is now the object that will continue to get updated throughout the MeshGenerator's generateCSG method.
 ```
 
 !alert! note title=Accessing other MeshGenerator objects by name
