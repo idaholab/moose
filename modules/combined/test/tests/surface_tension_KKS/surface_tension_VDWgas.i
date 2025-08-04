@@ -9,9 +9,6 @@
   nx = 300
   xmin = 0
   xmax = 30
-[]
-
-[Problem]
   coord_type = RSPHERICAL
 []
 

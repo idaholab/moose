@@ -35,12 +35,9 @@
   family = LAGRANGE
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = gravity_rz_quad8_test.e
+  coord_type = RZ
 []
 
 [Variables]

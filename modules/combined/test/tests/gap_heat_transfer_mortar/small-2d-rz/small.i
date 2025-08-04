@@ -69,9 +69,6 @@ name = 'small'
     new_block_id = '20'
     new_block_name = 'frictionless_primary_subdomain'
   []
-[]
-
-[Problem]
   coord_type = RZ
 []
 

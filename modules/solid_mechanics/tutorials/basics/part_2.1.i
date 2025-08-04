@@ -6,13 +6,10 @@
   displacements = 'disp_r disp_z' #change the variable names for the coordinate system
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = necking_quad4.e
   uniform_refine = 1
+  coord_type = RZ
 []
 
 [Physics/SolidMechanics/QuasiStatic]

@@ -3,9 +3,6 @@
   dim = 2
   nx = 3
   ny = 3
-[]
-
-[Problem]
   coord_type = RZ
 []
 

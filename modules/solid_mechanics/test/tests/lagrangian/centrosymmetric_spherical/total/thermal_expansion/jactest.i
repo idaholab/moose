@@ -8,9 +8,6 @@
   type = GeneratedMesh
   dim = 1
   nx = 2
-[]
-
-[Problem]
   coord_type = RSPHERICAL
 []
 

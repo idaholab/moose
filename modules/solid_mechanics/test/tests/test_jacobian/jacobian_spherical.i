@@ -10,9 +10,6 @@
     xmin = 1
     xmax = 2
   []
-[]
-
-[Problem]
   coord_type = RSPHERICAL
 []
 

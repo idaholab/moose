@@ -11,12 +11,12 @@
   dim = 1
   nx = 2000
   xmax = 2000
+  rz_coord_axis = Y
+  coord_type = RZ
 []
 
 [Problem]
   type = FEProblem
-  coord_type = RZ
-  rz_coord_axis = Y
 []
 
 [GlobalParams]

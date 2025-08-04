@@ -26,12 +26,9 @@
   temperature = temp
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = elastic_patch_rz.e
+  coord_type = RZ
 []
 
 [Variables]

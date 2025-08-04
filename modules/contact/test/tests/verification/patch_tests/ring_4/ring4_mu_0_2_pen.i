@@ -5,11 +5,11 @@
 
 [Mesh]
   file = ring4_mesh.e
+  coord_type = RZ
 []
 
 [Problem]
   type = FEProblem
-  coord_type = RZ
 []
 
 [Variables]

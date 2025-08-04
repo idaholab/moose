@@ -7,10 +7,6 @@
 # in the order of 1e-8 for finite strain.
 
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -20,6 +16,7 @@
   xmax = 1.75
   ymin = 0
   ymax = 1.5
+  coord_type = RZ
 []
 
 [GlobalParams]

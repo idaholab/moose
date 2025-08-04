@@ -1,0 +1,51 @@
+[Tests]
+  issues = '#30300'
+  design = 'BlockRestrictable.md sanity_checking.md'
+  [block_test]
+    requirement = 'The system shall allow users to define a default set of blocks for the simulation, which (1) limits kernel and material coverage checks to those blocks, and (2) automatically applies block restrictions to kernels and variables unless explicitly overridden by the user, and'
+    [default_block]
+      type = Exodiff
+      input = 'diffusion_with_null_material.i'
+      exodiff = 'diffusion_with_null_material_out.e'
+      detail = 'verify that defining a default set of blocks correctly limits kernel and material coverage checks, and automatically applies block restrictions to kernels and variables.'
+    []
+    [different_kernel_different_blocks]
+      type = Exodiff
+      input = 'diffusion_with_null_material_different_kernel_differnt_blocks.i'
+      exodiff = 'diffusion_with_null_material_different_kernel_differnt_blocks_out.e'
+      detail = 'verify that different kernels can be assigned to different blocks, as long as the block IDs are within the default block list provided by the user.'
+    []
+    [default_block_with_kernel_coverage_check_false]
+      type = RunApp
+      input = 'diffusion_with_null_material_kernel_coverage_check_false.i'
+      detail = 'verify the scenario where users define a default set of blocks but explicitly disable kernel coverage checking.'
+    []
+  []
+  [error_check]
+    requirement = 'The system shall throw an error if the user specifies incompatible parameters for Problem/block and coverage check block lists;'
+    [kernel_coverage_skip]
+      type = RunException
+      input = 'error_kernel_coverage_skip.i'
+      expect_err = 'Subdomain "2" is not being skipped.'
+      detail = 'an error shall be issued when the "skip list" contains blocks that are not part of the simulation domain specified by Problem/block.'
+    []
+    [kernel_coverage_only]
+      type = RunException
+      input = 'error_kernel_coverage_only.i'
+      expect_err = 'Subdomain "2" is not part of the simulation domain specified by Problem/block.'
+      detail = 'an error shall be issued when the "only list" contains blocks that are not part of the simulation domain specified by Problem/block.'
+    []
+    [material_coverage_skip]
+      type = RunException
+      input = 'error_material_coverage_skip.i'
+      expect_err = 'Subdomain "2" is not being skipped.'
+      detail = 'an error shall be issued when the "skip list" contains blocks that are not part of the simulation domain specified by Problem/block.'
+    []
+    [material_coverage_only]
+      type = RunException
+      input = 'error_material_coverage_only.i'
+      expect_err = 'Subdomain "2" is not part of the simulation domain specified by Problem/block.'
+      detail = 'an error shall be issued when the "only list" contains blocks that are not part of the simulation domain specified by Problem/block.'
+    []
+  []
+[]

@@ -13,11 +13,11 @@ offset=0e0
     nx = 2
     ny = 2
   []
+  coord_type = 'RZ'
 []
 
 [Problem]
   fv_bcs_integrity_check = false
-  coord_type = 'RZ'
 []
 
 [GlobalParams]

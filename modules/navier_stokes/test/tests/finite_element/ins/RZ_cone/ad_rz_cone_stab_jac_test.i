@@ -21,9 +21,6 @@
     nodes = '0'
     input = gen
   [../]
-[]
-
-[Problem]
   coord_type = RZ
 []
 

@@ -19,9 +19,6 @@ velocity_interp_method = 'rc'
 [Mesh]
   file = diverging.msh
   uniform_refine = 2
-[]
-
-[Problem]
   coord_type = 'RZ'
 []
 

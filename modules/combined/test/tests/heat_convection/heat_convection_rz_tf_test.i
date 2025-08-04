@@ -48,15 +48,12 @@
 #  3) 1) and 2) should prove that the Tf boundary condition is ramping as desired.
 # Note, we do the above because there is no way to plot a variable that is not on a mesh node!
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]    # Mesh Start
 # 10cm x 20cm cylinder not so detailed mesh, 2 radial, 6 axial nodes
 # Only one block (Block 1), all concrete
 # Sideset 1 - top of cylinder, Sideset 2 - length of cylinder, Sideset 3 - bottom of cylinder
   file = heat_convection_rz_mesh.e
+  coord_type = RZ
 []    # Mesh END
 
 [Variables]  # Variables Start

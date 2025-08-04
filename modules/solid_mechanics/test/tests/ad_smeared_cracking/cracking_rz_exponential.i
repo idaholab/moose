@@ -10,9 +10,6 @@
 
 [Mesh]
   file = cracking_rz_test.e
-[]
-
-[Problem]
   coord_type = RZ
 []
 

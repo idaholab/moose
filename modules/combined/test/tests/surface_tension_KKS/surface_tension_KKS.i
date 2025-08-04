@@ -11,9 +11,6 @@
   dim = 1
   nx = 200
   xmax = 200
-[]
-
-[Problem]
   coord_type = RSPHERICAL
 []
 

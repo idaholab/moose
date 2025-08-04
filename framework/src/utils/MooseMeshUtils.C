@@ -12,6 +12,8 @@
 
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
+#include "libmesh/id_types.h"
+#include "libmesh/int_range.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/utility.h"
@@ -185,20 +187,37 @@ getBoundaryIDSet(const MeshBase & mesh,
 std::vector<subdomain_id_type>
 getSubdomainIDs(const MeshBase & mesh, const std::vector<SubdomainName> & subdomain_names)
 {
-  std::vector<SubdomainID> ids(subdomain_names.size());
-
-  for (const auto i : index_range(subdomain_names))
-    ids[i] = MooseMeshUtils::getSubdomainID(subdomain_names[i], mesh);
-
+  mooseAssert(mesh.is_prepared(), "getSubdomainIDs() should only be called on a prepared mesh");
+  std::vector<subdomain_id_type> ids;
+  if (std::find(subdomain_names.begin(), subdomain_names.end(), "ANY_BLOCK_ID") !=
+      subdomain_names.end())
+  {
+    if (subdomain_names.size() > 1)
+      mooseError(
+          "You passed \"ANY_BLOCK_ID\" in addition to other subdomain names to getSubdomainIDs().");
+    ids.assign(mesh.get_mesh_subdomains().begin(), mesh.get_mesh_subdomains().end());
+  }
+  else
+  {
+    ids.resize(subdomain_names.size());
+    for (auto i : index_range(subdomain_names))
+      ids[i] = MooseMeshUtils::getSubdomainID(subdomain_names[i], mesh);
+  }
   return ids;
 }
 
 std::set<subdomain_id_type>
 getSubdomainIDs(const MeshBase & mesh, const std::set<SubdomainName> & subdomain_names)
 {
-  std::set<SubdomainID> ids;
+  mooseAssert(mesh.is_prepared(), "getSubdomainIDs() should only be called on a prepared mesh");
+  std::set<subdomain_id_type> ids;
   for (const auto & name : subdomain_names)
-    ids.insert(MooseMeshUtils::getSubdomainID(name, mesh));
+  {
+    if (name == "ANY_BLOCK_ID")
+      ids.insert(mesh.get_mesh_subdomains().begin(), mesh.get_mesh_subdomains().end());
+    else
+      ids.insert(MooseMeshUtils::getSubdomainID(name, mesh));
+  }
   return ids;
 }
 

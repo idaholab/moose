@@ -16,16 +16,13 @@
     nx = 4
     xmin = 0.2
   [../]
+  coord_type = RSPHERICAL
 []
 
 [Variables]
   [./u]
     order = FIRST
   [../]
-[]
-
-[Problem]
-  coord_type = RSPHERICAL
 []
 
 [Functions]

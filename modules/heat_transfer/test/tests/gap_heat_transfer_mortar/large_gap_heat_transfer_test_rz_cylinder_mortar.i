@@ -71,9 +71,6 @@ rpv_blocks = '3'
     input = secondary
   []
   allow_renumbering = false
-[]
-
-[Problem]
   coord_type = RZ
 []
 

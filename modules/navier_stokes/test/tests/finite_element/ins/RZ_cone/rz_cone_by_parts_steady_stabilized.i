@@ -14,9 +14,6 @@
 
 [Mesh]
   file = '2d_cone.msh'
-[]
-
-[Problem]
   coord_type = RZ
 []
 

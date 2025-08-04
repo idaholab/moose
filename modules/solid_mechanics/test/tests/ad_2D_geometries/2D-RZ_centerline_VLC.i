@@ -4,15 +4,12 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
+  coord_type = RZ
 []
 
 [GlobalParams]
   displacements = 'disp_r disp_z'
   volumetric_locking_correction = true
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [Physics/SolidMechanics/QuasiStatic]

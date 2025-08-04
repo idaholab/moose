@@ -9,6 +9,7 @@
     ymin = 0
     ymax = 1
   []
+  coord_type = RZ
 []
 
 [Variables/u]
@@ -72,10 +73,6 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [Outputs]

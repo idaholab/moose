@@ -12,14 +12,11 @@
   nx = 4
   xmin = 0.0
   xmax = 1.0
+  coord_type = RSPHERICAL
 []
 
 [GlobalParams]
   displacements = 'disp_x'
-[]
-
-[Problem]
-  coord_type = RSPHERICAL
 []
 
 [AuxVariables]
