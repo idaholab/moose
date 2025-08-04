@@ -69,7 +69,7 @@ public:
   void setMesh();
 
   /**
-   * Add an MFEM SubMeshes to the problem.
+   * Add an MFEM SubMesh to the problem.
    */
   void addSubMesh(const std::string & user_object_name,
                   const std::string & name,

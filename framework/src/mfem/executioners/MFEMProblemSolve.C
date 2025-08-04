@@ -23,7 +23,7 @@ MFEMProblemSolve::validParams()
   params.addParam<MooseEnum>(
       "assembly_level",
       assembly_levels,
-      "Matrix assembly level. Options: legacy, full, element, partial, none.");
+      "Matrix assembly level.");
   return params;
 }
 
