@@ -38,6 +38,9 @@ MooseBase::MooseBase(MooseApp & app, const InputParameters & params)
     _name(params.getObjectName()),
     _pars(params)
 {
+  mooseAssert(_type.size(), "Type is empty");
+  mooseAssert(_name.size(), "Name is empty");
+
   // This enforces that we call finalizeParams (checkParams() and setting file paths)
   mooseAssert(_pars.isFinalized(), "Params are not finalized");
 }

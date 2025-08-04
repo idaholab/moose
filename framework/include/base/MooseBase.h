@@ -86,13 +86,21 @@ public:
    * Get the type of this class.
    * @return the name of the type of this class
    */
-  const std::string & type() const { return _type; }
+  const std::string & type() const
+  {
+    mooseAssert(_type.size(), "Empty type");
+    return _type;
+  }
 
   /**
    * Get the name of the class
    * @return The name of the class
    */
-  const std::string & name() const { return _name; }
+  const std::string & name() const
+  {
+    mooseAssert(_name.size(), "Empty name");
+    return _name;
+  }
 
   /**
    * Get the class's combined type and name; useful in error handling.
