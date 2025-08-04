@@ -99,7 +99,7 @@ velocity_interp_method = 'rc'
         outlet_boundaries = 'outlet'
         momentum_outlet_types = 'fixed-pressure'
         pressure_functors = 0.0
-        wall_boundaries = 'wall       symmetry'
+        wall_boundaries = 'wall symmetry'
         momentum_wall_types = 'noslip symmetry'
 
         momentum_advection_interpolation = ${advected_interp_method}

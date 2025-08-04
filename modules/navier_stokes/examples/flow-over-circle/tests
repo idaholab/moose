@@ -5,7 +5,7 @@
     type = 'CSVDiff'
     input = 'flow_over_circle-physics.i'
     csvdiff = 'flow_over_circle-physics_out.csv'
-    requirement = 'The system shall be able to solve transient flow resulting in vortex shedding in 2D using the Navier Stokes Flow Physics syntax'
+    requirement = 'The system shall be able to solve transient flow resulting in vortex shedding in 2D using the Newton-based solution algorithm and the associated Navier Stokes shorthand physics syntax.'
     cli_args = 'refinement=2 Executioner/end_time=2e-3'
     mesh_mode = replicated
     valgrind = 'none'
@@ -14,7 +14,7 @@
     type = 'CSVDiff'
     input = 'flow_over_circle_linearfv-physics.i'
     csvdiff = 'flow_over_circle_linearfv-physics_out.csv'
-    requirement = 'The system shall be able to solve transient flow resulting in vortex shedding in 2D using the PIMPLE solution algorithm and the finite volume method'
+    requirement = 'The system shall be able to solve transient flow resulting in vortex shedding in 2D using the PIMPLE solution algorithm and the associated Navier Stokes shorthand physics syntax.'
     cli_args = 'refinement=2 Executioner/dt=1e-3 Executioner/num_steps=2'
     mesh_mode = replicated
     valgrind = 'none'
