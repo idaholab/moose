@@ -43,8 +43,9 @@ HexagonalGridDivision::validParams()
       "assign_domain_outside_grid_to_border",
       false,
       "Whether to map the domain outside the grid back to the border of the grid");
-  params.addParam<Real>(
-      "rotation_around_axis", 0., "Rotation angle to apply to the underlying hexagonal lattice");
+  params.addParam<Real>("rotation_around_axis",
+                        0.,
+                        "Rotation angle to apply to the underlying hexagonal lattice (in degrees)");
 
   return params;
 }

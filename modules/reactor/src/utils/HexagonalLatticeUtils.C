@@ -32,8 +32,10 @@ HexagonalLatticeUtils::HexagonalLatticeUtils(const Real bundle_inner_flat_to_fla
     _n_rings(n_rings),
     _axis(axis),
     _rotation_around_axis(rotation_around_axis),
-    _rotation_matrix(RotationMatrix::rotVec2DToX(
-        Point(std::cos(_rotation_around_axis), std::sin(_rotation_around_axis), 0.))),
+    _rotation_matrix(
+        RotationMatrix::rotVec2DToX(Point(std::cos(_rotation_around_axis * libMesh::pi / 180),
+                                          -std::sin(_rotation_around_axis * libMesh::pi / 180),
+                                          0.))),
     _bundle_side_length(hexagonSide(_bundle_pitch)),
     _pin_area(M_PI * _pin_diameter * _pin_diameter / 4.0),
     _pin_circumference(M_PI * _pin_diameter),

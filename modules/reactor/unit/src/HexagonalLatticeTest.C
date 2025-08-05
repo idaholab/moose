@@ -580,17 +580,17 @@ TEST_F(HexagonalLatticeTest, pin_centers_rotated_pi)
 {
   Real bp = 5.0, pp = 0.99, pd = 0.8, wd = 0.0, wp = 50.0;
   unsigned int nr = 3, a = 2;
-  HexagonalLatticeUtils hl14(bp, pp, pd, wd, wp, nr, a, libMesh::pi);
+  HexagonalLatticeUtils hl14(bp, pp, pd, wd, wp, nr, a, 180);
 
   nr = 1;
-  HexagonalLatticeUtils hl15(bp, pp, pd, wd, wp, nr, a, libMesh::pi);
+  HexagonalLatticeUtils hl15(bp, pp, pd, wd, wp, nr, a, 180);
 
   nr = 2;
-  HexagonalLatticeUtils hl16(bp, pp, pd, wd, wp, nr, a, libMesh::pi);
+  HexagonalLatticeUtils hl16(bp, pp, pd, wd, wp, nr, a, 180);
 
   bp = 10.0;
   nr = 4;
-  HexagonalLatticeUtils hl17(bp, pp, pd, wd, wp, nr, a, libMesh::pi);
+  HexagonalLatticeUtils hl17(bp, pp, pd, wd, wp, nr, a, 180);
 
   Real cos60 = 0.5;
   Real sin60 = std::sqrt(3.0) / 2.0;
