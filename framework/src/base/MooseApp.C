@@ -368,11 +368,7 @@ MooseApp::validParams()
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default");
 
-  MooseEnum compute_device_type("cpu cuda mps hip ceed-cpu ceed-cuda ceed-hip", "cpu");
-  params.addCommandLineParam<MooseEnum>("libtorch_device",
-                                        "--libtorch-device",
-                                        compute_device_type,
-                                        "Deprecated. Use --compute-device.");
+  const MooseEnum compute_device_type("cpu cuda mps hip ceed-cpu ceed-cuda ceed-hip", "cpu");
   params.addCommandLineParam<MooseEnum>(
       "compute_device",
       "--compute-device",
@@ -517,9 +513,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
 #ifdef MOOSE_LIBTORCH_ENABLED
     ,
-    _libtorch_device(determineLibtorchDeviceType(isParamSetByUser("libtorch_device")
-                                                     ? getParam<MooseEnum>("libtorch_device")
-                                                     : getParam<MooseEnum>("compute_device")))
+    _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("compute_device")))
 #endif
 #ifdef MOOSE_MFEM_ENABLED
     ,
@@ -533,13 +527,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
             : std::set<std::string>{})
 #endif
 {
-  if (isParamSetByUser("libtorch_device"))
-  {
-    mooseDeprecated("--libtorch-device has been renamed --compute-device.");
-    if (isParamSetByUser("compute_device"))
-      mooseError("Remove the redundant --libtorch-device option.");
-  }
-
   if (&parameters != &_pars)
   {
     const auto show_trace = Moose::show_trace;
@@ -801,8 +788,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
 std::optional<MooseEnum>
 MooseApp::getComputeDevice() const
 {
-  if (isParamSetByUser("libtorch_device"))
-    return getParam<MooseEnum>("libtorch_device");
   if (isParamSetByUser("compute_device"))
     return getParam<MooseEnum>("compute_device");
   return {};
@@ -3530,7 +3515,7 @@ MooseApp::constructingMeshGenerators() const
 torch::DeviceType
 MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum) const
 {
-  const auto pname = isParamSetByUser("libtorch_device") ? "--libtorch-device" : "--compute-device";
+  const auto pname = "--compute-device";
   if (device_enum == "cuda")
   {
 #ifdef __linux__

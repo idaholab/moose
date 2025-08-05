@@ -53,10 +53,9 @@ class RunApp(Tester):
         # Valgrind
         params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
-        params.addParam('libtorch_devices', "The devices to use for this libtorch test ('CPU', 'CUDA', 'MPS')")
         device_list_str = "', '".join(d.upper() for d in TestHarness.validComputeDevices())
         device_param_doc = f"The devices to use for this libtorch or MFEM test ('{device_list_str}'); device availability depends on library support and compilation settings; default ('CPU')"
-        params.addParam('devices', ['CPU'], device_param_doc)
+        params.addParam('compute_devices', ['CPU'], device_param_doc)
 
         return params
 
@@ -79,12 +78,7 @@ class RunApp(Tester):
             if params['no_additional_cli_args']:
                 raise Exception('The parameters "command_proxy" and "no_additional_cli_args" cannot be supplied together')
 
-        if params.isValid('libtorch_devices'):
-            for value in params['libtorch_devices']:
-                if value.lower() not in ['cpu', 'cuda', 'mps']:
-                    raise Exception(f'Unknown libtorch_device "{value}"')
-
-        for value in params['devices']:
+        for value in params['compute_devices']:
             if value.lower() not in TestHarness.validComputeDevices():
                 raise Exception(f'Unknown device "{value}"')
 
@@ -130,12 +124,7 @@ class RunApp(Tester):
                 self.setStatus(self.skip)
                 return False
 
-        if self.specs.isValid('libtorch_devices'):
-            devices_lower = [x.lower() for x in self.specs['libtorch_devices']]
-        elif self.specs.isValid('devices'):
-            devices_lower = [x.lower() for x in self.specs['devices']]
-        else:
-            devices_lower = [x.lower() for x in self.specs['compute_devices']]
+        devices_lower = [x.lower() for x in self.specs['compute_devices']]
         if options.compute_device not in devices_lower:
             self.addCaveats(f'{options.compute_device} not in compute devices')
             self.setStatus(self.skip)
