@@ -9,7 +9,8 @@
 
 [SubMeshes]
   [cut]
-    type = MFEMBoundaryElementSubMesh
+    type = MFEMCutTransitionSubMesh
+    cut_name = cut
     boundary = 1
   []
 []

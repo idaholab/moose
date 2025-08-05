@@ -9,7 +9,8 @@
 
 [SubMeshes]
   [cut]
-    type = MFEMBoundaryElementSubMesh
+    type = MFEMCutTransitionSubMesh
+    cut_name = cut
     boundary = 1
   []
 []
@@ -77,13 +78,13 @@
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = '5' 
-    value = 500.0
+    coefficient = 500.0
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = '1'
-    value = -500.0
+    coefficient = -500.0
   []
 []
 
