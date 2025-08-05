@@ -3,7 +3,7 @@
 
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/torus.e
+  file = ../mesh/embedded_torus.e
 []
 
 [Problem]
@@ -73,7 +73,7 @@
     type = MFEMVectorTangentialDirichletBC
     variable = a_field
     vector_coefficient = exact_a_field
-    boundary = '3 4'
+    boundary = 'Exterior'
   []
 []
 
@@ -95,6 +95,7 @@
     type = MFEMVectorFEDomainLFKernel
     variable = a_field
     vector_coefficient = current_density
+    block = '1 2'
   []   
 []
 

@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/torus.e
+  file = ../mesh/embedded_torus.e
 []
 
 [Problem]
@@ -77,7 +77,7 @@
   [high_terminal]
     type = MFEMScalarDirichletBC
     variable = submesh_potential
-    boundary = '5' 
+    boundary = '3' 
     coefficient = 500.0
   []
   [low_terminal]

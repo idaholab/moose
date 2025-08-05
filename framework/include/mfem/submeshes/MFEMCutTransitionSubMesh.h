@@ -45,9 +45,11 @@ public:
 
 protected:
   virtual void buildSubMesh() override;
-  void makeWedge(mfem::ParMesh & parent_mesh);
 
-    // Finds the coordinates for the "centre of mass" of the vertices of an
+  // Add attribute to the parent mesh representing the cut transition region
+  void modifyMesh(mfem::ParMesh & parent_mesh);
+
+  // Finds the coordinates for the "centre of mass" of the vertices of an
   // element.
   mfem::Vector elementCentre(int el, mfem::ParMesh *pm);
 

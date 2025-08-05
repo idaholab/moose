@@ -4,7 +4,7 @@
 
 [Mesh]
     type = MFEMMesh
-    file = ../mesh/torus.e
+    file = ../mesh/embedded_torus.e
 []
 
 [SubMeshes]
@@ -100,7 +100,7 @@
     type = MFEMDomainLFGradKernel
     variable = potential
     vector_coefficient = grad_source_potential
-    block = '3'
+    block = cut
   []    
 []
 

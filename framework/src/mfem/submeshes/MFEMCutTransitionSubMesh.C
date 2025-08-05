@@ -159,18 +159,19 @@ MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & param
 void
 MFEMCutTransitionSubMesh::buildSubMesh()
 { 
-  makeWedge(getMFEMProblem().mesh().getMFEMParMesh());
+  modifyMesh(getMFEMProblem().mesh().getMFEMParMesh());
   _submesh = std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromDomain(
     getMFEMProblem().mesh().getMFEMParMesh(), mfem::Array<int>({_subdomain_label})));
 }
 
-void MFEMCutTransitionSubMesh::makeWedge(mfem::ParMesh & parent_mesh) {
+void MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh) {
 
   std::vector<int> old_dom_attrs;
   std::vector<int> bdr_els;
   std::pair<int, int> elec_attrs_;
   elec_attrs_.first = _bdr_attribute;
   elec_attrs_.second = parent_mesh.bdr_attributes.Max() + 1;
+  const mfem::Array<int> coil_domains_({1,2});
 
   // First we save the current domain attributes so they may be restored later
   for (int e = 0; e < parent_mesh.GetNE(); ++e)
@@ -208,9 +209,9 @@ void MFEMCutTransitionSubMesh::makeWedge(mfem::ParMesh & parent_mesh) {
 
   for (int e = 0; e < parent_mesh.GetNE(); ++e) {
 
-    // if (!isInDomain(e, coil_domains_, parent_mesh) ||
-    //     plane.side(elementCentre(e, &parent_mesh)) == 1)
-    //   continue;
+    if (!isInDomain(e, coil_domains_, &parent_mesh) ||
+        plane.side(elementCentre(e, &parent_mesh)) == 1)
+      continue;
 
     if (
     plane.side(elementCentre(e, &parent_mesh)) == 1)
@@ -245,11 +246,11 @@ void MFEMCutTransitionSubMesh::makeWedge(mfem::ParMesh & parent_mesh) {
     int e1, e2;
     parent_mesh.GetFaceElements(wf, &e1, &e2);
 
-    // // If the face is a coil boundary
-    // if (!(isInDomain(e1, coil_domains_, parent_mesh) &&
-    //       isInDomain(e2, coil_domains_, parent_mesh))) {
-    //   continue;
-    // }
+    // If the face is a coil boundary
+    if (!(isInDomain(e1, coil_domains_, &parent_mesh) &&
+          isInDomain(e2, coil_domains_, &parent_mesh))) {
+      continue;
+    }
 
     // If the face is not true interior
     if (!(parent_mesh.FaceIsInterior(wf) ||
