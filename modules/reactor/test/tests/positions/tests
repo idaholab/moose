@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#23587'
+  issues = '#23587 #31215'
   design = 'HexagonalGridPositions.md'
 
   [test]
@@ -23,6 +23,15 @@
       jsondiff = 'hexagonal_grid_positions_3r_out.json'
       cli_args = 'Positions/active=hex_grid_3rings_exclusions Outputs/file_base=hexagonal_grid_positions_3r_out'
       detail = 'a three-ring hexagonal grid with some positions excluded,'
+    []
+    [rotated_hex_pattern_2rings]
+      type = 'JSONDiff'
+      input = 'hexagonal_grid_positions.i'
+      jsondiff = 'rotated_hexagonal_grid_positions_2r_out.json'
+      cli_args = "Positions/active=hex_grid_2rings_exclusions
+                  Positions/hex_grid_2rings_exclusions/rotation_around_axis=30
+                  Outputs/file_base=rotated_hexagonal_grid_positions_2r_out"
+      detail = 'a two-ring hexagonal grid with some positions excluded,'
     []
     [nested_hex_pattern]
       type = 'JSONDiff'
