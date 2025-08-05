@@ -10,6 +10,7 @@
 #include "HexagonalLatticeUtils.h"
 #include "MooseUtils.h"
 #include "GeometryUtils.h"
+#include "RotationMatrix.h"
 
 const Real HexagonalLatticeUtils::COS60 = 0.5;
 const Real HexagonalLatticeUtils::SIN60 = std::sqrt(3.0) / 2.0;
@@ -21,7 +22,8 @@ HexagonalLatticeUtils::HexagonalLatticeUtils(const Real bundle_inner_flat_to_fla
                                              const Real wire_diameter,
                                              const Real wire_pitch,
                                              const unsigned int n_rings,
-                                             const unsigned int axis)
+                                             const unsigned int axis,
+                                             const Real rotation_around_axis)
   : _bundle_pitch(bundle_inner_flat_to_flat),
     _pin_pitch(pin_pitch),
     _pin_diameter(pin_diameter),
@@ -29,6 +31,9 @@ HexagonalLatticeUtils::HexagonalLatticeUtils(const Real bundle_inner_flat_to_fla
     _wire_pitch(wire_pitch),
     _n_rings(n_rings),
     _axis(axis),
+    _rotation_around_axis(rotation_around_axis),
+    _rotation_matrix(RotationMatrix::rotVec2DToX(
+        Point(std::cos(_rotation_around_axis), std::sin(_rotation_around_axis), 0.))),
     _bundle_side_length(hexagonSide(_bundle_pitch)),
     _pin_area(M_PI * _pin_diameter * _pin_diameter / 4.0),
     _pin_circumference(M_PI * _pin_diameter),
@@ -58,6 +63,16 @@ HexagonalLatticeUtils::HexagonalLatticeUtils(const Real bundle_inner_flat_to_fla
 
   _unit_translation_x = {0.0, -SIN60, -SIN60, 0.0, SIN60, SIN60};
   _unit_translation_y = {1.0, COS60, -COS60, -1.0, -COS60, COS60};
+
+  // Use rotation matrix on unit translation vectors
+  if (rotation_around_axis != 0)
+    for (const auto i : make_range(6))
+    {
+      const Point rotated =
+          _rotation_matrix * Point(_unit_translation_x[i], _unit_translation_y[i], 0);
+      _unit_translation_x[i] = rotated(0);
+      _unit_translation_y[i] = rotated(1);
+    }
 
   // compute number of each pin and channel and channel type (interior, edge channel)
   computePinAndChannelTypes();
@@ -258,6 +273,18 @@ HexagonalLatticeUtils::computePinAndDuctCoordinates()
 
   Real edge_shiftx[] = {-1, -COS60, COS60, 1, COS60, -COS60};
   Real edge_shifty[] = {0, -SIN60, -SIN60, 0, SIN60, SIN60};
+
+  // Use rotation matrix on shift vectors
+  if (_rotation_around_axis != 0)
+    for (const auto i : make_range(6))
+    {
+      Point rotated = _rotation_matrix * Point(corner_shiftx[i], corner_shifty[i], 0);
+      corner_shiftx[i] = rotated(0);
+      corner_shifty[i] = rotated(1);
+      rotated = _rotation_matrix * Point(edge_shiftx[i], edge_shifty[i], 0);
+      edge_shiftx[i] = rotated(0);
+      edge_shifty[i] = rotated(1);
+    }
 
   // compute coordinates of the pin centers relative to the bundle's center
   Point center(0, 0, 0);
