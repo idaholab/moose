@@ -36,8 +36,7 @@ KokkosGenericConstantMaterial::KokkosGenericConstantMaterial(const InputParamete
   unsigned int num_values = _prop_values.size();
 
   if (num_names != num_values)
-    mooseError("Number of prop_names must match the number of prop_values for a "
-               "KokkosGenericConstantMaterial!");
+    paramError("prop_names", "Size must match the number of prop_values.");
 
   _props.create(_num_props);
 
