@@ -215,16 +215,20 @@ CylinderComponent::addMeshGenerators()
     ext_params.set<BoundaryName>("top_boundary") = name() + "_top_boundary";
 
     // parameters for expansion
-    ext_params.set<MooseEnum>("radial_growth_method") = getParam<MooseEnum>("radial_growth_method");
-    ext_params.set<Real>("r_final") = getParam<Real>("end_radius");
-    ext_params.set<Real>("start_radial_growth_rate") = getParam<Real>("start_radial_growth_rate");
-    ext_params.set<Real>("end_radial_growth_rate") = getParam<Real>("end_radial_growth_rate");
+    if (isParamValid("end_radius"))
+    {
+      ext_params.set<MooseEnum>("radial_growth_method") =
+          getParam<MooseEnum>("radial_growth_method");
+      ext_params.set<Real>("r_final") = getParam<Real>("end_radius");
+      ext_params.set<Real>("start_radial_growth_rate") = getParam<Real>("start_radial_growth_rate");
+      ext_params.set<Real>("end_radial_growth_rate") = getParam<Real>("end_radial_growth_rate");
+    }
 
-      const Point default_direction(1, 0, 0);
-      ext_params.set<Point>("direction") = default_direction;
-      _app.getMeshGeneratorSystem().addMeshGenerator(
-          "AdvancedExtruderGenerator", name() + "_base", ext_params);
-      _mg_names.push_back(name() + "_base");
+    const Point default_direction(1, 0, 0);
+    ext_params.set<Point>("direction") = default_direction;
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "AdvancedExtruderGenerator", name() + "_base", ext_params);
+    _mg_names.push_back(name() + "_base");
   }
 
   ComponentMeshTransformHelper::addMeshGenerators();
