@@ -11,6 +11,8 @@
 
 #include "WCNSFVFluxBCBase.h"
 
+class SinglePhaseFluidProperties;
+
 /**
  * Flux boundary condition for the weakly compressible energy equation
  */
