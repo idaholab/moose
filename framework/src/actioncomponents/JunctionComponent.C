@@ -40,6 +40,12 @@ JunctionComponent::validParams()
   MooseEnum junction_type("stitch_meshes fill_gap", "fill_gap");
   params.addParam<MooseEnum>("junction_method", junction_type, "How to join the two components");
 
+  params.addParam<bool>("enforce_all_nodes_match_on_boundaries",
+                        true,
+                        "Only stitch if all nodes match on the boundary. Defaults to true because "
+                        "there is a search algorithm that forces nodes to match assuming there are "
+                        "equal number of nodes on each target boundary.");
+
   // Parameters for changing radius -- final radius will be calculated under the hood
   MooseEnum radial_growth_methods("LINEAR CUBIC", "CUBIC");
   params.addParam<MooseEnum>("radial_growth_method",
@@ -80,7 +86,8 @@ JunctionComponent::JunctionComponent(const InputParameters & params)
     ComponentInitialConditionInterface(params),
     ComponentBoundaryConditionInterface(params),
     ComponentMeshTransformHelper(params),
-    _junction_method(getParam<MooseEnum>("junction_method"))
+    _junction_method(getParam<MooseEnum>("junction_method")),
+    _enforce_all_nodes_match_on_boundaries(getParam<bool>("enforce_all_nodes_match_on_boundaries"))
 {
   addRequiredTask("add_mesh_generator");
 
@@ -126,7 +133,8 @@ JunctionComponent::addMeshGenerators()
             {first_boundary, second_boundary}};
         params.set<bool>("verbose_stitching") = _verbose;
         params.set<bool>("output") = _verbose;
-        params.set<bool>("enforce_all_nodes_match_on_boundaries") = true;
+        params.set<bool>("enforce_all_nodes_match_on_boundaries") =
+            _enforce_all_nodes_match_on_boundaries;
         _app.getMeshGeneratorSystem().addMeshGenerator(
             "StitchMeshGenerator", name() + "_base", params);
         _mg_names.push_back(name() + "_base");
@@ -162,7 +170,9 @@ JunctionComponent::addMeshGenerators()
     const auto & second_component_cmth =
         _awh.getAction<ComponentMeshTransformHelper>(getParam<ComponentName>("second_component"));
 
-    // find start and end directions (may need to take the negative of the end direction)
+    // find start and end directions (may need to take the negative of the end direction).
+    // obey user parameters if set
+
     RealVectorValue start_direction = first_component_cmth.direction();
     RealVectorValue end_direction = second_component_cmth.direction();
 
@@ -257,7 +267,8 @@ JunctionComponent::addMeshGenerators()
           {name() + "_aeg_top_boundary", second_boundary}};
       stitcher_params.set<bool>("verbose_stitching") = _verbose;
       stitcher_params.set<bool>("output") = _verbose;
-      stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = true;
+      stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") =
+          _enforce_all_nodes_match_on_boundaries;
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "StitchMeshGenerator", name() + "_stitcher", stitcher_params);
       _mg_names.push_back(name() + "_stitcher");
@@ -273,7 +284,8 @@ JunctionComponent::addMeshGenerators()
           {first_boundary, name() + "_aeg_bottom_boundary"}};
       mesh_stitcher_params.set<bool>("verbose_stitching") = _verbose;
       mesh_stitcher_params.set<bool>("output") = _verbose;
-      mesh_stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = true;
+      mesh_stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") =
+          _enforce_all_nodes_match_on_boundaries;
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "StitchMeshGenerator", name() + "_mesh_stitcher", mesh_stitcher_params);
       _mg_names.push_back(name() + "_mesh_stitcher");
