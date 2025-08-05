@@ -79,6 +79,9 @@ def command_line_options(subparser, parent):
                                                      "temporary sites to be functional.")
     parser.add_argument('--hide-source', action='store_true',
                         help="Shortcut for setting the 'hide_source' option in the modal extension.")
+    parser.add_argument('--with-dap', default=None, help='Enable DAP (Digital Analytics ' \
+                        'Program, see digital.gov/guides/dap) Google Anayltics for the ' \
+                        'given agency (example: "DOE").')
 
 class MooseDocsWatcher(livereload.watcher.Watcher):
     """
@@ -193,6 +196,10 @@ def main(options):
         kwargs['Translator']['destination'] = mooseutils.eval_path(options.destination)
     if options.profile:
         kwargs['Translator']['profile'] = True
+
+    # Apply Renderer settings
+    if options.with_dap:
+        kwargs['Renderer']['with_dap'] = options.with_dap
 
     # Apply '--args' and override anything already set
     if options.args is not None:
