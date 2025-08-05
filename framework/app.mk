@@ -545,8 +545,6 @@ install_lib_from_archive_%: %
 	@echo "Installing library archive $(lib_archive_installed)"
 	@cp $< $(lib_archive_installed)
 	@$(call patch_la,$(lib_archive_installed),$(lib_install_dir))
-	@$(call patch_relink,$(lib_installed),$(libpath_pcre),$(libname_pcre))
-	@$(call patch_relink,$(lib_installed),$(libpath_framework),$(libname_framework))
 # These lines are critical in that they are a catch-all for nested applications. (e.g. These will properly remap MOOSE and the modules
 # in an application library to the installed locations) - DO NOT REMOVE! Yes, this can probably be done better
 	@$(eval libnames := $(foreach lib,$(filter %.la, $(applibs)),$(call lib_from_archive,$(lib))))
