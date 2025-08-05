@@ -104,7 +104,14 @@ rodriguesRotationMatrix(GenericRealVectorValue<is_ad> vec1, GenericRealVectorVal
 
   // test for exactly opposite vectors to avoid divide by zero
   if (k_vec.norm() < libMesh::TOLERANCE)
-    return -I;
+  {
+    GenericRealTensorValue<is_ad> rot_matrix;
+    if ((u - GenericRealVectorValue<is_ad>(1, 0, 0)).norm() < TOLERANCE)
+      rot_matrix = GenericRealTensorValue<is_ad>(-1, 0, 0, 0, -1, 0, 0, 0, 1);
+    else
+      mooseError("Rotation matrix cannot be generated for opposite-facing vectors at this time!");
+    return rot_matrix;
+  }
 
   k_vec /= k_vec.norm(); // normalize
   Real cos_theta = u * v;
