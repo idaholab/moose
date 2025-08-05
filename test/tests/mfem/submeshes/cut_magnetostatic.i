@@ -70,7 +70,7 @@
 
 [BCs]
   [tangential_a_bdr]
-    type = MFEMVectorFunctorTangentialDirichletBC
+    type = MFEMVectorTangentialDirichletBC
     variable = a_field
     vector_coefficient = exact_a_field
     boundary = '3 4'

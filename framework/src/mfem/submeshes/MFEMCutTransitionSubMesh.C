@@ -7,9 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMBoundaryElementSubMesh.h"
+#include "MFEMCutTransitionSubMesh.h"
 #include "MFEMProblem.h"
 
 // Pushes an element into a vector if the vector does not yet contain that same
@@ -35,7 +35,7 @@ template <typename T> void deleteAndClear(std::vector<T *> v) {
   v.clear();
 }
 
-bool MFEMBoundaryElementSubMesh::isInDomain(const int el, const mfem::Array<int> &dom,
+bool MFEMCutTransitionSubMesh::isInDomain(const int el, const mfem::Array<int> &dom,
   const mfem::ParMesh *mesh) {
 
 // This is for ghost elements
@@ -52,7 +52,7 @@ verify = true;
 return verify;
 }
 
-bool MFEMBoundaryElementSubMesh::isInDomain(const int el, const int &sd,
+bool MFEMCutTransitionSubMesh::isInDomain(const int el, const int &sd,
   const mfem::ParMesh *mesh) {
 
 // This is for ghost elements
@@ -62,7 +62,7 @@ return false;
 return mesh->GetAttribute(el) == sd;
 }
 
-mfem::Vector MFEMBoundaryElementSubMesh::elementCentre(int el, mfem::ParMesh *pm) {
+mfem::Vector MFEMCutTransitionSubMesh::elementCentre(int el, mfem::ParMesh *pm) {
 
 mfem::Array<int> elem_vtx;
 mfem::Vector com(3);
@@ -126,10 +126,10 @@ int Plane3D::side(const mfem::Vector v) {
     return 0;
 }
 
-registerMooseObject("MooseApp", MFEMBoundaryElementSubMesh);
+registerMooseObject("MooseApp", MFEMCutTransitionSubMesh);
 
 InputParameters
-MFEMBoundaryElementSubMesh::validParams()
+MFEMCutTransitionSubMesh::validParams()
 {
   InputParameters params = MFEMSubMesh::validParams();
   params.addClassDescription("Class to construct an MFEMSubMesh formed from the subspace of the "
@@ -139,26 +139,32 @@ MFEMBoundaryElementSubMesh::validParams()
       "-1",
       "The list of boundaries (ids) from the mesh where this boundary condition applies. "
       "Defaults to applying BC on all boundaries.");
+  params.addParam<SubdomainName>(
+      "cut_name",
+      "cut",
+      "The name of the subdomain to be created on from the mesh comprised of the set of elements "
+      "adjacent to the cut surface on one side.");      
   return params;
 }
 
-MFEMBoundaryElementSubMesh::MFEMBoundaryElementSubMesh(const InputParameters & parameters)
+MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & parameters)
   : MFEMSubMesh(parameters),
     _boundary_name(getParam<BoundaryName>("boundary")),
     _bdr_attribute(std::stoi(_boundary_name)),
+    _cut_name(getParam<SubdomainName>("cut_name")),    
     _subdomain_label(getMFEMProblem().mesh().getMFEMParMesh().attributes.Max()+1)
 {
 }
 
 void
-MFEMBoundaryElementSubMesh::buildSubMesh()
+MFEMCutTransitionSubMesh::buildSubMesh()
 { 
   makeWedge(getMFEMProblem().mesh().getMFEMParMesh());
   _submesh = std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromDomain(
     getMFEMProblem().mesh().getMFEMParMesh(), mfem::Array<int>({_subdomain_label})));
 }
 
-void MFEMBoundaryElementSubMesh::makeWedge(mfem::ParMesh & parent_mesh) {
+void MFEMCutTransitionSubMesh::makeWedge(mfem::ParMesh & parent_mesh) {
 
   std::vector<int> old_dom_attrs;
   std::vector<int> bdr_els;
@@ -288,7 +294,9 @@ void MFEMBoundaryElementSubMesh::makeWedge(mfem::ParMesh & parent_mesh) {
   // Only after this do we set the domain attributes
   for (auto e : wedge_els)
     parent_mesh.SetAttribute(e, _subdomain_label);
-
+  mfem::AttributeSets &attr_sets = parent_mesh.attribute_sets;
+  attr_sets.CreateAttributeSet(_cut_name);
+  attr_sets.AddToAttributeSet(_cut_name, _subdomain_label);
   // transition_domain_.Append(_subdomain_label);
   // coil_domains_.Append(_subdomain_label);
 

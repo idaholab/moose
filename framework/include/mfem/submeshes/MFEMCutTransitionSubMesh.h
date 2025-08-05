@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "MFEMSubMesh.h"
@@ -32,15 +32,16 @@ class Plane3D {
   };
 
 /**
- * Constructs and stores an mfem::ParSubMesh object as
- * as a restriction of the parent mesh to the set of user-specified boundaries.
+ * Modifies the MFEM Mesh to label a subdomain consisting of elements adjacent to an
+ * interior surface on one side, and constructs an stores an mfem::ParSubMesh object
+ * associated with it.
  * Access using the getSubMesh() accessor.
  */
-class MFEMBoundaryElementSubMesh : public MFEMSubMesh
+class MFEMCutTransitionSubMesh : public MFEMSubMesh
 {
 public:
   static InputParameters validParams();
-  MFEMBoundaryElementSubMesh(const InputParameters & parameters);
+  MFEMCutTransitionSubMesh(const InputParameters & parameters);
 
 protected:
   virtual void buildSubMesh() override;
@@ -58,6 +59,7 @@ protected:
 
   const BoundaryName & _boundary_name;
   const int _bdr_attribute;
+  const SubdomainName & _cut_name;    
   int _subdomain_label;
 };
 

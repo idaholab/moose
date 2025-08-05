@@ -5,18 +5,13 @@
 [Mesh]
     type = MFEMMesh
     file = ../mesh/torus.e
-  # [cut]
-  #   type = MFEMCutTransitionSubdomain
-  #   input = input_file 
-  #   boundary = 1
-  #   cut_name = cut
-  # []  
 []
 
 [SubMeshes]
   [cut]
-    type = MFEMDomainSubMesh
-    block = cut
+    type = MFEMCutTransitionSubMesh
+    cut_name = cut
+    boundary = 1
   []
 []
 
