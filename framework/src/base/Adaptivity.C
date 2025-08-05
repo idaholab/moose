@@ -59,7 +59,7 @@ Adaptivity::~Adaptivity() {}
 void
 Adaptivity::init(const unsigned int steps,
                  const unsigned int initial_steps,
-                 const MooseEnum & adaptivity_type)
+                 const AdaptivityType adaptivity_type)
 {
   // Get the pointer to the DisplacedProblem, this cannot be done at construction because
   // DisplacedProblem
@@ -75,19 +75,11 @@ Adaptivity::init(const unsigned int steps,
   _initial_steps = initial_steps;
   _steps = steps;
 
-  if (adaptivity_type == "h")
-    _adaptivity_type = std::string("h");
-  else if (adaptivity_type == "p")
-    _adaptivity_type = std::string("p");
-  else if (adaptivity_type == "hp")
-    _adaptivity_type = std::string("hp");
-  else
-    mooseError(std::string("Unknown mesh adaptivity type selection: ") +
-               std::string(adaptivity_type));
+  _adaptivity_type = adaptivity_type;
 
   _mesh_refinement_on = true;
 
-  if (_adaptivity_type == "p" || _adaptivity_type == "hp")
+  if (_adaptivity_type == AdaptivityType::P || _adaptivity_type == AdaptivityType::HP)
     _mesh.doingPRefinement(true);
 
   _mesh_refinement->set_periodic_boundaries_ptr(
@@ -223,7 +215,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     // Moving some of h flagged elements to p flagged based on the
     // local smoothness and prior h & p error estimates
     HPCoarsenTest hpselector;
-    if (_adaptivity_type == "hp")
+    if (_adaptivity_type == AdaptivityType::HP)
       hpselector.select_refinement(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system());
 
     if (_displaced_problem)
@@ -246,7 +238,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   if (distributed_adaptivity)
     _mesh_refinement->make_flags_parallel_consistent();
 
-  if (_adaptivity_type == "p")
+  if (_adaptivity_type == AdaptivityType::P)
     _mesh_refinement->switch_h_to_p_refinement();
 
   // Perform refinement and coarsening
@@ -259,7 +251,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     if (distributed_adaptivity)
       _displaced_mesh_refinement->make_flags_parallel_consistent();
 
-    if (_adaptivity_type == "p")
+    if (_adaptivity_type == AdaptivityType::P)
       _displaced_mesh_refinement->switch_h_to_p_refinement();
 
 #ifndef NDEBUG

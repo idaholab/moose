@@ -43,6 +43,16 @@ class ErrorEstimator;
 }
 
 /**
+ * Defines types of mesh adaptivity options available
+ */
+enum class AdaptivityType
+{
+  H = 0,
+  P = 1,
+  HP = 2
+};
+
+/**
  * Takes care of everything related to mesh adaptivity
  *
  */
@@ -63,7 +73,7 @@ public:
    */
   void init(const unsigned int steps,
             const unsigned int initial_steps,
-            const MooseEnum & adaptivity_type);
+            const AdaptivityType adaptivity_type);
 
   /**
    * Set adaptivity parameter
@@ -303,7 +313,7 @@ protected:
   std::string _marker_variable_name;
 
   /// Type of mesh adaptivity
-  std::string _adaptivity_type;
+  AdaptivityType _adaptivity_type;
 
   /// Name of the initial marker variable if using the new adaptivity system
   std::string _initial_marker_variable_name;

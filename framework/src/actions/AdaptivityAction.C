@@ -40,8 +40,6 @@ AdaptivityAction::validParams()
   MooseEnum estimators("KellyErrorEstimator LaplacianErrorEstimator PatchRecoveryErrorEstimator",
                        "KellyErrorEstimator");
 
-  MooseEnum adaptivity("h p hp", "h");
-
   params.addParam<unsigned int>(
       "initial_adaptivity",
       0,
@@ -54,8 +52,6 @@ AdaptivityAction::validParams()
                         "The fraction of elements or error to coarsen. Should be between 0 and 1.");
   params.addParam<MooseEnum>(
       "error_estimator", estimators, "The class name of the error estimator you want to use.");
-  params.addParam<MooseEnum>(
-      "adaptivity_type", adaptivity, "The type of the mesh adaptivity you want to use.");
   params.addDeprecatedParam<bool>(
       "print_changed_info",
       false,
@@ -144,11 +140,11 @@ AdaptivityAction::act()
     // splitting process. Adaptivity::init must be called for any adaptivity to work, however, so we
     // can't just skip it for the useSplit case.
     if (_mesh->isSplit())
-      adapt.init(0, 0, getParam<MooseEnum>("adaptivity_type"));
+      adapt.init(0, 0, getParam<MooseEnum>("adaptivity_type").getEnum<AdaptivityType>());
     else
       adapt.init(getParam<unsigned int>("steps"),
                  getParam<unsigned int>("initial_adaptivity"),
-                 getParam<MooseEnum>("adaptivity_type"));
+                 getParam<MooseEnum>("adaptivity_type").getEnum<AdaptivityType>());
 
     adapt.setErrorEstimator(getParam<MooseEnum>("error_estimator"));
 

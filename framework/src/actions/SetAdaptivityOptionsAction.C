@@ -43,7 +43,7 @@ commonAdaptivityParams()
       "The number of adaptive steps to use when on each timestep during a Transient simulation.");
   params.addParam<bool>(
       "recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
-  MooseEnum adaptivity("h p hp", "h");
+  MooseEnum adaptivity("h=0 p=1 hp=2", "h");
   params.addParam<MooseEnum>(
       "adaptivity_type", adaptivity, "Switch h or p or hp for respective mesh adaptivity");
   return params;
@@ -146,7 +146,7 @@ SetAdaptivityOptionsAction::act()
 
     adapt.init(getParam<unsigned int>("steps"),
                getParam<unsigned int>("initial_steps"),
-               getParam<MooseEnum>("adaptivity_type"));
+               getParam<MooseEnum>("adaptivity_type").getEnum<AdaptivityType>());
     adapt.setUseNewSystem();
 
     adapt.setTimeActive(getParam<Real>("start_time"), getParam<Real>("stop_time"));
