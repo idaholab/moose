@@ -11,10 +11,7 @@ import os
 import unittest
 import mock
 import types
-import io
-import mooseutils
-import moosesqa
-import copy
+import moosetree
 import MooseDocs
 from MooseDocs.commands import build
 from MooseDocs import base, common
@@ -136,21 +133,30 @@ class TestBuild(unittest.TestCase):
             init_mock.assert_any_call(conts[0])
             init_mock.assert_any_call(conts[1])
 
-    @mock.patch.object(base.Translator, 'execute')
-    @mock.patch.object(base.Translator, 'init')
-    def testWithDAP(self, init_mock, execute_mock):
+    def testWithDAP(self):
         """
         Tests setting up options the --with-dap CLI option, which sets
         'with_dap' for the Renderer
         """
         with_dap = 'DOE'
+
+        # Test that the Renderer config options are set
         args = self.getCommandLineArguments(with_dap=with_dap)
         opt, kwargs = build.setupOptions(args)
         self.assertEqual(kwargs['Renderer']['with_dap'], with_dap)
 
-        build.main(args)
-        init_mock.assert_called_once()
-        execute_mock.assert_called()
+        # Test the DAP script being added during postRender
+        renderer = base.HTMLRenderer(with_dap=with_dap)
+        self.assertEqual(renderer.get('with_dap'), with_dap)
+        body = renderer.getRoot()
+        root = body.parent
+        result = types.SimpleNamespace(root=root)
+        renderer.postRender({}, result)
+        script = moosetree.find(root, lambda n: n.name == 'script')
+        self.assertEqual(script.get('async'), True)
+        self.assertEqual(script.get('type'), 'text/javascript')
+        self.assertEqual(script.get('id'), '_fed_an_ua_tag')
+        self.assertIn(f'?agency={with_dap}', script.get('src'))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
