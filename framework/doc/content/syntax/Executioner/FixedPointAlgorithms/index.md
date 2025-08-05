@@ -57,7 +57,7 @@ functions and poor initial guesses can prevent convergence.
 Steffensen's method is a root finding technique based on perturbating a solution at a given point to approximate the local derivative, such that:
 
 !equation
-g(x_{n}) = \dfrac{f(x_{n} + f(x_{n}))}{f(x_{n})}
+g(x_{n}) = \dfrac{f(x_{n} + f(x_{n}))}{f(x_{n})} - 1
 
 !equation
 x_{n+1} = x_n - \dfrac{f(x_n)}{g(x_{n})}
