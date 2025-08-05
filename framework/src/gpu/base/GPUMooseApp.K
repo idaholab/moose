@@ -19,11 +19,11 @@ std::unique_ptr<Moose::Kokkos::MemoryPool> _pool;
 void
 MooseApp::queryGPUs()
 {
-  unsigned int num_gpus = Kokkos::num_devices();
+  unsigned int num_kokkos_gpus = Kokkos::num_devices();
 
-  comm().min(num_gpus);
+  comm().min(num_kokkos_gpus);
 
-  _has_gpus = num_gpus > 0;
+  _has_kokkos_gpus = num_kokkos_gpus > 0;
 }
 
 void
