@@ -124,7 +124,8 @@ JunctionComponent::addMeshGenerators()
                                                                 second_component.mg_names().back()};
         params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, second_boundary}};
-        params.set<bool>("verbose_stitching") = true;
+        params.set<bool>("verbose_stitching") = _verbose;
+        params.set<bool>("output") = _verbose;
         params.set<bool>("enforce_all_nodes_match_on_boundaries") = true;
         _app.getMeshGeneratorSystem().addMeshGenerator(
             "StitchMeshGenerator", name() + "_base", params);
@@ -139,7 +140,7 @@ JunctionComponent::addMeshGenerators()
         params.set<MeshGeneratorName>("input") = first_component.mg_names().back();
         params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
             {first_boundary, second_boundary}};
-        params.set<bool>("show_info") = true; // this can be changed later
+        params.set<bool>("show_info") = _verbose;
         _app.getMeshGeneratorSystem().addMeshGenerator(
             "StitchBoundaryMeshGenerator", name() + "_close", params);
         _mg_names.push_back(name() + "_close");
@@ -254,8 +255,8 @@ JunctionComponent::addMeshGenerators()
       stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
           {first_boundary, name() + "_aeg_bottom_boundary"},
           {name() + "_aeg_top_boundary", second_boundary}};
-      stitcher_params.set<bool>("verbose_stitching") = true;
-      stitcher_params.set<bool>("output") = true;
+      stitcher_params.set<bool>("verbose_stitching") = _verbose;
+      stitcher_params.set<bool>("output") = _verbose;
       stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = true;
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "StitchMeshGenerator", name() + "_stitcher", stitcher_params);
@@ -270,8 +271,8 @@ JunctionComponent::addMeshGenerators()
           std::vector<MeshGeneratorName>{first_component.mg_names().back(), name() + "_aeg"};
       mesh_stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
           {first_boundary, name() + "_aeg_bottom_boundary"}};
-      mesh_stitcher_params.set<bool>("verbose_stitching") = true;
-      mesh_stitcher_params.set<bool>("output") = true;
+      mesh_stitcher_params.set<bool>("verbose_stitching") = _verbose;
+      mesh_stitcher_params.set<bool>("output") = _verbose;
       mesh_stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") = true;
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "StitchMeshGenerator", name() + "_mesh_stitcher", mesh_stitcher_params);
@@ -282,7 +283,7 @@ JunctionComponent::addMeshGenerators()
       boundary_stitcher_params.set<MeshGeneratorName>("input") = name() + "_mesh_stitcher";
       boundary_stitcher_params.set<std::vector<std::vector<std::string>>>(
           "stitch_boundaries_pairs") = {{name() + "_aeg_top_boundary", second_boundary}};
-      boundary_stitcher_params.set<bool>("show_info") = true; // this can be changed later
+      boundary_stitcher_params.set<bool>("show_info") = _verbose;
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "StitchBoundaryMeshGenerator", name() + "_closed", boundary_stitcher_params);
       _mg_names.push_back(name() + "_closed");
