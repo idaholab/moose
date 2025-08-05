@@ -104,7 +104,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = ./OutputData/HeatTransferAverageField
+    file_base = OutputData/HeatTransferAverageField
     vtk_format = ASCII
   []
   [VisItDataCollection]
