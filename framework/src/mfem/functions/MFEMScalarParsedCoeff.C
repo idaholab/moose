@@ -7,6 +7,8 @@
 // Define a coefficient that, given a grid function u,
 // function func, returns func(u)
 
+#ifdef MOOSE_MFEM_ENABLED
+
 #include "MFEMScalarParsedCoeff.h"
 
 MFEMScalarParsedCoeff::MFEMScalarParsedCoeff(
@@ -39,3 +41,5 @@ MFEMScalarParsedCoeff::Eval(mfem::ElementTransformation & T, const mfem::Integra
 
   return _func->Eval(inpVals.data());
 }
+
+#endif

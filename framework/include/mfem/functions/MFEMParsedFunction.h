@@ -1,7 +1,10 @@
-#pragma once
-#include "FunctionParserUtils.h"
+#ifdef MOOSE_MFEM_ENABLED
 
-class MFEMGeneralUserObject;
+#pragma once
+
+#include "FunctionParserUtils.h"
+#include "MFEMGeneralUserObject.h"
+
 struct MFEMProblemData;
 /**
  * Declares parsed functions based on names and values prescribed by input parameters.
@@ -28,3 +31,5 @@ protected:
   /// function parser object for the resudual and on-diagonal Jacobian
   SymFunctionPtr _func_F;
 };
+
+#endif

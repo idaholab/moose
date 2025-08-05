@@ -1,3 +1,5 @@
+#ifdef MOOSE_MFEM_ENABLED
+
 #include "MFEMParsedFunction.h"
 #include "MFEMScalarParsedCoeff.h"
 #include "InputParameters.h"
@@ -84,3 +86,5 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
 }
 
 MFEMParsedFunction::~MFEMParsedFunction() {}
+
+#endif

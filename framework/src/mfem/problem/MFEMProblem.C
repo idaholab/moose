@@ -345,7 +345,6 @@ MFEMProblem::addFunction(const std::string & type,
   if (type == "MFEMParsedFunction")
   {
     FEProblemBase::addUserObject(type, name, parameters);
-    MFEMParsedFunction & mfem_parsed_function(getUserObject<MFEMParsedFunction>(name));
   }
   else
   {
