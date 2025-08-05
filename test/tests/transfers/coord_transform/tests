@@ -7,6 +7,14 @@
     requirement = 'The system shall be able to solve a diffusion problem with a coupled force provided by another variable.'
     issues = '#12293'
   []
+  [single-app-with-length-unit]
+    type = RunApp
+    input = single-app.i
+    cli_args = "Mesh/length_unit='10m' --check-input"
+    expect_out = 'Syntax OK'
+    requirement = 'The system shall allow specifying mesh length unit without field transfers because the length unit could by used by other MOOSE systems.'
+    issues = '#31200'
+  []
   [multi-app]
     type = Exodiff
     input = main-app.i
@@ -24,8 +32,8 @@
   [error_miss]
     type = RunException
     input = single-app.i
-    cli_args = "Mesh/length_unit='10m'"
-    expect_err = "Coordinate transformation parameters, listed below, are only to be used in the context of application to application field transfers at this time"
+    cli_args = "Mesh/alpha_rotation=60"
+    expect_err = "Coordinate non-scaling transformation parameters, 'alpha_rotation', 'beta_rotation', 'gamma_rotation', and 'up_direction', are only to be used in the context of application to application field transfers at this time"
     issues = '#30562'
     requirement = "The system shall return an error if parameters intended for field transfers between simulations are specified but ignored because the simulation is a standalone simulation."
   []

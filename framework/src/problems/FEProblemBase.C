@@ -8376,16 +8376,16 @@ FEProblemBase::checkProblemIntegrity()
   // Verify that we don't have any Element type/Coordinate Type conflicts
   checkCoordinateSystems();
 
-  // Coordinate transforms are only intended for use with MultiApps at this time. If you are not
-  // using multiapps but still require these, contact a moose developer
-  if (_mesh.coordTransform().hasScalingOrRotationTransformation() && _app.isUltimateMaster() &&
+  // Coordinate non-scaling transforms excluding length_unit are only intended for use with
+  // MultiApps
+  if (_mesh.coordTransform().hasNonScalingTransformation() && _app.isUltimateMaster() &&
       !hasMultiApps())
-    mooseError("Coordinate transformation parameters, listed below, are only to be used in the "
-               "context of application to application field transfers at this time. The mesh is "
-               "not modified by these parameters within an application.\n"
-               "You should likely use a 'TransformGenerator' in the [Mesh] block to achieve the "
-               "desired mesh modification.\n\n",
-               Moose::stringify(MooseAppCoordTransform::validParams()));
+    mooseError(
+        "Coordinate non-scaling transformation parameters, 'alpha_rotation', 'beta_rotation', "
+        "'gamma_rotation', and 'up_direction', are only to be used in the context of application "
+        "to application field transfers at this time. The mesh is not modified by these parameters "
+        "within an application.\nYou should likely use a 'TransformGenerator' in the [Mesh] block "
+        "to achieve the desired mesh modification.");
 
   // If using displacements, verify that the order of the displacement
   // variables matches the order of the elements in the displaced
