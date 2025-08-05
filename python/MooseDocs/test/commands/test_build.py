@@ -49,6 +49,7 @@ class TestBuild(unittest.TestCase):
         kwargs.setdefault('home', None)
         kwargs.setdefault('stable', False)
         kwargs.setdefault('hide_source', False)
+        kwargs.setdefault('with_dap', None)
         return types.SimpleNamespace(**kwargs)
 
     # Note: mock.patch.object() decorators are applied from the bottom upwards
@@ -134,6 +135,22 @@ class TestBuild(unittest.TestCase):
             _, conts, _ = self._load_multiple_out
             init_mock.assert_any_call(conts[0])
             init_mock.assert_any_call(conts[1])
+
+    @mock.patch.object(base.Translator, 'execute')
+    @mock.patch.object(base.Translator, 'init')
+    def testWithDAP(self, init_mock, execute_mock):
+        """
+        Tests setting up options the --with-dap CLI option, which sets
+        'with_dap' for the Renderer
+        """
+        with_dap = 'DOE'
+        args = self.getCommandLineArguments(with_dap=with_dap)
+        opt, kwargs = build.setupOptions(args)
+        self.assertEqual(kwargs['Renderer']['with_dap'], with_dap)
+
+        build.main(args)
+        init_mock.assert_called_once()
+        execute_mock.assert_called()
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
