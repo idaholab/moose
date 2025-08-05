@@ -253,11 +253,6 @@ PorousFlowDictatorName = 'dictator'
       dt = 0.25
     []
   []
-
-  [Quadrature]
-    type = SIMPSON
-    order = SECOND
-  []
 []
 
 [Outputs]
