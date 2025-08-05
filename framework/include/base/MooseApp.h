@@ -1607,7 +1607,7 @@ public:
   {
 #ifdef MOOSE_KOKKOS_ENABLED
 #ifdef MOOSE_ENABLE_KOKKOS_GPU
-    return _has_gpus;
+    return _has_kokkos_gpus;
 #else
     return true;
 #endif
@@ -1651,9 +1651,9 @@ private:
 #endif
 
   /**
-   * Flag whether every process has an associated GPU
+   * Flag whether every process has an associated Kokkos GPU
    */
-  bool _has_gpus = false;
+  bool _has_kokkos_gpus = false;
 
   /**
    * Flag whether there is any Kokkos object added by actions

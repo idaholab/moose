@@ -59,11 +59,11 @@ MaterialData::haveKokkosPropertyHelper(const std::string & prop_name) const
 }
 
 void
-MaterialData::kokkosRegisterLoadStoreHelper(Moose::Kokkos::PropertyKey key,
+MaterialData::kokkosRegisterLoadStoreHelper(std::type_index type,
                                             Moose::Kokkos::PropertyStore store,
                                             Moose::Kokkos::PropertyLoad load)
 {
   auto & storage = Moose::Kokkos::MaterialPropertyStorage::cast(_storage);
 
-  return storage.registerLoadStore(key, store, load);
+  return storage.registerLoadStore(type, store, load);
 }

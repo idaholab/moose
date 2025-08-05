@@ -59,7 +59,6 @@ struct PropRecord
   bool bnd = false;
 };
 
-using PropertyKey = std::pair<std::type_index, unsigned int>;
 using PropertyStore = std::function<void(std::ostream &, void *)>;
 using PropertyLoad = std::function<void(std::istream &, void *)>;
 
@@ -118,10 +117,10 @@ public:
   }
 
   /**
-   * Get the key to call load/store functions
-   * @returns The key for the load/store function pointer map
+   * Get the property type index for load/store functions
+   * @returns The property type index for the load/store function pointer map lookup
    */
-  virtual PropertyKey loadStoreKey() = 0;
+  virtual std::type_index propertyType() = 0;
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -190,7 +189,7 @@ void propertyLoad(std::istream & stream, void * prop);
  * The Kokkos material property class
  */
 template <typename T, unsigned int dimension = 0>
-class MaterialProperty : public MaterialPropertyBase
+class MaterialProperty final : public MaterialPropertyBase
 {
 public:
   /**
@@ -255,9 +254,11 @@ public:
                                                                  unsigned int qp) const;
 #endif
 
-  virtual PropertyKey loadStoreKey() override
+  virtual std::type_index propertyType() override
   {
-    return std::make_pair(std::type_index(typeid(T)), dimension);
+    static const std::type_index type = typeid(*this);
+
+    return type;
   }
 
 private:
@@ -383,8 +384,8 @@ propertyLoad(std::istream & stream, void * prop)
 
 // The Kokkos array containing Kokkos material properties requires a deep copy because the copy
 // constructor of each Kokkos material property should be invoked
-template <typename T>
-struct ArrayDeepCopy<MaterialProperty<T>>
+template <typename T, unsigned int dimension>
+struct ArrayDeepCopy<MaterialProperty<T, dimension>>
 {
   static const bool value = true;
 };

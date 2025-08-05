@@ -316,11 +316,11 @@ private:
   /**
    * Helper function to register load/store functions of a Kokkos material property to the Kokkos
    * material property storage
-   * @param key The key to call load/store functions
-   * @param store The function pointer to the store function
-   * @param load The function pointer to the load function
+   * @param type The property type index
+   * @param store The store function pointer
+   * @param load The load function pointer
    */
-  void kokkosRegisterLoadStoreHelper(Moose::Kokkos::PropertyKey key,
+  void kokkosRegisterLoadStoreHelper(std::type_index type,
                                      Moose::Kokkos::PropertyStore store,
                                      Moose::Kokkos::PropertyLoad load);
 #endif
@@ -466,7 +466,7 @@ MaterialData::getKokkosProperty(const std::string & prop_name)
     // to provide custom dataLoad and dataStore for non-trivially-copyable types that are never
     // used as stateful properties
     if constexpr (state > 0)
-      kokkosRegisterLoadStoreHelper(shell->loadStoreKey(),
+      kokkosRegisterLoadStoreHelper(shell->propertyType(),
                                     Moose::Kokkos::propertyStore<T, dimension>,
                                     Moose::Kokkos::propertyLoad<T, dimension>);
   }
