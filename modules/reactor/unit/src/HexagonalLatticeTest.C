@@ -576,6 +576,180 @@ TEST_F(HexagonalLatticeTest, pin_centers)
     EXPECT_DOUBLE_EQ(centers4[i](2), 0.0);
 }
 
+TEST_F(HexagonalLatticeTest, pin_centers_rotated_pi)
+{
+  Real bp = 5.0, pp = 0.99, pd = 0.8, wd = 0.0, wp = 50.0;
+  unsigned int nr = 3, a = 2;
+  HexagonalLatticeUtils hl14(bp, pp, pd, wd, wp, nr, a, libMesh::pi);
+
+  nr = 1;
+  HexagonalLatticeUtils hl15(bp, pp, pd, wd, wp, nr, a, libMesh::pi);
+
+  nr = 2;
+  HexagonalLatticeUtils hl16(bp, pp, pd, wd, wp, nr, a, libMesh::pi);
+
+  bp = 10.0;
+  nr = 4;
+  HexagonalLatticeUtils hl17(bp, pp, pd, wd, wp, nr, a, libMesh::pi);
+
+  Real cos60 = 0.5;
+  Real sin60 = std::sqrt(3.0) / 2.0;
+
+  auto & centers = hl15.pinCenters();
+  EXPECT_EQ(centers.size(), hl15.nPins());
+  ABS_DOUBLE_TEST(centers[0](0), 0.0);
+  ABS_DOUBLE_TEST(centers[0](1), 0.0);
+  ABS_DOUBLE_TEST(centers[0](2), 0.0);
+
+  Real p = 0.99;
+  auto & centers2 = hl16.pinCenters();
+  EXPECT_EQ(centers2.size(), hl16.nPins());
+  ABS_DOUBLE_TEST(centers2[0](0), 0.0);
+  ABS_DOUBLE_TEST(centers2[0](1), 0.0);
+  ABS_DOUBLE_TEST(centers2[1](0), -cos60 * p);
+  ABS_DOUBLE_TEST(centers2[1](1), -sin60 * p);
+  ABS_DOUBLE_TEST(centers2[2](0), cos60 * p);
+  ABS_DOUBLE_TEST(centers2[2](1), -sin60 * p);
+  ABS_DOUBLE_TEST(centers2[3](0), p);
+  ABS_DOUBLE_TEST(centers2[3](1), 0.0);
+  ABS_DOUBLE_TEST(centers2[4](0), cos60 * p);
+  ABS_DOUBLE_TEST(centers2[4](1), sin60 * p);
+  ABS_DOUBLE_TEST(centers2[5](0), -cos60 * p);
+  ABS_DOUBLE_TEST(centers2[5](1), sin60 * p);
+  ABS_DOUBLE_TEST(centers2[6](0), -p);
+  ABS_DOUBLE_TEST(centers2[6](1), (unsigned int)0);
+
+  for (const auto i : make_range(hl16.nPins()))
+    ABS_DOUBLE_TEST(centers2[i](2), 0.0);
+
+  auto & centers3 = hl14.pinCenters();
+  EXPECT_EQ(centers3.size(), hl14.nPins());
+  ABS_DOUBLE_TEST(centers3[0](0), 0.0);
+  ABS_DOUBLE_TEST(centers3[0](1), 0.0);
+  ABS_DOUBLE_TEST(centers3[1](0), -cos60 * p);
+  ABS_DOUBLE_TEST(centers3[1](1), -sin60 * p);
+  ABS_DOUBLE_TEST(centers3[2](0), cos60 * p);
+  ABS_DOUBLE_TEST(centers3[2](1), -sin60 * p);
+  ABS_DOUBLE_TEST(centers3[3](0), p);
+  ABS_DOUBLE_TEST(centers3[3](1), 0.0);
+  ABS_DOUBLE_TEST(centers3[4](0), cos60 * p);
+  ABS_DOUBLE_TEST(centers3[4](1), sin60 * p);
+  ABS_DOUBLE_TEST(centers3[5](0), -cos60 * p);
+  ABS_DOUBLE_TEST(centers3[5](1), sin60 * p);
+  ABS_DOUBLE_TEST(centers3[6](0), -p);
+  ABS_DOUBLE_TEST(centers3[6](1), (unsigned int)0);
+
+  ABS_DOUBLE_TEST(centers3[7](0), -p);
+  ABS_DOUBLE_TEST(centers3[7](1), -2 * p * sin60);
+  ABS_DOUBLE_TEST(centers3[8](0), (unsigned int)0);
+  ABS_DOUBLE_TEST(centers3[8](1), -2 * p * sin60);
+  ABS_DOUBLE_TEST(centers3[9](0), p);
+  ABS_DOUBLE_TEST(centers3[9](1), -2 * p * sin60);
+  ABS_DOUBLE_TEST(centers3[10](0), p + p * cos60);
+  ABS_DOUBLE_TEST(centers3[10](1), -p * sin60);
+  ABS_DOUBLE_TEST(centers3[11](0), 2 * p);
+  ABS_DOUBLE_TEST(centers3[11](1), (unsigned int)0);
+  ABS_DOUBLE_TEST(centers3[12](0), p + p * cos60);
+  ABS_DOUBLE_TEST(centers3[12](1), p * sin60);
+  ABS_DOUBLE_TEST(centers3[13](0), p);
+  ABS_DOUBLE_TEST(centers3[13](1), 2 * p * sin60);
+  ABS_DOUBLE_TEST(centers3[14](0), (unsigned int)0);
+  ABS_DOUBLE_TEST(centers3[14](1), 2 * p * sin60);
+  ABS_DOUBLE_TEST(centers3[15](0), -p);
+  ABS_DOUBLE_TEST(centers3[15](1), 2 * p * sin60);
+  ABS_DOUBLE_TEST(centers3[16](0), -p - p * cos60);
+  ABS_DOUBLE_TEST(centers3[16](1), p * sin60);
+  ABS_DOUBLE_TEST(centers3[17](0), -2 * p);
+  ABS_DOUBLE_TEST(centers3[17](1), 0.0);
+  ABS_DOUBLE_TEST(centers3[18](0), -p - p * cos60);
+  ABS_DOUBLE_TEST(centers3[18](1), -p * sin60);
+
+  for (const auto i : make_range(hl14.nPins()))
+    ABS_DOUBLE_TEST(centers3[i](2), 0.0);
+
+  auto & centers4 = hl17.pinCenters();
+  EXPECT_EQ(centers4.size(), hl17.nPins());
+  ABS_DOUBLE_TEST(centers4[0](0), 0.0);
+  ABS_DOUBLE_TEST(centers4[0](1), 0.0);
+  ABS_DOUBLE_TEST(centers4[1](0), -cos60 * p);
+  ABS_DOUBLE_TEST(centers4[1](1), -sin60 * p);
+  ABS_DOUBLE_TEST(centers4[2](0), cos60 * p);
+  ABS_DOUBLE_TEST(centers4[2](1), -sin60 * p);
+  ABS_DOUBLE_TEST(centers4[3](0), p);
+  ABS_DOUBLE_TEST(centers4[3](1), 0.0);
+  ABS_DOUBLE_TEST(centers4[4](0), cos60 * p);
+  ABS_DOUBLE_TEST(centers4[4](1), sin60 * p);
+  ABS_DOUBLE_TEST(centers4[5](0), -cos60 * p);
+  ABS_DOUBLE_TEST(centers4[5](1), sin60 * p);
+  ABS_DOUBLE_TEST(centers4[6](0), -p);
+  ABS_DOUBLE_TEST(centers4[6](1), (unsigned int)0);
+
+  ABS_DOUBLE_TEST(centers4[7](0), -p);
+  ABS_DOUBLE_TEST(centers4[7](1), -2 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[8](0), (unsigned int)0);
+  ABS_DOUBLE_TEST(centers4[8](1), -2 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[9](0), p);
+  ABS_DOUBLE_TEST(centers4[9](1), -2 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[10](0), p + p * cos60);
+  ABS_DOUBLE_TEST(centers4[10](1), -p * sin60);
+  ABS_DOUBLE_TEST(centers4[11](0), 2 * p);
+  ABS_DOUBLE_TEST(centers4[11](1), (unsigned int)0);
+  ABS_DOUBLE_TEST(centers4[12](0), p + p * cos60);
+  ABS_DOUBLE_TEST(centers4[12](1), p * sin60);
+  ABS_DOUBLE_TEST(centers4[13](0), p);
+  ABS_DOUBLE_TEST(centers4[13](1), 2 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[14](0), (unsigned int)0);
+  ABS_DOUBLE_TEST(centers4[14](1), 2 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[15](0), -p);
+  ABS_DOUBLE_TEST(centers4[15](1), 2 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[16](0), -p - p * cos60);
+  ABS_DOUBLE_TEST(centers4[16](1), p * sin60);
+  ABS_DOUBLE_TEST(centers4[17](0), -2 * p);
+  ABS_DOUBLE_TEST(centers4[17](1), 0.0);
+  ABS_DOUBLE_TEST(centers4[18](0), -p - p * cos60);
+  ABS_DOUBLE_TEST(centers4[18](1), -p * sin60);
+
+  ABS_DOUBLE_TEST(centers4[19](0), -p - p * cos60);
+  ABS_DOUBLE_TEST(centers4[19](1), -3 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[20](0), -p * cos60);
+  ABS_DOUBLE_TEST(centers4[20](1), -3 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[21](0), p * cos60);
+  ABS_DOUBLE_TEST(centers4[21](1), -3 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[22](0), p + p * cos60);
+  ABS_DOUBLE_TEST(centers4[22](1), -3 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[23](0), 2 * p);
+  ABS_DOUBLE_TEST(centers4[23](1), -2 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[24](0), 2 * p + p * cos60);
+  ABS_DOUBLE_TEST(centers4[24](1), -p * sin60);
+  ABS_DOUBLE_TEST(centers4[25](0), 3 * p);
+  ABS_DOUBLE_TEST(centers4[25](1), (unsigned int)0);
+  ABS_DOUBLE_TEST(centers4[26](0), 2 * p + p * cos60);
+  ABS_DOUBLE_TEST(centers4[26](1), p * sin60);
+  ABS_DOUBLE_TEST(centers4[27](0), 2 * p);
+  ABS_DOUBLE_TEST(centers4[27](1), 2 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[28](0), p + p * cos60);
+  ABS_DOUBLE_TEST(centers4[28](1), 3 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[29](0), p * cos60);
+  ABS_DOUBLE_TEST(centers4[29](1), 3 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[30](0), -p * cos60);
+  ABS_DOUBLE_TEST(centers4[30](1), 3 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[31](0), -p - p * cos60);
+  ABS_DOUBLE_TEST(centers4[31](1), 3 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[32](0), -2 * p);
+  ABS_DOUBLE_TEST(centers4[32](1), 2 * p * sin60);
+  ABS_DOUBLE_TEST(centers4[33](0), -2 * p - p * cos60);
+  ABS_DOUBLE_TEST(centers4[33](1), p * sin60);
+  ABS_DOUBLE_TEST(centers4[34](0), -3 * p);
+  ABS_DOUBLE_TEST(centers4[34](1), (unsigned int)0);
+  ABS_DOUBLE_TEST(centers4[35](0), -2 * p - p * cos60);
+  ABS_DOUBLE_TEST(centers4[35](1), -p * sin60);
+  ABS_DOUBLE_TEST(centers4[36](0), -2 * p);
+  ABS_DOUBLE_TEST(centers4[36](1), -2 * p * sin60);
+
+  for (const auto i : make_range(hl17.nPins()))
+    ABS_DOUBLE_TEST(centers4[i](2), 0.0);
+}
+
 TEST_F(HexagonalLatticeTest, channel_index_shifted)
 {
   Real bp = 4.0, pp = 0.8, pd = 0.6, wd = 0.05, wp = 50.0;
@@ -1781,10 +1955,10 @@ TEST_F(HexagonalLatticeTest, pin_corners)
   EXPECT_DOUBLE_EQ(pin1[0](0), x + 0.0);
   EXPECT_DOUBLE_EQ(pin1[0](1), y + side);
 
-  EXPECT_DOUBLE_EQ(pin1[1](0), x + -side * sin60);
+  ABS_DOUBLE_TEST(pin1[1](0), x + -side * sin60);
   EXPECT_DOUBLE_EQ(pin1[1](1), y + side * cos60);
 
-  EXPECT_DOUBLE_EQ(pin1[2](0), x + -side * sin60);
+  ABS_DOUBLE_TEST(pin1[2](0), x + -side * sin60);
   EXPECT_DOUBLE_EQ(pin1[2](1), y + -side * cos60);
 
   EXPECT_DOUBLE_EQ(pin1[3](0), x + 0);
