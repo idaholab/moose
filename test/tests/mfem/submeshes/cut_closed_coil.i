@@ -1,16 +1,22 @@
-[Mesh]
-  type = MFEMMesh
-  file = ../mesh/torus.e
-[]
-
 [Problem]
   type = MFEMProblem
 []
 
+[Mesh]
+    type = MFEMMesh
+    file = ../mesh/torus.e
+  # [cut]
+  #   type = MFEMCutTransitionSubdomain
+  #   input = input_file 
+  #   boundary = 1
+  #   cut_name = cut
+  # []  
+[]
+
 [SubMeshes]
   [cut]
-    type = MFEMBoundaryElementSubMesh
-    boundary = 1
+    type = MFEMDomainSubMesh
+    block = cut
   []
 []
 
@@ -83,7 +89,7 @@
 
 [FunctorMaterials]
   [Substance]
-    type = MFEMGenericConstantFunctorMaterial
+    type = MFEMGenericFunctorMaterial
     prop_names = diffusivity
     prop_values = 1.0
   []

@@ -79,7 +79,7 @@
 
 [FunctorMaterials]
   [Vacuum]
-    type = MFEMGenericConstantFunctorMaterial
+    type = MFEMGenericFunctorMaterial
     prop_names = reluctivity
     prop_values = 1.0
   []
