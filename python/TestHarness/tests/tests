@@ -316,4 +316,10 @@
     requirement = 'The system shall provide a python interface for loading previous test results from a database'
     issues = '#30819'
   []
+  [augmented_capabilities]
+    type = PythonUnitTest
+    input = test_AugmentedCapabilities.py
+    requirement = 'The system shall provide the ability to set whether or not a test can run using the capabilities system using properties of the currently running test suite.'
+    issues = '#31135'
+  []
 []

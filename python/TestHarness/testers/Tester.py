@@ -572,7 +572,27 @@ class Tester(MooseObject, OutputInterface):
         """
         reasons = {}
         checks = options._checks
-        capabilities = options._capabilities
+
+        # augment capabilities of the application with specs of the current tester
+        if options._capabilities is not None:
+            capabilities = options._capabilities.copy()
+            def augment(key, val_doc):
+                if key in capabilities:
+                    raise ValueError(f"Capability {key} is defined by the app, but it is a reserved dynamic test harness capability. This is an application bug.")
+                capabilities[key] = val_doc
+
+            augment('scale_refine', [options.scaling, 'The number of refinements to do when scaling'])
+            if options.valgrind_mode == '':
+                augment('valgrind', [False, 'Not running with valgrind'])
+            else:
+                augment('valgrind', [options.valgrind_mode.lower(), 'Performing valgrind testing'])
+            augment('recover', [options.enable_recover, 'Recover testing'])
+            augment('heavy', [options.all_tests or options.heavy_tests, 'Running with heavy tests'])
+            augment('mpi_procs', [self.getProcs(options), 'Number of MPI processes'])
+            augment('num_threads', [self.getThreads(options), 'Number of threads'])
+            augment('compute_device', [options.compute_device, 'Compute device'])
+        else:
+            capabilities = None
 
         tag_match = False
         for t in self.tags:
