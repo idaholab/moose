@@ -126,6 +126,8 @@ protected:
   void addPorousMediumSpeedMaterial();
   /// Add material to define the local speed with no porous medium treatment
   void addNonPorousMediumSpeedMaterial();
+  /// Function which adds the general functor fluid properties functor material to define fluid functor material property
+  void addFluidPropertiesFunctorMaterial();
 
   /// Function which adds the RhieChow interpolator user objects for weakly and incompressible formulations
   virtual void addRhieChowUserObjects() = 0;

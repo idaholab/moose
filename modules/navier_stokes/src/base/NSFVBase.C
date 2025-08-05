@@ -65,6 +65,12 @@ NSFVBase::commonMomentumEquationParams()
   params.addParam<bool>("solve_for_dynamic_pressure",
                         false,
                         "Whether to solve for the dynamic pressure instead of the total pressure");
+  params.addParam<Point>("reference_pressure_point",
+                         Point(0, 0, 0),
+                         "Point at which the gravity term for the static pressure is zero");
+  params.addParam<Real>("reference_pressure", 1e5, "Total pressure at the reference point");
+  params.addParamNamesToGroup(
+      "solve_for_dynamic_pressure reference_pressure_point reference_pressure", "Dynamic pressure");
 
   // Pressure pin parameters
   params.addParam<bool>(
