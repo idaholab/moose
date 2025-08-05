@@ -27,6 +27,9 @@
   []
   [ignore]
   []
+  [going_to_be_ignored_due_to_block_restriction]
+    block = '0 1'
+  []
 []
 
 [Materials]
