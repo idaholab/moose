@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MassMatrixDGKernel.h"
+#include "MassMatrix.h"
 
 registerMooseObject("NavierStokesApp", MassMatrixDGKernel);
 
@@ -15,15 +16,11 @@ InputParameters
 MassMatrixDGKernel::validParams()
 {
   InputParameters params = DGKernel::validParams();
-  params.addClassDescription("Computes a finite element mass matrix meant for use in "
-                             "preconditioning schemes which require one");
-  params.addParam<Real>("density", 1, "Optional density for scaling the computed mass.");
-  params.set<MultiMooseEnum>("vector_tags") = "";
-  params.set<MultiMooseEnum>("matrix_tags") = "";
-  params.suppressParameter<MultiMooseEnum>("vector_tags");
-  params.suppressParameter<std::vector<TagName>>("extra_vector_tags");
-  params.suppressParameter<std::vector<TagName>>("absolute_value_vector_tags");
-  params.set<bool>("matrix_only") = true;
+  params.addClassDescription(
+      "Computes a finite element mass matrix on internal faces meant for use in "
+      "preconditioning schemes which require one");
+  MassMatrix::setMassMatrixParams(params);
+  params.addParam<Real>("density", 1, "The density");
   return params;
 }
 

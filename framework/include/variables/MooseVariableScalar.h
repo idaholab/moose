@@ -84,6 +84,8 @@ public:
 
   void setActiveTags(const std::set<TagID> & vtags) override { _required_vector_tags = vtags; }
 
+  virtual void sizeMatrixTagData() override;
+
 protected:
   /// The value of scalar variable
   VariableValue _u;

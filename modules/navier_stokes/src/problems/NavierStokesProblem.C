@@ -9,7 +9,9 @@
 
 #include "NavierStokesProblem.h"
 #include "NonlinearSystemBase.h"
+#include "FieldSplitPreconditioner.h"
 #include "libmesh/petsc_matrix.h"
+#include "libmesh/static_condensation.h"
 
 using namespace libMesh;
 
@@ -96,6 +98,20 @@ NavierStokesProblem::~NavierStokesProblem()
   }
 }
 
+void
+NavierStokesProblem::initialSetup()
+{
+  FEProblem::initialSetup();
+  for (const auto & solver_sys : _solver_systems)
+    if (solver_sys->system().has_static_condensation())
+    {
+      if (_have_L_matrix)
+        mooseError("Static condensation and LSC preconditioning not supported together");
+      if (_have_mass_matrix)
+        cast_ref<StaticCondensation &>(solver_sys->getMatrix(massMatrixTagID()))
+            .uncondensed_dofs_only();
+    }
+}
 KSP
 NavierStokesProblem::findSchurKSP(KSP node, const unsigned int tree_position)
 {
@@ -133,7 +149,7 @@ NavierStokesProblem::findSchurKSP(KSP node, const unsigned int tree_position)
   LibmeshPetscCall(PCFieldSplitGetISByIndex(fs_pc, sub_ksp_index, &is));
 
   // Store this tree level's index set, which we will eventually use to get the sub-matrices
-  // required for our preconditioning process from the system matrix
+  // required for our preconditioning process from the system matrices
   _index_sets.push_back(is);
 
   // Free the array of sub linear solvers that got allocated in the PCFieldSplitGetSubKSP call
@@ -169,20 +185,26 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   // preconditioner for the Schur complement
   Mat global_Q = nullptr;
   if (_have_mass_matrix)
-    global_Q =
-        static_cast<PetscMatrix<Number> &>(getNonlinearSystemBase(0).getMatrix(massMatrixTagID()))
-            .mat();
+  {
+    auto & sparse_mass_mat = _current_nl_sys->getMatrix(massMatrixTagID());
+    if (_current_nl_sys->system().has_static_condensation())
+      global_Q = cast_ref<const PetscMatrixBase<Number> &>(
+                     cast_ref<StaticCondensation &>(sparse_mass_mat).get_condensed_mat())
+                     .mat();
+    else
+      global_Q = cast_ref<PetscMatrixBase<Number> &>(sparse_mass_mat).mat();
+  }
+
   // The Poisson operator matrix corresponding to the velocity degrees of freedom. This is only used
   // and is required for Olshanskii LSC preconditioning
   Mat global_L = nullptr;
   if (_have_L_matrix)
     global_L =
-        static_cast<PetscMatrix<Number> &>(getNonlinearSystemBase(0).getMatrix(LMatrixTagID()))
-            .mat();
+        cast_ref<PetscMatrixBase<Number> &>(_current_nl_sys->getMatrix(LMatrixTagID())).mat();
 
   //
-  // Process down from our system matrix to the sub-matrix containing the velocity-pressure dofs for
-  // which we are going to be doing the Schur complement preconditioning
+  // Process down from our system matrices to the sub-matrix containing the velocity-pressure dofs
+  // for which we are going to be doing the Schur complement preconditioning
   //
 
   auto process_intermediate_mats = [this](auto & intermediate_mats, auto parent_mat)
@@ -367,9 +389,7 @@ NavierStokesProblem::initPetscOutputAndSomeSolverSettings()
   }
 
   // Set the pre-KSP solve callback. At that time we will setup our Schur complement preconditioning
-  KSP ksp;
-  auto snes = currentNonlinearSystem().getSNES();
-  LibmeshPetscCall(SNESGetKSP(snes, &ksp));
+  auto ksp = currentNonlinearSystem().getFieldSplitPreconditioner().getKSP();
   LibmeshPetscCall(KSPSetPreSolve(ksp, &navierStokesKSPPreSolve, this));
 }
 

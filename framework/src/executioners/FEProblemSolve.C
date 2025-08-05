@@ -64,13 +64,6 @@ FEProblemSolve::validParams()
   InputParameters params = MultiSystemSolveObject::validParams();
   params += FEProblemSolve::feProblemDefaultConvergenceParams();
 
-  params.addParam<std::vector<std::vector<std::string>>>(
-      "splitting",
-      {},
-      "Top-level splitting defining a hierarchical decomposition into "
-      "subsystems to help the solver. Outer-vector of this vector-of-vector parameter correspond "
-      "to each nonlinear system.");
-
   std::set<std::string> line_searches = mooseLineSearches();
 
   std::set<std::string> alias_line_searches = {"default", "none", "basic"};
@@ -203,7 +196,7 @@ FEProblemSolve::validParams()
                               "Linear Solver");
   params.addParamNamesToGroup(
       "solve_type snesmf_reuse_base use_pre_SMO_residual "
-      "num_grids residual_and_jacobian_together splitting nonlinear_convergence linear_convergence",
+      "num_grids residual_and_jacobian_together nonlinear_convergence linear_convergence",
       "Nonlinear Solver");
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
@@ -328,13 +321,6 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
     i_nl_sys++;
 
     nl.setPreSMOResidual(getParam<bool>("use_pre_SMO_residual"));
-
-    const auto & all_splittings = getParam<std::vector<std::vector<std::string>>>("splitting");
-    if (all_splittings.size())
-      nl.setDecomposition(
-          getParamFromNonlinearSystemVectorParam<std::vector<std::string>>("splitting", i_nl_sys));
-    else
-      nl.setDecomposition({});
 
     const auto res_and_jac =
         getParamFromNonlinearSystemVectorParam<bool>("residual_and_jacobian_together", i_nl_sys);

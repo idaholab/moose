@@ -98,7 +98,8 @@ Split::setup(NonlinearSystemBase & nl, const std::string & prefix)
   // A reference to the PetscOptions
   Moose::PetscSupport::PetscOptions & po = _fe_problem.getPetscOptions();
   // prefix
-  std::string dmprefix = prefix + "dm_moose_";
+  const std::string prefix_with_dash = '-' + prefix;
+  std::string dmprefix = prefix_with_dash + "dm_moose_";
 
   if (isParamValid("unside_by_var_boundary_name"))
   {
@@ -141,23 +142,24 @@ Split::setup(NonlinearSystemBase & nl, const std::string & prefix)
     // If this split has subsplits, it is presumed that the pc_type used to solve this split's
     // subsystem is fieldsplit
     // with the following parameters (unless overridden by the user-specified petsc_options below).
-    po.pairs.emplace_back(prefix + "pc_type", "fieldsplit");
+    po.pairs.emplace_back(prefix_with_dash + "pc_type", "fieldsplit");
 
     // set Splitting Type
     const std::string petsc_splitting_type[] = {
         "additive", "multiplicative", "symmetric_multiplicative", "schur"};
-    po.pairs.emplace_back(prefix + "pc_fieldsplit_type", petsc_splitting_type[_splitting_type]);
+    po.pairs.emplace_back(prefix_with_dash + "pc_fieldsplit_type",
+                          petsc_splitting_type[_splitting_type]);
 
     if (_splitting_type == SplittingTypeSchur)
     {
       // set Schur Type
       const std::string petsc_schur_type[] = {"diag", "upper", "lower", "full"};
-      po.pairs.emplace_back(prefix + "pc_fieldsplit_schur_fact_type",
+      po.pairs.emplace_back(prefix_with_dash + "pc_fieldsplit_schur_fact_type",
                             petsc_schur_type[_schur_type]);
 
       // set Schur Preconditioner
       const std::string petsc_schur_pre[] = {"self", "selfp", "a11"};
-      po.pairs.emplace_back(prefix + "pc_fieldsplit_schur_precondition",
+      po.pairs.emplace_back(prefix_with_dash + "pc_fieldsplit_schur_precondition",
                             petsc_schur_pre[_schur_pre]);
     }
 
