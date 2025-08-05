@@ -1310,6 +1310,12 @@ public:
   MooseAppCoordTransform & coordTransform();
 
   /**
+   * @return whether coordinate transformation exists by having rotation parameters and
+   * up_direction parameter for the opposite of the gravity vector.
+   */
+  bool hasCoordTransform() const;
+
+  /**
    * @return the length unit of this mesh provided through the coordinate transformation object
    */
   const MooseUnits & lengthUnit() const;
@@ -1889,6 +1895,20 @@ MooseMesh::coordTransform()
 {
   mooseAssert(_coord_transform, "The coordinate transformation object is null.");
   return *_coord_transform;
+}
+
+inline bool
+MooseMesh::hasCoordTransform() const
+{
+  if (parameters().isParamValid("alpha_rotation"))
+    return true;
+  if (parameters().isParamValid("beta_rotation"))
+    return true;
+  if (parameters().isParamValid("gamma_rotation"))
+    return true;
+  if (parameters().isParamSetByUser("up_direction"))
+    return true;
+  return false;
 }
 
 template <>
