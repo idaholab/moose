@@ -5,11 +5,11 @@
     type = XMLDiff
     input = HeatTransferAverageField.i
     xmldiff = 'OutputData/HeatTransferAverageField/Run0/Run0.pvd
-                OutputData/HeatTransferAverageField/Run0/Cycle000001/proc000000.vtu'
+                OutputData/HeatTransferAverageField/Run0/Cycle000002/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to take a running time-weight average of an MFEM Variable'
     capabilities = 'mfem' 
-    platform=linux
+    platform = 'linux'
     max_parallel = 1
     recover = false
     max_threads = 1
