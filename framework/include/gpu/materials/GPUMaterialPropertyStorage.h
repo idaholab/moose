@@ -109,11 +109,11 @@ public:
   bool haveKokkosProperty(std::string prop_name, unsigned int state = 0);
   /**
    * Register the load/store functions
-   * @param key The key to call load/store functions
+   * @param type The property type index
    * @param store The function pointer to the store function
    * @param load The function pointer to the load function
    */
-  void registerLoadStore(PropertyKey key, PropertyStore store, PropertyLoad load);
+  void registerLoadStore(std::type_index type, PropertyStore store, PropertyLoad load);
   /**
    * Allocate all the material property data storages
    */
@@ -143,8 +143,8 @@ private:
    * Function pointer maps for load/store
    */
   ///{@
-  std::unordered_map<PropertyKey, PropertyStore> _store;
-  std::unordered_map<PropertyKey, PropertyLoad> _load;
+  static std::unordered_map<std::type_index, PropertyStore> _store_functions;
+  static std::unordered_map<std::type_index, PropertyLoad> _load_functions;
   ///@}
 };
 

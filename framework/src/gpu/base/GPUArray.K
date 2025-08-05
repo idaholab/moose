@@ -15,7 +15,7 @@ namespace Kokkos
 {
 
 void
-kokkosFree(void * ptr)
+free(void * ptr)
 {
   ::Kokkos::kokkos_free<ExecSpace::memory_space>(ptr);
 }

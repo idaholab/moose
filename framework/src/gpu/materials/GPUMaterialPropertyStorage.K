@@ -17,6 +17,9 @@ namespace Moose
 namespace Kokkos
 {
 
+std::unordered_map<std::type_index, PropertyStore> MaterialPropertyStorage::_store_functions;
+std::unordered_map<std::type_index, PropertyLoad> MaterialPropertyStorage::_load_functions;
+
 MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry,
                                                  FEProblemBase & problem)
   : ::MaterialPropertyStorage(registry, problem)
@@ -145,10 +148,12 @@ MaterialPropertyStorage::haveKokkosProperty(std::string prop_name, unsigned int 
 }
 
 void
-MaterialPropertyStorage::registerLoadStore(PropertyKey key, PropertyStore store, PropertyLoad load)
+MaterialPropertyStorage::registerLoadStore(std::type_index type,
+                                           PropertyStore store,
+                                           PropertyLoad load)
 {
-  _store[key] = store;
-  _load[key] = load;
+  _store_functions[type] = store;
+  _load_functions[type] = load;
 }
 
 void
@@ -211,8 +216,9 @@ dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storag
 
       for (unsigned int state = 0; state < num_states; ++state)
       {
-        auto it = storage._store.find(props[state][name]->loadStoreKey());
-        mooseAssert(it != storage._store.end(), "Store function was not properly registered.");
+        auto it = storage._store_functions.find(props[state][name]->propertyType());
+        mooseAssert(it != storage._store_functions.end(),
+                    "Store function was not properly registered.");
 
         it->second(ss, props[state][name].get());
       }
@@ -251,8 +257,9 @@ dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage
     if (records.count(name) && storage.getPropRecord(records[name].id).stateful())
       for (unsigned int state = 0; state < num_states; ++state)
       {
-        auto it = storage._load.find(props[state][name]->loadStoreKey());
-        mooseAssert(it != storage._load.end(), "Load function was not properly registered.");
+        auto it = storage._load_functions.find(props[state][name]->propertyType());
+        mooseAssert(it != storage._load_functions.end(),
+                    "Load function was not properly registered.");
 
         it->second(ss, props[state][name].get());
       }
