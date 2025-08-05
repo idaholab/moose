@@ -8,10 +8,10 @@
                 OutputData/HeatTransferAverageField/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to take a running time-weight average of an MFEM Variable'
-    capabilities = 'mfem'
+    capabilities = 'mfem' 
+    platform=linux
     max_parallel = 1
     recover = false
     max_threads = 1
-    platform = 'linux'
   []
 []
