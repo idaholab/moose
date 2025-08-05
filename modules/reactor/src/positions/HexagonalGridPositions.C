@@ -29,6 +29,9 @@ HexagonalGridPositions::validParams()
       "inner flat-to-flat distance");
   params.addRequiredRangeCheckedParam<Real>("pin_pitch", "pin_pitch>0", "Distance between pins");
   params.addRequiredRangeCheckedParam<unsigned int>("nr", "nr>0", "Number of hexagonal rings");
+  params.addParam<Real>(
+      "rotation_around_axis", 0., "Rotation angle to apply to the underlying hexagonal lattice");
+
   params.addRangeCheckedParam<std::vector<std::vector<unsigned int>>>(
       "pattern",
       {},
@@ -145,8 +148,14 @@ HexagonalGridPositions::initialize()
   clearPositions();
 
   // We make very large pins so they cover the entire position
-  _hex_latt = std::make_unique<HexagonalLatticeUtils>(
-      _lattice_flat_to_flat, _pin_pitch, _pin_pitch, 0., 1., _nr, _z_axis_index);
+  _hex_latt = std::make_unique<HexagonalLatticeUtils>(_lattice_flat_to_flat,
+                                                      _pin_pitch,
+                                                      _pin_pitch,
+                                                      0.,
+                                                      1.,
+                                                      _nr,
+                                                      _z_axis_index,
+                                                      getParam<Real>("rotation_around_axis"));
 
   if (!isParamSetByUser("positions_pattern"))
   {
