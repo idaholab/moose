@@ -1,7 +1,8 @@
 #pragma once
 #include "FunctionParserUtils.h"
-#include "MFEMProblemData.h"
-#include "MFEMGeneralUserObject.h"
+
+class MFEMGeneralUserObject;
+struct MFEMProblemData;
 /**
  * Declares parsed functions based on names and values prescribed by input parameters.
  */

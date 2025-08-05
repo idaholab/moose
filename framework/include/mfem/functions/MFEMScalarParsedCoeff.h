@@ -7,9 +7,10 @@
 // Define a coefficient that, given a grid function u,
 // function func, returns func(u)
 
+#ifdef MOOSE_MFEM_ENABLED
+
 #pragma once
 
-#include "mfem.hpp"
 #include "MFEMContainers.h"
 #include "FunctionParserUtils.h"
 #include <vector>
@@ -31,3 +32,5 @@ public:
 
   double Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip);
 };
+
+#endif
