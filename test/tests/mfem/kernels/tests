@@ -76,7 +76,7 @@
     xmldiff = 'OutputData/Diffusion_amr/Run0/Run0.pvd
                 OutputData/Diffusion_amr/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
-    requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
+    requirement = 'The system shall have the ability to solve a diffusion problem using MFEM using adaptive mesh refinement.'
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
