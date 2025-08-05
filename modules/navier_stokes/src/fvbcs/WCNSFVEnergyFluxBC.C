@@ -9,6 +9,7 @@
 
 #include "WCNSFVEnergyFluxBC.h"
 #include "INSFVEnergyVariable.h"
+#include "SinglePhaseFluidProperties.h"
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", WCNSFVEnergyFluxBC);
