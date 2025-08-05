@@ -153,6 +153,10 @@ protected:
   ///@}
 
 private:
+  // Unused for Kokkos materials because they are hidden by Kokkos functions
+  virtual void initQpStatefulProperties() override final {}
+  virtual void computeQpProperties() override final {}
+
   /**
    * Element IDs this material operates on for element material property evaluation
    */

@@ -29,11 +29,11 @@ MooseInit::initKokkos()
 
 #ifdef MOOSE_ENABLE_KOKKOS_GPU
 
-  unsigned int num_gpus = Kokkos::num_devices();
+  unsigned int num_kokkos_gpus = Kokkos::num_devices();
 
-  comm().min(num_gpus);
+  comm().min(num_kokkos_gpus);
 
-  if (num_gpus)
+  if (num_kokkos_gpus)
   {
     // Create a local communicator defined at each shared memory node
     Parallel::Communicator local_comm;
@@ -41,10 +41,10 @@ MooseInit::initKokkos()
 
     // The number of processes in each node is usually larger than the number of
     // GPU devices in the node, so multiple processes share the same GPU
-    unsigned int my_gpu_id = local_comm.rank() % num_gpus;
+    unsigned int kokkos_gpu_id = local_comm.rank() % num_kokkos_gpus;
 
     // Override the default GPU ID
-    settings.set_device_id(my_gpu_id);
+    settings.set_device_id(kokkos_gpu_id);
   }
 
 #endif

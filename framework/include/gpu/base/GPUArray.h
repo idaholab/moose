@@ -36,7 +36,7 @@ namespace Kokkos
 
 // This function simply calls ::Kokkos::kokkos_free, but it is separately defined in KokkosArray.K
 // because the Kokkos function cannot be directly seen by the host compiler
-void kokkosFree(void * ptr);
+void free(void * ptr);
 
 /**
  * The enumerator that dictates the memory copy direction
@@ -465,7 +465,7 @@ ArrayBase<T, dimension>::destroy()
     }
 
     if (_is_device_alloc && !_is_device_alias)
-      kokkosFree(_device_data);
+      Moose::Kokkos::free(_device_data);
   }
 
   _size = 0;
@@ -868,12 +868,12 @@ ArrayBase<T, dimension>::operator=(const T & scalar)
   return *this;
 }
 
-using ::dataStore;
-
 template <typename T, unsigned int dimension>
 void
 dataStore(std::ostream & stream, Array<T, dimension> & array, void * context)
 {
+  using ::dataStore;
+
   bool is_alloc = array.isAlloc();
   dataStore(stream, is_alloc, nullptr);
 
@@ -912,12 +912,12 @@ dataStore(std::ostream & stream, Array<T, dimension> & array, void * context)
       dataStore(stream, value, context);
 }
 
-using ::dataLoad;
-
 template <typename T, unsigned int dimension>
 void
 dataLoad(std::istream & stream, Array<T, dimension> & array, void * context)
 {
+  using ::dataLoad;
+
   bool is_alloc;
   dataLoad(stream, is_alloc, nullptr);
 
@@ -987,8 +987,9 @@ dataLoad(std::istream & stream, Array<T, dimension> & array, void * context)
  * copyToDevice() after populating data. For a nested Kokkos array, either copyToDeviceNested()
  * should be called for the outermost array or copyToDevice() should be called for each instance of
  * Kokkos array from the innermost to the outermost. Do not store this object as reference in your
- * Kokkos object if it used on device, because the reference refers to a host object and therefore
- * is not accessible on device. If storing it as a reference is required, see ReferenceWrapper.
+ * Kokkos object if it is used on device, because the reference refers to a host object and
+ * therefore is not accessible on device. If storing it as a reference is required, see
+ * ReferenceWrapper.
  */
 ///@{
 template <typename T>
