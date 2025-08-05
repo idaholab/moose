@@ -147,6 +147,11 @@ AdvancedExtruderGenerator::validParams()
                         "following the direction vector");
   params.addParam<libMesh::Real>(
       "r_final", "Final radius to extrude to. Defaults to constant radius if not specified.");
+  params.addParam<libMesh::Real>(
+      "r_start_intended",
+      "Advanced parameter to be set when extruding to a final radius. It "
+      "aids in the preservation of surface area when extruding. The "
+      "radius is defined to be the largest distance from the center.");
   params.addParam<MeshGeneratorName>(
       "target_mesh",
       "Mesh to be extruded to. If specified, a final radius is automatically calculated.");
@@ -155,6 +160,11 @@ AdvancedExtruderGenerator::validParams()
                              "Functional form to change radius while extruding along curve.");
   params.addParam<Real>("start_radial_growth_rate", 0, "Starting rate of radial expansion.");
   params.addParam<Real>("end_radial_growth_rate", 0, "Ending rate of radial expansion.");
+
+  params.addParam<bool>("correct_extrusion_to_target",
+                        true,
+                        "When extruding along a curve to a target radius, the extruded nodes will "
+                        "be corrected to align with the target mesh on the last extrusion.");
 
   return params;
 }
@@ -543,11 +553,12 @@ AdvancedExtruderGenerator::generate()
   if (_extrude_along_curve)
     reference_point = extrusion_curve->node_ptr(0);
 
-  libMesh::Real start_radius;
+  libMesh::Real start_radius_true;
   if (_extrude_along_curve)
-    start_radius = AdvancedExtruderGenerator::calculateStartRadiusFromCurve(extrusion_curve, input);
+    start_radius_true =
+        AdvancedExtruderGenerator::calculateStartRadiusFromCurve(extrusion_curve, input);
   else
-    start_radius =
+    start_radius_true =
         AdvancedExtruderGenerator::calculateStartRadiusFromCenter(center_of_input_mesh, input);
 
   libMesh::Real end_radius;
@@ -555,9 +566,13 @@ AdvancedExtruderGenerator::generate()
     end_radius = getParam<libMesh::Real>("r_final");
   else
     end_radius = AdvancedExtruderGenerator::calculateEndRadiusFromCurve(
-        extrusion_curve, target_mesh, start_radius);
-  if (std::abs(start_radius - end_radius) > libMesh::TOLERANCE)
-    _console << "Expanding radially with ratio: " << end_radius / start_radius << std::endl;
+        extrusion_curve, target_mesh, start_radius_true);
+
+  if (isParamValid("r_start_intended"))
+    end_radius *= start_radius_true / getParam<Real>("r_start_intended");
+
+  if (std::abs(start_radius_true - end_radius) > libMesh::TOLERANCE)
+    _console << "Expanding radially with ratio: " << end_radius / start_radius_true << std::endl;
 
   // Create translated layers of nodes in the direction of extrusion
   for (const auto & node : input->node_ptr_range())
@@ -634,8 +649,14 @@ AdvancedExtruderGenerator::generate()
             if (k > 0 && k < order * num_layers)
             {
               libMesh::Node * P_next = extrusion_curve->node_ptr(k + 1);
-              intersecting_plane_normal_vec =
-                  *P_next - *P_prev; // this approximates the derivative at the spline point
+              // intersecting_plane_normal_vec =
+              //     *P_next - *P_prev; // this approximates the derivative at the spline point
+              Real length_1 = (*P_current - *P_prev).norm();
+              Real length_2 = (*P_next - *P_current).norm();
+              Real length_total = length_1 + length_2;
+              // approximate derivative with weighted sum
+              intersecting_plane_normal_vec = length_1 / length_total * (*P_current - *P_prev) +
+                                              length_2 / length_total * (*P_next - *P_current);
             }
             else
               intersecting_plane_normal_vec = _end_extrusion_direction;
@@ -656,10 +677,10 @@ AdvancedExtruderGenerator::generate()
               libMesh::Real node_radius; // allocate some memory
 
               // Handle if we are expanding the radius as we extrude.
-              if (!MooseUtils::absoluteFuzzyEqual(end_radius, start_radius))
+              if (!MooseUtils::absoluteFuzzyEqual(end_radius, start_radius_true))
               {
                 node_radius = AdvancedExtruderGenerator::nodeRadius(
-                    start_node_radius, start_radius, end_radius, t);
+                    start_node_radius, start_radius_true, end_radius, t);
               }
               else
               {
@@ -668,6 +689,14 @@ AdvancedExtruderGenerator::generate()
 
               libMesh::Point new_node_point =
                   *P_current + node_radius * dir_along_line; // calculate new node location
+
+              // if we are on the last extrusion, map to the closest node using new_node_point as a
+              // starting guess
+              if ((k == total_extrap_heights - 1) && (e == total_num_elevations - 1) &&
+                  getParam<bool>("correct_extrusion_to_target"))
+                new_node_point =
+                    AdvancedExtruderGenerator::finalNodeSearch(new_node_point, target_mesh);
+
               current_distance = new_node_point -
                                  *node; // this backtracks a bit, but it fits in with what's here...
             }
@@ -693,11 +722,16 @@ AdvancedExtruderGenerator::generate()
                             : height * std::pow(bias, (Real)(layer_index - 1)) * (1.0 - bias) /
                                   (1.0 - std::pow(bias, (Real)(num_layers))) / (Real)order;
 
-            if (!MooseUtils::absoluteFuzzyEqual(end_radius, start_radius) &&
+            if (!MooseUtils::absoluteFuzzyEqual(end_radius, start_radius_true) &&
                 start_node_radius > libMesh::TOLERANCE)
             {
               libMesh::Real node_radius = AdvancedExtruderGenerator::nodeRadius(
-                  start_node_radius, start_radius, end_radius, t);
+                  start_node_radius, start_radius_true, end_radius, t);
+
+              if (MooseUtils::absoluteFuzzyEqual(t, 1.0))
+                mooseAssert(MooseUtils::absoluteFuzzyEqual(
+                                node_radius, start_node_radius / start_radius_true * end_radius),
+                            "Final expected radius not met!");
 
               // calculate direction to center of extrusion
               RealVectorValue dir_to_center = (*node + old_distance) - center_axis_point;
@@ -1474,32 +1508,32 @@ AdvancedExtruderGenerator::calculateStartRadiusFromCurve(
   mooseAssert(input_mesh->n_nodes() > 0, "input_mesh has no nodes!");
 
   libMesh::Node * reference_point = extrusion_curve->node_ptr(0);
-  libMesh::Real start_radius = 0; // initialize starting radius
+  libMesh::Real start_radius_true = 0; // initialize starting radius
   libMesh::Real test_radius;
   unsigned int counter = 0;
   for (const auto & node : input_mesh->node_ptr_range())
   {
     test_radius = (*node - *reference_point).norm();
     if (counter == 0)
-      start_radius = test_radius;
+      start_radius_true = test_radius;
     else
     {
-      if (test_radius > start_radius)
-        start_radius = test_radius;
+      if (test_radius > start_radius_true)
+        start_radius_true = test_radius;
     }
     counter++;
   }
-  return start_radius;
+  return start_radius_true;
 }
 
 libMesh::Real
 AdvancedExtruderGenerator::calculateEndRadiusFromCurve(
     const std::unique_ptr<MeshBase> & extrusion_curve,
     const std::unique_ptr<MeshBase> & target_mesh,
-    const libMesh::Real & start_radius)
+    const libMesh::Real & start_radius_true)
 {
   if (extrusion_curve == nullptr || target_mesh == nullptr)
-    return start_radius;
+    return start_radius_true;
 
   mooseAssert(target_mesh->n_nodes() > 0, "input_mesh has no nodes!");
 
@@ -1557,17 +1591,19 @@ AdvancedExtruderGenerator::radialWeighting(const MooseEnum function_type, const 
 
 libMesh::Real
 AdvancedExtruderGenerator::nodeRadius(const Real start_node_radius,
-                                      const Real start_radius,
+                                      const Real start_radius_true,
                                       const Real end_radius,
                                       const Real t)
 {
   libMesh::Real radius_scaling =
-      start_node_radius / start_radius; // fraction of the total starting radius the node lives in
+      start_node_radius /
+      start_radius_true; // fraction of the total starting radius the node lives in
   libMesh::Real radial_weight =
       AdvancedExtruderGenerator::radialWeighting(getParam<MooseEnum>("radial_growth_method"),
                                                  t); // calculate weighting for expansion
-  libMesh::Real node_radius = (start_radius * (1 - radial_weight) + end_radius * radial_weight) *
-                              radius_scaling; // calculate new radius
+  libMesh::Real node_radius =
+      (start_radius_true * (1 - radial_weight) + end_radius * radial_weight) *
+      radius_scaling; // calculate new radius
   return node_radius;
 }
 
@@ -1577,20 +1613,48 @@ AdvancedExtruderGenerator::calculateStartRadiusFromCenter(
 {
   mooseAssert(input_mesh->n_nodes() > 0, "input_mesh has no nodes!");
 
-  libMesh::Real start_radius = 0; // initialize starting radius
+  libMesh::Real start_radius_true = 0; // initialize starting radius
   libMesh::Real test_radius;
   unsigned int counter = 0;
   for (const auto & node : input_mesh->node_ptr_range())
   {
     test_radius = (*node - center).norm();
     if (counter == 0)
-      start_radius = test_radius;
+      start_radius_true = test_radius;
     else
     {
-      if (test_radius > start_radius)
-        start_radius = test_radius;
+      if (test_radius > start_radius_true)
+        start_radius_true = test_radius;
     }
     counter++;
   }
-  return start_radius;
+  return start_radius_true;
+}
+
+libMesh::Point
+AdvancedExtruderGenerator::finalNodeSearch(const libMesh::Point & node,
+                                           const std::unique_ptr<MeshBase> & target_mesh)
+{
+  mooseAssert(target_mesh->n_nodes() > 0, "input_mesh has no nodes!");
+
+  // loop over all nodes in mesh, keeping track of the distances. return the node with the small
+  // distance
+  Real test_distance;
+  Real shortest_distance = INFINITY;
+  libMesh::Point return_point;
+  for (const auto & trial_node : target_mesh->node_ptr_range())
+  {
+    test_distance = (*trial_node - node).norm();
+    if (test_distance < shortest_distance)
+    {
+      shortest_distance = test_distance;
+      return_point = *trial_node;
+
+      // skip the rest of the search if the start node is good
+      if (shortest_distance < TOLERANCE)
+        return return_point;
+    }
+  }
+
+  return return_point;
 }

@@ -163,7 +163,7 @@ CylinderComponent::addMeshGenerators()
       paramError("n_sectors", "Should be provided in 3D");
     if (isParamValid("start_radius") && !isParamValid("end_radius"))
       paramError("end_radius", "If start_radius is set, end_radius must also be set.");
-    if (isParamValid("start_radius") && !isParamValid("radius"))
+    if (isParamValid("start_radius") && isParamValid("radius"))
       paramError("radius", "If radius is set, start_radius must not be!");
 
     // create circular face
@@ -222,6 +222,7 @@ CylinderComponent::addMeshGenerators()
       ext_params.set<Real>("r_final") = getParam<Real>("end_radius");
       ext_params.set<Real>("start_radial_growth_rate") = getParam<Real>("start_radial_growth_rate");
       ext_params.set<Real>("end_radial_growth_rate") = getParam<Real>("end_radial_growth_rate");
+      ext_params.set<Real>("r_start_intended") = radius;
     }
 
     const Point default_direction(1, 0, 0);

@@ -33,5 +33,6 @@ protected:
   // virtual void setupComponent() override;
   virtual void checkIntegrity() override;
 
-  MooseEnum _junction_method;
+  const MooseEnum _junction_method;
+  const bool _enforce_all_nodes_match_on_boundaries;
 };

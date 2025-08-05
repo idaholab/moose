@@ -108,7 +108,7 @@ protected:
                                             const std::unique_ptr<MeshBase> & target_mesh,
                                             const libMesh::Real & start_radius);
 
-  /// Calculate weighting for radial expansion
+  /// Calculate weighting for radial expansion (used in nodeRadius)
   libMesh::Real radialWeighting(const MooseEnum function_type, const libMesh::Real t);
 
   /// Calculate radius for expansion
@@ -117,6 +117,15 @@ protected:
                            const Real end_radius,
                            const Real t);
 
+  /// @brief Calculates starting radius for extrusion along curve.
+  /// @param extrusion_curve 1D extrusion curve
+  /// @param target_mesh mesh to be extruded to
+  /// @param start_radius radius at the start of the extrusion (calculated with above method)
+  /// @return
   libMesh::Real calculateStartRadiusFromCenter(const libMesh::Point center,
                                                const std::unique_ptr<MeshBase> & input_mesh);
+
+  /// Find closest node in mesh to input node
+  libMesh::Point finalNodeSearch(const libMesh::Point & node,
+                                 const std::unique_ptr<MeshBase> & target_mesh);
 };
