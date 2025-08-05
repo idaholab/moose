@@ -92,7 +92,7 @@ DiscreteVariableResidualNorm::finalize()
   Parallel::push_parallel_vector_data(_communicator, _nonlocal_dof_indices_map, receive_functor);
 
   // compute the total number of Dofs for the variable on the subdomain
-  unsigned int n_dofs = _local_dof_indices.size();
+  auto n_dofs = _local_dof_indices.size();
   gatherSum(n_dofs);
 
   Real bias = 1.0;
