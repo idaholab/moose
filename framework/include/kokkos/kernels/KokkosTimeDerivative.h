@@ -23,12 +23,13 @@ public:
 
   KOKKOS_FUNCTION void computeJacobianInternal(const Derived * kernel, ResidualDatum & datum) const;
 
-  KOKKOS_FUNCTION inline Real
-  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
-  KOKKOS_FUNCTION inline Real computeQpJacobian(const unsigned int i,
-                                                const unsigned int j,
-                                                const unsigned int qp,
-                                                ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
+                                         const unsigned int qp,
+                                         ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
+                                         const unsigned int j,
+                                         const unsigned int qp,
+                                         ResidualDatum & datum) const;
 
 protected:
   const bool _lumping;
@@ -97,7 +98,7 @@ KokkosTimeDerivative<Derived>::computeJacobianInternal(const Derived * kernel,
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION inline Real
+KOKKOS_FUNCTION Real
 KokkosTimeDerivative<Derived>::computeQpResidual(const unsigned int i,
                                                  const unsigned int qp,
                                                  ResidualDatum & datum) const
@@ -106,7 +107,7 @@ KokkosTimeDerivative<Derived>::computeQpResidual(const unsigned int i,
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION inline Real
+KOKKOS_FUNCTION Real
 KokkosTimeDerivative<Derived>::computeQpJacobian(const unsigned int i,
                                                  const unsigned int j,
                                                  const unsigned int qp,

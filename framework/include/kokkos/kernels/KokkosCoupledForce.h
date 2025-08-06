@@ -22,8 +22,9 @@ public:
 
   KokkosCoupledForce(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION inline Real
-  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
+                                         const unsigned int qp,
+                                         ResidualDatum & datum) const;
 
 private:
   /// Coupled variable number
