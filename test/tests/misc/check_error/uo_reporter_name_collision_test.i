@@ -6,6 +6,11 @@
   nx = 5
 []
 
+[Problem]
+  type = FEProblem
+  solve = false
+[]
+
 [UserObjects]
   [ud]
     type = MTUserObject
@@ -14,18 +19,12 @@
   []
 []
 
-[Problem]
-  type = FEProblem
-  solve = false
-[]
-
 [Executioner]
   type = Steady
 []
 
-[VectorPostprocessors]
+[Reporters]
   [ud]
-    type = ConstantVectorPostprocessor
-    value = 1
+    type = ConstantReporter
   []
 []
