@@ -62,7 +62,7 @@ WebServerControl::validParams()
 }
 
 WebServerControl::WebServerControl(const InputParameters & parameters)
-  : Control(parameters), _currently_waiting(false)
+  : Control(parameters), _currently_waiting(false), _terminate_requested(false)
 {
   const auto has_port = isParamValid("port");
   const auto has_file_socket = isParamValid("file_socket");
@@ -318,7 +318,7 @@ WebServerControl::startServer()
           {
             if (this->_currently_waiting.load())
             {
-              this->_fe_problem.terminateSolve();
+              this->_terminate_requested.store(true);
               this->_currently_waiting.store(false);
               return HttpResponse{200};
             }
@@ -364,6 +364,9 @@ WebServerControl::execute()
   // set the same values
   std::vector<std::pair<std::string, std::string>> name_and_types;
 
+  // Need to also broadcast whether or not to terminate the solve on the timestep
+  bool terminate_solve = false; // Set value to avoid compiler warnings
+
   // Wait for the server on rank 0 to be done
   if (processor_id() == 0)
   {
@@ -377,6 +380,8 @@ WebServerControl::execute()
 
     for (const auto & value_ptr : _controlled_values)
       name_and_types.emplace_back(value_ptr->name(), value_ptr->type());
+
+    terminate_solve = _terminate_requested.load();
   }
 
   // All processes need to wait
@@ -407,6 +412,11 @@ WebServerControl::execute()
   }
 
   _controlled_values.clear();
+
+  // Set solve terminate on all ranks, if requested
+  _communicator.broadcast(terminate_solve);
+  if (terminate_solve)
+    _fe_problem.terminateSolve();
 }
 
 std::string

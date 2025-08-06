@@ -188,6 +188,9 @@ private:
   /// Whether or not the Control is currently waiting
   std::atomic<bool> _currently_waiting;
 
+  // Whether or not the solve should be terminated in the next execute() call
+  std::atomic<bool> _terminate_requested;
+
   /// The server
   std::unique_ptr<HttpServer> _server;
   /// The server thread
