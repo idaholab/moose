@@ -37,7 +37,7 @@ class Plane3D {
  * associated with it.
  * Access using the getSubMesh() accessor.
  */
-class MFEMCutTransitionSubMesh : public MFEMSubMesh
+class MFEMCutTransitionSubMesh : public MFEMSubMesh, public MFEMBlockRestrictable
 {
 public:
   static InputParameters validParams();
@@ -59,9 +59,9 @@ protected:
                   const mfem::ParMesh *mesh);
   bool isInDomain(const int el, const int &sd, const mfem::ParMesh *mesh);
 
-  const BoundaryName & _boundary_name;
-  const int _bdr_attribute;
-  const SubdomainName & _cut_name;    
+  const BoundaryName & _cut_boundary;
+  const int _cut_bdr_attribute;
+  const SubdomainName & _transition_subdomain;    
   int _subdomain_label;
 };
 
