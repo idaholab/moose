@@ -134,6 +134,14 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     PYTHON_VERSION=3.13
     PYTORCH_VERSION=2.7.1
 
+    # MFEM (and maybe other things?) use mpirun. In the case of openmpi,
+    # we need to have a clean tmpdir for it to store state (which,
+    # for some reason, /tmp doesn't work for this in fakeroot?)
+    if which ompi_info &> /dev/null; then
+        export TMPDIR=${ROOT_BUILD_DIR}/tmpdir
+        mkdir $TMPDIR
+    fi
+
     # Install code-server
     CODE_SERVER_FILE=code-server-${CODE_SERVER_VERSION}-amd64.rpm
     cd ${ROOT_BUILD_DIR}
