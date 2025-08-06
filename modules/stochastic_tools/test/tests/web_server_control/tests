@@ -1,0 +1,66 @@
+[Tests]
+  issues = '#31171'
+  [stochastic_control]
+    requirement = 'The system shall provide a python-based utility for performing stochastic simulations of on-the-fly'
+    [normal]
+      type = RunApp
+      input = sub.i
+      allow_test_objects = true
+      command_proxy = 'stochastic_control.py 0'
+      required_python_packages = requests
+      recover = false
+      restep = false
+      valgrind = none # Cannot handle extra command-line from valgrind
+
+      detail = 'in "normal" mode, '
+    []
+    [batch_reset]
+      type = RunApp
+      input = sub.i
+      allow_test_objects = true
+      command_proxy = 'stochastic_control.py 1'
+      required_python_packages = requests
+      recover = false
+      restep = false
+      valgrind = none # Cannot handle extra command-line from valgrind
+
+      detail = 'in "batch-reset" mode, '
+    []
+    [batch_restore]
+      type = RunApp
+      input = sub.i
+      allow_test_objects = true
+      command_proxy = 'stochastic_control.py 2'
+      required_python_packages = requests
+      recover = false
+      restep = false
+      valgrind = none # Cannot handle extra command-line from valgrind
+
+      detail = 'in "batch-restore" mode, '
+    []
+    [batch_reset_multi]
+      type = RunApp
+      input = sub.i
+      allow_test_objects = true
+      command_proxy = 'stochastic_control.py 1 --multi-output'
+      required_python_packages = requests
+      recover = false
+      restep = false
+      valgrind = none # Cannot handle extra command-line from valgrind
+
+      detail = 'in "batch-reset" mode with multiple outputs, and'
+    []
+    [batch_restore_multi]
+      type = RunApp
+      input = sub.i
+      allow_test_objects = true
+      command_proxy = 'stochastic_control.py 2 --multi-output'
+      required_python_packages = requests
+      recover = false
+      restep = false
+      valgrind = none # Cannot handle extra command-line from valgrind
+
+      detail = 'in "batch-restore" mode with multiple outputs.'
+    []
+  []
+[]
