@@ -57,6 +57,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     VTKINCLUDE_DIR={{ VTK_DIR }}/include/vtk-{{ vtk_vtk_friendly_version }}
     VTKLIB_DIR={{ VTK_DIR }}/lib
 
+    # Expose the compat cuda libraries that can be linked to for building without a GPU present
+    if [ -n "$CUDA_DIR" ]; then
+        export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}
+    fi
+
     # Don't build VTK for clang 16; 9.2.6 currently doesn't build for clang 16.
     # VTK 9.3 does build for clang 16, but it diffs horribly due to a few bugs
     if ! $CC --version | grep --quiet "clang version 16"; then
@@ -98,11 +103,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     cd ${LIBMESH_SRC_DIR}
     git checkout ${LIBMESH_GIT_SHA}
     git submodule update --init --recursive
-
-    # Expose the compat cuda libraries that can be linked to for building without a GPU present
-    if [ -n "$CUDA_DIR" ]; then
-        export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}
-    fi
 
     # Build libMesh
     umask 022
