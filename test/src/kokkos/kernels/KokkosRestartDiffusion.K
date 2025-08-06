@@ -21,7 +21,8 @@ KokkosRestartDiffusion::validParams()
 KokkosRestartDiffusion::KokkosRestartDiffusion(const InputParameters & parameters)
   : KokkosDiffusion(parameters),
     _step(declareRestartableData<unsigned int>("step", 0)),
-    _coef(declareRestartableData<Moose::Kokkos::Array<Real>>("coef", 100))
+    _coef(declareRestartableData<Moose::Kokkos::Array<Real>>("coef", 100)),
+    _last_t_step(declareRecoverableData<int>("last_t_step", -1))
 {
   *_coef = 1;
 }
@@ -29,7 +30,12 @@ KokkosRestartDiffusion::KokkosRestartDiffusion(const InputParameters & parameter
 void
 KokkosRestartDiffusion::timestepSetup()
 {
+  if (_last_t_step == _t_step)
+    return;
+
   _step = _step + 1;
   _coef(_step) = _coef(_step - 1) + 1;
   _coef->copyToDevice();
+
+  _last_t_step = _t_step;
 }
