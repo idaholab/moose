@@ -34,8 +34,7 @@ protected:
    * @brief Add a Material Cell object to cell list
    *
    * @param name unique cell name
-   * @param mat_name material name (TODO: this will eventually be a material object and not just a
-   * name)
+   * @param mat_name material name
    * @param region cell region
    * @return reference to CSGCell with material fill that was created and
    * added to this CSGCellList

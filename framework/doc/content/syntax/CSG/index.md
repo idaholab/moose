@@ -112,8 +112,8 @@ Below is example [!ac](JSON) surface output for a `CSG::CSGPlane` at x=5, `CSG::
 The cells output contains the following information:
 
 - `REGION`: the string representation of the equation of boolean operators (listed below) and surface names that defines the cell region
-- `FILLTYPE`: type of fill in the cell (`"VOID"`, `"MATERIAL"`, or `"UNIVERSE"`)
-- `FILL`: for `"MATERIAL"` or `"UNIVERSE"` `"FILLTYPE"`, the name of the fill (if `"VOID"` type, then name is an empty string `""`)
+- `FILLTYPE`: type of fill in the cell (`"VOID"`, `"CSG_MATERIAL"`, or `"UNIVERSE"`)
+- `FILL`: for `"CSG_MATERIAL"` or `"UNIVERSE"` `"FILLTYPE"`, the name of the fill (if `"VOID"` type, then name is an empty string `""`)
 
 | Boolean Operator   | String Representation |
 |--------------------|-----------------------|
@@ -130,7 +130,7 @@ An example of a cell defined as the space inside a finite x-cylinder and filled 
   "CELLS": {
     "My_XCylinder_Cell": {
       "FILL": "my_material",
-      "FILLTYPE": "MATERIAL",
+      "FILLTYPE": "CSG_MATERIAL",
       "REGION": "(-xcyl_surf_0 & -x_pos_plane & +x_neg_plane)"
     }
   }
