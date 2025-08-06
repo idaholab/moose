@@ -17,7 +17,7 @@
 std::unique_ptr<Moose::Kokkos::MemoryPool> _pool;
 
 void
-MooseApp::queryGPUs()
+MooseApp::queryKokkosGPUs()
 {
   unsigned int num_kokkos_gpus = Kokkos::num_devices();
 
