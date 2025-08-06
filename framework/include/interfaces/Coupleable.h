@@ -10,7 +10,7 @@
 #pragma once
 
 #ifdef MOOSE_KOKKOS_SCOPE
-#include "GPUVariableValue.h"
+#include "KokkosVariableValue.h"
 #endif
 
 #include <unordered_map>

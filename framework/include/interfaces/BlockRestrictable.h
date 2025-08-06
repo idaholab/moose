@@ -10,7 +10,7 @@
 #pragma once
 
 #ifdef MOOSE_KOKKOS_ENABLED
-#include "GPUTypes.h"
+#include "KokkosTypes.h"
 #endif
 
 // MOOSE includes
