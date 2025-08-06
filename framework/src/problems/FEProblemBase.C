@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef MOOSE_KOKKOS_ENABLED
-#include "GPUMaterialPropertyStorage.h"
+#include "KokkosMaterialPropertyStorage.h"
 #endif
 
 #include "FEProblemBase.h"
