@@ -98,17 +98,17 @@ WallFunctionYPlusAux::computeValue()
   const auto state = determineState();
 
   // Get the velocity vector
-  RealVectorValue velocity(_u_var->getElemValue(&elem, state).value());
+  RealVectorValue velocity(MetaPhysicL::raw_value(_u_var->getElemValue(&elem, state)));
   if (_v_var)
-    velocity(1) = _v_var->getElemValue(&elem, state).value();
+    velocity(1) = MetaPhysicL::raw_value(_v_var->getElemValue(&elem, state));
   if (_w_var)
-    velocity(2) = _w_var->getElemValue(&elem, state).value();
+    velocity(2) = MetaPhysicL::raw_value(_w_var->getElemValue(&elem, state));
 
   // Compute the velocity and direction of the velocity component that is parallel to the wall
   Real dist = std::abs(wall_vec * normal);
-  Real perpendicular_speed = velocity * normal;
-  RealVectorValue parallel_velocity = velocity - perpendicular_speed * normal;
-  Real parallel_speed = parallel_velocity.norm();
+  const Real perpendicular_speed = velocity * normal;
+  const RealVectorValue parallel_velocity = velocity - perpendicular_speed * normal;
+  const Real parallel_speed = parallel_velocity.norm();
 
   if (parallel_speed < 1e-6)
     return 0;
@@ -120,7 +120,7 @@ WallFunctionYPlusAux::computeValue()
   const auto elem_arg = makeElemArg(_current_elem);
   const auto rho = _rho(elem_arg, state);
   const auto mu = _mu(elem_arg, state);
-  Real u_star = NS::findUStar<Real>(mu, rho, parallel_speed, dist);
+  const Real u_star = NS::findUStar<Real>(mu, rho, parallel_speed, dist);
 
   return (dist * u_star * rho / mu);
 }
