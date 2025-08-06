@@ -225,8 +225,7 @@ const auto & new_universe = csg_obj->createUniverse("new_universe", list_of_cell
 ```
 
 #### Root Universe
-
-In theory, all universes in a model can be traced back to a singular overarching universe known as the root universe.
+All universes in a model should be able to be traced back, through the hierarchical tree of cells and universes, to a singular overarching universe known as the root universe.
 Because universes are a collection of cells and cells can be filled with universe, a tree of universes can be constructed such that the root universe is the collection of all cells in the model.
 When a `CSGBase` object is first [initialized](#initialization), a root `CSGUniverse` called `ROOT_UNIVERSE` is created by default.
 Every `CSGCell` that is created will be added to the root universe unless otherwise specified (as described [below](#adding-or-removing-cells)).
