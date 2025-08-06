@@ -10,7 +10,7 @@
 #pragma once
 
 #ifdef MOOSE_KOKKOS_ENABLED
-#include "GPUMaterialPropertyStorage.h"
+#include "KokkosMaterialPropertyStorage.h"
 #endif
 
 // MOOSE includes
