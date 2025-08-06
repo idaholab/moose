@@ -12,6 +12,7 @@
 #include "KokkosAssembly.h"
 
 #include "MooseMesh.h"
+#include "MoosePassKey.h"
 
 namespace Moose
 {
@@ -19,6 +20,8 @@ namespace Kokkos
 {
 
 class MaterialPropertyStorage;
+
+using StorageKey = Moose::PassKey<MaterialPropertyStorage>;
 
 template <typename T, unsigned int dimension>
 class MaterialPropertyValueBase;
@@ -122,6 +125,39 @@ public:
    */
   virtual std::type_index propertyType() = 0;
 
+  /**
+   * Initialize this property
+   * @param record The record of this property
+   */
+  virtual void init(const PropRecord & record, const StorageKey &)
+  {
+    _record = &record;
+    _id = record.id;
+  }
+
+  /**
+   * Allocate the data storage
+   * @param mesh The MOOSE mesh
+   * @param assembly The Kokkos assembly
+   * @param subdomains The MOOSE subdomain IDs
+   * @param bnd Whether this property is a face property
+   */
+  virtual void allocate(const MooseMesh & mesh,
+                        const Assembly & assembly,
+                        const std::set<SubdomainID> & subdomains,
+                        const bool bnd,
+                        StorageKey) = 0;
+  /**
+   * Deep copy another property
+   * @param prop The property to copy
+   */
+  virtual void copy(const MaterialPropertyBase & prop, StorageKey) = 0;
+  /**
+   * Swap with another property
+   * @param prop The property to swap
+   */
+  virtual void swap(MaterialPropertyBase & prop, StorageKey) = 0;
+
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get whether this property is valid
@@ -143,41 +179,6 @@ protected:
    * Flag whether this property has a default value
    */
   bool _default = false;
-
-private:
-  /**
-   * Initialize this property
-   * @param record The record of this property
-   */
-  void init(const PropRecord & record)
-  {
-    _record = &record;
-    _id = record.id;
-  }
-
-  /**
-   * Allocate the data storage
-   * @param mesh The MOOSE mesh
-   * @param assembly The Kokkos assembly
-   * @param subdomains The MOOSE subdomain IDs
-   * @param bnd Whether this property is a face property
-   */
-  virtual void allocate(const MooseMesh & mesh,
-                        const Assembly & assembly,
-                        const std::set<SubdomainID> & subdomains,
-                        const bool bnd) = 0;
-  /**
-   * Deep copy another property
-   * @param prop The property to copy
-   */
-  virtual void copy(const MaterialPropertyBase & prop) = 0;
-  /**
-   * Swap with another property
-   * @param prop The property to swap
-   */
-  virtual void swap(MaterialPropertyBase & prop) = 0;
-
-  friend class MaterialPropertyStorage;
 };
 
 template <typename T, unsigned int dimension>
@@ -218,12 +219,13 @@ public:
    */
   MaterialProperty(const MaterialProperty<T, dimension> & property)
   {
-    // If property._reference is nullptr, property itself is the reference material property
+    // If reference exists, copy the reference property
+    // Reference can be nullptr if the property is a default or optional property
     const auto & prop = property._reference ? *property._reference : property;
 
     shallowCopy(prop);
 
-    _reference = &prop;
+    _reference = property._reference;
   }
 
   /**
@@ -236,12 +238,6 @@ public:
 
     return *this;
   }
-
-  /**
-   * Get the clone of this property
-   * @returns The clone this property constructed through the copy constructor
-   */
-  MaterialProperty<T, dimension> clone() { return MaterialProperty<T, dimension>(*this); }
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -261,21 +257,24 @@ public:
     return type;
   }
 
+  virtual void init(const PropRecord & record, const StorageKey & key) override;
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  virtual void allocate(const MooseMesh & mesh,
+                        const Assembly & assembly,
+                        const std::set<SubdomainID> & subdomains,
+                        const bool bnd,
+                        StorageKey) override;
+  virtual void copy(const MaterialPropertyBase & prop, StorageKey) override;
+  virtual void swap(MaterialPropertyBase & prop, StorageKey) override;
+#endif
+
 private:
   /**
    * Shallow copy another property
    * @param property The property to be shallow copied
    */
   void shallowCopy(const MaterialProperty<T, dimension> & property);
-
-#ifdef MOOSE_KOKKOS_SCOPE
-  virtual void allocate(const MooseMesh & mesh,
-                        const Assembly & assembly,
-                        const std::set<SubdomainID> & subdomains,
-                        const bool bnd) override;
-  virtual void copy(const MaterialPropertyBase & prop) override;
-  virtual void swap(MaterialPropertyBase & prop) override;
-#endif
 
   /**
    * Pointer to the reference property
@@ -296,10 +295,19 @@ private:
   friend void propertyLoad<T, dimension>(std::istream &, void *);
 };
 
+template <typename T, unsigned int dimension>
+void
+MaterialProperty<T, dimension>::init(const PropRecord & record, const StorageKey & key)
+{
+  MaterialPropertyBase::init(record, key);
+
+  _reference = this;
+}
+
 #ifdef MOOSE_KOKKOS_SCOPE
 template <typename T, unsigned int dimension>
 void
-MaterialProperty<T, dimension>::copy(const MaterialPropertyBase & prop)
+MaterialProperty<T, dimension>::copy(const MaterialPropertyBase & prop, StorageKey)
 {
   auto prop_cast = dynamic_cast<const MaterialProperty<T, dimension> *>(&prop);
 
@@ -314,7 +322,7 @@ MaterialProperty<T, dimension>::copy(const MaterialPropertyBase & prop)
 
 template <typename T, unsigned int dimension>
 void
-MaterialProperty<T, dimension>::swap(MaterialPropertyBase & prop)
+MaterialProperty<T, dimension>::swap(MaterialPropertyBase & prop, StorageKey)
 {
   auto prop_cast = dynamic_cast<MaterialProperty<T, dimension> *>(&prop);
 
@@ -341,7 +349,8 @@ void
 MaterialProperty<T, dimension>::allocate(const MooseMesh & mesh,
                                          const Assembly & assembly,
                                          const std::set<SubdomainID> & subdomains,
-                                         const bool bnd)
+                                         const bool bnd,
+                                         StorageKey)
 {
   if (!_data.isAlloc())
     _data.create(mesh.meshSubdomains().size());
