@@ -137,6 +137,32 @@ CSGBase::removeCellsFromUniverse(const CSGUniverse & universe,
 }
 
 void
+CSGBase::joinOtherBase(std::unique_ptr<CSGBase> & base)
+{
+  joinSurfaceList(base->getSurfaceList());
+  joinCellList(base->getCellList());
+  joinUniverseList(base->getUniverseList());
+}
+
+void
+CSGBase::joinOtherBase(std::unique_ptr<CSGBase> & base, std::string & new_root_name_join)
+{
+  joinSurfaceList(base->getSurfaceList());
+  joinCellList(base->getCellList());
+  joinUniverseList(base->getUniverseList(), new_root_name_join);
+}
+
+void
+CSGBase::joinOtherBase(std::unique_ptr<CSGBase> & base,
+                       std::string & new_root_name_base,
+                       std::string & new_root_name_join)
+{
+  joinSurfaceList(base->getSurfaceList());
+  joinCellList(base->getCellList());
+  joinUniverseList(base->getUniverseList(), new_root_name_base, new_root_name_join);
+}
+
+void
 CSGBase::joinSurfaceList(CSGSurfaceList & surf_list)
 {
   // TODO: check if surface is a duplicate (by definition) and skip

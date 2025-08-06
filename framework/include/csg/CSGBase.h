@@ -83,8 +83,7 @@ public:
    * @brief Create a Material Cell object
    *
    * @param name unique cell name
-   * @param mat_name material name (TODO: this will eventually be a material object and not just a
-   * name)
+   * @param mat_name material name
    * @param region cell region
    * @param add_to_univ (optional) universe to which this cell will be added (default is root
    * universe)
@@ -271,12 +270,7 @@ public:
    *
    * @param base pointer to a different CSGBase object
    */
-  void joinOtherBase(std::unique_ptr<CSGBase> & base)
-  {
-    joinSurfaceList(base->getSurfaceList());
-    joinCellList(base->getCellList());
-    joinUniverseList(base->getUniverseList());
-  }
+  void joinOtherBase(std::unique_ptr<CSGBase> & base);
 
   /**
    * @brief Join another CSGBase object to this one. For the incoming CSGBase object,
@@ -288,12 +282,7 @@ public:
    * @param base pointer to a different CSGBase object
    * @param new_root_name_join new name for the universe generated from the incoming root universe
    */
-  void joinOtherBase(std::unique_ptr<CSGBase> & base, std::string & new_root_name_join)
-  {
-    joinSurfaceList(base->getSurfaceList());
-    joinCellList(base->getCellList());
-    joinUniverseList(base->getUniverseList(), new_root_name_join);
-  }
+  void joinOtherBase(std::unique_ptr<CSGBase> & base, std::string & new_root_name_join);
 
   /**
    * @brief Join another CSGBase object to this one. The root universe for the incoming CSGBase
@@ -309,12 +298,7 @@ public:
    */
   void joinOtherBase(std::unique_ptr<CSGBase> & base,
                      std::string & new_root_name_base,
-                     std::string & new_root_name_join)
-  {
-    joinSurfaceList(base->getSurfaceList());
-    joinCellList(base->getCellList());
-    joinUniverseList(base->getUniverseList(), new_root_name_base, new_root_name_join);
-  }
+                     std::string & new_root_name_join);
 
   /**
    * @brief generate the JSON representation output for the CSG object
