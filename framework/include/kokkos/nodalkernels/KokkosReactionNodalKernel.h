@@ -18,8 +18,8 @@ public:
 
   KokkosReactionNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION inline Real computeQpResidual(const dof_id_type node) const;
-  KOKKOS_FUNCTION inline Real computeQpJacobian(const dof_id_type node) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const;
+  KOKKOS_FUNCTION Real computeQpJacobian(const dof_id_type node) const;
 
 protected:
   const Real _coeff;

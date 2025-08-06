@@ -220,7 +220,7 @@ public:
    * @param boundary The boundary ID
    * @returns Whether the node is on the boundary
    */
-  KOKKOS_FUNCTION inline bool isBoundaryNode(dof_id_type node, BoundaryID boundary) const;
+  KOKKOS_FUNCTION bool isBoundaryNode(dof_id_type node, BoundaryID boundary) const;
 #endif
 
 private:
