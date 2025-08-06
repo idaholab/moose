@@ -163,6 +163,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     chmod 755 /opt/code-server/bin/*
     chmod 644 /opt/code-server/extensions/*
 
+    # Need to expose cuda compat libs when using mpich with cuda to run mpicc
+    if [ -n "$CUDA_DIR" ] && ! which ompi_info &> /dev/null; then
+        export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}
+    fi
+
     # Build and install wasp
     # This is redundant; hopefully we can use the one from conda in the future
     cd ${ROOT_BUILD_DIR}
@@ -319,19 +324,16 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     if [ -n "$CUDA_DIR" ]; then
         # Additional options with cuda
         MFEM_OPTIONS+=("-DMFEM_USE_CUDA=ON" "-DSuperLUDist_VERSION_OK=YES" "-DCUDA_ARCH=sm_80")
-        # Expose the compat libraries that can be linked to during configure for building without a GPU present
-        CUDA_COMPAT=${CUDA_DIR}/compat
-        export LD_LIBRARY_PATH=${CUDA_COMPAT}:${LD_LIBRARY_PATH}
+        # Expose the compat libraries if we haven't already
+        if [[ "$LD_LIBRARY_PATH" != *"${CUDA_DIR}/compat"* ]]; then
+            export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}
+        fi
     fi
 
     # Install MFEM
     mkdir -p ${MFEM_DIR}/logs
     MFEM_DIR=${MFEM_DIR} MFEM_SRC_DIR=${MFEM_SRC_DIR} CONDUIT_DIR=${CONDUIT_DIR} ${MFEM_BUILD_SCRIPT} "${MFEM_OPTIONS[@]}" 2>&1 | tee ${MFEM_DIR}/logs/build.log
 
-    # Hide cuda compat libs
-    if [ -n "$CUDA_DIR" ]; then
-        export LD_LIBRARY_PATH="${LD_LIBRARY_PATH/${CUDA_COMPAT}:/}"
-    fi
 {%- endif %}
 
     # Add moose channels
