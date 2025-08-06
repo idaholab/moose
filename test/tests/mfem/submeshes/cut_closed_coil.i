@@ -10,28 +10,33 @@
 [SubMeshes]
   [cut]
     type = MFEMCutTransitionSubMesh
-    cut_name = cut
+    cut_name = cut_test
     boundary = 1
   []
+  [coil]
+    type = MFEMDomainSubMesh
+    block = '1 2 4'
+    execution_order_group = 2
+  []  
 []
 
 [FESpaces]
-  [SubMeshH1FESpace]
+  [CoilH1FESpace]
     type = MFEMScalarFESpace
     fec_type = H1
     fec_order = FIRST
-    submesh = cut
-  []
+    submesh = coil
+  []  
   [H1FESpace]
     type = MFEMScalarFESpace
     fec_type = H1
     fec_order = FIRST
   []
-  [SubMeshHCurlFESpace]
+  [CoilHCurlFESpace]
     type = MFEMVectorFESpace
     fec_type = ND
     fec_order = FIRST
-    submesh = cut
+    submesh = coil
   []
   [HCurlFESpace]
     type = MFEMVectorFESpace
@@ -41,17 +46,25 @@
 []
 
 [Variables]
-  [potential]
+  [coil_potential]
     type = MFEMVariable
-    fespace = H1FESpace
+    fespace = CoilH1FESpace
   [] 
 []
 
 [AuxVariables]
+  [potential]
+    type = MFEMVariable
+    fespace = H1FESpace
+  []   
   [grad_potential]
     type = MFEMVariable
     fespace = HCurlFESpace
-  []    
+  []
+  [coil_grad_source_potential]
+    type = MFEMVariable
+    fespace = CoilHCurlFESpace
+  []  
   [grad_source_potential]
     type = MFEMVariable
     fespace = HCurlFESpace
@@ -93,14 +106,13 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = potential
+    variable = coil_potential
     coefficient = diffusivity
   []
   [source]
     type = MFEMDomainLFGradKernel
-    variable = potential
-    vector_coefficient = grad_source_potential
-    block = cut
+    variable = coil_potential
+    vector_coefficient = coil_grad_source_potential
   []    
 []
 
@@ -137,6 +149,18 @@
     variable = grad_source_potential
     from_multi_app = subapp
   []
+  [submesh_transfer_to_coil]
+    type = MFEMSubMeshTransfer
+    from_variable = grad_source_potential
+    to_variable = coil_grad_source_potential
+    execute_on = INITIAL
+  []
+  [submesh_transfer_from_coil]
+    type = MFEMSubMeshTransfer
+    from_variable = coil_potential
+    to_variable = potential
+    execute_on = TIMESTEP_END
+  []  
 []
 
 [Outputs]
@@ -150,5 +174,11 @@
     type = MFEMParaViewDataCollection
     file_base = OutputData/WholePotentialCoil
     vtk_format = ASCII
-  []    
+  []
+  [ParaViewDataCollection3]
+    type = MFEMParaViewDataCollection
+    file_base = OutputData/Coil
+    vtk_format = ASCII
+    submesh = coil
+  []      
 []
