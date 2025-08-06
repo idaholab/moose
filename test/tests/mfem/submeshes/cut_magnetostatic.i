@@ -86,6 +86,11 @@
 []
 
 [Kernels]
+  [mass]
+    type = MFEMVectorFEMassKernel
+    variable = a_field
+    coefficient = 1e-10
+  []  
   [curlcurl]
     type = MFEMCurlCurlKernel
     variable = a_field
@@ -103,14 +108,13 @@
   [ams]
     type = MFEMHypreAMS
     fespace = HCurlFESpace
-    singular = true
   []
 []
 
 [Solver]
   type = MFEMHypreGMRES
   preconditioner = ams
-  l_tol = 1e-9
+  l_tol = 1e-14
   l_max_its = 1000
 []
 
