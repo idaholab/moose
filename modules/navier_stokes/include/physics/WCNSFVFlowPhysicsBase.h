@@ -10,7 +10,7 @@
 #pragma once
 
 #include "NavierStokesPhysicsBase.h"
-#include "WCNSFVTurbulencePhysics.h"
+#include "WCNSFVTurbulencePhysicsBase.h"
 
 #define registerWCNSFVFlowPhysicsBaseTasks(app_name, derived_name)                                 \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
@@ -145,7 +145,7 @@ protected:
   }
 
   /// Find the turbulence physics
-  const WCNSFVTurbulencePhysics * getCoupledTurbulencePhysics() const;
+  const WCNSFVTurbulencePhysicsBase * getCoupledTurbulencePhysics() const;
 
   /// Name of the vector to hold pressure momentum equation contributions
   const TagName _pressure_tag = "p_tag";
@@ -187,7 +187,7 @@ protected:
   const MooseEnum _momentum_face_interpolation;
 
   /// Can be set to a coupled turbulence physics
-  const WCNSFVTurbulencePhysics * _turbulence_physics;
+  const WCNSFVTurbulencePhysicsBase * _turbulence_physics;
 
   /// Subdomains where we want to have volumetric friction
   std::vector<std::vector<SubdomainName>> _friction_blocks;
