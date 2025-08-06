@@ -20,10 +20,10 @@ public:
 
   KokkosDiffusionPrecompute(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION inline Real3 precomputeQpResidual(const unsigned int qp,
-                                                    ResidualDatum & datum) const;
-  KOKKOS_FUNCTION inline Real3
-  precomputeQpJacobian(const unsigned int j, const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real3 precomputeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real3 precomputeQpJacobian(const unsigned int j,
+                                             const unsigned int qp,
+                                             ResidualDatum & datum) const;
 };
 
 KOKKOS_FUNCTION inline Real3

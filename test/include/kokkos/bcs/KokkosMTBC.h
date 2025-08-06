@@ -10,7 +10,6 @@
 #pragma once
 
 #include "KokkosIntegratedBC.h"
-#include "KokkosMaterialProperty.h"
 
 class KokkosMTBC final : public Moose::Kokkos::IntegratedBC<KokkosMTBC>
 {
@@ -19,8 +18,9 @@ public:
 
   KokkosMTBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION inline Real
-  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
+                                         const unsigned int qp,
+                                         ResidualDatum & datum) const;
 
 private:
   /**

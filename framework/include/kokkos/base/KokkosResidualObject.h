@@ -118,10 +118,10 @@ protected:
    * @param i The test function index
    * @param comp The variable component
    */
-  KOKKOS_FUNCTION inline void accumulateTaggedElementalResidual(const Real local_re,
-                                                                const dof_id_type elem,
-                                                                const unsigned int i,
-                                                                const unsigned int comp = 0) const;
+  KOKKOS_FUNCTION void accumulateTaggedElementalResidual(const Real local_re,
+                                                         const dof_id_type elem,
+                                                         const unsigned int i,
+                                                         const unsigned int comp = 0) const;
   /**
    * Accumulate or set local nodal residual contribution to tagged vectors
    * @param add The flag whether to add or set the local residual
@@ -129,10 +129,10 @@ protected:
    * @param node The node ID
    * @param comp The variable component
    */
-  KOKKOS_FUNCTION inline void accumulateTaggedNodalResidual(const bool add,
-                                                            const Real local_re,
-                                                            const dof_id_type node,
-                                                            const unsigned int comp = 0) const;
+  KOKKOS_FUNCTION void accumulateTaggedNodalResidual(const bool add,
+                                                     const Real local_re,
+                                                     const dof_id_type node,
+                                                     const unsigned int comp = 0) const;
   /**
    * Accumulate local elemental Jacobian contribution to tagged matrices
    * @param local_ke The local elemental Jacobian contribution
@@ -142,12 +142,12 @@ protected:
    * @param jvar The variable number for column
    * @param comp The variable component
    */
-  KOKKOS_FUNCTION inline void accumulateTaggedElementalMatrix(const Real local_ke,
-                                                              const dof_id_type elem,
-                                                              const unsigned int i,
-                                                              const unsigned int j,
-                                                              const unsigned int jvar,
-                                                              const unsigned int comp = 0) const;
+  KOKKOS_FUNCTION void accumulateTaggedElementalMatrix(const Real local_ke,
+                                                       const dof_id_type elem,
+                                                       const unsigned int i,
+                                                       const unsigned int j,
+                                                       const unsigned int jvar,
+                                                       const unsigned int comp = 0) const;
   /**
    * Accumulate or set local nodal Jacobian contribution to tagged matrices
    * @param add The flag whether to add or set the local residual
@@ -156,11 +156,11 @@ protected:
    * @param jvar The variable number for column
    * @param comp The Variable component
    */
-  KOKKOS_FUNCTION inline void accumulateTaggedNodalMatrix(const bool add,
-                                                          const Real local_ke,
-                                                          const dof_id_type node,
-                                                          const unsigned int jvar,
-                                                          const unsigned int comp = 0) const;
+  KOKKOS_FUNCTION void accumulateTaggedNodalMatrix(const bool add,
+                                                   const Real local_ke,
+                                                   const dof_id_type node,
+                                                   const unsigned int jvar,
+                                                   const unsigned int comp = 0) const;
 
   /**
    * The common loop structure template for computing elemental residual
