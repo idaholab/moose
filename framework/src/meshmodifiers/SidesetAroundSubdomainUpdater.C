@@ -168,12 +168,19 @@ SidesetAroundSubdomainUpdater::finalize()
       _displaced_problem ? &_displaced_problem->mesh().getMesh() : nullptr;
   if (getParam<bool>("verbose"))
   {
-    if (_remove.size())
-      _console << "Removing " << _remove.size() << " sides from sideset " << _boundary_id
-               << " on processor " << _pid << std::endl;
-    if (_add.size())
-      _console << "Adding " << _add.size() << " sides to sideset " << _boundary_id
-               << " on processor " << _pid << std::endl;
+    unsigned int total_remove = 0, total_add = 0;
+    for (const auto & [pid, list] : _remove)
+      total_remove += _remove[pid].size();
+    for (const auto & [pid, list] : _add)
+      total_add += _add[pid].size();
+    comm().sum(total_remove);
+    comm().sum(total_add);
+
+    if (total_remove)
+      _console << "Removing " << total_remove << " sides from sideset " << _boundary_id
+               << std::endl;
+    if (total_add)
+      _console << "Adding " << total_add << " sides to sideset " << _boundary_id << std::endl;
   }
 
   auto add_functor = [this, &mesh, &displaced_mesh](const processor_id_type, const auto & sent_data)

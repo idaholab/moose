@@ -6,6 +6,6 @@
     input = 'displaced_and_modifying_meshes.i'
     csvdiff = 'displaced_and_modifying_meshes_out.csv'
     abs_zero = 1e-8
-    requirement = 'The system shall be able to use mortar constraints while modifying element subdomains in the mesh and the displaced mesh.'
+    requirement = 'The system shall be able to use mortar constraints while modifying element subdomains in the reference mesh and the displaced mesh.'
   []
 []

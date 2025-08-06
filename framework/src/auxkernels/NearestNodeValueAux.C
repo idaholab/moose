@@ -37,7 +37,7 @@ NearestNodeValueAux::NearestNodeValueAux(const InputParameters & parameters)
   if (boundaryNames().size() > 1)
     paramError("boundary", "NearestNodeValueAux can only be used with one boundary at a time!");
   if (boundaryNames().empty())
-    paramError("boundary", "Should be specified on a boundary or group of boundaries");
+    paramError("boundary", "Should be specified on a boundary");
 
   // Check that the paired variable is from the solution system
   if (_subproblem.hasAuxiliaryVariable("paired_variable"))
