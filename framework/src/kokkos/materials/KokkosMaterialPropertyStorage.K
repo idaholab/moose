@@ -58,7 +58,7 @@ MaterialPropertyStorage::addKokkosProperty(const std::string & prop_name,
   if (!_kokkos_props[0].count(prop_name))
   {
     _kokkos_props[0][prop_name] = shell;
-    _kokkos_props[0][prop_name]->init(record);
+    _kokkos_props[0][prop_name]->init(record, {});
   }
 
   return *_kokkos_props[0][prop_name];
@@ -74,7 +74,7 @@ MaterialPropertyStorage::addKokkosPropertyState(const std::string & prop_name,
   if (!_kokkos_props[state].count(prop_name))
   {
     _kokkos_props[state][prop_name] = shell;
-    _kokkos_props[state][prop_name]->init(record);
+    _kokkos_props[state][prop_name]->init(record, {});
   }
 
   return *_kokkos_props[state][prop_name];
@@ -136,7 +136,7 @@ MaterialPropertyStorage::allocateKokkosProperties()
         auto & blocks =
             declarer->boundaryRestricted() ? declarer->meshBlockIDs() : declarer->blockIDs();
 
-        prop->allocate(mesh, assembly, blocks, record.bnd);
+        prop->allocate(mesh, assembly, blocks, record.bnd, {});
       }
     }
 }
@@ -161,7 +161,7 @@ MaterialPropertyStorage::shift()
 {
   for (unsigned int state = maxState(); state != 0; --state)
     for (auto & [name, prop] : _kokkos_props[state])
-      prop->swap(*_kokkos_props[state - 1][name]);
+      prop->swap(*_kokkos_props[state - 1][name], {});
 }
 
 void
@@ -170,7 +170,7 @@ MaterialPropertyStorage::copy()
   for (unsigned int state : statefulIndexRange())
     for (auto & [name, prop] : _kokkos_props[state])
       if (!isRestoredProperty(name))
-        prop->copy(*_kokkos_props[0][name]);
+        prop->copy(*_kokkos_props[0][name], {});
 }
 
 } // namespace Kokkos

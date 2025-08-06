@@ -487,8 +487,7 @@ MaterialData::getKokkosProperty(const std::string & prop_name)
                prop_base.type(),
                "'.");
 
-  // We explicitly return the clone of this material property to avoid copy elision
-  return prop_cast->clone();
+  return *prop_cast;
 }
 
 template <typename T, unsigned int dimension>
@@ -516,7 +515,6 @@ MaterialData::declareKokkosProperty(const std::string & prop_name,
                prop_base.type(),
                "'.");
 
-  // We explicitly return the clone of this material property to avoid copy elision
-  return prop_cast->clone();
+  return *prop_cast;
 }
 #endif
