@@ -30,6 +30,7 @@ public:
 protected:
   Moose::Kokkos::Scalar<unsigned int> _step;
   Moose::Kokkos::ReferenceWrapper<Moose::Kokkos::Array<Real>> _coef;
+  int & _last_t_step;
 };
 
 KOKKOS_FUNCTION inline Real
