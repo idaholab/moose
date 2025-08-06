@@ -10,8 +10,8 @@
 #pragma once
 
 #ifdef MOOSE_KOKKOS_ENABLED
-#include "GPUAssembly.h"
-#include "GPUSystem.h"
+#include "KokkosAssembly.h"
+#include "KokkosSystem.h"
 #endif
 
 // MOOSE includes
