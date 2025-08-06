@@ -15,13 +15,13 @@ k(T) =
 
 where:
 
-- $k(T)$ is the thermal conductivity [W/m.K],
+- $k(T)$ is the thermal conductivity `[W/m.K]`,
 
-- $T$ is the temperature [K]`,
+- $T$ is the temperature `[K]`,
 
 and the model parameters values provided in [tab:thermal_conductivity_parameters_low].
 
-!table id=tab:thermal_conductivity_parameters_low caption=Parameters values for the thermal conductivity model from [eq:thermal_conductivity_low]. 
+!table id=tab:thermal_conductivity_parameters_low caption=Parameters values for the thermal conductivity model from [eq:thermal_conductivity_low].
 | Constant | Value      | Unit                |
 |----------|------------|---------------------|
 | N        | 8.740E-01  | `[-]`               |
@@ -32,19 +32,19 @@ and the model parameters values provided in [tab:thermal_conductivity_parameters
 
 For temperature range 55 ≤ $T$ ≤ 3653 K, the thermal conductivity is defined as
 
-\begin{equation} [eq:thermal_conductivity_high]
+\begin{equation} \label{eq:thermal_conductivity_high}
 k(T) = \frac{B0 + B1 \cdot \left( \frac{T}{1000} \right) + B2 \cdot \left( \frac{T}{1000} \right)^2 + B3 \cdot \left( \frac{T}{1000} \right)^3}{C0 + C1 \cdot \left( \frac{T}{1000} \right) + \left( \frac{T}{1000} \right)^2},
 \end{equation}
 
 where:
 
-- $k(T)$ is the thermal conductivity [W/m.K],
-- $T$ is the temperature [K]`,
+- $k(T)$ is the thermal conductivity `[W/m.K]`,
+
+- $T$ is the temperature `[K]`,
 
 and the model parameters values provided in [tab:thermal_conductivity_parameters_high].
 
-!table id=tab:thermal_conductivity_parameters_high caption=Parameters values for the thermal conductivity model from [eq:thermal_conductivity_high]. 
-
+!table id=tab:thermal_conductivity_parameters_high caption=Parameters values for the thermal conductivity model from [eq:thermal_conductivity_high].
 | Constant | Value       | Unit                |
 |----------|-------------|---------------------|
 | B0       | -3.679E+00  | `[W/m.K]`           |
@@ -69,7 +69,8 @@ where:
 - $T$ is the temperature `[K]`,
 
 and the model parameters values provided in [tab:specific_heat_parameters_low].
-!table id=tab:specific_heat_parameters_low caption=Parameters values for the specific heat model from [eq:specific_heat_low]. 
+
+!table id=tab:specific_heat_parameters_low caption=Parameters values for the specific heat model from [eq:specific_heat_low].
 | Constant | Value      | Unit                |
 |----------|------------|---------------------|
 | N        | 3.030E+00  | `[-]`               |
@@ -91,11 +92,12 @@ where:
 - $T$ is the temperature `[K]`,
 
 and the model parameters values provided in [tab:specific_heat_parameters_high].
-!table id=tab:specific_heat_parameters_high caption=Parameters values for the specific heat model from [eq:specific_heat_high]. 
+
+!table id=tab:specific_heat_parameters_high caption=Parameters values for the specific heat model from [eq:specific_heat_high].
 | Constant | Value       | Unit           |
 |----------|-------------|----------------|
 | B0       | 1.301E-01   | `[J/g.K]`      |
-| B1       | 2.225E-02   | `[J/g.K]`       |
+| B1       | 2.225E-02   | `[J/g.K]`      |
 | B2       | -7.224E-03  | `[J/g.K]`      |
 | B3       | 3.539E-03   | `[J/g.K]`      |
 | B$_{-2}$ | -3.061E-04  | `[J/g.K]`      |
@@ -123,7 +125,7 @@ and the thermal expansion $dL/L_0(T)$ `[%]` is given by:
 
 The values of the model parameters in [eq:thermal_expansion] are provided in [tab:thermal_expansion_parameters_low] for low temperatures (5 ≤ $T$ < 294 K), and [tab:thermal_expansion_parameters_high] for high temperatures (294 ≤ $T$ ≤ 3600 K).
 
-!table id=tab:thermal_expansion_parameters_low caption=Parameters values for the thermal expansion model from [eq:thermal_expansion] for 5 ≤ $T$ < 294 K. 
+!table id=tab:thermal_expansion_parameters_low caption=Parameters values for the thermal expansion model from [eq:thermal_expansion] for 5 ≤ $T$ < 294 K.
 | Constant | Value      | Unit           |
 |----------|------------|----------------|
 | A0       | -8.529E-02 | `[-]`          |
@@ -131,7 +133,7 @@ The values of the model parameters in [eq:thermal_expansion] are provided in [ta
 | A2       | 2.257E+00  | `[-]`          |
 | A3       | -3.157E+00 | `[-]`          |
 
-!table id=tab:thermal_expansion_parameters_high caption=Parameters values for the thermal expansion model from [eq:thermal_expansion] for 294 ≤ $T$ ≤ 3600 K. 
+!table id=tab:thermal_expansion_parameters_high caption=Parameters values for the thermal expansion model from [eq:thermal_expansion] for 294 ≤ $T$ ≤ 3600 K.
 | Constant | Value      | Unit           |
 |----------|------------|----------------|
 | A0       | -1.400E-01 | `[-]`          |
