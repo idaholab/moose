@@ -622,7 +622,7 @@ Example Output:
   "CELLS": {
     "Prism_square_cell": {
       "FILL": "square_material",
-      "FILLTYPE": "MATERIAL",
+      "FILLTYPE": "CSG_MATERIAL",
       "REGION":
           "(+Prism_surf_plus_x & -Prism_surf_minus_x & -Prism_surf_plus_y & +Prism_surf_minus_y & -Cube_surf_plus_z & +Cube_surf_minus_z)"
     }
