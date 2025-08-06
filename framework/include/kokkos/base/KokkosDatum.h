@@ -65,39 +65,44 @@ public:
    * Get the Kokkos assembly
    * @returns The Kokkos assembly
    */
-  KOKKOS_FUNCTION const auto & assembly() const { return _assembly; }
+  KOKKOS_FUNCTION const Assembly & assembly() const { return _assembly; }
   /**
    * Get the Kokkos system
    * @param sys The system number
    * @returns The Kokkos system
    */
-  KOKKOS_FUNCTION const auto & system(unsigned int sys) { return _systems[sys]; }
+  KOKKOS_FUNCTION const System & system(unsigned int sys) const { return _systems[sys]; }
 
   /**
    * Get the element information object
    * @returns The element information object
    */
-  KOKKOS_FUNCTION const auto & elem() const { return _elem; }
+  KOKKOS_FUNCTION const ElementInfo & elem() const { return _elem; }
+  /**
+   * Get the subdomain ID
+   * @returns The subdomain ID
+   */
+  KOKKOS_FUNCTION SubdomainID subdomain() const { return _elem.subdomain; }
   /**
    * Get the side index
    * @returns The side index
    */
-  KOKKOS_FUNCTION auto side() const { return _side; }
+  KOKKOS_FUNCTION unsigned int side() const { return _side; }
   /**
    * Get the number of local quadrature points
    * @returns The number of local quadrature points
    */
-  KOKKOS_FUNCTION auto n_qps() const { return _n_qps; }
+  KOKKOS_FUNCTION unsigned int n_qps() const { return _n_qps; }
   /**
    * Get the starting offset into the global quadrature point index
    * @returns The starting offset
    */
-  KOKKOS_FUNCTION auto qpOffset() const { return _qp_offset; }
+  KOKKOS_FUNCTION dof_id_type qpOffset() const { return _qp_offset; }
   /**
    * Get whether the current side has a neighbor
    * @returns Whether the current side has a neighbor
    */
-  KOKKOS_FUNCTION bool hasNeighbor() { return _neighbor != libMesh::DofObject::invalid_id; }
+  KOKKOS_FUNCTION bool hasNeighbor() const { return _neighbor != libMesh::DofObject::invalid_id; }
 
   /**
    * Get the inverse of Jacobian matrix
@@ -176,7 +181,7 @@ private:
    * Compute and cache the physical transformation data
    * @param qp The local quadrature point index
    */
-  KOKKOS_FUNCTION inline void reinitTransform(const unsigned int qp);
+  KOKKOS_FUNCTION void reinitTransform(const unsigned int qp);
 
   /**
    * Flag whether the physical transformation data was cached
@@ -269,47 +274,47 @@ public:
    * Get the number of local DOFs
    * @returns The number of local DOFs
    */
-  KOKKOS_FUNCTION auto n_dofs() const { return _n_idofs; }
+  KOKKOS_FUNCTION unsigned int n_dofs() const { return _n_idofs; }
   /**
    * Get the number of local DOFs
    * @returns The number of local DOFs
    */
-  KOKKOS_FUNCTION auto n_idofs() const { return _n_idofs; }
+  KOKKOS_FUNCTION unsigned int n_idofs() const { return _n_idofs; }
   /**
    * Get the number of local DOFs for the coupled variable
    * @returns The number of local DOFs
    */
-  KOKKOS_FUNCTION auto n_jdofs() const { return _n_jdofs; }
+  KOKKOS_FUNCTION unsigned int n_jdofs() const { return _n_jdofs; }
   /**
    * Get the variable number
    * @returns The variable number
    */
-  KOKKOS_FUNCTION auto var() const { return _ivar; }
+  KOKKOS_FUNCTION unsigned int var() const { return _ivar; }
   /**
    * Get the variable number
    * @returns The variable number
    */
-  KOKKOS_FUNCTION auto ivar() const { return _ivar; }
+  KOKKOS_FUNCTION unsigned int ivar() const { return _ivar; }
   /**
    * Get the coupled variable number
    * @returns The variable number
    */
-  KOKKOS_FUNCTION auto jvar() const { return _jvar; }
+  KOKKOS_FUNCTION unsigned int jvar() const { return _jvar; }
   /**
    * Get the variable FE type ID
    * @returns The variable FE type ID
    */
-  KOKKOS_FUNCTION auto fe() const { return _ife; }
+  KOKKOS_FUNCTION unsigned int fe() const { return _ife; }
   /**
    * Get the variable FE type ID
    * @returns The variable FE type ID
    */
-  KOKKOS_FUNCTION auto ife() const { return _ife; }
+  KOKKOS_FUNCTION unsigned int ife() const { return _ife; }
   /**
    * Get the coupled variable FE type ID
    * @returns The variable FE type ID
    */
-  KOKKOS_FUNCTION auto jfe() const { return _jfe; }
+  KOKKOS_FUNCTION unsigned int jfe() const { return _jfe; }
 
 protected:
   /**
