@@ -132,26 +132,31 @@ InputParameters
 MFEMCutTransitionSubMesh::validParams()
 {
   InputParameters params = MFEMSubMesh::validParams();
+  params += MFEMBlockRestrictable::validParams();
   params.addClassDescription("Class to construct an MFEMSubMesh formed from the subspace of the "
                              "parent mesh restricted to the set of user-specified subdomains.");
   params.addParam<BoundaryName>(
-      "boundary",
+      "cut_boundary",
       "-1",
-      "The list of boundaries (ids) from the mesh where this boundary condition applies. "
-      "Defaults to applying BC on all boundaries.");
+      "The boundary associated with the mesh cut.");
+  params.addParam<BoundaryName>(
+      "transition_subdomain_boundary",
+      "-1",
+      "Name to assign boundary of transition subdomain not shared with cut surface.");      
   params.addParam<SubdomainName>(
-      "cut_name",
+      "transition_subdomain",
       "cut",
       "The name of the subdomain to be created on from the mesh comprised of the set of elements "
-      "adjacent to the cut surface on one side.");      
+      "adjacent to the cut surface on one side.");
   return params;
 }
 
 MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & parameters)
   : MFEMSubMesh(parameters),
-    _boundary_name(getParam<BoundaryName>("boundary")),
-    _bdr_attribute(std::stoi(_boundary_name)),
-    _cut_name(getParam<SubdomainName>("cut_name")),    
+    MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
+    _cut_boundary(getParam<BoundaryName>("cut_boundary")),
+    _cut_bdr_attribute(std::stoi(_cut_boundary)),
+    _transition_subdomain(getParam<SubdomainName>("transition_subdomain")),    
     _subdomain_label(getMFEMProblem().mesh().getMFEMParMesh().attributes.Max()+1)
 {
 }
@@ -164,14 +169,14 @@ MFEMCutTransitionSubMesh::buildSubMesh()
     getMFEMProblem().mesh().getMFEMParMesh(), mfem::Array<int>({_subdomain_label})));
 }
 
-void MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh) {
-
+void 
+MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh)
+{
   std::vector<int> old_dom_attrs;
   std::vector<int> bdr_els;
   std::pair<int, int> elec_attrs_;
-  elec_attrs_.first = _bdr_attribute;
+  elec_attrs_.first = _cut_bdr_attribute;
   elec_attrs_.second = parent_mesh.bdr_attributes.Max() + 1;
-  const mfem::Array<int> coil_domains_({1,2});
 
   // First we save the current domain attributes so they may be restored later
   for (int e = 0; e < parent_mesh.GetNE(); ++e)
@@ -209,7 +214,7 @@ void MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh) {
 
   for (int e = 0; e < parent_mesh.GetNE(); ++e) {
 
-    if (!isInDomain(e, coil_domains_, &parent_mesh) ||
+    if (!isInDomain(e, getSubdomainAttributes(), &parent_mesh) ||
         plane.side(elementCentre(e, &parent_mesh)) == 1)
       continue;
 
@@ -247,8 +252,8 @@ void MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh) {
     parent_mesh.GetFaceElements(wf, &e1, &e2);
 
     // If the face is a coil boundary
-    if (!(isInDomain(e1, coil_domains_, &parent_mesh) &&
-          isInDomain(e2, coil_domains_, &parent_mesh))) {
+    if (!(isInDomain(e1, getSubdomainAttributes(), &parent_mesh) &&
+          isInDomain(e2, getSubdomainAttributes(), &parent_mesh))) {
       continue;
     }
 
@@ -296,10 +301,10 @@ void MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh) {
   for (auto e : wedge_els)
     parent_mesh.SetAttribute(e, _subdomain_label);
   mfem::AttributeSets &attr_sets = parent_mesh.attribute_sets;
-  attr_sets.CreateAttributeSet(_cut_name);
-  attr_sets.AddToAttributeSet(_cut_name, _subdomain_label);
+  attr_sets.CreateAttributeSet(_transition_subdomain);
+  attr_sets.AddToAttributeSet(_transition_subdomain, _subdomain_label);
   // transition_domain_.Append(_subdomain_label);
-  // coil_domains_.Append(_subdomain_label);
+  // getSubdomainAttributes().Append(_subdomain_label);
 
   parent_mesh.FinalizeTopology();
   parent_mesh.Finalize();

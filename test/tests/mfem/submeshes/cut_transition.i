@@ -10,8 +10,10 @@
 [SubMeshes]
   [cut]
     type = MFEMCutTransitionSubMesh
-    cut_name = cut
-    boundary = 1
+    cut_boundary = 1
+    transition_subdomain = cut
+    transition_subdomain_boundary = 3
+    block = '1 2'
   []
 []
 
