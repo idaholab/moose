@@ -10,7 +10,6 @@ The `CSGBase` class provides the framework in MOOSE for creating these generic [
 As stated, a [!ac](CSG) representation is defined minimally as a series of surfaces, cells, and universes.
 
 [Surfaces](source/csg/CSGBase.md#surfaces) are defined explicitly through surface equations (such as equations of a plane, sphere, etc.).
-Surfaces can be assigned a boundary type (vacuum, transmission, reflective, etc.).
 Each surface inherently separates two half-space [regions](source/csg/CSGBase.md#regions): positive and negative half-spaces.
 For example, for a plane with the equation $ax + by + cz = d$ the positive half-space represents the region $ax + by + cz > d$, while the negative half-space represents the region $ax + by + cz < d$. Similarly, for a spherical surface defined by the equation $x^2 + y^2 + z^2 = r^2$, the negative half-space represents the region $x^2 + y^2 + z^2 < r^2$ within the sphere while the positive half-space represents the region $x^2 + y^2 + z^2 > r^2$ outside the sphere.
 Example half-spaces are shown in [!ref](fig:halfspaces).
@@ -64,7 +63,6 @@ Surfaces contain the following information:
 
 - `TYPE`: the type of surface as defined by the class name that was used to create the surface
 - `COEFFICIENTS`: the values for each coefficient in the equation defining the surface type (shown in the table below)
-- `BOUNDARY`: type of boundary condition applied to the surface (`"TRANSMISSION"`, `"REFLECTIVE"`, or `"VACUUM"`)
 
 | `TYPE`      | Equation                                        | COEFFICIENTS          |
 |-------------|-------------------------------------------------|-----------------------|
@@ -80,7 +78,6 @@ Below is example [!ac](JSON) surface output for a `CSG::CSGPlane` at x=5, `CSG::
 {
   "SURFACES": {
     "my_plane": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -90,7 +87,6 @@ Below is example [!ac](JSON) surface output for a `CSG::CSGPlane` at x=5, `CSG::
       "TYPE": "CSG::CSGPlane"
     },
     "my_z_cylinder": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 2.0,
         "x0": 1.0,
@@ -99,7 +95,6 @@ Below is example [!ac](JSON) surface output for a `CSG::CSGPlane` at x=5, `CSG::
       "TYPE": "CSG::CSGZCylinder"
     },
     "my_sphere": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 5.0,
         "x0": -2.0,

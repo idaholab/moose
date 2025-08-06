@@ -29,12 +29,8 @@ public:
    * @param name unique name for the sphere surface
    * @param center center point of sphere
    * @param r radius of sphere
-   * @param boundary (optional) boundary type for the surface, default "TRANSMISSION"
    */
-  CSGSphere(const std::string & name,
-            const Point & center,
-            const Real r,
-            std::string boundary = "TRANSMISSION");
+  CSGSphere(const std::string & name, const Point & center, const Real r);
 
   /**
    * @brief Construct a new CSGSphere surface
@@ -42,9 +38,8 @@ public:
    * @param name unique name for the sphere surface
    * @param center center point of sphere
    * @param r radius of sphere
-   * @param boundary (optional) boundary type for the surface, default "TRANSMISSION"
    */
-  CSGSphere(const std::string & name, const Real r, std::string boundary = "TRANSMISSION");
+  CSGSphere(const std::string & name, const Real r);
 
   /**
    * Destructor

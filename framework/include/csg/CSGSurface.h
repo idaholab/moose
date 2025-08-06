@@ -41,9 +41,8 @@ public:
    *
    * @param name unique name of surface
    * @param surf_type surface type
-   * @param boundary boundary condition for the surface
    */
-  CSGSurface(const std::string & name, const std::string & surf_type, std::string & boundary);
+  CSGSurface(const std::string & name, const std::string & surf_type);
 
   /**
    * Destructor
@@ -56,20 +55,6 @@ public:
    * @return type of surface
    */
   const std::string getSurfaceType() const { return _surface_type; }
-
-  /**s
-   * @brief Set the Boundary Type (i.e. TRANSMISSION or VACUUM)
-   *
-   * @param boundary_type type of boundary
-   */
-  void setBoundaryType(std::string boundary_type) { _boundary_type = boundary_type; }
-
-  /**
-   * @brief Get the Boundary Type (i.e. TRANSMISSION or VACUUM)
-   *
-   * @return type of boundary
-   */
-  std::string getBoundaryType() const { return _boundary_type; }
 
   /**
    * @brief Get the coefficients that define the surface
@@ -122,9 +107,6 @@ protected:
   /// Type of surface that is being represented
   /// string is taken directly from the surface class name
   const std::string _surface_type;
-
-  /// An enum for boundary type of surface
-  MooseEnum _boundary_type;
 
   // CSGSurfaceList needs to be friend to access setName()
   friend class CSGSurfaceList;

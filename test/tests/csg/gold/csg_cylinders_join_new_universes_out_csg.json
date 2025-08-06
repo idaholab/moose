@@ -62,7 +62,6 @@
   },
   "SURFACES": {
     "CylsUniverse_bb_x_neg_surf": {
-      "BOUNDARY": "VACUUM",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -72,7 +71,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "CylsUniverse_bb_x_pos_surf": {
-      "BOUNDARY": "VACUUM",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -82,7 +80,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "CylsUniverse_bb_y_neg_surf": {
-      "BOUNDARY": "VACUUM",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -92,7 +89,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "CylsUniverse_bb_y_pos_surf": {
-      "BOUNDARY": "VACUUM",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -102,7 +98,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "CylsUniverse_bb_z_neg_surf": {
-      "BOUNDARY": "VACUUM",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -112,7 +107,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "CylsUniverse_bb_z_pos_surf": {
-      "BOUNDARY": "VACUUM",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -122,7 +116,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "XCyls_neg_plane": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -132,7 +125,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "XCyls_pos_plane": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -142,7 +134,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "XCyls_surf_cyl_x_0": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 1.0,
         "y0": 0.0,
@@ -151,7 +142,6 @@
       "TYPE": "CSG::CSGXCylinder"
     },
     "XCyls_surf_cyl_x_1": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 2.0,
         "y0": 0.0,
@@ -160,7 +150,6 @@
       "TYPE": "CSG::CSGXCylinder"
     },
     "XCyls_surf_cyl_x_2": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 3.0,
         "y0": 0.0,
@@ -169,7 +158,6 @@
       "TYPE": "CSG::CSGXCylinder"
     },
     "XCyls_x_neg_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -179,7 +167,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "XCyls_x_pos_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -189,7 +176,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "XCyls_y_neg_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -199,7 +185,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "XCyls_y_pos_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -209,7 +194,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "XCyls_z_neg_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -219,7 +203,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "XCyls_z_pos_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -229,7 +212,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "YCyls_neg_plane": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -239,7 +221,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "YCyls_pos_plane": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -249,7 +230,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "YCyls_surf_cyl_y_0": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 2.0,
         "x0": -10.0,
@@ -258,7 +238,6 @@
       "TYPE": "CSG::CSGYCylinder"
     },
     "YCyls_surf_cyl_y_1": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 4.0,
         "x0": -10.0,
@@ -267,7 +246,6 @@
       "TYPE": "CSG::CSGYCylinder"
     },
     "YCyls_x_neg_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -277,7 +255,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "YCyls_x_pos_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -287,7 +264,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "YCyls_y_neg_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -297,7 +273,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "YCyls_y_pos_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -307,7 +282,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "YCyls_z_neg_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -317,7 +291,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "YCyls_z_pos_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -327,7 +300,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "ZCyls_neg_plane": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -337,7 +309,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "ZCyls_pos_plane": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -347,7 +318,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "ZCyls_surf_cyl_z_0": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 1.0,
         "x0": 10.0,
@@ -356,7 +326,6 @@
       "TYPE": "CSG::CSGZCylinder"
     },
     "ZCyls_surf_cyl_z_1": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 2.0,
         "x0": 10.0,
@@ -365,7 +334,6 @@
       "TYPE": "CSG::CSGZCylinder"
     },
     "ZCyls_x_neg_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -375,7 +343,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "ZCyls_x_pos_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -385,7 +352,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "ZCyls_y_neg_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -395,7 +361,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "ZCyls_y_pos_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -405,7 +370,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "ZCyls_z_neg_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -415,7 +379,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "ZCyls_z_pos_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
