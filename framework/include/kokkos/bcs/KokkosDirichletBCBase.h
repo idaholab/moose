@@ -54,7 +54,7 @@ public:
    * @param node The node ID
    * @returns The residual contribution
    */
-  KOKKOS_FUNCTION inline Real computeQpResidual(const dof_id_type node) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const;
 
 private:
   /**
@@ -110,7 +110,7 @@ DirichletBCBase<Derived>::operator()(const dof_id_type tid) const
 }
 
 template <typename Derived>
-KOKKOS_FUNCTION inline Real
+KOKKOS_FUNCTION Real
 DirichletBCBase<Derived>::computeQpResidual(const dof_id_type node) const
 {
   auto bc = static_cast<const Derived *>(this);

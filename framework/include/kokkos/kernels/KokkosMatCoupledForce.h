@@ -24,13 +24,14 @@ public:
 
   KokkosMatCoupledForce(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION inline Real
-  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
-  KOKKOS_FUNCTION inline Real computeQpOffDiagJacobian(const unsigned int i,
-                                                       const unsigned int j,
-                                                       const unsigned int jvar,
-                                                       const unsigned int qp,
-                                                       ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
+                                         const unsigned int qp,
+                                         ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
+                                                const unsigned int j,
+                                                const unsigned int jvar,
+                                                const unsigned int qp,
+                                                ResidualDatum & datum) const;
 
 private:
   const unsigned int _n_coupled;

@@ -216,8 +216,7 @@ public:
    * @param point The point coordinate
    * @returns The coordinate transform factor
    */
-  KOKKOS_FUNCTION inline Real coordTransformFactor(const SubdomainID subdomain,
-                                                   const Real3 point) const;
+  KOKKOS_FUNCTION Real coordTransformFactor(const SubdomainID subdomain, const Real3 point) const;
   /**
    * Compute physical transformation data for an element
    * @param info The element information object
@@ -226,11 +225,11 @@ public:
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
    */
-  KOKKOS_FUNCTION inline void computePhysicalMap(const ElementInfo info,
-                                                 const unsigned int qp,
-                                                 Real33 * const jacobian,
-                                                 Real * const JxW,
-                                                 Real3 * const q_points) const;
+  KOKKOS_FUNCTION void computePhysicalMap(const ElementInfo info,
+                                          const unsigned int qp,
+                                          Real33 * const jacobian,
+                                          Real * const JxW,
+                                          Real3 * const q_points) const;
   /**
    * Compute physical transformation data for a side
    * @param info The element information object
@@ -240,12 +239,12 @@ public:
    * @param JxW The pointer to store transformed Jacobian weight
    * @param q_points The pointer to store physical quadrature point coordinate
    */
-  KOKKOS_FUNCTION inline void computePhysicalMap(const ElementInfo info,
-                                                 const unsigned int side,
-                                                 const unsigned int qp,
-                                                 Real33 * const jacobian,
-                                                 Real * const JxW,
-                                                 Real3 * const q_points) const;
+  KOKKOS_FUNCTION void computePhysicalMap(const ElementInfo info,
+                                          const unsigned int side,
+                                          const unsigned int qp,
+                                          Real33 * const jacobian,
+                                          Real * const JxW,
+                                          Real3 * const q_points) const;
 
   /**
    * Kokkos function for caching physical maps on element quadrature points

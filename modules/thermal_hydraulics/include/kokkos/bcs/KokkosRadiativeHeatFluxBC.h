@@ -21,7 +21,7 @@ public:
   static InputParameters validParams();
   KokkosRadiativeHeatFluxBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION inline Real coefficient() const;
+  KOKKOS_FUNCTION Real coefficient() const;
 
 private:
   /// Post-processor by which to scale boundary condition

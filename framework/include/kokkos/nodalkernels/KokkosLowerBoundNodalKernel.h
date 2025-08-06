@@ -21,10 +21,9 @@ public:
 
   KokkosLowerBoundNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION inline Real getResidual(const dof_id_type node) const;
-  KOKKOS_FUNCTION inline Real getJacobian(const dof_id_type node) const;
-  KOKKOS_FUNCTION inline Real getOffDiagJacobian(const unsigned int jvar,
-                                                 const dof_id_type node) const;
+  KOKKOS_FUNCTION Real getResidual(const dof_id_type node) const;
+  KOKKOS_FUNCTION Real getJacobian(const dof_id_type node) const;
+  KOKKOS_FUNCTION Real getOffDiagJacobian(const unsigned int jvar, const dof_id_type node) const;
 
 private:
   /// The lower bound on the coupled variable

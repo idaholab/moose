@@ -337,11 +337,11 @@ public:
    * @param tag The vector tag
    * @returns The face quadrature value
    */
-  KOKKOS_FUNCTION inline Real getVectorQpValueFace(const ElementInfo info,
-                                                   const unsigned int side,
-                                                   const unsigned int qp,
-                                                   const unsigned int var,
-                                                   const TagID tag) const;
+  KOKKOS_FUNCTION Real getVectorQpValueFace(const ElementInfo info,
+                                            const unsigned int side,
+                                            const unsigned int qp,
+                                            const unsigned int var,
+                                            const TagID tag) const;
   /**
    * Get the face quadrature gradient of a variable from a tagged vector
    * @param info The element information object
@@ -352,12 +352,12 @@ public:
    * @param tag The vector tag
    * @returns The face quadrature gradient
    */
-  KOKKOS_FUNCTION inline Real3 getVectorQpGradFace(const ElementInfo info,
-                                                   const unsigned int side,
-                                                   const Real33 jacobian,
-                                                   const unsigned int qp,
-                                                   const unsigned int var,
-                                                   const TagID tag) const;
+  KOKKOS_FUNCTION Real3 getVectorQpGradFace(const ElementInfo info,
+                                            const unsigned int side,
+                                            const Real33 jacobian,
+                                            const unsigned int qp,
+                                            const unsigned int var,
+                                            const TagID tag) const;
   /**
    * Get an entry from a tagged matrix
    * @param row The local row index
