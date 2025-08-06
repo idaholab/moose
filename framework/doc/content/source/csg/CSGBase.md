@@ -78,20 +78,15 @@ Information about how to define new types of surfaces can be found in [source/cs
 | Cylinder | `CSGYCylinder` | creates a cylinder aligned with the y-axis at the specified center location (`x`, `z`) |
 | Cylinder | `CSGZCylinder` | creates a cylinder aligned with the z-axis at the specified center location (`x`, `y`) |
 
-At the time of surface creation, the type of boundary can be optionally set.
-Options for boundary types are `"TRANSMISSION"` (default), `"VACUUM"`, and `"REFLECTIVE"`.
-
 Examples:
 
 ```cpp
 // create a plane defined by the points (1, 2, 3), (1, 1, 0), and (0, 0, 0)
-// set a reflective boundary type at the time of creation
 auto p1 = Point(1, 2, 3);
 auto p2 = Point(1, 1, 0);
 auto p3 = Point(0, 0, 0);
-auto bc_refl = "REFLECTIVE";
 std::unique_ptr<CSG::CSGSurface> plane_ptr =
-    std::make_unique<CSG::CSGPlane>('new_plane', p1, p2, p3, bc_refl);
+    std::make_unique<CSG::CSGPlane>('new_plane', p1, p2, p3);
 const auto & plane = csg_obj->addSurface(plane_ptr);
 ```
 
@@ -142,7 +137,6 @@ The `CSGSurface` objects can then be accessed or updated with the following meth
 - `getAllSurfaces`: retrieve a list of const references to each `CSGSurface` object in the `CSGBase` instance
 - `getSurfaceByName`: retrieve a const reference to the `CSGSurface` of the specified name
 - `renameSurface`: change the name of the `CSGSurface`
-- `updateSurfaceBoundaryType`: change the boundary type of the `CSGSurface` (`"TRANSMISSION"`, `"VACUUM"`, or `"REFLECTIVE"`)
 
 ### Regions
 
@@ -635,7 +629,6 @@ Example Output:
   },
   "SURFACES": {
     "Prism_surf_minus_x": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
@@ -645,7 +638,6 @@ Example Output:
       "TYPE": "CSG::CSGSPlane"
     },
     "Prism_surf_minus_y": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -655,7 +647,6 @@ Example Output:
       "TYPE": "CSG::CSGPlane"
     },
     "Cube_surf_minus_z": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -665,7 +656,6 @@ Example Output:
       "TYPE": "CSG::CSGPlane"
     },
     "Prism_surf_plus_x": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
@@ -675,7 +665,6 @@ Example Output:
       "TYPE": "CSG::CSGPlane"
     },
     "Prism_surf_plus_y": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -685,7 +674,6 @@ Example Output:
       "TYPE": "CSG::CSGPlane"
     },
     "Cube_surf_plus_z": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,

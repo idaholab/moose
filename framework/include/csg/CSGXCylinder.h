@@ -30,13 +30,8 @@ public:
    * @param y0 y coordinate of center
    * @param z0 z coordinate of center
    * @param r radius
-   * @param boundary (optional) boundary type for the surface, default "TRANSMISSION"
    */
-  CSGXCylinder(const std::string & name,
-               const Real y0,
-               const Real z0,
-               const Real r,
-               std::string boundary = "TRANSMISSION");
+  CSGXCylinder(const std::string & name, const Real y0, const Real z0, const Real r);
 
   /**
    * Destructor

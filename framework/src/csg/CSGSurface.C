@@ -12,12 +12,8 @@
 namespace CSG
 {
 
-CSGSurface::CSGSurface(const std::string & name,
-                       const std::string & surf_type,
-                       std::string & boundary)
-  : _name(name),
-    _surface_type(surf_type),
-    _boundary_type("TRANSMISSION VACUUM REFLECTIVE", boundary)
+CSGSurface::CSGSurface(const std::string & name, const std::string & surf_type)
+  : _name(name), _surface_type(surf_type)
 {
 }
 
@@ -41,10 +37,9 @@ bool
 CSGSurface::operator==(const CSGSurface & other) const
 {
   const auto name_eq = this->getName() == other.getName();
-  const auto boundary_type_eq = this->getBoundaryType() == other.getBoundaryType();
   const auto surface_type_eq = this->getSurfaceType() == other.getSurfaceType();
   const auto coeffs_eq = this->getCoeffs() == other.getCoeffs();
-  return (name_eq && boundary_type_eq && surface_type_eq && coeffs_eq);
+  return (name_eq && surface_type_eq && coeffs_eq);
 }
 
 bool

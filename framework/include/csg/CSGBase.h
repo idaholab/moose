@@ -80,14 +80,6 @@ public:
   }
 
   /**
-   * @brief change the boundary type of a surface
-   *
-   * @param surface CSGSurface to update
-   * @param boundary boundary type to set
-   */
-  void updateSurfaceBoundaryType(const CSGSurface & surface, std::string boundary);
-
-  /**
    * @brief Create a Material Cell object
    *
    * @param name unique cell name

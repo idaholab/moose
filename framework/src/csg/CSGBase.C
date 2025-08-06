@@ -19,16 +19,6 @@ CSGBase::CSGBase()
 
 CSGBase::~CSGBase() {}
 
-void
-CSGBase::updateSurfaceBoundaryType(const CSGSurface & surface, std::string boundary)
-{
-  auto & surf = getSurface(surface.getName());
-  if (surf != surface)
-    mooseError("A surface named " + surface.getName() + " is being updated that is different " +
-               "from the surface of the same name in the CSGBase instance.");
-  surf.setBoundaryType(boundary);
-}
-
 const CSGCell &
 CSGBase::createCell(const std::string & name,
                     const std::string & mat_name,
@@ -305,8 +295,7 @@ CSGBase::generateOutput() const
   {
     const auto & surf_name = s.getName();
     const auto & coeffs = s.getCoeffs();
-    csg_json["SURFACES"][surf_name] = {
-        {"TYPE", s.getSurfaceType()}, {"BOUNDARY", s.getBoundaryType()}, {"COEFFICIENTS", {}}};
+    csg_json["SURFACES"][surf_name] = {{"TYPE", s.getSurfaceType()}, {"COEFFICIENTS", {}}};
     for (const auto & c : coeffs)
       csg_json["SURFACES"][surf_name]["COEFFICIENTS"][c.first] = c.second;
   }

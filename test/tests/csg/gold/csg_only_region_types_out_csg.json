@@ -15,7 +15,6 @@
   },
   "SURFACES": {
     "surf_minus_x": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": -1.0,
@@ -25,7 +24,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "surf_minus_y": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
@@ -35,7 +33,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "surf_plus_x": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -45,7 +42,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "surf_plus_y": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
@@ -55,7 +51,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "surf_zero_y": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 1.0,
         "b": 0.0,
