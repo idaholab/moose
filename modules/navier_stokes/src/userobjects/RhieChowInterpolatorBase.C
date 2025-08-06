@@ -83,7 +83,6 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
     _us(libMesh::n_threads(), nullptr),
     _vs(libMesh::n_threads(), nullptr),
     _ws(libMesh::n_threads(), nullptr),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _displaced(dynamic_cast<DisplacedProblem *>(&(UserObject::_subproblem)))
 {
   if (!_p)
