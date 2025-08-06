@@ -184,6 +184,7 @@ public:
 
   virtual void copyOldSolutions();
   virtual void copyPreviousNonlinearSolutions();
+  virtual void copyPreviousFixedPointSolutions();
   virtual void restoreSolutions();
 
   /**
@@ -1072,7 +1073,7 @@ private:
                                      Moose::SolutionIterationType iteration_type) const;
 
   /// The solution states (0 = current, 1 = old, 2 = older, etc)
-  std::array<std::vector<NumericVector<Number> *>, 2> _solution_states;
+  std::array<std::vector<NumericVector<Number> *>, 3> _solution_states;
   /// The saved solution states (0 = current, 1 = old, 2 = older, etc)
   std::vector<NumericVector<Number> *> _saved_solution_states;
 };

@@ -1270,8 +1270,8 @@ SystemBase::copySolutionsBackwards()
 void
 SystemBase::copyPreviousNonlinearSolutions()
 {
-  // 1 is for nonlinear, 0 is for time, we do this for nonlinear only here
-  const auto states = _solution_states[1].size();
+  const auto states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Nonlinear)].size();
   if (states > 1)
     for (unsigned int i = states - 1; i > 0; --i)
       solutionState(i, Moose::SolutionIterationType::Nonlinear) =
@@ -1287,9 +1287,9 @@ SystemBase::copyPreviousNonlinearSolutions()
 void
 SystemBase::copyOldSolutions()
 {
-  // Copying the solutions backward so the current solution will become the old, and the old will
-  // become older. 0 index is for time, 1 would be nonlinear iteration.
-  const auto states = _solution_states[0].size();
+  // copy the solutions backward: current->old, old->older
+  const auto states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
   if (states > 1)
     for (unsigned int i = states - 1; i > 0; --i)
       solutionState(i) = solutionState(i - 1);
@@ -1298,6 +1298,23 @@ SystemBase::copyOldSolutions()
     *solutionUDotOld() = *solutionUDot();
   if (solutionUDotDotOld())
     *solutionUDotDotOld() = *solutionUDotDot();
+}
+
+/**
+ * Shifts the solutions backwards in fixed point iteration history
+ */
+void
+SystemBase::copyPreviousFixedPointSolutions()
+{
+  const auto n_states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::FixedPoint)]
+          .size();
+  if (n_states > 1)
+    for (unsigned int i = n_states - 1; i > 0; --i)
+    {
+      solutionState(i, Moose::SolutionIterationType::FixedPoint) =
+          solutionState(i - 1, Moose::SolutionIterationType::FixedPoint);
+    }
 }
 
 /**
@@ -1382,6 +1399,8 @@ SystemBase::oldSolutionStateVectorName(const unsigned int state,
   }
   else if (iteration_type == Moose::SolutionIterationType::Nonlinear && state == 1)
     return Moose::PREVIOUS_NL_SOLUTION_TAG;
+  else if (iteration_type == Moose::SolutionIterationType::FixedPoint && state == 1)
+    return Moose::PREVIOUS_FP_SOLUTION_TAG;
 
   return "solution_state_" + std::to_string(state) + "_" + Moose::stringify(iteration_type);
 }
@@ -1451,7 +1470,9 @@ SystemBase::needSolutionState(const unsigned int state,
     {
       auto tag = _subproblem.addVectorTag(oldSolutionStateVectorName(i, iteration_type),
                                           Moose::VECTOR_TAG_SOLUTION);
-      solution_states[i] = &addVector(tag, true, GHOSTED);
+      const ParallelType parallel_type =
+          iteration_type == Moose::SolutionIterationType::FixedPoint ? PARALLEL : GHOSTED;
+      solution_states[i] = &addVector(tag, true, parallel_type);
     }
     else
       mooseAssert(solution_states[i] == &getVector(oldSolutionStateVectorName(i, iteration_type)),

@@ -165,6 +165,12 @@ previousNonlinearState()
   return {(unsigned int)1, SolutionIterationType::Nonlinear};
 }
 
+inline StateArg
+previousFixedPointState()
+{
+  return {(unsigned int)1, SolutionIterationType::FixedPoint};
+}
+
 /**
  * A structure defining a "face" evaluation calling argument for Moose functors
  */
