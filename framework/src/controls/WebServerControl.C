@@ -355,6 +355,10 @@ WebServerControl::startServer()
 void
 WebServerControl::execute()
 {
+  // If simulation is requested to terminate, do not go through this control
+  if (_fe_problem.isSolveTerminationRequested())
+    return;
+
   // Needed to broadcast all of the types and names of data that we have received on rank 0
   // so that we can construct the same objects on the other ranks to receive the data and
   // set the same values
