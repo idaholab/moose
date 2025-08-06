@@ -216,5 +216,6 @@
     xmldiff = 'OutputData/DiffusionParsedSource/Run0/Run0.pvd
                 OutputData/DiffusionParsedSource/Run0/Cycle000001/proc000000.vtu'
     requirement = 'The systen shall have the ability parse function of non-linear variables'
+    capabilities = 'mfem'
   []
 []
