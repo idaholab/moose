@@ -19,9 +19,9 @@ public:
 
   KokkosCoupledForceNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION inline Real computeQpResidual(const dof_id_type node) const;
-  KOKKOS_FUNCTION inline Real computeQpOffDiagJacobian(const unsigned int jvar,
-                                                       const dof_id_type node) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const;
+  KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
+                                                const dof_id_type node) const;
 
 private:
   /// The number of the coupled variable

@@ -103,7 +103,7 @@ private:
    * @param j The global column index
    * @returns The index into the nonzero vector, and -1 if not found
    */
-  KOKKOS_FUNCTION inline PetscInt find(PetscInt i, PetscInt j) const;
+  KOKKOS_FUNCTION PetscInt find(PetscInt i, PetscInt j) const;
 #endif
 
   /**

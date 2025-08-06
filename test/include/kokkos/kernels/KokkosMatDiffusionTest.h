@@ -10,7 +10,6 @@
 #pragma once
 
 #include "KokkosKernel.h"
-#include "KokkosMaterialProperty.h"
 
 class KokkosMatDiffusionTest final : public Moose::Kokkos::Kernel<KokkosMatDiffusionTest>
 {
@@ -19,12 +18,13 @@ public:
 
   KokkosMatDiffusionTest(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION inline Real
-  computeQpResidual(const unsigned int i, const unsigned int qp, ResidualDatum & datum) const;
-  KOKKOS_FUNCTION inline Real computeQpJacobian(const unsigned int i,
-                                                const unsigned int j,
-                                                const unsigned int qp,
-                                                ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
+                                         const unsigned int qp,
+                                         ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
+                                         const unsigned int j,
+                                         const unsigned int qp,
+                                         ResidualDatum & datum) const;
 
 private:
   Moose::Kokkos::MaterialProperty<Real> _diff;
