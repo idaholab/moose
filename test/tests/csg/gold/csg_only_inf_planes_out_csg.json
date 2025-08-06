@@ -8,7 +8,6 @@
   },
   "SURFACES": {
     "surf_minus_x": {
-      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
@@ -18,7 +17,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "surf_minus_y": {
-      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -28,7 +26,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "surf_plus_x": {
-      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
@@ -38,7 +35,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "surf_plus_y": {
-      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,

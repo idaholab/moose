@@ -7,7 +7,7 @@ General information about implementing [!ac](CSG)-related methods can be found i
 ## Defining a New Surface Type
 
 Any arbitrary or custom surface can be defined by inheriting from `CSGSurface`.
-At a minimum, the surface name, surface type, and boundary type, must be set, and two virtual methods that need to be defined.
+At a minimum, the surface name and surface type, must be set, and two virtual methods that need to be defined.
 Additional information required by the constructor will depend on the specific surface to be defined.
 
 ### Setting Coefficients

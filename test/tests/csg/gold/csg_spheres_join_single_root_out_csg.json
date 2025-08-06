@@ -19,7 +19,6 @@
   },
   "SURFACES": {
     "OriginSphere_sphere_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 3.0,
         "x0": 0.0,
@@ -29,7 +28,6 @@
       "TYPE": "CSG::CSGSphere"
     },
     "PointSphere_sphere_surf": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "r": 5.0,
         "x0": -3.0,
@@ -39,7 +37,6 @@
       "TYPE": "CSG::CSGSphere"
     },
     "surf_minus_x": {
-      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
@@ -49,7 +46,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "surf_minus_y": {
-      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -59,7 +55,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "surf_minus_z": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -69,7 +64,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "surf_plus_x": {
-      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
@@ -79,7 +73,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "surf_plus_y": {
-      "BOUNDARY": "REFLECTIVE",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
@@ -89,7 +82,6 @@
       "TYPE": "CSG::CSGPlane"
     },
     "surf_plus_z": {
-      "BOUNDARY": "TRANSMISSION",
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
