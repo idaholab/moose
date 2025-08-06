@@ -37,12 +37,8 @@ MultiAppVectorPostprocessorTransfer::validParams()
                              "N sub-apps or"
                              " collects Postprocessor values from N sub-apps "
                              "into a VectorPostprocessor");
-  params.addParam<bool>(
-      "warn_source_object_execution_schedule",
-      true,
-      "Emit a warning when the transfer execution schedule is detected to lag "
-      "information from the vector postprocessor. Note that the check cannot detect all "
-      "potential wrong combinations of vector postprocessor/transfer execution schedules");
+  MultiAppTransfer::addUserObjectExecutionCheckParam(params);
+
   return params;
 }
 

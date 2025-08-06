@@ -37,11 +37,7 @@ MultiAppGeneralFieldUserObjectTransfer::validParams()
                                           "The UserObject you want to transfer values from. "
                                           "It must implement the SpatialValue() class routine");
 
-  params.addParam<bool>("warn_source_object_execution_schedule",
-                        true,
-                        "Emit a warning when the transfer execution schedule is detected to lag "
-                        "information from the user object. Note that the check cannot detect all "
-                        "potential wrong combinations of user-object/transfer execution schedules");
+  MultiAppTransfer::addUserObjectExecutionCheckParam(params);
 
   // Blanket ban on origin boundary restriction. User objects tend to extend beyond boundaries,
   // and be able to be evaluated within a volume rather than only on a boundary

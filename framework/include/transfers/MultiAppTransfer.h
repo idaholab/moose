@@ -103,11 +103,6 @@ public:
       return "Parent";
   }
 
-  /**
-   * Add the option to skip coordinate collapsing in coordinate transformation operations
-   */
-  static void addSkipCoordCollapsingParam(InputParameters & params);
-
   /// Whether the transfer owns a non-null from_multi_app
   bool hasFromMultiApp() const { return !(!_from_multi_app); }
 
@@ -120,7 +115,18 @@ public:
    */
   virtual void getAppInfo();
 
+  /**
+   * Add the option to skip coordinate collapsing in coordinate transformation operations
+   * Note: this is used by Actions creating transfers as well
+   */
+  static void addSkipCoordCollapsingParam(InputParameters & params);
+
 protected:
+  /**
+   * Add the execution order check parameter (to skip the warning if needed)
+   */
+  static void addUserObjectExecutionCheckParam(InputParameters & params);
+
   /**
    * Add the bounding box factor parameter to the supplied input parameters
    */

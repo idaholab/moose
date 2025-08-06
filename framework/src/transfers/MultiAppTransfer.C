@@ -82,6 +82,16 @@ MultiAppTransfer::addSkipCoordCollapsingParam(InputParameters & params)
   params.addParamNamesToGroup("skip_coordinate_collapsing", "Advanced");
 }
 
+void
+MultiAppTransfer::addUserObjectExecutionCheckParam(InputParameters & params)
+{
+  params.addParam<bool>("warn_source_object_execution_schedule",
+                        true,
+                        "Emit a warning when the transfer execution schedule is detected to lag "
+                        "information from the user object. Note that the check cannot detect all "
+                        "potential wrong combinations of user-object/transfer execution schedules");
+}
+
 MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   : Transfer(parameters),
     _skip_coordinate_collapsing(getParam<bool>("skip_coordinate_collapsing")),

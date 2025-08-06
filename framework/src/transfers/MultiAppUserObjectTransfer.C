@@ -74,11 +74,8 @@ MultiAppUserObjectTransfer::validParams()
                         false,
                         "When True, a from_multiapp transfer will work by finding the nearest "
                         "(using the `location`) sub-app and query that for the value to transfer");
-  params.addParam<bool>("warn_source_object_execution_schedule",
-                        true,
-                        "Emit a warning when the transfer execution schedule is detected to lag "
-                        "information from the user object. Note that the check cannot detect all "
-                        "potential wrong combinations of user-object/transfer execution schedules");
+  MultiAppTransfer::addUserObjectExecutionCheckParam(params);
+
   return params;
 }
 

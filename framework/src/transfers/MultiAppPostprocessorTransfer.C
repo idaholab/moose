@@ -38,12 +38,8 @@ MultiAppPostprocessorTransfer::validParams()
                              reduction_type,
                              "The type of reduction to perform to reduce postprocessor "
                              "values from multiple SubApps to a single value");
-  params.addParam<bool>(
-      "warn_source_object_execution_schedule",
-      true,
-      "Emit a warning when the transfer execution schedule is detected to lag "
-      "information from the postprocessor. Note that the check cannot detect all "
-      "potential wrong combinations of postprocessor/transfer execution schedules");
+  MultiAppTransfer::addUserObjectExecutionCheckParam(params);
+
   return params;
 }
 
