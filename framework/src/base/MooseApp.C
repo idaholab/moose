@@ -786,7 +786,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
 
 #ifdef MOOSE_KOKKOS_ENABLED
 #ifdef MOOSE_ENABLE_KOKKOS_GPU
-  queryGPUs();
+  queryKokkosGPUs();
 #endif
 #endif
 }
