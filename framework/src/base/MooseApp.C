@@ -2357,6 +2357,19 @@ MooseApp::runInputs()
 }
 
 void
+MooseApp::checkReservedCapability(const std::string & capability)
+{
+  // The list of these capabilities should match those within
+  // Tester.checkRunnableBase() in the TestHarness
+  static const std::set<std::string> reserved{
+      "scale_refine", "valgrind", "recover", "heavy", "mpi_procs", "num_threads", "compute_device"};
+  if (reserved.count(capability))
+    mooseError("MooseApp::addCapability(): The capability \"",
+               capability,
+               "\" is reserved and may not be registered by an application.");
+}
+
+void
 MooseApp::setOutputPosition(const Point & p)
 {
   _output_position_set = true;
@@ -3577,12 +3590,14 @@ MooseApp::addCapability(const std::string & capability,
                         CapabilityUtils::Type value,
                         const std::string & doc)
 {
+  checkReservedCapability(capability);
   Moose::Capabilities::getCapabilityRegistry().add(capability, value, doc);
 }
 
 void
 MooseApp::addCapability(const std::string & capability, const char * value, const std::string & doc)
 {
+  checkReservedCapability(capability);
   Moose::Capabilities::getCapabilityRegistry().add(capability, std::string(value), doc);
 }
 
