@@ -31,7 +31,7 @@
       cli_args = "Positions/active=hex_grid_2rings_exclusions
                   Positions/hex_grid_2rings_exclusions/rotation_around_axis=30
                   Outputs/file_base=rotated_hexagonal_grid_positions_2r_out"
-      detail = 'a two-ring hexagonal grid with some positions excluded,'
+      detail = 'a two-ring hexagonal grid with some positions excluded and rotated by a user-specified angle around its axis,'
     []
     [nested_hex_pattern]
       type = 'JSONDiff'
