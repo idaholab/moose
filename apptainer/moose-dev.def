@@ -20,7 +20,7 @@
 {#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
 {#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
 {#- WITH_MFEM: Whether or not to build mfem (default: 1 to build, 0 to not build)             -#}
-{#- WITHOUT_PYTORCH: Set to anything to not build/download pytorch                            -#}
+{#- WITHOUT_PYTORCH: Set to anything to not build/download pytorch and neml2                  -#}
 
 {#- Set WITH_MFEM default if not set                                                          -#}
 {%- if WITH_MFEM is not defined %}
@@ -97,8 +97,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     if [ -d "{{ NEML2_DIR }}" ]; then
         export NEML2_DIR={{ NEML2_DIR }}
     fi
-    # Adding this to not get GPU initialization errors from MPICH
-    export MPIR_CVAR_ENABLE_GPU=0
 {%- endif %}
 
 {% if PROFILING is defined %}
@@ -185,7 +183,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Figure out compiler and version to see if we build torch or use prebuilt torch
     COMPILER=$(mpicxx -show | awk '{ print $1 }')
-    BUILD_PYTORCH=1
     # Explicitly silence all warnings because the build is loud (>5MB of output...)
     BUILD_PYTORCH_CCXXFLAGS=("-w")
     BUILD_PYTORCH_FLAGS=()
@@ -197,10 +194,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
             echo "Failed to parse GCC version"
             exit 1
         fi
-        # GCC supported for 2.6.0 after GCC 9.3
-        if [ "$(printf '%s\n' "9.3" "$GCC_VERSION" | sort -V | head -n1)" != "9.3" ]; then
-            BUILD_PYTORCH=
-        fi
     elif [ "$COMPILER" == "clang++" ]; then
         # FBGEMM requires AVX512, which we don't get with clang
         BUILD_PYTORCH_FLAGS+=("-DUSE_FBGEMM:BOOL=OFF")
@@ -210,61 +203,51 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     fi
 
     LIBTORCH_DIR={{ LIBTORCH_DIR }}
-    if [ -n "$BUILD_PYTORCH" ]; then
-        # Clone pytorch for build
-        cd ${ROOT_BUILD_DIR}
-        git clone --branch v${PYTORCH_VERSION} --single-branch --recursive https://github.com/pytorch/pytorch
-        PYTORCH_DIR=${ROOT_BUILD_DIR}/pytorch
+    # Clone pytorch for build
+    cd ${ROOT_BUILD_DIR}
+    git clone --branch v${PYTORCH_VERSION} --single-branch --recursive https://github.com/pytorch/pytorch
+    PYTORCH_DIR=${ROOT_BUILD_DIR}/pytorch
 
-        # Create a temporary python environment for building pytorch
-        PYTORCH_CONDA_ENV=pytorch_build
-        conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.12
-        source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
-        pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
+    # Create a temporary python environment for building pytorch
+    PYTORCH_CONDA_ENV=pytorch_build
+    conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.12
+    source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
+    pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
 
-        # Need BLAS and LAPACK libs for torch in neml2
-        dnf install -y openblas-devel
+    # Need BLAS and LAPACK libs for torch in neml2
+    dnf install -y openblas-devel
 
-        # Require CUDA if we have cuda available
-        if [ -n "$CUDA_DIR" ]; then
-            # 6.1 (schwen), 7.0 V100 (sawtooth), 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
-            CUDA_ARCHES="61;70;80;86;89"
-            BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}" "-DCMAKE_CUDA_ARCHITECTURES=${CUDA_ARCHES}")
-        else
-            BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=OFF")
-        fi
-        # Build and install pytorch
-        mkdir -p $LIBTORCH_DIR/logs
-        PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
-        mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
-        CC= CXX= F77= F90= FC= CFLAGS="${BUILD_PYTORCH_CCXXFLAGS[*]}" CXXFLAGS="${BUILD_PYTORCH_CCXXFLAGS[*]}" cmake \
-            -GNinja \
-            -DBUILD_SHARED_LIBS:BOOL=ON \
-            -DCMAKE_BUILD_TYPE:STRING=Release \
-            -DCMAKE_INSTALL_PREFIX:PATH=${LIBTORCH_DIR} \
-            -DBUILD_PYTHON:BOOL=OFF \
-            -DUSE_BLAS:BOOL=ON \
-            -DBLAS:STRING=OpenBLAS \
-            -DUSE_LAPACK:BOOL=ON \
-            -DUSE_MPI:BOOL=OFF \
-            -DUSE_SYSTEM_NCCL:BOOL=ON \
-            "${BUILD_PYTORCH_FLAGS[@]}" \
-            ${PYTORCH_DIR} 2>&1 | tee ${LIBTORCH_DIR}/logs/cmake.log
-        cmake --build . --target install -- -j ${MOOSE_JOBS} 2>&1 | tee ${LIBTORCH_DIR}/logs/build.log
-
-        # Cleanup the python build environment
-        source deactivate
-        conda env remove -y -n ${PYTORCH_CONDA_ENV}
-        rm -rf ${PYTORCH_DIR} ${PYTORCH_BUILD_DIR}
+    # Require CUDA if we have cuda available
+    if [ -n "$CUDA_DIR" ]; then
+        # 6.1 (schwen), 7.0 V100 (sawtooth), 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
+        CUDA_ARCHES="61;70;80;86;89"
+        BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}" "-DCMAKE_CUDA_ARCHITECTURES=${CUDA_ARCHES}")
     else
-        # Install from the script, we should only be doing this for CPU
-        LIBTORCH_VER=2.1.0
-        if [ -n "$CUDA_DIR" ]; then
-            echo "Should not use precompiled torch with cuda"
-            exit 1
-        fi
-        ${ROOT_BUILD_DIR}/setup_libtorch.sh --version=${LIBTORCH_VER} --libtorch-dest="$(dirname "$LIBTORCH_DIR")" --libtorch-distribution=cpu --cleanup
+        BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=OFF")
     fi
+    # Build and install pytorch
+    mkdir -p $LIBTORCH_DIR/logs
+    PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
+    mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
+    CC= CXX= F77= F90= FC= CFLAGS="${BUILD_PYTORCH_CCXXFLAGS[*]}" CXXFLAGS="${BUILD_PYTORCH_CCXXFLAGS[*]}" cmake \
+        -GNinja \
+        -DBUILD_SHARED_LIBS:BOOL=ON \
+        -DCMAKE_BUILD_TYPE:STRING=Release \
+        -DCMAKE_INSTALL_PREFIX:PATH=${LIBTORCH_DIR} \
+        -DBUILD_PYTHON:BOOL=OFF \
+        -DUSE_BLAS:BOOL=ON \
+        -DBLAS:STRING=OpenBLAS \
+        -DUSE_LAPACK:BOOL=ON \
+        -DUSE_MPI:BOOL=OFF \
+        -DUSE_SYSTEM_NCCL:BOOL=ON \
+        "${BUILD_PYTORCH_FLAGS[@]}" \
+        ${PYTORCH_DIR} 2>&1 | tee ${LIBTORCH_DIR}/logs/cmake.log
+    cmake --build . --target install -- -j ${MOOSE_JOBS} 2>&1 | tee ${LIBTORCH_DIR}/logs/build.log
+
+    # Cleanup the python build environment
+    source deactivate
+    conda env remove -y -n ${PYTORCH_CONDA_ENV}
+    rm -rf ${PYTORCH_DIR} ${PYTORCH_BUILD_DIR}
 
     export LIBTORCH_DIR
     cd ${ROOT_BUILD_DIR}
@@ -411,8 +394,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     {{ MOOSE_DIR }}/scripts/{{ MFEM_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ MFEM_BUILD_SCRIPT }}
     {{ MOOSE_DIR }}/scripts/{{ CONDUIT_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ CONDUIT_BUILD_SCRIPT }}
 {% if WITHOUT_PYTORCH is not defined %}
-    # libtorch
-    {{ MOOSE_DIR }}/scripts/setup_libtorch.sh {{ ROOT_BUILD_DIR }}/setup_libtorch.sh
     # neml2
     {{ MOOSE_DIR }}/scripts/configure_neml2.sh {{ ROOT_BUILD_DIR }}/configure_neml2.sh
     {{ MOOSE_DIR }}/scripts/{{ NEML2_BUILD_SCRIPT }} {{ ROOT_BUILD_DIR }}/{{ NEML2_BUILD_SCRIPT }}
