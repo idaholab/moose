@@ -196,7 +196,8 @@ EOF
       F90FLAGS='' \
       F77FLAGS='' \
 {%- endif %}
-      --enable-fast=O2
+      --enable-fast=O2 \
+      --with-device=ch3:nemesis
     make -j ${MOOSE_JOBS}
     make install -j ${MOOSE_JOBS}
 {%- endif %}
