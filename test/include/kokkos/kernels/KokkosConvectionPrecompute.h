@@ -21,10 +21,10 @@ public:
 
   KokkosConvectionPrecompute(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION inline Real precomputeQpResidual(const unsigned int qp,
-                                                   ResidualDatum & datum) const;
-  KOKKOS_FUNCTION inline Real
-  precomputeQpJacobian(const unsigned int j, const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int j,
+                                            const unsigned int qp,
+                                            ResidualDatum & datum) const;
 
 private:
   const Real3 _velocity;
