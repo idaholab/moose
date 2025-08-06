@@ -14,13 +14,11 @@
     fec_type = H1
     fec_order = FIRST
   []
-
   [H1VectorFESpace]
     type = MFEMVectorFESpace
     fec_type = H1
     fec_order = FIRST
   []
-
   [HCurlFESpace]
     type = MFEMVectorFESpace
     fec_type = ND
@@ -29,27 +27,21 @@
 []
 
 [Variables]
-    [current]
-        type = MFEMVariable
-        fespace = H1FESpace
-    []
-    [Az]
-        type = MFEMVariable
-        fespace = H1FESpace
-
-    []
+  [Az]
+    type = MFEMVariable
+    fespace = H1FESpace
+  []
 []
 
 [AuxVariables]
-    [grad_Az]
-        type = MFEMVariable
-        fespace = HCurlFESpace
-    []
-
-    [J]
-        type = MFEMVariable
-        fespace = H1VectorFESpace
-    []
+  [grad_Az]
+    type = MFEMVariable
+    fespace = HCurlFESpace
+  []
+  [J]
+    type = MFEMVariable
+    fespace = H1VectorFESpace
+  []
 []
 
 [AuxKernels]
@@ -59,58 +51,46 @@
     source = Az
     execute_on = TIMESTEP_END
   []
-
    [current_output]
     type = MFEMScalarProjectAux
     coefficient = Jvalue
     variable = J
   []
-
 []
 
 [BCs]
-    [essential]
-        type = MFEMScalarDirichletBC
-        variable = Az
-        boundary = 1
-        coefficient = 1
-    []
+  [essential]
+    type = MFEMScalarDirichletBC
+    variable = Az
+    boundary = 1
+    coefficient = 1
+  []
 []
 
 [FunctorMaterials]
-    [with_current]
-        type = MFEMGenericFunctorMaterial
-        prop_names = Jvalue
-        prop_values = 8.0
-        block = 2
-    []
-
-    [no_current]
-        type = MFEMGenericFunctorMaterial
-        prop_names = Jvalue
-        prop_values = 0.0
-        block = 1
-    []
-
-  [Substance]
+  [no_current]
     type = MFEMGenericFunctorMaterial
-    prop_names = diffusivity
-    prop_values = 1.0
+    prop_names = Jvalue
+    prop_values = 0.0
+    block = 1
+  []
+  [with_current]
+    type = MFEMGenericFunctorMaterial
+    prop_names = Jvalue
+    prop_values = 8.0
+    block = 2
   []
 []
 
 [Kernels]
-    [diffusion]
-        type = MFEMDiffusionKernel
-        variable = Az
-        coefficient = diffusivity
-    []
-
-    [source]
-        type = MFEMDomainLFKernel
-        variable = Az
-        coefficient = 1
-    []
+  [diffusion]
+    type = MFEMDiffusionKernel
+    variable = Az
+  []
+  [source]
+    type = MFEMDomainLFKernel
+    variable = Az
+  []
 []
 
 [Preconditioner]
@@ -129,18 +109,13 @@
 
 [Executioner]
   type = MFEMSteady
-  device = "cpu"
+  device = cpu
 []
-
 
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/2DScalarCurrentProjection
     vtk_format = ASCII
-  []
-  [VisItDataCollection]
-    type = MFEMVisItDataCollection
-    file_base = OutputData/VisItDataCollection
   []
 []
