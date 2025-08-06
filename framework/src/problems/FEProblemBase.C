@@ -4305,7 +4305,7 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     auto euo = std::dynamic_pointer_cast<ElementUserObject>(user_object);
     auto suo = std::dynamic_pointer_cast<SideUserObject>(user_object);
     auto isuo = std::dynamic_pointer_cast<InternalSideUserObject>(user_object);
-    auto iuob = std::dynamic_pointer_cast<InterfaceUserObjectBase>(user_object);
+    auto iuo = std::dynamic_pointer_cast<InterfaceUserObjectBase>(user_object);
     auto nuo = std::dynamic_pointer_cast<NodalUserObject>(user_object);
     auto duo = std::dynamic_pointer_cast<DomainUserObject>(user_object);
     auto guo = std::dynamic_pointer_cast<GeneralUserObject>(user_object);
@@ -4315,12 +4315,14 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     // Account for displaced mesh use
     if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
     {
-      if (euo || nuo || duo)
+      // Whether to re-init or not depends on the attributes of the base classes.
+      // For example, InterfaceUOBase has "_current_side_elem" and "_neighbor_elem"
+      // so it needs to reinit on displaced faces and neighbors
+      if (euo || nuo || duo || isuo || iuo)
         _reinit_displaced_elem = true;
-      else if (suo || duo)
-        // shouldn't we add isuo
+      if (suo || duo || isuo || iuo)
         _reinit_displaced_face = true;
-      else if (iuob || duo)
+      if (iuo || duo || isuo)
         _reinit_displaced_neighbor = true;
     }
 
@@ -8135,6 +8137,11 @@ FEProblemBase::meshChanged(const bool intermediate_change,
   // mortar meshes. Note that this needs to happen after DisplacedProblem::meshChanged because the
   // mortar mesh discretization will depend necessarily on the displaced mesh being re-displaced
   updateMortarMesh();
+
+  // Nonlinear systems hold the mortar mesh functors. The domains of definition of the mortar
+  // functors might have changed when the mesh changed.
+  for (auto & nl_sys : _nl)
+    nl_sys->reinitMortarFunctors();
 
   reinitBecauseOfGhostingOrNewGeomObjects(/*mortar_changed=*/true);
 
