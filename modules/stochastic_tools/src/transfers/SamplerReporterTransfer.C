@@ -65,7 +65,8 @@ void
 SamplerReporterTransfer::initializeFromMultiapp()
 {
   // Initialize vectors so they are the proper size before transfer
-  _results->initialize();
+  if (_results->getExecuteOnEnum().contains(EXEC_TRANSFER))
+    _results->initialize();
 }
 
 void
