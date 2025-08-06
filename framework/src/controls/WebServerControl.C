@@ -382,6 +382,7 @@ WebServerControl::execute()
       name_and_types.emplace_back(value_ptr->name(), value_ptr->type());
 
     terminate_solve = _terminate_requested.load();
+    _terminate_requested.store(false);
   }
 
   // All processes need to wait
@@ -480,7 +481,7 @@ WebServerControl::RealEigenMatrixValue::getMatrixJSONValue(const miniJson::Json 
   {
     if (array_of_array_value[i].getType() != miniJson::JsonType::kArray)
       throw ValueBase::Exception(
-          "The value '" + array_of_array_value[i].serialize() + "' of type " +
+          "Element " + std::to_string(i) + " of '" + json_value.serialize() + "' of type " +
           stringifyJSONType(array_of_array_value[i].getType()) + " is not an array");
 
     const auto & array_value = array_of_array_value[i].toArray();

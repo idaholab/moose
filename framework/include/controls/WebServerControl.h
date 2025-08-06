@@ -47,6 +47,13 @@ public:
   template <typename T, miniJson::JsonType json_type>
   static T getScalarJSONValue(const miniJson::Json & json_value);
 
+  /**
+   * Convert values to a miniJson::Json node.
+   *
+   * @tparam T Data type
+   * @param value The value to be converted.
+   * @return miniJson::Json The miniJson::Json node of the converted value.
+   */
   template <typename T>
   static miniJson::Json toMiniJson(const T & value);
 

@@ -249,7 +249,8 @@
       command_proxy = 'errors.py set_controllable_matrix_bad_convert2'
       required_python_packages = requests
       cli_args = 'Reporters/test/matrix_value="0 1"'
-      expect_err = 'The value \'1234\' of type number is not an array'
+      expect_err = 'Element 0 of \'[ 1234 ]\' of type number is not an array'
+      match_literal = true
       detail = 'setting a matrix controllable parameter that is not an array of arrays'
     []
     [set_controllable_matrix_jagged]
@@ -260,7 +261,7 @@
       cli_args = 'Reporters/test/matrix_value="0 1"'
       expect_err = 'The matrix \'[ [ 11, 12 ], [ 21 ] ]\' is jagged.'
       match_literal = true
-      detail = 'setting a matrix controllable parameter that is not an array of arrays'
+      detail = 'setting a matrix controllable parameter that is jagged'
     []
   []
 

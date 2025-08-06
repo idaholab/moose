@@ -46,7 +46,7 @@ ReporterInterface::hasReporterValueByName(const ReporterName & reporter_name) co
 }
 
 const ReporterContextBase &
-ReporterInterface::getReporterContextBaseByName(const ReporterName & reporter_name)
+ReporterInterface::getReporterContextBaseByName(const ReporterName & reporter_name) const
 {
   if (!reportersAdded())
     _ri_moose_object.mooseError(

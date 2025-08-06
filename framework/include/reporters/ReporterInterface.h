@@ -86,7 +86,8 @@ protected:
    * @param reporter_name A ReporterName object that for the desired Reporter context.
    * @returns ReporterContextBase of the reporter value
    */
-  const ReporterContextBase & getReporterContextBaseByName(const ReporterName & reporter_name);
+  const ReporterContextBase &
+  getReporterContextBaseByName(const ReporterName & reporter_name) const;
 
   /**
    * @returns The ReporterName associated with the parametre \p param_name.
