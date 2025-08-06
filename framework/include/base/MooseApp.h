@@ -1099,6 +1099,47 @@ public:
   const std::set<std::string> & getMFEMDevices(Moose::PassKey<MultiApp>) const;
 #endif
 
+  /**
+   * Get whether Kokkos is available
+   * @returns
+   * 1) True if MOOSE is configured with Kokkos and every process has an associated GPU,
+   * 2) True if MOOSE is configured with Kokkos and GPU capablities are disabled,
+   * 3) False otherwise.
+   */
+  bool isKokkosAvailable() const
+  {
+#ifdef MOOSE_KOKKOS_ENABLED
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
+    return _has_kokkos_gpus;
+#else
+    return true;
+#endif
+#else
+    return false;
+#endif
+  }
+
+  /**
+   * Get whether there is any Kokkos object added by actions
+   * @returns Whether there is any Kokkos object added by actions
+   */
+  bool hasKokkosObjects() const { return _has_kokkos_objects; }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Allocate Kokkos memory pool
+   * @param size The memory pool size in the number of bytes
+   * @param ways The number of parallel ways
+   */
+  void allocateKokkosMemoryPool(std::size_t size, unsigned int ways) const;
+
+  /**
+   * Get Kokkos memory pool
+   * @returns The Kokkos memory pool
+   */
+  const Moose::Kokkos::MemoryPool & getKokkosMemoryPool() const;
+#endif
+
 protected:
   /**
    * Helper method for dynamic loading of objects
@@ -1595,54 +1636,11 @@ private:
   friend class Restartable;
   friend class SubProblem;
 
-public:
-  /**
-   * Get whether Kokkos is available
-   * @returns
-   * 1) True if MOOSE is configured with Kokkos and every process has an associated GPU,
-   * 2) True if MOOSE is configured with Kokkos and GPU capablities are disabled,
-   * 3) False otherwise.
-   */
-  bool isKokkosAvailable() const
-  {
-#ifdef MOOSE_KOKKOS_ENABLED
-#ifdef MOOSE_ENABLE_KOKKOS_GPU
-    return _has_kokkos_gpus;
-#else
-    return true;
-#endif
-#else
-    return false;
-#endif
-  }
-
-  /**
-   * Get whether there is any Kokkos object added by actions
-   * @returns Whether there is any Kokkos object added by actions
-   */
-  bool hasKokkosObjects() const { return _has_kokkos_objects; }
-
 #ifdef MOOSE_KOKKOS_ENABLED
   /**
-   * Allocate Kokkos memory pool
-   * @param size The memory pool size in the number of bytes
-   * @param ways The number of parallel ways
+   * Query the Kokkos GPUs in the system and check whether every process has an associated GPU
    */
-  void allocateKokkosMemoryPool(std::size_t size, unsigned int ways) const;
-
-  /**
-   * Get Kokkos memory pool
-   * @returns The Kokkos memory pool
-   */
-  const Moose::Kokkos::MemoryPool & getKokkosMemoryPool() const;
-#endif
-
-private:
-#ifdef MOOSE_KOKKOS_ENABLED
-  /**
-   * Query the GPUs in the system and check whether every process has an associated GPU
-   */
-  void queryGPUs();
+  void queryKokkosGPUs();
 
   /**
    * Deallocate Kokkos memory pool
