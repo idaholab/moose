@@ -32,13 +32,15 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
                      std::string region_type)
 {
   _region_type = region_type;
-  if (_region_type != "INTERSECTION" && _region_type != "UNION")
-    mooseError("Region type " + getRegionType() + " is not supported for two regions.");
-  else if (region_a.getRegionType() == "EMPTY" || region_b.getRegionType() == "EMPTY")
-    mooseError("Region operation " + getRegionType() + " cannot be performed on an empty region.");
+  if (getRegionType() != RegionType::INTERSECTION && getRegionType() != RegionType::UNION)
+    mooseError("Region type " + getRegionTypeString() + " is not supported for two regions.");
+  else if (region_a.getRegionType() == RegionType::EMPTY ||
+           region_b.getRegionType() == RegionType::EMPTY)
+    mooseError("Region operation " + getRegionTypeString() +
+               " cannot be performed on an empty region.");
   else
   {
-    std::string op = (_region_type == "UNION") ? " | " : " & ";
+    std::string op = (getRegionType() == RegionType::UNION) ? " | " : " & ";
     auto a_string = stripRegionString(region_a.toString(), op);
     auto b_string = stripRegionString(region_b.toString(), op);
 
@@ -54,16 +56,16 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
 CSGRegion::CSGRegion(const CSGRegion & region, std::string region_type)
 {
   _region_type = region_type;
-  if (_region_type != "COMPLEMENT" && _region_type != "EMPTY")
-    mooseError("Region type " + getRegionType() + " is not supported for a single region");
+  if (getRegionType() != RegionType::COMPLEMENT && getRegionType() != RegionType::EMPTY)
+    mooseError("Region type " + getRegionTypeString() + " is not supported for a single region");
 
-  if (_region_type == "COMPLEMENT")
+  if (getRegionType() == RegionType::COMPLEMENT)
   {
     // no change to surfaces, but update string
     _region_str = "~" + region.toString();
     _surfaces = region.getSurfaces();
   }
-  else if (_region_type == "EMPTY")
+  else if (getRegionType() == RegionType::EMPTY)
   {
     // reset the region and make it empty
     _region_str = "";

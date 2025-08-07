@@ -72,7 +72,7 @@ TestCSGInfiniteSquareMeshGenerator::generateCSG()
     auto halfspace =
         ((region_direction == CSG::CSGSurface::Halfspace::POSITIVE) ? +csg_plane : -csg_plane);
     // check if first halfspace to be added to the region
-    if (region.getRegionType() == "EMPTY")
+    if (region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
       region = halfspace;
     else
       region &= halfspace;
