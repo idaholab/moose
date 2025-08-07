@@ -19,7 +19,7 @@ FunctorChangeFunctorMaterialTempl<is_ad>::validParams()
   InputParameters params = FunctorMaterial::validParams();
   params.set<ExecFlagEnum>("execute_on") = {EXEC_ALWAYS};
 
-  params.addRequiredParam<MooseFunctorName>("functor", "Functor for which to compute change");
+  params.addRequiredParam<MooseFunctorName>("functor", "Functor for which to compute the change");
   MooseEnum change_over("time_step nonlinear fixed_point");
   change_over.addDocumentation("time_step", "Over the time step");
   change_over.addDocumentation("nonlinear", "Over the nonlinear iteration");

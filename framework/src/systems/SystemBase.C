@@ -1300,9 +1300,6 @@ SystemBase::copyOldSolutions()
     *solutionUDotDotOld() = *solutionUDotDot();
 }
 
-/**
- * Shifts the solutions backwards in fixed point iteration history
- */
 void
 SystemBase::copyPreviousFixedPointSolutions()
 {
@@ -1311,10 +1308,8 @@ SystemBase::copyPreviousFixedPointSolutions()
           .size();
   if (n_states > 1)
     for (unsigned int i = n_states - 1; i > 0; --i)
-    {
       solutionState(i, Moose::SolutionIterationType::FixedPoint) =
           solutionState(i - 1, Moose::SolutionIterationType::FixedPoint);
-    }
 }
 
 /**
