@@ -69,6 +69,14 @@ public:
   static const std::string main_app_name;
 
   /**
+   * Create an app with no input and command line arguments.
+   *
+   * Useful for unit testing.
+   */
+  static std::unique_ptr<MooseApp> create(const std::string & app_type,
+                                          const std::vector<std::string> & cli_args = {});
+
+  /**
    * Create a MooseApp from a Parser and CommandLine, both of which should have parsed.
    */
   static std::unique_ptr<MooseApp> create(std::unique_ptr<Parser> parser,
