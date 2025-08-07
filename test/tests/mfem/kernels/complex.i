@@ -42,28 +42,27 @@
   []
   [kappa_r]
     type = ParsedFunction
-    expression = 12.72019649514069
+    expression = 12.7201964951406889525742371916
   []
   [kappa_i]
     type = ParsedFunction
-    expression = -7.861513777574233
+    expression = -7.86151377757423297509831172647
   []
   [u0_r]
     type = ParsedFunction
-    expression = exp(y*kappa_i)*cos(z*kappa_r)
+    expression = exp(y*kappa_i)*cos(y*kappa_r)
     symbol_names = 'kappa_r kappa_i'
     symbol_values = 'kappa_r kappa_i'
   []
   [u0_i]
     type = ParsedFunction
-    expression = -exp(y*kappa_i)*sin(z*kappa_r)
+    expression = -exp(y*kappa_i)*sin(y*kappa_r)
     symbol_names = 'kappa_r kappa_i'
     symbol_values = 'kappa_r kappa_i'
   []
   [stiffnessCoef]
     type = ParsedFunction
-    expression = 0.0
-    #expression = 1.0/mu
+    expression = 1.0/mu
     symbol_names = 'mu'
     symbol_values = 'mu'
   []
@@ -92,20 +91,20 @@
 []
 
 [Kernels]
-  #[diffusion_complex]
-  #  type = MFEMComplexKernel
-  #  variable = u
-  #  [real_part]
-  #    variable = u
-  #    type = MFEMDiffusionKernel
-  #    coefficient = stiffnessCoef
-  #  []
-  #  [imag_part]
-  #    variable = u
-  #    type = MFEMDiffusionKernel
-  #    coefficient = 1.0
-  #  []
-  #[]
+  [diffusion_complex]
+    type = MFEMComplexKernel
+    variable = u
+    [real_part]
+      variable = u
+      type = MFEMDiffusionKernel
+      coefficient = stiffnessCoef
+    []
+    [imag_part]
+      variable = u
+      type = MFEMDiffusionKernel
+      coefficient = 0.0
+    []
+  []
   [mass_complex]
     type = MFEMComplexKernel
     variable = u
@@ -122,26 +121,14 @@
   []
 []
 
-[Preconditioner]
-  [jacobi]
-    type = MFEMCGSolver
-    l_tol = 1e-16
-    l_max_its = 1000
-  []
-[]
-
 [Solver]
-  type = MFEMGMRESSolver
-  preconditioner = jacobi
-  l_tol = 1e-16
-  l_max_its = 1000
+  type = MFEMSuperLU
 []
 
 [Executioner]
   type = MFEMSteady
-  device = cpu
   numeric_type = complex
-  assembly_level = partial
+  assembly_level = legacy
 []
 
 [Outputs]
