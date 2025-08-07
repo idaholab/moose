@@ -136,8 +136,7 @@ public:
 
   const std::vector<std::vector<MeshGenerator *>> & getOrderedMeshGenerators() const
   {
-    mooseAssert(_ordered_mesh_generators && _ordered_mesh_generators.size(),
-                "Mesh generator order has not been set");
+    mooseAssert(_ordered_mesh_generators.size(), "Mesh generator order has not been set");
     return _ordered_mesh_generators;
   }
 
