@@ -5,6 +5,9 @@
 #include "MFEMAuxKernel.h"
 #include "mfem.hpp"
 
+/**
+ * Projects a vector Coefficient into a vector-valued aux variable.
+ */
 class MFEMVectorProjectAux : public MFEMAuxKernel
 {
 public:
@@ -17,8 +20,7 @@ public:
   virtual void execute() override;
 
 protected:
-  const MFEMVectorCoefficientName _coefficient_name;
-  mfem::VectorCoefficient * _vec_coef;
+  mfem::VectorCoefficient & _vec_coef;
 };
 
 #endif

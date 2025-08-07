@@ -10,14 +10,13 @@ MFEMVectorProjectAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription("Projects a Vector Coefficient into a vector MFEMVariable.");
-  params.addRequiredParam<std::string>("coefficient", "Name of the Vector Coefficient to project.");
+  params.addRequiredParam<MFEMVectorCoefficientName>("coefficient",
+                                                     "Name of the Vector Coefficient to project.");
   return params;
 }
 
 MFEMVectorProjectAux::MFEMVectorProjectAux(const InputParameters & parameters)
-  : MFEMAuxKernel(parameters),
-    _coefficient_name(getParam<std::string>("coefficient")),
-    _vec_coef(&getVectorCoefficient(_coefficient_name))
+  : MFEMAuxKernel(parameters), _vec_coef(getVectorCoefficient("coefficient"))
 
 {
 }
@@ -27,7 +26,7 @@ MFEMVectorProjectAux::execute()
 {
 
   _result_var = 0.0;
-  _result_var.ProjectCoefficient(*_vec_coef);
+  _result_var.ProjectCoefficient(_vec_coef);
 }
 
 #endif

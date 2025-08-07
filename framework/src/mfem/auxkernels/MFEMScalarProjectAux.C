@@ -10,14 +10,13 @@ MFEMScalarProjectAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription("Projects a Scalar Coefficient into a scalea MFEMVariable");
-  params.addRequiredParam<std::string>("coefficient", "Name of the Scalar Coefficient to project.");
+  params.addRequiredParam<MFEMScalarCoefficientName>("coefficient",
+                                                     "Name of the Scalar Coefficient to project.");
   return params;
 }
 
 MFEMScalarProjectAux::MFEMScalarProjectAux(const InputParameters & parameters)
-  : MFEMAuxKernel(parameters),
-    _coefficient_name(getParam<std::string>("coefficient")),
-    _coef(&getScalarCoefficient(_coefficient_name))
+  : MFEMAuxKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 
@@ -25,7 +24,7 @@ void
 MFEMScalarProjectAux::execute()
 {
   _result_var = 0.0;
-  _result_var.ProjectCoefficient(*_coef);
+  _result_var.ProjectCoefficient(_coef);
 }
 
 #endif
