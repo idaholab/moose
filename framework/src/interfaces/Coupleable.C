@@ -2750,6 +2750,20 @@ Coupleable::coupledDots(const std::string & var_name) const
   return coupledVectorHelper<const VariableValue *>(var_name, func);
 }
 
+std::vector<const VariableValue *>
+Coupleable::coupledDotDots(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &coupledDotDot(var_name, comp); };
+  return coupledVectorHelper<const VariableValue *>(var_name, func);
+}
+
+std::vector<const VariableGradient *>
+Coupleable::coupledGradientDots(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &coupledGradientDot(var_name, comp); };
+  return coupledVectorHelper<const VariableGradient *>(var_name, func);
+}
+
 std::vector<const ADVariableValue *>
 Coupleable::adCoupledDots(const std::string & var_name) const
 {
