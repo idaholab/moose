@@ -262,10 +262,11 @@ ComplexEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
                                         mfem::BlockVector & trueX,
                                         mfem::BlockVector & trueRHS)
 {
-  mooseError("ComplexEquationSystem does not support legacy assembly.");
+
   // Allocate block operator
   DeleteAllBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
+
   // Form diagonal blocks.
   for (const auto i : index_range(_test_var_names))
   {
@@ -273,9 +274,10 @@ ComplexEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     auto slf = _slfs.Get(test_var_name);
     auto clf = _clfs.Get(test_var_name);
     mfem::Vector aux_x, aux_rhs;
-    mfem::OperatorPtr aux_a;
+    mfem::OperatorHandle aux_a;
     slf->FormLinearSystem(_ess_tdof_lists.at(i), *(_cxs.at(i)), *clf, aux_a, aux_x, aux_rhs);
-    _h_blocks(i, i) = aux_a.As<mfem::HypreParMatrix>();
+    _h_blocks(i, i) = aux_a.As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
+
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
   }
