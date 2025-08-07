@@ -14,6 +14,7 @@
     transition_subdomain = cut
     transition_subdomain_boundary = 3
     block = '1 2'
+    closed_subdomain = coil
   []
 []
 

@@ -14,10 +14,11 @@
     transition_subdomain = cut_test
     transition_subdomain_boundary = 3
     block = '1 2'
+    closed_subdomain = coil    
   []  
   [coil]
     type = MFEMDomainSubMesh
-    block = '1 2 4'
+    block = coil
     execution_order_group = 2
   []  
 []
