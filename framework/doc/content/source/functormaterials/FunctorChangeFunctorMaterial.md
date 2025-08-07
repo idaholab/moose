@@ -5,7 +5,7 @@ that computes the change in a [functor](/Functors/index.md) over one of the foll
 
 - time step
 - nonlinear iteration
-- MultiApp fixed point iteration
+- [MultiApp fixed point iteration](FixedPointAlgorithms/index.md)
 
 !alert tip title=Useful for step convergence criteria
 One use of this functor material is as a step criteria in assessing convergence for
