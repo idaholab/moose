@@ -9,6 +9,7 @@
 
 #include "TimesEnableControl.h"
 #include "Times.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseApp", TimesEnableControl);
 
@@ -17,7 +18,7 @@ TimesEnableControl::validParams()
 {
   InputParameters params = ConditionalEnableControl::validParams();
 
-  params.addRequiredParam<UserObjectName>(
+  params.addRequiredParam<TimesName>(
       "times", "The Times object providing the list of times to turn on/off the objects.");
 
   params.addParam<Real>(
@@ -38,7 +39,7 @@ TimesEnableControl::validParams()
 
 TimesEnableControl::TimesEnableControl(const InputParameters & parameters)
   : ConditionalEnableControl(parameters),
-    _times(getUserObject<Times>("times")),
+    _times(getTimes("times")),
     _time_window(getParam<Real>("time_window")),
     _act_on_time_stepping_across_time_point(
         getParam<bool>("act_on_time_stepping_across_a_time_point")),
