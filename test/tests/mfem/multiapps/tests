@@ -16,6 +16,7 @@
       compute_devices = 'cpu cuda'
       max_parallel = 1 # schemadiff with multiple ranks
       recover = false
+      restep = false
     []
     [MFEM_sub_cycling]
       type = XMLDiff
@@ -30,6 +31,7 @@
       compute_devices = 'cpu cuda'
       max_parallel = 1 # schemadiff with multiple ranks
       recover = false
+      restep = false
     []
   []
   [MFEMFullSolveMultiApps]
@@ -47,6 +49,7 @@
       compute_devices = 'cpu cuda'
       max_parallel = 1 # schemadiff with multiple ranks
       recover = false
+      restep = false
     []
   []
 []
