@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30655'
-  design = 'syntax/BCs/index.md'
+  design = 'KokkosMatchedValueBC.md'
 
   [test]
     type = 'Exodiff'
