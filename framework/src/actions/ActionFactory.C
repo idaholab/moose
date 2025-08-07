@@ -66,7 +66,7 @@ ActionFactory::create(const std::string & action,
       action_params.setHitNode(_app.parser().getRoot(), {});
   }
 
-  incoming_parser_params.set<std::string>("_unique_action_name") = unique_action_name;
+  action_params.set<std::string>(Action::unique_action_name_param) = unique_action_name;
   action_params.set<std::string>(MooseBase::name_param) = action_name;
 
   // Check and finalize the parameters

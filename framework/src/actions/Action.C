@@ -20,15 +20,17 @@
 #include "InputParameterWarehouse.h"
 #include "ActionFactory.h"
 
+const std::string Action::unique_action_name_param = "_unique_action_name";
+
 InputParameters
 Action::validParams()
 {
   InputParameters params = ParallelParamObject::validParams();
   params += Moose::Builder::validParams();
 
+  params.addPrivateParam<std::string>(unique_action_name_param);
   params.addPrivateParam<std::string>("_moose_docs_type",
                                       "action"); // the type of syntax for documentation system
-  params.addPrivateParam<std::string>("_unique_object_name");
   params.addPrivateParam<std::string>("task");
   params.addPrivateParam<std::string>("registered_identifier");
   params.addPrivateParam<ActionWarehouse *>("awh", nullptr);
