@@ -35,8 +35,8 @@ protected:
   const unsigned int _index;
   /// the density
   const Moose::Functor<Real> & _rho;
+  /// the reference density
+  const Real _rho_0;
   /// The gravity vector
   const RealVectorValue _gravity;
-  /// The reference point vector
-  const RealVectorValue _ref_point;
 };
