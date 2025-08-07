@@ -128,13 +128,12 @@
 [Executioner]
   type = MFEMSteady
   numeric_type = complex
-  assembly_level = legacy
 []
 
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/ComplexDiffusion
+    file_base = OutputData/Complex
     vtk_format = ASCII
   []
 []
