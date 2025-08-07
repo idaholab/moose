@@ -4239,9 +4239,9 @@ FEProblemBase::addPostprocessor(const std::string & pp_name,
 {
   // Check for name collision
   if (hasUserObject(name))
-    mooseError("A UserObject with the name \"",
-               name,
-               "\" already exists.  You may not add a Postprocessor by the same name.");
+    mooseError("A ",
+               getUserObjectBase(name).typeAndName(),
+               " already exists. You may not add a Postprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
 }
@@ -4253,9 +4253,9 @@ FEProblemBase::addVectorPostprocessor(const std::string & pp_name,
 {
   // Check for name collision
   if (hasUserObject(name))
-    mooseError("A UserObject with the name \"",
-               name,
-               "\" already exists.  You may not add a VectorPostprocessor by the same name.");
+    mooseError("A ",
+               getUserObjectBase(name).typeAndName(),
+               " already exists. You may not add a VectorPostprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
 }
@@ -4267,8 +4267,9 @@ FEProblemBase::addReporter(const std::string & type,
 {
   // Check for name collision
   if (hasUserObject(name))
-    mooseError(std::string("A UserObject with the name \"") + name +
-               "\" already exists.  You may not add a Reporter by the same name.");
+    mooseError("A ",
+               getUserObjectBase(name).typeAndName(),
+               " already exists. You may not add a Reporter by the same name.");
 
   addUserObject(type, name, parameters);
 }
