@@ -1651,7 +1651,7 @@ AdvancedExtruderGenerator::finalNodeSearch(const libMesh::Point & node,
       return_point = *trial_node;
 
       // skip the rest of the search if the start node is good
-      if (shortest_distance < TOLERANCE)
+      if (shortest_distance < TOLERANCE * TOLERANCE)
         return return_point;
     }
   }
