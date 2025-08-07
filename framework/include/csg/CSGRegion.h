@@ -21,6 +21,16 @@ namespace CSG
 class CSGRegion
 {
 public:
+  /// Enum for representing region types, defined to match _region_type MooseEnum
+  enum class RegionType
+  {
+    EMPTY = 0,
+    HALFSPACE = 1,
+    COMPLEMENT = 2,
+    INTERSECTION = 3,
+    UNION = 4
+  };
+
   /**
    * Default Constructor
    */
@@ -66,9 +76,16 @@ public:
   /**
    * @brief Get the region type
    *
-   * @return region type
+   * @return region type enum
    */
-  const std::string getRegionType() const { return _region_type; }
+  RegionType getRegionType() const { return _region_type.getEnum<RegionType>(); }
+
+  /**
+   * @brief Get the region type as a string
+   *
+   * @return region type string
+   */
+  const std::string getRegionTypeString() const { return _region_type; }
 
   /**
    * @brief Get the list of surfaces associated with the region
@@ -97,7 +114,7 @@ protected:
   std::string _region_str;
 
   /// An enum for type of type of operation that defines region
-  MooseEnum _region_type{"EMPTY HALFSPACE COMPLEMENT INTERSECTION UNION"};
+  MooseEnum _region_type{"EMPTY=0 HALFSPACE=1 COMPLEMENT=2 INTERSECTION=3 UNION=4"};
 
   /// Surface list associated with the region
   std::vector<std::reference_wrapper<const CSGSurface>> _surfaces;
