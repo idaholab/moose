@@ -38,8 +38,6 @@
         fespace = H1FESpace
 
     []
-
-
 []
 
 [AuxVariables]
@@ -66,6 +64,7 @@
     type = MFEMVectorProjectAux
     coefficient = Jvalue
     variable = J
+    execute_on = TIMESTEP_END
   []
 
 
@@ -83,15 +82,15 @@
 [FunctorMaterials]
     [with_current]
         type = MFEMGenericFunctorVectorMaterial
-        prop_names = 'Jvalue'
-        prop_values = '{8.0 8.0 8.0}'
+        prop_names = Jvalue
+        prop_values = '{8.0 8.0}'
         block = 2
     []
 
     [no_current]
         type = MFEMGenericFunctorVectorMaterial
-        prop_names = 'Jvalue'
-        prop_values = '{0.0 0.0 0.0}'
+        prop_names = Jvalue
+        prop_values = '{0.0 0.0}'
         block = 1
     []
 
@@ -112,7 +111,7 @@
     [source]
         type = MFEMVectorDomainLFKernel
         variable = Az
-        vector_coefficient = 'Jvalue'
+        vector_coefficient = Jvalue
     []
 []
 

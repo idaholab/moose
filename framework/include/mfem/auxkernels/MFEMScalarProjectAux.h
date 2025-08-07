@@ -20,8 +20,7 @@ public:
   virtual void execute() override;
 
 protected:
-  const MFEMScalarCoefficientName _coefficient_name;
-  mfem::Coefficient * _coef;
+  mfem::Coefficient & _coef;
 };
 
 #endif

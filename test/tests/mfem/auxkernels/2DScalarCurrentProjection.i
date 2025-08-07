@@ -27,6 +27,10 @@
 []
 
 [Variables]
+  [current]
+    type = MFEMVariable
+    fespace = H1FESpace
+  []
   [Az]
     type = MFEMVariable
     fespace = H1FESpace
@@ -90,6 +94,7 @@
   [source]
     type = MFEMDomainLFKernel
     variable = Az
+    coefficient = Jvalue
   []
 []
 
