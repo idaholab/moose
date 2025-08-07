@@ -11,7 +11,6 @@
 
 #include "SpatialUserObjectFunctor.h"
 #include "ElementVectorPostprocessor.h"
-#include "NonADFunctorInterface.h"
 
 /**
  * This MeshDivisionFunctorReductionVectorPostprocessor serves to integrate functors based

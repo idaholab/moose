@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#11594'
+  issues = '#11594 #31240'
   design = 'ElementValueSampler.md'
 
   [element_value_sampler]
@@ -28,6 +28,7 @@
       mesh_mode = REPLICATED
 
       detail = 'for finite volume variables mixed with finite element variables,'
+      max_threads = 1 # see libmesh issue #3808 (due to the linear fv variable here)
     []
   []
   [exceptions]
