@@ -16,6 +16,9 @@ import multiprocessing
 import logging
 import subprocess
 import shutil
+import argparse
+from typing import Tuple
+
 import yaml
 import livereload
 import mooseutils
@@ -79,6 +82,9 @@ def command_line_options(subparser, parent):
                                                      "temporary sites to be functional.")
     parser.add_argument('--hide-source', action='store_true',
                         help="Shortcut for setting the 'hide_source' option in the modal extension.")
+    parser.add_argument('--with-dap', default=None, type=str, help='Enable DAP (Digital ' \
+                        'Analytics Program, see digital.gov/guides/dap) Google Anayltics ' \
+                        'for the given agency (example: "DOE").')
 
 class MooseDocsWatcher(livereload.watcher.Watcher):
     """
@@ -154,22 +160,18 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
                   "configurations. Use '--help' for more information."
             LOG.warning(msg, os.path.relpath(source, MooseDocs.ROOT_DIR))
 
-def main(options):
+def setupOptions(options: argparse.Namespace) -> Tuple[argparse.Namespace, dict]:
     """
-    Main function for the build command.
-
-    Inputs:
-        options[argparse options]: Complete options from argparse, see MooseDocs/main.py
+    Augments the CLI argument options and sets up the configuration dict
+    for each object
     """
-    t = time.time()
-
     # Infinite nested dict
     tree = lambda: collections.defaultdict(tree)
-    kwargs = tree()
+    config = tree()
 
     # Setup executioner
     if options.executioner:
-        kwargs['Executioner']['type'] = options.executioner
+        config['Executioner']['type'] = options.executioner
 
     # Disable extensions
     if options.stable:
@@ -183,20 +185,38 @@ def main(options):
                             'MooseDocs.extensions.gitutils']
 
     for name in options.disable:
-        kwargs['Extensions'][name] = dict(active=False)
+        config['Extensions'][name] = dict(active=False)
 
     if options.hide_source:
-        kwargs['Extensions']['MooseDocs.extensions.modal']['hide_source'] = True
+        config['Extensions']['MooseDocs.extensions.modal']['hide_source'] = True
 
     # Apply Translator settings
     if options.destination:
-        kwargs['Translator']['destination'] = mooseutils.eval_path(options.destination)
+        config['Translator']['destination'] = mooseutils.eval_path(options.destination)
     if options.profile:
-        kwargs['Translator']['profile'] = True
+        config['Translator']['profile'] = True
+
+    # Apply Renderer settings
+    if options.with_dap:
+        config['Renderer']['with_dap'] = options.with_dap
 
     # Apply '--args' and override anything already set
     if options.args is not None:
-        mooseutils.recursive_update(kwargs, options.args)
+        mooseutils.recursive_update(config, options.args)
+
+    return options, config
+
+def main(options):
+    """
+    Main function for the build command.
+
+    Inputs:
+        options[argparse options]: Complete options from argparse, see MooseDocs/main.py
+    """
+    t = time.time()
+
+    # Augment the options and build the config kwargs
+    options, kwargs = setupOptions(options)
 
     # Create translators for the specified configuration files, provide kwargs to override them
     config_files = options.config if isinstance(options.config, list) else [options.config]

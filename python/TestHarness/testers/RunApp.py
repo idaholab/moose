@@ -54,7 +54,7 @@ class RunApp(Tester):
         params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
         params.addParam('libtorch_devices', "The devices to use for this libtorch test ('CPU', 'CUDA', 'MPS')")
-        device_list_str = "', '".join(d.upper() for d in TestHarness.validDevices())
+        device_list_str = "', '".join(d.upper() for d in TestHarness.validComputeDevices())
         device_param_doc = f"The devices to use for this libtorch or MFEM test ('{device_list_str}'); device availability depends on library support and compilation settings; default ('CPU')"
         params.addParam('devices', ['CPU'], device_param_doc)
 
@@ -85,7 +85,7 @@ class RunApp(Tester):
                     raise Exception(f'Unknown libtorch_device "{value}"')
 
         for value in params['devices']:
-            if value.lower() not in TestHarness.validDevices():
+            if value.lower() not in TestHarness.validComputeDevices():
                 raise Exception(f'Unknown device "{value}"')
 
     def getInputFile(self):
@@ -132,10 +132,12 @@ class RunApp(Tester):
 
         if self.specs.isValid('libtorch_devices'):
             devices_lower = [x.lower() for x in self.specs['libtorch_devices']]
-        else:
+        elif self.specs.isValid('devices'):
             devices_lower = [x.lower() for x in self.specs['devices']]
-        if options.device not in devices_lower:
-            self.addCaveats(f'{options.device} not in devices')
+        else:
+            devices_lower = [x.lower() for x in self.specs['compute_devices']]
+        if options.compute_device not in devices_lower:
+            self.addCaveats(f'{options.compute_device} not in compute devices')
             self.setStatus(self.skip)
             return False
 
@@ -295,15 +297,10 @@ class RunApp(Tester):
         if options.scaling and specs['scale_refine'] > 0:
             cli_args.insert(0, ' -r ' + str(specs['scale_refine']))
 
-        if specs.isValid('capabilities'):
-            if 'libtorch' in specs['capabilities']:
-                cli_args.append(f'--libtorch-device {options.device}')
-            if 'mfem' in specs['capabilities']:
-                cli_args.append(f'Executioner/device={options.device}')
-
         # Get the number of processors and threads the Tester requires
         ncpus = self.getProcs(options)
         nthreads = self.getThreads(options)
+        cli_args.append(f'--compute-device={options.compute_device}')
 
         if specs['redirect_output'] and ncpus > 1:
             cli_args.append('--keep-cout --redirect-output ' + self.name())

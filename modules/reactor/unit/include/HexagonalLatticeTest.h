@@ -12,6 +12,11 @@
 #include "HexagonalLatticeUtils.h"
 #include "MooseObjectUnitTest.h"
 
+// Macro for computing absolute error
+#define ABS_DOUBLE_TEST(value, ref_value)                                                          \
+  EXPECT_LE(std::abs(((MetaPhysicL::raw_value(value)) - (MetaPhysicL::raw_value(ref_value)))),     \
+            libMesh::TOLERANCE * libMesh::TOLERANCE)
+
 class HexagonalLatticeTest : public MooseObjectUnitTest
 {
 public:
