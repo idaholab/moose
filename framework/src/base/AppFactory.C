@@ -59,6 +59,21 @@ AppFactory::clearAppParams(const InputParameters & params, const ClearAppParamsK
 }
 
 std::unique_ptr<MooseApp>
+AppFactory::create(const std::string & app_type,
+                   const std::vector<std::string> & cli_args /* = {} */)
+{
+  auto parser = std::make_unique<Parser>(std::vector<std::string>());
+  parser->parse();
+  parser->setAppType(app_type);
+
+  auto command_line = std::make_unique<CommandLine>(std::vector<std::string>{"unused"});
+  command_line->addArguments(cli_args);
+  command_line->parse();
+
+  return AppFactory::create(std::move(parser), std::move(command_line));
+}
+
+std::unique_ptr<MooseApp>
 AppFactory::create(std::unique_ptr<Parser> parser, std::unique_ptr<CommandLine> command_line)
 {
   mooseAssert(parser, "Not set");

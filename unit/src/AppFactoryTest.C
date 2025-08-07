@@ -180,6 +180,26 @@ TEST(AppFactoryTest, createNotRegistered)
   }
 }
 
+TEST(AppFactoryTest, createForUnit)
+{
+  {
+    auto app = AppFactory::create("MooseUnitApp");
+    EXPECT_NE(app, nullptr);
+    auto & args = app->commandLine()->getArguments();
+    EXPECT_EQ(args.size(), 1);
+    EXPECT_EQ(args[0], "unused");
+  }
+
+  {
+    auto app = AppFactory::create("MooseUnitApp", {"--help"});
+    EXPECT_NE(app, nullptr);
+    auto & args = app->commandLine()->getArguments();
+    EXPECT_EQ(args.size(), 2);
+    EXPECT_EQ(args[0], "unused");
+    EXPECT_EQ(args[1], "--help");
+  }
+}
+
 TEST(AppFactoryTest, createAppShared)
 {
   const char * argv[2] = {"foo", "\0"};
