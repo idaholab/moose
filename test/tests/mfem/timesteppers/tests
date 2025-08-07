@@ -9,7 +9,7 @@
       csvdiff = 'mfem_multiple_timesteppers.csv'
       detail = 'using the minimum time step size of input time steppers,'
       capabilities = 'mfem'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
       max_parallel = 1 # MOOSE-MFEM-HypreGMRES doesn't appear to work with multiple ranks with cuda. Will be fixed by #31140
       recover = false
     []
@@ -19,7 +19,7 @@
       csvdiff = 'mfem_multiple_timesequences.csv'
       detail = 'or with specific times to hit.'
       capabilities = 'mfem'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
       max_parallel = 1 # MOOSE-MFEM-HypreGMRES doesn't appear to work with multiple ranks with cuda. Will be fixed by #31140
       recover = false
     []

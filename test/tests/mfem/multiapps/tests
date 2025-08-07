@@ -13,7 +13,7 @@
                   OutputData/dt_from_parent_sub/Run0/Cycle000009/proc000000.vtu'
       detail = "with a time step governed by the MFEM parent application,"
       capabilities = 'mfem & platform=linux'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
       max_parallel = 1 # schemadiff with multiple ranks
       recover = false
     []
@@ -27,7 +27,7 @@
                   OutputData/sub_cycling_sub/Run0/Cycle000002/proc000000.vtu'
       detail = "and with the sub-app running multiple timesteps for each timestep of the parent app."
       capabilities = 'mfem'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
       max_parallel = 1 # schemadiff with multiple ranks
       recover = false
     []
@@ -44,7 +44,7 @@
                   OutputData/full_solve_sub/Run0/Cycle000005/proc000000.vtu'
       detail = "with a transient problem running in the parent app."
       capabilities = 'mfem'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
       max_parallel = 1 # schemadiff with multiple ranks
       recover = false
     []
