@@ -12,7 +12,7 @@
       exodiff = 'kokkos_2d_diffusion_tag_vector_out.e'
       detail = 'numeric vector,'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
     [tag_matrix]
       type = 'Exodiff'
@@ -20,7 +20,7 @@
       exodiff = 'kokkos_2d_diffusion_tag_matrix_out.e'
       detail = 'numeric matrix,'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
     [tag_multiple_vectors]
       type = 'Exodiff'
@@ -28,7 +28,7 @@
       exodiff = 'kokkos_2d_diffusion_vector_tag_test_out.e'
       detail = 'multiple numeric vectors simultaneously, or'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
     [tag_multiple_matrices]
       type = 'Exodiff'
@@ -36,7 +36,7 @@
       exodiff = 'kokkos_2d_diffusion_matrix_tag_test_out.e'
       detail = 'multiple numeric matrices simultaneously.'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
   []
 
@@ -45,7 +45,7 @@
     input = 'kokkos_tag_residual_call.i'
     requirement = 'The Kokkos system shall be able to accumulate tagged vectors individually with multiple residual computations.'
     capabilities = 'kokkos'
-    devices = 'cpu cuda'
+    compute_devices = 'cpu cuda'
   []
 
   [systems]
@@ -57,7 +57,7 @@
       exodiff = 'kokkos_tag_neumann_out.e'
       detail = 'integrated boundary conditions,'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
 
     [test_tag_nodal_kernels]
@@ -66,7 +66,7 @@
       exodiff = 'kokkos_tag_nodal_kernels_out.e'
       detail = 'the nodal kernel system,'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
   []
 []

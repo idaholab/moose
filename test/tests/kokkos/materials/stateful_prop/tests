@@ -12,7 +12,7 @@
                   Outputs/file_base=kokkos_stateful_prop_test_current_out'
       detail = 'use current state in other calculations.'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
     [old]
       type = Exodiff
@@ -22,7 +22,7 @@
                   Outputs/file_base=kokkos_stateful_prop_test_old_out'
       detail = 'use old state in other calculations.'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
     [older]
       type = Exodiff
@@ -32,7 +32,7 @@
                   Outputs/file_base=kokkos_stateful_prop_test_older_out'
       detail = 'use older state in other calculations.'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
   []
 
@@ -44,7 +44,7 @@
       exodiff = 'kokkos_stateful_prop_spatial_test_out.e'
       detail = 'on blocks and boundaries.'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
     [spatial_bnd_only]
       type = Exodiff
@@ -52,7 +52,7 @@
       exodiff = 'kokkos_stateful_prop_on_bnd_only_out.e'
       detail = 'only on boundaries.'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
   []
 []

@@ -8,7 +8,7 @@
     exodiff = 'kokkos_var_coupling_out.e'
     requirement = 'The Kokkos material system shall be able to couple in variables to compute material properties.'
     capabilities = 'kokkos'
-    devices = 'cpu cuda'
+    compute_devices = 'cpu cuda'
   [../]
 
   [./var_stateful_coupling]
@@ -19,7 +19,7 @@
                 Outputs/file_base=kokkos_var_stateful_coupling_out'
     requirement = 'The Kokkos material system shall be able to couple in variables to initialize stateful material properties.'
     capabilities = 'kokkos'
-    devices = 'cpu cuda'
+    compute_devices = 'cpu cuda'
   [../]
 
   [./aux_coupling]
@@ -30,7 +30,7 @@
                 Outputs/file_base=kokkos_var_stateful_coupling_out'
     requirement = 'The Kokkos material system shall be able to couple in aux variables to compute material properties.'
     capabilities = 'kokkos'
-    devices = 'cpu cuda'
+    compute_devices = 'cpu cuda'
     prereq = var_stateful_coupling
   [../]
 
@@ -43,7 +43,7 @@
                 Outputs/file_base=kokkos_var_stateful_coupling_out'
     requirement = 'The Kokkos material system shall be able to couple in aux variables to initialize stateful material properties.'
     capabilities = 'kokkos'
-    devices = 'cpu cuda'
+    compute_devices = 'cpu cuda'
     prereq = aux_coupling
   [../]
 
@@ -55,7 +55,7 @@
                 Outputs/file_base=kokkos_prop_coupling_out'
     requirement = 'The Kokkos material system shall be able to couple in other material properties to compute material properties.'
     capabilities = 'kokkos'
-    devices = 'cpu cuda'
+    compute_devices = 'cpu cuda'
   [../]
 
   [./prop_stateful_coupling]
@@ -64,6 +64,6 @@
     exodiff = 'kokkos_prop_stateful_coupling_out.e'
     requirement = 'The Kokkos material system shall be able to couple in other stateful material properties to compute material properties.'
     capabilities = 'kokkos'
-    devices = 'cpu cuda'
+    compute_devices = 'cpu cuda'
   [../]
 []

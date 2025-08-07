@@ -11,7 +11,7 @@
       exodiff = 'kokkos_block_kernel_test_out.e'
       detail = 'through a subdomain restriction on the kernel, and'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
 
     [variable]
@@ -20,7 +20,7 @@
       exodiff = 'kokkos_block_vars_out.e'
       detail = 'through a subdomain restriction on the variable.'
       capabilities = 'kokkos'
-      devices = 'cpu cuda'
+      compute_devices = 'cpu cuda'
     []
   []
 []
