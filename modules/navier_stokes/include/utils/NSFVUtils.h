@@ -48,7 +48,13 @@ namespace NS
  * the porosity value on the "element" side of the face, and the second member is the porosity value
  * on the "neighbor" side of the face
  */
-std::tuple<bool, ADReal, ADReal> isPorosityJumpFace(const Moose::Functor<ADReal> & porosity,
-                                                    const FaceInfo & fi,
-                                                    const Moose::StateArg & time);
+template <class T>
+std::tuple<bool, T, T> isPorosityJumpFace(const Moose::Functor<T> & porosity,
+                                          const FaceInfo & fi,
+                                          const Moose::StateArg & time);
+
+extern template std::tuple<bool, Real, Real> isPorosityJumpFace<Real>(
+    const Moose::Functor<Real> & porosity, const FaceInfo & fi, const Moose::StateArg & time);
+extern template std::tuple<bool, ADReal, ADReal> isPorosityJumpFace<ADReal>(
+    const Moose::Functor<ADReal> & porosity, const FaceInfo & fi, const Moose::StateArg & time);
 }
