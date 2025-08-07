@@ -61,6 +61,7 @@ protected:
 
   const BoundaryName & _cut_boundary;
   const int _cut_bdr_attribute;
+  const BoundaryName & _transition_subdomain_boundary;
   const SubdomainName & _transition_subdomain;  
   const SubdomainName & _closed_subdomain;    
   int _subdomain_label;
