@@ -122,6 +122,14 @@ public:
 
 protected:
   /**
+   * Returns true if there is relaxation.
+   *
+   * @param primary Whether this routine is to save the variables for the primary transformed
+   *                quantities (as main app) or the secondary ones (as a subapp)
+   */
+  bool performingRelaxation(const bool primary) const;
+
+  /**
    * Saves the current values of the variables, and update the old(er) vectors.
    *
    * @param primary Whether this routine is to save the variables for the primary transformed

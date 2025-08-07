@@ -29,7 +29,4 @@ protected:
    * which to evaluate the variable. If not provided, defaults to the variable.
    */
   const VariableValue & _proxy_variable;
-
-  /// Extreme value of the proxy variable
-  Real _proxy_value;
 };

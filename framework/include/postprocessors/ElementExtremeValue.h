@@ -30,7 +30,4 @@ protected:
    * which to evaluate the variable. If not provided, defaults to the variable.
    */
   const VariableValue & _proxy_variable;
-
-  /// Extreme value of the value and proxy variable at the same point
-  std::pair<Real, Real> _proxy_value;
 };

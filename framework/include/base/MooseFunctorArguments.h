@@ -133,6 +133,11 @@ struct StateArg
   {
   }
 
+  bool operator==(const StateArg & other) const
+  {
+    return state == other.state && iteration_type == other.iteration_type;
+  }
+
   /// The state. Zero represents the most recent state, so for any kind of iteration type, a zero
   /// state represents the current state, e.g. current solution
   /// One may represent the 'old' value (one before, in the iteration_type specified), and two an 'older' or two steps away state
@@ -163,6 +168,12 @@ inline StateArg
 previousNonlinearState()
 {
   return {(unsigned int)1, SolutionIterationType::Nonlinear};
+}
+
+inline StateArg
+previousFixedPointState()
+{
+  return {(unsigned int)1, SolutionIterationType::FixedPoint};
 }
 
 /**
