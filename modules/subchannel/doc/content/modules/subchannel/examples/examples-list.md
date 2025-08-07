@@ -10,5 +10,6 @@ These examples do not fit into the verification or validation categories, but ar
 | Case | Title |
 | :- | :- |
 | 1 | [Thermo-mechanical coupling of 1 pin and 4 square subchannels](quad_thermo_mech.md) |
+| 2 | [Thermal coupling of 7/19 SCM subassemblies with a heat conduction model of wrappers/inter-wrapper ](multi_assemblies.md) |
 
 
