@@ -29,6 +29,8 @@ MaterialBase::validParams()
   params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
   params.addPrivateParam<bool>("_kokkos_material", true);
 
+  params.registerBase("KokkosMaterial");
+
   return params;
 }
 

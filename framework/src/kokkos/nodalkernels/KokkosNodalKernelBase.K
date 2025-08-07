@@ -20,7 +20,9 @@ NodalKernelBase::validParams()
   InputParameters params = ResidualObject::validParams();
   params += BlockRestrictable::validParams();
   params += BoundaryRestrictable::validParams();
-  params.registerBase("NodalKernel");
+
+  params.registerBase("KokkosNodalKernel");
+
   return params;
 }
 
