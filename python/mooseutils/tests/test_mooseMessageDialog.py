@@ -11,14 +11,19 @@
 import sys
 import unittest
 import mooseutils
-from PyQt5 import QtWidgets
 
+try:
+    from PyQt5 import QtWidgets
+except ModuleNotFoundError:
+    QtWidgets = None
+
+@unittest.skipIf(QtWidgets is None, "PyQt5 is not installed")
 class TestMooseMessageDialog(unittest.TestCase):
     """
     Tests the usage of the various messages functions in message package.
     """
 
-    app = QtWidgets.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv) if QtWidgets is not None else None
 
     def testMooseMessageDefault(self):
         """

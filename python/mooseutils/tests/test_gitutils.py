@@ -10,7 +10,7 @@
 import os
 import shutil
 import unittest
-import mock
+from unittest import mock
 import tempfile
 import subprocess
 import platform
@@ -163,6 +163,13 @@ class Test(unittest.TestCase):
         with mock.patch('mooseutils.check_output', side_effect=['false']) as mock_check_output:
             self.assertFalse(mooseutils.git_is_branch('main', '/working/dir'))
         mock_check_output.assert_called_once()
+
+    def testGitCommittersArgs(self):
+        with mock.patch('os.path.exists', return_value=True):
+            with mock.patch('mooseutils.check_output', return_value='1\tJohn Doe\n') as mock_co:
+                counts = mooseutils.git_committers('path', '--merges')
+        mock_co.assert_called_with(['git', 'shortlog', '-s', '--merges', '--', 'path'], encoding='utf-8')
+        self.assertEqual(counts['John Doe'], 1)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=True)

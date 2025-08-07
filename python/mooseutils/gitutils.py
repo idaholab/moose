@@ -168,7 +168,7 @@ def git_committers(loc=os.getcwd(), *args):
         raise OSError("The supplied location must be a file or directory: {}".format(loc))
     cmd = ['git', 'shortlog', '-s']
     for argument in args:
-      cmd += argument
+        cmd.append(argument)
     cmd += ['--', loc]
     committers = mooseutils.check_output(cmd, encoding='utf-8')
     counts = collections.defaultdict(int)

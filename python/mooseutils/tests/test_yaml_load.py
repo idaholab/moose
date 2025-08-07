@@ -10,8 +10,13 @@
 import os
 import unittest
 import tempfile
-from mooseutils.yaml_load import yaml_load, yaml_write, IncludeYamlFile
 
+try:
+    from mooseutils.yaml_load import yaml_load, yaml_write, IncludeYamlFile
+except ModuleNotFoundError:
+    yaml_load = None
+
+@unittest.skipIf(yaml_load is None, "PyYAML is not installed")
 class TestYamlLoad(unittest.TestCase):
     """
     Test that the size function returns something.
@@ -48,6 +53,7 @@ class TestYamlLoad(unittest.TestCase):
         self.assertEqual(data['e'], ['Edward', 'Bonnie'])
         self.assertEqual(data['f'], [1906])
 
+@unittest.skipIf(yaml_load is None, "PyYAML is not installed")
 class TestYamlWrite(unittest.TestCase):
     def setUp(self):
         _, self._tmp = tempfile.mkstemp(suffix='.yml', dir=os.path.dirname(__file__), text=True)
