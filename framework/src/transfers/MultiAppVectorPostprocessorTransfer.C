@@ -37,6 +37,8 @@ MultiAppVectorPostprocessorTransfer::validParams()
                              "N sub-apps or"
                              " collects Postprocessor values from N sub-apps "
                              "into a VectorPostprocessor");
+  MultiAppTransfer::addUserObjectExecutionCheckParam(params);
+
   return params;
 }
 
@@ -59,6 +61,7 @@ MultiAppVectorPostprocessorTransfer::executeToMultiapp()
                                                                        _vector_name);
 
   // Execute VPP if it was specified to execute on transfers
+  checkParentAppUserObjectExecuteOn(_master_vpp_name);
   _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::PRE_AUX, _master_vpp_name);
   _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, _master_vpp_name);
 
