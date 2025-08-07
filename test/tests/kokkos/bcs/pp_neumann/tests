@@ -8,6 +8,6 @@
     exodiff = 'kokkos_pp_neumann_out.e'
     requirement = 'The Kokkos system shall support the application of a Neumann boundary condition computed via Postprocessor object.'
     capabilities = 'kokkos'
-    devices = 'cpu cuda'
+    compute_devices = 'cpu cuda'
   [../]
 []
