@@ -1519,6 +1519,12 @@ private:
    */
   bool runInputs();
 
+  /**
+   * Helper that reports an error if the given capability is reserved and
+   * should not be added via addCapability().
+   */
+  static void checkReservedCapability(const std::string & capability);
+
   /// General storage for custom RestartableData that can be added to from outside applications
   std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>
       _restartable_meta_data;

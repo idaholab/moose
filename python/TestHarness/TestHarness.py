@@ -1146,8 +1146,6 @@ class TestHarness:
         parser.add_argument('--distributed-mesh', action='store_true', dest='distributed_mesh', help='Pass "--distributed-mesh" to executable')
 
         parser.add_argument('--compute-device', action='store', dest='compute_device', type=str, choices=TestHarness.validComputeDevices(), default='cpu', help='Run libtorch or MFEM tests with this compute device; device availability depends on library support and compilation settings')
-        parser.add_argument('--libtorch-device', action='store', dest='compute_device', type=str, choices=TestHarness.validComputeDevices(), help='Deprecated, use --compute-device instead')
-        parser.add_argument('--device', action='store', dest='compute_device', type=str, choices=TestHarness.validComputeDevices(), help='Deprecated, use --compute-device instead')
 
         parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors (Pass "--error" to executable)')
         parser.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (Pass "--error-unused" to executable)')

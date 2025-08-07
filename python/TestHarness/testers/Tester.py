@@ -581,6 +581,8 @@ class Tester(MooseObject, OutputInterface):
                     raise ValueError(f"Capability {key} is defined by the app, but it is a reserved dynamic test harness capability. This is an application bug.")
                 capabilities[key] = val_doc
 
+            # NOTE: If you add to this list, add the capability name as a reserved
+            # capability within MooseApp::checkReservedCapability()
             augment('scale_refine', [options.scaling, 'The number of refinements to do when scaling'])
             if options.valgrind_mode == '':
                 augment('valgrind', [False, 'Not running with valgrind'])
