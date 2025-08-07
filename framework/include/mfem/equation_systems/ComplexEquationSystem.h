@@ -37,10 +37,6 @@ public:
   void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc) override;
   void AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc);
 
-  virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
-                                  Moose::MFEM::GridFunctions & gridfunctions,
-                                  Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions) override;
-
   virtual void FormSystem(mfem::OperatorHandle & op,
                           mfem::BlockVector & trueX,
                           mfem::BlockVector & trueRHS) override;
