@@ -426,9 +426,9 @@ MaterialOutputAction::getParams(const std::string & type,
 
   params.set<AuxVariableName>("variable") = variable_name;
   if (_output_only_on_timestep_end)
-    params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END, EXEC_NONLINEAR};
   else
-    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_NONLINEAR};
 
   if (material.boundaryRestricted())
     params.set<std::vector<BoundaryName>>("boundary") = material.boundaryNames();

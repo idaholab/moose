@@ -89,7 +89,10 @@ PressureTempl<is_ad>::initialSetup()
     block_ids.insert(bids.begin(), bids.end());
   }
 
-  _coord_type = _fe_problem.getCoordSystem(*block_ids.begin());
+  if (block_ids.size())
+    _coord_type = _fe_problem.getCoordSystem(*block_ids.begin());
+  else
+    _coord_type = _fe_problem.mesh().getUniqueCoordSystem();
   for (auto blk_id : block_ids)
   {
     if (_coord_type != _fe_problem.getCoordSystem(blk_id))

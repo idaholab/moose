@@ -52,7 +52,8 @@ SidesetAroundSubdomainUpdater::SidesetAroundSubdomainUpdater(const InputParamete
     _neighbor_side(_assembly.neighborSide()),
     _assign_outer_surface_sides(getParam<bool>("assign_outer_surface_sides")),
     _boundary_name(getParam<BoundaryName>("update_boundary_name")),
-    _boundary_id(_mesh.getBoundaryID(_boundary_name)),
+    _boundary_id(isParamValid("update_sideset_id") ? getParam<BoundaryID>("update_sideset_id")
+                                                   : _mesh.getBoundaryID(_boundary_name)),
     _mask_side(isParamValid("mask_side") ? _mesh.getBoundaryID(getParam<BoundaryName>("mask_side"))
                                          : Moose::INVALID_BOUNDARY_ID),
     _boundary_info(_mesh.getMesh().get_boundary_info()),
@@ -204,7 +205,7 @@ SidesetAroundSubdomainUpdater::finalize()
   {
     mesh.getMesh().get_boundary_info().parallel_sync_side_ids();
     mesh.getMesh().get_boundary_info().parallel_sync_node_ids();
-    mesh.getMesh().get_boundary_info().build_node_list_from_side_list();
+    // mesh.getMesh().get_boundary_info().build_node_list_from_side_list();
     mesh.update();
   };
   sync(_mesh);

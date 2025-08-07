@@ -25,6 +25,7 @@ StitchedMeshGenerator::validParams()
   MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
 
   params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
+  params.addParam<Real>("stitching_tolerance", TOLERANCE, "Tolerance to use when stitching nodes");
   params.addParam<bool>(
       "clear_stitched_boundary_ids", true, "Whether or not to clear the stitched boundary IDs");
   params.addRequiredParam<std::vector<std::vector<std::string>>>(
@@ -234,7 +235,7 @@ StitchedMeshGenerator::generate()
     mesh->stitch_meshes(*meshes[i],
                         first,
                         second,
-                        TOLERANCE,
+                        getParam<Real>("stitching_tolerance"),
                         _clear_stitched_boundary_ids,
                         getParam<bool>("verbose_stitching"),
                         use_binary_search);

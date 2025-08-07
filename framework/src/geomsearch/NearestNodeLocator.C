@@ -64,6 +64,9 @@ NearestNodeLocator::findNodes()
 {
   TIME_SECTION("findNodes", 3, "Finding Nearest Nodes");
 
+  // creates boundary nodes
+  _mesh.update();
+
   /**
    * If this is the first time through we're going to build up a "neighborhood" of nodes
    * surrounding each of the secondary nodes.  This will speed searching later.
@@ -100,8 +103,8 @@ NearestNodeLocator::findNodes()
     }
 
     // Data structures to hold the boundary nodes
-    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-    for (const auto & bnode : bnd_nodes)
+    const std::set<BoundaryID> & bids = _mesh.getBoundaryIDs();
+    for (const auto bnode : *_mesh.getBoundaryNodeRange())
     {
       BoundaryID boundary_id = bnode->_bnd_id;
       dof_id_type node_id = bnode->_node->id();
