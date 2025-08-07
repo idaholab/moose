@@ -93,10 +93,16 @@ public:
    * @param parameters Parameters this object should have
    * @return The created object
    */
+  ///@{
   std::unique_ptr<MooseApp> create(const std::string & app_type,
                                    const std::string & name,
                                    InputParameters parameters,
                                    MPI_Comm COMM_WORLD_IN);
+  std::shared_ptr<MooseApp> createShared(const std::string & app_type,
+                                         const std::string & name,
+                                         InputParameters parameters,
+                                         MPI_Comm COMM_WORLD_IN);
+  ///@}
 
   /**
    * Deprecated helper function for creating a MooseApp for Apps haven't adapted to the new Parser

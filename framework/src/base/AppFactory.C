@@ -176,6 +176,15 @@ AppFactory::create(const std::string & app_type,
   return build_info->build(params);
 }
 
+std::shared_ptr<MooseApp>
+AppFactory::createShared(const std::string & app_type,
+                         const std::string & name,
+                         InputParameters parameters,
+                         MPI_Comm comm_world_in)
+{
+  return AppFactory::instance().create(app_type, name, parameters, comm_world_in);
+}
+
 std::size_t
 AppFactory::createdAppCount(const std::string & app_type) const
 {
