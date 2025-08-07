@@ -499,7 +499,8 @@ RhieChowMassFlux::populateCouplingFunctors(
         {
           _body_force_kernels[dim_i]->setCurrentElemInfo(&elem_info);
 
-          face_hbya(dim_i) =  -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
+          face_hbya(dim_i) =
+              -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
 
           face_hbya(dim_i) -= _body_force_kernels[dim_i]->computeRightHandSideContribution()
                               * ainv_reader[dim_i](elem_dof)/elem_info.volume();  //zero-term expansion
