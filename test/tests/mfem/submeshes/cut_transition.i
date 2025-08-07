@@ -12,10 +12,10 @@
     type = MFEMCutTransitionSubMesh
     cut_boundary = 1
     transition_subdomain = cut
-    transition_subdomain_boundary = 3
-    block = '1 2'
+    transition_subdomain_boundary = transition_bdr
     closed_subdomain = coil
-  []
+    block = '1 2'
+  []   
 []
 
 [FESpaces]
@@ -80,7 +80,7 @@
   [high_terminal]
     type = MFEMScalarDirichletBC
     variable = submesh_potential
-    boundary = '3' 
+    boundary = transition_bdr
     coefficient = 500.0
   []
   [low_terminal]
