@@ -20,7 +20,7 @@ BoundaryCondition::validParams()
   InputParameters params = ResidualObject::validParams();
   params += BoundaryRestrictableRequired::validParams();
 
-  params.registerBase("BoundaryCondition");
+  params.registerBase("KokkosBoundaryCondition");
 
   return params;
 }
