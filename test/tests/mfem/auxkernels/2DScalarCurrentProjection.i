@@ -27,6 +27,10 @@
 []
 
 [Variables]
+  [current]
+    type = MFEMVariable
+    fespace = H1FESpace
+  []
   [Az]
     type = MFEMVariable
     fespace = H1FESpace
@@ -85,11 +89,12 @@
 [Kernels]
   [diffusion]
     type = MFEMDiffusionKernel
-    variable = Az
+    variable = Az 
   []
   [source]
     type = MFEMDomainLFKernel
     variable = Az
+    coefficient = Jvalue
   []
 []
 
