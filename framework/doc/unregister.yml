@@ -1,3 +1,15 @@
 Postprocessor: UserObjects/*
 FunctorMaterial: Materials/*
 Variables: Adaptivity/Markers/*
+KokkosKernel: Kernels/*
+KokkosNodalKernel: NodalKernels/*
+KokkosBoundaryCondition: BCs/*
+KokkosMaterial: Materials/*
+Kernel: KokkosKernels/*
+VectorKernel: KokkosKernels/*
+ArrayKernel: KokkosKernels/*
+EigenKernel: KokkosKernels/*
+NodalKernel: KokkosNodalKernels/*
+BoundaryCondition: KokkosBCs/*
+MaterialBase: KokkosMaterials/*
+FunctorMaterial: KokkosMaterials/*

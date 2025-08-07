@@ -193,7 +193,6 @@ InputParameters
 Kernel<Derived>::validParams()
 {
   InputParameters params = KernelBase::validParams();
-  params.registerBase("Kernel");
   return params;
 }
 
