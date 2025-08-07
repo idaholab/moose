@@ -65,7 +65,11 @@ JunctionComponent::validParams()
   // Parameters for the region between meshes
   params.addParam<unsigned int>("n_elem_normal",
                                 "Number of elements in the normal direction of the junction");
-  params.addParam<SubdomainName>("block", "Block name for the junction, if a block is created.");
+  // params.addParam<SubdomainName>("block", "Block name for the junction, if a block is created.");
+
+  params.addParam<std::vector<BoundaryName>>("1D_edge_nodesets",
+                                             std::vector<BoundaryName>(),
+                                             "Nodesets on both edges of the spline curve.");
 
   // add curve controls
   params.addRangeCheckedParam<libMesh::Real>(
@@ -174,7 +178,7 @@ JunctionComponent::addMeshGenerators()
       mooseError("Stiching meshes of different dimensions is not implemented");
     }
   }
-  else if (_junction_method == "fill_gap")
+  else if (_junction_method == "fill_gap" && dimension_first > 1)
   {
     //
     // This method is set to use a B-Spline to draw a 1D curve between
@@ -322,6 +326,96 @@ JunctionComponent::addMeshGenerators()
       boundary_stitcher_params.set<MeshGeneratorName>("input") = name() + "_mesh_stitcher";
       boundary_stitcher_params.set<std::vector<std::vector<std::string>>>(
           "stitch_boundaries_pairs") = {{name() + "_aeg_top_boundary", second_boundary}};
+      boundary_stitcher_params.set<bool>("show_info") = _verbose;
+      _app.getMeshGeneratorSystem().addMeshGenerator(
+          "StitchBoundaryMeshGenerator", name() + "_closed", boundary_stitcher_params);
+      _mg_names.push_back(name() + "_closed");
+    }
+  }
+  else if (_junction_method == "fill_gap" && dimension_first == 1)
+  {
+    // not all action components are guaranteed to inherit from ComponentMeshTransformerHelper,
+    // which we need to specify the direction.
+    const auto & first_component_cmth =
+        _awh.getAction<ComponentMeshTransformHelper>(getParam<ComponentName>("first_component"));
+    const auto & second_component_cmth =
+        _awh.getAction<ComponentMeshTransformHelper>(getParam<ComponentName>("second_component"));
+
+    // find start and end directions (may need to take the negative of the end direction).
+    // obey user parameters if set
+
+    RealVectorValue start_direction, end_direction;
+    if (isParamValid("first_direction"))
+      start_direction = getParam<RealVectorValue>("first_direction");
+    else
+      start_direction = first_component_cmth.direction();
+    if (isParamValid("second_direction"))
+      end_direction = getParam<RealVectorValue>("second_direction");
+    else
+      end_direction = second_component_cmth.direction();
+
+    InputParameters bspline_params = _factory.getValidParams("BSplineCurveGenerator");
+    bspline_params.set<RealVectorValue>("start_direction") = start_direction;
+    bspline_params.set<RealVectorValue>("end_direction") = -end_direction;
+    bspline_params.set<unsigned int>("num_elements") = getParam<unsigned int>("n_elem_normal");
+    if (isParamValid("sharpness"))
+      bspline_params.set<Real>("sharpness") = getParam<Real>("sharpness");
+    bspline_params.set<unsigned int>("num_cps") = getParam<unsigned int>("num_cps");
+    bspline_params.set<MeshGeneratorName>("start_mesh") =
+        first_component.mg_names()
+            .back(); // get last name from list of generators creating the component
+    bspline_params.set<MeshGeneratorName>("end_mesh") =
+        second_component.mg_names()
+            .back(); // get last name from list of generators creating the component
+    bspline_params.set<BoundaryName>("start_boundary") = getParam<BoundaryName>("first_boundary");
+    bspline_params.set<BoundaryName>("end_boundary") = getParam<BoundaryName>("second_boundary");
+    bspline_params.set<std::vector<BoundaryName>>("edge_nodesets") = {
+        name() + "_bspline_start_node", name() + "_bspline_end_node"};
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "BSplineCurveGenerator", name() + "_curve", bspline_params);
+    _mg_names.push_back(name() + "_curve");
+
+    // stitcher for results
+    if (getParam<ComponentName>("first_component") != getParam<ComponentName>("second_component"))
+    {
+      InputParameters stitcher_params = _factory.getValidParams("StitchMeshGenerator");
+      stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") =
+          std::vector<MeshGeneratorName>{first_component.mg_names().back(),
+                                         name() + "_curve",
+                                         second_component.mg_names().back()};
+      stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
+          {first_boundary, name() + "_bspline_start_node"},
+          {name() + "_bspline_end_node", second_boundary}};
+      stitcher_params.set<bool>("verbose_stitching") = _verbose;
+      stitcher_params.set<bool>("output") = _verbose;
+      stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") =
+          _enforce_all_nodes_match_on_boundaries;
+      _app.getMeshGeneratorSystem().addMeshGenerator(
+          "StitchMeshGenerator", name() + "_stitcher", stitcher_params);
+      _mg_names.push_back(name() + "_stitcher");
+    }
+    else
+    {
+      // Handles case of needing to close a mesh. Using StitchBoundaryMeshGenerator prevents
+      // issues with element overlap.
+      InputParameters mesh_stitcher_params = _factory.getValidParams("StitchMeshGenerator");
+      mesh_stitcher_params.set<std::vector<MeshGeneratorName>>("inputs") =
+          std::vector<MeshGeneratorName>{first_component.mg_names().back(), name() + "_aeg"};
+      mesh_stitcher_params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") = {
+          {first_boundary, name() + "_bspline_start_node"}};
+      mesh_stitcher_params.set<bool>("verbose_stitching") = _verbose;
+      mesh_stitcher_params.set<bool>("output") = _verbose;
+      mesh_stitcher_params.set<bool>("enforce_all_nodes_match_on_boundaries") =
+          _enforce_all_nodes_match_on_boundaries;
+      _app.getMeshGeneratorSystem().addMeshGenerator(
+          "StitchMeshGenerator", name() + "_mesh_stitcher", mesh_stitcher_params);
+      _mg_names.push_back(name() + "_mesh_stitcher");
+
+      InputParameters boundary_stitcher_params =
+          _factory.getValidParams("StitchBoundaryMeshGenerator");
+      boundary_stitcher_params.set<MeshGeneratorName>("input") = name() + "_mesh_stitcher";
+      boundary_stitcher_params.set<std::vector<std::vector<std::string>>>(
+          "stitch_boundaries_pairs") = {{name() + "_bspline_end_node", second_boundary}};
       boundary_stitcher_params.set<bool>("show_info") = _verbose;
       _app.getMeshGeneratorSystem().addMeshGenerator(
           "StitchBoundaryMeshGenerator", name() + "_closed", boundary_stitcher_params);

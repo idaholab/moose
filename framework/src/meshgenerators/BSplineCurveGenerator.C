@@ -58,6 +58,8 @@ BSplineCurveGenerator::validParams()
   params.addClassDescription(
       "This BSplineMeshGenerator object is designed to generate a mesh of a curve that consists of "
       "EDGE2, EDGE3, or EDGE4 elements drawn using an open uniform B-Spline.");
+  params.addParam<std::vector<BoundaryName>>(
+      "edge_nodesets", std::vector<BoundaryName>(), "Nodesets on both edges of the spline curve");
 
   return params;
 }
@@ -73,6 +75,7 @@ BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
                ? 1
                : (getParam<MooseEnum>("edge_element_type") == "EDGE3" ? 2 : 3)),
     _num_elements(getParam<unsigned int>("num_elements")),
+    _node_set_boundaries(getParam<std::vector<BoundaryName>>("edge_nodesets")),
     _start_mesh(getMesh("start_mesh", true)),
     _end_mesh(getMesh("end_mesh", true))
 {
@@ -106,6 +109,8 @@ BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
     if (isParamValid("end_boundary") || isParamValid("end_mesh"))
       paramError("end_point and end_boundary or end_mesh cannot be simultaneously specified!");
   }
+  if (_node_set_boundaries.size() != 0 || _node_set_boundaries.size() != 2)
+    paramError("edge_nodesets", "If specified, edge_nodesets must have exactly 2 entries.");
 }
 
 std::unique_ptr<MeshBase>
@@ -170,6 +175,18 @@ BSplineCurveGenerator::generate()
 
     new_elem->subdomain_id() = 1; //
     mesh->add_elem(std::move(new_elem));
+  }
+  if (_node_set_boundaries.size())
+  {
+    // Add boundary nodesets to boundary info
+    BoundaryInfo & boundary_info = mesh->get_boundary_info();
+    int i = 0;
+    for (auto & side_name : _node_set_boundaries)
+      boundary_info.nodeset_name(i++) = side_name;
+
+    boundary_info.add_node(*nodes.begin(), boundary_info.get_id_by_name(_node_set_boundaries[0]));
+    boundary_info.add_node(*(nodes.end() - 1),
+                           boundary_info.get_id_by_name(_node_set_boundaries[1]));
   }
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

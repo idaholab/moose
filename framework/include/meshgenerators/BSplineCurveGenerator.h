@@ -38,6 +38,8 @@ protected:
   const unsigned int _order;
   /// number of elements to be drawn
   const unsigned int _num_elements;
+  /// vector of the names of the boundaries at the ends of the spline curve
+  std::vector<BoundaryName> _node_set_boundaries;
 
   std::unique_ptr<MeshBase> & _start_mesh;
   std::unique_ptr<MeshBase> & _end_mesh;
