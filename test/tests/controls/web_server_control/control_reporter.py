@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from base_controller import *
 import sys
+import numpy as np
 
 # This should be called by the test harness with the control_reporter.i
 # input file to test setting the controllable values for many times. It
@@ -36,6 +37,9 @@ if __name__ == '__main__':
     elif value == 'vec_string_value':
       values = [['what', 'magic'], ['dont', '   you', ' say!']]
       set_name = 'setControllableVectorString'
+    elif value == 'matrix_value':
+       values = [np.arange((i + 1) * (i + 2), dtype=np.float64).reshape((i + 1, i + 2)) * 10**i for i in range(1, 3)]
+       set_name = 'setControllableMatrix'
     else:
         raise Exception(f'Unknown value {value}')
 

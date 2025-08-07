@@ -13,6 +13,8 @@
 
 #include "WebServerControlTypeRegistry.h"
 
+#include "libmesh/parallel_eigen.h"
+
 #include "tinyhttp/http.h"
 
 #include <atomic>
@@ -45,6 +47,16 @@ public:
   template <typename T, miniJson::JsonType json_type>
   static T getScalarJSONValue(const miniJson::Json & json_value);
 
+  /**
+   * Convert values to a miniJson::Json node.
+   *
+   * @tparam T Data type
+   * @param value The value to be converted.
+   * @return miniJson::Json The miniJson::Json node of the converted value.
+   */
+  template <typename T>
+  static miniJson::Json toMiniJson(const T & value);
+
   using ValueBase = Moose::WebServerControlTypeRegistry::ValueBase;
 
   /**
@@ -59,6 +71,9 @@ public:
       : ValueBase(name, type), _value(value)
     {
     }
+
+    /// The underlying type of the value
+    using value_type = T;
 
     /**
      * @return The underlying value
@@ -128,6 +143,19 @@ public:
   };
 
   /**
+   * Class that stores a RealEigenMatrix controllable value to be set
+   */
+  class RealEigenMatrixValue : public TypedValueBase<RealEigenMatrix>
+  {
+  public:
+    RealEigenMatrixValue(const std::string & name, const std::string & type);
+    RealEigenMatrixValue(const std::string & name,
+                         const std::string & type,
+                         const miniJson::Json & json_value);
+    static RealEigenMatrix getMatrixJSONValue(const miniJson::Json & json_value);
+  };
+
+  /**
    * Registers a scalar parameter type to be controlled
    */
   template <typename T, miniJson::JsonType json_type>
@@ -145,6 +173,14 @@ public:
                                                                                 type_name + ">");
   }
 
+  /**
+   * Registers a vector parameter type to be controlled
+   */
+  static char registerRealEigenMatrix()
+  {
+    return Moose::WebServerControlTypeRegistry().add<RealEigenMatrixValue>("RealEigenMatrix");
+  }
+
 private:
   /**
    * Internal method for starting the server
@@ -158,6 +194,9 @@ private:
 
   /// Whether or not the Control is currently waiting
   std::atomic<bool> _currently_waiting;
+
+  // Whether or not the solve should be terminated in the next execute() call
+  std::atomic<bool> _terminate_requested;
 
   /// The server
   std::unique_ptr<HttpServer> _server;
@@ -189,3 +228,7 @@ WebServerControl::getScalarJSONValue(const miniJson::Json & json_value)
   ::mooseError("WebServerControl::getScalarJSONValue(): Not configured for parsing type ",
                stringifyJSONType(from_json_type));
 }
+
+// Explicit specialization
+template <>
+miniJson::Json WebServerControl::toMiniJson(const nlohmann::json & value);

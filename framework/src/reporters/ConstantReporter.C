@@ -23,6 +23,8 @@ ConstantReporter::validParams()
   params += addReporterTypeParams<std::string>("string");
   params += addReporterTypeParams<dof_id_type>("dof_id_type");
   params += addReporterTypeParams<Point>("point");
+  params += addReporterTypeParams<RealEigenVector>("eigen_vector", false, false);
+  params += addReporterTypeParams<RealEigenMatrix>("eigen_matrix", false, false);
 
   return params;
 }
@@ -42,4 +44,6 @@ ConstantReporter::ConstantReporter(const InputParameters & parameters) : General
   declareConstantVectorVectorReporterValues<Real>("real");
   declareConstantVectorVectorReporterValues<std::string>("string");
   declareConstantVectorVectorReporterValues<dof_id_type>("dof_id_type");
+  declareConstantReporterValue<RealEigenVector>("eigen_vector");
+  declareConstantReporterValue<RealEigenMatrix>("eigen_matrix");
 }

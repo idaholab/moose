@@ -31,6 +31,12 @@ ReporterName::ReporterName(const std::string & combined_name)
 
 ReporterName::ReporterName(const char * combined_name) : ReporterName(std::string(combined_name)) {}
 
+bool
+ReporterName::isValidName(const std::string & combined_name)
+{
+  return combined_name.rfind("/") != std::string::npos;
+}
+
 const std::string &
 ReporterName::getObjectName() const
 {

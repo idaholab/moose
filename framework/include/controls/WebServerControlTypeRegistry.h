@@ -12,8 +12,10 @@
 #include <string>
 #include <map>
 #include <type_traits>
+#include <typeindex>
 
 #include "MooseError.h"
+#include "MooseUtils.h"
 
 #include "minijson/minijson.h"
 
@@ -93,14 +95,25 @@ public:
   static char add(const std::string & type_name)
   {
     static_assert(std::is_base_of_v<ValueBase, DerivedValueType>, "Is not derived from ValueBase");
-    getRegistry()._types.emplace(type_name, std::make_unique<Type<DerivedValueType>>(type_name));
+    using value_type = typename DerivedValueType::value_type;
+    static const std::type_index index = typeid(value_type);
+    if (!getRegistry()
+             ._name_map.emplace(type_name, std::make_unique<Type<DerivedValueType>>(type_name))
+             .second)
+      ::mooseError("WebServerControlTypeRegistry: The string type \"",
+                   type_name,
+                   "\" is already registered.");
+    if (!getRegistry()._value_types.insert(index).second)
+      ::mooseError("WebServerControlRegistry: The type \"",
+                   MooseUtils::prettyCppType<value_type>(),
+                   "\" is already registered");
     return 0;
   }
 
   /**
    * @return Whether or not the type \p type is registered.
    */
-  static bool isRegistered(const std::string & type) { return getRegistry()._types.count(type); }
+  static bool isRegistered(const std::string & type) { return getRegistry()._name_map.count(type); }
 
   /**
    * Builds a value with the type \p type, name \p name, and a default value.
@@ -159,6 +172,8 @@ private:
   {
     Type(const std::string & type) : TypeBase(type) {}
 
+    using value_type = typename DerivedValueType::value_type;
+
     virtual std::unique_ptr<ValueBase> build(const std::string & name) const override final
     {
       return std::make_unique<DerivedValueType>(name, type());
@@ -176,13 +191,16 @@ private:
   static const TypeBase & get(const std::string & type)
   {
     auto & registry = getRegistry();
-    const auto it = registry._types.find(type);
-    if (it == registry._types.end())
+    const auto it = registry._name_map.find(type);
+    if (it == registry._name_map.end())
       mooseError("WebServerControlTypeRegistry: The type '", type, "' is not registered");
     return *it->second;
   }
 
   /// The registration data
-  std::map<std::string, std::unique_ptr<TypeBase>> _types;
+  std::map<std::string, std::unique_ptr<TypeBase>> _name_map;
+  /// The registered value types, to avoid registering the same underlying
+  /// value type multiple times
+  std::set<std::type_index> _value_types;
 };
 }

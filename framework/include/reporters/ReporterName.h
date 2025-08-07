@@ -36,6 +36,15 @@ public:
   ReporterName(){}; // empty constructor for InputParameters
 
   /**
+   * Determines if the inputted string is convertible to a ReporterName.
+   *
+   * @param object_and_value_name The string to determine convertibility
+   * @return true Inputted string has a "/"
+   * @return false Inputted string does not have a "/"
+   */
+  static bool isValidName(const std::string & object_and_value_name);
+
+  /**
    * Return the object name that produces the Reporter value
    */
   const std::string & getObjectName() const;

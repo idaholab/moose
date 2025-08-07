@@ -1,0 +1,42 @@
+{
+    "reporters": {
+        "constant": {
+            "type": "ConstantReporter",
+            "values": {
+                "eigen_matrix": {
+                    "type": "Eigen::Matrix<double, -1, -1, 0, -1, -1>"
+                },
+                "eigen_vector": {
+                    "type": "Eigen::Matrix<double, -1, 1, 0, -1, 1>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "constant": {
+                "eigen_matrix": [
+                    [
+                        1.0,
+                        2.0,
+                        3.0
+                    ],
+                    [
+                        4.0,
+                        5.0,
+                        6.0
+                    ]
+                ],
+                "eigen_vector": [
+                    1.0,
+                    2.0,
+                    3.0,
+                    4.0,
+                    5.0
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

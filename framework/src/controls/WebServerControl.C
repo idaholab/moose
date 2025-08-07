@@ -33,6 +33,9 @@ registerMooseObject("MooseApp", WebServerControl);
   registerWebServerControlVector(T, miniJson::JsonType::kNumber)
 #define registerWebServerControlVectorString(T)                                                    \
   registerWebServerControlVector(T, miniJson::JsonType::kString)
+#define registerWebServerControlRealEigenMatrix()                                                  \
+  static char registerWebServerControlCombine(wsc_matrix, __COUNTER__) =                           \
+      WebServerControl::registerRealEigenMatrix()
 
 // Registration of the types that we can accept in the web server for controlling parameters
 registerWebServerControlScalarBool(bool);
@@ -42,6 +45,7 @@ registerWebServerControlScalarString(std::string);
 registerWebServerControlVectorNumber(Real);
 registerWebServerControlVectorNumber(int);
 registerWebServerControlVectorString(std::string);
+registerWebServerControlRealEigenMatrix();
 
 InputParameters
 WebServerControl::validParams()
@@ -58,7 +62,7 @@ WebServerControl::validParams()
 }
 
 WebServerControl::WebServerControl(const InputParameters & parameters)
-  : Control(parameters), _currently_waiting(false)
+  : Control(parameters), _currently_waiting(false), _terminate_requested(false)
 {
   const auto has_port = isParamValid("port");
   const auto has_file_socket = isParamValid("file_socket");
@@ -191,6 +195,44 @@ WebServerControl::startServer()
             return HttpResponse{200, res_json};
           });
 
+  // POST /get/reporter, with data:
+  //   'name' (string): The name of the Reporter value (object_name/value_name)
+  // Returns code 200 on success and JSON:
+  //   'value' (double): The postprocessor value
+  _server->when("/get/reporter")
+      ->posted(
+          [this, &error, &get_name, &require_waiting, &require_parameters](const HttpRequest & req)
+          {
+            const auto & msg = req.json().toObject();
+
+            // Should only have name and type
+            if (const auto response = require_parameters(msg, {"name"}))
+              return *response;
+            // Should be waiting for data
+            if (const auto response = require_waiting(*this))
+              return *response;
+
+            // Get the reporter name
+            const auto name_result = get_name(msg, "reporter value to retrieve");
+            if (const auto response = std::get_if<HttpResponse>(&name_result))
+              return *response;
+            const auto & name = std::get<std::string>(name_result);
+            if (!ReporterName::isValidName(name))
+              return error(name + " is not a valid reporter name.");
+            const auto rname = ReporterName(name);
+
+            // Reporter should exist
+            if (!this->hasReporterValueByName(rname))
+              return error("The reporter value '" + name + "' was not found");
+
+            // Grab the reporter value in nlohmann::json format, then convert to miniJson
+            nlohmann::json njson;
+            getReporterContextBaseByName(rname).store(njson);
+            miniJson::Json::_object res_json = {{"value", toMiniJson(njson)}};
+
+            return HttpResponse{200, res_json};
+          });
+
   // POST /set/controllable, with data:
   //   'name' (string): The path to the controllable data
   //   'value': The data to set
@@ -269,6 +311,22 @@ WebServerControl::startServer()
             return error("The control is not currently waiting");
           });
 
+  // GET /terminate, Returns code 200 and tell FEProblemBase to terminate solve
+  _server->when("/terminate")
+      ->requested(
+          [this, &error](const HttpRequest &)
+          {
+            if (this->_currently_waiting.load())
+            {
+              this->_terminate_requested.store(true);
+              this->_currently_waiting.store(false);
+              return HttpResponse{200};
+            }
+
+            // Not currently waiting
+            return error("The control is not currently waiting");
+          });
+
   _server_thread = std::make_unique<std::thread>(
       [this]
       {
@@ -297,10 +355,17 @@ WebServerControl::startServer()
 void
 WebServerControl::execute()
 {
+  // If simulation is requested to terminate, do not go through this control
+  if (_fe_problem.isSolveTerminationRequested())
+    return;
+
   // Needed to broadcast all of the types and names of data that we have received on rank 0
   // so that we can construct the same objects on the other ranks to receive the data and
   // set the same values
   std::vector<std::pair<std::string, std::string>> name_and_types;
+
+  // Need to also broadcast whether or not to terminate the solve on the timestep
+  bool terminate_solve = false; // Set value to avoid compiler warnings
 
   // Wait for the server on rank 0 to be done
   if (processor_id() == 0)
@@ -315,6 +380,9 @@ WebServerControl::execute()
 
     for (const auto & value_ptr : _controlled_values)
       name_and_types.emplace_back(value_ptr->name(), value_ptr->type());
+
+    terminate_solve = _terminate_requested.load();
+    _terminate_requested.store(false);
   }
 
   // All processes need to wait
@@ -345,6 +413,11 @@ WebServerControl::execute()
   }
 
   _controlled_values.clear();
+
+  // Set solve terminate on all ranks, if requested
+  _communicator.broadcast(terminate_solve);
+  if (terminate_solve)
+    _fe_problem.terminateSolve();
 }
 
 std::string
@@ -363,4 +436,63 @@ WebServerControl::stringifyJSONType(const miniJson::JsonType & json_type)
   if (json_type == miniJson::JsonType::kObject)
     return "object";
   ::mooseError("WebServerControl::stringifyJSONType(): Unused JSON value type");
+}
+
+template <>
+miniJson::Json
+WebServerControl::toMiniJson(const nlohmann::json & value)
+{
+  const auto value_str = value.dump();
+  std::string errMsg;
+  const auto json_value = miniJson::Json::parse(value_str, errMsg);
+  if (!errMsg.empty())
+    ::mooseError("Failed parse value into miniJson:\n", errMsg);
+  return json_value;
+}
+
+WebServerControl::RealEigenMatrixValue::RealEigenMatrixValue(const std::string & name,
+                                                             const std::string & type)
+  : TypedValueBase<RealEigenMatrix>(name, type)
+{
+}
+
+WebServerControl::RealEigenMatrixValue::RealEigenMatrixValue(const std::string & name,
+                                                             const std::string & type,
+                                                             const miniJson::Json & json_value)
+  : TypedValueBase<RealEigenMatrix>(name, type, getMatrixJSONValue(json_value))
+{
+}
+
+RealEigenMatrix
+WebServerControl::RealEigenMatrixValue::getMatrixJSONValue(const miniJson::Json & json_value)
+{
+  const auto from_json_type = json_value.getType();
+  if (from_json_type != miniJson::JsonType::kArray)
+    throw ValueBase::Exception("The value '" + json_value.serialize() + "' of type " +
+                               stringifyJSONType(from_json_type) + " is not an array");
+
+  const auto & array_of_array_value = json_value.toArray();
+  const auto nrows = array_of_array_value.size();
+  if (nrows == 0)
+    return RealEigenMatrix::Zero(0, 0);
+
+  RealEigenMatrix matrix;
+  for (const auto i : make_range(nrows))
+  {
+    if (array_of_array_value[i].getType() != miniJson::JsonType::kArray)
+      throw ValueBase::Exception(
+          "Element " + std::to_string(i) + " of '" + json_value.serialize() + "' of type " +
+          stringifyJSONType(array_of_array_value[i].getType()) + " is not an array");
+
+    const auto & array_value = array_of_array_value[i].toArray();
+    if (i == 0)
+      matrix.resize(nrows, array_value.size());
+    else if (array_value.size() != (std::size_t)matrix.cols())
+      throw ValueBase::Exception("The matrix '" + json_value.serialize() + "' is jagged.");
+
+    for (const auto j : index_range(array_value))
+      matrix(i, j) = array_value[j].toDouble();
+  }
+
+  return matrix;
 }
