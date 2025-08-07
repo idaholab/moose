@@ -79,7 +79,7 @@ FVPorousFlowAdvectiveFluxBC::FVPorousFlowAdvectiveFluxBC(const InputParameters &
   {
     auto diri_params = FVDirichletBC::validParams();
     diri_params.applySpecificParameters(_pars, {"variable", "boundary"});
-    diri_params.addPrivateParam("_moose_app", &_app);
+    diri_params.addPrivateParam(MooseBase::app_param, &_app);
     diri_params.set<Real>("value") = _pp_value;
     _fv_problem.addFVBC("FVDirichletBC", name() + "_diri", diri_params);
     _fv_problem.fvBCsIntegrityCheck(false);

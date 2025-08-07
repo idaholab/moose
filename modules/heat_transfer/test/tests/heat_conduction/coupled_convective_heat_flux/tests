@@ -26,7 +26,7 @@
     type = RunException
     input = 'coupled_convective_heat_flux_two_phase.i'
     cli_args = "BCs/right/alpha='alpha_liquid'"
-    expect_err = '\(BCs/right/alpha\).*?The number of coupled components does not match the number of `T_infinity` components.'
+    expect_err = 'BCs/right/alpha: The number of coupled components does not match the number of `T_infinity` components.'
     requirement = 'The system shall report an error if the number of `alpha` components does not match the number of `T_infinity` components.'
   [../]
 
@@ -34,7 +34,7 @@
     type = RunException
     input = 'coupled_convective_heat_flux_two_phase.i'
     cli_args = "BCs/right/htc='Hw_liquid'"
-    expect_err = '\(BCs/right/htc\).*?The number of coupled components does not match the number of `T_infinity` components.'
+    expect_err = 'BCs/right/htc: The number of coupled components does not match the number of `T_infinity` components.'
     requirement = 'The system shall report an error if the number of `htc` components does not match the number of `T_infinity` components.'
   [../]
 

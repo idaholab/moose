@@ -36,8 +36,10 @@ ParsedMaterialHelper<is_ad>::validParams()
 }
 
 template <bool is_ad>
-ParsedMaterialHelper<is_ad>::ParsedMaterialHelper(const InputParameters & parameters,
-                                                  VariableNameMappingMode map_mode)
+ParsedMaterialHelper<is_ad>::ParsedMaterialHelper(
+    const InputParameters & parameters,
+    const VariableNameMappingMode map_mode,
+    const std::optional<std::string> & function_param_name /* = {} */)
   : FunctionMaterialBase<is_ad>(parameters),
     FunctionParserUtils<is_ad>(parameters),
     _symbol_names(_nargs),
@@ -45,10 +47,15 @@ ParsedMaterialHelper<is_ad>::ParsedMaterialHelper(const InputParameters & parame
                        .template getSetValueIDs<ExtraSymbols>()),
     _tol(0),
     _map_mode(map_mode),
+    _function_param_name(function_param_name),
     _upstream_mat_names(this->template getParam<std::vector<MaterialName>>("upstream_materials")),
     _error_on_missing_material_properties(
-        this->template getParam<bool>("error_on_missing_material_properties"))
+        this->template getParam<bool>("error_on_missing_material_properties")),
+    _params(parameters)
 {
+  if (_function_param_name)
+    mooseAssert(_params.have_parameter<std::string>(*_function_param_name),
+                "Does not have parameter");
 }
 
 template <bool is_ad>
@@ -169,7 +176,7 @@ ParsedMaterialHelper<is_ad>::functionParse(
   if (_map_mode == VariableNameMappingMode::USE_PARAM_NAMES)
     for (const auto & acd : _arg_constant_defaults)
       if (!_func_F->AddConstant(acd, this->_pars.defaultCoupledValue(acd)))
-        mooseError("Invalid constant name in parsed function object");
+        _params.mooseError("Invalid constant name in parsed function object");
 
   // set variable names based on map_mode
   switch (_map_mode)
@@ -190,12 +197,12 @@ ParsedMaterialHelper<is_ad>::functionParse(
       break;
 
     default:
-      mooseError("Unknown variable mapping mode.");
+      _params.mooseError("Unknown variable mapping mode.");
   }
 
   // tolerance vectors
   if (tol_names.size() != tol_values.size())
-    mooseError("The parameter vectors tol_names and tol_values must have equal length.");
+    _params.mooseError("The parameter vectors tol_names and tol_values must have equal length.");
 
   // set tolerances
   _tol.resize(_nargs);
@@ -254,8 +261,9 @@ ParsedMaterialHelper<is_ad>::functionParse(
 
   // get all functors
   if (!functor_symbols.empty() && functor_symbols.size() != functor_names.size())
-    mooseError("The parameter vector functor_symbols must be of same length as functor_names, if "
-               "not empty.");
+    _params.mooseError(
+        "The parameter vector functor_symbols must be of same length as functor_names, if "
+        "not empty.");
   _functors.resize(functor_names.size());
   for (const auto i : index_range(functor_names))
   {
@@ -279,12 +287,8 @@ ParsedMaterialHelper<is_ad>::functionParse(
 
   // build the base function
   if (_func_F->Parse(function_expression, variables) >= 0)
-    mooseError("Invalid function\n",
-               function_expression,
-               '\n',
-               variables,
-               "\nin ParsedMaterialHelper.\n",
-               _func_F->ErrorMsg());
+    parseError("Invalid parsed material function \"" + function_expression +
+               "\" with variables \"" + variables + "\"; " + _func_F->ErrorMsg());
 
   // create parameter passing buffer
   _func_params.resize(_nargs + nmat_props + _postprocessor_values.size() + _extra_symbols.size() +
@@ -398,6 +402,16 @@ ParsedMaterialHelper<is_ad>::computeQpProperties()
   // set function value
   if (_prop_F)
     (*_prop_F)[_qp] = evaluate(_func_F, _name);
+}
+
+template <bool is_ad>
+void
+ParsedMaterialHelper<is_ad>::parseError(const std::string & message) const
+{
+  if (_function_param_name)
+    _params.paramError(*_function_param_name, message);
+  else
+    _params.mooseError(message);
 }
 
 // explicit instantiation

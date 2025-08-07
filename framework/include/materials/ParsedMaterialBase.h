@@ -26,8 +26,11 @@ protected:
   /// Pointer to the MooseObject (to call paramError)
   const MooseObject * const _derived_object;
 
+  /// Parameter that the function comes from
+  const std::string _function_param;
+
   /// function expression
-  std::string _function;
+  const std::string _function;
 
   /// constant vectors
   std::vector<std::string> _constant_names;

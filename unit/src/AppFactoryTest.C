@@ -11,6 +11,7 @@
 
 #include "AppFactory.h"
 #include "CommandLine.h"
+#include "Parser.h"
 
 TEST(AppFactoryTest, manageAppParams)
 {
@@ -128,8 +129,9 @@ TEST(AppFactoryTest, appCopyConstructParams)
   command_line->parse();
   params.set<std::shared_ptr<CommandLine>>("_command_line") = command_line;
 
-  params.set<std::shared_ptr<Parser>>("_parser") =
-      std::make_shared<Parser>(std::vector<std::string>());
+  auto parser = std::make_shared<Parser>(std::vector<std::string>());
+  parser->parse();
+  params.set<std::shared_ptr<Parser>>("_parser") = parser;
 
   const auto deprecated_is_error = Moose::_deprecated_is_error;
   Moose::_deprecated_is_error = true;
@@ -138,7 +140,7 @@ TEST(AppFactoryTest, appCopyConstructParams)
       {
         try
         {
-          af.createShared(app_type, "test", params, MPI_COMM_WORLD);
+          af.create(app_type, "test", params, MPI_COMM_WORLD);
         }
         catch (const std::exception & e)
         {
@@ -159,4 +161,48 @@ TEST(AppFactoryTest, appCopyConstructParams)
 
   EXPECT_EQ(af._input_parameters.size(), 1);
   af._input_parameters.clear();
+}
+
+TEST(AppFactoryTest, createNotRegistered)
+{
+  AppFactory af;
+
+  try
+  {
+    af.create("fooapp", "unused", emptyInputParameters(), MPI_COMM_WORLD);
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("AppFactory::Create(): Application 'fooapp' was not registered") !=
+                std::string::npos)
+        << msg;
+  }
+}
+
+TEST(AppFactoryTest, createForUnit)
+{
+  {
+    auto app = AppFactory::create("MooseUnitApp");
+    EXPECT_NE(app, nullptr);
+    auto & args = app->commandLine()->getArguments();
+    EXPECT_EQ(args.size(), 1);
+    EXPECT_EQ(args[0], "unused");
+  }
+
+  {
+    auto app = AppFactory::create("MooseUnitApp", {"--help"});
+    EXPECT_NE(app, nullptr);
+    auto & args = app->commandLine()->getArguments();
+    EXPECT_EQ(args.size(), 2);
+    EXPECT_EQ(args[0], "unused");
+    EXPECT_EQ(args[1], "--help");
+  }
+}
+
+TEST(AppFactoryTest, createAppShared)
+{
+  const char * argv[2] = {"foo", "\0"};
+  auto app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
+  ASSERT_NE(app, nullptr);
 }

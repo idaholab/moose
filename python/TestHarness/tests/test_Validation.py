@@ -237,7 +237,7 @@ class TestValidation(TestHarnessTestCase):
         test spec
         """
         out = self.runTests('-i', 'validation_bad_python', exit_code=128).output
-        self.assertIn('validation_bad_python:   invalid syntax (validation_badpython.py, line 1)', out)
+        self.assertIn('validation_bad_python:2:   invalid syntax (validation_badpython.py, line 1)', out)
 
     def testDuplicateParam(self):
         """
@@ -245,7 +245,7 @@ class TestValidation(TestHarnessTestCase):
         multiple times from different cases
         """
         out = self.runTests('-i', 'validation_duplicate_param', exit_code=128).output
-        self.assertIn('Duplicate parameter "type" from validation test', out)
+        self.assertIn('validation_duplicate_param:2: Failed to create Tester: Duplicate parameter "type" from validation test', out)
 
 if __name__ == '__main__':
     unittest.main()

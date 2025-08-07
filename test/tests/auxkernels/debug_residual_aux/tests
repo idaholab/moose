@@ -4,7 +4,7 @@
   [errors]
     type = RunException
     input = mismatch_residual_test.i
-    expect_err = "A mismatch was found between family and order parameters for u_residual and u in debug_aux"
+    expect_err = "A mismatch was found between family and order parameters for u_residual and u"
     requirement = "The system shall have the ability to create an auxiliary variable that keeps track of the residual for a nonlinear system variable's equation and check that family and order parameters must be the same for the residual output variable and the equation variable."
   []
 []

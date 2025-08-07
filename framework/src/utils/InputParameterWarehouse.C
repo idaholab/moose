@@ -29,7 +29,7 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
   // Create the actual InputParameters object that will be reference by the objects
   std::shared_ptr<InputParameters> ptr = std::make_shared<InputParameters>(parameters);
 
-  auto base = ptr->get<std::string>("_moose_base");
+  const auto & base = ptr->getBase();
 
   // The object name defined by the base class name, this method of storing is used for
   // determining the uniqueness of the name
@@ -94,8 +94,8 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
   std::stringstream oss;
   oss << unique_name;
 
-  ptr->addPrivateParam<std::string>("_unique_name", oss.str());
-  ptr->addPrivateParam<std::string>("_object_name", name);
+  ptr->addPrivateParam<std::string>(MooseBase::unique_name_param, oss.str());
+  ptr->addPrivateParam<std::string>(MooseBase::name_param, name);
   ptr->addPrivateParam<THREAD_ID>("_tid", tid);
 
   // no more copies allowed
@@ -110,7 +110,8 @@ InputParameterWarehouse::removeInputParameters(const MooseObject & moose_object,
                                                THREAD_ID tid,
                                                const AddRemoveParamsKey)
 {
-  auto moose_object_name_string = moose_object.parameters().get<std::string>("_unique_name");
+  auto moose_object_name_string =
+      moose_object.parameters().get<std::string>(MooseBase::unique_name_param);
   MooseObjectName moose_object_name(moose_object_name_string);
   _input_parameters[tid].erase(moose_object_name);
 }

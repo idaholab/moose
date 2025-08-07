@@ -14,8 +14,7 @@
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except2.i
-    expect_err = 'source_species_names:
-    The name badname does not appear in the basis, equilibrium or kinetic species list'
+    expect_err = 'TimeDependentReactionSolver/source_species_names: The name badname does not appear in the basis, equilibrium or kinetic species list'
     match_literal = true
     requirement = 'An error will be thrown if a source species does not exist in the geochemical system'
     issues = '#15330'
@@ -36,8 +35,7 @@
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
     input = except4.i
-    expect_err = 'remove_fixed_activity_name:
-    The species Na\+ is does not have an activity or fugacity constraint so cannot have such a constraint removed'
+    expect_err = 'TimeDependentReactionSolver/remove_fixed_activity_name: The species Na\+ is does not have an activity or fugacity constraint so cannot have such a constraint removed'
     requirement = 'An error will be thrown if a species whose activity constraint is to be removed does not have an activity or fugacity constraint'
     issues = '#15330'
     design = 'GeochemistryTimeDependentReactor.md'

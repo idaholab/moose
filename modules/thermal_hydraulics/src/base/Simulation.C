@@ -47,7 +47,7 @@ Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
     LoggingInterface(_log),
     _thm_mesh(*static_cast<THMMesh *>(pars.get<MooseMesh *>("mesh"))),
     _fe_problem(fe_problem),
-    _thm_app(static_cast<ThermalHydraulicsApp &>(*pars.get<MooseApp *>("_moose_app"))),
+    _thm_app(static_cast<ThermalHydraulicsApp &>(*pars.get<MooseApp *>(MooseBase::app_param))),
     _thm_factory(_thm_app.getFactory()),
     _thm_pars(pars),
     _flow_fe_type(FEType(CONSTANT, MONOMIAL)),

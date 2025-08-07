@@ -31,8 +31,10 @@ DerivativeParsedMaterialHelperTempl<is_ad>::validParams()
 
 template <bool is_ad>
 DerivativeParsedMaterialHelperTempl<is_ad>::DerivativeParsedMaterialHelperTempl(
-    const InputParameters & parameters, VariableNameMappingMode map_mode)
-  : ParsedMaterialHelper<is_ad>(parameters, map_mode),
+    const InputParameters & parameters,
+    const VariableNameMappingMode map_mode,
+    const std::optional<std::string> & function_param_name /* = {} */)
+  : ParsedMaterialHelper<is_ad>(parameters, map_mode, function_param_name),
     _derivative_order(this->template getParam<unsigned int>("derivative_order")),
     _dmatvar_base("matpropautoderiv"),
     _dmatvar_index(0)

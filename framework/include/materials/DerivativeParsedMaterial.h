@@ -17,8 +17,8 @@
  * provide all derivatives.
  */
 template <bool is_ad>
-class DerivativeParsedMaterialTempl : public DerivativeParsedMaterialHelperTempl<is_ad>,
-                                      public ParsedMaterialBase
+class DerivativeParsedMaterialTempl : public ParsedMaterialBase,
+                                      public DerivativeParsedMaterialHelperTempl<is_ad>
 {
 public:
   static InputParameters validParams();

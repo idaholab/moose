@@ -72,7 +72,7 @@ void
 BoundaryRestrictable::initializeBoundaryRestrictable()
 {
   // The name and id of the object
-  const std::string & name = _moose_object.getParam<std::string>("_object_name");
+  const std::string & name = _moose_object.name();
 
   // If the mesh pointer is not defined, but FEProblemBase is, get it from there
   if (_bnd_feproblem != NULL && _bnd_mesh == NULL)
@@ -163,8 +163,8 @@ BoundaryRestrictable::initializeBoundaryRestrictable()
       if (!_bnd_nodal)
         // Diagnostic message
         msg << "\n\nMOOSE distinguishes between \"node sets\" and \"side sets\" depending on "
-               "whether \nyou are using \"Nodal\" or \"Integrated\" BCs respectively. Node sets "
-               "corresponding \nto your side sets are constructed for you by default.\n\n"
+               "whether\nyou are using \"Nodal\" or \"Integrated\" BCs respectively. Node sets "
+               "corresponding\nto your side sets are constructed for you by default.\n\n"
                "Try setting \"Mesh/construct_side_list_from_node_list=true\" if you see this "
                "error.\n"
                "Note: If you are running with adaptivity you should prefer using side sets.";
