@@ -89,7 +89,7 @@
 [Kernels]
   [diffusion]
     type = MFEMDiffusionKernel
-    variable = Az 
+    variable = Az
   []
   [source]
     type = MFEMDomainLFKernel
