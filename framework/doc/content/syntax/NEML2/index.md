@@ -1,5 +1,7 @@
 # NEML2 syntax
 
+!if! function=hasCapability('neml2')
+
 The `[NEML2]` block in the MOOSE input file is the entry point for defining NEML2 material model(s). All parameters are listed at [the bottom of the page](syntax/NEML2/index.md#syntax-list).
 
 !alert note
@@ -85,3 +87,9 @@ The schedulers are defined in the NEML2 input file, and can be selected using th
 !syntax parameters /NEML2/NEML2Action id=syntax-list
                                             heading=Sub-block parameters
                                             heading-level=2
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md
