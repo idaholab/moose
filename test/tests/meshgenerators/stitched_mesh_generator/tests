@@ -1,7 +1,7 @@
 [Tests]
   [stitched_mesh_generator]
     design = 'meshgenerators/StitchedMeshGenerator.md'
-    issues = '#11640'
+    issues = '#11640 #31191'
     requirement = "The system shall support the creation of a finite element mesh from existing "
                   "meshes"
 
@@ -45,7 +45,7 @@
     input = 'stitch_block_names.i'
     cli_args = '--mesh-only'
     exodiff = 'stitch_block_names_in.e'
-    exodiff_opts = '-match_by_name'
+    exodiff_opts = '-match_by_name -pedantic'
     recover = false
 
     requirement = "The system shall be able to combine subdomain names when stitching meshes"
@@ -57,7 +57,7 @@
     input = 'stitch_block_names.i'
     cli_args = '--mesh-only dont_stitch_block_names_in.e Mesh/stitch/subdomain_remapping=false'
     exodiff = 'dont_stitch_block_names_in.e'
-    exodiff_opts = '-match_by_name'
+    exodiff_opts = '-match_by_name -pedantic'
     recover = false
 
     requirement = "The system shall retain backwards compatibility with older stitching behavior"

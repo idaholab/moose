@@ -20,6 +20,7 @@
     exodiff = 'cylinder_3d_cartesian_out.e'
     design = 'RadialDisplacementCylinderAux.md'
     requirement = 'The system shall compute the radial component of displacement for 3D Cartesian cylindrical models'
+    capabilities = 'method!=dbg'
   [../]
   [./sphere_1d_spherical]
     type = 'Exodiff'
@@ -41,6 +42,7 @@
     exodiff = 'sphere_3d_cartesian_out.e'
     design = 'RadialDisplacementSphereAux.md'
     requirement = 'The system shall compute the radial component of displacement for 3D Cartesian spherical models'
+    capabilities = 'method!=dbg'
   [../]
 
   [./sphere_1d_spherical_except_1]

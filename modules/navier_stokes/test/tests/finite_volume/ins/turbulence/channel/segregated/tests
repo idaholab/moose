@@ -1,0 +1,11 @@
+[Tests]
+  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
+  issues = '#9007'
+  [channel_ERCOFTAC]
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC.i'
+    csvdiff = 'channel_ERCOFTAC_out_line_center_channel_0001.csv channel_ERCOFTAC_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_out_side_bottom_0001.csv channel_ERCOFTAC_out_side_top_0001.csv'
+    abs_zero = 1e-6
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel, and reach converged results with segregated solvers.'
+  []
+[]

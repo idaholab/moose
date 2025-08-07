@@ -9,6 +9,7 @@
 
 #include "DiscreteNucleationMap.h"
 #include "MooseMesh.h"
+#include "Executioner.h"
 
 #include "libmesh/quadrature.h"
 
@@ -45,10 +46,20 @@ DiscreteNucleationMap::DiscreteNucleationMap(const InputParameters & parameters)
 void
 DiscreteNucleationMap::initialize()
 {
-  if (_inserter.isMapUpdateRequired() || _mesh_changed)
+  if (_inserter.isMapUpdateRequired() || _mesh_changed || _force_rebuild_map)
   {
-    _rebuild_map = true;
-    _nucleus_map.clear();
+    // If the last solve didn't converge, postpone the rebuild until the next timestep
+    if (_app.getExecutioner()->lastSolveConverged())
+    {
+      _rebuild_map = true;
+      _nucleus_map.clear();
+      _force_rebuild_map = false;
+    }
+    else
+    {
+      _rebuild_map = false;
+      _force_rebuild_map = true;
+    }
   }
   else
     _rebuild_map = false;

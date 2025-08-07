@@ -60,8 +60,9 @@ prandtlPropertyDerivative(const Real & mu,
   return (k * (mu * dcp + cp * dmu) - mu * cp * dk) / std::max(k * k, 1e-8);
 }
 
-ADReal
-findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist)
+template <typename T>
+T
+findUStar(const T & mu, const T & rho, const T & u, const Real dist)
 {
   // usually takes about 3-4 iterations
   constexpr int MAX_ITERS{50};
@@ -73,28 +74,26 @@ findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
   mooseAssert(u > 0, "Need a strictly positive velocity");
   mooseAssert(dist > 0, "Need a strictly positive wall distance");
 
-  const ADReal nu = mu / rho;
+  const T nu = mu / rho;
 
   // Wall-function linearized guess
   const Real a_c = 1 / NS::von_karman_constant;
-  const ADReal b_c =
-      1.0 / NS::von_karman_constant * (std::log(NS::E_turb_constant * dist / mu) + 1.0);
-  const ADReal & c_c = u;
+  const T b_c = 1.0 / NS::von_karman_constant * (std::log(NS::E_turb_constant * dist / mu) + 1.0);
+  const T & c_c = u;
 
   /// This is important to reduce the number of nonlinear iterations
-  ADReal u_star =
-      std::max(1e-20, (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c));
+  T u_star = std::max(1e-20, (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c));
 
   // Newton-Raphson method to solve for u_star (friction velocity).
   for (int i = 0; i < MAX_ITERS; ++i)
   {
-    ADReal residual =
+    T residual =
         u_star / NS::von_karman_constant * std::log(NS::E_turb_constant * u_star * dist / nu) - u;
-    ADReal deriv =
-        (1.0 + std::log(NS::E_turb_constant * u_star * dist / nu)) / NS::von_karman_constant;
-    ADReal new_u_star = std::max(1e-20, u_star - residual / deriv);
+    T deriv = (1.0 + std::log(NS::E_turb_constant * u_star * dist / nu)) / NS::von_karman_constant;
+    T new_u_star = std::max(1e-20, u_star - residual / deriv);
 
-    Real rel_err = std::abs((new_u_star.value() - u_star.value()) / new_u_star.value());
+    Real rel_err =
+        std::abs(MetaPhysicL::raw_value(new_u_star - u_star) / MetaPhysicL::raw_value(new_u_star));
 
     u_star = new_u_star;
     if (rel_err < REL_TOLERANCE)
@@ -111,9 +110,13 @@ findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
                  dist,
                  ")");
 }
+template Real findUStar<Real>(const Real & mu, const Real & rho, const Real & u, const Real dist);
+template ADReal
+findUStar<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist);
 
-ADReal
-findyPlus(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist)
+template <typename T>
+T
+findyPlus(const T & mu, const T & rho, const T & u, const Real dist)
 {
   // Fixed point iteration method to find y_plus
   // It should take 3 or 4 iterations
@@ -127,25 +130,29 @@ findyPlus(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
   mooseAssert(dist > 0, "Need a strictly positive wall distance");
 
   Real yPlusLast = 0.0;
-  ADReal yPlus = dist * u * rho / mu; // Assign initial value to laminar
-  const Real rev_yPlusLam = 1.0 / yPlus.value();
-  const ADReal kappa_time_Re = NS::von_karman_constant * u * dist / (mu / rho);
+  T yPlus = dist * u * rho / mu; // Assign initial value to laminar
+  const Real rev_yPlusLam = 1.0 / MetaPhysicL::raw_value(yPlus);
+  const T kappa_time_Re = NS::von_karman_constant * u * dist / (mu / rho);
   unsigned int iters = 0;
 
   do
   {
-    yPlusLast = yPlus.value();
+    yPlusLast = MetaPhysicL::raw_value(yPlus);
     // Negative y plus does not make sense
     yPlus = std::max(NS::min_y_plus, yPlus);
     yPlus = (kappa_time_Re + yPlus) / (1.0 + std::log(NS::E_turb_constant * yPlus));
-  } while (std::abs(rev_yPlusLam * (yPlus.value() - yPlusLast)) > REL_TOLERANCE &&
+  } while (std::abs(rev_yPlusLam * (MetaPhysicL::raw_value(yPlus) - yPlusLast)) > REL_TOLERANCE &&
            ++iters < MAX_ITERS);
 
   return std::max(NS::min_y_plus, yPlus);
 }
+template Real findyPlus<Real>(const Real & mu, const Real & rho, const Real & u, Real dist);
+template ADReal
+findyPlus<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
 
-ADReal
-computeSpeed(const ADRealVectorValue & velocity)
+template <typename T>
+T
+computeSpeed(const libMesh::VectorValue<T> & velocity)
 {
   // if the velocity is zero, then the norm function call fails because AD tries to calculate the
   // derivatives which causes a divide by zero - because d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx.
@@ -153,6 +160,81 @@ computeSpeed(const ADRealVectorValue & velocity)
   // avoid this failure mode.
   return isZero(velocity) ? 1e-42 : velocity.norm();
 }
+template Real computeSpeed<Real>(const libMesh::VectorValue<Real> & velocity);
+template ADReal computeSpeed<ADReal>(const libMesh::VectorValue<ADReal> & velocity);
+
+template <typename T>
+T
+computeShearStrainRateNormSquared(const Moose::Functor<T> & u,
+                                  const Moose::Functor<T> * v,
+                                  const Moose::Functor<T> * w,
+                                  const Moose::ElemArg & elem_arg,
+                                  const Moose::StateArg & state)
+{
+  const auto & grad_u = u.gradient(elem_arg, state);
+  const T Sij_xx = 2.0 * grad_u(0);
+  T Sij_xy = 0.0;
+  T Sij_xz = 0.0;
+  T Sij_yy = 0.0;
+  T Sij_yz = 0.0;
+  T Sij_zz = 0.0;
+
+  const T grad_xx = grad_u(0);
+  T grad_xy = 0.0;
+  T grad_xz = 0.0;
+  T grad_yx = 0.0;
+  T grad_yy = 0.0;
+  T grad_yz = 0.0;
+  T grad_zx = 0.0;
+  T grad_zy = 0.0;
+  T grad_zz = 0.0;
+
+  T trace = Sij_xx / 3.0;
+
+  if (v) // dim >= 2
+  {
+    const auto & grad_v = (*v).gradient(elem_arg, state);
+    Sij_xy = grad_u(1) + grad_v(0);
+    Sij_yy = 2.0 * grad_v(1);
+
+    grad_xy = grad_u(1);
+    grad_yx = grad_v(0);
+    grad_yy = grad_v(1);
+
+    trace += Sij_yy / 3.0;
+
+    if (w) // dim >= 3
+    {
+      const auto & grad_w = (*w).gradient(elem_arg, state);
+
+      Sij_xz = grad_u(2) + grad_w(0);
+      Sij_yz = grad_v(2) + grad_w(1);
+      Sij_zz = 2.0 * grad_w(2);
+
+      grad_xz = grad_u(2);
+      grad_yz = grad_v(2);
+      grad_zx = grad_w(0);
+      grad_zy = grad_w(1);
+      grad_zz = grad_w(2);
+
+      trace += Sij_zz / 3.0;
+    }
+  }
+
+  return (Sij_xx - trace) * grad_xx + Sij_xy * grad_xy + Sij_xz * grad_xz + Sij_xy * grad_yx +
+         (Sij_yy - trace) * grad_yy + Sij_yz * grad_yz + Sij_xz * grad_zx + Sij_yz * grad_zy +
+         (Sij_zz - trace) * grad_zz;
+}
+template Real computeShearStrainRateNormSquared<Real>(const Moose::Functor<Real> & u,
+                                                      const Moose::Functor<Real> * v,
+                                                      const Moose::Functor<Real> * w,
+                                                      const Moose::ElemArg & elem_arg,
+                                                      const Moose::StateArg & state);
+template ADReal computeShearStrainRateNormSquared<ADReal>(const Moose::Functor<ADReal> & u,
+                                                          const Moose::Functor<ADReal> * v,
+                                                          const Moose::Functor<ADReal> * w,
+                                                          const Moose::ElemArg & elem_arg,
+                                                          const Moose::StateArg & state);
 
 /// Bounded element maps for wall treatment
 void
@@ -160,10 +242,10 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_names,
                        const FEProblemBase & fe_problem,
                        const SubProblem & subproblem,
                        const std::set<SubdomainID> & block_ids,
-                       std::map<const Elem *, bool> & wall_bounded_map)
+                       std::unordered_set<const Elem *> & wall_bounded)
 {
 
-  wall_bounded_map.clear();
+  wall_bounded.clear();
   const auto wall_boundary_ids = subproblem.mesh().getBoundaryIDs(wall_boundary_names);
 
   for (const auto & elem : fe_problem.mesh().getMesh().active_element_ptr_range())
@@ -176,7 +258,7 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_names,
         {
           for (const auto side_id : side_bnds)
             if (side_id == wall_id)
-              wall_bounded_map[elem] = true;
+              wall_bounded.insert(elem);
         }
       }
   }
@@ -190,7 +272,6 @@ getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
                 const std::set<SubdomainID> & block_ids,
                 std::map<const Elem *, std::vector<Real>> & dist_map)
 {
-
   dist_map.clear();
 
   for (const auto & elem : fe_problem.mesh().getMesh().active_element_ptr_range())
@@ -204,8 +285,18 @@ getWallDistance(const std::vector<BoundaryName> & wall_boundary_name,
           for (const auto side_id : side_bnds)
             if (side_id == wall_id)
             {
-              const FaceInfo * const fi = subproblem.mesh().faceInfo(elem, i_side);
-              const Real dist = std::abs((fi->elemCentroid() - fi->faceCentroid()) * fi->normal());
+              // The list below stores the face infos with respect to their owning elements,
+              // depending on the block restriction we might encounter situations where the
+              // element outside of the block owns the face info.
+              const auto & neighbor = elem->neighbor_ptr(i_side);
+              const auto elem_has_fi = Moose::FV::elemHasFaceInfo(*elem, neighbor);
+              const auto & elem_for_fi = elem_has_fi ? elem : neighbor;
+              const auto side = elem_has_fi ? i_side : neighbor->which_neighbor_am_i(elem);
+
+              const FaceInfo * const fi = subproblem.mesh().faceInfo(elem_for_fi, side);
+              const auto & elem_centroid =
+                  elem_has_fi ? fi->elemCentroid() : fi->neighborCentroid();
+              const Real dist = std::abs((elem_centroid - fi->faceCentroid()) * fi->normal());
               dist_map[elem].push_back(dist);
             }
         }
@@ -220,7 +311,6 @@ getElementFaceArgs(const std::vector<BoundaryName> & wall_boundary_name,
                    const std::set<SubdomainID> & block_ids,
                    std::map<const Elem *, std::vector<const FaceInfo *>> & face_info_map)
 {
-
   face_info_map.clear();
 
   for (const auto & elem : fe_problem.mesh().getMesh().active_element_ptr_range())
@@ -234,7 +324,15 @@ getElementFaceArgs(const std::vector<BoundaryName> & wall_boundary_name,
           for (const auto side_id : side_bnds)
             if (side_id == wall_id)
             {
-              const FaceInfo * fi = subproblem.mesh().faceInfo(elem, i_side);
+              // The list below stores the face infos with respect to their owning elements,
+              // depending on the block restriction we might encounter situations where the
+              // element outside of the block owns the face info.
+              const auto & neighbor = elem->neighbor_ptr(i_side);
+              const auto elem_has_fi = Moose::FV::elemHasFaceInfo(*elem, neighbor);
+              const auto & elem_for_fi = elem_has_fi ? elem : neighbor;
+              const auto side = elem_has_fi ? i_side : neighbor->which_neighbor_am_i(elem);
+
+              const FaceInfo * const fi = subproblem.mesh().faceInfo(elem_for_fi, side);
               face_info_map[elem].push_back(fi);
             }
         }

@@ -33,6 +33,8 @@ const ExecFlagType EXEC_NONLINEAR_CONVERGENCE = registerDefaultExecFlag("NONLINE
 const ExecFlagType EXEC_POSTCHECK = registerDefaultExecFlag("POSTCHECK");
 const ExecFlagType EXEC_TIMESTEP_END = registerDefaultExecFlag("TIMESTEP_END");
 const ExecFlagType EXEC_TIMESTEP_BEGIN = registerDefaultExecFlag("TIMESTEP_BEGIN");
+const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_ITERATION_END =
+    registerExecFlag("MULTIAPP_FIXED_POINT_ITERATION_END");
 const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_END =
     registerDefaultExecFlag("MULTIAPP_FIXED_POINT_END");
 const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_BEGIN =
@@ -281,6 +283,7 @@ addActionTypes(Syntax & syntax)
 
   registerTask("add_default_nonlinear_convergence", true);
   registerTask("add_default_multiapp_fixed_point_convergence", true);
+  registerTask("add_default_steady_state_convergence", true);
 
   registerTask("chain_control_setup", true);
 
@@ -350,7 +353,9 @@ addActionTypes(Syntax & syntax)
                            "(setup_quadrature)"
                            "(add_convergence)"
                            "(add_default_nonlinear_convergence,"
-                           " add_default_multiapp_fixed_point_convergence)"
+                           " add_default_multiapp_fixed_point_convergence,"
+                           " add_default_steady_state_convergence)"
+                           "(add_positions)"
                            "(add_periodic_bc)"
                            "(add_user_object, add_corrector, add_mesh_modifier)"
                            "(add_distribution)"
@@ -369,7 +374,6 @@ addActionTypes(Syntax & syntax)
                            "(setup_dampers)"
                            "(setup_residual_debug)"
                            "(add_bounds_vectors)"
-                           "(add_positions)"
                            "(add_mesh_division)"  // NearestPositionsDivision uses a Positions
                            "(add_multi_app)"
                            "(add_transfer)"

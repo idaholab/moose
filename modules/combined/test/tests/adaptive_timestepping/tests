@@ -21,6 +21,7 @@
     type = 'RunApp'
     input = 'adapt_tstep_function_change_restart1.i'
     recover = false
+    restep = false
     requirement = "The system shall run the first part of a model used to test restarting with adaptive time steps."
   [../]
 

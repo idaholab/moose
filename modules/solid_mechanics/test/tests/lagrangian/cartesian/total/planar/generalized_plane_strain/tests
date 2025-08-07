@@ -8,5 +8,6 @@
     issues = '#21757'
     design = 'source/kernels/lagrangian/TotalLagrangianWeakPlaneStress.md'
     requirement = '2D generalized plane strain solution shall match the 3D results in the limit of infinite thickness.'
+    capabilities = 'method!=dbg'
   []
 []

@@ -346,7 +346,7 @@ INSADTauMaterialTempl<T>::computeQpProperties()
 
   const auto nu = _mu[_qp] / _rho[_qp];
   const auto transient_part = _has_transient ? 4. / (_dt * _dt) : 0.;
-  _speed = NS::computeSpeed(_relative_velocity[_qp]);
+  _speed = NS::computeSpeed<ADReal>(_relative_velocity[_qp]);
   _tau[_qp] = _alpha / std::sqrt(transient_part + (2. * _speed / _hmax) * (2. * _speed / _hmax) +
                                  9. * (4. * nu / (_hmax * _hmax)) * (4. * nu / (_hmax * _hmax)));
 

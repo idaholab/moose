@@ -9,7 +9,7 @@
 
 import re, os, shutil
 from Tester import Tester
-from TestHarness import util
+from TestHarness import util, TestHarness
 from shlex import quote
 
 class RunApp(Tester):
@@ -53,8 +53,10 @@ class RunApp(Tester):
         # Valgrind
         params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
 
-        params.addParam('libtorch_devices', "The devices to use for this libtorch test ('CPU', 'CUDA', 'MPS')")
-        params.addParam('devices', ['CPU'], "The devices to use for this libtorch or MFEM test ('CPU', 'CUDA', 'HIP', 'MPS'); default ('CPU')")
+        device_list_str = "', '".join(d.upper() for d in TestHarness.validComputeDevices())
+        device_param_doc = f"The devices to use for this libtorch or MFEM test ('{device_list_str}'); device availability depends on library support and compilation settings; default ('CPU')"
+        params.addParam('compute_devices', ['CPU'], device_param_doc)
+
         return params
 
     def __init__(self, name, params):
@@ -76,14 +78,9 @@ class RunApp(Tester):
             if params['no_additional_cli_args']:
                 raise Exception('The parameters "command_proxy" and "no_additional_cli_args" cannot be supplied together')
 
-        if params.isValid('libtorch_devices'):
-            for value in params['libtorch_devices']:
-                if value.lower() not in ['cpu', 'cuda', 'mps']:
-                    raise Exception(f'Unknown libtorch_device "{value}')
-
-        for value in params['devices']:
-            if value.lower() not in ['cpu', 'cuda', 'hip', 'mps']:
-                raise Exception(f'Unknown device "{value}')
+        for value in params['compute_devices']:
+            if value.lower() not in TestHarness.validComputeDevices():
+                raise Exception(f'Unknown device "{value}"')
 
     def getInputFile(self):
         if self.specs.isValid('input'):
@@ -103,9 +100,16 @@ class RunApp(Tester):
         return input_file
 
     def checkRunnable(self, options):
-        if options.enable_recover:
-            if self.specs.isValid('expect_out') or self.specs.isValid('absent_out') or self.specs['should_crash'] == True:
-                self.addCaveats('expect_out RECOVER')
+        if options.enable_recover or options.enable_restep:
+            reason = 'RECOVER' if options.enable_recover else 'RESTEP'
+            caveats = []
+            for param in ['expect_out', 'absent_out']:
+                if self.specs.isValid(param):
+                    caveats.append(param)
+            if self.specs['should_crash'] == True:
+                caveats.append('should_crash')
+            if caveats:
+                self.addCaveats(f'{",".join(caveats)} {reason}')
                 self.setStatus(self.skip)
                 return False
 
@@ -120,12 +124,9 @@ class RunApp(Tester):
                 self.setStatus(self.skip)
                 return False
 
-        if self.specs.isValid('libtorch_devices'):
-            devices_lower = [x.lower() for x in self.specs['libtorch_devices']]
-        else:
-            devices_lower = [x.lower() for x in self.specs['devices']]
-        if options.device not in devices_lower:
-            self.addCaveats(f'{options.device} not in devices')
+        devices_lower = [x.lower() for x in self.specs['compute_devices']]
+        if options.compute_device not in devices_lower:
+            self.addCaveats(f'{options.compute_device} not in compute devices')
             self.setStatus(self.skip)
             return False
 
@@ -246,6 +247,9 @@ class RunApp(Tester):
             # and it is NOT supplied already in the cli-args option
             cli_args.append('--distributed-mesh')
 
+        if specs['restep'] != False and options.enable_restep:
+            cli_args.append('--test-restep')
+
         if '--error' not in cli_args and (not specs["allow_warnings"] or options.error) and not options.allow_warnings:
             cli_args.append('--error')
 
@@ -282,15 +286,10 @@ class RunApp(Tester):
         if options.scaling and specs['scale_refine'] > 0:
             cli_args.insert(0, ' -r ' + str(specs['scale_refine']))
 
-        if specs.isValid('capabilities'):
-            if 'libtorch' in specs['capabilities']:
-                cli_args.append(f'--libtorch-device {options.device}')
-            if 'mfem' in specs['capabilities']:
-                cli_args.append(f'Executioner/device={options.device}')
-
         # Get the number of processors and threads the Tester requires
         ncpus = self.getProcs(options)
         nthreads = self.getThreads(options)
+        cli_args.append(f'--compute-device={options.compute_device}')
 
         if specs['redirect_output'] and ncpus > 1:
             cli_args.append('--keep-cout --redirect-output ' + self.name())

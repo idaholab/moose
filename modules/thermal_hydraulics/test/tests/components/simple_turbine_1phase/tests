@@ -9,6 +9,7 @@
     override_columns = 'energy_diff mass_diff momentum_diff'
     override_abs_zero = '5e-6 2e-7 1e-4'
     override_rel_err = '0 0 0'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to model a simple turbine in 1D single phase compressible flow and show mass and energy conservation.'
   []
 
@@ -16,6 +17,7 @@
     type = 'Exodiff'
     input = 'phy.test.i'
     exodiff = 'phy.test_out.e'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to model a simple turbine in 1D single phase compressible flow.'
   []
 
@@ -23,6 +25,7 @@
     type = 'CSVDiff'
     input = 'clg.test.i'
     csvdiff = 'clg.test_csv.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to control the turbine power in a 1D single phase compressible flow simulation with a simple turbine.'
   []
 

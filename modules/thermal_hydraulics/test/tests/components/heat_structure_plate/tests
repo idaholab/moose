@@ -10,6 +10,7 @@
       input = 'by_hsmaterials.i'
       exodiff = 'transient.e'
       no_error_deprecated = True
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'with properties defined by HeatStructureMaterials.'
     []
     [by_materials]

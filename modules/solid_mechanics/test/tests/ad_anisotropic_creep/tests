@@ -8,6 +8,7 @@
     min_parallel = 2
     custom_cmp = 'generalized.exodiff'
     requirement = 'The system shall avoid regression on material time step and combined anisotropic creep computations'
+    capabilities = 'method!=dbg'
   []
   [ad_aniso_creep_x_3d]
     type = 'CSVDiff'
@@ -17,6 +18,7 @@
     min_parallel = 2
     rel_err = 1.0e-4
     abs_zero = 5.0e-7
+    capabilities = 'method!=dbg'
   []
   [aniso_creep_x_3d]
     type = 'CSVDiff'
@@ -26,6 +28,7 @@
     min_parallel = 2
     rel_err = 1.0e-4
     abs_zero = 5.0e-7
+    capabilities = 'method!=dbg'
   []
   [ad_aniso_creep_x_3d_aniso_elasticity]
     type = 'CSVDiff'
@@ -75,6 +78,7 @@
     min_parallel = 2
     rel_err = 1.0e-4
     abs_zero = 5.0e-7
+    capabilities = 'method!=dbg'
   []
   [ad_aniso_creep_y_3d]
     type = 'CSVDiff'
@@ -84,6 +88,7 @@
     min_parallel = 2
     rel_err = 1.0e-5
     abs_zero = 1.0e-7
+    capabilities = 'method!=dbg'
   []
   [ad_aniso_creep_z_3d]
     type = 'CSVDiff'
@@ -93,6 +98,7 @@
     min_parallel = 2
     rel_err = 1.0e-5
     abs_zero = 1.0e-7
+    capabilities = 'method!=dbg'
   []
   [ad_aniso_iso_iso]
     type = 'CSVDiff'
@@ -105,6 +111,7 @@
     min_parallel = 2
     rel_err = 1.0e-5
     abs_zero = 1.0e-8
+    capabilities = 'method!=dbg'
   []
   [jac_ad]
     type = 'PetscJacobianTester'
@@ -145,6 +152,7 @@
     min_parallel = 2
     rel_err = 1.0e-4
     abs_zero = 1.0e-8
+    capabilities = 'method!=dbg'
   []
   [aniso_creep_integration_error]
     type = 'CSVDiff'

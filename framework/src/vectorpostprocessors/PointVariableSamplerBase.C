@@ -60,8 +60,6 @@ PointVariableSamplerBase::PointVariableSamplerBase(const InputParameters & param
 void
 PointVariableSamplerBase::initialize()
 {
-  SamplerBase::initialize();
-
   PointSamplerBase::initialize();
 
   // Check for elemental variables, which are ill-defined on faces for this object

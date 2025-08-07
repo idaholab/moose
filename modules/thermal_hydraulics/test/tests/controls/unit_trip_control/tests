@@ -5,6 +5,7 @@
     csvdiff = 'no_latch.csv'
     cli_args = 'Outputs/file_base=no_latch'
     group = 'controls'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall provide a unit trip component that report true if the trip condition was met and false otherwise.'
     design = 'UnitTripControl.md'
     issues = '#619'
@@ -15,6 +16,7 @@
     input = 'test.i'
     csvdiff = 'latch.csv'
     cli_args = 'ControlLogic/trip_ctrl/latch=true Outputs/file_base=latch'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall provide a unit trip component that stays in tripped state after the trip happened.'
     design = 'UnitTripControl.md'
     issues = '#619'

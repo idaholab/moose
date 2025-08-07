@@ -38,7 +38,7 @@ all: $(plugin_FILE)
 $(plugin_LAFILE) : $(plugin_OBJECTS) $(plugin_INCLUDES)
 	@echo "Linking plugin "$(plugin_NAME)"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) -o $@ $(plugin_OBJECTS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(CURDIR)
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) -o $@ $(plugin_OBJECTS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(CURDIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(plugin_LAFILE) $(CURDIR)
 
 # here we copy the lib*.so file to the expected plugin name and uninstall the libtool clutter right away

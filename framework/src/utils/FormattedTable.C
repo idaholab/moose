@@ -189,7 +189,7 @@ FormattedTable::addRow(Real time)
 }
 
 Real
-FormattedTable::getLastTime()
+FormattedTable::getLastTime() const
 {
   mooseAssert(!empty(), "No Data stored in the FormattedTable");
   return _data.rbegin()->first;
@@ -423,7 +423,7 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
       printRow(_data[_output_row_index], align);
   }
 
-  _output_file.flush();
+  close();
 }
 
 void

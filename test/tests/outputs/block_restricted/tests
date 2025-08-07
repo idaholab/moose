@@ -19,4 +19,15 @@
     # oversampling outputs a warning in recover
     allow_warnings = true
   []
+  [block_restricted_vars]
+    type = 'Exodiff'
+    prereq = 'serialized'
+    input = 'block.i'
+    # we add a block restriction. Keep u block-restricted to all blocks to avoid changing the solution
+    cli_args = " Outputs/out/hide='ignore' Variables/u/block='0 1 2 3' AuxVariables/v/block='1 2 3' Problem/kernel_coverage_check=false"
+    exodiff = 'block_out.e'
+    requirement = 'The system shall be able to block restrict exodus output by creating a mesh clone and reducing it to specified blocks, serializing the solution, and block-restricting sampled variables to the intersection of the variable and sampling block restrictions.'
+    # oversampling outputs a warning in recover
+    allow_warnings = true
+  []
 []

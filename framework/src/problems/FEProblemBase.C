@@ -411,6 +411,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _dt_old(declareRestartableData<Real>("dt_old")),
     _need_to_add_default_nonlinear_convergence(false),
     _need_to_add_default_multiapp_fixed_point_convergence(false),
+    _need_to_add_default_steady_state_convergence(false),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
     _linear_systems(_num_linear_sys, nullptr),
@@ -2542,6 +2543,17 @@ FEProblemBase::addDefaultMultiAppFixedPointConvergence(const InputParameters & p
   addConvergence(class_name, getMultiAppFixedPointConvergenceName(), params);
 }
 
+void
+FEProblemBase::addDefaultSteadyStateConvergence(const InputParameters & params_to_apply)
+{
+  const std::string class_name = "DefaultSteadyStateConvergence";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.applyParameters(params_to_apply);
+  params.applyParameters(parameters());
+  params.set<bool>("added_as_default") = true;
+  addConvergence(class_name, getSteadyStateConvergenceName(), params);
+}
+
 bool
 FEProblemBase::hasFunction(const std::string & name, const THREAD_ID tid)
 {
@@ -4235,9 +4247,9 @@ FEProblemBase::addPostprocessor(const std::string & pp_name,
 {
   // Check for name collision
   if (hasUserObject(name))
-    mooseError("A UserObject with the name \"",
-               name,
-               "\" already exists.  You may not add a Postprocessor by the same name.");
+    mooseError("A ",
+               getUserObjectBase(name).typeAndName(),
+               " already exists. You may not add a Postprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
 }
@@ -4249,9 +4261,9 @@ FEProblemBase::addVectorPostprocessor(const std::string & pp_name,
 {
   // Check for name collision
   if (hasUserObject(name))
-    mooseError("A UserObject with the name \"",
-               name,
-               "\" already exists.  You may not add a VectorPostprocessor by the same name.");
+    mooseError("A ",
+               getUserObjectBase(name).typeAndName(),
+               " already exists. You may not add a VectorPostprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
 }
@@ -4263,8 +4275,9 @@ FEProblemBase::addReporter(const std::string & type,
 {
   // Check for name collision
   if (hasUserObject(name))
-    mooseError(std::string("A UserObject with the name \"") + name +
-               "\" already exists.  You may not add a Reporter by the same name.");
+    mooseError("A ",
+               getUserObjectBase(name).typeAndName(),
+               " already exists. You may not add a Reporter by the same name.");
 
   addUserObject(type, name, parameters);
 }
@@ -6614,6 +6627,10 @@ void
 FEProblemBase::restoreSolutions()
 {
   TIME_SECTION("restoreSolutions", 5, "Restoring Solutions");
+
+  if (!_not_zeroed_tagged_vectors.empty())
+    paramError("not_zeroed_tag_vectors",
+               "There is currently no way to restore not-zeroed vectors.");
 
   for (auto & sys : _solver_systems)
   {
@@ -9077,6 +9094,12 @@ FEProblemBase::setMultiAppFixedPointConvergenceName(const ConvergenceName & conv
   _multiapp_fixed_point_convergence_name = convergence_name;
 }
 
+void
+FEProblemBase::setSteadyStateConvergenceName(const ConvergenceName & convergence_name)
+{
+  _steady_state_convergence_name = convergence_name;
+}
+
 const std::vector<ConvergenceName> &
 FEProblemBase::getNonlinearConvergenceNames() const
 {
@@ -9116,6 +9139,15 @@ FEProblemBase::getMultiAppFixedPointConvergenceName() const
     return _multiapp_fixed_point_convergence_name.value();
   else
     mooseError("The fixed point convergence name has not been set.");
+}
+
+const ConvergenceName &
+FEProblemBase::getSteadyStateConvergenceName() const
+{
+  if (_steady_state_convergence_name)
+    return _steady_state_convergence_name.value();
+  else
+    mooseError("The steady convergence name has not been set.");
 }
 
 void

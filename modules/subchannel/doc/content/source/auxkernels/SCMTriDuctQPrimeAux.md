@@ -4,7 +4,7 @@
 
 ## Description
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 The `SCMTriDuctQPrimeAux` AuxKernel is used to compute the axial heat rate on a hexagonal duct surface.
 

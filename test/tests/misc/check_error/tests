@@ -712,7 +712,7 @@
   [uo_pps_name_collision_test]
     type = 'RunException'
     input = 'uo_pps_name_collision_test.i'
-    expect_err = 'A UserObject with the name "\w+" already exists'
+    expect_err = 'A MTUserObject "\w+" already exists'
 
     requirement = 'The system shall report an error when a UserObject and a Postprocessor are added with the same names.'
     issues = '#1405'
@@ -721,10 +721,19 @@
   [uo_vector_pps_name_collision_test]
     type = 'RunException'
     input = 'uo_vector_pps_name_collision_test.i'
-    expect_err = 'A UserObject with the name "\w+" already exists'
+    expect_err = 'A MTUserObject "\w+" already exists'
 
     requirement = 'The system shall report and error when a UserObject and a VectorPostprocessor are added with the same names.'
     issues = '#1405'
+  []
+
+  [uo_reporter_name_collision_test]
+    type = 'RunException'
+    input = 'uo_reporter_name_collision_test.i'
+    expect_err = 'A MTUserObject "\w+" already exists'
+
+    requirement = 'The system shall report an error when a UserObject and a Reporter are added with the same names.'
+    issues = '#31231'
   []
 
   [wrong_object_test]

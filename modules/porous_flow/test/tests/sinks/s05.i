@@ -99,45 +99,6 @@
   []
 []
 
-[Functions]
-  [mass10]
-    type = ParsedFunction
-    expression = 'vol*por*dens0*exp(pp/bulk)*if(pp>=0,1,pow(1+pow(-al*pp,1.0/(1-m)),-m))'
-    symbol_names = 'vol por dens0 pp bulk al m'
-    symbol_values = '0.25 0.1 1.1 p10 1.3 1.1 0.5'
-  []
-  [rate10]
-    type = ParsedFunction
-    expression = 'if(pp>center,fcn,fcn*exp(-0.5*(pp-center)*(pp-center)/sd/sd))'
-    symbol_names = 'fcn pp  center sd'
-    symbol_values = '6   p10 0.9    0.5'
-  []
-  [mass10_expect]
-    type = ParsedFunction
-    expression = 'mass_prev-rate*area*dt'
-    symbol_names = 'mass_prev rate     area dt'
-    symbol_values = 'm10_prev  m10_rate 0.5 2E-3'
-  []
-  [mass11]
-    type = ParsedFunction
-    expression = 'vol*por*dens0*exp(pp/bulk)*if(pp>=0,1,pow(1+pow(-al*pp,1.0/(1-m)),-m))'
-    symbol_names = 'vol por dens0 pp bulk al m'
-    symbol_values = '0.25 0.1 1.1 p11 1.3 1.1 0.5'
-  []
-  [rate11]
-    type = ParsedFunction
-    expression = 'if(pp>center,fcn,fcn*exp(-0.5*(pp-center)*(pp-center)/sd/sd))'
-    symbol_names = 'fcn pp  center sd'
-    symbol_values = '6   p11 0.9    0.5'
-  []
-  [mass11_expect]
-    type = ParsedFunction
-    expression = 'mass_prev-rate*area*dt'
-    symbol_names = 'mass_prev rate     area dt'
-    symbol_values = 'm11_prev  m11_rate 0.5 2E-3'
-  []
-[]
-
 [Postprocessors]
   [flux10]
     type = PointValue
@@ -157,25 +118,37 @@
     execute_on = 'initial timestep_end'
   []
   [m10]
-    type = FunctionValuePostprocessor
-    function = mass10
+    type = ParsedPostprocessor
+    expression = 'vol*por*dens0*exp(p10/bulk)*if(p10>=0,1,pow(1+pow(-al*p10,1.0/(1-m)),-m))'
+    constant_names = 'vol por dens0 bulk al m'
+    constant_expressions = '0.25 0.1 1.1 1.3 1.1 0.5'
+    pp_names = 'p10'
     execute_on = 'initial timestep_end'
   []
+  [dm10]
+    type = ChangeOverTimePostprocessor
+    postprocessor = m10
+    outputs = none
+  []
   [m10_prev]
-    type = FunctionValuePostprocessor
-    function = mass10
-    execute_on = 'timestep_begin'
+    type = ParsedPostprocessor
+    expression = 'm10 - dm10'
+    pp_names = 'm10 dm10'
     outputs = 'console'
   []
   [m10_rate]
-    type = FunctionValuePostprocessor
-    function = rate10
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'if(p10>center,fcn,fcn*exp(-0.5*(p10-center)*(p10-center)/sd/sd))'
+    constant_names = 'fcn center sd'
+    constant_expressions = '6 0.9 0.5'
+    pp_names = 'p10'
   []
   [m10_expect]
-    type = FunctionValuePostprocessor
-    function = mass10_expect
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'm10_prev-m10_rate*area*dt'
+    constant_names = 'area dt'
+    constant_expressions = '0.5 2E-3'
+    pp_names = 'm10_prev m10_rate'
   []
   [p01]
     type = PointValue
@@ -190,25 +163,37 @@
     execute_on = 'initial timestep_end'
   []
   [m11]
-    type = FunctionValuePostprocessor
-    function = mass11
+    type = ParsedPostprocessor
+    expression = 'vol*por*dens0*exp(p11/bulk)*if(p11>=0,1,pow(1+pow(-al*p11,1.0/(1-m)),-m))'
+    constant_names = 'vol por dens0 bulk al m'
+    constant_expressions = '0.25 0.1 1.1 1.3 1.1 0.5'
+    pp_names = 'p11'
     execute_on = 'initial timestep_end'
   []
+  [dm11]
+    type = ChangeOverTimePostprocessor
+    postprocessor = m11
+    outputs = none
+  []
   [m11_prev]
-    type = FunctionValuePostprocessor
-    function = mass11
-    execute_on = 'timestep_begin'
+    type = ParsedPostprocessor
+    expression = 'm11 - dm11'
+    pp_names = 'm11 dm11'
     outputs = 'console'
   []
   [m11_rate]
-    type = FunctionValuePostprocessor
-    function = rate11
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'if(p11>center,fcn,fcn*exp(-0.5*(p11-center)*(p11-center)/sd/sd))'
+    constant_names = 'fcn center sd'
+    constant_expressions = '6 0.9 0.5'
+    pp_names = 'p11'
   []
   [m11_expect]
-    type = FunctionValuePostprocessor
-    function = mass11_expect
-    execute_on = 'timestep_end'
+    type = ParsedPostprocessor
+    expression = 'm11_prev-m11_rate*area*dt'
+    constant_names = 'area dt'
+    constant_expressions = '0.5 2E-3'
+    pp_names = 'm11_prev m11_rate'
   []
 []
 

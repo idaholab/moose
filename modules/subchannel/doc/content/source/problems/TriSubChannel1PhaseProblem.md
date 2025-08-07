@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment to provide extra spacing
 
 This class solves for the subchannel flow variables in the case of subchannels/pins arranged in a triangular lattice.
 It inherits from the base class : `SubChannel1PhaseProblem`. Information regarding the solver can be found in [subchannel_theory.md].

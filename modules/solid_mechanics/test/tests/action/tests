@@ -154,6 +154,7 @@
       expect_out = "all: CONSTANT CONSTANT CONSTANT\n.*\nall: MONOMIAL MONOMIAL MONOMIAL\n"
       cli_args = "Physics/SolidMechanics/QuasiStatic/verbose=true"
       detail = "with the default options when parameters are not explicitly specified,"
+      capabilities = 'method!=dbg'
     []
     [material_output_order.single]
       type = RunApp
@@ -162,6 +163,7 @@
       cli_args = "Physics/SolidMechanics/QuasiStatic/verbose=true "
                  "Physics/SolidMechanics/QuasiStatic/material_output_order=FIRST"
       detail = "with given order and default family,"
+      capabilities = 'method!=dbg'
     []
     [material_output_order.family_single]
       type = RunApp
@@ -171,6 +173,7 @@
                  "Physics/SolidMechanics/QuasiStatic/material_output_order=FIRST "
                  "Physics/SolidMechanics/QuasiStatic/material_output_family=LAGRANGE"
       detail = "with given order and family,"
+      capabilities = 'method!=dbg'
     []
     [material_output_order.error1]
       type = RunException
@@ -180,6 +183,7 @@
                    "MONOMIAL; 1 to assign all outputs the same value, or the same size as the number "
                    "of generate outputs listed."
       detail = "with an error message when the wrong number of parameters are supplied,"
+      capabilities = 'method!=dbg'
     []
     [material_output_first_lagrange_manual]
       type = Exodiff
@@ -188,12 +192,14 @@
       max_parallel = 1
       max_threads = 1
       detail = "generates correct output using an AuxKernel,"
+      capabilities = 'method!=dbg'
     []
     [material_output_first_lagrange_automatic]
       type = Exodiff
       input = "material_output_first_lagrange_automatic.i"
       exodiff = "material_output_first_lagrange_automatic_out.e"
       detail = "generates correct output using the action."
+      capabilities = 'method!=dbg'
     []
   []
   [custom_output]

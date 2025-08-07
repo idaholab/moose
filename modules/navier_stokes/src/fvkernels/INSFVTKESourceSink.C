@@ -120,7 +120,7 @@ INSFVTKESourceSink::computeQpResidual()
 
     for (unsigned int i = 0; i < distance_vec.size(); i++)
     {
-      const auto parallel_speed = NS::computeSpeed(
+      const auto parallel_speed = NS::computeSpeed<ADReal>(
           velocity - velocity * face_info_vec[i]->normal() * face_info_vec[i]->normal());
       const auto distance = distance_vec[i];
 
@@ -128,7 +128,7 @@ INSFVTKESourceSink::computeQpResidual()
       if (_wall_treatment == NS::WallTreatmentEnum::NEQ) // Non-equilibrium / Non-iterative
         y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE) * rho / mu;
       else // Equilibrium / Iterative
-        y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
+        y_plus = NS::findyPlus<ADReal>(mu, rho, std::max(parallel_speed, 1e-10), distance);
 
       y_plus_vec.push_back(y_plus);
 

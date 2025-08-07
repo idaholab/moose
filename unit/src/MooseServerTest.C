@@ -1028,8 +1028,8 @@ label: uniform_refine                         text: uniform_refine = ${1:0}     
 label: up_direction                           text: up_direction =                                      desc: Specify what axis... pos: [6.0]-[6.0] kind: 13 format: regular
 label: use_displaced_mesh                     text: use_displaced_mesh = ${1:true}                      desc: Create the displa... pos: [6.0]-[6.0] kind:  8 format: snippet
 label: use_split                              text: use_split = ${1:false}                              desc: Use split distrib... pos: [6.0]-[6.0] kind:  8 format: snippet
-label: *                                      text: [block_name]\n  type = \n  $0\n[]                   desc: custom user named... pos: [6.0]-[6.0] kind:  6 format: snippet
-label: Partitioner                            text: [Partitioner]\n  type = \n  $0\n[]                  desc: application named... pos: [6.0]-[6.0] kind: 22 format: snippet
+label: *                                      text: [block_name]\n  type = $1\n  $0\n[]                 desc: custom user named... pos: [6.0]-[6.0] kind:  6 format: snippet
+label: Partitioner                            text: [Partitioner]\n  type = $1\n  $0\n[]                desc: application named... pos: [6.0]-[6.0] kind: 22 format: snippet
 )INPUT";
 
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
@@ -1061,7 +1061,7 @@ label: Debug                            text: [Debug]\n  $0\n[]                 
 label: DeprecatedBlock                  text: [DeprecatedBlock]\n  $0\n[]                  desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: DiracKernels                     text: [DiracKernels]\n  $0\n[]                     desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: Distributions                    text: [Distributions]\n  $0\n[]                    desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
-label: Executioner                      text: [Executioner]\n  type = \n  $0\n[]           desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
+label: Executioner                      text: [Executioner]\n  type = $1\n  $0\n[]         desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: Executors                        text: [Executors]\n  $0\n[]                        desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: FVBCs                            text: [FVBCs]\n  $0\n[]                            desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: FVICs                            text: [FVICs]\n  $0\n[]                            desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
@@ -1074,7 +1074,7 @@ label: ICs                              text: [ICs]\n  $0\n[]                   
 label: InterfaceKernels                 text: [InterfaceKernels]\n  $0\n[]                 desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: Kernels                          text: [Kernels]\n  $0\n[]                          desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: Materials                        text: [Materials]\n  $0\n[]                        desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
-label: Mesh                             text: [Mesh]\n  file = \n  $0\n[]                  desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
+label: Mesh                             text: [Mesh]\n  file = $1\n  $0\n[]                desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: MeshDivisions                    text: [MeshDivisions]\n  $0\n[]                    desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: MultiApps                        text: [MultiApps]\n  $0\n[]                        desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: NodalKernels                     text: [NodalKernels]\n  $0\n[]                     desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
@@ -1107,8 +1107,8 @@ TEST_F(MooseServerTest, CompletionValueActiveBlocks)
   int request_char = 12;
   std::size_t expect_count = 2;
   std::string expect_items = R"INPUT(
-label: u text: u desc: subblock name pos: [9.12]-[9.19] kind:  7 format: regular
-label: v text: v desc: subblock name pos: [9.12]-[9.19] kind:  7 format: regular
+label: u text: u desc: subblock name pos: [9.12]-[9.19] kind:  7 format: snippet
+label: v text: v desc: subblock name pos: [9.12]-[9.19] kind:  7 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
@@ -1122,8 +1122,8 @@ TEST_F(MooseServerTest, CompletionValueBooleanParam)
   int request_char = 10;
   std::size_t expect_count = 2;
   std::string expect_items = R"INPUT(
-label: false text: false desc:  pos: [33.10]-[33.15] kind:  8 format: regular
-label: true  text: true  desc:  pos: [33.10]-[33.15] kind:  8 format: regular
+label: false text: false desc:  pos: [33.10]-[33.15] kind:  8 format: snippet
+label: true  text: true  desc:  pos: [33.10]-[33.15] kind:  8 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
@@ -1137,10 +1137,10 @@ TEST_F(MooseServerTest, CompletionValueEnumsAndDocs)
   int request_char = 18;
   std::size_t expect_count = 4;
   std::string expect_items = R"INPUT(
-label: ERROR   text: ERROR   desc: Throw a MOOSE err... pos: [39.18]-[39.22] kind: 20 format: regular
-label: INFO    text: INFO    desc: Output an informa... pos: [39.18]-[39.22] kind: 20 format: regular
-label: NONE    text: NONE    desc: No message will b... pos: [39.18]-[39.22] kind: 20 format: regular
-label: WARNING text: WARNING desc: Output a warning ... pos: [39.18]-[39.22] kind: 20 format: regular
+label: ERROR   text: ERROR   desc: Throw a MOOSE err... pos: [39.18]-[39.22] kind: 20 format: snippet
+label: INFO    text: INFO    desc: Output an informa... pos: [39.18]-[39.22] kind: 20 format: snippet
+label: NONE    text: NONE    desc: No message will b... pos: [39.18]-[39.22] kind: 20 format: snippet
+label: WARNING text: WARNING desc: Output a warning ... pos: [39.18]-[39.22] kind: 20 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
@@ -1154,11 +1154,11 @@ TEST_F(MooseServerTest, CompletionValueAllowedTypes)
   int request_char = 9;
   std::size_t expect_count = 5;
   std::string expect_items = R"INPUT(
-label: Eigenvalue         text: Eigenvalue                       desc: Eigenvalue solves... pos: [30.9]-[30.18] kind: 25 format: regular
-label: InversePowerMethod text: InversePowerMethod\nbx_norm = \n desc: Inverse power met... pos: [30.9]-[30.18] kind: 25 format: regular
-label: NonlinearEigen     text: NonlinearEigen\nbx_norm = \n     desc: Executioner for e... pos: [30.9]-[30.18] kind: 25 format: regular
-label: Steady             text: Steady                           desc: Executioner for s... pos: [30.9]-[30.18] kind: 25 format: regular
-label: Transient          text: Transient                        desc: Executioner for t... pos: [30.9]-[30.18] kind: 25 format: regular
+label: Eigenvalue         text: Eigenvalue                           desc: Eigenvalue solves... pos: [30.9]-[30.18] kind: 25 format: snippet
+label: InversePowerMethod text: InversePowerMethod\nbx_norm = $1\n$0 desc: Inverse power met... pos: [30.9]-[30.18] kind: 25 format: snippet
+label: NonlinearEigen     text: NonlinearEigen\nbx_norm = $1\n$0     desc: Executioner for e... pos: [30.9]-[30.18] kind: 25 format: snippet
+label: Steady             text: Steady                               desc: Executioner for s... pos: [30.9]-[30.18] kind: 25 format: snippet
+label: Transient          text: Transient                            desc: Executioner for t... pos: [30.9]-[30.18] kind: 25 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
@@ -1172,10 +1172,10 @@ TEST_F(MooseServerTest, CompletionValueInputLookups)
   int request_char = 21;
   std::size_t expect_count = 4;
   std::string expect_items = R"INPUT(
-label: disp_x text: disp_x desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18 format: regular
-label: disp_y text: disp_y desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18 format: regular
-label: u      text: u      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18 format: regular
-label: v      text: v      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18 format: regular
+label: disp_x text: disp_x desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18 format: snippet
+label: disp_y text: disp_y desc: from /AuxVariables/* pos: [26.21]-[26.27] kind: 18 format: snippet
+label: u      text: u      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18 format: snippet
+label: v      text: v      desc: from /Variables/*    pos: [26.21]-[26.27] kind: 18 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 }
@@ -1392,7 +1392,7 @@ TEST_F(MooseServerTest, CompletionPartialInputCases)
 label: ghosted_boundaries           text: ghosted_boundaries =            desc: Boundaries to be ... pos: [3.2]-[3.6] kind: 14 format: regular
 label: ghosted_boundaries_inflation text: ghosted_boundaries_inflation =  desc: If you are using ... pos: [3.2]-[3.6] kind: 14 format: regular
 label: ghosting_patch_size          text: ghosting_patch_size =           desc: The number of nea... pos: [3.2]-[3.6] kind: 14 format: regular
-label: *                            text: [ghos]\n  type = \n  $0\n[]     desc: custom user named... pos: [3.2]-[3.6] kind:  6 format: snippet
+label: *                            text: [ghos]\n  type = $1\n  $0\n[]   desc: custom user named... pos: [3.2]-[3.6] kind:  6 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
@@ -1402,8 +1402,8 @@ label: *                            text: [ghos]\n  type = \n  $0\n[]     desc: 
   request_char = 5;
   expect_count = 2;
   expect_items = R"INPUT(
-label: FVInitialCondition text: FVInitialCondition]\n  type = \n  $0\n[] desc: application named... pos: [7.5]-[7.6] kind: 22 format: snippet
-label: InitialCondition   text: InitialCondition]\n  type = \n  $0\n[]   desc: application named... pos: [7.5]-[7.6] kind: 22 format: snippet
+label: FVInitialCondition text: FVInitialCondition]\n  type = $1\n  $0\n[] desc: application named... pos: [7.5]-[7.6] kind: 22 format: snippet
+label: InitialCondition   text: InitialCondition]\n  type = $1\n  $0\n[]   desc: application named... pos: [7.5]-[7.6] kind: 22 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
@@ -1413,8 +1413,8 @@ label: InitialCondition   text: InitialCondition]\n  type = \n  $0\n[]   desc: a
   request_char = 15;
   expect_count = 2;
   expect_items = R"INPUT(
-label: u text: u desc: from /Variables/* pos: [16.15]-[16.15] kind: 18 format: regular
-label: v text: v desc: from /Variables/* pos: [16.15]-[16.15] kind: 18 format: regular
+label: u text: u desc: from /Variables/* pos: [16.15]-[16.15] kind: 18 format: snippet
+label: v text: v desc: from /Variables/* pos: [16.15]-[16.15] kind: 18 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
@@ -1424,9 +1424,9 @@ label: v text: v desc: from /Variables/* pos: [16.15]-[16.15] kind: 18 format: r
   request_char = 6;
   expect_count = 3;
   expect_items = R"INPUT(
-label: TimeIntegrator  text: TimeIntegrator]\n  type = \n  $0\n[] desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
-label: TimeStepper     text: TimeStepper]\n  type = \n  $0\n[]    desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
-label: TimeSteppers    text: TimeSteppers]\n  $0\n[]              desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
+label: TimeIntegrator  text: TimeIntegrator]\n  type = $1\n  $0\n[] desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
+label: TimeStepper     text: TimeStepper]\n  type = $1\n  $0\n[]    desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
+label: TimeSteppers    text: TimeSteppers]\n  $0\n[]                desc: application named... pos: [21.3]-[21.6] kind: 22 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 
@@ -1436,11 +1436,11 @@ label: TimeSteppers    text: TimeSteppers]\n  $0\n[]              desc: applicat
   request_char = 23;
   expect_count = 5;
   expect_items = R"INPUT(
-label: 1                 text: 1                 desc:  pos: [27.23]-[27.23] kind: 20 format: regular
-label: 2                 text: 2                 desc:  pos: [27.23]-[27.23] kind: 20 format: regular
-label: 3                 text: 3                 desc:  pos: [27.23]-[27.23] kind: 20 format: regular
-label: DEFAULT           text: DEFAULT           desc:  pos: [27.23]-[27.23] kind: 20 format: regular
-label: PROBLEM_DIMENSION text: PROBLEM_DIMENSION desc:  pos: [27.23]-[27.23] kind: 20 format: regular
+label: 1                 text: 1                 desc:  pos: [27.23]-[27.23] kind: 20 format: snippet
+label: 2                 text: 2                 desc:  pos: [27.23]-[27.23] kind: 20 format: snippet
+label: 3                 text: 3                 desc:  pos: [27.23]-[27.23] kind: 20 format: snippet
+label: DEFAULT           text: DEFAULT           desc:  pos: [27.23]-[27.23] kind: 20 format: snippet
+label: PROBLEM_DIMENSION text: PROBLEM_DIMENSION desc:  pos: [27.23]-[27.23] kind: 20 format: snippet
 )INPUT";
   check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
 

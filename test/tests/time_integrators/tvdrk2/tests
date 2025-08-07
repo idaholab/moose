@@ -10,6 +10,7 @@
       type = 'Exodiff'
       input = '1d-linear.i'
       exodiff = '1d-linear_out.e'
+      restep = false # See mooseError at the end of ExplicitTVDRK2::solve()
 
       detail = "1D elements with linear finite element shape functions and"
     []
@@ -19,6 +20,7 @@
       input = '2d-quadratic.i'
       exodiff = '2d-quadratic_out.e'
       abs_zero = 1e-8
+      restep = false # See mooseError at the end of ExplicitTVDRK2::solve()
 
       detail = "2D elements with quadratic finite element shape functions."
     []

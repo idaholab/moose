@@ -80,5 +80,5 @@ protected:
   PerfID _final_timer;
 
 private:
-  bool _last_solve_converged;
+  bool _last_solve_converged = true;
 };

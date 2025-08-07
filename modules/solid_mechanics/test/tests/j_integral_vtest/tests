@@ -10,6 +10,7 @@
     max_parallel = 1
     requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
                   'including the J integral for surface breaking elliptical cracks.'
+    capabilities = 'method!=dbg'
   []
   [J_ellip_cm]
     type = 'CSVDiff'
@@ -21,6 +22,7 @@
     requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
                   'including the J integral for surface breaking elliptical cracks using the crack '
                   'mouth specification.'
+    capabilities = 'method!=dbg'
   []
   [J_ellip_cm_ad]
     type = 'CSVDiff'
@@ -30,10 +32,10 @@
               'j_int_surfbreak_ellip_crack_sym_mm_cm_ad_out_J_3_0001.csv'
     max_parallel = 1
     valgrind = 'none'
-    capabilities = 'method=opt'
     requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
                   'including the J integral for surface breaking elliptical cracks using the crack '
                   'mouth specification computing the system Jacobian via automatic differentiation.'
+    capabilities = 'method!=dbg'
   []
   [j_ellip_cfp]
     type = 'CSVDiff'
@@ -45,6 +47,7 @@
     requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
                   'including the J integral for surface breaking elliptical cracks with crack face '
                   'pressure.'
+    capabilities = 'method!=dbg'
   []
   [J_ellip_cm_cfp]
     type = 'CSVDiff'
@@ -56,6 +59,7 @@
     requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
                   'including the J integral for surface breaking elliptical cracks with crack face '
                   'pressure and crack mouth boundary specified.'
+    capabilities = 'method!=dbg'
   []
   [c_int_surfbreak_ellip_crack_sym_mm]
     design = 'syntax/DomainIntegral/index.md'
@@ -68,6 +72,7 @@
     heavy = true
     requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
                   'including the C integral for surface breaking elliptical cracks.'
+    capabilities = 'method!=dbg'
   []
 
   [c_int_surfbreak_ellip_crack_sym_mm_ad]
@@ -83,6 +88,7 @@
                   'including the C integral for surface breaking elliptical cracks using automatic '
                   'differentiation.'
     rel_err = 1.0e-4
+    capabilities = 'method!=dbg'
   []
   [j_int_fgm_sif]
     type = 'CSVDiff'
@@ -93,6 +99,7 @@
     requirement = 'The Domain Integral Action shall compute stress intensity factors from the '
                   'interaction integral for a crack perpendicular to a bi-material interface, '
                   'treating the interface as a functionally-graded material.'
+    capabilities = 'method!=dbg'
   []
   [j_int_fgm_sif_error]
     type = 'RunException'
@@ -101,6 +108,7 @@
     requirement = "The Domain Integral shall error out if the user input does not consistently "
                   "define the required material properties to consider extra interaction integral "
                   "terms for functionally graded materials."
+    capabilities = 'method!=dbg'
   []
   [fgm_5]
     issues = '#23313'
@@ -111,6 +119,7 @@
                   'interaction integral, with an added term stemming for spatially varying '
                   'properties, that accounts for the crack perpendicularity to the property grading '
                   'and yield verified results.'
+    capabilities = 'method!=dbg'
   []
   [axisymmetric_solution_tran]
     issues = '#23631'
@@ -119,5 +128,6 @@
     csvdiff = 'axisymmetric_solution_tran_out.csv'
     requirement = 'The Domain Integral Action shall compute verified stress intensity factors from the '
                   'interaction integral for axisymmetric geometries and circumferential cracks.'
+    capabilities = 'method!=dbg'
   []
 []

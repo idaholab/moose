@@ -40,6 +40,7 @@
   type = Transient
   num_steps = 100
   dt = 0.1
+  steady_state_tolerance = 1e-5
 
   solve_type = 'PJFNK'
 

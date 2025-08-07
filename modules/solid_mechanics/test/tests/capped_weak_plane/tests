@@ -164,6 +164,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent the behavior of a beam with its ends fully clamped"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7960"
+    capabilities = 'method!=dbg'
   [../]
 
   [./pull_and_shear_1step]
@@ -184,6 +185,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent a dynamic problem with plasticity in which a column of material is pulled in tension"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7960"
+    capabilities = 'method!=dbg'
   [../]
   [./push_and_shear]
     type = Exodiff
@@ -193,6 +195,7 @@
     requirement = "The CappedWeakPlaneStressUpdate model shall correctly represent a dynamic problem with plasticity in which a column of material is pushed in compression"
     design = "CappedWeakPlaneStressUpdate.md"
     issues = "#7960"
+    capabilities = 'method!=dbg'
   [../]
   [./throw_test]
     type = 'RunException'

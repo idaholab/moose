@@ -9,6 +9,7 @@
                   "complicated geometry for small deformations with the total Lagrangian "
                   "formulation, SMP matches FDP."
     valgrind = HEAVY
+    capabilities = 'method!=dbg'
   []
   [L-small]
     type = CSVDiff
@@ -18,5 +19,6 @@
                   "complicated geometry for large deformations with the total Lagrangian "
                   "formulation, SMP matches FDP."
     valgrind = HEAVY
+    capabilities = 'method!=dbg'
   []
 []

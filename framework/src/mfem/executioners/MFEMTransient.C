@@ -68,9 +68,6 @@ MFEMTransient::step(double dt, int) const
   // Synchonise time dependent GridFunctions with updated DoF data.
   _problem_operator->SetTestVariablesFromTrueVectors();
 
-  // Sync Host/Device
-  _problem_data.f.HostRead();
-
   // Execute user objects at timestep end
   _mfem_problem.execute(EXEC_TIMESTEP_END);
   // Perform the output of the current time step

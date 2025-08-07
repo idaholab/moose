@@ -25,6 +25,7 @@
     input = exact.i
     csvdiff = exact_spherical_out.csv
     requirement = 'The ADViscoplasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry in spherical coordinates.'
+    capabilities = 'method!=dbg'
   []
   [exact_spherical-jac]
     type = 'PetscJacobianTester'
@@ -44,6 +45,7 @@
     cli_args = 'GlobalParams/pore_shape_model=CYLINDRICAL Outputs/file_base=exact_cylindrical_out'
     prereq = exact_spherical
     requirement = 'The ADViscoplasticityStressUpdate class shall compute a ratio between the gauge stress, equilvalent stress, and hydrostatic stress across a wide swath of exponents and stress states using spherical pore geometry in cylindrical coordinates.'
+    capabilities = 'method!=dbg'
   []
   [exact_cylindrical-jac]
     type = 'PetscJacobianTester'

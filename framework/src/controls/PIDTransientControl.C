@@ -136,6 +136,9 @@ PIDTransientControl::execute()
     else
       _value = getPostprocessorValueByName(getParam<std::string>("parameter_pp"));
 
+    // Compute the delta between the current value of the postprocessor and the desired value
+    Real delta = _current - _target.value(_t);
+
     // Save integral and controlled value at each time step
     // if the solver fails, a smaller time step will be used but _t_step is unchanged
     if (_t_step != _t_step_old)
@@ -147,6 +150,8 @@ PIDTransientControl::execute()
       _integral_old = _integral;
       _value_old = _value;
       _t_step_old = _t_step;
+      _delta_prev_tstep = delta;
+      _old_delta_prev_tstep = _old_delta;
     }
 
     // If there were coupling/Picard iterations during the transient and they failed,
@@ -156,14 +161,9 @@ PIDTransientControl::execute()
     {
       _integral = _integral_old;
       _value = _value_old;
-
-      // Note we do not restore _old_delta because we dont have a way to keep track of it at the
-      // moment. And we really need to, it comes in the time derivative term. In the future, we will
-      // reset restartableData on new fixed point iterations.
+      delta = _delta_prev_tstep;
+      _old_delta = _old_delta_prev_tstep;
     }
-
-    // Compute the delta between the current value of the postprocessor and the desired value
-    Real delta = _current - _target.value(_t);
 
     // If desired, reset integral of the error if the error crosses zero
     if (_reset_integral_windup && delta * _old_delta < 0)

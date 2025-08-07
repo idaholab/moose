@@ -33,10 +33,18 @@ Transient::Transient(const InputParameters & parameters)
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 }
 
-Real
-Transient::relativeSolutionDifferenceNorm()
+void
+Transient::init()
 {
-  if (_check_aux)
+  TransientBase::init();
+
+  _feproblem_solve.initialSetup();
+}
+
+Real
+Transient::relativeSolutionDifferenceNorm(bool check_aux) const
+{
+  if (check_aux)
     return _aux.solution().l2_norm_diff(_aux.solutionOld()) / _aux.solution().l2_norm();
   else
   {

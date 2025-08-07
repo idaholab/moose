@@ -8,6 +8,7 @@
     rel_err = 2e-5
     requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
                   'including the T stress for cracks in an infinite plate.'
+    capabilities = 'method!=dbg'
   []
   [t_stress_ellip_crack_3d]
     type = 'CSVDiff'
@@ -21,6 +22,7 @@
     valgrind = 'heavy'
     requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
                   'including the T stress for an elliptical crack in 3D.'
+    capabilities = 'method!=dbg'
   []
   [ad_t_stress_ellip_crack_3d]
     type = 'CSVDiff'

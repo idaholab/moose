@@ -99,6 +99,9 @@ class MooseApp : public ConsoleStreamInterface,
                  public MooseBase
 {
 public:
+  /// Get the device accelerated computations are supposed to be running on.
+  std::optional<MooseEnum> getComputeDevice() const;
+
 #ifdef MOOSE_LIBTORCH_ENABLED
   /// Get the device torch is supposed to be running on.
   torch::DeviceType getLibtorchDevice() const { return _libtorch_device; }
@@ -535,10 +538,16 @@ public:
   }
 
   /**
-   *  Whether or not this simulation should only run half its transient (useful for testing
+   * Whether or not this simulation should only run half its transient (useful for testing
    * recovery)
    */
   bool testCheckpointHalfTransient() const { return _test_checkpoint_half_transient; }
+
+  /**
+   * Whether or not this simulation should fail a timestep and repeat (for testing).
+   * Selection rules for which time step to fail in TransientBase.C constructor.
+   */
+  bool testReStep() const { return _test_restep; }
 
   /**
    * Store a map of outputter names and file numbers
@@ -1315,7 +1324,9 @@ protected:
   std::string _restart_recover_base;
 
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
-  bool _test_checkpoint_half_transient;
+  const bool _test_checkpoint_half_transient;
+  /// Whether or not this simulation should fail its middle timestep and repeat (for testing)
+  const bool _test_restep;
 
   /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
   std::map<std::string, unsigned int> _output_file_numbers;
@@ -1508,6 +1519,12 @@ private:
    */
   bool runInputs();
 
+  /**
+   * Helper that reports an error if the given capability is reserved and
+   * should not be added via addCapability().
+   */
+  static void checkReservedCapability(const std::string & capability);
+
   /// General storage for custom RestartableData that can be added to from outside applications
   std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>
       _restartable_meta_data;
@@ -1582,7 +1599,7 @@ private:
   std::unique_ptr<Backup> * const _initial_backup;
 
 #ifdef MOOSE_LIBTORCH_ENABLED
-  /// The libtorch device this app is using.
+  /// The libtorch device this app is using (converted from compute_device)
   const torch::DeviceType _libtorch_device;
 #endif
 

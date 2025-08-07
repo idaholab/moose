@@ -33,6 +33,7 @@
     input = 'gap_heat_transfer_htonly_it_plot_test.i'
     exodiff = 'out_it_plot.e'
     custom_cmp = 'gap_heat_transfer_htonly_it_plot_test.cmp'
+    restep = false # Output on nonlinear does not support consistency with restep
     requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
                   "in 3D at each iteration"
     design = 'source/bcs/GapHeatTransfer.md'

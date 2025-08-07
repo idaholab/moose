@@ -9,6 +9,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
+    restep = false # Issue #31054
     requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in which crack growth occurs when the average stress in the element at the crack tip exceeds a critical value.'
     design = 'XFEMRankTwoTensorMarkerUserObject.md'
   [../]
@@ -36,6 +37,7 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
+    restep = false # Issue #31054
     requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in which crack growth occurs when the stress at any of the quadrature points in the element at the crack tip exceeds a critical value defined by the value of a field variable.'
     design = 'XFEMRankTwoTensorMarkerUserObject.md'
   [../]

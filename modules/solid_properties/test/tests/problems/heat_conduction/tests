@@ -3,6 +3,7 @@
     type = Exodiff
     input = 'heat_conduction.i'
     exodiff = 'heat_conduction_out.e'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall simulate a transient heat conduction problem using solid thermal properties."
     design = 'ThermalSolidPropertiesMaterial.md'
     issues = '#12284'

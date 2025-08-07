@@ -184,7 +184,8 @@ StitchedMeshGenerator::generate()
 
       if (overlap_found)
       {
-        const auto max_boundary_id = *base_mesh_bids.rbegin();
+        const auto max_boundary_id =
+            std::max(*base_mesh_bids.rbegin(), *stitched_mesh_bids.rbegin());
         BoundaryID new_index = 1;
         for (const auto bid : stitched_mesh_bids)
         {

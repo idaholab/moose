@@ -5,6 +5,7 @@
     type = 'Exodiff'
     input = '1d_advection_dg.i'
     exodiff = '1d_advection_dg_out.e'
+    restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
     requirement = "The system shall support solving 1D advection using the discontinous Galerkin method."
   [../]
 []

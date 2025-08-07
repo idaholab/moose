@@ -5,6 +5,7 @@
     type = 'Exodiff'
     input = 'test.i'
     exodiff = 'test_out.e'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to compute layered averages along a boundary, using cylindrical coordinates in a Cartesian frame of reference."
   []
 []

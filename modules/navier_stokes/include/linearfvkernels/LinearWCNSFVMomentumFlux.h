@@ -109,6 +109,10 @@ protected:
   /// matrix and right hand side contribution
   Real _face_mass_flux;
 
+  /// Multiplier that ensures the normal of the boundary always points outwards, even in cases
+  /// when the boundary is within the mesh.
+  Real _boundary_normal_factor;
+
   /// The cached matrix contribution
   Real _stress_matrix_contribution;
 

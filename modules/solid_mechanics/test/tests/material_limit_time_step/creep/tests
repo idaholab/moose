@@ -6,9 +6,9 @@
     exodiff = 'nafems_test5a_lim_out.e'
     rel_err = 4e-5
     abs_zero = 1e-8
-    capabilities = 'superlu'
     issues = '#8553'
     requirement = 'The system shall compute a timestep size that is limited by a power law creep model and a specified maximum inelastic strain increment.'
+    capabilities = 'superlu & method!=dbg'
   [../]
   [./test5a_lim_on_initial]
     type = 'CSVDiff'
@@ -16,11 +16,11 @@
     cli_args = 'Postprocessors/matl_ts_min/execute_on="initial timestep_end"
     Outputs/file_base=nafems_test5a_lim_on_initial_out'
     csvdiff = 'nafems_test5a_lim_on_initial_out.csv'
-    capabilities = 'superlu'
     override_columns = '_dt elas_str_yy matl_ts_min'
     override_rel_err = '4e-5 4e-5 4e-5'
     override_abs_zero = '1e-8 1e-10 1e-10'
     issues = '#10382'
     requirement = 'The system shall not impose a limit on the time step during the initial evaluation when the creep limiting time step option is used.'
+    capabilities = 'superlu & method!=dbg'
   [../]
 []

@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#28881'
+  issues = '#28881 #31198'
   design = 'meshgenerators/ParsedGenerateNodeset.md'
 
   [parsed_generate_nodeset_sub_id_test]
@@ -11,6 +11,17 @@
     recover = false
     mesh_mode = 'replicated'
     requirement = 'The system shall have the ability to assign mesh node sets based on parsed spatial functions, with a restriction on nodes that are in a given subdomain id.'
+  []
+
+  [excluded_sub_id_test]
+    type = 'Exodiff'
+    input = 'parsed_generate_nodeset_subdomain_excluded.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_generate_nodeset_subdomain_excluded_in.e'
+    exodiff_opts = -pedantic
+    recover = false
+    mesh_mode = 'replicated'
+    requirement = 'The system shall have the ability to assign mesh node sets based on parsed spatial functions, with a restriction on nodes that are not in a given subdomain id.'
   []
 
   [limit_to_one_bid]

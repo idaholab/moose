@@ -39,5 +39,6 @@
     requirement = "The mechanics system shall accurately predict the dynamic behavior of a shell "
                   "element."
     issues = "#15067"
+    capabilities = 'method!=dbg'
   []
 []

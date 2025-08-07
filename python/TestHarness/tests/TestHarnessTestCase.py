@@ -11,14 +11,17 @@ import os
 import unittest
 import tempfile
 import json
-import typing
 from io import StringIO
 from contextlib import nullcontext, redirect_stdout
-from TestHarness import TestHarness
 from dataclasses import dataclass
+from typing import Optional
+
+from TestHarness import TestHarness
+import pyhit
 
 MOOSE_DIR = os.getenv('MOOSE_DIR')
 TEST_DIR = os.path.join(MOOSE_DIR, 'test')
+
 
 class TestHarnessTestCase(unittest.TestCase):
     """
@@ -30,31 +33,72 @@ class TestHarnessTestCase(unittest.TestCase):
         # On screen output
         output: str = ''
         # JSON results
-        results: typing.Optional[dict] = None
+        results: Optional[dict] = None
         # TestHarness that was ran
-        harness: typing.Optional[TestHarness] = None
+        harness: Optional[TestHarness] = None
 
     def runTests(self, *args,
                  tmp_output: bool = True,
                  no_capabilities: bool = True,
                  capture_results: bool = True,
-                 exit_code: int = 0) -> RunTestsResult:
+                 exit_code: int = 0,
+                 tests: Optional[dict[str, dict]] = None) -> RunTestsResult:
+        """
+        Helper for running tests
+
+        Args:
+            Command line arguments to pass to the test harness
+        Keyword arguments:
+            tmp_output: Set to store output separately using the -o option in a temp directory
+            no_capabilities: Set to run without capabilities (--no-capabilities)
+            capture_results: Set to capture on-screen results
+            exit_code: Exit code to check against
+            tests: Test spec (dict of str -> params) to run instead
+        """
         argv = ['unused'] + list(args) + ['--term-format', 'njCst']
         if no_capabilities:
             argv += ['--no-capabilities']
 
+        test_root = TEST_DIR
+
+        test_spec = None
+        if tests:
+            test_spec = self.buildTestSpec(tests)
+
         result = self.RunTestsResult()
 
-        context = tempfile.TemporaryDirectory if tmp_output else nullcontext
+        context = tempfile.TemporaryDirectory if (tmp_output or test_spec) else nullcontext
         with context() as c:
+            test_harness_build_kwargs = {}
+
             if tmp_output:
                 argv += ['-o', c]
+
+            # Setup test spec directory if we're building one on the fly
+            if test_spec:
+                test_root = c
+
+                # Spec goes within the 'test' directory
+                test_dir = os.path.join(c, 'test')
+                os.mkdir(test_dir)
+
+                test_harness_build_kwargs['skip_testroot'] = True
+
+                # Write the test spec
+                test_spec_file = os.path.join(test_dir, 'tests')
+                with open(test_spec_file, 'w') as f:
+                    f.write(test_spec)
+
+                # Link the moose-exe so that it can be found
+                moose_exe = os.path.join(TEST_DIR, 'moose_test-opt')
+                os.symlink(moose_exe, os.path.join(test_root, 'moose_test-opt'))
+
             cwd = os.getcwd()
-            os.chdir(TEST_DIR)
+            os.chdir(test_root)
             stdout = StringIO()
             try:
                 with redirect_stdout(stdout):
-                    result.harness = TestHarness.build(argv, None, MOOSE_DIR)
+                    result.harness = TestHarness.build(argv, 'moose_test', MOOSE_DIR, **test_harness_build_kwargs)
                     result.harness.findAndRunTests()
             except SystemExit as e:
                 self.assertEqual(e.code, exit_code)
@@ -73,6 +117,27 @@ class TestHarnessTestCase(unittest.TestCase):
                     result.results = json.loads(f.read())
 
         return result
+
+    @staticmethod
+    def buildTestSpec(tests: dict[str, list[dict]]) -> str:
+        """
+        Helper for building a rendered test spec, given a dict of
+        test name -> test parameters
+        """
+        assert isinstance(tests, dict)
+
+        root = pyhit.Node()
+        tests_section = root.insert(0, 'Tests')
+
+        i = 0
+        for name, params in tests.items():
+            assert isinstance(name, str)
+            assert isinstance(params, dict)
+
+            test_section = tests_section.insert(i, name, **params)
+            i += 1
+
+        return root.render()
 
     def checkStatus(self, harness: TestHarness,
                     passed: int = 0,

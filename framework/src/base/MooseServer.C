@@ -733,7 +733,7 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
 
       // build required parameter list for each block to use in insert text
       std::string req_params = getRequiredParamsText(object_path, object_name, existing_params, "");
-      req_params += !req_params.empty() ? "\n" : "";
+      req_params += req_params.size() ? "\n" + std::string(client_snippet_support ? "$0" : "") : "";
 
       // check if object has registered base parameter that can be verified
       if (!object_params.have_parameter<std::string>("_moose_base"))
@@ -792,6 +792,10 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
     }
   }
 
+  // choose format of insertion text based on if client has snippet support
+  int text_format = client_snippet_support ? wasp::lsp::m_text_format_snippet
+                                           : wasp::lsp::m_text_format_plaintext;
+
   bool pass = true;
 
   // walk over pairs of options with descriptions and build completion list
@@ -817,7 +821,7 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
                                              description,
                                              false,
                                              false,
-                                             wasp::lsp::m_text_format_plaintext);
+                                             text_format);
   }
 
   return pass;
@@ -1504,6 +1508,7 @@ MooseServer::getRequiredParamsText(const std::string & subblock_path,
 
   // walk over collection of all parameters and build text of ones required
   std::string required_param_text;
+  std::size_t param_index = 1;
   for (const auto & valid_params_iter : valid_params)
   {
     // skip parameter if deprecated, private, defaulted, optional, existing
@@ -1511,7 +1516,10 @@ MooseServer::getRequiredParamsText(const std::string & subblock_path,
     if (!valid_params.isParamDeprecated(param_name) && !valid_params.isPrivate(param_name) &&
         !valid_params.isParamValid(param_name) && valid_params.isParamRequired(param_name) &&
         !existing_params.count(param_name))
-      required_param_text += "\n" + indent_spaces + param_name + " = ";
+    {
+      std::string tab_stop = client_snippet_support ? "$" + std::to_string(param_index++) : "";
+      required_param_text += "\n" + indent_spaces + param_name + " = " + tab_stop;
+    }
   }
 
   return required_param_text;

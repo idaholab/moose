@@ -109,6 +109,12 @@ ExplicitRK2::solve()
   _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
   _n_linear_iterations += getNumLinearIterationsLastSolve();
 
+  // Error if solve didn't work, since we can't undo the advanceState
+  if (!_fe_problem.converged(_nl->number()))
+    mooseError("Aborting as ",
+               type(),
+               " has undefined behavior if it attempts to re-do a timestep after the first stage.");
+
   // Reset time at beginning of step to its original value
   _fe_problem.timeOld() = time_old;
 }

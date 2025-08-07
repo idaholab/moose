@@ -28,6 +28,8 @@ protected:
   void addDefaultNonlinearConvergence();
   /// Adds the default fixed point Convergence object
   void addDefaultMultiAppFixedPointConvergence();
+  /// Adds the default steady-state Convergence object
+  void addDefaultSteadyStateConvergence();
 
   /**
    * Checks that nonlinear convergence parameters were not set in the executioner
@@ -39,4 +41,9 @@ protected:
    * if using a Convergence object that does not use them.
    */
   void checkUnusedMultiAppFixedPointConvergenceParameters();
+  /**
+   * Checks that steady-state convergence parameters were not set in the executioner
+   * if using a Convergence object that does not use them.
+   */
+  void checkUnusedSteadyStateConvergenceParameters();
 };
