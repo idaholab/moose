@@ -8,6 +8,6 @@
     exodiff = 'kokkos_matched_value_bc_test_out.e'
     requirement = 'The Kokkos system shall support matching variable values on a boundary.'
     capabilities = 'kokkos'
-    devices = 'cpu cuda'
+    compute_devices = 'cpu cuda'
   [../]
 []

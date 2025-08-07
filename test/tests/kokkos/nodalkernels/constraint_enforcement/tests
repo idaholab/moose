@@ -9,6 +9,7 @@
       exodiff = kokkos_lower_bound_out.e
       detail = 'have no oscillations in the solution, and'
       capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
     []
     [non_singular]
       input = kokkos_lower_bound.i
@@ -18,6 +19,7 @@
       cli_args = "nx=10 num_steps=5 Outputs/exodus=false Outputs/active='' -pc_type svd -pc_svd_monitor"
       detail = 'have a non-singular matrix'
       capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
     []
   []
   [upper_bound]
@@ -29,6 +31,7 @@
       exodiff = kokkos_upper_bound_out.e
       detail = 'have no oscillations in the solution, and'
       capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
     []
     [non_singular]
       input = kokkos_upper_bound.i
@@ -38,6 +41,7 @@
       cli_args = "nx=10 num_steps=5 Outputs/exodus=false Outputs/active='' -pc_type svd -pc_svd_monitor"
       detail = 'have a non-singular matrix'
       capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
     []
   []
   [upper_and_lower_bound]
@@ -50,6 +54,7 @@
       detail = 'have no oscillations in the solution, and'
       cli_args = "Postprocessors/active='active_upper_lm upper_violations active_lower_lm lower_violations'"
       capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
     []
     [non_singular]
       input = kokkos_upper_and_lower_bound.i
@@ -59,6 +64,7 @@
       cli_args = "nx=10 num_steps=5 Outputs/exodus=false Outputs/active='' -pc_type svd -pc_svd_monitor"
       detail = 'have a non-singular matrix, and'
       capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
     []
     [amg_fail]
       input = kokkos_upper_and_lower_bound.i
@@ -67,6 +73,7 @@
       cli_args = "Outputs/exodus=false Outputs/active='' -pc_type hypre -pc_hypre_type boomeramg -ksp_converged_reason"
       detail = 'be incompataible with algebraic multigrid'
       capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
     []
   []
 []
