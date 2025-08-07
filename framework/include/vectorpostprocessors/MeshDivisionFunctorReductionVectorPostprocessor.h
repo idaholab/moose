@@ -18,8 +18,7 @@
  * on the index of the elements in the mesh division
  */
 class MeshDivisionFunctorReductionVectorPostprocessor
-  : public SpatialUserObjectFunctor<ElementVectorPostprocessor>,
-    public NonADFunctorInterface
+  : public SpatialUserObjectFunctor<ElementVectorPostprocessor>
 {
 public:
   static InputParameters validParams();
