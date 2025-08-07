@@ -62,9 +62,6 @@
     expression_x = '0'
     expression_y = '0'
     expression_z = '0'
-
-    symbol_names = kappa
-    symbol_values = 3.1415926535
   []
 []
 

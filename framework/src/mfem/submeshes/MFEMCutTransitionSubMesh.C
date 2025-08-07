@@ -146,8 +146,13 @@ MFEMCutTransitionSubMesh::validParams()
   params.addParam<SubdomainName>(
       "transition_subdomain",
       "cut",
-      "The name of the subdomain to be created on from the mesh comprised of the set of elements "
+      "The name of the subdomain to be created on the mesh comprised of the set of elements "
       "adjacent to the cut surface on one side.");
+  params.addParam<SubdomainName>(
+      "closed_subdomain",
+      "closed_subdomain",
+      "The name of the subdomain attribute to be created comprised of the set of all elements "
+      "of the closed goemetry, including the new transition region.");      
   return params;
 }
 
@@ -156,7 +161,8 @@ MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & param
     MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
     _cut_boundary(getParam<BoundaryName>("cut_boundary")),
     _cut_bdr_attribute(std::stoi(_cut_boundary)),
-    _transition_subdomain(getParam<SubdomainName>("transition_subdomain")),    
+    _transition_subdomain(getParam<SubdomainName>("transition_subdomain")),   
+    _closed_subdomain(getParam<SubdomainName>("closed_subdomain")),    
     _subdomain_label(getMFEMProblem().mesh().getMFEMParMesh().attributes.Max()+1)
 {
 }
@@ -301,10 +307,14 @@ MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh)
   for (auto e : wedge_els)
     parent_mesh.SetAttribute(e, _subdomain_label);
   mfem::AttributeSets &attr_sets = parent_mesh.attribute_sets;
+  /// Create attribute set labelling the newly created transition region 
+  /// on one side of the cut
   attr_sets.CreateAttributeSet(_transition_subdomain);
   attr_sets.AddToAttributeSet(_transition_subdomain, _subdomain_label);
-  // transition_domain_.Append(_subdomain_label);
-  // getSubdomainAttributes().Append(_subdomain_label);
+  
+  /// Create attribute set labelling the entire closed geometry
+  attr_sets.SetAttributeSet(_closed_subdomain, getSubdomainAttributes());
+  attr_sets.AddToAttributeSet(_closed_subdomain, _subdomain_label);
 
   parent_mesh.FinalizeTopology();
   parent_mesh.Finalize();
