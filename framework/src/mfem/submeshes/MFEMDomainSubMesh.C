@@ -35,6 +35,8 @@ MFEMDomainSubMesh::buildSubMesh()
 {
   _submesh = std::make_shared<mfem::ParSubMesh>(
       mfem::ParSubMesh::CreateFromDomain(getMesh(), getSubdomainAttributes()));
+  _submesh->attribute_sets.attr_sets = getMesh().attribute_sets.attr_sets;
+  _submesh->bdr_attribute_sets.attr_sets = getMesh().bdr_attribute_sets.attr_sets;
 }
 
 #endif
