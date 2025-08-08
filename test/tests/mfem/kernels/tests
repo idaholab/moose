@@ -202,6 +202,17 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
+  [MFEMComplex]
+    type = XMLDiff
+    input = complex.i
+    xmldiff = 'OutputData/Complex/Run0/Run0.pvd
+                OutputData/Complex/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
+    requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM.'
+    capabilities = 'mfem'
+    max_parallel = 1
+    recover = false
+  []
   [MFEMHeatTransfer]
     type = XMLDiff
     input = heattransfer.i
