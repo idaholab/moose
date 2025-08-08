@@ -27,45 +27,6 @@ template <typename T> void pushIfUnique(std::vector<T> &vec, const T el)
     vec.push_back(el);
 }
 
-// Deletes and clears a vector of pointers
-template <typename T> void deleteAndClear(std::vector<T *> v) 
-{
-  for (auto p : v)
-    delete p;
-  v.clear();
-}
-
-bool MFEMCutTransitionSubMesh::isInDomain(const int el, const mfem::Array<int> &dom,
-  const mfem::ParMesh *mesh) 
-{
-  bool verify = false;
-  // This is for ghost elements
-  if (el < 0)
-    return false;
-
-  for (auto sd : dom) {
-    if (mesh->GetAttribute(el) == sd)
-      verify = true;
-  }
-  return verify;
-}
-
-mfem::Vector MFEMCutTransitionSubMesh::elementCentre(int el, mfem::ParMesh *pm)
-{
-  mfem::Array<int> elem_verts;
-  mfem::Vector com(3);
-  com = 0.0;
-
-  pm->GetElementVertices(el, elem_verts);
-
-  for (auto vtx : elem_verts) {
-    for (int j = 0; j < 3; ++j)
-      com[j] += pm->GetVertex(vtx)[j] / (double)elem_verts.Size();
-  }
-
-  return com;
-}
-
 // 3D Plane constructor and methods
 
 Plane3D::Plane3D() : d(0)
@@ -200,9 +161,10 @@ MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh)
     for (int e = 0; e < ne; e++)
     {  
       const int el = els[e];
-      if (isInDomain(el, getSubdomainAttributes(), &parent_mesh) &&
-        plane.side(elementCentre(el, &parent_mesh)) == 1)
-          pushIfUnique(wedge_els, el);
+      mfem::Vector el_center(3);
+      parent_mesh.GetElementCenter(el, el_center);
+      if (isInDomain(el, getSubdomainAttributes(), &parent_mesh) && plane.side(el_center) == 1)
+        pushIfUnique(wedge_els, el);
     }
   }
   delete vert_to_elem;
@@ -231,6 +193,24 @@ MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh)
   parent_mesh.FinalizeTopology();
   parent_mesh.Finalize();
   parent_mesh.SetAttributes();
+}
+
+bool
+MFEMCutTransitionSubMesh::isInDomain(const int el,
+                                     const mfem::Array<int> & dom,
+                                     const mfem::ParMesh * mesh)
+{
+  bool verify = false;
+  // This is for ghost elements
+  if (el < 0)
+    return false;
+
+  for (auto sd : dom)
+  {
+    if (mesh->GetAttribute(el) == sd)
+      verify = true;
+  }
+  return verify;
 }
 
 #endif
