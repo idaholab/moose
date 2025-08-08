@@ -43,6 +43,17 @@ class ErrorEstimator;
 }
 
 /**
+ * Defines types of mesh adaptivity options available
+ *
+ */
+enum class AdaptivityType
+{
+  H = 0,
+  P = 1,
+  HP = 2
+};
+
+/**
  * Takes care of everything related to mesh adaptivity
  *
  */
@@ -61,7 +72,9 @@ public:
    * for transient or eigen solves.
    * p_refinement indicates whether the refinement will be p-refinement or h-refinement.
    */
-  void init(const unsigned int steps, const unsigned int initial_steps, const bool p_refinement);
+  void init(const unsigned int steps,
+            const unsigned int initial_steps,
+            const AdaptivityType adaptivity_type);
 
   /**
    * Set adaptivity parameter
@@ -300,6 +313,9 @@ protected:
   /// Name of the marker variable if using the new adaptivity system
   std::string _marker_variable_name;
 
+  /// Type of mesh adaptivity
+  AdaptivityType _adaptivity_type;
+
   /// Name of the initial marker variable if using the new adaptivity system
   std::string _initial_marker_variable_name;
 
@@ -311,8 +327,6 @@ protected:
 
   /// Stores pointers to ErrorVectors associated with indicator field names
   std::map<std::string, std::unique_ptr<libMesh::ErrorVector>> _indicator_field_to_error_vector;
-
-  bool _p_refinement_flag = false;
 };
 
 template <typename T>
