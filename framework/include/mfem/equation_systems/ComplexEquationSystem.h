@@ -15,7 +15,7 @@ namespace Moose::MFEM
 Class to store weak form components (bilinear and linear forms, and optionally
 mixed and nonlinear forms) and build methods
 */
-class ComplexEquationSystem : public Moose::MFEM::EquationSystem
+class ComplexEquationSystem : public EquationSystem
 {
 
 public:
@@ -23,9 +23,9 @@ public:
   ~ComplexEquationSystem() = default;
 
   // Build forms
-  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
-                    Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions,
-                    const Moose::MFEM::FESpaces & fespaces,
+  virtual void Init(GridFunctions & gridfunctions,
+                    ComplexGridFunctions & cpx_gridfunctions,
+                    const FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level) override;
 
   virtual void BuildEquationSystem() override;
@@ -45,57 +45,51 @@ public:
                                 mfem::BlockVector & trueRHS) override;
 
   template <class FormType>
-  void
-  ApplyDomainBLFIntegrators(const std::string & trial_var_name,
-                            const std::string & test_var_name,
-                            std::shared_ptr<FormType> form,
-                            Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<
-                                std::vector<std::shared_ptr<MFEMComplexKernel>>>> & kernels_map);
+  void ApplyDomainBLFIntegrators(
+      const std::string & trial_var_name,
+      const std::string & test_var_name,
+      std::shared_ptr<FormType> form,
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> &
+          kernels_map);
 
-  inline void
-  ApplyDomainLFIntegrators(const std::string & test_var_name,
-                           std::shared_ptr<mfem::ParComplexLinearForm> form,
-                           Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<
-                               std::vector<std::shared_ptr<MFEMComplexKernel>>>> & kernels_map);
+  inline void ApplyDomainLFIntegrators(
+      const std::string & test_var_name,
+      std::shared_ptr<mfem::ParComplexLinearForm> form,
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> &
+          kernels_map);
 
   template <class FormType>
   void ApplyBoundaryBLFIntegrators(
       const std::string & trial_var_name,
       const std::string & test_var_name,
       std::shared_ptr<FormType> form,
-      Moose::MFEM::NamedFieldsMap<
-          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
           integrated_bc_map);
 
   inline void ApplyBoundaryLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParComplexLinearForm> form,
-      Moose::MFEM::NamedFieldsMap<
-          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
           integrated_bc_map);
 
   // Complex Linear and Bilinear Forms
-  Moose::MFEM::NamedFieldsMap<mfem::ParSesquilinearForm> _slfs;
-  Moose::MFEM::NamedFieldsMap<mfem::ParComplexLinearForm> _clfs;
+  NamedFieldsMap<mfem::ParSesquilinearForm> _slfs;
+  NamedFieldsMap<mfem::ParComplexLinearForm> _clfs;
 
   // Complex gridfunctions for setting Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cxs;
   std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cdxdts;
 
   // Complex kernels and integrated BCs
-  Moose::MFEM::NamedFieldsMap<
-      Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>
-      _cpx_kernels_map;
-  Moose::MFEM::NamedFieldsMap<
-      Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> _cpx_kernels_map;
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>
       _cpx_integrated_bc_map;
 
   // Complex essential BCs
-  Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>>
-      _cpx_essential_bc_map;
+  NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>> _cpx_essential_bc_map;
 
   // Complex trial variables
-  Moose::MFEM::ComplexGridFunctions _cpx_trial_variables;
+  ComplexGridFunctions _cpx_trial_variables;
 };
 
 template <class FormType>
@@ -104,8 +98,7 @@ ComplexEquationSystem::ApplyDomainBLFIntegrators(
     const std::string & trial_var_name,
     const std::string & test_var_name,
     std::shared_ptr<FormType> form,
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> & kernels_map)
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> & kernels_map)
 {
   if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(trial_var_name))
   {
@@ -130,8 +123,7 @@ inline void
 ComplexEquationSystem::ApplyDomainLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParComplexLinearForm> form,
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> & kernels_map)
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> & kernels_map)
 {
   if (kernels_map.Has(test_var_name))
   {
@@ -158,8 +150,7 @@ ComplexEquationSystem::ApplyBoundaryBLFIntegrators(
     const std::string & trial_var_name,
     const std::string & test_var_name,
     std::shared_ptr<FormType> form,
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
         integrated_bc_map)
 {
   if (integrated_bc_map.Has(test_var_name) &&
@@ -186,8 +177,7 @@ inline void
 ComplexEquationSystem::ApplyBoundaryLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParComplexLinearForm> form,
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
         integrated_bc_map)
 {
   if (integrated_bc_map.Has(test_var_name))
