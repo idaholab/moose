@@ -4,7 +4,7 @@
 
 ## Summary
 
-!syntax description /FESpaces/AddMFEMComplexKernelComponentAction
+!syntax description /Kernels/AddMFEMComplexKernelComponentAction
 
 ## Overview
 
@@ -15,7 +15,7 @@ Each of these is included as an `AuxKernel`, to be retrieved later when the `MFE
 
 !listing test/tests/mfem/kernels/complex.i block=Kernels
 
-!syntax parameters /FESpaces/AddMFEMComplexKernelComponentAction
+!syntax parameters /Kernels/AddMFEMComplexKernelComponentAction
 
 !if-end!
 
