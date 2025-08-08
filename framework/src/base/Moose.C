@@ -468,7 +468,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_mfem_complex_bc_components", BoundaryCondition, false);
   addTaskDependency("add_mfem_complex_kernel_components", "add_mfem_fespaces");
   addTaskDependency("add_mfem_complex_bc_components", "add_mfem_fespaces");
-  addTaskDependency("add_kernel", "add_mfem_complex_kernel_components");
+  addTaskDependency("add_mfem_complex_kernel_components", "add_kernel");
   addTaskDependency("add_bc", "add_mfem_complex_bc_components");
 
   // set mesh FE space

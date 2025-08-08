@@ -51,10 +51,12 @@ AddMFEMComplexKernelComponentAction::act()
       }
     }
 
-    std::string comp_name = action_name.substr(second_last_slash + 1, action_name.length());
+    std::string comp_name =
+        action_name.substr(second_last_slash + 1, action_name.length() - second_last_slash - 1);
+
     MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
     if (mfem_problem)
-      mfem_problem->addAuxKernel(_type, comp_name, _moose_object_pars);
+      mfem_problem->addComplexComponentToKernel(_type, comp_name, _moose_object_pars);
   }
 }
 

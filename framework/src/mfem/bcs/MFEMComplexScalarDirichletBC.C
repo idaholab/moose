@@ -16,7 +16,7 @@ registerMooseObject("MooseApp", MFEMComplexScalarDirichletBC);
 InputParameters
 MFEMComplexScalarDirichletBC::validParams()
 {
-  InputParameters params = MFEMEssentialBC::validParams();
+  InputParameters params = MFEMComplexEssentialBC::validParams();
   params.addClassDescription("Applies a Dirichlet condition to a scalar variable.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient_real",

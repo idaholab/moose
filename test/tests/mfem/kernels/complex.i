@@ -95,12 +95,10 @@
     type = MFEMComplexKernel
     variable = u
     [real_part]
-      variable = u
       type = MFEMDiffusionKernel
       coefficient = stiffnessCoef
     []
     [imag_part]
-      variable = u
       type = MFEMDiffusionKernel
       coefficient = 0.0
     []
@@ -109,12 +107,10 @@
     type = MFEMComplexKernel
     variable = u
     [real_part]
-      variable = u
       type = MFEMMassKernel
       coefficient = massCoef
     []
     [imag_part]
-      variable = u
       type = MFEMMassKernel
       coefficient = lossCoef
     []

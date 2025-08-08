@@ -302,8 +302,8 @@ MFEMProblem::addKernel(const std::string & kernel_name,
 
   if (dynamic_cast<const MFEMComplexKernel *>(kernel_uo) != nullptr)
   {
-    std::string r_name = name + "/real_part";
-    std::string i_name = name + "/imag_part";
+    // std::string r_name = name + "/real_part";
+    // std::string i_name = name + "/imag_part";
 
     auto object_ptr = getUserObject<MFEMComplexKernel>(name).getSharedPtr();
     auto kernel = std::dynamic_pointer_cast<MFEMComplexKernel>(object_ptr);
@@ -312,12 +312,12 @@ MFEMProblem::addKernel(const std::string & kernel_name,
 
     if (eqsys)
     {
-      auto r_ptr = getUserObject<MFEMKernel>(r_name).getSharedPtr();
-      auto real_kernel = std::dynamic_pointer_cast<MFEMKernel>(r_ptr);
-      auto i_ptr = getUserObject<MFEMKernel>(i_name).getSharedPtr();
-      auto imag_kernel = std::dynamic_pointer_cast<MFEMKernel>(i_ptr);
-      kernel->setRealKernel(real_kernel);
-      kernel->setImagKernel(imag_kernel);
+      // auto r_ptr = getUserObject<MFEMKernel>(r_name).getSharedPtr();
+      // auto real_kernel = std::dynamic_pointer_cast<MFEMKernel>(r_ptr);
+      // auto i_ptr = getUserObject<MFEMKernel>(i_name).getSharedPtr();
+      // auto imag_kernel = std::dynamic_pointer_cast<MFEMKernel>(i_ptr);
+      // kernel->setRealKernel(real_kernel);
+      // kernel->setImagKernel(imag_kernel);
       eqsys->AddKernel(std::move(kernel));
     }
     else
@@ -347,6 +347,27 @@ MFEMProblem::addKernel(const std::string & kernel_name,
   {
     mooseError("Unsupported kernel of type '", kernel_name, "' and name '", name, "' detected.");
   }
+}
+
+void
+MFEMProblem::addComplexComponentToKernel(const std::string & kernel_name,
+                                         const std::string & name,
+                                         InputParameters & parameters)
+{
+  std::string parent_name = name.substr(0, name.find_last_of('/'));
+  auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexKernel>(
+      getUserObject<MFEMComplexKernel>(parent_name).getSharedPtr());
+  parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
+  addAuxKernel(kernel_name, name, parameters);
+  auto kernel_ptr =
+      std::dynamic_pointer_cast<MFEMKernel>(getUserObject<MFEMKernel>(name).getSharedPtr());
+
+  if (name == parent_name + "/real_part")
+    parent_ptr->setRealKernel(std::dynamic_pointer_cast<MFEMKernel>(kernel_ptr));
+  else if (name == parent_name + "/imag_part")
+    parent_ptr->setImagKernel(std::dynamic_pointer_cast<MFEMKernel>(kernel_ptr));
+  else
+    mooseError("Unknown component name '", name, "' for MFEMComplexKernel.");
 }
 
 libMesh::Point
