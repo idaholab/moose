@@ -115,6 +115,13 @@ public:
                  InputParameters & parameters) override;
 
   /**
+   * Adds a real or imaginary component kernel to the parent MFEMComplexKernel.
+   */
+  void addComplexComponentToKernel(const std::string & kernel_name,
+                                   const std::string & name,
+                                   InputParameters & parameters);
+
+  /**
    * Override of ExternalProblem::addAuxKernel. Uses ExternalProblem::addAuxKernel to create a
    * MFEMGeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
    * to be used in the MFEM solve.
