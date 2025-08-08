@@ -1741,7 +1741,7 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto avg_massflux =
           0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
                  ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
-      auto beta = computeBeta(i_gap, iz);
+      auto beta = computeBeta(i_gap, iz, /*enthalpy=*/false);
 
       if (!_implicit_bool)
       {
