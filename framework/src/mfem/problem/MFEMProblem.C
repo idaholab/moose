@@ -97,34 +97,7 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
 
   std::string action_name = _app.actionWarehouse().getCurrentActionName();
 
-  if (dynamic_cast<const MFEMComplexIntegratedBC *>(mfem_bc_uo) != nullptr)
-  {
-    std::string r_name = name + "/real_part";
-    std::string i_name = name + "/imag_part";
-
-    auto object_ptr = getUserObject<MFEMComplexIntegratedBC>(name).getSharedPtr();
-    auto bc = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(object_ptr);
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
-
-    if (eqsys)
-    {
-      auto r_ptr = getUserObject<MFEMIntegratedBC>(r_name).getSharedPtr();
-      auto real_bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(r_ptr);
-      auto i_ptr = getUserObject<MFEMIntegratedBC>(i_name).getSharedPtr();
-      auto imag_bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(i_ptr);
-      bc->setRealBC(real_bc);
-      bc->setImagBC(imag_bc);
-
-      eqsys->AddIntegratedBC(std::move(bc));
-    }
-    else
-    {
-      mooseError("Cannot add complex integrated BC with name '" + name +
-                 "' because there is no corresponding equation system.");
-    }
-  }
-  else if (dynamic_cast<const MFEMIntegratedBC *>(mfem_bc_uo) != nullptr)
+  if (dynamic_cast<const MFEMIntegratedBC *>(mfem_bc_uo) != nullptr)
   {
     auto object_ptr = getUserObject<MFEMIntegratedBC>(name).getSharedPtr();
     auto bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(object_ptr);
@@ -340,6 +313,27 @@ MFEMProblem::addComplexComponentToKernel(const std::string & kernel_name,
     parent_ptr->setRealKernel(std::dynamic_pointer_cast<MFEMKernel>(kernel_ptr));
   else if (name == parent_name + "/imag_part")
     parent_ptr->setImagKernel(std::dynamic_pointer_cast<MFEMKernel>(kernel_ptr));
+  else
+    mooseError("Unknown component name '", name, "' for MFEMComplexKernel.");
+}
+
+void
+MFEMProblem::addComplexComponentToBC(const std::string & kernel_name,
+                                     const std::string & name,
+                                     InputParameters & parameters)
+{
+  std::string parent_name = name.substr(0, name.find_last_of('/'));
+  auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(
+      getUserObject<MFEMComplexIntegratedBC>(parent_name).getSharedPtr());
+  parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
+  addAuxBoundaryCondition(kernel_name, name, parameters);
+  auto bc_ptr = std::dynamic_pointer_cast<MFEMIntegratedBC>(
+      getUserObject<MFEMIntegratedBC>(name).getSharedPtr());
+
+  if (name == parent_name + "/real_part")
+    parent_ptr->setRealBC(std::dynamic_pointer_cast<MFEMIntegratedBC>(bc_ptr));
+  else if (name == parent_name + "/imag_part")
+    parent_ptr->setImagBC(std::dynamic_pointer_cast<MFEMIntegratedBC>(bc_ptr));
   else
     mooseError("Unknown component name '", name, "' for MFEMComplexKernel.");
 }
