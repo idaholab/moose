@@ -535,6 +535,12 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntaxTask("AddBCAction", "BCs/*", "add_bc");
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  registerSyntaxTask("AddKokkosKernelAction", "KokkosKernels/*", "add_kernel");
+  registerSyntaxTask("AddKokkosNodalKernelAction", "KokkosNodalKernels/*", "add_nodal_kernel");
+  registerSyntaxTask("AddKokkosBCAction", "KokkosBCs/*", "add_bc");
+#endif
+
   registerSyntax("CreateProblemAction", "Problem");
   registerSyntax("DynamicObjectRegistrationAction", "Problem");
 
@@ -592,6 +598,11 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddMaterialAction", "Materials/*");
   syntax.registerSyntaxType("Materials/*", "MaterialName");
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  registerSyntax("AddKokkosMaterialAction", "KokkosMaterials/*");
+  syntax.registerSyntaxType("KokkosMaterials/*", "MaterialName");
+#endif
 
   registerSyntax("AddFunctorMaterialAction", "FunctorMaterials/*");
   syntax.registerSyntaxType("FunctorMaterials/*", "MaterialName");

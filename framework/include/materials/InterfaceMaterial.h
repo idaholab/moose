@@ -176,6 +176,7 @@ public:
 protected:
   virtual const MaterialData & materialData() const override { return _material_data; }
   virtual MaterialData & materialData() override { return _material_data; }
+  virtual Moose::MaterialDataType materialDataType() override { return _material_data_type; }
 
   virtual const QBase & qRule() const override { return *_qrule; }
 
