@@ -45,10 +45,12 @@ MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & param
     MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
     _cut_boundary(getParam<BoundaryName>("cut_boundary")),
     _cut_bdr_attribute(std::stoi(_cut_boundary)),
+    _cut_submesh(std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromBoundary(
+        getMFEMProblem().mesh().getMFEMParMesh(), mfem::Array<int>({_cut_bdr_attribute})))),
     _transition_subdomain_boundary(getParam<BoundaryName>("transition_subdomain_boundary")),
-    _transition_subdomain(getParam<SubdomainName>("transition_subdomain")),   
-    _closed_subdomain(getParam<SubdomainName>("closed_subdomain")),    
-    _subdomain_label(getMFEMProblem().mesh().getMFEMParMesh().attributes.Max()+1)
+    _transition_subdomain(getParam<SubdomainName>("transition_subdomain")),
+    _closed_subdomain(getParam<SubdomainName>("closed_subdomain")),
+    _subdomain_label(getMFEMProblem().mesh().getMFEMParMesh().attributes.Max() + 1)
 {
 }
 
@@ -65,34 +67,24 @@ MFEMCutTransitionSubMesh::buildSubMesh()
 void
 MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 {
-  /// First we need to find the boundary elements on the cut boundary
-  std::vector<int> bdr_els;
-  for (int i = 0; i < parent_mesh.GetNBE(); ++i) {
-    if (parent_mesh.GetBdrAttribute(i) == _cut_bdr_attribute)
-      bdr_els.push_back(i);
-  }
-
-  /// Create a vector containing all of the vertices on the cut
-  std::vector<int> cut_verts;
-  for (const auto & bdr_el : bdr_els)
-  {
-    mfem::Array<int> face_verts;
-    parent_mesh.GetFaceVertices(parent_mesh.GetBdrElementFaceIndex(bdr_el), face_verts);
-    for (const auto & face_vert : face_verts)
-      cut_verts.push_back(face_vert);
-  }
-
   /// First create a plane based on the first boundary element found on the cut
   /// to use when determining orientation relative to the cut
   Plane3D plane;
-  if (bdr_els.size() > 0)
-    plane.make3DPlane(parent_mesh, parent_mesh.GetBdrElementFaceIndex(bdr_els[0]));
+  const mfem::Array<int> & parent_cut_element_id_map = _cut_submesh->GetParentElementIDMap();
+  if (parent_cut_element_id_map.Size() > 0)
+  {
+    int reference_face = parent_cut_element_id_map[0];
+    plane.make3DPlane(parent_mesh, parent_mesh.GetBdrElementFaceIndex(reference_face));
+  }
+
   /// Iterate over all vertices on cut, find elements with those vertices,
   /// and declare them transition elements if they are on the +ve side of the cut
   std::vector<int> transition_els;
   mfem::Table *vert_to_elem  = parent_mesh.GetVertexToElementTable();
-  for (auto cut_vert : cut_verts)
+  const mfem::Array<int> & cut_to_parent_vertex_id_map = _cut_submesh->GetParentVertexIDMap();
+  for (int i = 0; i < _cut_submesh->GetNV(); ++i)
   {
+    int cut_vert = cut_to_parent_vertex_id_map[i];
     int ne = vert_to_elem->RowSize(cut_vert); // number of elements touching cut vertex
     const int * els_adj_to_cut = vert_to_elem->GetRow(cut_vert); // elements touching cut vertex
     for (int i = 0; i < ne; i++)
