@@ -137,8 +137,8 @@ ComplexEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
   {
     if (!_cpx_kernels_map.Has(test_var_name))
     {
-      auto kernel_field_map = std::make_shared<
-          NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>();
+      auto kernel_field_map =
+          std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>();
       _cpx_kernels_map.Register(test_var_name, std::move(kernel_field_map));
     }
     // Register new kernels map if not present for the test/trial variable
@@ -185,8 +185,8 @@ ComplexEquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
   {
     if (!_cpx_integrated_bc_map.Has(test_var_name))
     {
-      auto integrated_bc_field_map = std::make_shared<
-          NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>();
+      auto integrated_bc_field_map =
+          std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>();
       _cpx_integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
     }
     // Register new integrated bc map if not present for the test/trial variable
@@ -202,8 +202,8 @@ ComplexEquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
   {
     if (!_integrated_bc_map.Has(test_var_name))
     {
-      auto integrated_bc_field_map = std::make_shared<
-          NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>();
+      auto integrated_bc_field_map =
+          std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>();
       _integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
     }
     // Register new integrated bc map if not present for the test/trial variable
