@@ -1,0 +1,30 @@
+[Tests]
+  design = 'syntax/AuxKernels/index.md'
+  issues = '#31153'
+
+  [MFEMScalarProjectAux]
+    type = XMLDiff
+    input = 2DScalarCurrentProjection.i
+    xmldiff = 'OutputData/2DScalarCurrentProjection/Run0/Run.pvd
+                OutputData/2DScalarCurrentProjection/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
+    requirement = 'The system shall have the ability to project a scalar coefficient into an MFEMVariable.'
+    capabilities = 'mfem'
+    max_parallel = 1
+    max_threads = 1
+    recover = false
+  []
+  [MFEMVectorProjectAux]
+    type = XMLDiff
+    input = 2DVectorCurrentProjection.i
+    xmldiff = 'OutputData/2DVectorCurrentProjection/Run0/Run.pvd
+                OutputData/2DScalarCurrentProjection/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
+    requirement = 'The system shall have the ability to project a vector coefficient into an MFEMVariable.'
+    capabilities = 'mfem'
+    max_parallel = 1
+    max_threads = 1
+    recover = false
+  []
+[]
+
