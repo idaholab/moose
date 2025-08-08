@@ -51,10 +51,6 @@ public:
                "getRealBFIntegrator() and getImagBFIntegrator()");
   }
 
-  // Get name of the trial variable (gridfunction) the kernel acts on.
-  // Defaults to the name of the test variable labelling the weak form.
-  virtual const std::string & getTrialVariableName() const { return _test_var_name; }
-
 protected:
   std::shared_ptr<MFEMIntegratedBC> _real_bc{nullptr};
   std::shared_ptr<MFEMIntegratedBC> _imag_bc{nullptr};
