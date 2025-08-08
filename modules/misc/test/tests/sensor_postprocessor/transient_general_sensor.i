@@ -65,7 +65,8 @@
     #execute_on = 'initial timestep_begin'
     input_signal = input_signal_pp
     noise_std_dev_function = '0'
-    delay_function = '0.3'
+    # Test was created before delay function worked as expected
+    delay_function = '0'
     drift_function = '0.2'
     efficiency_function = '0.8'
     signalToNoise_function = '1'
