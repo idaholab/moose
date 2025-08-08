@@ -495,40 +495,52 @@ prebuild:: | $(moose_config)
 wasp_submodule_status $(moose_revision_header) $(moose_LIB): | prebuild
 moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB) $(capabilities_LIB)
 
+# Check for support for process substitution, and if supported, we delete a known warning on MacOS from
+# the output because it is printed thousands of times
+CHECK_PROCESS_SUBSTITUTION := $(shell bash -c 'echo hello > >(cat)')
+ifeq ($(CHECK_PROCESS_SUBSTITUTION),hello)
+  SILENCE_SOME_WARNINGS = 1> >(cat >&1) 2> >(grep -v "could not create compact unwind for" >&2)
+endif
+
 # [JWP] With libtool, there is only one link command, it should work whether you are creating
 # shared or static libraries, and it should be portable across Linux and Mac...
 $(pcre_LIB): $(pcre_objects)
 	@echo "Linking Library "$@"..."
-	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(pcre_objects) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(pcre_DIR)
+	@bash -c '$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
+	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(pcre_objects) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(pcre_DIR) ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(pcre_LIB) $(pcre_DIR)
 
 $(gtest_LIB): $(gtest_objects)
 	@echo "Linking Library "$@"..."
-	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CC) -o $@ $(gtest_objects) $(EXTERNAL_FLAGS) -rpath $(gtest_DIR)
+	@bash -c '$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
+	  $(libmesh_CC) -o $@ $(gtest_objects) $(EXTERNAL_FLAGS) -rpath $(gtest_DIR) ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(gtest_LIB) $(gtest_DIR)
 
 $(hit_LIB): $(hit_objects)
 	@echo "Linking Library "$@"..."
-	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(hit_objects) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(HIT_DIR)
+	@bash -c '$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(hit_objects) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(HIT_DIR) ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hit_LIB) $(HIT_DIR)
 
+ifeq ($(MOOSE_UNITY),true)
+$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(moose_revision_header)
+	@echo "Linking Library "$@"..."
+	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR) ${SILENCE_SOME_WARNINGS}'
+	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
+else
+# We avoid bash -c outside unity build mode because there would be too many arguments and it triggers an error
 $(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(moose_revision_header)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
+endif
 
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
-
 $(moose_objects): $(moose_config_symlink) | moose_header_symlinks
-
 else
-
 $(moose_objects): $(moose_config)
-
 endif
 
 ## Clang static analyzer
@@ -566,8 +578,8 @@ exodiff: $(exodiff_APP)
 $(exodiff_objects): | prebuild
 $(exodiff_APP): $(exodiff_objects)
 	@echo "Linking Executable "$@"..."
-	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) $(exodiff_objects) -o $@ $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
+	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) $(exodiff_objects) -o $@ $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) ${SILENCE_SOME_WARNINGS}'
 
 -include $(wildcard $(exodiff_DIR)/*.d)
 

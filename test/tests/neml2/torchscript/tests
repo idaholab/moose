@@ -7,6 +7,6 @@
     input = 'heat_conduction.i'
     exodiff = 'heat_conduction_out.e'
     capabilities = 'neml2'
-    devices = 'cpu cuda'
+    compute_devices = 'cpu cuda'
   []
 []
