@@ -45,6 +45,10 @@
 {%- set CONDUIT_BUILD_SCRIPT = 'update_and_rebuild_conduit.sh' -%}
 {#- The installation location for conduit                                                     -#}
 {%- set CONDUIT_DIR = '/opt/conduit' -%}
+{#- The script used to install gslib                                                          -#}
+{%- set CONDUIT_BUILD_SCRIPT = 'update_and_rebuild_gslib.sh' -%}
+{#- The installation location for gslib                                                       -#}
+{%- set CONDUIT_DIR = '/opt/gslib' -%}
 {#- The script used to install mfem                                                           -#}
 {%- set MFEM_BUILD_SCRIPT = 'update_and_rebuild_mfem.sh' -%}
 {#- The installation location for mfem                                                        -#}

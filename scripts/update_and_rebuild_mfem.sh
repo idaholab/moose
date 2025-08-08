@@ -38,6 +38,7 @@ if [ -n "$help" ]; then
   echo
   echo "Influential variables"
   echo "CONDUIT_DIR              Path to conduit; default: ../framework/contrib/conduit/installed"
+  echo "GSLIB_DIR                Path to gslib; default: ../framework/contrib/gslib/installed"
   echo "LIBMESH_DIR              Path to libmesh (for netcdf); default ../libmesh/installed"
   echo "MFEM_DIR                 MFEM install prefix; default: ../framework/contrib/mfem/installed"
   echo "MFEM_SRC_DIR             Path to MFEM source; default: ../framework/contrib/mfem from submodule"
@@ -81,6 +82,7 @@ fi
 CONDUIT_BUILD_DIR="${CONDUIT_SRC_DIR}/build"
 
 CONDUIT_DIR=${CONDUIT_DIR:-$(get_realpath "${SCRIPT_DIR}/../framework/contrib/conduit/installed")}
+GSLIB_DIR=${GSLIB_DIR:-$(get_realpath "${SCRIPT_DIR}/../framework/contrib/gslib/installed")}
 LIBMESH_DIR=${LIBMESH_DIR:-$(get_realpath "${SCRIPT_DIR}/../libmesh/installed")}
 if [ -z "$PETSC_DIR" ]; then
   PETSC_DIR=$(get_realpath "${SCRIPT_DIR}/../petsc")
@@ -129,6 +131,8 @@ if [ -z "$go_fast" ]; then
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
       -DMFEM_USE_CONDUIT=YES \
       -DCONDUIT_DIR="$CONDUIT_DIR" \
+      -DMFEM_USE_GSLIB=YES \
+      -DGSLIB_DIR="$GSLIB_DIR" \
       "$@"
 fi
 
