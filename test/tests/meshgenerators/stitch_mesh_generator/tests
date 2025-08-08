@@ -1,6 +1,6 @@
 [Tests]
   [stitched_mesh_generator]
-    design = 'meshgenerators/StitchedMeshGenerator.md'
+    design = 'meshgenerators/StitchMeshGenerator.md'
     issues = '#11640 #31191'
     requirement = "The system shall support the creation of a finite element mesh from existing "
                   "meshes"
@@ -40,7 +40,7 @@
   []
   [stitch_block_names]
     type = 'Exodiff'
-    design = 'meshgenerators/StitchedMeshGenerator.md'
+    design = 'meshgenerators/StitchMeshGenerator.md'
     issues = '#30801'
     input = 'stitch_block_names.i'
     cli_args = '--mesh-only'
@@ -52,7 +52,7 @@
   []
   [dont_stitch_block_names]
     type = 'Exodiff'
-    design = 'meshgenerators/StitchedMeshGenerator.md'
+    design = 'meshgenerators/StitchMeshGenerator.md'
     issues = '#30801'
     input = 'stitch_block_names.i'
     cli_args = '--mesh-only dont_stitch_block_names_in.e Mesh/stitch/subdomain_remapping=false'
@@ -64,7 +64,7 @@
   []
   [samename-warning]
     type = RunException
-    design = 'meshgenerators/StitchedMeshGenerator.md'
+    design = 'meshgenerators/StitchMeshGenerator.md'
     issues = '#28049'
     requirement = "The system shall warn the user if boundary ID renumbering is disabled and it detects the same ID with different boundary names on the two meshes"
     expect_err = "Boundary ID 1 corresponds to different boundary names on the input meshes! On the first mesh it corresponds to `right` while on the second mesh it corresponds to `bazinga`."

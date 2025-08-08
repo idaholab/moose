@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "StitchedMeshGenerator.h"
+#include "StitchMeshGenerator.h"
 
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
@@ -15,26 +15,17 @@
 
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("MooseApp", StitchedMeshGenerator);
+registerMooseObjectRenamed("MooseApp",
+                           StitchedMeshGenerator,
+                           "06/30/2026 24:00",
+                           StitchMeshGenerator);
+registerMooseObject("MooseApp", StitchMeshGenerator);
 
 InputParameters
-StitchedMeshGenerator::validParams()
+StitchMeshGenerator::validParams()
 {
-  InputParameters params = MeshGenerator::validParams();
-
-  MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
-
+  InputParameters params = StitchMeshGeneratorBase::validParams();
   params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
-  params.addParam<bool>(
-      "clear_stitched_boundary_ids", true, "Whether or not to clear the stitched boundary IDs");
-  params.addRequiredParam<std::vector<std::vector<std::string>>>(
-      "stitch_boundaries_pairs",
-      "Pairs of boundaries to be stitched together between the 1st mesh in inputs and each "
-      "consecutive mesh");
-  params.addParam<MooseEnum>(
-      "algorithm",
-      algorithm,
-      "Control the use of binary search for the nodes of the stitched surfaces.");
   params.addParam<bool>("prevent_boundary_ids_overlap",
                         true,
                         "Whether to re-number boundaries in stitched meshes to prevent merging of "
@@ -47,34 +38,44 @@ StitchedMeshGenerator::validParams()
       "subdomain_remapping",
       true,
       "Treat input subdomain names as primary, preserving them and remapping IDs as needed");
-  params.addParam<bool>(
-      "verbose_stitching", false, "Whether mesh stitching should have verbose output.");
+
   params.addClassDescription(
       "Allows multiple mesh files to be stitched together to form a single mesh.");
 
+  // This is used for compatibility with TestSubGenerators
+  params.addPrivateParam<bool>("_check_inputs", true);
   return params;
 }
 
-StitchedMeshGenerator::StitchedMeshGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
+StitchMeshGenerator::StitchMeshGenerator(const InputParameters & parameters)
+  : StitchMeshGeneratorBase(parameters),
     _mesh_ptrs(getMeshes("inputs")),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
-    _clear_stitched_boundary_ids(getParam<bool>("clear_stitched_boundary_ids")),
-    _stitch_boundaries_pairs(
-        getParam<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs")),
-    _algorithm(parameters.get<MooseEnum>("algorithm")),
     _prevent_boundary_ids_overlap(getParam<bool>("prevent_boundary_ids_overlap")),
     _merge_boundaries_with_same_name(getParam<bool>("merge_boundaries_with_same_name"))
 {
+  // Check inputs
+  if (_input_names.size() - 1 != _stitch_boundaries_pairs.size() && getParam<bool>("_check_inputs"))
+    paramError("stitch_boundaries_pairs",
+               "Can only stitch one pair of boundary per pair of mesh. We have '" +
+                   std::to_string(_input_names.size()) +
+                   "' meshes specified (=" + std::to_string(_input_names.size() - 1) +
+                   " pairs) and " + std::to_string(_stitch_boundaries_pairs.size()) +
+                   " pairs of boundaries specified");
+  for (const auto & pair : _stitch_boundaries_pairs)
+    if (pair.size() != 2)
+      paramError("stitch_boundaries_pairs",
+                 "Stitched boundary pair '" + Moose::stringify(pair) +
+                     "' is not of length 2, but of length: " + std::to_string(pair.size()));
 }
 
 std::unique_ptr<MeshBase>
-StitchedMeshGenerator::generate()
+StitchMeshGenerator::generate()
 {
   // We put the first mesh in a local pointer
   std::unique_ptr<UnstructuredMesh> mesh = dynamic_pointer_cast<UnstructuredMesh>(*_mesh_ptrs[0]);
   if (!mesh) // This should never happen until libMesh implements on-the-fly-Elem mesh types
-    mooseError("StitchedMeshGenerator is only implemented for unstructured meshes");
+    mooseError("StitchMeshGenerator is only implemented for unstructured meshes");
 
   // Reserve spaces for the other meshes (no need to store the first one another time)
   std::vector<std::unique_ptr<UnstructuredMesh>> meshes(_mesh_ptrs.size() - 1);
@@ -86,79 +87,15 @@ StitchedMeshGenerator::generate()
   // Stitch all the meshes to the first one
   for (MooseIndex(meshes) i = 0; i < meshes.size(); i++)
   {
-    auto boundary_pair = _stitch_boundaries_pairs[i];
+    const auto boundary_pair = _stitch_boundaries_pairs[i];
 
-    boundary_id_type first, second;
-
-    try
-    {
-      first = MooseUtils::convert<boundary_id_type>(boundary_pair[0], true);
-    }
-    catch (...)
-    {
-      first = mesh->get_boundary_info().get_id_by_name(boundary_pair[0]);
-
-      if (first == BoundaryInfo::invalid_id)
-      {
-        std::stringstream error;
-
-        error << "Boundary " << boundary_pair[0] << " doesn't exist on mesh '" << _input_names[0]
-              << "' in generator " << name() << "\n";
-        error << "Boundary (sideset) names that do exist: \n";
-        error << " ID : Name\n";
-
-        auto & sideset_id_name_map = mesh->get_boundary_info().get_sideset_name_map();
-
-        for (auto & ss_name_map_pair : sideset_id_name_map)
-          error << " " << ss_name_map_pair.first << " : " << ss_name_map_pair.second << "\n";
-
-        error << "\nBoundary (nodeset) names that do exist: \n";
-        error << " ID : Name\n";
-
-        auto & nodeset_id_name_map = mesh->get_boundary_info().get_nodeset_name_map();
-
-        for (auto & ns_name_map_pair : nodeset_id_name_map)
-          error << " " << ns_name_map_pair.first << " : " << ns_name_map_pair.second << "\n";
-
-        paramError("stitch_boundaries_pairs", error.str());
-      }
-    }
-
-    try
-    {
-      second = MooseUtils::convert<boundary_id_type>(boundary_pair[1], true);
-    }
-    catch (...)
-    {
-      second = meshes[i]->get_boundary_info().get_id_by_name(boundary_pair[1]);
-
-      if (second == BoundaryInfo::invalid_id)
-      {
-        meshes[i]->print_info();
-
-        std::stringstream error;
-
-        error << "Boundary " << boundary_pair[1] << " doesn't exist on mesh '" << _input_names[i]
-              << "' in generator " << name() << "\n";
-        error << "Boundary (sideset) names that do exist: \n";
-        error << " ID : Name\n";
-
-        auto & sideset_id_name_map = meshes[i]->get_boundary_info().get_sideset_name_map();
-
-        for (auto & ss_name_map_pair : sideset_id_name_map)
-          error << " " << ss_name_map_pair.first << " : " << ss_name_map_pair.second << "\n";
-
-        error << "\nBoundary (nodeset) names that do exist: \n";
-        error << " ID : Name\n";
-
-        auto & nodeset_id_name_map = mesh->get_boundary_info().get_nodeset_name_map();
-
-        for (auto & ns_name_map_pair : nodeset_id_name_map)
-          error << " " << ns_name_map_pair.first << " : " << ns_name_map_pair.second << "\n";
-
-        paramError("stitch_boundaries_pairs", error.str());
-      }
-    }
+    // Check the input boundaries
+    const auto first = getBoundaryIdToStitch(
+        *mesh,
+        (_input_names.size() ? _input_names[0] : "(unknown)") +
+            ((i == 0) ? "" : (" (stitched with " + std::to_string(i) + " previous meshes)")),
+        boundary_pair[0]);
+    auto second = getBoundaryIdToStitch(*meshes[i], name(), boundary_pair[1]);
 
     const bool use_binary_search = (_algorithm == "BINARY");
 
@@ -239,7 +176,7 @@ StitchedMeshGenerator::generate()
     mesh->stitch_meshes(*meshes[i],
                         first,
                         second,
-                        TOLERANCE,
+                        getParam<Real>("stitching_hmin_tolerance_factor"),
                         _clear_stitched_boundary_ids,
                         getParam<bool>("verbose_stitching"),
                         use_binary_search,

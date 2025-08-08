@@ -43,6 +43,10 @@
     positions = 'pos'
     sort_by = id
     execute_on = TIMESTEP_END
+    # the finite volume variable is discontinuous at faces
+    # Note that we are not sampling on faces so it does not matter,
+    # we could set it to 'false' to have less checks when sampling
+    discontinuous = true
   []
 []
 
