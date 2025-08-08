@@ -123,7 +123,8 @@
     requirement = 'The system shall be able to transport an externally-generated scalar field variables in a fluid flow field using the NSFVAction syntax.'
     cli_args = "Variables/inactive='' Modules/NavierStokesFV/velocity_variable='vel_x vel_y' "
                "Modules/NavierStokesFV/pressure_variable='pressure' "
-               "Modules/NavierStokesFV/fluid_temperature_variable='T_fluid'"
+               "Modules/NavierStokesFV/fluid_temperature_variable='T_fluid' "
+               "Modules/NavierStokesFV/initial_temperature=0"
     design = 'NSFVAction.md'
     issues = '#19472'
     valgrind = HEAVY
