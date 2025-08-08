@@ -12,25 +12,6 @@
 #pragma once
 #include "MFEMSubMesh.h"
 
-
-class Plane3D {
-
-  public:
-    Plane3D();
-    ~Plane3D();
-  
-    // Constructs a mathematical 3D plane from a mesh face
-    void make3DPlane(const mfem::ParMesh *pm, const int face);
-  
-    // Calculates on which side of the infinite 3D plane a point is.
-    // Returns 1, -1, or 0, the latter meaning the point is on the plane
-    int side(const mfem::Vector v);
-  
-  private:
-    mfem::Vector *u;
-    double d;
-  };
-
 /**
  * Modifies the MFEM Mesh to label a subdomain consisting of elements adjacent to an
  * interior surface on one side, and constructs an stores an mfem::ParSubMesh object
@@ -46,13 +27,12 @@ public:
 protected:
   virtual void buildSubMesh() override;
 
-  // Add attribute to the parent mesh representing the cut transition region
-  void modifyMesh(mfem::ParMesh & parent_mesh);
+  // Add attributes to the parent mesh representing the cut transition region
+  void labelMesh(mfem::ParMesh & parent_mesh);
 
   // Checks whether a given element is within a certain domain or vector of
   // domains.
-  bool isInDomain(const int el, const mfem::Array<int> &dom,
-                  const mfem::ParMesh *mesh);
+  bool isInDomain(const int & el, const mfem::Array<int> & subdomains, const mfem::ParMesh & mesh);
 
   const BoundaryName & _cut_boundary;
   const int _cut_bdr_attribute;
@@ -60,6 +40,23 @@ protected:
   const SubdomainName & _transition_subdomain;  
   const SubdomainName & _closed_subdomain;    
   int _subdomain_label;
+};
+
+class Plane3D
+{
+public:
+  Plane3D();
+
+  // Constructs a mathematical 3D plane from a mesh face
+  void make3DPlane(const mfem::ParMesh & mesh, const int & face);
+
+  // Calculates on which side of the infinite 3D plane a point is.
+  // Returns 1, -1, or 0, the latter meaning the point is on the plane
+  int side(const mfem::Vector & v);
+
+private:
+  mfem::Vector normal;
+  double d;
 };
 
 #endif
