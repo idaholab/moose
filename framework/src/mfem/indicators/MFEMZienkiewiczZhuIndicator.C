@@ -11,6 +11,9 @@
 
 #include "MFEMZienkiewiczZhuIndicator.h"
 
+#include "MFEMProblemData.h"
+#include "MFEMKernel.h"
+
 registerMooseObject("MooseApp", MFEMZienkiewiczZhuIndicator);
 
 InputParameters
