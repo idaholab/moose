@@ -183,22 +183,19 @@ MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh)
   std::vector<int> bdr_els;
   for (int i = 0; i < parent_mesh.GetNBE(); ++i) {
     if (parent_mesh.GetBdrAttribute(i) == _cut_bdr_attribute)
-    {
       bdr_els.push_back(i);
-    }
   }
   Plane3D plane;
-  if (bdr_els.size() > 0) {
+  if (bdr_els.size() > 0)
     plane.make3DPlane(&parent_mesh, parent_mesh.GetBdrElementFaceIndex(bdr_els[0]));
-  }
-  std::vector<int> elec_vtx;
+  std::vector<int> cut_vtx;
   // Create a vector containing all of the vertices on the cut
   for (auto b_fc : bdr_els)
   {
     mfem::Array<int> face_vtx;
     parent_mesh.GetFaceVertices(parent_mesh.GetBdrElementFaceIndex(b_fc), face_vtx);
     for (auto v : face_vtx)
-      pushIfUnique(elec_vtx, v);
+      pushIfUnique(cut_vtx, v);
   }
 
   // Now we need to find all elements in the mesh that touch, on at least one
@@ -207,19 +204,15 @@ MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh)
   std::vector<int> wedge_els;
   for (int e = 0; e < parent_mesh.GetNE(); ++e)
   {
-    if (!isInDomain(e, getSubdomainAttributes(), &parent_mesh) ||
-        plane.side(elementCentre(e, &parent_mesh)) == 1)
-      continue;
-    if (plane.side(elementCentre(e, &parent_mesh)) == 1)
-      continue;
-    mfem::Array<int> elem_vtx;
-    parent_mesh.GetElementVertices(e, elem_vtx);
-    for (auto v1 : elem_vtx) {
-      for (auto v2 : elec_vtx) {
-        if (v1 == v2) {
-          pushIfUnique(wedge_els, e);
-        }
-      }
+    if (isInDomain(e, getSubdomainAttributes(), &parent_mesh) &&
+        plane.side(elementCentre(e, &parent_mesh)) != 1)
+    {
+      mfem::Array<int> elem_vtx;
+      parent_mesh.GetElementVertices(e, elem_vtx);
+      for (auto v1 : elem_vtx)
+        for (auto v2 : cut_vtx)
+          if (v1 == v2)
+            pushIfUnique(wedge_els, e);
     }
   }
 

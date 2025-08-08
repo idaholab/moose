@@ -109,7 +109,7 @@
 []
 
 [Solver]
-  type = MFEMHypreGMRES
+  type = MFEMHyprePCG
   preconditioner = ams
   l_tol = 1e-14
   l_max_its = 1000
