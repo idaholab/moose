@@ -41,4 +41,10 @@ MFEMExecutioner::MFEMExecutioner(const InputParameters & parameters)
                        Moose::PassKey<MFEMExecutioner>());
 }
 
+bool
+MFEMExecutioner::UseAMR() const
+{
+  return _mfem_problem.UseAMR();
+}
+
 #endif
