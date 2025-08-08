@@ -108,6 +108,16 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
   _finder.Setup(mesh);
   _finder.FindPoints(_points, _points_ordering);
 
+  // check all points were found
+  mfem::Array<unsigned int> point_codes = _finder.GetCode();
+  for (size_t i = 0; i < points.size(); i++)
+  {
+    if (point_codes[i] > 1)
+    {
+      mooseError("MFEMValueSamplerBase could not find point at ", points[i], ".");
+    }
+  }
+
   // declare points vectors for outputting
   const auto mesh_dim = this->getMFEMProblem().mesh().getMFEMParMesh().SpaceDimension();
   for (int i = 0; i < mesh_dim; i++)
