@@ -791,12 +791,17 @@ MultiApp::restore(bool force)
 
       for (unsigned int i = 0; i < _my_num_apps; i++)
       {
-        _end_solutions[i] = _apps[i]
-                                ->getExecutioner()
-                                ->feProblem()
-                                .getNonlinearSystemBase(/*nl_sys=*/0)
-                                .solution()
-                                .clone();
+        _end_solutions[i].resize(_apps[i]->getExecutioner()->feProblem().numSolverSystems());
+        for (unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numSolverSystems();
+             j++)
+        {
+          _end_solutions[i][j] = _apps[i]
+                                     ->getExecutioner()
+                                     ->feProblem()
+                                     .getSolverSystem(/*solver_sys=*/j)
+                                     .solution()
+                                     .clone();
+        }
         auto & sub_multiapps =
             _apps[i]->getExecutioner()->feProblem().getMultiAppWarehouse().getObjects();
 
@@ -835,11 +840,15 @@ MultiApp::restore(bool force)
     {
       for (unsigned int i = 0; i < _my_num_apps; i++)
       {
-        _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase(/*nl_sys=*/0).solution() =
-            *_end_solutions[i];
+        for (unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numSolverSystems();
+             j++)
+        {
+          _apps[i]->getExecutioner()->feProblem().getSolverSystem(/*solver_sys=*/j).solution() =
+              *_end_solutions[i][j];
 
-        // We need to synchronize solution so that local_solution has the right values
-        _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase(/*nl_sys=*/0).update();
+          // We need to synchronize solution so that local_solution has the right values
+          _apps[i]->getExecutioner()->feProblem().getSolverSystem(/*solver_sys=*/j).update();
+        }
       }
 
       _end_solutions.clear();
