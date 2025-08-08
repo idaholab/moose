@@ -57,7 +57,6 @@ protected:
   // domains.
   bool isInDomain(const int el, const mfem::Array<int> &dom,
                   const mfem::ParMesh *mesh);
-  bool isInDomain(const int el, const int &sd, const mfem::ParMesh *mesh);
 
   const BoundaryName & _cut_boundary;
   const int _cut_bdr_attribute;
