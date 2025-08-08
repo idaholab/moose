@@ -9,19 +9,18 @@
 
 #pragma once
 
-#include "MeshGenerator.h"
+#include "StitchMeshGeneratorBase.h"
 #include "libmesh/replicated_mesh.h"
-#include "MooseEnum.h"
 
 /**
  * Allows multiple mesh files to be "stitched" together to form a single mesh.
  */
-class StitchedMeshGenerator : public MeshGenerator
+class StitchMeshGenerator : public StitchMeshGeneratorBase
 {
 public:
   static InputParameters validParams();
 
-  StitchedMeshGenerator(const InputParameters & parameters);
+  StitchMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -31,15 +30,6 @@ protected:
 
   /// The mesh generator inputs to read
   const std::vector<MeshGeneratorName> & _input_names;
-
-  /// Whether or not to clear (remove) the stitched boundary IDs
-  const bool & _clear_stitched_boundary_ids;
-
-  /// A transformed version of _stitch_boundaries into a more logical "pairwise" structure
-  std::vector<std::vector<std::string>> _stitch_boundaries_pairs;
-
-  /// Type of algorithm used to find matching nodes (binary or exhaustive)
-  MooseEnum _algorithm;
 
   /// Whether to renumber all boundaries in stitched meshes to prevent accidental merging
   /// of sidesets with the same id

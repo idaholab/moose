@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "StitchedMeshGenerator.h"
+#include "StitchMeshGenerator.h"
 
 /**
  * Allows multiple mesh files to be "stitched" together to form a single mesh.
  */
-class TestSubgenerators : public StitchedMeshGenerator
+class TestSubgenerators : public StitchMeshGenerator
 {
 public:
   static InputParameters validParams();

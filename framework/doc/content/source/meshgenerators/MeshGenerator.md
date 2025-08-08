@@ -5,7 +5,7 @@ This is the base class for the `MeshGenerator` system.
 There are two types of mesh generators:
 
 - Those who create a mesh (examples: [GeneratedMeshGenerator.md], [AnnularMeshGenerator.md], [FileMeshGenerator.md]).
-- Those who modify an existing mesh (examples: [MeshExtruderGenerator.md], [StitchedMeshGenerator.md], [RenameBlockGenerator.md], [RenameBoundaryGenerator.md]).
+- Those who modify an existing mesh (examples: [MeshExtruderGenerator.md], [StitchMeshGenerator.md], [RenameBlockGenerator.md], [RenameBoundaryGenerator.md]).
 
 The purpose of these objects is to create complex meshes using only one input file. Indeed, you can use several MeshGenerator blocks in your input file. Those represent the different steps necessary to create your complex mesh. Note that an option exists for printing mesh information to screen (see [#showing-mesh-information]) for tracking down problems when generating complex meshes with multiple mesh generators.
 
@@ -58,7 +58,7 @@ For mesh generators that create a mesh, care must be taken as to the parallel ty
 
 You should +only+ use these APIs to create the base mesh in generators that create meshes. This is very important, because the internal preparation of the meshes for use is dependent on the parallel type of the mesh.
 
-For mesh generators that modify an existing mesh, you should have as an input parameter a `MeshGeneratorName` (or multiple, as a `std::vector<MeshGeneratorName>` if applicable) to obtain the mesh(es) to modify. You can then obtain said meshes via `MeshGenerator::getMesh()` and `MeshGenerator::getMeshByName()`. For examples, see [RenameBoundaryGenerator.md] and [StitchedMeshGenerator.md]. You then act on said meshes by overriding the `generate()` method, and returning the resulting mesh.
+For mesh generators that modify an existing mesh, you should have as an input parameter a `MeshGeneratorName` (or multiple, as a `std::vector<MeshGeneratorName>` if applicable) to obtain the mesh(es) to modify. You can then obtain said meshes via `MeshGenerator::getMesh()` and `MeshGenerator::getMeshByName()`. For examples, see [RenameBoundaryGenerator.md] and [StitchMeshGenerator.md]. You then act on said meshes by overriding the `generate()` method, and returning the resulting mesh.
 
 ### Using Sub MeshGenerators
 

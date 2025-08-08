@@ -28,7 +28,7 @@
     new_block = 'a_nice_name'
   []
   [stitch]
-    type = StitchedMeshGenerator
+    type = StitchMeshGenerator
     inputs = 'mesh1 give_name'
     stitch_boundaries_pairs = 'right left'
   []

@@ -9,14 +9,13 @@
 
 #pragma once
 
-#include "MeshGenerator.h"
+#include "StitchMeshGeneratorBase.h"
 #include "libmesh/replicated_mesh.h"
-#include "MooseEnum.h"
 
 /**
  * Allows a pair of boundaries to be "stitched" together.
  */
-class StitchBoundaryMeshGenerator : public MeshGenerator
+class StitchBoundaryMeshGenerator : public StitchMeshGeneratorBase
 {
 public:
   static InputParameters validParams();
@@ -28,13 +27,4 @@ public:
 protected:
   /// the input mesh
   std::unique_ptr<MeshBase> & _input;
-
-  /// Whether or not to clear (remove) the stitched boundary IDs
-  const bool & _clear_stitched_boundary_ids;
-
-  /// Pair of stitch boundaries
-  std::vector<boundary_id_type> _stitch_boundaries_pair;
-
-  /// Type of algorithm used to find matching nodes (binary or exhaustive)
-  MooseEnum _algorithm;
 };
