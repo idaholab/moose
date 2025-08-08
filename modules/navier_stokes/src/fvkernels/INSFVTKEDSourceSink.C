@@ -51,6 +51,10 @@ INSFVTKEDSourceSink::validParams()
   params.addParam<MooseFunctorName>(NS::turbulent_Prandtl, 0.9, "The turbulent Prandtl number.");
   params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
 
+  params.addParam<bool>("relaminarization", false, "Boolean to activate relaminarization.");
+  params.addParam<Real>("C", 0.3, "Relaminarization coefficient.");
+  params.addParam<MooseFunctorName>("wall_distance", "Distance to the wall.");
+
   return params;
 }
 
@@ -77,7 +81,10 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
     _alpha(params.isParamValid("alpha_name") ? &(getFunctor<ADReal>("alpha_name")) : nullptr),
     _Pr_t(params.isParamValid(NS::turbulent_Prandtl) ? &(getFunctor<ADReal>(NS::turbulent_Prandtl))
                                                      : nullptr),
-    _gravity(params.isParamValid("gravity") ? &getParam<RealVectorValue>("gravity") : nullptr)
+    _gravity(params.isParamValid("gravity") ? &getParam<RealVectorValue>("gravity") : nullptr),
+    _relaminarization(getParam<bool>("relaminarization")),
+    _C(getParam<Real>("C")),
+    _wall_distance(params.isParamValid("wall_distance") ? &getFunctor<Real>("wall_distance") : nullptr)
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
@@ -92,6 +99,9 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
 
   if (_temperature && !_gravity)
     paramError("gravity", "Gravity should be provided when buoyancy correction is active.");
+
+  if (_relaminarization && !_wall_distance)
+      paramError("wall_distance", "Wall distance shouold be provided when relaminarization is activated.");
 }
 
 void
@@ -272,6 +282,31 @@ INSFVTKEDSourceSink::computeQpResidual()
     const auto time_scale = raw_value(TKE_old) / raw_value(eps_old);
     production = _C1_eps * production_k / time_scale;
     destruction = _C2_eps * rho * _var(elem_arg, state) / time_scale;
+
+    if (_relaminarization)
+    {
+      // Useful definitions
+      const auto k = raw_value(TKE_old);
+      const auto eps = raw_value(eps_old);
+      const auto d = (*_wall_distance)(elem_arg, state);
+      const auto nu = mu / rho;
+
+      // Reynolds numbers
+      const auto Re_t = Utility::pow<2>(k) / eps / nu;
+      const auto Re_d = std::sqrt(k) * d / nu;
+      
+      // Damping function
+      const auto f2 = 1.0 - _C * std::exp(-Utility::pow<2>(Re_t));
+
+      // Produnction increase
+      const auto prod_increase = _D * f2
+                                * (production + 2*mu*k/Utility::pow<2>(d))
+                                * std::exp(-_E*Utility::pow<2>(Re_d));
+
+      // Correct relaminarized production and destruction
+      production += prod_increase;
+      destruction *= f2;
+    }
 
     residual = destruction - production;
   }
