@@ -19,6 +19,7 @@ VectorPostprocessor::validParams()
 {
   InputParameters params = UserObject::validParams();
   params += OutputInterface::validParams();
+  params += NonADFunctorInterface::validParams();
   params.addParam<bool>("contains_complete_history",
                         false,
                         "Set this flag to indicate that the values in all vectors declared by this "
@@ -50,6 +51,7 @@ VectorPostprocessor::validParams()
 
 VectorPostprocessor::VectorPostprocessor(const MooseObject * moose_object)
   : OutputInterface(moose_object->parameters()),
+    NonADFunctorInterface(moose_object),
     _vpp_name(MooseUtils::shortName(moose_object->parameters().get<std::string>("_object_name"))),
     _vpp_fe_problem(
         *moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),

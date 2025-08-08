@@ -35,7 +35,6 @@ MeshDivisionFunctorReductionVectorPostprocessor::validParams()
 MeshDivisionFunctorReductionVectorPostprocessor::MeshDivisionFunctorReductionVectorPostprocessor(
     const InputParameters & parameters)
   : SpatialUserObjectFunctor<ElementVectorPostprocessor>(parameters),
-    NonADFunctorInterface(this),
     _reduction(getParam<MooseEnum>("reduction")),
     _nfunctors(getParam<std::vector<MooseFunctorName>>("functors").size()),
     _mesh_division(_fe_problem.getMeshDivision(getParam<MeshDivisionName>("mesh_division"), _tid))

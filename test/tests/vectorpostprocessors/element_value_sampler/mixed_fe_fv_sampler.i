@@ -16,6 +16,10 @@
     []
 
   []
+  [T_linear]
+    type = MooseLinearVariableFVReal
+    initial_condition = 0.15
+  []
   [grad_T]
     order = CONSTANT
     family = MONOMIAL_VEC
@@ -43,7 +47,7 @@
 [VectorPostprocessors]
   [element_value_sampler]
     type = ElementValueSampler
-    variable = 'T auxGrad_T_x'
+    variable = 'T auxGrad_T_x T_linear'
     sort_by = id
   []
 []
