@@ -12,116 +12,90 @@
 #include "MFEMTransient.h"
 #include "MFEMProblem.h"
 #include "TimeDomainEquationSystemProblemOperator.h"
+#include "TimeStepper.h"
 
 registerMooseObject("MooseApp", MFEMTransient);
 
 InputParameters
 MFEMTransient::validParams()
 {
-  InputParameters params = MFEMExecutioner::validParams();
+  InputParameters params = MFEMProblemSolve::validParams();
+  params += TransientBase::validParams();
   params.addClassDescription("Executioner for transient MFEM problems.");
-  params.addParam<Real>("start_time", 0.0, "The start time of the simulation");
-  params.addParam<Real>("end_time", 1.0e30, "The end time of the simulation");
-  params.addParam<Real>("dt", 1., "The timestep size between solves");
-  params.addParam<unsigned int>(
-      "visualisation_steps", 1, "The number of timesteps in a transient run");
   return params;
 }
 
 MFEMTransient::MFEMTransient(const InputParameters & params)
-  : MFEMExecutioner(params),
-    _t_step(getParam<Real>("dt")),
-    _t_initial(getParam<Real>("start_time")),
-    _t_final(getParam<Real>("end_time")),
-    _t(_mfem_problem.time()),
-    _it(0),
-    _vis_steps(params.get<unsigned int>("visualisation_steps")),
-    _last_step(false)
+  : TransientBase(params),
+    _mfem_problem(dynamic_cast<MFEMProblem &>(feProblem())),
+    _mfem_problem_data(_mfem_problem.getProblemData()),
+    _mfem_problem_solve(*this, getProblemOperators())
 {
-  _app.setStartTime(_t_initial);
-  _t = _t_initial;
-  _mfem_problem.transient(true);
-}
-
-void
-MFEMTransient::constructProblemOperator()
-{
-  _problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>();
-  auto problem_operator =
-      std::make_unique<Moose::MFEM::TimeDomainEquationSystemProblemOperator>(_problem_data);
-  _problem_operator.reset();
-  _problem_operator = std::move(problem_operator);
-}
-
-void
-MFEMTransient::step(double dt, int) const
-{
-  // Check if current time step is final
-  if (_t + dt >= _t_final - dt / 2)
+  // If no ProblemOperators have been added by the user, add a default
+  if (getProblemOperators().empty())
   {
-    _last_step = true;
+    _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>();
+    auto problem_operator =
+        std::make_shared<Moose::MFEM::TimeDomainEquationSystemProblemOperator>(_mfem_problem);
+    addProblemOperator(std::move(problem_operator));
   }
-
-  // Advance time step.
-  _problem_data.ode_solver->Step(_problem_data.f, _t, dt);
-
-  // Synchonise time dependent GridFunctions with updated DoF data.
-  _problem_operator->SetTestVariablesFromTrueVectors();
-
-  // Execute user objects at timestep end
-  _mfem_problem.execute(EXEC_TIMESTEP_END);
-  // Perform the output of the current time step
-  _mfem_problem.outputStep(EXEC_TIMESTEP_END);
 }
 
 void
 MFEMTransient::init()
 {
-  _mfem_problem.execute(EXEC_PRE_MULTIAPP_SETUP);
-  _mfem_problem.initialSetup();
+  TransientBase::init();
 
   // Set up initial conditions
-  _problem_data.eqn_system->Init(
-      _problem_data.gridfunctions,
-      _problem_data.fespaces,
+  _mfem_problem_data.eqn_system->Init(
+      _mfem_problem_data.gridfunctions,
+      _mfem_problem_data.fespaces,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
-  _problem_operator->SetGridFunctions();
-  _problem_operator->Init(_problem_data.f);
-
-  // Set timestepper
-  _problem_data.ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
-  _problem_data.ode_solver->Init(*(_problem_operator));
-  _problem_operator->SetTime(0.0);
+  for (const auto & problem_operator : getProblemOperators())
+  {
+    problem_operator->SetGridFunctions();
+    problem_operator->Init(_mfem_problem_data.f);
+  }
 }
 
 void
-MFEMTransient::execute()
+MFEMTransient::takeStep(Real input_dt)
 {
-  _mfem_problem.outputStep(EXEC_INITIAL);
-  preExecute();
+  _dt_old = _dt;
 
-  while (_last_step != true)
+  if (input_dt == -1.0)
+    _dt = computeConstrainedDT();
+  else
+    _dt = input_dt;
+
+  _time_stepper->preSolve();
+  _problem.timestepSetup();
+  _problem.onTimestepBegin();
+
+  // Advance time step of the MFEM problem. Time is also updated here, and
+  // _problem_operator->SetTime is called inside the ode_solver->Step method to
+  // update the time used by time dependent (function) coefficients.
+  _time_stepper->step();
+
+  // Continue with usual TransientBase::takeStep() finalisation
+  _last_solve_converged = _time_stepper->converged();
+
+  if (!lastSolveConverged())
   {
-    _it++;
-    step(_t_step, _it);
+    _console << "Aborting as solve did not converge" << std::endl;
+    return;
   }
 
-  _mfem_problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN,
-                                   /*recurse_through_multiapp_levels=*/true);
-  _mfem_problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN, /*recurse_through_multiapp_levels=*/true);
-  _mfem_problem.finishMultiAppStep(EXEC_TIMESTEP_END, /*recurse_through_multiapp_levels=*/true);
-  _mfem_problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_END,
-                                   /*recurse_through_multiapp_levels=*/true);
+  if (lastSolveConverged())
+    _time_stepper->acceptStep();
+  else
+    _time_stepper->rejectStep();
 
-  TIME_SECTION("final", 1, "Executing Final Objects");
-  _mfem_problem.execMultiApps(EXEC_FINAL);
-  _mfem_problem.finalizeMultiApps();
-  _mfem_problem.execute(EXEC_FINAL);
-  _mfem_problem.outputStep(EXEC_FINAL);
-  _mfem_problem.postExecute();
+  // Set time to time old, since final time is updated in TransientBase::endStep()
+  _time = _time_old;
 
-  postExecute();
+  _time_stepper->postSolve();
 }
 
 #endif

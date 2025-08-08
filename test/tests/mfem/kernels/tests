@@ -143,6 +143,7 @@
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
+    restep = false
   []
   [MFEMHeatConductionElement]
     type = XMLDiff
@@ -162,6 +163,7 @@
     valgrind = none
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
+    restep = false
   []
   [MFEMHeatConductionMatFree]
     type = XMLDiff
@@ -182,6 +184,7 @@
     valgrind = none
     max_parallel = 1
     recover = false
+    restep = false
   []
   [MFEMHeatConductionLOR]
     type = XMLDiff
@@ -201,6 +204,7 @@
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
+    restep = false
   []
   [MFEMHeatTransfer]
     type = XMLDiff
@@ -213,6 +217,7 @@
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
+    restep = false
   []
   [MFEMLinearElasticity]
     type = XMLDiff

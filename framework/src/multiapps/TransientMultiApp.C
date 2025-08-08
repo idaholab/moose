@@ -347,8 +347,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
               throw MultiAppSolveFailure(oss.str());
             }
           }
-
-          at_steady = ex->convergedToSteadyState();
+          if (_detect_steady_state)
+            at_steady = ex->convergedToSteadyState();
 
           if (converged && _detect_steady_state && at_steady)
           {

@@ -6,10 +6,11 @@
 
 ## Overview
 
-`MFEMSteady` is the [`MFEMExecutioner`](MFEMExecutioner.md) type used to solve time independent MFEM
-finite element problems.
+`MFEMSteady` is the `Executioner` class used to solve time independent MFEM finite element problems,
+calling the [`MFEMProblemSolve`](MFEMProblemSolve.md) solve object to execute one or more MFEM
+`ProblemOperators`.
 
-As in all [`MFEMExecutioner`](MFEMExecutioner.md) derived classes, the desired device and assembly
+As in all `Executioner` classes using the [MFEMProblemSolve.md] solve object, the desired device and assembly
 level to use during problem set-up and solution can be selected.
 
 ## Example Input File Syntax

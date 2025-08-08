@@ -11,7 +11,7 @@
 
 #pragma once
 #include "MFEMProblemData.h"
-#include "ProblemOperatorInterface.h"
+#include "ProblemOperatorBase.h"
 
 namespace Moose::MFEM
 {
@@ -19,14 +19,13 @@ std::vector<std::string> GetTimeDerivativeNames(std::vector<std::string> gridfun
 
 /// Problem operator for time-dependent problems with no equation system. The user will need to subclass this since the solve is not
 /// implemented.
-class TimeDomainProblemOperator : public mfem::TimeDependentOperator,
-                                  public ProblemOperatorInterface
+class TimeDomainProblemOperator : public mfem::TimeDependentOperator, public ProblemOperatorBase
 {
 public:
-  TimeDomainProblemOperator(MFEMProblemData & problem) : ProblemOperatorInterface(problem) {}
+  TimeDomainProblemOperator(MFEMProblem & problem) : ProblemOperatorBase(problem) {}
 
   void SetGridFunctions() override;
-
+  void Solve() override {}
   void ImplicitSolve(const double, const mfem::Vector &, mfem::Vector &) override {}
 };
 

@@ -11,19 +11,19 @@
 
 #pragma once
 #include "MFEMProblemData.h"
-#include "ProblemOperatorInterface.h"
+#include "ProblemOperatorBase.h"
 
 namespace Moose::MFEM
 {
 /// Steady-state problem operator with no equation system.
-class ProblemOperator : public mfem::Operator, public ProblemOperatorInterface
+class ProblemOperator : public mfem::Operator, public ProblemOperatorBase
 {
 public:
-  ProblemOperator(MFEMProblemData & problem) : ProblemOperatorInterface(problem) {}
+  ProblemOperator(MFEMProblem & problem) : ProblemOperatorBase(problem) {}
 
   void SetGridFunctions() override;
 
-  virtual void Solve(mfem::Vector & /*X*/) {}
+  virtual void Solve() override {}
   void Mult(const mfem::Vector &, mfem::Vector &) const override {}
 };
 
