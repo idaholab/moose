@@ -179,59 +179,41 @@ MFEMCutTransitionSubMesh::buildSubMesh()
 void 
 MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh)
 {
-  std::vector<int> old_dom_attrs;
+  // First we need to find the boundary elements on the cut boundary
   std::vector<int> bdr_els;
-  std::pair<int, int> elec_attrs_;
-  elec_attrs_.first = _cut_bdr_attribute;
-  elec_attrs_.second = parent_mesh.bdr_attributes.Max() + 1;
-  
-  // First we save the current domain attributes so they may be restored later
-  for (int e = 0; e < parent_mesh.GetNE(); ++e)
-    old_dom_attrs.push_back(parent_mesh.GetAttribute(e));
-
-  // Now we need to find the electrode boundary
   for (int i = 0; i < parent_mesh.GetNBE(); ++i) {
-    if (parent_mesh.GetBdrAttribute(i) == elec_attrs_.first) {
+    if (parent_mesh.GetBdrAttribute(i) == _cut_bdr_attribute)
+    {
       bdr_els.push_back(i);
     }
   }
-
   Plane3D plane;
-
   if (bdr_els.size() > 0) {
     plane.make3DPlane(&parent_mesh, parent_mesh.GetBdrElementFaceIndex(bdr_els[0]));
   }
-
   std::vector<int> elec_vtx;
-  // Create a vector containing all of the vertices on the electrode
-  for (auto b_fc : bdr_els) {
-
+  // Create a vector containing all of the vertices on the cut
+  for (auto b_fc : bdr_els)
+  {
     mfem::Array<int> face_vtx;
     parent_mesh.GetFaceVertices(parent_mesh.GetBdrElementFaceIndex(b_fc), face_vtx);
-
     for (auto v : face_vtx)
       pushIfUnique(elec_vtx, v);
   }
 
   // Now we need to find all elements in the mesh that touch, on at least one
-  // vertex, the electrode face if they do touch the vertex, are on one side of
-  // the electrode, and belong to the coil domain, we add them to our wedge
-
+  // vertex, the cut face if they do touch the vertex, are on one side of
+  // the cut, and belong to the coil domain, we add them to our wedge
   std::vector<int> wedge_els;
-
-  for (int e = 0; e < parent_mesh.GetNE(); ++e) {
-
+  for (int e = 0; e < parent_mesh.GetNE(); ++e)
+  {
     if (!isInDomain(e, getSubdomainAttributes(), &parent_mesh) ||
         plane.side(elementCentre(e, &parent_mesh)) == 1)
       continue;
-
-    if (
-    plane.side(elementCentre(e, &parent_mesh)) == 1)
-  continue;
-
+    if (plane.side(elementCentre(e, &parent_mesh)) == 1)
+      continue;
     mfem::Array<int> elem_vtx;
     parent_mesh.GetElementVertices(e, elem_vtx);
-
     for (auto v1 : elem_vtx) {
       for (auto v2 : elec_vtx) {
         if (v1 == v2) {
@@ -239,69 +221,6 @@ MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh)
         }
       }
     }
-  }
-
-  // Now we set the second electrode boundary attribute. Start with a list of
-  // all the faces of the wedge elements and eliminate mesh and coil boundaries,
-  // the first electrode, and faces between wedge elements
-  std::vector<int> wedge_faces;
-  mfem::Array<int> el_faces;
-  mfem::Array<int> ori;
-
-  for (auto e : wedge_els) {
-    parent_mesh.GetElementFaces(e, el_faces, ori);
-    for (auto f : el_faces)
-      pushIfUnique(wedge_faces, f);
-  }
-
-  for (auto wf : wedge_faces) {
-    int e1, e2;
-    parent_mesh.GetFaceElements(wf, &e1, &e2);
-
-    // If the face is a coil boundary
-    if (!(isInDomain(e1, getSubdomainAttributes(), &parent_mesh) &&
-          isInDomain(e2, getSubdomainAttributes(), &parent_mesh))) {
-      continue;
-    }
-
-    // If the face is not true interior
-    if (!(parent_mesh.FaceIsInterior(wf) ||
-          (parent_mesh.GetFaceInformation(wf).tag ==
-               mfem::Mesh::FaceInfoTag::SharedConforming ||
-           parent_mesh.GetFaceInformation(wf).tag ==
-               mfem::Mesh::FaceInfoTag::SharedSlaveNonconforming))) {
-      continue;
-    }
-
-    // If the face is shared between two elements internal to the wedge
-    bool test1 = false;
-    bool test2 = false;
-    for (auto e : wedge_els) {
-      if (e == e1)
-        test1 = true;
-      if (e == e2)
-        test2 = true;
-    }
-
-    if (test1 && test2)
-      continue;
-
-    // If the face is part of the first electrode
-    test1 = false;
-    for (auto b_fc : bdr_els) {
-      if (wf == parent_mesh.GetBdrElementFaceIndex(b_fc)) {
-        test1 = true;
-        break;
-      }
-    }
-    if (test1)
-      continue;
-
-    // At last, if the face is none of these things, it must be our second
-    // electrode
-    auto *new_elem = parent_mesh.GetFace(wf)->Duplicate(&parent_mesh);
-    new_elem->SetAttribute(elec_attrs_.second);
-    parent_mesh.AddBdrElement(new_elem);
   }
 
   // Only after this do we set the domain attributes
@@ -313,8 +232,9 @@ MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh)
   /// Create boundary attribute set labelling the exterior of the newly created 
   /// transition region, excluding the cut  
   bdr_attr_sets.CreateAttributeSet(_transition_subdomain_boundary);
-  bdr_attr_sets.AddToAttributeSet(_transition_subdomain_boundary, elec_attrs_.second);  
-    
+  bdr_attr_sets.AddToAttributeSet(_transition_subdomain_boundary,
+                                  parent_mesh.bdr_attributes.Max() + 1);
+
   /// Create attribute set labelling the newly created transition region 
   /// on one side of the cut
   attr_sets.CreateAttributeSet(_transition_subdomain);
