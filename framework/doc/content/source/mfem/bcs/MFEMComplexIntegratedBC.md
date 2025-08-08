@@ -14,7 +14,7 @@ according to the test variable name returned from `getTestVariableName()`, simil
 
 Similarly to how [`MFEMComplexKernel`](source/mfem/kernels/MFEMComplexKernel.md) works, `MFEMComplexIntegratedBC`
 is a container for two `MFEMIntegratedBC` objects, one representing the real part of the integrated BC, and the other
-representing the imaginary part. These two can be set up using the `real_bc` and `imag_bc` sub-blocks on the script.
+representing the imaginary part. These two can be set up using the `real_part` and `imag_part` sub-blocks on the script.
 The two integrators need not be the same, but they do need to be applied to the same variable.
 
 !syntax parameters /BCs/MFEMComplexIntegratedBC
