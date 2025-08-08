@@ -120,6 +120,12 @@ public:
   void addComplexComponentToKernel(const std::string & kernel_name,
                                    const std::string & name,
                                    InputParameters & parameters);
+  /**
+   * Adds a real or imaginary component BC to the parent MFEMComplexIntegratedBC.
+   */
+  void addComplexComponentToBC(const std::string & kernel_name,
+                               const std::string & name,
+                               InputParameters & parameters);
 
   /**
    * Override of ExternalProblem::addAuxKernel. Uses ExternalProblem::addAuxKernel to create a
