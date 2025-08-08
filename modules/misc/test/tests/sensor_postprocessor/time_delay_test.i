@@ -11,10 +11,17 @@
 
 [Variables]
   [temperature]
-    initial_condition = 600 # Start at room temperature
+    initial_condition = 293 # Start at room temperature
   []
 []
 
+[Functions]
+  [delay_func]
+    type = PiecewiseLinear
+    x = '0    0.5   1'
+    y = '0.005 0.01   0.2'
+  []
+[]
 [Kernels]
   [heat_conduction]
     type = ADMatDiffusion
@@ -32,13 +39,13 @@
     type = DirichletBC
     variable = temperature
     boundary = left
-    value = 600 # (K)
+    value = 293 # (K)
   []
   [outlet_temperature]
     type = DirichletBC
     variable = temperature
     boundary = right
-    value = 602 # (K)
+    value = 650 # (K)
   []
 []
 
@@ -46,7 +53,7 @@
   [steel]
     type = ADGenericConstantMaterial
     prop_names = 'thermal_conductivity specific_heat density'
-    prop_values = '18 0.466 80' # W/m*K, J/kg-K, kg/m^3 @ 296K
+    prop_values = '1 0.466 80' # W/m*K, J/kg-K, kg/m^3 @ 296K
   []
 []
 
@@ -62,27 +69,26 @@
   []
   [general_sensor_pp]
     type = GeneralSensorPostprocessor
-    #execute_on = 'initial timestep_begin'
+    execute_on = 'initial timestep_end'
     input_signal = input_signal_pp
     noise_std_dev_function = '0'
-    # Test was created before delay function worked as expected
-    delay_function = '0'
-    drift_function = '0.2'
-    efficiency_function = '0.8'
-    signalToNoise_function = '1'
+    delay_function = delay_func
+    drift_function = '0'
+    efficiency_function = '1'
+    signalToNoise_function = '0'
     uncertainty_std_dev_function = '0'
-    R_function = '1'
-    proportional_weight = 1
-    integral_weight = 0
-    seed = 2
+    R_function = '0'
+    proportional_weight = '1'
+    integral_weight = '1'
+    seed = 999
   []
 []
 
 [Executioner]
   type = Transient
   line_search = none
-  dt = 0.1
-  num_steps = 100
+  dt = 0.01
+  num_steps = 200
   nl_rel_tol = 1e-02
   nl_abs_tol = 1e-8
   solve_type = NEWTON
@@ -92,4 +98,5 @@
 
 [Outputs]
   csv = true
+  exodus = false
 []
