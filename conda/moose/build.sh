@@ -27,14 +27,6 @@ function do_build(){
 # shellcheck disable=SC1091  # made available through meta.yaml src path
 source "${SRC_DIR:?}/retry_build.sh"
 
-# Conda on mac sets "-Wl,-dead_strip_dylibs" in LDFLAGS, which is picked up
-# during the application executable linking. Unfortunately, we end up with
-# intermediate dead dylibs during our build/install (which we do fix later!).
-# So... remove that flag on macs? Good, try conda.
-if [[ "$(uname)" == "Darwin" ]]; then
-  export LDFLAGS="${LDFLAGS//-Wl,-dead_strip_dylibs/}"
-fi
-
 # Sets up retry functions and calls do_build. Blocking until success
 # or 3 failed attempts, or 1 unknown/unhandled failure
 retry_build
