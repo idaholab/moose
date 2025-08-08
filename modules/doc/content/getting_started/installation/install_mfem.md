@@ -21,12 +21,13 @@ You may substitute `[options]` with any PETSc configure flags, which are discuss
 The PETSc GPU architecture specification takes in only the architecture number for CUDA builds, for instance for the `sm_80` architecture you would add the flag `--with-cuda-arch=80`. For HIP builds you should use the entire label, for instance `--with-hip-arch=gfx908`.
 
 
-Next, we build libMesh, Conduit, and Wasp by running their respective scripts:
+Next, we build libMesh, Conduit, Wasp and gslib by running their respective scripts:
 
 ```bash
 ./scripts/update_and_rebuild_libmesh.sh
 ./scripts/update_and_rebuild_conduit.sh
 ./scripts/update_and_rebuild_wasp.sh
+./scripts/update_and_rebuild_gslib.sh
 ```
 
 We must then build MFEM itself by running its script:

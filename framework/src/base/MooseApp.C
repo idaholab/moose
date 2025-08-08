@@ -857,7 +857,8 @@ MooseApp::registerCapabilities()
     missingCapability("mfem",
                       doc,
                       "Install mfem using the scripts/update_and_rebuild_mfem.sh script after "
-                      "first running scripts/update_and_rebuild_conduit.sh. Finally, configure "
+                      "first running scripts/update_and_rebuild_conduit.sh and "
+                      "scripts/update_and_rebuild_gslib.sh. Finally, configure "
                       "moose with ./configure --with-mfem");
 #endif
   }
