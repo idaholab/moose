@@ -12,70 +12,6 @@
 #include "MFEMCutTransitionSubMesh.h"
 #include "MFEMProblem.h"
 
-// Pushes an element into a vector if the vector does not yet contain that same
-// element
-template <typename T> void pushIfUnique(std::vector<T> &vec, const T el)
-{
-  bool verify = true;
-
-  for (auto e : vec) {
-    if (e == el)
-      verify = false;
-  }
-
-  if (verify == true)
-    vec.push_back(el);
-}
-
-// 3D Plane constructor and methods
-
-Plane3D::Plane3D() : d(0)
-{
-  u = new mfem::Vector(3);
-  *u = 0.0;
-}
-
-Plane3D::~Plane3D() { delete u; }
-
-void Plane3D::make3DPlane(const mfem::ParMesh *pm, const int face) 
-{
-  MFEM_ASSERT(pm->Dimension() == 3,
-              "Plane3D only works in 3-dimensional meshes!");
-
-  mfem::Array<int> face_verts;
-  std::vector<mfem::Vector> v;
-  pm->GetFaceVertices(face, face_verts);
-
-  // First we get the coordinates of 3 vertices on the face
-  for (auto vtx : face_verts)
-  {
-    mfem::Vector vtx_coords(3);
-    for (int j = 0; j < 3; ++j)
-      vtx_coords[j] = pm->GetVertex(vtx)[j];
-    v.push_back(vtx_coords);
-  }
-
-  // Now we find the unit vector normal to the face
-  v[0] -= v[1];
-  v[1] -= v[2];
-  v[0].cross3D(v[1], *u);
-  *u /= u->Norml2();
-
-  // Finally, we find d:
-  d = *u * v[2];
-}
-
-int Plane3D::side(const mfem::Vector v)
-{
-  double val = *u * v - d;
-  if (val > 0)
-    return 1;
-  else if (val < 0)
-    return -1;
-  else
-    return 0;
-}
-
 registerMooseObject("MooseApp", MFEMCutTransitionSubMesh);
 
 InputParameters
@@ -118,60 +54,62 @@ MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & param
 
 void
 MFEMCutTransitionSubMesh::buildSubMesh()
-{ 
-  modifyMesh(getMFEMProblem().mesh().getMFEMParMesh());
+{
+  labelMesh(getMFEMProblem().mesh().getMFEMParMesh());
   _submesh = std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromDomain(
     getMFEMProblem().mesh().getMFEMParMesh(), mfem::Array<int>({_subdomain_label})));
   _submesh->attribute_sets.attr_sets = getMesh().attribute_sets.attr_sets;
   _submesh->bdr_attribute_sets.attr_sets = getMesh().bdr_attribute_sets.attr_sets;         
 }
 
-void 
-MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh)
+void
+MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 {
-  // First we need to find the boundary elements on the cut boundary
+  /// First we need to find the boundary elements on the cut boundary
   std::vector<int> bdr_els;
   for (int i = 0; i < parent_mesh.GetNBE(); ++i) {
     if (parent_mesh.GetBdrAttribute(i) == _cut_bdr_attribute)
       bdr_els.push_back(i);
   }
 
-  // Create a vector containing all of the vertices on the cut
+  /// Create a vector containing all of the vertices on the cut
   std::vector<int> cut_verts;
   for (const auto & bdr_el : bdr_els)
   {
     mfem::Array<int> face_verts;
     parent_mesh.GetFaceVertices(parent_mesh.GetBdrElementFaceIndex(bdr_el), face_verts);
-    for (const auto & vert : face_verts)
-      pushIfUnique(cut_verts, vert);
+    for (const auto & face_vert : face_verts)
+      cut_verts.push_back(face_vert);
   }
 
-  // First create a plane based on the first boundary element found on the cut 
-  // to use when determining orientation relative to the cut
+  /// First create a plane based on the first boundary element found on the cut
+  /// to use when determining orientation relative to the cut
   Plane3D plane;
   if (bdr_els.size() > 0)
-    plane.make3DPlane(&parent_mesh, parent_mesh.GetBdrElementFaceIndex(bdr_els[0]));  
-  std::vector<int> wedge_els;
-
+    plane.make3DPlane(parent_mesh, parent_mesh.GetBdrElementFaceIndex(bdr_els[0]));
+  /// Iterate over all vertices on cut, find elements with those vertices,
+  /// and declare them transition elements if they are on the +ve side of the cut
+  std::vector<int> transition_els;
   mfem::Table *vert_to_elem  = parent_mesh.GetVertexToElementTable();
-  for (auto vert : cut_verts)
+  for (auto cut_vert : cut_verts)
   {
-    int ne = vert_to_elem->RowSize(vert); // number of elements touching cut vertex
-    const int* els = vert_to_elem->GetRow(vert); // elements touching cut vertex
-    for (int e = 0; e < ne; e++)
-    {  
-      const int el = els[e];
+    int ne = vert_to_elem->RowSize(cut_vert); // number of elements touching cut vertex
+    const int * els_adj_to_cut = vert_to_elem->GetRow(cut_vert); // elements touching cut vertex
+    for (int i = 0; i < ne; i++)
+    {
+      const int el_adj_to_cut = els_adj_to_cut[i];
       mfem::Vector el_center(3);
-      parent_mesh.GetElementCenter(el, el_center);
-      if (isInDomain(el, getSubdomainAttributes(), &parent_mesh) && plane.side(el_center) == 1)
-        pushIfUnique(wedge_els, el);
+      parent_mesh.GetElementCenter(el_adj_to_cut, el_center);
+      if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) &&
+          plane.side(el_center) == 1)
+        transition_els.push_back(el_adj_to_cut);
     }
   }
   delete vert_to_elem;
 
-  // Set the domain attributes for the transition region
-  for (auto e : wedge_els)
-    parent_mesh.SetAttribute(e, _subdomain_label);
+  /// Set the domain attributes for the transition region
+  for (const auto & transition_el : transition_els)
+    parent_mesh.SetAttribute(transition_el, _subdomain_label);
   mfem::AttributeSets &attr_sets = parent_mesh.attribute_sets;
   mfem::AttributeSets &bdr_attr_sets = parent_mesh.bdr_attribute_sets;
 
@@ -196,21 +134,65 @@ MFEMCutTransitionSubMesh::modifyMesh(mfem::ParMesh & parent_mesh)
 }
 
 bool
-MFEMCutTransitionSubMesh::isInDomain(const int el,
-                                     const mfem::Array<int> & dom,
-                                     const mfem::ParMesh * mesh)
+MFEMCutTransitionSubMesh::isInDomain(const int & element,
+                                     const mfem::Array<int> & subdomains,
+                                     const mfem::ParMesh & mesh)
 {
-  bool verify = false;
-  // This is for ghost elements
-  if (el < 0)
+  bool is_in_domain = false;
+  /// element<0 for ghost elements
+  if (element < 0)
     return false;
 
-  for (auto sd : dom)
+  for (const auto & subdomain : subdomains)
   {
-    if (mesh->GetAttribute(el) == sd)
-      verify = true;
+    if (mesh.GetAttribute(element) == subdomain)
+      is_in_domain = true;
   }
-  return verify;
+  return is_in_domain;
+}
+
+/// 3D Plane constructor and methods
+
+Plane3D::Plane3D() : normal(3), d(0) {}
+
+void
+Plane3D::make3DPlane(const mfem::ParMesh & mesh, const int & face)
+{
+  MFEM_ASSERT(pm->Dimension() == 3, "Plane3D only works in 3-dimensional meshes!");
+
+  mfem::Array<int> face_verts;
+  std::vector<mfem::Vector> v;
+  mesh.GetFaceVertices(face, face_verts);
+
+  /// First we get the coordinates of 3 vertices on the face
+  for (auto vtx : face_verts)
+  {
+    mfem::Vector vtx_coords(3);
+    for (int j = 0; j < 3; ++j)
+      vtx_coords[j] = mesh.GetVertex(vtx)[j];
+    v.push_back(vtx_coords);
+  }
+
+  /// Now we find the unit vector normal to the face
+  v[0] -= v[1];
+  v[1] -= v[2];
+  v[0].cross3D(v[1], normal);
+  normal /= normal.Norml2();
+
+  /// Finally, we find d:
+  d = normal * v[2];
+}
+
+int
+Plane3D::side(const mfem::Vector & v)
+{
+  double val = normal * v - d;
+  if (val > 0)
+    return 1;
+  else if (val < 0)
+    return -1;
+  else
+    return 0;
 }
 
 #endif
