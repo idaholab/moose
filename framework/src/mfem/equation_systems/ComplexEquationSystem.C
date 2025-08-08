@@ -7,9 +7,9 @@ namespace Moose::MFEM
 {
 
 void
-ComplexEquationSystem::Init(Moose::MFEM::GridFunctions & /*gridfunctions*/,
-                            Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions,
-                            const Moose::MFEM::FESpaces & /*fespaces*/,
+ComplexEquationSystem::Init(GridFunctions & /*gridfunctions*/,
+                            ComplexGridFunctions & cpx_gridfunctions,
+                            const FESpaces & /*fespaces*/,
                             mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
@@ -137,8 +137,8 @@ ComplexEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
   {
     if (!_cpx_kernels_map.Has(test_var_name))
     {
-      auto kernel_field_map = std::make_shared<
-          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>();
+      auto kernel_field_map =
+          std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>();
       _cpx_kernels_map.Register(test_var_name, std::move(kernel_field_map));
     }
     // Register new kernels map if not present for the test/trial variable
@@ -155,7 +155,7 @@ ComplexEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
     if (!_kernels_map.Has(test_var_name))
     {
       auto kernel_field_map =
-          std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
+          std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
       _kernels_map.Register(test_var_name, std::move(kernel_field_map));
     }
     // Register new kernels map if not present for the test/trial variable
@@ -185,8 +185,8 @@ ComplexEquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
   {
     if (!_cpx_integrated_bc_map.Has(test_var_name))
     {
-      auto integrated_bc_field_map = std::make_shared<
-          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>();
+      auto integrated_bc_field_map =
+          std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>();
       _cpx_integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
     }
     // Register new integrated bc map if not present for the test/trial variable
@@ -202,8 +202,8 @@ ComplexEquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
   {
     if (!_integrated_bc_map.Has(test_var_name))
     {
-      auto integrated_bc_field_map = std::make_shared<
-          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>();
+      auto integrated_bc_field_map =
+          std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>();
       _integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
     }
     // Register new integrated bc map if not present for the test/trial variable
