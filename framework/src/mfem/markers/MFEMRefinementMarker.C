@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMRefinementMarker.h"
+#include "MFEMIndicator.h"
 
 registerMooseObject("MooseApp", MFEMRefinementMarker);
 
