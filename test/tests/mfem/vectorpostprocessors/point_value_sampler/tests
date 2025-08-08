@@ -1,0 +1,20 @@
+[Tests]
+  [MFEMPointValueSamplerDiffusion]
+    type = CSVDiff
+    input = point_value_sampler_diffusion.i
+    csvdiff = 'point_value_sampler_diffusion_out_point_sample_0001.csv'
+    requirement = 'The system shall have the ability to interpolate scalars at arbitrary points using MFEM.'
+    abs_zero = 1e-6
+    capabilities = 'mfem'
+    recover = false
+  []
+  [MFEMPointValueSamplerCurlCurl]
+    type = CSVDiff
+    input = point_value_sampler_curlcurl.i
+    csvdiff = 'point_value_sampler_curlcurl_out_point_sample_0001.csv'
+    requirement = 'The system shall have the ability to interpolate vectors at arbitrary points using MFEM.'
+    abs_zero = 1e-6
+    capabilities = 'mfem'
+    recover = false
+  []
+[]
