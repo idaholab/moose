@@ -119,17 +119,8 @@
   []    
 []
 
-[Preconditioner]
-  [boomeramg]
-    type = MFEMHypreBoomerAMG
-  []
-[]
-
 [Solver]
-  type = MFEMHyprePCG
-  preconditioner = boomeramg
-  l_tol = 1e-8
-  l_max_its = 1000
+  type = MFEMSuperLU
 []
 
 [Executioner]
@@ -138,7 +129,7 @@
 []
 
 [MultiApps]
-  [subapp]
+  [transition]
     type = FullSolveMultiApp
     input_files = cut_transition.i
     execute_on = INITIAL
@@ -150,7 +141,7 @@
     type = MultiAppMFEMCopyTransfer
     source_variable = grad_source_potential
     variable = grad_source_potential
-    from_multi_app = subapp
+    from_multi_app = transition
   []
   [submesh_transfer_to_coil]
     type = MFEMSubMeshTransfer
