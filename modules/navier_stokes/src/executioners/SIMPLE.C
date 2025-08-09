@@ -35,6 +35,7 @@ void
 SIMPLE::init()
 {
   _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
+  _simple_solve.initialSetup();
   _problem.initialSetup();
   _simple_solve.checkIntegrity();
   _simple_solve.linkRhieChowUserObject();
