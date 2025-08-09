@@ -55,3 +55,7 @@
     path = framework/contrib/neml2
     url = ../../applied-material-modeling/neml2.git
     update = none
+[submodule "framework/contrib/gslib"]
+    path = framework/contrib/gslib
+    url = ../../Nek5000/gslib.git
+    update = none
