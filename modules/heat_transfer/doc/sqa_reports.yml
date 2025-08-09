@@ -8,7 +8,6 @@ Applications:
             - ${MOOSE_DIR}/framework/doc/unregister.yml
         remove:
             - ${MOOSE_DIR}/framework/doc/remove.yml
-        log_stub_files: WARNING
 
 Documents:
     software_quality_plan: sqa/inl_records.md#software_quality_plan
@@ -34,5 +33,4 @@ Requirements:
     heat_transfer:
         directories:
             - ${MOOSE_DIR}/modules/heat_transfer
-        log_duplicate_requirement: WARNING
         log_testable: WARNING

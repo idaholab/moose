@@ -94,7 +94,7 @@ Applications:
     heat_transfer:
         exe_directory: modules/combined
         app_types:
-            - HeatConductionApp
+            - HeatTransferApp
         content_directory: modules/heat_transfer/doc/content
         unregister:
             - framework/doc/unregister.yml
