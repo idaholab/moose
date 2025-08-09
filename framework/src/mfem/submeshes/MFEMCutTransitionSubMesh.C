@@ -97,6 +97,34 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
         transition_els.push_back(el_adj_to_cut);
     }
   }
+
+  // Detect shared vertices and add corresponding elements 
+  for (int g = 1, sv = 0; g < parent_mesh.GetNGroups(); g++)
+  {
+    for (int gv = 0; gv < parent_mesh.GroupNVertices(g); gv++, sv++)
+    {
+    int plvtx = parent_mesh.GroupVertex(g, gv);
+    const int sdim = parent_mesh.SpaceDimension();
+    mfem::Vector coord(sdim);
+    coord = parent_mesh.GetVertex(plvtx);
+    if (plane.side(coord) == 0) // check if shared vertex is on the cut plane
+    {
+      int cut_vert = plvtx;
+      int ne = vert_to_elem->RowSize(cut_vert); // number of elements touching cut vertex
+      const int * els_adj_to_cut = vert_to_elem->GetRow(cut_vert); // elements touching cut vertex
+      for (int i = 0; i < ne; i++)
+      {
+        const int el_adj_to_cut = els_adj_to_cut[i];
+        mfem::Vector el_center(3);
+        parent_mesh.GetElementCenter(el_adj_to_cut, el_center);
+        if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) &&
+            plane.side(el_center) == 1)
+          transition_els.push_back(el_adj_to_cut);
+        }
+      }
+    }
+  }
+
   delete vert_to_elem;
 
   /// Set the domain attributes for the transition region
@@ -178,10 +206,11 @@ Plane3D::make3DPlane(const mfem::ParMesh & mesh, const int & face)
 int
 Plane3D::side(const mfem::Vector & v)
 {
+  double tol = 1e-8;
   double val = normal * v - d;
-  if (val > 0)
+  if (val > tol)
     return 1;
-  else if (val < 0)
+  else if (val < -tol)
     return -1;
   else
     return 0;
