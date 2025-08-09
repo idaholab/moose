@@ -111,6 +111,12 @@ GapConductance::actionParameters()
   params.addRangeCheckedParam<unsigned int>(
       "min_gap_order", 0, "min_gap_order<=1", "Order of the Taylor expansion below min_gap");
 
+  params.addParamNamesToGroup("appended_property_name", "Material property retrieval");
+  params.addParamNamesToGroup("gap_geometry_type cylinder_axis_point_1 cylinder_axis_point_2",
+                              "Gap geometry");
+  params.addParamNamesToGroup("emissivity_primary emissivity_secondary", "Radiative heat transfer");
+  params.addParamNamesToGroup("min_gap max_gap min_gap_order", "Gap size");
+
   return params;
 }
 
