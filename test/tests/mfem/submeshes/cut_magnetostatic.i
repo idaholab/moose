@@ -121,7 +121,7 @@
 []
 
 [MultiApps]
-  [subapp]
+  [coil]
     type = FullSolveMultiApp
     input_files = cut_closed_coil.i
     execute_on = INITIAL
@@ -133,7 +133,7 @@
     type = MultiAppMFEMCopyTransfer
     source_variable = current_density
     variable = current_density
-    from_multi_app = subapp
+    from_multi_app = coil
   []  
 []
 
