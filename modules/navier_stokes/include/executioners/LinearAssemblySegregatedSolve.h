@@ -46,6 +46,8 @@ public:
   /// structure for the conjugate heat transfer routines
   void setupConjugateHeatTransferContainers();
 
+  void deduceCHTBoundaryCoupling();
+
   /// Update the coupling fields for the sol
   void updateCHTBoundaryCouplingSolid();
 
@@ -160,6 +162,9 @@ protected:
 
   /// ********************** Conjugate heat transfer variables ************** //
 
+  /// Helper function to see if we have conjugate heat transfer iteration or not
+  bool _cht_enabled;
+
   /// number of CHT fixed point iterations.
   const unsigned int _num_cht_fpi;
 
@@ -170,12 +175,13 @@ protected:
   const Real _cht_temperature_tolerance;
 
   /// The boundaries
-  const std::vector<BoundaryName> _cht_boundary_names;
-  const std::vector<BoundaryID> _cht_boundary_ids;
-  const std::vector<Real> _cht_solid_flux_relaxation_factor;
-  const std::vector<Real> _cht_fluid_flux_relaxation_factor;
-  const std::vector<Real> _cht_solid_temperature_relaxation_factor;
-  const std::vector<Real> _cht_fluid_temperature_relaxation_factor;
+  std::vector<BoundaryName> _cht_boundary_names;
+  std::set<BoundaryID> _cht_boundary_id_set;
+  std::vector<BoundaryID> _cht_boundary_ids;
+  std::vector<Real> _cht_solid_flux_relaxation_factor;
+  std::vector<Real> _cht_fluid_flux_relaxation_factor;
+  std::vector<Real> _cht_solid_temperature_relaxation_factor;
+  std::vector<Real> _cht_fluid_temperature_relaxation_factor;
 
   /// The subset of the FaceInfo objects that belong to the given boundaries.
   std::map<BoundaryID, std::vector<const FaceInfo *>> _cht_face_info;

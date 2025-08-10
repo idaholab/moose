@@ -29,5 +29,29 @@ public:
 
   static InputParameters validParams();
 
+  /**
+   * Compute the diffusive heat flux on the boundary.
+   */
   virtual Real computeBoundaryConductionFlux() const = 0;
+
+  /**
+   * Return the relaxation factor for temperature.
+   */
+  Real temperatureRelaxationFactor() const { return _temperature_relaxation_factor; }
+
+  /**
+   * Return the relaxation factor for heat flux.
+   */
+  Real fluxRelaxationFactor() const { return _flux_relaxation_factor; }
+
+protected:
+  /// Relaxation factor for the temperature field this boundary condition uses.
+  /// This is just a container, the actual values are used in the segregated solver
+  /// when the coupling fields are updated.
+  const Real _temperature_relaxation_factor;
+
+  /// Relaxation factor for the flux field this boundary condition uses.
+  /// This is just a container, the actual values are used in the segregated solver
+  /// when the coupling fields are updated.
+  const Real _flux_relaxation_factor;
 };

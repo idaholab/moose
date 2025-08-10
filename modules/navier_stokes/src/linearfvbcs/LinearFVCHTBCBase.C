@@ -13,10 +13,23 @@ InputParameters
 LinearFVCHTBCBase::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
+  params.addRangeCheckedParam<Real>(
+      "temperature_relaxation",
+      1.0,
+      "0.0<temperature_relaxation & temperature_relaxation<=1.0",
+      "The relaxation parameter for the temperature field in the coupling.");
+
+  params.addRangeCheckedParam<Real>("flux_relaxation",
+                                    1.0,
+                                    "0.0<flux_relaxation & flux_relaxation<=1.0",
+                                    "The relaxation parameter for the flux field in the coupling.");
+
   return params;
 }
 
 LinearFVCHTBCBase::LinearFVCHTBCBase(const InputParameters & parameters)
-  : LinearFVAdvectionDiffusionBC(parameters)
+  : LinearFVAdvectionDiffusionBC(parameters),
+    _temperature_relaxation_factor(getParam<Real>("temperature_relaxation")),
+    _flux_relaxation_factor(getParam<Real>("flux_relaxation"))
 {
 }
