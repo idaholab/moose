@@ -33,7 +33,6 @@ LinearFVDirichletCHTBC::LinearFVDirichletCHTBC(const InputParameters & parameter
     _thermal_conductivity(getFunctor<Real>("thermal_conductivity")),
     _prescribed_temperature(getFunctor<Real>("prescribed_temperature"))
 {
-  _var.computeCellGradients();
 }
 
 Real
