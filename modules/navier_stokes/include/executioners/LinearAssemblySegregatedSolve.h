@@ -13,6 +13,7 @@
 #include "RhieChowMassFlux.h"
 #include "SIMPLESolveBase.h"
 #include "FaceCenteredMapFunctor.h"
+#include "NS.h"
 
 class LinearFVCHTBCBase;
 
@@ -49,9 +50,7 @@ public:
   void deduceCHTBoundaryCoupling();
 
   /// Update the coupling fields for the sol
-  void updateCHTBoundaryCouplingSolid();
-
-  void updateCHTBoundaryCouplingFluid();
+  void updateCHTBoundaryCouplingFields(const NS::CHTSide side);
 
   /// Initialize the voupling fields for the conjugate heat transfer routines
   void initializeCHTCouplingFields();
@@ -178,31 +177,27 @@ protected:
   std::vector<BoundaryName> _cht_boundary_names;
   std::set<BoundaryID> _cht_boundary_id_set;
   std::vector<BoundaryID> _cht_boundary_ids;
-  std::vector<Real> _cht_solid_flux_relaxation_factor;
-  std::vector<Real> _cht_fluid_flux_relaxation_factor;
-  std::vector<Real> _cht_solid_temperature_relaxation_factor;
-  std::vector<Real> _cht_fluid_temperature_relaxation_factor;
+  std::vector<std::vector<Real>> _cht_flux_relaxation_factor;
+  std::vector<std::vector<Real>> _cht_temperature_relaxation_factor;
 
   /// The subset of the FaceInfo objects that belong to the given boundaries.
   std::map<BoundaryID, std::vector<const FaceInfo *>> _cht_face_info;
 
   /// Map of boundary conditions that describe the conjugate heat transfer from each side.
   /// This can't be const considering we need to update the underlying structures for each face
-  std::map<BoundaryID, std::pair<LinearFVCHTBCBase *, LinearFVCHTBCBase *>> _boundary_conditions;
+  std::map<BoundaryID, std::vector<LinearFVCHTBCBase *>> _cht_boundary_conditions;
 
   /// Functors describing the heat flux on the conjugate heat transfer interfaces.
   /// Two functors per sideset, first is solid second is fluid.
   std::map<BoundaryID,
-           std::pair<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>,
-                     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
+           std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
       _boundary_heat_flux;
 
-  std::map<BoundaryID, std::pair<Real, Real>> _integrated_boundary_heat_flux;
+  std::map<BoundaryID, std::vector<Real>> _integrated_boundary_heat_flux;
 
   /// Functors describing the heat flux on the conjugate heat transfer interfaces.
   /// Two functors per sideset, first is solid second is fluid.
   std::map<BoundaryID,
-           std::pair<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>,
-                     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
+           std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
       _boundary_temperatures;
 };
