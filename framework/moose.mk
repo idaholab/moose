@@ -445,7 +445,8 @@ ifeq (x$(moose_HEADER_deps),x)
   moose_HEADER_deps := $(realpath $(moose_GIT_DIR)/HEAD $(moose_GIT_DIR)/index)
 endif
 
-$(moose_revision_header): $(moose_HEADER_deps) | $(all_header_dir)
+.SECONDEXPANSION:
+$(moose_revision_header): $(moose_HEADER_deps) | $$(all_header_dir)
 	@echo "Checking if header needs updating: "$@"..."
 	$(shell REPO_LOCATION="$(FRAMEWORK_DIR)" \
 	        HEADER_FILE="$(moose_revision_header)" \
