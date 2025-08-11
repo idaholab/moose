@@ -31,10 +31,6 @@ LinearFVTKESourceSink::validParams()
 
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
-  params.addParam<bool>(
-      "linearized_model",
-      true,
-      "Boolean to determine if the problem should be use in a linear or nonlinear solve.");
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
 
   params.addParam<MooseEnum>("wall_treatment",
@@ -58,7 +54,6 @@ LinearFVTKESourceSink::LinearFVTKESourceSink(const InputParameters & params)
     _mu(getFunctor<Real>(NS::mu)),
     _mu_t(getFunctor<Real>(NS::mu_t)),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
-    _linearized_model(getParam<bool>("linearized_model")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _C_mu(getParam<Real>("C_mu")),
     _C_pl(getParam<Real>("C_pl"))
