@@ -432,6 +432,7 @@ WCNSFVTurbulencePhysics::addKEpsilonSink()
     params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
     params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
+    params.set<Real>("C_mu") = getParam<Real>("C_mu");
     params.set<Real>("C_pl") = getParam<Real>("C_pl");
     params.set<bool>("linearized_model") = getParam<bool>("linearize_sink_sources");
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
@@ -452,6 +453,7 @@ WCNSFVTurbulencePhysics::addKEpsilonSink()
     params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
     params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
+    params.set<Real>("C_mu") = getParam<Real>("C_mu");
     params.set<Real>("C_pl") = getParam<Real>("C_pl");
     params.set<bool>("linearized_model") = getParam<bool>("linearize_sink_sources");
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
@@ -508,6 +510,7 @@ WCNSFVTurbulencePhysics::addFVBCs()
     params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
     params.set<MooseFunctorName>(NS::TKE) = _tke_name;
+    params.set<Real>("C_mu") = getParam<Real>("C_mu");
     params.set<MooseEnum>("wall_treatment") = _wall_treatment_eps;
     for (const auto d : make_range(dimension()))
       params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
