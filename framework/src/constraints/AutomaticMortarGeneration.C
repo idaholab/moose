@@ -2003,7 +2003,16 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
 
           // Check whether the projection worked. The last condition checks for obliqueness of the
           // projection
-          if ((current_iterate < max_iterates) && (std::abs(xi2) <= 1. + _xi_tolerance) &&
+          //
+          // We are projecting on one side first and the other side second. If we make the
+          // tolerance bigger and remove the (5) factor we are going to continue to miss the
+          // second projection and fall into the exception message in
+          // projectPrimaryNodesSinglePair. What makes this modification to not fall in the
+          // exception is that we are projecting on one side more xi than in the other. There
+          // should be a better way of doing this by using actual distances and not parametric
+          // coordinates. But I believe making the tolerance uniformly larger or smaller won't do
+          // the trick here.
+          if ((current_iterate < max_iterates) && (std::abs(xi2) <= 1. + 5 * _xi_tolerance) &&
               (std::abs(
                    (primary_elem_candidate->point(0) - primary_elem_candidate->point(1)).unit() *
                    nodal_normal) < std::cos(_minimum_projection_angle * libMesh::pi / 180)))
@@ -2013,16 +2022,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             // on the interface start off being perfectly aligned. In this situation, we need to
             // associate the secondary node with two different elements (and two corresponding
             // xi^(2) values.
-
-            // We are projecting on one side first and the other side second. If we make the
-            // tolerance bigger and remove the (5) factor we are going to continue to miss the
-            // second projection and fall into the exception message in
-            // projectPrimaryNodesSinglePair. What makes this modification to not fall in the
-            // exception is that we are projecting on one side more xi than in the other. There
-            // should be a better way of doing this by using actual distances and not parametric
-            // coordinates. But I believe making the tolerance uniformly larger or smaller won't do
-            // the trick here.
-            if (std::abs(std::abs(xi2) - 1.) < _xi_tolerance * 5.0)
+            if (std::abs(std::abs(xi2) - 1.) <= _xi_tolerance * 5.0)
             {
               const Node * primary_node = (xi2 < 0) ? primary_elem_candidate->node_ptr(0)
                                                     : primary_elem_candidate->node_ptr(1);
