@@ -124,6 +124,7 @@
   [time]
     type = TimePostprocessor
     execute_on = 'INITIAL TIMESTEP_BEGIN'
+    outputs = 'none'
   []
   [eff_inelastic_strain]
     type = ElementAverageMaterialProperty
