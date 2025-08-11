@@ -49,12 +49,12 @@ namespace NS
  * on the "neighbor" side of the face
  */
 template <class T>
-std::tuple<bool, T, T> isPorosityJumpFace(const Moose::Functor<T> & porosity,
+std::tuple<bool, T, T> isPorosityJumpFace(const Moose::FunctorBase<T> & porosity,
                                           const FaceInfo & fi,
                                           const Moose::StateArg & time);
 
 extern template std::tuple<bool, Real, Real> isPorosityJumpFace<Real>(
-    const Moose::Functor<Real> & porosity, const FaceInfo & fi, const Moose::StateArg & time);
+    const Moose::FunctorBase<Real> & porosity, const FaceInfo & fi, const Moose::StateArg & time);
 extern template std::tuple<bool, ADReal, ADReal> isPorosityJumpFace<ADReal>(
-    const Moose::Functor<ADReal> & porosity, const FaceInfo & fi, const Moose::StateArg & time);
+    const Moose::FunctorBase<ADReal> & porosity, const FaceInfo & fi, const Moose::StateArg & time);
 }
