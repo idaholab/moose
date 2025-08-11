@@ -214,9 +214,10 @@ MooseAppCoordTransform::validParams()
                                       "Axis origin points for each block in 'rz_coord_blocks'");
   params.addParam<std::vector<RealVectorValue>>(
       "rz_coord_directions", "Axis directions for each block in 'rz_coord_blocks'");
-  params.addParam<std::string>(
-      "length_unit",
-      "How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5inches");
+  params.addParam<std::string>("length_unit",
+                               "How much distance one mesh length unit represents, e.g. 1 cm, 1 "
+                               "nm, 1 ft, 5inches. Note that this parameter is also used for "
+                               "applying transformation during MutliApp data transfers.");
   params.addRangeCheckedParam<Real>(
       "alpha_rotation",
       "-180<alpha_rotation<=180",
