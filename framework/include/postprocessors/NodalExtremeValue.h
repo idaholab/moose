@@ -19,7 +19,7 @@ public:
   static InputParameters validParams();
 
   NodalExtremeValue(const InputParameters & parameters);
-  virtual void execute() override { computeExtremeValue(); }
+  virtual void execute() override;
 
 protected:
   virtual std::pair<Real, Real> getProxyValuePair() override;
@@ -29,6 +29,7 @@ protected:
    * which to evaluate the variable. If not provided, defaults to the variable.
    */
   const VariableValue & _proxy_variable;
+  const MooseVariable * const _proxy_var;
 
   /// Extreme value of the proxy variable
   Real _proxy_value;
