@@ -34,7 +34,7 @@ GapHeatPointSourceMaster::validParams()
   params.addParam<std::string>("normal_smoothing_method",
                                "Method to use to smooth normals (edge_based|nodal_normal_based)");
   params.addClassDescription(
-      "Dirac kernel to create a heat source on the primary contact surface in thermal contact");
+      "Dirac kernel to create a heat source on the primary contact surface in thermal contact.");
 
   return params;
 }

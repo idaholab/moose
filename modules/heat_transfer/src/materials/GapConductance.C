@@ -28,7 +28,7 @@ GapConductance::validParams()
   params += GapConductance::actionParameters();
   params.addClassDescription(
       "Material to compute an effective gap conductance based on the thermal conductivity of the "
-      "gap and diffusive approximation to the radiative heat transfer");
+      "gap and diffusive approximation to the radiative heat transfer.");
 
   params.addRequiredCoupledVar("variable", "Temperature variable");
 

@@ -24,7 +24,7 @@
     exodiff = 'gap_heat_transfer_htonly_syntax_out.e'
     abs_zero = 1e-6
     requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
-                  "in 3D using the Thermal contact syntax"
+                  "in 3D using the ThermalContact syntax."
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#1609'
   []

@@ -3,7 +3,7 @@
 !syntax description /BCs/CoupledConvectiveFlux
 
 !alert warning
-`CoupledConvectiveFlux` is deprecated.
+`CoupledConvectiveFlux` is deprecated. Please use [CoupledConvectiveHeatFluxBC.md] instead.
 
 This boundary condition models the heat convection flux.
 The residual is computed on the boundary $\delta \Omega$ as:

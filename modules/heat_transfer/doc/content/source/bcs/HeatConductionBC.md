@@ -9,11 +9,12 @@ The residual is computed on the boundary $\delta \Omega$ as:
 !equation
 R = \int_{\delta \Omega} k \nabla T \psi
 
-with $k$ a `Real`-valued thermal conductivity, $T$ the solid temperature and $\psi$ a test function.
+with $k$ a `Real`-valued thermal conductivity, $T$ the solid temperature, and $\psi$ a test function.
 
-!alert warning
+!alert! warning
 If the thermal conductivity depends on temperature, the contribution of this boundary condition to the Jacobian
 will be approximate.
+!alert-end!
 
 !syntax parameters /BCs/HeatConductionBC
 

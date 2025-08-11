@@ -15,7 +15,7 @@ InputParameters
 HeatConductionBC::validParams()
 {
   InputParameters params = FluxBC::validParams();
-  params.addClassDescription("Boundary condition for a diffusive heat flux");
+  params.addClassDescription("Boundary condition for a diffusive heat flux.");
 
   return params;
 }
