@@ -23,6 +23,7 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
   params += NSFVBase::commonFluidEnergyEquationParams();
   params.transferParam<bool>(PINSFVEnergyAnisotropicDiffusion::validParams(),
                              "effective_conductivity");
+  params.addParamNamesToGroup("effective_conductivity", "Material properties");
 
   // TODO Remove the parameter once NavierStokesFV syntax has been removed
   params.addParam<bool>("add_energy_equation",
@@ -55,7 +56,8 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
                               "Numerical scheme");
   params.addParamNamesToGroup("energy_inlet_types energy_inlet_functors",
                               "Inlet boundary conditions");
-  params.addParamNamesToGroup("energy_wall_types energy_wall_functors", "Wall boundary conditions");
+  params.addParamNamesToGroup("energy_wall_boundaries energy_wall_types energy_wall_functors",
+                              "Wall boundary conditions");
 
   return params;
 }
