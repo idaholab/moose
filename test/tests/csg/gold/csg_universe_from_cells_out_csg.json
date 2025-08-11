@@ -1,0 +1,62 @@
+{
+  "CELLS": {
+    "ListUniv_contain_cell": {
+      "FILL": "ListUniv_univ",
+      "FILLTYPE": "UNIVERSE",
+      "REGION": "-ListUniv_contain_surf"
+    },
+    "ListUniv_sphere_cell_0": {
+      "FILL": "",
+      "FILLTYPE": "VOID",
+      "REGION": "-ListUniv_sphere_surf_0"
+    },
+    "ListUniv_sphere_cell_1": {
+      "FILL": "",
+      "FILLTYPE": "VOID",
+      "REGION": "-ListUniv_sphere_surf_1"
+    }
+  },
+  "SURFACES": {
+    "ListUniv_contain_surf": {
+      "COEFFICIENTS": {
+        "r": 3.0,
+        "x0": 0.0,
+        "y0": 0.0,
+        "z0": 0.0
+      },
+      "TYPE": "CSG::CSGSphere"
+    },
+    "ListUniv_sphere_surf_0": {
+      "COEFFICIENTS": {
+        "r": 1.0,
+        "x0": 0.0,
+        "y0": 0.0,
+        "z0": 0.0
+      },
+      "TYPE": "CSG::CSGSphere"
+    },
+    "ListUniv_sphere_surf_1": {
+      "COEFFICIENTS": {
+        "r": 2.0,
+        "x0": 0.0,
+        "y0": 0.0,
+        "z0": 0.0
+      },
+      "TYPE": "CSG::CSGSphere"
+    }
+  },
+  "UNIVERSES": {
+    "ListUniv_univ": {
+      "CELLS": [
+        "ListUniv_sphere_cell_0",
+        "ListUniv_sphere_cell_1"
+      ]
+    },
+    "ROOT_UNIVERSE": {
+      "CELLS": [
+        "ListUniv_contain_cell"
+      ],
+      "ROOT": true
+    }
+  }
+}

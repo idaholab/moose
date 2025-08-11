@@ -1,7 +1,7 @@
 [Mesh]
   [inf_square]
-    type = TestCSGInfiniteSquareMeshGenerator
-    side_length = 5
+    type = ExampleCSGInfiniteSquareMeshGenerator
+    side_length = 4
   []
   [cube]
     type = TestCSGAxialSurfaceMeshGenerator
