@@ -2,6 +2,7 @@
   type = MFEMMesh
   file = ../mesh/square.msh
   dim = 3
+  nc_simplices = true
 []
 
 [Adaptivity]
