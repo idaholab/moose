@@ -3954,6 +3954,12 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
   }
 }
 
+bool
+FEProblemBase::hasMaterial(const std::string & name, const THREAD_ID tid)
+{
+  return _all_materials.hasActiveObject(name, tid);
+}
+
 void
 FEProblemBase::prepareMaterials(const std::unordered_set<unsigned int> & consumer_needed_mat_props,
                                 const SubdomainID blk_id,
