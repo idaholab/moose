@@ -3,12 +3,11 @@
   type = MeshGeneratorMesh
   patch_update_strategy = iteration
 
+  #
+  # Binder
+  #
 
-#
-# Binder
-#
-  
-   [binder_block]
+  [binder_block]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 20
@@ -27,7 +26,7 @@
     type = SubdomainBoundingBoxGenerator
     input = binder_block
     block_id = 200
-    bottom_left = '0.75e+2 0.75e+2 0' 
+    bottom_left = '0.75e+2 0.75e+2 0'
     top_right = '3.75e+2 2.25e+2 0'
   []
 
@@ -35,7 +34,7 @@
     type = BoundingBoxNodeSetGenerator
     input = binder_rm
     new_boundary = 807
-    bottom_left = '0.75e+2 0.75e+2 0' 
+    bottom_left = '0.75e+2 0.75e+2 0'
     top_right = '7.5e+2 4.0e+2 0'
   []
 
@@ -44,9 +43,9 @@
     block = 200
     input = binder_rm_nodeset
     new_boundary = 815
-  []  
-  
-   [binder_inner_top]
+  []
+
+  [binder_inner_top]
     type = SideSetsFromBoundingBoxGenerator
     input = binder_initial
     included_boundaries = 815
@@ -73,10 +72,9 @@
     top_right = '0.78e+2 2.5e+2 0'
   []
 
-
-#
-# Crystal
-#
+  #
+  # Crystal
+  #
 
   [crystal_subdomain]
     type = GeneratedMeshGenerator
@@ -96,7 +94,7 @@
     type = SubdomainBoundingBoxGenerator
     input = crystal_subdomain
     block_id = 510
-    bottom_left = '1.25e+2 1.125e+2 0' 
+    bottom_left = '1.25e+2 1.125e+2 0'
     top_right = '4.0e+2 1.15e+2 0'
   []
 
@@ -104,7 +102,7 @@
     type = BoundingBoxNodeSetGenerator
     input = crack1_subdomain
     new_boundary = crack1_ns
-    bottom_left = '1.25e+2 1.125e+2 0' 
+    bottom_left = '1.25e+2 1.125e+2 0'
     top_right = '4.0e+2 1.15e+2 0'
   []
 
@@ -113,13 +111,13 @@
     block = 510
     input = crack1_nodeset
     new_boundary = 500
-  []  
+  []
 
   [crack2_subdomain]
     type = SubdomainBoundingBoxGenerator
     input = crystal_c1
     block_id = 610
-    bottom_left = '1.25e+2 1.5e+2 0' 
+    bottom_left = '1.25e+2 1.5e+2 0'
     top_right = '4.0e+2 1.525e+2 0'
   []
 
@@ -127,7 +125,7 @@
     type = BoundingBoxNodeSetGenerator
     input = crack2_subdomain
     new_boundary = crack2_ns
-    bottom_left = '1.25e+2 1.5e+2 0' 
+    bottom_left = '1.25e+2 1.5e+2 0'
     top_right = '4.0e+2 1.525e+2 0'
   []
 
@@ -136,13 +134,13 @@
     block = 610
     input = crack2_nodeset
     new_boundary = 600
-  [] 
+  []
 
   [crack3_subdomain]
     type = SubdomainBoundingBoxGenerator
     input = crystal_c2
     block_id = 710
-    bottom_left = '1.25e+2 1.875e+2 0' 
+    bottom_left = '1.25e+2 1.875e+2 0'
     top_right = '4.0e+2 1.9e+2 0'
   []
 
@@ -150,7 +148,7 @@
     type = BoundingBoxNodeSetGenerator
     input = crack3_subdomain
     new_boundary = crack3_ns
-    bottom_left = '1.25e+2 1.875e+2 0' 
+    bottom_left = '1.25e+2 1.875e+2 0'
     top_right = '4.0e+2 1.9e+2 0'
   []
 
@@ -159,7 +157,7 @@
     block = 710
     input = crack3_nodeset
     new_boundary = 700
-  [] 
+  []
 
   [crack1_lower]
     type = SideSetsFromBoundingBoxGenerator
@@ -219,7 +217,6 @@
     type = CombinerGenerator
     inputs = 'binder crystal'
   []
-
 []
 ##################################################################################
 [GlobalParams]
@@ -261,7 +258,6 @@
     order = CONSTANT
     family = MONOMIAL
   []
- 
 []
 
 #irr_value = 9
@@ -280,7 +276,6 @@
     type = ConstantFunction
     value = 825
   []
-
 []
 
 ###################################################################################
@@ -320,9 +315,7 @@
     function = irr_def
     use_displaced_mesh = false
   []
-
 []
-
 
 ###################################################################################
 [BCs]
@@ -333,7 +326,6 @@
     variable = disp_x
     value = 0.
   []
-  
 []
 
 ###################################################################################
@@ -490,7 +482,6 @@
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu superlu_dist'
-
 []
 
 [Outputs]
