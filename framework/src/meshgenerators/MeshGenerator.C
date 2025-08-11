@@ -383,6 +383,7 @@ MeshGenerator::generateInternalCSG()
 {
   mooseAssert(isDataOnly(), "Trying to use csg-only mode while not in data-driven mode");
   auto csg_obj = generateCSG();
+  mooseAssert(csg_obj, "Null CSG object");
   for (const auto & [requested_name, requested_csg] : _requested_csg_bases)
     if (*requested_csg)
       mooseError(

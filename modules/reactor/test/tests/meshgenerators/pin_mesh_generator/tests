@@ -46,7 +46,7 @@
     expect_err = "should not be defined for 2-D meshes"
   []
   [tri]
-    requirement = 'The system shall generate a 3D square pin mesh with ring and background region and tri center elements'
+    requirement = 'The system shall generate a 2D square pin mesh with ring and background region and tri center elements'
     type = 'Exodiff'
     input = 'pin_square.i'
     cli_args = "Mesh/pin1/mesh_intervals='1 1'
