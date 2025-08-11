@@ -195,7 +195,7 @@ public:
   /**
    * @returns the number of the system associated with this object
    */
-  unsigned int systemNumber() const;
+  unsigned int systemNumber() const { return _sys.number(); }
 
 protected:
   virtual void addPostprocessorDependencyHelper(const PostprocessorName & name) const override;
@@ -221,6 +221,7 @@ protected:
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
 
+  /// Whether to execute this object twice on initial
   const bool _duplicate_initial_execution;
 
   /// Depend UserObjects that to be used both for determining user object sorting and by AuxKernel
