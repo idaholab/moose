@@ -56,7 +56,7 @@ TestCSGCylindersMeshGenerator::generateCSG()
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   auto mg_name = this->name();
 
-  // create the top and bottom planes
+  // make the top and bottom planes
   Real a = 0;
   Real b = 0;
   Real c = 0;
@@ -76,6 +76,7 @@ TestCSGCylindersMeshGenerator::generateCSG()
   std::string prev_surf_name;
   for (unsigned int i = 0; i < _radii.size(); ++i)
   {
+    // create a cylinder surface of the specified orientation (x, y, or z)
     std::string surf_name = mg_name + "_surf_cyl_" + _axis + "_" + std::to_string(i);
     std::unique_ptr<CSG::CSGSurface> cyl_ptr;
     Point cyl_origin;

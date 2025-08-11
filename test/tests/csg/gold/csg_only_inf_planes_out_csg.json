@@ -1,45 +1,46 @@
 {
   "CELLS": {
-    "square_cell": {
+    "inf_square_square_cell": {
       "FILL": "square_material",
       "FILLTYPE": "CSG_MATERIAL",
-      "REGION": "(+surf_plus_x & -surf_minus_x & -surf_plus_y & +surf_minus_y)"
+      "REGION":
+          "(+inf_square_surf_plus_x & -inf_square_surf_minus_x & -inf_square_surf_plus_y & +inf_square_surf_minus_y)"
     }
   },
   "SURFACES": {
-    "surf_minus_x": {
+    "inf_square_surf_minus_x": {
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
-        "d": 2.5
+        "d": 2.0
       },
       "TYPE": "CSG::CSGPlane"
     },
-    "surf_minus_y": {
+    "inf_square_surf_minus_y": {
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
-        "d": -2.5
+        "d": -2.0
       },
       "TYPE": "CSG::CSGPlane"
     },
-    "surf_plus_x": {
+    "inf_square_surf_plus_x": {
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
-        "d": -2.5
+        "d": -2.0
       },
       "TYPE": "CSG::CSGPlane"
     },
-    "surf_plus_y": {
+    "inf_square_surf_plus_y": {
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
-        "d": 2.5
+        "d": 2.0
       },
       "TYPE": "CSG::CSGPlane"
     }
@@ -47,7 +48,7 @@
   "UNIVERSES": {
     "ROOT_UNIVERSE": {
       "CELLS": [
-        "square_cell"
+        "inf_square_square_cell"
       ],
       "ROOT": true
     }

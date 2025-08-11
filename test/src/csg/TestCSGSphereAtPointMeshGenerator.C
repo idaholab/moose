@@ -43,6 +43,7 @@ TestCSGSphereAtPointMeshGenerator::generateCSG()
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   auto mg_name = this->name();
+  // create a sphere surface of the specified radius at the specified center point
   std::unique_ptr<CSG::CSGSurface> sp_ptr =
       std::make_unique<CSG::CSGSphere>(mg_name + "_sphere_surf", _center, _radius);
   auto & sphere_surf = csg_obj->addSurface(sp_ptr);

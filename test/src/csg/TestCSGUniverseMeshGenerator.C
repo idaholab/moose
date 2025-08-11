@@ -60,17 +60,22 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
   // start by joining the first two sets of cylinders at the same level and push
   // one level down from root.
+
+  // get all CSGBase objects from the input mesh generators
   auto csg_bases = getCSGBasesByName(_input_mgs);
+  // get just the first two CSGBase objects to join together first
   std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*csg_bases[0]);
-  std::string new_base_name = _input_mgs[0] + "_univ";
   std::unique_ptr<CSG::CSGBase> inp_csg_obj = std::move(*csg_bases[1]);
+
+  // new names to use after joining first two bases
+  std::string new_base_name = _input_mgs[0] + "_univ";
   std::string new_join_name = _input_mgs[1] + "_univ";
 
   // joining via this method will move both roots into new universes;
   // subsequent input CSGBases will be joined uisng a different method (below)
   csg_obj->joinOtherBase(inp_csg_obj, new_base_name, new_join_name);
 
-  // new universe to collect all others into a main one
+  // new empty universe that cells will be added to
   auto & new_univ = csg_obj->createUniverse(mg_name + "_univ");
   // collect a list of cells to add to this new universe
   std::vector<std::reference_wrapper<const CSG::CSGCell>> cells_to_add;
@@ -83,8 +88,8 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
     if (i > 1)
     {
-      // join this incoming base at the same level as the other bases that already
-      // were joined, so incoming root is renamed but the current root remains
+      // join this incoming base at the same level as the other bases that already were joined
+      // incoming root is renamed but the current root remains untouched
       inp_csg_obj = std::move(*csg_bases[i]);
       new_join_name = img + "_univ";
       csg_obj->joinOtherBase(inp_csg_obj, new_join_name);
@@ -155,13 +160,14 @@ TestCSGUniverseMeshGenerator::generateCSG()
       const auto & img_cell = csg_obj->createCell(new_cell_name, csg_univ, new_region);
       cells_to_add.push_back(img_cell);
     }
-    else // add to the new universe at time of creation
+    else
+      // add cell containing csg_univ to the new universe (new_univ) at time of creation
       csg_obj->createCell(new_cell_name, csg_univ, new_region, &new_univ);
   }
 
   if (_add_cell_mode)
   {
-    // add the list of cells to the new universe now and remove from root universe
+    // add the list of cells to the new universe and remove from root universe
     csg_obj->addCellsToUniverse(new_univ, cells_to_add);
     csg_obj->removeCellsFromUniverse(csg_obj->getRootUniverse(), cells_to_add);
   }
