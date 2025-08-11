@@ -72,6 +72,9 @@ protected:
   virtual void addSpecificInternalEnergyAux();
   virtual void addSpecificTotalEnthalpyAux();
 
+  /// Adds the functor materials
+  virtual void addFunctorMaterials() {}
+
   /// Adds materials to compute fluid properties
   virtual void addFluidPropertiesMaterials() = 0;
 

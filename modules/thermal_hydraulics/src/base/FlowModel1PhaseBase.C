@@ -196,6 +196,7 @@ FlowModel1PhaseBase::addMooseObjects()
 
   addKernels();
   addDGKernels();
+  addFunctorMaterials();
   addAuxKernels();
   addFluidPropertiesMaterials();
   addNumericalFluxUserObject();

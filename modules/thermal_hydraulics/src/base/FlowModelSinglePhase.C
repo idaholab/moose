@@ -9,7 +9,6 @@
 
 #include "FlowModelSinglePhase.h"
 #include "FlowChannelBase.h"
-#include "THMNames.h"
 
 const std::string FlowModelSinglePhase::DENSITY = THM::DENSITY;
 const std::string FlowModelSinglePhase::FRICTION_FACTOR_DARCY = THM::FRICTION_FACTOR_DARCY;
@@ -137,6 +136,26 @@ FlowModelSinglePhase::addTemperatureAux()
   params.set<std::vector<VariableName>>("v") = {SPECIFIC_VOLUME};
   params.set<UserObjectName>("fp") = _fp_name;
   _sim.addAuxKernel(class_name, genName(_comp_name, "T_auxkernel"), params);
+}
+
+void
+FlowModelSinglePhase::addFunctorMaterials()
+{
+  // {
+  //   const std::string class_name = "FlowModel1PhaseVEFunctorMaterial";
+  //   const std::string obj_name = genName(_comp_name, class_name);
+  //     InputParameters params = _factory.getValidParams(class_name);
+  //   params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
+  //   _sim.addFunctorMaterial(class_name, obj_name, params);
+  // }
+  // {
+  //   const std::string class_name = "FlowModel1PhaseFunctorMaterial";
+  //   const std::string obj_name = genName(_comp_name, class_name);
+  //     InputParameters params = _factory.getValidParams(class_name);
+  //   params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
+  //   params.set<UserObjectName>("fluid_properties") = _fp_name;
+  //   _sim.addFunctorMaterial(class_name, obj_name, params);
+  // }
 }
 
 void

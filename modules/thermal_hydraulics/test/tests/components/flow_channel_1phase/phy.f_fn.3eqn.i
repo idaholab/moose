@@ -76,6 +76,54 @@ f = 5
   []
 []
 
+[FunctorMaterials]
+  [p_change_mat]
+    type = FunctorChangeFunctorMaterial
+    functor = p_fmp
+    change_over = nonlinear
+    prop_name = p_change
+    take_absolute_value = true
+  []
+  [T_change_mat]
+    type = FunctorChangeFunctorMaterial
+    functor = T_fmp
+    change_over = nonlinear
+    prop_name = T_change
+    take_absolute_value = true
+  []
+  [vel_change_mat]
+    type = FunctorChangeFunctorMaterial
+    functor = vel_fmp
+    change_over = nonlinear
+    prop_name = vel_change
+    take_absolute_value = true
+  []
+[]
+
+[Postprocessors]
+  [p_change_max]
+    type = ElementExtremeFunctorValue
+    block = 'pipe'
+    value_type = max
+    functor = p_change
+    execute_on = 'NONLINEAR_CONVERGENCE'
+  []
+  [T_change_max]
+    type = ElementExtremeFunctorValue
+    block = 'pipe'
+    value_type = max
+    functor = T_change
+    execute_on = 'NONLINEAR_CONVERGENCE'
+  []
+  [vel_change_max]
+    type = ElementExtremeFunctorValue
+    block = 'pipe'
+    value_type = max
+    functor = vel_change
+    execute_on = 'NONLINEAR_CONVERGENCE'
+  []
+[]
+
 [Preconditioning]
   [SMP_PJFNK]
     type = SMP
@@ -110,7 +158,11 @@ f = 5
 []
 
 [Outputs]
+  [console]
+    type = Console
+    execute_postprocessors_on = 'NONLINEAR'
+  []
   csv = true
-  show = 'f'
-  execute_on = 'timestep_end'
+  # show = 'f'
+  # execute_on = 'timestep_end'
 []

@@ -34,6 +34,8 @@ protected:
   virtual void addPressureAux() override;
   virtual void addTemperatureAux() override;
 
+  virtual void addFunctorMaterials() override;
+
   virtual void addFluidPropertiesMaterials() override;
 
   virtual void addNumericalFluxUserObject() override;
