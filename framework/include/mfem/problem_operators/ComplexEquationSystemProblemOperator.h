@@ -34,7 +34,7 @@ public:
   {
     if (!_equation_system)
     {
-      MFEM_ABORT("No equation system has been added to ProblemOperator.");
+      mooseError("No equation system has been added to ProblemOperator.");
     }
 
     return _equation_system.get();

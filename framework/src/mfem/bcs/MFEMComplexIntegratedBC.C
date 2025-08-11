@@ -17,10 +17,6 @@ InputParameters
 MFEMComplexIntegratedBC::validParams()
 {
   InputParameters params = MFEMBoundaryCondition::validParams();
-  params.addParam<UserObjectName>(
-      "real_bc", "Name of the integrated BC to use for the real of the composite complex BC.");
-  params.addParam<UserObjectName>(
-      "imag_bc", "Name of the integrated BC to use for the imaginary of the composite complex BC.");
 
   return params;
 }
