@@ -87,7 +87,6 @@ public:
   virtual void timestepSetup() override;
   virtual void initialSetup() override;
   virtual void meshChanged() override;
-  virtual void timestepSetup() override;
 
   virtual void initialize() override final;
   virtual void execute() override;

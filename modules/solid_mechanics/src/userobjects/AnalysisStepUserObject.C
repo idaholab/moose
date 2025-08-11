@@ -17,7 +17,7 @@ registerMooseObject("SolidMechanicsApp", AnalysisStepUserObject);
 InputParameters
 AnalysisStepUserObject::validParams()
 {
-  InputParameters params = NodalUserObject::validParams();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
       "Maps the time steps and the load step simulation times. It can be "
       "used in either direction depending on the simulation setup. It "
