@@ -94,7 +94,7 @@ As Navier-Stokes Finite Volume solvers continue to evolve in MOOSE, many new sol
 |                    | Fluid heat transfer       |            | Yes                                                          |                                                              | Yes                    |
 |                    | Solid phase heat transfer |            | Yes                                                          |                                                              |                        |
 |                    | Two phase                 |            | Yes                                                          |                                                              | Yes |
-|                    | Turbulence                |            | Yes                                                          |                                                              |                        |
+|                    | Turbulence                |            | Yes                                                          |                                                              |      Yes             |
 |                    | Scalar transport          |            | Yes                                                          |                                                              | Yes                    |
 
 
