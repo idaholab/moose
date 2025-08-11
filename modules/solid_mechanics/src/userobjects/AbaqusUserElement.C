@@ -78,6 +78,7 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
     _statev_index_current(0),
     _statev_index_old(1),
     _t_step_old(declareRestartableData<int>("uel_tstep_old", -1)),
+    _use_energy(getParam<bool>("use_energy")),
     _jtype(getParam<int>("jtype"))
 {
   // coupled variables must be nonlinear scalar fields
@@ -109,25 +110,6 @@ AbaqusUserElement::AbaqusUserElement(const InputParameters & params)
 }
 
 void
-AbaqusUserElement::timestepSetup()
-{
-  // swap the current and old state data after a converged timestep
-  if (_app.getExecutioner()->lastSolveConverged())
-  {
-    std::swap(_statev_index_old, _statev_index_current);
-    if (_use_energy)
-      for (const auto & [key, value] : _energy)
-        _energy_old[key] = value;
-  }
-  else
-  {
-    // last timestep did not converge, restore energy from energy_old
-    if (_use_energy)
-      for (const auto & [key, value] : _energy_old)
-        _energy[key] = value;
-  }
-}
-void
 AbaqusUserElement::initialSetup()
 {
   setupElemRange();
@@ -147,8 +129,22 @@ AbaqusUserElement::timestepSetup()
   if (_t_step == _t_step_old)
     return;
 
-  std::swap(_statev_index_old, _statev_index_current);
-  _t_step_old = _t_step;
+    // swap the current and old state data after a converged timestep
+  if (_app.getExecutioner()->lastSolveConverged())
+  {
+    std::swap(_statev_index_old, _statev_index_current);
+    if (_use_energy)
+      for (const auto & [key, value] : _energy)
+        _energy_old[key] = value;
+    _t_step_old = _t_step;
+  }
+  else
+  {
+    // last timestep did not converge, restore energy from energy_old
+    if (_use_energy)
+      for (const auto & [key, value] : _energy_old)
+        _energy[key] = value;
+  }
 }
 
 void
