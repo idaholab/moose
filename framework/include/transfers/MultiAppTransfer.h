@@ -103,11 +103,6 @@ public:
       return "Parent";
   }
 
-  /**
-   * Add the option to skip coordinate collapsing in coordinate transformation operations
-   */
-  static void addSkipCoordCollapsingParam(InputParameters & params);
-
   /// Whether the transfer owns a non-null from_multi_app
   bool hasFromMultiApp() const { return !(!_from_multi_app); }
 
@@ -120,7 +115,18 @@ public:
    */
   virtual void getAppInfo();
 
+  /**
+   * Add the option to skip coordinate collapsing in coordinate transformation operations
+   * Note: this is used by Actions creating transfers as well
+   */
+  static void addSkipCoordCollapsingParam(InputParameters & params);
+
 protected:
+  /**
+   * Add the execution order check parameter (to skip the warning if needed)
+   */
+  static void addUserObjectExecutionCheckParam(InputParameters & params);
+
   /**
    * Add the bounding box factor parameter to the supplied input parameters
    */
@@ -213,11 +219,16 @@ protected:
                "another multiapp");
   }
 
+  /// Checks the execute_on flags for user object transfers with user objects on the source app
+  /// which is also the parent app. This is to prevent a common mistake lagging the data from the
+  /// user object
+  void checkParentAppUserObjectExecuteOn(const std::string & object_name) const;
+
   /**
-   * Error if executing this MooseObject on EXEC_TRANSFER in a source multiapp (from_multiapp, e.g.
-   * child/sibling app). Note that, conversely, when the parent app is the source application, it is
-   * usually \emph desired to use EXEC_TRANSFER for a MooseObject that provides the values to
-   * transfer.
+   * Error if executing this MooseObject on EXEC_TRANSFER in a source multiapp (from_multiapp,
+   * e.g. child/sibling app). Note that, conversely, when the parent app is the source
+   * application, it is usually \emph desired to use EXEC_TRANSFER for a MooseObject that
+   * provides the values to transfer.
    * @param object_name name of the object to check the execute_on flags for
    */
   void errorIfObjectExecutesOnTransferInSourceApp(const std::string & object_name) const;
