@@ -14,6 +14,7 @@
 #include "OutputInterface.h"
 #include "MooseEnum.h"
 #include "ReporterContext.h"
+#include "NonADFunctorInterface.h"
 
 // libMesh
 #include "libmesh/parallel.h"
@@ -30,7 +31,7 @@ InputParameters validParams();
 /**
  * Base class for Postprocessors that produce a vector of values.
  */
-class VectorPostprocessor : public OutputInterface
+class VectorPostprocessor : public OutputInterface, public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();

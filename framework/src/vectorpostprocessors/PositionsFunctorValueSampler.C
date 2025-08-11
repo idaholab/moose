@@ -31,7 +31,6 @@ PositionsFunctorValueSampler::validParams()
 
 PositionsFunctorValueSampler::PositionsFunctorValueSampler(const InputParameters & parameters)
   : PointSamplerBase(parameters),
-    NonADFunctorInterface(this),
     _positions(_fe_problem.getPositionsObject(getParam<PositionsName>("positions")))
 {
   const auto & functor_names = getParam<std::vector<MooseFunctorName>>("functors");

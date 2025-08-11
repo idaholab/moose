@@ -11,12 +11,11 @@
 
 // MOOSE includes
 #include "PointSamplerBase.h"
-#include "NonADFunctorInterface.h"
 
 /**
  * Samples one or more functor(s) at points given by a Positions object
  */
-class PositionsFunctorValueSampler : public PointSamplerBase, public NonADFunctorInterface
+class PositionsFunctorValueSampler : public PointSamplerBase
 {
 public:
   static InputParameters validParams();

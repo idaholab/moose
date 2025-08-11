@@ -65,7 +65,11 @@ ElementValueSampler::execute()
   unsigned int i_fe = 0, i_fv = 0;
   for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
     if (_coupled_moose_vars[i]->isFV())
-      _values[i] = _coupled_standard_fv_moose_vars[i_fv++]->getElementalValue(_current_elem);
+    {
+      const auto state = determineState();
+      const Moose::ElemArg elem_arg = {_current_elem, /*correct_skewness*/ false};
+      _values[i] = MetaPhysicL::raw_value((*_coupled_fv_moose_vars[i_fv++])(elem_arg, state));
+    }
     else
       _values[i] = _coupled_standard_moose_vars[i_fe++]->getElementalValue(_current_elem);
 
