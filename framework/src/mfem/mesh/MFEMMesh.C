@@ -61,6 +61,10 @@ MFEMMesh::buildMesh()
                     isParamSetByUser("serial_refine") ? getParam<unsigned int>("serial_refine")
                                                       : getParam<unsigned int>("uniform_refine"));
 
+  // Not used by default - MFEM supports load balancing of parallel
+  // non-conforming meshes with a space-filling curve partitioning,
+  // but this requires the mesh to be ordered, ideally as a sequence
+  // of face-neighbours (c.f. MFEM example 6p)
   if (isParamSetByUser("reorder_mesh"))
   {
     mfem::Array<int> ordering;
@@ -77,7 +81,12 @@ MFEMMesh::buildMesh()
     mfem_ser_mesh.ReorderElements(ordering);
   }
 
-  mfem_ser_mesh.EnsureNCMesh(getParam<bool>("nc_simplices"));
+  // Make sure mesh is in non-conforming mode to enable local refinement
+  // of quadrilaterals/hexahedra (c.f. MFEM example 6p)
+  if (isParamSetByUser("nc_simplices"))
+  {
+    mfem_ser_mesh.EnsureNCMesh(getParam<bool>("nc_simplices"));
+  }
 
   // multi app should take the mpi comm from moose so is split correctly??
   auto comm = this->comm().get();
