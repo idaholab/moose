@@ -127,6 +127,17 @@ class TestResultsReaderReader(unittest.TestCase):
 
         return results, tests
 
+    def testHasAuth(self):
+        """
+        Helper for checking if auth is available or not given an environment
+        variable. This lets us within CIVET tests assert whether or not
+        the authentication is available when we expect it to be so (or not).
+        """
+        if os.environ.get('TEST_RESULTSREADER_HAS_AUTH') is not None:
+            self.assertTrue(HAS_AUTH)
+        if os.environ.get('TEST_RESULTSREADER_MISSING_AUTH') is not None:
+            self.assertFalse(HAS_AUTH)
+
     @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
     def testGetTestResultsGold(self):
         """
