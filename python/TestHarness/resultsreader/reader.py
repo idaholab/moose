@@ -102,8 +102,8 @@ class TestHarnessResultsReader:
             return TestHarnessResultsReader.Authentication(**auth)
         # Have one or two but not all three set
         if len(auth) != 0:
-            all_auth_vars = [var_name(k) for k in all_auth_keys]
-            raise ValueError(f'All environment variables "{" ".join(all_auth_vars)}" must be set for authentication')
+            all_auth_vars = ' '.join(map(var_name, all_auth_keys))
+            raise ValueError(f'All environment variables "{all_auth_vars}" must be set for authentication')
 
         # Try to get authentication from file
         auth_file = get_var('file')
