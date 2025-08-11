@@ -134,12 +134,17 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     PYTHON_VERSION=3.13
     PYTORCH_VERSION=2.7.1
 
-    # MFEM (and maybe other things?) use mpirun. In the case of openmpi,
-    # we need to have a clean tmpdir for it to store state (which,
-    # for some reason, /tmp doesn't work for this in fakeroot?)
+    # Special runtime setup for OpenMPI
     if which ompi_info &> /dev/null; then
+        # MFEM (and maybe other things?) use mpirun. In the case of openmpi,
+        # we need to have a clean tmpdir for it to store state (which,
+        # for some reason, /tmp doesn't work for this in fakeroot?)
         export TMPDIR=${ROOT_BUILD_DIR}/tmpdir
         mkdir $TMPDIR
+    # Special runtime setup for MPICH
+    else
+        # Required at configure time for MFEM checking petsc
+        export MPIR_CVAR_ENABLE_GPU=0
     fi
 
     # Install code-server
