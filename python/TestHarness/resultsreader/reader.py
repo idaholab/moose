@@ -79,10 +79,34 @@ class TestHarnessResultsReader:
     @staticmethod
     def loadEnvironmentAuthentication() -> Authentication | None:
         """
-        Attempts to load the authentication environment from the
-        "RESULTS_READER_AUTH_FILE" variable if it is available
+        Attempts to first load the authentication environment from
+        env vars RESULTS_READER_AUTH_[HOST,USERNAME,PASSWORD] if
+        available. Otherwise, tries to load the authentication
+        environment from the file set by env var
+        RESULTS_READER_AUTH_FILE if it is available.
         """
-        auth_file = os.environ.get('RESULTS_READER_AUTH_FILE')
+        # Helpers for getting authentication variables
+        var_name = lambda k: f'RESULTS_READER_AUTH_{k.upper()}'
+        get_var = lambda k: os.environ.get(var_name(k))
+
+        # Try to get authentication from env
+        all_auth_keys = ['host', 'username', 'password']
+        auth = {}
+        for key in all_auth_keys:
+            v = get_var(key)
+            if v:
+                auth[key] = v
+        # Have all three set
+        if len(auth) == 3:
+            auth['port'] = get_var('port')
+            return TestHarnessResultsReader.Authentication(**auth)
+        # Have one or two but not all three set
+        if len(auth) != 0:
+            all_auth_vars = [var_name(k) for k in all_auth_keys]
+            raise ValueError(f'All environment variables "{" ".join(all_auth_vars)}" must be set for authentication')
+
+        # Try to get authentication from file
+        auth_file = get_var('file')
         if auth_file is None:
             return None
         try:
