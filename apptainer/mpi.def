@@ -6,7 +6,7 @@
 {#- ALTERNATE_FROM: Set an alternate from (currently supported: clang, clang_min, gcc_min)    -#}
 
 {#- The minimum version of LLVM/Clang                                                         -#}
-{%- set MIN_CLANG_VERSION = '10.0.1' -%}
+{%- set MIN_CLANG_VERSION = '14.0.6' -%}
 
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
@@ -19,7 +19,7 @@
 {%- if ALTERNATE_FROM == "clang" %}
 {%- set CLANG_GCC_VERSION = '14' -%}
 {%- elif ALTERNATE_FROM == "clang_min" %}
-{%- set CLANG_GCC_VERSION = '10' -%}
+{%- set CLANG_GCC_VERSION = '11' -%}
 {%- else %}
 {%- set CLANG_GCC_VERSION = '' -%}
 {%- endif %}
