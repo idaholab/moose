@@ -2360,9 +2360,9 @@ MooseApp::checkReservedCapability(const std::string & capability)
   static const std::set<std::string> reserved{
       "scale_refine", "valgrind", "recover", "heavy", "mpi_procs", "num_threads", "compute_device"};
   if (reserved.count(capability))
-    mooseError("MooseApp::addCapability(): The capability \"",
-               capability,
-               "\" is reserved and may not be registered by an application.");
+    ::mooseError("MooseApp::addCapability(): The capability \"",
+                 capability,
+                 "\" is reserved and may not be registered by an application.");
 }
 
 void
