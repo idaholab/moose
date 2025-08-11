@@ -41,20 +41,17 @@ std::unique_ptr<CSG::CSGBase>
 TestCSGJoinBasesMeshGenerator::generateCSG()
 {
   const auto csg_bases = getCSGBases("input_meshes");
-  // first MG is the base, join all others to this one
+  // first mesh generator is the base, join all others to this one
   std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*csg_bases[0]);
-
-  // rename first MG's root to demonstrate that all others are still joined into
-  // root despite having different names
+  // rename first mesh generators's root to demonstrate that all others are
+  // still joined into root despite having different names
   auto mg_name = this->name();
   csg_obj->renameRootUniverse(mg_name + "_root");
-
-  auto root_univ = csg_obj->getRootUniverse();
+  // iterate over all other mesh generators and add their CSGBase to the first
   for (unsigned int i = 1; i < csg_bases.size(); ++i)
   {
     std::unique_ptr<CSG::CSGBase> inp_csg_obj = std::move(*csg_bases[i]);
     csg_obj->joinOtherBase(inp_csg_obj);
   }
-
   return csg_obj;
 }

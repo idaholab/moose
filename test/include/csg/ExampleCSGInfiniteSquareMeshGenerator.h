@@ -11,12 +11,12 @@
 
 #include "MeshGenerator.h"
 
-class TestCSGSphereAtPointMeshGenerator : public MeshGenerator
+class ExampleCSGInfiniteSquareMeshGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  TestCSGSphereAtPointMeshGenerator(const InputParameters & parameters);
+  ExampleCSGInfiniteSquareMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -25,8 +25,6 @@ public:
   std::unique_ptr<CSG::CSGBase> generateCSG() override;
 
 protected:
-  /// the radius of the sphere
-  const Real _radius;
-  /// the center of the sphere
-  const Point _center;
+  /// the side length of the infinite square
+  const Real _side_length;
 };

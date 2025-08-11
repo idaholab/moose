@@ -25,6 +25,6 @@ public:
   std::unique_ptr<CSG::CSGBase> generateCSG() override;
 
 protected:
-  /// the side length of the infinite square
+  /// the radius of the sphere
   const Real _radius;
 };

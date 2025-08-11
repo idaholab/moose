@@ -9,7 +9,7 @@
     radius = 3
   []
   [inf_square]
-    type = TestCSGInfiniteSquareMeshGenerator
+    type = ExampleCSGInfiniteSquareMeshGenerator
     side_length = 5
   []
   [Cube]

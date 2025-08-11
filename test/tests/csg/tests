@@ -53,6 +53,16 @@
         mesh_mode = REPLICATED
         detail = 'collects a list of cells to add to an empty universe and remove from another.'
     []
+    [csg_create_universe_from_cells]
+        max_threads = 1
+        type = 'JSONDiff'
+        input = 'csg_universe_from_cells.i'
+        cli_args = '--csg-only'
+        jsondiff = 'csg_universe_from_cells_out_csg.json'
+        recover = false
+        mesh_mode = REPLICATED
+        detail = 'collects a list of cells and creates a new universe from the list of cells.'
+    []
     [csg_only_final_generator]
         max_threads = 1
         type = 'JSONDiff'

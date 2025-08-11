@@ -1,32 +1,32 @@
 {
   "CELLS": {
-    "box_cell": {
+    "cube_box_cell": {
       "FILL": "square_material",
       "FILLTYPE": "CSG_MATERIAL",
       "REGION":
-          "(+surf_plus_x & -surf_minus_x & -surf_plus_y & +surf_minus_y & -surf_plus_z & +surf_minus_z)"
+          "(+inf_square_surf_plus_x & -inf_square_surf_minus_x & -inf_square_surf_plus_y & +inf_square_surf_minus_y & -cube_surf_plus_z & +cube_surf_minus_z)"
     }
   },
   "SURFACES": {
-    "surf_minus_x": {
+    "inf_square_surf_minus_x": {
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
-        "d": 2.5
+        "d": 2.0
       },
       "TYPE": "CSG::CSGPlane"
     },
-    "surf_minus_y": {
+    "inf_square_surf_minus_y": {
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
-        "d": -2.5
+        "d": -2.0
       },
       "TYPE": "CSG::CSGPlane"
     },
-    "surf_minus_z": {
+    "cube_surf_minus_z": {
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -35,25 +35,25 @@
       },
       "TYPE": "CSG::CSGPlane"
     },
-    "surf_plus_x": {
+    "inf_square_surf_plus_x": {
       "COEFFICIENTS": {
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
-        "d": -2.5
+        "d": -2.0
       },
       "TYPE": "CSG::CSGPlane"
     },
-    "surf_plus_y": {
+    "inf_square_surf_plus_y": {
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
-        "d": 2.5
+        "d": 2.0
       },
       "TYPE": "CSG::CSGPlane"
     },
-    "surf_plus_z": {
+    "cube_surf_plus_z": {
       "COEFFICIENTS": {
         "a": 0.0,
         "b": 0.0,
@@ -66,7 +66,7 @@
   "UNIVERSES": {
     "ROOT_UNIVERSE": {
       "CELLS": [
-        "box_cell"
+        "cube_box_cell"
       ],
       "ROOT": true
     }

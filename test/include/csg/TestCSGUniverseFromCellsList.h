@@ -11,12 +11,12 @@
 
 #include "MeshGenerator.h"
 
-class TestCSGSphereAtPointMeshGenerator : public MeshGenerator
+class TestCSGUniverseFromCellsList : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  TestCSGSphereAtPointMeshGenerator(const InputParameters & parameters);
+  TestCSGUniverseFromCellsList(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -25,8 +25,6 @@ public:
   std::unique_ptr<CSG::CSGBase> generateCSG() override;
 
 protected:
-  /// the radius of the sphere
-  const Real _radius;
-  /// the center of the sphere
-  const Point _center;
+  /// radii of the spheres
+  const std::vector<Real> _radii;
 };
