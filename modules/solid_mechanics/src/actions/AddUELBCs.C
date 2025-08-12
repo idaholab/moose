@@ -49,7 +49,7 @@ AddUELBCs::act()
   }
 
   _uel_mesh = dynamic_cast<AbaqusUELMesh *>(_mesh.get());
-  mooseAssert(_step_up, "Step user object should have been constructed, but it wasn't.");
+  mooseAssert(_step_uo, "Step user object should have been constructed, but it wasn't.");
   const auto var_list = _step_uo->getVariables();
 
   // create boundary conditions
