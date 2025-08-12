@@ -262,12 +262,10 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
       params.set<VariableName>("variable") = _fluid_enthalpy_name;
       params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
       params.set<std::vector<VariableName>>("p") = {_flow_equations_physics->getPressureName()};
-      if (MooseUtils::parsesToReal(getParam<FunctionName>("initial_temperature")))
+      Real temp;
+      if (MooseUtils::parsesToReal(getParam<FunctionName>("initial_temperature"), &temp))
       {
-        std::istringstream ss(getParam<FunctionName>("initial_temperature"));
-        Real value;
-        ss >> value;
-        params.defaultCoupledValue("T", value, 0);
+        params.defaultCoupledValue("T", temp, 0);
         params.set<std::vector<VariableName>>("T") = {};
       }
       else
