@@ -361,6 +361,11 @@ ContactAction::ContactAction(const InputParameters & params)
         paramError("newmark_gamma",
                    "newmark_gamma can only be used with the mortar_dynamics option");
     }
+
+    if (isParamSetByUser("penalty"))
+      paramError("penalty",
+                 "The 'penalty' parameter is not used for the 'mortar' formulation which instead "
+                 "uses Lagrange multipliers");
   }
   else
   {
