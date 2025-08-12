@@ -70,7 +70,7 @@ GeneralSensorPostprocessor::GeneralSensorPostprocessor(const InputParameters & p
     _R_function_values(declareRestartableData<std::vector<Real>>("R_function_values")),
     _t_step_old(declareRestartableData<int>("gsp_t_step_old", -1)),
     _seed(getParam<unsigned int>("seed")),
-    _delay_value(0)
+    _delay_value(0) // Initialize delay_value at 0
 {
 }
 
@@ -86,6 +86,8 @@ GeneralSensorPostprocessor::initialize()
   Real noise_value = _rng.randNormal(0, noise_std_dev);
   Real uncertainty_std_dev = _uncertainty_std_dev_function.value(_t);
   Real uncertainty_value = _rng.randNormal(0, uncertainty_std_dev);
+  // Added line to calculate delay_value from the delay function
+  _delay_value = _delay_function.value(_t);
 
   // if the problem is steady-state
   if (!_fe_problem.isTransient())
@@ -170,8 +172,9 @@ GeneralSensorPostprocessor::getDelayedInputSignal()
   if (t_desired < _time_values[0])
     input_signal_delayed = 0;
 
+  // Modified cases where desired time isin the time value list
   else if (t_desired == _time_values[0])
-    input_signal_delayed = _input_signal;
+    input_signal_delayed = _input_signal_values[0];
 
   // linear interpolation
   else if (t_desired > _time_values[0] && t_desired <= _t && t_desired >= _t - _dt)

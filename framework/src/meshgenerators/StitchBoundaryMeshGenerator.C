@@ -17,31 +17,21 @@ registerMooseObject("MooseApp", StitchBoundaryMeshGenerator);
 InputParameters
 StitchBoundaryMeshGenerator::validParams()
 {
-  InputParameters params = MeshGenerator::validParams();
-
-  MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
-
+  InputParameters params = StitchMeshGeneratorBase::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addParam<bool>(
-      "clear_stitched_boundary_ids", true, "Whether or not to clear the stitched boundary IDs");
-  params.addParam<MooseEnum>(
-      "algorithm",
-      algorithm,
-      "Control the use of binary search for the nodes of the stitched surfaces.");
-  params.addRequiredParam<std::vector<boundary_id_type>>(
-      "stitch_boundaries_pair", "Pair of boundaries to be stitched together.");
+  params.renameParam("stitch_boundaries_pairs",
+                     "stitch_boundaries_pair",
+                     "Pair of boundaries to be stitched together.");
   params.addClassDescription("Allows a pair of boundaries to be stitched together.");
 
   return params;
 }
 
 StitchBoundaryMeshGenerator::StitchBoundaryMeshGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
-    _input(getMesh("input")),
-    _clear_stitched_boundary_ids(getParam<bool>("clear_stitched_boundary_ids")),
-    _stitch_boundaries_pair(getParam<std::vector<boundary_id_type>>("stitch_boundaries_pair")),
-    _algorithm(parameters.get<MooseEnum>("algorithm"))
+  : StitchMeshGeneratorBase(parameters), _input(getMesh("input"))
 {
+  if (_stitch_boundaries_pairs.size() != 1 && _stitch_boundaries_pairs[0].size() != 2)
+    paramError("stitch_boundaries_pair", "Can only stitch two boundaries together.");
 }
 
 std::unique_ptr<MeshBase>
@@ -55,12 +45,18 @@ StitchBoundaryMeshGenerator::generate()
   // stitch_surfaces only recognizes node_set boundaries
   mesh->get_boundary_info().build_node_list_from_side_list();
 
-  mesh->stitch_surfaces(_stitch_boundaries_pair[0],
-                        _stitch_boundaries_pair[1],
+  // Check that boundaries exist
+  const auto first_bid = getBoundaryIdToStitch(*mesh, name(), _stitch_boundaries_pairs[0][0]);
+  const auto second_bid = getBoundaryIdToStitch(*mesh, name(), _stitch_boundaries_pairs[0][1]);
+
+  // Stitch the boundaries
+  mesh->stitch_surfaces(first_bid,
+                        second_bid,
                         TOLERANCE,
                         _clear_stitched_boundary_ids,
-                        /*verbose = */ true,
-                        use_binary_search);
+                        getParam<bool>("verbose_stitching"),
+                        use_binary_search,
+                        getParam<Real>("stitching_hmin_tolerance_factor"));
 
   mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);

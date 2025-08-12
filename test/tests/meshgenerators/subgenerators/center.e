@@ -1,1 +1,1 @@
-../stitched_mesh_generator/center.e
+../stitch_mesh_generator/center.e
