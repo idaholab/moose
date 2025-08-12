@@ -143,6 +143,18 @@ private:
   /// Range of reinitialized boundary nodes
   ConstBndNodeRange & reinitializedBndNodeRange();
 
+  /// @brief Gather patch elements for reinitialized elements based onthe reinitialization strategy.
+  void gatherPatchElements(const VariableName & var_name, ReinitStrategy reinit_strategy);
+
+  /// @brief Extrapolate polynomial for the given variable onto the reinitialized elements.
+  void extrapolatePolynomial(const VariableName & var_name);
+
+  /// @brief Store values from non-reinitialized nodes on reinitialized elements
+  void storeOverriddenDofValues(const std::vector<VariableName> & vars_names);
+
+  /// @brief Restore values to non-reinitialized nodes on reinitialized elements
+  void restoreOverriddenDofValues(const std::vector<VariableName> & vars_names);
+
   /// Reinitialize moved elements whose new subdomain is in this list
   std::vector<SubdomainID> _subdomain_ids_to_reinitialize;
 
@@ -224,18 +236,6 @@ private:
 
   /// @brief Set of processor IDs that have reinitialized elements and nodes.
   std::set<processor_id_type> _global_proc_ids_for_reinit;
-
-  /// @brief Gather patch elements for reinitialized elements based onthe reinitialization strategy.
-  void gatherPatchElements(const VariableName & var_name, ReinitStrategy reinit_strategy);
-
-  /// @brief Extrapolate polynomial for the given variable onto the reinitialized elements.
-  void extrapolatePolynomial(const VariableName & var_name);
-
-  /// @brief Store values from non-reinitialized nodes on reinitialized elements
-  void storeOverriddenDofValues(const std::vector<VariableName> & vars_names);
-
-  /// @brief Restore values to non-reinitialized nodes on reinitialized elements
-  void restoreOverriddenDofValues(const std::vector<VariableName> & vars_names);
 
 private:
   /// Construct a KD-tree from the given elements
