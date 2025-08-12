@@ -314,6 +314,10 @@ ElementSubdomainModifierBase::modify(
   if (_displaced_mesh)
     applyMovingBoundaryChanges(*_displaced_mesh);
 
+  // Some variable reinitialization strategies require patch elements to be gathered
+  // This has to be done *before* reinitializing the equation systems because we need to find
+  // currently evaluable elements
+  _evaluable_elems.clear();
   _patch_elem_ids.clear();
   for (auto i : index_range(_reinit_vars))
     prepareVariableForReinitialization(_reinit_vars[i], _reinit_strategy[i]);
@@ -947,34 +951,32 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
                                                   ReinitStrategy reinit_strategy)
 {
   _patch_elem_ids[var_name].clear();
-  mooseAssert(
-      reinit_strategy == ReinitStrategy::POLYNOMIAL_NEIGHBOR ||
-          reinit_strategy == ReinitStrategy::POLYNOMIAL_WHOLE ||
-          reinit_strategy == ReinitStrategy::POLYNOMIAL_NEARBY,
-      "reinit strategy must be POLYNOMIAL_NEIGHBOR, POLYNOMIAL_WHOLE, or POLYNOMIAL_NEARBY");
 
   // First collect all elements who own dofs in the current dofmap
-  std::unordered_set<const Elem *> candidate_elems;
-  std::vector<dof_id_type> candidate_elem_ids;
   auto & sys = _fe_problem.getSystem(var_name);
-  const auto & dof_map = sys.get_dof_map();
-  std::vector<dof_id_type> elem_dofs;
-  auto vn = sys.variable_number(static_cast<std::string>(var_name));
-  for (const auto elem : *_mesh.getActiveLocalElementRange())
-  {
-    if (_reinitialized_elems.count(elem->id()))
-      continue; // Skip elements that were reinitialized
 
-    dof_map.dof_indices(elem, elem_dofs, vn);
-    if (!elem_dofs.empty() &&
-        std::all_of(elem_dofs.begin(),
-                    elem_dofs.end(),
-                    [](dof_id_type dof) { return dof != libMesh::DofObject::invalid_id; }))
+  // Cache evaluable elements for the system if not already done
+  if (!_evaluable_elems.count(sys.number()))
+  {
+    auto & [candidate_elems, candidate_elem_ids] = _evaluable_elems[sys.number()];
+    const auto & dof_map = sys.get_dof_map();
+    std::vector<dof_id_type> elem_dofs;
+    auto vn = sys.variable_number(static_cast<std::string>(var_name));
+    for (const auto elem : *_mesh.getActiveLocalElementRange())
     {
-      candidate_elems.insert(elem);
-      candidate_elem_ids.push_back(elem->id());
+      if (std::find(_reinitialized_elems.begin(), _reinitialized_elems.end(), elem->id()) !=
+          _reinitialized_elems.end())
+        continue; // Skip elements that were reinitialized
+
+      dof_map.dof_indices(elem, elem_dofs, vn);
+      if (!elem_dofs.empty())
+      {
+        candidate_elems.insert(elem);
+        candidate_elem_ids.push_back(elem->id());
+      }
     }
   }
+  auto & [candidate_elems, candidate_elem_ids] = _evaluable_elems[sys.number()];
 
   // Now we gather patch elements based on the reinit strategy
   std::vector<dof_id_type> & patch_elems = _patch_elem_ids[var_name];
@@ -982,19 +984,25 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
   {
     case ReinitStrategy::POLYNOMIAL_NEIGHBOR:
     {
-      // Loop over all candidate elements, for each element, if any of its point neighbor belongs to
-      // the reinitialized elements, we will include that element in the patch element set.
-      for (const auto * elem : candidate_elems)
+      auto has_neighbor_in_reinit_elems = [&](const Elem * elem) -> bool
+      {
         for (const auto & node : elem->node_ref_range())
           for (const auto & neigh_id : _mesh.nodeToElemMap().at(node.id()))
             if (_reinitialized_elems.count(neigh_id))
-              patch_elems.push_back(elem->id());
+              return true;
+        return false;
+      };
+      // Loop over all candidate elements, for each element, if any of its point neighbor belongs to
+      // the reinitialized elements, we will include that element in the patch element set.
+      for (const auto * elem : candidate_elems)
+        if (has_neighbor_in_reinit_elems(elem))
+          patch_elems.push_back(elem->id());
       _mesh.comm().allgather(patch_elems);
       break;
     }
     case ReinitStrategy::POLYNOMIAL_WHOLE:
     {
-      // This is simple: just insert all candidate elements into the patch elements
+      // This is simple: all candidate elements are patch elements
       patch_elems = candidate_elem_ids;
       _mesh.comm().allgather(patch_elems);
       break;
@@ -1004,14 +1012,14 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
       // Before the search, we need to gather all candidate elements
       _mesh.comm().allgather(candidate_elem_ids);
       // Construct the KD-tree for searching nearby elements
-      _kd_tree = constructKDTreeFromElements(candidate_elem_ids);
+      auto kd_tree = constructKDTreeFromElements(candidate_elem_ids);
       // Loop over all reinitialized elements and find nearby elements from the KD-tree
       std::vector<nanoflann::ResultItem<std::size_t, Real>> query_result;
       for (const auto & elem_id : _reinitialized_elems)
       {
         const Elem * elem = _mesh.elemPtr(elem_id);
         const Point & centroid = elem->vertex_average();
-        _kd_tree->radiusSearch(centroid, _nearby_distance_threshold, query_result);
+        kd_tree->radiusSearch(centroid, _nearby_distance_threshold, query_result);
         for (const auto & [qid, dist] : query_result)
           patch_elems.push_back(candidate_elem_ids[qid]);
       }

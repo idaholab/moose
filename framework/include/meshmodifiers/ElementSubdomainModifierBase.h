@@ -48,8 +48,8 @@ public:
 
   ElementSubdomainModifierBase(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
-  virtual void meshChanged() override;
+  void initialSetup() override;
+  void meshChanged() override;
 
 protected:
   /**
@@ -216,20 +216,27 @@ private:
   /// @brief map from variable name to the index of the nodal patch recovery user object in `_pr`
   std::map<VariableName, unsigned int> _var_name_to_pr_idx;
 
+  /**
+   * @brief local evaluable elements before reinitializing the equation systems
+   * Key of the map is the system number, value of the map is a pair of:
+   *  (1) an unordered set of evaluable elements for the system
+   *  (2) a vector of evaluable element IDs associated with those elements
+   */
+  std::map<unsigned int, std::pair<std::unordered_set<const Elem *>, std::vector<dof_id_type>>>
+      _evaluable_elems;
+
   /// @brief A map to map reinitialization strategies to their corresponding patch element IDs
   std::map<VariableName, std::vector<dof_id_type>> _patch_elem_ids;
 
+  /// KD-tree related members
+  ///@{
   /// @brief Maximum number of elements allowed in a leaf node of the k-d tree.
   int _leaf_max_size = 10;
-
-  /// @brief k-d tree used for neighbor solved element search in polynomial extrapolation.
-  std::unique_ptr<KDTree> _kd_tree = nullptr;
-
   /// @brief Centroids of all solved elements used for k-d tree construction.
   std::vector<Point> _kd_tree_points;
-
   /// @brief Radius threshold for the k-d tree neighbor search.
   double _nearby_distance_threshold;
+  ///@}
 
   /// @brief List of variable names for which overridden DOF values should be restored.
   std::vector<VariableName> _vars_to_restore_overridden_dofs;

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ElementSubdomainModifier.h"
+#include "ElementSubdomainModifierBase.h"
 
 InputParameters
 ElementSubdomainModifier::validParams()
@@ -24,6 +25,7 @@ ElementSubdomainModifier::ElementSubdomainModifier(const InputParameters & param
 void
 ElementSubdomainModifier::initialize()
 {
+  ElementSubdomainModifierBase::initialize();
   // Clear moved elements from last execution
   _moved_elems.clear();
 }
