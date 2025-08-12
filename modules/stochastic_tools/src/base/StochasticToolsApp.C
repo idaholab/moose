@@ -106,12 +106,12 @@ StochasticToolsApp::registerApps()
 
 void
 StochasticToolsApp::requiresTorch(const MooseObject &
-#ifndef LIBTORCH_ENABLED
+#ifndef MOOSE_LIBTORCH_ENABLED
                                       obj
 #endif
 )
 {
-#ifndef LIBTORCH_ENABLED
+#ifndef MOOSE_LIBTORCH_ENABLED
   obj.mooseError("PyTorch C++ API (libtorch) must be installed to use this object, see "
                  "https://mooseframework.inl.gov/modules/stochastic_tools/install_pytorch.html for "
                  "instruction.");

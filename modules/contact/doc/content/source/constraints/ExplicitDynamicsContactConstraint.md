@@ -34,8 +34,10 @@ $\lambda_n$ is calculated at each node as a function of the wave speed and densi
 \end{equation}
 
 where the subscript $_q$ is a nodal index. With this formulation, the constraint force will be calculated within a few iterations.
-<!-- For relevant equations, see [!citep](heinstein2000contact), in particular,
-Equations (15), (21), (26) and (29). -->
+!!!
+For relevant equations, see [!citep](heinstein2000contact), in particular,
+Equations (15), (21), (26) and (29).
+!!!
 
 !syntax parameters /Constraints/ExplicitDynamicsContactConstraint
 

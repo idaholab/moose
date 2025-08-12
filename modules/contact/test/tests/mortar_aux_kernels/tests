@@ -26,6 +26,7 @@
     max_parallel = 4
     capabilities = 'ad_size>=50 & method!=dbg'
     valgrind = 'none'
+    restep = false # Issue #31054
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation via a mortar auxiliary kernel.'
     # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
@@ -178,6 +179,7 @@
     partial = True
     # Only mesh output, no transient steps taken
     recover = false
+    restep = false
     requirement = 'The system shall allow for a user controllable input such that the mortar segment '
                   'mesh does not contain segments built from oblique projections. Therefore, the '
                   'system shall generate many segments from oblique projections if a very small '

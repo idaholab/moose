@@ -26,8 +26,4 @@ protected:
 
   std::vector<AuxVariableName> _velocities;
   std::vector<AuxVariableName> _accelerations;
-
-  const Real _newmark_beta;
-  const Real _newmark_gamma;
-  const Real _hht_alpha;
 };

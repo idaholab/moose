@@ -3,7 +3,11 @@
     type = CSVDiff
     input = 'good.i'
     csvdiff = validation_ok.csv
-    cli_args = 'Outputs/file_base=validation_ok Outputs/csv=true Postprocessors/value/type=ConstantPostprocessor Postprocessors/value/value=100'
+    cli_args = 'Outputs/file_base=validation_ok
+                Outputs/csv=true
+                Postprocessors/value/type=ParsedPostprocessor
+                Postprocessors/value/expression="if(t>0, 100, 0)"
+                Postprocessors/value/use_t=true'
     validation_test = validation_ok.py
     validation_lower_bound = 95
     validation_upper_bound = 105
@@ -17,5 +21,16 @@
     type = RunCommand
     command = 'echo foo'
     validation_test = validation_exception.py
+  []
+  [csv]
+    type = RunApp
+    input = 'good.i'
+    cli_args = 'Outputs/file_base=validation_csv
+                Outputs/csv=true
+                Postprocessors/value/type=ParsedPostprocessor
+                Postprocessors/value/expression="if(t>0, 100, 0)"
+                Postprocessors/value/use_t=true'
+    validation_test = validation_csv.py
+    validation_csv = validation_csv.csv
   []
 []

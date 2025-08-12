@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "MFEMBoundaryCondition.h"
@@ -20,15 +20,14 @@ public:
   MFEMIntegratedBC(const InputParameters & parameters);
   virtual ~MFEMIntegratedBC() = default;
 
-  // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
-  // caller.
+  /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
   virtual mfem::LinearFormIntegrator * createLFIntegrator() = 0;
 
-  // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
+  /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() = 0;
 
-  // Get name of the trial variable (gridfunction) the kernel acts on.
-  // Defaults to the name of the test variable labelling the weak form.
+  /// Get name of the trial variable (gridfunction) the kernel acts on.
+  /// Defaults to the name of the test variable labelling the weak form.
   virtual const std::string & getTrialVariableName() const { return _test_var_name; }
 };
 

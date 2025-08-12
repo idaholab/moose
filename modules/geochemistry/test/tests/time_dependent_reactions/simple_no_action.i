@@ -10,16 +10,8 @@
   dim = 1
 []
 
-[Variables]
-  [u]
-  []
-[]
-
-[Kernels]
-  [u]
-    type = Diffusion
-    variable = u
-  []
+[Problem]
+  solve = false
 []
 
 [AuxVariables]

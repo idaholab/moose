@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#3087'
+  issues = '#3087 #31052'
   design = 'SideValueSampler.md'
   [external]
     type = 'CSVDiff'
@@ -15,5 +15,13 @@
     requirement = 'The system shall be capable of sampling one or more field variables along an internal side at each quadrature point along the side.'
     cli_args = 'VectorPostprocessors/inactive=side_sample'
     allow_warnings = true # parsed sideset generation isn't fully supported on distributed meshes
+  []
+  [fv]
+    type = 'CSVDiff'
+    input = 'side_value_sampler_fv.i'
+    csvdiff = 'side_value_sampler_fv_vpp_csv_side_sample_0001.csv side_value_sampler_fv_vpp_csv_internal_sample_0001.csv'
+    requirement = 'The system shall be capable of sampling one or more finite volume field variables along internal and external boundaries at each element face along the specified boundary.'
+    allow_warnings = true # parsed sideset generation isn't fully supported on distributed meshes
+    max_threads = 1 # see libmesh issue #3808
   []
 []

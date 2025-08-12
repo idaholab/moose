@@ -37,9 +37,15 @@ public:
     DIVERGED = -1
   };
 
+  /// Iteration type
+  using IterationType = MooseEnumItem;
+
   Convergence(const InputParameters & parameters);
 
   virtual void initialSetup() override {}
+
+  /// Perform checks related to the iteration type
+  virtual void checkIterationType(IterationType /*it_type*/) const {}
 
   /**
    * Method that gets called before each iteration loop
@@ -54,7 +60,7 @@ public:
   /**
    * Returns convergence status.
    *
-   * @param[in] iter   Iteration index
+   * @param[in] iter   Iteration index (first index in loop should be 0)
    */
   virtual MooseConvergenceStatus checkConvergence(unsigned int iter) = 0;
 

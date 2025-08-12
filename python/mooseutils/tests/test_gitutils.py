@@ -71,10 +71,17 @@ class Test(unittest.TestCase):
         status_func.return_value = {'test':'-'}
 
         root = mooseutils.git_root_dir()
+        # Test default (without progress output)
         mooseutils.git_init_submodule('test', root)
 
         status_func.assert_called_with(root)
         call_func.assert_called_with(['git', 'submodule', 'update', '--init', 'test'], cwd=root)
+
+        # Test with progress output
+        mooseutils.git_init_submodule('test', root, True)
+
+        status_func.assert_called_with(root)
+        call_func.assert_called_with(['git', 'submodule', 'update', '--init', '--progress', 'test'], cwd=root)
 
     def testGitVersion(self):
         ver = mooseutils.git_version()

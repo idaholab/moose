@@ -57,6 +57,7 @@
     abs_zero = 1e-9
     requirement = 'Stress matches exact analytic solution for elastoplasticity with linear hardening'
     design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
+    capabilities = 'method!=dbg'
   []
   [elastoplastic_powerlaw_hardening]
     type = CSVDiff
@@ -67,5 +68,6 @@
     abs_zero = 1e-9
     requirement = 'Stress matches exact analytic solution for elastoplasticity with power-law hardening'
     design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
+    capabilities = 'method!=dbg'
   []
 []

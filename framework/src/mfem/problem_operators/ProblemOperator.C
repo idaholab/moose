@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "ProblemOperator.h"
 
@@ -17,7 +17,7 @@ namespace Moose::MFEM
 void
 ProblemOperator::SetGridFunctions()
 {
-  ProblemOperatorInterface::SetGridFunctions();
+  ProblemOperatorBase::SetGridFunctions();
   width = height = _block_true_offsets[_trial_variables.size()];
 }
 

@@ -66,8 +66,12 @@ def _check_node(node, file_cache, object_prefix, syntax_prefix, logger):
     # ERROR: object does not have a markdown file and is not removed
     if (not node.removed) and is_missing:
         msg = "{} is missing a markdown file.\n".format(node.fullpath())
-        msg += "  The page should be located at {}\n".format(md_path)
-        msg += "  A stub page can be created using using the './moosedocs.py generate' command"
+        if os.path.exists(md_path):
+            msg += "  This page exists locally at the expected location, but it is not yet tracked by git.\n"
+            msg += "  In this case, please track the new markdown page using 'git add {}'.".format(md_path)
+        else:
+            msg += "  The page should be located at {}.\n".format(md_path)
+            msg += "  A stub page can be created using the './moosedocs.py generate' command."
         logger.log('log_missing_markdown', msg)
 
     # ERROR: missing description

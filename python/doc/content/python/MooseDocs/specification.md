@@ -43,6 +43,7 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 | Extension | Description |
 | :- | :- |
 | [extensions/core.md] | Basic markdown syntax such as code blocks, lists, and bold text. |
+| [extensions/comment.md] | Provides means to make comments within markdown that will not be rendered. |
 | [extensions/autolink.md] | Automatic linking across pages within markdown. |
 | [extensions/table.md] | Provides means for implementing tables using traditional markdown format. |
 | [extensions/katex.md] | Enables use of KaTeX rendered equations. |

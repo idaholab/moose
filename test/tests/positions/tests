@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#23587 #30899'
+  issues = '#23587 #30899 #31026'
   design = 'syntax/Positions/index.md'
 
   [test]

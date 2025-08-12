@@ -135,16 +135,25 @@ std::vector<std::string> rsplit(const std::string & str,
                                 std::size_t max_count = std::numeric_limits<std::size_t>::max());
 
 /**
- * Python like join function for strings.
+ * Python-like join function for strings over an iterator range.
+ */
+template <typename Iterator>
+std::string
+join(Iterator begin, Iterator end, const std::string & delimiter)
+{
+  std::ostringstream oss;
+  std::copy(begin, end, infix_ostream_iterator<std::string>(oss, delimiter.c_str()));
+  return oss.str();
+}
+
+/**
+ * Python-like join function for strings over a container.
  */
 template <typename T>
 std::string
 join(const T & strings, const std::string & delimiter)
 {
-  std::ostringstream oss;
-  std::copy(
-      strings.begin(), strings.end(), infix_ostream_iterator<std::string>(oss, delimiter.c_str()));
-  return oss.str();
+  return join(strings.begin(), strings.end(), delimiter);
 }
 
 /**
@@ -625,6 +634,27 @@ relativeFuzzyLessThan(const T & var1,
       var1,
       var2,
       tol * (std::abs(MetaPhysicL::raw_value(var1)) + std::abs(MetaPhysicL::raw_value(var2)))));
+}
+
+/**
+ * Function which takes the union of \p vector1 and \p vector2 and copies them
+ * to \p common . Depending on the vector size and data type this can be very expensive!
+ */
+template <typename T>
+void
+getUnion(const std::vector<T> & vector1, const std::vector<T> & vector2, std::vector<T> & common)
+{
+  std::unordered_set<T> unique_elements;
+  unique_elements.reserve(vector1.size() + vector2.size());
+
+  for (const T & entry : vector1)
+    unique_elements.insert(entry);
+  for (const T & entry : vector2)
+    unique_elements.insert(entry);
+
+  // Now populate the common vector with the union
+  common.clear();
+  common.assign(unique_elements.begin(), unique_elements.end());
 }
 
 /**

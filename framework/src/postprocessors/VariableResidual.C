@@ -37,6 +37,8 @@ VariableResidual::VariableResidual(const InputParameters & parameters)
                                  Moose::VarKindType::VAR_SOLVER,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD))
 {
+  mooseDeprecated(
+      "VariableResidual is deprecated. Please use DiscreteVariableResidualNorm instead.");
 }
 
 void

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMVectorIC.h"
 #include "MFEMProblem.h"
@@ -30,7 +30,7 @@ MFEMVectorIC::MFEMVectorIC(const InputParameters & params) : MFEMInitialConditio
 void
 MFEMVectorIC::execute()
 {
-  auto & coeff = getVectorCoefficient(getParam<MFEMVectorCoefficientName>("coefficient"));
+  auto & coeff = getVectorCoefficient("coefficient");
   auto grid_function = getMFEMProblem().getGridFunction(getParam<VariableName>("variable"));
   grid_function->ProjectCoefficient(coeff);
 }

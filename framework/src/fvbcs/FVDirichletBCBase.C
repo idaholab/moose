@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVDirichletBCBase.h"
+#include "MooseVariableFV.h"
 
 InputParameters
 FVDirichletBCBase::validParams()
@@ -19,6 +20,7 @@ FVDirichletBCBase::validParams()
 }
 
 FVDirichletBCBase::FVDirichletBCBase(const InputParameters & parameters)
-  : FVBoundaryCondition(parameters)
+  : FVBoundaryCondition(parameters),
+    _var_sys_numbers_pair(std::make_pair(_var.number(), _var.sys().number()))
 {
 }

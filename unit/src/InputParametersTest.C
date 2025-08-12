@@ -851,3 +851,11 @@ TEST(InputParametersTest, commandLineParamKnownArg)
   for (const auto & v : switches)
     ASSERT_TRUE(have_cl_name(v));
 }
+
+TEST(InputParametersTest, checkIsParamDefined)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("test_param", "This parameter should be indicated as being defined");
+  ASSERT_TRUE(params.isParamDefined("test_param"));
+  ASSERT_FALSE(params.isParamDefined("some_other_param"));
+}

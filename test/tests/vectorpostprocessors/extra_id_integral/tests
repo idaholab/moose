@@ -1,6 +1,6 @@
 [Tests]
   design = 'vectorpostprocessors/ExtraIDIntegralVectorPostprocessor.md'
-  issues = '#19617 #27138'
+  issues = '#19617 #27138 #30975'
   [test]
     requirement = 'The system shall be able to integrate or average variables or material properties parsed by extra IDs'
     [default]
@@ -42,6 +42,30 @@
       cli_args = "VectorPostprocessors/integral/id_name='assembly_id pin_id' VectorPostprocessors/integral/variable='value1 value2' VectorPostprocessors/integral/mat_prop='mat1 mat2' VectorPostprocessors/integral/average=true Outputs/file_base='extra_id_vpp_vars_mats_average'"
       detail = 'with multiple variable and material property averages and multiple extra IDs'
       recover = false
+    []
+  []
+
+  [functor]
+    requirement = "The system shall be able to output integral or average values stored in a vector postprocessor, and indexed by extra element integers, into an elemental auxiliary field variable"
+    [test]
+      type = Exodiff
+      input = functor_test.i
+      cli_args = VectorPostprocessors/eeid/spatial_value_name=u
+      exodiff = functor_test_out.e
+      detail = "based on the element's extra element integers"
+    []
+    [block_restriction_error]
+      type = RunException
+      input = functor_test.i
+      cli_args = 'VectorPostprocessors/eeid/spatial_value_name=u VectorPostprocessors/eeid/block=1'
+      expect_err = 'Failed evaluating spatial value'
+      detail = "issue a meaningful error when the vector postprocessor is asked for values of elements outside of its restricted subdomain"
+    []
+    [missing_vector_name_error]
+      type = RunException
+      input = functor_test.i
+      expect_err = 'spatial_value_name: Must set when ExtraIDIntegralVectorPostprocessor is used as a functor'
+      detail = "issue an error when the vector postprocessor misses the name of quantity of interest"
     []
   []
 []

@@ -102,14 +102,17 @@ def git_submodule_info(working_dir=os.getcwd(), *args):
         out[match.group('name')] = (match.group('status'), match.group('sha1'), match.group('refs'))
     return out
 
-def git_init_submodule(path, working_dir=os.getcwd()):
+def git_init_submodule(path, working_dir=os.getcwd(), progress=False):
     """
     Check if given path is a submodule and initialize it (unless it already has been) if so.
     """
     status = git_submodule_info(working_dir)
     for submodule, status in status.items():
-        if (submodule == path) and ((status[0] == '-') or ('(null)' in status[2])):
+        if (submodule == path) and ((status[0] == '-') or ('(null)' in status[2])) and (progress == False):
             subprocess.call(['git', 'submodule', 'update', '--init', path], cwd=working_dir)
+            break
+        elif (submodule == path) and ((status[0] == '-') or ('(null)' in status[2])) and (progress == True):
+            subprocess.call(['git', 'submodule', 'update', '--init', '--progress', path], cwd=working_dir)
             break
 
 def git_version():

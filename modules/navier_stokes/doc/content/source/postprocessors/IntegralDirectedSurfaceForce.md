@@ -17,7 +17,7 @@ to compute representative drag and lift coefficients.
 
 In this case, the lift and drag coefficients are computed on the surface of a cylinder.
 
-!listing examples/flow-over-circle/executioner_postprocessor.i block=Postprocessors
+!listing examples/flow-over-circle/postprocessors.i block=Postprocessors
 
 !syntax parameters /Postprocessors/IntegralDirectedSurfaceForce
 

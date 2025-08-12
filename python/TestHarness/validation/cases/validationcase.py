@@ -68,6 +68,12 @@ class ValidationCase(MooseObject):
         # The current outputs from the test run, if any
         self._tester_outputs: Optional[list] = tester_outputs
 
+    def getOutputFiles(self) -> list[str]:
+        """
+        Get the output files that this validation case consumes
+        """
+        return []
+
     def addResult(self, status: Status, message: str, **kwargs) -> None:
         """
         Adds a validation result to the database.

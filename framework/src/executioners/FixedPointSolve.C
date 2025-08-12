@@ -17,6 +17,7 @@
 #include "Console.h"
 #include "EigenExecutionerBase.h"
 #include "Convergence.h"
+#include "ConvergenceIterationTypes.h"
 
 InputParameters
 FixedPointSolve::fixedPointDefaultConvergenceParams()
@@ -185,6 +186,18 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _problem.setNeedToAddDefaultMultiAppFixedPointConvergence();
 }
 
+void
+FixedPointSolve::initialSetup()
+{
+  SolveObject::initialSetup();
+
+  if (_has_fixed_point_its)
+  {
+    auto & conv = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
+    conv.checkIterationType(ConvergenceIterationTypes::MULTIAPP_FIXED_POINT);
+  }
+}
+
 bool
 FixedPointSolve::solve()
 {
@@ -228,13 +241,15 @@ FixedPointSolve::solve()
     }
 
     // To detect a new time step
-    if (_old_entering_time == _problem.time())
+    if (_old_entering_time == _problem.time() &&
+        _fixed_point_status != MooseFixedPointConvergenceReason::UNSOLVED)
     {
       // Keep track of the iteration number of the main app
       _main_fixed_point_it++;
 
       // Save variable values before the solve. Solving will provide new values
-      saveVariableValues(false);
+      if (!_app.isUltimateMaster())
+        saveVariableValues(/*is parent app of this iteration=*/false);
     }
     else
       _main_fixed_point_it = 0;
@@ -270,6 +285,8 @@ FixedPointSolve::solve()
     {
       if (_has_fixed_point_its)
       {
+        _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_ITERATION_END);
+
         // Examine convergence metrics & properties and set the convergence reason
         bool break_out = examineFixedPointConvergence(converged);
 
@@ -460,6 +477,8 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 bool
 FixedPointSolve::examineFixedPointConvergence(bool & converged)
 {
+  _problem.execute(EXEC_MULTIAPP_FIXED_POINT_CONVERGENCE);
+
   auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
   const auto status = convergence.checkConvergence(_fixed_point_it);
   switch (status)

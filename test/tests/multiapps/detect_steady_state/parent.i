@@ -60,7 +60,6 @@
     positions = '0 0 0'
     input_files = sub.i
     sub_cycling = true
-    steady_state_tol = 1e-5
     detect_steady_state = true
   [../]
 []

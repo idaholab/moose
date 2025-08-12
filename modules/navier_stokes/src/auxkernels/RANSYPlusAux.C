@@ -41,12 +41,12 @@ RANSYPlusAux::validParams()
 RANSYPlusAux::RANSYPlusAux(const InputParameters & params)
   : AuxKernel(params),
     _dim(_subproblem.mesh().dimension()),
-    _u_var(getFunctor<ADReal>("u")),
-    _v_var(params.isParamValid("v") ? &(getFunctor<ADReal>("v")) : nullptr),
-    _w_var(params.isParamValid("w") ? &(getFunctor<ADReal>("w")) : nullptr),
-    _k(params.isParamValid(NS::TKE) ? &(getFunctor<ADReal>(NS::TKE)) : nullptr),
-    _rho(getFunctor<ADReal>(NS::density)),
-    _mu(getFunctor<ADReal>(NS::mu)),
+    _u_var(getFunctor<Real>("u")),
+    _v_var(params.isParamValid("v") ? &(getFunctor<Real>("v")) : nullptr),
+    _w_var(params.isParamValid("w") ? &(getFunctor<Real>("w")) : nullptr),
+    _k(params.isParamValid(NS::TKE) ? &(getFunctor<Real>(NS::TKE)) : nullptr),
+    _rho(getFunctor<Real>(NS::density)),
+    _mu(getFunctor<Real>(NS::mu)),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _C_mu(getParam<Real>("C_mu"))
@@ -74,17 +74,16 @@ RANSYPlusAux::initialSetup()
 Real
 RANSYPlusAux::computeValue()
 {
-
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
   {
     const auto state = determineState();
     const auto elem_arg = makeElemArg(_current_elem);
     const auto rho = _rho(elem_arg, state);
     const auto mu = _mu(elem_arg, state);
-    ADReal y_plus;
+    Real y_plus;
     std::vector<Real> y_plus_vec;
 
-    ADRealVectorValue velocity(_u_var(elem_arg, state));
+    RealVectorValue velocity(_u_var(elem_arg, state));
     if (_v_var)
       velocity(1) = (*_v_var)(elem_arg, state);
     if (_w_var)
@@ -95,7 +94,7 @@ RANSYPlusAux::computeValue()
 
     for (unsigned int i = 0; i < distance_vec.size(); i++)
     {
-      const auto parallel_speed = NS::computeSpeed(
+      const auto parallel_speed = NS::computeSpeed<Real>(
           velocity - velocity * face_info_vec[i]->normal() * face_info_vec[i]->normal());
       const auto distance = distance_vec[i];
 
@@ -104,9 +103,9 @@ RANSYPlusAux::computeValue()
         y_plus = std::pow(_C_mu, 0.25) * distance * std::sqrt((*_k)(elem_arg, state)) * rho / mu;
       else
         // Equilibrium / Iterative
-        y_plus = NS::findyPlus(mu, rho, std::max(parallel_speed, 1e-10), distance);
+        y_plus = NS::findyPlus<Real>(mu, rho, std::max(parallel_speed, 1e-10), distance);
 
-      y_plus_vec.push_back(raw_value(y_plus));
+      y_plus_vec.push_back(y_plus);
     }
     // Return average of y+ for cells with multiple wall faces
     return std::accumulate(y_plus_vec.begin(), y_plus_vec.end(), 0.0) / y_plus_vec.size();

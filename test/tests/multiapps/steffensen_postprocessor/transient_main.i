@@ -50,6 +50,7 @@
     type = SideAverageValue
     variable = u
     boundary = right
+    execute_on = 'transfer timestep_end'
   []
   [average]
     type = ElementAverageValue

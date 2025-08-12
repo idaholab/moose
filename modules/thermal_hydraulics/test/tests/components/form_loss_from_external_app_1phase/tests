@@ -7,6 +7,7 @@
     exodiff = 'phy.form_loss_1phase.parent_out_child0.e'
     rel_err = 1e-10
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to compute a form loss using data transfered from a multiapp.'
   []
 []

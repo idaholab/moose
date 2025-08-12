@@ -32,15 +32,9 @@ class PetscJacobianTester(RunApp):
         params.valid['valgrind'] = 'NONE'
         params.valid['petsc_version'] = ['>=3.9.4']
         params.valid['method'] = ['OPT']
-
+        params['recover'] = False
+        params['restep'] = False
         return params
-
-    def checkRunnable(self, options):
-        if options.enable_recover:
-            self.addCaveats('PetscJacTester RECOVER')
-            self.setStatus(self.skip)
-            return False
-        return RunApp.checkRunnable(self, options)
 
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)

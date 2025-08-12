@@ -1,0 +1,61 @@
+{
+  "data": {
+    "value_0": {
+      "abs_zero": 1e-10,
+      "bounds": null,
+      "description": "Element average value, index 0",
+      "key": "value_0",
+      "nominal": 0.0,
+      "rel_err": 1e-06,
+      "test": "TestCase.test",
+      "type": "ValidationScalarData",
+      "units": null,
+      "value": 0.0
+    },
+    "value_1": {
+      "abs_zero": 1e-10,
+      "bounds": null,
+      "description": "Element average value, index 1",
+      "key": "value_1",
+      "nominal": 100.0,
+      "rel_err": 1e-06,
+      "test": "TestCase.test",
+      "type": "ValidationScalarData",
+      "units": null,
+      "value": 100.0
+    },
+    "value_last": {
+      "abs_zero": 1e-10,
+      "bounds": null,
+      "description": "Element average value, index -1",
+      "key": "value_last",
+      "nominal": 100.0,
+      "rel_err": 1e-06,
+      "test": "TestCase.test",
+      "type": "ValidationScalarData",
+      "units": null,
+      "value": 100.0
+    }
+  },
+  "results": [
+    {
+      "data_key": "value_0",
+      "message": "value 0.000E+00 relative error skipped due to absolute zero",
+      "status": "OK",
+      "test": "TestCase.test"
+    },
+    {
+      "data_key": "value_1",
+      "message": "value 1.000E+02 relative error 0.000E+00 < required 1.000E-06",
+      "status": "OK",
+      "test": "TestCase.test"
+    },
+    {
+      "data_key": "value_last",
+      "message": "value 1.000E+02 relative error 0.000E+00 < required 1.000E-06",
+      "status": "OK",
+      "test": "TestCase.test"
+    }
+  ],
+  "script": "../../../test/tests/test_harness/validation_csv.py"
+}

@@ -45,7 +45,4 @@ TimeSequenceStepperFailTest::step()
                    << std::endl);
     _converged = false;
   }
-
-  if (converged())
-    _current_step++;
 }

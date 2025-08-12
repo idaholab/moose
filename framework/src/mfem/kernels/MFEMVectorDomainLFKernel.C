@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMVectorDomainLFKernel.h"
 #include "MFEMProblem.h"
@@ -27,8 +27,7 @@ MFEMVectorDomainLFKernel::validParams()
 }
 
 MFEMVectorDomainLFKernel::MFEMVectorDomainLFKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters),
-    _vec_coef(getVectorCoefficient(getParam<MFEMVectorCoefficientName>("vector_coefficient")))
+  : MFEMKernel(parameters), _vec_coef(getVectorCoefficient("vector_coefficient"))
 {
 }
 

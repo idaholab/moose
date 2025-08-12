@@ -12,7 +12,7 @@ another part of the mesh. It will throw an error if the extrusion vector would c
 
 !alert warning
 The output will have no sidesets, even the sideset which served for extrusion will be removed.
-The user is expected to use the other sideset generating generators on the output if sidesets are needed. 
+The user is expected to use the other sideset generating generators on the output if sidesets are needed.
 
 ## Visual Example
 
@@ -29,12 +29,12 @@ SideSetExtruderGenerator is actually a mere wrapper of 4 other generators:
 - a [LowerDBlockFromSidesetGenerator](LowerDBlockFromSidesetGenerator.md) to generate a block from the sideset
 - a [BlockToMeshConverterGenerator](BlockToMeshConverterGenerator.md) to generate a block with the mesh
 - a [MeshExtruderGenerator](MeshExtruderGenerator.md) to extrude the new mesh
-- a [StitchedMeshGenerator](StitchedMeshGenerator.md) to stitch the original mesh and the extruded mesh.
+- a [StitchMeshGenerator](StitchMeshGenerator.md) to stitch the original mesh and the extruded mesh.
 
 
 As such, the `SideSetExtruderGenerator` is exactly equivalent to the output of a recipe similar to the one below.
 If you are needing to tweak the output of `SideSetExtruderGenerator`, it may be preferable to use these generators
-instead. `SideSetExtruderGenerator` uses the default parameters of these sub-generators. 
+instead. `SideSetExtruderGenerator` uses the default parameters of these sub-generators.
 
 !listing test/tests/meshgenerators/sideset_extruder_generator/extrude_square.i
 

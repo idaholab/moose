@@ -100,6 +100,9 @@
     input = 'stateful_prop_copy_test.i'
     exodiff = 'out_stateful_copy.e'
     max_parallel = 1
+    # There currently isn't a way to undo a stateful material copy when
+    # trying to re-do the timestep where it happened
+    restep = false
 
     requirement = 'The system shall support the ability to copy stored stateful data from one '
                   'element to another element.'

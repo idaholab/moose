@@ -5,6 +5,7 @@
     type = 'CSVDiff'
     input = 'count_iterations.i'
     csvdiff = 'count_iterations_out.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to automatically count the number of solve iterations as a debugging feature.'
   []
 []

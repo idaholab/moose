@@ -4,7 +4,7 @@
 
 ## Overview
 
-<!-- -->
+!! Intentional comment for spacing
 
 This IC creates an initial field for the subchannel surface area ([!param](/ICs/MarvelTriFlowAreaIC/variable) = `S`), for a MARVEL-type reactor core.
 

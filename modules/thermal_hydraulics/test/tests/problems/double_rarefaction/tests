@@ -10,6 +10,7 @@
     abs_zero = 1e-10
     rel_err = 1e-5
     max_parallel = 1
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve with 1D single phase compresible flow a Riemann problem with a double rarefaction solution.'
   []
 []

@@ -1420,11 +1420,8 @@ protected:
   /// Vector of array coupled variables
   std::vector<ArrayMooseVariable *> _coupled_array_moose_vars;
 
-  /// Vector of standard finite volume coupled variables
-  std::vector<MooseVariableFV<Real> *> _coupled_standard_fv_moose_vars;
-
-  /// Vector of standard linear finite volume coupled variables
-  std::vector<MooseLinearVariableFV<Real> *> _coupled_standard_linear_fv_moose_vars;
+  /// Vector of all finite volume coupled variables
+  std::vector<MooseVariableField<Real> *> _coupled_fv_moose_vars;
 
   /// map from new to deprecated variable names
   const std::unordered_map<std::string, std::string> & _new_to_deprecated_coupled_vars;
@@ -1858,7 +1855,7 @@ Coupleable::getVarHelper(const std::string & var_name_in, unsigned int comp)
       if (var->name() == name_to_use)
         mooseError("The named variable is an array variable, try a "
                    "'coupledArray[Value/Gradient/Dot/etc]...' function instead");
-    for (auto & var : _coupled_standard_fv_moose_vars)
+    for (auto & var : _coupled_fv_moose_vars)
       if (var->name() == name_to_use)
         mooseError("The named variable is a finite volume variable, which the coupled[...] routine "
                    "used does not support. Try using the functor system routines instead.");

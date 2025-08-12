@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "ProblemOperator.h"
@@ -19,14 +19,14 @@ namespace Moose::MFEM
 class EquationSystemProblemOperator : public ProblemOperator, public EquationSystemInterface
 {
 public:
-  EquationSystemProblemOperator(MFEMProblemData & problem)
-    : ProblemOperator(problem), _equation_system(problem.eqn_system)
+  EquationSystemProblemOperator(MFEMProblem & problem)
+    : ProblemOperator(problem), _equation_system(_problem_data.eqn_system)
   {
   }
 
   void SetGridFunctions() override;
   void Init(mfem::BlockVector & X) override;
-  virtual void Solve(mfem::Vector & X) override;
+  virtual void Solve() override;
 
   [[nodiscard]] Moose::MFEM::EquationSystem * GetEquationSystem() const override
   {

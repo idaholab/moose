@@ -7,16 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMGradAux.h"
 #include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMGradAux);
 
-/*
-Class to set an H(curl) auxvariable to be the gradient of a H1 scalar variable.
-*/
 InputParameters
 MFEMGradAux::validParams()
 {

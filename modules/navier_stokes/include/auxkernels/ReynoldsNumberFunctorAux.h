@@ -25,11 +25,11 @@ protected:
   Real computeValue() override;
 
   /// The fluid speed
-  const Moose::Functor<ADReal> & _speed;
+  const Moose::Functor<Real> & _speed;
   /// The fluid density
-  const Moose::Functor<ADReal> & _rho;
+  const Moose::Functor<Real> & _rho;
   /// The fluid dynamic viscosity
-  const Moose::Functor<ADReal> & _mu;
+  const Moose::Functor<Real> & _mu;
   /// Whether to use a quadrature-based argument to evaluate the functors
   const bool _use_qp_arg;
 };

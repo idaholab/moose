@@ -1,0 +1,318 @@
+[Tests]
+  # Testing summary
+  # Input                        Wall function           Solver         Energy   Energy wall function
+  # lid-driven-turb-std-wall.i      std                  segregated     no
+  # lid-driven-turb-std-wall.i      std + bulk-wall      segregated     no
+  # lid-driven-turb-non-eq-wall.i   non-eq               segregated     no
+  # lid-driven-turb-linear-wall.i   linear               segregated     no
+  # lid-driven-turb-inc-wall.i      incremental          segregated     no
+  # lid-driven-turb-no-wall.i       none                 segregated     no
+  # lid-driven-turb-no-wall.i       none in log regime   segregated     no
+  # lid-driven-turb-non-eq-bulk.i   non-eq-bulk          segregated     no
+  # lid-driven-turb-energy.i        std                  segregated     yes      none
+  # lid-driven-turb-energy-wall.i   std                  segregated     yes      log-regime
+  # lid-driven-turb-energy-wall.i   linear               segregated     yes      linear
+  # lid-driven-turb-energy-wall.i   std in log region    segregated     yes      incremental
+  # lid-driven-turb-capped.i        std + capped mixing  segregated     no
+  design = 'INSFVTurbulentAdvection.md INSFVTurbulentDiffusion.md INSFVTKESourceSink.md INSFVTKEDSourceSink.md INSFVTurbulentViscosityWallFunction.md kEpsilonViscosityAux.md'
+  issues = '#9007'
+  [lid_driven_turb_std_wall]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with standard wall functions, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-std-wall.i'
+      csvdiff = 'lid-driven-turb-std-wall_out_horizontal_center_0001.csv lid-driven-turb-std-wall_out_side_left_0001.csv  lid-driven-turb-std-wall_out_side_top_0001.csv
+                 lid-driven-turb-std-wall_out_side_bottom_0001.csv       lid-driven-turb-std-wall_out_side_right_0001.csv lid-driven-turb-std-wall_out_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-std-wall.i'
+      csvdiff = 'lid-driven-turb-std-wall_short_horizontal_center_0001.csv lid-driven-turb-std-wall_short_side_left_0001.csv  lid-driven-turb-std-wall_short_side_top_0001.csv
+                 lid-driven-turb-std-wall_short_side_bottom_0001.csv       lid-driven-turb-std-wall_short_side_right_0001.csv lid-driven-turb-std-wall_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-std-wall_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_std_wall_bulk]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with standard wall functions using bulk wall treatment for the turbulent viscosity, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-std-wall.i'
+      csvdiff = 'bulk_treatment_horizontal_center_0001.csv bulk_treatment_side_left_0001.csv  bulk_treatment_side_top_0001.csv
+                 bulk_treatment_side_bottom_0001.csv       bulk_treatment_side_right_0001.csv bulk_treatment_vertical_center_0001.csv'
+      detail = ' and reach converged results with segregated solvers.'
+      cli_args = 'bulk_wall_treatment=true mu=1e-3 Outputs/file_base=bulk_treatment'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-std-wall.i'
+      csvdiff = 'bulk_treatment_short_horizontal_center_0001.csv bulk_treatment_short_side_left_0001.csv  bulk_treatment_short_side_top_0001.csv
+                 bulk_treatment_short_side_bottom_0001.csv       bulk_treatment_short_side_right_0001.csv bulk_treatment_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 bulk_wall_treatment=true mu=1e-3 Outputs/file_base=bulk_treatment_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_no_ts_limiter]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with the time scale limiter deactivated, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-std-wall.i'
+      csvdiff = 'no_time_scale_limiter_horizontal_center_0001.csv no_time_scale_limiter_side_left_0001.csv  no_time_scale_limiter_side_top_0001.csv
+                 no_time_scale_limiter_side_bottom_0001.csv       no_time_scale_limiter_side_right_0001.csv no_time_scale_limiter_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      cli_args = 'AuxKernels/compute_mu_t/scale_limiter="none" Outputs/file_base=no_time_scale_limiter'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-std-wall.i'
+      csvdiff = 'no_time_scale_limiter_short_horizontal_center_0001.csv no_time_scale_limiter_short_side_left_0001.csv  no_time_scale_limiter_short_side_top_0001.csv
+                 no_time_scale_limiter_short_side_bottom_0001.csv       no_time_scale_limiter_short_side_right_0001.csv no_time_scale_limiter_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks.'
+      cli_args = 'AuxKernels/compute_mu_t/scale_limiter="none" Executioner/num_iterations=10 Outputs/file_base=no_time_scale_limiter_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_non_eq_wall]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with non-equilibrium wall functions, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-non-eq-wall.i'
+      csvdiff = 'lid-driven-turb-non-eq-wall_out_horizontal_center_0001.csv lid-driven-turb-non-eq-wall_out_side_left_0001.csv  lid-driven-turb-non-eq-wall_out_side_top_0001.csv
+                 lid-driven-turb-non-eq-wall_out_side_bottom_0001.csv       lid-driven-turb-non-eq-wall_out_side_right_0001.csv lid-driven-turb-non-eq-wall_out_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-non-eq-wall.i'
+      csvdiff = 'lid-driven-turb-non-eq-wall_short_horizontal_center_0001.csv lid-driven-turb-non-eq-wall_short_side_left_0001.csv  lid-driven-turb-non-eq-wall_short_side_top_0001.csv
+                 lid-driven-turb-non-eq-wall_short_side_bottom_0001.csv       lid-driven-turb-non-eq-wall_short_side_right_0001.csv lid-driven-turb-non-eq-wall_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-non-eq-wall_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_linear_wall]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with linear wall functions, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-linear-wall.i'
+      csvdiff = 'lid-driven-turb-linear-wall_out_horizontal_center_0001.csv lid-driven-turb-linear-wall_out_side_left_0001.csv  lid-driven-turb-linear-wall_out_side_top_0001.csv
+                 lid-driven-turb-linear-wall_out_side_bottom_0001.csv       lid-driven-turb-linear-wall_out_side_right_0001.csv lid-driven-turb-linear-wall_out_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-linear-wall.i'
+      csvdiff = 'lid-driven-turb-linear-wall_short_horizontal_center_0001.csv lid-driven-turb-linear-wall_short_side_left_0001.csv  lid-driven-turb-linear-wall_short_side_top_0001.csv
+                 lid-driven-turb-linear-wall_short_side_bottom_0001.csv       lid-driven-turb-linear-wall_short_side_right_0001.csv lid-driven-turb-linear-wall_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks.'
+      abs_zero = 1e-6
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-linear-wall_short'
+    []
+  []
+  [lid_driven_turb_inc_wall]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with incremental wall functions, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-inc-wall.i'
+      csvdiff = 'lid-driven-turb-inc-wall_out_horizontal_center_0001.csv lid-driven-turb-inc-wall_out_side_left_0001.csv  lid-driven-turb-inc-wall_out_side_top_0001.csv
+                 lid-driven-turb-inc-wall_out_side_bottom_0001.csv       lid-driven-turb-inc-wall_out_side_right_0001.csv lid-driven-turb-inc-wall_out_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-inc-wall.i'
+      csvdiff = 'lid-driven-turb-inc-wall_short_horizontal_center_0001.csv lid-driven-turb-inc-wall_short_side_left_0001.csv  lid-driven-turb-inc-wall_short_side_top_0001.csv
+                 lid-driven-turb-inc-wall_short_side_bottom_0001.csv       lid-driven-turb-inc-wall_short_side_right_0001.csv lid-driven-turb-inc-wall_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks.'
+      abs_zero = 1e-6
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-inc-wall_short'
+    []
+  []
+  [lid_driven_turb_no_wall_log_first_layer]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with no wall treatment and the first cell in the logarithmic regime, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-no-wall.i'
+      csvdiff = 'no_wall_log_layer_horizontal_center_0001.csv no_wall_log_layer_side_left_0001.csv  no_wall_log_layer_side_top_0001.csv
+                 no_wall_log_layer_side_bottom_0001.csv       no_wall_log_layer_side_right_0001.csv no_wall_log_layer_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      cli_args = 'lid_velocity=10.0 Executioner/num_iterations=2000 Mesh/gen/nx=8 Mesh/gen/ny=8 Outputs/file_base=no_wall_log_layer'
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-no-wall.i'
+      csvdiff = 'no_wall_log_layer_short_horizontal_center_0001.csv no_wall_log_layer_short_side_left_0001.csv  no_wall_log_layer_short_side_top_0001.csv
+                 no_wall_log_layer_short_side_bottom_0001.csv       no_wall_log_layer_short_side_right_0001.csv no_wall_log_layer_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks.'
+      abs_zero = 1e-6
+      cli_args = 'Executioner/num_iterations=10 lid_velocity=10.0 Mesh/gen/nx=8 Mesh/gen/ny=8 Outputs/file_base=no_wall_log_layer_short'
+    []
+  []
+  [lid_driven_turb_no_wall]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with no wall treatment, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-no-wall.i'
+      csvdiff = 'lid-driven-turb-no-wall_out_horizontal_center_0001.csv lid-driven-turb-no-wall_out_side_left_0001.csv  lid-driven-turb-no-wall_out_side_top_0001.csv
+                 lid-driven-turb-no-wall_out_side_bottom_0001.csv       lid-driven-turb-no-wall_out_side_right_0001.csv lid-driven-turb-no-wall_out_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-no-wall.i'
+      csvdiff = 'lid-driven-turb-no-wall_short_horizontal_center_0001.csv lid-driven-turb-no-wall_short_side_left_0001.csv  lid-driven-turb-no-wall_short_side_top_0001.csv
+                 lid-driven-turb-no-wall_short_side_bottom_0001.csv       lid-driven-turb-no-wall_short_side_right_0001.csv lid-driven-turb-no-wall_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks.'
+      abs_zero = 1e-6
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-no-wall_short'
+    []
+  []
+  [lid_driven_turb_non_eq_bulk]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with non-equilibrium bulk treatment, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-non-eq-bulk.i'
+      csvdiff = 'lid-driven-turb-non-eq-bulk_out_horizontal_center_0001.csv lid-driven-turb-non-eq-bulk_out_side_left_0001.csv  lid-driven-turb-non-eq-bulk_out_side_top_0001.csv
+                 lid-driven-turb-non-eq-bulk_out_side_bottom_0001.csv       lid-driven-turb-non-eq-bulk_out_side_right_0001.csv lid-driven-turb-non-eq-bulk_out_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-non-eq-bulk.i'
+      csvdiff = 'lid-driven-turb-non-eq-bulk_short_horizontal_center_0001.csv lid-driven-turb-non-eq-bulk_short_side_left_0001.csv  lid-driven-turb-non-eq-bulk_short_side_top_0001.csv
+                 lid-driven-turb-non-eq-bulk_short_side_bottom_0001.csv       lid-driven-turb-non-eq-bulk_short_side_right_0001.csv lid-driven-turb-non-eq-bulk_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks.'
+      abs_zero = 1e-6
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-non-eq-bulk_short'
+    []
+  []
+  [lid_driven_turb_energy]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with transported energy, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-energy.i'
+      csvdiff = 'lid-driven-turb-energy_out_horizontal_center_0001.csv lid-driven-turb-energy_out_side_left_0001.csv  lid-driven-turb-energy_out_side_top_0001.csv
+                 lid-driven-turb-energy_out_side_bottom_0001.csv       lid-driven-turb-energy_out_side_right_0001.csv lid-driven-turb-energy_out_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-energy.i'
+      csvdiff = 'lid-driven-turb-energy_short_horizontal_center_0001.csv lid-driven-turb-energy_short_side_left_0001.csv  lid-driven-turb-energy_short_side_top_0001.csv
+                 lid-driven-turb-energy_short_side_bottom_0001.csv       lid-driven-turb-energy_short_side_right_0001.csv lid-driven-turb-energy_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks.'
+      abs_zero = 1e-6
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-energy_short'
+    []
+  []
+  [lid_driven_turb_energy_wall]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with temperature wall functions, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-energy-wall.i'
+      csvdiff = 'lid-driven-turb-energy-wall_out_horizontal_center_0001.csv lid-driven-turb-energy-wall_out_side_left_0001.csv  lid-driven-turb-energy-wall_out_side_top_0001.csv
+                 lid-driven-turb-energy-wall_out_side_bottom_0001.csv       lid-driven-turb-energy-wall_out_side_right_0001.csv lid-driven-turb-energy-wall_out_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-energy-wall.i'
+      csvdiff = 'lid-driven-turb-energy-wall_short_horizontal_center_0001.csv lid-driven-turb-energy-wall_short_side_left_0001.csv  lid-driven-turb-energy-wall_short_side_top_0001.csv
+                 lid-driven-turb-energy-wall_short_side_bottom_0001.csv       lid-driven-turb-energy-wall_short_side_right_0001.csv lid-driven-turb-energy-wall_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks,'
+      abs_zero = 1e-6
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-energy-wall_short'
+    []
+  []
+  [lid_driven_turb_energy_wall_linear]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with linearized temperature wall functions, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-energy-wall.i'
+      csvdiff = 'linear_temperature_wall_function_horizontal_center_0001.csv linear_temperature_wall_function_side_left_0001.csv  linear_temperature_wall_function_side_top_0001.csv
+                 linear_temperature_wall_function_side_bottom_0001.csv       linear_temperature_wall_function_side_right_0001.csv linear_temperature_wall_function_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      cli_args = 'wall_treatment_T="eq_linearized" wall_treatment_T="eq_linearized" Outputs/file_base=linear_temperature_wall_function'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-energy-wall.i'
+      csvdiff = 'linear_temperature_wall_function_short_horizontal_center_0001.csv linear_temperature_wall_function_short_side_left_0001.csv  linear_temperature_wall_function_short_side_top_0001.csv
+                 linear_temperature_wall_function_short_side_bottom_0001.csv       linear_temperature_wall_function_short_side_right_0001.csv linear_temperature_wall_function_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 wall_treatment_T="eq_linearized" wall_treatment_T="eq_linearized" Outputs/file_base=linear_temperature_wall_function_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_energy_wall_log]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with temperature wall functions in the log-layer regime, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-energy-wall.i'
+      csvdiff = 'temperature_wall_function_log_horizontal_center_0001.csv temperature_wall_function_log_side_left_0001.csv  temperature_wall_function_log_side_top_0001.csv
+                 temperature_wall_function_log_side_bottom_0001.csv       temperature_wall_function_log_side_right_0001.csv temperature_wall_function_log_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      cli_args = 'lid_velocity=10.0 Mesh/gen/nx=8 Mesh/gen/ny=8 Outputs/file_base=temperature_wall_function_log'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-energy-wall.i'
+      csvdiff = 'temperature_wall_function_log_short_horizontal_center_0001.csv temperature_wall_function_log_short_side_left_0001.csv  temperature_wall_function_log_short_side_top_0001.csv
+                 temperature_wall_function_log_short_side_bottom_0001.csv       temperature_wall_function_log_short_side_right_0001.csv temperature_wall_function_log_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks.'
+      cli_args = 'Executioner/num_iterations=10 lid_velocity=10.0 Mesh/gen/nx=8 Mesh/gen/ny=8 Outputs/file_base=temperature_wall_function_log_short'
+      abs_zero = 1e-6
+    []
+  []
+  [lid_driven_turb_capped]
+    requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with capped production, '
+    [result]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-capped.i'
+      csvdiff = 'lid-driven-turb-capped_out_horizontal_center_0001.csv lid-driven-turb-capped_out_side_left_0001.csv  lid-driven-turb-capped_out_side_top_0001.csv
+                 lid-driven-turb-capped_out_side_bottom_0001.csv       lid-driven-turb-capped_out_side_right_0001.csv lid-driven-turb-capped_out_vertical_center_0001.csv'
+      detail = 'and reach converged results with segregated solvers.'
+      abs_zero = 1e-6
+      heavy = true
+    []
+    [run]
+      type = 'CSVDiff'
+      input = 'lid-driven-turb-capped.i'
+      csvdiff = 'lid-driven-turb-capped_short_horizontal_center_0001.csv lid-driven-turb-capped_short_side_left_0001.csv  lid-driven-turb-capped_short_side_top_0001.csv
+                 lid-driven-turb-capped_short_side_bottom_0001.csv       lid-driven-turb-capped_short_side_right_0001.csv lid-driven-turb-capped_short_vertical_center_0001.csv'
+      detail = 'and pass debugging checks,'
+      abs_zero = 1e-6
+      cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-capped_short'
+    []
+  []
+[]

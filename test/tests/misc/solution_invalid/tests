@@ -77,6 +77,7 @@
     cli_args = "Executioner/type=Transient Executioner/num_steps=1 Executioner/dtmin=1e-13 Executioner/error_on_dtmin=false Outputs/file_base='solution_invalid_transient' "
     jsondiff = 'solution_invalid_transient.json'
     hpc = false # iteration counts can be MPI dependent
+    restep = false # Test will be repeating its own time steps
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output detailed information about why a solution is invalid to a file in transient simulations'
@@ -121,6 +122,9 @@
       input = solution_invalid_recover.i
       jsondiff = 'solution_invalid_checkpoint.json'
       hpc = false # iteration counts can be MPI dependent
+      # SolutionInvalidityReporter accumulates values, so repeating a timestep makes the object stateful.
+      # The object is meant to keep its state across failed timesteps, though.
+      restep = false
       cli_args = "Outputs/file_base='solution_invalid_checkpoint' Outputs/checkpoint=true"
       detail = 'outputting of checkpoint files'
     []
@@ -134,6 +138,9 @@
       cli_args = "--recover solution_invalid_checkpoint_cp/0003 Outputs/file_base='solution_invalid_recover' Executioner/num_steps=4 Outputs/json=true"
       jsondiff = 'solution_invalid_recover.json'
       prereq = 'test/solution_valid_checkpoint'
+      # SolutionInvalidityReporter accumulates values, so repeating a timestep makes the object stateful.
+      # The object is meant to keep its state across failed timesteps, though.
+      restep = false
       detail = 'restarting from the output data'
     []
   []

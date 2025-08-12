@@ -64,6 +64,7 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('library_mode',  ['ALL'], "A test that only runs when libraries are built under certain configurations ('ALL', 'STATIC', 'DYNAMIC')")
         params.addParam('unique_ids',    ['ALL'], "Deprecated. Use unique_id instead.")
         params.addParam('recover',       True,    "A test that runs with '--recover' mode enabled")
+        params.addParam('restep',        True,    "A test that can run with --test-restep")
         params.addParam('vtk',           ['ALL'], "A test that runs only if VTK is detected ('ALL', 'TRUE', 'FALSE')")
         params.addParam('tecplot',       ['ALL'], "A test that runs only if Tecplot is detected ('ALL', 'TRUE', 'FALSE')")
         params.addParam('dof_id_bytes',  ['ALL'], "A test that runs only if libmesh is configured --with-dof-id-bytes = a specific number, e.g. '4', '8'")
@@ -83,7 +84,6 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('libpng',        ['ALL'], "A test that runs only if libpng is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch',      ['ALL'], "A test that runs only if libtorch is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch_version', ['ALL'], "A list of libtorch versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-        params.addParam('mfem', ['ALL'], "A test that runs only if mfem is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('installation_type',['ALL'], "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')")
 
         params.addParam('capabilities',      "", "A test that only runs if all listed capabilities are supported by the executable")
@@ -238,6 +238,7 @@ class Tester(MooseObject, OutputInterface):
         # Paths to additional JSON metadata that can be collected
         self.json_metadata: dict[str, Tester.JSONMetadata] = {}
 
+        # The validation classes the user specified
         self._validation_classes = self.parameters()['_validation_classes']
 
     def getStatus(self):
@@ -289,12 +290,10 @@ class Tester(MooseObject, OutputInterface):
 
     def getResults(self, options) -> dict:
         """Get the results dict for this Tester"""
-        output_files = [os.path.join(self.getTestDir(), file) for file in self.getOutputFiles(options)]
         json_metadata = {k: os.path.join(self.getTestDir(), v.path) if v else None for k, v in self.json_metadata.items()}
         return {'name': self.__class__.__name__,
                 'command': self.getCommand(options),
                 'input_file': self.getInputFile(),
-                'output_files': output_files,
                 'json_metadata': json_metadata}
 
     def getStatusMessage(self):
@@ -573,7 +572,29 @@ class Tester(MooseObject, OutputInterface):
         """
         reasons = {}
         checks = options._checks
-        capabilities = options._capabilities
+
+        # augment capabilities of the application with specs of the current tester
+        if options._capabilities is not None:
+            capabilities = options._capabilities.copy()
+            def augment(key, val_doc):
+                if key in capabilities:
+                    raise ValueError(f"Capability {key} is defined by the app, but it is a reserved dynamic test harness capability. This is an application bug.")
+                capabilities[key] = val_doc
+
+            # NOTE: If you add to this list, add the capability name as a reserved
+            # capability within MooseApp::checkReservedCapability()
+            augment('scale_refine', [options.scaling, 'The number of refinements to do when scaling'])
+            if options.valgrind_mode == '':
+                augment('valgrind', [False, 'Not running with valgrind'])
+            else:
+                augment('valgrind', [options.valgrind_mode.lower(), 'Performing valgrind testing'])
+            augment('recover', [options.enable_recover, 'Recover testing'])
+            augment('heavy', [options.all_tests or options.heavy_tests, 'Running with heavy tests'])
+            augment('mpi_procs', [self.getProcs(options), 'Number of MPI processes'])
+            augment('num_threads', [self.getThreads(options), 'Number of threads'])
+            augment('compute_device', [options.compute_device, 'Compute device'])
+        else:
+            capabilities = None
 
         tag_match = False
         for t in self.tags:
@@ -653,6 +674,8 @@ class Tester(MooseObject, OutputInterface):
         # If we're running in recover mode skip tests that have recover = false
         elif options.enable_recover and self.specs['recover'] == False:
             reasons['recover'] = 'NO RECOVER'
+        elif options.enable_restep and self.specs['restep'] == False:
+            reasons['restep'] = 'NO RESTEP'
 
         # AD size check
         min_ad_size = self.specs['min_ad_size']
@@ -714,7 +737,7 @@ class Tester(MooseObject, OutputInterface):
                         'unique_ids', 'vtk', 'tecplot', 'petsc_debug', 'curl', 'superlu', 'mumps',
                         'strumpack', 'unique_id', 'slepc',
                         'boost', 'fparser_jit', 'parmetis', 'chaco', 'party', 'ptscotch',
-                        'threading', 'libpng', 'libtorch', 'mfem']
+                        'threading', 'libpng', 'libtorch']
 
         for check in local_checks:
             test_platforms = set()

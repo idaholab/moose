@@ -13,17 +13,17 @@
 #include "LinearFVElementalKernel.h"
 #include "FEProblemBase.h"
 
-ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(
-    FEProblemBase & fe_problem,
-    const unsigned int linear_system_num,
-    const Moose::FV::LinearFVComputationMode mode,
-    const std::set<TagID> & tags)
+ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(FEProblemBase & fe_problem,
+                                                               const unsigned int system_num,
+                                                               const std::set<TagID> & vector_tags,
+                                                               const std::set<TagID> & matrix_tags)
   : _fe_problem(fe_problem),
-    _linear_system_number(linear_system_num),
-    _mode(mode),
-    _tags(tags),
+    _system_number(system_num),
+    _vector_tags(vector_tags),
+    _matrix_tags(matrix_tags),
     _subdomain(Moose::INVALID_BLOCK_ID),
-    _old_subdomain(Moose::INVALID_BLOCK_ID)
+    _old_subdomain(Moose::INVALID_BLOCK_ID),
+    _system_contrib_objects_ready(false)
 {
 }
 
@@ -31,11 +31,12 @@ ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(
 ComputeLinearFVElementalThread::ComputeLinearFVElementalThread(ComputeLinearFVElementalThread & x,
                                                                Threads::split /*split*/)
   : _fe_problem(x._fe_problem),
-    _linear_system_number(x._linear_system_number),
-    _mode(x._mode),
-    _tags(x._tags),
+    _system_number(x._system_number),
+    _vector_tags(x._vector_tags),
+    _matrix_tags(x._matrix_tags),
     _subdomain(x._subdomain),
-    _old_subdomain(x._old_subdomain)
+    _old_subdomain(x._old_subdomain),
+    _system_contrib_objects_ready(x._system_contrib_objects_ready)
 {
 }
 
@@ -47,6 +48,7 @@ ComputeLinearFVElementalThread::operator()(const ElemInfoRange & range)
 
   _old_subdomain = Moose::INVALID_BLOCK_ID;
 
+  setupSystemContributionObjects();
   printGeneralExecutionInformation();
 
   // Iterate over all the elements in the range
@@ -55,21 +57,19 @@ ComputeLinearFVElementalThread::operator()(const ElemInfoRange & range)
     _subdomain = elem_info->subdomain_id();
     if (_subdomain != _old_subdomain)
     {
-      fetchSystemContributionObjects();
+      fetchBlockSystemContributionObjects();
       printBlockExecutionInformation();
     }
 
     const Real elem_volume = elem_info->volume() * elem_info->coordFactor();
+
+    // Time to add the contributions from the kernels
     for (auto kernel : _fv_kernels)
     {
       kernel->setCurrentElemInfo(elem_info);
       kernel->setCurrentElemVolume(elem_volume);
-      if (_mode == Moose::FV::LinearFVComputationMode::Matrix ||
-          _mode == Moose::FV::LinearFVComputationMode::FullSystem)
-        kernel->addMatrixContribution();
-      if (_mode == Moose::FV::LinearFVComputationMode::RHS ||
-          _mode == Moose::FV::LinearFVComputationMode::FullSystem)
-        kernel->addRightHandSideContribution();
+      kernel->addMatrixContribution();
+      kernel->addRightHandSideContribution();
     }
   }
 }
@@ -80,25 +80,71 @@ ComputeLinearFVElementalThread::join(const ComputeLinearFVElementalThread & /*y*
 }
 
 void
-ComputeLinearFVElementalThread::fetchSystemContributionObjects()
+ComputeLinearFVElementalThread::setupSystemContributionObjects()
 {
-  const auto system_number = _fe_problem.getLinearSystem(_linear_system_number).number();
-  _fv_kernels.clear();
+  // The reason why we need to grab vectors and matrices separately is that
+  // we want to grab a union instead of an intersection.
+  std::vector<LinearFVElementalKernel *> kernels_after_vectors;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(_system_number)
+      .template condition<AttribSystem>("LinearFVElementalKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_vector_tags)
+      .queryInto(kernels_after_vectors);
+
+  std::vector<LinearFVElementalKernel *> kernels_after_matrices;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(_system_number)
+      .template condition<AttribSystem>("LinearFVElementalKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribMatrixTags>(_matrix_tags)
+      .queryInto(kernels_after_matrices);
+
+  // We fetch the union of the available objects
   std::vector<LinearFVElementalKernel *> kernels;
-  auto base_query = _fe_problem.theWarehouse()
-                        .query()
-                        .template condition<AttribSysNum>(system_number)
-                        .template condition<AttribSubdomains>(_subdomain)
-                        .template condition<AttribSystem>("LinearFVElementalKernel")
-                        .template condition<AttribThread>(_tid);
+  MooseUtils::getUnion(kernels_after_vectors, kernels_after_matrices, kernels);
 
-  if (_mode == Moose::FV::LinearFVComputationMode::Matrix)
-    base_query.condition<AttribMatrixTags>(_tags).queryInto(kernels);
-  else
-    base_query.condition<AttribVectorTags>(_tags).queryInto(kernels);
+  // As a last step, we make sure the kernels know which vectors/matrices they need to contribute to
+  for (auto & kernel : kernels)
+    kernel->linkTaggedVectorsAndMatrices(_vector_tags, _matrix_tags);
+
+  _system_contrib_objects_ready = true;
+}
+
+void
+ComputeLinearFVElementalThread::fetchBlockSystemContributionObjects()
+{
+  mooseAssert(_system_contrib_objects_ready,
+              "The system contribution objects need to be set up before we fetch the "
+              "block-restricted objects!");
+
+  // Here we just filter based on subdomain ID on top of everything else
+  std::vector<LinearFVElementalKernel *> kernels_after_vector;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(_system_number)
+      .template condition<AttribSystem>("LinearFVElementalKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribVectorTags>(_vector_tags)
+      .template condition<AttribSubdomains>(_subdomain)
+      .queryInto(kernels_after_vector);
+
+  std::vector<LinearFVElementalKernel *> kernels_after_matrix;
+  _fe_problem.theWarehouse()
+      .query()
+      .template condition<AttribSysNum>(_system_number)
+      .template condition<AttribSystem>("LinearFVElementalKernel")
+      .template condition<AttribThread>(_tid)
+      .template condition<AttribMatrixTags>(_matrix_tags)
+      .template condition<AttribSubdomains>(_subdomain)
+      .queryInto(kernels_after_matrix);
+
+  // We populate the list of kernels with the union of the two vectors
+  MooseUtils::getUnion(kernels_after_vector, kernels_after_matrix, _fv_kernels);
+
   _old_subdomain = _subdomain;
-
-  _fv_kernels = std::vector<LinearFVElementalKernel *>(kernels.begin(), kernels.end());
 }
 
 void
@@ -110,6 +156,7 @@ ComputeLinearFVElementalThread::printGeneralExecutionInformation() const
   auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
   console << "[DBG] Beginning linear finite volume elemental objects loop on " << execute_on
           << std::endl;
+
   mooseDoOnce(console << "[DBG] Loop on elements (ElemInfo), objects ordered on each face: "
                       << std::endl;
               console << "[DBG] - linear finite volume kernels" << std::endl;);
@@ -118,7 +165,7 @@ ComputeLinearFVElementalThread::printGeneralExecutionInformation() const
 void
 ComputeLinearFVElementalThread::printBlockExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_fv_kernels.size())
+  if (!_fe_problem.shouldPrintExecution(_tid) || _fv_kernels.empty())
     return;
 
   auto & console = _fe_problem.console();
@@ -129,6 +176,7 @@ ComputeLinearFVElementalThread::printBlockExecutionInformation() const
   std::vector<MooseObject *> kernels_to_print;
   for (const auto & kernel : _fv_kernels)
     kernels_to_print.push_back(dynamic_cast<MooseObject *>(kernel));
+
   console << ConsoleUtils::formatString(ConsoleUtils::mooseObjectVectorToString(kernels_to_print),
                                         "[DBG]")
           << std::endl;

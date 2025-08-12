@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 
@@ -27,11 +27,11 @@ public:
 
   MFEMSubMeshTransfer(const InputParameters & parameters);
 
-  // Executes the transfer.
+  /// Executes the transfer.
   virtual void execute() override;
 
 private:
-  // Name of source MFEMVariable to transfer DoF data from.
+  /// Name of source MFEMVariable to transfer DoF data from.
   const VariableName & _source_var_name;
   /// Reference to source gridfunction.
   const mfem::ParGridFunction & _source_var;

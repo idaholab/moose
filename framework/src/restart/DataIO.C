@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DenseMatrix.h"
-#include "MooseConfig.h"
 #include "DataIO.h"
 #include "MooseMesh.h"
 #include "FEProblemBase.h"

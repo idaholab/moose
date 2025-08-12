@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMCurlCurlKernel.h"
 #include "MFEMProblem.h"
@@ -29,10 +29,9 @@ MFEMCurlCurlKernel::validParams()
 }
 
 MFEMCurlCurlKernel::MFEMCurlCurlKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters),
-    // FIXME: The MFEM bilinear form can also handle vector and matrix
-    // coefficients, so ideally we'd handle all three too.
-    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+// FIXME: The MFEM bilinear form can also handle vector and matrix
+// coefficients, so ideally we'd handle all three too.
 {
 }
 

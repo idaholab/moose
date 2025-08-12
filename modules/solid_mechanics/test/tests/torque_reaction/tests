@@ -24,6 +24,7 @@
     input = 'torque_reaction_cylinder.i'
     exodiff = 'torque_reaction_cylinder_out.e'
     abs_zero = 5.e-7
+    capabilities = 'method!=dbg'
   [../]
   [./disp_about_axis_motion]
     design = DisplacementAboutAxis.md
@@ -34,6 +35,7 @@
     csvdiff = 'disp_about_axis_axial_motion_out.csv'
     rel_err = 1E-5
     abs_zero = 1e-10
+    capabilities = 'method!=dbg'
   [../]
   [./disp_about_axis_motion_incremental]
     design = DisplacementAboutAxis.md
@@ -45,6 +47,7 @@
     rel_err = 1E-5
     abs_zero = 1e-10
     issues = '#15388'
+    capabilities = 'method!=dbg'
   [../]
   [./disp_about_axis_axial_motion_delayed]
     design = DisplacementAboutAxis.md
@@ -55,6 +58,7 @@
     rel_err = 1E-5
     abs_zero = 1e-10
     issues = '#15388'
+    capabilities = 'method!=dbg'
   [../]
   [./disp_about_axis_error1]
     design = DisplacementAboutAxis.md

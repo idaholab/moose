@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMVectorFEWeakDivergenceKernel.h"
 #include "MFEMProblem.h"
@@ -29,8 +29,7 @@ MFEMVectorFEWeakDivergenceKernel::validParams()
 
 MFEMVectorFEWeakDivergenceKernel::MFEMVectorFEWeakDivergenceKernel(
     const InputParameters & parameters)
-  : MFEMKernel(parameters),
-    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 

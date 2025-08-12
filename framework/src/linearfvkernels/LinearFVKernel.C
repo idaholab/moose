@@ -10,6 +10,7 @@
 #include "LinearFVKernel.h"
 #include "Assembly.h"
 #include "SubProblem.h"
+#include "FEProblemBase.h"
 
 InputParameters
 LinearFVKernel::validParams()
@@ -38,4 +39,11 @@ LinearFVKernel::LinearFVKernel(const InputParameters & params)
     _sys_num(_sys.number())
 {
   addMooseVariableDependency(&_var);
+}
+
+void
+LinearFVKernel::requestVariableCellGradient(const std::string & var_name)
+{
+  dynamic_cast<MooseLinearVariableFV<Real> *>(&_fe_problem.getStandardVariable(_tid, var_name))
+      ->computeCellGradients();
 }

@@ -21,6 +21,7 @@ ThermalConductivity::validParams()
   params.addRequiredParam<PostprocessorName>("T_hot", "Temperature on 'hot' boundary in K");
   params.addParam<Real>("length_scale", 1e-8, "Length scale of the solution, default is 1e-8");
   params.addParam<Real>("k0", 0.0, "Initial value of the thermal conductivity");
+  params.addClassDescription("Computes the effective thermal conductivity averaged on a boundary.");
   return params;
 }
 

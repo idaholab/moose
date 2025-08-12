@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "MFEMIntegratedBC.h"
@@ -19,11 +19,10 @@ public:
 
   MFEMBoundaryIntegratedBC(const InputParameters & parameters);
 
-  // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
-  // caller.
+  /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
   virtual mfem::LinearFormIntegrator * createLFIntegrator();
 
-  // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
+  /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::BilinearFormIntegrator * createBFIntegrator();
 
 protected:

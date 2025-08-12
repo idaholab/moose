@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "libmesh/ignore_warnings.h"
@@ -64,6 +64,9 @@ protected:
   /// Get the number of degrees of freedom per basis function needed
   /// in this finite element space.
   virtual int getVDim() const = 0;
+
+  /// Get the quadrature basis enum associated with the given name.
+  int getBasis(const std::string & basis_name) const;
 
 private:
   /// Constructs the fec from the fec name.

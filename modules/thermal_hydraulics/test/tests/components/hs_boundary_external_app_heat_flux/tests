@@ -16,6 +16,7 @@
     input = main.i
     csvdiff = 'main_out_sub0.csv'
     abs_zero = 1e-8
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to apply a heat flux from an external application to a heat structure.'
   []
 

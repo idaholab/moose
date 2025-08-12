@@ -8,6 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from .cases.validationcase import ValidationCase
+from .cases.csvvalidationcase import CSVValidationCase
 
 # The base validation classes that users will derive from
-ValidationCaseClasses = (ValidationCase,)
+ValidationCaseClasses = (ValidationCase, CSVValidationCase)

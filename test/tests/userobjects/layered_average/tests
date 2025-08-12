@@ -30,10 +30,22 @@
     issues = '#2941 #2567'
   []
 
+  [bounds_split]
+    type = 'Exodiff'
+    input = 'layered_average_bounds.i'
+    exodiff = 'layered_average_bounds_split_out.e'
+    cli_args = 'UserObjects/average/bound_uniform_splits=1 Outputs/file_base="layered_average_bounds_split_out"'
+
+    requirement = "The system shall be capable of uniformly splitting the bounds provided for "
+                  "computing the layered average"
+    design = '/LayeredAverage.md'
+    issues = '#30958'
+  []
+
   [errors]
     requirement = "The system shall report an error when computing layered averages of a variable if"
     design = '/LayeredAverage.md'
-    issues = '#2941 #2567'
+    issues = '#2941 #2567 #30958'
 
     [bounds_and_num_layers]
       type = 'RunException'
@@ -59,6 +71,15 @@
       expect_err = "One of 'bounds' or 'num_layers' must be specified"
 
       detail = "if neither the bounds or number of layers are set."
+    []
+
+    [not_enough_bounds]
+      type = 'RunException'
+      input = 'layered_average_bounds.i'
+      cli_args = 'UserObjects/average/bounds=0.2'
+      expect_err = "At least two boundaries must be provided in 'bounds' to form layers!"
+
+      detail = "if not enough bounds are specified."
     []
   []
 

@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "MFEMPostprocessor.h"
 #include "MFEMGeneralUserObject.h"
 
-/*
+/**
  * Compute the L2 error for a variable.
  */
 class MFEML2Error : public MFEMPostprocessor
@@ -32,8 +32,6 @@ public:
   virtual PostprocessorValue getValue() const override final;
 
 private:
-  const VariableName & _var_name;
-  const MFEMScalarCoefficientName & _coeff_name;
   mfem::Coefficient & _coeff;
   mfem::GridFunction & _var;
 };

@@ -132,9 +132,16 @@ class ScriptCommand(ImageCommand):
         script_absdir, script_name = os.path.split(script_path)
         script_localdir, script_name = os.path.split(script_localname)
 
+        # Append MOOSE python to the PYTHONPATH when we run the script
+        # so that our utilities can be used without extra path appends
+        this_dir = os.path.dirname(os.path.abspath(__file__))
+        python_dir = os.path.abspath(os.path.join(this_dir, '..', '..'))
+        run_env = os.environ.copy()
+        run_env['PYTHONPATH'] = f'{python_dir}:' + os.environ.get('PYTHONPATH', '')
+
         # Generate the plot
         LOG.info("Executing plot script %s", script_path)
-        result = subprocess.run(["python", script_path], capture_output=True, text=True)
+        result = subprocess.run(["python", script_path], capture_output=True, text=True, env=run_env)
         if result.returncode != 0:
             msg = "Failed to execute python script '{}':\n{}"
             raise exceptions.MooseDocsException(msg, script_path, result.stderr)

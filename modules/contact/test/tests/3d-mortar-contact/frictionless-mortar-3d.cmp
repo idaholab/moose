@@ -1,0 +1,14 @@
+COORDINATES absolute 1.e-6
+
+TIME STEPS relative 1.e-6 floor 1e-10
+GLOBAL VARIABLES relative 1.e-6 floor 0.0
+	contact
+	cumulative       relative 2e-1
+	num_nl           relative 2e-1
+
+NODAL VARIABLES relative 1.e-6 floor 1e-10
+	disp_x
+	disp_y
+	disp_z
+	mortar_normal_lm
+

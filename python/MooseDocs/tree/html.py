@@ -55,27 +55,26 @@ class Tag(NodeBase):
 
     def write(self):
         """Write the HTML as a string, e.g., <foo>...</foo>."""
-        out = ''
-        attr_list = []
+        true_attr_list = []
+        valued_attr_list = []
         skip_list = ('close', 'string')
         for key, value in self.items():
             if value and (key not in skip_list):
                 if isinstance(value, bool):
-                    if value:
-                        attr_list.append('{}'.format(key))
+                    true_attr_list.append(f'{key}')
                 else:
-                    attr_list.append('{}="{}"'.format(key, str(value).strip()))
+                    valued_attr_list.append(f'{key}="{str(value).strip()}"')
+        attr_list = true_attr_list + valued_attr_list
 
-        attr = ' '.join(attr_list)
-        if attr:
-            out += '<{} {}>'.format(self.name, attr)
-        else:
-            out += '<{}>'.format(self.name)
+        out = f'<{self.name}'
+        if attr_list:
+            out += ' ' + ' '.join(attr_list)
+        out += '>'
 
         for child in self.children:
             out += child.write()
         if self.get('close'):
-            out += '</{}>'.format(self.name)
+            out += f'</{self.name}>'
         return out
 
     def text(self):

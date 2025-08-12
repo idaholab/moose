@@ -6,6 +6,7 @@
     input = 'phy.test.i'
     exodiff = 'phy.test_out.e'
     no_error_deprecated = True # Closures1PhaseNone is deprecated
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to define a closure object that does not define closures, so they can be defined directly in the input file.'
   []
 []

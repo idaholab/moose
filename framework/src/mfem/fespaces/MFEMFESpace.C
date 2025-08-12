@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMFESpace.h"
 #include "MFEMProblem.h"
@@ -60,6 +60,34 @@ MFEMFESpace::buildFEC(const std::string & fec_name) const
   {
     _fec = std::shared_ptr<mfem::FiniteElementCollection>(mfem::FiniteElementCollection::New(name));
   }
+}
+
+int
+MFEMFESpace::getBasis(const std::string & basis_name) const
+{
+
+  if (!strcmp(basis_name.c_str(), "GaussLegendre"))
+    return mfem::BasisType::GaussLegendre;
+  else if (!strcmp(basis_name.c_str(), "GaussLobatto"))
+    return mfem::BasisType::GaussLobatto;
+  else if (!strcmp(basis_name.c_str(), "Positive"))
+    return mfem::BasisType::Positive;
+  else if (!strcmp(basis_name.c_str(), "OpenUniform"))
+    return mfem::BasisType::OpenUniform;
+  else if (!strcmp(basis_name.c_str(), "ClosedUniform"))
+    return mfem::BasisType::ClosedUniform;
+  else if (!strcmp(basis_name.c_str(), "OpenHalfUniform"))
+    return mfem::BasisType::OpenHalfUniform;
+  else if (!strcmp(basis_name.c_str(), "Serendipity"))
+    return mfem::BasisType::Serendipity;
+  else if (!strcmp(basis_name.c_str(), "ClosedGL"))
+    return mfem::BasisType::ClosedGL;
+  else if (!strcmp(basis_name.c_str(), "IntegratedGLL"))
+    return mfem::BasisType::IntegratedGLL;
+  else if (!strcmp(basis_name.c_str(), "NumBasisTypes"))
+    return mfem::BasisType::NumBasisTypes;
+  else
+    mooseError("Unknown basis type: ", basis_name);
 }
 
 void

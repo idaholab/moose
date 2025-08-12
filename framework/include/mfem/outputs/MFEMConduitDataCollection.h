@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "MFEMDataCollection.h"
@@ -25,6 +25,8 @@ public:
   virtual mfem::DataCollection & getDataCollection() override { return _conduit_dc; }
 
 protected:
+  bool gridFunctionsNeedHostRead() const override { return true; }
+
   mfem::ConduitDataCollection _conduit_dc;
   const MooseEnum _protocol;
 };

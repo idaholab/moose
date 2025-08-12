@@ -112,6 +112,7 @@
               'frictional-mortar-3d-dynamics_out_tangent_y_0001.csv'
     requirement = 'The system shall solve a dynamic 3D frictional bouncing block problem with mortar '
                   'constraint using nodal-attached geometry'
+    restep = false # Issue #31054
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
     capabilities = 'ad_size>=150 & method=opt'
@@ -122,7 +123,7 @@
     input = 'frictional-mortar-3d-dynamics-light.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    capabilities = 'ad_size>=100'
+    capabilities = 'ad_size>=64'
     requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem '
                   'with mortar constraint using nodal-attached geometry and the correct edge '
                   'dropping setting'
@@ -135,7 +136,7 @@
     input = 'frictional-mortar-3d-dynamics-light.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    capabilities = 'ad_size>=100'
+    capabilities = 'ad_size>=64'
     cli_args = 'Constraints/friction/correct_edge_dropping=false '
                'Constraints/normal_x/correct_edge_dropping=false '
                'Constraints/normal_y/correct_edge_dropping=false '
@@ -158,7 +159,8 @@
     input = 'frictional-mortar-3d-dynamics-light-function.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    capabilities = 'ad_size>=100'
+    capabilities = 'ad_size>=64'
+    restep = false # Issue #31054
     requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem '
                   'with mortar constraints using nodal geometry and a friction coefficient '
                   'that depends on the normal contact pressure and the relative tangential velocity'

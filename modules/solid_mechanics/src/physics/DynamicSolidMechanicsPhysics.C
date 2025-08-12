@@ -74,24 +74,6 @@ DynamicSolidMechanicsPhysics::validParams()
       "density", "density", "Name of Material Property that provides the density");
   params.addParamNamesToGroup("hht_alpha newmark_beta newmark_gamma",
                               "Time integration parameters");
-  // Deprecated parameters
-  params.addDeprecatedParam<Real>("alpha",
-                                  "alpha parameter for mass dependent numerical damping induced "
-                                  "by HHT time integration scheme",
-                                  "Please use hht_alpha");
-  params.addDeprecatedParam<Real>(
-      "beta", "beta parameter for Newmark Time integration", "Please use newmark_beta");
-  params.addDeprecatedParam<Real>(
-      "gamma", "gamma parameter for Newmark Time integration", "Please use newmark_gamma");
-  params.addDeprecatedParam<MaterialPropertyName>("eta",
-                                                  "Name of material property or a constant real "
-                                                  "number defining mass Rayleigh parameter (eta).",
-                                                  "Please use mass_damping_coefficient");
-  params.addDeprecatedParam<MaterialPropertyName>(
-      "zeta",
-      "Name of material property or a constant real "
-      "number defining stiffness Rayleigh parameter (zeta).",
-      "Please use stiffness_damping_coefficient");
 
   return params;
 }
@@ -99,12 +81,7 @@ DynamicSolidMechanicsPhysics::validParams()
 DynamicSolidMechanicsPhysics::DynamicSolidMechanicsPhysics(const InputParameters & params)
   : QuasiStaticSolidMechanicsPhysics(params),
     _velocities(getParam<std::vector<AuxVariableName>>("velocities")),
-    _accelerations(getParam<std::vector<AuxVariableName>>("accelerations")),
-    _newmark_beta(isParamValid("beta") ? getParam<Real>("beta") : getParam<Real>("newmark_beta")),
-    _newmark_gamma(isParamValid("gamma") ? getParam<Real>("gamma")
-                                         : getParam<Real>("newmark_gamma")),
-    _hht_alpha(isParamValid("alpha") ? getParam<Real>("alpha") : getParam<Real>("hht_alpha"))
-
+    _accelerations(getParam<std::vector<AuxVariableName>>("accelerations"))
 {
 }
 
@@ -153,7 +130,7 @@ DynamicSolidMechanicsPhysics::act()
       params.set<std::vector<VariableName>>("displacement") = {_displacements[i]};
       params.set<std::vector<VariableName>>("velocity") = {_velocities[i]};
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-      params.set<Real>("beta") = _newmark_beta;
+      params.set<Real>("beta") = getParam<Real>("newmark_beta");
       params.applyParameters(parameters());
       _problem->addAuxKernel(kernel_type, "TM_" + name() + '_' + _accelerations[i], params);
     }
@@ -166,7 +143,7 @@ DynamicSolidMechanicsPhysics::act()
       params.set<AuxVariableName>("variable") = _velocities[i];
       params.set<std::vector<VariableName>>("acceleration") = {_accelerations[i]};
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
-      params.set<Real>("gamma") = _newmark_gamma;
+      params.set<Real>("gamma") = getParam<Real>("newmark_gamma");
       params.applyParameters(parameters());
       _problem->addAuxKernel(kernel_type, "TM_" + name() + '_' + _velocities[i], params);
     }
@@ -184,12 +161,11 @@ DynamicSolidMechanicsPhysics::act()
       params.set<std::vector<VariableName>>("velocity") = {_velocities[i]};
       params.set<std::vector<VariableName>>("acceleration") = {_accelerations[i]};
       params.set<bool>("use_displaced_mesh") = false;
-      params.set<Real>("beta") = _newmark_beta;
-      params.set<Real>("gamma") = _newmark_gamma;
-      params.set<Real>("alpha") = _hht_alpha;
+      params.set<Real>("beta") = getParam<Real>("newmark_beta");
+      params.set<Real>("gamma") = getParam<Real>("newmark_gamma");
+      params.set<Real>("alpha") = getParam<Real>("hht_alpha");
       params.set<MaterialPropertyName>("eta") =
-          isParamValid("eta") ? getParam<MaterialPropertyName>("eta")
-                              : getParam<MaterialPropertyName>("mass_damping_coefficient");
+          getParam<MaterialPropertyName>("mass_damping_coefficient");
 
       params.applyParameters(parameters());
 
@@ -214,15 +190,13 @@ DynamicSolidMechanicsPhysics::getKernelType()
 InputParameters
 DynamicSolidMechanicsPhysics::getKernelParameters(std::string type)
 {
-  QuasiStaticSolidMechanicsPhysics::getKernelParameters(type);
-  InputParameters params = _factory.getValidParams(type);
-  params.applyParameters(parameters(), {"zeta", "alpha"});
+  InputParameters params = QuasiStaticSolidMechanicsPhysics::getKernelParameters(type);
 
-  params.set<Real>("alpha") =
-      isParamValid("alpha") ? getParam<Real>("alpha") : getParam<Real>("hht_alpha");
-  params.set<MaterialPropertyName>("zeta") =
-      isParamValid("zeta") ? getParam<MaterialPropertyName>("zeta")
-                           : getParam<MaterialPropertyName>("stiffness_damping_coefficient");
+  if (params.isParamDefined("alpha"))
+    params.set<Real>("alpha") = getParam<Real>("hht_alpha");
+  if (params.isParamDefined("zeta"))
+    params.set<MaterialPropertyName>("zeta") =
+        getParam<MaterialPropertyName>("stiffness_damping_coefficient");
 
   return params;
 }

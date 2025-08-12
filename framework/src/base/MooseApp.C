@@ -73,7 +73,7 @@
 #include <sys/utsname.h> // utsname
 #endif
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 #include <torch/version.h>
 #endif
 
@@ -287,6 +287,10 @@ MooseApp::validParams()
       "Run half of a transient with checkpoints enabled; used by the TestHarness");
   params.setGlobalCommandLineParam("test_checkpoint_half_transient");
 
+  params.addCommandLineParam<bool>("test_restep",
+                                   "--test-restep",
+                                   "Test re-running the middle timestep; used by the TestHarness");
+
   params.addCommandLineParam<bool>(
       "trap_fpe",
       "--trap-fpe",
@@ -370,11 +374,12 @@ MooseApp::validParams()
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default");
 
-  MooseEnum libtorch_device_type("cpu cuda mps", "cpu");
-  params.addCommandLineParam<MooseEnum>("libtorch_device",
-                                        "--libtorch-device",
-                                        libtorch_device_type,
-                                        "The device type we want to run libtorch on.");
+  const MooseEnum compute_device_type("cpu cuda mps hip ceed-cpu ceed-cuda ceed-hip", "cpu");
+  params.addCommandLineParam<MooseEnum>(
+      "compute_device",
+      "--compute-device",
+      compute_device_type,
+      "The device type we want to run accelerated (libtorch, MFEM) computations on.");
 
 #ifdef HAVE_GPERFTOOLS
   params.addCommandLineParam<std::string>(
@@ -406,6 +411,10 @@ MooseApp::validParams()
   params.addPrivateParam<const MooseMesh *>("_master_displaced_mesh");
   params.addPrivateParam<std::unique_ptr<Backup> *>("_initial_backup", nullptr);
   params.addPrivateParam<std::shared_ptr<Parser>>("_parser");
+#ifdef MOOSE_MFEM_ENABLED
+  params.addPrivateParam<std::shared_ptr<mfem::Device>>("_mfem_device");
+  params.addPrivateParam<std::vector<std::string>>("_mfem_devices");
+#endif
 
   params.addParam<bool>(
       "use_legacy_material_output",
@@ -488,7 +497,8 @@ MooseApp::MooseApp(const InputParameters & parameters)
 #else
     _trap_fpe(false),
 #endif
-    _test_checkpoint_half_transient(false),
+    _test_checkpoint_half_transient(parameters.get<bool>("test_checkpoint_half_transient")),
+    _test_restep(parameters.get<bool>("test_restep")),
     _check_input(getParam<bool>("check_input")),
     _multiapp_level(isParamValid("_multiapp_level") ? _pars.get<unsigned int>("_multiapp_level")
                                                     : 0),
@@ -507,9 +517,20 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _output_buffer_cache(nullptr),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
     _initial_backup(getParam<std::unique_ptr<Backup> *>("_initial_backup"))
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
     ,
-    _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("libtorch_device")))
+    _libtorch_device(determineLibtorchDeviceType(getParam<MooseEnum>("compute_device")))
+#endif
+#ifdef MOOSE_MFEM_ENABLED
+    ,
+    _mfem_device(isParamValid("_mfem_device")
+                     ? getParam<std::shared_ptr<mfem::Device>>("_mfem_device")
+                     : nullptr),
+    _mfem_devices(
+        isParamValid("_mfem_devices")
+            ? std::set<std::string>(getParam<std::vector<std::string>>("_mfem_devices").begin(),
+                                    getParam<std::vector<std::string>>("_mfem_devices").end())
+            : std::set<std::string>{})
 #endif
 {
   if (&parameters != &_pars)
@@ -732,11 +753,22 @@ MooseApp::MooseApp(const InputParameters & parameters)
     std::this_thread::sleep_for(std::chrono::seconds(getParam<unsigned int>("stop_for_debugger")));
   }
 
-  if (_master_mesh && _multiapp_level == 0)
+  if (_master_mesh && isUltimateMaster())
     mooseError("Mesh can be passed in only for sub-apps");
 
   if (_master_displaced_mesh && !_master_mesh)
     mooseError("_master_mesh should have been set when _master_displaced_mesh is set");
+
+#ifdef MOOSE_MFEM_ENABLED
+  if (_mfem_device)
+  {
+    mooseAssert(!isUltimateMaster(),
+                "The MFEM device should only be auto-set for sub-applications");
+    mooseAssert(!_mfem_devices.empty(),
+                "If we are a sub-application and we have an MFEM device object, then we must know "
+                "its configuration string");
+  }
+#endif
 
   // Data specifically associated with the mesh (meta-data) that will read from the restart
   // file early during the simulation setup so that they are available to Actions and other objects
@@ -751,8 +783,20 @@ MooseApp::MooseApp(const InputParameters & parameters)
                     name(),
                     " to remove this deprecation warning.");
 
+  if (_test_restep && _test_checkpoint_half_transient)
+    mooseError("Cannot use --test-restep and --test-checkpoint-half-transient together");
+
   registerCapabilities();
+
   Moose::out << std::flush;
+}
+
+std::optional<MooseEnum>
+MooseApp::getComputeDevice() const
+{
+  if (isParamSetByUser("compute_device"))
+    return getParam<MooseEnum>("compute_device");
+  return {};
 }
 
 void
@@ -799,7 +843,7 @@ MooseApp::registerCapabilities()
 
   {
     const auto doc = "LibTorch machine learning and parallel tensor algebra library";
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
     addCapability("libtorch", TORCH_VERSION, doc);
 #else
     missingCapability("libtorch",
@@ -813,7 +857,7 @@ MooseApp::registerCapabilities()
 
   {
     const auto doc = "MFEM finite element library";
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
     haveCapability("mfem", doc);
 #else
     missingCapability("mfem",
@@ -1216,8 +1260,6 @@ MooseApp::setupOptions()
     setErrorOverridden();
 
   _distributed_mesh_on_command_line = getParam<bool>("distributed_mesh");
-
-  _test_checkpoint_half_transient = getParam<bool>("test_checkpoint_half_transient");
 
   if (getParam<bool>("trap_fpe"))
   {
@@ -2350,6 +2392,19 @@ MooseApp::runInputs()
 }
 
 void
+MooseApp::checkReservedCapability(const std::string & capability)
+{
+  // The list of these capabilities should match those within
+  // Tester.checkRunnableBase() in the TestHarness
+  static const std::set<std::string> reserved{
+      "scale_refine", "valgrind", "recover", "heavy", "mpi_procs", "num_threads", "compute_device"};
+  if (reserved.count(capability))
+    mooseError("MooseApp::addCapability(): The capability \"",
+               capability,
+               "\" is reserved and may not be registered by an application.");
+}
+
+void
 MooseApp::setOutputPosition(const Point & p)
 {
   _output_position_set = true;
@@ -3182,7 +3237,10 @@ MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
     if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC))
     {
       if (rm->attachGeometricEarly())
+      {
         mesh.add_ghosting_functor(createRMFromTemplateAndInit(*rm, moose_mesh, mesh));
+        _attached_relationship_managers[Moose::RelationshipManagerType::GEOMETRIC].insert(rm.get());
+      }
       else
       {
         // If we have a geometric ghosting functor that can't be attached early, then we have to
@@ -3501,32 +3559,36 @@ MooseApp::constructingMeshGenerators() const
          _mesh_generator_system.appendingMeshGenerators();
 }
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 torch::DeviceType
 MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum) const
 {
+  const auto pname = "--compute-device";
   if (device_enum == "cuda")
   {
 #ifdef __linux__
     if (!torch::cuda::is_available())
-      mooseError("--libtorch-device=cuda: CUDA is not available");
+      mooseError(pname, "=cuda: CUDA support is not available in the linked libtorch library");
     return torch::kCUDA;
 #else
-    mooseError("--libtorch-device=cuda: CUDA is not supported on your platform");
+    mooseError(pname, "=cuda: CUDA is not supported on your platform");
 #endif
   }
   else if (device_enum == "mps")
   {
 #ifdef __APPLE__
     if (!torch::mps::is_available())
-      mooseError("--libtorch-device=mps: MPS is not available");
+      mooseError(pname, "=mps: MPS support is not available in the linked libtorch library");
     return torch::kMPS;
 #else
-    mooseError("--libtorch-device=mps: MPS is not supported on your platform");
+    mooseError(pname, "=mps: MPS is not supported on your platform");
 #endif
   }
 
-  mooseAssert(device_enum == "cpu", "Should be cpu");
+  else if (device_enum != "cpu")
+    mooseError("The device '",
+               device_enum,
+               "' is not currently supported by the MOOSE libtorch integration.");
   return torch::kCPU;
 }
 #endif
@@ -3563,11 +3625,34 @@ MooseApp::addCapability(const std::string & capability,
                         CapabilityUtils::Type value,
                         const std::string & doc)
 {
+  checkReservedCapability(capability);
   Moose::Capabilities::getCapabilityRegistry().add(capability, value, doc);
 }
 
 void
 MooseApp::addCapability(const std::string & capability, const char * value, const std::string & doc)
 {
+  checkReservedCapability(capability);
   Moose::Capabilities::getCapabilityRegistry().add(capability, std::string(value), doc);
 }
+
+#ifdef MOOSE_MFEM_ENABLED
+void
+MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMProblemSolve>)
+{
+  const auto string_vec = MooseUtils::split(device_string, ",");
+  auto string_set = std::set<std::string>(string_vec.begin(), string_vec.end());
+  if (!_mfem_device)
+  {
+    _mfem_device = std::make_shared<mfem::Device>(device_string);
+    _mfem_devices = std::move(string_set);
+    _mfem_device->Print(Moose::out);
+  }
+  else if (!device_string.empty() && string_set != _mfem_devices)
+    mooseError("Attempted to configure with MFEM devices '",
+               MooseUtils::join(string_set, " "),
+               "', but we have already configured the MFEM device object with the devices '",
+               MooseUtils::join(_mfem_devices, " "),
+               "'");
+}
+#endif

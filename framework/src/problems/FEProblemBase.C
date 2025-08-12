@@ -411,6 +411,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _dt_old(declareRestartableData<Real>("dt_old")),
     _need_to_add_default_nonlinear_convergence(false),
     _need_to_add_default_multiapp_fixed_point_convergence(false),
+    _need_to_add_default_steady_state_convergence(false),
     _linear_sys_names(getParam<std::vector<LinearSystemName>>("linear_sys_names")),
     _num_linear_sys(_linear_sys_names.size()),
     _linear_systems(_num_linear_sys, nullptr),
@@ -648,29 +649,29 @@ FEProblemBase::createTagVectors()
 {
   // add vectors and their tags to system
   auto & vectors = getParam<std::vector<std::vector<TagName>>>("extra_tag_vectors");
-  for (const auto nl_sys_num : index_range(vectors))
-    for (auto & vector : vectors[nl_sys_num])
+  for (const auto sys_num : index_range(vectors))
+    for (auto & vector : vectors[sys_num])
     {
       auto tag = addVectorTag(vector);
-      _nl[nl_sys_num]->addVector(tag, false, libMesh::GHOSTED);
+      _solver_systems[sys_num]->addVector(tag, false, libMesh::GHOSTED);
     }
 
   auto & not_zeroed_vectors = getParam<std::vector<std::vector<TagName>>>("not_zeroed_tag_vectors");
-  for (const auto nl_sys_num : index_range(not_zeroed_vectors))
-    for (auto & vector : not_zeroed_vectors[nl_sys_num])
+  for (const auto sys_num : index_range(not_zeroed_vectors))
+    for (auto & vector : not_zeroed_vectors[sys_num])
     {
       auto tag = addVectorTag(vector);
-      _nl[nl_sys_num]->addVector(tag, false, GHOSTED);
+      _solver_systems[sys_num]->addVector(tag, false, GHOSTED);
       addNotZeroedVectorTag(tag);
     }
 
   // add matrices and their tags
   auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
-  for (const auto nl_sys_num : index_range(matrices))
-    for (auto & matrix : matrices[nl_sys_num])
+  for (const auto sys_num : index_range(matrices))
+    for (auto & matrix : matrices[sys_num])
     {
       auto tag = addMatrixTag(matrix);
-      _nl[nl_sys_num]->addMatrix(tag);
+      _solver_systems[sys_num]->addMatrix(tag);
     }
 }
 
@@ -2542,6 +2543,17 @@ FEProblemBase::addDefaultMultiAppFixedPointConvergence(const InputParameters & p
   addConvergence(class_name, getMultiAppFixedPointConvergenceName(), params);
 }
 
+void
+FEProblemBase::addDefaultSteadyStateConvergence(const InputParameters & params_to_apply)
+{
+  const std::string class_name = "DefaultSteadyStateConvergence";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.applyParameters(params_to_apply);
+  params.applyParameters(parameters());
+  params.set<bool>("added_as_default") = true;
+  addConvergence(class_name, getSteadyStateConvergenceName(), params);
+}
+
 bool
 FEProblemBase::hasFunction(const std::string & name, const THREAD_ID tid)
 {
@@ -4227,9 +4239,9 @@ FEProblemBase::addPostprocessor(const std::string & pp_name,
 {
   // Check for name collision
   if (hasUserObject(name))
-    mooseError("A UserObject with the name \"",
-               name,
-               "\" already exists.  You may not add a Postprocessor by the same name.");
+    mooseError("A ",
+               getUserObjectBase(name).typeAndName(),
+               " already exists. You may not add a Postprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
 }
@@ -4241,9 +4253,9 @@ FEProblemBase::addVectorPostprocessor(const std::string & pp_name,
 {
   // Check for name collision
   if (hasUserObject(name))
-    mooseError("A UserObject with the name \"",
-               name,
-               "\" already exists.  You may not add a VectorPostprocessor by the same name.");
+    mooseError("A ",
+               getUserObjectBase(name).typeAndName(),
+               " already exists. You may not add a VectorPostprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
 }
@@ -4255,8 +4267,9 @@ FEProblemBase::addReporter(const std::string & type,
 {
   // Check for name collision
   if (hasUserObject(name))
-    mooseError(std::string("A UserObject with the name \"") + name +
-               "\" already exists.  You may not add a Reporter by the same name.");
+    mooseError("A ",
+               getUserObjectBase(name).typeAndName(),
+               " already exists. You may not add a Reporter by the same name.");
 
   addUserObject(type, name, parameters);
 }
@@ -5301,7 +5314,7 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION dire
 
   const MooseObjectWarehouse<Transfer> & wh = to_multiapp     ? _to_multi_app_transfers[type]
                                               : from_multiapp ? _from_multi_app_transfers[type]
-                                                              : _between_multi_app_transfers;
+                                                              : _between_multi_app_transfers[type];
 
   if (wh.hasActiveObjects())
   {
@@ -5609,10 +5622,12 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
     std::shared_ptr<MultiApp> multiapp;
     if (parameters.isParamValid("multi_app"))
       multiapp = getMultiApp(parameters.get<MultiAppName>("multi_app"));
-    else if (parameters.isParamValid("from_multi_app"))
-      multiapp = getMultiApp(parameters.get<MultiAppName>("from_multi_app"));
+    // This catches the sibling transfer case, where we want to be executing only as often as the
+    // receiving application. A transfer 'to' a multiapp is executed before that multiapp
     else if (parameters.isParamValid("to_multi_app"))
       multiapp = getMultiApp(parameters.get<MultiAppName>("to_multi_app"));
+    else if (parameters.isParamValid("from_multi_app"))
+      multiapp = getMultiApp(parameters.get<MultiAppName>("from_multi_app"));
     // else do nothing because the user has provided invalid input. They should get a nice error
     // about this during transfer construction. This necessitates checking for null in this next
     // line, however
@@ -6607,6 +6622,10 @@ FEProblemBase::restoreSolutions()
 {
   TIME_SECTION("restoreSolutions", 5, "Restoring Solutions");
 
+  if (!_not_zeroed_tagged_vectors.empty())
+    paramError("not_zeroed_tag_vectors",
+               "There is currently no way to restore not-zeroed vectors.");
+
   for (auto & sys : _solver_systems)
   {
     if (_verbose_restore)
@@ -7458,6 +7477,9 @@ FEProblemBase::computeLinearSystemSys(LinearImplicitSystem & sys,
 
   setCurrentLinearSystem(linearSysNum(sys.name()));
 
+  _current_linear_sys->associateVectorToTag(rhs, _current_linear_sys->rightHandSideVectorTag());
+  _current_linear_sys->associateMatrixToTag(system_matrix, _current_linear_sys->systemMatrixTag());
+
   // We are using the residual tag system for right hand sides so we fetch everything
   const auto & vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
@@ -7467,17 +7489,23 @@ FEProblemBase::computeLinearSystemSys(LinearImplicitSystem & sys,
   selectMatrixTagsFromSystem(*_current_linear_sys, getMatrixTags(), _linear_matrix_tags);
 
   computeLinearSystemTags(*(_current_linear_sys->currentSolution()),
-                          system_matrix,
-                          rhs,
                           _linear_vector_tags,
                           _linear_matrix_tags,
                           compute_gradients);
+
+  _current_linear_sys->disassociateMatrixFromTag(system_matrix,
+                                                 _current_linear_sys->systemMatrixTag());
+  _current_linear_sys->disassociateVectorFromTag(rhs,
+                                                 _current_linear_sys->rightHandSideVectorTag());
+  // We reset the tags to the default containers for further operations
+  _current_linear_sys->associateVectorToTag(_current_linear_sys->getRightHandSideVector(),
+                                            _current_linear_sys->rightHandSideVectorTag());
+  _current_linear_sys->associateMatrixToTag(_current_linear_sys->getSystemMatrix(),
+                                            _current_linear_sys->systemMatrixTag());
 }
 
 void
 FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
-                                       SparseMatrix<Number> & system_matrix,
-                                       NumericVector<Number> & rhs,
                                        const std::set<TagID> & vector_tags,
                                        const std::set<TagID> & matrix_tags,
                                        const bool compute_gradients)
@@ -7486,10 +7514,7 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   _current_linear_sys->setSolution(soln);
 
-  _current_linear_sys->associateVectorToTag(rhs, _current_linear_sys->rightHandSideVectorTag());
-  _current_linear_sys->associateMatrixToTag(system_matrix, _current_linear_sys->systemMatrixTag());
-
-  for (const auto tag : matrix_tags)
+  for (auto tag : matrix_tags)
   {
     auto & matrix = _current_linear_sys->getMatrix(tag);
     matrix.zero();
@@ -7537,21 +7562,14 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
 
   _app.getOutputWarehouse().jacobianSetup();
 
-  _safe_access_tagged_vectors = false;
-  _safe_access_tagged_matrices = false;
-
   _current_linear_sys->computeLinearSystemTags(vector_tags, matrix_tags, compute_gradients);
-
-  _safe_access_tagged_vectors = true;
-  _safe_access_tagged_matrices = true;
-
-  _current_linear_sys->disassociateMatrixFromTag(system_matrix,
-                                                 _current_linear_sys->systemMatrixTag());
-  _current_linear_sys->disassociateVectorFromTag(rhs,
-                                                 _current_linear_sys->rightHandSideVectorTag());
 
   // Reset execution flag as after this point we are no longer on LINEAR
   _current_execute_on_flag = EXEC_NONE;
+
+  // These are the relevant parts of resetState()
+  _safe_access_tagged_vectors = true;
+  _safe_access_tagged_matrices = true;
 }
 
 void
@@ -8870,6 +8888,7 @@ FEProblemBase::systemBaseNonlinear(const unsigned int sys_num) const
 SystemBase &
 FEProblemBase::systemBaseNonlinear(const unsigned int sys_num)
 {
+  mooseAssert(sys_num < _nl.size(), "System number greater than the number of nonlinear systems");
   return *_nl[sys_num];
 }
 
@@ -8887,6 +8906,22 @@ FEProblemBase::systemBaseLinear(const unsigned int sys_num)
   mooseAssert(sys_num < _linear_systems.size(),
               "System number greater than the number of linear systems");
   return *_linear_systems[sys_num];
+}
+
+const SystemBase &
+FEProblemBase::systemBaseSolver(const unsigned int sys_num) const
+{
+  mooseAssert(sys_num < _solver_systems.size(),
+              "System number greater than the number of solver systems");
+  return *_solver_systems[sys_num];
+}
+
+SystemBase &
+FEProblemBase::systemBaseSolver(const unsigned int sys_num)
+{
+  mooseAssert(sys_num < _solver_systems.size(),
+              "System number greater than the number of solver systems");
+  return *_solver_systems[sys_num];
 }
 
 const SystemBase &
@@ -9053,6 +9088,12 @@ FEProblemBase::setMultiAppFixedPointConvergenceName(const ConvergenceName & conv
   _multiapp_fixed_point_convergence_name = convergence_name;
 }
 
+void
+FEProblemBase::setSteadyStateConvergenceName(const ConvergenceName & convergence_name)
+{
+  _steady_state_convergence_name = convergence_name;
+}
+
 const std::vector<ConvergenceName> &
 FEProblemBase::getNonlinearConvergenceNames() const
 {
@@ -9092,6 +9133,15 @@ FEProblemBase::getMultiAppFixedPointConvergenceName() const
     return _multiapp_fixed_point_convergence_name.value();
   else
     mooseError("The fixed point convergence name has not been set.");
+}
+
+const ConvergenceName &
+FEProblemBase::getSteadyStateConvergenceName() const
+{
+  if (_steady_state_convergence_name)
+    return _steady_state_convergence_name.value();
+  else
+    mooseError("The steady convergence name has not been set.");
 }
 
 void

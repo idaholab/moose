@@ -242,9 +242,10 @@ public:
    *
    * @tparam    T       enum type
    * @param[in] param   name of the MooseEnum parameter
+   * @param[in] log_error  If true, log an error if the valid is invalid
    */
   template <typename T>
-  T getEnumParam(const std::string & param) const;
+  T getEnumParam(const std::string & param, bool log_error = true) const;
 
   /**
    * Whether the problem is transient
@@ -274,62 +275,6 @@ public:
    * @return vector of coordinate system types for this component
    */
   virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() const;
-
-protected:
-  /**
-   * Initializes the component
-   *
-   * The reason this function exists (as opposed to just having everything in
-   * the constructor) is because some initialization depends on all components
-   * existing, since many components couple to other components. Therefore,
-   * when deciding whether code should go into the constructor or this function,
-   * one should use the following reasoning: if an operation does not require
-   * the existence of other components, then put that operation in the
-   * constructor; otherwise, put it in this function.
-   */
-  virtual void init() {}
-
-  /**
-   * Perform secondary initialization, which relies on init() being called
-   * for all components.
-   */
-  virtual void initSecondary() {}
-
-  /**
-   * Check the component integrity
-   */
-  virtual void check() const {}
-
-  /**
-   * Performs mesh setup such as creating mesh or naming mesh sets
-   */
-  virtual void setupMesh() {}
-
-  /**
-   * Method to add a relationship manager for the objects being added to the system. Relationship
-   * managers have to be added relatively early. In many cases before the Action::act() method
-   * is called.
-   *
-   * This method was copied from Action.
-   *
-   * @param moose_object_pars The MooseObject to inspect for RelationshipManagers to add
-   */
-  void addRelationshipManagersFromParameters(const InputParameters & moose_object_pars);
-
-  Node * addNode(const Point & pt);
-  Elem * addNodeElement(dof_id_type node);
-
-  /**
-   * Sets the next subdomain ID, name, and coordinate system
-   *
-   * @param[in] subdomain_id  subdomain index
-   * @param[in] subdomain_name  name of the new subdomain
-   * @param[in] coord_system  type of coordinate system
-   */
-  virtual void
-  setSubdomainInfo(SubdomainID subdomain_id,
-                   const std::string & subdomain_name,
-                   const Moose::CoordinateSystemType & coord_system = Moose::COORD_XYZ);
 
   /**
    * Runtime check to make sure that a parameter of specified type exists in the component's input
@@ -434,6 +379,62 @@ protected:
   void checkMutuallyExclusiveParameters(const std::vector<std::string> & params,
                                         bool need_one_specified = true) const;
 
+protected:
+  /**
+   * Initializes the component
+   *
+   * The reason this function exists (as opposed to just having everything in
+   * the constructor) is because some initialization depends on all components
+   * existing, since many components couple to other components. Therefore,
+   * when deciding whether code should go into the constructor or this function,
+   * one should use the following reasoning: if an operation does not require
+   * the existence of other components, then put that operation in the
+   * constructor; otherwise, put it in this function.
+   */
+  virtual void init() {}
+
+  /**
+   * Perform secondary initialization, which relies on init() being called
+   * for all components.
+   */
+  virtual void initSecondary() {}
+
+  /**
+   * Check the component integrity
+   */
+  virtual void check() const {}
+
+  /**
+   * Performs mesh setup such as creating mesh or naming mesh sets
+   */
+  virtual void setupMesh() {}
+
+  /**
+   * Method to add a relationship manager for the objects being added to the system. Relationship
+   * managers have to be added relatively early. In many cases before the Action::act() method
+   * is called.
+   *
+   * This method was copied from Action.
+   *
+   * @param moose_object_pars The MooseObject to inspect for RelationshipManagers to add
+   */
+  void addRelationshipManagersFromParameters(const InputParameters & moose_object_pars);
+
+  Node * addNode(const Point & pt);
+  Elem * addNodeElement(dof_id_type node);
+
+  /**
+   * Sets the next subdomain ID, name, and coordinate system
+   *
+   * @param[in] subdomain_id  subdomain index
+   * @param[in] subdomain_name  name of the new subdomain
+   * @param[in] coord_system  type of coordinate system
+   */
+  virtual void
+  setSubdomainInfo(SubdomainID subdomain_id,
+                   const std::string & subdomain_name,
+                   const Moose::CoordinateSystemType & coord_system = Moose::COORD_XYZ);
+
   /// Pointer to a parent component (used in composed components)
   Component * _parent;
 
@@ -536,11 +537,11 @@ Component::hasComponentByName(const std::string & comp_name) const
 
 template <typename T>
 T
-Component::getEnumParam(const std::string & param) const
+Component::getEnumParam(const std::string & param, bool log_error) const
 {
   const MooseEnum & moose_enum = getParam<MooseEnum>(param);
   const T value = THM::stringToEnum<T>(moose_enum);
-  if (static_cast<int>(value) < 0) // cast necessary for scoped enums
+  if (log_error && static_cast<int>(value) < 0) // cast necessary for scoped enums
   {
     // Get the keys from the MooseEnum. Unfortunately, this returns a list of
     // *all* keys, including the invalid key that was supplied. Thus, that key

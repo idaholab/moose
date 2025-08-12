@@ -192,7 +192,9 @@ class TestHarness:
     # 4 - Added 'validation' (tests/*/tests/validation) to Job output if set
     # 5 - Added validation data types (tests/*/tests/data/type) to Job output if set
     # 6 - Added 'testharness/validation_version'
-    RESULTS_VERSION = 6
+    # 7 - Moved test output files from test/*/tests/*/tester/output_files to
+    #     job output in test/*/tests/*/output_files
+    RESULTS_VERSION = 7
 
     # Validation version history:
     # 1 - Initial tracking of version
@@ -249,6 +251,10 @@ class TestHarness:
         harness = TestHarness.build(argv, app_name, moose_dir, *args, **kwargs)
         harness.findAndRunTests()
         sys.exit(harness.error_code)
+
+    @staticmethod
+    def validComputeDevices():
+        return ['cpu', 'cuda', 'hip', 'mps', 'ceed-cpu', 'ceed-cuda', 'ceed-hip']
 
     def __init__(self, argv: list, moose_dir: str, moose_python: str, test_root: TestRoot):
         self.moose_python_dir = moose_python
@@ -1121,6 +1127,7 @@ class TestHarness:
         parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
         parser.add_argument('--recover', action='store_true', dest='enable_recover', help='Run a test in recover mode')
         parser.add_argument('--recoversuffix', action='store', type=str, default='cpr', dest='recoversuffix', help='Set the file suffix for recover mode')
+        parser.add_argument('--restep', action='store_true', dest='enable_restep', help='Run a test in restep mode')
         parser.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         parser.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
         parser.add_argument('--valgrind-max-fails', nargs=1, type=int, dest='valgrind_max_fails', default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
@@ -1137,7 +1144,9 @@ class TestHarness:
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
         parser.add_argument('--distributed-mesh', action='store_true', dest='distributed_mesh', help='Pass "--distributed-mesh" to executable')
-        parser.add_argument('--libtorch-device', action='store', dest='libtorch_device', type=str, choices=['cpu', 'cuda', 'mps'], default='cpu', help='Run libtorch tests with this device')
+
+        parser.add_argument('--compute-device', action='store', dest='compute_device', type=str, choices=TestHarness.validComputeDevices(), default='cpu', help='Run libtorch or MFEM tests with this compute device; device availability depends on library support and compilation settings')
+
         parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors (Pass "--error" to executable)')
         parser.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (Pass "--error-unused" to executable)')
         parser.add_argument('--error-deprecated', action='store_true', help='Run the tests with errors on deprecations')
@@ -1234,8 +1243,14 @@ class TestHarness:
         if opts.check_input and opts.no_check_input:
             print('ERROR: --check-input and --no-check-input cannot be used simultaneously')
             sys.exit(1)
-        if opts.check_input and opts.enable_recover:
-            print('ERROR: --check-input and --recover cannot be used simultaneously')
+        has_flags = []
+        for var, flag in [('check_input', '--check-input'),
+                          ('enable_recover', '--recover'),
+                          ('enable_restep', '--restep')]:
+            if getattr(opts, var):
+                has_flags.append(flag)
+        if len(has_flags) > 1:
+            print('ERROR:', ' and '.join(has_flags), 'cannot be used together')
             sys.exit(1)
         if opts.spec_file:
             if not os.path.exists(opts.spec_file):

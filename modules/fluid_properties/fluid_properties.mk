@@ -27,6 +27,7 @@ GEN_REVISION_save := ${GEN_REVISION}
 
 # AIR
 ifneq ($(AIR_FP_CONTENT),)
+ifneq ($(BUILDING_FP_APP), air)
   AIR_DIR            := $(AIR_FP_DIR)
 	APPLICATION_DIR    := $(AIR_FP_DIR)
 	APPLICATION_NAME   := air
@@ -34,11 +35,13 @@ ifneq ($(AIR_FP_CONTENT),)
 	GEN_REVISION       := yes
 	DEPEND_MODULES     += fluid_properties
 	include            $(FRAMEWORK_DIR)/app.mk
-	include            $(AIR_DIR)/libSBTL_Air.mk
+	include            $(AIR_FP_DIR)/libSBTL_Air.mk
+endif
 endif
 
 # CARBON_DIOXIDE
 ifneq ($(CARBON_DIOXIDE_FP_CONTENT),)
+ifneq ($(BUILDING_FP_APP), carbon_dioxide)
   CARBON_DIOXIDE_DIR := $(CARBON_DIOXIDE_FP_DIR)
 	APPLICATION_DIR    := $(CARBON_DIOXIDE_FP_DIR)
 	APPLICATION_NAME   := carbon_dioxide
@@ -46,11 +49,13 @@ ifneq ($(CARBON_DIOXIDE_FP_CONTENT),)
 	GEN_REVISION       := yes
 	DEPEND_MODULES     += fluid_properties
 	include            $(FRAMEWORK_DIR)/app.mk
-	include            $(CARBON_DIOXIDE_DIR)/libSBTL_CarbonDioxide.mk
+	include            $(CARBON_DIOXIDE_FP_DIR)/libSBTL_CarbonDioxide.mk
+endif
 endif
 
 # NITROGEN
 ifneq ($(NITROGEN_FP_CONTENT),)
+ifneq ($(BUILDING_FP_APP), nitrogen)
 	NITROGEN_DIR       := $(NITROGEN_FP_DIR)
 	APPLICATION_DIR    := $(NITROGEN_FP_DIR)
 	APPLICATION_NAME   := nitrogen
@@ -58,11 +63,13 @@ ifneq ($(NITROGEN_FP_CONTENT),)
 	GEN_REVISION       := yes
 	DEPEND_MODULES     += fluid_properties
 	include            $(FRAMEWORK_DIR)/app.mk
-	include            $(NITROGEN_DIR)/libSBTL_Nitrogen.mk
+	include            $(NITROGEN_FP_DIR)/libSBTL_Nitrogen.mk
+endif
 endif
 
 # HELIUM
 ifneq ($(HELIUM_FP_CONTENT),)
+ifneq ($(BUILDING_FP_APP), helium)
 	HELIUM_DIR         := $(HELIUM_FP_DIR)
 	APPLICATION_DIR    := $(HELIUM_FP_DIR)
 	APPLICATION_NAME   := helium
@@ -70,11 +77,13 @@ ifneq ($(HELIUM_FP_CONTENT),)
 	GEN_REVISION       := yes
 	DEPEND_MODULES     += fluid_properties
 	include            $(FRAMEWORK_DIR)/app.mk
-	include            $(HELIUM_DIR)/libSBTL_Helium.mk
+	include            $(HELIUM_FP_DIR)/libSBTL_Helium.mk
+endif
 endif
 
 # POTASSIUM
 ifneq ($(POTASSIUM_FP_CONTENT),)
+ifneq ($(BUILDING_FP_APP), potassium)
 	POTASSIUM_DIR      := $(POTASSIUM_FP_DIR)
 	APPLICATION_DIR    := $(POTASSIUM_FP_DIR)
 	APPLICATION_NAME   := potassium
@@ -82,11 +91,13 @@ ifneq ($(POTASSIUM_FP_CONTENT),)
 	GEN_REVISION       := yes
 	DEPEND_MODULES     += fluid_properties
 	include            $(FRAMEWORK_DIR)/app.mk
-	include            $(POTASSIUM_DIR)/libPotassiumProperties.mk
+	include            $(POTASSIUM_FP_DIR)/libPotassiumProperties.mk
+endif
 endif
 
 # SODIUM
 ifneq ($(SODIUM_FP_CONTENT),)
+ifneq ($(BUILDING_FP_APP), sodium)
 	SODIUM_DIR         := $(SODIUM_FP_DIR)
 	APPLICATION_DIR    := $(SODIUM_FP_DIR)
 	APPLICATION_NAME   := sodium
@@ -94,7 +105,8 @@ ifneq ($(SODIUM_FP_CONTENT),)
 	GEN_REVISION       := yes
 	DEPEND_MODULES     += fluid_properties
 	include            $(FRAMEWORK_DIR)/app.mk
-	include            $(SODIUM_DIR)/libSodiumProperties.mk
+	include            $(SODIUM_FP_DIR)/libSodiumProperties.mk
+endif
 endif
 
 # If building any fluid property submodule, we need to clear those before app.mk gets included

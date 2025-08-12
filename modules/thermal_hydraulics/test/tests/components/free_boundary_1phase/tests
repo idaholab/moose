@@ -10,6 +10,7 @@
     cli_args = 'Outputs/out_mass/type=CSV Outputs/out_mass/execute_postprocessors_on=final Outputs/out_mass/show=mass_conservation'
     abs_zero = 1e-10
     rel_err = 1e-15
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to specify a free surface boundary at the inlet and outlet and show conservation of mass.'
   []
   [phy:momentum_1phase]
@@ -19,6 +20,7 @@
     cli_args = 'Outputs/out_momentum/type=CSV Outputs/out_momentum/execute_postprocessors_on=final Outputs/out_momentum/show=momentum_conservation'
     abs_zero = 1e-6
     rel_err = 1e-15
+    restep = false # Test is prescribed to abort on failed timestep
     prereq = 'phy:mass_1phase'
     requirement = 'The system shall be able to specify a free surface boundary at the inlet and outlet and show conservation of momentum.'
   []
@@ -29,6 +31,7 @@
     cli_args = 'Outputs/out_energy/type=CSV Outputs/out_energy/execute_postprocessors_on=final Outputs/out_energy/show=energy_conservation'
     abs_zero = 1e-2
     rel_err = 1e-15
+    restep = false # Test is prescribed to abort on failed timestep
     prereq = 'phy:momentum_1phase'
     requirement = 'The system shall be able to specify a free surface boundary at the inlet and outlet and show conservation of energy.'
   []

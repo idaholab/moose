@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "MFEMMixedBilinearFormKernel.h"
 
-/*
+/**
  * \f[
- * (\sigma \nabla V, u')
+ * (k \vec \nabla u, \vec v)
  * \f]
  */
 class MFEMMixedVectorGradientKernel : public MFEMMixedBilinearFormKernel
@@ -24,7 +24,7 @@ public:
 
   MFEMMixedVectorGradientKernel(const InputParameters & parameters);
 
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
+  virtual mfem::BilinearFormIntegrator * createMBFIntegrator() override;
 
 protected:
   mfem::Coefficient & _coef;

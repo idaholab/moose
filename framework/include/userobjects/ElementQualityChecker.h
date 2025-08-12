@@ -38,18 +38,21 @@ protected:
   Real _upper_bound;
   Real _lower_bound;
 
-  // minimum, maximum and summation of quality metric values of all checked elements
+  /// minimum, maximum and summation of quality metric values of all checked elements
   Real _m_min;
   Real _m_max;
   Real _m_sum;
-  // number of checked elements
+  /// number of checked elements
   unsigned int _checked_elem_num;
-  // set to save ids for all failed elements
+  /// set to save ids for all failed elements
   std::set<dof_id_type> _elem_ids;
-  // whether the element quality check is bypassed or not
+  /// whether the element quality check is bypassed or not
   bool _bypassed;
-  // set to save bypassed element type
+  /// set to save bypassed element type
   std::set<std::string> _bypassed_elem_type;
+
+  /// Whether to print element applicability warning for bypassed elements
+  const bool _suppress_invalid_metric_warning;
 
 private:
   enum class FailureType

@@ -119,11 +119,11 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
 }
 
 void
-TimeSequenceStepperBase::step()
+TimeSequenceStepperBase::acceptStep()
 {
-  TimeStepper::step();
-  if (converged() && !_executioner.fixedPointSolve().XFEMRepeatStep())
-    _current_step++;
+  TimeStepper::acceptStep();
+  if (MooseUtils::absoluteFuzzyGreaterEqual(_time, getNextTimeInSequence()))
+    increaseCurrentStep();
 }
 
 Real

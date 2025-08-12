@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMProblem.h"
 #include "MFEMInitialCondition.h"
@@ -34,6 +34,7 @@ MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(param
 {
   // Initialise Hypre for all MFEM problems.
   mfem::Hypre::Init();
+  setMesh();
 }
 
 void
@@ -51,21 +52,6 @@ MFEMProblem::setMesh()
   getProblemData().comm = pmesh->GetComm();
   MPI_Comm_size(pmesh->GetComm(), &(getProblemData().num_procs));
   MPI_Comm_rank(pmesh->GetComm(), &(getProblemData().myid));
-}
-
-void
-MFEMProblem::initProblemOperator()
-{
-  setMesh();
-  auto mfem_exec_ptr = dynamic_cast<MFEMExecutioner *>(_app.getExecutioner());
-  if (mfem_exec_ptr != nullptr)
-  {
-    mfem_exec_ptr->constructProblemOperator();
-  }
-  else
-  {
-    mooseError("Executioner used that is not currently supported by MFEMProblem");
-  }
 }
 
 void

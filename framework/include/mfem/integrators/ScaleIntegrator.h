@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "MFEMGeneralUserObject.h"
@@ -91,6 +91,12 @@ public:
 
   virtual void
   AssembleEA(const mfem::FiniteElementSpace & fes, mfem::Vector & emat, const bool add);
+
+  virtual void AssembleMF(const mfem::FiniteElementSpace & fes);
+
+  virtual void AddMultMF(const mfem::Vector & x, mfem::Vector & y) const;
+
+  virtual void AssembleDiagonalMF(mfem::Vector & diag);
 
   virtual ~ScaleIntegrator();
 };

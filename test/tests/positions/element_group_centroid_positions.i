@@ -1,7 +1,4 @@
 [Mesh]
-  # Need additional reductions in code for distributed
-  parallel_type = replicated
-
   [fmg]
     type = FileMeshGenerator
     file = 'depletion_id_in.e'

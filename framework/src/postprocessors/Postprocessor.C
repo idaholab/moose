@@ -19,8 +19,6 @@ Postprocessor::validParams()
   InputParameters params = UserObject::validParams();
   params += OutputInterface::validParams();
   params += NonADFunctorInterface::validParams();
-  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
-  exec_enum.addAvailableFlags(EXEC_TRANSFER);
 
   params.addParamNamesToGroup("outputs", "Advanced");
   params.registerBase("Postprocessor");

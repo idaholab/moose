@@ -1807,10 +1807,10 @@ TabulatedFluidProperties::checkInputVariables(T & pressure, T & temperature) con
       MooseUtils::absoluteFuzzyGreaterThan(temperature, _temperature_max, libMesh::TOLERANCE))
   {
     if (_OOBBehavior == Throw)
-      mooseError("Temperature " + Moose::stringify(temperature) +
-                 " is outside the range of tabulated temperature (" +
-                 Moose::stringify(_temperature_min) + ", " + Moose::stringify(_temperature_max) +
-                 ").");
+      throw MooseException("Temperature " + Moose::stringify(temperature) +
+                           " is outside the range of tabulated temperature (" +
+                           Moose::stringify(_temperature_min) + ", " +
+                           Moose::stringify(_temperature_max) + ").");
     else
     {
       temperature = std::max(T(_temperature_min), std::min(temperature, T(_temperature_max)));
@@ -1847,9 +1847,9 @@ TabulatedFluidProperties::checkInputVariablesVE(T & v, T & e) const
   if (v < _v_min || v > _v_max)
   {
     if (_OOBBehavior == Throw)
-      mooseError("Specific volume " + Moose::stringify(v) +
-                 " is outside the range of tabulated specific volumes (" +
-                 Moose::stringify(_v_min) + ", " + Moose::stringify(_v_max) + ").");
+      throw MooseException("Specific volume " + Moose::stringify(v) +
+                           " is outside the range of tabulated specific volumes (" +
+                           Moose::stringify(_v_min) + ", " + Moose::stringify(_v_max) + ").");
     else
     {
       v = std::max(T(_v_min), std::min(v, T(_v_max)));

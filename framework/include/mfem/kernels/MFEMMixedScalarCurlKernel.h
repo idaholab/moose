@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "MFEMMixedBilinearFormKernel.h"
 
-/*
+/**
  * \f[
- * (\lambda \nabla \times u, v)
+ * (k \vec \nabla \times \vec u, v)
  * \f]
  */
 class MFEMMixedScalarCurlKernel : public MFEMMixedBilinearFormKernel
@@ -24,7 +24,7 @@ public:
 
   MFEMMixedScalarCurlKernel(const InputParameters & parameters);
 
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
+  virtual mfem::BilinearFormIntegrator * createMBFIntegrator() override;
 
 protected:
   mfem::Coefficient & _coef;

@@ -37,8 +37,9 @@
     input = 'user_object.i'
     exodiff = 'user_object_out.e'
     issues = '#6097'
-    requirement = 'The crystal plasticity system shall use pluggable user objects to dtermine the plasticity state variable evolution'
+    requirement = 'The crystal plasticity system shall use pluggable user objects to determine the plasticity state variable evolution'
     design = '/FiniteStrainUObasedCP.md'
+    capabilities = 'method!=dbg'
   []
   [save_euler]
     type = 'Exodiff'
@@ -47,6 +48,7 @@
     issues = '#6097'
     requirement = 'The crystal plasticity system shall make local Euler angles at material points available for output'
     design = '/FiniteStrainUObasedCP.md'
+    capabilities = 'method!=dbg'
   []
   [substep]
     type = 'Exodiff'
@@ -56,6 +58,7 @@
     issues = '#6097'
     requirement = 'The crystal plasticity system shall provide a substepping capability for improved convergence'
     design = '/FiniteStrainUObasedCP.md'
+    capabilities = 'method!=dbg'
   []
   [linesearch]
     type = 'Exodiff'
@@ -72,6 +75,7 @@
     issues = '#10629'
     requirement = 'The crystal plasticity rotations shall correctly rotate the elasticity tensors at each material point'
     design = '/ComputeElasticityTensorCP.md'
+    capabilities = 'method!=dbg'
   []
   [user_object_Voce_BCC]
     type = 'Exodiff'
@@ -80,6 +84,7 @@
     issues = '#11307'
     requirement = 'The crystal plasticity system shall provide a plugin user object implementing the Voce hardening law'
     design = '/CrystalPlasticityStateVarRateComponentVoce.md'
+    capabilities = 'method!=dbg'
   []
   [patch_recovery]
     type = 'Exodiff'
@@ -92,6 +97,7 @@
                   "plasticity finite strain application."
     design = 'nodal_patch_recovery.md'
     issues = '#18721'
+    capabilities = 'method!=dbg'
   []
   [prop_block_read]
     type = 'Exodiff'
@@ -101,6 +107,7 @@
     requirement = 'The system shall provide an object to read values from a file and map them onto a mesh besed on mesh block IDs'
     design = 'PropertyReadFile.md'
     allow_warnings = true # number of blocks is smaller than number of data points in CSV file
+    capabilities = 'method!=dbg'
   []
   [use_substep_dt]
     type = 'CSVDiff'
@@ -111,5 +118,6 @@
     issues = '#17340'
     requirement = 'The system shall apply correct boundary condition after timestep being cut during substepping'
     design = '/FiniteStrainUObasedCP.md'
+    capabilities = 'method!=dbg'
   []
 []

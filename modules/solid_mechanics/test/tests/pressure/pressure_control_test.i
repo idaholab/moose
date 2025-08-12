@@ -102,9 +102,10 @@
     # Side1 for initial and second time step
     start_time = 0
     # Then both Side2 and Side3
-    end_time = 0.9
+    end_time = 1.1
     # All Pressure are controlled outside of the period as well
     reverse_on_false = true
+    execute_on = 'initial timestep_begin'
   []
 []
 

@@ -14,6 +14,7 @@
     csvdiff = 'rotate_out.csv'
     requirement = "Stress state correctly rotates from step 10 to the final step with the updated "
                   "Lagrangian formulation"
+    capabilities = 'method!=dbg'
   []
   [truesdell]
     type = Exodiff

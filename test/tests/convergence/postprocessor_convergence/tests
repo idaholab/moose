@@ -1,11 +1,18 @@
 [Tests]
   design = 'PostprocessorConvergence.md'
-  issues = '#28765'
 
-  [test]
+  [nonlinear]
     type = CSVDiff
-    input = 'postprocessor_convergence.i'
-    csvdiff = 'postprocessor_convergence_out.csv'
-    requirement = 'The system shall be able to terminate iteration according to a post-processor value.'
+    input = 'nonlinear.i'
+    csvdiff = 'nonlinear_out.csv'
+    requirement = 'The system shall be able to terminate nonlinear iteration according to a post-processor value.'
+    issues = '#28765'
+  []
+  [multiapp_fp]
+    type = CSVDiff
+    input = 'multiapp_fp.i'
+    csvdiff = 'multiapp_fp_out.csv'
+    requirement = 'The system shall be able to terminate MultiApp fixed point iteration according to a post-processor value.'
+    issues = '#30784'
   []
 []

@@ -10,6 +10,7 @@
       input = 'parent.i'
       exodiff = 'parent_out.e parent_out_sub0.e'
       allow_warnings = true
+      restep = false # This is already testing what happens when a timestep is repeated
 
       detail = "The simulation shall continue by reducing the time step and"
     []

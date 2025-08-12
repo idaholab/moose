@@ -11,7 +11,7 @@
 [SubMeshes]
   [exterior]
     type = MFEMBoundarySubMesh
-    boundary = 3
+    boundary = curved_surface
   []
 []
 

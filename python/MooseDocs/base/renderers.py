@@ -233,6 +233,8 @@ class HTMLRenderer(Renderer):
         config['favicon'] = (None, "The location of the website favicon.")
         config['extra-css'] = ([], "List of additional CSS files to include.")
         config['extra-js'] = ([],"List of additional JS files to include.")
+        config['with_dap'] = (None, "If set, enable DAP (Digital Analytics Program " \
+                              ", see digital.gov/guides/dap) for this agency")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -296,6 +298,19 @@ class HTMLRenderer(Renderer):
         if favicon:
             html.Tag(head, 'link', rel="icon", type="image/x-icon", href=rel(favicon), \
                      sizes="16x16 32x32 64x64 128x128")
+
+        # Add the DAP Google Analytics script (see digital.gov/guides/dap)
+        with_dap = self.get('with_dap')
+        if with_dap:
+            assert isinstance(with_dap, str)
+            html.Tag(
+                body.parent,
+                'script',
+                **{'async': True},
+                type='text/javascript',
+                src=f'https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency={with_dap}',
+                id='_fed_an_ua_tag'
+            )
 
         # Add the extra-css, this is done here to make sure it shows up last
         files = {**self.__global_files, **page.get('renderer_files', dict())}

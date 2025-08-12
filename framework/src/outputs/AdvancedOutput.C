@@ -140,6 +140,7 @@ AdvancedOutput::AdvancedOutput(const InputParameters & parameters)
                                                            : false),
     _scalar_as_nodal(isParamValid("scalar_as_nodal") ? getParam<bool>("scalar_as_nodal") : false),
     _reporter_data(_problem_ptr->getReporterData()),
+    _last_execute_time(declareRecoverableData<std::map<std::string, Real>>("last_execute_time")),
     _postprocessors_as_reporters(getParam<bool>("postprocessors_as_reporters")),
     _vectorpostprocessors_as_reporters(getParam<bool>("vectorpostprocessors_as_reporters"))
 {

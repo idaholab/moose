@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMDataCollection.h"
 
@@ -52,6 +52,9 @@ MFEMDataCollection::output()
   // Write fields to disk
   dc.SetCycle(getFileNumber());
   dc.SetTime(time());
+  if (gridFunctionsNeedHostRead())
+    for (auto & [_, gf_ptr] : _problem_data.gridfunctions)
+      gf_ptr->HostRead();
   dc.Save();
   _file_num++;
 }

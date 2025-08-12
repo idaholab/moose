@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMMixedVectorGradientKernel.h"
 #include "MFEMProblem.h"
@@ -28,15 +28,14 @@ MFEMMixedVectorGradientKernel::validParams()
 }
 
 MFEMMixedVectorGradientKernel::MFEMMixedVectorGradientKernel(const InputParameters & parameters)
-  : MFEMMixedBilinearFormKernel(parameters),
-    // FIXME: The MFEM bilinear form can also handle vector and matrix
-    // coefficients, so ideally we'd handle all three too.
-    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+  : MFEMMixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
+// FIXME: The MFEM bilinear form can also handle vector and matrix
+// coefficients, so ideally we'd handle all three too.
 {
 }
 
 mfem::BilinearFormIntegrator *
-MFEMMixedVectorGradientKernel::createBFIntegrator()
+MFEMMixedVectorGradientKernel::createMBFIntegrator()
 {
   return new mfem::MixedVectorGradientIntegrator(_coef);
 }

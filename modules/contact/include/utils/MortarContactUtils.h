@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include "MooseConfig.h"
-
 #include "FEProblemBase.h"
 #include "ADReal.h"
 #include "RankTwoTensor.h"

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMMixedScalarCurlKernel.h"
 #include "MFEMProblem.h"
@@ -28,13 +28,12 @@ MFEMMixedScalarCurlKernel::validParams()
 }
 
 MFEMMixedScalarCurlKernel::MFEMMixedScalarCurlKernel(const InputParameters & parameters)
-  : MFEMMixedBilinearFormKernel(parameters),
-    _coef(getScalarCoefficient(getParam<MFEMScalarCoefficientName>("coefficient")))
+  : MFEMMixedBilinearFormKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
 
 mfem::BilinearFormIntegrator *
-MFEMMixedScalarCurlKernel::createBFIntegrator()
+MFEMMixedScalarCurlKernel::createMBFIntegrator()
 {
   return new mfem::MixedScalarCurlIntegrator(_coef);
 }

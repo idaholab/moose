@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "MFEMKernel.h"
 
-/*
+/**
  * \f[
- * (\sigma u, \nabla V')
+ * - (k \vec u, \vec \nabla v)
  * \f]
  */
 class MFEMVectorFEWeakDivergenceKernel : public MFEMKernel

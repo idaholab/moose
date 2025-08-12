@@ -7,16 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMDivAux.h"
 #include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMDivAux);
 
-/*
-Class to set an L2 auxvariable to be the divergence of a H(div) vector variable.
-*/
 InputParameters
 MFEMDivAux::validParams()
 {

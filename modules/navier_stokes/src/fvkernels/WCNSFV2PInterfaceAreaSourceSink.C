@@ -127,7 +127,7 @@ WCNSFV2PInterfaceAreaSourceSink::computeQpResidual()
   if (_w_var)
     velocity(2) = (*_w_var)(elem_arg, state);
 
-  const ADReal velocity_norm = NS::computeSpeed(velocity);
+  const ADReal velocity_norm = NS::computeSpeed<ADReal>(velocity);
   const auto pressure_gradient = raw_value(_pressure.gradient(elem_arg, state));
   const Real pressure_grad_norm =
       MooseUtils::isZero(pressure_gradient) ? 1e-42 : pressure_gradient.norm();

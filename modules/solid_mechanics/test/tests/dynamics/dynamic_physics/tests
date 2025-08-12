@@ -1,0 +1,86 @@
+[tests]
+  [dynamic_physics_2d_plane_strain_small]
+    type = 'CSVDiff'
+    input = 'dynamic_physics_2d_planar.i'
+    cli_args = 'Mesh/use_displaced_mesh=false '
+               'Outputs/file_base=dynamic_physics_2d_plane_strain_small_out'
+    csvdiff = 'dynamic_physics_2d_plane_strain_small_out.csv'
+    requirement = "The Physics/SolidMechanics/Dynamics block shall correctly set up "
+                  "the objects to solve 2D small-strain models with plane-strain "
+                  "assumptions."
+    design = "Dynamics.md"
+    issues = "#31007"
+  []
+  [dynamic_physics_2d_plane_strain_finite]
+    type = 'CSVDiff'
+    input = 'dynamic_physics_2d_planar.i'
+    cli_args = 'Physics/SolidMechanics/Dynamic/all/strain=FINITE '
+               'Outputs/file_base=dynamic_physics_2d_plane_strain_finite_out'
+    csvdiff = 'dynamic_physics_2d_plane_strain_finite_out.csv'
+    requirement = "The Physics/SolidMechanics/Dynamics block shall correctly set up "
+                  "the objects to solve 2D finite-strain models with plane-strain "
+                  "assumptions."
+    design = "Dynamics.md"
+    issues = "#31007"
+  []
+  [dynamic_physics_2d_plane_stress_small]
+    type = 'CSVDiff'
+    input = 'dynamic_physics_2d_planar.i'
+    cli_args = 'Mesh/use_displaced_mesh=false '
+               'GlobalParams/out_of_plane_strain=strain_zz_var '
+               'Variables/strain_zz_var/enable=true '
+               'Physics/SolidMechanics/Dynamic/all/planar_formulation=WEAK_PLANE_STRESS '
+               'Outputs/file_base=dynamic_physics_2d_plane_stress_small_out'
+    csvdiff = 'dynamic_physics_2d_plane_stress_small_out.csv'
+    requirement = "The Physics/SolidMechanics/Dynamics block shall correctly set up "
+                  "the objects to solve 2D small-strain models with plane-stress "
+                  "assumptions."
+    design = "Dynamics.md"
+    issues = "#31007"
+  []
+  [dynamic_physics_2d_plane_stress_finite]
+    type = 'CSVDiff'
+    input = 'dynamic_physics_2d_planar.i'
+    cli_args = 'GlobalParams/out_of_plane_strain=strain_zz_var '
+               'Variables/strain_zz_var/enable=true '
+               'Physics/SolidMechanics/Dynamic/all/planar_formulation=WEAK_PLANE_STRESS '
+               'Physics/SolidMechanics/Dynamic/all/strain=FINITE '
+               'Outputs/file_base=dynamic_physics_2d_plane_stress_finite_out'
+    csvdiff = 'dynamic_physics_2d_plane_stress_finite_out.csv'
+    requirement = "The Physics/SolidMechanics/Dynamics block shall correctly set up "
+                  "the objects to solve 2D finite-strain models with plane-stress "
+                  "assumptions."
+    design = "Dynamics.md"
+    issues = "#31007"
+  []
+  [dynamic_physics_2d_generalized_plane_strain_small]
+    type = 'CSVDiff'
+    input = 'dynamic_physics_2d_planar.i'
+    csvdiff = 'dynamic_physics_2d_generalized_plane_strain_small_out.csv'
+    cli_args = 'Mesh/use_displaced_mesh=false '
+               'Variables/strain_zz_var/family=SCALAR '
+               'Physics/SolidMechanics/Dynamic/all/planar_formulation=GENERALIZED_PLANE_STRAIN '
+               'Physics/SolidMechanics/Dynamic/all/scalar_out_of_plane_strain=strain_zz_var '
+               'Outputs/file_base=dynamic_physics_2d_generalized_plane_strain_small_out'
+    requirement = "The Physics/SolidMechanics/Dynamics block shall correctly set up "
+                  "the objects to solve 2D small-strain models with generalized plane strain "
+                  "assumptions."
+    design = "Dynamics.md"
+    issues = "#31007"
+  []
+  [dynamic_physics_2d_generalized_plane_strain_finite]
+    type = 'CSVDiff'
+    input = 'dynamic_physics_2d_planar.i'
+    csvdiff = 'dynamic_physics_2d_generalized_plane_strain_finite_out.csv'
+    cli_args = 'Variables/strain_zz_var/family=SCALAR '
+               'Physics/SolidMechanics/Dynamic/all/planar_formulation=GENERALIZED_PLANE_STRAIN '
+               'Physics/SolidMechanics/Dynamic/all/scalar_out_of_plane_strain=strain_zz_var '
+               'Physics/SolidMechanics/Dynamic/all/strain=FINITE '
+               'Outputs/file_base=dynamic_physics_2d_generalized_plane_strain_finite_out'
+    requirement = "The Physics/SolidMechanics/Dynamics block shall correctly set up "
+                  "the objects to solve 2D finite-strain models with generalized plane strain "
+                  "assumptions."
+    design = "Dynamics.md"
+    issues = "#31007"
+  []
+[]

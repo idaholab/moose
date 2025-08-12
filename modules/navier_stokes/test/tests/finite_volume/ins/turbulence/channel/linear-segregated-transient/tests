@@ -1,0 +1,15 @@
+[Tests]
+  design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
+  issues = '#29846'
+  [channel_ERCOFTAC_linear_transient]
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC.i'
+    csvdiff = 'channel_ERCOFTAC_out_line_center_channel_0001.csv channel_ERCOFTAC_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_out_side_bottom_0001.csv channel_ERCOFTAC_out_side_top_0001.csv'
+    abs_zero = 5e-6
+    rel_err = 5e-6
+    capabilities = 'method!=dbg'
+    recover = false # we don't support recovery for PIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    requirement = 'The system shall be able to solve transient fluid flow problems with the linear finite volume discretization and with k-epsilon turbulence model for a channel, and reach converged results with segregated solvers.'
+  []
+[]

@@ -8,21 +8,32 @@ function do_build(){
     fi
     # shellcheck disable=SC2086  # we want word spliting when dealing with passing arguments
     ./configure --prefix="${PREFIX:?}/moose" ${MOOSE_OPTIONS:-''} || return 1
-    CORES="${MOOSE_JOBS:-2}"
+    local CORES="${MOOSE_JOBS:-2}"
 
-    # moose_test-opt
+    # moose_test-opt; docs will come from combined so explicitly
+    # don't build them here
     cd test
-    make -j "${CORES:?}"
-    make install -j "${CORES:?}"
+    make -j "${CORES:?}" || return $?
+    MOOSE_SKIP_DOCS=1 make install -j "${CORES:?}" || return $?
+    "${PREFIX:?}/moose/bin/moose_test-opt" --help || return $?
 
     # combined-opt
     cd ../modules/combined
-    make -j "${CORES:?}" || return 1
-    make install -j "${CORES:?}" || return 1
+    make -j "${CORES:?}" || return $?
+    make install -j "${CORES:?}" || return $?
+    "${PREFIX:?}/moose/bin/combined-opt" --help || return $?
 }
 
 # shellcheck disable=SC1091  # made available through meta.yaml src path
 source "${SRC_DIR:?}/retry_build.sh"
+
+# Conda on mac sets "-Wl,-dead_strip_dylibs" in LDFLAGS, which is picked up
+# during the application executable linking. Unfortunately, we end up with
+# intermediate dead dylibs during our build/install (which we do fix later!).
+# So... remove that flag on macs? Good, try conda.
+if [[ "$(uname)" == "Darwin" ]]; then
+  export LDFLAGS="${LDFLAGS//-Wl,-dead_strip_dylibs/}"
+fi
 
 # Sets up retry functions and calls do_build. Blocking until success
 # or 3 failed attempts, or 1 unknown/unhandled failure

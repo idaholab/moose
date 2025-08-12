@@ -1,0 +1,73 @@
+[Tests]
+  [stitched_mesh_generator]
+    design = 'meshgenerators/StitchMeshGenerator.md'
+    issues = '#11640 #31191'
+    requirement = "The system shall support the creation of a finite element mesh from existing "
+                  "meshes"
+
+    [mesh_only]
+      type = 'Exodiff'
+      input = 'stitched_mesh_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'stitched_mesh_generator_in.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "by 'stitching' them together,"
+    []
+
+    [overlapping_bids]
+      type = 'Exodiff'
+      input = 'stitched_mesh_generator.i'
+      cli_args = '--mesh-only stitched_no_merging_ids.e'
+      exodiff = 'stitched_no_merging_ids.e'
+      exodiff_opts = '-pedantic'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "by preventing boundary merging based on ids during stitching and"
+    []
+
+    [simulation]
+      type = 'Exodiff'
+      input = 'stitched_mesh_generator2.i'
+      exodiff = 'stitched_mesh_generator2_out.e'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = "be able to utilize the resulting mesh in a simulation."
+    []
+  []
+  [stitch_block_names]
+    type = 'Exodiff'
+    design = 'meshgenerators/StitchMeshGenerator.md'
+    issues = '#30801'
+    input = 'stitch_block_names.i'
+    cli_args = '--mesh-only'
+    exodiff = 'stitch_block_names_in.e'
+    exodiff_opts = '-match_by_name -pedantic'
+    recover = false
+
+    requirement = "The system shall be able to combine subdomain names when stitching meshes"
+  []
+  [dont_stitch_block_names]
+    type = 'Exodiff'
+    design = 'meshgenerators/StitchMeshGenerator.md'
+    issues = '#30801'
+    input = 'stitch_block_names.i'
+    cli_args = '--mesh-only dont_stitch_block_names_in.e Mesh/stitch/subdomain_remapping=false'
+    exodiff = 'dont_stitch_block_names_in.e'
+    exodiff_opts = '-match_by_name -pedantic'
+    recover = false
+
+    requirement = "The system shall retain backwards compatibility with older stitching behavior"
+  []
+  [samename-warning]
+    type = RunException
+    design = 'meshgenerators/StitchMeshGenerator.md'
+    issues = '#28049'
+    requirement = "The system shall warn the user if boundary ID renumbering is disabled and it detects the same ID with different boundary names on the two meshes"
+    expect_err = "Boundary ID 1 corresponds to different boundary names on the input meshes! On the first mesh it corresponds to `right` while on the second mesh it corresponds to `bazinga`."
+    input = 'stitched_mesh_generator_sameid.i'
+  []
+[]

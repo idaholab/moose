@@ -12,7 +12,7 @@ Fixed temperatures at the boundary conditions are simple but not realistic. We w
 
 !!end-intro
 
-<!-- See index.md, the boundary conditions system is presented here -->
+!! See index.md, the boundary conditions system is presented there
 
 !---
 

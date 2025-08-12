@@ -37,8 +37,8 @@ if MOOSE_DIR is None:
     print("The MOOSE_DIR environment must be set, this should be set within moosedocs.py.")
     sys.exit(1)
 
-# Initialize submodule(s)
-mooseutils.git_init_submodule('large_media', MOOSE_DIR)
+# Initialize submodule(s) with progress output
+mooseutils.git_init_submodule('large_media', MOOSE_DIR, True)
 
 # List all files, this is done here to avoid running this command many times
 ls_files = mooseutils.git_ls_files if is_git_repo else mooseutils.list_files

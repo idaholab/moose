@@ -41,6 +41,10 @@ class TestValidation(TestHarnessTestCase):
         self.assertEqual(validation, validation_gold)
 
     def test(self):
+        """
+        Tests running a basic validation case with the TestHarness,
+        using the `ok` test in the `validation` test spec
+        """
         results = self.runTests('-i', 'validation', '--re', 'ok')
         out = results.results
         self.assertEqual(out['testharness']['validation_version'],
@@ -114,10 +118,40 @@ class TestValidation(TestHarnessTestCase):
 
         # Check timing; validation execution exists
         timing = test['timing']
-        self.assertIn('validation_init', timing)
         self.assertIn('validation_run', timing)
 
+    def testCSV(self):
+        """
+        Tests running a basic CSV validation case with the TestHarness,
+        using the `csv` test in the `validation` test spec.
+        """
+        results = self.runTests('-i', 'validation', '--re', 'csv')
+        out = results.results
+        harness = results.harness
+        self.assertEqual(out['testharness']['validation_version'],
+                         results.harness.VALIDATION_VERSION)
+
+        test = out['tests']['tests/test_harness']['tests']['csv']
+        status = test['status']
+        self.assertEqual(status['status'], 'OK')
+
+        # Validation entry
+        validation = test['validation']
+        # Compare against the golded values
+        # If this fails, you can regold by setting rewrite = true in compareGold
+        self.compareGold(validation, 'testcsv')
+
+        # Make sure the output path shows up in output files
+        job = harness.finished_jobs[0]
+        csv = os.path.join(job.getTestDir(), job.validation_cases[0].getParam('validation_csv'))
+        self.assertIn(csv, job.getOutputFiles(harness.options))
+
     def testFail(self):
+        """
+        Tests running a basic validation case with the TestHarness
+        that fails, using the `fail` test in the `validation`
+        test spec
+        """
         out = self.runTests('-i', 'validation', '--re', 'fail', exit_code=132).results
         test = out['tests']['tests/test_harness']['tests']['fail']
         status = test['status']
@@ -155,6 +189,11 @@ class TestValidation(TestHarnessTestCase):
         self.assertIn('Acquired 1 data value(s), 1 result(s): 0 ok, 1 fail, 0 skip', validation_output)
 
     def testException(self):
+        """
+        Tests running a basic validation case with the TestHarness
+        that throws a python exception, using the `exception` test
+        in the `validation` test spec
+        """
         out = self.runTests('-i', 'validation', '--re', 'exception', exit_code=132).results
         test = out['tests']['tests/test_harness']['tests']['exception']
         status = test['status']
@@ -172,11 +211,39 @@ class TestValidation(TestHarnessTestCase):
         self.assertIn('Exception: foo', validation_output)
         self.assertIn('Encountered exception(s) while running tests', validation_output)
 
+    def testInitException(self):
+        """
+        Tests a validation case initialization failure using the
+        `validation_init_exception` test spec
+        """
+        out = self.runTests('-i', 'validation_init_exception', exit_code=132).results
+        test = out['tests']['tests/test_harness']['tests']['test']
+
+        # Should have failed
+        status = test['status']
+        self.assertEqual(status['status'], 'ERROR')
+        self.assertEqual(status['status_message'], 'VALIDATION INIT EXCEPTION')
+
+        # Check that the exception is in on screen output
+        output = test['output']['job']
+        self.assertIn("Python exception encountered in validation case", output)
+        self.assertIn("validation_init_exception.py", output)
+        self.assertIn("raise Exception('foo')", output)
+
     def testBadPython(self):
+        """
+        Tests running a validation case with the TestHarness that
+        has invalid python syntax, using the `validation_bad_python`
+        test spec
+        """
         out = self.runTests('-i', 'validation_bad_python', exit_code=128).output
         self.assertIn('validation_bad_python:   invalid syntax (validation_badpython.py, line 1)', out)
 
     def testDuplicateParam(self):
+        """
+        Tests a validation case that specifies the same parameter
+        multiple times from different cases
+        """
         out = self.runTests('-i', 'validation_duplicate_param', exit_code=128).output
         self.assertIn('Duplicate parameter "type" from validation test', out)
 

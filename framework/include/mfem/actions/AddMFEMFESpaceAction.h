@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 
@@ -15,7 +15,7 @@
 #include "MFEMProblem.h"
 /**
  * This class allows us to have a section of the input file like the
- * following to add MFEM coefficients to the problem.
+ * following to add MFEM finite element spaces to the problem.
  *
  * [FESpaces]
  * []

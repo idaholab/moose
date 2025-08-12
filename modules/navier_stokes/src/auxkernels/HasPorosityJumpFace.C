@@ -24,7 +24,7 @@ HasPorosityJumpFace::validParams()
 }
 
 HasPorosityJumpFace::HasPorosityJumpFace(const InputParameters & parameters)
-  : AuxKernel(parameters), _eps(getFunctor<ADReal>(NS::porosity))
+  : AuxKernel(parameters), _eps(getFunctor<Real>(NS::porosity))
 {
   if (isNodal())
     mooseError("This AuxKernel only supports Elemental fields");

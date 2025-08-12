@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMSolverBase.h"
 
@@ -56,5 +56,26 @@ template void MFEMSolverBase::setPreconditioner(mfem::GMRESSolver &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreFGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HyprePCG &);
+
+bool
+MFEMSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf) const
+{
+  bool equiv = true;
+
+  if (auto fec = dynamic_cast<const mfem::ND_FECollection *>(blf.FESpace()->FEColl()))
+  {
+    if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
+        fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
+      equiv = false;
+  }
+  else if (auto fec = dynamic_cast<const mfem::RT_FECollection *>(blf.FESpace()->FEColl()))
+  {
+    if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
+        fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
+      equiv = false;
+  }
+
+  return equiv;
+}
 
 #endif

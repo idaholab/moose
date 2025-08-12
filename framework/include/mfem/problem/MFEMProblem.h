@@ -7,13 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
-#include "MFEMExecutioner.h"
 
 class MFEMProblem : public ExternalProblem
 {
@@ -25,7 +24,6 @@ public:
 
   virtual void initialSetup() override;
   virtual void externalSolve() override {}
-  virtual bool nlConverged(const unsigned int) override { return true; }
   virtual void syncSolutions(Direction) override {}
 
   /**
@@ -71,10 +69,8 @@ public:
   void setMesh();
 
   /**
-   * Initialise the required ProblemOperator used in the Executioner to solve the problem.
+   * Add an MFEM SubMesh to the problem.
    */
-  void initProblemOperator();
-
   void addSubMesh(const std::string & user_object_name,
                   const std::string & name,
                   InputParameters & parameters);

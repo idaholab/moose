@@ -481,9 +481,10 @@ MultiApp::readCommandLineArguments()
         MooseUtils::checkFileReadable(cli_args_file);
 
         std::ifstream is(cli_args_file.c_str());
-        std::copy(std::istream_iterator<std::string>(is),
-                  std::istream_iterator<std::string>(),
-                  std::back_inserter(cli_args));
+        // Read by line rather than space separated like the cli_args parameter
+        std::string line;
+        while (std::getline(is, line))
+          cli_args.push_back(line);
 
         // We do not allow empty files
         if (!cli_args.size())
@@ -662,6 +663,9 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
     timestep_tol =
         dynamic_cast<TransientBase *>(_fe_problem.getMooseApp().getExecutioner())->timestepTol();
 
+  // Determination on whether we need to backup the app due to changes below
+  bool backup_apps = false;
+
   // First, see if any Apps need to be reset
   for (unsigned int i = 0; i < _reset_times.size(); i++)
   {
@@ -696,6 +700,9 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
         if (target_time + timestep_tol >= _reset_times[j])
           _reset_happened[j] = true;
 
+      // Backup in case the next solve fails
+      backup_apps = true;
+
       break;
     }
   }
@@ -706,7 +713,13 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
     _move_happened = true;
     for (unsigned int i = 0; i < _move_apps.size(); i++)
       moveApp(_move_apps[i], _move_positions[i]);
+
+    // Backup in case the next solve fails
+    backup_apps = true;
   }
+
+  if (backup_apps)
+    backup();
 }
 
 Executioner *
@@ -778,12 +791,17 @@ MultiApp::restore(bool force)
 
       for (unsigned int i = 0; i < _my_num_apps; i++)
       {
-        _end_solutions[i] = _apps[i]
-                                ->getExecutioner()
-                                ->feProblem()
-                                .getNonlinearSystemBase(/*nl_sys=*/0)
-                                .solution()
-                                .clone();
+        _end_solutions[i].resize(_apps[i]->getExecutioner()->feProblem().numSolverSystems());
+        for (unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numSolverSystems();
+             j++)
+        {
+          _end_solutions[i][j] = _apps[i]
+                                     ->getExecutioner()
+                                     ->feProblem()
+                                     .getSolverSystem(/*solver_sys=*/j)
+                                     .solution()
+                                     .clone();
+        }
         auto & sub_multiapps =
             _apps[i]->getExecutioner()->feProblem().getMultiAppWarehouse().getObjects();
 
@@ -822,11 +840,15 @@ MultiApp::restore(bool force)
     {
       for (unsigned int i = 0; i < _my_num_apps; i++)
       {
-        _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase(/*nl_sys=*/0).solution() =
-            *_end_solutions[i];
+        for (unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numSolverSystems();
+             j++)
+        {
+          _apps[i]->getExecutioner()->feProblem().getSolverSystem(/*solver_sys=*/j).solution() =
+              *_end_solutions[i][j];
 
-        // We need to synchronize solution so that local_solution has the right values
-        _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase(/*nl_sys=*/0).update();
+          // We need to synchronize solution so that local_solution has the right values
+          _apps[i]->getExecutioner()->feProblem().getSolverSystem(/*solver_sys=*/j).update();
+        }
       }
 
       _end_solutions.clear();
@@ -845,6 +867,16 @@ MultiApp::restore(bool force)
 
       _end_aux_solutions.clear();
     }
+
+    // Make sure the displaced mesh on the multiapp is up-to-date with displacement variables
+    for (const auto & app_ptr : _apps)
+      if (app_ptr->feProblem().getDisplacedProblem())
+        app_ptr->feProblem().getDisplacedProblem()->updateMesh();
+
+    // If we are restoring due to a failed solve, make sure reset the solved state in the sub-apps
+    if (!getMooseApp().getExecutioner()->lastSolveConverged())
+      for (auto & app_ptr : _apps)
+        app_ptr->getExecutioner()->fixedPointSolve().clearFixedPointStatus();
   }
   else
   {
@@ -1136,6 +1168,13 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
   app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
+#ifdef MOOSE_MFEM_ENABLED
+  app_params.set<std::shared_ptr<mfem::Device>>("_mfem_device") =
+      _app.getMFEMDevice(Moose::PassKey<MultiApp>());
+  const auto & mfem_device_set = _app.getMFEMDevices(Moose::PassKey<MultiApp>());
+  app_params.set<std::vector<std::string>>("_mfem_devices") =
+      std::vector<std::string>(mfem_device_set.begin(), mfem_device_set.end());
+#endif
   if (getParam<bool>("clone_master_mesh") || getParam<bool>("clone_parent_mesh"))
   {
     if (_fe_problem.verboseMultiApps())

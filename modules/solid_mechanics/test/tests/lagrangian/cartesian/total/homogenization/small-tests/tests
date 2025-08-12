@@ -51,6 +51,7 @@
                "none strain strain strain' targets='strain11 strain12 strain22 strain13 strain23 "
                "strain33'"
     requirement = "Homogenization with strain constraints hits the targets in 3D"
+    capabilities = 'method!=dbg'
   []
   [3d-stress]
     type = CSVDiff
@@ -60,6 +61,7 @@
                "none stress stress stress' targets='stress11 stress12 stress22 stress13 stress23 "
                "stress33'"
     requirement = "Homogenization with stress constraints hits the targets in 3D"
+    capabilities = 'method!=dbg'
   []
   [3d-mixed]
     type = CSVDiff
@@ -69,5 +71,6 @@
                "stress stress stress' targets='stress11 strain12 strain22 stress13 stress23 "
                "stress33'"
     requirement = "Homogenization with mixed stress and strain constraints hits the targets in 3D"
+    capabilities = 'method!=dbg'
   []
 []

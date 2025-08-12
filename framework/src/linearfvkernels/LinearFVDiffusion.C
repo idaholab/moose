@@ -169,18 +169,22 @@ LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
 
   if (_use_nonorthogonal_correction && diff_bc->useBoundaryGradientExtrapolation())
   {
-    const auto correction_vector =
-        _current_face_info->normal() -
-        1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
-
-    // We might be on a face which is an internal boundary so we want to make sure we
-    // get the gradient from the right side.
+    // We support internal boundaries as well. In that case we have to decide on which side
+    // of the boundary we are on.
     const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
+    const Real boundary_normal_multiplier =
+        (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
+
+    // Unit vector to the boundary. Unfortunately, we have to recompute it because the value
+    // stored in the face info is only correct for external boundaries
+    const auto e_Cf = _current_face_info->faceCentroid() - elem_info->centroid();
+    const auto correction_vector =
+        _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;
 
     grad_contrib += _diffusion_coeff(face_arg, determineState()) * _var.gradSln(*elem_info) *
-                    correction_vector * _current_face_area;
+                    boundary_normal_multiplier * correction_vector * _current_face_area;
   }
 
   return grad_contrib;

@@ -32,6 +32,7 @@
       Outputs/checkpoint=true
       Outputs/file_base=part1_out'
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
 
     requirement = 'The system shall be able to model a motor connected to a shaft.'
   []
@@ -56,6 +57,7 @@
     csvdiff = clg.test.torque.csv
     input = 'clg.test.i'
     cli_args = 'ControlLogic/motor_ctrl/parameter=torque ControlLogic/motor_ctrl/function=torque_fn Postprocessors/test/parameter=torque Outputs/file_base=clg.test.torque'
+    restep = false # Test is prescribed to abort on failed timestep
 
     requirement = 'The system shall allow the torque of a shaft-connected motor to be controlled.'
   []
@@ -65,6 +67,7 @@
     csvdiff = clg.test.inertia.csv
     input = 'clg.test.i'
     cli_args = 'ControlLogic/motor_ctrl/parameter=inertia ControlLogic/motor_ctrl/function=inertia_fn Postprocessors/test/parameter=inertia Outputs/file_base=clg.test.inertia'
+    restep = false # Test is prescribed to abort on failed timestep
 
     requirement = 'The system shall allow the inertia of a shaft-connected motor to be controlled.'
   []

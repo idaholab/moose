@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
 
@@ -15,7 +15,7 @@
 
 /**
  * This class allows us to have a section of the input file like the following
- * specifying the solver to use and the solve options.
+ * specifying the preconditioner to use and its options.
  *
  * [Preconditioner]
  * []

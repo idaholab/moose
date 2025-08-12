@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "EquationSystem.h"
 #include "libmesh/int_range.h"
@@ -488,22 +488,22 @@ TimeDependentEquationSystem::BuildBilinearForms()
     auto b_integs = blf->GetBBFI();
     auto markers = blf->GetBBFI_Marker();
 
-    mfem::SumIntegrator * sum = new mfem::SumIntegrator(false);
-    ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, true);
-
-    for (int i = 0; i < integs->Size(); ++i)
+    // If implicit contributions exist, scale them by timestep and add to td_blf
+    if (integs->Size() || b_integs->Size())
     {
-      sum->AddIntegrator(*integs[i]);
-    }
+      mfem::SumIntegrator * sum = new mfem::SumIntegrator(false);
+      ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, true);
 
-    for (int i = 0; i < b_integs->Size(); ++i)
-    {
-      td_blf->AddBoundaryIntegrator(new ScaleIntegrator(*b_integs[i], _dt_coef.constant, false),
-                                    *(*markers[i]));
-    }
+      for (int i = 0; i < integs->Size(); ++i)
+        sum->AddIntegrator(*integs[i]);
 
-    // scaled_sum is owned by td_blf
-    td_blf->AddDomainIntegrator(scaled_sum);
+      for (int i = 0; i < b_integs->Size(); ++i)
+        td_blf->AddBoundaryIntegrator(new ScaleIntegrator(*b_integs[i], _dt_coef.constant, false),
+                                      *(*markers[i]));
+
+      // scaled_sum is owned by td_blf
+      td_blf->AddDomainIntegrator(scaled_sum);
+    }
 
     // Assemble form
     td_blf->Assemble();

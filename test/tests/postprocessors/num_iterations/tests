@@ -13,6 +13,7 @@
       cli_args = 'Executioner/TimeIntegrator/type=AStableDirk4 '
                  'Executioner/TimeIntegrator/safe_start=true Outputs/file_base=a_stable_dirk4'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = "four stage, A-stable DIRK;"
 
@@ -25,6 +26,7 @@
                  'Executioner/TimeIntegrator/solve_type=consistent '
                  'Outputs/file_base=actually_explicit_euler_consistent'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = "explicit Euler;"
     []
@@ -36,6 +38,7 @@
                  'Executioner/TimeIntegrator/solve_type=lumped '
                  'Outputs/file_base=actually_explicit_euler_lumped'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = "lumped explicit Euler;"
     []
@@ -47,6 +50,7 @@
                  'Executioner/TimeIntegrator/solve_type=lump_preconditioned '
                  'Outputs/file_base=actually_explicit_euler_lump_preconditioned'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = "lumped and preconditioned explicit Euler;"
     []
@@ -58,6 +62,7 @@
       Executioner/TimeIntegrator/type=BDF2
       Outputs/file_base=bdf2'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = "second-order backward difference;"
     []
@@ -67,6 +72,7 @@
       csvdiff = 'crank_nicolson.csv'
       cli_args = 'Executioner/TimeIntegrator/type=CrankNicolson Outputs/file_base=crank_nicolson'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = "Crank-Nicloson;"
     []
@@ -76,6 +82,7 @@
       csvdiff = 'explicit_euler.csv'
       cli_args = 'Executioner/TimeIntegrator/type=ExplicitEuler Outputs/file_base=explicit_euler'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = "quasi explicit Euler;"
     []
@@ -86,6 +93,7 @@
       cli_args = 'Executioner/TimeIntegrator/type=ExplicitMidpoint '
                  'Outputs/file_base=explicit_midpoint'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = "explicit midpoint;"
     []
@@ -95,6 +103,7 @@
       csvdiff = 'explicit_tvd_rk2.csv'
       cli_args = 'Executioner/TimeIntegrator/type=ExplicitTVDRK2 Outputs/file_base=explicit_tvd_rk2'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = "two-stage TVD Runge-Kutta;"
     []
@@ -104,6 +113,7 @@
       csvdiff = 'heun.csv'
       cli_args = 'Executioner/TimeIntegrator/type=Heun Outputs/file_base=heun'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = 'Heun;'
     []
@@ -113,6 +123,7 @@
       csvdiff = 'implicit_euler.csv'
       cli_args = 'Executioner/TimeIntegrator/type=ImplicitEuler Outputs/file_base=implicit_euler'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = 'implicit Euler;'
     []
@@ -123,6 +134,7 @@
       cli_args = 'Executioner/TimeIntegrator/type=ImplicitMidpoint '
                  'Outputs/file_base=implicit_midpoint'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = 'implicit midpoint;'
     []
@@ -132,6 +144,7 @@
       csvdiff = 'l_stable_dirk2.csv'
       cli_args = 'Executioner/TimeIntegrator/type=LStableDirk2 Outputs/file_base=l_stable_dirk2'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = 'two-stage, L-stable DIRK;'
     []
@@ -142,6 +155,7 @@
       csvdiff = 'l_stable_dirk3.csv'
       cli_args = 'Executioner/TimeIntegrator/type=LStableDirk3 Outputs/file_base=l_stable_dirk3'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = "three stage, L-stable DIRK;"
     []
@@ -151,6 +165,7 @@
       csvdiff = 'l_stable_dirk4.csv'
       cli_args = 'Executioner/TimeIntegrator/type=LStableDirk4 Outputs/file_base=l_stable_dirk4'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = "four stage, L-stable DIRK;"
     []
@@ -160,6 +175,7 @@
       csvdiff = 'ralston.csv'
       cli_args = 'Executioner/TimeIntegrator/type=Ralston Outputs/file_base=ralston'
       max_parallel = 1
+      restep = false # Explicitly needs to abort on solve failed
 
       detail = 'and Ralston methods.'
     []

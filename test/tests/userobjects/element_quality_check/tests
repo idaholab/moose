@@ -3,14 +3,14 @@
   design = 'ElementQualityChecker.md'
 
   [quality_checks]
-    requirement = 'The system shall evaluate the quality of all the mesh elements and report'
+    requirement = 'The system shall evaluate the quality of all the mesh elements and '
     [failure_warning]
       type = 'RunApp'
       input = 'failure_warning.i'
       expect_out = "List of failed element IDs: "
       allow_warnings = true
 
-      detail = 'a warning when the "warning" option is selected,'
+      detail = 'report a warning when the "warning" option is selected,'
     []
 
     [failure_error]
@@ -18,7 +18,7 @@
       input = 'failure_error.i'
       expect_err = "List of failed element IDs: "
 
-      detail = 'an error when the "error" option is selected, or'
+      detail = 'report an error when the "error" option is selected, '
     []
 
     [bypass_warning]
@@ -27,7 +27,15 @@
       expect_out = "Provided quality metric doesn't apply to following element type:"
       allow_warnings = true
 
-      detail = 'a message when the selected metric does not apply to the element type being examined.'
+      detail = 'report a message when the selected metric does not apply to the element type being examined, or'
+    []
+
+    [suppress_invalid_metric_warning]
+      type = 'RunApp'
+      input = 'bypass_warning.i'
+      cli_args = 'UserObjects/elem_quality_check/suppress_invalid_metric_warning=true'
+
+      detail = 'permit the suppression of the warning when the selected metric does not apply to the element type being examined.'
     []
   []
 []

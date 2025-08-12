@@ -19,6 +19,7 @@ CoupledConvectiveFlux::validParams()
   InputParameters params = IntegratedBC::validParams();
   params.addRequiredCoupledVar("T_infinity", "Field holding far-field temperature");
   params.addRequiredParam<Real>("coefficient", "Heat transfer coefficient");
+  params.addClassDescription("Integrated boundary condition for modeling a convective heat flux.");
 
   return params;
 }

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "ScaleIntegrator.h"
 
@@ -119,6 +119,31 @@ ScaleIntegrator::AssembleEA(const mfem::FiniteElementSpace & fes,
     _integrator->AssembleEA(fes, emat, add);
     emat *= _scale;
   }
+}
+
+void
+ScaleIntegrator::AssembleMF(const mfem::FiniteElementSpace & fes)
+{
+  CheckIntegrator();
+  _integrator->AssembleMF(fes);
+}
+
+void
+ScaleIntegrator::AddMultMF(const mfem::Vector & x, mfem::Vector & y) const
+{
+  // y += Mx*scale
+  mfem::Vector Mx(y.Size());
+  Mx = 0.0;
+  _integrator->AddMultMF(x, Mx);
+  Mx *= _scale;
+  y += Mx;
+}
+
+void
+ScaleIntegrator::AssembleDiagonalMF(mfem::Vector & diag)
+{
+  _integrator->AssembleDiagonalMF(diag);
+  diag *= _scale;
 }
 
 ScaleIntegrator::~ScaleIntegrator()

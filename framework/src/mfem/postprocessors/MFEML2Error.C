@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef MFEM_ENABLED
+#ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEML2Error.h"
 #include "MFEMProblem.h"
@@ -30,10 +30,8 @@ MFEML2Error::validParams()
 
 MFEML2Error::MFEML2Error(const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
-    _var_name(getParam<VariableName>("variable")),
-    _coeff_name(getParam<MFEMScalarCoefficientName>("function")),
-    _coeff(getScalarCoefficient(_coeff_name)),
-    _var(getMFEMProblem().getProblemData().gridfunctions.GetRef(_var_name))
+    _coeff(getScalarCoefficient("function")),
+    _var(getMFEMProblem().getProblemData().gridfunctions.GetRef(getParam<VariableName>("variable")))
 {
 }
 
