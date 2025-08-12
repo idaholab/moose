@@ -216,7 +216,6 @@ AbaqusUELMeshUserElement::execute()
     const auto nvar_aux = _aux_variables.size();
     all_aux_var_dof_indices.resize(nnode * nvar_aux);
     all_aux_var_dof_increments.resize(nnode * nvar_aux);
-    // std::cout << "nvar_aux = " << nvar_aux << " nnode=" << nnode << '\n';
 
     // get the list of dofs, looping over nodes first
     for (const auto i : make_range(nnode))

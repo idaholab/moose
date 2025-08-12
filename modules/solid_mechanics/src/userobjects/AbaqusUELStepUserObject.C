@@ -114,22 +114,6 @@ AbaqusUELStepUserObject::timestepSetup()
     // transitioning to a new step
     _current_step = next_step;
 
-    mooseInfoRepeated("Step: ", _current_step);
-    std::cout << "BEGIN\n";
-    for (const auto & [k, m] : *_current_step_bcs.first)
-    {
-      std::cout << "  var " << k << '\n';
-      for (const auto & [n, v] : m)
-        std::cout << "    n: " << n << " v: " << v << '\n';
-    }
-    std::cout << "END\n";
-    for (const auto & [k, m] : *_current_step_bcs.second)
-    {
-      std::cout << "  var " << k << '\n';
-      for (const auto & [n, v] : m)
-        std::cout << "    n: " << n << " v: " << v << '\n';
-    }
-
     const auto & bc_begin = *_current_step_bcs.first;
     const auto & bc_end = *_current_step_bcs.second;
 
@@ -169,9 +153,6 @@ AbaqusUELStepUserObject::timestepSetup()
           // put into map (we got the concentrated forces from the bulk AbaqusUELMeshUserElement,
           // the nodal reaction force should be the opposite of that - hence the minus sign)
           _current_step_begin_forces[var_id][pair.first] = -var_dof_values[0];
-
-          std::cout << "BEGIN_FORCE " << var_id << ' ' << pair.first << ' ' << -var_dof_values[0]
-                    << '\n';
         }
     }
 
@@ -203,9 +184,6 @@ AbaqusUELStepUserObject::timestepSetup()
 
           // put into map
           _current_step_begin_solution[var_id][pair.first] = var_dof_values[0];
-
-          std::cout << "BEGIN_SOLUTION " << var_id << ' ' << pair.first << ' ' << var_dof_values[0]
-                    << '\n';
         }
     }
   }
