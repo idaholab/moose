@@ -22,6 +22,9 @@ MFEMSteady::validParams()
   params += Executioner::validParams();
   params.addClassDescription("Executioner for steady state MFEM problems.");
   params.addParam<Real>("time", 0.0, "System time");
+  MooseEnum numeric_types("real complex", "real");
+  params.addParam<MooseEnum>(
+      "numeric_type", numeric_types, "Number type used for the problem. Can be real or complex.");
   return params;
 }
 
@@ -38,24 +41,23 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
   // If no ProblemOperators have been added by the user, add a default
   if (getProblemOperators().empty())
   {
-    if (_problem_data.num_type == MFEMProblemData::NumericType::REAL)
+    if (getParam<MooseEnum>("numeric_type") == "real")
     {
       _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
       auto problem_operator =
-        std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
+          std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
       addProblemOperator(std::move(problem_operator));
-
     }
-    else if (_problem_data.num_type == MFEMProblemData::NumericType::COMPLEX)
+    else if (getParam<MooseEnum>("numeric_type") == "complex")
     {
       _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
       auto problem_operator =
-        std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(_mfem_problem);
+          std::make_shared<Moose::MFEM::ComplexEquationSystemProblemOperator>(_mfem_problem);
       addProblemOperator(std::move(problem_operator));
     }
     else
       mooseError("Unknown numeric type. "
-               "Please set the numeric type to either 'REAL' or 'COMPLEX'.");
+                 "Please set the numeric type to either 'REAL' or 'COMPLEX'.");
   }
 }
 
@@ -66,10 +68,10 @@ MFEMSteady::init()
   _mfem_problem.initialSetup();
 
   // Set up initial conditions
-  _problem_data.eqn_system->Init(
-      _problem_data.gridfunctions,
-      _problem_data.cpx_gridfunctions,
-      _problem_data.fespaces,
+  _mfem_problem_data.eqn_system->Init(
+      _mfem_problem_data.gridfunctions,
+      _mfem_problem_data.cpx_gridfunctions,
+      _mfem_problem_data.fespaces,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
   for (const auto & problem_operator : getProblemOperators())

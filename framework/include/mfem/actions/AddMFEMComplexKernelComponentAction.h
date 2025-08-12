@@ -16,9 +16,6 @@
 /**
  * This class allows us to introduce as auxkernels the kernels that will be
  * the real and imaginary components of MFEMComplexKernels
- *
- * [ComplexKernels]
- * []
  */
 class AddMFEMComplexKernelComponentAction : public MooseObjectAction
 {
