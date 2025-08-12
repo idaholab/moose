@@ -36,14 +36,12 @@
   [extrapolation_patch]
     type = NodalPatchRecoveryVariable
     patch_polynomial_order = FIRST
-    use_specific_elements = true
     variable = 'diff'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [extrapolation_patch2]
     type = NodalPatchRecoveryVariable
     patch_polynomial_order = FIRST
-    use_specific_elements = true
     variable = 'diff2'
     execute_on = 'INITIAL TIMESTEP_END'
   []

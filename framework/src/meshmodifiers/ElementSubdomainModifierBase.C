@@ -268,7 +268,8 @@ ElementSubdomainModifierBase::initialSetup()
                    _pr_names.size(),
                    ") is less than the number of variables to reinitialize with polynomial "
                    "extrapolation.");
-      _pr[pr_count] = &getUserObjectByName<NodalPatchRecoveryBase>(_pr_names[pr_count]);
+      _pr[pr_count] =
+          &_fe_problem.getUserObject<NodalPatchRecoveryBase>(_pr_names[pr_count], /*tid=*/0);
       pr_count++;
     }
   if (_pr_names.size() != pr_count)
@@ -566,7 +567,7 @@ ElementSubdomainModifierBase::prepareVariableForReinitialization(const VariableN
       // The patch elements might be different for each variable
       gatherPatchElements(var_name, reinit_strategy);
       // Notify the patch recovery user object about the patch elements
-      _pr[pr_idx]->cacheAdditionalElements(_patch_elem_ids[var_name], /*synchronizeAebe=*/true);
+      _pr[pr_idx]->sync(_patch_elem_ids[var_name]);
       break;
     }
     default:
