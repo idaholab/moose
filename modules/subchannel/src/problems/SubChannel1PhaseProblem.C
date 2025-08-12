@@ -1404,9 +1404,9 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
   if (!_implicit_bool)
   {
     unsigned int last_node = (iblock + 1) * _block_size;
-    unsigned int first_node = iblock * _block_size;
+    unsigned int first_node = iblock * _block_size + 1;
     const Real & pitch = _subchannel_mesh.getPitch();
-    for (unsigned int iz = first_node + 1; iz < last_node + 1; iz++)
+    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     {
       auto dz = _z_grid[iz] - _z_grid[iz - 1];
       for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
@@ -1465,12 +1465,12 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
     LibmeshPetscCall(MatZeroEntries(_cmc_sys_Wij_mat));
     LibmeshPetscCall(VecZeroEntries(_cmc_sys_Wij_rhs));
     unsigned int last_node = (iblock + 1) * _block_size;
-    unsigned int first_node = iblock * _block_size;
+    unsigned int first_node = iblock * _block_size + 1;
     const Real & pitch = _subchannel_mesh.getPitch();
-    for (unsigned int iz = first_node + 1; iz < last_node + 1; iz++)
+    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     {
       auto dz = _z_grid[iz] - _z_grid[iz - 1];
-      auto iz_ind = iz - first_node - 1;
+      auto iz_ind = iz - first_node;
       for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
       {
         auto chans = _subchannel_mesh.getGapChannels(i_gap);
@@ -1528,7 +1528,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
                             (*_mdot_soln)(node_in_j) / S_j_in / rho_j_in;
         auto term_out = Sij * rho_star * (Lij / dz) * mass_term_out / 2.0;
         auto term_in = Sij * rho_star * (Lij / dz) * mass_term_in / 2.0;
-        if (iz == first_node + 1)
+        if (iz == first_node)
         {
           PetscInt row_ad = i_gap + _n_gaps * iz_ind;
           PetscScalar value_ad = term_in * alpha * _Wij(i_gap, iz - 1);
@@ -1701,9 +1701,9 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
       LibmeshPetscCall(VecAXPY(sol_holder_W, 1.0, sol_holder_P));
       PetscScalar * xx;
       LibmeshPetscCall(VecGetArray(sol_holder_W, &xx));
-      for (unsigned int iz = first_node + 1; iz < last_node + 1; iz++)
+      for (unsigned int iz = first_node; iz < last_node + 1; iz++)
       {
-        auto iz_ind = iz - first_node - 1;
+        auto iz_ind = iz - first_node;
         for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
         {
           _Wij_residual_matrix(i_gap, iz - 1 - iblock * _block_size) = xx[iz_ind * _n_gaps + i_gap];
@@ -1815,11 +1815,11 @@ libMesh::DenseVector<Real>
 SubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real> solution)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
-  unsigned int first_node = iblock * _block_size;
+  unsigned int first_node = iblock * _block_size + 1;
   libMesh::DenseVector<Real> Wij_residual_vector(_n_gaps * _block_size, 0.0);
   // Assign the solution to the cross-flow matrix
   int i = 0;
-  for (unsigned int iz = first_node + 1; iz < last_node + 1; iz++)
+  for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
     for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
     {
