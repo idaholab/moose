@@ -30,6 +30,9 @@ protected:
   // Add attributes to the parent mesh representing the cut transition region
   void labelMesh(mfem::ParMesh & parent_mesh);
 
+  // Set new attributes for the provided transition region elements
+  void setAttributes(mfem::ParMesh & parent_mesh, mfem::Array<int> & transition_els);
+
   // Checks whether a given element is within a certain domain or vector of
   // domains.
   bool isInDomain(const int & el, const mfem::Array<int> & subdomains, const mfem::ParMesh & mesh);

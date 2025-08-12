@@ -79,7 +79,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 
   /// Iterate over all vertices on cut, find elements with those vertices,
   /// and declare them transition elements if they are on the +ve side of the cut
-  std::vector<int> transition_els;
+  mfem::Array<int> transition_els;
   mfem::Table *vert_to_elem  = parent_mesh.GetVertexToElementTable();
   const mfem::Array<int> & cut_to_parent_vertex_id_map = _cut_submesh->GetParentVertexIDMap();
   for (int i = 0; i < _cut_submesh->GetNV(); ++i)
@@ -94,7 +94,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
       parent_mesh.GetElementCenter(el_adj_to_cut, el_center);
       if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) &&
           plane.side(el_center) == 1)
-        transition_els.push_back(el_adj_to_cut);
+        transition_els.Append(el_adj_to_cut);
     }
   }
 
@@ -119,17 +119,30 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
         parent_mesh.GetElementCenter(el_adj_to_cut, el_center);
         if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) &&
             plane.side(el_center) == 1)
-          transition_els.push_back(el_adj_to_cut);
+          transition_els.Append(el_adj_to_cut);
         }
       }
     }
   }
 
   delete vert_to_elem;
+  transition_els.Sort();
+  transition_els.Unique();
 
+  setAttributes(parent_mesh, transition_els);
+}
+
+void
+MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
+                                        mfem::Array<int> & transition_els)
+{
   /// Set the domain attributes for the transition region
-  for (const auto & transition_el : transition_els)
+  for (int i = 0; i < transition_els.Size(); ++i)
+  {
+    const auto & transition_el = transition_els[i];
     parent_mesh.SetAttribute(transition_el, _subdomain_label);
+  }
+
   mfem::AttributeSets &attr_sets = parent_mesh.attribute_sets;
   mfem::AttributeSets &bdr_attr_sets = parent_mesh.bdr_attribute_sets;
 
