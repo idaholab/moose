@@ -648,6 +648,16 @@ ElementSubdomainModifierBase::findReinitializedElemsAndNodes(
       if (nodeIsNewlyReinitialized(elem->node_id(i)))
         _reinitialized_nodes.insert(elem->node_id(i));
   }
+
+  // Gather reinitialized elements across all processors
+  _global_reinitialized_elems.clear();
+  std::vector<dof_id_type> reinitialized_elems_vec(_reinitialized_elems.begin(),
+                                                   _reinitialized_elems.end());
+  std::vector<std::vector<dof_id_type>> gathered;
+  _mesh.comm().allgather(reinitialized_elems_vec, gathered);
+
+  for (const auto & proc_elems : gathered)
+    _global_reinitialized_elems.insert(proc_elems.begin(), proc_elems.end());
 }
 
 bool
@@ -727,8 +737,11 @@ ElementSubdomainModifierBase::storeOverriddenDofValues(const VariableName & var_
   const auto var_num = var.number();
 
   // Get the DOFs on the reinitialized elements
+  // Here we should loop over all gathered processors' reinitialized elements
+  // because even the elements may belong to other processors, the DOFs on them
+  // may be owned by the current processor.
   std::set<dof_id_type> reinitialized_dofs;
-  for (const auto & elem_id : _reinitialized_elems)
+  for (const auto & elem_id : _global_reinitialized_elems)
   {
     const auto & elem = _mesh.elemPtr(elem_id);
     std::vector<dof_id_type> elem_dofs;
@@ -965,7 +978,8 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
   auto & [candidate_elems, candidate_elem_ids] = _evaluable_elems[sys.number()];
 
   // Now we gather patch elements based on the reinit strategy
-  std::vector<dof_id_type> & patch_elems = _patch_elem_ids[var_name];
+  auto & patch_elems = _patch_elem_ids[var_name];
+  patch_elems.clear();
   switch (reinit_strategy)
   {
     case ReinitStrategy::POLYNOMIAL_NEIGHBOR:
@@ -974,7 +988,8 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
       {
         for (const auto & node : elem->node_ref_range())
           for (const auto & neigh_id : _mesh.nodeToElemMap().at(node.id()))
-            if (_reinitialized_elems.count(neigh_id))
+            // here we need to use _global_reinitialized_elems gathering from all processors
+            if (_global_reinitialized_elems.count(neigh_id))
               return true;
         return false;
       };
@@ -983,14 +998,12 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
       for (const auto * elem : candidate_elems)
         if (has_neighbor_in_reinit_elems(elem))
           patch_elems.push_back(elem->id());
-      _mesh.comm().allgather(patch_elems);
       break;
     }
     case ReinitStrategy::POLYNOMIAL_WHOLE:
     {
       // This is simple: all candidate elements are patch elements
       patch_elems = candidate_elem_ids;
-      _mesh.comm().allgather(patch_elems);
       break;
     }
     case ReinitStrategy::POLYNOMIAL_NEARBY:
@@ -1015,6 +1028,10 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
       mooseError("Unknown reinitialization strategy");
       break;
   }
+
+  // every processor should have the same patch elements to do the polynomial extrapolation,
+  // so we gather them across all processors
+  _mesh.comm().allgather(patch_elems);
 
   patch_elems.erase(std::unique(patch_elems.begin(), patch_elems.end()), patch_elems.end());
 }
