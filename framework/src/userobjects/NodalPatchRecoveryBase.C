@@ -174,30 +174,36 @@ NodalPatchRecoveryBase::finalize()
 }
 
 std::unordered_map<processor_id_type, std::vector<dof_id_type>>
-NodalPatchRecoveryBase::gatherSendList(const std::vector<dof_id_type> & additional_elems)
+NodalPatchRecoveryBase::gatherSendList(
+    const std::optional<std::vector<dof_id_type>> & specific_elems)
 {
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
 
-  for (const auto & elem : _fe_problem.getEvaluableElementRange())
-    if (hasBlocks(elem->subdomain_id()))
-      if (elem->processor_id() != processor_id())
-        query_ids[elem->processor_id()].push_back(elem->id());
-
-  for (const auto & entry : additional_elems)
+  if (specific_elems)
   {
-    const Elem * elem = _mesh.elemPtr(entry);
-    if (hasBlocks(elem->subdomain_id()))
-      if (elem->processor_id() != processor_id())
-        query_ids[elem->processor_id()].push_back(elem->id());
+    for (const auto & entry : *specific_elems)
+    {
+      const Elem * elem = _mesh.elemPtr(entry);
+      if (hasBlocks(elem->subdomain_id()))
+        if (elem->processor_id() != processor_id())
+          query_ids[elem->processor_id()].push_back(elem->id());
+    }
+  }
+  else
+  {
+    for (const auto & elem : _fe_problem.getEvaluableElementRange())
+      if (hasBlocks(elem->subdomain_id()))
+        if (elem->processor_id() != processor_id())
+          query_ids[elem->processor_id()].push_back(elem->id());
   }
 
   return query_ids;
 }
 
 void
-NodalPatchRecoveryBase::sync(const std::vector<dof_id_type> & additional_elems)
+NodalPatchRecoveryBase::sync(const std::optional<std::vector<dof_id_type>> & specific_elems)
 {
-  const auto query_ids = gatherSendList(additional_elems);
+  const auto query_ids = gatherSendList(specific_elems);
 
   typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
 
@@ -206,8 +212,11 @@ NodalPatchRecoveryBase::sync(const std::vector<dof_id_type> & additional_elems)
                             const std::vector<dof_id_type> & elem_ids,
                             std::vector<AbPair> & ab_pairs)
   {
-    for (const auto & elem_id : elem_ids)
-      ab_pairs.emplace_back(_Ae.at(elem_id), _be.at(elem_id));
+    for (const auto i : index_range(elem_ids))
+    {
+      const auto elem_id = elem_ids[i];
+      ab_pairs.emplace_back(libmesh_map_find(_Ae, elem_id), libmesh_map_find(_be, elem_id));
+    }
   };
 
   // Gather answers received from other processors

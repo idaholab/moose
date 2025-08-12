@@ -13,8 +13,8 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 16
-    ny = 16
+    nx = 7
+    ny = 7
   []
   [left]
     type = SubdomainBoundingBoxGenerator
@@ -82,9 +82,6 @@
   [phi]
     block = '1 2'
   []
-  [proc]
-    block = '1 2'
-  []
 []
 
 [Functions]
@@ -101,12 +98,6 @@
     function = moving_circle_func
     block = '1 2'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
-  []
-  [proc]
-    type = ProcessorIDAux
-    variable = proc
-    execute_on = initial
-    block = '1 2'
   []
 []
 
@@ -196,6 +187,8 @@
   type = Transient
   dt = 0.3
   num_steps = 3
+  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-50
 []
 
 [Outputs]

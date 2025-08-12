@@ -13,8 +13,8 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 16
-    ny = 16
+    nx = 7
+    ny = 7
     nz = 16
   []
   [left]
@@ -70,9 +70,6 @@
   [phi]
     block = '1 2'
   []
-  [proc]
-    block = '1 2'
-  []
 []
 
 [Functions]
@@ -89,12 +86,6 @@
     function = moving_circle_func
     block = '1 2'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
-  []
-  [proc]
-    type = ProcessorIDAux
-    variable = proc
-    execute_on = initial
-    block = '1 2'
   []
 []
 

@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "ElementUserObject.h"
+#include <optional>
 
 class NodalPatchRecoveryBase : public ElementUserObject
 {
@@ -51,7 +52,7 @@ public:
    *
    * Gathers and distributes data required for evaluable elements (possibly from other processors)
    */
-  void sync(const std::vector<dof_id_type> & additional_elems = {});
+  void sync(const std::optional<std::vector<dof_id_type>> & specific_elems = std::nullopt);
 
   /// Returns the multi-index table
   const std::vector<std::vector<unsigned int>> & multiIndex() const { return _multi_index; }
@@ -66,7 +67,7 @@ private:
   /// Iterates over all evaluable elements and records their IDs in a query map
   /// if they belong to a different processor.
   std::unordered_map<processor_id_type, std::vector<dof_id_type>>
-  gatherSendList(const std::vector<dof_id_type> & additional_elems);
+  gatherSendList(const std::optional<std::vector<dof_id_type>> & specific_elems = std::nullopt);
 
   /**
    * Compute the P vector at a given point
