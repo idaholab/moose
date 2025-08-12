@@ -145,7 +145,7 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
   }
 
-  // Store pointers to FESpaces of all coupled (trial) variables
+  // Store pointers to FESpaces of all coupled variables
   for (auto & coupled_var_name : _coupled_var_names)
     _coupled_pfespaces.push_back(gridfunctions.Get(coupled_var_name)->ParFESpace());
 
@@ -408,7 +408,7 @@ EquationSystem::BuildMixedBilinearForms()
     auto test_mblfs = std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
     for (const auto j : index_range(_coupled_var_names))
     {
-      auto coupled_var_name = _coupled_var_names.at(j);
+      const auto & coupled_var_name = _coupled_var_names.at(j);
       auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_coupled_pfespaces.at(j),
                                                                _test_pfespaces.at(i));
       // Register MixedBilinearForm if kernels exist for it, and assemble

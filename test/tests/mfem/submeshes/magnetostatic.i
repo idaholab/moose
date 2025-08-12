@@ -44,7 +44,6 @@
     type = MFEMVariable
     fespace = HDivFESpace
   []
-
 []
 
 [AuxKernels]
