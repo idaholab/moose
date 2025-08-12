@@ -278,9 +278,7 @@ youngs_modulus = 10e11
 
 ###################################################################################
 [Physics]
-
   [SolidMechanics]
-
     [QuasiStatic]
       [all]
         eigenstrain_names = 'thermal_strain irr_strain'
@@ -317,12 +315,17 @@ youngs_modulus = 10e11
 
 ###################################################################################
 [BCs]
-
   [right]
     type = DirichletBC
     boundary = 'binder_right sd1_right'
     variable = disp_x
     value = 0.
+  []
+  [top]
+    type = DirichletBC
+    boundary = 'binder_top'
+    variable = disp_y
+    value = 0
   []
 []
 
