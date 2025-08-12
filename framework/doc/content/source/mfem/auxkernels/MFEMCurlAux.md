@@ -20,7 +20,7 @@ where $\vec u \in H(\mathrm{curl})$, $\vec v \in H(\mathrm{div})$ and $\lambda$ 
 
 ## Example Input File Syntax
 
-!listing curlcurl.i block=AuxKernels
+!listing mfem/kernels/curlcurl.i block=AuxKernels
 
 !syntax parameters /AuxKernels/MFEMCurlAux
 
