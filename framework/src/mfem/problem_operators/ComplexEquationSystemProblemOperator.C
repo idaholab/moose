@@ -18,7 +18,7 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
 {
   _trial_var_names = GetEquationSystem()->TrialVarNames();
 
-  _cpx_trial_variables = _problem.cpx_gridfunctions.Get(_trial_var_names);
+  _cpx_trial_variables = _problem_data.cpx_gridfunctions.Get(_trial_var_names);
 
   // Set operator size and block structure
   _block_true_offsets.SetSize(_cpx_trial_variables.size() + 1);
@@ -44,21 +44,22 @@ ComplexEquationSystemProblemOperator::Init(mfem::BlockVector & X)
 }
 
 void
-ComplexEquationSystemProblemOperator::Solve(mfem::Vector &)
+ComplexEquationSystemProblemOperator::Solve()
 {
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 
-  if (_problem.jacobian_solver->isLOR())
+  if (_problem_data.jacobian_solver->isLOR())
     mooseError("LOR solve is not supported for complex equation systems.");
 
-  _problem.nonlinear_solver->SetSolver(_problem.jacobian_solver->getSolver());
-  _problem.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem.nonlinear_solver->Mult(_true_rhs, _true_x);
+  _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
+  _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
+  _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
 
   if (auto cpx_eq_sys =
           std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(_equation_system))
   {
-    cpx_eq_sys->RecoverFEMSolution(_true_x, _problem.gridfunctions, _problem.cpx_gridfunctions);
+    cpx_eq_sys->RecoverFEMSolution(
+        _true_x, _problem_data.gridfunctions, _problem_data.cpx_gridfunctions);
   }
 }
 

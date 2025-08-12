@@ -19,16 +19,16 @@ class ComplexEquationSystemProblemOperator : public EquationSystemProblemOperato
 {
 
 public:
-  ComplexEquationSystemProblemOperator(MFEMProblemData & problem)
+  ComplexEquationSystemProblemOperator(MFEMProblem & problem)
     : EquationSystemProblemOperator(problem),
       _equation_system{
-          std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(problem.eqn_system)}
+          std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(_problem_data.eqn_system)}
   {
   }
 
   void SetGridFunctions() override;
   void Init(mfem::BlockVector & X) override;
-  virtual void Solve(mfem::Vector & X) override;
+  virtual void Solve() override;
 
   [[nodiscard]] Moose::MFEM::ComplexEquationSystem * GetEquationSystem() const override
   {

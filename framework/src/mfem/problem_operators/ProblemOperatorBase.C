@@ -19,8 +19,13 @@ namespace Moose::MFEM
 ProblemOperatorBase::ProblemOperatorBase(MFEMProblem & problem)
   : _problem(problem), _problem_data(problem.getProblemData())
 {
-  _test_variables = _problem.gridfunctions.Get(_test_var_names);
-  _trial_variables = _problem.gridfunctions.Get(_trial_var_names);
+}
+
+void
+ProblemOperatorBase::SetGridFunctions()
+{
+  _test_variables = _problem_data.gridfunctions.Get(_test_var_names);
+  _trial_variables = _problem_data.gridfunctions.Get(_trial_var_names);
 
   // Set operator size and block structure
   _block_true_offsets.SetSize(_trial_variables.size() + 1);

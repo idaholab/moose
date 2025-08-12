@@ -48,10 +48,10 @@ MFEMTransient::init()
   TransientBase::init();
 
   // Set up initial conditions
-  _problem_data.eqn_system->Init(
-      _problem_data.gridfunctions,
-      _problem_data.cpx_gridfunctions,
-      _problem_data.fespaces,
+  _mfem_problem_data.eqn_system->Init(
+      _mfem_problem_data.gridfunctions,
+      _mfem_problem_data.cpx_gridfunctions,
+      _mfem_problem_data.fespaces,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
   for (const auto & problem_operator : getProblemOperators())
