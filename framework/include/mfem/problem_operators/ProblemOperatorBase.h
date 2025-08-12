@@ -26,7 +26,6 @@ public:
   virtual void SetTrialVariablesFromTrueVectors();
   virtual void Init(mfem::BlockVector & X);
   virtual void Solve() = 0;
-  virtual void UniformRefinement( int num_refinements=1 );
 
   virtual int GetProblemSize();
 

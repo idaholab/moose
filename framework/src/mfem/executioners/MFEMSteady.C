@@ -22,8 +22,6 @@ MFEMSteady::validParams()
   params += Executioner::validParams();
   params.addClassDescription("Executioner for steady state MFEM problems.");
   params.addParam<Real>("time", 0.0, "System time");
-
-  params.addParam<std::string>("fe_space", "none", "FE Space to perform p-refinement in");
   return params;
 }
 
@@ -36,8 +34,6 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _time_step(_mfem_problem.timeStep()),
     _time([this]() -> Real & { return this->_mfem_problem.time() = this->_system_time; }()),
     _last_solve_converged(false)
-    _output_iteration_number(0),
-    _fe_space_name(getParam<std::string>("fe_space"))
 {
   // If no ProblemOperators have been added by the user, add a default
   if (getProblemOperators().empty())
@@ -85,7 +81,7 @@ void
 MFEMSteady::execute()
 {
   // first, we need to set up AMR
-  if (UseAMR())
+  if (_mfem_problem.UseAMR())
     _mfem_problem.SetUpAMR();
 
   if (_app.isRecovering())
@@ -107,17 +103,16 @@ MFEMSteady::execute()
   _time_step = 1;
   _mfem_problem.timestepSetup();
 
-  _last_solve_converged = _mfem_problem_solve.solve();
   // Solve equation system.
   if (_mfem_problem.shouldSolve())
   {
-    _problem_operator->Solve(_problem_data.f);
+    _last_solve_converged = _mfem_problem_solve.solve();
 
-    while (UseAMR() and ApplyRefinements())
+    while (_mfem_problem.UseAMR() and ApplyRefinements())
     {
       UpdateAfterRefinement();
       // Solve again
-      _problem_operator->Solve(_problem_data.f);
+      _last_solve_converged = _mfem_problem_solve.solve();
     }
   }
 
@@ -180,7 +175,10 @@ MFEMSteady::UpdateAfterRefinement()
   // Update in the mfem problem
   _mfem_problem.updateAfterRefinement();
 
-  _problem_operator->SetGridFunctions();
+  for (const auto & problem_operator : getProblemOperators())
+  {
+    problem_operator->SetGridFunctions();
+  }
 }
 
 #endif

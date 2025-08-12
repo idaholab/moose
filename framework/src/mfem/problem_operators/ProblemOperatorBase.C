@@ -74,7 +74,7 @@ ProblemOperatorBase::SetTrialVariablesFromTrueVectors()
 }
 
 int
-ProblemOperatorInterface::GetProblemSize()
+ProblemOperatorBase::GetProblemSize()
 {
   // update the global block offsets first
   _global_block_true_offsets.SetSize(_trial_variables.size() + 1);
