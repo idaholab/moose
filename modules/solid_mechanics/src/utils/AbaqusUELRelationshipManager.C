@@ -71,7 +71,7 @@ AbaqusUELRelationshipManager::operator()(const MeshBase::const_element_iterator 
       mooseError("Element not found in NodeToUELMap.");
 
     // iterate over the UEL Elements connected to the current node elem
-    for (const auto uel_elem_index  : it->second)
+    for (const auto uel_elem_index : it->second)
       // iterate over the NodeElements
       for (const auto nodeelem_index : elements[uel_elem_index]._nodes)
       {

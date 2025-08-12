@@ -129,7 +129,7 @@ AbaqusUserElement::timestepSetup()
   if (_t_step == _t_step_old)
     return;
 
-    // swap the current and old state data after a converged timestep
+  // swap the current and old state data after a converged timestep
   if (_app.getExecutioner()->lastSolveConverged())
   {
     std::swap(_statev_index_old, _statev_index_current);

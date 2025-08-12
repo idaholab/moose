@@ -12,7 +12,7 @@
 #include "DelimitedFileReader.h"
 #include "Function.h"
 
-    registerMooseObject("SolidMechanicsApp", AbaqusForceBC);
+registerMooseObject("SolidMechanicsApp", AbaqusForceBC);
 
 InputParameters
 AbaqusForceBC::validParams()
