@@ -268,7 +268,7 @@ youngs_modulus = 10e11
   []
   [irr_def]
     type = ConstantFunction
-    value = 3
+    value = 9
   []
   [initial_x_def]
     type = ConstantFunction
