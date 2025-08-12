@@ -1,5 +1,6 @@
-[Mesh]
+youngs_modulus = 10e11
 
+[Mesh]
   type = MeshGeneratorMesh
   patch_update_strategy = iteration
 
@@ -236,7 +237,6 @@
 
 ###################################################################################
 [AuxVariables]
-
   [temp]
     order = CONSTANT
     family = MONOMIAL
@@ -260,10 +260,8 @@
   []
 []
 
-#irr_value = 9
 ###################################################################################
 [Functions]
-
   [temp_def]
     type = ConstantFunction
     value = 800
@@ -330,7 +328,6 @@
 
 ###################################################################################
 [Contact]
-
   [bc_top]
     primary = 812
     secondary = 102
@@ -380,7 +377,7 @@
   [binder_elasticity_tensor]
     block = '800'
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 10e11
+    youngs_modulus = ${youngs_modulus}
     poissons_ratio = 0.01
   []
   [binder_therm_prefactor]
@@ -487,4 +484,3 @@
 [Outputs]
   exodus = true
 []
-
