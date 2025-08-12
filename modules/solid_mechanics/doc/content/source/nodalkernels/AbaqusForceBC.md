@@ -7,10 +7,10 @@
 `AbaqusForceBC` complements [AbaqusEssentialBC](AbaqusEssentialBC.md) in realizing Abaqus
 `*Boundary` behavior. When a Dirichlet constraint is deactivated at the beginning of a step, the
 corresponding nodal reaction force from the prior state is applied as an external nodal force and
-then ramped to zero over the course of the step using the step fraction `d ∈ [0,1]`:
+then ramped to zero over the course of the step using the step fraction `d in [0,1]`:
 
 - Reads the concentrated reaction force at the beginning of the step via
-  [AbaqusUELStepUserObject](../userobjects/AbaqusUELStepUserObject.md).
+  [AbaqusUELStepUserObject](userobjects/AbaqusUELStepUserObject.md).
 - Applies `(1 - d) * begin_force` at the node for the current Abaqus variable ID.
 - Operates on the synthetic `abaqus_bc_union_boundary` created by
   [AbaqusUELMesh](AbaqusUELMesh.md).

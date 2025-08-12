@@ -2,7 +2,7 @@
 
 ## Description
 
-The `AddUELICs` action reads field initial conditions from the [AbaqusUELMesh](../mesh/AbaqusUELMesh.md)
+The `AddUELICs` action reads field initial conditions from the [AbaqusUELMesh](mesh/AbaqusUELMesh.md)
 and creates corresponding MOOSE `ConstantIC` objects on automatically generated node-set boundaries.
 
 - For each initial condition entry in the Abaqus input, this action:
