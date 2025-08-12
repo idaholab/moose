@@ -6,7 +6,7 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set version = "2025.07.23" %}
+{% set version = "2025.08.06" %}
 
 package:
   name: moose-mpi

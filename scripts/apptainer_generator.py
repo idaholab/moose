@@ -324,7 +324,7 @@ class ApptainerGenerator:
         """
         file = self.container_path(name, tag)
         self.print(f'Building {def_file} in {file}')
-        command = ['apptainer', 'build', '--fakeroot']
+        command = ['apptainer', 'build']
         if args is not None:
             command += args
         if (hasattr(self.args, 'disable_cache') and

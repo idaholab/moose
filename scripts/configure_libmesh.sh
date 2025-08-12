@@ -41,24 +41,14 @@ function configure_libmesh()
   # If METHODS is not set in update_and_rebuild_libmesh.sh, set a default value.
   export METHODS=${METHODS:="opt oprof devel dbg"}
 
-  # On ARM Mac, we need to re-bootstrap because the current autotools
-  # in libMesh don't work with arm64 :(
-  # Roy is working on an autotools update eventually...
-  ADDED_ARGS=''
-  if [[ $(uname) == Darwin  ]] && [[ $(uname -m) == arm64 ]]; then
-    echo "INFO: Re-bootstrapping libMesh and its dependencies"
-    cd "$SRC_DIR" || exit $?
-    autoreconf -fiv || exit $?
-    cd contrib/metaphysicl || exit $?
-    ./bootstrap || exit $?
-    cd ../timpi || exit $?
-    ./bootstrap || exit $?
-    cd ../netcdf/netcdf-c-4.6.2 || exit $?
-    autoreconf -f -i || exit $?
+  EXTRA_ARGS=()
   # libtirpc has changed paths from a previous default searched location
-  elif [[ $(uname) == Linux ]] && [[ -d ${CONDA_PREFIX}/include/tirpc ]]; then
-    ADDED_ARGS+=" --with-xdr-include=${CONDA_PREFIX}/include/tirpc"
+  if [[ $(uname) == Linux ]] && [[ -d ${CONDA_PREFIX}/include/tirpc ]]; then
+    EXTRA_ARGS+=("--with-xdr-include=${CONDA_PREFIX}/include/tirpc")
   fi
+
+  # Allow unbound variable for when EXTRA_ARGS is empty
+  set +u
 
   cd "${SRC_DIR}/build" || exit 1
   # shellcheck disable=SC2086  # we want wordsplitting
@@ -78,8 +68,12 @@ function configure_libmesh()
                --prefix="${LIBMESH_DIR}" \
                --with-future-timpi-dir="${LIBMESH_DIR}" \
                INSTALL="${INSTALL_BINARY}" \
-               ${ADDED_ARGS} \
+               "${EXTRA_ARGS[@]}" \
                $*
+  local RETURN_CODE=$?
 
-  return $?
+  # Restore unbound variable checks
+  set -u
+
+  return $RETURN_CODE
 }
