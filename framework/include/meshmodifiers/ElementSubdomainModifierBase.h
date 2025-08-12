@@ -208,7 +208,7 @@ private:
   const std::vector<UserObjectName> _pr_names;
 
   /// @brief Apply initial conditions using polynomial extrapolation
-  std::vector<const NodalPatchRecoveryBase *> _pr;
+  std::vector<NodalPatchRecoveryBase *> _pr;
 
   /// @brief List of variable names to be initialized for IC
   std::vector<VariableName> _reinit_vars;
