@@ -454,7 +454,7 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
       LibmeshPetscCall(VecDuplicate(_amc_sys_mdot_rhs, &loc_prod));
       LibmeshPetscCall(VecDuplicate(_Wij_vec, &loc_Wij));
       LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
-          loc_Wij, _Wij, first_node, last_node + 1, _n_gaps));
+          loc_Wij, _Wij, first_node, last_node, _n_gaps));
       LibmeshPetscCall(MatMult(_mc_sumWij_mat, loc_Wij, loc_prod));
       LibmeshPetscCall(populateSolutionChan<SolutionHandle>(
           loc_prod, *_SumWij_soln, first_node, last_node, _n_channels));
