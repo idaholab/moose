@@ -150,10 +150,10 @@ private:
   void extrapolatePolynomial(const VariableName & var_name);
 
   /// @brief Store values from non-reinitialized nodes on reinitialized elements
-  void storeOverriddenDofValues(const std::vector<VariableName> & vars_names);
+  void storeOverriddenDofValues(const VariableName & var_name);
 
   /// @brief Restore values to non-reinitialized nodes on reinitialized elements
-  void restoreOverriddenDofValues(const std::vector<VariableName> & vars_names);
+  void restoreOverriddenDofValues(const VariableName & var_name);
 
   /// Reinitialize moved elements whose new subdomain is in this list
   std::vector<SubdomainID> _subdomain_ids_to_reinitialize;

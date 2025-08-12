@@ -16,6 +16,7 @@
 #include "libmesh/parallel_ghost_sync.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/parameters.h"
+#include <iterator>
 #include <unordered_set>
 
 InputParameters
@@ -679,9 +680,10 @@ ElementSubdomainModifierBase::applyIC()
 {
   // Before reinitializing variables, some DOFs may be overwritten.
   // By default, these overwritten DOF values are NOT restored.
-  // If the user sets `restore_overridden_dofs` with some true values, we first save the current
+  // If the user sets `restore_overridden_dofs` to true, we first save the current
   // values of these DOFs, then restore them after reinitialization.
-  storeOverriddenDofValues(_vars_to_restore_overridden_dofs);
+  for (const auto & var_name : _vars_to_restore_overridden_dofs)
+    storeOverriddenDofValues(var_name);
 
   // ReinitStrategy::IC
   std::set<VariableName> ic_vars;
@@ -697,7 +699,8 @@ ElementSubdomainModifierBase::applyIC()
     extrapolatePolynomial(var);
 
   // See the comment above, now we restore the values of the dofs that were overridden
-  restoreOverriddenDofValues(_vars_to_restore_overridden_dofs);
+  for (const auto & var_name : _vars_to_restore_overridden_dofs)
+    restoreOverriddenDofValues(var_name);
 
   mooseAssert(_fe_problem.numSolverSystems() <= 1,
               "This code was written for a single nonlinear system");
@@ -714,99 +717,81 @@ ElementSubdomainModifierBase::applyIC()
 }
 
 void
-ElementSubdomainModifierBase::storeOverriddenDofValues(const std::vector<VariableName> & vars_names)
+ElementSubdomainModifierBase::storeOverriddenDofValues(const VariableName & var_name)
 {
+  const auto & sys = _fe_problem.getSystem(var_name);
+  const auto & current_solution = *sys.current_local_solution;
+  const auto & dof_map = sys.get_dof_map();
+  const auto & var = _fe_problem.getStandardVariable(0, var_name);
+  const auto var_num = var.number();
 
-  for (const auto & var_name : vars_names)
+  // Get the DOFs on the reinitialized elements
+  std::set<dof_id_type> reinitialized_dofs;
+  for (const auto & elem_id : _reinitialized_elems)
   {
-    SystemBase & sys = _aux_sys.hasVariable(var_name)
-                           ? static_cast<SystemBase &>(_fe_problem.getAuxiliarySystem())
-                           : static_cast<SystemBase &>(_fe_problem.getNonlinearSystemBase(
-                                 _fe_problem.systemNumForVariable(var_name)));
-
-    const auto & current_solution = *sys.system().current_local_solution;
-
-    DofMap & dof_map = sys.dofMap();
-
-    const auto & var = _fe_problem.getStandardVariable(0, var_name);
-    const auto var_num = var.number();
-
-    // Get the DOFs on the reinitialized elements
-    std::set<dof_id_type> reinitialized_dofs;
-    for (const auto & elem_id : _reinitialized_elems)
-    {
-      const auto & elem = _mesh.elemPtr(elem_id);
-      std::vector<dof_id_type> elem_dofs;
-      dof_map.dof_indices(elem, elem_dofs, var_num);
-      reinitialized_dofs.insert(elem_dofs.begin(), elem_dofs.end());
-    }
-
-    // Get existing DOFs on the active elements excluding reinitialized elements
-    std::set<dof_id_type> existing_dofs;
-    for (const auto * elem : *_mesh.getActiveLocalElementRange())
-    {
-      if (_reinitialized_elems.count(elem->id()))
-        continue; // Skip reinitialized elements
-      std::vector<dof_id_type> elem_dofs;
-      dof_map.dof_indices(elem, elem_dofs, var_num);
-      existing_dofs.insert(elem_dofs.begin(), elem_dofs.end());
-    }
-
-    // Get the DOFs on the nodes that are overridden on reinitialized elements
-    std::set<dof_id_type> overridden_dofs;
-    std::set_intersection(reinitialized_dofs.begin(),
-                          reinitialized_dofs.end(),
-                          existing_dofs.begin(),
-                          existing_dofs.end(),
-                          std::inserter(overridden_dofs, overridden_dofs.begin()));
-
-    std::vector<Number> values;
-    for (auto dof : overridden_dofs)
-      values.push_back(current_solution(dof));
-
-    _overridden_values_on_reinit_elems[var_name] = {
-        std::vector<dof_id_type>(overridden_dofs.begin(), overridden_dofs.end()), values};
+    const auto & elem = _mesh.elemPtr(elem_id);
+    std::vector<dof_id_type> elem_dofs;
+    dof_map.dof_indices(elem, elem_dofs, var_num);
+    reinitialized_dofs.insert(elem_dofs.begin(), elem_dofs.end());
   }
+
+  // Get existing DOFs on the active elements excluding reinitialized elements
+  std::set<dof_id_type> existing_dofs;
+  for (const auto * elem : *_mesh.getActiveLocalElementRange())
+  {
+    if (_reinitialized_elems.count(elem->id()))
+      continue; // Skip reinitialized elements
+    std::vector<dof_id_type> elem_dofs;
+    dof_map.dof_indices(elem, elem_dofs, var_num);
+    existing_dofs.insert(elem_dofs.begin(), elem_dofs.end());
+  }
+
+  // Get the DOFs on the nodes that are overridden on reinitialized elements
+  std::vector<dof_id_type> overridden_dofs;
+  std::set_intersection(reinitialized_dofs.begin(),
+                        reinitialized_dofs.end(),
+                        existing_dofs.begin(),
+                        existing_dofs.end(),
+                        std::back_inserter(overridden_dofs));
+
+  // Values before overriding (to be restored later)
+  std::vector<Number> values;
+  for (auto dof : overridden_dofs)
+    values.push_back(current_solution(dof));
+
+  _overridden_values_on_reinit_elems[var_name] = {overridden_dofs, values};
 }
 
 void
-ElementSubdomainModifierBase::restoreOverriddenDofValues(
-    const std::vector<VariableName> & vars_names)
+ElementSubdomainModifierBase::restoreOverriddenDofValues(const VariableName & var_name)
 {
-  for (const auto & var_name : vars_names)
+  const auto sn = _fe_problem.systemNumForVariable(var_name);
+  auto & sys = _fe_problem.getSystemBase(sn);
+  auto & sol = sys.solution();
+  const auto & dof_map = sys.dofMap();
+  const auto & [dof_ids, values] = _overridden_values_on_reinit_elems[var_name];
+
+  std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, Number>>> push_data;
+
+  for (const int i : index_range(dof_ids))
   {
-    SystemBase & sys = _aux_sys.hasVariable(var_name)
-                           ? static_cast<SystemBase &>(_fe_problem.getAuxiliarySystem())
-                           : static_cast<SystemBase &>(_fe_problem.getNonlinearSystemBase(
-                                 _fe_problem.systemNumForVariable(var_name)));
-
-    DofMap & dof_map = sys.dofMap();
-
-    const auto & dof_ids = _overridden_values_on_reinit_elems[var_name].first;
-    const auto & values = _overridden_values_on_reinit_elems[var_name].second;
-
-    std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, Number>>> push_data;
-
-    for (const int i : index_range(dof_ids))
-    {
-      if (dof_map.dof_owner(dof_ids[i]) == processor_id())
-        sys.solution().set(dof_ids[i], values[i]);
-      else
-        push_data[dof_map.dof_owner(dof_ids[i])].emplace_back(dof_ids[i], values[i]);
-    }
-
-    auto push_receiver = [&](const processor_id_type,
-                             const std::vector<std::pair<dof_id_type, Number>> & received_data)
-    {
-      for (const auto & [id, value] : received_data)
-        sys.solution().set(id, value);
-    };
-
-    Parallel::push_parallel_vector_data(_mesh.comm(), push_data, push_receiver);
-
-    sys.solution().close();
-    sys.solution().localize(*sys.system().current_local_solution, sys.dofMap().get_send_list());
+    if (dof_map.dof_owner(dof_ids[i]) == processor_id())
+      sol.set(dof_ids[i], values[i]);
+    else
+      push_data[dof_map.dof_owner(dof_ids[i])].emplace_back(dof_ids[i], values[i]);
   }
+
+  auto push_receiver = [&](const processor_id_type,
+                           const std::vector<std::pair<dof_id_type, Number>> & received_data)
+  {
+    for (const auto & [id, value] : received_data)
+      sol.set(id, value);
+  };
+
+  Parallel::push_parallel_vector_data(_mesh.comm(), push_data, push_receiver);
+
+  sol.close();
+  sol.localize(*sys.system().current_local_solution, sys.dofMap().get_send_list());
 }
 
 void
