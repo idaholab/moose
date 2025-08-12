@@ -1,23 +1,15 @@
-# StepUserObject
+# AbaqusUELStepUserObject
 
-!syntax description /UserObjects/StepUserObject
+!syntax description /UserObjects/AbaqusUELStepUserObject
 
 ## Description
 
-`StepUserObject` is a general user object that performs basic computations to provide a
-loading step given a simulation time step value or a simulation time step value given a
-loading step. This user object is used to interface with [AbaqusUMATStress](/AbaqusUMATStress.md)
-and [AbaqusUExternalDB](/AbaqusUExternalDB.md) to provide step information to user routines.
-`StepUserObject` can also interface with [StepPeriod](/StepPeriod.md) to enable/disable
-boundary conditions and constraints according the user-defined loading steps.
+`AbaqusUELStepUserObject` processes the `*Step` section from an Abaqus input file loaded through an
+[AbaqusUELMesh](AbaqusUELMesh.md). It interfaces with the [BCs/Abaqus](BCs/Abaqus/index.md) action
+and provides data for boundary conditions implemented through [AbaqusEssentialBC](AbaqusEssentialBC.md) and [AbaqusForceBC](AbaqusForceBC.md).
 
+!syntax parameters /UserObjects/AbaqusUELStepUserObject
 
-## Example Input File Syntax
+!syntax inputs /UserObjects/AbaqusUELStepUserObject
 
-!listing modules/solid_mechanics/test/tests/umat/steps/elastic_temperature_steps_uo.i block=UserObjects/step_uo
-
-!syntax parameters /UserObjects/StepUserObject
-
-!syntax inputs /UserObjects/StepUserObject
-
-!syntax children /UserObjects/StepUserObject
+!syntax children /UserObjects/AbaqusUELStepUserObject

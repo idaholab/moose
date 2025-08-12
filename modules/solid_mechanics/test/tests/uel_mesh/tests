@@ -1,6 +1,6 @@
 [Tests]
   issues = '#29382'
-  design = 'AbaqusUELMeshUserElement.md AbaqusEssentailBC.md AbaqusForceBC.md'
+  design = 'AbaqusUELMeshUserElement.md AbaqusEssentialBC.md AbaqusForceBC.md'
 
   [build_uel_plugin_opt]
     type = RunCommand
