@@ -25,6 +25,8 @@
 #include "libmesh/remote_elem.h"
 
 #include <algorithm>
+#include <numeric>
+#include <unordered_map>
 #include <limits>
 
 template <>
@@ -1142,51 +1144,57 @@ FeatureFloodCount::mergeSets()
   // When working with _distribute_merge_work all of the maps will be empty except for one
   for (const auto map_num : make_range(_maps_size))
   {
-    for (auto it1 = _partial_feature_sets[map_num].begin();
-         it1 != _partial_feature_sets[map_num].end();
-         /* No increment on it1 */)
+    auto & feature_list = _partial_feature_sets[map_num];
+
+    if (feature_list.size() < 2)
+      continue;
+
+    // Move the list into a vector for indexed access
+    std::vector<FeatureData> features;
+    features.reserve(feature_list.size());
+    for (auto & fd : feature_list)
+      features.emplace_back(std::move(fd));
+    feature_list.clear();
+
+    const std::size_t n = features.size();
+    std::vector<std::size_t> parent(n);
+    std::iota(parent.begin(), parent.end(), 0);
+
+    // Disjoint set routines
+    auto find_root = [&](std::size_t i) {
+      while (parent[i] != i)
+        i = parent[i] = parent[parent[i]];
+      return i;
+    };
+
+    auto unite = [&](std::size_t a, std::size_t b) {
+      a = find_root(a);
+      b = find_root(b);
+      if (a != b)
+        parent[b] = a;
+    };
+
+    for (std::size_t i = 0; i < n; ++i)
+      for (std::size_t j = i + 1; j < n; ++j)
+        if (areFeaturesMergeable(features[i], features[j]))
+          unite(i, j);
+
+    std::unordered_map<std::size_t, std::size_t> root_index;
+    std::vector<FeatureData> merged;
+    merged.reserve(n);
+    for (std::size_t i = 0; i < n; ++i)
     {
-      bool merge_occured = false;
-      for (auto it2 = _partial_feature_sets[map_num].begin();
-           it2 != _partial_feature_sets[map_num].end();
-           ++it2)
-      {
-        if (it1 != it2 && areFeaturesMergeable(*it1, *it2))
-        {
-          it2->merge(std::move(*it1));
+      auto root = find_root(i);
+      auto ins = root_index.emplace(root, merged.size());
+      if (ins.second)
+        merged.emplace_back(std::move(features[i]));
+      else
+        merged[ins.first->second].merge(std::move(features[i]));
+    }
 
-          /**
-           * Insert the new entity at the end of the list so that it may be checked against all
-           * other partial features again.
-           */
-          _partial_feature_sets[map_num].emplace_back(std::move(*it2));
-
-          /**
-           * Now remove both halves the merged features: it2 contains the "moved" feature cell just
-           * inserted at the back of the list, it1 contains the mostly empty other half. We have to
-           * be careful about the order in which these two elements are deleted. We delete it2 first
-           * since we don't care where its iterator points after the deletion. We are going to break
-           * out of this loop anyway. If we delete it1 first, it may end up pointing at the same
-           * location as it2 which after the second deletion would cause both of the iterators to be
-           * invalidated.
-           */
-          _partial_feature_sets[map_num].erase(it2);
-          it1 = _partial_feature_sets[map_num].erase(it1); // it1 is incremented here!
-
-          // A merge occurred, this is used to determine whether or not we increment the outer
-          // iterator
-          merge_occured = true;
-
-          // We need to start the list comparison over for the new it1 so break here
-          break;
-        }
-      } // it2 loop
-
-      if (!merge_occured) // No merges so we need to manually increment the outer iterator
-        ++it1;
-
-    } // it1 loop
-  }   // map loop
+    for (auto & fd : merged)
+      feature_list.emplace_back(std::move(fd));
+  } // map loop
 }
 
 void
