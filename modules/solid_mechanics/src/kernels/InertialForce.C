@@ -110,6 +110,22 @@ InertialForceTempl<is_ad>::InertialForceTempl(const InputParameters & parameters
 }
 
 template <bool is_ad>
+std::pair<GenericReal<is_ad>, GenericReal<is_ad>>
+InertialForceTempl<is_ad>::computeNewmarkBetaVelAccel(const GenericReal<is_ad> & u,
+                                                      const Real u_old,
+                                                      const Real vel_old,
+                                                      const Real accel_old,
+                                                      const Real beta,
+                                                      const Real gamma,
+                                                      const Real dt)
+{
+  const auto accel =
+      1.0 / beta * (((u - u_old) / (dt * dt)) - vel_old / dt - accel_old * (0.5 - beta));
+  const auto vel = vel_old + (dt * (1.0 - gamma)) * accel_old + gamma * dt * accel;
+  return {vel, accel};
+}
+
+template <bool is_ad>
 GenericReal<is_ad>
 InertialForceTempl<is_ad>::computeQpResidual()
 {
@@ -117,11 +133,8 @@ InertialForceTempl<is_ad>::computeQpResidual()
     return 0;
   else if (_has_beta)
   {
-    auto accel = 1.0 / _beta *
-                 (((_u[_qp] - (*_u_old)[_qp]) / (_dt * _dt)) - (*_vel_old)[_qp] / _dt -
-                  (*_accel_old)[_qp] * (0.5 - _beta));
-    auto vel =
-        (*_vel_old)[_qp] + (_dt * (1.0 - _gamma)) * (*_accel_old)[_qp] + _gamma * _dt * accel;
+    const auto [vel, accel] = computeNewmarkBetaVelAccel(
+        _u[_qp], (*_u_old)[_qp], (*_vel_old)[_qp], (*_accel_old)[_qp], _beta, _gamma, _dt);
     return _test[_i][_qp] * _density[_qp] *
            (accel + vel * _eta[_qp] * (1.0 + _alpha) - _alpha * _eta[_qp] * (*_vel_old)[_qp]);
   }

@@ -28,6 +28,15 @@ public:
 
   InertialForceTempl(const InputParameters & parameters);
 
+  static std::pair<GenericReal<is_ad>, GenericReal<is_ad>>
+  computeNewmarkBetaVelAccel(const GenericReal<is_ad> & u,
+                             const Real u_old,
+                             const Real vel_old,
+                             const Real accel_old,
+                             const Real beta,
+                             const Real gamma,
+                             const Real dt);
+
 protected:
   virtual GenericReal<is_ad> computeQpResidual();
 
