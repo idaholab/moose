@@ -178,25 +178,17 @@ NodalPatchRecoveryBase::gatherSendList(const std::vector<dof_id_type> & addition
 {
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
 
-  const auto evaluable_elem_range = _fe_problem.getEvaluableElementRange();
-
-  std::vector<dof_id_type> evaluable_elem_ids;
-  for (const auto & elem : evaluable_elem_range)
-    if (hasBlocks(elem->subdomain_id())) // getEvaluableElementRange is not block restricted
-      evaluable_elem_ids.push_back(elem->id());
-
-  for (const auto & elem_id : evaluable_elem_ids)
-  {
-    const auto * elem = _mesh.elemPtr(elem_id);
-    if (elem->processor_id() != processor_id())
-      query_ids[elem->processor_id()].push_back(elem_id);
-  }
+  for (const auto & elem : _fe_problem.getEvaluableElementRange())
+    if (hasBlocks(elem->subdomain_id()))
+      if (elem->processor_id() != processor_id())
+        query_ids[elem->processor_id()].push_back(elem->id());
 
   for (const auto & entry : additional_elems)
   {
     const Elem * elem = _mesh.elemPtr(entry);
-    if (elem->processor_id() != processor_id())
-      query_ids[elem->processor_id()].push_back(elem->id());
+    if (hasBlocks(elem->subdomain_id()))
+      if (elem->processor_id() != processor_id())
+        query_ids[elem->processor_id()].push_back(elem->id());
   }
 
   return query_ids;

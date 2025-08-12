@@ -167,6 +167,8 @@
   type = Transient
   dt = 0.3
   num_steps = 3
+  nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-50
 []
 
 [Outputs]

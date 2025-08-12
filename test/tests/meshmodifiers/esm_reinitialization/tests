@@ -37,10 +37,10 @@
       type = 'Exodiff'
       input = 'external_moving_boundary_npr_elem_not_provide.i'
       exodiff = 'external_moving_boundary_npr_elem_not_provide_out.e-s002'
-      detail = 'using all elements in a designated region to estimate initial values by default.'
+      detail = 'using all elements in a designated region to estimate initial values by IC.'
     []
 
-    [DEFAULT]
+    [IC]
       type = 'Exodiff'
       input = 'external_moving_boundary_no_unsolved_blocks_all_default.i'
       exodiff = 'external_moving_boundary_no_unsolved_blocks_all_default_out.e-s004'
@@ -133,7 +133,8 @@
       type = RunException
       input = 'external_moving_boundary_npr_two_variables_npr_normal_set.i'
       cli_args = 'MeshModifiers/moving_circle/reinitialization_strategy="POLYNOMIAL_NEIGHBOR POLYNOMIAL_NEIGHBOR POLYNOMIAL_WHOLE"'
-      expect_err = "The 'reinitialization_strategy' parameter must have either a single value or a number of values equal to the number of 'reinitialize_variables'."
+      expect_err = "The 'reinitialization_strategy' parameter must have either a single value or a "
+                   "number of values equal to the number of 'reinitialize_variables'."
       detail = 'if the number of specified strategies does not match the number of associated fields.'
     []
 
@@ -141,7 +142,8 @@
       type = RunException
       input = 'restore_not_restore_test.i'
       cli_args = 'MeshModifiers/moving_circle/restore_overridden_dofs="true false"'
-      expect_err = "The 'restore_overridden_dofs' parameter must have either a single value or a number"
+      expect_err = "The 'restore_overridden_dofs' parameter must have either a single value or a "
+                   "number"
       detail = 'if the number of initialized variables and restore_overridden_dofs do not match.'
     []
 
@@ -157,7 +159,8 @@
       type = RunException
       input = 'external_moving_boundary_npr.i'
       cli_args = 'MeshModifiers/moving_circle/reinitialization_strategy="IC"'
-      expect_err = "Mismatch between number of reinitialization strategies using polynomial extrapolation and polynomial fitters"
+      expect_err = "Mismatch between number of reinitialization strategies using polynomial "
+                   "extrapolation and polynomial fitters"
       detail = 'if the number of extrapolation-based strategies does not match the number of corresponding extrapolation sources.'
     []
   []
