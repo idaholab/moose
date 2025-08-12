@@ -90,7 +90,6 @@ InputParser::parse(std::istream & in)
   forAll(nullptr,
          [this](const std::string & key, BlockNode &)
          {
-           std::cout << "key: " << key << std::endl;
            // if we find an assembly block, this is not a flat file
            if (key == "assembly")
              _is_flat = false;
@@ -152,7 +151,6 @@ InputParser::parseBlockInternal(BlockNode & node, const std::string & end)
   while (_current_line < _lines.size())
   {
     const auto & line = _lines[_current_line];
-    // std::cout << Moose::stringify(line) << '\n';
     if (line[0][0] != '*')
       node._data.push_back(line);
     const auto keyword = MooseUtils::toLower(line[0].substr(1));
