@@ -2328,9 +2328,9 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
               // there is still a chance since the tolerances are applied to
               // the xi coordinate and that value may be different on a primary element and a
               // secondary element since they may have different sizes.
-              throw MooseException("Nodes on primary and secondary surfaces are aligned. This is "
-                                   "causing trouble when identifying projections from secondary "
-                                   "nodes when performing primary node projections.");
+              throw MooseException("We detected alignment of a secondary/primary node pair while "
+                                   "projecting primary nodes. We should have already detected this "
+                                   "alignment during projection of the secondary nodes");
             }
             else // somewhere in the middle of the Elem
             {
