@@ -1,9 +1,22 @@
 # Include variables defined by MOOSE configure if it's been run
 -include $(MOOSE_DIR)/conf_vars.mk
 
+# If compile_commands.json is a goal, make sure it is the only goal
+ifneq ($(filter compile_commands.json,$(MAKECMDGOALS)),)
+ifneq ($(words $(MAKECMDGOALS)),1)
+$(error compile_commands.json must be the only goal when it is specified)
+endif
+endif
+
 # Whether or not to do a Unity build
-MOOSE_UNITY ?= true
-MOOSE_HEADER_SYMLINKS ?= true
+# If we are making compile_commands.json, default MOOSE_UNITY and MOOSE_HEADER_SYMLINKS to false
+ifeq ($(filter compile_commands.json,$(MAKECMDGOALS)),compile_commands.json)
+  MOOSE_UNITY ?= false
+  MOOSE_HEADER_SYMLINKS ?= false
+else
+  MOOSE_UNITY ?= true
+  MOOSE_HEADER_SYMLINKS ?= true
+endif
 
 # We ignore this in the contrib folder because we will set up the include
 # directories manually later
@@ -666,7 +679,7 @@ libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
 #
 # Clean targets
 #
-.PHONY: clean clobber cleanall echo_include echo_library install_make_dir libmesh_submodule_status hit capabilities
+.PHONY: clean clobber cleanall echo_include echo_library install_make_dir libmesh_submodule_status hit capabilities compile_commands.json
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
