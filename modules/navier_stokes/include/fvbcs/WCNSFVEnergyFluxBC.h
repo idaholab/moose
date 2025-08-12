@@ -41,10 +41,10 @@ protected:
   const Moose::Functor<ADReal> & _temperature;
 
   /// Fluid pressure functor
-  const Moose::Functor<ADReal> * _pressure;
+  const Moose::Functor<ADReal> * const _pressure;
 
-  /// Pointer to the enthalpy functor
-  const Moose::Functor<ADReal> * _h_fluid;
+  /// Pointer to the specific enthalpy functor
+  const Moose::Functor<ADReal> * const _h_fluid;
 
   /// Fluid properties object
   const SinglePhaseFluidProperties * const _fluid;

@@ -29,7 +29,7 @@ WCNSFVEnergyFluxBC::validParams()
   params.addParam<MooseFunctorName>(NS::cp, "specific heat capacity functor");
   params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "temperature functor");
 
-  // Parameters to solve with the enthalpy variable
+  // Parameters to solve with the specific enthalpy variable
   params.addParam<MooseFunctorName>(NS::pressure, "pressure functor");
   params.addParam<MooseFunctorName>(NS::specific_enthalpy,
                                     "Fluid specific enthalpy functor. This can be specified to "
@@ -134,7 +134,7 @@ WCNSFVEnergyFluxBC::enthalpy(const T & loc_arg,
   {
     if (_temperature_pp)
     {
-      // Preferrable to use the fluid property if we know it
+      // Preferable to use the fluid property if we know it
       if (_fluid)
         return _fluid->h_from_p_T((*_pressure)(loc_arg, state), (*_temperature_pp));
       else if (_cp)

@@ -77,7 +77,7 @@ public:
   NS::MomentumInletTypes inletBoundaryType(const BoundaryName & boundary_name) const
   {
     return NS::MomentumInletTypes(
-        (unsigned int)libmesh_map_find(_momentum_inlet_types, boundary_name));
+        static_cast<int>(libmesh_map_find(_momentum_inlet_types, boundary_name)));
   }
   /// Get the inlet direction if using a flux inlet
   const std::vector<Point> & getFluxInletDirections() const { return _flux_inlet_directions; }
