@@ -1,26 +1,15 @@
 [Tests]
-  design = 'syntax/AuxKernels/index.md'
-  issues = '#31153'
-
-  [MFEMScalarProjectAux]
+  [MFEMScalarVectorProjectAux]
     type = XMLDiff
-    input = 2DScalarCurrentProjection.i
-    xmldiff = 'OutputData/2DScalarCurrentProjection/Run0/Run0.pvd
-                OutputData/2DScalarCurrentProjection/Run0/Cycle000001/proc000000.vtu'
+    input = projection.i
+    xmldiff = 'OutputData/Projection/Run0/Run0.pvd
+                OutputData/Projection/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
-    requirement = 'The system shall have the ability to project a scalar coefficient onto an MFEMVariable.'
+    design = 'MFEMScalarProjectAux.md MFEMVectorProjectAux.md'
+    issues = '#31153'
+    requirement = 'The system shall have the ability to project scalar and vector coefficients onto appropriate MFEM variables.'
     capabilities = 'mfem'
-    max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
-  []
-  [MFEMVectorProjectAux]
-    type = XMLDiff
-    input = 2DVectorCurrentProjection.i
-    xmldiff = 'OutputData/2DVectorCurrentProjection/Run0/Run0.pvd
-                OutputData/2DVectorCurrentProjection/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
-    requirement = 'The system shall have the ability to project a vector coefficient onto an MFEMVariable.'
-    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []

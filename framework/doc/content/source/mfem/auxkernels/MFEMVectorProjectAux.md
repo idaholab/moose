@@ -12,7 +12,7 @@ AuxKernel for projecting a vector coefficient onto an MFEM variable.
 
 ## Example Input File Syntax
 
-!listing 2DVectorCurrentProjection.i block=/AuxKernels
+!listing mfem/auxkernels/projection.i block=/AuxKernels
 
 !syntax parameters /AuxKernels/MFEMVectorProjectAux
 

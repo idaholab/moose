@@ -14,23 +14,19 @@
     fec_type = H1
     fec_order = FIRST
   []
-  [H1VectorFESpace]
-    type = MFEMVectorFESpace
-    fec_type = H1
-    fec_order = FIRST
-  []
   [HCurlFESpace]
     type = MFEMVectorFESpace
     fec_type = ND
     fec_order = FIRST
   []
+  [L2FESpace]
+    type = MFEMScalarFESpace
+    fec_type = L2
+    fec_order = CONSTANT
+  []
 []
 
 [Variables]
-  [current]
-    type = MFEMVariable
-    fespace = H1FESpace
-  []
   [Az]
     type = MFEMVariable
     fespace = H1FESpace
@@ -38,27 +34,47 @@
 []
 
 [AuxVariables]
-  [grad_Az]
+  [J]
+    type = MFEMVariable
+    fespace = L2FESpace
+  []
+  [GAz]
     type = MFEMVariable
     fespace = HCurlFESpace
   []
-  [J]
+  [GAz(copy)]
     type = MFEMVariable
-    fespace = H1VectorFESpace
+    fespace = HCurlFESpace
+  []
+[]
+
+[Kernels]
+  [diffusion]
+    type = MFEMDiffusionKernel
+    variable = Az
+  []
+  [source]
+    type = MFEMDomainLFKernel
+    variable = Az
+    coefficient = J_source
   []
 []
 
 [AuxKernels]
-  [grad]
-    type = MFEMGradAux
-    variable = grad_Az
-    source = Az
-    execute_on = TIMESTEP_END
-  []
-   [current_output]
+  [J]
     type = MFEMScalarProjectAux
-    coefficient = Jvalue
     variable = J
+    coefficient = J_source
+  []
+  [GAz]
+    type = MFEMGradAux
+    variable = GAz
+    source = Az
+  []
+  [GAz(copy)]
+    type = MFEMVectorProjectAux
+    variable = GAz(copy)
+    vector_coefficient = GAz
   []
 []
 
@@ -72,29 +88,11 @@
 []
 
 [FunctorMaterials]
-  [no_current]
+  [J_wire]
     type = MFEMGenericFunctorMaterial
-    prop_names = Jvalue
-    prop_values = 0.0
-    block = 1
-  []
-  [with_current]
-    type = MFEMGenericFunctorMaterial
-    prop_names = Jvalue
+    prop_names = J_source
     prop_values = 8.0
-    block = 2
-  []
-[]
-
-[Kernels]
-  [diffusion]
-    type = MFEMDiffusionKernel
-    variable = Az
-  []
-  [source]
-    type = MFEMDomainLFKernel
-    variable = Az
-    coefficient = Jvalue
+    block = wire
   []
 []
 
@@ -106,21 +104,18 @@
 
 [Solver]
   type = MFEMHyprePCG
-  preconditioner= boomeramg
+  preconditioner = boomeramg
   l_tol = 1e-16
-  l_max_its = 1000
-  print_level = 2
 []
 
 [Executioner]
   type = MFEMSteady
-  device = cpu
 []
 
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/2DScalarCurrentProjection
+    file_base = OutputData/Projection
     vtk_format = ASCII
   []
 []
