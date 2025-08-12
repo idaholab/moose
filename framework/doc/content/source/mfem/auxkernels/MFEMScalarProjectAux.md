@@ -8,11 +8,11 @@
 
 ## Overview
 
-AuxKernel for projecting a scalar coefficient on to an MFEM Variable.
+AuxKernel for projecting a scalar coefficient onto an MFEM variable.
 
 ## Example Input File Syntax
 
-!listing 2DScalarCurrentPro.i block=AuxKernels
+!listing 2DScalarCurrentProjection.i block=/AuxKernels
 
 !syntax parameters /AuxKernels/MFEMScalarProjectAux
 

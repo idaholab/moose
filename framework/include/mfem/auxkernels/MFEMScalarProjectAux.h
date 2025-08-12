@@ -3,10 +3,9 @@
 #pragma once
 
 #include "MFEMAuxKernel.h"
-#include "mfem.hpp"
 
 /**
- * Projects a scalar Coefficient into a scalar-valued aux variable.
+ * Projects a scalar coefficient onto a scalar-valued aux variable.
  */
 class MFEMScalarProjectAux : public MFEMAuxKernel
 {
@@ -20,6 +19,7 @@ public:
   virtual void execute() override;
 
 protected:
+  /// Reference to source coefficient.
   mfem::Coefficient & _coef;
 };
 

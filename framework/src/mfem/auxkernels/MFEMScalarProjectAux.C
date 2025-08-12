@@ -1,7 +1,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMScalarProjectAux.h"
-#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMScalarProjectAux);
 
@@ -9,9 +8,9 @@ InputParameters
 MFEMScalarProjectAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
-  params.addClassDescription("Projects a Scalar Coefficient into a scalea MFEMVariable");
+  params.addClassDescription("Projects a scalar coefficient onto a scalar MFEMVariable");
   params.addRequiredParam<MFEMScalarCoefficientName>("coefficient",
-                                                     "Name of the Scalar Coefficient to project.");
+                                                     "Name of the scalar coefficient to project.");
   return params;
 }
 
