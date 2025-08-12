@@ -2,9 +2,29 @@
 
 !syntax description /NodalKernels/AbaqusForceBC
 
-# Description
+## Description
 
-This NodalKernel acts as a component of the Abaqus nodal (essential) boundary condition system. It applies an additional force to the node that corresponds to the reaction force of a previously active and now deactivated Dirichlet type boundary condition. This object needs to be a [NodalKernel](NodalKernel.md) as it _adds_ a force at boundary nodes, rather than _prescribing_ it.
+`AbaqusForceBC` complements [AbaqusEssentialBC](AbaqusEssentialBC.md) in realizing Abaqus
+`*Boundary` behavior. When a Dirichlet constraint is deactivated at the beginning of a step, the
+corresponding nodal reaction force from the prior state is applied as an external nodal force and
+then ramped to zero over the course of the step using the step fraction `d ∈ [0,1]`:
+
+- Reads the concentrated reaction force at the beginning of the step via
+  [AbaqusUELStepUserObject](../userobjects/AbaqusUELStepUserObject.md).
+- Applies `(1 - d) * begin_force` at the node for the current Abaqus variable ID.
+- Operates on the synthetic `abaqus_bc_union_boundary` created by
+  [AbaqusUELMesh](AbaqusUELMesh.md).
+
+This is a `NodalKernel` because it adds a force contribution rather than prescribing a value.
+
+To enable capturing reaction forces from the UEL bulk contributions, ensure the problem declares the
+`AbaqusUELTag` vector tag (used by [AbaqusUELMeshUserElement](AbaqusUELMeshUserElement.md)).
+
+## Usage
+
+Example configuration (paired with `AbaqusEssentialBC`):
+
+!listing modules/solid_mechanics/test/tests/uel_mesh/elastic.i block=NodalKernels
 
 !syntax parameters /NodalKernels/AbaqusForceBC
 
