@@ -333,18 +333,21 @@ youngs_modulus = 10e11
     secondary = 102
     formulation = mortar
     model = frictionless
+    correct_edge_dropping = true
   []
   [bc_bottom]
     primary = 810
     secondary = 100
     formulation = mortar
     model = frictionless
+    correct_edge_dropping = true
   []
   [bc_left]
     primary = 103
     secondary = 813
     formulation = mortar
     model = frictionless
+    correct_edge_dropping = true
   []
 
   [crack_1]
@@ -352,18 +355,21 @@ youngs_modulus = 10e11
     secondary = 512
     formulation = mortar
     model = frictionless
+    correct_edge_dropping = true
   []
   [crack_2]
     primary = 611
     secondary = 612
     formulation = mortar
     model = frictionless
+    correct_edge_dropping = true
   []
   [crack_3]
     primary = 711
     secondary = 712
     formulation = mortar
     model = frictionless
+    correct_edge_dropping = true
   []
 []
 
@@ -479,6 +485,7 @@ youngs_modulus = 10e11
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu superlu_dist'
+  nl_rel_tol = 1e-7
 []
 
 [Outputs]
