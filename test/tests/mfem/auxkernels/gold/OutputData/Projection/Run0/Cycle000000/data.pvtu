@@ -11,9 +11,9 @@
 </PCells>
 <PPointData>
 <PDataArray type="Float64" Name="Az" NumberOfComponents="1"  format="ascii" />
-<PDataArray type="Float64" Name="J" NumberOfComponents="2" ComponentName0="0" ComponentName1="1" format="ascii" />
-<PDataArray type="Float64" Name="current" NumberOfComponents="1"  format="ascii" />
-<PDataArray type="Float64" Name="grad_Az" NumberOfComponents="2" ComponentName0="0" ComponentName1="1" format="ascii" />
+<PDataArray type="Float64" Name="GAz" NumberOfComponents="2" ComponentName0="0" ComponentName1="1" format="ascii" />
+<PDataArray type="Float64" Name="GAz(copy)" NumberOfComponents="2" ComponentName0="0" ComponentName1="1" format="ascii" />
+<PDataArray type="Float64" Name="J" NumberOfComponents="1"  format="ascii" />
 </PPointData>
 <PCellData>
 	<PDataArray type="Int32" Name="attribute" NumberOfComponents="1" format="ascii"/>
