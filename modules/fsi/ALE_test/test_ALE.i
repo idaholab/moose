@@ -1,21 +1,38 @@
+beta = 0.25
+gamma = 0.5
+eta = 19.63
+zeta = 0.000025
+youngs_modulus = 1e8
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
 
 [Mesh]
-  type = FileMesh
-  file = tmesh_HR.msh
+  [file]
+    type = FileMeshGenerator
+    file = tmesh_HR.msh
+  []
+  [convert]
+    type = ElementOrderConversionGenerator
+    input = file
+    conversion_type = FIRST_ORDER
+  []
+  [matrix_side_interface]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = convert
+    new_boundary = interface_matrix_side
+    paired_block = 'inclusion'
+    primary_block = 'matrix'
+  []
 []
 
 [Variables]
   [disp_x]
-    order = SECOND
-    family = LAGRANGE
+    scaling = '${fparse 1/youngs_modulus}'
   []
   [disp_y]
-    order = SECOND
-    family = LAGRANGE
+    scaling = '${fparse 1/youngs_modulus}'
   []
   [vel]
     family = LAGRANGE_VEC
@@ -23,6 +40,19 @@
   []
   [p]
     block = 'matrix'
+  []
+  [lambda]
+    family = SCALAR
+    block = 'matrix'
+  []
+[]
+
+[AuxVariables]
+  [accel_x]
+    block = 'inclusion'
+  []
+  [accel_y]
+    block = 'inclusion'
   []
   [vel_x_solid]
     block = 'inclusion'
@@ -32,24 +62,13 @@
   []
 []
 
-[AuxVariables]
-
-  [accel_x]
-    block = 'inclusion'
-  []
-  [accel_y]
-    block = 'inclusion'
-  []
-[]
-
 [AuxKernels]
-
   [accel_x] # Calculates and stores acceleration at the end of time step
     type = NewmarkAccelAux
     variable = accel_x
     displacement = disp_x
     velocity = vel_x_solid
-    beta = 0.25
+    beta = ${beta}
     execute_on = timestep_end
     block = 'inclusion'
   []
@@ -58,24 +77,51 @@
     variable = accel_y
     displacement = disp_y
     velocity = vel_y_solid
-    beta = 0.25
+    beta = ${beta}
+    execute_on = timestep_end
+    block = 'inclusion'
+  []
+  [vel_x_solid]
+    type = NewmarkVelAux
+    variable = vel_x_solid
+    acceleration = accel_x
+    gamma = ${gamma}
+    execute_on = timestep_end
+    block = 'inclusion'
+  []
+  [vel_y_solid]
+    type = NewmarkVelAux
+    variable = vel_y_solid
+    acceleration = accel_y
+    gamma = ${gamma}
     execute_on = timestep_end
     block = 'inclusion'
   []
 []
 
+[ScalarKernels]
+  [mean_zero_pressure_lm]
+    type = AverageValueConstraint
+    variable = lambda
+    pp_name = pressure_integral
+    value = 0
+  []
+[]
+
 [Kernels]
   [mat_disp_x]
-    type = Diffusion
+    type = MatDiffusion
     variable = disp_x
     block = 'matrix'
     use_displaced_mesh = false
+    diffusivity = ${youngs_modulus}
   []
   [mat_disp_y]
-    type = Diffusion
+    type = MatDiffusion
     variable = disp_y
     block = 'matrix'
     use_displaced_mesh = false
+    diffusivity = ${youngs_modulus}
   []
 
   [mass]
@@ -135,40 +181,17 @@
     block = 'matrix'
   []
 
-  # Solid velocity and acceleration
-  [accel_tensor_x]
-    type = CoupledTimeDerivative
-    variable = disp_x
-    v = vel_x_solid
-    block = 'inclusion'
-    use_displaced_mesh = false
-  []
-  [accel_tensor_y]
-    type = CoupledTimeDerivative
-    variable = disp_y
-    v = vel_y_solid
-    block = 'inclusion'
-    use_displaced_mesh = false
-  []
-  [vxs_time_derivative_term]
-    type = CoupledTimeDerivative
-    variable = vel_x_solid
-    v = disp_x
-    block = 'inclusion'
-    use_displaced_mesh = false
-  []
-  [vys_time_derivative_term]
-    type = CoupledTimeDerivative
-    variable = vel_y_solid
-    v = disp_y
-    block = 'inclusion'
-    use_displaced_mesh = false
+  [mean_zero_pressure]
+    type = ScalarLagrangeMultiplier
+    variable = p
+    lambda = lambda
+    block = 'matrix'
   []
 
-  ## Solid Mech Dynamics
+  ## Solid Mech Dynamics legacy action (doesn't add InertialForce)
   [DynamicSolidMechanics] # zeta*K*vel + K * disp
     displacements = 'disp_x disp_y'
-    stiffness_damping_coefficient = 0.000025
+    stiffness_damping_coefficient = ${zeta}
     block = 'inclusion'
   []
 
@@ -177,9 +200,9 @@
     variable = disp_x
     velocity = vel_x_solid
     acceleration = accel_x
-    beta = 0.25 # Newmark time integration
-    gamma = 0.5 # Newmark time integration
-    eta = 19.63
+    beta = ${beta} # Newmark time integration
+    gamma = ${gamma} # Newmark time integration
+    eta = ${eta}
     block = 'inclusion'
   []
 
@@ -188,27 +211,29 @@
     variable = disp_y
     velocity = vel_x_solid
     acceleration = accel_y
-    beta = 0.25
-    gamma = 0.5
-    eta = 19.63
+    beta = ${beta}
+    gamma = ${gamma}
+    eta = ${eta}
     block = 'inclusion'
   []
 []
 
 [InterfaceKernels]
   [penalty]
-    type = ADPenaltyVelocityContinuity
+    type = ADPenaltyVelocityContinuityNewmarkBeta
     variable = vel
     fluid_velocity = vel
     displacements = 'disp_x disp_y'
     solid_velocities = 'vel_x_solid vel_y_solid'
-    boundary = 'inclusion_boundary'
-    penalty = 1e6
+    solid_accelerations = 'accel_x accel_y'
+    boundary = 'interface_matrix_side'
+    penalty = ${youngs_modulus}
+    beta = ${beta}
+    gamma = ${gamma}
   []
 []
 
 [Materials]
-
   [viscous_mat]
     type = ADGenericConstantMaterial
     block = 'matrix'
@@ -225,7 +250,7 @@
 
   [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 1e8
+    youngs_modulus = ${youngs_modulus}
     poissons_ratio = 0.3
     block = 'inclusion'
   []
@@ -250,7 +275,6 @@
 []
 
 [BCs] # mesh boundaries remain still so I dont think we need to use deformed mesh for vel
-
   [no_disp_x]
     type = DirichletBC
     variable = disp_x
@@ -306,15 +330,24 @@
 
 [Executioner]
   type = Transient
-  automatic_scaling = true
   solve_type = 'NEWTON'
   end_time = 100.0
+  nl_abs_tol = 1e-12
   [TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 5
     dt = 0.005
     growth_factor = 1.5
     cutback_factor = 0.9
+  []
+[]
+
+[Postprocessors]
+  [pressure_integral]
+    type = ElementIntegralVariablePostprocessor
+    variable = p
+    execute_on = linear
+    block = 'matrix'
   []
 []
 
