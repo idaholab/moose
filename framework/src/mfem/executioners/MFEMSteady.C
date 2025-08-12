@@ -103,34 +103,13 @@ MFEMSteady::execute()
   _time_step = 1;
   _mfem_problem.timestepSetup();
 
-  // Solve equation system.
-  if (_mfem_problem.shouldSolve())
-  {
-    _last_solve_converged = _mfem_problem_solve.solve();
-
-    while (_mfem_problem.UseAMR() and ApplyRefinements())
-    {
-      UpdateAfterRefinement();
-      // Solve again
-      _last_solve_converged = _mfem_problem_solve.solve();
-    }
-  }
-
-  // Displace mesh, if required
-  _mfem_problem.displaceMesh();
+  _last_solve_converged = _mfem_problem_solve.solve();
 
   _mfem_problem.computeIndicators();
   _mfem_problem.computeMarkers();
 
   // need to keep _time in sync with _time_step to get correct output
   _time = _time_step;
-  // Execute user objects at timestep end
-  _mfem_problem.execute(EXEC_TIMESTEP_END);
-
-  // Inform objects (e.g aux kernels) that they don't need to update after this point.
-  // H/P-refinement sets this to true
-  _mfem_problem.setMeshChanged(false);
-
   _mfem_problem.outputStep(EXEC_TIMESTEP_END);
   _time = _system_time;
 
@@ -146,39 +125,6 @@ MFEMSteady::execute()
   }
 
   postExecute();
-}
-
-//! Returns true if we need to solve again
-bool
-MFEMSteady::ApplyRefinements()
-{
-  bool output = false;
-
-  if (_mfem_problem.UsePRefinement())
-  {
-    output = true;
-    _mfem_problem.PRefine();
-  }
-
-  if (_mfem_problem.UseHRefinement())
-  {
-    output = true;
-    _mfem_problem.HRefine();
-  }
-
-  return output;
-}
-
-void
-MFEMSteady::UpdateAfterRefinement()
-{
-  // Update in the mfem problem
-  _mfem_problem.updateAfterRefinement();
-
-  for (const auto & problem_operator : getProblemOperators())
-  {
-    problem_operator->SetGridFunctions();
-  }
 }
 
 #endif
