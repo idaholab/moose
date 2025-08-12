@@ -83,7 +83,6 @@ MFEMProblemSolve::solve()
       for (const auto & problem_operator : _problem_operators)
         problem_operator->Solve();
     }
-
   }
   _mfem_problem.displaceMesh();
 
