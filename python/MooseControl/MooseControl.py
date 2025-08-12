@@ -17,6 +17,7 @@ import logging
 import tempfile
 from threading import Thread
 import numpy as np
+from typing import Any
 
 # Common logger for the MooseControl
 logger = logging.getLogger('MooseControl')
@@ -583,13 +584,13 @@ class MooseControl:
 
         return value
 
-    def getReporterValue(self, name: str) -> float:
-        """Gets a postprocessor value
+    def getReporterValue(self, name: str) -> Any:
+        """Gets a reporter value
 
         Parameters:
-            name (str): The name of the reporter value
+            name (str): The name of the reporter value (object_name/value_name)
         Returns:
-            float: The value of the postprocessor
+            Any: The reporter value
         """
         logger.debug(f'Getting reporter value for "{name}"')
         self._requireWaiting()
