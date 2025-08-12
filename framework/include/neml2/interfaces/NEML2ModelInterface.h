@@ -175,8 +175,11 @@ NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&
 
     auto thread_init = [this](neml2::Device device) -> void
     {
-      at::set_num_threads(libMesh::n_threads());
-      at::set_num_interop_threads(libMesh::n_threads());
+      mooseAssert(libMesh::cast_int<unsigned int>(at::get_num_threads()) == libMesh::n_threads(),
+                  "Inconsistent number of threads");
+      mooseAssert(libMesh::cast_int<unsigned int>(at::get_num_interop_threads()) ==
+                      libMesh::n_threads(),
+                  "Inconsistent number of interop threads");
       auto model = NEML2Utils::getModel(*_factory, _model->name());
       model->to(device);
       _model_pool[std::this_thread::get_id()] = std::move(model);
