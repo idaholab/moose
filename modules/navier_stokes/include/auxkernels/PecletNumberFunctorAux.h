@@ -25,9 +25,9 @@ protected:
   Real computeValue() override;
 
   /// The fluid speed
-  const Moose::Functor<ADReal> & _speed;
+  const Moose::Functor<Real> & _speed;
   /// The fluid thermal diffusivity or mass diffusivity. Should have units of length^2/time
-  const Moose::Functor<ADReal> & _alpha;
+  const Moose::Functor<Real> & _alpha;
   /// Whether to use a quadrature-based argument to evaluate the functors
   const bool _use_qp_arg;
 };
