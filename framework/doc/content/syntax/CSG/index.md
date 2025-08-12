@@ -72,40 +72,12 @@ Surfaces contain the following information:
 | `CSG::CSGYCylinder` | $(x - x_0)^2 + (z - z_0)^2 = r^2$               | `x0`, `z0`, `r`       |
 | `CSG::CSGZCylinder` | $(x - x_0)^2 + (y - y_0)^2 = r^2$               | `x0`, `y0`, `r`       |
 
-Below is example [!ac](JSON) surface output for a `CSG::CSGPlane` at x=5, `CSG::CSGZCylinder` of radius 2 centered at $(1, 3)$, and a `CSG::CSGSphere` centered at $(-2, -3, 7)$ with radius 5.
+Below are example [!ac](JSON) surface outputs for two `CSG::CSGSphere`s (one of radius 3 centered at the origin, and one of radius 5 centered at $(-3, -2, -1)$), a `CSG::CSGPlane` at $x=-2.5$, and two `CSG::CSGYCylinder`s of radius 2 and 4, both centered at $(-10, -10)$.
 
-```json
-{
-  "SURFACES": {
-    "my_plane": {
-      "COEFFICIENTS": {
-        "a": 1.0,
-        "b": 0.0,
-        "c": 0.0,
-        "d": 5.0
-      },
-      "TYPE": "CSG::CSGPlane"
-    },
-    "my_z_cylinder": {
-      "COEFFICIENTS": {
-        "r": 2.0,
-        "x0": 1.0,
-        "y0": 3.0
-      },
-      "TYPE": "CSG::CSGZCylinder"
-    },
-    "my_sphere": {
-      "COEFFICIENTS": {
-        "r": 5.0,
-        "x0": -2.0,
-        "y0": -3.0,
-        "z0": 7.0
-      },
-      "TYPE": "CSG::CSGSphere"
-    }
-  }
-}
-```
+!listing csg_spheres_join_single_root_out_csg.json start="SURFACES" end="inf_square_surf_minus_y"
+
+!listing csg_cylinders_join_new_universes_out_csg.json start="YCyls_surf_cyl_y_0" end="YCyls_x_neg_surf"
+
 
 ### Cells
 
@@ -123,62 +95,15 @@ The cells output contains the following information:
 | intersection       | `&`                   |
 | complement         | `~`                   |
 
-An example of a cell defined as the space inside a finite x-cylinder and filled with a solid material is below:
+An example of a cell defined as the space inside a box made of six planes and filled with a solid material is below:
 
-```json
-{
-  "CELLS": {
-    "My_XCylinder_Cell": {
-      "FILL": "my_material",
-      "FILLTYPE": "CSG_MATERIAL",
-      "REGION": "(-xcyl_surf_0 & -x_pos_plane & +x_neg_plane)"
-    }
-  }
-}
-```
+!listing csg_only_chained_out_csg.json start="CELLS" end="SURFACES"
 
 ### Universes
 
 Universes are simply defined by the list of the names of the `CELLS` that are contained in that universe.
 If the universe is also the root universe, it will have the designator `"ROOT": true`.
 An example of universe output for multiple universes containing various concentric cylinder cells is below.
-In this example, the cells named `AllCylsUniverse_box`, `XCyls_cell`, `YCyls_cell`, and `ZCyls_cell` are filled with other universes listed, forming a tree of connectedness tracing back to the `ROOT_UNIVERSE`.
+In this example, the cells named `CylsUniverse_box`, `XCyls_cell`, `YCyls_cell`, and `ZCyls_cell` are filled with other universes listed, forming a tree of connectedness tracing back to the `ROOT_UNIVERSE`.
 
-```json
-{
-  "UNIVERSES": {
-    "ROOT_UNIVERSE": {
-      "CELLS": [
-        "AllCylsUniverse_box"
-      ],
-      "ROOT": true
-    },
-    "AllCyls_univ": {
-      "CELLS": [
-        "XCyls_cell",
-        "YCyls_cell",
-        "ZCyls_cell"
-      ]
-    },
-    "XCyls_univ": {
-      "CELLS": [
-        "XCyls_cell_cyl_x_0",
-        "XCyls_cell_cyl_x_1",
-        "XCyls_cell_cyl_x_2"
-      ]
-    },
-    "YCyls_univ": {
-      "CELLS": [
-        "YCyls_cell_cyl_y_0",
-        "YCyls_cell_cyl_y_1"
-      ]
-    },
-    "ZCyls_univ": {
-      "CELLS": [
-        "ZCyls_cell_cyl_z_0",
-        "ZCyls_cell_cyl_z_1"
-      ]
-    }
-  }
-}
-```
+!listing csg_cylinders_join_new_universes_out_csg.json start="UNIVERSES"
