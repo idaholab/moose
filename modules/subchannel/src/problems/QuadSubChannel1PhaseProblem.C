@@ -357,7 +357,7 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
 }
 
 Real
-QuadSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz)
+QuadSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, bool /*enthalpy*/)
 {
   auto beta = _beta;
   if (!_constant_beta)
