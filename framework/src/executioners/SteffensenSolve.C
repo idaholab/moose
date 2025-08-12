@@ -24,7 +24,7 @@ SteffensenSolve::validParams()
   return params;
 }
 
-SteffensenSolve::SteffensenSolve(Executioner & ex) : FixedPointSolve(ex) { allocateStorage(true); }
+SteffensenSolve::SteffensenSolve(Executioner & ex) : FixedPointSolve(ex) {}
 
 void
 SteffensenSolve::allocateStorage(const bool primary)

@@ -192,6 +192,8 @@ FixedPointSolve::initialSetup()
 {
   SolveObject::initialSetup();
 
+  allocateStorage(true);
+
   if (_has_fixed_point_its)
   {
     auto & conv = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());

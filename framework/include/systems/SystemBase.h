@@ -226,11 +226,19 @@ public:
       Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time) const;
 
   /**
+   * Returns the parallel type of the given solution state
+   */
+  libMesh::ParallelType
+  solutionStateParallelType(const unsigned int state,
+                            const Moose::SolutionIterationType iteration_type) const;
+
+  /**
    * Registers that the solution state \p state is needed.
    */
   virtual void needSolutionState(
       const unsigned int state,
-      Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time);
+      Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time,
+      libMesh::ParallelType parallel_type = GHOSTED);
 
   /**
    * Whether or not the system has the solution state (0 = current, 1 = old, 2 = older, etc).

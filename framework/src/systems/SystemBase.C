@@ -1438,9 +1438,20 @@ SystemBase::solutionState(const unsigned int state,
   return *_solution_states[static_cast<unsigned short>(iteration_type)][state];
 }
 
+libMesh::ParallelType
+SystemBase::solutionStateParallelType(const unsigned int state,
+                                      const Moose::SolutionIterationType iteration_type) const
+{
+  if (!hasSolutionState(state, iteration_type))
+    mooseError("solutionStateParallelType() may only be called if the solution state exists.");
+
+  return _solution_states[static_cast<unsigned short>(iteration_type)][state]->type();
+}
+
 void
 SystemBase::needSolutionState(const unsigned int state,
-                              const Moose::SolutionIterationType iteration_type)
+                              const Moose::SolutionIterationType iteration_type,
+                              const libMesh::ParallelType parallel_type)
 {
   libmesh_parallel_only(this->comm());
   mooseAssert(!Threads::in_threads,
@@ -1465,13 +1476,21 @@ SystemBase::needSolutionState(const unsigned int state,
     {
       auto tag = _subproblem.addVectorTag(oldSolutionStateVectorName(i, iteration_type),
                                           Moose::VECTOR_TAG_SOLUTION);
-      const ParallelType parallel_type =
-          iteration_type == Moose::SolutionIterationType::FixedPoint ? PARALLEL : GHOSTED;
       solution_states[i] = &addVector(tag, true, parallel_type);
     }
     else
+    {
+      // If the existing parallel type is PARALLEL and GHOSTED is now requested,
+      // this would require an upgrade, which is risky if anybody has already
+      // stored a pointer to the existing vector, since the upgrade would create
+      // a new vector and make that pointer null. If the existing parallel type
+      // is GHOSTED and PARALLEL is now requested, we don't need to do anything.
+      if (parallel_type == GHOSTED && solutionStateParallelType(i, iteration_type) == PARALLEL)
+        mooseError("The solution state has already been declared as PARALLEL");
+
       mooseAssert(solution_states[i] == &getVector(oldSolutionStateVectorName(i, iteration_type)),
                   "Inconsistent solution state");
+    }
 }
 
 void

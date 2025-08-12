@@ -22,13 +22,7 @@ PicardSolve::validParams()
   return params;
 }
 
-PicardSolve::PicardSolve(Executioner & ex) : FixedPointSolve(ex)
-{
-  allocateStorage(true);
-
-  if (performingRelaxation(true))
-    _solver_sys.needSolutionState(1, Moose::SolutionIterationType::FixedPoint);
-}
+PicardSolve::PicardSolve(Executioner & ex) : FixedPointSolve(ex) {}
 
 void
 PicardSolve::allocateStorage(const bool primary)
@@ -36,26 +30,25 @@ PicardSolve::allocateStorage(const bool primary)
   if (!performingRelaxation(primary))
     return;
 
-  TagID old_tag_id;
   const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
-    old_tag_id = _problem.addVectorTag(Moose::PREVIOUS_FP_SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
-    _old_tag_id = old_tag_id;
+    _old_tag_id =
+        _problem.addVectorTag(Moose::PREVIOUS_FP_SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
+    _solver_sys.needSolutionState(1, Moose::SolutionIterationType::FixedPoint, PARALLEL);
+
     transformed_pps = &_transformed_pps;
     transformed_pps_values = &_transformed_pps_values;
   }
   else
   {
-    old_tag_id = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
-    _secondary_old_tag_id = old_tag_id;
+    _secondary_old_tag_id = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
+    _solver_sys.addVector(_secondary_old_tag_id, false, PARALLEL);
+
     transformed_pps = &_secondary_transformed_pps;
     transformed_pps_values = &_secondary_transformed_pps_values;
   }
-
-  // Store a copy of the previous solution
-  _solver_sys.addVector(old_tag_id, false, PARALLEL);
 
   // Allocate storage for the previous postprocessor values
   (*transformed_pps_values).resize((*transformed_pps).size());
