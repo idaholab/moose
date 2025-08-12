@@ -34,8 +34,6 @@ private:
   MFEMProblem & _mfem_problem;
   MFEMProblemData & _mfem_problem_data;
   MFEMProblemSolve _mfem_problem_solve;
-  void UpdateAfterRefinement();
-  bool ApplyRefinements();
 
   // Time variables used for consistency with MOOSE, needed for outputs.
   // Important for future synchronisation of solves in MultiApps
