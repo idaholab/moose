@@ -1,10 +1,16 @@
 # Include variables defined by MOOSE configure if it's been run
 -include $(MOOSE_DIR)/conf_vars.mk
 
-# If compile_commands.json is a goal, make sure it is the only goal
 ifneq ($(filter compile_commands.json,$(MAKECMDGOALS)),)
+# If compile_commands.json is a goal, make sure it is the only goal
 ifneq ($(words $(MAKECMDGOALS)),1)
 $(error compile_commands.json must be the only goal when it is specified)
+endif
+# compile_commands.json prefers METHOD=dbg, if METHOD was set to something else
+# it will be overridden to dbg. So let's warn the user about it.
+ifneq ($(METHOD),dbg)
+$(info compile_commands.json is using METHOD=dbg)
+METHOD := dbg
 endif
 endif
 
