@@ -38,7 +38,6 @@ AddUELICs::setupBoundary(std::size_t var_id,
   {
     const auto node_elem = mesh.elem_ptr(node);
     // make sure we only add nodes that carry the variable
-    std::cout << node << " " << node_elem->subdomain_id() << '\n';
     if ((node_elem->subdomain_id() & (1 << var_id)) == 0)
       mooseError("Trying to apply a boundary condition on a node on which the chosen variable does "
                  "not exist");
