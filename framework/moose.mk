@@ -6,12 +6,6 @@ ifneq ($(filter compile_commands.json,$(MAKECMDGOALS)),)
 ifneq ($(words $(MAKECMDGOALS)),1)
 $(error compile_commands.json must be the only goal when it is specified)
 endif
-# compile_commands.json prefers METHOD=dbg, if METHOD was set to something else
-# it will be overridden to dbg. So let's warn the user about it.
-ifneq ($(METHOD),dbg)
-$(info compile_commands.json is using METHOD=dbg)
-METHOD := dbg
-endif
 endif
 
 # Whether or not to do a Unity build

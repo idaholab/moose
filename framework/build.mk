@@ -15,10 +15,18 @@ MOOSE_JOBS        ?= 8
 # won't have a prefix. We'll use the automake default then:
 PREFIX ?= '/usr/local'
 
-# If the user has no environment variable
-# called METHOD, they get optimized mode.
-ifeq (x$(METHOD),x)
-  METHOD := opt
+ifneq ($(filter compile_commands.json,$(MAKECMDGOALS)),)
+# If compile_commands.json is a goal, make sure it is the only goal
+ifneq ($(words $(MAKECMDGOALS)),1)
+$(error compile_commands.json must be the only goal when it is specified)
+endif
+endif
+
+# Default method to dbg if generating compile_commands.json, opt otherwise
+ifeq ($(filter compile_commands.json,$(MAKECMDGOALS)),compile_commands.json)
+METHOD ?= dbg
+else
+METHOD ?= opt
 endif
 
 # libmesh-config is in different places depending on whether you are using
