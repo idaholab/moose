@@ -379,7 +379,7 @@ SubChannel1PhaseProblem::populateVectorFromDense(Vec & x,
   PetscScalar * xx;
   PetscFunctionBegin;
   LibmeshPetscCall(VecGetArray(x, &xx));
-  for (unsigned int iz = first_axial_level; iz < last_axial_level; iz++)
+  for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
   {
     unsigned int iz_ind = iz - first_axial_level;
     for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
