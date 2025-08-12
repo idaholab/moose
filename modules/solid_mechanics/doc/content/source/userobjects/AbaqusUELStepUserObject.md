@@ -1,23 +1,29 @@
-# StepUserObject
+# AbaqusUELStepUserObject
 
-!syntax description /UserObjects/StepUserObject
+!syntax description /UserObjects/AbaqusUELStepUserObject
 
 ## Description
 
-`StepUserObject` is a general user object that performs basic computations to provide a
-loading step given a simulation time step value or a simulation time step value given a
-loading step. This user object is used to interface with [AbaqusUMATStress](/AbaqusUMATStress.md)
-and [AbaqusUExternalDB](/AbaqusUExternalDB.md) to provide step information to user routines.
-`StepUserObject` can also interface with [StepPeriod](/StepPeriod.md) to enable/disable
-boundary conditions and constraints according the user-defined loading steps.
+`AbaqusUELStepUserObject` processes the `*Step` information from an Abaqus input file loaded through
+an [AbaqusUELMesh](AbaqusUELMesh.md). It builds a timeline of step durations and exposes the
+current step index and fractional progress along the step. It also provides lookups for boundary
+conditions and nodal forces that enable Abaqus-style activation/deactivation of nodal constraints.
 
+- Executes on `INITIAL` and `TIMESTEP_BEGIN` to determine the current step based on simulation time.
+- Provides `getBeginValues`/`getEndValues` maps for Abaqus variable IDs to nodal values, allowing
+  boundary conditions to ramp between begin/end values during a step.
+- Provides `getBeginSolution` for nodes and variables that become newly constrained during the step
+  (ramping from the solution at the step start).
+- Provides `getBeginForces` for nodes and variables that become unconstrained during the step,
+  exposing the concentrated reaction force captured from the bulk UEL contributions via the
+  `AbaqusUELTag` vector tag.
 
-## Example Input File Syntax
+This user object is typically consumed by [AbaqusEssentialBC](AbaqusEssentialBC.md) and
+[AbaqusForceBC](AbaqusForceBC.md) and is automatically set up by the
+[BCs/Abaqus](BCs/Abaqus/index.md) action.
 
-!listing modules/solid_mechanics/test/tests/umat/steps/elastic_temperature_steps_uo.i block=UserObjects/step_uo
+!syntax parameters /UserObjects/AbaqusUELStepUserObject
 
-!syntax parameters /UserObjects/StepUserObject
+!syntax inputs /UserObjects/AbaqusUELStepUserObject
 
-!syntax inputs /UserObjects/StepUserObject
-
-!syntax children /UserObjects/StepUserObject
+!syntax children /UserObjects/AbaqusUELStepUserObject
