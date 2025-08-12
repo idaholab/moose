@@ -139,74 +139,29 @@
 []
 
 [AuxVariables]
-  # Decomposing the magnetic vector potential
-  # for the electric field calculations
-  [A_x_real]
-    family = MONOMIAL
-    order = FIRST
-  []
-  [A_y_real]
-    family = MONOMIAL
-    order = FIRST
-  []
-
-  [A_x_imag]
-    family = MONOMIAL
-    order = FIRST
-  []
-  [A_y_imag]
-    family = MONOMIAL
-    order = FIRST
-  []
-
   # The electrical conductivity for the electric
   # field calculations
   [elec_cond]
     family = MONOMIAL
     order = FIRST
+    solver_sys = 'HT_system'
   []
 
   # The electric field profile determined from
   # the magnetic vector potential
   [E_real]
-    family = NEDELEC_ONE
+    family = MONOMIAL_VEC
     order = FIRST
+    solver_sys = 'EM_system'
   []
   [E_imag]
-    family = NEDELEC_ONE
+    family = MONOMIAL_VEC
     order = FIRST
+    solver_sys = 'EM_system'
   []
 []
 
 [AuxKernels]
-  # Decomposing the magnetic vector potential
-  # for the electric field calculations
-  [A_x_real]
-    type = VectorVariableComponentAux
-    variable = A_x_real
-    vector_variable = A_real
-    component = X
-  []
-  [A_y_real]
-    type = VectorVariableComponentAux
-    variable = A_y_real
-    vector_variable = A_real
-    component = Y
-  []
-
-  [A_x_imag]
-    type = VectorVariableComponentAux
-    variable = A_x_imag
-    vector_variable = A_imag
-    component = X
-  []
-  [A_y_imag]
-    type = VectorVariableComponentAux
-    variable = A_y_imag
-    vector_variable = A_imag
-    component = Y
-  []
-
   # The electrical conductivity for the electric
   # field calculations
   [cond]
@@ -224,16 +179,17 @@
   #       Q = 1/2 abs(E)^2 for frequency domain field formulations
   [E_real]
     type = ParsedVectorAux
-    coupled_variables = 'A_x_imag A_y_imag elec_cond'
-    expression_x = 'abs(2*3.14*60*A_x_imag) + abs(60e6/elec_cond)'
-    expression_y = 'abs(2*3.14*60*A_y_imag)'
+    coupled_variables = 'elec_cond'
+    coupled_vector_variables = 'A_imag'
+    expression_x = 'abs(2*3.14*60*A_imag) + abs(60e6/elec_cond)'
+    expression_y = 'abs(2*3.14*60*A_imag)'
     variable = E_real
   []
   [E_imag]
     type = ParsedVectorAux
-    coupled_variables = 'A_x_real A_y_real'
-    expression_x = 'abs(-2*3.14*60*A_x_real)'
-    expression_y = 'abs(-2*3.14*60*A_y_real)'
+    coupled_vector_variables = 'A_real'
+    expression_x = 'abs(-2*3.14*60*A_real)'
+    expression_y = 'abs(-2*3.14*60*A_real)'
     variable = E_imag
   []
 []
@@ -351,7 +307,7 @@
   [multisys]
     type = IterationCountConvergence
     min_iterations = 0
-    max_iterations = 10
+    max_iterations = 3
     converge_at_max_iterations = true
   []
 []
@@ -371,7 +327,7 @@
 
   multi_system_fixed_point = true
   multi_system_fixed_point_convergence = 'multisys'
-  nl_abs_tol = 1e-12
+  nl_forced_its = 3
 []
 
 [Outputs]
