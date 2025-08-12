@@ -3,10 +3,9 @@
 #pragma once
 
 #include "MFEMAuxKernel.h"
-#include "mfem.hpp"
 
 /**
- * Projects a vector Coefficient into a vector-valued aux variable.
+ * Projects a vector coefficient onto a vector-valued aux variable.
  */
 class MFEMVectorProjectAux : public MFEMAuxKernel
 {
@@ -20,6 +19,7 @@ public:
   virtual void execute() override;
 
 protected:
+  /// Reference to source coefficient.
   mfem::VectorCoefficient & _vec_coef;
 };
 
