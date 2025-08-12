@@ -20,10 +20,11 @@ ifneq ($(filter compile_commands.json,$(MAKECMDGOALS)),)
 ifneq ($(words $(MAKECMDGOALS)),1)
 $(error compile_commands.json must be the only goal when it is specified)
 endif
+GENERATING_COMPILE_COMMANDS := true
 endif
 
 # Default method to dbg if generating compile_commands.json, opt otherwise
-ifeq ($(filter compile_commands.json,$(MAKECMDGOALS)),compile_commands.json)
+ifeq ($(GENERATING_COMPILE_COMMANDS),true)
 METHOD ?= dbg
 else
 METHOD ?= opt

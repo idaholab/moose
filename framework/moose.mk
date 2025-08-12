@@ -1,16 +1,9 @@
 # Include variables defined by MOOSE configure if it's been run
 -include $(MOOSE_DIR)/conf_vars.mk
 
-ifneq ($(filter compile_commands.json,$(MAKECMDGOALS)),)
-# If compile_commands.json is a goal, make sure it is the only goal
-ifneq ($(words $(MAKECMDGOALS)),1)
-$(error compile_commands.json must be the only goal when it is specified)
-endif
-endif
-
 # Whether or not to do a Unity build
 # If we are making compile_commands.json, default MOOSE_UNITY and MOOSE_HEADER_SYMLINKS to false
-ifeq ($(filter compile_commands.json,$(MAKECMDGOALS)),compile_commands.json)
+ifeq ($(GENERATING_COMPILE_COMMANDS),true)
   MOOSE_UNITY ?= false
   MOOSE_HEADER_SYMLINKS ?= false
 else
