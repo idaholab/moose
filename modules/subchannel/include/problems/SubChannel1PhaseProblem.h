@@ -227,13 +227,6 @@ protected:
                                       const unsigned int last_axial_level,
                                       const unsigned int cross_dimension);
 
-  template <class T>
-  PetscErrorCode populateSolutionGap(const Vec & x,
-                                     T & solution,
-                                     const unsigned int first_axial_level,
-                                     const unsigned int last_axial_level,
-                                     const unsigned int cross_dimension);
-
   //// Matrices and vectors to be used in implicit assembly
   /// Mass conservation
   /// Mass conservation - sum of cross fluxes
@@ -410,28 +403,6 @@ SubChannel1PhaseProblem::populateSolutionChan(const Vec & x,
     {
       loc_node = _subchannel_mesh.getChannelNode(i_l, iz);
       loc_solution.set(loc_node, xx[iz_ind * cross_dimension + i_l]);
-    }
-  }
-  PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
-}
-
-template <class T>
-PetscErrorCode
-SubChannel1PhaseProblem::populateSolutionGap(const Vec & x,
-                                             T & loc_solution,
-                                             const unsigned int first_axial_level,
-                                             const unsigned int last_axial_level,
-                                             const unsigned int cross_dimension)
-{
-  PetscScalar * xx;
-  PetscFunctionBegin;
-  LibmeshPetscCall(VecGetArray(x, &xx));
-  for (unsigned int iz = first_axial_level; iz < last_axial_level + 1; iz++)
-  {
-    unsigned int iz_ind = iz - first_axial_level;
-    for (unsigned int i_l = 0; i_l < cross_dimension; i_l++)
-    {
-      loc_solution(iz * cross_dimension + i_l) = xx[iz_ind * cross_dimension + i_l];
     }
   }
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
