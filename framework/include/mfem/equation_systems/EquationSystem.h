@@ -169,8 +169,8 @@ protected:
           Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
           integrated_bc_map);
 
-  /// Gridfunctions for setting Dirichlet BCs
-  std::vector<std::unique_ptr<mfem::ParGridFunction>> _xs;
+  /// Gridfunctions holding essential constraints from Dirichlet BCs
+  std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
 

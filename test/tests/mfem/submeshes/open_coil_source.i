@@ -79,7 +79,7 @@
 [Solver]
   type = MFEMHypreGMRES
   preconditioner = boomeramg
-  l_tol = 1e-20
+  l_tol = 1e-10
   l_max_its = 1000
 []
 

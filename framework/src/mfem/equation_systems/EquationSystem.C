@@ -134,14 +134,15 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
   {
     if (!gridfunctions.Has(test_var_name))
     {
-      MFEM_ABORT("Test variable " << test_var_name
-                                  << " requested by equation system during initialisation was "
-                                     "not found in gridfunctions");
+      mooseError("MFEM variable ",
+                 test_var_name,
+                 " requested by equation system during initialisation was "
+                 "not found in gridfunctions");
     }
     // Store pointers to test FESpaces
     _test_pfespaces.push_back(gridfunctions.Get(test_var_name)->ParFESpace());
-    // Create auxiliary gridfunctions for applying Dirichlet conditions
-    _xs.emplace_back(
+    // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
+    _var_ess_constraints.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
   }
 
@@ -171,7 +172,7 @@ EquationSystem::ApplyEssentialBCs()
 
     // Set default value of gridfunction used in essential BC. Values
     // overwritten in applyEssentialBCs
-    mfem::ParGridFunction & trial_gf(*(_xs.at(i)));
+    mfem::ParGridFunction & trial_gf(*(_var_ess_constraints.at(i)));
     auto * const pmesh = _test_pfespaces.at(i)->GetParMesh();
     mooseAssert(pmesh, "parallel mesh is null");
 
@@ -241,7 +242,8 @@ EquationSystem::FormSystem(mfem::OperatorHandle & op,
   mfem::BlockVector aux_x, aux_rhs;
   mfem::OperatorPtr aux_a;
 
-  blf->FormLinearSystem(_ess_tdof_lists.at(0), *(_xs.at(0)), *lf, aux_a, aux_x, aux_rhs);
+  blf->FormLinearSystem(
+      _ess_tdof_lists.at(0), *(_var_ess_constraints.at(0)), *lf, aux_a, aux_x, aux_rhs);
 
   trueX.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
@@ -269,7 +271,8 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     auto lf = _lfs.Get(test_var_name);
     mfem::Vector aux_x, aux_rhs;
     mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
-    blf->FormLinearSystem(_ess_tdof_lists.at(i), *(_xs.at(i)), *lf, *aux_a, aux_x, aux_rhs);
+    blf->FormLinearSystem(
+        _ess_tdof_lists.at(i), *(_var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
     _h_blocks(i, i) = aux_a;
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
@@ -292,7 +295,7 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
         mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
         mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
                                           _ess_tdof_lists.at(i),
-                                          *(_xs.at(j)),
+                                          *(_var_ess_constraints.at(j)),
                                           aux_lf,
                                           *aux_a,
                                           aux_x,
@@ -596,7 +599,7 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     // }
     mfem::Vector aux_x, aux_rhs;
     // Update solution values on Dirichlet values to be in terms of du/dt instead of u
-    mfem::Vector bc_x = *(_xs.at(i).get());
+    mfem::Vector bc_x = *(_var_ess_constraints.at(i).get());
     bc_x -= *_eliminated_variables.Get(test_var_name);
     bc_x /= _dt_coef.constant;
 
@@ -634,7 +637,7 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
   // }
   mfem::Vector aux_x, aux_rhs;
   // Update solution values on Dirichlet values to be in terms of du/dt instead of u
-  mfem::Vector bc_x = *(_xs.at(0).get());
+  mfem::Vector bc_x = *(_var_ess_constraints.at(0).get());
   bc_x -= *_eliminated_variables.Get(test_var_name);
   bc_x /= _dt_coef.constant;
 
