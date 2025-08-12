@@ -324,7 +324,7 @@ ElementSubdomainModifierBase::modify(
 
   // Clear the serialized solution after the mesh has changed
   // TODO: double check if this is needed
-  _sys.cleanSerializedSolution();
+  _sys.resetSerializedSolution();
 
   // Initialize solution and stateful material properties
   applyIC();

@@ -37,14 +37,14 @@
     type = NodalPatchRecoveryVariable
     patch_polynomial_order = FIRST
     use_specific_elements = true
-    var = 'diff'
+    variable = 'diff'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [u_patch]
     type = NodalPatchRecoveryVariable
     patch_polynomial_order = FIRST
     use_specific_elements = true
-    var = 'u_recovered'
+    variable = 'u_recovered'
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []

@@ -128,7 +128,6 @@
 #include "libmesh/petsc_solver_exception.h"
 
 #include "metaphysicl/dualnumber.h"
-#include <vector>
 
 using namespace libMesh;
 
