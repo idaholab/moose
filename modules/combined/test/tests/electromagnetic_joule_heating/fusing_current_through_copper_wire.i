@@ -43,7 +43,7 @@
 []
 
 [Problem]
-  nl_sys_names = 'EM_system HT_system'
+  nl_sys_names = 'em_system ht_system'
 []
 
 [Variables]
@@ -52,18 +52,18 @@
   [A_real]
     family = NEDELEC_ONE
     order = FIRST
-    solver_sys = 'EM_system'
+    solver_sys = 'em_system'
   []
   [A_imag]
     family = NEDELEC_ONE
     order = FIRST
-    solver_sys = 'EM_system'
+    solver_sys = 'em_system'
   []
 
   # The temperature of the air in the copper wire
   [T]
     initial_condition = 293.0 #in K
-    solver_sys = 'HT_system'
+    solver_sys = 'ht_system'
   []
 []
 
@@ -144,7 +144,7 @@
   [elec_cond]
     family = MONOMIAL
     order = FIRST
-    solver_sys = 'HT_system'
+    solver_sys = 'ht_system'
   []
 
   # The electric field profile determined from
@@ -152,12 +152,12 @@
   [E_real]
     family = MONOMIAL_VEC
     order = FIRST
-    solver_sys = 'EM_system'
+    solver_sys = 'em_system'
   []
   [E_imag]
     family = MONOMIAL_VEC
     order = FIRST
-    solver_sys = 'EM_system'
+    solver_sys = 'em_system'
   []
 []
 
