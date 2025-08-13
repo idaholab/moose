@@ -11,6 +11,7 @@
 
 #include "EquationSystem.h"
 #include "libmesh/int_range.h"
+#include "../../../contrib/mfem/general/forall.hpp"
 
 namespace Moose::MFEM
 {
@@ -338,10 +339,36 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
   FormLinearSystem(_jacobian, trueX, trueRHS);
 }
 
+void 
+EquationSystem::ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & constraint_list, mfem::Vector &x) const
+{
+   const int csz = constraint_list.Size();
+   auto idx = constraint_list.Read();
+   auto d_w = w.Read();
+   // Use read+write access - we are modifying sub-vector of x
+   auto d_x = x.ReadWrite(); 
+   mfem::forall(csz, [=] MFEM_HOST_DEVICE (int i)
+   {
+      const int id = idx[i];
+      d_x[id] = d_w[id];
+   });
+}
+
 void
 EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 {
-  _jacobian->Mult(x, residual);
+  mfem::BlockVector block_x;
+  block_x.Update(*_block_true_offsets);
+  block_x = dynamic_cast<mfem::BlockVector&>(const_cast<mfem::Vector&>(x));
+
+  for (int i = 0; i < _trial_var_names.size(); i++)
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), block_x.GetBlock(i));
+    _gfuncs->Get(trial_var_name)->Distribute(&(block_x.GetBlock(i)));
+  }
+
+  _jacobian->Mult(block_x, residual);
   x.HostRead();
   residual.HostRead();
 }
@@ -454,8 +481,12 @@ EquationSystem::BuildMixedBilinearForms()
 }
 
 void
-EquationSystem::BuildEquationSystem()
+EquationSystem::BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, mfem::Array<int> & btoffsets)
 {
+  _gfuncs = &gridfunctions;
+  _block_true_offsets = &btoffsets;
+  _trueBlockRHS.Update(*_block_true_offsets);
+  _trueBlockdXdt.Update(*_block_true_offsets);
   BuildBilinearForms();
   BuildMixedBilinearForms();
   BuildLinearForms();
@@ -724,9 +755,9 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 }
 
 void
-TimeDependentEquationSystem::UpdateEquationSystem()
+TimeDependentEquationSystem::UpdateEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, mfem::Array<int> & btoffsets)
 {
-  EquationSystem::BuildEquationSystem();
+  EquationSystem::BuildEquationSystem(gridfunctions, btoffsets);
 }
 
 } // namespace Moose::MFEM

@@ -71,7 +71,7 @@ public:
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms();
   /// Build all forms comprising this EquationSystem
-  virtual void BuildEquationSystem();
+  virtual void BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, mfem::Array<int> & btoffsets);
 
   /// Form Jacobian operator based on on- and off-diagonal bilinear form contributions, populate
   /// solution and RHS vectors of true DoFs, and apply constraints
@@ -109,6 +109,9 @@ public:
   /// Update variable from solution vector after solve
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
                                   Moose::MFEM::GridFunctions & gridfunctions);
+  
+  /// Update solution with essential constraints                          
+  void ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & constraint_list, mfem::Vector &x) const;
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
@@ -212,6 +215,12 @@ protected:
   Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
 
   mutable mfem::OperatorHandle _jacobian;
+  mutable mfem::Vector _trueRHS;
+  mutable mfem::BlockVector _trueBlockRHS, _trueBlockdXdt;
+
+  Moose::MFEM::GridFunctions * _gfuncs;
+  mfem::Array<int> * _block_true_offsets;
+  mfem::Array<int> empty_tdof;
 
   mfem::AssemblyLevel _assembly_level;
 };
@@ -329,7 +338,7 @@ public:
                     mfem::AssemblyLevel assembly_level) override;
 
   virtual void SetTimeStep(mfem::real_t dt);
-  virtual void UpdateEquationSystem();
+  virtual void UpdateEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, mfem::Array<int> & btoffsets);
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   virtual void BuildBilinearForms() override;
