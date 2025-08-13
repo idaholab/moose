@@ -128,7 +128,6 @@ NodalPatchRecoveryBase::initialize()
 {
   _Ae.clear();
   _be.clear();
-  _synced = false;
   // make sure to clear the cached coefficients
   // so that the next time we call nodalPatchRecovery, we will recompute the coefficients to make
   // sure _Ae and _be has already been different but we do not use the same coefficients for the
@@ -169,8 +168,7 @@ NodalPatchRecoveryBase::finalize()
   // When calling nodalPatchRecovery, we may need to know _Ae and _be on algebraically ghosted
   // elements. However, this userobject is only run on local elements, so we need to query those
   // information from other processors in this finalize() method.
-  if (!_synced)
-    sync();
+  sync();
 }
 
 std::unordered_map<processor_id_type, std::vector<dof_id_type>>
@@ -212,9 +210,13 @@ NodalPatchRecoveryBase::sync(const std::optional<std::vector<dof_id_type>> & spe
                             const std::vector<dof_id_type> & elem_ids,
                             std::vector<AbPair> & ab_pairs)
   {
-    for (const auto i : index_range(elem_ids))
+    for (const auto & elem_id : elem_ids)
     {
-      const auto elem_id = elem_ids[i];
+      if (_Ae.find(elem_id) == _Ae.end())
+        mooseError("Missing entry for elem_id = ", elem_id, " in _Ae.");
+      if (_be.find(elem_id) == _be.end())
+        mooseError("Missing entry for elem_id = ", elem_id, " in _be.");
+
       ab_pairs.emplace_back(libmesh_map_find(_Ae, elem_id), libmesh_map_find(_be, elem_id));
     }
   };
@@ -236,7 +238,4 @@ NodalPatchRecoveryBase::sync(const std::optional<std::vector<dof_id_type>> & spe
   // the send and receive are called inside the pull_parallel_vector_data function
   libMesh::Parallel::pull_parallel_vector_data<AbPair>(
       _communicator, query_ids, gather_data, act_on_data, 0);
-
-  // This is in sync now
-  _synced = true;
 }

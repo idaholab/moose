@@ -11,7 +11,6 @@
 
 // MOOSE includes
 #include "ElementUserObject.h"
-#include <optional>
 
 class NodalPatchRecoveryBase : public ElementUserObject
 {
@@ -97,9 +96,6 @@ private:
 
   /// The element-level b vector
   std::map<dof_id_type, RealEigenVector> _be;
-
-  /// Whether the patch elements have been synchronized across processors
-  bool _synced = false;
 
   /// @brief Cache for least-squares coefficients used in nodal patch recovery.
   /// Typically, there is a one-to-one mapping from element to coefficients,

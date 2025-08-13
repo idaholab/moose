@@ -270,6 +270,7 @@ ElementSubdomainModifierBase::initialSetup()
                    "extrapolation.");
       _pr[pr_count] =
           &_fe_problem.getUserObject<NodalPatchRecoveryBase>(_pr_names[pr_count], /*tid=*/0);
+      _depend_uo.insert(_pr_names[pr_count]);
       pr_count++;
     }
   if (_pr_names.size() != pr_count)
@@ -622,6 +623,14 @@ ElementSubdomainModifierBase::findReinitializedElemsAndNodes(
   _reinitialized_elems.clear();
   _reinitialized_nodes.clear();
 
+  // One more algorithm:
+  // (1) Loop over moved elements
+  // (2) If neighbor element processor ID is not the same as current processor ID (ghost element),
+  //     push the moved element ID to the neighbor processor
+
+  std::unordered_map<processor_id_type, std::unordered_set<dof_id_type>> push_data_set;
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> push_data;
+
   for (const auto & [elem_id, subdomain] : moved_elems)
   {
     mooseAssert(_mesh.elemPtr(elem_id)->active(), "Moved elements should be active");
@@ -642,22 +651,40 @@ ElementSubdomainModifierBase::findReinitializedElemsAndNodes(
       else // New subdomain is not in list of subdomains
         continue;
     }
-
     const auto & elem = _mesh.elemPtr(elem_id);
+
+    // (1) Loop over nodes of moved elements
+    // (2) node to element map is used to find neighbor elements
+    // (3) If neighbor element processor ID is not the same as current processor ID (means that the
+    // current element is ghosted element to the neighbor processor), push the moved element (or
+    // reinitialized, or newly-activated) ID to the neighbor processor
+    for (const auto & node : elem->node_ref_range())
+      for (const auto & neigh_id : _mesh.nodeToElemMap().at(node.id()))
+        if (neigh_id != elem_id) // Don't check the element itself
+        {
+          const auto neigh_elem = _mesh.elemPtr(neigh_id);
+          if (neigh_elem->processor_id() != processor_id())
+            push_data_set[neigh_elem->processor_id()].insert(elem_id);
+        }
+
     for (unsigned int i = 0; i < elem->n_nodes(); ++i)
       if (nodeIsNewlyReinitialized(elem->node_id(i)))
         _reinitialized_nodes.insert(elem->node_id(i));
   }
 
-  // Gather reinitialized elements across all processors
-  _global_reinitialized_elems.clear();
-  std::vector<dof_id_type> reinitialized_elems_vec(_reinitialized_elems.begin(),
-                                                   _reinitialized_elems.end());
-  std::vector<std::vector<dof_id_type>> gathered;
-  _mesh.comm().allgather(reinitialized_elems_vec, gathered);
+  for (auto & [pid, s] : push_data_set)
+    push_data[pid] = {s.begin(), s.end()};
 
-  for (const auto & proc_elems : gathered)
-    _global_reinitialized_elems.insert(proc_elems.begin(), proc_elems.end());
+  _semi_local_reinitialized_elems = _reinitialized_elems;
+
+  auto push_receiver =
+      [this](const processor_id_type, const std::vector<dof_id_type> & received_data)
+  {
+    for (const auto & id : received_data)
+      _semi_local_reinitialized_elems.insert(id);
+  };
+
+  Parallel::push_parallel_vector_data(_mesh.comm(), push_data, push_receiver);
 }
 
 bool
@@ -737,11 +764,11 @@ ElementSubdomainModifierBase::storeOverriddenDofValues(const VariableName & var_
   const auto var_num = var.number();
 
   // Get the DOFs on the reinitialized elements
-  // Here we should loop over all gathered processors' reinitialized elements
-  // because even the elements may belong to other processors, the DOFs on them
-  // may be owned by the current processor.
+  // Here we should loop over both ghosted and local reinitialized elements.
+  // The ghosted elements here can take care of DoFs that is belong to the reinitialized
+  // elements but are not on the current processor.
   std::set<dof_id_type> reinitialized_dofs;
-  for (const auto & elem_id : _global_reinitialized_elems)
+  for (const auto & elem_id : _semi_local_reinitialized_elems)
   {
     const auto & elem = _mesh.elemPtr(elem_id);
     std::vector<dof_id_type> elem_dofs;
@@ -979,7 +1006,7 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
 
   // Now we gather patch elements based on the reinit strategy
   auto & patch_elems = _patch_elem_ids[var_name];
-  patch_elems.clear();
+
   switch (reinit_strategy)
   {
     case ReinitStrategy::POLYNOMIAL_NEIGHBOR:
@@ -989,12 +1016,12 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
         for (const auto & node : elem->node_ref_range())
           for (const auto & neigh_id : _mesh.nodeToElemMap().at(node.id()))
             // here we need to use _global_reinitialized_elems gathering from all processors
-            if (_global_reinitialized_elems.count(neigh_id))
+            if (_semi_local_reinitialized_elems.count(neigh_id))
               return true;
         return false;
       };
-      // Loop over all candidate elements, for each element, if any of its point neighbor belongs to
-      // the reinitialized elements, we will include that element in the patch element set.
+      // Loop over all candidate elements, for each element, if any of its point neighbor belongs
+      // to the reinitialized elements, we will include that element in the patch element set.
       for (const auto * elem : candidate_elems)
         if (has_neighbor_in_reinit_elems(elem))
           patch_elems.push_back(elem->id());
