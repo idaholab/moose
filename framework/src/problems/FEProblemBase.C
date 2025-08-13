@@ -2370,8 +2370,7 @@ FEProblemBase::reinitElemNeighborAndLowerD(const Elem * elem,
     }
   }
 
-  if (_displaced_problem &&
-      (_reinit_displaced_elem || _reinit_displaced_face || _reinit_displaced_neighbor))
+  if (_displaced_problem && (_reinit_displaced_face || _reinit_displaced_neighbor))
     _displaced_problem->reinitElemNeighborAndLowerD(
         _displaced_mesh->elemPtr(elem->id()), side, tid);
 }
@@ -4317,8 +4316,13 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     {
       // Whether to re-init or not depends on the attributes of the base classes.
       // For example, InterfaceUOBase has "_current_side_elem" and "_neighbor_elem"
-      // so it needs to reinit on displaced faces and neighbors
-      if (euo || nuo || duo || isuo || iuo)
+      // so it needs to reinit on displaced neighbors and faces
+      // _reinit_displaced_elem -> _current_elem will be reinited
+      // _reinit_displaced_face -> _current_elem, lowerD if any and _current_side_elem to be
+      // reinited _reinit_displaced_neighbor -> _current_elem, lowerD if any and _current_neighbor
+      // to be reinited Note that as soon as you use materials on the displaced mesh, all three get
+      // turned on.
+      if (euo || nuo || duo)
         _reinit_displaced_elem = true;
       if (suo || duo || isuo || iuo)
         _reinit_displaced_face = true;
