@@ -4,8 +4,8 @@
 
 ## Summary
 
-Child class of [MFEMIndicator](source/mfem/estimators/MFEMIndicator.md) that supplies
-the `mfem::L2ZienkiewiczZhuEstimator` to the [Refiner](source/mfem/refiners/MFEMRefinementMarker.md)
+Child class of [MFEMIndicator](source/mfem/indicators/MFEMIndicator.md) that supplies
+the `mfem::L2ZienkiewiczZhuEstimator` to the [MFEMRefinementMarker](source/mfem/markers/MFEMRefinementMarker.md)
 
 ## Overview
 
@@ -17,7 +17,11 @@ We can then construct the `L2ZienkiewiczZhuEstimator` object using the bilinear 
 associated with the kernel, the grid function associated with the variable, and the two finite
 element spaces we create for the fluxes.
 
-We can access this object using the `getEstimator()` method.
+This object is accessed once (by an `MFEMRefinementMarker`) this object using the `getEstimator()` method.
+
+## Example Input File Syntax
+
+!listing test/tests/mfem/kernels/diffusion_amr.i block=Adaptivity
 
 !if-end!
 
