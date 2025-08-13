@@ -597,11 +597,11 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         auto w_perim = (*_w_perim_soln)(node_in);
         // hydraulic diameter in the i direction
         auto Dh_i = 4.0 * S / w_perim;
-        auto time_term = _TR * ((*_mdot_soln)(node_out)-_mdot_soln->old(node_out)) * dz / _dt -
-                         dz * 2.0 * (*_mdot_soln)(node_out) * (rho_out - _rho_soln->old(node_out)) /
-                             rho_in / _dt;
-        auto mass_term1 =
-            std::pow((*_mdot_soln)(node_out), 2.0) * (1.0 / S / rho_out - 1.0 / S / rho_in);
+        auto time_term = _TR * (((*_mdot_soln)(node_out)-_mdot_soln->old(node_out)) * dz / _dt -
+                                dz * 2.0 * (*_mdot_soln)(node_out) *
+                                    (rho_out - _rho_soln->old(node_out)) / rho_in / _dt);
+        auto mass_term1 = std::pow((*_mdot_soln)(node_out), 2.0) *
+                          (1.0 / (*_S_flow_soln)(node_out) / rho_out - 1.0 / S / rho_in);
         auto mass_term2 = -2.0 * (*_mdot_soln)(node_out) * (*_SumWij_soln)(node_out) / S / rho_in;
         auto crossflow_term = 0.0;
         auto turbulent_term = 0.0;
@@ -1437,7 +1437,8 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         else
           rho_star = (rho_i + rho_j) / 2.0;
         auto mass_term_out =
-            (*_mdot_soln)(node_out_i) / Si / rho_i + (*_mdot_soln)(node_out_j) / Sj / rho_j;
+            (*_mdot_soln)(node_out_i) / (*_S_flow_soln)(node_out_i) / (*_rho_soln)(node_out_i) +
+            (*_mdot_soln)(node_out_j) / (*_S_flow_soln)(node_out_j) / (*_rho_soln)(node_out_j);
         auto mass_term_in =
             (*_mdot_soln)(node_in_i) / Si / rho_i + (*_mdot_soln)(node_in_j) / Sj / rho_j;
         auto term_out = Sij * rho_star * (Lij / dz) * mass_term_out * _Wij(i_gap, iz);
