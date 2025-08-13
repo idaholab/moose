@@ -1134,7 +1134,7 @@ class TestHarness:
         filtergroup.add_argument('--ignore', nargs='?', action='store', metavar='caveat', dest='ignored_caveats', const='all', type=str,
                                  help='Ignore specified caveats when checking if a test should run; using --ignore without a conditional will ignore all caveats')
         filtergroup.add_argument('--no-check-input', action='store_true', help='Do not run check_input (syntax) tests')
-        filtergroup.add_argument('--not_group', action='store', type=str, help='Run only tests NOT in the named group')
+        filtergroup.add_argument('--not-group', action='store', type=str, help='Run only tests NOT in the named group')
         filtergroup.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
         filtergroup.add_argument('--run', type=str, default='', dest='run', help='Only run tests of the specified of tag(s)')
         filtergroup.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
