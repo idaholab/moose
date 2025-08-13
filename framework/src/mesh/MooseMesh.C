@@ -1826,7 +1826,7 @@ MooseMesh::setBoundaryName(BoundaryID boundary_id, BoundaryName name)
 }
 
 const std::string &
-MooseMesh::getBoundaryName(BoundaryID boundary_id) const
+MooseMesh::getBoundaryName(const BoundaryID boundary_id) const
 {
   const BoundaryInfo & boundary_info = getMesh().get_boundary_info();
 
@@ -1835,6 +1835,13 @@ MooseMesh::getBoundaryName(BoundaryID boundary_id) const
     return boundary_info.get_sideset_name(boundary_id);
   else
     return boundary_info.get_nodeset_name(boundary_id);
+}
+
+std::string
+MooseMesh::getBoundaryString(BoundaryID boundary_id) const
+{
+  const auto name = getBoundaryName(boundary_id);
+  return name.size() ? name : std::to_string(boundary_id);
 }
 
 // specialization for PointListAdaptor<MooseMesh::PeriodicNodeInfo>

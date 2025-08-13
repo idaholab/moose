@@ -917,6 +917,13 @@ private:
   void traceableMeshChecks();
 
   /**
+   * Check for overlapping PeriodicRayBC boundaries and check for cases in which
+   * ghosting may not be sufficient with distribtued mesh for overlapping
+   * periodic boundaries.
+   */
+  void periodicBoundaryChecks();
+
+  /**
    * Does the setup for internal sidesets. This includes:
    * - Setting if the local mesh has internal sidesets that have RayBCs and on which
    *   boundary (stored in _internal_sidesets)
