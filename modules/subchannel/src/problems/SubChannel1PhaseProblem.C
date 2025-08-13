@@ -2027,8 +2027,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   }
   else
   {
-    unsigned int last_node = (iblock + 1) * _block_size;
-    unsigned int first_node = iblock * _block_size + 1;
     LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
         _prod, *_mdot_soln, first_node, last_node, _n_channels));
     Vec ls;
@@ -2385,8 +2383,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   /// Assigning the solutions to arrays
   PetscScalar * sol_p_array;
   LibmeshPetscCall(VecGetArray(sol_p, &sol_p_array));
-  PetscScalar * sol_Wij_array;
-  LibmeshPetscCall(VecGetArray(sol_Wij, &sol_Wij_array));
 
   /// Populating Mass flow
   LibmeshPetscCall(populateSolutionChan<SolutionHandle>(
@@ -2481,10 +2477,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(populateSolutionChan<SolutionHandle>(
       _prod, *_SumWij_soln, first_node, last_node, _n_channels));
 
-  Vec sumWij_loc;
-  LibmeshPetscCall(createPetscVector(sumWij_loc, _block_size * _n_channels));
-  LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
-      _prod, *_SumWij_soln, first_node, last_node, _n_channels));
 
   LibmeshPetscCall(VecAbs(_prod));
   LibmeshPetscCall(VecMax(_prod, NULL, &_max_sumWij_new));
@@ -2501,7 +2493,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(VecDestroy(&sol_mdot));
   LibmeshPetscCall(VecDestroy(&sol_p));
   LibmeshPetscCall(VecDestroy(&sol_Wij));
-  LibmeshPetscCall(VecDestroy(&sumWij_loc));
   if (_verbose_subchannel)
     _console << "Solutions destroyed." << std::endl;
 
