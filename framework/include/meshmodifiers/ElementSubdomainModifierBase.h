@@ -245,9 +245,6 @@ private:
   /// @brief List of variable names for which overridden DOF values should be restored.
   std::vector<VariableName> _vars_to_restore_overridden_dofs;
 
-  /// @brief Set of processor IDs that have reinitialized elements and nodes.
-  std::set<processor_id_type> _global_proc_ids_for_reinit;
-
 private:
   /// Construct a KD-tree from the given elements
   std::unique_ptr<KDTree> constructKDTreeFromElements(const std::vector<dof_id_type> & elems);

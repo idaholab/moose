@@ -329,10 +329,6 @@ ElementSubdomainModifierBase::modify(
   _fe_problem.meshChanged(
       /*intermediate_change=*/false, /*contract_mesh=*/false, /*clean_refinement_flags=*/false);
 
-  // Clear the serialized solution after the mesh has changed
-  // TODO: double check if this is needed
-  _sys.resetSerializedSolution();
-
   // Initialize solution and stateful material properties
   applyIC();
   if (_fe_problem.getMaterialWarehouse().hasActiveObjects(0))
