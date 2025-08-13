@@ -1,0 +1,20 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:            5.25 @ t1 max:               6 @ t4
+
+GLOBAL VARIABLES relative 1e-4 floor 1e-4
+	contact         # min:              11 @ t1	max:              11 @ t1
+	cumulative_li   # min:              48 @ t1	max:              74 @ t4
+	cumulative_nli  # min:              30 @ t1	max:              53 @ t4
+	num_l           # min:               8 @ t2	max:              28 @ t1
+	num_nl          # min:               7 @ t3	max:              10 @ t1
+
+NODAL VARIABLES relative 1e-4 floor 1e-4
+	disp_x                    # min:               0 @ t1,n51	max:      0.12500398 @ t4,n157
+	disp_y                    # min:               0 @ t1,n51	max:            0.21 @ t1,n119
+	frictional_normal_lm      # min:               0 @ t1,n1	max:       127.63013 @ t4,n140
+	frictional_tangential_lm  # min:               0 @ t1,n1	max:       47.502474 @ t4,n140
+
+ELEMENT VARIABLES relative 1e-4 floor 1e-4
+	stress_xx  # min:               0 @ t1,b3,e591	max:       36.475321 @ t4,b1,e34
+	stress_yy  # min:               0 @ t1,b3,e591	max:       92.982385 @ t4,b2,e500

@@ -31,8 +31,7 @@
     type = 'Exodiff'
     exodiff = 'block-dynamics-action_out.e'
     input = 'block-dynamics-action.i'
-    rel_err = 5.0e-4
-    abs_zero = 1.0e-5
+    custom_cmp = block-dynamics-action.cmp
     capabilities = 'ad_size>=50'
     cli_args = 'Contact/mechanical/mortar_dynamics=true Contact/mechanical/newmark_beta=0.25  '
                'Contact/mechanical/newmark_gamma=0.5 Executioner/dt=0.05 Executioner/end_time=0.3'
@@ -80,8 +79,7 @@
     type = 'Exodiff'
     exodiff = 'block-dynamics-friction-action_out.e'
     input = 'block-dynamics-friction-action.i'
-    rel_err = 5.0e-4
-    abs_zero = 1.0e-5
+    custom_cmp = block-dynamics-friction-action.cmp
     capabilities = 'ad_size>=50'
     cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3'
     requirement = 'The system shall solve mortar frictional contact between two blocks with weighted '

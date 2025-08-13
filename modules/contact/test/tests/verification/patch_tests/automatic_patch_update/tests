@@ -44,7 +44,7 @@
     map = false
     requirement = "The system shall be able to couple iteration patch update strategies with initial "
                   "adaptivity when using geometric searches with a replicated mesh."
-    rel_err = 5.5e-5
+    custom_cmp = iteration_adaptivity_parallel.cmp
   []
   [iteration_adaptivity_parallel_node_face]
     type = 'Exodiff'

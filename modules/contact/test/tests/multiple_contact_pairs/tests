@@ -27,8 +27,7 @@
     type = Exodiff
     input = 'multiple_pairs_mortar.i'
     exodiff = 'multiple_pairs_mortar_out.e'
-    abs_zero = 1.0e-8
-    rel_err = 1.0e-5
+    custom_cmp = multiple_pairs_mortar.cmp
     cli_args = "Postprocessors/active=''"
     map = False
     partial = True
@@ -39,8 +38,7 @@
     type = Exodiff
     input = 'multiple_pairs_mortar_friction.i'
     exodiff = 'multiple_pairs_mortar_friction_out.e'
-    abs_zero = 1.0e-8
-    rel_err = 1.0e-5
+    custom_cmp = multiple_pairs_mortar_friction.cmp
     cli_args = "Postprocessors/active=''"
     map = False
     partial = True
