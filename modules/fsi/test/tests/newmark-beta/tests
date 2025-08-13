@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#31295'
+  design = 'ADPenaltyVelocityContinuityNewmarkBeta.md'
+  [test]
+    type = CSVDiff
+    input = test_ALE.i
+    csvdiff = test_ALE_csv.csv
+    requirement = 'The system shall be able to model fluid structure interaction in which a fluid is exerting shearing forces on an inclusion and in which the solid dynamics are integrated using the Newmark-Beta method.'
+    recover = false # output executed on final
+    capabilities = 'method!=dbg'
+  []
+[]
