@@ -1427,7 +1427,8 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         else
           rho_star = (rho_i + rho_j) / 2.0;
         auto mass_term_out =
-            (*_mdot_soln)(node_out_i) / Si / rho_i + (*_mdot_soln)(node_out_j) / Sj / rho_j;
+            (*_mdot_soln)(node_out_i) / (*_S_flow_soln)(node_out_i) / (*_rho_soln)(node_out_i) +
+            (*_mdot_soln)(node_out_j) / (*_S_flow_soln)(node_out_j) / (*_rho_soln)(node_out_j);
         auto mass_term_in =
             (*_mdot_soln)(node_in_i) / Si / rho_i + (*_mdot_soln)(node_in_j) / Sj / rho_j;
         auto term_out = Sij * rho_star * (Lij / dz) * mass_term_out * _Wij(i_gap, iz);
