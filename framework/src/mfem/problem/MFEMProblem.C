@@ -326,6 +326,8 @@ MFEMProblem::addComplexComponentToBC(const std::string & kernel_name,
   auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(
       getUserObject<MFEMComplexIntegratedBC>(parent_name).getSharedPtr());
   parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
+  parameters.set<std::vector<BoundaryName>>("boundary") =
+      parent_ptr->getParam<std::vector<BoundaryName>>("boundary");
   addAuxBoundaryCondition(kernel_name, name, parameters);
   auto bc_ptr = std::dynamic_pointer_cast<MFEMIntegratedBC>(
       getUserObject<MFEMIntegratedBC>(name).getSharedPtr());

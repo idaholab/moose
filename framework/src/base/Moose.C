@@ -469,7 +469,7 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_mfem_complex_kernel_components", "add_mfem_fespaces");
   addTaskDependency("add_mfem_complex_bc_components", "add_mfem_fespaces");
   addTaskDependency("add_mfem_complex_kernel_components", "add_kernel");
-  addTaskDependency("add_bc", "add_mfem_complex_bc_components");
+  addTaskDependency("add_mfem_complex_bc_components", "add_bc");
 
   // set mesh FE space
   registerTask("set_mesh_fe_space", true);
