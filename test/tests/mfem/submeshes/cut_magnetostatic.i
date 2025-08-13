@@ -3,7 +3,7 @@
 
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/embedded_torus.e
+  file = ../mesh/embedded_concentric_torus.e
 []
 
 [Problem]
