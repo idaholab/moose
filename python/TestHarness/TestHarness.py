@@ -400,9 +400,8 @@ class TestHarness:
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
-        if (self.options.parallel_mesh == True or self.options.distributed_mesh == True) or \
-              (self.options.cli_args != None and \
-               (self.options.cli_args.find('--parallel-mesh') != -1 or self.options.cli_args.find('--distributed-mesh') != -1)):
+        if self.options.distributed_mesh == True or self.options.cli_args != None and \
+               self.options.cli_args.find('--distributed-mesh') != -1:
 
             option_set = set(['ALL', 'DISTRIBUTED'])
             checks['mesh_mode'] = option_set
@@ -1099,112 +1098,113 @@ class TestHarness:
 
     ## Parse command line options and assign them to self.options
     def parseCLArgs(self, argv):
-        parser = argparse.ArgumentParser(description='A tool used to test MOOSE based applications')
-        parser.add_argument('--opt', action='store_const', dest='method', const='opt', help='test the app_name-opt binary')
-        parser.add_argument('--dbg', action='store_const', dest='method', const='dbg', help='test the app_name-dbg binary')
-        parser.add_argument('--devel', action='store_const', dest='method', const='devel', help='test the app_name-devel binary')
-        parser.add_argument('--oprof', action='store_const', dest='method', const='oprof', help='test the app_name-oprof binary')
-        parser.add_argument('--pro', action='store_const', dest='method', const='pro', help='test the app_name-pro binary')
-        parser.add_argument('--run', type=str, default='', dest='run', help='only run tests of the specified of tag(s)')
-        parser.add_argument('--ignore', nargs='?', action='store', metavar='caveat', dest='ignored_caveats', const='all', type=str, help='ignore specified caveats when checking if a test should run: (--ignore "method compiler") Using --ignore with out a conditional will ignore all caveats')
-        parser.add_argument('-j', '--jobs', nargs='?', metavar='int', action='store', type=int, dest='jobs', const=1, help='run test binaries in parallel')
-        parser.add_argument('-e', action='store_true', dest='extra_info', help='Display "extra" information including all caveats and deleted tests')
-        parser.add_argument('-c', '--no-color', action='store_false', dest='colored', help='Do not show colored output')
-        parser.add_argument('--color-first-directory', action='store_true', dest='color_first_directory', help='Color first directory')
-        parser.add_argument('--heavy', action='store_true', dest='heavy_tests', help='Run tests marked with HEAVY : True')
-        parser.add_argument('--all-tests', action='store_true', dest='all_tests', help='Run normal tests and tests marked with HEAVY : True')
-        parser.add_argument('-g', '--group', action='store', type=str, dest='group', default='ALL', help='Run only tests in the named group')
-        parser.add_argument('--not_group', action='store', type=str, dest='not_group', help='Run only tests NOT in the named group')
-        parser.add_argument('--dbfile', nargs='?', action='store', dest='dbFile', help='Location to timings data base file. If not set, assumes $HOME/timingDB/timing.sqlite')
-        parser.add_argument('-l', '--load-average', action='store', type=float, dest='load', help='Do not run additional tests if the load average is at least LOAD')
-        parser.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
-        parser.add_argument('--longest-jobs', action='store', dest='longest_jobs', type=int, default=0, help='Print the longest running jobs upon completion')
-        parser.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Scale problems that have SCALE_REFINE set')
-        parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', help='The test specification file to look for (default: tests)')
-        parser.add_argument('--libmesh_dir', nargs=1, action='store', type=str, dest='libmesh_dir', help='Currently only needed for bitten code coverage')
-        parser.add_argument('--no-capabilities', action='store_true', dest='no_capabilities', help='Do not allow capability checks')
-        parser.add_argument('--parallel', '-p', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of processors to use when running mpiexec')
-        parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
-        parser.add_argument('--recover', action='store_true', dest='enable_recover', help='Run a test in recover mode')
-        parser.add_argument('--recoversuffix', action='store', type=str, default='cpr', dest='recoversuffix', help='Set the file suffix for recover mode')
-        parser.add_argument('--restep', action='store_true', dest='enable_restep', help='Run a test in restep mode')
-        parser.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
-        parser.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
-        parser.add_argument('--valgrind-max-fails', nargs=1, type=int, dest='valgrind_max_fails', default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
-        parser.add_argument('--max-fails', nargs=1, type=int, dest='max_fails', default=50, help='The number of tests allowed to fail before any additional tests will run')
-        parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
-        parser.add_argument('--failed-tests', action='store_true', dest='failed_tests', help='Run tests that previously failed')
-        parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
-        parser.add_argument('--no-check-input', action='store_true', dest='no_check_input', help='Do not run check_input (syntax) tests')
-        parser.add_argument('--spec-file', action='store', type=str, dest='spec_file', help='Supply a path to the tests spec file to run the tests found therein. Or supply a path to a directory in which the TestHarness will search for tests. You can further alter which tests spec files are found through the use of -i and --re')
-        parser.add_argument('-C', '--test-root', nargs=1, metavar='dir', type=str, dest='spec_file', help='Tell the TestHarness to search for test spec files at this location.')
-        parser.add_argument('-d', '--pedantic-checks', action='store_true', dest='pedantic_checks', help="Run pedantic checks of the Testers' file writes looking for race conditions.")
-        parser.add_argument('--capture-perf-graph', action='store_true', help='Capture PerfGraph for MOOSE application runs via Outputs/perf_graph_json_file')
-
-        # Options that pass straight through to the executable
-        parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
-        parser.add_argument('--distributed-mesh', action='store_true', dest='distributed_mesh', help='Pass "--distributed-mesh" to executable')
-
-        parser.add_argument('--compute-device', action='store', dest='compute_device', type=str, choices=TestHarness.validComputeDevices(), default='cpu', help='Run libtorch or MFEM tests with this compute device; device availability depends on library support and compilation settings')
-
-        parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors (Pass "--error" to executable)')
-        parser.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (Pass "--error-unused" to executable)')
-        parser.add_argument('--error-deprecated', action='store_true', help='Run the tests with errors on deprecations')
-        parser.add_argument('--allow-unused',action='store_true', help='Run the tests without errors on unused parameters (Pass "--allow-unused" to executable)')
-        parser.add_argument('--allow-warnings',action='store_true', help='Run the tests with warnings not as errors (Do not pass "--error" to executable)')
-        # Option to use for passing unwrapped options to the executable
-        parser.add_argument('--cli-args', nargs='?', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')
-        parser.add_argument('--dry-run', action='store_true', dest='dry_run', help="Pass --dry-run to print commands to run, but don't actually run them")
-        parser.add_argument('--use-subdir-exe', action="store_true", help='If there are sub directories that contain a new testroot, use that for running tests under that directory.')
-
-        # Options which manipulate the output in some way
-        outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
-        outputgroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='show the output of every test')
-        outputgroup.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='only show the result of every test, don\'t show test output even if it fails')
-        outputgroup.add_argument('--no-report', action='store_false', dest='report_skipped', help='do not report skipped tests')
-        outputgroup.add_argument('--show-directory', action='store_true', dest='show_directory', help='Print test directory path in out messages')
-        outputgroup.add_argument('-o', '--output-dir', nargs=1, metavar='directory', dest='output_dir', default='', help='Save all output files in the directory, and create it if necessary')
-        outputgroup.add_argument('-x', '--sep-files', action='store_true', dest='sep_files', help='Write the output of each test to a separate file. Only quiet output to terminal.')
-        outputgroup.add_argument('--include-input-file', action='store_true', dest='include_input', help='Include the contents of the input file when writing the results of a test to a file')
-        outputgroup.add_argument("--testharness-unittest", action="store_true", help="Run the TestHarness unittests that test the TestHarness.")
-        outputgroup.add_argument("--json", action="store_true", dest="json", help="Dump the parameters for the testers in JSON Format")
-        outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
-        outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
-        outputgroup.add_argument("--no-trimmed-output", action="store_true", dest="no_trimmed_output", help="Do not trim the output")
-        outputgroup.add_argument("--no-trimmed-output-on-error", action="store_true", dest="no_trimmed_output_on_error", help="Do not trim output for tests which cause an error")
-        outputgroup.add_argument("--results-file", nargs=1, default='.previous_test_results.json', help="Save run_tests results to an alternative json file (default: %(default)s)")
-        outputgroup.add_argument("--show-last-run", action="store_true", dest="show_last_run", help="Display previous results without executing tests again")
-
-        # Options for HPC execution
-        hpcgroup = parser.add_argument_group('HPC Options', 'Options controlling HPC execution')
-        hpcgroup.add_argument('--hpc', dest='hpc', action='store', choices=['pbs', 'slurm'], help='Launch tests using a HPC scheduler')
-        hpcgroup.add_argument('--hpc-host', nargs='+', action='store', dest='hpc_host', metavar='', help='The host(s) to use for submitting HPC jobs')
-        hpcgroup.add_argument('--hpc-pre-source', nargs=1, action="store", dest='hpc_pre_source', metavar='', help='Source specified file before launching HPC tests')
-        hpcgroup.add_argument('--hpc-file-timeout', nargs=1, type=int, action='store', dest='hpc_file_timeout', default=300, help='The time in seconds to wait for HPC output')
-        hpcgroup.add_argument('--hpc-scatter-procs', nargs=1, type=int, action='store', dest='hpc_scatter_procs', default=None, help='Set to run HPC jobs with scatter placement when the processor count is this or lower')
-        hpcgroup.add_argument('--hpc-apptainer-bindpath', nargs=1, action='store', type=str, dest='hpc_apptainer_bindpath', help='Sets the apptainer bindpath for HPC jobs')
-        hpcgroup.add_argument('--hpc-apptainer-no-home', action='store_true', dest='hpc_apptainer_no_home', help='Passes --no-home to apptainer for HPC jobs')
-        hpcgroup.add_argument('--hpc-project', nargs=1, action='store', dest='hpc_project', type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
-        hpcgroup.add_argument('--hpc-no-hold', nargs=1, action='store', type=bool, default=False, dest='hpc_no_hold', help='Do not pre-create hpc jobs to be held')
-        hpcgroup.add_argument('--pbs-queue', nargs=1, action='store', dest='hpc_queue', type=str, metavar='', help='Submit jobs to the specified queue')
-
-        # Try to find the terminal size if we can
-        # Try/except here because the terminal size could fail w/o a display
         term_cols = None
         try:
             term_cols = os.get_terminal_size().columns * 7/8
         except:
             term_cols = 110
             pass
-
-        # Optionally load in the environment controlled values
         term_cols = int(os.getenv('MOOSE_TERM_COLS', term_cols))
         term_format = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
 
-        # Terminal options
-        termgroup = parser.add_argument_group('Terminal Options', 'Options for controlling the formatting of terminal output')
-        termgroup.add_argument('--term-cols', dest='term_cols', action='store', type=int, default=term_cols, help='The number columns to use in output')
-        termgroup.add_argument('--term-format', dest='term_format', action='store', type=str, default=term_format, help='The formatting to use when outputting job status')
+        parser = argparse.ArgumentParser(description='A tool used to test MOOSE-based applications')
+
+        parser.add_argument('--failed-tests', action='store_true', help='Run tests that previously failed')
+        parser.add_argument('--show-last-run', action='store_true', help='Display previous results without executing tests again')
+        parser.add_argument('--dry-run', action='store_true', help="Print the commands to run without running them")
+
+        inputgroup = parser.add_argument_group('Test Specifications', 'Specify which test specification files to load')
+        inputgroup.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', help='The test specification file to look for (default: tests)')
+        inputgroup.add_argument('-C', '--test-root', nargs=1, metavar='dir', type=str, dest='spec_file', help='Search for test spec files in this location')
+        inputgroup.add_argument('--spec-file', action='store', type=str,
+                                help='Supply a path to the tests spec file to run the tests found therein or supply a path to a directory in which the TestHarness will search for tests')
+
+        parallelgroup = parser.add_argument_group('Parallelization', 'Control the parallel execution')
+        parallelgroup.add_argument('-j', '--jobs', nargs='?', action='store', type=int, dest='jobs', const=1, help='Set the number of parallel jobs for tests')
+        parallelgroup.add_argument('-l', '--load-average', action='store', type=float, dest='load', help='Do not run additional tests if the load average is at least LOAD')
+        parallelgroup.add_argument('-p', '--parallel', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of MPI processes to use for each job')
+        parallelgroup.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
+
+        filtergroup = parser.add_argument_group('Test Filters', 'Filter which tests are ran')
+        filtergroup.add_argument('-g', '--group', action='store', type=str, dest='group', default='ALL', help='Run only tests in the named group')
+        filtergroup.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Run tests that have SCALE_REFINE set')
+        filtergroup.add_argument('--all-tests', action='store_true', help='Run heavy and non-heavy tests')
+        filtergroup.add_argument('--check-input', action='store_true', help='Run check_input (syntax) tests only')
+        filtergroup.add_argument('--heavy', action='store_true', dest='heavy_tests', help='Run tests marked with heavy')
+        filtergroup.add_argument('--ignore', nargs='?', action='store', metavar='caveat', dest='ignored_caveats', const='all', type=str,
+                                 help='Ignore specified caveats when checking if a test should run; using --ignore without a conditional will ignore all caveats')
+        filtergroup.add_argument('--no-check-input', action='store_true', help='Do not run check_input (syntax) tests')
+        filtergroup.add_argument('--not_group', action='store', type=str, help='Run only tests NOT in the named group')
+        filtergroup.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
+        filtergroup.add_argument('--run', type=str, default='', dest='run', help='Only run tests of the specified of tag(s)')
+        filtergroup.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
+        filtergroup.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
+
+        capabilitygroup = parser.add_argument_group('Additional Capabilities', 'Enable or disable additional TestHarness capabilities')
+        capabilitygroup.add_argument('--capture-perf-graph', action='store_true', help='Capture PerfGraph for RunApp tests via Outputs/perf_graph_json_file')
+        capabilitygroup.add_argument('--cli-args', nargs='?', type=str, help='Append the following list of arguments to the command line (encapsulate the command in quotes)')
+        capabilitygroup.add_argument('--no-capabilities', action='store_true', help='Disable Capability checks')
+        capabilitygroup.add_argument('--pedantic-checks', action='store_true', help='Run pedantic checks of the Testers\' file writes looking for race conditions')
+        capabilitygroup.add_argument('--use-subdir-exe', action="store_true", help='If there are sub directories that contain a new testroot, use that for running tests under that directory')
+        capabilitygroup.add_argument('--recover', action='store_true', dest='enable_recover', help='Run tests in recover mode')
+        capabilitygroup.add_argument('--restep', action='store_true', dest='enable_restep', help='Run tests in restep mode')
+
+        appgroup = parser.add_argument_group('Application Options', 'Options that pass arguments directly to the executable')
+        appgroup.add_argument('--allow-unused',action='store_true', help='Run the tests without errors on unused parameters (pass --allow-unused)')
+        appgroup.add_argument('--allow-warnings',action='store_true', help='Run the tests with warnings not as errors (do not pass --error)')
+        appgroup.add_argument('--compute-device', action='store', type=str, choices=TestHarness.validComputeDevices(), default='cpu',
+                              help='Run tests that support this compute device; (passes --compute-device=...)')
+        appgroup.add_argument('--distributed-mesh', action='store_true', help='Run tests that support distributed mesh (pass --distributed-mesh)')
+        appgroup.add_argument('--error', action='store_true', help='Run the tests with warnings as errors (pass --error)')
+        appgroup.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (pass --error-unused)')
+        appgroup.add_argument('--error-deprecated', action='store_true', help='Run the tests with errors on deprecations (pass --error-deprecated)')
+        appgroup.add_argument('--recoversuffix', action='store', type=str, default='cpr', help='Set the file suffix for recover mode (pass --recoversuffix)')
+
+        methodgroup = parser.add_argument_group('Application Methods', 'Control which application biunary method is to be ran')
+        methodgroup.add_argument('--opt', action='store_const', dest='method', const='opt', help='Test the <app_name>-opt binary')
+        methodgroup.add_argument('--dbg', action='store_const', dest='method', const='dbg', help='Test the <app_name>-dbg binary')
+        methodgroup.add_argument('--devel', action='store_const', dest='method', const='devel', help='Test the <app_name>-devel binary')
+        methodgroup.add_argument('--oprof', action='store_const', dest='method', const='oprof', help='Test the <app_name>-oprof binary')
+
+        screengroup = parser.add_argument_group('On-screen Output', 'Control the on-screen output')
+        screengroup.add_argument('-c', '--no-color', action='store_false', dest='colored', help='Do not show colored output')
+        screengroup.add_argument('-e', action='store_true', dest='extra_info', help='Display "extra" information including all caveats and deleted tests')
+        screengroup.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='Only show the result of every test (even failed output)')
+        screengroup.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
+        screengroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='Show the output of every test')
+        screengroup.add_argument('--color-first-directory', action='store_true', help='Color first directory')
+        screengroup.add_argument('--longest-jobs', action='store', type=int, default=0, help='Print the longest running jobs upon completion')
+        screengroup.add_argument('--no-report', action='store_false', dest='report_skipped', help='Do not report skipped tests')
+        screengroup.add_argument("--no-trimmed-output", action="store_true", help="Do not trim the output")
+        screengroup.add_argument("--no-trimmed-output-on-error", action="store_true", help="Do not trim output for tests which cause an error")
+        screengroup.add_argument('--term-cols', action='store', type=int, default=term_cols, help='The number columns to use in output')
+        screengroup.add_argument('--term-format', action='store', type=str, default=term_format, help='The formatting to use when outputting job status')
+
+        outputgroup = parser.add_argument_group('Output', 'Control the file output')
+        outputgroup.add_argument('-o', '--output-dir', nargs=1, metavar='directory', dest='output_dir', default='', help='Save all output files in the directory, and create it if necessary')
+        outputgroup.add_argument('-x', '--sep-files', action='store_true', dest='sep_files', help='Write the output of each test to a separate file. Only quiet output to terminal.')
+        outputgroup.add_argument("--results-file", nargs=1, default='.previous_test_results.json', help="Save run_tests results to an alternative json file (default: %(default)s)")
+
+        failgroup = parser.add_argument_group('Failure Criteria', 'Control the failure criteria')
+        failgroup.add_argument('--max-fails', nargs=1, type=int, default=50, help='The number of tests allowed to fail before any additional tests will run')
+        failgroup.add_argument('--valgrind-max-fails', nargs=1, type=int, default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
+
+        hpcgroup = parser.add_argument_group('HPC', 'Enable and control HPC execution')
+        hpcgroup.add_argument('--hpc', dest='hpc', action='store', choices=['pbs', 'slurm'], help='Launch tests using a HPC scheduler')
+        hpcgroup.add_argument('--hpc-apptainer-bindpath', nargs=1, action='store', type=str, help='Sets the apptainer bindpath for HPC jobs')
+        hpcgroup.add_argument('--hpc-apptainer-no-home', action='store_true',  help='Passes --no-home to apptainer for HPC jobs')
+        hpcgroup.add_argument('--hpc-file-timeout', nargs=1, type=int, action='store', default=300, help='The time in seconds to wait for HPC output')
+        hpcgroup.add_argument('--hpc-host', nargs='+', action='store', metavar='', help='The host(s) to use for submitting HPC jobs')
+        hpcgroup.add_argument('--hpc-no-hold', nargs=1, action='store', type=bool, default=False, help='Do not pre-create hpc jobs to be held')
+        hpcgroup.add_argument('--hpc-pre-source', nargs=1, action="store", metavar='', help='Source specified file before launching HPC tests')
+        hpcgroup.add_argument('--hpc-project', nargs=1, action='store',  type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
+        hpcgroup.add_argument('--hpc-scatter-procs', nargs=1, type=int, action='store', dest='hpc_scatter_procs', default=None, help='Set to run HPC jobs with scatter placement when the processor count is this or lower')
+        hpcgroup.add_argument('--pbs-queue', nargs=1, action='store', dest='hpc_queue', type=str, metavar='', help='Submit jobs to the specified queue')
+
+        dumpgroup = parser.add_argument_group('Syntax Dumping', 'Dump the Tester parameters')
+        dumpgroup.add_argument('--json', action='store_true', help='Dump Tester parameters in JSON Format')
+        dumpgroup.add_argument('--yaml', action='store_true', help='Dump Tester parameters in Yaml Format')
+        dumpgroup.add_argument('--dump', action='store_true', help='Dump Tester parameters in HIT Format')
 
         code = True
         if self.code.decode() in argv:
@@ -1288,10 +1288,6 @@ class TestHarness:
 
         if not self.options.valgrind_mode:
             self.options.valgrind_mode = ''
-
-        # Update libmesh_dir to reflect arguments
-        if opts.libmesh_dir:
-            self.libmesh_dir = opts.libmesh_dir
 
         # Set default
         if not self.options.input_file_name:
