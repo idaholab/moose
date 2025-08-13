@@ -8,7 +8,7 @@ Renderer:
 
 Extensions:
     MooseDocs.extensions.navigation:
-        name: MOOSE Heat Conduction Module
+        name: MOOSE Heat Transfer Module
         repo: https://github.com/idaholab/moose
         home: /modules/heat_transfer/index.md
     MooseDocs.extensions.appsyntax:

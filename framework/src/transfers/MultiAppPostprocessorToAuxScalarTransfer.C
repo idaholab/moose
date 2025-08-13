@@ -31,6 +31,8 @@ MultiAppPostprocessorToAuxScalarTransfer::validParams()
       "from_postprocessor", "The name of the Postprocessor to transfer the value from.");
   params.addRequiredParam<VariableName>(
       "to_aux_scalar", "The name of the scalar AuxVariable to transfer the value to.");
+  MultiAppTransfer::addUserObjectExecutionCheckParam(params);
+
   return params;
 }
 
@@ -56,6 +58,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
   {
     case TO_MULTIAPP:
     {
+      checkParentAppUserObjectExecuteOn(_from_pp_name);
       _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::PRE_AUX, _from_pp_name);
       _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, _from_pp_name);
       break;

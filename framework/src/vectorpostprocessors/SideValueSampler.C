@@ -42,10 +42,9 @@ SideValueSampler::SideValueSampler(const InputParameters & parameters)
     SamplerBase::checkForStandardFieldVariableType(_coupled_moose_vars[i]);
   }
 
-  if (!_coupled_standard_fv_moose_vars.empty() || !_coupled_standard_linear_fv_moose_vars.empty())
+  if (!_coupled_fv_moose_vars.empty())
   {
-    const auto num_fv_vars =
-        _coupled_standard_fv_moose_vars.size() + _coupled_standard_linear_fv_moose_vars.size();
+    const auto num_fv_vars = _coupled_fv_moose_vars.size();
     if (num_fv_vars != _coupled_moose_vars.size())
       paramError(
           "variable",
@@ -53,11 +52,6 @@ SideValueSampler::SideValueSampler(const InputParameters & parameters)
           "sure all the provided variables are either FE or FV by separating this vector "
           "postprocessor "
           "into two blocks, one for finite element and another for finite volume variables!");
-
-    for (const auto var : _coupled_standard_fv_moose_vars)
-      _fv_vars.push_back(dynamic_cast<const MooseVariableField<Real> *>(var));
-    for (const auto var : _coupled_standard_linear_fv_moose_vars)
-      _fv_vars.push_back(dynamic_cast<const MooseVariableField<Real> *>(var));
 
     _qp_sampling = false;
   }
@@ -91,17 +85,19 @@ SideValueSampler::execute()
 
     for (const auto & fi : _face_infos)
     {
-      for (unsigned int i = 0; i < _fv_vars.size(); i++)
+      for (unsigned int i = 0; i < _coupled_fv_moose_vars.size(); i++)
       {
-        mooseAssert(_fv_vars[i]->hasFaceSide(*fi, true) || _fv_vars[i]->hasFaceSide(*fi, false),
-                    "Variable " + _fv_vars[i]->name() +
+        mooseAssert(_coupled_fv_moose_vars[i]->hasFaceSide(*fi, true) ||
+                        _coupled_fv_moose_vars[i]->hasFaceSide(*fi, false),
+                    "Variable " + _coupled_fv_moose_vars[i]->name() +
                         " should be defined on one side of the face!");
 
-        const auto * elem = _fv_vars[i]->hasFaceSide(*fi, true) ? fi->elemPtr() : fi->neighborPtr();
+        const auto * elem =
+            _coupled_fv_moose_vars[i]->hasFaceSide(*fi, true) ? fi->elemPtr() : fi->neighborPtr();
 
         const auto face_arg = Moose::FaceArg(
             {fi, Moose::FV::LimiterType::CentralDifference, true, false, elem, nullptr});
-        _values[i] = MetaPhysicL::raw_value((*_fv_vars[i])(face_arg, state));
+        _values[i] = MetaPhysicL::raw_value((*_coupled_fv_moose_vars[i])(face_arg, state));
       }
 
       SamplerBase::addSample(fi->faceCentroid(), _current_elem->id(), _values);

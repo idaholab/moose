@@ -74,6 +74,8 @@ MultiAppUserObjectTransfer::validParams()
                         false,
                         "When True, a from_multiapp transfer will work by finding the nearest "
                         "(using the `location`) sub-app and query that for the value to transfer");
+  MultiAppTransfer::addUserObjectExecutionCheckParam(params);
+
   return params;
 }
 
@@ -123,6 +125,7 @@ MultiAppUserObjectTransfer::execute()
   {
     case TO_MULTIAPP:
     {
+      checkParentAppUserObjectExecuteOn(_user_object_name);
       _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::PRE_AUX, _user_object_name);
       _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, _user_object_name);
       break;

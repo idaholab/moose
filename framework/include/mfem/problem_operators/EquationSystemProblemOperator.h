@@ -19,14 +19,14 @@ namespace Moose::MFEM
 class EquationSystemProblemOperator : public ProblemOperator, public EquationSystemInterface
 {
 public:
-  EquationSystemProblemOperator(MFEMProblemData & problem)
-    : ProblemOperator(problem), _equation_system(problem.eqn_system)
+  EquationSystemProblemOperator(MFEMProblem & problem)
+    : ProblemOperator(problem), _equation_system(_problem_data.eqn_system)
   {
   }
 
   void SetGridFunctions() override;
   void Init(mfem::BlockVector & X) override;
-  virtual void Solve(mfem::Vector & X) override;
+  virtual void Solve() override;
 
   [[nodiscard]] Moose::MFEM::EquationSystem * GetEquationSystem() const override
   {

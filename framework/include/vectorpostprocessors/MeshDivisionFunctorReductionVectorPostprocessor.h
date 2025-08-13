@@ -11,15 +11,13 @@
 
 #include "SpatialUserObjectFunctor.h"
 #include "ElementVectorPostprocessor.h"
-#include "NonADFunctorInterface.h"
 
 /**
  * This MeshDivisionFunctorReductionVectorPostprocessor serves to integrate functors based
  * on the index of the elements in the mesh division
  */
 class MeshDivisionFunctorReductionVectorPostprocessor
-  : public SpatialUserObjectFunctor<ElementVectorPostprocessor>,
-    public NonADFunctorInterface
+  : public SpatialUserObjectFunctor<ElementVectorPostprocessor>
 {
 public:
   static InputParameters validParams();

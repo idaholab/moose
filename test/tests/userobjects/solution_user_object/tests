@@ -39,4 +39,19 @@
     issues = "#30729"
     requirement = "The system shall be capable of reading second-order variable data from a previous solution."
   []
+
+  [write_exodus_initial]
+    type = RunApp
+    input = "write_exodus_initial.i"
+    issues = "#31238"
+    requirement = "The system shall be capable of writing out a constant monomial function on initial time."
+  []
+  [read_exodus_initial]
+    type = Exodiff
+    input = "read_exodus_initial.i"
+    exodiff = "read_exodus_initial_out.e"
+    prereq = "write_exodus_initial"
+    issues = "#31238"
+    requirement = "The system shall be able to read in a variable from a previous exodus file that only has fiels at time 0."
+  []
 []

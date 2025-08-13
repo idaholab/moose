@@ -5314,7 +5314,7 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION dire
 
   const MooseObjectWarehouse<Transfer> & wh = to_multiapp     ? _to_multi_app_transfers[type]
                                               : from_multiapp ? _from_multi_app_transfers[type]
-                                                              : _between_multi_app_transfers;
+                                                              : _between_multi_app_transfers[type];
 
   if (wh.hasActiveObjects())
   {
@@ -5622,10 +5622,12 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
     std::shared_ptr<MultiApp> multiapp;
     if (parameters.isParamValid("multi_app"))
       multiapp = getMultiApp(parameters.get<MultiAppName>("multi_app"));
-    else if (parameters.isParamValid("from_multi_app"))
-      multiapp = getMultiApp(parameters.get<MultiAppName>("from_multi_app"));
+    // This catches the sibling transfer case, where we want to be executing only as often as the
+    // receiving application. A transfer 'to' a multiapp is executed before that multiapp
     else if (parameters.isParamValid("to_multi_app"))
       multiapp = getMultiApp(parameters.get<MultiAppName>("to_multi_app"));
+    else if (parameters.isParamValid("from_multi_app"))
+      multiapp = getMultiApp(parameters.get<MultiAppName>("from_multi_app"));
     // else do nothing because the user has provided invalid input. They should get a nice error
     // about this during transfer construction. This necessitates checking for null in this next
     // line, however

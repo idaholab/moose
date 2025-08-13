@@ -26,9 +26,9 @@ ReynoldsNumberFunctorAux::validParams()
 
 ReynoldsNumberFunctorAux::ReynoldsNumberFunctorAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _speed(getFunctor<ADReal>(NS::speed)),
-    _rho(getFunctor<ADReal>(NS::density)),
-    _mu(getFunctor<ADReal>(NS::mu)),
+    _speed(getFunctor<Real>(NS::speed)),
+    _rho(getFunctor<Real>(NS::density)),
+    _mu(getFunctor<Real>(NS::mu)),
     _use_qp_arg(dynamic_cast<MooseVariableFE<Real> *>(&_var))
 {
   if (!_use_qp_arg && !dynamic_cast<MooseVariableFV<Real> *>(&_var))
@@ -49,13 +49,12 @@ ReynoldsNumberFunctorAux::computeValue()
   if (_use_qp_arg)
   {
     const Moose::ElemQpArg qp_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
-    return _current_elem->hmax() * raw_value(_rho(qp_arg, state)) *
-           raw_value(_speed(qp_arg, state)) / raw_value(_mu(qp_arg, state));
+    return _current_elem->hmax() * _rho(qp_arg, state) * _speed(qp_arg, state) / _mu(qp_arg, state);
   }
   else
   {
     const auto elem_arg = makeElemArg(_current_elem);
-    return _current_elem->hmax() * raw_value(_rho(elem_arg, state)) *
-           raw_value(_speed(elem_arg, state)) / raw_value(_mu(elem_arg, state));
+    return _current_elem->hmax() * _rho(elem_arg, state) * _speed(elem_arg, state) /
+           _mu(elem_arg, state);
   }
 }
