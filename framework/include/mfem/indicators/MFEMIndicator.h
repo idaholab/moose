@@ -16,7 +16,8 @@
 #include "MFEMVariable.h"
 
 /*
-Class to construct an MFEM estimator to apply to the equation system.
+ * Wrapper class for mfem::ErrorEstimator objects. To keep the
+ * naming consistent with MOOSE, we refer to it as an Indicator.
 */
 class MFEMIndicator : public MFEMGeneralUserObject
 {
