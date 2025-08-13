@@ -24,8 +24,7 @@ MFEMVectorFEMassIntegratedBC::validParams()
   return params;
 }
 
-MFEMVectorFEMassIntegratedBC::MFEMVectorFEMassIntegratedBC(
-    const InputParameters & parameters)
+MFEMVectorFEMassIntegratedBC::MFEMVectorFEMassIntegratedBC(const InputParameters & parameters)
   : MFEMIntegratedBC(parameters), _coef(getScalarCoefficient("coefficient"))
 {
 }
@@ -41,7 +40,8 @@ MFEMVectorFEMassIntegratedBC::createLFIntegrator()
 mfem::BilinearFormIntegrator *
 MFEMVectorFEMassIntegratedBC::createBFIntegrator()
 {
-  return new mfem::VectorFEMassIntegrator(_coef);;
+  return new mfem::VectorFEMassIntegrator(_coef);
+  ;
 }
 
 #endif
