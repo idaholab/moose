@@ -35,9 +35,9 @@
 [Functions]
   [mu0]
     type = ParsedFunction
-    expression = 4.0e-7*pi
-    symbol_names = 'pi'
-    symbol_values = 3.1415926535897932384
+    expression = PI*4e-7
+    symbol_names = 'PI'
+    symbol_values = '3.1415926535897932384'
   []
   [epsilon0]
     type = ParsedFunction
@@ -46,14 +46,6 @@
   [freq]
     type = ParsedFunction
     expression = 9e8
-  []
-  [RWTE10Real]
-    type = ParsedFunction
-    expression = 0.0 # NOT YET SET
-  []
-  [RWTE10Imag]
-    type = ParsedFunction
-    expression = 0.0 # NOT YET SET
   []
   [massCoef]
     type = ParsedFunction
@@ -73,6 +65,18 @@
     expression_y = 0.0
     expression_z = 0.0
   []
+  [RWTE10Real]
+    type = ParsedVectorFunction
+    expression_x = 0.0 # NOT YET SET
+    expression_y = 0.0
+    expression_z = 0.0
+  []
+  [RWTE10Imag]
+    type = ParsedVectorFunction
+    expression_x = 0.0 # NOT YET SET
+    expression_y = 0.0
+    expression_z = 0.0
+  []
   [port_length_vector]
     type = ParsedVectorFunction
     expression_x = 24.76e-2
@@ -87,28 +91,28 @@
   []
 []
 
-[FunctorMaterials]
-  [Mouse]
-    type = MFEMGenericFunctorMaterial
-    prop_names = 'elec_conductivity dielec_permittivity mag_permeability'
-    prop_values = '0.0 epsilon0 mu0'
-    block = 1
-  []
-  [Air]
-    type = MFEMGenericFunctorMaterial
-    prop_names = 'elec_conductivity dielec_permittivity mag_permeability'
-    prop_values = '0.97 43 * epsilon0 mu0'
-    block = 2
-  []
-[]
+#[FunctorMaterials]
+#  [Mouse]
+#    type = MFEMGenericFunctorMaterial
+#    prop_names = 'elec_conductivity dielec_permittivity mag_permeability'
+#    prop_values = '0.0 epsilon0 mu0'
+#    block = 1
+#  []
+#  [Air]
+#    type = MFEMGenericFunctorMaterial
+#    prop_names = 'elec_conductivity dielec_permittivity mag_permeability'
+#    prop_values = '0.97 43*epsilon0 mu0'
+#    block = 2
+#  []
+#[]
 
 [BCs]
   [tangential_E]
     type = MFEMComplexVectorTangentialDirichletBC
     variable = E
     boundary = '2 3 4'
-    coefficient_real = vecZero
-    coefficient_imag = vecZero
+    vector_coefficient_real = vecZero
+    vector_coefficient_imag = vecZero
   []
   [WaveguidePortInLF]
     type = MFEMComplexIntegratedBC
@@ -116,11 +120,11 @@
     boundary = '5'
     [real_part]
       type = MFEMVectorFEBoundaryTangentIntegratedBC
-      coefficient = RWTE10Real
+      vector_coefficient = RWTE10Real
     []
     [imag_part]
       type = MFEMVectorFEBoundaryTangentIntegratedBC
-      coefficient = RWTE10Imag
+      vector_coefficient = RWTE10Imag
     []
   []
   [WaveguidePortInBF]
@@ -137,7 +141,7 @@
     []
   []
   [WaveguidePortOutBF]
-    type = MFEMVectorFEBoundaryTangentIntegratedBC
+    type = MFEMComplexIntegratedBC
     variable = E
     boundary = '6'
     [real_part]
