@@ -60,6 +60,12 @@ youngs_modulus = 1e8
   [vel_y_solid]
     block = 'inclusion'
   []
+  [vel_x_fluid]
+    block = 'matrix'
+  []
+  [vel_y_fluid]
+    block = 'matrix'
+  []
 []
 
 [AuxKernels]
@@ -96,6 +102,20 @@ youngs_modulus = 1e8
     gamma = ${gamma}
     execute_on = timestep_end
     block = 'inclusion'
+  []
+  [vel_x_fluid]
+    type = VectorVariableComponentAux
+    variable = vel_x_fluid
+    vector_variable = vel
+    execute_on = timestep_end
+    component = 'x'
+  []
+  [vel_y_fluid]
+    type = VectorVariableComponentAux
+    variable = vel_y_fluid
+    vector_variable = vel
+    execute_on = timestep_end
+    component = 'y'
   []
 []
 
@@ -349,8 +369,24 @@ youngs_modulus = 1e8
     execute_on = linear
     block = 'matrix'
   []
+  [max_vel_y]
+    type = ElementExtremeValue
+    variable = vel_y_fluid
+    block = 'matrix'
+    value_type = max
+  []
+  [min_vel_y]
+    type = ElementExtremeValue
+    variable = vel_y_fluid
+    block = 'matrix'
+    value_type = min
+  []
 []
 
 [Outputs]
-  exodus = true
+  hide = 'pressure_integral lambda'
+  [csv]
+    type = CSV
+    execute_on = 'final'
+  []
 []
