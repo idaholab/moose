@@ -8,12 +8,22 @@ Virtual base class for element based error estimators.
 
 ## Overview
 
-MFEM Estimators are resonsible for providing Error Estimators to [Refiners](source/mfem/refiners/MFEMRefinementMarker.md). 
-The `mfem::ErrorEstimator` object is constructed using a variable and a kernel which applies to that variable.
+`MFEMIndicator` is responsible for building an `mfem::ErrorEstimator` object using a variable and its kernel.
+The error estimator is then passed on to an [MFEMRefinementMarker](source/mfem/markers/MFEMRefinementMarker.md)
+object.
 
+Broadly speaking, the `mfem::ErrorEstimator` object looks at one variable and its kernel (after a solve step)
+and determines which, if any, regions of the mesh need to be refined further. These recommendations are then
+passed on to the `MFEMRefinementMarker`, which does the actual refinement.
 
-`MFEMIndicator` is an abstract base class and should correctly implement
-the `createEstimator()` method.
+This class serves as an abstract base class, and does no actual implementation. 
+
+To keep the naming consistent with moose, we refer to this class as an Indicator.
+
+## Example Input File Syntax
+
+!listing test/tests/mfem/kernels/diffusion_amr.i block=Adaptivity
+
 
 !if-end!
 
