@@ -186,8 +186,9 @@ private:
   /// Range of reinitialized elements
   std::unique_ptr<ConstElemRange> _reinitialized_elem_range;
 
-  /// Reinitialized elements (gathered from all processors)
-  std::unordered_set<dof_id_type> _global_reinitialized_elems;
+  /// Semi-local Reinitialized elements:
+  /// Ghosted and local reinitialized elements
+  std::unordered_set<dof_id_type> _semi_local_reinitialized_elems;
 
   /// Reinitialized nodes
   std::unordered_set<dof_id_type> _reinitialized_nodes;
