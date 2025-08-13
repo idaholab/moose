@@ -177,23 +177,21 @@ NodalPatchRecoveryBase::gatherSendList(
 {
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
 
-  if (specific_elems)
+  auto add_to_query = [&](const libMesh::Elem * elem)
   {
+    if (hasBlocks(elem->subdomain_id()) && elem->processor_id() != processor_id())
+      query_ids[elem->processor_id()].push_back(elem->id());
+  };
+
+  if (specific_elems)
     for (const auto & entry : *specific_elems)
     {
-      const Elem * elem = _mesh.elemPtr(entry);
-      if (hasBlocks(elem->subdomain_id()))
-        if (elem->processor_id() != processor_id())
-          query_ids[elem->processor_id()].push_back(elem->id());
+      const auto * elem = _mesh.elemPtr(entry);
+      add_to_query(elem);
     }
-  }
   else
-  {
     for (const auto & elem : _fe_problem.getEvaluableElementRange())
-      if (hasBlocks(elem->subdomain_id()))
-        if (elem->processor_id() != processor_id())
-          query_ids[elem->processor_id()].push_back(elem->id());
-  }
+      add_to_query(elem);
 
   return query_ids;
 }
