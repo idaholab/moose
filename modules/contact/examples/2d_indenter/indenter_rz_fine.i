@@ -4,7 +4,6 @@
 []
 
 [Problem]
-  coord_type = RZ
   type = ReferenceResidualProblem
   reference_vector = 'ref'
   extra_tag_vectors = 'ref'
@@ -22,6 +21,7 @@
   []
   # For NodalVariableValue to work with distributed mesh
   allow_renumbering = false
+  coord_type = RZ
 []
 
 [Functions]

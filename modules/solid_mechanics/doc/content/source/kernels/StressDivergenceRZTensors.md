@@ -58,7 +58,7 @@ Using the solid mechanics quasi-static physics, as shown
 the `StressDivergenceRZTensors` kernel will be automatically built when the coordinate system in the
 Problem block is specified for the axisymmetric RZ system,
 
-!listing modules/solid_mechanics/test/tests/2D_geometries/2D-RZ_finiteStrain_test.i block=Problem
+!listing modules/solid_mechanics/test/tests/2D_geometries/2D-RZ_finiteStrain_test.i block=Mesh
 
 and only two displacement variables are provided:
 

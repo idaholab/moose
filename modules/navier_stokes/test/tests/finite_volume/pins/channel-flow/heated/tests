@@ -30,7 +30,7 @@
       abs_zero = 2e-9
       detail = 'in rz geometry,'
       valgrind = HEAVY
-      cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' Outputs/file_base='rc-heated-rz'"
+      cli_args = "Mesh/coord_type='rz' Mesh/rz_coord_axis='x' Outputs/file_base='rc-heated-rz'"
     []
     [kappa]
       type = 'Exodiff'

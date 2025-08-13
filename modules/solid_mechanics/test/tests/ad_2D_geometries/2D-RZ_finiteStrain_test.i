@@ -37,14 +37,11 @@
 
 [Mesh]
   file = 2D-RZ_mesh.e
+  coord_type = RZ
 []
 
 [GlobalParams]
   displacements = 'disp_r disp_z'
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [Physics/SolidMechanics/QuasiStatic]

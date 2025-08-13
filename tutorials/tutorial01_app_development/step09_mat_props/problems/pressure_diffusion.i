@@ -5,12 +5,12 @@
   ny = 10              # Number of elements in the y direction
   xmax = 0.304         # Length of test chamber
   ymax = 0.0257        # Test chamber radius
+  rz_coord_axis = X    # Which axis the symmetry is around
+  coord_type = RZ      # Axisymmetric RZ
 []
 
 [Problem]
   type = FEProblem  # This is the "normal" type of Finite Element Problem in MOOSE
-  coord_type = RZ   # Axisymmetric RZ
-  rz_coord_axis = X # Which axis the symmetry is around
 []
 
 [Variables]

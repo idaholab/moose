@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#30300'
+  design = 'BlockRestrictable.md Problem/index.md'
+  [block_test]
+    requirement = 'The system shall allow users to define a default set of blocks for the simulation, which (1) limits kernel and material coverage checks to those blocks, and (2) automatically applies block restrictions to kernels and variables unless explicitly overridden by the user, and'
+    [default_block]
+      type = Exodiff
+      input = 'diffusion_with_null_material.i'
+      exodiff = 'diffusion_with_null_material_out.e'
+      detail = 'verify that defining a default set of blocks correctly limits kernel and material coverage checks, and automatically applies block restrictions to kernels and variables.'
+    []
+    [different_kernel_different_blocks]
+      type = Exodiff
+      input = 'diffusion_with_null_material_different_kernel_differnt_blocks.i'
+      exodiff = 'diffusion_with_null_material_different_kernel_differnt_blocks_out.e'
+      detail = 'verify that different kernels can be assigned to different blocks, as long as the block IDs are within the default block list provided by the user.'
+    []
+    [default_block_with_kernel_coverage_check_false]
+      type = RunApp
+      input = 'diffusion_with_null_material_kernel_coverage_check_false.i'
+      detail = 'verify the scenario where users define a default set of blocks but explicitly disable kernel coverage checking.'
+    []
+  []
+[]

@@ -2,9 +2,6 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-[]
-
-[Problem]
   coord_type = RZ
 []
 

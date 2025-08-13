@@ -27,9 +27,6 @@ velocity_interp_method = 'average'
     nx = 10
     ny = 40
   []
-[]
-
-[Problem]
   coord_type = 'RZ'
 []
 

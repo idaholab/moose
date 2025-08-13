@@ -5,6 +5,7 @@
   ny = 8
   xmax = 0.1
   ymax = 0.5
+  coord_type = rz
 []
 
 [Variables]
@@ -70,6 +71,5 @@
 []
 
 [Problem]
-  coord_type = rz
   type = FEProblem
 []
