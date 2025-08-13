@@ -83,8 +83,9 @@ SubChannel1PhaseProblem::validParams()
       "gravity", gravity_direction, "Direction of gravity. Default is counter_flow");
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
-  params.addParam<bool>(
-      "staggered_pressure", false, "Boolean to define the use of explicit or implicit solution.");
+  params.addParam<bool>("staggered_pressure",
+                        false,
+                        "Boolean to define the use of staggered or collocated pressure.");
   params.addParam<bool>(
       "segregated", true, "Boolean to define whether to use a segregated solution.");
   params.addParam<bool>(
@@ -449,7 +450,7 @@ SubChannel1PhaseProblem::computeSumWij(int iblock)
       }
     }
   }
-  // Add to matrix if explicit
+  // Add to matrix if implicit
   else
   {
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
