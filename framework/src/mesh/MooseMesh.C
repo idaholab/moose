@@ -890,6 +890,7 @@ MooseMesh::meshChanged()
   _local_node_range.reset();
   _bnd_node_range.reset();
   _bnd_elem_range.reset();
+  clearQuadratureNodes();
 
   // Rebuild the ranges
   getActiveLocalElementRange();

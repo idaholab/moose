@@ -1136,11 +1136,6 @@ DisplacedProblem::meshChanged(const bool contract_mesh, const bool clean_refinem
     nl->reinit();
   _displaced_aux->reinit();
 
-  // We've performed some mesh adaptivity. We need to
-  // clear any quadrature nodes such that when we build the boundary node lists in
-  // MooseMesh::meshChanged we don't have any extraneous extra boundary nodes lying around
-  _mesh.clearQuadratureNodes();
-
   _mesh.meshChanged();
 
   // Before performing mesh adaptivity we un-displaced the mesh. We need to re-displace the mesh and
