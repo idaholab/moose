@@ -35,7 +35,7 @@
     type = PythonUnitTest
     input = test.py
     test_case = TestStaticCondensation
-    method = "!dbg"
+    capabilities = "method!=dbg"
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree
     valgrind = 'none'
