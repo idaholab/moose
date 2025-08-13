@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/2Dwire.e
+  file = ../mesh/wire2d.e
   dim = 2
 []
 
