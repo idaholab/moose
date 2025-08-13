@@ -105,6 +105,19 @@
       detail = 'vector of strings'
       valgrind = 'none' # http library is not completely valgrind clean
     []
+    [eigen_matrix]
+      type = JSONDiff
+      input = control_reporter.i
+      jsondiff = 'control_reporter_matrix.json'
+      skip_keys = 'number_of_parts part'
+      cli_args = 'Outputs/json/file_base=control_reporter_matrix
+                  Reporters/test/matrix_value="0 1"'
+      command_proxy = 'control_reporter.py matrix_value'
+      required_python_packages = requests
+      recover = false
+      detail = 'matrix'
+      valgrind = 'none' # http library is not completely valgrind clean
+    []
   []
 
   [get_postprocessor]
@@ -116,6 +129,17 @@
     recover = false
     restep = false
     requirement = 'The system shall support retreiving a postprocessor value via a REST API'
+    valgrind = 'none' # http library is not completely valgrind clean
+  []
+
+  [get_reporter]
+    type = JSONDiff
+    input = get_reporter.i
+    jsondiff = get_reporter_out.json
+    command_proxy = get_reporter.py
+    required_python_packages = requests
+    recover = false
+    requirement = 'The system shall support retrieving reporter values via a REST API'
     valgrind = 'none' # http library is not completely valgrind clean
   []
 
@@ -146,8 +170,20 @@
     valgrind = 'none' # http library is not completely valgrind clean
   []
 
+  [terminate]
+    type = CSVDiff
+    input = get_postprocessor.i
+    csvdiff = get_postprocessor_out.csv
+    command_proxy = 'terminate.py 3'
+    cli_args = 'Executioner/num_steps=100' # Greater than the what is in gold file
+    required_python_packages = requests
+    recover = false
+    requirement = 'The system shall support terminating the simulation at a requested timestep before the simulation is complete.'
+    valgrind = 'none' # http library is not completely valgrind clean
+  []
+
   # We cannot run these tests with valgrind because they come from the python script, which will terminate
-  # the MOOSE process early and therefore we won't receieve and of the valgrind summary output
+  # the MOOSE process early and therefore we won't receive and of the valgrind summary output
   [errors]
     requirement = 'The system shall report a reasonable error when interacting with the REST API when'
     [set_controllable_no_exist]
@@ -197,6 +233,35 @@
       expect_err = 'The value \'1234\' of type number is not an array'
       detail = 'setting a controllable parameter with a type that does not match'
       valgrind = none
+    []
+    [set_controllable_matrix_bad_convert1]
+      type = RunException
+      input = 'control_reporter.i'
+      command_proxy = 'errors.py set_controllable_matrix_bad_convert1'
+      required_python_packages = requests
+      cli_args = 'Reporters/test/matrix_value="0 1"'
+      expect_err = 'The value \'1234\' of type number is not an array'
+      detail = 'setting a matrix controllable parameter that is not an array'
+    []
+    [set_controllable_matrix_bad_convert2]
+      type = RunException
+      input = 'control_reporter.i'
+      command_proxy = 'errors.py set_controllable_matrix_bad_convert2'
+      required_python_packages = requests
+      cli_args = 'Reporters/test/matrix_value="0 1"'
+      expect_err = 'Element 0 of \'[ 1234 ]\' of type number is not an array'
+      match_literal = true
+      detail = 'setting a matrix controllable parameter that is not an array of arrays'
+    []
+    [set_controllable_matrix_jagged]
+      type = RunException
+      input = 'control_reporter.i'
+      command_proxy = 'errors.py set_controllable_matrix_jagged'
+      required_python_packages = requests
+      cli_args = 'Reporters/test/matrix_value="0 1"'
+      expect_err = 'The matrix \'[ [ 11, 12 ], [ 21 ] ]\' is jagged.'
+      match_literal = true
+      detail = 'setting a matrix controllable parameter that is jagged'
     []
   []
 

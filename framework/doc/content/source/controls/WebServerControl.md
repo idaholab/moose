@@ -75,6 +75,26 @@ where `<NAME>` is the name of the postprocessor whose value you wish to receive.
 }
 ```
 
+### `get/reporter`
+
+Used to obtain a reporter value. The control must be waiting in order to access this endpoint.
+
+Interact with this endpoint by a `POST` request to `/get/reporter` with the following `application/json` data:
+
+```language=json
+{
+  "name": "<NAME>"
+}
+```
+
+where `<NAME>` is the name of the reporter value (`object_name/value_name`) whose value you wish to receive. See [reporters](Reporters/index.md) for details on reporter values. The response will be of the form:
+
+```language=json
+{
+  "value": <VALUE>
+}
+```
+
 ### `set/controllable`
 
 Used to change a controllable parameter in the simulation. The control must be waiting in order to access this endpoint.
@@ -86,6 +106,7 @@ The following parameter types are currently supported by the endpoint:
 - `std::string`
 - `std::vector<Real>`
 - `std::vector<std::string>`
+- `RealEigenMatrix` (a.k.a. `Eigen::Matrix<Real>`)
 
 These types can be extended by the `registerWebServerControl[Scalar/Vector][BoolNumberString]` registration methods in the source for the `WebServerControl`.
 
@@ -94,7 +115,7 @@ Interact with this endpoint by a `POST` request to `/set/controllable` with the 
 ```language=json
 {
   "name": "<NAME>",
-  "type" "<TYPE>",
+  "type": "<TYPE>",
   "value": <VALUE>
 }
 ```
@@ -110,12 +131,19 @@ This endpoint can be accessed via the [MooseControl](MooseControl/index.md optio
 - `setControllableVectorReal()`: Sets a controllable `std::vector<Real>` parameter
 - `setControllableString()`: Sets a controllable `std::string` parameter
 - `setControllableVectorString()`: Sets a controllable `std::vector<std::string>` parameter
+- `setControllableMatrix()`: Sets a controllable `RealEigenMatrix` parameter
 
 ### `continue`
 
 Tells a waiting control to continue with the execution. The control must be waiting in order to access this endpoint.
 
-Interact with this endpoint by a `GET` request to `/continue`. On success, the response will be empty with a status code of 200.
+Interact with this endpoint by a `GET` request to `/continue`. On success, the response will be empty with a status code of 200. This endpoint can be accessed via the [MooseControl](MooseControl/index.md optional=true) python utility via `setContinue()`.
+
+### `terminate`
+
+Tells a waiting control to terminate the simulation at the end of the current timestep. Any other execution points in the control during the timestep will be skipped. The control must be waiting in order to access this endpoint.
+
+Interact with this endpoint by a `GET` request to `/terminate`. On success, the response will be empty with a status code of 200. This endpoint can be accessed via the [MooseControl](MooseControl/index.md optional=true) python utility via `setTerminate()`.
 
 !syntax parameters /Controls/WebServerControl
 
