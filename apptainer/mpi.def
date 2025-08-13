@@ -6,7 +6,7 @@
 {#- ALTERNATE_FROM: Set an alternate from (currently supported: clang, clang_min, gcc_min)    -#}
 
 {#- The minimum version of LLVM/Clang                                                         -#}
-{%- set MIN_CLANG_VERSION = '10.0.1' -%}
+{%- set MIN_CLANG_VERSION = '14.0.6' -%}
 
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
@@ -19,7 +19,7 @@
 {%- if ALTERNATE_FROM == "clang" %}
 {%- set CLANG_GCC_VERSION = '14' -%}
 {%- elif ALTERNATE_FROM == "clang_min" %}
-{%- set CLANG_GCC_VERSION = '10' -%}
+{%- set CLANG_GCC_VERSION = '11' -%}
 {%- else %}
 {%- set CLANG_GCC_VERSION = '' -%}
 {%- endif %}
@@ -31,14 +31,18 @@
 
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/mpi' -%}
+{#- The install location for mpich                                                            -#}
+{%- set MPICH_DIR = '/opt/mpich' -%}
+{#- The install location for openmpi                                                          -#}
+{%- set OPENMPI_DIR = '/opt/openmpi' -%}
 
 Bootstrap: oras
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-From: mooseharbor.hpc.inl.gov/base/rocky-x86_64:8.10-5
+From: harbor.hpc.inl.gov/moose-base/rocky-x86_64:8.10-5
 {%- elif ALTERNATE_FROM == "cuda" %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-cuda-x86_64:8.10-cuda12.4-3
+From: harbor.hpc.inl.gov/moose-hpcbase/rocky-cuda-x86_64:8.10-cuda12.9-0
 {%- else %}
-From: mooseharbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-3
+From: harbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-4
 {%- endif %}
 # Logan Harbour
 Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
@@ -87,10 +91,10 @@ EOF
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
 
     # Install prefix for mpich
-    export MOOSE_MPICH_DIR=/opt/mpich
+    export MOOSE_MPICH_DIR={{ MPICH_DIR }}
     # Install prefix for openmpi
-    if [ -d "/opt/openmpi" ]; then
-        export MOOSE_OPENMPI_DIR=/opt/openmpi
+    if [ -d "{{ OPENMPI_DIR }}" ]; then
+        export MOOSE_OPENMPI_DIR={{ OPENMPI_DIR }}
     fi
 
 {%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
@@ -192,7 +196,8 @@ EOF
       F90FLAGS='' \
       F77FLAGS='' \
 {%- endif %}
-      --enable-fast=O2
+      --enable-fast=O2 \
+      --with-device=ch3:nemesis
     make -j ${MOOSE_JOBS}
     make install -j ${MOOSE_JOBS}
 {%- endif %}
@@ -225,6 +230,15 @@ EOF
     # Clean Up
     rm -rf ${ROOT_BUILD_DIR}
     dnf clean all
+
+%test
+    if [ -d {{ MPICH_DIR }} ]; then
+        {{ MPICH_DIR }}/bin/mpiexec --version
+    fi
+    if [ -d {{ OPENMPI_DIR }} ]; then
+        {{ OPENMPI_DIR }}/bin/mpiexec --version
+        {{ OPENMPI_DIR }}/bin/ompi_info
+    fi
 
 %files
     {{ MOOSE_DIR }}/apptainer/set_prompt.bash {{ SET_PROMPT_SCRIPT }}

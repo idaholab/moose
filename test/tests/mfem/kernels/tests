@@ -254,7 +254,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
-    max_parallel = 1 # MOOSE-MFEM-HypreGMRES doesn't appear to work with multiple ranks with cuda
   []
   [MFEMDarcy]
     type = CSVDiff
