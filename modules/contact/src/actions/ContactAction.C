@@ -471,44 +471,49 @@ ContactAction::act()
     addNodeFaceContact();
 
   if (_current_task == "add_aux_kernel")
-  { // Add ContactPenetrationAuxAction.
+  { // Add PenetrationAux.
     if (!_problem->getDisplacedProblem())
       mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
                  "Mesh block.");
-    // Create auxiliary kernels for each contact pairs
-    for (const auto & contact_pair : _boundary_pairs)
+
+    if ((_formulation != ContactFormulation::MORTAR) &&
+        (_formulation != ContactFormulation::MORTAR_PENALTY))
     {
+      // Create auxiliary kernels for each contact pairs
+      for (const auto & contact_pair : _boundary_pairs)
       {
-        InputParameters params = _factory.getValidParams("PenetrationAux");
-        params.applyParameters(parameters(),
-                               {"secondary_gap_offset", "mapped_primary_gap_offset", "order"});
+        {
+          InputParameters params = _factory.getValidParams("PenetrationAux");
+          params.applyParameters(parameters(),
+                                 {"secondary_gap_offset", "mapped_primary_gap_offset", "order"});
 
-        std::vector<VariableName> displacements =
-            getParam<std::vector<VariableName>>("displacements");
-        const auto order = _problem->systemBaseNonlinear(/*nl_sys_num=*/0)
-                               .system()
-                               .variable_type(displacements[0])
-                               .order.get_order();
+          std::vector<VariableName> displacements =
+              getParam<std::vector<VariableName>>("displacements");
+          const auto order = _problem->systemBaseNonlinear(/*nl_sys_num=*/0)
+                                 .system()
+                                 .variable_type(displacements[0])
+                                 .order.get_order();
 
-        params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-        params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
-        params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
-        params.set<BoundaryName>("paired_boundary") = contact_pair.first;
-        params.set<AuxVariableName>("variable") = "penetration";
-        if (isParamValid("secondary_gap_offset"))
-          params.set<std::vector<VariableName>>("secondary_gap_offset") = {
-              getParam<VariableName>("secondary_gap_offset")};
-        if (isParamValid("mapped_primary_gap_offset"))
-          params.set<std::vector<VariableName>>("mapped_primary_gap_offset") = {
-              getParam<VariableName>("mapped_primary_gap_offset")};
-        params.set<bool>("use_displaced_mesh") = true;
-        std::string name = _name + "_contact_" + Moose::stringify(contact_auxkernel_counter++);
+          params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+          params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
+          params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
+          params.set<BoundaryName>("paired_boundary") = contact_pair.first;
+          params.set<AuxVariableName>("variable") = "penetration";
+          if (isParamValid("secondary_gap_offset"))
+            params.set<std::vector<VariableName>>("secondary_gap_offset") = {
+                getParam<VariableName>("secondary_gap_offset")};
+          if (isParamValid("mapped_primary_gap_offset"))
+            params.set<std::vector<VariableName>>("mapped_primary_gap_offset") = {
+                getParam<VariableName>("mapped_primary_gap_offset")};
+          params.set<bool>("use_displaced_mesh") = true;
+          std::string name = _name + "_contact_" + Moose::stringify(contact_auxkernel_counter++);
 
-        _problem->addAuxKernel("PenetrationAux", name, params);
+          _problem->addAuxKernel("PenetrationAux", name, params);
+        }
       }
-    }
 
-    addContactPressureAuxKernel();
+      addContactPressureAuxKernel();
+    }
 
     const unsigned int ndisp = getParam<std::vector<VariableName>>("displacements").size();
 
@@ -559,29 +564,33 @@ ContactAction::act()
                            .system()
                            .variable_type(displacements[0])
                            .order.get_order();
-    // Add ContactPenetrationVarAction
+    if ((_formulation != ContactFormulation::MORTAR) &&
+        (_formulation != ContactFormulation::MORTAR_PENALTY))
     {
-      auto var_params = _factory.getValidParams("MooseVariable");
-      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-      var_params.set<MooseEnum>("family") = "LAGRANGE";
+      // Add penetration aux variable
+      {
+        auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        var_params.set<MooseEnum>("family") = "LAGRANGE";
 
-      _problem->addAuxVariable("MooseVariable", "penetration", var_params);
-    }
-    // Add ContactPressureVarAction
-    {
-      auto var_params = _factory.getValidParams("MooseVariable");
-      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-      var_params.set<MooseEnum>("family") = "LAGRANGE";
+        _problem->addAuxVariable("MooseVariable", "penetration", var_params);
+      }
+      // Add contact pressure aux variable
+      {
+        auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        var_params.set<MooseEnum>("family") = "LAGRANGE";
 
-      _problem->addAuxVariable("MooseVariable", "contact_pressure", var_params);
-    }
-    // Add nodal area contact variable
-    {
-      auto var_params = _factory.getValidParams("MooseVariable");
-      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-      var_params.set<MooseEnum>("family") = "LAGRANGE";
+        _problem->addAuxVariable("MooseVariable", "contact_pressure", var_params);
+      }
+      // Add nodal area aux variable
+      {
+        auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        var_params.set<MooseEnum>("family") = "LAGRANGE";
 
-      _problem->addAuxVariable("MooseVariable", "nodal_area", var_params);
+        _problem->addAuxVariable("MooseVariable", "nodal_area", var_params);
+      }
     }
 
     const unsigned int ndisp = getParam<std::vector<VariableName>>("displacements").size();
@@ -605,7 +614,8 @@ ContactAction::act()
     }
   }
 
-  if (_current_task == "add_user_object")
+  if (_current_task == "add_user_object" && (_formulation != ContactFormulation::MORTAR) &&
+      (_formulation != ContactFormulation::MORTAR_PENALTY))
   {
     auto var_params = _factory.getValidParams("NodalArea");
 
