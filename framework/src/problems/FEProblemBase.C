@@ -117,6 +117,7 @@
 #include "RedistributeProperties.h"
 #include "Checkpoint.h"
 
+#include "libmesh/enum_parallel_type.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/coupling_matrix.h"
@@ -3743,15 +3744,15 @@ FEProblemBase::projectInitialConditionOnCustomRange(
 
 void
 FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
-                                            Number (*poly_func)(const Point &,
-                                                                const libMesh::Parameters &,
-                                                                const std::string &,
-                                                                const std::string &),
-                                            Gradient (*poly_func_grad)(const Point &,
-                                                                       const libMesh::Parameters &,
-                                                                       const std::string &,
-                                                                       const std::string &),
-                                            const libMesh::Parameters & function_parameters,
+                                            Number (*func)(const Point &,
+                                                           const libMesh::Parameters &,
+                                                           const std::string &,
+                                                           const std::string &),
+                                            Gradient (*func_grad)(const Point &,
+                                                                  const libMesh::Parameters &,
+                                                                  const std::string &,
+                                                                  const std::string &),
+                                            const libMesh::Parameters & params,
                                             const VariableName & target_var)
 {
   const auto & var = getStandardVariable(0, target_var);
@@ -3762,31 +3763,27 @@ FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
   // Let libmesh handle the projection
   System & libmesh_sys = getSystem(target_var);
   std::string temp_vec_name = "__temp_projection_" + target_var + "__";
-  NumericVector<Number> & temp_vec = libmesh_sys.add_vector(temp_vec_name, /*projected=*/false);
-  libmesh_sys.project_vector(poly_func, poly_func_grad, function_parameters, temp_vec);
+  NumericVector<Number> & temp_vec =
+      libmesh_sys.add_vector(temp_vec_name, /*projected=*/false, /*parallel_type=*/GHOSTED);
+  libmesh_sys.project_vector(func, func_grad, params, temp_vec);
   temp_vec.close();
 
-  // Get the dofs to copy
+  // Get the dof indices to copy
   DofMap & dof_map = sys.dofMap();
-  std::set<dof_id_type> owned_dof_indices;
-  std::vector<dof_id_type> dof_indices;
+  std::set<dof_id_type> dof_indices;
+  std::vector<dof_id_type> elem_dof_indices;
 
   for (const auto & elem : elem_range)
   {
-    dof_map.dof_indices(elem, dof_indices, var_num);
-    for (auto dof : dof_indices)
-    {
-      // if (dof_map.dof_owner(dof) == processor_id())
-      owned_dof_indices.insert(dof);
-    }
+    dof_map.dof_indices(elem, elem_dof_indices, var_num);
+    dof_indices.insert(elem_dof_indices.begin(), elem_dof_indices.end());
   }
+  std::vector<dof_id_type> dof_indices_v(dof_indices.begin(), dof_indices.end());
 
-  std::vector<dof_id_type> owned_dof_indices_vec(owned_dof_indices.begin(),
-                                                 owned_dof_indices.end());
   // Copy the projected values into the solution vector
   std::vector<Real> dof_vals;
-  temp_vec.get(owned_dof_indices_vec, dof_vals);
-  sys.solution().insert(dof_vals, owned_dof_indices_vec);
+  temp_vec.get(dof_indices_v, dof_vals);
+  sys.solution().insert(dof_vals, dof_indices_v);
   sys.solution().close();
   sys.solution().localize(*libmesh_sys.current_local_solution, sys.dofMap().get_send_list());
 

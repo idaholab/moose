@@ -947,26 +947,29 @@ public:
       const std::optional<std::set<VariableName>> & target_vars = std::nullopt);
 
   /**
-   * Project an initial condition given by a polynomial onto selected elements and nodes
-   * for a variable.
+   * Project a function onto a range of elements for a given variable
    *
-   * \param elem_range       Element range to project on (non-nodal)
-   * \param node_range       Node range for nodal variables
-   * \param poly_func        Polynomial function to project (function pointer)
-   * \param poly_func_grad   Gradient of the polynomial function (function pointer)
-   * \param function_parameters Parameters to pass to the polynomial function
-   * \param target_var variable name to project
+   * @warning The current implementation is not ideal. The projection takes place on all local
+   * active elements, ignoring the specified \p elem_range. After the projection, dof values on the
+   * specified \p elem_range are copied over to the current solution vector. This should be fixed
+   * once the project_vector or project_solution API is modified to take a custom element range.
+   *
+   * \param elem_range          Element range to project on
+   * \param func                Function to project
+   * \param func_grad           Gradient of the function
+   * \param params              Parameters to pass to the function
+   * \param target_var          variable name to project
    */
   void projectFunctionOnCustomRange(ConstElemRange & elem_range,
-                                    Number (*poly_func)(const Point &,
-                                                        const libMesh::Parameters &,
-                                                        const std::string &,
-                                                        const std::string &),
-                                    Gradient (*poly_func_grad)(const Point &,
-                                                               const libMesh::Parameters &,
-                                                               const std::string &,
-                                                               const std::string &),
-                                    const libMesh::Parameters & function_parameters,
+                                    Number (*func)(const Point &,
+                                                   const libMesh::Parameters &,
+                                                   const std::string &,
+                                                   const std::string &),
+                                    Gradient (*func_grad)(const Point &,
+                                                          const libMesh::Parameters &,
+                                                          const std::string &,
+                                                          const std::string &),
+                                    const libMesh::Parameters & params,
                                     const VariableName & target_var);
 
   // Materials
