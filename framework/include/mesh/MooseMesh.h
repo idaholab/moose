@@ -793,7 +793,13 @@ public:
   /**
    * Return the name of the boundary given the id.
    */
-  const std::string & getBoundaryName(BoundaryID boundary_id);
+  const std::string & getBoundaryName(const BoundaryID boundary_id) const;
+
+  /**
+   * Return the name of the boundary given the id, if it exists. Otherwise, return
+   * the id as a string.
+   */
+  std::string getBoundaryString(const BoundaryID boundary_id) const;
 
   /**
    * This routine builds a multimap of boundary ids to matching boundary ids across all periodic

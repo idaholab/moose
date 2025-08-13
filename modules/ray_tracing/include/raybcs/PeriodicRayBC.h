@@ -29,6 +29,9 @@ public:
   /// Name of the parameter that stores the PeriodicBoundaries pointer
   static const std::string periodic_boundaries_param;
 
+  /// Get the PeriodicBoundaries object this BC acts on
+  const libMesh::PeriodicBoundaries & getPeriodicBoundaries() const { return _periodic_boundaries; }
+
 private:
   /// The PeriodicBoundaries object
   const libMesh::PeriodicBoundaries & _periodic_boundaries;

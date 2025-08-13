@@ -9,23 +9,23 @@
 
 #include "RayTracingStudy.h"
 
-// Local Includes
 #include "AuxRayKernel.h"
 #include "RayBoundaryConditionBase.h"
 #include "RayKernel.h"
 #include "TraceRay.h"
 #include "TraceRayTools.h"
+#include "PeriodicRayBC.h"
 
-// MOOSE Includes
 #include "AuxiliarySystem.h"
 #include "Assembly.h"
 #include "NonlinearSystemBase.h"
 
-// libMesh Includes
 #include "libmesh/enum_to_string.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel_sync.h"
 #include "libmesh/remote_elem.h"
+#include "libmesh/periodic_boundary.h"
+#include "libmesh/periodic_boundaries.h"
 
 using namespace libMesh;
 
@@ -240,6 +240,9 @@ RayTracingStudy::initialSetup()
   // Check for traceable element types
   traceableMeshChecks();
 
+  // Check for sane periodic boundaries
+  periodicBoundaryChecks();
+
   // Setup for internal sidesets
   internalSidesetSetup();
 
@@ -383,7 +386,6 @@ RayTracingStudy::verifyDependenciesExist(const std::vector<RayTracingObject *> &
 void
 RayTracingStudy::traceableMeshChecks()
 {
-
   for (const auto & elem : *_mesh.getActiveLocalElementRange())
   {
     if (_fe_problem.adaptivity().isOn())
@@ -397,6 +399,113 @@ RayTracingStudy::traceableMeshChecks()
       mooseError("Element type ",
                  Utility::enum_to_string(elem->type()),
                  " is not supported in ray tracing");
+  }
+}
+
+void
+RayTracingStudy::periodicBoundaryChecks()
+{
+  // Collect the PeriodicRayBCs
+  std::vector<const RayBoundaryConditionBase *> rbc_ptrs;
+  getRayBCs(rbc_ptrs, 0);
+  std::vector<const PeriodicRayBC *> prbc_ptrs;
+  for (const auto rbc_ptr : rbc_ptrs)
+    if (const auto prbc_ptr = dynamic_cast<const PeriodicRayBC *>(rbc_ptr))
+      prbc_ptrs.push_back(prbc_ptr);
+  if (prbc_ptrs.empty())
+    return;
+
+  // Collect each of the periodic boundaries
+  std::map<boundary_id_type,
+           std::tuple<const PeriodicRayBC *,
+                      const libMesh::PeriodicBoundaryBase *,
+                      std::unordered_set<dof_id_type>>>
+      boundary_map;
+  for (const auto prbc_ptr : prbc_ptrs)
+  {
+    for (const auto & [bid, pb] : prbc_ptr->getPeriodicBoundaries())
+    {
+      const auto [it, inserted] = boundary_map.emplace(
+          std::piecewise_construct,
+          std::tuple{bid},
+          std::forward_as_tuple(prbc_ptr, pb.get(), std::unordered_set<dof_id_type>()));
+      if (!inserted)
+        prbc_ptr->mooseError("The periodic boundary '",
+                             _mesh.getBoundaryString(bid),
+                             "' has been defined in both ",
+                             prbc_ptr->typeAndName(),
+                             " and ",
+                             std::get<0>(it->second)->typeAndName());
+    }
+  }
+
+  // Because we don't have ghosting setup correctly yet, we need to check if any
+  // of the periodic boundaries are neighbors with distributed mesh. If the
+  // mesh is replicated, we don't need to check this. See #31280.
+  if (comm().size() == 1 || !_mesh.isDistributedMesh())
+    return;
+
+  // Collect all of the nodes that are on each periodic boundary
+  const auto & sideset_map = _mesh.getMesh().get_boundary_info().get_sideset_map();
+  for (const auto & [elem, side_bid_pair] : sideset_map)
+  {
+    const auto [side, bid] = side_bid_pair;
+    if (auto it = boundary_map.find(bid); it != boundary_map.end())
+      for (const auto n : elem->nodes_on_side(side))
+        std::get<2>(it->second).insert(elem->node_ref(n).id());
+  }
+
+  // Distributed meshes have distributed boundary information, so sync
+  for (auto & bid_tuple_pair : boundary_map)
+    comm().set_union(std::get<2>(bid_tuple_pair.second));
+
+  // Check for periodic boundaries that share nodes
+  std::map<std::pair<boundary_id_type, boundary_id_type>,
+           std::pair<const PeriodicRayBC *, const PeriodicRayBC *>>
+      warn_boundaries;
+  for (auto it = boundary_map.begin(); it != boundary_map.end(); ++it)
+  {
+    const auto & [bid, tup] = *it;
+    const auto [prbc_ptr, pb, node_ids] = tup;
+
+    for (auto other_it = std::next(it); other_it != boundary_map.end(); ++other_it)
+    {
+      const auto & [other_bid, other_tup] = *other_it;
+
+      // Don't check against boundaries that are paried together
+      if (pb->pairedboundary == other_bid)
+        continue;
+
+      const auto other_prbc_ptr = std::get<0>(other_tup);
+      const auto & other_node_ids = std::get<2>(other_tup);
+      for (const auto node_id : node_ids)
+        if (other_node_ids.count(node_id))
+        {
+          if (!warn_boundaries.count(std::make_pair(other_bid, bid)))
+            warn_boundaries.emplace(std::make_pair(bid, other_bid),
+                                    std::make_pair(prbc_ptr, other_prbc_ptr));
+          break;
+        }
+    }
+  }
+
+  if (warn_boundaries.size())
+  {
+    std::ostringstream oss;
+    oss << warn_boundaries.size()
+        << " ray tracing periodic boundaries were found to be neighbors:\n\n";
+    for (const auto & [bids_pair, prbc_ptrs_pair] : warn_boundaries)
+    {
+      const auto [bid, paired_bid] = bids_pair;
+      const auto [prbc_ptr, paired_prbc_ptr] = prbc_ptrs_pair;
+      oss << "  '" << _mesh.getBoundaryString(bid) << "' (in " << prbc_ptr->typeAndName()
+          << ") <-> '" << _mesh.getBoundaryString(paired_bid) << "' (in "
+          << paired_prbc_ptr->typeAndName() << ")\n";
+    }
+    oss << "\nThe periodic propagation of rays at points where two or more periodic"
+        << "\nboundaries meet is not fully supported with a distributed mesh."
+        << "\n\nIf you encounter trace failures, you should use a replicated mesh.";
+    mooseWarning(oss.str());
   }
 }
 
