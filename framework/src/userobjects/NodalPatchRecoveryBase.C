@@ -211,14 +211,7 @@ NodalPatchRecoveryBase::sync(const std::optional<std::vector<dof_id_type>> & spe
                             std::vector<AbPair> & ab_pairs)
   {
     for (const auto & elem_id : elem_ids)
-    {
-      if (_Ae.find(elem_id) == _Ae.end())
-        mooseError("Missing entry for elem_id = ", elem_id, " in _Ae.");
-      if (_be.find(elem_id) == _be.end())
-        mooseError("Missing entry for elem_id = ", elem_id, " in _be.");
-
       ab_pairs.emplace_back(libmesh_map_find(_Ae, elem_id), libmesh_map_find(_be, elem_id));
-    }
   };
 
   // Gather answers received from other processors
