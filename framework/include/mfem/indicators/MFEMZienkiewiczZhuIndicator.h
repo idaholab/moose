@@ -16,7 +16,7 @@
 /**
  * Wrapper for the Zienkiewicz-Zhu estimator with L2 projection. See mfem example 6p
  * for more details.
-*/
+ */
 class MFEMZienkiewiczZhuIndicator : public MFEMIndicator
 {
 public:
@@ -27,29 +27,28 @@ public:
 
   /**
    * Override the createEstimator method to use a Zienkiewicz-Zhu estimator.
-  */
+   */
   virtual bool createEstimator() override;
 
 protected:
+  /**
+   * Finite element space for the smoothed flux
+   */
+  std::unique_ptr<mfem::H1_FECollection> _smooth_flux_fec;
 
   /**
-  * Finite element space for the smoothed flux
-  */
-  std::unique_ptr<mfem::H1_FECollection> _smooth_flux_fec;
-  
-  /**
-  * Finite element collection for the smoothed flux
-  */
+   * Finite element collection for the smoothed flux
+   */
   std::unique_ptr<mfem::L2_FECollection> _flux_fec;
 
   /**
-  * Finite element space for the discontinuous flux
-  */
+   * Finite element space for the discontinuous flux
+   */
   std::unique_ptr<mfem::ParFiniteElementSpace> _smooth_flux_fes;
 
   /**
-  * Finite element collection for the discontinuous flux
-  */
+   * Finite element collection for the discontinuous flux
+   */
   std::unique_ptr<mfem::ParFiniteElementSpace> _flux_fes;
 };
 
