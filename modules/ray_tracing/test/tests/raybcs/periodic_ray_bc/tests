@@ -1,5 +1,5 @@
 [Tests]
-  design = 'PeriodicRayBC.md RayBCs/index.md'
+  design = 'PeriodicRayBC.md SetupPeriodicRayBCAction.md RayBCs/index.md'
   issues = '#31025 #31280'
 
   [test]
