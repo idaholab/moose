@@ -3756,11 +3756,8 @@ FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
 {
   const auto & var = getStandardVariable(0, target_var);
   const auto var_num = var.number();
-
-  SystemBase & sys =
-      _aux->hasVariable(target_var)
-          ? static_cast<SystemBase &>(getAuxiliarySystem())
-          : static_cast<SystemBase &>(getNonlinearSystemBase(systemNumForVariable(target_var)));
+  const auto sn = systemNumForVariable(target_var);
+  auto & sys = getSystemBase(sn);
 
   // Let libmesh handle the projection
   System & libmesh_sys = getSystem(target_var);
@@ -3779,32 +3776,10 @@ FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
     dof_map.dof_indices(elem, dof_indices, var_num);
     for (auto dof : dof_indices)
     {
-      if (dof_map.dof_owner(dof) == processor_id())
-        owned_dof_indices.insert(dof);
+      // if (dof_map.dof_owner(dof) == processor_id())
+      owned_dof_indices.insert(dof);
     }
   }
-
-  std::unordered_map<processor_id_type, std::vector<dof_id_type>> push_data;
-
-  for (const auto & elem : elem_range)
-  {
-    dof_map.dof_indices(elem, dof_indices, var_num);
-    for (auto dof : dof_indices)
-    {
-      if (dof_map.dof_owner(dof) == processor_id())
-        owned_dof_indices.insert(dof);
-      else // push the dof to the processor that owns it
-        push_data[dof_map.dof_owner(dof)].push_back(dof);
-    }
-  }
-
-  auto push_receiver = [&](const processor_id_type, const std::vector<dof_id_type> & received_data)
-  {
-    for (const auto & id : received_data)
-      owned_dof_indices.insert(id);
-  };
-
-  Parallel::push_parallel_vector_data(_mesh.comm(), push_data, push_receiver);
 
   std::vector<dof_id_type> owned_dof_indices_vec(owned_dof_indices.begin(),
                                                  owned_dof_indices.end());
