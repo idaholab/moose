@@ -2284,7 +2284,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     if (_verbose_subchannel)
       _console << "Mat assembled" << std::endl;
     LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
-        _prod, *_P_soln, first_node, last_node, _n_channels));
+        _prod, *_P_soln, first_node - 1, last_node - 1, _n_channels));
     LibmeshPetscCall(VecScale(diag_P, (1.0 - relaxation_factor_P)));
     LibmeshPetscCall(VecPointwiseMult(_prod, _prod, diag_P));
     LibmeshPetscCall(VecAXPY(vec_array[field_num], 1.0, _prod));
@@ -2406,7 +2406,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
   /// Populating Crossflow
   LibmeshPetscCall(populateDenseFromVector<libMesh::DenseMatrix<Real>>(
-      sol_Wij, _Wij, first_node, last_node - 1, _n_gaps));
+      sol_Wij, _Wij, first_node, last_node, _n_gaps));
 
   /// Populating Enthalpy
   if (_monolithic_thermal_bool)
