@@ -69,9 +69,8 @@ PolycrystalMatDiffusionBase<T>::validParams()
       "grain_op_vars", "var_name_base", "op_num", "Array of grain order parameter variables");
   params.addParam<bool>(
       "add_grain_op_gradients",
-      false,
-      "Whether grain order parameter gradient contributions are added to Jacobian. Set to false "
-      "unless diffusivity explicitly depends on grain OP gradients.");
+      true,
+      "Whether grain order parameter gradient contributions are added to Jacobian.");
   return params;
 }
 
