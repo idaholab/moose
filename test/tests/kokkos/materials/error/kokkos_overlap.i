@@ -5,58 +5,58 @@
     nx = 10
     ny = 1
   []
-  [./left_domain]
+  [left_domain]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '0.5 1 0'
     block_id = 10
-  [../]
+  []
 []
 
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 2
-  [../]
+  []
 []
 
 [KokkosKernels]
-  [./diff]
+  [diff]
     type = KokkosMatDiffusionTest
     variable = u
     prop_name = 'p'
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 2
-  [../]
-  [./right]
+  []
+  [right]
     type = KokkosDirichletBC
     variable = u
     boundary = right
     value = 3
-  [../]
+  []
 []
 
 [KokkosMaterials]
 
-  [./all]
+  [all]
     type = KokkosGenericConstantMaterial
     prop_names =  'f f_prime p'
     prop_values = '2 2.5     2.468'
-  [../]
+  []
 
-  [./left]
+  [left]
     type = KokkosGenericConstantMaterial
     prop_names =  'f f_prime p'
     prop_values = '1 0.5     1.2345'
-  [../]
+  []
 []
 
 [Executioner]

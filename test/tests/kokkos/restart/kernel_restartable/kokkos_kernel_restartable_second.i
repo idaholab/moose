@@ -19,34 +19,34 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [KokkosKernels]
-  [./diff]
+  [diff]
     type = KokkosRestartDiffusion
     variable = u
-  [../]
-  [./td]
+  []
+  [td]
     type = KokkosTimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = KokkosDirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

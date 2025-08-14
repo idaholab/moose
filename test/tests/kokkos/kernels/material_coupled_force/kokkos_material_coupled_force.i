@@ -10,68 +10,68 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [./v1]
+  [v1]
     initial_condition = 3
-  [../]
+  []
 
-  [./v2]
-  [../]
+  [v2]
+  []
 []
 
 [ICs]
-  [./v2_ic]
+  [v2_ic]
     type = FunctionIC
     variable = v2
     function = v2_func
-  [../]
+  []
 []
 
 [Functions]
-  [./v2_func]
+  [v2_func]
     type = ParsedFunction
     expression = 'x + 2 * y'
-  [../]
+  []
 
-  [./reference]
+  [reference]
     type = ParsedFunction
     expression = '3 * (-1) * 3.5 + (x + 2 * y) * 15 * 1.2'
-  [../]
+  []
 []
 
 [KokkosMaterials]
-  [./mat]
+  [mat]
     type = KokkosGenericConstantMaterial
     prop_names = 'm1 m2'
     prop_values = '-1 15'
-  [../]
+  []
 []
 
 [KokkosKernels]
-  [./reaction]
+  [reaction]
     type = KokkosReaction
     variable = u
-  [../]
+  []
 
-  [./coupled]
+  [coupled]
     type = KokkosMatCoupledForce
     variable = u
     v = 'v1 v2'
     coef = '3.5 1.2'
     material_properties = 'm1 m2'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     function = reference
     variable = u
-  [../]
+  []
 []
 
 [Executioner]

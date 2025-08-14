@@ -8,55 +8,55 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [KokkosKernels]
-  [./diff]
+  [diff]
     type = KokkosMatDiffusionTest
     variable = u
     prop_name = 'some_prop'
-  [../]
+  []
 
-  [./time]
+  [time]
     type = KokkosTimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     boundary = 'left'
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = KokkosDirichletBC
     variable = u
     boundary = 'right'
     value = 2
-  [../]
+  []
 []
 
 [KokkosMaterials]
   # This material couples in a stateful property from StatefulTest
-  [./coupled_mat]
+  [coupled_mat]
     type = KokkosCoupledMaterial
     mat_prop = 'some_prop'
     coupled_mat_prop = 'thermal_conductivity'
     use_old_prop = true
-  [../]
+  []
 
-  [./stateful_mat]
+  [stateful_mat]
     type = KokkosStatefulTest
     prop_names = thermal_conductivity
     prop_values = 1.0
-  [../]
+  []
 []
 
 [Executioner]

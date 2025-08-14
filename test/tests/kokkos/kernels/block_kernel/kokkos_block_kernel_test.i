@@ -4,40 +4,40 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1.0
-  [../]
+  []
 []
 
 [KokkosKernels]
-  [./diff]
+  [diff]
     type = KokkosDiffusion
     variable = u
-  [../]
+  []
 
-  [./body_force]
+  [body_force]
     # Corresponds to BodyForce with function = 'x + y'
     type = KokkosXYBodyForce
     variable = u
     block = 1
     value = 10
-  [../]
+  []
 
-  [./time]
+  [time]
     type = KokkosTimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./right]
+  [right]
     type = KokkosDirichletBC
     variable = u
     boundary = 2
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

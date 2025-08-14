@@ -6,49 +6,49 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./nodal_ode]
-  [../]
+  [u]
+  []
+  [nodal_ode]
+  []
 []
 
 [KokkosKernels]
-  [./diff]
+  [diff]
     type = KokkosCoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = KokkosTimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [KokkosNodalKernels]
-  [./td]
+  [td]
     type = KokkosTimeDerivativeNodalKernel
     variable = nodal_ode
-  [../]
-  [./constant_rate]
+  []
+  [constant_rate]
     type = KokkosConstantRate
     variable = nodal_ode
     rate = 1.0
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = KokkosDirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

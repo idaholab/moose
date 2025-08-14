@@ -12,44 +12,44 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [KokkosKernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = KokkosDiffusion
     variable = u
-  [../]
+  []
 []
 
 [KokkosBCs]
   active = 'left right top'
 
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     boundary = 3
     value = 0.0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = KokkosNeumannBC
     variable = u
     boundary = 1
     value = 2.0
-  [../]
+  []
 
-  [./top]
+  [top]
     type = KokkosVacuumBC
     variable = u
     boundary = 2
     alpha = 5.0
-  [../]
+  []
 []
 
 [Executioner]
