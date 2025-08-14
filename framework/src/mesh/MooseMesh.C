@@ -388,6 +388,7 @@ MooseMesh::freeBndNodes()
     it.second.clear();
 
   _bnd_node_ids.clear();
+  _bnd_node_range.reset();
 }
 
 void
@@ -401,6 +402,7 @@ MooseMesh::freeBndElems()
     it.second.clear();
 
   _bnd_elem_ids.clear();
+  _bnd_elem_range.reset();
 }
 
 bool
