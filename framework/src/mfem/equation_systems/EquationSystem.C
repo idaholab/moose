@@ -325,8 +325,6 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
   FormLinearSystem(_jacobian, trueX, trueRHS);
 }
 
-void CopyVec(const mfem::Vector & x, mfem::Vector & y){ y = x;}
-
 void applyDirchValues(const mfem::Vector &k, mfem::Vector &y, mfem::Array<int> dofs)
 {
   if(dofs.Size() > 0){ //Only apply if there are constrained DOF's
@@ -353,15 +351,18 @@ void applyDirchValues(const mfem::Vector &k, mfem::Vector &y, mfem::Array<int> d
 void
 EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 {
-  CopyVec(x,_trueBlockX);
+  mfem::BlockVector block_x;
+  block_x.Update(*_block_true_offsets);
+  block_x = dynamic_cast<mfem::BlockVector&>(const_cast<mfem::Vector&>(x));
+
   for (int i = 0; i < _trial_var_names.size(); i++)
   {
     auto & trial_var_name = _trial_var_names.at(i);
-    applyDirchValues(*(_var_ess_constraints.at(i)), _trueBlockX.GetBlock(i), _ess_tdof_lists.at(i));
-    _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockX.GetBlock(i)));
+    applyDirchValues(*(_var_ess_constraints.at(i)), block_x.GetBlock(i), _ess_tdof_lists.at(i));
+    _gfuncs->Get(trial_var_name)->Distribute(&(block_x.GetBlock(i)));
   }
 
-  _jacobian->Mult(_trueBlockX, residual);
+  _jacobian->Mult(block_x, residual);
   x.HostRead();
   residual.HostRead();
 }
@@ -476,10 +477,8 @@ EquationSystem::BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, 
 {
   _gfuncs = &gridfunctions;
   _block_true_offsets = &btoffsets;
-  _trueBlockX.Update(*_block_true_offsets);
   _trueBlockRHS.Update(*_block_true_offsets);
   _trueBlockdXdt.Update(*_block_true_offsets);
-  _trueBlockX_Old.Update(*_block_true_offsets);
   BuildBilinearForms();
   BuildMixedBilinearForms();
   BuildLinearForms();
