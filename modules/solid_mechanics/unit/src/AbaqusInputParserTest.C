@@ -14,6 +14,7 @@
 #include <string>
 
 #include "AbaqusInputParser.h"
+#include "AbaqusInputObjects.h"
 #include "DataFileUtils.h"
 
 using namespace Abaqus;
@@ -281,4 +282,96 @@ TEST(AbaqusInputParserTest, FlatFileDetection)
   // Has Part and Step blocks
   EXPECT_NE(find_child<BlockNode>(parser, "part"), nullptr);
   EXPECT_NE(find_child<BlockNode>(parser, "step"), nullptr);
+}
+
+TEST(AbaqusInputParserTest, AssemblyScopedSetsAndIndices)
+{
+  // Build a minimal assembly with an instance and both header- and inline-scoped sets
+  std::istringstream in(
+      "*Part, name=Cube\n"
+      "*Node\n"
+      "1, 0., 0.\n"
+      "2, 1., 0.\n"
+      "*User Element, Type=U1, Coordinates=2, Nodes=1, Variables=1\n"
+      "1\n"
+      "*Element, Type=U1, Elset=CUBE\n"
+      "1, 1\n"
+      "*End Part\n"
+      "*Assembly, name=Assembly\n"
+      "*Instance, name=Cube-1, part=Cube\n"
+      "*End Instance\n"
+      // Header-scoped set using clean integers
+      "*Nset, nset=ALL, instance=Cube-1\n"
+      "1, 2\n"
+      // Inline instance-qualified set
+      "*Nset, nset=INLINE\n"
+      "Cube-1.1, Cube-1.2\n"
+      "*End Assembly\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::AssemblyModel model;
+  model.parse(parser);
+
+  ASSERT_TRUE(model._assembly);
+  ASSERT_TRUE(model._assembly->_instance.has("Cube-1"));
+  const auto & inst = model._assembly->_instance["Cube-1"];
+
+  // Node index resolution: inline vs instance parameter
+  const auto idx_inline = model.getNodeIndex("Cube-1.2");
+  const auto idx_scoped = model.getNodeIndex("2", &inst);
+  EXPECT_EQ(idx_inline, idx_scoped);
+
+  // Element index resolution mirrors node logic
+  const auto eidx_inline = model.getElementIndex("Cube-1.1");
+  const auto eidx_scoped = model.getElementIndex("1", &inst);
+  EXPECT_EQ(eidx_inline, eidx_scoped);
+
+  // Header-scoped set populated
+  ASSERT_TRUE(model._nsets.find("ALL") != model._nsets.end());
+  const auto & all = model._nsets.at("ALL");
+  ASSERT_EQ(all.size(), 2u);
+  EXPECT_NE(std::find(all.begin(), all.end(), model.getNodeIndex("1", &inst)), all.end());
+  EXPECT_NE(std::find(all.begin(), all.end(), model.getNodeIndex("2", &inst)), all.end());
+
+  // Inline-scoped set populated
+  ASSERT_TRUE(model._nsets.find("INLINE") != model._nsets.end());
+  const auto & inline_set = model._nsets.at("INLINE");
+  ASSERT_EQ(inline_set.size(), 2u);
+  EXPECT_NE(std::find(inline_set.begin(), inline_set.end(), model.getNodeIndex("Cube-1.1")),
+            inline_set.end());
+  EXPECT_NE(std::find(inline_set.begin(), inline_set.end(), model.getNodeIndex("Cube-1.2")),
+            inline_set.end());
+}
+
+TEST(AbaqusInputParserTest, AssemblyScopedSetsAmbiguityError)
+{
+  // Both header instance= and inline instance-qualified tokens -> ambiguous
+  std::istringstream in(
+      "*Part, name=Cube\n"
+      "*Node\n"
+      "1, 0., 0.\n"
+      "*End Part\n"
+      "*Assembly, name=Assembly\n"
+      "*Instance, name=Cube-1, part=Cube\n"
+      "*End Instance\n"
+      "*Nset, nset=BAD, instance=Cube-1\n"
+      "Cube-1.1\n"
+      "*End Assembly\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::AssemblyModel model;
+  try
+  {
+    model.parse(parser);
+    FAIL() << "Expected ambiguous instance scoping error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("Ambiguous set token"), std::string::npos) << msg;
+  }
 }
