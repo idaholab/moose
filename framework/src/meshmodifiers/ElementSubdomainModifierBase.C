@@ -563,8 +563,10 @@ ElementSubdomainModifierBase::prepareVariableForReinitialization(const VariableN
       const int pr_idx = _var_name_to_pr_idx[var_name];
       // The patch elements might be different for each variable
       gatherPatchElements(var_name, reinit_strategy);
+
       // Notify the patch recovery user object about the patch elements
       _pr[pr_idx]->sync(_patch_elem_ids[var_name]);
+
       break;
     }
     default:
@@ -1031,19 +1033,39 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
     }
     case ReinitStrategy::POLYNOMIAL_NEARBY:
     {
-      // Before the search, we need to gather all candidate elements
-      _mesh.comm().allgather(candidate_elem_ids);
-      // Construct the KD-tree for searching nearby elements
-      auto kd_tree = constructKDTreeFromElements(candidate_elem_ids);
-      // Loop over all reinitialized elements and find nearby elements from the KD-tree
+      std::vector<Point> kd_points;
+      std::vector<dof_id_type> global_candidate_elem_ids;
+
+      if (_mesh.isDistributedMesh())
+      {
+        std::vector<std::pair<Point, dof_id_type>> pts_ids(candidate_elem_ids.size());
+        for (std::size_t i = 0; i < candidate_elem_ids.size(); ++i)
+          pts_ids[i] = {_mesh.elemPtr(candidate_elem_ids[i])->vertex_average(),
+                        candidate_elem_ids[i]};
+        _mesh.comm().allgather(pts_ids);
+        for (const auto & [pt, id] : pts_ids)
+        {
+          kd_points.push_back(pt);
+          global_candidate_elem_ids.push_back(id);
+        }
+      }
+      else
+      {
+        _mesh.comm().allgather(candidate_elem_ids);
+        global_candidate_elem_ids = candidate_elem_ids;
+        for (const auto & id : candidate_elem_ids)
+          kd_points.push_back(_mesh.elemPtr(id)->vertex_average());
+      }
+
+      const auto kd_tree = std::make_unique<KDTree>(kd_points, _leaf_max_size);
+
       std::vector<nanoflann::ResultItem<std::size_t, Real>> query_result;
       for (const auto & elem_id : _reinitialized_elems)
       {
-        const Elem * elem = _mesh.elemPtr(elem_id);
-        const Point & centroid = elem->vertex_average();
+        const Point & centroid = _mesh.elemPtr(elem_id)->vertex_average();
         kd_tree->radiusSearch(centroid, _nearby_distance_threshold, query_result);
         for (const auto & [qid, dist] : query_result)
-          patch_elems.push_back(candidate_elem_ids[qid]);
+          patch_elems.push_back(global_candidate_elem_ids[qid]);
       }
       break;
     }
@@ -1059,21 +1081,6 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
   // Remove duplicates from the patch elements (espcially important for POLYNOMIAL_NEARBY)
   std::sort(patch_elems.begin(), patch_elems.end());
   patch_elems.erase(std::unique(patch_elems.begin(), patch_elems.end()), patch_elems.end());
-}
-
-std::unique_ptr<KDTree>
-ElementSubdomainModifierBase::constructKDTreeFromElements(const std::vector<dof_id_type> & elems)
-{
-  _kd_tree_points.resize(elems.size());
-
-  for (auto i : index_range(elems))
-  {
-    const Elem * elem = _mesh.elemPtr(elems[i]);
-    _kd_tree_points[i] = elem->vertex_average();
-  }
-
-  // Create the KD-tree with the centroids of the elements
-  return std::make_unique<KDTree>(_kd_tree_points, _leaf_max_size);
 }
 
 void

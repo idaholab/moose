@@ -102,4 +102,10 @@ private:
   /// so only a single set of coefficients is cached rather than a full map.
   mutable std::vector<dof_id_type> _cached_elem_ids;
   mutable RealEigenVector _cached_coef;
+
+  /// @brief Whether the mesh is distributed
+  bool _distributed_mesh;
+
+  /// @brief The processor IDs vector in the running
+  std::vector<int> _proc_ids;
 };
