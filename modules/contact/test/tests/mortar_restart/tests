@@ -10,13 +10,14 @@
                   'contact action for mortar applications'
     valgrind = 'heavy'
     capabilities = 'method!=dbg'
+    recover = false # output on final
   []
   [frictional_bouncing_block_action_restart_2]
     type = 'Exodiff'
     input = 'frictional_bouncing_block_action_restart_2.i'
     exodiff = 'frictional_bouncing_block_action_restart_2_out.e'
     recover = false
-    custom_cmp = frictional_bouncing_block_action_restart_2.cmp
+    custom_cmp = frictional_bouncing_block_action_restart_1.cmp
     requirement = 'The system shall be able to restart a mortar mechanical contact simulation via '
                   'the action without generating additional lower dimensional subdomains which may '
                   'be unused'
