@@ -50,7 +50,8 @@ MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & param
     _transition_subdomain_boundary(getParam<BoundaryName>("transition_subdomain_boundary")),
     _transition_subdomain(getParam<SubdomainName>("transition_subdomain")),
     _closed_subdomain(getParam<SubdomainName>("closed_subdomain")),
-    _subdomain_label(getMFEMProblem().mesh().getMFEMParMesh().attributes.Max() + 1)
+    _subdomain_label(getMFEMProblem().mesh().getMFEMParMesh().attributes.Max() + 1),
+    _cut_normal(3)
 {
 }
 
@@ -67,18 +68,32 @@ MFEMCutTransitionSubMesh::buildSubMesh()
 void
 MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 {
-  /// First create a plane based on the first boundary element found on the cut
+  int mpi_comm_rank = 0;
+  int mpi_comm_size = 1;
+  MPI_Comm_rank(getMFEMProblem().mesh().getMFEMParMesh().GetComm(), &mpi_comm_rank);
+  MPI_Comm_size(getMFEMProblem().mesh().getMFEMParMesh().GetComm(), &mpi_comm_size);
+
+  /// First determine face normal based on the first boundary element found on the cut
   /// to use when determining orientation relative to the cut
-  Plane3D plane;
   const mfem::Array<int> & parent_cut_element_id_map = _cut_submesh->GetParentElementIDMap();
+  int rank_with_submesh = -1;
   if (parent_cut_element_id_map.Size() > 0)
   {
     int reference_face = parent_cut_element_id_map[0];
-    plane.make3DPlane(parent_mesh, parent_mesh.GetBdrElementFaceIndex(reference_face));
+    _cut_normal = findFaceNormal(parent_mesh, parent_mesh.GetBdrElementFaceIndex(reference_face));
+    rank_with_submesh = mpi_comm_rank;
   }
-  mfem::Vector orientation({0., 1., 0.});
-  // Plane may not exist on all processors!!
-
+  MPI_Allreduce(MPI_IN_PLACE,
+                &rank_with_submesh,
+                1,
+                MPI_INT,
+                MPI_MAX,
+                getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  MPI_Bcast(_cut_normal,
+            _cut_normal.Size(),
+            MPI_DOUBLE,
+            rank_with_submesh,
+            getMFEMProblem().mesh().getMFEMParMesh().GetComm());
   /// Iterate over all vertices on cut, find elements with those vertices,
   /// and declare them transition elements if they are on the +ve side of the cut
   mfem::Array<int> transition_els;
@@ -96,17 +111,13 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
     for (int i = 0; i < ne; i++)
     {
       const int el_adj_to_cut = els_adj_to_cut[i];
-      mfem::Vector el_center(3);
-      parent_mesh.GetElementCenter(el_adj_to_cut, el_center);
       if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) &&
-          plane.side(el_center) == 1)
+          sideOfCut(el_adj_to_cut, cut_vert, parent_mesh) == 1)
         transition_els.Append(el_adj_to_cut);
     }
   }
 
   // share cut verts coords or global ids across all procs
-  int mpi_comm_size = 1;
-  MPI_Comm_size(getMFEMProblem().mesh().getMFEMParMesh().GetComm(), &mpi_comm_size);
   int n_cut_vertices = global_cut_vert_ids.size();
   std::vector<int> cut_vert_sizes(mpi_comm_size, 0);
   MPI_Allgather(&n_cut_vertices,
@@ -159,17 +170,8 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
           for (int i = 0; i < ne; i++)
           {
             const int el_adj_to_cut = els_adj_to_cut[i];
-            mfem::Vector el_center(3);
-            parent_mesh.GetElementCenter(el_adj_to_cut, el_center);
-            const int sdim = parent_mesh.SpaceDimension();
-            mfem::Vector coord(parent_mesh.GetVertex(cut_vert), sdim);
-            mfem::Vector relative_center(sdim);
-            for (int j = 0; j < sdim; j++)
-            {
-              relative_center[j] = el_center[j] - coord[j];
-            }
-            double check = orientation * relative_center;
-            if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) && check > 0)
+            if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) &&
+                sideOfCut(el_adj_to_cut, cut_vert, parent_mesh) == 1)
               transition_els.Append(el_adj_to_cut);
           }
         }
@@ -182,6 +184,54 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
   transition_els.Unique();
 
   setAttributes(parent_mesh, transition_els);
+}
+
+mfem::Vector
+MFEMCutTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int & face)
+{
+  MFEM_ASSERT(mesh->SpatialDimension() == 3,
+              "MFEMCutTransitionSubMesh only works in 3-dimensional meshes!");
+  mfem::Vector normal;
+  mfem::Array<int> face_verts;
+  std::vector<mfem::Vector> v;
+  mesh.GetFaceVertices(face, face_verts);
+
+  /// First we get the coordinates of 3 vertices on the face
+  for (auto vtx : face_verts)
+  {
+    mfem::Vector vtx_coords(3);
+    for (int j = 0; j < 3; ++j)
+      vtx_coords[j] = mesh.GetVertex(vtx)[j];
+    v.push_back(vtx_coords);
+  }
+
+  /// Now we find the unit vector normal to the face
+  v[0] -= v[1];
+  v[1] -= v[2];
+  v[0].cross3D(v[1], normal);
+  normal /= normal.Norml2();
+  return normal;
+}
+
+int
+MFEMCutTransitionSubMesh::sideOfCut(const int & el,
+                                    const int & el_vertex_on_cut,
+                                    mfem::ParMesh & parent_mesh)
+{
+  const int sdim = parent_mesh.SpaceDimension();
+  mfem::Vector el_center(3);
+  parent_mesh.GetElementCenter(el, el_center);
+  mfem::Vector vertex_coords(parent_mesh.GetVertex(el_vertex_on_cut), sdim);
+  mfem::Vector relative_center(sdim);
+  for (int j = 0; j < sdim; j++)
+  {
+    relative_center[j] = el_center[j] - vertex_coords[j];
+  }
+  double side = _cut_normal * relative_center;
+  if (side > 0)
+    return 1;
+  else
+    return -1;
 }
 
 void
@@ -259,52 +309,6 @@ MFEMCutTransitionSubMesh::isInDomain(const int & element,
       is_in_domain = true;
   }
   return is_in_domain;
-}
-
-/// 3D Plane constructor and methods
-
-Plane3D::Plane3D() : normal(3), d(0) {}
-
-void
-Plane3D::make3DPlane(const mfem::ParMesh & mesh, const int & face)
-{
-  MFEM_ASSERT(pm->Dimension() == 3, "Plane3D only works in 3-dimensional meshes!");
-
-  mfem::Array<int> face_verts;
-  std::vector<mfem::Vector> v;
-  mesh.GetFaceVertices(face, face_verts);
-
-  /// First we get the coordinates of 3 vertices on the face
-  for (auto vtx : face_verts)
-  {
-    mfem::Vector vtx_coords(3);
-    for (int j = 0; j < 3; ++j)
-      vtx_coords[j] = mesh.GetVertex(vtx)[j];
-    v.push_back(vtx_coords);
-  }
-
-  /// Now we find the unit vector normal to the face
-  v[0] -= v[1];
-  v[1] -= v[2];
-  v[0].cross3D(v[1], normal);
-  normal /= normal.Norml2();
-
-  /// Finally, we find d:
-  d = normal * v[2];
-}
-
-int
-Plane3D::side(const mfem::Vector & v)
-{
-  double tol = 1e-8;
-  double val = normal * v - d;
-  // double val = v[1];
-  if (val > tol)
-    return 1;
-  else if (val < -tol)
-    return -1;
-  else
-    return 0;
 }
 
 #endif

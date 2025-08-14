@@ -37,6 +37,12 @@ protected:
   // domains.
   bool isInDomain(const int & el, const mfem::Array<int> & subdomains, const mfem::ParMesh & mesh);
 
+  // Finds the normal vector of a face in the mesh from its vertices
+  mfem::Vector findFaceNormal(const mfem::ParMesh & mesh, const int & face);
+
+  // Checks whether an element lies on the positive or negative side of the cut plane
+  int sideOfCut(const int & el, const int & el_vertex_on_cut, mfem::ParMesh & mesh);
+
   const BoundaryName & _cut_boundary;
   const int _cut_bdr_attribute;
   std::shared_ptr<mfem::ParSubMesh> _cut_submesh{nullptr};
@@ -44,23 +50,7 @@ protected:
   const SubdomainName & _transition_subdomain;  
   const SubdomainName & _closed_subdomain;    
   int _subdomain_label;
-};
-
-class Plane3D
-{
-public:
-  Plane3D();
-
-  // Constructs a mathematical 3D plane from a mesh face
-  void make3DPlane(const mfem::ParMesh & mesh, const int & face);
-
-  // Calculates on which side of the infinite 3D plane a point is.
-  // Returns 1, -1, or 0, the latter meaning the point is on the plane
-  int side(const mfem::Vector & v);
-
-private:
-  mfem::Vector normal;
-  double d;
+  mfem::Vector _cut_normal;
 };
 
 #endif
