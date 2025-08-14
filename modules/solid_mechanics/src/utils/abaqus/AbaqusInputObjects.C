@@ -351,22 +351,46 @@ Part::processSetHelper(const OptionNode & option, Instance * instance)
     }
     else
     {
-      // TODO: here we need to to implement instance.node_id syntax!
-      // TODO: we'll need the root model here!!! Assembly->Instance->Part
+      // Support inline entries that can be:
+      // - another set name (already built in set_map)
+      // - a plain numeric id (interpreted in the provided instance or this Part)
+      // - an instance-qualified id: "<instance>.<id>" (requires header instance or single instance)
+
       for (const auto i : index_range(data))
       {
-        // check for existing set first
-        const auto it = set_map.find(data[i]);
+        const auto & atom = data[i];
+
+        // 1) Referencing an existing set by name
+        const auto it = set_map.find(atom);
         if (it != set_map.end())
         {
-          // insert existing set
           unique_items.insert(it->second.begin(), it->second.end());
+          continue;
         }
-        else
+
+        // 2) Instance-qualified id: "instanceName.id"
+        std::vector<std::string> parts;
+        MooseUtils::tokenize(atom, parts, 1, ".");
+        if (parts.size() == 2)
         {
-          const auto item = MooseUtils::convert<AbaqusID>(data[i]);
-          unique_items.insert(id_to_index.at(item) + offset);
+          // Under current single-instance support, resolve against the provided instance.
+          if (!instance)
+            mooseError("Instance-qualified entry '",
+                       atom,
+                       "' requires 'instance=' on the option header (single-instance limitation).");
+
+          const auto id = MooseUtils::convert<AbaqusID>(parts[1]);
+          const auto & local_map =
+              is_nodal ? instance->_part._node_id_to_index : instance->_part._element_id_to_index;
+          const auto inst_offset = is_nodal ? instance->_local_to_global_node_index_offset
+                                            : instance->_local_to_global_element_index_offset;
+          unique_items.insert(local_map.at(id) + inst_offset);
+          continue;
         }
+
+        // 3) Plain numeric id in the current scope
+        const auto item = MooseUtils::convert<AbaqusID>(atom);
+        unique_items.insert(id_to_index.at(item) + offset);
       }
     }
   }
@@ -416,13 +440,25 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
       // nodes this line applies to (either a nset or a single node)
       const std::vector<Index> * node_set_ptr;
       std::vector<Index> single_node;
+
       if (_model._nsets.find(data[0]) != _model._nsets.end())
         node_set_ptr = &_model._nsets.at(data[0]);
       else
       {
-        // TODO: when we redesign _node_id_to_index as a map of vectors, well simply copy into a
-        // vector. alternatively we iterate over all parts...
-        single_node = {_model.getNodeIndex(data[0])};
+        // If the option is instance-scoped, resolve the single node within that instance
+        const Instance * scope_instance = nullptr;
+        if (option._header.has("instance"))
+        {
+          const auto inst_name = option._header.get<std::string>("instance");
+          const auto * asmb = dynamic_cast<const AssemblyModel *>(&_model);
+          if (!asmb || !asmb->_assembly)
+            mooseError("*Boundary with instance= requires an Assembly context.");
+          if (!asmb->_assembly->_instance.has(inst_name))
+            mooseError("Instance '", inst_name, "' not found for *Boundary instance=");
+          scope_instance = &asmb->_assembly->_instance[inst_name];
+        }
+
+        single_node = {_model.getNodeIndex(data[0], scope_instance)};
         node_set_ptr = &single_node;
       }
 
@@ -726,14 +762,18 @@ FlatModel::parse(const BlockNode & root)
 }
 
 Index
-FlatModel::getNodeIndex(const std::string & key) const
+FlatModel::getNodeIndex(const std::string & key, const Instance * instance) const
 {
+  if (instance)
+    mooseError("Instance-scoped lookup is not supported in FlatModel.");
   return _model._node_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
 }
 
 Index
-FlatModel::getElementIndex(const std::string & key) const
+FlatModel::getElementIndex(const std::string & key, const Instance * instance) const
 {
+  if (instance)
+    mooseError("Instance-scoped lookup is not supported in FlatModel.");
   return _model._element_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
 }
 
@@ -772,16 +812,67 @@ AssemblyModel::parse(const BlockNode & root)
 }
 
 Index
-AssemblyModel::getNodeIndex(const std::string & key) const
+AssemblyModel::getNodeIndex(const std::string & key, const Instance * instance) const
 {
-  // deal with instance. prefix
+  // If caller provided an instance, enforce clean integer and resolve within it
+  if (instance)
+  {
+    std::vector<std::string> parts;
+    MooseUtils::tokenize(key, parts, 1, ".");
+    if (parts.size() != 1)
+      mooseError("Instance-scoped node lookup expects a clean integer id but got '", key, "'.");
+    const auto node_id = MooseUtils::convert<AbaqusID>(key);
+    const auto local_index = instance->_part._node_id_to_index.at(node_id);
+    return local_index + instance->_local_to_global_node_index_offset;
+  }
+
+  // Otherwise support "instanceName.nodeId" or plain numeric ids
+  std::vector<std::string> parts;
+  MooseUtils::tokenize(key, parts, 1, ".");
+  if (parts.size() == 2)
+  {
+    const auto & instance_name = parts[0];
+    const auto node_id = MooseUtils::convert<AbaqusID>(parts[1]);
+    if (!_assembly)
+      mooseError("Node reference '", key, "' requires an Assembly but none was parsed.");
+    if (!_assembly->_instance.has(instance_name))
+      mooseError(
+          "Instance '", instance_name, "' not found while resolving node '", key, "'.");
+    const auto & inst = _assembly->_instance[instance_name];
+    const auto local_index = inst._part._node_id_to_index.at(node_id);
+    return local_index + inst._local_to_global_node_index_offset;
+  }
   return _model._node_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
 }
 
 Index
-AssemblyModel::getElementIndex(const std::string & key) const
+AssemblyModel::getElementIndex(const std::string & key, const Instance * instance) const
 {
-  // deal with instance. prefix
+  if (instance)
+  {
+    std::vector<std::string> parts;
+    MooseUtils::tokenize(key, parts, 1, ".");
+    if (parts.size() != 1)
+      mooseError("Instance-scoped element lookup expects a clean integer id but got '", key, "'.");
+    const auto elem_id = MooseUtils::convert<AbaqusID>(key);
+    const auto local_index = instance->_part._element_id_to_index.at(elem_id);
+    return local_index + instance->_local_to_global_element_index_offset;
+  }
+
+  std::vector<std::string> parts;
+  MooseUtils::tokenize(key, parts, 1, ".");
+  if (parts.size() == 2)
+  {
+    const auto & instance_name = parts[0];
+    const auto elem_id = MooseUtils::convert<AbaqusID>(parts[1]);
+    if (!_assembly)
+      mooseError("Element reference '", key, "' requires an Assembly but none was parsed.");
+    if (!_assembly->_instance.has(instance_name))
+      mooseError("Instance '", instance_name, "' not found while resolving element '", key, "'.");
+    const auto & inst = _assembly->_instance[instance_name];
+    const auto local_index = inst._part._element_id_to_index.at(elem_id);
+    return local_index + inst._local_to_global_element_index_offset;
+  }
   return _model._element_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
 }
 

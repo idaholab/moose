@@ -266,8 +266,9 @@ struct Model : public Part, public Step
 
   virtual void parse(const BlockNode & root) = 0;
 
-  virtual Index getNodeIndex(const std::string & key) const = 0;
-  virtual Index getElementIndex(const std::string & key) const = 0;
+  virtual Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const = 0;
+  virtual Index getElementIndex(const std::string & key,
+                                const Instance * instance = nullptr) const = 0;
 
   bool optionFunc(const std::string & key, const OptionNode & option);
   bool blockFunc(const std::string & key, const BlockNode & block);
@@ -290,8 +291,9 @@ struct FlatModel : public Model
   FlatModel() = default;
   virtual void parse(const BlockNode & root);
 
-  virtual Index getNodeIndex(const std::string & key) const;
-  virtual Index getElementIndex(const std::string & key) const;
+  virtual Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const;
+  virtual Index getElementIndex(const std::string & key,
+                                const Instance * instance = nullptr) const;
 };
 
 /**
@@ -308,8 +310,9 @@ struct AssemblyModel : public Model
   /// Assemblies
   std::unique_ptr<Assembly> _assembly;
 
-  virtual Index getNodeIndex(const std::string & key) const;
-  virtual Index getElementIndex(const std::string & key) const;
+  virtual Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const;
+  virtual Index getElementIndex(const std::string & key,
+                                const Instance * instance = nullptr) const;
 };
 
 /**
