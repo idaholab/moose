@@ -1,21 +1,18 @@
 COORDINATES absolute 1.e-6    # min separation not calculated
 
-TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:            5.25 @ t22
+TIME STEPS relative 1.e-6 floor 0.0     # min:             5.5 @ t1 max:             5.5 @ t1
 
-GLOBAL VARIABLES relative 1.0e-4 floor 1e-4
-	contact         # min:               0 @ t1	max:              11 @ t22
-	cumulative_li   # min:               0 @ t1	max:              48 @ t22
-	cumulative_nli  # min:               0 @ t1	max:              30 @ t22
-	num_l           # min:               0 @ t1	max:              28 @ t22
-	num_nl          # min:               0 @ t1	max:              10 @ t22
+GLOBAL VARIABLES relative 1e-4 floor 1e-4
+	contact              # min:              11 @ t1	max:              11 @ t1
+	num_l    relative .3 # min:              20 @ t1	max:              20 @ t1
+	num_nl               # min:               6 @ t1	max:               6 @ t1
 
-NODAL VARIABLES relative 1.0e-4 floor 1e-4
-	disp_x                    # min:               0 @ t1,n1	max:      0.10514107 @ t22,n158
-	disp_y                    # min:               0 @ t1,n1	max:            0.21 @ t1,n119
-	frictional_normal_lm      # min:               0 @ t1,n1	max:       16.243892 @ t22,n140
-	frictional_tangential_lm  # min:               0 @ t1,n1	max:       6.4975567 @ t22,n140
+NODAL VARIABLES relative 1e-4 floor 1e-4
+	disp_x                    # min:               0 @ t1,n51	max:      0.11163823 @ t1,n157
+	disp_y                    # min:               0 @ t1,n51	max:     0.021286893 @ t1,n119
+	frictional_normal_lm      # min:               0 @ t1,n1	max:       51.706862 @ t1,n140
+	frictional_tangential_lm  # min:               0 @ t1,n1	max:       20.630442 @ t1,n140
 
-ELEMENT VARIABLES relative 1.0e-4 floor 1e-4
-	stress_xx  # min:               0 @ t1,b1,e1	max:       5.8237658 @ t22,b1,e34
-	stress_yy  # min:               0 @ t1,b1,e1	max:       11.979097 @ t22,b2,e500
-
+ELEMENT VARIABLES relative 1e-4 floor 1e-4
+	stress_xx  # min:               0 @ t1,b3,e591	max:       15.932325 @ t1,b1,e34
+	stress_yy  # min:               0 @ t1,b3,e591	max:       38.286962 @ t1,b2,e500
