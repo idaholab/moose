@@ -29,6 +29,10 @@ as well. However, to enable it one needs to compile MOOSE with the C++ APIs of
 
 - [enable_pytorch.md]
 
+## Python Utilities
+
+- [StochasticControl.md]
+
 ## Objects, Actions, and Syntax
 
 The following is a complete list of all objects available in the stochastic tools module.
