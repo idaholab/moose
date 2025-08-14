@@ -153,14 +153,18 @@ struct Part
 
   bool optionFunc(const std::string & key, const OptionNode & option);
 
-  void processNodeSet(const OptionNode & option, Instance * instance = nullptr);
-  void processElementSet(const OptionNode & option, Instance * instance = nullptr);
+  void processNodeSet(const OptionNode & option,
+                      Instance * instance = nullptr,
+                      const AssemblyModel * asmb = nullptr);
+  void processElementSet(const OptionNode & option,
+                         Instance * instance = nullptr,
+                         const AssemblyModel * asmb = nullptr);
 
   const std::vector<std::size_t> & getNodeSet(const std::string & nset) const;
   const std::vector<std::size_t> & getElementSet(const std::string & elset) const;
 
   template <bool is_nodal>
-  void processSetHelper(const OptionNode & option, Instance * instance);
+  void processSetHelper(const OptionNode & option, Instance * instance, const AssemblyModel * asmb);
 
   ObjectStore<UserElement> _element_definition;
 
@@ -266,7 +270,8 @@ struct Model : public Part, public Step
 
   virtual void parse(const BlockNode & root) = 0;
 
-  virtual Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const = 0;
+  virtual Index getNodeIndex(const std::string & key,
+                             const Instance * instance = nullptr) const = 0;
   virtual Index getElementIndex(const std::string & key,
                                 const Instance * instance = nullptr) const = 0;
 
@@ -292,8 +297,7 @@ struct FlatModel : public Model
   virtual void parse(const BlockNode & root);
 
   virtual Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const;
-  virtual Index getElementIndex(const std::string & key,
-                                const Instance * instance = nullptr) const;
+  virtual Index getElementIndex(const std::string & key, const Instance * instance = nullptr) const;
 };
 
 /**
@@ -311,8 +315,7 @@ struct AssemblyModel : public Model
   std::unique_ptr<Assembly> _assembly;
 
   virtual Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const;
-  virtual Index getElementIndex(const std::string & key,
-                                const Instance * instance = nullptr) const;
+  virtual Index getElementIndex(const std::string & key, const Instance * instance = nullptr) const;
 };
 
 /**

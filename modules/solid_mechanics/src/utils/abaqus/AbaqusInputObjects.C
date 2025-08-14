@@ -221,9 +221,9 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
   }
 
   else if (key == "elset")
-    processElementSet(option);
+    processElementSet(option, nullptr, nullptr);
   else if (key == "nset")
-    processNodeSet(option);
+    processNodeSet(option, nullptr, nullptr);
 
   // UEL properties
   else if (key == "uel property")
@@ -268,7 +268,7 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
 }
 
 void
-Part::processNodeSet(const OptionNode & option, Instance * instance)
+Part::processNodeSet(const OptionNode & option, Instance * instance, const AssemblyModel * asmb)
 {
   const auto & map = option._header;
   const Index offset = instance ? instance->_local_to_global_node_index_offset : 0;
@@ -293,18 +293,18 @@ Part::processNodeSet(const OptionNode & option, Instance * instance)
   }
   else
     // data lines are only present if elset parameter is _not_ specified
-    processSetHelper<true>(option, instance);
+    processSetHelper<true>(option, instance, asmb);
 }
 
 void
-Part::processElementSet(const OptionNode & option, Instance * instance)
+Part::processElementSet(const OptionNode & option, Instance * instance, const AssemblyModel * asmb)
 {
-  processSetHelper<false>(option, instance);
+  processSetHelper<false>(option, instance, asmb);
 }
 
 template <bool is_nodal>
 void
-Part::processSetHelper(const OptionNode & option, Instance * instance)
+Part::processSetHelper(const OptionNode & option, Instance * instance, const AssemblyModel * asmb)
 {
   const auto & index_host = instance ? instance->_part : *this;
   const auto & id_to_index =
@@ -373,17 +373,25 @@ Part::processSetHelper(const OptionNode & option, Instance * instance)
         MooseUtils::tokenize(atom, parts, 1, ".");
         if (parts.size() == 2)
         {
-          // Under current single-instance support, resolve against the provided instance.
-          if (!instance)
-            mooseError("Instance-qualified entry '",
+          // Either inline instance OR header instance (mutually exclusive)
+          if (instance)
+            mooseError("Ambiguous set token '",
                        atom,
-                       "' requires 'instance=' on the option header (single-instance limitation).");
+                       "': both inline instance and header instance are provided.");
 
+          if (!asmb || !asmb->_assembly)
+            mooseError("Instance-qualified entry '", atom, "' requires Assembly context.");
+
+          const auto & inst_name = parts[0];
           const auto id = MooseUtils::convert<AbaqusID>(parts[1]);
+          if (!asmb->_assembly->_instance.has(inst_name))
+            mooseError("Instance '", inst_name, "' not found while resolving '", atom, "'.");
+
+          const auto & inst = asmb->_assembly->_instance[inst_name];
           const auto & local_map =
-              is_nodal ? instance->_part._node_id_to_index : instance->_part._element_id_to_index;
-          const auto inst_offset = is_nodal ? instance->_local_to_global_node_index_offset
-                                            : instance->_local_to_global_element_index_offset;
+              is_nodal ? inst._part._node_id_to_index : inst._part._element_id_to_index;
+          const auto inst_offset = is_nodal ? inst._local_to_global_node_index_offset
+                                            : inst._local_to_global_element_index_offset;
           unique_items.insert(local_map.at(id) + inst_offset);
           continue;
         }
@@ -641,13 +649,13 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
       const auto & instance_name = option._header.get<std::string>("instance", "");
       if (instance_name.empty())
       {
-        model.processElementSet(option); // What do we do here????? Iterate over all instances?
+        model.processElementSet(option, nullptr, &model); // model-level set
       }
       else
       {
         if (!_instance.has(instance_name))
           mooseError("Instance '", instance_name, "' not found in elset declaration.");
-        model.processElementSet(option, &_instance[instance_name]);
+        model.processElementSet(option, &_instance[instance_name], &model);
       }
     }
 
@@ -656,13 +664,13 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
       const auto & instance_name = option._header.get<std::string>("instance", "");
       if (instance_name.empty())
       {
-        model.processNodeSet(option); // What do we do here????? Iterate over all instances?
+        model.processNodeSet(option, nullptr, &model);
       }
       else
       {
         if (!_instance.has(instance_name))
           mooseError("Instance '", instance_name, "' not found in nset declaration.");
-        model.processNodeSet(option, &_instance[instance_name]);
+        model.processNodeSet(option, &_instance[instance_name], &model);
       }
     }
     else
@@ -836,8 +844,7 @@ AssemblyModel::getNodeIndex(const std::string & key, const Instance * instance) 
     if (!_assembly)
       mooseError("Node reference '", key, "' requires an Assembly but none was parsed.");
     if (!_assembly->_instance.has(instance_name))
-      mooseError(
-          "Instance '", instance_name, "' not found while resolving node '", key, "'.");
+      mooseError("Instance '", instance_name, "' not found while resolving node '", key, "'.");
     const auto & inst = _assembly->_instance[instance_name];
     const auto local_index = inst._part._node_id_to_index.at(node_id);
     return local_index + inst._local_to_global_node_index_offset;
