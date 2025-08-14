@@ -39,12 +39,9 @@
   volumetric_locking_correction = true
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = elastic_thermal_patch_rz_test.e
+  coord_type = RZ
 []
 
 [Functions]

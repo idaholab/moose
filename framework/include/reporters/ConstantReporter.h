@@ -23,10 +23,14 @@ public:
 protected:
   /// This will add another type of reporter to the params
   template <typename T>
-  static InputParameters addReporterTypeParams(const std::string & prefix, bool add_vector = true);
+  static InputParameters addReporterTypeParams(const std::string & prefix,
+                                               bool add_vector = true,
+                                               bool multiple_entries = true);
 
   ///@{
   /// Helper for declaring constant reporter values
+  template <typename T>
+  T * declareConstantReporterValue(const std::string & prefix);
   template <typename T>
   std::vector<T *> declareConstantReporterValues(const std::string & prefix);
   template <typename T>
@@ -39,9 +43,19 @@ protected:
 
 template <typename T>
 InputParameters
-ConstantReporter::addReporterTypeParams(const std::string & prefix, bool add_vector)
+ConstantReporter::addReporterTypeParams(const std::string & prefix,
+                                        bool add_vector,
+                                        bool multiple_entries)
 {
   InputParameters params = emptyInputParameters();
+
+  if (!multiple_entries)
+  {
+    mooseAssert(!add_vector, "Should be creating vector of singular entry.");
+    params.addParam<ReporterValueName>(prefix + "_name", "Name of " + prefix + " value.");
+    params.addParam<T>(prefix + "_value", "Value of " + prefix + ".");
+    return params;
+  }
 
   params.addParam<std::vector<ReporterValueName>>(prefix + "_names",
                                                   "Names for each " + prefix + " value.");
@@ -61,6 +75,25 @@ ConstantReporter::addReporterTypeParams(const std::string & prefix, bool add_vec
   }
 
   return params;
+}
+
+template <typename T>
+T *
+ConstantReporter::declareConstantReporterValue(const std::string & prefix)
+{
+  std::string names_param(prefix + "_name");
+  std::string values_param(prefix + "_value");
+  if (isParamValid(names_param) != isParamValid(values_param))
+    paramError((isParamValid(names_param) ? names_param : values_param),
+               "'",
+               names_param,
+               "' and '",
+               values_param,
+               "' must be set together.");
+  else if (isParamValid(names_param))
+    return &declareValue<T>(names_param, getParam<T>(values_param));
+
+  return nullptr;
 }
 
 template <typename T>

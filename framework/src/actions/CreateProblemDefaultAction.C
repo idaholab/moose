@@ -68,6 +68,11 @@ CreateProblemDefaultAction::act()
         type = "FEProblem";
       auto params = _factory.getValidParams(type);
 
+      // apply global parameters
+      auto & builder = _app.builder();
+      if (builder.root())
+        builder.extractParams("Problem", params);
+
       // apply common parameters of the object held by CreateProblemAction to honor user inputs in
       // [Problem]
       auto p = _awh.getActionByTask<CreateProblemAction>("create_problem");

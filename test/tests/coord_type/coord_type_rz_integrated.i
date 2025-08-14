@@ -6,11 +6,11 @@
   ymax = 1
   dim = 2
   allow_renumbering = false
+  coord_type = RZ
 []
 
 [Problem]
   type = FEProblem
-  coord_type = RZ
 []
 
 [Preconditioning]

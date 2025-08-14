@@ -19,5 +19,11 @@ if __name__ == '__main__':
             control._setControllable('Outputs/json/enable', 'bool', 'foo')
         elif test == 'set_controllable_vector_non_array':
             control._setControllable('Reporters/test/vec_real_value', 'std::vector<Real>', 1234)
+        elif test == 'set_controllable_matrix_bad_convert1':
+            control._setControllable('Reporters/test/matrix_value', 'RealEigenMatrix', 1234)
+        elif test == 'set_controllable_matrix_bad_convert2':
+            control._setControllable('Reporters/test/matrix_value', 'RealEigenMatrix', [1234])
+        elif test == 'set_controllable_matrix_jagged':
+            control._setControllable('Reporters/test/matrix_value', 'RealEigenMatrix', [[11, 12], [21]])
 
     base_controller('web_server', run_control)

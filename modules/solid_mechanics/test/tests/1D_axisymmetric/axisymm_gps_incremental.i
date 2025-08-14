@@ -5,12 +5,9 @@
   scalar_out_of_plane_strain = scalar_strain_yy
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = line.e
+  coord_type = RZ
 []
 
 [Variables]

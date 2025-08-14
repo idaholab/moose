@@ -22,8 +22,9 @@ WebServerControlTestReporter::validParams()
   params.addParam<std::vector<int>>("vec_int_value", "Test vector int value");
   params.addParam<std::string>("string_value", "Test string value");
   params.addParam<std::vector<std::string>>("vec_string_value", "Test vector string value");
-  params.declareControllable(
-      "bool_value real_value int_value vec_real_value vec_int_value string_value vec_string_value");
+  params.addParam<RealEigenMatrix>("matrix_value", "Test RealEigenMatrix value");
+  params.declareControllable("bool_value real_value int_value vec_real_value vec_int_value "
+                             "string_value vec_string_value matrix_value");
   return params;
 }
 
@@ -37,6 +38,7 @@ WebServerControlTestReporter::WebServerControlTestReporter(const InputParameters
   declare<std::vector<int>>("vec_int_value");
   declare<std::string>("string_value");
   declare<std::vector<std::string>>("vec_string_value");
+  declare<RealEigenMatrix>("matrix_value");
 }
 
 void

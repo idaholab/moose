@@ -45,6 +45,16 @@ ReporterInterface::hasReporterValueByName(const ReporterName & reporter_name) co
   return _ri_reporter_data.hasReporterValue(reporter_name);
 }
 
+const ReporterContextBase &
+ReporterInterface::getReporterContextBaseByName(const ReporterName & reporter_name) const
+{
+  if (!reportersAdded())
+    _ri_moose_object.mooseError(
+        "Cannot call getReporterContextBaseByName() until all Reporters have been constructed.");
+
+  return _ri_reporter_data.getReporterContextBase(reporter_name);
+}
+
 const ReporterName &
 ReporterInterface::getReporterName(const std::string & param_name) const
 {

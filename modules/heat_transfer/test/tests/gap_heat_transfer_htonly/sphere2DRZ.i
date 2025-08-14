@@ -59,12 +59,9 @@
   family = LAGRANGE
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = cyl2D.e
+  coord_type = RZ
 []
 
 [Functions]

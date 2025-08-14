@@ -12,6 +12,8 @@
 
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
+#include "libmesh/id_types.h"
+#include "libmesh/int_range.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/utility.h"
@@ -185,10 +187,28 @@ getBoundaryIDSet(const MeshBase & mesh,
 std::vector<subdomain_id_type>
 getSubdomainIDs(const MeshBase & mesh, const std::vector<SubdomainName> & subdomain_names)
 {
-  std::vector<SubdomainID> ids(subdomain_names.size());
+  std::vector<subdomain_id_type> ids;
 
-  for (const auto i : index_range(subdomain_names))
+  // shortcut for "ANY_BLOCK_ID"
+  if (subdomain_names.size() == 1 && subdomain_names[0] == "ANY_BLOCK_ID")
+  {
+    // since get_mesh_subdomains() requires a prepared mesh, we need to check that here
+    mooseAssert(mesh.is_prepared(),
+                "getSubdomainIDs() should only be called on a prepared mesh if ANY_BLOCK_ID is "
+                "used to query all block IDs");
+    ids.assign(mesh.get_mesh_subdomains().begin(), mesh.get_mesh_subdomains().end());
+    return ids;
+  }
+
+  // loop through subdomain names and get IDs (this preserves the order of subdomain_names)
+  ids.resize(subdomain_names.size());
+  for (auto i : index_range(subdomain_names))
+  {
+    if (subdomain_names[i] == "ANY_BLOCK_ID")
+      mooseError("getSubdomainIDs() accepts \"ANY_BLOCK_ID\" if and only if it is the only "
+                 "subdomain name being queried.");
     ids[i] = MooseMeshUtils::getSubdomainID(subdomain_names[i], mesh);
+  }
 
   return ids;
 }
@@ -196,10 +216,9 @@ getSubdomainIDs(const MeshBase & mesh, const std::vector<SubdomainName> & subdom
 std::set<subdomain_id_type>
 getSubdomainIDs(const MeshBase & mesh, const std::set<SubdomainName> & subdomain_names)
 {
-  std::set<SubdomainID> ids;
-  for (const auto & name : subdomain_names)
-    ids.insert(MooseMeshUtils::getSubdomainID(name, mesh));
-  return ids;
+  const auto blk_ids = getSubdomainIDs(
+      mesh, std::vector<SubdomainName>(subdomain_names.begin(), subdomain_names.end()));
+  return {blk_ids.begin(), blk_ids.end()};
 }
 
 BoundaryID

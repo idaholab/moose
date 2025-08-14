@@ -28,9 +28,6 @@
     nx = 20
     ny = 100
   []
-[]
-
-[Problem]
   coord_type = RZ
 []
 

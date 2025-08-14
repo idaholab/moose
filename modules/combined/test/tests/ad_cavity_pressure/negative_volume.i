@@ -7,10 +7,6 @@
 # open volume to the InternalVolume postprocessor, which
 # calculates a negative volume.
 
-[Problem]
-  coord_type = RZ
-[]
-
 [GlobalParams]
   displacements = 'disp_r disp_z'
 []
@@ -20,6 +16,7 @@
   dim = 2
   nx = 1
   ny = 2
+  coord_type = RZ
 []
 
 [Functions]

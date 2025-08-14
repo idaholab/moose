@@ -9,9 +9,6 @@
   dim = 2
   nx = 2
   ny = 2
-[]
-
-[Problem]
   coord_type = RZ
 []
 

@@ -18,9 +18,6 @@
   ymin = -1.1
   ymax = 1.1
   elem_type = QUAD9
-[]
-
-[Problem]
   coord_type = RZ
 []
 
