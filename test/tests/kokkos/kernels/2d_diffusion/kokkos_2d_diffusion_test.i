@@ -8,51 +8,51 @@
 ###########################################################
 
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [KokkosKernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = KokkosDiffusion
     variable = u
-  [../]
+  []
 []
 
 [KokkosBCs]
   # BCs cannot be preset due to Jacobian test
   active = 'left right'
 
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     preset = false
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = KokkosDirichletBC
     variable = u
     preset = false
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

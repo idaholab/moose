@@ -12,45 +12,45 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./v]
-  [../]
+  [u]
+  []
+  [v]
+  []
 []
 
 [KokkosKernels]
-  [./time_u]
+  [time_u]
     type = KokkosTimeDerivative
     variable = u
-  [../]
-  [./fn_u]
+  []
+  [fn_u]
     type = KokkosBodyForce
     variable = u
-  [../]
-  [./time_v]
+  []
+  [time_v]
     type = KokkosCoupledTimeDerivative
     variable = v
     v = u
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = KokkosDiffusion
     variable = v
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = v
     boundary = 'left'
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = KokkosDirichletBC
     variable = v
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
