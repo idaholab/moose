@@ -650,6 +650,8 @@ LinearAssemblySegregatedSolve::deduceCHTBoundaryCoupling()
 
     _cht_boundary_conditions.emplace(bd_id, std::move(bc_pair));
   }
+
+  _cht_system_numbers = std::vector<unsigned int>({_solid_energy_sys_number, _energy_sys_number});
 }
 
 void
@@ -766,7 +768,7 @@ LinearAssemblySegregatedSolve::updateCHTBoundaryCouplingFields(const NS::CHTSide
   {
     const auto bd_id = _cht_boundary_ids[i];
 
-    auto & fluid_bc = _cht_boundary_conditions[bd_id][other_side];
+    auto & other_bc = _cht_boundary_conditions[bd_id][other_side];
 
     const auto temperature_relaxation = _cht_flux_relaxation_factor[i][side];
     const auto flux_relaxation = _cht_temperature_relaxation_factor[i][side];
@@ -781,18 +783,22 @@ LinearAssemblySegregatedSolve::updateCHTBoundaryCouplingFields(const NS::CHTSide
 
       auto & integrated_flux = _integrated_boundary_heat_flux[bd_id][side];
 
+      // std::cout << "Temp relaxation " << temperature_relaxation << std::endl;
+      // std::cout << "Flux relaxation " << flux_relaxation << std::endl;
+
       const auto & bd_fi_container = _cht_face_info[bd_id];
 
       // We enter the face loop to update the coupling fields
       for (const auto & fi : bd_fi_container)
       {
-        fluid_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _energy_sys_number)));
+        other_bc->setupFaceData(fi,
+                                fi->faceType(std::make_pair(0, _cht_system_numbers[other_side])));
 
         temperature_container[fi->id()] =
-            temperature_relaxation * fluid_bc->computeBoundaryValue() +
+            temperature_relaxation * other_bc->computeBoundaryValue() +
             (1 - temperature_relaxation) * temperature_container[fi->id()];
 
-        const auto flux = flux_relaxation * fluid_bc->computeBoundaryConductionFlux() +
+        const auto flux = flux_relaxation * other_bc->computeBoundaryConductionFlux() +
                           (1 - flux_relaxation) * flux_container[fi->id()];
 
         flux_container[fi->id()] = flux;

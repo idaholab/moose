@@ -180,6 +180,8 @@ protected:
   std::vector<std::vector<Real>> _cht_flux_relaxation_factor;
   std::vector<std::vector<Real>> _cht_temperature_relaxation_factor;
 
+  std::vector<unsigned int> _cht_system_numbers;
+
   /// The subset of the FaceInfo objects that belong to the given boundaries.
   std::map<BoundaryID, std::vector<const FaceInfo *>> _cht_face_info;
 

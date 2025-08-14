@@ -24,7 +24,7 @@ LinearFVDirichletCHTBC::validParams()
       "Functor describing the temperature which is being prescibed on the boundary");
   params.addClassDescription(
       "Conjugate heat transfer BC for Dirichlet boundary condition-based coupling.");
-  params.suppressParameter<bool>("flux_relaxation");
+  // params.suppressParameter<bool>("flux_relaxation");
   return params;
 }
 
@@ -56,7 +56,7 @@ LinearFVDirichletCHTBC::computeBoundaryConductionFlux() const
 
   return -_thermal_conductivity(face, state) *
          ((_prescribed_temperature(face, state) - _var.getElemValue(*elem_info, state)) /
-              computeCellToFaceDistance() -
+              computeCellToFaceDistance() +
           _var.gradSln(*elem_info) * correction_vector);
 }
 
