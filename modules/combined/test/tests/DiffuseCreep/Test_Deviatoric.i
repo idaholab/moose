@@ -1,3 +1,7 @@
+#This test demonstrates the volume change due to gradient in vacancy flux
+#For this test, deviatoric part of strain rate is considered by substracting out the hydrostatic part from total creep strain tensor
+#Equal fluxes of vacancy are considered for the test, with diffusivity value of 1 (imposed by the factor option in GenericGradientComponent kernel)
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -92,14 +96,14 @@
     variable = c_v
   [../]
   [./flux_x]
-    type = GenericGradientComponent #Only solves expression J = -DgradU (where D = 1)
+    type = GenericGradientComponent #solves expression J = -DgradU (where D = 1 (given by factor option))
     v = c_v
     variable = jx_v
     component = 0
     factor = 1
   [../]
   [./flux_y]
-    type = GenericGradientComponent #Only solves expression J = -DgradU (where D = 1)
+    type = GenericGradientComponent #solves expression J = -DgradU (where D = 1 (given by factor option))
     v = c_v
     variable = jy_v
     component = 1
@@ -167,7 +171,7 @@
   []
   [neumann_source_right_x]
     type = ParsedMaterial
-    expression = '-1.5e-5' #Sign Change 
+    expression = '-1.5e-5' # -ve for leaving 
     property_name = neumann_source_right_x
     outputs = exodus
   []
@@ -179,13 +183,13 @@
   []
   [neumann_source_left_x]
     type = ParsedMaterial
-    expression = '-1.5e-5' #Sign Change 
+    expression = '-1.5e-5' # -ve for leaving
     property_name = neumann_source_left_x
     outputs = exodus
   []
   #Creep strain increments
   [diffuse_strain_increment]
-    type = DeviatoricStrainIncrement
+    type = DeviatoricStrainIncrement 
     dimension = 2
     xflux = jx_v
     yflux = jy_v
@@ -227,29 +231,17 @@
   solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
-  # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  # petsc_options_value = 'lu superlu_dist'
-  # petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold'
-  # petsc_options_value = 'hypre    boomeramg      31                 0.7'
-  # petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
-  # petsc_options_value = 'asm      31                  preonly       lu           2'
-  l_tol = 1e-4 #1e-3
-  l_max_its = 5 # SK
-  nl_max_its = 5 # SK
+  l_tol = 1e-4 
+  l_max_its = 5 
+  nl_max_its = 5 
   nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-08 # SK
+  nl_rel_tol = 1e-08 
   end_time = 1e5
   dt = 0.1
 
-  line_search = 'none' # SK
-  automatic_scaling = false # SK
-  nl_forced_its = 2 # SK
-
-  # [Adaptivity]
-  #   max_h_level = 2
-  #   refine_fraction = 0.3
-  #   coarsen_fraction = 0.2
-  # []
+  line_search = 'none' 
+  automatic_scaling = false 
+  nl_forced_its = 2 
 
   [TimeStepper]
     type = IterationAdaptiveDT
@@ -260,11 +252,10 @@
     cutback_factor = 0.8
   []
   dtmax = 1e5
-  # end_time = 100
 []
 
 [Outputs]
   exodus = true
   checkpoint = true
-  file_base = Test
+  file_base = Test_Deviatoric
 []
