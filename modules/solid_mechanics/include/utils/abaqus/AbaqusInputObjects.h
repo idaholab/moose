@@ -14,6 +14,7 @@
 #include <map>
 #include <memory>
 #include <istream>
+#include <variant>
 
 #include "AbaqusInputParser.h"
 #include "Conversion.h"
@@ -34,6 +35,8 @@ using Index = std::size_t;
 // maps from variable_id and node index to a value (used for BCs)
 template <typename T>
 using VariableValueMap = std::unordered_map<AbaqusID, std::unordered_map<Index, T>>;
+
+using IndexList = std::variant<Index, std::vector<Index>>;
 
 /**
  * Store objects of type T accessible under a name and a contiguous id.
@@ -263,6 +266,9 @@ struct Model : public Part, public Step
 
   virtual void parse(const BlockNode & root) = 0;
 
+  virtual Index getNodeIndex(const std::string & key) const = 0;
+  virtual Index getElementIndex(const std::string & key) const = 0;
+
   bool optionFunc(const std::string & key, const OptionNode & option);
   bool blockFunc(const std::string & key, const BlockNode & block);
 
@@ -283,6 +289,9 @@ struct FlatModel : public Model
 {
   FlatModel() = default;
   virtual void parse(const BlockNode & root);
+
+  virtual Index getNodeIndex(const std::string & key) const;
+  virtual Index getElementIndex(const std::string & key) const;
 };
 
 /**
@@ -298,6 +307,9 @@ struct AssemblyModel : public Model
 
   /// Assemblies
   std::unique_ptr<Assembly> _assembly;
+
+  virtual Index getNodeIndex(const std::string & key) const;
+  virtual Index getElementIndex(const std::string & key) const;
 };
 
 /**

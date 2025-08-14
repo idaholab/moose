@@ -21,15 +21,6 @@ using namespace Abaqus;
 namespace
 {
 
-// Utility: parse from a module data file under solid_mechanics:unit/
-static void parse_from_unit_file(const std::string & rel_path, InputParser & parser)
-{
-  const auto file = Moose::DataFileUtils::getPath("solid_mechanics:unit/" + rel_path).path;
-  std::ifstream in(file);
-  ASSERT_TRUE(in.good()) << "Failed to open test input: " << file;
-  parser.parse(in);
-}
-
 // Utility: find first child of a block by type string
 template <typename NodeT>
 static NodeT * find_child(Abaqus::BlockNode & node, const std::string & type)
@@ -83,7 +74,7 @@ TEST(AbaqusInputParserTest, UnknownKeywordThrows)
 TEST(AbaqusInputParserTest, ContinuationEOFThrows)
 {
   // Trailing comma must be followed by a continuation line
-  std::istringstream in("*Heading\n*Node\n1, 0., 0.,\n");
+  std::istringstream in("*Heading\n*Node\n1, 0., 0.,");
   InputParser parser;
   try
   {
@@ -250,6 +241,7 @@ TEST(AbaqusInputParserTest, SquareInpTreeAndAssembly)
       "*End Assembly\n");
 
   InputParser parser;
+
   parser.parse(in);
 
   EXPECT_FALSE(parser.isFlat());

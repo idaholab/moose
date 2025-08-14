@@ -9,6 +9,7 @@
 
 #include "AbaqusInputObjects.h"
 #include "MooseError.h"
+#include "MooseStringUtils.h"
 #include "MooseUtils.h"
 #include "libmesh/libmesh_common.h"
 
@@ -305,7 +306,9 @@ template <bool is_nodal>
 void
 Part::processSetHelper(const OptionNode & option, Instance * instance)
 {
-  const auto & id_to_index = is_nodal ? _node_id_to_index : _element_id_to_index;
+  const auto & index_host = instance ? instance->_part : *this;
+  const auto & id_to_index =
+      is_nodal ? index_host._node_id_to_index : index_host._element_id_to_index;
   const auto & name_key = is_nodal ? "nset" : "elset";
   auto & set_map = is_nodal ? _nsets : _elsets;
 
@@ -314,7 +317,7 @@ Part::processSetHelper(const OptionNode & option, Instance * instance)
   const auto name = map.get<std::string>(name_key);
   const auto offset = instance ? (is_nodal ? instance->_local_to_global_node_index_offset
                                            : instance->_local_to_global_element_index_offset)
-                               : 0.0;
+                               : 0;
 
   // implement GENERATE keyword
   const auto generate = map.get<bool>("generate");
@@ -362,7 +365,7 @@ Part::processSetHelper(const OptionNode & option, Instance * instance)
         else
         {
           const auto item = MooseUtils::convert<AbaqusID>(data[i]);
-          unique_items.insert(id_to_index.at(item));
+          unique_items.insert(id_to_index.at(item) + offset);
         }
       }
     }
@@ -418,8 +421,8 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
       else
       {
         // TODO: when we redesign _node_id_to_index as a map of vectors, well simply copy into a
-        // vector
-        single_node = {_model._node_id_to_index.at(MooseUtils::convert<AbaqusID>(data[0]))};
+        // vector. alternatively we iterate over all parts...
+        single_node = {_model.getNodeIndex(data[0])};
         node_set_ptr = &single_node;
       }
 
@@ -485,7 +488,12 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
 Instance::Instance(const BlockNode & block, AssemblyModel & model)
   : _part(model._part[block._header.get<std::string>("part")])
 {
-  // const auto & data = block._data;
+  // For now we only support single instance models. To support multiple instantiation
+  // we'd also need to add to the node ID to index map. this must be a map of vectors because
+  // the same ID can refer to multiple instantiated nodes now :-O
+  if (model._assembly && !model._assembly->_instance.empty())
+    mooseError("Currently only single instance assembly models are supported. Check "
+               "`modules/solid_mechanics/src/utils/abaqus/AbaqusInputObjects.C` for details.");
 
   RealVectorValue translation(0, 0, 0);
   RealTensorValue rotation(1, 0, 0, 0, 1, 0, 0, 0, 1);
@@ -585,10 +593,6 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
     for (const auto & index : elset)
       model_elset.push_back(index + _local_to_global_element_index_offset);
   }
-
-  // TODO: we also need to add to the node ID to index map. this must be a map of vectors because
-  // the same ID can refer to multiple instantiated nodes now :-O
-  mooseError("Instantiating is missing important implementation details.");
 }
 
 void
@@ -721,6 +725,18 @@ FlatModel::parse(const BlockNode & root)
   root.forAll(option_func, block_func);
 }
 
+Index
+FlatModel::getNodeIndex(const std::string & key) const
+{
+  return _model._node_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
+}
+
+Index
+FlatModel::getElementIndex(const std::string & key) const
+{
+  return _model._element_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
+}
+
 // Entry point for the final parsing stage
 void
 AssemblyModel::parse(const BlockNode & root)
@@ -753,6 +769,20 @@ AssemblyModel::parse(const BlockNode & root)
   };
 
   root.forAll(option_func, block_func);
+}
+
+Index
+AssemblyModel::getNodeIndex(const std::string & key) const
+{
+  // deal with instance. prefix
+  return _model._node_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
+}
+
+Index
+AssemblyModel::getElementIndex(const std::string & key) const
+{
+  // deal with instance. prefix
+  return _model._element_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
 }
 
 } // namespace Abaqus
