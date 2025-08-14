@@ -1,5 +1,6 @@
 [Tests]
   issues = '#31171'
+  design = 'StochasticControl.md'
   [stochastic_control]
     requirement = 'The system shall provide a python-based utility for performing stochastic simulations of on-the-fly'
     [normal]
