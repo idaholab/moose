@@ -353,7 +353,15 @@ void applyDirchValues(const mfem::Vector &k, mfem::Vector &y, mfem::Array<int> d
 void
 EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 {
-  _jacobian->Mult(x, residual);
+  CopyVec(x,_trueBlockX);
+  for (int i = 0; i < _trial_var_names.size(); i++)
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    applyDirchValues(*(_var_ess_constraints.at(i)), _trueBlockX.GetBlock(i), _ess_tdof_lists.at(i));
+    _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockX.GetBlock(i)));
+  }
+
+  _jacobian->Mult(_trueBlockX, residual);
   x.HostRead();
   residual.HostRead();
 }
