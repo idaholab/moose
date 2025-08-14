@@ -14,6 +14,7 @@
 #include <map>
 #include <memory>
 #include <istream>
+#include <variant>
 
 #include "AbaqusInputParser.h"
 #include "Conversion.h"
@@ -34,6 +35,8 @@ using Index = std::size_t;
 // maps from variable_id and node index to a value (used for BCs)
 template <typename T>
 using VariableValueMap = std::unordered_map<AbaqusID, std::unordered_map<Index, T>>;
+
+using IndexList = std::variant<Index, std::vector<Index>>;
 
 /**
  * Store objects of type T accessible under a name and a contiguous id.
@@ -150,14 +153,18 @@ struct Part
 
   bool optionFunc(const std::string & key, const OptionNode & option);
 
-  void processNodeSet(const OptionNode & option, Instance * instance = nullptr);
-  void processElementSet(const OptionNode & option, Instance * instance = nullptr);
+  void processNodeSet(const OptionNode & option,
+                      Instance * instance = nullptr,
+                      const AssemblyModel * asmb = nullptr);
+  void processElementSet(const OptionNode & option,
+                         Instance * instance = nullptr,
+                         const AssemblyModel * asmb = nullptr);
 
   const std::vector<std::size_t> & getNodeSet(const std::string & nset) const;
   const std::vector<std::size_t> & getElementSet(const std::string & elset) const;
 
   template <bool is_nodal>
-  void processSetHelper(const OptionNode & option, Instance * instance);
+  void processSetHelper(const OptionNode & option, Instance * instance, const AssemblyModel * asmb);
 
   ObjectStore<UserElement> _element_definition;
 
@@ -263,6 +270,15 @@ struct Model : public Part, public Step
 
   virtual void parse(const BlockNode & root) = 0;
 
+  virtual Index getNodeIndex(const std::string & key,
+                             const Instance * instance = nullptr) const = 0;
+  virtual Index getElementIndex(const std::string & key,
+                                const Instance * instance = nullptr) const = 0;
+
+  /// Resolve an instance by name
+  /// FlatModel: errors (no instances). AssemblyModel: returns a reference or errors if missing.
+  virtual const Instance & getInstance(const std::string & name) const;
+
   bool optionFunc(const std::string & key, const OptionNode & option);
   bool blockFunc(const std::string & key, const BlockNode & block);
 
@@ -283,6 +299,9 @@ struct FlatModel : public Model
 {
   FlatModel() = default;
   virtual void parse(const BlockNode & root);
+
+  virtual Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const;
+  virtual Index getElementIndex(const std::string & key, const Instance * instance = nullptr) const;
 };
 
 /**
@@ -298,6 +317,11 @@ struct AssemblyModel : public Model
 
   /// Assemblies
   std::unique_ptr<Assembly> _assembly;
+
+  virtual Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const;
+  virtual Index getElementIndex(const std::string & key, const Instance * instance = nullptr) const;
+
+  virtual const Instance & getInstance(const std::string & name) const;
 };
 
 /**
