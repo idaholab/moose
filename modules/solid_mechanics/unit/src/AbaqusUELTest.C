@@ -63,7 +63,7 @@ TEST(AbaqusUELTest, Square)
   ASSERT_EQ(elements.size(), 1u);
 
   static const Real gold_nodes[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-  const auto & nodes = elements[0].nodes;
+  const auto & nodes = elements[0]._nodes;
   ASSERT_EQ(nodes.size(), 9u);
 
   static const Real gold_coords[][2] = {{-1., -1.},
