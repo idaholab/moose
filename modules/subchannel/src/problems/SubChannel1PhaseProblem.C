@@ -2380,8 +2380,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   /// Assigning the solutions to arrays
   PetscScalar * sol_p_array;
   LibmeshPetscCall(VecGetArray(sol_p, &sol_p_array));
-  PetscScalar * sol_Wij_array;
-  LibmeshPetscCall(VecGetArray(sol_Wij, &sol_Wij_array));
 
   /// Populating Mass flow
   LibmeshPetscCall(populateSolutionChan<SolutionHandle>(
