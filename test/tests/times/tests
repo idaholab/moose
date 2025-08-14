@@ -74,7 +74,7 @@
       type = 'JSONDiff'
       input = 'external_times.i'
       jsondiff = 'external_times_out.json'
-      detail = 'the time steps set dynamicly by external app (Fake by function for testing without FMU dependency) during the simulation'
+      detail = 'the time steps set dynamicly during the simulation'
     []
   []
 

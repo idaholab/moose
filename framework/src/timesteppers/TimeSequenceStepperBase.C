@@ -156,7 +156,7 @@ TimeSequenceStepperBase::resetSequence()
 }
 
 void
-TimeSequenceStepperBase::step()
+TimeSequenceStepperBase::acceptStep()
 {
   TimeStepper::acceptStep();
   if (MooseUtils::absoluteFuzzyGreaterEqual(_time, getNextTimeInSequence()))

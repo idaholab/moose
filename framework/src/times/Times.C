@@ -32,7 +32,9 @@ Times::validParams()
   params.suppressParameter<MaterialPropertyName>("prop_getter_suffix");
   params.suppressParameter<bool>("use_interpolated_state");
 
-  params.addParam<bool>("dynamic_time_sequence", true, "Whether the time sequence is dynamic");
+  params.addParam<bool>("dynamic_time_sequence",
+                        true,
+                        "Whether the time sequence is dynamic and thus needs to be updated");
 
   params.registerBase("Times");
   return params;
