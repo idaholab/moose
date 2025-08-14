@@ -400,7 +400,7 @@ class TestHarness:
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
-        if self.options.distributed_mesh == True or self.options.cli_args != None and \
+        if self.options.distributed_mesh or not self.options.cli_args is None and \
                self.options.cli_args.find('--distributed-mesh') != -1:
 
             option_set = set(['ALL', 'DISTRIBUTED'])
