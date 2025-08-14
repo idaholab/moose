@@ -69,9 +69,7 @@ CreateProblemDefaultAction::act()
       auto params = _factory.getValidParams(type);
 
       // apply global parameters
-      auto & builder = _app.builder();
-      if (builder.root())
-        builder.extractParams("Problem", params);
+      _app.builder().extractParams("Problem", params);
 
       // apply common parameters of the object held by CreateProblemAction to honor user inputs in
       // [Problem]
