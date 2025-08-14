@@ -35,6 +35,9 @@
 #include "SolutionInvalidity.h"
 #include "MooseLinearVariableFV.h"
 #include "LinearFVTimeDerivative.h"
+#include "LinearFVFluxKernel.h"
+#include "LinearFVElementalKernel.h"
+#include "LinearFVBoundaryCondition.h"
 
 // libMesh
 #include "libmesh/linear_solver.h"
@@ -134,6 +137,16 @@ LinearSystem::initialSetup()
 
     for (auto * fv_kernel : fv_flux_kernels)
       fv_kernel->initialSetup();
+
+    std::vector<LinearFVBoundaryCondition *> fv_bcs;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("LinearFVBoundaryCondition")
+        .template condition<AttribThread>(tid)
+        .queryInto(fv_bcs);
+
+    for (auto * fv_bc : fv_bcs)
+      fv_bc->initialSetup();
   }
 }
 
