@@ -76,15 +76,21 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
     int reference_face = parent_cut_element_id_map[0];
     plane.make3DPlane(parent_mesh, parent_mesh.GetBdrElementFaceIndex(reference_face));
   }
+  mfem::Vector orientation({0., 1., 0.});
+  // Plane may not exist on all processors!!
 
   /// Iterate over all vertices on cut, find elements with those vertices,
   /// and declare them transition elements if they are on the +ve side of the cut
   mfem::Array<int> transition_els;
+  std::vector<int> global_cut_vert_ids;
+  mfem::Array<HYPRE_BigInt> gi;
+  parent_mesh.GetGlobalVertexIndices(gi);
   mfem::Table *vert_to_elem  = parent_mesh.GetVertexToElementTable();
   const mfem::Array<int> & cut_to_parent_vertex_id_map = _cut_submesh->GetParentVertexIDMap();
   for (int i = 0; i < _cut_submesh->GetNV(); ++i)
   {
     int cut_vert = cut_to_parent_vertex_id_map[i];
+    global_cut_vert_ids.push_back(gi[cut_vert]);
     int ne = vert_to_elem->RowSize(cut_vert); // number of elements touching cut vertex
     const int * els_adj_to_cut = vert_to_elem->GetRow(cut_vert); // elements touching cut vertex
     for (int i = 0; i < ne; i++)
@@ -98,28 +104,74 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
     }
   }
 
+  // share cut verts coords or global ids across all procs
+  int mpi_comm_size = 1;
+  MPI_Comm_size(getMFEMProblem().mesh().getMFEMParMesh().GetComm(), &mpi_comm_size);
+  int n_cut_vertices = global_cut_vert_ids.size();
+  std::vector<int> cut_vert_sizes(mpi_comm_size, 0);
+  MPI_Allgather(&n_cut_vertices,
+                1,
+                MPI_INT,
+                &cut_vert_sizes[0],
+                1,
+                MPI_INT,
+                getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  // Make an offset array and total the sizes.
+  std::vector<int> n_vert_offset(mpi_comm_size, 0);
+  for (int i = 1; i < mpi_comm_size; i++)
+    n_vert_offset[i] = n_vert_offset[i - 1] + cut_vert_sizes[i - 1];
+  int global_n_cut_vertices = 0;
+  for (int i = 0; i < mpi_comm_size; i++)
+    global_n_cut_vertices += cut_vert_sizes[i];
+
+  // Gather the queries to all ranks.
+  std::vector<int> all_cut_verts(global_n_cut_vertices, 0);
+  MPI_Allgatherv(&global_cut_vert_ids[0],
+                 n_cut_vertices,
+                 MPI_INT,
+                 &all_cut_verts[0],
+                 &cut_vert_sizes[0],
+                 &n_vert_offset[0],
+                 MPI_INT,
+                 getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+
+  // sign of dot product of (element centre - vert) with direction vec gives ori
+  // if shared vert coord = cut vert coord then shared vert touches
+  // create container storing global ID for all shared verts
+
+  // for all verts in cut submesh,
+  // if global vert
+
   /// Detect shared vertices and add corresponding elements
   for (int g = 1, sv = 0; g < parent_mesh.GetNGroups(); g++)
   {
     for (int gv = 0; gv < parent_mesh.GroupNVertices(g); gv++, sv++)
     {
-    int plvtx = parent_mesh.GroupVertex(g, gv);
-    const int sdim = parent_mesh.SpaceDimension();
-    mfem::Vector coord(sdim);
-    coord = parent_mesh.GetVertex(plvtx);
-    if (plane.side(coord) == 0) // check if shared vertex is on the cut plane
-    {
-      int cut_vert = plvtx;
-      int ne = vert_to_elem->RowSize(cut_vert); // number of elements touching cut vertex
-      const int * els_adj_to_cut = vert_to_elem->GetRow(cut_vert); // elements touching cut vertex
-      for (int i = 0; i < ne; i++)
+      // all els touching this shared vertex plvtx should be updated
+      int cut_vert = parent_mesh.GroupVertex(g, gv);
+      for (size_t i = 0; i < all_cut_verts.size(); i += 1)
       {
-        const int el_adj_to_cut = els_adj_to_cut[i];
-        mfem::Vector el_center(3);
-        parent_mesh.GetElementCenter(el_adj_to_cut, el_center);
-        if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) &&
-            plane.side(el_center) == 1)
-          transition_els.Append(el_adj_to_cut);
+        if (gi[cut_vert] == all_cut_verts[i]) // check if shared vertex is on the cut plane
+        {
+          int ne = vert_to_elem->RowSize(cut_vert); // number of elements touching cut vertex
+          const int * els_adj_to_cut =
+              vert_to_elem->GetRow(cut_vert); // elements touching cut vertex
+          for (int i = 0; i < ne; i++)
+          {
+            const int el_adj_to_cut = els_adj_to_cut[i];
+            mfem::Vector el_center(3);
+            parent_mesh.GetElementCenter(el_adj_to_cut, el_center);
+            const int sdim = parent_mesh.SpaceDimension();
+            mfem::Vector coord(parent_mesh.GetVertex(cut_vert), sdim);
+            mfem::Vector relative_center(sdim);
+            for (int j = 0; j < sdim; j++)
+            {
+              relative_center[j] = el_center[j] - coord[j];
+            }
+            double check = orientation * relative_center;
+            if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) && check > 0)
+              transition_els.Append(el_adj_to_cut);
+          }
         }
       }
     }
@@ -199,7 +251,7 @@ MFEMCutTransitionSubMesh::isInDomain(const int & element,
   bool is_in_domain = false;
   /// element<0 for ghost elements
   if (element < 0)
-    return false;
+    return true;
 
   for (const auto & subdomain : subdomains)
   {
