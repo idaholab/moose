@@ -9,6 +9,7 @@
 
 #include "AbaqusInputObjects.h"
 #include "MooseError.h"
+#include "MooseStringUtils.h"
 #include "MooseUtils.h"
 #include "libmesh/libmesh_common.h"
 
@@ -220,9 +221,9 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
   }
 
   else if (key == "elset")
-    processElementSet(option);
+    processElementSet(option, nullptr, nullptr);
   else if (key == "nset")
-    processNodeSet(option);
+    processNodeSet(option, nullptr, nullptr);
 
   // UEL properties
   else if (key == "uel property")
@@ -267,7 +268,7 @@ Part::optionFunc(const std::string & key, const OptionNode & option)
 }
 
 void
-Part::processNodeSet(const OptionNode & option, Instance * instance)
+Part::processNodeSet(const OptionNode & option, Instance * instance, const AssemblyModel * asmb)
 {
   const auto & map = option._header;
   const Index offset = instance ? instance->_local_to_global_node_index_offset : 0;
@@ -286,26 +287,31 @@ Part::processNodeSet(const OptionNode & option, Instance * instance)
     // make set unique and copy nodes into it
     std::set<Index> unique_nodes(nset.begin(), nset.end());
     for (const auto elem_index : elset)
-      for (const auto node_index : _elements[elem_index]._nodes)
+    {
+      const auto & elem = instance ? instance->_part._elements[elem_index] : _elements[elem_index];
+      for (const auto node_index : elem._nodes)
         unique_nodes.insert(node_index + offset);
+    }
     nset.assign(unique_nodes.begin(), unique_nodes.end());
   }
   else
     // data lines are only present if elset parameter is _not_ specified
-    processSetHelper<true>(option, instance);
+    processSetHelper<true>(option, instance, asmb);
 }
 
 void
-Part::processElementSet(const OptionNode & option, Instance * instance)
+Part::processElementSet(const OptionNode & option, Instance * instance, const AssemblyModel * asmb)
 {
-  processSetHelper<false>(option, instance);
+  processSetHelper<false>(option, instance, asmb);
 }
 
 template <bool is_nodal>
 void
-Part::processSetHelper(const OptionNode & option, Instance * instance)
+Part::processSetHelper(const OptionNode & option, Instance * instance, const AssemblyModel * asmb)
 {
-  const auto & id_to_index = is_nodal ? _node_id_to_index : _element_id_to_index;
+  const auto & index_host = instance ? instance->_part : *this;
+  const auto & id_to_index =
+      is_nodal ? index_host._node_id_to_index : index_host._element_id_to_index;
   const auto & name_key = is_nodal ? "nset" : "elset";
   auto & set_map = is_nodal ? _nsets : _elsets;
 
@@ -314,7 +320,7 @@ Part::processSetHelper(const OptionNode & option, Instance * instance)
   const auto name = map.get<std::string>(name_key);
   const auto offset = instance ? (is_nodal ? instance->_local_to_global_node_index_offset
                                            : instance->_local_to_global_element_index_offset)
-                               : 0.0;
+                               : 0;
 
   // implement GENERATE keyword
   const auto generate = map.get<bool>("generate");
@@ -329,6 +335,11 @@ Part::processSetHelper(const OptionNode & option, Instance * instance)
   {
     if (generate)
     {
+      // For assembly-level nodal sets, require an instance (either header or inline); GENERATE
+      // without instance context is not supported.
+      if constexpr (is_nodal)
+        if (asmb && !instance)
+          mooseError("Assembly-level *Nset with GENERATE requires an instance (header or inline).");
       // syntax check
       if (data.size() != 3)
         mooseError("Expected three values in ",
@@ -348,22 +359,56 @@ Part::processSetHelper(const OptionNode & option, Instance * instance)
     }
     else
     {
-      // TODO: here we need to to implement instance.node_id syntax!
-      // TODO: we'll need the root model here!!! Assembly->Instance->Part
+      // Support inline entries that can be:
+      // - another set name (already built in set_map)
+      // - a plain numeric id (interpreted in the provided instance or this Part)
+      // - an instance-qualified id: "<instance>.<id>" (requires header instance or single instance)
+
       for (const auto i : index_range(data))
       {
-        // check for existing set first
-        const auto it = set_map.find(data[i]);
+        const auto & atom = data[i];
+
+        // 1) Referencing an existing set by name
+        const auto it = set_map.find(atom);
         if (it != set_map.end())
         {
-          // insert existing set
           unique_items.insert(it->second.begin(), it->second.end());
+          continue;
         }
-        else
+
+        // 2) Instance-qualified id: "instanceName.id"
+        std::vector<std::string> parts;
+        MooseUtils::tokenize(atom, parts, 1, ".");
+        if (parts.size() == 2)
         {
-          const auto item = MooseUtils::convert<AbaqusID>(data[i]);
-          unique_items.insert(id_to_index.at(item));
+          // Either inline instance OR header instance (mutually exclusive)
+          if (instance)
+            mooseError("Ambiguous set token '",
+                       atom,
+                       "': both inline instance and header instance are provided.");
+
+          if (!asmb || !asmb->_assembly)
+            mooseError("Instance-qualified entry '", atom, "' requires Assembly context.");
+
+          const auto & inst_name = parts[0];
+          const auto id = MooseUtils::convert<AbaqusID>(parts[1]);
+          if (!asmb->_assembly->_instance.has(inst_name))
+            mooseError("Instance '", inst_name, "' not found while resolving '", atom, "'.");
+
+          const auto & inst = asmb->_assembly->_instance[inst_name];
+          const auto & local_map =
+              is_nodal ? inst._part._node_id_to_index : inst._part._element_id_to_index;
+          const auto inst_offset = is_nodal ? inst._local_to_global_node_index_offset
+                                            : inst._local_to_global_element_index_offset;
+          unique_items.insert(local_map.at(id) + inst_offset);
+          continue;
         }
+
+        // 3) Plain numeric id in the current scope
+        if (asmb && !instance && is_nodal)
+          mooseError("Assembly-level *Nset requires an instance: use 'instance=' or inline 'inst.id'");
+        const auto item = MooseUtils::convert<AbaqusID>(atom);
+        unique_items.insert(id_to_index.at(item) + offset);
       }
     }
   }
@@ -413,13 +458,25 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
       // nodes this line applies to (either a nset or a single node)
       const std::vector<Index> * node_set_ptr;
       std::vector<Index> single_node;
+
       if (_model._nsets.find(data[0]) != _model._nsets.end())
         node_set_ptr = &_model._nsets.at(data[0]);
       else
       {
-        // TODO: when we redesign _node_id_to_index as a map of vectors, well simply copy into a
-        // vector
-        single_node = {_model._node_id_to_index.at(MooseUtils::convert<AbaqusID>(data[0]))};
+        // If the option is instance-scoped, resolve the single node within that instance
+        const Instance * scope_instance = nullptr;
+        if (option._header.has("instance"))
+        {
+          const auto inst_name = option._header.get<std::string>("instance");
+          const auto * asmb = dynamic_cast<const AssemblyModel *>(&_model);
+          if (!asmb || !asmb->_assembly)
+            mooseError("*Boundary with instance= requires an Assembly context.");
+          if (!asmb->_assembly->_instance.has(inst_name))
+            mooseError("Instance '", inst_name, "' not found for *Boundary instance=");
+          scope_instance = &asmb->_assembly->_instance[inst_name];
+        }
+
+        single_node = {_model.getNodeIndex(data[0], scope_instance)};
         node_set_ptr = &single_node;
       }
 
@@ -485,7 +542,8 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
 Instance::Instance(const BlockNode & block, AssemblyModel & model)
   : _part(model._part[block._header.get<std::string>("part")])
 {
-  // const auto & data = block._data;
+  // Multiple instances are supported. Numeric IDs at assembly scope must be instance-qualified
+  // elsewhere to avoid ambiguity; code paths already enforce that where needed.
 
   RealVectorValue translation(0, 0, 0);
   RealTensorValue rotation(1, 0, 0, 0, 1, 0, 0, 0, 1);
@@ -585,10 +643,6 @@ Instance::Instance(const BlockNode & block, AssemblyModel & model)
     for (const auto & index : elset)
       model_elset.push_back(index + _local_to_global_element_index_offset);
   }
-
-  // TODO: we also need to add to the node ID to index map. this must be a map of vectors because
-  // the same ID can refer to multiple instantiated nodes now :-O
-  mooseError("Instantiating is missing important implementation details.");
 }
 
 void
@@ -601,13 +655,13 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
       const auto & instance_name = option._header.get<std::string>("instance", "");
       if (instance_name.empty())
       {
-        model.processElementSet(option); // What do we do here????? Iterate over all instances?
+        model.processElementSet(option, nullptr, &model); // model-level set
       }
       else
       {
         if (!_instance.has(instance_name))
           mooseError("Instance '", instance_name, "' not found in elset declaration.");
-        model.processElementSet(option, &_instance[instance_name]);
+        model.processElementSet(option, &_instance[instance_name], &model);
       }
     }
 
@@ -616,13 +670,13 @@ Assembly::parse(const BlockNode & block, AssemblyModel & model)
       const auto & instance_name = option._header.get<std::string>("instance", "");
       if (instance_name.empty())
       {
-        model.processNodeSet(option); // What do we do here????? Iterate over all instances?
+        model.processNodeSet(option, nullptr, &model);
       }
       else
       {
         if (!_instance.has(instance_name))
           mooseError("Instance '", instance_name, "' not found in nset declaration.");
-        model.processNodeSet(option, &_instance[instance_name]);
+        model.processNodeSet(option, &_instance[instance_name], &model);
       }
     }
     else
@@ -721,6 +775,29 @@ FlatModel::parse(const BlockNode & root)
   root.forAll(option_func, block_func);
 }
 
+Index
+FlatModel::getNodeIndex(const std::string & key, const Instance * instance) const
+{
+  if (instance)
+    mooseError("Instance-scoped lookup is not supported in FlatModel.");
+  return _model._node_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
+}
+
+Index
+FlatModel::getElementIndex(const std::string & key, const Instance * instance) const
+{
+  if (instance)
+    mooseError("Instance-scoped lookup is not supported in FlatModel.");
+  return _model._element_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
+}
+
+const Instance &
+Model::getInstance(const std::string & /*name*/) const
+{
+  // FlatModel path (no instances): error
+  mooseError("Instance lookup not supported in this model.");
+}
+
 // Entry point for the final parsing stage
 void
 AssemblyModel::parse(const BlockNode & root)
@@ -753,6 +830,78 @@ AssemblyModel::parse(const BlockNode & root)
   };
 
   root.forAll(option_func, block_func);
+}
+
+Index
+AssemblyModel::getNodeIndex(const std::string & key, const Instance * instance) const
+{
+  // If caller provided an instance, enforce clean integer and resolve within it
+  if (instance)
+  {
+    std::vector<std::string> parts;
+    MooseUtils::tokenize(key, parts, 1, ".");
+    if (parts.size() != 1)
+      mooseError("Instance-scoped node lookup expects a clean integer id but got '", key, "'.");
+    const auto node_id = MooseUtils::convert<AbaqusID>(key);
+    const auto local_index = instance->_part._node_id_to_index.at(node_id);
+    return local_index + instance->_local_to_global_node_index_offset;
+  }
+
+  // Otherwise support "instanceName.nodeId" or plain numeric ids
+  std::vector<std::string> parts;
+  MooseUtils::tokenize(key, parts, 1, ".");
+  if (parts.size() == 2)
+  {
+    const auto & instance_name = parts[0];
+    const auto node_id = MooseUtils::convert<AbaqusID>(parts[1]);
+    if (!_assembly)
+      mooseError("Node reference '", key, "' requires an Assembly but none was parsed.");
+    if (!_assembly->_instance.has(instance_name))
+      mooseError("Instance '", instance_name, "' not found while resolving node '", key, "'.");
+    const auto & inst = _assembly->_instance[instance_name];
+    const auto local_index = inst._part._node_id_to_index.at(node_id);
+    return local_index + inst._local_to_global_node_index_offset;
+  }
+  return _model._node_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
+}
+
+Index
+AssemblyModel::getElementIndex(const std::string & key, const Instance * instance) const
+{
+  if (instance)
+  {
+    std::vector<std::string> parts;
+    MooseUtils::tokenize(key, parts, 1, ".");
+    if (parts.size() != 1)
+      mooseError("Instance-scoped element lookup expects a clean integer id but got '", key, "'.");
+    const auto elem_id = MooseUtils::convert<AbaqusID>(key);
+    const auto local_index = instance->_part._element_id_to_index.at(elem_id);
+    return local_index + instance->_local_to_global_element_index_offset;
+  }
+
+  std::vector<std::string> parts;
+  MooseUtils::tokenize(key, parts, 1, ".");
+  if (parts.size() == 2)
+  {
+    const auto & instance_name = parts[0];
+    const auto elem_id = MooseUtils::convert<AbaqusID>(parts[1]);
+    if (!_assembly)
+      mooseError("Element reference '", key, "' requires an Assembly but none was parsed.");
+    if (!_assembly->_instance.has(instance_name))
+      mooseError("Instance '", instance_name, "' not found while resolving element '", key, "'.");
+    const auto & inst = _assembly->_instance[instance_name];
+    const auto local_index = inst._part._element_id_to_index.at(elem_id);
+    return local_index + inst._local_to_global_element_index_offset;
+  }
+  return _model._element_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
+}
+
+const Instance &
+AssemblyModel::getInstance(const std::string & name) const
+{
+  if (_assembly && _assembly->_instance.has(name))
+    return _assembly->_instance[name];
+  mooseError("Instance '", name, "' not found.");
 }
 
 } // namespace Abaqus
