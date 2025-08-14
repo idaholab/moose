@@ -113,7 +113,7 @@ $$
 \boldsymbol\alpha = (\alpha_1, ..., \alpha_d), \quad \alpha_i \in \mathbb{N}_{\ge 0}, \quad |\boldsymbol\alpha| = \sum_{i=1}^{d} \alpha_i.
 $$
 
-The monomial basis for degree \( m \) can be written as:
+The monomial basis for degree $m$ can be written as:
 
 $$
 P_{|\boldsymbol\alpha| = m} = \{x^{\alpha_1} y^{\alpha_2} z^{\alpha_3}\}_{\boldsymbol\alpha}.
@@ -121,12 +121,11 @@ $$
 
 For example, in 2D ($d = 2$) with $p = 2$, the complete monomial basis can be written as $\boldsymbol P = [1, x, y, x^2, xy, y^2]$.
 
-> **Remark**
-> The monomial generation can be implemented recursively. Define $P(0) = C$ as the constant term. Higher-order monomials are then constructed by augmenting $P(n-1)$ with all combinations of $(\alpha_1, \alpha_2, \alpha_3)$ such that $\alpha_1 + \alpha_2 + \alpha_3 = n$. That is,
->
-> $$
-> \boldsymbol P(n) = \boldsymbol P(n-1) \cup \{x^{\alpha_1} y^{\alpha_2} z^{\alpha_3} \mid \alpha_1 + \alpha_2 + \alpha_3 = n\}.
-> $$
+!alert note
+The monomial generation can be implemented recursively. Define $P(0) = C$ as the constant term. Higher-order monomials are then constructed by augmenting $P(n-1)$ with all combinations of $(\alpha_1, \alpha_2, \alpha_3)$ such that $\alpha_1 + \alpha_2 + \alpha_3 = n$. That is,
+$$
+\boldsymbol P(n) = \boldsymbol P(n-1) \cup \{x^{\alpha_1} y^{\alpha_2} z^{\alpha_3} \mid \alpha_1 + \alpha_2 + \alpha_3 = n\}.
+$$
 
 The fitting process solves a least-squares problem. In matrix form, it can be expressed as
 
@@ -145,7 +144,7 @@ $$
 
 where $u(\boldsymbol x_i)$ is the interpolated variable value at the quadrature point $\boldsymbol x_i$.
 
-> **Remark**
-> For least-squares fitting with the same patch of elements, the computed coefficients $\boldsymbol c$ can be cached and reused to reduce computational overhead.
+!alert note
+For least-squares fitting with the same patch of elements, the computed coefficients $\boldsymbol c$ can be cached and reused to reduce computational overhead.
 
 Once the least-squares problem is solved, the fitted polynomial is used to extrapolate the solution onto the *updated active* domain by projecting the polynomial.

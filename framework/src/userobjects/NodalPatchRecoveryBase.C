@@ -46,8 +46,11 @@ NodalPatchRecoveryBase::NodalPatchRecoveryBase(const InputParameters & parameter
     _patch_polynomial_order(
         static_cast<unsigned int>(getParam<MooseEnum>("patch_polynomial_order"))),
     _multi_index(MathUtils::multiIndex(_mesh.dimension(), _patch_polynomial_order)),
-    _q(_multi_index.size())
+    _q(_multi_index.size()),
+    _distributed_mesh(_mesh.isDistributedMesh()),
+    _proc_ids(n_processors())
 {
+  std::iota(_proc_ids.begin(), _proc_ids.end(), 0);
 }
 
 Real
@@ -65,7 +68,11 @@ NodalPatchRecoveryBase::getCoefficients(const std::vector<dof_id_type> & elem_id
 {
   // Check cache
   std::vector<dof_id_type> key = elem_ids;
+
+  // Sort and remove duplicates
   std::sort(key.begin(), key.end());
+  key.erase(std::unique(key.begin(), key.end()), key.end());
+
   if (key == _cached_elem_ids)
     return _cached_coef;
   else
@@ -81,11 +88,13 @@ NodalPatchRecoveryBase::getCoefficients(const std::vector<dof_id_type> & elem_id
     RealEigenVector b = RealEigenVector::Zero(_q);
     for (auto elem_id : elem_ids)
     {
-      if (!hasBlocks(_mesh.elemPtr(elem_id)->subdomain_id()))
-        mooseError("Element with id = ",
-                   elem_id,
-                   " is not in the block. "
-                   "Please use nodalPatchRecovery with elements in the block only.");
+      const auto elem = _mesh.elemPtr(elem_id);
+      if (elem /*prevent segmentation fault in distributed mesh*/)
+        if (!hasBlocks(elem->subdomain_id()))
+          mooseError("Element with id = ",
+                     elem_id,
+                     " is not in the block. "
+                     "Please use nodalPatchRecovery with elements in the block only.");
 
       if (_Ae.find(elem_id) == _Ae.end())
         mooseError("Missing entry for elem_id = ", elem_id, " in _Ae.");
@@ -177,6 +186,11 @@ NodalPatchRecoveryBase::gatherSendList(
 {
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
 
+  std::vector<std::pair<processor_id_type, dof_id_type>> query_pairs;
+
+  typedef std::pair<processor_id_type, dof_id_type> PidElemPair;
+  std::unordered_map<processor_id_type, std::vector<PidElemPair>> push_data;
+
   auto add_to_query = [&](const libMesh::Elem * elem)
   {
     if (hasBlocks(elem->subdomain_id()) && elem->processor_id() != processor_id())
@@ -184,11 +198,39 @@ NodalPatchRecoveryBase::gatherSendList(
   };
 
   if (specific_elems)
+  {
     for (const auto & entry : *specific_elems)
     {
       const auto * elem = _mesh.elemPtr(entry);
-      add_to_query(elem);
+      if (_distributed_mesh)
+      {
+        if (!elem)
+          continue; // Prevent segmentation fault in distributed mesh
+
+        if (hasBlocks(elem->subdomain_id()))
+          for (processor_id_type pid = 0; pid < n_processors(); ++pid)
+            if (pid != processor_id())
+              push_data[pid].push_back(std::make_pair(elem->processor_id(), elem->id()));
+      }
+      else
+        // For non-distributed meshes, element information is always accessible (not nullptr and
+        // processor ID can be retrieved), even if the element does not belong to the current
+        // processor.
+        add_to_query(elem);
     }
+
+    if (_distributed_mesh)
+    {
+      auto push_receiver =
+          [&](const processor_id_type, const std::vector<PidElemPair> & received_data)
+      {
+        for (const auto & [pid, id] : received_data)
+          query_ids[pid].push_back(id);
+      };
+
+      Parallel::push_parallel_vector_data(_mesh.comm(), push_data, push_receiver);
+    }
+  }
   else
     for (const auto & elem : _fe_problem.getEvaluableElementRange())
       add_to_query(elem);

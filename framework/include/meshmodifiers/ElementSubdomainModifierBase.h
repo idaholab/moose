@@ -244,8 +244,4 @@ private:
 
   /// @brief List of variable names for which overridden DOF values should be restored.
   std::vector<VariableName> _vars_to_restore_overridden_dofs;
-
-private:
-  /// Construct a KD-tree from the given elements
-  std::unique_ptr<KDTree> constructKDTreeFromElements(const std::vector<dof_id_type> & elems);
 };
