@@ -12,7 +12,7 @@
 #include "FluxBasedStrainIncrement.h"
 
 /**
- * DeviatoricStrainIncrement computes strain increment based on flux (vacancy)
+ * DeviatoricStrainIncrement computes strain increment based on flux (vacancy) gradient
  * Forest et. al. MSMSE 2015
  */
 class DeviatoricStrainIncrement : public FluxBasedStrainIncrement

@@ -32,5 +32,5 @@ DeviatoricStrainIncrement::computeQpProperties()
 {
   FluxBasedStrainIncrement::computeQpProperties();
 
-  _strain_increment[_qp] += (1.0/n) * ((_flux_grad_tensor.trace()) * (1.0 - _gb[_qp]) * _Identity_tensor) * _dt; 
+  _strain_increment[_qp] += (1.0/n) * ((_flux_grad_tensor.trace()) * (1.0 - _gb[_qp]) * _Identity_tensor) * _dt; //This is the hydrostatic part of strain rate tensor
 }
