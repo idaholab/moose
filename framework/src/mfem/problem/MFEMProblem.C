@@ -749,6 +749,12 @@ MFEMProblem::SetUpAMR()
   {
     mooseError("Failed to setup amr");
   }
+
+  // Check the mesh is non-conforming
+  if (_problem_data.pmesh->Conforming())
+  {
+    mooseError("Amr requires mesh to be non-conforming");
+  }
 }
 
 void

@@ -31,6 +31,8 @@ MFEMMesh::validParams()
   params.addParam<std::string>("displacement", "Optional variable to use for mesh displacement.");
   params.addParam<bool>(
       "nc_simplices", true, "For simplicial meshes, enable/disable nonconforming refinement.");
+  params.addParam<bool>(
+      "use_amr", false, "Determines whether we enable AMR (forces the mesh to be nonconforming)");
 
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
@@ -82,8 +84,10 @@ MFEMMesh::buildMesh()
   }
 
   // Make sure mesh is in non-conforming mode to enable local refinement
-  // of quadrilaterals/hexahedra (c.f. MFEM example 6p)
-  if (isParamSetByUser("nc_simplices"))
+  // of quadrilaterals/hexahedra (c.f. MFEM example 6p). The argument
+  // (true/false) determines whether a simplex mesh is considered to be
+  // non-conforming.
+  if (getParam<bool>("use_amr"))
   {
     mfem_ser_mesh.EnsureNCMesh(getParam<bool>("nc_simplices"));
   }
