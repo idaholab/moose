@@ -10,58 +10,58 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 # [AuxVariables]
-#   [./prop1]
+#   [prop1]
 #     order = SECOND
 #     family = MONOMIAL
-#   [../]
+#   []
 # []
 
 # [AuxKernels]
-#   [./prop1_output]
+#   [prop1_output]
 #     type = MaterialRealAux
 #     variable = prop1
 #     property = thermal_conductivity
-#   [../]
+#   []
 # []
 
 [KokkosKernels]
-  [./heat]
+  [heat]
     type = KokkosMatDiffusionTest
     variable = u
     prop_name = thermal_conductivity
-  [../]
-  [./ie]
+  []
+  [ie]
     type = KokkosTimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     boundary = 3
     value = 0.0
-  [../]
-  [./right]
+  []
+  [right]
     type = KokkosMTBC
     variable = u
     boundary = 1
     grad = 1.0
     prop_name = thermal_conductivity
-  [../]
+  []
 []
 
 [KokkosMaterials]
-  [./stateful]
+  [stateful]
     type = KokkosStatefulSpatialTest
     block = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -73,9 +73,9 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     elemental_as_nodal = true
     execute_elemental_on = none
-  [../]
+  []
 []

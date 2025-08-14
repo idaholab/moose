@@ -8,46 +8,46 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     initial_condition = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./v]
+  [v]
     initial_condition = 1
-  [../]
+  []
 []
 
 [KokkosKernels]
-  [./diff]
+  [diff]
     type = KokkosMatDiffusionTest
     variable = u
     prop_name = diffusion
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = KokkosDirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [KokkosMaterials]
-  [./coupling_u]
+  [coupling_u]
     type = KokkosVarCouplingMaterial
     block = 0
     var = u
-  [../]
+  []
 []
 
 [Executioner]

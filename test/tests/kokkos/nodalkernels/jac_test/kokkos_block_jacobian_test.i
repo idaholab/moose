@@ -6,58 +6,58 @@
 []
 
 [Variables]
-  [./u_x]
-  [../]
-  [./u_y]
-  [../]
+  [u_x]
+  []
+  [u_y]
+  []
 []
 
 [KokkosKernels]
-  [./diff_x]
+  [diff_x]
     type = KokkosCoefDiffusion
     variable = u_x
     coef = 0.1
-  [../]
-  [./diff_y]
+  []
+  [diff_y]
     type = KokkosCoefDiffusion
     variable = u_y
     coef = 0.1
-  [../]
+  []
 []
 
 [KokkosNodalKernels]
-  [./test_y]
+  [test_y]
     type = KokkosJacobianCheck
     variable = u_y
-  [../]
-  [./test_x]
+  []
+  [test_x]
     type = KokkosJacobianCheck
     variable = u_x
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./left_x]
+  [left_x]
     type = KokkosDirichletBC
     variable = u_x
     preset = false
     boundary = left
     value = 0
-  [../]
-  [./right_x]
+  []
+  [right_x]
     type = KokkosDirichletBC
     variable = u_x
     preset = false
     boundary = right
     value = 1
-  [../]
-  [./left_y]
+  []
+  [left_y]
     type = KokkosDirichletBC
     variable = u_y
     preset = false
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]
