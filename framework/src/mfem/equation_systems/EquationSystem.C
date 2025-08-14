@@ -325,6 +325,8 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
   FormLinearSystem(_jacobian, trueX, trueRHS);
 }
 
+void CopyVec(const mfem::Vector & x, mfem::Vector & y){ y = x;}
+
 void applyDirchValues(const mfem::Vector &k, mfem::Vector &y, mfem::Array<int> dofs)
 {
   if(dofs.Size() > 0){ //Only apply if there are constrained DOF's
