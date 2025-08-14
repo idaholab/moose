@@ -41,7 +41,7 @@ void
 VolumeStrainIncrement::computeQpProperties()
 {
   FluxBasedStrainIncrement::computeFluxGradTensor();
-  auto strain_rate = ((_Lambda_prefactor_J[_qp])*(_flux_grad_tensor.trace()) * _Identity_tensor) + ((_Lambda_prefactor_P[_qp]) * _source[_qp] * _Identity_tensor); 
+  auto strain_rate = ((_Lambda_prefactor_J[_qp])*(_flux_grad_tensor.trace()) * _Identity_tensor) + ((_Lambda_prefactor_P[_qp]) * _source[_qp] * _Identity_tensor); //Lambda's are the relaxation factors and trace of flux grad tensor gives divergence of flux. 
   _strain_increment[_qp] = strain_rate * _dt;
 }
 
