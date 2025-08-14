@@ -23,14 +23,7 @@ public:
   DeviatoricStrainIncrement(const InputParameters & parameters);
 
 protected:
-  // virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
 
-  // virtual void computeFluxGradTensor();
-  virtual void computeIdentityTensor();
-
   const Real n;
-
-  // RankTwoTensor _flux_grad_tensor;
-  RankTwoTensor _Identity_tensor;
 };

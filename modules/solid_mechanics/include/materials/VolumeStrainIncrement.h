@@ -12,7 +12,7 @@
 #include "FluxBasedStrainIncrement.h"
 
 /**
- * MyFluxBasedStrainIncrementVolcorrLocalConcExplicit computes strain increment based on flux (vacancy)
+ * VolumeStrainIncrement computes strain increment based on flux (vacancy)
  * Forest et. al. MSMSE 2015
  */
 class VolumeStrainIncrement : public FluxBasedStrainIncrement
@@ -23,14 +23,10 @@ public:
   VolumeStrainIncrement(const InputParameters & parameters);
 
 protected:
+  virtual void initQpStatefulProperties();
   virtual void computeQpProperties();
-
-  virtual void computeIdentityTensor();
 
   const MaterialProperty<Real> & _Lambda_prefactor_J;
   const MaterialProperty<Real> & _Lambda_prefactor_P;
-  const VariableValue & _derivative_conc;
   const MaterialProperty<Real> & _source;
-
-  RankTwoTensor _Identity_tensor;
 };

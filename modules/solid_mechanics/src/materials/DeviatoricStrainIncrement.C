@@ -17,7 +17,7 @@ DeviatoricStrainIncrement::validParams()
 {
   InputParameters params = FluxBasedStrainIncrement::validParams();
   params.addClassDescription("Compute deviatoric strain increment based on flux");
-  params.addRequiredParam<Real>("dimension","Dimensionality of the problem"); 
+  params.addRequiredParam<Real>("dimension","Dimensionality of the problem");
   return params;
 }
 
@@ -31,28 +31,6 @@ void
 DeviatoricStrainIncrement::computeQpProperties()
 {
   FluxBasedStrainIncrement::computeQpProperties();
-  
-  computeIdentityTensor();
 
-  _strain_increment[_qp] += (1.0/n) * ((_flux_grad_tensor.trace()) * _Identity_tensor) * (1.0 - _gb[_qp]) * _dt;
-
-}
-
-void
-DeviatoricStrainIncrement::computeIdentityTensor()
-{
-  RankTwoTensor iden(RankTwoTensor::initIdentity);
-  _Identity_tensor.zero();
-
-  _Identity_tensor.fillRow(0, iden.row(0));
-
-  if (_has_yflux)
-  {
-    _Identity_tensor.fillRow(1, iden.row(1));
-  }
-
-  if (_has_zflux)
-  {
-    _Identity_tensor.fillRow(2, iden.row(2));
-  }
+  _strain_increment[_qp] += (1.0/n) * ((_flux_grad_tensor.trace()) * (1.0 - _gb[_qp]) * _Identity_tensor) * _dt; 
 }

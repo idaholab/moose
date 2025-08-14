@@ -27,10 +27,6 @@
 [AuxVariables]
   [u]
   []
-  [./Timederivative_cv]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [grad_jx_x]
     order = FIRST
     family = MONOMIAL
@@ -110,11 +106,6 @@
 
 #Test
 [AuxKernels]
-  [Timederivative_cv]
-    type = TimeDerivativeAux
-    variable = Timederivative_cv
-    functor = c_v
-  []
   [flux_x_x]
     type = VariableGradientComponent
     gradient_variable = jx_v
@@ -167,31 +158,30 @@
     prop_values = 1
   [../]
   #Creep strain increments
-  [diffuse_strain_increment]
+  [deviatoric_strain_increment]
     type = DeviatoricStrainIncrement
     dimension = 2
     xflux = jx_v
     yflux = jy_v
-    property_name = diffuse_strain
-    output_properties = 'diffuse_strain'
+    property_name = deviatoric_strain
+    output_properties = 'deviatoric_strain'
     outputs = 'exodus'
   []
-  [volume_strain_increment]
+  [volumetric_strain_increment]
     type = VolumeStrainIncrement
     xflux = jx_v
     yflux = jy_v
-    TimederivativeConc = Timederivative_cv
     Lambda_Prefactor_J = Lambda_J
     Lambda_Prefactor_P = Lambda_P
     Source = source
-    property_name = volume_strain
-    output_properties = 'volume_strain'
+    property_name = volumetric_strain
+    output_properties = 'volumetric_strain'
     outputs = 'exodus'
   []
   [diffuse_creep_strain]
     type = SumTensorIncrements
     tensor_name = creep_strain
-    coupled_tensor_increment_names = 'diffuse_strain volume_strain'
+    coupled_tensor_increment_names = 'deviatoric_strain volumetric_strain'
     outputs = 'exodus'
   []
   [./strain]
@@ -261,5 +251,5 @@
 [Outputs]
   exodus = true
   checkpoint = true
-  file_base = Test_Volume
+  file_base = Testing_flux_separate_inheritedbothPJ
 []
