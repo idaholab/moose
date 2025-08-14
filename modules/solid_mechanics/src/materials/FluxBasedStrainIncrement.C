@@ -70,7 +70,7 @@ FluxBasedStrainIncrement::computeFluxGradTensor()
 }
 
 void
-FluxBasedStrainIncrement::computeIdentityTensor()
+FluxBasedStrainIncrement::computeIdentityTensor() //Identity tensor defined here, is added here, which is to be used in DeviatoricStrainIncrement and VolumeStrainIncrement objects which are inherited from FluxBasedStrainIncrement.
 {
   RankTwoTensor iden(RankTwoTensor::initIdentity);
   _Identity_tensor.zero();
