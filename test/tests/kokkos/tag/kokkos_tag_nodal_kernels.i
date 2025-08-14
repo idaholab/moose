@@ -6,60 +6,60 @@
 []
 
 [Variables]
-  [./u]
-  [../]
-  [./nodal_ode]
-  [../]
+  [u]
+  []
+  [nodal_ode]
+  []
 []
 
 [KokkosKernels]
-  [./diff]
+  [diff]
     type = KokkosDiffusion
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
-  [./time]
+  []
+  [time]
     type = KokkosTimeDerivative
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
 []
 
 [KokkosNodalKernels]
-  [./td]
+  [td]
     type = KokkosTimeDerivativeNodalKernel
     variable = nodal_ode
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
-  [./constant_rate]
+  []
+  [constant_rate]
     type = KokkosConstantRate
     variable = nodal_ode
     rate = 1.0
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1 vec_tag2'
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 0
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
-  [./right]
+  []
+  [right]
     type = KokkosDirichletBC
     variable = u
     boundary = right
     value = 10
     extra_matrix_tags = 'mat_tag1 mat_tag2'
     extra_vector_tags = 'vec_tag1'
-  [../]
+  []
 []
 
 [Problem]
@@ -72,31 +72,31 @@
 []
 
 [AuxVariables]
-  [./tag_variable1]
+  [tag_variable1]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./tag_variable2]
+  [tag_variable2]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./TagVectorAux1]
+  [TagVectorAux1]
     type = TagVectorAux
     variable = tag_variable1
     v = nodal_ode
     vector_tag = vec_tag2
-  [../]
+  []
 
-  [./TagVectorAux2]
+  [TagVectorAux2]
     type = TagMatrixAux
     variable = tag_variable2
     v = u
     matrix_tag = mat_tag2
-  [../]
+  []
 []
 
 [Executioner]

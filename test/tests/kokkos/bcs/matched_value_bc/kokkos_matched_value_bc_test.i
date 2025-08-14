@@ -1,10 +1,10 @@
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 # Solves a pair of coupled diffusion equations where u=v on the boundary
@@ -12,56 +12,56 @@
 [Variables]
   active = 'u v'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 3
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
     initial_condition = 2
-  [../]
+  []
 []
 
 [KokkosKernels]
   active = 'diff_u diff_v'
 
-  [./diff_u]
+  [diff_u]
     type = KokkosDiffusion
     variable = u
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = KokkosDiffusion
     variable = v
-  [../]
+  []
 []
 
 [KokkosBCs]
   active = 'right_v left_u'
 
-  [./right_v]
+  [right_v]
     type = KokkosDirichletBC
     variable = v
     boundary = 1
     value = 3
-  [../]
+  []
 
-  [./left_u]
+  [left_u]
     type = KokkosMatchedValueBC
     variable = u
     boundary = 3
     v = v
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./precond]
+  [precond]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

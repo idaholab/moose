@@ -12,43 +12,43 @@
 [Variables]
   active = 'convected'
 
-  [./convected]
+  [convected]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [KokkosKernels]
   active = 'diff conv'
 
-  [./diff]
+  [diff]
     type = KokkosDiffusionPrecompute
     variable = convected
-  [../]
+  []
 
-  [./conv]
+  [conv]
     type = KokkosConvectionPrecompute
     variable = convected
     velocity = '1.0 0.0 0.0'
-  [../]
+  []
 []
 
 [KokkosBCs]
   active = 'bottom top'
 
-  [./bottom]
+  [bottom]
     type = KokkosDirichletBC
     variable = convected
     boundary = 'left'
     value = 0
-  [../]
+  []
 
-  [./top]
+  [top]
     type = KokkosDirichletBC
     variable = convected
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

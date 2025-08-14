@@ -12,52 +12,52 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [KokkosKernels]
-  [./diff]
+  [diff]
     type = KokkosCoefDiffusion
     variable = u
     coef = 0.1
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     boundary = 'left'
     value = 1
-  [../]
+  []
 
-  [./right]
+  [right]
     type = KokkosDirichletBC
     variable = u
     boundary = 'right'
     value = 2
-  [../]
+  []
 []
 
 [KokkosMaterials]
-  [./mat1]
+  [mat1]
     type = KokkosCoupledMaterial
     mat_prop = 'prop-a'
     coupled_mat_prop = 'prop-b'
     use_old_prop = true
     block = 0
-  [../]
+  []
 
-  [./mat2]
+  [mat2]
     type = KokkosCoupledMaterial
     mat_prop = 'prop-b'
     coupled_mat_prop = 'prop-a'
     use_old_prop = false
     block = 0
-  [../]
+  []
 []
 
 [Executioner]
