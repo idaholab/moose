@@ -6,73 +6,73 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [KokkosKernels]
-  [./diff_u]
+  [diff_u]
     type = KokkosDiffusion
     variable = u
-  [../]
+  []
 
-  [./coupled_force_u]
+  [coupled_force_u]
     type = KokkosCoupledForce
     variable = u
     v = v
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = KokkosDiffusion
     variable = v
-  [../]
+  []
 []
 
 [KokkosBCs]
   # BCs on left
   # u: u=1
   # v: v=2
-  [./left_u]
+  [left_u]
     type = KokkosDirichletBC
     variable = u
     boundary = 3
     value = 1
-  [../]
+  []
 
-  [./left_v]
+  [left_v]
     type = KokkosDirichletBC
     variable = v
     boundary = 3
     value = 2
-  [../]
+  []
 
   # BCs on right
   # u: c*u + u^2 + v^2 = 9
   # v: no flux
-  [./right_u]
+  [right_u]
     type = KokkosCoupledDirichletBC
     variable = u
     boundary = 1
     value = 9
     v=v
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./precond]
+  [precond]
     type = SMP
     # 'full = true' is required for computeOffDiagJacobian() to get
     # called.  If you comment this out, you should see that this test
     # requires a different number of linear and nonlinear iterations.
     full = true
-  [../]
+  []
 []
 
 [Executioner]
