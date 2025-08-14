@@ -274,15 +274,21 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
   /// Create attribute set labelling the entire closed geometry
   attr_sets.SetAttributeSet(_closed_subdomain, getSubdomainAttributes());
   /// Add the new domain attributes to new attribute sets
-  for (int i = 0; i < global_new_attrs.Size(); ++i)
+  std::set<std::string> attr_set_names = attr_sets.GetAttributeSetNames();
+  for (int old_attr = 1; old_attr < global_new_attrs.Size() + 1; ++old_attr)
   {
-    int attr = global_new_attrs[i];
-    if (attr>old_max_attr)
+    int new_attr = global_new_attrs[old_attr - 1];
+    if (new_attr > old_max_attr)
     {
-      attr_sets.AddToAttributeSet(_transition_subdomain, attr);
-      attr_sets.AddToAttributeSet(_closed_subdomain, attr);    
+      attr_sets.AddToAttributeSet(_transition_subdomain, new_attr);
+      for (auto const & attr_set_name : attr_set_names)
+      {
+        const mfem::Array<int> & attr_set = attr_sets.GetAttributeSet(attr_set_name);
+        if (attr_set.Find(old_attr) != -1)
+          attr_sets.AddToAttributeSet(attr_set_name, new_attr);
+      }
     }
-  }  
+  }
 
   /// Create boundary attribute set labelling the exterior of the newly created 
   /// transition region, excluding the cut  
