@@ -1,0 +1,14 @@
+[Tests] 
+ [bodyforce]
+    requirement = 'The system shall provide an ability to solve a 2D diffusion problem including a volumetric source term.'
+    type = 'Exodiff'
+    input = '2D_ADLaplacianSplit_bodyforce.i'
+    exodiff = '2D_ADLaplacianSplit_bodyforce_out.e'
+ []
+ [neumannbc]
+    requirement = 'The system shall provide an ability to solve a 2D diffusion problem with a neumann boundary condition.'
+    type = 'Exodiff'
+    input = '2D_ADLaplacianSplit_neumannbc.i'
+    exodiff = '2D_ADLaplacianSplit_neumannbc_out.e'
+ []
+[] 
