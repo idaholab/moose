@@ -10,53 +10,53 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [KokkosKernels]
-  [./diff]
+  [diff]
     type = KokkosDiffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./coupled_bc_var]
-  [../]
+  [coupled_bc_var]
+  []
 []
 
 [ICs]
-  [./coupled_bc_var]
+  [coupled_bc_var]
     type = FunctionIC
     variable = coupled_bc_var
     function = set_coupled_bc_var
-  [../]
+  []
 []
 
 [Functions]
-  [./set_coupled_bc_var]
+  [set_coupled_bc_var]
     type = ParsedFunction
     expression = 'y - 0.5'
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = KokkosCoupledVarNeumannBC
     variable = u
     boundary = 1
     v = coupled_bc_var
-  [../]
+  []
 []
 
 [Executioner]

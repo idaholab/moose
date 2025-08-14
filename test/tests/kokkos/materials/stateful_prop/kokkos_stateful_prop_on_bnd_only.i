@@ -10,54 +10,54 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [KokkosKernels]
-  [./heat]
+  [heat]
     type = KokkosMatDiffusionTest
     variable = u
     prop_name = thermal_conductivity
-  [../]
+  []
 
-  [./ie]
+  [ie]
     type = KokkosTimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [KokkosBCs]
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     boundary = left
     value = 0.0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = KokkosMTBC
     variable = u
     boundary = right
     grad = 1.0
     prop_name = thermal_conductivity
-  [../]
+  []
 []
 
 [KokkosMaterials]
-  [./volatile]
+  [volatile]
     type = KokkosGenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = 10
     block = 0
-  [../]
+  []
 
-  [./stateful_on_boundary]
+  [stateful_on_boundary]
     type = KokkosStatefulSpatialTest
     boundary = right
-  [../]
+  []
 []
 
 [Executioner]

@@ -12,32 +12,32 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [KokkosKernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = KokkosDiffusion
     variable = u
-  [../]
+  []
 []
 
 [KokkosBCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = KokkosDirichletBC
     variable = u
     boundary = 3
     value = 0.0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = KokkosConvectiveFluxBC
     variable = u
     boundary = 1
@@ -45,7 +45,7 @@
     initial = 10
     final = 20
     duration = 10
-  [../]
+  []
 []
 
 [Executioner]

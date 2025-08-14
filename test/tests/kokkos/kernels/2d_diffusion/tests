@@ -1,7 +1,7 @@
 [Tests]
   issues = '#30655'
 
-  [./testdirichlet]
+  [testdirichlet]
     type = Exodiff
     input = 'kokkos_2d_diffusion_test.i'
     exodiff = 'kokkos_2d_diffusion_test_out.e'
@@ -9,9 +9,9 @@
     design = '/DirichletBC.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
-  [../]
+  []
 
-  [./testneumann]
+  [testneumann]
     type = Exodiff
     input = 'kokkos_2d_diffusion_neumannbc_test.i'
     exodiff = 'kokkos_2d_diffusion_neumannbc_test_out.e'
@@ -19,9 +19,9 @@
     design = '/NeumannBC.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
-  [../]
+  []
 
-  [./testbodyforce]
+  [testbodyforce]
     type = Exodiff
     input = 'kokkos_2d_diffusion_bodyforce_test.i'
     exodiff = 'kokkos_2d_diffusion_bodyforce_test_out.e'
@@ -29,9 +29,9 @@
     design = '/BodyForce.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
-  [../]
+  []
 
-  [./test_jacobian]
+  [test_jacobian]
     type = PetscJacobianTester
     input = 'kokkos_2d_diffusion_test.i'
     cli_args = 'Outputs/exodus=false'
@@ -40,9 +40,9 @@
     design = 'framework_stp.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
-  [../]
+  []
 
-  [./test_force_iteration]
+  [test_force_iteration]
     type = Exodiff
     input = 'kokkos_2d_diffusion_test.i'
     exodiff = 'kokkos_2d_diffusion_test_out.e'
@@ -52,9 +52,9 @@
     design = 'Transient.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
-  [../]
+  []
 
-  [./actual_linear_solver]
+  [actual_linear_solver]
     type = RunApp
     input = 'kokkos_2d_diffusion_test.i'
     cli_args = 'Executioner/solve_type=linear Outputs/exodus=false'
@@ -63,5 +63,5 @@
     design = 'FEProblem.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
-  [../]
+  []
 []

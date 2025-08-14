@@ -2,12 +2,12 @@
   issues = '#30655'
   design = 'syntax/BCs/index.md'
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'kokkos_matched_value_bc_test.i'
     exodiff = 'kokkos_matched_value_bc_test_out.e'
     requirement = 'The Kokkos system shall support matching variable values on a boundary.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
-  [../]
+  []
 []
