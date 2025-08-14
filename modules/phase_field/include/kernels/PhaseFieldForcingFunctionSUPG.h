@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.inl.gov
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,17 +12,20 @@
 #include "ADKernelGrad.h"
 
 /**
- * SUPG stabilization for the advection portion of the level set equation.
+ * SUPG stabilization term for a forcing function.
  */
-class PhaseFieldAdvectionSUPG : public ADKernelGrad
+class PhaseFieldForcingFunctionSUPG : public ADKernelGrad
 {
 public:
   static InputParameters validParams();
 
-  PhaseFieldAdvectionSUPG(const InputParameters & parameters);
+  PhaseFieldForcingFunctionSUPG(const InputParameters & parameters);
 
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;
+
+  /// Function value
+  const Function & _function;
 
   /// Velocity vector variable
   const ADVectorVariableValue & _velocity;
