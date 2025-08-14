@@ -1056,6 +1056,8 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
   // so we gather them across all processors
   _mesh.comm().allgather(patch_elems);
 
+  // Remove duplicates from the patch elements (espcially important for POLYNOMIAL_NEARBY)
+  std::sort(patch_elems.begin(), patch_elems.end());
   patch_elems.erase(std::unique(patch_elems.begin(), patch_elems.end()), patch_elems.end());
 }
 
