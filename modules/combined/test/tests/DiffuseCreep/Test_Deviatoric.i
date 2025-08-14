@@ -193,14 +193,14 @@
     dimension = 2
     xflux = jx_v
     yflux = jy_v
-    property_name = diffuse_strain
-    output_properties = 'diffuse_strain'
+    property_name = deviatoric_creep_strain_rate
+    output_properties = 'deviatoric_creep_strain_rate'
     outputs = 'exodus'
   []
   [diffuse_creep_strain]
     type = SumTensorIncrements
     tensor_name = creep_strain
-    coupled_tensor_increment_names = 'diffuse_strain'
+    coupled_tensor_increment_names = 'deviatoric_creep_strain_rate'
     outputs = 'exodus'
   []
  [./strain]

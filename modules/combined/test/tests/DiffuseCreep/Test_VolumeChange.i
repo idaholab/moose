@@ -1,3 +1,8 @@
+#This test demonstrates the volumetric strain increments under both lattice site conserved and non-conserved conditions.
+#VolumeStrainIncrement class in this test has been inherited from FluxBasedStrainIncrement object. 
+#For this test, both the deviatoric part of strain rate tensor (calculated by DeviatoricStrainIncrement) and volumetric strain is added using SumTensorIncrement object. 
+#A symmetrical geometry is considered with a constant source of vacancies. 
+
 [Mesh]
   [annular]
     type = AnnularMeshGenerator
@@ -85,14 +90,14 @@
     value = 1e-5
   []
   [./flux_x]
-    type = GenericGradientComponent #Only solves expression J = -DgradU (where D = 1)
+    type = GenericGradientComponent #Only solves expression J = -DgradU (where D = 1 (given by factor option))
     v = c_v
     variable = jx_v
     component = 0
     factor = 1
   [../]
   [./flux_y]
-    type = GenericGradientComponent #Only solves expression J = -DgradU (where D = 1)
+    type = GenericGradientComponent #Only solves expression J = -DgradU (where D = 1 (given by factor option))
     v = c_v
     variable = jy_v
     component = 1
@@ -251,5 +256,5 @@
 [Outputs]
   exodus = true
   checkpoint = true
-  file_base = Testing_flux_separate_inheritedbothPJ
+  file_base = Test_volumetric
 []
