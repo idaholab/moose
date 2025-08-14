@@ -12,8 +12,8 @@
 #include "FluxBasedStrainIncrement.h"
 
 /**
- * VolumeStrainIncrement computes strain increment based on flux (vacancy)
- * Forest et. al. MSMSE 2015
+ * VolumeStrainIncrement computes strain increment based on flux divergence and source for vacancy, which accounts for swelling (non conserved) and lattice site creation
+
  */
 class VolumeStrainIncrement : public FluxBasedStrainIncrement
 {
