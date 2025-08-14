@@ -189,7 +189,7 @@ protected:
 
   mutable mfem::OperatorHandle _jacobian;
   mutable mfem::Vector _trueRHS;
-  mutable mfem::BlockVector _trueBlockX, _trueBlockRHS, _trueBlockdXdt, _trueBlockX_Old;
+  mutable mfem::BlockVector _trueBlockRHS, _trueBlockdXdt;
 
   Moose::MFEM::GridFunctions * _gfuncs;
   mfem::Array<int> * _block_true_offsets;
