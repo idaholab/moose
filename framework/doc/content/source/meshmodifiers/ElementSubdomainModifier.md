@@ -105,11 +105,12 @@ There are two strategies for (re)initializing variables on the *updated active* 
 
 However, directly imposing such initial conditions often poses significant challenges for the solution procedure. For nonlinear material models, suboptimal initial guess could hinder convergence of the material model and/or that of the global solve. For evaluations on the deformed mesh, e.g., when geometric nonlinearity or mechanical contact is enabled, a bad initial condition of displacement could lead to ill-conditioned elements, and in extreme cases, could lead to highly skewed elements with inverted Jacobians.
 
-The second strategy aims to address these challenges. The key idea is to initialize the solution on the *updated active* domain leveraging the solution information from the *stationary active* domain. In the current implementation, we adopt the Zienkiewicz-Zhu patch recovery technique to initialize the solution field for the DoFs on *updated active* elements.
+The second strategy aims to address these challenges. The key idea is to initialize the solution on the *updated active* domain leveraging the solution information from the *stationary active* domain. In the current implementation, we adopt the Zienkiewicz–Zhu patch recovery technique to initialize the solution field for the DoFs on *updated active* elements.
 
 The initialization algorithm starts with constructing a patch of elements from the *stationary active* domain. By definition, solution to the variable of interest already exists on the patch. The solution is first interpolated onto the quadrature points on the *stationary active* domain, and a polynomial is fitted against the interpolated variable values using a least-squares fit. A complete set of monomials $P_{\boldsymbol\alpha}$ up to a given order $p$ is used as the basis of the polynomial. Let $\boldsymbol\alpha$ be a multi-index of dimension $d$, where
+
 $$
-\boldsymbol\alpha = (\alpha_1, ..., \alpha_d), \quad \alpha_i \in \mathbb{N}_{\geq 0}, \quad |\boldsymbol\alpha| = \sum_{i=1}^{d} \alpha_i.
+\boldsymbol\alpha = (\alpha_1, ..., \alpha_d), \quad \alpha_i \in \mathbb{N}_{\ge 0}, \quad |\boldsymbol\alpha| = \sum_{i=1}^{d} \alpha_i.
 $$
 
 The monomial basis for degree \( m \) can be written as:
@@ -122,11 +123,13 @@ For example, in 2D ($d = 2$) with $p = 2$, the complete monomial basis can be wr
 
 > **Remark**
 > The monomial generation can be implemented recursively. Define $P(0) = C$ as the constant term. Higher-order monomials are then constructed by augmenting $P(n-1)$ with all combinations of $(\alpha_1, \alpha_2, \alpha_3)$ such that $\alpha_1 + \alpha_2 + \alpha_3 = n$. That is,
+>
 > $$
 > \boldsymbol P(n) = \boldsymbol P(n-1) \cup \{x^{\alpha_1} y^{\alpha_2} z^{\alpha_3} \mid \alpha_1 + \alpha_2 + \alpha_3 = n\}.
 > $$
 
 The fitting process solves a least-squares problem. In matrix form, it can be expressed as
+
 $$
 \boldsymbol A \boldsymbol c = \boldsymbol b
 $$
