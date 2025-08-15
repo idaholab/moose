@@ -1,7 +1,9 @@
 #pragma once
 #include "NodalPatchRecoveryBase.h"
 
-/// Patch recovery from a coupled variable
+/**
+ * Patch recovery from a coupled variable
+ */
 class NodalPatchRecoveryVariable : public NodalPatchRecoveryBase
 {
 public:

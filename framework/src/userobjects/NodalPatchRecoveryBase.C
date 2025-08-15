@@ -57,56 +57,62 @@ Real
 NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
                                            const std::vector<dof_id_type> & elem_ids) const
 {
-  const RealEigenVector coef = getCoefficients(elem_ids);
+  const RealEigenVector coef = getCoefficientsNoCache(elem_ids); // const version
   // Compute the fitted nodal value
   RealEigenVector p = evaluateBasisFunctions(x);
   return p.dot(coef);
 }
 
 const RealEigenVector
-NodalPatchRecoveryBase::getCoefficients(const std::vector<dof_id_type> & elem_ids) const
+NodalPatchRecoveryBase::getCoefficientsNoCache(const std::vector<dof_id_type> & elem_ids) const
+{
+  auto elem_ids_reduced = removeDuplicates(elem_ids);
+
+  RealEigenVector coef = RealEigenVector::Zero(_q);
+  // Before we go, check if we have enough sample points for solving the least square fitting
+  if (_q_point.size() * elem_ids_reduced.size() < _q)
+    mooseError("There are not enough sample points to recover the nodal value, try reducing the "
+               "polynomial order or using a higher-order quadrature scheme.");
+
+  // Assemble the least squares problem over the patch
+  RealEigenMatrix A = RealEigenMatrix::Zero(_q, _q);
+  RealEigenVector b = RealEigenVector::Zero(_q);
+  for (auto elem_id : elem_ids_reduced)
+  {
+    const auto elem = _mesh.elemPtr(elem_id);
+    if (elem /*prevent segmentation fault in distributed mesh*/)
+      if (!hasBlocks(elem->subdomain_id()))
+        mooseError("Element with id = ",
+                   elem_id,
+                   " is not in the block. "
+                   "Please use nodalPatchRecovery with elements in the block only.");
+
+    if (_Ae.find(elem_id) == _Ae.end())
+      mooseError("Missing entry for elem_id = ", elem_id, " in _Ae.");
+    if (_be.find(elem_id) == _be.end())
+      mooseError("Missing entry for elem_id = ", elem_id, " in _be.");
+
+    A += libmesh_map_find(_Ae, elem_id);
+    b += libmesh_map_find(_be, elem_id);
+  }
+
+  // Solve the least squares fitting
+  coef = A.completeOrthogonalDecomposition().solve(b);
+
+  return coef;
+}
+
+const RealEigenVector
+NodalPatchRecoveryBase::getCoefficients(const std::vector<dof_id_type> & elem_ids)
 {
   // Check cache
-  std::vector<dof_id_type> key = elem_ids;
-
-  // Sort and remove duplicates
-  std::sort(key.begin(), key.end());
-  key.erase(std::unique(key.begin(), key.end()), key.end());
+  auto key = removeDuplicates(elem_ids);
 
   if (key == _cached_elem_ids)
     return _cached_coef;
   else
   {
-    RealEigenVector coef = RealEigenVector::Zero(_q);
-    // Before we go, check if we have enough sample points for solving the least square fitting
-    if (_q_point.size() * elem_ids.size() < _q)
-      mooseError("There are not enough sample points to recover the nodal value, try reducing the "
-                 "polynomial order or using a higher-order quadrature scheme.");
-
-    // Assemble the least squares problem over the patch
-    RealEigenMatrix A = RealEigenMatrix::Zero(_q, _q);
-    RealEigenVector b = RealEigenVector::Zero(_q);
-    for (auto elem_id : elem_ids)
-    {
-      const auto elem = _mesh.elemPtr(elem_id);
-      if (elem /*prevent segmentation fault in distributed mesh*/)
-        if (!hasBlocks(elem->subdomain_id()))
-          mooseError("Element with id = ",
-                     elem_id,
-                     " is not in the block. "
-                     "Please use nodalPatchRecovery with elements in the block only.");
-
-      if (_Ae.find(elem_id) == _Ae.end())
-        mooseError("Missing entry for elem_id = ", elem_id, " in _Ae.");
-      if (_be.find(elem_id) == _be.end())
-        mooseError("Missing entry for elem_id = ", elem_id, " in _be.");
-
-      A += libmesh_map_find(_Ae, elem_id);
-      b += libmesh_map_find(_be, elem_id);
-    }
-
-    // Solve the least squares fitting
-    coef = A.completeOrthogonalDecomposition().solve(b);
+    const auto coef = getCoefficientsNoCache(key); // const version
 
     _cached_elem_ids = key; // Update the cached element IDs
     _cached_coef = coef;    // Update the cached coefficients
@@ -269,4 +275,13 @@ NodalPatchRecoveryBase::sync(const std::optional<std::vector<dof_id_type>> & spe
   // the send and receive are called inside the pull_parallel_vector_data function
   libMesh::Parallel::pull_parallel_vector_data<AbPair>(
       _communicator, query_ids, gather_data, act_on_data, 0);
+}
+
+std::vector<dof_id_type>
+NodalPatchRecoveryBase::removeDuplicates(const std::vector<dof_id_type> & ids) const
+{
+  std::vector<dof_id_type> key = ids;
+  std::sort(key.begin(), key.end());
+  key.erase(std::unique(key.begin(), key.end()), key.end());
+  return key;
 }

@@ -30,16 +30,21 @@ public:
   virtual Real nodalPatchRecovery(const Point & p, const std::vector<dof_id_type> & elem_ids) const;
 
   /**
-   * Get the coefficients of the polynomial for the given element IDs.
-   * If the coefficients are already cached, return them directly.
+   * Const version of getCoefficients. This will always recompute the coefficients.
    *
    * @param elem_ids Ids of the elements in the patch
    * @return The coefficients of the polynomial
-   *
-   * @warning This method should not be called within a threaded region as it modifies some mutable
-   * data members
    */
-  const RealEigenVector getCoefficients(const std::vector<dof_id_type> & elem_ids) const;
+  const RealEigenVector getCoefficientsNoCache(const std::vector<dof_id_type> & elem_ids) const;
+
+  /**
+   * Non-const version of getCoefficients. This will recompute the coefficients
+   * even if they are already cached.
+   *
+   * @param elem_ids Ids of the elements in the patch
+   * @return The coefficients of the polynomial
+   */
+  const RealEigenVector getCoefficients(const std::vector<dof_id_type> & elem_ids);
 
   void initialize() override;
   void execute() override;
@@ -122,4 +127,6 @@ private:
 
   /// @brief The processor IDs vector in the running
   std::vector<int> _proc_ids;
+
+  std::vector<dof_id_type> removeDuplicates(const std::vector<dof_id_type> & ids) const;
 };
