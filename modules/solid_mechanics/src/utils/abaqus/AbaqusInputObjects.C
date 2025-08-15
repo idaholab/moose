@@ -302,6 +302,9 @@ Part::processNodeSet(const OptionNode & option, Instance * instance, const Assem
 void
 Part::processElementSet(const OptionNode & option, Instance * instance, const AssemblyModel * asmb)
 {
+  // Use the generic set helper for element sets as well.
+  // Assembly-level elsets with numeric-only entries should normally be instance-scoped; tests
+  // prefer inline instance-qualified tokens (e.g., I2.1) to avoid ambiguity.
   processSetHelper<false>(option, instance, asmb);
 }
 
@@ -406,7 +409,8 @@ Part::processSetHelper(const OptionNode & option, Instance * instance, const Ass
 
         // 3) Plain numeric id in the current scope
         if (asmb && !instance && is_nodal)
-          mooseError("Assembly-level *Nset requires an instance: use 'instance=' or inline 'inst.id'");
+          mooseError(
+              "Assembly-level *Nset requires an instance: use 'instance=' or inline 'inst.id'");
         const auto item = MooseUtils::convert<AbaqusID>(atom);
         unique_items.insert(id_to_index.at(item) + offset);
       }
