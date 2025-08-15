@@ -2002,7 +2002,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecAXPY(vec_array[field_num], 1.0, sumWij_loc));
     LibmeshPetscCall(VecDestroy(&sumWij_loc));
   }
-  V("Lin mom OK.");
+  V("Mass OK.");
 
   // Axial momentum conservation
   field_num = 1;
@@ -2027,8 +2027,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   }
   else
   {
-    unsigned int last_node = (iblock + 1) * _block_size;
-    unsigned int first_node = iblock * _block_size + 1;
     LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
         _prod, *_mdot_soln, first_node, last_node, _n_channels));
     Vec ls;
@@ -2104,7 +2102,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
   // Relaxing linear system
   // Weaker relaxation
-  if (true)
+  const bool kEnableWeakRelaxation = true;
+  if (kEnableWeakRelaxation)
   {
     // Estimating cross-flow resistances to achieve realizable solves
     LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
@@ -2167,6 +2166,13 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     PetscScalar min_mdot;
     LibmeshPetscCall(VecAbs(_prod));
     LibmeshPetscCall(VecMin(_prod, NULL, &min_mdot));
+    const PetscScalar kEpsMdot = 1e-12;
+    if (min_mdot < kEpsMdot)
+    {
+      V("Clamping min_mdot from " + std::to_string(min_mdot) + " to " + std::to_string(kEpsMdot) +
+        " to avoid divide-by-zero.");
+      min_mdot = kEpsMdot;
+    }
     V("Minimum estimated mdot: " + std::to_string(min_mdot));
 
     LibmeshPetscCall(VecAbs(sumWij_loc));
@@ -2189,7 +2195,11 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     VecSum(_Wij_loc_vec, &relax_factor);
     relax_factor /= _block_size * _n_gaps;
 #endif
-    relax_factor = relax_factor / _max_sumWij + 0.5;
+    const PetscScalar kEpsWij = 1e-12;
+    const PetscScalar denom = std::max(kEpsWij, _max_sumWij);
+    if (denom != _max_sumWij)
+      V("Clamping _max_sumWij to eps in relax_factor to avoid divide-by-zero.");
+    relax_factor = relax_factor / denom + 0.5;
     V("Relax base value: " + std::to_string(relax_factor));
 
     PetscScalar resistance_relaxation = 0.9;
@@ -2248,7 +2258,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecPointwiseMult(_prod, _prod, diag_mdot));
     LibmeshPetscCall(VecAXPY(vec_array[field_num], 1.0, _prod));
     LibmeshPetscCall(VecDestroy(&diag_mdot));
-
     V("mdot relaxed");
 
     field_num = 1;
@@ -2257,14 +2266,12 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(MatGetDiagonal(mat_array[Q * field_num + field_num], diag_P));
     LibmeshPetscCall(VecScale(diag_P, 1.0 / relaxation_factor_P));
     LibmeshPetscCall(MatDiagonalSet(mat_array[Q * field_num + field_num], diag_P, INSERT_VALUES));
-    V("Mat assembled");
     LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
         _prod, *_P_soln, first_node, last_node, _n_channels));
     LibmeshPetscCall(VecScale(diag_P, (1.0 - relaxation_factor_P)));
     LibmeshPetscCall(VecPointwiseMult(_prod, _prod, diag_P));
     LibmeshPetscCall(VecAXPY(vec_array[field_num], 1.0, _prod));
     LibmeshPetscCall(VecDestroy(&diag_P));
-
     V("P relaxed");
 
     field_num = 2;
@@ -2300,14 +2307,11 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit));
   // Splitting fields
   std::vector<IS> rows(Q);
-  // IS rows[Q];
-  PetscInt M = 0;
   LibmeshPetscCall(MatNestGetISs(A_nest, rows.data(), NULL));
   for (PetscInt j = 0; j < Q; ++j)
   {
     IS expand1;
-    LibmeshPetscCall(ISDuplicate(rows[M], &expand1));
-    M += 1;
+    LibmeshPetscCall(ISDuplicate(rows[j], &expand1));
     LibmeshPetscCall(PCFieldSplitSetIS(pc, NULL, expand1));
     LibmeshPetscCall(ISDestroy(&expand1));
   }
@@ -2334,16 +2338,35 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
   /// Recovering the solutions
   Vec sol_mdot, sol_p, sol_Wij;
+  Vec sol_h_coupled = NULL;
   V("Vectors to hold solution created");
   PetscInt num_vecs;
   Vec * loc_vecs;
   LibmeshPetscCall(VecNestGetSubVecs(x_nest, &num_vecs, &loc_vecs));
+  // Safety: ensure we have as many subvectors as fields we assembled
+  if (num_vecs < Q)
+  {
+    mooseError(name(),
+               " : VecNest returned fewer subvectors (",
+               num_vecs,
+               ") than expected fields (",
+               Q,
+               ").");
+  }
   LibmeshPetscCall(VecDuplicate(_mc_axial_convection_rhs, &sol_mdot));
   LibmeshPetscCall(VecCopy(loc_vecs[0], sol_mdot));
   LibmeshPetscCall(VecDuplicate(_amc_sys_mdot_rhs, &sol_p));
   LibmeshPetscCall(VecCopy(loc_vecs[1], sol_p));
   LibmeshPetscCall(VecDuplicate(_cmc_sys_Wij_rhs, &sol_Wij));
   LibmeshPetscCall(VecCopy(loc_vecs[2], sol_Wij));
+  // If we will need the enthalpy subvector from the coupled solve later, copy it now
+  if (_monolithic_thermal_bool && !lag_block_thermal_solve)
+  {
+    LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol_h_coupled));
+    LibmeshPetscCall(VecCopy(loc_vecs[3], sol_h_coupled));
+  }
+  // Done with the nested solution container; free it early
+  LibmeshPetscCall(VecDestroy(&x_nest));
   V("Solution from coupled solver copied to solution vectors");
 
   /// Assigning the solutions to arrays
@@ -2365,6 +2388,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
       _P_soln->set(node_in, value);
     }
   }
+  LibmeshPetscCall(VecRestoreArray(sol_p, &sol_p_array));
 
   /// Populating Crossflow
   LibmeshPetscCall(populateDenseFromVector<libMesh::DenseMatrix<Real>>(
@@ -2406,14 +2430,20 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
           _h_soln->set(node_out, h_out);
         }
       }
+      LibmeshPetscCall(VecRestoreArray(sol, &xx));
       LibmeshPetscCall(KSPDestroy(&ksploc));
       LibmeshPetscCall(VecDestroy(&sol));
     }
     else
     {
-      Vec sol_h;
-      LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol_h));
-      LibmeshPetscCall(VecCopy(loc_vecs[3], sol_h));
+      // We already copied the enthalpy subvector before destroying x_nest
+      if (!sol_h_coupled)
+      {
+        mooseError(
+            name(),
+            " : Expected coupled enthalpy vector (sol_h_coupled) to be set, but it is NULL.");
+      }
+      Vec sol_h = sol_h_coupled;
       PetscScalar * sol_h_array;
       LibmeshPetscCall(VecGetArray(sol_h, &sol_h_array));
       for (unsigned int iz = first_node; iz < last_node + 1; iz++)
@@ -2434,6 +2464,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
           _h_soln->set(node_out, h_out);
         }
       }
+      LibmeshPetscCall(VecRestoreArray(sol_h, &sol_h_array));
       LibmeshPetscCall(VecDestroy(&sol_h));
     }
   }
@@ -2451,12 +2482,18 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(VecAbs(_prod));
   LibmeshPetscCall(VecMax(_prod, NULL, &_max_sumWij_new));
   V("Maximum estimated Wij new: " + std::to_string(_max_sumWij_new));
-  _correction_factor = _max_sumWij_new / _max_sumWij;
+  // Guard division in case future changes alter earlier clamping
+  {
+    const PetscScalar kEpsWij = 1e-12;
+    const PetscScalar denom = std::max(kEpsWij, _max_sumWij);
+    if (denom != _max_sumWij)
+      V("Clamping _max_sumWij to eps in correction_factor to avoid divide-by-zero.");
+    _correction_factor = _max_sumWij_new / denom;
+  }
   V("Correction factor: " + std::to_string(_correction_factor));
   V("Solutions assigned to MOOSE variables.");
 
-  /// Destroying arrays
-  LibmeshPetscCall(VecDestroy(&x_nest));
+  // Destroying arrays
   LibmeshPetscCall(VecDestroy(&sol_mdot));
   LibmeshPetscCall(VecDestroy(&sol_p));
   LibmeshPetscCall(VecDestroy(&sol_Wij));
