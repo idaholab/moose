@@ -33,10 +33,10 @@ public:
    * Get the coefficients of the polynomial for the given element IDs.
    * If the coefficients are already cached, return them directly.
    *
-   * @param elem_ids    Ids of the elements in the patch
+   * @param elem_ids Ids of the elements in the patch
    * @return The coefficients of the polynomial
    *
-   * @warning This method shall not be called within a threaded region as it modifies some mutable
+   * @warning This method should not be called within a threaded region as it modifies some mutable
    * data members
    */
   const RealEigenVector getCoefficients(const std::vector<dof_id_type> & elem_ids) const;
@@ -47,9 +47,14 @@ public:
   void finalize() override;
 
   /**
-   * @brief Synchronizes local matrices and vectors (_Ae, _be) across processors
+   * @brief Synchronizes local matrices and vectors (_Ae, _be) across processors.
    *
-   * Gathers and distributes data required for evaluable elements (possibly from other processors)
+   * If @p specific_elems is provided, only those elements will be synchronized.
+   * This is typically used when the monomial basis needs to be built from a
+   * specific patch, or a subset of that patch.
+   *
+   * If @p specific_elems is not provided, all ghosted evaluable elements are
+   * synchronized (default behavior).
    */
   void sync(const std::optional<std::vector<dof_id_type>> & specific_elems = std::nullopt);
 
@@ -63,8 +68,17 @@ protected:
   unsigned int _qp;
 
 private:
-  /// Iterates over all evaluable elements and records their IDs in a query map
-  /// if they belong to a different processor.
+  /// Builds a query map of element IDs that need data from other processors.
+  /// There are two modes of operation:
+  /// (1) If @p specific_elems is not provided: iterate over all semi-local
+  ///     evaluable elements (including ghost elements) and record those that
+  ///     belong to a different processor.
+  /// (2) If @p specific_elems is provided: only iterate over the given elements,
+  ///     and record those that belong to a different processor.
+  ///
+  /// This ensures that "semi-local evaluable elements" are synchronized in the default
+  /// case, while still allowing callers to explicitly request synchronization
+  /// for a targeted subset when needed.
   std::unordered_map<processor_id_type, std::vector<dof_id_type>>
   gatherSendList(const std::optional<std::vector<dof_id_type>> & specific_elems = std::nullopt);
 

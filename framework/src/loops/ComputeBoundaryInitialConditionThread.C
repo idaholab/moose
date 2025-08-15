@@ -16,16 +16,21 @@
 #include "SystemBase.h"
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
-    FEProblemBase & fe_problem, const std::optional<std::set<VariableName>> & target_vars)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
-    _target_vars(target_vars)
+    FEProblemBase & fe_problem)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem)
 {
 }
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
     ComputeBoundaryInitialConditionThread & x, Threads::split split)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
-    _target_vars(x._target_vars)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split)
+{
+}
+
+ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
+    FEProblemBase & fe_problem, const std::set<VariableName> * target_vars)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+    _target_vars(target_vars)
 {
 }
 
@@ -47,7 +52,6 @@ ComputeBoundaryInitialConditionThread::onNode(ConstBndNodeRange::const_iterator 
     const auto & ics = warehouse.getActiveBoundaryObjects(boundary_id, _tid);
     for (const auto & ic : ics)
     {
-
       // Skip or include initial conditions based on target variable usage
       const auto & var_name = ic->variable().name();
       if (_target_vars && !_target_vars->count(var_name))

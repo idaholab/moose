@@ -1613,16 +1613,12 @@ NumericVector<Number> &
 SystemBase::serializedSolution()
 {
   if (!_serialized_solution.get())
-    resetSerializedSolution();
+  {
+    _serialized_solution = NumericVector<Number>::build(_communicator);
+    _serialized_solution->init(system().n_dofs(), false, SERIAL);
+  }
 
   return *_serialized_solution;
-}
-
-void
-SystemBase::resetSerializedSolution()
-{
-  _serialized_solution = NumericVector<Number>::build(_communicator);
-  _serialized_solution->init(system().n_dofs(), false, SERIAL);
 }
 
 void
