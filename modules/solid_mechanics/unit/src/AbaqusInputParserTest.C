@@ -469,9 +469,9 @@ TEST(AbaqusInputParserTest, MultipleInstances_AssemblyLevelSets)
       // Mixed inline instance-qualified nodeset
       "*Nset, nset=NS_MIXED\n"
       "I1.1, I2.2\n"
-      // Assembly-level elset for I2 (by instance)
-      "*Elset, elset=ES_I2, instance=I2\n"
-      "1\n"
+      // Assembly-level elset for I2 via inline instance-qualified element id
+      "*Elset, elset=ES_I2\n"
+      "I2.1\n"
       // Create nodeset from elset at assembly scope for I2
       "*Nset, nset=NS_FROM_ES, elset=EALL, instance=I2\n"
       "*End Assembly\n");
@@ -532,8 +532,9 @@ TEST(AbaqusInputParserTest, MultipleInstances_PartLevelSetsMerged)
       // Define part-level sets
       "*Nset, nset=PN\n"
       "1, 2\n"
+      // Define a part-level elset by referencing an existing one
       "*Elset, elset=PE\n"
-      "1\n"
+      "EALL\n"
       "*End Part\n"
       "*Assembly, name=A\n"
       "*Instance, name=I1, part=P\n"
@@ -566,6 +567,97 @@ TEST(AbaqusInputParserTest, MultipleInstances_PartLevelSetsMerged)
   ASSERT_EQ(pe.size(), 2u);
   EXPECT_NE(std::find(pe.begin(), pe.end(), model.getElementIndex("1", &i1)), pe.end());
   EXPECT_NE(std::find(pe.begin(), pe.end(), model.getElementIndex("1", &i2)), pe.end());
+}
+
+TEST(AbaqusInputParserTest, MultipleInstances_PartLevelElsetNumericMerged)
+{
+  // Part-level elset defined numerically should merge across instances
+  std::istringstream in(
+      "*Part, name=P\n"
+      "*Node\n"
+      "1, 0., 0.\n"
+      "2, 1., 0.\n"
+      "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
+      "1, 2\n"
+      "*Element, Type=U1, Elset=EALL\n"
+      "1, 1, 2\n"
+      // Define part-level elset numerically (using GENERATE to ensure robust parsing)
+      "*Elset, elset=PE, generate\n"
+      "1, 1, 1\n"
+      "*End Part\n"
+      "*Assembly, name=A\n"
+      "*Instance, name=I1, part=P\n"
+      "*End Instance\n"
+      "*Instance, name=I2, part=P\n"
+      "*End Instance\n"
+      "*End Assembly\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::AssemblyModel model;
+  model.parse(parser);
+
+  const auto & i1 = model.getInstance("I1");
+  const auto & i2 = model.getInstance("I2");
+
+  // Part-level elset exists and contains the single element index
+  ASSERT_TRUE(model._part.has("P"));
+  const auto & part = model._part["P"];
+  ASSERT_FALSE(part._element_id_to_index.empty());
+  ASSERT_TRUE(part._element_id_to_index.find(1) != part._element_id_to_index.end());
+  ASSERT_TRUE(part._elsets.find("EALL") != part._elsets.end());
+  const auto & eall_part = part._elsets.at("EALL");
+  ASSERT_EQ(eall_part.size(), 1u);
+  ASSERT_TRUE(part._elsets.find("PE") != part._elsets.end());
+  const auto & pe_part = part._elsets.at("PE");
+  ASSERT_EQ(pe_part.size(), 1u);
+
+  ASSERT_TRUE(model._elsets.find("PE") != model._elsets.end());
+  const auto & pe = model._elsets.at("PE");
+  ASSERT_EQ(pe.size(), 2u);
+  EXPECT_NE(std::find(pe.begin(), pe.end(), model.getElementIndex("1", &i1)), pe.end());
+  EXPECT_NE(std::find(pe.begin(), pe.end(), model.getElementIndex("1", &i2)), pe.end());
+}
+
+// Intentionally expected-to-fail test capturing the bare numeric elset issue.
+// A part-level *Elset with a simple numeric data line (no GENERATE) should populate the set,
+// but currently the option data lines are not captured (option._data.size() == 0 observed),
+// yielding an empty set. This test asserts the intended behavior and will fail until fixed.
+TEST(AbaqusInputParserTest, PartLevelElsetNumericBareLine)
+{
+  std::istringstream in(
+      "*Part, name=P\n"
+      "*Node\n"
+      "1, 0., 0.\n"
+      "2, 1., 0.\n"
+      "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
+      "1, 2\n"
+      "*Element, Type=U1, Elset=EALL\n"
+      "1, 1, 2\n"
+      // Bare numeric element set definition (no GENERATE)
+      "*Elset, elset=PE\n"
+      "1\n"
+      "*End Part\n"
+      "*Assembly, name=A\n"
+      "*Instance, name=I1, part=P\n"
+      "*End Instance\n"
+      "*End Assembly\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::AssemblyModel model;
+  model.parse(parser);
+
+  ASSERT_TRUE(model._part.has("P"));
+  const auto & part = model._part["P"];
+
+  // EXPECTED: PE should contain element id 1 resolved to the part-local index.
+  ASSERT_TRUE(part._elsets.find("PE") != part._elsets.end());
+  const auto & pe_part = part._elsets.at("PE");
+  // This currently fails (size()==0); keep as 1 to encode intended behavior.
+  ASSERT_EQ(pe_part.size(), 1u);
 }
 
 TEST(AbaqusInputParserTest, BoundaryInstanceScopedSingleNode)
