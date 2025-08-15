@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Kernel.h"
-#include "libmesh/Point.h"
+#include "libmesh/point.h"
 
 /**
  * Advanced hourglass correction for QUAD4 elements that computes the correction
@@ -24,10 +24,15 @@ protected:
   /// Base penalty parameter (supplied by the user)
   const Real _penalty;
 
+  /// Shear modulus for stabilization scaling (default 1.0)
+  const Real _mu;
+
   /// Displacement variable (applied component-wise: x or y)
   const MooseVariable::DoFValue & _v;
 
-  /// Precomputed normalized hourglass mode vectors (for a QUAD4 element)
-  std::vector<Real> _g1; // Mode 1: [ 1, -1, 1, -1 ]
-  std::vector<Real> _g2; // Mode 2: [ 1,  1,-1, -1 ]
+  /// Hourglass mode vectors for a QUAD4 element (unnormalized)
+  /// Mode 1: [ 1, -1,  1, -1 ]
+  /// Mode 2: [ 1,  1, -1, -1 ]
+  std::vector<Real> _g1;
+  std::vector<Real> _g2;
 };
