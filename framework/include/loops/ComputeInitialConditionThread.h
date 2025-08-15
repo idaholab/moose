@@ -38,7 +38,7 @@ protected:
 
 private:
   /// @brief the names of target variables for which the initial conditions are applied
-  const std::set<VariableName> * _target_vars;
+  const std::set<VariableName> * _target_vars = nullptr;
 
   // Set IC on specific variables
   ComputeInitialConditionThread(FEProblemBase & fe_problem,
