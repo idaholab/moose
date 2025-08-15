@@ -1907,20 +1907,42 @@ PetscErrorCode
 SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 {
   bool lag_block_thermal_solve = true;
-  Vec b_nest, x_nest; /* approx solution, RHS, exact solution */
-  Mat A_nest;         /* linear system matrix */
-  KSP ksp;            /* linear solver context */
-  PC pc;              /* preconditioner context */
+  Vec b_nest, x_nest; // RHS (b) and solution (x)
+  Mat A_nest;         // nested linear system matrix
+  KSP ksp;            // Krylov solver context
+  PC pc;              // preconditioner context
 
   PetscFunctionBegin;
-  PetscInt Q = _monolithic_thermal_bool ? 4 : 3;
+
+  // Small helper functions to reduce repetition
+  // Verbose print helper (no-op unless _verbose_subchannel is true)
+  auto V = [&](const std::string & s)
+  {
+    if (_verbose_subchannel)
+      _console << s << std::endl;
+  };
+  auto DuplicateAndAssemble = [&](Mat src, Mat & dst)
+  {
+    LibmeshPetscCall(MatDuplicate(src, MAT_COPY_VALUES, &dst));
+    LibmeshPetscCall(MatAssemblyBegin(dst, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(dst, MAT_FINAL_ASSEMBLY));
+  };
+  auto DuplicateAndCopy = [&](Vec src, Vec & dst)
+  {
+    LibmeshPetscCall(VecDuplicate(src, &dst));
+    LibmeshPetscCall(VecCopy(src, dst));
+  };
+
+  // Number of coupled fields (mass, axial momentum, crossflow momentum and enthalpy)
+  const PetscInt Q = _monolithic_thermal_bool ? 4 : 3;
   std::vector<Mat> mat_array(Q * Q);
   std::vector<Vec> vec_array(Q);
 
-  /// Initializing flags
-  bool _axial_mass_flow_tight_coupling = true;
-  bool _pressure_axial_momentum_tight_coupling = true;
-  bool _pressure_cross_momentum_tight_coupling = true;
+  // Coupling control flags (currently hardcoded)
+  const bool _axial_mass_flow_tight_coupling = true;
+  const bool _pressure_axial_momentum_tight_coupling = true;
+  const bool _pressure_cross_momentum_tight_coupling = true;
+  // index range for this block
   unsigned int first_node = iblock * _block_size + 1;
   unsigned int last_node = (iblock + 1) * _block_size;
 
@@ -1948,16 +1970,11 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   }
   // Mass conservation
   PetscInt field_num = 0;
-  LibmeshPetscCall(
-      MatDuplicate(_mc_axial_convection_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 0]));
-  LibmeshPetscCall(MatAssemblyBegin(mat_array[Q * field_num + 0], MAT_FINAL_ASSEMBLY));
-  LibmeshPetscCall(MatAssemblyEnd(mat_array[Q * field_num + 0], MAT_FINAL_ASSEMBLY));
+  DuplicateAndAssemble(_mc_axial_convection_mat, mat_array[Q * field_num + 0]);
   mat_array[Q * field_num + 1] = NULL;
   if (_axial_mass_flow_tight_coupling)
   {
-    LibmeshPetscCall(MatDuplicate(_mc_sumWij_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 2]));
-    LibmeshPetscCall(MatAssemblyBegin(mat_array[Q * field_num + 2], MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(mat_array[Q * field_num + 2], MAT_FINAL_ASSEMBLY));
+    DuplicateAndAssemble(_mc_sumWij_mat, mat_array[Q * field_num + 2]);
   }
   else
   {
@@ -1967,8 +1984,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   {
     mat_array[Q * field_num + 3] = NULL;
   }
-  LibmeshPetscCall(VecDuplicate(_mc_axial_convection_rhs, &vec_array[field_num]));
-  LibmeshPetscCall(VecCopy(_mc_axial_convection_rhs, vec_array[field_num]));
+  DuplicateAndCopy(_mc_axial_convection_rhs, vec_array[field_num]);
   if (!_axial_mass_flow_tight_coupling)
   {
     Vec sumWij_loc;
@@ -1989,33 +2005,25 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecAXPY(vec_array[field_num], 1.0, sumWij_loc));
     LibmeshPetscCall(VecDestroy(&sumWij_loc));
   }
+  V("Lin mom OK.");
 
-  if (_verbose_subchannel)
-    _console << "Mass ok." << std::endl;
   // Axial momentum conservation
   field_num = 1;
   if (_pressure_axial_momentum_tight_coupling)
   {
-    LibmeshPetscCall(
-        MatDuplicate(_amc_sys_mdot_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 0]));
-    LibmeshPetscCall(MatAssemblyBegin(mat_array[Q * field_num + 0], MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(mat_array[Q * field_num + 0], MAT_FINAL_ASSEMBLY));
+    DuplicateAndAssemble(_amc_sys_mdot_mat, mat_array[Q * field_num + 0]);
   }
   else
   {
     mat_array[Q * field_num + 0] = NULL;
   }
-  LibmeshPetscCall(
-      MatDuplicate(_amc_pressure_force_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 1]));
-  LibmeshPetscCall(MatAssemblyBegin(mat_array[Q * field_num + 1], MAT_FINAL_ASSEMBLY));
-  LibmeshPetscCall(MatAssemblyEnd(mat_array[Q * field_num + 1], MAT_FINAL_ASSEMBLY));
+  DuplicateAndAssemble(_amc_pressure_force_mat, mat_array[Q * field_num + 1]);
   mat_array[Q * field_num + 2] = NULL;
   if (_monolithic_thermal_bool)
   {
     mat_array[Q * field_num + 3] = NULL;
   }
-  LibmeshPetscCall(VecDuplicate(_amc_pressure_force_rhs, &vec_array[field_num]));
-  LibmeshPetscCall(VecCopy(_amc_pressure_force_rhs, vec_array[field_num]));
+  DuplicateAndCopy(_amc_pressure_force_rhs, vec_array[field_num]);
   if (_pressure_axial_momentum_tight_coupling)
   {
     LibmeshPetscCall(VecAXPY(vec_array[field_num], 1.0, _amc_sys_mdot_rhs));
@@ -2033,35 +2041,27 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecAXPY(vec_array[field_num], -1.0, ls));
     LibmeshPetscCall(VecDestroy(&ls));
   }
-
-  if (_verbose_subchannel)
-    _console << "Lin mom OK." << std::endl;
+  V("Lin mom OK.");
 
   // Cross momentum conservation
   field_num = 2;
   mat_array[Q * field_num + 0] = NULL;
   if (_pressure_cross_momentum_tight_coupling)
   {
-    LibmeshPetscCall(
-        MatDuplicate(_cmc_pressure_force_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 1]));
-    LibmeshPetscCall(MatAssemblyBegin(mat_array[Q * field_num + 1], MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(mat_array[Q * field_num + 1], MAT_FINAL_ASSEMBLY));
+    DuplicateAndAssemble(_cmc_pressure_force_mat, mat_array[Q * field_num + 1]);
   }
   else
   {
     mat_array[Q * field_num + 1] = NULL;
   }
 
-  LibmeshPetscCall(MatDuplicate(_cmc_sys_Wij_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 2]));
-  LibmeshPetscCall(MatAssemblyBegin(mat_array[Q * field_num + 2], MAT_FINAL_ASSEMBLY));
-  LibmeshPetscCall(MatAssemblyEnd(mat_array[Q * field_num + 2], MAT_FINAL_ASSEMBLY));
+  DuplicateAndAssemble(_cmc_sys_Wij_mat, mat_array[Q * field_num + 2]);
   if (_monolithic_thermal_bool)
   {
     mat_array[Q * field_num + 3] = NULL;
   }
 
-  LibmeshPetscCall(VecDuplicate(_cmc_sys_Wij_rhs, &vec_array[field_num]));
-  LibmeshPetscCall(VecCopy(_cmc_sys_Wij_rhs, vec_array[field_num]));
+  DuplicateAndCopy(_cmc_sys_Wij_rhs, vec_array[field_num]);
   if (_pressure_cross_momentum_tight_coupling)
   {
     LibmeshPetscCall(VecAXPY(vec_array[field_num], 1.0, _cmc_pressure_force_rhs));
@@ -2079,9 +2079,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecAXPY(vec_array[field_num], 1.0, sol_holder_P));
     LibmeshPetscCall(VecDestroy(&sol_holder_P));
   }
-
-  if (_verbose_subchannel)
-    _console << "Cross mom ok." << std::endl;
+  V("Cross mom OK.");
 
   // Energy conservation
   if (_monolithic_thermal_bool)
@@ -2098,16 +2096,13 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     }
     LibmeshPetscCall(MatAssemblyBegin(mat_array[Q * field_num + 3], MAT_FINAL_ASSEMBLY));
     LibmeshPetscCall(MatAssemblyEnd(mat_array[Q * field_num + 3], MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &vec_array[field_num]));
-    LibmeshPetscCall(VecCopy(_hc_sys_h_rhs, vec_array[field_num]));
+    DuplicateAndCopy(_hc_sys_h_rhs, vec_array[field_num]);
     if (lag_block_thermal_solve)
     {
       LibmeshPetscCall(VecZeroEntries(vec_array[field_num]));
       LibmeshPetscCall(VecShift(vec_array[field_num], 1.0));
     }
-
-    if (_verbose_subchannel)
-      _console << "Energy ok." << std::endl;
+    V("Energy OK.");
   }
 
   // Relaxing linear system
