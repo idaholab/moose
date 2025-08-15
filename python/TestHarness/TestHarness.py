@@ -323,8 +323,7 @@ class TestHarness:
         try:
             self.executable = self.getExecutable() if self.app_name else None
         except FileNotFoundError as e:
-            print(f'ERROR: {e}')
-            sys.exit(1)
+            self.errorExit(f'{e}')
 
         # Load capabilities if they're needed
         if self.options.no_capabilities:
@@ -610,8 +609,7 @@ class TestHarness:
 
         if params.isValid('prereq'):
             if type(params['prereq']) != list:
-                print(("Option 'prereq' needs to be of type list in " + params['test_name']))
-                sys.exit(1)
+                self.errorExit("Option 'prereq' needs to be of type list in " + params['test_name'])
 
         # Double the alloted time for tests when running with the valgrind option
         tester.setValgrindMode(self.options.valgrind_mode)
@@ -880,8 +878,7 @@ class TestHarness:
 
     def determineScheduler(self):
         if self.options.hpc_host and not self.options.hpc:
-            print(f'ERROR: --hpc must be set with --hpc-host for an unknown host')
-            sys.exit(1)
+            self.errorExit('--hpc must be set with --hpc-host for an unknown host')
 
         if self.options.hpc == 'pbs':
             return 'RunPBS'
@@ -904,8 +901,7 @@ class TestHarness:
 
         if self.useExistingStorage():
             if not os.path.exists(file):
-                print(f'The previous run {file} does not exist')
-                sys.exit(1)
+                self.errorExit(f'The previous run {file} does not exist')
             try:
                 with open(file, 'r') as f:
                     results = json.load(f)
@@ -915,12 +911,10 @@ class TestHarness:
 
             testharness = results.get('testharness')
             if testharness is None:
-                print(f'ERROR: The previous result {file} is not valid!')
-                sys.exit(1)
+                self.errorExit(f'The previous result {file} is not valid!')
 
             if not testharness.get('end_time'):
-                print(f'ERROR: The previous result {file} is incomplete!')
-                sys.exit(1)
+                self.errorExit(f'The previous result {file} is incomplete!')
 
             # Adhere to previous input file syntax, or set the default
             self.options.input_file_name = testharness.get('input_file_name', self.options.input_file_name)
@@ -1232,14 +1226,11 @@ class TestHarness:
     def checkAndUpdateCLArgs(self):
         opts = self.options
         if opts.group == opts.not_group:
-            print('ERROR: The group and not_group options cannot specify the same group')
-            sys.exit(1)
+            self.errorExit('The group and not_group options cannot specify the same group')
         if opts.valgrind_mode and opts.nthreads > 1:
-            print('ERROR: --threads cannot be used with --valgrind')
-            sys.exit(1)
+            self.errorExit('--threads cannot be used with --valgrind')
         if opts.check_input and opts.no_check_input:
-            print('ERROR: --check-input and --no-check-input cannot be used simultaneously')
-            sys.exit(1)
+            self.errorExit('--check-input and --no-check-input cannot be used simultaneously')
         has_flags = []
         for var, flag in [('check_input', '--check-input'),
                           ('enable_recover', '--recover'),
@@ -1247,23 +1238,18 @@ class TestHarness:
             if getattr(opts, var):
                 has_flags.append(flag)
         if len(has_flags) > 1:
-            print('ERROR:', ' and '.join(has_flags), 'cannot be used together')
-            sys.exit(1)
+            self.errorExit(' and '.join(has_flags), 'cannot be used together')
         if opts.spec_file:
             if not os.path.exists(opts.spec_file):
-                print('ERROR: --spec-file supplied but path does not exist')
-                sys.exit(1)
+                self.errorExit('--spec-file supplied but path does not exist')
             if os.path.isfile(opts.spec_file):
                 if opts.input_file_name:
-                    print('ERROR: Cannot use -i with --spec-file being a file')
-                    sys.exit(1)
+                    self.errorExit('Cannot use -i with --spec-file being a file')
                 self.options.input_file_name = os.path.basename(opts.spec_file)
         if opts.verbose and opts.quiet:
-            print('Do not be an oxymoron with --verbose and --quiet')
-            sys.exit(1)
+            self.errorExit('Do not be an oxymoron with --verbose and --quiet')
         if opts.error and opts.allow_warnings:
-            print(f'ERROR: Cannot use --error and --allow-warnings together')
-            sys.exit(1)
+            self.errorExit(f'Cannot use --error and --allow-warnings together')
 
         # Setup absolute paths and output paths
         if opts.output_dir:
@@ -1273,8 +1259,7 @@ class TestHarness:
             opts.results_file = os.path.abspath(opts.results_file)
 
         if opts.failed_tests and not os.path.exists(opts.results_file):
-            print('ERROR: --failed-tests could not detect a previous run')
-            sys.exit(1)
+            self.errorExit('--failed-tests could not detect a previous run')
 
         # Update any keys from the environment as necessary
         if not self.options.method:
@@ -1336,3 +1321,11 @@ class TestHarness:
             if host in hostname:
                 return config
         return None
+
+    @staticmethod
+    def errorExit(*args):
+        """
+        Helper for printing an error and exiting
+        """
+        message = ' '.join([f'{v}' for v in args])
+        raise SystemExit(f'ERROR: {message}')
