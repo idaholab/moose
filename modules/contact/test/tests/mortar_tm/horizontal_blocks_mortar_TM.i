@@ -133,13 +133,6 @@ offset = 0.01
 
     model = frictionless
     formulation = mortar
-
-    friction_coefficient = 0.0
-
-    normal_smoothing_distance = 0.1
-
-    penalty = 1e+8
-    normalize_penalty = true
   [../]
 []
 

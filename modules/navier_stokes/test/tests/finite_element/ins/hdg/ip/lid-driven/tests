@@ -45,7 +45,7 @@
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = 'in_tree'
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     valgrind = 'none'
   []
   [lid-mms-second]
@@ -56,7 +56,7 @@
     min_parallel = 4
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     valgrind = 'none'
     installation_type = 'in_tree'
   []
@@ -73,7 +73,7 @@
       input = matrix-testing.i
       csvdiff = matrix-testing_out.csv
       max_parallel = 1 # No MatLUFactor support for mpidense
-      method = "!dbg"
+      capabilities = "method!=dbg"
       valgrind = 'none'
       detail = 'first order polynomial bases (other than zeroth order volumetric pressure), and for'
       allow_test_objects = true
@@ -84,7 +84,7 @@
       cli_args = 'Outputs/file_base=second-order-matrix-testing Variables/vel_x/order=SECOND Variables/vel_y/order=SECOND Variables/pressure/order=FIRST Variables/vel_bar_x/order=SECOND Variables/vel_bar_y/order=SECOND Variables/pressure_bar/order=SECOND'
       csvdiff = second-order-matrix-testing.csv
       max_parallel = 1 # No MatLUFactor support for mpidense
-      method = "!dbg"
+      capabilities = "method!=dbg"
       valgrind = 'none'
       detail = 'second order polynomial bases (other than first order volumetric pressure).'
       allow_test_objects = true

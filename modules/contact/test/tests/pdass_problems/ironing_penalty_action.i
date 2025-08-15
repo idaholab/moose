@@ -295,8 +295,6 @@
   perf_graph = true
   exodus = true
   csv = true
-  hide = 'nodal_area penetration contact_pressure'
-
   [chkfile]
     type = CSV
     start_time = 0.0

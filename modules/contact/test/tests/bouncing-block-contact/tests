@@ -146,8 +146,7 @@
       map = true
       restep = false # Test is prescribed to abort on failed timestep
       cli_args = "Mesh/mesh_file/file=long-bottom-block-1elem-blocks-coarse.e "
-                 "Executioner/end_time=50 Postprocessors/active='' Outputs/hide='nodal_area "
-                 "contact_pressure penetration'"
+                 "Executioner/end_time=50 Postprocessors/active=''"
     []
   []
   [very_parallel_penalty]
