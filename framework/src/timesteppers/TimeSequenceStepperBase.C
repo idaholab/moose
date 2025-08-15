@@ -46,7 +46,7 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
   if (!_app.isRecovering())
   {
     // also we need to do something different when restarting
-    if (!_app.isRestarting())
+    if (!_app.isRestarting() || _time_sequence.empty())
     {
       // sync _executioner.startTime and endTime with _time_sequence
       Real start_time = _executioner.getStartTime();
@@ -84,6 +84,14 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
         if (times[j + 1] <= times[j])
           mooseError("time_sequence must be in ascending order.");
 
+      if (times.size() < _current_step + 1)
+        mooseError("The timesequence provided in the restart file must be identical to "
+                   "the one in the old file up to entry number ",
+                   _current_step + 1,
+                   " but there are only ",
+                   times.size(),
+                   " value(s) provided for the timesequence in the restart input.");
+
       // save the restarted time_sequence
       std::vector<Real> saved_time_sequence = _time_sequence;
       _time_sequence.clear();
@@ -95,8 +103,13 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
           mooseError("The timesequence provided in the restart file must be identical to "
                      "the one in the old file up to entry number ",
                      _current_step + 1,
-                     " = ",
-                     saved_time_sequence[_current_step]);
+                     " but entry ",
+                     j + 1,
+                     " is ",
+                     times[j],
+                     " in the restart input but ",
+                     saved_time_sequence[j],
+                     " in the restarted input.");
 
         _time_sequence.push_back(saved_time_sequence[j]);
       }
