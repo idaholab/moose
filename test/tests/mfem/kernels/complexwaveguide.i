@@ -61,7 +61,7 @@
   []
   [elec_cond_mouse]
     type = ParsedFunction
-    expression = 0.0 
+    expression = 0.0
   []
   [dielec_perm_mouse]
     type = ParsedFunction
@@ -71,7 +71,7 @@
   []
   [mass_coef_mouse]
     type = ParsedFunction
-    expression = -dielec_perm_mouse*angfreq^2 
+    expression = -dielec_perm_mouse*angfreq^2
     symbol_names = 'dielec_perm_mouse angfreq'
     symbol_values = 'dielec_perm_mouse angfreq'
   []
@@ -83,7 +83,7 @@
   []
   [elec_cond_air]
     type = ParsedFunction
-    expression = 0.97 
+    expression = 0.97
   []
   [dielec_perm_air]
     type = ParsedFunction

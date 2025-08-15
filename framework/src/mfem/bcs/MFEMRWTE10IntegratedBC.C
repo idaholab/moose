@@ -36,7 +36,7 @@ MFEMRWTE10IntegratedBC::validParams()
 
 MFEMRWTE10IntegratedBC::MFEMRWTE10IntegratedBC(
     const InputParameters & parameters)
-  : MFEMComplexIntegratedBC(parameters), 
+  : MFEMComplexIntegratedBC(parameters),
   _mu0(getParam<Real>("magnetic_permeability")),
   _epsilon0(getParam<Real>("electric_permittivity")),
   _omega(2 * M_PI * getParam<Real>("frequency")),
