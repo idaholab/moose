@@ -26,25 +26,25 @@ TimesInterface::TimesInterface(const MooseObject * moose_object)
 }
 
 const Times &
-TimesInterface::getTimes(const std::string & param) const
+TimesInterface::getTimes(const std::string & param, bool allow_unsorted) const
 {
   _curr_param = param;
-  const auto & times = getTimesByName(_tmi_params.get<TimesName>(param));
+  const auto & times = getTimesByName(_tmi_params.get<TimesName>(param), allow_unsorted);
   _curr_param.clear();
   return times;
 }
 
 const Times *
-TimesInterface::getOptionalTimes(const std::string & param) const
+TimesInterface::getOptionalTimes(const std::string & param, bool allow_unsorted) const
 {
   _curr_param = param;
-  const auto * times = _tmi_params.isParamValid(param) ? &getTimes(param) : nullptr;
+  const auto * times = _tmi_params.isParamValid(param) ? &getTimes(param, allow_unsorted) : nullptr;
   _curr_param.clear();
   return times;
 }
 
 const Times &
-TimesInterface::getTimesByName(const TimesName & name) const
+TimesInterface::getTimesByName(const TimesName & name, bool allow_unsorted) const
 {
   const Times * times_obj = nullptr; // Returned value
 
@@ -65,7 +65,7 @@ TimesInterface::getTimesByName(const TimesName & name) const
   }
 
   // Attempt to convert the point to a vector of reals to make a default Times object
-  else if (getDefaultTimesObject(name))
+  else if (getDefaultTimesObject(name, allow_unsorted))
     times_obj = &_default_times_objs.back();
 
   // Cannot do anything from here.
@@ -79,12 +79,12 @@ TimesInterface::getTimesByName(const TimesName & name) const
 }
 
 bool
-TimesInterface::getDefaultTimesObject(const std::string & input) const
+TimesInterface::getDefaultTimesObject(const std::string & input, bool allow_unsorted) const
 {
   std::vector<Real> times;
   if (MooseUtils::tokenizeAndConvert(input, times))
   {
-    if (!std::is_sorted(times.begin(), times.end()))
+    if (!allow_unsorted && !std::is_sorted(times.begin(), times.end()))
       timesError("Times are not sorted:\n    ", Moose::stringify(times, ", ", "", true));
     _default_times_objs.emplace_back(times, _tmi_feproblem);
     return true;

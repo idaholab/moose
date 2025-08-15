@@ -138,7 +138,7 @@ Output::Output(const InputParameters & parameters)
             : getParam<unsigned int>("time_step_interval")),
     _min_simulation_time_interval(getParam<Real>("min_simulation_time_interval")),
     _wall_time_interval(getParam<Real>("wall_time_interval")),
-    _sync_times_object(getOptionalTimes("sync_times")),
+    _sync_times_object(getOptionalTimes("sync_times", true)),
     _sync_times(_sync_times_object ? _sync_times_object->getUniqueTimes() : std::set<Real>()),
     _start_time(isParamValid("start_time") ? getParam<Real>("start_time")
                                            : std::numeric_limits<Real>::lowest()),
