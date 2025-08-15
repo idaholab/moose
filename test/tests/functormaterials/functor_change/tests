@@ -1,0 +1,26 @@
+[Tests]
+  design = 'FunctorChangeFunctorMaterial.md'
+  issues = '#31030'
+
+  [test]
+    requirement = 'The system shall be able to compute the change of a functor over'
+    [fixed_point]
+      type = CSVDiff
+      input = 'fp_parent.i'
+      csvdiff = 'fp_parent_out.csv'
+      detail = 'a fixed point iteration,'
+    []
+    [time_step]
+      type = CSVDiff
+      input = 'time_step.i'
+      csvdiff = 'time_step_out.csv'
+      detail = 'a time step, or'
+    []
+    [nonlinear]
+      type = CSVDiff
+      input = 'nonlinear.i'
+      csvdiff = 'nonlinear.csv'
+      detail = 'a nonlinear iteration.'
+    []
+  []
+[]

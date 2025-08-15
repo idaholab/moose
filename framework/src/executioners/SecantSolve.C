@@ -25,8 +25,6 @@ SecantSolve::validParams()
 
 SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex)
 {
-  allocateStorage(true);
-
   _transformed_pps_values.resize(_transformed_pps.size());
   for (size_t i = 0; i < _transformed_pps.size(); i++)
     _transformed_pps_values[i].resize(4);
@@ -38,40 +36,34 @@ SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex)
 void
 SecantSolve::allocateStorage(const bool primary)
 {
-  TagID fxn_m1_tagid;
-  TagID xn_m1_tagid;
-  TagID fxn_m2_tagid;
-  TagID xn_m2_tagid;
-  if (primary)
-  {
-    xn_m1_tagid = _problem.addVectorTag("xn_m1", Moose::VECTOR_TAG_SOLUTION);
-    fxn_m1_tagid = _problem.addVectorTag("fxn_m1", Moose::VECTOR_TAG_SOLUTION);
-    xn_m2_tagid = _problem.addVectorTag("xn_m2", Moose::VECTOR_TAG_SOLUTION);
-    fxn_m2_tagid = _problem.addVectorTag("fxn_m2", Moose::VECTOR_TAG_SOLUTION);
-    _xn_m1_tagid = xn_m1_tagid;
-    _fxn_m1_tagid = fxn_m1_tagid;
-    _xn_m2_tagid = xn_m2_tagid;
-    _fxn_m2_tagid = fxn_m2_tagid;
-  }
-  else
-  {
-    xn_m1_tagid = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
-    fxn_m1_tagid = _problem.addVectorTag("secondary_fxn_m1", Moose::VECTOR_TAG_SOLUTION);
-    xn_m2_tagid = _problem.addVectorTag("secondary_xn_m2", Moose::VECTOR_TAG_SOLUTION);
-    fxn_m2_tagid = _problem.addVectorTag("secondary_fxn_m2", Moose::VECTOR_TAG_SOLUTION);
-    _secondary_xn_m1_tagid = xn_m1_tagid;
-    _secondary_fxn_m1_tagid = fxn_m1_tagid;
-    _secondary_xn_m2_tagid = xn_m2_tagid;
-    _secondary_fxn_m2_tagid = fxn_m2_tagid;
-  }
-
   // TODO: We would only need to store the solution for the degrees of freedom that
   // will be transformed, not the entire solution.
   // Store solution vectors for the two previous points and their evaluation
-  _solver_sys.addVector(xn_m1_tagid, false, PARALLEL);
-  _solver_sys.addVector(fxn_m1_tagid, false, PARALLEL);
-  _solver_sys.addVector(xn_m2_tagid, false, PARALLEL);
-  _solver_sys.addVector(fxn_m2_tagid, false, PARALLEL);
+  if (primary)
+  {
+    _xn_m1_tagid =
+        _problem.addVectorTag(Moose::PREVIOUS_FP_SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
+    _fxn_m1_tagid = _problem.addVectorTag("fxn_m1", Moose::VECTOR_TAG_SOLUTION);
+    _xn_m2_tagid = _problem.addVectorTag("xn_m2", Moose::VECTOR_TAG_SOLUTION);
+    _fxn_m2_tagid = _problem.addVectorTag("fxn_m2", Moose::VECTOR_TAG_SOLUTION);
+
+    _solver_sys.needSolutionState(1, Moose::SolutionIterationType::FixedPoint, PARALLEL);
+    _solver_sys.addVector(_fxn_m1_tagid, false, PARALLEL);
+    _solver_sys.addVector(_xn_m2_tagid, false, PARALLEL);
+    _solver_sys.addVector(_fxn_m2_tagid, false, PARALLEL);
+  }
+  else
+  {
+    _secondary_xn_m1_tagid = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
+    _secondary_fxn_m1_tagid = _problem.addVectorTag("secondary_fxn_m1", Moose::VECTOR_TAG_SOLUTION);
+    _secondary_xn_m2_tagid = _problem.addVectorTag("secondary_xn_m2", Moose::VECTOR_TAG_SOLUTION);
+    _secondary_fxn_m2_tagid = _problem.addVectorTag("secondary_fxn_m2", Moose::VECTOR_TAG_SOLUTION);
+
+    _solver_sys.addVector(_secondary_xn_m1_tagid, false, PARALLEL);
+    _solver_sys.addVector(_secondary_fxn_m1_tagid, false, PARALLEL);
+    _solver_sys.addVector(_secondary_xn_m2_tagid, false, PARALLEL);
+    _solver_sys.addVector(_secondary_fxn_m2_tagid, false, PARALLEL);
+  }
 }
 
 void
@@ -117,7 +109,9 @@ SecantSolve::saveVariableValues(const bool primary)
   xn_m2 = xn_m1;
 
   // Before a solve, solution is a sequence term, after a solve, solution is the evaluated term
-  xn_m1 = solution;
+  // Primary is copied back by _solver_sys.copyPreviousFixedPointSolutions()
+  if (!primary)
+    xn_m1 = solution;
 
   // Since we did not update on the 0th iteration, the solution is also the previous evaluated term
   const unsigned int it = primary ? _fixed_point_it : _main_fixed_point_it;

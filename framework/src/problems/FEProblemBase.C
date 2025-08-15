@@ -698,7 +698,7 @@ FEProblemBase::createTagSolutions()
     // ease of use in doing things like copying solutions backwards. We're just storing pointers in
     // the solution states containers so populating the zeroth state does not cost us the memory of
     // a new vector
-    needSolutionState(2, Moose::SolutionIterationType::Nonlinear);
+    needSolutionState(1, Moose::SolutionIterationType::Nonlinear);
   }
 
   auto tag = addVectorTag(Moose::SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
@@ -708,15 +708,11 @@ FEProblemBase::createTagSolutions()
 }
 
 void
-FEProblemBase::needSolutionState(unsigned int oldest_needed,
-                                 Moose::SolutionIterationType iteration_type)
+FEProblemBase::needSolutionState(unsigned int state, Moose::SolutionIterationType iteration_type)
 {
-  for (const auto i : make_range((unsigned)0, oldest_needed))
-  {
-    for (auto & sys : _solver_systems)
-      sys->needSolutionState(i, iteration_type);
-    _aux->needSolutionState(i, iteration_type);
-  }
+  for (auto & sys : _solver_systems)
+    sys->needSolutionState(state, iteration_type);
+  _aux->needSolutionState(state, iteration_type);
 }
 
 void

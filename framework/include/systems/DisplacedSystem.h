@@ -227,7 +227,8 @@ public:
                     Moose::SolutionIterationType::Time) const override;
   virtual void needSolutionState(
       const unsigned int state,
-      Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time) override;
+      Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time,
+      libMesh::ParallelType parallel_type = GHOSTED) override;
   virtual bool hasSolutionState(const unsigned int state,
                                 Moose::SolutionIterationType iteration_type =
                                     Moose::SolutionIterationType::Time) const override;
@@ -280,9 +281,10 @@ DisplacedSystem::solutionState(const unsigned int state,
 
 inline void
 DisplacedSystem::needSolutionState(const unsigned int state,
-                                   const Moose::SolutionIterationType iteration_type)
+                                   const Moose::SolutionIterationType iteration_type,
+                                   const libMesh::ParallelType parallel_type)
 {
-  _undisplaced_system.needSolutionState(state, iteration_type);
+  _undisplaced_system.needSolutionState(state, iteration_type, parallel_type);
 }
 
 inline bool

@@ -30,7 +30,4 @@ protected:
    */
   const VariableValue & _proxy_variable;
   const MooseVariable * const _proxy_var;
-
-  /// Extreme value of the proxy variable
-  Real _proxy_value;
 };
