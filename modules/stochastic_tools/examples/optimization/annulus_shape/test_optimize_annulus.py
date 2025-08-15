@@ -8,7 +8,18 @@
 # * Licensed under LGPL 2.1, please see LICENSE for details
 # * https://www.gnu.org/licenses/lgpl-2.1.html
 import os
+import sys
+import importlib.util
 import numpy as np
+
+
+if importlib.util.find_spec("stochastic") is None:
+    _moose_dir = os.environ.get("MOOSE_DIR", os.path.join(os.path.dirname(__file__), *([".."] * 5)))
+    _stm_python_path = os.path.abspath(
+        os.path.join(_moose_dir, "modules", "stochastic_tools", "python")
+    )
+    sys.path.append(_stm_python_path)
+
 from optimize_annulus import optimize_annulus, cli_args
 
 if __name__ == "__main__":

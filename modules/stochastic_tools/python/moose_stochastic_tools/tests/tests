@@ -30,6 +30,8 @@
     type = PythonUnitTest
     input = test_stochastic_control.py
 
+    issues = '#31171'
+    design = 'StochasticControl.md'
     requirement = "The system shall include python utilities for driving stochastic simulations of MOOSE-based models."
   []
 []

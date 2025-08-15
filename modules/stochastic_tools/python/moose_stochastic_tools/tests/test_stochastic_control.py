@@ -19,8 +19,9 @@ import pyhit
 import moosetree
 
 if importlib.util.find_spec("moose_stochastic_tools") is None:
+    _moose_dir = os.environ.get("MOOSE_DIR", os.path.join(os.path.dirname(__file__), *([".."] * 5)))
     _stm_python_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../..", "python")
+        os.path.join(_moose_dir, "modules", "stochastic_tools", "python")
     )
     sys.path.append(_stm_python_path)
 
