@@ -2321,6 +2321,20 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(VecDuplicate(b_nest, &x_nest));
   LibmeshPetscCall(VecSet(x_nest, 0.0));
   LibmeshPetscCall(KSPSolve(ksp, b_nest, x_nest));
+  // Check convergence
+  KSPConvergedReason reason;
+  PetscInt its = 0;
+  LibmeshPetscCall(KSPGetConvergedReason(ksp, &reason));
+  LibmeshPetscCall(KSPGetIterationNumber(ksp, &its));
+  if (reason < 0)
+    mooseError(name(),
+               " : Linear solve diverged with reason ",
+               (int)reason,
+               " after ",
+               its,
+               " iterations.");
+  V("KSP converged in " + std::to_string(its) +
+    " iterations, reason=" + std::to_string((int)reason));
 
   /// Destroying solver elements
   LibmeshPetscCall(VecDestroy(&b_nest));
