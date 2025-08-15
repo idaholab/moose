@@ -89,7 +89,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
                 MPI_INT,
                 MPI_MAX,
                 getMFEMProblem().mesh().getMFEMParMesh().GetComm());
-  MPI_Bcast(_cut_normal,
+  MPI_Bcast(_cut_normal.GetData(),
             _cut_normal.Size(),
             MPI_DOUBLE,
             rank_with_submesh,
@@ -278,12 +278,14 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
   for (int old_attr = 1; old_attr < global_new_attrs.Size() + 1; ++old_attr)
   {
     int new_attr = global_new_attrs[old_attr - 1];
+    // Add attributes only if they're transition region attributes
     if (new_attr > old_max_attr)
     {
       attr_sets.AddToAttributeSet(_transition_subdomain, new_attr);
       for (auto const & attr_set_name : attr_set_names)
       {
         const mfem::Array<int> & attr_set = attr_sets.GetAttributeSet(attr_set_name);
+        // If attribute set has the old attribute of the transition region, add the new one
         if (attr_set.Find(old_attr) != -1)
           attr_sets.AddToAttributeSet(attr_set_name, new_attr);
       }
