@@ -469,9 +469,9 @@ TEST(AbaqusInputParserTest, MultipleInstances_AssemblyLevelSets)
       // Mixed inline instance-qualified nodeset
       "*Nset, nset=NS_MIXED\n"
       "I1.1, I2.2\n"
-      // Assembly-level elset for I2 (by instance)
-      "*Elset, elset=ES_I2, instance=I2\n"
-      "1\n"
+      // Assembly-level elset for I2 via inline instance-qualified element id
+      "*Elset, elset=ES_I2\n"
+      "I2.1\n"
       // Create nodeset from elset at assembly scope for I2
       "*Nset, nset=NS_FROM_ES, elset=EALL, instance=I2\n"
       "*End Assembly\n");
@@ -532,8 +532,9 @@ TEST(AbaqusInputParserTest, MultipleInstances_PartLevelSetsMerged)
       // Define part-level sets
       "*Nset, nset=PN\n"
       "1, 2\n"
+      // Define a part-level elset by referencing an existing one
       "*Elset, elset=PE\n"
-      "1\n"
+      "EALL\n"
       "*End Part\n"
       "*Assembly, name=A\n"
       "*Instance, name=I1, part=P\n"

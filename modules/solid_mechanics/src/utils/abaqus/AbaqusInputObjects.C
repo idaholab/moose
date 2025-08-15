@@ -302,7 +302,89 @@ Part::processNodeSet(const OptionNode & option, Instance * instance, const Assem
 void
 Part::processElementSet(const OptionNode & option, Instance * instance, const AssemblyModel * asmb)
 {
-  processSetHelper<false>(option, instance, asmb);
+  // Specialized implementation for element sets to ensure robust handling of
+  // numeric IDs in both Part and Assembly contexts (with instances).
+  const auto & map = option._header;
+
+  // target set name
+  const auto name = map.get<std::string>("elset");
+
+  // Source maps and offsets depend on scope
+  const Part & index_host = instance ? instance->_part : *this;
+  const auto & id_to_index = index_host._element_id_to_index;
+  const Index offset = instance ? instance->_local_to_global_element_index_offset : 0;
+
+  // implement GENERATE keyword if present
+  const bool generate = map.get<bool>("generate");
+
+  if (map.has("unsorted"))
+    mooseError("The UNSORTED keyword is not supported.");
+
+  // get or create the set and pre-populate a unique container
+  auto & set = _elsets[name];
+  std::set<Index> unique_items(set.begin(), set.end());
+
+  for (const auto & data : option._data)
+  {
+    if (generate)
+    {
+      if (data.size() != 3)
+        mooseError("Expected three values in elset definition '",
+                   name,
+                   "' with GENERATE keyword in Abaqus input.");
+
+      const auto begin = MooseUtils::convert<AbaqusID>(data[0]);
+      const auto end = MooseUtils::convert<AbaqusID>(data[1]);
+      const auto step = MooseUtils::convert<AbaqusID>(data[2]);
+      if (step == 0)
+        mooseError("Zero step in generated element set.");
+      for (AbaqusID item = begin; item <= end; item += step)
+        unique_items.insert(id_to_index.at(item) + offset);
+      continue;
+    }
+
+    // Non-generate: allow set names, numeric IDs, and inline instance qualified tokens
+    for (const auto i : index_range(data))
+    {
+      const auto & atom = data[i];
+
+      // 1) Referencing an existing set by name (current map)
+      const auto it = _elsets.find(atom);
+      if (it != _elsets.end())
+      {
+        unique_items.insert(it->second.begin(), it->second.end());
+        continue;
+      }
+
+      // 2) Instance-qualified id: "instanceName.id"
+      std::vector<std::string> parts;
+      MooseUtils::tokenize(atom, parts, 1, ".");
+      if (parts.size() == 2)
+      {
+        if (instance)
+          mooseError("Ambiguous set token '", atom, "': both inline and header instance provided.");
+        if (!asmb || !asmb->_assembly)
+          mooseError("Instance-qualified entry '", atom, "' requires Assembly context.");
+        const auto & inst_name = parts[0];
+        const auto id = MooseUtils::convert<AbaqusID>(parts[1]);
+        if (!asmb->_assembly->_instance.has(inst_name))
+          mooseError("Instance '", inst_name, "' not found while resolving '", atom, "'.");
+        const auto & inst = asmb->_assembly->_instance[inst_name];
+        unique_items.insert(inst._part._element_id_to_index.at(id) +
+                            inst._local_to_global_element_index_offset);
+        continue;
+      }
+
+      // 3) Plain numeric id in the current scope
+      if (asmb && !instance)
+        mooseError(
+            "Assembly-level *Elset requires an instance: use 'instance=' or inline 'inst.id'");
+      const auto item = MooseUtils::convert<AbaqusID>(atom);
+      unique_items.insert(id_to_index.at(item) + offset);
+    }
+  }
+
+  set.assign(unique_items.begin(), unique_items.end());
 }
 
 template <bool is_nodal>
