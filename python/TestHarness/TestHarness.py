@@ -352,7 +352,7 @@ class TestHarness:
                 if isinstance(required, str):
                     required = [required]
                 self.options._required_capabilities = self.buildRequiredCapabilities(
-                    self.options._capabilities,
+                    list(self.options._capabilities.keys()),
                     required
                 )
 
@@ -1342,17 +1342,17 @@ class TestHarness:
         return None
 
     @staticmethod
-    def buildRequiredCapabilities(capabilities: dict[str, Tuple[Any, str]],
-                                  required_capabilities: list[str]) -> list[Tuple[str, bool]]:
+    def buildRequiredCapabilities(registered: list[str],
+                                  required: list[str]) -> list[Tuple[str, bool]]:
         """
         Helper for setting up the required capabilities.
         """
         result = []
-        for v in [v.strip() for v in required_capabilities]:
+        for v in [v.strip() for v in required]:
             is_false = v[0] == '!'
             capability = v[1:] if is_false else v
-            if capability not in capabilities:
-                TestHarness.errorExit(f'Require capability "{capability}" is not registered')
+            if capability not in registered:
+                TestHarness.errorExit(f'Required capability "{capability}" is not registered')
             result.append((capability, is_false))
         return result
 
