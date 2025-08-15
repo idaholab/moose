@@ -542,12 +542,8 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
 Instance::Instance(const BlockNode & block, AssemblyModel & model)
   : _part(model._part[block._header.get<std::string>("part")])
 {
-  // For now we only support single instance models. To support multiple instantiation
-  // we'd also need to add to the node ID to index map. this must be a map of vectors because
-  // the same ID can refer to multiple instantiated nodes now :-O
-  if (model._assembly && !model._assembly->_instance.empty())
-    mooseError("Currently only single instance assembly models are supported. Check "
-               "`modules/solid_mechanics/src/utils/abaqus/AbaqusInputObjects.C` for details.");
+  // Multiple instances are supported. Numeric IDs at assembly scope must be instance-qualified
+  // elsewhere to avoid ambiguity; code paths already enforce that where needed.
 
   RealVectorValue translation(0, 0, 0);
   RealTensorValue rotation(1, 0, 0, 0, 1, 0, 0, 0, 1);

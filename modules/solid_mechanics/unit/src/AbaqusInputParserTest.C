@@ -445,6 +445,129 @@ TEST(AbaqusInputParserTest, AssemblyNsetRequiresInstance)
   }
 }
 
+TEST(AbaqusInputParserTest, MultipleInstances_AssemblyLevelSets)
+{
+  // Two instances of the same part; create assembly-level sets mixing nodes from both
+  std::istringstream in(
+      "*Part, name=P\n"
+      "*Node\n"
+      "1, 0., 0.\n"
+      "2, 1., 0.\n"
+      "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
+      "1, 2\n"
+      "*Element, Type=U1, Elset=EALL\n"
+      "1, 1, 2\n"
+      "*End Part\n"
+      "*Assembly, name=A\n"
+      "*Instance, name=I1, part=P\n"
+      "*End Instance\n"
+      "*Instance, name=I2, part=P\n"
+      "*End Instance\n"
+      // Header-scoped nodeset for I1
+      "*Nset, nset=NS_I1, instance=I1\n"
+      "1, 2\n"
+      // Mixed inline instance-qualified nodeset
+      "*Nset, nset=NS_MIXED\n"
+      "I1.1, I2.2\n"
+      // Assembly-level elset for I2 (by instance)
+      "*Elset, elset=ES_I2, instance=I2\n"
+      "1\n"
+      // Create nodeset from elset at assembly scope for I2
+      "*Nset, nset=NS_FROM_ES, elset=EALL, instance=I2\n"
+      "*End Assembly\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::AssemblyModel model;
+  model.parse(parser);
+
+  // Instances exist
+  const auto & i1 = model.getInstance("I1");
+  const auto & i2 = model.getInstance("I2");
+
+  // Header-scoped nodeset indices resolve within I1
+  ASSERT_TRUE(model._nsets.find("NS_I1") != model._nsets.end());
+  const auto & ns_i1 = model._nsets.at("NS_I1");
+  ASSERT_EQ(ns_i1.size(), 2u);
+  EXPECT_NE(std::find(ns_i1.begin(), ns_i1.end(), model.getNodeIndex("1", &i1)), ns_i1.end());
+  EXPECT_NE(std::find(ns_i1.begin(), ns_i1.end(), model.getNodeIndex("2", &i1)), ns_i1.end());
+
+  // Mixed inline nodeset contains nodes from different instances
+  ASSERT_TRUE(model._nsets.find("NS_MIXED") != model._nsets.end());
+  const auto & ns_mixed = model._nsets.at("NS_MIXED");
+  ASSERT_EQ(ns_mixed.size(), 2u);
+  EXPECT_NE(std::find(ns_mixed.begin(), ns_mixed.end(), model.getNodeIndex("I1.1")),
+            ns_mixed.end());
+  EXPECT_NE(std::find(ns_mixed.begin(), ns_mixed.end(), model.getNodeIndex("I2.2")),
+            ns_mixed.end());
+
+  // Assembly-level elset for I2 and derived nodeset from that elset
+  ASSERT_TRUE(model._elsets.find("ES_I2") != model._elsets.end());
+  const auto & es_i2 = model._elsets.at("ES_I2");
+  ASSERT_EQ(es_i2.size(), 1u);
+  EXPECT_NE(std::find(es_i2.begin(), es_i2.end(), model.getElementIndex("1", &i2)), es_i2.end());
+
+  ASSERT_TRUE(model._nsets.find("NS_FROM_ES") != model._nsets.end());
+  const auto & ns_from_es = model._nsets.at("NS_FROM_ES");
+  ASSERT_EQ(ns_from_es.size(), 2u);
+  EXPECT_NE(std::find(ns_from_es.begin(), ns_from_es.end(), model.getNodeIndex("1", &i2)),
+            ns_from_es.end());
+  EXPECT_NE(std::find(ns_from_es.begin(), ns_from_es.end(), model.getNodeIndex("2", &i2)),
+            ns_from_es.end());
+}
+
+TEST(AbaqusInputParserTest, MultipleInstances_PartLevelSetsMerged)
+{
+  // Part-level sets should merge across instances into model-level sets with proper offsets
+  std::istringstream in(
+      "*Part, name=P\n"
+      "*Node\n"
+      "1, 0., 0.\n"
+      "2, 1., 0.\n"
+      "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
+      "1, 2\n"
+      "*Element, Type=U1, Elset=EALL\n"
+      "1, 1, 2\n"
+      // Define part-level sets
+      "*Nset, nset=PN\n"
+      "1, 2\n"
+      "*Elset, elset=PE\n"
+      "1\n"
+      "*End Part\n"
+      "*Assembly, name=A\n"
+      "*Instance, name=I1, part=P\n"
+      "*End Instance\n"
+      "*Instance, name=I2, part=P\n"
+      "*End Instance\n"
+      "*End Assembly\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::AssemblyModel model;
+  model.parse(parser);
+
+  const auto & i1 = model.getInstance("I1");
+  const auto & i2 = model.getInstance("I2");
+
+  // Part-level nodeset PN should contain nodes from both instances
+  ASSERT_TRUE(model._nsets.find("PN") != model._nsets.end());
+  const auto & pn = model._nsets.at("PN");
+  ASSERT_EQ(pn.size(), 4u);
+  EXPECT_NE(std::find(pn.begin(), pn.end(), model.getNodeIndex("1", &i1)), pn.end());
+  EXPECT_NE(std::find(pn.begin(), pn.end(), model.getNodeIndex("2", &i1)), pn.end());
+  EXPECT_NE(std::find(pn.begin(), pn.end(), model.getNodeIndex("1", &i2)), pn.end());
+  EXPECT_NE(std::find(pn.begin(), pn.end(), model.getNodeIndex("2", &i2)), pn.end());
+
+  // Part-level elset PE should contain elements from both instances
+  ASSERT_TRUE(model._elsets.find("PE") != model._elsets.end());
+  const auto & pe = model._elsets.at("PE");
+  ASSERT_EQ(pe.size(), 2u);
+  EXPECT_NE(std::find(pe.begin(), pe.end(), model.getElementIndex("1", &i1)), pe.end());
+  EXPECT_NE(std::find(pe.begin(), pe.end(), model.getElementIndex("1", &i2)), pe.end());
+}
+
 TEST(AbaqusInputParserTest, BoundaryInstanceScopedSingleNode)
 {
   // Boundary with instance-scoped single node should resolve clean integer within that instance
