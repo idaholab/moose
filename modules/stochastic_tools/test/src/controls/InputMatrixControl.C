@@ -49,6 +49,5 @@ InputMatrixControl::execute()
     for (const auto j : make_range(ncol))
       matrix(i, j) = _sample_function.value(_t, Point(i, j));
 
-  _console << matrix << std::endl;
   setControllableValue<RealEigenMatrix>("parameter", matrix);
 }
