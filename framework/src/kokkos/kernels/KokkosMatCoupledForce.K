@@ -49,7 +49,7 @@ KokkosMatCoupledForce::KokkosMatCoupledForce(const InputParameters & parameters)
                  "KokkosReaction or something similar");
   }
 
-  _v_var_to_index.copy();
+  _v_var_to_index.copyToDevice();
 
   if (isParamValid("coef") && _coef.size() != _n_coupled)
     paramError("coef", "Size of coef must be equal to size of v");
