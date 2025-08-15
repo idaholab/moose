@@ -25,16 +25,15 @@ public:
 
   virtual mfem::LinearFormIntegrator * getRealLFIntegrator() override
   {
-    return (getParam<bool>("input_port") ? new mfem::VectorFEBoundaryTangentLFIntegrator(*_u_real) : nullptr);
+    return (getParam<bool>("input_port") ? new mfem::VectorFEBoundaryTangentLFIntegrator(*_u_real)
+                                         : nullptr);
   }
   virtual mfem::LinearFormIntegrator * getImagLFIntegrator() override
   {
-    return (getParam<bool>("input_port") ? new mfem::VectorFEBoundaryTangentLFIntegrator(*_u_imag) : nullptr);
+    return (getParam<bool>("input_port") ? new mfem::VectorFEBoundaryTangentLFIntegrator(*_u_imag)
+                                         : nullptr);
   }
-  virtual mfem::BilinearFormIntegrator * getRealBFIntegrator() override
-  {
-    return nullptr;
-  }
+  virtual mfem::BilinearFormIntegrator * getRealBFIntegrator() override { return nullptr; }
   virtual mfem::BilinearFormIntegrator * getImagBFIntegrator() override
   {
     return new mfem::VectorFEMassIntegrator(_robin_coef_im.get());
@@ -67,13 +66,12 @@ public:
   static inline mfem::Vector to3DMFEMVector(const RealVectorValue & v)
   {
     mfem::Vector mfem_vec(3);
-    for (int i=0; i<3; ++i)
-        mfem_vec(i) = v(i);
+    for (int i = 0; i < 3; ++i)
+      mfem_vec(i) = v(i);
     return mfem_vec;
   }
 
 protected:
-
   mfem::real_t _mu0;
   mfem::real_t _epsilon0;
 
@@ -95,8 +93,6 @@ protected:
   std::unique_ptr<mfem::ConstantCoefficient> _robin_coef_im{nullptr};
   std::unique_ptr<mfem::VectorFunctionCoefficient> _u_real{nullptr};
   std::unique_ptr<mfem::VectorFunctionCoefficient> _u_imag{nullptr};
-
-
 };
 
 #endif
