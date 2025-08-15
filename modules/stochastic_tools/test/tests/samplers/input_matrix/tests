@@ -1,10 +1,30 @@
 [Tests]
-  issues = '#22512'
   design = 'InputMatrixSampler.md'
   [sampling_test]
     type = CSVDiff
     input = input_matrix.i
     csvdiff = input_matrix_out_data_0001.csv
+
+    issues = '#22512'
     requirement = 'The system shall be able to sample an input-defined matrix.'
+  []
+  [dynamic_matrix]
+    type = JSONDiff
+    input = input_matrix_dynamic.i
+    jsondiff = input_matrix_dynamic_out.json
+    allow_test_objects = true
+
+    issues = '#31171'
+    requirement = 'The system shall be able to modify a input-defined sampling matrix during the simulation.'
+  []
+  [dynamic_matrix_error]
+    type = RunException
+    input = input_matrix_dynamic.i
+    cli_args = 'Controls/sample_control/num_cols_function=dynamic_num_rows'
+    expect_err = 'Inputted matrix as changed the number of columns from \d+ to \d+'
+    allow_test_objects = true
+
+    issues = '#31171'
+    requirement = 'The system shall throw an error if the input-defined sampling matrix changed the number of columns during the simulation.'
   []
 []
