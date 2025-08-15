@@ -12,13 +12,12 @@
 [Variables]
   [u]
   []
-[]
-
-[AuxVariables]
   [v1]
     initial_condition = 3
   []
+[]
 
+[AuxVariables]
   [v2]
   []
 []
@@ -64,6 +63,11 @@
     coef = '3.5 1.2'
     material_properties = 'm1 m2'
   []
+
+  [constant]
+    type = KokkosDiffusion
+    variable = v1
+  []
 []
 
 [Postprocessors]
@@ -76,6 +80,7 @@
 
 [Executioner]
   type = Steady
+  solve_type = NEWTON
 []
 
 [Outputs]
