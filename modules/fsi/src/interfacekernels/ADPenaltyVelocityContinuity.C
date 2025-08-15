@@ -47,6 +47,18 @@ ADPenaltyVelocityContinuity::ADPenaltyVelocityContinuity(const InputParameters &
     _displacements[i] = getVar("displacements", i);
 }
 
+ADRealVectorValue
+ADPenaltyVelocityContinuity::solidVelocity(const unsigned int qp) const
+{
+  ADRealVectorValue ret;
+  for (const auto i : index_range(_solid_velocities))
+  {
+    mooseAssert(_solid_velocities[i], "This should be non-null");
+    ret(i) = (*_solid_velocities[i])[qp];
+  }
+  return ret;
+}
+
 void
 ADPenaltyVelocityContinuity::computeResidual()
 {
@@ -54,18 +66,8 @@ ADPenaltyVelocityContinuity::computeResidual()
   for (auto & qp_jump : _qp_jumps)
     qp_jump = 0;
 
-  const auto solid_velocity = [&](const auto qp)
-  {
-    ADRealVectorValue ret;
-    for (const auto i : index_range(_solid_velocities))
-      if (_solid_velocities[i])
-        ret(i) = (*_solid_velocities[i])[qp];
-
-    return ret;
-  };
-
   for (const auto qp : make_range(_qrule->n_points()))
-    _qp_jumps[qp] = _ad_JxW[qp] * _ad_coord[qp] * _penalty * (_velocity[qp] - solid_velocity(qp));
+    _qp_jumps[qp] = _ad_JxW[qp] * _ad_coord[qp] * _penalty * (_velocity[qp] - solidVelocity(qp));
 
   // Fluid velocity residuals
   {

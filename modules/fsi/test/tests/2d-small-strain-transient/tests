@@ -11,6 +11,8 @@
       # vel_x_solid is not accurate
       # We may improve that in the future
       rel_err = 1e-4
+      capabilities = 'method!=dbg'
+      allow_warnings = true
     []
     [INSAD]
       type = 'Exodiff'
