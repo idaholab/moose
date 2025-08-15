@@ -52,7 +52,7 @@ PicardSolve::allocateStorage(const bool primary)
 
   // Allocate storage for the previous postprocessor values
   (*transformed_pps_values).resize((*transformed_pps).size());
-  for (size_t i = 0; i < (*transformed_pps).size(); i++)
+  for (const auto i : index_range(*transformed_pps))
     (*transformed_pps_values)[i].resize(1);
 }
 
@@ -93,7 +93,7 @@ PicardSolve::savePostprocessorValues(const bool primary)
   }
 
   // Save postprocessor previous values
-  for (size_t i = 0; i < (*transformed_pps).size(); i++)
+  for (const auto i : index_range(*transformed_pps))
     (*transformed_pps_values)[i][0] = getPostprocessorValueByName((*transformed_pps)[i]);
 }
 

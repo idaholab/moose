@@ -8,13 +8,13 @@
       type = CSVDiff
       input = 'fp_parent.i'
       csvdiff = 'fp_parent_out.csv'
-      detail = 'a fixed point iteration.'
+      detail = 'a fixed point iteration,'
     []
     [time_step]
       type = CSVDiff
       input = 'time_step.i'
       csvdiff = 'time_step_out.csv'
-      detail = 'a time step.'
+      detail = 'a time step, or'
     []
     [nonlinear]
       type = CSVDiff
