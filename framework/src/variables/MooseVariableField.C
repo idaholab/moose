@@ -56,18 +56,6 @@ MooseVariableField<OutputType>::timestepSetup()
 }
 
 template <typename OutputType>
-const NumericVector<Number> &
-MooseVariableField<OutputType>::getSolution(const Moose::StateArg & state) const
-{
-  // It's not safe to use solutionState(0) because it returns the libMesh System solution member
-  // which is wrong during things like finite difference Jacobian evaluation, e.g. when PETSc
-  // perturbs the solution vector we feed these perturbations into the current_local_solution
-  // while the libMesh solution is frozen in the non-perturbed state
-  return (state.state == 0) ? *this->_sys.currentSolution()
-                            : this->_sys.solutionState(state.state, state.iteration_type);
-}
-
-template <typename OutputType>
 Moose::VarFieldType
 MooseVariableField<OutputType>::fieldType() const
 {

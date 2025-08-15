@@ -400,11 +400,6 @@ public:
   bool hasBlocks(const SubdomainID id) const override { return BlockRestrictable::hasBlocks(id); }
 
 protected:
-  /**
-   * Get the solution corresponding to the provided state
-   */
-  const libMesh::NumericVector<libMesh::Number> & getSolution(const Moose::StateArg & state) const;
-
   /// the time integrator used for computing time derivatives
   const TimeIntegrator * const _time_integrator;
 
