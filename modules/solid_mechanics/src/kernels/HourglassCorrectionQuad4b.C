@@ -13,36 +13,24 @@ HourglassCorrectionQuad4b::validParams()
                              "incorporates geometric updates, finite strain effects, and "
                              "enforces orthogonality between hourglass and physical modes.");
   params.addParam<Real>("penalty", 1.0, "Base penalty parameter");
+  params.addParam<Real>(
+      "shear_modulus",
+      1.0,
+      "Shear modulus used in the hourglass stabilization scaling. Defaults to 1.0,"
+      " so existing penalty-based behavior is preserved when unspecified.");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
 HourglassCorrectionQuad4b::HourglassCorrectionQuad4b(const InputParameters & parameters)
-  : Kernel(parameters), _penalty(getParam<Real>("penalty")), _v(_var.dofValues())
+  : Kernel(parameters),
+    _penalty(getParam<Real>("penalty")),
+    _mu(getParam<Real>("shear_modulus")),
+    _v(_var.dofValues())
 {
-  // Precompute the normalized hourglass mode vectors for a QUAD4 element.
-  // Base vectors for a single displacement component:
-  //   Mode 1: [ 1, -1, 1, -1 ]
-  //   Mode 2: [ 1,  1,-1, -1 ]
-  const Real base_g1[4] = {1.0, -1.0, 1.0, -1.0};
-  const Real base_g2[4] = {1.0, 1.0, -1.0, -1.0};
-
-  _g1.resize(4);
-  _g2.resize(4);
-
-  Real norm_g1 = 0.0, norm_g2 = 0.0;
-  for (unsigned int i = 0; i < 4; ++i)
-  {
-    norm_g1 += base_g1[i] * base_g1[i];
-    norm_g2 += base_g2[i] * base_g2[i];
-  }
-  norm_g1 = std::sqrt(norm_g1);
-  norm_g2 = std::sqrt(norm_g2);
-  for (unsigned int i = 0; i < 4; ++i)
-  {
-    _g1[i] = base_g1[i] / norm_g1;
-    _g2[i] = base_g2[i] / norm_g2;
-  }
+  // Hourglass mode vectors (unnormalized) for a single displacement component
+  _g1 = {1.0, -1.0, 1.0, -1.0};
+  _g2 = {1.0, 1.0, -1.0, -1.0};
 }
 
 Real
@@ -52,93 +40,142 @@ HourglassCorrectionQuad4b::computeQpResidual()
   mooseAssert(_qp == 0, "This kernel must only be used with single quadrature point integration.");
   mooseAssert(_v.size() == 4, "This kernel requires 4 nodal DOF values (QUAD4 elements).");
 
-  // ---------------------------
-  // 1. Retrieve element geometry using MOOSE APIs and libMesh::Point operators.
-  // ---------------------------
-  // Get the element centroid.
-  Point center = _current_elem->vertex_average();
-
-  // Retrieve nodal coordinates.
-  std::vector<Point> coords(4);
+  // 1) Geometry about centroid and invariant metrics
+  const Point center = _current_elem->vertex_average();
+  std::vector<Point> coords(4), dx(4);
   for (unsigned int i = 0; i < 4; ++i)
-    coords[i] = _current_elem->node_ref(i);
-
-  // Compute deviations from the centroid using overloaded operators.
-  std::vector<Point> dx(4);
-  for (unsigned int i = 0; i < 4; ++i)
-    dx[i] = coords[i] - center;
-
-  // Get the element area (for 2D, volume() returns the area).
-  Real area = _current_elem->volume();
-
-  // Compute an axis-aligned bounding box (note: this is sensitive to rotation).
-  Real min_x = coords[0](0), max_x = coords[0](0);
-  Real min_y = coords[0](1), max_y = coords[0](1);
-  for (unsigned int i = 1; i < 4; ++i)
   {
-    min_x = std::min(min_x, coords[i](0));
-    max_x = std::max(max_x, coords[i](0));
-    min_y = std::min(min_y, coords[i](1));
-    max_y = std::max(max_y, coords[i](1));
+    coords[i] = _current_elem->node_ref(i);
+    dx[i] = coords[i] - center;
   }
-  Real Lx = max_x - min_x;
-  Real Ly = max_y - min_y;
-  Real aspect_ratio = (std::fabs(Ly) > 1e-12) ? Lx / Ly : 1.0;
+  const Real area = _current_elem->volume();
 
-  // ---------------------------
-  // 2. Compute the affine (uniform) displacement field.
-  // ---------------------------
-  // Compute the average displacement of the current component.
-  Real avg_disp = (_v[0] + _v[1] + _v[2] + _v[3]) / 4.0;
-
-  // Estimate an affine gradient using nodes 0 and 2 (diagonally opposite).
-  Real dx_total = coords[2](0) - coords[0](0);
-  Real dy_total = coords[2](1) - coords[0](1);
-  Real grad_x = (std::fabs(dx_total) > 1e-12) ? (_v[2] - _v[0]) / dx_total : 0.0;
-  Real grad_y = (std::fabs(dy_total) > 1e-12) ? (_v[2] - _v[0]) / dy_total : 0.0;
-
-  // Compute the affine displacement at each node.
-  std::vector<Real> u_affine(4);
+  // Build A = sum_i dx_i dx_i^T
+  Real A00 = 0.0, A01 = 0.0, A11 = 0.0;
   for (unsigned int i = 0; i < 4; ++i)
-    u_affine[i] = avg_disp + grad_x * dx[i](0) + grad_y * dx[i](1);
+  {
+    const Real x = dx[i](0);
+    const Real y = dx[i](1);
+    A00 += x * x;
+    A01 += x * y;
+    A11 += y * y;
+  }
+  // Invert A robustly
+  const Real det = A00 * A11 - A01 * A01;
+  const Real eps = 1e-12;
+  Real M00, M01, M10, M11;
+  if (std::fabs(det) > eps)
+  {
+    const Real inv = 1.0 / det;
+    M00 = A11 * inv;
+    M01 = -A01 * inv;
+    M10 = -A01 * inv;
+    M11 = A00 * inv;
+  }
+  else
+  {
+    // Regularize: treat A as diagonal with small size to avoid blow-up
+    const Real reg = std::max(A00 + A11, eps);
+    M00 = 1.0 / std::max(A00, reg);
+    M01 = 0.0;
+    M10 = 0.0;
+    M11 = 1.0 / std::max(A11, reg);
+  }
 
-  // The non-affine (hourglass) displacement is the difference between actual and affine
-  // displacements.
-  std::vector<Real> u_hourglass(4);
+  // 2) Least-squares affine fit: u_affine_i = avg + grad · dx_i
+  const Real avg = (_v[0] + _v[1] + _v[2] + _v[3]) / 4.0;
+  Real bx = 0.0, by = 0.0; // b = sum_i u_i dx_i
   for (unsigned int i = 0; i < 4; ++i)
-    u_hourglass[i] = _v[i] - u_affine[i];
+  {
+    bx += _v[i] * dx[i](0);
+    by += _v[i] * dx[i](1);
+  }
+  const Real gradx = M00 * bx + M01 * by;
+  const Real grady = M10 * bx + M11 * by;
 
-  // ---------------------------
-  // 3. Project the hourglass displacement onto the precomputed orthonormal modes.
-  // ---------------------------
+  std::vector<Real> u_hg(4);
+  for (unsigned int i = 0; i < 4; ++i)
+  {
+    const Real u_aff = avg + gradx * dx[i](0) + grady * dx[i](1);
+    u_hg[i] = _v[i] - u_aff;
+  }
+
+  // 3) Hourglass projections
   Real H1 = 0.0, H2 = 0.0;
   for (unsigned int i = 0; i < 4; ++i)
   {
-    H1 += u_hourglass[i] * _g1[i];
-    H2 += u_hourglass[i] * _g2[i];
+    H1 += _g1[i] * u_hg[i];
+    H2 += _g2[i] * u_hg[i];
   }
 
-  // ---------------------------
-  // 4. Compute a dynamic penalty factor based on current geometry.
-  // ---------------------------
-  // Scale the base penalty using the element area and the aspect ratio.
-  Real geometric_scaling = area / (Lx * Ly);
-  Real aspect_scaling = 1.0 + std::fabs(aspect_ratio - 1.0);
-  Real dynamic_penalty = _penalty * geometric_scaling * aspect_scaling;
+  // 4) Rotation-invariant scaling c = penalty * area / h^2, with h^2 = trace(A)/2
+  const Real h2 = std::max((A00 + A11) * 0.5, eps);
+  const Real c = _penalty * _mu * (area / h2);
 
-  // ---------------------------
-  // 5. Assemble the correction force (residual) for the current displacement component.
-  // ---------------------------
-  // The kernel returns the component of the hourglass correction force for the current node (_i).
-  Real residual = dynamic_penalty * (_g1[_i] * H1 + _g2[_i] * H2);
-
-  return residual;
+  // 5) Residual contribution at node _i
+  return c * (_g1[_i] * H1 + _g2[_i] * H2);
 }
 
 Real
 HourglassCorrectionQuad4b::computeQpJacobian()
 {
-  // For brevity, a simplified Jacobian is provided. A fully consistent Jacobian would require
-  // differentiating the dynamic penalty and projection steps.
-  return _penalty * ((_g1[_i] * _g1[_j] + _g2[_i] * _g2[_j]) / 16.0);
+  // Recompute geometry terms (held fixed w.r.t. displacement variable)
+  const Point center = _current_elem->vertex_average();
+  std::vector<Point> dx(4);
+  for (unsigned int i = 0; i < 4; ++i)
+    dx[i] = _current_elem->node_ref(i) - center;
+
+  Real A00 = 0.0, A01 = 0.0, A11 = 0.0;
+  for (unsigned int i = 0; i < 4; ++i)
+  {
+    const Real x = dx[i](0);
+    const Real y = dx[i](1);
+    A00 += x * x;
+    A01 += x * y;
+    A11 += y * y;
+  }
+  const Real det = A00 * A11 - A01 * A01;
+  const Real eps = 1e-12;
+  Real M00, M01, M10, M11;
+  if (std::fabs(det) > eps)
+  {
+    const Real inv = 1.0 / det;
+    M00 = A11 * inv;
+    M01 = -A01 * inv;
+    M10 = -A01 * inv;
+    M11 = A00 * inv;
+  }
+  else
+  {
+    const Real reg = std::max(A00 + A11, eps);
+    M00 = 1.0 / std::max(A00, reg);
+    M01 = 0.0;
+    M10 = 0.0;
+    M11 = 1.0 / std::max(A11, reg);
+  }
+
+  // Hourglass geometry vectors p_a = sum_i g_a_i dx_i
+  Real p1x = 0.0, p1y = 0.0, p2x = 0.0, p2y = 0.0;
+  for (unsigned int k = 0; k < 4; ++k)
+  {
+    p1x += _g1[k] * dx[k](0);
+    p1y += _g1[k] * dx[k](1);
+    p2x += _g2[k] * dx[k](0);
+    p2y += _g2[k] * dx[k](1);
+  }
+
+  // c scaling (geometry-only)
+  const Real area = _current_elem->volume();
+  const Real h2 = std::max((A00 + A11) * 0.5, eps);
+  const Real c = _penalty * _mu * (area / h2);
+
+  // Compute s_a(j) = p_a^T M dx_j
+  const Real dxjx = dx[_j](0), dxjy = dx[_j](1);
+  const Real Mdxjx = M00 * dxjx + M01 * dxjy;
+  const Real Mdxjy = M10 * dxjx + M11 * dxjy;
+  const Real s1j = p1x * Mdxjx + p1y * Mdxjy;
+  const Real s2j = p2x * Mdxjx + p2y * Mdxjy;
+
+  // Consistent tangent: K_ij = c * [ g1_i*(g1_j - s1j) + g2_i*(g2_j - s2j) ]
+  return c * (_g1[_i] * (_g1[_j] - s1j) + _g2[_i] * (_g2[_j] - s2j));
 }
