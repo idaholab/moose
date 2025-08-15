@@ -19,6 +19,7 @@
 #include "EigenExecutionerBase.h"
 #include "Convergence.h"
 #include "ConvergenceIterationTypes.h"
+#include "MooseUtils.h"
 
 InputParameters
 FixedPointSolve::fixedPointDefaultConvergenceParams()
@@ -564,7 +565,7 @@ bool
 FixedPointSolve::performingRelaxation(const bool primary) const
 {
   if (primary)
-    return _relax_factor != 1.;
+    return !MooseUtils::absoluteFuzzyEqual(_relax_factor, 1.0);
   else
-    return _secondary_relaxation_factor != 1.;
+    return !MooseUtils::absoluteFuzzyEqual(_secondary_relaxation_factor, 1.0);
 }
