@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#31298'
+  design = 'syntax/Contact/index.md MechanicalContactConstraint.md'
+  [frictionless_subdomain_mod]
+    type = 'Exodiff'
+    input = 'frictionless_subdomain_mod.i'
+    exodiff = 'frictionless_subdomain_mod_out.e frictionless_subdomain_mod_out.e-s002'
+    requirement = "The system shall permit models with contact to solve when elements
+                   are moved between subdomains using subdomain modifiers."
+  []
+[]
