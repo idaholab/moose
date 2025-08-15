@@ -74,7 +74,7 @@
     threshold = 0.5
     block = '10000 10001'
     # subdomain 10002 is inactive, no variables defined on it
-    subdomain_id = 10001
+    subdomain_id = 10002
     execute_on = 'INITIAL TIMESTEP_BEGIN'
     execution_order_group = '2'
   []
@@ -204,6 +204,9 @@
     type = SMP
     full = true
     solve_type = 'NEWTON'
+    # Default PC fails at 14 MPI
+    petsc_options_iname = '-pc_type -pc_factor_shift_type'
+    petsc_options_value = 'lu NONZERO'
   []
 []
 
