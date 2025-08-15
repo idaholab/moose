@@ -100,7 +100,7 @@ These are analogous to the modes described in [ParameterStudy](ParameterStudy/in
       y3 = runner([[0, 1, 2], [3, 4, 5]]) # Only runs input for [3, 4, 5]
   ```
 
-- Use `min_procs_per_sample` if each sample itself needs multiple processes (e.g., heavy physics solves requiring a lot of memory).
+- Set `min_procs_per_sample` in `StochasticRunOptions` if each sample itself needs multiple processes (e.g., heavy physics solves requiring a lot of memory).
 
 ## API Reference
 
