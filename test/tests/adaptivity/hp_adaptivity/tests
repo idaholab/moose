@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#31109'
+  design = " "
+  [./test]
+    type = 'Exodiff'
+    input = 'hp_adaptivity.i'
+    exodiff = 'hp_adaptivity_out.e'
+    requirement = "The system shall support hp adaptivity."
+  [../]
+[]
