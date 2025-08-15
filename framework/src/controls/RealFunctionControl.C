@@ -37,12 +37,5 @@ void
 RealFunctionControl::execute()
 {
   Real value = _function.value(_t);
-  ControllableParameter cparam = getControllableParameterByName(getParam<std::string>("parameter"));
-
-  if (cparam.check<Real>())
-    cparam.set<Real>(value);
-  else if (cparam.check<std::vector<Real>>())
-    cparam.set<std::vector<Real>>({value});
-  else
-    mooseError("Unable to locate a Real or std::vector<Real> parameter.");
+  setControllableValue<Real>("parameter", value);
 }
