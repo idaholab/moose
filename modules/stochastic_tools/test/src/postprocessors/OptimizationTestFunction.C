@@ -39,8 +39,6 @@ OptimizationTestFunction::getValue() const
     return eggholder(_x);
   else
     paramError("function", "Unknown function: ", _function);
-
-  return 0.0;
 }
 
 Real
