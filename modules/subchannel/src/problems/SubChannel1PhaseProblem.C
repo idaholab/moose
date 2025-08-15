@@ -1695,7 +1695,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
       Vec sol_holder_W;
       LibmeshPetscCall(createPetscVector(sol_holder_W, _block_size * _n_gaps));
       LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
-          _prodp, *_P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels));
+          _prodp, *_P_soln, first_node - 1, last_node - 1, _n_channels));
       LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
           _Wij_vec, _Wij, first_node, last_node, _n_gaps));
       LibmeshPetscCall(MatMult(_cmc_sys_Wij_mat, _Wij_vec, sol_holder_W));
@@ -2078,7 +2078,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     Vec sol_holder_P;
     LibmeshPetscCall(createPetscVector(sol_holder_P, _block_size * _n_gaps));
     LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
-        _prodp, *_P_soln, iblock * _block_size, (iblock + 1) * _block_size - 1, _n_channels));
+        _prodp, *_P_soln, first_node - 1, last_node - 1, _n_channels));
 
     LibmeshPetscCall(MatMult(_cmc_pressure_force_mat, _prodp, sol_holder_P));
     LibmeshPetscCall(VecAXPY(sol_holder_P, -1.0, _cmc_pressure_force_rhs));
@@ -2480,7 +2480,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(MatMult(_mc_sumWij_mat, sol_Wij, _prod));
   LibmeshPetscCall(populateSolutionChan<SolutionHandle>(
       _prod, *_SumWij_soln, first_node, last_node, _n_channels));
-
 
   LibmeshPetscCall(VecAbs(_prod));
   LibmeshPetscCall(VecMax(_prod, NULL, &_max_sumWij_new));
