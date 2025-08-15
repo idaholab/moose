@@ -39,6 +39,11 @@ class MooseEnumItem;
 class ExecFlagEnum;
 class MooseVariableFieldBase;
 
+namespace hit
+{
+class Node;
+}
+
 void MooseVecView(libMesh::NumericVector<libMesh::Number> & vector);
 void MooseVecView(const libMesh::NumericVector<libMesh::Number> & vector);
 void MooseMatView(libMesh::SparseMatrix<libMesh::Number> & mat);
@@ -280,6 +285,11 @@ public:
 private:
   MPI_Comm _orig;
 };
+
+/**
+ * Get the prefix to be associated with a hit node for a message
+ */
+std::string hitMessagePrefix(const hit::Node & node);
 
 // MOOSE Requires PETSc to run, this CPP check will cause a compile error if PETSc is not found
 #ifndef LIBMESH_HAVE_PETSC

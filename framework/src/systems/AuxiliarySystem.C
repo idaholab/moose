@@ -261,8 +261,8 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    if (parameters.get<std::string>("_moose_base") == "AuxKernel" ||
-        parameters.get<std::string>("_moose_base") == "Bounds")
+    const auto & base = parameters.getBase();
+    if (base == "AuxKernel" || base == "Bounds")
     {
       std::shared_ptr<AuxKernel> kernel =
           _factory.create<AuxKernel>(kernel_name, name, parameters, tid);
@@ -277,7 +277,7 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
         _elemental_aux_storage.addObject(kernel, tid);
     }
 
-    else if (parameters.get<std::string>("_moose_base") == "VectorAuxKernel")
+    else if (base == "VectorAuxKernel")
     {
       std::shared_ptr<VectorAuxKernel> kernel =
           _factory.create<VectorAuxKernel>(kernel_name, name, parameters, tid);
@@ -291,7 +291,7 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
         _elemental_vec_aux_storage.addObject(kernel, tid);
     }
 
-    else if (parameters.get<std::string>("_moose_base") == "ArrayAuxKernel")
+    else if (base == "ArrayAuxKernel")
     {
       std::shared_ptr<ArrayAuxKernel> kernel =
           _factory.create<ArrayAuxKernel>(kernel_name, name, parameters, tid);
@@ -307,8 +307,7 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
     else
       mooseAssert(false,
                   "Attempting to add AuxKernel of type '" + kernel_name + "' and name '" + name +
-                      "' to the auxiliary system with invalid _moose_base: " +
-                      parameters.get<std::string>("_moose_base"));
+                      "' to the auxiliary system with invalid _moose_base: " + base);
   }
 }
 

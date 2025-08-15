@@ -12,6 +12,7 @@
 #include "MooseApp.h"
 #include "InputParameterWarehouse.h"
 #include "MooseObjectAction.h"
+#include "Parser.h"
 
 ActionFactory::ActionFactory(MooseApp & app) : _app(app) {}
 
@@ -41,12 +42,14 @@ ActionFactory::create(const std::string & action,
                       InputParameters & incoming_parser_params)
 {
   std::string action_name = MooseUtils::shortName(full_action_name);
-  incoming_parser_params.addPrivateParam("_moose_app", &_app);
-  incoming_parser_params.addPrivateParam("action_type", action);
+  incoming_parser_params.addPrivateParam(MooseBase::app_param, &_app);
+  incoming_parser_params.set<std::string>(MooseBase::type_param) = action;
+
   std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
 
-  std::string unique_action_name =
+  const std::string unique_action_name =
       action + incoming_parser_params.get<std::string>("task") + full_action_name;
+
   // Create the actual parameters object that the object will reference
   InputParameters & action_params = _app.getInputParameterWarehouse().addInputParameters(
       unique_action_name, incoming_parser_params, 0, {});
@@ -60,8 +63,11 @@ ActionFactory::create(const std::string & action,
       action_params.setHitNode(*hit_node, {});
     // Don't have one, so just use the root
     else
-      action_params.setHitNode(*_app.parser().root(), {});
+      action_params.setHitNode(_app.parser().getRoot(), {});
   }
+
+  action_params.set<std::string>(Action::unique_action_name_param) = unique_action_name;
+  action_params.set<std::string>(MooseBase::name_param) = action_name;
 
   // Check and finalize the parameters
   action_params.finalize(action_name);
@@ -72,10 +78,6 @@ ActionFactory::create(const std::string & action,
     mooseError(
         std::string("Unable to find buildable Action from supplied InputParameters Object for ") +
         action_name);
-
-  // Add the name to the parameters
-  action_params.set<std::string>("_action_name") = action_name;
-  action_params.set<std::string>("_unique_action_name") = unique_action_name;
 
   // Create the object
   _currently_constructing.push_back(&action_params);
@@ -102,7 +104,7 @@ ActionFactory::getValidParams(const std::string & name)
     mooseError(std::string("A '") + name + "' is not a registered Action\n\n");
 
   InputParameters params = iter->second._obj_pointer->buildParameters();
-  params.addPrivateParam("_moose_app", &_app);
+  params.addPrivateParam(MooseBase::app_param, &_app);
   params.addPrivateParam<ActionWarehouse *>("awh", &_app.actionWarehouse());
 
   return params;

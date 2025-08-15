@@ -9,13 +9,14 @@
 
 #include "InputParameterWarehouse.h"
 #include "InputParameters.h"
+#include "MooseBase.h"
 
 TEST(InputParameterWarehouseTest, getControllableItems)
 {
   // One item
   {
     InputParameters in_params = emptyInputParameters();
-    in_params.addPrivateParam<std::string>("_moose_base", "Base");
+    in_params.registerBase("Base");
     in_params.addParam<int>("control", 1949, "");
     in_params.declareControllable("control");
 
@@ -39,7 +40,7 @@ TEST(InputParameterWarehouseTest, getControllableItems)
   // Many items
   {
     InputParameters in_params = emptyInputParameters();
-    in_params.addPrivateParam<std::string>("_moose_base", "Base");
+    in_params.registerBase("Base");
     in_params.addParam<int>("control", 1949, "");
     in_params.addParam<int>("control2", 1954, "");
 
@@ -72,7 +73,7 @@ TEST(InputParameterWarehouseTest, getControllableItems)
 TEST(InputParameterWarehouseTest, getControllableParameter)
 {
   InputParameters in_params = emptyInputParameters();
-  in_params.addPrivateParam<std::string>("_moose_base", "Base");
+  in_params.registerBase("Base");
   in_params.addParam<int>("control", 2011, "");
   in_params.addParam<int>("control2", 2013, "");
   in_params.addParam<int>("no_control", 2009, "");
@@ -99,7 +100,7 @@ TEST(InputParameterWarehouseTest, getControllableParameter)
 TEST(InputParameterWarehouseTest, getControllableParameterValues)
 {
   InputParameters in_params = emptyInputParameters();
-  in_params.addPrivateParam<std::string>("_moose_base", "Base");
+  in_params.registerBase("Base");
   in_params.addParam<int>("control", 2011, "");
   in_params.declareControllable("control");
 
@@ -116,7 +117,7 @@ TEST(InputParameterWarehouseTest, getControllableParameterValues)
 TEST(InputParameterWarehouseTest, emptyControllableParameterValues)
 {
   InputParameters in_params = emptyInputParameters();
-  in_params.addPrivateParam<std::string>("_moose_base", "Base");
+  in_params.registerBase("Base");
   in_params.addParam<int>("control", 2011, "");
   in_params.declareControllable("control");
 
@@ -134,7 +135,7 @@ TEST(InputParameterWarehouseTest, addControllableParameterConnection)
   // One-to-one
   {
     InputParameters in_params = emptyInputParameters();
-    in_params.addPrivateParam<std::string>("_moose_base", "Base");
+    in_params.registerBase("Base");
     in_params.addParam<int>("control", 1949, "");
     in_params.declareControllable("control");
 
@@ -164,7 +165,7 @@ TEST(InputParameterWarehouseTest, addControllableParameterConnection)
   // One-to-many
   {
     InputParameters in_params = emptyInputParameters();
-    in_params.addPrivateParam<std::string>("_moose_base", "Base");
+    in_params.registerBase("Base");
     in_params.addParam<int>("control", 1949, "");
     in_params.declareControllable("control");
 
@@ -172,7 +173,7 @@ TEST(InputParameterWarehouseTest, addControllableParameterConnection)
     const InputParameters & params0 = wh.addInputParameters("Object0", in_params, 0, {});
 
     in_params.set<int>("control") = 2011;
-    in_params.set<std::string>("_moose_base") = "Base2";
+    in_params.registerBase("Base2");
     const InputParameters & params1 = wh.addInputParameters("Object1", in_params, 0, {});
     in_params.set<int>("control") = 2013;
     const InputParameters & params2 = wh.addInputParameters("Object2", in_params, 0, {});
@@ -203,7 +204,7 @@ TEST(InputParameterWarehouseTest, addControllableParameterConnection)
   // Many-to-one
   {
     InputParameters in_params = emptyInputParameters();
-    in_params.addPrivateParam<std::string>("_moose_base", "Base");
+    in_params.registerBase("Base");
     in_params.addParam<int>("control", 1949, "");
     in_params.declareControllable("control");
 
@@ -211,7 +212,7 @@ TEST(InputParameterWarehouseTest, addControllableParameterConnection)
     const InputParameters & params0 = wh.addInputParameters("Object0", in_params, 0, {});
 
     in_params.set<int>("control") = 2011;
-    in_params.set<std::string>("_moose_base") = "Base2";
+    in_params.registerBase("Base2");
     const InputParameters & params1 = wh.addInputParameters("Object1", in_params, 0, {});
     in_params.set<int>("control") = 2013;
     const InputParameters & params2 = wh.addInputParameters("Object2", in_params, 0, {});
@@ -269,7 +270,7 @@ TEST(InputParameterWarehouseTest, addControllableParameterConnection)
   // Many-to-many
   {
     InputParameters in_params = emptyInputParameters();
-    in_params.addPrivateParam<std::string>("_moose_base", "Base");
+    in_params.registerBase("Base");
     in_params.addParam<int>("control", 1949, "");
     in_params.declareControllable("control");
 
@@ -279,7 +280,7 @@ TEST(InputParameterWarehouseTest, addControllableParameterConnection)
     const InputParameters & params1 = wh.addInputParameters("Object1", in_params, 0, {});
 
     in_params.set<int>("control") = 2011;
-    in_params.set<std::string>("_moose_base") = "Base2";
+    in_params.registerBase("Base2");
     const InputParameters & params2 = wh.addInputParameters("Object2", in_params, 0, {});
     in_params.set<int>("control") = 2013;
     const InputParameters & params3 = wh.addInputParameters("Object3", in_params, 0, {});
@@ -397,7 +398,7 @@ TEST(InputParameterWarehouseTest, addControllableParameterConnection)
 TEST(InputParameterWarehouseTest, addControllableParameterAlias)
 {
   InputParameters in_params = emptyInputParameters();
-  in_params.addPrivateParam<std::string>("_moose_base", "Base");
+  in_params.registerBase("Base");
   in_params.addParam<int>("control", 1949, "");
   in_params.declareControllable("control");
 

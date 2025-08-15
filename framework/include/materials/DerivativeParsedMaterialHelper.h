@@ -35,7 +35,8 @@ public:
 
   DerivativeParsedMaterialHelperTempl(
       const InputParameters & parameters,
-      VariableNameMappingMode map_mode = VariableNameMappingMode::USE_PARAM_NAMES);
+      const VariableNameMappingMode map_mode = VariableNameMappingMode::USE_PARAM_NAMES,
+      const std::optional<std::string> & function_param_name = {});
 
   static InputParameters validParams();
 

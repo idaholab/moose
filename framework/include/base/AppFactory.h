@@ -18,10 +18,8 @@
 #include "gtest/gtest.h"
 class GTEST_TEST_CLASS_NAME_(AppFactoryTest, manageAppParams);
 class GTEST_TEST_CLASS_NAME_(AppFactoryTest, appCopyConstructParams);
+class GTEST_TEST_CLASS_NAME_(AppFactoryTest, createNotRegistered);
 #endif
-
-// Forward declarations
-class InputParameters;
 
 /**
  * Macros
@@ -29,16 +27,11 @@ class InputParameters;
 #define registerApp(name) AppFactory::instance().reg<name>(#name)
 
 /**
- * alias to wrap shared pointer type
- */
-using MooseAppPtr = std::shared_ptr<MooseApp>;
-
-/**
  * Polymorphic data structure with parameter and object build access.
  */
 struct AppFactoryBuildInfoBase
 {
-  virtual MooseAppPtr build(const InputParameters & params) = 0;
+  virtual std::unique_ptr<MooseApp> build(const InputParameters & params) = 0;
   virtual InputParameters buildParameters() = 0;
   virtual ~AppFactoryBuildInfoBase() = default;
 
@@ -47,9 +40,9 @@ struct AppFactoryBuildInfoBase
 template <typename T>
 struct AppFactoryBuildInfo : public AppFactoryBuildInfoBase
 {
-  virtual MooseAppPtr build(const InputParameters & params) override
+  virtual std::unique_ptr<MooseApp> build(const InputParameters & params) override
   {
-    return std::make_shared<T>(params);
+    return std::make_unique<T>(params);
   }
   virtual InputParameters buildParameters() override { return T::validParams(); }
 };
@@ -71,21 +64,54 @@ public:
   virtual ~AppFactory();
 
   static InputParameters validParams();
+
+  /// The name for the "main" moose application
+  static const std::string main_app_name;
+
   /**
-   * Helper function for creating a MooseApp from command-line arguments and a Parser.
+   * Create an app with no input and command line arguments.
    *
-   * The parser must be set and have an app type set.
+   * Useful for unit testing.
    */
-  static MooseAppPtr createAppShared(int argc, char ** argv, std::unique_ptr<Parser> parser);
+  static std::unique_ptr<MooseApp> create(const std::string & app_type,
+                                          const std::vector<std::string> & cli_args = {});
+
+  /**
+   * Create a MooseApp from a Parser and CommandLine, both of which should have parsed.
+   */
+  static std::unique_ptr<MooseApp> create(std::unique_ptr<Parser> parser,
+                                          std::unique_ptr<CommandLine> command_line);
+
+  /**
+   * Create a MooseApp given a set of parameters.
+   *
+   * The Parser must be set in the _parser param and the CommandLine must be set
+   * in the _command_line param, both of which must have been parsed.
+   *
+   * @param app_type Type of the application being constructed
+   * @param name Name for the object
+   * @param parameters Parameters this object should have
+   * @return The created object
+   */
+  ///@{
+  std::unique_ptr<MooseApp> create(const std::string & app_type,
+                                   const std::string & name,
+                                   InputParameters parameters,
+                                   MPI_Comm COMM_WORLD_IN);
+  std::shared_ptr<MooseApp> createShared(const std::string & app_type,
+                                         const std::string & name,
+                                         InputParameters parameters,
+                                         MPI_Comm COMM_WORLD_IN);
+  ///@}
 
   /**
    * Deprecated helper function for creating a MooseApp for Apps haven't adapted to the new Parser
    * and Builder changes. This function needed to be removed after the new Parser and Builder merged
    */
-  static MooseAppPtr createAppShared(const std::string & default_app_type,
-                                     int argc,
-                                     char ** argv,
-                                     MPI_Comm comm_word = MPI_COMM_WORLD);
+  static std::shared_ptr<MooseApp> createAppShared(const std::string & default_app_type,
+                                                   int argc,
+                                                   char ** argv,
+                                                   MPI_Comm comm_word = MPI_COMM_WORLD);
 
   /**
    * Register a new object
@@ -133,18 +159,6 @@ public:
   void clearAppParams(const InputParameters & params, const ClearAppParamsKey);
 
   /**
-   * Build an application object (must be registered)
-   * @param app_type Type of the application being constructed
-   * @param name Name for the object
-   * @param parameters Parameters this object should have
-   * @return The created object
-   */
-  MooseAppPtr createShared(const std::string & app_type,
-                           const std::string & name,
-                           InputParameters parameters,
-                           MPI_Comm COMM_WORLD_IN);
-
-  /**
    * Returns a reference to the map from names to AppFactoryBuildInfo pointers
    */
   const auto & registeredObjects() const { return _name_to_build_info; }
@@ -180,13 +194,10 @@ protected:
   AppFactoryBuildInfoMap _name_to_build_info;
 
 private:
-  // Private constructor for singleton pattern
-  AppFactory() {}
-
   /**
    * Stores the given parameters within _input_parameters for app construction
    *
-   * Also calls finalize() on the parameters.
+   * Also calls finalize() on the parameters
    */
   const InputParameters & storeAppParams(InputParameters & params);
 
@@ -203,9 +214,13 @@ private:
    */
   std::size_t getAppParamsID(const InputParameters & params) const;
 
+  /// Private constructor for singleton pattern
+  AppFactory() {}
+
 #ifdef MOOSE_UNIT_TEST
   FRIEND_TEST(::AppFactoryTest, manageAppParams);
   FRIEND_TEST(::AppFactoryTest, appCopyConstructParams);
+  FRIEND_TEST(::AppFactoryTest, createNotRegistered);
 #endif
 
   /// Storage of input parameters used in applications (ID (from getAppParamsID()) -> params)

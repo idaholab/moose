@@ -26,7 +26,7 @@ FlowModelSetup::validParams()
 
 FlowModelSetup::FlowModelSetup(const InputParameters & params)
   : _this_params(params),
-    _this_app(*_this_params.getCheckedPointerParam<MooseApp *>("_moose_app")),
+    _this_app(*_this_params.getCheckedPointerParam<MooseApp *>(MooseBase::app_param)),
     _this_action_factory(_this_app.getActionFactory()),
     _this_action_warehouse(*_this_params.getCheckedPointerParam<ActionWarehouse *>("awh")),
     _fe_family(AddVariableAction::getNonlinearVariableFamilies()),

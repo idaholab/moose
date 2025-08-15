@@ -52,7 +52,7 @@ VectorPostprocessor::validParams()
 VectorPostprocessor::VectorPostprocessor(const MooseObject * moose_object)
   : OutputInterface(moose_object->parameters()),
     NonADFunctorInterface(moose_object),
-    _vpp_name(MooseUtils::shortName(moose_object->parameters().get<std::string>("_object_name"))),
+    _vpp_name(MooseUtils::shortName(moose_object->name())),
     _vpp_fe_problem(
         *moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _parallel_type(moose_object->parameters().get<MooseEnum>("parallel_type")),

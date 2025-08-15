@@ -45,7 +45,7 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
                     *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
                     parameters.get<THREAD_ID>("_tid"),
                     false),
-    Restartable(this, parameters.get<std::string>("_moose_base") + "s"),
+    Restartable(this, getBase() + "s"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),

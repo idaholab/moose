@@ -335,7 +335,6 @@ protected:
   static void SetUpTestCase()
   {
     moose_unit_app = Moose::createMooseApp("MooseUnitApp", 0, nullptr);
-
     moose_server = std::make_unique<MooseServer>(*moose_unit_app);
   }
 
@@ -757,7 +756,7 @@ TEST_F(MooseServerTest, DocumentChangeAndDiagnostics)
 
   EXPECT_EQ(document_uri, response_uri);
 
-  EXPECT_EQ(7u, diagnostics_array.size());
+  EXPECT_EQ(1u, diagnostics_array.size());
 
   std::ostringstream diagnostics_actual;
 
@@ -766,13 +765,14 @@ TEST_F(MooseServerTest, DocumentChangeAndDiagnostics)
   // expected diagnostics with zero-based lines and columns - bad bcs boundary
 
   std::string diagnostics_expect = R"INPUT(
-line:18 column:0 - (BCs/all/boundary):
-line:18 column:0 -     the following side sets (ids) do not exist on the mesh: top (2), bottom (3)
-line:18 column:0 -     MOOSE distinguishes between "node sets" and "side sets" depending on whether
-line:18 column:0 -     you are using "Nodal" or "Integrated" BCs respectively. Node sets corresponding
-line:18 column:0 -     to your side sets are constructed for you by default.
-line:18 column:0 -     Try setting "Mesh/construct_side_list_from_node_list=true" if you see this error.
-line:18 column:0 -     Note: If you are running with adaptivity you should prefer using side sets.
+line:18 column:4 - BCs/all/boundary: the following side sets (ids) do not exist on the mesh: top (2), bottom (3)
+
+MOOSE distinguishes between "node sets" and "side sets" depending on whether
+you are using "Nodal" or "Integrated" BCs respectively. Node sets corresponding
+to your side sets are constructed for you by default.
+
+Try setting "Mesh/construct_side_list_from_node_list=true" if you see this error.
+Note: If you are running with adaptivity you should prefer using side sets.
 )INPUT";
 
   EXPECT_EQ(diagnostics_expect, "\n" + diagnostics_actual.str());
@@ -1797,7 +1797,7 @@ TEST_F(MooseServerTest, DiagnosticsEmptyMessageSkip)
   // check that diagnostics array size and message contents are as expected
   std::size_t diagnostics_size_expect = 1;
   std::string diagnostics_list_expect = R"INPUT(
-line:11 column:2 -     no variable 'undefined' found for use in function parser expression
+line:11 column:2 - no variable 'undefined' found for use in function parser expression in 'globalvar'
 )INPUT";
 
   EXPECT_EQ(diagnostics_size_expect, diagnostics_array.size());
