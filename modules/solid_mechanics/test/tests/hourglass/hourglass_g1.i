@@ -30,19 +30,17 @@
   []
 []
 
-[Variables]
-  [disp_x]
-    [InitialCondition]
-      type = FunctionIC
-      # g1 at nodes [1,-1,1,-1] is represented by f(x,y) = 1 - 2x - 2y + 4xy
-      function = '1 - 2*x - 2*y + 4*x*y'
-    []
+[ICs]
+  [ic_disp_x]
+    type = FunctionIC
+    variable = disp_x
+    # g1 at nodes [1,-1,1,-1] is represented by f(x,y) = 1 - 2x - 2y + 4xy
+    function = '1 - 2*x - 2*y + 4*x*y'
   []
-  [disp_y]
-    [InitialCondition]
-      type = FunctionIC
-      function = 0
-    []
+  [ic_disp_y]
+    type = FunctionIC
+    variable = disp_y
+    function = 0
   []
 []
 
