@@ -24,10 +24,8 @@ NEML2_INCLUDE    := $(NEML2_DIR)/include
 # the same directory, we can get rid of this
 ifneq ($(wildcard $(NEML2_DIR)/lib/.),)
 NEML2_LIB_DIR 	 := $(NEML2_DIR)/lib
-else ifneq ($(wildcard $(NEML2_DIR)/lib64/.),)
-NEML2_LIB_DIR 	 := $(NEML2_DIR)/lib64
 else
-$(error Failed to find NEML2 libraries in $(NEML2_DIR)/lib or $(NEML2_DIR)/lib64)
+$(error Failed to find NEML2 libraries in $(NEML2_DIR)/lib)
 endif
 NEML2_LIBS       := neml2_base$(NEML2_SUFFIX) \
 									  neml2_dispatcher$(NEML2_SUFFIX) \
