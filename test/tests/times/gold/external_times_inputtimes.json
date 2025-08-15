@@ -13,7 +13,9 @@
         {
             "external_input": {
                 "times": [
-                    0.01
+                    0.01,
+                    0.2,
+                    0.3
                 ]
             },
             "time": 0.0,
@@ -22,6 +24,8 @@
         {
             "external_input": {
                 "times": [
+                    0.2,
+                    0.3,
                     0.52
                 ]
             },
@@ -31,37 +35,45 @@
         {
             "external_input": {
                 "times": [
-                    1.54
+                    0.2,
+                    0.3,
+                    0.9
                 ]
             },
-            "time": 0.52,
+            "time": 0.2,
             "time_step": 2
         },
         {
             "external_input": {
                 "times": [
-                    3.58
+                    0.2,
+                    0.3,
+                    1.1
                 ]
             },
-            "time": 1.54,
+            "time": 0.3,
             "time_step": 3
         },
         {
             "external_input": {
                 "times": [
-                    7.66
+                    0.2,
+                    0.3,
+                    2.7
                 ]
             },
-            "time": 3.58,
+            "time": 1.1,
             "time_step": 4
         },
         {
             "external_input": {
                 "times": [
-                    15.82
+                    0.2,
+                    0.3,
+                    5.9
                 ]
             },
-            "time": 7.66,
+            "time": 2.7,
             "time_step": 5
         }
     ]

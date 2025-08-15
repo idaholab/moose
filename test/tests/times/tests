@@ -70,12 +70,6 @@
       jsondiff = 'simulation_times_out.json'
       detail = 'the time steps taken by the simulation, and'
     []
-    [external_time]
-      type = 'JSONDiff'
-      input = 'external_times.i'
-      jsondiff = 'external_times_out.json'
-      detail = 'the time steps set dynamicly during the simulation'
-    []
   []
 
   [error_reporting]
@@ -90,4 +84,23 @@
       detail = 'times are gathered with a fixed time interval with no start and end times provided, while using a steady executioner.'
     []
   []
+
+   [external_time]
+       requirement = 'The system shall able to generate times from the time steps set dynamically during the simulation'
+      [no_input_times]
+        type = 'JSONDiff'
+        input = 'external_times.i'
+        jsondiff = 'external_times_out.json'
+        detail = 'with no input times array'
+      []
+
+      [with_input_times]
+        type = 'JSONDiff'
+        input = 'external_times.i'
+        cli_args = "
+        Times/external_input/times='0.2 0.3' Outputs/file_base=external_times_inputtimes "
+        jsondiff = 'external_times_inputtimes.json'
+        detail = 'with input times array'
+      []
+    []
 []
