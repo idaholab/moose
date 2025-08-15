@@ -127,6 +127,14 @@ FEProblemBase::getKokkosMaterialPropertyStorageConsumers(Moose::MaterialDataType
 void
 FEProblemBase::initKokkos()
 {
+  // Error on unsupported options
+
+  if (haveDisplaced())
+    mooseError("Kokkos does not support displaced mesh yet.");
+
+  if (adaptivity().isOn())
+    mooseError("Kokkos does not support adaptivity yet.");
+
   // Initialize Kokkos assembly
 
   _kokkos_assembly.init();
