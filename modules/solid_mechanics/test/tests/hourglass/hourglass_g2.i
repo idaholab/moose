@@ -30,19 +30,17 @@
   []
 []
 
-[Variables]
-  [disp_x]
-    [InitialCondition]
-      type = FunctionIC
-      # f(x,y) = 1 - 2*y produces nodal values [1,1,-1,-1]
-      function = '1 - 2*y'
-    []
+[ICs]
+  [ic_disp_x]
+    type = FunctionIC
+    variable = disp_x
+    # f(x,y) = 1 - 2*y produces nodal values [1,1,-1,-1]
+    function = '1 - 2*y'
   []
-  [disp_y]
-    [InitialCondition]
-      type = FunctionIC
-      function = 0
-    []
+  [ic_disp_y]
+    type = FunctionIC
+    variable = disp_y
+    function = 0
   []
 []
 

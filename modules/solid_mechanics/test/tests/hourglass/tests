@@ -1,0 +1,17 @@
+[Tests]
+  design = '/HourglassCorrectionQuad4b.md'
+  [hourglass_g1_csv]
+    type = 'CSVDiff'
+    input = 'hourglass_g1.i'
+    csvdiff = 'hourglass_g1_out_nodes_0001.csv'
+    rel_err = 1.0E-12
+    abs_zero = 1.0E-12
+  []
+  [hourglass_g2_csv]
+    type = 'CSVDiff'
+    input = 'hourglass_g2.i'
+    csvdiff = 'hourglass_g2_out_nodes_0002.csv'
+    rel_err = 1.0E-12
+    abs_zero = 1.0E-12
+  []
+[]
