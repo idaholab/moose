@@ -27,7 +27,7 @@ TwoMaterialPropertyInterface::TwoMaterialPropertyInterface(
     const std::set<SubdomainID> & blocks_ids,
     const std::set<BoundaryID> & boundary_ids)
   : MaterialPropertyInterface(moose_object, blocks_ids, boundary_ids),
-    _neighbor_material_data(_mi_feproblem.getMaterialData(Moose::NEIGHBOR_MATERIAL_DATA,
-                                                          _mi_params.get<THREAD_ID>("_tid")))
+    _neighbor_material_data(_mi_feproblem.getMaterialData(
+        Moose::NEIGHBOR_MATERIAL_DATA, _mi_params.get<THREAD_ID>("_tid"), moose_object))
 {
 }

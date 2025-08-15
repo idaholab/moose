@@ -52,6 +52,13 @@ MooseObject::MooseObject(const InputParameters & parameters)
                         parameters),
     _enabled(getParam<bool>("enable"))
 {
+#ifdef MOOSE_KOKKOS_ENABLED
+  // Calling this constructor while not executing actions means this object is being
+  // copy-constructed
+  if (isKokkosObject() && !_app.currentlyExecutingActions())
+    return;
+#endif
+
   if (Registry::isRegisteredObj(type()) && _app.getFactory().currentlyConstructing() != &parameters)
     mooseError(
         "This registered object was not constructed using the Factory, which is not supported.");
