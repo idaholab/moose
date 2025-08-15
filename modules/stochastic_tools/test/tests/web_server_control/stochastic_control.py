@@ -117,7 +117,7 @@ if __name__ == "__main__":
     matrices = [None] * num_steps
     for t in range(num_steps):
         # Test at least one matrix with only one entry
-        num_rows = 2 if t == 0 else np.random.randint(1, 10)
+        num_rows = 1 if t == 0 else np.random.randint(1, 10)
         matrices[t] = 2.0 * (t + 1) * (np.random.random((num_rows, num_cols)) - 0.5)
 
     with StochasticControl(

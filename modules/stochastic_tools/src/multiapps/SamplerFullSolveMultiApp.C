@@ -114,7 +114,10 @@ SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
 
   // Call initial setup based on the logic above
   if (initial_setup_required)
+  {
     initialSetup();
+    _solved_once = false;
+  }
   // Otherwise we need to restore for batch-restore
   else if (_solved_once && _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
     restore();
