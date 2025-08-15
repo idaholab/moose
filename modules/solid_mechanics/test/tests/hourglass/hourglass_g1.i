@@ -7,6 +7,27 @@
     ny = 1
     elem_type = QUAD4
   []
+  [point]
+    type = ExtraNodesetGenerator
+    input = gen
+    new_boundary = fixpoint
+    coord = '0 0 0'
+  []
+[]
+
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
+[Physics]
+  [SolidMechanics]
+    [QuasiStatic]
+      [all]
+        add_variables = true
+        strain = FINITE
+      []
+    []
+  []
 []
 
 [Variables]
@@ -41,6 +62,33 @@
   []
 []
 
+[BCs]
+  # Minimal anchoring to avoid rigid-body modes and singular matrices
+  [left_x]
+    type = DirichletBC
+    boundary = left
+    value = 0
+    variable = disp_x
+  []
+  [fix_y]
+    type = DirichletBC
+    boundary = fixpoint
+    value = 0
+    variable = disp_y
+  []
+[]
+
+[Materials]
+  [stress]
+    type = ComputeFiniteStrainElasticStress
+  []
+  [stiffness]
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 1
+    poissons_ratio = 0.3
+  []
+[]
+
 [Problem]
   kernel_coverage_check = FALSE
 []
@@ -67,4 +115,3 @@
   csv = true
   execute_on = 'INITIAL FINAL'
 []
-
