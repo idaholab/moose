@@ -1999,6 +1999,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
         LibmeshPetscCall(VecSetValues(sumWij_loc, 1, &row_vec_2, &value_vec_2, ADD_VALUES));
       }
     }
+    LibmeshPetscCall(VecAssemblyBegin(sumWij_loc));
+    LibmeshPetscCall(VecAssemblyEnd(sumWij_loc));
     LibmeshPetscCall(VecAXPY(vec_array[field_num], 1.0, sumWij_loc));
     LibmeshPetscCall(VecDestroy(&sumWij_loc));
   }
@@ -2162,6 +2164,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
         LibmeshPetscCall(VecSetValues(sumWij_loc, 1, &row_vec, &sumWij, INSERT_VALUES));
       }
     }
+    LibmeshPetscCall(VecAssemblyBegin(sumWij_loc));
+    LibmeshPetscCall(VecAssemblyEnd(sumWij_loc));
 
     PetscScalar min_mdot;
     LibmeshPetscCall(VecAbs(_prod));
