@@ -33,11 +33,26 @@ MFEMDataCollection::MFEMDataCollection(const InputParameters & parameters)
 void
 MFEMDataCollection::registerFields()
 {
+  // Save real fields
   mfem::DataCollection & dc(getDataCollection());
   for (auto const & [gf_name, gf_ptr] : _problem_data.gridfunctions)
   {
     if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
       dc.RegisterField(gf_name, gf_ptr.get());
+    else
+      mooseInfo("The variable ",
+                gf_name,
+                " is not defined on the same mesh as the output DataCollection.");
+  }
+
+  // Save complex fields
+  for (auto const & [gf_name, gf_ptr] : _problem_data.cpx_gridfunctions)
+  {
+    if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
+    {
+      dc.RegisterField(gf_name + "_r", &gf_ptr->real());
+      dc.RegisterField(gf_name + "_i", &gf_ptr->imag());
+    }
     else
       mooseInfo("The variable ",
                 gf_name,

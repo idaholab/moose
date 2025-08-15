@@ -44,13 +44,14 @@ public:
 
   /// Add kernels.
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
-  virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
+  virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc);
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
   virtual void ApplyEssentialBCs();
 
   /// Build forms
-  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
-                    const Moose::MFEM::FESpaces & fespaces,
+  virtual void Init(GridFunctions & gridfunctions,
+                    ComplexGridFunctions & cpx_gridfunctions,
+                    const FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level);
   virtual void BuildLinearForms();
   virtual void BuildBilinearForms();
@@ -79,7 +80,8 @@ public:
 
   /// Update variable from solution vector after solve
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
-                                  Moose::MFEM::GridFunctions & gridfunctions);
+                                  GridFunctions & gridfunctions,
+                                  ComplexGridFunctions & cpx_gridfunctions);
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
@@ -106,17 +108,17 @@ protected:
   /// from test_var_names when time derivatives are present.
   std::vector<std::string> _trial_var_names;
   /// Pointers to trial variables.
-  Moose::MFEM::GridFunctions _trial_variables;
+  GridFunctions _trial_variables;
   /// Names of all test variables corresponding to linear forms in this equation system
   std::vector<std::string> _test_var_names;
   /// Pointers to finite element spaces associated with test variables.
   std::vector<mfem::ParFiniteElementSpace *> _test_pfespaces;
 
   // Components of weak form. // Named according to test variable
-  Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _blfs;
-  Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> _lfs;
-  Moose::MFEM::NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
-  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
+  NamedFieldsMap<mfem::ParBilinearForm> _blfs;
+  NamedFieldsMap<mfem::ParLinearForm> _lfs;
+  NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
+  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>>
       _mblfs; // named according to trial variable
 
   /**
@@ -128,29 +130,25 @@ protected:
       const std::string & trial_var_name,
       const std::string & test_var_name,
       std::shared_ptr<FormType> form,
-      Moose::MFEM::NamedFieldsMap<
-          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
 
   void ApplyDomainLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParLinearForm> form,
-      Moose::MFEM::NamedFieldsMap<
-          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
 
   template <class FormType>
   void ApplyBoundaryBLFIntegrators(
       const std::string & trial_var_name,
       const std::string & test_var_name,
       std::shared_ptr<FormType> form,
-      Moose::MFEM::NamedFieldsMap<
-          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
           integrated_bc_map);
 
   void ApplyBoundaryLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParLinearForm> form,
-      Moose::MFEM::NamedFieldsMap<
-          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
           integrated_bc_map);
 
   /// Gridfunctions for setting Dirichlet BCs
@@ -161,16 +159,13 @@ protected:
 
   /// Arrays to store kernels to act on each component of weak form.
   /// Named according to test and trial variables.
-  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
-      _kernels_map;
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> _kernels_map;
   /// Arrays to store integrated BCs to act on each component of weak form.
   /// Named according to test and trial variables.
-  Moose::MFEM::NamedFieldsMap<
-      Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>
-      _integrated_bc_map;
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> _integrated_bc_map;
   /// Arrays to store essential BCs to act on each component of weak form.
   /// Named according to test variable.
-  Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
+  NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
 
   mutable mfem::OperatorHandle _jacobian;
 
@@ -183,8 +178,7 @@ EquationSystem::ApplyDomainBLFIntegrators(
     const std::string & trial_var_name,
     const std::string & test_var_name,
     std::shared_ptr<FormType> form,
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
 {
   if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(trial_var_name))
   {
@@ -206,8 +200,7 @@ inline void
 EquationSystem::ApplyDomainLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParLinearForm> form,
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
 {
   if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(test_var_name))
   {
@@ -231,8 +224,7 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     const std::string & trial_var_name,
     const std::string & test_var_name,
     std::shared_ptr<FormType> form,
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
         integrated_bc_map)
 {
   if (integrated_bc_map.Has(test_var_name) &&
@@ -256,8 +248,7 @@ inline void
 EquationSystem::ApplyBoundaryLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<mfem::ParLinearForm> form,
-    Moose::MFEM::NamedFieldsMap<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
         integrated_bc_map)
 {
   if (integrated_bc_map.Has(test_var_name) &&
@@ -306,10 +297,9 @@ protected:
   mfem::ConstantCoefficient _dt_coef;
   std::vector<std::string> _trial_var_time_derivative_names;
 
-  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
-      _td_kernels_map;
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> _td_kernels_map;
   /// Container to store contributions to weak form of the form (F du/dt, v)
-  Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
+  NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
 };
 
 inline const std::vector<std::string> &
