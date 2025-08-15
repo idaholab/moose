@@ -85,6 +85,9 @@ public:
   /// Update variable from solution vector after solve
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
                                   Moose::MFEM::GridFunctions & gridfunctions);
+  
+  /// Update solution with essential constraints                          
+  void ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & constraint_list, mfem::Vector &x) const;
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 

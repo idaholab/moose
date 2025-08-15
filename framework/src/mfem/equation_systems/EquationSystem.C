@@ -325,28 +325,20 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
   FormLinearSystem(_jacobian, trueX, trueRHS);
 }
 
-void applyDirchValues(const mfem::Vector &k, mfem::Vector &y, mfem::Array<int> dofs)
+void 
+EquationSystem::ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & constraint_list, mfem::Vector &x) const
 {
-  if(dofs.Size() > 0){ //Only apply if there are constrained DOF's
-
-    const bool use_dev = dofs.UseDevice() || k.UseDevice() || y.UseDevice();
-    const int n = dofs.Size();
-
-    // Use read+write access for X - we only modify some of its entries
-
-    auto d_X = y.ReadWrite(use_dev);
-    auto d_y = k.Read(use_dev);
-    auto d_dofs = dofs.Read(use_dev);
-
-    mfem::forall_switch(use_dev, n, [=] MFEM_HOST_DEVICE (int i)
-    {
-      const int dof_i = d_dofs[i];
-
-      if (dof_i >= 0)   d_X[dof_i]    =  d_y[dof_i];
-      if (!(dof_i >= 0))d_X[-1-dof_i] = -d_y[-1-dof_i];
-     });
-  }
-};
+   const int csz = constraint_list.Size();
+   auto idx = constraint_list.Read();
+   auto d_w = w.Read();
+   // Use read+write access - we are modifying sub-vector of x
+   auto d_x = x.ReadWrite(); 
+   mfem::forall(csz, [=] MFEM_HOST_DEVICE (int i)
+   {
+      const int id = idx[i];
+      d_x[id] = d_w[id];
+   });
+}
 
 void
 EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
@@ -358,7 +350,7 @@ EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
   for (int i = 0; i < _trial_var_names.size(); i++)
   {
     auto & trial_var_name = _trial_var_names.at(i);
-    applyDirchValues(*(_var_ess_constraints.at(i)), block_x.GetBlock(i), _ess_tdof_lists.at(i));
+    ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), block_x.GetBlock(i));
     _gfuncs->Get(trial_var_name)->Distribute(&(block_x.GetBlock(i)));
   }
 
