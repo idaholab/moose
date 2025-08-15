@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#31313'
+  design = 'Functors/index.md'
+
+  [test]
+    type = CSVDiff
+    input = test.i
+    csvdiff = test_out.csv
+    requirement = 'The system shall be able to use a scalar variable in a functor parameter.'
+  []
+[]
