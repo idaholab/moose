@@ -10,6 +10,7 @@
 #pragma once
 
 #include "KokkosKernel.h"
+#include "KokkosMap.h"
 
 /**
  * Represents a right hand side force term of the form
@@ -65,11 +66,10 @@ KokkosMatCoupledForce::computeQpOffDiagJacobian(const unsigned int i,
                                                 const unsigned int qp,
                                                 ResidualDatum & datum) const
 {
-  auto idx = _v_var_to_index.find(jvar);
-  if (idx == _v_var_to_index.size())
+  if (!_v_var_to_index.exists(jvar))
     return 0;
 
-  unsigned int p = _v_var_to_index[idx];
+  unsigned int p = _v_var_to_index[jvar];
 
   if (_coupled_props)
     return -_coef[p] * _mat_props[p](datum, qp) * _phi(datum, j, qp) * _test(datum, i, qp);
