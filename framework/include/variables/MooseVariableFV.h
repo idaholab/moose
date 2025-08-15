@@ -504,6 +504,8 @@ public:
   bool supportsFaceArg() const override final { return true; }
   bool supportsElemSideQpArg() const override final { return true; }
 
+  virtual void sizeMatrixTagData() override;
+
 protected:
   /**
    * Retrieves a Dirichlet boundary value for the provided face. Callers of this method should be

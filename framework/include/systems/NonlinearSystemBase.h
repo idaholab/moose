@@ -46,6 +46,7 @@ class HDGKernel;
 class BoundaryCondition;
 class ResidualObject;
 class PenetrationInfo;
+class FieldSplitPreconditionerBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -56,6 +57,7 @@ template <typename T>
 class SparseMatrix;
 template <typename T>
 class DiagonalMatrix;
+class DofMapBase;
 } // namespace libMesh
 
 /**
@@ -102,13 +104,12 @@ public:
   virtual void jacobianSetup() override;
 
   virtual void setupFiniteDifferencedPreconditioner() = 0;
-  void setupFieldDecomposition();
 
   bool haveFiniteDifferencedPreconditioner() const
   {
     return _use_finite_differenced_preconditioner;
   }
-  bool haveFieldSplitPreconditioner() const { return _use_field_split_preconditioner; }
+  bool haveFieldSplitPreconditioner() const { return _fsp; }
 
   /**
    * Adds a kernel
@@ -452,16 +453,15 @@ public:
   }
 
   /**
-   * If called with a single string, it is used as the name of a the top-level decomposition split.
-   * If the array is empty, no decomposition is used.
-   * In all other cases an error occurs.
+   * If called with a non-null object true this system will use a field split preconditioner matrix.
    */
-  void setDecomposition(const std::vector<std::string> & decomposition);
+  void useFieldSplitPreconditioner(FieldSplitPreconditionerBase * fsp) { _fsp = fsp; }
 
   /**
-   * If called with true this system will use a field split preconditioner matrix.
+   * @returns A field split preconditioner. This will error if there is no field split
+   * preconditioner
    */
-  void useFieldSplitPreconditioner(bool use = true) { _use_field_split_preconditioner = use; }
+  FieldSplitPreconditionerBase & getFieldSplitPreconditioner();
 
   /**
    * If called with true this will add entries into the jacobian to link together degrees of freedom
@@ -891,12 +891,8 @@ protected:
 
   MatFDColoring _fdcoloring;
 
-  /// Whether or not the system can be decomposed into splits
-  bool _have_decomposition;
-  /// Name of the top-level split of the decomposition
-  std::string _decomposition_split;
-  /// Whether or not to use a FieldSplitPreconditioner matrix based on the decomposition
-  bool _use_field_split_preconditioner;
+  /// The field split preconditioner if this sytem is using one
+  FieldSplitPreconditionerBase * _fsp;
 
   /// Whether or not to add implicit geometric couplings to the Jacobian for FDP
   bool _add_implicit_geometric_coupling_entries_to_jacobian;

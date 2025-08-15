@@ -30,7 +30,7 @@ public:
   Split(const InputParameters & parameters);
   virtual ~Split() = default;
 
-  virtual void setup(NonlinearSystemBase & nl, const std::string & prefix = "-");
+  virtual void setup(NonlinearSystemBase & nl, const std::string & prefix = "");
 
 protected:
   /// Which splitting to use

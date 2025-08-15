@@ -25,8 +25,9 @@ MassFluxPenalty::validParams()
   params.addRequiredParam<unsigned short>("component",
                                           "The velocity component this object is being applied to");
   params.addParam<Real>("gamma", 1, "The penalty to multiply the jump");
-  params.addClassDescription(
-      "introduces a jump correction for grad-div stabilization for discontinuous Galerkin methods");
+  params.addClassDescription("Introduces a jump correction on internal faces for grad-div "
+                             "stabilization for discontinuous Galerkin methods. Because this is "
+                             "derived from DGKernel this class executes once per face.");
   return params;
 }
 

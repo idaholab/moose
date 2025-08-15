@@ -131,17 +131,18 @@ setSlepcEigenSolverTolerances(EigenProblem & eigen_problem,
                               const InputParameters & params)
 {
   const auto & dont_add_these_options = eigen_problem.getPetscOptions().dont_add_these_options;
+  const auto prefix_with_dash = '-' + solver_params._prefix;
 
   mooseAssert(solver_params._solver_sys_num != libMesh::invalid_uint,
               "The solver system number must be initialized");
 
   Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
-                                                         solver_params._prefix + "eps_tol",
+                                                         prefix_with_dash + "eps_tol",
                                                          stringify(params.get<Real>("eigen_tol")));
 
   Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
       dont_add_these_options,
-      solver_params._prefix + "eps_max_it",
+      prefix_with_dash + "eps_max_it",
       stringify(params.get<unsigned int>("eigen_max_its")));
 
   // if it is a nonlinear eigenvalue solver, we need to set tolerances for nonlinear solver and
@@ -151,42 +152,42 @@ setSlepcEigenSolverTolerances(EigenProblem & eigen_problem,
     // nonlinear solver tolerances
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
         dont_add_these_options,
-        solver_params._prefix + "snes_max_it",
+        prefix_with_dash + "snes_max_it",
         stringify(params.get<unsigned int>("nl_max_its")));
 
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
         dont_add_these_options,
-        solver_params._prefix + "snes_max_funcs",
+        prefix_with_dash + "snes_max_funcs",
         stringify(params.get<unsigned int>("nl_max_funcs")));
 
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
         dont_add_these_options,
-        solver_params._prefix + "snes_atol",
+        prefix_with_dash + "snes_atol",
         stringify(params.get<Real>("nl_abs_tol")));
 
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
         dont_add_these_options,
-        solver_params._prefix + "snes_rtol",
+        prefix_with_dash + "snes_rtol",
         stringify(params.get<Real>("nl_rel_tol")));
 
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
         dont_add_these_options,
-        solver_params._prefix + "snes_stol",
+        prefix_with_dash + "snes_stol",
         stringify(params.get<Real>("nl_rel_step_tol")));
 
     // linear solver
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
         dont_add_these_options,
-        solver_params._prefix + "ksp_max_it",
+        prefix_with_dash + "ksp_max_it",
         stringify(params.get<unsigned int>("l_max_its")));
 
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
-                                                           solver_params._prefix + "ksp_rtol",
+                                                           prefix_with_dash + "ksp_rtol",
                                                            stringify(params.get<Real>("l_tol")));
 
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
         dont_add_these_options,
-        solver_params._prefix + "ksp_atol",
+        prefix_with_dash + "ksp_atol",
         stringify(params.get<Real>("l_abs_tol")));
   }
   else
@@ -194,16 +195,16 @@ setSlepcEigenSolverTolerances(EigenProblem & eigen_problem,
     // linear solver
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
         dont_add_these_options,
-        solver_params._prefix + "st_ksp_max_it",
+        prefix_with_dash + "st_ksp_max_it",
         stringify(params.get<unsigned int>("l_max_its")));
 
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(dont_add_these_options,
-                                                           solver_params._prefix + "st_ksp_rtol",
+                                                           prefix_with_dash + "st_ksp_rtol",
                                                            stringify(params.get<Real>("l_tol")));
 
     Moose::PetscSupport::setSinglePetscOptionIfAppropriate(
         dont_add_these_options,
-        solver_params._prefix + "st_ksp_atol",
+        prefix_with_dash + "st_ksp_atol",
         stringify(params.get<Real>("l_abs_tol")));
   }
 }
