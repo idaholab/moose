@@ -1,0 +1,47 @@
+
+#  *****************************************************************
+#             EXODIFF	(Version: 2.90) Modified: 2018-02-15
+#             Authors:  Richard Drake, rrdrake@sandia.gov
+#                       Greg Sjaardema, gdsjaar@sandia.gov
+#             Run on    2025/08/12   14:12:02 MDT
+#  *****************************************************************
+
+#  FILE 1: /scratch/dechcs/projects-better-wire-test/moose/modules/combined/test/tests/electromagnetic_joule_heating/fusing_current_through_copper_wire_out.e
+#   Title: fusing_current_through_copper_wire_out.e
+#          Dim = 2, Blocks = 1, Nodes = 345, Elements = 146, Nodesets = 3, Sidesets = 3
+#          Vars: Global = 0, Nodal = 10, Element = 0, Nodeset = 0, Sideset = 0, Times = 6
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:               5 @ t6
+
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES relative 1.e-6 floor 5.e-9
+	A_imag_x   # min:               0 @ t1,n1	max:    0.0053535065 @ t6,n275
+	A_imag_y   # min:               0 @ t1,n1	max:   1.9470776e-08 @ t6,n332
+	A_real_x   # min:               0 @ t1,n1	max:   3.3123835e-10 @ t6,n306
+	A_real_y   # min:               0 @ t1,n1	max:   1.5770118e-10 @ t6,n320
+	E_imag_x   relative 5.e-5 floor 9.e-8
+	E_imag_y   relative 5.e-5 floor 9.e-8
+	E_real_x   relative 5.e-5 floor 9.e-8
+	E_real_y   relative 5.e-5 floor 9.e-8
+	T          # min:             293 @ t1,n1	max:       552.68462 @ t6,n272
+	elec_cond  # min:        29726491 @ t6,n272	max:        59523810 @ t1,n134
+
+# No ELEMENT VARIABLES
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
+
