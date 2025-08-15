@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include <optional>
 #include "ThreadedNodeLoop.h"
 
 // MOOSE includes
@@ -22,10 +21,8 @@ class ComputeBoundaryInitialConditionThread
   : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  // Set IC on specific variables
-  ComputeBoundaryInitialConditionThread(
-      FEProblemBase & fe_problem,
-      const std::optional<std::set<VariableName>> & target_vars = std::nullopt);
+  // Set IC
+  ComputeBoundaryInitialConditionThread(FEProblemBase & fe_problem);
   // Splitting Constructor
   ComputeBoundaryInitialConditionThread(ComputeBoundaryInitialConditionThread & x,
                                         Threads::split split);
@@ -34,7 +31,14 @@ public:
 
   void join(const ComputeBoundaryInitialConditionThread & /*y*/);
 
-protected:
+private:
   /// @brief the names of target variables for which the initial conditions are applied
-  const std::optional<std::set<VariableName>> _target_vars;
+  const std::set<VariableName> * _target_vars;
+
+  // Set IC on specific variables
+  ComputeBoundaryInitialConditionThread(FEProblemBase & fe_problem,
+                                        const std::set<VariableName> * target_vars);
+
+  // Allow FEProblemBase to access the private constructor
+  friend class FEProblemBase;
 };

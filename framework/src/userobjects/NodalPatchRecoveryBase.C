@@ -186,8 +186,6 @@ NodalPatchRecoveryBase::gatherSendList(
 {
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
 
-  std::vector<std::pair<processor_id_type, dof_id_type>> query_pairs;
-
   typedef std::pair<processor_id_type, dof_id_type> PidElemPair;
   std::unordered_map<processor_id_type, std::vector<PidElemPair>> push_data;
 
