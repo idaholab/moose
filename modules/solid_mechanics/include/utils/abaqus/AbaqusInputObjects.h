@@ -275,6 +275,10 @@ struct Model : public Part, public Step
   virtual Index getElementIndex(const std::string & key,
                                 const Instance * instance = nullptr) const = 0;
 
+  /// Resolve an instance by name
+  /// FlatModel: errors (no instances). AssemblyModel: returns a reference or errors if missing.
+  virtual const Instance & getInstance(const std::string & name) const;
+
   bool optionFunc(const std::string & key, const OptionNode & option);
   bool blockFunc(const std::string & key, const BlockNode & block);
 
@@ -316,6 +320,8 @@ struct AssemblyModel : public Model
 
   virtual Index getNodeIndex(const std::string & key, const Instance * instance = nullptr) const;
   virtual Index getElementIndex(const std::string & key, const Instance * instance = nullptr) const;
+
+  virtual const Instance & getInstance(const std::string & name) const;
 };
 
 /**

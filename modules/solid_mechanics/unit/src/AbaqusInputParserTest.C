@@ -316,7 +316,7 @@ TEST(AbaqusInputParserTest, AssemblyScopedSetsAndIndices)
 
   ASSERT_TRUE(model._assembly);
   ASSERT_TRUE(model._assembly->_instance.has("Cube-1"));
-  const auto & inst = model._assembly->_instance["Cube-1"];
+  const auto & inst = model.getInstance("Cube-1");
 
   // Node index resolution: inline vs instance parameter
   const auto idx_inline = model.getNodeIndex("Cube-1.2");
@@ -374,4 +374,114 @@ TEST(AbaqusInputParserTest, AssemblyScopedSetsAmbiguityError)
     std::string msg(e.what());
     ASSERT_NE(msg.find("Ambiguous set token"), std::string::npos) << msg;
   }
+}
+
+TEST(AbaqusInputParserTest, AssemblyElsetToNsetCopyWithInstance)
+{
+  // Element set in part, assembly-level nodeset created from elset with instance scoping
+  std::istringstream in(
+      "*Part, name=Cube\n"
+      "*Node\n"
+      "1, 0., 0.\n"
+      "2, 1., 0.\n"
+      "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
+      "1, 2\n"
+      "*Element, Type=U1, Elset=CUBE\n"
+      "1, 1, 2\n"
+      "*End Part\n"
+      "*Assembly, name=Assembly\n"
+      "*Instance, name=Cube-1, part=Cube\n"
+      "*End Instance\n"
+      // Create a nodeset from the element set, assembly-level with instance
+      "*Nset, nset=NODES_FROM_E, elset=CUBE, instance=Cube-1\n"
+      "*End Assembly\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::AssemblyModel model;
+  model.parse(parser);
+
+  ASSERT_TRUE(model._nsets.find("NODES_FROM_E") != model._nsets.end());
+  const auto & ns = model._nsets.at("NODES_FROM_E");
+  ASSERT_EQ(ns.size(), 2u);
+
+  const auto & inst = model.getInstance("Cube-1");
+  const auto n1 = model.getNodeIndex("1", &inst);
+  const auto n2 = model.getNodeIndex("2", &inst);
+  EXPECT_NE(std::find(ns.begin(), ns.end(), n1), ns.end());
+  EXPECT_NE(std::find(ns.begin(), ns.end(), n2), ns.end());
+}
+
+TEST(AbaqusInputParserTest, AssemblyNsetRequiresInstance)
+{
+  // Assembly-level nodeset must specify an instance (header or inline). Numeric-only should error.
+  std::istringstream in(
+      "*Part, name=Cube\n"
+      "*Node\n"
+      "1, 0., 0.\n"
+      "2, 1., 0.\n"
+      "*End Part\n"
+      "*Assembly, name=Assembly\n"
+      "*Instance, name=Cube-1, part=Cube\n"
+      "*End Instance\n"
+      "*Nset, nset=BAD\n"
+      "1, 2\n"
+      "*End Assembly\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::AssemblyModel model;
+  try
+  {
+    model.parse(parser);
+    FAIL() << "Expected error due to missing instance for assembly-level *Nset";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("requires an instance"), std::string::npos) << msg;
+  }
+}
+
+TEST(AbaqusInputParserTest, BoundaryInstanceScopedSingleNode)
+{
+  // Boundary with instance-scoped single node should resolve clean integer within that instance
+  std::istringstream in(
+      "*Part, name=Cube\n"
+      "*Node\n"
+      "1, 0., 0.\n"
+      "*User Element, Type=U1, Coordinates=2, Nodes=1, Variables=1\n"
+      "1\n"
+      "*Element, Type=U1, Elset=CUBE\n"
+      "1, 1\n"
+      "*End Part\n"
+      "*Assembly, name=Assembly\n"
+      "*Instance, name=Cube-1, part=Cube\n"
+      "*End Instance\n"
+      "*End Assembly\n"
+      "*Step, name=S1\n"
+      "*Static\n"
+      "1., 1.\n"
+      "*Boundary, instance=Cube-1\n"
+      "1, 1, 1, 7.5\n"
+      "*End Step\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::AssemblyModel model;
+  model.parse(parser);
+
+  ASSERT_EQ(model._step.size(), 1u);
+  const auto & step = model._step[0];
+  const auto & inst = model.getInstance("Cube-1");
+  const auto idx = model.getNodeIndex("1", &inst);
+
+  // DOF id = 1 should have value 7.5 at the resolved node index
+  ASSERT_TRUE(step._bc_var_node_value_map.find(1) != step._bc_var_node_value_map.end());
+  const auto & node_value = step._bc_var_node_value_map.at(1);
+  ASSERT_TRUE(node_value.find(idx) != node_value.end());
+  EXPECT_DOUBLE_EQ(node_value.at(idx), 7.5);
 }

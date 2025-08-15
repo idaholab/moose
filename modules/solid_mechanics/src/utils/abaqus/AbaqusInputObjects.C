@@ -287,8 +287,11 @@ Part::processNodeSet(const OptionNode & option, Instance * instance, const Assem
     // make set unique and copy nodes into it
     std::set<Index> unique_nodes(nset.begin(), nset.end());
     for (const auto elem_index : elset)
-      for (const auto node_index : _elements[elem_index]._nodes)
+    {
+      const auto & elem = instance ? instance->_part._elements[elem_index] : _elements[elem_index];
+      for (const auto node_index : elem._nodes)
         unique_nodes.insert(node_index + offset);
+    }
     nset.assign(unique_nodes.begin(), unique_nodes.end());
   }
   else
@@ -332,6 +335,11 @@ Part::processSetHelper(const OptionNode & option, Instance * instance, const Ass
   {
     if (generate)
     {
+      // For assembly-level nodal sets, require an instance (either header or inline); GENERATE
+      // without instance context is not supported.
+      if constexpr (is_nodal)
+        if (asmb && !instance)
+          mooseError("Assembly-level *Nset with GENERATE requires an instance (header or inline).");
       // syntax check
       if (data.size() != 3)
         mooseError("Expected three values in ",
@@ -397,6 +405,8 @@ Part::processSetHelper(const OptionNode & option, Instance * instance, const Ass
         }
 
         // 3) Plain numeric id in the current scope
+        if (asmb && !instance && is_nodal)
+          mooseError("Assembly-level *Nset requires an instance: use 'instance=' or inline 'inst.id'");
         const auto item = MooseUtils::convert<AbaqusID>(atom);
         unique_items.insert(id_to_index.at(item) + offset);
       }
@@ -785,6 +795,13 @@ FlatModel::getElementIndex(const std::string & key, const Instance * instance) c
   return _model._element_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
 }
 
+const Instance &
+Model::getInstance(const std::string & /*name*/) const
+{
+  // FlatModel path (no instances): error
+  mooseError("Instance lookup not supported in this model.");
+}
+
 // Entry point for the final parsing stage
 void
 AssemblyModel::parse(const BlockNode & root)
@@ -881,6 +898,14 @@ AssemblyModel::getElementIndex(const std::string & key, const Instance * instanc
     return local_index + inst._local_to_global_element_index_offset;
   }
   return _model._element_id_to_index.at(MooseUtils::convert<AbaqusID>(key));
+}
+
+const Instance &
+AssemblyModel::getInstance(const std::string & name) const
+{
+  if (_assembly && _assembly->_instance.has(name))
+    return _assembly->_instance[name];
+  mooseError("Instance '", name, "' not found.");
 }
 
 } // namespace Abaqus
