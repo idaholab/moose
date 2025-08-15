@@ -43,6 +43,7 @@ class TestHarnessTestCase(unittest.TestCase):
                  no_capabilities: bool = True,
                  capture_results: bool = True,
                  exit_code: int = 0,
+                 run: bool = True,
                  tests: Optional[dict[str, dict]] = None) -> RunTestsResult:
         """
         Helper for running tests
@@ -100,10 +101,13 @@ class TestHarnessTestCase(unittest.TestCase):
             try:
                 with redirect_stdout(stdout):
                     result.harness = TestHarness.build(argv, 'moose_test', MOOSE_DIR, **test_harness_build_kwargs)
-                    result.harness.findAndRunTests()
+                    if run:
+                        result.harness.findAndRunTests()
             except SystemExit as e:
-                self.assertEqual(e.code, exit_code)
-                return result
+                if isinstance(e.code, int):
+                    self.assertEqual(e.code, exit_code)
+                    return result
+                raise
             finally:
                 os.chdir(cwd)
                 result.output = stdout.getvalue()
