@@ -9,6 +9,7 @@
 
 #include "AbaqusInputParser.h"
 #include "MooseError.h"
+#include "MooseStringUtils.h"
 #include "MooseUtils.h"
 
 namespace Abaqus
@@ -124,7 +125,7 @@ InputParser::loadFile(std::istream & in)
     }
 
     // skip empty lines and comments (todo: remove spaces)
-    if (ss.length() < 2 || ss.substr(0, 2) == "**")
+    if (ss.empty() || (ss.length() >= 2 && ss.substr(0, 2) == "**"))
       continue;
 
     // tokenize and trim
