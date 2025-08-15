@@ -18,6 +18,7 @@ import getpass
 import argparse
 import typing
 from collections import defaultdict, namedtuple, OrderedDict
+from typing import Any, Tuple
 
 from socket import gethostname
 
@@ -347,16 +348,13 @@ class TestHarness:
             # to perform a check to see if the capability check in the tester
             # changes if we change these value(s)
             if self.options.require_capability:
-                for val in self.options.require_capability:
-                    if isinstance(val, list):
-                        val = val[0]
-                    val = val.strip()
-                    is_false = val[0] == '!'
-                    capability = val[1:] if is_false else val
-
-                    if capability not in self.options._capabilities:
-                        self.errorExit(f'Require capability "{capability}" is not registered')
-                    self.options._required_capabilities.append((capability, is_false))
+                required = self.options.require_capability
+                if isinstance(required, str):
+                    required = [required]
+                self.options._required_capabilities = self.buildRequiredCapabilities(
+                    self.options._capabilities,
+                    required
+                )
 
         checks = {}
         checks['platform'] = util.getPlatforms()
@@ -1151,7 +1149,7 @@ class TestHarness:
         filtergroup.add_argument('--not-group', action='store', type=str, help='Run only tests NOT in the named group')
         filtergroup.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
         filtergroup.add_argument('--run', type=str, default='', dest='run', help='Only run tests of the specified of tag(s)')
-        filtergroup.add_argument('--require-capability', action='append', nargs=1, type=str, help='Require that a test depend on this capability name; can be negated with "!"')
+        filtergroup.add_argument('--require-capability', action='extend', nargs=1, type=str, help='Require that a test depend on this capability name; can be negated with "!"')
         filtergroup.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         filtergroup.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
 
@@ -1345,6 +1343,21 @@ class TestHarness:
             if host in hostname:
                 return config
         return None
+
+    @staticmethod
+    def buildRequiredCapabilities(capabilities: dict[str, Tuple[Any, str]],
+                                  required_capabilities: list[str]) -> list[Tuple[str, bool]]:
+        """
+        Helper for setting up the required capabilities.
+        """
+        result = []
+        for v in [v.strip() for v in required_capabilities]:
+            is_false = v[0] == '!'
+            capability = v[1:] if is_false else v
+            if capability not in capabilities:
+                TestHarness.errorExit(f'Require capability "{capability}" is not registered')
+            result.append((capability, is_false))
+        return result
 
     @staticmethod
     def errorExit(*args):
