@@ -2,7 +2,7 @@
 
 Functors are an abstraction, existing as a base class, that is available to several systems in MOOSE:
 
-- [Variables](syntax/Variables/index.md)
+- [Variables](syntax/Variables/index.md), including both field and scalar variables
 - [Auxiliary variables](syntax/AuxVariables/index.md)
 - [Functor material properties](syntax/FunctorMaterials/index.md)
 - [Functions](syntax/Functions/index.md)
