@@ -12,7 +12,7 @@ import enum
 import os
 import numpy as np
 from collections import OrderedDict
-from typing import Optional, Callable, Iterable
+from typing import Optional, Callable, Iterable, Generator
 
 import pyhit
 from MooseControl import MooseControl
@@ -461,8 +461,30 @@ class StochasticControl(MooseControl):
 
 
 class _ResultCache:
+    """
+    Lightweight tolerance-aware LRU cache for per-row simulation results.
+
+    Each cache entry maps a single input row (1-D array) to a single output row
+    (1-D array of QoIs). Keys are built by binning each coordinate using
+    `round(x / tol)`, which groups near-identical inputs into the same bucket.
+    To prevent false hits due to bin collisions, a bucket hit is accepted only
+    if `np.allclose(a, b, rtol=tol, atol=0.0)` holds.
+
+    Notes:
+        - Eviction policy is LRU (least recently used): accessing an entry moves it
+          to the "most recent" end; when `maxsize` is exceeded, the oldest entry is
+          evicted.
+    """
 
     def __init__(self, maxsize: int = 10000, tol: float = 1e-14):
+        """
+        Parameters:
+            maxsize (int): Maximum number of cached entries (default = 1e5). Must be > 0.
+            tol (float):
+                Relative tolerance used both for bucketing (via rounding `x / tol`)
+                and for equality checks (`np.allclose(..., rtol=tol, atol=0.0)`).
+                Must be > 0.
+        """
         assert maxsize > 0
         assert tol > 0.0
         self.maxsize = maxsize
@@ -472,12 +494,53 @@ class _ResultCache:
         )
 
     def _key(self, row: np.ndarray) -> tuple[int, ...]:
+        """
+        Compute the bucket key for an input row.
+
+        Parameters:
+            row (np.ndarray):
+                1-D input vector representing a single sample (shape: `(num_params,)`).
+
+        Returns:
+            tuple of int
+                The integer key obtained by rounding `row / tol` element-wise.
+
+        Notes:
+            - Different rows may map to the same key; correctness is enforced by
+              `_close` during retrieval.
+        """
         return tuple(np.rint(row / self.tol).astype(np.int64).tolist())
 
     def _close(self, a: np.ndarray, b: np.ndarray) -> bool:
+        """
+        Check whether two rows are considered equal within tolerance.
+
+        Parameters:
+            (a, b) (np.ndarray): Input rows to compare (shape is `(num_params,)`).
+
+        Returns:
+            bool
+                True if `np.allclose(a, b, rtol=tol, atol=0.0)` is satisfied; False otherwise.
+        """
         return np.allclose(a, b, rtol=self.tol, atol=0.0)
 
     def get(self, x: np.ndarray) -> Optional[np.ndarray]:
+        """
+        Retrieve a cached output row for a given input row, if present.
+
+        Parameters:
+            x (np.ndarray): 1-D input row (shape: `(num_params,)`).
+
+        Returns:
+            np.ndarray or None
+                Cached output row (shape: `(num_qois,)`) if a tolerance-verified
+                hit occurs; otherwise `None`.
+
+        Notes:
+            - On a hit, the entry is moved to the most recently used position for LRU accounting.
+            - A key match is necessary but not sufficient; a final `_close` check
+              guarantees the returned output corresponds to an input within tolerance.
+        """
         k = self._key(x)
         x_ref, y_ref = self._cache.get(k, (None, None))
         if not x_ref is None:
@@ -487,6 +550,20 @@ class _ResultCache:
         return None
 
     def set(self, x: np.ndarray, y: np.ndarray):
+        """
+        Insert or update the cached mapping for an input row.
+
+        Parameters:
+            x (np.ndarray): 1-D input row (shape: `(num_params,)`).
+            y (np.ndarray): 1-D output row (shape: `(num_qois,)`) to cache.
+
+        Notes:
+            - Stores copies of `x` and `y` to avoid accidental external mutation.
+            - Marks the entry as most recently used.
+            - If `maxsize` is exceeded, evicts the least recently used entry.
+            - This method does not perform a tolerance check; it trusts the caller to
+            store outputs corresponding to `x`.
+        """
         k = self._key(x)
         self._cache[k] = (x.copy(), y.copy())
         self._cache.move_to_end(k)
@@ -500,20 +577,70 @@ class StochasticRunner:
     and returns the corresponding QoI results.
 
     This class is designed to be used within a context manager via `StochasticControl`.
+
+    Attributes:
+        _control (StochasticControl): Underlying simulation controller.
+        _result_cache (_ResultCache): Cache instance; `None` if caching is disabled (default).
+
+    Notes:
+        - Caching is optional and configured via `configCache`.
+        - Caching is "per row": each input row maps to a cached output row.
+        - Duplicate rows within the same call are not deduplicated; both will be
+          evaluated unless they are already present in the cache from prior calls.
     """
 
     def __init__(self, control: StochasticControl):
         """
-        Initializes the StochasticRunner.
-
         Parameters:
-            control (StochasticControl): A StochasticControl instance managing
-                                         MOOSE interaction.
+            control (StochasticControl): A StochasticControl instance managing MOOSE interaction.
         """
         self._control: StochasticControl = control
         self._result_cache: Optional[_ResultCache] = None
 
-    def parallelWorker(self, func: Callable, x_iter: Iterable):
+    def parallelWorker(self, func: Callable, x_iter: Iterable) -> Generator[np.ndarray | float]:
+        """
+        Map-like callable to use as `workers` in SciPy optimizers (emulates
+        `multiprocessing.Pool.map`).
+
+        This method is designed to be passed directly as the `workers` argument
+        to SciPy routines that accept a map-like callable (e.g.,
+        `scipy.optimize.shgo`).
+
+        The idea is to utilize stochastic_tool's parallelism by sending a group
+        of samples at once. It does not utilize any python-based parallelism.
+
+        Behavior:
+            1. Materializes `x_iter` into a numpy array and ensures the internal
+               result cache is enabled and large enough for the batch.
+            2. Calls `self(X)` once to precompute and populate the cache for all rows.
+               (If your objective calls back into this runner, subsequent lookups are
+               cache hits and the underlying control isn't re-run.)
+            3. Returns a generator that yields `func(xi)` for each `xi` from
+               `x_iter`--i.e., a map-like interface compatible with SciPy's
+               `workers` argument.
+
+        Parameters:
+            func (Callable):
+                The function to apply to each element of `x_iter`. In typical
+                use this objective will call back into
+                `StochasticRunner.__call__` to obtain QoIs for `xi`.
+            x_iter (Iterable): Iterable of inputs (scalars or 1-D arrays).
+
+        Yields:
+            yi (np.ndarray or float):
+                The result of `func(xi)` for each `xi` in `x_iter`.
+
+        Examples::
+            >>> with StochasticControl(...) as runner:
+            ...     runner.configCache()
+            ...     def objective(x):
+            ...         y = runner(x)
+            ...         # Return first quantity of interest (column if multiple samples)
+            ...         return y[:, 0] if y.ndim > 1 else y[0]
+            ...
+            ...     from scipy.optimize import shgo
+            ...     res = shgo(objective, bounds, workers=runner.parallelWorker)
+        """
         x = np.array([xi for xi in x_iter])
         if self._result_cache is None:
             self.configCache(len(x_iter))
@@ -525,6 +652,21 @@ class StochasticRunner:
             yield func(xi)
 
     def configCache(self, maxsize: int = 10000, tol: float = 1e-14):
+        """
+        Enable, re-initialize, or disable the per-row result cache.
+
+        Parameters:
+            maxsize (int):
+                Cache capacity in number of rows. If `maxsize <= 0`, caching is disabled.
+                (default=1e5)
+            tol (float):
+                Relative tolerance used by the cache for both keying and closeness
+                checks. If `tol <= 0.0`, caching is disabled. (default=1e-14)
+
+        Notes:
+            - Sets `_result_cache` to a new `_ResultCache` instance when both
+            `maxsize > 0` and `tol > 0.0`; otherwise sets `_result_cache = None`.
+        """
         if maxsize > 0 and tol > 0.0:
             self._result_cache = _ResultCache(maxsize, tol)
         else:
@@ -538,13 +680,19 @@ class StochasticRunner:
             x_in (array or float): A single input vector, or array of input vectors.
 
         Returns:
-            A NumPy array or float representing the QoIs.
-            - If a single input and single QoI: returns a float.
-            - If a single input or single QoI: returns a 1D array.
-            - Otherwise, returns a 2D array of shape (num_samples, num_qois).
+            np.ndarray or float:
+                - If a single input and single QoI: returns a float.
+                - If a single input or single QoI: returns a 1D array.
+                - Otherwise, returns a 2D array of shape (num_samples, num_qois).
 
         Raises:
             ValueError: If the input shape doesn't match expected parameter dimensions.
+            ControlException: If the control's output row count does not match the input row count.
+
+        Notes:
+            - With caching enabled, each row is looked up in the cache; only misses
+              are sent to the underlying control. Rows duplicated within the same
+              call are not coalesced (each is treated independently).
         """
         # Convert input to numpy array
         x = self._preprocess(x_in)
@@ -600,6 +748,7 @@ class StochasticRunner:
         return x
 
     def _run_control(self, x: np.ndarray) -> np.ndarray:
+        """Execute the underlying control for a batch of inputs."""
         # Insert input
         self._control.setInput(x)
 
@@ -616,7 +765,7 @@ class StochasticRunner:
         return y
 
     def _postprocess(self, y: np.ndarray) -> np.ndarray | float:
-        """Return either float, vector, or matrix based on size of 2-D array"""
+        """Return either float, vector, or matrix based on size of 2-D array."""
         if np.size(y) == 1:  # A single QoI and row
             return y[0, 0]
         elif 1 in y.shape:  # A single QoI or row
