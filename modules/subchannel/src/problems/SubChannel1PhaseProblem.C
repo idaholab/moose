@@ -1943,8 +1943,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   const bool _pressure_axial_momentum_tight_coupling = true;
   const bool _pressure_cross_momentum_tight_coupling = true;
   // index range for this block
-  unsigned int first_node = iblock * _block_size + 1;
-  unsigned int last_node = (iblock + 1) * _block_size;
+  const unsigned int first_node = iblock * _block_size + 1;
+  const unsigned int last_node = (iblock + 1) * _block_size;
 
   /// Assembling matrices
   // Computing sum of crossflows with previous iteration
@@ -1963,11 +1963,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   if (_monolithic_thermal_bool)
     computeh(iblock);
 
-  if (_verbose_subchannel)
-  {
-    _console << "Starting nested system." << std::endl;
-    _console << "Number of simultaneous variables: " << Q << std::endl;
-  }
+  V("Starting nested system.");
+  V("Number of simultaneous variables: " + std::to_string(Q));
   // Mass conservation
   PetscInt field_num = 0;
   DuplicateAndAssemble(_mc_axial_convection_mat, mat_array[Q * field_num + 0]);
@@ -2170,14 +2167,12 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     PetscScalar min_mdot;
     LibmeshPetscCall(VecAbs(_prod));
     LibmeshPetscCall(VecMin(_prod, NULL, &min_mdot));
-    if (_verbose_subchannel)
-      _console << "Minimum estimated mdot: " << min_mdot << std::endl;
+    V("Minimum estimated mdot: " + std::to_string(min_mdot));
 
     LibmeshPetscCall(VecAbs(sumWij_loc));
     LibmeshPetscCall(VecMax(sumWij_loc, NULL, &_max_sumWij));
     _max_sumWij = std::max(1e-10, _max_sumWij);
-    if (_verbose_subchannel)
-      _console << "Maximum estimated Wij: " << _max_sumWij << std::endl;
+    V("Maximum estimated Wij: " + std::to_string(_max_sumWij));
 
     LibmeshPetscCall(populateVectorFromDense<libMesh::DenseMatrix<Real>>(
         _Wij_loc_vec, _Wij, first_node, last_node, _n_gaps));
@@ -2195,17 +2190,14 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     relax_factor /= _block_size * _n_gaps;
 #endif
     relax_factor = relax_factor / _max_sumWij + 0.5;
-    if (_verbose_subchannel)
-      _console << "Relax base value: " << relax_factor << std::endl;
+    V("Relax base value: " + std::to_string(relax_factor));
 
     PetscScalar resistance_relaxation = 0.9;
     _added_K = _max_sumWij / min_mdot;
-    if (_verbose_subchannel)
-      _console << "New cross resistance: " << _added_K << std::endl;
+    V("New cross resistance: " + std::to_string(_added_K));
     _added_K = (_added_K * resistance_relaxation + (1.0 - resistance_relaxation) * _added_K_old) *
                relax_factor;
-    if (_verbose_subchannel)
-      _console << "Relaxed cross resistance: " << _added_K << std::endl;
+    V("Relaxed cross resistance: " + std::to_string(_added_K));
     if (_added_K < 10 && _added_K >= 1.0)
       _added_K = 1.0; //(1.0 - resistance_relaxation);
     if (_added_K < 1.0 && _added_K >= 0.1)
@@ -2216,8 +2208,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
       _added_K = 0.1;
     if (_added_K < 1e-3)
       _added_K = 1.0 * _added_K;
-    if (_verbose_subchannel)
-      _console << "Actual added cross resistance: " << _added_K << std::endl;
+    V("Actual added cross resistance: " + std::to_string(_added_K));
     LibmeshPetscCall(VecScale(unity_vec_Wij, _added_K));
     _added_K_old = _added_K;
 
@@ -2240,13 +2231,9 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     relaxation_factor_mdot = 1.0;
     relaxation_factor_P = 1.0; // std::exp(-5.0);
     relaxation_factor_Wij = 0.1;
-
-    if (_verbose_subchannel)
-    {
-      _console << "Relax mdot: " << relaxation_factor_mdot << std::endl;
-      _console << "Relax P: " << relaxation_factor_P << std::endl;
-      _console << "Relax Wij: " << relaxation_factor_Wij << std::endl;
-    }
+    V("Relax mdot: " + std::to_string(relaxation_factor_mdot));
+    V("Relax P: " + std::to_string(relaxation_factor_P));
+    V("Relax Wij: " + std::to_string(relaxation_factor_Wij));
 
     PetscInt field_num = 0;
     Vec diag_mdot;
@@ -2262,8 +2249,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecAXPY(vec_array[field_num], 1.0, _prod));
     LibmeshPetscCall(VecDestroy(&diag_mdot));
 
-    if (_verbose_subchannel)
-      _console << "mdot relaxed" << std::endl;
+    V("mdot relaxed");
 
     field_num = 1;
     Vec diag_P;
@@ -2271,8 +2257,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(MatGetDiagonal(mat_array[Q * field_num + field_num], diag_P));
     LibmeshPetscCall(VecScale(diag_P, 1.0 / relaxation_factor_P));
     LibmeshPetscCall(MatDiagonalSet(mat_array[Q * field_num + field_num], diag_P, INSERT_VALUES));
-    if (_verbose_subchannel)
-      _console << "Mat assembled" << std::endl;
+    V("Mat assembled");
     LibmeshPetscCall(populateVectorFromHandle<SolutionHandle>(
         _prod, *_P_soln, first_node, last_node, _n_channels));
     LibmeshPetscCall(VecScale(diag_P, (1.0 - relaxation_factor_P)));
@@ -2280,8 +2265,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecAXPY(vec_array[field_num], 1.0, _prod));
     LibmeshPetscCall(VecDestroy(&diag_P));
 
-    if (_verbose_subchannel)
-      _console << "P relaxed" << std::endl;
+    V("P relaxed");
 
     field_num = 2;
     Vec diag_Wij;
@@ -2295,18 +2279,14 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecPointwiseMult(_Wij_vec, _Wij_vec, diag_Wij));
     LibmeshPetscCall(VecAXPY(vec_array[field_num], 1.0, _Wij_vec));
     LibmeshPetscCall(VecDestroy(&diag_Wij));
-
-    if (_verbose_subchannel)
-      _console << "Wij relaxed" << std::endl;
+    V("Wij relaxed");
   }
-  if (_verbose_subchannel)
-    _console << "Linear solver relaxed." << std::endl;
+  V("Linear solver relaxed");
 
   // Creating nested matrices
   LibmeshPetscCall(MatCreateNest(PETSC_COMM_SELF, Q, NULL, Q, NULL, mat_array.data(), &A_nest));
   LibmeshPetscCall(VecCreateNest(PETSC_COMM_SELF, Q, NULL, vec_array.data(), &b_nest));
-  if (_verbose_subchannel)
-    _console << "Nested system created." << std::endl;
+  V("Nested system created");
 
   /// Setting up linear solver
   // Creating linear solver
@@ -2331,8 +2311,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(PCFieldSplitSetIS(pc, NULL, expand1));
     LibmeshPetscCall(ISDestroy(&expand1));
   }
-  if (_verbose_subchannel)
-    _console << "Linear solver assembled." << std::endl;
+  V("Linear solver assembled");
 
   /// Solving
   LibmeshPetscCall(VecDuplicate(b_nest, &x_nest));
@@ -2351,26 +2330,21 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   {
     LibmeshPetscCall(VecDestroy(&vec_array[i]));
   }
-  if (_verbose_subchannel)
-    _console << "Solver elements destroyed." << std::endl;
+  V("Solver elements destroyed");
 
   /// Recovering the solutions
   Vec sol_mdot, sol_p, sol_Wij;
-  if (_verbose_subchannel)
-    _console << "Vectors created." << std::endl;
+  V("Vectors to hold solution created");
   PetscInt num_vecs;
   Vec * loc_vecs;
   LibmeshPetscCall(VecNestGetSubVecs(x_nest, &num_vecs, &loc_vecs));
-  if (_verbose_subchannel)
-    _console << "Starting extraction." << std::endl;
   LibmeshPetscCall(VecDuplicate(_mc_axial_convection_rhs, &sol_mdot));
   LibmeshPetscCall(VecCopy(loc_vecs[0], sol_mdot));
   LibmeshPetscCall(VecDuplicate(_amc_sys_mdot_rhs, &sol_p));
   LibmeshPetscCall(VecCopy(loc_vecs[1], sol_p));
   LibmeshPetscCall(VecDuplicate(_cmc_sys_Wij_rhs, &sol_Wij));
   LibmeshPetscCall(VecCopy(loc_vecs[2], sol_Wij));
-  if (_verbose_subchannel)
-    _console << "Getting individual field solutions from coupled solver." << std::endl;
+  V("Solution from coupled solver copied to solution vectors");
 
   /// Assigning the solutions to arrays
   PetscScalar * sol_p_array;
@@ -2476,13 +2450,10 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
   LibmeshPetscCall(VecAbs(_prod));
   LibmeshPetscCall(VecMax(_prod, NULL, &_max_sumWij_new));
-  if (_verbose_subchannel)
-    _console << "Maximum estimated Wij new: " << _max_sumWij_new << std::endl;
+  V("Maximum estimated Wij new: " + std::to_string(_max_sumWij_new));
   _correction_factor = _max_sumWij_new / _max_sumWij;
-  if (_verbose_subchannel)
-    _console << "Correction factor: " << _correction_factor << std::endl;
-  if (_verbose_subchannel)
-    _console << "Solutions assigned to MOOSE variables." << std::endl;
+  V("Correction factor: " + std::to_string(_correction_factor));
+  V("Solutions assigned to MOOSE variables.");
 
   /// Destroying arrays
   LibmeshPetscCall(VecDestroy(&x_nest));
@@ -2490,8 +2461,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(VecDestroy(&sol_p));
   LibmeshPetscCall(VecDestroy(&sol_Wij));
   LibmeshPetscCall(VecDestroy(&sumWij_loc));
-  if (_verbose_subchannel)
-    _console << "Solutions destroyed." << std::endl;
+  V("Solutions destroyed.");
 
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
@@ -2503,8 +2473,14 @@ SubChannel1PhaseProblem::externalSolve()
   _dt = (isTransient() ? dt() : _one);
   _TR = isTransient();
   initializeSolution();
-  if (_verbose_subchannel)
-    _console << "Solution initialized" << std::endl;
+  // Small helper functions to reduce repetition
+  // Verbose print helper (no-op unless _verbose_subchannel is true)
+  auto V = [&](const std::string & s)
+  {
+    if (_verbose_subchannel)
+      _console << s << std::endl;
+  };
+  V("Solution initialized");
   Real P_error = 1.0;
   unsigned int P_it = 0;
   unsigned int P_it_max;
@@ -2563,8 +2539,7 @@ SubChannel1PhaseProblem::externalSolve()
         {
           LibmeshPetscCall(implicitPetscSolve(iblock));
           computeWijPrime(iblock);
-          if (_verbose_subchannel)
-            _console << "Done with main solve." << std::endl;
+          V("Done with main solve.");
           if (_monolithic_thermal_bool)
           {
             // Enthalpy is already solved from the monolithic solve
@@ -2572,35 +2547,26 @@ SubChannel1PhaseProblem::externalSolve()
           }
           else
           {
-            if (_verbose_subchannel)
-              _console << "Starting thermal solve." << std::endl;
+            V("Starting thermal solve.");
             if (_compute_power)
             {
               computeh(iblock);
               computeT(iblock);
             }
-            if (_verbose_subchannel)
-              _console << "Done with thermal solve." << std::endl;
+            V("Done with thermal solve.");
           }
         }
-
-        if (_verbose_subchannel)
-          _console << "Start updating thermophysical properties." << std::endl;
-
+        V("Start updating thermophysical properties.");
         if (_compute_density)
           computeRho(iblock);
-
         if (_compute_viscosity)
           computeMu(iblock);
-
-        if (_verbose_subchannel)
-          _console << "Done updating thermophysical properties." << std::endl;
+        V("Done updating thermophysical properties.");
 
         // We must do a global assembly to make sure data is parallel consistent before we do things
         // like compute L2 norms
       aux_close:
         _aux->solution().close();
-
         auto T_L2norm_new = _T_soln->L2norm();
         T_block_error =
             std::abs((T_L2norm_new - T_L2norm_old_block) / (T_L2norm_old_block + 1E-14));
@@ -2614,11 +2580,8 @@ SubChannel1PhaseProblem::externalSolve()
     P_error =
         std::abs((P_L2norm_new_axial - P_L2norm_old_axial) / (P_L2norm_old_axial + _P_out + 1E-14));
     _console << "P_error :" << P_error << std::endl;
-    if (_verbose_subchannel)
-    {
-      _console << "Iteration:  " << P_it << std::endl;
-      _console << "Maximum iterations: " << P_it_max << std::endl;
-    }
+    V("Iteration:  " + std::to_string(P_it));
+    V("Maximum iterations: " + std::to_string(P_it_max));
   }
   // update old crossflow matrix
   _Wij_old = _Wij;
