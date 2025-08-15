@@ -14,7 +14,7 @@
     transition_subdomain = cut
     transition_subdomain_boundary = transition_bdr
     closed_subdomain = coil
-    block = '1 2'
+    block = 'TorusCore TorusSheath'
   []   
 []
 
