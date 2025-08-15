@@ -326,8 +326,11 @@ class TestHarness:
             self.errorExit(f'{e}')
 
         # Load capabilities if they're needed
+        self.options._required_capabilities = []
         if self.options.no_capabilities:
             self.options._capabilities = None
+            if self.options.require_capability:
+                self.errorExit('Cannot use --require-capability with --no-capabilities')
         else:
             assert self.executable
 
@@ -337,6 +340,23 @@ class TestHarness:
 
             with util.ScopedTimer(0.5, 'Parsing application capabilities'):
                 self.options._capabilities = util.getCapabilities(self.executable)
+
+            # Setup the required capabilities, if any. From the capabilities
+            # given by the user, we form the value that we should set them to
+            # when temporarily augmenting the capabilities in a Tester
+            # to perform a check to see if the capability check in the tester
+            # changes if we change these value(s)
+            if self.options.require_capability:
+                for val in self.options.require_capability:
+                    if isinstance(val, list):
+                        val = val[0]
+                    val = val.strip()
+                    is_false = val[0] == '!'
+                    capability = val[1:] if is_false else val
+
+                    if capability not in self.options._capabilities:
+                        self.errorExit(f'Require capability "{capability}" is not registered')
+                    self.options._required_capabilities.append((capability, is_false))
 
         checks = {}
         checks['platform'] = util.getPlatforms()
@@ -1130,6 +1150,7 @@ class TestHarness:
         filtergroup.add_argument('--no-check-input', action='store_true', help='Do not run check_input (syntax) tests')
         filtergroup.add_argument('--not-group', action='store', type=str, help='Run only tests NOT in the named group')
         filtergroup.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match the given regular expression')
+        filtergroup.add_argument('--require-capability', action='append', nargs=1, type=str, help='Require that a test depend on this capability name; can be negated with "!"')
         filtergroup.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         filtergroup.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
 
