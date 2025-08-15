@@ -25,7 +25,6 @@
 #include "libmesh/parallel.h"
 #include "libmesh/error_vector.h"
 #include "libmesh/distributed_mesh.h"
-#include "libmesh/hp_coarsentest.h"
 
 using namespace libMesh;
 
@@ -81,6 +80,11 @@ Adaptivity::init(const unsigned int steps,
 
   if (_adaptivity_type == AdaptivityType::P || _adaptivity_type == AdaptivityType::HP)
     _mesh.doingPRefinement(true);
+
+  _sibling_coupling = std::make_unique<SiblingCoupling>();
+  if (_adaptivity_type == AdaptivityType::HP)
+    _fe_problem.getNonlinearSystemBase(0).system().get_dof_map().add_algebraic_ghosting_functor(
+        *_sibling_coupling);
 
   _mesh_refinement->set_periodic_boundaries_ptr(
       _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
@@ -214,9 +218,10 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 
     // Moving some of h flagged elements to p flagged based on the
     // local smoothness and prior h & p error estimates
-    HPCoarsenTest hpselector;
+    _hp_coarsen_test = std::make_unique<HPCoarsenTest>();
     if (_adaptivity_type == AdaptivityType::HP)
-      hpselector.select_refinement(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system());
+      _hp_coarsen_test->select_refinement(
+          _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system());
 
     if (_displaced_problem)
       // Reuse the error vector and refine the displaced mesh

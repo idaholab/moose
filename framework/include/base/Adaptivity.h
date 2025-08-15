@@ -23,6 +23,8 @@
 
 // libMesh
 #include "libmesh/mesh_refinement.h"
+#include "libmesh/hp_coarsentest.h"
+#include "libmesh/sibling_coupling.h"
 
 class FEProblemBase;
 class MooseMesh;
@@ -323,6 +325,12 @@ protected:
 
   /// Whether or not to recompute markers during adaptivity cycles
   bool _recompute_markers_during_cycles;
+
+  /// Sibling coupling object for HP adaptivity to handle ghosting
+  std::unique_ptr<libMesh::SiblingCoupling> _sibling_coupling;
+
+  /// HP coarsen test object for HP adaptivity
+  std::unique_ptr<libMesh::HPCoarsenTest> _hp_coarsen_test;
 
   /// Stores pointers to ErrorVectors associated with indicator field names
   std::map<std::string, std::unique_ptr<libMesh::ErrorVector>> _indicator_field_to_error_vector;
