@@ -83,6 +83,13 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
 }
 
 void
+SamplerFullSolveMultiApp::backup()
+{
+  if (_mode != StochasticTools::MultiAppMode::BATCH_RESTORE)
+    FullSolveMultiApp::backup();
+}
+
+void
 SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
 {
   // Logic for calling initial setup again:
