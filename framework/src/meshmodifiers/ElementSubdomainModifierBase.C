@@ -108,6 +108,8 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
     _displaced_mesh(_displaced_problem ? &_displaced_problem->mesh() : nullptr),
     _nl_sys(_fe_problem.getNonlinearSystemBase(systemNumber())),
     _aux_sys(_fe_problem.getAuxiliarySystem()),
+    _t_step_old(declareRestartableData<int>("t_step_old", 0)),
+    _restep(false),
     _old_subdomain_reinitialized(getParam<bool>("old_subdomain_reinitialized")),
     _pr_names(getParam<std::vector<UserObjectName>>("polynomial_fitters")),
     _reinit_vars(getParam<std::vector<VariableName>>("reinitialize_variables")),
@@ -284,9 +286,33 @@ ElementSubdomainModifierBase::initialSetup()
 }
 
 void
+ElementSubdomainModifierBase::timestepSetup()
+{
+  if (_t_step == _t_step_old)
+  {
+    mooseInfoRepeated(name(), ": Restoring element subdomain changes.");
+
+    // Reverse the subdomain changes
+    auto moved_elem_reversed = _moved_elems;
+    for (auto & [elem_id, subdomain] : moved_elem_reversed)
+      std::swap(subdomain.first, subdomain.second);
+
+    _restep = true;
+    modify(moved_elem_reversed);
+    _restep = false;
+  }
+
+  _t_step_old = _t_step;
+}
+
+void
 ElementSubdomainModifierBase::modify(
     const std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> & moved_elems)
 {
+  if (!_restep)
+    // Cache the moved elements for potential restore
+    _moved_elems = moved_elems;
+
   // If nothing need to change, just return.
   // This will skip all mesh changes, and so no adaptivity mesh files will be written.
   auto n_moved_elem = moved_elems.size();
@@ -320,19 +346,25 @@ ElementSubdomainModifierBase::modify(
   // Some variable reinitialization strategies require patch elements to be gathered
   // This has to be done *before* reinitializing the equation systems because we need to find
   // currently evaluable elements
-  _evaluable_elems.clear();
-  _patch_elem_ids.clear();
-  for (auto i : index_range(_reinit_vars))
-    prepareVariableForReinitialization(_reinit_vars[i], _reinit_strategy[i]);
+  if (!_restep)
+  {
+    _evaluable_elems.clear();
+    _patch_elem_ids.clear();
+    for (auto i : index_range(_reinit_vars))
+      prepareVariableForReinitialization(_reinit_vars[i], _reinit_strategy[i]);
+  }
 
   // Reinit equation systems
   _fe_problem.meshChanged(
       /*intermediate_change=*/false, /*contract_mesh=*/false, /*clean_refinement_flags=*/false);
 
   // Initialize solution and stateful material properties
-  applyIC();
-  if (_fe_problem.getMaterialWarehouse().hasActiveObjects(0))
-    initElementStatefulProps();
+  if (!_restep)
+  {
+    applyIC();
+    if (_fe_problem.getMaterialWarehouse().hasActiveObjects(0))
+      initElementStatefulProps();
+  }
 }
 
 void

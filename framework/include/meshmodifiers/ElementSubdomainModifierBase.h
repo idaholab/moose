@@ -50,6 +50,7 @@ public:
 
   void initialSetup() override;
   void meshChanged() override;
+  void timestepSetup() override;
 
 protected:
   /**
@@ -154,6 +155,15 @@ private:
 
   /// @brief Restore values to non-reinitialized nodes on reinitialized elements
   void restoreOverriddenDofValues(const VariableName & var_name);
+
+  /// Cached moved elements for potential restore
+  std::unordered_map<dof_id_type, std::pair<SubdomainID, SubdomainID>> _moved_elems;
+
+  /// Previous time step number
+  int & _t_step_old;
+
+  /// Whether this is a re-step
+  bool _restep;
 
   /// Reinitialize moved elements whose new subdomain is in this list
   std::vector<SubdomainID> _subdomain_ids_to_reinitialize;
