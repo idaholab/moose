@@ -97,7 +97,7 @@
     type = MFEMVectorFEDomainLFKernel
     variable = a_field
     vector_coefficient = current_density
-    block = '1 2'
+    block = 'TorusCore TorusSheath'
   []   
 []
 
@@ -137,10 +137,22 @@
   []  
 []
 
+[Postprocessors]
+  [TotalCurrent]
+    type = MFEMBoundaryNetFluxPostprocessor
+    variable = current_density
+    boundary = 'MeasurementPlane'
+  []
+[]
+
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/MagnetostaticClosedCoil
     vtk_format = ASCII
   []
+  [ReportedCurrent]
+    type = CSV
+    file_base = OutputData/MagnetostaticClosedCoilCSV
+  []  
 []

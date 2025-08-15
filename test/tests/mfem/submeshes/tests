@@ -45,4 +45,13 @@
     recover = false
     max_threads = 1
   []  
+  [MFEMCutTransitionSubMesh]
+    type = CSVDiff
+    input = cut_magnetostatic.i
+    csvdiff = 'OutputData/MagnetostaticClosedCoilCSV.csv'    
+    requirement = 'MOOSE shall have the ability to strongly enforce topological constraints in MFEM by defining a transition region for variable discontinuities on one side of a cut plane.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
 []
