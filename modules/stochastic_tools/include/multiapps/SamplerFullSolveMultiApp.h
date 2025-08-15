@@ -30,9 +30,9 @@ public:
 
   /**
    * This method is overridden so that we only store the initial state and not on any other
-   * timestep.
+   * timestep when doing batch-restore.
    */
-  virtual void backup() override {}
+  virtual void backup() override;
 
   /**
    * Helper for inserting row data into commandline arguments
