@@ -409,7 +409,8 @@ Part::processSetHelper(const OptionNode & option, Instance * instance, const Ass
 
         // 3) Plain numeric id in the current scope
         if (asmb && !instance && is_nodal)
-          mooseError("Assembly-level *Nset requires an instance: use 'instance=' or inline 'inst.id'");
+          mooseError(
+              "Assembly-level *Nset requires an instance: use 'instance=' or inline 'inst.id'");
         const auto item = MooseUtils::convert<AbaqusID>(atom);
         unique_items.insert(id_to_index.at(item) + offset);
       }
