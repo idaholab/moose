@@ -11,6 +11,10 @@
 
 #include "KokkosTypes.h"
 
+#ifdef MOOSE_KOKKOS_SCOPE
+#include "KokkosUtils.h"
+#endif
+
 class MooseMesh;
 
 namespace Moose
