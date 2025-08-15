@@ -20,6 +20,7 @@
 // Kokkos headers
 #include "Kokkos_Core.hpp"
 #include "Kokkos_StdAlgorithms.hpp"
+#include "Kokkos_UnorderedMap.hpp"
 
 // libMesh uses an old Boost library and causes a build error due to an outdated CUDA
 // preprocessor which should be manually undefined after including CUDA runtime header

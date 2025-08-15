@@ -11,10 +11,6 @@
 
 #include "KokkosArray.h"
 
-#ifdef MOOSE_KOKKOS_SCOPE
-#include "KokkosUtils.h"
-#endif
-
 #include <memory>
 #include <map>
 
@@ -27,9 +23,6 @@ namespace Kokkos
  * The Kokkos wrapper class for standard map.
  * The map can only be populated on host.
  * Make sure to call copy() after populating the map on host.
- * The lookup on device is done in two steps: get the index with the key using find() and get the
- * value using operator[] with the index.
- * Uses simple binary search on device, so be cautious about the potential performance impact.
  */
 template <typename T1, typename T2>
 class Map
@@ -38,9 +31,8 @@ public:
   /**
    * Default constructor
    */
-  Map() : _map(std::make_shared<std::map<T1, T2>>()) {}
+  Map() : _map_host(std::make_shared<std::map<T1, T2>>()) {}
 
-#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get the beginning writeable iterator of the host map
    * @returns The beginning iterator
@@ -67,9 +59,9 @@ public:
    */
   auto & get()
   {
-    mooseAssert(_map, "Kokkos map error: host map was not initialized.");
+    mooseAssert(_map_host, "Kokkos map error: host map was not initialized.");
 
-    return *_map;
+    return *_map_host;
   }
   /**
    * Get the underlying const host map
@@ -77,14 +69,10 @@ public:
    */
   const auto & get() const
   {
-    mooseAssert(_map, "Kokkos map error: host map was not initialized.");
+    mooseAssert(_map_host, "Kokkos map error: host map was not initialized.");
 
-    return *_map;
+    return *_map_host;
   }
-  /**
-   * Call the host map's operator[]
-   */
-  T2 & operator[](const T1 & key) { return get()[key]; }
   /**
    * Copy the host map to device
    */
@@ -97,78 +85,81 @@ public:
   {
     KOKKOS_IF_ON_HOST(return get().size();)
 
-    return _keys.size();
+    return _map_device.size();
   }
   /**
-   * Find the index of a key
+   * Get whether the key exists
    * @param key The key
-   * @returns The index into the map, size of the map if key is not found
+   * @returns Whether the key exists
    */
-  KOKKOS_FUNCTION dof_id_type find(const T1 & key) const;
+  KOKKOS_FUNCTION bool exists(const T1 & key) const { return _map_device.exists(key); }
   /**
-   * Get the value corresponding to an index
-   * @param index The index into the map returned by find()
-   * @returns The reference of the value
+   * Get the value corresponding to a key
+   * @param key The key
+   * @returns The const reference of the value
    */
-  KOKKOS_FUNCTION const T2 & operator[](const dof_id_type index) const
+  KOKKOS_FUNCTION const T2 & operator[](const T1 & key) const
   {
-    KOKKOS_ASSERT(index < size());
+    KOKKOS_IF_ON_HOST(return get().at(key);)
 
-    return _values[index];
+    KOKKOS_ASSERT(exists(key));
+
+    return _map_device.value_at(_map_device.find(key));
   }
-#endif
+  /**
+   * Call host map's operator[]
+   * @param key The key
+   * @returns The writeable reference of the value
+   */
+  T2 & operator[](const T1 & key) { return get()[key]; }
 
 private:
   /**
    * Standard map on host
    * Stored as a shared pointer to avoid deep copy
    */
-  const std::shared_ptr<std::map<T1, T2>> _map;
+  const std::shared_ptr<std::map<T1, T2>> _map_host;
   /**
-   * Key array on device
+   * Kokkos map on device
    */
-  Array<T1> _keys;
+  ::Kokkos::UnorderedMap<T1, T2, ExecSpace> _map_device;
   /**
-   * Value array on device
+   * Maximum allowed size
    */
-  Array<T2> _values;
+  static constexpr std::size_t _max_size = std::numeric_limits<uint32_t>::max();
 };
 
-#ifdef MOOSE_KOKKOS_SCOPE
 template <typename T1, typename T2>
 void
 Map<T1, T2>::copy()
 {
-  std::vector<T1> keys;
-  std::vector<T2> values;
+  if (size() > _max_size)
+    mooseError("Kokkos map error: size cannot exceed ",
+               _max_size,
+               ", but the current size is ",
+               get().size(),
+               ".");
 
-  keys.reserve(_map->size());
-  values.reserve(_map->size());
+  Array<T1> keys(size());
+  Array<T2> values(size());
 
-  for (auto & [key, value] : *_map)
+  uint32_t i = 0;
+
+  for (auto & [key, value] : get())
   {
-    keys.push_back(key);
-    values.push_back(value);
+    keys[i] = key;
+    values[i++] = value;
   }
 
-  _keys = keys;
-  _values = values;
-}
+  keys.copyToDevice();
+  values.copyToDevice();
 
-template <typename T1, typename T2>
-KOKKOS_FUNCTION dof_id_type
-Map<T1, T2>::find(const T1 & key) const
-{
-  auto begin = &_keys.begin();
-  auto end = &_keys.end();
-  auto target = Utils::find(key, begin, end);
+  _map_device.rehash(size());
 
-  if (target == end)
-    return _keys.size();
-  else
-    return target - begin;
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<uint32_t>> policy(0, size());
+  ::Kokkos::parallel_for(
+      policy, KOKKOS_CLASS_LAMBDA(const uint32_t i) { _map_device.insert(keys[i], values[i]); });
 }
-#endif
 
 } // namespace Kokkos
 } // namespace Moose
