@@ -979,6 +979,17 @@ public:
    */
   bool isParamDefined(const std::string & name) const;
 
+  /**
+   * Query a parameter
+   *
+   * If the parameter is not valid, nullptr will be returned
+   *
+   * @param name The name of the parameter
+   * @return A pointer to the parameter value, if it exists
+   */
+  template <typename T>
+  const T * queryParam(const std::string & name) const;
+
   ///@{
   /*
    * These methods are here to retrieve parameters for scalar and vector types respectively. We will
@@ -2126,6 +2137,13 @@ template <>
 void InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & /*name*/,
                                                             MooseFunctorName & l_value,
                                                             const int & r_value);
+
+template <typename T>
+const T *
+InputParameters::queryParam(const std::string & name) const
+{
+  return isParamValid(name) ? &getParamHelper(name, *this, static_cast<T *>(0)) : nullptr;
+}
 
 // TODO: pass MooseBase here instead and use it in objects
 template <typename T>
