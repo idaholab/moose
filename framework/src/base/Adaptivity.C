@@ -23,6 +23,7 @@
 #include "libmesh/patch_recovery_error_estimator.h"
 #include "libmesh/fourth_error_estimators.h"
 #include "libmesh/parallel.h"
+#include "libmesh/sibling_coupling.h"
 #include "libmesh/error_vector.h"
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/hp_coarsentest.h"
@@ -214,9 +215,16 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 
     // Moving some of h flagged elements to p flagged based on the
     // local smoothness and prior h & p error estimates
-    HPCoarsenTest hpselector;
     if (_adaptivity_type == AdaptivityType::HP)
+    {
+      SiblingCoupling sibling_coupling;
+      _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0)
+          .system()
+          .get_dof_map()
+          .add_algebraic_ghosting_functor(sibling_coupling);
+      HPCoarsenTest hpselector;
       hpselector.select_refinement(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system());
+    }
 
     if (_displaced_problem)
       // Reuse the error vector and refine the displaced mesh
