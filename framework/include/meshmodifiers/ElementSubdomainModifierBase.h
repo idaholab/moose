@@ -165,6 +165,12 @@ private:
   /// Whether this is a re-step
   bool _restep;
 
+  /// Indicates whether the timestep has advanced.
+  /// Does not indicate that the timestep is larger than the previous one.
+  /// Most of time it is equivalent to `_t_step > _t_step_old`
+  /// Sometimes, `_t_step == _t_step_old` because of restep or failed steps.
+  bool _has_done_previous_step;
+
   /// Reinitialize moved elements whose new subdomain is in this list
   std::vector<SubdomainID> _subdomain_ids_to_reinitialize;
 

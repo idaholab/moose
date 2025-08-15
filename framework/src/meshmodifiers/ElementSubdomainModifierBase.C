@@ -110,6 +110,7 @@ ElementSubdomainModifierBase::ElementSubdomainModifierBase(const InputParameters
     _aux_sys(_fe_problem.getAuxiliarySystem()),
     _t_step_old(declareRestartableData<int>("t_step_old", 0)),
     _restep(false),
+    _has_done_previous_step(false),
     _old_subdomain_reinitialized(getParam<bool>("old_subdomain_reinitialized")),
     _pr_names(getParam<std::vector<UserObjectName>>("polynomial_fitters")),
     _reinit_vars(getParam<std::vector<VariableName>>("reinitialize_variables")),
@@ -288,7 +289,19 @@ ElementSubdomainModifierBase::initialSetup()
 void
 ElementSubdomainModifierBase::timestepSetup()
 {
-  if (_t_step == _t_step_old)
+  // Case 1: The timestep has advanced, and _has_done_previous_step is true.
+  //         (This is the normal case; _has_done_previous_step would not be false here.)
+  //
+  // Case 2: The timestep has not advanced, and _has_done_previous_step is false.
+  //         (This means the user intentionally calls ESM multiple times within one timestep,
+  //          such as in XFEM. In this case, we should NOT revert the subdomain changes.)
+  //
+  // Case 3: The timestep has not advanced, and _has_done_previous_step is true, which we should
+  //         REVERT the subdomain changes.
+  //         There are two possible scenarios here:
+  //         (1) A restep (repeating the step in unit tests).
+  //         (2) The solution diverged, and we want to retry with a reduced timestep.
+  if (_t_step == _t_step_old && _has_done_previous_step)
   {
     mooseInfoRepeated(name(), ": Restoring element subdomain changes.");
 
@@ -303,6 +316,8 @@ ElementSubdomainModifierBase::timestepSetup()
   }
 
   _t_step_old = _t_step;
+
+  _has_done_previous_step = false;
 }
 
 void
@@ -364,6 +379,7 @@ ElementSubdomainModifierBase::modify(
     applyIC();
     if (_fe_problem.getMaterialWarehouse().hasActiveObjects(0))
       initElementStatefulProps();
+    _has_done_previous_step = true; // Indicate that the timestep has been advanced
   }
 }
 
