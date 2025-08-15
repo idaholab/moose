@@ -569,6 +569,57 @@ TEST(AbaqusInputParserTest, MultipleInstances_PartLevelSetsMerged)
   EXPECT_NE(std::find(pe.begin(), pe.end(), model.getElementIndex("1", &i2)), pe.end());
 }
 
+TEST(AbaqusInputParserTest, MultipleInstances_PartLevelElsetNumericMerged)
+{
+  // Part-level elset defined numerically should merge across instances
+  std::istringstream in(
+      "*Part, name=P\n"
+      "*Node\n"
+      "1, 0., 0.\n"
+      "2, 1., 0.\n"
+      "*User Element, Type=U1, Coordinates=2, Nodes=2, Variables=1\n"
+      "1, 2\n"
+      "*Element, Type=U1, Elset=EALL\n"
+      "1, 1, 2\n"
+      // Define part-level elset numerically (using GENERATE to ensure robust parsing)
+      "*Elset, elset=PE, generate\n"
+      "1, 1, 1\n"
+      "*End Part\n"
+      "*Assembly, name=A\n"
+      "*Instance, name=I1, part=P\n"
+      "*End Instance\n"
+      "*Instance, name=I2, part=P\n"
+      "*End Instance\n"
+      "*End Assembly\n");
+
+  Abaqus::InputParser parser;
+  parser.parse(in);
+
+  Abaqus::AssemblyModel model;
+  model.parse(parser);
+
+  const auto & i1 = model.getInstance("I1");
+  const auto & i2 = model.getInstance("I2");
+
+  // Part-level elset exists and contains the single element index
+  ASSERT_TRUE(model._part.has("P"));
+  const auto & part = model._part["P"];
+  ASSERT_FALSE(part._element_id_to_index.empty());
+  ASSERT_TRUE(part._element_id_to_index.find(1) != part._element_id_to_index.end());
+  ASSERT_TRUE(part._elsets.find("EALL") != part._elsets.end());
+  const auto & eall_part = part._elsets.at("EALL");
+  ASSERT_EQ(eall_part.size(), 1u);
+  ASSERT_TRUE(part._elsets.find("PE") != part._elsets.end());
+  const auto & pe_part = part._elsets.at("PE");
+  ASSERT_EQ(pe_part.size(), 1u);
+
+  ASSERT_TRUE(model._elsets.find("PE") != model._elsets.end());
+  const auto & pe = model._elsets.at("PE");
+  ASSERT_EQ(pe.size(), 2u);
+  EXPECT_NE(std::find(pe.begin(), pe.end(), model.getElementIndex("1", &i1)), pe.end());
+  EXPECT_NE(std::find(pe.begin(), pe.end(), model.getElementIndex("1", &i2)), pe.end());
+}
+
 TEST(AbaqusInputParserTest, BoundaryInstanceScopedSingleNode)
 {
   // Boundary with instance-scoped single node should resolve clean integer within that instance
