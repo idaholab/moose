@@ -82,3 +82,8 @@ DerivativeStringToJSON(NonlinearSystemName);
 DerivativeStringToJSON(LinearSystemName);
 DerivativeStringToJSON(SolverSystemName);
 DerivativeStringToJSON(CLIArgString);
+#ifdef MFEM_ENABLED
+DerivativeStringToJSON(MFEMScalarCoefficientName);
+DerivativeStringToJSON(MFEMVectorCoefficientName);
+DerivativeStringToJSON(MFEMMatrixCoefficientName);
+#endif
