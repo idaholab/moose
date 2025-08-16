@@ -12,7 +12,7 @@
 #include "ElementUserObject.h"
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
-#include "NodalPatchRecoveryBase.h"
+#include "NodalPatchRecoveryVariable.h"
 #include "KDTree.h"
 
 /**
@@ -221,11 +221,11 @@ private:
   /// The strategy used to apply IC on newly activated nodes
   std::vector<ReinitStrategy> _reinit_strategy;
 
-  /// @brief Names of the NodalPatchRecoveryBase user objects
+  /// @brief Names of the NodalPatchRecoveryVariable user objects
   const std::vector<UserObjectName> _pr_names;
 
   /// @brief Apply initial conditions using polynomial extrapolation
-  std::vector<NodalPatchRecoveryBase *> _pr;
+  std::vector<NodalPatchRecoveryVariable *> _pr;
 
   /// @brief List of variable names to be initialized for IC
   std::vector<VariableName> _reinit_vars;
