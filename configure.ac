@@ -100,7 +100,7 @@ AS_IF([test "$neml2_support" = yes],
               [
                     AS_IF([test "${NEML2_DIR+set}" = set],
                           [neml2_library="${NEML2_DIR}"],
-                          [neml2_library="$ac_pwd/framework/contrib/neml2/installed"])
+                          [neml2_library="$ac_pwd/framework/contrib/neml2/installed/moose"])
               ])
         AC_DEFINE_UNQUOTED(NEML2_DIR, [$neml2_library], [The directory where neml2 is installed])
         AC_SUBST([neml2_library])
