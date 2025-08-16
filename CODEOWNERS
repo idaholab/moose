@@ -1,4 +1,4 @@
-/conda @loganharbour @milljm @cticenhour
+/conda @loganharbour @cticenhour
 /docker_ci @loganharbour
 /m4 @lindsayad
 
@@ -17,8 +17,8 @@
 
 /.github @permcody
 
-/libmesh @roystgnr @lindsayad @cticenhour @milljm @loganharbour
-/petsc @lindsayad @cticenhour @milljm @loganharbour
+/libmesh @roystgnr @lindsayad @cticenhour @loganharbour
+/petsc @lindsayad @cticenhour @loganharbour
 
 /framework/include @lindsayad
 /framework/src @lindsayad
@@ -47,7 +47,7 @@
 /framework/*/*/*Side* @roystgnr @lindsayad
 
 /modules/contact @bwspenc @lindsayad @recuero
-/modules/doc/content/getting_started/installation @milljm @loganharbour @cticenhour
+/modules/doc/content/getting_started/installation @loganharbour @cticenhour
 /modules/doc/content/newsletter @cticenhour
 /modules/doc/content/sqa_reports.yml @GiudGiud
 /modules/electromagnetics @cticenhour
@@ -77,15 +77,15 @@
 
 /python/MooseDocs @cticenhour
 /python/moosesqa @cticenhour
-/python/TestHarness @loganharbour @milljm
-/python/scripts/versioner.py @loganharbour @milljm
-/python/scripts/versioner.yaml @loganharbour @milljm
+/python/TestHarness @loganharbour
+/python/scripts/versioner.py @loganharbour
+/python/scripts/versioner.yaml @loganharbour
 
 /scripts/hpc_proxy.pac @loganharbour
-/scripts/configure_petsc.sh @cticenhour @milljm @loganharbour
-/scripts/update_and_rebuild_petsc.sh @cticenhour @milljm @loganharbour
-/scripts/update_and_rebuild_petsc_alt.sh @cticenhour @milljm @loganharbour
-/scripts/configure_libmesh.sh @cticenhour @milljm @loganharbour @roystgnr
-/scripts/update_and_rebuild_libmesh.sh @cticenhour @milljm @loganharbour @roystgnr
+/scripts/configure_petsc.sh @cticenhour @loganharbour
+/scripts/update_and_rebuild_petsc.sh @cticenhour @loganharbour
+/scripts/update_and_rebuild_petsc_alt.sh @cticenhour @loganharbour
+/scripts/configure_libmesh.sh @cticenhour @loganharbour @roystgnr
+/scripts/update_and_rebuild_libmesh.sh @cticenhour @loganharbour @roystgnr
 
 /test @lindsayad
