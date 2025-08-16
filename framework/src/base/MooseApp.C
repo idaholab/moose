@@ -1083,6 +1083,16 @@ MooseApp::registerCapabilities()
 #endif
   }
 
+  {
+    const auto doc = "sfcurves library for space filling curves (required by geometric "
+                     "partitioners such as SFCurves, Hilbert and Morton -  not LGPL compatible)";
+#ifdef LIBMESH_HAVE_SFCURVES
+    haveCapability("sfcurves", doc);
+#else
+    libmeshMissingCapability("sfcurves", doc, "--disable-sfc");
+#endif
+  }
+
 #ifdef LIBMESH_HAVE_FPARSER
 #ifdef LIBMESH_HAVE_FPARSER_JIT
   addCapability("fparser", "jit", "FParser enabled with just in time compilation support.");
