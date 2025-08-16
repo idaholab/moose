@@ -39,20 +39,25 @@ public:
 
   /// Add test variable to EquationSystem.
   virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
-  /// Add trial variable to EquationSystem.
-  virtual void AddTrialVariableNameIfMissing(const std::string & trial_var_name);
+  /// Add coupled variable to EquationSystem.
+  virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
 
   /// Add kernels.
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
-  virtual void ApplyEssentialBCs();
 
-  /// Build forms
+  /// Initialise
   virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
                     const Moose::MFEM::FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level);
+
+  /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms();
+  virtual void ApplyEssentialBCs();
+  virtual void EliminateCoupledVariables();
+
+  /// Build bilinear forms
   virtual void BuildBilinearForms();
   virtual void BuildMixedBilinearForms();
   virtual void BuildEquationSystem();
@@ -90,6 +95,9 @@ private:
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 
+  /// Set trial variable names from subset of coupled variables that have an associated test variable.
+  virtual void SetTrialVariableNames();
+
 protected:
   /// Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
   /// and then proceeds to delete all dynamically allocated memory for _h_blocks
@@ -102,15 +110,23 @@ protected:
   // Test variables are associated with LinearForms,
   // whereas trial variables are associated with gridfunctions.
 
-  /// Names of all variables corresponding to gridfunctions. This may differ
-  /// from test_var_names when time derivatives are present.
+  /// Names of all trial variables of kernels and boundary conditions
+  /// added to this EquationSystem.
+  std::vector<std::string> _coupled_var_names;
+  /// Subset of _coupled_var_names of all variables corresponding to gridfunctions with degrees of
+  /// freedom that comprise the state vector of this EquationSystem. This will differ from
+  /// _coupled_var_names when time derivatives or other eliminated variables are present.
   std::vector<std::string> _trial_var_names;
-  /// Pointers to trial variables.
-  Moose::MFEM::GridFunctions _trial_variables;
+  /// Names of all coupled variables without a corresponding test variable.
+  std::vector<std::string> _eliminated_var_names;
+  /// Pointers to coupled variables not part of the reduced EquationSystem.
+  Moose::MFEM::GridFunctions _eliminated_variables;
   /// Names of all test variables corresponding to linear forms in this equation system
   std::vector<std::string> _test_var_names;
   /// Pointers to finite element spaces associated with test variables.
   std::vector<mfem::ParFiniteElementSpace *> _test_pfespaces;
+  /// Pointers to finite element spaces associated with coupled variables.
+  std::vector<mfem::ParFiniteElementSpace *> _coupled_pfespaces;
 
   // Components of weak form. // Named according to test variable
   Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _blfs;
@@ -153,9 +169,8 @@ protected:
           Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
           integrated_bc_map);
 
-  /// Gridfunctions for setting Dirichlet BCs
-  std::vector<std::unique_ptr<mfem::ParGridFunction>> _xs;
-  std::vector<std::unique_ptr<mfem::ParGridFunction>> _dxdts;
+  /// Gridfunctions holding essential constraints from Dirichlet BCs
+  std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
 
@@ -285,7 +300,7 @@ class TimeDependentEquationSystem : public EquationSystem
 public:
   TimeDependentEquationSystem();
 
-  void AddTrialVariableNameIfMissing(const std::string & trial_var_name) override;
+  void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name) override;
 
   virtual void SetTimeStep(double dt);
   virtual void UpdateEquationSystem();
@@ -299,24 +314,19 @@ public:
                           mfem::BlockVector & truedXdt,
                           mfem::BlockVector & trueRHS) override;
 
-  const std::vector<std::string> & TrialVarTimeDerivativeNames() const;
-
 protected:
   /// Coefficient for timestep scaling
   mfem::ConstantCoefficient _dt_coef;
-  std::vector<std::string> _trial_var_time_derivative_names;
 
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
       _td_kernels_map;
   /// Container to store contributions to weak form of the form (F du/dt, v)
   Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
-};
 
-inline const std::vector<std::string> &
-TimeDependentEquationSystem::TrialVarTimeDerivativeNames() const
-{
-  return _trial_var_time_derivative_names;
-}
+private:
+  /// Set trial variable names from subset of coupled variables that have an associated test variable.
+  virtual void SetTrialVariableNames() override;
+};
 
 } // namespace Moose::MFEM
 
