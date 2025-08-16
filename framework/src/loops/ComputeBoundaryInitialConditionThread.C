@@ -27,6 +27,13 @@ ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
 {
 }
 
+ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
+    FEProblemBase & fe_problem, const std::set<VariableName> * target_vars)
+  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+    _target_vars(target_vars)
+{
+}
+
 void
 ComputeBoundaryInitialConditionThread::onNode(ConstBndNodeRange::const_iterator & nd)
 {
@@ -44,8 +51,15 @@ ComputeBoundaryInitialConditionThread::onNode(ConstBndNodeRange::const_iterator 
   {
     const auto & ics = warehouse.getActiveBoundaryObjects(boundary_id, _tid);
     for (const auto & ic : ics)
+    {
+      // Skip or include initial conditions based on target variable usage
+      const auto & var_name = ic->variable().name();
+      if (_target_vars && !_target_vars->count(var_name))
+        continue;
+
       if (node->processor_id() == _fe_problem.processor_id())
         ic->computeNodal(*node);
+    }
   }
 }
 
