@@ -20,7 +20,7 @@ class FEProblemBase;
 class ComputeInitialConditionThread
 {
 public:
-  // Set IC on specific variables
+  // Set IC on all variables
   ComputeInitialConditionThread(FEProblemBase & fe_problem);
 
   // Splitting Constructor

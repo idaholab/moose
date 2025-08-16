@@ -17,11 +17,14 @@ NodalPatchRecoveryVariable::validParams()
   InputParameters params = NodalPatchRecoveryBase::validParams();
   params.addRequiredCoupledVar(
       "variable", "The variable whose value will be fitted over the patch of elements.");
+
+  params.addClassDescription("Performs patch recovery using a coupled variable.");
+
   return params;
 }
 
 NodalPatchRecoveryVariable::NodalPatchRecoveryVariable(const InputParameters & params)
-  : NodalPatchRecoveryBase(params), _v(coupledValue("variable"))
+  : NodalPatchRecoveryBase(params), _v(coupledValue("variable")), _name(coupledName("variable"))
 {
 }
 
@@ -29,4 +32,10 @@ Real
 NodalPatchRecoveryVariable::computeValue()
 {
   return _v[_qp];
+}
+
+const VariableName &
+NodalPatchRecoveryVariable::variableName() const
+{
+  return _name;
 }

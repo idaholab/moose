@@ -277,7 +277,10 @@ ElementSubdomainModifierBase::initialSetup()
                    ") is less than the number of variables to reinitialize with polynomial "
                    "extrapolation.");
       _pr[pr_count] =
-          &_fe_problem.getUserObject<NodalPatchRecoveryBase>(_pr_names[pr_count], /*tid=*/0);
+          &_fe_problem.getUserObject<NodalPatchRecoveryVariable>(_pr_names[pr_count], /*tid=*/0);
+      mooseAssert(_pr[pr_count]->variableName() == _reinit_vars[i],
+                  "The patch recovery UserObject's variable name must match the variable being "
+                  "reinitialized in ElementSubdomainModifierBase.");
       _depend_uo.insert(_pr_names[pr_count]);
       pr_count++;
     }

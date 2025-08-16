@@ -21,7 +21,7 @@ class ComputeBoundaryInitialConditionThread
   : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
-  // Set IC
+  // Set IC on all variables
   ComputeBoundaryInitialConditionThread(FEProblemBase & fe_problem);
   // Splitting Constructor
   ComputeBoundaryInitialConditionThread(ComputeBoundaryInitialConditionThread & x,
