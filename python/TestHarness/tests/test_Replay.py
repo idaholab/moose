@@ -73,6 +73,6 @@ class TestHarnessTester(TestHarnessTestCase):
     def testNoResultsFile(self):
         """ Verify the TestHarness errors correctly when there is no results file to work with """
         with tempfile.TemporaryDirectory() as output_dir:
-            out = self.runTests('--show-last-run', '--results-file', 'non_existent', '-o', output_dir,
-                                tmp_output=False, capture_results=False, exit_code=1).output
-            self.assertIn(f'The previous run {output_dir}/non_existent does not exist', out)
+            with self.assertRaisesRegex(SystemExit, f'The previous run {output_dir}/non_existent does not exist'):
+                self.runTests('--show-last-run', '--results-file', 'non_existent', '-o', output_dir,
+                              tmp_output=False, capture_results=False, exit_code=1)
