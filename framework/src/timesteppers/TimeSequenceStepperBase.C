@@ -23,7 +23,8 @@ TimeSequenceStepperBase::validParams()
       false,
       "If true, uses the final time step size for times after the last time in the sequence, "
       "instead of taking a single step directly to the simulation end time");
-  params.addParam<bool>("use_last_t_for_end_time", false, "Use last time in sequence as 'end_time' in Executioner.");
+  params.addParam<bool>(
+      "use_last_t_for_end_time", false, "Use last time in sequence as 'end_time' in Executioner.");
   return params;
 }
 
@@ -65,7 +66,7 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
           _time_sequence.push_back(times[j]);
       }
 
-      if (! _set_end_time)
+      if (!_set_end_time)
         _time_sequence.push_back(end_time);
     }
     else
@@ -112,7 +113,7 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
           _time_sequence.push_back(times[j]);
       }
 
-      if (! _set_end_time)
+      if (!_set_end_time)
         _time_sequence.push_back(end_time);
     }
 
