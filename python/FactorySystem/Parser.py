@@ -56,7 +56,19 @@ class Parser:
         self.root = root(0) # make the [Tests] block the root
 
         self.check()
-        self._parseNode(filename, self.root, default_values)
+
+        # Convert any provided default values (from the testroot file) into a
+        # simple dictionary so that we can merge values without relying on
+        # pyhit.Node's type conversion rules.
+        if default_values is not None:
+            if isinstance(default_values, dict):
+                defaults = default_values
+            else:
+                defaults = {k: v for k, v in default_values.params()}
+        else:
+            defaults = {}
+
+        self._parseNode(filename, self.root, defaults)
 
     def check(self):
         """Perform error checking on the loaded hit tree"""
@@ -147,10 +159,7 @@ class Parser:
         # the inherited defaults with parameters defined on this node. This
         # allows values supplied in the [Tests] block to propagate to every
         # test contained within it.
-        child_defaults = pyhit.Node()
-        if default_values is not None:
-            for key, value in default_values.params():
-                child_defaults[key] = value
+        child_defaults = dict(default_values) if default_values is not None else {}
         for key, value in node.params():
             if key == 'type':
                 continue
@@ -169,12 +178,12 @@ class Parser:
             params.addParam('hit_path', node.fullpath, 'HIT path to test in spec file')
 
             # Apply any new defaults
-            for key, value in default_values.params():
+            for key, value in default_values.items():
                 if key in params.keys():
                     if key == 'cli_args':
-                      params[key].append(value)
+                        params[key].append(value)
                     else:
-                      params[key] = value
+                        params[key] = value
 
             # Extract the parameters from the hit node
             self.extractParams(params, node)
