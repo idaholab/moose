@@ -143,6 +143,22 @@ class Parser:
     # private:
     def _parseNode(self, filename, node, default_values):
 
+        # Build a new set of default values for any child blocks by combining
+        # the inherited defaults with parameters defined on this node. This
+        # allows values supplied in the [Tests] block to propagate to every
+        # test contained within it.
+        child_defaults = pyhit.Node()
+        if default_values is not None:
+            for key, value in default_values.params():
+                child_defaults[key] = value
+        for key, value in node.params():
+            if key == 'type':
+                continue
+            if key == 'cli_args' and key in child_defaults:
+                child_defaults[key] = child_defaults[key] + ' ' + value
+            else:
+                child_defaults[key] = value
+
         if 'type' in node:
             moose_type = node['type']
 
@@ -201,9 +217,11 @@ class Parser:
         elif node.parent.fullpath == 'Tests' and self._check_for_type and not self._looksLikeValidSubBlock(node):
             self.error('missing "type" parameter in block "{}"'.format(node.fullpath), node=node)
 
-        # Loop over the section names and parse them
+        # Loop over the section names and parse them using the newly
+        # constructed defaults which include any parameters defined at this
+        # level.
         for child in node:
-            self._parseNode(filename, child, default_values)
+            self._parseNode(filename, child, child_defaults)
 
     # This routine returns a Boolean indicating whether a given block
     # looks like a valid subblock. In the Testing system, a valid subblock
