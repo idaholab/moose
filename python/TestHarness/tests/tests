@@ -374,4 +374,10 @@
     requirement = 'The system shall provide the ability to filter tests if they do not require at or above a certain number of threads.'
     issues = '#32442'
   []
+  [parameter_propagation]
+    type = PythonUnitTest
+    input = test_ParameterPropagation.py
+    requirement = 'The system shall propagate parameters specified at higher levels as default into lower level blocks.'
+    issues = '#31322'
+  []
 []
