@@ -68,7 +68,6 @@
 []
 
 [Debug]
-  # show_var_residual = true
   show_var_residual_norms = true
 []
 
@@ -217,29 +216,17 @@
   solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
-  # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  # petsc_options_value = 'lu superlu_dist'
-  # petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart -pc_hypre_boomeramg_strong_threshold'
-  # petsc_options_value = 'hypre    boomeramg      31                 0.7'
-  # petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
-  # petsc_options_value = 'asm      31                  preonly       lu           2'
-  l_tol = 1e-4 #1e-3
-  l_max_its = 5 # SK
-  nl_max_its = 5 # SK
+  l_tol = 1e-4
+  l_max_its = 5 
+  nl_max_its = 5
   nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-08 # SK
+  nl_rel_tol = 1e-08
   end_time = 1e5
   dt = 0.1
 
-  line_search = 'none' # SK
-  automatic_scaling = false # SK
-  nl_forced_its = 2 # SK
-
-  # [Adaptivity]
-  #   max_h_level = 2
-  #   refine_fraction = 0.3
-  #   coarsen_fraction = 0.2
-  # []
+  line_search = 'none' 
+  automatic_scaling = false 
+  nl_forced_its = 2 
 
   [TimeStepper]
     type = IterationAdaptiveDT
@@ -250,7 +237,6 @@
     cutback_factor = 0.8
   []
   dtmax = 1e5
-  # end_time = 100
 []
 
 [Outputs]
