@@ -35,7 +35,6 @@
 []
 
 [Debug]
-  # show_var_residual = true
   show_var_residual_norms = true
 []
 
