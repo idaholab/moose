@@ -46,4 +46,7 @@ protected:
 
   /// stores the sequence of time points
   std::vector<Real> & _time_sequence;
+
+  /// Whether to use the last t in sequence as Executioner end_time
+  const bool _set_end_time;
 };

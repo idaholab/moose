@@ -23,6 +23,7 @@ TimeSequenceStepperBase::validParams()
       false,
       "If true, uses the final time step size for times after the last time in the sequence, "
       "instead of taking a single step directly to the simulation end time");
+  params.addParam<bool>("use_last_t_for_end_time", false, "Use last time in sequence as 'end_time' in Executioner.");
   return params;
 }
 
@@ -30,7 +31,8 @@ TimeSequenceStepperBase::TimeSequenceStepperBase(const InputParameters & paramet
   : TimeStepper(parameters),
     _use_last_dt_after_last_t(getParam<bool>("use_last_dt_after_last_t")),
     _current_step(declareRestartableData<unsigned int>("current_step", 0)),
-    _time_sequence(declareRestartableData<std::vector<Real>>("time_sequence"))
+    _time_sequence(declareRestartableData<std::vector<Real>>("time_sequence")),
+    _set_end_time(getParam<bool>("use_last_t_for_end_time"))
 {
 }
 
@@ -62,7 +64,9 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
         if (times[j] > start_time && times[j] < end_time)
           _time_sequence.push_back(times[j]);
       }
-      _time_sequence.push_back(end_time);
+
+      if (! _set_end_time)
+        _time_sequence.push_back(end_time);
     }
     else
     {
@@ -107,7 +111,16 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
         if (times[j] < end_time)
           _time_sequence.push_back(times[j]);
       }
-      _time_sequence.push_back(end_time);
+
+      if (! _set_end_time)
+        _time_sequence.push_back(end_time);
+    }
+
+    // Set end time to last time in sequence
+    if (_set_end_time)
+    {
+      auto & end_time = _executioner.endTime();
+      end_time = _time_sequence.back();
     }
   }
 
