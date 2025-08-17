@@ -14,3 +14,8 @@ class TestHarnessTester(TestHarnessTestCase):
         result = self.runTests('-i', 'global_capabilities', '--dry-run')
         test_results = result.results['tests']['tests/test_harness']['tests']['always_ok']
         self.assertEqual(test_results['capabilities'], 'foo')
+
+    def testGlobalPrereqPropagated(self):
+        result = self.runTests('-i', 'global_prereq', '--dry-run')
+        test_results = result.results['tests']['tests/test_harness']['tests']['parent']['tests']['child']
+        self.assertEqual(test_results['prereq'], ['pre'])

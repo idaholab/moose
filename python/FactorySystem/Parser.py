@@ -182,6 +182,14 @@ class Parser:
                 if key in params.keys():
                     if key == 'cli_args':
                         params[key].append(value)
+                    elif params.type(key) == list:
+                        if isinstance(value, str):
+                            value = value.replace('\n', ' ')
+                            params[key] = re.split(r'\s+', value)
+                        elif isinstance(value, (list, tuple)):
+                            params[key] = list(value)
+                        else:
+                            params[key] = [str(value)]
                     else:
                         params[key] = value
 
