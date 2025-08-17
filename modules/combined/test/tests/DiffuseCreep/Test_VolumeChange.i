@@ -28,7 +28,6 @@
   []
 []
 
-#Test
 [AuxVariables]
   [u]
   []
@@ -108,7 +107,6 @@
   []
 []
 
-#Test
 [AuxKernels]
   [flux_x_x]
     type = VariableGradientComponent
