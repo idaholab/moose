@@ -8,6 +8,7 @@ In this problem, we focus on an annular (ring-shaped) domain subjected to therma
 
 The optimization goal is to find the inner radius and thickness that minimize the maximum temperature within the domain while maintaining a fixed volume of the annulus. In other words, the design variables are the inner radius and thickness, and the objective function is the maximum temperature within the annulus. This is a constrained optimization problem because the volume of the annulus needs to remain constant during the optimization process.
 
+This example problem is identical to the [shape optimization example](optimization/examples/shapeOpt_Annulus.md optional=True) in the [Optimization module](modules/optimization/index.md optional=True). The optimization module version utilizes gradients for its minimization solve, which makes it a faster method, but is more involved to formulate.
 
 ## Physics Inputs
 
