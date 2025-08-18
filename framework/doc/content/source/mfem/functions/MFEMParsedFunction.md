@@ -8,7 +8,7 @@
 
 ## Overview
 
-`MFEMParsedFunction` is responsible for parsing expressions based on names and values of variables prescribed by input parameters.
+`MFEMParsedFunction` is responsible for parsing expressions that, in addition to being functions of position and time, can also depend on problem variables prescribed by input parameters.
 
 ## Example Input File Syntax
 

@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
@@ -5,7 +14,6 @@
 #include "FunctionParserUtils.h"
 #include "MFEMGeneralUserObject.h"
 
-struct MFEMProblemData;
 /**
  * Declares parsed functions based on names and values prescribed by input parameters.
  */
@@ -22,12 +30,10 @@ protected:
   std::string _function;
   /// function variables
   const std::vector<std::string> & _var_names;
-  unsigned int _num_props;
   /// import coordinates and time
   const bool _use_xyzt;
   /// coordinate and time variable names
   const std::vector<std::string> _xyzt;
-  MFEMProblemData & _problem_data;
   /// function parser object for the resudual and on-diagonal Jacobian
   SymFunctionPtr _func_F;
 };

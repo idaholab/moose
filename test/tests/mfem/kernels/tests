@@ -193,7 +193,7 @@
     input = diffusion_parsed_source.i
     xmldiff = 'OutputData/DiffusionParsedSource/Run0/Run0.pvd
                 OutputData/DiffusionParsedSource/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'The systen shall have the ability parse function of non-linear variables'
+    requirement = 'The system shall have the ability to parse functions of non-linear variables'
     capabilities = 'mfem'
   []
 []
