@@ -12,7 +12,7 @@ AuxKernel for calculating the time weighted average value of a running MFEM vari
 
 ## Example Input File Syntax
 
-!listing HeatTransferAverageField.i block=AuxKernels
+!listing mfem/kernels/heattransfer.i block=/AuxKernels
 
 !syntax parameters /AuxKernels/MFEMAverageFieldAux
 

@@ -17,11 +17,15 @@
   issues = '#31163'
   [HeatTransferAverageField]
     type = XMLDiff
-    input = HeatTransferAverageField.i
+    input = ../kernels/heattransfer.i
+    cli_args = 'AuxVariables/inactive="" '
+               'AuxKernels/inactive="" '
+               'AuxKernels/average_field/timestep_skip=2 '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatTransferAverageField'
     xmldiff = 'OutputData/HeatTransferAverageField/Run0/Run0.pvd
-                OutputData/HeatTransferAverageField/Run0/Cycle000002/proc000000.vtu'
+                OutputData/HeatTransferAverageField/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
-    requirement = 'The system shall have the ability to take a running time-weight average of an MFEM Variable'
+    requirement = 'The system shall have the ability to take a running time-weight average of an MFEM Variable.'
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
