@@ -42,7 +42,7 @@ ObtainAvgContactAngle::execute()
   {
     if (std::abs(_pf[qp]) < 0.5) // Operating only within the interface
     {
-      Real tol_val = libMesh::TOLERANCE * libMesh::TOLERANCE;
+      //Real tol_val = libMesh::TOLERANCE * libMesh::TOLERANCE;
       const Real weight = _grad_pf[qp].norm();
       _cos_theta_val +=
           _grad_pf[qp] * _normals[qp]; // weight * (_grad_pf[qp]/_grad_pf[qp].norm()) * _normals[qp]
