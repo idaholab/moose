@@ -38,11 +38,17 @@ ControllableInputTimes::initialize()
 {
   std::set<Real> times_set;
   if (_input_times.size())
-    for (Real t : _input_times)
+  {
+    for (Real & t : _input_times)
+    {
       times_set.insert(t);
+    }
+  }
 
   times_set.insert(_nexttime);
 
-  // materialize into your vector if needed
-  _times.assign(times_set.begin(), times_set.end());
+  for (Real t : times_set)
+  {
+    _times.push_back(t);
+  }
 }
