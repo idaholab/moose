@@ -5,7 +5,6 @@
 #include "FunctionParserUtils.h"
 #include "MFEMGeneralUserObject.h"
 
-struct MFEMProblemData;
 /**
  * Declares parsed functions based on names and values prescribed by input parameters.
  */
