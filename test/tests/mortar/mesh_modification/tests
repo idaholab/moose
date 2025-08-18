@@ -7,9 +7,5 @@
     csvdiff = 'displaced_and_modifying_meshes_out.csv'
     abs_zero = 1e-8
     requirement = 'The system shall be able to use mortar constraints while modifying element subdomains in the reference mesh and the displaced mesh.'
-    # See #31305
-    max_parallel = 4
-    # #30630 fixes distributed
-    mesh_mode = 'replicated'
   []
 []
