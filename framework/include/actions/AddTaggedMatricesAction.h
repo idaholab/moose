@@ -16,12 +16,12 @@
  * construction time because other objects, such as preconditioners, may influence the underlying
  * types of the added matrices
  */
-class AddTaggedMatriesAction : public Action
+class AddTaggedMatricesAction : public Action
 {
 public:
   static InputParameters validParams();
 
-  AddTaggedMatriesAction(const InputParameters & params);
+  AddTaggedMatricesAction(const InputParameters & params);
 
   virtual void act() override;
 };

@@ -2501,7 +2501,7 @@ public:
     CreateTaggedMatrixKey() {}
     CreateTaggedMatrixKey(const CreateTaggedMatrixKey &) {}
 
-    friend class AddTaggedMatriesAction;
+    friend class AddTaggedMatricesAction;
   };
 
   void createTagMatrices(CreateTaggedMatrixKey);

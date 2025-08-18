@@ -7,22 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AddTaggedMatriesAction.h"
+#include "AddTaggedMatricesAction.h"
 #include "ActionWarehouse.h"
 #include "FEProblem.h"
 
-registerMooseAction("MooseApp", AddTaggedMatriesAction, "create_tagged_matrices");
+registerMooseAction("MooseApp", AddTaggedMatricesAction, "create_tagged_matrices");
 
 InputParameters
-AddTaggedMatriesAction::validParams()
+AddTaggedMatricesAction::validParams()
 {
   return Action::validParams();
 }
 
-AddTaggedMatriesAction::AddTaggedMatriesAction(const InputParameters & params) : Action(params) {}
+AddTaggedMatricesAction::AddTaggedMatricesAction(const InputParameters & params) : Action(params) {}
 
 void
-AddTaggedMatriesAction::act()
+AddTaggedMatricesAction::act()
 {
   _problem->createTagMatrices(FEProblemBase::CreateTaggedMatrixKey{});
 }
