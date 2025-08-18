@@ -10,7 +10,7 @@
 [SubMeshes]
   [cut]
     type = MFEMCutTransitionSubMesh
-    cut_boundary = 1
+    cut_boundary = 'Cut'
     transition_subdomain = cut_test
     transition_subdomain_boundary = transition_bdr
     closed_subdomain = coil
@@ -92,7 +92,7 @@
     variable = current_density
     source1 = grad_potential
     source2 = grad_source_potential
-    scale_factor = -1.0
+    scale_factor = 1.0
     execute_on = TIMESTEP_END
     execution_order_group = 2
   []  
@@ -113,9 +113,12 @@
     coefficient = diffusivity
   []
   [source]
-    type = MFEMDomainLFGradKernel
+    type = MFEMMixedVectorGradientKernel
+    trial_variable = coil_grad_source_potential
     variable = coil_potential
-    vector_coefficient = coil_grad_source_potential
+    coefficient = 1.0
+    transpose = true
+    block = 'cut_test'
   []    
 []
 
@@ -174,5 +177,5 @@
     file_base = OutputData/Coil
     vtk_format = ASCII
     submesh = coil
-  []      
+  []
 []

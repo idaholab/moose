@@ -98,7 +98,7 @@
     variable = a_field
     vector_coefficient = current_density
     block = 'TorusCore TorusSheath'
-  []   
+  []
 []
 
 [Preconditioner]
