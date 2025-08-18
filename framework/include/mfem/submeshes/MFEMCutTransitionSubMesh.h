@@ -44,12 +44,10 @@ protected:
   int sideOfCut(const int & el, const int & el_vertex_on_cut, mfem::ParMesh & mesh);
 
   const BoundaryName & _cut_boundary;
-  const int _cut_bdr_attribute;
   std::shared_ptr<mfem::ParSubMesh> _cut_submesh{nullptr};
   const BoundaryName & _transition_subdomain_boundary;
-  const SubdomainName & _transition_subdomain;  
-  const SubdomainName & _closed_subdomain;    
-  int _subdomain_label;
+  const SubdomainName & _transition_subdomain;
+  const SubdomainName & _closed_subdomain;
   mfem::Vector _cut_normal;
 };
 

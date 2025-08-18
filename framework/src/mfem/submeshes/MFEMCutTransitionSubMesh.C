@@ -26,17 +26,15 @@ MFEMCutTransitionSubMesh::validParams()
       "The boundary associated with the mesh cut.");
   params.addRequiredParam<BoundaryName>(
       "transition_subdomain_boundary",
-      "Name to assign boundary of transition subdomain not shared with cut surface.");      
-  params.addParam<SubdomainName>(
+      "Name to assign boundary of transition subdomain not shared with cut surface.");
+  params.addRequiredParam<SubdomainName>(
       "transition_subdomain",
-      "cut",
       "The name of the subdomain to be created on the mesh comprised of the set of elements "
       "adjacent to the cut surface on one side.");
-  params.addParam<SubdomainName>(
-      "closed_subdomain",
+  params.addRequiredParam<SubdomainName>(
       "closed_subdomain",
       "The name of the subdomain attribute to be created comprised of the set of all elements "
-      "of the closed goemetry, including the new transition region.");      
+      "of the closed goemetry, including the new transition region.");
   return params;
 }
 
@@ -44,13 +42,12 @@ MFEMCutTransitionSubMesh::MFEMCutTransitionSubMesh(const InputParameters & param
   : MFEMSubMesh(parameters),
     MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
     _cut_boundary(getParam<BoundaryName>("cut_boundary")),
-    _cut_bdr_attribute(std::stoi(_cut_boundary)),
     _cut_submesh(std::make_shared<mfem::ParSubMesh>(mfem::ParSubMesh::CreateFromBoundary(
-        getMFEMProblem().mesh().getMFEMParMesh(), mfem::Array<int>({_cut_bdr_attribute})))),
+        getMFEMProblem().mesh().getMFEMParMesh(),
+        getMesh().bdr_attribute_sets.GetAttributeSet(_cut_boundary)))),
     _transition_subdomain_boundary(getParam<BoundaryName>("transition_subdomain_boundary")),
     _transition_subdomain(getParam<SubdomainName>("transition_subdomain")),
     _closed_subdomain(getParam<SubdomainName>("closed_subdomain")),
-    _subdomain_label(getMFEMProblem().mesh().getMFEMParMesh().attributes.Max() + 1),
     _cut_normal(3)
 {
 }

@@ -10,7 +10,7 @@
 [SubMeshes]
   [cut]
     type = MFEMCutTransitionSubMesh
-    cut_boundary = 1
+    cut_boundary = 'Cut'
     transition_subdomain = cut
     transition_subdomain_boundary = transition_bdr
     closed_subdomain = coil
@@ -75,19 +75,19 @@
   []
 []
 
-# High terminal set to new bdr attribute
+# Low terminal set to new bdr attribute
 [BCs]
-  [high_terminal]
-    type = MFEMScalarDirichletBC
-    variable = submesh_potential
-    boundary = transition_bdr
-    coefficient = 0.5
-  []
   [low_terminal]
     type = MFEMScalarDirichletBC
     variable = submesh_potential
-    boundary = '1'
-    coefficient = -0.5
+    boundary = transition_bdr
+    coefficient = 0.0
+  []
+  [high_terminal]
+    type = MFEMScalarDirichletBC
+    variable = submesh_potential
+    boundary = 'Cut'
+    coefficient = 1.0
   []
 []
 
