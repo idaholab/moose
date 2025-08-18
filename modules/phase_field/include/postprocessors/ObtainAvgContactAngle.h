@@ -30,7 +30,6 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
-
   /// Gradient of coupled variable
   const VariableValue & _pf;
 

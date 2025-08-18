@@ -14,7 +14,7 @@
 class PhaseFieldTwoPhaseSurfaceTension : public ADVectorKernelValue
 {
 public:
-  static InputParameters validParams();  
+  static InputParameters validParams();
   PhaseFieldTwoPhaseSurfaceTension(const InputParameters & parameters);
 
 protected:
@@ -23,5 +23,4 @@ protected:
   const ADVariableValue & _auxpf;
   const ADVariableGradient & _grad_pf;
   const Real & _coeff;
-
 };

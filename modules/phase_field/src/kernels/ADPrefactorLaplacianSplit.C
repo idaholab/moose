@@ -16,20 +16,20 @@ ADPrefactorLaplacianSplit::validParams()
 {
   InputParameters params = ADLaplacianSplit::validParams();
   params.addClassDescription("Laplacian split with a prefactor.");
-  params.addRequiredParam<Real>("prefactor", "prefactor of the Laplacian operator"); 
-  params.addParam<MaterialPropertyName>("density_value", "1.0", "density of the fluid mixture");  
+  params.addRequiredParam<Real>("prefactor", "prefactor of the Laplacian operator");
+  params.addParam<MaterialPropertyName>("density_value", "1.0", "density of the fluid mixture");
   return params;
 }
 
 ADPrefactorLaplacianSplit::ADPrefactorLaplacianSplit(const InputParameters & parameters)
-  : ADLaplacianSplit(parameters), _prefactor(getParam<Real>("prefactor")), _rho_val(getADMaterialProperty<Real>("density_value"))
+  : ADLaplacianSplit(parameters),
+    _prefactor(getParam<Real>("prefactor")),
+    _rho_val(getADMaterialProperty<Real>("density_value"))
 {
-
 }
 
 ADRealGradient
 ADPrefactorLaplacianSplit::precomputeQpResidual()
 {
-  return (_prefactor/_rho_val[_qp]) * ADLaplacianSplit::precomputeQpResidual();
+  return (_prefactor / _rho_val[_qp]) * ADLaplacianSplit::precomputeQpResidual();
 }
-

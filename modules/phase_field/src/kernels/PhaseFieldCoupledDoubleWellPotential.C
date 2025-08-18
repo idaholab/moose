@@ -20,11 +20,9 @@ PhaseFieldCoupledDoubleWellPotential::validParams()
   return params;
 }
 
-PhaseFieldCoupledDoubleWellPotential::PhaseFieldCoupledDoubleWellPotential(const InputParameters & parameters)
-  : ADKernelValue(parameters),
-    _c(adCoupledValue("c")),
-    _prefactor(getParam<Real>("prefactor"))
-
+PhaseFieldCoupledDoubleWellPotential::PhaseFieldCoupledDoubleWellPotential(
+    const InputParameters & parameters)
+  : ADKernelValue(parameters), _c(adCoupledValue("c")), _prefactor(getParam<Real>("prefactor"))
 
 {
 }
@@ -32,6 +30,5 @@ PhaseFieldCoupledDoubleWellPotential::PhaseFieldCoupledDoubleWellPotential(const
 ADReal
 PhaseFieldCoupledDoubleWellPotential::precomputeQpResidual()
 {
-  return _prefactor*_c[_qp]*(_c[_qp]*_c[_qp] - 1);
+  return _prefactor * _c[_qp] * (_c[_qp] * _c[_qp] - 1);
 }
- 

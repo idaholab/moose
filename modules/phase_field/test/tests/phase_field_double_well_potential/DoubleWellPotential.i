@@ -66,7 +66,7 @@
 []
 
 [Executioner]
-  type = Transient 
+  type = Transient
   start_time = 0.1
   end_time = 0.102
   dt = 1e-4
@@ -77,6 +77,6 @@
  [csv]
    type = CSV
    time_step_interval = 1
- [] 
+ []
 []
 

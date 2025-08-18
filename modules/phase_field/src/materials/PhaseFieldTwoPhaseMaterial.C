@@ -22,8 +22,7 @@ PhaseFieldTwoPhaseMaterial::validParams()
   return params;
 }
 
-PhaseFieldTwoPhaseMaterial::PhaseFieldTwoPhaseMaterial(
-    const InputParameters & parameters)
+PhaseFieldTwoPhaseMaterial::PhaseFieldTwoPhaseMaterial(const InputParameters & parameters)
   : ADMaterial(parameters),
     _pf(adCoupledValue("pf")),
     _prop_value_1(getParam<Real>("prop_value_1")),
@@ -32,9 +31,8 @@ PhaseFieldTwoPhaseMaterial::PhaseFieldTwoPhaseMaterial(
 {
 }
 
-
 void
 PhaseFieldTwoPhaseMaterial::computeQpProperties()
 {
-  _prop[_qp] = 0.5*(1-_pf[_qp])*_prop_value_1 + 0.5*(1+_pf[_qp])*_prop_value_2;
+  _prop[_qp] = 0.5 * (1 - _pf[_qp]) * _prop_value_1 + 0.5 * (1 + _pf[_qp]) * _prop_value_2;
 }
