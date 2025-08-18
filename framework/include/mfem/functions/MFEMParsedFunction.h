@@ -30,7 +30,6 @@ protected:
   std::string _function;
   /// function variables
   const std::vector<std::string> & _var_names;
-  unsigned int _num_props;
   /// import coordinates and time
   const bool _use_xyzt;
   /// coordinate and time variable names
