@@ -31,9 +31,9 @@ If the boundaries provided through `moving_boundaries` already exist, the modifi
 
 !listing test/tests/meshmodifiers/element_subdomain_modifier/moving_boundary.i start=[moving_circle] end=[] include-end=true
 
-!media large_media/mesh_modifiers/element_subdomain_modifier/nodeset.png style=float:center;width:100%; caption=The evolving nodeset (green) between subdomains 1 and 2, as created by the modifier without an existing boundary.
+!media large_media/mesh_modifiers/element_subdomain_modifier/nodeset.png style=float:center;width:100%; caption=The evolving nodeset (green) between subdomains 1 and 2, as created by the modifier without an existing boundary. 
 
-The modifier only creates and modifies boundaries over elements that change subdomain, so the vertical boundary between subdomains 1 and 2 at $x=0.25$ is not added to the created boundary.
+The modifier only creates and modifies boundaries over elements that change subdomain, so the vertical boundary between subdomains 1 and 2 at $x=0.25$ is not added to the created boundary. 
 
 If only one boundary is provided but multiple pairs of subdomains are specified, then all the pairs are applied to the one boundary. Element sides on a subdomain's external boundary can also be added by specifying only one subdomain.
 
@@ -46,6 +46,7 @@ Since the update of the moving boundary only occurs over elements that change su
 !listing test/tests/meshmodifiers/element_subdomain_modifier/partial_moving_boundary.i start=[moving_circle] end=[] include-end=true
 
 !media large_media/mesh_modifiers/element_subdomain_modifier/partial.png style=float:center;width:100%; caption=The evolving sideset (green) around subdomain 1, including the external element sides, from an existing boundary.
+ 
 
 Even though the `moving_boundary_subdomain_pairs` defines the moving boundary to be between subdomains 1 and 2 only, the right side of subdomain 2 remains throughout, as no element sides belong to elements that change subdomain.
 
