@@ -26,7 +26,6 @@ protected:
   const bool _use_xyzt;
   /// coordinate and time variable names
   const std::vector<std::string> _xyzt;
-  MFEMProblemData & _problem_data;
   /// function parser object for the resudual and on-diagonal Jacobian
   SymFunctionPtr _func_F;
 };
