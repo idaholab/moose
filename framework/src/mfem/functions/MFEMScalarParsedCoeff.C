@@ -20,7 +20,7 @@ MFEMScalarParsedCoeff::MFEMScalarParsedCoeff(
 {
 }
 
-double
+mfem::real_t
 MFEMScalarParsedCoeff::Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip)
 {
   std::vector<libMesh::Real> inpVals(_inputs.size() + (_use_xyzt ? 4 : 0));
