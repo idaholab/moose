@@ -107,6 +107,29 @@ AS_IF([test "$neml2_support" = yes],
         AC_MSG_RESULT([NEML2 library path: $neml2_library])
       ])
 
+AC_ARG_WITH(kokkos,
+            AS_HELP_STRING([--with-kokkos@<:@=ARG@:>@],[Specify if Kokkos support should be enabled @<:@ARG=yes or cpu to disable GPU capabilities@:>@]),
+            [kokkos_support=yes],
+            [kokkos_support=no])
+
+AC_MSG_RESULT([configuring with kokkos support: $kokkos_support])
+
+AS_IF([test "$kokkos_support" = yes],
+      [
+        AC_DEFINE(KOKKOS_ENABLED, 1, [Whether to use Kokkos-related code or not])
+        AC_SUBST([kokkos_support],[true])
+
+        AS_IF([test "$with_kokkos" = cpu],
+              [
+                  AC_MSG_RESULT([Kokkos GPU capabilities disabled])
+                  AC_SUBST([kokkos_gpu],[false])
+              ],
+              [
+                  AC_MSG_RESULT([Kokkos GPU capabilities enabled])
+                  AC_SUBST([kokkos_gpu],[true])
+              ])
+      ])
+
 AC_PATH_TOOL(PKG_CONFIG,pkg-config)
 if test x$PKG_CONFIG != x; then
   AC_SUBST(LIBPNG)

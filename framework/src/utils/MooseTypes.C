@@ -27,6 +27,15 @@ const TagName OLD_SOLUTION_TAG = "SOLUTION_STATE_1";
 const TagName OLDER_SOLUTION_TAG = "SOLUTION_STATE_2";
 const TagName PREVIOUS_NL_SOLUTION_TAG = "U_PREVIOUS_NL_NEWTON";
 const TagName PREVIOUS_FP_SOLUTION_TAG = "U_PREVIOUS_FP";
+const TagName SOLUTION_DOT_TAG = "u_dot_factor";
+const TagName SOLUTION_DOTDOT_TAG = "u_dotdot_factor";
+
+#ifdef MOOSE_KOKKOS_ENABLED
+namespace Kokkos
+{
+const std::string KOKKOS_OBJECT_PARAM = "_kokkos_object";
+}
+#endif
 }
 
 /**
