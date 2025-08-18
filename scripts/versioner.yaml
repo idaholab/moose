@@ -76,7 +76,7 @@ packages:
   # dependers: moose-dev
   wasp:
     version: 2025.07.07
-    build_number: 0
+    build_number: 1
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
@@ -93,7 +93,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.08.06
+    version: 2025.08.18
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
