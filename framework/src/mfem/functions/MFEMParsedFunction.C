@@ -61,8 +61,7 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
 
   // parse function
   if (_func_F->Parse(_function, variables) >= 0)
-    mooseError(
-        "Invalid function\n", _function, "\nin ParsedAux ", name(), ".\n", _func_F->ErrorMsg());
+    mooseError("Invalid function\n", _function, "\nError:\n", _func_F->ErrorMsg());
 
   // optimize
   if (!_disable_fpoptimizer)
