@@ -472,24 +472,28 @@ class ApptainerGenerator:
             contents += f'{name}.civet.job {civet_server}/job/{civet_job_id}\n'
         return definition + '\n\n' + self.add_def_whitespace(contents)
 
-    def _add_definition_environment(self, definition):
+    def _add_definition_environment(self, definition: str) -> str:
         """
         Adds to the definition environment
         """
-        if self.version == self.tag:
-            name_summary = f'{self.name}:{self.tag}'
-        else:
-            name_summary = f'{self.name}:{self.tag}({self.version})'
+        name_summary = f'{self.name}:{self.tag}'
+        if self.version != self.tag:
+            name_summary += f'({self.version})'
 
-        content = [f'#',
-                   f'# Begin environment for {name_summary}',
-                   f'#',
-                   f'export MOOSE_APPTAINER_GENERATOR_LIBRARY="{self.args.library}"',
-                   f'export MOOSE_APPTAINER_GENERATOR_NAME="{self.name}"',
-                   f'export MOOSE_APPTAINER_GENERATOR_NAME_SUMMARY="{name_summary}"',
-                   f'export MOOSE_APPTAINER_GENERATOR_TAG="{self.tag}"',
-                   f'export MOOSE_APPTAINER_GENERATOR_VERSION="{self.version}"']
-        content = '\n    ' + '\n    '.join(content) + '\n\n'
+        vars = {
+            'LIBRARY': self.args.library,
+            'NAME': self.name,
+            'SUMMARY': name_summary,
+            'TAG': self.tag,
+            'VERSION': self.version,
+            'MOOSE_VERSION': self.git_repo_sha(MOOSE_DIR)
+        }
+
+        content = ['#', f'# Begin environment for {name_summary}', '#']
+        for k, v in vars.items():
+            content += [f'export MOOSE_APPTAINER_GENERATOR_{k}="{v}"']
+        prefix = '\n    '
+        content = prefix + prefix.join(content) + '\n\n'
 
         env_header = '\n%environment\n'
         if env_header in definition:
