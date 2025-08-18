@@ -40,7 +40,7 @@ ObtainAvgContactAngle::execute()
 
   for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
   {
-    if (std::abs(_pf[qp]) < 0.5) //Operating only within the interface
+    if (std::abs(_pf[qp]) < 0.5) // Operating only within the interface
     {
       Real tol_val = libMesh::TOLERANCE * libMesh::TOLERANCE;
       const Real weight = _grad_pf[qp].norm();

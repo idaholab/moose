@@ -27,7 +27,7 @@ protected:
 
 private:
   /// reference to coupled variable, pf here
-  const ADVariableValue & _pf; 
+  const ADVariableValue & _pf;
   /// Gradient of coupled variable
   const ADVariableGradient & _grad_pf;
   /// Interface width
@@ -38,5 +38,4 @@ private:
   const Real & _sigma;
   /// Contact angle of the fluid with the wall boundary in Radians
   const Real & _contactangle;
-
 };

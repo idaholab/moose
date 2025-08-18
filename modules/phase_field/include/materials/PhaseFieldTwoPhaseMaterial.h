@@ -26,5 +26,4 @@ protected:
   const Real _prop_value_1;
   const Real _prop_value_2;
   ADMaterialProperty<Real> & _prop;
-
 };

@@ -6,7 +6,7 @@ nu = 1e-4#mobility parameter
 
 ##if contact angle is 30 degree, in this model you have to specify (180-contact angle)*pi/180
 contactangle = 2.61799
-lambda = ${fparse 3*sigma*epsilon/(2*sqrt(2))} 
+lambda = ${fparse 3*sigma*epsilon/(2*sqrt(2))}
 prefactor_phi = ${fparse nu*lambda/(epsilon*epsilon)}
 prefactor_psi = ${fparse -epsilon*epsilon}
 coeff = ${fparse lambda/(epsilon*epsilon)}
@@ -19,7 +19,7 @@ coeff = ${fparse lambda/(epsilon*epsilon)}
     xmax = 0.2e-3
     ymin = 0
     ymax = 0.2e-3
-    nx = 20  
+    nx = 20
     ny = 20
     elem_type = QUAD9
   []
@@ -47,13 +47,13 @@ coeff = ${fparse lambda/(epsilon*epsilon)}
 
 
 [Variables]
-  [pf]   
+  [pf]
     family = LAGRANGE
-    order = second    
+    order = second
   []
-  [auxpf]   
+  [auxpf]
     family = LAGRANGE
-    order = second    
+    order = second
   []
   [velocity]
     family = LAGRANGE_VEC
@@ -176,7 +176,7 @@ coeff = ${fparse lambda/(epsilon*epsilon)}
     type = PhaseFieldTwoPhaseMaterial
     prop_name = mu
     prop_value_1 = 1e-3
-    prop_value_2 = 7.6e-3   
+    prop_value_2 = 7.6e-3
     pf = pf
    # outputs = exodus
   []
@@ -257,6 +257,6 @@ coeff = ${fparse lambda/(epsilon*epsilon)}
 [Outputs]
   [csv]
     type = CSV
-    time_step_interval = 1  
+    time_step_interval = 1
   []
 []

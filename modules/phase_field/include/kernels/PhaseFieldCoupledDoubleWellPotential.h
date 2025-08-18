@@ -18,7 +18,7 @@
 class PhaseFieldCoupledDoubleWellPotential : public ADKernelValue
 {
 public:
-  static InputParameters validParams();  
+  static InputParameters validParams();
   PhaseFieldCoupledDoubleWellPotential(const InputParameters & parameters);
 
 protected:
@@ -26,5 +26,4 @@ protected:
 
   const ADVariableValue & _c;
   const Real & _prefactor;
-
 };

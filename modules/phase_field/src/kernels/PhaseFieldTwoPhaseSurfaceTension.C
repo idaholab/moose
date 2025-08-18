@@ -21,7 +21,8 @@ PhaseFieldTwoPhaseSurfaceTension::validParams()
   return params;
 }
 
-PhaseFieldTwoPhaseSurfaceTension::PhaseFieldTwoPhaseSurfaceTension(const InputParameters & parameters)
+PhaseFieldTwoPhaseSurfaceTension::PhaseFieldTwoPhaseSurfaceTension(
+    const InputParameters & parameters)
   : ADVectorKernelValue(parameters),
     _auxpf(adCoupledValue("auxpf")),
     _grad_pf(adCoupledGradient("pf")),
@@ -32,6 +33,5 @@ PhaseFieldTwoPhaseSurfaceTension::PhaseFieldTwoPhaseSurfaceTension(const InputPa
 ADRealVectorValue
 PhaseFieldTwoPhaseSurfaceTension::precomputeQpResidual()
 {
-  return -_coeff*_auxpf[_qp]*_grad_pf[_qp];
+  return -_coeff * _auxpf[_qp] * _grad_pf[_qp];
 }
- 
