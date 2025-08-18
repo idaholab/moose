@@ -30,7 +30,7 @@ public:
                         bool use_xyzt,
                         const FunctionParserUtils<false>::SymFunctionPtr & func);
 
-  double Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip);
+  mfem::real_t Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
 };
 
 #endif
