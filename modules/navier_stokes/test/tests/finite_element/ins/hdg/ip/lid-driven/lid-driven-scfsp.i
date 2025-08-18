@@ -318,7 +318,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
   print_linear_residuals = 'false'
   [out]
     type = Exodus
-    hide = 'pressure_average'
+    hide = 'pressure_average vel_bar_x vel_bar_y pressure_bar'
     output_material_properties = true
     execute_on = 'timestep_end'
   []
