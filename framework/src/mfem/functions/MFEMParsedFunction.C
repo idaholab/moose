@@ -35,8 +35,7 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
     _function(getParam<std::string>("expression")),
     _var_names(getParam<std::vector<std::string>>("var_names")),
     _use_xyzt(getParam<bool>("use_xyzt")),
-    _xyzt({"x", "y", "z", "t"}),
-    _problem_data(getMFEMProblem().getProblemData())
+    _xyzt({"x", "y", "z", "t"})
 {
 
   // build variables argument
