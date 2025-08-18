@@ -46,18 +46,12 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
     _use_xyzt(getParam<bool>("use_xyzt")),
     _xyzt({"x", "y", "z", "t"})
 {
-
-  // build variables argument
-  std::string variables;
-
   // coupled field variables
-  for (const auto i : index_range(_var_names))
-    variables += (i == 0 ? "" : ",") + _var_names[i];
+  std::string variables = MooseUtils::stringJoin(_var_names, ",");
 
   // positions and time
   if (_use_xyzt)
-    for (auto & v : _xyzt)
-      variables += (variables.empty() ? "" : ",") + v;
+    variables += (variables.empty() ? "" : ",") + MooseUtils::stringJoin(_xyzt, ",");
 
   // base function object
   _func_F = std::make_shared<SymFunction>();
