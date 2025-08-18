@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMParsedFunction.h"
@@ -35,21 +44,14 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
     _function(getParam<std::string>("expression")),
     _var_names(getParam<std::vector<std::string>>("var_names")),
     _use_xyzt(getParam<bool>("use_xyzt")),
-    _xyzt({"x", "y", "z", "t"}),
-    _problem_data(getMFEMProblem().getProblemData())
+    _xyzt({"x", "y", "z", "t"})
 {
-
-  // build variables argument
-  std::string variables;
-
   // coupled field variables
-  for (const auto i : index_range(_var_names))
-    variables += (i == 0 ? "" : ",") + _var_names[i];
+  std::string variables = MooseUtils::stringJoin(_var_names, ",");
 
   // positions and time
   if (_use_xyzt)
-    for (auto & v : _xyzt)
-      variables += (variables.empty() ? "" : ",") + v;
+    variables += (variables.empty() ? "" : ",") + MooseUtils::stringJoin(_xyzt, ",");
 
   // base function object
   _func_F = std::make_shared<SymFunction>();
@@ -59,8 +61,7 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
 
   // parse function
   if (_func_F->Parse(_function, variables) >= 0)
-    mooseError(
-        "Invalid function\n", _function, "\nin ParsedAux ", name(), ".\n", _func_F->ErrorMsg());
+    mooseError("Invalid function\n", _function, "\nError:\n", _func_F->ErrorMsg());
 
   // optimize
   if (!_disable_fpoptimizer)

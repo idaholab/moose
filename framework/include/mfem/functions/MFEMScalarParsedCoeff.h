@@ -1,11 +1,11 @@
-/***********************************************\
-!        Construct a non-linear parsed          !
-!        grid function coefficient              !
-!                                               !
-\***********************************************/
-
-// Define a coefficient that, given a grid function u,
-// function func, returns func(u)
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef MOOSE_MFEM_ENABLED
 
@@ -16,6 +16,10 @@
 #include <vector>
 #include <functional>
 
+/**
+ * Define a coefficient that, given a set of grid functions u, v, w, ...,
+ * and a function func, returns func(x, y, z, t, u, v, w, ...)
+ */
 class MFEMScalarParsedCoeff : public mfem::Coefficient
 {
 private:
@@ -30,7 +34,7 @@ public:
                         bool use_xyzt,
                         const FunctionParserUtils<false>::SymFunctionPtr & func);
 
-  double Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip);
+  mfem::real_t Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
 };
 
 #endif
