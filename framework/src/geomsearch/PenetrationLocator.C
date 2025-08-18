@@ -103,10 +103,6 @@ PenetrationLocator::detectPenetration()
 {
   TIME_SECTION("detectPenetration", 3, "Detecting Penetration");
 
-  // Get list of boundary (elem, side, id) tuples.
-  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> bc_tuples =
-      _mesh.buildActiveSideList();
-
   // Grab the secondary nodes we need to worry about from the NearestNodeLocator
   NodeIdRange & secondary_node_range = _nearest_node.secondaryNodeRange();
 
@@ -124,8 +120,7 @@ PenetrationLocator::detectPenetration()
                        _fe,
                        _fe_type,
                        _nearest_node,
-                       _mesh.nodeToElemMap(),
-                       bc_tuples);
+                       _mesh.nodeToElemMap());
 
   Threads::parallel_reduce(secondary_node_range, pt);
 

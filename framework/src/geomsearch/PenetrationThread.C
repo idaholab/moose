@@ -41,8 +41,7 @@ PenetrationThread::PenetrationThread(
     std::vector<std::vector<FEBase *>> & fes,
     FEType & fe_type,
     NearestNodeLocator & nearest_node,
-    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
-    const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & bc_tuples)
+    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map)
   : _subproblem(subproblem),
     _mesh(mesh),
     _primary_boundary(primary_boundary),
@@ -60,8 +59,7 @@ PenetrationThread::PenetrationThread(
     _fes(fes),
     _fe_type(fe_type),
     _nearest_node(nearest_node),
-    _node_to_elem_map(node_to_elem_map),
-    _bc_tuples(bc_tuples)
+    _node_to_elem_map(node_to_elem_map)
 {
 }
 
@@ -81,8 +79,7 @@ PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*spl
     _fes(x._fes),
     _fe_type(x._fe_type),
     _nearest_node(x._nearest_node),
-    _node_to_elem_map(x._node_to_elem_map),
-    _bc_tuples(x._bc_tuples)
+    _node_to_elem_map(x._node_to_elem_map)
 {
 }
 
@@ -1645,23 +1642,17 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
                                      const std::vector<const Node *> & nodes_that_must_be_on_side,
                                      const bool check_whether_reasonable)
 {
-  std::vector<unsigned int> sides;
-  // TODO: After libMesh update, add this line to MooseMesh.h, call sidesWithBoundaryID,  delete
-  // getSidesOnPrimaryBoundary, and delete vectors used by it
-  //  void sidesWithBoundaryID(std::vector<unsigned int>& sides, const Elem * const elem, const
-  //  BoundaryID boundary_id) const
-  // {
-  //   _mesh.get_boundary_info().sides_with_boundary_id(sides, elem, boundary_id);
-  // }
-  getSidesOnPrimaryBoundary(sides, elem);
-  // _mesh.sidesWithBoundaryID(sides, elem, _primary_boundary);
+  const BoundaryInfo & boundary_info = _mesh.getMesh().get_boundary_info();
 
-  for (unsigned int i = 0; i < sides.size(); ++i)
+  for (auto s : elem->side_index_range())
   {
+    if (!boundary_info.has_boundary_id(elem, s, _primary_boundary))
+      continue;
+
     // Don't create info for this side if one already exists
     bool already_have_info_this_side = false;
     for (const auto & pi : thisElemInfo)
-      if (pi->_side_num == sides[i])
+      if (pi->_side_num == s)
       {
         already_have_info_this_side = true;
         break;
@@ -1670,7 +1661,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
     if (already_have_info_this_side)
       break;
 
-    const Elem * side = (elem->build_side_ptr(sides[i])).release();
+    const Elem * side = elem->build_side_ptr(s).release();
 
     // Only continue with creating info for this side if the side contains
     // all of the nodes in nodes_that_must_be_on_side
@@ -1720,7 +1711,7 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
     std::unique_ptr<PenetrationInfo> pen_info =
         std::make_unique<PenetrationInfo>(elem,
                                           side,
-                                          sides[i],
+                                          s,
                                           normal,
                                           distance,
                                           tangential_distance,
@@ -1752,31 +1743,4 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemIn
       p_info.push_back(pen_info.release());
     }
   }
-}
-
-// TODO: After libMesh update, replace this with a call to sidesWithBoundaryID, delete vectors used
-// by this method
-void
-PenetrationThread::getSidesOnPrimaryBoundary(std::vector<unsigned int> & sides,
-                                             const Elem * const elem)
-{
-  // For each tuple, the fields are (0=elem_id, 1=side_id, 2=bc_id)
-  sides.clear();
-  struct Comp
-  {
-    bool operator()(const libMesh::BoundaryInfo::BCTuple & tup, dof_id_type id) const
-    {
-      return std::get<0>(tup) < id;
-    }
-    bool operator()(dof_id_type id, const libMesh::BoundaryInfo::BCTuple & tup) const
-    {
-      return id < std::get<0>(tup);
-    }
-  };
-
-  auto range = std::equal_range(_bc_tuples.begin(), _bc_tuples.end(), elem->id(), Comp{});
-
-  for (auto & t = range.first; t != range.second; ++t)
-    if (std::get<2>(*t) == static_cast<boundary_id_type>(_primary_boundary))
-      sides.push_back(std::get<1>(*t));
 }
