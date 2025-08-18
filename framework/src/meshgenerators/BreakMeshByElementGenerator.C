@@ -26,8 +26,15 @@ BreakMeshByElementGenerator::validParams()
   params.addClassDescription("Break all element-element interfaces in the specified subdomains.");
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addParam<std::vector<SubdomainID>>("subdomains", "The list of subdomain IDs to explode.");
-  params.addRequiredParam<BoundaryName>(
-      "interface_name", "The boundary name containing all broken element-element interfaces.");
+  params.addParam<BoundaryName>(
+      "interface_name",
+      "element_boundaries",
+      "The boundary name containing all broken element-element interfaces.");
+  params.addRangeCheckedParam<unsigned int>(
+      "interface_sides",
+      1,
+      "interface_sides<3",
+      "Whether to add no interface boundary, a 1-sided boundary, or a 2-sided boundary");
   return params;
 }
 
@@ -35,7 +42,8 @@ BreakMeshByElementGenerator::BreakMeshByElementGenerator(const InputParameters &
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _subdomains(getParam<std::vector<SubdomainID>>("subdomains")),
-    _interface_name(getParam<BoundaryName>("interface_name"))
+    _interface_name(getParam<BoundaryName>("interface_name")),
+    _interface_sides(getParam<unsigned int>("interface_sides"))
 {
 }
 
@@ -44,14 +52,18 @@ BreakMeshByElementGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
+  if (!mesh->is_prepared())
+    mesh->prepare_for_use();
+
   // check that the subdomain IDs exist in the mesh
   for (const auto & id : _subdomains)
     if (!MooseMeshUtils::hasSubdomainID(*mesh, id))
       paramError("subdomains", "The block ID '", id, "' was not found in the mesh");
 
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
-  if (boundary_info.get_id_by_name(_interface_name) != Moose::INVALID_BOUNDARY_ID)
-    paramError("interface_name", "The specified interface name already exits in the mesh.");
+  if (_interface_sides &&
+      boundary_info.get_id_by_name(_interface_name) != Moose::INVALID_BOUNDARY_ID)
+    paramError("interface_name", "The specified interface name already exists in the mesh.");
 
   const auto node_to_elem_map = buildSubdomainRestrictedNodeToElemMap(mesh, _subdomains);
 
@@ -60,6 +72,10 @@ BreakMeshByElementGenerator::generate()
   createInterface(*mesh, node_to_elem_map);
 
   Partitioner::set_node_processor_ids(*mesh);
+
+  // We need to update the global_boundary_ids, and this is faster
+  // than a full prepare_for_use()
+  boundary_info.regenerate_id_sets();
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
@@ -136,13 +152,7 @@ void
 BreakMeshByElementGenerator::createInterface(MeshBase & mesh,
                                              const NodeToElemMapType & node_to_elem_map) const
 {
-  BoundaryInfo & boundary_info = mesh.get_boundary_info();
-  const auto & existing_boundary_ids = boundary_info.get_boundary_ids();
-  boundary_id_type interface_id =
-      existing_boundary_ids.empty() ? 0 : *existing_boundary_ids.rbegin() + 1;
-  boundary_info.sideset_name(interface_id) = _interface_name;
-
-  std::set<std::pair<dof_id_type, unsigned int>> sides_to_add;
+  std::set<std::pair<dof_id_type, unsigned int>> sides_breaking;
 
   for (const auto & node_to_elems : node_to_elem_map)
     for (const auto & elem_id_i : node_to_elems.second)
@@ -151,11 +161,25 @@ BreakMeshByElementGenerator::createInterface(MeshBase & mesh,
       for (const auto & elem_id_j : node_to_elems.second)
       {
         Elem * elem_j = mesh.elem_ptr(elem_id_j);
-        if (elem_i != elem_j && elem_id_i < elem_id_j && elem_i->has_neighbor(elem_j))
-          sides_to_add.insert(std::make_pair(elem_id_i, elem_i->which_neighbor_am_i(elem_j)));
+        if (elem_i != elem_j && elem_i->has_neighbor(elem_j))
+          sides_breaking.insert(std::make_pair(elem_id_i, elem_i->which_neighbor_am_i(elem_j)));
       }
     }
 
-  for (const auto & [elem_id, side] : sides_to_add)
-    boundary_info.add_side(elem_id, side, interface_id);
+  if (_interface_sides)
+  {
+    BoundaryInfo & boundary_info = mesh.get_boundary_info();
+
+    const auto & existing_boundary_ids = boundary_info.get_boundary_ids();
+    const boundary_id_type interface_id =
+        existing_boundary_ids.empty() ? 0 : *existing_boundary_ids.rbegin() + 1;
+    boundary_info.sideset_name(interface_id) = _interface_name;
+
+    for (const auto & [elem_id, side] : sides_breaking)
+      if (_interface_sides > 1 || elem_id > mesh.elem_ptr(elem_id)->neighbor_ptr(side)->id())
+        boundary_info.add_side(elem_id, side, interface_id);
+  }
+
+  for (const auto & [elem_id, side] : sides_breaking)
+    mesh.elem_ref(elem_id).set_neighbor(side, nullptr);
 }
