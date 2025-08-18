@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#9698 #6353 #6795 #24868 #27240'
+  issues = '#9698 #6353 #6795 #24868 #27240 #31279'
   design = 'TimeSequenceStepper.md'
 
   [time_sequence]
@@ -86,7 +86,7 @@
                   'when solves fail.'
   []
 
-  [restart]
+  [restart_from_timesequence]
     requirement = 'The system shall support the ability to run a calculation for the purpose of '
                   'creating a time sequence restart file:'
     [timesequence_restart1]
@@ -105,7 +105,7 @@
       exodiff = 'timesequence_restart2.e'
       cli_args = 'Outputs/file_base=timesequence_restart2'
       recover = false
-      prereq = 'restart/timesequence_restart1'
+      prereq = 'restart_from_timesequence/timesequence_restart1'
 
       detail = 'when restarting where the time sequence is identical, and'
     []
@@ -116,15 +116,35 @@
       exodiff = 'timesequence_restart3.e'
       cli_args = 'Outputs/file_base=timesequence_restart3'
       recover = false
-      prereq = 'restart/timesequence_restart1'
+      prereq = 'restart_from_timesequence/timesequence_restart1'
 
       detail = 'when restarting where the time sequence is different after the point of the '
                'checkpoint.'
     []
   []
 
-  [restart_failure]
+  [general_restart]
+    requirement = 'The system shall support the ability to'
+    [steady_for_restart]
+      type = 'RunApp'
+      input = 'steady_for_restart.i'
+      recover = false
 
+      detail = 'run a non-transient simulation for later restart with time sequence, '
+    []
+
+    [restart_from_steady]
+      type = 'RunApp'
+      input = 'restart_from_steady.i'
+      cli_args = 'Outputs/file_base=timesequence_restart1'
+      recover = false
+      prereq = 'general_restart/steady_for_restart'   
+
+      detail = 'restart from a non-transient into a transient simulation with sequence time stepper'
+    []
+  []
+
+  [restart_failure]
     requirement = 'The system shall support the ability to run a calculation for the purpose of '
                   'creating a time sequence restart file suitable for failure:'
 
@@ -136,9 +156,7 @@
       recover = false
       max_threads = 1
       max_parallel = 1
-
       detail = 'when writing the checkpoint file,'
-
     []
 
     [timesequence_restart_failure2]
@@ -149,8 +167,20 @@
       prereq = 'restart_failure/timesequence_restart_failure_1'
       max_threads = 1
       max_parallel = 1
-
       detail = 'when restarting where the time sequence is different prior to the failure.'
     []
+    
+    [restart_too_few_values_in_sequence]
+      type = 'RunException'
+      input = 'timesequence_restart_failure.i'
+      cli_args = "Executioner/TimeStepper/time_sequence='0   0.85'"
+      expect_err= "The timesequence provided in the restart file must be identical"
+      recover = false
+      prereq = 'restart_failure/timesequence_restart_failure_1'
+      max_threads = 1
+      max_parallel = 1
+      detail = 'when restarting where the time sequence has fewer values than the restarted input'
+    []
+    
   []
 []

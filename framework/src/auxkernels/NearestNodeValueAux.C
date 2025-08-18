@@ -35,12 +35,15 @@ NearestNodeValueAux::NearestNodeValueAux(const InputParameters & parameters)
     _paired_variable(coupled("paired_variable"))
 {
   if (boundaryNames().size() > 1)
-    mooseError("NearestNodeValueAux can only be used with one boundary at a time!");
+    paramError("boundary", "NearestNodeValueAux can only be used with one boundary at a time!");
+  if (boundaryNames().empty())
+    paramError("boundary", "Should be specified on a boundary");
 
   // Check that the paired variable is from the solution system
   if (_subproblem.hasAuxiliaryVariable("paired_variable"))
     paramError("paired_variable", "Paired variable should not be auxiliary");
-  // Check that the paired variable is nodal
+  // Check that the paired variable has degrees of freedom on nodes (and thus can be sampled
+  // directly at the dof index of the node)
   if (!getVar("paired_variable", 0)->hasDoFsOnNodes())
     paramError("paired_variable", "Paired variable does not have degrees of freedom on nodes");
 

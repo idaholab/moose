@@ -698,7 +698,7 @@ FEProblemBase::createTagSolutions()
     // ease of use in doing things like copying solutions backwards. We're just storing pointers in
     // the solution states containers so populating the zeroth state does not cost us the memory of
     // a new vector
-    needSolutionState(2, Moose::SolutionIterationType::Nonlinear);
+    needSolutionState(1, Moose::SolutionIterationType::Nonlinear);
   }
 
   auto tag = addVectorTag(Moose::SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
@@ -708,15 +708,11 @@ FEProblemBase::createTagSolutions()
 }
 
 void
-FEProblemBase::needSolutionState(unsigned int oldest_needed,
-                                 Moose::SolutionIterationType iteration_type)
+FEProblemBase::needSolutionState(unsigned int state, Moose::SolutionIterationType iteration_type)
 {
-  for (const auto i : make_range((unsigned)0, oldest_needed))
-  {
-    for (auto & sys : _solver_systems)
-      sys->needSolutionState(i, iteration_type);
-    _aux->needSolutionState(i, iteration_type);
-  }
+  for (auto & sys : _solver_systems)
+    sys->needSolutionState(state, iteration_type);
+  _aux->needSolutionState(state, iteration_type);
 }
 
 void
@@ -2376,8 +2372,7 @@ FEProblemBase::reinitElemNeighborAndLowerD(const Elem * elem,
     }
   }
 
-  if (_displaced_problem &&
-      (_reinit_displaced_elem || _reinit_displaced_face || _reinit_displaced_neighbor))
+  if (_displaced_problem && (_reinit_displaced_face || _reinit_displaced_neighbor))
     _displaced_problem->reinitElemNeighborAndLowerD(
         _displaced_mesh->elemPtr(elem->id()), side, tid);
 }
@@ -4311,7 +4306,7 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     auto euo = std::dynamic_pointer_cast<ElementUserObject>(user_object);
     auto suo = std::dynamic_pointer_cast<SideUserObject>(user_object);
     auto isuo = std::dynamic_pointer_cast<InternalSideUserObject>(user_object);
-    auto iuob = std::dynamic_pointer_cast<InterfaceUserObjectBase>(user_object);
+    auto iuo = std::dynamic_pointer_cast<InterfaceUserObjectBase>(user_object);
     auto nuo = std::dynamic_pointer_cast<NodalUserObject>(user_object);
     auto duo = std::dynamic_pointer_cast<DomainUserObject>(user_object);
     auto guo = std::dynamic_pointer_cast<GeneralUserObject>(user_object);
@@ -4321,12 +4316,19 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     // Account for displaced mesh use
     if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
     {
+      // Whether to re-init or not depends on the attributes of the base classes.
+      // For example, InterfaceUOBase has "_current_side_elem" and "_neighbor_elem"
+      // so it needs to reinit on displaced neighbors and faces
+      // _reinit_displaced_elem -> _current_elem will be reinited
+      // _reinit_displaced_face -> _current_elem, lowerD if any and _current_side_elem to be
+      // reinited _reinit_displaced_neighbor -> _current_elem, lowerD if any and _current_neighbor
+      // to be reinited Note that as soon as you use materials on the displaced mesh, all three get
+      // turned on.
       if (euo || nuo || duo)
         _reinit_displaced_elem = true;
-      else if (suo || duo)
-        // shouldn't we add isuo
+      if (suo || duo || isuo || iuo)
         _reinit_displaced_face = true;
-      else if (iuob || duo)
+      if (iuo || duo || isuo)
         _reinit_displaced_neighbor = true;
     }
 
@@ -8143,6 +8145,11 @@ FEProblemBase::meshChanged(const bool intermediate_change,
   // mortar meshes. Note that this needs to happen after DisplacedProblem::meshChanged because the
   // mortar mesh discretization will depend necessarily on the displaced mesh being re-displaced
   updateMortarMesh();
+
+  // Nonlinear systems hold the mortar mesh functors. The domains of definition of the mortar
+  // functors might have changed when the mesh changed.
+  for (auto & nl_sys : _nl)
+    nl_sys->reinitMortarFunctors();
 
   reinitBecauseOfGhostingOrNewGeomObjects(/*mortar_changed=*/true);
 

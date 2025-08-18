@@ -407,7 +407,7 @@ MooseApp::validParams()
   params.addPrivateParam<std::shared_ptr<Parser>>("_parser");
 #ifdef MOOSE_MFEM_ENABLED
   params.addPrivateParam<std::shared_ptr<mfem::Device>>("_mfem_device");
-  params.addPrivateParam<std::vector<std::string>>("_mfem_devices");
+  params.addPrivateParam<std::set<std::string>>("_mfem_devices");
 #endif
 
   params.addParam<bool>(
@@ -520,11 +520,8 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _mfem_device(isParamValid("_mfem_device")
                      ? getParam<std::shared_ptr<mfem::Device>>("_mfem_device")
                      : nullptr),
-    _mfem_devices(
-        isParamValid("_mfem_devices")
-            ? std::set<std::string>(getParam<std::vector<std::string>>("_mfem_devices").begin(),
-                                    getParam<std::vector<std::string>>("_mfem_devices").end())
-            : std::set<std::string>{})
+    _mfem_devices(isParamValid("_mfem_devices") ? getParam<std::set<std::string>>("_mfem_devices")
+                                                : std::set<std::string>{})
 #endif
 {
   if (&parameters != &_pars)

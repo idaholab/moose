@@ -52,9 +52,6 @@ MFEMDataCollection::output()
   // Write fields to disk
   dc.SetCycle(getFileNumber());
   dc.SetTime(time());
-  if (gridFunctionsNeedHostRead())
-    for (auto & [_, gf_ptr] : _problem_data.gridfunctions)
-      gf_ptr->HostRead();
   dc.Save();
   _file_num++;
 }

@@ -192,6 +192,17 @@ NonlinearSystemBase::preInit()
 }
 
 void
+NonlinearSystemBase::reinitMortarFunctors()
+{
+  // reinit is called on meshChanged() in FEProblemBase. We could implement meshChanged() instead.
+  // Subdomains might have changed
+  for (auto & functor : _displaced_mortar_functors)
+    functor.second.setupMortarMaterials();
+  for (auto & functor : _undisplaced_mortar_functors)
+    functor.second.setupMortarMaterials();
+}
+
+void
 NonlinearSystemBase::turnOffJacobian()
 {
   system().set_basic_system_only();

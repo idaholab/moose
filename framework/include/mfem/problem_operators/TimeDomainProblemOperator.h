@@ -15,8 +15,6 @@
 
 namespace Moose::MFEM
 {
-std::vector<std::string> GetTimeDerivativeNames(std::vector<std::string> gridfunction_names);
-
 /// Problem operator for time-dependent problems with no equation system. The user will need to subclass this since the solve is not
 /// implemented.
 class TimeDomainProblemOperator : public mfem::TimeDependentOperator, public ProblemOperatorBase

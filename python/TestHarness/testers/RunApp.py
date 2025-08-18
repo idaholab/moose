@@ -242,7 +242,7 @@ class RunApp(Tester):
         if specs['capabilities']:
             cli_args.append('--required-capabilities="' + quote(specs['capabilities'])+'"')
 
-        if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in cli_args or '--distributed-mesh' not in cli_args):
+        if options.distributed_mesh and '--distributed-mesh' not in cli_args:
             # The user has passed the parallel-mesh option to the test harness
             # and it is NOT supplied already in the cli-args option
             cli_args.append('--distributed-mesh')

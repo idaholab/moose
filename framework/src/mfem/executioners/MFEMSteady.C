@@ -32,10 +32,9 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     _mfem_problem_solve(*this, getProblemOperators()),
     _system_time(getParam<Real>("time")),
     _time_step(_mfem_problem.timeStep()),
-    _time(_mfem_problem.time()),
+    _time([this]() -> Real & { return this->_mfem_problem.time() = this->_system_time; }()),
     _last_solve_converged(false)
 {
-  _time = _system_time;
   // If no ProblemOperators have been added by the user, add a default
   if (getProblemOperators().empty())
   {

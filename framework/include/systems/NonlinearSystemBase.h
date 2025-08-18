@@ -70,6 +70,8 @@ public:
   virtual ~NonlinearSystemBase();
 
   virtual void preInit() override;
+  /// Update the mortar functors if the mesh has changed
+  void reinitMortarFunctors();
 
   bool computedScalingJacobian() const { return _computed_scaling; }
 

@@ -41,6 +41,9 @@ public:
       bool displaced,
       Assembly & assembly);
 
+  /// Setup step for materials that needs to be re-done if subdomains change
+  void setupMortarMaterials();
+
   /**
    * Loops over the mortar segment mesh and computes the residual/Jacobian
    */

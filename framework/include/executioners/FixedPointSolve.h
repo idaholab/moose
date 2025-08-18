@@ -122,6 +122,13 @@ public:
 
 protected:
   /**
+   * Returns true if there is relaxation.
+   *
+   * @param primary True if this is the parent app; false if this is a child app.
+   */
+  bool performingRelaxation(const bool primary) const;
+
+  /**
    * Saves the current values of the variables, and update the old(er) vectors.
    *
    * @param primary Whether this routine is to save the variables for the primary transformed
