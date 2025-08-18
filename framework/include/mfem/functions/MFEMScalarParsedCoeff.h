@@ -16,6 +16,10 @@
 #include <vector>
 #include <functional>
 
+/**
+ * Define a coefficient that, given a set of grid functions u, v, w, ...,
+ * and a function func, returns func(x, y, z, t, u, v, w, ...)
+ */
 class MFEMScalarParsedCoeff : public mfem::Coefficient
 {
 private:
