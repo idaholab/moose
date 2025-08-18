@@ -116,13 +116,13 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
       if (!_set_end_time)
         _time_sequence.push_back(end_time);
     }
+  }
 
-    // Set end time to last time in sequence
-    if (_set_end_time)
-    {
-      auto & end_time = _executioner.endTime();
-      end_time = _time_sequence.back();
-    }
+  // Set end time to last time in sequence if requested
+  if (_set_end_time)
+  {
+    auto & end_time = _executioner.endTime();
+    end_time = _time_sequence.back();
   }
 
   if (_app.testCheckpointHalfTransient())
