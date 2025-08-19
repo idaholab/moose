@@ -16,7 +16,12 @@
   [temp]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 1000.0
   []
+[]
+
+[Problem]
+  allow_initial_conditions_with_restart = true
 []
 
 [Physics/SolidMechanics/QuasiStatic]

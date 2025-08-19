@@ -1138,14 +1138,7 @@ FEProblemBase::initialSetup()
 
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
           _neighbor_material_props.hasStatefulProperties())
-      {
         _has_initialized_stateful = true;
-        if (_ics.hasObjects() && _app.isRestarting())
-          paramError("allow_initial_conditions_with_restart",
-                     "Changing solution state with initial conditions in the presence of restarted "
-                     "stateful material properties will leave you with an invalid base/previous "
-                     "state, e.g. a state that is not at equilibrium");
-      }
     }
   }
 
