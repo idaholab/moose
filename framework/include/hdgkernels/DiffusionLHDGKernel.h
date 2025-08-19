@@ -40,16 +40,4 @@ public:
 protected:
   /// optional source
   const Moose::Functor<Real> & _source;
-
-  /// The face quadrature rule
-  const QBase * const & _qrule_face;
-
-  /// The physical locations of the quadrature points on the face
-  const MooseArray<Point> & _q_point_face;
-
-  /// transformed Jacobian weights on the current element face
-  const MooseArray<Real> & _JxW_face;
-
-  /// face normals
-  const MooseArray<Point> & _normals;
 };

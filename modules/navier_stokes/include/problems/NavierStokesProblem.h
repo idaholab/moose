@@ -61,6 +61,8 @@ public:
    */
   virtual ~NavierStokesProblem();
 
+  virtual void initialSetup() override;
+
 protected:
   /**
    * Reinitialize PETSc output for proper linear/nonlinear iteration display

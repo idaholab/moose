@@ -892,4 +892,11 @@ MooseLinearVariableFV<OutputType>::nodalDofIndexNeighbor() const
   nodalError();
 }
 
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::sizeMatrixTagData()
+{
+  _element_data->sizeMatrixTagData();
+}
+
 template class MooseLinearVariableFV<Real>;

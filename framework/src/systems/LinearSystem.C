@@ -218,7 +218,7 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
   _linear_implicit_system.rhs->zero();
 
   // Make matrix ready to use
-  activeAllMatrixTags();
+  activateAllMatrixTags();
 
   for (auto tag : matrix_tags)
   {

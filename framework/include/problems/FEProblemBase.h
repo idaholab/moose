@@ -2496,6 +2496,16 @@ public:
 
   virtual Moose::FEBackend feBackend() const { return Moose::FEBackend::LibMesh; }
 
+  class CreateTaggedMatrixKey
+  {
+    CreateTaggedMatrixKey() {}
+    CreateTaggedMatrixKey(const CreateTaggedMatrixKey &) {}
+
+    friend class AddTaggedMatricesAction;
+  };
+
+  void createTagMatrices(CreateTaggedMatrixKey);
+
 protected:
   /**
    * Deprecated. Users should switch to overriding the meshChanged which takes arguments

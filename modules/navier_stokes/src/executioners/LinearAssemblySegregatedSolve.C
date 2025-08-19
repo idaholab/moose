@@ -145,10 +145,10 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
       const auto & active_scalar_petsc_pair_options = getParam<MooseEnumItem, std::string>(
           "active_scalar_petsc_options_iname", "active_scalar_petsc_options_value");
       Moose::PetscSupport::addPetscFlagsToPetscOptions(
-          active_scalar_petsc_options, "-", *this, _active_scalar_petsc_options);
+          active_scalar_petsc_options, "", *this, _active_scalar_petsc_options);
       Moose::PetscSupport::addPetscPairsToPetscOptions(active_scalar_petsc_pair_options,
                                                        _problem.mesh().dimension(),
-                                                       "-",
+                                                       "",
                                                        *this,
                                                        _active_scalar_petsc_options);
 
