@@ -273,6 +273,11 @@ ContactAction::validParams()
       "Whether to use the Petrov-Galerkin approach for the mortar-based constraints. If set to "
       "true, we use the standard basis as the test function and dual basis as "
       "the shape function for the interpolation of the Lagrange multiplier variable.");
+  params.addParam<bool>(
+      "debug_mesh",
+      false,
+      "Whether we are going to enable mortar segment mesh debug information. An exodus"
+      "file will be generated if the user sets this flag to true");
   return params;
 }
 
@@ -843,139 +848,141 @@ ContactAction::addMortarContact()
 
     if (_model != ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
     {
-      auto var_params = _factory.getValidParams("LMWeightedGapUserObject");
+      auto uo_params = _factory.getValidParams("LMWeightedGapUserObject");
 
-      var_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
-      var_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
-      var_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
-      var_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
-      var_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
-      var_params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
-      var_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+      uo_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
+      uo_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
+      uo_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
+      uo_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
+      uo_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
+      uo_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
       if (ndisp > 2)
-        var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
-      var_params.set<bool>("use_displaced_mesh") = true;
-      var_params.set<std::vector<VariableName>>("lm_variable") = {normal_lagrange_multiplier_name};
-      var_params.set<bool>("use_petrov_galerkin") = getParam<bool>("use_petrov_galerkin");
+        uo_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
+      uo_params.set<bool>("use_displaced_mesh") = true;
+      uo_params.set<std::vector<VariableName>>("lm_variable") = {normal_lagrange_multiplier_name};
+      uo_params.applySpecificParameters(
+          parameters(), {"correct_edge_dropping", "use_petrov_galerkin", "debug_mesh"});
       if (getParam<bool>("use_petrov_galerkin"))
-        var_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
+        uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
       _problem->addUserObject(
-          "LMWeightedGapUserObject", "lm_weightedgap_object_" + name(), var_params);
+          "LMWeightedGapUserObject", "lm_weightedgap_object_" + name(), uo_params);
     }
     else if (_model == ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR)
     {
-      auto var_params = _factory.getValidParams("LMWeightedVelocitiesUserObject");
-      var_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
-      var_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
-      var_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
-      var_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
-      var_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
-      var_params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
-      var_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+      auto uo_params = _factory.getValidParams("LMWeightedVelocitiesUserObject");
+      uo_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
+      uo_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
+      uo_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
+      uo_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
+      uo_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
+      uo_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
       if (ndisp > 2)
-        var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
+        uo_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
 
-      var_params.set<VariableName>("secondary_variable") = displacements[0];
-      var_params.set<bool>("use_displaced_mesh") = true;
-      var_params.set<std::vector<VariableName>>("lm_variable_normal") = {
+      uo_params.set<VariableName>("secondary_variable") = displacements[0];
+      uo_params.set<bool>("use_displaced_mesh") = true;
+      uo_params.set<std::vector<VariableName>>("lm_variable_normal") = {
           normal_lagrange_multiplier_name};
-      var_params.set<std::vector<VariableName>>("lm_variable_tangential_one") = {
+      uo_params.set<std::vector<VariableName>>("lm_variable_tangential_one") = {
           tangential_lagrange_multiplier_name};
       if (ndisp > 2)
-        var_params.set<std::vector<VariableName>>("lm_variable_tangential_two") = {
+        uo_params.set<std::vector<VariableName>>("lm_variable_tangential_two") = {
             tangential_lagrange_multiplier_3d_name};
-      var_params.set<bool>("use_petrov_galerkin") = getParam<bool>("use_petrov_galerkin");
+      uo_params.applySpecificParameters(
+          parameters(), {"correct_edge_dropping", "use_petrov_galerkin", "debug_mesh"});
       if (getParam<bool>("use_petrov_galerkin"))
-        var_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
+        uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
       _problem->addUserObject(
-          "LMWeightedVelocitiesUserObject", "lm_weightedvelocities_object_" + name(), var_params);
+          "LMWeightedVelocitiesUserObject", "lm_weightedvelocities_object_" + name(), uo_params);
     }
 
     if (_model != ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR_PENALTY)
     {
-      auto var_params = _factory.getValidParams("PenaltyWeightedGapUserObject");
+      auto uo_params = _factory.getValidParams("PenaltyWeightedGapUserObject");
 
-      var_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
-      var_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
-      var_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
-      var_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
-      var_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
-      var_params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
-      var_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
-      var_params.set<Real>("penalty") = getParam<Real>("penalty");
+      uo_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
+      uo_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
+      uo_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
+      uo_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
+      uo_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
+      uo_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
 
       // AL parameters
-      var_params.set<Real>("max_penalty_multiplier") = getParam<Real>("max_penalty_multiplier");
-      var_params.set<MooseEnum>("adaptivity_penalty_normal") =
-          getParam<MooseEnum>("adaptivity_penalty_normal");
+      uo_params.applySpecificParameters(parameters(),
+                                        {"correct_edge_dropping",
+                                         "penalty",
+                                         "debug_mesh",
+                                         "max_penalty_multiplier",
+                                         "adaptivity_penalty_normal"});
+
       if (isParamValid("al_penetration_tolerance"))
-        var_params.set<Real>("penetration_tolerance") = getParam<Real>("al_penetration_tolerance");
+        uo_params.set<Real>("penetration_tolerance") = getParam<Real>("al_penetration_tolerance");
       if (isParamValid("penalty_multiplier"))
-        var_params.set<Real>("penalty_multiplier") = getParam<Real>("penalty_multiplier");
+        uo_params.set<Real>("penalty_multiplier") = getParam<Real>("penalty_multiplier");
       // In the contact action, we force the physical value of the normal gap, which also normalizes
       // the penalty factor with the "area" around the node
-      var_params.set<bool>("use_physical_gap") = true;
+      uo_params.set<bool>("use_physical_gap") = true;
 
       if (_use_dual)
-        var_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
+        uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
       if (ndisp > 2)
-        var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
-      var_params.set<bool>("use_displaced_mesh") = true;
+        uo_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
+      uo_params.set<bool>("use_displaced_mesh") = true;
 
       _problem->addUserObject(
-          "PenaltyWeightedGapUserObject", "penalty_weightedgap_object_" + name(), var_params);
+          "PenaltyWeightedGapUserObject", "penalty_weightedgap_object_" + name(), uo_params);
       _problem->haveADObjects(true);
     }
     else if (_model == ContactModel::COULOMB && _formulation == ContactFormulation::MORTAR_PENALTY)
     {
-      auto var_params = _factory.getValidParams("PenaltyFrictionUserObject");
-      var_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
-      var_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
-      var_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
-      var_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
-      var_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
-      var_params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
-      var_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+      auto uo_params = _factory.getValidParams("PenaltyFrictionUserObject");
+      uo_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
+      uo_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
+      uo_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
+      uo_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
+      uo_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
+      uo_params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
+      uo_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
       if (ndisp > 2)
-        var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
+        uo_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
 
-      var_params.set<VariableName>("secondary_variable") = displacements[0];
-      var_params.set<bool>("use_displaced_mesh") = true;
-      var_params.set<Real>("friction_coefficient") = getParam<Real>("friction_coefficient");
-      var_params.set<Real>("penalty") = getParam<Real>("penalty");
-      var_params.set<Real>("penalty_friction") = getParam<Real>("penalty_friction");
+      uo_params.set<VariableName>("secondary_variable") = displacements[0];
+      uo_params.set<bool>("use_displaced_mesh") = true;
+      uo_params.set<Real>("friction_coefficient") = getParam<Real>("friction_coefficient");
+      uo_params.set<Real>("penalty") = getParam<Real>("penalty");
+      uo_params.set<Real>("penalty_friction") = getParam<Real>("penalty_friction");
 
       // AL parameters
-      var_params.set<Real>("max_penalty_multiplier") = getParam<Real>("max_penalty_multiplier");
-      var_params.set<MooseEnum>("adaptivity_penalty_normal") =
+      uo_params.set<Real>("max_penalty_multiplier") = getParam<Real>("max_penalty_multiplier");
+      uo_params.set<MooseEnum>("adaptivity_penalty_normal") =
           getParam<MooseEnum>("adaptivity_penalty_normal");
-      var_params.set<MooseEnum>("adaptivity_penalty_friction") =
+      uo_params.set<MooseEnum>("adaptivity_penalty_friction") =
           getParam<MooseEnum>("adaptivity_penalty_friction");
       if (isParamValid("al_penetration_tolerance"))
-        var_params.set<Real>("penetration_tolerance") = getParam<Real>("al_penetration_tolerance");
+        uo_params.set<Real>("penetration_tolerance") = getParam<Real>("al_penetration_tolerance");
       if (isParamValid("penalty_multiplier"))
-        var_params.set<Real>("penalty_multiplier") = getParam<Real>("penalty_multiplier");
+        uo_params.set<Real>("penalty_multiplier") = getParam<Real>("penalty_multiplier");
       if (isParamValid("penalty_multiplier_friction"))
-        var_params.set<Real>("penalty_multiplier_friction") =
+        uo_params.set<Real>("penalty_multiplier_friction") =
             getParam<Real>("penalty_multiplier_friction");
 
       if (isParamValid("al_incremental_slip_tolerance"))
-        var_params.set<Real>("slip_tolerance") = getParam<Real>("al_incremental_slip_tolerance");
+        uo_params.set<Real>("slip_tolerance") = getParam<Real>("al_incremental_slip_tolerance");
       // In the contact action, we force the physical value of the normal gap, which also normalizes
       // the penalty factor with the "area" around the node
-      var_params.set<bool>("use_physical_gap") = true;
+      uo_params.set<bool>("use_physical_gap") = true;
 
       if (_use_dual)
-        var_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
+        uo_params.set<std::vector<VariableName>>("aux_lm") = {auxiliary_lagrange_multiplier_name};
 
-      var_params.applySpecificParameters(parameters(),
-                                         {"friction_coefficient", "penalty", "penalty_friction"});
+      uo_params.applySpecificParameters(parameters(),
+                                        {"friction_coefficient", "penalty", "penalty_friction"});
 
       _problem->addUserObject(
-          "PenaltyFrictionUserObject", "penalty_friction_object_" + name(), var_params);
+          "PenaltyFrictionUserObject", "penalty_friction_object_" + name(), uo_params);
       _problem->haveADObjects(true);
     }
   }
@@ -1019,7 +1026,8 @@ ContactAction::addMortarContact()
                                      {"correct_edge_dropping",
                                       "normalize_c",
                                       "extra_vector_tags",
-                                      "absolute_value_vector_tags"});
+                                      "absolute_value_vector_tags",
+                                      "debug_mesh"});
 
       _problem->addConstraint(
           mortar_constraint_name, action_name + "_normal_lm_weighted_gap", params);
@@ -1072,8 +1080,8 @@ ContactAction::addMortarContact()
             tangential_lagrange_multiplier_3d_name};
 
       params.set<Real>("mu") = getParam<Real>("friction_coefficient");
-      params.applySpecificParameters(parameters(),
-                                     {"extra_vector_tags", "absolute_value_vector_tags"});
+      params.applySpecificParameters(
+          parameters(), {"extra_vector_tags", "absolute_value_vector_tags", "debug_mesh"});
 
       _problem->addConstraint(mortar_constraint_name, action_name + "_tangential_lm", params);
       _problem->haveADObjects(true);
@@ -1105,8 +1113,8 @@ ContactAction::addMortarContact()
       // The second frictional LM acts on a perpendicular direction.
       if (is_additional_frictional_constraint)
         params.set<MooseEnum>("direction") = "direction_2";
-      params.applySpecificParameters(parameters(),
-                                     {"extra_vector_tags", "absolute_value_vector_tags"});
+      params.applySpecificParameters(
+          parameters(), {"extra_vector_tags", "absolute_value_vector_tags", "debug_mesh"});
 
       for (unsigned int i = 0; i < displacements.size(); ++i)
       {
