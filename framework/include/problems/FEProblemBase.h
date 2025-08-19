@@ -18,7 +18,6 @@
 #include "SubProblem.h"
 #include "GeometricSearchData.h"
 #include "MeshDivision.h"
-#include "MortarData.h"
 #include "ReporterData.h"
 #include "Adaptivity.h"
 #include "InitialConditionWarehouse.h"
@@ -65,6 +64,7 @@ class MultiMooseEnum;
 class MaterialPropertyStorage;
 class MaterialData;
 class MooseEnum;
+class MortarData;
 class Assembly;
 class JacobianBlock;
 class Control;
@@ -1818,7 +1818,8 @@ public:
                      bool on_displaced);
   ///@}
 
-  const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
+  const std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                           std::unique_ptr<AutomaticMortarGeneration>> &
   getMortarInterfaces(bool on_displaced) const;
 
   virtual void possiblyRebuildGeomSearchPatches();
@@ -2403,8 +2404,8 @@ public:
   /**
    * Returns the mortar data object
    */
-  const MortarData & mortarData() const { return _mortar_data; }
-  MortarData & mortarData() { return _mortar_data; }
+  const MortarData & mortarData() const { return *_mortar_data; }
+  MortarData & mortarData() { return *_mortar_data; }
 
   /**
    * Whether the simulation has neighbor coupling
@@ -3045,7 +3046,7 @@ protected:
   MooseMesh * _displaced_mesh;
   std::shared_ptr<DisplacedProblem> _displaced_problem;
   GeometricSearchData _geometric_search_data;
-  MortarData _mortar_data;
+  std::unique_ptr<MortarData> _mortar_data;
 
   /// Whether to call DisplacedProblem::reinitElem when this->reinitElem is called
   bool _reinit_displaced_elem;

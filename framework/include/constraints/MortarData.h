@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "AutomaticMortarGeneration.h"
+#include "MooseTypes.h"
 #include "MooseHashing.h"
 
 #include "libmesh/parallel_object.h"
@@ -19,6 +19,7 @@
 
 class SubProblem;
 class MortarExecutorInterface;
+class AutomaticMortarGeneration;
 
 class MortarData : public libMesh::ParallelObject
 {
@@ -69,7 +70,8 @@ public:
   /**
    * Return all automatic mortar generation objects on either the displaced or undisplaced mesh
    */
-  const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
+  const std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                           std::unique_ptr<AutomaticMortarGeneration>> &
   getMortarInterfaces(bool on_displaced) const
   {
     if (on_displaced)
@@ -136,11 +138,12 @@ private:
 
   /// Map from primary-secondary (in that order) boundary ID pair to the corresponding
   /// undisplaced AutomaticMortarGeneration object
-  std::unordered_map<MortarKey, AutomaticMortarGeneration> _mortar_interfaces;
+  std::unordered_map<MortarKey, std::unique_ptr<AutomaticMortarGeneration>> _mortar_interfaces;
 
   /// Map from primary-secondary (in that order) boundary ID pair to the corresponding
   /// displaced AutomaticMortarGeneration object
-  std::unordered_map<MortarKey, AutomaticMortarGeneration> _displaced_mortar_interfaces;
+  std::unordered_map<MortarKey, std::unique_ptr<AutomaticMortarGeneration>>
+      _displaced_mortar_interfaces;
 
   /// A set containing the subdomain ids covered by all the mortar interfaces in this MortarData
   /// object

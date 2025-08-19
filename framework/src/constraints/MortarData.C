@@ -12,6 +12,7 @@
 #include "MooseMesh.h"
 #include "MooseError.h"
 #include "MortarExecutorInterface.h"
+#include "AutomaticMortarGeneration.h"
 
 MortarData::MortarData(const libMesh::ParallelObject & other)
   : libMesh::ParallelObject(other), _mortar_initd(false)
@@ -61,19 +62,19 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
   // Generate lower-d mesh
   if (mortar_interfaces.find(boundary_key) == mortar_interfaces.end())
   {
-    auto [it, inserted] =
-        mortar_interfaces.emplace(boundary_key,
-                                  AutomaticMortarGeneration(subproblem.getMooseApp(),
-                                                            mesh,
-                                                            boundary_key,
-                                                            subdomain_key,
-                                                            on_displaced,
-                                                            periodic,
-                                                            debug,
-                                                            correct_edge_dropping,
-                                                            minimum_projection_angle));
+    auto [it, inserted] = mortar_interfaces.emplace(
+        boundary_key,
+        std::make_unique<AutomaticMortarGeneration>(subproblem.getMooseApp(),
+                                                    mesh,
+                                                    boundary_key,
+                                                    subdomain_key,
+                                                    on_displaced,
+                                                    periodic,
+                                                    debug,
+                                                    correct_edge_dropping,
+                                                    minimum_projection_angle));
     if (inserted)
-      it->second.initOutput();
+      it->second->initOutput();
   }
 
   // See whether to query the mesh
@@ -117,22 +118,12 @@ MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundar
                                const std::pair<SubdomainID, SubdomainID> & /*subdomain_key*/,
                                bool on_displaced) const
 {
-  if (on_displaced)
-  {
-    if (_displaced_mortar_interfaces.find(boundary_key) == _displaced_mortar_interfaces.end())
-      mooseError(
-          "The requested mortar interface AutomaticMortarGeneration object does not yet exist!");
-
-    return _displaced_mortar_interfaces.at(boundary_key);
-  }
-  else
-  {
-    if (_mortar_interfaces.find(boundary_key) == _mortar_interfaces.end())
-      mooseError(
-          "The requested mortar interface AutomaticMortarGeneration object does not yet exist!");
-
-    return _mortar_interfaces.at(boundary_key);
-  }
+  auto & mortar_interfaces = on_displaced ? _displaced_mortar_interfaces : _mortar_interfaces;
+  auto it = mortar_interfaces.find(boundary_key);
+  if (it == mortar_interfaces.end())
+    mooseError(
+        "The requested mortar interface AutomaticMortarGeneration object does not yet exist!");
+  return *it->second;
 }
 
 AutomaticMortarGeneration &
@@ -149,9 +140,9 @@ void
 MortarData::update()
 {
   for (auto & mortar_pair : _mortar_interfaces)
-    update(mortar_pair.second);
+    update(*mortar_pair.second);
   for (auto & mortar_pair : _displaced_mortar_interfaces)
-    update(mortar_pair.second);
+    update(*mortar_pair.second);
 
   _mortar_initd = true;
 }

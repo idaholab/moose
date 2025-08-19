@@ -120,6 +120,8 @@
 #include "MortarUserObjectThread.h"
 #include "RedistributeProperties.h"
 #include "Checkpoint.h"
+#include "MortarData.h"
+#include "AutomaticMortarGeneration.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -457,7 +459,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 #endif
     _displaced_mesh(nullptr),
     _geometric_search_data(*this, _mesh),
-    _mortar_data(*this),
+    _mortar_data(std::make_unique<MortarData>(*this)),
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
     _reinit_displaced_neighbor(false),
@@ -1300,7 +1302,7 @@ FEProblemBase::initialSetup()
   // We need to move the mesh in order to build a map between mortar secondary and primary
   // interfaces. This map will then be used by the AgumentSparsityOnInterface ghosting functor to
   // know which dofs we need ghosted when we call EquationSystems::reinit
-  if (_displaced_problem && _mortar_data.hasDisplacedObjects())
+  if (_displaced_problem && _mortar_data->hasDisplacedObjects())
   {
     _displaced_problem->updateMesh();
     // if displacements were applied to the mesh, the mortar mesh should be updated too
@@ -5163,21 +5165,20 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
           {
             // go over mortar interfaces and construct functors
             const auto & mortar_interfaces = getMortarInterfaces(displaced);
-            for (const auto & mortar_interface : mortar_interfaces)
+            for (const auto & [primary_secondary_boundary_pair, mortar_generation_ptr] :
+                 mortar_interfaces)
             {
-              const auto primary_secondary_boundary_pair = mortar_interface.first;
               auto mortar_uos_to_execute =
                   getMortarUserObjects(primary_secondary_boundary_pair.first,
                                        primary_secondary_boundary_pair.second,
                                        displaced,
                                        mortar);
-              const auto & mortar_generation_object = mortar_interface.second;
 
               auto * const subproblem = displaced
                                             ? static_cast<SubProblem *>(_displaced_problem.get())
                                             : static_cast<SubProblem *>(this);
               MortarUserObjectThread muot(mortar_uos_to_execute,
-                                          mortar_generation_object,
+                                          *mortar_generation_ptr,
                                           *subproblem,
                                           *this,
                                           displaced,
@@ -5343,11 +5344,11 @@ FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects(const bool mortar_changed
   // Need to see if _any_ processor has ghosted elems or geometry objects.
   bool needs_reinit = !_ghosted_elems.empty();
   needs_reinit = needs_reinit || !_geometric_search_data._nearest_node_locators.empty() ||
-                 (_mortar_data.hasObjects() && mortar_changed);
+                 (_mortar_data->hasObjects() && mortar_changed);
   needs_reinit =
       needs_reinit || (_displaced_problem &&
                        (!_displaced_problem->geomSearchData()._nearest_node_locators.empty() ||
-                        (_mortar_data.hasDisplacedObjects() && mortar_changed)));
+                        (_mortar_data->hasDisplacedObjects() && mortar_changed)));
   _communicator.max(needs_reinit);
 
   if (needs_reinit)
@@ -6492,7 +6493,7 @@ FEProblemBase::init()
   // during residual and Jacobian evaluation because when displacements are solution variables
   // the mortar mesh will move and change during the course of a non-linear solve. We DO NOT
   // redo ghosting during non-linear solve, so for purpose 1) the below call has to be made
-  if (!_mortar_data.initialized())
+  if (!_mortar_data->initialized())
     updateMortarMesh();
 
   {
@@ -7221,7 +7222,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
       {
         computeSystems(EXEC_PRE_DISPLACE);
         _displaced_problem->updateMesh();
-        if (_mortar_data.hasDisplacedObjects())
+        if (_mortar_data->hasDisplacedObjects())
           updateMortarMesh();
       }
 
@@ -7453,7 +7454,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
       {
         computeSystems(EXEC_PRE_DISPLACE);
         _displaced_problem->updateMesh();
-        if (_mortar_data.hasDisplacedObjects())
+        if (_mortar_data->hasDisplacedObjects())
           updateMortarMesh();
       }
 
@@ -8033,7 +8034,7 @@ FEProblemBase::updateMortarMesh()
 
   FloatingPointExceptionGuard fpe_guard(_app);
 
-  _mortar_data.update();
+  _mortar_data->update();
 }
 
 void
@@ -8049,23 +8050,23 @@ FEProblemBase::createMortarInterface(
   _has_mortar = true;
 
   if (on_displaced)
-    return _mortar_data.createMortarInterface(primary_secondary_boundary_pair,
-                                              primary_secondary_subdomain_pair,
-                                              *_displaced_problem,
-                                              on_displaced,
-                                              periodic,
-                                              debug,
-                                              correct_edge_dropping,
-                                              minimum_projection_angle);
+    return _mortar_data->createMortarInterface(primary_secondary_boundary_pair,
+                                               primary_secondary_subdomain_pair,
+                                               *_displaced_problem,
+                                               on_displaced,
+                                               periodic,
+                                               debug,
+                                               correct_edge_dropping,
+                                               minimum_projection_angle);
   else
-    return _mortar_data.createMortarInterface(primary_secondary_boundary_pair,
-                                              primary_secondary_subdomain_pair,
-                                              *this,
-                                              on_displaced,
-                                              periodic,
-                                              debug,
-                                              correct_edge_dropping,
-                                              minimum_projection_angle);
+    return _mortar_data->createMortarInterface(primary_secondary_boundary_pair,
+                                               primary_secondary_subdomain_pair,
+                                               *this,
+                                               on_displaced,
+                                               periodic,
+                                               debug,
+                                               correct_edge_dropping,
+                                               minimum_projection_angle);
 }
 
 const AutomaticMortarGeneration &
@@ -8074,7 +8075,7 @@ FEProblemBase::getMortarInterface(
     const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
     bool on_displaced) const
 {
-  return _mortar_data.getMortarInterface(
+  return _mortar_data->getMortarInterface(
       primary_secondary_boundary_pair, primary_secondary_subdomain_pair, on_displaced);
 }
 
@@ -8084,14 +8085,8 @@ FEProblemBase::getMortarInterface(
     const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
     bool on_displaced)
 {
-  return _mortar_data.getMortarInterface(
+  return _mortar_data->getMortarInterface(
       primary_secondary_boundary_pair, primary_secondary_subdomain_pair, on_displaced);
-}
-
-const std::unordered_map<std::pair<BoundaryID, BoundaryID>, AutomaticMortarGeneration> &
-FEProblemBase::getMortarInterfaces(bool on_displaced) const
-{
-  return _mortar_data.getMortarInterfaces(on_displaced);
 }
 
 void
@@ -8607,7 +8602,7 @@ FEProblemBase::checkProblemIntegrity()
       }
 
       // also exclude mortar spaces from the material check
-      auto && mortar_subdomain_ids = _mortar_data.getMortarSubdomainIDs();
+      auto && mortar_subdomain_ids = _mortar_data->getMortarSubdomainIDs();
       for (auto subdomain_id : mortar_subdomain_ids)
         local_mesh_subs.erase(subdomain_id);
 
@@ -9696,4 +9691,11 @@ bool
 FEProblemBase::checkNonlocalCouplingRequirement() const
 {
   return _requires_nonlocal_coupling;
+}
+
+const std::unordered_map<std::pair<BoundaryID, BoundaryID>,
+                         std::unique_ptr<AutomaticMortarGeneration>> &
+FEProblemBase::getMortarInterfaces(bool on_displaced) const
+{
+  return _mortar_data->getMortarInterfaces(on_displaced);
 }
