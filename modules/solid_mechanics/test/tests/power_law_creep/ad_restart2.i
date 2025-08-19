@@ -16,6 +16,7 @@
   [temp]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 1000.0
   []
 []
 
@@ -130,4 +131,6 @@
 
 [Problem]
   restart_file_base = ad_restart1_out_cp/0006
+  # temp has an initial condition despite the restart
+  allow_initial_conditions_with_restart = true
 []
