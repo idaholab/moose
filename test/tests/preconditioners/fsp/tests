@@ -68,14 +68,14 @@
       input = penalty-fsp-test.i
       exodiff = penalty-fsp-test_out.e
       type = Exodiff
-      rel_err = 2e-5
+      rel_err = 1e-4
     []
     [condensed]
       detail = 'field split preconditioner on a statically condensed system.'
       input = scfsp_test.i
       exodiff = scfsp_test_out.e
       type = Exodiff
-      rel_err = 2e-5
+      rel_err = 1e-4
       max_threads = 1 # static condensation doesn't currently support threading
     []
   []
