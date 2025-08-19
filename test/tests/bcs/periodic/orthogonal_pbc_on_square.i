@@ -59,6 +59,7 @@
   # active = ' '
   [./Periodic]
     [./x]
+      variable = u
       primary = bottom
       secondary = left
       transform_func = 'tr_x tr_y'

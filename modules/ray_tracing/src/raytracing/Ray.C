@@ -140,7 +140,11 @@ Ray::equalityHelper(const Ray & other, const bool equal) const
     return !equal;
   if (_current_incoming_side != other._current_incoming_side)
     return !equal;
+  if (_trajectory_changed != other._trajectory_changed)
+    return !equal;
   if (_end_set != other._end_set)
+    return !equal;
+  if (_should_continue != other._should_continue)
     return !equal;
   if (_processor_crossings != other._processor_crossings)
     return !equal;
@@ -148,13 +152,9 @@ Ray::equalityHelper(const Ray & other, const bool equal) const
     return !equal;
   if (_trajectory_changes != other._trajectory_changes)
     return !equal;
-  if (_trajectory_changed != other._trajectory_changed)
-    return !equal;
   if (!MooseUtils::absoluteFuzzyEqual(_distance, other._distance))
     return !equal;
   if (!MooseUtils::absoluteFuzzyEqual(_max_distance, other._max_distance))
-    return !equal;
-  if (_should_continue != other._should_continue)
     return !equal;
   if (_data.size() != other._data.size())
     return !equal;
@@ -212,6 +212,20 @@ Ray::changeStartDirection(const Point & start,
 
   _current_point = start;
   _direction = direction.unit();
+  _trajectory_changed = true;
+}
+
+void
+Ray::changePointElemSide(const Point & point,
+                         const Elem & elem,
+                         const unsigned int side,
+                         const ChangePointElemSideKey)
+{
+  mooseAssert(!_trajectory_changed, "Should not have already changed");
+
+  _current_point = point;
+  _current_elem = &elem;
+  _current_incoming_side = side;
   _trajectory_changed = true;
 }
 
@@ -708,14 +722,14 @@ dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context)
   auto current_elem_id = ray->currentElem() ? ray->currentElem()->id() : DofObject::invalid_id;
   storeHelper(stream, current_elem_id, context);
   storeHelper(stream, ray->_current_incoming_side, context);
+  storeHelper(stream, ray->_trajectory_changed, context);
   storeHelper(stream, ray->_end_set, context);
+  storeHelper(stream, ray->_should_continue, context);
   storeHelper(stream, ray->_processor_crossings, context);
   storeHelper(stream, ray->_intersections, context);
   storeHelper(stream, ray->_trajectory_changes, context);
-  storeHelper(stream, ray->_trajectory_changed, context);
   storeHelper(stream, ray->_distance, context);
   storeHelper(stream, ray->_max_distance, context);
-  storeHelper(stream, ray->_should_continue, context);
   storeHelper(stream, ray->_data, context);
   storeHelper(stream, ray->_aux_data, context);
 }
@@ -740,14 +754,14 @@ dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context)
   loadHelper(stream, current_elem_id, context);
   ray->_current_elem = study->meshBase().query_elem_ptr(current_elem_id);
   loadHelper(stream, ray->_current_incoming_side, context);
+  loadHelper(stream, ray->_trajectory_changed, context);
   loadHelper(stream, ray->_end_set, context);
+  loadHelper(stream, ray->_should_continue, context);
   loadHelper(stream, ray->_processor_crossings, context);
   loadHelper(stream, ray->_intersections, context);
   loadHelper(stream, ray->_trajectory_changes, context);
-  loadHelper(stream, ray->_trajectory_changed, context);
   loadHelper(stream, ray->_distance, context);
   loadHelper(stream, ray->_max_distance, context);
-  loadHelper(stream, ray->_should_continue, context);
   loadHelper(stream, ray->_data, context);
   loadHelper(stream, ray->_aux_data, context);
 

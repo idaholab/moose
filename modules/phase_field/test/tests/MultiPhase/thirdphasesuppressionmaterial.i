@@ -41,14 +41,6 @@
   [../]
 []
 
-[BCs]
-  [./Periodic]
-    [./All]
-      auto_direction = 'x y'
-    [../]
-  [../]
-[]
-
 [Materials]
   [./suppressionbarrier]
     type = ThirdPhaseSuppressionMaterial

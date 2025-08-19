@@ -1046,7 +1046,7 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
   debugRay("Top of trace loop Ray info\n", ray->getInfo());
   debugRay("Top of trace loop starting elem info\n", ray->currentElem()->get_info());
 
-  // Invalidate this up front because it's copied immedtiately into _last_intersected_extrema
+  // Invalidate this up front because it's copied immediately into _last_intersected_extrema
   _intersected_extrema.invalidate();
 
 #ifdef DEBUG_RAY_MESH_IF
@@ -1584,8 +1584,9 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
       // Apply boundary conditions
       applyOnExternalBoundary(ray);
 
-      traceAssert(ray->currentPoint().absolute_fuzzy_equals(_intersection_point, TRACE_TOLERANCE),
-                  "RayBC changed the Ray point");
+      if (_current_elem == ray->currentElem())
+        traceAssert(ray->currentPoint().absolute_fuzzy_equals(_intersection_point, TRACE_TOLERANCE),
+                    "RayBC changed the Ray point");
 
       // Quit tracing if the Ray was killed by a BC
       if (!_should_continue)
@@ -1599,24 +1600,50 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
       // RayBC changed the direction of the Ray
       if (ray->trajectoryChanged())
       {
-        debugRay("RayBC changed the trajectory");
-        debugRay("  new direction = ", ray->direction());
-        traceAssert(ray->direction() *
-                            _study.getSideNormal(_current_elem, _intersected_side, _tid) <
-                        TRACE_TOLERANCE,
-                    "Reflected ray is not incoming");
         possiblyAddDebugRayMeshPoint(_incoming_point, _intersection_point);
 
         _last_elem = _current_elem;
-        _incoming_point = _intersection_point;
-        _incoming_side = _intersected_side;
-        ray->setCurrentPoint(_incoming_point);
-        ray->setCurrentIncomingSide(_incoming_side);
+        // Direction changed
+        if (_current_elem == ray->currentElem())
+        {
+          debugRay("RayBC reflected the ray");
+          debugRay("  new direction = ", ray->direction());
+          traceAssert(ray->direction() *
+                              _study.getSideNormal(_current_elem, _intersected_side, _tid) <
+                          TRACE_TOLERANCE,
+                      "Reflected ray is not incoming");
+
+          _incoming_point = _intersection_point;
+          _incoming_side = _intersected_side;
+          ray->setCurrentPoint(_incoming_point);
+          ray->setCurrentIncomingSide(_incoming_side);
+        }
+        // Position changed (PeriodicRayBC)
+        else
+        {
+          debugRay("RayBC moved the ray");
+          debugRay("  new point = ", ray->currentPoint());
+          debugRay("  new pid = ", ray->currentElem()->processor_id());
+          debugRay("  new elem id = ", ray->currentElem()->id());
+          debugRay("  new side = ", ray->currentIncomingSide());
+
+          _current_elem = ray->currentElem();
+          _incoming_point = ray->currentPoint();
+          _incoming_side = ray->currentIncomingSide();
+          _intersected_extrema.invalidate();
+
+          if (_current_elem->processor_id() != _pid)
+          {
+            continueTraceOffProcessor(ray);
+            return;
+          }
+        }
         onTrajectoryChanged(ray);
       }
     }
 
     onContinueTrace(ray);
+
   } while (true);
 
   // If a trace made its way down here and didn't return... it failed
@@ -2114,6 +2141,18 @@ TraceRay::onBoundary(const std::shared_ptr<Ray> & ray, const bool external)
     for (const auto bnd_elems_i : _on_boundary_apply_index)
     {
       auto & bnd_elem = _boundary_elems[bnd_elems_i];
+
+      debugRay("Calling ",
+               rbc->type(),
+               "::onBoundary for \"",
+               rbc->name(),
+               "\" on elem ",
+               bnd_elem.elem->id(),
+               " and side ",
+               bnd_elem.side,
+               " for bnd_id ",
+               bnd_elem.bnd_id);
+
       _current_elem = bnd_elem.elem;
       _current_bnd_id = bnd_elem.bnd_id;
       _intersected_side = bnd_elem.side;
