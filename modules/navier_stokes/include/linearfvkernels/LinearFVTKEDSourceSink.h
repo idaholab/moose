@@ -78,6 +78,18 @@ protected:
   /// Production Limiter Constant
   const Real _C_pl;
 
+  /// Temperature field
+  const Moose::Functor<Real> * _temperature;
+
+  /// Thermal expansion coefficient
+  const Moose::Functor<Real> * _alpha;
+
+  /// Turbulent Prandtl number
+  const Moose::Functor<Real> * _Pr_t;
+
+  /// Gravity vector
+  const RealVectorValue * _gravity;
+
   ///@{
   /** Maps for wall treatment */
   std::unordered_set<const Elem *> _wall_bounded;
