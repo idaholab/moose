@@ -230,7 +230,8 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     _debug(debug),
     _on_displaced(on_displaced),
     _periodic(periodic),
-    _distributed(!_mesh.is_replicated()),
+    // We always ghost the entire mortar interface when it is allowed to displace
+    _distributed(_on_displaced ? false : !_mesh.is_replicated()),
     _correct_edge_dropping(correct_edge_dropping),
     _minimum_projection_angle(minimum_projection_angle)
 {
