@@ -1,5 +1,5 @@
 [Tests]
-  design = 'syntax/auxkernels/MFEMAverageFieldAux.md'
+  design = 'syntax/auxkernels/index.md'
   issues = '#31163'
   [HeatTransferAverageField]
     type = XMLDiff
@@ -7,7 +7,6 @@
     cli_args = 'AuxVariables/inactive="" '
                'AuxKernels/inactive="" '
                'AuxKernels/average_field/timestep_skip=2 '
-               'Executioner/end_time = 4.0'
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatTransferAverageField'
     xmldiff = 'OutputData/HeatTransferAverageField/Run0/Run0.pvd
                 OutputData/HeatTransferAverageField/Run0/Cycle000001/proc000000.vtu'
