@@ -25,7 +25,6 @@
 
 // MOOSE includes
 #include "Moose.h"
-#include "Parser.h"
 #include "Builder.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
@@ -45,6 +44,8 @@
 #include "MooseBase.h"
 #include "Capabilities.h"
 #include "MoosePassKey.h"
+#include "SystemInfo.h"
+#include "Syntax.h"
 
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
@@ -65,7 +66,6 @@ class Executor;
 class NullExecutor;
 class FEProblemBase;
 class InputParameterWarehouse;
-class SystemInfo;
 class CommandLine;
 class RelationshipManager;
 class SolutionInvalidity;
@@ -93,10 +93,7 @@ class Node;
  *
  * Each application should register its own objects and register its own special syntax
  */
-class MooseApp : public ConsoleStreamInterface,
-                 public PerfGraphInterface,
-                 public libMesh::ParallelObject,
-                 public MooseBase
+class MooseApp : public PerfGraphInterface, public libMesh::ParallelObject, public MooseBase
 {
 public:
   /// Get the device accelerated computations are supposed to be running on.
@@ -158,12 +155,6 @@ public:
   void setExitCode(const int exit_code) { _exit_code = exit_code; }
 
   /**
-   * Get the parameters of the object
-   * @return The parameters of the object
-   */
-  const InputParameters & parameters() { return _pars; }
-
-  /**
    * The RankMap is a useful object for determining how the processes
    * are laid out on the physical nodes of the cluster
    */
@@ -181,33 +172,6 @@ public:
   SolutionInvalidity & solutionInvalidity() { return _solution_invalidity; }
   const SolutionInvalidity & solutionInvalidity() const { return _solution_invalidity; }
   ///@}
-
-  ///@{
-  /**
-   * Retrieve a parameter for the object
-   * @param name The name of the parameter
-   * @return The value of the parameter
-   */
-  template <typename T>
-  const T & getParam(const std::string & name);
-
-  template <typename T>
-  const T & getParam(const std::string & name) const;
-  ///@}
-
-  /**
-   * Retrieve a renamed parameter for the object. This helper makes sure we
-   * check both names before erroring, and that only one parameter is passed to avoid
-   * silent errors
-   * @param old_name the old name for the parameter
-   * @param new_name the new name for the parameter
-   */
-  template <typename T>
-  const T & getRenamedParam(const std::string & old_name, const std::string & new_name) const;
-
-  inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
-
-  inline bool isParamSetByUser(const std::string & nm) const { return _pars.isParamSetByUser(nm); }
 
   /**
    * Run the application
@@ -385,7 +349,10 @@ public:
   /**
    * @return The Parser
    **/
+  ///@{
+  const Parser & parser() const;
   Parser & parser();
+  ///@}
 
   /**
    * After adding all of the Executor Params - this function will actually cause all of them to be
@@ -584,7 +551,7 @@ public:
    * Get SystemInfo object
    * @return A pointer to the SystemInformation object
    */
-  const SystemInfo * getSystemInfo() const { return _sys_info.get(); }
+  const SystemInfo & getSystemInfo() const { return _sys_info; }
 
   ///@{
   /**
@@ -1168,9 +1135,6 @@ protected:
   addCapability(const std::string & capability, const char * value, const std::string & doc);
   //@}
 
-  /// Parameters of this object
-  const InputParameters & _pars;
-
   /// The string representation of the type of this object as registered (see registerApp(AppName))
   const std::string _type;
 
@@ -1198,9 +1162,6 @@ protected:
   /// Offset of the local App time to the "global" problem time
   Real _global_time_offset;
 
-  /// Command line object
-  std::shared_ptr<CommandLine> _command_line;
-
   /// Syntax of the input file
   Syntax _syntax;
 
@@ -1217,8 +1178,14 @@ protected:
   /// OutputWarehouse object for this App
   OutputWarehouse _output_warehouse;
 
-  /// Parser for parsing the input file
+  /// Parser for parsing the input file (owns the root hit node)
   const std::shared_ptr<Parser> _parser;
+
+  /// The CommandLine object
+  const std::shared_ptr<CommandLine> _command_line;
+
+  /// System Information
+  SystemInfo _sys_info;
 
   /// Builder for building app related parser tree
   Moose::Builder _builder;
@@ -1271,9 +1238,6 @@ protected:
 
   /// Boolean to indicate whether to use an eigenvalue executioner
   bool _use_eigen_value;
-
-  /// System Information
-  std::unique_ptr<SystemInfo> _sys_info;
 
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
   enum UNUSED_CHECK
@@ -1616,45 +1580,6 @@ private:
   friend class Restartable;
   friend class SubProblem;
 };
-
-template <typename T>
-const T &
-MooseApp::getParam(const std::string & name)
-{
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
-}
-
-template <typename T>
-const T &
-MooseApp::getParam(const std::string & name) const
-{
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0), this);
-}
-
-template <typename T>
-const T &
-MooseApp::getRenamedParam(const std::string & old_name, const std::string & new_name) const
-{
-  // this enables having a default on the new parameter but bypassing it with the old one
-  // Most important: accept new parameter
-  if (isParamSetByUser(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0), this);
-  // Second most: accept old parameter
-  else if (isParamValid(old_name) && !isParamSetByUser(new_name))
-    return InputParameters::getParamHelper(old_name, _pars, static_cast<T *>(0), this);
-  // Third most: accept default for new parameter
-  else if (isParamValid(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0), this);
-  // Refuse: no default, no value passed
-  else if (!isParamValid(old_name) && !isParamValid(new_name))
-    mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
-               "' is being retrieved without being set.\n"
-               "Did you mispell it?");
-  // Refuse: both old and new parameters set by user
-  else
-    mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
-               "' may not be provided alongside former parameter '" + old_name + "'");
-}
 
 template <class T>
 void

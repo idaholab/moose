@@ -226,7 +226,8 @@ SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) 
     new_pars.applyParameters(_moose_object_pars);
 
     new_pars.set<MeshFileName>("file") = split_file;
-    new_pars.set<MooseApp *>("_moose_app") = moose_object_params.get<MooseApp *>("_moose_app");
+    new_pars.set<MooseApp *>(MooseBase::app_param) =
+        moose_object_params.get<MooseApp *>(MooseBase::app_param);
     moose_object_params = new_pars;
   }
   else

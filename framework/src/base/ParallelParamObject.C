@@ -11,14 +11,17 @@
 
 #include "MooseApp.h"
 
-ParallelParamObject::ParallelParamObject(const std::string & type,
-                                         const std::string & name,
-                                         MooseApp & app,
-                                         const InputParameters & params)
-  : MooseBase(type, name, app, params),
-    MooseBaseParameterInterface(*this, params),
-    MooseBaseErrorInterface(static_cast<MooseBase &>(*this)),
-    ParallelObject(app),
-    DataFileInterface(*this)
+InputParameters
+ParallelParamObject::validParams()
+{
+  return MooseBase::validParams();
+}
+
+ParallelParamObject::ParallelParamObject(const InputParameters & params)
+  : MooseBase(params),
+    ParallelObject(_app),
+    DataFileInterface(*this),
+    _factory(_app.getFactory()),
+    _action_factory(_app.getActionFactory())
 {
 }

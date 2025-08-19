@@ -30,7 +30,7 @@ Reporter::Reporter(const MooseObject * moose_object)
   : OutputInterface(moose_object->parameters(), /*build_list=*/false),
     _reporter_moose_object(*moose_object),
     _reporter_params(_reporter_moose_object.parameters()),
-    _reporter_name(_reporter_params.get<std::string>("_object_name")),
+    _reporter_name(_reporter_moose_object.name()),
     _reporter_fe_problem(
         *_reporter_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _reporter_data(_reporter_fe_problem.getReporterData(ReporterData::WriteKey()))
@@ -42,7 +42,7 @@ Reporter::Reporter(const MooseObject * moose_object)
 void
 Reporter::store(nlohmann::json & json) const
 {
-  json["type"] = _reporter_params.get<std::string>("_type");
+  json["type"] = _reporter_moose_object.type();
 }
 
 const ReporterValueName &

@@ -246,7 +246,6 @@ MultiApp::validParams()
   params.addParam<bool>(
       "clone_parent_mesh", false, "True to clone parent app mesh and use it for this MultiApp.");
 
-  params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
   params.declareControllable("enable");
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
@@ -1135,6 +1134,10 @@ MultiApp::parentOutputPositionChanged()
 void
 MultiApp::createApp(unsigned int i, Real start_time)
 {
+  // Delete the old app if we're resetting
+  if (_apps[i])
+    _apps[i].reset();
+
   // Define the app name
   const std::string multiapp_name = getMultiAppName(name(), _first_local_app + i, _total_num_apps);
   std::string full_name;
@@ -1158,7 +1161,6 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // as used within the parent app (_app)
   auto app_cli = _app.commandLine()->initSubAppCommandLine(name(), multiapp_name, input_cli_args);
   app_cli->parse();
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(app_cli);
 
   if (_fe_problem.verboseMultiApps())
     _console << COLOR_CYAN << "Creating MultiApp " << name() << " of type " << _app_type
@@ -1191,32 +1193,31 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   // create new parser tree for the application and parse
   auto parser = std::make_unique<Parser>(input_file);
+  parser->setCommandLineParams(app_cli->buildHitParams());
+  parser->parse();
 
-  if (input_file.size())
-  {
-    parser->parse();
-    const auto & app_type = parser->getAppType();
-    if (app_type.empty() && _app_type.empty())
-      mooseWarning("The application type is not specified for ",
-                   full_name,
-                   ". Please use [Application] block to specify the application type.");
-    if (!app_type.empty() && app_type != _app_type &&
-        !AppFactory::instance().isRegistered(app_type))
-      mooseError("In the ",
+  // Checks on app type
+  const auto & app_type = parser->getAppType();
+  if (app_type.empty() && _app_type.empty())
+    mooseWarning("The application type is not specified for ",
                  full_name,
-                 ", '",
-                 app_type,
-                 "' is not a registered application. The registered application is named: '",
-                 _app_type,
-                 "'. Please double check the [Application] block to make sure the correct "
-                 "application is provided. \n");
-  }
+                 ". Please use [Application] block to specify the application type.");
+  if (!app_type.empty() && app_type != _app_type && !AppFactory::instance().isRegistered(app_type))
+    mooseError("In the ",
+               full_name,
+               ", '",
+               app_type,
+               "' is not a registered application. The registered application is named: '",
+               _app_type,
+               "'. Please double check the [Application] block to make sure the correct "
+               "application is provided. \n");
 
   if (parser->getAppType().empty())
     parser->setAppType(_app_type);
 
   app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
-  _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(app_cli);
+  _apps[i] = AppFactory::instance().create(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
 
   app->setGlobalTimeOffset(start_time);

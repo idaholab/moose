@@ -223,26 +223,24 @@ OutputWarehouse::mooseConsole(std::ostringstream & buffer)
     buffer.clear();
     buffer.str("");
   }
-  else if (!_app.actionWarehouse().isTaskComplete("add_output"))
+  else if (_app.actionWarehouse().hasTask("add_output") &&
+           !_app.actionWarehouse().isTaskComplete("add_output") && !_buffer_action_console_outputs)
   {
-    if (!_buffer_action_console_outputs)
-    {
-      // this will cause messages to console before its construction immediately flushed and
-      // cleared.
-      bool this_message_ends_in_newline = message.empty() ? true : message.back() == '\n';
+    // this will cause messages to console before its construction immediately flushed and
+    // cleared.
+    bool this_message_ends_in_newline = message.empty() ? true : message.back() == '\n';
 
-      // If that last message ended in newline then this one may need
-      // to start with indenting
-      // Note that we only indent the first line if the last message ended in new line
-      if (_app.multiAppLevel() > 0)
-        MooseUtils::indentMessage(_app.name(), message, COLOR_CYAN, _last_message_ended_in_newline);
+    // If that last message ended in newline then this one may need
+    // to start with indenting
+    // Note that we only indent the first line if the last message ended in new line
+    if (_app.multiAppLevel() > 0)
+      MooseUtils::indentMessage(_app.name(), message, COLOR_CYAN, _last_message_ended_in_newline);
 
-      Moose::out << message << std::flush;
-      buffer.clear();
-      buffer.str("");
+    Moose::out << message << std::flush;
+    buffer.clear();
+    buffer.str("");
 
-      _last_message_ended_in_newline = this_message_ends_in_newline;
-    }
+    _last_message_ended_in_newline = this_message_ends_in_newline;
   }
 
   _last_buffer = &buffer;

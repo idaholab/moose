@@ -13,8 +13,6 @@
 #include "ConsoleStreamInterface.h"
 #include "MooseTypes.h"
 #include "InputParameters.h"
-#include "Syntax.h"
-#include "Parser.h"
 
 #include "hit/hit.h"
 
@@ -31,6 +29,8 @@ class Factory;
 class ActionFactory;
 class GlobalParamsAction;
 class JsonSyntaxTree;
+class Parser;
+class Syntax;
 
 namespace Moose
 {
@@ -43,7 +43,7 @@ public:
 
   void walk(const std::string & fullpath, const std::string & nodename, hit::Node * n) override;
 
-  std::vector<std::string> errors;
+  std::vector<hit::ErrorMessage> errors;
 
 private:
   std::set<std::string> _used;
@@ -62,7 +62,7 @@ public:
     YAML
   };
 
-  Builder(MooseApp & app, ActionWarehouse & action_wh, std::shared_ptr<Parser> parser);
+  Builder(MooseApp & app, ActionWarehouse & action_wh, Parser & parser);
   virtual ~Builder();
 
   /**
@@ -109,12 +109,7 @@ public:
 
   std::vector<std::string> listValidParams(std::string & section_name);
 
-  /**
-   * @return The root node in the parser
-   */
-  hit::Node * root();
-
-protected:
+private:
   /**
    * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
    * since they are called only from this Object
@@ -132,7 +127,8 @@ protected:
                                    const std::string & short_name,
                                    InputParameters::Parameter<T> * param,
                                    bool in_global,
-                                   GlobalParamsAction * global_block);
+                                   GlobalParamsAction * global_block,
+                                   const hit::Node & node);
 
   /// Template method for setting any vector type parameter read from the input file or command line
   template <typename T, typename Base>
@@ -214,12 +210,6 @@ protected:
                                     bool in_global,
                                     GlobalParamsAction * global_block);
 
-  std::unique_ptr<hit::Node> _cli_root = nullptr;
-  /// The root node from the Parser; in the future, we should probably clone this so that
-  /// we don't muck with the root node in the Parser
-  hit::Node * _root;
-  std::vector<std::string> _secs_need_first;
-
   /// The MooseApp this Parser is part of
   MooseApp & _app;
   /// The Factory associated with that MooseApp
@@ -231,7 +221,9 @@ protected:
   /// Reference to an object that defines input file syntax
   Syntax & _syntax;
   /// The front parser
-  const std::shared_ptr<Parser> _parser;
+  Parser & _parser;
+  /// The root node from the Parser
+  hit::Node & _root;
 
   /// Object for holding the syntax parse tree
   std::unique_ptr<SyntaxTree> _syntax_formatter;
@@ -239,21 +231,18 @@ protected:
   /// The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;
 
-  /// Boolean to indicate whether parsing has started (sections have been extracted)
-  bool _sections_read;
+  /// The sections that we need to execute first (read during the final walk)
+  std::vector<std::string> _secs_need_first;
 
   /// The current parameter object for which parameters are being extracted
   InputParameters * _current_params;
 
-  /// The current stream object used for capturing errors during extraction
-  std::ostringstream * _current_error_stream;
+  /// The errors accumulated during the walk
+  std::vector<hit::ErrorMessage> _errors;
 
-  /// Tracks whether a deprecated param has had its warning message printed already.
-  std::unordered_set<std::string> _deprec_param_tracker;
+  /// Deprecation warnings
+  std::unordered_map<std::string, std::string> _deprecated_params;
 
-private:
-  std::string _errmsg;
-  std::string _warnmsg;
   void walkRaw(std::string fullpath, std::string nodepath, hit::Node * n);
 };
 }

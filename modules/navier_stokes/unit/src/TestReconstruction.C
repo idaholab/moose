@@ -40,8 +40,6 @@
 void
 testReconstruction(const Moose::CoordinateSystemType coord_type)
 {
-  const char * argv[2] = {"foo", "\0"};
-
   MultiMooseEnum coord_type_enum("XYZ RZ RSPHERICAL", "XYZ");
   coord_type_enum = (coord_type == Moose::COORD_XYZ) ? "XYZ" : "RZ";
 
@@ -57,7 +55,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
   for (const auto i : index_range(num_elem))
   {
     const auto nx = num_elem[i];
-    auto app = AppFactory::createAppShared("NavierStokesUnitApp", 1, (char **)argv);
+    auto app = AppFactory::create("NavierStokesUnitApp");
     auto * factory = &app->getFactory();
     std::string mesh_type = "MeshGeneratorMesh";
 

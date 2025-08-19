@@ -33,6 +33,9 @@ class Factory;
 class Action : public ParallelParamObject, public MeshMetaDataInterface, public PerfGraphInterface
 {
 public:
+  /// The name of the parameter that contains the unique action name
+  static const std::string unique_action_name_param;
+
   static InputParameters validParams();
 
   Action(const InputParameters & parameters);

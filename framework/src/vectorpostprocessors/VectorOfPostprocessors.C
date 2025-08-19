@@ -31,7 +31,7 @@ VectorOfPostprocessors::validParams()
 
 VectorOfPostprocessors::VectorOfPostprocessors(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
-    _pp_vec(declareVector(MooseUtils::shortName(parameters.get<std::string>("_object_name"))))
+    _pp_vec(declareVector(MooseUtils::shortName(parameters.getObjectName())))
 {
   std::vector<PostprocessorName> pps_names(
       getParam<std::vector<PostprocessorName>>("postprocessors"));

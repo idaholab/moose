@@ -55,8 +55,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
                                                      const std::set<BoundaryID> & boundary_ids)
   : _mi_moose_object(*moose_object),
     _mi_params(_mi_moose_object.parameters()),
-    _mi_name(_mi_params.get<std::string>("_object_name")),
-    _mi_moose_object_name(_mi_params.get<std::string>("_moose_base"), _mi_name, "::"),
+    _mi_name(moose_object->name()),
+    _mi_moose_object_name(_mi_moose_object.getBase(), _mi_name, "::"),
     _mi_feproblem(*_mi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _mi_subproblem(*_mi_params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
@@ -157,12 +157,13 @@ MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(
     std::ostringstream oss;
     oss << "Incompatible material and object blocks:";
 
-    oss << "\n    " << paramErrorPrefix(discrete->parameters(), "block")
+    oss << "\n    " << discrete->parameters().paramLocationPrefix("block")
         << " material defined on blocks ";
     for (const auto & sbd_id : discrete->blockIDs())
       oss << sbd_id << ", ";
 
-    oss << "\n    " << paramErrorPrefix(_mi_params, "block") << " object needs material on blocks ";
+    oss << "\n    " << _mi_params.paramLocationPrefix("block")
+        << " object needs material on blocks ";
     for (const auto & block_id : _mi_block_ids)
       oss << block_id << ", ";
 
@@ -175,12 +176,12 @@ MaterialPropertyInterface::checkBlockAndBoundaryCompatibility(
     std::ostringstream oss;
     oss << "Incompatible material and object boundaries:";
 
-    oss << "\n    " << paramErrorPrefix(discrete->parameters(), "boundary")
+    oss << "\n    " << discrete->parameters().paramLocationPrefix("boundary")
         << " material defined on boundaries ";
     for (const auto & bnd_id : discrete->boundaryIDs())
       oss << bnd_id << ", ";
 
-    oss << "\n    " << paramErrorPrefix(_mi_params, "boundary")
+    oss << "\n    " << _mi_params.paramLocationPrefix("boundary")
         << " object needs material on boundaries ";
     for (const auto & bnd_id : _mi_boundary_ids)
       oss << bnd_id << ", ";

@@ -339,7 +339,7 @@ MeshGenerator::addMeshSubgenerator(const std::string & type,
     mooseError("Can only call addMeshSubgenerator() during MeshGenerator construction");
 
   // In case the user forgot it
-  params.set<MooseApp *>("_moose_app") = &_app;
+  params.set<MooseApp *>(MooseBase::app_param) = &_app;
 
   // Set this to be data-only if this generator is data only
   params.set<bool>(data_only_param) = isDataOnly();

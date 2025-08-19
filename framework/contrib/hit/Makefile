@@ -16,7 +16,7 @@ ifeq (, $(shell which $(pyconfig) 2>/dev/null))
 endif
 cython := cython3
 ifeq (, $(shell which $(cython) 2>/dev/null))
-	cython := 'cython -3'
+	cython := 'cython'
 endif
 
 ifeq ($(UNAME), Darwin)

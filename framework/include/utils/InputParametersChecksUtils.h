@@ -553,9 +553,8 @@ InputParametersChecksUtils<C>::warnInconsistent(const InputParameters & other_pa
   if (!consistent)
     forwardMooseWarning("Parameter " + param_name + " is inconsistent between Physics \"" +
                         forwardName() + "\" of type \"" + forwardType() +
-                        "\" and the parameter set for \"" +
-                        other_param.get<std::string>("_action_name") + "\" of type \"" +
-                        other_param.get<std::string>("action_type") + "\"");
+                        "\" and the parameter set for \"" + other_param.getObjectName() +
+                        "\" of type \"" + other_param.getObjectType() + "\"");
 }
 
 template <typename C>

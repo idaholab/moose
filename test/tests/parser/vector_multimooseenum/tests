@@ -13,7 +13,7 @@
     input = 'vmme.i'
     cli_args = "Materials/vmme/mme='b;; a b c d e; e'"
     requirement = 'The system shall return a usage message when the vector of MultiMooseEnums includes an empty entry.'
-    expect_err = "In Materials/vmme/mme, one entry in the vector is empty.  This is not allowed."
+    expect_err = "CLI_ARGS: entry 1 in 'Materials/vmme/mme' is empty"
   []
   [vmme_invalid]
     type = RunException

@@ -16,6 +16,8 @@
 
 #include "libmesh/fparser_ad.hh"
 
+#include <optional>
+
 #define usingParsedMaterialHelperMembers(T)                                                        \
   usingFunctionMaterialBaseMembers(T);                                                             \
   usingFunctionParserUtilsMembers(T);                                                              \
@@ -57,7 +59,9 @@ public:
     dt
   };
 
-  ParsedMaterialHelper(const InputParameters & parameters, VariableNameMappingMode map_mode);
+  ParsedMaterialHelper(const InputParameters & parameters,
+                       const VariableNameMappingMode map_mode,
+                       const std::optional<std::string> & function_param_name = {});
 
   static InputParameters validParams();
 
@@ -204,6 +208,9 @@ protected:
    */
   const VariableNameMappingMode _map_mode;
 
+  /// Optional parameter name that represents the function to associate errors with
+  const std::optional<std::string> _function_param_name;
+
   /**
    * Vector to hold list of material names that must be updated prior to evaluating current material
    * (for compute = false materials)
@@ -218,4 +225,11 @@ protected:
    * (for compute = false materials)
    */
   std::vector<MaterialBase *> _upstream_mat;
+
+private:
+  /// Helper for reporting a parse error with a much as context as possible
+  void parseError(const std::string & message) const;
+
+  /// The underlying parameters
+  const InputParameters & _params;
 };
