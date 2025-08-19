@@ -37,6 +37,8 @@ LinearFVConvectiveHeatTransferBC::LinearFVConvectiveHeatTransferBC(
     _rhs_temperature = &_temp_solid;
   else
     _rhs_temperature = &_temp_fluid;
+
+  _var.computeCellGradients();
 }
 
 Real

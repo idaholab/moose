@@ -11,6 +11,7 @@
 #include "FEProblem.h"
 #include "SegregatedSolverUtils.h"
 #include "LinearSystem.h"
+#include "LinearFVCHTBCBase.h"
 
 using namespace libMesh;
 
@@ -56,6 +57,20 @@ LinearAssemblySegregatedSolve::validParams()
                                     "0.0<active_scalar_l_abs_tol",
                                     "The absolute tolerance on the normalized residual in the "
                                     "linear solver of the active scalar equation(s).");
+
+  params.addRangeCheckedParam<unsigned int>(
+      "num_cht_fpi",
+      1,
+      "num_cht_fpi > 0",
+      "Number of maximum fixed point iterations (FPI). Currently only applied to"
+      " conjugate heat transfer simulations. The default value of 1 essentially keeps"
+      " the FPI feature turned off.");
+
+  params.addRangeCheckedParam<Real>(
+      "cht_heat_flux_tolerance", 1e-8, "cht_heat_flux_tolerance > 0", "Bazinga.");
+  params.addRangeCheckedParam<Real>(
+      "cht_temperature_tolerance", 1e-8, "cht_temperature_tolerance > 0", "Bazinga.");
+
   params.addParam<unsigned int>(
       "active_scalar_l_max_its",
       10000,
@@ -92,7 +107,10 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
         getParam<std::vector<Real>>("active_scalar_equation_relaxation")),
     _active_scalar_l_abs_tol(getParam<Real>("active_scalar_l_abs_tol")),
     _active_scalar_absolute_tolerance(
-        getParam<std::vector<Real>>("active_scalar_absolute_tolerance"))
+        getParam<std::vector<Real>>("active_scalar_absolute_tolerance")),
+    _num_cht_fpi(getParam<unsigned int>("num_cht_fpi")),
+    _cht_heat_flux_tolerance(getParam<Real>("cht_heat_flux_tolerance")),
+    _cht_temperature_tolerance(getParam<Real>("cht_temperature_tolerance"))
 {
   // We fetch the systems and their numbers for the momentum equations.
   for (auto system_i : index_range(_momentum_system_names))
@@ -281,6 +299,13 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   momentum_solver.reuse_preconditioner(false);
 
   return its_normalized_residuals;
+}
+
+void
+LinearAssemblySegregatedSolve::initialSetup()
+{
+  deduceCHTBoundaryCoupling();
+  setupConjugateHeatTransferContainers();
 }
 
 std::pair<unsigned int, Real>
@@ -536,6 +561,249 @@ LinearAssemblySegregatedSolve::solveAdvectedSystem(const unsigned int system_num
   return residuals;
 }
 
+void
+LinearAssemblySegregatedSolve::deduceCHTBoundaryCoupling()
+{
+  if (_solid_energy_system->nVariables() != 1)
+    mooseError("We should have only one variable in the solid energy system: ",
+               _energy_system->name(),
+               "! Right now we have: ",
+               Moose::stringify(_solid_energy_system->getVariableNames()));
+  if (_energy_system->nVariables() != 1)
+    mooseError("We should have only one variable in the fluid energy system: ",
+               _energy_system->name(),
+               "! Right now we have: ",
+               Moose::stringify(_energy_system->getVariableNames()));
+
+  std::vector<LinearFVBoundaryCondition *> bcs;
+  _problem.getMooseApp()
+      .theWarehouse()
+      .query()
+      .template condition<AttribSystem>("LinearFVBoundaryCondition")
+      .template condition<AttribVar>(0)
+      .template condition<AttribSysNum>(_solid_energy_sys_number)
+      .queryInto(bcs);
+
+  std::vector<LinearFVCHTBCBase *> cht_bcs_solid;
+  for (auto bc : bcs)
+    if (auto cht_bc = dynamic_cast<LinearFVCHTBCBase *>(bc))
+    {
+      cht_bcs_solid.push_back(cht_bc);
+      const auto & boundary_ids = cht_bc->boundaryIDs();
+      _cht_boundary_id_set.insert(boundary_ids.begin(), boundary_ids.end());
+    }
+
+  _problem.getMooseApp()
+      .theWarehouse()
+      .query()
+      .template condition<AttribSystem>("LinearFVBoundaryCondition")
+      .template condition<AttribVar>(0)
+      .template condition<AttribSysNum>(_energy_sys_number)
+      .queryInto(bcs);
+
+  std::vector<LinearFVCHTBCBase *> cht_bcs_fluid;
+  for (auto bc : bcs)
+    if (auto cht_bc = dynamic_cast<LinearFVCHTBCBase *>(bc))
+    {
+      cht_bcs_fluid.push_back(cht_bc);
+      const auto & boundary_ids = cht_bc->boundaryIDs();
+      _cht_boundary_id_set.insert(boundary_ids.begin(), boundary_ids.end());
+    }
+
+  _cht_boundary_ids =
+      std::vector<BoundaryID>(_cht_boundary_id_set.begin(), _cht_boundary_id_set.end());
+
+  // For every boundary ID we will need two boundary conditions, otherwise
+  // we error.
+  _cht_boundary_names.clear();
+  _cht_boundary_conditions.clear();
+  _cht_flux_relaxation_factor.clear();
+  _cht_temperature_relaxation_factor.clear();
+  for (const auto i : index_range(_cht_boundary_ids))
+  {
+    const auto bd_id = _cht_boundary_ids[i];
+    _cht_boundary_names.push_back(_problem.mesh().getBoundaryName(bd_id));
+
+    auto bc_pair = std::vector<LinearFVCHTBCBase *>(2, nullptr);
+
+    for (auto solid_bc : cht_bcs_solid)
+      if (solid_bc->hasBoundary(bd_id))
+        bc_pair[NS::CHTSide::SOLID] = solid_bc;
+
+    for (auto fluid_bc : cht_bcs_fluid)
+      if (fluid_bc->hasBoundary(bd_id))
+        bc_pair[NS::CHTSide::FLUID] = fluid_bc;
+
+    if (!bc_pair[NS::CHTSide::SOLID] || !bc_pair[NS::CHTSide::FLUID])
+      mooseError("Conjugate heat transfer setup encountered a boundary: ID ",
+                 bd_id,
+                 " name: ",
+                 _cht_boundary_names.back(),
+                 " which does not have a pair! Make sure you add a conjugate heat transfer "
+                 "boundary condition to both sides!");
+
+    _cht_flux_relaxation_factor.push_back({bc_pair[NS::CHTSide::SOLID]->fluxRelaxationFactor(),
+                                           bc_pair[NS::CHTSide::FLUID]->fluxRelaxationFactor()});
+    _cht_temperature_relaxation_factor.push_back(
+        {bc_pair[NS::CHTSide::SOLID]->temperatureRelaxationFactor(),
+         bc_pair[NS::CHTSide::FLUID]->temperatureRelaxationFactor()});
+
+    _cht_boundary_conditions.emplace(bd_id, std::move(bc_pair));
+  }
+}
+
+void
+LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
+{
+  const auto * fluid_variable =
+      dynamic_cast<const MooseLinearVariableFVReal *>(&_energy_system->getVariable(0, 0));
+  const auto * solid_variable =
+      dynamic_cast<const MooseLinearVariableFVReal *>(&_solid_energy_system->getVariable(0, 0));
+
+  // First we create the functors
+  for (const auto i : index_range(_cht_boundary_ids))
+  {
+    const auto bd_id = _cht_boundary_ids[i];
+    const auto & bd_name = _cht_boundary_names[i];
+
+    // We populate the face infos for every interface
+    auto & bd_fi_container = _cht_face_info[bd_id];
+    for (auto & fi : _problem.mesh().faceInfo())
+      if (fi->boundaryIDs().count(bd_id))
+        bd_fi_container.push_back(fi);
+
+    FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> solid_bd_flux(
+        _problem.mesh(), solid_variable->blockIDs(), "heat_flux_solid_" + bd_name);
+    FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> fluid_bd_flux(
+        _problem.mesh(), fluid_variable->blockIDs(), "heat_flux_fluid_" + bd_name);
+
+    // We do this ugliness to save an extra line, considering emplace already gives a reference to
+    // the freshly emplaced object
+    auto & flux_container =
+        _boundary_heat_flux
+            .emplace(
+                bd_id,
+                std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
+                    {std::move(solid_bd_flux), std::move(fluid_bd_flux)}))
+            .first->second;
+
+    _integrated_boundary_heat_flux.emplace(bd_id, std::vector<Real>({0.0, 0.0}));
+
+    FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> solid_bd_temperature(
+        _problem.mesh(), solid_variable->blockIDs(), "bd_temperature_solid_" + bd_name);
+    FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> fluid_bd_temperature(
+        _problem.mesh(), fluid_variable->blockIDs(), "bd_temperature_fluid_" + bd_name);
+
+    // We do this ugliness to save an extra line, considering emplace already gives a reference to
+    // the freshly emplaced object
+    auto & temperature_container =
+        _boundary_temperatures
+            .emplace(
+                bd_id,
+                std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
+                    {std::move(solid_bd_temperature), std::move(fluid_bd_temperature)}))
+            .first->second;
+
+    for (const auto tid : make_range(libMesh::n_threads()))
+    {
+      _problem.addFunctor("heat_flux_solid_" + bd_name, flux_container[NS::CHTSide::SOLID], tid);
+      _problem.addFunctor("heat_flux_fluid_" + bd_name, flux_container[NS::CHTSide::FLUID], tid);
+      _problem.addFunctor(
+          "bd_temperature_solid_" + bd_name, temperature_container[NS::CHTSide::SOLID], tid);
+      _problem.addFunctor(
+          "bd_temperature_fluid_" + bd_name, temperature_container[NS::CHTSide::FLUID], tid);
+    }
+
+    // Initialize the containers, they will be filled with correct values soon
+    for (auto & fi : bd_fi_container)
+    {
+      flux_container[NS::CHTSide::SOLID][fi->id()] = 0.0;
+      flux_container[NS::CHTSide::FLUID][fi->id()] = 0.0;
+      temperature_container[NS::CHTSide::SOLID][fi->id()] = 0.0;
+      temperature_container[NS::CHTSide::FLUID][fi->id()] = 0.0;
+    }
+  }
+}
+
+void
+LinearAssemblySegregatedSolve::initializeCHTCouplingFields()
+{
+  for (const auto i : index_range(_cht_boundary_ids))
+  {
+    const auto bd_id = _cht_boundary_ids[i];
+
+    auto & solid_bc = _cht_boundary_conditions[bd_id][NS::CHTSide::SOLID];
+    auto & fluid_bc = _cht_boundary_conditions[bd_id][NS::CHTSide::FLUID];
+
+    auto it_temp = _boundary_temperatures.find(bd_id);
+
+    if (it_temp != _boundary_temperatures.end())
+    {
+      auto & temperature_container_solid = it_temp->second[NS::CHTSide::SOLID];
+      auto & temperature_container_fluid = it_temp->second[NS::CHTSide::FLUID];
+
+      const auto & bd_fi_container = _cht_face_info[bd_id];
+      // We enter the face loop to update the coupling fields
+      for (const auto & fi : bd_fi_container)
+      {
+        fluid_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _energy_sys_number)));
+        solid_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _solid_energy_sys_number)));
+        temperature_container_solid[fi->id()] = fluid_bc->computeBoundaryValue();
+        temperature_container_fluid[fi->id()] = solid_bc->computeBoundaryValue();
+      }
+    }
+    else
+      mooseError("We could not find the given CHT BC in the flux or the temperature map!");
+  }
+}
+
+void
+LinearAssemblySegregatedSolve::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
+{
+  const NS::CHTSide other_side = static_cast<NS::CHTSide>(1 - side);
+
+  for (const auto i : index_range(_cht_boundary_ids))
+  {
+    const auto bd_id = _cht_boundary_ids[i];
+
+    auto & fluid_bc = _cht_boundary_conditions[bd_id][other_side];
+
+    const auto temperature_relaxation = _cht_flux_relaxation_factor[i][side];
+    const auto flux_relaxation = _cht_temperature_relaxation_factor[i][side];
+
+    auto it_flux = _boundary_heat_flux.find(bd_id);
+    auto it_temp = _boundary_temperatures.find(bd_id);
+
+    if (it_flux != _boundary_heat_flux.end() && it_temp != _boundary_temperatures.end())
+    {
+      auto & flux_container = it_flux->second[side];
+      auto & temperature_container = it_temp->second[side];
+
+      auto & integrated_flux = _integrated_boundary_heat_flux[bd_id][side];
+
+      const auto & bd_fi_container = _cht_face_info[bd_id];
+
+      // We enter the face loop to update the coupling fields
+      for (const auto & fi : bd_fi_container)
+      {
+        fluid_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _energy_sys_number)));
+
+        temperature_container[fi->id()] =
+            temperature_relaxation * fluid_bc->computeBoundaryValue() +
+            (1 - temperature_relaxation) * temperature_container[fi->id()];
+
+        const auto flux = flux_relaxation * fluid_bc->computeBoundaryConductionFlux() +
+                          (1 - flux_relaxation) * flux_container[fi->id()];
+
+        flux_container[fi->id()] = flux;
+        integrated_flux += flux * fi->faceArea() * fi->faceCoord();
+      }
+    }
+    else
+      mooseError("We could not find the given CHT BC in the flux or the temperature map!");
+  }
+}
+
 bool
 LinearAssemblySegregatedSolve::solve()
 {
@@ -576,6 +844,7 @@ LinearAssemblySegregatedSolve::solve()
 
   bool converged = false;
   // Loop until converged or hit the maximum allowed iteration number
+  initializeCHTCouplingFields();
   while (simple_iteration_counter < _num_iterations && !converged)
   {
     simple_iteration_counter++;
@@ -606,28 +875,53 @@ LinearAssemblySegregatedSolve::solve()
     // outside of the velocity-pressure loop
     if (_has_energy_system)
     {
-      // We set the preconditioner/controllable parameters through petsc options. Linear
-      // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
-      ns_residuals[momentum_residual.size() + _has_energy_system] =
-          solveAdvectedSystem(_energy_sys_number,
-                              *_energy_system,
-                              _energy_equation_relaxation,
-                              _energy_linear_control,
-                              _energy_l_abs_tol);
-    }
-    if (_has_solid_energy_system)
-    {
-      // We set the preconditioner/controllable parameters through petsc options. Linear
-      // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
-      ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
-          solveSolidEnergy();
+      unsigned int fpi_itrs = 0;
+
+      while (fpi_itrs + 1 < _num_cht_fpi)
+      {
+        std::cout << " CHT Iteration:" << fpi_itrs + 1 << std::endl;
+        // We set the preconditioner/controllable parameters through petsc options. Linear
+        // tolerances will be overridden within the solver.
+        updateCHTBoundaryCouplingFields(NS::CHTSide::FLUID);
+        Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
+        ns_residuals[momentum_residual.size() + _has_energy_system] =
+            solveAdvectedSystem(_energy_sys_number,
+                                *_energy_system,
+                                _energy_equation_relaxation,
+                                _energy_linear_control,
+                                _energy_l_abs_tol);
+
+        if (_has_solid_energy_system)
+        {
+          // We set the preconditioner/controllable parameters through petsc options. Linear
+          // tolerances will be overridden within the solver.
+          _energy_system->computeGradients();
+          updateCHTBoundaryCouplingFields(NS::CHTSide::SOLID);
+          Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
+          ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
+              solveSolidEnergy();
+
+          _solid_energy_system->computeGradients();
+        }
+
+        for (const auto i : index_range(_integrated_boundary_heat_flux))
+        {
+          auto & integrated_fluxes = _integrated_boundary_heat_flux[_cht_boundary_ids[i]];
+          _communicator.sum(integrated_fluxes[NS::CHTSide::SOLID]);
+          _communicator.sum(integrated_fluxes[NS::CHTSide::FLUID]);
+          _console << " Boundary " << _cht_boundary_names[i] << " flux on solid side "
+                   << integrated_fluxes[NS::CHTSide::SOLID]
+                   << " flux on fluid side: " << integrated_fluxes[NS::CHTSide::FLUID] << std::endl;
+          integrated_fluxes = std::vector<Real>({0.0, 0.0});
+        }
+
+        fpi_itrs++;
+      }
     }
 
     // If we have active scalar equations, solve them here in case they depend on temperature
-    // or they affect the fluid properties such that they must be solved concurrently with pressure
-    // and velocity
+    // or they affect the fluid properties such that they must be solved concurrently with
+    // pressure and velocity
     if (_has_active_scalar_systems)
     {
       _problem.execute(EXEC_NONLINEAR);
@@ -670,9 +964,9 @@ LinearAssemblySegregatedSolve::solve()
     converged = NS::FV::converged(ns_residuals, ns_abs_tols);
   }
 
-  // If we have passive scalar equations, solve them here. We assume the material properties in the
-  // Navier-Stokes equations do not depend on passive scalars, as they are passive, therefore we
-  // solve outside of the velocity-pressure loop
+  // If we have passive scalar equations, solve them here. We assume the material properties in
+  // the Navier-Stokes equations do not depend on passive scalars, as they are passive, therefore
+  // we solve outside of the velocity-pressure loop
   if (_has_passive_scalar_systems && (converged || _continue_on_max_its))
   {
     // The reason why we need more than one iteration is due to the matrix relaxation
