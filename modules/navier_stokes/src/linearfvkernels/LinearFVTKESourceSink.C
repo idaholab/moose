@@ -44,6 +44,11 @@ LinearFVTKESourceSink::validParams()
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
   params.addParam<Real>("C_pl", 10.0, "Production Limiter Constant Multiplier.");
 
+  params.addParam<MooseFunctorName>(NS::temperature, "The temperature.");
+  params.addParam<MooseFunctorName>("alpha_name", "Thermal expansion factor.");
+  params.addParam<MooseFunctorName>(NS::turbulent_Prandtl, 0.9, "The turbulent Prandtl number.");
+  params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
+
   return params;
 }
 
@@ -61,13 +66,27 @@ LinearFVTKESourceSink::LinearFVTKESourceSink(const InputParameters & params)
     _linearized_model(getParam<bool>("linearized_model")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _C_mu(getParam<Real>("C_mu")),
-    _C_pl(getParam<Real>("C_pl"))
+    _C_pl(getParam<Real>("C_pl")),
+    _temperature(params.isParamValid(NS::temperature) ? &(getFunctor<Real>(NS::temperature))
+                                                      : nullptr),
+    _alpha(params.isParamValid("alpha_name") ? &(getFunctor<Real>("alpha_name")) : nullptr),
+    _Pr_t(params.isParamValid(NS::turbulent_Prandtl) ? &(getFunctor<Real>(NS::turbulent_Prandtl))
+                                                     : nullptr),
+    _gravity(params.isParamValid("gravity") ? &getParam<RealVectorValue>("gravity") : nullptr)
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
 
   if (_dim >= 3 && !_w_var)
     paramError("w", "In three or more dimensions, the w velocity must be supplied!");
+
+  if (_temperature && !_alpha)
+    paramError("alpha",
+               "The thermal expansion coefficient should be >0.0 for themal bouyancy production "
+               "correction.");
+
+  if (_temperature && !_gravity)
+    paramError("gravity", "Gravity should be provided when bouyancy corrections are active.");
 
   // // Strain tensor term requires velocity gradients;
   if (dynamic_cast<const MooseLinearVariableFV<Real> *>(&_u_var))
@@ -206,7 +225,14 @@ LinearFVTKESourceSink::computeRightHandSideContribution()
     const auto symmetric_strain_tensor_sq_norm =
         NS::computeShearStrainRateNormSquared<Real>(_u_var, _v_var, _w_var, elem_arg, state);
 
-    auto production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
+        auto base_strain = symmetric_strain_tensor_sq_norm;
+
+    // Bouyancy strain
+    if (_temperature)
+      base_strain += (*_alpha)(elem_arg, state) / (*_Pr_t)(elem_arg, state) *
+                     (_temperature->gradient(elem_arg, state) * (*_gravity));
+
+    auto production = _mu_t(elem_arg, state) * base_strain;
 
     // k-Production limiter (needed for flows with stagnation zones)
     const Real production_limit = _C_pl * _rho(elem_arg, state) * _epsilon(elem_arg, state);
