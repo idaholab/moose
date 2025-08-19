@@ -2069,7 +2069,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             continue;
 
           // Now generically solve for xi2
-          auto && order = primary_elem_candidate->default_order();
+          const auto order = primary_elem_candidate->default_order();
           DualNumber<Real> xi2_dn{0, 1};
           unsigned int current_iterate = 0, max_iterates = 10;
 
