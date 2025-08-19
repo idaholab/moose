@@ -1,4 +1,6 @@
-[Tests] 
+[Tests]
+ issues = '#31300'
+ design = 'ADLaplacianSplit.md' 
  [bodyforce]
     requirement = 'The system shall provide an ability to solve a 2D diffusion problem including a volumetric source term.'
     type = 'Exodiff'

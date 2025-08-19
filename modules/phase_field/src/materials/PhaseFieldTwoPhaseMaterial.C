@@ -15,6 +15,7 @@ InputParameters
 PhaseFieldTwoPhaseMaterial::validParams()
 {
   InputParameters params = ADMaterial::validParams();
+  params.addClassDescription("Material that assigns properties based on the phase field variable.");
   params.addRequiredCoupledVar("pf", "Phase field variable");
   params.addRequiredParam<MaterialPropertyName>("prop_name", "Name of material property.");
   params.addRequiredParam<Real>("prop_value_1", "value of phase 1.");

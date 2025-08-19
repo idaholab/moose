@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#31300'
+  design = 'PhaseFieldTimeDerivativeSUPG.md PhaseFieldForcingFunctionSUPG.md PhaseFieldAdvection.md PhaseFieldAdvectionSUPG.md'
   [mms]
     type = CSVDiff
     input = phase_field_advection_mms.i

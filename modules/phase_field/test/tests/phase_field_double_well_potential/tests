@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#31300'
+  design = 'PhaseFieldCoupledDoubleWellPotential.md'
   [double_well_potential]
     type = CSVDiff
     input = DoubleWellPotential.i 

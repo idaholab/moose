@@ -15,6 +15,7 @@ InputParameters
 PhaseFieldTwoPhaseSurfaceTension::validParams()
 {
   InputParameters params = ADKernelValue::validParams();
+  params.addClassDescription("Phase field surface tension force for the Navier-Stokes equations.");
   params.addRequiredCoupledVar("auxpf", "Auxillary variable in phase field formulation");
   params.addRequiredCoupledVar("pf", "phase field variable");
   params.addRequiredParam<Real>("coeff", "prefactor relating chemical potential and psi");
