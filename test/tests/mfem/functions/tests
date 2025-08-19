@@ -1,0 +1,12 @@
+[Tests]
+  design = 'syntax/Problem/index.md'
+  issues = '#29632'
+  [MFEMFunctionParsedSource]
+    type = XMLDiff
+    input = function_parsed_source.i
+    xmldiff = 'OutputData/FunctionParsedSource/Run0/Run0.pvd
+                OutputData/FunctionParsedSource/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to parse functions of non-linear variables'
+    capabilities = 'mfem'
+  []
+[]
