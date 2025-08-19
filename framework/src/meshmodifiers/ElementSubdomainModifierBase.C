@@ -14,7 +14,7 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/remote_elem.h"
 #include "libmesh/parallel_ghost_sync.h"
-#include "libmesh/petsc_vector.h"
+#include "libmesh/numeric_vector.h"
 #include "libmesh/parameters.h"
 #include <iterator>
 #include <unordered_set>
@@ -97,10 +97,9 @@ ElementSubdomainModifierBase::validParams()
       "This is useful when the solved values on these DOFs should be preserved. If the list is "
       "empty, overridden DOF values will NOT be restored for any variable by default.");
 
-  params.addParam<bool>(
-      "skip_restore_subdomain_changes",
-      false,
-      "Skipping restoring the subdomain changes if the timestep is not advanced.");
+  params.addParam<bool>("skip_restore_subdomain_changes",
+                        false,
+                        "Skip restoring the subdomain changes if the timestep is not advanced.");
 
   params.registerBase("MeshModifier");
 
@@ -541,6 +540,17 @@ ElementSubdomainModifierBase::applyMovingBoundaryChanges(MooseMesh & mesh)
     }
   }
 
+  Parallel::push_parallel_vector_data(
+      bnd_info.comm(),
+      remove_ghost_sides,
+      [&mesh,
+       &bnd_info](processor_id_type,
+                  const std::vector<std::tuple<dof_id_type, unsigned short, BoundaryID>> & received)
+      {
+        for (const auto & [elem_id, side, bnd] : received)
+          bnd_info.remove_side(mesh.elemPtr(elem_id), side, bnd);
+      });
+
   // Add element sides to moving boundaries
   for (const auto & [elem_id, sides] : _add_element_sides)
     for (const auto & [side, bnd] : sides)
@@ -568,17 +578,6 @@ ElementSubdomainModifierBase::applyMovingBoundaryChanges(MooseMesh & mesh)
       {
         for (const auto & [elem_id, side, bnd] : received)
           bnd_info.add_side(mesh.elemPtr(elem_id), side, bnd);
-      });
-
-  Parallel::push_parallel_vector_data(
-      bnd_info.comm(),
-      remove_ghost_sides,
-      [&mesh,
-       &bnd_info](processor_id_type,
-                  const std::vector<std::tuple<dof_id_type, unsigned short, BoundaryID>> & received)
-      {
-        for (const auto & [elem_id, side, bnd] : received)
-          bnd_info.remove_side(mesh.elemPtr(elem_id), side, bnd);
       });
 
   bnd_info.parallel_sync_side_ids();
