@@ -9,17 +9,18 @@
 
 #include "PolycrystalMatDiffusion.h"
 
-registerMooseObject("MooseApp", PolycrystalMatDiffusion);
+registerMooseObject("PhaseFieldApp", PolycrystalMatDiffusion);
 
 InputParameters
 PolycrystalMatDiffusion::validParams()
 {
   InputParameters params = PolycrystalMatDiffusionBase<Real>::validParams();
-  params.addClassDescription( //TODO fix comment
+  params.addClassDescription(
       "Diffusion equation Kernel that takes an isotropic Diffusivity from a material property");
   return params;
 }
 
-PolycrystalMatDiffusion::PolycrystalMatDiffusion(const InputParameters & parameters) : PolycrystalMatDiffusionBase<Real>(parameters)
+PolycrystalMatDiffusion::PolycrystalMatDiffusion(const InputParameters & parameters)
+  : PolycrystalMatDiffusionBase<Real>(parameters)
 {
 }

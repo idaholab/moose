@@ -15,7 +15,7 @@ InputParameters
 PolycrystalMatAnisoDiffusion::validParams()
 {
   InputParameters params = PolycrystalMatDiffusionBase<RealTensorValue>::validParams();
-  params.addClassDescription( //TODO fix comment
+  params.addClassDescription(
       "Diffusion equation Kernel that takes an anisotropic Diffusivity from a material property");
   return params;
 }
