@@ -18,6 +18,15 @@
 #include "libmesh/parallel_eigen.h"
 #include <iomanip>
 
+static std::vector<dof_id_type>
+deduplicate(const std::vector<dof_id_type> & ids)
+{
+  std::vector<dof_id_type> key = ids;
+  std::sort(key.begin(), key.end());
+  key.erase(std::unique(key.begin(), key.end()), key.end());
+  return key;
+}
+
 InputParameters
 NodalPatchRecoveryBase::validParams()
 {
@@ -66,7 +75,7 @@ NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
 const RealEigenVector
 NodalPatchRecoveryBase::getCoefficientsNoCache(const std::vector<dof_id_type> & elem_ids) const
 {
-  auto elem_ids_reduced = removeDuplicates(elem_ids);
+  auto elem_ids_reduced = deduplicate(elem_ids);
 
   RealEigenVector coef = RealEigenVector::Zero(_q);
   // Before we go, check if we have enough sample points for solving the least square fitting
@@ -106,7 +115,7 @@ const RealEigenVector
 NodalPatchRecoveryBase::getCoefficients(const std::vector<dof_id_type> & elem_ids)
 {
   // Check cache
-  auto key = removeDuplicates(elem_ids);
+  auto key = deduplicate(elem_ids);
 
   if (key == _cached_elem_ids)
     return _cached_coef;
@@ -187,66 +196,80 @@ NodalPatchRecoveryBase::finalize()
 }
 
 std::unordered_map<processor_id_type, std::vector<dof_id_type>>
-NodalPatchRecoveryBase::gatherSendList(
-    const std::optional<std::vector<dof_id_type>> & specific_elems)
+NodalPatchRecoveryBase::gatherSendList(const std::vector<dof_id_type> & specific_elems)
 {
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
 
   typedef std::pair<processor_id_type, dof_id_type> PidElemPair;
   std::unordered_map<processor_id_type, std::vector<PidElemPair>> push_data;
 
-  auto add_to_query = [&](const libMesh::Elem * elem)
+  for (const auto & entry : specific_elems)
   {
-    if (hasBlocks(elem->subdomain_id()) && elem->processor_id() != processor_id())
-      query_ids[elem->processor_id()].push_back(elem->id());
-  };
-
-  if (specific_elems)
-  {
-    for (const auto & entry : *specific_elems)
-    {
-      const auto * elem = _mesh.elemPtr(entry);
-      if (_distributed_mesh)
-      {
-        if (!elem)
-          continue; // Prevent segmentation fault in distributed mesh
-
-        if (hasBlocks(elem->subdomain_id()))
-          for (processor_id_type pid = 0; pid < n_processors(); ++pid)
-            if (pid != processor_id())
-              push_data[pid].push_back(std::make_pair(elem->processor_id(), elem->id()));
-      }
-      else
-        // For non-distributed meshes, element information is always accessible (not nullptr and
-        // processor ID can be retrieved), even if the element does not belong to the current
-        // processor.
-        add_to_query(elem);
-    }
-
+    const auto * elem = _mesh.elemPtr(entry);
     if (_distributed_mesh)
     {
-      auto push_receiver =
-          [&](const processor_id_type, const std::vector<PidElemPair> & received_data)
-      {
-        for (const auto & [pid, id] : received_data)
-          query_ids[pid].push_back(id);
-      };
+      if (!elem)
+        continue; // Prevent segmentation fault in distributed mesh
 
-      Parallel::push_parallel_vector_data(_mesh.comm(), push_data, push_receiver);
+      if (hasBlocks(elem->subdomain_id()))
+        for (processor_id_type pid = 0; pid < n_processors(); ++pid)
+          if (pid != processor_id())
+            push_data[pid].push_back(std::make_pair(elem->processor_id(), elem->id()));
     }
+    else
+      // For non-distributed meshes, element information is always accessible (not nullptr and
+      // processor ID can be retrieved), even if the element does not belong to the current
+      // processor.
+      addToQuery(elem, query_ids);
   }
-  else
-    for (const auto & elem : _fe_problem.getEvaluableElementRange())
-      add_to_query(elem);
+
+  if (_distributed_mesh)
+  {
+    auto push_receiver =
+        [&](const processor_id_type, const std::vector<PidElemPair> & received_data)
+    {
+      for (const auto & [pid, id] : received_data)
+        query_ids[pid].push_back(id);
+    };
+
+    Parallel::push_parallel_vector_data(_mesh.comm(), push_data, push_receiver);
+  }
+
+  return query_ids;
+}
+
+std::unordered_map<processor_id_type, std::vector<dof_id_type>>
+NodalPatchRecoveryBase::gatherSendList()
+{
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
+
+  typedef std::pair<processor_id_type, dof_id_type> PidElemPair;
+  std::unordered_map<processor_id_type, std::vector<PidElemPair>> push_data;
+
+  for (const auto & elem : _fe_problem.getEvaluableElementRange())
+    addToQuery(elem, query_ids);
 
   return query_ids;
 }
 
 void
-NodalPatchRecoveryBase::sync(const std::optional<std::vector<dof_id_type>> & specific_elems)
+NodalPatchRecoveryBase::sync()
+{
+  const auto query_ids = gatherSendList();
+  syncHelper(query_ids);
+}
+
+void
+NodalPatchRecoveryBase::sync(const std::vector<dof_id_type> & specific_elems)
 {
   const auto query_ids = gatherSendList(specific_elems);
+  syncHelper(query_ids);
+}
 
+void
+NodalPatchRecoveryBase::syncHelper(
+    const std::unordered_map<processor_id_type, std::vector<dof_id_type>> & query_ids)
+{
   typedef std::pair<RealEigenMatrix, RealEigenVector> AbPair;
 
   // Answer queries received from other processors
@@ -277,11 +300,11 @@ NodalPatchRecoveryBase::sync(const std::optional<std::vector<dof_id_type>> & spe
       _communicator, query_ids, gather_data, act_on_data, 0);
 }
 
-std::vector<dof_id_type>
-NodalPatchRecoveryBase::removeDuplicates(const std::vector<dof_id_type> & ids) const
+void
+NodalPatchRecoveryBase::addToQuery(
+    const libMesh::Elem * elem,
+    std::unordered_map<processor_id_type, std::vector<dof_id_type>> & query_ids)
 {
-  std::vector<dof_id_type> key = ids;
-  std::sort(key.begin(), key.end());
-  key.erase(std::unique(key.begin(), key.end()), key.end());
-  return key;
-}
+  if (hasBlocks(elem->subdomain_id()) && elem->processor_id() != processor_id())
+    query_ids[elem->processor_id()].push_back(elem->id());
+};

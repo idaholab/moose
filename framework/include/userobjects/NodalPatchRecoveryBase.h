@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "ElementUserObject.h"
 
+class ElementSubdomainModifierBase;
+
 class NodalPatchRecoveryBase : public ElementUserObject
 {
 public:
@@ -51,18 +53,6 @@ public:
   void threadJoin(const UserObject &) override;
   void finalize() override;
 
-  /**
-   * @brief Synchronizes local matrices and vectors (_Ae, _be) across processors.
-   *
-   * If @p specific_elems is provided, only those elements will be synchronized.
-   * This is typically used when the monomial basis needs to be built from a
-   * specific patch, or a subset of that patch.
-   *
-   * If @p specific_elems is not provided, all ghosted evaluable elements are
-   * synchronized (default behavior).
-   */
-  void sync(const std::optional<std::vector<dof_id_type>> & specific_elems = std::nullopt);
-
   /// Returns the multi-index table
   const std::vector<std::vector<unsigned int>> & multiIndex() const { return _multi_index; }
 
@@ -73,19 +63,17 @@ protected:
   unsigned int _qp;
 
 private:
-  /// Builds a query map of element IDs that need data from other processors.
-  /// There are two modes of operation:
-  /// (1) If @p specific_elems is not provided: iterate over all semi-local
-  ///     evaluable elements (including ghost elements) and record those that
-  ///     belong to a different processor.
-  /// (2) If @p specific_elems is provided: only iterate over the given elements,
-  ///     and record those that belong to a different processor.
-  ///
-  /// This ensures that "semi-local evaluable elements" are synchronized in the default
-  /// case, while still allowing callers to explicitly request synchronization
-  /// for a targeted subset when needed.
+  /// Builds a query map of element IDs that require data from other processors.
+  /// @param specific_elems Only iterates over the provided elements and records
+  /// those belonging to a different processor.
   std::unordered_map<processor_id_type, std::vector<dof_id_type>>
-  gatherSendList(const std::optional<std::vector<dof_id_type>> & specific_elems = std::nullopt);
+  gatherSendList(const std::vector<dof_id_type> & specific_elems);
+
+  /// Builds a query map of element IDs that require data from other processors.
+  /// Iterates over all semi-local evaluable elements (including ghost elements) and records those
+  /// belonging to a different processor.
+  /// Ensures that all semi-local evaluable elements are properly synchronized.
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> gatherSendList();
 
   /**
    * Compute the P vector at a given point
@@ -100,6 +88,33 @@ private:
    * @param q_point point at which to evaluate the polynomial basis
    */
   RealEigenVector evaluateBasisFunctions(const Point & q_point) const;
+
+  /**
+   * @brief Synchronizes local matrices and vectors (_Ae, _be) across processors.
+   *
+   * @p specific_elems: the elements that will be synchronized.
+   * This is typically used when the monomial basis needs to be built from a
+   * specific patch, or a subset of that patch.
+   */
+  void sync(const std::vector<dof_id_type> & specific_elems);
+
+  /**
+   * @brief Synchronizes local matrices and vectors (_Ae, _be) across processors.
+   * all ghosted evaluable elements are synchronized.
+   */
+  void sync();
+
+  /**
+   * @brief Helper function to perform the actual communication of _Ae and _be.
+   */
+  void
+  syncHelper(const std::unordered_map<processor_id_type, std::vector<dof_id_type>> & query_ids);
+
+  /**
+   * @brief Adds an element to the query map if it belongs to a different processor.
+   */
+  void addToQuery(const libMesh::Elem * elem,
+                  std::unordered_map<processor_id_type, std::vector<dof_id_type>> & query_ids);
 
   /// The polynomial order, default is variable order
   const unsigned int _patch_polynomial_order;
@@ -128,5 +143,5 @@ private:
   /// @brief The processor IDs vector in the running
   std::vector<int> _proc_ids;
 
-  std::vector<dof_id_type> removeDuplicates(const std::vector<dof_id_type> & ids) const;
+  friend class ElementSubdomainModifierBase;
 };
