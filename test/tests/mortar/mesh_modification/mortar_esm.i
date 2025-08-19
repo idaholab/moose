@@ -1,38 +1,21 @@
 [Mesh]
   [file]
     type = FileMeshGenerator
-    file = '../continuity-2d-conforming/2blk-conf.e'
-  []
-  [rename]
-    type = RenameBlockGenerator
-    input = file
-    old_block = '1 2'
-    new_block = '0 1'
-  []
-  [rename_bdy]
-    type = RenameBoundaryGenerator
-    new_boundary = 'left top right bottom'
-    old_boundary = '1 2 3 4'
-    input = rename
+    file = 'gold/2blk-conf.msh'
   []
   [secondary]
     type = LowerDBlockFromSidesetGenerator
-    input = rename_bdy
-    sidesets = '101'
-    new_block_id = '10001'
+    input = file
+    sidesets = 'lower_half_internal_boundary'
+    new_block_id = '101'
     new_block_name = 'secondary_lower'
   []
   [primary]
     type = LowerDBlockFromSidesetGenerator
     input = secondary
-    sidesets = '100'
-    new_block_id = '10000'
+    sidesets = 'upper_half_internal_boundary'
+    new_block_id = '102'
     new_block_name = 'primary_lower'
-  []
-  [separate_elements]
-    type = MeshRepairGenerator
-    input = primary
-    separate_blocks_by_element_types = true
   []
   patch_update_strategy = ITERATION
   # for consistent CSV output
@@ -40,64 +23,45 @@
   second_order = true
 []
 
-# Turn on displaced mesh everywhere
 [GlobalParams]
-  use_displaced_mesh = true
+  use_displaced_mesh = false
   displacements = 'disp_x disp_y'
 []
 
 # Pre-declare future subdomain
 [Mesh]
-  add_subdomain_ids = '2 10002'
+  add_subdomain_names = 'null null_lower'
+  add_subdomain_ids = '3 103'
 []
+
 [Problem]
   kernel_coverage_check = false
 []
 
 [MeshModifiers]
   # Change the subdomains on every time step, starting from the bottom
-  # See 'rising_from_bottom' for the variable guiding the subdomain changes
-  [inactivate_regular_elems_from_the_bottom]
+  # See 'entering_from_left' for the variable guiding the subdomain changes
+  [deactivate_regular_elems]
     type = CoupledVarThresholdElementSubdomainModifier
-    coupled_var = 'rising_from_bottom'
+    coupled_var = 'entering_from_left'
     criterion_type = 'ABOVE'
     threshold = 0.5
-    block = '0 1'
-    # subdomain 2 is inactive, no variables defined on it
-    subdomain_id = 2
+    block = '1 2'
+    # subdomain 3 is inactive, no variables defined on it
+    subdomain_id = 3
+    moving_boundary_subdomain_pairs = '2 1; 1 2; 1; 2'
+    moving_boundaries = 'upper_half_internal_boundary lower_half_internal_boundary lower_half_external_boundary upper_half_external_boundary'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
     execution_order_group = '0'
   []
-  [inactivate_lowerD_elems_from_the_bottom]
+  [deactivate_lowerD_elems]
     type = CoupledVarThresholdElementSubdomainModifier
-    coupled_var = 'rising_from_bottom'
+    coupled_var = 'entering_from_left'
     criterion_type = 'ABOVE'
     threshold = 0.5
-    block = '10000 10001'
-    # subdomain 10002 is inactive, no variables defined on it
-    subdomain_id = 10002
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
-    execution_order_group = '2'
-  []
-  # Update the sidesets between domain 1 and 2 as we change the mesh
-  # Otherwise we would execute the mortar constraints by block 2, where u is not defined
-  [update_boundary_100]
-    type = SidesetAroundSubdomainUpdater
-    update_boundary_name = 100
-    inner_subdomains = '1'
-    outer_subdomains = '0'
-    use_displaced_mesh = true
-    assign_outer_surface_sides = false
-    execute_on = 'INITIAL TIMESTEP_BEGIN'
-    execution_order_group = '1'
-  []
-  [update_boundary_101]
-    type = SidesetAroundSubdomainUpdater
-    update_boundary_name = 101
-    inner_subdomains = '0'
-    outer_subdomains = '1'
-    use_displaced_mesh = true
-    assign_outer_surface_sides = false
+    block = '101 102'
+    # subdomain 103 is inactive, no variables defined on it
+    subdomain_id = 103
     execute_on = 'INITIAL TIMESTEP_BEGIN'
     execution_order_group = '1'
   []
@@ -118,7 +82,7 @@
   [u]
     order = SECOND
     family = LAGRANGE
-    block = '0 1'
+    block = 'lower_half upper_half'
   []
   [lambda]
     order = FIRST
@@ -130,29 +94,31 @@
 [Kernels]
   [diff]
     type = Diffusion
-    variable = u
+    variable = 'u'
+    block = 'lower_half upper_half'
   []
   [ffn]
     type = BodyForce
-    variable = u
-    function = ffn
+    variable = 'u'
+    function = 'ffn'
+    block = 'lower_half upper_half'
   []
 []
 
 [Constraints]
   [equal]
     type = EqualValueConstraint
-    variable = lambda
+    variable = 'lambda'
     secondary_variable = 'u'
-    primary_boundary = 100
-    primary_subdomain = 10000
-    secondary_boundary = 101
-    secondary_subdomain = 10001
+    primary_boundary = 'upper_half_internal_boundary'
+    primary_subdomain = 'primary_lower'
+    secondary_boundary = 'lower_half_internal_boundary'
+    secondary_subdomain = 'secondary_lower'
   []
 []
 
 [AuxVariables]
-  [rising_from_bottom]
+  [entering_from_left]
     order = CONSTANT
     family = MONOMIAL
     [AuxKernel]
@@ -160,7 +126,8 @@
       expression = 'if(t > x * 4, 1, 0)'
       use_xyzt = true
       # both full-dimensional and low-dimensional should change subdomains
-      block = '0 1 10000 10001'
+      block = 'lower_half upper_half secondary_lower primary_lower'
+      execute_on = 'INITIAL TIMESTEP_BEGIN'
     []
   []
   [disp_x]
@@ -174,31 +141,34 @@
 [BCs]
   [all]
     type = FunctionDirichletBC
-    variable = u
-    boundary = 'right left top bottom'
-    function = exact_sln
+    variable = 'u'
+    boundary = 'lower_half_external_boundary upper_half_external_boundary'
+    function = 'exact_sln'
   []
 []
 
 [Postprocessors]
   [l2_error]
     type = ElementL2Error
-    variable = u
-    function = exact_sln
-    block = '0 1'
-    execute_on = 'initial timestep_end'
+    variable = 'u'
+    function = 'exact_sln'
+    block = 'lower_half upper_half'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
-  [vol_0]
+  [vol_lower_half]
     type = VolumePostprocessor
-    block = 0
+    block = 'lower_half'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
-  [vol_1]
+  [vol_upper_half]
     type = VolumePostprocessor
-    block = 1
+    block = 'upper_half'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
-  [vol_2]
+  [vol_null]
     type = VolumePostprocessor
-    block = 2
+    block = 'null'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 
@@ -207,7 +177,6 @@
     type = SMP
     full = true
     solve_type = 'NEWTON'
-    # Default PC fails at 14 MPI
     petsc_options_iname = '-pc_type -pc_factor_shift_type'
     petsc_options_value = 'lu NONZERO'
   []
@@ -217,6 +186,7 @@
   type = Transient
   num_steps = 3
   nl_abs_tol = 1e-12
+  nl_rel_tol = 1e-11
 
   dtmin = 1
 []
@@ -237,7 +207,7 @@
     extrema_type = 'MAX'
     # only 8 nodes on final step
     num_extrema = 8
-    block = '0 1'
-    execute_on = 'timestep_end'
+    block = 'lower_half upper_half'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
