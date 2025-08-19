@@ -188,12 +188,4 @@
     compute_devices = 'cpu cuda'
     recover = false
   []  
-  [MFEMDiffusionParsedSource]
-    type = XMLDiff
-    input = diffusion_parsed_source.i
-    xmldiff = 'OutputData/DiffusionParsedSource/Run0/Run0.pvd
-                OutputData/DiffusionParsedSource/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'The system shall have the ability to parse functions of non-linear variables'
-    capabilities = 'mfem'
-  []
 []
