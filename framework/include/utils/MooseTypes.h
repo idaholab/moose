@@ -991,6 +991,23 @@ typedef std::function<void(const InputParameters &, InputParameters &)>
 
 std::string stringify(const Moose::RelationshipManagerType & t);
 std::string stringify(const Moose::TimeIntegratorType & t);
+
+/**
+ * Base class that all derivative string classes are derived from so
+ * that they can be identified
+ */
+struct DerivativeString
+{
+};
+
+/**
+ * Class that derivative string classes that _do_ allow spaces during
+ * parsing derive from
+ */
+struct DerivativeStringAllowSpaces
+{
+};
+
 } // namespace Moose
 
 namespace libMesh
@@ -1002,8 +1019,6 @@ print_helper(std::ostream & os, const Moose::RelationshipManagerType * param)
   // Specialization so that we don't print out unprintable characters
   os << Moose::stringify(*param);
 }
-
-// End of Moose Namespace
 }
 
 template <>
@@ -1020,8 +1035,8 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
  * Be sure to use the DerivativeStringToJSON macro for new types in
  * MooseTypes.C to also define to_json for each
  */
-#define DerivativeStringClass(TheName)                                                             \
-  class TheName : public std::string                                                               \
+#define DerivativeStringClass(TheName, ...)                                                        \
+  class TheName : public std::string, Moose::DerivativeString, ##__VA_ARGS__                       \
   {                                                                                                \
   public:                                                                                          \
     TheName() : std::string() {}                                                                   \
@@ -1099,7 +1114,7 @@ DerivativeStringClass(VectorPostprocessorName);
 DerivativeStringClass(MeshDivisionName);
 
 /// This type is used for objects that expect Moose Function objects
-DerivativeStringClass(FunctionName);
+DerivativeStringClass(FunctionName, Moose::DerivativeStringAllowSpaces);
 
 /// This type is used for objects that expect Moose Distribution objects
 DerivativeStringClass(DistributionName);
@@ -1159,7 +1174,7 @@ DerivativeStringClass(TimesName);
 DerivativeStringClass(ExecutorName);
 
 /// ParsedFunction/ParsedMaterial etc. FParser expression
-DerivativeStringClass(ParsedFunctionExpression);
+DerivativeStringClass(ParsedFunctionExpression, Moose::DerivativeStringAllowSpaces);
 
 /// System name support of multiple nonlinear systems on the same mesh
 DerivativeStringClass(NonlinearSystemName);
@@ -1174,18 +1189,21 @@ DerivativeStringClass(LinearSystemName);
 DerivativeStringClass(SolverSystemName);
 
 /// Command line argument, specialized to handle quotes in vector arguments
-DerivativeStringClass(CLIArgString);
+DerivativeStringClass(CLIArgString, Moose::DerivativeStringAllowSpaces);
 
 #ifdef MOOSE_MFEM_ENABLED
 /**
  * Coefficients used in input for MFEM residual objects
  */
 ///@{
-DerivativeStringClass(MFEMScalarCoefficientName);
-DerivativeStringClass(MFEMVectorCoefficientName);
-DerivativeStringClass(MFEMMatrixCoefficientName);
+DerivativeStringClass(MFEMScalarCoefficientName, Moose::DerivativeStringAllowSpaces);
+DerivativeStringClass(MFEMVectorCoefficientName, Moose::DerivativeStringAllowSpaces);
+DerivativeStringClass(MFEMMatrixCoefficientName, Moose::DerivativeStringAllowSpaces);
 ///@}
 #endif
+
+#undef DerivativeStringClass
+
 /**
  * additional MOOSE typedefs
  */
