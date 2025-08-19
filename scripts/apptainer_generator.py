@@ -483,7 +483,7 @@ class ApptainerGenerator:
         vars = {
             'LIBRARY': self.args.library,
             'NAME': self.name,
-            'SUMMARY': name_summary,
+            'NAME_SUMMARY': name_summary,
             'TAG': self.tag,
             'VERSION': self.version,
             'MOOSE_VERSION': self.git_repo_sha(MOOSE_DIR)
