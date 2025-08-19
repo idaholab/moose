@@ -131,6 +131,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         exit 1
     fi
 
+    # Special runtime setup for OpenMPI, which can have issues when
+    # running a binary with a fakeroot-ed tmpdir (or something like that)
+    if which ompi_info &> /dev/null; then
+        export TMPDIR=${TEMP_LOC}/tmpdir
+        mkdir $TMPDIR
+    fi
+
     # Delete the things that we don't need, and capture the configure args
     # if we do need them
     EXTRA_MOOSE_OPTIONS=()
