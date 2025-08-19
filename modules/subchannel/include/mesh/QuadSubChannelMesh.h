@@ -82,10 +82,10 @@ public:
   /// Number of subchannels in the -y direction
   virtual const unsigned int & getNy() const { return _ny; }
   /**
-   * Returns the gap, not to be confused with the gap between pins, this refers to the gap
+   * Returns the side gap, not to be confused with the gap between pins, this refers to the gap
    * next to the duct. Edge Pitch W = (pitch/2 - pin_diameter/2 + gap) [m]
    */
-  const Real & getGap() const { return _gap; }
+  const Real & getSideGap() const { return _side_gap; }
 
   unsigned int getSubchannelIndexFromPoint(const Point & p) const override;
   virtual unsigned int channelIndex(const Point & point) const override;
@@ -115,10 +115,11 @@ protected:
   /// Number of pins
   unsigned int _n_pins;
   /**
-   * The gap, not to be confused with the gap between pins, this refers to the gap
-   * next to the duct. Edge Pitch W = (pitch/2 - pin_diameter/2 + gap) [m]
+   * The side gap, not to be confused with the gap between pins, this refers to the gap
+   * next to the duct or else the distance between the subchannel centroid to the duct wall.
+   * Edge Pitch W = (pitch/2 - pin_diameter/2 + gap) [m]
    */
-  Real _gap;
+  Real _side_gap;
   /// vector of subchannel nodes
   std::vector<std::vector<Node *>> _nodes;
   /// vector of fuel pin nodes
