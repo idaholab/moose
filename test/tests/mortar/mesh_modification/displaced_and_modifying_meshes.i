@@ -37,6 +37,7 @@
   patch_update_strategy = ITERATION
   # for consistent CSV output
   allow_renumbering = false
+  second_order = true
 []
 
 # Turn on displaced mesh everywhere
@@ -115,7 +116,7 @@
 
 [Variables]
   [u]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
     block = '0 1'
   []
@@ -163,8 +164,10 @@
     []
   []
   [disp_x]
+    order = SECOND
   []
   [disp_y]
+    order = SECOND
   []
 []
 
