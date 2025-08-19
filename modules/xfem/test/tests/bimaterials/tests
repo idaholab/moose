@@ -66,4 +66,21 @@
     design = 'LevelSetBiMaterialRankTwo.md'
     issues = '#15437'
   [../]
+  [glued_bimaterial_ad_constraint]
+    type = Exodiff
+    input = glued_bimaterials_2d.i
+    exodiff = 'glued_bimaterials_2d_out.e'
+    abs_zero = 1e-8
+    cli_args = 'Constraints/dispx_constraint/type=ADXFEMSingleVariableConstraint Constraints/dispy_constraint/type=ADXFEMSingleVariableConstraint'
+    use_old_floor = true
+    map = false
+    capabilities = 'unique_id'
+    requirement = 'The XFEM module shall have the capability to calculate '
+                  'mechanical response in two glued, layered materials with '
+                  'the interface location and material properties applied to '
+                  'on each side of the boundary determined by a level set '
+                  'function using an AD constraint.'
+    design = 'LevelSetCutUserObject.md XFEMSingleVariableConstraint.md'
+    issues = '#30998'
+  []
 []

@@ -49,7 +49,7 @@
 #include "NodeFaceConstraint.h"
 #include "NodeElemConstraintBase.h"
 #include "MortarConstraint.h"
-#include "ElemElemConstraint.h"
+#include "ElemElemConstraintBase.h"
 #include "ScalarKernelBase.h"
 #include "Parser.h"
 #include "Split.h"
