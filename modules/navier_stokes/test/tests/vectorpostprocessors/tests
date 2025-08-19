@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#31211'
+  design = 'SideValueSampler.md'
+  [nu]
+    type = 'CSVDiff'
+    input = 'test.i'
+    csvdiff = 'side_value_sampler_fv_vpp_csv_side_sample_0001.csv'
+    requirement = 'The system shall accurately sample the Nusselt number on a boundary and output it in a csv file'
+    allow_warnings = true # parsed sideset generation isn't fully supported on distributed meshes
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]
