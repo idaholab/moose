@@ -1,6 +1,6 @@
 # ControllableInputTimes
 
-!syntax description /Times/DynamicInputTimes
+!syntax description /Times/ControllableInputTimes
 
 This object should be used to specify a time sequence dynamically updating during the simulation.
 
@@ -11,8 +11,8 @@ In the example, `RealFunctionControl` computes the next event time during the ru
 
 !listing test/tests/times/external_times.i
 
-!syntax parameters /Times/DynamicInputTimes
+!syntax parameters /Times/ControllableInputTimes
 
-!syntax inputs /Times/DynamicInputTimes
+!syntax inputs /Times/ControllableInputTimes
 
-!syntax children /Times/DynamicInputTimes
+!syntax children /Times/ControllableInputTimes
