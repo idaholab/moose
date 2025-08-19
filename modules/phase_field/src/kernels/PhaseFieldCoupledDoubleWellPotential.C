@@ -15,6 +15,7 @@ InputParameters
 PhaseFieldCoupledDoubleWellPotential::validParams()
 {
   InputParameters params = ADKernelValue::validParams();
+  params.addClassDescription("Double well potential for Cahn-Hilliard advection.");
   params.addRequiredCoupledVar("c", "phase field variable");
   params.addRequiredParam<Real>("prefactor", "prefactor for double well potential");
   return params;

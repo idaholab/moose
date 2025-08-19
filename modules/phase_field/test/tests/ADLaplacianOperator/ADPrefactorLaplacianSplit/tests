@@ -1,4 +1,6 @@
 [Tests]
+ issues = '#31300'
+ design = 'ADPrefactorLaplacianSplit.md'
  [ad_transient]
    type = 'Exodiff'
    input = 'ad_transient_prefactorLaplacianSplit.i'
