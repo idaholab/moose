@@ -74,6 +74,7 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   registerMooseObjectTask("add_covariance", CovarianceFunctionBase, false);
   addTaskDependency("add_covariance", "add_user_object");
   addTaskDependency("add_distribution", "add_covariance");
+
   // Mapping objects
   registerSyntaxTask("AddVariableMappingAction", "VariableMappings/*", "add_variable_mapping");
   registerMooseObjectTask("add_variable_mapping", VariableMappingBase, false);

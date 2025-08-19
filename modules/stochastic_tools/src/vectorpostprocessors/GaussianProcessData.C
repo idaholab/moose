@@ -8,6 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Stocastic Tools Includes
+
+#ifdef LIBTORCH_ENABLED
+
 #include "GaussianProcessData.h"
 
 registerMooseObject("StochasticToolsApp", GaussianProcessData);
@@ -54,3 +57,5 @@ GaussianProcessData::initialize()
     }
   }
 }
+
+#endif
