@@ -104,7 +104,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/DiffusionParsedSource
+    file_base = OutputData/FunctionParsedSource
     vtk_format = ASCII
   []
 []
