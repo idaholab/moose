@@ -25,7 +25,7 @@ public:
 protected:
   virtual void initialize() override {}
 
-  /// The next external time sequences to hit
+  /// The input times
   std::vector<Real> _input_times;
 
   /// Storage used when 'times' isn't provided

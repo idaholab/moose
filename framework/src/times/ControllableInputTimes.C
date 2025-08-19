@@ -16,8 +16,8 @@ ControllableInputTimes::validParams()
 {
   InputParameters params = InputTimes::validParams();
   params.addClassDescription("Times set directly from a user parameter in the input file");
-  params.addRequiredParam<Real>("nexttime", "Time to store in the times vector");
-  params.declareControllable("nexttime");
+  params.addRequiredParam<Real>("next_time", "Time to store in the times vector");
+  params.declareControllable("next_time");
 
   // Times are known for all processes already
   params.set<bool>("auto_broadcast") = false;
@@ -27,7 +27,7 @@ ControllableInputTimes::validParams()
 }
 
 ControllableInputTimes::ControllableInputTimes(const InputParameters & parameters)
-  : InputTimes(parameters), _nexttime(getParam<Real>("nexttime"))
+  : InputTimes(parameters), _next_time(getParam<Real>("next_time"))
 {
   // Initialize times array
   _times.push_back(0);
@@ -38,17 +38,11 @@ ControllableInputTimes::initialize()
 {
   std::set<Real> times_set;
   if (_input_times.size())
-  {
     for (Real & t : _input_times)
-    {
       times_set.insert(t);
-    }
-  }
 
-  times_set.insert(_nexttime);
+  times_set.insert(_next_time);
 
   for (Real t : times_set)
-  {
     _times.push_back(t);
-  }
 }
