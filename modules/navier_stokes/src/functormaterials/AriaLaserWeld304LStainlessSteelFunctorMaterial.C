@@ -6,11 +6,11 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
+  
 #include "AriaLaserWeld304LStainlessSteelFunctorMaterial.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesTestApp", AriaLaserWeld304LStainlessSteelFunctorMaterial);
+registerMooseObject("NavierStokesApp", AriaLaserWeld304LStainlessSteelFunctorMaterial);
 
 InputParameters
 AriaLaserWeld304LStainlessSteelFunctorMaterial::validParams()

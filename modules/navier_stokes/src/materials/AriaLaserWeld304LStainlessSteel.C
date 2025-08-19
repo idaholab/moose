@@ -9,7 +9,7 @@
 
 #include "AriaLaserWeld304LStainlessSteel.h"
 
-registerMooseObject("NavierStokesTestApp", AriaLaserWeld304LStainlessSteel);
+registerMooseObject("NavierStokesApp", AriaLaserWeld304LStainlessSteel);
 
 InputParameters
 AriaLaserWeld304LStainlessSteel::validParams()
