@@ -12,7 +12,7 @@
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/diffusion_parsed_source.i block=Functions AuxVariables
+!listing test/tests/mfem/functions/function_parsed_source.i block=Functions AuxVariables
 
 !syntax parameters /Functions/MFEMParsedFunction
 
