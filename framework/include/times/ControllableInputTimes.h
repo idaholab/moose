@@ -13,7 +13,7 @@
 #include "InputTimes.h"
 
 /**
- * Simple times from an input parameter
+ * Times from an input parameter and from a value that is modified by Controls
  */
 class ControllableInputTimes : public InputTimes
 {
@@ -26,6 +26,6 @@ protected:
   virtual void initialize() override;
 
 private:
-  /// The next external time sequence to hit
-  const Real & _nexttime;
+  /// The controllable time attribute
+  const Real & _next_time;
 };

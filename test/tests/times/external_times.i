@@ -9,7 +9,7 @@
 [Times]
   [external_input]
     type = ControllableInputTimes
-    nexttime = 0.01
+    next_time = 0.01
     execute_on = 'initial timestep_end'
   []
 []
@@ -46,7 +46,7 @@
 [Controls]
   [func_control]
     type = RealFunctionControl
-    parameter = 'Times/external_input/nexttime'
+    parameter = 'Times/external_input/next_time'
     function = 'fake_external_time'
     execute_on = 'initial timestep_end'
   []
