@@ -32,13 +32,15 @@ SolutionTimeAdaptiveDT::validParams()
 
 SolutionTimeAdaptiveDT::SolutionTimeAdaptiveDT(const InputParameters & parameters)
   : TimeStepper(parameters),
-    _direction(getParam<int>("initial_direction")),
+    _direction(declareRestartableData<int>("direction", getParam<int>("initial_direction"))),
     _percent_change(getParam<Real>("percent_change")),
-    _older_sol_time_vs_dt(std::numeric_limits<Real>::max()),
-    _old_sol_time_vs_dt(std::numeric_limits<Real>::max()),
-    _sol_time_vs_dt(std::numeric_limits<Real>::max()),
+    _older_sol_time_vs_dt(
+        declareRestartableData<Real>("older_sol_time_vs_dt", std::numeric_limits<Real>::max())),
+    _old_sol_time_vs_dt(
+        declareRestartableData<Real>("old_sol_time_vs_dt", std::numeric_limits<Real>::max())),
+    _sol_time_vs_dt(
+        declareRestartableData<Real>("sol_time_vs_dt", std::numeric_limits<Real>::max())),
     _adapt_log(getParam<bool>("adapt_log"))
-
 {
   if ((_adapt_log) && (processor_id() == 0))
   {

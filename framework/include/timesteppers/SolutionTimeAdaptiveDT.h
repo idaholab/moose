@@ -39,13 +39,15 @@ protected:
    * Multiplier specifying the direction the timestep is currently going.
    * Positive for up.  Negative for down.
    */
-  short _direction;
+  int & _direction;
 
   /// Percentage to change the timestep by either way.
-  Real _percent_change;
+  const Real _percent_change;
 
   /// Ratios to control whether to increase or decrease the current timestep
-  Real _older_sol_time_vs_dt, _old_sol_time_vs_dt, _sol_time_vs_dt;
+  Real & _older_sol_time_vs_dt;
+  Real & _old_sol_time_vs_dt;
+  Real & _sol_time_vs_dt;
 
   /// Boolean to control whether a separate adapt log is written to a file
   bool _adapt_log;
