@@ -1,6 +1,6 @@
 # NEML2
 
-In addition to the MOOSE native material models, MOOSE can also seamlessly interface with the external material modeling library [NEML2](https://github.com/applied-material-modeling/neml2) [!cite](neml2osti,osti_1961125).
+In addition to the MOOSE native material models, MOOSE can also seamlessly interface with the external material modeling library [NEML2](https://github.com/applied-material-modeling/neml2) [!cite](neml2softwarex,neml2osti,osti_1961125).
 
 NEML2, the New Engineering Material modeling Library, version 2, is an offshoot of [NEML](https://github.com/Argonne-National-Laboratory/neml), an earlier material modeling code developed at Argonne National Laboratory. the library is provided as open source software under a MIT license.
 
@@ -14,7 +14,7 @@ NEML2 depends on libtorch. See the [libtorch installation guide](getting_started
 If libtorch was downloaded/installed to a non-default location, it is a good idea to set the environment variable `LIBTORCH_DIR` to make sure the same libtorch installation is consistently used throughout the build process.
 
 ```bash
-export LIBTORCH=/path/to/libtorch
+export LIBTORCH_DIR=/path/to/libtorch
 ```
 
 !alert-end!
@@ -54,6 +54,21 @@ Please refer to the [NEML2 syntax](syntax/NEML2/index.md) documentation for more
 ## Citing NEML2
 
 ```text
+@article{neml2softwarex,
+  title = {NEML2: An efficient and modular multiphysics constitutive modeling library for hybrid computing environments},
+  journal = {SoftwareX},
+  volume = {31},
+  pages = {102302},
+  year = {2025},
+  issn = {2352-7110},
+  doi = {https://doi.org/10.1016/j.softx.2025.102302},
+  url = {https://www.sciencedirect.com/science/article/pii/S2352711025002687},
+  author = {Tianchen Hu and Mark C. Messner},
+  keywords = {Constitutive model, GPU, Multiphysics}
+}
+```
+
+```text
 @techreport{neml2osti,
   author      = {Tianchen Hu and Mark C.  Messner and Daniel Schwen and Lynn B.  Munday and Dewen Yushu},
   title       = {NEML2: A High Performance Library for Constitutive Modeling},
@@ -64,7 +79,9 @@ Please refer to the [NEML2 syntax](syntax/NEML2/index.md) documentation for more
   year        = {2024},
   month       = {09}
 }
+```
 
+```text
 @misc{osti_1961125,
   author = {MESSNER, MARK and HU, TIANCHEN and US DOE NE-NEAMS},
   title  = {NEML2 - THE NEW ENGINEERING MATERIAL MODEL LIBRARY, VERSION 2},
