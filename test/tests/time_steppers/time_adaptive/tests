@@ -6,15 +6,6 @@
 
     design = 'Executioner/TimeStepper/index.md'
     issues = '#2288 #18863'
-    requirement = 'The system shall support the ability to select time step sizes based upon the '
-                  'ratio of the real (wall) time of the solve and the size of the time step.'
-
-    # The tested object relies on walltime elapsed for each step. Under valgrind
-    # the execution slows down so much that the set delays in SlowProblem become
-    # small compared to the overall execution overhead and the test fails.
-    valgrind = NONE
-
-    # HPC runtime isn't reliable enough
-    hpc = false
+    requirement = 'The system shall support the ability to select time step sizes based upon the ratio of the real (wall) time of the solve and the size of the time step.'
   []
 []

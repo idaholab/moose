@@ -29,6 +29,9 @@ public:
   virtual void rejectStep() override;
 
 protected:
+  /// Take a step and record the elapsed time
+  virtual std::chrono::milliseconds::rep stepAndRecordElapsedTime();
+
   virtual Real computeInitialDT() override;
   virtual Real computeDT() override;
 
