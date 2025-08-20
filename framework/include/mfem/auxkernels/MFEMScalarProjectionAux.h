@@ -16,14 +16,14 @@
 /**
  * Projects a scalar coefficient onto a scalar-valued aux variable.
  */
-class MFEMScalarProjectAux : public MFEMAuxKernel
+class MFEMScalarProjectionAux : public MFEMAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMScalarProjectAux(const InputParameters & parameters);
+  MFEMScalarProjectionAux(const InputParameters & parameters);
 
-  virtual ~MFEMScalarProjectAux() = default;
+  virtual ~MFEMScalarProjectionAux() = default;
 
   virtual void execute() override;
 

@@ -9,12 +9,12 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMVectorProjectAux.h"
+#include "MFEMVectorProjectionAux.h"
 
-registerMooseObject("MooseApp", MFEMVectorProjectAux);
+registerMooseObject("MooseApp", MFEMVectorProjectionAux);
 
 InputParameters
-MFEMVectorProjectAux::validParams()
+MFEMVectorProjectionAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription("Projects a vector coefficient onto a vector MFEMVariable.");
@@ -23,13 +23,13 @@ MFEMVectorProjectAux::validParams()
   return params;
 }
 
-MFEMVectorProjectAux::MFEMVectorProjectAux(const InputParameters & parameters)
+MFEMVectorProjectionAux::MFEMVectorProjectionAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters), _vec_coef(getVectorCoefficient("vector_coefficient"))
 {
 }
 
 void
-MFEMVectorProjectAux::execute()
+MFEMVectorProjectionAux::execute()
 {
   _result_var = 0.0;
   _result_var.ProjectCoefficient(_vec_coef);

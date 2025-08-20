@@ -1,10 +1,10 @@
-# MFEMVectorProjectAux
+# MFEMVectorProjectionAux
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /AuxKernels/MFEMVectorProjectAux
+!syntax description /AuxKernels/MFEMVectorProjectionAux
 
 ## Overview
 
@@ -14,11 +14,11 @@ AuxKernel for projecting a vector coefficient onto an MFEM variable.
 
 !listing mfem/auxkernels/projection.i block=/AuxKernels
 
-!syntax parameters /AuxKernels/MFEMVectorProjectAux
+!syntax parameters /AuxKernels/MFEMVectorProjectionAux
 
-!syntax inputs /AuxKernels/MFEMVectorProjectAux
+!syntax inputs /AuxKernels/MFEMVectorProjectionAux
 
-!syntax children /AuxKernels/MFEMVectorProjectAux
+!syntax children /AuxKernels/MFEMVectorProjectionAux
 
 !if-end!
 

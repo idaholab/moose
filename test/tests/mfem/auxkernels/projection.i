@@ -62,7 +62,7 @@
 
 [AuxKernels]
   [J]
-    type = MFEMScalarProjectAux
+    type = MFEMScalarProjectionAux
     variable = J
     coefficient = J_source
   []
@@ -72,7 +72,7 @@
     source = Az
   []
   [GAz(copy)]
-    type = MFEMVectorProjectAux
+    type = MFEMVectorProjectionAux
     variable = GAz(copy)
     vector_coefficient = GAz
   []
