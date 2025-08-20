@@ -22,10 +22,13 @@
 #include "FileLineInfo.h"
 #include "CommandLine.h"
 #include "Parser.h"
+#include "FEProblemBase.h"
+#include "PiecewiseBase.h"
 #include "pcrecpp.h"
 #include "hit/hit.h"
 #include "wasphit/HITInterpreter.h"
 #include "waspcore/utils.h"
+#include "waspplot/CustomPlotSerialization.h"
 #include <algorithm>
 #include <vector>
 #include <sstream>
@@ -37,19 +40,15 @@ MooseServer::MooseServer(MooseApp & moose_app)
     _connection(std::make_shared<wasp::lsp::IOStreamConnection>(this)),
     _formatting_tab_size(0)
 {
-  // set server capabilities to receive full input text when changed
-  server_capabilities[wasp::lsp::m_text_doc_sync] = wasp::DataObject();
-  server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_open_close] = true;
-  server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_change] = wasp::lsp::m_change_full;
-
-  // notify completion, symbol, formatting, definition capabilities support
-  server_capabilities[wasp::lsp::m_completion_provider] = wasp::DataObject();
-  server_capabilities[wasp::lsp::m_completion_provider][wasp::lsp::m_resolve_provider] = false;
-  server_capabilities[wasp::lsp::m_doc_symbol_provider] = true;
-  server_capabilities[wasp::lsp::m_doc_format_provider] = true;
-  server_capabilities[wasp::lsp::m_definition_provider] = true;
-  server_capabilities[wasp::lsp::m_references_provider] = true;
-  server_capabilities[wasp::lsp::m_hover_provider] = true;
+  // add all implemented server capabilities to notify client in initialize
+  enableFullSync();
+  enableSymbols();
+  enableCompletion();
+  enableDefinition();
+  enableReferences();
+  enableFormatting();
+  enableHover();
+  enableExtension("plotting");
 }
 
 bool
@@ -1617,6 +1616,121 @@ MooseServer::getRequiredParamsText(const std::string & subblock_path,
   }
 
   return required_param_text;
+}
+
+bool
+MooseServer::gatherExtensionResponses(wasp::DataArray & extensionResponses,
+                                      const std::string & extensionMethod,
+                                      int line,
+                                      int character)
+{
+  // use appropriate method to fill response based on extension method name
+  bool pass = true;
+  if (extensionMethod == "plotting")
+    pass = gatherPlottingResponses(extensionResponses, line, character);
+  return pass;
+}
+
+bool
+MooseServer::gatherPlottingResponses(wasp::DataArray & plottingResponses, int line, int character)
+{
+  // return without adding any plot response objects if parser root is null
+  auto root_ptr = queryRoot();
+  if (!root_ptr)
+    return true;
+  auto & root = *root_ptr;
+
+  // find hit node for zero based request line and column number from input
+  wasp::HITNodeView view_root = root.getNodeView();
+  wasp::HITNodeView request_context =
+      wasp::findNodeUnderLineColumn(view_root, line + 1, character + 1);
+
+  // get object context and value of type parameter for request if provided
+  wasp::HITNodeView object_context = request_context;
+  while (object_context.type() != wasp::OBJECT && object_context.has_parent())
+    object_context = object_context.parent();
+  const std::string & object_name = object_context.name();
+  wasp::HITNodeView type_node = object_context.first_child_by_name("type");
+  const std::string & object_type =
+      type_node.is_null() ? "" : wasp::strip_quotes(hit::extractValue(type_node.data()));
+
+  // get problem from action warehouse and return without any plots if null
+  std::shared_ptr<FEProblemBase> & problem = getCheckApp().actionWarehouse().problemBase();
+  if (!problem)
+    return true;
+
+  // return without any plots added when request is not from function block
+  if (!problem->hasFunction(object_name))
+    return true;
+
+  // get function from problem and return with no plots added if wrong type
+  const auto * pw_func = dynamic_cast<const PiecewiseBase *>(&problem->getFunction(object_name));
+  if (!pw_func)
+    return true;
+
+  // return without adding plot response objects when function size is zero
+  if (pw_func->functionSize() == 0)
+    return true;
+
+  // walk over piecewise function and gather keys and values for line graph
+  std::vector<double> graph_keys, graph_vals;
+  for (std::size_t i = 0; i < pw_func->functionSize(); i++)
+  {
+    graph_keys.push_back(pw_func->domain(i));
+    graph_vals.push_back(pw_func->range(i));
+  }
+
+  // build CustomPlot object from function data then serialize for response
+  std::string plot_title = object_name + " " + object_type + " Function";
+  wasp::CustomPlot plot_object;
+  buildLineGraphPlot(plot_object, plot_title, graph_keys, graph_vals);
+  plottingResponses.push_back(wasp::serializeCustomPlot(plot_object));
+
+  return true;
+}
+
+void
+MooseServer::buildLineGraphPlot(wasp::CustomPlot & plot_object,
+                                const std::string & plot_title,
+                                const std::vector<double> & graph_keys,
+                                const std::vector<double> & graph_vals)
+{
+  // axis ranges
+  double min_key = *std::min_element(graph_keys.begin(), graph_keys.end());
+  double max_key = *std::max_element(graph_keys.begin(), graph_keys.end());
+  double min_val = *std::min_element(graph_vals.begin(), graph_vals.end());
+  double max_val = *std::max_element(graph_vals.begin(), graph_vals.end());
+
+  // plot setup
+  plot_object.title().text(plot_title);
+  plot_object.title().font().pointsize(18);
+  plot_object.title().visible(true);
+  plot_object.legend().visible(false);
+
+  // plot x-axis
+  plot_object.x1Axis().label("abscissa values");
+  plot_object.x1Axis().rangeMin(min_key);
+  plot_object.x1Axis().rangeMax(max_key);
+  plot_object.x1Axis().scaleType(wasp::CustomPlot::stLinear);
+  plot_object.x1Axis().labelType(wasp::CustomPlot::ltNumber);
+  plot_object.x1Axis().labelFont().pointsize(18);
+  plot_object.x1Axis().tickLabelFont().pointsize(16);
+
+  // plot y-axis
+  plot_object.y1Axis().label("ordinate values");
+  plot_object.y1Axis().rangeMin(min_val);
+  plot_object.y1Axis().rangeMax(max_val);
+  plot_object.y1Axis().scaleType(wasp::CustomPlot::stLinear);
+  plot_object.y1Axis().labelType(wasp::CustomPlot::ltNumber);
+  plot_object.y1Axis().labelFont().pointsize(18);
+  plot_object.y1Axis().tickLabelFont().pointsize(16);
+
+  // graph series
+  auto line_graph = std::make_shared<wasp::CustomPlot::Graph>();
+  line_graph->keys() = graph_keys;
+  line_graph->values() = graph_vals;
+  line_graph->scatterShape(wasp::CustomPlot::ssDisc);
+  plot_object.series().push_back(line_graph);
 }
 
 const hit::Node *
