@@ -19,12 +19,15 @@
 #include "waspcore/Object.h"
 #include "wasplsp/LSP.h"
 #include "wasplsp/SymbolIterator.h"
+#include "waspplot/CustomPlotFile.h"
+#include "waspplot/CustomPlotSerialization.h"
 #include <string>
 #include <sstream>
 #include <memory>
 #include <vector>
 #include <fstream>
 #include <cstdio>
+#include <filesystem>
 
 class MooseServerTest : public ::testing::Test
 {
@@ -187,8 +190,8 @@ protected:
   void format_locations(const wasp::DataArray & locations_array,
                         std::ostringstream & locations_stream) const
   {
-    std::string uri_pattern = "(" + std::string(wasp::lsp::m_uri_prefix) + ")(/.*/framework/)(.*)";
-    std::string uri_replace = "\\1...absolute.../framework/\\3";
+    auto uri_pattern = "(" + std::string(wasp::lsp::m_uri_prefix) + ")(.*/)(framework/.*|unit/.*)";
+    auto uri_replace = "\\1...absolute.../\\3";
 
     std::size_t locations_size = locations_array.size();
 
@@ -331,11 +334,64 @@ protected:
     EXPECT_EQ(expect_text, actual_text);
   }
 
-  // create moose_unit_app and moose_server to persist for reuse between tests
+  // build plotting request, handle request with server, and check response
+  void check_plotting(int request_id,
+                      const std::string & request_uri,
+                      int request_line,
+                      int request_char,
+                      const std::string & expect_title,
+                      const std::vector<double> & expect_keys,
+                      const std::vector<double> & expect_vals,
+                      double expect_xaxis_range_min,
+                      double expect_xaxis_range_max,
+                      double expect_yaxis_range_min,
+                      double expect_yaxis_range_max) const
+  {
+    // build plotting extension request for server with provided parameters
+    wasp::DataObject ext_request;
+    std::stringstream ext_errors;
+    std::string ext_method = "plotting";
+    EXPECT_TRUE(wasp::lsp::buildExtensionRequest(
+        ext_request, ext_errors, ext_method, request_id, request_uri, request_line, request_char));
+    EXPECT_TRUE(ext_errors.str().empty());
+
+    // handle plotting extension request built from parameters using server
+    wasp::DataObject ext_response;
+    EXPECT_TRUE(moose_server->handleExtensionRequest(ext_method, ext_request, ext_response));
+    EXPECT_TRUE(moose_server->getErrors().empty());
+
+    // dissect server plotting extension response and get CustomPlot object
+    std::stringstream response_errors;
+    int response_id;
+    wasp::DataArray ext_array;
+    EXPECT_TRUE(
+        wasp::lsp::dissectExtensionResponse(ext_response, response_errors, response_id, ext_array));
+    EXPECT_TRUE(response_errors.str().empty());
+    EXPECT_EQ(request_id, response_id);
+    EXPECT_EQ(1u, ext_array.size());
+    auto check_plot = wasp::deserializeCustomPlot(*(ext_array.at(0).to_object()));
+
+    // check dissected values of CustomPlot response object built by server
+    EXPECT_EQ(expect_title, check_plot->title().text());
+    EXPECT_TRUE(check_plot->x1Axis().hasRangeMin());
+    EXPECT_TRUE(check_plot->x1Axis().hasRangeMax());
+    EXPECT_TRUE(check_plot->y1Axis().hasRangeMin());
+    EXPECT_TRUE(check_plot->y1Axis().hasRangeMax());
+    EXPECT_EQ(expect_xaxis_range_min, check_plot->x1Axis().rangeMin());
+    EXPECT_EQ(expect_xaxis_range_max, check_plot->x1Axis().rangeMax());
+    EXPECT_EQ(expect_yaxis_range_min, check_plot->y1Axis().rangeMin());
+    EXPECT_EQ(expect_yaxis_range_max, check_plot->y1Axis().rangeMax());
+    EXPECT_EQ(1u, check_plot->series().size());
+    EXPECT_EQ(expect_keys, check_plot->series()[0]->keys());
+    EXPECT_EQ(expect_vals, check_plot->series()[0]->values());
+  }
+
+  // create moose_unit_app, moose_server, and test_input_path for all tests
   static void SetUpTestCase()
   {
     moose_unit_app = Moose::createMooseApp("MooseUnitApp", 0, nullptr);
     moose_server = std::make_unique<MooseServer>(*moose_unit_app);
+    test_input_path = std::filesystem::current_path().string() + "/test.i";
   }
 
   // delete moose_unit_app and moose_server after all test runs have completed
@@ -345,14 +401,16 @@ protected:
     moose_server.reset();
   }
 
-  // statically declare moose_unit_app and moose_server for reuse across tests
+  // make sure moose_unit_app, moose_server, and test_input_path are static
   static std::shared_ptr<MooseApp> moose_unit_app;
   static std::unique_ptr<MooseServer> moose_server;
+  static std::string test_input_path;
 };
 
-// define moose_unit_app and moose_server that are declared as static in class
+// define moose_unit_app, moose_server, and test_input_path declared static
 std::shared_ptr<MooseApp> MooseServerTest::moose_unit_app;
 std::unique_ptr<MooseServer> MooseServerTest::moose_server;
+std::string MooseServerTest::test_input_path;
 
 TEST_F(MooseServerTest, InitializeAndInitialized)
 {
@@ -368,6 +426,10 @@ TEST_F(MooseServerTest, InitializeAndInitialized)
   complete_caps[wasp::lsp::m_compitem] = compitem_caps;
   textdoc_caps[wasp::lsp::m_comp] = complete_caps;
   client_caps[wasp::lsp::m_text_document] = textdoc_caps;
+
+  // enable plotting extension in client so server knows that it is allowed
+  client_caps[wasp::lsp::m_extensions_provider] = wasp::DataObject();
+  client_caps[wasp::lsp::m_extensions_provider]["plotting"] = true;
 
   // build initialize request with the test parameters
 
@@ -406,7 +468,7 @@ TEST_F(MooseServerTest, InitializeAndInitialized)
 
   EXPECT_EQ(request_id, response_id);
 
-  EXPECT_EQ(7u, server_capabilities.size());
+  EXPECT_EQ(8u, server_capabilities.size());
 
   EXPECT_TRUE(server_capabilities[wasp::lsp::m_text_doc_sync].is_object());
   const auto & text_doc_sync_caps = *(server_capabilities[wasp::lsp::m_text_doc_sync].to_object());
@@ -440,6 +502,13 @@ TEST_F(MooseServerTest, InitializeAndInitialized)
   EXPECT_TRUE(server_capabilities[wasp::lsp::m_hover_provider].is_bool());
   EXPECT_TRUE(server_capabilities[wasp::lsp::m_hover_provider].to_bool());
 
+  EXPECT_TRUE(server_capabilities[wasp::lsp::m_extensions_provider].is_object());
+  const auto & ext_caps = *(server_capabilities[wasp::lsp::m_extensions_provider].to_object());
+  EXPECT_EQ(1u, ext_caps.size());
+  EXPECT_TRUE(ext_caps.contains("plotting"));
+  EXPECT_TRUE(ext_caps["plotting"].is_bool());
+  EXPECT_TRUE(ext_caps["plotting"].to_bool());
+
   // build initialized notification which takes no extra parameters
 
   wasp::DataObject initialized_notification;
@@ -461,7 +530,7 @@ TEST_F(MooseServerTest, DocumentOpenAndDiagnostics)
 {
   // didopen test parameters - note input has error with variable u twice
 
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string document_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   std::string document_language_id = "test_language_id_string";
   int document_version = 1;
   std::string document_text_open = R"INPUT(
@@ -554,7 +623,7 @@ TEST_F(MooseServerTest, DocumentOpenAndSymbols)
   // symbols test parameters
 
   int request_id = 2;
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string document_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
 
   // build symbols request with the test parameters
 
@@ -679,7 +748,7 @@ TEST_F(MooseServerTest, DocumentChangeAndDiagnostics)
 {
   // didchange test parameters - note input has error with bad bcs boundary
 
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string document_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int document_version = 2;
   int start_line = -1;
   int start_character = -1;
@@ -783,7 +852,7 @@ TEST_F(MooseServerTest, DocumentChangeAndSymbols)
   // symbols test parameters
 
   int request_id = 3;
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string document_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
 
   // build symbols request with the test parameters
 
@@ -910,7 +979,7 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
 {
   // didchange test parameters - update input to set up autocomplete scenarios
 
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int doc_version = 3;
   std::string doc_text_change = R"INPUT(
 [Mesh]
@@ -1038,7 +1107,7 @@ label: Partitioner                            text: [Partitioner]\n  type = $1\n
 TEST_F(MooseServerTest, CompletionDocumentRootLevel)
 {
   // completion test parameters - at document root level outside of all blocks
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int request_id = 5;
   int request_line = 42;
   int request_char = 0;
@@ -1101,7 +1170,7 @@ label: VectorPostprocessors             text: [VectorPostprocessors]\n  $0\n[]  
 TEST_F(MooseServerTest, CompletionValueActiveBlocks)
 {
   // completion test parameters - on active parameter value in Variables block
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int request_id = 6;
   int request_line = 9;
   int request_char = 12;
@@ -1116,7 +1185,7 @@ label: v text: v desc: subblock name pos: [9.12]-[9.19] kind:  7 format: snippet
 TEST_F(MooseServerTest, CompletionValueBooleanParam)
 {
   // completion test parameters - on boolean value of solve param from Problem
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int request_id = 7;
   int request_line = 33;
   int request_char = 10;
@@ -1131,7 +1200,7 @@ label: true  text: true  desc:  pos: [33.10]-[33.15] kind:  8 format: snippet
 TEST_F(MooseServerTest, CompletionValueEnumsAndDocs)
 {
   // completion test parameters - on error_level enum in Terminator UserObject
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int request_id = 8;
   int request_line = 39;
   int request_char = 18;
@@ -1148,7 +1217,7 @@ label: WARNING text: WARNING desc: Output a warning ... pos: [39.18]-[39.22] kin
 TEST_F(MooseServerTest, CompletionValueAllowedTypes)
 {
   // completion test parameters - on type parameter value in Executioner block
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int request_id = 9;
   int request_line = 30;
   int request_char = 9;
@@ -1166,7 +1235,7 @@ label: Transient          text: Transient                            desc: Execu
 TEST_F(MooseServerTest, CompletionValueInputLookups)
 {
   // completion test parameters - on displacements parameter value in VacuumBC
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int request_id = 10;
   int request_line = 26;
   int request_char = 21;
@@ -1185,7 +1254,7 @@ TEST_F(MooseServerTest, DefinitionObjectTypeSource)
   // definition test parameters - on Transient.C defined object type Transient
 
   int request_id = 11;
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int line = 30;
   int character = 9;
 
@@ -1240,7 +1309,7 @@ TEST_F(MooseServerTest, DefinitionInputFileLookups)
   // definition test parameters - on AuxVariables defined displacements disp_x
 
   int request_id = 12;
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int line = 26;
   int character = 21;
 
@@ -1284,9 +1353,9 @@ TEST_F(MooseServerTest, DefinitionInputFileLookups)
   // expected locations with zero-based lines and columns
 
   std::string locations_expect = R"INPUT(
-document_uri: "file:///test/input/path"    location_start: [16.4]    location_end: [16.10]
-document_uri: "file:///test/input/path"    location_start: [17.7]    location_end: [17.13]
-document_uri: "file:///test/input/path"    location_start: [19.5]    location_end: [19.11]
+document_uri: "file://...absolute.../unit/test.i"    location_start: [16.4]    location_end: [16.10]
+document_uri: "file://...absolute.../unit/test.i"    location_start: [17.7]    location_end: [17.13]
+document_uri: "file://...absolute.../unit/test.i"    location_start: [19.5]    location_end: [19.11]
 )INPUT";
 
   EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
@@ -1295,7 +1364,7 @@ document_uri: "file:///test/input/path"    location_start: [19.5]    location_en
 TEST_F(MooseServerTest, HoverDocumentationRequests)
 {
   // check hover 01 - on boundary parameter key in BCs block of VacuumBC type
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int request_id = 13;
   int request_line = 24;
   int request_char = 10;
@@ -1341,7 +1410,7 @@ TEST_F(MooseServerTest, HoverDocumentationRequests)
 TEST_F(MooseServerTest, CompletionPartialInputCases)
 {
   // didchange test parameters - update for partial input completion checking
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int doc_version = 4;
   std::string doc_text_change = R"INPUT(
 [Mesh]
@@ -1460,7 +1529,7 @@ label: linear_residual_start_time text: linear_residual_start_time =           d
 TEST_F(MooseServerTest, DocumentReferencesRequest)
 {
   // didchange test parameters - update input to set up document references
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int doc_version = 5;
   std::string doc_text_change = R"INPUT(
 [Mesh]
@@ -1544,12 +1613,12 @@ TEST_F(MooseServerTest, DocumentReferencesRequest)
   std::ostringstream locations_actual;
   format_locations(locations_array, locations_actual);
   std::string locations_expect = R"INPUT(
-document_uri: "file:///test/input/path"    location_start: [6.3]    location_end: [6.4]
-document_uri: "file:///test/input/path"    location_start: [12.15]    location_end: [12.18]
-document_uri: "file:///test/input/path"    location_start: [19.15]    location_end: [19.16]
-document_uri: "file:///test/input/path"    location_start: [26.21]    location_end: [26.22]
-document_uri: "file:///test/input/path"    location_start: [26.25]    location_end: [26.26]
-document_uri: "file:///test/input/path"    location_start: [26.29]    location_end: [26.30]
+document_uri: "file://...absolute.../unit/test.i"    location_start: [6.3]    location_end: [6.4]
+document_uri: "file://...absolute.../unit/test.i"    location_start: [12.15]    location_end: [12.18]
+document_uri: "file://...absolute.../unit/test.i"    location_start: [19.15]    location_end: [19.16]
+document_uri: "file://...absolute.../unit/test.i"    location_start: [26.21]    location_end: [26.22]
+document_uri: "file://...absolute.../unit/test.i"    location_start: [26.25]    location_end: [26.26]
+document_uri: "file://...absolute.../unit/test.i"    location_start: [26.29]    location_end: [26.30]
 )INPUT";
   EXPECT_EQ(locations_expect, "\n" + locations_actual.str());
 }
@@ -1564,7 +1633,7 @@ TEST_F(MooseServerTest, DocumentFormattingRequest)
 
   // didchange test parameters - update input to set up document formatting
 
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int doc_version = 6;
   std::string doc_text_change = R"INPUT(
 
@@ -1762,7 +1831,7 @@ num_dim = 2
 TEST_F(MooseServerTest, DiagnosticsEmptyMessageSkip)
 {
   // didchange test parameters - create empty diagnostic which is not added
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
   int doc_version = 7;
   std::string doc_text_change = R"INPUT(
 [Mesh]
@@ -1804,6 +1873,297 @@ line:11 column:2 - no variable 'undefined' found for use in function parser expr
   EXPECT_EQ(diagnostics_list_expect, "\n" + diagnostics_list_actual.str());
 }
 
+TEST_F(MooseServerTest, PlottingExtensionRequests)
+{
+  // write csv files with data to disk that will be referenced by functions
+  std::ofstream csv_row_basic("csv_row_basic.csv");
+  csv_row_basic << R"INPUT(
+301, 302, 303, 304 # ignored comment
+3.1, 3.2, 3.3, 3.4 # ignored comment
+)INPUT";
+  csv_row_basic.close();
+  std::ofstream csv_col_basic("csv_col_basic.csv");
+  csv_col_basic << R"INPUT(
+401, 4.1 # ignored comment
+402, 4.2 # ignored comment
+403, 4.3 # ignored comment
+404, 4.4 # ignored comment
+)INPUT";
+  csv_col_basic.close();
+  std::ofstream csv_row_title("csv_row_title.csv");
+  csv_row_title << R"INPUT(
+heat, 5.1, 5.2, 5.3, 5.4 # ignored comment
+skip, 710, 720, 730, 740 # ignored comment
+time, 501, 502, 503, 504 # ignored comment
+)INPUT";
+  csv_row_title.close();
+  std::ofstream csv_col_index("csv_col_index.csv");
+  csv_col_index << R"INPUT(
+6.1, 810, 601 # ignored comment
+6.2, 820, 602 # ignored comment
+6.3, 830, 603 # ignored comment
+6.4, 840, 604 # ignored comment
+)INPUT";
+  csv_col_index.close();
+
+  // didchange test parameters - update input and prepare plotting requests
+  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  int doc_version = 8;
+  std::string doc_text_change = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 3
+[]
+[Functions]
+  [input_x_and_y]
+    type = PiecewiseLinear
+    x = '101 102 103 104 105 106 107 108'
+    y = '1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8'
+  []
+  [input_xy_data]
+    type = PiecewiseConstant
+    xy_data = '2.1 201
+               2.2 202
+               2.3 203
+               2.4 204
+               2.5 205
+               2.6 206
+               2.7 207
+               2.8 208'
+  []
+  [csv_row_basic]
+    type = PiecewiseLinear
+    data_file = csv_row_basic.csv
+    format = rows
+  []
+  [csv_col_basic]
+    type = PiecewiseConstant
+    data_file = csv_col_basic.csv
+    format = columns
+  []
+  [csv_row_title]
+    type = PiecewiseLinear
+    data_file = csv_row_title.csv
+    format = rows
+    xy_in_file_only = false
+    x_title = time
+    y_title = heat
+  []
+  [csv_col_index]
+    type = PiecewiseConstant
+    data_file = csv_col_index.csv
+    format = columns
+    xy_in_file_only = false
+    x_index_in_file = 2
+    y_index_in_file = 0
+  []
+[]
+[Variables]
+  [u]
+  []
+[]
+[BCs]
+  [bc_input_x_and_y_func]
+    type = FunctionDirichletBC
+    boundary = 0
+    variable = u
+    function = input_x_and_y
+  []
+  [bc_input_xy_data_func]
+    type = FunctionDirichletBC
+    boundary = 1
+    variable = u
+    function = input_xy_data
+  []
+  [bc_csv_row_basic_func]
+    type = FunctionDirichletBC
+    boundary = 2
+    variable = u
+    function = csv_row_basic
+  []
+  [bc_csv_col_basic_func]
+    type = FunctionDirichletBC
+    boundary = 3
+    variable = u
+    function = csv_col_basic
+  []
+  [bc_csv_row_title_func]
+    type = FunctionDirichletBC
+    boundary = 4
+    variable = u
+    function = csv_row_title
+  []
+  [bc_csv_col_index_func]
+    type = FunctionDirichletBC
+    boundary = 5
+    variable = u
+    function = csv_col_index
+  []
+[]
+[Kernels]
+  [diff]
+    type = Diffusion
+    variable = u
+  []
+[]
+[Executioner]
+  type = Transient
+[]
+)INPUT";
+
+  // build didchange notification from parameters and handle it with server
+  wasp::DataObject didchange_notification, diagnostics_notification;
+  std::stringstream errors;
+  EXPECT_TRUE(wasp::lsp::buildDidChangeNotification(
+      didchange_notification, errors, doc_uri, doc_version, -1, -1, -1, -1, -1, doc_text_change));
+  EXPECT_TRUE(
+      moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification));
+
+  // check plotting 01 - PiecewiseLinear type function giving x and y input
+  int request_id = 27;
+  int request_line = 8;
+  int request_char = 25;
+  auto expect_title = "input_x_and_y PiecewiseLinear Function";
+  auto expect_keys = std::vector<double>{101, 102, 103, 104, 105, 106, 107, 108};
+  auto expect_vals = std::vector<double>{1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8};
+  double expect_xaxis_range_min = 101;
+  double expect_xaxis_range_max = 108;
+  double expect_yaxis_range_min = 1.1;
+  double expect_yaxis_range_max = 1.8;
+  check_plotting(request_id,
+                 doc_uri,
+                 request_line,
+                 request_char,
+                 expect_title,
+                 expect_keys,
+                 expect_vals,
+                 expect_xaxis_range_min,
+                 expect_xaxis_range_max,
+                 expect_yaxis_range_min,
+                 expect_yaxis_range_max);
+
+  // check plotting 02 - PiecewiseConstant function providing xy_data input
+  request_id = 28;
+  request_line = 12;
+  request_char = 28;
+  expect_title = "input_xy_data PiecewiseConstant Function";
+  expect_keys = std::vector<double>{2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8};
+  expect_vals = std::vector<double>{201, 202, 203, 204, 205, 206, 207, 208};
+  expect_xaxis_range_min = 2.1;
+  expect_xaxis_range_max = 2.8;
+  expect_yaxis_range_min = 201;
+  expect_yaxis_range_max = 208;
+  check_plotting(request_id,
+                 doc_uri,
+                 request_line,
+                 request_char,
+                 expect_title,
+                 expect_keys,
+                 expect_vals,
+                 expect_xaxis_range_min,
+                 expect_xaxis_range_max,
+                 expect_yaxis_range_min,
+                 expect_yaxis_range_max);
+
+  // check plotting 03 - PiecewiseLinear type function giving basic row csv
+  request_id = 29;
+  request_line = 24;
+  request_char = 33;
+  expect_title = "csv_row_basic PiecewiseLinear Function";
+  expect_keys = std::vector<double>{301, 302, 303, 304};
+  expect_vals = std::vector<double>{3.1, 3.2, 3.3, 3.4};
+  expect_xaxis_range_min = 301;
+  expect_xaxis_range_max = 304;
+  expect_yaxis_range_min = 3.1;
+  expect_yaxis_range_max = 3.4;
+  check_plotting(request_id,
+                 doc_uri,
+                 request_line,
+                 request_char,
+                 expect_title,
+                 expect_keys,
+                 expect_vals,
+                 expect_xaxis_range_min,
+                 expect_xaxis_range_max,
+                 expect_yaxis_range_min,
+                 expect_yaxis_range_max);
+
+  // check plotting 04 - PiecewiseConstant function giving basic column csv
+  request_id = 30;
+  request_line = 30;
+  request_char = 20;
+  expect_title = "csv_col_basic PiecewiseConstant Function";
+  expect_keys = std::vector<double>{401, 402, 403, 404};
+  expect_vals = std::vector<double>{4.1, 4.2, 4.3, 4.4};
+  expect_xaxis_range_min = 401;
+  expect_xaxis_range_max = 404;
+  expect_yaxis_range_min = 4.1;
+  expect_yaxis_range_max = 4.4;
+  check_plotting(request_id,
+                 doc_uri,
+                 request_line,
+                 request_char,
+                 expect_title,
+                 expect_keys,
+                 expect_vals,
+                 expect_xaxis_range_min,
+                 expect_xaxis_range_max,
+                 expect_yaxis_range_min,
+                 expect_yaxis_range_max);
+
+  // check plotting 05 - PiecewiseLinear type function giving title row csv
+  request_id = 31;
+  request_line = 36;
+  request_char = 27;
+  expect_title = "csv_row_title PiecewiseLinear Function";
+  expect_keys = std::vector<double>{501, 502, 503, 504};
+  expect_vals = std::vector<double>{5.1, 5.2, 5.3, 5.4};
+  expect_xaxis_range_min = 501;
+  expect_xaxis_range_max = 504;
+  expect_yaxis_range_min = 5.1;
+  expect_yaxis_range_max = 5.4;
+  check_plotting(request_id,
+                 doc_uri,
+                 request_line,
+                 request_char,
+                 expect_title,
+                 expect_keys,
+                 expect_vals,
+                 expect_xaxis_range_min,
+                 expect_xaxis_range_max,
+                 expect_yaxis_range_min,
+                 expect_yaxis_range_max);
+
+  // check plotting 06 - PiecewiseConstant function giving index column csv
+  request_id = 32;
+  request_line = 46;
+  request_char = 23;
+  expect_title = "csv_col_index PiecewiseConstant Function";
+  expect_keys = std::vector<double>{601, 602, 603, 604};
+  expect_vals = std::vector<double>{6.1, 6.2, 6.3, 6.4};
+  expect_xaxis_range_min = 601;
+  expect_xaxis_range_max = 604;
+  expect_yaxis_range_min = 6.1;
+  expect_yaxis_range_max = 6.4;
+  check_plotting(request_id,
+                 doc_uri,
+                 request_line,
+                 request_char,
+                 expect_title,
+                 expect_keys,
+                 expect_vals,
+                 expect_xaxis_range_min,
+                 expect_xaxis_range_max,
+                 expect_yaxis_range_min,
+                 expect_yaxis_range_max);
+
+  // remove csv files with data from disk that were referenced by functions
+  std::remove("csv_row_basic.csv");
+  std::remove("csv_col_basic.csv");
+  std::remove("csv_row_title.csv");
+  std::remove("csv_col_index.csv");
+}
+
 TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 {
   // check moose_server can share connection it will use to read and write
@@ -1812,7 +2172,7 @@ TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 
   // didclose test parameter
 
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string("/test/input/path");
+  std::string document_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
 
   // build didclose notification with the test parameter
 
@@ -1832,7 +2192,7 @@ TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 
   // shutdown test parameter
 
-  int request_id = 27;
+  int request_id = 33;
 
   // build shutdown request with the test parameters
 
