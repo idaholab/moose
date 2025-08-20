@@ -27,7 +27,4 @@ protected:
 
   /// The input times
   std::vector<Real> _input_times;
-
-  /// Storage used when 'times' isn't provided
-  std::vector<Real> _empty_times;
 };
