@@ -27,3 +27,4 @@ with a time derivative kernel ([TimeDerivative](/TimeDerivative.md)) and a body 
 !syntax inputs /Kernels/PhaseFieldAdvection
 
 !syntax children /Kernels/PhaseFieldAdvection
+
