@@ -68,7 +68,7 @@ protected:
   /**
    * The side gap, not to be confused with the gap between pins, this refers to the gap
    * next to the duct or else the distance between the subchannel centroid to the duct wall.
-   * Edge Pitch W = (pitch/2 - pin_diameter/2 + gap) [m]
+   * distance(edge pin center, duct wall) = pitch / 2 + side_gap [m].
    */
   const Real _side_gap;
   /// block index

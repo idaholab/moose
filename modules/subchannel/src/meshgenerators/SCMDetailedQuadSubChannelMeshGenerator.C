@@ -35,10 +35,10 @@ SCMDetailedQuadSubChannelMeshGenerator::validParams()
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
   params.addRequiredParam<Real>(
       "gap",
-      "(The side gap, not to be confused with the gap between pins, this refers to the gap "
+      "The side gap, not to be confused with the gap between pins, this refers to the gap "
       "next to the duct or else the distance between the subchannel centroid to the duct wall."
       "distance(edge pin center, duct wall) = pitch / 2 + side_gap [m]");
-  params.renameParam("gap", "side_gap", "08/06/2026");
+  params.deprecateParam("gap", "side_gap", "08/06/2026");
   params.addParam<unsigned int>("block_id", 0, "Block ID used for the mesh subdomain.");
   return params;
 }
