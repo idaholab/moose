@@ -7,7 +7,7 @@ moose_libmesh:
   - moose-libmesh 2025.08.06 openmpi_0
 
 moose_wasp:
-  - moose-wasp 2025.07.07
+  - moose-wasp 2025.09.04
 
 moose_tools:
   - moose-tools 2025.06.26
