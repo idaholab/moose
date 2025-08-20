@@ -367,10 +367,40 @@ EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
     ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), block_x.GetBlock(i));
     _gfuncs->Get(trial_var_name)->Distribute(&(block_x.GetBlock(i)));
   }
-
+  UpdateJacobian();
+  const_cast<EquationSystem*>(this)->FormLinearSystem(_jacobian,  block_x, _trueBlockRHS);
   _jacobian->Mult(block_x, residual);
   x.HostRead();
   residual.HostRead();
+}
+
+void
+EquationSystem::UpdateJacobian() const
+{
+
+  for (int i = 0; i < _test_var_names.size(); i++)
+    {
+      auto & test_var_name = _test_var_names.at(i);
+      auto blf = _blfs.Get(test_var_name);
+      blf->Update();
+      blf->Assemble();
+    }
+
+    // Form off-diagonal blocks
+    for (int i = 0; i < _test_var_names.size(); i++)
+    {
+      auto test_var_name = _test_var_names.at(i);
+      for (int j = 0; j < _test_var_names.size(); j++)
+      {
+        auto trial_var_name = _test_var_names.at(j);
+        if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+        {
+          auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
+          mblf->Update();
+          mblf->Assemble();
+        }
+      }
+    }
 }
 
 mfem::Operator &
