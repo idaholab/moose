@@ -3,6 +3,7 @@
   design = " "
   [./test]
     type = 'Exodiff'
+    mesh_mode = REPLICATED
     input = 'hp_adaptivity.i'
     exodiff = 'hp_adaptivity_out.e'
     requirement = "The system shall support hp adaptivity."
