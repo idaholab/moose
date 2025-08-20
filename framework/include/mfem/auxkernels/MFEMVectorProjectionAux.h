@@ -16,14 +16,14 @@
 /**
  * Projects a vector coefficient onto a vector-valued aux variable.
  */
-class MFEMVectorProjectAux : public MFEMAuxKernel
+class MFEMVectorProjectionAux : public MFEMAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMVectorProjectAux(const InputParameters & parameters);
+  MFEMVectorProjectionAux(const InputParameters & parameters);
 
-  virtual ~MFEMVectorProjectAux() = default;
+  virtual ~MFEMVectorProjectionAux() = default;
 
   virtual void execute() override;
 

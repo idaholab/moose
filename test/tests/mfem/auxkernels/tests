@@ -1,11 +1,11 @@
 [Tests]
-  [MFEMScalarVectorProjectAux]
+  [MFEMScalarVectorProjectionAux]
     type = XMLDiff
     input = projection.i
     xmldiff = 'OutputData/Projection/Run0/Run0.pvd
                 OutputData/Projection/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
-    design = 'MFEMScalarProjectAux.md MFEMVectorProjectAux.md'
+    design = 'MFEMScalarProjectionAux.md MFEMVectorProjectionAux.md'
     issues = '#31153'
     requirement = 'The system shall have the ability to project scalar and vector coefficients onto appropriate MFEM variables.'
     capabilities = 'mfem'

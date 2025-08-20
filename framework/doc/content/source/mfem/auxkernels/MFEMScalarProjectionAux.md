@@ -1,10 +1,10 @@
-# MFEMScalarProjectAux
+# MFEMScalarProjectionAux
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /AuxKernels/MFEMScalarProjectAux
+!syntax description /AuxKernels/MFEMScalarProjectionAux
 
 ## Overview
 
@@ -14,11 +14,11 @@ AuxKernel for projecting a scalar coefficient onto an MFEM variable.
 
 !listing mfem/auxkernels/projection.i block=/AuxKernels
 
-!syntax parameters /AuxKernels/MFEMScalarProjectAux
+!syntax parameters /AuxKernels/MFEMScalarProjectionAux
 
-!syntax inputs /AuxKernels/MFEMScalarProjectAux
+!syntax inputs /AuxKernels/MFEMScalarProjectionAux
 
-!syntax children /AuxKernels/MFEMScalarProjectAux
+!syntax children /AuxKernels/MFEMScalarProjectionAux
 
 !if-end!
 
