@@ -19,6 +19,7 @@ NodePositions::validParams()
   InputParameters params = Positions::validParams();
   params.addClassDescription("Positions of element nodes.");
   params += BlockRestrictable::validParams();
+  params += BoundaryRestrictable::validParams();
 
   // Element nodes must be sorted to remove duplicates.
   params.suppressParameter<bool>("auto_sort");
@@ -30,7 +31,10 @@ NodePositions::validParams()
 }
 
 NodePositions::NodePositions(const InputParameters & parameters)
-  : Positions(parameters), BlockRestrictable(this), _mesh(_fe_problem.mesh())
+  : Positions(parameters),
+    BlockRestrictable(this),
+    BoundaryRestrictable(this, true),
+    _mesh(_fe_problem.mesh())
 {
   // Mesh is ready at construction
   initialize();
@@ -43,11 +47,33 @@ NodePositions::initialize()
 {
   clearPositions();
 
+  // Only needed for boundary restriction
+  const BoundaryInfo * binfo = nullptr;
+  if (boundaryRestricted())
+    binfo = &_fe_problem.mesh().getMesh().get_boundary_info();
+
   for (const auto & [node_id, elems_ids] : _fe_problem.mesh().nodeToElemMap())
   {
-    if (!_mesh.queryNodePtr(node_id))
+    const auto node = _mesh.queryNodePtr(node_id);
+    if (!node)
       continue;
 
+    // Check that node is part of boundary restriction
+    if (binfo)
+    {
+      if (!binfo->get_nodeset_map().count(node))
+        continue;
+      else
+      {
+        const auto iter_pr = binfo->get_nodeset_map().equal_range(node);
+        for (auto nid = iter_pr.first; nid != binfo->get_nodeset_map().equal_range(node).second;
+             nid++)
+          if (hasBoundary(nid->second))
+            goto inRestriction;
+      }
+      continue;
+    }
+  inRestriction:
     // Check the elements associated with the node to see if they're in the block
     // we're block-restricting. If so, add the node to the positions vector and move
     // on to the next node (to minimize duplicates).
