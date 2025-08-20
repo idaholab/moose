@@ -109,9 +109,6 @@ FieldSplitPreconditionerTempl<Base>::createMooseDM(DM * dm)
   LibmeshPetscCallA(
       _nl.comm().get(),
       DMCreateMoose(_nl.comm().get(), _nl, dofMap(), system(), _decomposition_split, dm));
-  LibmeshPetscCallA(
-      _nl.comm().get(),
-      DMCreateMoose(_nl.comm().get(), _nl, dofMap(), system(), _decomposition_split, dm));
   LibmeshPetscCallA(_nl.comm().get(),
                     PetscObjectSetOptionsPrefix((PetscObject)*dm, prefix().c_str()));
   LibmeshPetscCall(DMSetFromOptions(*dm));
