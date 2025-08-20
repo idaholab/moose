@@ -2020,16 +2020,17 @@ time, 501, 502, 503, 504 # ignored comment
       moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification));
 
   // check plotting 01 - PiecewiseLinear type function giving x and y input
+  double pad_factor = 0.05;
   int request_id = 27;
   int request_line = 8;
   int request_char = 25;
   auto expect_title = "input_x_and_y PiecewiseLinear Function";
   auto expect_keys = std::vector<double>{101, 102, 103, 104, 105, 106, 107, 108};
   auto expect_vals = std::vector<double>{1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8};
-  double expect_xaxis_range_min = 101;
-  double expect_xaxis_range_max = 108;
-  double expect_yaxis_range_min = 1.1;
-  double expect_yaxis_range_max = 1.8;
+  double expect_xaxis_range_min = 101 - ((108 - 101) * pad_factor);
+  double expect_xaxis_range_max = 108 + ((108 - 101) * pad_factor);
+  double expect_yaxis_range_min = 1.1 - ((1.8 - 1.1) * pad_factor);
+  double expect_yaxis_range_max = 1.8 + ((1.8 - 1.1) * pad_factor);
   check_plotting(request_id,
                  doc_uri,
                  request_line,
@@ -2049,10 +2050,10 @@ time, 501, 502, 503, 504 # ignored comment
   expect_title = "input_xy_data PiecewiseConstant Function";
   expect_keys = std::vector<double>{2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8};
   expect_vals = std::vector<double>{201, 202, 203, 204, 205, 206, 207, 208};
-  expect_xaxis_range_min = 2.1;
-  expect_xaxis_range_max = 2.8;
-  expect_yaxis_range_min = 201;
-  expect_yaxis_range_max = 208;
+  expect_xaxis_range_min = 2.1 - ((2.8 - 2.1) * pad_factor);
+  expect_xaxis_range_max = 2.8 + ((2.8 - 2.1) * pad_factor);
+  expect_yaxis_range_min = 201 - ((208 - 201) * pad_factor);
+  expect_yaxis_range_max = 208 + ((208 - 201) * pad_factor);
   check_plotting(request_id,
                  doc_uri,
                  request_line,
@@ -2072,10 +2073,10 @@ time, 501, 502, 503, 504 # ignored comment
   expect_title = "csv_row_basic PiecewiseLinear Function";
   expect_keys = std::vector<double>{301, 302, 303, 304};
   expect_vals = std::vector<double>{3.1, 3.2, 3.3, 3.4};
-  expect_xaxis_range_min = 301;
-  expect_xaxis_range_max = 304;
-  expect_yaxis_range_min = 3.1;
-  expect_yaxis_range_max = 3.4;
+  expect_xaxis_range_min = 301 - ((304 - 301) * pad_factor);
+  expect_xaxis_range_max = 304 + ((304 - 301) * pad_factor);
+  expect_yaxis_range_min = 3.1 - ((3.4 - 3.1) * pad_factor);
+  expect_yaxis_range_max = 3.4 + ((3.4 - 3.1) * pad_factor);
   check_plotting(request_id,
                  doc_uri,
                  request_line,
@@ -2095,10 +2096,10 @@ time, 501, 502, 503, 504 # ignored comment
   expect_title = "csv_col_basic PiecewiseConstant Function";
   expect_keys = std::vector<double>{401, 402, 403, 404};
   expect_vals = std::vector<double>{4.1, 4.2, 4.3, 4.4};
-  expect_xaxis_range_min = 401;
-  expect_xaxis_range_max = 404;
-  expect_yaxis_range_min = 4.1;
-  expect_yaxis_range_max = 4.4;
+  expect_xaxis_range_min = 401 - ((404 - 401) * pad_factor);
+  expect_xaxis_range_max = 404 + ((404 - 401) * pad_factor);
+  expect_yaxis_range_min = 4.1 - ((4.4 - 4.1) * pad_factor);
+  expect_yaxis_range_max = 4.4 + ((4.4 - 4.1) * pad_factor);
   check_plotting(request_id,
                  doc_uri,
                  request_line,
@@ -2118,10 +2119,10 @@ time, 501, 502, 503, 504 # ignored comment
   expect_title = "csv_row_title PiecewiseLinear Function";
   expect_keys = std::vector<double>{501, 502, 503, 504};
   expect_vals = std::vector<double>{5.1, 5.2, 5.3, 5.4};
-  expect_xaxis_range_min = 501;
-  expect_xaxis_range_max = 504;
-  expect_yaxis_range_min = 5.1;
-  expect_yaxis_range_max = 5.4;
+  expect_xaxis_range_min = 501 - ((504 - 501) * pad_factor);
+  expect_xaxis_range_max = 504 + ((504 - 501) * pad_factor);
+  expect_yaxis_range_min = 5.1 - ((5.4 - 5.1) * pad_factor);
+  expect_yaxis_range_max = 5.4 + ((5.4 - 5.1) * pad_factor);
   check_plotting(request_id,
                  doc_uri,
                  request_line,
@@ -2141,10 +2142,10 @@ time, 501, 502, 503, 504 # ignored comment
   expect_title = "csv_col_index PiecewiseConstant Function";
   expect_keys = std::vector<double>{601, 602, 603, 604};
   expect_vals = std::vector<double>{6.1, 6.2, 6.3, 6.4};
-  expect_xaxis_range_min = 601;
-  expect_xaxis_range_max = 604;
-  expect_yaxis_range_min = 6.1;
-  expect_yaxis_range_max = 6.4;
+  expect_xaxis_range_min = 601 - ((604 - 601) * pad_factor);
+  expect_xaxis_range_max = 604 + ((604 - 601) * pad_factor);
+  expect_yaxis_range_min = 6.1 - ((6.4 - 6.1) * pad_factor);
+  expect_yaxis_range_max = 6.4 + ((6.4 - 6.1) * pad_factor);
   check_plotting(request_id,
                  doc_uri,
                  request_line,
