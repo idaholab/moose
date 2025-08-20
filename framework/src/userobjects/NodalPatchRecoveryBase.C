@@ -307,4 +307,4 @@ NodalPatchRecoveryBase::addToQuery(
 {
   if (hasBlocks(elem->subdomain_id()) && elem->processor_id() != processor_id())
     query_ids[elem->processor_id()].push_back(elem->id());
-};
+}
