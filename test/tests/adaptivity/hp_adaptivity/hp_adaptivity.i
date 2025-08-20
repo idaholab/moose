@@ -1,10 +1,11 @@
+
 [Mesh]
   partitioner = 'linear'
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 1
-    ny = 1
+    nx = 5
+    ny = 5
     xmax = 2
     ymax = 2
     elem_type = QUAD8
@@ -82,7 +83,7 @@
   solve_type = NEWTON
   [Adaptivity]
     adaptivity_type = hp
-    steps = 5
+    steps = 3
     refine_fraction = 0.7
     coarsen_fraction = 0.05
     max_h_level = 15
@@ -95,6 +96,7 @@
     order = CONSTANT
   []
 []
+
 [AuxKernels]
   [elem_p_level]
     type = AdaptivityAux
