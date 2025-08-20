@@ -92,7 +92,8 @@ IndependentMHDecision::nextSamples(std::vector<Real> & req_inputs,
   {
     for (unsigned int k = 0; k < _sampler.getNumberOfCols() - _num_confg_params; ++k)
       req_inputs[k] = input_matrix(parallel_index, k);
-    _variance[parallel_index] = _new_var_samples[parallel_index];
+    for (unsigned int k = 0; k < _num_variances; ++k)
+      _variance[k][parallel_index] = _new_var_samples[k][parallel_index];
   }
 }
 

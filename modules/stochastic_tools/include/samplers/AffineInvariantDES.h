@@ -49,7 +49,7 @@ protected:
   const std::vector<std::vector<Real>> & _previous_state;
 
   /// Reporter value with the previous state of all the walkers for variance
-  const std::vector<Real> & _previous_state_var;
+  const std::vector<std::vector<Real>> & _previous_state_var;
 
   /// Tuning options for the internal params
   const MooseEnum & _tuning_option;
