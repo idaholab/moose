@@ -187,5 +187,5 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
-  []  
+  []
 []

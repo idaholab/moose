@@ -29,8 +29,8 @@ MFEMParsedFunction::validParams()
   params.addRequiredCustomTypeParam<std::string>(
       "function", "FunctionExpression", "Parsed function expression to compute");
   params.deprecateParam("function", "expression", "02/07/2024");
-  params.addRequiredParam<std::vector<std::string>>("var_names",
-                                                    "The names of the function variable names");
+  params.addRequiredParam<std::vector<VariableName>>("var_names",
+                                                     "The names of the function variable names");
   params.addParam<bool>(
       "use_xyzt",
       false,
@@ -42,7 +42,7 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     FunctionParserUtils(parameters),
     _function(getParam<std::string>("expression")),
-    _var_names(getParam<std::vector<std::string>>("var_names")),
+    _var_names(getParam<std::vector<VariableName>>("var_names")),
     _use_xyzt(getParam<bool>("use_xyzt")),
     _xyzt({"x", "y", "z", "t"})
 {

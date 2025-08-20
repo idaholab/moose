@@ -29,7 +29,7 @@ protected:
   /// function expression
   std::string _function;
   /// function variables
-  const std::vector<std::string> & _var_names;
+  const std::vector<VariableName> & _var_names;
   /// import coordinates and time
   const bool _use_xyzt;
   /// coordinate and time variable names
