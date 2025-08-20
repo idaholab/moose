@@ -1,11 +1,7 @@
-## This test verifies the implmentation of the PhaseFieldContactAngle , ObtainAvgContactAngle and PhaseFieldTwoPhaseSurfaceTension kernels.
-
 sigma = 25e-3 #10e-3 #25e-3 #surface tension coefficient
 epsilon = 1e-6 #width parameter
 nu = 1e-4#mobility parameter
-
-##if contact angle is 30 degree, in this model you have to specify (180-contact angle)*pi/180
-contactangle = 2.61799
+contactangle = 2.61799#0.523599#1.0472
 lambda = ${fparse 3*sigma*epsilon/(2*sqrt(2))}
 prefactor_phi = ${fparse nu*lambda/(epsilon*epsilon)}
 prefactor_psi = ${fparse -epsilon*epsilon}
@@ -231,7 +227,7 @@ coeff = ${fparse lambda/(epsilon*epsilon)}
   type = Transient
   solve_type = NEWTON
   start_time = 0
-  end_time = 4e-8
+  num_steps = 15
   dtmax = 0.25
   [TimeStepper]
     type = IterationAdaptiveDT

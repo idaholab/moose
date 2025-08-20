@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#31300'
-  design = 'PhaseFieldContactAngle.md ObtainAvgContactAngle.md PhaseFieldTwoPhaseSurfaceTension.md PhaseFieldTwoPhaseMaterial.md' 
+  issues = "#31300"
+  design = "PhaseFieldTwoPhaseSurfaceTension.md PhaseFieldTwoPhaseMaterial.md"
   [contact_angle]
     type = CSVDiff
     input = contact_angle.i
