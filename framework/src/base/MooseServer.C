@@ -1701,6 +1701,15 @@ MooseServer::buildLineGraphPlot(wasp::CustomPlot & plot_object,
   double min_val = *std::min_element(graph_vals.begin(), graph_vals.end());
   double max_val = *std::max_element(graph_vals.begin(), graph_vals.end());
 
+  // widen extents
+  double pad_factor = 0.05;
+  double pad_x_axis = (max_key - min_key) * pad_factor;
+  double pad_y_axis = (max_val - min_val) * pad_factor;
+  min_key -= pad_x_axis;
+  max_key += pad_x_axis;
+  min_val -= pad_y_axis;
+  max_val += pad_y_axis;
+
   // plot setup
   plot_object.title().text(plot_title);
   plot_object.title().font().pointsize(18);
