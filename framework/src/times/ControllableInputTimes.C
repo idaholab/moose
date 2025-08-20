@@ -22,6 +22,7 @@ ControllableInputTimes::validParams()
   // Times are known for all processes already
   params.set<bool>("auto_broadcast") = false;
   params.makeParamNotRequired("times");
+  params.set<bool>("dynamic_time_sequence") = true;
 
   return params;
 }
