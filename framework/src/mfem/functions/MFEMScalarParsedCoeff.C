@@ -12,21 +12,21 @@
 #include "MFEMScalarParsedCoeff.h"
 
 MFEMScalarParsedCoeff::MFEMScalarParsedCoeff(
-    const Moose::MFEM::GridFunctions & gFuncs,
-    const std::vector<std::string> & inputs,
+    const Moose::MFEM::GridFunctions & gridfunctions,
+    const std::vector<VariableName> & var_names,
     bool use_xyzt,
     const FunctionParserUtils<false>::SymFunctionPtr & func)
-  : _gFuncs(gFuncs), _inputs(inputs), _use_xyzt(use_xyzt), _func(func)
+  : _gridfunctions(gridfunctions), _var_names(var_names), _use_xyzt(use_xyzt), _func(func)
 {
 }
 
 mfem::real_t
 MFEMScalarParsedCoeff::Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip)
 {
-  std::vector<mfem::real_t> inpVals(_inputs.size() + (_use_xyzt ? 4 : 0));
+  std::vector<mfem::real_t> vals(_var_names.size() + (_use_xyzt ? 4 : 0));
 
-  for (unsigned i = 0; i < _inputs.size(); i++)
-    inpVals[i] = _gFuncs.GetRef(_inputs[i]).GetValue(T, ip);
+  for (unsigned i = 0; i < _var_names.size(); i++)
+    vals[i] = _gridfunctions.GetRef(_var_names[i]).GetValue(T, ip);
 
   if (_use_xyzt)
   {
@@ -34,12 +34,12 @@ MFEMScalarParsedCoeff::Eval(mfem::ElementTransformation & T, const mfem::Integra
     T.Transform(ip, transip);
 
     for (unsigned i = 0; i < 3; i++)
-      inpVals[_inputs.size() + i] = transip(i);
+      vals[_var_names.size() + i] = transip(i);
 
-    inpVals[_inputs.size() + 3] = GetTime();
+    vals[_var_names.size() + 3] = GetTime();
   }
 
-  return _func->Eval(inpVals.data());
+  return _func->Eval(vals.data());
 }
 
 #endif
