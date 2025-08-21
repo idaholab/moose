@@ -72,7 +72,10 @@ LowerDBlockFromSidesetGenerator::generate()
   }
   catch (MooseException & e)
   {
-    paramError("sidesets", e.what());
+    if (((std::string)e.what()).compare(0, 12, "The sideset ") == 0)
+      paramError("sidesets", e.what());
+    else
+      mooseError(e.what());
   }
 
   return mesh;

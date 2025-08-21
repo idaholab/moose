@@ -85,10 +85,10 @@
     use_auto_area_func = true
   []
   [smg]
-    type = StitchedMeshGenerator
+    type = StitchMeshGenerator
     inputs = 'bd_1 bd_2 bd_3 bd_4 bd_top bd_bot'
     clear_stitched_boundary_ids = true
-    stitch_boundaries_pairs = '0 0;0 0;0 0;0 0;0 0;0 0'
+    stitch_boundaries_pairs = '0 0;0 0;0 0;0 0;0 0'
     merge_boundaries_with_same_name = true
     prevent_boundary_ids_overlap = false
   []

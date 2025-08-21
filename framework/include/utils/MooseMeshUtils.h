@@ -21,9 +21,9 @@ namespace MooseMeshUtils
 
 // Used to temporarily store information about which lower-dimensional
 // sides to add and what subdomain id to use for the added sides.
-struct ElemSideDouble
+struct ElemSidePair
 {
-  ElemSideDouble(Elem * elem_in, unsigned short int side_in) : elem(elem_in), side(side_in) {}
+  ElemSidePair(Elem * elem_in, unsigned short int side_in) : elem(elem_in), side(side_in) {}
 
   Elem * elem;
   unsigned short int side;
@@ -428,7 +428,7 @@ std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const ReplicatedMesh & input_m
                                                   const boundary_id_type boundary_id);
 
 /**
- * Create a new subdomain from a list of sidesets in a given mesh.
+ * Create a new subdomain by generating new side elements from a list of sidesets in a given mesh.
  * @param mesh The mesh to work on
  * @param boundary_names The names of the sidesets to be used to create the new subdomain
  * @param new_subdomain_id The ID of the new subdomain to be created based on the sidesets
