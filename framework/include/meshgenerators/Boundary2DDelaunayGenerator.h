@@ -76,7 +76,7 @@ protected:
   Point meshNormal2D(const MeshBase & mesh);
 
   /**
-   * Calculate the maximum deviation of the normal vectors in a give mesh from a global average
+   * Calculate the maximum deviation of the normal vectors in a given mesh from a global average
    * normal vector.
    * @param mesh The mesh for which the maximum deviation is to be calculated
    * @param global_norm The global average normal vector

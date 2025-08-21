@@ -133,7 +133,10 @@ Boundary2DDelaunayGenerator::generate()
   }
   catch (MooseException & e)
   {
-    paramError("boundary_names", e.what());
+    if (((std::string)e.what()).compare(0, 12, "The sideset ") == 0)
+      paramError("boundary_names", e.what());
+    else
+      mooseError(e.what());
   }
 
   // If holes are provided, we need to create new blocks for them too
@@ -148,7 +151,10 @@ Boundary2DDelaunayGenerator::generate()
     }
     catch (MooseException & e)
     {
-      paramError("hole_boundary_names", e.what());
+      if (((std::string)e.what()).compare(0, 12, "The sideset ") == 0)
+        paramError("hole_boundary_names", e.what());
+      else
+        mooseError(e.what());
     }
   }
 
@@ -173,10 +179,17 @@ Boundary2DDelaunayGenerator::generate()
 Point
 Boundary2DDelaunayGenerator::elemNormal(const Elem & elem)
 {
+  mooseAssert(elem.n_vertices() == 3 || elem.n_vertices() == 4, "unsupported element type.");
   // Only the first three vertices are used to calculate the normal vector
   const Point & p0 = *elem.node_ptr(0);
   const Point & p1 = *elem.node_ptr(1);
   const Point & p2 = *elem.node_ptr(2);
+
+  if (elem.n_vertices() == 4)
+  {
+    const Point & p3 = *elem.node_ptr(3);
+    return ((p2 - p0).cross(p3 - p1)).unit();
+  }
 
   return ((p2 - p1).cross(p0 - p1)).unit();
 }
@@ -188,8 +201,7 @@ Boundary2DDelaunayGenerator::meshNormal2D(const MeshBase & mesh)
   Real mesh_area = 0.0;
 
   // Check all the elements' normal vectors
-  for (const auto & elem :
-       as_range(mesh.active_local_elements_begin(), mesh.active_local_elements_end()))
+  for (const auto & elem : mesh.active_local_element_ptr_range())
   {
     const Real elem_area = elem->volume();
     mesh_norm += elemNormal(*elem) * elem_area;
@@ -206,8 +218,7 @@ Boundary2DDelaunayGenerator::meshNormalDeviation2D(const MeshBase & mesh, const 
 {
   Real max_deviation(0.0);
   // Check all the elements' deviation from the global normal vector
-  for (const auto & elem :
-       as_range(mesh.active_local_elements_begin(), mesh.active_local_elements_end()))
+  for (const auto & elem : mesh.active_local_element_ptr_range())
   {
     const Real elem_deviation = std::acos(global_norm * elemNormal(*elem)) / M_PI * 180.0;
     max_deviation = std::max(max_deviation, elem_deviation);

@@ -735,7 +735,7 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
     side_list = mesh->get_boundary_info().build_side_list();
   }
 
-  std::vector<std::pair<dof_id_type, ElemSideDouble>> element_sides_on_boundary;
+  std::vector<std::pair<dof_id_type, ElemSidePair>> element_sides_on_boundary;
   dof_id_type counter = 0;
   for (const auto & triple : side_list)
     if (sidesets.count(std::get<2>(triple)))
@@ -749,7 +749,7 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
               type_name,
               "s are run before any refinement generators");
         element_sides_on_boundary.push_back(
-            std::make_pair(counter, ElemSideDouble(elem, std::get<1>(triple))));
+            std::make_pair(counter, ElemSidePair(elem, std::get<1>(triple))));
       }
       ++counter;
     }
