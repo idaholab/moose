@@ -35,7 +35,7 @@ MFEMZienkiewiczZhuIndicator::createEstimator()
 
   // fetch the kernel first so we can get the blf integrator
   const UserObject * kernel_uo = &(getMFEMProblem().getUserObjectBase(_kernel_name));
-  if (dynamic_cast<const MFEMKernel *>(kernel_uo) != nullptr)
+  if (dynamic_cast<const MFEMKernel *>(kernel_uo))
   {
     std::shared_ptr<MooseObject> object_ptr =
         getMFEMProblem().getUserObject<MFEMKernel>(_kernel_name).getSharedPtr();
