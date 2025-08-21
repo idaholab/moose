@@ -14,12 +14,6 @@
   []
 []
 
-[UserObjects]
-  [ics]
-    type = AbaqusUELInitialCondition
-  []
-[]
-
 [AuxVariables]
   [pid]
   []
@@ -45,6 +39,9 @@
 []
 
 [UserObjects]
+  [step_uo]
+    type = AbaqusUELStepUserObject
+  []
   [uel]
     type = AbaqusUELMeshUserElement
     uel_type = U1
