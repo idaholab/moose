@@ -8,7 +8,14 @@
 
 ## Overview
 
-AuxKernel for calculating the running time average of an MFEM variable during a transient simulation projected onto an AuxVariable.
+AuxKernel for calculating the running time average of a scalar variable during a transient simulation using the rectangle rule.
+
+!equation
+v(t) = (1 - \omega) v(t - \Delta t) + \omega u(t), \,\,\, \omega = \Delta t / (t - s), \,\,\, t > s
+
+where $u \in H^1$ or $L^2$ is the scalar variable to take the average of, $v \in H^1$ or $L^2$ is the
+scalar variable holding the time average of $u$, and $s$ is a timeskip, i.e. a timespan at the beginning
+of the simulation, prescribed by the user, during which no time averaging occurs.
 
 ## Example Input File Syntax
 

@@ -16,7 +16,7 @@
  * AuxKernel to compute a running time average of an MFEMVariable
  * using a linear blend.
  *
- *   avg_new(x) = (1 - w)*avg_old(x) + w*src(x), w = dt / (t - skip)
+ * avg_new(x) = (1 - w) * avg_old(x) + w * src(x), w = dt / (t - s), t > s
  */
 class MFEMScalarTimeAverageAux : public MFEMAuxKernel
 {
@@ -27,15 +27,24 @@ public:
 
   virtual ~MFEMScalarTimeAverageAux() override = default;
 
+  /// Computes the auxvariable.
   virtual void execute() override;
 
 protected:
-  /// Name of the source MFEMVariable name to take the average from
+  /// Name of source MFEMVariable to take the time average of.
   const VariableName _source_var_name;
-  /// Reference to the MFEMVariable underlying GridFunction
-  const mfem::ParGridFunction & _source_var;
-  /// Time before the averaging starts
-  const mfem::real_t _skip;
+  /// Reference to source gridfunction coefficient.
+  mfem::Coefficient & _source_var_coefficient;
+  /// Reference to result gridfunction coefficient.
+  mfem::Coefficient & _result_var_coefficient;
+  /// Placeholder gridfunction to avoid read/write aliasing during projection.
+  mfem::ParGridFunction _average_var;
+  /// Time before the averaging starts.
+  const Real & _skip;
+  /// The current time.
+  const Real & _time;
+  /// Time step size.
+  const Real & _dt;
 };
 
 #endif

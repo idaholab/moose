@@ -19,8 +19,8 @@ MFEMScalarTimeAverageAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription(
-      "Running time average of an MFEMVariable projected onto an AuxVariable.");
-  params.addRequiredParam<VariableName>("source", "Name of the MFEMVariable to average from.");
+      "Calculates a running time average of a scalar MFEM variable projected onto an auxvariable");
+  params.addRequiredParam<VariableName>("source", "Scalar MFEMVariable to take the average of.");
   params.addParam<mfem::real_t>("time_skip", 0.0, "Time to skip before beginning the average.");
 
   return params;
@@ -29,31 +29,27 @@ MFEMScalarTimeAverageAux::validParams()
 MFEMScalarTimeAverageAux::MFEMScalarTimeAverageAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
-    _source_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_source_var_name)),
-    _skip(getParam<mfem::real_t>("time_skip"))
+    _source_var_coefficient(getScalarCoefficientByName(_source_var_name)),
+    _result_var_coefficient(getScalarCoefficientByName(_result_var_name)),
+    _average_var(_result_var.ParFESpace()),
+    _skip(getParam<Real>("time_skip")),
+    _time(getMFEMProblem().time()),
+    _dt(getMFEMProblem().dt())
 {
 }
 
 void
 MFEMScalarTimeAverageAux::execute()
 {
-  // project the average value using linear blend mfem::SumCoeffient calculated
-  // from the current _source_var, with a time-average weight w = dt/(t-skip), and
-  // return (1-w)*old + w*new for each integration point.
-  mfem::real_t t = getMFEMProblem().time();
-  mfem::real_t dt = getMFEMProblem().dt();
-  // weight 0 until averaging starts, then dt/(t - _skip)
-  const mfem::real_t w = (t > _skip) ? (dt / (t - _skip)) : 0.0;
-  // Snapshot the previous average to avoid read/write aliasing during projection
-  mfem::ParGridFunction old_copy(_result_var);
-  // Wrap snapshot and source as coefficients
-  mfem::GridFunctionCoefficient old_avg(&old_copy);
-  mfem::GridFunctionCoefficient src(&_source_var);
+  if (_time <= _skip)
+    return;
 
-  // Linear Blend (1-w)*old + w*src
-  mfem::SumCoefficient blend(old_avg, src, (1.0 - w), w);
+  // Linear blend: (1 - w) * avg_old + w * src
+  const mfem::real_t w = _dt / (_time - _skip);
+  mfem::SumCoefficient blend(_result_var_coefficient, _source_var_coefficient, 1.0 - w, w);
+  _average_var.ProjectCoefficient(blend);
 
-  _result_var.ProjectCoefficient(blend);
+  _result_var = _average_var;
 }
 
 #endif
