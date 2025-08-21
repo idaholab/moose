@@ -40,10 +40,10 @@ private:
   /// @brief the names of target variables for which the initial conditions are applied
   const std::set<VariableName> * _target_vars = nullptr;
 
-  // Set IC on specific variables
+  /// Set IC on specific variables
   ComputeInitialConditionThread(FEProblemBase & fe_problem,
                                 const std::set<VariableName> * target_vars);
 
-  // Allow FEProblemBase to access the private constructor
+  /// Allow FEProblemBase to access the private constructor
   friend class FEProblemBase;
 };

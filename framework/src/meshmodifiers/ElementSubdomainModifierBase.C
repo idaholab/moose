@@ -77,8 +77,9 @@ ElementSubdomainModifierBase::validParams()
   params.addParam<std::vector<UserObjectName>>(
       "polynomial_fitters",
       {},
-      "List of NodalPatchRecovery UserObjects used to fit the polynomial for reinitialization. "
-      "Only needed if 'reinitialization_strategy' is set to POLYNOMIAL_x.");
+      "List of NodalPatchRecovery UserObjects used for polynomial fitting during variable "
+      "reinitialization. Required only if 'reinitialization_strategy' includes "
+      "POLYNOMIAL_NEIGHBOR, POLYNOMIAL_WHOLE, or POLYNOMIAL_NEARBY.");
   params.addParam<int>(
       "nearby_kd_tree_leaf_max_size",
       10,
@@ -918,7 +919,6 @@ ElementSubdomainModifierBase::reinitializedBndNodeRange()
       if (_reinitialized_nodes.count(bnd_node->_node->id()))
         nodes.push_back(bnd_node);
 
-  // Make some fake node iterators defining this vector of nodes
   BndNode * const * bnd_node_itr_begin = const_cast<BndNode * const *>(nodes.data());
   BndNode * const * bnd_node_itr_end = bnd_node_itr_begin + nodes.size();
 

@@ -3770,6 +3770,10 @@ FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
                                             const libMesh::Parameters & params,
                                             const VariableName & target_var)
 {
+  mooseAssert(!Threads::in_threads,
+              "We're performing a projection based on data from just the thread 0 variable, so any "
+              "modifications to the variable solution must have been thread joined already");
+
   const auto & var = getStandardVariable(0, target_var);
   const auto var_num = var.number();
   const auto sn = systemNumForVariable(target_var);
@@ -3777,7 +3781,6 @@ FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
 
   // Let libmesh handle the projection
   System & libmesh_sys = getSystem(target_var);
-  std::string temp_vec_name = "__temp_projection_" + target_var + "__";
   auto temp_vec = libmesh_sys.current_local_solution->zero_clone();
   libmesh_sys.project_vector(func, func_grad, params, *temp_vec);
   temp_vec->close();

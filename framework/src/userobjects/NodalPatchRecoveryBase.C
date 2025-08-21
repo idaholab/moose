@@ -18,8 +18,13 @@
 #include "libmesh/parallel_eigen.h"
 #include <iomanip>
 
+// Remove duplicates and sort entries from a vector of element IDs.
+// This is necessary because user input may contain repeated element IDs,
+// which is problematic when using these IDs as keys.
+// In Patch Recovery, we also want to avoid duplicate elements contributing
+// multiple times to the Ae and be.
 static std::vector<dof_id_type>
-deduplicate(const std::vector<dof_id_type> & ids)
+removeDuplicateEntries(const std::vector<dof_id_type> & ids)
 {
   std::vector<dof_id_type> key = ids;
   std::sort(key.begin(), key.end());
@@ -75,7 +80,7 @@ NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
 const RealEigenVector
 NodalPatchRecoveryBase::getCoefficientsNoCache(const std::vector<dof_id_type> & elem_ids) const
 {
-  auto elem_ids_reduced = deduplicate(elem_ids);
+  auto elem_ids_reduced = removeDuplicateEntries(elem_ids);
 
   RealEigenVector coef = RealEigenVector::Zero(_q);
   // Before we go, check if we have enough sample points for solving the least square fitting
@@ -115,7 +120,7 @@ const RealEigenVector
 NodalPatchRecoveryBase::getCoefficients(const std::vector<dof_id_type> & elem_ids)
 {
   // Check cache
-  auto key = deduplicate(elem_ids);
+  auto key = removeDuplicateEntries(elem_ids);
 
   if (key == _cached_elem_ids)
     return _cached_coef;
@@ -150,14 +155,14 @@ NodalPatchRecoveryBase::evaluateBasisFunctions(const Point & q_point) const
 void
 NodalPatchRecoveryBase::initialize()
 {
-  _Ae.clear();
-  _be.clear();
-  // make sure to clear the cached coefficients
-  // so that the next time we call nodalPatchRecovery, we will recompute the coefficients to make
-  // sure _Ae and _be has already been different but we do not use the same coefficients for the
-  // same element
+  // Clear cached data to ensure coefficients are correctly recomputed in the next patch recovery
+  // iteration. _Ae and _be must also be reset, as the associated patch elements may differ in the
+  // upcoming iteration.
+
   _cached_elem_ids.clear();
   _cached_coef = RealEigenVector::Zero(_q);
+  _Ae.clear();
+  _be.clear();
 }
 
 void
@@ -217,9 +222,7 @@ NodalPatchRecoveryBase::gatherSendList(const std::vector<dof_id_type> & specific
             push_data[pid].push_back(std::make_pair(elem->processor_id(), elem->id()));
     }
     else
-      // For non-distributed meshes, element information is always accessible (not nullptr and
-      // processor ID can be retrieved), even if the element does not belong to the current
-      // processor.
+      // Add to query_ids if this element's data is on a different processor
       addToQuery(elem, query_ids);
   }
 

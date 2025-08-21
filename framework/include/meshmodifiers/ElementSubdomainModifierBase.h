@@ -165,7 +165,7 @@ private:
   /// Whether this is a re-step
   bool _restep;
 
-  /// Skipping restroring the subdomain changes if the timestep is not advanced
+  /// Skipping restoring the subdomain changes if the timestep is not advanced
   bool _skip_restore_subdomain_changes;
 
   /// Reinitialize moved elements whose new subdomain is in this list
@@ -199,8 +199,7 @@ private:
   /// Range of reinitialized elements
   std::unique_ptr<ConstElemRange> _reinitialized_elem_range;
 
-  /// Semi-local Reinitialized elements:
-  /// Ghosted and local reinitialized elements
+  /// Semi-local reinitialized elements: ghosted and local reinitialized elements
   std::unordered_set<dof_id_type> _semi_local_reinitialized_elems;
 
   /// Reinitialized nodes
@@ -218,7 +217,7 @@ private:
   std::map<VariableName, std::pair<std::vector<dof_id_type>, std::vector<Number>>>
       _overridden_values_on_reinit_elems;
 
-  /// The strategy used to apply IC on newly activated nodes
+  /// The strategy used to apply IC on newly activated elements
   std::vector<ReinitStrategy> _reinit_strategy;
 
   /// @brief Names of the NodalPatchRecoveryVariable user objects
