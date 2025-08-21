@@ -36,8 +36,6 @@ FunctorTimes::FunctorTimes(const InputParameters & parameters)
     _functor(getFunctor<Real>("functor")),
     _factor(getFunctor<Real>("factor"))
 {
-  // Initialize times array
-  _times.push_back(0);
 }
 
 void

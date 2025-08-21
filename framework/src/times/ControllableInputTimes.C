@@ -30,8 +30,6 @@ ControllableInputTimes::validParams()
 ControllableInputTimes::ControllableInputTimes(const InputParameters & parameters)
   : InputTimes(parameters), _next_time(getParam<Real>("next_time"))
 {
-  // Initialize times array
-  _times.push_back(0);
 }
 
 void
