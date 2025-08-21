@@ -725,7 +725,7 @@ convertHex8Elem(ReplicatedMesh & mesh,
 {
   // We add a node at the centroid of the HEX8 element
   // With this node, the HEX8 can be converted into 6 PYRAMID5 elements
-  // For the PYRAMID5 element, it can further be converted into 2 TET3 elements
+  // For the PYRAMID5 element at the 'side_indices', they can further be converted into 2 TET4 elements
   const Point elem_cent = mesh.elem_ptr(elem_id)->true_centroid();
   auto new_node = mesh.add_point(elem_cent);
   for (const auto & i_side : make_range(mesh.elem_ptr(elem_id)->n_sides()))

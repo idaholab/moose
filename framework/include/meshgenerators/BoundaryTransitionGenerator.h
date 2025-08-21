@@ -27,7 +27,7 @@ public:
 protected:
   /// Mesh that possibly comes from another generator
   std::unique_ptr<MeshBase> & _input;
-  ///The boundaries to be converted
+  /// The boundaries to convert the neighboring elements of
   const std::vector<BoundaryName> _boundary_names;
   /// Number of layers of elements to be converted
   const unsigned int _conversion_element_layer_number;
