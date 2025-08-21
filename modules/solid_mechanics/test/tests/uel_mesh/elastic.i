@@ -14,12 +14,6 @@
   []
 []
 
-[UserObjects]
-  [ics]
-    type = AbaqusUELInitialCondition
-  []
-[]
-
 [AuxVariables]
   [pid]
   []
@@ -70,14 +64,14 @@
 []
 
 [UserObjects]
+  [step_uo]
+    type = AbaqusUELStepUserObject
+  []
   [uel]
     type = AbaqusUELMeshUserElement
     uel_type = U1
     plugin = ../../plugins/small_strain_tri_uel
     element_sets = CUBE
-  []
-  [step_uo]
-    type = AbaqusUELStepUserObject
   []
 []
 
