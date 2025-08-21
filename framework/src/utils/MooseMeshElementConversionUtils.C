@@ -725,7 +725,8 @@ convertHex8Elem(ReplicatedMesh & mesh,
 {
   // We add a node at the centroid of the HEX8 element
   // With this node, the HEX8 can be converted into 6 PYRAMID5 elements
-  // For the PYRAMID5 element, it can further be converted into 2 TET3 elements
+  // For the PYRAMID5 element at the 'side_indices', they can further be converted into 2 TET4
+  // elements
   const Point elem_cent = mesh.elem_ptr(elem_id)->true_centroid();
   auto new_node = mesh.add_point(elem_cent);
   for (const auto & i_side : make_range(mesh.elem_ptr(elem_id)->n_sides()))
@@ -924,17 +925,8 @@ createUnitPyramid5FromPrism6(ReplicatedMesh & mesh,
                              const SubdomainID & subdomain_id_shift_base)
 {
   // Same as Hex8
-  auto new_elem = std::make_unique<Pyramid5>();
-  new_elem->set_node(0, mesh.elem_ptr(elem_id)->side_ptr(side_index)->node_ptr(3));
-  new_elem->set_node(1, mesh.elem_ptr(elem_id)->side_ptr(side_index)->node_ptr(2));
-  new_elem->set_node(2, mesh.elem_ptr(elem_id)->side_ptr(side_index)->node_ptr(1));
-  new_elem->set_node(3, mesh.elem_ptr(elem_id)->side_ptr(side_index)->node_ptr(0));
-  new_elem->set_node(4, const_cast<Node *>(new_node));
-  new_elem->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + subdomain_id_shift_base * 2;
-  auto new_elem_ptr = mesh.add_elem(std::move(new_elem));
-  retainEEID(mesh, elem_id, new_elem_ptr);
-  for (const auto & bid : side_info)
-    mesh.get_boundary_info().add_side(new_elem_ptr, 4, bid);
+  createUnitPyramid5FromHex8(
+      mesh, elem_id, side_index, new_node, side_info, subdomain_id_shift_base);
 }
 
 void
@@ -1007,16 +999,14 @@ retainEEID(ReplicatedMesh & mesh, const dof_id_type & elem_id, Elem * new_elem_p
 {
   const unsigned int n_eeid = mesh.n_elem_integers();
   for (const auto & i : make_range(n_eeid))
-  {
     new_elem_ptr->set_extra_integer(i, mesh.elem_ptr(elem_id)->get_extra_integer(i));
-  }
 }
 
 void
 transitionLayerGenerator(ReplicatedMesh & mesh,
                          const std::vector<BoundaryName> & boundary_names,
-                         const unsigned int & conversion_element_layer_number,
-                         const bool & external_boundaries_checking)
+                         const unsigned int conversion_element_layer_number,
+                         const bool external_boundaries_checking)
 {
   // The base subdomain ID to shift the original elements because of the element type change
   const auto sid_shift_base = MooseMeshUtils::getNextFreeSubdomainID(mesh);
@@ -1071,6 +1061,9 @@ transitionLayerGenerator(ReplicatedMesh & mesh,
             elems_list.push_back(std::make_pair(
                 std::get<0>(side_info), std::vector<unsigned int>({std::get<1>(side_info)})));
         }
+        else if (side_type == C0POLYGON)
+          throw MooseException("The provided boundary set contains C0POLYGON side elements, which "
+                               "is not supported.");
         else
           mooseAssert(false,
                       "Impossible scenario: a linear side element that is neither TRI3 nor QUAD4.");
@@ -1193,7 +1186,7 @@ void
 assignConvertedElementsSubdomainNameSuffix(
     ReplicatedMesh & mesh,
     const std::set<subdomain_id_type> & original_subdomain_ids,
-    const subdomain_id_type & sid_shift_base,
+    const subdomain_id_type sid_shift_base,
     const SubdomainName & tet_suffix,
     const SubdomainName & pyramid_suffix)
 {

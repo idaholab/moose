@@ -15,19 +15,19 @@
  * Convert the elements involved in a set of external boundaries to ensure that the boundary set
  * only contains TRI3 elements.
  */
-class BoundaryTransitionGenerator : public MeshGenerator
+class BoundaryElementConversionGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  BoundaryTransitionGenerator(const InputParameters & parameters);
+  BoundaryElementConversionGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
   /// Mesh that possibly comes from another generator
   std::unique_ptr<MeshBase> & _input;
-  ///The boundaries to be converted
+  /// The boundaries to convert the neighboring elements of
   const std::vector<BoundaryName> _boundary_names;
   /// Number of layers of elements to be converted
   const unsigned int _conversion_element_layer_number;

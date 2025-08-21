@@ -233,7 +233,8 @@ elementBoundaryInfoCollector(const std::vector<libMesh::BoundaryInfo::BCTuple> &
                              std::vector<std::vector<boundary_id_type>> & elem_side_list);
 
 /**
- * Convert the element to a TRI3 element by modifying the mesh.
+ * Convert the element to an element with TRI3 side-elements on the user-specified sides by
+ * modifying the mesh.
  * @param mesh The mesh containing the element
  * @param elem_id The ID of the element to be converted
  * @param side_indices The indices of the sides to be converted
@@ -322,7 +323,8 @@ void createUnitTet4FromPrism6(ReplicatedMesh & mesh,
                               const SubdomainID & subdomain_id_shift_base);
 
 /**
- * Create a PYRAMID5 element based on on side and the centroid of the PRISM6 element.
+ * Create a PYRAMID5 element opposite the sides converted to tets and the centroid of the PRISM6
+ * element.
  * @param mesh The mesh containing the element
  * @param elem_id The ID of the PRISM6 element to be converted
  * @param side_index The index of the side to be converted
@@ -369,8 +371,8 @@ void retainEEID(ReplicatedMesh & mesh, const dof_id_type & elem_id, Elem * new_e
  */
 void transitionLayerGenerator(ReplicatedMesh & mesh,
                               const std::vector<BoundaryName> & boundary_names,
-                              const unsigned int & conversion_element_layer_number,
-                              const bool & external_boundaries_checking);
+                              const unsigned int conversion_element_layer_number,
+                              const bool external_boundaries_checking);
 /**
  * Assign a subdomain name suffix to the converted elements created during transition layer
  * generation.
@@ -385,7 +387,7 @@ void transitionLayerGenerator(ReplicatedMesh & mesh,
 void assignConvertedElementsSubdomainNameSuffix(
     ReplicatedMesh & mesh,
     const std::set<subdomain_id_type> & original_subdomain_ids,
-    const subdomain_id_type & sid_shift_base,
+    const subdomain_id_type sid_shift_base,
     const SubdomainName & tet_suffix,
     const SubdomainName & pyramid_suffix);
 }

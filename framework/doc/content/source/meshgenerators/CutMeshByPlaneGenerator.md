@@ -8,7 +8,7 @@ The `CutMeshByPlaneGenerator` is basically the 3D version of [`XYMeshLineCutter`
 
 ## Methods
 
-As cutting a `TET4` element along a plane is most straightforward, the elements that are crossed by the cutting plane need to be converted into TET4 elements before the cutting operation. The `CutMeshByPlaneGenerator` supports two methods for this conversion:
+As cutting a `TET4` element along a plane is most straightforward, the elements that are crossed by the cutting plane are converted into TET4 elements before the cutting operation. The `CutMeshByPlaneGenerator` supports two methods for this conversion:
 
 !media framework/meshgenerators/plane_cut_transition.png
        style=display: block;margin-left:auto;margin-right:auto;width:85%;
@@ -23,7 +23,7 @@ As all the non-`TET4` elements are converted into `TET4` elements, the output me
 
 ### Method 2: Transition Layer Approach
 
-The transition layer approach utilizes an algorithm that is similar to what is described in [`BoundaryTransitionGenerator`](/BoundaryTransitionGenerator.md).In this method, only the elements that are crossed by the cutting plane are converted into `TET4` elements (using the [`ElementsToTetrahedronsConverter`](/ElementsToTetrahedronsConverter.md) algorithm). The elements that are adjacent to these converted `TET4` elements are also converted into a combination of `TET4` and `PYRAMID5` elements, which are then used to create a transition layer between the `TET4` elements and the original elements. In this case, the majority of elements in the input mesh can be retained as they are. This option can be enabled by setting [!param](/Mesh/CutMeshByPlaneGenerator/generate_transition_layer) to `true`. See the third and fourth subfigures in [plane_cut_transition] for an example.
+The transition layer approach utilizes an algorithm that is similar to what is described in [`BoundaryElementConversionGenerator`](/BoundaryElementConversionGenerator.md). In this method, only the elements that are crossed by the cutting plane are converted into `TET4` elements (using the [`ElementsToTetrahedronsConverter`](/ElementsToTetrahedronsConverter.md) algorithm). The elements that are adjacent to these converted `TET4` elements are also converted into a combination of `TET4` and `PYRAMID5` elements, which are then used to create a transition layer between the `TET4` elements and the original elements. In this case, the majority of elements in the input mesh can be retained as they are. This option can be enabled by setting [!param](/Mesh/CutMeshByPlaneGenerator/generate_transition_layer) to `true`. See the third and fourth subfigures in [plane_cut_transition] for an example.
 
 As new types of elements are introduced in the transition layer, only the subdomain ids and names of the input mesh that are associated with the retained elements are preserved in the output mesh. The new `TET4` and `PYRAMID5` elements in the transition layer are assigned new subdomain names that are based on the original subdomain names with a suffix defined by [!param](/Mesh/CutMeshByPlaneGenerator/converted_pyramid_element_subdomain_name_suffix) and [!param](/Mesh/CutMeshByPlaneGenerator/converted_tet_element_subdomain_name_suffix), respectively. The new subdomain ids are assigned by automatically shifting the original ids.
 

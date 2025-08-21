@@ -1,5 +1,5 @@
 [Tests]
-  design = 'BoundaryTransitionGenerator.md'
+  design = 'BoundaryElementConversionGenerator.md'
   issues = '#31293'
   [simple_hex8]
     type = Exodiff
