@@ -13,7 +13,6 @@
         {
             "external_input": {
                 "times": [
-                    0.0,
                     0.01
                 ]
             },
@@ -23,7 +22,6 @@
         {
             "external_input": {
                 "times": [
-                    0.0,
                     0.01,
                     0.52
                 ]
@@ -34,7 +32,6 @@
         {
             "external_input": {
                 "times": [
-                    0.0,
                     0.01,
                     0.52,
                     1.54
@@ -46,7 +43,6 @@
         {
             "external_input": {
                 "times": [
-                    0.0,
                     0.01,
                     0.52,
                     1.54,
@@ -59,7 +55,6 @@
         {
             "external_input": {
                 "times": [
-                    0.0,
                     0.01,
                     0.52,
                     1.54,
@@ -73,7 +68,6 @@
         {
             "external_input": {
                 "times": [
-                    0.0,
                     0.01,
                     0.52,
                     1.54,
