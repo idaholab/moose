@@ -41,7 +41,7 @@ public:
    * @param elem_ids Ids of the elements in the patch
    * @return The coefficients of the polynomial
    */
-  const RealEigenVector getCoefficientsNoCache(const std::vector<dof_id_type> & elem_ids) const;
+  const RealEigenVector getCoefficients(const std::vector<dof_id_type> & elem_ids) const;
 
   /**
    * Compute coefficients, using cached values if available, and store any newly computed
@@ -53,7 +53,7 @@ public:
    * @param elem_ids Ids of the elements in the patch
    * @return The coefficients of the polynomial
    */
-  const RealEigenVector getCoefficients(const std::vector<dof_id_type> & elem_ids);
+  const RealEigenVector getCachedCoefficients(const std::vector<dof_id_type> & elem_ids);
 
   void initialize() override;
   void execute() override;

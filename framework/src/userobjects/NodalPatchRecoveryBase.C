@@ -71,14 +71,14 @@ Real
 NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
                                            const std::vector<dof_id_type> & elem_ids) const
 {
-  const RealEigenVector coef = getCoefficientsNoCache(elem_ids); // const version
+  const RealEigenVector coef = getCoefficients(elem_ids); // const version
   // Compute the fitted nodal value
   RealEigenVector p = evaluateBasisFunctions(x);
   return p.dot(coef);
 }
 
 const RealEigenVector
-NodalPatchRecoveryBase::getCoefficientsNoCache(const std::vector<dof_id_type> & elem_ids) const
+NodalPatchRecoveryBase::getCoefficients(const std::vector<dof_id_type> & elem_ids) const
 {
   auto elem_ids_reduced = removeDuplicateEntries(elem_ids);
 
@@ -117,7 +117,7 @@ NodalPatchRecoveryBase::getCoefficientsNoCache(const std::vector<dof_id_type> & 
 }
 
 const RealEigenVector
-NodalPatchRecoveryBase::getCoefficients(const std::vector<dof_id_type> & elem_ids)
+NodalPatchRecoveryBase::getCachedCoefficients(const std::vector<dof_id_type> & elem_ids)
 {
   // Check cache
   auto key = removeDuplicateEntries(elem_ids);
@@ -126,7 +126,7 @@ NodalPatchRecoveryBase::getCoefficients(const std::vector<dof_id_type> & elem_id
     return _cached_coef;
   else
   {
-    const auto coef = getCoefficientsNoCache(key); // const version
+    const auto coef = getCoefficients(key); // const version
 
     _cached_elem_ids = key; // Update the cached element IDs
     _cached_coef = coef;    // Update the cached coefficients

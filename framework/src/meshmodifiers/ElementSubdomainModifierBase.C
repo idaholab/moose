@@ -1127,7 +1127,7 @@ void
 ElementSubdomainModifierBase::extrapolatePolynomial(const VariableName & var_name)
 {
   const auto & coef =
-      _pr[_var_name_to_pr_idx[var_name]]->getCoefficients(_patch_elem_ids[var_name]);
+      _pr[_var_name_to_pr_idx[var_name]]->getCachedCoefficients(_patch_elem_ids[var_name]);
 
   const unsigned dim = _mesh.dimension();
 

@@ -39,6 +39,6 @@ private:
   ComputeBoundaryInitialConditionThread(FEProblemBase & fe_problem,
                                         const std::set<VariableName> * target_vars);
 
-  /// Allow FEProblemBase to access the private constructor
+  // Allow FEProblemBase to access the private constructor
   friend class FEProblemBase;
 };
