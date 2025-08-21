@@ -528,7 +528,90 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
   }
   else if (key == "dload")
   {
-    // TODO
+    // DLOAD lines apply distributed loads to elements or element sets.
+    // Support OP=MOD (default) to inherit previous step loads; OP=NEW to reset.
+    const auto op = MooseUtils::toLower(option._header.get<std::string>("op", "mod"));
+    if (op != "mod" && op != "new")
+      mooseError("Unknown value for *Dload OP=", op);
+
+    if (&_model != this && op == "mod")
+    {
+      const auto & previous_step =
+          _model._step.size() > 0 ? _model._step[_model._step.size() - 1] : _model;
+      _dloads = previous_step._dloads;
+    }
+    else if (&_model != this && op == "new")
+      _dloads.clear();
+
+    auto parse_jdltyp = [](const std::string & token) -> int
+    {
+      // Accept integer or S#/P# strings mapping to a face index.
+      if (!token.empty() && (token[0] == 'S' || token[0] == 's' || token[0] == 'P' || token[0] == 'p'))
+      {
+        auto face_str = token.substr(1);
+        try
+        {
+          int face = std::stoi(face_str);
+          return face;
+        }
+        catch (...)
+        {
+          mooseError("Invalid DLOAD type token '", token, "'");
+        }
+      }
+      // Try integer directly
+      try
+      {
+        return std::stoi(token);
+      }
+      catch (...)
+      {
+        mooseError("Invalid DLOAD type token '", token, "'");
+      }
+      return 0;
+    };
+
+    // loop over data lines
+    for (const auto & data : option._data)
+    {
+      if (data.size() < 2)
+        mooseError("At least two fields are required in each DLOAD data line");
+
+      // Resolve element targets: elset name or single element id (possibly instance-scoped)
+      const std::vector<Index> * element_set_ptr = nullptr;
+      std::vector<Index> single_element;
+
+      if (_model._elsets.find(data[0]) != _model._elsets.end())
+        element_set_ptr = &_model._elsets.at(data[0]);
+      else
+      {
+        // If the option is instance-scoped, resolve the single element within that instance
+        const Instance * scope_instance = nullptr;
+        if (option._header.has("instance"))
+        {
+          const auto inst_name = option._header.get<std::string>("instance");
+          const auto * asmb = dynamic_cast<const AssemblyModel *>(&_model);
+          if (!asmb || !asmb->_assembly)
+            mooseError("*Dload with instance= requires an Assembly context.");
+          if (!asmb->_assembly->_instance.has(inst_name))
+            mooseError("Instance '", inst_name, "' not found for *Dload instance=");
+          scope_instance = &asmb->_assembly->_instance[inst_name];
+        }
+
+        single_element = {_model.getElementIndex(data[0], scope_instance)};
+        element_set_ptr = &single_element;
+      }
+
+      // Type and magnitude
+      if (data.size() < 3)
+        mooseError("DLOAD line requires type and magnitude: '<elset|elem>, <type>, <mag>'");
+      const auto jdltyp = parse_jdltyp(data[1]);
+      const Real magnitude = MooseUtils::convert<Real>(data[2]);
+
+      // Append load to all selected elements
+      for (const auto elem_index : *element_set_ptr)
+        _dloads[elem_index].push_back(DLoad{jdltyp, magnitude});
+    }
   }
   else if (key == "restart")
   {

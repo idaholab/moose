@@ -9,11 +9,13 @@
 
 #include "AbaqusUELMeshUserElement.h"
 #include "AbaqusUELMesh.h"
+#include "AbaqusUELStepUserObject.h"
 #include "MooseError.h"
 #include "MooseTypes.h"
 #include "SystemBase.h"
 #include "AuxiliarySystem.h"
 #include "Executioner.h"
+#include <unordered_map>
 
 #define QUOTE(macro) stringifyName(macro)
 
@@ -54,6 +56,10 @@ AbaqusUELMeshUserElement::validParams()
   // UEL plugin file
   params.addRequiredParam<FileName>("plugin", "UEL plugin file");
 
+  // Step user object (provides step fraction and DLOADs); default to 'step_uo'
+  params.addParam<UserObjectName>("step_user_object", "Step user object");
+  params.set<UserObjectName>("step_user_object") = UserObjectName("step_uo");
+
   params.addParam<bool>(
       "use_energy", false, "Set to true of the UEL plugin makes use of the ENERGY parameter");
 
@@ -92,7 +98,8 @@ AbaqusUELMeshUserElement::AbaqusUELMeshUserElement(const InputParameters & param
     _statev_index_old(declareRestartableData<std::size_t>("statev_index_old", 1)),
     _use_energy(getParam<bool>("use_energy")),
     _energy(declareRestartableData<std::map<dof_id_type, std::array<Real, 8>>>("energy")),
-    _energy_old(declareRestartableData<std::map<dof_id_type, std::array<Real, 8>>>("energy_old"))
+    _energy_old(declareRestartableData<std::map<dof_id_type, std::array<Real, 8>>>("energy_old")),
+    _step_uo(getUserObject<AbaqusUELStepUserObject>("step_user_object"))
 {
   // get coupled variables from UEL type
   for (const auto i : make_range(_uel_definition._n_nodes))
@@ -181,6 +188,11 @@ AbaqusUELMeshUserElement::execute()
   std::vector<Real> all_aux_var_dof_increments;
   std::vector<Real> all_aux_var_dof_values;
   std::vector<Real> aux_var_values_to_uel;
+
+  // for dload
+  std::vector<int> jdltp_vec;
+  std::vector<Real> adlmag_vec;
+  const Real dfrac = _step_uo.getStepFraction();
 
   // parameters for the UEL plugin
   std::array<int, 5> lflags;
@@ -324,6 +336,40 @@ AbaqusUELMeshUserElement::execute()
     current_state = _statev[_statev_index_old][jelem];
     current_state.resize(_nstatev);
 
+    // Assemble distributed loads for this element (from step UO)
+    jdltp_vec.clear();
+    adlmag_vec.clear();
+    int ndload_val = 0;
+    int mdload_val = 0;
+    {
+      const auto * begin_list = _step_uo.getBeginDLoads(uel_elem_index);
+      const auto * end_list = _step_uo.getEndDLoads(uel_elem_index);
+      if (begin_list || end_list)
+      {
+        std::unordered_map<int, std::pair<Real, Real>> by_face; // begin,end
+        if (begin_list)
+          for (const auto & dl : *begin_list)
+            by_face[dl._jdltyp].first = dl._magnitude;
+        if (end_list)
+          for (const auto & dl : *end_list)
+            by_face[dl._jdltyp].second = dl._magnitude;
+        for (const auto & kv : by_face)
+        {
+          const int face = kv.first;
+          const Real mb = kv.second.first;
+          const Real me = kv.second.second;
+          const Real mnow = (1.0 - dfrac) * mb + dfrac * me;
+          if (mnow != 0.0)
+          {
+            jdltp_vec.push_back(face);
+            adlmag_vec.push_back(mnow);
+          }
+        }
+        ndload_val = static_cast<int>(adlmag_vec.size());
+        mdload_val = ndload_val;
+      }
+    }
+
     // call the plugin
     _uel(_local_re.get_values().data(),
          _local_ke.get_values().data(),
@@ -348,15 +394,15 @@ AbaqusUELMeshUserElement::execute()
          &idummy /* KINC */,
          &jelem,
          nullptr /* PARAMS[] */,
-         &idummy /* NDLOAD */,
-         nullptr /* JDLTYP[] */,
-         nullptr /* ADLMAG[] */,
+         &ndload_val /* NDLOAD */,
+         (ndload_val ? jdltp_vec.data() : nullptr) /* JDLTYP[] */,
+         (ndload_val ? adlmag_vec.data() : nullptr) /* ADLMAG[] */,
          aux_var_values_to_uel.data() /* PREDEF[] */,
          &npredf /* NPREDF */,
          lflags.data() /* LFLAGS[] */,
          &ndofel /* MLVARX */,
          nullptr /* DDLMAG[] */,
-         &idummy /* MDLOAD */,
+         &mdload_val /* MDLOAD */,
          &pnewdt,
          uel_elem._properties.second,
          const_cast<int *>(&_uel_definition._n_iproperties),
