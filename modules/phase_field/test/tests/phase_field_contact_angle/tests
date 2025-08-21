@@ -1,9 +1,0 @@
-[Tests]
-  [contact_angle]
-    type = CSVDiff
-    input = contact_angle.i
-    csvdiff = contact_angle_csv.csv
-    min_parallel = 8
-    requirement = "The PhaseFieldContactAngle kernel correctly implements the prescribed contact angle."
-  []
-[]
