@@ -50,6 +50,12 @@ LinearFVTKEDSourceSink::validParams()
   params.addParam<MooseFunctorName>(NS::turbulent_Prandtl, 0.9, "The turbulent Prandtl number.");
   params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
 
+// Added
+  params.addParam<MooseFunctorName>(NS::temperature, "The temperature.");
+  params.addParam<MooseFunctorName>("alpha_name", "Thermal expansion factor.");
+  params.addParam<MooseFunctorName>(NS::turbulent_Prandtl, 0.9, "The turbulent Prandtl number.");
+  params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
+
   return params;
 }
 

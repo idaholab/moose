@@ -349,8 +349,8 @@ advected_interp_method = 'upwind'
   num_iterations = 1000
   print_fields = false
   continue_on_max_its = true
-  dt = 1
-  num_steps = 200
+  dt = 0.1
+  num_steps = 350
   num_piso_iterations = 0
 
   pin_pressure = true

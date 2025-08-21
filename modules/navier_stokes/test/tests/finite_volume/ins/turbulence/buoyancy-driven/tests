@@ -1,12 +1,11 @@
 [Tests]
-  # Adapted from test file for linear-segregated-transient
   design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
   issues = '#29846'
   [buoyancy_driven_cavity]
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model and C3-buoyancy for a square cavity with linear FV discretization.'
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization on only part of the domain.'
     type = 'CSVDiff'
     input = 'cavity.i'
-    csvdiff = 'cavity_csv_horizontal_0351.csv  cavity_csv_vertical_0351.csv'
+    csvdiff = 'cavity_csv_horizontal_0351.csv  cavity_csv_vertical_0351'
     abs_zero = 1e-6
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
