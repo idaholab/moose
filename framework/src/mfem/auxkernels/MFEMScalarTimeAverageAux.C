@@ -9,13 +9,13 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMAverageFieldAux.h"
+#include "MFEMScalarTimeAverageAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMAverageFieldAux);
+registerMooseObject("MooseApp", MFEMScalarTimeAverageAux);
 
 InputParameters
-MFEMAverageFieldAux::validParams()
+MFEMScalarTimeAverageAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription(
@@ -26,7 +26,7 @@ MFEMAverageFieldAux::validParams()
   return params;
 }
 
-MFEMAverageFieldAux::MFEMAverageFieldAux(const InputParameters & parameters)
+MFEMScalarTimeAverageAux::MFEMScalarTimeAverageAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_source_var_name)),
@@ -35,7 +35,7 @@ MFEMAverageFieldAux::MFEMAverageFieldAux(const InputParameters & parameters)
 }
 
 void
-MFEMAverageFieldAux::execute()
+MFEMScalarTimeAverageAux::execute()
 {
   // project the average value using linear blend mfem::SumCoeffient calculated
   // from the current _source_var, with a time-average weight w = dt/(t-skip), and

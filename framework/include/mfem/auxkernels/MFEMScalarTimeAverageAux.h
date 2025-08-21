@@ -18,14 +18,14 @@
  *
  *   avg_new(x) = (1 - w)*avg_old(x) + w*src(x), w = dt / (t - skip)
  */
-class MFEMAverageFieldAux : public MFEMAuxKernel
+class MFEMScalarTimeAverageAux : public MFEMAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMAverageFieldAux(const InputParameters & parameters);
+  MFEMScalarTimeAverageAux(const InputParameters & parameters);
 
-  virtual ~MFEMAverageFieldAux() override = default;
+  virtual ~MFEMScalarTimeAverageAux() override = default;
 
   virtual void execute() override;
 
