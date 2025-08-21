@@ -227,7 +227,7 @@ coeff = ${fparse lambda/(epsilon*epsilon)}
   type = Transient
   solve_type = NEWTON
   start_time = 0
-  num_steps = 15
+  num_steps = 5
   dtmax = 0.25
   [TimeStepper]
     type = IterationAdaptiveDT
@@ -239,8 +239,10 @@ coeff = ${fparse lambda/(epsilon*epsilon)}
   []
   # petsc_options_iname = '-pc_type -ksp_gmres_restart -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount'
   # petsc_options_value = 'lu       50                  superlu_dist              NONZERO               1e-15'
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu      '
+  #petsc_options_iname = '-pc_type'
+  #petsc_options_value = 'lu      '
+  petsc_options_iname = '-pc_type        -pc_factor_shift_type     -pc_factor_shift_amount'
+  petsc_options_value = 'lu    NONZERO               1e-15  '
   line_search = 'none'
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-8

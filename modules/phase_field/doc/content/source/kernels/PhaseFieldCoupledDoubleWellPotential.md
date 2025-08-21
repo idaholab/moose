@@ -11,7 +11,7 @@ The chemical potential($G$) associated with Cahn-Hilliard equation for the advec
 
 where, $\lambda$ is the the mixing energy density and $\epsilon$ is the interface thickness between the phases.
 
-The `PhaseFieldCoupledDoubleWellPotential` implments the second term in the above equation as follows:
+The `PhaseFieldCoupledDoubleWellPotential` implements the second term in the above equation as follows:
 
 \begin{equation}
     prefactor \phi (\phi^2 - 1)

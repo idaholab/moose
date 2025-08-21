@@ -29,10 +29,8 @@ PhaseFieldAdvectionSUPG::PhaseFieldAdvectionSUPG(const InputParameters & paramet
 ADRealVectorValue
 PhaseFieldAdvectionSUPG::precomputeQpResidual()
 {
-  ADReal tau;
-  if (_velocity[_qp].norm() > 1.0e-10)
-    tau = _current_elem->hmin() / (2 * _velocity[_qp].norm());
-  else
-    tau = _current_elem->hmin() / (2 * 1.0e-10);
+  ADReal tau =
+      _current_elem->hmin() /
+      (2 * (_velocity[_qp] + RealVectorValue(libMesh::TOLERANCE * libMesh::TOLERANCE)).norm());
   return (tau * _velocity[_qp]) * (_velocity[_qp] * _grad_u[_qp]);
 }

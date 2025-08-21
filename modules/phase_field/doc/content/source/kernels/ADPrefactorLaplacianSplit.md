@@ -1,6 +1,6 @@
 # ADPrefactorLaplacianSplit
 
-!syntax description /Kernels/ADPrefactorLaplacian
+!syntax description /Kernels/ADPrefactorLaplacianSplit
 
 This kernel implements a laplacian kernel as follows:
 
