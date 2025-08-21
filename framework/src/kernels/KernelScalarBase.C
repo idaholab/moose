@@ -243,3 +243,17 @@ KernelScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int svar_num
               svar.dofIndices(),
               _kappa_var_ptr->scalingFactor());
 }
+
+void
+KernelScalarBase::computeResidualAndJacobian()
+{
+  Kernel::computeResidualAndJacobian(); // compute and assemble regular variable contributions
+
+  for (const auto & jvariable : getCoupledMooseScalarVars())
+  {
+    const unsigned int jvar = jvariable->number();
+
+    if (_is_implicit)
+      computeOffDiagJacobianScalar(jvar);
+  }
+}
