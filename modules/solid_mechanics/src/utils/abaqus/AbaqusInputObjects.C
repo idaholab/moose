@@ -545,8 +545,9 @@ Step::optionFunc(const std::string & key, const OptionNode & option)
 
     auto parse_jdltyp = [](const std::string & token) -> int
     {
-      // Accept integer or S#/P# strings mapping to a face index.
-      if (!token.empty() && (token[0] == 'S' || token[0] == 's' || token[0] == 'P' || token[0] == 'p'))
+      // Accept integer or S#/P# strings mapping to a face index or U# for UELs
+      std::string valid = "SsPpUu";
+      if (!token.empty() && valid.find(token[0]) != std::string::npos)
       {
         auto face_str = token.substr(1);
         try

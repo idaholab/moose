@@ -43,7 +43,7 @@ using IndexList = std::variant<Index, std::vector<Index>>;
  */
 struct DLoad
 {
-  int _jdltyp;   // Abaqus face/type code as passed to UEL JDLTYP
+  int _jdltyp;     // Abaqus face/type code as passed to UEL JDLTYP
   Real _magnitude; // Load magnitude as passed to UEL ADLMAG
 };
 
