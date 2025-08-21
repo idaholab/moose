@@ -41,6 +41,10 @@ public:
 
   void timestepSetup() override;
 
+  /// DLOAD getters for current step (begin/end)
+  const std::vector<Abaqus::DLoad> * getBeginDLoads(Abaqus::Index elem_index) const;
+  const std::vector<Abaqus::DLoad> * getEndDLoads(Abaqus::Index elem_index) const;
+
 protected:
   void initialize() override {}
   void execute() override {}
@@ -76,4 +80,9 @@ protected:
 
   /// applied forces for deactivated BCs
   Abaqus::VariableValueMap<Real> _current_step_begin_solution;
+
+  /// Distributed loads for the beginning and end of the current step
+  std::pair<const std::unordered_map<Abaqus::Index, std::vector<Abaqus::DLoad>> *,
+            const std::unordered_map<Abaqus::Index, std::vector<Abaqus::DLoad>> *>
+      _current_step_dloads;
 };
