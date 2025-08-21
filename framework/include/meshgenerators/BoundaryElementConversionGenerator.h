@@ -15,12 +15,12 @@
  * Convert the elements involved in a set of external boundaries to ensure that the boundary set
  * only contains TRI3 elements.
  */
-class BoundaryTransitionGenerator : public MeshGenerator
+class BoundaryElementConversionGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  BoundaryTransitionGenerator(const InputParameters & parameters);
+  BoundaryElementConversionGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

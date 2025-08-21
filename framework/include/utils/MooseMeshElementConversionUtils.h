@@ -371,8 +371,8 @@ void retainEEID(ReplicatedMesh & mesh, const dof_id_type & elem_id, Elem * new_e
  */
 void transitionLayerGenerator(ReplicatedMesh & mesh,
                               const std::vector<BoundaryName> & boundary_names,
-                              const unsigned int & conversion_element_layer_number,
-                              const bool & external_boundaries_checking);
+                              const unsigned int conversion_element_layer_number,
+                              const bool external_boundaries_checking);
 /**
  * Assign a subdomain name suffix to the converted elements created during transition layer
  * generation.
@@ -387,7 +387,7 @@ void transitionLayerGenerator(ReplicatedMesh & mesh,
 void assignConvertedElementsSubdomainNameSuffix(
     ReplicatedMesh & mesh,
     const std::set<subdomain_id_type> & original_subdomain_ids,
-    const subdomain_id_type & sid_shift_base,
+    const subdomain_id_type sid_shift_base,
     const SubdomainName & tet_suffix,
     const SubdomainName & pyramid_suffix);
 }

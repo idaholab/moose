@@ -8,7 +8,7 @@
     nz = 2
   []
   [trans]
-    type = BoundaryTransitionGenerator
+    type = BoundaryElementConversionGenerator
     input = gmg
     boundary_names = 'left'
   []

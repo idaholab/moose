@@ -7,19 +7,21 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "BoundaryTransitionGenerator.h"
+#include "BoundaryElementConversionGenerator.h"
 #include "MooseMeshElementConversionUtils.h"
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
 
-registerMooseObject("MooseApp", BoundaryTransitionGenerator);
+registerMooseObject("MooseApp", BoundaryElementConversionGenerator);
 
 InputParameters
-BoundaryTransitionGenerator::validParams()
+BoundaryElementConversionGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  params.addParam<MeshGeneratorName>("input", "mesh to create the boundary transition layer on.");
+  params.addParam<MeshGeneratorName>(
+      "input",
+      "mesh generator creating the mesh on which to create the boundary transition layer on.");
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary_names", "Boundaries that need to be converted to form a transition layer.");
   params.addParam<unsigned int>(
@@ -47,7 +49,8 @@ BoundaryTransitionGenerator::validParams()
   return params;
 }
 
-BoundaryTransitionGenerator::BoundaryTransitionGenerator(const InputParameters & parameters)
+BoundaryElementConversionGenerator::BoundaryElementConversionGenerator(
+    const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary_names")),
@@ -57,7 +60,7 @@ BoundaryTransitionGenerator::BoundaryTransitionGenerator(const InputParameters &
 }
 
 std::unique_ptr<MeshBase>
-BoundaryTransitionGenerator::generate()
+BoundaryElementConversionGenerator::generate()
 {
   auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
   if (!replicated_mesh_ptr)

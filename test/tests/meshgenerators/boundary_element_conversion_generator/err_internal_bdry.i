@@ -15,7 +15,7 @@
     normal = '1 0 0'
   []
   [trans]
-    type = BoundaryTransitionGenerator
+    type = BoundaryElementConversionGenerator
     input = int_bdry
     boundary_names = 'new'
     external_boundaries_checking = true
