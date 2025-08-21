@@ -16,7 +16,7 @@
 #include "DynamicLibraryLoader.h"
 #include "AbaqusUELMesh.h"
 
-class AbaqusUELStepUserObject;
+class AbaqusDLoadInterpolator;
 
 /**
  * This user-object is a testbed for implementing a custom element.
@@ -167,6 +167,6 @@ protected:
   /// transpose of the Jacobian inserted into the MOOSE non-linear system
   DenseMatrix<Real> _local_ke_T;
 
-  /// Step coordination user object (required for DLOAD ramping)
-  const AbaqusUELStepUserObject & _step_uo;
+  /// DLOAD interpolator UO
+  const AbaqusDLoadInterpolator & _dload_uo;
 };
