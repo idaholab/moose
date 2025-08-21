@@ -52,7 +52,7 @@ AbaqusUELStepUserObject::AbaqusUELStepUserObject(const InputParameters & paramet
     _current_step(libMesh::invalid_uint),
     _current_step_fraction(0.0),
     _current_step_bcs({&_uel_mesh.getModel()._bc_var_node_value_map,
-                      &_uel_mesh.getModel()._bc_var_node_value_map}),
+                       &_uel_mesh.getModel()._bc_var_node_value_map}),
     _current_step_dloads({&_uel_mesh.getModel()._dloads, &_uel_mesh.getModel()._dloads})
 {
   // Fill the time interval look-up table
