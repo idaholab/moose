@@ -13,7 +13,7 @@
 #include "MFEMAuxKernel.h"
 
 /**
- * AuxKernel to compute a time-weighted running average of an MFEMVariable
+ * AuxKernel to compute a running time average of an MFEMVariable
  * using a linear blend.
  *
  *   avg_new(x) = (1 - w)*avg_old(x) + w*src(x), w = dt / (t - skip)

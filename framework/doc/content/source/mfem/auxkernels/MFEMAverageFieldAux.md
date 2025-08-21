@@ -8,7 +8,7 @@
 
 ## Overview
 
-AuxKernel for calculating the time weighted average value of a running MFEM variable during a transient simulation projected into an AuxVariable
+AuxKernel for calculating the running time average of an MFEM variable during a transient simulation projected onto an AuxVariable.
 
 ## Example Input File Syntax
 

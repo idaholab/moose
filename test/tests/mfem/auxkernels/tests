@@ -13,22 +13,22 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []
-  design = 'syntax/auxkernels/MFEMAverageFieldAux.md'
-  issues = '#31163'
-  [HeatTransferAverageField]
+  [MFEMScalarTimeAverageAux]
     type = XMLDiff
     input = ../kernels/heattransfer.i
     cli_args = 'AuxVariables/inactive="" '
                'AuxKernels/inactive="" '
-               'AuxKernels/average_field/timestep_skip=2 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatTransferAverageField'
-    xmldiff = 'OutputData/HeatTransferAverageField/Run0/Run0.pvd
-                OutputData/HeatTransferAverageField/Run0/Cycle000001/proc000000.vtu'
+               'AuxKernels/average_field/time_skip=2 '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatTransferTimeAverage'
+    xmldiff = 'OutputData/HeatTransferTimeAverage/Run0/Run0.pvd
+                OutputData/HeatTransferTimeAverage/Run0/Cycle000003/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
-    requirement = 'The system shall have the ability to take a running time-weight average of an MFEM Variable.'
+    design = 'MFEMScalarTimeAverageAux.md'
+    issues = '#31163'
+    requirement = 'The system shall have the ability to take a running time average of an MFEM variable.'
     capabilities = 'mfem'
-    max_parallel = 1
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
     recover = false
-    max_threads = 1
   []
 []
