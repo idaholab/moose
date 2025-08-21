@@ -39,6 +39,15 @@ using VariableValueMap = std::unordered_map<AbaqusID, std::unordered_map<Index, 
 using IndexList = std::variant<Index, std::vector<Index>>;
 
 /**
+ * Distributed load specification for an element (from *Dload)
+ */
+struct DLoad
+{
+  int _jdltyp;   // Abaqus face/type code as passed to UEL JDLTYP
+  Real _magnitude; // Load magnitude as passed to UEL ADLMAG
+};
+
+/**
  * Store objects of type T accessible under a name and a contiguous id.
  */
 template <typename T>
@@ -223,6 +232,9 @@ struct Step
   /// (mapping from Abaqus variable ID to a (node index, value) map)
   VariableValueMap<Real> _bc_var_node_value_map;
 
+  /// distributed loads per element for this step
+  std::unordered_map<Index, std::vector<DLoad>> _dloads;
+
   /// Model acces to get node sets
   const Model & _model;
 
@@ -290,6 +302,9 @@ struct Model : public Part, public Step
 
   /// Steps
   ObjectStore<Step> _step;
+
+  /// distributed loads specified at model scope (begin state before first step)
+  std::unordered_map<Index, std::vector<DLoad>> _dloads;
 };
 
 /**

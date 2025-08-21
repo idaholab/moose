@@ -43,9 +43,18 @@ internally and persisted across time steps.
 - `element_sets`: one or more Abaqus element sets to operate on; elements are filtered to those of
   the specified `uel_type`.
 - `plugin`: path to the compiled UEL plugin; the loader appends a method suffix and `.plugin`.
+- `step_user_object`: name of the [AbaqusUELStepUserObject](AbaqusUELStepUserObject.md) that
+  provides the current step fraction and distributed loads parsed from `*Dload`. Defaults to
+  `step_uo`.
 - `external_fields`: optional list of AuxVariables to pass as PREDEF fields to the UEL. Values are
   typically supplied by [AbaqusPredefAux](auxkernels/AbaqusPredefAux.md).
 - `use_energy`: set to true if the UEL writes energy quantities.
+
+### Distributed Loads (DLOAD)
+
+`*Dload` entries in the Abaqus input are parsed per step and passed to the UEL through
+`NDLOAD`, `JDLTYP`, and `ADLMAG`. Magnitudes are linearly ramped from the previous step values to
+the current step values using the step fraction `d ∈ [0, 1]` provided by the step user object.
 
 Example configuration (from a test):
 
