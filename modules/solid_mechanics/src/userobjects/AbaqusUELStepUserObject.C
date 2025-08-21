@@ -52,7 +52,8 @@ AbaqusUELStepUserObject::AbaqusUELStepUserObject(const InputParameters & paramet
     _current_step(libMesh::invalid_uint),
     _current_step_fraction(0.0),
     _current_step_bcs({&_uel_mesh.getModel()._bc_var_node_value_map,
-                       &_uel_mesh.getModel()._bc_var_node_value_map})
+                      &_uel_mesh.getModel()._bc_var_node_value_map}),
+    _current_step_dloads({&_uel_mesh.getModel()._dloads, &_uel_mesh.getModel()._dloads})
 {
   // Fill the time interval look-up table
   _times.resize(_steps.size() + 1);
@@ -110,6 +111,8 @@ AbaqusUELStepUserObject::timestepSetup()
 
     // shift bc state (beginning and end of new step) forward
     _current_step_bcs = {_current_step_bcs.second, &_steps[next_step]._bc_var_node_value_map};
+    // shift dload state forward
+    _current_step_dloads = {_current_step_dloads.second, &_steps[next_step]._dloads};
 
     // transitioning to a new step
     _current_step = next_step;
@@ -237,4 +240,22 @@ AbaqusUELStepUserObject::getVariables() const
   for (const auto & pair : _var_map)
     var_list.emplace(pair.first, _uel_mesh.getVarName(pair.first));
   return var_list;
+}
+
+const std::vector<Abaqus::DLoad> *
+AbaqusUELStepUserObject::getBeginDLoads(Abaqus::Index elem_index) const
+{
+  const auto it = _current_step_dloads.first->find(elem_index);
+  if (it == _current_step_dloads.first->end())
+    return nullptr;
+  return &it->second;
+}
+
+const std::vector<Abaqus::DLoad> *
+AbaqusUELStepUserObject::getEndDLoads(Abaqus::Index elem_index) const
+{
+  const auto it = _current_step_dloads.second->find(elem_index);
+  if (it == _current_step_dloads.second->end())
+    return nullptr;
+  return &it->second;
 }
