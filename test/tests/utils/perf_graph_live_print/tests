@@ -7,6 +7,7 @@
     issues = '#15444'
     design = 'utils/PerfGraph.md'
     requirement = 'The system shall allow for timing sections of code and having automated print-outs when they take too long.'
+    perf_graph_live = true
   []
 
   [nested_sections]
@@ -19,6 +20,7 @@
     issues = '#15444'
     design = 'utils/PerfGraphLivePrint.md'
     requirement = 'The system shall allow for nested code timing sections and having automated print-outs of the code section names when they are taking a long time.'
+    perf_graph_live = true
   []
   [section_interrupted_by_regular_print]
     # this test does not address the warnings 'direct to Moose::out' issue #23750
@@ -30,6 +32,7 @@
     issues = '#23746'
     design = 'utils/PerfGraphLivePrint.md'
     requirement = 'The system shall be able to display the automatic print-out of a timed section even when an external print happened before the threshold for the automatic print-out was met.'
+    perf_graph_live = true
   []
 
   [multiapps]
@@ -41,6 +44,7 @@
     issues = '#19114'
     design = 'utils/PerfGraphLivePrint.md'
     requirement = 'The system shall allow for automatic print-outs of timing sections within multiapps.'
+    perf_graph_live = true
   []
   [multiapps_and_nested]
     type = RunApp
@@ -51,6 +55,7 @@
     issues = '#19114'
     design = 'utils/PerfGraphLivePrint.md'
     requirement = 'The system shall allow for automatic print-outs of nested timing sections within multiapps.'
+    perf_graph_live = true
   []
 
   [nested_multiapps]
@@ -62,5 +67,6 @@
     issues = '#19114'
     design = 'utils/PerfGraphLivePrint.md'
     requirement = 'The system shall allow for automatic print-outs of timing sections within nested multiapps.'
+    perf_graph_live = true
   []
 []
