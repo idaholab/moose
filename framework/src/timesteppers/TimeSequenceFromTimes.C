@@ -25,22 +25,23 @@ TimeSequenceFromTimes::validParams()
 
 TimeSequenceFromTimes::TimeSequenceFromTimes(const InputParameters & parameters)
   : TimeSequenceStepperBase(parameters),
-    _times(_fe_problem.getUserObject<Times>(getParam<TimesName>("times"))),
-    _time_points(_times.getTimes())
+    _times(_fe_problem.getUserObject<Times>(getParam<TimesName>("times")))
 {
 }
 
 void
 TimeSequenceFromTimes::init()
 {
-  setupSequence(_time_points);
+  auto time_points = _times.getTimes();
+  setupSequence(time_points);
 }
 
 void
 TimeSequenceFromTimes::updateTimeSequence()
 {
+  auto time_points = _times.getTimes();
   resetSequence();
-  updateSequence(_time_points);
+  updateSequence(time_points);
 }
 
 Real

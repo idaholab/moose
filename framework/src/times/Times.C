@@ -110,9 +110,7 @@ Times::getTimes() const
     return _times;
   else
   {
-    // If times array is empty, use current time as start time in the time array
-    _times.push_back(getCurrentTime());
-    return _times;
+    mooseError("Times vector has not been initialized.");
   }
 }
 
