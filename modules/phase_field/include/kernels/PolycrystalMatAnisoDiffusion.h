@@ -12,9 +12,10 @@
 #include "PolycrystalMatDiffusionBase.h"
 
 /**
- * TODO fix comment Anisotropic diffusion kernel that takes a diffusion coefficient of type
- * RealTensorValue. All logic is implemnted in the MatDiffusionBase class
- * template.
+ * Anisotropic diffusion kernel that takes a diffusion coefficient of type
+ * RealTensorValue. Extends MatDiffusion to allow improved numerical performance
+ * in polycrystalline microstructures by adding Jacobian contributions for cases
+ * where diffusivity depends on gradients of order parameters.
  */
 class PolycrystalMatAnisoDiffusion : public PolycrystalMatDiffusionBase<RealTensorValue>
 {

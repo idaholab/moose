@@ -97,9 +97,6 @@ template <typename T>
 Real
 PolycrystalMatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  // get the coupled variable jvar is referring to
-  // const unsigned int cvar = this->mapJvarToCvar(jvar);
-
   Real sum = MatDiffusionBase<T>::computeQpOffDiagJacobian(jvar);
   if (jvar == _surface_op_var)
     sum += _dDdgradc[this->_qp] * this->_grad_phi[this->_j][this->_qp] * this->_grad_v[this->_qp] *

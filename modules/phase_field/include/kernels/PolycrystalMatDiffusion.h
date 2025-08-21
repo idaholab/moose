@@ -12,9 +12,10 @@
 #include "PolycrystalMatDiffusionBase.h"
 
 /**
- * TODO FIX Isotropic diffusion kernel that takes a diffusion coefficient of type
- * Real. All logic is implemnted in the MatDiffusionBase class
- * template.
+ * Isotropic diffusion kernel that takes a diffusion coefficient of type
+ * Real. Extends MatDiffusion to allow improved numerical performance in polycrystalline
+ * microstructures by adding Jacobian contributions for cases where diffusivity depends
+ * on gradients of order parameters.
  */
 class PolycrystalMatDiffusion : public PolycrystalMatDiffusionBase<Real>
 {
