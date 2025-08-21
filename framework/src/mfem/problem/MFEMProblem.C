@@ -79,7 +79,7 @@ MFEMProblem::addIndicator(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
 
   const UserObject * est_uo = &(getUserObjectBase(name));
-  if (dynamic_cast<const MFEMIndicator *>(est_uo) != nullptr)
+  if (dynamic_cast<const MFEMIndicator *>(est_uo))
   {
     // success
     std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMIndicator>(name).getSharedPtr();
@@ -103,7 +103,7 @@ MFEMProblem::addMarker(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
 
   const UserObject * est_uo = &(getUserObjectBase(name));
-  if (dynamic_cast<const MFEMRefinementMarker *>(est_uo) != nullptr)
+  if (dynamic_cast<const MFEMRefinementMarker *>(est_uo))
   {
     std::shared_ptr<MooseObject> object_ptr =
         getUserObject<MFEMRefinementMarker>(name).getSharedPtr();

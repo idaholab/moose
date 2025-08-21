@@ -190,7 +190,7 @@ public:
                              const std::string & name,
                              InputParameters & parameters);
   /**
-   * Override of ExternalProblem::addIndicator. Uses ExternalProblem::addIndicator to create a
+   * Override of ExternalProblem::addIndicator. Uses ExternalProblem::addIndicator to create an
    * MFEMGeneralUserObject representing the error estimator in MOOSE, and creates a corresponding
    * MFEMIndicator to be used when setting up adaptive mesh refinement later.
    */
@@ -199,7 +199,7 @@ public:
                     InputParameters & parameters) override;
 
   /**
-   * Override of ExternalProblem::addMarker. Uses ExternalProblem::addMarker to create a
+   * Override of ExternalProblem::addMarker. Uses ExternalProblem::addMarker to create an
    * MFEMGeneralUserObject representing the error estimator in MOOSE, and creates a corresponding
    * MFEMRefinementMarker to be used for adaptive mesh refinement. If the pointer conversion
    * is successful, this method sets the MFEMProblemData::_use_amr to true.

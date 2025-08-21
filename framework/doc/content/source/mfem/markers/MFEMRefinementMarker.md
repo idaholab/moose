@@ -9,7 +9,7 @@ Wrapper around `mfem::ThresholdRefiner`. Input file needs to have the name of an
 
 ## Overview
 
-Currently contains one method for H-refinement (`Apply`) and another for P-refinement (`MarkWithoutRefining`).
+Currently contains one method for h-refinement (`HRefine`) and another for p-refinement (`MarkWithoutRefining`).
 Both advance an internal counter which determines how many refinement steps have been taken.
 
 

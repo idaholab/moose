@@ -32,10 +32,10 @@ MFEMRefinementMarker::validParams()
                                     "refine>=0 & refine<=1",
                                     "Elements within this percentage of the max error will "
                                     "be refined.  Must be between 0 and 1!");
-  params.addRangeCheckedParam<int>(
-      "max_h_level", 0, "max_h_level>=0 & max_h_level <= 10", "Total number of h-refinement steps");
-  params.addRangeCheckedParam<int>(
-      "max_p_level", 0, "max_p_level>=0 & max_p_level <= 10", "Total number of p-refinement steps");
+  params.addRangeCheckedParam<unsigned>(
+      "max_h_level", 0, "max_h_level>=0 & max_h_level<=10", "Max number of h-refinement steps");
+  params.addRangeCheckedParam<unsigned>(
+      "max_p_level", 0, "max_p_level>=0 & max_p_level<=10", "Max number of p-refinement steps");
 
   params.addRequiredParam<std::string>("indicator", "Estimator to use");
   return params;
@@ -45,8 +45,8 @@ MFEMRefinementMarker::MFEMRefinementMarker(const InputParameters & params)
   : MFEMGeneralUserObject(params),
     _estimator_name(getParam<std::string>("indicator")),
     _error_threshold(getParam<Real>("refine")),
-    _max_h_level(getParam<int>("max_h_level")),
-    _max_p_level(getParam<int>("max_p_level")),
+    _max_h_level(getParam<unsigned>("max_h_level")),
+    _max_p_level(getParam<unsigned>("max_p_level")),
     _refinement_type(getParam<MooseEnum>("refinement_type"))
 {
   // _use_h_refinement and _use_p_refinement both default to false
