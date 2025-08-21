@@ -12,14 +12,11 @@
 
 #include "MFEMGeneralUserObject.h"
 
-/*
-Class to construct threshold refiner.
-
-The underlying mfem::ThresholdRefiner needs to be initialised with a
-reference to the estimator.
-
-Making all the methods dummies for now.
-*/
+/**
+ * Class to construct threshold refiner.
+ * The underlying mfem::ThresholdRefiner needs to be initialised with a
+ * reference to the estimator.
+ */
 class MFEMRefinementMarker : public MFEMGeneralUserObject
 {
 public:
@@ -52,8 +49,8 @@ public:
     return _use_p_refinement and !_stop_p_ref and (_p_ref_counter < _max_p_level);
   }
 
-  int MaxHLevel() const { return _max_h_level; }
-  int MaxPLevel() const { return _max_p_level; }
+  const unsigned & maxHLevel() const { return _max_h_level; }
+  const unsigned & maxPLevel() const { return _max_p_level; }
 
 protected:
   // Shared pointer to underlying mfem object
@@ -61,10 +58,10 @@ protected:
   std::string _estimator_name;
 
   float _error_threshold;
-  int _max_h_level;
-  int _max_p_level;
-  int _h_ref_counter{0};
-  int _p_ref_counter{0};
+  const unsigned _max_h_level;
+  const unsigned _max_p_level;
+  unsigned _h_ref_counter{0};
+  unsigned _p_ref_counter{0};
 
   /// Bool to indicate we have reached stopping condition
   /// for h-refinement.

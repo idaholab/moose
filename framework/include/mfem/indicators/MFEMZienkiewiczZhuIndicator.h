@@ -37,7 +37,7 @@ protected:
   /// Finite element collection for the discontinuous flux
   std::unique_ptr<mfem::L2_FECollection> _flux_fec;
 
-  /// Finite element space for the smooth flux
+  /// Finite element space for the smoothed flux
   std::unique_ptr<mfem::ParFiniteElementSpace> _smooth_flux_fes;
 
   /// Finite element space for the discontinuous flux
