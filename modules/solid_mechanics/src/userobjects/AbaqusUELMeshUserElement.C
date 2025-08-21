@@ -9,7 +9,7 @@
 
 #include "AbaqusUELMeshUserElement.h"
 #include "AbaqusUELMesh.h"
-#include "AbaqusUELStepUserObject.h"
+#include "AbaqusDLoadInterpolator.h"
 #include "MooseError.h"
 #include "MooseTypes.h"
 #include "SystemBase.h"
@@ -56,9 +56,9 @@ AbaqusUELMeshUserElement::validParams()
   // UEL plugin file
   params.addRequiredParam<FileName>("plugin", "UEL plugin file");
 
-  // Step user object (provides step fraction and DLOADs); default to 'step_uo'
-  params.addParam<UserObjectName>("step_user_object", "Step user object");
-  params.set<UserObjectName>("step_user_object") = UserObjectName("step_uo");
+  // DLOAD interpolator (provides per-element arrays); default to 'dload_uo'
+  params.addParam<UserObjectName>(
+      "dload_interpolator", "dload_uo", "DLOAD interpolator user object");
 
   params.addParam<bool>(
       "use_energy", false, "Set to true of the UEL plugin makes use of the ENERGY parameter");
@@ -99,7 +99,7 @@ AbaqusUELMeshUserElement::AbaqusUELMeshUserElement(const InputParameters & param
     _use_energy(getParam<bool>("use_energy")),
     _energy(declareRestartableData<std::map<dof_id_type, std::array<Real, 8>>>("energy")),
     _energy_old(declareRestartableData<std::map<dof_id_type, std::array<Real, 8>>>("energy_old")),
-    _step_uo(getUserObject<AbaqusUELStepUserObject>("step_user_object"))
+    _dload_uo(getUserObject<AbaqusDLoadInterpolator>("dload_interpolator"))
 {
   // get coupled variables from UEL type
   for (const auto i : make_range(_uel_definition._n_nodes))
@@ -189,10 +189,9 @@ AbaqusUELMeshUserElement::execute()
   std::vector<Real> all_aux_var_dof_values;
   std::vector<Real> aux_var_values_to_uel;
 
-  // for dload
+  // dload arrays assembled by interpolator at time step start
   std::vector<int> jdltp_vec;
   std::vector<Real> adlmag_vec;
-  const Real dfrac = _step_uo.getStepFraction();
 
   // parameters for the UEL plugin
   std::array<int, 5> lflags;
@@ -336,36 +335,17 @@ AbaqusUELMeshUserElement::execute()
     current_state = _statev[_statev_index_old][jelem];
     current_state.resize(_nstatev);
 
-    // Assemble distributed loads for this element (from step UO)
-    jdltp_vec.clear();
-    adlmag_vec.clear();
+    // Assemble distributed loads for this element from DLoadInterpolator
     int ndload_val = 0;
     int mdload_val = 0;
+    if (const auto * tptr = _dload_uo.getTypes(uel_elem_index))
     {
-      const auto * begin_list = _step_uo.getBeginDLoads(uel_elem_index);
-      const auto * end_list = _step_uo.getEndDLoads(uel_elem_index);
-      if (begin_list || end_list)
+      const auto * mptr = _dload_uo.getMagnitudes(uel_elem_index);
+      if (mptr && tptr->size() == mptr->size() && !tptr->empty())
       {
-        std::unordered_map<int, std::pair<Real, Real>> by_face; // begin,end
-        if (begin_list)
-          for (const auto & dl : *begin_list)
-            by_face[dl._jdltyp].first = dl._magnitude;
-        if (end_list)
-          for (const auto & dl : *end_list)
-            by_face[dl._jdltyp].second = dl._magnitude;
-        for (const auto & kv : by_face)
-        {
-          const int face = kv.first;
-          const Real mb = kv.second.first;
-          const Real me = kv.second.second;
-          const Real mnow = (1.0 - dfrac) * mb + dfrac * me;
-          if (mnow != 0.0)
-          {
-            jdltp_vec.push_back(face);
-            adlmag_vec.push_back(mnow);
-          }
-        }
-        ndload_val = static_cast<int>(adlmag_vec.size());
+        jdltp_vec = *tptr;
+        adlmag_vec = *mptr;
+        ndload_val = static_cast<int>(jdltp_vec.size());
         mdload_val = ndload_val;
       }
     }
