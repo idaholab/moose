@@ -34,7 +34,7 @@
 [AuxKernels]
   inactive = average_field
   [average_field]
-    type = MFEMAverageFieldAux
+    type = MFEMScalarTimeAverageAux
     variable = average_temperature
     source = temperature
   []

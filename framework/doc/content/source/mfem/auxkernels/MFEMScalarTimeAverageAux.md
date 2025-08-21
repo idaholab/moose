@@ -1,10 +1,10 @@
-# MFEMAverageFieldAux
+# MFEMScalarTimeAverageAux
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /AuxKernels/MFEMAverageFieldAux
+!syntax description /AuxKernels/MFEMScalarTimeAverageAux
 
 ## Overview
 
@@ -14,11 +14,11 @@ AuxKernel for calculating the running time average of an MFEM variable during a 
 
 !listing mfem/kernels/heattransfer.i block=/AuxKernels
 
-!syntax parameters /AuxKernels/MFEMAverageFieldAux
+!syntax parameters /AuxKernels/MFEMScalarTimeAverageAux
 
-!syntax inputs /AuxKernels/MFEMAverageFieldAux
+!syntax inputs /AuxKernels/MFEMScalarTimeAverageAux
 
-!syntax children /AuxKernels/MFEMAverageFieldAux
+!syntax children /AuxKernels/MFEMScalarTimeAverageAux
 
 !if-end!
 
