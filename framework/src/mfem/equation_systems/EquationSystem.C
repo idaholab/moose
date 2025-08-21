@@ -452,8 +452,7 @@ EquationSystem::UpdateEquationSystem()
   // update these grid functions too
   for (const auto i : index_range(_test_var_names))
   {
-    _xs.at(i)->Update();
-    _dxdts.at(i)->Update();
+    _var_ess_constraints.at(i)->Update();
   }
 
   // Apply boundary conditions
