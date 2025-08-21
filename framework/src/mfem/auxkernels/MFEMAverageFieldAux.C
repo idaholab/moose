@@ -19,9 +19,9 @@ MFEMAverageFieldAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription(
-      "Time-weighted running average of an MFEMVariable, projected into an AuxVariable.");
+      "Running time average of an MFEMVariable projected onto an AuxVariable.");
   params.addRequiredParam<VariableName>("source", "Name of the MFEMVariable to average from.");
-  params.addParam<mfem::real_t>("timestep_skip", 0.0, "Time to skip before beginning the average.");
+  params.addParam<mfem::real_t>("time_skip", 0.0, "Time to skip before beginning the average.");
 
   return params;
 }
@@ -30,8 +30,7 @@ MFEMAverageFieldAux::MFEMAverageFieldAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_source_var_name)),
-    _skip(getParam<mfem::real_t>("timestep_skip"))
-//)
+    _skip(getParam<mfem::real_t>("time_skip"))
 {
 }
 
