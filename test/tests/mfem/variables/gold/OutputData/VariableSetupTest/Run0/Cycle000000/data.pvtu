@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<VTKFile type="PUnstructuredGrid" version ="0.1" byte_order="LittleEndian">
+<VTKFile type="PUnstructuredGrid" version ="2.2" byte_order="LittleEndian">
 <PUnstructuredGrid GhostLevel="0">
 <PPoints>
 	<PDataArray type="Float64"  Name="Points" NumberOfComponents="3" format="binary"/>
@@ -10,14 +10,12 @@
 	<PDataArray type="UInt8"  Name="types"        NumberOfComponents="1" format="binary"/>
 </PCells>
 <PPointData>
-<PDataArray type="Float64" Name="dscalar_auxvar_dt" NumberOfComponents="1" format="binary" />
-<PDataArray type="Float64" Name="dscalar_var_dt" NumberOfComponents="1" format="binary" />
-<PDataArray type="Float64" Name="dvector_auxvar_dt" NumberOfComponents="1" format="binary" />
-<PDataArray type="Float64" Name="dvector_var_dt" NumberOfComponents="1" format="binary" />
-<PDataArray type="Float64" Name="scalar_auxvar" NumberOfComponents="1" format="binary" />
-<PDataArray type="Float64" Name="scalar_var" NumberOfComponents="1" format="binary" />
-<PDataArray type="Float64" Name="vector_auxvar" NumberOfComponents="1" format="binary" />
-<PDataArray type="Float64" Name="vector_var" NumberOfComponents="1" format="binary" />
+<PDataArray type="Float64" Name="dscalar_var_dt" NumberOfComponents="1"  format="binary" />
+<PDataArray type="Float64" Name="dvector_var_dt" NumberOfComponents="1"  format="binary" />
+<PDataArray type="Float64" Name="scalar_auxvar" NumberOfComponents="1"  format="binary" />
+<PDataArray type="Float64" Name="scalar_var" NumberOfComponents="1"  format="binary" />
+<PDataArray type="Float64" Name="vector_auxvar" NumberOfComponents="1"  format="binary" />
+<PDataArray type="Float64" Name="vector_var" NumberOfComponents="1"  format="binary" />
 </PPointData>
 <PCellData>
 	<PDataArray type="Int32" Name="attribute" NumberOfComponents="1" format="binary"/>
