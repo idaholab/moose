@@ -67,11 +67,16 @@
   [step_uo]
     type = AbaqusUELStepUserObject
   []
+  [dload_uo]
+    type = AbaqusDLoadInterpolator
+    step_user_object = step_uo
+  []
   [uel]
     type = AbaqusUELMeshUserElement
     uel_type = U1
     plugin = ../../plugins/small_strain_tri_uel
     element_sets = CUBE
+    dload_interpolator = dload_uo
   []
 []
 
