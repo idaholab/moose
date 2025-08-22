@@ -8085,6 +8085,8 @@ FEProblemBase::meshChanged(const bool intermediate_change,
   // callbacks (e.g. for sparsity calculations) triggered by the
   // EquationSystems reinit may require up-to-date MooseMesh caches.
   _mesh.meshChanged();
+  if (_displaced_problem)
+    _displaced_mesh->meshChanged();
 
   // If we're just going to alter the mesh again, all we need to
   // handle here is AMR and projections, not full system reinit
@@ -8118,6 +8120,8 @@ FEProblemBase::meshChanged(const bool intermediate_change,
   // "active" and "local" may have been *changed* by refinement and
   // repartitioning done in EquationSystems::reinit().
   _mesh.meshChanged();
+  if (_displaced_problem)
+    _displaced_mesh->meshChanged();
 
   // If we have finite volume variables, we will need to recompute additional elemental/face
   // quantities
