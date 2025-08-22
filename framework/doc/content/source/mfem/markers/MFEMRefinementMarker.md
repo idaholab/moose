@@ -6,13 +6,20 @@
 
 Wrapper around `mfem::ThresholdRefiner`. Input file needs to have the name of an estimator to construct correctly.
 
-
 ## Overview
 
 Currently contains one method for h-refinement (`HRefine`) and another for p-refinement (`MarkWithoutRefining`).
 Both advance an internal counter which determines how many refinement steps have been taken.
 
+## Example Input File Syntax
 
+!listing mfem/kernels/diffusion_amr.i block=Adaptivity
+
+!syntax parameters /Adaptivity/Markers/MFEMRefinementMarker
+
+!syntax inputs /Adaptivity/Markers/MFEMRefinementMarker
+
+!syntax children /Adaptivity/Markers/MFEMRefinementMarker
 !if-end!
 
 !else
