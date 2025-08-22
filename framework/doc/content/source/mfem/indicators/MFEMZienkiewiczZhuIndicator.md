@@ -21,7 +21,13 @@ This object is accessed once (by an `MFEMRefinementMarker`) using the `getEstima
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/diffusion_amr.i block=Adaptivity
+!listing mfem/kernels/diffusion_amr.i block=Adaptivity
+
+!syntax parameters /Adaptivity/Indicators/MFEMZienkiewiczZhuIndicator
+
+!syntax inputs /Adaptivity/Indicators/MFEMZienkiewiczZhuIndicator
+
+!syntax children /Adaptivity/Indicators/MFEMZienkiewiczZhuIndicator
 
 !if-end!
 
