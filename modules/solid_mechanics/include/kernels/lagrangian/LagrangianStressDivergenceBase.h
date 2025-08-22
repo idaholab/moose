@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "KernelScalarBase.h"
 #include "DerivativeMaterialInterface.h"
 #include "JvarMapInterface.h"
 #include "StabilizationUtils.h"
@@ -25,7 +25,7 @@
 /// most of the math has to be done in the subclasses
 ///
 class LagrangianStressDivergenceBase
-  : public JvarMapKernelInterface<DerivativeMaterialInterface<Kernel>>
+  : public JvarMapKernelInterface<DerivativeMaterialInterface<KernelScalarBase>>
 {
 public:
   static InputParameters validParams();

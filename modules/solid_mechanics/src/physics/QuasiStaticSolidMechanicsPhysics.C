@@ -18,7 +18,7 @@
 
 #include "BlockRestrictable.h"
 
-#include "HomogenizationConstraint.h"
+#include "ComputeHomogenizedLagrangianStrain.h" // Where the constraint enum lives
 #include "AddVariableAction.h"
 
 #include "libmesh/string_to_enum.h"
@@ -467,8 +467,9 @@ QuasiStaticSolidMechanicsPhysics::act()
 
       if (_lk_homogenization)
       {
-        params.set<std::vector<VariableName>>("macro_gradient") = {_hname};
-        params.set<UserObjectName>("homogenization_constraint") = _integrator_name;
+        params.set<std::vector<VariableName>>("scalar_variable") = {_hname};
+        params.set<MultiMooseEnum>("constraint_types") = _constraint_types;
+        params.set<std::vector<FunctionName>>("targets") = _targets;
       }
 
       _problem->addKernel(ad_prepend + tensor_kernel_type, kernel_name, params);
@@ -481,32 +482,6 @@ QuasiStaticSolidMechanicsPhysics::act()
       params.set<NonlinearVariableName>("variable") = getParam<VariableName>("out_of_plane_strain");
 
       _problem->addKernel(ad_prepend + "WeakPlaneStress", wps_kernel_name, params);
-    }
-  }
-  else if (_current_task == "add_scalar_kernel")
-  {
-    if (_lk_homogenization)
-    {
-      InputParameters params = _factory.getValidParams("HomogenizationConstraintScalarKernel");
-      params.set<NonlinearVariableName>("variable") = _hname;
-      params.set<UserObjectName>("homogenization_constraint") = _integrator_name;
-
-      _problem->addScalarKernel(
-          "HomogenizationConstraintScalarKernel", "HomogenizationConstraints", params);
-    }
-  }
-  else if (_current_task == "add_user_object")
-  {
-    if (_lk_homogenization)
-    {
-      InputParameters params = _factory.getValidParams("HomogenizationConstraint");
-      params.set<MultiMooseEnum>("constraint_types") = _constraint_types;
-      params.set<std::vector<FunctionName>>("targets") = _targets;
-      params.set<bool>("large_kinematics") = _lk_large_kinematics;
-      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
-      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
-
-      _problem->addUserObject("HomogenizationConstraint", _integrator_name, params);
     }
   }
 }
@@ -988,7 +963,8 @@ QuasiStaticSolidMechanicsPhysics::actLagrangianKernelStrain()
 
     params.set<MaterialPropertyName>("homogenization_gradient_name") = _homogenization_strain_name;
     params.set<std::vector<VariableName>>("macro_gradient") = {_hname};
-    params.set<UserObjectName>("homogenization_constraint") = _integrator_name;
+    params.set<MultiMooseEnum>("constraint_types") = _constraint_types;
+    params.set<std::vector<FunctionName>>("targets") = _targets;
 
     _problem->addMaterial(type, name() + "_compute_" + _homogenization_strain_name, params);
   }

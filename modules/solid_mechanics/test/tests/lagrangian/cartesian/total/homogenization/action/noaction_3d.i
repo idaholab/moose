@@ -3,9 +3,6 @@
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   large_kinematics = true
-  constraint_types = 'stress strain strain strain stress strain strain strain strain'
-  macro_gradient = hvar
-  homogenization_constraint = homogenization
 []
 
 [Mesh]
@@ -248,36 +245,30 @@
   []
 []
 
-[UserObjects]
-  [homogenization]
-    type = HomogenizationConstraint
-    targets = 'stress11 strain21 strain31 strain12 stress22 strain32 strain13 strain23 strain33'
-    execute_on = 'INITIAL LINEAR NONLINEAR'
-  []
-[]
-
 [Kernels]
   [sdx]
     type = HomogenizedTotalLagrangianStressDivergence
     variable = disp_x
     component = 0
+    constraint_types = 'stress strain strain strain stress strain strain strain strain'
+    targets = 'stress11 strain21 strain31 strain12 stress22 strain32 strain13 strain23 strain33'
+    scalar_variable = hvar
   []
   [sdy]
     type = HomogenizedTotalLagrangianStressDivergence
     variable = disp_y
     component = 1
+    constraint_types = 'stress strain strain strain stress strain strain strain strain'
+    targets = 'stress11 strain21 strain31 strain12 stress22 strain32 strain13 strain23 strain33'
+    scalar_variable = hvar
   []
   [sdz]
     type = HomogenizedTotalLagrangianStressDivergence
     variable = disp_z
     component = 2
-  []
-[]
-
-[ScalarKernels]
-  [enforce]
-    type = HomogenizationConstraintScalarKernel
-    variable = hvar
+    constraint_types = 'stress strain strain strain stress strain strain strain strain'
+    targets = 'stress11 strain21 strain31 strain12 stress22 strain32 strain13 strain23 strain33'
+    scalar_variable = hvar
   []
 []
 
@@ -317,10 +308,6 @@
   [strain21]
     type = ParsedFunction
     expression = '-1.5e-2*t'
-  []
-  [zero]
-    type = ConstantFunction
-    expression = 0
   []
 []
 
@@ -414,6 +401,9 @@
   []
   [compute_homogenization_gradient]
     type = ComputeHomogenizedLagrangianStrain
+    macro_gradient = hvar
+    constraint_types = 'stress strain strain strain stress strain strain strain strain'
+    targets = 'stress11 strain21 strain31 strain12 stress22 strain32 strain13 strain23 strain33'
   []
 []
 

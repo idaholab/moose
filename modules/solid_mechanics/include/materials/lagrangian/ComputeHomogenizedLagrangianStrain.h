@@ -10,7 +10,22 @@
 #pragma once
 
 #include "Material.h"
-#include "HomogenizationConstraint.h"
+
+// Helpers common to the whole homogenization system
+namespace Homogenization
+{
+/// Moose constraint type, for input
+const MultiMooseEnum constraintType("strain stress none");
+/// Constraint type: stress/PK stress or strain/deformation gradient
+enum class ConstraintType
+{
+  Strain,
+  Stress,
+  None
+};
+typedef std::map<std::pair<unsigned int, unsigned int>, std::pair<ConstraintType, const Function *>>
+    ConstraintMap;
+}
 
 /// Calculate the tensor corresponding to homogenization gradient
 ///
@@ -31,11 +46,8 @@ protected:
   /// The base name for material properties
   const std::string _base_name;
 
-  /// The homogenization constraint userobject
-  const HomogenizationConstraint & _constraint;
-
   /// Constraint map
-  const Homogenization::ConstraintMap & _cmap;
+  Homogenization::ConstraintMap _cmap;
 
   /// ScalarVariable with the field
   const VariableValue & _macro_gradient;

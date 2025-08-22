@@ -12,7 +12,7 @@
 InputParameters
 LagrangianStressDivergenceBase::validParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = KernelScalarBase::validParams();
 
   params.addRequiredParam<unsigned int>("component", "Which direction this kernel acts in");
   params.addRequiredCoupledVar("displacements", "The displacement components");
@@ -40,7 +40,7 @@ LagrangianStressDivergenceBase::validParams()
 }
 
 LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParameters & parameters)
-  : JvarMapKernelInterface<DerivativeMaterialInterface<Kernel>>(parameters),
+  : JvarMapKernelInterface<DerivativeMaterialInterface<KernelScalarBase>>(parameters),
     _large_kinematics(getParam<bool>("large_kinematics")),
     _stabilize_strain(getParam<bool>("stabilize_strain")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
