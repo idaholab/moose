@@ -23,6 +23,23 @@
   []
 []
 
+[AuxVariables]
+  inactive = average_temperature
+  [average_temperature]
+    type = MFEMVariable
+    fespace = H1FESpace
+  []
+[]
+
+[AuxKernels]
+  inactive = average_field
+  [average_field]
+    type = MFEMScalarTimeAverageAux
+    variable = average_temperature
+    source = temperature
+  []
+[]
+
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
