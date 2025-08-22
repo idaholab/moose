@@ -3,9 +3,9 @@
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   large_kinematics = true
-  constraint_types = 'stress strain strain stress stress strain stress stress stress'
   macro_gradient = hvar
-  targets = 'stress11 zero zero stress12 stress22 zero stress13 stress23 stress33'
+  constraint_types = ${constraint_types}
+  targets = ${targets}
 []
 
 [Mesh]
@@ -39,32 +39,6 @@
   [hvar]
     family = SCALAR
     order = NINTH
-  []
-[]
-
-[ICs]
-  [disp_x]
-    type = RandomIC
-    variable = disp_x
-    min = -0.1
-    max = 0.1
-  []
-  [disp_y]
-    type = RandomIC
-    variable = disp_y
-    min = -0.1
-    max = 0.1
-  []
-  [disp_z]
-    type = RandomIC
-    variable = disp_z
-    min = -0.1
-    max = 0.1
-  []
-  [hvar]
-    type = ScalarConstantIC
-    variable = hvar
-    value = 0.1
   []
 []
 
@@ -296,6 +270,42 @@
 []
 
 [Functions]
+  [strain11]
+    type = ParsedFunction
+    expression = '8.0e-2*t'
+  []
+  [strain22]
+    type = ParsedFunction
+    expression = '-4.0e-2*t'
+  []
+  [strain33]
+    type = ParsedFunction
+    expression = '8.0e-2*t'
+  []
+  [strain23]
+    type = ParsedFunction
+    expression = '2.0e-2*t'
+  []
+  [strain13]
+    type = ParsedFunction
+    expression = '-7.0e-2*t'
+  []
+  [strain12]
+    type = ParsedFunction
+    expression = '1.0e-2*t'
+  []
+  [strain32]
+    type = ParsedFunction
+    expression = '1.0e-2*t'
+  []
+  [strain31]
+    type = ParsedFunction
+    expression = '2.0e-2*t'
+  []
+  [strain21]
+    type = ParsedFunction
+    expression = '-1.5e-2*t'
+  []
   [stress11]
     type = ParsedFunction
     expression = '4.0e2*t'
@@ -331,10 +341,6 @@
   [stress21]
     type = ParsedFunction
     expression = '-1.5e2*t'
-  []
-  [zero]
-    type = ConstantFunction
-    value = 0
   []
 []
 
@@ -428,13 +434,6 @@
   []
   [compute_homogenization_gradient]
     type = ComputeHomogenizedLagrangianStrain
-  []
-[]
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
   []
 []
 
@@ -535,6 +534,8 @@
 [Executioner]
   type = Transient
 
+  residual_and_jacobian_together = true
+
   solve_type = 'newton'
   line_search = none
 
@@ -550,10 +551,9 @@
   start_time = 0.0
   dt = 0.2
   dtmin = 0.2
-  end_time = 0.2
+  end_time = 1.0
 []
 
 [Outputs]
-  exodus = false
-  csv = false
+  csv = true
 []

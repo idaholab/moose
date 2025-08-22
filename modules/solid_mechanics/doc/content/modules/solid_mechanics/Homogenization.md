@@ -150,12 +150,10 @@ The following steps then provide the homogenization constraints.  These steps ca
 the appropriate options in the [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md).
 
 1. Add a `ScalarVariable` with the appropriate order for the problem being solved (see [sizes]).
-2. Add a [`HomogenizationConstraint`](userobjects/lagrangian/HomogenizationConstraint.md) `UserObject` to calculate the volume-averaged constraint value.
-3. Add a [`HomogenizationConstraintScalarKernel`](HomogenizationConstraintScalarKernel.md) to enforce the constraints.
-4. Add a [`ComputeHomogenizedLagrangianStrain`](ComputeHomogenizedLagrangianStrain.md) material object to convert the values of the scalar variable to 
+2. Add a [`ComputeHomogenizedLagrangianStrain`](ComputeHomogenizedLagrangianStrain.md) material object to convert the values of the scalar variable to 
    the homogenization strain or displacement gradient.
-5. Inform the [`ComputeLagrangianStrain`](ComputeLagrangianStrain.md) object of the name of the homogenization strain with the `homogenization_gradient_names` parameter.
-6. Use [`HomogenizedTotalLagrangianStressDivergence`](HomogenizedTotalLagrangianStressDivergence.md) kernels and inform the kernels of the constraints so that they can 
+3. Inform the [`ComputeLagrangianStrain`](ComputeLagrangianStrain.md) object of the name of the homogenization strain with the `homogenization_gradient_names` parameter.
+4. Use [`HomogenizedTotalLagrangianStressDivergence`](HomogenizedTotalLagrangianStressDivergence.md) kernels and inform the kernels of the constraints so that they can 
    include the appropriate off-diagonal Jacobian entries with the `macro_gradient`, and `constraint_types` parameters.
 
 !bibtex bibliography
