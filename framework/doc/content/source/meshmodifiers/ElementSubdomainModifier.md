@@ -110,11 +110,20 @@ The second strategy aims to address these challenges. The key idea is to initial
 
 The initialization algorithm starts with constructing a patch of elements from the *stationary active* domain. By definition, a solution to the variable of interest already exists on the patch. The solution is first interpolated onto the quadrature points on the *stationary active* domain, and a polynomial is fitted against the interpolated variable values using a least-squares fit. A complete set of monomials $P_{\boldsymbol\alpha}$ up to a given order $p$ is used as the basis of the polynomial. Let $\boldsymbol\alpha$ be a multi-index of dimension $d$, where
 
-$ \boldsymbol{\alpha} = (\alpha_1, ..., \alpha_d), \quad \alpha_i \in \mathbb{N}_{\ge 0}, \quad |\boldsymbol{\alpha}| = \sum_{i=1}^{d} \alpha_i. $
+!equation id=def-multiindex
+\boldsymbol{\alpha}=(\alpha_1,\dots,\alpha_d),\quad
+\alpha_i\in\mathbb{N}_{\ge 0},\quad
+|\boldsymbol{\alpha}|=\sum_{i=1}^d \alpha_i .
 
 The monomial basis for degree $m$ can be written as:
 
-$ P_{|\boldsymbol{\alpha}| = m} = \{x^{\alpha_1} y^{\alpha_2} z^{\alpha_3}\}_{\boldsymbol{\alpha}}. $
+!equation id=monomial-degree-m
+\mathcal{P}_{m}
+=\Bigl\{\mathbf{x}^{\boldsymbol{\alpha}}
+:\boldsymbol{\alpha}\in\mathbb{N}_{\ge 0}^{\,d},\
+|\boldsymbol{\alpha}|=m\Bigr\},\qquad
+\mathbf{x}^{\boldsymbol{\alpha}}
+:=x_1^{\alpha_1}\cdots x_d^{\alpha_d}.
 
 For example, in 2D ($d = 2$) with $p = 2$, the complete monomial basis can be written as
 $\boldsymbol P = [1, x, y, x^2, xy, y^2]$.
@@ -125,19 +134,26 @@ Higher-order monomials are then constructed by augmenting $P(n-1)$ with all comb
 $(\alpha_1, \alpha_2, \alpha_3)$ such that $\alpha_1 + \alpha_2 + \alpha_3 = n$.
 
 That is,
-$ \boldsymbol P(n) = \boldsymbol P(n-1) \cup \{x^{\alpha_1} y^{\alpha_2} z^{\alpha_3} \mid \alpha_1 + \alpha_2 + \alpha_3 = n\}. $
+
+!equation id=poly-basis-recursive
+\boldsymbol{P}(n)=\boldsymbol{P}(n-1)\cup\mathcal{M}_n
+
+!equation id=Mn-def
+\mathcal{M}_n=\{x^{\alpha_1}y^{\alpha_2}z^{\alpha_3}\}_{\alpha_1+\alpha_2+\alpha_3=n}
 
 The fitting process solves a least-squares problem. In matrix form, it can be expressed as
 
-$ \boldsymbol A \boldsymbol c = \boldsymbol b $
+!equation id=least-squares
+\boldsymbol{A}\,\boldsymbol{c} = \boldsymbol{b}
 
 where $\boldsymbol A$ is the patch interpolation matrix, $\boldsymbol b$ is the patch interpolation vector,
 and $\boldsymbol c$ contains the fitted polynomial coefficients. These matrices are assembled over $n$ quadrature points on the patch:
 
-$ \begin{aligned}
-\boldsymbol A &= \sum_{i=1}^n \boldsymbol P^T(\boldsymbol x_i)\boldsymbol P(\boldsymbol x_i), \\
-\boldsymbol b &= \sum_{i=1}^n \boldsymbol P^T(\boldsymbol x_i) u(\boldsymbol x_i),
-\end{aligned} $
+!equation id=patch-assembly
+\begin{aligned}
+\boldsymbol{A} &= \sum_{i=1}^{n} \boldsymbol{P}^{T}(\boldsymbol{x}_i)\,\boldsymbol{P}(\boldsymbol{x}_i), \\
+\boldsymbol{b} &= \sum_{i=1}^{n} \boldsymbol{P}^{T}(\boldsymbol{x}_i)\,u(\boldsymbol{x}_i).
+\end{aligned}
 
 where $u(\boldsymbol x_i)$ is the interpolated variable value at the quadrature point $\boldsymbol x_i$.
 
