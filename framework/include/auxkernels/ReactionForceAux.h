@@ -9,23 +9,19 @@
 
 #pragma once
 
-#include "AuxKernel.h"
-#include "TagAuxBase.h"
+#include "TagVectorAux.h"
 
 /**
- * The value of a tagged vector for a given variable is coupled to
- * the current AuxVariable. TagVectorAux returns the coupled dof value.
+ * Similar to TagVectorAux, but returns the _unscaled_ vector value that is consistent with the
+ * units of the simulation.
  */
-class TagVectorAux : public TagAuxBase<AuxKernel>
+class ReactionForceAux : public TagVectorAux
 {
 public:
   static InputParameters validParams();
 
-  TagVectorAux(const InputParameters & parameters);
+  ReactionForceAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue() override;
-
-  const VariableValue & _v;
-  const MooseVariableBase & _v_var;
+  Real computeValue() override;
 };

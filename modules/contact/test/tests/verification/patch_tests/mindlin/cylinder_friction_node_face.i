@@ -134,13 +134,13 @@
     paired_boundary = 2
   []
   [react_x]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'disp_x'
     variable = 'react_x'
   []
   [react_y]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'disp_y'
     variable = 'react_y'

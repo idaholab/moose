@@ -15,8 +15,8 @@ InputParameters
 TagVectorAux::validParams()
 {
   InputParameters params = TagAuxBase<AuxKernel>::validParams();
-  params.addRequiredParam<TagName>("vector_tag", "Tag Name this Aux works on");
-  params.addClassDescription("Couple a tag vector, and return its nodal value");
+  params.addRequiredParam<TagName>("vector_tag", "Tag Name this AuxKernel works on");
+  params.addClassDescription("Couple a tag vector, and return its dof value");
   return params;
 }
 

@@ -37,13 +37,13 @@
 
 [AuxKernels]
   [saved_x]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'disp_x'
     variable = 'saved_x'
   []
   [saved_y]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'disp_y'
     variable = 'saved_y'

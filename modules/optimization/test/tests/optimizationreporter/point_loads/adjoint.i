@@ -24,7 +24,7 @@
 []
 [AuxKernels]
   [residual_src]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'adjoint'
     variable = 'residual_src'

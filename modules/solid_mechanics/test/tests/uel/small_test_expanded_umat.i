@@ -90,13 +90,13 @@
 
 [AuxKernels]
   [res_x]
-    type = TagVectorAux
+    type = ReactionForceAux
     variable = res_x
     v = disp_x
     vector_tag = kernel_residual
   []
   [res_y]
-    type = TagVectorAux
+    type = ReactionForceAux
     variable = res_y
     v = disp_y
     vector_tag = kernel_residual
