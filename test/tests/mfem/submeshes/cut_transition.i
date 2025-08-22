@@ -1,3 +1,6 @@
+# Subapp to constrain the source electric field on a thick cut of
+# a closed toroidal conductor
+
 [Mesh]
   type = MFEMMesh
   file = ../mesh/embedded_concentric_torus.e
@@ -11,24 +14,29 @@
   [cut]
     type = MFEMCutTransitionSubMesh
     cut_boundary = 'Cut'
-    transition_subdomain = cut
+    block = 'TorusCore TorusSheath'
+    transition_subdomain = transition_dom
     transition_subdomain_boundary = transition_bdr
     closed_subdomain = coil
-    block = 'TorusCore TorusSheath'
-  []   
+  []
 []
 
 [FESpaces]
+  [H1FESpace]
+    type = MFEMScalarFESpace
+    fec_type = H1
+    fec_order = FIRST
+  []
+  [HCurlFESpace]
+    type = MFEMVectorFESpace
+    fec_type = ND
+    fec_order = FIRST
+  []
   [SubMeshH1FESpace]
     type = MFEMScalarFESpace
     fec_type = H1
     fec_order = FIRST
     submesh = cut
-  []
-  [H1FESpace]
-    type = MFEMScalarFESpace
-    fec_type = H1
-    fec_order = FIRST
   []
   [SubMeshHCurlFESpace]
     type = MFEMVectorFESpace
@@ -36,58 +44,52 @@
     fec_order = FIRST
     submesh = cut
   []
-  [HCurlFESpace]
-    type = MFEMVectorFESpace
-    fec_type = ND
-    fec_order = FIRST
-  []
 []
 
 [Variables]
   [submesh_potential]
     type = MFEMVariable
     fespace = SubMeshH1FESpace
-  [] 
+  []
 []
 
 [AuxVariables]
   [potential]
     type = MFEMVariable
     fespace = H1FESpace
-  [] 
-  [submesh_grad_source_potential]
-    type = MFEMVariable
-    fespace = SubMeshHCurlFESpace
-  []    
-  [grad_source_potential]
+  []
+  [external_e_field]
     type = MFEMVariable
     fespace = HCurlFESpace
-  []  
+  []
+  [submesh_external_e_field]
+    type = MFEMVariable
+    fespace = SubMeshHCurlFESpace
+  []
 []
 
 [AuxKernels]
   [grad]
     type = MFEMGradAux
-    variable = submesh_grad_source_potential
+    variable = submesh_external_e_field
     source = submesh_potential
-    scale_factor = 1.0
+    scale_factor = -1.0
     execute_on = TIMESTEP_END
   []
 []
 
-# Low terminal set to new bdr attribute
 [BCs]
-  [low_terminal]
+  [transition_domain_boundary]
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = transition_bdr
     coefficient = 0.0
   []
-  [high_terminal]
+  [cut_surface]
     type = MFEMScalarDirichletBC
     variable = submesh_potential
     boundary = 'Cut'
-    coefficient = 1.0
+    coefficient = -1.0 # Imposed global constraint on loop voltage
   []
 []
 
@@ -128,8 +130,8 @@
 [Transfers]
   [submesh_transfer]
     type = MFEMSubMeshTransfer
-    from_variable = submesh_grad_source_potential
-    to_variable = grad_source_potential
+    from_variable = submesh_external_e_field
+    to_variable = external_e_field
     execution_order_group=2
   []
 []
@@ -145,5 +147,5 @@
     type = MFEMParaViewDataCollection
     file_base = OutputData/WholePotential
     vtk_format = ASCII
-  []  
+  []
 []
