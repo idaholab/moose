@@ -20,11 +20,6 @@ This class serves as an abstract base class, and does no actual implementation.
 
 To keep the naming consistent with similar classes in MOOSE, we refer to this class as an Indicator.
 
-## Example Input File Syntax
-
-!listing test/tests/mfem/kernels/diffusion_amr.i block=Adaptivity
-
-
 !if-end!
 
 !else
