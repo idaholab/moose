@@ -1,3 +1,6 @@
+# Solve for the electric field on a closed conductor subject to
+# global loop voltage constraint.
+
 [Problem]
   type = MFEMProblem
 []
@@ -11,29 +14,34 @@
   [cut]
     type = MFEMCutTransitionSubMesh
     cut_boundary = 'Cut'
-    transition_subdomain = cut_test
+    block = 'TorusCore TorusSheath'
+    transition_subdomain = transition_dom
     transition_subdomain_boundary = transition_bdr
     closed_subdomain = coil
-    block = 'TorusCore TorusSheath'
-  []  
+  []
   [coil]
     type = MFEMDomainSubMesh
     block = coil
     execution_order_group = 2
-  []  
+  []
 []
 
 [FESpaces]
+  [H1FESpace]
+    type = MFEMScalarFESpace
+    fec_type = H1
+    fec_order = FIRST
+  []
+  [HCurlFESpace]
+    type = MFEMVectorFESpace
+    fec_type = ND
+    fec_order = FIRST
+  []
   [CoilH1FESpace]
     type = MFEMScalarFESpace
     fec_type = H1
     fec_order = FIRST
     submesh = coil
-  []  
-  [H1FESpace]
-    type = MFEMScalarFESpace
-    fec_type = H1
-    fec_order = FIRST
   []
   [CoilHCurlFESpace]
     type = MFEMVectorFESpace
@@ -41,38 +49,33 @@
     fec_order = FIRST
     submesh = coil
   []
-  [HCurlFESpace]
-    type = MFEMVectorFESpace
-    fec_type = ND
-    fec_order = FIRST
-  []
 []
 
 [Variables]
-  [coil_potential]
+  [coil_induced_potential]
     type = MFEMVariable
     fespace = CoilH1FESpace
-  [] 
+  []
 []
 
 [AuxVariables]
-  [potential]
+  [induced_potential]
     type = MFEMVariable
     fespace = H1FESpace
-  []   
-  [grad_potential]
+  []
+  [induced_e_field]
     type = MFEMVariable
     fespace = HCurlFESpace
   []
-  [coil_grad_source_potential]
+  [coil_external_e_field]
     type = MFEMVariable
     fespace = CoilHCurlFESpace
-  []  
-  [grad_source_potential]
+  []
+  [external_e_field]
     type = MFEMVariable
     fespace = HCurlFESpace
   []
-  [current_density]
+  [e_field]
     type = MFEMVariable
     fespace = HCurlFESpace
   []
@@ -81,27 +84,27 @@
 [AuxKernels]
   [grad]
     type = MFEMGradAux
-    variable = grad_potential
-    source = potential
-    scale_factor = 1.0
+    variable = induced_e_field
+    source = induced_potential
+    scale_factor = -1.0
     execute_on = TIMESTEP_END
     execution_order_group = 1
   []
   [sum]
     type = MFEMSumAux
-    variable = current_density
-    source1 = grad_potential
-    source2 = grad_source_potential
+    variable = e_field
+    source1 = induced_e_field
+    source2 = external_e_field
     scale_factor = 1.0
     execute_on = TIMESTEP_END
     execution_order_group = 2
-  []  
+  []
 []
 
 [FunctorMaterials]
   [Substance]
     type = MFEMGenericFunctorMaterial
-    prop_names = diffusivity
+    prop_names = conductivity
     prop_values = 1.0
   []
 []
@@ -109,17 +112,17 @@
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = coil_potential
-    coefficient = diffusivity
+    variable = coil_induced_potential
+    coefficient = conductivity
   []
   [source]
     type = MFEMMixedVectorGradientKernel
-    trial_variable = coil_grad_source_potential
-    variable = coil_potential
-    coefficient = 1.0
+    trial_variable = coil_external_e_field
+    variable = coil_induced_potential
+    coefficient = -1.0
     transpose = true
-    block = 'cut_test'
-  []    
+    block = 'transition_dom'
+  []
 []
 
 [Solver]
@@ -142,22 +145,22 @@
 [Transfers]
   [from_sub]
     type = MultiAppMFEMCopyTransfer
-    source_variable = grad_source_potential
-    variable = grad_source_potential
+    source_variable = external_e_field
+    variable = external_e_field
     from_multi_app = transition
   []
   [submesh_transfer_to_coil]
     type = MFEMSubMeshTransfer
-    from_variable = grad_source_potential
-    to_variable = coil_grad_source_potential
+    from_variable = external_e_field
+    to_variable = coil_external_e_field
     execute_on = INITIAL
   []
   [submesh_transfer_from_coil]
     type = MFEMSubMeshTransfer
-    from_variable = coil_potential
-    to_variable = potential
+    from_variable = coil_induced_potential
+    to_variable = induced_potential
     execute_on = TIMESTEP_END
-  []  
+  []
 []
 
 [Outputs]

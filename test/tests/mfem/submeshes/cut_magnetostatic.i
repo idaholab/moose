@@ -1,5 +1,5 @@
-# Definite Maxwell problem solved with Nedelec elements of the first kind
-# based on MFEM Example 3.
+# Magnetostatic problem solved on a closed conductor subject to
+# global loop voltage constraint.
 
 [Mesh]
   type = MFEMMesh
@@ -35,14 +35,10 @@
     type = MFEMVariable
     fespace = HDivFESpace
   []
-  [grad_potential]
+  [e_field]
     type = MFEMVariable
     fespace = HCurlFESpace
-  []    
-  [current_density]
-    type = MFEMVariable
-    fespace = HCurlFESpace
-  []    
+  []
 []
 
 [AuxKernels]
@@ -80,6 +76,12 @@
     prop_names = reluctivity
     prop_values = 1.0
   []
+  [Conductor]
+    type = MFEMGenericFunctorMaterial
+    prop_names = conductivity
+    prop_values = 1.0
+    block = 'TorusCore TorusSheath'
+  []
 []
 
 [Kernels]
@@ -87,16 +89,17 @@
     type = MFEMVectorFEMassKernel
     variable = a_field
     coefficient = 1e-10
-  []  
+  []
   [curlcurl]
     type = MFEMCurlCurlKernel
     variable = a_field
     coefficient = reluctivity
   []
   [source]
-    type = MFEMVectorFEDomainLFKernel
+    type = MFEMMixedVectorMassKernel
     variable = a_field
-    vector_coefficient = current_density
+    trial_variable = e_field
+    coefficient = conductivity
     block = 'TorusCore TorusSheath'
   []
 []
@@ -131,16 +134,16 @@
 [Transfers]
   [from_sub]
     type = MultiAppMFEMCopyTransfer
-    source_variable = current_density
-    variable = current_density
+    source_variable = e_field
+    variable = e_field
     from_multi_app = coil
-  []  
+  []
 []
 
 [Postprocessors]
   [TotalCurrent]
     type = MFEMBoundaryNetFluxPostprocessor
-    variable = current_density
+    variable = e_field
     boundary = 'MeasurementPlane'
   []
 []
@@ -154,5 +157,5 @@
   [ReportedCurrent]
     type = CSV
     file_base = OutputData/MagnetostaticClosedCoilCSV
-  []  
+  []
 []
