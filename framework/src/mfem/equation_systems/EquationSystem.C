@@ -343,7 +343,7 @@ EquationSystem::ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & con
 }
 
 void
-EquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::real_t & time, const mfem::Vector & x_old)
+EquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vector & x_old)
 {
   //Update the old vector
   mfem::BlockVector block_x_old;
@@ -355,10 +355,7 @@ EquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::rea
 
   // Update the dxdts boundary conditions
   for (int i = 0; i < _test_var_names.size(); i++)
-  {
-    auto & test_var_name = _trial_var_names.at(i);
     *(_dvardt_ess_constraints.at(i)) = (*(_var_ess_constraints.at(i)) - block_x_old.GetBlock(i))/dt;
-  }
 };
 
 

@@ -91,7 +91,7 @@ public:
   /// Update solution with essential constraints                          
   void ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & constraint_list, mfem::Vector &x) const;
 
-  void UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::real_t & time, const mfem::Vector & x_old);
+  void UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vector & x_old);
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
