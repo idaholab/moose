@@ -64,6 +64,8 @@ template <class T>
 TagAuxBase<T>::TagAuxBase(const InputParameters & parameters)
   : T(parameters), _scaled(this->template getParam<bool>("scaled"))
 {
+  if (!_scaled)
+    paramError("scaled", "Setting scaled = false is not supported anymore.");
 }
 
 template <class T>
