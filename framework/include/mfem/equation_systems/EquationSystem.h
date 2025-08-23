@@ -91,6 +91,8 @@ public:
   /// Update solution with essential constraints                          
   void ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & constraint_list, mfem::Vector &x) const;
 
+  void UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::real_t & time, const mfem::Vector & x_old);
+
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
   const std::vector<std::string> & TrialVarNames() const { return _trial_var_names; }
@@ -176,6 +178,7 @@ protected:
 
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
+  std::vector<std::unique_ptr<mfem::ParGridFunction>> _dvardt_ess_constraints;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
 

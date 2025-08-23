@@ -145,6 +145,8 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
     // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
     _var_ess_constraints.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
+    _dvardt_ess_constraints.emplace_back(
+        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
   }
 
   // Store pointers to FESpaces of all coupled variables
@@ -339,6 +341,26 @@ EquationSystem::ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & con
       d_x[id] = d_w[id];
    });
 }
+
+void
+EquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::real_t & time, const mfem::Vector & x_old)
+{
+  //Update the old vector
+  mfem::BlockVector block_x_old;
+  block_x_old.Update(*_block_true_offsets);
+  block_x_old = dynamic_cast<mfem::BlockVector&>(const_cast<mfem::Vector&>(x_old));
+
+  //Update the xs boundary conditions
+  ApplyEssentialBCs();
+
+  // Update the dxdts boundary conditions
+  for (int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto & test_var_name = _trial_var_names.at(i);
+    *(_dvardt_ess_constraints.at(i)) = (*(_var_ess_constraints.at(i)) - block_x_old.GetBlock(i))/dt;
+  }
+};
+
 
 void
 EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
