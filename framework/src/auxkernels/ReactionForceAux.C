@@ -15,7 +15,8 @@ InputParameters
 ReactionForceAux::validParams()
 {
   InputParameters params = TagVectorAux::validParams();
-  params.addClassDescription("Couple a tag vector, and return its dof value. Variable scaling is removed from the dof value.");
+  params.addClassDescription("Couple a tag vector, and return its dof value. Variable scaling is "
+                             "removed from the dof value.");
   params.addRequiredParam<TagName>("vector_tag", "Tag Name this AuxKernel works on");
   params.suppressParameter<bool>("scaled");
   return params;
