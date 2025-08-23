@@ -7,6 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "MooseError.h"
 #include "TagVectorAux.h"
 
 registerMooseObject("MooseApp", TagVectorAux);
@@ -26,6 +27,10 @@ TagVectorAux::TagVectorAux(const InputParameters & parameters)
     _v_var(*getFieldVar("v", 0))
 {
   checkCoupledVariable(&_v_var, &_var);
+
+  if (!_scaled)
+    mooseDeprecated(
+        "scaled = false is deprecated. Use ReactionForceAux to obtain the unscaled value.");
 }
 
 Real
