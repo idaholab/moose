@@ -32,6 +32,7 @@ EquationSystemProblemOperator::Init(mfem::BlockVector & X)
 void
 EquationSystemProblemOperator::Solve()
 {
+  GetEquationSystem()->ApplyEssentialBCs();
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 
   if (_problem_data.jacobian_solver->isLOR() && _equation_system->_test_var_names.size() > 1)

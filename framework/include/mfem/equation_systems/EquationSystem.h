@@ -115,6 +115,8 @@ public:
   /// Update solution with essential constraints                          
   void ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & constraint_list, mfem::Vector &x) const;
 
+  void CopyVec(const mfem::Vector & x, mfem::Vector & y){ y = x;}
+
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
   const std::vector<std::string> & TrialVarNames() const { return _trial_var_names; }
@@ -218,7 +220,7 @@ protected:
 
   mutable mfem::OperatorHandle _jacobian;
   mutable mfem::Vector _trueRHS;
-  mutable mfem::BlockVector _trueBlockRHS, _trueBlockdXdt;
+  mutable mfem::BlockVector _trueBlockRHS, _trueBlockSol;
 
   Moose::MFEM::GridFunctions * _gfuncs;
   mfem::Array<int> * _block_true_offsets;
@@ -375,6 +377,7 @@ public:
           new ScaleIntegrator(*boundary_integrators[i], scale_factor, false),
           *(*boundary_markers[i]));
   }
+  void UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vector & x_old);
 
 protected:
   /// Coefficient for timestep scaling

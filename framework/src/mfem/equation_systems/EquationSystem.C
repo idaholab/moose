@@ -125,21 +125,24 @@ void
 EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions, mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
+  
+  // Extract which coupled variables are to be trivially eliminated and which are trial variables
+  SetTrialVariableNames();
 
-  for (auto & test_var_name : _test_var_names)
+  for (auto & trial_var_name : _trial_var_names)
   {
-    if (!gridfunctions.Has(test_var_name))
+    if (!gridfunctions.Has(trial_var_name))
     {
       mooseError("MFEM variable ",
-                 test_var_name,
+                 trial_var_name,
                  " requested by equation system during initialisation was "
                  "not found in gridfunctions");
     }
     // Store pointers to test FESpaces
-    _test_pfespaces.push_back(gridfunctions.Get(test_var_name)->ParFESpace());
+    _test_pfespaces.push_back(gridfunctions.Get(trial_var_name)->ParFESpace());
     // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
     _var_ess_constraints.emplace_back(
-        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
+        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(trial_var_name)->ParFESpace()));
   }
 
   // Extract which coupled variables are to be trivially eliminated and which are trial variables
@@ -355,24 +358,43 @@ EquationSystem::ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & con
 }
 
 void
-EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
+EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  mfem::BlockVector block_x;
-  block_x.Update(*_block_true_offsets);
-  block_x = dynamic_cast<mfem::BlockVector&>(const_cast<mfem::Vector&>(x));
-
+  const_cast<EquationSystem*>(this)->CopyVec(sol,_trueBlockSol);
+  
   for (int i = 0; i < _trial_var_names.size(); i++)
   {
     auto & trial_var_name = _trial_var_names.at(i);
-    ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), block_x.GetBlock(i));
-    _gfuncs->Get(trial_var_name)->Distribute(&(block_x.GetBlock(i)));
+    ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), _trueBlockSol.GetBlock(i));
+    _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockSol.GetBlock(i)));
   }
   UpdateJacobian();
-  const_cast<EquationSystem*>(this)->FormLinearSystem(_jacobian,  block_x, _trueBlockRHS);
-  _jacobian->Mult(block_x, residual);
-  x.HostRead();
+  const_cast<EquationSystem*>(this)->FormLinearSystem(_jacobian,  _trueBlockSol, _trueBlockRHS);
+  _jacobian->Mult(_trueBlockSol, residual);
+  sol.HostRead();
   residual.HostRead();
 }
+
+void
+TimeDependentEquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vector & x_old)
+{
+  //Update the old vector
+  mfem::BlockVector block_x_old;
+  block_x_old.Update(*_block_true_offsets);
+
+  //Update the old vector
+  CopyVec(x_old, block_x_old);
+
+  //Update the xs boundary conditions
+  ApplyEssentialBCs();
+
+  // Update the dxdts boundary conditions
+  for (int i = 0; i < _test_var_names.size(); i++)
+  {
+    *(_var_ess_constraints.at(i)) -= block_x_old.GetBlock(i);
+    *(_var_ess_constraints.at(i)) /= dt;
+  }
+};
 
 void
 EquationSystem::UpdateJacobian() const
@@ -516,7 +538,7 @@ EquationSystem::BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, 
   _gfuncs = &gridfunctions;
   _block_true_offsets = &btoffsets;
   _trueBlockRHS.Update(*_block_true_offsets);
-  _trueBlockdXdt.Update(*_block_true_offsets);
+  _trueBlockSol.Update(*_block_true_offsets);
   BuildBilinearForms();
   BuildMixedBilinearForms();
   BuildLinearForms();
@@ -767,12 +789,23 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
   auto & test_var_name = _test_var_names.at(0);
   auto td_blf = _td_blfs.Get(test_var_name);
   auto lf = _lfs.Get(test_var_name);
+  // if implicit, add contribution to linear form from terms involving state
+  // variable at previous timestep: {
+
+  // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
+  mfem::Vector lf_prev(lf->Size());
+  blf->Mult(*_eliminated_variables.Get(test_var_name), lf_prev);
+  *lf -= lf_prev;
+  // }
+  mfem::Vector aux_x, aux_rhs;
+  // Update solution values on Dirichlet values to be in terms of du/dt instead of u
+  //mfem::Vector bc_x = *(_var_ess_constraints.at(0).get());
+  //bc_x -= *_eliminated_variables.Get(test_var_name);
+  //bc_x /= _dt_coef.constant;
 
   // Form linear system for operator acting on vector of du/dt
   mfem::OperatorPtr aux_a;
-  mfem::Vector aux_x, aux_rhs;
-  td_blf->FormLinearSystem(
-      _ess_tdof_lists.at(0), *(_td_var_ess_constraints.at(0)), *lf, aux_a, aux_x, aux_rhs);
+  td_blf->FormLinearSystem(_ess_tdof_lists.at(0), *(_td_var_ess_constraints.at(0)), *lf, aux_a, aux_x, aux_rhs);
 
   truedXdt.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
