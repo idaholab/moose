@@ -23,7 +23,7 @@ MFEMScalarParsedCoeff::MFEMScalarParsedCoeff(
 mfem::real_t
 MFEMScalarParsedCoeff::Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip)
 {
-  std::vector<mfem::real_t> inpVals(_inputs.size() + (_use_xyzt ? 4 : 0));
+  std::vector<mfem::real_t> vals(_var_names.size() + (_use_xyzt ? 4 : 0));
 
   for (unsigned i = 0; i < _var_names.size(); i++)
     vals[i] = _gridfunctions.GetRef(_var_names[i]).GetValue(T, ip);
