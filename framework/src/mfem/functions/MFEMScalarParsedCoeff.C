@@ -36,7 +36,7 @@ MFEMScalarParsedCoeff::Eval(mfem::ElementTransformation & T, const mfem::Integra
     for (unsigned i = 0; i < 3; i++)
       vals[_var_names.size() + i] = transip(i);
 
-    inpVals[_inputs.size() + 3] = GetTime();
+    vals[_var_names.size() + 3] = GetTime();
   }
 
   return _func->Eval(inpVals.data());
