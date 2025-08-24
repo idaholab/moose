@@ -23,8 +23,8 @@
 class MFEMScalarParsedCoeff : public mfem::Coefficient
 {
 private:
-  const Moose::MFEM::GridFunctions & _gFuncs;
-  const std::vector<std::string> & _inputs;
+  const Moose::MFEM::GridFunctions & _gridfunctions;
+  const std::vector<VariableName> & _var_names;
   bool _use_xyzt;
   const FunctionParserUtils<false>::SymFunctionPtr & _func;
 
