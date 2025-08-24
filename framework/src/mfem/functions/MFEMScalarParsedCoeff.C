@@ -16,7 +16,7 @@ MFEMScalarParsedCoeff::MFEMScalarParsedCoeff(
     const std::vector<VariableName> & var_names,
     bool use_xyzt,
     const FunctionParserUtils<false>::SymFunctionPtr & func)
-  : _gFuncs(gFuncs), _inputs(inputs), _use_xyzt(use_xyzt), _func(func)
+  : _gridfunctions(gridfunctions), _var_names(var_names), _use_xyzt(use_xyzt), _func(func)
 {
 }
 
