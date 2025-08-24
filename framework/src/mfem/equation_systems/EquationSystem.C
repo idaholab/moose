@@ -348,14 +348,21 @@ EquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vec
   //Update the old vector
   mfem::BlockVector block_x_old;
   block_x_old.Update(*_block_true_offsets);
-  block_x_old = dynamic_cast<mfem::BlockVector&>(const_cast<mfem::Vector&>(x_old));
+
+  //Update the old vector
+  CopyVec(x_old, block_x_old);
 
   //Update the xs boundary conditions
   ApplyEssentialBCs();
 
   // Update the dxdts boundary conditions
   for (int i = 0; i < _test_var_names.size(); i++)
-    *(_dvardt_ess_constraints.at(i)) = (*(_var_ess_constraints.at(i)) - block_x_old.GetBlock(i))/dt;
+  {
+    auto & test_var_name = _trial_var_names.at(i);
+    CopyVec( *(_var_ess_constraints.at(i)), *(_dvardt_ess_constraints.at(i)) );
+    *(_dvardt_ess_constraints.at(i)) -= block_x_old.GetBlock(i);
+    *(_dvardt_ess_constraints.at(i)) /= dt;
+  }
 };
 
 
@@ -376,6 +383,24 @@ EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
   const_cast<EquationSystem*>(this)->FormLinearSystem(_jacobian,  block_x, _trueBlockRHS);
   _jacobian->Mult(block_x, residual);
   x.HostRead();
+  residual.HostRead();
+}
+
+void
+TimeDependentEquationSystem::Mult(const mfem::Vector & dXdt, mfem::Vector & residual) const
+{
+  const_cast<TimeDependentEquationSystem*>(this)->CopyVec(dXdt,_trueBlockdXdt);
+  
+  for (int i = 0; i < _trial_var_names.size(); i++)
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    ApplyEssVals(*(_dvardt_ess_constraints.at(i)), _ess_tdof_lists.at(i), _trueBlockdXdt.GetBlock(i));
+    _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockdXdt.GetBlock(i)));
+  }
+  UpdateJacobian();
+  const_cast<TimeDependentEquationSystem*>(this)->FormLinearSystem(_jacobian,  _trueBlockdXdt, _trueBlockRHS);
+  _jacobian->Mult(_trueBlockdXdt, residual);
+  dXdt.HostRead();
   residual.HostRead();
 }
 

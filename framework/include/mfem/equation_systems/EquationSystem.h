@@ -91,6 +91,8 @@ public:
   /// Update solution with essential constraints                          
   void ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & constraint_list, mfem::Vector &x) const;
 
+  void CopyVec(const mfem::Vector & x, mfem::Vector & y){ y = x;}
+
   void UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vector & x_old);
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
@@ -327,6 +329,9 @@ public:
   virtual void FormSystem(mfem::OperatorHandle & op,
                           mfem::BlockVector & truedXdt,
                           mfem::BlockVector & trueRHS) override;
+  
+  /// Compute residual y = Mu
+  void Mult(const mfem::Vector & u, mfem::Vector & residual) const override;
 
 protected:
   /// Coefficient for timestep scaling
