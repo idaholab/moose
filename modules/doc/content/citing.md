@@ -112,6 +112,25 @@ If you are using Libtorch APIs within MOOSE, please consider citing:
 }
 ```
 
+## NEML2 constitutive models
+
+If you are using NEML2 constitutive models, please consider citing:
+
+```
+@article{neml2softwarex,
+  title    = {NEML2: An efficient and modular multiphysics constitutive modeling library for hybrid computing environments},
+  journal  = {SoftwareX},
+  volume   = {31},
+  pages    = {102302},
+  year     = {2025},
+  issn     = {2352-7110},
+  doi      = {https://doi.org/10.1016/j.softx.2025.102302},
+  url      = {https://www.sciencedirect.com/science/article/pii/S2352711025002687},
+  author   = {Tianchen Hu and Mark C. Messner},
+  keywords = {Constitutive model, GPU, Multiphysics}
+}
+```
+
 ## Modules
 
 If you are using a physics module for your application, please cite the appropriate references
@@ -191,6 +210,29 @@ journal = {International Journal for Numerical Methods in Engineering},
  number = {3},
   pages = {434--449},
     doi = {10.1002/nme.6215}
+}
+```
+
+If you use the Lagrangian mechanics kernels and/or materials, please consider citing:
+
+```
+@article{10.1145/3716308,
+  author     = {Hu, Tianchen and Messner, Mark C.},
+  title      = {A Simple, Scalable Large Deformation Solid Mechanics Implementation in the MOOSE Framework},
+  year       = {2025},
+  issue_date = {March 2025},
+  publisher  = {Association for Computing Machinery},
+  address    = {New York, NY, USA},
+  volume     = {51},
+  number     = {1},
+  issn       = {0098-3500},
+  url        = {https://doi.org/10.1145/3716308},
+  doi        = {10.1145/3716308},
+  journal    = {ACM Trans. Math. Softw.},
+  month      = apr,
+  articleno  = {4},
+  numpages   = {22},
+  keywords   = {finite element method, solid mechanics, large deformation}
 }
 ```
 
