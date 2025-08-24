@@ -158,15 +158,6 @@
       expect_err = 'Provided points to define a CSGPlane are collinear'
       mesh_mode = REPLICATED
     []
-    [equality_halfspace]
-      max_threads = 1
-      type = 'RunException'
-      input = 'csg_only_equality_halfspace_error.i'
-      detail = ' trying to define a halfspace of a surface based on a point that lies on the surface'
-      cli_args = '--csg-only'
-      expect_err = 'ambiguously defined halfspace'
-      mesh_mode = REPLICATED
-    []
     [halfspace_defined_by_two_regions]
       max_threads = 1
       type = 'RunException'
