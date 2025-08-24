@@ -29,8 +29,8 @@ private:
   const FunctionParserUtils<false>::SymFunctionPtr & _func;
 
 public:
-  MFEMScalarParsedCoeff(const Moose::MFEM::GridFunctions & gFuncs,
-                        const std::vector<std::string> & inputs,
+  MFEMScalarParsedCoeff(const Moose::MFEM::GridFunctions & gridfunctions,
+                        const std::vector<VariableName> & var_names,
                         bool use_xyzt,
                         const FunctionParserUtils<false>::SymFunctionPtr & func);
 
