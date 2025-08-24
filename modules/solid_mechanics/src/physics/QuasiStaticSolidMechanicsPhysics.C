@@ -18,7 +18,7 @@
 
 #include "BlockRestrictable.h"
 
-#include "ComputeHomogenizedLagrangianStrain.h" // Where the constraint enum lives
+#include "HomogenizationInterface.h"
 #include "AddVariableAction.h"
 
 #include "libmesh/string_to_enum.h"
@@ -107,15 +107,13 @@ QuasiStaticSolidMechanicsPhysics::validParams()
                         "calculator within TMA internally.");
 
   // Homogenization system input
-  MultiMooseEnum constraintType("strain stress");
-  params.addParam<MultiMooseEnum>("constraint_types",
-                                  Homogenization::constraintType,
-                                  "Type of each constraint: "
-                                  "stress or strain.");
-  params.addParam<std::vector<FunctionName>>("targets",
-                                             {},
-                                             "Functions giving the target "
-                                             "values of each constraint.");
+  params.addRequiredParam<MultiMooseEnum>(
+      "constraint_types",
+      Homogenization::constraintType,
+      "Type of each constraint: strain, stress, or none. The types are specified in the "
+      "column-major order, and there must be 9 entries in total.");
+  params.addRequiredParam<std::vector<FunctionName>>(
+      "targets", "Functions giving the targets to hit for constraint types that are not none.");
 
   params.addParamNamesToGroup("scaling", "Variables");
   params.addParamNamesToGroup("strain_base_name automatic_eigenstrain_names", "Strain");

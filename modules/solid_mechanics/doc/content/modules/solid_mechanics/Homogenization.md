@@ -13,9 +13,9 @@ of a representative volume of material.
 
 ## Mathematical Description
 
-[!cite](danielsson2002three) describes the theory underlying the 
-homogenization system.  The system aims to impose cell average 
-stress or deformation constraints.  
+[!cite](danielsson2002three) describes the theory underlying the
+homogenization system.  The system aims to impose cell average
+stress or deformation constraints.
 For small deformations these constraints are of the type
 \begin{equation}
       \hat{s}_{ij}=\frac{1}{V}\int_{v}s_{ij}dV
@@ -53,19 +53,19 @@ The small deformation constraints unroll following the Voigt convention,
 the large deformation constraints are the row-major unrolled full tensor
 
 !table id=sizes caption=Number of available constraints and input file order
-| Problem dimension | Small deformation constraints        | Large deformation constraints |
-|-------------------|--------------------------------------|-------------------------------|
-| 1                 | 1: $xx$                              | 1: $xx$                       |
-| 2                 | 3: $xx$, $yy$, $xy$                  | 4: $xx$, $xy$, $yx$, $yy$     |
+| Problem dimension | Small deformation constraints        | Large deformation constraints                           |
+| ----------------- | ------------------------------------ | ------------------------------------------------------- |
+| 1                 | 1: $xx$                              | 1: $xx$                                                 |
+| 2                 | 3: $xx$, $yy$, $xy$                  | 4: $xx$, $xy$, $yx$, $yy$                               |
 | 3                 | 6: $xx$, $yy$, $zz$, $yz$, $xz$ $xy$ | 9: $xx$, $xy$, $xz$, $yx$, $yy$, $yz$, $zx$, $zy$, $zz$ |
 
-To meet these cell average stress or strain components the system introduces an extra, 
+To meet these cell average stress or strain components the system introduces an extra,
 affine displacement field over the domain
 \begin{equation}
       u_{i}=u_{i}^{\mu}+u_{i}^{M}
 \end{equation}
 where $u_{i}^\mu$ is the interpolated displacement field arising from the standard finite element
-problem and 
+problem and
 \begin{equation}
       u_{i}^{M}=G_{iJ}X_{J}
 \end{equation}
@@ -84,7 +84,7 @@ The system implements the constrains by imposing a scalar residual equation for 
       R=\int_{V}\left(X-\hat{X}\right)dV=0
 \end{equation}
 where $X$ represents a stress or deformation constrain, as appropriate.
-This constraint is implemented as a `ScalarKernel`. 
+This constraint is implemented as a `ScalarKernel`.
 using a [UserObject](UserObject.md) to visit each element and compute the volume integral.
 
 ## Example Simulation
@@ -124,7 +124,7 @@ The easiest way to set up a homogenization problem is to use the [SolidMechanics
 which automatically configures the correct MOOSE objects.
 
 !alert warning
-The homogenization constraint system only works with the [total Lagrangian](kernels/lagrangian/TotalLagrangianStressDivergence.md) 
+The homogenization constraint system only works with the [total Lagrangian](kernels/lagrangian/TotalLagrangianStressDivergence.md)
 implementation of the stress equilibrium kernel.  Specifically, you must use the [`HomogenizedTotalLagrangianStressDivergence`](HomogenizedTotalLagrangianStressDivergence.md)
 subclass as it implements the correct off-diagonal Jacobian entries.
 
@@ -142,18 +142,18 @@ sufficient constraint to solve the stress equilibrium equations) but produce zer
 The final step the user must take is to define their constraints using MOOSE [Functions](syntax/Functions/index.md).
 
 !alert warning
-For large deformation problems in 2D and 3D the user must specify at least 1 off-diagonal displacement constraint (2D) and at 
+For large deformation problems in 2D and 3D the user must specify at least 1 off-diagonal displacement constraint (2D) and at
 least 3 off-diagonal displacement gradient constraints (3D).  That is, not all of the constraints can be stress constraints for
 large deformations.  An unconstrained displacement gradient admits free rigid body rotation and these modes must removed.
 
-The following steps then provide the homogenization constraints.  These steps can be replaced by 
+The following steps then provide the homogenization constraints.  These steps can be replaced by
 the appropriate options in the [SolidMechanics/QuasiStatic](/Physics/SolidMechanics/QuasiStatic/index.md).
 
 1. Add a `ScalarVariable` with the appropriate order for the problem being solved (see [sizes]).
-2. Add a [`ComputeHomogenizedLagrangianStrain`](ComputeHomogenizedLagrangianStrain.md) material object to convert the values of the scalar variable to 
+2. Add a [`ComputeHomogenizedLagrangianStrain`](ComputeHomogenizedLagrangianStrain.md) material object to convert the values of the scalar variable to
    the homogenization strain or displacement gradient.
 3. Inform the [`ComputeLagrangianStrain`](ComputeLagrangianStrain.md) object of the name of the homogenization strain with the `homogenization_gradient_names` parameter.
-4. Use [`HomogenizedTotalLagrangianStressDivergence`](HomogenizedTotalLagrangianStressDivergence.md) kernels and inform the kernels of the constraints so that they can 
+4. Use the [`HomogenizedTotalLagrangianStressDivergence`](HomogenizedTotalLagrangianStressDivergence.md) kernel and inform the kernel of the constraints so that they can
    include the appropriate off-diagonal Jacobian entries with the `macro_gradient`, and `constraint_types` parameters.
 
 !bibtex bibliography

@@ -249,11 +249,7 @@ KernelScalarBase::computeResidualAndJacobian()
 {
   Kernel::computeResidualAndJacobian(); // compute and assemble regular variable contributions
 
-  for (const auto & jvariable : getCoupledMooseScalarVars())
-  {
-    const unsigned int jvar = jvariable->number();
-
-    if (_is_implicit)
-      computeOffDiagJacobianScalar(jvar);
-  }
+  if (_is_implicit)
+    for (const auto * jvar : getCoupledMooseScalarVars())
+      computeOffDiagJacobianScalar(jvar->number());
 }

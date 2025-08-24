@@ -14,18 +14,13 @@ registerMooseObject("SolidMechanicsApp", ComputeHomogenizedLagrangianStrain);
 InputParameters
 ComputeHomogenizedLagrangianStrain::validParams()
 {
-  InputParameters params = Material::validParams();
+  InputParameters params = HomogenizationInterface<Material>::validParams();
+  params.addClassDescription("Calculate eigenstrain-like contribution from the homogenization "
+                             "strain used to satisfy the homogenization constraints.");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<MaterialPropertyName>("homogenization_gradient_name",
                                         "homogenization_gradient",
                                         "Name of the constant gradient field");
-  params.addRequiredParam<MultiMooseEnum>(
-      "constraint_types",
-      Homogenization::constraintType,
-      "Type of each constraint: strain, stress, or none. The types are specified in the "
-      "column-major order, and there must be 9 entries in total.");
-  params.addRequiredParam<std::vector<FunctionName>>(
-      "targets", "Functions giving the targets to hit for constraint types that are not none.");
   params.addRequiredCoupledVar("macro_gradient",
                                "Scalar field defining the "
                                "macro gradient");
@@ -34,33 +29,12 @@ ComputeHomogenizedLagrangianStrain::validParams()
 
 ComputeHomogenizedLagrangianStrain::ComputeHomogenizedLagrangianStrain(
     const InputParameters & parameters)
-  : Material(parameters),
+  : HomogenizationInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _macro_gradient(coupledScalarValue("macro_gradient")),
     _homogenization_contribution(
         declareProperty<RankTwoTensor>(_base_name + "homogenization_gradient_name"))
 {
-  // Constraint types
-  auto types = getParam<MultiMooseEnum>("constraint_types");
-  if (types.size() != Moose::dim * Moose::dim)
-    mooseError("Number of constraint types must equal dim * dim. ", types.size(), " are provided.");
-
-  // Targets to hit
-  const std::vector<FunctionName> & fnames = getParam<std::vector<FunctionName>>("targets");
-
-  // Prepare the constraint map
-  unsigned int fcount = 0;
-  for (const auto j : make_range(Moose::dim))
-    for (const auto i : make_range(Moose::dim))
-    {
-      const auto idx = i + Moose::dim * j;
-      const auto ctype = static_cast<Homogenization::ConstraintType>(types.get(idx));
-      if (ctype != Homogenization::ConstraintType::None)
-      {
-        const Function * const f = &getFunctionByName(fnames[fcount++]);
-        _cmap[{i, j}] = {ctype, f};
-      }
-    }
 }
 
 void
@@ -68,9 +42,9 @@ ComputeHomogenizedLagrangianStrain::computeQpProperties()
 {
   _homogenization_contribution[_qp].zero();
   unsigned int count = 0;
-  for (auto && indices : _cmap)
+  for (const auto & [indices, constraint] : cmap())
   {
-    auto && [i, j] = indices.first;
+    const auto [i, j] = indices;
     _homogenization_contribution[_qp](i, j) = _macro_gradient[count++];
   }
 }

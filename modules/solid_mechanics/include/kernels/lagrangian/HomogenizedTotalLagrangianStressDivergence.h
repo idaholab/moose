@@ -10,26 +10,12 @@
 #pragma once
 
 #include "TotalLagrangianStressDivergence.h"
-
-// Helpers common to the whole homogenization system
-namespace Homogenization
-{
-/// Moose constraint type, for input
-const MultiMooseEnum constraintType("strain stress none");
-/// Constraint type: stress/PK stress or strain/deformation gradient
-enum class ConstraintType
-{
-  Strain,
-  Stress,
-  None
-};
-typedef std::map<std::pair<unsigned int, unsigned int>, std::pair<ConstraintType, const Function *>>
-    ConstraintMap;
-}
+#include "HomogenizationInterface.h"
 
 /// Total Lagrangian formulation with all homogenization terms (one disp_xyz field and macro_gradient scalar)
 ///
-class HomogenizedTotalLagrangianStressDivergence : public TotalLagrangianStressDivergence
+class HomogenizedTotalLagrangianStressDivergence
+  : public HomogenizationInterface<TotalLagrangianStressDivergence>
 {
 public:
   static InputParameters validParams();
@@ -71,16 +57,10 @@ protected:
    */
   virtual Real computeQpOffDiagJacobianScalar(const unsigned int svar_num) override;
 
-protected:
-  /// Type of each constraint (stress or strain) for each component
-  Homogenization::ConstraintMap _cmap;
+private:
+  /// Indices for off-diagonal Jacobian components
+  unsigned int _m, _n;
 
-  /// The constraint type; initialize with 'none'
+  /// Type of current homogenization constraint
   Homogenization::ConstraintType _ctype = Homogenization::ConstraintType::None;
-
-  /// Used internally to iterate over each scalar component
-  unsigned int _m;
-  unsigned int _n;
-  unsigned int _a;
-  unsigned int _b;
 };
