@@ -22,9 +22,8 @@
     type = 'RunApp'
     prereq = eigen_problem_solve_fail
     requirement = 'The system shall have the ability to disable the nonlinear-eigen system solve in a simulation.'
-    # regex meant to make sure no messaged about solve failing is printed last
-    # \S+ is to consume the ansi color characters
-    expect_out = 'Solve Skipped!\S+\s+(?!Aborting)'
+    # regex meant to make sure no message about solve failing is printed
+    expect_out = 'Solve Skipped!(?![\s\S]*Aborting)'
     absent_out = 'WARNING! There are options you set that were not used!'
     input = 'ne_fail.i'
     cli_args = Problem/solve=false
