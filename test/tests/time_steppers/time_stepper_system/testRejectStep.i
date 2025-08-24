@@ -37,7 +37,6 @@
   []
 []
 
-
 [Executioner]
   type = Transient
   num_steps = 10
@@ -52,12 +51,12 @@
     []
 
     [SolutionTimeAdaptiveDT]
-      type = SolutionTimeAdaptiveDT
+      type = SolutionTimeAdaptiveDTTest
       dt = 5
+      fake_wall_time_sequence = '100 100 200 200 600 300 300 1000 1000 2000 100'
     []
   []
 []
-
 
 [Postprocessors]
   [dt]
