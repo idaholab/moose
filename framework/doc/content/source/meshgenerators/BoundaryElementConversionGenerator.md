@@ -18,6 +18,8 @@ There are four types of linear 3D elements supported by this mesh generator: `HE
        id=boundary_transition
        caption=Generation of the boundary layer based on the `left` boundary of cube mesh consisting different linear 3D elements: (left column) original mesh; (right column) mesh after the conversion.
 
+The most common application of this mesh generator is applied to external boundaries of the [!param](/Mesh/BoundaryElementConversionGenerator/input) mesh. The mesh generator can also be applied to internal boundaries, in which case both sides of the internal boundary are converted. Users can enable [!param](/Mesh/BoundaryElementConversionGenerator/external_boundaries_checking) to enforce that the specified boundaries are external to avert unintended behavior.
+
 ### HEX8
 
 All the six sides of a `HEX8` elements are `QUAD4`. Any sides involved in the given boundaries will need to be divided into two `TRI3` sides that belong to two different new elements. To keep the other `QUAD4` sides unchanged, a simple strategy is adopted. First, the `HEX8` elements are divided into six `PYRAMID5` elements, each of which is defined by one of the `QUAD4` sides and the centroid of the `HEX8` element. For those `QUAD4` sides involved in the given boundaries, the `PYRAMID5` elements are further divided into two `TET4` elements (see the top row of [boundary_transition] as an example).
