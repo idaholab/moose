@@ -23,7 +23,7 @@ registerMooseObject("MooseApp", Boundary2DDelaunayGenerator);
 InputParameters
 Boundary2DDelaunayGenerator::validParams()
 {
-  InputParameters params = MeshGenerator::validParams();
+  InputParameters params = SurfaceDelaunayGeneratorBase::validParams();
   params += FunctionParserUtils<false>::validParams();
 
   params.addClassDescription(
@@ -37,28 +37,6 @@ Boundary2DDelaunayGenerator::validParams()
       "The optional boundaries to be used as the holes in the mesh during triangulation. Note that "
       "this is a vector of vectors, which allows each hole to be defined as a combination of "
       "multiple boundaries.");
-  // Area control parameters
-  params.addParam<bool>("use_auto_area_func",
-                        false,
-                        "Use the automatic area function for the triangle meshing region.");
-  params.addParam<Real>(
-      "auto_area_func_default_size",
-      0,
-      "Background size for automatic area function, or 0 to use non background size");
-  params.addParam<Real>("auto_area_func_default_size_dist",
-                        -1.0,
-                        "Effective distance of background size for automatic area "
-                        "function, or negative to use non background size");
-  params.addParam<unsigned int>("auto_area_function_num_points",
-                                10,
-                                "Maximum number of nearest points used for the inverse distance "
-                                "interpolation algorithm for automatic area function calculation.");
-  params.addRangeCheckedParam<Real>(
-      "auto_area_function_power",
-      1.0,
-      "auto_area_function_power>0",
-      "Polynomial power of the inverse distance interpolation algorithm for automatic area "
-      "function calculation.");
 
   params.addParam<std::string>(
       "level_set",
@@ -83,16 +61,11 @@ Boundary2DDelaunayGenerator::validParams()
 }
 
 Boundary2DDelaunayGenerator::Boundary2DDelaunayGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
+  : SurfaceDelaunayGeneratorBase(parameters),
     FunctionParserUtils<false>(parameters),
     _input(getMesh("input")),
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary_names")),
     _hole_boundary_names(getParam<std::vector<std::vector<BoundaryName>>>("hole_boundary_names")),
-    _use_auto_area_func(getParam<bool>("use_auto_area_func")),
-    _auto_area_func_default_size(getParam<Real>("auto_area_func_default_size")),
-    _auto_area_func_default_size_dist(getParam<Real>("auto_area_func_default_size_dist")),
-    _auto_area_function_num_points(getParam<unsigned int>("auto_area_function_num_points")),
-    _auto_area_function_power(getParam<Real>("auto_area_function_power")),
     _max_level_set_correction_iterations(
         getParam<unsigned int>("max_level_set_correction_iterations")),
     _max_angle_deviation(getParam<Real>("max_angle_deviation")),

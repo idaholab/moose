@@ -29,7 +29,7 @@ registerMooseObject("MooseApp", XYDelaunayGenerator);
 InputParameters
 XYDelaunayGenerator::validParams()
 {
-  InputParameters params = MeshGenerator::validParams();
+  InputParameters params = SurfaceDelaunayGeneratorBase::validParams();
 
   MooseEnum algorithm("BINARY EXHAUSTIVE", "BINARY");
   MooseEnum tri_elem_type("TRI3 TRI6 TRI7 DEFAULT", "DEFAULT");
@@ -85,28 +85,6 @@ XYDelaunayGenerator::validParams()
       std::string(),
       "Desired area as a function of x,y; omit to skip non-uniform refinement");
 
-  params.addParam<bool>("use_auto_area_func",
-                        false,
-                        "Use the automatic area function for the triangle meshing region.");
-  params.addParam<Real>(
-      "auto_area_func_default_size",
-      0,
-      "Background size for automatic area function, or 0 to use non background size");
-  params.addParam<Real>("auto_area_func_default_size_dist",
-                        -1.0,
-                        "Effective distance of background size for automatic area "
-                        "function, or negative to use non background size");
-  params.addParam<unsigned int>("auto_area_function_num_points",
-                                10,
-                                "Maximum number of nearest points used for the inverse distance "
-                                "interpolation algorithm for automatic area function calculation.");
-  params.addRangeCheckedParam<Real>(
-      "auto_area_function_power",
-      1.0,
-      "auto_area_function_power>0",
-      "Polynomial power of the inverse distance interpolation algorithm for automatic area "
-      "function calculation.");
-
   params.addParam<MooseEnum>(
       "algorithm",
       algorithm,
@@ -133,7 +111,7 @@ XYDelaunayGenerator::validParams()
 }
 
 XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
+  : SurfaceDelaunayGeneratorBase(parameters),
     _bdy_ptr(getMesh("boundary")),
     _add_nodes_per_boundary_segment(getParam<unsigned int>("add_nodes_per_boundary_segment")),
     _refine_bdy(getParam<bool>("refine_boundary")),
@@ -145,11 +123,6 @@ XYDelaunayGenerator::XYDelaunayGenerator(const InputParameters & parameters)
     _refine_holes(getParam<std::vector<bool>>("refine_holes")),
     _desired_area(getParam<Real>("desired_area")),
     _desired_area_func(getParam<std::string>("desired_area_func")),
-    _use_auto_area_func(getParam<bool>("use_auto_area_func")),
-    _auto_area_func_default_size(getParam<Real>("auto_area_func_default_size")),
-    _auto_area_func_default_size_dist(getParam<Real>("auto_area_func_default_size_dist")),
-    _auto_area_function_num_points(getParam<unsigned int>("auto_area_function_num_points")),
-    _auto_area_function_power(getParam<Real>("auto_area_function_power")),
     _algorithm(parameters.get<MooseEnum>("algorithm")),
     _tri_elem_type(parameters.get<MooseEnum>("tri_element_type")),
     _verbose_stitching(parameters.get<bool>("verbose_stitching")),
