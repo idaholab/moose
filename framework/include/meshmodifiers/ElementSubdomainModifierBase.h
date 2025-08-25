@@ -144,16 +144,17 @@ private:
   /// Range of reinitialized boundary nodes
   ConstBndNodeRange & reinitializedBndNodeRange();
 
-  /// @brief Gather patch elements for reinitialized elements based onthe reinitialization strategy.
+  /// @brief Gather patch elements for reinitialized elements based on the reinitialization strategy.
   void gatherPatchElements(const VariableName & var_name, ReinitStrategy reinit_strategy);
 
   /// @brief Extrapolate polynomial for the given variable onto the reinitialized elements.
   void extrapolatePolynomial(const VariableName & var_name);
 
-  /// @brief Store values from non-reinitialized nodes on reinitialized elements
+  /// @brief Store values from non-reinitialized DoFs on reinitialized elements
+  /// Stores the value before re-initialization, to potentially restore this value
   void storeOverriddenDofValues(const VariableName & var_name);
 
-  /// @brief Restore values to non-reinitialized nodes on reinitialized elements
+  /// @brief Restore values to non-reinitialized DoFs on reinitialized elements
   void restoreOverriddenDofValues(const VariableName & var_name);
 
   /// Cached moved elements for potential restore
@@ -217,7 +218,7 @@ private:
   std::map<VariableName, std::pair<std::vector<dof_id_type>, std::vector<Number>>>
       _overridden_values_on_reinit_elems;
 
-  /// The strategy used to apply IC on newly activated elements
+  /// The strategies used to apply IC on newly activated elements, for each variable
   std::vector<ReinitStrategy> _reinit_strategy;
 
   /// @brief Names of the NodalPatchRecoveryVariable user objects
@@ -241,7 +242,7 @@ private:
   std::map<unsigned int, std::pair<std::unordered_set<const Elem *>, std::vector<dof_id_type>>>
       _evaluable_elems;
 
-  /// @brief A map to map reinitialization strategies to their corresponding patch element IDs
+  /// @brief A map from variable names to their corresponding patch element IDs
   std::map<VariableName, std::vector<dof_id_type>> _patch_elem_ids;
 
   /// KD-tree related members

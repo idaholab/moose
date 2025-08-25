@@ -201,7 +201,7 @@ NodalPatchRecoveryBase::finalize()
 }
 
 std::unordered_map<processor_id_type, std::vector<dof_id_type>>
-NodalPatchRecoveryBase::gatherSendList(const std::vector<dof_id_type> & specific_elems)
+NodalPatchRecoveryBase::gatherRequestList(const std::vector<dof_id_type> & specific_elems)
 {
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
 
@@ -242,7 +242,7 @@ NodalPatchRecoveryBase::gatherSendList(const std::vector<dof_id_type> & specific
 }
 
 std::unordered_map<processor_id_type, std::vector<dof_id_type>>
-NodalPatchRecoveryBase::gatherSendList()
+NodalPatchRecoveryBase::gatherRequestList()
 {
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
 
@@ -258,14 +258,14 @@ NodalPatchRecoveryBase::gatherSendList()
 void
 NodalPatchRecoveryBase::sync()
 {
-  const auto query_ids = gatherSendList();
+  const auto query_ids = gatherRequestList();
   syncHelper(query_ids);
 }
 
 void
 NodalPatchRecoveryBase::sync(const std::vector<dof_id_type> & specific_elems)
 {
-  const auto query_ids = gatherSendList(specific_elems);
+  const auto query_ids = gatherRequestList(specific_elems);
   syncHelper(query_ids);
 }
 
@@ -306,7 +306,7 @@ NodalPatchRecoveryBase::syncHelper(
 void
 NodalPatchRecoveryBase::addToQuery(
     const libMesh::Elem * elem,
-    std::unordered_map<processor_id_type, std::vector<dof_id_type>> & query_ids)
+    std::unordered_map<processor_id_type, std::vector<dof_id_type>> & query_ids) const
 {
   if (hasBlocks(elem->subdomain_id()) && elem->processor_id() != processor_id())
     query_ids[elem->processor_id()].push_back(elem->id());

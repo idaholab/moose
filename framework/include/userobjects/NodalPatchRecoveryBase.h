@@ -32,8 +32,7 @@ public:
   virtual Real nodalPatchRecovery(const Point & p, const std::vector<dof_id_type> & elem_ids) const;
 
   /**
-   * Compute coefficients without reading or writing cached values, which allows this method to be
-   * const
+   * Compute coefficients without reading or writing cached values
    * The coefficients returned by this function are intended to be multiplied with the multi-index
    * table to build the corresponding polynomial. For details on the multi-index table, refer to the
    * comments in the multiIndex() function.
@@ -71,19 +70,20 @@ protected:
 
 private:
   /// Builds a query map of element IDs that require data from other processors.
-  /// This version of this method only checks data communication needs for a provided vector of elements
-  /// @param specific_elems Set of elements to consider for data needed from another processor
+  /// This version of this method only checks data communication needs for a provided vector of elements.
+  /// @param specific_elems Set of elements that we need the information about Ae and be (which may be own by current processor
+  /// or need to be requested from another processor).
   /// @return Map of processor id to vector of non-local elements on the current processor that belong to
   ///                that processor. Used to ensure that all non-local evaluable elements are properly synchronized
   std::unordered_map<processor_id_type, std::vector<dof_id_type>>
-  gatherSendList(const std::vector<dof_id_type> & specific_elems);
+  gatherRequestList(const std::vector<dof_id_type> & specific_elems);
 
   /// Builds a query map of element IDs that require data from other processors.
   /// This version of this method iterates over all semi-local evaluable elements (including ghost elements)
-  /// and records those belonging to a different processor.
+  /// and records those belonging to a different processor and request from them.
   /// @return Map of processor id to vector of semilocal elements on the current processor that belong to
   ///                that processor. Used to ensure that all semi-local evaluable elements are properly synchronized
-  std::unordered_map<processor_id_type, std::vector<dof_id_type>> gatherSendList();
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> gatherRequestList();
 
   /**
    * Compute the P vector at a given point
@@ -102,7 +102,7 @@ private:
   /**
    * @brief Synchronizes local matrices and vectors (_Ae, _be) across processors.
    *
-   * @p specific_elems: the elements that will be synchronized.
+   * @param specific_elems: the elements that will be synchronized.
    * This is typically used when the monomial basis needs to be built from a
    * specific patch, or a subset of that patch.
    */
@@ -126,14 +126,15 @@ private:
    * @param query_ids Map of processor id to vector of semilocal elements on the current processor
    *                                   that belong to that processor.
    */
-  void addToQuery(const libMesh::Elem * elem,
-                  std::unordered_map<processor_id_type, std::vector<dof_id_type>> & query_ids);
+  void
+  addToQuery(const libMesh::Elem * elem,
+             std::unordered_map<processor_id_type, std::vector<dof_id_type>> & query_ids) const;
 
   /// The polynomial order, default is variable order
   const unsigned int _patch_polynomial_order;
 
   /**
-   * Generates the multi-index table for a polynomial basis.
+   * Multi-index table for a polynomial basis.
    *
    * Each multi-index is a vector of exponents [i, j, k], representing monomials like x^i y^j z^k.
    * The table contains all unique multi-indices where the sum of exponents is <= order.
@@ -147,10 +148,6 @@ private:
    * dim = 2, order = 2: [0,0], [0,1], [1,0], [0,2], [1,1], [2,0]
    * dim = 3, order = 2: [0,0,0], [0,0,1], [0,1,0], [1,0,0], [0,0,2], [0,1,1], [1,0,1], [0,2,0],
    * [1,1,0], [2,0,0]
-   *
-   * @param dim Number of variables.
-   * @param order Maximum total degree.
-   * @return Vector of multi-indices.
    */
   const std::vector<std::vector<unsigned int>> _multi_index;
 

@@ -945,7 +945,6 @@ ElementSubdomainModifierBase::reinitializedNodeRange()
   for (auto node_id : _reinitialized_nodes)
     nodes.push_back(_mesh.nodePtr(node_id)); // displaced mesh shares the same node object
 
-  // Make some fake node iterators defining this vector of nodes
   Node * const * node_itr_begin = const_cast<Node * const *>(nodes.data());
   Node * const * node_itr_end = node_itr_begin + nodes.size();
 
