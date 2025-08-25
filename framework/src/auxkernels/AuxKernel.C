@@ -33,6 +33,7 @@ AuxKernelTempl<ComputeValueType>::validParams()
   params += MeshChangedInterface::validParams();
   params += MaterialPropertyInterface::validParams();
   params += FunctorInterface::validParams();
+  params += GeometricSearchInterface::validParams();
 
   // Add the SetupInterface parameter 'execute_on' with 'linear' and 'timestep_end'
   params += SetupInterface::validParams();
