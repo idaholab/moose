@@ -113,7 +113,7 @@ QuasiStaticSolidMechanicsPhysics::validParams()
       "Type of each constraint: strain, stress, or none. The types are specified in the "
       "column-major order, and there must be 9 entries in total.");
   params.addParam<std::vector<FunctionName>>(
-      "targets", "Functions giving the targets to hit for constraint types that are not none.");
+      "targets", {}, "Functions giving the targets to hit for constraint types that are not none.");
 
   params.addParamNamesToGroup("scaling", "Variables");
   params.addParamNamesToGroup("strain_base_name automatic_eigenstrain_names", "Strain");
