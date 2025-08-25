@@ -22,6 +22,11 @@
 
 // Forward declarations
 class NonlinearSystemBase;
+namespace libMesh
+{
+class DofMapBase;
+class System;
+}
 
 extern PetscErrorCode DMMooseRegisterAll();
 
@@ -29,15 +34,21 @@ extern PetscErrorCode DMMooseRegisterAll();
  * Create a MOOSE DM
  * @param comm The communicator that the DM should use
  * @param nl The nonlinear system context that the DM is associated with
+ * @param dof_map A reference to the DoFMap, which you can get from the system
  * @param dm_name A name to associate with the DM
  * @param dm A pointer to the PETSc DM
  */
-extern PetscErrorCode
-DMCreateMoose(MPI_Comm comm, NonlinearSystemBase & nl, const std::string & dm_name, DM * dm);
+extern PetscErrorCode DMCreateMoose(MPI_Comm comm,
+                                    NonlinearSystemBase & nl,
+                                    const libMesh::DofMapBase & dof_map,
+                                    const libMesh::System & system,
+                                    const std::string & dm_name,
+                                    DM * dm);
 
 extern PetscErrorCode DMMooseReset(DM);
 extern PetscErrorCode DMMooseSetNonlinearSystem(DM, NonlinearSystemBase &);
 extern PetscErrorCode DMMooseGetNonlinearSystem(DM, NonlinearSystemBase *&);
+extern PetscErrorCode DMMooseSetDofMap(DM, const libMesh::DofMapBase &);
 extern PetscErrorCode DMMooseGetBlocks(DM, std::vector<std::string> &);
 extern PetscErrorCode DMMooseGetVariables(DM, std::vector<std::string> &);
 extern PetscErrorCode DMMooseGetSides(DM, std::set<std::string> &);

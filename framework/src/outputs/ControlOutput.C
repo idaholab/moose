@@ -118,8 +118,8 @@ ControlOutput::outputControls()
 
     if (!names.empty())
     {
-      oss << ConsoleUtils::indent(2) << COLOR_YELLOW << ptr->get<std::string>("_object_name")
-          << COLOR_DEFAULT << '\n';
+      oss << ConsoleUtils::indent(2) << COLOR_YELLOW << ptr->getObjectName() << COLOR_DEFAULT
+          << '\n';
 
       // Full names(s)
       oss << ConsoleUtils::indent(4) << "Name(s): ";

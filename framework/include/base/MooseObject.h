@@ -19,7 +19,6 @@
 
 #define usingMooseObjectMembers                                                                    \
   usingMooseBaseMembers;                                                                           \
-  usingMooseBaseParameterInterfaceMembers;                                                         \
   using MooseObject::enabled
 
 /**

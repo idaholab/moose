@@ -32,6 +32,13 @@ class SubProblem;
 class SystemBase;
 class MooseMesh;
 
+/**
+ * Base variable class. Sadly there are a lot of methods in here that should be pure virtual but
+ * can't be because AddVariableAction/MooseObjectAction will retrieve the validParams of
+ * MooseVariableBase which checks to ensure that MooseVariableBase is a registered object, and
+ * registration requires an instantiation. So we add runtime errors instead of compile-time
+ * errors for these would-be pure virtuals
+ */
 class MooseVariableBase : public MooseObject,
                           public BlockRestrictable,
                           public OutputInterface,
@@ -65,11 +72,6 @@ public:
    * Get the system this variable is part of.
    */
   const SystemBase & sys() const { return _sys; }
-
-  /**
-   * Get the variable name
-   */
-  const std::string & name() const override { return _var_name; }
 
   /**
    * Get dual mortar option
@@ -188,6 +190,11 @@ public:
    */
   bool isLowerD() const { return _is_lower_d; }
 
+  /**
+   * Size data structures related to matrix tagging
+   */
+  virtual void sizeMatrixTagData() { mooseError("Derived class must implement this method"); }
+
 protected:
   /**
    * @returns whether we should insert derivatives
@@ -239,9 +246,6 @@ protected:
   /// scaling factor for this variable
   std::vector<Real> _scaling_factor;
 
-  /// Variable name
-  std::string _var_name;
-
   /// If dual mortar approach is used
   bool _use_dual;
 
@@ -272,5 +276,4 @@ MooseVariableBase::setActiveTags(const std::set<TagID> &)
   using MooseVariableBase::_mesh;                                                                  \
   using MooseVariableBase::_tid;                                                                   \
   using MooseVariableBase::_count;                                                                 \
-  using MooseVariableBase::_scaling_factor;                                                        \
-  using MooseVariableBase::_var_name
+  using MooseVariableBase::_scaling_factor

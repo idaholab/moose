@@ -670,8 +670,11 @@ FEProblemBase::createTagVectors()
       _solver_systems[sys_num]->addVector(tag, false, GHOSTED);
       addNotZeroedVectorTag(tag);
     }
+}
 
-  // add matrices and their tags
+void
+FEProblemBase::createTagMatrices(CreateTaggedMatrixKey)
+{
   auto & matrices = getParam<std::vector<std::vector<TagName>>>("extra_tag_matrices");
   for (const auto sys_num : index_range(matrices))
     for (auto & matrix : matrices[sys_num])
@@ -679,6 +682,10 @@ FEProblemBase::createTagVectors()
       auto tag = addMatrixTag(matrix);
       _solver_systems[sys_num]->addMatrix(tag);
     }
+
+  for (auto & sys : _solver_systems)
+    sys->sizeVariableMatrixData();
+  _aux->sizeVariableMatrixData();
 }
 
 void
@@ -3071,7 +3078,7 @@ FEProblemBase::addConstraint(const std::string & c_name,
       if (!has_secondary_var && !has_primary_var)
         mooseError(
             "Either a 'secondary_variable' or 'primary_variable' parameter must be supplied for '",
-            parameters.get<std::string>("_object_name"),
+            parameters.getObjectName(),
             "'");
       return has_secondary_var ? "secondary_variable" : "primary_variable";
     }
@@ -3934,7 +3941,7 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
           warehouse->addObjects(material, neighbor_material, face_material, tid);
 
       // Names of all controllable parameters for this Material object
-      const std::string & base = parameters.get<std::string>("_moose_base");
+      const std::string & base = parameters.getBase();
       MooseObjectParameterName name(MooseObjectName(base, material->name()), "*");
       const auto param_names =
           _app.getInputParameterWarehouse().getControllableParameterNames(name);
@@ -5251,7 +5258,6 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
   parallel_object_only();
 
   parameters.set<MPI_Comm>("_mpi_comm") = _communicator.get();
-  parameters.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
 
   if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
   {
@@ -5915,7 +5921,7 @@ FEProblemBase::addAnyRedistributers()
                                     const bool use_displaced_mesh)
     {
       InputParameters redistribute_params = RedistributeProperties::validParams();
-      redistribute_params.set<MooseApp *>("_moose_app") = &_app;
+      redistribute_params.set<MooseApp *>(MooseBase::app_param) = &_app;
       redistribute_params.set<std::string>("for_whom") = this->name();
       redistribute_params.set<MooseMesh *>("mesh") = &mesh;
       redistribute_params.set<Moose::RelationshipManagerType>("rm_type") =
@@ -6928,7 +6934,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
         {
           auto & matrix = _current_nl_sys->getMatrix(tag);
           matrix.zero();
-          if (haveADObjects() && !assembly(0, _current_nl_sys->number()).hasStaticCondensation())
+          if (haveADObjects() && !_current_nl_sys->system().has_static_condensation())
             // PETSc algorithms require diagonal allocations regardless of whether there is non-zero
             // diagonal dependence. With global AD indexing we only add non-zero
             // dependence, so PETSc will scream at us unless we artificially add the diagonals.
@@ -7316,7 +7322,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
               matrix.restore_original_nonzero_pattern();
             else
               matrix.zero();
-            if (haveADObjects() && !assembly(0, _current_nl_sys->number()).hasStaticCondensation())
+            if (haveADObjects() && !_current_nl_sys->system().has_static_condensation())
               // PETSc algorithms require diagonal allocations regardless of whether there is
               // non-zero diagonal dependence. With global AD indexing we only add non-zero
               // dependence, so PETSc will scream at us unless we artificially add the diagonals.

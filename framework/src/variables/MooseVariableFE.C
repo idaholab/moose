@@ -1376,6 +1376,15 @@ MooseVariableFE<OutputType>::jacobianSetup()
   MooseVariableField<OutputType>::jacobianSetup();
 }
 
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::sizeMatrixTagData()
+{
+  _element_data->sizeMatrixTagData();
+  _neighbor_data->sizeMatrixTagData();
+  _lower_data->sizeMatrixTagData();
+}
+
 template class MooseVariableFE<Real>;
 template class MooseVariableFE<RealVectorValue>;
 template class MooseVariableFE<RealEigenVector>;

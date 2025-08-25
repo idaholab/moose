@@ -116,21 +116,21 @@
       type = 'RunException'
       input = '3d.i'
       cli_args = 'BCs/CavityPressure/1/R=0'
-      expect_err = 'Range check failed for parameter BCs/CavityPressure/1/R'
+      expect_err = "BCs/CavityPressure/1/R: Range check failed; expression = 'R > 0.0', value = 0"
       detail = 'the range checking of the gas constant parameter R fails'
     [../]
     [./range_check_initial_temperature]
       type = 'RunException'
       input = '3d.i'
       cli_args = 'BCs/CavityPressure/1/initial_temperature=0'
-      expect_err = 'Range check failed for parameter BCs/CavityPressure/1/initial_temperature'
+      expect_err = "BCs/CavityPressure/1/initial_temperature: Range check failed; expression = 'initial_temperature > 0.0', value = 0"
       detail = 'the range checking of the initial temperature fails'
     [../]
     [./range_check_initial_pressure]
       type = 'RunException'
       input = '3d.i'
       cli_args = 'BCs/CavityPressure/1/initial_pressure=-1'
-      expect_err = 'Range check failed for parameter BCs/CavityPressure/1/initial_pressure'
+      expect_err = "BCs/CavityPressure/1/initial_pressure: Range check failed; expression = 'initial_pressure >= 0.0', value = -1"
       detail = 'the range checking of the initial pressure fails'
     [../]
   []

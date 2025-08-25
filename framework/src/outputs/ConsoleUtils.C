@@ -49,8 +49,7 @@ outputFrameworkInformation(const MooseApp & app)
   std::stringstream oss;
   oss << std::left;
 
-  if (app.getSystemInfo() != NULL)
-    oss << app.getSystemInfo()->getInfo();
+  oss << app.getSystemInfo().getInfo();
 
   oss << "Input File(s):\n";
   for (const auto & entry : app.getInputFileNames())
@@ -440,7 +439,7 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
     {
       if (problem.numNonlinearSystems() > 1)
         mpc_desc += "[" + problem.getNonlinearSystemNames()[i] + "]: ";
-      mpc_desc += mpc->getParam<std::string>("_type") + " ";
+      mpc_desc += mpc->type() + " ";
       if (mpc->name().find("_moose_auto") != std::string::npos)
         mpc_desc += "(auto) ";
     }

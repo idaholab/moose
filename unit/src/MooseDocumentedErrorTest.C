@@ -20,7 +20,7 @@ TEST_F(MooseDocumentedErrorTest, mooseObjectError)
         catch (const std::exception & e)
         {
           EXPECT_EQ(std::string(e.what()),
-                    "The following error occurred in the Problem 'problem' of type "
+                    "The following occurred in the Problem 'problem' of type "
                     "FEProblem.\n\nfoo\n\nThis error is documented at "
                     "github.com/idaholab/moose/issues/1234.");
           throw;

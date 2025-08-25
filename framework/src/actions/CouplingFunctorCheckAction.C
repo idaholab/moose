@@ -24,7 +24,7 @@ InputParameters
 CouplingFunctorCheckAction::validParams()
 {
   auto params = Action::validParams();
-  params.set<std::string>("_action_name") = "coupling_functor_check";
+  params.set<std::string>(MooseBase::name_param) = "coupling_functor_check";
   return Action::validParams();
 }
 

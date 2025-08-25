@@ -156,6 +156,8 @@ public:
   virtual bool computingDiv() const override final { return false; }
   virtual bool usesSecondPhiNeighbor() const override final { return false; }
 
+  virtual void sizeMatrixTagData() override;
+
 protected:
   /// Throw an error when somebody requests time-related data from this variable
   [[noreturn]] void timeIntegratorError() const;

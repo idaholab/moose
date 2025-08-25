@@ -1,0 +1,19 @@
+[Tests]
+  design = '/HDGKernels/index.md'
+  issues = '#30038'
+  [1d-advection]
+    type = CSVDiff
+    input = 1d-advection-test.i
+    csvdiff = 1d-advection-test_out.csv
+    requirement = 'The system shall be able to solve a one dimensional advection problem using a hybridized discontinuous Galerkin discretization with static condensation with non-uniform refinement of the domain.'
+    max_threads = 1 # static condensation doesn't currently support threading
+  []
+  [2d-advection-diffusion]
+    type = Exodiff
+    input = 2d-advection-diffusion-test.i
+    exodiff = 2d-advection-diffusion-test_out.e
+    requirement = 'The system shall be able to solve a two dimensional advection-diffusion problem using a hybridized discontinuous Galerkin discretization with static condensation with non-uniform refinement of the domain.'
+    max_threads = 1 # static condensation doesn't currently support threading
+    max_parallel = 2 # temporary fix until SCDofMap properly handles dofs it owns but that aren't covered by calls to active local element dof indices
+  []
+[]

@@ -38,13 +38,12 @@ ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal
     // VPPs used by ScalarKernels must be broadcast because we don't know where the
     // ScalarKernel will end up being evaluated
     // Note: residual objects should have a valid _moose_base.
-    VectorPostprocessorInterface(this,
-                                 parameters.get<std::string>("_moose_base") == "ScalarKernel"),
+    VectorPostprocessorInterface(this, getBase() == "ScalarKernel"),
     RandomInterface(parameters,
                     *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
                     parameters.get<THREAD_ID>("_tid"),
                     is_nodal),
-    Restartable(this, parameters.get<std::string>("_moose_base") + "s"),
+    Restartable(this, getBase() + "s"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
