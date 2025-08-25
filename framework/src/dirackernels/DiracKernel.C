@@ -48,10 +48,7 @@ DiracKernelTempl<T>::DiracKernelTempl(const InputParameters & parameters)
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
     _u(_var.sln()),
-    _grad_u(_var.gradSln()),
-    _drop_duplicate_points(parameters.get<bool>("drop_duplicate_points")),
-    _point_not_found_behavior(
-        parameters.get<MooseEnum>("point_not_found_behavior").getEnum<PointNotFoundBehavior>())
+    _grad_u(_var.gradSln())
 {
   addMooseVariableDependency(&this->mooseVariableField());
 
