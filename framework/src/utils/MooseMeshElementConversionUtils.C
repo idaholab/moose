@@ -1010,7 +1010,8 @@ transitionLayerGenerator(ReplicatedMesh & mesh,
 {
   // The base subdomain ID to shift the original elements because of the element type change
   const auto sid_shift_base = MooseMeshUtils::getNextFreeSubdomainID(mesh);
-  // The maximum subdomain ID that would be involved is sid_shift_base * 3, we would like to make sure it would not overflow
+  // The maximum subdomain ID that would be involved is sid_shift_base * 3, we would like to make
+  // sure it would not overflow
   if (sid_shift_base * 3 > std::numeric_limits<subdomain_id_type>::max())
     throw MooseException("subdomain id overflow");
 
@@ -1034,7 +1035,7 @@ transitionLayerGenerator(ReplicatedMesh & mesh,
   std::vector<std::set<dof_id_type>> layered_elems_list;
   layered_elems_list.push_back(std::set<dof_id_type>());
   // Need to collect the list of elements that need to be converted
-  if (external_boundaries_checking && !mesh.is_prepared())
+  if (!mesh.is_prepared())
     mesh.find_neighbors();
   for (const auto & side_info : side_list)
   {
@@ -1052,30 +1053,66 @@ transitionLayerGenerator(ReplicatedMesh & mesh,
       const auto side_type =
           mesh.elem_ptr(std::get<0>(side_info))->side_ptr(std::get<1>(side_info))->type();
       layered_elems_list.back().emplace(std::get<0>(side_info));
+      // If we enforce external boundary, then a non-null neighbor leads to an error
+      // Otherwise, we need to convert both sides, that means the neighbor information also needs to
+      // be added
+      const auto neighbor_ptr =
+          mesh.elem_ptr(std::get<0>(side_info))->neighbor_ptr(std::get<1>(side_info));
+      if (neighbor_ptr)
+      {
+        if (external_boundaries_checking)
+          throw MooseException(
+              "The provided boundary contains non-external sides, which is required when "
+              "external_boundaries_checking is enabled.");
+        else
+          layered_elems_list.back().emplace(neighbor_ptr->id());
+      }
+
       if (conversion_element_layer_number == 1)
       {
         if (side_type == TRI3)
           continue; // Already TRI3, no need to convert
         else if (side_type == QUAD4)
         {
-          if (elems_list.size() && elems_list.back().first == std::get<0>(side_info))
-            elems_list.back().second.push_back(std::get<1>(side_info));
+          auto pit = std::find_if(elems_list.begin(),
+                                  elems_list.end(),
+                                  [elem_id = std::get<0>(side_info)](const auto & p)
+                                  { return p.first == elem_id; });
+          if (elems_list.size() && pit != elems_list.end())
+          {
+            pit->second.push_back(std::get<1>(side_info));
+          }
           else
             elems_list.push_back(std::make_pair(
                 std::get<0>(side_info), std::vector<unsigned int>({std::get<1>(side_info)})));
+          if (neighbor_ptr)
+          {
+            auto sit = std::find_if(elems_list.begin(),
+                                    elems_list.end(),
+                                    [elem_id = neighbor_ptr->id()](const auto & p)
+                                    { return p.first == elem_id; });
+            if (elems_list.size() && sit != elems_list.end())
+            {
+              sit->second.push_back(
+                  neighbor_ptr->which_neighbor_am_i(mesh.elem_ptr(std::get<0>(side_info))));
+            }
+            else
+            {
+              elems_list.push_back(std::make_pair(
+                  neighbor_ptr->id(),
+                  std::vector<unsigned int>(
+                      {neighbor_ptr->which_neighbor_am_i(mesh.elem_ptr(std::get<0>(side_info)))})));
+            }
+          }
         }
         else if (side_type == C0POLYGON)
           throw MooseException("The provided boundary set contains C0POLYGON side elements, which "
                                "is not supported.");
         else
           mooseAssert(false,
-                      "Impossible scenario: a linear non-polygon side element that is neither TRI3 nor QUAD4.");
+                      "Impossible scenario: a linear non-polygon side element that is neither TRI3 "
+                      "nor QUAD4.");
       }
-      if (external_boundaries_checking)
-        if (mesh.elem_ptr(std::get<0>(side_info))->neighbor_ptr(std::get<1>(side_info)))
-          throw MooseException(
-              "The provided boundary contains non-external sides, which is required when "
-              "external_boundaries_checking is enabled.");
     }
   }
 

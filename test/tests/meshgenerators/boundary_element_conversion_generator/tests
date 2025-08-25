@@ -10,6 +10,15 @@
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall be able to convert HEX8 elements so that the single given boundary only contains TRI3 sides.'
   []
+  [double_hex8]
+    type = Exodiff
+    input = double_conversion.i
+    exodiff = 'double_hex8.e'
+    cli_args = '--mesh-only double_hex8.e'
+    recover = false
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall be able to convert HEX8 elements so that the single given internal boundary only contains TRI3 sides on both sides'
+  []
   [complex_hex8]
     type = Exodiff
     input = simple_conversion.i
