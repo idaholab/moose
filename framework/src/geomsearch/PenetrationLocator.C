@@ -50,6 +50,7 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
     _do_normal_smoothing(false),
     _normal_smoothing_distance(0.0),
     _normal_smoothing_method(NSM_EDGE_BASED),
+    _use_point_locator(false),
     _patch_update_strategy(_mesh.getPatchUpdateStrategy())
 {
   // Preconstruct an FE object for each thread we're going to use and for each lower-dimensional
@@ -106,6 +107,10 @@ PenetrationLocator::detectPenetration()
   // Grab the secondary nodes we need to worry about from the NearestNodeLocator
   NodeIdRange & secondary_node_range = _nearest_node.secondaryNodeRange();
 
+  // Make sure a master point locator has been built if we'll need one
+  if (_use_point_locator)
+    _mesh.getPointLocator();
+
   PenetrationThread pt(_subproblem,
                        _mesh,
                        _primary_boundary,
@@ -117,6 +122,7 @@ PenetrationLocator::detectPenetration()
                        _do_normal_smoothing,
                        _normal_smoothing_distance,
                        _normal_smoothing_method,
+                       _use_point_locator,
                        _fe,
                        _fe_type,
                        _nearest_node,
@@ -197,6 +203,12 @@ PenetrationLocator::penetrationNormal(dof_id_type node_id)
     return found_it->second->_normal;
   else
     return RealVectorValue(0, 0, 0);
+}
+
+void
+PenetrationLocator::setUsePointLocator(bool state)
+{
+  _use_point_locator = state;
 }
 
 void

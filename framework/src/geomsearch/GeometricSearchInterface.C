@@ -20,7 +20,18 @@
 InputParameters
 GeometricSearchInterface::validParams()
 {
-  return emptyInputParameters();
+  InputParameters params = emptyInputParameters();
+
+  params.addParam<bool>(
+      "search_using_point_locator",
+      false,
+      "Whether to use the mesh point locator (typically an octree search) to find "
+      "elements around closest points of near-contact, contact, or penetration.  "
+      "This is less efficient than the default search via node-element connectivity, but "
+      "may be necessary to accurately detect gaps, contact, or penetration on any "
+      "boundaries whose elements are not connected via shared nodes. ");
+
+  return params;
 }
 
 GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_object)
@@ -29,6 +40,8 @@ GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_obj
                                ->geomSearchData()),
     _requires_geometric_search(false)
 {
+  if (moose_object->getParam<bool>("search_using_point_locator"))
+    _geometric_search_data.setSearchUsingPointLocator(true);
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
