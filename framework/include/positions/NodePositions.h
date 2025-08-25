@@ -12,11 +12,12 @@
 // Moose includes
 #include "Positions.h"
 #include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
 
 /**
  * Positions from nodes of elements in the mesh
  */
-class NodePositions : public Positions, BlockRestrictable
+class NodePositions : public Positions, BlockRestrictable, BoundaryRestrictable
 {
 public:
   static InputParameters validParams();
