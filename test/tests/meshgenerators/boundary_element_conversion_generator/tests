@@ -105,4 +105,13 @@
     mesh_mode = 'REPLICATED'
     requirement = 'The system shall throw an error if the provided boundary is not external when it is asked to check the external boundaries.'
   []
+  [err_sid_overflow]
+    type = 'RunException'
+    input = 'simple_conversion.i'
+    cli_args = '--mesh-only simple_conversion_err.e
+                Mesh/gmg/subdomain_ids="30000"'
+    expect_err = 'too large and cause overflow'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall throw an error if the input mesh contains subdomain ids that are too large.'
+  []
 []
