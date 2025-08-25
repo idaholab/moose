@@ -214,9 +214,10 @@ MooseAppCoordTransform::validParams()
                                       "Axis origin points for each block in 'rz_coord_blocks'");
   params.addParam<std::vector<RealVectorValue>>(
       "rz_coord_directions", "Axis directions for each block in 'rz_coord_blocks'");
-  params.addParam<std::string>(
-      "length_unit",
-      "How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5inches");
+  params.addParam<std::string>("length_unit",
+                               "How much distance one mesh length unit represents, e.g. 1 cm, 1 "
+                               "nm, 1 ft, 5inches. Note that this parameter is mostly used for "
+                               "creating a coordinate mapping during MultiApp data transfers.");
   params.addRangeCheckedParam<Real>(
       "alpha_rotation",
       "-180<alpha_rotation<=180",
@@ -453,6 +454,21 @@ MooseAppCoordTransform::hasScalingOrRotationTransformation() const
             return true;
         }
         else if (!MooseUtils::absoluteFuzzyEqual(matrix_elem, 0))
+          return true;
+      }
+
+  return false;
+}
+
+bool
+MooseAppCoordTransform::hasNonScalingTransformation() const
+{
+  if (_rs)
+    for (const auto i : make_range(Moose::dim))
+      for (const auto j : make_range(Moose::dim))
+      {
+        const auto matrix_elem = (*_rs)(i, j);
+        if (i != j && !MooseUtils::absoluteFuzzyEqual(matrix_elem, 0))
           return true;
       }
 
