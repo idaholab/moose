@@ -1,10 +1,10 @@
-# HourglassCorrectionQuad4b
+# HourglassCorrectionQuad4
 
-!syntax description /Kernels/HourglassCorrectionQuad4b
+!syntax description /Kernels/HourglassCorrectionQuad4
 
 ## Description
 
-`HourglassCorrectionQuad4b` applies an hourglass stabilization to underintegrated
+`HourglassCorrectionQuad4` applies an hourglass stabilization to underintegrated
 `QUAD4` elements for a single displacement component (x or y). It removes the best-fit
 affine (linear) part of the displacement over each element and penalizes only the two
 non-affine hourglass modes, following the spirit of Flanagan–Belytschko hourglass control
@@ -64,9 +64,9 @@ uniform-strain (affine) modes unpenalized.
 
 A minimal single-element test using one-point quadrature and simple anchoring can be found at
 
-!listing modules/solid_mechanics/test/tests/hourglass/hourglass_g1.i
+!listing modules/solid_mechanics/test/tests/hourglass/hourglass_residual_g1.i
 
-!listing modules/solid_mechanics/test/tests/hourglass/hourglass_g2.i
+!listing modules/solid_mechanics/test/tests/hourglass/hourglass_residual_g1.i
 
 For a beam example that uses this kernel with a realistic shear modulus:
 
@@ -80,8 +80,8 @@ For a beam example that uses this kernel with a realistic shear modulus:
 
 ## Parameters
 
-!syntax parameters /Kernels/HourglassCorrectionQuad4b
+!syntax parameters /Kernels/HourglassCorrectionQuad4
 
-!syntax inputs /Kernels/HourglassCorrectionQuad4b
+!syntax inputs /Kernels/HourglassCorrectionQuad4
 
-!syntax children /Kernels/HourglassCorrectionQuad4b
+!syntax children /Kernels/HourglassCorrectionQuad4

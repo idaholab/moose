@@ -197,7 +197,7 @@ stringify(const MooseArray<T> & c,
           bool enclose_list_in_curly_braces = false)
 {
   std::vector<T> buf(c.size());
-  for (const auto i:index_range(c))
+  for (const auto i : index_range(c))
     buf[i] = c[i];
   return stringify(buf, delim, elem_encl, enclose_list_in_curly_braces);
 }

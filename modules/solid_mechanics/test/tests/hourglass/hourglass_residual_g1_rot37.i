@@ -39,13 +39,13 @@
 
 [Kernels]
   [hourglass_x]
-    type = HourglassCorrectionQuad4b
+    type = HourglassCorrectionQuad4
     variable = disp_x
     penalty = 1
     shear_modulus = 1
   []
   [hourglass_y]
-    type = HourglassCorrectionQuad4b
+    type = HourglassCorrectionQuad4
     variable = disp_y
     penalty = 1
     shear_modulus = 1
