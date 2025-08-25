@@ -9,8 +9,8 @@
       csvdiff = 'xyzdelaunay_mesh_generator_out.csv'
       recover = false
       detail = "within an input boundary mesh containing volume elements"
+      valgrind = none
       capabilities = 'netgen'
-      valgrind = heavy
     []
     [basic_2d]
       type = 'CSVDiff'
@@ -18,6 +18,7 @@
       csvdiff = 'xyzdelaunay_mesh_generator_out.csv'
       recover = false
       detail = "within an input boundary mesh containing surface elements"
+      valgrind = none
       capabilities = 'netgen'
     []
     [with_3d_holes]
@@ -26,8 +27,8 @@
       csvdiff = 'xyzdelaunay_with_holes_out.csv'
       recover = false
       detail = "respecting any specified interior 'hole' meshes that contain volume elements"
+      valgrind = none
       capabilities = 'netgen'
-      valgrind = heavy
     []
     [with_2d_holes]
       type = 'CSVDiff'
@@ -35,8 +36,8 @@
       csvdiff = 'xyzdelaunay_with_holes_out.csv'
       recover = false
       detail = "respecting any specified interior 'hole' meshes that contain surface elements"
+      valgrind = none
       capabilities = 'netgen'
-      valgrind = heavy
     []
     [stitching]
       type = 'CSVDiff'
@@ -45,8 +46,8 @@
       csvdiff = 'xyzdelaunay_stitching_out.csv'
       recover = false
       detail = "selectively stitching 'hole' meshes into the final mesh"
+      valgrind = none
       capabilities = 'netgen'
-      valgrind = heavy
     []
     [convert_and_stitch]
       type = 'CSVDiff'
@@ -57,6 +58,7 @@
       csvdiff = 'xyzdelaunay_stitching_out.csv'
       recover = false
       detail = "selectively stitching 'hole' meshes into the final mesh after converting non-TET4 meshes"
+      valgrind = none
       capabilities = 'netgen'
     []
     [nested]
@@ -85,6 +87,7 @@
       csvdiff = 'xyzdelaunay_bcid_csv.csv'
       recover = false
       detail = "with specified boundary names assigned without stitching the hole meshes."
+      valgrind = none
       capabilities = 'netgen'
     []
     [bcid_stitch]
@@ -95,6 +98,7 @@
       csvdiff = 'xyzdelaunay_bcid_csv.csv'
       recover = false
       detail = "with specified boundary names assigned with the hole meshes stitched."
+      valgrind = none
       capabilities = 'netgen'
     []
     [bcid_numeric]
@@ -109,6 +113,7 @@
       csvdiff = 'xyzdelaunay_bcid_csv.csv'
       recover = false
       detail = "with specified boundary ids assigned."
+      valgrind = none
       capabilities = 'netgen'
     []
   []
@@ -132,6 +137,7 @@
       cli_args = '--mesh-only err.e'
       expect_err = "All elements in a hole mesh must have the same dimension that is either 2D or 3D"
       detail = "if a hole mesh contains elements that are neither 2D nor 3D"
+      valgrind = none
       capabilities = 'netgen'
     []
     [stitch_2d_holes]
@@ -141,6 +147,7 @@
                   Mesh/triang/stitch_holes="true true"'
       expect_err = "for which stitching onto a 3D mesh does not make sense."
       detail = "if a 2D hole mesh is specified to be stitched"
+      valgrind = none
       capabilities = 'netgen'
     []
     [inconsistent_stitch_num]
@@ -150,6 +157,7 @@
                   Mesh/triang/stitch_holes="true true true"'
       expect_err = "Need one stitch_holes entry per hole"
       detail = "if the number of hole meshes does not match the number of hole stitching flags"
+      valgrind = none
       capabilities = 'netgen'
     []
     [inconsistent_bdry_num]
@@ -158,6 +166,7 @@
       cli_args = 'Mesh/triang/hole_boundaries="h1"'
       expect_err = "Need one hole_boundaries entry per hole"
       detail = "if the number of hole meshes does not match the number of assigned boundary names"
+      valgrind = none
       capabilities = 'netgen'
     []
     [hole_mesh_mixed_dim]
@@ -166,6 +175,7 @@
       cli_args = '--mesh-only err.e'
       expect_err = "All elements in a hole mesh must have the same dimension that is either 2D or 3D"
       detail = "if a hole mesh contains elements of mixed dimensions"
+      valgrind = none
       capabilities = 'netgen'
     []
     [convert_not_allowed]
@@ -175,6 +185,7 @@
                   Mesh/final_generator=triang'
       expect_err = "3D hole meshes with non-TRI3 surface elements cannot be stitched"
       detail = "if a hole mesh to be stitched contains non-TRI3 surface elements but is not allowed to be converted"
+      valgrind = none
       capabilities = 'netgen'
     []
   []
