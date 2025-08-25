@@ -71,13 +71,13 @@
 # Shear modulus mu = E / (2(1 + nu)) = 1 / (2 * 1.3) = 0.3846153846
 [Kernels]
   [hourglass_x]
-    type = HourglassCorrectionQuad4b
+    type = HourglassCorrectionQuad4
     variable = disp_x
     penalty = 0.2
     shear_modulus = 0.38461538461538464
   []
   [hourglass_y]
-    type = HourglassCorrectionQuad4b
+    type = HourglassCorrectionQuad4
     variable = disp_y
     penalty = 0.2
     shear_modulus = 0.38461538461538464
