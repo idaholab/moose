@@ -58,7 +58,7 @@ Adaptivity::~Adaptivity() {}
 void
 Adaptivity::init(const unsigned int steps,
                  const unsigned int initial_steps,
-                 const bool p_refinement)
+                 const AdaptivityType adaptivity_type)
 {
   // Get the pointer to the DisplacedProblem, this cannot be done at construction because
   // DisplacedProblem
@@ -73,11 +73,18 @@ Adaptivity::init(const unsigned int steps,
 
   _initial_steps = initial_steps;
   _steps = steps;
-  _p_refinement_flag = p_refinement;
+
+  _adaptivity_type = adaptivity_type;
+
   _mesh_refinement_on = true;
 
-  if (_p_refinement_flag)
+  if (_adaptivity_type == AdaptivityType::P || _adaptivity_type == AdaptivityType::HP)
     _mesh.doingPRefinement(true);
+
+  _sibling_coupling = std::make_unique<SiblingCoupling>();
+  if (_adaptivity_type == AdaptivityType::HP)
+    _fe_problem.getNonlinearSystemBase(0).system().get_dof_map().add_algebraic_ghosting_functor(
+        *_sibling_coupling);
 
   _mesh_refinement->set_periodic_boundaries_ptr(
       _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
@@ -209,6 +216,13 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     // Flag elements to be refined and coarsened
     _mesh_refinement->flag_elements_by_error_fraction(*_error);
 
+    // Moving some of h flagged elements to p flagged based on the
+    // local smoothness and prior h & p error estimates
+    _hp_coarsen_test = std::make_unique<HPCoarsenTest>();
+    if (_adaptivity_type == AdaptivityType::HP)
+      _hp_coarsen_test->select_refinement(
+          _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system());
+
     if (_displaced_problem)
       // Reuse the error vector and refine the displaced mesh
       _displaced_mesh_refinement->flag_elements_by_error_fraction(*_error);
@@ -229,7 +243,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   if (distributed_adaptivity)
     _mesh_refinement->make_flags_parallel_consistent();
 
-  if (_p_refinement_flag)
+  if (_adaptivity_type == AdaptivityType::P)
     _mesh_refinement->switch_h_to_p_refinement();
 
   // Perform refinement and coarsening
@@ -242,7 +256,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     if (distributed_adaptivity)
       _displaced_mesh_refinement->make_flags_parallel_consistent();
 
-    if (_p_refinement_flag)
+    if (_adaptivity_type == AdaptivityType::P)
       _displaced_mesh_refinement->switch_h_to_p_refinement();
 
 #ifndef NDEBUG
