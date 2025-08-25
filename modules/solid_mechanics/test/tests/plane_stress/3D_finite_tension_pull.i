@@ -52,7 +52,7 @@
 
 [AuxKernels]
   [react_x]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'disp_x'
     variable = 'react_x'

@@ -75,13 +75,13 @@
     use_displaced_mesh = false
   []
   [saved_x]
-    type = TagVectorAux
+    type = ReactionForceAux
     variable = 'saved_x'
     vector_tag = 'ref'
     v = 'disp_x'
   []
   [saved_y]
-    type = TagVectorAux
+    type = ReactionForceAux
     variable = 'saved_y'
     vector_tag = 'ref'
     v = 'disp_y'

@@ -14,8 +14,8 @@
 #include "MooseVariableFieldBase.h"
 
 /**
- * The value of a tagged vector for a given node and a given variable is coupled to
- * the current AuxVariable. TagVectorAux returns the coupled nodal value.
+ * The value of a tagged vector for a given variable is coupled to
+ * the current AuxVariable.
  */
 template <class T>
 class TagAuxBase : public T
@@ -50,10 +50,13 @@ TagAuxBase<T>::validParams()
                                "The coupled variable whose components are coupled to AuxVariable");
   params.set<ExecFlagEnum>("execute_on", true) = {EXEC_TIMESTEP_END};
   params.suppressParameter<ExecFlagEnum>("execute_on");
-  params.addParam<bool>("scaled",
-                        true,
-                        "Return value depending on the variable scaling/autoscaling. Set this to "
-                        "false to obtain unscaled physical reaction forces.");
+  params.addDeprecatedParam<bool>(
+      "scaled",
+      true,
+      "Return value depending on the variable scaling/autoscaling. Set this to false to obtain "
+      "unscaled values with units consistent with the rest of the simulation.",
+      "This parameter will be removed in the future. If you are currently setting scaled = true, "
+      "you can safely remove this parameter.");
   return params;
 }
 
