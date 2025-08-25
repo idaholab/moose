@@ -19,7 +19,7 @@
         mesh_mode = 'REPLICATED'
         recover = false
         detail ='cut a 3D mesh to generate a raw level set mesh that can be used for 3D Delaunay mesh generation.'
-        valgrind = none
+        valgrind = none # see #31360
         capabilities = 'netgen'
       []
     []
