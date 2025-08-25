@@ -38,6 +38,7 @@ PenetrationThread::PenetrationThread(
     bool do_normal_smoothing,
     Real normal_smoothing_distance,
     PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
+    bool use_point_locator,
     std::vector<std::vector<FEBase *>> & fes,
     FEType & fe_type,
     NearestNodeLocator & nearest_node,
@@ -53,6 +54,7 @@ PenetrationThread::PenetrationThread(
     _do_normal_smoothing(do_normal_smoothing),
     _normal_smoothing_distance(normal_smoothing_distance),
     _normal_smoothing_method(normal_smoothing_method),
+    _use_point_locator(use_point_locator),
     _nodal_normal_x(NULL),
     _nodal_normal_y(NULL),
     _nodal_normal_z(NULL),
@@ -76,6 +78,7 @@ PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*spl
     _do_normal_smoothing(x._do_normal_smoothing),
     _normal_smoothing_distance(x._normal_smoothing_distance),
     _normal_smoothing_method(x._normal_smoothing_method),
+    _use_point_locator(x._use_point_locator),
     _fes(x._fes),
     _fe_type(x._fe_type),
     _nearest_node(x._nearest_node),
@@ -97,6 +100,11 @@ PenetrationThread::operator()(const NodeIdRange & range)
     _nodal_normal_y = &_subproblem.getStandardVariable(_tid, "nodal_normal_y");
     _nodal_normal_z = &_subproblem.getStandardVariable(_tid, "nodal_normal_z");
   }
+
+  const BoundaryInfo & boundary_info = _mesh.getMesh().get_boundary_info();
+  std::unique_ptr<PointLocatorBase> point_locator;
+  if (_use_point_locator)
+    point_locator = _mesh.getPointLocator();
 
   for (const auto & node_id : range)
   {
@@ -187,18 +195,51 @@ PenetrationThread::operator()(const NodeIdRange & range)
     if (!info_set)
     {
       const Node * closest_node = _nearest_node.nearestNode(node.id());
-      auto node_to_elem_pair = _node_to_elem_map.find(closest_node->id());
-      mooseAssert(node_to_elem_pair != _node_to_elem_map.end(),
-                  "Missing entry in node to elem map");
-      const std::vector<dof_id_type> & closest_elems = node_to_elem_pair->second;
 
-      for (const auto & elem_id : closest_elems)
+      std::vector<dof_id_type> located_elem_ids;
+      const std::vector<dof_id_type> * closest_elems;
+
+      if (_use_point_locator)
+      {
+        std::set<const Elem *> candidate_elements;
+        (*point_locator)(*closest_node, candidate_elements);
+        for (const Elem * elem : candidate_elements)
+        {
+          for (auto s : elem->side_index_range())
+            if (boundary_info.has_boundary_id(elem, s, _primary_boundary))
+            {
+              located_elem_ids.push_back(elem->id());
+              break;
+            }
+        }
+        closest_elems = &located_elem_ids;
+      }
+      else
+      {
+        auto node_to_elem_pair = _node_to_elem_map.find(closest_node->id());
+        mooseAssert(node_to_elem_pair != _node_to_elem_map.end(),
+                    "Missing entry in node to elem map");
+        closest_elems = &(node_to_elem_pair->second);
+      }
+
+      for (const auto & elem_id : *closest_elems)
       {
         const Elem * elem = _mesh.elemPtr(elem_id);
 
         std::vector<PenetrationInfo *> thisElemInfo;
+
         std::vector<const Node *> nodesThatMustBeOnSide;
-        nodesThatMustBeOnSide.push_back(closest_node);
+        // If we have a disconnected mesh, we might not have *any*
+        // nodes that must be on a side we check; we'll rely on
+        // boundary info to find valid sides, then rely on comparing
+        // closest points from each to find the best.
+        //
+        // If we don't have a disconnected mesh, then for maximum
+        // backwards compatibility we're still using the older ridge
+        // and peak detection code, which depends on us ruling out
+        // sides that don't touch closest_node.
+        if (!_use_point_locator)
+          nodesThatMustBeOnSide.push_back(closest_node);
         createInfoForElem(
             thisElemInfo, p_info, &node, elem, nodesThatMustBeOnSide, _check_whether_reasonable);
       }

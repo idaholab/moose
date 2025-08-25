@@ -35,6 +35,7 @@ public:
                     bool do_normal_smoothing,
                     Real normal_smoothing_distance,
                     PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
+                    bool use_point_locator,
                     std::vector<std::vector<libMesh::FEBase *>> & fes,
                     libMesh::FEType & fe_type,
                     NearestNodeLocator & nearest_node,
@@ -66,6 +67,7 @@ protected:
   bool _do_normal_smoothing;
   Real _normal_smoothing_distance;
   PenetrationLocator::NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
+  bool _use_point_locator;
   MooseVariable * _nodal_normal_x;
   MooseVariable * _nodal_normal_y;
   MooseVariable * _nodal_normal_z;
