@@ -1,17 +1,68 @@
 [Tests]
-  design = '/HourglassCorrectionQuad4b.md'
-  [hourglass_g1_csv]
-    type = 'CSVDiff'
-    input = 'hourglass_g1.i'
-    csvdiff = 'hourglass_g1_out_nodes_0001.csv'
-    rel_err = 1.0E-12
-    abs_zero = 1.0E-12
+  design = 'HourglassCorrectionQuad4b.md'
+
+  [mode]
+    [g1]
+      type = 'CSVDiff'
+      input = 'hourglass_residual_g1.i'
+      csvdiff = 'hourglass_residual_g1_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+    []
+    [g1_rot37]
+      type = 'CSVDiff'
+      input = 'hourglass_residual_g1_rot37.i'
+      csvdiff = 'hourglass_residual_g1_rot37_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+    []
+    [g2]
+      type = 'CSVDiff'
+      input = 'hourglass_residual_g2.i'
+      csvdiff = 'hourglass_residual_g2_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+    []
   []
-  [hourglass_g2_csv]
-    type = 'CSVDiff'
-    input = 'hourglass_g2.i'
-    csvdiff = 'hourglass_g2_out_nodes_0002.csv'
-    rel_err = 1.0E-12
-    abs_zero = 1.0E-12
+
+  [affine]
+    [rot0_residual]
+      type = 'CSVDiff'
+      input = 'affine_rot0.i'
+      csvdiff = 'affine_rot0_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+    []
+    [rot37_residual]
+      type = 'CSVDiff'
+      input = 'affine_rot37.i'
+      csvdiff = 'affine_rot37_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+    []
+  []
+
+  [beam]
+    [stabilized]
+      type = 'CSVDiff'
+      input = 'beam_equiv_quad4b.i'
+      csvdiff = 'beam_equiv_quad4b_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+    []
+    [ref]
+      type = 'CSVDiff'
+      input = 'beam_equiv_ref.i'
+      csvdiff = 'beam_equiv_ref_out.csv'
+      rel_err = 1.0E-12
+      abs_zero = 1.0E-12
+    []
+    [jac]
+      type = 'PetscJacobianTester'
+      input = 'beam_equiv_quad4b.i'
+      ratio_tol = 1E-5
+      difference_tol = 1E10
+      cli_args = 'Executioner/num_steps=5 Executioner/dt=1'
+    []
   []
 []
