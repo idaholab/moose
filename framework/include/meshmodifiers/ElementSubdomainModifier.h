@@ -18,10 +18,10 @@ public:
 
   ElementSubdomainModifier(const InputParameters & parameters);
 
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void threadJoin(const UserObject & /*uo*/) override;
-  virtual void finalize() override;
+  void initialize() override;
+  void execute() override;
+  void threadJoin(const UserObject & /*uo*/) override;
+  void finalize() override;
 
 protected:
   /**
