@@ -35,13 +35,13 @@ SCMQuadWettedPerimIC::value(const Point & p)
 {
   auto pitch = _mesh.getPitch();
   auto pin_diameter = _mesh.getPinDiameter();
-  auto gap = _mesh.getGap();
+  auto side_gap = _mesh.getSideGap();
   auto rod_circumference = M_PI * pin_diameter;
   auto i = _mesh.getSubchannelIndexFromPoint(p);
   auto subch_type = _mesh.getSubchannelType(i);
 
   if (subch_type == EChannelType::CORNER)
-    return 0.25 * rod_circumference + pitch + 2 * gap;
+    return 0.25 * rod_circumference + pitch + 2 * side_gap;
   else if (subch_type == EChannelType::EDGE)
     return 0.5 * rod_circumference + pitch;
   else

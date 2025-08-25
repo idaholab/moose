@@ -36,7 +36,7 @@ SCMQuadFlowAreaIC::value(const Point & p)
   Real standard_area, rod_area, additional_area;
   auto pitch = _mesh.getPitch();
   auto pin_diameter = _mesh.getPinDiameter();
-  auto gap = _mesh.getGap();
+  auto side_gap = _mesh.getSideGap();
   auto z_blockage = _mesh.getZBlockage();
   auto index_blockage = _mesh.getIndexBlockage();
   auto reduction_blockage = _mesh.getReductionBlockage();
@@ -47,13 +47,13 @@ SCMQuadFlowAreaIC::value(const Point & p)
   {
     standard_area = 0.25 * pitch * pitch;
     rod_area = 0.25 * 0.25 * M_PI * pin_diameter * pin_diameter;
-    additional_area = pitch * gap + gap * gap;
+    additional_area = pitch * side_gap + side_gap * side_gap;
   }
   else if (subch_type == EChannelType::EDGE)
   {
     standard_area = 0.5 * pitch * pitch;
     rod_area = 0.5 * 0.25 * M_PI * pin_diameter * pin_diameter;
-    additional_area = pitch * gap;
+    additional_area = pitch * side_gap;
   }
   else
   {

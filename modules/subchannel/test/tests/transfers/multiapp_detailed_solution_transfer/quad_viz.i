@@ -10,7 +10,7 @@
 [Mesh]
   [sub_channel]
     type = SCMDetailedQuadSubChannelMeshGenerator
-    gap = 0.1
+    side_gap = 0.1
   []
 
   [fuel_pins]
