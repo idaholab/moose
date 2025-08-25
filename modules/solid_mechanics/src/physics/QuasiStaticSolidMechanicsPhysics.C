@@ -107,12 +107,12 @@ QuasiStaticSolidMechanicsPhysics::validParams()
                         "calculator within TMA internally.");
 
   // Homogenization system input
-  params.addRequiredParam<MultiMooseEnum>(
+  params.addParam<MultiMooseEnum>(
       "constraint_types",
       Homogenization::constraintType,
       "Type of each constraint: strain, stress, or none. The types are specified in the "
       "column-major order, and there must be 9 entries in total.");
-  params.addRequiredParam<std::vector<FunctionName>>(
+  params.addParam<std::vector<FunctionName>>(
       "targets", "Functions giving the targets to hit for constraint types that are not none.");
 
   params.addParamNamesToGroup("scaling", "Variables");
