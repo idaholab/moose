@@ -1,0 +1,12 @@
+[Tests]
+  issues = "#31300"
+  design = "PhaseFieldTwoPhaseSurfaceTension.md PhaseFieldTwoPhaseMaterial.md"
+  [contact_angle]
+    type = CSVDiff
+    input = contact_angle_verification.i
+    csvdiff = contact_angle_verification_csv.csv
+    min_parallel = 8
+    max_time = 1500
+    requirement = "The PhaseFieldContactAngle kernel correctly implements the prescribed contact angle."
+  []
+[]
