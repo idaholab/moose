@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61", "wheel", "cmake>=3.20", "cibuildwheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moose-hit"
+description = "HIT Parser for MOOSE"
+version = "2025.08.20"
+requires-python = ">=3.10"
+authors = [
+    { name = "Logan Harbour", email = "loganhharbour@gmail.com" },
+    { name = "Zachary Prince", email = "zachmprince@gmail.com" },
+]
+
+[tool.cibuildwheel]
+build = ["cp*-manylinux_x86_64", "cp*-manylinux_aarch64"]
+skip = "pp*, gp*, cp{38,39,314}-*"
+# build-before = ["bash scripts/update_and_rebuild_wasp.sh --skip-submodule-update"]
+test-command = "python -c \"import hit; print(f'hit successfully installed in {hit.__file__}')\""
+build-verbosity = 3
