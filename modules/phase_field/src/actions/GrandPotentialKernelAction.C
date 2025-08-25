@@ -172,6 +172,11 @@ GrandPotentialKernelAction::act()
   std::vector<VariableName> v2;
   v2.resize(n_etas + n_grs - 1);
 
+  std::vector<VariableName> v_etas;
+  v_etas.resize(n_etas);
+  for (unsigned int i = 0; i < n_etas; ++i)
+    v_etas[i] = all_etas[i];
+
   // Grains and order parameters
   NonlinearVariableName var_name;
   MaterialPropertyName kappa;
@@ -288,7 +293,7 @@ GrandPotentialKernelAction::act()
       _problem->addKernel("TimeDerivative", kernel_name, params);
 
       // MatDiffusion concentration (coupled with chempot)
-      params = _factory.getValidParams("MatDiffusion");
+      params = _factory.getValidParams("PolycrystalMatDiffusion");
       params.set<NonlinearVariableName>("variable") = c_names[i];
       params.set<std::vector<VariableName>>("v") = v3;
       params.set<bool>("implicit") = implicity;
@@ -298,12 +303,13 @@ GrandPotentialKernelAction::act()
       if (aniso.get(i))
       {
         params.set<std::vector<VariableName>>("args") = v1;
-        _problem->addKernel("MatAnisoDiffusion", kernel_name, params);
+        params.set<std::vector<VariableName>>("surface_op_var") = v_etas;
+        _problem->addKernel("PolycrystalMatAnisoDiffusion", kernel_name, params);
       }
       else
       {
         params.set<std::vector<VariableName>>("args") = v0;
-        _problem->addKernel("MatDiffusion", kernel_name, params);
+        _problem->addKernel("PolycrystalMatDiffusion", kernel_name, params);
       }
     }
 
@@ -361,18 +367,21 @@ GrandPotentialKernelAction::act()
       _problem->addKernel("SusceptibilityTimeDerivative", kernel_name, params);
 
       // MatDiffusion
-      params = _factory.getValidParams("MatDiffusion");
+      params = _factory.getValidParams("PolycrystalMatDiffusion");
       params.set<NonlinearVariableName>("variable") = w_names[i];
       params.set<bool>("implicit") = implicity;
       params.set<bool>("use_displaced_mesh") = displaced_mesh;
       params.set<MaterialPropertyName>("diffusivity") = M[i];
       kernel_name = "MatDif_" + w_names[i];
       if (aniso.get(i))
-        _problem->addKernel("MatAnisoDiffusion", kernel_name, params);
+      {
+        params.set<std::vector<VariableName>>("surface_op_var") = v_etas;
+        _problem->addKernel("PolycrystalMatAnisoDiffusion", kernel_name, params);
+      }
       else
       {
         params.set<std::vector<VariableName>>("args") = v0;
-        _problem->addKernel("MatDiffusion", kernel_name, params);
+        _problem->addKernel("PolycrystalMatDiffusion", kernel_name, params);
       }
 
       // CoupledSwitchingTimeDerivative

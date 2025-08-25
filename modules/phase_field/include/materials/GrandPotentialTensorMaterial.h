@@ -57,6 +57,7 @@ protected:
   const MaterialProperty<Real> & _dchidc;
   std::vector<const MaterialProperty<Real> *> _dchideta;
   std::vector<MaterialProperty<RealTensorValue> *> _dchiDdeta;
+  std::vector<MaterialProperty<RankThreeTensor> *> _dchiDdgradeta;
 
   Real _GBMobility;
   Real _GBmob0;
