@@ -83,7 +83,12 @@ BoundaryElementConversionGenerator::generate()
   }
   catch (const MooseException & e)
   {
-    if (((std::string)e.what()).compare(13, 8, "boundary") == 0)
+    if (((std::string)e.what()).compare("subdomain id overflow") == 0)
+      paramError("input",
+                 "Some subdomain ids of the input mesh are too large and cause overflow when "
+                 "assigning new subdomain ids during element conversion. Please consider lowering "
+                 "the subdomain ids using RenameBlockGenerator.");
+    else if (((std::string)e.what()).compare(13, 8, "boundary") == 0)
       paramError("boundary_names", e.what());
     else
       paramError("input", e.what());

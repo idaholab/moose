@@ -1010,6 +1010,9 @@ transitionLayerGenerator(ReplicatedMesh & mesh,
 {
   // The base subdomain ID to shift the original elements because of the element type change
   const auto sid_shift_base = MooseMeshUtils::getNextFreeSubdomainID(mesh);
+  // The maximum subdomain ID that would be involved is sid_shift_base * 3, we would like to make sure it would not overflow
+  if (sid_shift_base * 3 > std::numeric_limits<subdomain_id_type>::max())
+    throw MooseException("subdomain id overflow");
 
   // It would be convenient to have a single boundary id instead of a vector.
   const auto uniform_tmp_bid = MooseMeshUtils::getNextFreeBoundaryID(mesh);
@@ -1066,7 +1069,7 @@ transitionLayerGenerator(ReplicatedMesh & mesh,
                                "is not supported.");
         else
           mooseAssert(false,
-                      "Impossible scenario: a linear side element that is neither TRI3 nor QUAD4.");
+                      "Impossible scenario: a linear non-polygon side element that is neither TRI3 nor QUAD4.");
       }
       if (external_boundaries_checking)
         if (mesh.elem_ptr(std::get<0>(side_info))->neighbor_ptr(std::get<1>(side_info)))
