@@ -22,7 +22,15 @@ ReactionForceAux::validParams()
   return params;
 }
 
-ReactionForceAux::ReactionForceAux(const InputParameters & parameters) : TagVectorAux(parameters) {}
+ReactionForceAux::ReactionForceAux(const InputParameters & parameters) : TagVectorAux(parameters)
+{
+  const auto vector_tag_id = _subproblem.getVectorTagID(getParam<TagName>("vector_tag"));
+  const auto vector_tag_type = _subproblem.vectorTagType(vector_tag_id);
+  if (vector_tag_type != Moose::VECTOR_TAG_RESIDUAL)
+    paramError("vector_tag",
+               "The provided vector tag does not correspond to a residual vector tag, which is the "
+               "only kind of vector tag type for which scaling is applicable");
+}
 
 Real
 ReactionForceAux::computeValue()
