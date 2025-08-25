@@ -10,21 +10,22 @@
 #pragma once
 
 // Moose includes
-#include "Times.h"
+#include "InputTimes.h"
 
 /**
- * Simple times from an input parameter
+ * Times from an input parameter and from a value that is modified by Controls
  */
-class InputTimes : public Times
+class ControllableInputTimes : public InputTimes
 {
 public:
   static InputParameters validParams();
-  InputTimes(const InputParameters & parameters);
-  virtual ~InputTimes() = default;
+  ControllableInputTimes(const InputParameters & parameters);
+  virtual ~ControllableInputTimes() = default;
 
 protected:
-  virtual void initialize() override {}
+  virtual void initialize() override;
 
-  /// The input times
-  std::vector<Real> _input_times;
+private:
+  /// The controllable time attribute
+  const Real & _next_time;
 };
