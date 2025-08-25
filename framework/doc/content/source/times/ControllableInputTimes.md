@@ -11,6 +11,10 @@ In the example, `RealFunctionControl` computes the next event time during the ru
 
 !listing test/tests/times/external_times.i
 
+!alert note
+The controllable times are added to / sorted into the times vector and are never removed, even when the value of the controllable [!param](/Times/ControllableInputTimes/next_time) parameter is changed.
+
+
 !syntax parameters /Times/ControllableInputTimes
 
 !syntax inputs /Times/ControllableInputTimes
