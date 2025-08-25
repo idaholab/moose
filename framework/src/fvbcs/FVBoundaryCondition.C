@@ -32,6 +32,7 @@ FVBoundaryCondition::validParams()
   params += BoundaryRestrictableRequired::validParams();
   params += TaggingInterface::validParams();
   params += ADFunctorInterface::validParams();
+  params += GeometricSearchInterface::validParams();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");

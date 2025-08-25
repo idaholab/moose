@@ -20,6 +20,7 @@ NodalKernelBase::validParams()
   InputParameters params = ResidualObject::validParams();
   params += BlockRestrictable::validParams();
   params += BoundaryRestrictable::validParams();
+  params += GeometricSearchInterface::validParams();
   params.addParam<bool>("use_displaced_mesh",
                         false,
                         "Whether or not this object should use the "
