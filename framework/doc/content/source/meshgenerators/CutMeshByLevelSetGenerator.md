@@ -10,7 +10,14 @@ Using this mesh generator, a 3D structured mesh defined by a bounding box (e.g.,
 
 ## Methods
 
-`CutMeshByLevelSetGenerator` first converts all elements of the input mesh into `TET4` elements. Next, the `TET4` elements sliced by the level set are further split into `TET4` elements. This mesh generator uses exact the same algorithm as its sibling mesh generator, [`CutMeshByPlaneGenerator`](/CutMeshByPlaneGenerator.md). At the first-order element level, cutting by a plane and cutting by a level set are the same.
+!media framework/meshgenerators/ls_cut_transition.png
+       style=display: block;margin-left:auto;margin-right:auto;width:75%;
+       id=ls_cut_transition
+       caption=Example of cutting a cube mesh consisting of `HEX8` elements using a spherical level set. From left to right: (1) mesh after the cutting without the transition layer; (2) mesh after the cutting with the transition layer; (3-5) detailed breakdown of the mesh cut with the transition layer.
+
+`CutMeshByLevelSetGenerator` first either converts all elements of the input mesh into `TET4` elements, or converts the elements crossed by the level set into `TET4` elements along with a transition layer that consists of `TET4` and `PYRAMID5` elements. Next, the `TET4` elements sliced by the level set are further split into `TET4` elements. 
+
+This mesh generator uses exactly the same algorithm as its sibling mesh generator, [`CutMeshByPlaneGenerator`](/CutMeshByPlaneGenerator.md). At the first-order element level, cutting by a plane and cutting by a level set are the same. See [ls_cut_transition] for an example. Refer to [`CutMeshByPlaneGenerator`](/CutMeshByPlaneGenerator.md) for advanced options and details.
 
 ## Example Syntax
 
