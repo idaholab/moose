@@ -1,0 +1,17 @@
+[Tests]
+  design = 'FVSP3ThermalRadiationBC.md FVSP3TemperatureBC.md FVSP3ThermalRadiationDiffusion.md FVSP3ThermalRadiationSourceSink.md FVSP3TemperatureSourceSink.md'
+  issues = '#31346'
+
+  [glass_cube_2D_thick]
+    type = CSVDiff
+    input = 'adaptive2D_e1.i'
+    csvdiff = 'adaptive2D_e1_csv_y0_0005.csv'
+    requirement = 'The system shell run a short simulation with SP3 kernels and BCs in 2D optically thick cooling'
+  []
+  [glass_cube_2D_thin]
+    type = CSVDiff
+    input = 'adaptive2D_e10.i'
+    csvdiff = 'adaptive2D_e10_csv_y0_0005.csv'
+    requirement = 'The system shell run a short simulation with SP3 kernels and BCs in 2D optically thin cooling'
+  []
+[]
