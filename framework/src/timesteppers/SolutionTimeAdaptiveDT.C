@@ -32,13 +32,15 @@ SolutionTimeAdaptiveDT::validParams()
 
 SolutionTimeAdaptiveDT::SolutionTimeAdaptiveDT(const InputParameters & parameters)
   : TimeStepper(parameters),
-    _direction(getParam<int>("initial_direction")),
+    _direction(declareRestartableData<int>("direction", getParam<int>("initial_direction"))),
     _percent_change(getParam<Real>("percent_change")),
-    _older_sol_time_vs_dt(std::numeric_limits<Real>::max()),
-    _old_sol_time_vs_dt(std::numeric_limits<Real>::max()),
-    _sol_time_vs_dt(std::numeric_limits<Real>::max()),
+    _older_sol_time_vs_dt(
+        declareRestartableData<Real>("older_sol_time_vs_dt", std::numeric_limits<Real>::max())),
+    _old_sol_time_vs_dt(
+        declareRestartableData<Real>("old_sol_time_vs_dt", std::numeric_limits<Real>::max())),
+    _sol_time_vs_dt(
+        declareRestartableData<Real>("sol_time_vs_dt", std::numeric_limits<Real>::max())),
     _adapt_log(getParam<bool>("adapt_log"))
-
 {
   if ((_adapt_log) && (processor_id() == 0))
   {
@@ -55,13 +57,7 @@ SolutionTimeAdaptiveDT::~SolutionTimeAdaptiveDT() { _adaptive_log.close(); }
 void
 SolutionTimeAdaptiveDT::step()
 {
-  auto solve_start = std::chrono::system_clock::now();
-
-  TimeStepper::step();
-
-  auto solve_end = std::chrono::system_clock::now();
-  auto elapsed_time =
-      std::chrono::duration_cast<std::chrono::milliseconds>(solve_end - solve_start).count();
+  auto elapsed_time = stepAndRecordElapsedTime();
 
   // Take the maximum time over all processors so all processors compute and use the same dt
   TimeStepper::_communicator.max(elapsed_time);
@@ -69,6 +65,15 @@ SolutionTimeAdaptiveDT::step()
   _older_sol_time_vs_dt = _old_sol_time_vs_dt;
   _old_sol_time_vs_dt = _sol_time_vs_dt;
   _sol_time_vs_dt = elapsed_time / _dt;
+}
+
+std::chrono::milliseconds::rep
+SolutionTimeAdaptiveDT::stepAndRecordElapsedTime()
+{
+  auto start = std::chrono::system_clock::now();
+  TimeStepper::step();
+  auto end = std::chrono::system_clock::now();
+  return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 }
 
 Real
