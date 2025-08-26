@@ -10,7 +10,7 @@
 #include "TagResidualAux.h"
 
 registerMooseObject("MooseApp", TagResidualAux);
-registerMooseObjectDeprecated("MooseApp", TagVectorAux, "10/01/2025 00:00");
+registerMooseObjectRenamed("MooseApp", TagVectorAux, "10/01/2025 00:00", TagResidualAux);
 
 InputParameters
 TagResidualAux::validParams()
@@ -36,6 +36,10 @@ TagResidualAux::initialSetup()
 
   const auto vector_tag_id = _subproblem.getVectorTagID(getParam<TagName>("vector_tag"));
   const auto vector_tag_type = _subproblem.vectorTagType(vector_tag_id);
+  if (vector_tag_type == Moose::VECTOR_TAG_SOLUTION)
+    paramError("vector_tag",
+               "The provided vector tag corresponds to a solution vector tag. Please use "
+               "'TagSolutionAux' instead.");
   if (vector_tag_type != Moose::VECTOR_TAG_RESIDUAL)
     paramError("vector_tag",
                "The provided vector tag does not correspond to a residual vector tag.");
