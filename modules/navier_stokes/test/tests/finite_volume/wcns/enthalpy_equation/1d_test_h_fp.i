@@ -69,9 +69,6 @@ advected_interp_method = 'upwind'
   [k_var]
     type = MooseLinearVariableFVReal
   []
-  [alpha_var]
-    type = MooseLinearVariableFVReal
-  []
   [T]
     type = MooseLinearVariableFVReal
     initial_condition = ${T_in}
