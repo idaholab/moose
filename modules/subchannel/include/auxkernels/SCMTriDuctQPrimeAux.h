@@ -22,8 +22,4 @@ public:
   SCMTriDuctQPrimeAux(const InputParameters & parameters);
 
   virtual Real computeValue() override;
-
-protected:
-  /// flat-to-flat distance
-  const Real & _flat_to_flat;
 };
