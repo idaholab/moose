@@ -107,7 +107,7 @@ HomogenizationInterface<T>::HomogenizationInterface(const InputParameters & para
   if (fcount != fnames.size())
     this->paramError(
         "targets",
-        "Number of target functions must equal the number of non-none constraint types.",
+        "Number of target functions must equal the number of non-none constraint types. ",
         fnames.size(),
         " are provided, but ",
         fcount,

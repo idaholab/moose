@@ -1,5 +1,5 @@
 constraint_types = 'strain none none none none none none none none'
-targets = 'strain11 zero zero zero zero zero zero zero zero'
+targets = 'strain11'
 
 [Mesh]
   [base]
@@ -14,8 +14,7 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
                 1 0 0
                 0 -1 0
                 0 1 0
-            '
-              '    0 0 -1
+                0 0 -1
                 0 0 1'
     fixed_normal = true
     new_boundary = 'left right bottom top back front'
@@ -667,39 +666,39 @@ targets = 'strain11 zero zero zero zero zero zero zero zero'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
   [mCS_xx]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = cauchy_stress_xx
   []
   [mCS_yy]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = cauchy_stress_yy
   []
   [mCS_zz]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = cauchy_stress_zz
   []
   [mCS_xy]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = cauchy_stress_xy
   []
   [mCS_xz]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = cauchy_stress_xz
   []
   [mCS_yx]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = cauchy_stress_yx
   []
   [mCS_yz]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = cauchy_stress_yz
   []
   [mCS_zy]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = cauchy_stress_zy
   []
   [mCS_zx]
-    type     = ElementAverageValue
+    type = ElementAverageValue
     variable = cauchy_stress_zx
   []
 []
