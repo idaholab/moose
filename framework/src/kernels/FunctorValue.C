@@ -20,8 +20,7 @@ FunctorValueTempl<is_ad>::validParams()
   InputParameters params = KernelValueParent<is_ad>::validParams();
   params.addClassDescription(
       "Residual term (u - prop) to set variable u equal to a given functor.");
-  params.addRequiredParam<MooseFunctorName>(
-      "functor", "Functor to be used in the kernel");
+  params.addRequiredParam<MooseFunctorName>("functor", "Functor to be used in the kernel");
   params.addParam<bool>(
       "positive", true, "If the kernel is positive, this is true, if negative, it is false");
   return params;
