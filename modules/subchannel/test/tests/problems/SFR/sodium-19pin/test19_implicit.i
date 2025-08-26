@@ -62,7 +62,7 @@ P_out = 2.0e5 # Pa
   [displacement]
     block = subchannel
   []
-  [q_prime_duct]
+  [duct_heat_flux]
     block = duct
   []
   [Tduct]

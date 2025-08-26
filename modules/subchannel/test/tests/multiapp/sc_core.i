@@ -100,7 +100,7 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   [mu]
     block = subchannel
   []
-  [q_prime_duct]
+  [duct_heat_flux]
     block = duct
     initial_condition = 0
   []
