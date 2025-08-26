@@ -129,7 +129,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _deformation(getParam<bool>("deformation")),
     _fp(nullptr),
     _Tpin_soln(nullptr),
-    _q_prime_duct_soln(nullptr),
+    _duct_heat_flux_soln(nullptr),
     _Tduct_soln(nullptr)
 {
   // Require only one process
@@ -154,14 +154,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   _Wij_residual_matrix.resize(_n_gaps, _block_size);
   _Wij_residual_matrix.zero();
   _converged = true;
-
-  _outer_channels = 0.0;
-  for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-  {
-    auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-    if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
-      _outer_channels += 1.0;
-  }
 
   // Mass conservation components
   LibmeshPetscCall(
@@ -262,8 +254,8 @@ SubChannel1PhaseProblem::initialSetup()
       std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DISPLACEMENT));
   if (_duct_mesh_exist)
   {
-    _q_prime_duct_soln =
-        std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DUCT_LINEAR_HEAT_RATE));
+    _duct_heat_flux_soln =
+        std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DUCT_HEAT_FLUX));
     _Tduct_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DUCT_TEMPERATURE));
   }
 }
@@ -1305,34 +1297,6 @@ SubChannel1PhaseProblem::computeP(int iblock)
         LibmeshPetscCall(VecDestroy(&sol));
       }
     }
-  }
-}
-
-Real
-SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz)
-{
-  if (_duct_mesh_exist)
-  {
-    auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-    if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
-    {
-      auto dz = _z_grid[iz] - _z_grid[iz - 1];
-      auto * node_in_chan = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-      auto * node_out_chan = _subchannel_mesh.getChannelNode(i_ch, iz);
-      auto * node_in_duct = _subchannel_mesh.getDuctNodeFromChannel(node_in_chan);
-      auto * node_out_duct = _subchannel_mesh.getDuctNodeFromChannel(node_out_chan);
-      auto heat_rate_in = (*_q_prime_duct_soln)(node_in_duct);
-      auto heat_rate_out = (*_q_prime_duct_soln)(node_out_duct);
-      return 0.5 * (heat_rate_in + heat_rate_out) * dz / _outer_channels;
-    }
-    else
-    {
-      return 0.0;
-    }
-  }
-  else
-  {
-    return 0;
   }
 }
 
@@ -2687,7 +2651,7 @@ SubChannel1PhaseProblem::externalSolve()
       auto Pr = (*_mu_soln)(node_chan)*cp / k;
       auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
       auto hw = Nu * k / Dh_i;
-      auto T_chan = (*_q_prime_duct_soln)(dn) / (_subchannel_mesh.getPinDiameter() * M_PI * hw) +
+      auto T_chan = (*_duct_heat_flux_soln)(dn) / (_subchannel_mesh.getPinDiameter() * M_PI * hw) +
                     (*_T_soln)(node_chan);
       _Tduct_soln->set(dn, T_chan);
     }
