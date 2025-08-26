@@ -2,7 +2,7 @@
 
 !syntax description /Kernels/FunctorValue
 
-This kernel sets the kernel variable $u$ (`variable`) weekly enforced to the
+This kernel sets the kernel variable $u$ (`variable`) weakly enforced to the
 value of a functor $p$ (`functor`).
 
 !equation
