@@ -12,6 +12,16 @@ import os
 import unittest
 
 class TestExamples(unittest.TestCase):
+
+    def setUp(self):
+        self._orig_cwd = os.getcwd()
+        os.chdir(os.path.dirname(__file__))
+
+    def tearDown(self):
+        if os.path.exists("input_modified.i"):
+            os.remove("input_modified.i")
+        os.chdir(self._orig_cwd)
+
     def test(self):
 
         # MOOSEDOCS:example-begin

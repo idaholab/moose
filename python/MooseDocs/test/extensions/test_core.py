@@ -58,7 +58,7 @@ this'''
         self.assertToken(ast(0)(2), 'Word', content='this')
 
     def testEscapeCharacter(self):
-        text = "No \[link\] and no \!\! comment"
+        text = r"No \[link\] and no \!\! comment"
         ast = self.tokenize(text)
         self.assertToken(ast(0), 'Paragraph', size=14)
         self.assertToken(ast(0)(0), 'Word', content='No')

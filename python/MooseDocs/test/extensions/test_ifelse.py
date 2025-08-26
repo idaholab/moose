@@ -12,11 +12,12 @@ import sys
 import unittest
 import logging
 from MooseDocs import common, base, tree
-from MooseDocs.test import MooseDocsTestCase
+from MooseDocs.test import MooseDocsTestCase, requiresMooseExecutable
 from MooseDocs.extensions import core, command, table, floats, materialicon, autolink, heading, appsyntax, ifelse, modal, alert
 logging.basicConfig()
 
-def testFunction(ext, value):
+
+def mockFunction(ext, value):
     return value
 
 class TestHasMooseApp(MooseDocsTestCase):
@@ -30,6 +31,7 @@ class TestHasMooseApp(MooseDocsTestCase):
         if ext is appsyntax:
             return dict(executable=os.path.join(os.getenv('MOOSE_DIR'), 'test'))
 
+    @requiresMooseExecutable()
     def testIf(self):
         ast = self.tokenize("!if function=hasMooseApp('MooseTestApp')\ncontent")
         self.assertEqual(len(ast), 1)
@@ -54,6 +56,7 @@ class TestCapabilities(MooseDocsTestCase):
         if ext is appsyntax:
             return dict(executable=os.path.join(os.getenv('MOOSE_DIR'), 'test'))
 
+    @requiresMooseExecutable()
     def testHasCapability(self):
         ast = self.tokenize("!if function=hasCapability('petsc')\ncontent")
         self.assertEqual(len(ast), 1)
@@ -78,7 +81,7 @@ class TestStatements(MooseDocsTestCase):
 
     def testIf(self):
         # True
-        ast = self.tokenize("!if function=testFunction(True)\ncontent")
+        ast = self.tokenize("!if function=mockFunction(True)\ncontent")
         self.assertEqual(len(ast), 1)
         self.assertToken(ast(0), 'Statement', size=1)
         self.assertToken(ast(0,0), 'Condition', size=1, command='if')
@@ -86,15 +89,14 @@ class TestStatements(MooseDocsTestCase):
         self.assertToken(ast(0,0,0,0), 'Word', size=0, content='content')
 
         # False
-        ast = self.tokenize("!if function=testFunction(False)\ncontent")
+        ast = self.tokenize("!if function=mockFunction(False)\ncontent")
         self.assertEqual(len(ast), 1)
         self.assertToken(ast(0), 'Statement', size=1)
         self.assertToken(ast(0,0), 'Condition', size=0, command='if')
 
-
     def testIfElse(self):
         # True
-        ast = self.tokenize("!if function=testFunction(True)\ncontent\n\n!else\nelse")
+        ast = self.tokenize("!if function=mockFunction(True)\ncontent\n\n!else\nelse")
         self.assertEqual(len(ast), 1)
         self.assertToken(ast(0), 'Statement', size=2)
         self.assertToken(ast(0,0), 'Condition', size=1, command='if')
@@ -103,7 +105,7 @@ class TestStatements(MooseDocsTestCase):
         self.assertToken(ast(0,1), 'Condition', size=0, command='else')
 
         # False
-        ast = self.tokenize("!if function=testFunction(False)\ncontent\n\n!else\nelse")
+        ast = self.tokenize("!if function=mockFunction(False)\ncontent\n\n!else\nelse")
         self.assertEqual(len(ast), 1)
         self.assertToken(ast(0), 'Statement', size=2)
         self.assertToken(ast(0,0), 'Condition', size=0, command='if')
@@ -113,7 +115,9 @@ class TestStatements(MooseDocsTestCase):
 
     def testIfElif(self):
         # True/True
-        ast = self.tokenize("!if function=testFunction(True)\ncontent\n\n!elif function=testFunction(True)\nelif")
+        ast = self.tokenize(
+            "!if function=mockFunction(True)\ncontent\n\n!elif function=mockFunction(True)\nelif"
+        )
         self.assertEqual(len(ast), 1)
         self.assertToken(ast(0), 'Statement', size=2)
         self.assertToken(ast(0,0), 'Condition', size=1, command='if')
@@ -122,7 +126,9 @@ class TestStatements(MooseDocsTestCase):
         self.assertToken(ast(0,1), 'Condition', size=0, command='elif')
 
         # False/True
-        ast = self.tokenize("!if function=testFunction(False)\ncontent\n\n!elif function=testFunction(True)\nelif")
+        ast = self.tokenize(
+            "!if function=mockFunction(False)\ncontent\n\n!elif function=mockFunction(True)\nelif"
+        )
         self.assertToken(ast(0), 'Statement', size=2)
         self.assertToken(ast(0,0), 'Condition', size=0, command='if')
         self.assertToken(ast(0,1), 'Condition', size=1, command='elif')
@@ -130,14 +136,18 @@ class TestStatements(MooseDocsTestCase):
         self.assertToken(ast(0,1,0,0), 'Word', size=0, content='elif')
 
         # False/False
-        ast = self.tokenize("!if function=testFunction(False)\ncontent\n\n!elif function=testFunction(False)\nelif")
+        ast = self.tokenize(
+            "!if function=mockFunction(False)\ncontent\n\n!elif function=mockFunction(False)\nelif"
+        )
         self.assertToken(ast(0), 'Statement', size=2)
         self.assertToken(ast(0,0), 'Condition', size=0, command='if')
         self.assertToken(ast(0,1), 'Condition', size=0, command='elif')
 
     def testIfElifElse(self):
         # True/True
-        ast = self.tokenize("!if function=testFunction(True)\ncontent\n\n!elif function=testFunction(True)\nelif\n\n!else\nelse")
+        ast = self.tokenize(
+            "!if function=mockFunction(True)\ncontent\n\n!elif function=mockFunction(True)\nelif\n\n!else\nelse"
+        )
         self.assertEqual(len(ast), 1)
         self.assertToken(ast(0), 'Statement', size=3)
         self.assertToken(ast(0,0), 'Condition', size=1, command='if')
@@ -147,7 +157,9 @@ class TestStatements(MooseDocsTestCase):
         self.assertToken(ast(0,2), 'Condition', size=0, command='else')
 
         # False/True
-        ast = self.tokenize("!if function=testFunction(False)\ncontent\n\n!elif function=testFunction(True)\nelif\n\n!else\nelse")
+        ast = self.tokenize(
+            "!if function=mockFunction(False)\ncontent\n\n!elif function=mockFunction(True)\nelif\n\n!else\nelse"
+        )
         self.assertToken(ast(0), 'Statement', size=3)
         self.assertToken(ast(0,0), 'Condition', size=0, command='if')
         self.assertToken(ast(0,1), 'Condition', size=1, command='elif')
@@ -156,7 +168,9 @@ class TestStatements(MooseDocsTestCase):
         self.assertToken(ast(0,2), 'Condition', size=0, command='else')
 
         # False/False
-        ast = self.tokenize("!if function=testFunction(False)\ncontent\n\n!elif function=testFunction(False)\nelif\n\n!else\nelse")
+        ast = self.tokenize(
+            "!if function=mockFunction(False)\ncontent\n\n!elif function=mockFunction(False)\nelif\n\n!else\nelse"
+        )
         self.assertToken(ast(0), 'Statement', size=3)
         self.assertToken(ast(0,0), 'Condition', size=0, command='if')
         self.assertToken(ast(0,1), 'Condition', size=0, command='elif')
@@ -177,10 +191,14 @@ class TestStatements(MooseDocsTestCase):
         self.assertToken(ast(0,0), 'Condition', size=0, command='if')
         self.assertToken(ast(1), 'ErrorToken', message="Invalid expression for 'function' setting: invalidFunction(1980")
 
-        ast = self.tokenize("!if function=testFunction(1980)\ncontent")
+        ast = self.tokenize("!if function=mockFunction(1980)\ncontent")
         self.assertToken(ast(0), 'Statement', size=1)
         self.assertToken(ast(0,0), 'Condition', size=0, command='if')
-        self.assertToken(ast(1), 'ErrorToken', message="The return value from the function 'testFunction' must be a 'bool' type, but '<class 'int'>' returned.")
+        self.assertToken(
+            ast(1),
+            "ErrorToken",
+            message="The return value from the function 'mockFunction' must be a 'bool' type, but '<class 'int'>' returned.",
+        )
 
     def testElseCommandErrors(self):
         ast = self.tokenize("!else")

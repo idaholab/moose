@@ -3,17 +3,20 @@ import os
 import unittest
 import logging
 import moosesyntax
-from MooseDocs.test import MooseDocsTestCase
+from MooseDocs.test import MooseDocsTestCase, requiresMooseExecutable
 from MooseDocs.extensions import core, command, table, floats, materialicon, autolink, heading, appsyntax, modal, alert
-from MooseDocs import base
+from MooseDocs import base, MOOSE_DIR
+
 logging.basicConfig()
 
+
+@requiresMooseExecutable()
 class AppSyntaxTestCase(MooseDocsTestCase):
     EXTENSIONS = [core, command, table, floats, materialicon, autolink, heading, appsyntax, modal, alert]
 
     def setupExtension(self, ext):
         if ext is appsyntax:
-            return dict(executable=os.path.join(os.getenv('MOOSE_DIR'), 'test'))
+            return dict(executable=os.path.join(MOOSE_DIR, "test"))
 
 class TestExternalPage(AppSyntaxTestCase):
     def testExternalPage(self):

@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import subprocess
-from TestHarnessTestCase import TestHarnessTestCase
+from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
     def testTimeout(self):
@@ -17,7 +17,7 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         out = self.runTests('-i', 'timeout', exit_code=1).output
 
-        self.assertRegex(out, 'test_harness\.timeout.*?TIMEOUT')
+        self.assertRegex(out, r"test_harness\.timeout.*?TIMEOUT")
 
     def testTimeoutEnv(self):
         """
@@ -27,4 +27,4 @@ class TestHarnessTester(TestHarnessTestCase):
         out = self.runTests('-i', 'timeout', exit_code=1).output
         os.environ.pop('MOOSE_TEST_MAX_TIME')
 
-        self.assertRegex(out, 'test_harness\.timeout.*?TIMEOUT')
+        self.assertRegex(out, r"test_harness\.timeout.*?TIMEOUT")

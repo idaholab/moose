@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from TestHarnessTestCase import TestHarnessTestCase
+from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
     def testMissingGold(self):
@@ -15,5 +15,5 @@ class TestHarnessTester(TestHarnessTestCase):
         Test for Missing Gold file
         """
         out = self.runTests('-i', 'missing_gold', exit_code=128).output
-        self.assertRegex(out, 'test_harness\.exodiff.*?FAILED \(MISSING GOLD FILE\)')
-        self.assertRegex(out, 'test_harness\.csvdiff.*?FAILED \(MISSING GOLD FILE\)')
+        self.assertRegex(out, r"test_harness\.exodiff.*?FAILED \(MISSING GOLD FILE\)")
+        self.assertRegex(out, r"test_harness\.csvdiff.*?FAILED \(MISSING GOLD FILE\)")

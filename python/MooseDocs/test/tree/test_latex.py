@@ -17,18 +17,18 @@ class TestLatex(unittest.TestCase):
     Tests for latex tree structure.
     """
     def testEscape(self):
-        self.assertEqual(latex.escape('&'), '\&')
-        self.assertEqual(latex.escape('%'), '\%')
-        self.assertEqual(latex.escape('$'), '\$')
-        self.assertEqual(latex.escape('#'), '\#')
-        self.assertEqual(latex.escape('_'), '\_')
-        self.assertEqual(latex.escape('{'), '\{')
-        self.assertEqual(latex.escape('}'), '\}')
-        self.assertEqual(latex.escape('^'), '{\\textasciicircum}')
-        self.assertEqual(latex.escape('~'), '{\\textasciitilde}')
-        self.assertEqual(latex.escape('\\'), '{\\textbackslash}')
-        self.assertEqual(latex.escape('<'), '{\\textless}')
-        self.assertEqual(latex.escape('>'), '{\\textgreater}')
+        self.assertEqual(latex.escape("&"), r"\&")
+        self.assertEqual(latex.escape("%"), r"\%")
+        self.assertEqual(latex.escape("$"), r"\$")
+        self.assertEqual(latex.escape("#"), r"\#")
+        self.assertEqual(latex.escape("_"), r"\_")
+        self.assertEqual(latex.escape("{"), r"\{")
+        self.assertEqual(latex.escape("}"), r"\}")
+        self.assertEqual(latex.escape("^"), r"{\textasciicircum}")
+        self.assertEqual(latex.escape("~"), r"{\textasciitilde}")
+        self.assertEqual(latex.escape("\\"), r"{\textbackslash}")
+        self.assertEqual(latex.escape("<"), r"{\textless}")
+        self.assertEqual(latex.escape(">"), r"{\textgreater}")
 
     def testEnclosureBase(self):
         enc = latex.EnclosureBase('foo', None, enclose=('#','@'))

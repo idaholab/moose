@@ -8,6 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+import os
 import unittest
 import logging
 from MooseDocs.test import MooseDocsTestCase
@@ -97,6 +98,15 @@ class TestModalLink(MooseDocsTestCase):
 
 class TestModalSourceLink(MooseDocsTestCase):
     EXTENSIONS = [core, modal]
+
+    def setUp(self):
+        self._orig_cwd = os.getcwd()
+        os.chdir(os.path.dirname(__file__))
+        super().setUp()
+
+    def tearDown(self):
+        os.chdir(self._orig_cwd)
+        super().tearDown()
 
     def testHTML(self):
         ast = modal.ModalSourceLink(None, src='test')
@@ -199,6 +209,15 @@ class TestModalSourceLink(MooseDocsTestCase):
 
 class TestModalSourceLinkDisableSource(MooseDocsTestCase):
     EXTENSIONS = [core, modal]
+
+    def setUp(self):
+        self._orig_cwd = os.getcwd()
+        os.chdir(os.path.dirname(__file__))
+        super().setUp()
+
+    def tearDown(self):
+        os.chdir(self._orig_cwd)
+        super().tearDown()
 
     def setupExtension(self, ext):
         if ext == modal:

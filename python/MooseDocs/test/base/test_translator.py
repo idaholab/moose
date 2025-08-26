@@ -17,12 +17,13 @@ import os
 from MooseDocs import common
 from MooseDocs.common import exceptions
 from MooseDocs.extensions import command
+from MooseDocs.test import TEST_ROOT
 
 class TestTranslator(unittest.TestCase):
 
     def setUp(self):
         command.CommandExtension.EXTENSION_COMMANDS.clear()
-        config = os.path.join('..', 'config.yml')
+        config = os.path.join(TEST_ROOT, "config.yml")
         self.translator, _ = common.load_config(config)
         self.translator.init()
 
@@ -31,9 +32,8 @@ class TestTranslator(unittest.TestCase):
         self.assertEqual(page.local, 'extensions/core.md')
 
     def testFindPageError(self):
-        with self.assertRaises(exceptions.MooseDocsException) as cm:
-            page = self.translator.findPage('wrong.md')
-            self.assertIn('Did you mean', ex.exception.message)
+        with self.assertRaisesRegex(exceptions.MooseDocsException, "Did you mean"):
+            page = self.translator.findPage("wrong.md")
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

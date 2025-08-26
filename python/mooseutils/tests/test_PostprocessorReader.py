@@ -16,6 +16,8 @@ import subprocess
 import time
 import mooseutils
 
+from mooseutils.tests import TEST_FILES
+
 class TestrPostprocessorReader(unittest.TestCase):
     """
     Test use of PostprocessorReader for loading/reloading csv files.
@@ -27,8 +29,8 @@ class TestrPostprocessorReader(unittest.TestCase):
         """
         Define the test filename.
         """
-        self._partial = os.path.abspath('../../test_files/white_elephant_jan_2016_partial.csv')
-        self._filename = os.path.abspath('../../test_files/white_elephant_jan_2016.csv')
+        self._partial = os.path.join(TEST_FILES, "white_elephant_jan_2016_partial.csv")
+        self._filename = os.path.join(TEST_FILES, "white_elephant_jan_2016.csv")
         self._keys = ['air_temp_low_24_hour_set_1', 'snow_depth_set_1']
 
     def testBasic(self):
