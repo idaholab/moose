@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/CutMeshByPlaneGenerator.md'
-  issues = '#26579 #26902'
+  issues = '#26579 #26902 #31293'
   [test]
     requirement = "The system shall be able to "
     [simple_hex_cut]
@@ -12,6 +12,16 @@
       mesh_mode = 'REPLICATED'
       recover = false
       detail ='cut a 3D mesh consisting of only HEX8 elements with the cut face id automatically assigned.'
+    []
+    [simple_hex_cut_transition]
+      type = 'Exodiff'
+      input = 'simple_fine.i'
+      exodiff = 'simple_hex_cut_transition_in.e'
+      cli_args = '--mesh-only simple_hex_cut_transition_in.e 
+                  Mesh/gmg/elem_type=HEX8'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail ='cut a 3D mesh consisting of only HEX8 elements by using the transition layer approach with the cut face id automatically assigned.'
     []
     [simple_hex_cut_aligned]
       type = 'Exodiff'
@@ -25,6 +35,20 @@
       mesh_mode = 'REPLICATED'
       recover = false
       detail ='cut a 3D mesh consisting of only HEX8 elements using a cutting plane overlapped with some element faces.'
+    []
+    [simple_hex_cut_aligned_transition]
+      type = 'Exodiff'
+      input = 'simple_fine.i'
+      exodiff = 'simple_hex_cut_aligned_transition_in.e'
+      exodiff_opts = '-pedantic'
+      cli_args = '--mesh-only simple_hex_cut_aligned_transition_in.e
+                  Mesh/gmg/elem_type=HEX8
+                  Mesh/cut/plane_point="0.5 0.75 0.0"
+                  Mesh/cut/plane_normal="0.0 1.0 0.0"
+                  Mesh/cut/generate_transition_layer=true'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail ='cut a 3D mesh consisting of only HEX8 elements using a cutting plane overlapped with some element faces with a transition layer.'
     []
     [simple_prism_cut]
       type = 'Exodiff'
@@ -113,6 +137,24 @@
       expect_err = 'but they are inconsistent'
       mesh_mode = 'REPLICATED'
       detail = 'if the specified cut face id and names are inconsistent with the input mesh.'
+    []
+    [err_tet_name_conflict]
+      type = 'RunException'
+      input = 'simple_fine.i'
+      cli_args = '--mesh-only err.e 
+                  Mesh/rename/new_block="lower lower_to_tet"'
+      expect_err = 'already exists in the mesh'
+      mesh_mode = 'REPLICATED'
+      detail = 'if the suffix for converted TET4 elements results in a subdomain name that already exists in the mesh.'
+    []
+    [err_pyramid_name_conflict]
+      type = 'RunException'
+      input = 'simple_fine.i'
+      cli_args = '--mesh-only err.e 
+                  Mesh/rename/new_block="lower lower_to_pyramid"'
+      expect_err = 'already exists in the mesh'
+      mesh_mode = 'REPLICATED'
+      detail = 'if the suffix for converted PYRAMID5 elements results in a subdomain name that already exists in the mesh.'
     []
   []
 []

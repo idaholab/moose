@@ -1,6 +1,6 @@
 [Tests]
     design = 'meshgenerators/CutMeshByLevelSetGenerator.md'
-    issues = '#29703'
+    issues = '#29703 #31293'
     [test]
       requirement = "The system shall be able to "
       [simple_hex_cut]
@@ -10,7 +10,20 @@
         cli_args = '--mesh-only simple_hex_cut_in.e'
         mesh_mode = 'REPLICATED'
         recover = false
-        detail ='cut a 3D mesh consisting of only HEX8 elements based on a level set with the cut face id automatically assigned.'
+        detail ='cut a 3D mesh consisting of only HEX8 elements based on a level set with the cut face id automatically assigned using the full conversion approach.'
+      []
+      [simple_hex_cut_transition]
+        type = 'Exodiff'
+        input = 'simple_cut.i'
+        exodiff = 'simple_hex_cut_transition_in.e'
+        cli_args = '--mesh-only simple_hex_cut_transition_in.e
+                    Mesh/lsc/generate_transition_layer=true
+                    Mesh/gmg/nx=6
+                    Mesh/gmg/ny=6
+                    Mesh/gmg/nz=6'
+        mesh_mode = 'REPLICATED'
+        recover = false
+        detail ='cut a 3D mesh consisting of only HEX8 elements based on a level set with the cut face id automatically assigned using the transition layer approach.'
       []
       [with_xyzd]
         type = 'CSVDiff'

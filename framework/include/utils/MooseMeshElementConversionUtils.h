@@ -200,7 +200,7 @@ pyramidNodesToTetNodesDeterminer(std::vector<const Node *> & pyramid_nodes,
  * @param mesh The mesh to be converted
  * @param elems_to_process A vector of pairs of element ids and a bool indicating whether the
  * element needs to be fully retained or will be further processed in the following procedures
- * @param converted_elems_ids_to_track A vector of element ids that need to be tracked for beig
+ * @param converted_elems_ids_to_track A vector of element ids that need to be tracked for being
  * further processed in the following procedures
  * @param block_id_to_remove The id of a new subdomain in the mesh containing all the elements to be
  * removed
@@ -231,4 +231,163 @@ elementBoundaryInfoCollector(const std::vector<libMesh::BoundaryInfo::BCTuple> &
                              const dof_id_type elem_id,
                              const unsigned short n_elem_sides,
                              std::vector<std::vector<boundary_id_type>> & elem_side_list);
+
+/**
+ * Convert the element to an element with TRI3 side-elements on the user-specified sides by
+ * modifying the mesh.
+ * @param mesh The mesh containing the element
+ * @param elem_id The ID of the element to be converted
+ * @param side_indices The indices of the sides to be converted
+ * @param elem_side_info The boundary IDs associated with the sides of the element
+ * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
+ */
+void convertElem(ReplicatedMesh & mesh,
+                 const dof_id_type & elem_id,
+                 const std::vector<unsigned int> & side_indices,
+                 const std::vector<std::vector<boundary_id_type>> & elem_side_info,
+                 const SubdomainID & subdomain_id_shift_base);
+
+/**
+ * Convert a HEX8 element to elements with TRI3 surfaces on the given original QUAD4 side(s).
+ * @param mesh The mesh containing the element
+ * @param elem_id The ID of the HEX8 element to be converted
+ * @param side_indices The indices of the QUAD4 sides to be converted to TRI3 sides
+ * @param elem_side_info The boundary IDs associated with the sides of the HEX8 element
+ * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
+ */
+void convertHex8Elem(ReplicatedMesh & mesh,
+                     const dof_id_type & elem_id,
+                     const std::vector<unsigned int> & side_indices,
+                     const std::vector<std::vector<boundary_id_type>> & elem_side_info,
+                     const SubdomainID & subdomain_id_shift_base);
+
+/**
+ * Create one PYRAMID5 element based on a side and the centroid of the HEX8 element.
+ * @param mesh The mesh containing the element
+ * @param elem_id The ID of the HEX8 element to be converted
+ * @param side_index The index of the side to be converted
+ * @param new_node The new node created at the centroid of the HEX8 element
+ * @param side_info The boundary IDs associated with the side of the HEX8 element
+ * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
+ */
+void createUnitPyramid5FromHex8(ReplicatedMesh & mesh,
+                                const dof_id_type & elem_id,
+                                const unsigned int & side_index,
+                                const Node * new_node,
+                                const std::vector<boundary_id_type> & side_info,
+                                const SubdomainID & subdomain_id_shift_base);
+
+/**
+ * Create two TET4 elements based on a side and the centroid of the HEX8 element.
+ * @param mesh The mesh containing the element
+ * @param elem_id The ID of the HEX8 element to be converted
+ * @param side_index The index of the side to be converted
+ * @param new_node The new node created at the centroid of the HEX8 element
+ * @param side_info The boundary IDs associated with the side of the HEX8 element
+ * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
+ */
+void createUnitTet4FromHex8(ReplicatedMesh & mesh,
+                            const dof_id_type & elem_id,
+                            const unsigned int & side_index,
+                            const Node * new_node,
+                            const std::vector<boundary_id_type> & side_info,
+                            const SubdomainID & subdomain_id_shift_base);
+
+/**
+ * Convert a PRISM6 element to elements with TRI3 surfaces on the given original QUAD4 side(s).
+ * @param mesh The mesh containing the element
+ * @param elem_id The ID of the PRISM6 element to be converted
+ * @param side_indices The indices of the QUAD sides to be converted to TRI3 sides
+ * @param elem_side_info The boundary IDs associated with the sides of the PRISM6 element
+ * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
+ */
+void convertPrism6Elem(ReplicatedMesh & mesh,
+                       const dof_id_type & elem_id,
+                       const std::vector<unsigned int> & side_indices,
+                       const std::vector<std::vector<boundary_id_type>> & elem_side_info,
+                       const SubdomainID & subdomain_id_shift_base);
+/**
+ * Create one or two TET4 elements based on a side and the centroid of the PRISM6 element.
+ * @param mesh The mesh containing the element
+ * @param elem_id The ID of the PRISM6 element to be converted
+ * @param side_index The index of the side to be converted
+ * @param new_node The new node created at the centroid of the PRISM6 element
+ * @param side_info The boundary IDs associated with the side of the PRISM6 element
+ * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
+ */
+void createUnitTet4FromPrism6(ReplicatedMesh & mesh,
+                              const dof_id_type & elem_id,
+                              const unsigned int & side_index,
+                              const Node * new_node,
+                              const std::vector<boundary_id_type> & side_info,
+                              const SubdomainID & subdomain_id_shift_base);
+
+/**
+ * Create a PYRAMID5 element opposite the sides converted to tets and the centroid of the PRISM6
+ * element.
+ * @param mesh The mesh containing the element
+ * @param elem_id The ID of the PRISM6 element to be converted
+ * @param side_index The index of the side to be converted
+ * @param new_node The new node created at the centroid of the PRISM6 element
+ * @param side_info The boundary IDs associated with the side of the PRISM6 element
+ * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
+ */
+void createUnitPyramid5FromPrism6(ReplicatedMesh & mesh,
+                                  const dof_id_type & elem_id,
+                                  const unsigned int & side_index,
+                                  const Node * new_node,
+                                  const std::vector<boundary_id_type> & side_info,
+                                  const SubdomainID & subdomain_id_shift_base);
+
+/**
+ * Convert a PYRAMID5 element to elements with TRI3 surfaces on the original QUAD4 side.
+ * @param mesh The mesh containing the element
+ * @param elem_id The ID of the PYRAMID5 element to be converted
+ * @param elem_side_info The boundary IDs associated with the sides of the PYRAMID
+ * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
+ */
+void convertPyramid5Elem(ReplicatedMesh & mesh,
+                         const dof_id_type & elem_id,
+                         const std::vector<std::vector<boundary_id_type>> & elem_side_info,
+                         const SubdomainID & subdomain_id_shift_base);
+
+/**
+ * Retain the extra integer of the original element in a new element.
+ * @param mesh The mesh containing the element
+ * @param elem_id The ID of the original element
+ * @param new_elem_ptr The pointer to the new element that will retain the extra integer
+ */
+void retainEEID(ReplicatedMesh & mesh, const dof_id_type & elem_id, Elem * new_elem_ptr);
+
+/**
+ * Generate a transition layer of elements with TRI3 surfaces on the given boundaries.
+ * @param mesh The mesh to be modified
+ * @param boundary_names A vector of boundary names on which the transition layer will be
+ * generated
+ * @param conversion_element_layer_number The number of element layers to be converted on the given
+ * boundaries.
+ * @param external_boundaries_checking Whether to check if the provided boundaries are external
+ * boundaries
+ */
+void transitionLayerGenerator(ReplicatedMesh & mesh,
+                              const std::vector<BoundaryName> & boundary_names,
+                              const unsigned int conversion_element_layer_number,
+                              const bool external_boundaries_checking);
+/**
+ * Assign a subdomain name suffix to the converted elements created during transition layer
+ * generation.
+ * @param mesh The mesh to be modified
+ * @param original_subdomain_ids A set of original subdomain IDs of the mesh before conversion
+ * @param sid_shift_base The base subdomain ID to shift the original elements because of the
+ * element type change
+ * @param tet_suffix The suffix to be added to the subdomain names of the converted TET4 elements
+ * @param pyramid_suffix The suffix to be added to the subdomain names of the converted PYRAMID5
+ * elements
+ */
+void assignConvertedElementsSubdomainNameSuffix(
+    ReplicatedMesh & mesh,
+    const std::set<subdomain_id_type> & original_subdomain_ids,
+    const subdomain_id_type sid_shift_base,
+    const SubdomainName & tet_suffix,
+    const SubdomainName & pyramid_suffix);
 }
