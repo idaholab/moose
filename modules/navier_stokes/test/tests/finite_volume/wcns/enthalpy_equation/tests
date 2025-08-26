@@ -16,10 +16,18 @@
       type = CSVDiff
       input = 1d_test_h_fp.i
       csvdiff = 1d_test_h_fp_out.csv
-      detail = 'an enthalpy function defined in fluid properties.'
+      detail = 'an enthalpy function defined in fluid properties,'
       abs_zero = 1e-5
       rel_err = 1e-5
       max_threads = 1 # see libmesh issue #3808
+    []
+    [analytical_outlet_temperature_fp_nonlinearFV]
+      type = CSVDiff
+      input = 1d_test_h_fp-nonlinearFV.i
+      csvdiff = 1d_test_h_fp-nonlinearFV_out.csv
+      detail = 'using an enthalpy function defined in fluid properties and the nonlinear finite volume discretization'
+      abs_zero = 1e-5
+      rel_err = 1e-5
     []
   []
   [2d-fp]
