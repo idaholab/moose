@@ -16,9 +16,11 @@ from moosesqa import Requirement, number_requirements, get_requirements_from_fil
 from moosesqa import  get_requirements_from_tests, get_test_specification
 from moosesqa.get_requirements import _find_file
 
+from mooseutils.tests import MOOSE_DIR
+
 class TestGetRequirementsFromFile(unittest.TestCase):
+
     def testBasic(self):
-        MOOSE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
         filename = os.path.join(MOOSE_DIR, 'python', 'moosesqa', 'test', 'specs', 'spec_basic')
         req = get_requirements_from_file(filename)
 
@@ -161,8 +163,8 @@ class TestGetTestSpecification(unittest.TestCase):
         self.assertIn("Unable to locate 'wrong'", str(e.exception))
 
 class TestGetRequirementsFromTests(unittest.TestCase):
+
     def testBasic(self):
-        MOOSE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
         loc = [os.path.join(MOOSE_DIR, 'test', 'tests', 'markers')]
         req = get_requirements_from_tests(loc, ['tests'])
 
@@ -192,7 +194,7 @@ class TestGetRequirementsFromTests(unittest.TestCase):
         self.assertEqual(r1.prefix, 'box_marker')
 
     def testRequirementWithDetails(self):
-        loc = [os.getcwd()]
+        loc = [os.path.dirname(__file__)]
         req = get_requirements_from_tests(loc, ['test_get_requirements_spec0'])
 
         self.assertEqual(len(req), 1)

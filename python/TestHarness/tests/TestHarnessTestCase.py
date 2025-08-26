@@ -18,11 +18,16 @@ from typing import Optional
 
 from TestHarness import TestHarness
 import pyhit
+import mooseutils
 
-MOOSE_DIR = os.getenv('MOOSE_DIR')
+MOOSE_DIR = mooseutils.find_moose_directory()
 TEST_DIR = os.path.join(MOOSE_DIR, 'test')
 
 
+@unittest.skipIf(
+    mooseutils.find_moose_executable(os.path.join(MOOSE_DIR, "test")) is None,
+    "MOOSE executable not available.",
+)
 class TestHarnessTestCase(unittest.TestCase):
     """
     TestCase class for running TestHarness commands.

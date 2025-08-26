@@ -108,6 +108,7 @@ compile_commands.json
 build
 framework/contrib/libtorch
 test.cache
+*.egg-info/
 
 # Allow certain files in gold directories
 !**/gold/**/*.e

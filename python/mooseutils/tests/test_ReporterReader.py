@@ -13,6 +13,8 @@ import unittest
 import subprocess
 import mooseutils
 
+from mooseutils.tests import MOOSE_DIR
+
 class TestReporterReader(unittest.TestCase):
     """
     Test use of ReporterReader for loading/reloading json files.
@@ -22,10 +24,19 @@ class TestReporterReader(unittest.TestCase):
         """
         Define the test filenames.
         """
-        self._basicfile = os.path.abspath('../../../test/tests/reporters/constant_reporter/gold/constant_reporter_out.json')
-        self._timefile = os.path.abspath('../../../test/tests/reporters/accumulated_reporter/gold/accumulate_reporter_out.json')
-        self._onepertimefile = os.path.abspath('../../../test/tests/outputs/json/one_file_per_timestep/gold/json_out_*.json')
-        self._partsfile = os.path.abspath('../../../test/tests/reporters/mesh_info/gold/mesh_info_out.json')
+        test_dir = os.path.join(MOOSE_DIR, "test", "tests")
+        self._basicfile = os.path.join(
+            test_dir, "reporters/constant_reporter/gold/constant_reporter_out.json"
+        )
+        self._timefile = os.path.join(
+            test_dir, "reporters/accumulated_reporter/gold/accumulate_reporter_out.json"
+        )
+        self._onepertimefile = os.path.join(
+            test_dir, "outputs/json/one_file_per_timestep/gold/json_out_*.json"
+        )
+        self._partsfile = os.path.join(
+            test_dir, "reporters/mesh_info/gold/mesh_info_out.json"
+        )
 
     def testBasic(self):
         """

@@ -81,8 +81,8 @@ class TestLexer(unittest.TestCase):
     def testTokenize(self):
         root = tokens.Token(None)
         grammar = lexers.Grammar()
-        grammar.add('foo', re.compile('(?P<content>\w+) *'), FooBarComponent())
-        grammar.add('word', re.compile('(?P<content>\w+) *'), WordComponent())
+        grammar.add("foo", re.compile(r"(?P<content>\w+) *"), FooBarComponent())
+        grammar.add("word", re.compile(r"(?P<content>\w+) *"), WordComponent())
 
         lexer = lexers.Lexer()
 
@@ -107,7 +107,7 @@ class TestLexer(unittest.TestCase):
         # Extra
         root = tokens.Token(None)
         grammar = lexers.Grammar()
-        grammar.add('foo', re.compile('(?P<content>\w+) *'), FooBarComponent())
+        grammar.add("foo", re.compile(r"(?P<content>\w+) *"), FooBarComponent())
 
         lexer = lexers.Lexer()
         lexer.tokenize(root, 'foo ???', None, grammar)
@@ -130,8 +130,8 @@ class TestRecursiveLexer(unittest.TestCase):
     """
     def testTokenize(self):
         lexer = lexers.RecursiveLexer('block', 'inline')
-        lexer.add('block', 'foo', re.compile('(?P<inline>\w+) *'), letters_func)
-        lexer.add('inline', 'bar', re.compile('(?P<content>\w)'), letter_func)
+        lexer.add("block", "foo", re.compile(r"(?P<inline>\w+) *"), letters_func)
+        lexer.add("inline", "bar", re.compile(r"(?P<content>\w)"), letter_func)
 
         root = tokens.Token(None)
         lexer.tokenize(root, 'foo', None, lexer.grammar('block'))

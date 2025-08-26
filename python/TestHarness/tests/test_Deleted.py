@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from TestHarnessTestCase import TestHarnessTestCase
+from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
     def testDeleted(self):

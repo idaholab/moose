@@ -15,6 +15,7 @@ import io
 import mooseutils
 import moosesqa
 from MooseDocs.commands import generate
+from MooseDocs.test import requiresMooseExecutable
 
 @unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
 class TestGenerate(unittest.TestCase):
@@ -30,6 +31,7 @@ class TestGenerate(unittest.TestCase):
 
     @mock.patch('MooseDocs.commands.generate._shouldCreateStub')
     @mock.patch('MooseDocs.commands.generate._writeFile')
+    @requiresMooseExecutable()
     def testGenerate(self, writeFile, shouldCreateStub):
 
         # Store the filenames to be created

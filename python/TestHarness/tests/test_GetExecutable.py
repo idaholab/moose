@@ -12,12 +12,12 @@ import unittest
 import mock
 import TestHarness
 from contextlib import redirect_stdout
+from TestHarness.tests.TestHarnessTestCase import MOOSE_DIR
 
 class TestHarnessTester(unittest.TestCase):
     def __init__(self, methodName='runTest'):
         super().__init__(methodName)
 
-        self.MOOSE_DIR = os.getenv('MOOSE_DIR')
         self.all_methods = {'opt', 'oprof', 'dbg', 'devel'}
 
     def helperGetPresentMethods(self, directory):
@@ -26,7 +26,7 @@ class TestHarnessTester(unittest.TestCase):
         """
 
         prev_dir = os.getcwd()
-        os.chdir(os.path.join(self.MOOSE_DIR, directory))
+        os.chdir(os.path.join(MOOSE_DIR, directory))
 
         try:
             present_methods = set()
@@ -41,12 +41,12 @@ class TestHarnessTester(unittest.TestCase):
         return present_methods
 
     def helperTestGetExecutable(self, testroot_path, method, expect_fail):
-        os.chdir(os.path.join(self.MOOSE_DIR, testroot_path))
+        os.chdir(os.path.join(MOOSE_DIR, testroot_path))
         out = io.StringIO()
         with redirect_stdout(out):
             with self.assertRaises(SystemExit) as e:
                 args = ['', method, '--test-root', 'testroot']
-                TestHarness.TestHarness.buildAndRun(args, None, self.MOOSE_DIR)
+                TestHarness.TestHarness.buildAndRun(args, None, MOOSE_DIR)
             if expect_fail:
                 self.assertNotEqual(e.exception.code, 0)
             else:

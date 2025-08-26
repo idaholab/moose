@@ -18,6 +18,7 @@ from tempfile import TemporaryDirectory
 import pandas as pd
 from TestHarness.validation import CSVValidationCase
 
+THIS_DIR = os.path.dirname(__file__)
 DEFAULT_REL_ERR: float = float(CSVValidationCase.validParams()['validation_rel_err'])
 
 class TestCSVValidationCase(unittest.TestCase):
@@ -29,7 +30,9 @@ class TestCSVValidationCase(unittest.TestCase):
 
         When running this, you can set rewrite=True to rewrite the gold.
         """
-        gold_path = os.path.join('gold', 'validation', f'csvvalidationcase_{name}.json')
+        gold_path = os.path.join(
+            THIS_DIR, "gold", "validation", f"csvvalidationcase_{name}.json"
+        )
 
         data = {'results': [asdict(v) for v in case.results],
                 'data': {k: asdict(v) for k, v in case.data.items()}}

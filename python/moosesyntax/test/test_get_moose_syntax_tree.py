@@ -15,20 +15,25 @@ import moosetree
 import mooseutils
 import moosesyntax
 
+from mooseutils.tests import MOOSE_DIR
+
+MOOSE_EXE_LOCATION = os.path.join(MOOSE_DIR, "test")
+MOOSE_EXE = mooseutils.find_moose_executable(MOOSE_EXE_LOCATION)
+
+
+@unittest.skipIf(MOOSE_EXE is None, "MOOSE executable not found.")
 class TestSyntaxTreeRun(unittest.TestCase):
     """Test 'get_moose_syntax_tree' can operate with given executable"""
     def testRun(self):
-        location = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'test'))
-        exe = mooseutils.find_moose_executable(location)
-        root = moosesyntax.get_moose_syntax_tree(exe)
+        root = moosesyntax.get_moose_syntax_tree(MOOSE_EXE)
 
+
+@unittest.skipIf(MOOSE_EXE is None, "MOOSE executable not found.")
 class TestSyntaxTree(unittest.TestCase):
     """Test 'get_moose_syntax_tree' features"""
     @classmethod
     def setUpClass(cls):
-        location = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'test'))
-        exe = mooseutils.find_moose_executable(location)
-        raw = mooseutils.runExe(exe, ['--json', '--allow-test-objects'])
+        raw = mooseutils.runExe(MOOSE_EXE, ["--json", "--allow-test-objects"])
         raw = raw.split('**START JSON DATA**\n')[1]
         raw = raw.split('**END JSON DATA**')[0]
         cls.json = mooseutils.json_parse(raw)

@@ -51,10 +51,8 @@ class FakeMongoClient(MongoClient):
     def close(self):
         pass
 
-class TestResultsReaderReader(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
+class TestResultsReaderReader(unittest.TestCase):
     def buildProdGetTestResultsGold(self):
         """
         Helper for building the gold file for testing getTestResults(),

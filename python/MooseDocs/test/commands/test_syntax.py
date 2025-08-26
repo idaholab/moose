@@ -15,6 +15,7 @@ import io
 import mooseutils
 import moosesqa
 from MooseDocs.commands import syntax
+from MooseDocs.test import requiresMooseExecutable
 
 @unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
 class TestGenerate(unittest.TestCase):
@@ -29,6 +30,7 @@ class TestGenerate(unittest.TestCase):
         os.chdir(self._working_dir)
 
     @mock.patch('mooseutils.colorText')
+    @requiresMooseExecutable()
     def testDump(self, colorText):
         colorText.side_effect = lambda txt, *args, **kwargs: txt
 

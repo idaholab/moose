@@ -14,6 +14,8 @@ import unittest
 import time
 import mooseutils
 
+from mooseutils.tests import TEST_FILES
+
 class TestMooseDataFrame(unittest.TestCase):
     """
     Test use of MooseDataFrame for loading/reloading csv files.
@@ -23,7 +25,8 @@ class TestMooseDataFrame(unittest.TestCase):
         """
         Define the test filename.
         """
-        self._filename = '../../test_files/white_elephant_jan_2016.csv'
+        self._filename = os.path.join(TEST_FILES, "white_elephant_jan_2016.csv")
+        assert os.path.exists(self._filename)
         self._keys = ['air_temp_low_24_hour_set_1', 'snow_depth_set_1']
 
     def testBasic(self):

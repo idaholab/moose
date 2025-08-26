@@ -9,17 +9,21 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import unittest
+from unittest.mock import patch
 import MooseDocs
 from MooseDocs.common import project_find
 
 
 class TestProjectFind(unittest.TestCase):
+
+    @patch(
+        "MooseDocs.PROJECT_FILES",
+        ["file0.md", "/path/to/another/file0.md", "image1.png"],
+    )
     def test(self):
         """
         Test that class with h and C files are located.
         """
-        MooseDocs.PROJECT_FILES = ['file0.md', '/path/to/another/file0.md', 'image1.png']
-
         self.assertEqual(project_find('image1.png'), ['image1.png'])
         self.assertEqual(project_find('file0.md'), ['file0.md', '/path/to/another/file0.md'])
         self.assertEqual(project_find('e0.md'), ['file0.md', '/path/to/another/file0.md'])

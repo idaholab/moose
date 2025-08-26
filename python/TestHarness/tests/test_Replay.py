@@ -12,7 +12,7 @@ import re
 import shutil
 import tempfile
 
-from TestHarnessTestCase import TestHarnessTestCase
+from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
     def setUp(self):

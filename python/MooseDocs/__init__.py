@@ -8,13 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import sys
-import subprocess
 import logging
-
-if sys.version_info < (3, 6):
-    print('"MOOSEDocs" requires python version 3.6 or greater, version {}.{} is being used.' \
-          .format(sys.version_info[0], sys.version_info[1]))
-    sys.exit(1)
 
 import mooseutils
 
@@ -32,10 +26,11 @@ elif 'ROOT_DIR' not in os.environ:
 ROOT_DIR = os.environ['ROOT_DIR']
 
 # Setup MOOSE_DIR/ROOT_DIR
-MOOSE_DIR = os.getenv('MOOSE_DIR', None)
+MOOSE_DIR = mooseutils.find_moose_directory()
 if MOOSE_DIR is None:
-    print("The MOOSE_DIR environment must be set, this should be set within moosedocs.py.")
-    sys.exit(1)
+    raise OSError(
+        "The MOOSE_DIR environment must be set, this should be set within moosedocs.py."
+    )
 
 # Initialize submodule(s) with progress output
 mooseutils.git_init_submodule('large_media', MOOSE_DIR, True)

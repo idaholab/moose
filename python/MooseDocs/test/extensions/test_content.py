@@ -369,7 +369,7 @@ class TestContentOutline(MooseDocsTestCase):
             self.assertHTMLTag(eval('outline' + indices), 'li')
             href = 'extensions/' + head['page'] + '.html#' + head['id']
             self.assertHTMLTag(eval('outline' + indices + '(0)'), 'a', href=href)
-            title = re.findall("[\w]+|[.,!?;:\"'%&@$^*+-=~_\|\/<>(){}\[\]]|[\s]", key)
+            title = re.findall(r"[\w]+|[.,!?;:\"'%&@$^*+-=~_\|\/<>(){}\[\]]|[\s]", key)
             for i, s in enumerate(title):
                 index = '(0)(' + str(i) + ')'
                 self.assertHTMLString(eval('outline' + indices + index), content=s)

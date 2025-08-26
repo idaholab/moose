@@ -12,13 +12,18 @@ import copy, os, unittest
 from mooseutils.PerfGraphReporterReader import PerfGraphReporterReader, PerfGraphNode
 from mooseutils.ReporterReader import ReporterReader
 
+from mooseutils.tests import MOOSE_DIR
+
 class TestPerfGraphReporterReader(unittest.TestCase):
     """
     Test use of PerfGraphReporterReader for loading PerfGraphReporter data.
     """
 
     def setUp(self):
-        self._file = os.path.abspath('../../../test/tests/reporters/perf_graph_reporter/gold/perf_graph_reporter_json.json')
+        self._file = os.path.join(
+            MOOSE_DIR,
+            "test/tests/reporters/perf_graph_reporter/gold/perf_graph_reporter_json.json",
+        )
 
         reader = ReporterReader(self._file)
         reader.update(reader.times()[-1])

@@ -12,6 +12,8 @@ import unittest
 import mock
 from moosesyntax.nodes import NodeBase, ObjectNodeBase, SyntaxNode, ActionNode, MooseObjectNode, MooseObjectActionNode
 
+from mooseutils.tests import MOOSE_DIR
+
 class TestNodeBase(unittest.TestCase):
     def setUp(self):
         self._root = NodeBase(None, '')
@@ -104,8 +106,10 @@ class TestSyntaxNode(unittest.TestCase):
 class TestObjectNodeBase(unittest.TestCase):
 
     def testProperties(self):
-        source = os.path.abspath(os.path.join('..', '..', '..', 'framework', 'src', 'kernels', 'Diffusion.C'))
-        include = os.path.abspath(os.path.join('..', '..', '..', 'framework', 'include', 'kernels', 'Diffusion.h'))
+        source = os.path.join(MOOSE_DIR, "framework", "src", "kernels", "Diffusion.C")
+        include = os.path.join(
+            MOOSE_DIR, "framework", "include", "kernels", "Diffusion.h"
+        )
         kwargs = {'class':'Diffusion', 'label':'MooseApp', 'register_file':source, 'parameters':{'year':1980}}
         r = ObjectNodeBase(None, 'a', **kwargs)
 

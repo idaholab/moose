@@ -10,6 +10,7 @@
 import os
 import re
 import sys
+import importlib.util
 
 import MooseDocs
 from ..common import exceptions
@@ -17,8 +18,26 @@ from ..tree import tokens
 from . import core, command
 
 # Needed to load the Versioner
-sys.path.append(os.path.join(MooseDocs.MOOSE_DIR, 'scripts'))
-from versioner import *
+def getVersionerClass():
+    """Dynamically load the versioner.Versioner class since it isn't installed by default."""
+    # If we aren't in MOOSE, we can't find the versioner script
+    if MooseDocs.MOOSE_DIR is None:
+        return None
+
+    # Do a file-based module load
+    spec = importlib.util.spec_from_file_location(
+        "versioner", os.path.join(MooseDocs.MOOSE_DIR, "scripts", "versioner.py")
+    )
+    versioner_mod = importlib.util.module_from_spec(spec)
+
+    # If the file doesn't, exist, it will throw here
+    try:
+        spec.loader.exec_module(versioner_mod)
+    except FileNotFoundError:
+        return None
+    else:
+        return versioner_mod.Versioner
+
 
 def make_extension(**kwargs):
     return VersionerExtension(**kwargs)
@@ -29,9 +48,10 @@ class VersionerExtension(command.CommandExtension):
     """
 
     def __init__(self, **kwargs):
-      super().__init__(**kwargs)
+        super().__init__(**kwargs)
 
-      self.packages = Versioner().get_packages('HEAD')
+        versioner_class = getVersionerClass()
+        self.packages = versioner_class().get_packages("HEAD")
 
     def extend(self, reader, renderer):
         self.requires(core, command)

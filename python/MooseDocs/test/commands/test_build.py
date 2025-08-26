@@ -15,12 +15,13 @@ import moosetree
 import MooseDocs
 from MooseDocs.commands import build
 from MooseDocs import base, common
+from MooseDocs import MOOSE_DIR
 
 class TestBuild(unittest.TestCase):
     def setUp(self):
         # Change to the test/doc directory
         self._working_dir = os.getcwd()
-        moose_test_doc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'test', 'doc'))
+        moose_test_doc_dir = os.path.join(MOOSE_DIR, "test", "doc")
         os.chdir(moose_test_doc_dir)
 
     def tearDown(self):

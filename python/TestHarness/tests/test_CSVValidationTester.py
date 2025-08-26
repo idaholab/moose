@@ -9,7 +9,7 @@
 import sys
 import unittest
 import subprocess
-from TestHarnessTestCase import TestHarnessTestCase
+from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
 
