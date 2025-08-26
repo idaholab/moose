@@ -112,7 +112,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [Dpin]
     block = fuel_pins
   []
-  [q_prime_duct]
+  [duct_heat_flux]
     block = duct
   []
   [Tduct]
