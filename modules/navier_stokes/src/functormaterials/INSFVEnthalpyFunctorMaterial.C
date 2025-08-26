@@ -129,9 +129,8 @@ INSFVEnthalpyFunctorMaterial::INSFVEnthalpyFunctorMaterial(const InputParameters
         NS::time_deriv(getParam<MooseFunctorName>(NS::specific_enthalpy)),
         [this](const auto & r, const auto & t)
         {
-          Real h, dh_dp, dh_dT;
-          _fp->h_from_p_T(
-              (*_pressure)(r, t).value(), (*_temperature)(r, t).value(), h, dh_dp, dh_dT);
+          ADReal h, dh_dp, dh_dT;
+          _fp->h_from_p_T((*_pressure)(r, t), (*_temperature)(r, t), h, dh_dp, dh_dT);
           return dh_dT * (*_temperature).dot(r, t) + dh_dp * _pressure->dot(r, t);
         });
   }
