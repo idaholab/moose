@@ -9,19 +9,25 @@
 
 #pragma once
 
-#include "TagVectorAux.h"
+#include "AuxKernel.h"
+#include "TagAuxBase.h"
 
 /**
- * Similar to TagVectorAux, but returns the _unscaled_ vector value that is consistent with the
- * units of the simulation.
+ * The value of a tagged residual vector for a given variable is coupled to
+ * the current AuxVariable.
  */
-class ReactionForceAux : public TagVectorAux
+class TagResidualAux : public TagAuxBase<AuxKernel>
 {
 public:
   static InputParameters validParams();
 
-  ReactionForceAux(const InputParameters & parameters);
+  TagResidualAux(const InputParameters & parameters);
+
+  void initialSetup() override;
 
 protected:
-  Real computeValue() override;
+  virtual Real computeValue() override;
+
+  const VariableValue & _v;
+  const MooseVariableBase & _v_var;
 };
