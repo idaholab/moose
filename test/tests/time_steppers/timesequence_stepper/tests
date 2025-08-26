@@ -71,7 +71,22 @@
       input = 'timesequence_last_dt.i'
       csvdiff = 'timesequence_last_dt_out.csv'
 
-      detail = 'allowing the last time step size to be used past the final time in the sequence.'
+      detail = 'allowing the last time step size to be used past the final time in the sequence, and'
+    []
+
+    [use_last_t_for_end_time]
+      type = CSVDiff
+      input = timesequence.i
+      csvdiff = timesequence_out.csv
+      # end_time will be ignored since the last time in the sequence will be used
+      # we have to specify the number of steps for a reasonable mid-step in 'restep' mode
+      # Note that we specify the exact number of 'sync steps' to be sure to test for setting the end time
+      cli_args = "Executioner/TimeStepper/use_last_t_for_end_time=true
+                  Executioner/end_time=99
+                  Executioner/num_steps=7
+                  Postprocessors/dt/type=TimestepSize Outputs/csv=true"
+
+      detail = 'use the final time in the sequence as the simulation end time.'
     []
   []
 
