@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moose-python"
+description = "Python tools for MOOSE"
+version = "2025.08.20"
+readme = "README.md" # Should do something custom for python
+license = "LGPL-2.1"
+license-files = ["LICENSE", "COPYRIGHT"]
+requires-python = ">=3.10"
+dependencies = [
+    "beautifulsoup4",
+    "deepdiff",
+    "graphviz",
+    "h5py",
+    "jinja2",
+    "livereload",
+    "lxml",
+    "matplotlib>3.9.0",
+    "mock",
+    "moose-hit",
+    "numpy",
+    "packaging",
+    "pandas",
+    "paramiko",
+    "plotly",
+    "pybtex",
+    "pylatexenc",
+    "pymongo",
+    "pyyaml",
+    "requests",
+    "scikit-image",
+    "sympy",
+    "xmltodict<0.14",
+]
+maintainers = [
+    { name = "Logan Harbour", email = "loganhharbour@gmail.com" },
+    { name = "Zachary Prince", email = "zachmprince@gmail.com" },
+]
+
+[project.urls]
+Homepage = "https://mooseframework.inl.gov/index.html"
+Repository = "https://github.com/idaholab/moose"
+Issues = "https://github.com/idaholab/moose/issues"
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["python"]
+exclude = ["doc*", "peacock*", "pycapabilities*"]
+
+[tool.pytest.ini_options]
+python_classes = "" # This will enforce that all tests derive from unittest.TestCase
+minversion = "6.0"
+testpaths = [
+    "python/mms",
+    "python/MooseDocs",
+    "python/moosesqa",
+    "python/moosesyntax",
+    "python/moosetree",
+    "python/mooseutils",
+    "python/parameters",
+    "python/postprocessing",
+    "python/pyhit",
+    "python/TestHarness",
+]
