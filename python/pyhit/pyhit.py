@@ -11,7 +11,7 @@
 import os
 import subprocess
 import moosetree
-import hit
+from moose_hit import hit
 from mooseutils import message
 
 class Node(moosetree.Node):

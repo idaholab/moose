@@ -15,6 +15,8 @@ import mooseutils
 import time
 import subprocess
 
+from mooseutils.tests import TEST_FILES
+
 class TestVectorPostprocessorReader(unittest.TestCase):
     """
     Test use of MooseDataFrame for loading/reloading csv files.
@@ -24,7 +26,7 @@ class TestVectorPostprocessorReader(unittest.TestCase):
         """
         Define the test filename.
         """
-        self._pattern = os.path.abspath('../../test_files/vpp_*.csv')
+        self._pattern = os.path.join(TEST_FILES, "vpp_*.csv")
 
     def copyfiles(self, copytime=True):
         """

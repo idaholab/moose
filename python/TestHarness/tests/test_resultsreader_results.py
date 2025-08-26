@@ -27,9 +27,14 @@ FAKE_TIME = datetime.now()
 
 class TestResultsReaderResults(TestHarnessTestCase):
     def __init__(self, *args, **kwargs):
+        self.run_tests_result = None
         super().__init__(*args, **kwargs)
 
-        self.run_tests_result = self.runTests('-i', 'validation', '--capture-perf-graph', exit_code=132)
+    def setUp(self):
+        if self.run_tests_result is None:
+            self.run_tests_result = self.runTests(
+                "-i", "validation", "--capture-perf-graph", exit_code=132
+            )
 
     def captureResult(self, remove_civet_keys=[], civet_version=FAKE_CIVET_VERSION):
         values = self.run_tests_result.results.copy()

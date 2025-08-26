@@ -18,9 +18,12 @@ import copy
 import platform
 import subprocess
 from MooseDocs.commands import check
+from MooseDocs.test import requiresMooseExecutable
 
 @unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
 class TestCheckScript(unittest.TestCase):
+
+    @requiresMooseExecutable()
     def testCheck(self, *args):
 
         # Test that script runs from within the containing directory
@@ -71,6 +74,7 @@ class TestCheck(unittest.TestCase):
         # Restore the working directory
         os.chdir(self._working_dir)
 
+    @requiresMooseExecutable()
     def testCheck(self):
 
         # Create command-line arguments in

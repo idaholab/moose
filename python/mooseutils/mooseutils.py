@@ -16,11 +16,14 @@ import subprocess
 import time
 import cProfile as profile
 import pstats
+from typing import Optional
 
 try:
     from io import StringIO
 except ImportError:
     from io import StringIO
+
+import mooseutils
 
 def colorText(string, color, **kwargs):
     """
@@ -83,6 +86,50 @@ def str2bool(string):
         return True
     else:
         return False
+
+
+def find_moose_directory(loc: str = os.getcwd()) -> Optional[str]:
+    """Finds the moose directory following given the following logic:
+
+    1. Check if 'MOOSE_DIR' environment variable is set.
+    2. Using git, checks if the given location is a MOOSE repo.
+    3. Checks if there is a moose submodule.
+    4. Checks if loc/moose is the right place.
+    5. Checks if loc/../moose is the right place.
+    """
+    # 1) MOOSE_DIR is set
+    if "MOOSE_DIR" in os.environ:
+        return os.environ["MOOSE_DIR"]
+
+    def is_moose_dir(trial):
+        return os.path.exists(os.path.join(trial, "framework", "Makefile"))
+
+    if mooseutils.git_is_repo(loc):
+        # 2) loc is within a moose repo
+        root_dir = mooseutils.git_root_dir(loc)
+        if is_moose_dir(root_dir):
+            return root_dir
+
+        # 3) Moose submodule exists
+        status = mooseutils.git_submodule_info(loc)
+        for repo in status.keys():
+            if repo.endswith("moose"):
+                dir = os.path.abspath(os.path.join(loc, repo))
+                if is_moose_dir(dir):
+                    return dir
+
+    # 4) loc/moose exists
+    dir = os.path.join(loc, "moose")
+    if is_moose_dir(dir):
+        return dir
+
+    # 5) loc/../moose exists
+    dir = os.path.abspath(os.path.join(loc, "..", "moose"))
+    if is_moose_dir(dir):
+        return dir
+
+    return None
+
 
 def find_moose_executable(loc, **kwargs):
     """

@@ -17,6 +17,8 @@ try:
 except ModuleNotFoundError:
     pass
 
+from mooseutils.tests import TEST_FILES
+
 class TestCombineCSV(unittest.TestCase):
     """
     Test use of combine_csv.py for combining csv files.
@@ -26,8 +28,8 @@ class TestCombineCSV(unittest.TestCase):
         """
         Define the pattern for test files.
         """
-        self.__goldpath = os.path.abspath('../../test_files/gold')
-        self.__basename = os.path.abspath('../../test_files/test_combine_in_')
+        self.__goldpath = os.path.join(TEST_FILES, "gold")
+        self.__basename = os.path.join(TEST_FILES, "test_combine_in_")
 
     def tearDown(self):
         """

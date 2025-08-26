@@ -8,8 +8,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import sys
 import unittest
+from unittest.mock import patch
+from io import StringIO
 from mooseutils import message
 
 class TestMooseMessage(unittest.TestCase):
@@ -17,12 +18,22 @@ class TestMooseMessage(unittest.TestCase):
     Tests the usage of the various messages functions in message package.
     """
 
+    def setUp(self):
+        self._stdout_patcher = patch("sys.stdout", new=StringIO())
+        self.mock_stdout = self._stdout_patcher.start()
+        self._stderr_patcher = patch("sys.stderr", new=StringIO())
+        self.mock_stderr = self._stderr_patcher.start()
+
+    def tearDown(self):
+        self._stdout_patcher.stop()
+        self._stderr_patcher.stop()
+
     def testMooseMessageDefault(self):
         """
         Test the default message with a string and a number supplied.
         """
         message.mooseMessage("The default message with a number", 1.0)
-        output = sys.stdout.getvalue()
+        output = self.mock_stdout.getvalue()
         self.assertIn("The default message with a number 1.0", output)
 
     @unittest.skip('Breaks with current package')
@@ -31,8 +42,8 @@ class TestMooseMessage(unittest.TestCase):
         Test that the traceback argument is operational.
         """
         message.mooseMessage("A message", "with a traceback!", traceback = True)
-        output = sys.stdout.getvalue()
-        err = sys.stderr.getvalue()
+        output = self.mock_stdout.getvalue()
+        err = self.mock_stderr.getvalue()
         self.assertIn("A message with a traceback!", output)
         self.assertIn("message.mooseMessage", err)
 
@@ -41,25 +52,25 @@ class TestMooseMessage(unittest.TestCase):
         Test that the color flag is working.
         """
         message.mooseMessage("This should be RED.", color = 'RED')
-        output = sys.stdout.getvalue()
+        output = self.mock_stdout.getvalue()
         self.assertIn('\033[31m', output)
 
     def testMooseMessageDebugOn(self):
         """
         Test that the debug flag enables debug messages.
         """
-        message.MOOSE_DEBUG_MODE = True
-        message.mooseMessage("You should see this!", debug=True)
-        output = sys.stdout.getvalue()
+        with patch("mooseutils.message.MOOSE_DEBUG_MODE", True):
+            message.mooseMessage("You should see this!", debug=True)
+        output = self.mock_stdout.getvalue()
         self.assertIn("You should see this!", output)
 
     def testMooseMessageDebugOff(self):
         """
         Test that the debug flag enables debug messages.
         """
-        message.MOOSE_DEBUG_MODE = False
-        message.mooseDebug("You should see this!", debug=True)
-        output = sys.stdout.getvalue()
+        with patch("mooseutils.message.MOOSE_DEBUG_MODE", False):
+            message.mooseDebug("You should see this!", debug=True)
+        output = self.mock_stdout.getvalue()
         self.assertIn("You should see this!", output)
 
     @unittest.skip('Breaks with current package')
@@ -68,8 +79,8 @@ class TestMooseMessage(unittest.TestCase):
         Tests mooseError function.
         """
         message.mooseError("Don't do it!")
-        output = sys.stdout.getvalue()
-        err = sys.stderr.getvalue()
+        output = self.mock_stdout.getvalue()
+        err = self.mock_stderr.getvalue()
         self.assertIn('ERROR', output)
         self.assertIn("Don't do it!", output)
         self.assertIn("in mooseError", err)
@@ -80,7 +91,7 @@ class TestMooseMessage(unittest.TestCase):
         Tests mooseWarning function.
         """
         message.mooseWarning("Just a little warning")
-        output = sys.stdout.getvalue()
+        output = self.mock_stdout.getvalue()
         self.assertIn('WARNING', output)
         self.assertIn("Just a little warning", output)
         self.assertIn('\033[33m', output)
@@ -89,18 +100,18 @@ class TestMooseMessage(unittest.TestCase):
         """
         Test use of mooseDebug function, with debugging enabled.
         """
-        message.MOOSE_DEBUG_MODE = True
-        message.mooseDebug("You should see this!")
-        output = sys.stdout.getvalue()
+        with patch("mooseutils.message.MOOSE_DEBUG_MODE", True):
+            message.mooseDebug("You should see this!")
+        output = self.mock_stdout.getvalue()
         self.assertIn("You should see this!", output)
 
     def testDebugMessageOff(self):
         """
         Test use of mooseDebug function, with debugging disabled.
         """
-        message.MOOSE_DEBUG_MODE = False
-        message.mooseDebug("You should NOT see this!")
-        output = sys.stdout.getvalue()
+        with patch("mooseutils.message.MOOSE_DEBUG_MODE", False):
+            message.mooseDebug("You should NOT see this!")
+        output = self.mock_stdout.getvalue()
         self.assertNotIn("You should NOT see this!", output)
 
 

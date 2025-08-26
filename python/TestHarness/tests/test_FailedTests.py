@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import tempfile
-from TestHarnessTestCase import TestHarnessTestCase
+from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
     def testFailedTests(self):
