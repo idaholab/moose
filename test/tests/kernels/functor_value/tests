@@ -6,6 +6,6 @@
     type = Exodiff
     input = 'functor_value.i'
     exodiff = 'functor_value_out.e'
-    requirement = 'The system shall allow the residual to be defined in such a way that the variable matches a predefined value (as defined by a Functor).'
+    requirement = 'The system shall allow the residual to be defined in such a way that the variable matches a predefined value, computed by a Functor.'
   []
 []
