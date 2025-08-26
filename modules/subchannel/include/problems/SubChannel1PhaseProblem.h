@@ -327,6 +327,12 @@ protected:
   PetscScalar _correction_factor = 1.0;
 
 public:
+  inline void verbose(const std::string & s) const
+  {
+    if (_verbose_subchannel)
+      _console << s << std::endl;
+  }
+
   static InputParameters validParams();
 };
 

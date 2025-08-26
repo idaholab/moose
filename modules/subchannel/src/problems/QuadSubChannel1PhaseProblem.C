@@ -798,8 +798,7 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
 #endif
     LibmeshPetscCall(MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
     LibmeshPetscCall(MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY));
-    if (_verbose_subchannel)
-      _console << "Block: " << iblock << " - Enthalpy conservation matrix assembled" << std::endl;
+    verbose("Block: " + std::to_string(iblock) + " - Enthalpy conservation matrix assembled");
     // RHS
     LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_time_derivative_rhs));
     LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_advective_derivative_rhs));
