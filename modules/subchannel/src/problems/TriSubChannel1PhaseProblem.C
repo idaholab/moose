@@ -673,6 +673,38 @@ TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int 
     return 0.0;
 }
 
+Real
+TriSubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz)
+{
+  if (_duct_mesh_exist)
+  {
+    auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+    if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
+    {
+      auto dz = _z_grid[iz] - _z_grid[iz - 1];
+      auto * node_in_chan = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+      auto * node_out_chan = _subchannel_mesh.getChannelNode(i_ch, iz);
+      auto * node_in_duct = _subchannel_mesh.getDuctNodeFromChannel(node_in_chan);
+      auto * node_out_duct = _subchannel_mesh.getDuctNodeFromChannel(node_out_chan);
+      auto heat_rate_in = (*_duct_heat_flux_soln)(node_in_duct);
+      auto heat_rate_out = (*_duct_heat_flux_soln)(node_out_duct);
+      auto width = _subchannel_mesh.getPitch();
+      if (subch_type == EChannelType::CORNER)
+        width = 2.0 / std::sqrt(3.0) *
+                (_subchannel_mesh.getPinDiameter() / 2.0 + _tri_sch_mesh.getDuctToPinGap());
+      return 0.5 * (heat_rate_in + heat_rate_out) * dz * width;
+    }
+    else
+    {
+      return 0.0;
+    }
+  }
+  else
+  {
+    return 0.0;
+  }
+}
+
 void
 TriSubChannel1PhaseProblem::computeh(int iblock)
 {
