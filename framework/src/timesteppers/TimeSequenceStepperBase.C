@@ -50,25 +50,7 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
   {
     // also we need to do something different when restarting
     if (!_app.isRestarting() || _time_sequence.empty())
-    {
-      // sync _executioner.startTime and endTime with _time_sequence
-      Real start_time = _executioner.getStartTime();
-      Real end_time = _executioner.endTime();
-
-      // make sure time sequence is in strictly ascending order
-      if (!std::is_sorted(times.begin(), times.end(), std::less_equal<Real>()))
-        paramError("time_sequence", "Time points must be in strictly ascending order.");
-
-      _time_sequence.push_back(start_time);
-      for (unsigned int j = 0; j < times.size(); ++j)
-      {
-        if (times[j] > start_time && times[j] < end_time)
-          _time_sequence.push_back(times[j]);
-      }
-
-      if (!_set_end_time)
-        _time_sequence.push_back(end_time);
-    }
+      updateSequence(times);
     else
     {
       // in case of restart it should be allowed to modify _time_sequence if it follows the
@@ -99,6 +81,7 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
 
       // save the restarted time_sequence
       std::vector<Real> saved_time_sequence = _time_sequence;
+
       _time_sequence.clear();
 
       // step 1: fill in the entries up to _current_step
@@ -143,6 +126,33 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
     unsigned int half = (_time_sequence.size() - 1) / 2;
     _executioner.endTime() = _time_sequence[half];
   }
+}
+
+void
+TimeSequenceStepperBase::updateSequence(const std::vector<Real> & times)
+{
+  Real start_time = _executioner.getStartTime();
+  Real end_time = _executioner.endTime();
+
+  // make sure time sequence is in strictly ascending order
+  if (!std::is_sorted(times.begin(), times.end(), std::less_equal<Real>()))
+    paramError("time_sequence", "Time points must be in strictly ascending order.");
+
+  _time_sequence.push_back(start_time);
+  for (unsigned int j = 0; j < times.size(); ++j)
+  {
+    if (times[j] > start_time && times[j] < end_time)
+      _time_sequence.push_back(times[j]);
+  }
+
+  if (!_set_end_time)
+    _time_sequence.push_back(end_time);
+}
+
+void
+TimeSequenceStepperBase::resetSequence()
+{
+  _time_sequence.clear();
 }
 
 void

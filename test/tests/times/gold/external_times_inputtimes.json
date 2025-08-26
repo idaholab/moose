@@ -1,0 +1,95 @@
+{
+    "reporters": {
+        "external_input": {
+            "type": "ControllableInputTimes",
+            "values": {
+                "times": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "external_input": {
+                "times": [
+                    0.01,
+                    0.2,
+                    0.3
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.01,
+                    0.2,
+                    0.3,
+                    0.52
+                ]
+            },
+            "time": 0.01,
+            "time_step": 1
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.01,
+                    0.2,
+                    0.3,
+                    0.52,
+                    0.9
+                ]
+            },
+            "time": 0.2,
+            "time_step": 2
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.01,
+                    0.2,
+                    0.3,
+                    0.52,
+                    0.9,
+                    1.1
+                ]
+            },
+            "time": 0.3,
+            "time_step": 3
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.01,
+                    0.2,
+                    0.3,
+                    0.52,
+                    0.9,
+                    1.1,
+                    1.54
+                ]
+            },
+            "time": 0.52,
+            "time_step": 4
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.01,
+                    0.2,
+                    0.3,
+                    0.52,
+                    0.9,
+                    1.1,
+                    1.54,
+                    2.3
+                ]
+            },
+            "time": 0.9,
+            "time_step": 5
+        }
+    ]
+}

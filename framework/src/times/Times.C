@@ -32,6 +32,10 @@ Times::validParams()
   params.suppressParameter<MaterialPropertyName>("prop_getter_suffix");
   params.suppressParameter<bool>("use_interpolated_state");
 
+  params.addParam<bool>("dynamic_time_sequence",
+                        true,
+                        "Whether the time sequence is dynamic and thus needs to be updated");
+
   params.registerBase("Times");
   return params;
 }
@@ -44,7 +48,8 @@ Times::Times(const InputParameters & parameters)
     _need_broadcast(getParam<bool>("auto_broadcast")),
     _need_sort(getParam<bool>("auto_sort")),
     _need_unique(getParam<bool>("unique_times")),
-    _unique_tol(getParam<Real>("unique_tolerance"))
+    _unique_tol(getParam<Real>("unique_tolerance")),
+    _dynamic_time_sequence(getParam<bool>("dynamic_time_sequence"))
 {
 }
 
@@ -104,7 +109,9 @@ Times::getTimes() const
   if (_times.size())
     return _times;
   else
+  {
     mooseError("Times vector has not been initialized.");
+  }
 }
 
 void

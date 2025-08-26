@@ -1,0 +1,83 @@
+{
+    "reporters": {
+        "external_input": {
+            "type": "ControllableInputTimes",
+            "values": {
+                "times": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "external_input": {
+                "times": [
+                    0.01
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.01,
+                    0.52
+                ]
+            },
+            "time": 0.01,
+            "time_step": 1
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.01,
+                    0.52,
+                    1.54
+                ]
+            },
+            "time": 0.52,
+            "time_step": 2
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.01,
+                    0.52,
+                    1.54,
+                    3.58
+                ]
+            },
+            "time": 1.54,
+            "time_step": 3
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.01,
+                    0.52,
+                    1.54,
+                    3.58,
+                    7.66
+                ]
+            },
+            "time": 3.58,
+            "time_step": 4
+        },
+        {
+            "external_input": {
+                "times": [
+                    0.01,
+                    0.52,
+                    1.54,
+                    3.58,
+                    7.66,
+                    15.82
+                ]
+            },
+            "time": 7.66,
+            "time_step": 5
+        }
+    ]
+}
