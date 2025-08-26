@@ -11,8 +11,7 @@ value of a functor $p$ (`functor`).
 The $\pm$ sign is controlled by the `positive` boolean parameter.
 
 !alert note
-This kernel does not impose equality if other kernels are used. This is
-unless a penalty constraint would be imposed.
+This kernel only imposes the equality between the variable and the functor when it is the only kernel in that variable's equation on the specified subdomains.
 
 !syntax parameters /Kernels/FunctorValue
 
