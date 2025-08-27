@@ -277,6 +277,8 @@ private:
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
+  /// We keep these private as we don't want a derived class to call a do-nothing implementation
+  /// If they call a parent class implementation, it must have been re-defined as protected
   virtual void addSolverVariables() {}
   virtual void addAuxiliaryVariables() {}
   virtual void addInitialConditions() {}
