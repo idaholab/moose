@@ -6,7 +6,7 @@
     n_cells = 20
     pitch = 0.0126
     pin_diameter = 0.00950
-    gap = 0.00095
+    side_gap = 0.00095
     heated_length = 1.0
   []
 

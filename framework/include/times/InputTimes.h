@@ -24,4 +24,7 @@ public:
 
 protected:
   virtual void initialize() override {}
+
+  /// The input times
+  std::vector<Real> _input_times;
 };

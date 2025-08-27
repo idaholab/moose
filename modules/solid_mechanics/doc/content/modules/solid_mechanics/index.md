@@ -106,7 +106,7 @@ The Solid Mechanics module currently has two, partially interoperable
 underlying systems:
 
 - The current system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) and related kernels.
-- A newer system based on the [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) and [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) kernels.
+- A newer system based on the [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) and [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) kernels [!cite](10.1145/3716308).
 
 The current system may suffer from convergence issues caused by non-exact Jacobians for large deformations problems when not used with the Automatic Differentiation variants of the kernels and underlying materials.
 The newer system (referred to in the documentation as the *Lagrangian* kernels) has exact Jacobians and also includes:

@@ -49,6 +49,8 @@ public:
   ///                         or return instead the largest Real number (from std::numeric_limits)
   Real getNextTime(const Real current_time, const bool error_if_no_next) const;
 
+  bool isDynamicTimeSequence() const { return _dynamic_time_sequence; };
+
 protected:
   /// In charge of computing / loading the times, unless all that could be done there is done
   /// in the constructor
@@ -79,4 +81,7 @@ protected:
   const bool _need_unique;
   /// Absolute tolerance for performing duplication checks to make the times vector unique
   const Real _unique_tol;
+
+  /// whether the time sequence is set dynamically
+  const bool _dynamic_time_sequence;
 };

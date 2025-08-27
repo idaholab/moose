@@ -45,8 +45,12 @@ protected:
   const unsigned int _ny;
   /// Total number of subchannels
   unsigned int _n_channels;
-  /// Half of gap between adjacent assemblies
-  const Real _gap;
+  /**
+   * The side gap, not to be confused with the gap between pins, this refers to the gap
+   * next to the duct or else the distance between the subchannel centroid to the duct wall.
+   * distance(edge pin center, duct wall) = pitch / 2 + side_gap [m].
+   */
+  const Real _side_gap;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;
   /// x,y coordinates of the subchannel centroids

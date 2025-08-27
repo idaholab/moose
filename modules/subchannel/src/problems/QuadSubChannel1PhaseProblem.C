@@ -50,7 +50,7 @@ QuadSubChannel1PhaseProblem::initializeSolution()
   {
     Real standard_area, additional_area, wetted_perimeter, displaced_area;
     auto pitch = _subchannel_mesh.getPitch();
-    auto gap = _subchannel_mesh.getGap();
+    auto side_gap = _subchannel_mesh.getSideGap();
     auto z_blockage = _subchannel_mesh.getZBlockage();
     auto index_blockage = _subchannel_mesh.getIndexBlockage();
     auto reduction_blockage = _subchannel_mesh.getReductionBlockage();
@@ -73,16 +73,16 @@ QuadSubChannel1PhaseProblem::initializeSolution()
         if (subch_type == EChannelType::CORNER)
         {
           standard_area = 0.25 * pitch * pitch;
-          displaced_area = (2 * gap + pitch) * (*_displacement_soln)(node) / sqrt(2) +
+          displaced_area = (2 * side_gap + pitch) * (*_displacement_soln)(node) / sqrt(2) +
                            (*_displacement_soln)(node) * (*_displacement_soln)(node) / 2;
-          additional_area = pitch * gap + gap * gap;
+          additional_area = pitch * side_gap + side_gap * side_gap;
           wetted_perimeter =
-              rod_perimeter + pitch + 2 * gap + 2 * (*_displacement_soln)(node) / sqrt(2);
+              rod_perimeter + pitch + 2 * side_gap + 2 * (*_displacement_soln)(node) / sqrt(2);
         }
         else if (subch_type == EChannelType::EDGE)
         {
           standard_area = 0.5 * pitch * pitch;
-          additional_area = pitch * gap;
+          additional_area = pitch * side_gap;
           displaced_area = pitch * (*_displacement_soln)(node);
           wetted_perimeter = rod_perimeter + pitch;
         }
@@ -175,7 +175,7 @@ QuadSubChannel1PhaseProblem::initializeSolution()
           }
           displacement = displacement / counter;
           _subchannel_mesh._gij_map[iz][i_gap] =
-              (pitch - (*_Dpin_soln)(pin_node_1)) / 2.0 + gap + displacement;
+              (pitch - (*_Dpin_soln)(pin_node_1)) / 2.0 + side_gap + displacement;
         }
         else // center gap
         {
@@ -243,8 +243,8 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
     auto pin_diameter = _subchannel_mesh.getPinDiameter();
     // This gap is a constant value for the whole assembly. Might want to make it
     // subchannel specific in the future if we have duct deformation.
-    auto gap = _subchannel_mesh.getGap();
-    auto w = (pin_diameter / 2.0) + (pitch / 2.0) + gap;
+    auto side_gap = _subchannel_mesh.getSideGap();
+    auto w = (pin_diameter / 2.0) + (pitch / 2.0) + side_gap;
     auto p_over_d = pitch / pin_diameter;
     auto w_over_d = w / pin_diameter;
     auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
