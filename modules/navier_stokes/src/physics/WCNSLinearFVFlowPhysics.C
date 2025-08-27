@@ -31,6 +31,7 @@ WCNSLinearFVFlowPhysics::validParams()
 
   params.addParam<bool>(
       "orthogonality_correction", false, "Whether to use orthogonality correction");
+  params.renameParam("orthogonality_correction", "use_nonorthogonal_correction", "");
   params.set<unsigned short>("ghost_layers") = 1;
 
   // This will be adapted based on the dimension
@@ -245,7 +246,11 @@ WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
-  params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+  if (!_turbulence_physics)
+    params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+  else
+    params.set<MooseFunctorName>(NS::mu) = NS::mu_eff;
+
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
   params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
