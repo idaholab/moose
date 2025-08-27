@@ -53,7 +53,7 @@
     moving_boundary_subdomain_pairs = '2 1; 1 2; 1; 2'
     moving_boundaries = 'upper_half_internal_boundary lower_half_internal_boundary lower_half_external_boundary upper_half_external_boundary'
     execute_on = 'INITIAL TIMESTEP_BEGIN'
-    execution_order_group = '0'
+    execution_order_group = '1'
   []
   [deactivate_lowerD_elems]
     type = CoupledVarThresholdElementSubdomainModifier
@@ -64,7 +64,7 @@
     # subdomain 103 is inactive, no variables defined on it
     subdomain_id = 103
     execute_on = 'INITIAL TIMESTEP_BEGIN'
-    execution_order_group = '1'
+    execution_order_group = '0'
   []
 []
 
