@@ -34,7 +34,7 @@ NodePositions::NodePositions(const InputParameters & parameters)
   : Positions(parameters),
     BlockRestrictable(this),
     BoundaryRestrictable(this, true),
-    _mesh(_fe_problem.mesh(getParam<bool>("use_displaced_mesh")))
+    _mesh(_subproblem.mesh())
 {
   // Mesh is ready at construction
   initialize();
@@ -50,9 +50,9 @@ NodePositions::initialize()
   // Only needed for boundary restriction
   const BoundaryInfo * binfo = nullptr;
   if (boundaryRestricted())
-    binfo = &_fe_problem.mesh().getMesh().get_boundary_info();
+    binfo = &_mesh.getMesh().get_boundary_info();
 
-  for (const auto & [node_id, elems_ids] : _fe_problem.mesh().nodeToElemMap())
+  for (const auto & [node_id, elems_ids] : _mesh.nodeToElemMap())
   {
     const auto * const node = _mesh.queryNodePtr(node_id);
     if (!node)

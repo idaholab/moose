@@ -29,5 +29,5 @@ public:
   // We need to override finalize to prune duplicate positions on distributed meshes.
   virtual void finalize() override;
 
-  const MooseMesh & _mesh;
+  MooseMesh & _mesh;
 };

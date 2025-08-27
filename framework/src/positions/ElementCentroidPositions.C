@@ -27,9 +27,7 @@ ElementCentroidPositions::validParams()
 }
 
 ElementCentroidPositions::ElementCentroidPositions(const InputParameters & parameters)
-  : Positions(parameters),
-    BlockRestrictable(this),
-    _mesh(_fe_problem.mesh(getParam<bool>("use_displaced_mesh")))
+  : Positions(parameters), BlockRestrictable(this), _mesh(_subproblem.mesh())
 {
   // Mesh is ready at construction
   initialize();
