@@ -8,7 +8,8 @@
 
 ## Overview
 
-AuxKernel for projecting a scalar coefficient onto an MFEM variable.
+AuxKernel for projecting a scalar coefficient onto a scalar auxiliary variable
+in, e.g., $H^1$ or $L^2$.
 
 ## Example Input File Syntax
 

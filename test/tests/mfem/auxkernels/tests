@@ -7,7 +7,7 @@
     ignored_items = "root['VTKFile']['@version']"
     design = 'MFEMScalarProjectionAux.md MFEMVectorProjectionAux.md'
     issues = '#31153'
-    requirement = 'The system shall have the ability to project scalar and vector coefficients onto appropriate MFEM variables.'
+    requirement = 'The system shall have the ability to project scalar and vector coefficients onto appropriate MFEM auxvariables.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks

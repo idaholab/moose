@@ -14,7 +14,7 @@
 #include "MFEMAuxKernel.h"
 
 /**
- * Projects a vector coefficient onto a vector-valued aux variable.
+ * Projects a vector coefficient onto a vector-valued auxvariable.
  */
 class MFEMVectorProjectionAux : public MFEMAuxKernel
 {

@@ -14,7 +14,7 @@
 #include "MFEMAuxKernel.h"
 
 /**
- * Projects a scalar coefficient onto a scalar-valued aux variable.
+ * Projects a scalar coefficient onto a scalar-valued auxvariable.
  */
 class MFEMScalarProjectionAux : public MFEMAuxKernel
 {

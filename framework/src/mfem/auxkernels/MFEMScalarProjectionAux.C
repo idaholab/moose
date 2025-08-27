@@ -17,7 +17,7 @@ InputParameters
 MFEMScalarProjectionAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
-  params.addClassDescription("Projects a scalar coefficient onto a scalar MFEMVariable");
+  params.addClassDescription("Projects a scalar coefficient onto a scalar MFEM auxvariable");
   params.addRequiredParam<MFEMScalarCoefficientName>("coefficient",
                                                      "Name of the scalar coefficient to project.");
   return params;

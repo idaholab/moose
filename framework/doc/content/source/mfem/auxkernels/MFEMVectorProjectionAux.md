@@ -8,7 +8,8 @@
 
 ## Overview
 
-AuxKernel for projecting a vector coefficient onto an MFEM variable.
+AuxKernel for projecting a vector coefficient onto a vector auxiliary variable
+in, e.g., $H(\mathrm{curl})$ or $H(\mathrm{div})$.
 
 ## Example Input File Syntax
 

@@ -17,7 +17,7 @@ InputParameters
 MFEMVectorProjectionAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
-  params.addClassDescription("Projects a vector coefficient onto a vector MFEMVariable.");
+  params.addClassDescription("Projects a vector coefficient onto a vector MFEM auxvariable.");
   params.addRequiredParam<MFEMVectorCoefficientName>("vector_coefficient",
                                                      "Name of the vector coefficient to project.");
   return params;
