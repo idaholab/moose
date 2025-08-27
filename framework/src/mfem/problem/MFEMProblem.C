@@ -79,20 +79,14 @@ MFEMProblem::addIndicator(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
 
   const UserObject * est_uo = &(getUserObjectBase(name));
-  if (dynamic_cast<const MFEMIndicator *>(est_uo))
-  {
-    // success
-    std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMIndicator>(name).getSharedPtr();
-    std::shared_ptr<MFEMIndicator> estimator = std::dynamic_pointer_cast<MFEMIndicator>(object_ptr);
+  mooseAssert(dynamic_cast<const MFEMIndicator *>(est_uo),
+              "Cannot add estimator with name '" + name + "'");
 
-    // construct the estimator itself
-    estimator->createEstimator();
-  }
+  std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMIndicator>(name).getSharedPtr();
+  std::shared_ptr<MFEMIndicator> estimator = std::dynamic_pointer_cast<MFEMIndicator>(object_ptr);
 
-  else
-  {
-    mooseError("Cannot add estimator :()");
-  }
+  // construct the estimator itself
+  estimator->createEstimator();
 }
 
 void
@@ -103,21 +97,16 @@ MFEMProblem::addMarker(const std::string & user_object_name,
   FEProblemBase::addUserObject(user_object_name, name, parameters);
 
   const UserObject * est_uo = &(getUserObjectBase(name));
-  if (dynamic_cast<const MFEMRefinementMarker *>(est_uo))
-  {
-    std::shared_ptr<MooseObject> object_ptr =
-        getUserObject<MFEMRefinementMarker>(name).getSharedPtr();
-    std::shared_ptr<MFEMRefinementMarker> refiner =
-        std::dynamic_pointer_cast<MFEMRefinementMarker>(object_ptr);
+  mooseAssert(dynamic_cast<const MFEMRefinementMarker *>(est_uo),
+              "Cannot add estimator with refiner '" + name + "'");
 
-    _problem_data._refiner = refiner;
-    _problem_data._use_amr = true;
-  }
+  std::shared_ptr<MooseObject> object_ptr =
+      getUserObject<MFEMRefinementMarker>(name).getSharedPtr();
+  std::shared_ptr<MFEMRefinementMarker> refiner =
+      std::dynamic_pointer_cast<MFEMRefinementMarker>(object_ptr);
 
-  else
-  {
-    mooseError("Cannot add refiner :()");
-  }
+  _problem_data._refiner = refiner;
+  _problem_data._use_amr = true;
 }
 
 void
@@ -739,43 +728,33 @@ MFEMProblem::solverTypeString(const unsigned int libmesh_dbg_var(solver_sys_num)
 }
 
 void
-MFEMProblem::SetUpAMR()
+MFEMProblem::setUpAMR()
 {
-  if (_problem_data._refiner)
-  {
-    _problem_data._refiner->setUp();
-  }
-  else
-  {
-    mooseError("Failed to setup amr");
-  }
+  mooseAssert(_problem_data._refiner, "Found no refiner during setUpAMR()");
+  _problem_data._refiner->setUp();
 
-  // Check the mesh is non-conforming
-  if (_problem_data.pmesh->Conforming())
-  {
-    mooseError("Amr requires mesh to be non-conforming");
-  }
+  mooseAssert(_problem_data.pmesh->Nonconforming(), "Mesh must be non-conforming to use amr");
 }
 
 void
-MFEMProblem::HRefine()
+MFEMProblem::hRefine()
 {
-  if (UseAMR())
+  if (useAMR())
   {
-    _problem_data._refiner->HRefine(*_problem_data.pmesh);
+    _problem_data._refiner->hRefine(*_problem_data.pmesh);
     ;
   }
   else
   {
     mooseError(
-        "Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
+        "Called EquationSystemProblemOperator::hRefine(), even though _use_amr is set to false.");
   }
 }
 
 void
-MFEMProblem::PRefine()
+MFEMProblem::pRefine()
 {
-  if (UseAMR())
+  if (useAMR())
   {
     mfem::Array<mfem::pRefinement> prefinements;
     mfem::Array<mfem::Refinement> refinements;
@@ -795,20 +774,20 @@ MFEMProblem::PRefine()
   else
   {
     mooseError(
-        "Called EquationSystemProblemOperator::HRefine(), even though _use_amr is set to false.");
+        "Called EquationSystemProblemOperator::hRefine(), even though _use_amr is set to false.");
   }
 }
 
 bool
-MFEMProblem::UseHRefinement() const
+MFEMProblem::useHRefinement() const
 {
-  return (_problem_data._refiner->UseHRefinement());
+  return (_problem_data._refiner->useHRefinement());
 }
 
 bool
-MFEMProblem::UsePRefinement() const
+MFEMProblem::usePRefinement() const
 {
-  return (_problem_data._refiner->UsePRefinement());
+  return (_problem_data._refiner->usePRefinement());
 }
 
 #endif

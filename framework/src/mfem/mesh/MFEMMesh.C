@@ -33,6 +33,10 @@ MFEMMesh::validParams()
       "nc_simplices", true, "For simplicial meshes, enable/disable nonconforming refinement.");
   params.addParam<bool>(
       "use_amr", false, "Determines whether we enable AMR (forces the mesh to be nonconforming)");
+  params.addParam<bool>("reorder_mesh",
+                        false,
+                        "Determines whether we reorder the mesh to improve dynamic partitioning. "
+                        "Only Hilbert is supported at present.");
 
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
@@ -63,23 +67,14 @@ MFEMMesh::buildMesh()
                     isParamSetByUser("serial_refine") ? getParam<unsigned int>("serial_refine")
                                                       : getParam<unsigned int>("uniform_refine"));
 
-  // Not used by default - MFEM supports load balancing of parallel
-  // non-conforming meshes with a space-filling curve partitioning,
-  // but this requires the mesh to be ordered, ideally as a sequence
-  // of face-neighbours (c.f. MFEM example 6p)
-  if (isParamSetByUser("reorder_mesh"))
+  // MFEM supports load balancing of parallel non-conforming meshes
+  // with a space-filling curve partitioning, and we can improve it
+  // by re-ordering the mesh. For now, we only support the Hilbert
+  // ordering, although there is one other option.
+  if (getParam<bool>("reorder_mesh"))
   {
     mfem::Array<int> ordering;
-    switch (getParam<int>("reorder_mesh"))
-    {
-      case 1:
-        mfem_ser_mesh.GetHilbertElementOrdering(ordering);
-        break;
-      case 2:
-        mfem_ser_mesh.GetGeckoElementOrdering(ordering);
-        break;
-    }
-
+    mfem_ser_mesh.GetHilbertElementOrdering(ordering);
     mfem_ser_mesh.ReorderElements(ordering);
   }
 

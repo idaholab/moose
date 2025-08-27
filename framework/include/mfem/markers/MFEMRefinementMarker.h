@@ -11,6 +11,7 @@
 #pragma once
 
 #include "MFEMGeneralUserObject.h"
+#include "MFEMIndicator.h"
 
 /**
  * Class to construct threshold refiner.
@@ -35,16 +36,16 @@ public:
   void MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinement> & refinements);
 
   /// Refines the mesh wherever the refiner sees fit.
-  void HRefine(mfem::ParMesh & mesh);
+  void hRefine(mfem::ParMesh & mesh);
 
   /// Checks if H refinement is enabled, and if we should continue.
-  bool UseHRefinement() const
+  bool useHRefinement() const
   {
     return _use_h_refinement and !_stop_h_ref and (_h_ref_counter < _max_h_level);
   }
 
   /// Checks if P refinement is enabled, and if we should continue.
-  bool UsePRefinement() const
+  bool usePRefinement() const
   {
     return _use_p_refinement and !_stop_p_ref and (_p_ref_counter < _max_p_level);
   }
@@ -53,8 +54,8 @@ public:
   const unsigned & maxPLevel() const { return _max_p_level; }
 
 protected:
-  // Shared pointer to underlying mfem object
-  std::shared_ptr<mfem::ThresholdRefiner> _threshold_refiner;
+  /// Shared pointer to underlying mfem object
+  std::unique_ptr<mfem::ThresholdRefiner> _threshold_refiner;
   std::string _estimator_name;
 
   float _error_threshold;
@@ -75,6 +76,8 @@ protected:
 
   bool _use_h_refinement{false};
   bool _use_p_refinement{false};
+
+  const MFEMIndicator * _estimator{nullptr};
 };
 
 #endif

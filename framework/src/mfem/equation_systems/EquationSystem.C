@@ -476,8 +476,7 @@ EquationSystem::UpdateEquationSystem()
       auto trial_var_name = _test_var_names.at(j);
       if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
       {
-        auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
-                                                                 _test_pfespaces.at(i));
+        auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
         mblf->Update();
         mblf->Assemble();
       }

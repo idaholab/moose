@@ -76,9 +76,9 @@ MFEMProblemSolve::solve()
     for (const auto & problem_operator : _problem_operators)
       problem_operator->Solve();
 
-    while (_mfem_problem.UseAMR() and ApplyRefinements())
+    while (_mfem_problem.useAMR() and applyRefinements())
     {
-      UpdateAfterRefinement();
+      updateAfterRefinement();
       // Solve again
       for (const auto & problem_operator : _problem_operators)
         problem_operator->Solve();
@@ -113,27 +113,27 @@ MFEMProblemSolve::solve()
 
 //! Returns true if we need to solve again
 bool
-MFEMProblemSolve::ApplyRefinements()
+MFEMProblemSolve::applyRefinements()
 {
   bool output = false;
 
-  if (_mfem_problem.UsePRefinement())
+  if (_mfem_problem.usePRefinement())
   {
     output = true;
-    _mfem_problem.PRefine();
+    _mfem_problem.pRefine();
   }
 
-  if (_mfem_problem.UseHRefinement())
+  if (_mfem_problem.useHRefinement())
   {
     output = true;
-    _mfem_problem.HRefine();
+    _mfem_problem.hRefine();
   }
 
   return output;
 }
 
 void
-MFEMProblemSolve::UpdateAfterRefinement()
+MFEMProblemSolve::updateAfterRefinement()
 {
   // Update in the mfem problem
   _mfem_problem.updateAfterRefinement();
