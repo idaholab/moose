@@ -11,29 +11,36 @@
 
 #pragma once
 #include "MFEMPostprocessor.h"
-#include "MFEMBoundaryRestrictable.h"
+#include "MFEMBlockRestrictable.h"
 
 /**
- * Compute the total flux crossing a sideset in the problem.
+ * Compute the integral of the innter product between two MFEM vector FE variables, scaled by an
+ * optional scalar coefficient.
  */
-class MFEMBoundaryNetFluxPostprocessor : public MFEMPostprocessor, public MFEMBoundaryRestrictable
+class MFEMVectorFEInnerProductIntegralPostprocessor : public MFEMPostprocessor,
+                                                      public MFEMBlockRestrictable
 {
 public:
   static InputParameters validParams();
 
-  MFEMBoundaryNetFluxPostprocessor(const InputParameters & parameters);
+  MFEMVectorFEInnerProductIntegralPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;
+
+  /**
+   * Evaluate integral.
+   */
   virtual void execute() override;
 
   /**
-   * Get the L2 Error.
+   * Return the last evaluated integral value.
    */
   virtual PostprocessorValue getValue() const override final;
 
 private:
-  mfem::real_t _total_flux;
-  mfem::GridFunction & _var;
+  mfem::real_t _integral;
+  mfem::ParGridFunction & _primal_var;
+  mfem::ParGridFunction & _dual_var;
 };
 
 #endif
