@@ -7,6 +7,7 @@
     exodiff = steady_out.e
     recover = false
     abs_zero = 1e-7
+    custom_cmp = 'test.exodiff'
     max_threads = 1
     max_parallel = 1
     requirement = 'The system shall be able to restart after a steady state solution'
@@ -17,6 +18,7 @@
     exodiff = transient_out.e
     prereq = 'steady'
     abs_zero = 5e-6
+    custom_cmp = 'test.exodiff'
     max_threads = 1
     max_parallel = 1
     requirement = 'The system shall be able to restart after a transient solution'

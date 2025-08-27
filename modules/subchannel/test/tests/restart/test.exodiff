@@ -1,0 +1,5 @@
+COORDINATES
+TIME STEPS
+NODAL VARIABLES
+	!q_prime_duct
+	!duct_heat_flux

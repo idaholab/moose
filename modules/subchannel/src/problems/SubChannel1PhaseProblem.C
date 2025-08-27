@@ -1872,6 +1872,35 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   PetscFunctionReturn(LIBMESH_PETSC_SUCCESS);
 }
 
+Real
+SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz)
+{
+  if (_duct_mesh_exist)
+  {
+    auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+    if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
+    {
+      auto dz = _z_grid[iz] - _z_grid[iz - 1];
+      auto * node_in_chan = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+      auto * node_out_chan = _subchannel_mesh.getChannelNode(i_ch, iz);
+      auto * node_in_duct = _subchannel_mesh.getDuctNodeFromChannel(node_in_chan);
+      auto * node_out_duct = _subchannel_mesh.getDuctNodeFromChannel(node_out_chan);
+      auto heat_rate_in = (*_duct_heat_flux_soln)(node_in_duct);
+      auto heat_rate_out = (*_duct_heat_flux_soln)(node_out_duct);
+      auto width = getSubChannelWidth(i_ch);
+      return 0.5 * (heat_rate_in + heat_rate_out) * dz * width;
+    }
+    else
+    {
+      return 0.0;
+    }
+  }
+  else
+  {
+    return 0.0;
+  }
+}
+
 PetscErrorCode
 SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 {
