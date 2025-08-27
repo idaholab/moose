@@ -471,6 +471,8 @@ WCNSFVTurbulencePhysics::addKEpsilonSink()
 void
 WCNSFVTurbulencePhysics::addAuxiliaryKernels()
 {
+  WCNSFVTurbulencePhysicsBase::addAuxiliaryKernels();
+
   // Note that if we are restarting this will overwrite the restarted mixing-length
   if (_turbulence_model == "mixing-length")
   {
