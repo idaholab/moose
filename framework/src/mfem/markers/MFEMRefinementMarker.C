@@ -10,7 +10,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMRefinementMarker.h"
-#include "MFEMIndicator.h"
 
 registerMooseObject("MooseApp", MFEMRefinementMarker);
 
@@ -20,7 +19,7 @@ MFEMRefinementMarker::validParams()
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("Marker");
 
-  MooseEnum refinement_type("H_REF P_REF H_P_REF", "H_P_REF");
+  MooseEnum refinement_type("h p hp", "hp");
   params.addRequiredParam<MooseEnum>(
       "refinement_type",
       refinement_type,
@@ -47,31 +46,19 @@ MFEMRefinementMarker::MFEMRefinementMarker(const InputParameters & params)
     _error_threshold(getParam<Real>("refine")),
     _max_h_level(getParam<unsigned>("max_h_level")),
     _max_p_level(getParam<unsigned>("max_p_level")),
-    _refinement_type(getParam<MooseEnum>("refinement_type"))
+    _refinement_type(getParam<MooseEnum>("refinement_type")),
+    _use_h_refinement(_refinement_type == "h" || _refinement_type == "hp"),
+    _use_p_refinement(_refinement_type == "p" || _refinement_type == "hp")
 {
-  // _use_h_refinement and _use_p_refinement both default to false
-  if (_refinement_type == "H_P_REF")
-  {
-    _use_h_refinement = true;
-    _use_p_refinement = true;
-  }
-  else if (_refinement_type == "H_REF")
-  {
-    _use_h_refinement = true;
-  }
-  else if (_refinement_type == "P_REF")
-  {
-    _use_p_refinement = true;
-  }
 }
 
 void
 MFEMRefinementMarker::setUp()
 {
   // fetch const ref to the estimator
-  const auto & estimator = getUserObjectByName<MFEMIndicator>(_estimator_name);
+  _estimator = &getUserObjectByName<MFEMIndicator>(_estimator_name);
 
-  _threshold_refiner = std::make_shared<mfem::ThresholdRefiner>(*(estimator.getEstimator()));
+  _threshold_refiner = std::make_unique<mfem::ThresholdRefiner>(*(_estimator->getEstimator()));
   _threshold_refiner->SetTotalErrorFraction(_error_threshold);
 }
 
@@ -98,7 +85,7 @@ MFEMRefinementMarker::MarkWithoutRefining(mfem::ParMesh & mesh,
 
 // We poll the refiner to ask if we need to stop h-refinement
 void
-MFEMRefinementMarker::HRefine(mfem::ParMesh & mesh)
+MFEMRefinementMarker::hRefine(mfem::ParMesh & mesh)
 {
   // Increase the counter and check if we have exceeded
   // the max number of refinement steps
@@ -114,9 +101,8 @@ MFEMRefinementMarker::HRefine(mfem::ParMesh & mesh)
 std::shared_ptr<mfem::ParFiniteElementSpace>
 MFEMRefinementMarker::getFESpace()
 {
-  const auto & estimator = getUserObjectByName<MFEMIndicator>(_estimator_name);
-
-  return estimator.getFESpace();
+  mooseAssert(_estimator, "Indicator is null");
+  return _estimator->getFESpace();
 }
 
 #endif
