@@ -41,6 +41,9 @@ PorousFlowDictator::validParams()
                                 0,
                                 "The fluid phase number of the aqueous phase in which the "
                                 "equilibrium and kinetic chemical reactions occur");
+
+  params.addParam<SolverSystemName>("solver_sys", "Name of the solver system for the porepressure");
+  params.addParamNamesToGroup("solver_sys", "Advanced");
   return params;
 }
 
@@ -73,15 +76,17 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
                      _num_variables); // Note: the _num_variables assignment indicates that "this is
                                       // not a PorousFlow variable"
   for (unsigned int i = 0; i < _num_variables; ++i)
+  {
     if (_moose_var_num[i] < _pf_var_num.size())
       _pf_var_num[_moose_var_num[i]] = i;
     else
       // should not couple AuxVariables to the Dictator (Jacobian entries are not calculated for
       // them)
       mooseError("PorousFlowDictator: AuxVariables variables must not be coupled into the Dictator "
-                 "for this is against specification #1984.  Variable number ",
-                 i,
-                 " is an AuxVariable.");
+                 "for this is against specification #1984.  Variable '",
+                 coupledName("porous_flow_vars", /*comp=*/i),
+                 "' is either an AuxVariable or from a different nonlinear system.");
+  }
 
   if ((_num_phases > 0) && (_aqueous_phase_number >= _num_phases))
     mooseError("PorousflowDictator: The aqueous phase number must be less than the number of fluid "
