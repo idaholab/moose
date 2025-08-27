@@ -72,7 +72,9 @@ protected:
   /// Computes Residual Matrix based on the lateral momentum conservation equation for block iblock
   void computeWijResidual(int iblock);
   /// Function that computes the heat flux added by the duct
-  virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz) = 0;
+  Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
+  /// Function that computes the heat flux added by the duct
+  virtual Real getSubChannelWidth(unsigned int i_ch) = 0;
   /// Computes Residual Vector based on the lateral momentum conservation equation for block iblock & updates flow variables based on current crossflow solution
   libMesh::DenseVector<Real> residualFunction(int iblock, libMesh::DenseVector<Real> solution);
   /// Computes solution of nonlinear equation using snes and provided a residual in a formFunction
