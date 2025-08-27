@@ -41,7 +41,7 @@ ElementGroupCentroidPositions::validParams()
 ElementGroupCentroidPositions::ElementGroupCentroidPositions(const InputParameters & parameters)
   : Positions(parameters),
     BlockRestrictable(this),
-    _mesh(_fe_problem.mesh()),
+    _mesh(_fe_problem.mesh(getParam<bool>("use_displaced_mesh"))),
     _group_type(getParam<MooseEnum>("grouping_type"))
 {
   // We are not excluding using both block restriction and extra element ids

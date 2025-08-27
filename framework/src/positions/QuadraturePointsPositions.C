@@ -42,7 +42,7 @@ QuadraturePointsPositions::validParams()
 QuadraturePointsPositions::QuadraturePointsPositions(const InputParameters & parameters)
   : Positions(parameters),
     BlockRestrictable(this),
-    _mesh(_fe_problem.mesh()),
+    _mesh(_fe_problem.mesh(getParam<bool>("use_displaced_mesh"))),
     _q_type(Moose::stringToEnum<QuadratureType>(getParam<MooseEnum>("quadrature_type"))),
     _q_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("quadrature_order")))
 {

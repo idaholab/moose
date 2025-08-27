@@ -62,7 +62,7 @@ FunctorPositions::initialize()
   _fe_problem.mesh().errorIfDistributedMesh(type());
   // Locate the origin on the mesh
   const Point p(0, 0, 0);
-  auto pl = _fe_problem.mesh().getMesh().sub_point_locator();
+  auto pl = _fe_problem.mesh(getParam<bool>("use_displaced_mesh")).getMesh().sub_point_locator();
   auto * const elem = (*pl)(p);
   if (!elem)
     mooseError("Origin point not in local mesh, cannot evaluate the functor there");
