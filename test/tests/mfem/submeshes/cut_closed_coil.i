@@ -1,6 +1,11 @@
 # Solve for the electric field on a closed conductor subject to
 # global loop voltage constraint.
 
+initial_coil_domains = 'TorusCore TorusSheath'
+coil_cut_surface = 'Cut'
+coil_loop_voltage = -1.0
+coil_conductivity = 1.0
+
 [Problem]
   type = MFEMProblem
 []
@@ -10,11 +15,28 @@
     file = ../mesh/embedded_concentric_torus.e
 []
 
+[FunctorMaterials]
+  [Conductor]
+    type = MFEMGenericFunctorMaterial
+    prop_names = conductivity
+    prop_values = ${coil_conductivity}
+  []
+[]
+
+[ICs]
+  [coil_external_potential_ic]
+    type = MFEMScalarBoundaryIC
+    variable = coil_external_potential
+    boundary = ${coil_cut_surface}
+    coefficient = ${coil_loop_voltage}
+  []
+[]
+
 [SubMeshes]
   [cut]
     type = MFEMCutTransitionSubMesh
-    cut_boundary = 'Cut'
-    block = 'TorusCore TorusSheath'
+    cut_boundary = ${coil_cut_surface}
+    block = ${initial_coil_domains}
     transition_subdomain = transition_dom
     transition_subdomain_boundary = transition_bdr
     closed_subdomain = coil_dom
@@ -101,33 +123,22 @@
   []  
 []
 
-[ICs]
-  [coil_external_potential_ic]
-    type = MFEMScalarBoundaryIC
-    variable = coil_external_potential
-    boundary = 'Cut'
-    coefficient = -1.0 # Loop voltage
-  []
-[]
-
 [AuxKernels]
-  [induced_e_field]
+  [update_induced_e_field]
     type = MFEMGradAux
     variable = induced_e_field
     source = induced_potential
     scale_factor = -1.0
     execute_on = TIMESTEP_END
-    execution_order_group = 1
   []
-  [external_e_field]
+  [update_external_e_field]
     type = MFEMGradAux
     variable = transition_external_e_field
     source = transition_external_potential
     scale_factor = -1.0
     execute_on = TIMESTEP_END
-    execution_order_group = 1
   []
-  [sum]
+  [update_total_e_field]
     type = MFEMSumAux
     variable = e_field
     source1 = induced_e_field
@@ -135,14 +146,6 @@
     scale_factor = 1.0
     execute_on = TIMESTEP_END
     execution_order_group = 3
-  []
-[]
-
-[FunctorMaterials]
-  [Substance]
-    type = MFEMGenericFunctorMaterial
-    prop_names = conductivity
-    prop_values = 1.0
   []
 []
 
@@ -156,7 +159,7 @@
     type = MFEMMixedGradGradKernel
     trial_variable = coil_external_potential
     variable = coil_induced_potential
-    coefficient = 1.0
+    coefficient = conductivity
     block = 'transition_dom'
   []
 []
@@ -193,18 +196,18 @@
 []
 
 [Outputs]
-  [ParaViewDataCollection]
+  [GlobalParaViewDataCollection]
+    type = MFEMParaViewDataCollection
+    file_base = OutputData/WholePotentialCoil
+    vtk_format = ASCII
+  []
+  [TransitionParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/CutPotentialCoil
     vtk_format = ASCII
     submesh = cut
   []
-  [ParaViewDataCollection2]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/WholePotentialCoil
-    vtk_format = ASCII
-  []
-  [ParaViewDataCollection3]
+  [CoilParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/Coil
     vtk_format = ASCII
