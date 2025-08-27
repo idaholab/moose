@@ -19,6 +19,16 @@
 namespace MooseMeshUtils
 {
 
+// Used to temporarily store information about which lower-dimensional
+// sides to add and what subdomain id to use for the added sides.
+struct ElemSidePair
+{
+  ElemSidePair(Elem * elem_in, unsigned short int side_in) : elem(elem_in), side(side_in) {}
+
+  Elem * elem;
+  unsigned short int side;
+};
+
 /**
  * Merges the boundary IDs of boundaries that have the same names
  * but different IDs.
@@ -416,4 +426,29 @@ void extraElemIntegerSwapParametersProcessor(
  */
 std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const ReplicatedMesh & input_mesh,
                                                   const boundary_id_type boundary_id);
+
+/**
+ * Create a new subdomain by generating new side elements from a list of sidesets in a given mesh.
+ * @param mesh The mesh to work on
+ * @param boundary_names The names of the sidesets to be used to create the new subdomain
+ * @param new_subdomain_id The ID of the new subdomain to be created based on the sidesets
+ * @param new_subdomain_name The name of the new subdomain to be created based on the sidesets
+ * @param type_name The type of the mesh generator that is calling this method, used for error
+ *                  messages and debugging purposes.
+ */
+void createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
+                                 std::vector<BoundaryName> boundary_names,
+                                 const SubdomainID new_subdomain_id,
+                                 const SubdomainName new_subdomain_name,
+                                 const std::string type_name);
+
+/**
+ * Convert a list of blocks in a given mesh to a standalone new mesh.
+ * @param source_mesh The source mesh from which the blocks will be converted
+ * @param target_mesh The target mesh to which the blocks will be converted
+ * @param target_blocks The names of the blocks to be converted to the target mesh
+ */
+void convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
+                        std::unique_ptr<MeshBase> & target_mesh,
+                        const std::vector<SubdomainName> & target_blocks);
 }
