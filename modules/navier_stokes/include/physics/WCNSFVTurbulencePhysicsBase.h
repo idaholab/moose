@@ -60,6 +60,7 @@ protected:
   virtual void addAuxiliaryVariables() override;
   virtual void addFVKernels() override = 0;
   virtual void addFVBCs() override = 0;
+  virtual void addAuxiliaryKernels() override;
   virtual void addInitialConditions() override;
   virtual void addMaterials() override;
 

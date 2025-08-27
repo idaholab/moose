@@ -13,6 +13,7 @@
 #include "WCNSFVScalarTransportPhysicsBase.h"
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSLinearFVTurbulencePhysics.h"
+#include "kEpsilonViscosityAux.h"
 #include "NSFVBase.h"
 
 InputParameters
@@ -59,13 +60,15 @@ WCNSFVTurbulencePhysicsBase::validParams()
   params.addParam<MooseFunctorName>(
       NS::turbulent_Prandtl, NS::turbulent_Prandtl, "Turbulent Prandtl number");
   params.transferParam<Real>(INSFVTKESourceSink::validParams(), "C_pl");
+  params.transferParam<Real>(kEpsilonViscosityAux::validParams(), "mu_t_ratio_max");
 
   // Boundary parameters
   params.addParam<bool>("bulk_wall_treatment", true, "Whether to treat the wall cell as bulk");
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
   params.addParam<MooseEnum>("wall_treatment_eps",
                              wall_treatment,
-                             "The method used for computing the epsilon wall functions");
+                             "The method used for computing the epsilon wall functions and the "
+                             "turbulence viscosity wall functions");
   params.addParam<MooseEnum>("wall_treatment_T",
                              wall_treatment,
                              "The method used for computing the temperature wall functions");
@@ -274,31 +277,6 @@ WCNSFVTurbulencePhysicsBase::retrieveCoupledPhysics()
 }
 
 void
-WCNSFVTurbulencePhysicsBase::addAuxiliaryVariables()
-{
-  if (_turbulence_model == "k-epsilon" && getParam<bool>("mu_t_as_aux_variable"))
-  {
-    auto params = getFactory().getValidParams("MooseVariableFVReal");
-    assignBlocks(params, _blocks);
-    if (isParamValid("turbulent_viscosity_two_term_bc_expansion"))
-      params.set<bool>("two_term_boundary_expansion") =
-          getParam<bool>("turbulent_viscosity_two_term_bc_expansion");
-    if (!shouldCreateVariable(_turbulent_viscosity_name, _blocks, /*error if aux*/ false))
-      reportPotentiallyMissedParameters({"turbulent_viscosity_two_term_bc_expansion"},
-                                        "MooseVariableFVReal");
-    else
-      getProblem().addAuxVariable("MooseVariableFVReal", _turbulent_viscosity_name, params);
-  }
-  if (_turbulence_model == "k-epsilon" && getParam<bool>("k_t_as_aux_variable"))
-  {
-    auto params = getFactory().getValidParams("MooseVariableFVReal");
-    assignBlocks(params, _blocks);
-    if (shouldCreateVariable(NS::k_t, _blocks, /*error if aux*/ false))
-      getProblem().addAuxVariable("MooseVariableFVReal", NS::k_t, params);
-  }
-}
-
-void
 WCNSFVTurbulencePhysicsBase::addInitialConditions()
 {
   if (_turbulence_model == "mixing-length" || _turbulence_model == "none")
@@ -363,6 +341,75 @@ WCNSFVTurbulencePhysicsBase::addInitialConditions()
                      /*whether IC is a default*/ !isParamSetByUser("initial_tked"),
                      /*error if already an IC*/ isParamSetByUser("initial_tked")))
     getProblem().addInitialCondition(ic_type, prefix() + "initial_tked", params);
+}
+
+void
+WCNSFVTurbulencePhysicsBase::addAuxiliaryVariables()
+{
+  // Not future-proof
+  const bool is_linear = dynamic_cast<WCNSLinearFVTurbulencePhysics *>(this);
+  const auto var_type = is_linear ? "MooseLinearVariableFVReal" : "MooseVariableFVReal";
+
+  if (_turbulence_model == "k-epsilon" && getParam<bool>("mu_t_as_aux_variable"))
+  {
+    auto params = getFactory().getValidParams(var_type);
+    assignBlocks(params, _blocks);
+    if (!is_linear && isParamValid("turbulent_viscosity_two_term_bc_expansion"))
+      params.set<bool>("two_term_boundary_expansion") =
+          getParam<bool>("turbulent_viscosity_two_term_bc_expansion");
+    if (!shouldCreateVariable(_turbulent_viscosity_name, _blocks, /*error if aux*/ false))
+      reportPotentiallyMissedParameters({"turbulent_viscosity_two_term_bc_expansion"}, var_type);
+    else
+      getProblem().addAuxVariable(var_type, _turbulent_viscosity_name, params);
+  }
+  if (_turbulence_model == "k-epsilon" && getParam<bool>("k_t_as_aux_variable"))
+  {
+    auto params = getFactory().getValidParams(var_type);
+    assignBlocks(params, _blocks);
+    if (shouldCreateVariable(NS::k_t, _blocks, /*error if aux*/ false))
+      getProblem().addAuxVariable(var_type, NS::k_t, params);
+  }
+}
+
+void
+WCNSFVTurbulencePhysicsBase::addAuxiliaryKernels()
+{
+  const std::string u_names[3] = {"u", "v", "w"};
+  // Not future-proof
+  const bool is_linear = dynamic_cast<WCNSLinearFVTurbulencePhysics *>(this);
+
+  if (_turbulence_model == "k-epsilon" && getParam<bool>("mu_t_as_aux_variable"))
+  {
+    auto params = getFactory().getValidParams("kEpsilonViscosityAux");
+    assignBlocks(params, _blocks);
+
+    params.set<AuxVariableName>("variable") = _turbulent_viscosity_name;
+    params.set<MooseFunctorName>(NS::density) = _flow_equations_physics->densityName();
+    params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
+    params.set<MooseFunctorName>(NS::TKE) = _tke_name;
+    params.set<MooseFunctorName>(NS::TKED) = _tked_name;
+    params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
+    params.set<MooseEnum>("wall_treatment") = _wall_treatment_eps;
+    for (const auto d : make_range(dimension()))
+      params.set<MooseFunctorName>(u_names[d]) = _velocity_names[d];
+
+    params.set<bool>("newton_solve") = !is_linear;
+    params.applySpecificParameters(parameters(), {"C_mu", "bulk_wall_treatment", "mu_t_ratio_max"});
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_NONLINEAR};
+
+    getProblem().addAuxKernel("kEpsilonViscosityAux", name() + "_viscosity_aux", params);
+  }
+  if (_turbulence_model == "k-epsilon" && getParam<bool>("k_t_as_aux_variable"))
+  {
+    auto params = getFactory().getValidParams("TurbulentConductivityAux");
+    assignBlocks(params, _blocks);
+    params.set<AuxVariableName>("variable") = NS::k_t;
+    params.set<MooseFunctorName>(NS::cp) = _fluid_energy_physics->getSpecificHeatName();
+    params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
+    params.applySpecificParameters(parameters(), {"Pr_t"});
+    getProblem().addAuxKernel(
+        "TurbulentConductivityAux", name() + "_thermal_conductivity_aux", params);
+  }
 }
 
 void
