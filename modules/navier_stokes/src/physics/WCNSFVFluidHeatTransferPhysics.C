@@ -512,6 +512,11 @@ WCNSFVFluidHeatTransferPhysics::addMaterials()
   {
     params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
     params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
+    if (isParamValid(NS::fluid))
+    {
+      params.set<bool>("assumed_constant_cp") = false;
+      params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
+    }
   }
   if (_solve_for_enthalpy)
   {
