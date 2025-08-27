@@ -47,7 +47,7 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
     _xyzt({"x", "y", "z", "t"})
 {
   // coupled field variables
-  std::string variables = MooseUtils::stringJoin(_var_names, ",");
+  std::string variables = MooseUtils::stringJoin({_var_names.begin(), _var_names.end()}, ",");
 
   // positions and time
   if (_use_xyzt)
