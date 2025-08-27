@@ -36,8 +36,8 @@ public:
 protected:
   MFEMProblem & _mfem_problem;
   std::vector<std::shared_ptr<Moose::MFEM::ProblemOperatorBase>> & _problem_operators;
-  void UpdateAfterRefinement();
-  bool ApplyRefinements();
+  void updateAfterRefinement();
+  bool applyRefinements();
 };
 
 #endif

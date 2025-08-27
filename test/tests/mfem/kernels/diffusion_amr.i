@@ -21,7 +21,7 @@
       indicator = l2zz
       max_h_level = 1
       max_p_level = 1
-      refinement_type = H_P_REF
+      refinement_type = hp
     []
   []
 []
