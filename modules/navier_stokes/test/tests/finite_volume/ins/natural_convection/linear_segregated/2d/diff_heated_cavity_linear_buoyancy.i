@@ -1,11 +1,11 @@
 ################################################################################
 # MATERIAL PROPERTIES
 ################################################################################
-rho = 3279.
-mu = 1.
+rho_0 = 3279.
+mu = 1.0
 k_cond = 38.0
-cp = 640.
-alpha_b = 3.26e-4
+cp = ${fparse 640}
+alpha_b = 3.26e-4#3.26e-4
 T_0 = 875.0
 
 walls = 'right left top bottom'
@@ -30,10 +30,10 @@ walls = 'right left top bottom'
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = 0
-    xmax = 1
-    ymin = 0
-    ymax = 1
+    xmin = 1 #
+    xmax = 2.0 #1
+    ymin = 1.0 #0
+    ymax = 2.0 #1
     nx = 30
     ny = 30
   []
@@ -49,8 +49,9 @@ walls = 'right left top bottom'
     u = superficial_vel_x
     v = superficial_vel_y
     pressure = pressure
-    rho = ${rho} # 'rho'
+    rho = 'rho' #'rho' # 'rho'
     p_diffusion_kernel = p_diffusion
+    body_force_kernels_name = 'u_buoyancy; v_buoyancy'
   []
 []
 
@@ -89,24 +90,14 @@ walls = 'right left top bottom'
     pressure = pressure
     momentum_component = 'x'
   []
-  # [u_buoyancy]
-  #   type = LinearFVMomentumBoussinesq
-  #   variable = superficial_vel_x
-  #   T_fluid = T_fluid
-  #   gravity = '0 -9.81 0'
-  #   rho = ${rho}
-  #   ref_temperature = ${T_0}
-  #   alpha_name = ${alpha}
-  #   momentum_component = 'x'
-  # []
   [u_buoyancy]
     type = LinearFVMomentumBuoyancy
     variable = superficial_vel_x
     rho = 'rho'
+    reference_rho = ${rho_0}
     gravity = '0 -9.81 0'
     momentum_component = 'x'
   []
-
 
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
@@ -121,20 +112,11 @@ walls = 'right left top bottom'
     pressure = pressure
     momentum_component = 'y'
   []
-  # [v_buoyancy]
-  #   type = LinearFVMomentumBoussinesq
-  #   variable = superficial_vel_y
-  #   T_fluid = T_fluid
-  #   gravity = '0 -9.81 0'
-  #   rho = ${rho}
-  #   ref_temperature = ${T_0}
-  #   alpha_name = ${alpha}
-  #   momentum_component = 'y'
-  # []
   [v_buoyancy]
     type = LinearFVMomentumBuoyancy
     variable = superficial_vel_y
     rho = 'rho'
+    reference_rho = ${rho_0}
     gravity = '0 -9.81 0'
     momentum_component = 'y'
   []
@@ -143,13 +125,13 @@ walls = 'right left top bottom'
     type = LinearFVAnisotropicDiffusion
     variable = pressure
     diffusion_tensor = Ainv
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [HbyA_divergence]
     type = LinearFVDivergence
     variable = pressure
     face_flux = HbyA
-    force_boundary_execution = true
+    force_boundary_execution = false
   []
 
    ####### FUEL ENERGY EQUATION #######
@@ -194,44 +176,32 @@ walls = 'right left top bottom'
     functor = 880.0
   []
   [T_all]
-    type = LinearFVAdvectionDiffusionExtrapolatedBC
+    type = LinearFVAdvectionDiffusionFunctorNeumannBC
     variable = T_fluid
     boundary = 'top bottom'
-    use_two_term_expansion = false
+    functor = 0.0
   []
-  [pressure-extrapolation]
-    type = LinearFVExtrapolatedPressureBC
-    boundary = ${walls}
+  [pressure]
+    type = LinearFVPressureFluxBC
+    boundary = 'top bottom left right'
     variable = pressure
-    use_two_term_expansion = false
+    HbyA_flux = HbyA
+    Ainv = Ainv
   []
 []
-
-# [FunctorMaterials]
-#   [constant_functors]
-#     type = GenericFunctorMaterial
-#     prop_names = 'cp alpha_b'
-#     prop_values = '${cp} ${alpha}'
-#   []
-# []
-
-# [FluidProperties]
-#   [fluid_properties_obj]
-#     type                             = SimpleFluidProperties
-#     density0                         = ${rho}   # kg/m^3
-#     thermal_expansion                = ${alpha_b} # K^{-1}
-#     cp                               = ${cp}      # J/kg·K
-#     viscosity                        = ${mu}    # Pa-s11
-#     thermal_conductivity             = ${k_cond}         # W/m·K
-#   []
-# []
 
 [FunctorMaterials]
   [rho_function]
     type = ParsedFunctorMaterial
     property_name = 'rho'
     functor_names = 'T_fluid'
-    expression = '${rho}*(1-${alpha_b}*(T_fluid-${T_0})) '
+    expression = '${rho_0}*(1-${alpha_b}*(T_fluid-${T_0})) '
+  []
+  [d_rho_g_function]
+    type = ParsedFunctorMaterial
+    property_name = 'delta_rho_g'
+    functor_names = 'rho'
+    expression = ' (rho - ${rho_0}) * (-9.8)'
   []
 []
 
@@ -252,18 +222,18 @@ walls = 'right left top bottom'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
   momentum_equation_relaxation = 0.3
-  pressure_variable_relaxation = 0.7
+  pressure_variable_relaxation = 0.3
   energy_equation_relaxation = 0.95
-  num_iterations = 3000
-  pressure_absolute_tolerance = 1e-8
-  momentum_absolute_tolerance = 1e-8
-  energy_absolute_tolerance = 1e-8
+  num_iterations = 1500
+  pressure_absolute_tolerance = 1e-9
+  momentum_absolute_tolerance = 1e-9
+  energy_absolute_tolerance = 1e-9
   print_fields = false
   momentum_l_max_its = 300
 
   pin_pressure = true
   pressure_pin_value = 0.0
-  pressure_pin_point = '0.5 0.0 0.0'
+  pressure_pin_point = '1.5 1.5 0.0' #'0.5 0 0'
 
   # momentum_petsc_options = '-ksp_monitor'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
