@@ -136,7 +136,7 @@
     vector_tag = 'solution'
   []
   [soln_u]
-    type = TagVectorAux
+    type = TagSolutionAux
     variable = soln_u
     v = u
     vector_tag = 'solution'
@@ -148,7 +148,7 @@
     vector_tag = 'rhs'
   []
   [rhs_u]
-    type = TagVectorAux
+    type = TagResidualAux
     variable = rhs_u
     v = u
     vector_tag = 'rhs'
@@ -160,7 +160,7 @@
     vector_tag = 'vec_tag_u'
   []
   [extra_vector_u]
-    type = TagVectorAux
+    type = TagSolutionAux
     variable = vector_tag_u
     v = u
     vector_tag = 'vec_tag_u'
@@ -178,7 +178,7 @@
     vector_tag = 'solution'
   []
   [soln_v]
-    type = TagVectorAux
+    type = TagSolutionAux
     variable = soln_v
     v = v
     vector_tag = 'solution'
@@ -190,7 +190,7 @@
     vector_tag = 'rhs'
   []
   [rhs_v]
-    type = TagVectorAux
+    type = TagSolutionAux
     variable = rhs_v
     v = v
     vector_tag = 'rhs'
@@ -202,7 +202,7 @@
     vector_tag = 'vec_tag_v'
   []
   [extra_vector_v]
-    type = TagVectorAux
+    type = TagResidualAux
     variable = vector_tag_v
     v = v
     vector_tag = 'vec_tag_v'

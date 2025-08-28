@@ -39,10 +39,11 @@
 
 [AuxKernels]
   [flux]
-    type = ReactionForceAux
+    type = TagResidualAux
     variable = flux
     v = temp
     vector_tag = 'bcs'
+    scaled = false
   []
 []
 
@@ -90,7 +91,7 @@
   start_time = 0.0
   end_time = 1.0
   dt = 1.0
-  nl_rel_tol=1e-12
+  nl_rel_tol = 1e-12
 []
 
 [Outputs]

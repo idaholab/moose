@@ -1,13 +1,13 @@
-period=.2e-4 # s
-endtime=${fparse 3 * period} # s
-timestep=${fparse period / 100} # s
-surfacetemp=2700 # K
-bottomtemp=2700 # K
-sb=5.67e-8 # W/(m^2 K^4)
-advected_interp_method='upwind'
-velocity_interp_method='rc'
-rho='rho'
-mu='mu'
+period = .2e-4 # s
+endtime = '${fparse 3 * period}' # s
+timestep = '${fparse period / 100}' # s
+surfacetemp = 2700 # K
+bottomtemp = 2700 # K
+sb = 5.67e-8 # W/(m^2 K^4)
+advected_interp_method = 'upwind'
+velocity_interp_method = 'rc'
+rho = 'rho'
+mu = 'mu'
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -73,37 +73,37 @@ mu='mu'
     execute_on = timestep_end
   []
   [e_time]
-    type = ReactionForceAux
+    type = TagResidualAux
     variable = e_time
     vector_tag = e_time
     v = T
   []
   [e_advection]
-    type = ReactionForceAux
+    type = TagResidualAux
     variable = e_advection
     vector_tag = e_advection
     v = T
   []
   [e_mesh_advection]
-    type = ReactionForceAux
+    type = TagResidualAux
     variable = e_mesh_advection
     vector_tag = e_mesh_advection
     v = T
   []
   [e_conduction]
-    type = ReactionForceAux
+    type = TagResidualAux
     variable = e_conduction
     vector_tag = e_conduction
     v = T
   []
   [e_laser]
-    type = ReactionForceAux
+    type = TagResidualAux
     variable = e_laser
     vector_tag = e_laser
     v = T
   []
   [e_radiation]
-    type = ReactionForceAux
+    type = TagResidualAux
     variable = e_radiation
     vector_tag = e_radiation
     v = T
