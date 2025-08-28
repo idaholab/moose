@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PhaseFieldAdvection.h"
+#include "ADPhaseFieldAdvection.h"
 
-registerMooseObject("PhaseFieldApp", PhaseFieldAdvection);
+registerMooseObject("PhaseFieldApp", ADPhaseFieldAdvection);
 
 InputParameters
-PhaseFieldAdvection::validParams()
+ADPhaseFieldAdvection::validParams()
 {
   InputParameters params = ADKernelValue::validParams();
   params.addClassDescription("Implements the phasefield advection equation: $\\vec{v}\\cdot\\nabla "
@@ -22,13 +22,13 @@ PhaseFieldAdvection::validParams()
   return params;
 }
 
-PhaseFieldAdvection::PhaseFieldAdvection(const InputParameters & parameters)
+ADPhaseFieldAdvection::ADPhaseFieldAdvection(const InputParameters & parameters)
   : ADKernelValue(parameters), _velocity(adCoupledVectorValue("velocity"))
 {
 }
 
 ADReal
-PhaseFieldAdvection::precomputeQpResidual()
+ADPhaseFieldAdvection::precomputeQpResidual()
 {
   return _velocity[_qp] * _grad_u[_qp];
 }

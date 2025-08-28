@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PhaseFieldContactAngleBC.h"
+#include "ADPhaseFieldContactAngleBC.h"
 
-registerMooseObject("PhaseFieldApp", PhaseFieldContactAngleBC);
+registerMooseObject("PhaseFieldApp", ADPhaseFieldContactAngleBC);
 
 InputParameters
-PhaseFieldContactAngleBC::validParams()
+ADPhaseFieldContactAngleBC::validParams()
 {
   InputParameters params = ADIntegratedBC::validParams();
   params.addClassDescription("Enforce contact angle BC using phase field variable");
@@ -25,7 +25,7 @@ PhaseFieldContactAngleBC::validParams()
   return params;
 }
 
-PhaseFieldContactAngleBC::PhaseFieldContactAngleBC(const InputParameters & params)
+ADPhaseFieldContactAngleBC::ADPhaseFieldContactAngleBC(const InputParameters & params)
   : ADIntegratedBC(params),
     _pf(adCoupledValue("pf")),
     _grad_pf(adCoupledGradient("pf")),
@@ -37,7 +37,7 @@ PhaseFieldContactAngleBC::PhaseFieldContactAngleBC(const InputParameters & param
 }
 
 ADReal
-PhaseFieldContactAngleBC::computeQpResidual()
+ADPhaseFieldContactAngleBC::computeQpResidual()
 {
   return _test[_i][_qp] * (0.75 * _epsilon * _epsilon / _lambda) * _sigma *
          std::cos(_contactangle) * (1 - _pf[_qp] * _pf[_qp]);

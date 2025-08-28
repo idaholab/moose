@@ -57,12 +57,12 @@
     variable = pf
   []
   [time_supg]
-    type = PhaseFieldTimeDerivativeSUPG
+    type = ADPhaseFieldTimeDerivativeSUPG
     variable = pf
     velocity = velocity
   []
   [pf_advection]
-    type = PhaseFieldAdvection
+    type = ADPhaseFieldAdvection
     variable = pf
     velocity = velocity
   []
@@ -72,12 +72,12 @@
     function = pf_mms
   []
   [pf_advection_supg]
-    type = PhaseFieldAdvectionSUPG
+    type = ADPhaseFieldAdvectionSUPG
     variable = pf
     velocity = velocity
   []
   [pf_forcing_supg]
-    type = PhaseFieldForcingFunctionSUPG
+    type = ADPhaseFieldForcingFunctionSUPG
     velocity = velocity
     variable = pf
     function = pf_mms

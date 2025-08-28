@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://mooseframework.inl.gov
+//* https://www.mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,16 +11,19 @@
 
 #include "ADKernelValue.h"
 
-class PhaseFieldTwoPhaseSurfaceTension : public ADVectorKernelValue
+/**
+ * Coupled Double well Potential with a prefactor
+ *psi * (psi^2 - 1)
+ */
+class ADPhaseFieldCoupledDoubleWellPotential : public ADKernelValue
 {
 public:
   static InputParameters validParams();
-  PhaseFieldTwoPhaseSurfaceTension(const InputParameters & parameters);
+  ADPhaseFieldCoupledDoubleWellPotential(const InputParameters & parameters);
 
 protected:
-  virtual ADRealVectorValue precomputeQpResidual() override;
+  virtual ADReal precomputeQpResidual() override;
 
-  const ADVariableValue & _auxpf;
-  const ADVariableGradient & _grad_pf;
-  const Real & _coeff;
+  const ADVariableValue & _c;
+  const Real & _prefactor;
 };

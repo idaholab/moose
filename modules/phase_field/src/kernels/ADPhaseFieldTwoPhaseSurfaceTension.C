@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PhaseFieldTwoPhaseSurfaceTension.h"
+#include "ADPhaseFieldTwoPhaseSurfaceTension.h"
 
-registerMooseObject("PhaseFieldApp", PhaseFieldTwoPhaseSurfaceTension);
+registerMooseObject("PhaseFieldApp", ADPhaseFieldTwoPhaseSurfaceTension);
 
 InputParameters
-PhaseFieldTwoPhaseSurfaceTension::validParams()
+ADPhaseFieldTwoPhaseSurfaceTension::validParams()
 {
   InputParameters params = ADKernelValue::validParams();
   params.addClassDescription("Phase field surface tension force for the Navier-Stokes equations.");
@@ -22,7 +22,7 @@ PhaseFieldTwoPhaseSurfaceTension::validParams()
   return params;
 }
 
-PhaseFieldTwoPhaseSurfaceTension::PhaseFieldTwoPhaseSurfaceTension(
+ADPhaseFieldTwoPhaseSurfaceTension::ADPhaseFieldTwoPhaseSurfaceTension(
     const InputParameters & parameters)
   : ADVectorKernelValue(parameters),
     _auxpf(adCoupledValue("auxpf")),
@@ -32,7 +32,7 @@ PhaseFieldTwoPhaseSurfaceTension::PhaseFieldTwoPhaseSurfaceTension(
 }
 
 ADRealVectorValue
-PhaseFieldTwoPhaseSurfaceTension::precomputeQpResidual()
+ADPhaseFieldTwoPhaseSurfaceTension::precomputeQpResidual()
 {
   return -_coeff * _auxpf[_qp] * _grad_pf[_qp];
 }

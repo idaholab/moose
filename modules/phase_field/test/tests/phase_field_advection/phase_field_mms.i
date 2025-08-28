@@ -53,7 +53,7 @@
 
 [Kernels]
   [pf_advection]
-    type = PhaseFieldAdvection
+    type = ADPhaseFieldAdvection
     variable = pf
     velocity = velocity
   []

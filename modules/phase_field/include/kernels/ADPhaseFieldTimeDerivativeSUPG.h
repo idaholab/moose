@@ -14,12 +14,12 @@
 /**
  * Applies SUPG stabilization to the time derivative.
  */
-class PhaseFieldTimeDerivativeSUPG : public ADTimeKernelGrad
+class ADPhaseFieldTimeDerivativeSUPG : public ADTimeKernelGrad
 {
 public:
   static InputParameters validParams();
 
-  PhaseFieldTimeDerivativeSUPG(const InputParameters & parameters);
+  ADPhaseFieldTimeDerivativeSUPG(const InputParameters & parameters);
 
 protected:
   virtual ADRealVectorValue precomputeQpResidual() override;

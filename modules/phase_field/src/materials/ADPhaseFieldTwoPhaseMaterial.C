@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PhaseFieldTwoPhaseMaterial.h"
+#include "ADPhaseFieldTwoPhaseMaterial.h"
 
-registerADMooseObject("PhaseFieldApp", PhaseFieldTwoPhaseMaterial);
+registerADMooseObject("PhaseFieldApp", ADPhaseFieldTwoPhaseMaterial);
 
 InputParameters
-PhaseFieldTwoPhaseMaterial::validParams()
+ADPhaseFieldTwoPhaseMaterial::validParams()
 {
   InputParameters params = ADMaterial::validParams();
   params.addClassDescription("Material that assigns properties based on the phase field variable.");
@@ -23,7 +23,7 @@ PhaseFieldTwoPhaseMaterial::validParams()
   return params;
 }
 
-PhaseFieldTwoPhaseMaterial::PhaseFieldTwoPhaseMaterial(const InputParameters & parameters)
+ADPhaseFieldTwoPhaseMaterial::ADPhaseFieldTwoPhaseMaterial(const InputParameters & parameters)
   : ADMaterial(parameters),
     _pf(adCoupledValue("pf")),
     _prop_value_1(getParam<Real>("prop_value_1")),
@@ -33,7 +33,7 @@ PhaseFieldTwoPhaseMaterial::PhaseFieldTwoPhaseMaterial(const InputParameters & p
 }
 
 void
-PhaseFieldTwoPhaseMaterial::computeQpProperties()
+ADPhaseFieldTwoPhaseMaterial::computeQpProperties()
 {
   _prop[_qp] = 0.5 * (1 - _pf[_qp]) * _prop_value_1 + 0.5 * (1 + _pf[_qp]) * _prop_value_2;
 }

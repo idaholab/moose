@@ -1,6 +1,6 @@
-# PhaseFieldCoupledDoubleWellPotential
+# ADPhaseFieldCoupledDoubleWellPotential
 
-!syntax description /Kernels/PhaseFieldCoupledDoubleWellPotential
+!syntax description /Kernels/ADPhaseFieldCoupledDoubleWellPotential
 
 The chemical potential($G$) associated with Cahn-Hilliard equation for the advection of the phase field variable ($\phi$) can be written as([!citep](yue2010sharp)):
 
@@ -11,7 +11,7 @@ The chemical potential($G$) associated with Cahn-Hilliard equation for the advec
 
 where, $\lambda$ is the the mixing energy density and $\epsilon$ is the interface thickness between the phases.
 
-The `PhaseFieldCoupledDoubleWellPotential` implements the second term in the above equation as follows:
+The `ADPhaseFieldCoupledDoubleWellPotential` implements the second term in the above equation as follows:
 
 \begin{equation}
     prefactor \phi (\phi^2 - 1)
@@ -20,10 +20,10 @@ The `PhaseFieldCoupledDoubleWellPotential` implements the second term in the abo
 where $prefactor$ can be specified as per the problem.
 
 
-!syntax parameters /Kernels/PhaseFieldCoupledDoubleWellPotential
+!syntax parameters /Kernels/ADPhaseFieldCoupledDoubleWellPotential
 
-!syntax inputs /Kernels/PhaseFieldCoupledDoubleWellPotential
+!syntax inputs /Kernels/ADPhaseFieldCoupledDoubleWellPotential
 
-!syntax children /Kernels/PhaseFieldCoupledDoubleWellPotential
+!syntax children /Kernels/ADPhaseFieldCoupledDoubleWellPotential
 
 !bibtex bibliography

@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PhaseFieldCoupledDoubleWellPotential.h"
+#include "ADPhaseFieldCoupledDoubleWellPotential.h"
 
-registerMooseObject("PhaseFieldApp", PhaseFieldCoupledDoubleWellPotential);
+registerMooseObject("PhaseFieldApp", ADPhaseFieldCoupledDoubleWellPotential);
 
 InputParameters
-PhaseFieldCoupledDoubleWellPotential::validParams()
+ADPhaseFieldCoupledDoubleWellPotential::validParams()
 {
   InputParameters params = ADKernelValue::validParams();
   params.addClassDescription("Double well potential for Cahn-Hilliard advection.");
@@ -21,7 +21,7 @@ PhaseFieldCoupledDoubleWellPotential::validParams()
   return params;
 }
 
-PhaseFieldCoupledDoubleWellPotential::PhaseFieldCoupledDoubleWellPotential(
+ADPhaseFieldCoupledDoubleWellPotential::ADPhaseFieldCoupledDoubleWellPotential(
     const InputParameters & parameters)
   : ADKernelValue(parameters), _c(adCoupledValue("c")), _prefactor(getParam<Real>("prefactor"))
 
@@ -29,7 +29,7 @@ PhaseFieldCoupledDoubleWellPotential::PhaseFieldCoupledDoubleWellPotential(
 }
 
 ADReal
-PhaseFieldCoupledDoubleWellPotential::precomputeQpResidual()
+ADPhaseFieldCoupledDoubleWellPotential::precomputeQpResidual()
 {
   return _prefactor * _c[_qp] * (_c[_qp] * _c[_qp] - 1);
 }

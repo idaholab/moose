@@ -9,21 +9,18 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "ADKernelValue.h"
 
-#define usingPhaseFieldTwoPhaseMateriallMembers usingMaterialMembers;
-
-class PhaseFieldTwoPhaseMaterial : public ADMaterial
+class ADPhaseFieldTwoPhaseSurfaceTension : public ADVectorKernelValue
 {
 public:
   static InputParameters validParams();
-  PhaseFieldTwoPhaseMaterial(const InputParameters & parameters);
+  ADPhaseFieldTwoPhaseSurfaceTension(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties() override;
+  virtual ADRealVectorValue precomputeQpResidual() override;
 
-  const ADVariableValue & _pf;
-  const Real _prop_value_1;
-  const Real _prop_value_2;
-  ADMaterialProperty<Real> & _prop;
+  const ADVariableValue & _auxpf;
+  const ADVariableGradient & _grad_pf;
+  const Real & _coeff;
 };

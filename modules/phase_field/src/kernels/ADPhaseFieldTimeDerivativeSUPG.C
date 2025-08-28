@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PhaseFieldTimeDerivativeSUPG.h"
+#include "ADPhaseFieldTimeDerivativeSUPG.h"
 
-registerMooseObject("PhaseFieldApp", PhaseFieldTimeDerivativeSUPG);
+registerMooseObject("PhaseFieldApp", ADPhaseFieldTimeDerivativeSUPG);
 
 InputParameters
-PhaseFieldTimeDerivativeSUPG::validParams()
+ADPhaseFieldTimeDerivativeSUPG::validParams()
 {
   InputParameters params = ADTimeKernelGrad::validParams();
   params.addClassDescription(
@@ -21,13 +21,13 @@ PhaseFieldTimeDerivativeSUPG::validParams()
   return params;
 }
 
-PhaseFieldTimeDerivativeSUPG::PhaseFieldTimeDerivativeSUPG(const InputParameters & parameters)
+ADPhaseFieldTimeDerivativeSUPG::ADPhaseFieldTimeDerivativeSUPG(const InputParameters & parameters)
   : ADTimeKernelGrad(parameters), _velocity(adCoupledVectorValue("velocity"))
 {
 }
 
 ADRealVectorValue
-PhaseFieldTimeDerivativeSUPG::precomputeQpResidual()
+ADPhaseFieldTimeDerivativeSUPG::precomputeQpResidual()
 {
   ADReal tau =
       _current_elem->hmin() /

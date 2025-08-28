@@ -15,10 +15,10 @@
  * Implements a simple constant Neumann BC where grad(u)=alpha * v on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class PhaseFieldContactAngleBC : public ADIntegratedBC
+class ADPhaseFieldContactAngleBC : public ADIntegratedBC
 {
 public:
-  PhaseFieldContactAngleBC(const InputParameters & parameters);
+  ADPhaseFieldContactAngleBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 

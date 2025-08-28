@@ -1,5 +1,5 @@
 ###########################################################
-# This is a simple test of the PhaseFieldCoupledDoubleWellPotential System.
+# This is a simple test of the ADPhaseFieldCoupledDoubleWellPotential System.
 # It solves the a simple ODE du/dt = u*(u^2-1).
 # Start time = 0.1
 # u(0.1) = 0.9
@@ -35,7 +35,7 @@
     variable = u
   []
   [bf]
-    type = PhaseFieldCoupledDoubleWellPotential
+    type = ADPhaseFieldCoupledDoubleWellPotential
     c = u
     variable = 'u'
     prefactor = -1.0

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.inl.gov
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,23 +9,23 @@
 
 #pragma once
 
-#include "ADKernelValue.h"
+#include "ADKernelGrad.h"
 
 /**
- * Advection Kernel for the phasefield equation.
- *
- * u.grad(phi),
- * where u is the interface velocity and phi is the order parameter
+ * SUPG stabilization term for a forcing function.
  */
-class PhaseFieldAdvection : public ADKernelValue
+class ADPhaseFieldForcingFunctionSUPG : public ADKernelGrad
 {
 public:
   static InputParameters validParams();
 
-  PhaseFieldAdvection(const InputParameters & parameters);
+  ADPhaseFieldForcingFunctionSUPG(const InputParameters & parameters);
 
 protected:
-  virtual ADReal precomputeQpResidual() override;
+  virtual ADRealVectorValue precomputeQpResidual() override;
+
+  /// Function value
+  const Function & _function;
 
   /// Velocity vector variable
   const ADVectorVariableValue & _velocity;

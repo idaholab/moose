@@ -1,10 +1,10 @@
-# PhaseFieldAdvection
+# ADPhaseFieldAdvection
 
 The phase field equation (known as the Cahn-Hilliard equation) is typically defined as below. As shown in this equation, the
-`PhaseFieldAdvection` kernel implements the advection portion of the equation.
+`ADPhaseFieldAdvection` kernel implements the advection portion of the equation.
 
 \begin{equation}
-    \frac{\partial \phi}{\partial t} + \underbrace{\vec{v} \cdot \nabla \phi}_{\textrm{PhaseFieldAdvection}} = \gamma \nabla^2 G
+    \frac{\partial \phi}{\partial t} + \underbrace{\vec{v} \cdot \nabla \phi}_{\textrm{ADPhaseFieldAdvection}} = \gamma \nabla^2 G
 \end{equation}
 where $\phi$ is the phase field variable, $t$ is time, and $\vec{v}$ is a known velocity field that
 advects the phase field variable. $\gamma$ is the mobility coefficient and $G$ is the chemical potential associated with interface between two phases.
@@ -22,9 +22,9 @@ with a time derivative kernel ([TimeDerivative](/TimeDerivative.md)) and a body 
 
 !listing modules/phase_field/test/tests/phase_field_advection/phase_field_mms.i block=Kernels
 
-!syntax parameters /Kernels/PhaseFieldAdvection
+!syntax parameters /Kernels/ADPhaseFieldAdvection
 
-!syntax inputs /Kernels/PhaseFieldAdvection
+!syntax inputs /Kernels/ADPhaseFieldAdvection
 
-!syntax children /Kernels/PhaseFieldAdvection
+!syntax children /Kernels/ADPhaseFieldAdvection
 

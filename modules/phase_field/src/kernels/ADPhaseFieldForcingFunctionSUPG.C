@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PhaseFieldForcingFunctionSUPG.h"
+#include "ADPhaseFieldForcingFunctionSUPG.h"
 #include "Function.h"
 
-registerMooseObject("PhaseFieldApp", PhaseFieldForcingFunctionSUPG);
+registerMooseObject("PhaseFieldApp", ADPhaseFieldForcingFunctionSUPG);
 
 InputParameters
-PhaseFieldForcingFunctionSUPG::validParams()
+ADPhaseFieldForcingFunctionSUPG::validParams()
 {
   InputParameters params = ADKernelGrad::validParams();
   params.addClassDescription("The SUPG stablization term for a forcing function.");
@@ -22,7 +22,7 @@ PhaseFieldForcingFunctionSUPG::validParams()
   return params;
 }
 
-PhaseFieldForcingFunctionSUPG::PhaseFieldForcingFunctionSUPG(const InputParameters & parameters)
+ADPhaseFieldForcingFunctionSUPG::ADPhaseFieldForcingFunctionSUPG(const InputParameters & parameters)
   : ADKernelGrad(parameters),
     _function(getFunction("function")),
     _velocity(adCoupledVectorValue("velocity"))
@@ -30,7 +30,7 @@ PhaseFieldForcingFunctionSUPG::PhaseFieldForcingFunctionSUPG(const InputParamete
 }
 
 ADRealVectorValue
-PhaseFieldForcingFunctionSUPG::precomputeQpResidual()
+ADPhaseFieldForcingFunctionSUPG::precomputeQpResidual()
 {
   ADReal tau =
       _current_elem->hmin() /

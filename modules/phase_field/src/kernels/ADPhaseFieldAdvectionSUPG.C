@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PhaseFieldAdvectionSUPG.h"
+#include "ADPhaseFieldAdvectionSUPG.h"
 
-registerMooseObject("PhaseFieldApp", PhaseFieldAdvectionSUPG);
+registerMooseObject("PhaseFieldApp", ADPhaseFieldAdvectionSUPG);
 
 InputParameters
-PhaseFieldAdvectionSUPG::validParams()
+ADPhaseFieldAdvectionSUPG::validParams()
 {
   InputParameters params = ADKernelGrad::validParams();
   params.addClassDescription(
@@ -21,13 +21,13 @@ PhaseFieldAdvectionSUPG::validParams()
   return params;
 }
 
-PhaseFieldAdvectionSUPG::PhaseFieldAdvectionSUPG(const InputParameters & parameters)
+ADPhaseFieldAdvectionSUPG::ADPhaseFieldAdvectionSUPG(const InputParameters & parameters)
   : ADKernelGrad(parameters), _velocity(adCoupledVectorValue("velocity"))
 {
 }
 
 ADRealVectorValue
-PhaseFieldAdvectionSUPG::precomputeQpResidual()
+ADPhaseFieldAdvectionSUPG::precomputeQpResidual()
 {
   ADReal tau =
       _current_elem->hmin() /

@@ -69,7 +69,7 @@ prefactor_psi = ${fparse -epsilon*epsilon}
   []
 
   [phasefield_supg]
-    type = PhaseFieldTimeDerivativeSUPG
+    type = ADPhaseFieldTimeDerivativeSUPG
     velocity = velocity
     variable = pf
   []
@@ -95,7 +95,7 @@ prefactor_psi = ${fparse -epsilon*epsilon}
   []
 
   [Auxphasefield_doublewell]
-    type=PhaseFieldCoupledDoubleWellPotential
+    type=ADPhaseFieldCoupledDoubleWellPotential
     variable = auxpf
     c = pf
     prefactor=-1.0
@@ -112,7 +112,7 @@ prefactor_psi = ${fparse -epsilon*epsilon}
   []
 
   [ContactangleBC]
-    type=PhaseFieldContactAngleBC
+    type=ADPhaseFieldContactAngleBC
     variable = auxpf
     pf = pf
     epsilon = ${epsilon}
@@ -125,7 +125,7 @@ prefactor_psi = ${fparse -epsilon*epsilon}
 
 [Materials]
   [rho]
-    type = PhaseFieldTwoPhaseMaterial
+    type = ADPhaseFieldTwoPhaseMaterial
     prop_name = rho
     prop_value_1 = 1000
     prop_value_2 = 840
@@ -133,7 +133,7 @@ prefactor_psi = ${fparse -epsilon*epsilon}
    # outputs = exodus
   []
   [mu]
-    type = PhaseFieldTwoPhaseMaterial
+    type = ADPhaseFieldTwoPhaseMaterial
     prop_name = mu
     prop_value_1 = 1e-3
     prop_value_2 = 7.6e-3

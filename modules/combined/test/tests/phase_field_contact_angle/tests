@@ -1,6 +1,6 @@
 [Tests]
   issues = "#31300"
-  design = "PhaseFieldTwoPhaseSurfaceTension.md PhaseFieldTwoPhaseMaterial.md"
+  design = "ADPhaseFieldTwoPhaseSurfaceTension.md ADPhaseFieldTwoPhaseMaterial.md"
   [contact_angle]
     type = CSVDiff
     input = contact_angle.i
@@ -8,6 +8,6 @@
     min_parallel = 8
     max_time = 600
     heavy = true
-    requirement = "The PhaseFieldContactAngle kernel correctly implements the prescribed contact angle."
+    requirement = "The ADPhaseFieldContactAngleBC kernel correctly implements the prescribed contact angle."
   []
 []

@@ -9,20 +9,23 @@
 
 #pragma once
 
-#include "ADKernelGrad.h"
+#include "ADKernelValue.h"
 
 /**
- * SUPG stabilization for the advection portion of the level set equation.
+ * Advection Kernel for the phasefield equation.
+ *
+ * u.grad(phi),
+ * where u is the interface velocity and phi is the order parameter
  */
-class PhaseFieldAdvectionSUPG : public ADKernelGrad
+class ADPhaseFieldAdvection : public ADKernelValue
 {
 public:
   static InputParameters validParams();
 
-  PhaseFieldAdvectionSUPG(const InputParameters & parameters);
+  ADPhaseFieldAdvection(const InputParameters & parameters);
 
 protected:
-  virtual ADRealVectorValue precomputeQpResidual() override;
+  virtual ADReal precomputeQpResidual() override;
 
   /// Velocity vector variable
   const ADVectorVariableValue & _velocity;

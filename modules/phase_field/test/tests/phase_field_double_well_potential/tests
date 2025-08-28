@@ -1,10 +1,10 @@
 [Tests]
   issues = '#31300'
-  design = 'PhaseFieldCoupledDoubleWellPotential.md'
+  design = 'ADPhaseFieldCoupledDoubleWellPotential.md'
   [double_well_potential]
     type = CSVDiff
     input = DoubleWellPotential.i 
     csvdiff = DoubleWellPotential_csv.csv
-    requirement = "The PhaseFieldCoupledDoubleWellPotential kernel can correctly implement the source term for phase field equation."
+    requirement = "The ADPhaseFieldCoupledDoubleWellPotential kernel can correctly implement the source term for phase field equation."
   []
 []
