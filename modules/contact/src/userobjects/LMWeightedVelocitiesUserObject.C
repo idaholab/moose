@@ -20,7 +20,7 @@ LMWeightedVelocitiesUserObject::validParams()
   params += LMWeightedGapUserObject::newParams();
   params.addClassDescription("Provides the mortar contact Lagrange multipliers (normal and "
                              "tangential) for constraint enforcement.");
-  params.renameParam("lm_variable", "lm_variable_normal", "");
+  params.renameCoupledVar("lm_variable", "lm_variable_normal", "");
   params.addRequiredCoupledVar(
       "lm_variable_tangential_one",
       "The Lagrange multiplier variable representing the tangential contact pressure along the "
