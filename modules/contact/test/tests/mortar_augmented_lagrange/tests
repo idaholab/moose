@@ -1,7 +1,7 @@
 [Tests]
   issues = '#24349'
   [aux_errors]
-    design = PenaltyMortarUserObjectAux.md
+    design = MortarUserObjectAux.md
     requirement = 'The aux kernel shall throw an error if the supplied user object dies not support computing the property'
 
     [normal_pressure]

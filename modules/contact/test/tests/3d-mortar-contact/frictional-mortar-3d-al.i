@@ -35,31 +35,31 @@ offset = 0.00
 
 [AuxKernels]
   [penalty_normal_pressure_auxk]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_normal_pressure
     user_object = friction_uo
     contact_quantity = normal_pressure
   []
   [penalty_frictional_pressure_one_auxk]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_frictional_pressure_one
     user_object = friction_uo
     contact_quantity = tangential_pressure_one
   []
   [penalty_accumulated_slip_auxk]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = accumulated_slip_one
     user_object = friction_uo
     contact_quantity = accumulated_slip_one
   []
   [penalty_frictional_pressure_two_auxk]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_frictional_pressure_two
     user_object = friction_uo
     contact_quantity = tangential_pressure_two
   []
   [penalty_accumulated_slip_two_auxk]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = accumulated_slip_two
     user_object = friction_uo
     contact_quantity = accumulated_slip_two
