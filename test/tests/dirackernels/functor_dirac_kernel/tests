@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#31315'
+  design = 'FunctorDiracKernel.md'
+
+  [test]
+    type = CSVDiff
+    input = 'functor_dirac_kernel.i'
+    csvdiff = 'functor_dirac_kernel_out.csv'
+    requirement = "The system shall be able to specify a dirac kernel using a functor."
+  []
+[]
