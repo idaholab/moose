@@ -31,7 +31,6 @@ MFEMScalarProjectionAux::MFEMScalarProjectionAux(const InputParameters & paramet
 void
 MFEMScalarProjectionAux::execute()
 {
-  _result_var = 0.0;
   _result_var.ProjectCoefficient(_coef);
 }
 
