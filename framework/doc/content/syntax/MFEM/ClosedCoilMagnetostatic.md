@@ -4,9 +4,7 @@
 
 Solves for the magnetic field around a topologically closed toroidal conductor carrying a net
   current, using a magnetic vector potential discretized using $H(\mathrm{curl})$ conforming Nédélec
-  elements, following the method described in [P. Dular. "Local and Global Constraints in Finite
-  Element Modeling and the Benefits of Nodal and Edge Elements Coupling." International Compumag
-  Society Newsletter, 7, no. 2 (2000): 4-7.](https://hdl.handle.net/2268/191358) for enforcing
+  elements, following the method described in [P. Dular, International Compumag Society Newsletter, 7, no. 2 (2000): 4-7.](https://hdl.handle.net/2268/191358) for enforcing
   global constraints.
 
 ## Description
@@ -58,7 +56,7 @@ In a simply connected domain, satisfying  $\vec \nabla \times \vec E =  \vec 0$ 
     \vec E = - \vec \nabla \phi + \vec E_{ext}.
 \end{equation}
 
-With this, we can arrive at the weak form for $\vec \nabla \times \vec H &= \vec J$ we intend to solve, of the form
+With this, we can arrive at the weak form for $\vec \nabla \times \vec H = \vec J$ we intend to solve, of the form
 
 \begin{equation}
 \begin{split}
@@ -110,7 +108,7 @@ so ${\vec c_i = \vec \nabla v_i}$.
 Finally, to impose the global voltage constraint $\mathcal V = \oint_{\mathcal C} \vec E_{ext} \cdot d\vec l$, we identify that
 
 \begin{equation}
-  \mathcal V = \oint_{\mathcal C} \vec E_{ext} \cdot d\vec l$ = v|_{\Gamma_c} - v|_{\partial \Omega_t \backslash \Gamma_c}
+  \mathcal V = \oint_{\mathcal C} \vec E_{ext} \cdot d\vec l = v|_{\Gamma_c} - v|_{\partial \Omega_t \backslash \Gamma_c}
 \end{equation}
 
 since $\vec c_i = 0$ outside $\Omega_t$. The loop voltage constraint is thus strongly imposed by
@@ -120,7 +118,7 @@ since $\vec c_i = 0$ outside $\Omega_t$. The loop voltage constraint is thus str
 
 This is shown explicitly in the example file:
 
-!listing test/tests/mfem/submeshes/cut_transition.i
+!listing test/tests/mfem/submeshes/cut_closed_coil.i
 
 ## Solving for the Total Electric Field
 
@@ -134,8 +132,6 @@ With $\vec E_{ext}$ now constrained, we now must solve for the remaining degrees
 \end{equation}
 
 for $\phi$. We then can calculate the total electric field from the sum of its induced and external components.
-
-!listing test/tests/mfem/submeshes/cut_closed_coil.i
 
 ## Solving for the Magnetic Flux Density
 

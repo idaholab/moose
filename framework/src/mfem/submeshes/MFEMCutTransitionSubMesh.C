@@ -19,8 +19,10 @@ MFEMCutTransitionSubMesh::validParams()
 {
   InputParameters params = MFEMSubMesh::validParams();
   params += MFEMBlockRestrictable::validParams();
-  params.addClassDescription("Class to construct an MFEMSubMesh formed from the subspace of the "
-                             "parent mesh restricted to the set of user-specified subdomains.");
+  params.addClassDescription(
+      "Class to construct an MFEMSubMesh formed from the set of elements that have least one "
+      "vertex on the specified cut plane, that lie on one side of the plane, "
+      "and that are restricted to the set of user-specified subdomains.");
   params.addRequiredParam<BoundaryName>(
       "cut_boundary",
       "The boundary associated with the mesh cut.");
