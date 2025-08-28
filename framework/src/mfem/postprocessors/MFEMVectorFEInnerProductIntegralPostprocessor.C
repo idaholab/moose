@@ -36,24 +36,26 @@ MFEMVectorFEInnerProductIntegralPostprocessor::MFEMVectorFEInnerProductIntegralP
     _primal_var(getMFEMProblem().getProblemData().gridfunctions.GetRef(
         getParam<VariableName>("primal_variable"))),
     _dual_var(getMFEMProblem().getProblemData().gridfunctions.GetRef(
-        getParam<VariableName>("dual_variable")))
+        getParam<VariableName>("dual_variable"))),
+    _scalar_coef(getScalarCoefficient("coefficient")),
+    _dual_var_coef(&_dual_var),
+    _scaled_dual_var_coef(_scalar_coef, _dual_var_coef),
+    _subdomain_integrator(_primal_var.ParFESpace())
 {
 }
 
 void
 MFEMVectorFEInnerProductIntegralPostprocessor::initialize()
 {
+  _subdomain_integrator.AddDomainIntegrator(
+      new mfem::VectorFEDomainLFIntegrator(_scaled_dual_var_coef), getSubdomainMarkers());
 }
 
 void
 MFEMVectorFEInnerProductIntegralPostprocessor::execute()
 {
-  mfem::VectorGridFunctionCoefficient dual_var_coef(&_dual_var);
-  mfem::ParLinearForm subdomain_integrator(_primal_var.ParFESpace());
-  subdomain_integrator.AddDomainIntegrator(new mfem::VectorFEDomainLFIntegrator(dual_var_coef),
-                                           getSubdomainMarkers());
-  subdomain_integrator.Assemble();
-  _integral = subdomain_integrator(_primal_var);
+  _subdomain_integrator.Assemble();
+  _integral = _subdomain_integrator(_primal_var);
 }
 
 PostprocessorValue

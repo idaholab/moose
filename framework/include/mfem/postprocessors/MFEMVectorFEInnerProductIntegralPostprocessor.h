@@ -41,6 +41,10 @@ private:
   mfem::real_t _integral;
   mfem::ParGridFunction & _primal_var;
   mfem::ParGridFunction & _dual_var;
+  mfem::Coefficient & _scalar_coef;
+  mfem::VectorGridFunctionCoefficient _dual_var_coef;
+  mfem::ScalarVectorProductCoefficient _scaled_dual_var_coef;
+  mfem::ParLinearForm _subdomain_integrator;
 };
 
 #endif
