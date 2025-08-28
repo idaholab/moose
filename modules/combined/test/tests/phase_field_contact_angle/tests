@@ -6,7 +6,8 @@
     input = contact_angle.i
     csvdiff = contact_angle_csv.csv
     min_parallel = 8
-    max_time = 1500
+    max_time = 600
+    heavy = true
     requirement = "The PhaseFieldContactAngle kernel correctly implements the prescribed contact angle."
   []
 []

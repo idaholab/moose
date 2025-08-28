@@ -11,8 +11,6 @@
 
 #include "ADKernelGrad.h"
 
-// Forward Declarations
-
 /**
  * Split with a variable that holds the Laplacian of the phase field.
  */
