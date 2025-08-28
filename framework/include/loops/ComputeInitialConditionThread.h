@@ -20,7 +20,9 @@ class FEProblemBase;
 class ComputeInitialConditionThread
 {
 public:
+  // Set IC on all variables
   ComputeInitialConditionThread(FEProblemBase & fe_problem);
+
   // Splitting Constructor
   ComputeInitialConditionThread(ComputeInitialConditionThread & x, Threads::split split);
 
@@ -33,4 +35,15 @@ protected:
 
   FEProblemBase & _fe_problem;
   THREAD_ID _tid;
+
+private:
+  /// @brief the names of target variables for which the initial conditions are applied
+  const std::set<VariableName> * _target_vars = nullptr;
+
+  /// Set IC on specific variables
+  ComputeInitialConditionThread(FEProblemBase & fe_problem,
+                                const std::set<VariableName> * target_vars);
+
+  // Allow FEProblemBase to access the private constructor
+  friend class FEProblemBase;
 };

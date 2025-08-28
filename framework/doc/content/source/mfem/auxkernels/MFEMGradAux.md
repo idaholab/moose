@@ -14,7 +14,7 @@ a scalar elemental result variable defined on an $H(\mathrm{curl})$ conforming N
 The result may be scaled by an optional (global) scalar factor.
 
 !equation
-v = \lambda \vec\nabla u
+\vec v = \lambda \vec\nabla u
 
 where $u \in H^1$, $\vec v \in H(\mathrm{curl})$ and $\lambda$ is a scalar constant.
 

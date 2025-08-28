@@ -943,11 +943,42 @@ public:
    * Project initial conditions for custom \p elem_range and \p bnd_node_range
    * This is needed when elements/boundary nodes are added to a specific subdomain
    * at an intermediate step
+   * @param elem_range Element range to project on
+   * @param bnd_node_range Boundary node range to project on
+   * @param target_vars Set of variable names to project ICs
    */
-  void projectInitialConditionOnCustomRange(libMesh::ConstElemRange & elem_range,
-                                            ConstBndNodeRange & bnd_node_range);
+  void projectInitialConditionOnCustomRange(
+      libMesh::ConstElemRange & elem_range,
+      ConstBndNodeRange & bnd_node_range,
+      const std::optional<std::set<VariableName>> & target_vars = std::nullopt);
 
-  // Materials /////
+  /**
+   * Project a function onto a range of elements for a given variable
+   *
+   * @warning The current implementation is not ideal. The projection takes place on all local
+   * active elements, ignoring the specified \p elem_range. After the projection, dof values on the
+   * specified \p elem_range are copied over to the current solution vector. This should be fixed
+   * once the project_vector or project_solution API is modified to take a custom element range.
+   *
+   * \param elem_range          Element range to project on
+   * \param func                Function to project
+   * \param func_grad           Gradient of the function
+   * \param params              Parameters to pass to the function
+   * \param target_var          variable name to project
+   */
+  void projectFunctionOnCustomRange(ConstElemRange & elem_range,
+                                    Number (*func)(const Point &,
+                                                   const libMesh::Parameters &,
+                                                   const std::string &,
+                                                   const std::string &),
+                                    Gradient (*func_grad)(const Point &,
+                                                          const libMesh::Parameters &,
+                                                          const std::string &,
+                                                          const std::string &),
+                                    const libMesh::Parameters & params,
+                                    const VariableName & target_var);
+
+  // Materials
   virtual void addMaterial(const std::string & material_name,
                            const std::string & name,
                            InputParameters & parameters);
