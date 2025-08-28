@@ -227,6 +227,9 @@ num_cells = 40
   [Total_power_SCMPinPowerPostprocessor]
     type = SCMPinPowerPostprocessor
   []
+  [Total_power_SCMTHPowerPostprocessor]
+    type = SCMTHPowerPostprocessor
+  []
 []
 
 [VectorPostprocessors]

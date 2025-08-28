@@ -181,6 +181,9 @@ P_out = 4.923e6 # Pa
   [Total_power_SCMPinPowerPostprocessor]
     type = SCMPinPowerPostprocessor
   []
+  [Total_power_SCMTHPowerPostprocessor]
+    type = SCMTHPowerPostprocessor
+  []
 []
 
 [VectorPostprocessors]

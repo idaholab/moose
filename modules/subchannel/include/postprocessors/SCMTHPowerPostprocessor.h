@@ -13,7 +13,7 @@
 #include "SubChannelMesh.h"
 
 /**
- * Calculates the total power that goes into the coolant based on
+ * Calculates the total power [W] that goes into the coolant based on
  * the thermal-hydraulic balance of inlet and outlet
  */
 class SCMTHPowerPostprocessor : public GeneralPostprocessor
