@@ -219,8 +219,8 @@ length = 0.5
     variable = q_prime_aux
     block = fuel_pins
   []
-  [Total_power_SCMPowerPostprocessor]
-    type = SCMPowerPostprocessor
+  [Total_power_SCMPinPowerPostprocessor]
+    type = SCMPinPowerPostprocessor
   []
 []
 
