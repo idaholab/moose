@@ -10,8 +10,7 @@ The user needs to specify a subchannel problem. Either a QuadSubChannel1PhasePro
 
 ## Example Input File Syntax
 
-<!-- !listing /test/tests/SCMQuadPower/test.i block=Postprocessors language=moose
-!listing /test/tests/SCMTriPower/test.i block=Postprocessors language=moose -->
+listing /test/tests/problems/SFR/sodium-19pin/test19_implicit.i block=Postprocessors language=moose
 
 !syntax parameters /Postprocessors/SCMDuctPowerPostprocessor
 

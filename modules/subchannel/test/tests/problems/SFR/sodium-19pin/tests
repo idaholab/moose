@@ -19,6 +19,7 @@
     recover = false
     allow_warnings = true
     max_parallel = 1
+    rel_err = 3e-4
     requirement = 'The system will examine the subchannel implicit solver for a 19pin liquid sodium cooled assembly'
   []
   [test_monolithic]

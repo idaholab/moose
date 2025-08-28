@@ -87,6 +87,7 @@ P_out = 2.0e5 # Pa
   compute_power = true
   implicit = true
   segregated = true
+  verbose_subchannel = true
 []
 
 [ICs]
@@ -111,6 +112,12 @@ P_out = 2.0e5 # Pa
     type = ConstantIC
     variable = T
     value = ${T_in}
+  []
+
+  [duct_heat_flux_ic]
+    type = ConstantIC
+    variable = duct_heat_flux #W/m2
+    value = 1000.0
   []
 
   [P_ic]
@@ -248,17 +255,23 @@ P_out = 2.0e5 # Pa
     variable = T
     height = 2
   []
-  [Total_power]
-    type = ElementIntegralVariablePostprocessor
-    variable = q_prime
-    block = subchannel
-  []
   [mdot-8]
     type = SubChannelPointValue
     variable = mdot
     index = 28
     execute_on = 'TIMESTEP_END'
     height = 0.5
+  []
+  [Total_power]
+    type = ElementIntegralVariablePostprocessor
+    variable = q_prime
+    block = subchannel
+  []
+  [Total_power_SCMDuctPowerPostprocessor]
+    type = SCMDuctPowerPostprocessor
+  []
+  [Total_power_SCMTHPowerPostprocessor]
+    type = SCMTHPowerPostprocessor
   []
 []
 
