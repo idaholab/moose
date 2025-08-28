@@ -42,7 +42,7 @@ MFEMZienkiewiczZhuIndicator::createEstimator()
   integ = kernel->createBFIntegrator();
 
   // Next, we need to check that this integrator is supported by mfem::L2ZienkiewiczZhuEstimator
-  bool is_supported = false;
+  [[maybe_unused]] bool is_supported = false;
 
   // Check it correctly casts into DiffusionIntegrator
   is_supported |= (dynamic_cast<mfem::DiffusionIntegrator *>(integ) != nullptr);
