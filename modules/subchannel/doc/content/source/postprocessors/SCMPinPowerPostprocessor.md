@@ -1,6 +1,6 @@
-# SCMPowerPostprocessor
+# SCMPinPowerPostprocessor
 
-!syntax description /Postprocessors/SCMPowerPostprocessor
+!syntax description /Postprocessors/SCMPinPowerPostprocessor
 
 ## Overview
 
@@ -13,8 +13,8 @@ The user needs to specify a subchannel problem. Either a QuadSubChannel1PhasePro
 !listing /test/tests/SCMQuadPower/test.i block=Postprocessors language=moose
 !listing /test/tests/SCMTriPower/test.i block=Postprocessors language=moose
 
-!syntax parameters /Postprocessors/SCMPowerPostprocessor
+!syntax parameters /Postprocessors/SCMPinPowerPostprocessor
 
-!syntax inputs /Postprocessors/SCMPowerPostprocessor
+!syntax inputs /Postprocessors/SCMPinPowerPostprocessor
 
-!syntax children /Postprocessors/SCMPowerPostprocessor
+!syntax children /Postprocessors/SCMPinPowerPostprocessor

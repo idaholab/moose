@@ -186,8 +186,8 @@ num_cells = 40
     type = ElementIntegralVariablePostprocessor
     variable = q_prime_aux
   []
-  [Total_power_SCMPowerPostprocessor]
-    type = SCMPowerPostprocessor
+  [Total_power_SCMPinPowerPostprocessor]
+    type = SCMPinPowerPostprocessor
   []
 []
 

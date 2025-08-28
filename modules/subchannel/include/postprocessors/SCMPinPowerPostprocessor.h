@@ -13,14 +13,14 @@
 #include "SubChannelMesh.h"
 
 /**
- * Calculates the total power of the subchannel assmbly based on
+ * Calculates the total power that goes into the coolant from the fuel pins based on
  * the variable q_prime
  */
-class SCMPowerPostprocessor : public GeneralPostprocessor
+class SCMPinPowerPostprocessor : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
-  SCMPowerPostprocessor(const InputParameters & params);
+  SCMPinPowerPostprocessor(const InputParameters & params);
   virtual void initialize() override {}
   virtual void execute() override;
   virtual void finalize() override {}
