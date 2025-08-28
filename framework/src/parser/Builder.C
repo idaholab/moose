@@ -7,9 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
 #include "MooseUtils.h"
-#include "MooseInit.h"
 #include "InputParameters.h"
 #include "ActionFactory.h"
 #include "Action.h"
@@ -19,13 +17,7 @@
 #include "AddActionComponentAction.h"
 #include "ActionWarehouse.h"
 #include "EmptyAction.h"
-#include "FEProblem.h"
-#include "MooseMesh.h"
-#include "Executioner.h"
 #include "MooseApp.h"
-#include "MooseEnum.h"
-#include "MultiMooseEnum.h"
-#include "MultiApp.h"
 #include "GlobalParamsAction.h"
 #include "SyntaxTree.h"
 #include "InputFileFormatter.h"
@@ -33,22 +25,13 @@
 #include "MooseTypes.h"
 #include "CommandLine.h"
 #include "JsonSyntaxTree.h"
-#include "SystemInfo.h"
-#include "MooseUtils.h"
-#include "Conversion.h"
-#include "Units.h"
-#include "ActionComponent.h"
 #include "Syntax.h"
+#include "ParameterRegistry.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/fparser.hh"
 
-// Regular expression includes
-#include "pcrecpp.h"
-
-// C++ includes
 #include <string>
-#include <map>
 #include <fstream>
 #include <iomanip>
 #include <algorithm>
@@ -59,35 +42,33 @@ namespace Moose
 {
 
 bool
-isSectionActive(std::string path, hit::Node * root)
+isSectionActive(const hit::Node & node)
 {
-  hit::Node * n = root->find(path);
+  const hit::Node * n = &node;
   while (n)
   {
-    hit::Node * section = n->parent();
+    const auto section = n->parent();
     if (section)
     {
-      auto actives = section->find("active");
-      auto inactives = section->find("inactive");
-
       // only check current level, not nested ones
-      if (actives && actives->type() == hit::NodeType::Field && actives->parent() == section)
+      if (const auto active = section->find("active");
+          active && active->type() == hit::NodeType::Field && active->parent() == section)
       {
-        auto vars = section->param<std::vector<std::string>>("active");
-        bool have_var = false;
-        for (auto & var : vars)
-          if (n->path() == hit::pathNorm(var))
-            have_var = true;
-        if (!have_var)
-          return false;
+        const auto vars = active->param<std::vector<std::string>>();
+        return std::find_if(vars.begin(),
+                            vars.end(),
+                            [&n](const auto & var)
+                            { return n->path() == hit::pathNorm(var); }) != vars.end();
       }
       // only check current level, not nested ones
-      if (inactives && inactives->type() == hit::NodeType::Field && inactives->parent() == section)
+      if (const auto inactive = section->find("inactive");
+          inactive && inactive->type() == hit::NodeType::Field && inactive->parent() == section)
       {
-        auto vars = section->param<std::vector<std::string>>("inactive");
-        for (auto & var : vars)
-          if (n->path() == hit::pathNorm(var))
-            return false;
+        const auto vars = inactive->param<std::vector<std::string>>();
+        return std::find_if(vars.begin(),
+                            vars.end(),
+                            [&n](const auto & var)
+                            { return n->path() == hit::pathNorm(var); }) == vars.end();
       }
     }
     n = section;
@@ -96,18 +77,18 @@ isSectionActive(std::string path, hit::Node * root)
 }
 
 std::vector<std::string>
-findSimilar(std::string param, std::vector<std::string> options)
+findSimilar(const std::string & param, const std::vector<std::string> & options)
 {
   std::vector<std::string> candidates;
   if (options.size() == 0)
     return candidates;
 
   int mindist = MooseUtils::levenshteinDist(options[0], param);
-  for (auto & opt : options)
+  for (const auto & opt : options)
   {
-    int dist = MooseUtils::levenshteinDist(opt, param);
+    const int dist = MooseUtils::levenshteinDist(opt, param);
     // magic number heuristics to get similarity distance cutoff
-    int dist_cutoff = 1 + param.size() / 5;
+    const int dist_cutoff = 1 + param.size() / 5;
     if (dist > dist_cutoff || dist > mindist)
       continue;
 
@@ -130,8 +111,7 @@ Builder::Builder(MooseApp & app, ActionWarehouse & action_wh, Parser & parser)
     _syntax(_action_wh.syntax()),
     _parser(parser),
     _root(_parser.getRoot()),
-    _syntax_formatter(nullptr),
-    _current_params(nullptr)
+    _syntax_formatter(nullptr)
 {
 }
 
@@ -182,11 +162,11 @@ UnusedWalker::walk(const std::string & fullpath, const std::string & nodename, h
   // args) because their unused params are checked+reported independently of the ones in the
   // main tree.
   if (!_used.count(fullpath) && nodename != "active" && nodename != "inactive" &&
-      isSectionActive(fullpath, n->root()) && n->line() > 0)
+      isSectionActive(*n) && n->line() > 0)
   {
     auto section_name = fullpath.substr(0, fullpath.rfind("/"));
-    auto paramlist = _builder.listValidParams(section_name);
-    auto candidates = findSimilar(nodename, paramlist);
+    const auto paramlist = _builder.listValidParams(section_name);
+    const auto candidates = findSimilar(nodename, paramlist);
     if (candidates.size() > 0)
       errors.emplace_back(
           "unused parameter '" + fullpath + "'; did you mean '" + candidates[0] + "'?", n);
@@ -213,7 +193,7 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
 
   // Before we retrieve any actions or build any objects, make sure that the section they are in
   // is active
-  if (!isSectionActive(curr_identifier, &_root))
+  if (!isSectionActive(*n))
     return;
 
   // Extract the block parameters before constructing the action
@@ -261,7 +241,7 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
     params.set<ActionWarehouse *>("awh") = &_action_wh;
     params.setHitNode(*n, {});
 
-    extractParams(curr_identifier, params);
+    extractParams(n, params);
 
     // Add the parsed syntax to the parameters object for consumption by the Action
     params.set<std::string>("task") = it->second._task;
@@ -283,7 +263,7 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
       {
         auto & object_params = object_action->getObjectParams();
         object_params.setHitNode(*n, {});
-        extractParams(curr_identifier, object_params);
+        extractParams(n, object_params);
         object_params.set<std::vector<std::string>>("control_tags")
             .push_back(MooseUtils::baseName(curr_identifier));
       }
@@ -294,7 +274,7 @@ Builder::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node *
       {
         auto & component_params = component_action->getComponentParams();
         component_params.setHitNode(*n, {});
-        extractParams(curr_identifier, component_params);
+        extractParams(n, component_params);
         component_params.set<std::vector<std::string>>("control_tags")
             .push_back(MooseUtils::baseName(curr_identifier));
       }
@@ -309,9 +289,10 @@ void
 Builder::walk(const std::string & fullpath, const std::string & nodepath, hit::Node * n)
 {
   // skip sections that were manually processed first.
-  for (auto & sec : _secs_need_first)
-    if (nodepath == sec)
-      return;
+  if (std::find(_secs_need_first.begin(), _secs_need_first.end(), nodepath) !=
+      _secs_need_first.end())
+    return;
+
   walkRaw(fullpath, nodepath, n);
 }
 
@@ -322,30 +303,35 @@ Builder::build()
   _extracted_vars = _parser.getExtractedVars();
 
   // There are a few order dependent actions that have to be built first in
-  // order for the parser and application to function properly:
-  //
-  // SetupDebugAction: This action can contain an option for monitoring the parser progress. It must
-  //                   be parsed first to capture all of the parsing output.
-  //
-  // GlobalParamsAction: This action is checked during the parameter extraction routines of all
-  //                     subsequent blocks. It must be parsed early since it must exist during
-  //                     subsequent parameter extraction.
-  //
-  // DynamicObjectRegistration: This action must be built before any MooseObjectActions are built.
-  //                            This is because we retrieve valid parameters from the Factory
-  //                            during parse time. Objects must be registered before
-  //                            validParameters can be retrieved.
-  auto syntax = _syntax.getSyntaxByAction("SetupDebugAction");
-  std::copy(syntax.begin(), syntax.end(), std::back_inserter(_secs_need_first));
+  // order for the parser and application to function properly
+  const auto need_action_syntax_first = [this](const auto & action_Name)
+  {
+    const auto syntax = _syntax.getSyntaxByAction(action_Name);
+    mooseAssert(syntax.size(), "Empty syntax");
+    std::copy(syntax.begin(), syntax.end(), std::back_inserter(_secs_need_first));
+    return syntax;
+  };
 
-  syntax = _syntax.getSyntaxByAction("GlobalParamsAction");
-  std::copy(syntax.begin(), syntax.end(), std::back_inserter(_secs_need_first));
+  // SetupDebugAction: This action can contain an option for monitoring the
+  // parser progress. It must be parsed first to capture all of the parsing
+  // output progress.
+  need_action_syntax_first("SetupDebugAction");
 
-  syntax = _syntax.getSyntaxByAction("DynamicObjectRegistrationAction");
-  std::copy(syntax.begin(), syntax.end(), std::back_inserter(_secs_need_first));
+  // GlobalParamsAction: This action is checked during the parameter extraction
+  // routines of all subsequent blocks. It must be parsed early since it must
+  // exist during subsequent parameter extraction.
+  const auto global_params_syntax = need_action_syntax_first("GlobalParamsAction");
+  mooseAssert(global_params_syntax.size() == 1, "Unexpected GlobalParamsAction syntax size");
+  const auto global_params_prefix = global_params_syntax.front();
+  _global_params_node = _root.find(global_params_prefix);
+
+  // DynamicObjectRegistration: This action must be built before any MooseObjectActions
+  // are built. This is because we retrieve valid parameters from the Factory
+  // during parse time. Objects must be registered before validParameters can be retrieved.
+  need_action_syntax_first("DynamicObjectRegistrationAction");
 
   // Walk all the sections extracting paramters from each into InputParameters objects
-  for (auto & sec : _secs_need_first)
+  for (const auto & sec : _secs_need_first)
     if (auto n = _root.find(sec))
       walkRaw(n->parent()->fullpath(), n->path(), n);
 
@@ -356,8 +342,8 @@ Builder::build()
   if (_deprecated_params.size())
   {
     std::vector<std::string> messages;
-    for (const auto & param_message_pair : _deprecated_params)
-      messages.push_back(param_message_pair.second);
+    for (const auto & key_message_pair : _deprecated_params)
+      messages.push_back(key_message_pair.second);
     const auto message = MooseUtils::stringJoin(messages, "\n\n");
 
     const auto current_show_trace = Moose::show_trace;
@@ -680,611 +666,147 @@ Builder::buildFullTree(const std::string & search_string)
   Moose::out << _syntax_formatter->print(search_string) << std::flush;
 }
 
-/**************************************************************************************************
- **************************************************************************************************
- *                                   Parameter Extraction Routines                                *
- **************************************************************************************************
- **************************************************************************************************/
-using std::string;
-
-// Template Specializations for retrieving special types from the input file
-template <>
-void Builder::setScalarParameter<RealVectorValue, RealVectorValue>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<RealVectorValue> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void Builder::setScalarParameter<Point, Point>(const std::string & full_name,
-                                               const std::string & short_name,
-                                               InputParameters::Parameter<Point> * param,
-                                               bool in_global,
-                                               GlobalParamsAction * global_block);
-
-template <>
-void Builder::setScalarParameter<RealEigenVector, RealEigenVector>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<RealEigenVector> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void Builder::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<RealEigenMatrix> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void Builder::setScalarParameter<PostprocessorName, PostprocessorName>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<PostprocessorName> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
 void
-Builder::setScalarParameter<MooseEnum, MooseEnum>(const std::string & full_name,
-                                                  const std::string & short_name,
-                                                  InputParameters::Parameter<MooseEnum> * param,
-                                                  bool in_global,
-                                                  GlobalParamsAction * global_block);
-
-template <>
-void Builder::setScalarParameter<MultiMooseEnum, MultiMooseEnum>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<MultiMooseEnum> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void Builder::setScalarParameter<ExecFlagEnum, ExecFlagEnum>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<ExecFlagEnum> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void Builder::setScalarParameter<RealTensorValue, RealTensorValue>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<RealTensorValue> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void Builder::setScalarParameter<ReporterName, std::string>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<ReporterName> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-// Vectors
-template <>
-void Builder::setVectorParameter<RealVectorValue, RealVectorValue>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<RealVectorValue>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void
-Builder::setVectorParameter<Point, Point>(const std::string & full_name,
-                                          const std::string & short_name,
-                                          InputParameters::Parameter<std::vector<Point>> * param,
-                                          bool in_global,
-                                          GlobalParamsAction * global_block);
-
-template <>
-void Builder::setVectorParameter<PostprocessorName, PostprocessorName>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<PostprocessorName>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void Builder::setVectorParameter<MooseEnum, MooseEnum>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<MooseEnum>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void Builder::setVectorParameter<MultiMooseEnum, MultiMooseEnum>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<MultiMooseEnum>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void Builder::setVectorParameter<VariableName, VariableName>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<VariableName>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void Builder::setVectorParameter<ReporterName, std::string>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<ReporterName>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void Builder::setVectorParameter<CLIArgString, std::string>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<CLIArgString>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-template <>
-void Builder::setDoubleIndexParameter<Point>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<std::vector<Point>>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block);
-
-void
-Builder::extractParams(const std::string & prefix, InputParameters & p)
+Builder::extractParams(const hit::Node * const section_node, InputParameters & p)
 {
-  std::ostringstream error_stream;
-  static const std::string global_params_task = "set_global_params";
-  static const std::string global_params_block_name =
-      _syntax.getSyntaxByAction("GlobalParamsAction").front();
+  if (section_node)
+    mooseAssert(section_node->type() == hit::NodeType::Section, "Node type should be a section");
 
-  ActionIterator act_iter = _action_wh.actionBlocksWithActionBegin(global_params_task);
-  GlobalParamsAction * global_params_block = nullptr;
-
-  // We are grabbing only the first
-  if (act_iter != _action_wh.actionBlocksWithActionEnd(global_params_task))
-    global_params_block = dynamic_cast<GlobalParamsAction *>(*act_iter);
-
-  // Set a pointer to the current InputParameters object being parsed so that it
-  // can be referred to in the extraction routines
-  _current_params = &p;
-  for (const auto & it : p)
+  for (const auto & [name, par_unique_ptr] : p)
   {
-    if (p.shouldIgnore(it.first))
+    if (p.shouldIgnore(name))
       continue;
 
-    const hit::Node * node = nullptr;
-    bool found = false;
-    bool in_global = false;
+    const hit::Node * param_node = nullptr;
 
-    const auto found_param =
-        [this, &found, &node, &p](const std::string & param_name, const std::string & full_name)
+    for (const auto & param_name : p.paramAliases(name))
     {
-      found = true;
-      p.setHitNode(param_name, *node, {});
-      p.set_attributes(param_name, false);
-      _extracted_vars.insert(full_name);
-    };
-
-    for (const auto & param_name : p.paramAliases(it.first))
-    {
-      std::string full_name = prefix + "/" + param_name;
-
-      // Mark parameters appearing in the input file or command line
-      if (node = _root.find(full_name); node && node->type() == hit::NodeType::Field)
+      // Check for parameters under the given section, if a section
+      // node was provided
+      if (section_node)
       {
-        found_param(param_name, full_name);
-
-        // Store a deprecated warning if one exists and we haven't for this parameter
-        // TODO: This is pretty bad and only lets us skip per parameter name...
-        if (const auto deprecated_message = p.queryDeprecatedParamMessage(param_name))
-          _deprecated_params.emplace(param_name, *deprecated_message);
+        if (const auto section_param_node = section_node->find(param_name);
+            section_param_node && section_param_node->type() == hit::NodeType::Field &&
+            section_param_node->parent() == section_node)
+          param_node = section_param_node;
       }
-      // Wait! Check the GlobalParams section
-      else if (global_params_block)
+      // No node found within the given section, check [GlobalParams]
+      if (!param_node && _global_params_node)
       {
-        full_name = global_params_block_name + "/" + param_name;
-        if (node = _root.find(full_name); node)
+        if (const auto global_node = _global_params_node->find(param_name);
+            global_node && global_node->type() == hit::NodeType::Field &&
+            global_node->parent() == _global_params_node)
         {
-          found_param(param_name, full_name);
-          in_global = true;
+          mooseAssert(isGlobal(*global_node), "Could not detect global-ness");
+          param_node = global_node;
         }
       }
-      if (found)
+
+      // Found it
+      if (param_node)
       {
+        const auto fullpath = param_node->fullpath();
+        p.setHitNode(param_name, *param_node, {});
+        p.set_attributes(param_name, false);
+        _extracted_vars.insert(fullpath);
 
-        if (p.isPrivate(param_name) && !in_global)
+        const auto global = isGlobal(*param_node);
+
+        // Check for deprecated parameters if the parameter is not a global param
+        if (!global)
+          if (const auto deprecated_message = p.queryDeprecatedParamMessage(param_name))
+          {
+            std::string key = "";
+            if (const auto object_type_ptr = p.queryObjectType())
+              key += *object_type_ptr + "_";
+            key += param_name;
+            _deprecated_params.emplace(key, *deprecated_message);
+          }
+
+        // Private parameter, don't set
+        if (p.isPrivate(param_name))
         {
-          // Warn on private, just once
-          if (std::find_if(_errors.begin(),
-                           _errors.end(),
-                           [&node](const auto & err) { return err.node == node; }) == _errors.end())
-            _errors.emplace_back("parameter '" + full_name + "' is private and cannot be set",
-                                 node);
+          // Error if it isn't global, just once
+          if (!global && std::find_if(_errors.begin(),
+                                      _errors.end(),
+                                      [&param_node](const auto & err)
+                                      { return err.node == param_node; }) == _errors.end())
+            _errors.emplace_back("parameter '" + fullpath + "' is private and cannot be set",
+                                 param_node);
           continue;
         }
-        // avoid setting the parameter
-        else if (p.isPrivate(param_name) && in_global)
-          continue;
 
-        auto & short_name = param_name;
-        libMesh::Parameters::Value * par = MooseUtils::get(it.second);
-
-#define setscalarvaltype(ptype, base, range)                                                       \
-  else if (par->type() == demangle(typeid(ptype).name()))                                          \
-      setScalarValueTypeParameter<ptype, range, base>(                                             \
-          full_name,                                                                               \
-          short_name,                                                                              \
-          dynamic_cast<InputParameters::Parameter<ptype> *>(par),                                  \
-          in_global,                                                                               \
-          global_params_block,                                                                     \
-          *node)
-#define setscalar(ptype, base)                                                                     \
-  else if (par->type() == demangle(typeid(ptype).name()))                                          \
-      setScalarParameter<ptype, base>(full_name,                                                   \
-                                      short_name,                                                  \
-                                      dynamic_cast<InputParameters::Parameter<ptype> *>(par),      \
-                                      in_global,                                                   \
-                                      global_params_block)
-#define setvector(ptype, base)                                                                     \
-  else if (par->type() == demangle(typeid(std::vector<ptype>).name()))                             \
-      setVectorParameter<ptype, base>(                                                             \
-          full_name,                                                                               \
-          short_name,                                                                              \
-          dynamic_cast<InputParameters::Parameter<std::vector<ptype>> *>(par),                     \
-          in_global,                                                                               \
-          global_params_block)
-#define setmap(key_type, mapped_type)                                                              \
-  else if (par->type() == demangle(typeid(std::map<key_type, mapped_type>).name()))                \
-      setMapParameter(                                                                             \
-          full_name,                                                                               \
-          short_name,                                                                              \
-          dynamic_cast<InputParameters::Parameter<std::map<key_type, mapped_type>> *>(par),        \
-          in_global,                                                                               \
-          global_params_block)
-#define setvectorvector(ptype)                                                                     \
-  else if (par->type() == demangle(typeid(std::vector<std::vector<ptype>>).name()))                \
-      setDoubleIndexParameter<ptype>(                                                              \
-          full_name,                                                                               \
-          short_name,                                                                              \
-          dynamic_cast<InputParameters::Parameter<std::vector<std::vector<ptype>>> *>(par),        \
-          in_global,                                                                               \
-          global_params_block)
-#define setvectorvectorvector(ptype)                                                               \
-  else if (par->type() == demangle(typeid(std::vector<std::vector<std::vector<ptype>>>).name()))   \
-      setTripleIndexParameter<ptype>(                                                              \
-          full_name,                                                                               \
-          short_name,                                                                              \
-          dynamic_cast<                                                                            \
-              InputParameters::Parameter<std::vector<std::vector<std::vector<ptype>>>> *>(par),    \
-          in_global,                                                                               \
-          global_params_block)
-
-        /**
-         * Scalar types
-         */
-        // built-ins
-        // NOTE: Similar dynamic casting is done in InputParameters.C, please update appropriately
-        if (false)
-          ;
-        setscalarvaltype(Real, double, Real);
-        setscalarvaltype(int, int, long);
-        setscalarvaltype(unsigned short, unsigned int, long);
-        setscalarvaltype(long, int, long);
-        setscalarvaltype(unsigned int, unsigned int, long);
-        setscalarvaltype(unsigned long, unsigned int, long);
-        setscalarvaltype(long int, int64_t, long);
-        setscalarvaltype(unsigned long long, unsigned int, long);
-
-        setscalar(bool, bool);
-        setscalar(SubdomainID, int);
-        setscalar(BoundaryID, int);
-
-        // string and string-subclass types
-        setscalar(string, string);
-        setscalar(SubdomainName, string);
-        setscalar(BoundaryName, string);
-        setscalar(FileName, string);
-        setscalar(MeshFileName, string);
-        setscalar(MatrixFileName, string);
-        setscalar(FileNameNoExtension, string);
-        setscalar(RelativeFileName, string);
-        setscalar(DataFileName, string);
-        setscalar(ComponentName, string);
-        setscalar(PhysicsName, string);
-        setscalar(OutFileBase, string);
-        setscalar(VariableName, string);
-        setscalar(NonlinearVariableName, string);
-        setscalar(LinearVariableName, string);
-        setscalar(SolverVariableName, string);
-        setscalar(AuxVariableName, string);
-        setscalar(FunctionName, string);
-        setscalar(ConvergenceName, string);
-        setscalar(MeshDivisionName, string);
-        setscalar(UserObjectName, string);
-        setscalar(VectorPostprocessorName, string);
-        setscalar(IndicatorName, string);
-        setscalar(MarkerName, string);
-        setscalar(MultiAppName, string);
-        setscalar(OutputName, string);
-        setscalar(MaterialPropertyName, string);
-        setscalar(MooseFunctorName, string);
-        setscalar(MaterialName, string);
-        setscalar(DistributionName, string);
-        setscalar(PositionsName, string);
-        setscalar(SamplerName, string);
-        setscalar(TagName, string);
-        setscalar(TimesName, string);
-        setscalar(MeshGeneratorName, string);
-        setscalar(ExtraElementIDName, string);
-        setscalar(PostprocessorName, PostprocessorName);
-        setscalar(ExecutorName, string);
-        setscalar(NonlinearSystemName, string);
-        setscalar(LinearSystemName, string);
-        setscalar(SolverSystemName, string);
-        setscalar(CLIArgString, string);
-#ifdef MOOSE_MFEM_ENABLED
-        setscalar(MFEMScalarCoefficientName, string);
-        setscalar(MFEMVectorCoefficientName, string);
-        setscalar(MFEMMatrixCoefficientName, string);
-#endif
-
-        // Moose Compound Scalars
-        setscalar(RealVectorValue, RealVectorValue);
-        setscalar(Point, Point);
-        setscalar(RealEigenVector, RealEigenVector);
-        setscalar(RealEigenMatrix, RealEigenMatrix);
-        setscalar(MooseEnum, MooseEnum);
-        setscalar(MultiMooseEnum, MultiMooseEnum);
-        setscalar(RealTensorValue, RealTensorValue);
-        setscalar(ExecFlagEnum, ExecFlagEnum);
-        setscalar(ReporterName, string);
-        setscalar(ReporterValueName, string);
-        setscalar(ParsedFunctionExpression, string);
-
-        // vector types
-        setvector(bool, bool);
-        setvector(Real, double);
-        setvector(int, int);
-        setvector(long, int);
-        setvector(unsigned int, int);
-
-// We need to be able to parse 8-byte unsigned types when
-// libmesh is configured --with-dof-id-bytes=8.  Officially,
-// libmesh uses uint64_t in that scenario, which is usually
-// equivalent to 'unsigned long long'.  Note that 'long long'
-// has been around since C99 so most C++ compilers support it,
-// but presumably uint64_t is the "most standard" way to get a
-// 64-bit unsigned type, so we'll stick with that here.
-#if LIBMESH_DOF_ID_BYTES == 8
-        setvector(uint64_t, int);
-#endif
-
-        setvector(SubdomainID, int);
-        setvector(BoundaryID, int);
-        setvector(RealVectorValue, RealVectorValue);
-        setvector(Point, Point);
-        setvector(MooseEnum, MooseEnum);
-        setvector(MultiMooseEnum, MultiMooseEnum);
-
-        setvector(string, string);
-        setvector(FileName, string);
-        setvector(FileNameNoExtension, string);
-        setvector(RelativeFileName, string);
-        setvector(DataFileName, string);
-        setvector(MeshFileName, string);
-        setvector(MatrixFileName, string);
-        setvector(SubdomainName, string);
-        setvector(BoundaryName, string);
-        setvector(NonlinearVariableName, string);
-        setvector(LinearVariableName, string);
-        setvector(SolverVariableName, string);
-        setvector(AuxVariableName, string);
-        setvector(FunctionName, string);
-        setvector(ConvergenceName, string);
-        setvector(MeshDivisionName, string);
-        setvector(UserObjectName, string);
-        setvector(IndicatorName, string);
-        setvector(MarkerName, string);
-        setvector(MultiAppName, string);
-        setvector(PostprocessorName, PostprocessorName);
-        setvector(VectorPostprocessorName, string);
-        setvector(OutputName, string);
-        setvector(MaterialPropertyName, string);
-        setvector(MooseFunctorName, string);
-        setvector(MaterialName, string);
-        setvector(DistributionName, string);
-        setvector(SamplerName, string);
-        setvector(TagName, string);
-        setvector(VariableName, VariableName);
-        setvector(MeshGeneratorName, string);
-        setvector(ExtraElementIDName, string);
-        setvector(ReporterName, string);
-        setvector(CLIArgString, string);
-        setvector(ComponentName, string);
-        setvector(PhysicsName, string);
-        setvector(PositionsName, string);
-        setvector(TimesName, string);
-        setvector(ReporterValueName, string);
-        setvector(ExecutorName, string);
-        setvector(NonlinearSystemName, string);
-        setvector(LinearSystemName, string);
-        setvector(SolverSystemName, string);
-#ifdef MOOSE_MFEM_ENABLED
-        setvector(MFEMScalarCoefficientName, string);
-        setvector(MFEMVectorCoefficientName, string);
-        setvector(MFEMMatrixCoefficientName, string);
-#endif
-
-        // map types
-        setmap(string, unsigned int);
-        setmap(string, Real);
-        setmap(string, string);
-        setmap(unsigned int, unsigned int);
-        setmap(unsigned long, unsigned int);
-        setmap(unsigned long long, unsigned int);
-
-        // Double indexed types
-        setvectorvector(Real);
-        setvectorvector(int);
-        setvectorvector(long);
-        setvectorvector(unsigned int);
-        setvectorvector(unsigned long long);
-
-// See vector type explanation
-#if LIBMESH_DOF_ID_BYTES == 8
-        setvectorvector(uint64_t);
-#endif
-
-        setvectorvector(SubdomainID);
-        setvectorvector(BoundaryID);
-        setvectorvector(Point);
-        setvectorvector(string);
-        setvectorvector(FileName);
-        setvectorvector(FileNameNoExtension);
-        setvectorvector(DataFileName);
-        setvectorvector(MeshFileName);
-        setvectorvector(MatrixFileName);
-        setvectorvector(SubdomainName);
-        setvectorvector(BoundaryName);
-        setvectorvector(VariableName);
-        setvectorvector(NonlinearVariableName);
-        setvectorvector(LinearVariableName);
-        setvectorvector(SolverVariableName);
-        setvectorvector(AuxVariableName);
-        setvectorvector(FunctionName);
-        setvectorvector(ConvergenceName);
-        setvectorvector(UserObjectName);
-        setvectorvector(IndicatorName);
-        setvectorvector(MarkerName);
-        setvectorvector(MultiAppName);
-        setvectorvector(PostprocessorName);
-        setvectorvector(VectorPostprocessorName);
-        setvectorvector(MarkerName);
-        setvectorvector(OutputName);
-        setvectorvector(MaterialPropertyName);
-        setvectorvector(MooseFunctorName);
-        setvectorvector(MaterialName);
-        setvectorvector(DistributionName);
-        setvectorvector(SamplerName);
-        setvectorvector(TagName);
-#ifdef MOOSE_MFEM_ENABLED
-        setvectorvector(MFEMScalarCoefficientName);
-        setvectorvector(MFEMVectorCoefficientName);
-        setvectorvector(MFEMMatrixCoefficientName);
-#endif
-
-        // Triple indexed types
-        setvectorvectorvector(Real);
-        setvectorvectorvector(int);
-        setvectorvectorvector(long);
-        setvectorvectorvector(unsigned int);
-        setvectorvectorvector(unsigned long long);
-
-// See vector type explanation
-#if LIBMESH_DOF_ID_BYTES == 8
-        setvectorvectorvector(uint64_t);
-#endif
-
-        setvectorvectorvector(SubdomainID);
-        setvectorvectorvector(BoundaryID);
-        setvectorvectorvector(string);
-        setvectorvectorvector(FileName);
-        setvectorvectorvector(FileNameNoExtension);
-        setvectorvectorvector(DataFileName);
-        setvectorvectorvector(MeshFileName);
-        setvectorvectorvector(MatrixFileName);
-        setvectorvectorvector(SubdomainName);
-        setvectorvectorvector(BoundaryName);
-        setvectorvectorvector(VariableName);
-        setvectorvectorvector(NonlinearVariableName);
-        setvectorvectorvector(LinearVariableName);
-        setvectorvectorvector(AuxVariableName);
-        setvectorvectorvector(FunctionName);
-        setvectorvectorvector(UserObjectName);
-        setvectorvectorvector(IndicatorName);
-        setvectorvectorvector(MarkerName);
-        setvectorvectorvector(MultiAppName);
-        setvectorvectorvector(PostprocessorName);
-        setvectorvectorvector(VectorPostprocessorName);
-        setvectorvectorvector(MarkerName);
-        setvectorvectorvector(OutputName);
-        setvectorvectorvector(MaterialPropertyName);
-        setvectorvectorvector(MooseFunctorName);
-        setvectorvectorvector(MaterialName);
-        setvectorvectorvector(DistributionName);
-        setvectorvectorvector(SamplerName);
-        else
+        // Set the value, capturing errors
+        const auto param_field = dynamic_cast<const hit::Field *>(param_node);
+        mooseAssert(param_field, "Is not a field");
+        bool set_param = false;
+        try
         {
-          _parser.parseError(
-              {{"unsupported type '" + par->type() + "' for input parameter '" + full_name + "'",
-                node}});
+          ParameterRegistry::get().set(*par_unique_ptr, *param_field);
+          set_param = true;
+        }
+        catch (hit::Error & e)
+        {
+          _errors.emplace_back(e.message, param_node);
+        }
+        catch (std::exception & e)
+        {
+          _errors.emplace_back(e.what(), param_node);
         }
 
-#undef setscalarValueType
-#undef setscalar
-#undef setvector
-#undef setvectorvectorvector
-#undef setvectorvector
-#undef setmap
+        // Break if we failed here and don't perform extra checks
+        if (!set_param)
+          break;
+
+        // Special setup for vector<VariableName>
+        if (auto cast_par = dynamic_cast<InputParameters::Parameter<std::vector<VariableName>> *>(
+                par_unique_ptr.get()))
+          if (const auto error = p.setupVariableNames(cast_par->set(), *param_node, {}))
+            _errors.emplace_back(*error, param_node);
+
+        // Possibly perform a range check if this parameter has one
+        if (p.isRangeChecked(param_node->path()))
+          if (const auto error = p.parameterRangeCheck(
+                  *par_unique_ptr, param_node->fullpath(), param_node->path(), true))
+            _errors.emplace_back(error->second, param_node);
+
+        // Don't check the other alises since we've found it
         break;
       }
     }
 
-    if (!found)
+    // Special casing when the parameter was not found
+    if (!param_node)
     {
-      /**
-       * Special case handling
-       *   if the parameter wasn't found in the input file or the cli object the logic in this
-       * branch will execute
-       */
-
       // In the case where we have OutFileName but it wasn't actually found in the input filename,
       // we will populate it with the actual parsed filename which is available here in the
       // parser.
-
-      InputParameters::Parameter<OutFileBase> * scalar_p =
-          dynamic_cast<InputParameters::Parameter<OutFileBase> *>(MooseUtils::get(it.second));
-      if (scalar_p)
+      if (auto out_par_ptr =
+              dynamic_cast<InputParameters::Parameter<OutFileBase> *>(par_unique_ptr.get()))
       {
-        std::string input_file_name = getPrimaryFileName();
-        mooseAssert(input_file_name != "", "Input Filename is nullptr");
-        size_t pos = input_file_name.find_last_of('.');
+        const auto input_file_name = getPrimaryFileName();
+        mooseAssert(input_file_name.size(), "Input Filename is empty");
+        const auto pos = input_file_name.find_last_of('.');
         mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
-        scalar_p->set() = input_file_name.substr(0, pos) + "_out";
-        p.set_attributes(it.first, false);
+        out_par_ptr->set() = input_file_name.substr(0, pos) + "_out";
+        p.set_attributes(name, false);
       }
     }
   }
 
-  // Here we will see if there are any auto build vectors that need to be created
-  std::map<std::string, std::pair<std::string, std::string>> auto_build_vectors =
-      p.getAutoBuildVectors();
-  for (const auto & it : auto_build_vectors)
+  // See if there are any auto build vectors that need to be created
+  for (const auto & [param_name, base_name_num_repeat_pair] : p.getAutoBuildVectors())
   {
+    const auto & [base_name, num_repeat] = base_name_num_repeat_pair;
     // We'll autogenerate values iff the requested vector is not valid but both the base and
-    // number
-    // are valid
-    const std::string & base_name = it.second.first;
-    const std::string & num_repeat = it.second.second;
-
-    if (!p.isParamValid(it.first) && p.isParamValid(base_name) && p.isParamValid(num_repeat))
+    // number are valid
+    if (!p.isParamValid(param_name) && p.isParamValid(base_name) && p.isParamValid(num_repeat))
     {
-      unsigned int vec_size = p.get<unsigned int>(num_repeat);
+      const auto vec_size = p.get<unsigned int>(num_repeat);
       const std::string & name = p.get<std::string>(base_name);
 
       std::vector<VariableName> variable_names(vec_size);
-      for (unsigned int i = 0; i < vec_size; ++i)
+      for (const auto i : index_range(variable_names))
       {
         std::ostringstream oss;
         oss << name << i;
@@ -1292,1003 +814,22 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
       }
 
       // Finally set the autogenerated vector into the InputParameters object
-      p.set<std::vector<VariableName>>(it.first) = variable_names;
+      p.set<std::vector<VariableName>>(param_name) = variable_names;
     }
   }
 }
 
-template <typename T>
+void
+Builder::extractParams(const std::string & prefix, InputParameters & p)
+{
+  const auto node = _root.find(prefix);
+  extractParams((node && node->type() == hit::NodeType::Section) ? node : nullptr, p);
+}
+
 bool
-toBool(const std::string & /*s*/, T & /*val*/)
+Builder::isGlobal(const hit::Node & node) const
 {
-  return false;
+  return _global_params_node && node.parent() == _global_params_node;
 }
 
-template <>
-bool
-toBool<bool>(const std::string & s, bool & val)
-{
-  return hit::toBool(s, &val);
-}
-
-template <typename T, typename Base>
-void
-Builder::setScalarParameter(const std::string & full_name,
-                            const std::string & short_name,
-                            InputParameters::Parameter<T> * param,
-                            bool in_global,
-                            GlobalParamsAction * global_block)
-{
-  auto node = _root.find(full_name, true);
-  try
-  {
-    param->set() = node->param<Base>();
-  }
-  catch (hit::Error & err)
-  {
-    auto strval = node->param<std::string>();
-
-    auto & t = typeid(T);
-    // handle the case where the user put a number inside quotes
-    if constexpr (std::is_same_v<T, int> || std::is_same_v<T, unsigned int> ||
-                  std::is_same_v<T, SubdomainID> || std::is_same_v<T, BoundaryID> ||
-                  std::is_same_v<T, double>)
-    {
-      try
-      {
-        param->set() = MooseUtils::convert<T>(strval, true);
-      }
-      catch (std::invalid_argument & /*e*/)
-      {
-        const std::string format_type = (t == typeid(double)) ? "float" : "integer";
-        _errors.emplace_back("invalid " + format_type + " syntax for parameter: " + full_name +
-                                 "='" + strval + "'",
-                             node);
-      }
-    }
-    else if constexpr (std::is_same_v<T, bool>)
-    {
-      if (!toBool(strval, param->set()))
-        _errors.emplace_back(
-            "invalid boolean syntax for parameter: " + full_name + "='" + strval + "'", node);
-    }
-    else
-      throw;
-  }
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setScalarParam<T>(short_name) = param->get();
-  }
-}
-
-template <typename T, typename UP_T, typename Base>
-void
-Builder::setScalarValueTypeParameter(const std::string & full_name,
-                                     const std::string & short_name,
-                                     InputParameters::Parameter<T> * param,
-                                     bool in_global,
-                                     GlobalParamsAction * global_block,
-                                     const hit::Node & node)
-{
-  setScalarParameter<T, Base>(full_name, short_name, param, in_global, global_block);
-
-  // If this is a range checked param, we need to make sure that the value falls within the
-  // requested range
-  mooseAssert(_current_params, "Current params is nullptr");
-
-  const auto error = _current_params->rangeCheck<T, UP_T>(full_name, short_name, param);
-  if (error)
-    _errors.emplace_back(error->second, &node);
-}
-
-template <typename T, typename Base>
-void
-Builder::setVectorParameter(const std::string & full_name,
-                            const std::string & short_name,
-                            InputParameters::Parameter<std::vector<T>> * param,
-                            bool in_global,
-                            GlobalParamsAction * global_block)
-{
-  std::vector<T> vec;
-  if (const auto node = _root.find(full_name))
-  {
-    try
-    {
-      auto tmp = node->param<std::vector<Base>>();
-      for (auto val : tmp)
-        vec.push_back(val);
-    }
-    catch (hit::Error & err)
-    {
-      Parser::appendErrorMessages(_errors, err);
-      return;
-    }
-  }
-
-  param->set() = vec;
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setVectorParam<T>(short_name).resize(param->get().size());
-    for (unsigned int i = 0; i < vec.size(); ++i)
-      global_block->setVectorParam<T>(short_name)[i] = param->get()[i];
-  }
-}
-
-template <typename KeyType, typename MappedType>
-void
-Builder::setMapParameter(const std::string & full_name,
-                         const std::string & short_name,
-                         InputParameters::Parameter<std::map<KeyType, MappedType>> * param,
-                         bool in_global,
-                         GlobalParamsAction * global_block)
-{
-  std::map<KeyType, MappedType> the_map;
-
-  if (const auto node = _root.find(full_name))
-  {
-    try
-    {
-      const auto & string_vec = node->param<std::vector<std::string>>();
-      auto it = string_vec.begin();
-      while (it != string_vec.end())
-      {
-        const auto & string_key = *it;
-        ++it;
-        if (it == string_vec.end())
-        {
-          _errors.emplace_back(
-              "odd number of entries in string vector for map parameter '" + full_name +
-                  "'; there must be " +
-                  "an even number or else you will end up with a key without a value",
-              node);
-          return;
-        }
-        const auto & string_value = *it;
-        ++it;
-
-        std::pair<KeyType, MappedType> pr;
-        // key
-        try
-        {
-          pr.first = MooseUtils::convert<KeyType>(string_key, true);
-        }
-        catch (std::invalid_argument & /*e*/)
-        {
-          _errors.emplace_back("invalid " + MooseUtils::prettyCppType<KeyType>() +
-                                   " syntax for map parameter '" + full_name +
-                                   "' key: " + string_key,
-                               node);
-          return;
-        }
-        // value
-        try
-        {
-          pr.second = MooseUtils::convert<MappedType>(string_value, true);
-        }
-        catch (std::invalid_argument & /*e*/)
-        {
-          _errors.emplace_back("invalid " + MooseUtils::prettyCppType<MappedType>() +
-                                   " syntax for map parameter '" + full_name +
-                                   "' value: " + string_value,
-                               node);
-          return;
-        }
-
-        auto insert_pr = the_map.insert(std::move(pr));
-        if (!insert_pr.second)
-        {
-          _errors.emplace_back("Duplicate map entry for map parameter: '" + full_name + "'; key '" +
-                                   string_key + "' appears multiple times",
-                               node);
-          return;
-        }
-      }
-    }
-    catch (hit::Error & err)
-    {
-      Parser::appendErrorMessages(_errors, err);
-      return;
-    }
-  }
-
-  param->set() = the_map;
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    auto & global_map = global_block->setParam<std::map<KeyType, MappedType>>(short_name);
-    for (const auto & pair : the_map)
-      global_map.insert(pair);
-  }
-}
-
-template <typename T>
-void
-Builder::setDoubleIndexParameter(const std::string & full_name,
-                                 const std::string & short_name,
-                                 InputParameters::Parameter<std::vector<std::vector<T>>> * param,
-                                 bool in_global,
-                                 GlobalParamsAction * global_block)
-{
-  auto & value = param->set();
-
-  // Get the full string assigned to the variable full_name
-  const auto node = _root.find(full_name, true);
-  const auto value_string = MooseUtils::trim(node->param<std::string>());
-
-  // split vector at delim ;
-  // NOTE: the substrings are _not_ of type T yet
-  // The zero length here is intentional, as we want something like:
-  // "abc; 123;" -> ["abc", "123", ""]
-  std::vector<std::string> outer_string_vectors;
-  // With split, we will get a single entry if the string value is empty. However,
-  // that should represent an empty vector<vector>. Therefore, only split if we have values.
-  if (!value_string.empty())
-    outer_string_vectors = MooseUtils::split(value_string, ";");
-
-  const auto outer_vector_size = outer_string_vectors.size();
-  value.resize(outer_vector_size);
-
-  for (const auto j : index_range(outer_string_vectors))
-    if (!MooseUtils::tokenizeAndConvert<T>(outer_string_vectors[j], value[j]))
-    {
-      _errors.emplace_back("invalid format for parameter " + full_name, node);
-      return;
-    }
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setDoubleIndexParam<T>(short_name).resize(outer_vector_size);
-    for (const auto j : make_range(outer_vector_size))
-    {
-      global_block->setDoubleIndexParam<T>(short_name)[j].resize(value[j].size());
-      for (const auto i : index_range(value[j]))
-        global_block->setDoubleIndexParam<T>(short_name)[j][i] = value[j][i];
-    }
-  }
-}
-
-template <typename T>
-void
-Builder::setTripleIndexParameter(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<std::vector<std::vector<T>>>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  // Get the full string assigned to the variable full_name
-  auto node = _root.find(full_name, true);
-  const std::string buffer_raw = node->param<std::string>();
-  // In case the parameter is empty
-  if (buffer_raw.find_first_not_of(' ', 0) == std::string::npos)
-    return;
-
-  // Add a space between neighboring delim's, before the first delim if nothing is ahead of it, and
-  // after the last delim if nothing is behind it.
-  std::string buffer;
-  buffer.push_back(buffer_raw[0]);
-  if (buffer[0] == '|' || buffer[0] == ';')
-    buffer = ' ' + buffer;
-  for (std::string::size_type i = 1; i < buffer_raw.size(); i++)
-  {
-    if ((buffer_raw[i - 1] == '|' || buffer_raw[i - 1] == ';') &&
-        (buffer_raw[i] == '|' || buffer_raw[i] == ';'))
-      buffer.push_back(' ');
-    buffer.push_back(buffer_raw[i]);
-  }
-  if (buffer.back() == '|' || buffer.back() == ';')
-    buffer.push_back(' ');
-
-  // split vector at delim | to get a series of 2D subvectors
-  std::vector<std::string> first_tokenized_vector;
-  std::vector<std::vector<std::string>> second_tokenized_vector;
-  MooseUtils::tokenize(buffer, first_tokenized_vector, 1, "|");
-  param->set().resize(first_tokenized_vector.size());
-  second_tokenized_vector.resize(first_tokenized_vector.size());
-  for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
-  {
-    // Identify empty subvector first
-    if (first_tokenized_vector[j].find_first_not_of(' ', 0) == std::string::npos)
-    {
-      param->set()[j].resize(0);
-      continue;
-    }
-    // split each 2D subvector at delim ; to get 1D sub-subvectors
-    // NOTE: the 1D sub-subvectors are _not_ of type T yet
-    MooseUtils::tokenize(first_tokenized_vector[j], second_tokenized_vector[j], 1, ";");
-    param->set()[j].resize(second_tokenized_vector[j].size());
-    for (unsigned k = 0; k < second_tokenized_vector[j].size(); ++k)
-      if (!MooseUtils::tokenizeAndConvert<T>(second_tokenized_vector[j][k], param->set()[j][k]))
-      {
-        _errors.emplace_back("invalid format for '" + full_name + "'", node);
-        return;
-      }
-  }
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setTripleIndexParam<T>(short_name).resize(first_tokenized_vector.size());
-    for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
-    {
-      global_block->setTripleIndexParam<T>(short_name)[j].resize(second_tokenized_vector[j].size());
-      for (unsigned k = 0; k < second_tokenized_vector[j].size(); ++k)
-      {
-        global_block->setTripleIndexParam<T>(short_name)[j][k].resize(param->get()[j][k].size());
-        for (unsigned int i = 0; i < param->get()[j][k].size(); ++i)
-          global_block->setTripleIndexParam<T>(short_name)[j][k][i] = param->get()[j][k][i];
-      }
-    }
-  }
-}
-
-template <typename T>
-void
-Builder::setScalarComponentParameter(const std::string & full_name,
-                                     const std::string & short_name,
-                                     InputParameters::Parameter<T> * param,
-                                     bool in_global,
-                                     GlobalParamsAction * global_block)
-{
-  auto node = _root.find(full_name, true);
-  std::vector<double> vec;
-  try
-  {
-    vec = node->param<std::vector<double>>();
-  }
-  catch (hit::Error & err)
-  {
-    Parser::appendErrorMessages(_errors, err);
-    return;
-  }
-
-  if (vec.size() != LIBMESH_DIM)
-  {
-    _errors.emplace_back("wrong number of values in scalar component parameter '" + full_name +
-                             "': " + short_name + " was given " + std::to_string(vec.size()) +
-                             " components but should have " + std::to_string(LIBMESH_DIM),
-                         node);
-    return;
-  }
-
-  T value;
-  for (unsigned int i = 0; i < vec.size(); ++i)
-    value(i) = Real(vec[i]);
-
-  param->set() = value;
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setScalarParam<T>(short_name) = value;
-  }
-}
-
-template <typename T>
-void
-Builder::setVectorComponentParameter(const std::string & full_name,
-                                     const std::string & short_name,
-                                     InputParameters::Parameter<std::vector<T>> * param,
-                                     bool in_global,
-                                     GlobalParamsAction * global_block)
-{
-  auto node = _root.find(full_name, true);
-  std::vector<double> vec;
-  try
-  {
-    vec = node->param<std::vector<double>>();
-  }
-  catch (hit::Error & err)
-  {
-    Parser::appendErrorMessages(_errors, err);
-    return;
-  }
-
-  if (vec.size() % LIBMESH_DIM)
-  {
-    _errors.emplace_back("wrong number of values in vector component parameter '" + full_name +
-                             "': size " + std::to_string(vec.size()) + " is not a multiple of " +
-                             std::to_string(LIBMESH_DIM),
-                         node);
-    return;
-  }
-
-  std::vector<T> values;
-  for (unsigned int i = 0; i < vec.size() / LIBMESH_DIM; ++i)
-  {
-    T value;
-    for (int j = 0; j < LIBMESH_DIM; ++j)
-      value(j) = Real(vec[i * LIBMESH_DIM + j]);
-    values.push_back(value);
-  }
-
-  param->set() = values;
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setVectorParam<T>(short_name).resize(vec.size(), values[0]);
-    for (unsigned int i = 0; i < vec.size() / LIBMESH_DIM; ++i)
-      global_block->setVectorParam<T>(short_name)[i] = values[0];
-  }
-}
-
-template <typename T>
-void
-Builder::setVectorVectorComponentParameter(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<std::vector<T>>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  // Get the full string assigned to the variable full_name
-  auto node = _root.find(full_name, true);
-  std::string buffer = node->param<std::string>();
-
-  // split vector at delim ;
-  // NOTE: the substrings are _not_ of type T yet
-  std::vector<std::string> first_tokenized_vector;
-  MooseUtils::tokenize(buffer, first_tokenized_vector, 1, ";");
-  param->set().resize(first_tokenized_vector.size());
-
-  // get a vector<vector<double>> first
-  std::vector<std::vector<double>> vecvec(first_tokenized_vector.size());
-  for (unsigned j = 0; j < vecvec.size(); ++j)
-    if (!MooseUtils::tokenizeAndConvert<double>(first_tokenized_vector[j], vecvec[j]))
-    {
-      _errors.emplace_back("invalid format for parameter " + full_name, node);
-      return;
-    }
-
-  for (const auto & vec : vecvec)
-    if (vec.size() % LIBMESH_DIM)
-    {
-      _errors.emplace_back("wrong number of values in double-indexed vector component parameter '" +
-                               full_name + "': size of subcomponent " + std::to_string(vec.size()) +
-                               " is not a multiple of " + std::to_string(LIBMESH_DIM),
-                           node);
-      return;
-    }
-
-  // convert vector<vector<double>> to vector<vector<T>>
-  std::vector<std::vector<T>> values(vecvec.size());
-  for (unsigned int id_vec = 0; id_vec < vecvec.size(); ++id_vec)
-    for (unsigned int i = 0; i < vecvec[id_vec].size() / LIBMESH_DIM; ++i)
-    {
-      T value;
-      for (int j = 0; j < LIBMESH_DIM; ++j)
-        value(j) = Real(vecvec[id_vec][i * LIBMESH_DIM + j]);
-      values[id_vec].push_back(value);
-    }
-
-  param->set() = values;
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setDoubleIndexParam<T>(short_name).resize(vecvec.size());
-    for (unsigned j = 0; j < vecvec.size(); ++j)
-    {
-      global_block->setDoubleIndexParam<T>(short_name)[j].resize(param->get()[j].size() /
-                                                                 LIBMESH_DIM);
-      for (unsigned int i = 0; i < param->get()[j].size() / LIBMESH_DIM; ++i)
-        global_block->setDoubleIndexParam<T>(short_name)[j][i] = values[j][i];
-    }
-  }
-}
-
-template <>
-void
-Builder::setScalarParameter<RealVectorValue, RealVectorValue>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<RealVectorValue> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  setScalarComponentParameter(full_name, short_name, param, in_global, global_block);
-}
-
-template <>
-void
-Builder::setScalarParameter<Point, Point>(const std::string & full_name,
-                                          const std::string & short_name,
-                                          InputParameters::Parameter<Point> * param,
-                                          bool in_global,
-                                          GlobalParamsAction * global_block)
-{
-  setScalarComponentParameter(full_name, short_name, param, in_global, global_block);
-}
-
-template <>
-void
-Builder::setScalarParameter<RealEigenVector, RealEigenVector>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<RealEigenVector> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  std::vector<double> vec;
-  try
-  {
-    vec = _root.param<std::vector<double>>(full_name);
-  }
-  catch (hit::Error & err)
-  {
-    Parser::appendErrorMessages(_errors, err);
-    return;
-  }
-
-  RealEigenVector value(vec.size());
-  for (unsigned int i = 0; i < vec.size(); ++i)
-    value(i) = Real(vec[i]);
-
-  param->set() = value;
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setScalarParam<RealEigenVector>(short_name) = value;
-  }
-}
-
-template <>
-void
-Builder::setScalarParameter<RealEigenMatrix, RealEigenMatrix>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<RealEigenMatrix> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  // Get the full string assigned to the variable full_name
-  auto node = _root.find(full_name, true);
-  std::string buffer = node->param<std::string>();
-
-  // split vector at delim ;
-  // NOTE: the substrings are _not_ of type T yet
-  std::vector<std::string> first_tokenized_vector;
-  MooseUtils::tokenize(buffer, first_tokenized_vector, 1, ";");
-
-  std::vector<std::vector<Real>> values(first_tokenized_vector.size());
-
-  for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
-  {
-    if (!MooseUtils::tokenizeAndConvert<Real>(first_tokenized_vector[j], values[j]) ||
-        (j != 0 && values[j].size() != values[0].size()))
-    {
-      _errors.emplace_back("invalid format for parameter " + full_name, node);
-      return;
-    }
-  }
-
-  RealEigenMatrix value(values.size(), values[0].size());
-  for (unsigned int i = 0; i < values.size(); ++i)
-    for (unsigned int j = 0; j < values[i].size(); ++j)
-      value(i, j) = values[i][j];
-
-  param->set() = value;
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setScalarParam<RealEigenMatrix>(short_name) = value;
-  }
-}
-
-template <>
-void
-Builder::setScalarParameter<MooseEnum, MooseEnum>(const std::string & full_name,
-                                                  const std::string & short_name,
-                                                  InputParameters::Parameter<MooseEnum> * param,
-                                                  bool in_global,
-                                                  GlobalParamsAction * global_block)
-{
-  MooseEnum current_param = param->get();
-
-  std::string value = _root.param<std::string>(full_name);
-
-  param->set() = value;
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setScalarParam<MooseEnum>(short_name) = current_param;
-  }
-}
-
-template <>
-void
-Builder::setScalarParameter<MultiMooseEnum, MultiMooseEnum>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<MultiMooseEnum> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  MultiMooseEnum current_param = param->get();
-
-  auto vec = _root.param<std::vector<std::string>>(full_name);
-
-  std::string raw_values;
-  for (unsigned int i = 0; i < vec.size(); ++i)
-    raw_values += ' ' + vec[i];
-
-  param->set() = raw_values;
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setScalarParam<MultiMooseEnum>(short_name) = current_param;
-  }
-}
-
-template <>
-void
-Builder::setScalarParameter<ExecFlagEnum, ExecFlagEnum>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<ExecFlagEnum> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  ExecFlagEnum current_param = param->get();
-  auto vec = _root.param<std::vector<std::string>>(full_name);
-
-  std::string raw_values;
-  for (unsigned int i = 0; i < vec.size(); ++i)
-    raw_values += ' ' + vec[i];
-
-  param->set() = raw_values;
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setScalarParam<ExecFlagEnum>(short_name) = current_param;
-  }
-}
-
-template <>
-void
-Builder::setScalarParameter<RealTensorValue, RealTensorValue>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<RealTensorValue> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  auto node = _root.find(full_name, true);
-  auto vec = node->param<std::vector<double>>();
-  if (vec.size() != LIBMESH_DIM * LIBMESH_DIM)
-  {
-    _errors.emplace_back("invalid RealTensorValue parameter '" + full_name + "': size is " +
-                             std::to_string(vec.size()) + " but should be " +
-                             std::to_string(LIBMESH_DIM * LIBMESH_DIM),
-                         node);
-    return;
-  }
-
-  RealTensorValue value;
-  for (int i = 0; i < LIBMESH_DIM; ++i)
-    for (int j = 0; j < LIBMESH_DIM; ++j)
-      value(i, j) = Real(vec[i * LIBMESH_DIM + j]);
-
-  param->set() = value;
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setScalarParam<RealTensorValue>(short_name) = value;
-  }
-}
-
-// Specialization for coupling a Real value where a postprocessor would be needed in MOOSE
-template <>
-void
-Builder::setScalarParameter<PostprocessorName, PostprocessorName>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<PostprocessorName> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  PostprocessorName pps_name = _root.param<std::string>(full_name);
-  param->set() = pps_name;
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setScalarParam<PostprocessorName>(short_name) = pps_name;
-  }
-}
-
-template <>
-void
-Builder::setScalarParameter<ReporterName, std::string>(
-    const std::string & full_name,
-    const std::string & /*short_name*/,
-    InputParameters::Parameter<ReporterName> * param,
-    bool /*in_global*/,
-    GlobalParamsAction * /*global_block*/)
-{
-  auto node = _root.find(full_name, true);
-  std::vector<std::string> names = MooseUtils::rsplit(node->param<std::string>(), "/", 2);
-  if (names.size() != 2)
-    _errors.emplace_back(
-        "The supplied name ReporterName '" + full_name + "' must contain the '/' delimiter.", node);
-  else
-    param->set() = ReporterName(names[0], names[1]);
-}
-
-template <>
-void
-Builder::setVectorParameter<RealVectorValue, RealVectorValue>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<RealVectorValue>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  setVectorComponentParameter(full_name, short_name, param, in_global, global_block);
-}
-
-template <>
-void
-Builder::setVectorParameter<Point, Point>(const std::string & full_name,
-                                          const std::string & short_name,
-                                          InputParameters::Parameter<std::vector<Point>> * param,
-                                          bool in_global,
-                                          GlobalParamsAction * global_block)
-{
-  setVectorComponentParameter(full_name, short_name, param, in_global, global_block);
-}
-
-template <>
-void
-Builder::setVectorParameter<MooseEnum, MooseEnum>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<MooseEnum>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  std::vector<MooseEnum> enum_values = param->get();
-  std::vector<std::string> values(enum_values.size());
-  for (unsigned int i = 0; i < values.size(); ++i)
-    values[i] = static_cast<std::string>(enum_values[i]);
-
-  /**
-   * With MOOSE Enums we need a default object so it should have been passed in the param pointer.
-   * We are only going to use the first item in the vector (values[0]) and ignore the rest.
-   */
-  std::vector<std::string> vec;
-  if (auto node = _root.find(full_name, true))
-  {
-    vec = node->param<std::vector<std::string>>();
-    param->set().resize(vec.size(), enum_values[0]);
-  }
-
-  for (unsigned int i = 0; i < vec.size(); ++i)
-    param->set()[i] = vec[i];
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setVectorParam<MooseEnum>(short_name).resize(vec.size(), enum_values[0]);
-    for (unsigned int i = 0; i < vec.size(); ++i)
-      global_block->setVectorParam<MooseEnum>(short_name)[i] = values[0];
-  }
-}
-
-template <>
-void
-Builder::setVectorParameter<MultiMooseEnum, MultiMooseEnum>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<MultiMooseEnum>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  const auto node = _root.find(full_name, true);
-  const std::vector<MultiMooseEnum> & enum_values = param->get();
-
-  // Get the full string assigned to the variable full_name
-  std::string buffer = node->param<std::string>();
-
-  bool has_empty = false;
-  const auto first_tokenized_vector = MooseUtils::split(buffer, ";");
-  for (const auto i : index_range(first_tokenized_vector))
-  {
-    const auto & entry = first_tokenized_vector[i];
-    if (MooseUtils::trim(entry) == "")
-    {
-      has_empty = true;
-      _errors.emplace_back("entry " + std::to_string(i) + " in '" + node->fullpath() + "' is empty",
-                           node);
-    }
-  }
-
-  if (has_empty)
-    return;
-
-  param->set().resize(first_tokenized_vector.size(), enum_values[0]);
-
-  std::vector<std::vector<std::string>> vecvec(first_tokenized_vector.size());
-  for (const auto i : index_range(vecvec))
-  {
-    MooseUtils::tokenize<std::string>(first_tokenized_vector[i], vecvec[i], 1, " ");
-    param->set()[i] = vecvec[i];
-  }
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setVectorParam<MultiMooseEnum>(short_name).resize(vecvec.size(), enum_values[0]);
-    for (unsigned int i = 0; i < vecvec.size(); ++i)
-      global_block->setVectorParam<MultiMooseEnum>(short_name)[i] = vecvec[i];
-  }
-}
-
-template <>
-void
-Builder::setVectorParameter<PostprocessorName, PostprocessorName>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<PostprocessorName>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  std::vector<std::string> pps_names = _root.param<std::vector<std::string>>(full_name);
-  unsigned int n = pps_names.size();
-  param->set().resize(n);
-
-  for (unsigned int j = 0; j < n; ++j)
-    param->set()[j] = pps_names[j];
-
-  if (in_global)
-  {
-    global_block->remove(short_name);
-    global_block->setVectorParam<PostprocessorName>(short_name).resize(n, "");
-    for (unsigned int j = 0; j < n; ++j)
-      global_block->setVectorParam<PostprocessorName>(short_name)[j] = pps_names[j];
-  }
-}
-
-/**
- * Specialization for coupling vectors. This routine handles default values and auto generated
- * VariableValue vectors.
- */
-template <>
-void
-Builder::setVectorParameter<VariableName, VariableName>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<VariableName>> * param,
-    bool /*in_global*/,
-    GlobalParamsAction * /*global_block*/)
-{
-  auto node = _root.find(full_name, true);
-  auto vec = node->param<std::vector<std::string>>();
-  auto strval = node->param<std::string>();
-  std::vector<VariableName> var_names(vec.size());
-
-  bool has_var_names = false;
-  for (unsigned int i = 0; i < vec.size(); ++i)
-  {
-    VariableName var_name = vec[i];
-
-    Real real_value;
-    std::istringstream ss(var_name);
-
-    // If we are able to convert this value into a Real, then set a default coupled value
-    // NOTE: parameter must be either all default or no defaults
-    if (ss >> real_value && ss.eof())
-      _current_params->defaultCoupledValue(short_name, real_value, i);
-    else
-    {
-      var_names[i] = var_name;
-      has_var_names = true;
-    }
-  }
-
-  if (has_var_names)
-  {
-    param->set().resize(vec.size());
-
-    for (unsigned int i = 0; i < vec.size(); ++i)
-      if (var_names[i] == "")
-        _errors.emplace_back("invalid value for '" + full_name +
-                                 "': coupled vectors where some parameters are reals and others "
-                                 "are variables are not supported",
-                             node);
-      else
-        param->set()[i] = var_names[i];
-  }
-}
-
-template <>
-void
-Builder::setVectorParameter<ReporterName, std::string>(
-    const std::string & full_name,
-    const std::string & /*short_name*/,
-    InputParameters::Parameter<std::vector<ReporterName>> * param,
-    bool /*in_global*/,
-    GlobalParamsAction * /*global_block*/)
-{
-  auto node = _root.find(full_name, true);
-  auto rnames = node->param<std::vector<std::string>>();
-  param->set().resize(rnames.size());
-
-  for (unsigned int i = 0; i < rnames.size(); ++i)
-  {
-    std::vector<std::string> names = MooseUtils::rsplit(rnames[i], "/", 2);
-    if (names.size() != 2)
-      _errors.emplace_back("the supplied name ReporterName '" + rnames[i] +
-                               "' must contain the '/' delimiter",
-                           node);
-    else
-      param->set()[i] = ReporterName(names[0], names[1]);
-  }
-}
-
-template <>
-void
-Builder::setVectorParameter<CLIArgString, std::string>(
-    const std::string & full_name,
-    const std::string & /*short_name*/,
-    InputParameters::Parameter<std::vector<CLIArgString>> * param,
-    bool /*in_global*/,
-    GlobalParamsAction * /*global_block*/)
-{
-  // Parsed as a vector of string, the vectors parameters are being cut
-  auto rnames = _root.param<std::vector<std::string>>(full_name);
-  param->set().resize(rnames.size()); // slightly oversized if vectors have been split
-
-  // Skip empty parameter
-  if (rnames.empty())
-    return;
-
-  // Re-assemble vector parameters
-  unsigned int i_param = 0;
-  bool vector_param_detected = false;
-  for (unsigned int i = 0; i < rnames.size(); ++i)
-  {
-    // Look for a quote, both types
-    std::vector<std::string> double_split =
-        MooseUtils::rsplit(rnames[i], "\"", std::numeric_limits<std::size_t>::max());
-    std::vector<std::string> single_split =
-        MooseUtils::rsplit(rnames[i], "\'", std::numeric_limits<std::size_t>::max());
-    if (double_split.size() + single_split.size() >= 3)
-      // Either entering or exiting a vector parameter (>3 is entering another vector)
-      // Even and >2 number of quotes means both finished and started another vector parameter
-      if ((double_split.size() + single_split.size()) % 2 == 1)
-        vector_param_detected = !vector_param_detected;
-
-    // We're building a vector parameters, just append the text, rebuild the spaces
-    if (vector_param_detected)
-      param->set()[i_param] += rnames[i] + ' ';
-    else
-    {
-      param->set()[i_param] += rnames[i];
-      i_param++;
-    }
-  }
-  // Use actual size after re-forming vector parameters
-  param->set().resize(i_param);
-}
-
-template <>
-void
-Builder::setDoubleIndexParameter<Point>(
-    const std::string & full_name,
-    const std::string & short_name,
-    InputParameters::Parameter<std::vector<std::vector<Point>>> * param,
-    bool in_global,
-    GlobalParamsAction * global_block)
-{
-  setVectorVectorComponentParameter(full_name, short_name, param, in_global, global_block);
-}
 } // end of namespace Moose
