@@ -244,7 +244,7 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
   {
     const auto & transition_el = transition_els[i];
     const int old_attr = parent_mesh.GetAttribute(transition_el);
-    new_attrs[old_attr-1] = old_max_attr + old_attr%old_max_attr;
+    new_attrs[old_attr-1] = old_max_attr + old_attr%old_max_attr + 1;
   }
 
   /// Distribute local attribute IDs to other MPI ranks to create set of new
