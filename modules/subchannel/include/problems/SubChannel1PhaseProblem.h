@@ -37,6 +37,8 @@ public:
 
   /// Computes added heat for channel i_ch and cell iz
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
+  /// Function that computes the heat flux added by the duct
+  Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
 
 protected:
   struct FrictionStruct
@@ -71,8 +73,6 @@ protected:
   void computeMu(int iblock);
   /// Computes Residual Matrix based on the lateral momentum conservation equation for block iblock
   void computeWijResidual(int iblock);
-  /// Function that computes the heat flux added by the duct
-  Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
   /// Function that computes the heat flux added by the duct
   virtual Real getSubChannelWidth(unsigned int i_ch) = 0;
   /// Computes Residual Vector based on the lateral momentum conservation equation for block iblock & updates flow variables based on current crossflow solution
