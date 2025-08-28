@@ -6,7 +6,6 @@
     input = domain_submesh.i
     xmldiff = 'OutputData/DomainPotential/Run0/Run0.pvd
                 OutputData/DomainPotential/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'MOOSE shall have the ability to solve a diffusion problem defined on an MFEM domain restricted submesh.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -18,7 +17,6 @@
     input = boundary_submesh.i
     xmldiff = 'OutputData/BoundaryPotential/Run0/Run0.pvd
                 OutputData/BoundaryPotential/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'MOOSE shall have the ability to solve an FE problem defined on an MFEM boundary restricted submesh.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -30,7 +28,6 @@
     input = domain_submesh_transfer.i
     xmldiff = 'OutputData/DomainPotentialTransfer/Run0/Run0.pvd
                 OutputData/DomainPotentialTransfer/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'MOOSE shall have the ability to transfer a domain restricted submesh variable data to a corresponding variable defined on the parent mesh.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -42,7 +39,6 @@
     input = magnetostatic.i
     xmldiff = 'OutputData/Magnetostatic/Run0/Run0.pvd
                 OutputData/Magnetostatic/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'MOOSE shall have the ability to support source terms arising from the elimination of coupled MFEM variables external to the equation system.'
     capabilities = 'mfem'
     max_parallel = 1
