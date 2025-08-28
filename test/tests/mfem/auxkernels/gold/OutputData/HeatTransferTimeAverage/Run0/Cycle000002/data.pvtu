@@ -11,7 +11,6 @@
 </PCells>
 <PPointData>
 <PDataArray type="Float64" Name="average_temperature" NumberOfComponents="1"  format="ascii" />
-<PDataArray type="Float64" Name="daverage_temperature_dt" NumberOfComponents="1"  format="ascii" />
 <PDataArray type="Float64" Name="dtemperature_dt" NumberOfComponents="1"  format="ascii" />
 <PDataArray type="Float64" Name="temperature" NumberOfComponents="1"  format="ascii" />
 </PPointData>
