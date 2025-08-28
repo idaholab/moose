@@ -51,6 +51,7 @@ walls = 'right left top bottom'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
+    body_force_kernels_name = "u_buoyancy; v_buoyancy"
   []
 []
 
@@ -93,7 +94,7 @@ walls = 'right left top bottom'
     type = LinearFVMomentumBoussinesq
     variable = superficial_vel_x
     T_fluid = T_fluid
-    gravity = '0 -9.81 0'
+    gravity = '0 -9.8 0'
     rho = ${rho}
     ref_temperature = ${T_0}
     alpha_name = ${alpha}
@@ -184,11 +185,12 @@ walls = 'right left top bottom'
     boundary = 'top bottom'
     use_two_term_expansion = false
   []
-  [pressure-extrapolation]
-    type = LinearFVExtrapolatedPressureBC
-    boundary = ${walls}
+  [pressure]
+    type = LinearFVPressureFluxBC
+    boundary = 'top bottom left right'
     variable = pressure
-    use_two_term_expansion = false
+    HbyA_flux = HbyA
+    Ainv = Ainv
   []
 []
 
@@ -239,6 +241,8 @@ walls = 'right left top bottom'
 
   energy_petsc_options_iname = '-pc_type -pc_hypre_type'
   energy_petsc_options_value = 'hypre boomeramg'
+
+  continue_on_max_its = true
 []
 
 ################################################################################
@@ -248,4 +252,3 @@ walls = 'right left top bottom'
 [Outputs]
   exodus = true
 []
-
