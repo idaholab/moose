@@ -283,9 +283,7 @@ static auto vector_realvectorvalue = registry.add<std::vector<RealVectorValue>>(
 static auto vector_mooseenum = registry.add<std::vector<MooseEnum>>(
     [](std::vector<MooseEnum> & value, const hit::Field & field)
     {
-      // Don't have something to initialize on
-      if (value.empty())
-        return;
+      mooseAssert(value.size() == 1, "Missing a value to initialize on");
 
       // With MOOSE enums we need a default object so it should have been
       // passed in the param pointer. We are only going to use the first
@@ -299,6 +297,8 @@ static auto vector_mooseenum = registry.add<std::vector<MooseEnum>>(
 static auto vector_multimooseenum = registry.add<std::vector<MultiMooseEnum>>(
     [](std::vector<MultiMooseEnum> & value, const hit::Field & field)
     {
+      mooseAssert(value.size() == 1, "Missing a value to initialize on");
+
       const auto tokens = MooseUtils::split(field.param<std::string>(), ";");
       for (const auto i : index_range(tokens))
       {
