@@ -34,21 +34,27 @@ MFEMZienkiewiczZhuIndicator::createEstimator()
   mfem::BilinearFormIntegrator * integ;
 
   // fetch the kernel first so we can get the blf integrator
-  const UserObject * kernel_uo = &(getMFEMProblem().getUserObjectBase(_kernel_name));
-  if (dynamic_cast<const MFEMKernel *>(kernel_uo))
-  {
-    std::shared_ptr<MooseObject> object_ptr =
-        getMFEMProblem().getUserObject<MFEMKernel>(_kernel_name).getSharedPtr();
-    std::shared_ptr<MFEMKernel> kernel = std::dynamic_pointer_cast<MFEMKernel>(object_ptr);
-    integ = kernel->createBFIntegrator();
-  }
-  else
-  {
-    mooseError("Could not fetch kernel with name ", _kernel_name);
-  }
+  mooseAssert(dynamic_cast<const MFEMKernel *>(&(getMFEMProblem().getUserObjectBase(_kernel_name))),
+              "Could not fetch kernel with name " + _kernel_name);
+  std::shared_ptr<MooseObject> object_ptr =
+      getMFEMProblem().getUserObject<MFEMKernel>(_kernel_name).getSharedPtr();
+  std::shared_ptr<MFEMKernel> kernel = std::dynamic_pointer_cast<MFEMKernel>(object_ptr);
+  integ = kernel->createBFIntegrator();
 
-  // beforehand we would fetch this from the finite element collections
-  // in the problem data
+  // Next, we need to check that this integrator is supported by mfem::L2ZienkiewiczZhuEstimator
+  bool is_supported = false;
+
+  // Check it correctly casts into DiffusionIntegrator
+  is_supported |= (dynamic_cast<mfem::DiffusionIntegrator *>(integ) != nullptr);
+  // Check it correctly casts into CurlCurlIntegrator
+  is_supported |= (dynamic_cast<mfem::CurlCurlIntegrator *>(integ) != nullptr);
+  // Check it correctly casts into ElasticityIntegrator
+  is_supported |= (dynamic_cast<mfem::ElasticityIntegrator *>(integ) != nullptr);
+
+  mooseAssert(is_supported,
+              "MFEMZienkiewiczZhuIndicator only supports MFEMDiffusionKernel, MFEMCurlCurlKernel "
+              "and MFEMLinearElasticityKernel");
+
   int order = getFESpace()->GetMaxElementOrder();
 
   int dim = problem.pmesh->Dimension();
