@@ -65,3 +65,19 @@ TEST(ParameterRegistryTest, setNotRegistered)
   const auto set = [&registry, &field, &param]() { registry.set(param, *field); };
   Moose::UnitUtils::assertThrows(set, "Parameter type 'double' is not registered");
 }
+
+TEST(ParameterRegistryTest, setCatchMooseError)
+{
+  Moose::ParameterRegistry registry;
+  registry.add<int>([](int &, const hit::Field &) { ::mooseError("foo"); });
+
+  libMesh::Parameters params;
+  params.set<int>("value");
+  auto & param = *params.begin()->second.get();
+
+  const std::unique_ptr<const hit::Node> root(hit::parse("file", "value = 1"));
+  const auto field = dynamic_cast<const hit::Field *>(root->find("value"));
+
+  const auto set = [&registry, &field, &param]() { registry.set(param, *field); };
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(set, "foo");
+}

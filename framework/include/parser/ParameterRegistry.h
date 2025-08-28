@@ -22,6 +22,7 @@ class GTEST_TEST_CLASS_NAME_(ParameterRegistryTest, add);
 class GTEST_TEST_CLASS_NAME_(ParameterRegistryTest, addExists);
 class GTEST_TEST_CLASS_NAME_(ParameterRegistryTest, set);
 class GTEST_TEST_CLASS_NAME_(ParameterRegistryTest, setNotRegistered);
+class GTEST_TEST_CLASS_NAME_(ParameterRegistryTest, setCatchMooseError);
 #endif
 
 namespace hit
@@ -66,6 +67,7 @@ private:
   FRIEND_TEST(::ParameterRegistryTest, addExists);
   FRIEND_TEST(::ParameterRegistryTest, set);
   FRIEND_TEST(::ParameterRegistryTest, setNotRegistered);
+  FRIEND_TEST(::ParameterRegistryTest, setCatchMooseError);
 #endif
 
   /// Registration map of type -> function to fill each type
