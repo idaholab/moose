@@ -132,7 +132,7 @@
 []
 
 [Transfers]
-  [from_sub]
+  [from_coil]
     type = MultiAppMFEMCopyTransfer
     source_variable = e_field
     variable = e_field
@@ -156,7 +156,7 @@
     file_base = OutputData/MagnetostaticClosedCoil
     vtk_format = ASCII
   []
-  [ReportedCurrent]
+  [ReportedPostprocessors]
     type = CSV
     file_base = OutputData/MagnetostaticClosedCoilCSV
   []

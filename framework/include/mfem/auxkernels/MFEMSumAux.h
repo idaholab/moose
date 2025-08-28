@@ -16,7 +16,7 @@
 #include "MFEMAuxKernel.h"
 
 /*
-Class to set an H(curl) auxvariable to be the gradient of a H1 scalar variable.
+Class to scale and sum two MFEM variables, and store the result in a third variable.
 */
 class MFEMSumAux : public MFEMAuxKernel
 {
@@ -31,14 +31,15 @@ public:
   virtual void execute() override;
 
 protected:
-  // Name of source MFEMVariable to take the gradient of.
-  const VariableName _source1_var_name;
-  const VariableName _source2_var_name;
-  // Reference to source gridfunction.
-  const mfem::ParGridFunction & _source1_var;
-  const mfem::ParGridFunction & _source2_var;  
-  // Scalar factor to multiply the result by.
-  const mfem::real_t _scale_factor;
+  // Names of input MFEMVariables to sum.
+  const VariableName _v1_var_name;
+  const VariableName _v2_var_name;
+  // Reference to input variable gridfunctions.
+  const mfem::ParGridFunction & _v1_var;
+  const mfem::ParGridFunction & _v2_var;  
+  // Scalar factors to multiply the input variables by.
+  const mfem::real_t _lambda1;
+  const mfem::real_t _lambda2;
 };
 
 #endif
