@@ -65,25 +65,25 @@
     vector_tag = 'nontime'
   []
   [soln]
-    type = TagVectorAux
+    type = TagSolutionAux
     variable = soln
     v = v
     vector_tag = 'solution'
   []
   [soln_old]
-    type = TagVectorAux
+    type = TagSolutionAux
     variable = soln_old
     v = v
     vector_tag = 'solution_state_1'
   []
   [soln_older]
-    type = TagVectorAux
+    type = TagSolutionAux
     variable = soln_older
     v = v
     vector_tag = 'solution_state_2'
   []
   [nontime]
-    type = TagVectorAux
+    type = TagResidualAux
     variable = resid_nontime
     v = v
     vector_tag = 'nontime'
