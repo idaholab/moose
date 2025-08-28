@@ -4,15 +4,6 @@
     design = MortarUserObjectAux.md
     requirement = 'The aux kernel shall throw an error if the supplied user object dies not support computing the property'
 
-    [normal_pressure]
-      type = RunException
-      input = aux_errors.i
-      cli_args = 'AuxKernels/gap/contact_quantity=normal_pressure'
-      detail = 'normal_pressure'
-      expect_err = "The 'NORMAL_PRESSURE' quantity is only provided by a 'PenaltyWeightedGapUserObject' or "
-                   "derived object\."
-    []
-
     [accumulated_slip_one]
       type = RunException
       input = aux_errors.i

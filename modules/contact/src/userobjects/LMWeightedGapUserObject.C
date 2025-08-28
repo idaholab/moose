@@ -62,7 +62,7 @@ LMWeightedGapUserObject::checkInput(const MooseVariable * const var,
                                     const std::string & var_name) const
 {
   if (isCoupledConstant(var_name))
-    paramError("lm_variable_normal",
+    paramError(var_name,
                "The Lagrange multiplier variable must be an actual variable and not a constant.");
   else if (!var)
     paramError(var_name,
