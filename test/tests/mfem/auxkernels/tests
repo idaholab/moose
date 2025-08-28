@@ -1,0 +1,16 @@
+[Tests]
+  [MFEMScalarVectorProjectionAux]
+    type = XMLDiff
+    input = projection.i
+    xmldiff = 'OutputData/Projection/Run0/Run0.pvd
+                OutputData/Projection/Run0/Cycle000001/proc000000.vtu'
+    ignored_items = "root['VTKFile']['@version']"
+    design = 'MFEMScalarProjectionAux.md MFEMVectorProjectionAux.md'
+    issues = '#31153'
+    requirement = 'The system shall have the ability to project scalar and vector coefficients onto appropriate MFEM auxvariables.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
+[]
