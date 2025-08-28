@@ -139,7 +139,7 @@ registerVectorParameter(bool);
 
 /// Helper for converting a string to a ReporterName, which requires splitting
 /// the string at the '/' delimiter
-const auto
+auto
 convert_reporter_name(const std::string & val, const hit::Field & field) -> ReporterName
 {
   const auto names = MooseUtils::rsplit(val, "/", 2);
@@ -154,7 +154,7 @@ convert_reporter_name(const std::string & val, const hit::Field & field) -> Repo
 /*******************************************************************************/
 
 /// Helper for setting a scalar component value (one with 3 real values)
-const auto set_scalar_component_value = [](auto & value, const hit::Field & field)
+auto set_scalar_component_value = [](auto & value, const hit::Field & field)
 {
   const auto vec = field.param<std::vector<double>>();
   if (vec.size() != LIBMESH_DIM)
@@ -249,7 +249,7 @@ static auto reportername = registry.add<ReporterName>(
 /*******************************************************************************/
 
 /// Helper for setting a vector component value (one with 3 real values)
-const auto set_vector_component_value = [](auto & value, const hit::Field & field)
+auto set_vector_component_value = [](auto & value, const hit::Field & field)
 {
   value.clear();
   const auto vec = field.param<std::vector<double>>();
