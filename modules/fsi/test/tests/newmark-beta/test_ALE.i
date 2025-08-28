@@ -208,14 +208,24 @@ youngs_modulus = 1e8
     block = 'matrix'
   []
 
-  ## Solid Mech Dynamics legacy action (doesn't add InertialForce)
-  [DynamicSolidMechanics] # zeta*K*vel + K * disp
-    displacements = 'disp_x disp_y'
-    stiffness_damping_coefficient = ${zeta}
-    block = 'inclusion'
+  # zeta*K*vel + K * disp
+  [dynamic_stress_x]
+    type = DynamicStressDivergenceTensors
+    block = inclusion
+    component = 0
+    variable = disp_x
+    zeta = ${zeta}
+  []
+  [dynamic_stress_y]
+    type = DynamicStressDivergenceTensors
+    block = inclusion
+    component = 1
+    variable = disp_y
+    zeta = ${zeta}
   []
 
-  [inertia_x] # M*accel + eta*M*vel
+  # M*accel + eta*M*vel
+  [inertia_x]
     type = InertialForce
     variable = disp_x
     velocity = vel_x_solid
@@ -225,11 +235,10 @@ youngs_modulus = 1e8
     eta = ${eta}
     block = 'inclusion'
   []
-
   [inertia_y]
     type = InertialForce
     variable = disp_y
-    velocity = vel_x_solid
+    velocity = vel_y_solid
     acceleration = accel_y
     beta = ${beta}
     gamma = ${gamma}

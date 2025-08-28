@@ -52,10 +52,7 @@ ADPenaltyVelocityContinuity::solidVelocity(const unsigned int qp) const
 {
   ADRealVectorValue ret;
   for (const auto i : index_range(_solid_velocities))
-  {
-    mooseAssert(_solid_velocities[i], "This should be non-null");
     ret(i) = (*_solid_velocities[i])[qp];
-  }
   return ret;
 }
 
