@@ -769,6 +769,12 @@ public:
   virtual SystemBase & getSystemBase(const unsigned int sys_num);
 
   /**
+   * Get non-constant reference to a system in this problem
+   * @param sys_name The name of the system
+   */
+  SystemBase & getSystemBase(const std::string & sys_name);
+
+  /**
    * Get non-constant reference to a linear system
    * @param sys_num The number of the linear system
    */

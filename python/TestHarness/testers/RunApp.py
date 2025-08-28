@@ -49,6 +49,7 @@ class RunApp(Tester):
         params.addParam('no_additional_cli_args', False, "A Boolean indicating that no additional CLI args should be added from the TestHarness. Note: This parameter should be rarely used as it will not pass on additional options such as those related to mpi, threads, distributed mesh, errors, etc.")
 
         params.addParam('capture_perf_graph', True, 'Whether or not to enable the capturing of PerfGraph output via Outputs/perf_graph_json_file and --capture-perf-graph')
+        params.addParam("perf_graph_live", False, "Whether to enable perf graph live printing")
 
         # Valgrind
         params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
@@ -249,6 +250,9 @@ class RunApp(Tester):
 
         if specs['restep'] != False and options.enable_restep:
             cli_args.append('--test-restep')
+
+        if not specs['perf_graph_live'] and '--disable-perf-graph-live' not in cli_args:
+            cli_args.append('--disable-perf-graph-live')
 
         if '--error' not in cli_args and (not specs["allow_warnings"] or options.error) and not options.allow_warnings:
             cli_args.append('--error')

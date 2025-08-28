@@ -71,23 +71,22 @@
   []
 []
 
-
 [BCs]
 []
 
 [Kernels]
-# Order parameter eta_alpha0
+  # Order parameter eta_alpha0
   [ACa0_bulk]
     type = ADACGrGrMulti
     variable = etaa0
-    v =           'etab0 etab1'
+    v = 'etab0 etab1'
     gamma_names = 'gab   gab'
   []
   [ACa0_sw]
     type = ADACSwitching
     variable = etaa0
-    Fj_names  = 'omegaa omegab'
-    hj_names  = 'ha     hb'
+    Fj_names = 'omegaa omegab'
+    hj_names = 'ha     hb'
   []
   [ACa0_int]
     type = ADACInterface
@@ -99,18 +98,18 @@
     type = ADTimeDerivative
     variable = etaa0
   []
-# Order parameter eta_beta0
+  # Order parameter eta_beta0
   [ACb0_bulk]
     type = ADACGrGrMulti
     variable = etab0
-    v =           'etaa0 etab1'
+    v = 'etaa0 etab1'
     gamma_names = 'gab   gbb'
   []
   [ACb0_sw]
     type = ADACSwitching
     variable = etab0
-    Fj_names  = 'omegaa omegab'
-    hj_names  = 'ha     hb'
+    Fj_names = 'omegaa omegab'
+    hj_names = 'ha     hb'
   []
   [ACb0_int]
     type = ADACInterface
@@ -122,18 +121,18 @@
     type = ADTimeDerivative
     variable = etab0
   []
-# Order parameter eta_beta1
+  # Order parameter eta_beta1
   [ACb1_bulk]
     type = ADACGrGrMulti
     variable = etab1
-    v =           'etaa0 etab0'
+    v = 'etaa0 etab0'
     gamma_names = 'gab   gbb'
   []
   [ACb1_sw]
     type = ADACSwitching
     variable = etab1
-    Fj_names  = 'omegaa omegab'
-    hj_names  = 'ha     hb'
+    Fj_names = 'omegaa omegab'
+    hj_names = 'ha     hb'
   []
   [ACb1_int]
     type = ADACInterface
@@ -145,7 +144,7 @@
     type = ADTimeDerivative
     variable = etab1
   []
-#Chemical potential
+  #Chemical potential
   [w_dot]
     type = ADSusceptibilityTimeDerivative
     variable = w
@@ -240,7 +239,7 @@
   []
   [const]
     type = ADGenericConstantMaterial
-    prop_names =  'kappa_c  kappa   L   D    chi  Vm   ka    caeq kb    cbeq  gab gbb mu'
+    prop_names = 'kappa_c  kappa   L   D    chi  Vm   ka    caeq kb    cbeq  gab gbb mu'
     prop_values = '0        1       1.0 1.0  1.0  1.0  10.0  0.1  10.0  0.9   4.5 1.5 1.0'
   []
   [Mobility]
@@ -270,10 +269,9 @@
   nl_abs_tol = 1e-8
   num_steps = 2
   [TimeStepper]
-    type = SolutionTimeAdaptiveDT
-    dt = 0.1
+    type = TimeSequenceStepper
+    time_sequence = '0.1 0.21'
   []
-
 []
 
 [Outputs]
