@@ -107,28 +107,28 @@ StiffenedGasFluidProperties::T_from_v_e(
 }
 
 Real
-StiffenedGasFluidProperties::T_from_p_h(Real v, Real e) const
+StiffenedGasFluidProperties::T_from_p_h(Real p, Real h) const
 {
-  return T_from_p_h_template(v, e);
+  return T_from_p_h_template(p, h);
 }
 
 void
-StiffenedGasFluidProperties::T_from_p_h(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const
+StiffenedGasFluidProperties::T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const
 {
-  T_from_p_h_template(v, e, T, dT_dv, dT_de);
+  T_from_p_h_template(p, h, T, dT_dp, dT_dh);
 }
 
 ADReal
-StiffenedGasFluidProperties::T_from_p_h(const ADReal & v, const ADReal & e) const
+StiffenedGasFluidProperties::T_from_p_h(const ADReal & p, const ADReal & h) const
 {
-  return T_from_p_h_template(v, e);
+  return T_from_p_h_template(p, h);
 }
 
 void
 StiffenedGasFluidProperties::T_from_p_h(
-    const ADReal & v, const ADReal & e, ADReal & p, ADReal & dp_dv, ADReal & dp_de) const
+    const ADReal & p, const ADReal & h, ADReal & T, ADReal & dT_dp, ADReal & dT_dh) const
 {
-  T_from_p_h_template(v, e, p, dp_dv, dp_de);
+  T_from_p_h_template(p, h, T, dT_dp, dT_dh);
 }
 
 Real
