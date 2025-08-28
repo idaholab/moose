@@ -78,8 +78,7 @@ MFEMProblem::addIndicator(const std::string & user_object_name,
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
 
-  const UserObject * est_uo = &(getUserObjectBase(name));
-  mooseAssert(dynamic_cast<const MFEMIndicator *>(est_uo),
+  mooseAssert(dynamic_cast<const MFEMIndicator *>(&(getUserObjectBase(name))),
               "Cannot add estimator with name '" + name + "'");
 
   std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMIndicator>(name).getSharedPtr();
@@ -96,8 +95,7 @@ MFEMProblem::addMarker(const std::string & user_object_name,
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
 
-  const UserObject * est_uo = &(getUserObjectBase(name));
-  mooseAssert(dynamic_cast<const MFEMRefinementMarker *>(est_uo),
+  mooseAssert(dynamic_cast<const MFEMRefinementMarker *>(&(getUserObjectBase(name))),
               "Cannot add estimator with refiner '" + name + "'");
 
   std::shared_ptr<MooseObject> object_ptr =
