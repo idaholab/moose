@@ -1,5 +1,5 @@
-constraint_types = 'strain none none none none none none none none'
-targets = 'strain11'
+constraint_types = 'strain none none stress stress stress stress none stress'
+targets = 'strain11 zero zero zero zero zero'
 
 [Mesh]
   [base]
@@ -204,7 +204,7 @@ targets = 'strain11'
   [hvar]
     type = MooseVariableScalar
     family = SCALAR
-    order = FIRST
+    order = SIXTH
   []
 []
 

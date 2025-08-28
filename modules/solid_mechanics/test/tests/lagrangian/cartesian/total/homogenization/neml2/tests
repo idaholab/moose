@@ -7,6 +7,8 @@
     exodiff = 'large_neml_out.e'
     requirement = "NEML2 output matches moose material output with large kinematics"
     capabilities = 'method!=dbg & neml2'
+    abs_zero = 1e-6
+    rel_err = 1e-6
   []
   [small_deformations]
     type = Exodiff
@@ -14,5 +16,7 @@
     exodiff = 'small_neml_out.e'
     requirement = "NEML2 output matches moose material output with small kinematics"
     capabilities = 'method!=dbg & neml2'
+    abs_zero = 1e-6
+    rel_err = 1e-6
   []
 []
