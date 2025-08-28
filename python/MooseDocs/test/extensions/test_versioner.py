@@ -17,9 +17,10 @@ from MooseDocs.extensions import core, command, versioner
 from MooseDocs import base, MOOSE_DIR
 logging.basicConfig()
 
-sys.path.append(os.path.join(MOOSE_DIR, 'scripts'))
-from versioner import *
+Versioner = versioner.getVersionerClass()
 
+
+@unittest.skipIf(Versioner is None, "versioner module not found.")
 class TestTemplate(MooseDocsTestCase):
     EXTENSIONS = [core, command, versioner]
 

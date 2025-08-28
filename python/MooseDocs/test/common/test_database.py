@@ -12,18 +12,24 @@ import unittest
 from MooseDocs.common import build_class_database
 
 class TestClassDatabase(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
+
+    def setUp(self):
         """
         Create class database.
         """
-        cls.database = build_class_database(['${MOOSE_DIR}/framework/src',
-                                             '${MOOSE_DIR}/test/src',
-                                             '${MOOSE_DIR}/modules/heat_transfer/src'],
-                                            ['${MOOSE_DIR}/framework/include',
-                                             '${MOOSE_DIR}/test/include',
-                                             '${MOOSE_DIR}/modules/heat_transfer/include'],
-                                            ['${MOOSE_DIR}/test/tests'])
+        self.database = build_class_database(
+            [
+                "${MOOSE_DIR}/framework/src",
+                "${MOOSE_DIR}/test/src",
+                "${MOOSE_DIR}/modules/heat_transfer/src",
+            ],
+            [
+                "${MOOSE_DIR}/framework/include",
+                "${MOOSE_DIR}/test/include",
+                "${MOOSE_DIR}/modules/heat_transfer/include",
+            ],
+            ["${MOOSE_DIR}/test/tests"],
+        )
 
     def testBasic(self):
         """

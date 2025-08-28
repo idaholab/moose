@@ -10,7 +10,7 @@
 """Wrapper for hit parser."""
 import os
 import moosetree
-import hit
+from moose_hit import hit
 from mooseutils import message
 
 class Node(moosetree.Node):

@@ -18,6 +18,8 @@ from TestHarness.validation.dataclasses import *
 from TestHarness.validation.exceptions import *
 from FactorySystem.InputParameters import InputParameters
 
+THIS_DIR = os.path.dirname(__file__)
+
 class TestValidationCase(unittest.TestCase):
     """
     Test cases for ValidationCase
@@ -28,7 +30,9 @@ class TestValidationCase(unittest.TestCase):
 
         When running this, you can set rewrite=True to rewrite the gold.
         """
-        gold_path = os.path.join('gold', 'validation', f'validationcase_{name}.json')
+        gold_path = os.path.join(
+            THIS_DIR, "gold", "validation", f"validationcase_{name}.json"
+        )
 
         data = {'results': [asdict(v) for v in case.results],
                 'data': {k: asdict(v) for k, v in case.data.items()}}

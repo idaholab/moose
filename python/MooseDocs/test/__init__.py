@@ -7,13 +7,32 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+import os
+import sys
 import unittest
 import mooseutils
 from mock import patch
 from MooseDocs.common import load_extensions
-from MooseDocs import base
+from MooseDocs import base, MOOSE_DIR
 from MooseDocs.tree import pages, html, latex
 from MooseDocs.extensions import command
+
+TEST_ROOT = os.path.dirname(__file__)
+
+
+def requiresMooseExecutable(exe_path=os.path.join(MOOSE_DIR, "test")):
+    """Custom decorator that will skip tests if an executable is not available,
+    but only if running in a pytest environment.
+    """
+    # Pytest will load itself when called
+    if not "pytest" in sys.modules:
+        return lambda func_or_cls: func_or_cls
+    exe = mooseutils.find_moose_executable(exe_path)
+    if exe is None:
+        return unittest.skip(f"Requires moose executable in {exe_path}.")
+    else:
+        return lambda func_or_cls: func_or_cls
+
 
 class MooseDocsTestCase(unittest.TestCase):
     """
