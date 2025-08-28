@@ -92,7 +92,7 @@ FunctorExtremaPositions::initialize()
 
   // Loop over the local mesh, keep track of all extrema
   for (const auto & elem :
-       _fe_problem.mesh().getMesh().active_local_subdomain_set_element_ptr_range(blockIDs()))
+       _subproblem.mesh().getMesh().active_local_subdomain_set_element_ptr_range(blockIDs()))
   {
     const Moose::ElemArg elem_arg = {elem, false};
     auto value = _functor(elem_arg, time_arg);

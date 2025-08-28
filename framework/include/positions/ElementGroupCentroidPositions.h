@@ -25,7 +25,7 @@ public:
 
   void initialize() override;
 
-  MooseMesh & _mesh;
+  const MooseMesh & _mesh;
 
   ///{
   /// How to group elements, to compute centroids for these groups
