@@ -15,7 +15,10 @@ collection for the smoothed flux.
 
 We can then construct the `L2ZienkiewiczZhuEstimator` object using the bilinear form integrator
 associated with the chosen kernel, the grid function associated with the variable, and the two finite
-element spaces we created for the fluxes.
+element spaces we created for the fluxes. This object needs the underlying `mfem::BilinearFormIntegrator`
+to implement the methods `ComputeElementFlux()` and `ComputeFluxEnergy()`. Practically speaking, this
+means the only kernels we can attach this indicator to are [MFEMDiffusionKernel.md],
+[MFEMCurlCurlKernel.md] and [MFEMLinearElasticityKernel.md]
 
 This object is accessed once (by an `MFEMRefinementMarker`) using the `getEstimator()` method.
 
