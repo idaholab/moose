@@ -147,6 +147,7 @@
       restep = false # Test is prescribed to abort on failed timestep
       cli_args = "Mesh/mesh_file/file=long-bottom-block-1elem-blocks-coarse.e "
                  "Executioner/end_time=50 Postprocessors/active=''"
+      custom_cmp = 'frictionless-penalty-weighted-gap-action.cmp'
     []
   []
   [very_parallel_penalty]
@@ -197,7 +198,7 @@
       exodiff = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action_out.e'
       detail = 'using the contact action'
       cli_args = "Postprocessors/active=''"
-      abs_zero = 5e-9
+      custom_cmp = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.cmp'
     []
   []
   [split_secondary]
@@ -222,6 +223,7 @@
                   'build the set of constraints, user objects, and application of generalized '
                   'forces.'
     capabilities = 'method!=dbg'
+    custom_cmp = 'variational-frictional.cmp'
     valgrind = 'heavy'
   []
   [mixed_inactive_nodes]
