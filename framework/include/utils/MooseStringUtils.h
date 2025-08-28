@@ -160,11 +160,10 @@ tokenizeAndConvert(const std::string & str,
  * @params name The string to convert upper case.
  */
 inline std::string
-toUpper(const std::string & name)
+toUpper(std::string name)
 {
-  std::string upper(name);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-  return upper;
+  std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+  return name;
 }
 
 /**
@@ -172,11 +171,9 @@ toUpper(const std::string & name)
  * @params name The string to convert upper case.
  */
 inline std::string
-toLower(const std::string & name)
+toLower(std::string name)
 {
-  std::string lower(name);
-  std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-  return lower;
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  return name;
 }
-
 }
