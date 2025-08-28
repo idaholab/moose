@@ -22,8 +22,8 @@ MFEMSumAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription(
-      "Calculates the gradient of an H1 conforming source variable and stores the result"
-      " on an H(curl) conforming ND result auxvariable");
+      "Calculates the sum of two variables sharing an FE space, each optionally scaled by a real "
+      "constant, and stores the result in a third.");
   params.addRequiredParam<VariableName>("source1",
                                         "Scalar H1 MFEMVariable to take the gradient of.");
   params.addRequiredParam<VariableName>("source2",
@@ -46,6 +46,9 @@ MFEMSumAux::MFEMSumAux(const InputParameters & parameters)
 void
 MFEMSumAux::execute()
 {
+  //  ///
+  //  friend void add(const real_t a, const Vector &x,
+  //                  const real_t b, const Vector &y, Vector &z);
   add(_source1_var, _scale_factor, _source2_var, _result_var);
 }
 
