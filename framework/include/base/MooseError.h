@@ -87,12 +87,7 @@ operator<<(std::ostream & os, const std::tuple<T...> & tup)
   do                                                                                               \
   {                                                                                                \
     if (err != MPI_SUCCESS)                                                                        \
-    {                                                                                              \
-      if (libMesh::global_n_processors() == 1)                                                     \
-        libMesh::print_trace();                                                                    \
-      libmesh_here();                                                                              \
-      MOOSE_ABORT;                                                                                 \
-    }                                                                                              \
+      moose::internal::mooseErrorRaw("");                                                          \
   } while (0)
 
 #define mooseException(...)                                                                        \
@@ -118,12 +113,7 @@ operator<<(std::ostream & os, const std::tuple<T...> & tup)
       else                                                                                         \
       {                                                                                            \
         Moose::err << _assert_oss_.str() << std::flush;                                            \
-        if (libMesh::global_n_processors() == 1)                                                   \
-          libMesh::print_trace();                                                                  \
-        else                                                                                       \
-          libMesh::write_traceout();                                                               \
-        libmesh_here();                                                                            \
-        MOOSE_ABORT;                                                                               \
+        moose::internal::mooseErrorRaw("");                                                        \
       }                                                                                            \
     }                                                                                              \
   } while (0)

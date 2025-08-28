@@ -57,43 +57,55 @@ mooseErrorRaw(std::string msg,
   if (Moose::_throw_on_error)
     throw MooseRuntimeError(msg, node);
 
-  // If we have a node available, add in the hit context (file location)
-  if (node)
-    msg = Moose::hitMessagePrefix(*node) + msg;
-
-  msg = mooseMsgFmt(msg, "*** ERROR ***", COLOR_RED);
-
-  std::ostringstream oss;
-  oss << msg << "\n";
-
-  // this independent flush of the partial error message (i.e. without the
-  // trace) is here because trace retrieval can be slow in some
-  // circumstances, and we want to get the error message out ASAP.
-  msg = oss.str();
-  if (!prefix.empty())
-    MooseUtils::indentMessage(prefix, msg);
+  static std::atomic_flag aborting = ATOMIC_FLAG_INIT;
+  if (aborting.test_and_set(std::memory_order_acq_rel))
+    // Another thread has gone before us. MPI_Abort, despite its name, does not behave like
+    // std::abort but instead calls exit handlers and destroys statics. So we don't want to touch
+    // anything static at this point. We'll just wait until the winning thread has incurred program
+    // exit
+    for (;;)
+      // Don't burn cpu
+      sched_yield();
+  else
   {
-    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
-    Moose::err << msg << std::flush;
+    std::ostringstream oss;
+    if (!msg.empty())
+    {
+      // If we have a node available, add in the hit context (file location)
+      if (node)
+        msg = Moose::hitMessagePrefix(*node) + msg;
+
+      msg = mooseMsgFmt(msg, "*** ERROR ***", COLOR_RED);
+
+      oss << msg << "\n";
+
+      // this independent flush of the partial error message (i.e. without the
+      // trace) is here because trace retrieval can be slow in some
+      // circumstances, and we want to get the error message out ASAP.
+      msg = oss.str();
+      if (!prefix.empty())
+        MooseUtils::indentMessage(prefix, msg);
+      {
+        Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+        Moose::err << msg << std::flush;
+      }
+
+      oss.str("");
+    }
+
+    if (Moose::show_trace && libMesh::global_n_processors() == 1)
+      print_trace(oss);
+
+    {
+      Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+      Moose::err << msg << std::flush;
+
+      if (libMesh::global_n_processors() > 1)
+        libMesh::write_traceout();
+    }
+
+    MOOSE_ABORT;
   }
-
-  oss.str("");
-  if (Moose::show_trace && libMesh::global_n_processors() == 1)
-    print_trace(oss);
-
-  msg = oss.str();
-  if (!prefix.empty())
-    MooseUtils::indentMessage(prefix, msg);
-
-  {
-    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
-    Moose::err << msg << std::flush;
-
-    if (libMesh::global_n_processors() > 1)
-      libMesh::write_traceout();
-  }
-
-  MOOSE_ABORT;
 }
 
 void
