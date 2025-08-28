@@ -14,11 +14,9 @@
 registerMooseObject("ContactApp", LMWeightedGapUserObject);
 
 InputParameters
-LMWeightedGapUserObject::validParams()
+LMWeightedGapUserObject::newParams()
 {
-  InputParameters params = WeightedGapUserObject::validParams();
-  params.addClassDescription(
-      "Provides the mortar normal Lagrange multiplier for constraint enforcement.");
+  auto params = emptyInputParameters();
   params.addRequiredCoupledVar(
       "lm_variable", "The Lagrange multiplier variable representing the contact pressure.");
   params.addParam<bool>(
@@ -29,23 +27,24 @@ LMWeightedGapUserObject::validParams()
   return params;
 }
 
+InputParameters
+LMWeightedGapUserObject::validParams()
+{
+  InputParameters params = WeightedGapUserObject::validParams();
+  params.addClassDescription(
+      "Provides the mortar normal Lagrange multiplier for constraint enforcement.");
+  params += LMWeightedGapUserObject::newParams();
+  return params;
+}
+
 LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & parameters)
   : WeightedGapUserObject(parameters),
     _lm_var(getVar("lm_variable", 0)),
     _use_petrov_galerkin(getParam<bool>("use_petrov_galerkin")),
     _aux_lm_var(isCoupled("aux_lm") ? getVar("aux_lm", 0) : nullptr)
 {
-  if (isCoupledConstant("lm_variable"))
-    paramError("lm_variable",
-               "The Lagrange multiplier variable must be an actual variable and not a constant.");
-  else if (!_lm_var)
-    paramError("lm_variable",
-               "The Lagrange multiplier variable must be provided and be an actual variable.");
-
-  if (!_lm_var->isNodal())
-    paramError("lm_variable",
-               "The Lagrange multiplier variable must have its degrees of freedom exclusively on "
-               "nodes, e.g. it should probably be of finite element type 'Lagrange'.");
+  checkInput(_lm_var, "lm_variable");
+  verifyNodal(*_lm_var, "lm_variable");
 
   if (_use_petrov_galerkin && ((!isParamValid("aux_lm")) || _aux_lm_var == nullptr))
     paramError("use_petrov_galerkin",
@@ -58,6 +57,27 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
                "false`.");
 }
 
+void
+LMWeightedGapUserObject::checkInput(const MooseVariable * const var,
+                                    const std::string & var_name) const
+{
+  if (isCoupledConstant(var_name))
+    paramError("lm_variable_normal",
+               "The Lagrange multiplier variable must be an actual variable and not a constant.");
+  else if (!var)
+    paramError(var_name,
+               "The Lagrange multiplier variables must be provided and be actual variables.");
+}
+
+void
+LMWeightedGapUserObject::verifyNodal(const MooseVariable & var, const std::string & var_name) const
+{
+  if (!var.isNodal())
+    paramError(var_name,
+               "The Lagrange multiplier variables must have degrees of freedom exclusively on "
+               "nodes, e.g. they should probably be of finite element type 'Lagrange'.");
+}
+
 const VariableTestValue &
 LMWeightedGapUserObject::test() const
 {
@@ -68,4 +88,18 @@ const ADVariableValue &
 LMWeightedGapUserObject::contactPressure() const
 {
   return _lm_var->adSlnLower();
+}
+
+Real
+LMWeightedGapUserObject::getNormalContactPressure(const Node * const node) const
+{
+  const auto sys_num = _lm_var->sys().number();
+  const auto var_num = _lm_var->number();
+  if (!node->n_dofs(sys_num, var_num))
+    mooseError("No degrees of freedom for the Lagrange multiplier at the node. If this is being "
+               "called from an aux kernel make sure that your aux variable has the same order as "
+               "your Lagrange multiplier");
+
+  const auto dof_number = node->dof_number(sys_num, var_num, 0);
+  return (*_lm_var->sys().currentSolution())(dof_number);
 }

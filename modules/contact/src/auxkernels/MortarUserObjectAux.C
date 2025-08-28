@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PenaltyMortarUserObjectAux.h"
+#include "MortarUserObjectAux.h"
 
 // supported user objects
 #include "WeightedGapUserObject.h"
@@ -15,16 +15,20 @@
 #include "WeightedVelocitiesUserObject.h"
 #include "PenaltyFrictionUserObject.h"
 
-registerMooseObject("ContactApp", PenaltyMortarUserObjectAux);
+registerMooseObject("ContactApp", MortarUserObjectAux);
+registerMooseObjectRenamed("ContactApp",
+                           PenaltyMortarUserObjectAux,
+                           "01/01/2026 00:00",
+                           MortarUserObjectAux);
 
-const MooseEnum PenaltyMortarUserObjectAux::_contact_quantities(
+const MooseEnum MortarUserObjectAux::_contact_quantities(
     "normal_pressure accumulated_slip_one "
     "tangential_pressure_one tangential_velocity_one accumulated_slip_two "
     "tangential_pressure_two tangential_velocity_two normal_gap "
     "normal_lm delta_tangential_lm_one delta_tangential_lm_two active_set");
 
 InputParameters
-PenaltyMortarUserObjectAux::validParams()
+MortarUserObjectAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
@@ -42,7 +46,7 @@ PenaltyMortarUserObjectAux::validParams()
   return params;
 }
 
-PenaltyMortarUserObjectAux::PenaltyMortarUserObjectAux(const InputParameters & parameters)
+MortarUserObjectAux::MortarUserObjectAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _contact_quantity(getParam<MooseEnum>("contact_quantity").getEnum<ContactQuantityEnum>()),
     _user_object(getUserObject<UserObject>("user_object")),
@@ -52,9 +56,9 @@ PenaltyMortarUserObjectAux::PenaltyMortarUserObjectAux(const InputParameters & p
     _pfuo(dynamic_cast<const PenaltyFrictionUserObject *>(&_user_object)),
     _outputs({
         {ContactQuantityEnum::NORMAL_PRESSURE,
-         {"PenaltyWeightedGapUserObject",
-          _pwguo,
-          [&]() { return _pwguo->getNormalContactPressure(_current_node); }}},
+         {"WeightedGapUserObject",
+          _wguo,
+          [&]() { return _wguo->getNormalContactPressure(_current_node); }}},
 
         {ContactQuantityEnum::NORMAL_GAP,
          {"WeightedGapUserObject", _wguo, [&]() { return _wguo->getNormalGap(_current_node); }}},
@@ -117,7 +121,7 @@ PenaltyMortarUserObjectAux::PenaltyMortarUserObjectAux(const InputParameters & p
   // error check
   const auto it = _outputs.find(_contact_quantity);
   if (it == _outputs.end())
-    mooseError("Internal error: Contact quantity request in PressureMortarUserObjectAux is not "
+    mooseError("Internal error: Contact quantity request in MortarUserObjectAux is not "
                "recognized.");
   if (!std::get<1>(it->second))
     paramError("user_object",
@@ -129,7 +133,7 @@ PenaltyMortarUserObjectAux::PenaltyMortarUserObjectAux(const InputParameters & p
 }
 
 Real
-PenaltyMortarUserObjectAux::computeValue()
+MortarUserObjectAux::computeValue()
 {
   // execute functional to retrieve selected quantity
   return std::get<2>(_outputs[_contact_quantity])();
