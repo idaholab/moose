@@ -392,9 +392,46 @@ TEST(ParameterRegistrationTest, testVectorComponentValue)
                                              "cannot convert field 'key' value 'a' to float");
 }
 
+TEST(ParameterRegistrationTest, testVectorMooseEnum)
+{
+  const auto test_field = buildTestField("\"a b\"");
+  auto test_param = buildTestParam<std::vector<MooseEnum>>();
+  *test_param.value = {{"a b c"}};
+  Moose::ParameterRegistry::get().set(*test_param.param, *test_field.field);
+  ASSERT_EQ(test_param.value->size(), 2);
+  ASSERT_TRUE((*test_param.value)[0] == "a");
+  ASSERT_TRUE((*test_param.value)[1] == "b");
+}
+
+TEST(ParameterRegistrationTest, testVectorMultiMooseEnum)
+{
+  // Success
+  {
+    const auto test_field = buildTestField("\"a b; a\"");
+    auto test_param = buildTestParam<std::vector<MultiMooseEnum>>();
+    *test_param.value = {{"a b c"}};
+    Moose::ParameterRegistry::get().set(*test_param.param, *test_field.field);
+    ASSERT_EQ(test_param.value->size(), 2);
+    ASSERT_TRUE((*test_param.value)[0].isValueSet("a"));
+    ASSERT_TRUE((*test_param.value)[0].isValueSet("b"));
+    ASSERT_FALSE((*test_param.value)[0].isValueSet("c"));
+    ASSERT_TRUE((*test_param.value)[1].isValueSet("a"));
+    ASSERT_FALSE((*test_param.value)[1].isValueSet("b"));
+    ASSERT_FALSE((*test_param.value)[1].isValueSet("c"));
+  }
+
+  // Empty entry, error
+  {
+    const auto test_field = buildTestField("\"a b;\"");
+    auto test_param = buildTestParam<std::vector<MultiMooseEnum>>();
+    Moose::UnitUtils::assertThrows<std::invalid_argument>(
+        [&test_field, &test_param]()
+        { Moose::ParameterRegistry::get().set(*test_param.param, *test_field.field); },
+        "entry 1 in '" + param_name + "' is empty");
+  }
+}
+
 // Still need to test:
-// - vector<MooseEnum>
-// - vector<MultiMooseEnum>
 // - vector<CLIArgString>
 // double component value
 
