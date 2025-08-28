@@ -433,7 +433,6 @@ TEST(ParameterRegistrationTest, testVectorMultiMooseEnum)
 
 // Still need to test:
 // - vector<CLIArgString>
-// double component value
 
 TEST(ParameterRegistrationTest, testVectorReporterName)
 {
@@ -445,4 +444,24 @@ TEST(ParameterRegistrationTest, testVectorReporterName)
       []() { testValue<std::vector<ReporterName>>("\"foo/bar baz\""); },
       "invalid syntax in ReporterName parameter " + param_name +
           ": supplied name 'baz' must contain the '/' delimiter");
+}
+
+TEST(ParameterRegistrationTest, testDoubleVectorComponentValue)
+{
+  // success
+  testValue<std::vector<std::vector<Point>>>("\"1 2 3.0\n4.0 5 6; 7 8 9.0\"",
+                                             {{{1, 2, 3}, {4, 5, 6}}, {{7, 8, 9}}});
+  testValue<std::vector<std::vector<RealVectorValue>>>("\"1 2 3; 4.0 5 6\n7 8.0 9\"",
+                                                       {{{1, 2, 3}}, {{4, 5, 6}, {7, 8, 9}}});
+
+  // bad size
+  Moose::UnitUtils::assertThrows<std::invalid_argument>(
+      []() { testValue<std::vector<std::vector<Point>>>("\"1 2 3; 4 5 6.0\n7.0 8\""); },
+      "wrong number of values in double-indexed vector component parameter '" + param_name +
+          "' at index 1: subcomponent size 5 is not a multiple of 3");
+
+  // conversion failed
+  Moose::UnitUtils::assertThrows<std::invalid_argument>(
+      []() { testValue<std::vector<std::vector<Point>>>("a"); },
+      "invalid format for parameter '" + param_name + "' at index 0");
 }

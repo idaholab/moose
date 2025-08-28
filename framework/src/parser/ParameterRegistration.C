@@ -387,12 +387,15 @@ const auto set_double_vector_component_value = [](auto & value, const hit::Field
       throw std::invalid_argument("invalid format for parameter '" + field.fullpath() +
                                   "' at index " + std::to_string(i));
 
-  for (const auto & vec : vecvec)
+  for (const auto i : index_range(vecvec))
+  {
+    const auto & vec = vecvec[i];
     if (vec.size() % LIBMESH_DIM)
       throw std::invalid_argument(
           "wrong number of values in double-indexed vector component parameter '" +
-          field.fullpath() + "': size of subcomponent " + std::to_string(vec.size()) +
-          " is not a multiple of " + std::to_string(LIBMESH_DIM));
+          field.fullpath() + "' at index " + std::to_string(i) + ": subcomponent size " +
+          std::to_string(vec.size()) + " is not a multiple of " + std::to_string(LIBMESH_DIM));
+  }
 
   // convert vector<vector<double>> to vector<vector<T>>
   value.resize(vecvec.size());
