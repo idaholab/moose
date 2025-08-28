@@ -222,6 +222,9 @@ length = 0.5
   [Total_power_SCMPinPowerPostprocessor]
     type = SCMPinPowerPostprocessor
   []
+  [Total_power_SCMTHPowerPostprocessor]
+    type = SCMTHPowerPostprocessor
+  []
 []
 
 [VectorPostprocessors]

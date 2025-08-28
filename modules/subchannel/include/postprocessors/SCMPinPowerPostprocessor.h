@@ -13,7 +13,7 @@
 #include "SubChannelMesh.h"
 
 /**
- * Calculates the total power that goes into the coolant from the fuel pins based on
+ * Calculates the total power [W] that goes into the coolant from the fuel pins based on
  * the variable q_prime
  */
 class SCMPinPowerPostprocessor : public GeneralPostprocessor
