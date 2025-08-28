@@ -718,7 +718,7 @@ ContactAction::addMortarContact()
     // Don't do mesh generators when recovering or when the user has requested for us not to
     // (presumably because the lower-dimensional blocks are already in the mesh due to manual
     // addition or because we are restarting)
-    if (!(_app.isRecovering() && _app.isUltimateMaster()) && !_app.masterMesh() &&
+    if (!(_app.isRecovering() && _app.isUltimateMaster()) && !_app.useMasterMesh() &&
         _generate_mortar_mesh)
     {
       const MeshGeneratorName primary_name = primary_subdomain_name + "_generator";

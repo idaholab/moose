@@ -157,7 +157,7 @@ MortarGapHeatTransferAction::act()
 void
 MortarGapHeatTransferAction::coreMortarMesh()
 {
-  if (!(_app.isRecovering() && _app.isUltimateMaster()) && !_app.masterMesh())
+  if (!(_app.isRecovering() && _app.isUltimateMaster()) && !_app.useMasterMesh())
   {
     std::string action_name = MooseUtils::shortName(name());
 
