@@ -14,9 +14,6 @@
 
 registerMooseObject("MooseApp", MFEMSumAux);
 
-/*
-Class to set an H(curl) auxvariable to be the gradient of a H1 scalar variable.
-*/
 InputParameters
 MFEMSumAux::validParams()
 {
@@ -24,32 +21,29 @@ MFEMSumAux::validParams()
   params.addClassDescription(
       "Calculates the sum of two variables sharing an FE space, each optionally scaled by a real "
       "constant, and stores the result in a third.");
-  params.addRequiredParam<VariableName>("source1",
-                                        "Scalar H1 MFEMVariable to take the gradient of.");
-  params.addRequiredParam<VariableName>("source2",
-                                          "Scalar H1 MFEMVariable to take the gradient of.");                                        
-  params.addParam<mfem::real_t>("scale_factor", 1.0, "Factor to scale result auxvariable by.");
+  params.addRequiredParam<VariableName>("first_source_variable", "First variable to sum.");
+  params.addRequiredParam<VariableName>("second_source_variable", "Second variable to sum.");
+  params.addParam<mfem::real_t>("first_scale_factor", 1.0, "Factor to scale the first variable by prior to sum.");
+  params.addParam<mfem::real_t>("second_scale_factor", 1.0, "Factor to scale the second variable by prior to sum.");
   return params;
 }
 
 MFEMSumAux::MFEMSumAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
-    _source1_var_name(getParam<VariableName>("source1")),
-    _source2_var_name(getParam<VariableName>("source2")),
-    _source1_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_source1_var_name)),
-    _source2_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_source2_var_name)),    
-    _scale_factor(getParam<mfem::real_t>("scale_factor"))
+    _v1_var_name(getParam<VariableName>("first_source_variable")),
+    _v2_var_name(getParam<VariableName>("second_source_variable")),
+    _v1_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_v1_var_name)),
+    _v2_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_v2_var_name)),    
+    _lambda1(getParam<mfem::real_t>("first_scale_factor")),
+    _lambda2(getParam<mfem::real_t>("second_scale_factor"))
 {
 }
 
-// Computes the auxvariable.
 void
 MFEMSumAux::execute()
 {
-  //  ///
-  //  friend void add(const real_t a, const Vector &x,
-  //                  const real_t b, const Vector &y, Vector &z);
-  add(_source1_var, _scale_factor, _source2_var, _result_var);
+  // result = lambda1 * v1 + lambda2 * v2
+  add(_lambda1, _v1_var, _lambda2, _v2_var, _result_var);
 }
 
 #endif
