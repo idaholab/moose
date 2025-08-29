@@ -188,7 +188,7 @@
   []
   #Creep strain increments
   [diffuse_strain_increment]
-    type = DeviatoricStrainIncrement 
+    type = DeviatoricFluxBasedStrainIncrement 
     dimension = 2
     xflux = jx_v
     yflux = jy_v

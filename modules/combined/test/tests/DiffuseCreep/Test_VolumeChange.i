@@ -161,7 +161,7 @@
   [../]
   #Creep strain increments
   [deviatoric_strain_increment]
-    type = DeviatoricStrainIncrement
+    type = DeviatoricFluxBasedStrainIncrement
     dimension = 2
     xflux = jx_v
     yflux = jy_v
@@ -170,7 +170,7 @@
     outputs = 'exodus'
   []
   [volumetric_strain_increment]
-    type = VolumeStrainIncrement
+    type = VolumeFluxBasedStrainIncrement
     xflux = jx_v
     yflux = jy_v
     Lambda_Prefactor_J = Lambda_J
