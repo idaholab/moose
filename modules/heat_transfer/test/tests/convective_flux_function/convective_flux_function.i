@@ -39,7 +39,7 @@
 
 [AuxKernels]
   [flux]
-    type = TagVectorAux
+    type = ReactionForceAux
     variable = flux
     v = temp
     vector_tag = 'bcs'

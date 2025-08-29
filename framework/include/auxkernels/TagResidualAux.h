@@ -13,15 +13,17 @@
 #include "TagAuxBase.h"
 
 /**
- * The value of a tagged vector for a given node and a given variable is coupled to
- * the current AuxVariable. TagVectorAux returns the coupled nodal value.
+ * The value of a tagged residual vector for a given variable is coupled to
+ * the current AuxVariable.
  */
-class TagVectorAux : public TagAuxBase<AuxKernel>
+class TagResidualAux : public TagAuxBase<AuxKernel>
 {
 public:
   static InputParameters validParams();
 
-  TagVectorAux(const InputParameters & parameters);
+  TagResidualAux(const InputParameters & parameters);
+
+  void initialSetup() override;
 
 protected:
   virtual Real computeValue() override;
