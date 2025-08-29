@@ -40,4 +40,6 @@ protected:
   /// Stabilization magnitude parameter
   const Real _gamma;
   const Function * const _dirichlet_func;
+  /// Whether to scale by 1/h
+  const bool _h_scaling;
 };

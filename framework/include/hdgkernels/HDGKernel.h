@@ -39,4 +39,7 @@ protected:
 
   /// face normals
   const MooseArray<Point> & _normals;
+
+  /// The volume (area) of the current integration side
+  const Real & _current_side_volume;
 };
