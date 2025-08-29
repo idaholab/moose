@@ -207,6 +207,10 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & primar
                                 qsecondary_id,
                                 order,
                                 getQuadratureNearestNodeLocator(primary_id, secondary_id));
+
+    if (_search_using_point_locator)
+      pl->setUsePointLocator(true);
+
     _penetration_locators[std::pair<BoundaryID, BoundaryID>(primary_id, qsecondary_id)] = pl;
   }
 
