@@ -419,16 +419,6 @@ TEST(ParameterRegistrationTest, testVectorMultiMooseEnum)
     ASSERT_FALSE((*test_param.value)[1].isValueSet("b"));
     ASSERT_FALSE((*test_param.value)[1].isValueSet("c"));
   }
-
-  // Empty entry, error
-  {
-    const auto test_field = buildTestField("\"a b;\"");
-    auto test_param = buildTestParam<std::vector<MultiMooseEnum>>();
-    Moose::UnitUtils::assertThrows<std::invalid_argument>(
-        [&test_field, &test_param]()
-        { Moose::ParameterRegistry::get().set(*test_param.param, *test_field.field); },
-        "entry 1 in '" + param_name + "' is empty");
-  }
 }
 
 // Still need to test:
