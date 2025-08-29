@@ -11,6 +11,7 @@
 
 #pragma once
 #include "MFEMInitialCondition.h"
+#include "MFEMBoundaryRestrictable.h"
 
 /**
  * Class used to set the initial value(s) on a scalar valued MFEMVariable.
