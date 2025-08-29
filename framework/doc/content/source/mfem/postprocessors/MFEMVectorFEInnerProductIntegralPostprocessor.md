@@ -19,7 +19,7 @@ and $\Omega$ is the user-specified mesh subdomain.
 
 ## Example Input File Syntax
 
-!listing mfem/submeshes/cut_magnetostatic.i block=Postprocessors
+!listing mfem/submeshes/av_magnetostatic.i block=Postprocessors
 
 !syntax parameters /Postprocessors/MFEMVectorFEInnerProductIntegralPostprocessor
 

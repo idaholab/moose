@@ -152,4 +152,23 @@ should be added for stability.
 
 The full closed coil magnetostatic example detailed above can be found below:
 
-!listing test/tests/mfem/submeshes/cut_magnetostatic.i
+!listing test/tests/mfem/submeshes/av_magnetostatic.i
+
+## Global Current Constraints
+
+Strongly constraining the total current through the conductor instead of the loop voltage is also
+possible, by defining a cut plane in the domain outside the conductor region using the H-phi
+formulation instead of the A-V formulation detailed above; the details are similar, using a magnetic
+scalar potential instead of an electric scalar potential. The constraint to be enforced is
+
+\begin{equation}
+\oint_{\mathcal C} \vec H \cdot d\vec l = I
+\end{equation}
+
+where $\mathcal C$ is any path encircling the conductor, and I is the total current passing through
+the path $\mathcal C$. Outside the conductor, the magnetic field $\vec H$ is curl-free, and thus can
+be expressed by the gradient of a scalar magnetic potential (up to a sign).
+
+An example file for this approach can be found below:
+
+!listing test/tests/mfem/submeshes/hphi_magnetostatic.i
