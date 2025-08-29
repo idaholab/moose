@@ -55,7 +55,7 @@ MFEMZienkiewiczZhuIndicator::createEstimator()
               "MFEMZienkiewiczZhuIndicator only supports MFEMDiffusionKernel, MFEMCurlCurlKernel "
               "and MFEMLinearElasticityKernel");
 
-  int order = getFESpace()->GetMaxElementOrder();
+  int order = getFESpace().GetMaxElementOrder();
 
   int dim = problem.pmesh->Dimension();
   int sdim = problem.pmesh->SpaceDimension();
@@ -73,7 +73,7 @@ MFEMZienkiewiczZhuIndicator::createEstimator()
       problem.pmesh.get(), _smooth_flux_fec.get(), dim);
 
   // fetch the grid function we need
-  auto gridfunction = problem.gridfunctions.GetShared(_variable_name);
+  auto gridfunction = problem.gridfunctions.GetShared(_var_name);
 
   // finally, initialise the estimator
   _error_estimator = std::make_shared<mfem::L2ZienkiewiczZhuEstimator>(
