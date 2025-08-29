@@ -90,6 +90,17 @@
       allow_test_objects = true
     []
   []
+  [scaled_not_equiv]
+    type = CSVDiff
+    input = matrix-testing.i
+    csvdiff = scaled-matrix-testing.csv
+    max_parallel = 1 # No MatLUFactor support for mpidense
+    method = "!dbg"
+    valgrind = 'none'
+    requirement = 'The system shall show that the jump finite element weak form is not equivalent to the matrix product B_upb M_pb^-1 B_pbu when one over h scaling is introduced.'
+    allow_test_objects = true
+    cli_args = 'Outputs/file_base=scaled-matrix-testing GlobalParams/h_scaling=true'
+  []
   [lid_driven_fsp]
     type = Exodiff
     input = lid-driven-fsp.i
