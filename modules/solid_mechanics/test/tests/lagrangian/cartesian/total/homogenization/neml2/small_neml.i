@@ -160,6 +160,23 @@ targets = 'strain11 zero zero zero zero zero'
   []
 []
 
+[BCs]
+  [Periodic]
+    [x]
+      variable = disp_x
+      auto_direction = 'x y z'
+    []
+    [y]
+      variable = disp_y
+      auto_direction = 'x y z'
+    []
+    [z]
+      variable = disp_z
+      auto_direction = 'x y z'
+    []
+  []
+[]
+
 [UserObjects]
   [moose_strain_to_jacobian]
     type = MOOSESymmetricRankTwoTensorMaterialPropertyToNEML2
