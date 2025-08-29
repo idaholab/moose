@@ -542,6 +542,16 @@ PhysicsBase::checkBlockRestrictionIdentical(const std::string & object_name,
 }
 
 bool
+PhysicsBase::hasBlocks(const std::vector<SubdomainName> & blocks) const
+{
+  mooseAssert(_blocks.size(), "hasBlocks called before blocks were initialized");
+  return std::all_of(blocks.begin(),
+                     blocks.end(),
+                     [this](const SubdomainName & block)
+                     { return std::find(_blocks.begin(), _blocks.end(), block) != _blocks.end(); });
+}
+
+bool
 PhysicsBase::allMeshBlocks(const std::vector<SubdomainName> & blocks) const
 {
   mooseAssert(_mesh, "The mesh should exist already");
