@@ -47,8 +47,16 @@ MFEMVectorFEInnerProductIntegralPostprocessor::MFEMVectorFEInnerProductIntegralP
 void
 MFEMVectorFEInnerProductIntegralPostprocessor::initialize()
 {
-  _subdomain_integrator.AddDomainIntegrator(
-      new mfem::VectorFEDomainLFIntegrator(_scaled_dual_var_coef), getSubdomainMarkers());
+  if (isSubdomainRestricted())
+  {
+    _subdomain_integrator.AddDomainIntegrator(
+        new mfem::VectorFEDomainLFIntegrator(_scaled_dual_var_coef), getSubdomainMarkers());
+  }
+  else
+  {
+    _subdomain_integrator.AddDomainIntegrator(
+        new mfem::VectorFEDomainLFIntegrator(_scaled_dual_var_coef));
+  }
 }
 
 void

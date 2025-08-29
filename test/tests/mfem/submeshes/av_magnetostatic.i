@@ -158,6 +158,6 @@
   []
   [ReportedPostprocessors]
     type = CSV
-    file_base = OutputData/MagnetostaticClosedCoilCSV
+    file_base = OutputData/AVMagnetostaticClosedCoilCSV
   []
 []

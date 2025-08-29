@@ -45,15 +45,26 @@
     recover = false
     max_threads = 1
   []  
-  [MFEMCutTransitionSubMesh]
+  [MFEMGeometryCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
     issues = '#31404'
     type = CSVDiff
-    input = cut_magnetostatic.i
-    csvdiff = 'OutputData/MagnetostaticClosedCoilCSV.csv'    
-    requirement = 'MOOSE shall have the ability to strongly enforce global topological constraints in MFEM by defining a transition region for variable discontinuities on one side of a cut plane.'
+    input = av_magnetostatic.i
+    csvdiff = 'OutputData/AVMagnetostaticClosedCoilCSV.csv'    
+    requirement = 'MOOSE shall have the ability to strongly enforce global topological constraints in MFEM by defining a transition region for variable discontinuities on one side of a cut plane defined in a solid geometry.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
   []
+  [MFEMVacuumCutTransitionSubMesh]
+    design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
+    issues = '#31404'
+    type = CSVDiff
+    input = hphi_magnetostatic.i
+    csvdiff = 'OutputData/HPhiMagnetostaticClosedCoilCSV.csv'    
+    requirement = 'MOOSE shall have the ability to strongly enforce global topological constraints in MFEM by defining a transition region for variable discontinuities on one side of a cut plane defined in an exterior vacuum region.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []  
 []
