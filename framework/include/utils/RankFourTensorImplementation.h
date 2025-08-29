@@ -806,9 +806,9 @@ RankFourTensorTempl<T>::fillGeneralOrthotropicFromInputVector(const std::vector<
   const T & nubc = input[11];
 
   // Input must satisfy constraints.
-  bool preserve_symmetry = MooseUtils::absoluteFuzzyEqual(nuab * Eb, nuba * Ea) &&
-                           MooseUtils::absoluteFuzzyEqual(nuca * Ea, nuac * Ec) &&
-                           MooseUtils::absoluteFuzzyEqual(nubc * Ec, nucb * Eb);
+  bool preserve_symmetry = MooseUtils::relativeFuzzyEqual(nuab * Eb, nuba * Ea) &&
+                           MooseUtils::relativeFuzzyEqual(nuca * Ea, nuac * Ec) &&
+                           MooseUtils::relativeFuzzyEqual(nubc * Ec, nucb * Eb);
 
   if (!preserve_symmetry)
     mooseError("Orthotropic elasticity tensor input is not consistent with symmetry requirements. "
