@@ -88,7 +88,7 @@ advected_interp_method = 'upwind'
 
 [FunctorMaterials]
   [fluid_props_to_mat_props]
-    type = GeneralFunctorFluidProps
+    type = NonADGeneralFunctorFluidProps
     fp = lead
     pressure = ${p_ref}
     T_fluid = 'T'
