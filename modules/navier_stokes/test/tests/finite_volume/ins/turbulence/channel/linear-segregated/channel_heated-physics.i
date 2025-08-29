@@ -1,9 +1,30 @@
 
 !include header_and_mesh.i
 
+q = 5
+cp = 300
+
 [Problem]
-  linear_sys_names = 'u_system v_system pressure_system TKE_system TKED_system'
+  linear_sys_names = 'u_system v_system pressure_system energy_system TKE_system TKED_system'
   previous_nl_solution_required = true
+[]
+
+# These are only needed when solving for enthalpy
+# Alternatively, a FluidProperties user object may be used
+[Materials]
+  active = ''
+  [h_from_T]
+    type = ParsedFunctorMaterial
+    expression = '${cp} * T_fluid'
+    functor_names = 'T_fluid'
+    property_name = 'h_from_p_T_functor'
+  []
+  [T_from_h]
+    type = ParsedFunctorMaterial
+    expression = 'h / ${cp}'
+    functor_names = 'h'
+    property_name = 'T_from_p_h_functor'
+  []
 []
 
 [Physics]
@@ -40,12 +61,27 @@
       momentum_advection_interpolation = ${advected_interp_method}
       system_names = 'u_system v_system pressure_system'
     []
+    [FluidHeatTransferSegregated/energy]
+      # turbulence Physics coupling picked up automatically
+      initial_temperature = 0
+
+      thermal_conductivity = 1.1
+      specific_heat = ${cp}
+
+      energy_inlet_types = 'fixed-temperature'
+      energy_inlet_functors = '0'
+      energy_wall_types = 'heatflux heatflux'
+      energy_wall_functors = '0 0'
+
+      external_heat_source = '${q}'
+    []
     [TurbulenceSegregated/k-epsilon]
       # Model
       turbulence_handling = 'k-epsilon'
       tke_name = TKE
       tked_name = TKED
       system_names = 'TKE_system TKED_system'
+      fluid_heat_transfer_physics = energy
 
       initial_tke = ${k_init}
       initial_tked = ${eps_init}
@@ -57,7 +93,9 @@
       C_pl = 1e10
       C1_eps = ${C1_eps}
       C2_eps = ${C2_eps}
+      Pr_t = 0.9
 
+      k_t_as_aux_variable = true
       turbulence_walls = ${walls}
       wall_treatment_eps = ${wall_treatment}
       bulk_wall_treatment = ${bulk_wall_treatment}
@@ -121,27 +159,34 @@
   rhie_chow_user_object = 'ins_rhie_chow_interpolator'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
+  energy_system = 'energy_system'
   turbulence_systems = 'TKE_system TKED_system'
 
   momentum_l_abs_tol = 1e-14
   pressure_l_abs_tol = 1e-14
   turbulence_l_abs_tol = 1e-14
+  energy_l_abs_tol = 1e-14
   momentum_l_tol = 1e-14
   pressure_l_tol = 1e-14
+  energy_l_tol = 1e-14
   turbulence_l_tol = 1e-14
 
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
+  energy_equation_relaxation = 0.8
   turbulence_equation_relaxation = '0.2 0.2'
   turbulence_field_relaxation = '0.2 0.2'
   num_iterations = 1000
   pressure_absolute_tolerance = 1e-12
   momentum_absolute_tolerance = 1e-12
+  energy_absolute_tolerance = 1e-12
   turbulence_absolute_tolerance = '1e-12 1e-12'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
+  energy_petsc_options_iname = '-pc_type -pc_hypre_type'
+  energy_petsc_options_value = 'hypre boomeramg'
   turbulence_petsc_options_iname = '-pc_type -pc_hypre_type'
   turbulence_petsc_options_value = 'hypre boomeramg'
 
@@ -149,5 +194,27 @@
   continue_on_max_its = true
 []
 
-variables_to_sample = 'vel_x vel_y pressure TKE TKED'
+variables_to_sample = 'vel_x vel_y pressure T_fluid TKE TKED'
 !include postprocessing.i
+
+# More postprocessor for temperature
+[Postprocessors]
+  [outlet_T]
+    type = SideAverageValue
+    boundary = right
+    variable = T_fluid
+  []
+  [Q_out]
+    type = VolumetricFlowRate
+    boundary = 'right'
+    vel_x = 'vel_x'
+    vel_y = 'vel_y'
+    advected_quantity = 'rho_h'
+    rhie_chow_user_object = 'ins_rhie_chow_interpolator'
+  []
+  [balance_percent]
+    type = ParsedPostprocessor
+    expression = '100 * (0 - Q_out + 2 * ${L} * ${H} * ${q}) / Q_out'
+    pp_names = 'Q_out'
+  []
+[]
