@@ -36,7 +36,7 @@ protected:
   const VariableName _v2_var_name;
   // Reference to input variable gridfunctions.
   const mfem::ParGridFunction & _v1_var;
-  const mfem::ParGridFunction & _v2_var;  
+  const mfem::ParGridFunction & _v2_var;
   // Scalar factors to multiply the input variables by.
   const mfem::real_t _lambda1;
   const mfem::real_t _lambda2;

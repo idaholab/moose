@@ -43,7 +43,7 @@ MFEMBlockRestrictable::subdomainsToAttributes(const std::vector<SubdomainName> &
 {
   mfem::Array<int> attributes;
   auto & mesh = getMesh();
-  
+
   for (const SubdomainName & subdomain_name : subdomain_names)
   {
     try
@@ -58,7 +58,7 @@ MFEMBlockRestrictable::subdomainsToAttributes(const std::vector<SubdomainName> &
       auto & subdomain_ids = mesh.attribute_sets.GetAttributeSet(subdomain_name);
       for (const auto & subdomain_id : subdomain_ids)
         attributes.Append(subdomain_id);
-    }    
+    }
   }
   return attributes;
 }
