@@ -23,6 +23,74 @@
 
 using namespace libMesh;
 
+// Anonymous namespace for helper functions that ought to be moved
+// into libMesh
+namespace
+{
+Point
+closest_point_to_edge(const Point & src, const Point & p0, const Point & p1)
+{
+  const Point line01 = p1 - p0;
+  const Real line0c_xi = ((src - p0) * line01) / line01.norm_sq();
+  // The projection would be behind p0; p0 is closest
+  if (line0c_xi <= 0)
+    return p0;
+  // The projection would be past p1; p1 is closest
+  if (line0c_xi >= 1)
+    return p1;
+  // The projection is on the segment between p0 to p1.
+  return p0 + line0c_xi * line01;
+}
+
+Point
+closest_point_to_side(const Point & src, const Elem & side)
+{
+  switch (side.type())
+  {
+    case EDGE2:
+    case EDGE3:
+    case EDGE4:
+      mooseAssert(side.has_affine_map(),
+                  "Penetration of elements with curved sides not implemented");
+      return closest_point_to_edge(src, side.point(0), side.point(1));
+    case TRI3:
+    case TRI6:
+    {
+      mooseAssert(side.has_affine_map(),
+                  "Penetration of elements with curved sides not implemented");
+      const Point p0 = side.point(0), p1 = side.point(1), p2 = side.point(2);
+      const Point l01 = p1 - p0, l02 = p2 - p0;
+      const Point tri_normal = (l01.cross(l02)).unit();
+      const Point linecs = ((src - p0) * tri_normal) / tri_normal.norm_sq() * tri_normal;
+      Point in_plane = src - linecs;
+      Point planar_offset = in_plane - p0;
+      // If we're outside the triangle past line 01, our closest point
+      // is on that line.
+      if (planar_offset.cross(l01) * tri_normal > 0)
+        return closest_point_to_edge(src, p0, p1);
+      // If we're outside the triangle past line 02, our closest point
+      // is on that line.
+      if (planar_offset.cross(l02) * tri_normal < 0)
+        return closest_point_to_edge(src, p0, p2);
+      // If we're outside the triangle past line 12, our closest point
+      // is on that line.
+      if ((in_plane - p1).cross(p2 - p1) * tri_normal > 0)
+        return closest_point_to_edge(src, p1, p2);
+      // We must be inside the triangle!
+      return in_plane;
+    }
+    case QUAD4:
+    case QUAD8:
+    case QUAD9:
+      mooseError("Not implemented");
+    default:
+      mooseError("Side type not recognized");
+      break;
+  }
+}
+
+} // anonymous namespace
+
 // Mutex to use when accessing _penetration_info;
 Threads::spin_mutex pinfo_mutex;
 
@@ -254,222 +322,259 @@ PenetrationThread::operator()(const NodeIdRange & range)
       }
       else if (p_info.size() > 1)
       {
+        if (_use_point_locator)
+        {
+          Real min_distance_sq = std::numeric_limits<Real>::max();
+          Point best_point;
+          unsigned int best_i = invalid_uint;
 
-        // Loop through all pairs of faces, and check for contact on ridge between each face pair
-        std::vector<RidgeData> ridgeDataVec;
-        for (unsigned int i = 0; i + 1 < p_info.size(); ++i)
-          for (unsigned int j = i + 1; j < p_info.size(); ++j)
+          for (unsigned int i = 0; i < p_info.size(); ++i)
           {
-            Point closest_coor;
-            Real tangential_distance(0.0);
-            const Node * closest_node_on_ridge = NULL;
-            unsigned int index = 0;
-            Point closest_coor_ref;
-            bool found_ridge_contact_point = findRidgeContactPoint(closest_coor,
-                                                                   tangential_distance,
-                                                                   closest_node_on_ridge,
-                                                                   index,
-                                                                   closest_coor_ref,
-                                                                   p_info,
-                                                                   i,
-                                                                   j);
-            if (found_ridge_contact_point)
+            const Point closest_point = closest_point_to_side(node, *p_info[i]->_side);
+            const Real distance_sq = (closest_point - node).norm_sq();
+            if (distance_sq < min_distance_sq)
             {
-              RidgeData rpd;
-              rpd._closest_coor = closest_coor;
-              rpd._tangential_distance = tangential_distance;
-              rpd._closest_node = closest_node_on_ridge;
-              rpd._index = index;
-              rpd._closest_coor_ref = closest_coor_ref;
-              ridgeDataVec.push_back(rpd);
+              min_distance_sq = distance_sq;
+              best_point = closest_point;
+              best_i = i;
             }
           }
 
-        if (ridgeDataVec.size() > 0) // Either find the ridge pair that is the best or find a peak
+          p_info[best_i]->_closest_point = best_point;
+          p_info[best_i]->_distance =
+              (p_info[best_i]->_distance >= 0.0 ? 1.0 : -1.0) * std::sqrt(min_distance_sq);
+          if (_do_normal_smoothing)
+            mooseError("Normal smoothing not implemented with point locator code");
+          Point normal = (best_point - node).unit();
+          const Real dot = normal * p_info[best_i]->_normal;
+          if (dot < 0)
+            normal *= -1;
+          p_info[best_i]->_normal = normal;
+
+          switchInfo(info, p_info[best_i]);
+          info_set = true;
+        }
+        else
         {
-          // Group together ridges for which we are off the edge of a common node.
-          // Those are peaks.
-          std::vector<RidgeSetData> ridgeSetDataVec;
-          for (unsigned int i = 0; i < ridgeDataVec.size(); ++i)
-          {
-            bool foundSetWithMatchingNode = false;
-            for (unsigned int j = 0; j < ridgeSetDataVec.size(); ++j)
+          // Loop through all pairs of faces, and check for contact on ridge between each face pair
+          std::vector<RidgeData> ridgeDataVec;
+          for (unsigned int i = 0; i + 1 < p_info.size(); ++i)
+            for (unsigned int j = i + 1; j < p_info.size(); ++j)
             {
-              if (ridgeDataVec[i]._closest_node != NULL &&
-                  ridgeDataVec[i]._closest_node == ridgeSetDataVec[j]._closest_node)
+              Point closest_coor;
+              Real tangential_distance(0.0);
+              const Node * closest_node_on_ridge = NULL;
+              unsigned int index = 0;
+              Point closest_coor_ref;
+              bool found_ridge_contact_point = findRidgeContactPoint(closest_coor,
+                                                                     tangential_distance,
+                                                                     closest_node_on_ridge,
+                                                                     index,
+                                                                     closest_coor_ref,
+                                                                     p_info,
+                                                                     i,
+                                                                     j);
+              if (found_ridge_contact_point)
               {
-                foundSetWithMatchingNode = true;
-                ridgeSetDataVec[j]._ridge_data_vec.push_back(ridgeDataVec[i]);
-                break;
+                RidgeData rpd;
+                rpd._closest_coor = closest_coor;
+                rpd._tangential_distance = tangential_distance;
+                rpd._closest_node = closest_node_on_ridge;
+                rpd._index = index;
+                rpd._closest_coor_ref = closest_coor_ref;
+                ridgeDataVec.push_back(rpd);
               }
             }
-            if (!foundSetWithMatchingNode)
-            {
-              RidgeSetData rsd;
-              rsd._distance = std::numeric_limits<Real>::max();
-              rsd._ridge_data_vec.push_back(ridgeDataVec[i]);
-              rsd._closest_node = ridgeDataVec[i]._closest_node;
-              ridgeSetDataVec.push_back(rsd);
-            }
-          }
-          // Compute distance to each set of ridges
-          for (unsigned int i = 0; i < ridgeSetDataVec.size(); ++i)
+
+          if (ridgeDataVec.size() > 0) // Either find the ridge pair that is the best or find a peak
           {
-            if (ridgeSetDataVec[i]._closest_node !=
-                NULL) // Either a peak or off the edge of single ridge
+            // Group together ridges for which we are off the edge of a common node.
+            // Those are peaks.
+            std::vector<RidgeSetData> ridgeSetDataVec;
+            for (unsigned int i = 0; i < ridgeDataVec.size(); ++i)
             {
-              if (ridgeSetDataVec[i]._ridge_data_vec.size() == 1) // off edge of single ridge
+              bool foundSetWithMatchingNode = false;
+              for (unsigned int j = 0; j < ridgeSetDataVec.size(); ++j)
               {
-                if (ridgeSetDataVec[i]._ridge_data_vec[0]._tangential_distance <=
-                    _tangential_tolerance) // off within tolerance
+                if (ridgeDataVec[i]._closest_node != NULL &&
+                    ridgeDataVec[i]._closest_node == ridgeSetDataVec[j]._closest_node)
                 {
-                  ridgeSetDataVec[i]._closest_coor =
-                      ridgeSetDataVec[i]._ridge_data_vec[0]._closest_coor;
+                  foundSetWithMatchingNode = true;
+                  ridgeSetDataVec[j]._ridge_data_vec.push_back(ridgeDataVec[i]);
+                  break;
+                }
+              }
+              if (!foundSetWithMatchingNode)
+              {
+                RidgeSetData rsd;
+                rsd._distance = std::numeric_limits<Real>::max();
+                rsd._ridge_data_vec.push_back(ridgeDataVec[i]);
+                rsd._closest_node = ridgeDataVec[i]._closest_node;
+                ridgeSetDataVec.push_back(rsd);
+              }
+            }
+            // Compute distance to each set of ridges
+            for (unsigned int i = 0; i < ridgeSetDataVec.size(); ++i)
+            {
+              if (ridgeSetDataVec[i]._closest_node !=
+                  NULL) // Either a peak or off the edge of single ridge
+              {
+                if (ridgeSetDataVec[i]._ridge_data_vec.size() == 1) // off edge of single ridge
+                {
+                  if (ridgeSetDataVec[i]._ridge_data_vec[0]._tangential_distance <=
+                      _tangential_tolerance) // off within tolerance
+                  {
+                    ridgeSetDataVec[i]._closest_coor =
+                        ridgeSetDataVec[i]._ridge_data_vec[0]._closest_coor;
+                    Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
+                    ridgeSetDataVec[i]._distance = contact_point_vec.norm();
+                  }
+                }
+                else // several ridges join at common node to make peak.  The common node is the
+                     // contact point
+                {
+                  ridgeSetDataVec[i]._closest_coor = *ridgeSetDataVec[i]._closest_node;
                   Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
                   ridgeSetDataVec[i]._distance = contact_point_vec.norm();
                 }
               }
-              else // several ridges join at common node to make peak.  The common node is the
-                   // contact point
+              else // on a single ridge
               {
-                ridgeSetDataVec[i]._closest_coor = *ridgeSetDataVec[i]._closest_node;
+                ridgeSetDataVec[i]._closest_coor =
+                    ridgeSetDataVec[i]._ridge_data_vec[0]._closest_coor;
                 Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
                 ridgeSetDataVec[i]._distance = contact_point_vec.norm();
               }
             }
-            else // on a single ridge
+            // Find the set of ridges closest to us.
+            unsigned int closest_ridge_set_index(0);
+            Real closest_distance(ridgeSetDataVec[0]._distance);
+            Point closest_point(ridgeSetDataVec[0]._closest_coor);
+            for (unsigned int i = 1; i < ridgeSetDataVec.size(); ++i)
             {
-              ridgeSetDataVec[i]._closest_coor =
-                  ridgeSetDataVec[i]._ridge_data_vec[0]._closest_coor;
-              Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
-              ridgeSetDataVec[i]._distance = contact_point_vec.norm();
-            }
-          }
-          // Find the set of ridges closest to us.
-          unsigned int closest_ridge_set_index(0);
-          Real closest_distance(ridgeSetDataVec[0]._distance);
-          Point closest_point(ridgeSetDataVec[0]._closest_coor);
-          for (unsigned int i = 1; i < ridgeSetDataVec.size(); ++i)
-          {
-            if (ridgeSetDataVec[i]._distance < closest_distance)
-            {
-              closest_ridge_set_index = i;
-              closest_distance = ridgeSetDataVec[i]._distance;
-              closest_point = ridgeSetDataVec[i]._closest_coor;
-            }
-          }
-
-          if (closest_distance <
-              std::numeric_limits<Real>::max()) // contact point is on the closest ridge set
-          {
-            // find the face in the ridge set with the smallest index, assign that one to the
-            // interaction
-            unsigned int face_index(std::numeric_limits<unsigned int>::max());
-            for (unsigned int i = 0;
-                 i < ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size();
-                 ++i)
-            {
-              if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index < face_index)
-                face_index = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index;
-            }
-
-            mooseAssert(face_index < std::numeric_limits<unsigned int>::max(),
-                        "face_index invalid");
-
-            p_info[face_index]->_closest_point = closest_point;
-            p_info[face_index]->_distance =
-                (p_info[face_index]->_distance >= 0.0 ? 1.0 : -1.0) * closest_distance;
-            // Calculate the normal as the vector from the ridge to the point only if we're not
-            // doing normal
-            // smoothing.  Normal smoothing will average out the normals on its own.
-            if (!_do_normal_smoothing)
-            {
-              Point normal(closest_point - node);
-              const Real len(normal.norm());
-              if (len > 0)
+              if (ridgeSetDataVec[i]._distance < closest_distance)
               {
-                normal /= len;
+                closest_ridge_set_index = i;
+                closest_distance = ridgeSetDataVec[i]._distance;
+                closest_point = ridgeSetDataVec[i]._closest_coor;
               }
-              const Real dot(normal * p_info[face_index]->_normal);
-              if (dot < 0)
-              {
-                normal *= -1;
-              }
-              p_info[face_index]->_normal = normal;
             }
-            p_info[face_index]->_tangential_distance = 0.0;
 
-            Point closest_point_ref;
-            if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size() ==
-                1) // contact with a single ridge rather than a peak
+            if (closest_distance <
+                std::numeric_limits<Real>::max()) // contact point is on the closest ridge set
             {
-              p_info[face_index]->_tangential_distance =
-                  ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[0]._tangential_distance;
-              p_info[face_index]->_closest_point_ref =
-                  ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[0]._closest_coor_ref;
-            }
-            else
-            { // peak
-              const Node * closest_node_on_face;
-              bool restricted = restrictPointToFace(p_info[face_index]->_closest_point_ref,
-                                                    closest_node_on_face,
-                                                    p_info[face_index]->_side);
-              if (restricted)
+              // find the face in the ridge set with the smallest index, assign that one to the
+              // interaction
+              unsigned int face_index(std::numeric_limits<unsigned int>::max());
+              for (unsigned int i = 0;
+                   i < ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size();
+                   ++i)
               {
-                if (closest_node_on_face != ridgeSetDataVec[closest_ridge_set_index]._closest_node)
+                if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index < face_index)
+                  face_index = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index;
+              }
+
+              mooseAssert(face_index < std::numeric_limits<unsigned int>::max(),
+                          "face_index invalid");
+
+              p_info[face_index]->_closest_point = closest_point;
+              p_info[face_index]->_distance =
+                  (p_info[face_index]->_distance >= 0.0 ? 1.0 : -1.0) * closest_distance;
+              // Calculate the normal as the vector from the ridge to the point only if we're not
+              // doing normal
+              // smoothing.  Normal smoothing will average out the normals on its own.
+              if (!_do_normal_smoothing)
+              {
+                Point normal(closest_point - node);
+                const Real len(normal.norm());
+                if (len > 0)
                 {
-                  mooseError("Closest node when restricting point to face != closest node from "
-                             "RidgeSetData");
+                  normal /= len;
+                }
+                const Real dot(normal * p_info[face_index]->_normal);
+                if (dot < 0)
+                {
+                  normal *= -1;
+                }
+                p_info[face_index]->_normal = normal;
+              }
+              p_info[face_index]->_tangential_distance = 0.0;
+
+              Point closest_point_ref;
+              if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size() ==
+                  1) // contact with a single ridge rather than a peak
+              {
+                p_info[face_index]->_tangential_distance = ridgeSetDataVec[closest_ridge_set_index]
+                                                               ._ridge_data_vec[0]
+                                                               ._tangential_distance;
+                p_info[face_index]->_closest_point_ref =
+                    ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[0]._closest_coor_ref;
+              }
+              else
+              { // peak
+                const Node * closest_node_on_face;
+                bool restricted = restrictPointToFace(p_info[face_index]->_closest_point_ref,
+                                                      closest_node_on_face,
+                                                      p_info[face_index]->_side);
+                if (restricted)
+                {
+                  if (closest_node_on_face !=
+                      ridgeSetDataVec[closest_ridge_set_index]._closest_node)
+                  {
+                    mooseError("Closest node when restricting point to face != closest node from "
+                               "RidgeSetData");
+                  }
                 }
               }
-            }
 
-            FEBase * fe = _fes[_tid][p_info[face_index]->_side->dim()];
-            std::vector<Point> points(1);
-            points[0] = p_info[face_index]->_closest_point_ref;
-            fe->reinit(p_info[face_index]->_side, &points);
-            p_info[face_index]->_side_phi = fe->get_phi();
-            p_info[face_index]->_side_grad_phi = fe->get_dphi();
-            p_info[face_index]->_dxyzdxi = fe->get_dxyzdxi();
-            p_info[face_index]->_dxyzdeta = fe->get_dxyzdeta();
-            p_info[face_index]->_d2xyzdxideta = fe->get_d2xyzdxideta();
+              FEBase * fe = _fes[_tid][p_info[face_index]->_side->dim()];
+              std::vector<Point> points(1);
+              points[0] = p_info[face_index]->_closest_point_ref;
+              fe->reinit(p_info[face_index]->_side, &points);
+              p_info[face_index]->_side_phi = fe->get_phi();
+              p_info[face_index]->_side_grad_phi = fe->get_dphi();
+              p_info[face_index]->_dxyzdxi = fe->get_dxyzdxi();
+              p_info[face_index]->_dxyzdeta = fe->get_dxyzdeta();
+              p_info[face_index]->_d2xyzdxideta = fe->get_d2xyzdxideta();
 
-            switchInfo(info, p_info[face_index]);
-            info_set = true;
-          }
-          else
-          { // todo:remove invalid ridge cases so they don't mess up individual face competition????
-          }
-        }
-
-        if (!info_set) // contact wasn't on a ridge -- compete individual interactions
-        {
-          unsigned int best(0), i(1);
-          do
-          {
-            CompeteInteractionResult CIResult = competeInteractions(p_info[best], p_info[i]);
-            if (CIResult == FIRST_WINS)
-            {
-              i++;
-            }
-            else if (CIResult == SECOND_WINS)
-            {
-              best = i;
-              i++;
-            }
-            else if (CIResult == NEITHER_WINS)
-            {
-              best = i + 1;
-              i += 2;
-            }
-          } while (i < p_info.size() && best < p_info.size());
-          if (best < p_info.size())
-          {
-            // Ensure final info is within the tangential tolerance
-            if (p_info[best]->_tangential_distance <= _tangential_tolerance)
-            {
-              switchInfo(info, p_info[best]);
+              switchInfo(info, p_info[face_index]);
               info_set = true;
+            }
+            else
+            { // todo:remove invalid ridge cases so they don't mess up individual face
+              // competition????
+            }
+          }
+
+          if (!info_set) // contact wasn't on a ridge -- compete individual interactions
+          {
+            unsigned int best(0), i(1);
+            do
+            {
+              CompeteInteractionResult CIResult = competeInteractions(p_info[best], p_info[i]);
+              if (CIResult == FIRST_WINS)
+              {
+                i++;
+              }
+              else if (CIResult == SECOND_WINS)
+              {
+                best = i;
+                i++;
+              }
+              else if (CIResult == NEITHER_WINS)
+              {
+                best = i + 1;
+                i += 2;
+              }
+            } while (i < p_info.size() && best < p_info.size());
+            if (best < p_info.size())
+            {
+              // Ensure final info is within the tangential tolerance
+              if (p_info[best]->_tangential_distance <= _tangential_tolerance)
+              {
+                switchInfo(info, p_info[best]);
+                info_set = true;
+              }
             }
           }
         }
