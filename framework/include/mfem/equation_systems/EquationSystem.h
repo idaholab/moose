@@ -60,6 +60,7 @@ public:
   /// Build bilinear forms
   virtual void BuildBilinearForms();
   virtual void BuildMixedBilinearForms();
+  virtual void UpdateEquationSystem();
   virtual void BuildEquationSystem();
 
   /// Form linear system, with essential boundary conditions accounted for
@@ -303,7 +304,7 @@ public:
   void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name) override;
 
   virtual void SetTimeStep(double dt);
-  virtual void UpdateEquationSystem();
+  virtual void RebuildEquationSystem();
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   virtual void BuildBilinearForms() override;
