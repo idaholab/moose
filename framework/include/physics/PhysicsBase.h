@@ -69,6 +69,12 @@ public:
                                       const std::vector<SubdomainName> & blocks,
                                       const bool error_if_not_identical = true) const;
 
+  /**
+   * Whether the Physics is defined on those blocks
+   * @param blocks the blocks to check
+   */
+  bool hasBlocks(const std::vector<SubdomainName> & blocks) const;
+
   // Coupling with Physics //
   /**
    * @brief Get a Physics from the ActionWarehouse with the requested type and name
