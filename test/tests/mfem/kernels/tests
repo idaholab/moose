@@ -6,7 +6,6 @@
     input = curlcurl.i
     xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu' # schemadiff with cuda
@@ -20,7 +19,6 @@
     input = curlcurl.i
     xmldiff = 'OutputData/CurlCurlLOR/Run0/Run0.pvd
                 OutputData/CurlCurlLOR/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     cli_args = 'FESpaces/HCurlFESpace/fec_order=THIRD '
                'FESpaces/HCurlFESpace/closed_basis=GaussLobatto '
                'FESpaces/HCurlFESpace/open_basis=IntegratedGLL '
@@ -42,7 +40,6 @@
     input = diffusion.i
     xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
                 OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -57,7 +54,6 @@
               'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
     cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Executioner/assembly_level=partial'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -73,7 +69,6 @@
                'Executioner/device=ceed-cpu '
                'Executioner/assembly_level=none'
     compute_devices = 'ceed-cpu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
     capabilities = 'mfem'
     max_parallel = 1
@@ -84,7 +79,6 @@
     input = diffusion.i
     xmldiff = 'OutputData/DiffusionLOR/Run0/Run0.pvd '
               'OutputData/DiffusionLOR/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     cli_args = 'FESpaces/H1FESpace/fec_order=SECOND '
                'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Preconditioner/jacobi/low_order_refined=true '
@@ -101,7 +95,6 @@
     input = graddiv.i
     xmldiff = 'OutputData/GradDiv/Run0/Run0.pvd
                 OutputData/GradDiv/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a grad-div problem with Raviart-Thomas elements using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -114,7 +107,6 @@
     input = graddiv.i
     xmldiff = 'OutputData/GradDivLOR/Run0/Run0.pvd
                 OutputData/GradDivLOR/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     cli_args = 'Mesh/file=../mesh/beam-hex.mesh FESpaces/HDivFESpace/fec_order=THIRD '
                'FESpaces/HDivFESpace/closed_basis=GaussLobatto '
                'FESpaces/HDivFESpace/open_basis=IntegratedGLL '
@@ -137,7 +129,6 @@
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -156,7 +147,6 @@
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
                'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Executioner/assembly_level=element'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -178,7 +168,6 @@
                'Executioner/assembly_level=none '
                'Executioner/device=ceed-cpu'
     compute_devices = 'ceed-cpu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with matrix-free assembly using MFEM.'
     capabilities = 'mfem'
     valgrind = none
@@ -192,7 +181,6 @@
     xmldiff = 'OutputData/HeatConductionLOR/Run0/Run0.pvd
                 OutputData/HeatConductionLOR/Run0/Cycle000001/proc000000.vtu
                 OutputData/HeatConductionLOR/Run0/Cycle000004/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
                'FESpaces/H1FESpace/fec_order=SECOND '
@@ -211,7 +199,6 @@
     input = heattransfer.i
     xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
                 OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -224,7 +211,6 @@
     input = linearelasticity.i
     xmldiff = 'OutputData/LinearElasticity/Run0/Run0.pvd
                 OutputData/LinearElasticity/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a linear elasticity problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -236,7 +222,6 @@
     input = gravity.i
     xmldiff = 'OutputData/Gravity/Run0/Run0.pvd
                 OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu' # schemadiff with cuda

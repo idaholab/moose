@@ -67,10 +67,6 @@ class SchemaDiff(RunApp):
             else:
                 gold = os.path.join(self.getTestDir(), specs['gold_dir'], gold_file)
                 test = os.path.join(self.getTestDir(), file)
-                # We always ignore the header_type attribute, since it was
-                # introduced in VTK 7 and doesn't seem to be important as
-                # far as Paraview is concerned.
-                specs['ignored_items'].append('header_type')
 
                 gold_dict = self.try_load(gold)
                 test_dict = self.try_load(test)
@@ -150,7 +146,13 @@ class SchemaDiff(RunApp):
                         return True #if the values in the pseudo-list are different, but all fall within the accepted rel_err, the list is skipped for diffing.
                     except ValueError:
                         return False
-        exclude_paths = []
+
+        # We always ignore the header_type attribute, since it was
+        # introduced in VTK 7 and doesn't seem to be important as
+        # far as Paraview is concerned.
+        # We always ignore the version attribute, since there seems
+        # to be (enough) backward compatibility.
+        exclude_paths = ["root['VTKFile']['@header_type']", "root['VTKFile']['@version']"]
         if exclude_values:
             for value in exclude_values:
                 search = orig | deepdiff.search.grep(value, case_sensitive=True)
