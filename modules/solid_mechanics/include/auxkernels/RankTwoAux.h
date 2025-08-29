@@ -17,7 +17,6 @@
  * property, for example stress or strain, and output the value for the
  * supplied indices.
  */
-
 template <bool is_ad>
 class RankTwoAuxTempl : public NodalPatchRecovery
 {

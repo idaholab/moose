@@ -1,0 +1,56 @@
+[Tests]
+  issues = '#29382'
+  design = 'AbaqusUELMeshUserElement.md AbaqusEssentialBC.md AbaqusForceBC.md'
+
+  # we use a space-filling curve partitioner in all tests, so libsfcurves must be available for parallel runs
+  #capabilities = 'mpi_procs=1 | sfcurves'
+
+  # currently this has a bug in parallel
+  capabilities = '!mpi_procs | mpi_procs=1'
+
+  [build_uel_plugin_opt]
+    type = RunCommand
+    command = "cd elasticity_uel; make"
+    use_shell = True
+    requirement = "The elastic UEL test plugin shall be built in opt."
+    method = 'opt'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+  [build_uel_plugin_dbg]
+    type = RunCommand
+    command = "cd elasticity_uel; make METHOD=dbg"
+    use_shell = True
+    requirement = "The elastic UEL test plugin shall be built in dbg."
+    method = 'dbg'
+    # skip test if test is being run out-of-tree. Issue Ref: #25279
+    installation_type = in_tree
+  []
+
+  [mesh_only]
+    type = Exodiff
+    input = abaqus_uel_read.i
+    exodiff = abaqus_uel_read_in.e
+    cli_args = '--mesh-only'
+    method = 'opt dbg'
+    requirement = 'The system shall be able to load an Abaqus input file with UEL user elements.'
+    installation_type = in_tree
+  []
+
+  [elastic_bc]
+    type = Exodiff
+    abs_zero = 1e-9
+    input = elastic.i
+    exodiff = elastic_out.e
+    requirement = 'The system shall be able to apply essential boundary conditions from an Abaqus input file with UEL user elements.'
+    installation_type = in_tree
+  []
+  [elastic_action_bc]
+    type = Exodiff
+    abs_zero = 1e-9
+    input = elastic_action.i
+    exodiff = elastic_action_out.e
+    requirement = 'The system shall be able to apply essential boundary conditions set up by an action from an Abaqus input file with UEL user elements.'
+    installation_type = in_tree
+  []
+[]
