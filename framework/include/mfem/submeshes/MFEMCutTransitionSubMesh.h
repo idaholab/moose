@@ -28,20 +28,19 @@ public:
 protected:
   virtual void buildSubMesh() override;
 
-  // Add attributes to the parent mesh representing the cut transition region
+  /// Add attributes to the parent mesh representing the cut transition region
   void labelMesh(mfem::ParMesh & parent_mesh);
 
-  // Set new attributes for the provided transition region elements
+  /// Set new attributes for the provided transition region elements
   void setAttributes(mfem::ParMesh & parent_mesh, mfem::Array<int> & transition_els);
 
-  // Checks whether a given element is within a certain domain or vector of
-  // domains.
+  /// Checks whether a given element is within a certain domain or vector of domains.
   bool isInDomain(const int & el, const mfem::Array<int> & subdomains, const mfem::ParMesh & mesh);
 
-  // Finds the normal vector of a face in the mesh from its vertices
+  /// Finds the normal vector of a face in the mesh from its vertices
   mfem::Vector findFaceNormal(const mfem::ParMesh & mesh, const int & face);
 
-  // Checks whether an element lies on the positive or negative side of the cut plane
+  /// Checks whether an element lies on the positive or negative side of the cut plane
   int sideOfCut(const int & el, const int & el_vertex_on_cut, mfem::ParMesh & mesh);
 
   const BoundaryName & _cut_boundary;
