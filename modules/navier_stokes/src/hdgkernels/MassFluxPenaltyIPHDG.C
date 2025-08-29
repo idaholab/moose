@@ -25,6 +25,7 @@ MassFluxPenaltyIPHDG::validParams()
   params.addRequiredRangeCheckedParam<unsigned short>(
       "component", "0<=component<=1", "The velocity component this object is being applied to");
   params.addParam<Real>("gamma", 1, "The penalty to multiply the jump");
+  params.addParam<bool>("h_scaling", false, "Whether to scale by 1/h");
   params.addClassDescription("introduces a jump correction on internal faces for grad-div "
                              "stabilization for discontinuous Galerkin methods. Because this is "
                              "derived from HDGKernel this class executes twice per face.");
@@ -46,7 +47,8 @@ MassFluxPenaltyIPHDG::MassFluxPenaltyIPHDG(const InputParameters & parameters)
     _vel_x_face_phi(_vel_x_face_var.phiFace()),
     _vel_y_face_phi(_vel_y_face_var.phiFace()),
     _comp(getParam<unsigned short>("component")),
-    _gamma(getParam<Real>("gamma"))
+    _gamma(getParam<Real>("gamma")),
+    _h_scaling(getParam<bool>("h_scaling"))
 {
   if (_mesh.dimension() > 2)
     mooseError("Only two-dimensional velocity is currently implemented");
@@ -110,5 +112,8 @@ MassFluxPenaltyIPHDG::computeQpResidualOnSide()
   const ADRealVectorValue soln_jump(
       _vel_x[_qp] - _vel_x_face[_qp], _vel_y[_qp] - _vel_y_face[_qp], 0);
 
-  return _gamma * soln_jump * _normals[_qp] * _normals[_qp](_comp);
+  auto coeff = _gamma;
+  if (_h_scaling)
+    coeff /= _current_side_volume;
+  return coeff * soln_jump * _normals[_qp] * _normals[_qp](_comp);
 }
