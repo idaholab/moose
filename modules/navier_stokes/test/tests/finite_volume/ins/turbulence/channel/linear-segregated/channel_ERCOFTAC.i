@@ -337,4 +337,5 @@
   continue_on_max_its = true
 []
 
+variables_to_sample = 'vel_x vel_y pressure_over_density TKE TKED'
 !include postprocessing.i

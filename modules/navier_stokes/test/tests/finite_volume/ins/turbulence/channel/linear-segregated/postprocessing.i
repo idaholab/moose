@@ -23,14 +23,14 @@
   [side_bottom]
     type = SideValueSampler
     boundary = 'bottom'
-    variable = 'vel_x vel_y pressure_over_density TKE TKED'
+    variable = ${variables_to_sample}
     sort_by = 'x'
     execute_on = 'timestep_end'
   []
   [side_top]
     type = SideValueSampler
     boundary = 'top'
-    variable = 'vel_x vel_y pressure_over_density TKE TKED'
+    variable = ${variables_to_sample}
     sort_by = 'x'
     execute_on = 'timestep_end'
   []
@@ -39,7 +39,7 @@
     start_point = '${fparse 0.125 * L} ${fparse 0.0001} 0'
     end_point = '${fparse 0.875 * L} ${fparse 0.0001} 0'
     num_points = ${Mesh/block_1/nx}
-    variable = 'vel_x vel_y pressure_over_density TKE TKED'
+    variable = ${variables_to_sample}
     sort_by = 'x'
     execute_on = 'timestep_end'
   []
@@ -48,7 +48,7 @@
     start_point = '${fparse 0.125 * L} ${fparse 0.5 * H} 0'
     end_point = '${fparse 0.875 * L} ${fparse 0.5 * H} 0'
     num_points =  ${Mesh/block_1/nx}
-    variable = 'vel_x vel_y pressure_over_density TKE TKED'
+    variable = ${variables_to_sample}
     sort_by = 'x'
     execute_on = 'timestep_end'
   []
