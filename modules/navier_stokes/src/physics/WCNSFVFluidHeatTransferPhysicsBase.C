@@ -306,8 +306,17 @@ WCNSFVFluidHeatTransferPhysicsBase::defineKOverCpFunctors(const bool use_ad)
     if (!MooseUtils::parsesToReal(getSpecificHeatName()))
       f_names.push_back(getSpecificHeatName());
     params.set<std::vector<std::string>>("functor_names") = f_names;
-    params.set<std::string>("expression") =
-        _thermal_conductivity_name[i] + "/" + getSpecificHeatName();
+    const auto th_cond_name =
+    _thermal_conductivity_name[i] + (_turbulence_physics ? "_plus_kt" : "");
+    if (!_turbulence_physics)
+      params.set<std::string>("expression") =
+          _thermal_conductivity_name[i] + "/" + getSpecificHeatName();
+    else
+    {
+      f_names.push_back("k_t");
+      params.set<std::string>("expression") =
+          "(" + _thermal_conductivity_name[i] + " + k_t) /" + getSpecificHeatName();
+    }
     params.set<std::string>("property_name") = _thermal_conductivity_name[i] + "_by_cp";
     getProblem().addMaterial(
         object_type, prefix() + "rho_alpha_from_" + _thermal_conductivity_name[i], params);

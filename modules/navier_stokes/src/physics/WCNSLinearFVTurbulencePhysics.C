@@ -159,24 +159,8 @@ WCNSLinearFVTurbulencePhysics::addFluidEnergyTurbulenceKernels()
 {
   if (_turbulence_model == "k-epsilon")
   {
-    const std::string kernel_type = "LinearFVDiffusion";
-    const auto T_fluid_name = _flow_equations_physics->getFluidTemperatureName();
-    InputParameters params = getFactory().getValidParams(kernel_type);
-    assignBlocks(params, _blocks);
-    if (!_fluid_energy_physics->getParam<bool>("solve_for_enthalpy"))
-    {
-      params.set<LinearVariableName>("variable") = T_fluid_name;
-      params.set<MooseFunctorName>("diffusion_coeff") = NS::k_t;
-    }
-    else
-    {
-      params.set<LinearVariableName>("variable") = _fluid_energy_physics->getSpecificEnthalpyName();
-      params.set<MooseFunctorName>("diffusion_coeff") = NS::k_t + "_by_cp";
-    }
-    params.set<bool>("use_nonorthogonal_correction") =
-        _fluid_energy_physics->getParam<bool>("use_nonorthogonal_correction");
-    getProblem().addLinearFVKernel(
-        kernel_type, prefix() + T_fluid_name + "_turbulent_diffusion", params);
+    // Simpler to add the kernel in the fluid heat transfer physics with k + k_t instead of two
+    // kernels one with k, one with k_t
   }
 }
 
