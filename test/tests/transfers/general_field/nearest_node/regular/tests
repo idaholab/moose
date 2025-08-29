@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#16427 #16429'
+  issues = '#16427 #16429 #30988'
   design = 'transfers/MultiAppGeneralFieldNearestLocationTransfer.md'
 
   [2d_overlay]
@@ -85,6 +85,68 @@
                  "MultiApps/sub/positions='0.05 0.05 0'"
       expect_err = "multiple valid values from equidistant points were "
       detail = 'the furthest of the nearest nodes desired being equidistant to the target point as the next furthest'
+    []
+  []
+  
+  [block_boundaries_ids]
+  requirement = "The system shall report an error if a variable is required to be transferred"
+  
+    [bad_from_block_to_multiapp]
+      type = RunException
+      input = main.i
+      cli_args = "Transfers/to_sub/from_blocks=NOT_A_BLOCK"
+      expect_err = "The block 'NOT_A_BLOCK' was not found in the mesh"
+      detail = "with an invalid source block for the to_multiapp."
+    []
+    [bad_to_block_to_multiapp]
+      type = RunException
+      input = main.i
+      cli_args = "Transfers/to_sub/to_blocks=NOT_A_BLOCK"
+      expect_err = "The block 'NOT_A_BLOCK' was not found in the mesh"
+      detail = "with an invalid target block for the to_multiapp."
+    []
+    [bad_from_boundary_to_multiapp]
+      type = RunException
+      input = main.i
+      cli_args = "Transfers/to_sub/from_boundaries=NOT_A_BOUNDARY"
+      expect_err = "The boundary 'NOT_A_BOUNDARY' was not found in the mesh"
+      detail = "with an invalid source boundaries for the to_multiapp."
+    []
+    [bad_to_boundary_to_multiapp]
+      type = RunException
+      input = main.i
+      cli_args = "Transfers/to_sub/to_boundaries=NOT_A_BOUNDARY"
+      expect_err = "The boundary 'NOT_A_BOUNDARY' was not found in the mesh"
+      detail = "with an invalid target boundary for the to_multiapp."
+    []
+    
+    [bad_from_block_from_multiapp]
+      type = RunException
+      input = main.i
+      cli_args = "Transfers/from_sub/from_blocks=NOT_A_BLOCK"
+      expect_err = "The block 'NOT_A_BLOCK' was not found in the mesh"
+      detail = "with an invalid source block for the from_multiapp."
+    []
+    [bad_to_block_from_multiapp]
+      type = RunException
+      input = main.i
+      cli_args = "Transfers/from_sub/to_blocks=NOT_A_BLOCK"
+      expect_err = "The block 'NOT_A_BLOCK' was not found in the mesh"
+      detail = "with an invalid target block for the from_multiapp."
+    []
+    [bad_from_boundary_from_multiapp]
+      type = RunException
+      input = main.i
+      cli_args = "Transfers/from_sub/from_boundaries=NOT_A_BOUNDARY"
+      expect_err = "The boundary 'NOT_A_BOUNDARY' was not found in the mesh"
+      detail = "with an invalid source boundaries for the from_multiapp."
+    []
+    [bad_to_boundary_from_multiapp]
+      type = RunException
+      input = main.i
+      cli_args = "Transfers/from_sub/to_boundaries=NOT_A_BOUNDARY"
+      expect_err = "The boundary 'NOT_A_BOUNDARY' was not found in the mesh"
+      detail = "with an invalid target boundary for the from_multiapp."
     []
   []
 []
