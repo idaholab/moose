@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMIndicator.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMIndicator);
 
