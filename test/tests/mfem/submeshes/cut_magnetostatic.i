@@ -145,7 +145,7 @@
     type = MFEMVectorFEInnerProductIntegralPostprocessor
     coefficient = conductivity
     dual_variable = e_field
-    primal_variable = e_field 
+    primal_variable = e_field
     block = 'TorusCore TorusSheath'
   []
 []

@@ -120,7 +120,7 @@ coil_conductivity = 1.0
   [e_field]
     type = MFEMVariable
     fespace = HCurlFESpace
-  []  
+  []
 []
 
 [AuxKernels]
@@ -190,8 +190,8 @@ coil_conductivity = 1.0
     from_variable = transition_external_e_field
     to_variable = external_e_field
     execute_on = TIMESTEP_END
-    execution_order_group = 2    
-  []  
+    execution_order_group = 2
+  []
 []
 
 [Outputs]

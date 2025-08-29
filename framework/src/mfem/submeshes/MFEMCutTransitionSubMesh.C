@@ -23,9 +23,8 @@ MFEMCutTransitionSubMesh::validParams()
       "Class to construct an MFEMSubMesh formed from the set of elements that have least one "
       "vertex on the specified cut plane, that lie on one side of the plane, "
       "and that are restricted to the set of user-specified subdomains.");
-  params.addRequiredParam<BoundaryName>(
-      "cut_boundary",
-      "The boundary associated with the mesh cut.");
+  params.addRequiredParam<BoundaryName>("cut_boundary",
+                                        "The boundary associated with the mesh cut.");
   params.addRequiredParam<BoundaryName>(
       "transition_subdomain_boundary",
       "Name to assign boundary of transition subdomain not shared with cut surface.");
@@ -99,7 +98,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
   std::vector<int> global_cut_vert_ids;
   mfem::Array<HYPRE_BigInt> gi;
   parent_mesh.GetGlobalVertexIndices(gi);
-  mfem::Table *vert_to_elem  = parent_mesh.GetVertexToElementTable();
+  mfem::Table * vert_to_elem = parent_mesh.GetVertexToElementTable();
   const mfem::Array<int> & cut_to_parent_vertex_id_map = _cut_submesh->GetParentVertexIDMap();
   for (int i = 0; i < _cut_submesh->GetNV(); ++i)
   {
@@ -246,15 +245,19 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
   {
     const auto & transition_el = transition_els[i];
     const int old_attr = parent_mesh.GetAttribute(transition_el);
-    new_attrs[old_attr-1] = old_max_attr + old_attr%old_max_attr + 1;
+    new_attrs[old_attr - 1] = old_max_attr + old_attr % old_max_attr + 1;
   }
 
   /// Distribute local attribute IDs to other MPI ranks to create set of new
   /// global attribute IDs for the transition region.
   mfem::Array<int> global_new_attrs(old_max_attr);
   global_new_attrs = -1;
-  MPI_Allreduce(new_attrs, global_new_attrs, old_max_attr,
-              MPI_INT, MPI_MAX, getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  MPI_Allreduce(new_attrs,
+                global_new_attrs,
+                old_max_attr,
+                MPI_INT,
+                MPI_MAX,
+                getMFEMProblem().mesh().getMFEMParMesh().GetComm());
 
   /// Set the new attribute IDs for transition region elements
   for (int i = 0; i < transition_els.Size(); ++i)
@@ -262,7 +265,7 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
     const auto & transition_el = transition_els[i];
     const int old_attr = parent_mesh.GetAttribute(transition_el);
     if (old_attr < old_max_attr + 1)
-      parent_mesh.SetAttribute(transition_el, global_new_attrs[old_attr-1]);
+      parent_mesh.SetAttribute(transition_el, global_new_attrs[old_attr - 1]);
   }
 
   mfem::AttributeSets & attr_sets = parent_mesh.attribute_sets;
@@ -291,8 +294,8 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
     }
   }
 
-  /// Create boundary attribute set labelling the exterior of the newly created 
-  /// transition region, excluding the cut  
+  /// Create boundary attribute set labelling the exterior of the newly created
+  /// transition region, excluding the cut
   bdr_attr_sets.CreateAttributeSet(_transition_subdomain_boundary);
   bdr_attr_sets.AddToAttributeSet(_transition_subdomain_boundary,
                                   parent_mesh.bdr_attributes.Max() + 1);

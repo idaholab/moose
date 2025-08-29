@@ -19,21 +19,23 @@ InputParameters
 MFEMScalarBoundaryIC::validParams()
 {
   auto params = MFEMInitialCondition::validParams();
-  params += MFEMBoundaryRestrictable::validParams();  
+  params += MFEMBoundaryRestrictable::validParams();
   params.addClassDescription("Sets the initial values of an MFEM scalar variable from a "
                              "user-specified scalar coefficient.");
   params.addRequiredParam<MFEMScalarCoefficientName>("coefficient", "The scalar coefficient");
   return params;
 }
 
-MFEMScalarBoundaryIC::MFEMScalarBoundaryIC(const InputParameters & params) : MFEMInitialCondition(params), 
-MFEMBoundaryRestrictable(params,
+MFEMScalarBoundaryIC::MFEMScalarBoundaryIC(const InputParameters & params)
+  : MFEMInitialCondition(params),
+    MFEMBoundaryRestrictable(params,
                              *getMFEMProblem()
                                   .getProblemData()
                                   .gridfunctions.GetRef(getParam<VariableName>("variable"))
                                   .ParFESpace()
                                   ->GetParMesh())
-                                  {}
+{
+}
 
 void
 MFEMScalarBoundaryIC::execute()
