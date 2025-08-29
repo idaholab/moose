@@ -1,0 +1,59 @@
+[Tests]
+  issues = '#31171'
+  design = 'annulus_shape.md'
+  [optimize_annulus]
+    requirement = 'The system shall provide functionality to enable python-based global optimization of input parameters with simulation-based constraints using methods such as'
+    [shgo]
+      type = RunApp
+      input = annulus.i
+      command_proxy = 'test_optimize_annulus.py -o shgo'
+      required_python_packages = 'requests scipy'
+      heavy = true
+      capabilities = 'method=opt'
+      recover = false
+      restep = false
+      valgrind = none
+
+      detail = 'Simplicial Homology Global Optimization (SHGO)'
+    []
+    [differential_evolution]
+      type = RunApp
+      input = annulus.i
+      command_proxy = 'test_optimize_annulus.py -o differential_evolution'
+      required_python_packages = 'requests scipy'
+      heavy = true
+      capabilities = 'method=opt'
+      recover = false
+      restep = false
+      valgrind = none
+
+      detail = 'Differential Evolution'
+    []
+    [slsqp]
+      type = RunApp
+      input = annulus.i
+      command_proxy = 'test_optimize_annulus.py -o slsqp'
+      required_python_packages = 'requests scipy'
+      heavy = true
+      capabilities = 'method=opt'
+      recover = false
+      restep = false
+      valgrind = none
+
+      detail = 'Sequential Least Squares Programming (SLSQP)'
+    []
+    [shgo_restore]
+      type = RunApp
+      input = annulus_displaced_mesh.i
+      command_proxy = 'test_optimize_annulus.py -o shgo -m 4'
+      required_python_packages = 'requests scipy'
+      heavy = true
+      capabilities = 'method=opt'
+      recover = false
+      restep = false
+      valgrind = none
+
+      detail = 'SHGO while restoring samples versus resetting.'
+    []
+  []
+[]

@@ -27,6 +27,10 @@ Bayesian UQ:
 
 - [modules/stochastic_tools/examples/bayesian_uq_1d_diff.md]
 
+Python Interface
+
+- [modules/stochastic_tools/examples/annulus_shape.md]
+
 !if! function=hasCapability('libtorch')
 
 Deep Reinforcement Learning Models:
