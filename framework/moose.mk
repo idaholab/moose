@@ -204,8 +204,10 @@ endif
 UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
 	DYNAMIC_LOOKUP := -undefined dynamic_lookup
+	hit_pad_LDFLAGS := -Wl,-headerpad_max_install_names
 else
 	DYNAMIC_LOOKUP :=
+	hit_pad_LDFLAGS :=
 endif
 
 # windows (msys2) specific settings (we need to cut the version number off)
@@ -226,7 +228,7 @@ pyhit_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS) $(wasp_CXXFLAGS) $(wasp_LDFLAGS)
 
 hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 	@echo "Building and linking $(pyhit_LIB)..."
-	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) $(CXXFLAGS) -I$(HIT_DIR)/include -std=c++17 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
+	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) $(CXXFLAGS) -I$(HIT_DIR)/include -std=c++17 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB) $(hit_pad_LDFLAGS))'
 	@bash -c '(cd "$(HIT_DIR)" && $(MAKE))'
 
 capabilities_LIBNAME      := capabilities.$(PYMOD_EXTENSION)

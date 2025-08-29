@@ -21,8 +21,10 @@ endif
 
 ifeq ($(UNAME), Darwin)
 	DYNAMIC_LOOKUP := -undefined dynamic_lookup
+	hit_pad_LDFLAGS := -Wl,-headerpad_max_install_names
 else
 	DYNAMIC_LOOKUP :=
+	hit_pad_LDFLAGS :=
 endif
 
 $(info Building hit for python with $(pyconfig))
@@ -61,7 +63,7 @@ hit: $(hit_srcdir)/main.cc $(hit_srcfiles) include/hit/braceexpr.h include/hit/l
 bindings: hit.so
 
 hit.so: $(hit_srcfiles)
-	$(hit_CXX) -std=c++17 $(wasp_CXXFLAGS) $(hit_includeflags) -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(DYNAMIC_LOOKUP) $^ $(HITCPP) -o $@ $(wasp_LDFLAGS)
+	$(hit_CXX) -std=c++17 $(wasp_CXXFLAGS) $(hit_includeflags) -w -fPIC -lstdc++ -shared -L$(PYTHONPREFIX)/lib $(PYTHONCFLAGS) $(DYNAMIC_LOOKUP) $^ $(HITCPP) -o $@ $(wasp_LDFLAGS) $(hit_pad_LDFLAGS)
 
 $(HITCPP): hit.pyx chit.pxd
 	$(cython) -o $@ --cplus $<
