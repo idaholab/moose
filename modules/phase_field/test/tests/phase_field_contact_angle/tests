@@ -1,0 +1,31 @@
+[Tests]
+  issues = "#31300"
+  design = "ADPhaseFieldTwoPhaseSurfaceTension.md ADPhaseFieldTwoPhaseMaterial.md"
+  [contactangle_150]
+    type = CSVDiff
+    input = contact_angle_verification.i
+    cli_args = 'contactangle=2.61799 Outputs/file_base=contactangle_150'
+    csvdiff = contactangle_150.csv
+    min_parallel = 8
+    max_time = 600
+    requirement = "The ADPhaseFieldContactAngleBC kernel correctly implements the prescribed contact angle."
+  []
+  [contactangle_30]
+    type = CSVDiff
+    input = contact_angle_verification.i
+    cli_args = 'contactangle=0.523599 Outputs/file_base=contactangle_30'
+    csvdiff = contactangle_30.csv
+    min_parallel = 8
+    max_time = 600
+    requirement = "The ADPhaseFieldContactAngleBC kernel correctly implements the prescribed contact angle."
+  []
+  [contactangle_60]
+    type = CSVDiff
+    input = contact_angle_verification.i
+    cli_args = 'contactangle=1.0472 Outputs/file_base=contactangle_60'
+    csvdiff = contactangle_60.csv
+    min_parallel = 8
+    max_time = 600
+    requirement = "The ADPhaseFieldContactAngleBC kernel correctly implements the prescribed contact angle."
+  []
+[]

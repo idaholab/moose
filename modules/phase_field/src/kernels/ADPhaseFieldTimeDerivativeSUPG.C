@@ -1,0 +1,36 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ADPhaseFieldTimeDerivativeSUPG.h"
+
+registerMooseObject("PhaseFieldApp", ADPhaseFieldTimeDerivativeSUPG);
+
+InputParameters
+ADPhaseFieldTimeDerivativeSUPG::validParams()
+{
+  InputParameters params = ADTimeKernelGrad::validParams();
+  params.addClassDescription(
+      "SUPG stablization terms for the time derivative of the level set equation.");
+  params.addRequiredCoupledVar("velocity", "Velocity vector variable.");
+  return params;
+}
+
+ADPhaseFieldTimeDerivativeSUPG::ADPhaseFieldTimeDerivativeSUPG(const InputParameters & parameters)
+  : ADTimeKernelGrad(parameters), _velocity(adCoupledVectorValue("velocity"))
+{
+}
+
+ADRealVectorValue
+ADPhaseFieldTimeDerivativeSUPG::precomputeQpResidual()
+{
+  ADReal tau =
+      _current_elem->hmin() /
+      (2 * (_velocity[_qp] + RealVectorValue(libMesh::TOLERANCE * libMesh::TOLERANCE)).norm());
+  return tau * _velocity[_qp] * _u_dot[_qp];
+}
