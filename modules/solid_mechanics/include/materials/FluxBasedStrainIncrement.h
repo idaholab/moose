@@ -38,7 +38,7 @@ protected:
   const VariableGradient * const _grad_jz;
 
   const VariableValue & _gb;
-  
+
   MaterialProperty<RankTwoTensor> & _strain_increment;
 
   RankTwoTensor _flux_grad_tensor;

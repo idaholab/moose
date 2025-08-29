@@ -37,7 +37,7 @@ FluxBasedStrainIncrement::FluxBasedStrainIncrement(const InputParameters & param
     _strain_increment(
         declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("property_name")))
 {
-   computeIdentityTensor();
+  computeIdentityTensor();
 }
 
 void
@@ -70,24 +70,27 @@ FluxBasedStrainIncrement::computeFluxGradTensor()
 }
 
 void
-FluxBasedStrainIncrement::computeIdentityTensor() //Identity tensor defined here, is added here, which is to be used in DeviatoricStrainIncrement and VolumeStrainIncrement objects which are inherited from FluxBasedStrainIncrement.
+FluxBasedStrainIncrement::
+    computeIdentityTensor() // Identity tensor defined here, is added here, which is to be used in
+                            // DeviatoricStrainIncrement and VolumeStrainIncrement objects which are
+                            // inherited from FluxBasedStrainIncrement.
 {
   RankTwoTensor iden(RankTwoTensor::initIdentity);
   _Identity_tensor.zero();
 
-  _Identity_tensor(0,0) = iden(0,0);
+  _Identity_tensor(0, 0) = iden(0, 0);
 
   if (_has_yflux)
   {
-    _Identity_tensor(0,1) = iden(0,1);
-    _Identity_tensor(1,0) = iden(1,0);
-    _Identity_tensor(1,1) = iden(1,1);
+    _Identity_tensor(0, 1) = iden(0, 1);
+    _Identity_tensor(1, 0) = iden(1, 0);
+    _Identity_tensor(1, 1) = iden(1, 1);
   }
 
   if (_has_zflux)
   {
-    _Identity_tensor(0,2) = iden(0,2);
-    _Identity_tensor(2,0) = iden(2,0);
-    _Identity_tensor(2,2) = iden(2,2);
+    _Identity_tensor(0, 2) = iden(0, 2);
+    _Identity_tensor(2, 0) = iden(2, 0);
+    _Identity_tensor(2, 2) = iden(2, 2);
   }
 }

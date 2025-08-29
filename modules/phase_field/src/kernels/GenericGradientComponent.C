@@ -15,16 +15,14 @@ InputParameters
 GenericGradientComponent::validParams()
 {
   InputParameters params = GradientComponent::validParams();
-  params.addClassDescription(
-      "Set the kernel variable to a specified component of the gradient of a coupled variable with a scaling factor");
-  params.addParam<Real>("factor",
-                                  "factor to be multiplied with the gradient component optional"); 
+  params.addClassDescription("Set the kernel variable to a specified component of the gradient of "
+                             "a coupled variable with a scaling factor");
+  params.addParam<Real>("factor", "factor to be multiplied with the gradient component optional");
   return params;
 }
 
 GenericGradientComponent::GenericGradientComponent(const InputParameters & parameters)
-  : GradientComponent(parameters),
-    _factor(getParam<Real>("factor"))
+  : GradientComponent(parameters), _factor(getParam<Real>("factor"))
 
 {
 }
@@ -32,8 +30,8 @@ GenericGradientComponent::GenericGradientComponent(const InputParameters & param
 Real
 GenericGradientComponent::computeQpResidual()
 {
-  return (_u[_qp] + (_factor) * _grad_v[_qp](_component)) * _test[_i][_qp]; 
-} 
+  return (_u[_qp] + (_factor)*_grad_v[_qp](_component)) * _test[_i][_qp];
+}
 
 Real
 GenericGradientComponent::computeQpJacobian()
@@ -45,6 +43,7 @@ Real
 GenericGradientComponent::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_var)
-  return (_factor) * _grad_phi[_j][_qp](_component) * _test[_i][_qp]; // + _grad_phi instead of negative
+    return (_factor)*_grad_phi[_j][_qp](_component) *
+           _test[_i][_qp]; // + _grad_phi instead of negative
   return 0.0;
 }

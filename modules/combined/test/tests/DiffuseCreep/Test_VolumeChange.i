@@ -1,7 +1,7 @@
 #This test demonstrates the volumetric strain increments under both lattice site conserved and non-conserved conditions.
-#VolumeStrainIncrement class in this test has been inherited from FluxBasedStrainIncrement object. 
-#For this test, both the deviatoric part of strain rate tensor (calculated by DeviatoricStrainIncrement) and volumetric strain is added using SumTensorIncrement object. 
-#A symmetrical geometry is considered with a constant source of vacancies. 
+#VolumeStrainIncrement class in this test has been inherited from FluxBasedStrainIncrement object.
+#For this test, both the deviatoric part of strain rate tensor (calculated by DeviatoricStrainIncrement) and volumetric strain is added using SumTensorIncrement object.
+#A symmetrical geometry is considered with a constant source of vacancies.
 
 [Mesh]
   [annular]
@@ -215,16 +215,16 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   l_tol = 1e-4
-  l_max_its = 5 
+  l_max_its = 5
   nl_max_its = 5
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-08
   end_time = 1e5
   dt = 0.1
 
-  line_search = 'none' 
-  automatic_scaling = false 
-  nl_forced_its = 2 
+  line_search = 'none'
+  automatic_scaling = false
+  nl_forced_its = 2
 
   [TimeStepper]
     type = IterationAdaptiveDT

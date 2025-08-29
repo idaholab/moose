@@ -17,13 +17,13 @@ DeviatoricFluxBasedStrainIncrement::validParams()
 {
   InputParameters params = FluxBasedStrainIncrement::validParams();
   params.addClassDescription("Compute deviatoric strain increment based on flux");
-  params.addRequiredParam<Real>("dimension","Dimensionality of the problem");
+  params.addRequiredParam<Real>("dimension", "Dimensionality of the problem");
   return params;
 }
 
-DeviatoricFluxBasedStrainIncrement::DeviatoricFluxBasedStrainIncrement(const InputParameters & parameters)
-  : FluxBasedStrainIncrement(parameters),
-    n(getParam<Real>("dimension"))
+DeviatoricFluxBasedStrainIncrement::DeviatoricFluxBasedStrainIncrement(
+    const InputParameters & parameters)
+  : FluxBasedStrainIncrement(parameters), n(getParam<Real>("dimension"))
 {
 }
 
@@ -32,5 +32,7 @@ DeviatoricFluxBasedStrainIncrement::computeQpProperties()
 {
   FluxBasedStrainIncrement::computeQpProperties();
 
-  _strain_increment[_qp] += (1.0/n) * ((_flux_grad_tensor.trace()) * (1.0 - _gb[_qp]) * _Identity_tensor) * _dt; //This is the hydrostatic part of strain rate tensor
+  _strain_increment[_qp] += (1.0 / n) *
+                            ((_flux_grad_tensor.trace()) * (1.0 - _gb[_qp]) * _Identity_tensor) *
+                            _dt; // This is the hydrostatic part of strain rate tensor
 }

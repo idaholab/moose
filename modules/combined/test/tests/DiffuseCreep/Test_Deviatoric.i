@@ -164,19 +164,19 @@
   [../]
   [neumann_source_top_y] # +ve for entering
     type = ParsedMaterial
-    expression = '1.5e-5' 
+    expression = '1.5e-5'
     property_name = neumann_source_top_y
     outputs = exodus
   []
   [neumann_source_right_x]
     type = ParsedMaterial
-    expression = '-1.5e-5' # -ve for leaving 
+    expression = '-1.5e-5' # -ve for leaving
     property_name = neumann_source_right_x
     outputs = exodus
   []
   [neumann_source_bottom_y] # +ve for entering
     type = ParsedMaterial
-    expression = '1.5e-5' 
+    expression = '1.5e-5'
     property_name = neumann_source_bottom_y
     outputs = exodus
   []
@@ -188,7 +188,7 @@
   []
   #Creep strain increments
   [diffuse_strain_increment]
-    type = DeviatoricFluxBasedStrainIncrement 
+    type = DeviatoricFluxBasedStrainIncrement
     dimension = 2
     xflux = jx_v
     yflux = jy_v
@@ -230,17 +230,17 @@
   solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
-  l_tol = 1e-4 
-  l_max_its = 5 
-  nl_max_its = 5 
+  l_tol = 1e-4
+  l_max_its = 5
+  nl_max_its = 5
   nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-08 
+  nl_rel_tol = 1e-08
   end_time = 1e5
   dt = 0.1
 
-  line_search = 'none' 
-  automatic_scaling = false 
-  nl_forced_its = 2 
+  line_search = 'none'
+  automatic_scaling = false
+  nl_forced_its = 2
 
   [TimeStepper]
     type = IterationAdaptiveDT
