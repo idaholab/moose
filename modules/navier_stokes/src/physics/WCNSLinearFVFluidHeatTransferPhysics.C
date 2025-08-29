@@ -147,8 +147,9 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
     else
     {
       params.set<LinearVariableName>("variable") = _fluid_enthalpy_name;
-      params.set<MooseFunctorName>("diffusion_coeff") =
-          _thermal_conductivity_name[block_i] + "_by_cp";
+      const auto th_cond_name =
+          _thermal_conductivity_name[block_i] + (_turbulence_physics ? "_plus_kt" : "");
+      params.set<MooseFunctorName>("diffusion_coeff") = th_cond_name + "_by_cp";
     }
     std::vector<SubdomainName> block_names =
         num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
@@ -165,6 +166,20 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
 
     getProblem().addLinearFVKernel(
         kernel_type, prefix() + "ins_energy_diffusion_" + block_name, params);
+    // Condensed into one kernel when solving for enthalpy
+    if (_turbulence_physics && !_solve_for_enthalpy)
+    {
+      params.set<MooseFunctorName>("diffusion_coeff") = "k_t";
+      // Turbulence might not span the entire domain, just like thermal diffusivity might not
+      if (!_turbulence_physics->hasBlocks(block_names))
+      {
+        mooseWarning("Ignoring turbulent energy diffusion term on blocks " +
+                     Moose::stringify(block_names));
+        continue;
+      }
+      getProblem().addLinearFVKernel(
+          kernel_type, prefix() + "ins_energy_turb_diffusion_" + block_name, params);
+    }
   }
 }
 
@@ -416,20 +431,30 @@ WCNSLinearFVFluidHeatTransferPhysics::addMaterials()
     // Define alpha, the diffusion coefficient when solving for enthalpy, on each block
     for (unsigned int i = 0; i < _thermal_conductivity_name.size(); ++i)
     {
-      const auto object_type = "ADParsedFunctorMaterial";
+      const auto object_type = "ParsedFunctorMaterial";
       InputParameters params = getFactory().getValidParams(object_type);
-      assignBlocks(params, _blocks);
+      const auto block_names =
+          _thermal_conductivity_blocks.size() ? _thermal_conductivity_blocks[i] : _blocks;
+      assignBlocks(params, block_names);
       std::vector<std::string> f_names;
       if (!MooseUtils::parsesToReal(_thermal_conductivity_name[i]))
         f_names.push_back(_thermal_conductivity_name[i]);
       if (!MooseUtils::parsesToReal(getSpecificHeatName()))
         f_names.push_back(getSpecificHeatName());
+      const auto th_cond_name =
+          _thermal_conductivity_name[i] + (_turbulence_physics ? "_plus_kt" : "");
+      if (!_turbulence_physics)
+        params.set<std::string>("expression") =
+            _thermal_conductivity_name[i] + "/" + getSpecificHeatName();
+      else
+      {
+        f_names.push_back("k_t");
+        params.set<std::string>("expression") =
+            "(" + _thermal_conductivity_name[i] + " + k_t) /" + getSpecificHeatName();
+      }
+      params.set<std::string>("property_name") = th_cond_name + "_by_cp";
       params.set<std::vector<std::string>>("functor_names") = f_names;
-      params.set<std::string>("expression") =
-          _thermal_conductivity_name[i] + "/" + getSpecificHeatName();
-      params.set<std::string>("property_name") = _thermal_conductivity_name[i] + "_by_cp";
-      getProblem().addMaterial(
-          object_type, prefix() + "alpha_from_" + _thermal_conductivity_name[i], params);
+      getProblem().addMaterial(object_type, prefix() + "alpha_from_" + th_cond_name, params);
     }
   }
 }
