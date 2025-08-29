@@ -31,7 +31,6 @@ MFEMVectorProjectionAux::MFEMVectorProjectionAux(const InputParameters & paramet
 void
 MFEMVectorProjectionAux::execute()
 {
-  _result_var = 0.0;
   _result_var.ProjectCoefficient(_vec_coef);
 }
 
