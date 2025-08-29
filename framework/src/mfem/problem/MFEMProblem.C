@@ -766,7 +766,7 @@ MFEMProblem::pRefine()
       prefinements[i].delta = 1; // Increase the element order by 1
     }
 
-    _problem_data._refiner->getFESpace()->PRefineAndUpdate(prefinements);
+    _problem_data._refiner->getFESpace().PRefineAndUpdate(prefinements);
   }
 
   else

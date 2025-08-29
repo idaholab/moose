@@ -29,7 +29,7 @@ public:
 
   void setUp();
 
-  std::shared_ptr<mfem::ParFiniteElementSpace> getFESpace();
+  mfem::ParFiniteElementSpace & getFESpace();
 
   /// Modifies the input array with all the locations in the mesh where we should increase
   /// the polynomial order

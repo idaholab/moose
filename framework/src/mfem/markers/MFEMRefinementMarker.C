@@ -98,7 +98,7 @@ MFEMRefinementMarker::hRefine(mfem::ParMesh & mesh)
   _stop_h_ref |= _threshold_refiner->Stop();
 }
 
-std::shared_ptr<mfem::ParFiniteElementSpace>
+mfem::ParFiniteElementSpace &
 MFEMRefinementMarker::getFESpace()
 {
   mooseAssert(_estimator, "Indicator is null");
