@@ -144,13 +144,6 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
                  MPI_INT,
                  getMFEMProblem().mesh().getMFEMParMesh().GetComm());
 
-  // sign of dot product of (element centre - vert) with direction vec gives ori
-  // if shared vert coord = cut vert coord then shared vert touches
-  // create container storing global ID for all shared verts
-
-  // for all verts in cut submesh,
-  // if global vert
-
   /// Detect shared vertices and add corresponding elements
   for (int g = 1, sv = 0; g < parent_mesh.GetNGroups(); g++)
   {
