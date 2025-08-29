@@ -65,7 +65,7 @@ mooseErrorRaw(std::string msg,
     // exit
     for (;;)
       // Don't burn cpu
-      sched_yield();
+      pause();
   else
   {
     std::ostringstream oss;
