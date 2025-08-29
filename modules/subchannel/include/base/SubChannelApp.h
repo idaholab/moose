@@ -52,7 +52,7 @@ public:
   /// linear heat rate
   static const std::string LINEAR_HEAT_RATE;
   /// duct linear heat rate
-  static const std::string DUCT_LINEAR_HEAT_RATE;
+  static const std::string DUCT_HEAT_FLUX;
   /// duct temperature
   static const std::string DUCT_TEMPERATURE;
   /// subchannel displacement

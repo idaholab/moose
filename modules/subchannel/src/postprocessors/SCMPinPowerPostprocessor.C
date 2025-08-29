@@ -7,24 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SCMPowerPostprocessor.h"
+#include "SCMPinPowerPostprocessor.h"
 #include "FEProblemBase.h"
 #include "MooseMesh.h"
 #include "SCM.h"
 #include "SubChannel1PhaseProblem.h"
 
-registerMooseObject("SubChannelApp", SCMPowerPostprocessor);
+registerMooseObject("SubChannelApp", SCMPinPowerPostprocessor);
 
 InputParameters
-SCMPowerPostprocessor::validParams()
+SCMPinPowerPostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  params.addClassDescription(
-      "Calculates the total power of the assembly based on the distribution of variable q_prime");
+  params.addClassDescription("Calculates the power that goes into the coolant from the fuel-pins "
+                             "based on aux variable q_prime");
   return params;
 }
 
-SCMPowerPostprocessor::SCMPowerPostprocessor(const InputParameters & parameters)
+SCMPinPowerPostprocessor::SCMPinPowerPostprocessor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mesh(SCM::getConstMesh<SubChannelMesh>(_fe_problem.mesh())),
     _value(0)
@@ -32,13 +32,13 @@ SCMPowerPostprocessor::SCMPowerPostprocessor(const InputParameters & parameters)
 }
 
 void
-SCMPowerPostprocessor::execute()
+SCMPinPowerPostprocessor::execute()
 {
   const auto scm_problem = dynamic_cast<SubChannel1PhaseProblem *>(&_fe_problem);
   const auto nz = _mesh.getNumOfAxialCells();
   const auto n_channels = _mesh.getNumOfChannels();
   if (!scm_problem)
-    mooseError("SCMPowerPostprocessor can only be used within a subchannel 1phase problem.");
+    mooseError("SCMPinPowerPostprocessor can only be used within a subchannel 1phase problem.");
   auto power = 0.0;
   for (unsigned int iz = 1; iz < nz + 1; iz++)
     for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
@@ -47,7 +47,7 @@ SCMPowerPostprocessor::execute()
 }
 
 Real
-SCMPowerPostprocessor::getValue() const
+SCMPinPowerPostprocessor::getValue() const
 {
   return _value;
 }

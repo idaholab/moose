@@ -178,8 +178,11 @@ P_out = 4.923e6 # Pa
     type = ElementIntegralVariablePostprocessor
     variable = q_prime_aux
   []
-  [Total_power_SCMPowerPostprocessor]
-    type = SCMPowerPostprocessor
+  [Total_power_SCMPinPowerPostprocessor]
+    type = SCMPinPowerPostprocessor
+  []
+  [Total_power_SCMTHPowerPostprocessor]
+    type = SCMTHPowerPostprocessor
   []
 []
 
