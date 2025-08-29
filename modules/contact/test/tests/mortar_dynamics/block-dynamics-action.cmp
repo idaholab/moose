@@ -1,0 +1,15 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:             0.3 @ t7
+
+NODAL VARIABLES relative 5.0e-4 floor 1.0e-5
+	accel_x               # min:               0 @ t1,n1	max:             4.8 @ t7,n571
+	accel_y               # min:               0 @ t1,n1	max:       10.802252 @ t7,n662
+	accel_z               # min:               0 @ t1,n1	max:               0 @ t1,n1
+	disp_x                # min:               0 @ t1,n1	max:    0.0088131356 @ t7,n551
+	disp_y                # min:               0 @ t1,n1	max:     0.011798695 @ t7,n551
+	mechanical_normal_lm  # min:               0 @ t1,n1	max:        184608.8 @ t7,n662
+	vel_x                 # min:               0 @ t1,n1	max:      0.10478646 @ t7,n551
+	vel_y                 # min:               0 @ t1,n1	max:      0.14269868 @ t7,n551
+	vel_z                 # min:               0 @ t1,n1	max:               0 @ t1,n1
+

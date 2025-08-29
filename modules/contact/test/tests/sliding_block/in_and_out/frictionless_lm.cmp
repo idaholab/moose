@@ -1,0 +1,14 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               1 @ t1 max:              15 @ t15
+
+GLOBAL VARIABLES relative 1.e-6 floor 1e-6
+	contact  # min:               0 @ t1	max:               0 @ t1
+	lin      # min:               5 @ t1	max:               9 @ t2
+	num_nl   # min:               4 @ t1	max:               6 @ t5
+
+NODAL VARIABLES relative 1.e-6 floor 1e-6
+	contact_normal_lm  # min:               0 @ t1,n1	max:       13778.582 @ t13,n224
+	disp_x             # min:               0 @ t1,n137	max:     0.059671401 @ t9,n220
+	disp_y             # min:               0 @ t1,n137	max:              15 @ t15,n221
+
