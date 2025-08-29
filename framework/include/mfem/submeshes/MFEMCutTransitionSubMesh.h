@@ -11,6 +11,7 @@
 
 #pragma once
 #include "MFEMSubMesh.h"
+#include "MFEMBlockRestrictable.h"
 
 /**
  * Modifies the MFEM Mesh to label a subdomain consisting of elements adjacent to an
