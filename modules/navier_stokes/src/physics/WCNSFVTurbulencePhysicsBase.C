@@ -399,7 +399,8 @@ WCNSFVTurbulencePhysicsBase::addAuxiliaryKernels()
 
     getProblem().addAuxKernel("kEpsilonViscosityAux", name() + "_viscosity_aux", params);
   }
-  if (_turbulence_model == "k-epsilon" && getParam<bool>("k_t_as_aux_variable"))
+  if (_turbulence_model == "k-epsilon" && _has_energy_equation &&
+      getParam<bool>("k_t_as_aux_variable"))
   {
     auto params = getFactory().getValidParams("TurbulentConductivityAux");
     assignBlocks(params, _blocks);
@@ -456,7 +457,7 @@ WCNSFVTurbulencePhysicsBase::addMaterials()
 
     if (_has_energy_equation && !getProblem().hasFunctor(NS::k_t, /*thread_id=*/0))
     {
-      mooseAssert(!getParam<bool>("k_t_as_aux_variable"), "k_t should exist");
+      mooseAssert(!getParam<bool>("k_t_as_aux_variable"), "k_t should not exist");
       const auto object_type = is_linear ? "ParsedFunctorMaterial" : "ADParsedFunctorMaterial";
       InputParameters params = getFactory().getValidParams(object_type);
       assignBlocks(params, _blocks);
@@ -499,9 +500,9 @@ WCNSFVTurbulencePhysicsBase::addMaterials()
 
       const auto turbulent_schmidt_number = getParam<std::vector<Real>>("Sc_t");
       if (turbulent_schmidt_number.size() != 1)
-        paramError(
-            "passive_scalar_schmidt_number",
-            "Only one passive scalar turbulent Schmidt number can be specified with k-epsilon");
+        paramError("passive_scalar_schmidt_number",
+                   "A single passive scalar turbulent Schmidt number can and must be specified "
+                   "with k-epsilon");
       params.set<std::string>("expression") = _turbulent_viscosity_name + "/" + rho_name + " / " +
                                               std::to_string(turbulent_schmidt_number[0]);
       params.set<std::string>("property_name") = NS::mu_t_passive_scalar;
