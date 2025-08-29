@@ -34,15 +34,3 @@ void
 GlobalParamsAction::act()
 {
 }
-
-void
-GlobalParamsAction::remove(const std::string & name)
-{
-  parameters().remove(name);
-}
-
-InputParameters &
-GlobalParamsAction::parameters()
-{
-  return const_cast<InputParameters &>(_pars);
-}

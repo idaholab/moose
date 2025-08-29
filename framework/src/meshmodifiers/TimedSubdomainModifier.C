@@ -266,9 +266,10 @@ TimedSubdomainModifier::buildFromFile()
 SubdomainID
 TimedSubdomainModifier::getSubdomainIDAndCheck(const std::string & subdomain_name)
 {
-  const auto id = _mesh.getSubdomainID(subdomain_name);
+  const auto name = MooseUtils::trim(subdomain_name);
+  const auto id = _mesh.getSubdomainID(name);
   if (id == Moose::INVALID_BLOCK_ID)
-    mooseError("block", "Subdomain \"" + subdomain_name + "\" not found in mesh.");
+    mooseError("block", "Subdomain \"" + name + "\" not found in mesh.");
   return id;
 }
 

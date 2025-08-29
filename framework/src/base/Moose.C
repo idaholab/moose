@@ -763,6 +763,17 @@ setColorConsole(bool use_color, bool force)
   return _color_console;
 }
 
+ScopedThrowOnError::ScopedThrowOnError(const bool throw_on_error)
+  : _throw_on_error_before(Moose::_throw_on_error)
+{
+  mooseAssert(!libMesh::Threads::in_threads, "Cannot be used in threads");
+  Moose::_throw_on_error = throw_on_error;
+}
+
+ScopedThrowOnError::ScopedThrowOnError() : ScopedThrowOnError(true) {}
+
+ScopedThrowOnError::~ScopedThrowOnError() { Moose::_throw_on_error = _throw_on_error_before; }
+
 std::string
 hitMessagePrefix(const hit::Node & node)
 {

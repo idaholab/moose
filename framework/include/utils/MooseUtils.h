@@ -831,54 +831,32 @@ expandAllMatches(const std::vector<T> & candidates, std::vector<T> & patterns)
 }
 
 /**
- * convert takes a string representation of a number type and converts it to the number.
- * This method is here to get around deficiencies in the STL stoi and stod methods where they
- * might successfully convert part of a string to a number when we'd like to throw an error.
+ * Takes the string representation of a value and converts it to the value.
+ *
+ * See the convert method in MooseStringUtils.h for more information on
+ * handling of each case.
+ *
+ * @param str The string to convert from
+ * @param throw_on_failure If true, throw on a failure to convert, otherwise use mooseError
+ * @return The converted value on success
  */
 template <typename T>
 T
 convert(const std::string & str, bool throw_on_failure = false)
 {
-  std::stringstream ss(str);
   T val;
-  if ((ss >> val).fail() || !ss.eof())
+  try
   {
-    std::string msg = std::string("Unable to convert '") + str + "' to type " +
-                      libMesh::demangle(typeid(T).name());
-
-    if (throw_on_failure)
-      throw std::invalid_argument(msg);
-    else
-      mooseError(msg);
+    convert(str, val, true);
   }
-
+  catch (std::exception const & e)
+  {
+    if (throw_on_failure)
+      throw;
+    mooseError(e.what());
+  }
   return val;
 }
-
-template <>
-short int convert<short int>(const std::string & str, bool throw_on_failure);
-
-template <>
-unsigned short int convert<unsigned short int>(const std::string & str, bool throw_on_failure);
-
-template <>
-int convert<int>(const std::string & str, bool throw_on_failure);
-
-template <>
-unsigned int convert<unsigned int>(const std::string & str, bool throw_on_failure);
-
-template <>
-long int convert<long int>(const std::string & str, bool throw_on_failure);
-
-template <>
-unsigned long int convert<unsigned long int>(const std::string & str, bool throw_on_failure);
-
-template <>
-long long int convert<long long int>(const std::string & str, bool throw_on_failure);
-
-template <>
-unsigned long long int convert<unsigned long long int>(const std::string & str,
-                                                       bool throw_on_failure);
 
 /**
  * Create a symbolic link, if the link already exists it is replaced.

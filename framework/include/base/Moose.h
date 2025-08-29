@@ -287,6 +287,36 @@ private:
 };
 
 /**
+ * Scoped helper for setting Moose::_throw_on_error during this scope.
+ *
+ * Cannot be used within threads.
+ */
+class ScopedThrowOnError
+{
+public:
+  /**
+   * Default constructor, which sets Moose::_throw_on_error = true
+   */
+  ScopedThrowOnError();
+
+  /**
+   * Specialized constructor, which sets Moose::_throw_on_error
+   * based on the argument \p throw_on_error
+   */
+  ScopedThrowOnError(const bool throw_on_error);
+
+  /**
+   * Destructor, which sets Moose::_throw_on_error to what it
+   * was upon construction
+   */
+  ~ScopedThrowOnError();
+
+private:
+  /// The value of Moose::_throw_on_error at construction
+  const bool _throw_on_error_before;
+};
+
+/**
  * Get the prefix to be associated with a hit node for a message
  */
 std::string hitMessagePrefix(const hit::Node & node);

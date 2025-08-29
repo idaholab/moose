@@ -63,7 +63,7 @@ TEST(InputParametersTest, checkRangeCheckedParam)
     params.addRangeCheckedParam<std::vector<Real>>(name, value, range_function, "Some doc");
     const auto param = dynamic_cast<libMesh::Parameters::Parameter<std::vector<Real>> *>(
         params.begin()->second.get());
-    const auto result = params.rangeCheck<Real, Real>(name, name, param);
+    const auto result = params.rangeCheck<Real, Real>(name, name, *param);
     EXPECT_TRUE(result.has_value());
     ASSERT_EQ(is_user_error, result->first);
     ASSERT_EQ(expect_error, result->second);
@@ -72,12 +72,16 @@ TEST(InputParametersTest, checkRangeCheckedParam)
   // Invalid range function
   test_vector_error({}, "!", false, "Error parsing expression '!' for parameter p");
   // Check all values, vector has no values
-  test_vector_error({}, "p = 1", true, "Range checking empty vector 'p = 1'");
+  test_vector_error(
+      {}, "p = 1", true, "Range checking empty vector parameter p; expression = 'p = 1'");
   // Check all values, invalid variable
   test_vector_error({1}, "a = 1", false, "Error parsing expression 'a = 1'");
   // Index check out of range
   test_vector_error(
-      {1}, "p_1 = 1", true, "Error parsing expression 'p_1 = 1'; out of range variable 'p_1'");
+      {1},
+      "p_1 = 1",
+      true,
+      "Error parsing expression 'p_1 = 1' for parameter p; out of range variable 'p_1'");
   // Index check invalid variable
   test_vector_error(
       {1}, "p_a = 1", false, "Error parsing expression 'p_a = 1'; invalid variable 'p_a'");
@@ -91,7 +95,7 @@ TEST(InputParametersTest, checkRangeCheckedParam)
     params.addRangeCheckedParam<Real>(name, 1, range_function, "Some doc");
     const auto param =
         dynamic_cast<libMesh::Parameters::Parameter<Real> *>(params.begin()->second.get());
-    const auto result = params.rangeCheck<Real, Real>(name, name, param);
+    const auto result = params.rangeCheck<Real, Real>(name, name, *param);
     EXPECT_TRUE(result.has_value());
     ASSERT_EQ(is_user_error, result->first);
     ASSERT_EQ(expect_error, result->second);

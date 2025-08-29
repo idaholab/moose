@@ -141,8 +141,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
                           &hit_node_diagnostic,
                           &zero_line_diagnostic](const auto & action) -> bool
   {
-    const bool cached_throw_on_error = Moose::_throw_on_error;
-    Moose::_throw_on_error = true;
+    Moose::ScopedThrowOnError scoped_throw_on_error;
     bool threw = true;
 
     try
@@ -169,7 +168,6 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
       zero_line_diagnostic(err.what());
     }
 
-    Moose::_throw_on_error = cached_throw_on_error;
     return !threw;
   };
 

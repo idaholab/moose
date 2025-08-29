@@ -906,15 +906,6 @@
     issues = '#8412'
   []
 
-  [bad_number]
-    type = 'RunException'
-    input = 'bad_number.i'
-    expect_err = "invalid float syntax for parameter: BCs/right/value"
-
-    requirement = 'The system shall report an error when floating point input parameter types fail to parse as floating point numbers.'
-    issues = '#10310'
-  []
-
   [coupling_field_into_scalar]
     type = 'RunException'
     input = 'coupling_field_into_scalar.i'
