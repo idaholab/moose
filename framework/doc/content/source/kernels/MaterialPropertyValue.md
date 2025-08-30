@@ -15,6 +15,10 @@ a projection of an interior material property onto (nodal) basis function degree
 of freedom. It can be used to generate a smooth field for outputting material
 properties.
 
+!alert note
+This kernel only imposes the equality between the variable and the functor when it
+is the only kernel in that variable's equation on the specified subdomains.
+
 !syntax parameters /Kernels/MaterialPropertyValue
 
 !syntax inputs /Kernels/MaterialPropertyValue
