@@ -1,5 +1,12 @@
 !gallery! large=6
 
+!card! gallery/puma.mp4 title=Thermal post-processing of a turbine blade
+Simulation of the thermal post-processing pipeline of a turbine blade using [PUMA](https://github.com/applied-material-modeling/puma). The pipeline starts from a binder-jet printed porous silicon carbide preform filled with precursor phenolic resin. During pyrolysis, the resin thermally decomposes into carbonaceous char. The carbon-rich preform is then infiltrated with molten silicon, which reacts with carbon to form silicon carbide while any excess silicon fills remaining pores. This polymer infiltration and pyrolysis (PIP) process is repeated multiple cycles, yielding a dense Si–SiC composite. PUMA predicts degrees of reaction, phase fractions, temperature, deformation, and (residual) stress throughout the post-processing processes.
+
+!style fontsize=90% fontweight=100
+*Credit:*  Huy Tran, et. al. (ANL)
+!card-end!
+
 !card! gallery/weld.mp4 title=Welding simulation of a pressure vessel
 Simulation of the laser welding process (with a total of 8 weld passes) joining two separate vessel segments. The animation shows the complete transient of temperature, equivalent plastic strain, and von Mises stress. The coupled thermomechanical simulation is set up using the MALAMUTE app. Deposition of the weld material is modeled using element subdomain modifiers.
 
