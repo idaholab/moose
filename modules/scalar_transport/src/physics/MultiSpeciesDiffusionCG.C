@@ -240,7 +240,7 @@ MultiSpeciesDiffusionCG::addSolverVariables()
                    "Cannot specify the variable order if variable " + var_name +
                        " is defined outside the Physics block");
       else
-        return;
+        continue;
     }
 
     const std::string variable_type = "MooseVariable";
